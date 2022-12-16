@@ -1,0 +1,94 @@
+@import "../../styles/variables.scss";
+
+.nftAnimation {
+  background-color: $dark-grey;
+  padding: 0;
+  position: relative;
+
+  img {
+    max-width: 100%;
+  }
+
+  iframe {
+    width: 80%;
+    height: 650px;
+  }
+
+  video {
+    max-width: 80%;
+    height: 650px;
+  }
+  @media only screen and (max-width: 1200px) {
+    video {
+      height: 450px;
+    }
+  }
+
+  svg {
+    width: 100%;
+  }
+}
+
+.height850 {
+  max-height: 850px;
+}
+
+.height650 {
+  max-height: 650px !important;
+}
+
+@media only screen and (min-width: 1200px) {
+  .height650 {
+    min-height: 450px;
+  }
+}
+
+.height300 {
+  height: 300px;
+}
+
+@media only screen and (max-width: 1200px) {
+  .height300 {
+    height: 250px;
+  }
+}
+
+@media only screen and (max-width: 800px) {
+  .height300 {
+    height: 200px;
+  }
+}
+
+.imageWrapper {
+  background-color: $dark-grey;
+  padding: 0;
+  position: relative;
+}
+
+.tokenImg {
+  max-width: 100%;
+  max-height: 100%;
+}
+
+.balance {
+  position: absolute;
+  left: 0;
+  top: 22px;
+  background-color: rgba(255, 255, 255, 0.5);
+  color: black;
+  padding-left: 15px;
+  padding-right: 15px;
+  line-height: 35px;
+  font-weight: bolder;
+  background: #ffffff;
+  opacity: 0.75;
+  box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+}
+
+.balanceBigger {
+  padding: 6px 25px;
+}
+
+.transparentBG {
+  background-color: transparent !important;
+}
