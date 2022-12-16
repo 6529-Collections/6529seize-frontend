@@ -1,0 +1,118 @@
+@import "~bootstrap/scss/bootstrap.scss";
+@import "./variables.scss";
+
+@media (min-width: 1600px) {
+  .container,
+  .container-lg,
+  .container-md,
+  .container-sm,
+  .container-xl,
+  .container-xxl {
+    max-width: 1520px !important;
+  }
+}
+
+@media (min-width: 1800px) {
+  .container,
+  .container-lg,
+  .container-md,
+  .container-sm,
+  .container-xl,
+  .container-xxl {
+    max-width: 1720px !important;
+  }
+}
+
+@media (min-width: 2000px) {
+  .container,
+  .container-lg,
+  .container-md,
+  .container-sm,
+  .container-xl,
+  .container-xxl {
+    max-width: 1920px !important;
+  }
+}
+
+.navbar-expand .navbar-nav .dropdown-menu {
+  background-color: $bg-color-1;
+  border-top: 3px solid white;
+  border-top-right-radius: 0;
+  border-top-left-radius: 0;
+}
+
+.dropdown-item {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  width: 98%;
+  margin-left: 1%;
+  color: $font-color !important;
+}
+
+.dropdown-toggle::after {
+  margin-top: 11px;
+  margin-left: 5px;
+}
+
+.dropdown-item.active,
+.dropdown-item:active,
+.dropdown-item:hover {
+  background-color: $very-dark-grey !important;
+  color: $font-color !important;
+}
+
+.nav-link {
+  color: $font-color;
+}
+
+.navbar-nav .show > .nav-link,
+.navbar-nav .nav-link.active {
+  pointer-events: none !important;
+  color: $lightest-grey;
+}
+
+table,
+thead,
+tbody,
+tfoot,
+tr,
+td,
+th {
+  color: $font-color !important;
+  border: none !important;
+}
+
+.table > :not(caption) > * > * {
+  padding: 0.1rem 0.1rem;
+}
+
+.nav-tabs {
+  border: none !important;
+}
+
+.nav-tabs .nav-link {
+  color: darken($color: $font-color, $amount: $darken-percentage) !important;
+}
+
+.nav-tabs .nav-link.active,
+.nav-tabs .nav-item.show .nav-link {
+  background-color: transparent !important;
+  color: $font-color !important;
+  border: none !important;
+  border-color: $very-dark-grey !important;
+  pointer-events: none !important;
+}
+
+.nav-tabs .nav-link:hover {
+  border-color: $very-dark-grey !important;
+  color: $font-color !important;
+}
+
+.nav-link:hover,
+.nav-link:focus {
+  color: $lightest-grey;
+}
+
+.dropdown-divider {
+  border-color: $very-dark-grey !important;
+}
