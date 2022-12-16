@@ -54,11 +54,9 @@ export function getDateDisplay(date: Date) {
     return `${Math.round(secondsAgo / 60)} minutes ago`;
   }
   if (60 * 60 * 24 > secondsAgo) {
-    const hours = Math.round(secondsAgo / (60 * 60));
-    if (2 > hours) {
-      return `${Math.round(secondsAgo / 60)} minutes ago`;
-    }
-    return `${hours} hours ago`;
+    const hours = Math.floor(secondsAgo / (60 * 60));
+    const minutes = secondsAgo % (60 * 60);
+    return `${hours} hrs ${Math.floor(minutes / 60)} mins ago`;
   }
   const days = Math.round(secondsAgo / (60 * 60 * 24));
   if (2 > days) {
