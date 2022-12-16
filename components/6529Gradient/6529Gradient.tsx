@@ -1,0 +1,284 @@
+import styles from "./6529Gradient.module.scss";
+
+import { useEffect, useState } from "react";
+import dynamic from "next/dynamic";
+import { Container, Row, Col } from "react-bootstrap";
+import { useAccount } from "wagmi";
+import { GRADIENT_CONTRACT, MEMES_CONTRACT } from "../../constants";
+import { DBResponse } from "../../entities/IDBResponse";
+import { NFT } from "../../entities/INFT";
+import { Owner, OwnerRank } from "../../entities/IOwner";
+import { SortDirection } from "../../entities/ISort";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { TDH } from "../../entities/ITDH";
+import { areEqualAddresses, numberWithCommas } from "../../helpers/Helpers";
+import { useRouter } from "next/router";
+
+const NFTImage = dynamic(() => import("../nft-image/NFTImage"), {
+  ssr: false,
+});
+
+const Address = dynamic(() => import("../address/Address"), { ssr: false });
+
+enum Sort {
+  ID = "id",
+  TDH = "tdh_rank",
+}
+
+export default function GradientsComponent() {
+  const router = useRouter();
+
+  const { address, connector, isConnected } = useAccount();
+
+  const [nfts, setNfts] = useState<NFT[]>([]);
+  const [nftOwners, setNftOwners] = useState<Owner[]>([]);
+  const [nftsLoaded, setNftsLoaded] = useState(false);
+  const [nftsSorted, setNftsSorted] = useState(false);
+  const [sortDir, setSortDir] = useState<SortDirection>();
+  const [sort, setSort] = useState<Sort>();
+
+  const [ownersLoaded, setOwnersLoaded] = useState(false);
+
+  useEffect(() => {
+    if (router.isReady && ownersLoaded && nftsLoaded) {
+      let initialSortDir = SortDirection.ASC;
+      let initialSort = Sort.ID;
+
+      const routerSortDir = router.query.sort_dir;
+      if (routerSortDir) {
+        const resolvedRouterSortDir = Object.values(SortDirection).find(
+          (sd) => sd == routerSortDir
+        );
+        if (resolvedRouterSortDir) {
+          initialSortDir = resolvedRouterSortDir;
+        }
+      }
+
+      const routerSort = router.query.sort;
+      if (routerSort) {
+        const resolvedRouterSort = Object.values(Sort).find(
+          (sd) => sd == routerSort
+        );
+        if (resolvedRouterSort) {
+          initialSort = resolvedRouterSort;
+        }
+      }
+
+      setSort(initialSort);
+      setSortDir(initialSortDir);
+    }
+  }, [router.isReady, ownersLoaded, nftsLoaded]);
+
+  useEffect(() => {
+    async function fetchNfts(url: string, mynfts: NFT[]) {
+      return fetch(url)
+        .then((res) => res.json())
+        .then((response: DBResponse) => {
+          if (response.next) {
+            fetchNfts(response.next, [...mynfts].concat(response.data));
+          } else {
+            const newnfts = [...mynfts]
+              .concat(response.data)
+              .filter((value, index, self) => {
+                return self.findIndex((v) => v.id === value.id) === index;
+              });
+
+            setNfts(
+              [...newnfts]
+                .sort((a, b) => (a.tdh > b.tdh ? -1 : 1))
+                .map((n, index) => {
+                  n.tdh_rank = index + 1;
+                  return n;
+                })
+            );
+            setNftsLoaded(true);
+          }
+        });
+    }
+    if (router.isReady) {
+      const initialUrlNfts = `${process.env.API_ENDPOINT}/api/nfts?contract=${GRADIENT_CONTRACT}`;
+      fetchNfts(initialUrlNfts, []);
+    }
+  }, [router.isReady]);
+
+  useEffect(() => {
+    async function fetchOwners(url: string, owners: Owner[]) {
+      return fetch(url)
+        .then((res) => res.json())
+        .then((response: DBResponse) => {
+          if (response.next) {
+            fetchOwners(response.next, [...owners].concat(response.data));
+          } else {
+            if (!ownersLoaded) {
+              const newOwners = [...owners].concat(response.data);
+
+              const allOwners: Owner[] = [];
+              [...nfts]
+                .sort((a, b) => (a.tdh > b.tdh ? -1 : 1))
+                .map((nft) => {
+                  const owner = newOwners.find((o) => o.token_id == nft.id);
+                  if (owner) {
+                    allOwners.push(owner);
+                  }
+                });
+              setNftOwners(allOwners);
+              setOwnersLoaded(true);
+            }
+          }
+        });
+    }
+
+    if (router.isReady && nftsLoaded) {
+      const initialUrlOwners = `${process.env.API_ENDPOINT}/api/owners?contract=${GRADIENT_CONTRACT}`;
+      fetchOwners(initialUrlOwners, []);
+    }
+  }, [router.isReady, nftsLoaded]);
+
+  useEffect(() => {
+    if (sort && sortDir) {
+      router.replace({
+        query: { sort: sort, sort_dir: sortDir },
+      });
+
+      if (sort == Sort.ID) {
+        if (sortDir == SortDirection.ASC) {
+          setNfts([...nfts].sort((a, b) => (a.id > b.id ? 1 : -1)));
+        } else {
+          setNfts([...nfts].sort((a, b) => (a.id > b.id ? -1 : 1)));
+        }
+      }
+      if (sort == Sort.TDH) {
+        if (sortDir == SortDirection.ASC) {
+          setNfts([...nfts].sort((a, b) => (a.tdh > b.tdh ? -1 : 1)));
+        } else {
+          setNfts([...nfts].sort((a, b) => (a.tdh > b.tdh ? 1 : -1)));
+        }
+      }
+      setNftsSorted(true);
+    }
+  }, [sortDir, sort]);
+
+  function printNft(nft: NFT) {
+    const owner = nftOwners.find((o) => o.token_id == nft.id);
+    return (
+      <Col
+        key={`${nft.contract}-${nft.id}`}
+        className="pt-3 pb-3"
+        xs={{ span: 6 }}
+        sm={{ span: 4 }}
+        md={{ span: 3 }}
+        lg={{ span: 3 }}>
+        <Container fluid className="no-padding">
+          <Row>
+            <Col>
+              <a href={`/6529-gradient/${nft.id}`}>
+                <NFTImage
+                  nft={nft}
+                  animation={false}
+                  height={300}
+                  balance={0}
+                  showOwned={owner && areEqualAddresses(address, owner?.wallet)}
+                  showThumbnail={true}
+                />
+              </a>
+            </Col>
+          </Row>
+          <Row>
+            <Col className="text-center pt-2">
+              <a href={`/6529-gradient/${nft.id}`}>{nft.name}</a>
+            </Col>
+          </Row>
+          <Row>
+            <Col className="text-center">
+              {owner && (
+                <Address
+                  address={owner.wallet}
+                  ens={owner.wallet_display}
+                  hideCopy={true}
+                />
+              )}
+            </Col>
+          </Row>
+          {owner && (
+            <Row>
+              <Col className="text-center pt-2">
+                TDH: <b>{numberWithCommas(Math.round(nft.tdh))}</b> | Rank:{" "}
+                <b>
+                  {nft.tdh_rank}/{nfts.length}
+                </b>
+              </Col>
+            </Row>
+          )}
+        </Container>
+      </Col>
+    );
+  }
+
+  function printNfts(rowIndex?: number) {
+    return <Row className="pt-2">{nfts.map((nft) => printNft(nft))}</Row>;
+  }
+
+  return (
+    <Container fluid className={styles.mainContainer}>
+      <Row>
+        <Col>
+          <Container className="pt-4">
+            <>
+              <Row>
+                <Col>
+                  <h1>6529 GRADIENT</h1>
+                </Col>
+              </Row>
+              <Row className="pt-2">
+                <Col>
+                  Sort&nbsp;&nbsp;
+                  <FontAwesomeIcon
+                    icon="chevron-circle-up"
+                    onClick={() => setSortDir(SortDirection.ASC)}
+                    className={`${styles.sortDirection} ${
+                      sortDir != SortDirection.ASC ? styles.disabled : ""
+                    }`}
+                  />{" "}
+                  <FontAwesomeIcon
+                    icon="chevron-circle-down"
+                    onClick={() => setSortDir(SortDirection.DESC)}
+                    className={`${styles.sortDirection} ${
+                      sortDir != SortDirection.DESC ? styles.disabled : ""
+                    }`}
+                  />
+                </Col>
+              </Row>
+              <Row className="pt-2">
+                <Col>
+                  <span
+                    onClick={() => setSort(Sort.ID)}
+                    className={`${styles.sort} ${
+                      sort != Sort.ID ? styles.disabled : ""
+                    }`}>
+                    ID
+                  </span>
+                  <span
+                    onClick={() => setSort(Sort.TDH)}
+                    className={`${styles.sort} ${
+                      sort != Sort.TDH ? styles.disabled : ""
+                    }`}>
+                    TDH
+                  </span>
+                </Col>
+              </Row>
+              {nftsSorted &&
+                (nfts.length > 0 ? (
+                  printNfts()
+                ) : (
+                  <Col>
+                    <img src="/SummerGlasses.svg" className="icon-100" />{" "}
+                    Nothing here yet
+                  </Col>
+                ))}
+            </>
+          </Container>
+        </Col>
+      </Row>
+    </Container>
+  );
+}

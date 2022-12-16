@@ -1,0 +1,67 @@
+import Head from "next/head";
+import styles from "../../styles/Home.module.scss";
+
+import dynamic from "next/dynamic";
+import { GRADIENT_CONTRACT } from "../../constants";
+
+const Header = dynamic(() => import("../../components/header/Header"), {
+  ssr: false,
+});
+
+const GradientPageComponent = dynamic(
+  () => import("../../components/6529Gradient/GradientPage"),
+  {
+    ssr: false,
+  }
+);
+
+export default function GradientPageIndex(props: any) {
+  const pagenameFull = `${props.name} | 6529 SEIZE`;
+
+  return (
+    <>
+      <Head>
+        <title>{pagenameFull}</title>
+        <link rel="icon" href="/favicon.ico" />
+        <meta name="description" content={pagenameFull} />
+        <meta
+          property="og:url"
+          content={`http://52.50.150.109:3001/the-memes/${props.id}`}
+        />
+        <meta property="og:title" content={props.name} />
+        <meta property="og:image" content={props.image} />
+        <meta property="og:description" content="6529 SEIZE" />
+      </Head>
+
+      <main className={styles.main}>
+        <Header />
+        <GradientPageComponent />
+      </main>
+    </>
+  );
+}
+
+export async function getServerSideProps(req: any, res: any, resolvedUrl: any) {
+  const id = req.query.id;
+  const nftRequest = await fetch(
+    `${process.env.API_ENDPOINT}/api/nfts?contract=${GRADIENT_CONTRACT}&id=${id}`
+  );
+  const response = await nftRequest.json();
+  let name = `#${id}`;
+  let image = `http://52.50.150.109:3001/Seize_Logo_Glasses_2.png`;
+  if (response && response.data.length > 0) {
+    name = response.data[0].name;
+    image = response.data[0].thumbnail
+      ? response.data[0].thumbnail
+      : response.data[0].image
+      ? response.data[0].image
+      : image;
+  }
+  return {
+    props: {
+      id: id,
+      name: name,
+      image: image,
+    },
+  };
+}
