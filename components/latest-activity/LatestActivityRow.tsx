@@ -104,7 +104,8 @@ export default function LatestActivityRow(props: Props) {
               address={props.tr.from_address}
               ens={props.tr.from_display}
             />
-            {props.tr.value > 0 && ` for ${props.tr.value} ETH`}
+            {props.tr.value > 0 &&
+              ` for ${Math.round(props.tr.value * 1000) / 1000} ETH`}
             &nbsp;&nbsp;
             <a
               href={`https://etherscan.io/tx/${props.tr.transaction}`}
