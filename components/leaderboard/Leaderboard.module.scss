@@ -17,6 +17,10 @@
 
 .pageHeader {
   white-space: nowrap;
+  h1 {
+    max-height: 45px;
+    margin-bottom: 0px !important;
+  }
 }
 
 .hodler {
@@ -105,11 +109,7 @@
 
 .leaderboardTable > :not(caption) > * > *,
 .nftLeaderboardTable > :not(caption) > * > * {
-  padding: 0.5rem !important;
-}
-
-.borderBottom {
-  border-bottom: 0.5px solid $font-color !important;
+  padding: 0.5rem;
 }
 
 .lastTDH {
@@ -117,6 +117,7 @@
   color: $font-color-h;
   line-height: 48px;
   font-size: smaller;
+  text-align: right;
   a {
     color: $font-color-h !important;
   }
@@ -124,6 +125,12 @@
 
 @media only screen and (max-width: 800px) {
   .lastTDH {
+    text-align: left;
     line-height: 26px;
   }
+}
+
+.borderBottom {
+  border-bottom: 0.5px solid $font-color !important;
+  padding: 0rem !important;
 }
