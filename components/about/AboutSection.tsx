@@ -430,7 +430,7 @@ export default function AboutSectionComponent(props: Props) {
             <h1 className="float-none">MISSION</h1>
           </Col>
         </Row>
-        <Row className="pt-5 ">
+        <Row className="pt-4 pb-4">
           <Col>
             <h1 className="float-none font-color">
               THE 6529 MISSION IS TO ACCELERATE THE DEVELOPMENT OF AN OPEN

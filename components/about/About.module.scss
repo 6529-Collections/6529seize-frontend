@@ -21,9 +21,18 @@
   width: 90%;
 }
 
+.aboutMenuLeftFull {
+  width: 100%;
+  display: none;
+}
+
 @media only screen and (max-width: 1000px) {
   .aboutMenuLeft {
     display: none;
+  }
+
+  .aboutMenuLeftFull {
+    display: block;
   }
 
   .aboutMenuRight {

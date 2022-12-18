@@ -39,6 +39,7 @@ export default function About() {
       router.push(`?section=${section}`, undefined, {
         shallow: true,
       });
+      window.scrollTo(0, 0);
     }
   }, [section]);
 
@@ -126,6 +127,68 @@ export default function About() {
                     </Container>
                   </Col>
                   {section && <AboutSectionComponent section={section} />}
+                </Row>
+                <Row className="pt-4">
+                  <Col className={menuStyles.aboutMenuLeftFull}>
+                    <Container>
+                      <Row>
+                        <Col>
+                          <h3 className="float-none">About</h3>
+                        </Col>
+                      </Row>
+                      <Row className="pt-1 pb-1">
+                        <Col
+                          onClick={() => setSection(AboutSection.MEMES)}
+                          className={menuStyles.aboutMenuLeftItem}>
+                          The Memes
+                        </Col>
+                      </Row>
+                      <Row className="pt-1 pb-1">
+                        <Col
+                          onClick={() =>
+                            setSection(AboutSection.MEMES_CALENDAR)
+                          }
+                          className={menuStyles.aboutMenuLeftItem}>
+                          Memes Calendar
+                        </Col>
+                      </Row>
+                      <Row className="pt-1 pb-1">
+                        <Col
+                          onClick={() => setSection(AboutSection.MEMES_FAQ)}
+                          className={menuStyles.aboutMenuLeftItem}>
+                          Memes FAQ
+                        </Col>
+                      </Row>
+                      <Row className="pt-1 pb-1">
+                        <Col
+                          onClick={() => setSection(AboutSection.GRADIENTS)}
+                          className={menuStyles.aboutMenuLeftItem}>
+                          6529 Gradient
+                        </Col>
+                      </Row>
+                      <Row className="pt-1 pb-1">
+                        <Col
+                          onClick={() => setSection(AboutSection.GRADIENTS_FAQ)}
+                          className={menuStyles.aboutMenuLeftItem}>
+                          Gradients FAQ
+                        </Col>
+                      </Row>
+                      <Row className="pt-1 pb-1">
+                        <Col
+                          onClick={() => setSection(AboutSection.MISSION)}
+                          className={menuStyles.aboutMenuLeftItem}>
+                          Mission
+                        </Col>
+                      </Row>
+                      <Row className="pt-1 pb-1">
+                        <Col
+                          onClick={() => setSection(AboutSection.CONTACT_US)}
+                          className={menuStyles.aboutMenuLeftItem}>
+                          Contact Us
+                        </Col>
+                      </Row>
+                    </Container>
+                  </Col>
                 </Row>
               </Container>
             </Col>
