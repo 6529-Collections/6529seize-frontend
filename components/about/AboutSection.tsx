@@ -200,7 +200,7 @@ export default function AboutSectionComponent(props: Props) {
                   <td>Awakening</td>
                 </tr>
                 <tr>
-                  <td>April 9 to Ju30ne 8</td>
+                  <td>April 9 to June 30</td>
                   <td>Spring SZN3</td>
                 </tr>
                 <tr>
