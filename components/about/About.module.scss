@@ -1,0 +1,49 @@
+@import "../../styles/variables.scss";
+
+.aboutMenuLeft {
+  width: 10%;
+  flex: none;
+
+  a {
+    cursor: pointer;
+    text-decoration: none !important;
+  }
+}
+
+.aboutMenuLeftItem {
+  cursor: pointer;
+  &:hover {
+    color: $lightest-grey;
+  }
+}
+
+.aboutMenuRight {
+  width: 90%;
+}
+
+@media only screen and (max-width: 1000px) {
+  .aboutMenuLeft {
+    display: none;
+  }
+
+  .aboutMenuRight {
+    width: 100%;
+  }
+}
+
+.collectionImage {
+  max-height: 400px;
+  max-width: 100%;
+}
+
+.calendarTable {
+  th {
+    padding-top: 25px;
+    padding-bottom: 25px;
+  }
+  td {
+    border: 1px solid white !important;
+    width: 50%;
+    padding: 10px;
+  }
+}

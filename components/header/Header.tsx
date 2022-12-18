@@ -57,7 +57,7 @@ export default function Header() {
               <Image
                 className={styles.logoIcon}
                 src="/Seize_Logo_Glasses.png"
-                alt="6529.io"
+                alt="6539Seize"
                 width={60}
                 height={30}
               />
@@ -246,33 +246,21 @@ export default function Header() {
                 </Row>
                 <Row className="pt-3">
                   <Col>
-                    <a href="/about">
-                      <h3>About</h3>
-                    </a>
-                  </Col>
-                </Row>
-                <Row>
-                  <Col xs={{ span: 6, offset: 3 }}>
-                    <hr />
-                  </Col>
-                </Row>
-                <Row className="pt-3">
-                  <Col>
-                    <a href="/about/the-memes">
+                    <a href="/about?section=the-memes">
                       <h3>The Memes</h3>
                     </a>
                   </Col>
                 </Row>
                 <Row className="pt-3">
                   <Col>
-                    <a href="/about/memes-calendar">
+                    <a href="/about?section=memes-calendar">
                       <h3>Memes Calendar</h3>
                     </a>
                   </Col>
                 </Row>
                 <Row className="pt-3">
                   <Col>
-                    <a href="/about/memes-faq">
+                    <a href="/about?section=memes-faq">
                       <h3>Memes FAQ</h3>
                     </a>
                   </Col>
@@ -284,14 +272,14 @@ export default function Header() {
                 </Row>
                 <Row className="pt-3">
                   <Col>
-                    <a href="/about/6529-gradient">
+                    <a href="/about?section=6529-gradient">
                       <h3>6529 Gradient</h3>
                     </a>
                   </Col>
                 </Row>
                 <Row className="pt-3">
                   <Col>
-                    <a href="/about/gradients-faq">
+                    <a href="/about?section=gradients-faq">
                       <h3>Gradients FAQ</h3>
                     </a>
                   </Col>
@@ -303,14 +291,14 @@ export default function Header() {
                 </Row>
                 <Row className="pt-3">
                   <Col>
-                    <a href="/about/mission">
+                    <a href="/about?section=mission">
                       <h3>Mission</h3>
                     </a>
                   </Col>
                 </Row>
                 <Row className="pt-3">
                   <Col>
-                    <a href="/about/contact-us">
+                    <a href="/about?section=contact-us">
                       <h3>Contact Us</h3>
                     </a>
                   </Col>
@@ -346,7 +334,7 @@ export default function Header() {
                     <Image
                       className={styles.logoIcon}
                       src="/Seize_Logo_Glasses.png"
-                      alt="6529.io"
+                      alt="6539Seize"
                       width={60}
                       height={60}
                     />
@@ -370,7 +358,7 @@ export default function Header() {
                         <img
                           className={`${styles.logoIcon2} ${styles.burgerMenuBtn} d-block ${styles.dMdNone}`}
                           src="/Seize_Logo_2.png"
-                          alt="6529.io"
+                          alt="6539Seize"
                           onClick={() => setBurgerMenuOpen(true)}
                         />
                         <Navbar
@@ -436,21 +424,16 @@ export default function Header() {
                             <NavDropdown
                               title="About"
                               className={`${styles.mainNavLink} ${
-                                router.pathname == "/about" ? "active" : ""
+                                router.pathname.includes("/about")
+                                  ? "active"
+                                  : ""
                               }`}
                               align={"start"}>
                               <NavDropdown.Item
                                 className={styles.dropdownItem}
                                 onClick={() =>
-                                  (window.location.href = "/about")
-                                }>
-                                About
-                              </NavDropdown.Item>
-                              <NavDropdown.Divider />
-                              <NavDropdown.Item
-                                className={styles.dropdownItem}
-                                onClick={() =>
-                                  (window.location.href = "/about/the-memes")
+                                  (window.location.href =
+                                    "/about?section=the-memes")
                                 }>
                                 The Memes
                               </NavDropdown.Item>
@@ -458,14 +441,15 @@ export default function Header() {
                                 className={styles.dropdownItem}
                                 onClick={() =>
                                   (window.location.href =
-                                    "/about/memes-calendar")
+                                    "/about?section=memes-calendar")
                                 }>
                                 Memes Calendar
                               </NavDropdown.Item>
                               <NavDropdown.Item
                                 className={styles.dropdownItem}
                                 onClick={() =>
-                                  (window.location.href = "/about/memes-faq")
+                                  (window.location.href =
+                                    "/about?section=memes-faq")
                                 }>
                                 Memes FAQ
                               </NavDropdown.Item>
@@ -474,7 +458,7 @@ export default function Header() {
                                 className={styles.dropdownItem}
                                 onClick={() =>
                                   (window.location.href =
-                                    "/about/6529-gradient")
+                                    "/about?section=6529-gradient")
                                 }>
                                 6529 Gradient
                               </NavDropdown.Item>
@@ -482,7 +466,7 @@ export default function Header() {
                                 className={styles.dropdownItem}
                                 onClick={() =>
                                   (window.location.href =
-                                    "/about/gradients-faq")
+                                    "/about?section=gradients-faq")
                                 }>
                                 Gradients FAQ
                               </NavDropdown.Item>
@@ -490,14 +474,16 @@ export default function Header() {
                               <NavDropdown.Item
                                 className={styles.dropdownItem}
                                 onClick={() =>
-                                  (window.location.href = "/about/mission")
+                                  (window.location.href =
+                                    "/about?section=mission")
                                 }>
                                 Mission
                               </NavDropdown.Item>
                               <NavDropdown.Item
                                 className={styles.dropdownItem}
                                 onClick={() =>
-                                  (window.location.href = "/about/contact-us")
+                                  (window.location.href =
+                                    "/about?section=contact-us")
                                 }>
                                 Contact Us
                               </NavDropdown.Item>
@@ -556,7 +542,7 @@ export default function Header() {
                         <img
                           className={`${styles.logoIcon2} d-none ${styles.dMdBlock}`}
                           src="/Seize_Logo_2.png"
-                          alt="6529.io"
+                          alt="6539Seize"
                         />
                       </Container>
                     </Navbar>

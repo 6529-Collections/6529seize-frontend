@@ -134,7 +134,7 @@ export default function Leaderboard(props: Props) {
           </h1>
         </Col>
         {lastTDH && (
-          <Col className={`text-right ${styles.lastTDH}`}>
+          <Col className={`${styles.lastTDH}`}>
             * LAST TDH: {getDateDisplay(lastTDH.date)} BLOCK:{" "}
             <a
               href={`https://etherscan.io/block/${lastTDH.block}`}
