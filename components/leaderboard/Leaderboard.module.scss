@@ -1,0 +1,136 @@
+@import "../../styles/variables.scss";
+
+.scrollContainer {
+  -ms-overflow-style: none; /* Internet Explorer 10+ */
+  scrollbar-width: none; /* Firefox */
+  overflow-x: scroll;
+}
+
+.scrollContainer::-webkit-scrollbar {
+  display: none;
+}
+
+.rank {
+  width: 5%;
+  text-align: center;
+}
+
+.pageHeader {
+  white-space: nowrap;
+  h1 {
+    max-height: 45px;
+    margin-bottom: 0px !important;
+  }
+}
+
+.hodler {
+  width: 35%;
+  margin-left: 10%;
+  span {
+    overflow-wrap: break-word;
+  }
+}
+
+.tdh {
+  width: 30%;
+  text-align: center;
+}
+
+.tdhSub {
+  width: 10%;
+  text-align: center;
+}
+
+.balance {
+  width: 30%;
+  text-align: center;
+}
+
+.viewAllLink {
+  font-size: 15px !important;
+  font-family: $main-font;
+  font-weight: lighter;
+}
+
+@media only screen and (max-width: 800px) {
+  .viewAllLink {
+    font-size: 12px !important;
+  }
+}
+
+.caret {
+  height: 14px;
+  cursor: pointer;
+}
+
+.disabled {
+  color: $lightest-grey;
+  &:hover {
+    color: white;
+  }
+}
+
+.gap {
+  height: 8px;
+  width: 8px;
+}
+
+.leaderboardTable {
+  tr td {
+    white-space: nowrap;
+  }
+
+  td {
+    line-height: 40px;
+  }
+
+  tr:nth-child(even) {
+    background-color: $almost-very-dark-grey;
+  }
+}
+
+.nftLeaderboardTable {
+  tr td {
+    white-space: nowrap;
+  }
+
+  tr td:first-child {
+    width: 1%;
+  }
+
+  td {
+    line-height: 40px;
+  }
+
+  tr:nth-child(even) {
+    background-color: $almost-very-dark-grey;
+  }
+}
+
+.leaderboardTable > :not(caption) > * > *,
+.nftLeaderboardTable > :not(caption) > * > * {
+  padding: 0.5rem;
+}
+
+.lastTDH {
+  white-space: nowrap;
+  color: $font-color-h;
+  line-height: 48px;
+  font-size: smaller;
+  text-align: right;
+  a {
+    color: $font-color-h !important;
+  }
+}
+
+@media only screen and (max-width: 800px) {
+  .lastTDH {
+    text-align: left;
+    line-height: 26px;
+  }
+}
+
+.borderBottom {
+  border-bottom: 0.5px solid $font-color !important;
+  padding: 0rem !important;
+}

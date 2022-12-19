@@ -1,0 +1,71 @@
+@import "../../styles/variables.scss";
+
+.address {
+  text-decoration: underline;
+  font-weight: bolder;
+}
+
+.copy {
+  padding-left: 4px;
+  cursor: copy;
+  font-size: 15px;
+  width: 15px;
+
+  &:hover {
+    opacity: 0.75;
+  }
+}
+
+.copyActive {
+  cursor: default;
+  color: $green;
+}
+
+.memesTag {
+  font-family: $main-font;
+  font-size: $font-size;
+  color: $font-color !important;
+  margin-left: 10px;
+  padding: 2px 5px;
+  background-color: $green;
+  white-space: nowrap;
+  box-shadow: 0 4px 4px rgb(0 0 0 / 25%);
+}
+
+.memesCardsSetsTag {
+  font-family: $main-font;
+  font-size: $font-size;
+  color: $font-color !important;
+  margin-left: 10px;
+  padding: 2px 5px;
+  background-color: $pink;
+  white-space: nowrap;
+  box-shadow: 0 4px 4px rgb(0 0 0 / 25%);
+}
+
+.gradientsTag {
+  font-family: $main-font;
+  font-size: $font-size;
+  color: $font-color !important;
+  margin-left: 10px;
+  padding: 2px 5px;
+  background-color: $blue;
+  white-space: nowrap;
+  box-shadow: 0 4px 4px rgb(0 0 0 / 25%);
+}
+
+@media only screen and (max-width: 1200px) {
+  .memesTag,
+  .memesCardsSetsTag,
+  .gradientsTag {
+    font-size: $font-smaller !important;
+  }
+}
+
+@media only screen and (max-width: 800px) {
+  .memesTag,
+  .memesCardsSetsTag,
+  .gradientsTag {
+    font-size: $font-smallest !important;
+  }
+}
