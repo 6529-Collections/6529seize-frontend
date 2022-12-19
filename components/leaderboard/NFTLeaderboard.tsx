@@ -1,0 +1,466 @@
+import { useState, useEffect } from "react";
+import { Container, Row, Col, Table } from "react-bootstrap";
+import { DBResponse } from "../../entities/IDBResponse";
+import { TDH, TDHCalc } from "../../entities/ITDH";
+import styles from "./Leaderboard.module.scss";
+import dynamic from "next/dynamic";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  areEqualAddresses,
+  getDateDisplay,
+  numberWithCommas,
+} from "../../helpers/Helpers";
+import Pagination from "../pagination/Pagination";
+import { SortDirection } from "../../entities/ISort";
+import { OwnerTags } from "../../entities/IOwner";
+import { useRouter } from "next/router";
+
+const Address = dynamic(() => import("../address/Address"), { ssr: false });
+
+interface Props {
+  contract: string;
+  nftId: number;
+  page: number;
+  pageSize: number;
+}
+
+enum Sort {
+  card_tdh = "card_tdh",
+  card_tdh__raw = "card_tdh__raw",
+  card_balance = "card_balance",
+  total_tdh = "total_tdh",
+  total_tdh__raw = "total_tdh__raw",
+  total_balance = "total_balance",
+}
+
+export default function NFTLeaderboard(props: Props) {
+  const router = useRouter();
+  const [pageProps, setPageProps] = useState<Props>(props);
+  const [totalResults, setTotalResults] = useState(0);
+  const [leaderboard, setLeaderboard] = useState<TDH[]>();
+  const [leaderboardLoaded, setLeaderboardLoaded] = useState(false);
+  const [lastTDH, setLastTDH] = useState<TDHCalc>();
+  const [next, setNext] = useState(null);
+  const [sort, setSort] = useState<{
+    sort: Sort;
+    sort_direction: SortDirection;
+  }>({ sort: Sort.card_tdh, sort_direction: SortDirection.ASC });
+
+  const [ownerTags, setOwnersTags] = useState<OwnerTags[]>([]);
+  const [ownerTagsLoaded, setOwnerTagsLoaded] = useState(false);
+
+  async function fetchResults() {
+    var top = document.getElementById(`leaderboard-${props.nftId}`)?.offsetTop;
+    if (top && window.scrollY > 0) {
+      window.scrollTo(0, top);
+    }
+    fetch(
+      `${process.env.API_ENDPOINT}/api/tdh/${props.contract}/${props.nftId}?page_size=${props.pageSize}&page=${pageProps.page}&sort=${sort.sort}&sort_direction=${sort.sort_direction}`
+    )
+      .then((res) => res.json())
+      .then((response: DBResponse) => {
+        setTotalResults(response.count);
+        setNext(response.next);
+        setLeaderboard(response.data);
+        setLeaderboardLoaded(true);
+      });
+  }
+
+  useEffect(() => {
+    async function fetchOwnersTags(url: string, myowners: OwnerTags[]) {
+      return fetch(url)
+        .then((res) => res.json())
+        .then((response: DBResponse) => {
+          if (response.next) {
+            fetchOwnersTags(response.next, [...myowners].concat(response.data));
+          } else {
+            const newOwnersTags = [...myowners].concat(response.data);
+            setOwnersTags(newOwnersTags);
+            setOwnerTagsLoaded(true);
+          }
+        });
+    }
+
+    if (leaderboard && router.isReady && leaderboard.length > 0) {
+      const uniqueWallets = [...leaderboard].map((l) => l.wallet);
+      const initialUrlOwners = `${
+        process.env.API_ENDPOINT
+      }/api/owners_tags?wallet=${uniqueWallets.join(",")}`;
+      fetchOwnersTags(initialUrlOwners, []);
+    }
+  }, [router.isReady, leaderboard]);
+
+  useEffect(() => {
+    fetch(`${process.env.API_ENDPOINT}/api/blocks?page_size=${1}`)
+      .then((res) => res.json())
+      .then((response: DBResponse) => {
+        if (response.data.length > 0) {
+          setLastTDH({
+            block: response.data[0].block_number,
+            date: new Date(response.data[0].timestamp),
+          });
+        }
+      });
+  }, []);
+
+  useEffect(() => {
+    if (pageProps.page == 1) {
+      fetchResults();
+    } else {
+      setPageProps({ ...pageProps, page: 1 });
+    }
+  }, [sort]);
+
+  useEffect(() => {
+    fetchResults();
+  }, [pageProps.page]);
+
+  return (
+    <Container className={`no-padding pt-4`} id={`leaderboard-${props.nftId}`}>
+      <Row>
+        <Col>
+          <h1>COMMUNITY -</h1>
+          <h1> CARD {props.nftId}</h1>
+        </Col>
+        {lastTDH && (
+          <Col className={`text-right ${styles.lastTDH}`}>
+            * LAST TDH: {getDateDisplay(lastTDH.date)} BLOCK:{" "}
+            <a
+              href={`https://etherscan.io/block/${lastTDH.block}`}
+              rel="noreferrer"
+              target="_blank">
+              {lastTDH.block}
+            </a>
+          </Col>
+        )}
+      </Row>
+      {leaderboard && leaderboard.length > 0 && (
+        <Row className={styles.scrollContainer}>
+          <Col>
+            <Table bordered={false} className={styles.leaderboardTable}>
+              <thead>
+                <tr>
+                  <th className={styles.rank}></th>
+                  <th className={styles.hodler}></th>
+                  <th className={styles.gap}></th>
+                  <th
+                    colSpan={3}
+                    className={`${styles.tdh} ${styles.borderBottom}`}>
+                    <b>This Card</b>
+                  </th>
+                  <th className={styles.gap}></th>
+                  <th
+                    colSpan={3}
+                    className={`${styles.tdh} ${styles.borderBottom}`}>
+                    <b>Total</b>
+                  </th>
+                </tr>
+                <tr className={styles.gap}></tr>
+                <tr>
+                  <th className={styles.rank}>Rank</th>
+                  <th className={styles.hodler}>HODLer</th>
+                  <th className={styles.gap}></th>
+                  <th className={styles.tdhSub}>
+                    <span className="d-flex align-items-center justify-content-center">
+                      TDH&nbsp;
+                      <span className="d-flex flex-column">
+                        <FontAwesomeIcon
+                          icon="square-caret-up"
+                          onClick={() =>
+                            setSort({
+                              sort: Sort.card_tdh,
+                              sort_direction: SortDirection.DESC,
+                            })
+                          }
+                          className={`${styles.caret} ${
+                            sort.sort_direction != SortDirection.DESC ||
+                            sort.sort != Sort.card_tdh
+                              ? styles.disabled
+                              : ""
+                          }`}
+                        />
+                        <FontAwesomeIcon
+                          icon="square-caret-down"
+                          onClick={() =>
+                            setSort({
+                              sort: Sort.card_tdh,
+                              sort_direction: SortDirection.ASC,
+                            })
+                          }
+                          className={`${styles.caret} ${
+                            sort.sort_direction != SortDirection.ASC ||
+                            sort.sort != Sort.card_tdh
+                              ? styles.disabled
+                              : ""
+                          }`}
+                        />
+                      </span>
+                    </span>
+                  </th>
+                  <th className={styles.tdhSub}>
+                    <span className="d-flex align-items-center justify-content-center">
+                      Unweighted TDH&nbsp;
+                      <span className="d-flex flex-column">
+                        <FontAwesomeIcon
+                          icon="square-caret-up"
+                          onClick={() =>
+                            setSort({
+                              sort: Sort.card_tdh__raw,
+                              sort_direction: SortDirection.ASC,
+                            })
+                          }
+                          className={`${styles.caret} ${
+                            sort.sort_direction != SortDirection.ASC ||
+                            sort.sort != Sort.card_tdh__raw
+                              ? styles.disabled
+                              : ""
+                          }`}
+                        />
+                        <FontAwesomeIcon
+                          icon="square-caret-down"
+                          onClick={() =>
+                            setSort({
+                              sort: Sort.card_tdh__raw,
+                              sort_direction: SortDirection.DESC,
+                            })
+                          }
+                          className={`${styles.caret} ${
+                            sort.sort_direction != SortDirection.DESC ||
+                            sort.sort != Sort.card_tdh__raw
+                              ? styles.disabled
+                              : ""
+                          }`}
+                        />
+                      </span>
+                    </span>
+                  </th>
+                  <th className={styles.tdhSub}>
+                    <span className="d-flex align-items-center justify-content-center">
+                      Balance&nbsp;
+                      <span className="d-flex flex-column">
+                        <FontAwesomeIcon
+                          icon="square-caret-up"
+                          onClick={() =>
+                            setSort({
+                              sort: Sort.card_balance,
+                              sort_direction: SortDirection.ASC,
+                            })
+                          }
+                          className={`${styles.caret} ${
+                            sort.sort_direction != SortDirection.ASC ||
+                            sort.sort != Sort.card_balance
+                              ? styles.disabled
+                              : ""
+                          }`}
+                        />
+                        <FontAwesomeIcon
+                          icon="square-caret-down"
+                          onClick={() =>
+                            setSort({
+                              sort: Sort.card_balance,
+                              sort_direction: SortDirection.DESC,
+                            })
+                          }
+                          className={`${styles.caret} ${
+                            sort.sort_direction != SortDirection.DESC ||
+                            sort.sort != Sort.card_balance
+                              ? styles.disabled
+                              : ""
+                          }`}
+                        />
+                      </span>
+                    </span>
+                  </th>
+                  <th className={styles.gap}></th>
+                  <th className={styles.tdhSub}>
+                    <span className="d-flex align-items-center justify-content-center">
+                      TDH&nbsp;
+                      <span className="d-flex flex-column">
+                        <FontAwesomeIcon
+                          icon="square-caret-up"
+                          onClick={() =>
+                            setSort({
+                              sort: Sort.total_balance,
+                              sort_direction: SortDirection.ASC,
+                            })
+                          }
+                          className={`${styles.caret} ${
+                            sort.sort_direction != SortDirection.ASC ||
+                            sort.sort != Sort.total_balance
+                              ? styles.disabled
+                              : ""
+                          }`}
+                        />
+                        <FontAwesomeIcon
+                          icon="square-caret-down"
+                          onClick={() =>
+                            setSort({
+                              sort: Sort.total_balance,
+                              sort_direction: SortDirection.DESC,
+                            })
+                          }
+                          className={`${styles.caret} ${
+                            sort.sort_direction != SortDirection.DESC ||
+                            sort.sort != Sort.total_balance
+                              ? styles.disabled
+                              : ""
+                          }`}
+                        />
+                      </span>
+                    </span>
+                  </th>
+                  <th className={styles.tdhSub}>
+                    <span className="d-flex align-items-center justify-content-center">
+                      Unweighted TDH&nbsp;
+                      <span className="d-flex flex-column">
+                        <FontAwesomeIcon
+                          icon="square-caret-up"
+                          onClick={() =>
+                            setSort({
+                              sort: Sort.total_tdh__raw,
+                              sort_direction: SortDirection.ASC,
+                            })
+                          }
+                          className={`${styles.caret} ${
+                            sort.sort_direction != SortDirection.ASC ||
+                            sort.sort != Sort.total_tdh__raw
+                              ? styles.disabled
+                              : ""
+                          }`}
+                        />
+                        <FontAwesomeIcon
+                          icon="square-caret-down"
+                          onClick={() =>
+                            setSort({
+                              sort: Sort.total_tdh__raw,
+                              sort_direction: SortDirection.DESC,
+                            })
+                          }
+                          className={`${styles.caret} ${
+                            sort.sort_direction != SortDirection.DESC ||
+                            sort.sort != Sort.total_tdh__raw
+                              ? styles.disabled
+                              : ""
+                          }`}
+                        />
+                      </span>
+                    </span>
+                  </th>
+                  <th className={styles.tdhSub}>
+                    <span className="d-flex align-items-center justify-content-center">
+                      Balance&nbsp;
+                      <span className="d-flex flex-column">
+                        <FontAwesomeIcon
+                          icon="square-caret-up"
+                          onClick={() =>
+                            setSort({
+                              sort: Sort.total_balance,
+                              sort_direction: SortDirection.ASC,
+                            })
+                          }
+                          className={`${styles.caret} ${
+                            sort.sort_direction != SortDirection.ASC ||
+                            sort.sort != Sort.total_balance
+                              ? styles.disabled
+                              : ""
+                          }`}
+                        />
+                        <FontAwesomeIcon
+                          icon="square-caret-down"
+                          onClick={() =>
+                            setSort({
+                              sort: Sort.total_balance,
+                              sort_direction: SortDirection.DESC,
+                            })
+                          }
+                          className={`${styles.caret} ${
+                            sort.sort_direction != SortDirection.DESC ||
+                            sort.sort != Sort.total_balance
+                              ? styles.disabled
+                              : ""
+                          }`}
+                        />
+                      </span>
+                    </span>
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr className={styles.gap}></tr>
+                {leaderboard &&
+                  ownerTagsLoaded &&
+                  leaderboard.map((lead, index) => {
+                    const thisCard = lead.memes.find(
+                      (m) => m.id == props.nftId
+                    );
+                    const tags = ownerTags.find((ot) =>
+                      areEqualAddresses(ot.wallet, lead.wallet)
+                    );
+                    if (thisCard)
+                      return (
+                        <tr key={`${index}-${lead.wallet}`}>
+                          <td className={styles.rank}>{lead.tdh_rank}</td>
+                          <td className={styles.hodler}>
+                            <Address
+                              address={lead.wallet}
+                              ens={lead.wallet_display}
+                              tags={{
+                                memesCardsSets: tags
+                                  ? tags.memes_cards_sets
+                                  : 0,
+                                memesBalance: tags ? tags.unique_memes : 0,
+                                gradientsBalance: tags
+                                  ? tags.gradients_balance
+                                  : 0,
+                                genesis: tags ? tags.genesis : false,
+                              }}
+                            />
+                          </td>
+                          <td className={styles.gap}></td>
+                          <td className={styles.tdhSub}>
+                            {numberWithCommas(Math.round(thisCard.tdh))}
+                          </td>
+                          <td className={styles.tdhSub}>
+                            {numberWithCommas(Math.round(thisCard.tdh__raw))}
+                          </td>
+                          <td className={styles.tdhSub}>
+                            {numberWithCommas(thisCard.balance)}
+                          </td>
+                          <td className={styles.gap}></td>
+                          <td className={styles.tdhSub}>
+                            {numberWithCommas(Math.round(lead.boosted_tdh))}
+                          </td>
+                          <td className={styles.tdhSub}>
+                            {numberWithCommas(Math.round(lead.tdh__raw))}
+                          </td>
+                          <td className={styles.tdhSub}>
+                            {numberWithCommas(lead.memes_balance)}
+                          </td>
+                        </tr>
+                      );
+                  })}
+              </tbody>
+            </Table>
+          </Col>
+        </Row>
+      )}
+      {totalResults > 0 && (
+        <Row className="text-center pt-2 pb-3">
+          <Pagination
+            page={pageProps.page}
+            pageSize={pageProps.pageSize}
+            totalResults={totalResults}
+            setPage={function (newPage: number) {
+              setPageProps({ ...pageProps, page: newPage });
+            }}
+          />
+        </Row>
+      )}
+      {leaderboardLoaded && leaderboard?.length == 0 && (
+        <Row>
+          <Col>No TDH accrued</Col>
+        </Row>
+      )}
+    </Container>
+  );
+}
