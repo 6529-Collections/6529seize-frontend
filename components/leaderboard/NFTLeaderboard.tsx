@@ -120,7 +120,7 @@ export default function NFTLeaderboard(props: Props) {
       <Row>
         <Col>
           <h1>COMMUNITY -</h1>
-          <h1> CARD {props.nftId}</h1>
+          <h1>&nbsp;CARD {props.nftId}</h1>
         </Col>
         {lastTDH && (
           <Col className={`text-right ${styles.lastTDH}`}>

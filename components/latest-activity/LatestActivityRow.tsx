@@ -76,22 +76,27 @@ export default function LatestActivityRow(props: Props) {
             <Address address={props.tr.to_address} ens={props.tr.to_display} />{" "}
             {props.tr.value > 0 ? "bought" : "received"} {props.tr.token_count}x{" "}
             {props.nft ? (
-              <img
-                title={
-                  isMemesContract(props.tr.contract)
-                    ? `Meme #${props.tr.token_id}`
-                    : isGradientsContract(props.tr.contract)
-                    ? `Gradient #${props.tr.token_id}`
-                    : `#${props.tr.token_id}`
-                }
-                src={
-                  props.nft.thumbnail ? props.nft.thumbnail : props.nft.image
-                }
-                onError={({ currentTarget }) => {
-                  currentTarget.src = props.nft!.image;
-                }}
-                className={styles.nftImage}
-              />
+              <a
+                href={`/the-memes/${props.nft?.id}`}
+                target="_blank"
+                rel="noreferrer">
+                <img
+                  title={
+                    isMemesContract(props.tr.contract)
+                      ? `Meme #${props.tr.token_id}`
+                      : isGradientsContract(props.tr.contract)
+                      ? `Gradient #${props.tr.token_id}`
+                      : `#${props.tr.token_id}`
+                  }
+                  src={
+                    props.nft.thumbnail ? props.nft.thumbnail : props.nft.image
+                  }
+                  onError={({ currentTarget }) => {
+                    currentTarget.src = props.nft!.image;
+                  }}
+                  className={styles.nftImage}
+                />
+              </a>
             ) : isMemesContract(props.tr.contract) ? (
               `Meme #${props.tr.token_id}`
             ) : isGradientsContract(props.tr.contract) ? (
