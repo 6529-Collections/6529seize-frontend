@@ -1,0 +1,134 @@
+@import "../../styles/variables.scss";
+
+.mainContainer {
+  font-size: larger;
+  z-index: 10;
+  position: relative;
+  min-height: $header-height;
+  background-color: $bg-color-1;
+}
+
+.headerRow {
+  min-height: $header-height;
+  z-index: 10;
+}
+
+.headerLeft {
+  height: $header-height;
+}
+
+.logoIcon {
+  width: 100%;
+  height: auto;
+  max-width: 250px;
+  max-height: 42px;
+}
+
+.logoIcon2 {
+  height: auto;
+  max-height: 42px;
+  padding-left: 35px;
+}
+
+.headerRight {
+  font-weight: bold;
+  font-size: $font-size;
+}
+
+.burgerMenuBtn {
+  max-height: 28px !important;
+}
+
+.burgerMenu {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: $bg-color-1;
+  z-index: 11;
+  padding-top: 20px;
+  padding-bottom: 20px;
+  overflow-y: scroll;
+
+  a {
+    text-decoration: none;
+  }
+
+  h3,
+  h4 {
+    float: none;
+  }
+
+  button {
+    color: $bg-color-1 !important;
+    border: none;
+    background-color: $font-color;
+    padding: 12px 20px;
+  }
+
+  .burgerMenuCaretOpen::after {
+    display: inline-block;
+    margin-left: 0.255em;
+    vertical-align: 0.255em;
+    content: "";
+    position: relative;
+    top: 2px;
+    border-top: 0.3em solid;
+    border-right: 0.3em solid transparent;
+    border-bottom: 0;
+    border-left: 0.3em solid transparent;
+  }
+
+  .burgerMenuCaretClose::after {
+    display: inline-block;
+    margin-left: 0.255em;
+    vertical-align: 0.255em;
+    content: "";
+    position: relative;
+    top: 2px;
+    border-top: 0;
+    border-right: 0.3em solid transparent;
+    border-bottom: 0.3em solid;
+    border-left: 0.3em solid transparent;
+  }
+}
+
+.burgerMenuClose {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  font-size: 20px;
+  font-family: $square-font;
+}
+
+.mainNavLink {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-left: 25px;
+  a span {
+    text-decoration: none !important;
+  }
+}
+
+.connectBtn {
+  background-color: white;
+  padding-left: 12px;
+  padding-right: 22px;
+}
+
+.fontBlack {
+  a:first-of-type {
+    color: black;
+  }
+}
+
+@media (min-width: 1000px) {
+  .dMdNone {
+    display: none !important;
+  }
+  .dMdBlock {
+    display: block !important;
+  }
+}

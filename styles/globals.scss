@@ -1,0 +1,168 @@
+@import "./variables.scss";
+
+body {
+  background: $bg-color-1;
+  background-color: $bg-color-2 !important;
+  color: $font-color !important;
+  font-size: $font-size !important;
+  font-family: $main-font !important;
+}
+
+@media only screen and (max-width: 1200px) {
+  body {
+    font-size: $font-smaller !important;
+  }
+}
+
+@media only screen and (max-width: 800px) {
+  body {
+    font-size: $font-smallest !important;
+  }
+}
+
+textarea,
+select,
+input,
+button {
+  outline: 0 !important;
+  box-shadow: none !important;
+  color: $font-color !important;
+}
+
+a {
+  color: $font-color;
+  text-decoration: underline;
+  color: $font-color;
+}
+
+a:hover {
+  color: darken($color: $font-color, $amount: $darken-percentage);
+}
+
+* {
+  &:before,
+  &:after {
+    position: absolute;
+    content: "";
+  }
+}
+
+h1 {
+  font-family: $square-font !important;
+  font-size: 48px;
+  float: left;
+  color: $font-color-h;
+}
+
+h2 {
+  font-size: 32px;
+  font-weight: bold;
+  float: left;
+  color: $font-color-h;
+}
+
+h3 {
+  font-size: 28px;
+  font-weight: bold;
+  float: left;
+  color: $font-color-h;
+}
+
+h4 {
+  font-size: 24px;
+  font-weight: bold;
+  float: left;
+  color: $font-color-h;
+}
+
+@media only screen and (max-width: 800px) {
+  h1 {
+    font-family: $square-font !important;
+    font-size: 26px;
+    float: left;
+  }
+
+  h2 {
+    font-size: 22px;
+    font-weight: bold;
+    float: left;
+  }
+
+  h3 {
+    font-size: 18px;
+    font-weight: bold;
+    float: left;
+  }
+
+  h4 {
+    font-size: 18px;
+    font-weight: bold;
+    float: left;
+  }
+}
+
+.text-right {
+  text-align: right;
+}
+
+.icon-100 {
+  width: 100px;
+}
+
+.no-padding {
+  padding: 0;
+}
+
+#walletconnect-wrapper {
+  color: black !important;
+
+  a {
+    color: black !important;
+  }
+}
+
+#footer {
+  background-color: $bg-color-1;
+  padding: 1.5rem;
+  line-height: 18px;
+
+  img {
+    height: 18px;
+    vertical-align: bottom;
+  }
+
+  @media only screen and (max-width: 800px) {
+    img {
+      height: 14px;
+      vertical-align: middle;
+    }
+  }
+
+  a {
+    padding-top: 5px;
+    padding-bottom: 5px;
+    text-decoration: none;
+    white-space: nowrap;
+  }
+
+  a:hover {
+    opacity: 0.75;
+  }
+}
+
+.twitter-share-button {
+  background-color: #1d9bf0 !important;
+  height: 30px;
+  box-sizing: border-box;
+  padding: 1px 12px 1px 6px !important;
+  border-radius: 9999px;
+  font-size: smaller !important;
+
+  &:hover {
+    background-color: #0c7abf !important;
+  }
+}
+
+.font-color {
+  color: $font-color;
+}

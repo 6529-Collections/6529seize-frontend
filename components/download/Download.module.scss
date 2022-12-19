@@ -1,0 +1,25 @@
+@import "../../styles/variables.scss";
+
+.download {
+  margin-left: 5px;
+  color: $lightest-grey;
+  width: 20px;
+
+  svg {
+    width: 20px;
+    color: white;
+    cursor: pointer;
+
+    &:hover {
+      color: darken($color: $font-color, $amount: $darken-percentage);
+    }
+  }
+}
+
+.cancelDownload {
+  color: white;
+  cursor: pointer;
+  &:hover {
+    text-decoration: underline;
+  }
+}

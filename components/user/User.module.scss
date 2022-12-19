@@ -1,0 +1,62 @@
+@import "../../styles/variables.scss";
+
+.ownerAddress {
+  float: none;
+  color: $font-color !important;
+  span {
+    text-decoration: none !important;
+  }
+}
+
+.subHeader {
+  font-weight: lighter;
+  color: $font-color !important;
+  float: none;
+}
+
+.lastTDH {
+  white-space: nowrap;
+  color: $font-color-h;
+  line-height: 48px;
+  font-size: smaller;
+  a {
+    color: $font-color-h !important;
+  }
+}
+
+@media only screen and (max-width: 800px) {
+  .lastTDH {
+    line-height: 26px;
+  }
+}
+
+.seizedToggle {
+  width: fit-content;
+  float: left;
+  padding-right: 15px;
+  input {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='%23000'/%3e%3c/svg%3e") !important;
+    border-color: black !important;
+  }
+  input:checked {
+    background-color: $green !important;
+  }
+}
+
+.sortDirection {
+  width: $font-size;
+  cursor: pointer;
+}
+
+.disabled {
+  color: $lightest-grey;
+  text-decoration: none;
+  &:hover {
+    color: white;
+  }
+}
+
+.sort {
+  cursor: pointer;
+  margin-right: 15px;
+}
