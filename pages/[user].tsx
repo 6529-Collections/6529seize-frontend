@@ -61,7 +61,7 @@ export async function getServerSideProps(req: any, res: any, resolvedUrl: any) {
   let userDisplay = formatAddress(user);
   const responseText = await nftRequest.text();
   if (responseText) {
-    const response = await nftRequest.json();
+    const response = await JSON.parse(responseText);
     userDisplay = response.display ? response.display : userDisplay;
   }
 
