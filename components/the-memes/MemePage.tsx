@@ -878,23 +878,21 @@ export default function MemePage() {
                       <h3>Minting Approach</h3>
                     </Col>
                   </Row>
-                  {nft.id > 3 ? (
-                    <Row>
-                      <Col>
-                        <a
-                          href={
-                            `https://github.com/6529-Collections/thememecards/tree/main/card` +
-                            nft.id
-                          }
-                          target="_blank"
-                          rel="noreferrer">
-                          Distribution Plan
-                        </a>
-                      </Col>
-                    </Row>
-                  ) : (
-                    "GENESIS"
-                  )}
+                  <Row>
+                    <Col>
+                      <a
+                        href={
+                          nft.id > 3
+                            ? `https://github.com/6529-Collections/thememecards/tree/main/card` +
+                              nft.id
+                            : `https://github.com/6529-Collections/thememecards/tree/main/card1-3`
+                        }
+                        target="_blank"
+                        rel="noreferrer">
+                        Distribution Plan
+                      </a>
+                    </Col>
+                  </Row>
                   {/* <Row>
                     <Col>
                       <a
