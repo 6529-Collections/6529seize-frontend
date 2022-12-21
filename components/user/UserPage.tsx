@@ -38,7 +38,8 @@ interface Props {
 
 enum Sort {
   ID = "id",
-  TDH = "tdh_rank",
+  TDH = "tdh",
+  RANK = "tdh_rank",
 }
 
 export default function UserPage(props: Props) {
@@ -65,6 +66,7 @@ export default function UserPage(props: Props) {
   const [ownerENS, setOwnerENS] = useState("");
   const [owned, setOwned] = useState<Owner[]>([]);
   const [nfts, setNfts] = useState<NFT[]>([]);
+  const [nftsLoaded, setNftsLoaded] = useState(false);
   const [tdh, setTDH] = useState<TDH>();
   const [ownerTags, setOwnerTags] = useState<OwnerTags>();
   const [showNonSeized, setShowNonSeized] = useState(true);
@@ -174,6 +176,7 @@ export default function UserPage(props: Props) {
           } else {
             const newnfts = [...mynfts].concat(response.data);
             setNfts(newnfts);
+            setNftsLoaded(true);
           }
         });
     }
@@ -182,11 +185,15 @@ export default function UserPage(props: Props) {
       let initialNftsUrl = "";
       if (isConnected && areEqualAddresses(ownerAddress, address)) {
         setUserIsOwner(true);
+        setShowNonSeized(true);
         initialNftsUrl = `${process.env.API_ENDPOINT}/api/nfts?sort_direction=ASC`;
       } else {
+        setUserIsOwner(false);
         initialNftsUrl = `${process.env.API_ENDPOINT}/api/${ownerAddress}/nfts`;
       }
-      fetchNfts(initialNftsUrl, []);
+      if (!nftsLoaded) {
+        fetchNfts(initialNftsUrl, []);
+      }
     }
   }, [ownerAddress, router.isReady, isConnected]);
 
@@ -335,6 +342,88 @@ export default function UserPage(props: Props) {
           );
         }
       }
+      if (sort == Sort.RANK) {
+        if (sortDir == SortDirection.ASC) {
+          setNfts(
+            [...nfts].sort((a, b) => {
+              let atdh;
+              let btdh;
+
+              const aBalance = getBalance(a);
+              const bBalance = getBalance(b);
+
+              if (areEqualAddresses(a.contract, MEMES_CONTRACT)) {
+                atdh = tdh?.memes_ranks.find((m) => m.id == a.id)?.rank;
+              } else if (areEqualAddresses(a.contract, GRADIENT_CONTRACT)) {
+                atdh = tdh?.gradients_ranks.find((m) => m.id == a.id)?.rank;
+              }
+              if (areEqualAddresses(b.contract, MEMES_CONTRACT)) {
+                btdh = tdh?.memes_ranks.find((m) => m.id == b.id)?.rank;
+              } else if (areEqualAddresses(b.contract, GRADIENT_CONTRACT)) {
+                btdh = tdh?.gradients_ranks.find((m) => m.id == b.id)?.rank;
+              }
+
+              if (aBalance > 0 && !atdh) {
+                atdh = 0;
+              }
+              if (bBalance > 0 && !btdh) {
+                btdh = 0;
+              }
+
+              if (atdh != undefined && btdh != undefined) {
+                if (atdh > btdh) {
+                  return 1;
+                } else if (atdh < btdh) {
+                  return -1;
+                } else {
+                  return a.id > b.id ? 1 : -1;
+                }
+              } else {
+                return aBalance > bBalance ? -1 : 1;
+              }
+            })
+          );
+        } else {
+          setNfts(
+            [...nfts].sort((a, b) => {
+              let atdh;
+              let btdh;
+
+              const aBalance = getBalance(a);
+              const bBalance = getBalance(b);
+
+              if (areEqualAddresses(a.contract, MEMES_CONTRACT)) {
+                atdh = tdh?.memes_ranks.find((m) => m.id == a.id)?.rank;
+              } else if (areEqualAddresses(a.contract, GRADIENT_CONTRACT)) {
+                atdh = tdh?.gradients_ranks.find((m) => m.id == a.id)?.rank;
+              }
+              if (areEqualAddresses(b.contract, MEMES_CONTRACT)) {
+                btdh = tdh?.memes_ranks.find((m) => m.id == b.id)?.rank;
+              } else if (areEqualAddresses(b.contract, GRADIENT_CONTRACT)) {
+                btdh = tdh?.gradients_ranks.find((m) => m.id == b.id)?.rank;
+              }
+
+              if (aBalance > 0 && !atdh) {
+                atdh = 0;
+              }
+              if (bBalance > 0 && !btdh) {
+                btdh = 0;
+              }
+              if (atdh && btdh) {
+                if (atdh > btdh) {
+                  return -1;
+                } else if (atdh < btdh) {
+                  return 1;
+                } else {
+                  return a.id > b.id ? 1 : -1;
+                }
+              } else {
+                return aBalance > bBalance ? -1 : 1;
+              }
+            })
+          );
+        }
+      }
     }
   }, [sortDir, sort]);
 
@@ -356,10 +445,11 @@ export default function UserPage(props: Props) {
 
     if (
       (nftbalance > 0 || (userIsOwner && showNonSeized && isMemes)) &&
-      ((hideMemes && !isMemes) ||
-        (hideGradients && !isGradients) ||
-        (!hideMemes && isMemes) ||
-        (!hideGradients && isGradients))
+      // ((hideMemes && !isMemes) ||
+      //   (hideGradients && !isGradients) ||
+      //   (!hideMemes && isMemes) ||
+      //   (!hideGradients && isGradients))
+      ((!hideMemes && isMemes) || (!hideGradients && isGradients))
     )
       return (
         <Col
@@ -444,7 +534,7 @@ export default function UserPage(props: Props) {
               onClick={() => setShowNonSeized(!showNonSeized)}
             />
           )}
-          {/* {ownerTags &&
+          {ownerTags &&
             ownerTags?.memes_balance > 0 &&
             ownerTags?.gradients_balance > 0 && (
               <>
@@ -454,9 +544,9 @@ export default function UserPage(props: Props) {
                   label={`Hide Gradients`}
                   checked={hideGradients}
                   onClick={() => {
-                    if (hideMemes) {
-                      setHideMemes(false);
-                    }
+                    // if (hideMemes) {
+                    //   setHideMemes(false);
+                    // }
                     setHideGradients(!hideGradients);
                   }}
                 />
@@ -466,14 +556,14 @@ export default function UserPage(props: Props) {
                   label={`Hide Memes`}
                   checked={hideMemes}
                   onClick={() => {
-                    if (hideGradients) {
-                      setHideGradients(false);
-                    }
+                    // if (hideGradients) {
+                    //   setHideGradients(false);
+                    // }
                     setHideMemes(!hideMemes);
                   }}
                 />
               </>
-            )} */}
+            )}
         </Col>
       </Row>
     );
@@ -485,7 +575,7 @@ export default function UserPage(props: Props) {
       <Container fluid className={styles.mainContainer}>
         <Row>
           <Col>
-            <Container className="mt-2 pt-2 pb-3">
+            <Container className="mt-2 pt-2 pb-2">
               <Row>
                 <Col className="text-right">
                   {ownerAddress && (
@@ -510,7 +600,7 @@ export default function UserPage(props: Props) {
                   )}
                 </Col>
               </Row>
-              <Row>
+              <Row className="pt-2">
                 <Col className="text-center">
                   <h2 className={styles.ownerAddress}>
                     {ownerTags ? (
@@ -561,7 +651,7 @@ export default function UserPage(props: Props) {
               )}
             </Container>
             <Container>
-              {/* <Row className="pt-2">
+              <Row className="pt-2 pb-2">
                 <Col>
                   Sort&nbsp;&nbsp;
                   <FontAwesomeIcon
@@ -596,8 +686,15 @@ export default function UserPage(props: Props) {
                     }`}>
                     TDH
                   </span>
+                  <span
+                    onClick={() => setSort(Sort.RANK)}
+                    className={`${styles.sort} ${
+                      sort != Sort.RANK ? styles.disabled : ""
+                    }`}>
+                    RANK
+                  </span>
                 </Col>
-              </Row> */}
+              </Row>
               {printUserControls()}
               {ownerLoaded &&
                 (owned.length > 0 ? (
