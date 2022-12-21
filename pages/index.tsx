@@ -45,22 +45,25 @@ export default function Home() {
             const nftExtended = response.data[0];
             setNFT(nft);
             setnftExtended(nftExtended);
-            if (address && nft.id) {
-              fetch(
-                `${process.env.API_ENDPOINT}/api/owners?contract=${nft.contract}&wallet=${address}&id=${nft.id}`
-              )
-                .then((res) => res.json())
-                .then((response: DBResponse) => {
-                  if (response.data.length > 0) {
-                    setNftBalance(response.data[0].balance);
-                  }
-                });
-            } else {
-              setNftBalance(0);
-            }
           });
       });
   }, []);
+
+  useEffect(() => {
+    if (address && nft && nft.id) {
+      fetch(
+        `${process.env.API_ENDPOINT}/api/owners?contract=${nft.contract}&wallet=${address}&id=${nft.id}`
+      )
+        .then((res) => res.json())
+        .then((response: DBResponse) => {
+          if (response.data.length > 0) {
+            setNftBalance(response.data[0].balance);
+          }
+        });
+    } else {
+      setNftBalance(0);
+    }
+  }, [address, nft]);
 
   useEffect(() => {
     fetch(`${process.env.API_ENDPOINT}/api/transactions?page_size=12`)
