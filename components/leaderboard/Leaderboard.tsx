@@ -485,7 +485,12 @@ export default function Leaderboard(props: Props) {
                     );
                     return (
                       <tr key={`${index}-${lead.wallet}`}>
-                        <td className={styles.rank}>{lead.tdh_rank}</td>
+                        <td className={styles.rank}>
+                          {/* {lead.tdh_rank} */}
+                          {index +
+                            1 +
+                            (pageProps.page - 1) * pageProps.pageSize}
+                        </td>
                         <td className={styles.hodler}>
                           <Address
                             address={lead.wallet}
