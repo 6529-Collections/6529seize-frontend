@@ -1,6 +1,6 @@
 import styles from "./User.module.scss";
 
-import { Col, Container, Form, Row } from "react-bootstrap";
+import { Col, Container, Form, Row, Table } from "react-bootstrap";
 import { useEffect, useState } from "react";
 import { DBResponse } from "../../entities/IDBResponse";
 import { Owner, OwnerTags } from "../../entities/IOwner";
@@ -20,7 +20,7 @@ import {
   MEMES_CONTRACT,
   SIX529_MUSEUM,
 } from "../../constants";
-import { TDH, TDHCalc } from "../../entities/ITDH";
+import { TDH, TDHCalc, TDHMetrics } from "../../entities/ITDH";
 import { useAccount } from "wagmi";
 import { SortDirection } from "../../entities/ISort";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -67,7 +67,7 @@ export default function UserPage(props: Props) {
   const [owned, setOwned] = useState<Owner[]>([]);
   const [nfts, setNfts] = useState<NFT[]>([]);
   const [nftsLoaded, setNftsLoaded] = useState(false);
-  const [tdh, setTDH] = useState<TDH>();
+  const [tdh, setTDH] = useState<TDHMetrics>();
   const [ownerTags, setOwnerTags] = useState<OwnerTags>();
   const [showNonSeized, setShowNonSeized] = useState(true);
   const [userIsOwner, setUserIsOwner] = useState(false);
@@ -199,7 +199,7 @@ export default function UserPage(props: Props) {
 
   useEffect(() => {
     async function fetchTDH() {
-      const url = `${process.env.API_ENDPOINT}/api/tdh/?wallet=${ownerAddress}`;
+      const url = `${process.env.API_ENDPOINT}/api/owner_metrics/?wallet=${ownerAddress}`;
       return fetch(url)
         .then((res) => res.json())
         .then((response: DBResponse) => {
@@ -600,8 +600,13 @@ export default function UserPage(props: Props) {
                   )}
                 </Col>
               </Row>
-              <Row className="pt-2">
-                <Col className="text-center">
+              <Row className="pt-3">
+                <Col
+                  className="text-center d-flex align-items-center justify-content-center"
+                  xs={{ span: 12 }}
+                  sm={{ span: 12 }}
+                  md={{ span: 6 }}
+                  lg={{ span: 6 }}>
                   <h2 className={styles.ownerAddress}>
                     {ownerTags ? (
                       <Address
@@ -625,30 +630,95 @@ export default function UserPage(props: Props) {
                     )}
                   </h2>
                 </Col>
+                {tdh && (
+                  <Col
+                    className="text-left"
+                    xs={{ span: 12 }}
+                    sm={{ span: 12 }}
+                    md={{ span: 6 }}
+                    lg={{ span: 6 }}>
+                    <Table className={styles.primaryTable}>
+                      <tr>
+                        <td>
+                          <h4>TDH</h4>
+                        </td>
+                        {lastTDH && (
+                          <td className={`text-right ${styles.lastTDH}`}>
+                            LAST TDH:{" "}
+                            {`${getDateDisplay(new Date(lastTDH.date))}`} |
+                            BLOCK:{" "}
+                            <a
+                              href={`https://etherscan.io/block/${lastTDH.block}`}
+                              rel="noreferrer"
+                              target="_blank">
+                              {lastTDH.block}
+                            </a>
+                          </td>
+                        )}
+                      </tr>
+                      <tr>
+                        <td>TDH</td>
+                        <td>{numberWithCommas(tdh.tdh)}</td>
+                      </tr>
+                      <tr>
+                        <td>Rank</td>
+                        <td>#{numberWithCommas(tdh.tdh_rank)}</td>
+                      </tr>
+                      <tr>
+                        <td>Balance</td>
+                        <td>{numberWithCommas(tdh.balance)}</td>
+                      </tr>
+                    </Table>
+                    <Table className={styles.secondaryTable}>
+                      <tr>
+                        <td>
+                          <h4>In</h4>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td>Purchases (ETH)</td>
+                        <td>
+                          {numberWithCommas(
+                            Math.round(tdh.purchases_value * 1000) / 1000
+                          )}
+                        </td>
+                      </tr>
+                      <tr>
+                        <td>Purchases</td>
+                        <td>{numberWithCommas(tdh.purchases_count)}</td>
+                      </tr>
+                      <tr>
+                        <td>Transfers In</td>
+                        <td>{numberWithCommas(tdh.transfers_in)}</td>
+                      </tr>
+                    </Table>
+                    <Table
+                      className={`${styles.secondaryTable} ${styles.secondaryTableMargin}`}>
+                      <tr>
+                        <td>
+                          <h4>Out</h4>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td>Sales (ETH)</td>
+                        <td>
+                          {numberWithCommas(
+                            Math.round(tdh.sales_value * 1000) / 1000
+                          )}
+                        </td>
+                      </tr>
+                      <tr>
+                        <td>Sales</td>
+                        <td>{numberWithCommas(tdh.sales_count)}</td>
+                      </tr>
+                      <tr>
+                        <td>Transfers Out</td>
+                        <td>{numberWithCommas(tdh.transfers_out)}</td>
+                      </tr>
+                    </Table>
+                  </Col>
+                )}
               </Row>
-              {tdh && (
-                <Row className="pt-3">
-                  <Col className="text-center">
-                    <h3 className={styles.subHeader}>
-                      TDH: {numberWithCommas(tdh.tdh)} | Rank #{tdh.tdh_rank}
-                    </h3>
-                  </Col>
-                </Row>
-              )}
-              {lastTDH && (
-                <Row>
-                  <Col className={`text-center ${styles.lastTDH}`}>
-                    LAST TDH: {`${getDateDisplay(new Date(lastTDH.date))}`} |
-                    BLOCK:{" "}
-                    <a
-                      href={`https://etherscan.io/block/${lastTDH.block}`}
-                      rel="noreferrer"
-                      target="_blank">
-                      {lastTDH.block}
-                    </a>
-                  </Col>
-                </Row>
-              )}
             </Container>
             <Container>
               <Row className="pt-2 pb-2">
