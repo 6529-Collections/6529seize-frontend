@@ -587,8 +587,8 @@ export default function UserPage(props: Props) {
                           ? ownerENS
                           : formatAddress(ownerAddress as string)
                       }'s 6529 Collection${
-                        tdh && `\nTDH: ${tdh.tdh} -  Rank ${tdh.tdh_rank}`
-                      }\n#6529seize\n\n`}>
+                        tdh && `\nTDH ${tdh.tdh} - \Rank ${tdh.tdh_rank}`
+                      }\n#6529Seize\n\n`}>
                       <TwitterIcon
                         size={30}
                         round
@@ -679,7 +679,7 @@ export default function UserPage(props: Props) {
                         <td>Purchases (ETH)</td>
                         <td>
                           {numberWithCommas(
-                            Math.round(tdh.purchases_value * 1000) / 1000
+                            Math.round(tdh.purchases_value * 100) / 100
                           )}
                         </td>
                       </tr>
@@ -703,7 +703,7 @@ export default function UserPage(props: Props) {
                         <td>Sales (ETH)</td>
                         <td>
                           {numberWithCommas(
-                            Math.round(tdh.sales_value * 1000) / 1000
+                            Math.round(tdh.sales_value * 100) / 100
                           )}
                         </td>
                       </tr>
