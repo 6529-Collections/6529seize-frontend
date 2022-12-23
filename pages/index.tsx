@@ -253,7 +253,7 @@ export default function Home() {
                         Floor Price:{" "}
                         {nft.floor_price > 0
                           ? `${numberWithCommas(
-                              Math.round(nft.floor_price * 1000) / 1000
+                              Math.round(nft.floor_price * 100) / 100
                             )} ETH`
                           : `N/A`}
                       </Col>

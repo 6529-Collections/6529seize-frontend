@@ -96,7 +96,7 @@ export default function TDH() {
                       </li>
                       <li className="mt-1">
                         For 1155 NFTs, use the longest (most favorable) count.
-                        For example, if wallet Ox has the following pattern:
+                        For example, if wallet 0x has the following pattern:
                       </li>
                       <ul>
                         <li className="mt-1">

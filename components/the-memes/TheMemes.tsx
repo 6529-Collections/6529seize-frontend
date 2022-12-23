@@ -449,7 +449,7 @@ export default function TheMemesComponent() {
               {sort == Sort.FLOOR_PRICE &&
                 (nft.floor_price > 0
                   ? `Floor Price: ${numberWithCommas(
-                      Math.round(nft.floor_price * 1000) / 1000
+                      Math.round(nft.floor_price * 100) / 100
                     )} ETH`
                   : `Floor Price: N/A`)}
               {sort == Sort.MARKET_CAP &&
