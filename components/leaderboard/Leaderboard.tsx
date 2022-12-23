@@ -160,6 +160,18 @@ export default function Leaderboard(props: Props) {
                   <th className={styles.hodler}></th>
                   <th className={styles.gap}></th>
                   <th
+                    colSpan={3}
+                    className={`${styles.tdh} ${styles.borderBottom}`}>
+                    <b>Total Cards HODLed</b>
+                  </th>
+                  <th className={styles.gap}></th>
+                  <th
+                    colSpan={3}
+                    className={`${styles.tdh} ${styles.borderBottom}`}>
+                    <b>Interactions</b>
+                  </th>
+                  <th className={styles.gap}></th>
+                  <th
                     colSpan={tdhExpanded ? 6 : 3}
                     className={`${styles.tdh} ${styles.borderBottom}`}>
                     <b>Total Days HODLed (TDH)</b>
@@ -175,23 +187,235 @@ export default function Leaderboard(props: Props) {
                       }`}
                     />
                   </th>
-                  <th className={styles.gap}></th>
-                  <th
-                    colSpan={3}
-                    className={`${styles.tdh} ${styles.borderBottom}`}>
-                    <b>Interactions</b>
-                  </th>
-                  <th className={styles.gap}></th>
-                  <th
-                    colSpan={3}
-                    className={`${styles.tdh} ${styles.borderBottom}`}>
-                    <b>Total Cards HODLed</b>
-                  </th>
                 </tr>
                 <tr className={styles.gap}></tr>
                 <tr>
                   <th className={styles.rank}>Rank</th>
                   <th className={styles.hodler}>HODLer</th>
+                  <th className={styles.gap}></th>
+                  <th className={styles.tdhSub}>
+                    <span className="d-flex align-items-center justify-content-center">
+                      Total&nbsp;
+                      <span className="d-flex flex-column">
+                        <FontAwesomeIcon
+                          icon="square-caret-up"
+                          onClick={() =>
+                            setSort({
+                              sort: Sort.total_balance,
+                              sort_direction: SortDirection.ASC,
+                            })
+                          }
+                          className={`${styles.caret} ${
+                            sort.sort_direction != SortDirection.ASC ||
+                            sort.sort != Sort.total_balance
+                              ? styles.disabled
+                              : ""
+                          }`}
+                        />
+                        <FontAwesomeIcon
+                          icon="square-caret-down"
+                          onClick={() =>
+                            setSort({
+                              sort: Sort.total_balance,
+                              sort_direction: SortDirection.DESC,
+                            })
+                          }
+                          className={`${styles.caret} ${
+                            sort.sort_direction != SortDirection.DESC ||
+                            sort.sort != Sort.total_balance
+                              ? styles.disabled
+                              : ""
+                          }`}
+                        />
+                      </span>
+                    </span>
+                  </th>
+                  <th className={styles.tdhSub}>
+                    <span className="d-flex align-items-center justify-content-center">
+                      SZN1&nbsp;
+                      <span className="d-flex flex-column">
+                        <FontAwesomeIcon
+                          icon="square-caret-up"
+                          onClick={() =>
+                            setSort({
+                              sort: Sort.szn1_balance,
+                              sort_direction: SortDirection.ASC,
+                            })
+                          }
+                          className={`${styles.caret} ${
+                            sort.sort_direction != SortDirection.ASC ||
+                            sort.sort != Sort.szn1_balance
+                              ? styles.disabled
+                              : ""
+                          }`}
+                        />
+                        <FontAwesomeIcon
+                          icon="square-caret-down"
+                          onClick={() =>
+                            setSort({
+                              sort: Sort.szn1_balance,
+                              sort_direction: SortDirection.DESC,
+                            })
+                          }
+                          className={`${styles.caret} ${
+                            sort.sort_direction != SortDirection.DESC ||
+                            sort.sort != Sort.szn1_balance
+                              ? styles.disabled
+                              : ""
+                          }`}
+                        />
+                      </span>
+                    </span>
+                  </th>
+                  <th className={styles.tdhSub}>
+                    <span className="d-flex align-items-center justify-content-center">
+                      Gradients&nbsp;
+                      <span className="d-flex flex-column">
+                        <FontAwesomeIcon
+                          icon="square-caret-up"
+                          onClick={() =>
+                            setSort({
+                              sort: Sort.gradients_balance,
+                              sort_direction: SortDirection.ASC,
+                            })
+                          }
+                          className={`${styles.caret} ${
+                            sort.sort_direction != SortDirection.ASC ||
+                            sort.sort != Sort.gradients_balance
+                              ? styles.disabled
+                              : ""
+                          }`}
+                        />
+                        <FontAwesomeIcon
+                          icon="square-caret-down"
+                          onClick={() =>
+                            setSort({
+                              sort: Sort.gradients_balance,
+                              sort_direction: SortDirection.DESC,
+                            })
+                          }
+                          className={`${styles.caret} ${
+                            sort.sort_direction != SortDirection.DESC ||
+                            sort.sort != Sort.gradients_balance
+                              ? styles.disabled
+                              : ""
+                          }`}
+                        />
+                      </span>
+                    </span>
+                  </th>
+                  <th className={styles.gap}></th>
+                  <th className={styles.tdhSub}>
+                    <span className="d-flex align-items-center justify-content-center">
+                      Purchases (ETH)&nbsp;
+                      <span className="d-flex flex-column">
+                        <FontAwesomeIcon
+                          icon="square-caret-up"
+                          onClick={() =>
+                            setSort({
+                              sort: Sort.purchases_value,
+                              sort_direction: SortDirection.ASC,
+                            })
+                          }
+                          className={`${styles.caret} ${
+                            sort.sort_direction != SortDirection.ASC ||
+                            sort.sort != Sort.purchases_value
+                              ? styles.disabled
+                              : ""
+                          }`}
+                        />
+                        <FontAwesomeIcon
+                          icon="square-caret-down"
+                          onClick={() =>
+                            setSort({
+                              sort: Sort.purchases_value,
+                              sort_direction: SortDirection.DESC,
+                            })
+                          }
+                          className={`${styles.caret} ${
+                            sort.sort_direction != SortDirection.DESC ||
+                            sort.sort != Sort.purchases_value
+                              ? styles.disabled
+                              : ""
+                          }`}
+                        />
+                      </span>
+                    </span>
+                  </th>
+                  <th className={styles.tdhSub}>
+                    <span className="d-flex align-items-center justify-content-center">
+                      Sales (ETH)&nbsp;
+                      <span className="d-flex flex-column">
+                        <FontAwesomeIcon
+                          icon="square-caret-up"
+                          onClick={() =>
+                            setSort({
+                              sort: Sort.sales_value,
+                              sort_direction: SortDirection.ASC,
+                            })
+                          }
+                          className={`${styles.caret} ${
+                            sort.sort_direction != SortDirection.ASC ||
+                            sort.sort != Sort.sales_value
+                              ? styles.disabled
+                              : ""
+                          }`}
+                        />
+                        <FontAwesomeIcon
+                          icon="square-caret-down"
+                          onClick={() =>
+                            setSort({
+                              sort: Sort.sales_value,
+                              sort_direction: SortDirection.DESC,
+                            })
+                          }
+                          className={`${styles.caret} ${
+                            sort.sort_direction != SortDirection.DESC ||
+                            sort.sort != Sort.sales_value
+                              ? styles.disabled
+                              : ""
+                          }`}
+                        />
+                      </span>
+                    </span>
+                  </th>
+                  <th className={styles.tdhSub}>
+                    <span className="d-flex align-items-center justify-content-center">
+                      Sales&nbsp;
+                      <span className="d-flex flex-column">
+                        <FontAwesomeIcon
+                          icon="square-caret-up"
+                          onClick={() =>
+                            setSort({
+                              sort: Sort.sales_count,
+                              sort_direction: SortDirection.ASC,
+                            })
+                          }
+                          className={`${styles.caret} ${
+                            sort.sort_direction != SortDirection.ASC ||
+                            sort.sort != Sort.sales_count
+                              ? styles.disabled
+                              : ""
+                          }`}
+                        />
+                        <FontAwesomeIcon
+                          icon="square-caret-down"
+                          onClick={() =>
+                            setSort({
+                              sort: Sort.sales_count,
+                              sort_direction: SortDirection.DESC,
+                            })
+                          }
+                          className={`${styles.caret} ${
+                            sort.sort_direction != SortDirection.DESC ||
+                            sort.sort != Sort.sales_count
+                              ? styles.disabled
+                              : ""
+                          }`}
+                        />
+                      </span>
+                    </span>
+                  </th>
                   <th className={styles.gap}></th>
                   <th className={styles.tdhSub}>
                     <span className="d-flex align-items-center justify-content-center">
@@ -389,230 +613,6 @@ export default function Leaderboard(props: Props) {
                       </span>
                     </th>
                   )}
-                  <th className={styles.gap}></th>
-                  <th className={styles.tdhSub}>
-                    <span className="d-flex align-items-center justify-content-center">
-                      Purchases (ETH)&nbsp;
-                      <span className="d-flex flex-column">
-                        <FontAwesomeIcon
-                          icon="square-caret-up"
-                          onClick={() =>
-                            setSort({
-                              sort: Sort.purchases_value,
-                              sort_direction: SortDirection.ASC,
-                            })
-                          }
-                          className={`${styles.caret} ${
-                            sort.sort_direction != SortDirection.ASC ||
-                            sort.sort != Sort.purchases_value
-                              ? styles.disabled
-                              : ""
-                          }`}
-                        />
-                        <FontAwesomeIcon
-                          icon="square-caret-down"
-                          onClick={() =>
-                            setSort({
-                              sort: Sort.purchases_value,
-                              sort_direction: SortDirection.DESC,
-                            })
-                          }
-                          className={`${styles.caret} ${
-                            sort.sort_direction != SortDirection.DESC ||
-                            sort.sort != Sort.purchases_value
-                              ? styles.disabled
-                              : ""
-                          }`}
-                        />
-                      </span>
-                    </span>
-                  </th>
-                  <th className={styles.tdhSub}>
-                    <span className="d-flex align-items-center justify-content-center">
-                      Sales (ETH)&nbsp;
-                      <span className="d-flex flex-column">
-                        <FontAwesomeIcon
-                          icon="square-caret-up"
-                          onClick={() =>
-                            setSort({
-                              sort: Sort.sales_value,
-                              sort_direction: SortDirection.ASC,
-                            })
-                          }
-                          className={`${styles.caret} ${
-                            sort.sort_direction != SortDirection.ASC ||
-                            sort.sort != Sort.sales_value
-                              ? styles.disabled
-                              : ""
-                          }`}
-                        />
-                        <FontAwesomeIcon
-                          icon="square-caret-down"
-                          onClick={() =>
-                            setSort({
-                              sort: Sort.sales_value,
-                              sort_direction: SortDirection.DESC,
-                            })
-                          }
-                          className={`${styles.caret} ${
-                            sort.sort_direction != SortDirection.DESC ||
-                            sort.sort != Sort.sales_value
-                              ? styles.disabled
-                              : ""
-                          }`}
-                        />
-                      </span>
-                    </span>
-                  </th>
-                  <th className={styles.tdhSub}>
-                    <span className="d-flex align-items-center justify-content-center">
-                      Sales&nbsp;
-                      <span className="d-flex flex-column">
-                        <FontAwesomeIcon
-                          icon="square-caret-up"
-                          onClick={() =>
-                            setSort({
-                              sort: Sort.sales_count,
-                              sort_direction: SortDirection.ASC,
-                            })
-                          }
-                          className={`${styles.caret} ${
-                            sort.sort_direction != SortDirection.ASC ||
-                            sort.sort != Sort.sales_count
-                              ? styles.disabled
-                              : ""
-                          }`}
-                        />
-                        <FontAwesomeIcon
-                          icon="square-caret-down"
-                          onClick={() =>
-                            setSort({
-                              sort: Sort.sales_count,
-                              sort_direction: SortDirection.DESC,
-                            })
-                          }
-                          className={`${styles.caret} ${
-                            sort.sort_direction != SortDirection.DESC ||
-                            sort.sort != Sort.sales_count
-                              ? styles.disabled
-                              : ""
-                          }`}
-                        />
-                      </span>
-                    </span>
-                  </th>
-                  <th className={styles.gap}></th>
-                  <th className={styles.tdhSub}>
-                    <span className="d-flex align-items-center justify-content-center">
-                      Total&nbsp;
-                      <span className="d-flex flex-column">
-                        <FontAwesomeIcon
-                          icon="square-caret-up"
-                          onClick={() =>
-                            setSort({
-                              sort: Sort.total_balance,
-                              sort_direction: SortDirection.ASC,
-                            })
-                          }
-                          className={`${styles.caret} ${
-                            sort.sort_direction != SortDirection.ASC ||
-                            sort.sort != Sort.total_balance
-                              ? styles.disabled
-                              : ""
-                          }`}
-                        />
-                        <FontAwesomeIcon
-                          icon="square-caret-down"
-                          onClick={() =>
-                            setSort({
-                              sort: Sort.total_balance,
-                              sort_direction: SortDirection.DESC,
-                            })
-                          }
-                          className={`${styles.caret} ${
-                            sort.sort_direction != SortDirection.DESC ||
-                            sort.sort != Sort.total_balance
-                              ? styles.disabled
-                              : ""
-                          }`}
-                        />
-                      </span>
-                    </span>
-                  </th>
-                  <th className={styles.tdhSub}>
-                    <span className="d-flex align-items-center justify-content-center">
-                      SZN1&nbsp;
-                      <span className="d-flex flex-column">
-                        <FontAwesomeIcon
-                          icon="square-caret-up"
-                          onClick={() =>
-                            setSort({
-                              sort: Sort.szn1_balance,
-                              sort_direction: SortDirection.ASC,
-                            })
-                          }
-                          className={`${styles.caret} ${
-                            sort.sort_direction != SortDirection.ASC ||
-                            sort.sort != Sort.szn1_balance
-                              ? styles.disabled
-                              : ""
-                          }`}
-                        />
-                        <FontAwesomeIcon
-                          icon="square-caret-down"
-                          onClick={() =>
-                            setSort({
-                              sort: Sort.szn1_balance,
-                              sort_direction: SortDirection.DESC,
-                            })
-                          }
-                          className={`${styles.caret} ${
-                            sort.sort_direction != SortDirection.DESC ||
-                            sort.sort != Sort.szn1_balance
-                              ? styles.disabled
-                              : ""
-                          }`}
-                        />
-                      </span>
-                    </span>
-                  </th>
-                  <th className={styles.tdhSub}>
-                    <span className="d-flex align-items-center justify-content-center">
-                      Gradients&nbsp;
-                      <span className="d-flex flex-column">
-                        <FontAwesomeIcon
-                          icon="square-caret-up"
-                          onClick={() =>
-                            setSort({
-                              sort: Sort.gradients_balance,
-                              sort_direction: SortDirection.ASC,
-                            })
-                          }
-                          className={`${styles.caret} ${
-                            sort.sort_direction != SortDirection.ASC ||
-                            sort.sort != Sort.gradients_balance
-                              ? styles.disabled
-                              : ""
-                          }`}
-                        />
-                        <FontAwesomeIcon
-                          icon="square-caret-down"
-                          onClick={() =>
-                            setSort({
-                              sort: Sort.gradients_balance,
-                              sort_direction: SortDirection.DESC,
-                            })
-                          }
-                          className={`${styles.caret} ${
-                            sort.sort_direction != SortDirection.DESC ||
-                            sort.sort != Sort.gradients_balance
-                              ? styles.disabled
-                              : ""
-                          }`}
-                        />
-                      </span>
-                    </span>
-                  </th>
                 </tr>
               </thead>
               <tbody>
@@ -647,6 +647,30 @@ export default function Leaderboard(props: Props) {
                         </td>
                         <td className={styles.gap}></td>
                         <td className={styles.tdhSub}>
+                          {numberWithCommas(lead.balance)}
+                        </td>
+                        <td className={styles.tdhSub}>
+                          {numberWithCommas(lead.memes_balance_season1)}
+                        </td>
+                        <td className={styles.tdhSub}>
+                          {numberWithCommas(lead.gradients_balance)}
+                        </td>
+                        <td className={styles.gap}></td>
+                        <td className={styles.tdhSub}>
+                          {numberWithCommas(
+                            Math.round(lead.purchases_value * 100) / 100
+                          )}
+                        </td>
+                        <td className={styles.tdhSub}>
+                          {numberWithCommas(
+                            Math.round(lead.sales_value * 100) / 100
+                          )}
+                        </td>
+                        <td className={styles.tdhSub}>
+                          {numberWithCommas(lead.sales_count)}
+                        </td>
+                        <td className={styles.gap}></td>
+                        <td className={styles.tdhSub}>
                           {numberWithCommas(lead.boosted_tdh)}
                         </td>
                         {tdhExpanded && (
@@ -670,30 +694,6 @@ export default function Leaderboard(props: Props) {
                             {numberWithCommas(lead.gradients_tdh)}
                           </td>
                         )}
-                        <td className={styles.gap}></td>
-                        <td className={styles.tdhSub}>
-                          {numberWithCommas(
-                            Math.round(lead.purchases_value * 1000) / 1000
-                          )}
-                        </td>
-                        <td className={styles.tdhSub}>
-                          {numberWithCommas(
-                            Math.round(lead.sales_value * 1000) / 1000
-                          )}
-                        </td>
-                        <td className={styles.tdhSub}>
-                          {numberWithCommas(lead.sales_count)}
-                        </td>
-                        <td className={styles.gap}></td>
-                        <td className={styles.tdhSub}>
-                          {numberWithCommas(lead.balance)}
-                        </td>
-                        <td className={styles.tdhSub}>
-                          {numberWithCommas(lead.memes_balance_season1)}
-                        </td>
-                        <td className={styles.tdhSub}>
-                          {numberWithCommas(lead.gradients_balance)}
-                        </td>
                       </tr>
                     );
                   })}

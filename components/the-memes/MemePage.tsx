@@ -398,7 +398,7 @@ export default function MemePage() {
                           <td>
                             {nft.floor_price > 0
                               ? `${numberWithCommas(
-                                  Math.round(nft.floor_price * 1000) / 1000
+                                  Math.round(nft.floor_price * 100) / 100
                                 )} ETH`
                               : `N/A`}
                           </td>
@@ -1146,7 +1146,7 @@ export default function MemePage() {
                             <td>
                               {nft.floor_price > 0
                                 ? `${numberWithCommas(
-                                    Math.round(nft.floor_price * 1000) / 1000
+                                    Math.round(nft.floor_price * 100) / 100
                                   )} ETH`
                                 : `N/A`}
                             </td>
@@ -1251,7 +1251,7 @@ export default function MemePage() {
                     <TwitterShareButton
                       className="twitter-share-button"
                       url={window.location.href.split("?")[0]}
-                      title={`Meme Card #${nft.id} \n${nft.name}\n${nft.artist}\n#6529seize\n\n`}>
+                      title={`Meme Card #${nft.id} \n${nft.name}\nby ${nft.artist}\n#6529Seize\n\n`}>
                       <TwitterIcon
                         size={30}
                         round
