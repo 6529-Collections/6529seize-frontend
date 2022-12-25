@@ -638,36 +638,38 @@ export default function UserPage(props: Props) {
                     md={{ span: 6 }}
                     lg={{ span: 6 }}>
                     <Table className={styles.primaryTable}>
-                      <tr>
-                        <td>
-                          <h4>TDH</h4>
-                        </td>
-                        {lastTDH && (
-                          <td className={`text-right ${styles.lastTDH}`}>
-                            LAST TDH:{" "}
-                            {`${getDateDisplay(new Date(lastTDH.date))}`} |
-                            BLOCK:{" "}
-                            <a
-                              href={`https://etherscan.io/block/${lastTDH.block}`}
-                              rel="noreferrer"
-                              target="_blank">
-                              {lastTDH.block}
-                            </a>
+                      <tbody>
+                        <tr>
+                          <td>
+                            <h4>TDH</h4>
                           </td>
-                        )}
-                      </tr>
-                      <tr>
-                        <td>TDH</td>
-                        <td>{numberWithCommas(tdh.tdh)}</td>
-                      </tr>
-                      <tr>
-                        <td>Rank</td>
-                        <td>#{numberWithCommas(tdh.tdh_rank)}</td>
-                      </tr>
-                      <tr>
-                        <td>Balance</td>
-                        <td>{numberWithCommas(tdh.balance)}</td>
-                      </tr>
+                          {lastTDH && (
+                            <td className={`text-right ${styles.lastTDH}`}>
+                              LAST TDH:{" "}
+                              {`${getDateDisplay(new Date(lastTDH.date))}`} |
+                              BLOCK:{" "}
+                              <a
+                                href={`https://etherscan.io/block/${lastTDH.block}`}
+                                rel="noreferrer"
+                                target="_blank">
+                                {lastTDH.block}
+                              </a>
+                            </td>
+                          )}
+                        </tr>
+                        <tr>
+                          <td>TDH</td>
+                          <td>{numberWithCommas(tdh.tdh)}</td>
+                        </tr>
+                        <tr>
+                          <td>Rank</td>
+                          <td>#{numberWithCommas(tdh.tdh_rank)}</td>
+                        </tr>
+                        <tr>
+                          <td>Balance</td>
+                          <td>{numberWithCommas(tdh.balance)}</td>
+                        </tr>
+                      </tbody>
                     </Table>
                     <Table className={styles.secondaryTable}>
                       <tr>

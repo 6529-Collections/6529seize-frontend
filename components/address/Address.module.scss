@@ -3,10 +3,11 @@
 .address {
   text-decoration: underline;
   font-weight: bolder;
+  margin-right: 10px;
 }
 
 .copy {
-  padding-left: 4px;
+  margin-right: 10px;
   cursor: copy;
   font-size: 15px;
   width: 15px;
@@ -25,7 +26,7 @@
   font-family: $main-font;
   font-size: $font-size;
   color: $font-color !important;
-  margin-left: 10px;
+  margin-right: 10px;
   padding: 2px 5px;
   background-color: $green;
   white-space: nowrap;
@@ -36,7 +37,7 @@
   font-family: $main-font;
   font-size: $font-size;
   color: $font-color !important;
-  margin-left: 10px;
+  margin-right: 10px;
   padding: 2px 5px;
   background-color: $pink;
   white-space: nowrap;
@@ -47,7 +48,7 @@
   font-family: $main-font;
   font-size: $font-size;
   color: $font-color !important;
-  margin-left: 10px;
+  margin-right: 10px;
   padding: 2px 5px;
   background-color: $blue;
   white-space: nowrap;
@@ -68,4 +69,12 @@
   .gradientsTag {
     font-size: $font-smallest !important;
   }
+}
+
+.addressWidget {
+  white-space: break-spaces;
+}
+
+.noWrap {
+  white-space: nowrap;
 }
