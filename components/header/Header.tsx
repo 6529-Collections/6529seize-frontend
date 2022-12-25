@@ -206,6 +206,13 @@ export default function Header() {
                     </a>
                   </Col>
                 </Row>
+                <Row className="pt-3">
+                  <Col>
+                    <a href="/downloads">
+                      <h3>Downloads</h3>
+                    </a>
+                  </Col>
+                </Row>
                 <Row>
                   <Col xs={{ span: 6, offset: 3 }}>
                     <hr />
@@ -412,6 +419,13 @@ export default function Header() {
                                   (window.location.href = "/metrics")
                                 }>
                                 Metrics
+                              </NavDropdown.Item>
+                              <NavDropdown.Item
+                                className={styles.dropdownItem}
+                                onClick={() =>
+                                  (window.location.href = "/downloads")
+                                }>
+                                Downloads
                               </NavDropdown.Item>
                             </NavDropdown>
                             <Nav.Link
