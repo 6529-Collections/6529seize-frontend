@@ -43,7 +43,11 @@ export default function TheMemesPage() {
       <main className={styles.main}>
         <Header />
         <Breadcrumb breadcrumbs={breadcrumbs} />
-        <TheMemesComponent />
+        <TheMemesComponent
+          setCrumbs={function (crumbs: Crumb[]) {
+            setBreadcrumbs(crumbs);
+          }}
+        />
       </main>
     </>
   );
