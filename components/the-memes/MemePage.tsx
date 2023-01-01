@@ -149,10 +149,10 @@ export default function MemePage() {
                 setBreadcrumbs([
                   { display: "Home", href: "/" },
                   { display: "The Memes", href: "/the-memes" },
-                  // {
-                  //   display: `SZN${nftMetas[0].season}`,
-                  //   href: "/the-memes",
-                  // },
+                  {
+                    display: `SZN${nftMetas[0].season}`,
+                    href: `/the-memes?szn=${nftMetas[0].season}&sort=age&sort_dir=ASC`,
+                  },
                   { display: `Card ${nftId} - ${response.data[0].name}` },
                 ]);
               });
@@ -1301,14 +1301,10 @@ export default function MemePage() {
                     </Col>
                   </Row>
                   <Row className="pt-2">
-                    <Col
-                    // xs={{ span: 12 }}
-                    // sm={{ span: 12 }}
-                    // md={{ span: 9 }}
-                    // lg={{ span: 9 }}
-                    >
+                    <Col>
                       <h2>
-                        <a href="/the-memes?sort=age&sort_dir=ASC">
+                        <a
+                          href={`/the-memes?szn=${nftMeta.season}&sort=age&sort_dir=ASC`}>
                           SZN{nftMeta.season}
                         </a>
                       </h2>
