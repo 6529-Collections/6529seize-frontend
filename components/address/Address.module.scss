@@ -69,12 +69,11 @@
   .gradientsTag {
     font-size: $font-smallest !important;
   }
-}
+  .addressWidget {
+    white-space: break-spaces;
+  }
 
-.addressWidget {
-  white-space: break-spaces;
-}
-
-.noWrap {
-  white-space: nowrap;
+  .noWrap {
+    white-space: nowrap;
+  }
 }
