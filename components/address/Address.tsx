@@ -86,25 +86,28 @@ export default function Address(props: Props) {
               />
             ))}
           {props.isUserPage && <br />}
-          {props.tags &&
-            (props.tags.memesCardsSets > 0 ? (
-              <span className={styles.memesCardsSetsTag}>
-                {props.tags.memesCardsSets}x Memes Set
-                {props.tags.memesCardsSets > 1 ? `s` : ""}
-              </span>
-            ) : props.tags.memesBalance > 0 ? (
-              <span className={styles.memesTag}>
-                {props.tags.memesBalance}x Meme
-                {props.tags.memesBalance > 1 ? `s` : ""}
-                {props.tags.genesis ? ` (+Genesis)` : ""}
-              </span>
-            ) : (
-              ""
-            ))}
-          {props.tags && props.tags.gradientsBalance > 0 && (
-            <span className={styles.gradientsTag}>
-              {props.tags.gradientsBalance}x Gradient
-              {props.tags.gradientsBalance > 1 ? `s` : ""}
+          {props.tags && (
+            <span className={styles.noWrap}>
+              {props.tags.memesCardsSets > 0 ? (
+                <span className={styles.memesCardsSetsTag}>
+                  {props.tags.memesCardsSets}x Memes Set
+                  {props.tags.memesCardsSets > 1 ? `s` : ""}
+                </span>
+              ) : props.tags.memesBalance > 0 ? (
+                <span className={styles.memesTag}>
+                  {props.tags.memesBalance}x Meme
+                  {props.tags.memesBalance > 1 ? `s` : ""}
+                  {props.tags.genesis ? ` (+Genesis)` : ""}
+                </span>
+              ) : (
+                ""
+              )}
+              {props.tags.gradientsBalance > 0 && (
+                <span className={styles.gradientsTag}>
+                  {props.tags.gradientsBalance}x Gradient
+                  {props.tags.gradientsBalance > 1 ? `s` : ""}
+                </span>
+              )}
             </span>
           )}
         </>

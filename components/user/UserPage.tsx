@@ -1,6 +1,6 @@
 import styles from "./User.module.scss";
 
-import { Col, Container, Form, Row } from "react-bootstrap";
+import { Col, Container, Form, Row, Table } from "react-bootstrap";
 import { useEffect, useState } from "react";
 import { DBResponse } from "../../entities/IDBResponse";
 import { Owner, OwnerTags } from "../../entities/IOwner";
@@ -20,7 +20,7 @@ import {
   MEMES_CONTRACT,
   SIX529_MUSEUM,
 } from "../../constants";
-import { TDH, TDHCalc } from "../../entities/ITDH";
+import { TDH, TDHCalc, TDHMetrics } from "../../entities/ITDH";
 import { useAccount } from "wagmi";
 import { SortDirection } from "../../entities/ISort";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -38,7 +38,8 @@ interface Props {
 
 enum Sort {
   ID = "id",
-  TDH = "tdh_rank",
+  TDH = "tdh",
+  RANK = "tdh_rank",
 }
 
 export default function UserPage(props: Props) {
@@ -65,7 +66,8 @@ export default function UserPage(props: Props) {
   const [ownerENS, setOwnerENS] = useState("");
   const [owned, setOwned] = useState<Owner[]>([]);
   const [nfts, setNfts] = useState<NFT[]>([]);
-  const [tdh, setTDH] = useState<TDH>();
+  const [nftsLoaded, setNftsLoaded] = useState(false);
+  const [tdh, setTDH] = useState<TDHMetrics>();
   const [ownerTags, setOwnerTags] = useState<OwnerTags>();
   const [showNonSeized, setShowNonSeized] = useState(true);
   const [userIsOwner, setUserIsOwner] = useState(false);
@@ -174,6 +176,7 @@ export default function UserPage(props: Props) {
           } else {
             const newnfts = [...mynfts].concat(response.data);
             setNfts(newnfts);
+            setNftsLoaded(true);
           }
         });
     }
@@ -182,17 +185,21 @@ export default function UserPage(props: Props) {
       let initialNftsUrl = "";
       if (isConnected && areEqualAddresses(ownerAddress, address)) {
         setUserIsOwner(true);
+        setShowNonSeized(true);
         initialNftsUrl = `${process.env.API_ENDPOINT}/api/nfts?sort_direction=ASC`;
       } else {
+        setUserIsOwner(false);
         initialNftsUrl = `${process.env.API_ENDPOINT}/api/${ownerAddress}/nfts`;
       }
-      fetchNfts(initialNftsUrl, []);
+      if (!nftsLoaded) {
+        fetchNfts(initialNftsUrl, []);
+      }
     }
   }, [ownerAddress, router.isReady, isConnected]);
 
   useEffect(() => {
     async function fetchTDH() {
-      const url = `${process.env.API_ENDPOINT}/api/tdh/?wallet=${ownerAddress}`;
+      const url = `${process.env.API_ENDPOINT}/api/owner_metrics/?wallet=${ownerAddress}`;
       return fetch(url)
         .then((res) => res.json())
         .then((response: DBResponse) => {
@@ -335,6 +342,88 @@ export default function UserPage(props: Props) {
           );
         }
       }
+      if (sort == Sort.RANK) {
+        if (sortDir == SortDirection.ASC) {
+          setNfts(
+            [...nfts].sort((a, b) => {
+              let atdh;
+              let btdh;
+
+              const aBalance = getBalance(a);
+              const bBalance = getBalance(b);
+
+              if (areEqualAddresses(a.contract, MEMES_CONTRACT)) {
+                atdh = tdh?.memes_ranks.find((m) => m.id == a.id)?.rank;
+              } else if (areEqualAddresses(a.contract, GRADIENT_CONTRACT)) {
+                atdh = tdh?.gradients_ranks.find((m) => m.id == a.id)?.rank;
+              }
+              if (areEqualAddresses(b.contract, MEMES_CONTRACT)) {
+                btdh = tdh?.memes_ranks.find((m) => m.id == b.id)?.rank;
+              } else if (areEqualAddresses(b.contract, GRADIENT_CONTRACT)) {
+                btdh = tdh?.gradients_ranks.find((m) => m.id == b.id)?.rank;
+              }
+
+              if (aBalance > 0 && !atdh) {
+                atdh = 0;
+              }
+              if (bBalance > 0 && !btdh) {
+                btdh = 0;
+              }
+
+              if (atdh != undefined && btdh != undefined) {
+                if (atdh > btdh) {
+                  return 1;
+                } else if (atdh < btdh) {
+                  return -1;
+                } else {
+                  return a.id > b.id ? 1 : -1;
+                }
+              } else {
+                return aBalance > bBalance ? -1 : 1;
+              }
+            })
+          );
+        } else {
+          setNfts(
+            [...nfts].sort((a, b) => {
+              let atdh;
+              let btdh;
+
+              const aBalance = getBalance(a);
+              const bBalance = getBalance(b);
+
+              if (areEqualAddresses(a.contract, MEMES_CONTRACT)) {
+                atdh = tdh?.memes_ranks.find((m) => m.id == a.id)?.rank;
+              } else if (areEqualAddresses(a.contract, GRADIENT_CONTRACT)) {
+                atdh = tdh?.gradients_ranks.find((m) => m.id == a.id)?.rank;
+              }
+              if (areEqualAddresses(b.contract, MEMES_CONTRACT)) {
+                btdh = tdh?.memes_ranks.find((m) => m.id == b.id)?.rank;
+              } else if (areEqualAddresses(b.contract, GRADIENT_CONTRACT)) {
+                btdh = tdh?.gradients_ranks.find((m) => m.id == b.id)?.rank;
+              }
+
+              if (aBalance > 0 && !atdh) {
+                atdh = 0;
+              }
+              if (bBalance > 0 && !btdh) {
+                btdh = 0;
+              }
+              if (atdh && btdh) {
+                if (atdh > btdh) {
+                  return -1;
+                } else if (atdh < btdh) {
+                  return 1;
+                } else {
+                  return a.id > b.id ? 1 : -1;
+                }
+              } else {
+                return aBalance > bBalance ? -1 : 1;
+              }
+            })
+          );
+        }
+      }
     }
   }, [sortDir, sort]);
 
@@ -356,10 +445,11 @@ export default function UserPage(props: Props) {
 
     if (
       (nftbalance > 0 || (userIsOwner && showNonSeized && isMemes)) &&
-      ((hideMemes && !isMemes) ||
-        (hideGradients && !isGradients) ||
-        (!hideMemes && isMemes) ||
-        (!hideGradients && isGradients))
+      // ((hideMemes && !isMemes) ||
+      //   (hideGradients && !isGradients) ||
+      //   (!hideMemes && isMemes) ||
+      //   (!hideGradients && isGradients))
+      ((!hideMemes && isMemes) || (!hideGradients && isGradients))
     )
       return (
         <Col
@@ -444,7 +534,7 @@ export default function UserPage(props: Props) {
               onClick={() => setShowNonSeized(!showNonSeized)}
             />
           )}
-          {/* {ownerTags &&
+          {ownerTags &&
             ownerTags?.memes_balance > 0 &&
             ownerTags?.gradients_balance > 0 && (
               <>
@@ -454,9 +544,9 @@ export default function UserPage(props: Props) {
                   label={`Hide Gradients`}
                   checked={hideGradients}
                   onClick={() => {
-                    if (hideMemes) {
-                      setHideMemes(false);
-                    }
+                    // if (hideMemes) {
+                    //   setHideMemes(false);
+                    // }
                     setHideGradients(!hideGradients);
                   }}
                 />
@@ -466,14 +556,14 @@ export default function UserPage(props: Props) {
                   label={`Hide Memes`}
                   checked={hideMemes}
                   onClick={() => {
-                    if (hideGradients) {
-                      setHideGradients(false);
-                    }
+                    // if (hideGradients) {
+                    //   setHideGradients(false);
+                    // }
                     setHideMemes(!hideMemes);
                   }}
                 />
               </>
-            )} */}
+            )}
         </Col>
       </Row>
     );
@@ -485,7 +575,7 @@ export default function UserPage(props: Props) {
       <Container fluid className={styles.mainContainer}>
         <Row>
           <Col>
-            <Container className="mt-2 pt-2 pb-3">
+            <Container className="mt-2 pt-2 pb-2">
               <Row>
                 <Col className="text-right">
                   {ownerAddress && (
@@ -497,8 +587,11 @@ export default function UserPage(props: Props) {
                           ? ownerENS
                           : formatAddress(ownerAddress as string)
                       }'s 6529 Collection${
-                        tdh && `\nTDH: ${tdh.tdh} -  Rank ${tdh.tdh_rank}`
-                      }\n#6529seize\n\n`}>
+                        tdh &&
+                        `\nTDH ${tdh ? tdh.tdh : "N/A"} - \Rank ${
+                          tdh ? tdh.tdh_rank : "N/A"
+                        }`
+                      }\n#6529Seize\n\n`}>
                       <TwitterIcon
                         size={30}
                         round
@@ -510,8 +603,13 @@ export default function UserPage(props: Props) {
                   )}
                 </Col>
               </Row>
-              <Row>
-                <Col className="text-center">
+              <Row className="pt-3">
+                <Col
+                  className="text-center d-flex align-items-center justify-content-center"
+                  xs={{ span: 12 }}
+                  sm={{ span: 12 }}
+                  md={{ span: 6 }}
+                  lg={{ span: 6 }}>
                   <h2 className={styles.ownerAddress}>
                     {ownerTags ? (
                       <Address
@@ -535,33 +633,104 @@ export default function UserPage(props: Props) {
                     )}
                   </h2>
                 </Col>
+                {tdh && (
+                  <Col
+                    className="text-left"
+                    xs={{ span: 12 }}
+                    sm={{ span: 12 }}
+                    md={{ span: 6 }}
+                    lg={{ span: 6 }}>
+                    <Table className={styles.primaryTable}>
+                      <tbody>
+                        <tr>
+                          <td>
+                            <h4>TDH</h4>
+                          </td>
+                          {lastTDH && (
+                            <td className={`text-right ${styles.lastTDH}`}>
+                              LAST TDH:{" "}
+                              {`${getDateDisplay(new Date(lastTDH.date))}`} |
+                              BLOCK:{" "}
+                              <a
+                                href={`https://etherscan.io/block/${lastTDH.block}`}
+                                rel="noreferrer"
+                                target="_blank">
+                                {lastTDH.block}
+                              </a>
+                            </td>
+                          )}
+                        </tr>
+                        <tr>
+                          <td>TDH</td>
+                          <td>{numberWithCommas(tdh.boosted_tdh)}</td>
+                        </tr>
+                        <tr>
+                          <td>Rank</td>
+                          <td>#{numberWithCommas(tdh.tdh_rank)}</td>
+                        </tr>
+                        <tr>
+                          <td>Balance</td>
+                          <td>{numberWithCommas(tdh.balance)}</td>
+                        </tr>
+                      </tbody>
+                    </Table>
+                    <Table className={styles.secondaryTable}>
+                      <tbody>
+                        <tr>
+                          <td>
+                            <h4>In</h4>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td>Purchases (ETH)</td>
+                          <td>
+                            {numberWithCommas(
+                              Math.round(tdh.purchases_value * 100) / 100
+                            )}
+                          </td>
+                        </tr>
+                        <tr>
+                          <td>Purchases</td>
+                          <td>{numberWithCommas(tdh.purchases_count)}</td>
+                        </tr>
+                        <tr>
+                          <td>Transfers In</td>
+                          <td>{numberWithCommas(tdh.transfers_in)}</td>
+                        </tr>
+                      </tbody>
+                    </Table>
+                    <Table
+                      className={`${styles.secondaryTable} ${styles.secondaryTableMargin}`}>
+                      <tbody>
+                        <tr>
+                          <td>
+                            <h4>Out</h4>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td>Sales (ETH)</td>
+                          <td>
+                            {numberWithCommas(
+                              Math.round(tdh.sales_value * 100) / 100
+                            )}
+                          </td>
+                        </tr>
+                        <tr>
+                          <td>Sales</td>
+                          <td>{numberWithCommas(tdh.sales_count)}</td>
+                        </tr>
+                        <tr>
+                          <td>Transfers Out</td>
+                          <td>{numberWithCommas(tdh.transfers_out)}</td>
+                        </tr>
+                      </tbody>
+                    </Table>
+                  </Col>
+                )}
               </Row>
-              {tdh && (
-                <Row className="pt-3">
-                  <Col className="text-center">
-                    <h3 className={styles.subHeader}>
-                      TDH: {numberWithCommas(tdh.tdh)} | Rank #{tdh.tdh_rank}
-                    </h3>
-                  </Col>
-                </Row>
-              )}
-              {lastTDH && (
-                <Row>
-                  <Col className={`text-center ${styles.lastTDH}`}>
-                    LAST TDH: {`${getDateDisplay(new Date(lastTDH.date))}`} |
-                    BLOCK:{" "}
-                    <a
-                      href={`https://etherscan.io/block/${lastTDH.block}`}
-                      rel="noreferrer"
-                      target="_blank">
-                      {lastTDH.block}
-                    </a>
-                  </Col>
-                </Row>
-              )}
             </Container>
             <Container>
-              {/* <Row className="pt-2">
+              <Row className="pt-2 pb-2">
                 <Col>
                   Sort&nbsp;&nbsp;
                   <FontAwesomeIcon
@@ -596,8 +765,15 @@ export default function UserPage(props: Props) {
                     }`}>
                     TDH
                   </span>
+                  <span
+                    onClick={() => setSort(Sort.RANK)}
+                    className={`${styles.sort} ${
+                      sort != Sort.RANK ? styles.disabled : ""
+                    }`}>
+                    RANK
+                  </span>
                 </Col>
-              </Row> */}
+              </Row>
               {printUserControls()}
               {ownerLoaded &&
                 (owned.length > 0 ? (

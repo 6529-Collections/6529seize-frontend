@@ -35,10 +35,12 @@ interface Meme {
   meme_name: string;
 }
 
-export default function TheMemesComponent() {
-  const router = useRouter();
+interface Props {
+  setCrumbs(crumbs: Crumb[]): any;
+}
 
-  const [breadcrumbs, setBreadcrumbs] = useState<Crumb[]>([]);
+export default function TheMemesComponent(props: Props) {
+  const router = useRouter();
 
   const { address, connector, isConnected } = useAccount();
 
@@ -46,6 +48,7 @@ export default function TheMemesComponent() {
     if (router.isReady) {
       let initialSortDir = SortDirection.ASC;
       let initialSort = Sort.AGE;
+      let initialSzn = 0;
 
       const routerSortDir = router.query.sort_dir;
       if (routerSortDir) {
@@ -67,29 +70,25 @@ export default function TheMemesComponent() {
         }
       }
 
+      const routerSzn = router.query.szn;
+      if (routerSzn) {
+        if (Array.isArray(routerSzn)) {
+          initialSzn = parseInt(routerSzn[0]);
+        } else {
+          initialSzn = parseInt(routerSzn);
+        }
+      }
+
       setSort(initialSort);
       setSortDir(initialSortDir);
+      setSelectedSeason(initialSzn);
     }
   }, [router.isReady]);
-
-  // function resolveSort(): Sort {
-  //   const routerSort = router.query.sort;
-  //   if (routerSort) {
-  //     const resolvedRouterSort = Object.values(Sort).find(
-  //       (sd) => sd == routerSort
-  //     );
-  //     if (resolvedRouterSort) {
-  //       return resolvedRouterSort;
-  //     }
-  //   }
-
-  //   return Sort.AGE;
-  // }
 
   const [sortDir, setSortDir] = useState<SortDirection>();
   const [sort, setSort] = useState<Sort>();
 
-  const [selectedSeason, setSelectedSeason] = useState(1);
+  const [selectedSeason, setSelectedSeason] = useState(0);
   const [nfts, setNfts] = useState<NFT[]>([]);
   const [nftMetas, setNftMetas] = useState<MemesExtendedData[]>([]);
   const [nftBalances, setNftBalances] = useState<Owner[]>([]);
@@ -103,6 +102,28 @@ export default function TheMemesComponent() {
     }
     return 0;
   }
+
+  useEffect(() => {
+    const crumbs = [];
+    crumbs.push({ display: "Home", href: "/" });
+    crumbs.push({ display: "The Memes" });
+    if (selectedSeason > 0) {
+      crumbs.push({ display: `SZN${selectedSeason}` });
+    }
+    props.setCrumbs(crumbs);
+
+    if (sort && sortDir) {
+      if (selectedSeason > 0) {
+        router.replace({
+          query: { szn: selectedSeason, sort: sort, sort_dir: sortDir },
+        });
+      } else {
+        router.replace({
+          query: { sort: sort, sort_dir: sortDir },
+        });
+      }
+    }
+  }, [selectedSeason]);
 
   useEffect(() => {
     const myMemes: Meme[] = [];
@@ -119,9 +140,8 @@ export default function TheMemesComponent() {
   }, [nftMetas]);
 
   useEffect(() => {
-    fetch(
-      `${process.env.API_ENDPOINT}/api/memes_extended_data?season=${selectedSeason}`
-    )
+    const nftsUrl = `${process.env.API_ENDPOINT}/api/memes_extended_data`;
+    fetch(nftsUrl)
       .then((res) => res.json())
       .then((response: DBResponse) => {
         const nftMetas = response.data;
@@ -142,13 +162,8 @@ export default function TheMemesComponent() {
           setNfts([]);
           setNftsLoaded(true);
         }
-        setBreadcrumbs([
-          { display: "Home", href: "/" },
-          { display: "The Memes" },
-          { display: `SZN${selectedSeason}` },
-        ]);
       });
-  }, [selectedSeason]);
+  }, []);
 
   useEffect(() => {
     if (address && nftMetas.length > 0) {
@@ -166,9 +181,15 @@ export default function TheMemesComponent() {
 
   useEffect(() => {
     if (sort && sortDir && nftsLoaded) {
-      router.replace({
-        query: { sort: sort, sort_dir: sortDir },
-      });
+      if (selectedSeason > 0) {
+        router.replace({
+          query: { szn: selectedSeason, sort: sort, sort_dir: sortDir },
+        });
+      } else {
+        router.replace({
+          query: { sort: sort, sort_dir: sortDir },
+        });
+      }
 
       if (sort == Sort.AGE) {
         if (sortDir == SortDirection.ASC) {
@@ -391,81 +412,86 @@ export default function TheMemesComponent() {
   }
 
   function printNft(nft: NFT) {
-    return (
-      <Col
-        key={`${nft.contract}-${nft.id}`}
-        className="pt-3 pb-3"
-        xs={{ span: 6 }}
-        sm={{ span: 4 }}
-        md={{ span: 3 }}
-        lg={{ span: 3 }}>
-        <Container fluid className="no-padding">
-          <Row>
-            <a href={`/the-memes/${nft.id}`}>
-              <NFTImage
-                nft={nft}
-                animation={false}
-                height={300}
-                balance={getBalance(nft.id)}
-                showThumbnail={true}
-              />
-            </a>
-          </Row>
-          <Row>
-            <Col className="text-center pt-2">
-              <a href={`/the-memes/${nft.id}`}>{nft.name}</a>
-            </Col>
-          </Row>
-          <Row>
-            <Col className="text-center pt-1">
-              {sort &&
-                (sort == Sort.AGE || sort == Sort.MEME) &&
-                printMintDate(nft)}
-              {sort == Sort.EDITION_SIZE && `Edition Size: ${nft.supply}`}
-              {sort == Sort.TDH &&
-                `TDH: ${numberWithCommas(Math.round(nft.tdh))}`}
-              {sort == Sort.HODLERS &&
-                `HODLers: ${
-                  nftMetas.find((nftm) => nftm.id == nft.id)?.hodlers
-                }`}
-              {sort == Sort.UNIQUE_PERCENT &&
-                `Unique: ${
-                  Math.round(
-                    nftMetas.find((nftm) => nftm.id == nft.id)
-                      ?.percent_unique! *
-                      100 *
-                      10
-                  ) / 10
-                }%`}
-              {sort == Sort.UNIQUE_PERCENT_EX_MUSEUM &&
-                `Unique Ex-Museum: ${
-                  Math.round(
-                    nftMetas.find((nftm) => nftm.id == nft.id)
-                      ?.percent_unique_cleaned! *
-                      100 *
-                      10
-                  ) / 10
-                }%`}
-              {sort == Sort.FLOOR_PRICE &&
-                (nft.floor_price > 0
-                  ? `Floor Price: ${numberWithCommas(
-                      Math.round(nft.floor_price * 1000) / 1000
-                    )} ETH`
-                  : `Floor Price: N/A`)}
-              {sort == Sort.MARKET_CAP &&
-                (nft.market_cap > 0
-                  ? `Market Cap: ${numberWithCommas(
-                      Math.round(nft.market_cap * 100) / 100
-                    )} ETH`
-                  : `Market Cap: N/A`)}
-            </Col>
-          </Row>
-        </Container>
-      </Col>
-    );
+    const season = nft.metadata.attributes.find(
+      (a: any) => a.trait_type == "Type - Season"
+    ).value;
+    if (selectedSeason == 0 || selectedSeason == season) {
+      return (
+        <Col
+          key={`${nft.contract}-${nft.id}`}
+          className="pt-3 pb-3"
+          xs={{ span: 6 }}
+          sm={{ span: 4 }}
+          md={{ span: 3 }}
+          lg={{ span: 3 }}>
+          <Container fluid className="no-padding">
+            <Row>
+              <a href={`/the-memes/${nft.id}`}>
+                <NFTImage
+                  nft={nft}
+                  animation={false}
+                  height={300}
+                  balance={getBalance(nft.id)}
+                  showThumbnail={true}
+                />
+              </a>
+            </Row>
+            <Row>
+              <Col className="text-center pt-2">
+                <a href={`/the-memes/${nft.id}`}>{nft.name}</a>
+              </Col>
+            </Row>
+            <Row>
+              <Col className="text-center pt-1">
+                {sort &&
+                  (sort == Sort.AGE || sort == Sort.MEME) &&
+                  printMintDate(nft)}
+                {sort == Sort.EDITION_SIZE && `Edition Size: ${nft.supply}`}
+                {sort == Sort.TDH &&
+                  `TDH: ${numberWithCommas(Math.round(nft.tdh))}`}
+                {sort == Sort.HODLERS &&
+                  `HODLers: ${
+                    nftMetas.find((nftm) => nftm.id == nft.id)?.hodlers
+                  }`}
+                {sort == Sort.UNIQUE_PERCENT &&
+                  `Unique: ${
+                    Math.round(
+                      nftMetas.find((nftm) => nftm.id == nft.id)
+                        ?.percent_unique! *
+                        100 *
+                        10
+                    ) / 10
+                  }%`}
+                {sort == Sort.UNIQUE_PERCENT_EX_MUSEUM &&
+                  `Unique Ex-Museum: ${
+                    Math.round(
+                      nftMetas.find((nftm) => nftm.id == nft.id)
+                        ?.percent_unique_cleaned! *
+                        100 *
+                        10
+                    ) / 10
+                  }%`}
+                {sort == Sort.FLOOR_PRICE &&
+                  (nft.floor_price > 0
+                    ? `Floor Price: ${numberWithCommas(
+                        Math.round(nft.floor_price * 100) / 100
+                      )} ETH`
+                    : `Floor Price: N/A`)}
+                {sort == Sort.MARKET_CAP &&
+                  (nft.market_cap > 0
+                    ? `Market Cap: ${numberWithCommas(
+                        Math.round(nft.market_cap * 100) / 100
+                      )} ETH`
+                    : `Market Cap: N/A`)}
+              </Col>
+            </Row>
+          </Container>
+        </Col>
+      );
+    }
   }
 
-  function printNfts(rowIndex?: number) {
+  function printNfts() {
     return <Row className="pt-2">{nfts.map((nft) => printNft(nft))}</Row>;
   }
 
@@ -503,24 +529,36 @@ export default function TheMemesComponent() {
                 <Col>
                   <h1>THE MEMES</h1>
                 </Col>
-              </Row>
-              <Row>
-                <Col>
-                  {/* <h2
-                    className={`${styles.season} ${
-                      selectedSeason == 1 && styles.selectedSeason
-                    }`}
-                    onClick={() => setSelectedSeason(1)}>
-                    SZN1
-                  </h2> */}
-                  {/* <h2>&nbsp;&nbsp;|&nbsp;&nbsp;</h2>
-                    <h2
+                <Col className="d-flex align-items-center justify-content-end">
+                  <h3>
+                    <span
+                      onClick={() => setSelectedSeason(0)}
                       className={`${styles.season} ${
-                        selectedSeason == 2 && styles.selectedSeason
-                      }`}
-                      onClick={() => setSelectedSeason(2)}>
+                        selectedSeason > 0 ? styles.disabled : ""
+                      }`}>
+                      All
+                    </span>
+                  </h3>
+                  <h3>&nbsp;&nbsp;|&nbsp;&nbsp;</h3>
+                  <h3>
+                    <span
+                      onClick={() => setSelectedSeason(1)}
+                      className={`${styles.season} ${
+                        selectedSeason != 1 ? styles.disabled : ""
+                      }`}>
+                      SZN1
+                    </span>
+                  </h3>
+                  <h3>&nbsp;&nbsp;|&nbsp;&nbsp;</h3>
+                  <h3>
+                    <span
+                      onClick={() => setSelectedSeason(2)}
+                      className={`${styles.season} ${
+                        selectedSeason != 2 ? styles.disabled : ""
+                      }`}>
                       SZN2
-                    </h2> */}
+                    </span>
+                  </h3>
                 </Col>
               </Row>
               <Row className="pt-2">

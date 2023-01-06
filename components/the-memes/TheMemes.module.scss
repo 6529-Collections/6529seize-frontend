@@ -11,18 +11,10 @@
 }
 
 .season {
+  color: $font-color;
   cursor: pointer;
-  text-decoration: underline;
   &:hover {
     color: darken($color: $font-color, $amount: $darken-percentage);
-  }
-}
-
-.selectedSeason {
-  cursor: default;
-  text-decoration: none;
-  &:hover {
-    color: $lightest-grey;
   }
 }
 
@@ -74,6 +66,7 @@
 }
 
 .sort {
+  color: $font-color;
   cursor: pointer;
   margin-right: 15px;
 }
