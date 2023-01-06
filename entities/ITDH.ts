@@ -32,6 +32,19 @@ export interface TDH {
   gradients_ranks: NftRank[];
 }
 
+export interface TDHMetrics extends TDH {
+  purchases_value: number;
+  purchases_count: number;
+  purchases_value_primary: number;
+  purchases_count_primary: number;
+  purchases_value_secondary: number;
+  purchases_count_secondary: number;
+  sales_value: number;
+  sales_count: number;
+  transfers_in: number;
+  transfers_out: number;
+}
+
 export interface RankedTDH extends TDH {
   rank: number;
 }

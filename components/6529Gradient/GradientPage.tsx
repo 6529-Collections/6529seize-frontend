@@ -236,7 +236,7 @@ export default function GradientPage() {
                           <td>
                             {nft.floor_price > 0
                               ? `${numberWithCommas(
-                                  Math.round(nft.floor_price * 1000) / 1000
+                                  Math.round(nft.floor_price * 100) / 100
                                 )} ETH`
                               : `N/A`}
                           </td>
@@ -374,7 +374,7 @@ export default function GradientPage() {
                     <TwitterShareButton
                       className="twitter-share-button"
                       url={window.location.href.split("?")[0]}
-                      title={`${nft.name}\n#6529seize\n\n`}>
+                      title={`${nft.name}\n#6529Seize\n\n`}>
                       <TwitterIcon
                         size={30}
                         round

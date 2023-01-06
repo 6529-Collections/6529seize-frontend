@@ -55,6 +55,8 @@ export enum MEME_FOCUS {
 export default function MemePage() {
   const router = useRouter();
 
+  const [isFullScreenSupported, setIsFullScreenSupported] = useState(false);
+
   const [nftId, setNftId] = useState<string>();
   const [fullscreenElementId, setFullscreenElementId] = useState<string>(
     "the-art-fullscreen-img"
@@ -100,6 +102,7 @@ export default function MemePage() {
 
   useEffect(() => {
     if (router.isReady) {
+      setIsFullScreenSupported(fullScreenSupported());
       let initialFocus = MEME_FOCUS.LIVE;
 
       const routerFocus = router.query.focus;
@@ -149,10 +152,10 @@ export default function MemePage() {
                 setBreadcrumbs([
                   { display: "Home", href: "/" },
                   { display: "The Memes", href: "/the-memes" },
-                  // {
-                  //   display: `SZN${nftMetas[0].season}`,
-                  //   href: "/the-memes",
-                  // },
+                  {
+                    display: `SZN${nftMetas[0].season}`,
+                    href: `/the-memes?szn=${nftMetas[0].season}&sort=age&sort_dir=ASC`,
+                  },
                   { display: `Card ${nftId} - ${response.data[0].name}` },
                 ]);
               });
@@ -398,7 +401,7 @@ export default function MemePage() {
                           <td>
                             {nft.floor_price > 0
                               ? `${numberWithCommas(
-                                  Math.round(nft.floor_price * 1000) / 1000
+                                  Math.round(nft.floor_price * 100) / 100
                                 )} ETH`
                               : `N/A`}
                           </td>
@@ -680,18 +683,6 @@ export default function MemePage() {
     });
   }
 
-  function printFullScreen() {
-    return (
-      <FontAwesomeIcon
-        icon="expand-alt"
-        className={styles.fullScreen}
-        onClick={() =>
-          fullscreenElementId && enterArtFullScreen(fullscreenElementId)
-        }
-      />
-    );
-  }
-
   function printTheArt() {
     carouselHandlerSlid();
     if (nft && nftMeta) {
@@ -699,7 +690,16 @@ export default function MemePage() {
         <>
           <Container>
             <Row className="position-relative">
-              {fullScreenSupported() && printFullScreen()}
+              {isFullScreenSupported && (
+                <FontAwesomeIcon
+                  icon="expand-alt"
+                  className={styles.fullScreen}
+                  onClick={() =>
+                    fullscreenElementId &&
+                    enterArtFullScreen(fullscreenElementId)
+                  }
+                />
+              )}
               {nft.animation ? (
                 <Carousel
                   className={styles.memesCarousel}
@@ -1146,7 +1146,7 @@ export default function MemePage() {
                             <td>
                               {nft.floor_price > 0
                                 ? `${numberWithCommas(
-                                    Math.round(nft.floor_price * 1000) / 1000
+                                    Math.round(nft.floor_price * 100) / 100
                                   )} ETH`
                                 : `N/A`}
                             </td>
@@ -1251,7 +1251,7 @@ export default function MemePage() {
                     <TwitterShareButton
                       className="twitter-share-button"
                       url={window.location.href.split("?")[0]}
-                      title={`Meme Card #${nft.id} \n${nft.name}\n${nft.artist}\n#6529seize\n\n`}>
+                      title={`Meme Card #${nft.id} \n${nft.name}\nby ${nft.artist}\n#6529Seize\n\n`}>
                       <TwitterIcon
                         size={30}
                         round
@@ -1301,14 +1301,10 @@ export default function MemePage() {
                     </Col>
                   </Row>
                   <Row className="pt-2">
-                    <Col
-                    // xs={{ span: 12 }}
-                    // sm={{ span: 12 }}
-                    // md={{ span: 9 }}
-                    // lg={{ span: 9 }}
-                    >
+                    <Col>
                       <h2>
-                        <a href="/the-memes?sort=age&sort_dir=ASC">
+                        <a
+                          href={`/the-memes?szn=${nftMeta.season}&sort=age&sort_dir=ASC`}>
                           SZN{nftMeta.season}
                         </a>
                       </h2>

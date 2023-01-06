@@ -63,6 +63,19 @@
   cursor: pointer;
 }
 
+.caretTDH {
+  height: $font-size;
+  cursor: pointer;
+  position: absolute;
+  right: 0;
+}
+
+@media only screen and (max-width: 800px) {
+  .caretTDH {
+    height: $font-smaller;
+  }
+}
+
 .disabled {
   color: $lightest-grey;
   &:hover {
@@ -77,6 +90,12 @@
 
 .leaderboardTable {
   tr td {
+    white-space: nowrap;
+    align-items: center;
+    vertical-align: middle;
+  }
+
+  th span {
     white-space: nowrap;
   }
 
@@ -133,4 +152,5 @@
 .borderBottom {
   border-bottom: 0.5px solid $font-color !important;
   padding: 0rem !important;
+  position: relative;
 }

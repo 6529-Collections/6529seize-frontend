@@ -16,8 +16,7 @@
 
 .lastTDH {
   white-space: nowrap;
-  color: $font-color-h;
-  line-height: 48px;
+  color: $font-color-h !important;
   font-size: smaller;
   a {
     color: $font-color-h !important;
@@ -59,4 +58,35 @@
 .sort {
   cursor: pointer;
   margin-right: 15px;
+}
+
+.primaryTable {
+}
+
+.secondaryTableMargin {
+  margin-left: 4%;
+}
+
+.secondaryTable {
+  width: 48%;
+
+  float: left;
+
+  tr:not(:first-child) {
+    border-bottom: 1px solid $dark-grey !important;
+
+    td:not(:first-child) {
+      text-align: right;
+    }
+  }
+}
+
+.primaryTable {
+  tr:not(:first-child) {
+    border-bottom: 1px solid $dark-grey !important;
+
+    td:not(:first-child) {
+      text-align: right;
+    }
+  }
 }
