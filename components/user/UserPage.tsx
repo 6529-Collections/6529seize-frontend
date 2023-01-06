@@ -586,12 +586,11 @@ export default function UserPage(props: Props) {
                         ownerENS
                           ? ownerENS
                           : formatAddress(ownerAddress as string)
-                      }'s 6529 Collection${
-                        tdh &&
-                        `\nTDH ${tdh ? tdh.tdh : "N/A"} - \Rank ${
-                          tdh ? tdh.tdh_rank : "N/A"
-                        }`
-                      }\n#6529Seize\n\n`}>
+                      }'s 6529 Collection${`\nTDH ${
+                        tdh ? tdh.tdh : "N/A"
+                      } - \Rank ${
+                        tdh ? tdh.tdh_rank : "N/A"
+                      }`}\n#6529Seize\n\n`}>
                       <TwitterIcon
                         size={30}
                         round
