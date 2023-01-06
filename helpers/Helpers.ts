@@ -42,6 +42,7 @@ export function fromGWEI(from: number) {
 }
 
 export function numberWithCommas(x: number) {
+  if (x == 0) return "-";
   return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 }
 
@@ -73,16 +74,18 @@ export function areEqualAddresses(w1: any, w2: any) {
 }
 
 export const fullScreenSupported = () => {
-  const element: any = document.getElementsByClassName("container")[0];
+  const doc: any = document;
+  const el: any = doc.body;
+  const check =
+    typeof el.requestFullscreen !== "undefined" ||
+    typeof el.mozRequestFullScreen !== "undefined" ||
+    typeof el.webkitRequestFullscreen !== "undefined" ||
+    typeof el.msRequestFullscreen !== "undefined" ||
+    typeof doc.exitFullscreen !== "undefined" ||
+    typeof doc.mozCancelFullScreen !== "undefined" ||
+    typeof doc.webkitExitFullscreen !== "undefined";
 
-  if (!element) return false;
-
-  return (
-    element.requestFullscreen ||
-    element.mozRequestFullScreen ||
-    element.webkitRequestFullscreen ||
-    element.msRequestFullscreen
-  );
+  return check;
 };
 
 export function enterArtFullScreen(elementId: string) {
