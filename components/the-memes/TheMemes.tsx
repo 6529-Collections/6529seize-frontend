@@ -415,7 +415,6 @@ export default function TheMemesComponent(props: Props) {
     const season = nft.metadata.attributes.find(
       (a: any) => a.trait_type == "Type - Season"
     ).value;
-    console.log(season);
     if (selectedSeason == 0 || selectedSeason == season) {
       return (
         <Col

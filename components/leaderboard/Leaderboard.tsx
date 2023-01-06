@@ -27,10 +27,14 @@ enum Sort {
   tdh_rank = "tdh_rank",
   tdh = "tdh",
   tdh__raw = "tdh__raw",
+  memes_tdh = "memes_tdh",
   szn1_tdh = "memes_tdh_season1",
+  szn2_tdh = "memes_tdh_season1",
   gradients_tdh = "gradients_tdh",
   total_balance = "balance",
+  memes_balance = "memes_balance",
   szn1_balance = "memes_balance_season1",
+  szn2_balance = "memes_balance_season2",
   gradients_balance = "gradients_balance",
   purchases_value = "purchases_value",
   sales_value = "sales_value",
@@ -56,6 +60,7 @@ export default function Leaderboard(props: Props) {
   const [ownerTags, setOwnersTags] = useState<OwnerTags[]>([]);
   const [ownerTagsLoaded, setOwnerTagsLoaded] = useState(false);
 
+  const [balancesExpanded, setBalancesExpanded] = useState(false);
   const [tdhExpanded, setTdhExpanded] = useState(false);
 
   async function fetchResults() {
@@ -160,9 +165,18 @@ export default function Leaderboard(props: Props) {
                   <th className={styles.hodler}></th>
                   <th className={styles.gap}></th>
                   <th
-                    colSpan={3}
+                    colSpan={balancesExpanded ? 5 : 3}
                     className={`${styles.tdh} ${styles.borderBottom}`}>
                     <b>Total Cards HODLed</b>
+                    <FontAwesomeIcon
+                      icon={
+                        balancesExpanded
+                          ? "chevron-circle-left"
+                          : "chevron-circle-right"
+                      }
+                      onClick={() => setBalancesExpanded(!balancesExpanded)}
+                      className={`${styles.caretTDH}`}
+                    />
                   </th>
                   <th className={styles.gap}></th>
                   <th
@@ -172,7 +186,7 @@ export default function Leaderboard(props: Props) {
                   </th>
                   <th className={styles.gap}></th>
                   <th
-                    colSpan={tdhExpanded ? 6 : 3}
+                    colSpan={tdhExpanded ? 8 : 3}
                     className={`${styles.tdh} ${styles.borderBottom}`}>
                     <b>Total Days HODLed (TDH)</b>
                     <FontAwesomeIcon
@@ -182,9 +196,7 @@ export default function Leaderboard(props: Props) {
                           : "chevron-circle-right"
                       }
                       onClick={() => setTdhExpanded(!tdhExpanded)}
-                      className={`${styles.caretTDH} ${
-                        sort.sort_direction != SortDirection.DESC
-                      }`}
+                      className={`${styles.caretTDH}`}
                     />
                   </th>
                 </tr>
@@ -232,19 +244,19 @@ export default function Leaderboard(props: Props) {
                   </th>
                   <th className={styles.tdhSub}>
                     <span className="d-flex align-items-center justify-content-center">
-                      SZN1&nbsp;
+                      Memes&nbsp;
                       <span className="d-flex flex-column">
                         <FontAwesomeIcon
                           icon="square-caret-up"
                           onClick={() =>
                             setSort({
-                              sort: Sort.szn1_balance,
+                              sort: Sort.memes_balance,
                               sort_direction: SortDirection.ASC,
                             })
                           }
                           className={`${styles.caret} ${
                             sort.sort_direction != SortDirection.ASC ||
-                            sort.sort != Sort.szn1_balance
+                            sort.sort != Sort.memes_balance
                               ? styles.disabled
                               : ""
                           }`}
@@ -253,13 +265,13 @@ export default function Leaderboard(props: Props) {
                           icon="square-caret-down"
                           onClick={() =>
                             setSort({
-                              sort: Sort.szn1_balance,
+                              sort: Sort.memes_balance,
                               sort_direction: SortDirection.DESC,
                             })
                           }
                           className={`${styles.caret} ${
                             sort.sort_direction != SortDirection.DESC ||
-                            sort.sort != Sort.szn1_balance
+                            sort.sort != Sort.memes_balance
                               ? styles.disabled
                               : ""
                           }`}
@@ -267,6 +279,84 @@ export default function Leaderboard(props: Props) {
                       </span>
                     </span>
                   </th>
+                  {balancesExpanded && (
+                    <>
+                      <th className={styles.tdhSub}>
+                        <span className="d-flex align-items-center justify-content-center">
+                          SZN1&nbsp;
+                          <span className="d-flex flex-column">
+                            <FontAwesomeIcon
+                              icon="square-caret-up"
+                              onClick={() =>
+                                setSort({
+                                  sort: Sort.szn1_balance,
+                                  sort_direction: SortDirection.ASC,
+                                })
+                              }
+                              className={`${styles.caret} ${
+                                sort.sort_direction != SortDirection.ASC ||
+                                sort.sort != Sort.szn1_balance
+                                  ? styles.disabled
+                                  : ""
+                              }`}
+                            />
+                            <FontAwesomeIcon
+                              icon="square-caret-down"
+                              onClick={() =>
+                                setSort({
+                                  sort: Sort.szn1_balance,
+                                  sort_direction: SortDirection.DESC,
+                                })
+                              }
+                              className={`${styles.caret} ${
+                                sort.sort_direction != SortDirection.DESC ||
+                                sort.sort != Sort.szn1_balance
+                                  ? styles.disabled
+                                  : ""
+                              }`}
+                            />
+                          </span>
+                        </span>
+                      </th>
+                      <th className={styles.tdhSub}>
+                        <span className="d-flex align-items-center justify-content-center">
+                          SZN2&nbsp;
+                          <span className="d-flex flex-column">
+                            <FontAwesomeIcon
+                              icon="square-caret-up"
+                              onClick={() =>
+                                setSort({
+                                  sort: Sort.szn2_balance,
+                                  sort_direction: SortDirection.ASC,
+                                })
+                              }
+                              className={`${styles.caret} ${
+                                sort.sort_direction != SortDirection.ASC ||
+                                sort.sort != Sort.szn2_balance
+                                  ? styles.disabled
+                                  : ""
+                              }`}
+                            />
+                            <FontAwesomeIcon
+                              icon="square-caret-down"
+                              onClick={() =>
+                                setSort({
+                                  sort: Sort.szn2_balance,
+                                  sort_direction: SortDirection.DESC,
+                                })
+                              }
+                              className={`${styles.caret} ${
+                                sort.sort_direction != SortDirection.DESC ||
+                                sort.sort != Sort.szn2_balance
+                                  ? styles.disabled
+                                  : ""
+                              }`}
+                            />
+                          </span>
+                        </span>
+                      </th>
+                    </>
+                  )}
                   <th className={styles.tdhSub}>
                     <span className="d-flex align-items-center justify-content-center">
                       Gradients&nbsp;
@@ -536,43 +626,119 @@ export default function Leaderboard(props: Props) {
                     </span>
                   </th>
                   {tdhExpanded && (
-                    <th className={styles.tdhSub}>
-                      <span className="d-flex align-items-center justify-content-center">
-                        SZN1&nbsp;
-                        <span className="d-flex flex-column">
-                          <FontAwesomeIcon
-                            icon="square-caret-up"
-                            onClick={() =>
-                              setSort({
-                                sort: Sort.szn1_tdh,
-                                sort_direction: SortDirection.ASC,
-                              })
-                            }
-                            className={`${styles.caret} ${
-                              sort.sort_direction != SortDirection.ASC ||
-                              sort.sort != Sort.szn1_tdh
-                                ? styles.disabled
-                                : ""
-                            }`}
-                          />
-                          <FontAwesomeIcon
-                            icon="square-caret-down"
-                            onClick={() =>
-                              setSort({
-                                sort: Sort.szn1_tdh,
-                                sort_direction: SortDirection.DESC,
-                              })
-                            }
-                            className={`${styles.caret} ${
-                              sort.sort_direction != SortDirection.DESC ||
-                              sort.sort != Sort.szn1_tdh
-                                ? styles.disabled
-                                : ""
-                            }`}
-                          />
+                    <>
+                      <th className={styles.tdhSub}>
+                        <span className="d-flex align-items-center justify-content-center">
+                          Memes&nbsp;
+                          <span className="d-flex flex-column">
+                            <FontAwesomeIcon
+                              icon="square-caret-up"
+                              onClick={() =>
+                                setSort({
+                                  sort: Sort.memes_tdh,
+                                  sort_direction: SortDirection.ASC,
+                                })
+                              }
+                              className={`${styles.caret} ${
+                                sort.sort_direction != SortDirection.ASC ||
+                                sort.sort != Sort.memes_tdh
+                                  ? styles.disabled
+                                  : ""
+                              }`}
+                            />
+                            <FontAwesomeIcon
+                              icon="square-caret-down"
+                              onClick={() =>
+                                setSort({
+                                  sort: Sort.memes_tdh,
+                                  sort_direction: SortDirection.DESC,
+                                })
+                              }
+                              className={`${styles.caret} ${
+                                sort.sort_direction != SortDirection.DESC ||
+                                sort.sort != Sort.memes_tdh
+                                  ? styles.disabled
+                                  : ""
+                              }`}
+                            />
+                          </span>
                         </span>
-                      </span>
-                    </th>
+                      </th>
+                      <th className={styles.tdhSub}>
+                        <span className="d-flex align-items-center justify-content-center">
+                          SZN1&nbsp;
+                          <span className="d-flex flex-column">
+                            <FontAwesomeIcon
+                              icon="square-caret-up"
+                              onClick={() =>
+                                setSort({
+                                  sort: Sort.szn1_tdh,
+                                  sort_direction: SortDirection.ASC,
+                                })
+                              }
+                              className={`${styles.caret} ${
+                                sort.sort_direction != SortDirection.ASC ||
+                                sort.sort != Sort.szn1_tdh
+                                  ? styles.disabled
+                                  : ""
+                              }`}
+                            />
+                            <FontAwesomeIcon
+                              icon="square-caret-down"
+                              onClick={() =>
+                                setSort({
+                                  sort: Sort.szn1_tdh,
+                                  sort_direction: SortDirection.DESC,
+                                })
+                              }
+                              className={`${styles.caret} ${
+                                sort.sort_direction != SortDirection.DESC ||
+                                sort.sort != Sort.szn1_tdh
+                                  ? styles.disabled
+                                  : ""
+                              }`}
+                            />
+                          </span>
+                        </span>
+                      </th>
+                      <th className={styles.tdhSub}>
+                        <span className="d-flex align-items-center justify-content-center">
+                          SZN2&nbsp;
+                          <span className="d-flex flex-column">
+                            <FontAwesomeIcon
+                              icon="square-caret-up"
+                              onClick={() =>
+                                setSort({
+                                  sort: Sort.szn2_tdh,
+                                  sort_direction: SortDirection.ASC,
+                                })
+                              }
+                              className={`${styles.caret} ${
+                                sort.sort_direction != SortDirection.ASC ||
+                                sort.sort != Sort.szn2_tdh
+                                  ? styles.disabled
+                                  : ""
+                              }`}
+                            />
+                            <FontAwesomeIcon
+                              icon="square-caret-down"
+                              onClick={() =>
+                                setSort({
+                                  sort: Sort.szn2_tdh,
+                                  sort_direction: SortDirection.DESC,
+                                })
+                              }
+                              className={`${styles.caret} ${
+                                sort.sort_direction != SortDirection.DESC ||
+                                sort.sort != Sort.szn2_tdh
+                                  ? styles.disabled
+                                  : ""
+                              }`}
+                            />
+                          </span>
+                        </span>
+                      </th>
+                    </>
                   )}
                   {tdhExpanded && (
                     <th className={styles.tdhSub}>
@@ -650,8 +816,18 @@ export default function Leaderboard(props: Props) {
                           {numberWithCommas(lead.balance)}
                         </td>
                         <td className={styles.tdhSub}>
-                          {numberWithCommas(lead.memes_balance_season1)}
+                          {numberWithCommas(lead.memes_balance)}
                         </td>
+                        {balancesExpanded && (
+                          <>
+                            <td className={styles.tdhSub}>
+                              {numberWithCommas(lead.memes_balance_season1)}
+                            </td>
+                            <td className={styles.tdhSub}>
+                              {numberWithCommas(lead.memes_balance_season2)}
+                            </td>
+                          </>
+                        )}
                         <td className={styles.tdhSub}>
                           {numberWithCommas(lead.gradients_balance)}
                         </td>
@@ -685,9 +861,17 @@ export default function Leaderboard(props: Props) {
                           {numberWithCommas(lead.tdh__raw)}
                         </td>
                         {tdhExpanded && (
-                          <td className={styles.tdhSub}>
-                            {numberWithCommas(lead.memes_tdh_season1)}
-                          </td>
+                          <>
+                            <td className={styles.tdhSub}>
+                              {numberWithCommas(lead.memes_tdh)}
+                            </td>
+                            <td className={styles.tdhSub}>
+                              {numberWithCommas(lead.memes_tdh_season1)}
+                            </td>
+                            <td className={styles.tdhSub}>
+                              {numberWithCommas(lead.memes_tdh_season2)}
+                            </td>
+                          </>
                         )}
                         {tdhExpanded && (
                           <td className={styles.tdhSub}>

@@ -55,6 +55,8 @@ export enum MEME_FOCUS {
 export default function MemePage() {
   const router = useRouter();
 
+  const [isFullScreenSupported, setIsFullScreenSupported] = useState(false);
+
   const [nftId, setNftId] = useState<string>();
   const [fullscreenElementId, setFullscreenElementId] = useState<string>(
     "the-art-fullscreen-img"
@@ -100,6 +102,7 @@ export default function MemePage() {
 
   useEffect(() => {
     if (router.isReady) {
+      setIsFullScreenSupported(fullScreenSupported());
       let initialFocus = MEME_FOCUS.LIVE;
 
       const routerFocus = router.query.focus;
@@ -680,18 +683,6 @@ export default function MemePage() {
     });
   }
 
-  function printFullScreen() {
-    return (
-      <FontAwesomeIcon
-        icon="expand-alt"
-        className={styles.fullScreen}
-        onClick={() =>
-          fullscreenElementId && enterArtFullScreen(fullscreenElementId)
-        }
-      />
-    );
-  }
-
   function printTheArt() {
     carouselHandlerSlid();
     if (nft && nftMeta) {
@@ -699,7 +690,16 @@ export default function MemePage() {
         <>
           <Container>
             <Row className="position-relative">
-              {fullScreenSupported() && printFullScreen()}
+              {isFullScreenSupported && (
+                <FontAwesomeIcon
+                  icon="expand-alt"
+                  className={styles.fullScreen}
+                  onClick={() =>
+                    fullscreenElementId &&
+                    enterArtFullScreen(fullscreenElementId)
+                  }
+                />
+              )}
               {nft.animation ? (
                 <Carousel
                   className={styles.memesCarousel}

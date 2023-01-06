@@ -587,7 +587,10 @@ export default function UserPage(props: Props) {
                           ? ownerENS
                           : formatAddress(ownerAddress as string)
                       }'s 6529 Collection${
-                        tdh && `\nTDH ${tdh.tdh} - \Rank ${tdh.tdh_rank}`
+                        tdh &&
+                        `\nTDH ${tdh ? tdh.tdh : "N/A"} - \Rank ${
+                          tdh ? tdh.tdh_rank : "N/A"
+                        }`
                       }\n#6529Seize\n\n`}>
                       <TwitterIcon
                         size={30}
@@ -659,7 +662,7 @@ export default function UserPage(props: Props) {
                         </tr>
                         <tr>
                           <td>TDH</td>
-                          <td>{numberWithCommas(tdh.tdh)}</td>
+                          <td>{numberWithCommas(tdh.boosted_tdh)}</td>
                         </tr>
                         <tr>
                           <td>Rank</td>
@@ -672,51 +675,55 @@ export default function UserPage(props: Props) {
                       </tbody>
                     </Table>
                     <Table className={styles.secondaryTable}>
-                      <tr>
-                        <td>
-                          <h4>In</h4>
-                        </td>
-                      </tr>
-                      <tr>
-                        <td>Purchases (ETH)</td>
-                        <td>
-                          {numberWithCommas(
-                            Math.round(tdh.purchases_value * 100) / 100
-                          )}
-                        </td>
-                      </tr>
-                      <tr>
-                        <td>Purchases</td>
-                        <td>{numberWithCommas(tdh.purchases_count)}</td>
-                      </tr>
-                      <tr>
-                        <td>Transfers In</td>
-                        <td>{numberWithCommas(tdh.transfers_in)}</td>
-                      </tr>
+                      <tbody>
+                        <tr>
+                          <td>
+                            <h4>In</h4>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td>Purchases (ETH)</td>
+                          <td>
+                            {numberWithCommas(
+                              Math.round(tdh.purchases_value * 100) / 100
+                            )}
+                          </td>
+                        </tr>
+                        <tr>
+                          <td>Purchases</td>
+                          <td>{numberWithCommas(tdh.purchases_count)}</td>
+                        </tr>
+                        <tr>
+                          <td>Transfers In</td>
+                          <td>{numberWithCommas(tdh.transfers_in)}</td>
+                        </tr>
+                      </tbody>
                     </Table>
                     <Table
                       className={`${styles.secondaryTable} ${styles.secondaryTableMargin}`}>
-                      <tr>
-                        <td>
-                          <h4>Out</h4>
-                        </td>
-                      </tr>
-                      <tr>
-                        <td>Sales (ETH)</td>
-                        <td>
-                          {numberWithCommas(
-                            Math.round(tdh.sales_value * 100) / 100
-                          )}
-                        </td>
-                      </tr>
-                      <tr>
-                        <td>Sales</td>
-                        <td>{numberWithCommas(tdh.sales_count)}</td>
-                      </tr>
-                      <tr>
-                        <td>Transfers Out</td>
-                        <td>{numberWithCommas(tdh.transfers_out)}</td>
-                      </tr>
+                      <tbody>
+                        <tr>
+                          <td>
+                            <h4>Out</h4>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td>Sales (ETH)</td>
+                          <td>
+                            {numberWithCommas(
+                              Math.round(tdh.sales_value * 100) / 100
+                            )}
+                          </td>
+                        </tr>
+                        <tr>
+                          <td>Sales</td>
+                          <td>{numberWithCommas(tdh.sales_count)}</td>
+                        </tr>
+                        <tr>
+                          <td>Transfers Out</td>
+                          <td>{numberWithCommas(tdh.transfers_out)}</td>
+                        </tr>
+                      </tbody>
                     </Table>
                   </Col>
                 )}
