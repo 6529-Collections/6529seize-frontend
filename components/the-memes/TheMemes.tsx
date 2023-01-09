@@ -13,6 +13,7 @@ import { SortDirection } from "../../entities/ISort";
 import { Crumb } from "../breadcrumb/Breadcrumb";
 import { getDateDisplay, numberWithCommas } from "../../helpers/Helpers";
 import { useRouter } from "next/router";
+import { fetchAllPages } from "../../services/6529api";
 
 const NFTImage = dynamic(() => import("../nft-image/NFTImage"), {
   ssr: false,
@@ -141,28 +142,23 @@ export default function TheMemesComponent(props: Props) {
 
   useEffect(() => {
     const nftsUrl = `${process.env.API_ENDPOINT}/api/memes_extended_data`;
-    fetch(nftsUrl)
-      .then((res) => res.json())
-      .then((response: DBResponse) => {
-        const nftMetas = response.data;
-        setNftMetas(nftMetas);
-        if (nftMetas.length > 0) {
-          const tokenIds = nftMetas.map((n: MemesExtendedData) => n.id);
-          fetch(
-            `${
-              process.env.API_ENDPOINT
-            }/api/nfts?contract=${MEMES_CONTRACT}&id=${tokenIds.join(",")}`
-          )
-            .then((res) => res.json())
-            .then((response: DBResponse) => {
-              setNfts(response.data);
-              setNftsLoaded(true);
-            });
-        } else {
-          setNfts([]);
+    fetchAllPages(nftsUrl).then((responseNftMetas: any[]) => {
+      setNftMetas(responseNftMetas);
+      if (responseNftMetas.length > 0) {
+        const tokenIds = responseNftMetas.map((n: MemesExtendedData) => n.id);
+        fetchAllPages(
+          `${
+            process.env.API_ENDPOINT
+          }/api/nfts?contract=${MEMES_CONTRACT}&id=${tokenIds.join(",")}`
+        ).then((responseNfts: any[]) => {
+          setNfts(responseNfts);
           setNftsLoaded(true);
-        }
-      });
+        });
+      } else {
+        setNfts([]);
+        setNftsLoaded(true);
+      }
+    });
   }, []);
 
   useEffect(() => {
