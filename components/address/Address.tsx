@@ -4,6 +4,7 @@ import { useEnsName } from "wagmi";
 import { MANIFOLD, SIX529_MUSEUM } from "../../constants";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useState } from "react";
+import { Dropdown } from "react-bootstrap";
 
 interface Props {
   address: `0x${string}` | undefined;
@@ -29,12 +30,12 @@ export default function Address(props: Props) {
 
   const [isCopied, setIsCopied] = useState(false);
 
-  function copy() {
-    navigator.clipboard.writeText(props.address!);
+  function copy(text: any) {
+    navigator.clipboard.writeText(text);
     setIsCopied(true);
     setTimeout(() => {
       setIsCopied(false);
-    }, 1000);
+    }, 300);
   }
 
   function resolveAddress() {
@@ -62,55 +63,88 @@ export default function Address(props: Props) {
   return (
     <span className={styles.addressWidget}>
       <>
-        {
-          <span className={styles.address}>
-            {props.disableLink && resolveAddress()}
-            {!props.disableLink && (
-              <a href={`/${props.address}`}>{resolveAddress()}</a>
-            )}
-          </span>
-        }
-        <>
+        <span
+          className={
+            props.isUserPage
+              ? "d-flex justify-content-center align-items-center"
+              : ""
+          }>
+          {
+            <span className={styles.address}>
+              {props.disableLink && resolveAddress()}
+              {!props.disableLink && (
+                <a href={`/${props.address}`}>{resolveAddress()}</a>
+              )}
+            </span>
+          }
           {!props.hideCopy &&
             navigator.clipboard &&
-            (isCopied ? (
-              <FontAwesomeIcon
-                icon="copy"
-                className={`${styles.copy} ${styles.copyActive}`}
-              />
+            (props.ens ? (
+              <Dropdown className={styles.copyDropdown}>
+                <Dropdown.Toggle>
+                  <FontAwesomeIcon
+                    icon="copy"
+                    className={`${styles.copy} ${
+                      isCopied ? styles.copyActive : ""
+                    }`}
+                  />
+                </Dropdown.Toggle>
+
+                <Dropdown.Menu>
+                  <Dropdown.Item
+                    className={styles.copyDropdownItem}
+                    onClick={() => copy(props.ens)}>
+                    {props.ens}
+                  </Dropdown.Item>
+                  <Dropdown.Item
+                    className={styles.copyDropdownItem}
+                    onClick={() => copy(props.address)}>
+                    {formatAddress(props.address as string)}
+                  </Dropdown.Item>
+                </Dropdown.Menu>
+              </Dropdown>
             ) : (
               <FontAwesomeIcon
                 icon="copy"
-                className={styles.copy}
-                onClick={copy}
+                className={`${styles.copy} ${
+                  isCopied ? styles.copyActive : ""
+                }`}
+                onClick={() => copy(props.address)}
               />
             ))}
-          {props.isUserPage && <br />}
-          {props.tags && (
-            <span className={styles.noWrap}>
-              {props.tags.memesCardsSets > 0 ? (
-                <span className={styles.memesCardsSetsTag}>
-                  {props.tags.memesCardsSets}x Memes Set
-                  {props.tags.memesCardsSets > 1 ? `s` : ""}
-                </span>
-              ) : props.tags.memesBalance > 0 ? (
-                <span className={styles.memesTag}>
-                  {props.tags.memesBalance}x Meme
-                  {props.tags.memesBalance > 1 ? `s` : ""}
-                  {props.tags.genesis ? ` (+Genesis)` : ""}
-                </span>
-              ) : (
-                ""
-              )}
-              {props.tags.gradientsBalance > 0 && (
-                <span className={styles.gradientsTag}>
-                  {props.tags.gradientsBalance}x Gradient
-                  {props.tags.gradientsBalance > 1 ? `s` : ""}
-                </span>
-              )}
+        </span>
+        {props.isUserPage && props.ens && (
+          <>
+            <span className={styles.userPageAddress}>
+              {formatAddress(props.address as string)}
             </span>
-          )}
-        </>
+            <br />
+          </>
+        )}
+        {props.tags && (
+          <span className={styles.noWrap}>
+            {props.tags.memesCardsSets > 0 ? (
+              <span className={styles.memesCardsSetsTag}>
+                {props.tags.memesCardsSets}x Memes Set
+                {props.tags.memesCardsSets > 1 ? `s` : ""}
+              </span>
+            ) : props.tags.memesBalance > 0 ? (
+              <span className={styles.memesTag}>
+                {props.tags.memesBalance}x Meme
+                {props.tags.memesBalance > 1 ? `s` : ""}
+                {props.tags.genesis ? ` (+Genesis)` : ""}
+              </span>
+            ) : (
+              ""
+            )}
+            {props.tags.gradientsBalance > 0 && (
+              <span className={styles.gradientsTag}>
+                {props.tags.gradientsBalance}x Gradient
+                {props.tags.gradientsBalance > 1 ? `s` : ""}
+              </span>
+            )}
+          </span>
+        )}
       </>
     </span>
   );
