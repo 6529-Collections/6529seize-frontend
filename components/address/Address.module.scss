@@ -4,7 +4,6 @@
   text-decoration: underline;
   font-weight: bolder;
   margin-right: 10px;
-  float: left;
 }
 
 .copy {
@@ -24,7 +23,6 @@
 }
 
 .copyDropdown {
-  float: left;
   button {
     cursor: copy;
     padding: 0;
@@ -33,10 +31,6 @@
     &::after {
       border: none !important;
     }
-  }
-
-  .dropdown-item {
-    background-color: red !important;
   }
 }
 
