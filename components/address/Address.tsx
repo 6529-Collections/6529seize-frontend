@@ -80,7 +80,7 @@ export default function Address(props: Props) {
           {!props.hideCopy &&
             navigator.clipboard &&
             (props.ens ? (
-              <Dropdown className={styles.copyDropdown}>
+              <span className={`${styles.copyDropdown} dropdown`}>
                 <Dropdown.Toggle>
                   <FontAwesomeIcon
                     icon="copy"
@@ -102,7 +102,7 @@ export default function Address(props: Props) {
                     {formatAddress(props.address as string)}
                   </Dropdown.Item>
                 </Dropdown.Menu>
-              </Dropdown>
+              </span>
             ) : (
               <FontAwesomeIcon
                 icon="copy"
