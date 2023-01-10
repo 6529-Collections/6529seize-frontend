@@ -543,10 +543,7 @@ export default function UserPage(props: Props) {
                   className={`${styles.seizedToggle}`}
                   label={`Hide Gradients`}
                   checked={hideGradients}
-                  onClick={() => {
-                    // if (hideMemes) {
-                    //   setHideMemes(false);
-                    // }
+                  onChange={() => {
                     setHideGradients(!hideGradients);
                   }}
                 />
@@ -555,10 +552,7 @@ export default function UserPage(props: Props) {
                   className={`${styles.seizedToggle}`}
                   label={`Hide Memes`}
                   checked={hideMemes}
-                  onClick={() => {
-                    // if (hideGradients) {
-                    //   setHideGradients(false);
-                    // }
+                  onChange={() => {
                     setHideMemes(!hideMemes);
                   }}
                 />

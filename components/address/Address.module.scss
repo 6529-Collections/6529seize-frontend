@@ -4,6 +4,7 @@
   text-decoration: underline;
   font-weight: bolder;
   margin-right: 10px;
+  float: left;
 }
 
 .copy {
@@ -20,6 +21,27 @@
 .copyActive {
   cursor: default;
   color: $green;
+}
+
+.copyDropdown {
+  float: left;
+  button {
+    cursor: copy;
+    padding: 0;
+    background-color: transparent !important;
+    border-color: transparent !important;
+    &::after {
+      border: none !important;
+    }
+  }
+
+  .dropdown-item {
+    background-color: red !important;
+  }
+}
+
+.copyDropdownItem {
+  cursor: copy;
 }
 
 .memesTag {
@@ -76,4 +98,8 @@
   .noWrap {
     white-space: nowrap;
   }
+}
+
+.userPageAddress {
+  font-size: $font-size !important;
 }
