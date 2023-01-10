@@ -95,6 +95,11 @@
     vertical-align: middle;
   }
 
+  th {
+    white-space: nowrap;
+    width: fit-content;
+  }
+
   th span {
     white-space: nowrap;
   }
@@ -153,4 +158,24 @@
   border-bottom: 0.5px solid $font-color !important;
   padding: 0rem !important;
   position: relative;
+}
+
+.contentDropdown {
+  height: 40px;
+  margin-top: 4px;
+  text-align: center;
+  background-color: transparent;
+  border: none;
+
+  button {
+    font-size: larger;
+    font-weight: bolder;
+    cursor: copy;
+    padding: 0;
+    background-color: transparent !important;
+    border-color: transparent !important;
+    &::after {
+      margin-top: 45%;
+    }
+  }
 }
