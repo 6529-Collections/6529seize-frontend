@@ -357,10 +357,10 @@ export default function Leaderboard(props: Props) {
                 {Content.MEMES}
               </Dropdown.Item>
               <Dropdown.Item onClick={() => setContent(Content.MEMES1)}>
-                &emsp;{Content.MEMES1}
+                &nbsp;&nbsp;{Content.MEMES1}
               </Dropdown.Item>
               <Dropdown.Item onClick={() => setContent(Content.MEMES2)}>
-                &emsp;{Content.MEMES2}
+                &nbsp;&nbsp;{Content.MEMES2}
               </Dropdown.Item>
               <Dropdown.Item onClick={() => setContent(Content.GRADIENTS)}>
                 {Content.GRADIENTS}

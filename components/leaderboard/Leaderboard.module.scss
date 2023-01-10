@@ -179,3 +179,13 @@
     }
   }
 }
+
+@media only screen and (max-width: 800px) {
+  .contentDropdown {
+    button {
+      &::after {
+        margin-top: 0.5rem;
+      }
+    }
+  }
+}
