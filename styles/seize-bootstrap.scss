@@ -34,7 +34,8 @@
   }
 }
 
-.navbar-expand .navbar-nav .dropdown-menu {
+.navbar-expand .navbar-nav .dropdown-menu,
+.dropdown .dropdown-menu {
   background-color: $bg-color-1;
   border-top: 3px solid white;
   border-top-right-radius: 0;
