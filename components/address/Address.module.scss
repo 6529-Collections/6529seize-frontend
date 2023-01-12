@@ -23,6 +23,7 @@
 }
 
 .copyDropdown {
+  display: inline-block;
   button {
     cursor: copy;
     padding: 0;
@@ -71,6 +72,10 @@
   box-shadow: 0 4px 4px rgb(0 0 0 / 25%);
 }
 
+.breakTags {
+  display: none;
+}
+
 @media only screen and (max-width: 1200px) {
   .memesTag,
   .memesCardsSetsTag,
@@ -79,18 +84,24 @@
   }
 }
 
+@media only screen and (max-width: 1600px) {
+  // .addressWidget {
+  //   white-space: break-spaces;
+  // }
+
+  // .noWrap {
+  //   white-space: nowrap;
+  // }
+  .breakTags {
+    display: contents;
+  }
+}
+
 @media only screen and (max-width: 1000px) {
   .memesTag,
   .memesCardsSetsTag,
   .gradientsTag {
-    font-size: $font-smallest !important;
-  }
-  .addressWidget {
-    white-space: break-spaces;
-  }
-
-  .noWrap {
-    white-space: nowrap;
+    font-size: 9px !important;
   }
 }
 

@@ -9,13 +9,15 @@ body {
 }
 
 @media only screen and (max-width: 1200px) {
-  body {
+  body,
+  button {
     font-size: $font-smaller !important;
   }
 }
 
 @media only screen and (max-width: 800px) {
-  body {
+  body,
+  button {
     font-size: $font-smallest !important;
   }
 }
@@ -24,6 +26,7 @@ textarea,
 select,
 input,
 button {
+  font-size: $font-size !important;
   outline: 0 !important;
   box-shadow: none !important;
   color: $font-color !important;
