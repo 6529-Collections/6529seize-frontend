@@ -594,43 +594,45 @@ export default function Leaderboard(props: Props) {
             )}
           </h1>
         </Col>
-        <Col className="d-flex justify-content-center">
-          <Dropdown className={styles.contentDropdown} drop={"down-centered"}>
-            <Dropdown.Toggle>Collection: {content}</Dropdown.Toggle>
-            <Dropdown.Menu>
-              <Dropdown.Item onClick={() => setContent(Content.ALL)}>
-                {Content.ALL}
-              </Dropdown.Item>
-              <Dropdown.Item onClick={() => setContent(Content.MEMES)}>
-                {Content.MEMES}
-              </Dropdown.Item>
-              <Dropdown.Item onClick={() => setContent(Content.MEMES1)}>
-                &nbsp;&nbsp;{Content.MEMES1}
-              </Dropdown.Item>
-              <Dropdown.Item onClick={() => setContent(Content.MEMES2)}>
-                &nbsp;&nbsp;{Content.MEMES2}
-              </Dropdown.Item>
-              <Dropdown.Item onClick={() => setContent(Content.GRADIENTS)}>
-                {Content.GRADIENTS}
-              </Dropdown.Item>
-            </Dropdown.Menu>
-          </Dropdown>
-          <span className={styles.focusSwitchLabel}>TDH</span>
-          <Form.Check
-            type="switch"
-            className={styles.focusSwitch}
-            label={`Interactions`}
-            checked={focus == Focus.INTERACTIONS}
-            onChange={() => {
-              if (focus == Focus.TDH) {
-                setFocus(Focus.INTERACTIONS);
-              }
-              if (focus == Focus.INTERACTIONS) {
-                setFocus(Focus.TDH);
-              }
-            }}
-          />
-        </Col>
+        {lastTDH && (
+          <Col className="d-flex justify-content-center">
+            <Dropdown className={styles.contentDropdown} drop={"down-centered"}>
+              <Dropdown.Toggle>Collection: {content}</Dropdown.Toggle>
+              <Dropdown.Menu>
+                <Dropdown.Item onClick={() => setContent(Content.ALL)}>
+                  {Content.ALL}
+                </Dropdown.Item>
+                <Dropdown.Item onClick={() => setContent(Content.MEMES)}>
+                  {Content.MEMES}
+                </Dropdown.Item>
+                <Dropdown.Item onClick={() => setContent(Content.MEMES1)}>
+                  &nbsp;&nbsp;{Content.MEMES1}
+                </Dropdown.Item>
+                <Dropdown.Item onClick={() => setContent(Content.MEMES2)}>
+                  &nbsp;&nbsp;{Content.MEMES2}
+                </Dropdown.Item>
+                <Dropdown.Item onClick={() => setContent(Content.GRADIENTS)}>
+                  {Content.GRADIENTS}
+                </Dropdown.Item>
+              </Dropdown.Menu>
+            </Dropdown>
+            <span className={styles.focusSwitchLabel}>TDH</span>
+            <Form.Check
+              type="switch"
+              className={styles.focusSwitch}
+              label={`Interactions`}
+              checked={focus == Focus.INTERACTIONS}
+              onChange={() => {
+                if (focus == Focus.TDH) {
+                  setFocus(Focus.INTERACTIONS);
+                }
+                if (focus == Focus.INTERACTIONS) {
+                  setFocus(Focus.TDH);
+                }
+              }}
+            />
+          </Col>
+        )}
         {lastTDH && (
           <Col className={`${styles.lastTDH}`}>
             * LAST TDH: {getDateDisplay(lastTDH.date)} BLOCK:{" "}
