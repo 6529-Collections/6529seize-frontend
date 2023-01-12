@@ -10,11 +10,6 @@
   display: none;
 }
 
-.rank {
-  width: 5%;
-  text-align: center;
-}
-
 .pageHeader {
   white-space: nowrap;
   h1 {
@@ -23,26 +18,31 @@
   }
 }
 
+.rank {
+  width: 5%;
+  text-align: center;
+}
+
 .hodler {
-  width: 35%;
+  width: 40%;
   margin-left: 10%;
   span {
     overflow-wrap: break-word;
   }
 }
 
+.balance {
+  width: 10%;
+  text-align: center;
+}
+
 .tdh {
-  width: 30%;
+  width: 45%;
   text-align: center;
 }
 
 .tdhSub {
   width: 10%;
-  text-align: center;
-}
-
-.balance {
-  width: 30%;
   text-align: center;
 }
 
@@ -63,19 +63,6 @@
   cursor: pointer;
 }
 
-.caretTDH {
-  height: $font-size;
-  cursor: pointer;
-  position: absolute;
-  right: 0;
-}
-
-@media only screen and (max-width: 800px) {
-  .caretTDH {
-    height: $font-smaller;
-  }
-}
-
 .disabled {
   color: $lightest-grey;
   &:hover {
@@ -85,7 +72,8 @@
 
 .gap {
   height: 8px;
-  width: 8px;
+  // width: 8px;
+  background-color: transparent !important;
 }
 
 .leaderboardTable {
@@ -97,7 +85,6 @@
 
   th {
     white-space: nowrap;
-    width: fit-content;
   }
 
   th span {
@@ -160,16 +147,44 @@
   position: relative;
 }
 
+.focusSwitchLabel {
+  float: left;
+  line-height: 48px;
+  margin-left: 75px;
+  font-size: larger;
+  font-weight: bolder;
+}
+
+.focusSwitch {
+  font-size: larger;
+  font-weight: bolder;
+  float: left;
+  height: 48px;
+  line-height: 48px;
+  input {
+    cursor: pointer;
+    line-height: 48px;
+    margin-top: 15px;
+    background-color: $yellow;
+    border-color: $very-dark-grey !important;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='%231e1e1e'/%3e%3c/svg%3e") !important;
+  }
+  input:checked {
+    background-color: $orange !important;
+  }
+}
+
 .contentDropdown {
-  height: 40px;
-  margin-top: 4px;
+  line-height: 48px;
   text-align: center;
   background-color: transparent;
   border: none;
-
+  a {
+    line-height: 30px;
+  }
   button {
-    font-size: larger;
-    font-weight: bolder;
+    font-size: larger !important;
+    font-weight: bolder !important;
     cursor: copy;
     padding: 0;
     background-color: transparent !important;
@@ -180,8 +195,18 @@
   }
 }
 
+.ownerTagsDropdown {
+  button {
+    font-weight: bolder;
+    padding: 0;
+    background-color: transparent !important;
+    border-color: transparent !important;
+  }
+}
+
 @media only screen and (max-width: 800px) {
-  .contentDropdown {
+  .contentDropdown,
+  .ownerTagsDropdown {
     button {
       &::after {
         margin-top: 0.5rem;
