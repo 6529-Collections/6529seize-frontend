@@ -17,8 +17,6 @@ interface Props {
 }
 
 export default function NFTImage(props: Props) {
-  const [revealMissing, setRevealMissing] = useState(false);
-
   if (
     props.animation &&
     props.nft.animation &&
@@ -41,9 +39,9 @@ export default function NFTImage(props: Props) {
   ) {
     return (
       <Col
-        className={`${styles.nftAnimation} height${props.height} ${
-          props.transparentBG && styles.transparentBG
-        }`}>
+        className={`text-center ${styles.nftAnimation} ${
+          props.height == 650 ? styles.height650 : styles.height300
+        } ${props.transparentBG && styles.transparentBG}`}>
         <video
           id={`${props.id && `${props.id}`}`}
           autoPlay

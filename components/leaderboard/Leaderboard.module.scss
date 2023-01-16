@@ -150,7 +150,7 @@
 .focusSwitchLabel {
   float: left;
   line-height: 48px;
-  margin-left: 75px;
+  margin-left: 60px;
   font-size: larger;
   font-weight: bolder;
 }
@@ -171,6 +171,18 @@
   }
   input:checked {
     background-color: $orange !important;
+  }
+}
+
+@media only screen and (max-width: 1200px) {
+  .focusSwitch {
+    margin-left: 10px;
+  }
+}
+
+@media only screen and (max-width: 800px) {
+  .focusSwitch {
+    margin-left: 20px;
   }
 }
 
