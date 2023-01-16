@@ -281,7 +281,10 @@ export default function Leaderboard(props: Props) {
 
   useEffect(() => {
     if (sort.sort != Sort.total_balance) {
-      setSort(Sort.total_balance);
+      setSort({
+        sort: Sort.total_balance,
+        sort_direction: sort.sort_direction,
+      });
     }
   }, [focus]);
 
