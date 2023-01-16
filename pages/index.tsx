@@ -122,14 +122,23 @@ export default function Home() {
                   lg={{ span: 6 }}>
                   <Container className="no-padding">
                     <Row>
-                      <a href={`/the-memes/${nft.id}`}>
+                      {nft.animation ? (
+                        <a href={`/the-memes/${nft.id}`}>
+                          <NFTImage
+                            nft={nft}
+                            animation={true}
+                            height={650}
+                            balance={nftBalance}
+                          />
+                        </a>
+                      ) : (
                         <NFTImage
                           nft={nft}
                           animation={true}
                           height={650}
                           balance={nftBalance}
                         />
-                      </a>
+                      )}
                     </Row>
                   </Container>
                 </Col>
