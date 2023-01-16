@@ -125,7 +125,7 @@ export default function Home() {
                       <a href={`/the-memes/${nft.id}`}>
                         <NFTImage
                           nft={nft}
-                          animation={false}
+                          animation={true}
                           height={650}
                           balance={nftBalance}
                         />

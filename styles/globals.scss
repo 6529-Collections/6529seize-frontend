@@ -8,20 +8,6 @@ body {
   font-family: $main-font !important;
 }
 
-@media only screen and (max-width: 1200px) {
-  body,
-  button {
-    font-size: $font-smaller !important;
-  }
-}
-
-@media only screen and (max-width: 800px) {
-  body,
-  button {
-    font-size: $font-smallest !important;
-  }
-}
-
 textarea,
 select,
 input,
@@ -40,6 +26,20 @@ a {
 
 a:hover {
   color: darken($color: $font-color, $amount: $darken-percentage);
+}
+
+@media only screen and (max-width: 1200px) {
+  body,
+  button {
+    font-size: $font-smaller !important;
+  }
+}
+
+@media only screen and (max-width: 800px) {
+  body,
+  button {
+    font-size: $font-smallest !important;
+  }
 }
 
 * {

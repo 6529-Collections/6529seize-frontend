@@ -102,16 +102,12 @@ export default function Leaderboard(props: Props) {
   const [sort, setSort] = useState<{
     sort: Sort;
     sort_direction: SortDirection;
-  }>({ sort: Sort.boosted_tdh, sort_direction: SortDirection.DESC });
+  }>({ sort: Sort.total_balance, sort_direction: SortDirection.DESC });
   const [showViewAll, setShowViewAll] = useState(
     !window.location.pathname.includes("community")
   );
 
   async function fetchResults() {
-    // var top = document.getElementById(`leaderboard-page`)?.offsetTop;
-    // if (top && window.scrollY > 0) {
-    //   window.scrollTo(0, 0);
-    // }
     let tagFilter = "";
     switch (ownerTagFilter) {
       case OwnerTagFilter.MEMES_SETS:
@@ -136,7 +132,7 @@ export default function Leaderboard(props: Props) {
   }
 
   useEffect(() => {
-    if (sort && router.isReady) {
+    if (sort && ownerTagFilter && router.isReady) {
       if (pageProps.page == 1) {
         fetchResults();
       } else {
@@ -167,119 +163,126 @@ export default function Leaderboard(props: Props) {
   }, [pageProps.page]);
 
   useEffect(() => {
-    if (
-      [
-        Sort.total_balance,
-        Sort.memes_balance,
-        Sort.szn1_balance,
-        Sort.szn2_balance,
-        Sort.gradients_balance,
-      ].includes(sort.sort)
-    ) {
-      setSort({ sort: getBalanceSort(), sort_direction: sort.sort_direction });
-    }
-    if (
-      [
-        Sort.boosted_tdh,
-        Sort.boosted_memes_tdh,
-        Sort.boosted_szn1_tdh,
-        Sort.boosted_szn2_tdh,
-        Sort.boosted_gradients_tdh,
-      ].includes(sort.sort)
-    ) {
-      setSort({
-        sort: getBoostedTdhSort(),
-        sort_direction: sort.sort_direction,
-      });
-    }
-    if (
-      [
-        Sort.tdh,
-        Sort.memes_tdh,
-        Sort.szn1_tdh,
-        Sort.szn2_tdh,
-        Sort.gradients_tdh,
-      ].includes(sort.sort)
-    ) {
-      setSort({
-        sort: getTdhSort(),
-        sort_direction: sort.sort_direction,
-      });
-    }
-    if (
-      [
-        Sort.tdh__raw,
-        Sort.memes_tdh__raw,
-        Sort.szn1_tdh__raw,
-        Sort.szn2_tdh__raw,
-        Sort.gradients_tdh__raw,
-      ].includes(sort.sort)
-    ) {
-      setSort({
-        sort: getTdhRawSort(),
-        sort_direction: sort.sort_direction,
-      });
-    }
-    if (
-      [
-        Sort.purchases_value,
-        Sort.purchases_value_memes,
-        Sort.purchases_value_memes_season1,
-        Sort.purchases_value_memes_season2,
-        Sort.purchases_value_gradients,
-      ].includes(sort.sort)
-    ) {
-      setSort({
-        sort: getPuchasesSort(),
-        sort_direction: sort.sort_direction,
-      });
-    }
-    if (
-      [
-        Sort.sales_value,
-        Sort.sales_value_memes,
-        Sort.sales_value_memes_season1,
-        Sort.sales_value_memes_season2,
-        Sort.sales_value_gradients,
-      ].includes(sort.sort)
-    ) {
-      setSort({
-        sort: getSalesSort(),
-        sort_direction: sort.sort_direction,
-      });
-    }
-    if (
-      [
-        Sort.transfers_in,
-        Sort.transfers_in_memes,
-        Sort.transfers_in_memes_season1,
-        Sort.transfers_in_memes_season2,
-        Sort.transfers_in_gradients,
-      ].includes(sort.sort)
-    ) {
-      setSort({
-        sort: getTransfersInSort(),
-        sort_direction: sort.sort_direction,
-      });
-    }
-    if (
-      [
-        Sort.transfers_out,
-        Sort.transfers_out_memes,
-        Sort.transfers_out_memes_season1,
-        Sort.transfers_out_memes_season2,
-        Sort.transfers_out_gradients,
-      ].includes(sort.sort)
-    ) {
-      setSort({
-        sort: getTransfersOutSort(),
-        sort_direction: sort.sort_direction,
-      });
+    if (content) {
+      if (
+        [
+          Sort.total_balance,
+          Sort.memes_balance,
+          Sort.szn1_balance,
+          Sort.szn2_balance,
+          Sort.gradients_balance,
+        ].includes(sort.sort)
+      ) {
+        setSort({
+          sort: getBalanceSort(),
+          sort_direction: sort.sort_direction,
+        });
+      }
+      if (
+        [
+          Sort.boosted_tdh,
+          Sort.boosted_memes_tdh,
+          Sort.boosted_szn1_tdh,
+          Sort.boosted_szn2_tdh,
+          Sort.boosted_gradients_tdh,
+        ].includes(sort.sort)
+      ) {
+        setSort({
+          sort: getBoostedTdhSort(),
+          sort_direction: sort.sort_direction,
+        });
+      }
+      if (
+        [
+          Sort.tdh,
+          Sort.memes_tdh,
+          Sort.szn1_tdh,
+          Sort.szn2_tdh,
+          Sort.gradients_tdh,
+        ].includes(sort.sort)
+      ) {
+        setSort({
+          sort: getTdhSort(),
+          sort_direction: sort.sort_direction,
+        });
+      }
+      if (
+        [
+          Sort.tdh__raw,
+          Sort.memes_tdh__raw,
+          Sort.szn1_tdh__raw,
+          Sort.szn2_tdh__raw,
+          Sort.gradients_tdh__raw,
+        ].includes(sort.sort)
+      ) {
+        setSort({
+          sort: getTdhRawSort(),
+          sort_direction: sort.sort_direction,
+        });
+      }
+      if (
+        [
+          Sort.purchases_value,
+          Sort.purchases_value_memes,
+          Sort.purchases_value_memes_season1,
+          Sort.purchases_value_memes_season2,
+          Sort.purchases_value_gradients,
+        ].includes(sort.sort)
+      ) {
+        setSort({
+          sort: getPuchasesSort(),
+          sort_direction: sort.sort_direction,
+        });
+      }
+      if (
+        [
+          Sort.sales_value,
+          Sort.sales_value_memes,
+          Sort.sales_value_memes_season1,
+          Sort.sales_value_memes_season2,
+          Sort.sales_value_gradients,
+        ].includes(sort.sort)
+      ) {
+        setSort({
+          sort: getSalesSort(),
+          sort_direction: sort.sort_direction,
+        });
+      }
+      if (
+        [
+          Sort.transfers_in,
+          Sort.transfers_in_memes,
+          Sort.transfers_in_memes_season1,
+          Sort.transfers_in_memes_season2,
+          Sort.transfers_in_gradients,
+        ].includes(sort.sort)
+      ) {
+        setSort({
+          sort: getTransfersInSort(),
+          sort_direction: sort.sort_direction,
+        });
+      }
+      if (
+        [
+          Sort.transfers_out,
+          Sort.transfers_out_memes,
+          Sort.transfers_out_memes_season1,
+          Sort.transfers_out_memes_season2,
+          Sort.transfers_out_gradients,
+        ].includes(sort.sort)
+      ) {
+        setSort({
+          sort: getTransfersOutSort(),
+          sort_direction: sort.sort_direction,
+        });
+      }
     }
   }, [content]);
 
   useEffect(() => {
-    setSort({ sort: getBalanceSort(), sort_direction: sort.sort_direction });
+    if (sort.sort != Sort.total_balance) {
+      setSort(Sort.total_balance);
+    }
   }, [focus]);
 
   function getCardsHodled(lead: TDHMetrics) {
