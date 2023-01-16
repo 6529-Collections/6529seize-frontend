@@ -123,6 +123,13 @@ export default function Home() {
                   <Container className="no-padding">
                     <Row>
                       {nft.animation ? (
+                        <NFTImage
+                          nft={nft}
+                          animation={true}
+                          height={650}
+                          balance={nftBalance}
+                        />
+                      ) : (
                         <a href={`/the-memes/${nft.id}`}>
                           <NFTImage
                             nft={nft}
@@ -131,13 +138,6 @@ export default function Home() {
                             balance={nftBalance}
                           />
                         </a>
-                      ) : (
-                        <NFTImage
-                          nft={nft}
-                          animation={true}
-                          height={650}
-                          balance={nftBalance}
-                        />
                       )}
                     </Row>
                   </Container>
