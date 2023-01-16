@@ -47,6 +47,7 @@ export default function NFTImage(props: Props) {
           autoPlay
           muted
           controls
+          loop
           src={props.nft.animation}
           poster={props.nft.thumbnail}
           onError={({ currentTarget }) => {
