@@ -851,6 +851,7 @@ export default function Leaderboard(props: Props) {
                       <Dropdown.Menu>
                         {Object.values(OwnerTagFilter).map((tagFilter) => (
                           <Dropdown.Item
+                            key={OwnerTagFilter.MEMES_SETS_MINUS1}
                             onClick={() => setOwnerTagFilter(tagFilter)}>
                             {[
                               OwnerTagFilter.MEMES_SETS_MINUS1,
