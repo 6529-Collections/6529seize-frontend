@@ -45,7 +45,12 @@ export default function TheMemesPage() {
         <Container fluid className={styles.mainContainer}>
           <Row>
             <Col>
-              <Leaderboard page={1} pageSize={50} showMore={true} />
+              <Leaderboard
+                page={1}
+                pageSize={50}
+                showMore={true}
+                showLastTdh={true}
+              />
             </Col>
           </Row>
         </Container>

@@ -60,16 +60,13 @@
   margin-right: 15px;
 }
 
-.primaryTable {
-}
-
 .secondaryTableMargin {
   margin-left: 4%;
 }
 
 .secondaryTable {
   width: 48%;
-
+  margin-top: 15px;
   float: left;
 
   tr:not(:first-child) {
@@ -82,11 +79,18 @@
 }
 
 .primaryTable {
+  tr td {
+    width: calc(100% / 6);
+  }
   tr:not(:first-child) {
     border-bottom: 1px solid $dark-grey !important;
 
     td:not(:first-child) {
       text-align: right;
     }
+  }
+
+  tr:nth-child(2) {
+    border-bottom: none !important;
   }
 }

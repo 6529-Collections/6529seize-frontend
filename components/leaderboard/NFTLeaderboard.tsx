@@ -122,7 +122,7 @@ export default function NFTLeaderboard(props: Props) {
           <h1>COMMUNITY -</h1>
           <h1>&nbsp;CARD {props.nftId}</h1>
         </Col>
-        {lastTDH && (
+        {/* {lastTDH && (
           <Col className={`text-right ${styles.lastTDH}`}>
             * LAST TDH: {getDateDisplay(lastTDH.date)} BLOCK:{" "}
             <a
@@ -132,7 +132,7 @@ export default function NFTLeaderboard(props: Props) {
               {lastTDH.block}
             </a>
           </Col>
-        )}
+        )} */}
       </Row>
       {leaderboard && leaderboard.length > 0 && (
         <Row className={styles.scrollContainer}>
@@ -412,6 +412,12 @@ export default function NFTLeaderboard(props: Props) {
                               tags={{
                                 memesCardsSets: tags
                                   ? tags.memes_cards_sets
+                                  : 0,
+                                memesCardsSetS1: tags
+                                  ? tags.memes_cards_sets_szn1
+                                  : 0,
+                                memesCardsSetS2: tags
+                                  ? tags.memes_cards_sets_szn2
                                   : 0,
                                 memesBalance: tags ? tags.unique_memes : 0,
                                 gradientsBalance: tags

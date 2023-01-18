@@ -13,7 +13,6 @@
 .pageHeader {
   white-space: nowrap;
   h1 {
-    max-height: 45px;
     margin-bottom: 0px !important;
   }
 }
@@ -42,7 +41,7 @@
 }
 
 .tdhSub {
-  width: 10%;
+  width: 11%;
   text-align: center;
 }
 
@@ -52,10 +51,31 @@
   font-weight: lighter;
 }
 
+.tdhBoost {
+  font-size: 13px;
+  line-height: 13px;
+}
+
+@media only screen and (max-width: 1200px) {
+  .tdhBoost {
+    font-size: 11px;
+    line-height: 11px;
+  }
+}
+
 @media only screen and (max-width: 800px) {
   .viewAllLink {
     font-size: 12px !important;
   }
+
+  .tdhBoost {
+    font-size: 9px;
+    line-height: 9px;
+  }
+}
+
+.boolean {
+  height: $font-size;
 }
 
 .caret {
@@ -63,17 +83,27 @@
   cursor: pointer;
 }
 
+@media only screen and (max-width: 1200px) {
+  .boolean {
+    height: $font-smaller !important;
+  }
+
+  .caret {
+    height: 12px;
+  }
+}
+
+@media only screen and (max-width: 800px) {
+  .boolean {
+    height: $font-smallest !important;
+  }
+}
+
 .disabled {
   color: $lightest-grey;
   &:hover {
     color: white;
   }
-}
-
-.gap {
-  height: 8px;
-  // width: 8px;
-  background-color: transparent !important;
 }
 
 .leaderboardTable {
@@ -95,8 +125,19 @@
     line-height: 40px;
   }
 
-  tr:nth-child(even) {
+  thead tr {
+    background-color: transparent !important;
+  }
+
+  tr:nth-child(odd) {
     background-color: $almost-very-dark-grey;
+  }
+}
+
+@media only screen and (max-width: 800px) {
+  .hodler {
+    min-width: 200px;
+    white-space: break-spaces !important;
   }
 }
 
@@ -126,18 +167,10 @@
 .lastTDH {
   white-space: nowrap;
   color: $font-color-h;
-  line-height: 48px;
+  // line-height: 48px;
   font-size: smaller;
-  text-align: right;
   a {
     color: $font-color-h !important;
-  }
-}
-
-@media only screen and (max-width: 800px) {
-  .lastTDH {
-    text-align: left;
-    line-height: 26px;
   }
 }
 
@@ -148,11 +181,33 @@
 }
 
 .focusSwitchLabel {
+  white-space: nowrap;
   float: left;
   line-height: 48px;
-  margin-left: 60px;
-  font-size: larger;
-  font-weight: bolder;
+  // margin-left: 60px;
+  // font-size: larger;
+  // font-weight: bolder;
+  border: 2px solid white;
+  border-left: none;
+  padding-left: 10px;
+  padding-right: 10px;
+  cursor: pointer;
+  width: calc(100% / 3);
+  text-align: center;
+
+  &:first-of-type {
+    border: 2px solid white;
+  }
+}
+
+.focusSwitchLabelExtraPadding {
+  padding-left: 18px;
+  padding-right: 18px;
+}
+
+.focusSwitchLabelActive {
+  background-color: $font-color;
+  color: $bg-color-2;
 }
 
 .focusSwitch {
@@ -224,5 +279,15 @@
         margin-top: 0.5rem;
       }
     }
+  }
+}
+
+@media (min-width: 1400px) {
+  .lg-none-6529 {
+    display: none !important;
+  }
+
+  .lg-block-6529 {
+    display: block !important;
   }
 }
