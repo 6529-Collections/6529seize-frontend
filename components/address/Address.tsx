@@ -120,9 +120,6 @@ export default function Address(props: Props) {
           <br />
         </>
       )}
-      <span className={styles.breakTags}>
-        <br />
-      </span>
       {props.tags && (
         <span className={styles.noWrap}>
           {props.tags.memesCardsSets > 0 ? (
