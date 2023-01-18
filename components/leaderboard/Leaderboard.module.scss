@@ -111,6 +111,12 @@
     white-space: nowrap;
     align-items: center;
     vertical-align: middle;
+    span {
+      float: left;
+      line-height: 20px;
+      margin-top: 4px;
+      margin-bottom: 4px;
+    }
   }
 
   th {
