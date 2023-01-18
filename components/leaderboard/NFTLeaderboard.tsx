@@ -423,7 +423,7 @@ export default function NFTLeaderboard(props: Props) {
                                 gradientsBalance: tags
                                   ? tags.gradients_balance
                                   : 0,
-                                genesis: tags ? tags.genesis : false,
+                                genesis: tags ? tags.genesis : 0,
                               }}
                             />
                           </td>
