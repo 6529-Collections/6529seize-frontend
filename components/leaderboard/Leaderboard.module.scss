@@ -134,10 +134,15 @@
   }
 }
 
-@media only screen and (max-width: 800px) {
+@media only screen and (max-width: 1600px) {
   .hodler {
-    min-width: 200px;
     white-space: break-spaces !important;
+  }
+}
+
+@media only screen and (max-width: 1290px) {
+  .hodler {
+    min-width: 220px;
   }
 }
 
@@ -279,15 +284,5 @@
         margin-top: 0.5rem;
       }
     }
-  }
-}
-
-@media (min-width: 1400px) {
-  .lg-none-6529 {
-    display: none !important;
-  }
-
-  .lg-block-6529 {
-    display: block !important;
   }
 }
