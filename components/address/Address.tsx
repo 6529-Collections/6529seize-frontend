@@ -13,8 +13,10 @@ interface Props {
   resolveEns?: boolean;
   tags?: {
     memesCardsSets: number;
+    memesCardsSetS1: number;
+    memesCardsSetS2: number;
     memesBalance: number;
-    genesis: boolean;
+    genesis: number;
     gradientsBalance: number;
   };
   isUserPage?: boolean;
@@ -61,94 +63,102 @@ export default function Address(props: Props) {
   }
 
   return (
-    <span className={styles.addressWidget}>
-      <>
-        <span
-          className={
-            props.isUserPage
-              ? "d-flex justify-content-center align-items-center"
-              : ""
-          }>
-          {
-            <span className={styles.address}>
-              {props.disableLink && resolveAddress()}
-              {!props.disableLink && (
-                <a href={`/${props.address}`}>{resolveAddress()}</a>
-              )}
-            </span>
-          }
-          {!props.hideCopy &&
-            navigator.clipboard &&
-            (props.ens ? (
-              <Dropdown className={`${styles.copyDropdown} dropdown`}>
-                <Dropdown.Toggle>
-                  <FontAwesomeIcon
-                    icon="copy"
-                    className={`${styles.copy} ${
-                      isCopied ? styles.copyActive : ""
-                    }`}
-                  />
-                </Dropdown.Toggle>
-
-                <Dropdown.Menu>
-                  <Dropdown.Item
-                    className={styles.copyDropdownItem}
-                    onClick={() => copy(props.ens)}>
-                    {props.ens}
-                  </Dropdown.Item>
-                  <Dropdown.Item
-                    className={styles.copyDropdownItem}
-                    onClick={() => copy(props.address)}>
-                    {formatAddress(props.address as string)}
-                  </Dropdown.Item>
-                </Dropdown.Menu>
-              </Dropdown>
-            ) : (
-              <FontAwesomeIcon
-                icon="copy"
-                className={`${styles.copy} ${
-                  isCopied ? styles.copyActive : ""
-                }`}
-                onClick={() => copy(props.address)}
-              />
-            ))}
-        </span>
-        {props.isUserPage && props.ens && (
-          <>
-            <span className={styles.userPageAddress}>
-              {formatAddress(props.address as string)}
-            </span>
-            <br />
-          </>
-        )}
-        <span className={styles.breakTags}>
-          <br />
-        </span>
-        {props.tags && (
-          <span className={styles.noWrap}>
-            {props.tags.memesCardsSets > 0 ? (
-              <span className={styles.memesCardsSetsTag}>
-                {props.tags.memesCardsSets}x Memes Set
-                {props.tags.memesCardsSets > 1 ? `s` : ""}
-              </span>
-            ) : props.tags.memesBalance > 0 ? (
-              <span className={styles.memesTag}>
-                {props.tags.memesBalance}x Meme
-                {props.tags.memesBalance > 1 ? `s` : ""}
-                {props.tags.genesis ? ` (+Genesis)` : ""}
-              </span>
-            ) : (
-              ""
-            )}
-            {props.tags.gradientsBalance > 0 && (
-              <span className={styles.gradientsTag}>
-                {props.tags.gradientsBalance}x Gradient
-                {props.tags.gradientsBalance > 1 ? `s` : ""}
-              </span>
+    <>
+      <span
+        className={
+          props.isUserPage
+            ? "d-flex justify-content-center align-items-center"
+            : ""
+        }>
+        {
+          <span className={styles.address}>
+            {props.disableLink && resolveAddress()}
+            {!props.disableLink && (
+              <a href={`/${props.address}`}>{resolveAddress()}</a>
             )}
           </span>
-        )}
-      </>
-    </span>
+        }
+        {!props.hideCopy &&
+          navigator.clipboard &&
+          (props.ens ? (
+            <Dropdown className={`${styles.copyDropdown} dropdown`}>
+              <Dropdown.Toggle>
+                <FontAwesomeIcon
+                  icon="copy"
+                  className={`${styles.copy} ${
+                    isCopied ? styles.copyActive : ""
+                  }`}
+                />
+              </Dropdown.Toggle>
+
+              <Dropdown.Menu>
+                <Dropdown.Item
+                  className={styles.copyDropdownItem}
+                  onClick={() => copy(props.ens)}>
+                  {props.ens}
+                </Dropdown.Item>
+                <Dropdown.Item
+                  className={styles.copyDropdownItem}
+                  onClick={() => copy(props.address)}>
+                  {formatAddress(props.address as string)}
+                </Dropdown.Item>
+              </Dropdown.Menu>
+            </Dropdown>
+          ) : (
+            <FontAwesomeIcon
+              icon="copy"
+              className={`${styles.copy} ${isCopied ? styles.copyActive : ""}`}
+              onClick={() => copy(props.address)}
+            />
+          ))}
+      </span>
+      {props.isUserPage && props.ens && (
+        <>
+          <span className={styles.userPageAddress}>
+            {formatAddress(props.address as string)}
+          </span>
+          <br />
+        </>
+      )}
+      <span className={styles.breakTags}>
+        <br />
+      </span>
+      {props.tags && (
+        <span className={styles.noWrap}>
+          {props.tags.memesCardsSets > 0 ? (
+            <span className={styles.memesCardsSetsTag}>
+              {props.tags.memesCardsSets}x Memes Set
+              {props.tags.memesCardsSets > 1 ? `s` : ""}
+            </span>
+          ) : props.tags.memesBalance > 0 ? (
+            <span className={styles.memesTag}>
+              {props.tags.memesBalance}x Meme
+              {props.tags.memesBalance > 1 ? `s` : ""}
+              {props.tags.genesis > 0 ? ` (+Genesis)` : ""}
+            </span>
+          ) : (
+            ""
+          )}
+          {props.tags.memesCardsSetS1 > 0 && (
+            <span className={styles.memesCardsSetsS1Tag}>
+              {props.tags.memesCardsSetS1}x SZN1 Set
+              {props.tags.memesCardsSets > 1 ? `s` : ""}
+            </span>
+          )}
+          {props.tags.memesCardsSetS2 > 0 && (
+            <span className={styles.memesCardsSetsS2Tag}>
+              {props.tags.memesCardsSetS2}x SZN2 Set
+              {props.tags.memesCardsSets > 1 ? `s` : ""}
+            </span>
+          )}
+          {props.tags.gradientsBalance > 0 && (
+            <span className={styles.gradientsTag}>
+              {props.tags.gradientsBalance}x Gradient
+              {props.tags.gradientsBalance > 1 ? `s` : ""}
+            </span>
+          )}
+        </span>
+      )}
+    </>
   );
 }

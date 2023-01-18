@@ -25,7 +25,9 @@ export default function LatestActivityRow(props: Props) {
   return (
     <tr
       key={`${props.tr.from_address}-${props.tr.to_address}-${props.tr.transaction}-${props.tr.token_id}-latestactivity-row`}>
-      <td>{getDateDisplay(new Date(props.tr.transaction_date))}</td>
+      <td className="align-middle text-center">
+        {getDateDisplay(new Date(props.tr.transaction_date))}
+      </td>
       <td className="align-middle text-center">
         <FontAwesomeIcon
           className={
@@ -49,17 +51,15 @@ export default function LatestActivityRow(props: Props) {
           <>
             airdrop {props.tr.token_count}x{" "}
             {props.nft ? (
-              <Tippy content="Hello">
-                <img
-                  src={
-                    props.nft.thumbnail ? props.nft.thumbnail : props.nft.image
-                  }
-                  onError={({ currentTarget }) => {
-                    currentTarget.src = props.nft!.image;
-                  }}
-                  className={styles.nftImage}
-                />
-              </Tippy>
+              <img
+                src={
+                  props.nft.thumbnail ? props.nft.thumbnail : props.nft.image
+                }
+                onError={({ currentTarget }) => {
+                  currentTarget.src = props.nft!.image;
+                }}
+                className={styles.nftImage}
+              />
             ) : isMemesContract(props.tr.contract) ? (
               `Meme #${props.tr.token_id}`
             ) : isGradientsContract(props.tr.contract) ? (

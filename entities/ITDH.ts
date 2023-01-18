@@ -10,8 +10,12 @@ export interface TDH {
   boosted_tdh: number;
   tdh__raw: number;
   tdh_rank: number;
+  tdh_rank_memes: number;
+  tdh_rank_memes_szn1: number;
+  tdh_rank_memes_szn2: number;
+  tdh_rank_gradients: number;
   balance: number;
-  genesis: boolean;
+  genesis: number;
   memes_cards_sets: number;
   unique_memes: number;
   boosted_memes_tdh: number;
@@ -34,6 +38,10 @@ export interface TDH {
   gradients_tdh__raw: number;
   gradients: NftTDH[];
   gradients_ranks: NftRank[];
+  memes_cards_sets_minus1: number;
+  memes_cards_sets_minus2: number;
+  memes_cards_sets_szn1: number;
+  memes_cards_sets_szn2: number;
 }
 
 export interface TDHMetrics extends TDH {

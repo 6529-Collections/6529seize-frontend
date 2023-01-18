@@ -12,6 +12,7 @@ import {
   areEqualAddresses,
   formatAddress,
   getDateDisplay,
+  nextTdh,
   numberWithCommas,
 } from "../../helpers/Helpers";
 import {
@@ -84,6 +85,18 @@ export default function UserPage(props: Props) {
       return balance.balance;
     }
     return 0;
+  }
+
+  printNextTdhCountdown();
+
+  function printNextTdhCountdown() {
+    var tdhDiv1 = document.getElementById("next-tdh-div-1");
+
+    setInterval(function () {
+      if (tdhDiv1) {
+        tdhDiv1.innerHTML = nextTdh();
+      }
+    }, 1000);
   }
 
   useEffect(() => {
@@ -161,8 +174,8 @@ export default function UserPage(props: Props) {
     }
 
     if (user && router.isReady) {
-      const initialOwnedUrl = `${process.env.API_ENDPOINT}/api/owners?wallet=${user}`;
-      fetchOwned(initialOwnedUrl, []);
+      const initialOwnersUrl = `${process.env.API_ENDPOINT}/api/owners?wallet=${user}`;
+      fetchOwned(initialOwnersUrl, []);
     }
   }, [user, router.isReady]);
 
@@ -610,6 +623,8 @@ export default function UserPage(props: Props) {
                         ens={ownerENS}
                         tags={{
                           memesCardsSets: ownerTags.memes_cards_sets,
+                          memesCardsSetS1: ownerTags.memes_cards_sets_szn1,
+                          memesCardsSetS2: ownerTags.memes_cards_sets_szn2,
                           memesBalance: ownerTags.unique_memes,
                           gradientsBalance: ownerTags.gradients_balance,
                           genesis: ownerTags.genesis,
@@ -640,30 +655,100 @@ export default function UserPage(props: Props) {
                             <h4>TDH</h4>
                           </td>
                           {lastTDH && (
-                            <td className={`text-right ${styles.lastTDH}`}>
-                              LAST TDH:{" "}
-                              {`${getDateDisplay(new Date(lastTDH.date))}`} |
-                              BLOCK:{" "}
+                            <td
+                              className={`text-right ${styles.lastTDH}`}
+                              colSpan={5}>
+                              * TDH Block&nbsp;
                               <a
                                 href={`https://etherscan.io/block/${lastTDH.block}`}
                                 rel="noreferrer"
                                 target="_blank">
                                 {lastTDH.block}
                               </a>
+                              &nbsp;|&nbsp;Next Calculation&nbsp;
+                              <span id="next-tdh-div-1">{nextTdh()}</span>
                             </td>
                           )}
                         </tr>
                         <tr>
-                          <td>TDH</td>
+                          <td></td>
+                          <td>
+                            <b>Total</b>
+                          </td>
+                          <td>
+                            <b>Memes</b>
+                          </td>
+                          <td>
+                            <b>Memes SZN1</b>
+                          </td>
+                          <td>
+                            <b>Memes SZN2</b>
+                          </td>
+                          <td>
+                            <b>6529 Gradient</b>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td>
+                            <b>TDH</b>
+                          </td>
                           <td>{numberWithCommas(tdh.boosted_tdh)}</td>
+                          <td>
+                            {numberWithCommas(
+                              Math.round(tdh.boosted_memes_tdh)
+                            )}
+                          </td>
+                          <td>
+                            {numberWithCommas(
+                              Math.round(tdh.boosted_memes_tdh_season1)
+                            )}
+                          </td>
+                          <td>
+                            {numberWithCommas(
+                              Math.round(tdh.boosted_memes_tdh_season2)
+                            )}
+                          </td>
+                          <td>
+                            {numberWithCommas(
+                              Math.round(tdh.boosted_gradients_tdh)
+                            )}
+                          </td>
                         </tr>
                         <tr>
-                          <td>Rank</td>
-                          <td>#{numberWithCommas(tdh.tdh_rank)}</td>
-                        </tr>
-                        <tr>
-                          <td>Balance</td>
+                          <td>
+                            <b>Balance</b>
+                          </td>
                           <td>{numberWithCommas(tdh.balance)}</td>
+                          <td>{numberWithCommas(tdh.memes_balance)}</td>
+                          <td>{numberWithCommas(tdh.memes_balance_season1)}</td>
+                          <td>{numberWithCommas(tdh.memes_balance_season2)}</td>
+                          <td>{numberWithCommas(tdh.gradients_balance)}</td>
+                        </tr>
+                        <tr>
+                          <td>
+                            <b>Rank</b>
+                          </td>
+                          <td>#{numberWithCommas(tdh.tdh_rank)}</td>
+                          <td>
+                            {tdh.tdh_rank_memes > 0
+                              ? `#${numberWithCommas(tdh.tdh_rank_memes)}`
+                              : "-"}
+                          </td>
+                          <td>
+                            {tdh.tdh_rank_memes_szn1 > 0
+                              ? `#${numberWithCommas(tdh.tdh_rank_memes_szn1)}`
+                              : "-"}
+                          </td>
+                          <td>
+                            {tdh.tdh_rank_memes_szn2 > 0
+                              ? `#${numberWithCommas(tdh.tdh_rank_memes_szn2)}`
+                              : "-"}
+                          </td>
+                          <td>
+                            {tdh.tdh_rank_gradients > 0
+                              ? `#${numberWithCommas(tdh.tdh_rank_gradients)}`
+                              : "-"}
+                          </td>
                         </tr>
                       </tbody>
                     </Table>
@@ -675,25 +760,29 @@ export default function UserPage(props: Props) {
                           </td>
                         </tr>
                         <tr>
-                          <td>Purchases (ETH)</td>
+                          <td>Purchases</td>
                           <td>
-                            {numberWithCommas(
-                              Math.round(tdh.purchases_value * 100) / 100
-                            )}
+                            {tdh.purchases_count > 0
+                              ? `x${numberWithCommas(
+                                  tdh.purchases_count
+                                )} - ${numberWithCommas(
+                                  Math.round(tdh.purchases_value * 100) / 100
+                                )} eth`
+                              : "-"}
                           </td>
                         </tr>
                         <tr>
-                          <td>Purchases</td>
-                          <td>{numberWithCommas(tdh.purchases_count)}</td>
-                        </tr>
-                        <tr>
                           <td>Transfers In</td>
-                          <td>{numberWithCommas(tdh.transfers_in)}</td>
+                          <td>
+                            {tdh.transfers_in > 0
+                              ? `x${numberWithCommas(tdh.transfers_in)}`
+                              : "-"}
+                          </td>
                         </tr>
                       </tbody>
                     </Table>
                     <Table
-                      className={`${styles.secondaryTable} ${styles.secondaryTableMargin}`}>
+                      className={`${styles.secondaryTable} ${styles.secondaryTableMargin} pt-2`}>
                       <tbody>
                         <tr>
                           <td>
@@ -701,20 +790,24 @@ export default function UserPage(props: Props) {
                           </td>
                         </tr>
                         <tr>
-                          <td>Sales (ETH)</td>
+                          <td>Sales</td>
                           <td>
-                            {numberWithCommas(
-                              Math.round(tdh.sales_value * 100) / 100
-                            )}
+                            {tdh.sales_count > 0
+                              ? `x${numberWithCommas(
+                                  tdh.sales_count
+                                )} - ${numberWithCommas(
+                                  Math.round(tdh.sales_value * 100) / 100
+                                )} eth`
+                              : "-"}
                           </td>
                         </tr>
                         <tr>
-                          <td>Sales</td>
-                          <td>{numberWithCommas(tdh.sales_count)}</td>
-                        </tr>
-                        <tr>
                           <td>Transfers Out</td>
-                          <td>{numberWithCommas(tdh.transfers_out)}</td>
+                          <td>
+                            {tdh.transfers_out > 0
+                              ? `x${numberWithCommas(tdh.transfers_out)}`
+                              : "-"}
+                          </td>
                         </tr>
                       </tbody>
                     </Table>
