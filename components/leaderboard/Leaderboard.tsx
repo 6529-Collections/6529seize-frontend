@@ -5,7 +5,11 @@ import { TDHCalc, TDHMetrics } from "../../entities/ITDH";
 import styles from "./Leaderboard.module.scss";
 import dynamic from "next/dynamic";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { getDateDisplay, numberWithCommas } from "../../helpers/Helpers";
+import {
+  getDateDisplay,
+  nextTdh,
+  numberWithCommas,
+} from "../../helpers/Helpers";
 import Pagination from "../pagination/Pagination";
 import { SortDirection } from "../../entities/ISort";
 import { useRouter } from "next/router";
@@ -16,6 +20,7 @@ interface Props {
   page: number;
   pageSize: number;
   showMore?: boolean;
+  showLastTdh?: boolean;
 }
 
 enum Sort {
@@ -63,6 +68,11 @@ enum Sort {
   transfers_out_gradients = "transfers_out_gradients",
   boosted_memes_tdh_season1 = "boosted_memes_tdh_season1",
   boosted_memes_tdh_season2 = "boosted_memes_tdh_season2",
+  memes_cards_sets = "memes_cards_sets",
+  memes_cards_sets_szn1 = "memes_cards_sets_szn1",
+  memes_cards_sets_szn2 = "memes_cards_sets_szn2",
+  memes_cards_sets_minus1 = "memes_cards_sets_minus1",
+  memes_cards_sets_genesis = "genesis",
 }
 
 enum Content {
@@ -76,13 +86,17 @@ enum Content {
 enum OwnerTagFilter {
   ALL = "All",
   MEMES_SETS = "Meme Set",
-  GENESIS = "Meme Genesis",
+  MEMES_SETS_MINUS1 = "Meme Set -1",
+  MEMES_SETS_SZN1 = "SZN1 Set",
+  MEMES_SETS_SZN2 = "SZN2 Set",
+  GENESIS = "Genesis Set",
   GRADIENTS = "6529 Gradient",
 }
 
 enum Focus {
   TDH,
   INTERACTIONS,
+  SETS,
 }
 
 export default function Leaderboard(props: Props) {
@@ -107,11 +121,24 @@ export default function Leaderboard(props: Props) {
     !window.location.pathname.includes("community")
   );
 
+  if (props.showLastTdh) {
+    printNextTdhCountdown();
+  }
+
   async function fetchResults() {
     let tagFilter = "";
     switch (ownerTagFilter) {
       case OwnerTagFilter.MEMES_SETS:
         tagFilter = "&filter=memes_set";
+        break;
+      case OwnerTagFilter.MEMES_SETS_MINUS1:
+        tagFilter = "&filter=memes_set_minus1";
+        break;
+      case OwnerTagFilter.MEMES_SETS_SZN1:
+        tagFilter = "&filter=memes_set_szn1";
+        break;
+      case OwnerTagFilter.MEMES_SETS_SZN2:
+        tagFilter = "&filter=memes_set_szn2";
         break;
       case OwnerTagFilter.GENESIS:
         tagFilter = "&filter=memes_genesis";
@@ -132,14 +159,14 @@ export default function Leaderboard(props: Props) {
   }
 
   useEffect(() => {
-    if (sort && ownerTagFilter && router.isReady) {
+    if (sort && ownerTagFilter && router.isReady && content) {
       if (pageProps.page == 1) {
         fetchResults();
       } else {
         setPageProps({ ...pageProps, page: 1 });
       }
     }
-  }, [sort, ownerTagFilter, router.isReady]);
+  }, [sort, ownerTagFilter, router.isReady, content]);
 
   useEffect(() => {
     fetch(`${process.env.API_ENDPOINT}/api/blocks?page_size=${1}`)
@@ -276,15 +303,36 @@ export default function Leaderboard(props: Props) {
           sort_direction: sort.sort_direction,
         });
       }
+      if (
+        [
+          Sort.memes_cards_sets,
+          Sort.memes_cards_sets_szn1,
+          Sort.memes_cards_sets_szn2,
+        ].includes(sort.sort)
+      ) {
+        setSort({
+          sort: getSetsSort(),
+          sort_direction: sort.sort_direction,
+        });
+      }
     }
   }, [content]);
 
   useEffect(() => {
-    if (sort.sort != Sort.total_balance) {
-      setSort({
-        sort: Sort.total_balance,
-        sort_direction: sort.sort_direction,
-      });
+    if (focus == Focus.SETS) {
+      if (sort.sort != Sort.memes_cards_sets) {
+        setSort({
+          sort: Sort.memes_cards_sets,
+          sort_direction: sort.sort_direction,
+        });
+      }
+    } else {
+      if (sort.sort != getBalanceSort()) {
+        setSort({
+          sort: getBalanceSort(),
+          sort_direction: sort.sort_direction,
+        });
+      }
     }
   }, [focus]);
 
@@ -389,10 +437,9 @@ export default function Leaderboard(props: Props) {
     }
 
     if (trf > 0) {
-      return `x${trf}`;
-    } else {
-      return "-";
+      return `x${numberWithCommas(trf)}`;
     }
+    return "-";
   }
 
   function getTransfersOut(lead: TDHMetrics) {
@@ -416,22 +463,40 @@ export default function Leaderboard(props: Props) {
     }
 
     if (trf > 0) {
-      return `x${trf}`;
-    } else {
-      return "-";
+      return `x${numberWithCommas(trf)}`;
     }
+    return "-";
+  }
+
+  function getSets(lead: TDHMetrics) {
+    let sets;
+    switch (content) {
+      case Content.MEMES1:
+        sets = lead.memes_cards_sets_szn1;
+        break;
+      case Content.MEMES2:
+        sets = lead.memes_cards_sets_szn2;
+        break;
+      default:
+        sets = lead.memes_cards_sets;
+        break;
+    }
+    if (sets > 0) {
+      return `x${numberWithCommas(sets)}`;
+    }
+    return "-";
   }
 
   function getDaysHodledTdhBoosted(lead: TDHMetrics) {
     switch (content) {
       case Content.MEMES:
-        return lead.memes_tdh * lead.boost;
+        return lead.boosted_memes_tdh;
       case Content.MEMES1:
-        return lead.memes_tdh_season1 * lead.boost;
+        return lead.boosted_memes_tdh_season1;
       case Content.MEMES2:
-        return lead.memes_tdh_season2 * lead.boost;
+        return lead.boosted_memes_tdh_season2;
       case Content.GRADIENTS:
-        return lead.gradients_tdh * lead.boost;
+        return lead.boosted_gradients_tdh;
       default:
         return lead.boosted_tdh;
     }
@@ -479,6 +544,17 @@ export default function Leaderboard(props: Props) {
         return Sort.gradients_balance;
       default:
         return Sort.total_balance;
+    }
+  }
+
+  function getSetsSort() {
+    switch (content) {
+      case Content.MEMES1:
+        return Sort.memes_cards_sets_szn1;
+      case Content.MEMES2:
+        return Sort.memes_cards_sets_szn2;
+      default:
+        return Sort.memes_cards_sets;
     }
   }
 
@@ -572,6 +648,20 @@ export default function Leaderboard(props: Props) {
     }
   }
 
+  function printNextTdhCountdown() {
+    var tdhDiv1 = document.getElementById("next-tdh-div-1");
+    var tdhDiv2 = document.getElementById("next-tdh-div-2");
+
+    setInterval(function () {
+      if (tdhDiv1) {
+        tdhDiv1.innerHTML = nextTdh();
+      }
+      if (tdhDiv2) {
+        tdhDiv2.innerHTML = nextTdh();
+      }
+    }, 1000);
+  }
+
   function getTransfersOutSort() {
     switch (content) {
       case Content.MEMES:
@@ -587,10 +677,68 @@ export default function Leaderboard(props: Props) {
     }
   }
 
+  function printCollectionsDropdown() {
+    return (
+      <Dropdown className={styles.contentDropdown} drop={"down-centered"}>
+        <Dropdown.Toggle>Collection: {content}</Dropdown.Toggle>
+        <Dropdown.Menu>
+          <Dropdown.Item onClick={() => setContent(Content.ALL)}>
+            {Content.ALL}
+          </Dropdown.Item>
+          <Dropdown.Item onClick={() => setContent(Content.MEMES)}>
+            {Content.MEMES}
+          </Dropdown.Item>
+          <Dropdown.Item onClick={() => setContent(Content.MEMES1)}>
+            &nbsp;&nbsp;{Content.MEMES1}
+          </Dropdown.Item>
+          <Dropdown.Item onClick={() => setContent(Content.MEMES2)}>
+            &nbsp;&nbsp;{Content.MEMES2}
+          </Dropdown.Item>
+          <Dropdown.Item onClick={() => setContent(Content.GRADIENTS)}>
+            {Content.GRADIENTS}
+          </Dropdown.Item>
+        </Dropdown.Menu>
+      </Dropdown>
+    );
+  }
+
+  function printInteractionsWidget() {
+    return (
+      <>
+        <span
+          onClick={() => setFocus(Focus.TDH)}
+          className={`${styles.focusSwitchLabel} ${
+            focus == Focus.TDH && styles.focusSwitchLabelActive
+          }`}>
+          Cards HODLed
+        </span>
+        <span
+          onClick={() => setFocus(Focus.INTERACTIONS)}
+          className={`${styles.focusSwitchLabel} ${
+            styles.focusSwitchLabelExtraPadding
+          } ${focus == Focus.INTERACTIONS && styles.focusSwitchLabelActive}`}>
+          Interactions
+        </span>
+        <span
+          onClick={() => setFocus(Focus.SETS)}
+          className={`${styles.focusSwitchLabel} ${
+            styles.focusSwitchLabelExtraPadding
+          } ${focus == Focus.SETS && styles.focusSwitchLabelActive}`}>
+          Sets
+        </span>
+      </>
+    );
+  }
+
   return (
     <Container className={`no-padding pt-4`} id={`leaderboard-page`}>
       <Row>
-        <Col className={styles.pageHeader}>
+        <Col
+          className={`${styles.pageHeader} d-flex align-items-center`}
+          xs={{ span: 6 }}
+          sm={{ span: 6 }}
+          md={{ span: 6 }}
+          lg={{ span: 3 }}>
           <h1>
             COMMUNITY{" "}
             {showViewAll && (
@@ -601,62 +749,72 @@ export default function Leaderboard(props: Props) {
           </h1>
         </Col>
         {lastTDH && (
-          <Col className="d-flex justify-content-center">
-            <Dropdown className={styles.contentDropdown} drop={"down-centered"}>
-              <Dropdown.Toggle>Collection: {content}</Dropdown.Toggle>
-              <Dropdown.Menu>
-                <Dropdown.Item onClick={() => setContent(Content.ALL)}>
-                  {Content.ALL}
-                </Dropdown.Item>
-                <Dropdown.Item onClick={() => setContent(Content.MEMES)}>
-                  {Content.MEMES}
-                </Dropdown.Item>
-                <Dropdown.Item onClick={() => setContent(Content.MEMES1)}>
-                  &nbsp;&nbsp;{Content.MEMES1}
-                </Dropdown.Item>
-                <Dropdown.Item onClick={() => setContent(Content.MEMES2)}>
-                  &nbsp;&nbsp;{Content.MEMES2}
-                </Dropdown.Item>
-                <Dropdown.Item onClick={() => setContent(Content.GRADIENTS)}>
-                  {Content.GRADIENTS}
-                </Dropdown.Item>
-              </Dropdown.Menu>
-            </Dropdown>
-            <span className={styles.focusSwitchLabel}>TDH</span>
-            <Form.Check
-              type="switch"
-              className={styles.focusSwitch}
-              label={`Interactions`}
-              checked={focus == Focus.INTERACTIONS}
-              onChange={() => {
-                if (focus == Focus.TDH) {
-                  setFocus(Focus.INTERACTIONS);
-                }
-                if (focus == Focus.INTERACTIONS) {
-                  setFocus(Focus.TDH);
-                }
-              }}
-            />
-          </Col>
+          <>
+            <Col
+              lg={3}
+              className="d-flex justify-content-center d-none d-lg-block">
+              {printCollectionsDropdown()}
+            </Col>
+            <Col
+              className="d-flex justify-content-center d-none d-lg-block"
+              lg={6}>
+              {printInteractionsWidget()}
+            </Col>
+          </>
         )}
-        {lastTDH && (
-          <Col className={`${styles.lastTDH}`}>
-            * LAST TDH: {getDateDisplay(lastTDH.date)} BLOCK:{" "}
+        {lastTDH && props.showLastTdh && (
+          <Col
+            className={`${styles.lastTDH} d-flex align-items-center justify-content-end d-lg-none`}
+            xs={{ span: 6 }}
+            sm={{ span: 6 }}
+            md={{ span: 6 }}
+            lg={{ span: 6 }}>
+            * TDH Block&nbsp;
             <a
               href={`https://etherscan.io/block/${lastTDH.block}`}
               rel="noreferrer"
               target="_blank">
               {lastTDH.block}
             </a>
+            &nbsp;|&nbsp;Next Calculation&nbsp;
+            <span id="next-tdh-div-1">{nextTdh()}</span>
           </Col>
         )}
       </Row>
-      <Row className={`${styles.scrollContainer} pt-3`}>
+      <Row className="pt-1 d-none d-lg-block">
+        {lastTDH && props.showLastTdh && (
+          <Col
+            className={`${styles.lastTDH} d-flex align-items-center justify-content-end`}
+            xs={{ span: 12 }}
+            sm={{ span: 12 }}
+            md={{ span: 12 }}
+            lg={{ span: 12 }}>
+            * TDH Block&nbsp;
+            <a
+              href={`https://etherscan.io/block/${lastTDH.block}`}
+              rel="noreferrer"
+              target="_blank">
+              {lastTDH.block}
+            </a>
+            &nbsp;|&nbsp;Next Calculation&nbsp;
+            <span id="next-tdh-div-2">{nextTdh()}</span>
+          </Col>
+        )}
+      </Row>
+      <Row className="d-lg-none">
+        <Col md={4} className="d-flex justify-content-center">
+          {printCollectionsDropdown()}
+        </Col>
+        <Col md={8} className="d-flex justify-content-center">
+          {printInteractionsWidget()}
+        </Col>
+      </Row>
+      <Row className={`${styles.scrollContainer}`}>
         <Col>
           {leaderboard && leaderboard.length > 0 && (
             <Table bordered={false} className={styles.leaderboardTable}>
               <thead>
-                <tr>
+                {/* <tr>
                   <th className={styles.rank}></th>
                   <th className={styles.hodler}></th>
                   <th className={styles.gap}></th>
@@ -680,8 +838,7 @@ export default function Leaderboard(props: Props) {
                       <b>Days HODLed (TDH)</b>
                     </th>
                   )}
-                </tr>
-                <tr className={styles.gap}></tr>
+                </tr> */}
                 <tr>
                   <th className={styles.rank}>Rank</th>
                   <th className={styles.hodler}>
@@ -692,70 +849,63 @@ export default function Leaderboard(props: Props) {
                         HODLers: {ownerTagFilter}
                       </Dropdown.Toggle>
                       <Dropdown.Menu>
-                        <Dropdown.Item
-                          onClick={() => setOwnerTagFilter(OwnerTagFilter.ALL)}>
-                          {OwnerTagFilter.ALL}
-                        </Dropdown.Item>
-                        <Dropdown.Item
-                          onClick={() =>
-                            setOwnerTagFilter(OwnerTagFilter.MEMES_SETS)
-                          }>
-                          {OwnerTagFilter.MEMES_SETS}
-                        </Dropdown.Item>
-                        <Dropdown.Item
-                          onClick={() =>
-                            setOwnerTagFilter(OwnerTagFilter.GENESIS)
-                          }>
-                          {OwnerTagFilter.GENESIS}
-                        </Dropdown.Item>
-                        <Dropdown.Item
-                          onClick={() =>
-                            setOwnerTagFilter(OwnerTagFilter.GRADIENTS)
-                          }>
-                          {OwnerTagFilter.GRADIENTS}
-                        </Dropdown.Item>
+                        {Object.values(OwnerTagFilter).map((tagFilter) => (
+                          <Dropdown.Item
+                            onClick={() => setOwnerTagFilter(tagFilter)}>
+                            {[
+                              OwnerTagFilter.MEMES_SETS_MINUS1,
+                              OwnerTagFilter.MEMES_SETS_SZN1,
+                              OwnerTagFilter.MEMES_SETS_SZN2,
+                              OwnerTagFilter.GENESIS,
+                            ].includes(tagFilter) ? (
+                              <>&nbsp;&nbsp;{tagFilter}</>
+                            ) : (
+                              tagFilter
+                            )}
+                          </Dropdown.Item>
+                        ))}
                       </Dropdown.Menu>
                     </Dropdown>
                   </th>
-                  <th className={styles.gap}></th>
-                  <th className={styles.tdhSub}>
-                    <span className="d-flex align-items-center justify-content-center">
-                      {content}&nbsp;
-                      <span className="d-flex flex-column">
-                        <FontAwesomeIcon
-                          icon="square-caret-up"
-                          onClick={() =>
-                            setSort({
-                              sort: getBalanceSort(),
-                              sort_direction: SortDirection.ASC,
-                            })
-                          }
-                          className={`${styles.caret} ${
-                            sort.sort_direction != SortDirection.ASC ||
-                            sort.sort != getBalanceSort()
-                              ? styles.disabled
-                              : ""
-                          }`}
-                        />
-                        <FontAwesomeIcon
-                          icon="square-caret-down"
-                          onClick={() =>
-                            setSort({
-                              sort: getBalanceSort(),
-                              sort_direction: SortDirection.DESC,
-                            })
-                          }
-                          className={`${styles.caret} ${
-                            sort.sort_direction != SortDirection.DESC ||
-                            sort.sort != getBalanceSort()
-                              ? styles.disabled
-                              : ""
-                          }`}
-                        />
+                  {(focus == Focus.TDH || focus == Focus.INTERACTIONS) && (
+                    <th className={styles.tdhSub}>
+                      <span className="d-flex align-items-center justify-content-center">
+                        Cards HODLed&nbsp;
+                        <span className="d-flex flex-column">
+                          <FontAwesomeIcon
+                            icon="square-caret-up"
+                            onClick={() =>
+                              setSort({
+                                sort: getBalanceSort(),
+                                sort_direction: SortDirection.ASC,
+                              })
+                            }
+                            className={`${styles.caret} ${
+                              sort.sort_direction != SortDirection.ASC ||
+                              sort.sort != getBalanceSort()
+                                ? styles.disabled
+                                : ""
+                            }`}
+                          />
+                          <FontAwesomeIcon
+                            icon="square-caret-down"
+                            onClick={() =>
+                              setSort({
+                                sort: getBalanceSort(),
+                                sort_direction: SortDirection.DESC,
+                              })
+                            }
+                            className={`${styles.caret} ${
+                              sort.sort_direction != SortDirection.DESC ||
+                              sort.sort != getBalanceSort()
+                                ? styles.disabled
+                                : ""
+                            }`}
+                          />
+                        </span>
                       </span>
-                    </span>
-                  </th>
-                  <th className={styles.gap}></th>
+                    </th>
+                  )}
                   {focus == Focus.INTERACTIONS && (
                     <>
                       <th className={styles.tdhSub}>
@@ -912,6 +1062,48 @@ export default function Leaderboard(props: Props) {
                     <>
                       <th className={styles.tdhSub}>
                         <span className="d-flex align-items-center justify-content-center">
+                          {content == Content.MEMES1
+                            ? "SZN1"
+                            : content == Content.MEMES2
+                            ? "SZN2"
+                            : "Meme"}{" "}
+                          Sets&nbsp;
+                          <span className="d-flex flex-column">
+                            <FontAwesomeIcon
+                              icon="square-caret-up"
+                              onClick={() =>
+                                setSort({
+                                  sort: getSetsSort(),
+                                  sort_direction: SortDirection.ASC,
+                                })
+                              }
+                              className={`${styles.caret} ${
+                                sort.sort_direction != SortDirection.ASC ||
+                                sort.sort != getSetsSort()
+                                  ? styles.disabled
+                                  : ""
+                              }`}
+                            />
+                            <FontAwesomeIcon
+                              icon="square-caret-down"
+                              onClick={() =>
+                                setSort({
+                                  sort: getSetsSort(),
+                                  sort_direction: SortDirection.DESC,
+                                })
+                              }
+                              className={`${styles.caret} ${
+                                sort.sort_direction != SortDirection.DESC ||
+                                sort.sort != getSetsSort()
+                                  ? styles.disabled
+                                  : ""
+                              }`}
+                            />
+                          </span>
+                        </span>
+                      </th>
+                      <th className={styles.tdhSub}>
+                        <span className="d-flex align-items-center justify-content-center">
                           TDH&nbsp;
                           <span className="d-flex flex-column">
                             <FontAwesomeIcon
@@ -949,12 +1141,7 @@ export default function Leaderboard(props: Props) {
                       </th>
                       <th className={styles.tdhSub}>
                         <span className="d-flex align-items-center justify-content-center">
-                          Boost&nbsp;
-                        </span>
-                      </th>
-                      <th className={styles.tdhSub}>
-                        <span className="d-flex align-items-center justify-content-center">
-                          Unboosted&nbsp;
+                          Unboosted TDH&nbsp;
                           <span className="d-flex flex-column">
                             <FontAwesomeIcon
                               icon="square-caret-up"
@@ -991,7 +1178,7 @@ export default function Leaderboard(props: Props) {
                       </th>
                       <th className={styles.tdhSub}>
                         <span className="d-flex align-items-center justify-content-center">
-                          Unweighted&nbsp;
+                          Unweighted TDH&nbsp;
                           <span className="d-flex flex-column">
                             <FontAwesomeIcon
                               icon="square-caret-up"
@@ -1028,10 +1215,198 @@ export default function Leaderboard(props: Props) {
                       </th>
                     </>
                   )}
+                  {focus == Focus.SETS && (
+                    <>
+                      <th className={styles.tdhSub}>
+                        <span className="d-flex align-items-center justify-content-center">
+                          Meme Sets&nbsp;
+                          <span className="d-flex flex-column">
+                            <FontAwesomeIcon
+                              icon="square-caret-up"
+                              onClick={() =>
+                                setSort({
+                                  sort: Sort.memes_cards_sets,
+                                  sort_direction: SortDirection.ASC,
+                                })
+                              }
+                              className={`${styles.caret} ${
+                                sort.sort_direction != SortDirection.ASC ||
+                                sort.sort != Sort.memes_cards_sets
+                                  ? styles.disabled
+                                  : ""
+                              }`}
+                            />
+                            <FontAwesomeIcon
+                              icon="square-caret-down"
+                              onClick={() =>
+                                setSort({
+                                  sort: Sort.memes_cards_sets,
+                                  sort_direction: SortDirection.DESC,
+                                })
+                              }
+                              className={`${styles.caret} ${
+                                sort.sort_direction != SortDirection.DESC ||
+                                sort.sort != Sort.memes_cards_sets
+                                  ? styles.disabled
+                                  : ""
+                              }`}
+                            />
+                          </span>
+                        </span>
+                      </th>
+                      <th className={styles.tdhSub}>
+                        <span className="d-flex align-items-center justify-content-center">
+                          Meme Sets -1&nbsp;
+                          <span className="d-flex flex-column">
+                            <FontAwesomeIcon
+                              icon="square-caret-up"
+                              onClick={() =>
+                                setSort({
+                                  sort: Sort.memes_cards_sets_minus1,
+                                  sort_direction: SortDirection.ASC,
+                                })
+                              }
+                              className={`${styles.caret} ${
+                                sort.sort_direction != SortDirection.ASC ||
+                                sort.sort != Sort.memes_cards_sets_minus1
+                                  ? styles.disabled
+                                  : ""
+                              }`}
+                            />
+                            <FontAwesomeIcon
+                              icon="square-caret-down"
+                              onClick={() =>
+                                setSort({
+                                  sort: Sort.memes_cards_sets_minus1,
+                                  sort_direction: SortDirection.DESC,
+                                })
+                              }
+                              className={`${styles.caret} ${
+                                sort.sort_direction != SortDirection.DESC ||
+                                sort.sort != Sort.memes_cards_sets_minus1
+                                  ? styles.disabled
+                                  : ""
+                              }`}
+                            />
+                          </span>
+                        </span>
+                      </th>
+                      <th className={styles.tdhSub}>
+                        <span className="d-flex align-items-center justify-content-center">
+                          Meme SZN1 Sets&nbsp;
+                          <span className="d-flex flex-column">
+                            <FontAwesomeIcon
+                              icon="square-caret-up"
+                              onClick={() =>
+                                setSort({
+                                  sort: Sort.memes_cards_sets_szn1,
+                                  sort_direction: SortDirection.ASC,
+                                })
+                              }
+                              className={`${styles.caret} ${
+                                sort.sort_direction != SortDirection.ASC ||
+                                sort.sort != Sort.memes_cards_sets_szn1
+                                  ? styles.disabled
+                                  : ""
+                              }`}
+                            />
+                            <FontAwesomeIcon
+                              icon="square-caret-down"
+                              onClick={() =>
+                                setSort({
+                                  sort: Sort.memes_cards_sets_szn1,
+                                  sort_direction: SortDirection.DESC,
+                                })
+                              }
+                              className={`${styles.caret} ${
+                                sort.sort_direction != SortDirection.DESC ||
+                                sort.sort != Sort.memes_cards_sets_szn1
+                                  ? styles.disabled
+                                  : ""
+                              }`}
+                            />
+                          </span>
+                        </span>
+                      </th>
+                      <th className={styles.tdhSub}>
+                        <span className="d-flex align-items-center justify-content-center">
+                          Meme SZN2 Sets&nbsp;
+                          <span className="d-flex flex-column">
+                            <FontAwesomeIcon
+                              icon="square-caret-up"
+                              onClick={() =>
+                                setSort({
+                                  sort: Sort.memes_cards_sets_szn2,
+                                  sort_direction: SortDirection.ASC,
+                                })
+                              }
+                              className={`${styles.caret} ${
+                                sort.sort_direction != SortDirection.ASC ||
+                                sort.sort != Sort.memes_cards_sets_szn2
+                                  ? styles.disabled
+                                  : ""
+                              }`}
+                            />
+                            <FontAwesomeIcon
+                              icon="square-caret-down"
+                              onClick={() =>
+                                setSort({
+                                  sort: Sort.memes_cards_sets_szn2,
+                                  sort_direction: SortDirection.DESC,
+                                })
+                              }
+                              className={`${styles.caret} ${
+                                sort.sort_direction != SortDirection.DESC ||
+                                sort.sort != Sort.memes_cards_sets_szn2
+                                  ? styles.disabled
+                                  : ""
+                              }`}
+                            />
+                          </span>
+                        </span>
+                      </th>
+                      <th className={styles.tdhSub}>
+                        <span className="d-flex align-items-center justify-content-center">
+                          Genesis Sets&nbsp;
+                          <span className="d-flex flex-column">
+                            <FontAwesomeIcon
+                              icon="square-caret-up"
+                              onClick={() =>
+                                setSort({
+                                  sort: Sort.memes_cards_sets_genesis,
+                                  sort_direction: SortDirection.ASC,
+                                })
+                              }
+                              className={`${styles.caret} ${
+                                sort.sort_direction != SortDirection.ASC ||
+                                sort.sort != Sort.memes_cards_sets_genesis
+                                  ? styles.disabled
+                                  : ""
+                              }`}
+                            />
+                            <FontAwesomeIcon
+                              icon="square-caret-down"
+                              onClick={() =>
+                                setSort({
+                                  sort: Sort.memes_cards_sets_genesis,
+                                  sort_direction: SortDirection.DESC,
+                                })
+                              }
+                              className={`${styles.caret} ${
+                                sort.sort_direction != SortDirection.DESC ||
+                                sort.sort != Sort.memes_cards_sets_genesis
+                                  ? styles.disabled
+                                  : ""
+                              }`}
+                            />
+                          </span>
+                        </span>
+                      </th>
+                    </>
+                  )}
                 </tr>
               </thead>
               <tbody>
-                <tr className={styles.gap}></tr>
                 {leaderboard &&
                   leaderboard.map((lead, index) => {
                     return (
@@ -1048,17 +1423,20 @@ export default function Leaderboard(props: Props) {
                             ens={lead.wallet_display}
                             tags={{
                               memesCardsSets: lead.memes_cards_sets,
+                              memesCardsSetS1: lead.memes_cards_sets_szn1,
+                              memesCardsSetS2: lead.memes_cards_sets_szn2,
                               memesBalance: lead.unique_memes,
                               gradientsBalance: lead.gradients_balance,
                               genesis: lead.genesis,
                             }}
                           />
                         </td>
-                        <td className={styles.gap}></td>
-                        <td className={styles.tdhSub}>
-                          {numberWithCommas(getCardsHodled(lead))}
-                        </td>
-                        <td className={styles.gap}></td>
+                        {(focus == Focus.TDH ||
+                          focus == Focus.INTERACTIONS) && (
+                          <td className={styles.tdhSub}>
+                            {numberWithCommas(getCardsHodled(lead))}
+                          </td>
+                        )}
                         {focus == Focus.INTERACTIONS && (
                           <>
                             <td className={styles.tdhSub}>
@@ -1075,17 +1453,59 @@ export default function Leaderboard(props: Props) {
                         )}
                         {focus == Focus.TDH && (
                           <>
+                            <td className={styles.tdhSub}>{getSets(lead)}</td>
                             <td className={styles.tdhSub}>
                               {numberWithCommas(
                                 Math.round(getDaysHodledTdhBoosted(lead))
                               )}
                             </td>
-                            <td className={styles.tdhSub}>x{lead.boost}</td>
                             <td className={styles.tdhSub}>
-                              {numberWithCommas(getDaysHodledTdh(lead))}
+                              {numberWithCommas(
+                                Math.round(getDaysHodledTdh(lead))
+                              )}
+                              <span className={styles.tdhBoost}>
+                                &nbsp;(x{lead.boost})
+                              </span>
                             </td>
                             <td className={styles.tdhSub}>
-                              {numberWithCommas(getDaysHodledTdhRaw(lead))}
+                              {numberWithCommas(
+                                Math.round(getDaysHodledTdhRaw(lead))
+                              )}
+                            </td>
+                          </>
+                        )}
+                        {focus == Focus.SETS && (
+                          <>
+                            <td className={styles.tdhSub}>
+                              {lead.memes_cards_sets > 0
+                                ? `x${numberWithCommas(lead.memes_cards_sets)}`
+                                : "-"}
+                            </td>
+                            <td className={styles.tdhSub}>
+                              {lead.memes_cards_sets_minus1 > 0
+                                ? `x${numberWithCommas(
+                                    lead.memes_cards_sets_minus1
+                                  )}`
+                                : "-"}
+                            </td>
+                            <td className={styles.tdhSub}>
+                              {lead.memes_cards_sets_szn1 > 0
+                                ? `x${numberWithCommas(
+                                    lead.memes_cards_sets_szn1
+                                  )}`
+                                : "-"}
+                            </td>
+                            <td className={styles.tdhSub}>
+                              {lead.memes_cards_sets_szn2 > 0
+                                ? `x${numberWithCommas(
+                                    lead.memes_cards_sets_szn2
+                                  )}`
+                                : "-"}
+                            </td>
+                            <td className={styles.tdhSub}>
+                              {lead.genesis > 0
+                                ? `x${numberWithCommas(lead.genesis)}`
+                                : "-"}
                             </td>
                           </>
                         )}
