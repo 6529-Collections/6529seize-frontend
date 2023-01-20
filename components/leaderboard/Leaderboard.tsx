@@ -46,12 +46,21 @@ enum Sort {
   szn2_balance = "memes_balance_season2",
   gradients_balance = "gradients_balance",
   purchases_value = "purchases_value",
+  purchases_count = "purchases_count",
   sales_value = "sales_value",
   sales_count = "sales_count",
+  purchases_count_memes = "purchases_count_memes",
+  purchases_count_memes_season1 = "purchases_count_memes_season1",
+  purchases_count_memes_season2 = "purchases_count_memes_season2",
+  purchases_count_gradients = "purchases_count_gradients",
   purchases_value_memes = "purchases_value_memes",
   purchases_value_memes_season1 = "purchases_value_memes_season1",
   purchases_value_memes_season2 = "purchases_value_memes_season2",
   purchases_value_gradients = "purchases_value_gradients",
+  sales_count_memes = "sales_count_memes",
+  sales_count_memes_season1 = "sales_count_memes_season1",
+  sales_count_memes_season2 = "sales_count_memes_season2",
+  sales_count_gradients = "sales_count_gradients",
   sales_value_memes = "sales_value_memes",
   sales_value_memes_season1 = "sales_value_memes_season1",
   sales_value_memes_season2 = "sales_value_memes_season2",
@@ -72,7 +81,9 @@ enum Sort {
   memes_cards_sets_szn1 = "memes_cards_sets_szn1",
   memes_cards_sets_szn2 = "memes_cards_sets_szn2",
   memes_cards_sets_minus1 = "memes_cards_sets_minus1",
+  memes_cards_sets_minus2 = "memes_cards_sets_minus2",
   memes_cards_sets_genesis = "genesis",
+  unique_memes = "unique_memes",
 }
 
 enum Content {
@@ -94,9 +105,9 @@ enum OwnerTagFilter {
 }
 
 enum Focus {
-  TDH,
-  INTERACTIONS,
-  SETS,
+  TDH = "Cards HODLed",
+  INTERACTIONS = "Interactions",
+  SETS = "Sets",
 }
 
 export default function Leaderboard(props: Props) {
@@ -257,7 +268,35 @@ export default function Leaderboard(props: Props) {
         ].includes(sort.sort)
       ) {
         setSort({
-          sort: getPuchasesSort(),
+          sort: getPurchasesvalueSort(),
+          sort_direction: sort.sort_direction,
+        });
+      }
+      if (
+        [
+          Sort.purchases_count,
+          Sort.purchases_count_memes,
+          Sort.purchases_count_memes_season1,
+          Sort.purchases_count_memes_season2,
+          Sort.purchases_count_gradients,
+        ].includes(sort.sort)
+      ) {
+        setSort({
+          sort: getPurchasesCountSort(),
+          sort_direction: sort.sort_direction,
+        });
+      }
+      if (
+        [
+          Sort.sales_count,
+          Sort.sales_count_memes,
+          Sort.sales_count_memes_season1,
+          Sort.sales_count_memes_season2,
+          Sort.sales_count_gradients,
+        ].includes(sort.sort)
+      ) {
+        setSort({
+          sort: getSalesCountSort(),
           sort_direction: sort.sort_direction,
         });
       }
@@ -271,7 +310,7 @@ export default function Leaderboard(props: Props) {
         ].includes(sort.sort)
       ) {
         setSort({
-          sort: getSalesSort(),
+          sort: getSalesValueSort(),
           sort_direction: sort.sort_direction,
         });
       }
@@ -319,17 +358,26 @@ export default function Leaderboard(props: Props) {
   }, [content]);
 
   useEffect(() => {
+    if (focus == Focus.TDH) {
+      if (sort.sort != getBalanceSort()) {
+        setSort({
+          sort: getBalanceSort(),
+          sort_direction: sort.sort_direction,
+        });
+      }
+    }
+    if (focus == Focus.INTERACTIONS) {
+      if (sort.sort != getPurchasesCountSort()) {
+        setSort({
+          sort: getPurchasesCountSort(),
+          sort_direction: sort.sort_direction,
+        });
+      }
+    }
     if (focus == Focus.SETS) {
       if (sort.sort != Sort.memes_cards_sets) {
         setSort({
           sort: Sort.memes_cards_sets,
-          sort_direction: sort.sort_direction,
-        });
-      }
-    } else {
-      if (sort.sort != getBalanceSort()) {
-        setSort({
-          sort: getBalanceSort(),
           sort_direction: sort.sort_direction,
         });
       }
@@ -351,67 +399,102 @@ export default function Leaderboard(props: Props) {
     }
   }
 
-  function getPurchases(lead: TDHMetrics) {
-    let value = 0;
+  function getPurchasesCount(lead: TDHMetrics) {
     let count = 0;
     switch (content) {
       case Content.MEMES:
-        value = lead.purchases_value_memes;
         count = lead.purchases_count_memes;
         break;
       case Content.MEMES1:
-        value = lead.purchases_value_memes_season1;
         count = lead.purchases_count_memes_season1;
         break;
       case Content.MEMES2:
-        value = lead.purchases_value_memes_season2;
         count = lead.purchases_count_memes_season2;
         break;
       case Content.GRADIENTS:
-        value = lead.purchases_value_gradients;
         count = lead.purchases_count_gradients;
         break;
       default:
-        value = lead.purchases_value;
         count = lead.purchases_count;
     }
 
-    return formatInteraction(count, value);
+    if (count > 0) {
+      return `x${numberWithCommas(count)}`;
+    }
+    return "-";
   }
 
-  function getSales(lead: TDHMetrics) {
+  function getPurchasesValue(lead: TDHMetrics) {
     let value = 0;
+    switch (content) {
+      case Content.MEMES:
+        value = lead.purchases_value_memes;
+        break;
+      case Content.MEMES1:
+        value = lead.purchases_value_memes_season1;
+        break;
+      case Content.MEMES2:
+        value = lead.purchases_value_memes_season2;
+        break;
+      case Content.GRADIENTS:
+        value = lead.purchases_value_gradients;
+        break;
+      default:
+        value = lead.purchases_value;
+    }
+
+    if (value > 0) {
+      return `${numberWithCommas(Math.round(value * 100) / 100)}`;
+    }
+    return "-";
+  }
+
+  function getSalesCount(lead: TDHMetrics) {
     let count = 0;
     switch (content) {
       case Content.MEMES:
-        value = lead.sales_value_memes;
         count = lead.sales_count_memes;
         break;
       case Content.MEMES1:
-        value = lead.sales_value_memes_season1;
         count = lead.sales_count_memes_season1;
         break;
       case Content.MEMES2:
-        value = lead.sales_value_memes_season2;
         count = lead.sales_count_memes_season2;
         break;
       case Content.GRADIENTS:
-        value = lead.sales_value_gradients;
         count = lead.sales_count_gradients;
         break;
       default:
-        value = lead.sales_value;
         count = lead.sales_count;
     }
 
-    return formatInteraction(count, value);
+    if (count > 0) {
+      return `x${numberWithCommas(count)}`;
+    }
+    return "-";
   }
 
-  function formatInteraction(count: number, value: number) {
-    if (count > 0) {
-      return `x${numberWithCommas(count)} - ${numberWithCommas(
-        Math.round(value * 100) / 100
-      )} eth`;
+  function getSalesValue(lead: TDHMetrics) {
+    let value = 0;
+    switch (content) {
+      case Content.MEMES:
+        value = lead.sales_value_memes;
+        break;
+      case Content.MEMES1:
+        value = lead.sales_value_memes_season1;
+        break;
+      case Content.MEMES2:
+        value = lead.sales_value_memes_season2;
+        break;
+      case Content.GRADIENTS:
+        value = lead.sales_value_gradients;
+        break;
+      default:
+        value = lead.sales_value;
+    }
+
+    if (value > 0) {
+      return `${numberWithCommas(Math.round(value * 100) / 100)}`;
     }
     return "-";
   }
@@ -603,7 +686,22 @@ export default function Leaderboard(props: Props) {
     }
   }
 
-  function getPuchasesSort() {
+  function getPurchasesCountSort() {
+    switch (content) {
+      case Content.MEMES:
+        return Sort.purchases_count_memes;
+      case Content.MEMES1:
+        return Sort.purchases_count_memes_season1;
+      case Content.MEMES2:
+        return Sort.purchases_count_memes_season2;
+      case Content.GRADIENTS:
+        return Sort.purchases_count_gradients;
+      default:
+        return Sort.purchases_count;
+    }
+  }
+
+  function getPurchasesvalueSort() {
     switch (content) {
       case Content.MEMES:
         return Sort.purchases_value_memes;
@@ -618,7 +716,22 @@ export default function Leaderboard(props: Props) {
     }
   }
 
-  function getSalesSort() {
+  function getSalesCountSort() {
+    switch (content) {
+      case Content.MEMES:
+        return Sort.sales_count_memes;
+      case Content.MEMES1:
+        return Sort.sales_count_memes_season1;
+      case Content.MEMES2:
+        return Sort.sales_count_memes_season2;
+      case Content.GRADIENTS:
+        return Sort.sales_count_gradients;
+      default:
+        return Sort.sales_count;
+    }
+  }
+
+  function getSalesValueSort() {
     switch (content) {
       case Content.MEMES:
         return Sort.sales_value_memes;
@@ -677,6 +790,32 @@ export default function Leaderboard(props: Props) {
     }
   }
 
+  function printHodlersDropdown() {
+    return (
+      <Dropdown className={styles.contentDropdown} drop={"down-centered"}>
+        <Dropdown.Toggle>HODLers: {ownerTagFilter}</Dropdown.Toggle>
+        <Dropdown.Menu>
+          {Object.values(OwnerTagFilter).map((tagFilter) => (
+            <Dropdown.Item
+              key={tagFilter}
+              onClick={() => setOwnerTagFilter(tagFilter)}>
+              {[
+                OwnerTagFilter.MEMES_SETS_MINUS1,
+                OwnerTagFilter.MEMES_SETS_SZN1,
+                OwnerTagFilter.MEMES_SETS_SZN2,
+                OwnerTagFilter.GENESIS,
+              ].includes(tagFilter) ? (
+                <>&nbsp;&nbsp;{tagFilter}</>
+              ) : (
+                tagFilter
+              )}
+            </Dropdown.Item>
+          ))}
+        </Dropdown.Menu>
+      </Dropdown>
+    );
+  }
+
   function printCollectionsDropdown() {
     return (
       <Dropdown className={styles.contentDropdown} drop={"down-centered"}>
@@ -733,12 +872,7 @@ export default function Leaderboard(props: Props) {
   return (
     <Container className={`no-padding pt-4`} id={`leaderboard-page`}>
       <Row>
-        <Col
-          className={`${styles.pageHeader} d-flex align-items-center`}
-          xs={{ span: 6 }}
-          sm={{ span: 6 }}
-          md={{ span: 6 }}
-          lg={{ span: 3 }}>
+        <Col className={`d-flex align-items-center`} xs={6}>
           <h1>
             COMMUNITY{" "}
             {showViewAll && (
@@ -748,27 +882,10 @@ export default function Leaderboard(props: Props) {
             )}
           </h1>
         </Col>
-        {lastTDH && (
-          <>
-            <Col
-              lg={3}
-              className="d-flex justify-content-center d-none d-lg-block">
-              {printCollectionsDropdown()}
-            </Col>
-            <Col
-              className="d-flex justify-content-center d-none d-lg-block"
-              lg={6}>
-              {printInteractionsWidget()}
-            </Col>
-          </>
-        )}
         {lastTDH && props.showLastTdh && (
           <Col
-            className={`${styles.lastTDH} d-flex align-items-center justify-content-end d-lg-none`}
-            xs={{ span: 6 }}
-            sm={{ span: 6 }}
-            md={{ span: 6 }}
-            lg={{ span: 6 }}>
+            className={`${styles.lastTDH} d-flex align-items-start justify-content-end`}
+            xs={6}>
             * TDH Block&nbsp;
             <a
               href={`https://etherscan.io/block/${lastTDH.block}`}
@@ -781,94 +898,72 @@ export default function Leaderboard(props: Props) {
           </Col>
         )}
       </Row>
-      <Row className="pt-1 d-none d-lg-block">
-        {lastTDH && props.showLastTdh && (
-          <Col
-            className={`${styles.lastTDH} d-flex align-items-center justify-content-end`}
-            xs={{ span: 12 }}
-            sm={{ span: 12 }}
-            md={{ span: 12 }}
-            lg={{ span: 12 }}>
-            * TDH Block&nbsp;
-            <a
-              href={`https://etherscan.io/block/${lastTDH.block}`}
-              rel="noreferrer"
-              target="_blank">
-              {lastTDH.block}
-            </a>
-            &nbsp;|&nbsp;Next Calculation&nbsp;
-            <span id="next-tdh-div-2">{nextTdh()}</span>
-          </Col>
-        )}
-      </Row>
-      <Row className="d-lg-none">
-        <Col md={4} className="d-flex justify-content-center">
+      <Row className="pt-2 pb-2">
+        <Col
+          className={`${styles.pageHeader} text-center pt-1 pb-1`}
+          xs={{ span: 6 }}
+          sm={{ span: 6 }}
+          md={{ span: 3 }}
+          lg={{ span: 3 }}>
+          {printHodlersDropdown()}
+        </Col>
+        <Col
+          className={`${styles.pageHeader} text-center pt-1 pb-1`}
+          xs={{ span: 6 }}
+          sm={{ span: 6 }}
+          md={{ span: 3 }}
+          lg={{ span: 3 }}>
           {printCollectionsDropdown()}
         </Col>
-        <Col md={8} className="d-flex justify-content-center">
-          {printInteractionsWidget()}
+        <Col
+          className={`${styles.pageHeader} pt-1 pb-1`}
+          xs={{ span: 12 }}
+          sm={{ span: 12 }}
+          md={{ span: 6 }}
+          lg={{ span: 6 }}>
+          <div
+            className={`${styles.headerMenuFocus} d-flex justify-content-center align-items-center`}>
+            <span>
+              <span
+                onClick={() => setFocus(Focus.TDH)}
+                className={`${styles.focus} ${
+                  focus != Focus.TDH ? styles.disabled : ""
+                }`}>
+                {Focus.TDH}
+              </span>
+            </span>
+            &nbsp;&nbsp;|&nbsp;&nbsp;
+            <span>
+              <span
+                onClick={() => setFocus(Focus.INTERACTIONS)}
+                className={`${styles.focus} ${
+                  focus != Focus.INTERACTIONS ? styles.disabled : ""
+                }`}>
+                {Focus.INTERACTIONS}
+              </span>
+            </span>
+            &nbsp;&nbsp;|&nbsp;&nbsp;
+            <span>
+              <span
+                onClick={() => setFocus(Focus.SETS)}
+                className={`${styles.focus} ${
+                  focus != Focus.SETS ? styles.disabled : ""
+                }`}>
+                {Focus.SETS}
+              </span>
+            </span>
+          </div>
         </Col>
       </Row>
-      <Row className={`${styles.scrollContainer}`}>
+      <Row className={`${styles.scrollContainer} pt-2`}>
         <Col>
           {leaderboard && leaderboard.length > 0 && (
             <Table bordered={false} className={styles.leaderboardTable}>
               <thead>
-                {/* <tr>
-                  <th className={styles.rank}></th>
-                  <th className={styles.hodler}></th>
-                  <th className={styles.gap}></th>
-                  <th
-                    colSpan={1}
-                    className={`${styles.balance} ${styles.borderBottom}`}>
-                    <b>Cards HODLed</b>
-                  </th>
-                  <th className={styles.gap}></th>
-                  {focus == Focus.INTERACTIONS && (
-                    <th
-                      colSpan={4}
-                      className={`${styles.tdh} ${styles.borderBottom}`}>
-                      <b>Interactions</b>
-                    </th>
-                  )}
-                  {focus == Focus.TDH && (
-                    <th
-                      colSpan={4}
-                      className={`${styles.tdh} ${styles.borderBottom}`}>
-                      <b>Days HODLed (TDH)</b>
-                    </th>
-                  )}
-                </tr> */}
                 <tr>
                   <th className={styles.rank}>Rank</th>
-                  <th className={styles.hodler}>
-                    <Dropdown
-                      className={styles.ownerTagsDropdown}
-                      drop={"down-centered"}>
-                      <Dropdown.Toggle>
-                        HODLers: {ownerTagFilter}
-                      </Dropdown.Toggle>
-                      <Dropdown.Menu>
-                        {Object.values(OwnerTagFilter).map((tagFilter) => (
-                          <Dropdown.Item
-                            key={OwnerTagFilter.MEMES_SETS_MINUS1}
-                            onClick={() => setOwnerTagFilter(tagFilter)}>
-                            {[
-                              OwnerTagFilter.MEMES_SETS_MINUS1,
-                              OwnerTagFilter.MEMES_SETS_SZN1,
-                              OwnerTagFilter.MEMES_SETS_SZN2,
-                              OwnerTagFilter.GENESIS,
-                            ].includes(tagFilter) ? (
-                              <>&nbsp;&nbsp;{tagFilter}</>
-                            ) : (
-                              tagFilter
-                            )}
-                          </Dropdown.Item>
-                        ))}
-                      </Dropdown.Menu>
-                    </Dropdown>
-                  </th>
-                  {(focus == Focus.TDH || focus == Focus.INTERACTIONS) && (
+                  <th className={styles.hodler}>HODLer</th>
+                  {focus == Focus.TDH && (
                     <th className={styles.tdhSub}>
                       <span className="d-flex align-items-center justify-content-center">
                         Cards HODLed&nbsp;
@@ -917,13 +1012,13 @@ export default function Leaderboard(props: Props) {
                               icon="square-caret-up"
                               onClick={() =>
                                 setSort({
-                                  sort: getPuchasesSort(),
+                                  sort: getPurchasesCountSort(),
                                   sort_direction: SortDirection.ASC,
                                 })
                               }
                               className={`${styles.caret} ${
                                 sort.sort_direction != SortDirection.ASC ||
-                                sort.sort != getPuchasesSort()
+                                sort.sort != getPurchasesCountSort()
                                   ? styles.disabled
                                   : ""
                               }`}
@@ -932,13 +1027,50 @@ export default function Leaderboard(props: Props) {
                               icon="square-caret-down"
                               onClick={() =>
                                 setSort({
-                                  sort: getPuchasesSort(),
+                                  sort: getPurchasesCountSort(),
                                   sort_direction: SortDirection.DESC,
                                 })
                               }
                               className={`${styles.caret} ${
                                 sort.sort_direction != SortDirection.DESC ||
-                                sort.sort != getPuchasesSort()
+                                sort.sort != getPurchasesCountSort()
+                                  ? styles.disabled
+                                  : ""
+                              }`}
+                            />
+                          </span>
+                        </span>
+                      </th>
+                      <th className={styles.tdhSub}>
+                        <span className="d-flex align-items-center justify-content-center">
+                          Purchases (ETH)&nbsp;
+                          <span className="d-flex flex-column">
+                            <FontAwesomeIcon
+                              icon="square-caret-up"
+                              onClick={() =>
+                                setSort({
+                                  sort: getPurchasesvalueSort(),
+                                  sort_direction: SortDirection.ASC,
+                                })
+                              }
+                              className={`${styles.caret} ${
+                                sort.sort_direction != SortDirection.ASC ||
+                                sort.sort != getPurchasesvalueSort()
+                                  ? styles.disabled
+                                  : ""
+                              }`}
+                            />
+                            <FontAwesomeIcon
+                              icon="square-caret-down"
+                              onClick={() =>
+                                setSort({
+                                  sort: getPurchasesvalueSort(),
+                                  sort_direction: SortDirection.DESC,
+                                })
+                              }
+                              className={`${styles.caret} ${
+                                sort.sort_direction != SortDirection.DESC ||
+                                sort.sort != getPurchasesvalueSort()
                                   ? styles.disabled
                                   : ""
                               }`}
@@ -954,13 +1086,13 @@ export default function Leaderboard(props: Props) {
                               icon="square-caret-up"
                               onClick={() =>
                                 setSort({
-                                  sort: getSalesSort(),
+                                  sort: getSalesCountSort(),
                                   sort_direction: SortDirection.ASC,
                                 })
                               }
                               className={`${styles.caret} ${
                                 sort.sort_direction != SortDirection.ASC ||
-                                sort.sort != getSalesSort()
+                                sort.sort != getSalesCountSort()
                                   ? styles.disabled
                                   : ""
                               }`}
@@ -969,13 +1101,50 @@ export default function Leaderboard(props: Props) {
                               icon="square-caret-down"
                               onClick={() =>
                                 setSort({
-                                  sort: getSalesSort(),
+                                  sort: getSalesCountSort(),
                                   sort_direction: SortDirection.DESC,
                                 })
                               }
                               className={`${styles.caret} ${
                                 sort.sort_direction != SortDirection.DESC ||
-                                sort.sort != getSalesSort()
+                                sort.sort != getSalesCountSort()
+                                  ? styles.disabled
+                                  : ""
+                              }`}
+                            />
+                          </span>
+                        </span>
+                      </th>
+                      <th className={styles.tdhSub}>
+                        <span className="d-flex align-items-center justify-content-center">
+                          Sales (ETH)&nbsp;
+                          <span className="d-flex flex-column">
+                            <FontAwesomeIcon
+                              icon="square-caret-up"
+                              onClick={() =>
+                                setSort({
+                                  sort: getSalesValueSort(),
+                                  sort_direction: SortDirection.ASC,
+                                })
+                              }
+                              className={`${styles.caret} ${
+                                sort.sort_direction != SortDirection.ASC ||
+                                sort.sort != getSalesValueSort()
+                                  ? styles.disabled
+                                  : ""
+                              }`}
+                            />
+                            <FontAwesomeIcon
+                              icon="square-caret-down"
+                              onClick={() =>
+                                setSort({
+                                  sort: getSalesValueSort(),
+                                  sort_direction: SortDirection.DESC,
+                                })
+                              }
+                              className={`${styles.caret} ${
+                                sort.sort_direction != SortDirection.DESC ||
+                                sort.sort != getSalesValueSort()
                                   ? styles.disabled
                                   : ""
                               }`}
@@ -1063,6 +1232,43 @@ export default function Leaderboard(props: Props) {
                     <>
                       <th className={styles.tdhSub}>
                         <span className="d-flex align-items-center justify-content-center">
+                          Unique Memes&nbsp;
+                          <span className="d-flex flex-column">
+                            <FontAwesomeIcon
+                              icon="square-caret-up"
+                              onClick={() =>
+                                setSort({
+                                  sort: Sort.unique_memes,
+                                  sort_direction: SortDirection.ASC,
+                                })
+                              }
+                              className={`${styles.caret} ${
+                                sort.sort_direction != SortDirection.ASC ||
+                                sort.sort != Sort.unique_memes
+                                  ? styles.disabled
+                                  : ""
+                              }`}
+                            />
+                            <FontAwesomeIcon
+                              icon="square-caret-down"
+                              onClick={() =>
+                                setSort({
+                                  sort: Sort.unique_memes,
+                                  sort_direction: SortDirection.DESC,
+                                })
+                              }
+                              className={`${styles.caret} ${
+                                sort.sort_direction != SortDirection.DESC ||
+                                sort.sort != Sort.unique_memes
+                                  ? styles.disabled
+                                  : ""
+                              }`}
+                            />
+                          </span>
+                        </span>
+                      </th>
+                      <th className={styles.tdhSub}>
+                        <span className="d-flex align-items-center justify-content-center">
                           {content == Content.MEMES1
                             ? "SZN1"
                             : content == Content.MEMES2
@@ -1142,7 +1348,9 @@ export default function Leaderboard(props: Props) {
                       </th>
                       <th className={styles.tdhSub}>
                         <span className="d-flex align-items-center justify-content-center">
-                          Unboosted TDH&nbsp;
+                          TDH&nbsp;
+                          <span className={styles.tdhSubNote}>(unboosted)</span>
+                          &nbsp;
                           <span className="d-flex flex-column">
                             <FontAwesomeIcon
                               icon="square-caret-up"
@@ -1179,7 +1387,11 @@ export default function Leaderboard(props: Props) {
                       </th>
                       <th className={styles.tdhSub}>
                         <span className="d-flex align-items-center justify-content-center">
-                          Unweighted TDH&nbsp;
+                          TDH&nbsp;
+                          <span className={styles.tdhSubNote}>
+                            (unweighted)
+                          </span>
+                          &nbsp;
                           <span className="d-flex flex-column">
                             <FontAwesomeIcon
                               icon="square-caret-up"
@@ -1285,6 +1497,43 @@ export default function Leaderboard(props: Props) {
                               className={`${styles.caret} ${
                                 sort.sort_direction != SortDirection.DESC ||
                                 sort.sort != Sort.memes_cards_sets_minus1
+                                  ? styles.disabled
+                                  : ""
+                              }`}
+                            />
+                          </span>
+                        </span>
+                      </th>
+                      <th className={styles.tdhSub}>
+                        <span className="d-flex align-items-center justify-content-center">
+                          Meme Sets -2&nbsp;
+                          <span className="d-flex flex-column">
+                            <FontAwesomeIcon
+                              icon="square-caret-up"
+                              onClick={() =>
+                                setSort({
+                                  sort: Sort.memes_cards_sets_minus2,
+                                  sort_direction: SortDirection.ASC,
+                                })
+                              }
+                              className={`${styles.caret} ${
+                                sort.sort_direction != SortDirection.ASC ||
+                                sort.sort != Sort.memes_cards_sets_minus2
+                                  ? styles.disabled
+                                  : ""
+                              }`}
+                            />
+                            <FontAwesomeIcon
+                              icon="square-caret-down"
+                              onClick={() =>
+                                setSort({
+                                  sort: Sort.memes_cards_sets_minus2,
+                                  sort_direction: SortDirection.DESC,
+                                })
+                              }
+                              className={`${styles.caret} ${
+                                sort.sort_direction != SortDirection.DESC ||
+                                sort.sort != Sort.memes_cards_sets_minus2
                                   ? styles.disabled
                                   : ""
                               }`}
@@ -1432,8 +1681,7 @@ export default function Leaderboard(props: Props) {
                             }}
                           />
                         </td>
-                        {(focus == Focus.TDH ||
-                          focus == Focus.INTERACTIONS) && (
+                        {focus == Focus.TDH && (
                           <td className={styles.tdhSub}>
                             {numberWithCommas(getCardsHodled(lead))}
                           </td>
@@ -1441,9 +1689,17 @@ export default function Leaderboard(props: Props) {
                         {focus == Focus.INTERACTIONS && (
                           <>
                             <td className={styles.tdhSub}>
-                              {getPurchases(lead)}
+                              {getPurchasesCount(lead)}
                             </td>
-                            <td className={styles.tdhSub}>{getSales(lead)}</td>
+                            <td className={styles.tdhSub}>
+                              {getPurchasesValue(lead)}
+                            </td>
+                            <td className={styles.tdhSub}>
+                              {getSalesCount(lead)}
+                            </td>
+                            <td className={styles.tdhSub}>
+                              {getSalesValue(lead)}
+                            </td>
                             <td className={styles.tdhSub}>
                               {getTransfersIn(lead)}
                             </td>
@@ -1454,6 +1710,9 @@ export default function Leaderboard(props: Props) {
                         )}
                         {focus == Focus.TDH && (
                           <>
+                            <td className={styles.tdhSub}>
+                              {numberWithCommas(Math.round(lead.unique_memes))}
+                            </td>
                             <td className={styles.tdhSub}>{getSets(lead)}</td>
                             <td className={styles.tdhSub}>
                               {numberWithCommas(
@@ -1486,6 +1745,13 @@ export default function Leaderboard(props: Props) {
                               {lead.memes_cards_sets_minus1 > 0
                                 ? `x${numberWithCommas(
                                     lead.memes_cards_sets_minus1
+                                  )}`
+                                : "-"}
+                            </td>
+                            <td className={styles.tdhSub}>
+                              {lead.memes_cards_sets_minus2 > 0
+                                ? `x${numberWithCommas(
+                                    lead.memes_cards_sets_minus2
                                   )}`
                                 : "-"}
                             </td>

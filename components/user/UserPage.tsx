@@ -594,7 +594,7 @@ export default function UserPage(props: Props) {
                           ? ownerENS
                           : formatAddress(ownerAddress as string)
                       }'s 6529 Collection${`\nTDH ${
-                        tdh ? tdh.tdh : "N/A"
+                        tdh ? tdh.boosted_tdh : "N/A"
                       } - \Rank ${
                         tdh ? tdh.tdh_rank : "N/A"
                       }`}\n#6529Seize\n\n`}>
@@ -629,6 +629,7 @@ export default function UserPage(props: Props) {
                           gradientsBalance: ownerTags.gradients_balance,
                           genesis: ownerTags.genesis,
                         }}
+                        expandedTags={true}
                         isUserPage={true}
                         disableLink={true}
                       />
@@ -763,11 +764,17 @@ export default function UserPage(props: Props) {
                           <td>Purchases</td>
                           <td>
                             {tdh.purchases_count > 0
-                              ? `x${numberWithCommas(
-                                  tdh.purchases_count
-                                )} - ${numberWithCommas(
+                              ? `x${numberWithCommas(tdh.purchases_count)}`
+                              : "-"}
+                          </td>
+                        </tr>
+                        <tr>
+                          <td>Purchases (ETH)</td>
+                          <td>
+                            {tdh.purchases_value > 0
+                              ? `${numberWithCommas(
                                   Math.round(tdh.purchases_value * 100) / 100
-                                )} eth`
+                                )}`
                               : "-"}
                           </td>
                         </tr>
@@ -793,9 +800,15 @@ export default function UserPage(props: Props) {
                           <td>Sales</td>
                           <td>
                             {tdh.sales_count > 0
-                              ? `x${numberWithCommas(
-                                  tdh.sales_count
-                                )} - ${numberWithCommas(
+                              ? `x${numberWithCommas(tdh.sales_count)}`
+                              : "-"}
+                          </td>
+                        </tr>
+                        <tr>
+                          <td>Sales (ETH)</td>
+                          <td>
+                            {tdh.sales_value > 0
+                              ? `${numberWithCommas(
                                   Math.round(tdh.sales_value * 100) / 100
                                 )} eth`
                               : "-"}
