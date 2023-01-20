@@ -10,6 +10,17 @@
   display: none;
 }
 
+.headerMenuFocus {
+  background-color: transparent;
+  width: 100%;
+  height: 48px;
+  height: 48px;
+  line-height: 48px;
+  font-size: larger;
+  font-weight: bolder;
+  color: $lightest-grey;
+}
+
 .pageHeader {
   white-space: nowrap;
   h1 {
@@ -40,8 +51,13 @@
   text-align: center;
 }
 
+.tdhSubNote {
+  font-size: smaller;
+  font-weight: lighter;
+}
+
 .tdhSub {
-  width: 11%;
+  width: calc(55% / 6);
   text-align: center;
 }
 
@@ -196,9 +212,6 @@
   white-space: nowrap;
   float: left;
   line-height: 48px;
-  // margin-left: 60px;
-  // font-size: larger;
-  // font-weight: bolder;
   border: 2px solid white;
   border-left: none;
   padding-left: 10px;
@@ -272,20 +285,26 @@
       margin-top: 0.8rem;
     }
   }
+  div {
+    width: 60%;
+  }
 }
 
-.ownerTagsDropdown {
-  button {
-    font-weight: bolder;
-    padding: 0;
-    background-color: transparent !important;
-    border-color: transparent !important;
+.focus {
+  color: $font-color;
+  cursor: pointer;
+}
+
+.disabled {
+  color: $lightest-grey;
+  text-decoration: none;
+  &:hover {
+    color: white;
   }
 }
 
 @media only screen and (max-width: 800px) {
-  .contentDropdown,
-  .ownerTagsDropdown {
+  .contentDropdown {
     button {
       &::after {
         margin-top: 0.5rem;

@@ -24,7 +24,7 @@ export default function NFTImage(props: Props) {
   ) {
     return (
       <Col
-        className={`${styles.nftAnimation} height${props.height} ${
+        className={`text-center ${styles.nftAnimation} ${
           props.transparentBG && styles.transparentBG
         }`}>
         <iframe src={props.nft.animation} id={`${props.id && `${props.id}`}`} />

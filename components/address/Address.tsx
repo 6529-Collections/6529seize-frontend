@@ -19,6 +19,7 @@ interface Props {
     genesis: number;
     gradientsBalance: number;
   };
+  expandedTags?: boolean;
   isUserPage?: boolean;
   disableLink?: boolean;
 }
@@ -136,23 +137,34 @@ export default function Address(props: Props) {
           ) : (
             ""
           )}
-          {props.tags.memesCardsSetS1 > 0 && (
-            <span className={styles.memesCardsSetsS1Tag}>
-              {props.tags.memesCardsSetS1}x SZN1 Set
-              {props.tags.memesCardsSets > 1 ? `s` : ""}
-            </span>
-          )}
-          {props.tags.memesCardsSetS2 > 0 && (
-            <span className={styles.memesCardsSetsS2Tag}>
-              {props.tags.memesCardsSetS2}x SZN2 Set
-              {props.tags.memesCardsSets > 1 ? `s` : ""}
-            </span>
-          )}
-          {props.tags.gradientsBalance > 0 && (
+          {props.tags.gradientsBalance > 0 && !props.expandedTags ? (
             <span className={styles.gradientsTag}>
               {props.tags.gradientsBalance}x Gradient
               {props.tags.gradientsBalance > 1 ? `s` : ""}
             </span>
+          ) : (
+            <>
+              {props.tags.memesCardsSetS1 > 0 &&
+                (props.tags.memesCardsSets == 0 || props.expandedTags) && (
+                  <span className={styles.memesCardsSetsS1Tag}>
+                    {props.tags.memesCardsSetS1}x SZN1 Set
+                    {props.tags.memesCardsSets > 1 ? `s` : ""}
+                  </span>
+                )}
+              {props.tags.memesCardsSetS2 > 0 &&
+                (props.tags.memesCardsSets == 0 || props.expandedTags) && (
+                  <span className={styles.memesCardsSetsS2Tag}>
+                    {props.tags.memesCardsSetS2}x SZN2 Set
+                    {props.tags.memesCardsSets > 1 ? `s` : ""}
+                  </span>
+                )}
+              {props.tags.gradientsBalance > 0 && props.expandedTags && (
+                <span className={styles.gradientsTag}>
+                  {props.tags.gradientsBalance}x Gradient
+                  {props.tags.gradientsBalance > 1 ? `s` : ""}
+                </span>
+              )}
+            </>
           )}
         </span>
       )}

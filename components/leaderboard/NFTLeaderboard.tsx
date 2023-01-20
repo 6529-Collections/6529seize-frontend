@@ -50,10 +50,6 @@ export default function NFTLeaderboard(props: Props) {
   const [ownerTagsLoaded, setOwnerTagsLoaded] = useState(false);
 
   async function fetchResults() {
-    var top = document.getElementById(`leaderboard-${props.nftId}`)?.offsetTop;
-    if (top && window.scrollY > 0) {
-      window.scrollTo(0, top);
-    }
     fetch(
       `${process.env.API_ENDPOINT}/api/tdh/${props.contract}/${props.nftId}?page_size=${props.pageSize}&page=${pageProps.page}&sort=${sort.sort}&sort_direction=${sort.sort_direction}`
     )
