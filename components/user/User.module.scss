@@ -18,6 +18,7 @@
   white-space: nowrap;
   color: $font-color-h !important;
   font-size: smaller;
+  vertical-align: top !important;
   a {
     color: $font-color-h !important;
   }
@@ -86,6 +87,7 @@
   tr td {
     width: calc(100% / 6);
     line-height: 25px;
+    vertical-align: middle;
   }
   tr:not(:first-child) {
     border-bottom: 1px solid $dark-grey !important;
