@@ -644,7 +644,7 @@ export default function UserPage(props: Props) {
                 </Col>
                 {tdh && (
                   <Col
-                    className="text-left"
+                    className="text-left pt-2"
                     xs={{ span: 12 }}
                     sm={{ span: 12 }}
                     md={{ span: 6 }}
@@ -652,13 +652,13 @@ export default function UserPage(props: Props) {
                     <Table className={styles.primaryTable}>
                       <tbody>
                         <tr>
-                          <td>
-                            <h4>TDH</h4>
+                          <td colSpan={3}>
+                            <h4>Cards HODLed</h4>
                           </td>
                           {lastTDH && (
                             <td
                               className={`text-right ${styles.lastTDH}`}
-                              colSpan={5}>
+                              colSpan={3}>
                               * TDH Block&nbsp;
                               <a
                                 href={`https://etherscan.io/block/${lastTDH.block}`}
