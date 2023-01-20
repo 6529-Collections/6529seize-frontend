@@ -76,3 +76,38 @@
   max-width: 40px;
   max-height: 40px;
 }
+
+.filterDropdown {
+  line-height: 48px;
+  text-align: center;
+  background-color: transparent;
+  border: none;
+  width: 100%;
+  a {
+    line-height: 30px;
+  }
+  button {
+    font-size: larger !important;
+    font-weight: bolder !important;
+    cursor: copy;
+    padding: 0;
+    background-color: transparent !important;
+    border-color: transparent !important;
+    &::after {
+      margin-top: 0.8rem;
+    }
+  }
+  div {
+    width: 60%;
+  }
+}
+
+@media only screen and (max-width: 800px) {
+  .filterDropdown {
+    button {
+      &::after {
+        margin-top: 0.5rem;
+      }
+    }
+  }
+}

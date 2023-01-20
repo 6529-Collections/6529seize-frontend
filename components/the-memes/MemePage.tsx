@@ -286,14 +286,15 @@ export default function MemePage() {
             md={{ span: 6 }}
             lg={{ span: 6 }}
             className="pt-2">
-            {nft && (
-              <NFTImage
-                nft={nft}
-                animation={false}
-                height={650}
-                balance={nftBalance}
-              />
-            )}
+            {nft &&
+              (!isHtml() || (isHtml() && activeTab == MEME_FOCUS.LIVE)) && (
+                <NFTImage
+                  nft={nft}
+                  animation={true}
+                  height={650}
+                  balance={nftBalance}
+                />
+              )}
           </Col>
           {nft && nftMeta && (
             <Col
@@ -523,14 +524,16 @@ export default function MemePage() {
             md={{ span: 6 }}
             lg={{ span: 6 }}
             className="pt-2">
-            {nft && (
-              <NFTImage
-                nft={nft}
-                animation={false}
-                height={650}
-                balance={nftBalance}
-              />
-            )}
+            {nft &&
+              (!isHtml() ||
+                (isHtml() && activeTab == MEME_FOCUS.YOUR_CARDS)) && (
+                <NFTImage
+                  nft={nft}
+                  animation={true}
+                  height={650}
+                  balance={nftBalance}
+                />
+              )}
           </Col>
           <Col
             xs={{ span: 12 }}
@@ -614,7 +617,7 @@ export default function MemePage() {
                       <Row>
                         <Col>
                           {sold.length} card{sold.length > 1 && "s"} sold for{" "}
-                          {soldSum}
+                          {soldSum} eth
                         </Col>
                       </Row>
                     )}
@@ -676,6 +679,10 @@ export default function MemePage() {
     });
   }
 
+  function isHtml() {
+    return nft ? nft.metadata.animation_details?.format == "HTML" : false;
+  }
+
   function carouselHandlerSlid() {
     const videos = document.querySelectorAll("video");
     videos.forEach((video, key) => {
@@ -700,7 +707,8 @@ export default function MemePage() {
                   }
                 />
               )}
-              {nft.animation ? (
+              {nft.animation &&
+              (!isHtml() || (isHtml() && activeTab == MEME_FOCUS.THE_ART)) ? (
                 <Carousel
                   className={styles.memesCarousel}
                   interval={null}
@@ -1103,14 +1111,16 @@ export default function MemePage() {
               md={{ span: 6 }}
               lg={{ span: 6 }}
               className="pt-2">
-              {nft && (
-                <NFTImage
-                  nft={nft}
-                  animation={false}
-                  height={650}
-                  balance={nftBalance}
-                />
-              )}
+              {nft &&
+                (!isHtml() ||
+                  (isHtml() && activeTab == MEME_FOCUS.HODLERS)) && (
+                  <NFTImage
+                    nft={nft}
+                    animation={true}
+                    height={650}
+                    balance={nftBalance}
+                  />
+                )}
             </Col>
             {nft && nftMeta && (
               <Col
@@ -1320,11 +1330,6 @@ export default function MemePage() {
                         onSelect={(view) => {
                           const newTab = MEME_TABS.find((t) => t.focus == view);
                           if (newTab) {
-                            if (newTab.focus != MEME_FOCUS.THE_ART) {
-                              carouselHandlerSlide(
-                                nft.animation ? 0 : undefined
-                              );
-                            }
                             setActiveTab(newTab.focus);
                           }
                         }}>

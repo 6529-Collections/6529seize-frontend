@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Container, Row, Col, Table } from "react-bootstrap";
+import { Container, Row, Col, Table, Dropdown } from "react-bootstrap";
 import { DBResponse } from "../../entities/IDBResponse";
 import styles from "./LatestActivity.module.scss";
 import dynamic from "next/dynamic";
@@ -18,6 +18,13 @@ interface Props {
   showMore?: boolean;
 }
 
+enum TypeFilter {
+  ALL = "All",
+  SALES = "Sales",
+  TRANSFERS = "Transfers",
+  AIRDROPS = "Airdrops",
+}
+
 export default function LatestActivity(props: Props) {
   const router = useRouter();
   const [activity, setActivity] = useState<Transaction[]>([]);
@@ -31,17 +38,29 @@ export default function LatestActivity(props: Props) {
   const [nfts, setNfts] = useState<NFT[]>([]);
   const [nftsLoaded, setNftsLoaded] = useState(false);
 
+  const [typeFilter, setTypeFilter] = useState<TypeFilter>(TypeFilter.ALL);
+
   useEffect(() => {
-    fetch(
-      `${process.env.API_ENDPOINT}/api/transactions?page_size=${props.pageSize}&page=${page}`
-    )
+    let url = `${process.env.API_ENDPOINT}/api/transactions?page_size=${props.pageSize}&page=${page}`;
+    switch (typeFilter) {
+      case TypeFilter.SALES:
+        url += `&filter=sales`;
+        break;
+      case TypeFilter.TRANSFERS:
+        url += `&filter=transfers`;
+        break;
+      case TypeFilter.AIRDROPS:
+        url += `&filter=airdrops`;
+        break;
+    }
+    fetch(url)
       .then((res) => res.json())
       .then((response: DBResponse) => {
         setTotalResults(response.count);
         setNext(response.next);
         setActivity(response.data);
       });
-  }, [page]);
+  }, [page, typeFilter]);
 
   useEffect(() => {
     async function fetchNfts(url: string, mynfts: NFT[]) {
@@ -74,8 +93,12 @@ export default function LatestActivity(props: Props) {
 
   return (
     <Container className={`no-padding pt-4`}>
-      <Row>
-        <Col>
+      <Row className="d-flex align-items-center">
+        <Col
+          xs={{ span: 12 }}
+          sm={{ span: 7 }}
+          md={{ span: 9 }}
+          lg={{ span: 9 }}>
           <h1>
             LATEST ACTIVITY{" "}
             {showViewAll && (
@@ -85,6 +108,27 @@ export default function LatestActivity(props: Props) {
             )}
           </h1>
         </Col>
+        {!showViewAll && (
+          <Col
+            xs={{ span: 12 }}
+            sm={{ span: 5 }}
+            md={{ span: 3 }}
+            lg={{ span: 3 }}
+            className={`d-flex justify-content-center align-items-center`}>
+            <Dropdown className={styles.filterDropdown} drop={"down-centered"}>
+              <Dropdown.Toggle>Filter: {typeFilter}</Dropdown.Toggle>
+              <Dropdown.Menu>
+                {Object.values(TypeFilter).map((filter) => (
+                  <Dropdown.Item
+                    key={TypeFilter.ALL}
+                    onClick={() => setTypeFilter(filter)}>
+                    {filter}
+                  </Dropdown.Item>
+                ))}
+              </Dropdown.Menu>
+            </Dropdown>
+          </Col>
+        )}
       </Row>
       <Row className={styles.scrollContainer}>
         <Col>

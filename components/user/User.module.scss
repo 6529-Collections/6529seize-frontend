@@ -69,6 +69,10 @@
   margin-top: 15px;
   float: left;
 
+  tr td {
+    line-height: 25px;
+  }
+
   tr:not(:first-child) {
     border-bottom: 1px solid $dark-grey !important;
 
@@ -81,6 +85,7 @@
 .primaryTable {
   tr td {
     width: calc(100% / 6);
+    line-height: 25px;
   }
   tr:not(:first-child) {
     border-bottom: 1px solid $dark-grey !important;
