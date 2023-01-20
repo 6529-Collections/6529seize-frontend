@@ -810,7 +810,7 @@ export default function UserPage(props: Props) {
                             {tdh.sales_value > 0
                               ? `${numberWithCommas(
                                   Math.round(tdh.sales_value * 100) / 100
-                                )} eth`
+                                )}`
                               : "-"}
                           </td>
                         </tr>
