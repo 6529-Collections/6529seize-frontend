@@ -129,7 +129,7 @@ export default function Header() {
                         }}
                         className="pt-3"
                         key={`${connector.name}-dropdown-item-burger-menu`}>
-                        {connector.name.toUpperCase()}
+                        {connector.name}
                       </h4>
                     ))
                 )}
@@ -531,7 +531,7 @@ export default function Header() {
                                   key="disconnect-dropdown-item"
                                   className={styles.dropdownItem}
                                   onClick={() => disconnect()}>
-                                  DISCONNECT
+                                  Disconnect
                                 </NavDropdown.Item>
                               </NavDropdown>
                             ) : (
@@ -546,7 +546,7 @@ export default function Header() {
                                       key={`${connector.name}-dropdown-item`}
                                       className={`${styles.dropdownItem}`}
                                       onClick={() => connect({ connector })}>
-                                      {connector.name.toUpperCase()}
+                                      {connector.name}
                                     </NavDropdown.Item>
                                   ))}
                               </NavDropdown>

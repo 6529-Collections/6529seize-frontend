@@ -18,6 +18,8 @@ export interface TDH {
   genesis: number;
   memes_cards_sets: number;
   unique_memes: number;
+  unique_memes_szn1: number;
+  unique_memes_szn2: number;
   boosted_memes_tdh: number;
   memes_tdh: number;
   memes_tdh__raw: number;
