@@ -424,7 +424,7 @@ export default function MemePage() {
                 {nftBalance > 0 && (
                   <Row className="pt-3">
                     <Col>
-                      <h3>
+                      <h3 className="font-color">
                         You Own {nftBalance} edition{nftBalance > 1 && "s"}
                       </h3>
                     </Col>
@@ -471,27 +471,37 @@ export default function MemePage() {
     );
   }
 
+  function getTokenCount(transactions: Transaction[]) {
+    let count = 0;
+    [...transactions].map((e) => {
+      count += e.token_count;
+    });
+    return count;
+  }
+
   function printYourCards() {
-    const firstAcquired = transactions[0];
+    const firstAcquired = [...transactions].sort((a, b) =>
+      a.transaction_date > b.transaction_date ? 1 : -1
+    )[0];
 
     const airdropped = transactions.filter((t) =>
       areEqualAddresses(t.from_address, NULL_ADDRESS)
-    ).length;
+    );
 
     const transferredIn = !address
-      ? 0
+      ? []
       : transactions.filter(
           (t) =>
             !areEqualAddresses(t.from_address, NULL_ADDRESS) &&
             areEqualAddresses(t.to_address, address) &&
             t.value == 0
-        ).length;
+        );
 
     const transferredOut = !address
-      ? 0
+      ? []
       : transactions.filter(
           (t) => areEqualAddresses(t.from_address, address) && t.value == 0
-        ).length;
+        );
 
     const bought = !address
       ? []
@@ -556,76 +566,114 @@ export default function MemePage() {
                     </Col>
                   </Row>
                 )}
-                {transactions.length > 0 && (
+                {transactions.length > 0 && address && (
                   <>
-                    <>
-                      <Row className="pt-2">
-                        <Col>
-                          <h3>Rank</h3>
-                        </Col>
-                      </Row>
-                      <Row>
-                        <Col>
-                          {myRank && myTDH ? (
-                            <h4 className={styles.rankSubheading}>
-                              #{myRank?.rank} in Total Days HODLed (
-                              {myTDH && Math.round(myTDH.tdh)})
-                            </h4>
-                          ) : (
-                            "No TDH accrued"
-                          )}
-                        </Col>
-                      </Row>
-                    </>
-                    <Row className="pt-4">
+                    {nftBalance > 0 && (
+                      <>
+                        <Row className="pt-2">
+                          <Col>
+                            <h3 className="font-color">
+                              You Own {nftBalance} edition
+                              {nftBalance > 1 && "s"}
+                            </h3>
+                          </Col>
+                        </Row>
+                        {myRank && nft && myTDH ? (
+                          <Row className="pt-2">
+                            <Col
+                              xs={{ span: 12 }}
+                              sm={{ span: 12 }}
+                              md={{ span: 12 }}
+                              lg={{ span: 8 }}>
+                              <Table bordered={false}>
+                                <tbody>
+                                  <tr className={`${styles.overviewColumn}`}>
+                                    <td>Rank</td>
+                                    <td className="text-right">
+                                      #{myRank?.rank}
+                                    </td>
+                                  </tr>
+                                  <tr
+                                    className={`pt-1 ${styles.overviewColumn}`}>
+                                    <td>Unweighted TDH</td>
+                                    <td className="text-right">
+                                      {myTDH.tdh__raw}
+                                    </td>
+                                  </tr>
+                                  <tr
+                                    className={`pt-1 ${styles.overviewColumn}`}>
+                                    <td>TDH</td>
+                                    <td className="text-right">
+                                      {Math.round(myTDH.tdh)}
+                                    </td>
+                                  </tr>
+                                </tbody>
+                              </Table>
+                            </Col>
+                          </Row>
+                        ) : (
+                          <Row>
+                            <Col className={`pt-1 ${styles.overviewColumn}`}>
+                              No TDH accrued
+                            </Col>
+                          </Row>
+                        )}
+                      </>
+                    )}
+                    <Row className="pt-2 pb-2">
                       <Col>
-                        <h3>Total Summary</h3>
+                        <h3>Overview</h3>
                       </Col>
                     </Row>
-                    <Row className="pb-2">
+                    <Row className={`pb-2 ${styles.overviewColumn}`}>
                       <Col>
                         First acquired{" "}
-                        {getDateDisplay(
+                        {printMintDate(
                           new Date(firstAcquired.transaction_date)
                         )}
                       </Col>
                     </Row>
-                    {airdropped > 0 && (
-                      <Row>
+                    {airdropped.length > 0 && (
+                      <Row className={`pt-1 ${styles.overviewColumn}`}>
                         <Col>
-                          {airdropped} card{airdropped > 1 && "s"} airdropped
+                          {getTokenCount(airdropped)} card
+                          {getTokenCount(airdropped) > 1 && "s"} airdropped
                         </Col>
                       </Row>
                     )}
                     {bought.length > 0 && (
-                      <Row>
+                      <Row className={`pt-1 ${styles.overviewColumn}`}>
                         <Col>
-                          {bought.length} card{bought.length > 1 && "s"} bought
-                          for {boughtSum} ETH
+                          {getTokenCount(bought)} card
+                          {getTokenCount(bought) > 1 && "s"} bought for{" "}
+                          {boughtSum} ETH
                         </Col>
                       </Row>
                     )}
-                    {transferredIn > 0 && (
-                      <Row>
+                    {transferredIn.length > 0 && (
+                      <Row className={`pt-1 ${styles.overviewColumn}`}>
                         <Col>
-                          {transferredIn} card{transferredIn > 1 && "s"}{" "}
-                          transferred in
+                          {getTokenCount(transferredIn)} card
+                          {getTokenCount(transferredIn) > 1 && "s"} transferred
+                          in
                         </Col>
                       </Row>
                     )}
                     {sold.length > 0 && (
-                      <Row>
+                      <Row className={`pt-1 ${styles.overviewColumn}`}>
                         <Col>
-                          {sold.length} card{sold.length > 1 && "s"} sold for{" "}
-                          {soldSum} eth
+                          {getTokenCount(sold)} card
+                          {getTokenCount(sold) > 1 && "s"} sold for {soldSum}{" "}
+                          eth
                         </Col>
                       </Row>
                     )}
-                    {transferredOut > 0 && (
-                      <Row>
+                    {transferredOut.length > 0 && (
+                      <Row className={`pt-1 ${styles.overviewColumn}`}>
                         <Col>
-                          {transferredOut} card{transferredOut > 1 && "s"}{" "}
-                          transferred out
+                          {getTokenCount(transferredOut)} card
+                          {getTokenCount(transferredOut) > 1 && "s"} transferred
+                          out
                         </Col>
                       </Row>
                     )}
