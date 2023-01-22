@@ -27,6 +27,15 @@ export default function NFTImage(props: Props) {
         className={`text-center ${styles.nftAnimation} ${
           props.transparentBG && styles.transparentBG
         }`}>
+        {props.balance > 0 && (
+          <span
+            className={`${styles.balance}  ${
+              props.height == 650 ? styles.balanceBigger : ""
+            }`}>
+            <span>{props.height == 650 && "SEIZED "}x</span>
+            {props.balance}
+          </span>
+        )}
         <iframe src={props.nft.animation} id={`${props.id && `${props.id}`}`} />
       </Col>
     );
@@ -42,6 +51,15 @@ export default function NFTImage(props: Props) {
         className={`text-center ${styles.nftAnimation} ${
           props.height == 650 ? styles.height650 : styles.height300
         } ${props.transparentBG && styles.transparentBG}`}>
+        {props.balance > 0 && (
+          <span
+            className={`${styles.balance}  ${
+              props.height == 650 ? styles.balanceBigger : ""
+            }`}>
+            <span>{props.height == 650 && "SEIZED "}x</span>
+            {props.balance}
+          </span>
+        )}
         <video
           id={`${props.id && `${props.id}`}`}
           autoPlay

@@ -11,6 +11,7 @@ const nextConfig = {
     ETHERSCAN_API_KEY: process.env.ETHERSCAN_API_KEY,
     ALCHEMY_API_KEY: process.env.ALCHEMY_API_KEY,
     API_ENDPOINT: process.env.REACT_APP_API_ENDPOINT,
+    ACTIVATE_PASSWORD: false,
   },
 };
 

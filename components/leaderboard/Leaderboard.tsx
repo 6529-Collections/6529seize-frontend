@@ -84,6 +84,8 @@ enum Sort {
   memes_cards_sets_minus2 = "memes_cards_sets_minus2",
   memes_cards_sets_genesis = "genesis",
   unique_memes = "unique_memes",
+  unique_memes_szn1 = "unique_memes_szn1",
+  unique_memes_szn2 = "unique_memes_szn2",
 }
 
 enum Content {
@@ -118,6 +120,7 @@ export default function Leaderboard(props: Props) {
     OwnerTagFilter.ALL
   );
   const [focus, setFocus] = useState<Focus>(Focus.TDH);
+  const [hideMuseum, setHideMuseum] = useState(false);
 
   const [pageProps, setPageProps] = useState<Props>(props);
   const [totalResults, setTotalResults] = useState(0);
@@ -158,8 +161,9 @@ export default function Leaderboard(props: Props) {
         tagFilter = "&filter=gradients";
         break;
     }
+    let museumFilter = hideMuseum ? "&hide_museum=true" : "";
     fetch(
-      `${process.env.API_ENDPOINT}/api/owner_metrics?page_size=${props.pageSize}&page=${pageProps.page}&sort=${sort.sort}&sort_direction=${sort.sort_direction}${tagFilter}`
+      `${process.env.API_ENDPOINT}/api/owner_metrics?page_size=${props.pageSize}&page=${pageProps.page}&sort=${sort.sort}&sort_direction=${sort.sort_direction}${tagFilter}${museumFilter}`
     )
       .then((res) => res.json())
       .then((response: DBResponse) => {
@@ -177,7 +181,7 @@ export default function Leaderboard(props: Props) {
         setPageProps({ ...pageProps, page: 1 });
       }
     }
-  }, [sort, ownerTagFilter, router.isReady, content]);
+  }, [sort, ownerTagFilter, router.isReady, content, hideMuseum]);
 
   useEffect(() => {
     fetch(`${process.env.API_ENDPOINT}/api/blocks?page_size=${1}`)
@@ -351,6 +355,18 @@ export default function Leaderboard(props: Props) {
       ) {
         setSort({
           sort: getSetsSort(),
+          sort_direction: sort.sort_direction,
+        });
+      }
+      if (
+        [
+          Sort.unique_memes,
+          Sort.unique_memes_szn1,
+          Sort.unique_memes_szn2,
+        ].includes(sort.sort)
+      ) {
+        setSort({
+          sort: getUniqueMemesSetsSort(),
           sort_direction: sort.sort_direction,
         });
       }
@@ -551,6 +567,25 @@ export default function Leaderboard(props: Props) {
     return "-";
   }
 
+  function getUniqueMemes(lead: TDHMetrics) {
+    let unique;
+    switch (content) {
+      case Content.MEMES1:
+        unique = lead.unique_memes_szn1;
+        break;
+      case Content.MEMES2:
+        unique = lead.unique_memes_szn2;
+        break;
+      default:
+        unique = lead.unique_memes;
+        break;
+    }
+    if (unique > 0) {
+      return `x${numberWithCommas(unique)}`;
+    }
+    return "-";
+  }
+
   function getSets(lead: TDHMetrics) {
     let sets;
     switch (content) {
@@ -627,6 +662,17 @@ export default function Leaderboard(props: Props) {
         return Sort.gradients_balance;
       default:
         return Sort.total_balance;
+    }
+  }
+
+  function getUniqueMemesSetsSort() {
+    switch (content) {
+      case Content.MEMES1:
+        return Sort.unique_memes_szn1;
+      case Content.MEMES2:
+        return Sort.unique_memes_szn2;
+      default:
+        return Sort.unique_memes;
     }
   }
 
@@ -884,7 +930,7 @@ export default function Leaderboard(props: Props) {
         </Col>
         {lastTDH && props.showLastTdh && (
           <Col
-            className={`${styles.lastTDH} d-flex align-items-start justify-content-end`}
+            className={`${styles.lastTDH} d-flex align-items-center justify-content-end`}
             xs={6}>
             * TDH Block&nbsp;
             <a
@@ -898,63 +944,79 @@ export default function Leaderboard(props: Props) {
           </Col>
         )}
       </Row>
-      <Row className="pt-2 pb-2">
-        <Col
-          className={`${styles.pageHeader} text-center pt-1 pb-1`}
-          xs={{ span: 6 }}
-          sm={{ span: 6 }}
-          md={{ span: 3 }}
-          lg={{ span: 3 }}>
-          {printHodlersDropdown()}
-        </Col>
-        <Col
-          className={`${styles.pageHeader} text-center pt-1 pb-1`}
-          xs={{ span: 6 }}
-          sm={{ span: 6 }}
-          md={{ span: 3 }}
-          lg={{ span: 3 }}>
-          {printCollectionsDropdown()}
-        </Col>
-        <Col
-          className={`${styles.pageHeader} pt-1 pb-1`}
-          xs={{ span: 12 }}
-          sm={{ span: 12 }}
-          md={{ span: 6 }}
-          lg={{ span: 6 }}>
-          <div
-            className={`${styles.headerMenuFocus} d-flex justify-content-center align-items-center`}>
-            <span>
-              <span
-                onClick={() => setFocus(Focus.TDH)}
-                className={`${styles.focus} ${
-                  focus != Focus.TDH ? styles.disabled : ""
-                }`}>
-                {Focus.TDH}
+      {!showViewAll && (
+        <Row className="pt-2 pb-2">
+          <Col
+            className={`${styles.pageHeader} text-center`}
+            xs={{ span: 6 }}
+            sm={{ span: 6 }}
+            md={{ span: 3 }}
+            lg={{ span: 3 }}>
+            {printHodlersDropdown()}
+          </Col>
+          <Col
+            className={`${styles.pageHeader} text-center`}
+            xs={{ span: 6 }}
+            sm={{ span: 6 }}
+            md={{ span: 3 }}
+            lg={{ span: 3 }}>
+            {printCollectionsDropdown()}
+          </Col>
+          <Col
+            className={`${styles.pageHeader}`}
+            xs={{ span: 12 }}
+            sm={{ span: 12 }}
+            md={{ span: 4 }}
+            lg={{ span: 4 }}>
+            <div
+              className={`${styles.headerMenuFocus} d-flex justify-content-center align-items-center`}>
+              <span>
+                <span
+                  onClick={() => setFocus(Focus.TDH)}
+                  className={`${styles.focus} ${
+                    focus != Focus.TDH ? styles.disabled : ""
+                  }`}>
+                  {Focus.TDH}
+                </span>
               </span>
-            </span>
-            &nbsp;&nbsp;|&nbsp;&nbsp;
-            <span>
-              <span
-                onClick={() => setFocus(Focus.INTERACTIONS)}
-                className={`${styles.focus} ${
-                  focus != Focus.INTERACTIONS ? styles.disabled : ""
-                }`}>
-                {Focus.INTERACTIONS}
+              &nbsp;&nbsp;|&nbsp;&nbsp;
+              <span>
+                <span
+                  onClick={() => setFocus(Focus.INTERACTIONS)}
+                  className={`${styles.focus} ${
+                    focus != Focus.INTERACTIONS ? styles.disabled : ""
+                  }`}>
+                  {Focus.INTERACTIONS}
+                </span>
               </span>
-            </span>
-            &nbsp;&nbsp;|&nbsp;&nbsp;
-            <span>
-              <span
-                onClick={() => setFocus(Focus.SETS)}
-                className={`${styles.focus} ${
-                  focus != Focus.SETS ? styles.disabled : ""
-                }`}>
-                {Focus.SETS}
+              &nbsp;&nbsp;|&nbsp;&nbsp;
+              <span>
+                <span
+                  onClick={() => setFocus(Focus.SETS)}
+                  className={`${styles.focus} ${
+                    focus != Focus.SETS ? styles.disabled : ""
+                  }`}>
+                  {Focus.SETS}
+                </span>
               </span>
-            </span>
-          </div>
-        </Col>
-      </Row>
+            </div>
+          </Col>
+          <Col
+            className={`${styles.pageHeader} text-center`}
+            xs={{ span: 12 }}
+            sm={{ span: 12 }}
+            md={{ span: 2 }}
+            lg={{ span: 2 }}>
+            <Form.Check
+              type="switch"
+              checked={hideMuseum}
+              className={`${styles.museumToggle}`}
+              label={`Hide 6529Museum`}
+              onChange={() => setHideMuseum(!hideMuseum)}
+            />
+          </Col>
+        </Row>
+      )}
       <Row className={`${styles.scrollContainer} pt-2`}>
         <Col>
           {leaderboard && leaderboard.length > 0 && (
@@ -962,7 +1024,12 @@ export default function Leaderboard(props: Props) {
               <thead>
                 <tr>
                   <th className={styles.rank}>Rank</th>
-                  <th className={styles.hodler}>HODLer</th>
+                  <th className={styles.hodler}>
+                    HODLer&nbsp;&nbsp;
+                    <span className={styles.totalResults}>
+                      x{totalResults}
+                    </span>{" "}
+                  </th>
                   {focus == Focus.TDH && (
                     <th className={styles.tdhSub}>
                       <span className="d-flex align-items-center justify-content-center">
@@ -1238,13 +1305,13 @@ export default function Leaderboard(props: Props) {
                               icon="square-caret-up"
                               onClick={() =>
                                 setSort({
-                                  sort: Sort.unique_memes,
+                                  sort: getUniqueMemesSetsSort(),
                                   sort_direction: SortDirection.ASC,
                                 })
                               }
                               className={`${styles.caret} ${
                                 sort.sort_direction != SortDirection.ASC ||
-                                sort.sort != Sort.unique_memes
+                                sort.sort != getUniqueMemesSetsSort()
                                   ? styles.disabled
                                   : ""
                               }`}
@@ -1253,13 +1320,13 @@ export default function Leaderboard(props: Props) {
                               icon="square-caret-down"
                               onClick={() =>
                                 setSort({
-                                  sort: Sort.unique_memes,
+                                  sort: getUniqueMemesSetsSort(),
                                   sort_direction: SortDirection.DESC,
                                 })
                               }
                               className={`${styles.caret} ${
                                 sort.sort_direction != SortDirection.DESC ||
-                                sort.sort != Sort.unique_memes
+                                sort.sort != getUniqueMemesSetsSort()
                                   ? styles.disabled
                                   : ""
                               }`}
@@ -1711,7 +1778,7 @@ export default function Leaderboard(props: Props) {
                         {focus == Focus.TDH && (
                           <>
                             <td className={styles.tdhSub}>
-                              {numberWithCommas(Math.round(lead.unique_memes))}
+                              {getUniqueMemes(lead)}
                             </td>
                             <td className={styles.tdhSub}>{getSets(lead)}</td>
                             <td className={styles.tdhSub}>

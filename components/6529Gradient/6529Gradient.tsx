@@ -4,13 +4,12 @@ import { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 import { Container, Row, Col } from "react-bootstrap";
 import { useAccount } from "wagmi";
-import { GRADIENT_CONTRACT, MEMES_CONTRACT } from "../../constants";
+import { GRADIENT_CONTRACT } from "../../constants";
 import { DBResponse } from "../../entities/IDBResponse";
 import { NFT } from "../../entities/INFT";
-import { Owner, OwnerRank } from "../../entities/IOwner";
+import { Owner } from "../../entities/IOwner";
 import { SortDirection } from "../../entities/ISort";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { TDH } from "../../entities/ITDH";
 import { areEqualAddresses, numberWithCommas } from "../../helpers/Helpers";
 import { useRouter } from "next/router";
 
