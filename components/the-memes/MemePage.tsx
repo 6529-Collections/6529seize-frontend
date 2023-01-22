@@ -81,6 +81,8 @@ export default function MemePage() {
   const [collectionRank, setCollectionRank] = useState(-1);
   const [totalNftCount, setTotalNftCount] = useState(-1);
 
+  const [userLoaded, setUserLoaded] = useState(false);
+
   const liveTab = {
     focus: MEME_FOCUS.LIVE,
     title: "Live",
@@ -183,12 +185,13 @@ export default function MemePage() {
           let countOut = 0;
           response.data.map((d: Transaction) => {
             if (areEqualAddresses(address, d.from_address)) {
-              countOut += 1;
+              countOut += d.token_count;
             }
             if (areEqualAddresses(address, d.to_address)) {
-              countIn += 1;
+              countIn += d.token_count;
             }
           });
+          setUserLoaded(true);
           setNftBalance(countIn - countOut);
         });
     }
@@ -559,7 +562,7 @@ export default function MemePage() {
                     </Col>
                   </Row>
                 )}
-                {nftBalance == 0 && address && nft && (
+                {nftBalance == 0 && address && nft && userLoaded && (
                   <Row className="pt-2">
                     <Col>
                       <h3>You don&apos;t own any editions of Card {nft.id}</h3>
