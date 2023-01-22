@@ -1790,9 +1790,11 @@ export default function Leaderboard(props: Props) {
                               {numberWithCommas(
                                 Math.round(getDaysHodledTdh(lead))
                               )}
-                              <span className={styles.tdhBoost}>
-                                &nbsp;(x{lead.boost})
-                              </span>
+                              {lead.boost && (
+                                <span className={styles.tdhBoost}>
+                                  &nbsp;(x{lead.boost})
+                                </span>
+                              )}
                             </td>
                             <td className={styles.tdhSub}>
                               {numberWithCommas(

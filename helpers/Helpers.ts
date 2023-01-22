@@ -42,7 +42,7 @@ export function fromGWEI(from: number) {
 }
 
 export function numberWithCommas(x: number) {
-  if (x == 0) return "-";
+  if (x == null || x == 0) return "-";
   return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 }
 
