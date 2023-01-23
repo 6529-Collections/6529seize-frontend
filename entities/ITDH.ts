@@ -97,6 +97,11 @@ export interface TDHMetrics extends TDH {
   transfers_out_memes_season1: number;
   transfers_out_memes_season2: number;
   transfers_out_gradients: number;
+  dense_rank_balance: number;
+  dense_rank_balance_memes: number;
+  dense_rank_balance_memes_season1: number;
+  dense_rank_balance_memes_season2: number;
+  dense_rank_balance_gradients: number;
 }
 
 export interface RankedTDH extends TDH {

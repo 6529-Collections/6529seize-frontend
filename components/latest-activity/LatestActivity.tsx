@@ -9,6 +9,7 @@ import LatestActivityRow from "./LatestActivityRow";
 import { useRouter } from "next/router";
 import { NFT } from "../../entities/INFT";
 import { areEqualAddresses } from "../../helpers/Helpers";
+import { fetchAllPages, fetchUrl } from "../../services/6529api";
 
 const Address = dynamic(() => import("../address/Address"), { ssr: false });
 
@@ -53,41 +54,27 @@ export default function LatestActivity(props: Props) {
         url += `&filter=airdrops`;
         break;
     }
-    fetch(url)
-      .then((res) => res.json())
-      .then((response: DBResponse) => {
-        setTotalResults(response.count);
-        setNext(response.next);
-        setActivity(response.data);
-      });
+    fetchUrl(url).then((response: DBResponse) => {
+      setTotalResults(response.count);
+      setNext(response.next);
+      setActivity(response.data);
+    });
   }, [page, typeFilter]);
 
   useEffect(() => {
-    async function fetchNfts(url: string, mynfts: NFT[]) {
-      return fetch(url)
-        .then((res) => res.json())
-        .then((response: DBResponse) => {
-          if (response.next) {
-            fetchNfts(response.next, [...mynfts].concat(response.data));
-          } else {
-            const newnfts = [...mynfts]
-              .concat(response.data)
-              .filter((value, index, self) => {
-                return self.findIndex((v) => v.id === value.id) === index;
-              });
-
-            setNfts(
-              [...newnfts].map((n) => {
-                return n;
-              })
-            );
-            setNftsLoaded(true);
-          }
-        });
+    async function fetchNfts(url: string) {
+      fetchAllPages(url).then((newnfts: NFT[]) => {
+        setNfts(
+          [...newnfts].map((n) => {
+            return n;
+          })
+        );
+        setNftsLoaded(true);
+      });
     }
     if (router.isReady) {
       const initialUrlNfts = `${process.env.API_ENDPOINT}/api/nfts`;
-      fetchNfts(initialUrlNfts, []);
+      fetchNfts(initialUrlNfts);
     }
   }, [router.isReady]);
 

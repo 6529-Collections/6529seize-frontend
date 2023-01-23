@@ -158,7 +158,14 @@ export default function Header() {
           <Row className="pt-3 pb-3">
             <Col>
               <a href="/6529-gradient?sort=id&sort_dir=ASC">
-                <h3>6529 Gradient</h3>
+                <h3>Gradient</h3>
+              </a>
+            </Col>
+          </Row>
+          <Row className="pt-3 pb-3">
+            <Col>
+              <a href="/rememes">
+                <h3>ReMemes</h3>
               </a>
             </Col>
           </Row>
@@ -280,7 +287,7 @@ export default function Header() {
                 <Row className="pt-3">
                   <Col>
                     <a href="/about?section=6529-gradient">
-                      <h3>6529 Gradient</h3>
+                      <h3>Gradient</h3>
                     </a>
                   </Col>
                 </Row>
@@ -393,7 +400,14 @@ export default function Header() {
                                   : ""
                               }`}
                               href="/6529-gradient?sort=id&sort_dir=ASC">
-                              6529 Gradient
+                              Gradient
+                            </Nav.Link>
+                            <Nav.Link
+                              className={`${styles.mainNavLink} ${
+                                router.pathname == "/rememes" ? "active" : ""
+                              }`}
+                              href="/rememes">
+                              ReMemes
                             </Nav.Link>
                             <NavDropdown
                               title="Community"
