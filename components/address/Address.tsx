@@ -1,5 +1,5 @@
 import styles from "./Address.module.scss";
-import { formatAddress } from "../../helpers/Helpers";
+import { formatAddress, numberWithCommas } from "../../helpers/Helpers";
 import { useEnsName } from "wagmi";
 import { MANIFOLD, SIX529_MUSEUM } from "../../constants";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -18,6 +18,8 @@ interface Props {
     memesBalance: number;
     genesis: number;
     gradientsBalance: number;
+    tdh_rank?: number;
+    balance_rank?: number;
   };
   expandedTags?: boolean;
   isUserPage?: boolean;
@@ -123,13 +125,32 @@ export default function Address(props: Props) {
       )}
       {props.tags && (
         <span className={styles.noWrap}>
+          {(props.tags.tdh_rank || props.tags.balance_rank) && (
+            <>
+              {props.tags.balance_rank &&
+                props.tags.balance_rank > 0 &&
+                props.expandedTags && (
+                  <span className={`${styles.tag} ${styles.rankTag}`}>
+                    Cards Rank #{numberWithCommas(props.tags.balance_rank)}
+                  </span>
+                )}
+              {props.tags.tdh_rank &&
+                props.tags.tdh_rank > 0 &&
+                props.expandedTags && (
+                  <span className={`${styles.tag} ${styles.rankTag}`}>
+                    TDH Rank #{numberWithCommas(props.tags.tdh_rank)}
+                  </span>
+                )}
+              <br />
+            </>
+          )}
           {props.tags.memesCardsSets > 0 ? (
-            <span className={styles.memesCardsSetsTag}>
+            <span className={`${styles.tag} ${styles.memesCardsSetsTag}`}>
               {props.tags.memesCardsSets}x Memes Set
               {props.tags.memesCardsSets > 1 ? `s` : ""}
             </span>
           ) : props.tags.memesBalance > 0 ? (
-            <span className={styles.memesTag}>
+            <span className={`${styles.tag} ${styles.memesTag}`}>
               {props.tags.memesBalance}x Meme
               {props.tags.memesBalance > 1 ? `s` : ""}
               {props.tags.genesis > 0 ? ` (+Genesis)` : ""}
@@ -138,7 +159,7 @@ export default function Address(props: Props) {
             ""
           )}
           {props.tags.gradientsBalance > 0 && !props.expandedTags ? (
-            <span className={styles.gradientsTag}>
+            <span className={`${styles.tag} ${styles.gradientsTag}`}>
               {props.tags.gradientsBalance}x Gradient
               {props.tags.gradientsBalance > 1 ? `s` : ""}
             </span>
@@ -146,20 +167,22 @@ export default function Address(props: Props) {
             <>
               {props.tags.memesCardsSetS1 > 0 &&
                 (props.tags.memesCardsSets == 0 || props.expandedTags) && (
-                  <span className={styles.memesCardsSetsS1Tag}>
+                  <span
+                    className={`${styles.tag} ${styles.memesCardsSetsS1Tag}`}>
                     {props.tags.memesCardsSetS1}x SZN1 Set
                     {props.tags.memesCardsSets > 1 ? `s` : ""}
                   </span>
                 )}
               {props.tags.memesCardsSetS2 > 0 &&
                 (props.tags.memesCardsSets == 0 || props.expandedTags) && (
-                  <span className={styles.memesCardsSetsS2Tag}>
+                  <span
+                    className={`${styles.tag} ${styles.memesCardsSetsS2Tag}`}>
                     {props.tags.memesCardsSetS2}x SZN2 Set
                     {props.tags.memesCardsSets > 1 ? `s` : ""}
                   </span>
                 )}
               {props.tags.gradientsBalance > 0 && props.expandedTags && (
-                <span className={styles.gradientsTag}>
+                <span className={`${styles.tag} ${styles.gradientsTag}`}>
                   {props.tags.gradientsBalance}x Gradient
                   {props.tags.gradientsBalance > 1 ? `s` : ""}
                 </span>

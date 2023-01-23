@@ -39,87 +39,49 @@
   cursor: copy;
 }
 
-.memesTag {
+.tag {
   font-family: $main-font;
   font-size: $font-size;
   color: $font-color !important;
   margin-right: 10px;
   padding: 2px 5px;
-  background-color: $salmon;
   white-space: nowrap;
   box-shadow: 0 4px 4px rgb(0 0 0 / 25%);
+}
+
+.memesTag {
+  background-color: $salmon;
 }
 
 .memesCardsSetsTag {
-  font-family: $main-font;
-  font-size: $font-size;
-  color: $font-color !important;
-  margin-right: 10px;
-  padding: 2px 5px;
   background-color: $pink;
-  white-space: nowrap;
-  box-shadow: 0 4px 4px rgb(0 0 0 / 25%);
 }
 
 .memesCardsSetsS1Tag {
-  font-family: $main-font;
-  font-size: $font-size;
-  color: $font-color !important;
-  margin-right: 10px;
-  padding: 2px 5px;
   background-color: $green;
-  white-space: nowrap;
-  box-shadow: 0 4px 4px rgb(0 0 0 / 25%);
 }
 
 .memesCardsSetsS2Tag {
-  font-family: $main-font;
-  font-size: $font-size;
-  color: $font-color !important;
-  margin-right: 10px;
-  padding: 2px 5px;
   background-color: $raspberry;
-  white-space: nowrap;
-  box-shadow: 0 4px 4px rgb(0 0 0 / 25%);
 }
 
 .gradientsTag {
-  font-family: $main-font;
-  font-size: $font-size;
-  color: $font-color !important;
-  margin-right: 10px;
-  padding: 2px 5px;
   background-color: $blue;
-  white-space: nowrap;
-  box-shadow: 0 4px 4px rgb(0 0 0 / 25%);
 }
 
-.breakTags {
-  display: none;
+.rankTag {
+  background-color: $off-white;
+  color: $dark-grey !important;
 }
 
 @media only screen and (max-width: 1200px) {
-  .memesTag,
-  .memesCardsSetsTag,
-  .gradientsTag,
-  .memesCardsSetsS1Tag,
-  .memesCardsSetsS2Tag {
+  .tag {
     font-size: $font-smaller !important;
   }
 }
 
-@media only screen and (max-width: 1600px) {
-  .breakTags {
-    display: contents;
-  }
-}
-
 @media only screen and (max-width: 1000px) {
-  .memesTag,
-  .memesCardsSetsTag,
-  .gradientsTag,
-  .memesCardsSetsS1Tag,
-  .memesCardsSetsS2Tag {
+  .tag {
     font-size: $font-smallest !important;
   }
 }

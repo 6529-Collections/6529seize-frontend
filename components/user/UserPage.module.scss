@@ -97,7 +97,13 @@
     }
   }
 
-  tr:nth-child(2) {
+  tr:nth-child(2),
+  tr:nth-child(3),
+  tr:nth-child(6) {
     border-bottom: none !important;
   }
+}
+
+.primaryTableGap {
+  height: 15px;
 }

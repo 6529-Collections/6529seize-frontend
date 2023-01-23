@@ -13,7 +13,7 @@ import { SortDirection } from "../../entities/ISort";
 import { Crumb } from "../breadcrumb/Breadcrumb";
 import { getDateDisplay, numberWithCommas } from "../../helpers/Helpers";
 import { useRouter } from "next/router";
-import { fetchAllPages } from "../../services/6529api";
+import { fetchAllPages, fetchUrl } from "../../services/6529api";
 
 const NFTImage = dynamic(() => import("../nft-image/NFTImage"), {
   ssr: false,
@@ -169,13 +169,11 @@ export default function TheMemesComponent(props: Props) {
 
   useEffect(() => {
     if (address && nftMetas.length > 0) {
-      fetch(
+      fetchUrl(
         `${process.env.API_ENDPOINT}/api/owners?contract=${MEMES_CONTRACT}&wallet=${address}`
-      )
-        .then((res) => res.json())
-        .then((response: DBResponse) => {
-          setNftBalances(response.data);
-        });
+      ).then((response: DBResponse) => {
+        setNftBalances(response.data);
+      });
     } else {
       setNftBalances([]);
     }

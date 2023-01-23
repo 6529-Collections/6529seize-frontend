@@ -29,8 +29,9 @@ import Download from "../download/Download";
 import LatestActivityRow from "../latest-activity/LatestActivityRow";
 import { Transaction } from "../../entities/ITransaction";
 import { useRouter } from "next/router";
-import { TDH } from "../../entities/ITDH";
+import { TDHMetrics } from "../../entities/ITDH";
 import { TwitterIcon, TwitterShareButton } from "react-share";
+import { fetchUrl } from "../../services/6529api";
 
 const NFTImage = dynamic(() => import("../nft-image/NFTImage"), {
   ssr: false,
@@ -73,7 +74,7 @@ export default function MemePage() {
   const [nftBalance, setNftBalance] = useState<number>(0);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
 
-  const [myOwner, setMyOwner] = useState<TDH>();
+  const [myOwner, setMyOwner] = useState<TDHMetrics>();
   const [myTDH, setMyTDH] = useState<NftTDH>();
   const [myRank, setMyRank] = useState<NftRank>();
 
@@ -139,112 +140,106 @@ export default function MemePage() {
 
   useEffect(() => {
     if (nftId) {
-      fetch(`${process.env.API_ENDPOINT}/api/memes_extended_data?id=${nftId}`)
-        .then((res) => res.json())
-        .then((response: DBResponse) => {
-          const nftMetas = response.data;
-          if (nftMetas.length == 1) {
-            setNftMeta(nftMetas[0]);
-            fetch(
-              `${process.env.API_ENDPOINT}/api/nfts?id=${nftId}&contract=${MEMES_CONTRACT}`
-            )
-              .then((res) => res.json())
-              .then((response: DBResponse) => {
-                setNft(response.data[0]);
-                setBreadcrumbs([
-                  { display: "Home", href: "/" },
-                  { display: "The Memes", href: "/the-memes" },
-                  {
-                    display: `SZN${nftMetas[0].season}`,
-                    href: `/the-memes?szn=${nftMetas[0].season}&sort=age&sort_dir=ASC`,
-                  },
-                  { display: `Card ${nftId} - ${response.data[0].name}` },
-                ]);
-              });
-          } else {
-            setNftMeta(undefined);
+      fetchUrl(
+        `${process.env.API_ENDPOINT}/api/memes_extended_data?id=${nftId}`
+      ).then((response: DBResponse) => {
+        const nftMetas = response.data;
+        if (nftMetas.length == 1) {
+          setNftMeta(nftMetas[0]);
+          fetchUrl(
+            `${process.env.API_ENDPOINT}/api/nfts?id=${nftId}&contract=${MEMES_CONTRACT}`
+          ).then((response: DBResponse) => {
+            setNft(response.data[0]);
             setBreadcrumbs([
               { display: "Home", href: "/" },
               { display: "The Memes", href: "/the-memes" },
-              { display: `${nftId}` },
+              {
+                display: `SZN${nftMetas[0].season}`,
+                href: `/the-memes?szn=${nftMetas[0].season}&sort=age&sort_dir=ASC`,
+              },
+              { display: `Card ${nftId} - ${response.data[0].name}` },
             ]);
-          }
-        });
+          });
+        } else {
+          setNftMeta(undefined);
+          setBreadcrumbs([
+            { display: "Home", href: "/" },
+            { display: "The Memes", href: "/the-memes" },
+            { display: `${nftId}` },
+          ]);
+        }
+      });
     }
   }, [nftId]);
 
   useEffect(() => {
     if (address && nftId) {
-      fetch(
+      fetchUrl(
         `${process.env.API_ENDPOINT}/api/transactions?contract=${MEMES_CONTRACT}&wallet=${address}&id=${nftId}`
-      )
-        .then((res) => res.json())
-        .then((response: DBResponse) => {
-          setTransactions(response.data);
-          let countIn = 0;
-          let countOut = 0;
-          response.data.map((d: Transaction) => {
-            if (areEqualAddresses(address, d.from_address)) {
-              countOut += d.token_count;
-            }
-            if (areEqualAddresses(address, d.to_address)) {
-              countIn += d.token_count;
-            }
-          });
-          setUserLoaded(true);
-          setNftBalance(countIn - countOut);
+      ).then((response: DBResponse) => {
+        setTransactions(response.data);
+        let countIn = 0;
+        let countOut = 0;
+        response.data.map((d: Transaction) => {
+          if (areEqualAddresses(address, d.from_address)) {
+            countOut += d.token_count;
+          }
+          if (areEqualAddresses(address, d.to_address)) {
+            countIn += d.token_count;
+          }
         });
+        setUserLoaded(true);
+        setNftBalance(countIn - countOut);
+      });
     }
   }, [nftId, address]);
 
   useEffect(() => {
     if (address && nftId) {
-      fetch(`${process.env.API_ENDPOINT}/api/tdh?wallet=${address}`)
-        .then((res) => res.json())
-        .then((response: DBResponse) => {
-          if (response.data.length > 0) {
-            const mine: TDH = response.data[0];
-            setMyOwner(mine);
-            setMyTDH(mine.memes.find((m) => m.id == parseInt(nftId)));
-            setMyRank(mine.memes_ranks.find((m) => m.id == parseInt(nftId)));
-          }
-        });
+      fetchUrl(
+        `${process.env.API_ENDPOINT}/api/tdh/${MEMES_CONTRACT}/${nftId}?wallet=${address}`
+      ).then((response: DBResponse) => {
+        if (response.data.length > 0) {
+          const mine: TDHMetrics = response.data[0];
+          setMyOwner(mine);
+          setMyTDH(mine.memes.find((m) => m.id == parseInt(nftId)));
+          setMyRank(mine.memes_ranks.find((m) => m.id == parseInt(nftId)));
+        }
+      });
     }
   }, [address, nftId]);
 
   useEffect(() => {
-    fetch(`${process.env.API_ENDPOINT}/api/nfts`)
-      .then((res) => res.json())
-      .then((response: DBResponse) => {
+    fetchUrl(`${process.env.API_ENDPOINT}/api/nfts`).then(
+      (response: DBResponse) => {
         setTotalNftCount(response.count);
-      });
+      }
+    );
   }, []);
 
   useEffect(() => {
     async function fetchNfts(url: string, mynfts: NFT[]) {
-      return fetch(url)
-        .then((res) => res.json())
-        .then((response: DBResponse) => {
-          if (response.next) {
-            fetchNfts(response.next, [...mynfts].concat(response.data));
-          } else {
-            const newnfts = [...mynfts]
-              .concat(response.data)
-              .filter((value, index, self) => {
-                return self.findIndex((v) => v.id === value.id) === index;
-              });
+      return fetchUrl(url).then((response: DBResponse) => {
+        if (response.next) {
+          fetchNfts(response.next, [...mynfts].concat(response.data));
+        } else {
+          const newnfts = [...mynfts]
+            .concat(response.data)
+            .filter((value, index, self) => {
+              return self.findIndex((v) => v.id === value.id) === index;
+            });
 
-            const rankedNFTs = newnfts.sort((a, b) =>
-              a.tdh_rank > b.tdh_rank ? 1 : -1
+          const rankedNFTs = newnfts.sort((a, b) =>
+            a.tdh_rank > b.tdh_rank ? 1 : -1
+          );
+          setCollectionCount(newnfts.length);
+          if (nftId) {
+            setCollectionRank(
+              rankedNFTs.map((r) => r.id).indexOf(parseInt(nftId))
             );
-            setCollectionCount(newnfts.length);
-            if (nftId) {
-              setCollectionRank(
-                rankedNFTs.map((r) => r.id).indexOf(parseInt(nftId))
-              );
-            }
           }
-        });
+        }
+      });
     }
     if (router.isReady && nftId) {
       const initialUrlNfts = `${process.env.API_ENDPOINT}/api/nfts?contract=${MEMES_CONTRACT}`;
@@ -571,14 +566,37 @@ export default function MemePage() {
                 )}
                 {transactions.length > 0 && address && (
                   <>
-                    {nftBalance > 0 && (
+                    {nftBalance > 0 && myOwner && (
                       <>
                         <Row className="pt-2">
-                          <Col>
+                          {/* <Col>
                             <h3 className="font-color">
                               You Own {nftBalance} edition
-                              {nftBalance > 1 && "s"}
+                              {nftBalance > 1 && "s"} -{" "}
+                              {myOwner.dense_rank_balance}
                             </h3>
+                          </Col> */}
+                          <Col
+                            xs={{ span: 12 }}
+                            sm={{ span: 12 }}
+                            md={{ span: 12 }}
+                            lg={{ span: 8 }}>
+                            <Table bordered={false}>
+                              <tbody>
+                                <tr className={`${styles.overviewColumn}`}>
+                                  <td>Cards</td>
+                                  <td className="text-right">{`x${nftBalance}`}</td>
+                                </tr>
+                                <tr className={`pt-1 ${styles.overviewColumn}`}>
+                                  <td>Rank</td>
+                                  <td className="text-right">
+                                    {`#${numberWithCommas(
+                                      myOwner.dense_rank_balance
+                                    )}`}
+                                  </td>
+                                </tr>
+                              </tbody>
+                            </Table>
                           </Col>
                         </Row>
                         {myRank && nft && myTDH ? (
@@ -590,24 +608,24 @@ export default function MemePage() {
                               lg={{ span: 8 }}>
                               <Table bordered={false}>
                                 <tbody>
-                                  <tr className={`${styles.overviewColumn}`}>
-                                    <td>Rank</td>
-                                    <td className="text-right">
-                                      #{myRank?.rank}
-                                    </td>
-                                  </tr>
-                                  <tr
-                                    className={`pt-1 ${styles.overviewColumn}`}>
-                                    <td>Unweighted TDH</td>
-                                    <td className="text-right">
-                                      {myTDH.tdh__raw}
-                                    </td>
-                                  </tr>
                                   <tr
                                     className={`pt-1 ${styles.overviewColumn}`}>
                                     <td>TDH</td>
                                     <td className="text-right">
                                       {Math.round(myTDH.tdh)}
+                                    </td>
+                                  </tr>
+                                  {/* <tr
+                                    className={`pt-1 ${styles.overviewColumn}`}>
+                                    <td>Unweighted TDH</td>
+                                    <td className="text-right">
+                                      {myTDH.tdh__raw}
+                                    </td>
+                                  </tr> */}
+                                  <tr className={`${styles.overviewColumn}`}>
+                                    <td>Rank</td>
+                                    <td className="text-right">
+                                      #{myRank?.rank}
                                     </td>
                                   </tr>
                                 </tbody>
@@ -1312,7 +1330,7 @@ export default function MemePage() {
                     <TwitterShareButton
                       className="twitter-share-button"
                       url={window.location.href.split("?")[0]}
-                      title={`Meme Card #${nft.id} \n${nft.name}\nby ${nft.artist}\n#6529Seize\n\n`}>
+                      title={`Meme Card #${nft.id} \n${nft.name}\nby ${nft.artist}\n#6529SEIZE\n\n`}>
                       <TwitterIcon
                         size={30}
                         round
