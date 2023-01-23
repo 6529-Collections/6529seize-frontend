@@ -1,4 +1,4 @@
-import styles from "./User.module.scss";
+import styles from "./UserPage.module.scss";
 
 import { Col, Container, Form, Row, Table } from "react-bootstrap";
 import { useEffect, useState } from "react";
@@ -26,6 +26,7 @@ import { useAccount } from "wagmi";
 import { SortDirection } from "../../entities/ISort";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { TwitterShareButton, TwitterIcon } from "react-share";
+import { fetchUrl } from "../../services/6529api";
 
 const NFTImage = dynamic(() => import("../nft-image/NFTImage"), {
   ssr: false,
@@ -100,77 +101,75 @@ export default function UserPage(props: Props) {
   }
 
   useEffect(() => {
-    fetch(`${process.env.API_ENDPOINT}/api/blocks?page_size=${1}`)
-      .then((res) => res.json())
-      .then((response: DBResponse) => {
+    fetchUrl(`${process.env.API_ENDPOINT}/api/blocks?page_size=${1}`).then(
+      (response: DBResponse) => {
         if (response.data.length > 0) {
           setLastTDH({
             block: response.data[0].block_number,
             date: new Date(response.data[0].timestamp),
           });
         }
-      });
+      }
+    );
   }, []);
 
   useEffect(() => {
     async function fetchOwned(url: string, myowned: Owner[]) {
-      return fetch(url)
-        .then((res) => res.json())
-        .then((response: DBResponse) => {
-          if (response.next) {
-            fetchOwned(response.next, [...myowned].concat(response.data));
+      return fetchUrl(url).then((response: DBResponse) => {
+        if (response.next) {
+          fetchOwned(response.next, [...myowned].concat(response.data));
+        } else {
+          const newOwned = [...myowned].concat(response.data);
+          if (newOwned.length > 0) {
+            setOwned(newOwned);
+            setOwnerAddress(newOwned[0].wallet);
+            let walletDisplay = newOwned[0].wallet as string;
+            if (
+              walletDisplay &&
+              areEqualAddresses(walletDisplay, SIX529_MUSEUM)
+            ) {
+              walletDisplay = "6529Museum";
+            }
+            if (walletDisplay && areEqualAddresses(walletDisplay, MANIFOLD)) {
+              walletDisplay = "Manifold Gallery";
+            }
+            walletDisplay = newOwned[0].wallet_display
+              ? newOwned[0].wallet_display
+              : walletDisplay.startsWith("0x")
+              ? ""
+              : walletDisplay;
+            if (walletDisplay) {
+              setOwnerENS(walletDisplay);
+              router.push(walletDisplay.replace(" ", "-"), undefined, {
+                shallow: true,
+              });
+            }
+
+            let walletCrumb = walletDisplay
+              ? walletDisplay
+              : newOwned[0].wallet;
+
+            setBreadcrumbs([
+              { display: "Home", href: "/" },
+              {
+                display: walletCrumb,
+              },
+            ]);
+            setOwnerLoaded(true);
           } else {
-            const newOwned = [...myowned].concat(response.data);
-            if (newOwned.length > 0) {
-              setOwned(newOwned);
-              setOwnerAddress(newOwned[0].wallet);
-              let walletDisplay = newOwned[0].wallet as string;
-              if (
-                walletDisplay &&
-                areEqualAddresses(walletDisplay, SIX529_MUSEUM)
-              ) {
-                walletDisplay = "6529Museum";
-              }
-              if (walletDisplay && areEqualAddresses(walletDisplay, MANIFOLD)) {
-                walletDisplay = "Manifold Gallery";
-              }
-              walletDisplay = newOwned[0].wallet_display
-                ? newOwned[0].wallet_display
-                : walletDisplay.startsWith("0x")
-                ? ""
-                : walletDisplay;
-              if (walletDisplay) {
-                setOwnerENS(walletDisplay);
-                router.push(walletDisplay.replace(" ", "-"), undefined, {
-                  shallow: true,
-                });
-              }
-
-              let walletCrumb = walletDisplay
-                ? walletDisplay
-                : newOwned[0].wallet;
-
-              setBreadcrumbs([
-                { display: "Home", href: "/" },
-                {
-                  display: walletCrumb,
-                },
-              ]);
+            if (user.startsWith("0x") && user.length > 20) {
+              setOwnerAddress(user as `0x${string}`);
+              setOwnerLoaded(true);
+            } else if (user.endsWith(".eth")) {
+              setOwnerAddress(user as `0x${string}`);
+              setOwnerENS(user);
               setOwnerLoaded(true);
             } else {
-              if (user.startsWith("0x") && user.length > 20) {
-                setOwnerAddress(user as `0x${string}`);
-                setOwnerLoaded(true);
-              } else if (user.endsWith(".eth")) {
-                setOwnerAddress(user as `0x${string}`);
-                setOwnerENS(user);
-                setOwnerLoaded(true);
-              } else {
-                window.location.href = "/404";
-              }
+              window.location.href = "/404";
             }
           }
-        });
+        }
+      });
     }
 
     if (user && router.isReady) {
@@ -181,17 +180,15 @@ export default function UserPage(props: Props) {
 
   useEffect(() => {
     async function fetchNfts(url: string, mynfts: NFT[]) {
-      return fetch(url)
-        .then((res) => res.json())
-        .then((response: DBResponse) => {
-          if (response.next) {
-            fetchNfts(response.next, [...mynfts].concat(response.data));
-          } else {
-            const newnfts = [...mynfts].concat(response.data);
-            setNfts(newnfts);
-            setNftsLoaded(true);
-          }
-        });
+      return fetchUrl(url).then((response: DBResponse) => {
+        if (response.next) {
+          fetchNfts(response.next, [...mynfts].concat(response.data));
+        } else {
+          const newnfts = [...mynfts].concat(response.data);
+          setNfts(newnfts);
+          setNftsLoaded(true);
+        }
+      });
     }
 
     if (ownerAddress && router.isReady) {
@@ -213,13 +210,11 @@ export default function UserPage(props: Props) {
   useEffect(() => {
     async function fetchTDH() {
       const url = `${process.env.API_ENDPOINT}/api/owner_metrics/?wallet=${ownerAddress}`;
-      return fetch(url)
-        .then((res) => res.json())
-        .then((response: DBResponse) => {
-          if (response && response.data.length == 1) {
-            setTDH(response.data[0]);
-          }
-        });
+      return fetchUrl(url).then((response: DBResponse) => {
+        if (response && response.data.length == 1) {
+          setTDH(response.data[0]);
+        }
+      });
     }
 
     if (ownerAddress && router.isReady) {
@@ -229,13 +224,11 @@ export default function UserPage(props: Props) {
 
   useEffect(() => {
     async function fetchOwnerTags(url: string) {
-      return fetch(url)
-        .then((res) => res.json())
-        .then((response: DBResponse) => {
-          if (response.data.length == 1) {
-            setOwnerTags(response.data[0]);
-          }
-        });
+      return fetchUrl(url).then((response: DBResponse) => {
+        if (response.data.length == 1) {
+          setOwnerTags(response.data[0]);
+        }
+      });
     }
 
     if (tdh && router.isReady) {
@@ -448,10 +441,10 @@ export default function UserPage(props: Props) {
     const isMemes = areEqualAddresses(nft.contract, MEMES_CONTRACT);
     const isGradients = areEqualAddresses(nft.contract, GRADIENT_CONTRACT);
 
-    if (isMemes) {
+    if (isMemes && tdh?.memes) {
       nfttdh = tdh?.memes.find((m) => m.id == nft.id)?.tdh;
       nftrank = tdh?.memes_ranks.find((g) => g.id == nft.id)?.rank;
-    } else if (isGradients) {
+    } else if (isGradients && tdh?.gradients) {
       nfttdh = tdh?.gradients.find((m) => m.id == nft.id)?.tdh;
       nftrank = tdh?.gradients_ranks.find((g) => g.id == nft.id)?.rank;
     }
@@ -593,11 +586,17 @@ export default function UserPage(props: Props) {
                         ownerENS
                           ? ownerENS
                           : formatAddress(ownerAddress as string)
-                      }'s 6529 Collection${`\nTDH ${
-                        tdh ? tdh.boosted_tdh : "N/A"
-                      } - \Rank ${
-                        tdh ? tdh.tdh_rank : "N/A"
-                      }`}\n#6529Seize\n\n`}>
+                      }'s SEIZE Collection${
+                        tdh
+                          ? `\n\nCards\nx${numberWithCommas(
+                              tdh.balance
+                            )} - \Rank #${
+                              tdh.dense_rank_balance
+                            }\n\nTDH\n${numberWithCommas(
+                              tdh.boosted_tdh
+                            )} - \Rank #${tdh.tdh_rank}`
+                          : ""
+                      }\n\n#6529SEIZE\n\n`}>
                       <TwitterIcon
                         size={30}
                         round
@@ -628,6 +627,8 @@ export default function UserPage(props: Props) {
                           memesBalance: ownerTags.unique_memes,
                           gradientsBalance: ownerTags.gradients_balance,
                           genesis: ownerTags.genesis,
+                          tdh_rank: tdh ? tdh?.tdh_rank : -1,
+                          balance_rank: tdh ? tdh?.dense_rank_balance : -1,
                         }}
                         expandedTags={true}
                         isUserPage={true}
@@ -689,6 +690,77 @@ export default function UserPage(props: Props) {
                             <b>6529 Gradient</b>
                           </td>
                         </tr>
+                        <tr className={styles.primaryTableGap}></tr>
+                        <tr>
+                          <td>
+                            <b>Cards</b>
+                          </td>
+                          <td>
+                            x
+                            {numberWithCommas(
+                              tdh.memes_balance + tdh.gradients_balance
+                            )}
+                          </td>
+                          <td>
+                            {tdh.memes_balance > 0
+                              ? `x${numberWithCommas(tdh.memes_balance)}`
+                              : "-"}
+                          </td>
+                          <td>
+                            {tdh.memes_balance_season1 > 0
+                              ? `x${numberWithCommas(
+                                  tdh.memes_balance_season1
+                                )}`
+                              : "-"}
+                          </td>
+                          <td>
+                            {tdh.memes_balance_season2 > 0
+                              ? `x${numberWithCommas(
+                                  tdh.memes_balance_season2
+                                )}`
+                              : "-"}
+                          </td>
+                          <td>
+                            {tdh.gradients_balance > 0
+                              ? `x${numberWithCommas(tdh.gradients_balance)}`
+                              : "-"}
+                          </td>
+                        </tr>
+                        <tr>
+                          <td>
+                            <b>Rank</b>
+                          </td>
+                          <td>#{numberWithCommas(tdh.dense_rank_balance)}</td>
+                          <td>
+                            {tdh.memes_balance > 0
+                              ? `#${numberWithCommas(
+                                  tdh.dense_rank_balance_memes
+                                )}`
+                              : "-"}
+                          </td>
+                          <td>
+                            {tdh.memes_balance_season1 > 0
+                              ? `#${numberWithCommas(
+                                  tdh.dense_rank_balance_memes_season1
+                                )}`
+                              : "-"}
+                          </td>
+                          <td>
+                            {tdh.memes_balance_season2 > 0
+                              ? `#${numberWithCommas(
+                                  tdh.dense_rank_balance_memes_season2
+                                )}`
+                              : "-"}
+                          </td>
+                          <td>
+                            {tdh.gradients_balance > 0
+                              ? `#${numberWithCommas(
+                                  tdh.dense_rank_balance_gradients
+                                )}`
+                              : "-"}
+                          </td>
+                        </tr>
+                        <tr className={styles.primaryTableGap}></tr>
                         <tr>
                           <td>
                             <b>TDH</b>
@@ -717,19 +789,13 @@ export default function UserPage(props: Props) {
                         </tr>
                         <tr>
                           <td>
-                            <b>Balance</b>
-                          </td>
-                          <td>{numberWithCommas(tdh.balance)}</td>
-                          <td>{numberWithCommas(tdh.memes_balance)}</td>
-                          <td>{numberWithCommas(tdh.memes_balance_season1)}</td>
-                          <td>{numberWithCommas(tdh.memes_balance_season2)}</td>
-                          <td>{numberWithCommas(tdh.gradients_balance)}</td>
-                        </tr>
-                        <tr>
-                          <td>
                             <b>Rank</b>
                           </td>
-                          <td>#{numberWithCommas(tdh.tdh_rank)}</td>
+                          <td>
+                            {tdh.tdh_rank > 0
+                              ? `#${numberWithCommas(tdh.tdh_rank)}`
+                              : "-"}
+                          </td>
                           <td>
                             {tdh.tdh_rank_memes > 0
                               ? `#${numberWithCommas(tdh.tdh_rank_memes)}`

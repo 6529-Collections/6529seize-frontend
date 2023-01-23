@@ -22,6 +22,7 @@ import { Transaction } from "../../entities/ITransaction";
 import { useRouter } from "next/router";
 import { Owner } from "../../entities/IOwner";
 import { TwitterIcon, TwitterShareButton } from "react-share";
+import { fetchUrl } from "../../services/6529api";
 
 const NFTImage = dynamic(() => import("../nft-image/NFTImage"), {
   ssr: false,
@@ -60,18 +61,16 @@ export default function GradientPage() {
 
   useEffect(() => {
     if (nftId) {
-      fetch(
+      fetchUrl(
         `${process.env.API_ENDPOINT}/api/nfts?id=${nftId}&contract=${GRADIENT_CONTRACT}`
-      )
-        .then((res) => res.json())
-        .then((response: DBResponse) => {
-          setNft(response.data[0]);
-          setBreadcrumbs([
-            { display: "Home", href: "/" },
-            { display: "6529 Gradient", href: "/6529-gradient" },
-            { display: `${response.data[0].name}` },
-          ]);
-        });
+      ).then((response: DBResponse) => {
+        setNft(response.data[0]);
+        setBreadcrumbs([
+          { display: "Home", href: "/" },
+          { display: "6529 Gradient", href: "/6529-gradient" },
+          { display: `${response.data[0].name}` },
+        ]);
+      });
     } else {
       setBreadcrumbs([
         { display: "Home", href: "/" },
@@ -83,49 +82,45 @@ export default function GradientPage() {
 
   useEffect(() => {
     if (nftId) {
-      fetch(
+      fetchUrl(
         `${process.env.API_ENDPOINT}/api/owners?id=${nftId}&contract=${GRADIENT_CONTRACT}`
-      )
-        .then((res) => res.json())
-        .then((response: DBResponse) => {
-          setNftOwner(response.data[0]);
-        });
+      ).then((response: DBResponse) => {
+        setNftOwner(response.data[0]);
+      });
     }
   }, [nftId]);
 
   useEffect(() => {
-    fetch(`${process.env.API_ENDPOINT}/api/nfts`)
-      .then((res) => res.json())
-      .then((response: DBResponse) => {
+    fetchUrl(`${process.env.API_ENDPOINT}/api/nfts`).then(
+      (response: DBResponse) => {
         setTotalNftCount(response.count);
-      });
+      }
+    );
   }, []);
 
   useEffect(() => {
     async function fetchNfts(url: string, mynfts: NFT[]) {
-      return fetch(url)
-        .then((res) => res.json())
-        .then((response: DBResponse) => {
-          if (response.next) {
-            fetchNfts(response.next, [...mynfts].concat(response.data));
-          } else {
-            const newnfts = [...mynfts]
-              .concat(response.data)
-              .filter((value, index, self) => {
-                return self.findIndex((v) => v.id === value.id) === index;
-              });
+      return fetchUrl(url).then((response: DBResponse) => {
+        if (response.next) {
+          fetchNfts(response.next, [...mynfts].concat(response.data));
+        } else {
+          const newnfts = [...mynfts]
+            .concat(response.data)
+            .filter((value, index, self) => {
+              return self.findIndex((v) => v.id === value.id) === index;
+            });
 
-            const rankedNFTs = newnfts.sort((a, b) =>
-              a.tdh_rank > b.tdh_rank ? 1 : -1
+          const rankedNFTs = newnfts.sort((a, b) =>
+            a.tdh_rank > b.tdh_rank ? 1 : -1
+          );
+          setCollectionCount(newnfts.length);
+          if (nftId) {
+            setCollectionRank(
+              rankedNFTs.map((r) => r.id).indexOf(parseInt(nftId)) + 1
             );
-            setCollectionCount(newnfts.length);
-            if (nftId) {
-              setCollectionRank(
-                rankedNFTs.map((r) => r.id).indexOf(parseInt(nftId)) + 1
-              );
-            }
           }
-        });
+        }
+      });
     }
     if (router.isReady && nftId) {
       const initialUrlNfts = `${process.env.API_ENDPOINT}/api/nfts?contract=${GRADIENT_CONTRACT}`;
@@ -135,13 +130,11 @@ export default function GradientPage() {
 
   useEffect(() => {
     if (address && nftId) {
-      fetch(
+      fetchUrl(
         `${process.env.API_ENDPOINT}/api/transactions?contract=${GRADIENT_CONTRACT}&id=${nftId}`
-      )
-        .then((res) => res.json())
-        .then((response: DBResponse) => {
-          setTransactions(response.data);
-        });
+      ).then((response: DBResponse) => {
+        setTransactions(response.data);
+      });
     }
   }, [nftId]);
 
@@ -374,7 +367,7 @@ export default function GradientPage() {
                     <TwitterShareButton
                       className="twitter-share-button"
                       url={window.location.href.split("?")[0]}
-                      title={`${nft.name}\n#6529Seize\n\n`}>
+                      title={`${nft.name}\n#6529SEIZE\n\n`}>
                       <TwitterIcon
                         size={30}
                         round

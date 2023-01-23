@@ -13,6 +13,7 @@ import {
 import Pagination from "../pagination/Pagination";
 import { SortDirection } from "../../entities/ISort";
 import { useRouter } from "next/router";
+import { fetchUrl } from "../../services/6529api";
 
 const Address = dynamic(() => import("../address/Address"), { ssr: false });
 
@@ -93,17 +94,18 @@ enum Content {
   MEMES = "Memes",
   MEMES1 = "Memes SZN1",
   MEMES2 = "Memes SZN2",
-  GRADIENTS = "6529 Gradient",
+  GRADIENTS = "Gradient",
 }
 
 enum OwnerTagFilter {
   ALL = "All",
+  MEMES = "Memes",
   MEMES_SETS = "Meme Set",
   MEMES_SETS_MINUS1 = "Meme Set -1",
   MEMES_SETS_SZN1 = "SZN1 Set",
   MEMES_SETS_SZN2 = "SZN2 Set",
   GENESIS = "Genesis Set",
-  GRADIENTS = "6529 Gradient",
+  GRADIENTS = "Gradient",
 }
 
 enum Focus {
@@ -142,6 +144,9 @@ export default function Leaderboard(props: Props) {
   async function fetchResults() {
     let tagFilter = "";
     switch (ownerTagFilter) {
+      case OwnerTagFilter.MEMES:
+        tagFilter = "&filter=memes";
+        break;
       case OwnerTagFilter.MEMES_SETS:
         tagFilter = "&filter=memes_set";
         break;
@@ -162,15 +167,13 @@ export default function Leaderboard(props: Props) {
         break;
     }
     let museumFilter = hideMuseum ? "&hide_museum=true" : "";
-    fetch(
+    fetchUrl(
       `${process.env.API_ENDPOINT}/api/owner_metrics?page_size=${props.pageSize}&page=${pageProps.page}&sort=${sort.sort}&sort_direction=${sort.sort_direction}${tagFilter}${museumFilter}`
-    )
-      .then((res) => res.json())
-      .then((response: DBResponse) => {
-        setTotalResults(response.count);
-        setNext(response.next);
-        setLeaderboard(response.data);
-      });
+    ).then((response: DBResponse) => {
+      setTotalResults(response.count);
+      setNext(response.next);
+      setLeaderboard(response.data);
+    });
   }
 
   useEffect(() => {
@@ -184,16 +187,16 @@ export default function Leaderboard(props: Props) {
   }, [sort, ownerTagFilter, router.isReady, content, hideMuseum]);
 
   useEffect(() => {
-    fetch(`${process.env.API_ENDPOINT}/api/blocks?page_size=${1}`)
-      .then((res) => res.json())
-      .then((response: DBResponse) => {
+    fetchUrl(`${process.env.API_ENDPOINT}/api/blocks?page_size=${1}`).then(
+      (response: DBResponse) => {
         if (response.data.length > 0) {
           setLastTDH({
             block: response.data[0].block_number,
             date: new Date(response.data[0].timestamp),
           });
         }
-      });
+      }
+    );
   }, []);
 
   useEffect(() => {
@@ -846,6 +849,7 @@ export default function Leaderboard(props: Props) {
               key={tagFilter}
               onClick={() => setOwnerTagFilter(tagFilter)}>
               {[
+                OwnerTagFilter.MEMES_SETS,
                 OwnerTagFilter.MEMES_SETS_MINUS1,
                 OwnerTagFilter.MEMES_SETS_SZN1,
                 OwnerTagFilter.MEMES_SETS_SZN2,
