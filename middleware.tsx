@@ -11,13 +11,11 @@ export function middleware(req: NextRequest) {
   }
 
   const apiAuth = req.cookies.get(API_AUTH_COOKIE);
+
   if (
     process.env.ACTIVATE_API_PASSWORD &&
     !apiAuth &&
-    req.nextUrl.pathname != "/access" &&
-    !req.nextUrl.pathname.endsWith(".png") &&
-    !req.nextUrl.pathname.endsWith(".jepg") &&
-    !req.nextUrl.pathname.endsWith(".ico")
+    req.nextUrl.pathname != "/access"
   ) {
     return NextResponse.redirect(new URL("/access", req.url));
   }
