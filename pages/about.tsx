@@ -49,12 +49,15 @@ export default function About() {
         <title>About | 6529 SEIZE</title>
         <link rel="icon" href="/favicon.ico" />
         <meta name="description" content="About | 6529 SEIZE" />
-        <meta property="og:url" content={`http://52.50.150.109:3001/about`} />
+        <meta
+          property="og:url"
+          content={`${process.env.BASE_ENDPOINT}/about`}
+        />
         <meta property="og:title" content={`About`} />
         <meta property="og:description" content="6529 SEIZE" />
         <meta
           property="og:image"
-          content={`http://52.50.150.109:3001/Seize_Logo_Glasses_2.png`}
+          content={`${process.env.BASE_ENDPOINT}/Seize_Logo_Glasses_2.png`}
         />
       </Head>
 

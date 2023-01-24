@@ -27,12 +27,12 @@ export default function UserPageIndex(props: any) {
         <meta name="description" content={props.title} />
         <meta
           property="og:url"
-          content={`http://52.50.150.109:3001/${props.url}`}
+          content={`${process.env.BASE_ENDPOINT}/${props.url}`}
         />
         <meta property="og:title" content={props.title} />
         <meta
           property="og:image"
-          content={`http://52.50.150.109:3001/Seize_Logo_Glasses_2.png`}
+          content={`${process.env.BASE_ENDPOINT}/Seize_Logo_Glasses_2.png`}
         />
         <meta property="og:description" content="6529 SEIZE" />
       </Head>

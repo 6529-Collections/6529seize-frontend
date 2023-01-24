@@ -31,13 +31,13 @@ export default function GradientsPage() {
         <meta name="description" content="6529 Gradient | 6529 SEIZE" />
         <meta
           property="og:url"
-          content={`http://52.50.150.109:3001/6529-gradient`}
+          content={`${process.env.BASE_ENDPOINT}/6529-gradient`}
         />
         <meta property="og:title" content={`6529 Gradient`} />
         <meta property="og:description" content={`6529 SEIZE`} />
         <meta
           property="og:image"
-          content={`http://52.50.150.109:3001/gradients-preview.png`}
+          content={`${process.env.BASE_ENDPOINT}/gradients-preview.png`}
         />
       </Head>
 
