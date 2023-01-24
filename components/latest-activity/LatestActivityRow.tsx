@@ -24,7 +24,8 @@ interface Props {
 export default function LatestActivityRow(props: Props) {
   return (
     <tr
-      key={`${props.tr.from_address}-${props.tr.to_address}-${props.tr.transaction}-${props.tr.token_id}-latestactivity-row`}>
+      key={`${props.tr.from_address}-${props.tr.to_address}-${props.tr.transaction}-${props.tr.token_id}-latestactivity-row`}
+      className={styles.latestActivityRow}>
       <td className="align-middle text-center">
         {getDateDisplay(new Date(props.tr.transaction_date))}
       </td>

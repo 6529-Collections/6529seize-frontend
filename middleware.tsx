@@ -12,7 +12,7 @@ export function middleware(req: NextRequest) {
 
   const apiAuth = req.cookies.get(API_AUTH_COOKIE);
   if (
-    process.env.ACTIVATE_PASSWORD &&
+    process.env.ACTIVATE_API_PASSWORD &&
     !apiAuth &&
     req.nextUrl.pathname != "/access" &&
     !req.nextUrl.pathname.endsWith(".png") &&
@@ -20,6 +20,15 @@ export function middleware(req: NextRequest) {
     !req.nextUrl.pathname.endsWith(".ico")
   ) {
     return NextResponse.redirect(new URL("/access", req.url));
+  }
+  if (apiAuth) {
+    fetch(`${process.env.API_ENDPOINT}/api/`, {
+      headers: apiAuth ? { "x-6529-auth": apiAuth } : {},
+    }).then((r) => {
+      if (r.status == 401) {
+        return NextResponse.redirect(new URL("/access", req.url));
+      }
+    });
   }
   return NextResponse.next();
 }
