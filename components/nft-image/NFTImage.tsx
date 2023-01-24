@@ -17,8 +17,6 @@ interface Props {
 }
 
 export default function NFTImage(props: Props) {
-  const [revealMissing, setRevealMissing] = useState(false);
-
   if (
     props.animation &&
     props.nft.animation &&
@@ -26,9 +24,18 @@ export default function NFTImage(props: Props) {
   ) {
     return (
       <Col
-        className={`${styles.nftAnimation} height${props.height} ${
+        className={`text-center ${styles.nftAnimation} ${
           props.transparentBG && styles.transparentBG
         }`}>
+        {props.balance > 0 && (
+          <span
+            className={`${styles.balance}  ${
+              props.height == 650 ? styles.balanceBigger : ""
+            }`}>
+            <span>{props.height == 650 && "SEIZED "}x</span>
+            {props.balance}
+          </span>
+        )}
         <iframe src={props.nft.animation} id={`${props.id && `${props.id}`}`} />
       </Col>
     );
@@ -41,14 +48,24 @@ export default function NFTImage(props: Props) {
   ) {
     return (
       <Col
-        className={`${styles.nftAnimation} height${props.height} ${
-          props.transparentBG && styles.transparentBG
-        }`}>
+        className={`text-center ${styles.nftAnimation} ${
+          props.height == 650 ? styles.height650 : styles.height300
+        } ${props.transparentBG && styles.transparentBG}`}>
+        {props.balance > 0 && (
+          <span
+            className={`${styles.balance}  ${
+              props.height == 650 ? styles.balanceBigger : ""
+            }`}>
+            <span>{props.height == 650 && "SEIZED "}x</span>
+            {props.balance}
+          </span>
+        )}
         <video
           id={`${props.id && `${props.id}`}`}
           autoPlay
           muted
           controls
+          loop
           src={props.nft.animation}
           poster={props.nft.thumbnail}
           onError={({ currentTarget }) => {

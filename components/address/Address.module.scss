@@ -22,58 +22,70 @@
   color: $green;
 }
 
-.memesTag {
+.copyDropdown {
+  display: inline-block;
+  button {
+    cursor: copy;
+    padding: 0;
+    background-color: transparent !important;
+    border-color: transparent !important;
+    &::after {
+      border: none !important;
+    }
+  }
+}
+
+.copyDropdownItem {
+  cursor: copy;
+}
+
+.tag {
   font-family: $main-font;
   font-size: $font-size;
   color: $font-color !important;
   margin-right: 10px;
   padding: 2px 5px;
-  background-color: $green;
   white-space: nowrap;
   box-shadow: 0 4px 4px rgb(0 0 0 / 25%);
+}
+
+.memesTag {
+  background-color: $salmon;
 }
 
 .memesCardsSetsTag {
-  font-family: $main-font;
-  font-size: $font-size;
-  color: $font-color !important;
-  margin-right: 10px;
-  padding: 2px 5px;
   background-color: $pink;
-  white-space: nowrap;
-  box-shadow: 0 4px 4px rgb(0 0 0 / 25%);
+}
+
+.memesCardsSetsS1Tag {
+  background-color: $green;
+}
+
+.memesCardsSetsS2Tag {
+  background-color: $raspberry;
 }
 
 .gradientsTag {
-  font-family: $main-font;
-  font-size: $font-size;
-  color: $font-color !important;
-  margin-right: 10px;
-  padding: 2px 5px;
   background-color: $blue;
-  white-space: nowrap;
-  box-shadow: 0 4px 4px rgb(0 0 0 / 25%);
+}
+
+.rankTag {
+  background-color: $off-white;
+  color: $dark-grey !important;
 }
 
 @media only screen and (max-width: 1200px) {
-  .memesTag,
-  .memesCardsSetsTag,
-  .gradientsTag {
+  .tag {
     font-size: $font-smaller !important;
   }
 }
 
-@media only screen and (max-width: 800px) {
-  .memesTag,
-  .memesCardsSetsTag,
-  .gradientsTag {
+@media only screen and (max-width: 1000px) {
+  .tag {
     font-size: $font-smallest !important;
   }
-  .addressWidget {
-    white-space: break-spaces;
-  }
+}
 
-  .noWrap {
-    white-space: nowrap;
-  }
+.userPageAddress {
+  font-size: $font-size !important;
 }

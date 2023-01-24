@@ -24,8 +24,11 @@ interface Props {
 export default function LatestActivityRow(props: Props) {
   return (
     <tr
-      key={`${props.tr.from_address}-${props.tr.to_address}-${props.tr.transaction}-${props.tr.token_id}-latestactivity-row`}>
-      <td>{getDateDisplay(new Date(props.tr.transaction_date))}</td>
+      key={`${props.tr.from_address}-${props.tr.to_address}-${props.tr.transaction}-${props.tr.token_id}-latestactivity-row`}
+      className={styles.latestActivityRow}>
+      <td className="align-middle text-center">
+        {getDateDisplay(new Date(props.tr.transaction_date))}
+      </td>
       <td className="align-middle text-center">
         <FontAwesomeIcon
           className={
@@ -49,17 +52,15 @@ export default function LatestActivityRow(props: Props) {
           <>
             airdrop {props.tr.token_count}x{" "}
             {props.nft ? (
-              <Tippy content="Hello">
-                <img
-                  src={
-                    props.nft.thumbnail ? props.nft.thumbnail : props.nft.image
-                  }
-                  onError={({ currentTarget }) => {
-                    currentTarget.src = props.nft!.image;
-                  }}
-                  className={styles.nftImage}
-                />
-              </Tippy>
+              <img
+                src={
+                  props.nft.thumbnail ? props.nft.thumbnail : props.nft.image
+                }
+                onError={({ currentTarget }) => {
+                  currentTarget.src = props.nft!.image;
+                }}
+                className={styles.nftImage}
+              />
             ) : isMemesContract(props.tr.contract) ? (
               `Meme #${props.tr.token_id}`
             ) : isGradientsContract(props.tr.contract) ? (
@@ -110,7 +111,7 @@ export default function LatestActivityRow(props: Props) {
               ens={props.tr.from_display}
             />
             {props.tr.value > 0 &&
-              ` for ${Math.round(props.tr.value * 100) / 100} ETH`}
+              ` for ${Math.round(props.tr.value * 100000) / 100000} ETH`}
             &nbsp;&nbsp;
             <a
               href={`https://etherscan.io/tx/${props.tr.transaction}`}

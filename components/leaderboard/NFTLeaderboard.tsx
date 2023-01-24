@@ -14,6 +14,7 @@ import Pagination from "../pagination/Pagination";
 import { SortDirection } from "../../entities/ISort";
 import { OwnerTags } from "../../entities/IOwner";
 import { useRouter } from "next/router";
+import { fetchAllPages, fetchUrl } from "../../services/6529api";
 
 const Address = dynamic(() => import("../address/Address"), { ssr: false });
 
@@ -50,35 +51,22 @@ export default function NFTLeaderboard(props: Props) {
   const [ownerTagsLoaded, setOwnerTagsLoaded] = useState(false);
 
   async function fetchResults() {
-    var top = document.getElementById(`leaderboard-${props.nftId}`)?.offsetTop;
-    if (top && window.scrollY > 0) {
-      window.scrollTo(0, top);
-    }
-    fetch(
+    fetchUrl(
       `${process.env.API_ENDPOINT}/api/tdh/${props.contract}/${props.nftId}?page_size=${props.pageSize}&page=${pageProps.page}&sort=${sort.sort}&sort_direction=${sort.sort_direction}`
-    )
-      .then((res) => res.json())
-      .then((response: DBResponse) => {
-        setTotalResults(response.count);
-        setNext(response.next);
-        setLeaderboard(response.data);
-        setLeaderboardLoaded(true);
-      });
+    ).then((response: DBResponse) => {
+      setTotalResults(response.count);
+      setNext(response.next);
+      setLeaderboard(response.data);
+      setLeaderboardLoaded(true);
+    });
   }
 
   useEffect(() => {
-    async function fetchOwnersTags(url: string, myowners: OwnerTags[]) {
-      return fetch(url)
-        .then((res) => res.json())
-        .then((response: DBResponse) => {
-          if (response.next) {
-            fetchOwnersTags(response.next, [...myowners].concat(response.data));
-          } else {
-            const newOwnersTags = [...myowners].concat(response.data);
-            setOwnersTags(newOwnersTags);
-            setOwnerTagsLoaded(true);
-          }
-        });
+    async function fetchOwnersTags(url: string) {
+      return fetchAllPages(url).then((newOwnersTags: OwnerTags[]) => {
+        setOwnersTags(newOwnersTags);
+        setOwnerTagsLoaded(true);
+      });
     }
 
     if (leaderboard && router.isReady && leaderboard.length > 0) {
@@ -86,21 +74,21 @@ export default function NFTLeaderboard(props: Props) {
       const initialUrlOwners = `${
         process.env.API_ENDPOINT
       }/api/owners_tags?wallet=${uniqueWallets.join(",")}`;
-      fetchOwnersTags(initialUrlOwners, []);
+      fetchOwnersTags(initialUrlOwners);
     }
   }, [router.isReady, leaderboard]);
 
   useEffect(() => {
-    fetch(`${process.env.API_ENDPOINT}/api/blocks?page_size=${1}`)
-      .then((res) => res.json())
-      .then((response: DBResponse) => {
+    fetchUrl(`${process.env.API_ENDPOINT}/api/blocks?page_size=${1}`).then(
+      (response: DBResponse) => {
         if (response.data.length > 0) {
           setLastTDH({
             block: response.data[0].block_number,
             date: new Date(response.data[0].timestamp),
           });
         }
-      });
+      }
+    );
   }, []);
 
   useEffect(() => {
@@ -122,7 +110,7 @@ export default function NFTLeaderboard(props: Props) {
           <h1>COMMUNITY -</h1>
           <h1>&nbsp;CARD {props.nftId}</h1>
         </Col>
-        {lastTDH && (
+        {/* {lastTDH && (
           <Col className={`text-right ${styles.lastTDH}`}>
             * LAST TDH: {getDateDisplay(lastTDH.date)} BLOCK:{" "}
             <a
@@ -132,7 +120,7 @@ export default function NFTLeaderboard(props: Props) {
               {lastTDH.block}
             </a>
           </Col>
-        )}
+        )} */}
       </Row>
       {leaderboard && leaderboard.length > 0 && (
         <Row className={styles.scrollContainer}>
@@ -413,11 +401,17 @@ export default function NFTLeaderboard(props: Props) {
                                 memesCardsSets: tags
                                   ? tags.memes_cards_sets
                                   : 0,
+                                memesCardsSetS1: tags
+                                  ? tags.memes_cards_sets_szn1
+                                  : 0,
+                                memesCardsSetS2: tags
+                                  ? tags.memes_cards_sets_szn2
+                                  : 0,
                                 memesBalance: tags ? tags.unique_memes : 0,
                                 gradientsBalance: tags
                                   ? tags.gradients_balance
                                   : 0,
-                                genesis: tags ? tags.genesis : false,
+                                genesis: tags ? tags.genesis : 0,
                               }}
                             />
                           </td>

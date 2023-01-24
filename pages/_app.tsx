@@ -41,6 +41,8 @@ import {
   faBars,
   faEye,
   faEyeSlash,
+  faCheck,
+  faXmark,
 } from "@fortawesome/free-solid-svg-icons";
 
 library.add(
@@ -64,7 +66,9 @@ library.add(
   faExpandAlt,
   faBars,
   faEye,
-  faEyeSlash
+  faEyeSlash,
+  faCheck,
+  faXmark
 );
 
 const providerAlchemy = alchemyProvider({
