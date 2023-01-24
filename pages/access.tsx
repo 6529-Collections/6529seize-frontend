@@ -50,13 +50,13 @@ export default function Login() {
         <meta name="description" content="Access Page | 6529 SEIZE" />
         <meta
           property="og:url"
-          content={`${window.location.protocol}//${window.location.host}/access`}
+          content={`${process.env.BASE_ENDPOINT}/access`}
         />
         <meta property="og:title" content={`Access Page`} />
         <meta property="og:description" content="6529 SEIZE" />
         <meta
           property="og:image"
-          content={`${window.location.protocol}//${window.location.host}/Seize_Logo_Glasses_2.png`}
+          content={`${process.env.BASE_ENDPOINT}/Seize_Logo_Glasses_2.png`}
         />
       </Head>
       <main className={styles.login}>
