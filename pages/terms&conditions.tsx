@@ -22,13 +22,13 @@ export default function TermsConditions() {
         <meta name="description" content="Terms & Conditions | 6529 SEIZE" />
         <meta
           property="og:url"
-          content={`http://52.50.150.109:3001/terms&conditions`}
+          content={`${process.env.BASE_ENDPOINT}/terms&conditions`}
         />
         <meta property="og:title" content="Terms & Conditions" />
         <meta property="og:description" content="6529 SEIZE" />
         <meta
           property="og:image"
-          content={`http://52.50.150.109:3001/Seize_Logo_Glasses_2.png`}
+          content={`${process.env.BASE_ENDPOINT}/Seize_Logo_Glasses_2.png`}
         />
       </Head>
 

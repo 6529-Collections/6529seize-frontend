@@ -88,12 +88,12 @@ export default function Home() {
         <title>6529 SEIZE</title>
         <link rel="icon" href="/favicon.ico" />
         <meta name="description" content="Home | 6529 SEIZE" />
-        <meta property="og:url" content="http://52.50.150.109:3001" />
+        <meta property="og:url" content={`${process.env.BASE_ENDPOINT}`} />
         <meta property="og:title" content="Home" />
         <meta property="og:description" content="6529 SEIZE" />
         <meta
           property="og:image"
-          content={`http://52.50.150.109:3001/Seize_Logo_Glasses_2.png`}
+          content={`${process.env.BASE_ENDPOINT}/Seize_Logo_Glasses_2.png`}
         />
       </Head>
 

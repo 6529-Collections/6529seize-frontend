@@ -51,13 +51,13 @@ export default function Downloads() {
         <meta name="description" content="Downloads | 6529 SEIZE" />
         <meta
           property="og:url"
-          content={`http://52.50.150.109:3001/downloads`}
+          content={`${process.env.BASE_ENDPOINT}/downloads`}
         />
         <meta property="og:title" content={`Downloads`} />
         <meta property="og:description" content="6529 SEIZE" />
         <meta
           property="og:image"
-          content={`http://52.50.150.109:3001/Seize_Logo_Glasses_2.png`}
+          content={`${process.env.BASE_ENDPOINT}/Seize_Logo_Glasses_2.png`}
         />
       </Head>
 

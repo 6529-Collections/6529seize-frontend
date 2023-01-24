@@ -143,3 +143,13 @@
     max-width: 400px;
   }
 }
+
+.reMemesImg {
+  width: 100%;
+}
+
+@media only screen and (max-width: 800px) {
+  .reMemesImg {
+    max-width: 350px;
+  }
+}
