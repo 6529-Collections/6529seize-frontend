@@ -12,8 +12,8 @@ const nextConfig = {
     ALCHEMY_API_KEY: process.env.ALCHEMY_API_KEY,
     API_ENDPOINT: process.env.REACT_APP_API_ENDPOINT,
     ACTIVATE_API_PASSWORD:
-      process.env.ACTIVATE_API_PASSWORD &&
-      process.env.ACTIVATE_API_PASSWORD === "true"
+      process.env.REACT_APP_ACTIVATE_API_PASSWORD &&
+      process.env.REACT_APP_ACTIVATE_API_PASSWORD === "true"
         ? true
         : false,
   },
