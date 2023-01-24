@@ -4,7 +4,7 @@ import { API_AUTH_COOKIE } from "../constants";
 
 export async function fetchUrl(url: string): Promise<DBResponse> {
   let headers = {};
-  if (process.env.ACTIVATE_PASSWORD) {
+  if (process.env.ACTIVATE_API_PASSWORD) {
     const apiAuth = Cookies.get(API_AUTH_COOKIE);
     if (apiAuth) {
       headers = { "x-6529-auth": apiAuth };
