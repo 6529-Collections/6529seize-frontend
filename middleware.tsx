@@ -5,19 +5,19 @@ import { API_AUTH_COOKIE } from "./constants";
 export function middleware(req: NextRequest) {
   if (
     req.nextUrl.pathname.startsWith("/_next") ||
-    req.nextUrl.pathname.startsWith("/favicon.ico")
+    req.nextUrl.pathname.endsWith("favicon.ico") ||
+    req.nextUrl.pathname.endsWith(".jpeg") ||
+    req.nextUrl.pathname.endsWith(".png")
   ) {
     return NextResponse.next();
   }
 
   const apiAuth = req.cookies.get(API_AUTH_COOKIE);
+
   if (
     process.env.ACTIVATE_API_PASSWORD &&
     !apiAuth &&
-    req.nextUrl.pathname != "/access" &&
-    !req.nextUrl.pathname.endsWith(".png") &&
-    !req.nextUrl.pathname.endsWith(".jepg") &&
-    !req.nextUrl.pathname.endsWith(".ico")
+    req.nextUrl.pathname != "/access"
   ) {
     return NextResponse.redirect(new URL("/access", req.url));
   }
