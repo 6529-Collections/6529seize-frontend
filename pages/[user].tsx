@@ -3,7 +3,9 @@ import styles from "../styles/Home.module.scss";
 
 import dynamic from "next/dynamic";
 import { useRouter } from "next/router";
-import { formatAddress } from "../helpers/Helpers";
+import { areEqualAddresses, formatAddress } from "../helpers/Helpers";
+import { title } from "process";
+import { MANIFOLD, SIX529_MUSEUM } from "../constants";
 
 const Header = dynamic(() => import("../components/header/Header"), {
   ssr: false,
@@ -16,6 +18,7 @@ const UserPage = dynamic(() => import("../components/user/UserPage"), {
 export default function UserPageIndex(props: any) {
   const router = useRouter();
   const pagenameFull = `${props.title} | 6529 SEIZE`;
+
   return (
     <>
       <Head>
@@ -57,12 +60,18 @@ export async function getServerSideProps(req: any, res: any, resolvedUrl: any) {
       props: { title: user, url: user },
     };
   }
-  const nftRequest = await fetch(`${process.env.API_ENDPOINT}/api/ens/${user}`);
+  const ensRequest = await fetch(`${process.env.API_ENDPOINT}/api/ens/${user}`);
   let userDisplay = formatAddress(user);
-  const responseText = await nftRequest.text();
+  const responseText = await ensRequest.text();
   if (responseText) {
     const response = await JSON.parse(responseText);
-    userDisplay = response.display ? response.display : userDisplay;
+    userDisplay = response.display
+      ? response.display
+      : areEqualAddresses(user, SIX529_MUSEUM)
+      ? "6529Museum"
+      : areEqualAddresses(user, MANIFOLD)
+      ? "Manifold-Gallery"
+      : userDisplay;
   }
 
   return {

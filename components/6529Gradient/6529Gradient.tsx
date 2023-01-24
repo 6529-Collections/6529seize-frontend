@@ -4,15 +4,15 @@ import { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 import { Container, Row, Col } from "react-bootstrap";
 import { useAccount } from "wagmi";
-import { GRADIENT_CONTRACT, MEMES_CONTRACT } from "../../constants";
+import { GRADIENT_CONTRACT } from "../../constants";
 import { DBResponse } from "../../entities/IDBResponse";
 import { NFT } from "../../entities/INFT";
-import { Owner, OwnerRank } from "../../entities/IOwner";
+import { Owner } from "../../entities/IOwner";
 import { SortDirection } from "../../entities/ISort";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { TDH } from "../../entities/ITDH";
 import { areEqualAddresses, numberWithCommas } from "../../helpers/Helpers";
 import { useRouter } from "next/router";
+import { fetchAllPages } from "../../services/6529api";
 
 const NFTImage = dynamic(() => import("../nft-image/NFTImage"), {
   ssr: false,
@@ -70,67 +70,47 @@ export default function GradientsComponent() {
   }, [router.isReady, ownersLoaded, nftsLoaded]);
 
   useEffect(() => {
-    async function fetchNfts(url: string, mynfts: NFT[]) {
-      return fetch(url)
-        .then((res) => res.json())
-        .then((response: DBResponse) => {
-          if (response.next) {
-            fetchNfts(response.next, [...mynfts].concat(response.data));
-          } else {
-            const newnfts = [...mynfts]
-              .concat(response.data)
-              .filter((value, index, self) => {
-                return self.findIndex((v) => v.id === value.id) === index;
-              });
-
-            setNfts(
-              [...newnfts]
-                .sort((a, b) => (a.tdh > b.tdh ? -1 : 1))
-                .map((n, index) => {
-                  n.tdh_rank = index + 1;
-                  return n;
-                })
-            );
-            setNftsLoaded(true);
-          }
-        });
+    async function fetchNfts(url: string) {
+      fetchAllPages(url).then((newNfts: NFT[]) => {
+        setNfts(
+          [...newNfts]
+            .sort((a, b) => (a.tdh > b.tdh ? -1 : 1))
+            .map((n, index) => {
+              n.tdh_rank = index + 1;
+              return n;
+            })
+        );
+        setNftsLoaded(true);
+      });
     }
     if (router.isReady) {
       const initialUrlNfts = `${process.env.API_ENDPOINT}/api/nfts?contract=${GRADIENT_CONTRACT}`;
-      fetchNfts(initialUrlNfts, []);
+      fetchNfts(initialUrlNfts);
     }
   }, [router.isReady]);
 
   useEffect(() => {
-    async function fetchOwners(url: string, owners: Owner[]) {
-      return fetch(url)
-        .then((res) => res.json())
-        .then((response: DBResponse) => {
-          if (response.next) {
-            fetchOwners(response.next, [...owners].concat(response.data));
-          } else {
-            if (!ownersLoaded) {
-              const newOwners = [...owners].concat(response.data);
-
-              const allOwners: Owner[] = [];
-              [...nfts]
-                .sort((a, b) => (a.tdh > b.tdh ? -1 : 1))
-                .map((nft) => {
-                  const owner = newOwners.find((o) => o.token_id == nft.id);
-                  if (owner) {
-                    allOwners.push(owner);
-                  }
-                });
-              setNftOwners(allOwners);
-              setOwnersLoaded(true);
-            }
-          }
-        });
+    async function fetchOwners(url: string) {
+      fetchAllPages(url).then((newOwners: Owner[]) => {
+        if (!ownersLoaded) {
+          const allOwners: Owner[] = [];
+          [...nfts]
+            .sort((a, b) => (a.tdh > b.tdh ? -1 : 1))
+            .map((nft) => {
+              const owner = newOwners.find((o) => o.token_id == nft.id);
+              if (owner) {
+                allOwners.push(owner);
+              }
+            });
+          setNftOwners(allOwners);
+          setOwnersLoaded(true);
+        }
+      });
     }
 
     if (router.isReady && nftsLoaded) {
       const initialUrlOwners = `${process.env.API_ENDPOINT}/api/owners?contract=${GRADIENT_CONTRACT}`;
-      fetchOwners(initialUrlOwners, []);
+      fetchOwners(initialUrlOwners);
     }
   }, [router.isReady, nftsLoaded]);
 

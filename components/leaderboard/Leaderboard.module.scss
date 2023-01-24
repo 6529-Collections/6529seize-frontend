@@ -10,39 +10,58 @@
   display: none;
 }
 
-.rank {
-  width: 5%;
-  text-align: center;
+.headerMenuFocus {
+  background-color: transparent;
+  width: 100%;
+  height: 48px;
+  height: 48px;
+  line-height: 48px;
+  font-size: larger;
+  font-weight: bolder;
+  color: $lightest-grey;
 }
 
 .pageHeader {
   white-space: nowrap;
   h1 {
-    max-height: 45px;
     margin-bottom: 0px !important;
   }
 }
 
+.rank {
+  width: 5%;
+  text-align: center;
+}
+
 .hodler {
-  width: 35%;
+  width: 40%;
   margin-left: 10%;
   span {
     overflow-wrap: break-word;
   }
 }
 
-.tdh {
-  width: 30%;
-  text-align: center;
+.totalResults {
+  font-size: larger;
 }
 
-.tdhSub {
+.balance {
   width: 10%;
   text-align: center;
 }
 
-.balance {
-  width: 30%;
+.tdh {
+  width: 45%;
+  text-align: center;
+}
+
+.tdhSubNote {
+  font-size: smaller;
+  font-weight: lighter;
+}
+
+.tdhSub {
+  width: calc(55% / 6);
   text-align: center;
 }
 
@@ -52,10 +71,32 @@
   font-weight: lighter;
 }
 
+.tdhBoost {
+  font-size: 13px;
+  line-height: 13px !important;
+  float: none !important;
+}
+
+@media only screen and (max-width: 1200px) {
+  .tdhBoost {
+    font-size: 11px;
+    line-height: 11px;
+  }
+}
+
 @media only screen and (max-width: 800px) {
   .viewAllLink {
     font-size: 12px !important;
   }
+
+  .tdhBoost {
+    font-size: 9px;
+    line-height: 9px;
+  }
+}
+
+.boolean {
+  height: $font-size;
 }
 
 .caret {
@@ -63,16 +104,19 @@
   cursor: pointer;
 }
 
-.caretTDH {
-  height: $font-size;
-  cursor: pointer;
-  position: absolute;
-  right: 0;
+@media only screen and (max-width: 1200px) {
+  .boolean {
+    height: $font-smaller !important;
+  }
+
+  .caret {
+    height: 12px;
+  }
 }
 
 @media only screen and (max-width: 800px) {
-  .caretTDH {
-    height: $font-smaller;
+  .boolean {
+    height: $font-smallest !important;
   }
 }
 
@@ -83,16 +127,21 @@
   }
 }
 
-.gap {
-  height: 8px;
-  width: 8px;
-}
-
 .leaderboardTable {
   tr td {
     white-space: nowrap;
     align-items: center;
     vertical-align: middle;
+    span {
+      float: left;
+      line-height: 20px;
+      margin-top: 4px;
+      margin-bottom: 4px;
+    }
+  }
+
+  th {
+    white-space: nowrap;
   }
 
   th span {
@@ -103,8 +152,24 @@
     line-height: 40px;
   }
 
-  tr:nth-child(even) {
+  thead tr {
+    background-color: transparent !important;
+  }
+
+  tr:nth-child(odd) {
     background-color: $almost-very-dark-grey;
+  }
+}
+
+@media only screen and (max-width: 1600px) {
+  .hodler {
+    white-space: break-spaces !important;
+  }
+}
+
+@media only screen and (max-width: 1290px) {
+  .hodler {
+    min-width: 220px;
   }
 }
 
@@ -134,18 +199,10 @@
 .lastTDH {
   white-space: nowrap;
   color: $font-color-h;
-  line-height: 48px;
+  // line-height: 48px;
   font-size: smaller;
-  text-align: right;
   a {
     color: $font-color-h !important;
-  }
-}
-
-@media only screen and (max-width: 800px) {
-  .lastTDH {
-    text-align: left;
-    line-height: 26px;
   }
 }
 
@@ -153,4 +210,123 @@
   border-bottom: 0.5px solid $font-color !important;
   padding: 0rem !important;
   position: relative;
+}
+
+.focusSwitchLabel {
+  white-space: nowrap;
+  float: left;
+  line-height: 48px;
+  border: 2px solid white;
+  border-left: none;
+  padding-left: 10px;
+  padding-right: 10px;
+  cursor: pointer;
+  width: calc(100% / 3);
+  text-align: center;
+
+  &:first-of-type {
+    border: 2px solid white;
+  }
+}
+
+.focusSwitchLabelExtraPadding {
+  padding-left: 18px;
+  padding-right: 18px;
+}
+
+.focusSwitchLabelActive {
+  background-color: $font-color;
+  color: $bg-color-2;
+}
+
+.focusSwitch {
+  font-size: larger;
+  font-weight: bolder;
+  float: left;
+  height: 48px;
+  line-height: 48px;
+  input {
+    cursor: pointer;
+    line-height: 48px;
+    margin-top: 15px;
+    background-color: $yellow;
+    border-color: $very-dark-grey !important;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='%231e1e1e'/%3e%3c/svg%3e") !important;
+  }
+  input:checked {
+    background-color: $orange !important;
+  }
+}
+
+@media only screen and (max-width: 1200px) {
+  .focusSwitch {
+    margin-left: 10px;
+  }
+}
+
+@media only screen and (max-width: 800px) {
+  .focusSwitch {
+    margin-left: 20px;
+  }
+}
+
+.contentDropdown {
+  line-height: 48px;
+  text-align: center;
+  background-color: transparent;
+  border: none;
+  a {
+    line-height: 30px;
+  }
+  button {
+    font-size: larger !important;
+    font-weight: bolder !important;
+    cursor: copy;
+    padding: 0;
+    background-color: transparent !important;
+    border-color: transparent !important;
+    &::after {
+      margin-top: 0.8rem;
+    }
+  }
+  div {
+    width: 60%;
+  }
+}
+
+.focus {
+  color: $font-color;
+  cursor: pointer;
+}
+
+.disabled {
+  color: $lightest-grey;
+  text-decoration: none;
+  &:hover {
+    color: white;
+  }
+}
+
+@media only screen and (max-width: 800px) {
+  .contentDropdown {
+    button {
+      &::after {
+        margin-top: 0.5rem;
+      }
+    }
+  }
+}
+
+.museumToggle {
+  display: inline-block;
+  margin-left: 20px;
+  line-height: 48px;
+  input {
+    margin-top: 15px;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='%23000'/%3e%3c/svg%3e") !important;
+    border-color: black !important;
+  }
+  input:checked {
+    background-color: $yellow !important;
+  }
 }

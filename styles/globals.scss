@@ -8,28 +8,19 @@ body {
   font-family: $main-font !important;
 }
 
-@media only screen and (max-width: 1200px) {
-  body {
-    font-size: $font-smaller !important;
-  }
-}
-
-@media only screen and (max-width: 800px) {
-  body {
-    font-size: $font-smallest !important;
-  }
-}
-
 textarea,
 select,
 input,
-button {
+button,
+video {
+  font-size: $font-size !important;
   outline: 0 !important;
   box-shadow: none !important;
   color: $font-color !important;
 }
 
 a {
+  outline: 0 !important;
   color: $font-color;
   text-decoration: underline;
   color: $font-color;
@@ -37,6 +28,20 @@ a {
 
 a:hover {
   color: darken($color: $font-color, $amount: $darken-percentage);
+}
+
+@media only screen and (max-width: 1200px) {
+  body,
+  button {
+    font-size: $font-smaller !important;
+  }
+}
+
+@media only screen and (max-width: 800px) {
+  body,
+  button {
+    font-size: $font-smallest !important;
+  }
 }
 
 * {

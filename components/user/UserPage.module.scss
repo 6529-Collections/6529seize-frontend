@@ -18,6 +18,7 @@
   white-space: nowrap;
   color: $font-color-h !important;
   font-size: smaller;
+  vertical-align: top !important;
   a {
     color: $font-color-h !important;
   }
@@ -30,7 +31,9 @@
 }
 
 .seizedToggle {
+  line-height: 28px;
   width: fit-content;
+  min-width: 150px;
   float: left;
   padding-right: 15px;
   input {
@@ -39,6 +42,13 @@
   }
   input:checked {
     background-color: $green !important;
+  }
+}
+
+@media only screen and (max-width: 800px) {
+  .seizedToggle input {
+    margin-right: 6px;
+    margin-left: -1.5em !important;
   }
 }
 
@@ -60,17 +70,18 @@
   margin-right: 15px;
 }
 
-.primaryTable {
-}
-
 .secondaryTableMargin {
   margin-left: 4%;
 }
 
 .secondaryTable {
   width: 48%;
-
+  margin-top: 15px;
   float: left;
+
+  tr td {
+    line-height: 25px;
+  }
 
   tr:not(:first-child) {
     border-bottom: 1px solid $dark-grey !important;
@@ -82,6 +93,11 @@
 }
 
 .primaryTable {
+  tr td {
+    width: calc(100% / 6);
+    line-height: 25px;
+    vertical-align: middle;
+  }
   tr:not(:first-child) {
     border-bottom: 1px solid $dark-grey !important;
 
@@ -89,4 +105,14 @@
       text-align: right;
     }
   }
+
+  tr:nth-child(2),
+  tr:nth-child(3),
+  tr:nth-child(6) {
+    border-bottom: none !important;
+  }
+}
+
+.primaryTableGap {
+  height: 15px;
 }

@@ -1,6 +1,39 @@
 @import "~bootstrap/scss/bootstrap.scss";
 @import "./variables.scss";
 
+@media (max-width: 1000px) {
+  .container,
+  .container-lg,
+  .container-md,
+  .container-sm,
+  .container-xl,
+  .container-xxl {
+    max-width: 920px !important;
+  }
+}
+
+@media (min-width: 1200px) {
+  .container,
+  .container-lg,
+  .container-md,
+  .container-sm,
+  .container-xl,
+  .container-xxl {
+    max-width: 1120px !important;
+  }
+}
+
+@media (min-width: 1400px) {
+  .container,
+  .container-lg,
+  .container-md,
+  .container-sm,
+  .container-xl,
+  .container-xxl {
+    max-width: 1320px !important;
+  }
+}
+
 @media (min-width: 1600px) {
   .container,
   .container-lg,
@@ -34,7 +67,9 @@
   }
 }
 
-.navbar-expand .navbar-nav .dropdown-menu {
+.navbar-expand .navbar-nav .dropdown-menu,
+.dropdown .dropdown-menu,
+.dropdown-center .dropdown-menu {
   background-color: $bg-color-1;
   border-top: 3px solid white;
   border-top-right-radius: 0;

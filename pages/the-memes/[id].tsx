@@ -4,6 +4,7 @@ import styles from "../../styles/Home.module.scss";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/router";
 import { MEMES_CONTRACT } from "../../constants";
+import { fetchUrl } from "../../services/6529api";
 
 const Header = dynamic(() => import("../../components/header/Header"), {
   ssr: false,
@@ -49,13 +50,12 @@ export default function MemePageIndex(props: any) {
 
 export async function getServerSideProps(req: any, res: any, resolvedUrl: any) {
   const id = req.query.id;
-  const nftRequest = await fetch(
+  const response = await fetchUrl(
     `${process.env.API_ENDPOINT}/api/nfts?contract=${MEMES_CONTRACT}&id=${id}`
   );
-  const response = await nftRequest.json();
   let name = `Meme Card #${id}`;
   let image = `http://52.50.150.109:3001/Seize_Logo_Glasses_2.png`;
-  if (response && response.data.length > 0) {
+  if (response && response.data && response.data.length > 0) {
     name = `${response.data[0].name} | ${name}`;
     image = response.data[0].thumbnail
       ? response.data[0].thumbnail
