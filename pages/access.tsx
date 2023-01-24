@@ -3,7 +3,7 @@ import styles from "../styles/Home.module.scss";
 import Cookies from "js-cookie";
 import { API_AUTH_COOKIE } from "../constants";
 import { useRouter } from "next/router";
-import { Head } from "next/document";
+import Head from "next/head";
 
 export default function Login() {
   const router = useRouter();
