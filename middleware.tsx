@@ -5,9 +5,9 @@ import { API_AUTH_COOKIE } from "./constants";
 export function middleware(req: NextRequest) {
   if (
     req.nextUrl.pathname.startsWith("/_next") ||
-    req.nextUrl.pathname.startsWith("/favicon.ico") ||
-    req.nextUrl.pathname.startsWith(".jpeg") ||
-    req.nextUrl.pathname.startsWith(".png")
+    req.nextUrl.pathname.endsWith("favicon.ico") ||
+    req.nextUrl.pathname.endsWith(".jpeg") ||
+    req.nextUrl.pathname.endsWith(".png")
   ) {
     return NextResponse.next();
   }
