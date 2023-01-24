@@ -8,6 +8,7 @@ import Breadcrumb, { Crumb } from "../components/breadcrumb/Breadcrumb";
 import { useRouter } from "next/router";
 import { DBResponse } from "../entities/IDBResponse";
 import Download from "../components/download/Download";
+import { fetchUrl } from "../services/6529api";
 
 const Header = dynamic(() => import("../components/header/Header"), {
   ssr: false,
@@ -23,13 +24,13 @@ export default function Downloads() {
   const [downloads, setDownloads] = useState<any[]>();
 
   useEffect(() => {
-    fetch(`${process.env.API_ENDPOINT}/api/uploads?page_size=${50}`)
-      .then((res) => res.json())
-      .then((response: DBResponse) => {
+    fetchUrl(`${process.env.API_ENDPOINT}/api/uploads?page_size=${50}`).then(
+      (response: DBResponse) => {
         if (response.data.length > 0) {
           setDownloads(response.data);
         }
-      });
+      }
+    );
   }, [router.isReady]);
 
   function printDate(dateString: any) {

@@ -10,7 +10,7 @@ const Header = dynamic(() => import("../components/header/Header"), {
   ssr: false,
 });
 
-export default function TheMemesPage() {
+export default function Buidl() {
   const [breadcrumbs, setBreadcrumbs] = useState<Crumb[]>([
     { display: "Home", href: "/" },
     { display: "BUIDL" },

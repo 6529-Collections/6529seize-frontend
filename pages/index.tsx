@@ -13,6 +13,7 @@ import dynamic from "next/dynamic";
 import { getDateDisplay, numberWithCommas } from "../helpers/Helpers";
 import { useAccount } from "wagmi";
 import Link from "next/link";
+import { fetchUrl } from "../services/6529api";
 
 const Header = dynamic(() => import("../components/header/Header"), {
   ssr: false,
@@ -31,46 +32,40 @@ export default function Home() {
   const [activity, setActivity] = useState<Transaction[]>();
 
   useEffect(() => {
-    fetch(
+    fetchUrl(
       `${process.env.API_ENDPOINT}/api/nfts?contract=${MEMES_CONTRACT}&page_size=1`
-    )
-      .then((res) => res.json())
-      .then((response: DBResponse) => {
-        const nft = response.data[0];
-        fetch(
-          `${process.env.API_ENDPOINT}/api/memes_extended_data?id=${nft.id}`
-        )
-          .then((res) => res.json())
-          .then((response: DBResponse) => {
-            const nftExtended = response.data[0];
-            setNFT(nft);
-            setnftExtended(nftExtended);
-          });
+    ).then((response: DBResponse) => {
+      const nft = response.data[0];
+      fetchUrl(
+        `${process.env.API_ENDPOINT}/api/memes_extended_data?id=${nft.id}`
+      ).then((response: DBResponse) => {
+        const nftExtended = response.data[0];
+        setNFT(nft);
+        setnftExtended(nftExtended);
       });
+    });
   }, []);
 
   useEffect(() => {
     if (address && nft && nft.id) {
-      fetch(
+      fetchUrl(
         `${process.env.API_ENDPOINT}/api/owners?contract=${nft.contract}&wallet=${address}&id=${nft.id}`
-      )
-        .then((res) => res.json())
-        .then((response: DBResponse) => {
-          if (response.data.length > 0) {
-            setNftBalance(response.data[0].balance);
-          }
-        });
+      ).then((response: DBResponse) => {
+        if (response.data.length > 0) {
+          setNftBalance(response.data[0].balance);
+        }
+      });
     } else {
       setNftBalance(0);
     }
   }, [address, nft]);
 
   useEffect(() => {
-    fetch(`${process.env.API_ENDPOINT}/api/transactions?page_size=12`)
-      .then((res) => res.json())
-      .then((response: DBResponse) => {
+    fetchUrl(`${process.env.API_ENDPOINT}/api/transactions?page_size=12`).then(
+      (response: DBResponse) => {
         setActivity(response.data);
-      });
+      }
+    );
   }, []);
 
   function printMintDate(nft: NFT) {
@@ -122,14 +117,23 @@ export default function Home() {
                   lg={{ span: 6 }}>
                   <Container className="no-padding">
                     <Row>
-                      <a href={`/the-memes/${nft.id}`}>
+                      {nft.animation ? (
                         <NFTImage
                           nft={nft}
-                          animation={false}
+                          animation={true}
                           height={650}
                           balance={nftBalance}
                         />
-                      </a>
+                      ) : (
+                        <a href={`/the-memes/${nft.id}`}>
+                          <NFTImage
+                            nft={nft}
+                            animation={true}
+                            height={650}
+                            balance={nftBalance}
+                          />
+                        </a>
+                      )}
                     </Row>
                   </Container>
                 </Col>

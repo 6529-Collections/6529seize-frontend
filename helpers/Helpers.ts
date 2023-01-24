@@ -42,7 +42,7 @@ export function fromGWEI(from: number) {
 }
 
 export function numberWithCommas(x: number) {
-  if (x == 0) return "-";
+  if (x == null || x == 0) return "-";
   return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 }
 
@@ -57,7 +57,9 @@ export function getDateDisplay(date: Date) {
   if (60 * 60 * 24 > secondsAgo) {
     const hours = Math.floor(secondsAgo / (60 * 60));
     const minutes = secondsAgo % (60 * 60);
-    return `${hours} hrs ${Math.floor(minutes / 60)} mins ago`;
+    return `${hours} hrs ${
+      minutes > 0 ? `${Math.floor(minutes / 60)} mins` : ""
+    } ago`;
   }
   const days = Math.round(secondsAgo / (60 * 60 * 24));
   if (2 > days) {
@@ -102,4 +104,20 @@ export function enterArtFullScreen(elementId: string) {
   } else if (element.msRequestFullscreen) {
     element.msRequestFullscreen();
   }
+}
+
+export function nextTdh() {
+  const now = new Date();
+  const utcMidnight = new Date(now).setUTCHours(24, 0, 0, 0);
+
+  var diffMS = utcMidnight / 1000 - now.getTime() / 1000;
+  var diffHr = Math.floor(diffMS / 3600);
+  diffMS = diffMS - diffHr * 3600;
+  var diffMi = Math.floor(diffMS / 60);
+  diffMS = diffMS - diffMi * 60;
+  var diffS = Math.floor(diffMS);
+  var result = diffHr < 10 ? "0" + diffHr : diffHr;
+  result += ":" + (diffMi < 10 ? "0" + diffMi : diffMi);
+  result += ":" + (diffS < 10 ? "0" + diffS : diffS);
+  return result.toString();
 }

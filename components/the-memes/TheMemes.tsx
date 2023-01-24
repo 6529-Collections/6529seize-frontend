@@ -13,7 +13,7 @@ import { SortDirection } from "../../entities/ISort";
 import { Crumb } from "../breadcrumb/Breadcrumb";
 import { getDateDisplay, numberWithCommas } from "../../helpers/Helpers";
 import { useRouter } from "next/router";
-import { fetchAllPages } from "../../services/6529api";
+import { fetchAllPages, fetchUrl } from "../../services/6529api";
 
 const NFTImage = dynamic(() => import("../nft-image/NFTImage"), {
   ssr: false,
@@ -91,6 +91,7 @@ export default function TheMemesComponent(props: Props) {
 
   const [selectedSeason, setSelectedSeason] = useState(0);
   const [nfts, setNfts] = useState<NFT[]>([]);
+  const [seasons, setSeasons] = useState<number[]>([]);
   const [nftMetas, setNftMetas] = useState<MemesExtendedData[]>([]);
   const [nftBalances, setNftBalances] = useState<Owner[]>([]);
   const [nftsLoaded, setNftsLoaded] = useState(false);
@@ -144,6 +145,11 @@ export default function TheMemesComponent(props: Props) {
     const nftsUrl = `${process.env.API_ENDPOINT}/api/memes_extended_data`;
     fetchAllPages(nftsUrl).then((responseNftMetas: any[]) => {
       setNftMetas(responseNftMetas);
+      setSeasons(
+        Array.from(new Set(responseNftMetas.map((meme) => meme.season))).sort(
+          (a, b) => a - b
+        )
+      );
       if (responseNftMetas.length > 0) {
         const tokenIds = responseNftMetas.map((n: MemesExtendedData) => n.id);
         fetchAllPages(
@@ -163,13 +169,11 @@ export default function TheMemesComponent(props: Props) {
 
   useEffect(() => {
     if (address && nftMetas.length > 0) {
-      fetch(
+      fetchUrl(
         `${process.env.API_ENDPOINT}/api/owners?contract=${MEMES_CONTRACT}&wallet=${address}`
-      )
-        .then((res) => res.json())
-        .then((response: DBResponse) => {
-          setNftBalances(response.data);
-        });
+      ).then((response: DBResponse) => {
+        setNftBalances(response.data);
+      });
     } else {
       setNftBalances([]);
     }
@@ -408,9 +412,7 @@ export default function TheMemesComponent(props: Props) {
   }
 
   function printNft(nft: NFT) {
-    const season = nft.metadata.attributes.find(
-      (a: any) => a.trait_type == "Type - Season"
-    ).value;
+    const season = nftMetas.find((a) => a.id == nft.id)?.season;
     if (selectedSeason == 0 || selectedSeason == season) {
       return (
         <Col
@@ -535,26 +537,21 @@ export default function TheMemesComponent(props: Props) {
                       All
                     </span>
                   </h3>
-                  <h3>&nbsp;&nbsp;|&nbsp;&nbsp;</h3>
-                  <h3>
-                    <span
-                      onClick={() => setSelectedSeason(1)}
-                      className={`${styles.season} ${
-                        selectedSeason != 1 ? styles.disabled : ""
-                      }`}>
-                      SZN1
+                  {seasons.map((s) => (
+                    <span key={`season-${s}-span`}>
+                      <h3>&nbsp;&nbsp;|&nbsp;&nbsp;</h3>
+                      <h3>
+                        <span
+                          key={`season-${s}-h3-2-span`}
+                          onClick={() => setSelectedSeason(s)}
+                          className={`${styles.season} ${
+                            selectedSeason != s ? styles.disabled : ""
+                          }`}>
+                          SZN{s}
+                        </span>
+                      </h3>
                     </span>
-                  </h3>
-                  <h3>&nbsp;&nbsp;|&nbsp;&nbsp;</h3>
-                  <h3>
-                    <span
-                      onClick={() => setSelectedSeason(2)}
-                      className={`${styles.season} ${
-                        selectedSeason != 2 ? styles.disabled : ""
-                      }`}>
-                      SZN2
-                    </span>
-                  </h3>
+                  ))}
                 </Col>
               </Row>
               <Row className="pt-2">

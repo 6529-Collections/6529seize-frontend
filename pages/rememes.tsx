@@ -1,37 +1,29 @@
 import Head from "next/head";
 import styles from "../styles/Home.module.scss";
-
+import Image from "next/image";
 import { useState } from "react";
 import Breadcrumb, { Crumb } from "../components/breadcrumb/Breadcrumb";
 import { Container, Row, Col } from "react-bootstrap";
 import dynamic from "next/dynamic";
 
-const Leaderboard = dynamic(
-  () => import("../components/leaderboard/Leaderboard"),
-  { ssr: false }
-);
-
 const Header = dynamic(() => import("../components/header/Header"), {
   ssr: false,
 });
 
-export default function TheMemesPage() {
+export default function ReMemes() {
   const [breadcrumbs, setBreadcrumbs] = useState<Crumb[]>([
     { display: "Home", href: "/" },
-    { display: "Community" },
+    { display: "ReMemes" },
   ]);
 
   return (
     <>
       <Head>
-        <title>Community | 6529 SEIZE</title>
+        <title>ReMemes | 6529 SEIZE</title>
         <link rel="icon" href="/favicon.ico" />
-        <meta name="description" content="Community | 6529 SEIZE" />
-        <meta
-          property="og:url"
-          content={`http://52.50.150.109:3001/community`}
-        />
-        <meta property="og:title" content="Community" />
+        <meta name="description" content="ReMemes | 6529 SEIZE" />
+        <meta property="og:url" content="http://52.50.150.109:3001/rememes" />
+        <meta property="og:title" content="ReMemes" />
         <meta property="og:description" content="6529 SEIZE" />
         <meta
           property="og:image"
@@ -42,14 +34,20 @@ export default function TheMemesPage() {
       <main className={styles.main}>
         <Header />
         <Breadcrumb breadcrumbs={breadcrumbs} />
-        <Container fluid className={styles.mainContainer}>
-          <Row>
+        <Container fluid className={`${styles.main} text-center`}>
+          <Row className="pt-5">
             <Col>
-              <Leaderboard
-                page={1}
-                pageSize={50}
-                showMore={true}
-                showLastTdh={true}
+              <Image
+                src="/re-memes-w.jpeg"
+                width={250}
+                height={250}
+                alt="ReMemes"
+              />
+              <Image
+                src="/re-memes-b.jpeg"
+                width={250}
+                height={250}
+                alt="ReMemes"
               />
             </Col>
           </Row>

@@ -29,8 +29,9 @@ import Download from "../download/Download";
 import LatestActivityRow from "../latest-activity/LatestActivityRow";
 import { Transaction } from "../../entities/ITransaction";
 import { useRouter } from "next/router";
-import { TDH } from "../../entities/ITDH";
+import { TDHMetrics } from "../../entities/ITDH";
 import { TwitterIcon, TwitterShareButton } from "react-share";
+import { fetchUrl } from "../../services/6529api";
 
 const NFTImage = dynamic(() => import("../nft-image/NFTImage"), {
   ssr: false,
@@ -73,13 +74,15 @@ export default function MemePage() {
   const [nftBalance, setNftBalance] = useState<number>(0);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
 
-  const [myOwner, setMyOwner] = useState<TDH>();
+  const [myOwner, setMyOwner] = useState<TDHMetrics>();
   const [myTDH, setMyTDH] = useState<NftTDH>();
   const [myRank, setMyRank] = useState<NftRank>();
 
   const [collectionCount, setCollectionCount] = useState(-1);
   const [collectionRank, setCollectionRank] = useState(-1);
   const [totalNftCount, setTotalNftCount] = useState(-1);
+
+  const [userLoaded, setUserLoaded] = useState(false);
 
   const liveTab = {
     focus: MEME_FOCUS.LIVE,
@@ -137,111 +140,106 @@ export default function MemePage() {
 
   useEffect(() => {
     if (nftId) {
-      fetch(`${process.env.API_ENDPOINT}/api/memes_extended_data?id=${nftId}`)
-        .then((res) => res.json())
-        .then((response: DBResponse) => {
-          const nftMetas = response.data;
-          if (nftMetas.length == 1) {
-            setNftMeta(nftMetas[0]);
-            fetch(
-              `${process.env.API_ENDPOINT}/api/nfts?id=${nftId}&contract=${MEMES_CONTRACT}`
-            )
-              .then((res) => res.json())
-              .then((response: DBResponse) => {
-                setNft(response.data[0]);
-                setBreadcrumbs([
-                  { display: "Home", href: "/" },
-                  { display: "The Memes", href: "/the-memes" },
-                  {
-                    display: `SZN${nftMetas[0].season}`,
-                    href: `/the-memes?szn=${nftMetas[0].season}&sort=age&sort_dir=ASC`,
-                  },
-                  { display: `Card ${nftId} - ${response.data[0].name}` },
-                ]);
-              });
-          } else {
-            setNftMeta(undefined);
+      fetchUrl(
+        `${process.env.API_ENDPOINT}/api/memes_extended_data?id=${nftId}`
+      ).then((response: DBResponse) => {
+        const nftMetas = response.data;
+        if (nftMetas.length == 1) {
+          setNftMeta(nftMetas[0]);
+          fetchUrl(
+            `${process.env.API_ENDPOINT}/api/nfts?id=${nftId}&contract=${MEMES_CONTRACT}`
+          ).then((response: DBResponse) => {
+            setNft(response.data[0]);
             setBreadcrumbs([
               { display: "Home", href: "/" },
               { display: "The Memes", href: "/the-memes" },
-              { display: `${nftId}` },
+              {
+                display: `SZN${nftMetas[0].season}`,
+                href: `/the-memes?szn=${nftMetas[0].season}&sort=age&sort_dir=ASC`,
+              },
+              { display: `Card ${nftId} - ${response.data[0].name}` },
             ]);
-          }
-        });
+          });
+        } else {
+          setNftMeta(undefined);
+          setBreadcrumbs([
+            { display: "Home", href: "/" },
+            { display: "The Memes", href: "/the-memes" },
+            { display: `${nftId}` },
+          ]);
+        }
+      });
     }
   }, [nftId]);
 
   useEffect(() => {
     if (address && nftId) {
-      fetch(
+      fetchUrl(
         `${process.env.API_ENDPOINT}/api/transactions?contract=${MEMES_CONTRACT}&wallet=${address}&id=${nftId}`
-      )
-        .then((res) => res.json())
-        .then((response: DBResponse) => {
-          setTransactions(response.data);
-          let countIn = 0;
-          let countOut = 0;
-          response.data.map((d: Transaction) => {
-            if (areEqualAddresses(address, d.from_address)) {
-              countOut += 1;
-            }
-            if (areEqualAddresses(address, d.to_address)) {
-              countIn += 1;
-            }
-          });
-          setNftBalance(countIn - countOut);
+      ).then((response: DBResponse) => {
+        setTransactions(response.data);
+        let countIn = 0;
+        let countOut = 0;
+        response.data.map((d: Transaction) => {
+          if (areEqualAddresses(address, d.from_address)) {
+            countOut += d.token_count;
+          }
+          if (areEqualAddresses(address, d.to_address)) {
+            countIn += d.token_count;
+          }
         });
+        setUserLoaded(true);
+        setNftBalance(countIn - countOut);
+      });
     }
   }, [nftId, address]);
 
   useEffect(() => {
     if (address && nftId) {
-      fetch(`${process.env.API_ENDPOINT}/api/tdh?wallet=${address}`)
-        .then((res) => res.json())
-        .then((response: DBResponse) => {
-          if (response.data.length > 0) {
-            const mine: TDH = response.data[0];
-            setMyOwner(mine);
-            setMyTDH(mine.memes.find((m) => m.id == parseInt(nftId)));
-            setMyRank(mine.memes_ranks.find((m) => m.id == parseInt(nftId)));
-          }
-        });
+      fetchUrl(
+        `${process.env.API_ENDPOINT}/api/tdh/${MEMES_CONTRACT}/${nftId}?wallet=${address}`
+      ).then((response: DBResponse) => {
+        if (response.data.length > 0) {
+          const mine: TDHMetrics = response.data[0];
+          setMyOwner(mine);
+          setMyTDH(mine.memes.find((m) => m.id == parseInt(nftId)));
+          setMyRank(mine.memes_ranks.find((m) => m.id == parseInt(nftId)));
+        }
+      });
     }
   }, [address, nftId]);
 
   useEffect(() => {
-    fetch(`${process.env.API_ENDPOINT}/api/nfts`)
-      .then((res) => res.json())
-      .then((response: DBResponse) => {
+    fetchUrl(`${process.env.API_ENDPOINT}/api/nfts`).then(
+      (response: DBResponse) => {
         setTotalNftCount(response.count);
-      });
+      }
+    );
   }, []);
 
   useEffect(() => {
     async function fetchNfts(url: string, mynfts: NFT[]) {
-      return fetch(url)
-        .then((res) => res.json())
-        .then((response: DBResponse) => {
-          if (response.next) {
-            fetchNfts(response.next, [...mynfts].concat(response.data));
-          } else {
-            const newnfts = [...mynfts]
-              .concat(response.data)
-              .filter((value, index, self) => {
-                return self.findIndex((v) => v.id === value.id) === index;
-              });
+      return fetchUrl(url).then((response: DBResponse) => {
+        if (response.next) {
+          fetchNfts(response.next, [...mynfts].concat(response.data));
+        } else {
+          const newnfts = [...mynfts]
+            .concat(response.data)
+            .filter((value, index, self) => {
+              return self.findIndex((v) => v.id === value.id) === index;
+            });
 
-            const rankedNFTs = newnfts.sort((a, b) =>
-              a.tdh_rank > b.tdh_rank ? 1 : -1
+          const rankedNFTs = newnfts.sort((a, b) =>
+            a.tdh_rank > b.tdh_rank ? 1 : -1
+          );
+          setCollectionCount(newnfts.length);
+          if (nftId) {
+            setCollectionRank(
+              rankedNFTs.map((r) => r.id).indexOf(parseInt(nftId))
             );
-            setCollectionCount(newnfts.length);
-            if (nftId) {
-              setCollectionRank(
-                rankedNFTs.map((r) => r.id).indexOf(parseInt(nftId))
-              );
-            }
           }
-        });
+        }
+      });
     }
     if (router.isReady && nftId) {
       const initialUrlNfts = `${process.env.API_ENDPOINT}/api/nfts?contract=${MEMES_CONTRACT}`;
@@ -286,14 +284,15 @@ export default function MemePage() {
             md={{ span: 6 }}
             lg={{ span: 6 }}
             className="pt-2">
-            {nft && (
-              <NFTImage
-                nft={nft}
-                animation={false}
-                height={650}
-                balance={nftBalance}
-              />
-            )}
+            {nft &&
+              (!isHtml() || (isHtml() && activeTab == MEME_FOCUS.LIVE)) && (
+                <NFTImage
+                  nft={nft}
+                  animation={true}
+                  height={650}
+                  balance={nftBalance}
+                />
+              )}
           </Col>
           {nft && nftMeta && (
             <Col
@@ -423,7 +422,7 @@ export default function MemePage() {
                 {nftBalance > 0 && (
                   <Row className="pt-3">
                     <Col>
-                      <h3>
+                      <h3 className="font-color">
                         You Own {nftBalance} edition{nftBalance > 1 && "s"}
                       </h3>
                     </Col>
@@ -470,27 +469,37 @@ export default function MemePage() {
     );
   }
 
+  function getTokenCount(transactions: Transaction[]) {
+    let count = 0;
+    [...transactions].map((e) => {
+      count += e.token_count;
+    });
+    return count;
+  }
+
   function printYourCards() {
-    const firstAcquired = transactions[0];
+    const firstAcquired = [...transactions].sort((a, b) =>
+      a.transaction_date > b.transaction_date ? 1 : -1
+    )[0];
 
     const airdropped = transactions.filter((t) =>
       areEqualAddresses(t.from_address, NULL_ADDRESS)
-    ).length;
+    );
 
     const transferredIn = !address
-      ? 0
+      ? []
       : transactions.filter(
           (t) =>
             !areEqualAddresses(t.from_address, NULL_ADDRESS) &&
             areEqualAddresses(t.to_address, address) &&
             t.value == 0
-        ).length;
+        );
 
     const transferredOut = !address
-      ? 0
+      ? []
       : transactions.filter(
           (t) => areEqualAddresses(t.from_address, address) && t.value == 0
-        ).length;
+        );
 
     const bought = !address
       ? []
@@ -523,14 +532,16 @@ export default function MemePage() {
             md={{ span: 6 }}
             lg={{ span: 6 }}
             className="pt-2">
-            {nft && (
-              <NFTImage
-                nft={nft}
-                animation={false}
-                height={650}
-                balance={nftBalance}
-              />
-            )}
+            {nft &&
+              (!isHtml() ||
+                (isHtml() && activeTab == MEME_FOCUS.YOUR_CARDS)) && (
+                <NFTImage
+                  nft={nft}
+                  animation={true}
+                  height={650}
+                  balance={nftBalance}
+                />
+              )}
           </Col>
           <Col
             xs={{ span: 12 }}
@@ -546,83 +557,144 @@ export default function MemePage() {
                     </Col>
                   </Row>
                 )}
-                {nftBalance == 0 && address && nft && (
+                {nftBalance == 0 && address && nft && userLoaded && (
                   <Row className="pt-2">
                     <Col>
                       <h3>You don&apos;t own any editions of Card {nft.id}</h3>
                     </Col>
                   </Row>
                 )}
-                {transactions.length > 0 && (
+                {transactions.length > 0 && address && (
                   <>
-                    <>
-                      <Row className="pt-2">
-                        <Col>
-                          <h3>Rank</h3>
-                        </Col>
-                      </Row>
-                      <Row>
-                        <Col>
-                          {myRank && myTDH ? (
-                            <h4 className={styles.rankSubheading}>
-                              #{myRank?.rank} in Total Days HODLed (
-                              {myTDH && Math.round(myTDH.tdh)})
-                            </h4>
-                          ) : (
-                            "No TDH accrued"
-                          )}
-                        </Col>
-                      </Row>
-                    </>
-                    <Row className="pt-4">
+                    {nftBalance > 0 && myOwner && (
+                      <>
+                        <Row className="pt-2">
+                          {/* <Col>
+                            <h3 className="font-color">
+                              You Own {nftBalance} edition
+                              {nftBalance > 1 && "s"} -{" "}
+                              {myOwner.dense_rank_balance}
+                            </h3>
+                          </Col> */}
+                          <Col
+                            xs={{ span: 12 }}
+                            sm={{ span: 12 }}
+                            md={{ span: 12 }}
+                            lg={{ span: 8 }}>
+                            <Table bordered={false}>
+                              <tbody>
+                                <tr className={`${styles.overviewColumn}`}>
+                                  <td>Cards</td>
+                                  <td className="text-right">{`x${nftBalance}`}</td>
+                                </tr>
+                                <tr className={`pt-1 ${styles.overviewColumn}`}>
+                                  <td>Rank</td>
+                                  <td className="text-right">
+                                    {`#${numberWithCommas(
+                                      myOwner.dense_rank_balance
+                                    )}`}
+                                  </td>
+                                </tr>
+                              </tbody>
+                            </Table>
+                          </Col>
+                        </Row>
+                        {myRank && nft && myTDH ? (
+                          <Row className="pt-2">
+                            <Col
+                              xs={{ span: 12 }}
+                              sm={{ span: 12 }}
+                              md={{ span: 12 }}
+                              lg={{ span: 8 }}>
+                              <Table bordered={false}>
+                                <tbody>
+                                  <tr
+                                    className={`pt-1 ${styles.overviewColumn}`}>
+                                    <td>TDH</td>
+                                    <td className="text-right">
+                                      {Math.round(myTDH.tdh)}
+                                    </td>
+                                  </tr>
+                                  {/* <tr
+                                    className={`pt-1 ${styles.overviewColumn}`}>
+                                    <td>Unweighted TDH</td>
+                                    <td className="text-right">
+                                      {myTDH.tdh__raw}
+                                    </td>
+                                  </tr> */}
+                                  <tr className={`${styles.overviewColumn}`}>
+                                    <td>Rank</td>
+                                    <td className="text-right">
+                                      #{myRank?.rank}
+                                    </td>
+                                  </tr>
+                                </tbody>
+                              </Table>
+                            </Col>
+                          </Row>
+                        ) : (
+                          <Row>
+                            <Col className={`pt-1 ${styles.overviewColumn}`}>
+                              No TDH accrued
+                            </Col>
+                          </Row>
+                        )}
+                      </>
+                    )}
+                    <Row className="pt-2 pb-2">
                       <Col>
-                        <h3>Total Summary</h3>
+                        <h3>Overview</h3>
                       </Col>
                     </Row>
-                    <Row className="pb-2">
+                    <Row className={`pb-2 ${styles.overviewColumn}`}>
                       <Col>
                         First acquired{" "}
-                        {getDateDisplay(
+                        {printMintDate(
                           new Date(firstAcquired.transaction_date)
                         )}
                       </Col>
                     </Row>
-                    {airdropped > 0 && (
-                      <Row>
+                    {airdropped.length > 0 && (
+                      <Row className={`pt-1 ${styles.overviewColumn}`}>
                         <Col>
-                          {airdropped} card{airdropped > 1 && "s"} airdropped
+                          {getTokenCount(airdropped)} card
+                          {getTokenCount(airdropped) > 1 && "s"} airdropped
                         </Col>
                       </Row>
                     )}
                     {bought.length > 0 && (
-                      <Row>
+                      <Row className={`pt-1 ${styles.overviewColumn}`}>
                         <Col>
-                          {bought.length} card{bought.length > 1 && "s"} bought
-                          for {boughtSum} ETH
+                          {getTokenCount(bought)} card
+                          {getTokenCount(bought) > 1 && "s"} bought for{" "}
+                          {boughtSum} ETH
                         </Col>
                       </Row>
                     )}
-                    {transferredIn > 0 && (
-                      <Row>
+                    {transferredIn.length > 0 && (
+                      <Row className={`pt-1 ${styles.overviewColumn}`}>
                         <Col>
-                          {transferredIn} card{transferredIn > 1 && "s"}{" "}
-                          transferred in
+                          {getTokenCount(transferredIn)} card
+                          {getTokenCount(transferredIn) > 1 && "s"} transferred
+                          in
                         </Col>
                       </Row>
                     )}
                     {sold.length > 0 && (
-                      <Row>
+                      <Row className={`pt-1 ${styles.overviewColumn}`}>
                         <Col>
-                          {sold.length} card{sold.length > 1 && "s"} sold for{" "}
-                          {soldSum}
+                          {getTokenCount(sold)} card
+                          {getTokenCount(sold) > 1 && "s"} sold for {soldSum}{" "}
+                          eth
                         </Col>
                       </Row>
                     )}
-                    {transferredOut > 0 && (
-                      <Row>
+                    {transferredOut.length > 0 && (
+                      <Row className={`pt-1 ${styles.overviewColumn}`}>
                         <Col>
-                          {transferredOut} card{transferredOut > 1 && "s"}{" "}
-                          transferred out
+                          {getTokenCount(transferredOut)} card
+                          {getTokenCount(transferredOut) > 1 && "s"} transferred
+                          out
                         </Col>
                       </Row>
                     )}
@@ -676,6 +748,10 @@ export default function MemePage() {
     });
   }
 
+  function isHtml() {
+    return nft ? nft.metadata.animation_details?.format == "HTML" : false;
+  }
+
   function carouselHandlerSlid() {
     const videos = document.querySelectorAll("video");
     videos.forEach((video, key) => {
@@ -700,7 +776,8 @@ export default function MemePage() {
                   }
                 />
               )}
-              {nft.animation ? (
+              {nft.animation &&
+              (!isHtml() || (isHtml() && activeTab == MEME_FOCUS.THE_ART)) ? (
                 <Carousel
                   className={styles.memesCarousel}
                   interval={null}
@@ -1103,14 +1180,16 @@ export default function MemePage() {
               md={{ span: 6 }}
               lg={{ span: 6 }}
               className="pt-2">
-              {nft && (
-                <NFTImage
-                  nft={nft}
-                  animation={false}
-                  height={650}
-                  balance={nftBalance}
-                />
-              )}
+              {nft &&
+                (!isHtml() ||
+                  (isHtml() && activeTab == MEME_FOCUS.HODLERS)) && (
+                  <NFTImage
+                    nft={nft}
+                    animation={true}
+                    height={650}
+                    balance={nftBalance}
+                  />
+                )}
             </Col>
             {nft && nftMeta && (
               <Col
@@ -1251,7 +1330,7 @@ export default function MemePage() {
                     <TwitterShareButton
                       className="twitter-share-button"
                       url={window.location.href.split("?")[0]}
-                      title={`Meme Card #${nft.id} \n${nft.name}\nby ${nft.artist}\n#6529Seize\n\n`}>
+                      title={`Meme Card #${nft.id} \n${nft.name}\nby ${nft.artist}\n#6529SEIZE\n\n`}>
                       <TwitterIcon
                         size={30}
                         round
@@ -1320,11 +1399,6 @@ export default function MemePage() {
                         onSelect={(view) => {
                           const newTab = MEME_TABS.find((t) => t.focus == view);
                           if (newTab) {
-                            if (newTab.focus != MEME_FOCUS.THE_ART) {
-                              carouselHandlerSlide(
-                                nft.animation ? 0 : undefined
-                              );
-                            }
                             setActiveTab(newTab.focus);
                           }
                         }}>
