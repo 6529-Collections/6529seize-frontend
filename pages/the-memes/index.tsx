@@ -30,13 +30,13 @@ export default function TheMemesPage() {
         <meta name="description" content="The Memes | 6529 SEIZE" />
         <meta
           property="og:url"
-          content={`http://52.50.150.109:3001/the-memes`}
+          content={`${process.env.BASE_ENDPOINT}/the-memes`}
         />
         <meta property="og:title" content="The Memes" />
         <meta property="og:description" content="6529 SEIZE" />
         <meta
           property="og:image"
-          content={`http://52.50.150.109:3001/memes-preview.png`}
+          content={`${process.env.BASE_ENDPOINT}/memes-preview.png`}
         />
       </Head>
 
