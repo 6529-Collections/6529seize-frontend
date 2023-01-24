@@ -28,7 +28,7 @@ export default function MemePageIndex(props: any) {
         <meta name="description" content={pagenameFull} />
         <meta
           property="og:url"
-          content={`http://52.50.150.109:3001/the-memes/${props.id}`}
+          content={`${process.env.BASE_ENDPOINT}/the-memes/${props.id}`}
         />
         <meta property="og:title" content={props.name} />
         <meta property="og:image" content={props.image} />
@@ -54,7 +54,7 @@ export async function getServerSideProps(req: any, res: any, resolvedUrl: any) {
     `${process.env.API_ENDPOINT}/api/nfts?contract=${MEMES_CONTRACT}&id=${id}`
   );
   let name = `Meme Card #${id}`;
-  let image = `http://52.50.150.109:3001/Seize_Logo_Glasses_2.png`;
+  let image = `${process.env.BASE_ENDPOINT}/Seize_Logo_Glasses_2.png`;
   if (response && response.data && response.data.length > 0) {
     name = `${response.data[0].name} | ${name}`;
     image = response.data[0].thumbnail
