@@ -116,7 +116,7 @@ export default function MemePage() {
   };
   const activityTab = {
     focus: MEME_FOCUS.ACTIVITY,
-    title: "Latest Activity",
+    title: "Activity",
   };
 
   const MEME_TABS: MemeTab[] = [
