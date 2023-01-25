@@ -197,3 +197,38 @@
   font-size: smaller;
   font-weight: lighter;
 }
+
+.activityFilterDropdown {
+  line-height: 48px;
+  text-align: center;
+  background-color: transparent;
+  border: none;
+  width: 100%;
+  a {
+    line-height: 30px;
+  }
+  button {
+    font-size: larger !important;
+    font-weight: bolder !important;
+    cursor: copy;
+    padding: 0;
+    background-color: transparent !important;
+    border-color: transparent !important;
+    &::after {
+      margin-top: 0.8rem;
+    }
+  }
+  div {
+    width: 80%;
+  }
+}
+
+@media only screen and (max-width: 800px) {
+  .activityFilterDropdown {
+    button {
+      &::after {
+        margin-top: 0.5rem;
+      }
+    }
+  }
+}

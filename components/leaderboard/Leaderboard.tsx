@@ -137,11 +137,14 @@ export default function Leaderboard(props: Props) {
     !window.location.pathname.includes("community")
   );
 
+  const [showLoader, setShowLoader] = useState(false);
+
   if (props.showLastTdh) {
     printNextTdhCountdown();
   }
 
   async function fetchResults() {
+    setShowLoader(true);
     let tagFilter = "";
     switch (ownerTagFilter) {
       case OwnerTagFilter.MEMES:
@@ -173,6 +176,7 @@ export default function Leaderboard(props: Props) {
       setTotalResults(response.count);
       setNext(response.next);
       setLeaderboard(response.data);
+      setShowLoader(false);
     });
   }
 
@@ -891,32 +895,10 @@ export default function Leaderboard(props: Props) {
     );
   }
 
-  function printInteractionsWidget() {
-    return (
-      <>
-        <span
-          onClick={() => setFocus(Focus.TDH)}
-          className={`${styles.focusSwitchLabel} ${
-            focus == Focus.TDH && styles.focusSwitchLabelActive
-          }`}>
-          Cards HODLed
-        </span>
-        <span
-          onClick={() => setFocus(Focus.INTERACTIONS)}
-          className={`${styles.focusSwitchLabel} ${
-            styles.focusSwitchLabelExtraPadding
-          } ${focus == Focus.INTERACTIONS && styles.focusSwitchLabelActive}`}>
-          Interactions
-        </span>
-        <span
-          onClick={() => setFocus(Focus.SETS)}
-          className={`${styles.focusSwitchLabel} ${
-            styles.focusSwitchLabelExtraPadding
-          } ${focus == Focus.SETS && styles.focusSwitchLabelActive}`}>
-          Sets
-        </span>
-      </>
-    );
+  function printLoader() {
+    if (showLoader) {
+      return <span className={styles.loader}></span>;
+    }
   }
 
   return (
@@ -1033,6 +1015,7 @@ export default function Leaderboard(props: Props) {
                     <span className={styles.totalResults}>
                       x{totalResults}
                     </span>{" "}
+                    {printLoader()}
                   </th>
                   {focus == Focus.TDH && (
                     <th className={styles.tdhSub}>
