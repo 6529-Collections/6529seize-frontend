@@ -19,7 +19,7 @@ interface Props {
   showMore?: boolean;
 }
 
-enum TypeFilter {
+export enum TypeFilter {
   ALL = "All",
   SALES = "Sales",
   TRANSFERS = "Transfers",
@@ -107,8 +107,11 @@ export default function LatestActivity(props: Props) {
               <Dropdown.Menu>
                 {Object.values(TypeFilter).map((filter) => (
                   <Dropdown.Item
-                    key={TypeFilter.ALL}
-                    onClick={() => setTypeFilter(filter)}>
+                    key={filter}
+                    onClick={() => {
+                      setPage(1);
+                      setTypeFilter(filter);
+                    }}>
                     {filter}
                   </Dropdown.Item>
                 ))}

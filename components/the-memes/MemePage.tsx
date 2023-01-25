@@ -12,6 +12,7 @@ import {
   Tabs,
   Tab,
   Carousel,
+  Dropdown,
 } from "react-bootstrap";
 import { useAccount } from "wagmi";
 import { MEMES_CONTRACT, NULL_ADDRESS } from "../../constants";
@@ -32,6 +33,8 @@ import { useRouter } from "next/router";
 import { TDHMetrics } from "../../entities/ITDH";
 import { TwitterIcon, TwitterShareButton } from "react-share";
 import { fetchUrl } from "../../services/6529api";
+import Pagination from "../pagination/Pagination";
+import { TypeFilter } from "../latest-activity/LatestActivity";
 
 const NFTImage = dynamic(() => import("../nft-image/NFTImage"), {
   ssr: false,
@@ -51,7 +54,10 @@ export enum MEME_FOCUS {
   YOUR_CARDS = "your-cards",
   THE_ART = "the-art",
   HODLERS = "hodlers",
+  ACTIVITY = "activity",
 }
+
+const ACTIVITY_PAGE_SIZE = 25;
 
 export default function MemePage() {
   const router = useRouter();
@@ -73,6 +79,7 @@ export default function MemePage() {
   const [nftMeta, setNftMeta] = useState<MemesExtendedData>();
   const [nftBalance, setNftBalance] = useState<number>(0);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [activity, setActivity] = useState<Transaction[]>([]);
 
   const [myOwner, setMyOwner] = useState<TDHMetrics>();
   const [myTDH, setMyTDH] = useState<NftTDH>();
@@ -83,6 +90,13 @@ export default function MemePage() {
   const [totalNftCount, setTotalNftCount] = useState(-1);
 
   const [userLoaded, setUserLoaded] = useState(false);
+
+  const [activityPage, setActivityPage] = useState(1);
+  const [activityTotalResults, setActivityTotalResults] = useState(0);
+
+  const [activityTypeFilter, setActivityTypeFilter] = useState<TypeFilter>(
+    TypeFilter.ALL
+  );
 
   const liveTab = {
     focus: MEME_FOCUS.LIVE,
@@ -100,8 +114,18 @@ export default function MemePage() {
     focus: MEME_FOCUS.HODLERS,
     title: "HODLers",
   };
+  const activityTab = {
+    focus: MEME_FOCUS.ACTIVITY,
+    title: "Activity",
+  };
 
-  const MEME_TABS: MemeTab[] = [liveTab, cardsTab, artTab, hodlersTab];
+  const MEME_TABS: MemeTab[] = [
+    liveTab,
+    cardsTab,
+    artTab,
+    hodlersTab,
+    activityTab,
+  ];
 
   useEffect(() => {
     if (router.isReady) {
@@ -210,6 +234,27 @@ export default function MemePage() {
   }, [address, nftId]);
 
   useEffect(() => {
+    if (nftId) {
+      let url = `${process.env.API_ENDPOINT}/api/transactions?contract=${MEMES_CONTRACT}&id=${nftId}&page_size=${ACTIVITY_PAGE_SIZE}&page=${activityPage}`;
+      switch (activityTypeFilter) {
+        case TypeFilter.SALES:
+          url += `&filter=sales`;
+          break;
+        case TypeFilter.TRANSFERS:
+          url += `&filter=transfers`;
+          break;
+        case TypeFilter.AIRDROPS:
+          url += `&filter=airdrops`;
+          break;
+      }
+      fetchUrl(url).then((response: DBResponse) => {
+        setActivityTotalResults(response.count);
+        setActivity(response.data);
+      });
+    }
+  }, [nftId, activityPage, activityTypeFilter]);
+
+  useEffect(() => {
     fetchUrl(`${process.env.API_ENDPOINT}/api/nfts`).then(
       (response: DBResponse) => {
         setTotalNftCount(response.count);
@@ -271,6 +316,8 @@ export default function MemePage() {
         return printTheArt();
       case MEME_FOCUS.HODLERS:
         return printHodlers();
+      case MEME_FOCUS.ACTIVITY:
+        return printActivity();
     }
   }
 
@@ -1296,7 +1343,7 @@ export default function MemePage() {
                   contract={nft.contract}
                   nftId={parseInt(nftId)}
                   page={1}
-                  pageSize={25}
+                  pageSize={ACTIVITY_PAGE_SIZE}
                 />
               </Col>
             </Row>
@@ -1312,6 +1359,74 @@ export default function MemePage() {
       '<a href=\'$1\' target="blank" rel="noreferrer">$1</a>'
     );
     return d;
+  }
+
+  function printActivity() {
+    return (
+      <Container>
+        <Row>
+          <Col
+            className="d-flex align-items-center"
+            xs={{ span: 7 }}
+            sm={{ span: 7 }}
+            md={{ span: 9 }}
+            lg={{ span: 10 }}>
+            <h3>Card Activity</h3>
+          </Col>
+          <Col
+            xs={{ span: 5 }}
+            sm={{ span: 5 }}
+            md={{ span: 3 }}
+            lg={{ span: 2 }}>
+            <Dropdown
+              className={styles.activityFilterDropdown}
+              drop={"down-centered"}>
+              <Dropdown.Toggle>Filter: {activityTypeFilter}</Dropdown.Toggle>
+              <Dropdown.Menu>
+                {Object.values(TypeFilter).map((filter) => (
+                  <Dropdown.Item
+                    key={`nft-activity-${filter}`}
+                    onClick={() => {
+                      setActivityPage(1);
+                      setActivityTypeFilter(filter);
+                    }}>
+                    {filter}
+                  </Dropdown.Item>
+                ))}
+              </Dropdown.Menu>
+            </Dropdown>
+          </Col>
+        </Row>
+        <Row className={`pt-2 ${styles.transactionsScrollContainer}`}>
+          <Col>
+            <Table bordered={false} className={styles.transactionsTable}>
+              <tbody>
+                {activity.map((tr) => (
+                  <LatestActivityRow
+                    tr={tr}
+                    nft={nft}
+                    key={`${tr.from_address}-${tr.to_address}-${tr.transaction}-${tr.token_id}`}
+                  />
+                ))}
+              </tbody>
+            </Table>
+          </Col>
+        </Row>
+        {activity.length > 0 && (
+          <Row className="text-center pt-2 pb-3">
+            <Pagination
+              page={activityPage}
+              pageSize={ACTIVITY_PAGE_SIZE}
+              totalResults={activityTotalResults}
+              setPage={function (newPage: number) {
+                setActivityPage(newPage);
+                window.scrollTo(0, 0);
+              }}
+            />
+          </Row>
+        )}
+      </Container>
+    );
   }
 
   return (
@@ -1330,7 +1445,7 @@ export default function MemePage() {
                     <TwitterShareButton
                       className="twitter-share-button"
                       url={window.location.href.split("?")[0]}
-                      title={`Meme Card #${nft.id} \n${nft.name}\nby ${nft.artist}\n#6529SEIZE\n\n`}>
+                      title={`Meme Card #${nft.id} \n${nft.name}\nby ${nft.artist}\n\n#6529SEIZE\n\n`}>
                       <TwitterIcon
                         size={30}
                         round

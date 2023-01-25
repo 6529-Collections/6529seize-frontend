@@ -36,7 +36,13 @@ export default function NFTImage(props: Props) {
             {props.balance}
           </span>
         )}
-        <iframe src={props.nft.animation} id={`${props.id && `${props.id}`}`} />
+        <iframe
+          src={props.nft.animation}
+          onError={({ currentTarget }) => {
+            currentTarget.src = props.nft.metadata.animation;
+          }}
+          id={`${props.id && `${props.id}`}`}
+        />
       </Col>
     );
   }
