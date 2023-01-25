@@ -52,15 +52,26 @@ export default function LatestActivityRow(props: Props) {
           <>
             airdrop {props.tr.token_count}x{" "}
             {props.nft ? (
-              <img
-                src={
-                  props.nft.thumbnail ? props.nft.thumbnail : props.nft.image
+              <a
+                href={
+                  isMemesContract(props.tr.contract)
+                    ? `/the-memes/${props.nft?.id}`
+                    : isGradientsContract(props.tr.contract)
+                    ? `/6529-gradient/${props.nft?.id}`
+                    : ``
                 }
-                onError={({ currentTarget }) => {
-                  currentTarget.src = props.nft!.image;
-                }}
-                className={styles.nftImage}
-              />
+                target="_blank"
+                rel="noreferrer">
+                <img
+                  src={
+                    props.nft.thumbnail ? props.nft.thumbnail : props.nft.image
+                  }
+                  onError={({ currentTarget }) => {
+                    currentTarget.src = props.nft!.image;
+                  }}
+                  className={styles.nftImage}
+                />
+              </a>
             ) : isMemesContract(props.tr.contract) ? (
               `Meme #${props.tr.token_id}`
             ) : isGradientsContract(props.tr.contract) ? (
@@ -78,7 +89,13 @@ export default function LatestActivityRow(props: Props) {
             {props.tr.value > 0 ? "bought" : "received"} {props.tr.token_count}x{" "}
             {props.nft ? (
               <a
-                href={`/the-memes/${props.nft?.id}`}
+                href={
+                  isMemesContract(props.tr.contract)
+                    ? `/the-memes/${props.nft?.id}`
+                    : isGradientsContract(props.tr.contract)
+                    ? `/6529-gradient/${props.nft?.id}`
+                    : ``
+                }
                 target="_blank"
                 rel="noreferrer">
                 <img
