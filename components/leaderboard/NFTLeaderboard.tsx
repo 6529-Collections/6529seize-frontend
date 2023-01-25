@@ -45,7 +45,7 @@ export default function NFTLeaderboard(props: Props) {
   const [sort, setSort] = useState<{
     sort: Sort;
     sort_direction: SortDirection;
-  }>({ sort: Sort.card_tdh, sort_direction: SortDirection.ASC });
+  }>({ sort: Sort.card_tdh, sort_direction: SortDirection.DESC });
 
   const [ownerTags, setOwnersTags] = useState<OwnerTags[]>([]);
   const [ownerTagsLoaded, setOwnerTagsLoaded] = useState(false);
@@ -157,11 +157,11 @@ export default function NFTLeaderboard(props: Props) {
                           onClick={() =>
                             setSort({
                               sort: Sort.card_tdh,
-                              sort_direction: SortDirection.DESC,
+                              sort_direction: SortDirection.ASC,
                             })
                           }
                           className={`${styles.caret} ${
-                            sort.sort_direction != SortDirection.DESC ||
+                            sort.sort_direction != SortDirection.ASC ||
                             sort.sort != Sort.card_tdh
                               ? styles.disabled
                               : ""
@@ -172,11 +172,11 @@ export default function NFTLeaderboard(props: Props) {
                           onClick={() =>
                             setSort({
                               sort: Sort.card_tdh,
-                              sort_direction: SortDirection.ASC,
+                              sort_direction: SortDirection.DESC,
                             })
                           }
                           className={`${styles.caret} ${
-                            sort.sort_direction != SortDirection.ASC ||
+                            sort.sort_direction != SortDirection.DESC ||
                             sort.sort != Sort.card_tdh
                               ? styles.disabled
                               : ""
@@ -268,13 +268,13 @@ export default function NFTLeaderboard(props: Props) {
                           icon="square-caret-up"
                           onClick={() =>
                             setSort({
-                              sort: Sort.total_balance,
+                              sort: Sort.total_tdh,
                               sort_direction: SortDirection.ASC,
                             })
                           }
                           className={`${styles.caret} ${
                             sort.sort_direction != SortDirection.ASC ||
-                            sort.sort != Sort.total_balance
+                            sort.sort != Sort.total_tdh
                               ? styles.disabled
                               : ""
                           }`}
@@ -283,13 +283,13 @@ export default function NFTLeaderboard(props: Props) {
                           icon="square-caret-down"
                           onClick={() =>
                             setSort({
-                              sort: Sort.total_balance,
+                              sort: Sort.total_tdh,
                               sort_direction: SortDirection.DESC,
                             })
                           }
                           className={`${styles.caret} ${
                             sort.sort_direction != SortDirection.DESC ||
-                            sort.sort != Sort.total_balance
+                            sort.sort != Sort.total_tdh
                               ? styles.disabled
                               : ""
                           }`}
