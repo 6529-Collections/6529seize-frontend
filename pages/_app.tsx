@@ -90,16 +90,16 @@ const client = createClient({
         shimDisconnect: true,
       },
     }),
-    new CoinbaseWalletConnector({
-      chains,
-      options: {
-        appName: PROJECT_NAME,
-      },
-    }),
     new WalletConnectConnector({
       chains,
       options: {
         qrcode: true,
+      },
+    }),
+    new CoinbaseWalletConnector({
+      chains,
+      options: {
+        appName: PROJECT_NAME,
       },
     }),
   ],
