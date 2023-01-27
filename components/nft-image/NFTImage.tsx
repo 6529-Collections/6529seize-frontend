@@ -1,13 +1,12 @@
 import styles from "./NFTImage.module.scss";
 import { Col } from "react-bootstrap";
 import { NFT } from "../../entities/INFT";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { useState } from "react";
 
 interface Props {
   nft: NFT;
   animation: boolean;
   showThumbnail?: boolean;
+  showOriginal?: boolean;
   height: 300 | 650;
   balance: number;
   showOwned?: boolean;
@@ -75,11 +74,15 @@ export default function NFTImage(props: Props) {
           controls
           loop
           src={
-            props.nft.compressed_animation
+            !props.showOriginal && props.nft.compressed_animation
               ? props.nft.compressed_animation
               : props.nft.animation
           }
-          poster={props.nft.scaled ? props.nft.scaled : props.nft.image}
+          poster={
+            !props.showOriginal && props.nft.scaled
+              ? props.nft.scaled
+              : props.nft.image
+          }
           onError={({ currentTarget }) => {
             if (currentTarget.src == props.nft.compressed_animation) {
               currentTarget.src = props.nft.animation;
@@ -104,7 +107,7 @@ export default function NFTImage(props: Props) {
         src={
           props.showThumbnail
             ? props.nft.thumbnail
-            : props.nft.scaled
+            : props.nft.scaled && !props.showOriginal
             ? props.nft.scaled
             : props.nft.image
         }

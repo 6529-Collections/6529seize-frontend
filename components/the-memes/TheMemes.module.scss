@@ -232,3 +232,18 @@
     }
   }
 }
+
+.tabFocus {
+  cursor: pointer;
+  margin-right: 30px;
+  color: $lightest-grey;
+  font-size: larger;
+
+  &:hover {
+    color: white;
+  }
+}
+
+.tabFocusActive {
+  color: white !important;
+}
