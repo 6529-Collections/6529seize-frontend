@@ -1,6 +1,6 @@
 import styles from "./UserPage.module.scss";
 
-import { Col, Container, Form, Row, Table } from "react-bootstrap";
+import { Col, Container, Dropdown, Form, Row, Table } from "react-bootstrap";
 import { useEffect, useState } from "react";
 import { DBResponse } from "../../entities/IDBResponse";
 import { Owner, OwnerTags } from "../../entities/IOwner";
@@ -27,6 +27,10 @@ import { SortDirection } from "../../entities/ISort";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { TwitterShareButton, TwitterIcon } from "react-share";
 import { fetchUrl } from "../../services/6529api";
+import Pagination from "../pagination/Pagination";
+import { TypeFilter } from "../latest-activity/LatestActivity";
+import LatestActivityRow from "../latest-activity/LatestActivityRow";
+import { Transaction } from "../../entities/ITransaction";
 
 const NFTImage = dynamic(() => import("../nft-image/NFTImage"), {
   ssr: false,
@@ -38,15 +42,22 @@ interface Props {
   user: string;
 }
 
+enum Focus {
+  COLLECTION,
+  ACTIVITY,
+}
 enum Sort {
   ID = "id",
   TDH = "tdh",
   RANK = "tdh_rank",
 }
 
+const ACTIVITY_PAGE_SIZE = 25;
+
 export default function UserPage(props: Props) {
   const router = useRouter();
   const { address, connector, isConnected } = useAccount();
+  const [focus, setFocus] = useState<Focus>(Focus.COLLECTION);
   const [sortDir, setSortDir] = useState<SortDirection>(SortDirection.ASC);
   const [sort, setSort] = useState<Sort>(Sort.ID);
 
@@ -78,6 +89,13 @@ export default function UserPage(props: Props) {
   const [hideMemes, setHideMemes] = useState(false);
   const [hideGradients, setHideGradients] = useState(false);
 
+  const [activity, setActivity] = useState<Transaction[]>([]);
+  const [activityTypeFilter, setActivityTypeFilter] = useState<TypeFilter>(
+    TypeFilter.ALL
+  );
+  const [activityPage, setActivityPage] = useState(1);
+  const [activityTotalResults, setActivityTotalResults] = useState(0);
+
   function getBalance(nft: NFT) {
     const balance = owned.find(
       (b) => b.token_id == nft.id && areEqualAddresses(b.contract, nft.contract)
@@ -86,6 +104,14 @@ export default function UserPage(props: Props) {
       return balance.balance;
     }
     return 0;
+  }
+
+  function findNftOrNull(tr: Transaction) {
+    const nft = [...nfts].find(
+      (n) => areEqualAddresses(tr.contract, n.contract) && tr.token_id == n.id
+    );
+
+    return nft;
   }
 
   printNextTdhCountdown();
@@ -236,6 +262,27 @@ export default function UserPage(props: Props) {
       fetchOwnerTags(initialUrlOwners);
     }
   }, [router.isReady, tdh]);
+
+  useEffect(() => {
+    if (ownerAddress && router.isReady) {
+      let url = `${process.env.API_ENDPOINT}/api/transactions?contract=${MEMES_CONTRACT}&wallet=${ownerAddress}&page_size=${ACTIVITY_PAGE_SIZE}&page=${activityPage}`;
+      switch (activityTypeFilter) {
+        case TypeFilter.SALES:
+          url += `&filter=sales`;
+          break;
+        case TypeFilter.TRANSFERS:
+          url += `&filter=transfers`;
+          break;
+        case TypeFilter.AIRDROPS:
+          url += `&filter=airdrops`;
+          break;
+      }
+      fetchUrl(url).then((response: DBResponse) => {
+        setActivityTotalResults(response.count);
+        setActivity(response.data);
+      });
+    }
+  }, [activityPage, ownerAddress, router.isReady, activityTypeFilter]);
 
   useEffect(() => {
     if (sort && sortDir) {
@@ -895,60 +942,163 @@ export default function UserPage(props: Props) {
               </Row>
             </Container>
             <Container>
-              <Row className="pt-2 pb-2">
-                <Col>
-                  Sort&nbsp;&nbsp;
-                  <FontAwesomeIcon
-                    icon="chevron-circle-up"
-                    onClick={() => setSortDir(SortDirection.ASC)}
-                    className={`${styles.sortDirection} ${
-                      sortDir != SortDirection.ASC ? styles.disabled : ""
-                    }`}
-                  />{" "}
-                  <FontAwesomeIcon
-                    icon="chevron-circle-down"
-                    onClick={() => setSortDir(SortDirection.DESC)}
-                    className={`${styles.sortDirection} ${
-                      sortDir != SortDirection.DESC ? styles.disabled : ""
-                    }`}
-                  />
-                </Col>
-              </Row>
-              <Row className="pt-2">
-                <Col>
-                  <span
-                    onClick={() => setSort(Sort.ID)}
-                    className={`${styles.sort} ${
-                      sort != Sort.ID ? styles.disabled : ""
-                    }`}>
-                    ID
-                  </span>
-                  <span
-                    onClick={() => setSort(Sort.TDH)}
-                    className={`${styles.sort} ${
-                      sort != Sort.TDH ? styles.disabled : ""
-                    }`}>
-                    TDH
-                  </span>
-                  <span
-                    onClick={() => setSort(Sort.RANK)}
-                    className={`${styles.sort} ${
-                      sort != Sort.RANK ? styles.disabled : ""
-                    }`}>
-                    RANK
-                  </span>
-                </Col>
-              </Row>
-              {printUserControls()}
-              {ownerLoaded &&
-                (owned.length > 0 ? (
-                  printNfts()
-                ) : (
+              <Row className="pt-3 pb-3">
+                {focus == Focus.COLLECTION && (
                   <Col>
-                    <img src="/SummerGlasses.svg" className="icon-100" />{" "}
-                    Nothing here yet
+                    Sort&nbsp;&nbsp;
+                    <FontAwesomeIcon
+                      icon="chevron-circle-up"
+                      onClick={() => setSortDir(SortDirection.ASC)}
+                      className={`${styles.sortDirection} ${
+                        sortDir != SortDirection.ASC ? styles.disabled : ""
+                      }`}
+                    />{" "}
+                    <FontAwesomeIcon
+                      icon="chevron-circle-down"
+                      onClick={() => setSortDir(SortDirection.DESC)}
+                      className={`${styles.sortDirection} ${
+                        sortDir != SortDirection.DESC ? styles.disabled : ""
+                      }`}
+                    />
                   </Col>
-                ))}
+                )}
+                <Col className="d-flex justify-content-end">
+                  <h3
+                    className={
+                      focus == Focus.COLLECTION
+                        ? styles.focusActive
+                        : styles.focus
+                    }
+                    onClick={() => setFocus(Focus.COLLECTION)}>
+                    Collection
+                  </h3>
+                  <h3>&nbsp;|&nbsp;</h3>
+                  <h3
+                    className={
+                      focus == Focus.ACTIVITY
+                        ? styles.focusActive
+                        : styles.focus
+                    }
+                    onClick={() => setFocus(Focus.ACTIVITY)}>
+                    Activity
+                  </h3>
+                </Col>
+              </Row>
+              {focus == Focus.COLLECTION && (
+                <>
+                  <Row className="pt-2">
+                    <Col>
+                      <span
+                        onClick={() => setSort(Sort.ID)}
+                        className={`${styles.sort} ${
+                          sort != Sort.ID ? styles.disabled : ""
+                        }`}>
+                        ID
+                      </span>
+                      <span
+                        onClick={() => setSort(Sort.TDH)}
+                        className={`${styles.sort} ${
+                          sort != Sort.TDH ? styles.disabled : ""
+                        }`}>
+                        TDH
+                      </span>
+                      <span
+                        onClick={() => setSort(Sort.RANK)}
+                        className={`${styles.sort} ${
+                          sort != Sort.RANK ? styles.disabled : ""
+                        }`}>
+                        RANK
+                      </span>
+                    </Col>
+                  </Row>
+                  {printUserControls()}
+                  {ownerLoaded &&
+                    (owned.length > 0 ? (
+                      printNfts()
+                    ) : (
+                      <Col>
+                        <img src="/SummerGlasses.svg" className="icon-100" />{" "}
+                        Nothing here yet
+                      </Col>
+                    ))}
+                </>
+              )}
+              {focus == Focus.ACTIVITY && (
+                <>
+                  <Row>
+                    <Col
+                      className="d-flex align-items-center"
+                      xs={{ span: 7 }}
+                      sm={{ span: 7 }}
+                      md={{ span: 9 }}
+                      lg={{ span: 10 }}>
+                      <h3>Wallet Activity</h3>
+                    </Col>
+                    <Col
+                      xs={{ span: 5 }}
+                      sm={{ span: 5 }}
+                      md={{ span: 3 }}
+                      lg={{ span: 2 }}>
+                      <Dropdown
+                        className={styles.activityFilterDropdown}
+                        drop={"down-centered"}>
+                        <Dropdown.Toggle>
+                          Filter: {activityTypeFilter}
+                        </Dropdown.Toggle>
+                        <Dropdown.Menu>
+                          {Object.values(TypeFilter).map((filter) => (
+                            <Dropdown.Item
+                              key={`nft-activity-${filter}`}
+                              onClick={() => {
+                                setActivityPage(1);
+                                setActivityTypeFilter(filter);
+                              }}>
+                              {filter}
+                            </Dropdown.Item>
+                          ))}
+                        </Dropdown.Menu>
+                      </Dropdown>
+                    </Col>
+                  </Row>
+                  <Row className={`pt-2 ${styles.transactionsScrollContainer}`}>
+                    <Col>
+                      {activity.length > 0 ? (
+                        <Table
+                          bordered={false}
+                          className={styles.transactionsTable}>
+                          <tbody>
+                            {activity.map((tr) => (
+                              <LatestActivityRow
+                                tr={tr}
+                                nft={findNftOrNull(tr)}
+                                key={`${tr.from_address}-${tr.to_address}-${tr.transaction}-${tr.token_id}`}
+                              />
+                            ))}
+                          </tbody>
+                        </Table>
+                      ) : (
+                        <>
+                          <img src="/SummerGlasses.svg" className="icon-100" />{" "}
+                          Nothing here yet
+                        </>
+                      )}
+                    </Col>
+                  </Row>
+                  {activity.length > 0 && (
+                    <Row className="text-center pt-2 pb-3">
+                      <Pagination
+                        page={activityPage}
+                        pageSize={ACTIVITY_PAGE_SIZE}
+                        totalResults={activityTotalResults}
+                        setPage={function (newPage: number) {
+                          setActivityPage(newPage);
+                          window.scrollTo(0, 0);
+                        }}
+                      />
+                    </Row>
+                  )}
+                </>
+              )}
             </Container>
           </Col>
         </Row>
