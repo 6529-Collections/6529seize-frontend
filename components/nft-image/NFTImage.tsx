@@ -25,7 +25,7 @@ export default function NFTImage(props: Props) {
     return (
       <Col
         className={`text-center ${styles.nftAnimation} ${
-          props.transparentBG && styles.transparentBG
+          props.transparentBG ? styles.transparentBG : ""
         }`}>
         {props.balance > 0 && (
           <span
@@ -56,7 +56,9 @@ export default function NFTImage(props: Props) {
       <Col
         className={`text-center ${styles.nftAnimation} ${
           props.height == 650 ? styles.height650 : styles.height300
-        } ${props.transparentBG && styles.transparentBG}`}>
+        } ${
+          props.transparentBG ? styles.transparentBG : ""
+        } d-flex justify-content-center align-items-center`}>
         {props.balance > 0 && (
           <span
             className={`${styles.balance}  ${
