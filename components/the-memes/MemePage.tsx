@@ -827,6 +827,7 @@ export default function MemePage() {
                     height={650}
                     balance={0}
                     transparentBG={true}
+                    showOriginal={true}
                     id="the-art-fullscreen-img"
                   />
                 </>
