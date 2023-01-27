@@ -72,10 +72,18 @@ export default function NFTImage(props: Props) {
           muted
           controls
           loop
-          src={props.nft.animation}
+          src={
+            props.nft.compressed_animation
+              ? props.nft.compressed_animation
+              : props.nft.animation
+          }
           poster={props.nft.thumbnail}
           onError={({ currentTarget }) => {
-            currentTarget.src = props.nft.metadata.animation;
+            if (currentTarget.src == props.nft.compressed_animation) {
+              currentTarget.src = props.nft.animation;
+            } else {
+              currentTarget.src = props.nft.metadata.animation;
+            }
           }}></video>
       </Col>
     );
@@ -91,9 +99,19 @@ export default function NFTImage(props: Props) {
       }`}>
       <img
         id={`${props.id && `${props.id}`}`}
-        src={props.showThumbnail ? props.nft.thumbnail : props.nft.image}
+        src={
+          props.showThumbnail
+            ? props.nft.thumbnail
+            : props.nft.scaled
+            ? props.nft.scaled
+            : props.nft.image
+        }
         onError={({ currentTarget }) => {
           if (currentTarget.src == props.nft.thumbnail) {
+            currentTarget.src = props.nft.scaled
+              ? props.nft.scaled
+              : props.nft.image;
+          } else if (currentTarget.src == props.nft.scaled) {
             currentTarget.src = props.nft.image;
           } else {
             currentTarget.src = props.nft.metadata.image;
