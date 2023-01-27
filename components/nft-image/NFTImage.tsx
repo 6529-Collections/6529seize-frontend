@@ -79,7 +79,7 @@ export default function NFTImage(props: Props) {
               ? props.nft.compressed_animation
               : props.nft.animation
           }
-          poster={props.nft.thumbnail}
+          poster={props.nft.scaled ? props.nft.scaled : props.nft.image}
           onError={({ currentTarget }) => {
             if (currentTarget.src == props.nft.compressed_animation) {
               currentTarget.src = props.nft.animation;
