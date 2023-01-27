@@ -26,6 +26,18 @@ interface Props {
   disableLink?: boolean;
 }
 
+const MEMES_SETS_ICON =
+  "https://d3lqz0a4bldqgf.cloudfront.net/images/scaled_x450/0x33FD426905F149f8376e227d0C9D3340AaD17aF1/4.WEBP";
+
+const SZN_1_ICON =
+  "https://d3lqz0a4bldqgf.cloudfront.net/images/scaled_x450/0x33FD426905F149f8376e227d0C9D3340AaD17aF1/1.WEBP";
+
+const SZN_2_ICON =
+  "https://d3lqz0a4bldqgf.cloudfront.net/images/scaled_x450/0x33FD426905F149f8376e227d0C9D3340AaD17aF1/48.WEBP";
+
+const GRADIENT_ICON =
+  "https://d3lqz0a4bldqgf.cloudfront.net/images/scaled_x450/0x0c58ef43ff3032005e472cb5709f8908acb00205/0.WEBP";
+
 export default function Address(props: Props) {
   let ensResolution: any = null;
 
@@ -146,22 +158,29 @@ export default function Address(props: Props) {
           )}
           {props.tags.memesCardsSets > 0 ? (
             <span className={`${styles.tag} ${styles.memesCardsSetsTag}`}>
-              {props.tags.memesCardsSets}x Memes Set
-              {props.tags.memesCardsSets > 1 ? `s` : ""}
+              {props.tags.memesCardsSets}x{" "}
+              {props.isUserPage &&
+                `Memes Set${props.tags.memesCardsSets > 1 ? "s " : " "}`}
+              <img src={MEMES_SETS_ICON} className={styles.tagIcon} />
             </span>
           ) : props.tags.memesBalance > 0 ? (
             <span className={`${styles.tag} ${styles.memesTag}`}>
-              {props.tags.memesBalance}x Meme
-              {props.tags.memesBalance > 1 ? `s` : ""}
-              {props.tags.genesis > 0 ? ` (+Genesis)` : ""}
+              {props.tags.memesBalance}x{" "}
+              {props.isUserPage &&
+                `Meme Set${props.tags.memesCardsSets > 1 ? "s " : " "}${
+                  props.tags.genesis > 0 ? ` (+Genesis) ` : ""
+                }`}
+              <img src={SZN_1_ICON} className={styles.tagIcon} />
             </span>
           ) : (
             ""
           )}
           {props.tags.gradientsBalance > 0 && !props.expandedTags ? (
             <span className={`${styles.tag} ${styles.gradientsTag}`}>
-              {props.tags.gradientsBalance}x Gradient
-              {props.tags.gradientsBalance > 1 ? `s` : ""}
+              {props.tags.gradientsBalance}x{" "}
+              {props.isUserPage &&
+                `Gradient${props.tags.gradientsBalance > 1 ? "s " : " "}`}
+              <img src={GRADIENT_ICON} className={styles.tagIcon} />
             </span>
           ) : (
             <>
@@ -169,22 +188,28 @@ export default function Address(props: Props) {
                 (props.tags.memesCardsSets == 0 || props.expandedTags) && (
                   <span
                     className={`${styles.tag} ${styles.memesCardsSetsS1Tag}`}>
-                    {props.tags.memesCardsSetS1}x SZN1 Set
-                    {props.tags.memesCardsSets > 1 ? `s` : ""}
+                    {props.tags.memesCardsSetS1}x{" "}
+                    {props.isUserPage &&
+                      `SZN1 Set${props.tags.memesCardsSetS1 > 1 ? "s " : " "}`}
+                    <img src={SZN_1_ICON} className={styles.tagIcon} />
                   </span>
                 )}
               {props.tags.memesCardsSetS2 > 0 &&
                 (props.tags.memesCardsSets == 0 || props.expandedTags) && (
                   <span
                     className={`${styles.tag} ${styles.memesCardsSetsS2Tag}`}>
-                    {props.tags.memesCardsSetS2}x SZN2 Set
-                    {props.tags.memesCardsSets > 1 ? `s` : ""}
+                    {props.tags.memesCardsSetS2}x{" "}
+                    {props.isUserPage &&
+                      `SZN2 Set${props.tags.memesCardsSetS2 > 1 ? "s " : " "}`}
+                    <img src={SZN_2_ICON} className={styles.tagIcon} />
                   </span>
                 )}
               {props.tags.gradientsBalance > 0 && props.expandedTags && (
                 <span className={`${styles.tag} ${styles.gradientsTag}`}>
-                  {props.tags.gradientsBalance}x Gradient
-                  {props.tags.gradientsBalance > 1 ? `s` : ""}
+                  {props.tags.gradientsBalance}x{" "}
+                  {props.isUserPage &&
+                    `Gradient${props.tags.gradientsBalance > 1 ? "s " : " "}`}
+                  <img src={GRADIENT_ICON} className={styles.tagIcon} />
                 </span>
               )}
             </>
