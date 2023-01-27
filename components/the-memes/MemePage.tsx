@@ -9,8 +9,6 @@ import {
   Row,
   Col,
   Table,
-  Tabs,
-  Tab,
   Carousel,
   Dropdown,
 } from "react-bootstrap";
@@ -155,9 +153,13 @@ export default function MemePage() {
         query.focus = activeTab;
       }
       if (router.query != query) {
-        router.replace({
-          query: query,
-        });
+        router.replace(
+          {
+            query: query,
+          },
+          undefined,
+          { shallow: true }
+        );
       }
     }
   }, [activeTab, router.isReady]);
@@ -306,204 +308,55 @@ export default function MemePage() {
     );
   }
 
-  function printContent(focus: MEME_FOCUS) {
-    switch (focus) {
-      case MEME_FOCUS.LIVE:
-        return printLive();
-      case MEME_FOCUS.YOUR_CARDS:
-        return printYourCards();
-      case MEME_FOCUS.THE_ART:
-        return printTheArt();
-      case MEME_FOCUS.HODLERS:
-        return printHodlers();
-      case MEME_FOCUS.ACTIVITY:
-        return printActivity();
+  function printContent() {
+    if (activeTab == MEME_FOCUS.ACTIVITY) {
+      return printActivity();
     }
-  }
 
-  function printLive() {
+    if (activeTab == MEME_FOCUS.THE_ART) {
+      return printTheArt();
+    }
     return (
       <Container>
         <Row>
-          <Col
-            xs={{ span: 12 }}
-            sm={{ span: 12 }}
-            md={{ span: 6 }}
-            lg={{ span: 6 }}
-            className="pt-2">
-            {nft &&
-              (!isHtml() || (isHtml() && activeTab == MEME_FOCUS.LIVE)) && (
-                <NFTImage
-                  nft={nft}
-                  animation={true}
-                  height={650}
-                  balance={nftBalance}
-                />
-              )}
-          </Col>
-          {nft && nftMeta && (
-            <Col
-              xs={{ span: 12 }}
-              sm={{ span: 12 }}
-              md={{ span: 6 }}
-              lg={{ span: 6 }}
-              className="pt-2">
-              <Container>
-                <Row>
-                  <Col>
-                    <h3>Meme HODLers</h3>
-                  </Col>
-                </Row>
-                <Row>
-                  <Col>
-                    <Table bordered={false} className={styles.hodlersTableLive}>
-                      <tbody>
-                        <tr>
-                          <td>Edition Size</td>
-                          <td className="text-right">{nftMeta.edition_size}</td>
-                          <td className="text-right">
-                            {nftMeta.edition_size_rank}/
-                            {nftMeta.collection_size}
-                          </td>
-                        </tr>
-                        <tr>
-                          <td>6529 Museum</td>
-                          <td className="text-right">
-                            {nftMeta.museum_holdings}
-                          </td>
-                          <td className="text-right">
-                            {nftMeta.museum_holdings_rank}/
-                            {nftMeta.collection_size}
-                          </td>
-                        </tr>
-                        <tr>
-                          <td>Edition Size ex. 6529 Museum</td>
-                          <td className="text-right">
-                            {nftMeta.edition_size_cleaned}
-                          </td>
-                          <td className="text-right">
-                            {nftMeta.edition_size_cleaned_rank}/
-                            {nftMeta.collection_size}
-                          </td>
-                        </tr>
-                        <tr>
-                          <td>HODLers</td>
-                          <td className="text-right">{nftMeta.hodlers}</td>
-                          <td className="text-right">
-                            {nftMeta.hodlers_rank}/{nftMeta.collection_size}
-                          </td>
-                        </tr>
-                        <tr>
-                          <td>% Unique</td>
-                          <td className="text-right">
-                            {Math.round(nftMeta.percent_unique * 100 * 10) / 10}
-                            %
-                          </td>
-                          <td className="text-right">
-                            {nftMeta.percent_unique_rank}/
-                            {nftMeta.collection_size}
-                          </td>
-                        </tr>
-                        <tr>
-                          <td>% Unique ex. 6529 Museum</td>
-                          <td className="text-right">
-                            {Math.round(
-                              nftMeta.percent_unique_cleaned * 100 * 10
-                            ) / 10}
-                            %
-                          </td>
-                          <td className="text-right">
-                            {nftMeta.percent_unique_cleaned_rank}/
-                            {nftMeta.collection_size}
-                          </td>
-                        </tr>
-                      </tbody>
-                    </Table>
-                  </Col>
-                </Row>
-                <Row className="pt-3">
-                  <Col>
-                    <h3>NFT</h3>
-                  </Col>
-                </Row>
-                <Row>
-                  <Col>
-                    <Table bordered={false}>
-                      <tbody>
-                        <tr>
-                          <td>Artist</td>
-                          <td>{nft.artist}</td>
-                        </tr>
-                        <tr>
-                          <td>Mint Date</td>
-                          <td>{printMintDate(nft.mint_date)}</td>
-                        </tr>
-                        <tr>
-                          <td>HODL Rate</td>
-                          <td>{Math.round(nft.hodl_rate * 100) / 100}</td>
-                        </tr>
-                        <tr>
-                          <td>Floor Price</td>
-                          <td>
-                            {nft.floor_price > 0
-                              ? `${numberWithCommas(
-                                  Math.round(nft.floor_price * 100) / 100
-                                )} ETH`
-                              : `N/A`}
-                          </td>
-                        </tr>
-                        <tr>
-                          <td>Market Cap</td>
-                          <td>
-                            {nft.market_cap > 0
-                              ? `${numberWithCommas(
-                                  Math.round(nft.market_cap * 100) / 100
-                                )} ETH`
-                              : `N/A`}
-                          </td>
-                        </tr>
-                      </tbody>
-                    </Table>
-                  </Col>
-                </Row>
-                {nftBalance > 0 && (
-                  <Row className="pt-3">
-                    <Col>
-                      <h3 className="font-color">
-                        You Own {nftBalance} edition{nftBalance > 1 && "s"}
-                      </h3>
-                    </Col>
-                  </Row>
-                )}
-                <Row className="pt-4">
-                  <Col>
-                    <a
-                      href={`https://opensea.io/assets/ethereum/${MEMES_CONTRACT}/${nft.id}`}
-                      target="_blank"
-                      rel="noreferrer">
-                      <img className={styles.marketplace} src="/opensea.png" />
-                    </a>
-                    {/* <a
-                      href={`https://looksrare.org/collections/${MEMES_CONTRACT}/${nft.id}`}
-                      target="_blank"
-                      rel="noreferrer">
-                      <img
-                        className={styles.marketplace}
-                        src="/looksrare.png"
-                      />
-                    </a> */}
-                    <a
-                      href={`https://x2y2.io/eth/${MEMES_CONTRACT}/${nft.id}`}
-                      target="_blank"
-                      rel="noreferrer">
-                      <img className={styles.marketplace} src="/x2y2.png" />
-                    </a>
-                  </Col>
-                </Row>
-              </Container>
-            </Col>
-          )}
+          {[
+            MEME_FOCUS.LIVE,
+            MEME_FOCUS.YOUR_CARDS,
+            MEME_FOCUS.HODLERS,
+          ].includes(activeTab!) &&
+            nft && (
+              <>
+                <Col
+                  xs={{ span: 12 }}
+                  sm={{ span: 12 }}
+                  md={{ span: 6 }}
+                  lg={{ span: 6 }}
+                  className="pt-2">
+                  <NFTImage
+                    nft={nft}
+                    animation={true}
+                    height={650}
+                    balance={nftBalance}
+                  />
+                </Col>
+                {activeTab == MEME_FOCUS.LIVE && <>{printLive()}</>}
+                {activeTab == MEME_FOCUS.YOUR_CARDS && <>{printYourCards()}</>}
+                {activeTab == MEME_FOCUS.HODLERS && <>{printHodlers()}</>}
+              </>
+            )}
         </Row>
+        <Row>
+          {activeTab == MEME_FOCUS.LIVE && <>{printLiveSub()}</>}
+          {activeTab == MEME_FOCUS.YOUR_CARDS && <>{printYourCardsSub()}</>}
+          {activeTab == MEME_FOCUS.HODLERS && <>{printHodlersSub()}</>}
+        </Row>
+      </Container>
+    );
+  }
+
+  function printLiveSub() {
+    return (
+      <>
         <Row className="pt-5">
           <Col>
             <h3>ReMemes</h3>
@@ -512,8 +365,168 @@ export default function MemePage() {
         <Row className="pt-2">
           <Col>Coming Soon</Col>
         </Row>
-      </Container>
+      </>
     );
+  }
+
+  function printLive() {
+    if (nft && nftMeta) {
+      return (
+        <Col
+          xs={{ span: 12 }}
+          sm={{ span: 12 }}
+          md={{ span: 6 }}
+          lg={{ span: 6 }}
+          className="pt-2">
+          <Container>
+            <Row>
+              <Col>
+                <h3>Meme HODLers</h3>
+              </Col>
+            </Row>
+            <Row>
+              <Col>
+                <Table bordered={false} className={styles.hodlersTableLive}>
+                  <tbody>
+                    <tr>
+                      <td>Edition Size</td>
+                      <td className="text-right">{nftMeta.edition_size}</td>
+                      <td className="text-right">
+                        {nftMeta.edition_size_rank}/{nftMeta.collection_size}
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>6529 Museum</td>
+                      <td className="text-right">{nftMeta.museum_holdings}</td>
+                      <td className="text-right">
+                        {nftMeta.museum_holdings_rank}/{nftMeta.collection_size}
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>Edition Size ex. 6529 Museum</td>
+                      <td className="text-right">
+                        {nftMeta.edition_size_cleaned}
+                      </td>
+                      <td className="text-right">
+                        {nftMeta.edition_size_cleaned_rank}/
+                        {nftMeta.collection_size}
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>HODLers</td>
+                      <td className="text-right">{nftMeta.hodlers}</td>
+                      <td className="text-right">
+                        {nftMeta.hodlers_rank}/{nftMeta.collection_size}
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>% Unique</td>
+                      <td className="text-right">
+                        {Math.round(nftMeta.percent_unique * 100 * 10) / 10}%
+                      </td>
+                      <td className="text-right">
+                        {nftMeta.percent_unique_rank}/{nftMeta.collection_size}
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>% Unique ex. 6529 Museum</td>
+                      <td className="text-right">
+                        {Math.round(nftMeta.percent_unique_cleaned * 100 * 10) /
+                          10}
+                        %
+                      </td>
+                      <td className="text-right">
+                        {nftMeta.percent_unique_cleaned_rank}/
+                        {nftMeta.collection_size}
+                      </td>
+                    </tr>
+                  </tbody>
+                </Table>
+              </Col>
+            </Row>
+            <Row className="pt-3">
+              <Col>
+                <h3>NFT</h3>
+              </Col>
+            </Row>
+            <Row>
+              <Col>
+                <Table bordered={false}>
+                  <tbody>
+                    <tr>
+                      <td>Artist</td>
+                      <td>{nft.artist}</td>
+                    </tr>
+                    <tr>
+                      <td>Mint Date</td>
+                      <td>{printMintDate(nft.mint_date)}</td>
+                    </tr>
+                    <tr>
+                      <td>HODL Rate</td>
+                      <td>{Math.round(nft.hodl_rate * 100) / 100}</td>
+                    </tr>
+                    <tr>
+                      <td>Floor Price</td>
+                      <td>
+                        {nft.floor_price > 0
+                          ? `${numberWithCommas(
+                              Math.round(nft.floor_price * 100) / 100
+                            )} ETH`
+                          : `N/A`}
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>Market Cap</td>
+                      <td>
+                        {nft.market_cap > 0
+                          ? `${numberWithCommas(
+                              Math.round(nft.market_cap * 100) / 100
+                            )} ETH`
+                          : `N/A`}
+                      </td>
+                    </tr>
+                  </tbody>
+                </Table>
+              </Col>
+            </Row>
+            {nftBalance > 0 && (
+              <Row className="pt-3">
+                <Col>
+                  <h3 className="font-color">
+                    You Own {nftBalance} edition{nftBalance > 1 && "s"}
+                  </h3>
+                </Col>
+              </Row>
+            )}
+            <Row className="pt-4">
+              <Col>
+                <a
+                  href={`https://opensea.io/assets/ethereum/${MEMES_CONTRACT}/${nft.id}`}
+                  target="_blank"
+                  rel="noreferrer">
+                  <img className={styles.marketplace} src="/opensea.png" />
+                </a>
+                {/* <a
+                      href={`https://looksrare.org/collections/${MEMES_CONTRACT}/${nft.id}`}
+                      target="_blank"
+                      rel="noreferrer">
+                      <img
+                        className={styles.marketplace}
+                        src="/looksrare.png"
+                      />
+                    </a> */}
+                <a
+                  href={`https://x2y2.io/eth/${MEMES_CONTRACT}/${nft.id}`}
+                  target="_blank"
+                  rel="noreferrer">
+                  <img className={styles.marketplace} src="/x2y2.png" />
+                </a>
+              </Col>
+            </Row>
+          </Container>
+        </Col>
+      );
+    }
   }
 
   function getTokenCount(transactions: Transaction[]) {
@@ -522,6 +535,36 @@ export default function MemePage() {
       count += e.token_count;
     });
     return count;
+  }
+
+  function printYourCardsSub() {
+    return (
+      <>
+        {transactions.length > 0 && (
+          <>
+            <Row className="pt-4">
+              <Col>
+                <h3>Your Transaction History</h3>
+              </Col>
+            </Row>
+            <Row className={`pt-4 ${styles.transactionsScrollContainer}`}>
+              <Col>
+                <Table bordered={false} className={styles.transactionsTable}>
+                  <tbody>
+                    {transactions.map((tr) => (
+                      <LatestActivityRow
+                        tr={tr}
+                        key={`${tr.from_address}-${tr.to_address}-${tr.transaction}-${tr.token_id}`}
+                      />
+                    ))}
+                  </tbody>
+                </Table>
+              </Col>
+            </Row>
+          </>
+        )}
+      </>
+    );
   }
 
   function printYourCards() {
@@ -571,210 +614,144 @@ export default function MemePage() {
     });
 
     return (
-      <Container>
-        <Row>
-          <Col
-            xs={{ span: 12 }}
-            sm={{ span: 12 }}
-            md={{ span: 6 }}
-            lg={{ span: 6 }}
-            className="pt-2">
-            {nft &&
-              (!isHtml() ||
-                (isHtml() && activeTab == MEME_FOCUS.YOUR_CARDS)) && (
-                <NFTImage
-                  nft={nft}
-                  animation={true}
-                  height={650}
-                  balance={nftBalance}
-                />
-              )}
-          </Col>
-          <Col
-            xs={{ span: 12 }}
-            sm={{ span: 12 }}
-            md={{ span: 6 }}
-            lg={{ span: 6 }}>
-            <Container>
-              <Row>
-                {!address && (
-                  <Row className="pt-2">
-                    <Col>
-                      <h4>Connect your wallet to view your cards.</h4>
-                    </Col>
-                  </Row>
-                )}
-                {nftBalance == 0 && address && nft && userLoaded && (
-                  <Row className="pt-2">
-                    <Col>
-                      <h3>You don&apos;t own any editions of Card {nft.id}</h3>
-                    </Col>
-                  </Row>
-                )}
-                {transactions.length > 0 && address && (
+      <Col
+        xs={{ span: 12 }}
+        sm={{ span: 12 }}
+        md={{ span: 6 }}
+        lg={{ span: 6 }}>
+        <Container>
+          <Row>
+            {!address && (
+              <Row className="pt-2">
+                <Col>
+                  <h4>Connect your wallet to view your cards.</h4>
+                </Col>
+              </Row>
+            )}
+            {nftBalance == 0 && address && nft && userLoaded && (
+              <Row className="pt-2">
+                <Col>
+                  <h3>You don&apos;t own any editions of Card {nft.id}</h3>
+                </Col>
+              </Row>
+            )}
+            {transactions.length > 0 && address && (
+              <>
+                {nftBalance > 0 && myOwner && (
                   <>
-                    {nftBalance > 0 && myOwner && (
-                      <>
-                        <Row className="pt-2">
-                          {/* <Col>
-                            <h3 className="font-color">
-                              You Own {nftBalance} edition
-                              {nftBalance > 1 && "s"} -{" "}
-                              {myOwner.dense_rank_balance}
-                            </h3>
-                          </Col> */}
-                          <Col
-                            xs={{ span: 12 }}
-                            sm={{ span: 12 }}
-                            md={{ span: 12 }}
-                            lg={{ span: 8 }}>
-                            <Table bordered={false}>
-                              <tbody>
-                                <tr className={`${styles.overviewColumn}`}>
-                                  <td>Cards</td>
-                                  <td className="text-right">{`x${nftBalance}`}</td>
-                                </tr>
-                                <tr className={`pt-1 ${styles.overviewColumn}`}>
-                                  <td>Rank</td>
-                                  <td className="text-right">
-                                    {`#${numberWithCommas(
-                                      myOwner.dense_rank_balance
-                                    )}`}
-                                  </td>
-                                </tr>
-                              </tbody>
-                            </Table>
-                          </Col>
-                        </Row>
-                        {myRank && nft && myTDH ? (
-                          <Row className="pt-2">
-                            <Col
-                              xs={{ span: 12 }}
-                              sm={{ span: 12 }}
-                              md={{ span: 12 }}
-                              lg={{ span: 8 }}>
-                              <Table bordered={false}>
-                                <tbody>
-                                  <tr
-                                    className={`pt-1 ${styles.overviewColumn}`}>
-                                    <td>TDH</td>
-                                    <td className="text-right">
-                                      {Math.round(myTDH.tdh)}
-                                    </td>
-                                  </tr>
-                                  {/* <tr
-                                    className={`pt-1 ${styles.overviewColumn}`}>
-                                    <td>Unweighted TDH</td>
-                                    <td className="text-right">
-                                      {myTDH.tdh__raw}
-                                    </td>
-                                  </tr> */}
-                                  <tr className={`${styles.overviewColumn}`}>
-                                    <td>Rank</td>
-                                    <td className="text-right">
-                                      #{myRank?.rank}
-                                    </td>
-                                  </tr>
-                                </tbody>
-                              </Table>
-                            </Col>
-                          </Row>
-                        ) : (
-                          <Row>
-                            <Col className={`pt-1 ${styles.overviewColumn}`}>
-                              No TDH accrued
-                            </Col>
-                          </Row>
-                        )}
-                      </>
-                    )}
-                    <Row className="pt-2 pb-2">
-                      <Col>
-                        <h3>Overview</h3>
+                    <Row className="pt-2">
+                      <Col
+                        xs={{ span: 12 }}
+                        sm={{ span: 12 }}
+                        md={{ span: 12 }}
+                        lg={{ span: 8 }}>
+                        <Table bordered={false}>
+                          <tbody>
+                            <tr className={`${styles.overviewColumn}`}>
+                              <td>Cards</td>
+                              <td className="text-right">{`x${nftBalance}`}</td>
+                            </tr>
+                            <tr className={`pt-1 ${styles.overviewColumn}`}>
+                              <td>Rank</td>
+                              <td className="text-right">
+                                {`#${numberWithCommas(
+                                  myOwner.dense_rank_balance
+                                )}`}
+                              </td>
+                            </tr>
+                          </tbody>
+                        </Table>
                       </Col>
                     </Row>
-                    <Row className={`pb-2 ${styles.overviewColumn}`}>
-                      <Col>
-                        First acquired{" "}
-                        {printMintDate(
-                          new Date(firstAcquired.transaction_date)
-                        )}
-                      </Col>
-                    </Row>
-                    {airdropped.length > 0 && (
-                      <Row className={`pt-1 ${styles.overviewColumn}`}>
-                        <Col>
-                          {getTokenCount(airdropped)} card
-                          {getTokenCount(airdropped) > 1 && "s"} airdropped
+                    {myRank && nft && myTDH ? (
+                      <Row className="pt-2">
+                        <Col
+                          xs={{ span: 12 }}
+                          sm={{ span: 12 }}
+                          md={{ span: 12 }}
+                          lg={{ span: 8 }}>
+                          <Table bordered={false}>
+                            <tbody>
+                              <tr className={`pt-1 ${styles.overviewColumn}`}>
+                                <td>TDH</td>
+                                <td className="text-right">
+                                  {Math.round(myTDH.tdh)}
+                                </td>
+                              </tr>
+                              <tr className={`${styles.overviewColumn}`}>
+                                <td>Rank</td>
+                                <td className="text-right">#{myRank?.rank}</td>
+                              </tr>
+                            </tbody>
+                          </Table>
                         </Col>
                       </Row>
-                    )}
-                    {bought.length > 0 && (
-                      <Row className={`pt-1 ${styles.overviewColumn}`}>
-                        <Col>
-                          {getTokenCount(bought)} card
-                          {getTokenCount(bought) > 1 && "s"} bought for{" "}
-                          {boughtSum} ETH
-                        </Col>
-                      </Row>
-                    )}
-                    {transferredIn.length > 0 && (
-                      <Row className={`pt-1 ${styles.overviewColumn}`}>
-                        <Col>
-                          {getTokenCount(transferredIn)} card
-                          {getTokenCount(transferredIn) > 1 && "s"} transferred
-                          in
-                        </Col>
-                      </Row>
-                    )}
-                    {sold.length > 0 && (
-                      <Row className={`pt-1 ${styles.overviewColumn}`}>
-                        <Col>
-                          {getTokenCount(sold)} card
-                          {getTokenCount(sold) > 1 && "s"} sold for {soldSum}{" "}
-                          eth
-                        </Col>
-                      </Row>
-                    )}
-                    {transferredOut.length > 0 && (
-                      <Row className={`pt-1 ${styles.overviewColumn}`}>
-                        <Col>
-                          {getTokenCount(transferredOut)} card
-                          {getTokenCount(transferredOut) > 1 && "s"} transferred
-                          out
+                    ) : (
+                      <Row>
+                        <Col className={`pt-1 ${styles.overviewColumn}`}>
+                          No TDH accrued
                         </Col>
                       </Row>
                     )}
                   </>
                 )}
-              </Row>
-            </Container>
-          </Col>
-        </Row>
-        {transactions.length > 0 && (
-          <>
-            <Row className="pt-4">
-              <Col>
-                <h3>Your Transaction History</h3>
-              </Col>
-            </Row>
-            <Row className={`pt-4 ${styles.transactionsScrollContainer}`}>
-              <Col>
-                <Table bordered={false} className={styles.transactionsTable}>
-                  <tbody>
-                    {transactions.map((tr) => (
-                      <LatestActivityRow
-                        tr={tr}
-                        key={`${tr.from_address}-${tr.to_address}-${tr.transaction}-${tr.token_id}`}
-                      />
-                    ))}
-                  </tbody>
-                </Table>
-              </Col>
-            </Row>
-          </>
-        )}
-      </Container>
+                <Row className="pt-2 pb-2">
+                  <Col>
+                    <h3>Overview</h3>
+                  </Col>
+                </Row>
+                <Row className={`pb-2 ${styles.overviewColumn}`}>
+                  <Col>
+                    First acquired{" "}
+                    {printMintDate(new Date(firstAcquired.transaction_date))}
+                  </Col>
+                </Row>
+                {airdropped.length > 0 && (
+                  <Row className={`pt-1 ${styles.overviewColumn}`}>
+                    <Col>
+                      {getTokenCount(airdropped)} card
+                      {getTokenCount(airdropped) > 1 && "s"} airdropped
+                    </Col>
+                  </Row>
+                )}
+                {bought.length > 0 && (
+                  <Row className={`pt-1 ${styles.overviewColumn}`}>
+                    <Col>
+                      {getTokenCount(bought)} card
+                      {getTokenCount(bought) > 1 && "s"} bought for {boughtSum}{" "}
+                      ETH
+                    </Col>
+                  </Row>
+                )}
+                {transferredIn.length > 0 && (
+                  <Row className={`pt-1 ${styles.overviewColumn}`}>
+                    <Col>
+                      {getTokenCount(transferredIn)} card
+                      {getTokenCount(transferredIn) > 1 && "s"} transferred in
+                    </Col>
+                  </Row>
+                )}
+                {sold.length > 0 && (
+                  <Row className={`pt-1 ${styles.overviewColumn}`}>
+                    <Col>
+                      {getTokenCount(sold)} card
+                      {getTokenCount(sold) > 1 && "s"} sold for {soldSum} eth
+                    </Col>
+                  </Row>
+                )}
+                {transferredOut.length > 0 && (
+                  <Row className={`pt-1 ${styles.overviewColumn}`}>
+                    <Col>
+                      {getTokenCount(transferredOut)} card
+                      {getTokenCount(transferredOut) > 1 && "s"} transferred out
+                    </Col>
+                  </Row>
+                )}
+              </>
+            )}
+          </Row>
+        </Container>
+      </Col>
     );
   }
 
@@ -784,30 +761,10 @@ export default function MemePage() {
     } else {
       setFullscreenElementId("the-art-fullscreen-img");
     }
-
-    const videos = document.querySelectorAll("video");
-    videos.forEach((video, key) => {
-      if (video.currentTime > 0) {
-        video.currentTime = 0;
-        video.load();
-        video.pause();
-      }
-    });
-  }
-
-  function isHtml() {
-    return nft ? nft.metadata.animation_details?.format == "HTML" : false;
-  }
-
-  function carouselHandlerSlid() {
-    const videos = document.querySelectorAll("video");
-    videos.forEach((video, key) => {
-      video.play();
-    });
   }
 
   function printTheArt() {
-    carouselHandlerSlid();
+    // carouselHandlerSlid();
     if (nft && nftMeta) {
       return (
         <>
@@ -823,15 +780,13 @@ export default function MemePage() {
                   }
                 />
               )}
-              {nft.animation &&
-              (!isHtml() || (isHtml() && activeTab == MEME_FOCUS.THE_ART)) ? (
+              {nft.animation ? (
                 <Carousel
                   className={styles.memesCarousel}
                   interval={null}
                   indicators={false}
                   wrap={false}
-                  onSlide={carouselHandlerSlide}
-                  onSlid={carouselHandlerSlid}>
+                  onSlide={carouselHandlerSlide}>
                   <Carousel.Item className="text-center">
                     <div className="pt-4 pb-3">
                       {nft.metadata.animation_details.format}
@@ -842,6 +797,7 @@ export default function MemePage() {
                       height={650}
                       balance={0}
                       transparentBG={true}
+                      showOriginal={true}
                       id="the-art-fullscreen-animation"
                     />
                   </Carousel.Item>
@@ -855,6 +811,7 @@ export default function MemePage() {
                       height={650}
                       balance={0}
                       transparentBG={true}
+                      showOriginal={true}
                       id="the-art-fullscreen-img"
                     />
                   </Carousel.Item>
@@ -1017,32 +974,6 @@ export default function MemePage() {
                       </a>
                     </Col>
                   </Row>
-                  {/* <Row>
-                    <Col>
-                      <a
-                        href={
-                          `https://github.com/6529-Collections/thememecards/tree/main/card` +
-                          nft.id
-                        }
-                        target="_blank"
-                        rel="noreferrer">
-                        Allowlist
-                      </a>
-                    </Col>
-                  </Row> */}
-                  {/* <Row>
-                    <Col>
-                      <a
-                        href={
-                          `https://github.com/6529-Collections/thememecards/tree/main/card` +
-                          nft.id
-                        }
-                        target="_blank"
-                        rel="noreferrer">
-                        Randomization
-                      </a>
-                    </Col>
-                  </Row> */}
                   <Row>
                     <Col>
                       Mint price:{" "}
@@ -1216,140 +1147,117 @@ export default function MemePage() {
     }
   }
 
-  function printHodlers() {
-    if (nft && nftMeta)
+  function printHodlersSub() {
+    if (nft && nftId) {
       return (
-        <Container>
-          <Row>
-            <Col
-              xs={{ span: 12 }}
-              sm={{ span: 12 }}
-              md={{ span: 6 }}
-              lg={{ span: 6 }}
-              className="pt-2">
-              {nft &&
-                (!isHtml() ||
-                  (isHtml() && activeTab == MEME_FOCUS.HODLERS)) && (
-                  <NFTImage
-                    nft={nft}
-                    animation={true}
-                    height={650}
-                    balance={nftBalance}
-                  />
-                )}
-            </Col>
-            {nft && nftMeta && (
-              <Col
-                xs={{ span: 12 }}
-                sm={{ span: 12 }}
-                md={{ span: 6 }}
-                lg={{ span: 6 }}
-                className="pt-2">
-                <Container>
-                  <Row>
-                    <Col>
-                      <h3>NFT</h3>
-                    </Col>
-                  </Row>
-                  <Row>
-                    <Col>
-                      <Table bordered={false} className={styles.hodlersTable}>
-                        <tbody>
-                          <tr>
-                            <td>Mint Date</td>
-                            <td>{printMintDate(nft.mint_date)}</td>
-                          </tr>
-                          <tr>
-                            <td>HODL Rate</td>
-                            <td>
-                              {numberWithCommas(
-                                Math.round(nft.hodl_rate * 100) / 100
-                              )}
-                            </td>
-                          </tr>
-                          <tr>
-                            <td>Floor Price</td>
-                            <td>
-                              {nft.floor_price > 0
-                                ? `${numberWithCommas(
-                                    Math.round(nft.floor_price * 100) / 100
-                                  )} ETH`
-                                : `N/A`}
-                            </td>
-                          </tr>
-                          <tr>
-                            <td>Market Cap</td>
-                            <td>
-                              {nft.market_cap > 0
-                                ? `${numberWithCommas(
-                                    Math.round(nft.market_cap * 100) / 100
-                                  )} ETH`
-                                : `N/A`}
-                            </td>
-                          </tr>
-                        </tbody>
-                      </Table>
-                      <Row className="pt-2">
-                        <Col>
-                          <h3>TDH</h3>
-                        </Col>
-                      </Row>
-                      <Table bordered={false} className={styles.hodlersTable}>
-                        <tbody>
-                          <tr>
-                            <td>TDH</td>
-                            <td>
-                              {numberWithCommas(
-                                Math.round(nft.tdh * 100) / 100
-                              )}
-                            </td>
-                          </tr>
-                          <tr>
-                            <td>Unweighted TDH</td>
-                            <td>
-                              {numberWithCommas(
-                                Math.round(nft.tdh__raw * 100) / 100
-                              )}
-                            </td>
-                          </tr>
-                          <tr>
-                            <td>Meme Rank</td>
-                            <td>
-                              {collectionRank
-                                ? collectionRank
-                                : collectionCount}
-                              /{collectionCount}
-                            </td>
-                          </tr>
-                          <tr>
-                            <td>Total Rank</td>
-                            <td>
-                              {nft.tdh_rank ? nft.tdh_rank : totalNftCount}/
-                              {totalNftCount}
-                            </td>
-                          </tr>
-                        </tbody>
-                      </Table>
-                    </Col>
-                  </Row>
-                </Container>
-              </Col>
-            )}
-          </Row>
-          {nftId && (
-            <Row className="pt-3">
+        <Row className="pt-3">
+          <Col>
+            <NFTLeaderboard
+              contract={nft.contract}
+              nftId={parseInt(nftId)}
+              page={1}
+              pageSize={ACTIVITY_PAGE_SIZE}
+            />
+          </Col>
+        </Row>
+      );
+    }
+  }
+
+  function printHodlers() {
+    if (nft && nftMeta) {
+      return (
+        <Col
+          xs={{ span: 12 }}
+          sm={{ span: 12 }}
+          md={{ span: 6 }}
+          lg={{ span: 6 }}
+          className="pt-2">
+          <Container>
+            <Row>
               <Col>
-                <NFTLeaderboard
-                  contract={nft.contract}
-                  nftId={parseInt(nftId)}
-                  page={1}
-                  pageSize={ACTIVITY_PAGE_SIZE}
-                />
+                <h3>NFT</h3>
               </Col>
             </Row>
-          )}
-        </Container>
+            <Row>
+              <Col>
+                <Table bordered={false} className={styles.hodlersTable}>
+                  <tbody>
+                    <tr>
+                      <td>Mint Date</td>
+                      <td>{printMintDate(nft.mint_date)}</td>
+                    </tr>
+                    <tr>
+                      <td>HODL Rate</td>
+                      <td>
+                        {numberWithCommas(
+                          Math.round(nft.hodl_rate * 100) / 100
+                        )}
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>Floor Price</td>
+                      <td>
+                        {nft.floor_price > 0
+                          ? `${numberWithCommas(
+                              Math.round(nft.floor_price * 100) / 100
+                            )} ETH`
+                          : `N/A`}
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>Market Cap</td>
+                      <td>
+                        {nft.market_cap > 0
+                          ? `${numberWithCommas(
+                              Math.round(nft.market_cap * 100) / 100
+                            )} ETH`
+                          : `N/A`}
+                      </td>
+                    </tr>
+                  </tbody>
+                </Table>
+                <Row className="pt-2">
+                  <Col>
+                    <h3>TDH</h3>
+                  </Col>
+                </Row>
+                <Table bordered={false} className={styles.hodlersTable}>
+                  <tbody>
+                    <tr>
+                      <td>TDH</td>
+                      <td>
+                        {numberWithCommas(Math.round(nft.tdh * 100) / 100)}
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>Unweighted TDH</td>
+                      <td>
+                        {numberWithCommas(Math.round(nft.tdh__raw * 100) / 100)}
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>Meme Rank</td>
+                      <td>
+                        {collectionRank ? collectionRank : collectionCount}/
+                        {collectionCount}
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>Total Rank</td>
+                      <td>
+                        {nft.tdh_rank ? nft.tdh_rank : totalNftCount}/
+                        {totalNftCount}
+                      </td>
+                    </tr>
+                  </tbody>
+                </Table>
+              </Col>
+            </Row>
+          </Container>
+        </Col>
       );
+    }
   }
 
   function parseDescription(description: string) {
@@ -1506,28 +1414,23 @@ export default function MemePage() {
                       <h2>{nft.name}</h2>
                     </Col>
                   </Row>
-                  <Row className="pt-2">
+                  <Row className="pt-3 pb-3">
                     <Col>
-                      <Tabs
-                        activeKey={activeTab}
-                        className={`mb-3`}
-                        onSelect={(view) => {
-                          const newTab = MEME_TABS.find((t) => t.focus == view);
-                          if (newTab) {
-                            setActiveTab(newTab.focus);
-                          }
-                        }}>
-                        {MEME_TABS.map((tab) => (
-                          <Tab
-                            key={`${nft.id}-${nft.contract}-${tab.focus}-tab`}
-                            eventKey={tab.focus}
-                            title={tab.title}>
-                            {printContent(tab.focus)}
-                          </Tab>
-                        ))}
-                      </Tabs>
+                      {MEME_TABS.map((tab) => (
+                        <span
+                          key={`${nft.id}-${nft.contract}-${tab.focus}-tab`}
+                          className={`${styles.tabFocus} ${
+                            activeTab == tab.focus ? styles.tabFocusActive : ""
+                          }`}
+                          onClick={() => {
+                            setActiveTab(tab.focus);
+                          }}>
+                          {tab.title}
+                        </span>
+                      ))}
                     </Col>
                   </Row>
+                  {printContent()}
                 </>
               )}
             </Container>

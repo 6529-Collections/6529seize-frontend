@@ -47,26 +47,7 @@
   padding: 2px 5px;
   white-space: nowrap;
   box-shadow: 0 4px 4px rgb(0 0 0 / 25%);
-}
-
-.memesTag {
-  background-color: $salmon;
-}
-
-.memesCardsSetsTag {
-  background-color: $pink;
-}
-
-.memesCardsSetsS1Tag {
-  background-color: $green;
-}
-
-.memesCardsSetsS2Tag {
-  background-color: $raspberry;
-}
-
-.gradientsTag {
-  background-color: $blue;
+  background-color: $dark-grey;
 }
 
 .rankTag {
@@ -88,4 +69,13 @@
 
 .userPageAddress {
   font-size: $font-size !important;
+}
+
+.tagIcon {
+  margin-left: 4px;
+  margin-right: 4px;
+  padding-top: 2px;
+  padding-bottom: 2px;
+  max-width: 40px;
+  max-height: 40px;
 }
