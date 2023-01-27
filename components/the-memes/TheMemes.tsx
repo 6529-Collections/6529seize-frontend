@@ -527,7 +527,10 @@ export default function TheMemesComponent(props: Props) {
                 <Col>
                   <h1>THE MEMES</h1>
                 </Col>
-                <Col className="d-flex align-items-center justify-content-end">
+                <Col
+                  className="d-flex align-items-center justify-content-end"
+                  xs={12}
+                  sm={6}>
                   <h3>
                     <span
                       onClick={() => setSelectedSeason(0)}
