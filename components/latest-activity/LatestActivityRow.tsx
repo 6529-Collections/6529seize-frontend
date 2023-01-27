@@ -64,7 +64,7 @@ export default function LatestActivityRow(props: Props) {
                 rel="noreferrer">
                 <img
                   src={
-                    props.nft.thumbnail ? props.nft.thumbnail : props.nft.image
+                    props.nft.thumbnail ? props.nft.thumbnail : props.nft.scaled
                   }
                   onError={({ currentTarget }) => {
                     currentTarget.src = props.nft!.image;

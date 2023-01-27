@@ -13,7 +13,9 @@ export interface NFT {
   artist: string;
   uri: string;
   thumbnail: string;
+  scaled: string;
   image: string;
+  compressed_animation: string;
   animation: string;
   metadata: any;
   tdh: number;
