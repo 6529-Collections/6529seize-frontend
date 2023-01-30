@@ -14,6 +14,7 @@ import Pagination from "../pagination/Pagination";
 import { SortDirection } from "../../entities/ISort";
 import { useRouter } from "next/router";
 import { fetchUrl } from "../../services/6529api";
+import { MEMES_CONTRACT } from "../../constants";
 
 const Address = dynamic(() => import("../address/Address"), { ssr: false });
 
@@ -124,6 +125,8 @@ export default function Leaderboard(props: Props) {
   const [focus, setFocus] = useState<Focus>(Focus.TDH);
   const [hideMuseum, setHideMuseum] = useState(false);
 
+  const [memesCount, setMemesCount] = useState<number>();
+
   const [pageProps, setPageProps] = useState<Props>(props);
   const [totalResults, setTotalResults] = useState(0);
   const [leaderboard, setLeaderboard] = useState<TDHMetrics[]>();
@@ -201,6 +204,12 @@ export default function Leaderboard(props: Props) {
         }
       }
     );
+
+    fetchUrl(
+      `${process.env.API_ENDPOINT}/api/nfts?contract=${MEMES_CONTRACT}`
+    ).then((response: DBResponse) => {
+      setMemesCount(response.count);
+    });
   }, []);
 
   useEffect(() => {
@@ -576,19 +585,23 @@ export default function Leaderboard(props: Props) {
 
   function getUniqueMemes(lead: TDHMetrics) {
     let unique;
-    switch (content) {
-      case Content.MEMES1:
-        unique = lead.unique_memes_szn1;
-        break;
-      case Content.MEMES2:
-        unique = lead.unique_memes_szn2;
-        break;
-      default:
-        unique = lead.unique_memes;
-        break;
-    }
-    if (unique > 0) {
-      return `x${numberWithCommas(unique)}`;
+    if (memesCount) {
+      switch (content) {
+        case Content.MEMES1:
+          unique = lead.unique_memes_szn1;
+          break;
+        case Content.MEMES2:
+          unique = lead.unique_memes_szn2;
+          break;
+        default:
+          unique = lead.unique_memes;
+          break;
+      }
+      if (unique > 0) {
+        return `${numberWithCommas(unique)}/${memesCount} (${Math.round(
+          (unique / memesCount) * 100
+        )}%)`;
+      }
     }
     return "-";
   }

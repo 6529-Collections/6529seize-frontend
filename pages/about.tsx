@@ -122,6 +122,13 @@ export default function About() {
                       </Row>
                       <Row className="pt-1 pb-1">
                         <Col
+                          onClick={() => setSection(AboutSection.RELEASE_NOTES)}
+                          className={menuStyles.aboutMenuLeftItem}>
+                          Release Notes
+                        </Col>
+                      </Row>
+                      <Row className="pt-1 pb-1">
+                        <Col
                           onClick={() => setSection(AboutSection.CONTACT_US)}
                           className={menuStyles.aboutMenuLeftItem}>
                           Contact Us
@@ -181,6 +188,13 @@ export default function About() {
                           onClick={() => setSection(AboutSection.MISSION)}
                           className={menuStyles.aboutMenuLeftItem}>
                           Mission
+                        </Col>
+                      </Row>
+                      <Row className="pt-1 pb-1">
+                        <Col
+                          onClick={() => setSection(AboutSection.RELEASE_NOTES)}
+                          className={menuStyles.aboutMenuLeftItem}>
+                          Release Notes
                         </Col>
                       </Row>
                       <Row className="pt-1 pb-1">
