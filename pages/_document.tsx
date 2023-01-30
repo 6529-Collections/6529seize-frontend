@@ -24,22 +24,23 @@ export default function Document() {
             href="https://twitter.com/punk6529"
             target="_blank"
             rel="noreferrer">
-            <img src="/twitter.png"></img> @punk6529
+            <img src="/twitter.png" alt="punk6529 Twitter" /> @punk6529
           </a>
           &nbsp;&nbsp;|&nbsp;&nbsp;
           <a
             href="https://twitter.com/6529Collections"
             target="_blank"
             rel="noreferrer">
-            <img src="/twitter.png"></img> @6529Collections
+            <img src="/twitter.png" alt="6529Collections Twitter" />{" "}
+            @6529Collections
           </a>
           &nbsp;&nbsp;|&nbsp;&nbsp;
           <a href="https://discord.gg/join-om" target="_blank" rel="noreferrer">
-            <img src="/discord.png"></img> OM Discord
+            <img src="/discord.png" alt="OM Discrod" /> OM Discord
           </a>
           &nbsp;&nbsp;|&nbsp;&nbsp;
           <a href="https://6529.io" target="_blank" rel="noreferrer">
-            <img src="/Seize_Logo_2.png"></img> 6529.io
+            <img src="/Seize_Logo_2.png" alt="6529.io" /> 6529.io
           </a>
           &nbsp;&nbsp;|&nbsp;&nbsp;
           <a href="/terms&conditions">Terms & Conditions</a>

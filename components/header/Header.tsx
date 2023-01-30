@@ -312,6 +312,13 @@ export default function Header() {
                 </Row>
                 <Row className="pt-3">
                   <Col>
+                    <a href="/about?section=release-notes">
+                      <h3>Release Notes</h3>
+                    </a>
+                  </Col>
+                </Row>
+                <Row className="pt-3">
+                  <Col>
                     <a href="/about?section=contact-us">
                       <h3>Contact Us</h3>
                     </a>
@@ -506,6 +513,14 @@ export default function Header() {
                                     "/about?section=mission")
                                 }>
                                 Mission
+                              </NavDropdown.Item>
+                              <NavDropdown.Item
+                                className={styles.dropdownItem}
+                                onClick={() =>
+                                  (window.location.href =
+                                    "/about?section=release-notes")
+                                }>
+                                Release Notes
                               </NavDropdown.Item>
                               <NavDropdown.Item
                                 className={styles.dropdownItem}
