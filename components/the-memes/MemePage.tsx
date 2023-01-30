@@ -317,7 +317,7 @@ export default function MemePage() {
       return printTheArt();
     }
     return (
-      <Container>
+      <Container className="p-0">
         <Row>
           {[
             MEME_FOCUS.LIVE,
@@ -359,11 +359,42 @@ export default function MemePage() {
       <>
         <Row className="pt-5">
           <Col>
-            <h3>ReMemes</h3>
+            <img
+              src="/memes-lab.png"
+              alt="memes-lab"
+              className={styles.liveSubImage}
+            />
           </Col>
         </Row>
-        <Row className="pt-2">
-          <Col>Coming Soon</Col>
+        <Row className="pt-4 pb-4">
+          <Col>
+            The Meme Lab is the lab for Meme Artists to release work that is
+            related to The Meme Cards.
+            <br />
+            Meme Lab NFTs that reference this NFT will appear here once the Meme
+            Lab is launched.
+          </Col>
+        </Row>
+        <Row className="pt-5">
+          <Col>
+            <img
+              src="/re-memes.png"
+              alt="re-memes"
+              className={styles.liveSubImage}
+            />
+          </Col>
+        </Row>
+        <Row className="pt-4 pb-4">
+          <Col>
+            ReMemes are community-driven derivatives inspired by the Meme Cards.
+            We hope to display them here once we find a "safe" way to do so.
+            <br />
+            Learn more{" "}
+            <a href="/rememes" target="_blank">
+              here
+            </a>
+            .
+          </Col>
         </Row>
       </>
     );
@@ -378,7 +409,7 @@ export default function MemePage() {
           md={{ span: 6 }}
           lg={{ span: 6 }}
           className="pt-2">
-          <Container>
+          <Container className="p-0">
             <Row>
               <Col>
                 <h3>Meme HODLers</h3>
@@ -504,7 +535,11 @@ export default function MemePage() {
                   href={`https://opensea.io/assets/ethereum/${MEMES_CONTRACT}/${nft.id}`}
                   target="_blank"
                   rel="noreferrer">
-                  <img className={styles.marketplace} src="/opensea.png" />
+                  <img
+                    className={styles.marketplace}
+                    src="/opensea.png"
+                    alt="opensea"
+                  />
                 </a>
                 {/* <a
                       href={`https://looksrare.org/collections/${MEMES_CONTRACT}/${nft.id}`}
@@ -519,7 +554,11 @@ export default function MemePage() {
                   href={`https://x2y2.io/eth/${MEMES_CONTRACT}/${nft.id}`}
                   target="_blank"
                   rel="noreferrer">
-                  <img className={styles.marketplace} src="/x2y2.png" />
+                  <img
+                    className={styles.marketplace}
+                    src="/x2y2.png"
+                    alt="x2y2"
+                  />
                 </a>
               </Col>
             </Row>
@@ -619,7 +658,7 @@ export default function MemePage() {
         sm={{ span: 12 }}
         md={{ span: 6 }}
         lg={{ span: 6 }}>
-        <Container>
+        <Container className="p-0">
           <Row>
             {!address && (
               <Row className="pt-2">
@@ -768,7 +807,7 @@ export default function MemePage() {
     if (nft && nftMeta) {
       return (
         <>
-          <Container>
+          <Container className="p-0">
             <Row className="position-relative">
               {isFullScreenSupported && (
                 <FontAwesomeIcon
@@ -1174,7 +1213,7 @@ export default function MemePage() {
           md={{ span: 6 }}
           lg={{ span: 6 }}
           className="pt-2">
-          <Container>
+          <Container className="p-0">
             <Row>
               <Col>
                 <h3>NFT</h3>
@@ -1244,13 +1283,6 @@ export default function MemePage() {
                         {collectionCount}
                       </td>
                     </tr>
-                    <tr>
-                      <td>Total Rank</td>
-                      <td>
-                        {nft.tdh_rank ? nft.tdh_rank : totalNftCount}/
-                        {totalNftCount}
-                      </td>
-                    </tr>
                   </tbody>
                 </Table>
               </Col>
@@ -1272,7 +1304,7 @@ export default function MemePage() {
 
   function printActivity() {
     return (
-      <Container>
+      <Container className="p-0">
         <Row>
           <Col
             className="d-flex align-items-center"
@@ -1349,7 +1381,7 @@ export default function MemePage() {
                 <Col>
                   <h1>THE MEMES</h1>
                 </Col>
-                {nft && (
+                {/* {nft && (
                   <Col className="d-flex align-items-center justify-content-end">
                     <TwitterShareButton
                       className="twitter-share-button"
@@ -1364,7 +1396,7 @@ export default function MemePage() {
                       Tweet
                     </TwitterShareButton>
                   </Col>
-                )}
+                )} */}
               </Row>
               {nftMeta && nft && (
                 <>
