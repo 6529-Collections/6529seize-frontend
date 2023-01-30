@@ -8,24 +8,17 @@ import dynamic from "next/dynamic";
 import { useRouter } from "next/router";
 import Breadcrumb, { Crumb } from "../breadcrumb/Breadcrumb";
 import { NFT } from "../../entities/INFT";
-import {
-  areEqualAddresses,
-  formatAddress,
-  getDateDisplay,
-  nextTdh,
-  numberWithCommas,
-} from "../../helpers/Helpers";
+import { areEqualAddresses, numberWithCommas } from "../../helpers/Helpers";
 import {
   GRADIENT_CONTRACT,
   MANIFOLD,
   MEMES_CONTRACT,
   SIX529_MUSEUM,
 } from "../../constants";
-import { TDH, TDHCalc, TDHMetrics } from "../../entities/ITDH";
+import { TDHMetrics } from "../../entities/ITDH";
 import { useAccount } from "wagmi";
 import { SortDirection } from "../../entities/ISort";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { TwitterShareButton, TwitterIcon } from "react-share";
 import { fetchUrl } from "../../services/6529api";
 import Pagination from "../pagination/Pagination";
 import { TypeFilter } from "../latest-activity/LatestActivity";
@@ -84,7 +77,6 @@ export default function UserPage(props: Props) {
   const [ownerTags, setOwnerTags] = useState<OwnerTags>();
   const [showNonSeized, setShowNonSeized] = useState(true);
   const [userIsOwner, setUserIsOwner] = useState(false);
-  const [lastTDH, setLastTDH] = useState<TDHCalc>();
 
   const [hideMemes, setHideMemes] = useState(false);
   const [hideGradients, setHideGradients] = useState(false);
@@ -113,31 +105,6 @@ export default function UserPage(props: Props) {
 
     return nft;
   }
-
-  printNextTdhCountdown();
-
-  function printNextTdhCountdown() {
-    var tdhDiv1 = document.getElementById("next-tdh-div-1");
-
-    setInterval(function () {
-      if (tdhDiv1) {
-        tdhDiv1.innerHTML = nextTdh();
-      }
-    }, 1000);
-  }
-
-  useEffect(() => {
-    fetchUrl(`${process.env.API_ENDPOINT}/api/blocks?page_size=${1}`).then(
-      (response: DBResponse) => {
-        if (response.data.length > 0) {
-          setLastTDH({
-            block: response.data[0].block_number,
-            date: new Date(response.data[0].timestamp),
-          });
-        }
-      }
-    );
-  }, []);
 
   useEffect(() => {
     async function fetchOwned(url: string, myowned: Owner[]) {
@@ -625,7 +592,7 @@ export default function UserPage(props: Props) {
             <Container className="mt-2 pt-2 pb-2">
               <Row>
                 <Col className="text-right">
-                  {ownerAddress && (
+                  {/* {ownerAddress && (
                     <TwitterShareButton
                       className="twitter-share-button"
                       url={window.location.href.split("?")[0]}
@@ -652,7 +619,7 @@ export default function UserPage(props: Props) {
                       />
                       Tweet
                     </TwitterShareButton>
-                  )}
+                  )} */}
                 </Col>
               </Row>
               <Row className="pt-3">
@@ -662,33 +629,59 @@ export default function UserPage(props: Props) {
                   sm={{ span: 12 }}
                   md={{ span: 6 }}
                   lg={{ span: 6 }}>
-                  <h2 className={styles.ownerAddress}>
-                    {ownerTags ? (
-                      <Address
-                        address={ownerAddress}
-                        ens={ownerENS}
-                        tags={{
-                          memesCardsSets: ownerTags.memes_cards_sets,
-                          memesCardsSetS1: ownerTags.memes_cards_sets_szn1,
-                          memesCardsSetS2: ownerTags.memes_cards_sets_szn2,
-                          memesBalance: ownerTags.unique_memes,
-                          gradientsBalance: ownerTags.gradients_balance,
-                          genesis: ownerTags.genesis,
-                          tdh_rank: tdh ? tdh?.tdh_rank : -1,
-                          balance_rank: tdh ? tdh?.dense_rank_balance : -1,
-                        }}
-                        expandedTags={true}
-                        isUserPage={true}
-                        disableLink={true}
-                      />
-                    ) : (
-                      <Address
-                        address={ownerAddress}
-                        ens={ownerENS}
-                        disableLink={true}
-                      />
-                    )}
-                  </h2>
+                  <Container className="p-0">
+                    <Row>
+                      <h2 className={styles.ownerAddress}>
+                        {ownerTags ? (
+                          <Address
+                            address={ownerAddress}
+                            ens={ownerENS}
+                            tags={{
+                              memesCardsSets: ownerTags.memes_cards_sets,
+                              memesCardsSetS1: ownerTags.memes_cards_sets_szn1,
+                              memesCardsSetS2: ownerTags.memes_cards_sets_szn2,
+                              memesBalance: ownerTags.unique_memes,
+                              gradientsBalance: ownerTags.gradients_balance,
+                              genesis: ownerTags.genesis,
+                              tdh_rank: tdh ? tdh?.tdh_rank : -1,
+                              balance_rank: tdh ? tdh?.dense_rank_balance : -1,
+                            }}
+                            expandedTags={true}
+                            isUserPage={true}
+                            disableLink={true}
+                          />
+                        ) : (
+                          <Address
+                            address={ownerAddress}
+                            ens={ownerENS}
+                            disableLink={true}
+                          />
+                        )}
+                      </h2>
+                    </Row>
+                    <Row className="pt-3">
+                      <Col>
+                        <a
+                          href={`https://opensea.io/${ownerAddress}`}
+                          target="_blank">
+                          <img
+                            className={styles.marketplace}
+                            src="/opensea.png"
+                            alt="opensea"
+                          />
+                        </a>
+                        <a
+                          href={`https://x2y2.io/user/${ownerAddress}`}
+                          target="_blank">
+                          <img
+                            className={styles.marketplace}
+                            src="/x2y2.png"
+                            alt="x2y2"
+                          />
+                        </a>
+                      </Col>
+                    </Row>
+                  </Container>
                 </Col>
                 {tdh && (
                   <Col
@@ -703,21 +696,6 @@ export default function UserPage(props: Props) {
                           <td colSpan={3}>
                             <h4>Cards HODLed</h4>
                           </td>
-                          {lastTDH && (
-                            <td
-                              className={`text-right ${styles.lastTDH}`}
-                              colSpan={3}>
-                              * TDH Block&nbsp;
-                              <a
-                                href={`https://etherscan.io/block/${lastTDH.block}`}
-                                rel="noreferrer"
-                                target="_blank">
-                                {lastTDH.block}
-                              </a>
-                              &nbsp;|&nbsp;Next Calculation&nbsp;
-                              <span id="next-tdh-div-1">{nextTdh()}</span>
-                            </td>
-                          )}
                         </tr>
                         <tr>
                           <td></td>
@@ -1017,7 +995,11 @@ export default function UserPage(props: Props) {
                       printNfts()
                     ) : (
                       <Col>
-                        <img src="/SummerGlasses.svg" className="icon-100" />{" "}
+                        <img
+                          src="/SummerGlasses.svg"
+                          className="icon-100"
+                          alt="SummerGlasses"
+                        />{" "}
                         Nothing here yet
                       </Col>
                     ))}
@@ -1078,7 +1060,11 @@ export default function UserPage(props: Props) {
                         </Table>
                       ) : (
                         <>
-                          <img src="/SummerGlasses.svg" className="icon-100" />{" "}
+                          <img
+                            src="/SummerGlasses.svg"
+                            className="icon-100"
+                            alt="SummerGlasses"
+                          />{" "}
                           Nothing here yet
                         </>
                       )}

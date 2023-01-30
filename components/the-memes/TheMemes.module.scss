@@ -234,10 +234,11 @@
 }
 
 .tabFocus {
+  white-space: nowrap;
   cursor: pointer;
-  margin-right: 30px;
+  margin-right: 20px;
   color: $lightest-grey;
-  font-size: larger;
+  // font-size: larger;
 
   &:hover {
     color: white;
@@ -246,4 +247,20 @@
 
 .tabFocusActive {
   color: white !important;
+}
+
+.liveSubImage {
+  max-width: 300px;
+}
+
+@media only screen and (max-width: 1200px) {
+  .liveSubImage {
+    max-width: 250px;
+  }
+}
+
+@media only screen and (max-width: 1000px) {
+  .liveSubImage {
+    max-width: 200px;
+  }
 }

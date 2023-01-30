@@ -60,7 +60,9 @@ export default function Login() {
         />
       </Head>
       <main className={styles.login}>
-        {image && <img src={image} className={styles.loginImage} />}
+        {image && (
+          <img src={image} className={styles.loginImage} alt="access" />
+        )}
         <div className={styles.loginPrompt}>
           <input
             disabled={inputDisabled}

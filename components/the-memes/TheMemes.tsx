@@ -655,7 +655,11 @@ export default function TheMemesComponent(props: Props) {
                   )
                 ) : (
                   <Col>
-                    <img src="/SummerGlasses.svg" className="icon-100" />{" "}
+                    <img
+                      src="/SummerGlasses.svg"
+                      className="icon-100"
+                      alt="SummerGlasses"
+                    />{" "}
                     Nothing here yet
                   </Col>
                 ))}
