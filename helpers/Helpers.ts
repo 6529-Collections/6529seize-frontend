@@ -1,6 +1,9 @@
 import { GRADIENT_CONTRACT, MEMES_CONTRACT } from "../constants";
 
 export function formatAddress(address: string) {
+  if (!address || !address.startsWith("0x")) {
+    return address;
+  }
   return `${address.substring(0, 6)}...${address.substring(
     address.length - 4
   )}`;
@@ -57,7 +60,7 @@ export function getDateDisplay(date: Date) {
   if (60 * 60 * 24 > secondsAgo) {
     const hours = Math.floor(secondsAgo / (60 * 60));
     const minutes = secondsAgo % (60 * 60);
-    return `${hours} hrs ${
+    return `${hours} hr${hours > 1 ? "s" : ""} ${
       minutes > 0 ? `${Math.floor(minutes / 60)} mins` : ""
     } ago`;
   }

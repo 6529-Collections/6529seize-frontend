@@ -3,11 +3,19 @@
 .address {
   text-decoration: underline;
   font-weight: bolder;
-  margin-right: 10px;
+  color: white;
+  margin-bottom: 0 !important;
+}
+
+.addressUserPage {
+  font-size: xx-large;
+  font-weight: bold;
+  cursor: copy;
 }
 
 .copy {
-  margin-right: 10px;
+  margin-left: 6px;
+  margin-right: 6px;
   cursor: copy;
   font-size: 15px;
   width: 15px;
@@ -32,6 +40,9 @@
     &::after {
       border: none !important;
     }
+  }
+  div {
+    width: 100%;
   }
 }
 
@@ -59,11 +70,19 @@
   .tag {
     font-size: $font-smaller !important;
   }
+  .copy {
+    font-size: 12px;
+    width: 12px;
+  }
 }
 
 @media only screen and (max-width: 1000px) {
   .tag {
     font-size: $font-smallest !important;
+  }
+  .copy {
+    font-size: 10px;
+    width: 10px;
   }
 }
 
@@ -78,4 +97,34 @@
   padding-bottom: 2px;
   max-width: 40px;
   max-height: 40px;
+}
+
+.memesSetTag {
+  background-color: $pink;
+  line-height: 24px;
+  margin-top: 8px !important;
+}
+
+.memesTag {
+  background-color: $raspberry;
+  line-height: 24px;
+  margin-top: 8px !important;
+}
+
+.memeSzn1Tag {
+  background-color: $green;
+  line-height: 24px;
+  margin-top: 8px !important;
+}
+
+.memeSzn2Tag {
+  background-color: $blue;
+  line-height: 24px;
+  margin-top: 8px !important;
+}
+
+.gradientTag {
+  background-color: $lighter-grey;
+  line-height: 24px;
+  margin-top: 8px !important;
 }
