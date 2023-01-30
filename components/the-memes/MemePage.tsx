@@ -387,7 +387,8 @@ export default function MemePage() {
         <Row className="pt-4 pb-4">
           <Col>
             ReMemes are community-driven derivatives inspired by the Meme Cards.
-            We hope to display them here once we find a "safe" way to do so.
+            We hope to display them here once we find a &quot;safe&quot; way to
+            do so.
             <br />
             Learn more{" "}
             <a href="/rememes" target="_blank">
