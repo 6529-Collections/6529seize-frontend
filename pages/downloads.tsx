@@ -26,9 +26,7 @@ export default function Downloads() {
   useEffect(() => {
     fetchUrl(`${process.env.API_ENDPOINT}/api/uploads?page_size=${50}`).then(
       (response: DBResponse) => {
-        if (response.data.length > 0) {
-          setDownloads(response.data);
-        }
+        setDownloads(response.data);
       }
     );
   }, [router.isReady]);
@@ -73,6 +71,12 @@ export default function Downloads() {
                     <h1>DOWNLOADS</h1>
                   </Col>
                 </Row>
+                <Row>
+                  <Col>
+                    We export our daily calculations of all community metrics to
+                    Arweave at 00:30 UTC.
+                  </Col>
+                </Row>
                 {downloads && downloads.length > 0 && (
                   <Row className={`pt-3 ${styles.downloadsScrollContainer}`}>
                     <Col>
@@ -95,6 +99,16 @@ export default function Downloads() {
                       </Table>
                     </Col>
                   </Row>
+                )}
+                {downloads != undefined && downloads.length == 0 && (
+                  <>
+                    <img
+                      src="/SummerGlasses.svg"
+                      className="icon-100"
+                      alt="SummerGlasses"
+                    />{" "}
+                    Nothing here yet
+                  </>
                 )}
               </Container>
             </Col>

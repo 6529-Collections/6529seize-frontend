@@ -273,12 +273,6 @@ export default function GradientPage() {
                             {collectionRank}/{collectionCount}
                           </td>
                         </tr>
-                        <tr>
-                          <td>Total Rank</td>
-                          <td>
-                            {nft.tdh_rank}/{totalNftCount}
-                          </td>
-                        </tr>
                       </tbody>
                     </Table>
                   </Col>
@@ -289,7 +283,11 @@ export default function GradientPage() {
                       href={`https://opensea.io/assets/ethereum/${GRADIENT_CONTRACT}/${nft.id}`}
                       target="_blank"
                       rel="noreferrer">
-                      <img className={styles.marketplace} src="/opensea.png" />
+                      <img
+                        className={styles.marketplace}
+                        src="/opensea.png"
+                        alt="opensea"
+                      />
                     </a>
                     {/* <a
                       href={`https://looksrare.org/collections/${GRADIENT_CONTRACT}/${nft.id}`}
@@ -304,7 +302,11 @@ export default function GradientPage() {
                       href={`https://x2y2.io/eth/${GRADIENT_CONTRACT}/${nft.id}`}
                       target="_blank"
                       rel="noreferrer">
-                      <img className={styles.marketplace} src="/x2y2.png" />
+                      <img
+                        className={styles.marketplace}
+                        src="/x2y2.png"
+                        alt="x2y2"
+                      />
                     </a>
                   </Col>
                 </Row>
@@ -362,7 +364,7 @@ export default function GradientPage() {
                 <Col>
                   <h1>6529 GRADIENT</h1>
                 </Col>
-                {nft && (
+                {/* {nft && (
                   <Col className="d-flex align-items-center justify-content-end">
                     <TwitterShareButton
                       className="twitter-share-button"
@@ -377,7 +379,7 @@ export default function GradientPage() {
                       Tweet
                     </TwitterShareButton>
                   </Col>
-                )}
+                )} */}
               </Row>
               <Row className="pt-2">
                 <Col>

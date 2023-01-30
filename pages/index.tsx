@@ -281,6 +281,7 @@ export default function Home() {
                           <img
                             className={styles.marketplace}
                             src="/opensea.png"
+                            alt="opensea"
                           />
                         </a>
                         {/* <a
@@ -296,7 +297,11 @@ export default function Home() {
                           href={`https://x2y2.io/eth/${MEMES_CONTRACT}/${nft.id}`}
                           target="_blank"
                           rel="noreferrer">
-                          <img className={styles.marketplace} src="/x2y2.png" />
+                          <img
+                            className={styles.marketplace}
+                            src="/x2y2.png"
+                            alt="x2y2"
+                          />
                         </a>
                       </Col>
                     </Row>

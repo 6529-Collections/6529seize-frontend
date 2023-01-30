@@ -26,17 +26,15 @@ interface Props {
   disableLink?: boolean;
 }
 
-const MEMES_SETS_ICON =
-  "https://d3lqz0a4bldqgf.cloudfront.net/images/scaled_x450/0x33FD426905F149f8376e227d0C9D3340AaD17aF1/4.WEBP";
+const MEMES_SETS_ICON = "";
 
-const SZN_1_ICON =
-  "https://d3lqz0a4bldqgf.cloudfront.net/images/scaled_x450/0x33FD426905F149f8376e227d0C9D3340AaD17aF1/1.WEBP";
+const UNIQUE_MEMES_ICON = "";
 
-const SZN_2_ICON =
-  "https://d3lqz0a4bldqgf.cloudfront.net/images/scaled_x450/0x33FD426905F149f8376e227d0C9D3340AaD17aF1/48.WEBP";
+const SZN_1_ICON = "";
 
-const GRADIENT_ICON =
-  "https://d3lqz0a4bldqgf.cloudfront.net/images/scaled_x450/0x0c58ef43ff3032005e472cb5709f8908acb00205/0.WEBP";
+const SZN_2_ICON = "";
+
+const GRADIENT_ICON = "";
 
 export default function Address(props: Props) {
   let ensResolution: any = null;
@@ -85,56 +83,81 @@ export default function Address(props: Props) {
             ? "d-flex justify-content-center align-items-center"
             : ""
         }>
-        {
+        {(props.hideCopy || !navigator.clipboard) && (
           <span className={styles.address}>
             {props.disableLink && resolveAddress()}
             {!props.disableLink && (
               <a href={`/${props.address}`}>{resolveAddress()}</a>
             )}
           </span>
-        }
-        {!props.hideCopy &&
-          navigator.clipboard &&
-          (props.ens ? (
-            <Dropdown className={`${styles.copyDropdown} dropdown`}>
-              <Dropdown.Toggle>
+        )}
+        {!props.hideCopy && navigator.clipboard && (
+          <>
+            {!props.isUserPage && (
+              <span
+                className={`${styles.address} ${
+                  props.isUserPage ? styles.addressUserPage : ""
+                }`}>
+                <a href={`/${props.address}`}>{resolveAddress()}</a>
+              </span>
+            )}
+            {props.ens ? (
+              <Dropdown className={`${styles.copyDropdown}`}>
+                <Dropdown.Toggle>
+                  {props.isUserPage && (
+                    <span
+                      className={`${styles.address} ${
+                        props.isUserPage ? styles.addressUserPage : ""
+                      }`}>
+                      {resolveAddress()}
+                    </span>
+                  )}
+                  <FontAwesomeIcon
+                    icon="copy"
+                    className={`${styles.copy} ${
+                      isCopied ? styles.copyActive : ""
+                    }`}
+                  />
+                </Dropdown.Toggle>
+
+                <Dropdown.Menu>
+                  {props.ens && (
+                    <Dropdown.Item
+                      className={styles.copyDropdownItem}
+                      onClick={() => copy(props.ens)}>
+                      {props.ens}
+                    </Dropdown.Item>
+                  )}
+                  <Dropdown.Item
+                    className={styles.copyDropdownItem}
+                    onClick={() => copy(props.address)}>
+                    {formatAddress(props.address as string)}
+                  </Dropdown.Item>
+                </Dropdown.Menu>
+              </Dropdown>
+            ) : (
+              <>
+                {props.isUserPage && (
+                  <span
+                    onClick={() => copy(props.address)}
+                    className={`${styles.address} ${
+                      props.isUserPage ? styles.addressUserPage : ""
+                    }`}>
+                    {resolveAddress()}
+                  </span>
+                )}
                 <FontAwesomeIcon
                   icon="copy"
+                  onClick={() => copy(props.address)}
                   className={`${styles.copy} ${
                     isCopied ? styles.copyActive : ""
                   }`}
                 />
-              </Dropdown.Toggle>
-
-              <Dropdown.Menu>
-                <Dropdown.Item
-                  className={styles.copyDropdownItem}
-                  onClick={() => copy(props.ens)}>
-                  {props.ens}
-                </Dropdown.Item>
-                <Dropdown.Item
-                  className={styles.copyDropdownItem}
-                  onClick={() => copy(props.address)}>
-                  {formatAddress(props.address as string)}
-                </Dropdown.Item>
-              </Dropdown.Menu>
-            </Dropdown>
-          ) : (
-            <FontAwesomeIcon
-              icon="copy"
-              className={`${styles.copy} ${isCopied ? styles.copyActive : ""}`}
-              onClick={() => copy(props.address)}
-            />
-          ))}
+              </>
+            )}
+          </>
+        )}
       </span>
-      {props.isUserPage && props.ens && (
-        <>
-          <span className={styles.userPageAddress}>
-            {formatAddress(props.address as string)}
-          </span>
-          <br />
-        </>
-      )}
       {props.tags && (
         <span className={styles.noWrap}>
           {(props.tags.tdh_rank || props.tags.balance_rank) && (
@@ -157,59 +180,111 @@ export default function Address(props: Props) {
             </>
           )}
           {props.tags.memesCardsSets > 0 ? (
-            <span className={`${styles.tag} ${styles.memesCardsSetsTag}`}>
+            <span
+              className={`${styles.tag} ${
+                !MEMES_SETS_ICON ? styles.memesSetTag : ""
+              }`}>
               {props.tags.memesCardsSets}x{" "}
-              {props.isUserPage &&
+              {(props.isUserPage || !MEMES_SETS_ICON) &&
                 `Memes Set${props.tags.memesCardsSets > 1 ? "s " : " "}`}
-              <img src={MEMES_SETS_ICON} className={styles.tagIcon} />
+              {MEMES_SETS_ICON && (
+                <img
+                  src={MEMES_SETS_ICON}
+                  className={styles.tagIcon}
+                  alt="Memes Sets"
+                />
+              )}
             </span>
           ) : props.tags.memesBalance > 0 ? (
-            <span className={`${styles.tag} ${styles.memesTag}`}>
+            <span
+              className={`${styles.tag} ${
+                !UNIQUE_MEMES_ICON ? styles.memesTag : ""
+              }`}>
               {props.tags.memesBalance}x{" "}
-              {props.isUserPage &&
-                `Meme Set${props.tags.memesCardsSets > 1 ? "s " : " "}${
+              {(props.isUserPage || !UNIQUE_MEMES_ICON) &&
+                `Meme${props.tags.memesCardsSets > 1 ? "s " : " "}${
                   props.tags.genesis > 0 ? ` (+Genesis) ` : ""
                 }`}
-              <img src={SZN_1_ICON} className={styles.tagIcon} />
+              {UNIQUE_MEMES_ICON && (
+                <img
+                  src={UNIQUE_MEMES_ICON}
+                  className={styles.tagIcon}
+                  alt="Unique Memes"
+                />
+              )}
             </span>
           ) : (
             ""
           )}
           {props.tags.gradientsBalance > 0 && !props.expandedTags ? (
-            <span className={`${styles.tag} ${styles.gradientsTag}`}>
+            <span
+              className={`${styles.tag} ${
+                !GRADIENT_ICON ? styles.gradientTag : ""
+              }`}>
               {props.tags.gradientsBalance}x{" "}
-              {props.isUserPage &&
+              {(props.isUserPage || !GRADIENT_ICON) &&
                 `Gradient${props.tags.gradientsBalance > 1 ? "s " : " "}`}
-              <img src={GRADIENT_ICON} className={styles.tagIcon} />
+              {GRADIENT_ICON && (
+                <img
+                  src={GRADIENT_ICON}
+                  className={styles.tagIcon}
+                  alt="6529 Gradient"
+                />
+              )}
             </span>
           ) : (
             <>
               {props.tags.memesCardsSetS1 > 0 &&
                 (props.tags.memesCardsSets == 0 || props.expandedTags) && (
                   <span
-                    className={`${styles.tag} ${styles.memesCardsSetsS1Tag}`}>
+                    className={`${styles.tag} ${
+                      !SZN_1_ICON ? styles.memeSzn1Tag : ""
+                    }`}>
                     {props.tags.memesCardsSetS1}x{" "}
-                    {props.isUserPage &&
+                    {(props.isUserPage || !SZN_1_ICON) &&
                       `SZN1 Set${props.tags.memesCardsSetS1 > 1 ? "s " : " "}`}
-                    <img src={SZN_1_ICON} className={styles.tagIcon} />
+                    {SZN_1_ICON && (
+                      <img
+                        src={SZN_1_ICON}
+                        className={styles.tagIcon}
+                        alt="Memes SZN1"
+                      />
+                    )}
                   </span>
                 )}
               {props.tags.memesCardsSetS2 > 0 &&
                 (props.tags.memesCardsSets == 0 || props.expandedTags) && (
                   <span
-                    className={`${styles.tag} ${styles.memesCardsSetsS2Tag}`}>
+                    className={`${styles.tag} ${
+                      !SZN_2_ICON ? styles.memeSzn2Tag : ""
+                    }`}>
                     {props.tags.memesCardsSetS2}x{" "}
-                    {props.isUserPage &&
+                    {(props.isUserPage || !SZN_2_ICON) &&
                       `SZN2 Set${props.tags.memesCardsSetS2 > 1 ? "s " : " "}`}
-                    <img src={SZN_2_ICON} className={styles.tagIcon} />
+                    {SZN_2_ICON && (
+                      <img
+                        src={SZN_2_ICON}
+                        className={styles.tagIcon}
+                        alt="Memes SZN2"
+                      />
+                    )}
                   </span>
                 )}
               {props.tags.gradientsBalance > 0 && props.expandedTags && (
-                <span className={`${styles.tag} ${styles.gradientsTag}`}>
+                <span
+                  className={`${styles.tag} ${
+                    !GRADIENT_ICON ? styles.gradientTag : ""
+                  }`}>
                   {props.tags.gradientsBalance}x{" "}
-                  {props.isUserPage &&
+                  {(props.isUserPage || !GRADIENT_ICON) &&
                     `Gradient${props.tags.gradientsBalance > 1 ? "s " : " "}`}
-                  <img src={GRADIENT_ICON} className={styles.tagIcon} />
+                  {GRADIENT_ICON && (
+                    <img
+                      src={GRADIENT_ICON}
+                      className={styles.tagIcon}
+                      alt="6529 Gradient"
+                    />
+                  )}
                 </span>
               )}
             </>

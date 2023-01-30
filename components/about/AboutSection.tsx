@@ -9,6 +9,7 @@ export enum AboutSection {
   GRADIENTS = "6529-gradient",
   GRADIENTS_FAQ = "gradients-faq",
   MISSION = "mission",
+  RELEASE_NOTES = "release-notes",
   CONTACT_US = "contact-us",
 }
 
@@ -29,7 +30,11 @@ export default function AboutSectionComponent(props: Props) {
         </Row>
         <Row className="pt-2 pb-2">
           <Col className="pt-3 pb-3 text-center">
-            <img src="/memes-preview.png" className={styles.collectionImage} />
+            <img
+              src="/memes-preview.png"
+              className={styles.collectionImage}
+              alt="The Memes"
+            />
           </Col>
         </Row>
         <Row className="pt-3">
@@ -258,6 +263,7 @@ export default function AboutSectionComponent(props: Props) {
           <Col className="pt-3 pb-3 text-center">
             <img
               src="/gradients-preview.png"
+              alt="6529 Gradient"
               className={styles.collectionImage}
             />
           </Col>
@@ -457,6 +463,38 @@ export default function AboutSectionComponent(props: Props) {
     );
   }
 
+  function printReleaseNotes() {
+    return (
+      <Container>
+        <Row>
+          <Col className="text-center">
+            <h1 className="float-none">RELEASE NOTES</h1>
+          </Col>
+        </Row>
+        <Row>
+          <Col className="text-left">
+            <p>
+              <u>
+                <b>v1.0.0</b>
+              </u>
+            </p>
+            <p>
+              <b>Release Date: TBC</b>
+            </p>
+            <p>Details</p>
+            <p>
+              <ul>
+                <li>
+                  <b>Initial Launch 🚀</b>
+                </li>
+              </ul>
+            </p>
+          </Col>
+        </Row>
+      </Container>
+    );
+  }
+
   function printContent() {
     switch (props.section) {
       case AboutSection.MEMES:
@@ -471,6 +509,8 @@ export default function AboutSectionComponent(props: Props) {
         return printGradientsFAQ();
       case AboutSection.MISSION:
         return printMission();
+      case AboutSection.RELEASE_NOTES:
+        return printReleaseNotes();
       case AboutSection.CONTACT_US:
         return printContactUs();
     }

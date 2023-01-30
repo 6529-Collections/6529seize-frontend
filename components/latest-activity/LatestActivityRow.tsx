@@ -66,6 +66,7 @@ export default function LatestActivityRow(props: Props) {
                   src={
                     props.nft.thumbnail ? props.nft.thumbnail : props.nft.scaled
                   }
+                  alt={props.nft.name}
                   onError={({ currentTarget }) => {
                     currentTarget.src = props.nft!.image;
                   }}
@@ -109,6 +110,7 @@ export default function LatestActivityRow(props: Props) {
                   src={
                     props.nft.thumbnail ? props.nft.thumbnail : props.nft.image
                   }
+                  alt={props.nft.name}
                   onError={({ currentTarget }) => {
                     currentTarget.src = props.nft!.image;
                   }}
