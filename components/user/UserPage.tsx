@@ -663,7 +663,8 @@ export default function UserPage(props: Props) {
                       <Col>
                         <a
                           href={`https://opensea.io/${ownerAddress}`}
-                          target="_blank">
+                          target="_blank"
+                          rel="noreferrer">
                           <img
                             className={styles.marketplace}
                             src="/opensea.png"
@@ -672,7 +673,8 @@ export default function UserPage(props: Props) {
                         </a>
                         <a
                           href={`https://x2y2.io/user/${ownerAddress}`}
-                          target="_blank">
+                          target="_blank"
+                          rel="noreferrer">
                           <img
                             className={styles.marketplace}
                             src="/x2y2.png"
