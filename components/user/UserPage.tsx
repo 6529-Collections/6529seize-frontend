@@ -75,6 +75,8 @@ export default function UserPage(props: Props) {
   const [nftsLoaded, setNftsLoaded] = useState(false);
   const [tdh, setTDH] = useState<TDHMetrics>();
   const [ownerTags, setOwnerTags] = useState<OwnerTags>();
+
+  const [showSeized, setShowSeized] = useState(true);
   const [showNonSeized, setShowNonSeized] = useState(true);
   const [userIsOwner, setUserIsOwner] = useState(false);
 
@@ -546,14 +548,19 @@ export default function UserPage(props: Props) {
     return (
       <Row className="pt-3">
         <Col>
-          {ownerAddress && address && userIsOwner && (
-            <Form.Check
-              type="switch"
-              className={`${styles.seizedToggle}`}
-              label={`Hide Non-Seized`}
-              onClick={() => setShowNonSeized(!showNonSeized)}
-            />
-          )}
+          <Form.Check
+            type="switch"
+            className={`${styles.seizedToggle}`}
+            label={`Hide Seized`}
+            checked={showSeized}
+            onClick={() => setShowSeized(!showSeized)}
+          />
+          <Form.Check
+            type="switch"
+            className={`${styles.seizedToggle}`}
+            label={`Hide Non-Seized`}
+            onClick={() => setShowNonSeized(!showNonSeized)}
+          />
           {ownerTags &&
             ownerTags?.memes_balance > 0 &&
             ownerTags?.gradients_balance > 0 && (
@@ -745,6 +752,37 @@ export default function UserPage(props: Props) {
                               ? `x${numberWithCommas(
                                   tdh.memes_balance_season2
                                 )}`
+                              : "-"}
+                          </td>
+                          <td>
+                            {tdh.gradients_balance > 0
+                              ? `x${numberWithCommas(tdh.gradients_balance)}`
+                              : "-"}
+                          </td>
+                        </tr>
+                        <tr>
+                          <td>
+                            <b>Unique</b>
+                          </td>
+                          <td>
+                            x
+                            {numberWithCommas(
+                              tdh.unique_memes + tdh.gradients_balance
+                            )}
+                          </td>
+                          <td>
+                            {tdh.unique_memes_szn1 > 0
+                              ? `x${numberWithCommas(tdh.unique_memes)}`
+                              : "-"}
+                          </td>
+                          <td>
+                            {tdh.unique_memes_szn1 > 0
+                              ? `x${numberWithCommas(tdh.unique_memes_szn1)}`
+                              : "-"}
+                          </td>
+                          <td>
+                            {tdh.unique_memes_szn2 > 0
+                              ? `x${numberWithCommas(tdh.unique_memes_szn2)}`
                               : "-"}
                           </td>
                           <td>
