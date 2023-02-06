@@ -85,7 +85,8 @@ export default function NFTImage(props: Props) {
             } else {
               currentTarget.src = props.nft.metadata.animation;
             }
-          }}></video>
+          }}
+          playsInline={true}></video>
       </Col>
     );
   }
