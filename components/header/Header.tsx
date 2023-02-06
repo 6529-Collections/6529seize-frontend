@@ -40,7 +40,10 @@ export default function Header() {
 
   function printBurgerMenu() {
     return (
-      <div className={styles.burgerMenu}>
+      <div
+        className={`${styles.burgerMenu} ${
+          burgerMenuOpen ? styles.burgerMenuOpen : ""
+        }`}>
         <span
           className={styles.burgerMenuClose}
           onClick={() => {
@@ -56,6 +59,7 @@ export default function Header() {
             <Col>
               <Image
                 className={styles.logoIcon}
+                priority={true}
                 src="/Seize_Logo_Glasses.png"
                 alt="6539Seize"
                 width={60}
@@ -339,7 +343,7 @@ export default function Header() {
 
   return (
     <>
-      {burgerMenuOpen && printBurgerMenu()}
+      {printBurgerMenu()}
       <Container fluid className={styles.mainContainer}>
         <Row>
           <Col>
@@ -354,10 +358,11 @@ export default function Header() {
                   <a href="/">
                     <Image
                       className={styles.logoIcon}
+                      priority={true}
                       src="/Seize_Logo_Glasses.png"
                       alt="6539Seize"
                       width={60}
-                      height={60}
+                      height={40}
                     />
                   </a>
                 </Col>
@@ -371,11 +376,6 @@ export default function Header() {
                     <Navbar expand="lg" variant="dark">
                       <Container
                         className={`d-flex align-items-center justify-content-end`}>
-                        {/* <FontAwesomeIcon
-                          icon="bars"
-                          className={`${styles.burgerMenuBtn} d-block ${styles.dMdNone}`}
-                          onClick={() => setBurgerMenuOpen(true)}
-                        /> */}
                         <img
                           className={`${styles.logoIcon2} ${styles.burgerMenuBtn} d-block ${styles.dMdNone}`}
                           src="/Seize_Logo_2.png"
