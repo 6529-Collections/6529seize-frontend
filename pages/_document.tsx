@@ -4,7 +4,7 @@ import { Container, Row, Col } from "react-bootstrap";
 
 export default function Document() {
   return (
-    <Html>
+    <Html lang="en">
       <Head>
         <meta name="description" content="6529 SEIZE" />
         <link rel="icon" href="/favicon.ico" />
