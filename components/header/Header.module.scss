@@ -21,7 +21,6 @@
   width: 100%;
   height: auto;
   max-width: 250px;
-  max-height: 42px;
 }
 
 .logoIcon2 {
@@ -41,6 +40,7 @@
 
 .burgerMenu {
   position: fixed;
+  display: none;
   top: 0;
   left: 0;
   width: 100%;
@@ -62,9 +62,16 @@
 
   button {
     color: $bg-color-1 !important;
+    span {
+      color: $bg-color-1 !important;
+    }
     border: none;
     background-color: $font-color;
     padding: 12px 20px;
+  }
+
+  button::after {
+    top: 1px !important;
   }
 
   .burgerMenuCaretOpen::after {
@@ -92,6 +99,10 @@
     border-bottom: 0.3em solid;
     border-left: 0.3em solid transparent;
   }
+}
+
+.burgerMenuOpen {
+  display: block;
 }
 
 .burgerMenuClose {
