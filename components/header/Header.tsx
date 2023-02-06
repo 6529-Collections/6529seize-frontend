@@ -63,7 +63,7 @@ export default function Header() {
                 src="/Seize_Logo_Glasses.png"
                 alt="6539Seize"
                 width={60}
-                height={30}
+                height={40}
               />
             </Col>
           </Row>
@@ -71,6 +71,7 @@ export default function Header() {
             <Col>
               <h3>
                 <button
+                  name="show menu"
                   className={
                     showBurgerMenuConnectOptions
                       ? styles.burgerMenuCaretClose

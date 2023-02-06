@@ -2,33 +2,30 @@ import Cookies from "js-cookie";
 import { NextRequest, NextResponse } from "next/server";
 import { API_AUTH_COOKIE } from "./constants";
 
-export function middleware(req: NextRequest) {
+export async function middleware(req: NextRequest) {
+  const { pathname } = req.nextUrl;
+
   if (
-    req.nextUrl.pathname.startsWith("/_next") ||
-    req.nextUrl.pathname.endsWith("favicon.ico") ||
-    req.nextUrl.pathname.endsWith(".jpeg") ||
-    req.nextUrl.pathname.endsWith(".png")
+    pathname.startsWith("/_next") ||
+    pathname.endsWith("favicon.ico") ||
+    pathname.endsWith(".jpeg") ||
+    pathname.endsWith(".png")
   ) {
     return NextResponse.next();
   }
 
-  const apiAuth = req.cookies.get(API_AUTH_COOKIE);
-
-  if (
-    process.env.ACTIVATE_API_PASSWORD &&
-    !apiAuth &&
-    req.nextUrl.pathname != "/access"
-  ) {
-    return NextResponse.redirect(new URL("/access", req.url));
-  }
-  if (apiAuth) {
-    fetch(`${process.env.API_ENDPOINT}/api/`, {
+  if (pathname != "/access") {
+    const apiAuth = req.cookies.get(API_AUTH_COOKIE);
+    const r = await fetch(`${process.env.API_ENDPOINT}/api/`, {
       headers: apiAuth ? { "x-6529-auth": apiAuth } : {},
-    }).then((r) => {
-      if (r.status == 401) {
-        return NextResponse.redirect(new URL("/access", req.url));
-      }
     });
+
+    if (r.status == 401) {
+      req.nextUrl.pathname = "/access";
+      req.nextUrl.search = "";
+      return NextResponse.redirect(req.nextUrl);
+    } else {
+      return NextResponse.next();
+    }
   }
-  return NextResponse.next();
 }
