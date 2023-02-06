@@ -54,6 +54,7 @@ a:hover {
 
 h1 {
   font-family: $square-font !important;
+  font-display: swap;
   font-size: 48px;
   float: left;
   color: $font-color-h;
@@ -83,6 +84,7 @@ h4 {
 @media only screen and (max-width: 800px) {
   h1 {
     font-family: $square-font !important;
+    font-display: swap;
     font-size: 26px;
     float: left;
   }
