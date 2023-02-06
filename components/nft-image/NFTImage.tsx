@@ -73,6 +73,7 @@ export default function NFTImage(props: Props) {
           muted
           controls
           loop
+          playsInline
           src={
             !props.showOriginal && props.nft.compressed_animation
               ? props.nft.compressed_animation
@@ -85,8 +86,7 @@ export default function NFTImage(props: Props) {
             } else {
               currentTarget.src = props.nft.metadata.animation;
             }
-          }}
-          playsInline={true}></video>
+          }}></video>
       </Col>
     );
   }
