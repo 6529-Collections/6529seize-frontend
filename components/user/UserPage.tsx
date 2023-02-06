@@ -8,7 +8,12 @@ import dynamic from "next/dynamic";
 import { useRouter } from "next/router";
 import Breadcrumb, { Crumb } from "../breadcrumb/Breadcrumb";
 import { NFT } from "../../entities/INFT";
-import { areEqualAddresses, numberWithCommas } from "../../helpers/Helpers";
+import {
+  areEqualAddresses,
+  isGradientsContract,
+  isMemesContract,
+  numberWithCommas,
+} from "../../helpers/Helpers";
 import {
   GRADIENT_CONTRACT,
   MANIFOLD,
@@ -75,7 +80,9 @@ export default function UserPage(props: Props) {
   const [nftsLoaded, setNftsLoaded] = useState(false);
   const [tdh, setTDH] = useState<TDHMetrics>();
   const [ownerTags, setOwnerTags] = useState<OwnerTags>();
-  const [showNonSeized, setShowNonSeized] = useState(true);
+
+  const [hideSeized, setHideSeized] = useState(false);
+  const [hideNonSeized, setHideNonSeized] = useState(true);
   const [userIsOwner, setUserIsOwner] = useState(false);
 
   const [hideMemes, setHideMemes] = useState(false);
@@ -188,7 +195,6 @@ export default function UserPage(props: Props) {
       let initialNftsUrl = "";
       if (isConnected && areEqualAddresses(ownerAddress, address)) {
         setUserIsOwner(true);
-        setShowNonSeized(true);
         initialNftsUrl = `${process.env.API_ENDPOINT}/api/nfts?sort_direction=ASC`;
       } else {
         setUserIsOwner(false);
@@ -452,8 +458,8 @@ export default function UserPage(props: Props) {
     let nftrank;
     const nftbalance = getBalance(nft);
 
-    const isMemes = areEqualAddresses(nft.contract, MEMES_CONTRACT);
-    const isGradients = areEqualAddresses(nft.contract, GRADIENT_CONTRACT);
+    const isMemes = isMemesContract(nft.contract);
+    const isGradients = isGradientsContract(nft.contract);
 
     if (isMemes && tdh?.memes) {
       nfttdh = tdh?.memes.find((m) => m.id == nft.id)?.tdh;
@@ -463,79 +469,84 @@ export default function UserPage(props: Props) {
       nftrank = tdh?.gradients_ranks.find((g) => g.id == nft.id)?.rank;
     }
 
-    if (
-      (nftbalance > 0 || (userIsOwner && showNonSeized && isMemes)) &&
-      // ((hideMemes && !isMemes) ||
-      //   (hideGradients && !isGradients) ||
-      //   (!hideMemes && isMemes) ||
-      //   (!hideGradients && isGradients))
-      ((!hideMemes && isMemes) || (!hideGradients && isGradients))
-    )
-      return (
-        <Col
-          key={`${nft.contract}-${nft.id}`}
-          className="pt-3 pb-3"
-          xs={{ span: 6 }}
-          sm={{ span: 4 }}
-          md={{ span: 3 }}
-          lg={{ span: 3 }}>
-          <Container fluid className="no-padding">
-            <Row>
-              <Col>
-                <a
-                  href={`/${
-                    areEqualAddresses(nft.contract, MEMES_CONTRACT)
-                      ? "the-memes"
-                      : "6529-gradient"
-                  }/${nft.id}`}>
-                  <NFTImage
-                    nft={nft}
-                    animation={false}
-                    height={300}
-                    missing={nftbalance == 0}
-                    balance={
-                      areEqualAddresses(nft.contract, GRADIENT_CONTRACT)
-                        ? 0
-                        : nftbalance
-                    }
-                    showOwned={
-                      areEqualAddresses(nft.contract, GRADIENT_CONTRACT) &&
-                      nftbalance > 0
-                        ? true
-                        : false
-                    }
-                    showThumbnail={true}
-                  />
-                </a>
-              </Col>
-            </Row>
+    if (nftbalance > 0 && hideSeized) {
+      return;
+    }
+    if (nftbalance == 0 && (hideNonSeized || isGradients)) {
+      return;
+    }
+    if (nftbalance > 0 && isGradients && hideGradients) {
+      return;
+    }
+    if (nftbalance > 0 && isMemes && hideMemes) {
+      return;
+    }
+
+    return (
+      <Col
+        key={`${nft.contract}-${nft.id}`}
+        className="pt-3 pb-3"
+        xs={{ span: 6 }}
+        sm={{ span: 4 }}
+        md={{ span: 3 }}
+        lg={{ span: 3 }}>
+        <Container fluid className="no-padding">
+          <Row>
+            <Col>
+              <a
+                href={`/${
+                  areEqualAddresses(nft.contract, MEMES_CONTRACT)
+                    ? "the-memes"
+                    : "6529-gradient"
+                }/${nft.id}`}>
+                <NFTImage
+                  nft={nft}
+                  animation={false}
+                  height={300}
+                  missing={nftbalance == 0}
+                  balance={
+                    areEqualAddresses(nft.contract, GRADIENT_CONTRACT)
+                      ? 0
+                      : nftbalance
+                  }
+                  showOwned={
+                    areEqualAddresses(nft.contract, GRADIENT_CONTRACT) &&
+                    nftbalance > 0
+                      ? true
+                      : false
+                  }
+                  showThumbnail={true}
+                />
+              </a>
+            </Col>
+          </Row>
+          <Row>
+            <Col className="text-center pt-2">
+              <a
+                href={`/${
+                  areEqualAddresses(nft.contract, MEMES_CONTRACT)
+                    ? "the-memes"
+                    : "6529-gradient"
+                }/${nft.id}`}>
+                {nft.name}
+              </a>
+            </Col>
+          </Row>
+          {nfttdh && nftrank && (
             <Row>
               <Col className="text-center pt-2">
-                <a
-                  href={`/${
-                    areEqualAddresses(nft.contract, MEMES_CONTRACT)
-                      ? "the-memes"
-                      : "6529-gradient"
-                  }/${nft.id}`}>
-                  {nft.name}
-                </a>
+                TDH: {numberWithCommas(Math.round(nfttdh))} | Rank #{nftrank}
               </Col>
             </Row>
-            {nfttdh && nftrank && (
-              <Row>
-                <Col className="text-center pt-2">
-                  TDH: {numberWithCommas(Math.round(nfttdh))} | Rank #{nftrank}
-                </Col>
-              </Row>
-            )}
-            {!nfttdh && !nftrank && nftbalance > 0 && (
-              <Row>
-                <Col className="text-center pt-2">TDH: 0 | Rank N/A</Col>
-              </Row>
-            )}
-          </Container>
-        </Col>
-      );
+          )}
+          {!nfttdh && !nftrank && nftbalance > 0 && (
+            <Row>
+              <Col className="text-center pt-2">TDH: 0 | Rank N/A</Col>
+            </Row>
+          )}
+        </Container>
+      </Col>
+    );
   }
 
   function printNfts() {
@@ -546,14 +557,20 @@ export default function UserPage(props: Props) {
     return (
       <Row className="pt-3">
         <Col>
-          {ownerAddress && address && userIsOwner && (
-            <Form.Check
-              type="switch"
-              className={`${styles.seizedToggle}`}
-              label={`Hide Non-Seized`}
-              onClick={() => setShowNonSeized(!showNonSeized)}
-            />
-          )}
+          <Form.Check
+            type="switch"
+            className={`${styles.seizedToggle}`}
+            label={`Hide Non-Seized`}
+            checked={hideNonSeized}
+            onClick={() => setHideNonSeized(!hideNonSeized)}
+          />
+          <Form.Check
+            type="switch"
+            className={`${styles.seizedToggle}`}
+            label={`Hide Seized`}
+            checked={hideSeized}
+            onClick={() => setHideSeized(!hideSeized)}
+          />
           {ownerTags &&
             ownerTags?.memes_balance > 0 &&
             ownerTags?.gradients_balance > 0 && (
@@ -630,59 +647,67 @@ export default function UserPage(props: Props) {
                   md={{ span: 6 }}
                   lg={{ span: 6 }}>
                   <Container className="p-0">
-                    <Row>
-                      <h2 className={styles.ownerAddress}>
-                        {ownerTags ? (
-                          <Address
-                            address={ownerAddress}
-                            ens={ownerENS}
-                            tags={{
-                              memesCardsSets: ownerTags.memes_cards_sets,
-                              memesCardsSetS1: ownerTags.memes_cards_sets_szn1,
-                              memesCardsSetS2: ownerTags.memes_cards_sets_szn2,
-                              memesBalance: ownerTags.unique_memes,
-                              gradientsBalance: ownerTags.gradients_balance,
-                              genesis: ownerTags.genesis,
-                              tdh_rank: tdh ? tdh?.tdh_rank : -1,
-                              balance_rank: tdh ? tdh?.dense_rank_balance : -1,
-                            }}
-                            expandedTags={true}
-                            isUserPage={true}
-                            disableLink={true}
-                          />
-                        ) : (
-                          <Address
-                            address={ownerAddress}
-                            ens={ownerENS}
-                            disableLink={true}
-                          />
-                        )}
-                      </h2>
-                    </Row>
-                    <Row className="pt-3">
-                      <Col>
-                        <a
-                          href={`https://opensea.io/${ownerAddress}`}
-                          target="_blank"
-                          rel="noreferrer">
-                          <img
-                            className={styles.marketplace}
-                            src="/opensea.png"
-                            alt="opensea"
-                          />
-                        </a>
-                        <a
-                          href={`https://x2y2.io/user/${ownerAddress}`}
-                          target="_blank"
-                          rel="noreferrer">
-                          <img
-                            className={styles.marketplace}
-                            src="/x2y2.png"
-                            alt="x2y2"
-                          />
-                        </a>
-                      </Col>
-                    </Row>
+                    {ownerAddress && (
+                      <>
+                        <Row>
+                          <h2 className={styles.ownerAddress}>
+                            {ownerTags ? (
+                              <Address
+                                address={ownerAddress}
+                                ens={ownerENS}
+                                tags={{
+                                  memesCardsSets: ownerTags.memes_cards_sets,
+                                  memesCardsSetS1:
+                                    ownerTags.memes_cards_sets_szn1,
+                                  memesCardsSetS2:
+                                    ownerTags.memes_cards_sets_szn2,
+                                  memesBalance: ownerTags.unique_memes,
+                                  gradientsBalance: ownerTags.gradients_balance,
+                                  genesis: ownerTags.genesis,
+                                  tdh_rank: tdh ? tdh?.tdh_rank : -1,
+                                  balance_rank: tdh
+                                    ? tdh?.dense_rank_balance
+                                    : -1,
+                                }}
+                                expandedTags={true}
+                                isUserPage={true}
+                                disableLink={true}
+                              />
+                            ) : (
+                              <Address
+                                address={ownerAddress}
+                                ens={ownerENS}
+                                disableLink={true}
+                              />
+                            )}
+                          </h2>
+                        </Row>
+                        <Row className="pt-3">
+                          <Col>
+                            <a
+                              href={`https://opensea.io/${ownerAddress}`}
+                              target="_blank"
+                              rel="noreferrer">
+                              <img
+                                className={styles.marketplace}
+                                src="/opensea.png"
+                                alt="opensea"
+                              />
+                            </a>
+                            <a
+                              href={`https://x2y2.io/user/${ownerAddress}`}
+                              target="_blank"
+                              rel="noreferrer">
+                              <img
+                                className={styles.marketplace}
+                                src="/x2y2.png"
+                                alt="x2y2"
+                              />
+                            </a>
+                          </Col>
+                        </Row>
+                      </>
+                    )}
                   </Container>
                 </Col>
                 {tdh && (
@@ -745,6 +770,37 @@ export default function UserPage(props: Props) {
                               ? `x${numberWithCommas(
                                   tdh.memes_balance_season2
                                 )}`
+                              : "-"}
+                          </td>
+                          <td>
+                            {tdh.gradients_balance > 0
+                              ? `x${numberWithCommas(tdh.gradients_balance)}`
+                              : "-"}
+                          </td>
+                        </tr>
+                        <tr>
+                          <td>
+                            <b>Unique</b>
+                          </td>
+                          <td>
+                            x
+                            {numberWithCommas(
+                              tdh.unique_memes + tdh.gradients_balance
+                            )}
+                          </td>
+                          <td>
+                            {tdh.unique_memes_szn1 > 0
+                              ? `x${numberWithCommas(tdh.unique_memes)}`
+                              : "-"}
+                          </td>
+                          <td>
+                            {tdh.unique_memes_szn1 > 0
+                              ? `x${numberWithCommas(tdh.unique_memes_szn1)}`
+                              : "-"}
+                          </td>
+                          <td>
+                            {tdh.unique_memes_szn2 > 0
+                              ? `x${numberWithCommas(tdh.unique_memes_szn2)}`
                               : "-"}
                           </td>
                           <td>
