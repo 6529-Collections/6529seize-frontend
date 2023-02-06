@@ -143,7 +143,7 @@ export default function Home() {
                   sm={{ span: 12 }}
                   md={{ span: 6 }}
                   lg={{ span: 6 }}>
-                  <Container>
+                  <Container className="no-padding">
                     <Row>
                       <Col>
                         <u>

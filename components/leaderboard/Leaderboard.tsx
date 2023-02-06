@@ -917,7 +917,10 @@ export default function Leaderboard(props: Props) {
   return (
     <Container className={`no-padding pt-4`} id={`leaderboard-page`}>
       <Row>
-        <Col className={`d-flex align-items-center`} xs={6}>
+        <Col
+          className={`d-flex align-items-center`}
+          xs={showViewAll ? 12 : 6}
+          sm={6}>
           <h1>
             COMMUNITY{" "}
             {showViewAll && (
