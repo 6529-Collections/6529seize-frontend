@@ -6,6 +6,7 @@ const nextConfig = {
   reactStrictMode: false,
   swcMinify: true,
   compress: true,
+  productionBrowserSourceMaps: true,
   images: {
     domains: ["6529.io", "arweave.net"],
     unoptimized: true,
