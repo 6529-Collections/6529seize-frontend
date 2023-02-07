@@ -103,7 +103,7 @@ export default function Address(props: Props) {
             )}
             {props.ens ? (
               <Dropdown className={`${styles.copyDropdown}`}>
-                <Dropdown.Toggle>
+                <Dropdown.Toggle name={`${props.address}-copy-toggle`}>
                   {props.isUserPage && (
                     <span
                       className={`${styles.address} ${
