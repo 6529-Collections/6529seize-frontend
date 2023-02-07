@@ -67,7 +67,7 @@ export default function Login() {
           <input
             disabled={inputDisabled}
             type="text"
-            placeholder="Team Login"
+            placeholder={inputDisabled ? "Go to seize.io" : "Team Login"}
             onKeyDown={(event: React.KeyboardEvent<HTMLDivElement>): void => {
               if (event.key.toLowerCase() == "enter") {
                 doLogin(event.target);
