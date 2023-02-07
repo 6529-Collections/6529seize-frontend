@@ -4,7 +4,6 @@ import { useAccount, useConnect, useDisconnect } from "wagmi";
 import { useRouter } from "next/router";
 import Image from "next/image";
 import dynamic from "next/dynamic";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useEffect, useState } from "react";
 
 const Address = dynamic(() => import("../address/Address"), { ssr: false });

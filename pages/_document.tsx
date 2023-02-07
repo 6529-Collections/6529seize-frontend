@@ -6,11 +6,6 @@ export default function Document() {
       <Head>
         <meta name="description" content="6529 SEIZE" />
         <link rel="icon" href="/favicon.ico" />
-        <link
-          href="https://fonts.cdnfonts.com/css/square-one-2"
-          rel="preload"
-        />
-        <link rel="icon" href="/favicon.ico" />
       </Head>
       <body>
         <Main />
