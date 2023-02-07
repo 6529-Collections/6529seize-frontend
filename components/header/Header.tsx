@@ -62,8 +62,8 @@ export default function Header() {
                 priority={true}
                 src="/Seize_Logo_Glasses.png"
                 alt="6539Seize"
-                width={60}
-                height={40}
+                width={319}
+                height={50}
               />
             </Col>
           </Row>
@@ -362,8 +362,8 @@ export default function Header() {
                       priority={true}
                       src="/Seize_Logo_Glasses.png"
                       alt="6539Seize"
-                      width={60}
-                      height={40}
+                      width={319}
+                      height={50}
                     />
                   </a>
                 </Col>

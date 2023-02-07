@@ -1,6 +1,4 @@
-import Image from "next/image";
 import { Html, Head, Main, NextScript } from "next/document";
-import { Container, Row, Col } from "react-bootstrap";
 
 export default function Document() {
   return (
@@ -10,7 +8,7 @@ export default function Document() {
         <link rel="icon" href="/favicon.ico" />
         <link
           href="https://fonts.cdnfonts.com/css/square-one-2"
-          rel="stylesheet"
+          rel="preload"
         />
         <link rel="icon" href="/favicon.ico" />
       </Head>
