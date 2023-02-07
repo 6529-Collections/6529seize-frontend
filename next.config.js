@@ -1,12 +1,11 @@
 /** @type {import('next').NextConfig} */
 
-const VERSION = "v1.0.0-r1";
+const VERSION = "v1.0.0-r2";
 
 const nextConfig = {
   reactStrictMode: false,
   swcMinify: true,
   compress: true,
-  productionBrowserSourceMaps: true,
   images: {
     domains: ["6529.io", "arweave.net"],
     unoptimized: true,
