@@ -12,7 +12,6 @@ import LatestActivity from "../components/latest-activity/LatestActivity";
 import dynamic from "next/dynamic";
 import { getDateDisplay, numberWithCommas } from "../helpers/Helpers";
 import { useAccount } from "wagmi";
-import Link from "next/link";
 import { fetchUrl } from "../services/6529api";
 
 const Header = dynamic(() => import("../components/header/Header"), {

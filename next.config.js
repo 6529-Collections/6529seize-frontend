@@ -1,4 +1,7 @@
 /** @type {import('next').NextConfig} */
+
+const VERSION = "v1.0.0-r1";
+
 const nextConfig = {
   reactStrictMode: false,
   swcMinify: true,
@@ -13,6 +16,9 @@ const nextConfig = {
     ALCHEMY_API_KEY: process.env.ALCHEMY_API_KEY,
     API_ENDPOINT: process.env.REACT_APP_API_ENDPOINT,
     BASE_ENDPOINT: process.env.REACT_APP_BASE_ENDPOINT,
+  },
+  async generateBuildId() {
+    return VERSION;
   },
 };
 
