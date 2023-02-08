@@ -5,7 +5,8 @@
   "scripts": {
     "dev": "next dev -p 3001",
     "analyze": "source-map-explorer .next/static/*.js",
-    "build": "next build && npm run analyze",
+    "build:analyze": "next build && npm run analyze",
+    "build": "next build",
     "start": "next start -p 3001",
     "lint": "next lint"
   },
