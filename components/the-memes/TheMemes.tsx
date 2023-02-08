@@ -1,5 +1,5 @@
 import styles from "./TheMemes.module.scss";
-
+import Image from "next/image";
 import { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -655,9 +655,13 @@ export default function TheMemesComponent(props: Props) {
                   )
                 ) : (
                   <Col>
-                    <img
+                    <Image
+                      loading={"lazy"}
+                      width="0"
+                      height="0"
+                      sizes="100vw"
+                      style={{ height: "auto", width: "100px" }}
                       src="/SummerGlasses.svg"
-                      className="icon-100"
                       alt="SummerGlasses"
                     />{" "}
                     Nothing here yet

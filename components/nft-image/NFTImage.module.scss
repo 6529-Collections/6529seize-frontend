@@ -5,9 +5,6 @@
   padding: 0;
   position: relative;
   max-height: 650px;
-  img {
-    max-width: 100%;
-  }
 
   iframe {
     width: 100%;
@@ -71,11 +68,6 @@
   background-color: $dark-grey;
   padding: 0;
   position: relative;
-}
-
-.tokenImg {
-  max-width: 100%;
-  max-height: 100%;
 }
 
 .balance {
