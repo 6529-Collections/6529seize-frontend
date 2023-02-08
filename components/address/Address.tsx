@@ -103,7 +103,9 @@ export default function Address(props: Props) {
             )}
             {props.ens ? (
               <Dropdown className={`${styles.copyDropdown}`}>
-                <Dropdown.Toggle name={`copy-toggle`}>
+                <Dropdown.Toggle
+                  name={`copy-toggle`}
+                  aria-label={`copy-toggle`}>
                   {props.isUserPage && (
                     <span
                       className={`${styles.address} ${
@@ -115,6 +117,7 @@ export default function Address(props: Props) {
                   <FontAwesomeIcon
                     icon="copy"
                     name={`copy-btn`}
+                    aria-label={`copy-btn`}
                     className={`${styles.copy} ${
                       isCopied ? styles.copyActive : ""
                     }`}
@@ -126,6 +129,7 @@ export default function Address(props: Props) {
                     <Dropdown.Item
                       className={styles.copyDropdownItem}
                       name={`copy-ens-btn`}
+                      aria-label={`copy-ens-btn`}
                       onClick={() => copy(props.ens)}>
                       {props.ens}
                     </Dropdown.Item>
@@ -133,6 +137,7 @@ export default function Address(props: Props) {
                   <Dropdown.Item
                     className={styles.copyDropdownItem}
                     name={`copy-address-btn`}
+                    aria-label={`copy-address-btn`}
                     onClick={() => copy(props.address)}>
                     {formatAddress(props.address as string)}
                   </Dropdown.Item>
@@ -153,6 +158,7 @@ export default function Address(props: Props) {
                   icon="copy"
                   onClick={() => copy(props.address)}
                   name={`copy-btn`}
+                  aria-label={`copy-btn`}
                   className={`${styles.copy} ${
                     isCopied ? styles.copyActive : ""
                   }`}
