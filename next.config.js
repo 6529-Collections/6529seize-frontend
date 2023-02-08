@@ -1,6 +1,6 @@
 /** @type {import('next').NextConfig} */
 
-const VERSION = "v1.0.0-r2";
+const VERSION = "v1.0.0-r3";
 
 const nextConfig = {
   reactStrictMode: false,

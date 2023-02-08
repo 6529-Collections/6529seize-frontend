@@ -4,7 +4,8 @@
   "private": true,
   "scripts": {
     "dev": "next dev -p 3001",
-    "build": "next build",
+    "analyze": "source-map-explorer .next/static/*.js",
+    "build": "next build && npm run analyze",
     "start": "next start -p 3001",
     "lint": "next lint"
   },
@@ -34,6 +35,7 @@
     "@types/react-dom": "18.0.8",
     "eslint": "8.26.0",
     "eslint-config-next": "13.0.0",
+    "source-map-explorer": "^2.5.3",
     "typescript": "4.9.3"
   }
 }
