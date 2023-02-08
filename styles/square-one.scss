@@ -4,6 +4,7 @@
   font-weight: 400;
   src: local("Square One"),
     url(https://fonts.cdnfonts.com/s/55931/SquareOne-p7jra.woff) format("woff");
+  font-display: swap;
 }
 @font-face {
   font-family: square one;
@@ -12,6 +13,7 @@
   src: local("Square One"),
     url(https://fonts.cdnfonts.com/s/55931/SquareOneItalic-3ze5G.woff)
       format("woff");
+  font-display: swap;
 }
 @font-face {
   font-family: square one;
@@ -20,6 +22,7 @@
   src: local("Square One"),
     url(https://fonts.cdnfonts.com/s/55931/SquareOneBold-OVno8.woff)
       format("woff");
+  font-display: swap;
 }
 @font-face {
   font-family: square one;
@@ -28,4 +31,5 @@
   src: local("Square One"),
     url(https://fonts.cdnfonts.com/s/55931/SquareOneBoldItalic-ax8do.woff)
       format("woff");
+  font-display: swap;
 }
