@@ -1,7 +1,7 @@
 import styles from "./6529Gradient.module.scss";
 
 import { useEffect, useState } from "react";
-
+import Image from "next/image";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import dynamic from "next/dynamic";
 import { Container, Row, Col, Table } from "react-bootstrap";
@@ -283,29 +283,36 @@ export default function GradientPage() {
                       href={`https://opensea.io/assets/ethereum/${GRADIENT_CONTRACT}/${nft.id}`}
                       target="_blank"
                       rel="noreferrer">
-                      <img
+                      <Image
                         className={styles.marketplace}
                         src="/opensea.png"
                         alt="opensea"
+                        width={40}
+                        height={40}
                       />
                     </a>
                     {/* <a
                       href={`https://looksrare.org/collections/${GRADIENT_CONTRACT}/${nft.id}`}
                       target="_blank"
                       rel="noreferrer">
-                      <img
+                      <Image
                         className={styles.marketplace}
                         src="/looksrare.png"
+                        alt="looksrare"
+                        width={40}
+                        height={40}
                       />
                     </a> */}
                     <a
                       href={`https://x2y2.io/eth/${GRADIENT_CONTRACT}/${nft.id}`}
                       target="_blank"
                       rel="noreferrer">
-                      <img
+                      <Image
                         className={styles.marketplace}
                         src="/x2y2.png"
                         alt="x2y2"
+                        width={40}
+                        height={40}
                       />
                     </a>
                   </Col>

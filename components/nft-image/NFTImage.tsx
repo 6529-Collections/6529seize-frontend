@@ -1,6 +1,7 @@
 import styles from "./NFTImage.module.scss";
 import { Col } from "react-bootstrap";
 import { NFT } from "../../entities/INFT";
+import Image from "next/image";
 
 interface Props {
   nft: NFT;
@@ -99,7 +100,12 @@ export default function NFTImage(props: Props) {
       } ${props.height == 300 ? styles.height300 : ""} ${
         props.transparentBG && styles.transparentBG
       }`}>
-      <img
+      <Image
+        priority
+        width="0"
+        height="0"
+        sizes="100vw"
+        style={{ height: "100%", width: "auto", maxWidth: "100%" }}
         id={`${props.id && `${props.id}`}`}
         src={
           props.showThumbnail
@@ -120,9 +126,7 @@ export default function NFTImage(props: Props) {
           }
         }}
         alt={props.nft.name}
-        className={`${styles.tokenImg} ${
-          props.height == 650 ? styles.height650 : ""
-        } ${props.missing ? styles.nftGreyscale : ""}`}
+        className={props.height == 650 ? styles.height650 : ""}
       />
       {props.balance > 0 && (
         <span

@@ -53,10 +53,19 @@ export default function ReMemes() {
                     sm={{ span: 12 }}
                     md={{ span: 3 }}
                     lg={{ span: 3 }}>
-                    <img
+                    <Image
+                      loading={"lazy"}
+                      width="0"
+                      height="0"
+                      sizes="100vw"
+                      style={{
+                        height: "auto",
+                        width: "auto",
+                        maxHeight: "350px",
+                        maxWidth: "100%",
+                      }}
                       src="/re-memes-w.jpeg"
                       alt="ReMemes"
-                      className={styles.reMemesImg}
                     />
                   </Col>
                   <Col className="pt-2 pb-2">

@@ -4,6 +4,7 @@ import dynamic from "next/dynamic";
 import { Container, Row, Col, Table } from "react-bootstrap";
 import Breadcrumb, { Crumb } from "../components/breadcrumb/Breadcrumb";
 import { useState } from "react";
+import Image from "next/image";
 
 const Header = dynamic(() => import("../components/header/Header"), {
   ssr: false,
@@ -128,10 +129,17 @@ export default function TDH() {
                     sm={{ span: 12 }}
                     md={{ span: 12 }}
                     lg={{ span: 6 }}>
-                    <img
+                    <Image
+                      width="0"
+                      height="0"
+                      sizes="100vw"
+                      style={{
+                        height: "auto",
+                        width: "auto",
+                        maxHeight: "300px",
+                      }}
                       src="/intern.png"
                       alt="intern"
-                      className={styles.intern}
                     />
                   </Col>
                 </Row>
