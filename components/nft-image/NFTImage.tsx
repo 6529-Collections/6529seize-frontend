@@ -105,7 +105,12 @@ export default function NFTImage(props: Props) {
         width="0"
         height="0"
         sizes="100vw"
-        style={{ height: "100%", width: "auto", maxWidth: "100%" }}
+        style={{
+          height: "auto",
+          width: "auto",
+          maxWidth: "100%",
+          maxHeight: "100%",
+        }}
         id={`${props.id && `${props.id}`}`}
         src={
           props.showThumbnail
