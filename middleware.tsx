@@ -17,7 +17,7 @@ export async function middleware(req: NextRequest) {
   if (pathname != "/access") {
     const apiAuth = req.cookies.get(API_AUTH_COOKIE);
     const r = await fetch(`${process.env.API_ENDPOINT}/api/`, {
-      headers: apiAuth ? { "x-6529-auth": apiAuth.value } : {},
+      headers: apiAuth ? { "x-6529-auth": apiAuth } : {},
     });
 
     if (r.status == 401) {
