@@ -2,9 +2,9 @@ import styles from "./Header.module.scss";
 import { Container, Row, Col, Nav, Navbar, NavDropdown } from "react-bootstrap";
 import { useAccount, useConnect, useDisconnect } from "wagmi";
 import { useRouter } from "next/router";
-import Image from "next/image";
 import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
+import Image from "next/image";
 
 const Address = dynamic(() => import("../address/Address"), { ssr: false });
 
@@ -376,8 +376,17 @@ export default function Header() {
                     <Navbar expand="lg" variant="dark">
                       <Container
                         className={`d-flex align-items-center justify-content-end`}>
-                        <img
-                          className={`${styles.logoIcon2} ${styles.burgerMenuBtn} d-block ${styles.dMdNone}`}
+                        <Image
+                          width="0"
+                          height="0"
+                          sizes="100vw"
+                          style={{
+                            height: "auto",
+                            width: "auto",
+                            maxHeight: "42px",
+                            paddingLeft: "35px",
+                          }}
+                          className={`${styles.burgerMenuBtn} d-block ${styles.dMdNone}`}
                           src="/Seize_Logo_2.png"
                           alt="6539Seize"
                           onClick={() => setBurgerMenuOpen(true)}
@@ -582,8 +591,17 @@ export default function Header() {
                             )}
                           </Nav>
                         </Navbar>
-                        <img
-                          className={`${styles.logoIcon2} d-none ${styles.dMdBlock}`}
+                        <Image
+                          width="0"
+                          height="0"
+                          sizes="100vw"
+                          style={{
+                            height: "auto",
+                            width: "auto",
+                            maxHeight: "42px",
+                            paddingLeft: "35px",
+                          }}
+                          className={`d-none ${styles.dMdBlock}`}
                           src="/Seize_Logo_2.png"
                           alt="6539Seize"
                         />

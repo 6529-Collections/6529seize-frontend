@@ -1,6 +1,7 @@
 import Head from "next/head";
 import styles from "../styles/Home.module.scss";
 import dynamic from "next/dynamic";
+import Image from "next/image";
 
 const Header = dynamic(() => import("../components/header/Header"), {
   ssr: false,
@@ -25,9 +26,12 @@ export default function Seize404() {
       <main className={styles.main}>
         <Header />
         <div className={`${styles.mainContainer} ${styles.pageNotFound}`}>
-          <img
+          <Image
+            width="0"
+            height="0"
+            sizes="100vw"
+            style={{ height: "auto", width: "100px" }}
             src="/SummerGlasses.svg"
-            className={styles.summerGlasses404}
             alt="SummerGlasses"
           />
           <h2>404 | PAGE NOT FOUND</h2>

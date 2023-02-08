@@ -30,9 +30,17 @@ export default function AboutSectionComponent(props: Props) {
         </Row>
         <Row className="pt-2 pb-2">
           <Col className="pt-3 pb-3 text-center">
-            <img
+            <Image
+              width="0"
+              height="0"
+              sizes="100vw"
+              style={{
+                height: "auto",
+                width: "auto",
+                maxHeight: "400px",
+                maxWidth: "100%",
+              }}
               src="/memes-preview.png"
-              className={styles.collectionImage}
               alt="The Memes"
             />
           </Col>
@@ -261,10 +269,18 @@ export default function AboutSectionComponent(props: Props) {
         </Row>
         <Row className="pt-2 pb-2">
           <Col className="pt-3 pb-3 text-center">
-            <img
+            <Image
+              width="0"
+              height="0"
+              sizes="100vw"
+              style={{
+                height: "auto",
+                width: "auto",
+                maxHeight: "400px",
+                maxWidth: "100%",
+              }}
               src="/gradients-preview.png"
               alt="6529 Gradient"
-              className={styles.collectionImage}
             />
           </Col>
         </Row>
