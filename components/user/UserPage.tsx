@@ -1,5 +1,5 @@
 import styles from "./UserPage.module.scss";
-
+import Image from "next/image";
 import { Col, Container, Dropdown, Form, Row, Table } from "react-bootstrap";
 import { useEffect, useState } from "react";
 import { DBResponse } from "../../entities/IDBResponse";
@@ -688,20 +688,24 @@ export default function UserPage(props: Props) {
                               href={`https://opensea.io/${ownerAddress}`}
                               target="_blank"
                               rel="noreferrer">
-                              <img
+                              <Image
                                 className={styles.marketplace}
                                 src="/opensea.png"
                                 alt="opensea"
+                                width={40}
+                                height={40}
                               />
                             </a>
                             <a
                               href={`https://x2y2.io/user/${ownerAddress}`}
                               target="_blank"
                               rel="noreferrer">
-                              <img
+                              <Image
                                 className={styles.marketplace}
                                 src="/x2y2.png"
                                 alt="x2y2"
+                                width={40}
+                                height={40}
                               />
                             </a>
                           </Col>
@@ -1053,9 +1057,13 @@ export default function UserPage(props: Props) {
                       printNfts()
                     ) : (
                       <Col>
-                        <img
+                        <Image
+                          loading={"lazy"}
+                          width="0"
+                          height="0"
+                          sizes="100vw"
+                          style={{ height: "auto", width: "100px" }}
                           src="/SummerGlasses.svg"
-                          className="icon-100"
                           alt="SummerGlasses"
                         />{" "}
                         Nothing here yet
@@ -1118,9 +1126,13 @@ export default function UserPage(props: Props) {
                         </Table>
                       ) : (
                         <>
-                          <img
+                          <Image
+                            loading={"lazy"}
+                            width="0"
+                            height="0"
+                            sizes="100vw"
+                            style={{ height: "auto", width: "100px" }}
                             src="/SummerGlasses.svg"
-                            className="icon-100"
                             alt="SummerGlasses"
                           />{" "}
                           Nothing here yet

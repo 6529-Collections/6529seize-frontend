@@ -1,3 +1,4 @@
+import Image from "next/image";
 import styles from "./LatestActivity.module.scss";
 import dynamic from "next/dynamic";
 import { Transaction } from "../../entities/ITransaction";
@@ -62,7 +63,12 @@ export default function LatestActivityRow(props: Props) {
                 }
                 target="_blank"
                 rel="noreferrer">
-                <img
+                <Image
+                  loading={"lazy"}
+                  width="0"
+                  height="0"
+                  sizes="100vw"
+                  style={{ height: "40px", width: "auto" }}
                   src={
                     props.nft.thumbnail ? props.nft.thumbnail : props.nft.scaled
                   }
@@ -99,7 +105,7 @@ export default function LatestActivityRow(props: Props) {
                 }
                 target="_blank"
                 rel="noreferrer">
-                <img
+                <Image
                   title={
                     isMemesContract(props.tr.contract)
                       ? `Meme #${props.tr.token_id}`
@@ -107,6 +113,11 @@ export default function LatestActivityRow(props: Props) {
                       ? `Gradient #${props.tr.token_id}`
                       : `#${props.tr.token_id}`
                   }
+                  loading={"lazy"}
+                  width="0"
+                  height="0"
+                  sizes="100vw"
+                  style={{ height: "40px", width: "auto" }}
                   src={
                     props.nft.thumbnail ? props.nft.thumbnail : props.nft.image
                   }

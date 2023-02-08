@@ -1,7 +1,7 @@
 import styles from "./TheMemes.module.scss";
 
 import { useEffect, useState } from "react";
-
+import Image from "next/image";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import dynamic from "next/dynamic";
 import {
@@ -359,10 +359,14 @@ export default function MemePage() {
       <>
         <Row className="pt-5">
           <Col>
-            <img
+            <Image
+              loading={"lazy"}
+              width="0"
+              height="0"
+              sizes="100vw"
+              style={{ width: "250px", height: "auto" }}
               src="/memes-lab.png"
               alt="memes-lab"
-              className={styles.liveSubImage}
             />
           </Col>
         </Row>
@@ -377,10 +381,14 @@ export default function MemePage() {
         </Row>
         <Row className="pt-5">
           <Col>
-            <img
+            <Image
+              loading={"lazy"}
+              width="0"
+              height="0"
+              sizes="100vw"
+              style={{ width: "250px", height: "auto" }}
               src="/re-memes.png"
               alt="re-memes"
-              className={styles.liveSubImage}
             />
           </Col>
         </Row>
@@ -536,29 +544,36 @@ export default function MemePage() {
                   href={`https://opensea.io/assets/ethereum/${MEMES_CONTRACT}/${nft.id}`}
                   target="_blank"
                   rel="noreferrer">
-                  <img
+                  <Image
                     className={styles.marketplace}
                     src="/opensea.png"
                     alt="opensea"
+                    width={40}
+                    height={40}
                   />
                 </a>
                 {/* <a
                       href={`https://looksrare.org/collections/${MEMES_CONTRACT}/${nft.id}`}
                       target="_blank"
                       rel="noreferrer">
-                      <img
+                      <Image
                         className={styles.marketplace}
                         src="/looksrare.png"
+                        alt="looksrare"
+                        width={40}
+                        height={40}
                       />
                     </a> */}
                 <a
                   href={`https://x2y2.io/eth/${MEMES_CONTRACT}/${nft.id}`}
                   target="_blank"
                   rel="noreferrer">
-                  <img
+                  <Image
                     className={styles.marketplace}
                     src="/x2y2.png"
                     alt="x2y2"
+                    width={40}
+                    height={40}
                   />
                 </a>
               </Col>

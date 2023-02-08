@@ -4,6 +4,7 @@ import Cookies from "js-cookie";
 import { API_AUTH_COOKIE } from "../constants";
 import { useRouter } from "next/router";
 import Head from "next/head";
+import Image from "next/image";
 
 export default function Login() {
   const router = useRouter();
@@ -61,7 +62,20 @@ export default function Login() {
       </Head>
       <main className={styles.login}>
         {image && (
-          <img src={image} className={styles.loginImage} alt="access" />
+          <Image
+            width="0"
+            height="0"
+            sizes="100vw"
+            style={{
+              height: "auto",
+              width: "auto",
+              maxWidth: "100%",
+              maxHeight: "100%",
+            }}
+            src={image}
+            className={styles.loginImage}
+            alt="access"
+          />
         )}
         <div className={styles.loginPrompt}>
           <input

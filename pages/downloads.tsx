@@ -1,7 +1,7 @@
 import Head from "next/head";
 import styles from "../styles/Home.module.scss";
 import { Col, Container, Row, Table } from "react-bootstrap";
-
+import Image from "next/image";
 import { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 import Breadcrumb, { Crumb } from "../components/breadcrumb/Breadcrumb";
@@ -102,9 +102,13 @@ export default function Downloads() {
                 )}
                 {downloads != undefined && downloads.length == 0 && (
                   <>
-                    <img
+                    <Image
+                      loading={"lazy"}
+                      width="0"
+                      height="0"
+                      sizes="100vw"
+                      style={{ height: "auto", width: "100px" }}
                       src="/SummerGlasses.svg"
-                      className="icon-100"
                       alt="SummerGlasses"
                     />{" "}
                     Nothing here yet
