@@ -31,8 +31,6 @@
 }
 
 .marketplace {
-  width: 40px;
-  height: 40px;
   margin-right: 15px;
 }
 
@@ -60,10 +58,6 @@
 
 .tdhFormulaTable > :not(caption) > * > * {
   padding: 0.5rem !important;
-}
-
-.intern {
-  max-height: 300px;
 }
 
 .tdhMain {
@@ -141,15 +135,5 @@
     background-color: $almost-very-dark-grey;
     width: 80%;
     max-width: 400px;
-  }
-}
-
-.reMemesImg {
-  width: 100%;
-}
-
-@media only screen and (max-width: 800px) {
-  .reMemesImg {
-    max-width: 350px;
   }
 }

@@ -1,5 +1,6 @@
 import Head from "next/head";
 import styles from "../styles/Home.module.scss";
+import Image from "next/image";
 import { Col, Container, Row, Table } from "react-bootstrap";
 import { useEffect, useState } from "react";
 import { Transaction } from "ethers";
@@ -142,7 +143,7 @@ export default function Home() {
                   sm={{ span: 12 }}
                   md={{ span: 6 }}
                   lg={{ span: 6 }}>
-                  <Container className="no-padding">
+                  <Container>
                     <Row>
                       <Col>
                         <u>
@@ -277,29 +278,36 @@ export default function Home() {
                           href={`https://opensea.io/assets/ethereum/${MEMES_CONTRACT}/${nft.id}`}
                           target="_blank"
                           rel="noreferrer">
-                          <img
+                          <Image
                             className={styles.marketplace}
                             src="/opensea.png"
                             alt="opensea"
+                            width={40}
+                            height={40}
                           />
                         </a>
                         {/* <a
                           href={`https://looksrare.org/collections/${MEMES_CONTRACT}/${nft.id}`}
                           target="_blank"
                           rel="noreferrer">
-                          <img
-                            className={styles.marketplace}
-                            src="/looksrare.png"
-                          />
+                          <Image
+                        className={styles.marketplace}
+                        src="/looksrare.png"
+                        alt="looksrare"
+                        width={40}
+                        height={40}
+                      />
                         </a> */}
                         <a
                           href={`https://x2y2.io/eth/${MEMES_CONTRACT}/${nft.id}`}
                           target="_blank"
                           rel="noreferrer">
-                          <img
+                          <Image
                             className={styles.marketplace}
                             src="/x2y2.png"
                             alt="x2y2"
+                            width={40}
+                            height={40}
                           />
                         </a>
                       </Col>
