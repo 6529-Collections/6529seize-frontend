@@ -1,6 +1,6 @@
 /** @type {import('next').NextConfig} */
 
-const VERSION = "v1.0.0-r5";
+const VERSION = "v1.0.0-r6";
 const withBundleAnalyzer = require("@next/bundle-analyzer")({
   openAnalyzer: false,
 });
