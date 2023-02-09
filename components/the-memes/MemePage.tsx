@@ -363,7 +363,6 @@ export default function MemePage() {
               loading={"lazy"}
               width="0"
               height="0"
-              sizes="100vw"
               style={{ width: "250px", height: "auto" }}
               src="/memes-lab.png"
               alt="memes-lab"
@@ -385,7 +384,6 @@ export default function MemePage() {
               loading={"lazy"}
               width="0"
               height="0"
-              sizes="100vw"
               style={{ width: "250px", height: "auto" }}
               src="/re-memes.png"
               alt="re-memes"

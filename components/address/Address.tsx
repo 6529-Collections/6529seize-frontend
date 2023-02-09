@@ -212,7 +212,7 @@ export default function Address(props: Props) {
               }`}>
               {props.tags.memesBalance}x{" "}
               {(props.isUserPage || !UNIQUE_MEMES_ICON) &&
-                `Meme${props.tags.memesCardsSets > 1 ? "s " : " "}${
+                `Meme${props.tags.memesBalance > 1 ? "s " : " "}${
                   props.tags.genesis > 0 ? ` (+Genesis) ` : ""
                 }`}
               {UNIQUE_MEMES_ICON && (

@@ -66,9 +66,8 @@ export default function LatestActivityRow(props: Props) {
                 <Image
                   loading={"lazy"}
                   width="0"
-                  height="0"
-                  sizes="100vw"
-                  style={{ height: "40px", width: "auto" }}
+                  height={40}
+                  style={{ width: "auto" }}
                   src={
                     props.nft.thumbnail ? props.nft.thumbnail : props.nft.scaled
                   }
@@ -115,9 +114,8 @@ export default function LatestActivityRow(props: Props) {
                   }
                   loading={"lazy"}
                   width="0"
-                  height="0"
-                  sizes="100vw"
-                  style={{ height: "40px", width: "auto" }}
+                  height={40}
+                  style={{ width: "auto" }}
                   src={
                     props.nft.thumbnail ? props.nft.thumbnail : props.nft.image
                   }
