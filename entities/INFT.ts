@@ -12,6 +12,7 @@ export interface NFT {
   description: string;
   artist: string;
   uri: string;
+  icon: string;
   thumbnail: string;
   scaled: string;
   image: string;
