@@ -4,9 +4,11 @@ import dynamic from "next/dynamic";
 import { Container, Row, Col } from "react-bootstrap";
 import Breadcrumb, { Crumb } from "../components/breadcrumb/Breadcrumb";
 import { useState } from "react";
+import HeaderPlaceholder from "../components/header/HeaderPlaceholder";
 
 const Header = dynamic(() => import("../components/header/Header"), {
   ssr: false,
+  loading: () => <HeaderPlaceholder />,
 });
 
 export default function TermsConditions() {

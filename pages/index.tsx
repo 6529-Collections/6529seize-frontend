@@ -11,10 +11,11 @@ import dynamic from "next/dynamic";
 import { getDateDisplay, numberWithCommas } from "../helpers/Helpers";
 import { useAccount } from "wagmi";
 import { fetchUrl } from "../services/6529api";
-import { Transaction } from "../entities/ITransaction";
+import HeaderPlaceholder from "../components/header/HeaderPlaceholder";
 
 const Header = dynamic(() => import("../components/header/Header"), {
   ssr: false,
+  loading: () => <HeaderPlaceholder />,
 });
 
 const NFTImage = dynamic(() => import("../components/nft-image/NFTImage"), {

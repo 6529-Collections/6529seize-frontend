@@ -9,9 +9,11 @@ import { useRouter } from "next/router";
 import { DBResponse } from "../entities/IDBResponse";
 import Download from "../components/download/Download";
 import { fetchUrl } from "../services/6529api";
+import HeaderPlaceholder from "../components/header/HeaderPlaceholder";
 
 const Header = dynamic(() => import("../components/header/Header"), {
   ssr: false,
+  loading: () => <HeaderPlaceholder />,
 });
 
 export default function Downloads() {
