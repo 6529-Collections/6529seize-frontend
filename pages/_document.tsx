@@ -7,6 +7,8 @@ export default function Document() {
       <Head>
         <meta name="description" content="6529 SEIZE" />
         <link rel="icon" href="/favicon.ico" />
+        <link rel="preconnect" href={process.env.API_ENDPOINT} />
+        <link rel="preconnect" href="https://d3lqz0a4bldqgf.cloudfront.net" />
       </Head>
       <body>
         <Main />
@@ -22,7 +24,6 @@ export default function Document() {
               loading={"lazy"}
               width="0"
               height="0"
-              sizes="100vw"
               style={{ height: "18px", width: "auto" }}
               src="/twitter.png"
               alt="punk6529 Twitter"
@@ -38,7 +39,6 @@ export default function Document() {
               loading={"lazy"}
               width="0"
               height="0"
-              sizes="100vw"
               style={{ height: "18px", width: "auto" }}
               src="/twitter.png"
               alt="6529Collections Twitter"
@@ -51,7 +51,6 @@ export default function Document() {
               loading={"lazy"}
               width="0"
               height="0"
-              sizes="100vw"
               style={{ height: "18px", width: "auto" }}
               src="/discord.png"
               alt="OM Discrod"
@@ -64,7 +63,6 @@ export default function Document() {
               loading={"lazy"}
               width="0"
               height="0"
-              sizes="100vw"
               style={{ height: "18px", width: "auto" }}
               src="/Seize_Logo_2.png"
               alt="6529.io"
