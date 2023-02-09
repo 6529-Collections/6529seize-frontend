@@ -384,6 +384,7 @@ export default function Header(props: Props) {
                       <Container
                         className={`d-flex align-items-center justify-content-end`}>
                         <Image
+                          priority
                           width="0"
                           height="0"
                           style={{
@@ -598,6 +599,7 @@ export default function Header(props: Props) {
                           </Nav>
                         </Navbar>
                         <Image
+                          priority
                           width="0"
                           height="0"
                           style={{
