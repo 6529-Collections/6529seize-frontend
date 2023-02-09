@@ -8,7 +8,11 @@ import Image from "next/image";
 
 const Address = dynamic(() => import("../address/Address"), { ssr: false });
 
-export default function Header() {
+interface Props {
+  onLoad?: () => void;
+}
+
+export default function Header(props: Props) {
   const router = useRouter();
   const { address, connector, isConnected } = useAccount();
   const { connect, connectors, error, isLoading, pendingConnector } =
@@ -34,6 +38,9 @@ export default function Header() {
 
     handleResize();
 
+    if (props.onLoad) {
+      props.onLoad();
+    }
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
