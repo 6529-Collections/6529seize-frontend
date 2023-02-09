@@ -3,7 +3,6 @@ import styles from "../styles/Home.module.scss";
 import Image from "next/image";
 import { Col, Container, Row, Table } from "react-bootstrap";
 import { useEffect, useState } from "react";
-import { Transaction } from "ethers";
 import { MEMES_CONTRACT } from "../constants";
 import { DBResponse } from "../entities/IDBResponse";
 import { NFT, MemesExtendedData } from "../entities/INFT";
@@ -12,6 +11,7 @@ import dynamic from "next/dynamic";
 import { getDateDisplay, numberWithCommas } from "../helpers/Helpers";
 import { useAccount } from "wagmi";
 import { fetchUrl } from "../services/6529api";
+import { Transaction } from "../entities/ITransaction";
 
 const Header = dynamic(() => import("../components/header/Header"), {
   ssr: false,
@@ -39,8 +39,6 @@ export default function Home() {
   const [nftExtended, setnftExtended] = useState<MemesExtendedData>();
   const { address, connector, isConnected } = useAccount();
   const [nftBalance, setNftBalance] = useState<number>(0);
-
-  const [activity, setActivity] = useState<Transaction[]>();
 
   useEffect(() => {
     fetchUrl(
@@ -70,14 +68,6 @@ export default function Home() {
       setNftBalance(0);
     }
   }, [address, nft]);
-
-  useEffect(() => {
-    fetchUrl(`${process.env.API_ENDPOINT}/api/transactions?page_size=12`).then(
-      (response: DBResponse) => {
-        setActivity(response.data);
-      }
-    );
-  }, []);
 
   function printMintDate(nft: NFT) {
     const mintDate = new Date(nft.mint_date);
