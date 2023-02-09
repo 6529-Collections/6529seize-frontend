@@ -138,3 +138,10 @@
     display: block !important;
   }
 }
+
+.headerPlaceholder {
+  z-index: 10;
+  position: relative;
+  min-height: $header-height;
+  background-color: $bg-color-1;
+}

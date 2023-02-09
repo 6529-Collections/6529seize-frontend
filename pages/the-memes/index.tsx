@@ -4,9 +4,11 @@ import styles from "../../styles/Home.module.scss";
 import { useState } from "react";
 import Breadcrumb, { Crumb } from "../../components/breadcrumb/Breadcrumb";
 import dynamic from "next/dynamic";
+import HeaderPlaceholder from "../../components/header/HeaderPlaceholder";
 
 const Header = dynamic(() => import("../../components/header/Header"), {
   ssr: false,
+  loading: () => <HeaderPlaceholder />,
 });
 
 const TheMemesComponent = dynamic(
