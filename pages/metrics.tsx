@@ -132,7 +132,6 @@ export default function TDH() {
                     <Image
                       width="0"
                       height="0"
-                      sizes="100vw"
                       style={{
                         height: "auto",
                         width: "auto",
