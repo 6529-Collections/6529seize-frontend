@@ -11,8 +11,6 @@ import {
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { NULL_ADDRESS } from "../../constants";
 import { NFT } from "../../entities/INFT";
-import Tippy from "@tippyjs/react";
-import "tippy.js/dist/tippy.css"; // optional
 
 const Address = dynamic(() => import("../address/Address"), { ssr: false });
 

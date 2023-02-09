@@ -2,6 +2,7 @@
 
 const VERSION = "v1.0.0-r6";
 const withBundleAnalyzer = require("@next/bundle-analyzer")({
+  enabled: true,
   openAnalyzer: false,
 });
 
@@ -16,7 +17,6 @@ const nextConfig = {
     minimumCacheTTL: 86400,
   },
   env: {
-    ETHERSCAN_API_KEY: process.env.ETHERSCAN_API_KEY,
     ALCHEMY_API_KEY: process.env.ALCHEMY_API_KEY,
     API_ENDPOINT: process.env.REACT_APP_API_ENDPOINT,
     BASE_ENDPOINT: process.env.REACT_APP_BASE_ENDPOINT,
