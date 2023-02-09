@@ -57,7 +57,6 @@ export default function ReMemes() {
                       loading={"lazy"}
                       width="0"
                       height="0"
-                      sizes="100vw"
                       style={{
                         height: "auto",
                         width: "auto",

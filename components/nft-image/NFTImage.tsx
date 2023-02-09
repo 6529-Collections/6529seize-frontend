@@ -112,7 +112,6 @@ export default function NFTImage(props: Props) {
         priority
         width="0"
         height="0"
-        sizes="100vw"
         style={{
           height: "auto",
           width: "auto",
