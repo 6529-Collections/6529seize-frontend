@@ -5,6 +5,7 @@ import { useState } from "react";
 import Breadcrumb, { Crumb } from "../components/breadcrumb/Breadcrumb";
 import { Container, Row, Col } from "react-bootstrap";
 import dynamic from "next/dynamic";
+import HeaderPlaceholder from "../components/header/HeaderPlaceholder";
 
 const Leaderboard = dynamic(
   () => import("../components/leaderboard/Leaderboard"),
@@ -13,6 +14,7 @@ const Leaderboard = dynamic(
 
 const Header = dynamic(() => import("../components/header/Header"), {
   ssr: false,
+  loading: () => <HeaderPlaceholder />,
 });
 
 export default function TheMemesPage() {
