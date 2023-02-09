@@ -2,6 +2,7 @@ import styles from "./NFTImage.module.scss";
 import { Col } from "react-bootstrap";
 import { NFT } from "../../entities/INFT";
 import Image from "next/image";
+import { useEffect } from "react";
 
 interface Props {
   nft: NFT;
@@ -14,9 +15,16 @@ interface Props {
   transparentBG?: boolean;
   id?: string;
   missing?: boolean;
+  onLoad?: () => void;
 }
 
 export default function NFTImage(props: Props) {
+  useEffect(() => {
+    if (props.onLoad) {
+      props.onLoad();
+    }
+  }, []);
+
   if (
     props.animation &&
     props.nft.animation &&
