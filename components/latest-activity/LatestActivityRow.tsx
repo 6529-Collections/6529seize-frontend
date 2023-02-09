@@ -63,9 +63,9 @@ export default function LatestActivityRow(props: Props) {
                 rel="noreferrer">
                 <Image
                   loading={"lazy"}
-                  width="0"
-                  height={40}
-                  style={{ width: "auto" }}
+                  width={0}
+                  height={0}
+                  style={{ height: "40px", width: "auto" }}
                   src={
                     props.nft.thumbnail ? props.nft.thumbnail : props.nft.scaled
                   }
@@ -110,10 +110,9 @@ export default function LatestActivityRow(props: Props) {
                       ? `Gradient #${props.tr.token_id}`
                       : `#${props.tr.token_id}`
                   }
-                  loading={"lazy"}
-                  width="0"
-                  height={40}
-                  style={{ width: "auto" }}
+                  width={0}
+                  height={0}
+                  style={{ height: "40px", width: "auto" }}
                   src={
                     props.nft.thumbnail ? props.nft.thumbnail : props.nft.image
                   }
