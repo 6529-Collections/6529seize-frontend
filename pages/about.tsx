@@ -10,9 +10,11 @@ import { useRouter } from "next/router";
 import AboutSectionComponent, {
   AboutSection,
 } from "../components/about/AboutSection";
+import HeaderPlaceholder from "../components/header/HeaderPlaceholder";
 
 const Header = dynamic(() => import("../components/header/Header"), {
   ssr: false,
+  loading: () => <HeaderPlaceholder />,
 });
 
 export default function About() {
