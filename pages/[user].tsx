@@ -6,9 +6,11 @@ import { useRouter } from "next/router";
 import { areEqualAddresses, formatAddress } from "../helpers/Helpers";
 import { title } from "process";
 import { MANIFOLD, SIX529_MUSEUM } from "../constants";
+import HeaderPlaceholder from "../components/header/HeaderPlaceholder";
 
 const Header = dynamic(() => import("../components/header/Header"), {
   ssr: false,
+  loading: () => <HeaderPlaceholder />,
 });
 
 const UserPage = dynamic(() => import("../components/user/UserPage"), {
