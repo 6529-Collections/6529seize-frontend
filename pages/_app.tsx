@@ -44,6 +44,7 @@ import {
   faCheck,
   faXmark,
 } from "@fortawesome/free-solid-svg-icons";
+import Head from "next/head";
 
 library.add(
   faArrowUp,
@@ -111,10 +112,15 @@ export default function App({ Component, pageProps }: AppProps) {
   pageProps.provider = provider;
 
   return (
-    <SSRProvider>
-      <WagmiConfig client={client}>
-        <Component {...pageProps} />
-      </WagmiConfig>
-    </SSRProvider>
+    <>
+      <Head>
+        <meta name="viewport" content="viewport-fit=cover" />
+      </Head>
+      <SSRProvider>
+        <WagmiConfig client={client}>
+          <Component {...pageProps} />
+        </WagmiConfig>
+      </SSRProvider>
+    </>
   );
 }
