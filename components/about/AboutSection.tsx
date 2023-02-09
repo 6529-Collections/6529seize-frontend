@@ -33,7 +33,6 @@ export default function AboutSectionComponent(props: Props) {
             <Image
               width="0"
               height="0"
-              sizes="100vw"
               style={{
                 height: "auto",
                 width: "auto",
@@ -272,7 +271,6 @@ export default function AboutSectionComponent(props: Props) {
             <Image
               width="0"
               height="0"
-              sizes="100vw"
               style={{
                 height: "auto",
                 width: "auto",

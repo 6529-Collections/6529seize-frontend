@@ -1061,7 +1061,6 @@ export default function UserPage(props: Props) {
                           loading={"lazy"}
                           width="0"
                           height="0"
-                          sizes="100vw"
                           style={{ height: "auto", width: "100px" }}
                           src="/SummerGlasses.svg"
                           alt="SummerGlasses"
@@ -1130,7 +1129,6 @@ export default function UserPage(props: Props) {
                             loading={"lazy"}
                             width="0"
                             height="0"
-                            sizes="100vw"
                             style={{ height: "auto", width: "100px" }}
                             src="/SummerGlasses.svg"
                             alt="SummerGlasses"
