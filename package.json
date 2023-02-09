@@ -13,30 +13,24 @@
     "@fortawesome/fontawesome-svg-core": "^6.2.0",
     "@fortawesome/free-solid-svg-icons": "^6.2.0",
     "@fortawesome/react-fontawesome": "^0.2.0",
-    "@next/bundle-analyzer": "^13.1.6",
-    "@tippyjs/react": "^4.2.6",
-    "@wagmi/core": "^0.6.8",
-    "bootstrap": "^5.2.2",
-    "ethers": "^5.7.2",
+    "bootstrap": "^5.2.3",
     "js-cookie": "^3.0.1",
     "next": "^13.1.6",
     "react": "18.2.0",
     "react-bootstrap": "^2.7.0",
-    "react-dom": "18.2.0",
     "react-share": "^4.4.1",
     "react-use-downloader": "^1.2.1",
     "sass": "^1.55.0",
-    "tippy.js": "^6.2.5",
-    "wagmi": "^0.7.8"
+    "wagmi": "^0.7.15"
   },
   "devDependencies": {
-    "next-unused": "^0.0.6",
+    "@next/bundle-analyzer": "^13.1.6",
     "@types/js-cookie": "^3.0.2",
     "@types/node": "18.11.10",
     "@types/react": "18.0.25",
-    "@types/react-dom": "18.0.8",
     "eslint": "8.26.0",
     "eslint-config-next": "13.0.0",
+    "next-unused": "^0.0.6",
     "typescript": "4.9.3"
   }
 }
