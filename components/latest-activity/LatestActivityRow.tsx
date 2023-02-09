@@ -114,7 +114,11 @@ export default function LatestActivityRow(props: Props) {
                   height={0}
                   style={{ height: "40px", width: "auto" }}
                   src={
-                    props.nft.thumbnail ? props.nft.thumbnail : props.nft.image
+                    props.nft.icon
+                      ? props.nft.icon
+                      : props.nft.thumbnail
+                      ? props.nft.thumbnail
+                      : props.nft.image
                   }
                   alt={props.nft.name}
                   onError={({ currentTarget }) => {
