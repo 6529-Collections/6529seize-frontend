@@ -114,7 +114,6 @@ export default function UserPage(props: Props) {
   }
 
   useEffect(() => {
-    alert(process.env.NODE_ENV);
     async function fetchOwned(url: string, myowned: Owner[]) {
       return fetchUrl(url).then((response: DBResponse) => {
         if (response.next) {
