@@ -102,6 +102,11 @@ export interface TDHMetrics extends TDH {
   dense_rank_balance_memes_season1: number;
   dense_rank_balance_memes_season2: number;
   dense_rank_balance_gradients: number;
+  dense_rank_balance__ties: number;
+  dense_rank_balance_memes__ties: number;
+  dense_rank_balance_memes_season1__ties: number;
+  dense_rank_balance_memes_season2__ties: number;
+  dense_rank_balance_gradients__ties: number;
 }
 
 export interface RankedTDH extends TDH {
