@@ -192,13 +192,11 @@ export default function UserPage(props: Props) {
     }
 
     if (ownerAddress && router.isReady) {
-      let initialNftsUrl = "";
+      let initialNftsUrl = `${process.env.API_ENDPOINT}/api/nfts?sort_direction=ASC`;
       if (isConnected && areEqualAddresses(ownerAddress, address)) {
         setUserIsOwner(true);
-        initialNftsUrl = `${process.env.API_ENDPOINT}/api/nfts?sort_direction=ASC`;
       } else {
         setUserIsOwner(false);
-        initialNftsUrl = `${process.env.API_ENDPOINT}/api/${ownerAddress}/nfts`;
       }
       if (!nftsLoaded) {
         fetchNfts(initialNftsUrl, []);
@@ -793,7 +791,7 @@ export default function UserPage(props: Props) {
                             )}
                           </td>
                           <td>
-                            {tdh.unique_memes_szn1 > 0
+                            {tdh.unique_memes > 0
                               ? `x${numberWithCommas(tdh.unique_memes)}`
                               : "-"}
                           </td>
