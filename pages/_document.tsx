@@ -9,6 +9,21 @@ export default function Document() {
         <link rel="icon" href="/favicon.ico" />
         <link rel="preconnect" href={process.env.API_ENDPOINT} />
         <link rel="preconnect" href="https://d3lqz0a4bldqgf.cloudfront.net" />
+        {/* Google Analytics tracking code */}
+        <script
+          async
+          src={`https://www.googletagmanager.com/gtag/js?id=G-71NLVV3KY3`}
+        />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              window.dataLayer = window.dataLayer || [];
+              function gtag(){dataLayer.push(arguments);}
+              gtag('js', new Date());
+              gtag('config', 'G-71NLVV3KY3');
+            `,
+          }}
+        />
       </Head>
       <body>
         <Main />
