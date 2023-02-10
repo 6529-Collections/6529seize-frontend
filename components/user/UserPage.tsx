@@ -114,6 +114,7 @@ export default function UserPage(props: Props) {
   }
 
   useEffect(() => {
+    alert(process.env.NODE_ENV);
     async function fetchOwned(url: string, myowned: Owner[]) {
       return fetchUrl(url).then((response: DBResponse) => {
         if (response.next) {
@@ -560,14 +561,14 @@ export default function UserPage(props: Props) {
             className={`${styles.seizedToggle}`}
             label={`Hide Non-Seized`}
             checked={hideNonSeized}
-            onClick={() => setHideNonSeized(!hideNonSeized)}
+            onChange={() => setHideNonSeized(!hideNonSeized)}
           />
           <Form.Check
             type="switch"
             className={`${styles.seizedToggle}`}
             label={`Hide Seized`}
             checked={hideSeized}
-            onClick={() => setHideSeized(!hideSeized)}
+            onChange={() => setHideSeized(!hideSeized)}
           />
           {ownerTags &&
             ownerTags?.memes_balance > 0 &&
@@ -815,33 +816,52 @@ export default function UserPage(props: Props) {
                           <td>
                             <b>Rank</b>
                           </td>
-                          <td>#{numberWithCommas(tdh.dense_rank_balance)}</td>
+                          <td>
+                            #{numberWithCommas(tdh.dense_rank_balance)}
+                            {tdh.dense_rank_balance__ties > 1 && ` (tie)`}
+                          </td>
                           <td>
                             {tdh.memes_balance > 0
                               ? `#${numberWithCommas(
                                   tdh.dense_rank_balance_memes
-                                )}`
+                                )}${
+                                  tdh.dense_rank_balance_memes__ties > 1
+                                    ? ` (tie)`
+                                    : ""
+                                }`
                               : "-"}
                           </td>
                           <td>
                             {tdh.memes_balance_season1 > 0
                               ? `#${numberWithCommas(
                                   tdh.dense_rank_balance_memes_season1
-                                )}`
+                                )}${
+                                  tdh.dense_rank_balance_memes_season1__ties > 1
+                                    ? ` (tie)`
+                                    : ""
+                                }`
                               : "-"}
                           </td>
                           <td>
                             {tdh.memes_balance_season2 > 0
                               ? `#${numberWithCommas(
                                   tdh.dense_rank_balance_memes_season2
-                                )}`
+                                )}${
+                                  tdh.dense_rank_balance_memes_season2__ties > 1
+                                    ? ` (tie)`
+                                    : ""
+                                }`
                               : "-"}
                           </td>
                           <td>
                             {tdh.gradients_balance > 0
                               ? `#${numberWithCommas(
                                   tdh.dense_rank_balance_gradients
-                                )}`
+                                )}${
+                                  tdh.dense_rank_balance_gradients__ties > 1
+                                    ? ` (tie)`
+                                    : ""
+                                }`
                               : "-"}
                           </td>
                         </tr>
