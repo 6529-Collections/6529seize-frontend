@@ -81,7 +81,11 @@ export default function About() {
                       <Row className="pt-1 pb-1">
                         <Col
                           onClick={() => setSection(AboutSection.MEMES)}
-                          className={menuStyles.aboutMenuLeftItem}>
+                          className={`${menuStyles.aboutMenuLeftItem} ${
+                            section == AboutSection.MEMES
+                              ? menuStyles.aboutMenuLeftItemActive
+                              : ""
+                          }`}>
                           The Memes
                         </Col>
                       </Row>
@@ -90,50 +94,115 @@ export default function About() {
                           onClick={() =>
                             setSection(AboutSection.MEMES_CALENDAR)
                           }
-                          className={menuStyles.aboutMenuLeftItem}>
+                          className={`${menuStyles.aboutMenuLeftItem} ${
+                            section == AboutSection.MEMES_CALENDAR
+                              ? menuStyles.aboutMenuLeftItemActive
+                              : ""
+                          }`}>
                           Memes Calendar
                         </Col>
                       </Row>
                       <Row className="pt-1 pb-1">
                         <Col
-                          onClick={() => setSection(AboutSection.MEMES_FAQ)}
-                          className={menuStyles.aboutMenuLeftItem}>
-                          Memes FAQ
+                          onClick={() => setSection(AboutSection.MEME_LAB)}
+                          className={`${menuStyles.aboutMenuLeftItem} ${
+                            section == AboutSection.MEME_LAB
+                              ? menuStyles.aboutMenuLeftItemActive
+                              : ""
+                          }`}>
+                          MemeLab
                         </Col>
                       </Row>
                       <Row className="pt-1 pb-1">
                         <Col
                           onClick={() => setSection(AboutSection.GRADIENTS)}
-                          className={menuStyles.aboutMenuLeftItem}>
+                          className={`${menuStyles.aboutMenuLeftItem} ${
+                            section == AboutSection.GRADIENTS
+                              ? menuStyles.aboutMenuLeftItemActive
+                              : ""
+                          }`}>
                           6529 Gradient
                         </Col>
                       </Row>
                       <Row className="pt-1 pb-1">
                         <Col
-                          onClick={() => setSection(AboutSection.GRADIENTS_FAQ)}
-                          className={menuStyles.aboutMenuLeftItem}>
-                          Gradients FAQ
+                          onClick={() => setSection(AboutSection.FAQ)}
+                          className={`${menuStyles.aboutMenuLeftItem} ${
+                            section == AboutSection.FAQ
+                              ? menuStyles.aboutMenuLeftItemActive
+                              : ""
+                          }`}>
+                          FAQ
                         </Col>
                       </Row>
                       <Row className="pt-1 pb-1">
                         <Col
                           onClick={() => setSection(AboutSection.MISSION)}
-                          className={menuStyles.aboutMenuLeftItem}>
+                          className={`${menuStyles.aboutMenuLeftItem} ${
+                            section == AboutSection.MISSION
+                              ? menuStyles.aboutMenuLeftItemActive
+                              : ""
+                          }`}>
                           Mission
                         </Col>
                       </Row>
                       <Row className="pt-1 pb-1">
                         <Col
                           onClick={() => setSection(AboutSection.RELEASE_NOTES)}
-                          className={menuStyles.aboutMenuLeftItem}>
+                          className={`${menuStyles.aboutMenuLeftItem} ${
+                            section == AboutSection.RELEASE_NOTES
+                              ? menuStyles.aboutMenuLeftItemActive
+                              : ""
+                          }`}>
                           Release Notes
                         </Col>
                       </Row>
                       <Row className="pt-1 pb-1">
                         <Col
                           onClick={() => setSection(AboutSection.CONTACT_US)}
-                          className={menuStyles.aboutMenuLeftItem}>
+                          className={`${menuStyles.aboutMenuLeftItem} ${
+                            section == AboutSection.CONTACT_US
+                              ? menuStyles.aboutMenuLeftItemActive
+                              : ""
+                          }`}>
                           Contact Us
+                        </Col>
+                      </Row>
+                      <Row className="pt-1 pb-1">
+                        <Col
+                          onClick={() =>
+                            setSection(AboutSection.TERMS_OF_SERVICE)
+                          }
+                          className={`${menuStyles.aboutMenuLeftItem} ${
+                            section == AboutSection.TERMS_OF_SERVICE
+                              ? menuStyles.aboutMenuLeftItemActive
+                              : ""
+                          }`}>
+                          Terms of Service
+                        </Col>
+                      </Row>
+                      <Row className="pt-1 pb-1">
+                        <Col
+                          onClick={() =>
+                            setSection(AboutSection.PRIVACY_POLICY)
+                          }
+                          className={`${menuStyles.aboutMenuLeftItem} ${
+                            section == AboutSection.PRIVACY_POLICY
+                              ? menuStyles.aboutMenuLeftItemActive
+                              : ""
+                          }`}>
+                          Privacy Policy
+                        </Col>
+                      </Row>
+                      <Row className="pt-1 pb-1">
+                        <Col
+                          onClick={() => setSection(AboutSection.LICENSE)}
+                          className={`${menuStyles.aboutMenuLeftItem} ${
+                            section == AboutSection.LICENSE
+                              ? menuStyles.aboutMenuLeftItemActive
+                              : ""
+                          }`}>
+                          License
                         </Col>
                       </Row>
                     </Container>
@@ -151,7 +220,11 @@ export default function About() {
                       <Row className="pt-1 pb-1">
                         <Col
                           onClick={() => setSection(AboutSection.MEMES)}
-                          className={menuStyles.aboutMenuLeftItem}>
+                          className={`${menuStyles.aboutMenuLeftItem} ${
+                            section == AboutSection.MEMES
+                              ? menuStyles.aboutMenuLeftItemActive
+                              : ""
+                          }`}>
                           The Memes
                         </Col>
                       </Row>
@@ -160,50 +233,115 @@ export default function About() {
                           onClick={() =>
                             setSection(AboutSection.MEMES_CALENDAR)
                           }
-                          className={menuStyles.aboutMenuLeftItem}>
+                          className={`${menuStyles.aboutMenuLeftItem} ${
+                            section == AboutSection.MEMES_CALENDAR
+                              ? menuStyles.aboutMenuLeftItemActive
+                              : ""
+                          }`}>
                           Memes Calendar
                         </Col>
                       </Row>
                       <Row className="pt-1 pb-1">
                         <Col
-                          onClick={() => setSection(AboutSection.MEMES_FAQ)}
-                          className={menuStyles.aboutMenuLeftItem}>
-                          Memes FAQ
+                          onClick={() => setSection(AboutSection.MEME_LAB)}
+                          className={`${menuStyles.aboutMenuLeftItem} ${
+                            section == AboutSection.MEME_LAB
+                              ? menuStyles.aboutMenuLeftItemActive
+                              : ""
+                          }`}>
+                          MemeLab
                         </Col>
                       </Row>
                       <Row className="pt-1 pb-1">
                         <Col
                           onClick={() => setSection(AboutSection.GRADIENTS)}
-                          className={menuStyles.aboutMenuLeftItem}>
+                          className={`${menuStyles.aboutMenuLeftItem} ${
+                            section == AboutSection.GRADIENTS
+                              ? menuStyles.aboutMenuLeftItemActive
+                              : ""
+                          }`}>
                           6529 Gradient
                         </Col>
                       </Row>
                       <Row className="pt-1 pb-1">
                         <Col
-                          onClick={() => setSection(AboutSection.GRADIENTS_FAQ)}
-                          className={menuStyles.aboutMenuLeftItem}>
-                          Gradients FAQ
+                          onClick={() => setSection(AboutSection.FAQ)}
+                          className={`${menuStyles.aboutMenuLeftItem} ${
+                            section == AboutSection.FAQ
+                              ? menuStyles.aboutMenuLeftItemActive
+                              : ""
+                          }`}>
+                          FAQ
                         </Col>
                       </Row>
                       <Row className="pt-1 pb-1">
                         <Col
                           onClick={() => setSection(AboutSection.MISSION)}
-                          className={menuStyles.aboutMenuLeftItem}>
+                          className={`${menuStyles.aboutMenuLeftItem} ${
+                            section == AboutSection.MISSION
+                              ? menuStyles.aboutMenuLeftItemActive
+                              : ""
+                          }`}>
                           Mission
                         </Col>
                       </Row>
                       <Row className="pt-1 pb-1">
                         <Col
                           onClick={() => setSection(AboutSection.RELEASE_NOTES)}
-                          className={menuStyles.aboutMenuLeftItem}>
+                          className={`${menuStyles.aboutMenuLeftItem} ${
+                            section == AboutSection.RELEASE_NOTES
+                              ? menuStyles.aboutMenuLeftItemActive
+                              : ""
+                          }`}>
                           Release Notes
                         </Col>
                       </Row>
                       <Row className="pt-1 pb-1">
                         <Col
                           onClick={() => setSection(AboutSection.CONTACT_US)}
-                          className={menuStyles.aboutMenuLeftItem}>
+                          className={`${menuStyles.aboutMenuLeftItem} ${
+                            section == AboutSection.CONTACT_US
+                              ? menuStyles.aboutMenuLeftItemActive
+                              : ""
+                          }`}>
                           Contact Us
+                        </Col>
+                      </Row>
+                      <Row className="pt-1 pb-1">
+                        <Col
+                          onClick={() =>
+                            setSection(AboutSection.TERMS_OF_SERVICE)
+                          }
+                          className={`${menuStyles.aboutMenuLeftItem} ${
+                            section == AboutSection.TERMS_OF_SERVICE
+                              ? menuStyles.aboutMenuLeftItemActive
+                              : ""
+                          }`}>
+                          Terms of Service
+                        </Col>
+                      </Row>
+                      <Row className="pt-1 pb-1">
+                        <Col
+                          onClick={() =>
+                            setSection(AboutSection.PRIVACY_POLICY)
+                          }
+                          className={`${menuStyles.aboutMenuLeftItem} ${
+                            section == AboutSection.PRIVACY_POLICY
+                              ? menuStyles.aboutMenuLeftItemActive
+                              : ""
+                          }`}>
+                          Privacy Policy
+                        </Col>
+                      </Row>
+                      <Row className="pt-1 pb-1">
+                        <Col
+                          onClick={() => setSection(AboutSection.LICENSE)}
+                          className={`${menuStyles.aboutMenuLeftItem} ${
+                            section == AboutSection.LICENSE
+                              ? menuStyles.aboutMenuLeftItemActive
+                              : ""
+                          }`}>
+                          License
                         </Col>
                       </Row>
                     </Container>
