@@ -64,9 +64,9 @@ export default function AboutSectionComponent(props: Props) {
               given point in time.
             </p>
             <p>
-              From "Just Do It" to "Digital Gold" to "Yes We Can" / "Make
-              America Great Again," those who control the best memes, control
-              societal resources.
+              From &quot;Just Do It&quot; to &quot;Digital Gold&quot; to
+              &quot;Yes We Can&quot; / &quot;Make America Great Again,&quot;
+              those who control the best memes, control societal resources.
             </p>
           </Col>
         </Row>
@@ -555,24 +555,26 @@ export default function AboutSectionComponent(props: Props) {
                 These are the abbreviations used in this document.
                 <br />
                 <br />
-                "Terms": Terms of Service
+                &quot;Terms&quot;: Terms of Service
                 <br />
                 <br />
-                "We": 6529 Collections LLC
+                &quot;We&quot;: 6529 Collections LLC
                 <br />
                 <br />
-                "6529 NFTs": The Memes, 6529 Gradient, Meme Lab, GenMemes, 6529
-                Intern and other NFTs we may mint from time to time.
+                &quot;6529 NFTs&quot;: The Memes, 6529 Gradient, Meme Lab,
+                GenMemes, 6529 Intern and other NFTs we may mint from time to
+                time.
                 <br />
                 <br />
-                "You": An adult, at least 18 years of age, who is not subject to
-                sanctions by the US government.
+                &quot;You&quot;: An adult, at least 18 years of age, who is not
+                subject to sanctions by the US government.
                 <br />
                 <br />
-                "Third Parties": Everyone else who is not "We" or "You"
+                &quot;Third Parties&quot;: Everyone else who is not
+                &quot;We&quot; or &quot;You&quot;
                 <br />
                 <br />
-                "Our Platform": the website located at{" "}
+                &quot;Our Platform&quot;: the website located at{" "}
                 <a href="https://seize.io" target="_blank" rel="noreferrer">
                   seize.io
                 </a>{" "}
@@ -587,10 +589,10 @@ export default function AboutSectionComponent(props: Props) {
                 file storage platforms like IPFS or Arweave.
                 <br />
                 <br />
-                "Not Our Platform": Everything else that is not included in "Our
-                Platform" including your Ethereum wallet, NFTs marketplaces and
-                publicly accessible secondary functions on our smart contracts
-                such as token transfers.
+                &quot;Not Our Platform&quot;: Everything else that is not
+                included in &quot;Our Platform&quot; including your Ethereum
+                wallet, NFTs marketplaces and publicly accessible secondary
+                functions on our smart contracts such as token transfers.
               </li>
               <br />
               <br />
@@ -665,8 +667,9 @@ export default function AboutSectionComponent(props: Props) {
                 reference may change at any time. The changes are effective
                 immediately. <br />
                 <br />
-                Any change will be communicated by changing the "Last Updated"
-                date on this webpage or any other method we choose.
+                Any change will be communicated by changing the &quot;Last
+                Updated&quot; date on this webpage or any other method we
+                choose.
                 <br />
                 <br />
                 If you disagree with the changes, that is fine, but you cannot
@@ -804,9 +807,9 @@ export default function AboutSectionComponent(props: Props) {
                 <br />
                 Due to the architecture of ERC-1155 contracts, 6529 NFTs can be
                 transferred without our permission or consent. We cannot
-                "freeze" someone's 6529 NFTs or transfer them to a party of our
-                choosing. After the primary sale from us to you, you are in full
-                control of your token.
+                &quot;freeze&quot; someone&apos;s 6529 NFTs or transfer them to
+                a party of our choosing. After the primary sale from us to you,
+                you are in full control of your token.
                 <br />
                 <br />
                 This means that you can transact 6529 NFTs in their Ethereum
@@ -906,8 +909,9 @@ export default function AboutSectionComponent(props: Props) {
                 <b>Utility</b>
                 <br />
                 <br />
-                6529 NFTs do not have any "utility" - in other words, 6529 NFTs
-                do not guarantee you access to any future product or service.
+                6529 NFTs do not have any &quot;utility&quot; - in other words,
+                6529 NFTs do not guarantee you access to any future product or
+                service.
                 <br />
                 <br />
                 We may, from time to time, test services that interoperate with
@@ -917,7 +921,7 @@ export default function AboutSectionComponent(props: Props) {
                 These should be considered experimental, subject to change,
                 subject to being terminated and in any cases not changing the
                 general principle that we make no commitments to offering
-                "utility"
+                &quot;utility&quot;
               </li>
               <br />
               <br />
@@ -961,8 +965,8 @@ export default function AboutSectionComponent(props: Props) {
                 <br />
                 <br />
                 The United States makes it illegal to engage in economic
-                transactions with certain people or entities &#40;"Sanctioned
-                Parties"&#40;
+                transactions with certain people or entities
+                &#40;&quot;Sanctioned Parties&quot;&#40;
                 <br />
                 <br />
                 As we prefer not to go to jail, if you are a Sanctioned Party,
@@ -1025,8 +1029,8 @@ export default function AboutSectionComponent(props: Props) {
                 blockchain.
                 <br />
                 <br />
-                Moving them to another blockchain including an "L2" Ethereum
-                blockchain will lead to their loss.
+                Moving them to another blockchain including an &quot;L2&quot;
+                Ethereum blockchain will lead to their loss.
               </li>
               <br />
               <br />
@@ -1057,8 +1061,8 @@ export default function AboutSectionComponent(props: Props) {
                 <br />
                 <br />
                 Given this, we will not pay you and you cannot claim
-                compensation for "sharing ideas". If this is not acceptable to
-                you, do not share your ideas with us.
+                compensation for &quot;sharing ideas&quot;. If this is not
+                acceptable to you, do not share your ideas with us.
                 <br />
                 <br />
                 We will not sign NDAs or non-competes to hear your ideas.
@@ -1081,7 +1085,9 @@ export default function AboutSectionComponent(props: Props) {
               <br />
               <br />
               <li>
-                <b>You Can't Sue Us, Either Individually Or In Large Groups</b>
+                <b>
+                  You Can&apos;t Sue Us, Either Individually Or In Large Groups
+                </b>
                 <br />
                 <br />
                 You waive your right to sue us or to participate in a class
@@ -1124,9 +1130,9 @@ export default function AboutSectionComponent(props: Props) {
                 <br />
                 You agreed to indemnify us and our subsidiaries, affiliates,
                 managers, members, officers, partners and employees
-                &#40;together "6529 Parties"&#41; from losses, liabilities,
-                claims, demands, damages, expenses or costs &#40;"Claims"&#41;
-                arising out of or related to
+                &#40;together &quot;6529 Parties&quot;&#41; from losses,
+                liabilities, claims, demands, damages, expenses or costs
+                &#40;&quot;Claims&quot;&#41; arising out of or related to
                 <br />
                 a. Your access to or use of Our Platform
                 <br />
@@ -1147,8 +1153,8 @@ export default function AboutSectionComponent(props: Props) {
                 You will cooperate with the 6529 Parties in defending such
                 Claims and pay all fees, costs and expenses associated with
                 defending such Claims &#40;including, but not limited to,
-                attorneys' fees&#41;. 6529 Parties will have control of the
-                defense or settlement, at 6529 Party's sole option, of any
+                attorneys&apos; fees&#41;. 6529 Parties will have control of the
+                defense or settlement, at 6529 Party&apos;s sole option, of any
                 third-party Claims.
               </li>
               <br />
@@ -1158,12 +1164,12 @@ export default function AboutSectionComponent(props: Props) {
                 <br />
                 <br />
                 Our Platform, the 6529 NFTs and any services relating to them is
-                provided "As Is" and "As Available" without warranties of any
-                kind, either express or implied, including warranties of
-                merchantability, fitness for a particular purpose, title and
-                non-infringement. We do not warrant that Our Platform, NFTs or
-                communication and content relating to them is accurate, complete
-                or error-free.
+                provided &quot;As Is&quot; and &quot;As Available&quot; without
+                warranties of any kind, either express or implied, including
+                warranties of merchantability, fitness for a particular purpose,
+                title and non-infringement. We do not warrant that Our Platform,
+                NFTs or communication and content relating to them is accurate,
+                complete or error-free.
                 <br />
                 <br />
                 We further reiterate the disclaimers, without limitation, in
@@ -1219,11 +1225,11 @@ export default function AboutSectionComponent(props: Props) {
                 <br />
                 If you are a consumer who resides in California, you hereby
                 waive your rights under California Civil Code § 1542, which
-                provides: "A general release does not extend to claims that the
-                creditor or releasing party does not know or suspect to exist in
-                his or her favor at the time of executing the release and that,
-                if known by him or her, would have materially affected his or
-                her settlement with the debtor or released party."
+                provides: &quot;A general release does not extend to claims that
+                the creditor or releasing party does not know or suspect to
+                exist in his or her favor at the time of executing the release
+                and that, if known by him or her, would have materially affected
+                his or her settlement with the debtor or released party.&quot;
               </li>
               <br />
               <br />
@@ -1333,7 +1339,7 @@ export default function AboutSectionComponent(props: Props) {
                 <li>
                   <b>Google Analytics:</b> We use Google Analytics to understand
                   how people use the website and to learn more about our
-                  website's performance.
+                  website&apos;s performance.
                   <br />
                   <br />
                   Information about Google Analytics privacy policy can be found
@@ -1465,12 +1471,12 @@ export default function AboutSectionComponent(props: Props) {
               permission from us. You can make derivative works, you can
               copy-paste-mint the cards themselves, you can compete with The
               Memes with a derivative or identical collection, you can make
-              "merch", and, generally, you can do whatever you like.
+              &quot;merch&quot;, and, generally, you can do whatever you like.
             </p>
             <p>
-              The community term for derivative works is "ReMemes" but you do
-              not have to call your work ReMemes. Our goal is for the messages
-              embodied in the Meme Cards to spread around the world, to
+              The community term for derivative works is &quot;ReMemes&quot; but
+              you do not have to call your work ReMemes. Our goal is for the
+              messages embodied in the Meme Cards to spread around the world, to
               different people, in different cultures and countries, who speak
               different languages and have different cultural contexts. As such,
               we{" "}
@@ -1484,7 +1490,7 @@ export default function AboutSectionComponent(props: Props) {
               feel free to share or to brainstorm ideas, but do not wait for
               permission from us before proceeding. Permission is not required
               and also we receive a lot of messages so we might not see your
-              message, so don't sit around waiting for us to reply.
+              message, so don&apos;t sit around waiting for us to reply.
             </p>
             <p>
               It is possible that some Meme Cards contain copyrighted elements
@@ -1508,10 +1514,10 @@ export default function AboutSectionComponent(props: Props) {
             </p>
             <p>
               We do not have the right to put Punk 6529 into the public domain
-              nor can we authorize use of trademark "Cryptopunks" – that trade
-              name is also owned by Yuga Labs. We waive any responsibility for
-              damages you may suffer for using The Memes in a way that infringes
-              on the rights of third parties.
+              nor can we authorize use of trademark &quot;Cryptopunks&quot; -
+              that trade name is also owned by Yuga Labs. We waive any
+              responsibility for damages you may suffer for using The Memes in a
+              way that infringes on the rights of third parties.
             </p>
             <p>
               <b>Gradient</b>
@@ -1549,17 +1555,18 @@ export default function AboutSectionComponent(props: Props) {
                 <li>
                   Gradient hodlers feel free to use their specific Gradient and
                   Gradient Number &#40;e.g. Gradient #88&#41; in an online
-                  service's branding, so long as the service does not purport to
-                  be offered by 6529.
+                  service&apos;s branding, so long as the service does not
+                  purport to be offered by 6529.
                 </li>
               </ul>
             </p>
             <p>
               While we hope the above model will be workable, we reserve the
-              right to adjust this license, at our sole discretion. No "IP
-              rights" have ever been promised to Gradient hodlers and Gradient
-              hodlers should not buy a Gradient based on the expectation of any
-              "IP rights", including the above, being available.
+              right to adjust this license, at our sole discretion. No &quot;IP
+              rights&quot; have ever been promised to Gradient hodlers and
+              Gradient hodlers should not buy a Gradient based on the
+              expectation of any &quot;IP rights&quot;, including the above,
+              being available.
             </p>
           </Col>
         </Row>
