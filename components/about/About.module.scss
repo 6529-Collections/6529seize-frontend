@@ -17,6 +17,10 @@
   }
 }
 
+.aboutMenuLeftItemActive {
+  text-decoration: underline;
+}
+
 .aboutMenuRight {
   width: 85%;
 }
@@ -50,4 +54,8 @@
     width: 50%;
     padding: 10px;
   }
+}
+
+.lastUpdateText {
+  color: $font-color-h !important;
 }

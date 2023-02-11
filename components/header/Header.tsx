@@ -285,8 +285,8 @@ export default function Header(props: Props) {
                 </Row>
                 <Row className="pt-3">
                   <Col>
-                    <a href="/about?section=memes-faq">
-                      <h3>Memes FAQ</h3>
+                    <a href="/about?section=meme-lab">
+                      <h3>MemeLab</h3>
                     </a>
                   </Col>
                 </Row>
@@ -302,16 +302,16 @@ export default function Header(props: Props) {
                     </a>
                   </Col>
                 </Row>
-                <Row className="pt-3">
-                  <Col>
-                    <a href="/about?section=gradients-faq">
-                      <h3>Gradients FAQ</h3>
-                    </a>
-                  </Col>
-                </Row>
                 <Row>
                   <Col xs={{ span: 6, offset: 3 }}>
                     <hr />
+                  </Col>
+                </Row>
+                <Row className="pt-3">
+                  <Col>
+                    <a href="/about?section=faq">
+                      <h3>FAQ</h3>
+                    </a>
                   </Col>
                 </Row>
                 <Row className="pt-3">
@@ -332,6 +332,32 @@ export default function Header(props: Props) {
                   <Col>
                     <a href="/about?section=contact-us">
                       <h3>Contact Us</h3>
+                    </a>
+                  </Col>
+                </Row>
+                <Row>
+                  <Col xs={{ span: 6, offset: 3 }}>
+                    <hr />
+                  </Col>
+                </Row>
+                <Row className="pt-3">
+                  <Col>
+                    <a href="/about?section=terms-of-service">
+                      <h3>Terms of Service</h3>
+                    </a>
+                  </Col>
+                </Row>
+                <Row className="pt-3">
+                  <Col>
+                    <a href="/about?section=privacy-policy">
+                      <h3>Privacy Policy</h3>
+                    </a>
+                  </Col>
+                </Row>
+                <Row className="pt-3">
+                  <Col>
+                    <a href="/about?section=license">
+                      <h3>License</h3>
                     </a>
                   </Col>
                 </Row>
@@ -500,9 +526,9 @@ export default function Header(props: Props) {
                                 className={styles.dropdownItem}
                                 onClick={() =>
                                   (window.location.href =
-                                    "/about?section=memes-faq")
+                                    "/about?section=meme-lab")
                                 }>
-                                Memes FAQ
+                                MemeLab
                               </NavDropdown.Item>
                               <NavDropdown.Divider />
                               <NavDropdown.Item
@@ -513,15 +539,14 @@ export default function Header(props: Props) {
                                 }>
                                 6529 Gradient
                               </NavDropdown.Item>
+                              <NavDropdown.Divider />
                               <NavDropdown.Item
                                 className={styles.dropdownItem}
                                 onClick={() =>
-                                  (window.location.href =
-                                    "/about?section=gradients-faq")
+                                  (window.location.href = "/about?section=faq")
                                 }>
-                                Gradients FAQ
+                                FAQ
                               </NavDropdown.Item>
-                              <NavDropdown.Divider />
                               <NavDropdown.Item
                                 className={styles.dropdownItem}
                                 onClick={() =>
@@ -545,6 +570,31 @@ export default function Header(props: Props) {
                                     "/about?section=contact-us")
                                 }>
                                 Contact Us
+                              </NavDropdown.Item>
+                              <NavDropdown.Divider />
+                              <NavDropdown.Item
+                                className={styles.dropdownItem}
+                                onClick={() =>
+                                  (window.location.href =
+                                    "/about?section=terms-of-service")
+                                }>
+                                Terms of Service
+                              </NavDropdown.Item>
+                              <NavDropdown.Item
+                                className={styles.dropdownItem}
+                                onClick={() =>
+                                  (window.location.href =
+                                    "/about?section=privacy-policy")
+                                }>
+                                Privacy Policy
+                              </NavDropdown.Item>
+                              <NavDropdown.Item
+                                className={styles.dropdownItem}
+                                onClick={() =>
+                                  (window.location.href =
+                                    "/about?section=license")
+                                }>
+                                License
                               </NavDropdown.Item>
                             </NavDropdown>
                             {isConnected ? (
