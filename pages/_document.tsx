@@ -85,7 +85,11 @@ export default function Document() {
             6529.io
           </a>
           &nbsp;&nbsp;|&nbsp;&nbsp;
-          <a href="/terms&conditions">Terms & Conditions</a>
+          <a href="/about?section=terms-of-service">Terms of Service</a>
+          &nbsp;&nbsp;|&nbsp;&nbsp;
+          <a href="/about?section=privacy-policy">Privacy Policy</a>
+          &nbsp;&nbsp;|&nbsp;&nbsp;
+          <a href="/about?section=license">License</a>
         </footer>
       </body>
     </Html>
