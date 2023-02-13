@@ -712,30 +712,27 @@ export default function AboutSectionComponent(props: Props) {
                 <br />
                 <br />
                 <a
-                  href="https://seize.io/about?section=the-memes"
+                  href="/about?section=the-memes"
                   target="_blank"
                   rel="noreferrer">
                   seize.io/about?section=the-memes
                 </a>
                 <br />
                 <a
-                  href="https://seize.io/about?section=6529-gradient"
+                  href="/about?section=6529-gradient"
                   target="_blank"
                   rel="noreferrer">
                   seize.io/about?section=6529-gradient
                 </a>
                 <br />
                 <a
-                  href="https://seize.io/about?section=meme-lab"
+                  href="/about?section=meme-lab"
                   target="_blank"
                   rel="noreferrer">
                   seize.io/about?section=meme-lab
                 </a>
                 <br />
-                <a
-                  href="https://seize.io/about?section=faq"
-                  target="_blank"
-                  rel="noreferrer">
+                <a href="/about?section=faq" target="_blank" rel="noreferrer">
                   seize.io/about?section=faq
                 </a>
               </li>
@@ -754,7 +751,7 @@ export default function AboutSectionComponent(props: Props) {
                 <br />
                 <br />
                 <a
-                  href="https://seize.io/about?section=license"
+                  href="/about?section=license"
                   target="_blank"
                   rel="noreferrer">
                   seize.io/about?section=license
@@ -776,10 +773,7 @@ export default function AboutSectionComponent(props: Props) {
                 incorporated by reference into these Terms.
                 <br />
                 <br />
-                <a
-                  href="https://seize.io/minting"
-                  target="_blank"
-                  rel="noreferrer">
+                <a href="/minting" target="_blank" rel="noreferrer">
                   seize.io/minting
                 </a>
               </li>
@@ -794,7 +788,7 @@ export default function AboutSectionComponent(props: Props) {
                 <br />
                 <br />
                 <a
-                  href="https://seize.io/about?section=privacy-policy"
+                  href="/about?section=privacy-policy"
                   target="_blank"
                   rel="noreferrer">
                   seize.io/about?section=privacy-policy
@@ -938,7 +932,7 @@ export default function AboutSectionComponent(props: Props) {
                 agree with them or not, as we have no way to monitor or exercise
                 control over them. <br />
                 <br />
-                Our perspectives on the 6529 NFTs can be found on the
+                Our perspectives on the 6529 NFTs can be found on the{" "}
                 <a href="https://seize.io" target="_blank" rel="noreferrer">
                   seize.io
                 </a>{" "}
@@ -1116,10 +1110,7 @@ export default function AboutSectionComponent(props: Props) {
                 incorporated by reference into these Terms.
                 <br />
                 <br />
-                <a
-                  href="https://seize.io/dispute-resolution"
-                  target="_blank"
-                  rel="noreferrer">
+                <a href="/dispute-resolution" target="_blank" rel="noreferrer">
                   seize.io/dispute-resolution
                 </a>{" "}
               </li>
@@ -1375,10 +1366,10 @@ export default function AboutSectionComponent(props: Props) {
                   <b>Cookies:</b> We use 1st party cookies. The cookies we use
                   can be found here:{" "}
                   <a
-                    href="https://seize.io/cookie-policy"
+                    href="/about?section=cookie-policy"
                     target="_blank"
                     rel="noreferrer">
-                    seize.io/cookie-policy
+                    seize.io/about?section=cookie-policy
                   </a>
                   .
                 </li>
@@ -1574,7 +1565,7 @@ export default function AboutSectionComponent(props: Props) {
       </Container>
     );
   }
-  
+
   function printCookiePolicy() {
     return (
       <Container>
@@ -1591,53 +1582,96 @@ export default function AboutSectionComponent(props: Props) {
         <Row>
           <Col>
             <>
-				<h2>Cookie List</h2><br/><br/>
-				<p>A cookie is a small piece of data (text file) that a website – when visited by a user – asks your browser to store on your device in order to remember information about you. Those cookies are set by us and called first-party cookies. More specifically, we use cookies and other tracking technologies for the following purposes:</p>
-				<h3>Strictly Necessary Cookies</h3><br/><br/>
-				<p>These cookies are necessary for the website to function and cannot be switched off in our systems. They are usually only set in response to actions made by you which amount to a request for services. You can set your browser to block or alert you about these cookies, but some parts of the site will not then work. These cookies do not store any personally identifiable information.</p>
-				<Table className={styles.cookiePolicyTable}>
-				  <tr>
-					<th>Domain</th>
-					<th>Cookies</th>
-					<th>Cookies used</th>
-					<th>Lifespan</th>
-				  </tr>
-				  <tr>
-					<td>seize.io</td>
-					<td><a href="https://cookiepedia.co.uk/cookies/AWSALBTGCORS">AWSALBTGCORS</a></td>
-					<td>First Party</td>
-					<td>7 days</td>
-				  </tr>
-				  <tr>
-					<td>seize.io</td>
-					<td><a href="https://cookiepedia.co.uk/cookies/AWSALBTG">AWSALBTG</a></td>
-					<td>First Party</td>
-					<td>7 days</td>
-				  </tr>
-				</Table>
-				<br/>
-				<h3>Performance Cookies</h3><br/><br/>
-				<p>These cookies allow us to count visits and traffic sources so we can measure and improve the performance of our site. They help us to know which pages are the most and least popular and see how visitors move around the site. All information these cookies collect is aggregated and therefore anonymous. If you do not allow these cookies we will not know when you have visited our site, and will not be able to monitor its performance.</p>
-				<Table className={styles.cookiePolicyTable}>
-				  <tr>
-					<th>Domain</th>
-					<th>Cookies</th>
-					<th>Cookies used</th>
-					<th>Lifespan</th>
-				  </tr>
-				  <tr>
-					<td>.seize.io</td>
-					<td><a href="https://cookiepedia.co.uk/cookies/_ga_">_ga_71NLVV3KY3</a></td>
-					<td>First Party</td>
-					<td>372 days</td>
-				  </tr>
-				  <tr>
-					<td>.seize.io</td>
-					<td><a href="https://cookiepedia.co.uk/cookies/_ga">_ga</a></td>
-					<td>First Party</td>
-					<td>372 days</td>
-				  </tr>
-				</Table>
+              <h2>Cookie List</h2>
+              <br />
+              <br />
+              <p>
+                A cookie is a small piece of data (text file) that a website –
+                when visited by a user – asks your browser to store on your
+                device in order to remember information about you. Those cookies
+                are set by us and called first-party cookies. More specifically,
+                we use cookies and other tracking technologies for the following
+                purposes:
+              </p>
+              <h3>Strictly Necessary Cookies</h3>
+              <br />
+              <br />
+              <p>
+                These cookies are necessary for the website to function and
+                cannot be switched off in our systems. They are usually only set
+                in response to actions made by you which amount to a request for
+                services. You can set your browser to block or alert you about
+                these cookies, but some parts of the site will not then work.
+                These cookies do not store any personally identifiable
+                information.
+              </p>
+              <Table className={styles.cookiePolicyTable}>
+                <tr>
+                  <th>Domain</th>
+                  <th>Cookies</th>
+                  <th>Cookies used</th>
+                  <th>Lifespan</th>
+                </tr>
+                <tr>
+                  <td>seize.io</td>
+                  <td>
+                    <a href="https://cookiepedia.co.uk/cookies/AWSALBTGCORS">
+                      AWSALBTGCORS
+                    </a>
+                  </td>
+                  <td>First Party</td>
+                  <td>7 days</td>
+                </tr>
+                <tr>
+                  <td>seize.io</td>
+                  <td>
+                    <a href="https://cookiepedia.co.uk/cookies/AWSALBTG">
+                      AWSALBTG
+                    </a>
+                  </td>
+                  <td>First Party</td>
+                  <td>7 days</td>
+                </tr>
+              </Table>
+              <br />
+              <h3>Performance Cookies</h3>
+              <br />
+              <br />
+              <p>
+                These cookies allow us to count visits and traffic sources so we
+                can measure and improve the performance of our site. They help
+                us to know which pages are the most and least popular and see
+                how visitors move around the site. All information these cookies
+                collect is aggregated and therefore anonymous. If you do not
+                allow these cookies we will not know when you have visited our
+                site, and will not be able to monitor its performance.
+              </p>
+              <Table className={styles.cookiePolicyTable}>
+                <tr>
+                  <th>Domain</th>
+                  <th>Cookies</th>
+                  <th>Cookies used</th>
+                  <th>Lifespan</th>
+                </tr>
+                <tr>
+                  <td>.seize.io</td>
+                  <td>
+                    <a href="https://cookiepedia.co.uk/cookies/_ga_">
+                      _ga_71NLVV3KY3
+                    </a>
+                  </td>
+                  <td>First Party</td>
+                  <td>372 days</td>
+                </tr>
+                <tr>
+                  <td>.seize.io</td>
+                  <td>
+                    <a href="https://cookiepedia.co.uk/cookies/_ga">_ga</a>
+                  </td>
+                  <td>First Party</td>
+                  <td>372 days</td>
+                </tr>
+              </Table>
             </>
           </Col>
         </Row>
@@ -1669,7 +1703,7 @@ export default function AboutSectionComponent(props: Props) {
         return printPrivacyPolicy();
       case AboutSection.LICENSE:
         return printLicense();
-	  case AboutSection.COOKIE_POLICY:
+      case AboutSection.COOKIE_POLICY:
         return printCookiePolicy();
     }
   }
