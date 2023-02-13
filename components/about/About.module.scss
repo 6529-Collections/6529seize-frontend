@@ -56,6 +56,19 @@
   }
 }
 
+.cookiePolicyTable {
+  th {
+    padding-top: 25px;
+    padding-bottom: 25px;
+  }
+  td {
+    border: 1px solid white !important;
+    width: calc(100%/4);
+    padding: 10px;
+  }
+}
+
+
 .lastUpdateText {
   color: $font-color-h !important;
 }
