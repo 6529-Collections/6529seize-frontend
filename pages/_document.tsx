@@ -1,5 +1,6 @@
 import { Html, Head, Main, NextScript } from "next/document";
 import Image from "next/image";
+import { AboutSection } from "../components/about/AboutSection";
 
 export default function Document() {
   return (
@@ -85,13 +86,19 @@ export default function Document() {
             6529.io
           </a>
           &nbsp;&nbsp;|&nbsp;&nbsp;
-          <a href="/about?section=terms-of-service">Terms of Service</a>
+          <a href={`/about?section=${AboutSection.TERMS_OF_SERVICE}`}>
+            Terms of Service
+          </a>
           &nbsp;&nbsp;|&nbsp;&nbsp;
-          <a href="/about?section=privacy-policy">Privacy Policy</a>
-		  &nbsp;&nbsp;|&nbsp;&nbsp;
-          <a href="/about?section=cookie-policy">Cookie Policy</a>
+          <a href={`/about?section=${AboutSection.PRIVACY_POLICY}`}>
+            Privacy Policy
+          </a>
           &nbsp;&nbsp;|&nbsp;&nbsp;
-          <a href="/about?section=license">License</a>
+          <a href={`/about?section=${AboutSection.COOKIE_POLICY}`}>
+            Cookie Policy
+          </a>
+          &nbsp;&nbsp;|&nbsp;&nbsp;
+          <a href={`/about?section=${AboutSection.LICENSE}`}>License</a>
         </footer>
       </body>
     </Html>
