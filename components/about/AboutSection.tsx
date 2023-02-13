@@ -712,30 +712,27 @@ export default function AboutSectionComponent(props: Props) {
                 <br />
                 <br />
                 <a
-                  href="https://seize.io/about?section=the-memes"
+                  href="/about?section=the-memes"
                   target="_blank"
                   rel="noreferrer">
                   seize.io/about?section=the-memes
                 </a>
                 <br />
                 <a
-                  href="https://seize.io/about?section=6529-gradient"
+                  href="/about?section=6529-gradient"
                   target="_blank"
                   rel="noreferrer">
                   seize.io/about?section=6529-gradient
                 </a>
                 <br />
                 <a
-                  href="https://seize.io/about?section=meme-lab"
+                  href="/about?section=meme-lab"
                   target="_blank"
                   rel="noreferrer">
                   seize.io/about?section=meme-lab
                 </a>
                 <br />
-                <a
-                  href="https://seize.io/about?section=faq"
-                  target="_blank"
-                  rel="noreferrer">
+                <a href="/about?section=faq" target="_blank" rel="noreferrer">
                   seize.io/about?section=faq
                 </a>
               </li>
@@ -754,7 +751,7 @@ export default function AboutSectionComponent(props: Props) {
                 <br />
                 <br />
                 <a
-                  href="https://seize.io/about?section=license"
+                  href="/about?section=license"
                   target="_blank"
                   rel="noreferrer">
                   seize.io/about?section=license
@@ -776,10 +773,7 @@ export default function AboutSectionComponent(props: Props) {
                 incorporated by reference into these Terms.
                 <br />
                 <br />
-                <a
-                  href="https://seize.io/minting"
-                  target="_blank"
-                  rel="noreferrer">
+                <a href="/minting" target="_blank" rel="noreferrer">
                   seize.io/minting
                 </a>
               </li>
@@ -794,7 +788,7 @@ export default function AboutSectionComponent(props: Props) {
                 <br />
                 <br />
                 <a
-                  href="https://seize.io/about?section=privacy-policy"
+                  href="/about?section=privacy-policy"
                   target="_blank"
                   rel="noreferrer">
                   seize.io/about?section=privacy-policy
@@ -938,7 +932,7 @@ export default function AboutSectionComponent(props: Props) {
                 agree with them or not, as we have no way to monitor or exercise
                 control over them. <br />
                 <br />
-                Our perspectives on the 6529 NFTs can be found on the
+                Our perspectives on the 6529 NFTs can be found on the{" "}
                 <a href="https://seize.io" target="_blank" rel="noreferrer">
                   seize.io
                 </a>{" "}
@@ -1116,10 +1110,7 @@ export default function AboutSectionComponent(props: Props) {
                 incorporated by reference into these Terms.
                 <br />
                 <br />
-                <a
-                  href="https://seize.io/dispute-resolution"
-                  target="_blank"
-                  rel="noreferrer">
+                <a href="/dispute-resolution" target="_blank" rel="noreferrer">
                   seize.io/dispute-resolution
                 </a>{" "}
               </li>
@@ -1375,7 +1366,7 @@ export default function AboutSectionComponent(props: Props) {
                   <b>Cookies:</b> We use 1st party cookies. The cookies we use
                   can be found here:{" "}
                   <a
-                    href="https://seize.io/about?section=cookie-policy"
+                    href="/about?section=cookie-policy"
                     target="_blank"
                     rel="noreferrer">
                     seize.io/about?section=cookie-policy
