@@ -31,7 +31,12 @@ export default function About() {
       if (!router.query.section) {
         setSection(AboutSection.MEMES);
       } else {
-        setSection(router.query.section as AboutSection);
+        const section: AboutSection = router.query.section as AboutSection;
+        if (section) {
+          setSection(section);
+        } else {
+          setSection(AboutSection.MEMES);
+        }
       }
     }
   }, [router.isReady]);
@@ -41,6 +46,15 @@ export default function About() {
       router.push(`?section=${section}`, undefined, {
         shallow: true,
       });
+      const sectionTitle = section
+        .split("-")
+        .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(" ");
+      setBreadcrumbs([
+        { display: "Home", href: "/" },
+        { display: "About" },
+        { display: sectionTitle },
+      ]);
       window.scrollTo(0, 0);
     }
   }, [section]);
