@@ -194,11 +194,9 @@ export default function About() {
                           Privacy Policy
                         </Col>
                       </Row>
-					  <Row className="pt-1 pb-1">
+                      <Row className="pt-1 pb-1">
                         <Col
-                          onClick={() =>
-                            setSection(AboutSection.COOKIE_POLICY)
-                          }
+                          onClick={() => setSection(AboutSection.COOKIE_POLICY)}
                           className={`${menuStyles.aboutMenuLeftItem} ${
                             section == AboutSection.COOKIE_POLICY
                               ? menuStyles.aboutMenuLeftItemActive
@@ -346,11 +344,9 @@ export default function About() {
                           Privacy Policy
                         </Col>
                       </Row>
-					  <Row className="pt-1 pb-1">
+                      <Row className="pt-1 pb-1">
                         <Col
-                          onClick={() =>
-                            setSection(AboutSection.COOKIE_POLICY)
-                          }
+                          onClick={() => setSection(AboutSection.COOKIE_POLICY)}
                           className={`${menuStyles.aboutMenuLeftItem} ${
                             section == AboutSection.COOKIE_POLICY
                               ? menuStyles.aboutMenuLeftItemActive
