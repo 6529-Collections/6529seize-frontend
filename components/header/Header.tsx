@@ -354,6 +354,13 @@ export default function Header(props: Props) {
                     </a>
                   </Col>
                 </Row>
+				<Row className="pt-3">
+                  <Col>
+                    <a href="/about?section=cookie-policy">
+                      <h3>Cookie Policy</h3>
+                    </a>
+                  </Col>
+                </Row>
                 <Row className="pt-3">
                   <Col>
                     <a href="/about?section=license">
@@ -587,6 +594,14 @@ export default function Header(props: Props) {
                                     "/about?section=privacy-policy")
                                 }>
                                 Privacy Policy
+                              </NavDropdown.Item>
+							  <NavDropdown.Item
+                                className={styles.dropdownItem}
+                                onClick={() =>
+                                  (window.location.href =
+                                    "/about?section=cookie-policy")
+                                }>
+                                Cookie Policy
                               </NavDropdown.Item>
                               <NavDropdown.Item
                                 className={styles.dropdownItem}

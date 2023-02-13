@@ -88,6 +88,8 @@ export default function Document() {
           <a href="/about?section=terms-of-service">Terms of Service</a>
           &nbsp;&nbsp;|&nbsp;&nbsp;
           <a href="/about?section=privacy-policy">Privacy Policy</a>
+		  &nbsp;&nbsp;|&nbsp;&nbsp;
+          <a href="/about?section=cookie-policy">Cookie Policy</a>
           &nbsp;&nbsp;|&nbsp;&nbsp;
           <a href="/about?section=license">License</a>
         </footer>
