@@ -712,27 +712,30 @@ export default function AboutSectionComponent(props: Props) {
                 <br />
                 <br />
                 <a
-                  href="/about?section=the-memes"
+                  href={`/about?section=${AboutSection.MEMES}`}
                   target="_blank"
                   rel="noreferrer">
                   seize.io/about?section=the-memes
                 </a>
                 <br />
                 <a
-                  href="/about?section=6529-gradient"
+                  href={`/about?section=${AboutSection.GRADIENTS}`}
                   target="_blank"
                   rel="noreferrer">
                   seize.io/about?section=6529-gradient
                 </a>
                 <br />
                 <a
-                  href="/about?section=meme-lab"
+                  href={`/about?section=${AboutSection.MEME_LAB}`}
                   target="_blank"
                   rel="noreferrer">
                   seize.io/about?section=meme-lab
                 </a>
                 <br />
-                <a href="/about?section=faq" target="_blank" rel="noreferrer">
+                <a
+                  href={`/about?section=${AboutSection.FAQ}`}
+                  target="_blank"
+                  rel="noreferrer">
                   seize.io/about?section=faq
                 </a>
               </li>
@@ -751,7 +754,7 @@ export default function AboutSectionComponent(props: Props) {
                 <br />
                 <br />
                 <a
-                  href="/about?section=license"
+                  href={`/about?section=${AboutSection.LICENSE}`}
                   target="_blank"
                   rel="noreferrer">
                   seize.io/about?section=license
@@ -788,7 +791,7 @@ export default function AboutSectionComponent(props: Props) {
                 <br />
                 <br />
                 <a
-                  href="/about?section=privacy-policy"
+                  href={`/about?section=${AboutSection.PRIVACY_POLICY}`}
                   target="_blank"
                   rel="noreferrer">
                   seize.io/about?section=privacy-policy
@@ -1366,7 +1369,7 @@ export default function AboutSectionComponent(props: Props) {
                   <b>Cookies:</b> We use 1st party cookies. The cookies we use
                   can be found here:{" "}
                   <a
-                    href="/about?section=cookie-policy"
+                    href={`/about?section=${AboutSection.COOKIE_POLICY}`}
                     target="_blank"
                     rel="noreferrer">
                     seize.io/about?section=cookie-policy
