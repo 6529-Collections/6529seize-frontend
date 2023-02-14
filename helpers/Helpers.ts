@@ -124,3 +124,14 @@ export function nextTdh() {
   result += ":" + (diffS < 10 ? "0" + diffS : diffS);
   return result.toString();
 }
+
+export function splitArtists(artists: string) {
+  const a = artists
+    .split(" / ")
+    .join(",")
+    .split(", ")
+    .join(",")
+    .split(" and ")
+    .join(",");
+  return a;
+}
