@@ -22,6 +22,7 @@ import {
   enterArtFullScreen,
   fullScreenSupported,
   numberWithCommas,
+  splitArtists,
 } from "../../helpers/Helpers";
 import Breadcrumb, { Crumb } from "../breadcrumb/Breadcrumb";
 import Download from "../download/Download";
@@ -74,6 +75,7 @@ export default function MemePage() {
   const { address, connector, isConnected } = useAccount();
 
   const [nft, setNft] = useState<NFT>();
+  const [memeLabNfts, setMemeLabNfts] = useState<NFT[]>([]);
   const [nftMeta, setNftMeta] = useState<MemesExtendedData>();
   const [nftBalance, setNftBalance] = useState<number>(0);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
@@ -185,6 +187,13 @@ export default function MemePage() {
               },
               { display: `Card ${nftId} - ${response.data[0].name}` },
             ]);
+
+            const artists = splitArtists(response.data[0].artist);
+            fetchUrl(
+              `${process.env.API_ENDPOINT}/api/nfts_memelab?sort_direction=asc&meme_id=${nftId}`
+            ).then((response: DBResponse) => {
+              setMemeLabNfts(response.data);
+            });
           });
         } else {
           setNftMeta(undefined);
@@ -378,6 +387,52 @@ export default function MemePage() {
             Lab is launched.
           </Col>
         </Row>
+        {memeLabNfts.length > 0 && (
+          <Row className="pt-2 pb-2">
+            {memeLabNfts.map((nft) => {
+              return (
+                <Col
+                  key={`${nft.contract}-${nft.id}`}
+                  className="pt-3 pb-3"
+                  xs={{ span: 6 }}
+                  sm={{ span: 4 }}
+                  md={{ span: 3 }}
+                  lg={{ span: 3 }}>
+                  <Container fluid className="no-padding">
+                    <Row>
+                      <Col>
+                        <NFTImage
+                          nft={nft}
+                          animation={false}
+                          height={300}
+                          balance={0}
+                          showThumbnail={true}
+                        />
+                      </Col>
+                    </Row>
+                    <Row>
+                      <Col className="text-center pt-2">
+                        <b>
+                          #{nft.id} - {nft.name}
+                        </b>
+                      </Col>
+                    </Row>
+                    <Row>
+                      <Col className="text-center pt-2">
+                        Artists: {nft.artist}
+                      </Col>
+                    </Row>
+                    <Row>
+                      <Col className="text-center pt-2">
+                        Supply: {nft.supply}
+                      </Col>
+                    </Row>
+                  </Container>
+                </Col>
+              );
+            })}
+          </Row>
+        )}
         <Row className="pt-5">
           <Col>
             <Image
