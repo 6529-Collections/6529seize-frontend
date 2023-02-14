@@ -169,10 +169,10 @@ export default function TheMemesComponent(props: Props) {
 
   useEffect(() => {
     if (address && nftMetas.length > 0) {
-      fetchUrl(
+      fetchAllPages(
         `${process.env.API_ENDPOINT}/api/owners?contract=${MEMES_CONTRACT}&wallet=${address}`
-      ).then((response: DBResponse) => {
-        setNftBalances(response.data);
+      ).then((owners: Owner[]) => {
+        setNftBalances(owners);
       });
     } else {
       setNftBalances([]);
