@@ -68,12 +68,12 @@ export default function AboutMinting() {
               <br />
               <li>
                 Currently the mints are happening Mon/Wed/Friday at 11am ET (4pm
-                UTC), but times may vary. Please follow{" "}
+                UTC), but times may vary. Please follow &#64;
                 <a
                   href="https://twitter.com/6529collections"
                   target="_blank"
                   rel="noreferrer">
-                  &#64;6529collections
+                  6529collections
                 </a>{" "}
                 for details
               </li>
