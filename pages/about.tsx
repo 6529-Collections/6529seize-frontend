@@ -135,7 +135,7 @@ export default function About() {
                               ? menuStyles.aboutMenuLeftItemActive
                               : ""
                           }`}>
-                          6529 Gradient
+                          Gradient
                         </Col>
                       </Row>
                       <Row className="pt-1 pb-1">
@@ -149,15 +149,48 @@ export default function About() {
                           FAQ
                         </Col>
                       </Row>
-                      <Row className="pt-1 pb-1">
+					  <Row className="pt-1 pb-1">
                         <Col
-                          onClick={() => setSection(AboutSection.MISSION)}
+                          onClick={() => setSection(AboutSection.MINTING)}
                           className={`${menuStyles.aboutMenuLeftItem} ${
-                            section == AboutSection.MISSION
+                            section == AboutSection.MINTING
                               ? menuStyles.aboutMenuLeftItemActive
                               : ""
                           }`}>
-                          Mission
+                          Minting
+                        </Col>
+                      </Row>
+					  <Row className="pt-1 pb-1">
+                        <Col
+                          onClick={() => setSection(AboutSection.LICENSE)}
+                          className={`${menuStyles.aboutMenuLeftItem} ${
+                            section == AboutSection.LICENSE
+                              ? menuStyles.aboutMenuLeftItemActive
+                              : ""
+                          }`}>
+                          License
+                        </Col>
+                      </Row>
+					  <Row className="pt-1 pb-1">
+                        <Col
+                          onClick={() => setSection(AboutSection.APPLY)}
+                          className={`${menuStyles.aboutMenuLeftItem} ${
+                            section == AboutSection.APPLY
+                              ? menuStyles.aboutMenuLeftItemActive
+                              : ""
+                          }`}>
+                          Apply
+                        </Col>
+                      </Row>
+					  <Row className="pt-1 pb-1">
+                        <Col
+                          onClick={() => setSection(AboutSection.CONTACT_US)}
+                          className={`${menuStyles.aboutMenuLeftItem} ${
+                            section == AboutSection.CONTACT_US
+                              ? menuStyles.aboutMenuLeftItemActive
+                              : ""
+                          }`}>
+                          Contact Us
                         </Col>
                       </Row>
                       <Row className="pt-1 pb-1">
@@ -169,17 +202,6 @@ export default function About() {
                               : ""
                           }`}>
                           Release Notes
-                        </Col>
-                      </Row>
-                      <Row className="pt-1 pb-1">
-                        <Col
-                          onClick={() => setSection(AboutSection.CONTACT_US)}
-                          className={`${menuStyles.aboutMenuLeftItem} ${
-                            section == AboutSection.CONTACT_US
-                              ? menuStyles.aboutMenuLeftItemActive
-                              : ""
-                          }`}>
-                          Contact Us
                         </Col>
                       </Row>
                       <Row className="pt-1 pb-1">
@@ -208,26 +230,17 @@ export default function About() {
                           Privacy Policy
                         </Col>
                       </Row>
-                      <Row className="pt-1 pb-1">
+					  <Row className="pt-1 pb-1">
                         <Col
-                          onClick={() => setSection(AboutSection.COOKIE_POLICY)}
+                          onClick={() =>
+                            setSection(AboutSection.COOKIE_POLICY)
+                          }
                           className={`${menuStyles.aboutMenuLeftItem} ${
                             section == AboutSection.COOKIE_POLICY
                               ? menuStyles.aboutMenuLeftItemActive
                               : ""
                           }`}>
                           Cookie Policy
-                        </Col>
-                      </Row>
-                      <Row className="pt-1 pb-1">
-                        <Col
-                          onClick={() => setSection(AboutSection.LICENSE)}
-                          className={`${menuStyles.aboutMenuLeftItem} ${
-                            section == AboutSection.LICENSE
-                              ? menuStyles.aboutMenuLeftItemActive
-                              : ""
-                          }`}>
-                          License
                         </Col>
                       </Row>
                     </Container>
@@ -285,7 +298,7 @@ export default function About() {
                               ? menuStyles.aboutMenuLeftItemActive
                               : ""
                           }`}>
-                          6529 Gradient
+                          Gradient
                         </Col>
                       </Row>
                       <Row className="pt-1 pb-1">
@@ -299,15 +312,48 @@ export default function About() {
                           FAQ
                         </Col>
                       </Row>
-                      <Row className="pt-1 pb-1">
+					  <Row className="pt-1 pb-1">
                         <Col
-                          onClick={() => setSection(AboutSection.MISSION)}
+                          onClick={() => setSection(AboutSection.MINTING)}
                           className={`${menuStyles.aboutMenuLeftItem} ${
-                            section == AboutSection.MISSION
+                            section == AboutSection.MINTING
                               ? menuStyles.aboutMenuLeftItemActive
                               : ""
                           }`}>
-                          Mission
+                          Minting
+                        </Col>
+                      </Row>
+					  <Row className="pt-1 pb-1">
+                        <Col
+                          onClick={() => setSection(AboutSection.LICENSE)}
+                          className={`${menuStyles.aboutMenuLeftItem} ${
+                            section == AboutSection.LICENSE
+                              ? menuStyles.aboutMenuLeftItemActive
+                              : ""
+                          }`}>
+                          License
+                        </Col>
+                      </Row>
+					  <Row className="pt-1 pb-1">
+                        <Col
+                          onClick={() => setSection(AboutSection.APPLY)}
+                          className={`${menuStyles.aboutMenuLeftItem} ${
+                            section == AboutSection.APPLY
+                              ? menuStyles.aboutMenuLeftItemActive
+                              : ""
+                          }`}>
+                          Apply
+                        </Col>
+                      </Row>
+					  <Row className="pt-1 pb-1">
+                        <Col
+                          onClick={() => setSection(AboutSection.CONTACT_US)}
+                          className={`${menuStyles.aboutMenuLeftItem} ${
+                            section == AboutSection.CONTACT_US
+                              ? menuStyles.aboutMenuLeftItemActive
+                              : ""
+                          }`}>
+                          Contact Us
                         </Col>
                       </Row>
                       <Row className="pt-1 pb-1">
@@ -319,17 +365,6 @@ export default function About() {
                               : ""
                           }`}>
                           Release Notes
-                        </Col>
-                      </Row>
-                      <Row className="pt-1 pb-1">
-                        <Col
-                          onClick={() => setSection(AboutSection.CONTACT_US)}
-                          className={`${menuStyles.aboutMenuLeftItem} ${
-                            section == AboutSection.CONTACT_US
-                              ? menuStyles.aboutMenuLeftItemActive
-                              : ""
-                          }`}>
-                          Contact Us
                         </Col>
                       </Row>
                       <Row className="pt-1 pb-1">
@@ -358,26 +393,17 @@ export default function About() {
                           Privacy Policy
                         </Col>
                       </Row>
-                      <Row className="pt-1 pb-1">
+					  <Row className="pt-1 pb-1">
                         <Col
-                          onClick={() => setSection(AboutSection.COOKIE_POLICY)}
+                          onClick={() =>
+                            setSection(AboutSection.COOKIE_POLICY)
+                          }
                           className={`${menuStyles.aboutMenuLeftItem} ${
                             section == AboutSection.COOKIE_POLICY
                               ? menuStyles.aboutMenuLeftItemActive
                               : ""
                           }`}>
                           Cookie Policy
-                        </Col>
-                      </Row>
-                      <Row className="pt-1 pb-1">
-                        <Col
-                          onClick={() => setSection(AboutSection.LICENSE)}
-                          className={`${menuStyles.aboutMenuLeftItem} ${
-                            section == AboutSection.LICENSE
-                              ? menuStyles.aboutMenuLeftItemActive
-                              : ""
-                          }`}>
-                          License
                         </Col>
                       </Row>
                     </Container>
