@@ -32,7 +32,7 @@ export default function ReMemes() {
         <meta property="og:description" content="6529 SEIZE" />
         <meta
           property="og:image"
-          content={`${process.env.BASE_ENDPOINT}/Seize_Logo_Glasses_2.png`}
+          content={`${process.env.BASE_ENDPOINT}/re-memes-b.jpeg`}
         />
       </Head>
 
