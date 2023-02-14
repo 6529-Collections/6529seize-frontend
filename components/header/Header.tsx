@@ -228,7 +228,7 @@ export default function Header(props: Props) {
                 <Row className="pt-3">
                   <Col>
                     <a href="/community-metrics">
-                      <h3>Metrics</h3>
+                      <h3>Community Metrics</h3>
                     </a>
                   </Col>
                 </Row>
