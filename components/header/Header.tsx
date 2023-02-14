@@ -174,6 +174,13 @@ export default function Header(props: Props) {
               </a>
             </Col>
           </Row>
+		  <Row className="pt-3 pb-3">
+            <Col>
+              <a href="/meme-lab">
+                <h3>Meme Lab</h3>
+              </a>
+            </Col>
+          </Row>
           <Row className="pt-3 pb-3">
             <Col>
               <a href="/rememes">
@@ -242,13 +249,6 @@ export default function Header(props: Props) {
           </Row>
           <Row className="pt-3 pb-3">
             <Col>
-              <a href="/buidl">
-                <h3>BUIDL</h3>
-              </a>
-            </Col>
-          </Row>
-          <Row className="pt-3 pb-3">
-            <Col>
               <h3
                 onClick={() => {
                   setShowBurgerMenuAbout(!showBurgerMenuAbout);
@@ -272,33 +272,28 @@ export default function Header(props: Props) {
                 </Row>
                 <Row className="pt-3">
                   <Col>
-                    <a href={`/about?section=${AboutSection.MEMES}`}>
+                    <a href="/about?section=the-memes">
                       <h3>The Memes</h3>
                     </a>
                   </Col>
                 </Row>
                 <Row className="pt-3">
                   <Col>
-                    <a href={`/about?section=${AboutSection.MEMES_CALENDAR}`}>
+                    <a href="/about?section=memes-calendar">
                       <h3>Memes Calendar</h3>
                     </a>
                   </Col>
                 </Row>
                 <Row className="pt-3">
                   <Col>
-                    <a href={`/about?section=${AboutSection.MEME_LAB}`}>
-                      <h3>MemeLab</h3>
+                    <a href="/about?section=meme-lab">
+                      <h3>Meme Lab</h3>
                     </a>
                   </Col>
                 </Row>
-                <Row>
-                  <Col xs={{ span: 6, offset: 3 }}>
-                    <hr />
-                  </Col>
-                </Row>
-                <Row className="pt-3">
+				<Row className="pt-3">
                   <Col>
-                    <a href={`/about?section=${AboutSection.GRADIENTS}`}>
+                    <a href="/about?section=6529-gradient">
                       <h3>Gradient</h3>
                     </a>
                   </Col>
@@ -310,29 +305,48 @@ export default function Header(props: Props) {
                 </Row>
                 <Row className="pt-3">
                   <Col>
-                    <a href={`/about?section=${AboutSection.FAQ}`}>
+                    <a href="/about?section=faq">
                       <h3>FAQ</h3>
                     </a>
                   </Col>
                 </Row>
                 <Row className="pt-3">
                   <Col>
-                    <a href={`/about?section=${AboutSection.MISSION}`}>
-                      <h3>Mission</h3>
+                    <a href="/about?section=minting">
+                      <h3>Minting</h3>
                     </a>
                   </Col>
                 </Row>
-                <Row className="pt-3">
+				<Row className="pt-3">
                   <Col>
-                    <a href={`/about?section=${AboutSection.RELEASE_NOTES}`}>
-                      <h3>Release Notes</h3>
+                    <a href="/about?section=license">
+                      <h3>License</h3>
                     </a>
                   </Col>
                 </Row>
-                <Row className="pt-3">
+				<Row>
+                  <Col xs={{ span: 6, offset: 3 }}>
+                    <hr />
+                  </Col>
+                </Row>
+				<Row className="pt-3">
                   <Col>
-                    <a href={`/about?section=${AboutSection.CONTACT_US}`}>
+                    <a href="/about?section=apply">
+                      <h3>Apply</h3>
+                    </a>
+                  </Col>
+                </Row>
+				<Row className="pt-3">
+                  <Col>
+                    <a href="/about?section=contact-us">
                       <h3>Contact Us</h3>
+                    </a>
+                  </Col>
+                </Row>
+                <Row className="pt-3">
+                  <Col>
+                    <a href="/about?section=release-notes">
+                      <h3>Release Notes</h3>
                     </a>
                   </Col>
                 </Row>
@@ -343,29 +357,22 @@ export default function Header(props: Props) {
                 </Row>
                 <Row className="pt-3">
                   <Col>
-                    <a href={`/about?section=${AboutSection.TERMS_OF_SERVICE}`}>
+                    <a href="/about?section=terms-of-service">
                       <h3>Terms of Service</h3>
                     </a>
                   </Col>
                 </Row>
                 <Row className="pt-3">
                   <Col>
-                    <a href={`/about?section=${AboutSection.PRIVACY_POLICY}`}>
+                    <a href="/about?section=privacy-policy">
                       <h3>Privacy Policy</h3>
                     </a>
                   </Col>
                 </Row>
-                <Row className="pt-3">
+				<Row className="pt-3">
                   <Col>
-                    <a href={`/about?section=${AboutSection.COOKIE_POLICY}`}>
+                    <a href="/about?section=cookie-policy">
                       <h3>Cookie Policy</h3>
-                    </a>
-                  </Col>
-                </Row>
-                <Row className="pt-3">
-                  <Col>
-                    <a href={`/about?section=${AboutSection.LICENSE}`}>
-                      <h3>License</h3>
                     </a>
                   </Col>
                 </Row>
@@ -459,6 +466,13 @@ export default function Header(props: Props) {
                               href="/6529-gradient?sort=id&sort_dir=ASC">
                               Gradient
                             </Nav.Link>
+							<Nav.Link
+                              className={`${styles.mainNavLink} ${
+                                router.pathname == "/meme-lab" ? "active" : ""
+                              }`}
+                              href="/meme-lab">
+                              Meme Lab
+                            </Nav.Link>
                             <Nav.Link
                               className={`${styles.mainNavLink} ${
                                 router.pathname == "/rememes" ? "active" : ""
@@ -499,13 +513,6 @@ export default function Header(props: Props) {
                                 Downloads
                               </NavDropdown.Item>
                             </NavDropdown>
-                            <Nav.Link
-                              className={`${styles.mainNavLink} ${
-                                router.pathname == "/buidl" ? "active" : ""
-                              }`}
-                              href="/buidl">
-                              BUIDL
-                            </Nav.Link>
                             <NavDropdown
                               title="About"
                               className={`${styles.mainNavLink} ${
@@ -517,89 +524,108 @@ export default function Header(props: Props) {
                               <NavDropdown.Item
                                 className={styles.dropdownItem}
                                 onClick={() =>
-                                  (window.location.href = `/about?section=${AboutSection.MEMES}`)
+                                  (window.location.href =
+                                    "/about?section=the-memes")
                                 }>
                                 The Memes
                               </NavDropdown.Item>
                               <NavDropdown.Item
                                 className={styles.dropdownItem}
                                 onClick={() =>
-                                  (window.location.href = `/about?section=${AboutSection.MEMES_CALENDAR}`)
+                                  (window.location.href =
+                                    "/about?section=memes-calendar")
                                 }>
                                 Memes Calendar
                               </NavDropdown.Item>
                               <NavDropdown.Item
                                 className={styles.dropdownItem}
                                 onClick={() =>
-                                  (window.location.href = `/about?section=${AboutSection.MEME_LAB}`)
+                                  (window.location.href =
+                                    "/about?section=meme-lab")
                                 }>
-                                MemeLab
+                                Meme Lab
+                              </NavDropdown.Item>
+                              <NavDropdown.Item
+                                className={styles.dropdownItem}
+                                onClick={() =>
+                                  (window.location.href =
+                                    "/about?section=6529-gradient")
+                                }>
+                                Gradient
                               </NavDropdown.Item>
                               <NavDropdown.Divider />
                               <NavDropdown.Item
                                 className={styles.dropdownItem}
                                 onClick={() =>
-                                  (window.location.href = `/about?section=${AboutSection.GRADIENTS}`)
-                                }>
-                                6529 Gradient
-                              </NavDropdown.Item>
-                              <NavDropdown.Divider />
-                              <NavDropdown.Item
-                                className={styles.dropdownItem}
-                                onClick={() =>
-                                  (window.location.href = `/about?section=${AboutSection.FAQ}`)
+                                  (window.location.href = "/about?section=faq")
                                 }>
                                 FAQ
                               </NavDropdown.Item>
                               <NavDropdown.Item
                                 className={styles.dropdownItem}
                                 onClick={() =>
-                                  (window.location.href = `/about?section=${AboutSection.MISSION}`)
+                                  (window.location.href =
+                                    "/about?section=minting")
                                 }>
-                                Mission
+                                Minting
                               </NavDropdown.Item>
-                              <NavDropdown.Item
+							  <NavDropdown.Item
                                 className={styles.dropdownItem}
                                 onClick={() =>
-                                  (window.location.href = `/about?section=${AboutSection.RELEASE_NOTES}`)
+                                  (window.location.href =
+                                    "/about?section=license")
                                 }>
-                                Release Notes
+                                License
                               </NavDropdown.Item>
-                              <NavDropdown.Item
+							  <NavDropdown.Divider />
+							  <NavDropdown.Item
                                 className={styles.dropdownItem}
                                 onClick={() =>
-                                  (window.location.href = `/about?section=${AboutSection.CONTACT_US}`)
+                                  (window.location.href =
+                                    "/about?section=apply")
+                                }>
+                                Apply
+                              </NavDropdown.Item>
+							  <NavDropdown.Item
+                                className={styles.dropdownItem}
+                                onClick={() =>
+                                  (window.location.href =
+                                    "/about?section=contact-us")
                                 }>
                                 Contact Us
+                              </NavDropdown.Item>
+                              <NavDropdown.Item
+                                className={styles.dropdownItem}
+                                onClick={() =>
+                                  (window.location.href =
+                                    "/about?section=release-notes")
+                                }>
+                                Release Notes
                               </NavDropdown.Item>
                               <NavDropdown.Divider />
                               <NavDropdown.Item
                                 className={styles.dropdownItem}
                                 onClick={() =>
-                                  (window.location.href = `/about?section=${AboutSection.TERMS_OF_SERVICE}`)
+                                  (window.location.href =
+                                    "/about?section=terms-of-service")
                                 }>
                                 Terms of Service
                               </NavDropdown.Item>
                               <NavDropdown.Item
                                 className={styles.dropdownItem}
                                 onClick={() =>
-                                  (window.location.href = `/about?section=${AboutSection.PRIVACY_POLICY}`)
+                                  (window.location.href =
+                                    "/about?section=privacy-policy")
                                 }>
                                 Privacy Policy
                               </NavDropdown.Item>
-                              <NavDropdown.Item
+							  <NavDropdown.Item
                                 className={styles.dropdownItem}
                                 onClick={() =>
-                                  (window.location.href = `/about?section=${AboutSection.COOKIE_POLICY}`)
+                                  (window.location.href =
+                                    "/about?section=cookie-policy")
                                 }>
                                 Cookie Policy
-                              </NavDropdown.Item>
-                              <NavDropdown.Item
-                                className={styles.dropdownItem}
-                                onClick={() =>
-                                  (window.location.href = `/about?section=${AboutSection.LICENSE}`)
-                                }>
-                                License
                               </NavDropdown.Item>
                             </NavDropdown>
                             {isConnected ? (
