@@ -1,5 +1,6 @@
 import { Html, Head, Main, NextScript } from "next/document";
 import Image from "next/image";
+import { AboutSection } from "./about/[section]";
 
 export default function Document() {
   return (
@@ -43,7 +44,7 @@ export default function Document() {
               src="/twitter.png"
               alt="punk6529 Twitter"
             />{" "}
-            @punk6529
+            &#64;punk6529
           </a>
           &nbsp;&nbsp;|&nbsp;&nbsp;
           <a
@@ -58,7 +59,7 @@ export default function Document() {
               src="/twitter.png"
               alt="6529Collections Twitter"
             />{" "}
-            @6529Collections
+            &#64;6529Collections
           </a>
           &nbsp;&nbsp;|&nbsp;&nbsp;
           <a href="https://discord.gg/join-om" target="_blank" rel="noreferrer">
@@ -85,13 +86,15 @@ export default function Document() {
             6529.io
           </a>
           &nbsp;&nbsp;|&nbsp;&nbsp;
-          <a href="/about?section=terms-of-service">Terms of Service</a>
+          <a href={`/about/${AboutSection.TERMS_OF_SERVICE}`}>
+            Terms of Service
+          </a>
           &nbsp;&nbsp;|&nbsp;&nbsp;
-          <a href="/about?section=privacy-policy">Privacy Policy</a>
-		  &nbsp;&nbsp;|&nbsp;&nbsp;
-          <a href="/about?section=cookie-policy">Cookie Policy</a>
+          <a href={`/about/${AboutSection.PRIVACY_POLICY}`}>Privacy Policy</a>
           &nbsp;&nbsp;|&nbsp;&nbsp;
-          <a href="/about?section=license">License</a>
+          <a href={`/about/${AboutSection.COOKIE_POLICY}`}>Cookie Policy</a>
+          &nbsp;&nbsp;|&nbsp;&nbsp;
+          <a href={`/about/${AboutSection.LICENSE}`}>License</a>
         </footer>
       </body>
     </Html>
