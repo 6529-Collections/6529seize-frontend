@@ -32,7 +32,7 @@ export default function ReMemes() {
         <meta property="og:description" content="6529 SEIZE" />
         <meta
           property="og:image"
-          content={`${process.env.BASE_ENDPOINT}/Seize_Logo_Glasses_2.png`}
+          content={`${process.env.BASE_ENDPOINT}/re-memes-b.jpeg`}
         />
       </Head>
 
@@ -76,7 +76,7 @@ export default function ReMemes() {
                     </p>
                     <p>
                       The Meme Cards are CC0, which means that anyone can use
-                      them to make derivative works (the “ReMemes”).
+                      them to make derivative works (the &quot;ReMemes&quot;).
                     </p>
                     <p>
                       The ReMemes come in all styles, shapes and sizes, from
@@ -84,9 +84,10 @@ export default function ReMemes() {
                       work. The ReMemes are sold / minted by their creators in a
                       wide variety of formats, at different price points, with
                       different distribution methods, on their own contracts.
-                      There are no “official” or “approved” ReMemes. You do not
-                      need permission to make a ReMeme. We love hearing about
-                      ReMemes but that is different than seeking permission.
+                      There are no &quot;official&quot; or &quot;approved&quot;
+                      ReMemes. You do not need permission to make a ReMeme. We
+                      love hearing about ReMemes but that is different than
+                      seeking permission.
                     </p>
                     <p>
                       We believe that in the medium to long-term, the ReMemes

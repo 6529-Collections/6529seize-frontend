@@ -2,7 +2,7 @@
 
 const VERSION = "v1.0.0-r7";
 const withBundleAnalyzer = require("@next/bundle-analyzer")({
-  enabled: true,
+  enabled: process.env.NODE_ENV == "production" ? true : false,
   openAnalyzer: false,
 });
 
