@@ -286,8 +286,11 @@ export default function AboutTermsOfService() {
                 incorporated by reference into these Terms.
                 <br />
                 <br />
-                <a href="/minting" target="_blank" rel="noreferrer">
-                  seize.io/minting
+                <a
+                  href={`/about/${AboutSection.MINTING}`}
+                  target="_blank"
+                  rel="noreferrer">
+                  seize.io/about/{AboutSection.MINTING}
                 </a>
               </li>
               <br />
