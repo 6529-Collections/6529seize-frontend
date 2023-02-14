@@ -5,16 +5,13 @@ import { TDHCalc, TDHMetrics } from "../../entities/ITDH";
 import styles from "./Leaderboard.module.scss";
 import dynamic from "next/dynamic";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  getDateDisplay,
-  nextTdh,
-  numberWithCommas,
-} from "../../helpers/Helpers";
+import { nextTdh, numberWithCommas } from "../../helpers/Helpers";
 import Pagination from "../pagination/Pagination";
 import { SortDirection } from "../../entities/ISort";
 import { useRouter } from "next/router";
-import { fetchUrl } from "../../services/6529api";
+import { fetchAllPages, fetchUrl } from "../../services/6529api";
 import { MEMES_CONTRACT } from "../../constants";
+import { MemesExtendedData } from "../../entities/INFT";
 
 const Address = dynamic(() => import("../address/Address"), { ssr: false });
 
@@ -126,6 +123,8 @@ export default function Leaderboard(props: Props) {
   const [hideMuseum, setHideMuseum] = useState(false);
 
   const [memesCount, setMemesCount] = useState<number>();
+  const [memesCountS1, setMemesCountS1] = useState<number>();
+  const [memesCountS2, setMemesCountS2] = useState<number>();
 
   const [pageProps, setPageProps] = useState<Props>(props);
   const [totalResults, setTotalResults] = useState(0);
@@ -205,10 +204,12 @@ export default function Leaderboard(props: Props) {
       }
     );
 
-    fetchUrl(
-      `${process.env.API_ENDPOINT}/api/nfts?contract=${MEMES_CONTRACT}`
-    ).then((response: DBResponse) => {
-      setMemesCount(response.count);
+    fetchAllPages(
+      `${process.env.API_ENDPOINT}/api/memes_extended_data?contract=${MEMES_CONTRACT}`
+    ).then((newNfts: MemesExtendedData[]) => {
+      setMemesCount(newNfts.length);
+      setMemesCountS1([...newNfts].filter((n) => n.season == 1).length);
+      setMemesCountS2([...newNfts].filter((n) => n.season == 2).length);
     });
   }, []);
 
@@ -585,21 +586,25 @@ export default function Leaderboard(props: Props) {
 
   function getUniqueMemes(lead: TDHMetrics) {
     let unique;
-    if (memesCount) {
+    let uniqueTotal;
+    if (memesCount && memesCountS1 && memesCountS2) {
       switch (content) {
         case Content.MEMES1:
           unique = lead.unique_memes_szn1;
+          uniqueTotal = memesCountS1;
           break;
         case Content.MEMES2:
           unique = lead.unique_memes_szn2;
+          uniqueTotal = memesCountS2;
           break;
         default:
           unique = lead.unique_memes;
+          uniqueTotal = memesCount;
           break;
       }
       if (unique > 0) {
-        return `${numberWithCommas(unique)}/${memesCount} (${Math.round(
-          (unique / memesCount) * 100
+        return `${numberWithCommas(unique)}/${uniqueTotal} (${Math.round(
+          (unique / uniqueTotal) * 100
         )}%)`;
       }
     }
