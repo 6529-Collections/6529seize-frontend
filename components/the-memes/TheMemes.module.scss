@@ -13,9 +13,6 @@
 .season {
   color: $font-color;
   cursor: pointer;
-  &:hover {
-    color: darken($color: $font-color, $amount: $darken-percentage);
-  }
 }
 
 .tab {
