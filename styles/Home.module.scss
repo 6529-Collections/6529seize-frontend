@@ -56,6 +56,10 @@
   background-color: transparent;
 }
 
+.tdhFormulaTable {
+  max-width: 750px;
+}
+
 .tdhFormulaTable > :not(caption) > * > * {
   padding: 0.5rem !important;
 }
