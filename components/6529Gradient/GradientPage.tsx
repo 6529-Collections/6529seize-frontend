@@ -402,11 +402,11 @@ export default function GradientPage() {
                           <h2>
                             <a
                               href={`/6529-gradient/${parseInt(nftId) - 1}`}
-                              className={
+                              className={`${styles.nextPreviousNft} ${
                                 parseInt(nftId) == 0
                                   ? styles.nftPreviousdisabled
                                   : ""
-                              }>
+                              }`}>
                               <FontAwesomeIcon icon="chevron-circle-left" />
                             </a>
                           </h2>
@@ -414,11 +414,11 @@ export default function GradientPage() {
                             &nbsp;
                             <a
                               href={`/6529-gradient/${parseInt(nftId) + 1}`}
-                              className={
+                              className={`${styles.nextPreviousNft} ${
                                 parseInt(nftId) == 100
-                                  ? styles.nftNextdisabled
+                                  ? styles.nftPreviousdisabled
                                   : ""
-                              }>
+                              }`}>
                               <FontAwesomeIcon icon="chevron-circle-right" />
                             </a>
                           </h2>
