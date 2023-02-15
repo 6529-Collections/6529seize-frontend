@@ -176,7 +176,7 @@ export default function Header(props: Props) {
           </Row>
           <Row className="pt-3 pb-3">
             <Col>
-              <a href="/meme-lab">
+              <a href="/about/meme-lab">
                 <h3>Meme Lab</h3>
               </a>
             </Col>
@@ -468,9 +468,11 @@ export default function Header(props: Props) {
                             </Nav.Link>
                             <Nav.Link
                               className={`${styles.mainNavLink} ${
-                                router.pathname == "/meme-lab" ? "active" : ""
+                                router.pathname == "/about/meme-lab"
+                                  ? "active"
+                                  : ""
                               }`}
-                              href="/meme-lab">
+                              href="/about/meme-lab">
                               Meme Lab
                             </Nav.Link>
                             <Nav.Link
