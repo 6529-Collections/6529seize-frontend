@@ -65,8 +65,9 @@ export default function Header(props: Props) {
           <Row className="pt-5 pb-4">
             <Col>
               <Image
+                loading="eager"
+                priority
                 className={styles.logoIcon}
-                priority={true}
                 src="/Seize_Logo_Glasses.png"
                 alt="6539Seize"
                 width={319}
@@ -405,8 +406,9 @@ export default function Header(props: Props) {
                   className={`d-flex align-items-center justify-content-start ${styles.headerLeft}`}>
                   <a href="/">
                     <Image
+                      loading="eager"
+                      priority
                       className={styles.logoIcon}
-                      priority={true}
                       src="/Seize_Logo_Glasses.png"
                       alt="6539Seize"
                       width={319}
@@ -425,6 +427,7 @@ export default function Header(props: Props) {
                       <Container
                         className={`d-flex align-items-center justify-content-end`}>
                         <Image
+                          loading="eager"
                           priority
                           width="0"
                           height="0"
@@ -468,7 +471,7 @@ export default function Header(props: Props) {
                             </Nav.Link>
                             <Nav.Link
                               className={`${styles.mainNavLink} ${
-                                router.pathname == "/about/meme-lab"
+                                router.asPath == "/about/meme-lab"
                                   ? "active"
                                   : ""
                               }`}
@@ -670,6 +673,7 @@ export default function Header(props: Props) {
                           </Nav>
                         </Navbar>
                         <Image
+                          loading="eager"
                           priority
                           width="0"
                           height="0"

@@ -56,7 +56,8 @@ export default function ReMemes() {
                     md={{ span: 3 }}
                     lg={{ span: 3 }}>
                     <Image
-                      loading={"lazy"}
+                      loading="eager"
+                      priority
                       width="0"
                       height="0"
                       style={{
