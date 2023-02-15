@@ -109,6 +109,7 @@ export default function NFTImage(props: Props) {
         props.transparentBG && styles.transparentBG
       }`}>
       <Image
+        loading="eager"
         priority
         width="0"
         height="0"
