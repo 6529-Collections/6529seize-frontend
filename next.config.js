@@ -6,7 +6,7 @@ const VERSION = require("child_process")
   .trim();
 
 const withBundleAnalyzer = require("@next/bundle-analyzer")({
-  enabled: true,
+  enabled: process.env.NODE_ENV == "development" ? false : true,
   openAnalyzer: false,
 });
 
