@@ -11,12 +11,8 @@ import { publicProvider } from "wagmi/providers/public";
 import { CoinbaseWalletConnector } from "wagmi/connectors/coinbaseWallet";
 import { WalletConnectConnector } from "wagmi/connectors/walletConnect";
 import { InjectedConnector } from "wagmi/connectors/injected";
-import {
-  configureChains,
-  createClient,
-  defaultChains,
-  WagmiConfig,
-} from "wagmi";
+import { mainnet } from "wagmi/chains";
+import { configureChains, createClient, WagmiConfig } from "wagmi";
 
 import { library } from "@fortawesome/fontawesome-svg-core";
 import {
@@ -72,24 +68,16 @@ library.add(
   faXmark
 );
 
-const providerAlchemy = alchemyProvider({
-  apiKey: process.env.ALCHEMY_API_KEY,
-});
-
-const providerPublic = publicProvider();
-
-const { chains, provider, webSocketProvider } = configureChains(defaultChains, [
-  providerAlchemy,
-  providerPublic,
-]);
+const { chains, provider } = configureChains(
+  [mainnet],
+  [alchemyProvider({ apiKey: process.env.ALCHEMY_API_KEY! })]
+);
 
 const client = createClient({
   autoConnect: true,
   connectors: [
     new InjectedConnector({
-      options: {
-        shimDisconnect: true,
-      },
+      chains,
     }),
     new WalletConnectConnector({
       chains,
@@ -105,7 +93,6 @@ const client = createClient({
     }),
   ],
   provider,
-  webSocketProvider,
 });
 
 export default function App({ Component, pageProps }: AppProps) {

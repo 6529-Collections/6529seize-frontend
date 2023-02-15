@@ -1,8 +1,12 @@
 /** @type {import('next').NextConfig} */
 
-const VERSION = "v1.0.0-r8";
+const VERSION = require("child_process")
+  .execSync("git rev-parse HEAD")
+  .toString()
+  .trim();
+
 const withBundleAnalyzer = require("@next/bundle-analyzer")({
-  enabled: process.env.NODE_ENV == "production" ? true : false,
+  enabled: true,
   openAnalyzer: false,
 });
 
@@ -20,6 +24,7 @@ const nextConfig = {
     ALCHEMY_API_KEY: process.env.ALCHEMY_API_KEY,
     API_ENDPOINT: process.env.REACT_APP_API_ENDPOINT,
     BASE_ENDPOINT: process.env.REACT_APP_BASE_ENDPOINT,
+    VERSION: VERSION,
   },
   async generateBuildId() {
     return VERSION;
