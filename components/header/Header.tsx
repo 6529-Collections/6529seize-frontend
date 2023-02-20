@@ -65,8 +65,9 @@ export default function Header(props: Props) {
           <Row className="pt-5 pb-4">
             <Col>
               <Image
+                loading="eager"
+                priority
                 className={styles.logoIcon}
-                priority={true}
                 src="/Seize_Logo_Glasses.png"
                 alt="6539Seize"
                 width={319}
@@ -176,7 +177,7 @@ export default function Header(props: Props) {
           </Row>
           <Row className="pt-3 pb-3">
             <Col>
-              <a href="/meme-lab">
+              <a href="/about/meme-lab">
                 <h3>Meme Lab</h3>
               </a>
             </Col>
@@ -228,7 +229,7 @@ export default function Header(props: Props) {
                 <Row className="pt-3">
                   <Col>
                     <a href="/community-metrics">
-                      <h3>Metrics</h3>
+                      <h3>Community Metrics</h3>
                     </a>
                   </Col>
                 </Row>
@@ -405,8 +406,9 @@ export default function Header(props: Props) {
                   className={`d-flex align-items-center justify-content-start ${styles.headerLeft}`}>
                   <a href="/">
                     <Image
+                      loading="eager"
+                      priority
                       className={styles.logoIcon}
-                      priority={true}
                       src="/Seize_Logo_Glasses.png"
                       alt="6539Seize"
                       width={319}
@@ -425,6 +427,7 @@ export default function Header(props: Props) {
                       <Container
                         className={`d-flex align-items-center justify-content-end`}>
                         <Image
+                          loading="eager"
                           priority
                           width="0"
                           height="0"
@@ -468,9 +471,11 @@ export default function Header(props: Props) {
                             </Nav.Link>
                             <Nav.Link
                               className={`${styles.mainNavLink} ${
-                                router.pathname == "/meme-lab" ? "active" : ""
+                                router.asPath == "/about/meme-lab"
+                                  ? "active"
+                                  : ""
                               }`}
-                              href="/meme-lab">
+                              href="/about/meme-lab">
                               Meme Lab
                             </Nav.Link>
                             <Nav.Link
@@ -668,6 +673,7 @@ export default function Header(props: Props) {
                           </Nav>
                         </Navbar>
                         <Image
+                          loading="eager"
                           priority
                           width="0"
                           height="0"
