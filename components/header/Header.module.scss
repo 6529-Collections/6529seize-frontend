@@ -30,6 +30,7 @@
 
 .burgerMenuBtn {
   max-height: 28px !important;
+  cursor: pointer;
 }
 
 .burgerMenu {
@@ -104,8 +105,7 @@
   top: 15px;
   right: 15px;
   font-size: 20px;
-  font-family: $square-font;
-  font-display: swap;
+  cursor: pointer;
 }
 
 .mainNavLink {
@@ -113,6 +113,7 @@
   justify-content: center;
   align-items: center;
   margin-left: 25px;
+  white-space: nowrap;
   a span {
     text-decoration: none !important;
   }
@@ -130,7 +131,7 @@
   }
 }
 
-@media (min-width: 1000px) {
+@media (min-width: 1300px) {
   .dMdNone {
     display: none !important;
   }

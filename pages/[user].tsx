@@ -4,9 +4,9 @@ import styles from "../styles/Home.module.scss";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/router";
 import { areEqualAddresses, formatAddress } from "../helpers/Helpers";
-import { title } from "process";
 import { MANIFOLD, SIX529_MUSEUM } from "../constants";
 import HeaderPlaceholder from "../components/header/HeaderPlaceholder";
+import { useEffect, useState } from "react";
 
 const Header = dynamic(() => import("../components/header/Header"), {
   ssr: false,
@@ -20,6 +20,18 @@ const UserPage = dynamic(() => import("../components/user/UserPage"), {
 export default function UserPageIndex(props: any) {
   const router = useRouter();
   const pagenameFull = `${props.title} | 6529 SEIZE`;
+
+  const [user, setUser] = useState(
+    Array.isArray(router.query.user) ? router.query.user[0] : router.query.user
+  );
+
+  useEffect(() => {
+    if (user) {
+      if (!user.startsWith("0x") && !user.endsWith(".eth")) {
+        window.location.href = "404";
+      }
+    }
+  }, [user]);
 
   return (
     <>

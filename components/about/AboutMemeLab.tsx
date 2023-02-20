@@ -1,6 +1,7 @@
 import { Col, Container, Row } from "react-bootstrap";
 import Head from "next/head";
 import { AboutSection } from "../../pages/about/[section]";
+import Image from "next/image";
 
 export default function AboutMemeLab() {
   return (
@@ -22,8 +23,16 @@ export default function AboutMemeLab() {
       </Head>
       <Container>
         <Row>
-          <Col className="text-center">
-            <h1 className="float-none">MEME LAB</h1>
+          <Col className="text-center pt-2 pb-4">
+            <Image
+              loading="eager"
+              priority
+              width="0"
+              height="0"
+              style={{ width: "250px", height: "auto" }}
+              src="/memelab.png"
+              alt="memelab"
+            />
           </Col>
         </Row>
         <Row className="pt-3 pb-3">
