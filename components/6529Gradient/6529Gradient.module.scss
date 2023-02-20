@@ -86,3 +86,19 @@
     width: 50%;
   }
 }
+
+.nextPreviousNft {
+  width: 35px;
+  svg {
+    width: 35px;
+  }
+}
+
+@media only screen and (max-width: 800px) {
+  .nextPreviousNft {
+    width: 25px;
+    svg {
+      width: 25px;
+    }
+  }
+}

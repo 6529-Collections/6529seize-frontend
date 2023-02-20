@@ -373,8 +373,8 @@ export default function MemePage() {
               width="0"
               height="0"
               style={{ width: "250px", height: "auto" }}
-              src="/memes-lab.png"
-              alt="memes-lab"
+              src="/memelab.png"
+              alt="memelab"
             />
           </Col>
         </Row>

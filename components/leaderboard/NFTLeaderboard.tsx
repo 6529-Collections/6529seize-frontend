@@ -5,11 +5,7 @@ import { TDH, TDHCalc } from "../../entities/ITDH";
 import styles from "./Leaderboard.module.scss";
 import dynamic from "next/dynamic";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  areEqualAddresses,
-  getDateDisplay,
-  numberWithCommas,
-} from "../../helpers/Helpers";
+import { areEqualAddresses, numberWithCommas } from "../../helpers/Helpers";
 import Pagination from "../pagination/Pagination";
 import { SortDirection } from "../../entities/ISort";
 import { OwnerTags } from "../../entities/IOwner";
@@ -45,7 +41,7 @@ export default function NFTLeaderboard(props: Props) {
   const [sort, setSort] = useState<{
     sort: Sort;
     sort_direction: SortDirection;
-  }>({ sort: Sort.card_tdh, sort_direction: SortDirection.DESC });
+  }>({ sort: Sort.card_balance, sort_direction: SortDirection.DESC });
 
   const [ownerTags, setOwnersTags] = useState<OwnerTags[]>([]);
   const [ownerTagsLoaded, setOwnerTagsLoaded] = useState(false);
@@ -150,6 +146,43 @@ export default function NFTLeaderboard(props: Props) {
                   <th className={styles.gap}></th>
                   <th className={styles.tdhSub}>
                     <span className="d-flex align-items-center justify-content-center">
+                      Balance&nbsp;
+                      <span className="d-flex flex-column">
+                        <FontAwesomeIcon
+                          icon="square-caret-up"
+                          onClick={() =>
+                            setSort({
+                              sort: Sort.card_balance,
+                              sort_direction: SortDirection.ASC,
+                            })
+                          }
+                          className={`${styles.caret} ${
+                            sort.sort_direction != SortDirection.ASC ||
+                            sort.sort != Sort.card_balance
+                              ? styles.disabled
+                              : ""
+                          }`}
+                        />
+                        <FontAwesomeIcon
+                          icon="square-caret-down"
+                          onClick={() =>
+                            setSort({
+                              sort: Sort.card_balance,
+                              sort_direction: SortDirection.DESC,
+                            })
+                          }
+                          className={`${styles.caret} ${
+                            sort.sort_direction != SortDirection.DESC ||
+                            sort.sort != Sort.card_balance
+                              ? styles.disabled
+                              : ""
+                          }`}
+                        />
+                      </span>
+                    </span>
+                  </th>
+                  <th className={styles.tdhSub}>
+                    <span className="d-flex align-items-center justify-content-center">
                       TDH&nbsp;
                       <span className="d-flex flex-column">
                         <FontAwesomeIcon
@@ -215,43 +248,6 @@ export default function NFTLeaderboard(props: Props) {
                           className={`${styles.caret} ${
                             sort.sort_direction != SortDirection.DESC ||
                             sort.sort != Sort.card_tdh__raw
-                              ? styles.disabled
-                              : ""
-                          }`}
-                        />
-                      </span>
-                    </span>
-                  </th>
-                  <th className={styles.tdhSub}>
-                    <span className="d-flex align-items-center justify-content-center">
-                      Balance&nbsp;
-                      <span className="d-flex flex-column">
-                        <FontAwesomeIcon
-                          icon="square-caret-up"
-                          onClick={() =>
-                            setSort({
-                              sort: Sort.card_balance,
-                              sort_direction: SortDirection.ASC,
-                            })
-                          }
-                          className={`${styles.caret} ${
-                            sort.sort_direction != SortDirection.ASC ||
-                            sort.sort != Sort.card_balance
-                              ? styles.disabled
-                              : ""
-                          }`}
-                        />
-                        <FontAwesomeIcon
-                          icon="square-caret-down"
-                          onClick={() =>
-                            setSort({
-                              sort: Sort.card_balance,
-                              sort_direction: SortDirection.DESC,
-                            })
-                          }
-                          className={`${styles.caret} ${
-                            sort.sort_direction != SortDirection.DESC ||
-                            sort.sort != Sort.card_balance
                               ? styles.disabled
                               : ""
                           }`}
@@ -262,6 +258,43 @@ export default function NFTLeaderboard(props: Props) {
                   <th className={styles.gap}></th>
                   <th className={styles.tdhSub}>
                     <span className="d-flex align-items-center justify-content-center">
+                      Balance&nbsp;
+                      <span className="d-flex flex-column">
+                        <FontAwesomeIcon
+                          icon="square-caret-up"
+                          onClick={() =>
+                            setSort({
+                              sort: Sort.total_balance,
+                              sort_direction: SortDirection.ASC,
+                            })
+                          }
+                          className={`${styles.caret} ${
+                            sort.sort_direction != SortDirection.ASC ||
+                            sort.sort != Sort.total_balance
+                              ? styles.disabled
+                              : ""
+                          }`}
+                        />
+                        <FontAwesomeIcon
+                          icon="square-caret-down"
+                          onClick={() =>
+                            setSort({
+                              sort: Sort.total_balance,
+                              sort_direction: SortDirection.DESC,
+                            })
+                          }
+                          className={`${styles.caret} ${
+                            sort.sort_direction != SortDirection.DESC ||
+                            sort.sort != Sort.total_balance
+                              ? styles.disabled
+                              : ""
+                          }`}
+                        />
+                      </span>
+                    </span>
+                  </th>
+                  <th className={styles.tdhSub}>
+                    <span className="d-flex align-items-center justify-content-center">
                       TDH&nbsp;
                       <span className="d-flex flex-column">
                         <FontAwesomeIcon
@@ -327,43 +360,6 @@ export default function NFTLeaderboard(props: Props) {
                           className={`${styles.caret} ${
                             sort.sort_direction != SortDirection.DESC ||
                             sort.sort != Sort.total_tdh__raw
-                              ? styles.disabled
-                              : ""
-                          }`}
-                        />
-                      </span>
-                    </span>
-                  </th>
-                  <th className={styles.tdhSub}>
-                    <span className="d-flex align-items-center justify-content-center">
-                      Balance&nbsp;
-                      <span className="d-flex flex-column">
-                        <FontAwesomeIcon
-                          icon="square-caret-up"
-                          onClick={() =>
-                            setSort({
-                              sort: Sort.total_balance,
-                              sort_direction: SortDirection.ASC,
-                            })
-                          }
-                          className={`${styles.caret} ${
-                            sort.sort_direction != SortDirection.ASC ||
-                            sort.sort != Sort.total_balance
-                              ? styles.disabled
-                              : ""
-                          }`}
-                        />
-                        <FontAwesomeIcon
-                          icon="square-caret-down"
-                          onClick={() =>
-                            setSort({
-                              sort: Sort.total_balance,
-                              sort_direction: SortDirection.DESC,
-                            })
-                          }
-                          className={`${styles.caret} ${
-                            sort.sort_direction != SortDirection.DESC ||
-                            sort.sort != Sort.total_balance
                               ? styles.disabled
                               : ""
                           }`}
@@ -417,23 +413,23 @@ export default function NFTLeaderboard(props: Props) {
                           </td>
                           <td className={styles.gap}></td>
                           <td className={styles.tdhSub}>
+                            {numberWithCommas(thisCard.balance)}
+                          </td>
+                          <td className={styles.tdhSub}>
                             {numberWithCommas(Math.round(thisCard.tdh))}
                           </td>
                           <td className={styles.tdhSub}>
                             {numberWithCommas(Math.round(thisCard.tdh__raw))}
                           </td>
-                          <td className={styles.tdhSub}>
-                            {numberWithCommas(thisCard.balance)}
-                          </td>
                           <td className={styles.gap}></td>
+                          <td className={styles.tdhSub}>
+                            {numberWithCommas(lead.memes_balance)}
+                          </td>
                           <td className={styles.tdhSub}>
                             {numberWithCommas(Math.round(lead.boosted_tdh))}
                           </td>
                           <td className={styles.tdhSub}>
                             {numberWithCommas(Math.round(lead.tdh__raw))}
-                          </td>
-                          <td className={styles.tdhSub}>
-                            {numberWithCommas(lead.memes_balance)}
                           </td>
                         </tr>
                       );
