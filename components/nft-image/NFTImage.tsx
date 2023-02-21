@@ -2,7 +2,7 @@ import styles from "./NFTImage.module.scss";
 import { Col } from "react-bootstrap";
 import { BaseNFT } from "../../entities/INFT";
 import Image from "next/image";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 interface Props {
   nft: BaseNFT;
@@ -19,6 +19,8 @@ interface Props {
 }
 
 export default function NFTImage(props: Props) {
+  const [showBalance, setShowBalance] = useState(false)
+
   useEffect(() => {
     if (props.onLoad) {
       props.onLoad();
@@ -35,7 +37,7 @@ export default function NFTImage(props: Props) {
         className={`text-center ${styles.nftAnimation} ${
           props.transparentBG ? styles.transparentBG : ""
         }`}>
-        {props.balance > 0 && (
+        {props.balance > 0 && showBalance && (
           <span
             className={`${styles.balance}  ${
               props.height == 650 ? styles.balanceBigger : ""
@@ -46,6 +48,7 @@ export default function NFTImage(props: Props) {
         )}
         <iframe
           src={props.nft.animation}
+          onLoad={() =>setShowBalance(true)}
           onError={({ currentTarget }) => {
             currentTarget.src = props.nft.metadata.animation;
           }}
@@ -67,7 +70,7 @@ export default function NFTImage(props: Props) {
         } ${
           props.transparentBG ? styles.transparentBG : ""
         } d-flex justify-content-center align-items-center`}>
-        {props.balance > 0 && (
+        {props.balance > 0 && showBalance && (
           <span
             className={`${styles.balance}  ${
               props.height == 650 ? styles.balanceBigger : ""
@@ -89,6 +92,7 @@ export default function NFTImage(props: Props) {
               : props.nft.animation
           }
           poster={props.nft.scaled ? props.nft.scaled : props.nft.image}
+          onLoadStart={() =>setShowBalance(true)}
           onError={({ currentTarget }) => {
             if (currentTarget.src == props.nft.compressed_animation) {
               currentTarget.src = props.nft.animation;
@@ -127,6 +131,7 @@ export default function NFTImage(props: Props) {
             ? props.nft.scaled
             : props.nft.image
         }
+        onLoad={() =>setShowBalance(true)}
         onError={({ currentTarget }) => {
           if (currentTarget.src == props.nft.thumbnail) {
             currentTarget.src = props.nft.scaled
@@ -141,7 +146,7 @@ export default function NFTImage(props: Props) {
         alt={props.nft.name}
         className={props.height == 650 ? styles.height650 : ""}
       />
-      {props.balance > 0 && (
+      {props.balance > 0 && showBalance && (
         <span
           className={`${styles.balance}  ${
             props.height == 650 ? styles.balanceBigger : ""
