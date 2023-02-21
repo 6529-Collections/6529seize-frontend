@@ -41,6 +41,22 @@
   }
 }
 
+.memeLabRank {
+  width: 5%;
+  text-align: center;
+}
+
+.memeLabHodler {
+  width: 80%;
+  span {
+    overflow-wrap: break-word;
+  }
+}
+
+.memeLabBalance {
+  width: 15%;
+}
+
 .totalResults {
   font-size: larger;
 }
@@ -125,6 +141,46 @@
   &:hover {
     color: white;
   }
+}
+
+.memeLabLeaderboardTable {
+  tr td {
+    white-space: nowrap;
+    align-items: center;
+    vertical-align: middle;
+    span {
+      float: left;
+      margin-top: 4px;
+      margin-bottom: 4px;
+      a {
+        line-height: 40px;
+      }
+    }
+  }
+
+  th {
+    white-space: nowrap;
+  }
+
+  th span {
+    white-space: nowrap;
+  }
+
+  td {
+    line-height: 40px;
+  }
+
+  thead tr {
+    background-color: transparent !important;
+  }
+
+  tr:nth-child(even) {
+    background-color: $almost-very-dark-grey;
+  }
+}
+
+.gap {
+  height: 5px;
 }
 
 .leaderboardTable {
