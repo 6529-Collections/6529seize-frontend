@@ -1,11 +1,11 @@
 import styles from "./NFTImage.module.scss";
 import { Col } from "react-bootstrap";
-import { NFT } from "../../entities/INFT";
+import { BaseNFT } from "../../entities/INFT";
 import Image from "next/image";
 import { useEffect } from "react";
 
 interface Props {
-  nft: NFT;
+  nft: BaseNFT;
   animation: boolean;
   showThumbnail?: boolean;
   showOriginal?: boolean;
