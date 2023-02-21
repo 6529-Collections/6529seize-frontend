@@ -90,8 +90,6 @@ export default function LabPage() {
 
   const [myOwner, setMyOwner] = useState<TDHMetrics>();
 
-  const [collectionCount, setCollectionCount] = useState(-1);
-
   const [userLoaded, setUserLoaded] = useState(false);
 
   const [activityPage, setActivityPage] = useState(1);

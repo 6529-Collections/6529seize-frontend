@@ -499,20 +499,18 @@ export default function TheMemesComponent(props: Props) {
         nftMetas.find((m) => n.id == m.id && m.meme == meme.meme)
       );
       return (
-        <>
-          <Row className="pt-3" key={`${meme.meme}-${meme.meme_name}-row-1`}>
-            <Col key={`${meme.meme}-${meme.meme_name}-row-1-col`}>
+        <Row key={`${meme.meme}-${meme.meme_name}`}>
+          <Col xs={12} className="pt-3">
+            <Col>
               <h4>
                 {meme.meme} - {meme.meme_name}
               </h4>
             </Col>
-          </Row>
-          <Row key={`${meme.meme}-${meme.meme_name}-row-2`}>
-            {[...memeNfts]
-              .sort((a, b) => (a.mint_date > b.mint_date ? 1 : -1))
-              .map((nft: NFT) => printNft(nft))}
-          </Row>
-        </>
+          </Col>
+          {[...memeNfts]
+            .sort((a, b) => (a.mint_date > b.mint_date ? 1 : -1))
+            .map((nft: NFT) => printNft(nft))}
+        </Row>
       );
     });
   }
