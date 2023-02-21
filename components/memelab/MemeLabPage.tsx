@@ -937,7 +937,7 @@ export default function LabPage() {
                                 a.value
                             )
                             .map((a: any) => (
-                              <tr>
+                              <tr key={`${a.trait_type}-${a.value}`}>
                                 <td>{a.trait_type}</td>
                                 <td>{a.value}</td>
                               </tr>
