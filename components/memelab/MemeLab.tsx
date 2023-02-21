@@ -34,7 +34,6 @@ export default function MemeLabComponent() {
     if (router.isReady) {
       let initialSortDir = SortDirection.ASC;
       let initialSort = Sort.AGE;
-      let initialSzn = 0;
 
       const routerSortDir = router.query.sort_dir;
       if (routerSortDir) {
@@ -53,15 +52,6 @@ export default function MemeLabComponent() {
         );
         if (resolvedRouterSort) {
           initialSort = resolvedRouterSort;
-        }
-      }
-
-      const routerSzn = router.query.szn;
-      if (routerSzn) {
-        if (Array.isArray(routerSzn)) {
-          initialSzn = parseInt(routerSzn[0]);
-        } else {
-          initialSzn = parseInt(routerSzn);
         }
       }
 
@@ -99,7 +89,6 @@ export default function MemeLabComponent() {
           )}`
         ).then((responseNfts: any[]) => {
           setNfts(responseNfts);
-          setNftsLoaded(true);
         });
       } else {
         setNfts([]);
@@ -121,14 +110,16 @@ export default function MemeLabComponent() {
   }, [nftMetas, address]);
 
   useEffect(() => {
-    const myArtists: string[] = [];
-    [...nfts].map((nft) => {
-      if (!myArtists.includes(nft.artist)) {
-        myArtists.push(nft.artist);
-      }
-    });
-
-    setLabArtists(myArtists.sort());
+    if (nfts && nfts.length > 0) {
+      const myArtists: string[] = [];
+      [...nfts].map((nft) => {
+        if (!myArtists.includes(nft.artist)) {
+          myArtists.push(nft.artist);
+        }
+      });
+      setLabArtists(myArtists.sort());
+      setNftsLoaded(true);
+    }
   }, [nfts]);
 
   useEffect(() => {
@@ -366,18 +357,14 @@ export default function MemeLabComponent() {
     return labArtists.map((artist) => {
       const artistNfts = [...nfts].filter((n) => n.artist == artist);
       return (
-        <>
-          <Row className="pt-3" key={`${artist}-row-1`}>
-            <Col key={`${artist}-row-1-col`}>
-              <h4>{artist}</h4>
-            </Col>
-          </Row>
-          <Row key={`${artist}-row-2`}>
-            {[...artistNfts]
-              .sort((a, b) => (a.mint_date > b.mint_date ? 1 : -1))
-              .map((nft: LabNFT) => printNft(nft))}
-          </Row>
-        </>
+        <Row key={`${artist}-row`}>
+          <Col xs={12} className="pt-3">
+            <h4>{artist}</h4>
+          </Col>
+          {[...artistNfts]
+            .sort((a, b) => (a.mint_date > b.mint_date ? 1 : -1))
+            .map((nft: LabNFT) => printNft(nft))}
+        </Row>
       );
     });
   }
