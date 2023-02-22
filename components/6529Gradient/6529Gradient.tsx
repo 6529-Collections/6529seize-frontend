@@ -116,9 +116,13 @@ export default function GradientsComponent() {
 
   useEffect(() => {
     if (sort && sortDir) {
-      router.replace({
-        query: { sort: sort, sort_dir: sortDir },
-      });
+      router.replace(
+        {
+          query: { sort: sort, sort_dir: sortDir },
+        },
+        undefined,
+        { shallow: true }
+      );
 
       if (sort == Sort.ID) {
         if (sortDir == SortDirection.ASC) {

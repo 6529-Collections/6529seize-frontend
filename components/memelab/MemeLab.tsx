@@ -8,7 +8,7 @@ import { useAccount } from "wagmi";
 import { LabNFT, LabExtendedData } from "../../entities/INFT";
 import { Owner } from "../../entities/IOwner";
 import { SortDirection } from "../../entities/ISort";
-import { getDateDisplay } from "../../helpers/Helpers";
+import { getDateDisplay, numberWithCommas } from "../../helpers/Helpers";
 import { useRouter } from "next/router";
 import { fetchAllPages } from "../../services/6529api";
 
@@ -21,8 +21,11 @@ enum Sort {
   EDITION_SIZE = "edition-size",
   HODLERS = "hodlers",
   ARTISTS = "artists",
+  COLLECTIONS = "collections",
   UNIQUE_PERCENT = "unique",
   UNIQUE_PERCENT_EX_MUSEUM = "unique-ex-museum",
+  FLOOR_PRICE = "floor-price",
+  MARKET_CAP = "market-cap",
 }
 
 export default function MemeLabComponent() {
@@ -68,6 +71,7 @@ export default function MemeLabComponent() {
   const [nftBalances, setNftBalances] = useState<Owner[]>([]);
   const [nftsLoaded, setNftsLoaded] = useState(false);
   const [labArtists, setLabArtists] = useState<string[]>([]);
+  const [labCollections, setLabCollections] = useState<string[]>([]);
 
   function getBalance(id: number) {
     const balance = nftBalances.find((b) => b.token_id == id);
@@ -81,6 +85,13 @@ export default function MemeLabComponent() {
     const nftsUrl = `${process.env.API_ENDPOINT}/api/lab_extended_data`;
     fetchAllPages(nftsUrl).then((responseNftMetas: LabExtendedData[]) => {
       setNftMetas(responseNftMetas);
+      const myCollections: string[] = [];
+      [...responseNftMetas].map((nftMeta) => {
+        if (!myCollections.includes(nftMeta.metadata_collection)) {
+          myCollections.push(nftMeta.metadata_collection);
+        }
+      });
+      setLabCollections(myCollections.sort());
       if (responseNftMetas.length > 0) {
         const tokenIds = responseNftMetas.map((n: LabExtendedData) => n.id);
         fetchAllPages(
@@ -124,9 +135,13 @@ export default function MemeLabComponent() {
 
   useEffect(() => {
     if (sort && sortDir && nftsLoaded) {
-      router.replace({
-        query: { sort: sort, sort_dir: sortDir },
-      });
+      router.replace(
+        {
+          query: { sort: sort, sort_dir: sortDir },
+        },
+        undefined,
+        { shallow: true }
+      );
 
       if (sort == Sort.AGE) {
         if (sortDir == SortDirection.ASC) {
@@ -201,6 +216,13 @@ export default function MemeLabComponent() {
           setLabArtists([...labArtists].reverse());
         }
       }
+      if (sort == Sort.COLLECTIONS) {
+        if (sortDir == SortDirection.ASC) {
+          setLabCollections([...labCollections].sort());
+        } else {
+          setLabCollections([...labCollections].reverse());
+        }
+      }
       if (sort == Sort.UNIQUE_PERCENT) {
         if (sortDir == SortDirection.ASC) {
           setNfts(
@@ -271,6 +293,46 @@ export default function MemeLabComponent() {
           );
         }
       }
+      if (sort == Sort.FLOOR_PRICE) {
+        setNfts([...nfts].sort((a, b) => (a.mint_date > b.mint_date ? 1 : -1)));
+        if (sortDir == SortDirection.ASC) {
+          setNfts(
+            [...nfts].sort((a, b) => {
+              if (a.floor_price > b.floor_price) return 1;
+              if (a.floor_price < b.floor_price) return -1;
+              return a.mint_date > b.mint_date ? 1 : -1;
+            })
+          );
+        } else {
+          setNfts(
+            [...nfts].sort((a, b) => {
+              if (a.floor_price > b.floor_price) return -1;
+              if (a.floor_price < b.floor_price) return 1;
+              return a.mint_date > b.mint_date ? 1 : -1;
+            })
+          );
+        }
+      }
+      if (sort == Sort.MARKET_CAP) {
+        setNfts([...nfts].sort((a, b) => (a.mint_date > b.mint_date ? 1 : -1)));
+        if (sortDir == SortDirection.ASC) {
+          setNfts(
+            [...nfts].sort((a, b) => {
+              if (a.market_cap > b.market_cap) return 1;
+              if (a.market_cap < b.market_cap) return -1;
+              return a.mint_date > b.mint_date ? 1 : -1;
+            })
+          );
+        } else {
+          setNfts(
+            [...nfts].sort((a, b) => {
+              if (a.market_cap > b.market_cap) return -1;
+              if (a.market_cap < b.market_cap) return 1;
+              return a.mint_date > b.mint_date ? 1 : -1;
+            })
+          );
+        }
+      }
     }
   }, [sort, sortDir, nftsLoaded]);
 
@@ -319,6 +381,7 @@ export default function MemeLabComponent() {
               {sort &&
                 (sort == Sort.AGE || sort == Sort.ARTISTS) &&
                 printMintDate(nft)}
+              {sort == Sort.COLLECTIONS && `Artists: ${nft.artist}`}
               {sort == Sort.EDITION_SIZE && `Edition Size: ${nft.supply}`}
               {sort == Sort.HODLERS &&
                 `HODLers: ${
@@ -342,6 +405,18 @@ export default function MemeLabComponent() {
                       10
                   ) / 10
                 }%`}
+              {sort == Sort.FLOOR_PRICE &&
+                (nft.floor_price > 0
+                  ? `Floor Price: ${numberWithCommas(
+                      Math.round(nft.floor_price * 100) / 100
+                    )} ETH`
+                  : `Floor Price: N/A`)}
+              {sort == Sort.MARKET_CAP &&
+                (nft.market_cap > 0
+                  ? `Market Cap: ${numberWithCommas(
+                      Math.round(nft.market_cap * 100) / 100
+                    )} ETH`
+                  : `Market Cap: N/A`)}
             </Col>
           </Row>
         </Container>
@@ -362,6 +437,34 @@ export default function MemeLabComponent() {
             <h4>{artist}</h4>
           </Col>
           {[...artistNfts]
+            .sort((a, b) => (a.mint_date > b.mint_date ? 1 : -1))
+            .map((nft: LabNFT) => printNft(nft))}
+        </Row>
+      );
+    });
+  }
+
+  function printCollections() {
+    return labCollections.map((collection) => {
+      const collectionNftsMetas = [...nftMetas].filter(
+        (n) => n.metadata_collection == collection
+      );
+      const collectionNfts = [...nfts].filter((n) =>
+        collectionNftsMetas.some((a) => a.id == n.id)
+      );
+      return (
+        <Row key={`${collection}-row`}>
+          <Col xs={12} className="pt-3">
+            <h4>
+              {collection}&nbsp;
+              <a
+                className={styles.collectionLink}
+                href={`/meme-lab/collection/${collection.replace(" ", "-")}`}>
+                view
+              </a>
+            </h4>
+          </Col>
+          {[...collectionNfts]
             .sort((a, b) => (a.mint_date > b.mint_date ? 1 : -1))
             .map((nft: LabNFT) => printNft(nft))}
         </Row>
@@ -430,6 +533,13 @@ export default function MemeLabComponent() {
                     Artists
                   </span>
                   <span
+                    onClick={() => setSort(Sort.COLLECTIONS)}
+                    className={`${styles.sort} ${
+                      sort != Sort.COLLECTIONS ? styles.disabled : ""
+                    }`}>
+                    Collections
+                  </span>
+                  <span
                     onClick={() => setSort(Sort.UNIQUE_PERCENT)}
                     className={`${styles.sort} ${
                       sort != Sort.UNIQUE_PERCENT ? styles.disabled : ""
@@ -445,6 +555,20 @@ export default function MemeLabComponent() {
                     }`}>
                     Unique % Ex-Museum
                   </span>
+                  <span
+                    onClick={() => setSort(Sort.FLOOR_PRICE)}
+                    className={`${styles.sort} ${
+                      sort != Sort.FLOOR_PRICE ? styles.disabled : ""
+                    }`}>
+                    Floor Price
+                  </span>
+                  <span
+                    onClick={() => setSort(Sort.MARKET_CAP)}
+                    className={`${styles.sort} ${
+                      sort != Sort.MARKET_CAP ? styles.disabled : ""
+                    }`}>
+                    Market Cap
+                  </span>
                 </Col>
               </Row>
 
@@ -452,6 +576,8 @@ export default function MemeLabComponent() {
                 (nfts.length > 0 ? (
                   sort == Sort.ARTISTS ? (
                     printArtists()
+                  ) : sort == Sort.COLLECTIONS ? (
+                    printCollections()
                   ) : (
                     printNfts()
                   )

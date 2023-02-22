@@ -1,19 +1,17 @@
-import styles from "./TheMemes.module.scss";
-import Image from "next/image";
+import styles from "./MemeLab.module.scss";
+
 import { useEffect, useState } from "react";
+import Image from "next/image";
 import dynamic from "next/dynamic";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Container, Row, Col } from "react-bootstrap";
 import { useAccount } from "wagmi";
-import { MEMES_CONTRACT } from "../../constants";
-import { DBResponse } from "../../entities/IDBResponse";
-import { NFT, MemesExtendedData } from "../../entities/INFT";
-import { Owner } from "../../entities/IOwner";
-import { SortDirection } from "../../entities/ISort";
-import { Crumb } from "../breadcrumb/Breadcrumb";
+import { LabNFT, LabExtendedData } from "../../entities/INFT";
 import { getDateDisplay, numberWithCommas } from "../../helpers/Helpers";
 import { useRouter } from "next/router";
-import { fetchAllPages, fetchUrl } from "../../services/6529api";
+import { fetchAllPages } from "../../services/6529api";
+import { Owner } from "../../entities/IOwner";
+import { SortDirection } from "../../entities/ISort";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 const NFTImage = dynamic(() => import("../nft-image/NFTImage"), {
   ssr: false,
@@ -22,163 +20,92 @@ const NFTImage = dynamic(() => import("../nft-image/NFTImage"), {
 enum Sort {
   AGE = "age",
   EDITION_SIZE = "edition-size",
-  MEME = "meme",
   HODLERS = "hodlers",
-  TDH = "tdh",
   UNIQUE_PERCENT = "unique",
   UNIQUE_PERCENT_EX_MUSEUM = "unique-ex-museum",
   FLOOR_PRICE = "floor-price",
   MARKET_CAP = "market-cap",
 }
 
-interface Meme {
-  meme: number;
-  meme_name: string;
-}
-
-interface Props {
-  setCrumbs(crumbs: Crumb[]): any;
-}
-
-export default function TheMemesComponent(props: Props) {
+export default function LabCollection() {
   const router = useRouter();
+  const [collectionName, setCollectionName] = useState<string>();
 
   const { address, connector, isConnected } = useAccount();
 
-  useEffect(() => {
-    if (router.isReady) {
-      let initialSortDir = SortDirection.ASC;
-      let initialSort = Sort.AGE;
-      let initialSzn = 0;
-
-      const routerSortDir = router.query.sort_dir;
-      if (routerSortDir) {
-        const resolvedRouterSortDir = Object.values(SortDirection).find(
-          (sd) => sd == routerSortDir
-        );
-        if (resolvedRouterSortDir) {
-          initialSortDir = resolvedRouterSortDir;
-        }
-      }
-
-      const routerSort = router.query.sort;
-      if (routerSort) {
-        const resolvedRouterSort = Object.values(Sort).find(
-          (sd) => sd == routerSort
-        );
-        if (resolvedRouterSort) {
-          initialSort = resolvedRouterSort;
-        }
-      }
-
-      const routerSzn = router.query.szn;
-      if (routerSzn) {
-        if (Array.isArray(routerSzn)) {
-          initialSzn = parseInt(routerSzn[0]);
-        } else {
-          initialSzn = parseInt(routerSzn);
-        }
-      }
-
-      setSort(initialSort);
-      setSortDir(initialSortDir);
-      setSelectedSeason(initialSzn);
-    }
-  }, [router.isReady]);
+  const [nfts, setNfts] = useState<LabNFT[]>([]);
+  const [nftMetas, setNftMetas] = useState<LabExtendedData[]>([]);
+  const [nftsLoaded, setNftsLoaded] = useState(false);
+  const [nftBalances, setNftBalances] = useState<Owner[]>([]);
 
   const [sortDir, setSortDir] = useState<SortDirection>();
   const [sort, setSort] = useState<Sort>();
 
-  const [selectedSeason, setSelectedSeason] = useState(0);
-  const [nfts, setNfts] = useState<NFT[]>([]);
-  const [seasons, setSeasons] = useState<number[]>([]);
-  const [nftMetas, setNftMetas] = useState<MemesExtendedData[]>([]);
-  const [nftBalances, setNftBalances] = useState<Owner[]>([]);
-  const [nftsLoaded, setNftsLoaded] = useState(false);
-  const [nftMemes, setNftMemes] = useState<Meme[]>([]);
-
-  function getBalance(id: number) {
-    const balance = nftBalances.find((b) => b.token_id == id);
-    if (balance) {
-      return balance.balance;
-    }
-    return 0;
-  }
-
   useEffect(() => {
-    const crumbs = [];
-    crumbs.push({ display: "Home", href: "/" });
-    crumbs.push({ display: "The Memes" });
-    if (selectedSeason > 0) {
-      crumbs.push({ display: `SZN${selectedSeason}` });
-    }
-    props.setCrumbs(crumbs);
+    if (router.isReady) {
+      if (router.query.collection) {
+        let c = router.query.collection as string;
+        c = c.replace("-", " ");
+        setCollectionName(c);
 
-    if (sort && sortDir) {
-      if (selectedSeason > 0) {
-        router.replace(
-          {
-            query: { szn: selectedSeason, sort: sort, sort_dir: sortDir },
-          },
-          undefined,
-          { shallow: true }
-        );
-      } else {
-        router.replace(
-          {
-            query: { sort: sort, sort_dir: sortDir },
-          },
-          undefined,
-          { shallow: true }
-        );
+        let initialSortDir = SortDirection.ASC;
+        let initialSort = Sort.AGE;
+
+        const routerSortDir = router.query.sort_dir;
+        if (routerSortDir) {
+          const resolvedRouterSortDir = Object.values(SortDirection).find(
+            (sd) => sd == routerSortDir
+          );
+          if (resolvedRouterSortDir) {
+            initialSortDir = resolvedRouterSortDir;
+          }
+        }
+
+        const routerSort = router.query.sort;
+        if (routerSort) {
+          const resolvedRouterSort = Object.values(Sort).find(
+            (sd) => sd == routerSort
+          );
+          if (resolvedRouterSort) {
+            initialSort = resolvedRouterSort;
+          }
+        }
+
+        setSort(initialSort);
+        setSortDir(initialSortDir);
       }
     }
-  }, [selectedSeason]);
+  }, [router.isReady]);
 
   useEffect(() => {
-    const myMemes: Meme[] = [];
-    [...nftMetas].map((nftm) => {
-      if (!myMemes.some((m) => m.meme == nftm.meme)) {
-        myMemes.push({
-          meme: nftm.meme,
-          meme_name: nftm.meme_name,
-        });
-      }
-    });
-
-    setNftMemes([...myMemes].sort((a, b) => (a.meme > b.meme ? 1 : -1)));
-  }, [nftMetas]);
-
-  useEffect(() => {
-    const nftsUrl = `${process.env.API_ENDPOINT}/api/memes_extended_data`;
-    fetchAllPages(nftsUrl).then((responseNftMetas: any[]) => {
-      setNftMetas(responseNftMetas);
-      setSeasons(
-        Array.from(new Set(responseNftMetas.map((meme) => meme.season))).sort(
-          (a, b) => a - b
-        )
-      );
-      if (responseNftMetas.length > 0) {
-        const tokenIds = responseNftMetas.map((n: MemesExtendedData) => n.id);
-        fetchAllPages(
-          `${
-            process.env.API_ENDPOINT
-          }/api/nfts?contract=${MEMES_CONTRACT}&id=${tokenIds.join(",")}`
-        ).then((responseNfts: any[]) => {
-          setNfts(responseNfts);
+    if (collectionName) {
+      const nftsUrl = `${
+        process.env.API_ENDPOINT
+      }/api/lab_extended_data?collection=${encodeURIComponent(collectionName)}`;
+      fetchAllPages(nftsUrl).then((responseNftMetas: LabExtendedData[]) => {
+        setNftMetas(responseNftMetas);
+        if (responseNftMetas.length > 0) {
+          const tokenIds = responseNftMetas.map((n: LabExtendedData) => n.id);
+          fetchAllPages(
+            `${process.env.API_ENDPOINT}/api/nfts_memelab?id=${tokenIds.join(
+              ","
+            )}`
+          ).then((responseNfts: any[]) => {
+            setNfts(responseNfts);
+            setNftsLoaded(true);
+          });
+        } else {
+          setNfts([]);
           setNftsLoaded(true);
-        });
-      } else {
-        setNfts([]);
-        setNftsLoaded(true);
-      }
-    });
-  }, []);
+        }
+      });
+    }
+  }, [collectionName]);
 
   useEffect(() => {
     if (address && nftMetas.length > 0) {
       fetchAllPages(
-        `${process.env.API_ENDPOINT}/api/owners?contract=${MEMES_CONTRACT}&wallet=${address}`
+        `${process.env.API_ENDPOINT}/api/owners_memelab?wallet=${address}`
       ).then((owners: Owner[]) => {
         setNftBalances(owners);
       });
@@ -189,23 +116,17 @@ export default function TheMemesComponent(props: Props) {
 
   useEffect(() => {
     if (sort && sortDir && nftsLoaded) {
-      if (selectedSeason > 0) {
-        router.replace(
-          {
-            query: { szn: selectedSeason, sort: sort, sort_dir: sortDir },
+      router.replace(
+        {
+          query: {
+            collection: collectionName?.replace(" ", "-"),
+            sort: sort,
+            sort_dir: sortDir,
           },
-          undefined,
-          { shallow: true }
-        );
-      } else {
-        router.replace(
-          {
-            query: { sort: sort, sort_dir: sortDir },
-          },
-          undefined,
-          { shallow: true }
-        );
-      }
+        },
+        undefined,
+        { shallow: true }
+      );
 
       if (sort == Sort.AGE) {
         if (sortDir == SortDirection.ASC) {
@@ -238,13 +159,6 @@ export default function TheMemesComponent(props: Props) {
           );
         }
       }
-      if (sort == Sort.MEME) {
-        if (sortDir == SortDirection.ASC) {
-          setNftMemes([...nftMemes].sort((a, b) => (a.meme > b.meme ? 1 : -1)));
-        } else {
-          setNftMemes([...nftMemes].sort((a, b) => (a.meme > b.meme ? -1 : 1)));
-        }
-      }
       if (sort == Sort.HODLERS) {
         if (sortDir == SortDirection.ASC) {
           setNfts(
@@ -275,26 +189,6 @@ export default function TheMemesComponent(props: Props) {
                 nftMetas.find((t2) => b.id == t2.id)!.hodlers
               )
                 return 1;
-              return a.mint_date > b.mint_date ? 1 : -1;
-            })
-          );
-        }
-      }
-      if (sort == Sort.TDH) {
-        setNfts([...nfts].sort((a, b) => (a.mint_date > b.mint_date ? 1 : -1)));
-        if (sortDir == SortDirection.ASC) {
-          setNfts(
-            [...nfts].sort((a, b) => {
-              if (a.tdh > b.tdh) return 1;
-              if (a.tdh < b.tdh) return -1;
-              return a.mint_date > b.mint_date ? 1 : -1;
-            })
-          );
-        } else {
-          setNfts(
-            [...nfts].sort((a, b) => {
-              if (a.tdh > b.tdh) return -1;
-              if (a.tdh < b.tdh) return 1;
               return a.mint_date > b.mint_date ? 1 : -1;
             })
           );
@@ -413,7 +307,15 @@ export default function TheMemesComponent(props: Props) {
     }
   }, [sort, sortDir, nftsLoaded]);
 
-  function printMintDate(nft: NFT) {
+  function getBalance(id: number) {
+    const balance = nftBalances.find((b) => b.token_id == id);
+    if (balance) {
+      return balance.balance;
+    }
+    return 0;
+  }
+
+  function printMintDate(nft: LabNFT) {
     const mintDate = new Date(nft.mint_date);
     return (
       <>
@@ -427,148 +329,98 @@ export default function TheMemesComponent(props: Props) {
     );
   }
 
-  function printNft(nft: NFT) {
-    const season = nftMetas.find((a) => a.id == nft.id)?.season;
-    if (selectedSeason == 0 || selectedSeason == season) {
-      return (
-        <Col
-          key={`${nft.contract}-${nft.id}`}
-          className="pt-3 pb-3"
-          xs={{ span: 6 }}
-          sm={{ span: 4 }}
-          md={{ span: 3 }}
-          lg={{ span: 3 }}>
-          <Container fluid className="no-padding">
-            <Row>
-              <a href={`/the-memes/${nft.id}`}>
-                <NFTImage
-                  nft={nft}
-                  animation={false}
-                  height={300}
-                  balance={getBalance(nft.id)}
-                  showThumbnail={true}
-                />
-              </a>
-            </Row>
-            <Row>
-              <Col className="text-center pt-2">
-                <a href={`/the-memes/${nft.id}`}>{nft.name}</a>
-              </Col>
-            </Row>
-            <Row>
-              <Col className="text-center pt-1">
-                {sort &&
-                  (sort == Sort.AGE || sort == Sort.MEME) &&
-                  printMintDate(nft)}
-                {sort == Sort.EDITION_SIZE && `Edition Size: ${nft.supply}`}
-                {sort == Sort.TDH &&
-                  `TDH: ${numberWithCommas(Math.round(nft.tdh))}`}
-                {sort == Sort.HODLERS &&
-                  `HODLers: ${
-                    nftMetas.find((nftm) => nftm.id == nft.id)?.hodlers
-                  }`}
-                {sort == Sort.UNIQUE_PERCENT &&
-                  `Unique: ${
-                    Math.round(
-                      nftMetas.find((nftm) => nftm.id == nft.id)
-                        ?.percent_unique! *
-                        100 *
-                        10
-                    ) / 10
-                  }%`}
-                {sort == Sort.UNIQUE_PERCENT_EX_MUSEUM &&
-                  `Unique Ex-Museum: ${
-                    Math.round(
-                      nftMetas.find((nftm) => nftm.id == nft.id)
-                        ?.percent_unique_cleaned! *
-                        100 *
-                        10
-                    ) / 10
-                  }%`}
-                {sort == Sort.FLOOR_PRICE &&
-                  (nft.floor_price > 0
-                    ? `Floor Price: ${numberWithCommas(
-                        Math.round(nft.floor_price * 100) / 100
-                      )} ETH`
-                    : `Floor Price: N/A`)}
-                {sort == Sort.MARKET_CAP &&
-                  (nft.market_cap > 0
-                    ? `Market Cap: ${numberWithCommas(
-                        Math.round(nft.market_cap * 100) / 100
-                      )} ETH`
-                    : `Market Cap: N/A`)}
-              </Col>
-            </Row>
-          </Container>
-        </Col>
-      );
-    }
+  function printNft(nft: LabNFT) {
+    return (
+      <Col
+        key={`${nft.contract}-${nft.id}`}
+        className="pt-3 pb-3"
+        xs={{ span: 6 }}
+        sm={{ span: 4 }}
+        md={{ span: 3 }}
+        lg={{ span: 3 }}>
+        <Container fluid className="no-padding">
+          <Row>
+            <a href={`/meme-lab/${nft.id}`}>
+              <NFTImage
+                nft={nft}
+                animation={false}
+                height={300}
+                balance={getBalance(nft.id)}
+                showThumbnail={true}
+              />
+            </a>
+          </Row>
+          <Row>
+            <Col className="text-center pt-2">
+              <a href={`/the-memes/${nft.id}`}>{nft.name}</a>
+            </Col>
+          </Row>
+          <Row>
+            <Col className="text-center pt-2">Artists: {nft.artist}</Col>
+          </Row>
+          <Row>
+            <Col className="text-center pt-1">
+              {sort && sort == Sort.AGE && printMintDate(nft)}
+              {sort == Sort.EDITION_SIZE && `Edition Size: ${nft.supply}`}
+              {sort == Sort.HODLERS &&
+                `HODLers: ${
+                  nftMetas.find((nftm) => nftm.id == nft.id)?.hodlers
+                }`}
+              {sort == Sort.UNIQUE_PERCENT &&
+                `Unique: ${
+                  Math.round(
+                    nftMetas.find((nftm) => nftm.id == nft.id)
+                      ?.percent_unique! *
+                      100 *
+                      10
+                  ) / 10
+                }%`}
+              {sort == Sort.UNIQUE_PERCENT_EX_MUSEUM &&
+                `Unique Ex-Museum: ${
+                  Math.round(
+                    nftMetas.find((nftm) => nftm.id == nft.id)
+                      ?.percent_unique_cleaned! *
+                      100 *
+                      10
+                  ) / 10
+                }%`}
+              {sort == Sort.FLOOR_PRICE &&
+                (nft.floor_price > 0
+                  ? `Floor Price: ${numberWithCommas(
+                      Math.round(nft.floor_price * 100) / 100
+                    )} ETH`
+                  : `Floor Price: N/A`)}
+              {sort == Sort.MARKET_CAP &&
+                (nft.market_cap > 0
+                  ? `Market Cap: ${numberWithCommas(
+                      Math.round(nft.market_cap * 100) / 100
+                    )} ETH`
+                  : `Market Cap: N/A`)}
+            </Col>
+          </Row>
+        </Container>
+      </Col>
+    );
   }
 
   function printNfts() {
     return <Row className="pt-2">{nfts.map((nft) => printNft(nft))}</Row>;
   }
 
-  function printMemes() {
-    return nftMemes.map((meme) => {
-      const memeNfts = [...nfts].filter((n) =>
-        nftMetas.find((m) => n.id == m.id && m.meme == meme.meme)
-      );
-      return (
-        <Row key={`${meme.meme}-${meme.meme_name}`}>
-          <Col xs={12} className="pt-3">
-            <Col>
-              <h4>
-                {meme.meme} - {meme.meme_name}
-              </h4>
-            </Col>
-          </Col>
-          {[...memeNfts]
-            .sort((a, b) => (a.mint_date > b.mint_date ? 1 : -1))
-            .map((nft: NFT) => printNft(nft))}
-        </Row>
-      );
-    });
-  }
-
   return (
-    <Container fluid className={styles.mainContainer}>
-      <Row>
-        <Col>
-          <Container className="pt-4">
-            <>
+    <>
+      <Container fluid className={styles.mainContainer}>
+        <Row>
+          <Col>
+            <Container className="pt-4 pb-4">
               <Row>
                 <Col>
-                  <h1>THE MEMES</h1>
+                  <h1>MEME LAB COLLECTIONS</h1>
                 </Col>
-                <Col
-                  className="d-flex align-items-center justify-content-end"
-                  xs={12}
-                  sm={6}>
-                  <h3>
-                    <span
-                      onClick={() => setSelectedSeason(0)}
-                      className={`${styles.season} ${
-                        selectedSeason > 0 ? styles.disabled : ""
-                      }`}>
-                      All
-                    </span>
-                  </h3>
-                  {seasons.map((s) => (
-                    <span key={`season-${s}-span`}>
-                      <h3>&nbsp;&nbsp;|&nbsp;&nbsp;</h3>
-                      <h3>
-                        <span
-                          key={`season-${s}-h3-2-span`}
-                          onClick={() => setSelectedSeason(s)}
-                          className={`${styles.season} ${
-                            selectedSeason != s ? styles.disabled : ""
-                          }`}>
-                          SZN{s}
-                        </span>
-                      </h3>
-                    </span>
-                  ))}
+              </Row>
+              <Row className="pt-3">
+                <Col>
+                  <h2 className="font-color">{collectionName}</h2>
                 </Col>
               </Row>
               <Row className="pt-2">
@@ -607,25 +459,11 @@ export default function TheMemesComponent(props: Props) {
                     Edition Size
                   </span>
                   <span
-                    onClick={() => setSort(Sort.MEME)}
-                    className={`${styles.sort} ${
-                      sort != Sort.MEME ? styles.disabled : ""
-                    }`}>
-                    Meme
-                  </span>
-                  <span
                     onClick={() => setSort(Sort.HODLERS)}
                     className={`${styles.sort} ${
                       sort != Sort.HODLERS ? styles.disabled : ""
                     }`}>
                     HODLers
-                  </span>
-                  <span
-                    onClick={() => setSort(Sort.TDH)}
-                    className={`${styles.sort} ${
-                      sort != Sort.TDH ? styles.disabled : ""
-                    }`}>
-                    TDH
                   </span>
                   <span
                     onClick={() => setSort(Sort.UNIQUE_PERCENT)}
@@ -659,14 +497,9 @@ export default function TheMemesComponent(props: Props) {
                   </span>
                 </Col>
               </Row>
-
               {nftsLoaded &&
                 (nfts.length > 0 ? (
-                  sort == Sort.MEME ? (
-                    printMemes()
-                  ) : (
-                    printNfts()
-                  )
+                  printNfts()
                 ) : (
                   <Col>
                     <Image
@@ -680,10 +513,10 @@ export default function TheMemesComponent(props: Props) {
                     Nothing here yet
                   </Col>
                 ))}
-            </>
-          </Container>
-        </Col>
-      </Row>
-    </Container>
+            </Container>
+          </Col>
+        </Row>
+      </Container>
+    </>
   );
 }

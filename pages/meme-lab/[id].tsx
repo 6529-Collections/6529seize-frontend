@@ -17,7 +17,7 @@ const LabPageComponent = dynamic(
   }
 );
 
-export default function MemeLabIndex(props: any) {
+export default function MemeLabPage(props: any) {
   const pagenameFull = `${props.name} | 6529 SEIZE`;
 
   return (
