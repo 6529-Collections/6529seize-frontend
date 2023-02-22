@@ -7,7 +7,6 @@ import { PROJECT_NAME } from "../constants";
 
 import { alchemyProvider } from "wagmi/providers/alchemy";
 
-import { publicProvider } from "wagmi/providers/public";
 import { CoinbaseWalletConnector } from "wagmi/connectors/coinbaseWallet";
 import { WalletConnectConnector } from "wagmi/connectors/walletConnect";
 import { InjectedConnector } from "wagmi/connectors/injected";
@@ -39,6 +38,7 @@ import {
   faEyeSlash,
   faCheck,
   faXmark,
+  faCartPlus,
 } from "@fortawesome/free-solid-svg-icons";
 import Head from "next/head";
 
@@ -65,7 +65,8 @@ library.add(
   faEye,
   faEyeSlash,
   faCheck,
-  faXmark
+  faXmark,
+  faCartPlus
 );
 
 const { chains, provider } = configureChains(

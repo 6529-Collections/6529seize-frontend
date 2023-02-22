@@ -10,12 +10,12 @@ import {
 } from "../../helpers/Helpers";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { NULL_ADDRESS } from "../../constants";
-import { NFT } from "../../entities/INFT";
+import { BaseNFT } from "../../entities/INFT";
 
 const Address = dynamic(() => import("../address/Address"), { ssr: false });
 
 interface Props {
-  nft?: NFT;
+  nft?: BaseNFT;
   tr: Transaction;
   mykey?: string;
 }
@@ -39,7 +39,9 @@ export default function LatestActivityRow(props: Props) {
           }
           icon={
             props.tr.value > 0
-              ? "shopping-cart"
+              ? areEqualAddresses(NULL_ADDRESS, props.tr.from_address)
+                ? "cart-plus"
+                : "shopping-cart"
               : areEqualAddresses(NULL_ADDRESS, props.tr.from_address)
               ? "parachute-box"
               : "exchange"
@@ -49,7 +51,18 @@ export default function LatestActivityRow(props: Props) {
       <td>
         {areEqualAddresses(NULL_ADDRESS, props.tr.from_address) && (
           <>
-            airdrop {props.tr.token_count}x{" "}
+            {props.tr.value > 0 ? (
+              <>
+                <Address
+                  address={props.tr.to_address}
+                  ens={props.tr.to_display}
+                />
+                minted
+              </>
+            ) : (
+              "airdrop"
+            )}{" "}
+            {props.tr.token_count}x{" "}
             {props.nft ? (
               <a
                 href={
@@ -82,9 +95,27 @@ export default function LatestActivityRow(props: Props) {
               `Gradient #${props.tr.token_id}`
             ) : (
               `#${props.tr.token_id}`
-            )}{" "}
-            to{" "}
-            <Address address={props.tr.to_address} ens={props.tr.to_display} />
+            )}
+            {props.tr.value == 0 && (
+              <>
+                {" "}
+                to{" "}
+                <Address
+                  address={props.tr.to_address}
+                  ens={props.tr.to_display}
+                />
+              </>
+            )}
+            &nbsp;&nbsp;
+            {props.tr.value > 0 && (
+              <a
+                href={`https://etherscan.io/tx/${props.tr.transaction}`}
+                className={styles.transactionLink}
+                target="_blank"
+                rel="noreferrer">
+                view txn
+              </a>
+            )}
           </>
         )}
         {!areEqualAddresses(NULL_ADDRESS, props.tr.from_address) && (

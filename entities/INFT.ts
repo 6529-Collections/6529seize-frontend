@@ -1,4 +1,4 @@
-export interface NFT {
+export interface BaseNFT {
   id: number;
   contract: string;
   created_at: Date;
@@ -8,7 +8,6 @@ export interface NFT {
   name: string;
   collection: string;
   token_type: string;
-  hodl_rate: number;
   description: string;
   artist: string;
   uri: string;
@@ -16,14 +15,22 @@ export interface NFT {
   thumbnail: string;
   scaled: string;
   image: string;
-  compressed_animation: string;
+  compressed_animation?: string;
   animation: string;
-  metadata: any;
+  metadata?: any;
+  market_cap: number;
+  floor_price: number;
+}
+
+export interface LabNFT extends BaseNFT {
+  meme_references: number[];
+}
+
+export interface NFT extends BaseNFT {
   tdh: number;
   tdh__raw: number;
   tdh_rank: number;
-  market_cap: number;
-  floor_price: number;
+  hodl_rate: number;
 }
 
 export interface MemesExtendedData {
@@ -61,4 +68,25 @@ export interface NftTDH {
   balance: number;
   tdh: number;
   tdh__raw: number;
+}
+
+export interface LabExtendedData {
+  id: number;
+  created_at: Date;
+  name: string;
+  meme_references: number[];
+  collection_size: number;
+  edition_size: number;
+  edition_size_rank: number;
+  museum_holdings: number;
+  museum_holdings_rank: number;
+  edition_size_cleaned: number;
+  edition_size_cleaned_rank: number;
+  hodlers: number;
+  hodlers_rank: number;
+  percent_unique: number;
+  percent_unique_rank: number;
+  percent_unique_cleaned: number;
+  percent_unique_cleaned_rank: number;
+  metadata_collection: string;
 }
