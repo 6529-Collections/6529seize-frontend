@@ -1,0 +1,78 @@
+import Head from "next/head";
+import styles from "../../../styles/Home.module.scss";
+
+import dynamic from "next/dynamic";
+import HeaderPlaceholder from "../../../components/header/HeaderPlaceholder";
+import Breadcrumb, { Crumb } from "../../../components/breadcrumb/Breadcrumb";
+import { useState } from "react";
+
+const Header = dynamic(() => import("../../../components/header/Header"), {
+  ssr: false,
+  loading: () => <HeaderPlaceholder />,
+});
+
+const LabCollectionComponent = dynamic(
+  () => import("../../../components/memelab/MemeLabCollection"),
+  {
+    ssr: false,
+  }
+);
+
+export default function MemeLabIndex(props: {
+  collection: string;
+  name: string;
+}) {
+  const [breadcrumbs, setBreadcrumbs] = useState<Crumb[]>([
+    { display: "Home", href: "/" },
+    { display: "Meme Lab", href: "/meme-lab" },
+    { display: "Collections", href: "/meme-lab?sort=collections" },
+    { display: props.collection.replace("-", " ") },
+  ]);
+  const pagenameFull = `${props.name} | 6529 SEIZE`;
+
+  return (
+    <>
+      <Head>
+        <title>{pagenameFull}</title>
+        <link rel="icon" href="/favicon.ico" />
+        <meta name="description" content={pagenameFull} />
+        <meta
+          property="og:url"
+          content={`${process.env.BASE_ENDPOINT}/the-memes/collection/${props.collection}`}
+        />
+        <meta property="og:title" content={props.name} />
+        <meta
+          property="og:image"
+          content={`${process.env.BASE_ENDPOINT}/Seize_Logo_Glasses_2.png`}
+        />
+        <meta property="og:description" content="6529 SEIZE" />
+        <meta name="twitter:card" content={pagenameFull} />
+        <meta name="twitter:image:alt" content={props.name} />
+        <meta name="twitter:title" content={props.name} />
+        <meta name="twitter:description" content="6529 SEIZE" />
+        <meta
+          name="twitter:image"
+          content={`${process.env.BASE_ENDPOINT}/Seize_Logo_Glasses_2.png`}
+        />
+      </Head>
+
+      <main className={styles.main}>
+        <Header />
+        <Breadcrumb breadcrumbs={breadcrumbs} />
+        <LabCollectionComponent />
+      </main>
+    </>
+  );
+}
+
+export async function getServerSideProps(req: any, res: any, resolvedUrl: any) {
+  const collection = req.query.collection;
+  let name = `${collection.replace("-", " ")} | Meme Lab Collections`;
+
+  return {
+    props: {
+      collection: collection,
+      name: name,
+    },
+  };
+}

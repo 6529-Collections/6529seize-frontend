@@ -18,6 +18,8 @@ export interface BaseNFT {
   compressed_animation?: string;
   animation: string;
   metadata?: any;
+  market_cap: number;
+  floor_price: number;
 }
 
 export interface LabNFT extends BaseNFT {
@@ -29,8 +31,6 @@ export interface NFT extends BaseNFT {
   tdh__raw: number;
   tdh_rank: number;
   hodl_rate: number;
-  market_cap: number;
-  floor_price: number;
 }
 
 export interface MemesExtendedData {
@@ -88,4 +88,5 @@ export interface LabExtendedData {
   percent_unique_rank: number;
   percent_unique_cleaned: number;
   percent_unique_cleaned_rank: number;
+  metadata_collection: string;
 }
