@@ -1,0 +1,249 @@
+@import "../../styles/variables.scss";
+
+.main {
+  min-height: 100vh;
+}
+
+.mainContainer {
+  background-color: $bg-color-2;
+  min-height: calc(100vh - $header-height);
+  padding-bottom: 20px;
+}
+
+.season {
+  color: $font-color;
+  cursor: pointer;
+}
+
+.tab {
+  padding: 0;
+}
+
+.collectionLink {
+  font-size: 16px;
+}
+
+.hodlersTableLive {
+  margin-bottom: 0;
+}
+
+.hodlersTableLive > :not(caption) > * > * {
+  padding: 0.1rem 0.1rem;
+}
+
+.marketplace {
+  margin-right: 15px;
+}
+
+.marketplace:hover {
+  opacity: 0.75;
+}
+
+.theArtImage {
+  max-width: 100%;
+  max-height: 800px;
+}
+
+.nftAttribute {
+  border: 1px solid $font-color;
+  text-align: center;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
+  span:nth-of-type(1) {
+    font-size: 13px;
+    white-space: nowrap;
+  }
+  span:nth-of-type(2) {
+    font-size: 15px;
+    font-weight: bolder;
+    white-space: nowrap;
+  }
+}
+
+.sort {
+  color: $font-color;
+  cursor: pointer;
+  margin-right: 15px;
+}
+
+.sortDirection {
+  width: $font-size;
+  cursor: pointer;
+}
+
+.disabled {
+  color: $lightest-grey;
+  text-decoration: none;
+  &:hover {
+    color: white;
+  }
+}
+
+.fullScreen {
+  position: absolute;
+  top: 3.1rem;
+  right: 0;
+  cursor: pointer;
+  z-index: 100;
+  width: 20px;
+}
+
+.memePageTab {
+  color: darken($color: $font-color, $amount: $darken-percentage);
+  margin-right: 15px;
+  cursor: pointer;
+  &:hover {
+    color: white;
+  }
+}
+
+.memePageTabActive {
+  color: white;
+}
+
+@media only screen and (max-width: 450px) {
+  .arweaveLink {
+    font-size: 8px;
+  }
+}
+
+.nextPreviousNft {
+  width: 35px;
+  svg {
+    width: 35px;
+  }
+}
+
+@media only screen and (max-width: 800px) {
+  .nextPreviousNft {
+    width: 25px;
+    svg {
+      width: 25px;
+    }
+  }
+}
+
+.nftNextdisabled,
+.nftPreviousdisabled {
+  pointer-events: none !important;
+  color: darken($color: $font-color, $amount: $darken-percentage);
+}
+
+.transactionsTable {
+  tr td {
+    white-space: nowrap;
+  }
+  tr td:first-child {
+    width: 1%;
+  }
+
+  tr {
+    line-height: 40px;
+  }
+
+  tr:nth-child(odd) {
+    background-color: $almost-very-dark-grey;
+  }
+}
+
+.transactionsScrollContainer {
+  -ms-overflow-style: none; /* Internet Explorer 10+ */
+  scrollbar-width: none; /* Firefox */
+  overflow-x: scroll;
+}
+
+.transactionsScrollContainer::-webkit-scrollbar {
+  display: none;
+}
+
+.transactionsTable > :not(caption) > * > * {
+  padding: 0.5rem !important;
+}
+
+.memesCarousel {
+  a {
+    height: fit-content;
+    top: 22px;
+    width: 80%;
+  }
+
+  a span {
+    width: 1.2rem;
+    height: 1.2rem;
+  }
+}
+
+.rankSubheading {
+  color: $font-color !important;
+}
+
+.hodlersTable {
+  td {
+    width: 50%;
+  }
+}
+
+.overviewColumn {
+  font-size: larger;
+  font-weight: bolder;
+}
+
+.overviewColumnNote {
+  font-size: smaller;
+  font-weight: lighter;
+}
+
+.activityFilterDropdown {
+  line-height: 48px;
+  text-align: center;
+  background-color: transparent;
+  border: none;
+  width: 100%;
+  a {
+    line-height: 30px;
+  }
+  button {
+    font-size: larger !important;
+    font-weight: bolder !important;
+    cursor: copy;
+    padding: 0;
+    background-color: transparent !important;
+    border-color: transparent !important;
+    &::after {
+      margin-top: 0.8rem;
+    }
+  }
+  div {
+    width: 80%;
+  }
+}
+
+@media only screen and (max-width: 800px) {
+  .activityFilterDropdown {
+    button {
+      &::after {
+        margin-top: 0.5rem;
+      }
+    }
+  }
+}
+
+.tabFocus {
+  white-space: nowrap;
+  cursor: pointer;
+  margin-right: 20px;
+  color: $lightest-grey;
+  // font-size: larger;
+
+  &:hover {
+    color: white;
+  }
+}
+
+.tabFocusActive {
+  color: white !important;
+}

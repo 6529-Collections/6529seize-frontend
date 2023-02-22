@@ -177,7 +177,7 @@ export default function Header(props: Props) {
           </Row>
           <Row className="pt-3 pb-3">
             <Col>
-              <a href="/about/meme-lab">
+              <a href="/meme-lab">
                 <h3>Meme Lab</h3>
               </a>
             </Col>
@@ -399,10 +399,10 @@ export default function Header(props: Props) {
             <Container>
               <Row className={styles.headerRow}>
                 <Col
-                  xs={{ span: 6 }}
-                  sm={{ span: 4 }}
-                  md={{ span: 2 }}
-                  lg={{ span: 2 }}
+                  xs={{ span: 8 }}
+                  sm={{ span: 8 }}
+                  md={{ span: 8 }}
+                  lg={{ span: 3 }}
                   className={`d-flex align-items-center justify-content-start ${styles.headerLeft}`}>
                   <a href="/">
                     <Image
@@ -417,10 +417,10 @@ export default function Header(props: Props) {
                   </a>
                 </Col>
                 <Col
-                  xs={{ span: 6 }}
-                  sm={{ span: 8 }}
-                  md={{ span: 10 }}
-                  lg={{ span: 10 }}
+                  xs={{ span: 4 }}
+                  sm={{ span: 4 }}
+                  md={{ span: 4 }}
+                  lg={{ span: 9 }}
                   className={`d-flex align-items-center justify-content-end ${styles.headerRight}`}>
                   <Container>
                     <Navbar expand="lg" variant="dark">
@@ -471,11 +471,9 @@ export default function Header(props: Props) {
                             </Nav.Link>
                             <Nav.Link
                               className={`${styles.mainNavLink} ${
-                                router.asPath == "/about/meme-lab"
-                                  ? "active"
-                                  : ""
+                                router.pathname == "/meme-lab" ? "active" : ""
                               }`}
-                              href="/about/meme-lab">
+                              href="/meme-lab">
                               Meme Lab
                             </Nav.Link>
                             <Nav.Link
