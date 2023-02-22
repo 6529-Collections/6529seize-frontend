@@ -18,7 +18,7 @@ const MemeLabComponent = dynamic(
   }
 );
 
-export default function MemeLabPage() {
+export default function MemeLab() {
   const [breadcrumbs, setBreadcrumbs] = useState<Crumb[]>([
     { display: "Home", href: "/" },
     { display: "Meme Lab" },

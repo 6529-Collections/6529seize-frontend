@@ -401,8 +401,46 @@ export default function LabPage() {
                       <td>{nft.artist}</td>
                     </tr>
                     <tr>
+                      <td>Collection</td>
+                      <td>
+                        <a
+                          href={`/meme-lab/collection/${nftMeta.metadata_collection.replace(
+                            " ",
+                            "-"
+                          )}`}>
+                          {nftMeta.metadata_collection}
+                        </a>
+                      </td>
+                    </tr>
+                    <tr>
                       <td>Mint Date</td>
                       <td>{printMintDate(nft.mint_date)}</td>
+                    </tr>
+                    <tr>
+                      <td>Mint Price</td>
+                      <td>
+                        {nft.mint_price ? `${nft.mint_price} ETH` : `N/A`}
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>Floor Price</td>
+                      <td>
+                        {nft.floor_price
+                          ? `${numberWithCommas(
+                              Math.round(nft.floor_price * 100) / 100
+                            )} ETH`
+                          : `N/A`}
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>Market Cap</td>
+                      <td>
+                        {nft.market_cap
+                          ? `${numberWithCommas(
+                              Math.round(nft.market_cap * 100) / 100
+                            )} ETH`
+                          : `N/A`}
+                      </td>
                     </tr>
                   </tbody>
                 </Table>
