@@ -96,6 +96,10 @@ export default function Document() {
           <a href={`/about/${AboutSection.COOKIE_POLICY}`}>Cookie Policy</a>
           &nbsp;&nbsp;|&nbsp;&nbsp;
           <a href={`/about/${AboutSection.LICENSE}`}>License</a>
+          &nbsp;&nbsp;|&nbsp;&nbsp;
+          <a href={`https://status.seize.io/`} target="_blank" rel="noreferrer">
+            Status
+          </a>
         </footer>
       </body>
     </Html>

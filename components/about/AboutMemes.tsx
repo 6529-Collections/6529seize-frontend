@@ -66,12 +66,12 @@ export default function AboutMemes() {
             <p>
               The Memes is a collection of art NFTs whose goal is to spread the
               message of decentralization, in a way that tweetstorms, policy
-              papers and podcast can&apos;t.
+              papers and podcasts can&apos;t.
             </p>
             <p>
-              More specifically, we believe that the ownership layer metaverse
-              should be built on open standards on an interoperable public
-              commons, namely NFTs.
+              The Memes are large edition, CC0 (public domain) NFTs that spread
+              far and wide, are remixed, ReMemed, and reinterpreted by the world
+              at large.
             </p>
             <p>
               This is what we call &quot;the open metaverse&quot; and we think
