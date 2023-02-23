@@ -29,7 +29,7 @@ export default function AboutCookiePolicy() {
         </Row>
         <Row>
           <Col className={`${styles.lastUpdateText} text-right pt-3 pb-3`}>
-            Last Updated: February 13, 2023
+            Last Updated: February 23, 2023
           </Col>
         </Row>
         <Row className="pt-3 pb-3">

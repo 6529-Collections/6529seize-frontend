@@ -59,7 +59,7 @@ export enum MEME_FOCUS {
   LIVE = "live",
   YOUR_CARDS = "your-cards",
   THE_ART = "the-art",
-  HODLERS = "hodlers",
+  HODLERS = "collectors",
   ACTIVITY = "activity",
 }
 
@@ -113,7 +113,7 @@ export default function LabPage() {
   };
   const hodlersTab = {
     focus: MEME_FOCUS.HODLERS,
-    title: "HODLers",
+    title: "Collectors",
   };
   const activityTab = {
     focus: MEME_FOCUS.ACTIVITY,
@@ -448,7 +448,7 @@ export default function LabPage() {
             </Row>
             <Row>
               <Col>
-                <h3>Meme HODLers</h3>
+                <h3>Meme Collectors</h3>
               </Col>
             </Row>
             <Row>
@@ -480,7 +480,7 @@ export default function LabPage() {
                       </td>
                     </tr>
                     <tr>
-                      <td>HODLers</td>
+                      <td>Collectors</td>
                       <td className="text-right">{nftMeta.hodlers}</td>
                       <td className="text-right">
                         {nftMeta.hodlers_rank}/{nftMeta.collection_size}

@@ -19,7 +19,7 @@ const NFTImage = dynamic(() => import("../nft-image/NFTImage"), {
 enum Sort {
   AGE = "age",
   EDITION_SIZE = "edition-size",
-  HODLERS = "hodlers",
+  HODLERS = "collectors",
   ARTISTS = "artists",
   COLLECTIONS = "collections",
   UNIQUE_PERCENT = "unique",
@@ -384,7 +384,7 @@ export default function MemeLabComponent() {
               {sort == Sort.COLLECTIONS && `Artists: ${nft.artist}`}
               {sort == Sort.EDITION_SIZE && `Edition Size: ${nft.supply}`}
               {sort == Sort.HODLERS &&
-                `HODLers: ${
+                `Collectors: ${
                   nftMetas.find((nftm) => nftm.id == nft.id)?.hodlers
                 }`}
               {sort == Sort.UNIQUE_PERCENT &&
@@ -526,7 +526,7 @@ export default function MemeLabComponent() {
                     className={`${styles.sort} ${
                       sort != Sort.HODLERS ? styles.disabled : ""
                     }`}>
-                    HODLers
+                    Collectors
                   </span>
                   <span
                     onClick={() => setSort(Sort.ARTISTS)}
