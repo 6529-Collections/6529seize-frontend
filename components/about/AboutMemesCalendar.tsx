@@ -104,6 +104,14 @@ export default function AboutMemesCalendar() {
             </Table>
           </Col>
         </Row>
+        <Row className="pt-3">
+          <Col className="text-center">
+            <p>
+              The Calendar has changed in the past and may change in the future
+              for any reason.
+            </p>
+          </Col>
+        </Row>
       </Container>
     </>
   );

@@ -42,20 +42,18 @@ export default function AboutMemeLab() {
               already minted a Meme Card. They can use the Meme Lab contract to
               mint NFTs that they like, in any way that they like.
             </p>
-            <br />
             <p>
               We actively encourage the artists to experiment on any dimension
-              they like on the Meme Labs contract - artistic, community, edition
-              size, price and so on.
+              they like on the Meme Lab&apos;s contract - artistic, community,
+              edition size, price and so on.
               <br />
               We will learn more in the next 6 months about how artists plan to
               use it and what happens.
             </p>
             <p>
-              We hope to see some successes and certainly expect there will be
+              We hope to see some successes, and certainly expect there will be
               some failures too.
             </p>
-            <p>We intend to support the Meme Lab on seize.io.</p>
           </Col>
         </Row>
       </Container>

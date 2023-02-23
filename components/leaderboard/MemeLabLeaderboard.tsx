@@ -107,7 +107,7 @@ export default function MemeLabLeaderboard(props: Props) {
               <thead>
                 <tr>
                   <th className={styles.memeLabRank}>Rank</th>
-                  <th className={styles.memeLabHodler}>HODLer</th>
+                  <th className={styles.memeLabHodler}>Collector</th>
                   <th className={`${styles.memeLabBalance} text-center`}>
                     <span className="d-flex align-items-center justify-content-center">
                       Balance&nbsp;
