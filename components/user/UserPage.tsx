@@ -140,7 +140,7 @@ export default function UserPage(props: Props) {
               : walletDisplay;
             if (walletDisplay) {
               setOwnerENS(walletDisplay);
-              router.push(walletDisplay.replace(" ", "-"), undefined, {
+              router.push(walletDisplay.replaceAll(" ", "-"), undefined, {
                 shallow: true,
               });
             }
