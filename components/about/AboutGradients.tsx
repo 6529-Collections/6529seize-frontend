@@ -70,7 +70,7 @@ export default function AboutGradients() {
               background switching from white to black from #49 to #51.
             </p>
             <p>
-              It is the artist&apos;s ( &#64;
+              It is the artist&apos;s (&#64;
               <a
                 href="https://twitter.com/6529er"
                 target="_blank"
@@ -101,8 +101,9 @@ export default function AboutGradients() {
               the 6529 logo.
             </p>
             <p>
-              We encourage experimentation with the Gradients as the holders are
-              likely to be strong supporters of decentralization.
+              We encourage social experimentation in the Gradient community, as
+              the collectors are likely to be strong supporters of
+              decentralization.
             </p>
           </Col>
         </Row>

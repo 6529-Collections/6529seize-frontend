@@ -82,8 +82,8 @@ export default function ReMemes() {
                     <p>
                       The ReMemes come in all styles, shapes and sizes, from
                       direct copies of The Memes to highly inventive and complex
-                      work. The ReMemes are sold / minted by their creators in a
-                      wide variety of formats, at different price points, with
+                      works. The ReMemes are sold / minted by their creators in
+                      a wide variety of formats, at different price points, with
                       different distribution methods, on their own contracts.
                       There are no &quot;official&quot; or &quot;approved&quot;
                       ReMemes. You do not need permission to make a ReMeme. We
@@ -91,7 +91,7 @@ export default function ReMemes() {
                       seeking permission.
                     </p>
                     <p>
-                      We believe that in the medium to long-term, the ReMemes
+                      We believe that in the medium to long term, the ReMemes
                       will be the most important carriers of the mission. If we
                       want to reach 100M people, we need to spread all types of
                       messages in all types of communities, across the world.

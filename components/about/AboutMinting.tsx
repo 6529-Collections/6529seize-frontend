@@ -54,7 +54,7 @@ export default function AboutMinting() {
               <br />
               <li>There is no other minting website for The Memes</li>
               <br />
-              <li>The minting price is 0.06529ETH + gas costs</li>
+              <li>The current minting price is 0.06529ETH + gas costs</li>
               <br />
               <li>
                 Minting time and dates are announced on{" "}
@@ -67,7 +67,7 @@ export default function AboutMinting() {
               </li>
               <br />
               <li>
-                Currently the mints are happening Mon/Wed/Friday at 11am ET (4pm
+                Currently, the mints are happening Mon/Wed/Fri at 11am ET (4pm
                 UTC), but times may vary. Please follow &#64;
                 <a
                   href="https://twitter.com/6529collections"
@@ -90,8 +90,8 @@ export default function AboutMinting() {
                 <ul>
                   <br />
                   <li>
-                    There are many more hodlers of The Memes NFTs than there are
-                    allowlist spots.
+                    There are many more collectors of The Memes NFTs than there
+                    are allowlist spots.
                   </li>
                   <br />
                   <li>
@@ -136,7 +136,7 @@ export default function AboutMinting() {
                 much more money to the artists and creators. The downside is
                 that it makes the project accessible only to wealthy collectors.
                 We do not want The Memes to be accessible only to wealthy
-                collectors so we have rejected this approach too.
+                collectors, so we have rejected this approach too.
               </li>
               <br />
               <li>
@@ -154,8 +154,8 @@ export default function AboutMinting() {
                 model for The Memes. Our current approach is to use this model
                 approximately once per SZN. The cultural factors in the NFT
                 space generally appear to preclude against ongoing use of Open
-                Editions and most artists are not comfortable with open editions
-                (they prefer to use their &quot;one&quot; or
+                Editions, and most artists are not comfortable with open
+                editions (they prefer to use their &quot;one&quot; or
                 &quot;occasional&quot; Open Edition for themselves).
               </li>
             </ul>
@@ -178,7 +178,7 @@ export default function AboutMinting() {
                   <br />
                   <li>
                     A few times a week, an artist in the collective produces an
-                    edition of hopefully attractive, definitely ideological art
+                    edition of hopefully attractive, definitely ideological, art
                     that is put up for sale at a hopefully attractive price
                   </li>
                   <br />
@@ -210,9 +210,9 @@ export default function AboutMinting() {
                     Sybil attacks. As Wikipedia states: &quot;
                     <i>
                       A Sybil attack is a type of attack on a computer network
-                      service in which an attacker subverts the service&quot;s
+                      service in which an attacker subverts the service&apos;s
                       reputation by creating a large number of pseudonymous
-                      identities and uses hem to gain a disproportionally large
+                      identities and uses them to gain a disproportionally large
                       influence
                     </i>
                     &quot;
@@ -242,12 +242,12 @@ export default function AboutMinting() {
                   </li>
                   <br />
                   <li>
-                    It was a tedious process and I am not sure any other
+                    It was a tedious process, and I am not sure any other
                     meaningful collection has started that way
                   </li>
                   <br />
                   <li>
-                    What we &quot;earned&quot; in return however is a base of
+                    What we &quot;earned&quot; in return, however, is a base of
                     &quot;real people&quot; and editions that are
                     extraordinarily well distributed. On most Memes cards,
                     unique ownership percentages are in the 70-80% range or 80%
@@ -264,7 +264,7 @@ export default function AboutMinting() {
                   <br />
                   <li>
                     Demand was relatively low and the mints took time to mint
-                    out.
+                    out
                   </li>
                   <br />
                   <li>
@@ -273,7 +273,7 @@ export default function AboutMinting() {
                   <br />
                   <li>
                     Over time, however, there was more demand for The Memes and
-                    the allowlists become more challenging to create.
+                    the allowlists become more challenging to create
                   </li>
                 </ul>
               </li>
@@ -309,10 +309,11 @@ export default function AboutMinting() {
               </li>
               <br />
               <li>
-                The second part of the process is a few partial airdrops to:
+                The second part of the process is a few &quot;partial&quot;
+                airdrops to:
                 <ul>
                   <br />
-                  <li>Hodlers of Meme Card or Gradients</li>
+                  <li>Collectors of Meme Card or Gradients</li>
                   <br />
                   <li>Collectors of the artist</li>
                   <br />
@@ -340,16 +341,20 @@ export default function AboutMinting() {
                   <br />
                   <li>
                     If we overestimate the number of people to allowlist, there
-                    is a gas war. If we underestimate, we go to Phase II which
-                    is a continuation of the Phase I logic, but to a broader set
-                    of participants. Phase III is the public mint.
+                    is a gas war
+                  </li>
+                  <br />
+                  <li>
+                    If we underestimate, we go to Phase II which is a
+                    continuation of the Phase I logic, but to a broader set of
+                    participants. Phase III is the public mint
                   </li>
                   <br />
                   <li>
                     It is impossible to get this precisely right because
                     likelihood to mint varies by different groups, particularly
                     the artist&apos;s collectors. We are happy if we are 80%
-                    correct, 80% of the time.
+                    correct, 80% of the time
                   </li>
                   <br />
                   <li>
@@ -357,8 +362,8 @@ export default function AboutMinting() {
                     <ul>
                       <br />
                       <li>
-                        Some of the &quot;larger&quot; Meme Card holders with a
-                        focus on &quot;large&quot; being &quot;number of
+                        Some of the &quot;larger&quot; Meme Card collectors with
+                        a focus on &quot;large&quot; being &quot;number of
                         different cards held&quot;, as opposed to &quot;total
                         cards held&quot;
                       </li>
@@ -373,8 +378,8 @@ export default function AboutMinting() {
                           We prefer &quot;number of different cards held&quot;
                           to &quot;total cards held&quot; because getting
                           different cards in individual&apos;s wallets where
-                          they can be seen is more important than getting
-                          duplicates of the same card in wallets
+                          they can be seen by others is more important than
+                          getting duplicates of the same card in wallets
                         </li>
                         <br />
                         <li>
@@ -383,7 +388,7 @@ export default function AboutMinting() {
                         </li>
                       </ul>
                       <br />
-                      <li>Some or all of the Gradient holders</li>
+                      <li>Some or all of the Gradient collectors</li>
                       <br />
                       <li>Some or all of the artist&apos;s collectors</li>
                       <br />
@@ -397,29 +402,29 @@ export default function AboutMinting() {
                       <br />
                       <li>
                         We often allowlist the larger collectors not only
-                        because they tend to be bigger supported of the gallery
-                        but also because if we did not, they would split their
-                        cards into separate wallets and appear to be more
-                        numerous smaller collectors.
+                        because they tend to be bigger supporters of the
+                        gallery, but also because, if we did not, they would
+                        split their cards into separate wallets and appear to be
+                        more numerous smaller collectors
                       </li>
                       <br />
                       <li>
-                        We often allowlist the Gradient holders because they
+                        We often allowlist the Gradient collectors because they
                         were early supporters of the vision
                       </li>
                       <br />
                       <li>
-                        We always allowlist the artist&apos;s collectors because
-                        of course the artist should allowlist their own
-                        collectors and also because this is an important
+                        We always allowlist the artist&apos;s collectors
+                        because, of course, the artist should allowlist their
+                        own collectors, and also because this is an important
                         mechanism to introduce new collectors to The Memes
                       </li>
                       <br />
                       <li>
-                        We have allowlisted holders of over hundreds, possibly
-                        thousands, of collections so far. It is hugely important
-                        to the project mission and we intend to continue to do
-                        this.
+                        We have allowlisted collectors of over hundreds,
+                        possibly thousands, of collections so far. It is hugely
+                        important to the project mission and we intend to
+                        continue to do this
                       </li>
                       <br />
                       <li>
@@ -430,7 +435,7 @@ export default function AboutMinting() {
                   </li>
                   <br />
                   <li>
-                    Having said all that, we also sometimes deviate from those
+                    Having said all that, we also sometimes deviate from this
                     approach to improve the diversity of collectors. How often
                     we can deviate from that before the large collectors split
                     their wallets is a challenging question.
@@ -440,7 +445,7 @@ export default function AboutMinting() {
               <br />
               <li>
                 It is important to emphasize that you see the allowlist in the
-                same light in which we see it, namely that it is something like
+                same light in which we see it, namely, that it is something like
                 a guest list for a gallery.
                 <ul>
                   <br />
@@ -484,8 +489,8 @@ export default function AboutMinting() {
                   <br />
                   <li>
                     We announce in advance on which Ethereum block we will
-                    snapshot the holders of the collectors of The Memes, the
-                    Gradients and the artist&apos;s NFTs
+                    snapshot the collectors of The Memes, the Gradients and the
+                    artist&apos;s NFTs
                   </li>
                   <br />
                   <li>
@@ -494,11 +499,11 @@ export default function AboutMinting() {
                   <br />
                   <li>
                     It is important for this to work that the blocks are
-                    announced publicly before they happen.
+                    announced publicly before they happen
                   </li>
                   <br />
                   <li>
-                    We post our allowlist formula and calculations on github.
+                    We post our allowlist formula and calculations on github
                   </li>
                   <br />
                   <li>
@@ -520,22 +525,23 @@ export default function AboutMinting() {
             <ul>
               <li>
                 We think there are areas that can be improved in the allowlist
-                approach to make it richer at capturing different variables
+                approach to make it richer at capturing different variables.
               </li>
               <br />
               <li>
-                In February we hope to roll out a metric called &quot;TDH&quot;
+                In February, we hope to roll out a metric called &quot;TDH&quot;
                 - Total Days Held, a metric that derives from the old Bitcoin
-                metric of Total Days Destroyed
+                metric of Total Days Destroyed.
               </li>
               <br />
               <li>
                 It is a metric of how long The Memes have been held by an
                 address and it adds another useful data point. There may be
-                times when we want to favor someone who has held 10 cards for 1
-                year vs someone who has held 10 cards for 1 day. As with all
-                metrics, TDH is not going to be used in a fixed way. It is
-                another tool in our toolkit.
+                times when someone may want to differentiate between a collector
+                who has held 10 cards for 1 year vs a collector who has held 10
+                cards for 1 day. As with all metrics, TDH is not going to be
+                used in a fixed way. It is another tool in the toolkit and
+                metrics we are making available.
               </li>
               <br />
               <li>
@@ -544,19 +550,13 @@ export default function AboutMinting() {
                 ReMemes, who is generally helpful to the mission? In the
                 physical world these factors would definitely be taken into
                 account. The challenge here is how to do this in a decentralized
-                and transparent way
+                and transparent way.
               </li>
               <br />
               <li>
                 We would like to find a way to categorize the collectors based
-                on their actions. Who is a market-maker? Who is a HODLer? These
-                might be useful factors in future allowlists.
-              </li>
-              <br />
-              <li>
-                We would like to find a way to categorize the collectors based
-                on their actions. Who is a market-maker? Who is a HODLer? These
-                might be useful factors in future allowlists.
+                on their actions. These might be useful factors in future
+                allowlists.
               </li>
               <br />
               <li>
@@ -573,20 +573,20 @@ export default function AboutMinting() {
             <ul>
               <li>
                 One of our mental models is that NFTs are publicly readable
-                databases of people with common interests
+                databases of people with common interests.
               </li>
               <br />
               <li>
                 Given this, we hope that the publicly readable database of The
-                Memes holders will be used by many other people to make their
+                Memes collectors will be used by many other people to make their
                 own guest lists - for Meme Labs, for ReMemes, for all types of
-                things we can and can&apos;t imagine
+                things we can and can&apos;t imagine.
               </li>
               <br />
               <li>
                 In order to support this, we are going to progressively make our
                 tools for allowlists available to everyone (whether Meme Card
-                holders or not)
+                collectors or not).
               </li>
               <br />
               <li>
@@ -615,7 +615,7 @@ export default function AboutMinting() {
               <br />
               <li>
                 Some users have reported that hard-refreshing or clearing their
-                local browser cache between mints may be helpful
+                local browser cache between mints may be helpful.
               </li>
               <br />
               <li>

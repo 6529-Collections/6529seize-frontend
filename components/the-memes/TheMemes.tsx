@@ -23,7 +23,7 @@ enum Sort {
   AGE = "age",
   EDITION_SIZE = "edition-size",
   MEME = "meme",
-  HODLERS = "hodlers",
+  HODLERS = "collectors",
   TDH = "tdh",
   UNIQUE_PERCENT = "unique",
   UNIQUE_PERCENT_EX_MUSEUM = "unique-ex-museum",
@@ -464,7 +464,7 @@ export default function TheMemesComponent(props: Props) {
                 {sort == Sort.TDH &&
                   `TDH: ${numberWithCommas(Math.round(nft.tdh))}`}
                 {sort == Sort.HODLERS &&
-                  `HODLers: ${
+                  `Collectors: ${
                     nftMetas.find((nftm) => nftm.id == nft.id)?.hodlers
                   }`}
                 {sort == Sort.UNIQUE_PERCENT &&
@@ -618,7 +618,7 @@ export default function TheMemesComponent(props: Props) {
                     className={`${styles.sort} ${
                       sort != Sort.HODLERS ? styles.disabled : ""
                     }`}>
-                    HODLers
+                    Collectors
                   </span>
                   <span
                     onClick={() => setSort(Sort.TDH)}
