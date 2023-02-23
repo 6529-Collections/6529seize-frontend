@@ -29,7 +29,7 @@ export default function AboutFAQ() {
         </Row>
         <Row>
           <Col className={`${styles.lastUpdateText} text-right pt-3 pb-3`}>
-            Last Updated: February 14, 2023
+            Last Updated: February 23, 2023
           </Col>
         </Row>
         <Row>
@@ -44,7 +44,7 @@ export default function AboutFAQ() {
                 <b>What are The Memes?</b>
                 <br />
                 <br />
-                The Memes are art-oriented editions, made by many wonderful
+                The Memes are art-oriented editions, created by many wonderful
                 artists, whose organizing principle is that they are focused on
                 spreading the message of decentralization
               </li>
@@ -113,10 +113,10 @@ export default function AboutFAQ() {
               </li>
               <br />
               <li>
-                <b>Where do Meme hodlers gather?</b>
+                <b>Where do The Memes collectors gather?</b>
                 <br />
                 <br />
-                Mostly in the OM Discord. Warning, it can get chaotic
+                Mostly in the OM Discord. Warning, it can get chaotic!
                 <br />
                 <br />
                 <a
@@ -141,7 +141,7 @@ export default function AboutFAQ() {
                 society are not academic or technical in nature.
                 <br />
                 <br />
-                The apex objects are artistic, social or cultural and a
+                The apex objects are artistic, social or cultural, and a
                 well-designed meme is much more impactful than any tweetstorm.
                 <br />
                 <br />
@@ -164,7 +164,7 @@ export default function AboutFAQ() {
                 <br />
                 <br />
                 Yes. Not every meme will spread, but given the diversity in
-                artistic approaches, eventually one or more, will spread very
+                artistic approaches, eventually one, or more, will spread very
                 far.
               </li>
               <br />
@@ -181,10 +181,10 @@ export default function AboutFAQ() {
                 b&#41; Giving some less well-known artists the opportunity to
                 share their work with a larger collector base
                 <br />
-                c&#41; Release art into the public domain
+                c&#41; Releasing art into the public domain
                 <br />
-                d&#41; Learn and share findings about how to run mints without
-                high gas costs and other negative effects
+                d&#41; Learning and sharing findings about how to run mints
+                without high gas costs and other negative effects
                 <br />
                 e&#41; Release open-source data and tools for others to use
                 <br />
@@ -196,7 +196,7 @@ export default function AboutFAQ() {
                 <br />
                 That the ideas expressed in The Memes take hold in NFT, then
                 crypto, then broader culture, whether expressed via The Memes
-                collectors, ReMemers or otherwise.
+                collectors, Meme Lab collectors, ReMemers or otherwise.
                 <br />
                 <br />
                 Our tools/metrics to measure this today are still rudimentary
@@ -208,7 +208,7 @@ export default function AboutFAQ() {
                 <br />
                 <br />
                 The SZNs are the seasons of The Memes. The Genesis SZN1 was in
-                2022. We aim to run 4 SZNs in 2023.
+                2022. We expect to run 4 SZNs in 2023.
                 <br />
                 <br />
                 We think that SZNs give a sense of structure and cadence to The
@@ -228,18 +228,23 @@ export default function AboutFAQ() {
                 <b>How many SZNs will The Memes run?</b>
                 <br />
                 <br />
-                As long as The Memes are having a positive impact and having
-                fun. We hope this will be for a long time and that our alien or
-                AI overlords don&apos;t end the fun.
+                As long as The Memes are having a positive impact and the
+                collection is fun. We hope this will be for a long time and that
+                our alien or AI overlords don&apos;t end the fun.
+                <br />
+                <br />
+                &quot;Have fun changing the world with art&quot; sounds like a
+                good way to think about it.
               </li>
               <br />
               <li>
                 <b>Who are the set collectors?</b>
                 <br />
                 <br />
-                Collectors who are trying to have either: 1 of each meme from a
-                particular SZN (like SZN1 or SZN2) or one of each meme from the
-                whole collection or the 3 Genesis memes.
+                Collectors who are trying to collect either: 1 of each meme from
+                a particular SZN (like SZN1 or SZN2), or one of each meme from
+                the whole collection, or the 3 Genesis memes, or thematic
+                sub-sets.
                 <br />
                 <br />
                 We salute their commitment to The Memes, though obviously we
@@ -256,7 +261,7 @@ export default function AboutFAQ() {
                 <br />
                 We hope that people will use them as a natural attention
                 gathering point to do interesting things with community ReMemes,
-                with community projects, with new announcements or just to take
+                with community projects, with new announcements, or just to take
                 a break.
               </li>
             </ol>
@@ -275,7 +280,7 @@ export default function AboutFAQ() {
                 been: 0.06529ETH.
                 <br />
                 <br />
-                Sometimes we give away The Memes for free also
+                Sometimes we give away The Memes for free
                 (&quot;airdrops&quot;).
               </li>
               <br />
@@ -296,8 +301,8 @@ export default function AboutFAQ() {
                 <br />
                 <br />
                 We usually (but not always) manage demand for The Memes by
-                limiting primary minting to existing holders or the holders of
-                the collaborating artist.
+                limiting primary minting to existing collectors or the
+                collectors of the collaborating artist.
                 <br />
                 <br />
                 Please read about the process in detail here:{" "}
@@ -339,8 +344,8 @@ export default function AboutFAQ() {
                 <br />
                 <br />
                 The price of NFTs in the secondary market tends to be very
-                volatile, long-term value is highly uncertain and dependent on
-                many factors, in particular consumer demand for The Memes.
+                volatile. Long-term value is highly uncertain and dependent on
+                many factors, in particular, consumer demand for The Memes.
                 <br />
                 <br />
                 Like all art and all NFTs, our recommendation is to only buy The
@@ -350,12 +355,12 @@ export default function AboutFAQ() {
               <br />
               <li>
                 <b>
-                  I would like to have a SZN2 Meme but they are too expensive
+                  I would like to have a SZN2 Meme, but they are too expensive
                 </b>
                 <br />
                 <br />
-                We will offer a large/open edition at some point during SZN2
-                and, generally, every SZN.
+                We expect to offer a large/open edition at some point during
+                SZN2 and, generally, every SZN.
               </li>
               <br />
               <li>
@@ -385,15 +390,18 @@ export default function AboutFAQ() {
                 <b>What am I buying when I buy an NFT with CC0 art?</b>
                 <br />
                 <br />
-                This is a great question. In our view, a sense of identity and
-                provenance with the art. The primary minters are paying the
-                artists to release the work into the public domain.
+                This is a great question.
+                <br />
+                <br />
+                In our view, a sense of identity and provenance with the artist
+                and the art. The primary minters are paying the artists to
+                release the work into the public domain.
                 <br />
                 <br />
                 The tokens reflect that provenance. If this is appealing to you,
                 if this matches some sense of identity of yours, if you take
-                value in the ownership, then you might consider buy an NFT from
-                The Memes.
+                value in the ownership of such art, then you may consider buying
+                an NFT from The Memes collection.
                 <br />
                 <br />
                 If not, it is ok, you can just take the art.
@@ -403,8 +411,12 @@ export default function AboutFAQ() {
                 <b>Do I receive IP rights by owning a NFT from The Memes?</b>
                 <br />
                 <br />
-                No. You have the same rights (or lack) as anyone else in the
-                world. The Memes are in the public domain.
+                No. You have the same rights (or lack thereof) as anyone else in
+                the world. The Memes are in the public domain.
+                <br />
+                <br />
+                Note that most art from the 19th century and earlier is also in
+                the public domain.
               </li>
               <br />
               <li>
@@ -418,7 +430,7 @@ export default function AboutFAQ() {
               </li>
               <br />
               <li>
-                <b>I need to sell my Memes for (whatever reason)</b>
+                <b>I need to sell my Memes for (whatever reason).</b>
                 <br />
                 <br />
                 It is fine and normal. We do not want anyone to stress
@@ -439,8 +451,11 @@ export default function AboutFAQ() {
                   rel="noreferrer">
                   punk6529
                 </a>
-                . I have never tweeted about the price of any NFT ever and am
-                certainly not going to start now.
+                . I have never tweeted about the price of any NFT and am
+                certainly not going to start now. I do not think the price of
+                NFTs is what is particularly interesting about them vs the fact
+                that they are decentralized databases of digital objects that
+                could be foundational technology for the metaverse.
               </li>
               <br />
               <li>
@@ -476,14 +491,17 @@ export default function AboutFAQ() {
                 <br />
                 <br />
                 When you mint a Meme Card, you have, at the point, the final
-                product - an art edition NFT. Neither we nor the artist make any
-                commitments to you that we will take any further actions to make
-                the NFT more exciting or valuable. We think The Memes are
-                exciting and fun just the way they are.
+                product - an art edition NFT.
                 <br />
                 <br />
-                &quot;The art is the utility&quot; is phrase that people
-                sometimes use to describe this.
+                Neither we, nor the artist, make any commitments to you that we
+                will take any further actions to make the NFT more exciting or
+                valuable. We think The Memes are exciting and fun just the way
+                they are.
+                <br />
+                <br />
+                &quot;The art is the utility&quot; is a phrase that people
+                sometimes use to describe this concept.
                 <br />
                 <br />
                 This is how art traditionally works. If you buy an Andy Warhol
@@ -501,7 +519,7 @@ export default function AboutFAQ() {
                 <br />
                 <br />
                 There are many other NFT collections that offer NFTs with
-                (supposed) &quot;utility&quot;, mostly in the PFP field - if
+                (supposed) &apos;utility&apos;, mostly in the PFP field - if
                 that is something that you are looking for, those collections
                 may be a better fit for you.
               </li>
@@ -516,9 +534,10 @@ export default function AboutFAQ() {
                 We would happily drink coffee in a The Memes coffee mug.
                 <br />
                 <br />
-                Given that The Memes are CC0, we assume that if there is market
+                Given that The Memes are CC0, we assume that, if there is market
                 demand for The Memes coffee mugs, a specialist in coffee mug
-                making will eventually produce coffee mugs.
+                making will eventually produce The Memes coffee mugs and we can
+                buy one if we like.
                 <br />
                 <br />
                 We are not specialists in coffee mug making and do not want to
@@ -527,9 +546,6 @@ export default function AboutFAQ() {
               <br />
               <li>
                 <b>Anything else on this topic?</b>
-                <br />
-                <br />
-                We would happily drink coffee in a The Memes coffee mug.
                 <br />
                 <br />
                 Ask not what The Memes will do for you, but what you will do for
@@ -547,10 +563,9 @@ export default function AboutFAQ() {
                 <b>What are ReMemes?</b>
                 <br />
                 <br />
-                ReMemes are community-driven derivatives of The Memes. We love
-                the ReMemes and highly encourage them. In the long run, we
-                believe will be more important than The Memes in spreading the
-                message of decentralization.
+                ReMemes are community-driven derivatives of The Memes. In the
+                long run, we believe ReMemes will be more important than The
+                Memes in spreading the message of decentralization.
               </li>
               <br />
               <li>
@@ -559,7 +574,7 @@ export default function AboutFAQ() {
                 <br />
                 Anyone! You do not need approval from anyone. We encourage you
                 to try, even if you do not think of yourself as an
-                &quot;artist&quot;.
+                &apos;artist&apos;.
                 <br />
                 <br />
                 It is a great way to learn a bit about minting NFTs.
@@ -588,9 +603,7 @@ export default function AboutFAQ() {
                 <b>What Is the Meme Lab?</b>
                 <br />
                 <br />
-                The Meme Lab is an experimental CC0 contract for artists who
-                have already minted a Meme Card. They can use the Meme Lab
-                contract to mint NFTs that they like, in any way that they like.
+                What Is the Meme Lab?
                 <br />
                 <br />
                 We actively encourage the artists to experiment on any dimension
@@ -607,52 +620,45 @@ export default function AboutFAQ() {
                 what happens.
                 <br />
                 <br />
-                We hope to see some successes and certainly expect there will be
-                some failures too.
+                We hope to see some successes, and certainly expect there will
+                be some failures too.
               </li>
               <br />
-              <li>
-                <b>Will Meme Lab be on the website?</b>
-                <br />
-                <br />
-                Yes, we are working on it.
-              </li>
               <br />
               <li>
-                <b>
-                  How do the Meme Cards, the Meme Labs and the ReMemes interact?
-                </b>
+                <b>How do The Memes, the Meme Labs and the ReMemes interact?</b>
                 <br />
                 <br />
-                The Meme Cards are a curated collection - &#64;
+                The Memes artists are invited to mint on The Memes contract.
+                &#64;
                 <a
                   href="https://twitter.com/punk6529"
                   target="_blank"
                   rel="noreferrer">
                   punk6529
                 </a>{" "}
-                and &#64;
+                , &#64;
                 <a
                   href="https://twitter.com/6529er"
                   target="_blank"
                   rel="noreferrer">
                   6529er
                 </a>{" "}
-                are involved in the curation of the art and the artists, to a
-                greater or lesser degree, depending on circumstances. There is a
-                somewhat predictable cadence to the pace of new Meme Cards and
+                other team members, and community members recommend interesting
+                established and emerging NFT artists for The Memes. There is a
+                somewhat predictable cadence to the pace of new Meme Cards, and
                 to the edition size.
                 <br />
                 <br />
-                The Meme Lab is an experimental &apos;playground&apos; for
+                The Meme Lab is an experimental &quot;playground&quot; for
                 artists who have already dropped a Meme Card. It is one ERC-1155
-                contract but there is no curation and no particular pattern to
-                who mints what when.
+                contract but there is no particular pattern to who mints what
+                when, at least so far.
                 <br />
                 <br />
                 The ReMemes are completely community driven. They are based on
-                many independent ERC-721 and ERC-1155 contracts and there is no
-                central coordination point.
+                many independent ERC-721 and ERC-1155 contracts by individual
+                artists or collectives.
               </li>
             </ol>
             <br />
@@ -661,22 +667,25 @@ export default function AboutFAQ() {
                 <b>Gradients</b>
               </u>
             </p>
-            <ol start={40}>
+            <ol start={39}>
               <li>
-                <b>What relationship do the Gradients have with The Memes?</b>
+                <b>
+                  What relationship does the 6529 Gradient collection have with
+                  The Memes?
+                </b>
                 <br />
                 <br />
                 There is no direct relationship.
                 <br />
                 <br />
-                The Gradients were a prior collection that was completely
-                conceptual in nature. It was 101 color variations of the 6529
-                logo and nothing else.
+                The 6529 Gradient collection was a prior collection that was
+                completely conceptual in nature. It is 101 grayscale variations
+                of the 6529 logo.
               </li>
               <br />
               <li>
                 <b>
-                  Why are Gradients collectors included in The Memes allowlists?
+                  Why are Gradient collectors included in The Memes allowlists?
                 </b>
                 <br />
                 <br />
@@ -691,15 +700,16 @@ export default function AboutFAQ() {
                 <b>Other</b>
               </u>
             </p>
-            <ol start={42}>
+            <ol start={41}>
               <li>
                 <b>
-                  What is the purpose of the 10% of Memes held by the 6529
-                  Museum?
+                  What is the purpose of the 10% of The Memes displayed in the
+                  6529 Museum?
                 </b>
                 <br />
                 <br />
-                We do not know yet. It is totally open at this stage.
+                We do not know yet. It is totally open at this stage. We are
+                collectors too.
                 <br />
                 <br />
                 The closest analogy for how we view them is that it is a form of
@@ -728,7 +738,8 @@ export default function AboutFAQ() {
                 <b>Why aren&apos;t The Meme cards set up as a DAO?</b>
                 <br />
                 <br />A DAO used to mean a &quot;Decentralized Autonomous
-                Organization&quot; or what we call today a smart contract.
+                Organization&quot; or, what we call today, a &quot;smart
+                contract&quot;.
                 <br />
                 <br />
                 In the NFT field, DAOs are usually not decentralized nor
@@ -736,23 +747,15 @@ export default function AboutFAQ() {
                 <br />
                 <br />
                 The term is often used to describe arrangements where token
-                holders of an NFT somehow have collective assets/treasuries - a
-                common pattern, for example, is a DAO to collect NFTs together.
+                holders of an NFT somehow have collective assets/treasuries. We
+                have a variety of concerns about some of these arrangements.
                 <br />
                 <br />
-                We are concerned that some of these arrangements will be deemed
-                illegal in the United States, in other words that they will be
-                found to be unregistered securities.
-                <br />
-                <br />
-                There is no need to put the mission at risk in this way.
-                <br />
-                <br />
-                The Memes model is much simpler. We sell NFTs on primary like
-                any normal sale of art, at which point the buyers have full
-                independence from us and each other. The token is on the
-                Ethereum blockchain, the art is hosted on Arweave and the art is
-                CC0.
+                The Memes model is much simpler. We help artists sell NFTs on
+                primary like any normal sale of art, at which point the
+                collectors have full independence from us and each other. The
+                token is on the Ethereum blockchain, the art is hosted on
+                Arweave and the art is CC0.
               </li>
             </ol>
           </Col>

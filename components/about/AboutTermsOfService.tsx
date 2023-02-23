@@ -32,7 +32,7 @@ export default function AboutTermsOfService() {
         </Row>
         <Row>
           <Col className={`${styles.lastUpdateText} text-right pt-3 pb-3`}>
-            Last Updated: February 11, 2023
+            Last Updated: February 23, 2023
           </Col>
         </Row>
         <Row className="pt-3 pb-3">
@@ -52,8 +52,8 @@ export default function AboutTermsOfService() {
                 <br />
                 <br />
                 &quot;6529 NFTs&quot;: The Memes, 6529 Gradient, Meme Lab,
-                GenMemes, 6529 Intern and other NFTs we may mint from time to
-                time.
+                GenMemes, 6529 Intern and other NFTs that may be added from time
+                to time.
                 <br />
                 <br />
                 &quot;You&quot;: An adult, at least 18 years of age, who is not
@@ -74,20 +74,20 @@ export default function AboutTermsOfService() {
                 </a>{" "}
                 , including hosted minting or primary sales pages, any primary
                 mints or sales directly from our smart contracts, any mobile or
-                metaverse applications we make and any content &#40;data,
-                descriptions or otherwise&#41; on our website or decentralized
-                file storage platforms like IPFS or Arweave.
+                metaverse applications we may make, and any content (data,
+                descriptions or otherwise) on our website or decentralized file
+                storage platforms like IPFS or Arweave.
                 <br />
                 <br />
                 &quot;Not Our Platform&quot;: Everything else that is not
                 included in &quot;Our Platform&quot; including your Ethereum
-                wallet, NFTs marketplaces and publicly accessible secondary
-                functions on our smart contracts such as token transfers.
+                wallet, NFT marketplaces, and publicly accessible secondary
+                functions on our smart contracts, such as token transfers.
               </li>
               <br />
               <br />
               <li>
-                <b>The Underlying Principle Of These Terms</b>
+                <b>The Underlying Principles Of These Terms</b>
                 <br />
                 <br />
                 There are two underlying principles of these terms:
@@ -95,8 +95,9 @@ export default function AboutTermsOfService() {
                 <br />
                 <ol>
                   <li>
-                    Our main ongoing activity is primary minting CC0 NFTs with a
-                    mission-based focus at fairly affordable prices.
+                    Our main ongoing activity is primary minting CC0 NFTs (The
+                    Memes, Meme Lab, GenMemes are CC0) with a mission-based
+                    focus at fairly affordable prices.
                     <br />
                     <br />
                     Once the NFTs have been primary minted:
@@ -114,9 +115,9 @@ export default function AboutTermsOfService() {
                   </li>
                   <br />
                   <li>
-                    We do not have control of what someone does with The Memes
-                    NFT after minting, either at the level of the token or the
-                    art.
+                    We do not have control of what someone does with The Memes,
+                    Meme Lab and GenMemes NFTs after minting, either at the
+                    level of the token or the art.
                   </li>
                 </ol>
                 <br />
@@ -157,16 +158,20 @@ export default function AboutTermsOfService() {
                   rel="noreferrer">
                   punk6529
                 </a>{" "}
-                tweets a lot and has a lot of ideas, that may change from time
-                to time. <br />
+                tweets a lot and has a lot of ideas that may change from time to
+                time.
                 <br />
-                You should have no expectation whatsoever that what he is going
-                to tweet is going to match your current or future understanding
-                of the 6529 NFTs. <br />
                 <br />
-                His, or any other person&apos;s, retweets, likes or twitter or
-                discord communications are not endorsements nor do they reflect
-                changes in Terms.
+                You should have no expectation whatsoever that what he (or other
+                team members) are going to tweet or otherwise communicate is
+                going to match your current or future understanding of the 6529
+                NFTs.
+                <br />
+                <br />
+                His, or any other person or team member&apos;s, retweets, likes,
+                twitter or discord communications, podcasts, essays or other
+                communications are not endorsements nor do they reflect changes
+                in Terms.
               </li>
               <br />
               <br />
@@ -176,11 +181,12 @@ export default function AboutTermsOfService() {
                 <br />
                 The Terms and any pages or policies incorporated in the Terms by
                 reference may change at any time. The changes are effective
-                immediately. <br />
+                immediately.
                 <br />
-                Any change will be communicated by changing the &quot;Last
-                Updated&quot; date on this webpage or any other method we
-                choose.
+                <br />
+                Any material change will be communicated by changing the
+                &quot;Last Updated&quot; date on this webpage or any other
+                method we choose.
                 <br />
                 <br />
                 If you disagree with the changes, that is fine, but you cannot
@@ -201,8 +207,8 @@ export default function AboutTermsOfService() {
                 <b>We Are On A Mission</b>
                 <br />
                 <br />
-                The mission of The Meme cards is to effectively make people
-                aware of the importance of decentralization.
+                The mission of 6529 NFTs is to effectively make people aware of
+                the importance of decentralization.
                 <br />
                 <br />
                 If at any point in time, at our sole discretion, we think a
@@ -252,7 +258,7 @@ export default function AboutTermsOfService() {
               <br />
               <br />
               <li>
-                <b>License / IP</b>
+                <b>License &#47; IP</b>
                 <br />
                 <br />
                 Our NFTs do not transfer any IP rights to you.
@@ -276,9 +282,8 @@ export default function AboutTermsOfService() {
                 <b>Minting NFTs</b>
                 <br />
                 <br />
-                You have no right to receive &#40;airdrop&#41; or mint
-                &#40;allowlist&#41; a future 6529 NFT based on owning one or
-                more current 6529 NFTs.
+                You have no right to receive (airdrop) or mint (allowlist) a
+                future 6529 NFT based on owning one or more current 6529 NFTs.
                 <br />
                 <br />
                 You acknowledge that you have read and accept the information on
@@ -316,7 +321,7 @@ export default function AboutTermsOfService() {
                 <b>Not Our Platform</b>
                 <br />
                 <br />
-                Due to the architecture of ERC-1155 contracts, 6529 NFTs can be
+                Due to the architecture of NFT contracts, 6529 NFTs can be
                 transferred without our permission or consent. We cannot
                 &quot;freeze&quot; someone&apos;s 6529 NFTs or transfer them to
                 a party of our choosing. After the primary sale from us to you,
@@ -334,9 +339,9 @@ export default function AboutTermsOfService() {
                 We take absolutely no responsibility whatsoever for what you and
                 Third Parties do on Not Our Platform, including but not limited
                 to, suffering economic losses, security risks, theft, hacking,
-                what commitments or representations are made as a part of those
-                transactions, and if those transactions are legal in your
-                jurisdiction.
+                unpleasant consumer experiences, what commitments or
+                representations are made as a part of those transactions, and if
+                those transactions are legal in your jurisdiction.
                 <br />
                 <br />
                 We are not a party to those transactions. We have a relationship
@@ -355,17 +360,17 @@ export default function AboutTermsOfService() {
                 <br />
                 Many things can potentially go wrong with NFTs in general or
                 6529-related NFTs in particular, including but not limited to:
-                &#40;a&#41; technical flaws/bugs/hacks/vulnerabilities at the
-                protocol level, &#40;b&#41; changes at the protocol level,
-                &#40;c&#41; changes in which protocols are popular, &#40;d&#41;
-                technical flaws/bugs/hacks/vulnerabilities at the wallet level,
-                &#40;e&#41; changes in the popularity of NFTs in general or any
-                NFTs specifically, &#40;f&#41; technical
-                flaws/bugs/hacks/vulnerabilities of project or marketplace
-                websites, &#40;g&#41; technical flaws/bugs/hacks/vulnerabilities
-                of general or project-related communication channels such as
-                discord or twitter, &#40;h&#41; regulatory changes or actions
-                that impact specific NFTs &#40;including ours&#41; or all NFTs.
+                (a) technical flaws/bugs/hacks/vulnerabilities at the protocol
+                level, (b) changes at the protocol level, (c) changes in which
+                protocols are popular, (d) technical
+                flaws/bugs/hacks/vulnerabilities at the wallet level, (e)
+                changes in the popularity of NFTs in general or any NFTs
+                specifically, (f) technical flaws/bugs/hacks/vulnerabilities of
+                project or marketplace websites, (g) technical
+                flaws/bugs/hacks/vulnerabilities of general or project-related
+                communication channels such as discord or twitter, (h) legal or
+                regulatory changes or actions that impact specific NFTs
+                (including ours) or all NFTs.
               </li>
               <br />
               <br />
@@ -375,10 +380,11 @@ export default function AboutTermsOfService() {
                 <br />
                 The future value of art and collectibles is based on demand and
                 social factors, is impossible to forecast, and, in any case, is
-                out of our control. <br />
+                out of our control.
                 <br />
-                We have no idea what the future value &#40;if any&#41; will be
-                of 6529 NFTs.
+                <br />
+                We have no idea what the future value (if any) will be of 6529
+                NFTs.
               </li>
               <br />
               <br />
@@ -387,7 +393,7 @@ export default function AboutTermsOfService() {
                 <br />
                 <br />
                 Most 6529 NFTs have secondary sale royalties associated with
-                them that go to us, the collaborating artist or both.
+                them that are paid to us, the collaborating artist or both.
                 <br />
                 <br />
                 While we have not done so, we reserve the right with no further
@@ -400,8 +406,8 @@ export default function AboutTermsOfService() {
                 <b>CC0</b>
                 <br />
                 <br />
-                Most 6529 NFTs are CC0 &#40;Creative Commons 0&#41; licensed
-                which means they are in the public domain.
+                Most 6529 NFTs are CC0 (Creative Commons 0) licensed which means
+                they are in the public domain.
                 <br />
                 <br />
                 This means anyone in the world can use the image associated with
@@ -420,19 +426,18 @@ export default function AboutTermsOfService() {
                 <b>Utility</b>
                 <br />
                 <br />
-                6529 NFTs do not have any &quot;utility&quot; - in other words,
-                6529 NFTs do not guarantee you access to any future product or
-                service.
+                6529 NFTs do not have any &quot;utility&quot; beyond being works
+                of art.
                 <br />
                 <br />
-                We may, from time to time, test services that interoperate with
-                6529 NFTs.
+                We may, from time to time, test or operate services that
+                interoperate with 6529 NFTs.
                 <br />
                 <br />
                 These should be considered experimental, subject to change,
-                subject to being terminated and in any cases not changing the
+                subject to being terminated and, in any case, not changing the
                 general principle that we make no commitments to offering
-                &quot;utility&quot;
+                &quot;utility&quot; to owners of 6529 NFTs.
               </li>
               <br />
               <br />
@@ -446,7 +451,8 @@ export default function AboutTermsOfService() {
                 <br />
                 We take no responsibility for these communications, whether we
                 agree with them or not, as we have no way to monitor or exercise
-                control over them. <br />
+                control over them.
+                <br />
                 <br />
                 Our perspectives on the 6529 NFTs can be found on the{" "}
                 <a href="https://seize.io" target="_blank" rel="noreferrer">
@@ -461,13 +467,16 @@ export default function AboutTermsOfService() {
                 <br />
                 <br />
                 We may provide from time to time the ability to delegate minting
-                from one wallet to another or to consolidate wallet contents for
-                minting purposes.
+                from one wallet to another, or to consolidate wallet contents
+                for minting purposes. We take no responsibilities for errors,
+                losses or missed opportunities relating to air drops or
+                allowlist based on delegation or consolidation (or for any other
+                reason).
                 <br />
                 <br />
                 What formula or platform we use for delegation or consolidation
-                &#40;or whether we offer this functionality at all&#41; is in
-                our sole discretion.
+                (or whether we offer this functionality at all) is in our sole
+                discretion.
               </li>
               <br />
               <br />
@@ -476,16 +485,16 @@ export default function AboutTermsOfService() {
                 <br />
                 <br />
                 The United States makes it illegal to engage in economic
-                transactions with certain people or entities
-                &#40;&quot;Sanctioned Parties&quot;&#41;
+                transactions with certain people or entities (&quot;Sanctioned
+                Parties&quot;)
                 <br />
                 <br />
                 As we prefer not to go to jail, if you are a Sanctioned Party,
                 we cannot engage in any economic activities with you.
                 <br />
                 <br />
-                If you are a Sanctioned Party, please a&#41; do not mint a 6529
-                NFT, b&#41; apply to be a Meme Card artist, c&#41; or send us
+                If you are a Sanctioned Party, please do not: a&#41; mint a 6529
+                NFT, b&#41; apply to be a Meme Card artist, or c&#41; send us
                 any ETH, for royalties or otherwise.
               </li>
               <br />
@@ -499,9 +508,9 @@ export default function AboutTermsOfService() {
                 <br />
                 <br />
                 Mistakes in how an Ethereum wallet is used can lead to loss of
-                your 6529 NFTs &#40;or other tokens&#41;, failed transaction or
-                high gas costs. Such events are your responsibility and out of
-                our control and we cannot offer you compensation or any other
+                your 6529 NFTs (or other tokens), failed transactions or high
+                gas costs. Such events are your responsibility and out of our
+                control and we cannot offer you compensation or any other
                 recourse for such events.
                 <br />
                 <br />
@@ -522,9 +531,9 @@ export default function AboutTermsOfService() {
                 transfer their private keys.
                 <br />
                 <br />
-                We take no responsibility for phishing sites and cannot provide
-                any compensation or assistance for phishing, thefts or other
-                related matters.
+                We take no responsibility for phishing sites, even if we are
+                made aware of them, and cannot provide any compensation or
+                assistance for phishing, thefts or other related matters.
                 <br />
                 <br />
                 It is your responsibility to understand which transactions you
@@ -568,7 +577,8 @@ export default function AboutTermsOfService() {
                 <br />
                 <br />
                 You can feel free to share ideas with us, but we may use them or
-                may already be working on similar ideas.
+                may already be workiThird Party Content or Servicesng on similar
+                ideas.
                 <br />
                 <br />
                 Given this, we will not pay you and you cannot claim
@@ -606,8 +616,8 @@ export default function AboutTermsOfService() {
                 dispute.
                 <br />
                 <br />
-                Specifically you agree to the following as it relates to
-                disputes between you and us
+                Specifically, you agree to the following as it relates to
+                disputes between you and us:
                 <br />
                 <br />
                 a&#41; That any dispute we might have, it is individual between
@@ -636,34 +646,36 @@ export default function AboutTermsOfService() {
                 <b>Indemnification</b>
                 <br />
                 <br />
-                You agreed to indemnify us and our subsidiaries, affiliates,
-                managers, members, officers, partners and employees
-                &#40;together &quot;6529 Parties&quot;&#41; from losses,
+                You agree to indemnify us and our subsidiaries, affiliates,
+                managers, members, officers, partners, service providers and
+                employees (together &quot;6529 Parties&quot;) from losses,
                 liabilities, claims, demands, damages, expenses or costs
-                &#40;&quot;Claims&quot;&#41; arising out of or related to
+                (&quot;Claims&quot;) arising out of or related to:
                 <br />
                 a. Your access to or use of Our Platform
                 <br />
-                b. Your use of 6529 NFTs
+                b. Your access to or use of Not Our Platform
                 <br />
-                c. Your Violation of Terms
+                c. Your use of 6529 NFTs
                 <br />
-                d. Your Infringement of intellectual property, privacy, property
+                d. Your Violation of Terms
+                <br />
+                e. Your Infringement of intellectual property, privacy, property
                 rights of others
                 <br />
-                e. Your Conduct
+                f. Your Conduct
                 <br />
-                f. Your Violation of Laws/Regulations
+                g. Your Violation of Laws/Regulations
                 <br />
-                g. Your Feedback And Ideas
+                h. Your Feedback And Ideas
                 <br />
                 <br />
-                You will cooperate with the 6529 Parties in defending such
-                Claims and pay all fees, costs and expenses associated with
-                defending such Claims &#40;including, but not limited to,
-                attorneys&apos; fees&#41;. 6529 Parties will have control of the
-                defense or settlement, at 6529 Party&apos;s sole option, of any
-                third-party Claims.
+                You will cooperate with the 6529 Parties in defending any such
+                third-party Claims and pay all fees, costs and expenses
+                associated with defending such Claims (including, but not
+                limited to, attorneys&apos; fees). 6529 Parties will have
+                control of the defense or settlement, at 6529 Parties&apos; sole
+                option, of any third-party Claims.
               </li>
               <br />
               <br />
@@ -671,13 +683,13 @@ export default function AboutTermsOfService() {
                 <b>Disclaimers</b>
                 <br />
                 <br />
-                Our Platform, the 6529 NFTs and any services relating to them is
-                provided &quot;As Is&quot; and &quot;As Available&quot; without
-                warranties of any kind, either express or implied, including
-                warranties of merchantability, fitness for a particular purpose,
-                title and non-infringement. We do not warrant that Our Platform,
-                NFTs or communication and content relating to them is accurate,
-                complete or error-free.
+                Our Platform, the 6529 NFTs and any services relating to them
+                are provided &quot;As Is&quot; and &quot;As Available&quot;
+                without warranties of any kind, either express or implied,
+                including warranties of merchantability, fitness for a
+                particular purpose, title and non-infringement. We do not
+                warrant that Our Platform, NFTs or communication and content
+                relating to them is accurate, complete or error-free.
                 <br />
                 <br />
                 We further reiterate the disclaimers, without limitation, in
@@ -723,12 +735,12 @@ export default function AboutTermsOfService() {
                 <br />
                 To the fullest extent permitted by applicable law, you release
                 the 6529 Parties from responsibility, liability, claims, demands
-                and/or damages &#40;actual and consequential&#41; of every kind
-                and nature, known and unknown &#40;including, but not limited
-                to, claims of negligence&#41;, arising out of or related to
-                disputes between users, acts or omissions of Third Parties or
-                anything for which you have agreed that we will have no
-                responsibility or liability pursuant to these terms.
+                and/or damages (actual and consequential) of every kind and
+                nature, known and unknown (including, but not limited to, claims
+                of negligence), arising out of or related to disputes between
+                users, acts or omissions of Third Parties or anything for which
+                you have agreed that we will have no responsibility or liability
+                pursuant to these terms.
                 <br />
                 <br />
                 If you are a consumer who resides in California, you hereby
@@ -747,10 +759,10 @@ export default function AboutTermsOfService() {
                 <br />
                 Any dispute arising from these Terms and your use of our
                 Services will be governed by and construed and enforced in
-                accordance with the laws of the Delaware without regard to
-                conflict of law rules or principles. Any dispute that is not
-                subject to Arbitration will be resolved in the federal or state
-                courts located in Wilmington, Delaware.
+                accordance with the laws of New York without regard to conflict
+                of law rules or principles. Any dispute that is not subject to
+                Arbitration will be resolved in the federal or state courts
+                located in Wilmington, Delaware.
               </li>
               <br />
               <br />
@@ -786,9 +798,9 @@ export default function AboutTermsOfService() {
                 <b>Severability</b>
                 <br />
                 <br />
-                This means that if a certain section of this website is
+                This means that if a certain section of these Terms is
                 determined in some or all jurisdictions to be void, illegal or
-                unenforceable, it will be severed from the rest of this contract
+                unenforceable, it will be severed from the rest of these Terms
                 and the remainder of the contract will continue to be valid and
                 binding.
               </li>

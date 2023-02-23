@@ -723,7 +723,7 @@ export default function UserPage(props: Props) {
                       <tbody>
                         <tr>
                           <td colSpan={3}>
-                            <h4>Cards HODLed</h4>
+                            <h4>Cards Collected</h4>
                           </td>
                         </tr>
                         <tr>
