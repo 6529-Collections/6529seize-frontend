@@ -107,7 +107,7 @@ enum OwnerTagFilter {
 }
 
 enum Focus {
-  TDH = "Cards HODLed",
+  TDH = "Cards Collected",
   INTERACTIONS = "Interactions",
   SETS = "Sets",
 }
@@ -864,7 +864,7 @@ export default function Leaderboard(props: Props) {
   function printHodlersDropdown() {
     return (
       <Dropdown className={styles.contentDropdown} drop={"down-centered"}>
-        <Dropdown.Toggle>HODLers: {ownerTagFilter}</Dropdown.Toggle>
+        <Dropdown.Toggle>Collectors: {ownerTagFilter}</Dropdown.Toggle>
         <Dropdown.Menu>
           {Object.values(OwnerTagFilter).map((tagFilter) => (
             <Dropdown.Item
@@ -1032,7 +1032,7 @@ export default function Leaderboard(props: Props) {
                 <tr>
                   <th className={styles.rank}>Rank</th>
                   <th className={styles.hodler}>
-                    HODLer&nbsp;&nbsp;
+                    Collector&nbsp;&nbsp;
                     <span className={styles.totalResults}>
                       x{totalResults}
                     </span>{" "}
@@ -1041,7 +1041,7 @@ export default function Leaderboard(props: Props) {
                   {focus == Focus.TDH && (
                     <th className={styles.tdhSub}>
                       <span className="d-flex align-items-center justify-content-center">
-                        Cards HODLed&nbsp;
+                        Cards Collected&nbsp;
                         <span className="d-flex flex-column">
                           <FontAwesomeIcon
                             icon="square-caret-up"

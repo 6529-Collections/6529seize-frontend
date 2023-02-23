@@ -61,8 +61,8 @@ export default function TDH() {
                       average.
                     </p>
                     <p>
-                      We further believe that by seeing hodler behavior
-                      on-chain, we can further delineate different profiles. In
+                      We further believe that by seeing collector behavior
+                      on-chain, we can further delineate different profiles . In
                       other words, someone who bought a few Meme Cards early and
                       then just held them is likely a different psychological
                       profile than an active buyer and seller.
@@ -71,7 +71,7 @@ export default function TDH() {
                       We calculate and make available community wide (all of
                       them directly from public blockchain data) and we expect
                       to add more metrics over time. These metrics may be used
-                      from time-to-time by us for allowlists, by others for
+                      from time to time by us for allowlists, by others for
                       their own allowlists or by anyone for any purpose
                       whatsoever.
                     </p>
@@ -98,8 +98,8 @@ export default function TDH() {
                       <b>Metrics Definitions</b>
                     </p>
                     <p>
-                      <b>Cards Hodled:</b> This is the total number of The Memes
-                      NFTs owned by an address
+                      <b>Cards Collected:</b> This is the total number of The
+                      Memes NFTs owned by an address
                     </p>
                     <p>
                       <b>Unique Memes:</b> The total number of unique The Meme
@@ -169,9 +169,9 @@ export default function TDH() {
                       (3,941/101)
                     </p>
                     <p>
-                      <b>TDH:</b> TDH (unboosted) with a fun qualitative
-                      multiplier based on NFTs held. The boosters are as
-                      follows:
+                      <b>TDH:</b> &quot;TDH (unboosted)&quot; multiplied by a
+                      fun qualitative factor based on which NFTS were collected.
+                      The boosters are as follows:
                     </p>
                     &#40;1&#41;
                     <Table className={styles.tdhFormulaTable} bordered={false}>

@@ -142,7 +142,7 @@ export default function NFTLeaderboard(props: Props) {
                 <tr className={styles.gap}></tr>
                 <tr>
                   <th className={styles.rank}>Rank</th>
-                  <th className={styles.hodler}>HODLer</th>
+                  <th className={styles.hodler}>Collector</th>
                   <th className={styles.gap}></th>
                   <th className={styles.tdhSub}>
                     <span className="d-flex align-items-center justify-content-center">
