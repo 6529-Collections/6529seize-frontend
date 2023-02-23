@@ -26,7 +26,7 @@ export default function MemeLabIndex(props: {
     { display: "Home", href: "/" },
     { display: "Meme Lab", href: "/meme-lab" },
     { display: "Collections", href: "/meme-lab?sort=collections" },
-    { display: props.collection.replace("-", " ") },
+    { display: props.collection.replaceAll("-", " ") },
   ]);
   const pagenameFull = `${props.name} | 6529 SEIZE`;
 
@@ -67,7 +67,7 @@ export default function MemeLabIndex(props: {
 
 export async function getServerSideProps(req: any, res: any, resolvedUrl: any) {
   const collection = req.query.collection;
-  let name = `${collection.replace("-", " ")} | Meme Lab Collections`;
+  let name = `${collection.replaceAll("-", " ")} | Meme Lab Collections`;
 
   return {
     props: {
