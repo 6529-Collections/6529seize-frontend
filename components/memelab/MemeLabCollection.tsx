@@ -45,7 +45,7 @@ export default function LabCollection() {
     if (router.isReady) {
       if (router.query.collection) {
         let c = router.query.collection as string;
-        c = c.replace("-", " ");
+        c = c.replaceAll("-", " ");
         setCollectionName(c);
 
         let initialSortDir = SortDirection.ASC;
@@ -119,7 +119,7 @@ export default function LabCollection() {
       router.replace(
         {
           query: {
-            collection: collectionName?.replace(" ", "-"),
+            collection: collectionName?.replaceAll(" ", "-"),
             sort: sort,
             sort_dir: sortDir,
           },
