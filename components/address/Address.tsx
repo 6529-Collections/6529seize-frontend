@@ -65,7 +65,7 @@ export default function Address(props: Props) {
       return "6529Museum";
     }
     if (props.address?.toUpperCase() == MANIFOLD.toUpperCase()) {
-      return "Manifold Gallery";
+      return "Manifold Minting Wallet";
     }
 
     if (ensResolution && ensResolution.data) {
