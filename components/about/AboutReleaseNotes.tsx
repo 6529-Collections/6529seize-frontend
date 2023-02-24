@@ -14,31 +14,38 @@ export default function AboutReleaseNotes() {
             <p>
               <b>This is the Release log for the seize.io website.</b>
             </p>
-            <p>The log is updated in reverse chronological order.</p>
             <p>
-              Major site-wide releases are incremented as 1.x.x
-              <br />
-              New features are incremented as x.1.x
-              <br />
-              Small updates or bug fixes are incremented as x.x.1
+              <b>General Methodology</b>
             </p>
+            <ul>
+              <li>The log is updated in reverse chronological order</li>
+              <li>Major site-wide releases are incremented as 1.x.x</li>
+              <li>New features are incremented as x.1.x</li>
+              <li>Small updates or bug fixes are incremented as x.x.1</li>
+            </ul>
             <br />
             <p>
               <b>Release 1.0.0</b>
               <br />
-              Feb TBC, 2023
+              Feb 24, 2023
               <br />
-              This release is the initial site launch. Given this, it will be
-              less detailed on each feature than subsequent logs.
+              This release is the initial site launch. Given Release 1.0.0 is
+              the initial release and is a broad release, the log for this
+              release will be less detailed on a per-feature basis than
+              subsequent logs will be.
             </p>
-            <p>
-              The initial release includes the following significant features
-            </p>
+            <p>The initial release includes:</p>
             <ul>
-              <li>Details about all Meme Cards</li>
-              <li>Details about all Gradient</li>
-              <li>Community Metrics</li>
-              <li>Activity logs of purchases and transfers of Meme Cards</li>
+              <li>Initial release of seize.io</li>
+              <li>Information and statistics about The Memes NFTs</li>
+              <li>Information and statistics about Meme Lab NFTs</li>
+              <li>Information and statistics about 6529 Gradient NFTs </li>
+              <li>
+                Information and statistics about collectors of The Memes and
+                Gradient NFTs
+              </li>
+              <li>Ability to connect a wallet to see your own owned NFTs</li>
+              <li>Activity logs of purchases and transfers of NFTs</li>
               <li>Various informational pages</li>
             </ul>
           </Col>

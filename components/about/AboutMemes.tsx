@@ -58,9 +58,15 @@ export default function AboutMemes() {
               at large.
             </p>
             <p>
-              This is what we call &quot;the open metaverse&quot; and we think
-              it is the most consequential technology decision in our society
-              right now.
+              We believe that permissionless NFTs on decentralized public
+              blockchains should used as the default ownership layer for digital
+              objects - profile pictures, avatars, art, virtual spaces, game
+              objects, identities and so on - and that application providers
+              should reference that ownership layer. This is what we call
+              &quot;the open metaverse&quot;.We think whether our digital
+              objects are recorded in centralized corporate databased or
+              user-owned public blockchains is the most consequential technology
+              decision in our society right now.
             </p>
             <p>
               The Memes are large edition, CCO (public domain) NFTs that are

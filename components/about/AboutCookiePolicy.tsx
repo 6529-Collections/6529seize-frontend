@@ -59,7 +59,8 @@ export default function AboutCookiePolicy() {
                         target="_blank"
                         rel="noreferrer">
                         AWSALBTGCORS
-                      </a>
+                      </a>{" "}
+                      (Amazon Web Services)
                     </td>
                     <td>First Party</td>
                     <td>7 days</td>
@@ -72,7 +73,8 @@ export default function AboutCookiePolicy() {
                         target="_blank"
                         rel="noreferrer">
                         AWSALBTG
-                      </a>
+                      </a>{" "}
+                      (Amazon Web Services)
                     </td>
                     <td>First Party</td>
                     <td>7 days</td>
@@ -110,7 +112,8 @@ export default function AboutCookiePolicy() {
                         target="_blank"
                         rel="noreferrer">
                         _ga_71NLVV3KY3
-                      </a>
+                      </a>{" "}
+                      (Google Analytics)
                     </td>
                     <td>First Party</td>
                     <td>372 days</td>
@@ -123,7 +126,22 @@ export default function AboutCookiePolicy() {
                         target="_blank"
                         rel="noreferrer">
                         _ga
-                      </a>
+                      </a>{" "}
+                      (Google Analytics)
+                    </td>
+                    <td>First Party</td>
+                    <td>372 days</td>
+                  </tr>
+                  <tr>
+                    <td>.seize.io</td>
+                    <td>
+                      <a
+                        href="https://cookiepedia.co.uk/cookies/_gid"
+                        target="_blank"
+                        rel="noreferrer">
+                        _gid
+                      </a>{" "}
+                      (Google Analytics)
                     </td>
                     <td>First Party</td>
                     <td>372 days</td>
