@@ -62,7 +62,7 @@ export default function TDH() {
                     </p>
                     <p>
                       We further believe that by seeing collector behavior
-                      on-chain, we can further delineate different profiles . In
+                      on-chain, we can further delineate different profiles. In
                       other words, someone who bought a few Meme Cards early and
                       then just held them is likely a different psychological
                       profile than an active buyer and seller.

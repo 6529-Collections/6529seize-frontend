@@ -554,7 +554,7 @@ export default function MemePage() {
                       <td>{printMintDate(nft.mint_date)}</td>
                     </tr>
                     <tr>
-                      <td>HODL Rate</td>
+                      <td>TDH Rate</td>
                       <td>{Math.round(nft.hodl_rate * 100) / 100}</td>
                     </tr>
                     <tr>
@@ -1296,7 +1296,7 @@ export default function MemePage() {
                       <td>{printMintDate(nft.mint_date)}</td>
                     </tr>
                     <tr>
-                      <td>HODL Rate</td>
+                      <td>TDH Rate</td>
                       <td>
                         {numberWithCommas(
                           Math.round(nft.hodl_rate * 100) / 100
