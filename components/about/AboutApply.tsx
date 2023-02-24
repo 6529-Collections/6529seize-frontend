@@ -26,7 +26,7 @@ export default function AboutApply() {
               with:
             </p>
             <ul>
-              <li>Your name:</li>
+              <li>Your name</li>
               <br />
               <li>Your twitter handle</li>
               <br />
