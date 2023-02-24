@@ -30,50 +30,78 @@ export default function AboutPrivacyPolicy() {
                 <b>Service</b>&quot;)).
               </p>
               <br />
-              <p>
-                <h3>Personal information we collect</h3>
-              </p>
+              <h3>Index</h3>
+              <br />
+              <br />
+              <ul>
+                <li>Personal information we collect</li>
+                <li>How we use your personal information</li>
+                <li>How we share your personal information</li>
+                <li>Your choices</li>
+                <li>Other sites and services</li>
+                <li>Security</li>
+                <li>International data transfers</li>
+                <li>Children</li>
+                <li>Changes to this Privacy Policy</li>
+                <li>How to contact us</li>
+              </ul>
+              <br />
+              <h3>Personal information we collect</h3>
+              <br />
               <br />
               <p>
                 <b>Information you provide to us.</b> Personal information you
                 may provide to us through the Service or otherwise includes:
-                <ul>
-                  <li>
-                    <b>Transactional data</b>, such as blockchain transaction
-                    history and other information associated with your linked
-                    cryptocurrency wallet, as well as information needed to mint
-                    a nonfungible token (&quot;NFT&quot;) on or through the
-                    Services.
-                  </li>
-                  <li>
-                    <b>Communications data</b> based on our exchanges with you,
-                    including when you contact us through the Service, social
-                    media, or otherwise.
-                  </li>
-                  <li>
-                    <b>Other data</b> not specifically listed here, which we
-                    will use as described in this Privacy Policy or as otherwise
-                    disclosed at the time of collection.
-                  </li>
-                </ul>
-              </p>
-              <p>
-                <b>Third-party sources.</b>We may combine personal information
-                we receive from you with personal information we obtain from
-                other sources, such as:
               </p>
               <ul>
                 <li>
-                  <b>Public sources</b>, such as public blockchains (like
-                  Ethereum) and ledgers, social media platforms, and other
-                  publicly available sources.
+                  <b>Transactional data</b>, when you connect your Ethereum
+                  wallet to our website or minting pages, we read your public
+                  wallet data such as your Ethereum addresses and which tokens
+                  you have in your address in order to display those tokens on
+                  our Service or to allow you to mint an NFT on or through the
+                  Service. It is not possible to mint an NFT without connecting
+                  an Ethereum wallet in this manner.
                 </li>
                 <li>
-                  <b>Third-party services</b>, such as virtual currency account
+                  <b>Communications data</b> based on our exchanges with you,
+                  including when you contact us through the Service, social
+                  media, or otherwise.
+                </li>
+                <li>
+                  <b>Other data</b> not specifically listed here, which we will
+                  use as described in this Privacy Policy or as otherwise
+                  disclosed at the time of collection.
+                </li>
+              </ul>
+              <p>
+                <b>Third-party sources.</b>We may combine personal information
+                we receive from you with public or personal information we may
+                obtain from other sources, such as:
+              </p>
+              <ul>
+                <li>
+                  <b>Public blockchains:</b> we obtain publicly available
+                  information about NFTs, NFT transactions and addresses from
+                  public blockchains like Ethereum. As a non-exclusive example,
+                  we display on our website which Ethereum addresses own our
+                  NFTs.
+                </li>
+                <li>
+                  <b>Social Media platforms:</b> social media platforms, and
+                  other publicly available sources. As a non-exclusive example,
+                  you may contact us on Twitter and we might learn your name
+                  from your Twitter public profile.
+                </li>
+                <li>
+                  <b>Third-party services:</b> such as virtual currency account
                   services you link to the Services. This data may include your
                   wallet address or other information associated with that
                   account that is made available to us based on your account
                   settings on that service.
+                  <br />
+                  As a non-exclusive example, when you connect your Ethereum
+                  wallet to our website, it shares your wallet address with us.
                 </li>
               </ul>
               <p>
@@ -82,29 +110,31 @@ export default function AboutPrivacyPolicy() {
                 you, your computer or mobile device, and your interaction over
                 time with the Service, our communications and other online
                 services, such as:
-                <ul>
-                  <li>
-                    <b>Device data</b>, such as your computer or mobile device’s
-                    operating system type and version, manufacturer and model,
-                    browser type, screen resolution, RAM and disk size, CPU
-                    usage, device type (e.g., phone, tablet), IP address, unique
-                    identifiers (including identifiers used for advertising
-                    purposes), language settings, mobile device carrier,
-                    radio/network information (e.g., Wi-Fi, LTE, 3G), and
-                    general location information such as city, state or
-                    geographic area.
-                  </li>
-                  <li>
-                    <b>Online activity data</b>, such as pages or screens you
-                    viewed, how long you spent on a page or screen, the website
-                    you visited before browsing to the Service, navigation paths
-                    between pages or screens, information about your activity on
-                    a page or screen, access times and duration of access, and
-                    whether you have opened our emails or clicked links within
-                    them.
-                  </li>
-                </ul>
               </p>
+              <ul>
+                <li>
+                  <b>Device data</b>, such as your computer or mobile
+                  device&apos;s operating system type and version, manufacturer
+                  and model, browser type, screen resolution, RAM and disk size,
+                  CPU usage, device type (e.g., phone, tablet), IP address,
+                  unique identifiers (including identifiers used for advertising
+                  purposes), language settings, mobile device carrier,
+                  radio/network information (e.g., Wi-Fi, LTE, 3G), and general
+                  location information such as city, state or geographic area.
+                  <br />
+                  As a non-exclusive example, we may serve a version of our
+                  webpage appropriate to the size of your screen.
+                </li>
+                <li>
+                  <b>Online activity data</b>, such as pages or screens you
+                  viewed, how long you spent on a page or screen, the website
+                  you visited before browsing to the Service, navigation paths
+                  between pages or screens, information about your activity on a
+                  page or screen, access times and duration of access, and
+                  whether you have opened our emails or clicked links within
+                  them.
+                </li>
+              </ul>
               <p>
                 <b>Cookies.</b> Some of our automatic data collection is
                 facilitated by cookies and similar technologies. For more
@@ -115,13 +145,12 @@ export default function AboutPrivacyPolicy() {
                   rel="noreferrer">
                   Cookie Policy
                 </a>
-                . We will also store a record of your preferences in respect of
+                . We may also store a record of your preferences in respect of
                 the use of these technologies in connection with the Service.
               </p>
               <br />
-              <p>
-                <h3>How we use your personal information</h3>
-              </p>
+              <h3>How we use your personal information</h3>
+              <br />
               <br />
               <p>
                 We may use your personal information for the following purposes
@@ -130,30 +159,30 @@ export default function AboutPrivacyPolicy() {
               <p>
                 <b>Service delivery and operations.</b> We may use your personal
                 information to:
-                <ul>
-                  <li>
-                    provide, operate and improve the Service and our business;
-                  </li>
-                  <li>
-                    personalizing the service, including remembering your
-                    selections and preferences as you navigate the Service;
-                  </li>
-                  <li>enable you to mint an NFT;</li>
-                  <li>
-                    communicate with you about the Service, including by sending
-                    Service-related announcements, updates, security alerts, and
-                    support and administrative messages;
-                  </li>
-                  <li>
-                    understand your needs and interests, and personalize your
-                    experience with the Service and our communications; and
-                  </li>
-                  <li>
-                    provide support for the Service, and respond to your
-                    requests, questions and feedback.
-                  </li>
-                </ul>
               </p>
+              <ul>
+                <li>
+                  provide, operate and improve the Service and our business;
+                </li>
+                <li>
+                  personalize the service, including remembering your selections
+                  and preferences as you navigate the Service;
+                </li>
+                <li>enable you to mint an NFT;</li>
+                <li>
+                  communicate with you about the Service, including by sending
+                  Service-related announcements, updates, security alerts, and
+                  support and administrative messages;
+                </li>
+                <li>
+                  understand your needs and interests, and personalize your
+                  experience with the Service and our communications; and
+                </li>
+                <li>
+                  provide support for the Service, and respond to your requests,
+                  questions and feedback.
+                </li>
+              </ul>
               <p>
                 <b>Research and development.</b> We may use your personal
                 information for research and development purposes, including to
@@ -180,40 +209,38 @@ export default function AboutPrivacyPolicy() {
               <p>
                 <b>Compliance and protection.</b> We may use your personal
                 information to:
-                <ul>
-                  <li>
-                    comply with applicable laws, lawful requests, and legal
-                    process, such as to respond to subpoenas, investigations or
-                    requests from government authorities;
-                  </li>
-                  <li>
-                    protect our, your or others&apos; rights, privacy, safety or
-                    property (including by making and defending legal claims);
-                  </li>
-                  <li>
-                    audit our internal processes for compliance with legal and
-                    contractual requirements or our internal policies;
-                  </li>
-                  <li>
-                    enforce the terms and conditions that govern the Service;
-                    and
-                  </li>
-                  <li>
-                    prevent, identify, investigate and deter fraudulent,
-                    harmful, unauthorized, unethical or illegal activity,
-                    including cyberattacks and identity theft.
-                  </li>
-                </ul>
               </p>
+              <ul>
+                <li>
+                  comply with applicable laws, lawful requests, and legal
+                  process, such as to respond to subpoenas, investigations or
+                  requests from government authorities;
+                </li>
+                <li>
+                  protect our, your or others&apos; rights, privacy, safety or
+                  property (including by making and defending legal claims);
+                </li>
+                <li>
+                  audit our internal processes for compliance with legal and
+                  contractual requirements or our internal policies;
+                </li>
+                <li>
+                  enforce the terms and conditions that govern the Service; and
+                </li>
+                <li>
+                  prevent, identify, investigate and deter fraudulent, harmful,
+                  unauthorized, unethical or illegal activity, including
+                  cyberattacks and identity theft.
+                </li>
+              </ul>
               <p>
                 <b>With your consent.</b> In some cases, we may specifically ask
                 for your consent to collect, use or share your personal
                 information, such as when required by law.
               </p>
               <br />
-              <p>
-                <h3>How we share your personal information</h3>
-              </p>
+              <h3>How we share your personal information</h3>
+              <br />
               <br />
               <p>
                 We may share your personal information with the following
@@ -244,31 +271,29 @@ export default function AboutPrivacyPolicy() {
               <p>
                 <b>Business transferees.</b> We may disclose personal
                 information in the context of actual or prospective business
-                transactions (e.g., investments in Seize, financing of Seize,
-                public stock offerings, or the sale, transfer or merger of all
-                or part of our business, assets or shares), for example, we may
-                need to share certain personal information with prospective
-                counterparties and their advisers. We may also disclose your
-                personal information to an acquirer, successor, or assignee of
-                Seize as part of any merger, acquisition, sale of assets, or
-                similar transaction, and/or in the event of an insolvency,
-                bankruptcy, or receivership in which personal information is
-                transferred to one or more third parties as one of our business
-                assets.
+                transactions (e.g., investments in or sale of our company), for
+                example, we may need to share certain personal information with
+                prospective counterparties and their advisers. We may also
+                disclose your personal information to an acquirer, successor, or
+                assignee of 6529 Collections as part of any merger, acquisition,
+                sale of assets, or similar transaction, and/or in the event of
+                an insolvency, bankruptcy, or receivership in which personal
+                information is transferred to one or more third parties as one
+                of our business assets.
               </p>
               <p>
-                <b>Other users and the public.</b> Your transactional data may
-                be visible to other users of the Service and the public,
-                including on the public blockchain (like Ethereum). This
-                information can be seen, collected and used by others, including
-                being cached, copied, screen captured or stored elsewhere by
-                others (e.g., search engines), and we are not responsible for
-                any such use of this information.
+                <b>Other users and the public.</b> Your transactional data is
+                visible to other users of the Service and the public, including
+                on the Ethereum blockchain, directly on Ethereum nodes and on a
+                wide variety of websites and services that read directly from
+                the Ethereum blockchain. This information can be seen, collected
+                and used by others, including being cached, copied, screen
+                captured or stored elsewhere by others (e.g., search engines),
+                and we are not responsible for any such use of this information.
               </p>
               <br />
-              <p>
-                <h3>Your choices</h3>
-              </p>
+              <h3>Your choices</h3>
+              <br />
               <br />
               <p>
                 <b>Cookies.</b> For information about cookies employed by the
@@ -292,7 +317,7 @@ export default function AboutPrivacyPolicy() {
                 send &quot;Do Not Track&quot; signals to the online services
                 that you visit. We currently do not respond to &quot;Do Not
                 Track&quot; signals. To find out more about &quot;Do Not
-                Track&quot;, please visit{" "}
+                Track,&quot; please visit{" "}
                 <a
                   href={`http://www.allaboutdnt.com`}
                   target="_blank"
@@ -318,9 +343,8 @@ export default function AboutPrivacyPolicy() {
                 received from that third party.
               </p>
               <br />
-              <p>
-                <h3>Other sites and services</h3>
-              </p>
+              <h3>Other sites and services</h3>
+              <br />
               <br />
               <p>
                 The Service may contain links to websites, mobile applications,
@@ -335,9 +359,8 @@ export default function AboutPrivacyPolicy() {
                 websites, mobile applications and online services you use.
               </p>
               <br />
-              <p>
-                <h3>Security</h3>
-              </p>
+              <h3>Security</h3>
+              <br />
               <br />
               <p>
                 We employ a number of technical, organizational and physical
@@ -347,9 +370,8 @@ export default function AboutPrivacyPolicy() {
                 of your personal information.
               </p>
               <br />
-              <p>
-                <h3>International data transfer</h3>
-              </p>
+              <h3>International data transfer</h3>
+              <br />
               <br />
               <p>
                 We and our service providers may operate and process your
@@ -359,9 +381,8 @@ export default function AboutPrivacyPolicy() {
                 as those in your state, province, or country.
               </p>
               <br />
-              <p>
-                <h3>Children</h3>
-              </p>
+              <h3>Children</h3>
+              <br />
               <br />
               <p>
                 The Service is not intended for use by anyone under 18 years of
@@ -381,9 +402,8 @@ export default function AboutPrivacyPolicy() {
                 information.
               </p>
               <br />
-              <p>
-                <h3>Changes to this Privacy Policy</h3>
-              </p>
+              <h3>Changes to this Privacy Policy</h3>
+              <br />
               <br />
               <p>
                 We reserve the right to modify this Privacy Policy at any time.
@@ -398,34 +418,150 @@ export default function AboutPrivacyPolicy() {
                 interactions with the Service and our business.
               </p>
               <br />
+              <h3>European Union residents / Your Rights</h3>
+              <br />
+              <br />
               <p>
-                <h3>How to contact us</h3>
+                We have taken all appropriate measures to provide any
+                information relating to your rights as well as how to exercise
+                these rights. Under Chapter III of the GDPR you have the
+                following rights:
               </p>
               <br />
               <p>
-                <ul>
-                  <li>
-                    Email:{" "}
-                    <a
-                      href="mailto:privacy@6529.io"
-                      target="_blank"
-                      rel="noreferrer">
-                      privacy&#64;6529.io
-                    </a>
-                  </li>
-                  <li>
-                    Mail:
-                    <br />
-                    6529 Collections LLC
-                    <br />
-                    2810 N Church St
-                    <br />
-                    #76435 Wilmington, DE 19802-4447
-                    <br />
-                    United States of America
-                  </li>
-                </ul>
+                <b>
+                  Transparent information, communication and modalities for the
+                  exercise of your rights
+                </b>
+                <br />
+                You have the right to be provided with your data freely and in
+                an intelligible and easily accessible form. Following your
+                request, we shall provide information without undue delay and in
+                any event within one month of receipt of the request. That
+                period may be extended where necessary, taking into account the
+                complexity and number of requests. In that case we will inform
+                you for the reasons of the delay.
               </p>
+              <br />
+              <p>
+                <b>
+                  Information to be provided where personal data are collected
+                  from the data subject
+                </b>
+                <br />
+                You have the right to know the contact details of the agent who
+                collects your data, the purposes of the processing for which the
+                personal data are intended, the legal basis for the processing,
+                the recipients or categories of recipients of the personal data
+                and where applicable the fact that the controller intends to
+                transfer personal data to a third country.
+              </p>
+              <br />
+              <p>
+                <b>Right of access</b>
+                <br />
+                You have the right to request and receive a copy of your
+                personal data undergoing processing. However, for any further
+                copies requested, we may charge you a reasonable fee that is
+                based on administrative costs.
+              </p>
+              <br />
+              <p>
+                <b>Right to rectification</b>
+                <br />
+                You have the right to obtain from us within reasonable time the
+                rectification of inaccurate personal data concerning you.
+              </p>
+              <br />
+              <p>
+                <b>Right to erasure (&apos;right to be forgotten&apos;)</b>
+                <br />
+                There is a right to ask for the erasure of your personal data
+                and no longer processed where the personal data are no longer
+                necessary in relation to the purposes for which they are
+                controlled or otherwise processed.
+                <br />
+                <br />
+                Thus, in the cases where we retain and process personal data in
+                accordance with the provisions of Article 6(1)(c) of the GDPR,
+                we may object to such a request and may keep the relevant
+                personal data that are required in order for our us to comply
+                with its legal obligations or the legal obligations of a
+                Controller that cooperates with our us pursuant to the terms of
+                a Data Processing Agreement.
+              </p>
+              <br />
+              <p>
+                <b>Right to restriction of processing</b>
+                <br />
+                We ensure that we have in place a procedure where you have the
+                right to restrict the processing of your personal data.
+                Nonetheless, for those personal data that are necessary for
+                compliance with a legal obligation, we may object to the
+                restriction.
+              </p>
+              <br />
+              <p>
+                <b>Right to data portability</b>
+                <br />
+                You have the right to receive the personal data concerning you,
+                which you have provided to us, in a structured, commonly used
+                and machine-readable format and you have the right to transmit
+                those data to another controller without hindrance from the
+                controller to which the personal data have been provided.
+              </p>
+              <br />
+              <p>
+                <b>Right to object</b>
+                <br />
+                You have the right to object to the processing of your personal
+                data. However, since we lawfully process such data under Article
+                6(1)(c), we will still have the right to process the data.
+              </p>
+              <br />
+              <p>
+                <b>Automated individual decision-making, including profiling</b>
+                <br />
+                You have the right to be subject to a decision solely on
+                automated processing, including profiling, which produces legal
+                effects concerning you or similarly significantly affects you.
+              </p>
+              <br />
+              <p>
+                <b>Ethereum blockchain data</b>
+                <br />
+                For avoidance of doubt, we consider that information about
+                Ethereum addresses, ENS names, tokens and token transactions on
+                the Ethereum blockchain and similar public blockchains, is
+                public data and we may store, process or display it without
+                limitation.
+              </p>
+              <br />
+              <h3>How to contact us</h3>
+              <br />
+              <br />
+              <ul>
+                <li>
+                  Email:{" "}
+                  <a
+                    href="mailto:privacy@6529.io"
+                    target="_blank"
+                    rel="noreferrer">
+                    privacy&#64;6529.io
+                  </a>
+                </li>
+                <li>
+                  Mail:
+                  <br />
+                  6529 Collections LLC
+                  <br />
+                  2810 N Church St
+                  <br />
+                  #76435 Wilmington, DE 19802-4447
+                  <br />
+                  United States of America
+                </li>
+              </ul>
             </>
           </Col>
         </Row>
