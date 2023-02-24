@@ -63,7 +63,7 @@ export default function AboutMemes() {
               objects - profile pictures, avatars, art, virtual spaces, game
               objects, identities and so on - and that application providers
               should reference that ownership layer. This is what we call
-              &quot;the open metaverse&quot;.We think whether our digital
+              &quot;the open metaverse&quot;. We think whether our digital
               objects are recorded in centralized corporate databased or
               user-owned public blockchains is the most consequential technology
               decision in our society right now.
