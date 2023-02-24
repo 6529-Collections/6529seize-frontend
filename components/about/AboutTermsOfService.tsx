@@ -103,10 +103,10 @@ export default function AboutTermsOfService() {
                 </ol>
                 <br />
                 &quot;Our Platforms&quot; provide a (hopefully) convenient way
-                to see information about The Memes and The Memes community and
-                to primary mint NFTs, but they are not the token nor the art. We
-                do not make any claims on the token or the art post-minting, nor
-                do we take any responsibility for it.
+                to see information about 6529 NFTs and their collectors and to
+                primary mint NFTs, but they are not the token nor the art. We do
+                not make any claims on the token post-minting or on the art for
+                the CC0 6529 NFTs, nor do we take any responsibility for either.
               </li>
               <br />
               <li>
@@ -558,8 +558,7 @@ export default function AboutTermsOfService() {
                 <br />
                 <br />
                 You can feel free to share ideas with us, but we may use them or
-                may already be workiThird Party Content or Servicesng on similar
-                ideas.
+                may already be working on similar ideas.
                 <br />
                 <br />
                 Given this, we will not pay you and you cannot claim
