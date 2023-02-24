@@ -63,11 +63,10 @@
   }
   td {
     border: 1px solid white !important;
-    width: calc(100%/4);
+    width: fit-content;
     padding: 10px;
   }
 }
-
 
 .lastUpdateText {
   color: $font-color-h !important;

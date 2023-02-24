@@ -124,15 +124,17 @@ export default function Home() {
                   <Container className="no-padding">
                     <Row>
                       {nft.animation ? (
-                        <NFTImage
-                          nft={nft}
-                          animation={true}
-                          height={650}
-                          balance={nftBalance}
-                          onLoad={() => {
-                            setIsNftImageLoaded(true);
-                          }}
-                        />
+                        <span>
+                          <NFTImage
+                            nft={nft}
+                            animation={true}
+                            height={650}
+                            balance={nftBalance}
+                            onLoad={() => {
+                              setIsNftImageLoaded(true);
+                            }}
+                          />
+                        </span>
                       ) : (
                         <a href={`/the-memes/${nft.id}`}>
                           <NFTImage
