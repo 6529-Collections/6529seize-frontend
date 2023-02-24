@@ -1,26 +1,10 @@
 import { Col, Container, Row } from "react-bootstrap";
-import Head from "next/head";
 import { AboutSection } from "../../pages/about/[section]";
 import styles from "./About.module.scss";
 
 export default function AboutFAQ() {
   return (
     <>
-      <Head>
-        <title>About - FAQ | 6529 SEIZE</title>
-        <link rel="icon" href="/favicon.ico" />
-        <meta name="description" content="About - FAQ | 6529 SEIZE" />
-        <meta
-          property="og:url"
-          content={`${process.env.BASE_ENDPOINT}/about/${AboutSection.FAQ}`}
-        />
-        <meta property="og:title" content={`About - FAQ`} />
-        <meta property="og:description" content="6529 SEIZE" />
-        <meta
-          property="og:image"
-          content={`${process.env.BASE_ENDPOINT}/Seize_Logo_Glasses_2.png`}
-        />
-      </Head>
       <Container>
         <Row>
           <Col className="text-center">
