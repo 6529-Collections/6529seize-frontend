@@ -6,6 +6,7 @@ import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import { AboutSection } from "../../pages/about/[section]";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 const Address = dynamic(() => import("../address/Address"), { ssr: false });
 
@@ -51,16 +52,15 @@ export default function Header(props: Props) {
         className={`${styles.burgerMenu} ${
           burgerMenuOpen ? styles.burgerMenuOpen : ""
         }`}>
-        <span
+        <FontAwesomeIcon
           className={styles.burgerMenuClose}
+          icon="times-circle"
           onClick={() => {
             setBurgerMenuOpen(false);
             setShowBurgerMenuAbout(false);
             setsetShowBurgerMenuCommunity(false);
             setShowBurgerMenuConnectOptions(false);
-          }}>
-          X
-        </span>
+          }}></FontAwesomeIcon>
         <Container className="text-center">
           <Row className="pt-5 pb-4">
             <Col>

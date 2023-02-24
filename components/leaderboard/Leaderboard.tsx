@@ -938,7 +938,10 @@ export default function Leaderboard(props: Props) {
         {lastTDH && props.showLastTdh && (
           <Col
             className={`${styles.lastTDH} d-flex align-items-center justify-content-end`}
-            xs={6}>
+            xs={{ span: 12 }}
+            sm={{ span: 6 }}
+            md={{ span: 6 }}
+            lg={{ span: 6 }}>
             * TDH Block&nbsp;
             <a
               href={`https://etherscan.io/block/${lastTDH.block}`}
