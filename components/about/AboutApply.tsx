@@ -28,11 +28,11 @@ export default function AboutApply() {
             <ul>
               <li>Your name:</li>
               <br />
-              <li>Your twitter handle:</li>
+              <li>Your twitter handle</li>
               <br />
-              <li>A link to your work:</li>
+              <li>A link to your work</li>
               <br />
-              <li>Anything you would like us to know:</li>
+              <li>Anything you would like us to know</li>
             </ul>
             <br />
             <p>Please note:</p>

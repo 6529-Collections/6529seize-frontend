@@ -170,7 +170,7 @@ export default function AboutFAQ() {
                 d&#41; Learning and sharing findings about how to run mints
                 without high gas costs and other negative effects
                 <br />
-                e&#41; Release open-source data and tools for others to use
+                e&#41; Releasing open-source data and tools for others to use
                 <br />
               </li>
               <br />
@@ -183,8 +183,13 @@ export default function AboutFAQ() {
                 collectors, Meme Lab collectors, ReMemers or otherwise.
                 <br />
                 <br />
-                Our tools/metrics to measure this today are still rudimentary
-                and we need to refine them.
+                For example, &quot;Freedom To Transact&quot; has started to take
+                hold as a useful concept and shorthand among people in our
+                community and beyond.
+                <br />
+                <br />
+                Our tools/metrics to measure the spread of these concepts today
+                are still rudimentary and we need to refine them.
               </li>
               <br />
               <li>
@@ -503,7 +508,7 @@ export default function AboutFAQ() {
                 <br />
                 <br />
                 There are many other NFT collections that offer NFTs with
-                (supposed) &apos;utility&apos;, mostly in the PFP field - if
+                (supposed) &quot;utility&quot;, mostly in the PFP field - if
                 that is something that you are looking for, those collections
                 may be a better fit for you.
               </li>
@@ -556,12 +561,7 @@ export default function AboutFAQ() {
                 <b>Who can make a ReMeme?</b>
                 <br />
                 <br />
-                Anyone! You do not need approval from anyone. We encourage you
-                to try, even if you do not think of yourself as an
-                &apos;artist&apos;.
-                <br />
-                <br />
-                It is a great way to learn a bit about minting NFTs.
+                Anyone! You do not need approval from anyone.
               </li>
               <br />
               <li>
@@ -587,12 +587,9 @@ export default function AboutFAQ() {
                 <b>What Is the Meme Lab?</b>
                 <br />
                 <br />
-                What Is the Meme Lab?
-                <br />
-                <br />
-                We actively encourage the artists to experiment on any dimension
-                they like on the Meme Labs contract - artistic, community,
-                edition size, price and so on.
+                The Meme Lab is an experimental CC0 contract for artists who
+                have already minted a Meme Card. They can use the Meme Lab
+                contract to mint NFTs that they like, in any way that they like.
               </li>
               <br />
               <li>
@@ -701,6 +698,10 @@ export default function AboutFAQ() {
                 decentralized emergent uses of The Memes are developed in the
                 community and we want to participate or enable others to
                 participate.
+                <br />
+                <br />
+                We may hold them, sell them, donate them, let other people use
+                them or do nothing at all with them.
               </li>
               <br />
               <li>

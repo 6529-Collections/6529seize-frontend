@@ -39,6 +39,7 @@ import {
   faCheck,
   faXmark,
   faCartPlus,
+  faTimesCircle,
 } from "@fortawesome/free-solid-svg-icons";
 import Head from "next/head";
 
@@ -66,7 +67,8 @@ library.add(
   faEyeSlash,
   faCheck,
   faXmark,
-  faCartPlus
+  faCartPlus,
+  faTimesCircle
 );
 
 const { chains, provider } = configureChains(

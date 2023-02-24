@@ -302,8 +302,8 @@ export default function AboutMinting() {
                   <br />
                   <li>
                     The purpose of the partial airdrops is to give a chance to
-                    community members who are not always online and available to
-                    mint.
+                    acquire a Meme Card to community members who are not always
+                    online and available to mint.
                   </li>
                 </ul>
               </li>

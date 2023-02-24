@@ -81,6 +81,20 @@ export default function AboutContactUs() {
                 already know.
               </li>
             </ul>
+            <br />
+            <p>
+              If, for some strange reason, you would like to send us a letter or
+              postcard, you can do so here:
+              <br />
+              <br />
+              6529 Collections LLC
+              <br />
+              2810 N Church St
+              <br />
+              #76435 Wilmington, DE 19802-4447
+              <br />
+              United States of America
+            </p>
           </Col>
         </Row>
       </Container>
