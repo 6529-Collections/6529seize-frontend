@@ -62,7 +62,7 @@ export default function UserPage(props: Props) {
   const [user, setUser] = useState(
     props.user.toUpperCase() == "6529Museum".toUpperCase()
       ? SIX529_MUSEUM
-      : props.user.toUpperCase() == "Manifold-Gallery".toUpperCase()
+      : props.user.toUpperCase() == "Manifold-Minting-Wallet".toUpperCase()
       ? MANIFOLD
       : props.user
   );
@@ -131,7 +131,7 @@ export default function UserPage(props: Props) {
               walletDisplay = "6529Museum";
             }
             if (walletDisplay && areEqualAddresses(walletDisplay, MANIFOLD)) {
-              walletDisplay = "Manifold Gallery";
+              walletDisplay = "Manifold Minting Wallet";
             }
             walletDisplay = newOwned[0].wallet_display
               ? newOwned[0].wallet_display
