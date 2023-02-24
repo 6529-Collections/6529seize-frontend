@@ -84,7 +84,7 @@ export async function getServerSideProps(req: any, res: any, resolvedUrl: any) {
       : areEqualAddresses(user, SIX529_MUSEUM)
       ? "6529Museum"
       : areEqualAddresses(user, MANIFOLD)
-      ? "Manifold-Gallery"
+      ? "Manifold-Minting-Wallet"
       : userDisplay;
   }
 
