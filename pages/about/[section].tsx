@@ -20,6 +20,7 @@ import AboutReleaseNotes from "../../components/about/AboutReleaseNotes";
 import AboutTermsOfService from "../../components/about/AboutTermsOfService";
 import AboutPrivacyPolicy from "../../components/about/AboutPrivacyPolicy";
 import AboutCookiePolicy from "../../components/about/AboutCookiePolicy";
+import Head from "next/head";
 
 export enum AboutSection {
   MEMES = "the-memes",
@@ -43,34 +44,25 @@ const Header = dynamic(() => import("../../components/header/Header"), {
   loading: () => <HeaderPlaceholder />,
 });
 
-export default function About() {
+interface Props {
+  section: AboutSection;
+  sectionTitle: string;
+}
+
+export default function About(props: Props) {
   const router = useRouter();
   const [breadcrumbs, setBreadcrumbs] = useState<Crumb[]>([
     { display: "Home", href: "/" },
     { display: "About" },
   ]);
 
-  const [section, setSection] = useState<AboutSection>();
-  const [sectionTitle, setSectionTitle] = useState<string>();
+  const [section, setSection] = useState<AboutSection>(props.section);
+  const [sectionTitle, setSectionTitle] = useState<string>(props.sectionTitle);
 
-  useEffect(() => {
-    if (router.isReady) {
-      if (
-        router.query.section &&
-        Object.values(AboutSection).includes(
-          router.query.section as AboutSection
-        )
-      ) {
-        const mySection = router.query.section as AboutSection;
-        const title = mySection
-          .split("-")
-          .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-          .join(" ");
-        setSectionTitle(title);
-        setSection(mySection);
-      }
-    }
-  }, [router.isReady]);
+  function setNewSection(section: AboutSection) {
+    setSection(section);
+    setSectionTitle(section.toUpperCase().replaceAll("-", " "));
+  }
 
   useEffect(() => {
     if (section && sectionTitle) {
@@ -124,6 +116,24 @@ export default function About() {
 
   return (
     <>
+      <Head>
+        <title>{`About - ${sectionTitle} | 6529 SEIZE`}</title>
+        <link rel="icon" href="/favicon.ico" />
+        <meta
+          name="description"
+          content={`About - ${sectionTitle} | 6529 SEIZE`}
+        />
+        <meta
+          property="og:url"
+          content={`${process.env.BASE_ENDPOINT}/about/${section}`}
+        />
+        <meta property="og:title" content={`About - ${sectionTitle}`} />
+        <meta property="og:description" content="6529 SEIZE" />
+        <meta
+          property="og:image"
+          content={`${process.env.BASE_ENDPOINT}/Seize_Logo_Glasses_2.png`}
+        />
+      </Head>
       <main className={styles.main}>
         <Header />
         <Breadcrumb breadcrumbs={breadcrumbs} />
@@ -141,7 +151,7 @@ export default function About() {
                       </Row>
                       <Row className="pt-1 pb-1">
                         <Col
-                          onClick={() => setSection(AboutSection.MEMES)}
+                          onClick={() => setNewSection(AboutSection.MEMES)}
                           className={`${menuStyles.aboutMenuLeftItem} ${
                             section == AboutSection.MEMES
                               ? menuStyles.aboutMenuLeftItemActive
@@ -153,7 +163,7 @@ export default function About() {
                       <Row className="pt-1 pb-1">
                         <Col
                           onClick={() =>
-                            setSection(AboutSection.MEMES_CALENDAR)
+                            setNewSection(AboutSection.MEMES_CALENDAR)
                           }
                           className={`${menuStyles.aboutMenuLeftItem} ${
                             section == AboutSection.MEMES_CALENDAR
@@ -165,18 +175,18 @@ export default function About() {
                       </Row>
                       <Row className="pt-1 pb-1">
                         <Col
-                          onClick={() => setSection(AboutSection.MEME_LAB)}
+                          onClick={() => setNewSection(AboutSection.MEME_LAB)}
                           className={`${menuStyles.aboutMenuLeftItem} ${
                             section == AboutSection.MEME_LAB
                               ? menuStyles.aboutMenuLeftItemActive
                               : ""
                           }`}>
-                          MemeLab
+                          Meme Lab
                         </Col>
                       </Row>
                       <Row className="pt-1 pb-1">
                         <Col
-                          onClick={() => setSection(AboutSection.GRADIENTS)}
+                          onClick={() => setNewSection(AboutSection.GRADIENTS)}
                           className={`${menuStyles.aboutMenuLeftItem} ${
                             section == AboutSection.GRADIENTS
                               ? menuStyles.aboutMenuLeftItemActive
@@ -192,7 +202,7 @@ export default function About() {
                       </Row>
                       <Row className="pt-1 pb-1">
                         <Col
-                          onClick={() => setSection(AboutSection.FAQ)}
+                          onClick={() => setNewSection(AboutSection.FAQ)}
                           className={`${menuStyles.aboutMenuLeftItem} ${
                             section == AboutSection.FAQ
                               ? menuStyles.aboutMenuLeftItemActive
@@ -203,7 +213,7 @@ export default function About() {
                       </Row>
                       <Row className="pt-1 pb-1">
                         <Col
-                          onClick={() => setSection(AboutSection.MINTING)}
+                          onClick={() => setNewSection(AboutSection.MINTING)}
                           className={`${menuStyles.aboutMenuLeftItem} ${
                             section == AboutSection.MINTING
                               ? menuStyles.aboutMenuLeftItemActive
@@ -214,7 +224,7 @@ export default function About() {
                       </Row>
                       <Row className="pt-1 pb-1">
                         <Col
-                          onClick={() => setSection(AboutSection.LICENSE)}
+                          onClick={() => setNewSection(AboutSection.LICENSE)}
                           className={`${menuStyles.aboutMenuLeftItem} ${
                             section == AboutSection.LICENSE
                               ? menuStyles.aboutMenuLeftItemActive
@@ -230,7 +240,7 @@ export default function About() {
                       </Row>
                       <Row className="pt-1 pb-1">
                         <Col
-                          onClick={() => setSection(AboutSection.APPLY)}
+                          onClick={() => setNewSection(AboutSection.APPLY)}
                           className={`${menuStyles.aboutMenuLeftItem} ${
                             section == AboutSection.APPLY
                               ? menuStyles.aboutMenuLeftItemActive
@@ -241,7 +251,7 @@ export default function About() {
                       </Row>
                       <Row className="pt-1 pb-1">
                         <Col
-                          onClick={() => setSection(AboutSection.CONTACT_US)}
+                          onClick={() => setNewSection(AboutSection.CONTACT_US)}
                           className={`${menuStyles.aboutMenuLeftItem} ${
                             section == AboutSection.CONTACT_US
                               ? menuStyles.aboutMenuLeftItemActive
@@ -252,7 +262,9 @@ export default function About() {
                       </Row>
                       <Row className="pt-1 pb-1">
                         <Col
-                          onClick={() => setSection(AboutSection.RELEASE_NOTES)}
+                          onClick={() =>
+                            setNewSection(AboutSection.RELEASE_NOTES)
+                          }
                           className={`${menuStyles.aboutMenuLeftItem} ${
                             section == AboutSection.RELEASE_NOTES
                               ? menuStyles.aboutMenuLeftItemActive
@@ -269,7 +281,7 @@ export default function About() {
                       <Row className="pt-1 pb-1">
                         <Col
                           onClick={() =>
-                            setSection(AboutSection.TERMS_OF_SERVICE)
+                            setNewSection(AboutSection.TERMS_OF_SERVICE)
                           }
                           className={`${menuStyles.aboutMenuLeftItem} ${
                             section == AboutSection.TERMS_OF_SERVICE
@@ -282,7 +294,7 @@ export default function About() {
                       <Row className="pt-1 pb-1">
                         <Col
                           onClick={() =>
-                            setSection(AboutSection.PRIVACY_POLICY)
+                            setNewSection(AboutSection.PRIVACY_POLICY)
                           }
                           className={`${menuStyles.aboutMenuLeftItem} ${
                             section == AboutSection.PRIVACY_POLICY
@@ -294,7 +306,9 @@ export default function About() {
                       </Row>
                       <Row className="pt-1 pb-1">
                         <Col
-                          onClick={() => setSection(AboutSection.COOKIE_POLICY)}
+                          onClick={() =>
+                            setNewSection(AboutSection.COOKIE_POLICY)
+                          }
                           className={`${menuStyles.aboutMenuLeftItem} ${
                             section == AboutSection.COOKIE_POLICY
                               ? menuStyles.aboutMenuLeftItemActive
@@ -321,7 +335,7 @@ export default function About() {
                       </Row>
                       <Row className="pt-1 pb-1">
                         <Col
-                          onClick={() => setSection(AboutSection.MEMES)}
+                          onClick={() => setNewSection(AboutSection.MEMES)}
                           className={`${menuStyles.aboutMenuLeftItem} ${
                             section == AboutSection.MEMES
                               ? menuStyles.aboutMenuLeftItemActive
@@ -333,7 +347,7 @@ export default function About() {
                       <Row className="pt-1 pb-1">
                         <Col
                           onClick={() =>
-                            setSection(AboutSection.MEMES_CALENDAR)
+                            setNewSection(AboutSection.MEMES_CALENDAR)
                           }
                           className={`${menuStyles.aboutMenuLeftItem} ${
                             section == AboutSection.MEMES_CALENDAR
@@ -345,7 +359,7 @@ export default function About() {
                       </Row>
                       <Row className="pt-1 pb-1">
                         <Col
-                          onClick={() => setSection(AboutSection.MEME_LAB)}
+                          onClick={() => setNewSection(AboutSection.MEME_LAB)}
                           className={`${menuStyles.aboutMenuLeftItem} ${
                             section == AboutSection.MEME_LAB
                               ? menuStyles.aboutMenuLeftItemActive
@@ -356,7 +370,7 @@ export default function About() {
                       </Row>
                       <Row className="pt-1 pb-1">
                         <Col
-                          onClick={() => setSection(AboutSection.GRADIENTS)}
+                          onClick={() => setNewSection(AboutSection.GRADIENTS)}
                           className={`${menuStyles.aboutMenuLeftItem} ${
                             section == AboutSection.GRADIENTS
                               ? menuStyles.aboutMenuLeftItemActive
@@ -372,7 +386,7 @@ export default function About() {
                       </Row>
                       <Row className="pt-1 pb-1">
                         <Col
-                          onClick={() => setSection(AboutSection.FAQ)}
+                          onClick={() => setNewSection(AboutSection.FAQ)}
                           className={`${menuStyles.aboutMenuLeftItem} ${
                             section == AboutSection.FAQ
                               ? menuStyles.aboutMenuLeftItemActive
@@ -383,7 +397,7 @@ export default function About() {
                       </Row>
                       <Row className="pt-1 pb-1">
                         <Col
-                          onClick={() => setSection(AboutSection.MINTING)}
+                          onClick={() => setNewSection(AboutSection.MINTING)}
                           className={`${menuStyles.aboutMenuLeftItem} ${
                             section == AboutSection.MINTING
                               ? menuStyles.aboutMenuLeftItemActive
@@ -394,7 +408,7 @@ export default function About() {
                       </Row>
                       <Row className="pt-1 pb-1">
                         <Col
-                          onClick={() => setSection(AboutSection.LICENSE)}
+                          onClick={() => setNewSection(AboutSection.LICENSE)}
                           className={`${menuStyles.aboutMenuLeftItem} ${
                             section == AboutSection.LICENSE
                               ? menuStyles.aboutMenuLeftItemActive
@@ -410,7 +424,7 @@ export default function About() {
                       </Row>
                       <Row className="pt-1 pb-1">
                         <Col
-                          onClick={() => setSection(AboutSection.APPLY)}
+                          onClick={() => setNewSection(AboutSection.APPLY)}
                           className={`${menuStyles.aboutMenuLeftItem} ${
                             section == AboutSection.APPLY
                               ? menuStyles.aboutMenuLeftItemActive
@@ -421,7 +435,7 @@ export default function About() {
                       </Row>
                       <Row className="pt-1 pb-1">
                         <Col
-                          onClick={() => setSection(AboutSection.CONTACT_US)}
+                          onClick={() => setNewSection(AboutSection.CONTACT_US)}
                           className={`${menuStyles.aboutMenuLeftItem} ${
                             section == AboutSection.CONTACT_US
                               ? menuStyles.aboutMenuLeftItemActive
@@ -432,7 +446,9 @@ export default function About() {
                       </Row>
                       <Row className="pt-1 pb-1">
                         <Col
-                          onClick={() => setSection(AboutSection.RELEASE_NOTES)}
+                          onClick={() =>
+                            setNewSection(AboutSection.RELEASE_NOTES)
+                          }
                           className={`${menuStyles.aboutMenuLeftItem} ${
                             section == AboutSection.RELEASE_NOTES
                               ? menuStyles.aboutMenuLeftItemActive
@@ -449,7 +465,7 @@ export default function About() {
                       <Row className="pt-1 pb-1">
                         <Col
                           onClick={() =>
-                            setSection(AboutSection.TERMS_OF_SERVICE)
+                            setNewSection(AboutSection.TERMS_OF_SERVICE)
                           }
                           className={`${menuStyles.aboutMenuLeftItem} ${
                             section == AboutSection.TERMS_OF_SERVICE
@@ -462,7 +478,7 @@ export default function About() {
                       <Row className="pt-1 pb-1">
                         <Col
                           onClick={() =>
-                            setSection(AboutSection.PRIVACY_POLICY)
+                            setNewSection(AboutSection.PRIVACY_POLICY)
                           }
                           className={`${menuStyles.aboutMenuLeftItem} ${
                             section == AboutSection.PRIVACY_POLICY
@@ -474,7 +490,9 @@ export default function About() {
                       </Row>
                       <Row className="pt-1 pb-1">
                         <Col
-                          onClick={() => setSection(AboutSection.COOKIE_POLICY)}
+                          onClick={() =>
+                            setNewSection(AboutSection.COOKIE_POLICY)
+                          }
                           className={`${menuStyles.aboutMenuLeftItem} ${
                             section == AboutSection.COOKIE_POLICY
                               ? menuStyles.aboutMenuLeftItemActive
@@ -493,4 +511,30 @@ export default function About() {
       </main>
     </>
   );
+}
+
+export async function getServerSideProps(req: any, res: any, resolvedUrl: any) {
+  const sectionPath = req.query.section;
+
+  if (
+    sectionPath &&
+    Object.values(AboutSection).includes(sectionPath as AboutSection)
+  ) {
+    const section = sectionPath as AboutSection;
+    const sectionTitle = section.toUpperCase().replaceAll("-", " ");
+    return {
+      props: {
+        section,
+        sectionTitle,
+      },
+    };
+  } else {
+    return {
+      redirect: {
+        permanent: false,
+        destination: "/404",
+      },
+      props: {},
+    };
+  }
 }
