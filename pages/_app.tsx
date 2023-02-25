@@ -9,7 +9,7 @@ import { alchemyProvider } from "wagmi/providers/alchemy";
 
 import { CoinbaseWalletConnector } from "wagmi/connectors/coinbaseWallet";
 import { WalletConnectConnector } from "wagmi/connectors/walletConnect";
-import { InjectedConnector } from "wagmi/connectors/injected";
+import { MetaMaskConnector } from "wagmi/connectors/metaMask";
 import { mainnet } from "wagmi/chains";
 import { configureChains, createClient, WagmiConfig } from "wagmi";
 
@@ -79,7 +79,7 @@ const { chains, provider } = configureChains(
 const client = createClient({
   autoConnect: true,
   connectors: [
-    new InjectedConnector({
+    new MetaMaskConnector({
       chains,
     }),
     new WalletConnectConnector({
