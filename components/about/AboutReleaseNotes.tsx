@@ -25,6 +25,18 @@ export default function AboutReleaseNotes() {
             </ul>
             <br />
             <p>
+              <b>Release 1.0.1</b>
+              <br />
+              Feb 25, 2023
+            </p>
+            <ul>
+              <li>
+                Fixed bug where in some cases wallet connectors would be
+                duplicated under the 'Connect' button dropdown.
+              </li>
+            </ul>
+            <br />
+            <p>
               <b>Release 1.0.0</b>
               <br />
               Feb 24, 2023

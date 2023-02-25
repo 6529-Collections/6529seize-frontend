@@ -63,15 +63,14 @@ export default function AboutFAQ() {
                 <br />
                 <br />
                 For endless tweetstorms about why NFTs are important to
-                decentralization, see his pinned tweet:
-                <br />
-                <br />
+                decentralization, see{" "}
                 <a
-                  href="https://twitter.com/punk6529/status/1448399827054833668?s=20&t=V5rVRg9MgOod_KPzQIBOKw"
+                  href="https://twitter.com/punk6529/status/1448399827054833668"
                   target="_blank"
                   rel="noreferrer">
-                  https://twitter.com/punk6529/status/1448399827054833668?s=20&t=V5rVRg9MgOod_KPzQIBOKw
+                  his pinned tweet
                 </a>
+                .
               </li>
               <br />
               <li>
