@@ -33,16 +33,17 @@
 
 .seizedToggle {
   line-height: 28px;
-  width: fit-content;
-  min-width: 150px;
   float: left;
-  padding-right: 15px;
+  padding-right: 25px;
+
   input {
-    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='%23000'/%3e%3c/svg%3e") !important;
-    border-color: black !important;
+    border-color: transparent !important;
+    background-color: white !important;
+    cursor: pointer;
   }
+
   input:checked {
-    background-color: $green !important;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='2.3' fill='%23000'/%3e%3c/svg%3e") !important;
   }
 }
 

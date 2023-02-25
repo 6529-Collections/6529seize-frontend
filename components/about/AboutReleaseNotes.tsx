@@ -27,12 +27,17 @@ export default function AboutReleaseNotes() {
             <p>
               <b>Release 1.0.1</b>
               <br />
-              Feb 25, 2023
+              Feb 26, 2023
             </p>
             <ul>
               <li>
                 Fixed bug where in some cases wallet connectors would be
                 duplicated under the Connect button dropdown.
+              </li>
+              <li>
+                Changed User page to use radio buttons for 'All', 'Seized',
+                'Non-Seized' as opposed to 'Hide Seized', 'Hide Non-Seized'
+                switches
               </li>
             </ul>
             <br />
