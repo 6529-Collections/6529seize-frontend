@@ -35,9 +35,9 @@ export default function AboutReleaseNotes() {
                 duplicated under the Connect button dropdown.
               </li>
               <li>
-                Changed User page to use radio buttons for 'All', 'Seized',
-                'Non-Seized' as opposed to 'Hide Seized', 'Hide Non-Seized'
-                switches
+                Changed User page to use radio buttons for &apos;All&apos;,
+                &apos;Seized&apos;, &apos;Non-Seized&apos; as opposed to
+                &apos;Hide Seized&apos;, &apos;Hide Non-Seized&apos; switches
               </li>
             </ul>
             <br />
