@@ -128,7 +128,7 @@ export default function AboutFAQ() {
                 well-designed meme is much more impactful than any tweetstorm.
                 <br />
                 <br />
-                &quot;Yes We Can&quot; and &quot;Make American Great Again&quot;
+                &quot;Yes We Can&quot; and &quot;Make America Great Again&quot;
                 were simple but immensely powerful memes that gave their
                 creators the US Presidency.
                 <br />

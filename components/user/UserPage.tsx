@@ -556,18 +556,37 @@ export default function UserPage(props: Props) {
       <Row className="pt-3">
         <Col>
           <Form.Check
-            type="switch"
+            type="radio"
+            name="hide"
+            checked={!hideSeized && !hideNonSeized}
             className={`${styles.seizedToggle}`}
-            label={`Hide Non-Seized`}
-            checked={hideNonSeized}
-            onChange={() => setHideNonSeized(!hideNonSeized)}
+            label={`All`}
+            onChange={() => {
+              setHideSeized(false);
+              setHideNonSeized(false);
+            }}
           />
           <Form.Check
-            type="switch"
+            type="radio"
+            checked={!hideSeized && hideNonSeized}
             className={`${styles.seizedToggle}`}
-            label={`Hide Seized`}
-            checked={hideSeized}
-            onChange={() => setHideSeized(!hideSeized)}
+            name="hide"
+            label={`Seized`}
+            onChange={() => {
+              setHideSeized(false);
+              setHideNonSeized(true);
+            }}
+          />
+          <Form.Check
+            type="radio"
+            checked={hideSeized && !hideNonSeized}
+            className={`${styles.seizedToggle}`}
+            name="hide"
+            label={`Non-Seized`}
+            onChange={() => {
+              setHideSeized(true);
+              setHideNonSeized(false);
+            }}
           />
           {ownerTags &&
             ownerTags?.memes_balance > 0 &&
