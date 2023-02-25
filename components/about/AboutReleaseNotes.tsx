@@ -32,7 +32,7 @@ export default function AboutReleaseNotes() {
             <ul>
               <li>
                 Fixed bug where in some cases wallet connectors would be
-                duplicated under the 'Connect' button dropdown.
+                duplicated under the Connect button dropdown.
               </li>
             </ul>
             <br />
