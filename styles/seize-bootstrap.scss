@@ -130,6 +130,10 @@
   color: $font-color !important;
 }
 
+.dropdown-item:focus {
+  background-color: initial !important;
+}
+
 .nav-link {
   color: $font-color;
 }
@@ -184,4 +188,23 @@ th {
 
 .dropdown-divider {
   border-color: $very-dark-grey !important;
+}
+
+.modal-content {
+  color: black;
+  border-radius: 0;
+}
+
+.modal-header {
+  color: black;
+  background-color: white;
+  border-radius: 0;
+  border: none !important;
+
+  .btn-close {
+    opacity: 1;
+    &:hover {
+      opacity: 0.8;
+    }
+  }
 }

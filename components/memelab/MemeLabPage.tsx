@@ -289,7 +289,7 @@ export default function LabPage() {
                   sm={{ span: 12 }}
                   md={{ span: 6 }}
                   lg={{ span: 6 }}
-                  className="pt-2">
+                  className={`pt-2 pb-4`}>
                   <NFTImage
                     nft={nft}
                     animation={true}
@@ -313,7 +313,7 @@ export default function LabPage() {
   function printLiveSub() {
     return (
       <>
-        <Row className="pt-5">
+        <Row className="pt-3">
           <Col>
             <Image
               loading={"lazy"}
@@ -1073,7 +1073,65 @@ export default function LabPage() {
   function printActivity() {
     return (
       <Container className="p-0">
-        <Row>
+        {nft && (
+          <>
+            <Row className="pt-2">
+              <Col>
+                <h3>Card Volumes</h3>
+              </Col>
+            </Row>
+            <Row className="pt-2">
+              <Col>
+                <Table className="text-center">
+                  <thead>
+                    <tr>
+                      <th>24 Hours</th>
+                      <th>7 Days</th>
+                      <th>1 Month</th>
+                      <th>Total</th>
+                    </tr>
+                  </thead>
+                  <tbody className="pt-3">
+                    <tr>
+                      <td>
+                        {nft.total_volume_last_24_hours > 0
+                          ? `${numberWithCommas(
+                              Math.round(nft.total_volume_last_24_hours * 100) /
+                                100
+                            )} ETH`
+                          : `N/A`}
+                      </td>
+                      <td>
+                        {nft.total_volume_last_7_days > 0
+                          ? `${numberWithCommas(
+                              Math.round(nft.total_volume_last_7_days * 100) /
+                                100
+                            )} ETH`
+                          : `N/A`}
+                      </td>
+                      <td>
+                        {nft.total_volume_last_1_month > 0
+                          ? `${numberWithCommas(
+                              Math.round(nft.total_volume_last_1_month * 100) /
+                                100
+                            )} ETH`
+                          : `N/A`}
+                      </td>
+                      <td>
+                        {nft.total_volume > 0
+                          ? `${numberWithCommas(
+                              Math.round(nft.total_volume * 100) / 100
+                            )} ETH`
+                          : `N/A`}
+                      </td>
+                    </tr>
+                  </tbody>
+                </Table>
+              </Col>
+            </Row>
+          </>
+        )}
+        <Row className="pt-3">
           <Col
             className="d-flex align-items-center"
             xs={{ span: 7 }}
