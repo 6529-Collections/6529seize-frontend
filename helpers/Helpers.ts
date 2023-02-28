@@ -135,3 +135,11 @@ export function splitArtists(artists: string) {
     .join(",");
   return a;
 }
+
+export function removeProtocol(link: string) {
+  if (!link) {
+    return link;
+  }
+
+  return link.replace(/(^\w+:|^)\/\//, "");
+}

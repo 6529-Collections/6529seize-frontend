@@ -20,6 +20,10 @@ export interface BaseNFT {
   metadata?: any;
   market_cap: number;
   floor_price: number;
+  total_volume_last_24_hours: number;
+  total_volume_last_7_days: number;
+  total_volume_last_1_month: number;
+  total_volume: number;
 }
 
 export interface LabNFT extends BaseNFT {

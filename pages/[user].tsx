@@ -8,6 +8,10 @@ import { MANIFOLD, SIX529_MUSEUM } from "../constants";
 import HeaderPlaceholder from "../components/header/HeaderPlaceholder";
 import { useEffect, useState } from "react";
 
+export enum ReservedUser {
+  MUSEUM = "6529Museum",
+  MANIFOLD = "Manifold-Minting-Wallet",
+}
 const Header = dynamic(() => import("../components/header/Header"), {
   ssr: false,
   loading: () => <HeaderPlaceholder />,
@@ -27,7 +31,11 @@ export default function UserPageIndex(props: any) {
 
   useEffect(() => {
     if (user) {
-      if (!user.startsWith("0x") && !user.endsWith(".eth")) {
+      if (
+        !user.startsWith("0x") &&
+        !user.endsWith(".eth") &&
+        !Object.values(ReservedUser).includes(user as ReservedUser)
+      ) {
         window.location.href = "404";
       }
     }
@@ -82,9 +90,9 @@ export async function getServerSideProps(req: any, res: any, resolvedUrl: any) {
     userDisplay = response.display
       ? response.display
       : areEqualAddresses(user, SIX529_MUSEUM)
-      ? "6529Museum"
+      ? ReservedUser.MUSEUM
       : areEqualAddresses(user, MANIFOLD)
-      ? "Manifold-Minting-Wallet"
+      ? ReservedUser.MANIFOLD
       : userDisplay;
   }
 

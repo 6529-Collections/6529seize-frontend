@@ -1,5 +1,15 @@
 import { useState, useEffect } from "react";
-import { Container, Row, Col, Table, Dropdown, Form } from "react-bootstrap";
+import {
+  Container,
+  Row,
+  Col,
+  Table,
+  Dropdown,
+  Form,
+  Button,
+  Modal,
+  InputGroup,
+} from "react-bootstrap";
 import { DBResponse } from "../../entities/IDBResponse";
 import { TDHCalc, TDHMetrics } from "../../entities/ITDH";
 import styles from "./Leaderboard.module.scss";
@@ -141,8 +151,36 @@ export default function Leaderboard(props: Props) {
 
   const [showLoader, setShowLoader] = useState(false);
 
+  const [showSearchModal, setShowSearchModal] = useState(false);
+  const [searchWallets, setSearchWallets] = useState<string[]>([]);
+  const [searchValue, setSearchValue] = useState("");
+  const [invalidWalletAdded, setInvalidWalletAdded] = useState(false);
+
   if (props.showLastTdh) {
     printNextTdhCountdown();
+  }
+
+  function addSearchWallet() {
+    if (
+      (searchValue.startsWith("0x") || searchValue.endsWith(".eth")) &&
+      !searchWallets.some((sw) => sw == searchValue)
+    ) {
+      setSearchWallets((w) => [...w, searchValue]);
+      setSearchValue("");
+    } else {
+      setInvalidWalletAdded(true);
+      setTimeout(() => {
+        setInvalidWalletAdded(false);
+      }, 200);
+    }
+  }
+
+  function getRank(index: number, lead: TDHMetrics) {
+    if (searchWallets.length > 0) {
+      return lead.dense_rank_sort;
+    } else {
+      return index + 1 + (pageProps.page - 1) * pageProps.pageSize;
+    }
   }
 
   async function fetchResults() {
@@ -172,8 +210,12 @@ export default function Leaderboard(props: Props) {
         break;
     }
     let museumFilter = hideMuseum ? "&hide_museum=true" : "";
+    let walletFilter = "";
+    if (searchWallets) {
+      walletFilter = `&wallet=${searchWallets.join(",")}`;
+    }
     fetchUrl(
-      `${process.env.API_ENDPOINT}/api/owner_metrics?page_size=${props.pageSize}&page=${pageProps.page}&sort=${sort.sort}&sort_direction=${sort.sort_direction}${tagFilter}${museumFilter}`
+      `${process.env.API_ENDPOINT}/api/owner_metrics?page_size=${props.pageSize}&page=${pageProps.page}&sort=${sort.sort}&sort_direction=${sort.sort_direction}${tagFilter}${museumFilter}${walletFilter}`
     ).then((response: DBResponse) => {
       setTotalResults(response.count);
       setNext(response.next);
@@ -190,7 +232,14 @@ export default function Leaderboard(props: Props) {
         setPageProps({ ...pageProps, page: 1 });
       }
     }
-  }, [sort, ownerTagFilter, router.isReady, content, hideMuseum]);
+  }, [
+    sort,
+    ownerTagFilter,
+    router.isReady,
+    content,
+    hideMuseum,
+    searchWallets,
+  ]);
 
   useEffect(() => {
     fetchUrl(`${process.env.API_ENDPOINT}/api/blocks?page_size=${1}`).then(
@@ -924,8 +973,10 @@ export default function Leaderboard(props: Props) {
       <Row>
         <Col
           className={`d-flex align-items-center`}
-          xs={showViewAll ? 12 : 6}
-          sm={6}>
+          xs={{ span: showViewAll ? 12 : 6 }}
+          sm={{ span: 6 }}
+          md={{ span: 6 }}
+          lg={{ span: 6 }}>
           <h1>
             COMMUNITY{" "}
             {showViewAll && (
@@ -935,10 +986,11 @@ export default function Leaderboard(props: Props) {
             )}
           </h1>
         </Col>
+
         {lastTDH && props.showLastTdh && (
           <Col
             className={`${styles.lastTDH} d-flex align-items-center justify-content-end`}
-            xs={{ span: 12 }}
+            xs={{ span: 6 }}
             sm={{ span: 6 }}
             md={{ span: 6 }}
             lg={{ span: 6 }}>
@@ -949,8 +1001,8 @@ export default function Leaderboard(props: Props) {
               target="_blank">
               {lastTDH.block}
             </a>
-            &nbsp;|&nbsp;Next Calculation&nbsp;
-            <span id="next-tdh-div-1">{nextTdh()}</span>
+            {/* &nbsp;|&nbsp;Next Calculation&nbsp;
+            <span id="next-tdh-div-1">{nextTdh()}</span> */}
           </Col>
         )}
       </Row>
@@ -960,8 +1012,8 @@ export default function Leaderboard(props: Props) {
             className={`${styles.pageHeader} text-center`}
             xs={{ span: 6 }}
             sm={{ span: 6 }}
-            md={{ span: 3 }}
-            lg={{ span: 3 }}>
+            md={{ span: 2 }}
+            lg={{ span: 2 }}>
             {printHodlersDropdown()}
           </Col>
           <Col
@@ -1013,8 +1065,8 @@ export default function Leaderboard(props: Props) {
           </Col>
           <Col
             className={`${styles.pageHeader} text-center`}
-            xs={{ span: 12 }}
-            sm={{ span: 12 }}
+            xs={{ span: 8 }}
+            sm={{ span: 8 }}
             md={{ span: 2 }}
             lg={{ span: 2 }}>
             <Form.Check
@@ -1025,6 +1077,21 @@ export default function Leaderboard(props: Props) {
               onChange={() => setHideMuseum(!hideMuseum)}
             />
           </Col>
+          <Col
+            className="d-flex align-items-center justify-content-center"
+            xs={2}
+            sm={1}>
+            <span
+              onClick={() => setShowSearchModal(true)}
+              className={`${styles.searchBtn} ${
+                searchWallets.length > 0 ? styles.searchBtnActive : ""
+              } d-flex align-items-center justify-content-center`}>
+              {" "}
+              <FontAwesomeIcon
+                className={styles.searchBtnIcon}
+                icon="search"></FontAwesomeIcon>
+            </span>
+          </Col>
         </Row>
       )}
       <Row className={`${styles.scrollContainer} pt-2`}>
@@ -1034,7 +1101,7 @@ export default function Leaderboard(props: Props) {
               <thead>
                 <tr>
                   <th className={styles.rank}>Rank</th>
-                  <th className={styles.hodler}>
+                  <th className={`${styles.hodler}`}>
                     Collector&nbsp;&nbsp;
                     <span className={styles.totalResults}>
                       x{totalResults}
@@ -1741,9 +1808,7 @@ export default function Leaderboard(props: Props) {
                       <tr key={`${index}-${lead.wallet}`}>
                         <td className={styles.rank}>
                           {/* {lead.tdh_rank} */}
-                          {index +
-                            1 +
-                            (pageProps.page - 1) * pageProps.pageSize}
+                          {getRank(index, lead)}
                         </td>
                         <td className={styles.hodler}>
                           <Address
@@ -1864,7 +1929,7 @@ export default function Leaderboard(props: Props) {
           )}
         </Col>
       </Row>
-      {props.showMore && totalResults > 0 && leaderboard && (
+      {props.showMore && totalResults > pageProps.pageSize && leaderboard && (
         <Row className="text-center pt-2 pb-3">
           <Pagination
             page={pageProps.page}
@@ -1876,6 +1941,55 @@ export default function Leaderboard(props: Props) {
           />
         </Row>
       )}
+      <Modal
+        show={showSearchModal}
+        centered={true}
+        onHide={() => setShowSearchModal(false)}>
+        <Modal.Header closeButton>
+          <Modal.Title>Wallet Search</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <InputGroup
+            className={`${
+              invalidWalletAdded ? styles.shakeWalletInput : ""
+            } mb-3`}>
+            <Form.Control
+              value={searchValue}
+              onChange={(e) => setSearchValue(e.target.value)}
+              onKeyDown={(target) => {
+                if (target.key == "Enter") {
+                  addSearchWallet();
+                }
+              }}
+              autoFocus
+              className={`${styles.modalInput}`}
+              placeholder="Search wallet address or ENS"
+            />
+            <Button className={styles.modalButton} onClick={addSearchWallet}>
+              +
+            </Button>
+          </InputGroup>
+          {searchWallets.map((w) => (
+            <div key={w} className="pt-1 pb-1">
+              <FontAwesomeIcon
+                onClick={() => {
+                  setSearchWallets([...searchWallets].filter((sw) => sw != w));
+                }}
+                className={styles.removeWalletBtn}
+                icon="square-minus"></FontAwesomeIcon>
+              {"  "}
+              {w}
+            </div>
+          ))}
+          {searchWallets.length > 0 && (
+            <Button
+              className={`${styles.modalButtonClear} mt-3 mb-2`}
+              onClick={() => setSearchWallets([])}>
+              Clear All
+            </Button>
+          )}
+        </Modal.Body>
+      </Modal>
     </Container>
   );
 }
