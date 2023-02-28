@@ -59,6 +59,11 @@
   cursor: pointer;
 }
 
+.season {
+  color: $font-color;
+  cursor: pointer;
+}
+
 .disabled {
   color: $lightest-grey;
   text-decoration: none;
@@ -199,4 +204,17 @@
 
 .marketplace {
   margin-right: 15px;
+}
+
+.ownerLink {
+  font-size: larger;
+  cursor: pointer;
+}
+
+.ownerLinkIcon {
+  height: 20px;
+}
+
+.nftImagePadding {
+  padding-bottom: 35px;
 }

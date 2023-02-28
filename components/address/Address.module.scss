@@ -10,30 +10,26 @@
 .addressUserPage {
   font-size: xx-large;
   font-weight: bold;
-  cursor: copy;
 }
 
 .copy {
   margin-left: 6px;
   margin-right: 10px;
-  cursor: copy;
   font-size: 15px;
   width: 15px;
 
   &:hover {
     opacity: 0.75;
   }
-}
 
-.copyActive {
-  cursor: default;
-  color: $green;
+  &:focus {
+    outline: none !important;
+  }
 }
 
 .copyDropdown {
   display: inline-block;
   button {
-    cursor: copy;
     padding: 0;
     background-color: transparent !important;
     border-color: transparent !important;
@@ -44,10 +40,6 @@
   div {
     width: 100%;
   }
-}
-
-.copyDropdownItem {
-  cursor: copy;
 }
 
 .tag {

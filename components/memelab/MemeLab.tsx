@@ -26,6 +26,7 @@ enum Sort {
   UNIQUE_PERCENT_EX_MUSEUM = "unique-ex-museum",
   FLOOR_PRICE = "floor-price",
   MARKET_CAP = "market-cap",
+  VOLUME = "volume",
 }
 
 export default function MemeLabComponent() {
@@ -333,6 +334,30 @@ export default function MemeLabComponent() {
           );
         }
       }
+      if (sort == Sort.VOLUME) {
+        setNfts([...nfts].sort((a, b) => (a.mint_date > b.mint_date ? 1 : -1)));
+        if (sortDir == SortDirection.ASC) {
+          setNfts(
+            [...nfts].sort((a, b) => {
+              if (a.total_volume_last_7_days > b.total_volume_last_7_days)
+                return 1;
+              if (a.total_volume_last_7_days < b.total_volume_last_7_days)
+                return -1;
+              return a.mint_date > b.mint_date ? 1 : -1;
+            })
+          );
+        } else {
+          setNfts(
+            [...nfts].sort((a, b) => {
+              if (a.total_volume_last_7_days > b.total_volume_last_7_days)
+                return -1;
+              if (a.total_volume_last_7_days < b.total_volume_last_7_days)
+                return 1;
+              return a.mint_date > b.mint_date ? 1 : -1;
+            })
+          );
+        }
+      }
     }
   }, [sort, sortDir, nftsLoaded]);
 
@@ -361,7 +386,9 @@ export default function MemeLabComponent() {
         lg={{ span: 3 }}>
         <Container fluid className="no-padding">
           <Row>
-            <a href={`/meme-lab/${nft.id}`}>
+            <a
+              href={`/meme-lab/${nft.id}`}
+              className={address && styles.nftImagePadding}>
               <NFTImage
                 nft={nft}
                 animation={false}
@@ -417,6 +444,12 @@ export default function MemeLabComponent() {
                       Math.round(nft.market_cap * 100) / 100
                     )} ETH`
                   : `Market Cap: N/A`)}
+              {sort == Sort.VOLUME &&
+                (nft.total_volume_last_7_days > 0
+                  ? `Volume: ${numberWithCommas(
+                      Math.round(nft.total_volume_last_7_days * 100) / 100
+                    )} ETH`
+                  : `Volume: N/A`)}
             </Col>
           </Row>
         </Container>
@@ -571,6 +604,13 @@ export default function MemeLabComponent() {
                       sort != Sort.MARKET_CAP ? styles.disabled : ""
                     }`}>
                     Market Cap
+                  </span>
+                  <span
+                    onClick={() => setSort(Sort.VOLUME)}
+                    className={`${styles.sort} ${
+                      sort != Sort.VOLUME ? styles.disabled : ""
+                    }`}>
+                    Volume (7 days)
                   </span>
                 </Col>
               </Row>

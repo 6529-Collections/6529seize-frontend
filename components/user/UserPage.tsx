@@ -7,12 +7,14 @@ import { Owner, OwnerTags } from "../../entities/IOwner";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/router";
 import Breadcrumb, { Crumb } from "../breadcrumb/Breadcrumb";
-import { NFT } from "../../entities/INFT";
+import { MemesExtendedData, NFT } from "../../entities/INFT";
 import {
   areEqualAddresses,
+  formatAddress,
   isGradientsContract,
   isMemesContract,
   numberWithCommas,
+  removeProtocol,
 } from "../../helpers/Helpers";
 import {
   GRADIENT_CONTRACT,
@@ -24,11 +26,13 @@ import { TDHMetrics } from "../../entities/ITDH";
 import { useAccount } from "wagmi";
 import { SortDirection } from "../../entities/ISort";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { fetchUrl } from "../../services/6529api";
+import { fetchAllPages, fetchUrl } from "../../services/6529api";
 import Pagination from "../pagination/Pagination";
 import { TypeFilter } from "../latest-activity/LatestActivity";
 import LatestActivityRow from "../latest-activity/LatestActivityRow";
 import { Transaction } from "../../entities/ITransaction";
+import { ReservedUser } from "../../pages/[user]";
+import Tippy from "@tippyjs/react";
 
 const NFTImage = dynamic(() => import("../nft-image/NFTImage"), {
   ssr: false,
@@ -58,11 +62,15 @@ export default function UserPage(props: Props) {
   const [focus, setFocus] = useState<Focus>(Focus.COLLECTION);
   const [sortDir, setSortDir] = useState<SortDirection>(SortDirection.ASC);
   const [sort, setSort] = useState<Sort>(Sort.ID);
+  const [seasons, setSeasons] = useState<number[]>([]);
+  const [selectedSeason, setSelectedSeason] = useState(0);
+  const [nftMetas, setNftMetas] = useState<MemesExtendedData[]>([]);
+  const [ownerLinkCopied, setIsOwnerLinkCopied] = useState(false);
 
   const [user, setUser] = useState(
-    props.user.toUpperCase() == "6529Museum".toUpperCase()
+    props.user.toUpperCase() == ReservedUser.MUSEUM.toUpperCase()
       ? SIX529_MUSEUM
-      : props.user.toUpperCase() == "Manifold-Minting-Wallet".toUpperCase()
+      : props.user.toUpperCase() == ReservedUser.MANIFOLD.toUpperCase()
       ? MANIFOLD
       : props.user
   );
@@ -74,6 +82,7 @@ export default function UserPage(props: Props) {
   const [ownerAddress, setOwnerAddress] = useState<`0x${string}` | undefined>(
     undefined
   );
+  const [ownerLink, setOwnerLink] = useState("");
   const [ownerENS, setOwnerENS] = useState("");
   const [owned, setOwned] = useState<Owner[]>([]);
   const [nfts, setNfts] = useState<NFT[]>([]);
@@ -145,6 +154,13 @@ export default function UserPage(props: Props) {
               });
             }
 
+            const ownerLink = `${
+              process.env.BASE_ENDPOINT
+                ? process.env.BASE_ENDPOINT
+                : "https://seize.io"
+            }/${walletDisplay ? walletDisplay : formatAddress(user)}`;
+            setOwnerLink(ownerLink);
+
             let walletCrumb = walletDisplay
               ? walletDisplay
               : newOwned[0].wallet;
@@ -179,27 +195,37 @@ export default function UserPage(props: Props) {
   }, [user, router.isReady]);
 
   useEffect(() => {
-    async function fetchNfts(url: string, mynfts: NFT[]) {
-      return fetchUrl(url).then((response: DBResponse) => {
-        if (response.next) {
-          fetchNfts(response.next, [...mynfts].concat(response.data));
-        } else {
-          const newnfts = [...mynfts].concat(response.data);
-          setNfts(newnfts);
+    const nftsUrl = `${process.env.API_ENDPOINT}/api/memes_extended_data`;
+    fetchAllPages(nftsUrl).then((responseNftMetas: any[]) => {
+      setNftMetas(responseNftMetas);
+      setSeasons(
+        Array.from(new Set(responseNftMetas.map((meme) => meme.season))).sort(
+          (a, b) => a - b
+        )
+      );
+      if (responseNftMetas.length > 0) {
+        const tokenIds = responseNftMetas.map((n: MemesExtendedData) => n.id);
+        fetchAllPages(
+          `${
+            process.env.API_ENDPOINT
+          }/api/nfts?contract=${MEMES_CONTRACT}&id=${tokenIds.join(",")}`
+        ).then((responseNfts: any[]) => {
+          setNfts(responseNfts);
           setNftsLoaded(true);
-        }
-      });
-    }
+        });
+      } else {
+        setNfts([]);
+        setNftsLoaded(true);
+      }
+    });
+  }, []);
 
+  useEffect(() => {
     if (ownerAddress && router.isReady) {
-      let initialNftsUrl = `${process.env.API_ENDPOINT}/api/nfts?sort_direction=ASC`;
       if (isConnected && areEqualAddresses(ownerAddress, address)) {
         setUserIsOwner(true);
       } else {
         setUserIsOwner(false);
-      }
-      if (!nftsLoaded) {
-        fetchNfts(initialNftsUrl, []);
       }
     }
   }, [ownerAddress, router.isReady, isConnected]);
@@ -480,6 +506,11 @@ export default function UserPage(props: Props) {
       return;
     }
 
+    const season = nftMetas.find((a) => a.id == nft.id)?.season;
+    if (selectedSeason != 0 && selectedSeason != season) {
+      return;
+    }
+
     return (
       <Col
         key={`${nft.contract}-${nft.id}`}
@@ -490,33 +521,32 @@ export default function UserPage(props: Props) {
         lg={{ span: 3 }}>
         <Container fluid className="no-padding">
           <Row>
-            <Col>
-              <a
-                href={`/${
-                  areEqualAddresses(nft.contract, MEMES_CONTRACT)
-                    ? "the-memes"
-                    : "6529-gradient"
-                }/${nft.id}`}>
-                <NFTImage
-                  nft={nft}
-                  animation={false}
-                  height={300}
-                  missing={nftbalance == 0}
-                  balance={
-                    areEqualAddresses(nft.contract, GRADIENT_CONTRACT)
-                      ? 0
-                      : nftbalance
-                  }
-                  showOwned={
-                    areEqualAddresses(nft.contract, GRADIENT_CONTRACT) &&
-                    nftbalance > 0
-                      ? true
-                      : false
-                  }
-                  showThumbnail={true}
-                />
-              </a>
-            </Col>
+            <a
+              className={styles.nftImagePadding}
+              href={`/${
+                areEqualAddresses(nft.contract, MEMES_CONTRACT)
+                  ? "the-memes"
+                  : "6529-gradient"
+              }/${nft.id}`}>
+              <NFTImage
+                nft={nft}
+                animation={false}
+                height={300}
+                missing={nftbalance == 0}
+                balance={
+                  areEqualAddresses(nft.contract, GRADIENT_CONTRACT)
+                    ? 0
+                    : nftbalance
+                }
+                showOwned={
+                  areEqualAddresses(nft.contract, GRADIENT_CONTRACT) &&
+                  nftbalance > 0
+                    ? true
+                    : false
+                }
+                showThumbnail={true}
+              />
+            </a>
           </Row>
           <Row>
             <Col className="text-center pt-2">
@@ -582,7 +612,7 @@ export default function UserPage(props: Props) {
             checked={hideSeized && !hideNonSeized}
             className={`${styles.seizedToggle}`}
             name="hide"
-            label={`Non-Seized`}
+            label={`Unseized`}
             onChange={() => {
               setHideSeized(true);
               setHideNonSeized(false);
@@ -698,6 +728,33 @@ export default function UserPage(props: Props) {
                               />
                             )}
                           </h2>
+                        </Row>
+                        <Row className="pt-2 pb-2">
+                          <Col>
+                            <Tippy
+                              content={ownerLinkCopied ? "Copied" : "Copy"}
+                              placement={"right"}
+                              theme={"light"}
+                              hideOnClick={false}>
+                              <span
+                                className={styles.ownerLink}
+                                onClick={() => {
+                                  if (navigator.clipboard) {
+                                    navigator.clipboard.writeText(ownerLink);
+                                  }
+                                  setIsOwnerLinkCopied(true);
+                                  setTimeout(() => {
+                                    setIsOwnerLinkCopied(false);
+                                  }, 1000);
+                                }}>
+                                {removeProtocol(ownerLink)}{" "}
+                                <FontAwesomeIcon
+                                  icon="link"
+                                  className={styles.ownerLinkIcon}
+                                />
+                              </span>
+                            </Tippy>
+                          </Col>
                         </Row>
                         <Row className="pt-3">
                           <Col>
@@ -1019,7 +1076,7 @@ export default function UserPage(props: Props) {
             </Container>
             <Container>
               <Row className="pt-3 pb-3">
-                {focus == Focus.COLLECTION && (
+                {/* {focus == Focus.COLLECTION && (
                   <Col>
                     Sort&nbsp;&nbsp;
                     <FontAwesomeIcon
@@ -1037,8 +1094,8 @@ export default function UserPage(props: Props) {
                       }`}
                     />
                   </Col>
-                )}
-                <Col className="d-flex justify-content-end">
+                )} */}
+                <Col className="d-flex align-items-center justify-content-center">
                   <h3
                     className={
                       focus == Focus.COLLECTION
@@ -1062,29 +1119,76 @@ export default function UserPage(props: Props) {
               </Row>
               {focus == Focus.COLLECTION && (
                 <>
-                  <Row className="pt-2">
-                    <Col>
-                      <span
-                        onClick={() => setSort(Sort.ID)}
-                        className={`${styles.sort} ${
-                          sort != Sort.ID ? styles.disabled : ""
-                        }`}>
-                        ID
-                      </span>
-                      <span
-                        onClick={() => setSort(Sort.TDH)}
-                        className={`${styles.sort} ${
-                          sort != Sort.TDH ? styles.disabled : ""
-                        }`}>
-                        TDH
-                      </span>
-                      <span
-                        onClick={() => setSort(Sort.RANK)}
-                        className={`${styles.sort} ${
-                          sort != Sort.RANK ? styles.disabled : ""
-                        }`}>
-                        RANK
-                      </span>
+                  <Row>
+                    <Col xs={5}>
+                      <Col xs={12}>
+                        Sort&nbsp;&nbsp;
+                        <FontAwesomeIcon
+                          icon="chevron-circle-up"
+                          onClick={() => setSortDir(SortDirection.ASC)}
+                          className={`${styles.sortDirection} ${
+                            sortDir != SortDirection.ASC ? styles.disabled : ""
+                          }`}
+                        />{" "}
+                        <FontAwesomeIcon
+                          icon="chevron-circle-down"
+                          onClick={() => setSortDir(SortDirection.DESC)}
+                          className={`${styles.sortDirection} ${
+                            sortDir != SortDirection.DESC ? styles.disabled : ""
+                          }`}
+                        />
+                      </Col>
+                      <Col xs={12} className="pt-2">
+                        <span
+                          onClick={() => setSort(Sort.ID)}
+                          className={`${styles.sort} ${
+                            sort != Sort.ID ? styles.disabled : ""
+                          }`}>
+                          ID
+                        </span>
+                        <span
+                          onClick={() => setSort(Sort.TDH)}
+                          className={`${styles.sort} ${
+                            sort != Sort.TDH ? styles.disabled : ""
+                          }`}>
+                          TDH
+                        </span>
+                        <span
+                          onClick={() => setSort(Sort.RANK)}
+                          className={`${styles.sort} ${
+                            sort != Sort.RANK ? styles.disabled : ""
+                          }`}>
+                          RANK
+                        </span>
+                      </Col>
+                    </Col>
+                    <Col
+                      className="d-flex align-items-center justify-content-end"
+                      xs={7}>
+                      <h3>
+                        <span
+                          onClick={() => setSelectedSeason(0)}
+                          className={`${styles.season} ${
+                            selectedSeason > 0 ? styles.disabled : ""
+                          }`}>
+                          All
+                        </span>
+                      </h3>
+                      {seasons.map((s) => (
+                        <span key={`season-${s}-span`}>
+                          <h3>&nbsp;&nbsp;|&nbsp;&nbsp;</h3>
+                          <h3>
+                            <span
+                              key={`season-${s}-h3-2-span`}
+                              onClick={() => setSelectedSeason(s)}
+                              className={`${styles.season} ${
+                                selectedSeason != s ? styles.disabled : ""
+                              }`}>
+                              SZN{s}
+                            </span>
+                          </h3>
+                        </span>
+                      ))}
                     </Col>
                   </Row>
                   {printUserControls()}

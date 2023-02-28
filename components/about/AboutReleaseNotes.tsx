@@ -27,7 +27,7 @@ export default function AboutReleaseNotes() {
             <p>
               <b>Release 1.0.1</b>
               <br />
-              Feb 26, 2023
+              Feb 29, 2023
             </p>
             <ul>
               <li>
@@ -36,9 +36,20 @@ export default function AboutReleaseNotes() {
               </li>
               <li>
                 Changed User page to use radio buttons for &apos;All&apos;,
-                &apos;Seized&apos;, &apos;Non-Seized&apos; as opposed to
+                &apos;Seized&apos;, &apos;Unseized&apos; as opposed to
                 &apos;Hide Seized&apos;, &apos;Hide Non-Seized&apos; switches
               </li>
+              <li>
+                Introduced search functionality by wallet address and ENS in
+                Comunity Table
+              </li>
+              <li>Added Volume tab in The Memes page and Meme Lab Page</li>
+              <li>
+                Added Volumes table for each Meme and Meme Lab Card under
+                Activity
+              </li>
+              <li>Added profile link in User page</li>
+              <li>Reposition card balance to not hide the art</li>
             </ul>
             <br />
             <p>

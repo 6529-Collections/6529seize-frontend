@@ -19,7 +19,7 @@ interface Props {
 }
 
 export default function NFTImage(props: Props) {
-  const [showBalance, setShowBalance] = useState(false)
+  const [showBalance, setShowBalance] = useState(false);
 
   useEffect(() => {
     if (props.onLoad) {
@@ -42,13 +42,13 @@ export default function NFTImage(props: Props) {
             className={`${styles.balance}  ${
               props.height == 650 ? styles.balanceBigger : ""
             }`}>
-            <span>{props.height == 650 && "SEIZED "}x</span>
+            <span>SEIZED x</span>
             {props.balance}
           </span>
         )}
         <iframe
           src={props.nft.animation}
-          onLoad={() =>setShowBalance(true)}
+          onLoad={() => setShowBalance(true)}
           onError={({ currentTarget }) => {
             currentTarget.src = props.nft.metadata.animation;
           }}
@@ -75,7 +75,7 @@ export default function NFTImage(props: Props) {
             className={`${styles.balance}  ${
               props.height == 650 ? styles.balanceBigger : ""
             }`}>
-            <span>{props.height == 650 && "SEIZED "}x</span>
+            <span>SEIZED x</span>
             {props.balance}
           </span>
         )}
@@ -92,7 +92,7 @@ export default function NFTImage(props: Props) {
               : props.nft.animation
           }
           poster={props.nft.scaled ? props.nft.scaled : props.nft.image}
-          onLoadStart={() =>setShowBalance(true)}
+          onLoadStart={() => setShowBalance(true)}
           onError={({ currentTarget }) => {
             if (currentTarget.src == props.nft.compressed_animation) {
               currentTarget.src = props.nft.animation;
@@ -107,7 +107,7 @@ export default function NFTImage(props: Props) {
   return (
     <Col
       xs={12}
-      className={`text-center d-flex align-items-center justify-content-center ${
+      className={`mb-2 text-center d-flex align-items-center justify-content-center ${
         styles.imageWrapper
       } ${props.height == 300 ? styles.height300 : ""} ${
         props.transparentBG && styles.transparentBG
@@ -131,7 +131,7 @@ export default function NFTImage(props: Props) {
             ? props.nft.scaled
             : props.nft.image
         }
-        onLoad={() =>setShowBalance(true)}
+        onLoad={() => setShowBalance(true)}
         onError={({ currentTarget }) => {
           if (currentTarget.src == props.nft.thumbnail) {
             currentTarget.src = props.nft.scaled
@@ -151,11 +151,11 @@ export default function NFTImage(props: Props) {
           className={`${styles.balance}  ${
             props.height == 650 ? styles.balanceBigger : ""
           }`}>
-          <span>{props.height == 650 && "SEIZED "}x</span>
+          <span>SEIZED x</span>
           {props.balance}
         </span>
       )}
-      {props.missing && <span className={`${styles.balance}`}>NOT SEIZED</span>}
+      {props.missing && <span className={`${styles.balance}`}>UNSEIZED</span>}
       {props.showOwned && (
         <span
           className={`${styles.balance}  ${
