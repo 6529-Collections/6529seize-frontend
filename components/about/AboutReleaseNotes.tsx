@@ -50,6 +50,7 @@ export default function AboutReleaseNotes() {
               </li>
               <li>Added profile link in User page</li>
               <li>Reposition card balance to not hide the art</li>
+              <li>Added SZN filter in User page</li>
             </ul>
             <br />
             <p>
