@@ -47,7 +47,7 @@ export default function AboutReleaseNotes() {
                   <li>
                     Introduced search functionality by wallet address and ENS
                   </li>
-                  <li>Added 'Hide 6529Team' toggle</li>
+                  <li>Added &apos;Hide 6529Team&apos; toggle</li>
                 </ul>
               </li>
               <li>
