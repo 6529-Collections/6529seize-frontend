@@ -1,4 +1,5 @@
 import { Col, Container, Row } from "react-bootstrap";
+import { AboutSection } from "../../pages/about/[section]";
 
 export default function AboutReleaseNotes() {
   return (
@@ -80,6 +81,20 @@ export default function AboutReleaseNotes() {
                 The Memes card page, Meme Lab card page
                 <ul>
                   <li>Added Volumes table under Activity tab</li>
+                </ul>
+              </li>
+              <li>
+                About
+                <ul>
+                  <li>
+                    New section added{" "}
+                    <a
+                      href={`/about/${AboutSection.DATA_DECENTR}`}
+                      target="_blank"
+                      rel="noreferrer">
+                      Data Decentralization
+                    </a>
+                  </li>
                 </ul>
               </li>
             </ul>
