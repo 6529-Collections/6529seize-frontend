@@ -14,13 +14,12 @@ interface Props {
   showOwned?: boolean;
   transparentBG?: boolean;
   id?: string;
-  missing?: boolean;
+  showUnseized: boolean;
   onLoad?: () => void;
 }
 
 export default function NFTImage(props: Props) {
   const [showBalance, setShowBalance] = useState(false);
-
   useEffect(() => {
     if (props.onLoad) {
       props.onLoad();
@@ -42,9 +41,11 @@ export default function NFTImage(props: Props) {
             className={`${styles.balance}  ${
               props.height == 650 ? styles.balanceBigger : ""
             }`}>
-            <span>SEIZED x</span>
-            {props.balance}
+            <span>SEIZED{!props.showOwned ? ` x${props.balance}` : ""}</span>
           </span>
+        )}
+        {props.showUnseized && props.balance == 0 && (
+          <span className={`${styles.balance}`}>UNSEIZED</span>
         )}
         <iframe
           src={props.nft.animation}
@@ -75,9 +76,11 @@ export default function NFTImage(props: Props) {
             className={`${styles.balance}  ${
               props.height == 650 ? styles.balanceBigger : ""
             }`}>
-            <span>SEIZED x</span>
-            {props.balance}
+            <span>SEIZED{!props.showOwned ? ` x${props.balance}` : ""}</span>
           </span>
+        )}
+        {props.showUnseized && props.balance == 0 && (
+          <span className={`${styles.balance}`}>UNSEIZED</span>
         )}
         <video
           id={`${props.id && `${props.id}`}`}
@@ -151,18 +154,14 @@ export default function NFTImage(props: Props) {
           className={`${styles.balance}  ${
             props.height == 650 ? styles.balanceBigger : ""
           }`}>
-          <span>SEIZED x</span>
-          {props.balance}
+          <span>SEIZED{!props.showOwned ? ` x${props.balance}` : ""}</span>
         </span>
       )}
-      {props.missing && <span className={`${styles.balance}`}>UNSEIZED</span>}
-      {props.showOwned && (
-        <span
-          className={`${styles.balance}  ${
-            props.height == 650 ? styles.balanceBigger : ""
-          }`}>
-          SEIZED
-        </span>
+      {props.showUnseized && props.balance == 0 && (
+        <span className={`${styles.balance}`}>UNSEIZED</span>
+      )}
+      {props.showUnseized && props.balance == 0 && (
+        <span className={`${styles.balance}`}>UNSEIZED</span>
       )}
     </Col>
   );

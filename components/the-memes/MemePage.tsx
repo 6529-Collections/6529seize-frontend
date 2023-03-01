@@ -224,6 +224,8 @@ export default function MemePage() {
         setUserLoaded(true);
         setNftBalance(countIn - countOut);
       });
+    } else {
+      setNftBalance(0);
     }
   }, [nftId, address]);
 
@@ -344,6 +346,7 @@ export default function MemePage() {
                     animation={true}
                     height={650}
                     balance={nftBalance}
+                    showUnseized={address != undefined && address != null}
                   />
                 </Col>
                 {activeTab == MEME_FOCUS.LIVE && <>{printLive()}</>}
@@ -410,6 +413,7 @@ export default function MemePage() {
                             height={300}
                             balance={0}
                             showThumbnail={true}
+                            showUnseized={false}
                           />
                         </a>
                       </Col>
@@ -905,6 +909,7 @@ export default function MemePage() {
                       balance={0}
                       transparentBG={true}
                       showOriginal={true}
+                      showUnseized={false}
                       id="the-art-fullscreen-animation"
                     />
                   </Carousel.Item>
@@ -919,6 +924,7 @@ export default function MemePage() {
                       balance={0}
                       transparentBG={true}
                       showOriginal={true}
+                      showUnseized={false}
                       id="the-art-fullscreen-img"
                     />
                   </Carousel.Item>
@@ -935,6 +941,7 @@ export default function MemePage() {
                     balance={0}
                     transparentBG={true}
                     showOriginal={true}
+                    showUnseized={false}
                     id="the-art-fullscreen-img"
                   />
                 </>
@@ -1388,7 +1395,7 @@ export default function MemePage() {
                       <th>24 Hours</th>
                       <th>7 Days</th>
                       <th>1 Month</th>
-                      <th>Total</th>
+                      <th>All Time</th>
                     </tr>
                   </thead>
                   <tbody className="pt-3">

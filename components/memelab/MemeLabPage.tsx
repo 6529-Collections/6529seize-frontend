@@ -227,6 +227,8 @@ export default function LabPage() {
         setUserLoaded(true);
         setNftBalance(countIn - countOut);
       });
+    } else {
+      setNftBalance(0);
     }
   }, [nftId, address]);
 
@@ -289,12 +291,13 @@ export default function LabPage() {
                   sm={{ span: 12 }}
                   md={{ span: 6 }}
                   lg={{ span: 6 }}
-                  className={`pt-2 pb-4`}>
+                  className={`pt-2 pb-5`}>
                   <NFTImage
                     nft={nft}
                     animation={true}
                     height={650}
                     balance={nftBalance}
+                    showUnseized={address != undefined && address != null}
                   />
                 </Col>
                 {activeTab == MEME_FOCUS.LIVE && <>{printLive()}</>}
@@ -351,6 +354,7 @@ export default function LabPage() {
                             height={300}
                             balance={0}
                             showThumbnail={true}
+                            showUnseized={false}
                           />
                         </a>
                       </Col>
@@ -805,6 +809,7 @@ export default function LabPage() {
                       balance={0}
                       transparentBG={true}
                       showOriginal={true}
+                      showUnseized={false}
                       id="the-art-fullscreen-animation"
                     />
                   </Carousel.Item>
@@ -819,6 +824,7 @@ export default function LabPage() {
                       balance={0}
                       transparentBG={true}
                       showOriginal={true}
+                      showUnseized={false}
                       id="the-art-fullscreen-img"
                     />
                   </Carousel.Item>
@@ -835,6 +841,7 @@ export default function LabPage() {
                     balance={0}
                     transparentBG={true}
                     showOriginal={true}
+                    showUnseized={false}
                     id="the-art-fullscreen-img"
                   />
                 </>
@@ -1087,8 +1094,8 @@ export default function LabPage() {
                     <tr>
                       <th>24 Hours</th>
                       <th>7 Days</th>
-                      <th>1 Month</th>
-                      <th>Total</th>
+                      <th>30 Days</th>
+                      <th>All Time</th>
                     </tr>
                   </thead>
                   <tbody className="pt-3">

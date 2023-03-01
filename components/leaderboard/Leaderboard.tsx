@@ -131,6 +131,7 @@ export default function Leaderboard(props: Props) {
   );
   const [focus, setFocus] = useState<Focus>(Focus.TDH);
   const [hideMuseum, setHideMuseum] = useState(false);
+  const [hideTeam, setHideTeam] = useState(false);
 
   const [memesCount, setMemesCount] = useState<number>();
   const [memesCountS1, setMemesCountS1] = useState<number>();
@@ -176,7 +177,7 @@ export default function Leaderboard(props: Props) {
   }
 
   function getRank(index: number, lead: TDHMetrics) {
-    if (searchWallets.length > 0) {
+    if (searchWallets.length > 0 && lead.dense_rank_sort) {
       return lead.dense_rank_sort;
     } else {
       return index + 1 + (pageProps.page - 1) * pageProps.pageSize;
@@ -210,12 +211,13 @@ export default function Leaderboard(props: Props) {
         break;
     }
     let museumFilter = hideMuseum ? "&hide_museum=true" : "";
+    let teamFilter = hideTeam ? "&hide_team=true" : "";
     let walletFilter = "";
     if (searchWallets) {
       walletFilter = `&wallet=${searchWallets.join(",")}`;
     }
     fetchUrl(
-      `${process.env.API_ENDPOINT}/api/owner_metrics?page_size=${props.pageSize}&page=${pageProps.page}&sort=${sort.sort}&sort_direction=${sort.sort_direction}${tagFilter}${museumFilter}${walletFilter}`
+      `${process.env.API_ENDPOINT}/api/owner_metrics?page_size=${props.pageSize}&page=${pageProps.page}&sort=${sort.sort}&sort_direction=${sort.sort_direction}${tagFilter}${museumFilter}${teamFilter}${walletFilter}`
     ).then((response: DBResponse) => {
       setTotalResults(response.count);
       setNext(response.next);
@@ -238,6 +240,7 @@ export default function Leaderboard(props: Props) {
     router.isReady,
     content,
     hideMuseum,
+    hideTeam,
     searchWallets,
   ]);
 
@@ -1007,92 +1010,99 @@ export default function Leaderboard(props: Props) {
         )}
       </Row>
       {!showViewAll && (
-        <Row className="pt-2 pb-2">
-          <Col
-            className={`${styles.pageHeader} text-center`}
-            xs={{ span: 6 }}
-            sm={{ span: 6 }}
-            md={{ span: 2 }}
-            lg={{ span: 2 }}>
-            {printHodlersDropdown()}
-          </Col>
-          <Col
-            className={`${styles.pageHeader} text-center`}
-            xs={{ span: 6 }}
-            sm={{ span: 6 }}
-            md={{ span: 3 }}
-            lg={{ span: 3 }}>
-            {printCollectionsDropdown()}
-          </Col>
-          <Col
-            className={`${styles.pageHeader}`}
-            xs={{ span: 12 }}
-            sm={{ span: 12 }}
-            md={{ span: 4 }}
-            lg={{ span: 4 }}>
-            <div
-              className={`${styles.headerMenuFocus} d-flex justify-content-center align-items-center`}>
-              <span>
-                <span
-                  onClick={() => setFocus(Focus.TDH)}
-                  className={`${styles.focus} ${
-                    focus != Focus.TDH ? styles.disabled : ""
-                  }`}>
-                  {Focus.TDH}
+        <>
+          <Row className="pt-2 pb-2">
+            <Col
+              className={`${styles.pageHeader} text-center`}
+              xs={{ span: 6 }}
+              sm={{ span: 6 }}
+              md={{ span: 3 }}
+              lg={{ span: 3 }}>
+              {printHodlersDropdown()}
+            </Col>
+            <Col
+              className={`${styles.pageHeader} text-center`}
+              xs={{ span: 6 }}
+              sm={{ span: 6 }}
+              md={{ span: 3 }}
+              lg={{ span: 3 }}>
+              {printCollectionsDropdown()}
+            </Col>
+            <Col
+              className={`${styles.pageHeader}`}
+              xs={{ span: 10 }}
+              sm={{ span: 10 }}
+              md={{ span: 4 }}
+              lg={{ span: 4 }}>
+              <div
+                className={`${styles.headerMenuFocus} d-flex justify-content-center align-items-center`}>
+                <span>
+                  <span
+                    onClick={() => setFocus(Focus.TDH)}
+                    className={`${styles.focus} ${
+                      focus != Focus.TDH ? styles.disabled : ""
+                    }`}>
+                    {Focus.TDH}
+                  </span>
                 </span>
-              </span>
-              &nbsp;&nbsp;|&nbsp;&nbsp;
-              <span>
-                <span
-                  onClick={() => setFocus(Focus.INTERACTIONS)}
-                  className={`${styles.focus} ${
-                    focus != Focus.INTERACTIONS ? styles.disabled : ""
-                  }`}>
-                  {Focus.INTERACTIONS}
+                &nbsp;&nbsp;|&nbsp;&nbsp;
+                <span>
+                  <span
+                    onClick={() => setFocus(Focus.INTERACTIONS)}
+                    className={`${styles.focus} ${
+                      focus != Focus.INTERACTIONS ? styles.disabled : ""
+                    }`}>
+                    {Focus.INTERACTIONS}
+                  </span>
                 </span>
-              </span>
-              &nbsp;&nbsp;|&nbsp;&nbsp;
-              <span>
-                <span
-                  onClick={() => setFocus(Focus.SETS)}
-                  className={`${styles.focus} ${
-                    focus != Focus.SETS ? styles.disabled : ""
-                  }`}>
-                  {Focus.SETS}
+                &nbsp;&nbsp;|&nbsp;&nbsp;
+                <span>
+                  <span
+                    onClick={() => setFocus(Focus.SETS)}
+                    className={`${styles.focus} ${
+                      focus != Focus.SETS ? styles.disabled : ""
+                    }`}>
+                    {Focus.SETS}
+                  </span>
                 </span>
+              </div>
+            </Col>
+            <Col
+              className="d-flex align-items-center justify-content-center"
+              xs={2}
+              sm={2}>
+              <span
+                onClick={() => setShowSearchModal(true)}
+                className={`${styles.searchBtn} ${
+                  searchWallets.length > 0 ? styles.searchBtnActive : ""
+                } d-flex align-items-center justify-content-center`}>
+                {" "}
+                <FontAwesomeIcon
+                  className={styles.searchBtnIcon}
+                  icon="search"></FontAwesomeIcon>
               </span>
-            </div>
-          </Col>
-          <Col
-            className={`${styles.pageHeader} text-center`}
-            xs={{ span: 8 }}
-            sm={{ span: 8 }}
-            md={{ span: 2 }}
-            lg={{ span: 2 }}>
-            <Form.Check
-              type="switch"
-              checked={hideMuseum}
-              className={`${styles.museumToggle}`}
-              label={`Hide 6529Museum`}
-              onChange={() => setHideMuseum(!hideMuseum)}
-            />
-          </Col>
-          <Col
-            className="d-flex align-items-center justify-content-center"
-            xs={2}
-            sm={1}>
-            <span
-              onClick={() => setShowSearchModal(true)}
-              className={`${styles.searchBtn} ${
-                searchWallets.length > 0 ? styles.searchBtnActive : ""
-              } d-flex align-items-center justify-content-center`}>
-              {" "}
-              <FontAwesomeIcon
-                className={styles.searchBtnIcon}
-                icon="search"></FontAwesomeIcon>
-            </span>
-          </Col>
-        </Row>
+            </Col>
+          </Row>
+          <Row className="pt-1 pb-1">
+            <Col
+              className={`${styles.pageHeader} d-flex justify-content-center align-items-center`}>
+              <Form.Check
+                type="switch"
+                checked={hideMuseum}
+                className={`${styles.museumToggle}`}
+                label={`Hide 6529Museum`}
+                onChange={() => setHideMuseum(!hideMuseum)}
+              />
+              <Form.Check
+                type="switch"
+                checked={hideTeam}
+                className={`${styles.museumToggle}`}
+                label={`Hide 6529Team`}
+                onChange={() => setHideTeam(!hideTeam)}
+              />
+            </Col>
+          </Row>
+        </>
       )}
       <Row className={`${styles.scrollContainer} pt-2`}>
         <Col>
