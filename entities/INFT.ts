@@ -94,3 +94,10 @@ export interface LabExtendedData {
   percent_unique_cleaned_rank: number;
   metadata_collection: string;
 }
+
+export enum VolumeType {
+  HOURS_24 = "24 Hours",
+  DAYS_7 = "7 Days",
+  DAYS_30 = "30 Days",
+  ALL_TIME = "All Time",
+}

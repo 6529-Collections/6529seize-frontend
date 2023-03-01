@@ -25,9 +25,9 @@ export default function AboutReleaseNotes() {
             </ul>
             <br />
             <p>
-              <b>Release 1.0.1</b>
+              <b>Release 1.1.0</b>
               <br />
-              Feb 29, 2023
+              Mar 02, 2023
             </p>
             <ul>
               <li>
@@ -35,22 +35,53 @@ export default function AboutReleaseNotes() {
                 duplicated under the Connect button dropdown.
               </li>
               <li>
-                Changed User page to use radio buttons for &apos;All&apos;,
-                &apos;Seized&apos;, &apos;Unseized&apos; as opposed to
-                &apos;Hide Seized&apos;, &apos;Hide Non-Seized&apos; switches
+                All NFT Images
+                <ul>
+                  <li>Reposition card balance to not hide the art</li>
+                </ul>
               </li>
               <li>
-                Introduced search functionality by wallet address and ENS in
-                Comunity Table
+                Community page
+                <ul>
+                  <li>
+                    Introduced search functionality by wallet address and ENS
+                  </li>
+                  <li>Added 'Hide 6529Team' toggle</li>
+                </ul>
               </li>
-              <li>Added Volume tab in The Memes page and Meme Lab Page</li>
               <li>
-                Added Volumes table for each Meme and Meme Lab Card under
-                Activity
+                User Page
+                <ul>
+                  <li>
+                    Changed to use radio buttons for &apos;All&apos;,
+                    &apos;Seized&apos;, &apos;Unseized&apos; as opposed to
+                    &apos;Hide Seized&apos;, &apos;Hide Non-Seized&apos;
+                    switches
+                  </li>
+                  <li>Added profile link</li>
+                  <li>Added SZN filter</li>
+                </ul>
               </li>
-              <li>Added profile link in User page</li>
-              <li>Reposition card balance to not hide the art</li>
-              <li>Added SZN filter in User page</li>
+              <li>
+                The Memes, Meme Lab, Meme Lab Collections
+                <ul>
+                  <li>
+                    Added Volume tab for:
+                    <ul>
+                      <li>24 Hours</li>
+                      <li>7 Days</li>
+                      <li>30 Days</li>
+                      <li>All Time</li>
+                    </ul>
+                  </li>
+                </ul>
+              </li>
+              <li>
+                The Memes card page, Meme Lab card page
+                <ul>
+                  <li>Added Volumes table under Activity tab</li>
+                </ul>
+              </li>
             </ul>
             <br />
             <p>

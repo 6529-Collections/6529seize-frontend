@@ -204,15 +204,12 @@ export default function UserPage(props: Props) {
         )
       );
       if (responseNftMetas.length > 0) {
-        const tokenIds = responseNftMetas.map((n: MemesExtendedData) => n.id);
-        fetchAllPages(
-          `${
-            process.env.API_ENDPOINT
-          }/api/nfts?contract=${MEMES_CONTRACT}&id=${tokenIds.join(",")}`
-        ).then((responseNfts: any[]) => {
-          setNfts(responseNfts);
-          setNftsLoaded(true);
-        });
+        fetchAllPages(`${process.env.API_ENDPOINT}/api/nfts`).then(
+          (responseNfts: any[]) => {
+            setNfts(responseNfts);
+            setNftsLoaded(true);
+          }
+        );
       } else {
         setNfts([]);
         setNftsLoaded(true);
@@ -475,7 +472,15 @@ export default function UserPage(props: Props) {
         }
       }
     }
-  }, [sortDir, sort]);
+  }, [
+    sortDir,
+    sort,
+    hideMemes,
+    hideGradients,
+    hideSeized,
+    hideNonSeized,
+    nftsLoaded,
+  ]);
 
   function printNft(nft: NFT) {
     let nfttdh;
@@ -532,12 +537,7 @@ export default function UserPage(props: Props) {
                 nft={nft}
                 animation={false}
                 height={300}
-                missing={nftbalance == 0}
-                balance={
-                  areEqualAddresses(nft.contract, GRADIENT_CONTRACT)
-                    ? 0
-                    : nftbalance
-                }
+                balance={nftbalance}
                 showOwned={
                   areEqualAddresses(nft.contract, GRADIENT_CONTRACT) &&
                   nftbalance > 0
@@ -545,6 +545,7 @@ export default function UserPage(props: Props) {
                     : false
                 }
                 showThumbnail={true}
+                showUnseized={true}
               />
             </a>
           </Row>

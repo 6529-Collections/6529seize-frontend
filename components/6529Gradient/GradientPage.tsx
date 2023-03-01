@@ -175,6 +175,7 @@ export default function GradientPage() {
                   nftOwner &&
                   areEqualAddresses(address, nftOwner.wallet)
                 }
+                showUnseized={false}
               />
             )}
           </Col>
@@ -194,6 +195,7 @@ export default function GradientPage() {
                 <Row>
                   <Col>
                     <h4 className={styles.subheading}>
+                      {nftOwner && address == nftOwner.wallet ? "*" : ""}
                       {nftOwner && (
                         <Address
                           address={nftOwner.wallet}

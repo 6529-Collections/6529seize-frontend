@@ -3,12 +3,16 @@ import Image from "next/image";
 import { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { Container, Row, Col } from "react-bootstrap";
+import { Container, Row, Col, Dropdown } from "react-bootstrap";
 import { useAccount } from "wagmi";
-import { LabNFT, LabExtendedData } from "../../entities/INFT";
+import { LabNFT, LabExtendedData, VolumeType } from "../../entities/INFT";
 import { Owner } from "../../entities/IOwner";
 import { SortDirection } from "../../entities/ISort";
-import { getDateDisplay, numberWithCommas } from "../../helpers/Helpers";
+import {
+  getDateDisplay,
+  getValuesForVolumeType,
+  numberWithCommas,
+} from "../../helpers/Helpers";
 import { useRouter } from "next/router";
 import { fetchAllPages } from "../../services/6529api";
 
@@ -73,6 +77,8 @@ export default function MemeLabComponent() {
   const [nftsLoaded, setNftsLoaded] = useState(false);
   const [labArtists, setLabArtists] = useState<string[]>([]);
   const [labCollections, setLabCollections] = useState<string[]>([]);
+
+  const [volumeType, setVolumeType] = useState<VolumeType>(VolumeType.HOURS_24);
 
   function getBalance(id: number) {
     const balance = nftBalances.find((b) => b.token_id == id);
@@ -339,20 +345,21 @@ export default function MemeLabComponent() {
         if (sortDir == SortDirection.ASC) {
           setNfts(
             [...nfts].sort((a, b) => {
-              if (a.total_volume_last_7_days > b.total_volume_last_7_days)
-                return 1;
-              if (a.total_volume_last_7_days < b.total_volume_last_7_days)
-                return -1;
+              const aVolume = getValuesForVolumeType(volumeType, a);
+              const bVolume = getValuesForVolumeType(volumeType, b);
+
+              if (aVolume > bVolume) return -1;
+              if (aVolume < bVolume) return 1;
               return a.mint_date > b.mint_date ? 1 : -1;
             })
           );
         } else {
           setNfts(
             [...nfts].sort((a, b) => {
-              if (a.total_volume_last_7_days > b.total_volume_last_7_days)
-                return -1;
-              if (a.total_volume_last_7_days < b.total_volume_last_7_days)
-                return 1;
+              const aVolume = getValuesForVolumeType(volumeType, a);
+              const bVolume = getValuesForVolumeType(volumeType, b);
+              if (aVolume > bVolume) return 1;
+              if (aVolume < bVolume) return -1;
               return a.mint_date > b.mint_date ? 1 : -1;
             })
           );
@@ -395,6 +402,7 @@ export default function MemeLabComponent() {
                 height={300}
                 balance={getBalance(nft.id)}
                 showThumbnail={true}
+                showUnseized={address != undefined && address != null}
               />
             </a>
           </Row>
@@ -446,8 +454,16 @@ export default function MemeLabComponent() {
                   : `Market Cap: N/A`)}
               {sort == Sort.VOLUME &&
                 (nft.total_volume_last_7_days > 0
-                  ? `Volume: ${numberWithCommas(
-                      Math.round(nft.total_volume_last_7_days * 100) / 100
+                  ? `Volume (${volumeType}): ${numberWithCommas(
+                      Math.round(
+                        (volumeType == VolumeType.HOURS_24
+                          ? nft.total_volume_last_24_hours
+                          : volumeType == VolumeType.DAYS_7
+                          ? nft.total_volume_last_7_days
+                          : volumeType == VolumeType.DAYS_30
+                          ? nft.total_volume_last_1_month
+                          : nft.total_volume) * 100
+                      ) / 100
                     )} ETH`
                   : `Volume: N/A`)}
             </Col>
@@ -605,12 +621,28 @@ export default function MemeLabComponent() {
                     }`}>
                     Market Cap
                   </span>
-                  <span
-                    onClick={() => setSort(Sort.VOLUME)}
-                    className={`${styles.sort} ${
-                      sort != Sort.VOLUME ? styles.disabled : ""
-                    }`}>
-                    Volume (7 days)
+                  <span>
+                    <Dropdown
+                      className={`${styles.volumeDropdown} ${
+                        sort == Sort.VOLUME ? styles.volumeDropdownEnabled : ""
+                      }`}
+                      drop={"down-centered"}>
+                      <Dropdown.Toggle>Volume</Dropdown.Toggle>
+                      <Dropdown.Menu>
+                        {Object.values(VolumeType).map((vol) => (
+                          <Dropdown.Item
+                            key={vol}
+                            onClick={() => {
+                              setVolumeType(vol);
+                              if (sort != Sort.VOLUME) {
+                                setSort(Sort.VOLUME);
+                              }
+                            }}>
+                            {vol}
+                          </Dropdown.Item>
+                        ))}
+                      </Dropdown.Menu>
+                    </Dropdown>
                   </span>
                 </Col>
               </Row>
