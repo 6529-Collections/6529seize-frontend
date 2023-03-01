@@ -351,6 +351,13 @@ export default function Header(props: Props) {
                     </a>
                   </Col>
                 </Row>
+                <Row className="pt-3">
+                  <Col>
+                    <a href={`/about/${AboutSection.DATA_DECENTR}`}>
+                      <h3>Data Decentralization</h3>
+                    </a>
+                  </Col>
+                </Row>
                 <Row>
                   <Col xs={{ span: 6, offset: 3 }}>
                     <hr />
@@ -596,6 +603,13 @@ export default function Header(props: Props) {
                                 }>
                                 Release Notes
                               </NavDropdown.Item>
+                              <NavDropdown.Item
+                                className={styles.dropdownItem}
+                                onClick={() =>
+                                  (window.location.href = `/about/${AboutSection.DATA_DECENTR}`)
+                                }>
+                                Data Decentralization
+                              </NavDropdown.Item>
                               <NavDropdown.Divider />
                               <NavDropdown.Item
                                 className={styles.dropdownItem}
@@ -656,16 +670,23 @@ export default function Header(props: Props) {
                                 title="Connect"
                                 className={`${styles.mainNavLink} ${styles.connectBtn} ${styles.fontBlack}`}
                                 align={"start"}>
-                                {connectors
-                                  .filter((a) => a.ready)
-                                  .map((connector) => (
-                                    <NavDropdown.Item
-                                      key={`${connector.name}-dropdown-item`}
-                                      className={`${styles.dropdownItem}`}
-                                      onClick={() => connect({ connector })}>
-                                      {connector.name}
-                                    </NavDropdown.Item>
-                                  ))}
+                                {connectors.map((connector) => (
+                                  <NavDropdown.Item
+                                    key={`${connector.name}-dropdown-item`}
+                                    className={`${styles.dropdownItem}`}
+                                    onClick={() => {
+                                      if (connector.ready) {
+                                        connect({ connector });
+                                      } else if (connector.name == "MetaMask") {
+                                        window.open(
+                                          "https://metamask.io/download/",
+                                          "_blank"
+                                        );
+                                      }
+                                    }}>
+                                    {connector.name}
+                                  </NavDropdown.Item>
+                                ))}
                               </NavDropdown>
                             )}
                           </Nav>

@@ -124,7 +124,7 @@ export default function Home() {
                   <Container className="no-padding">
                     <Row>
                       {nft.animation ? (
-                        <span>
+                        <span className={address && styles.nftImagePadding}>
                           <NFTImage
                             nft={nft}
                             animation={true}
@@ -133,10 +133,15 @@ export default function Home() {
                             onLoad={() => {
                               setIsNftImageLoaded(true);
                             }}
+                            showUnseized={
+                              address != undefined && address != null
+                            }
                           />
                         </span>
                       ) : (
-                        <a href={`/the-memes/${nft.id}`}>
+                        <a
+                          href={`/the-memes/${nft.id}`}
+                          className={address && styles.nftImagePadding}>
                           <NFTImage
                             nft={nft}
                             animation={true}
@@ -145,6 +150,9 @@ export default function Home() {
                             onLoad={() => {
                               setIsNftImageLoaded(true);
                             }}
+                            showUnseized={
+                              address != undefined && address != null
+                            }
                           />
                         </a>
                       )}

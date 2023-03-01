@@ -5,7 +5,6 @@ import dynamic from "next/dynamic";
 import { Container, Row, Col } from "react-bootstrap";
 import { useAccount } from "wagmi";
 import { GRADIENT_CONTRACT } from "../../constants";
-import { DBResponse } from "../../entities/IDBResponse";
 import { NFT } from "../../entities/INFT";
 import { Owner } from "../../entities/IOwner";
 import { SortDirection } from "../../entities/ISort";
@@ -162,6 +161,7 @@ export default function GradientsComponent() {
                   height={300}
                   balance={0}
                   showOwned={owner && areEqualAddresses(address, owner?.wallet)}
+                  showUnseized={false}
                   showThumbnail={true}
                 />
               </a>
@@ -174,6 +174,7 @@ export default function GradientsComponent() {
           </Row>
           <Row>
             <Col className="text-center">
+              {owner && address == owner.wallet ? "*" : ""}
               {owner && (
                 <Address
                   address={owner.wallet}
