@@ -41,7 +41,7 @@ export default function NFTLeaderboard(props: Props) {
   const [sort, setSort] = useState<{
     sort: Sort;
     sort_direction: SortDirection;
-  }>({ sort: Sort.card_balance, sort_direction: SortDirection.DESC });
+  }>({ sort: Sort.card_tdh, sort_direction: SortDirection.DESC });
 
   const [ownerTags, setOwnersTags] = useState<OwnerTags[]>([]);
   const [ownerTagsLoaded, setOwnerTagsLoaded] = useState(false);
@@ -100,7 +100,7 @@ export default function NFTLeaderboard(props: Props) {
   }, [pageProps.page]);
 
   return (
-    <Container className={`no-padding pt-4`} id={`leaderboard-${props.nftId}`}>
+    <Container className={`no-padding pt-3`} id={`leaderboard-${props.nftId}`}>
       <Row>
         <Col>
           <h1>COMMUNITY -</h1>

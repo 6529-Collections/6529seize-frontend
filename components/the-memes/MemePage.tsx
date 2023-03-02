@@ -224,6 +224,8 @@ export default function MemePage() {
         setUserLoaded(true);
         setNftBalance(countIn - countOut);
       });
+    } else {
+      setNftBalance(0);
     }
   }, [nftId, address]);
 
@@ -338,12 +340,13 @@ export default function MemePage() {
                   sm={{ span: 12 }}
                   md={{ span: 6 }}
                   lg={{ span: 6 }}
-                  className="pt-2">
+                  className={`pt-2 pb-5`}>
                   <NFTImage
                     nft={nft}
                     animation={true}
                     height={650}
                     balance={nftBalance}
+                    showUnseized={address != undefined && address != null}
                   />
                 </Col>
                 {activeTab == MEME_FOCUS.LIVE && <>{printLive()}</>}
@@ -364,7 +367,7 @@ export default function MemePage() {
   function printLiveSub() {
     return (
       <>
-        <Row className="pt-5">
+        <Row className="pt-3">
           <Col>
             <Image
               loading={"lazy"}
@@ -410,6 +413,7 @@ export default function MemePage() {
                             height={300}
                             balance={0}
                             showThumbnail={true}
+                            showUnseized={false}
                           />
                         </a>
                       </Col>
@@ -905,6 +909,7 @@ export default function MemePage() {
                       balance={0}
                       transparentBG={true}
                       showOriginal={true}
+                      showUnseized={false}
                       id="the-art-fullscreen-animation"
                     />
                   </Carousel.Item>
@@ -919,6 +924,7 @@ export default function MemePage() {
                       balance={0}
                       transparentBG={true}
                       showOriginal={true}
+                      showUnseized={false}
                       id="the-art-fullscreen-img"
                     />
                   </Carousel.Item>
@@ -935,6 +941,7 @@ export default function MemePage() {
                     balance={0}
                     transparentBG={true}
                     showOriginal={true}
+                    showUnseized={false}
                     id="the-art-fullscreen-img"
                   />
                 </>
@@ -969,19 +976,30 @@ export default function MemePage() {
                           />
                         </Col>
                       </Row>
-                      {nft.metadata.animation && (
+                      {(nft.metadata.animation ||
+                        nft.metadata.animation_url) && (
                         <Row className="pt-3">
                           <Col>
                             {nft.metadata.animation_details.format}{" "}
                             <a
                               className={styles.arweaveLink}
-                              href={nft.metadata.animation}
+                              href={
+                                nft.metadata.animation
+                                  ? nft.metadata.animation
+                                  : nft.metadata.animation_url
+                              }
                               target="_blank"
                               rel="noreferrer">
-                              {nft.metadata.animation}
+                              {nft.metadata.animation
+                                ? nft.metadata.animation
+                                : nft.metadata.animation_url}
                             </a>
                             <Download
-                              href={nft.metadata.animation}
+                              href={
+                                nft.metadata.animation
+                                  ? nft.metadata.animation
+                                  : nft.metadata.animation_url
+                              }
                               name={nft.name}
                               extension={nft.metadata.animation_details.format}
                             />
@@ -1085,7 +1103,11 @@ export default function MemePage() {
                   <Row>
                     <Col>
                       Mint price:{" "}
-                      {nft.mint_price > 0 ? `${nft.mint_price} ETH` : `N/A`}
+                      {nft.mint_price > 0
+                        ? `${numberWithCommas(
+                            Math.round(nft.mint_price * 100000) / 100000
+                          )} ETH`
+                        : `N/A`}
                     </Col>
                   </Row>
                 </Container>
@@ -1296,6 +1318,16 @@ export default function MemePage() {
                       <td>{printMintDate(nft.mint_date)}</td>
                     </tr>
                     <tr>
+                      <td>Mint Price</td>
+                      <td>
+                        {nft.mint_price > 0
+                          ? `${numberWithCommas(
+                              Math.round(nft.mint_price * 100000) / 100000
+                            )} ETH`
+                          : `N/A`}
+                      </td>
+                    </tr>
+                    <tr>
                       <td>TDH Rate</td>
                       <td>
                         {numberWithCommas(
@@ -1373,7 +1405,65 @@ export default function MemePage() {
   function printActivity() {
     return (
       <Container className="p-0">
-        <Row>
+        {nft && (
+          <>
+            <Row className="pt-2">
+              <Col>
+                <h3>Card Volumes</h3>
+              </Col>
+            </Row>
+            <Row className="pt-2">
+              <Col>
+                <Table className="text-center">
+                  <thead>
+                    <tr>
+                      <th>24 Hours</th>
+                      <th>7 Days</th>
+                      <th>1 Month</th>
+                      <th>All Time</th>
+                    </tr>
+                  </thead>
+                  <tbody className="pt-3">
+                    <tr>
+                      <td>
+                        {nft.total_volume_last_24_hours > 0
+                          ? `${numberWithCommas(
+                              Math.round(nft.total_volume_last_24_hours * 100) /
+                                100
+                            )} ETH`
+                          : `N/A`}
+                      </td>
+                      <td>
+                        {nft.total_volume_last_7_days > 0
+                          ? `${numberWithCommas(
+                              Math.round(nft.total_volume_last_7_days * 100) /
+                                100
+                            )} ETH`
+                          : `N/A`}
+                      </td>
+                      <td>
+                        {nft.total_volume_last_1_month > 0
+                          ? `${numberWithCommas(
+                              Math.round(nft.total_volume_last_1_month * 100) /
+                                100
+                            )} ETH`
+                          : `N/A`}
+                      </td>
+                      <td>
+                        {nft.total_volume > 0
+                          ? `${numberWithCommas(
+                              Math.round(nft.total_volume * 100) / 100
+                            )} ETH`
+                          : `N/A`}
+                      </td>
+                    </tr>
+                  </tbody>
+                </Table>
+              </Col>
+            </Row>
+          </>
+        )}
+        <Row className="pt-3">
           <Col
             className="d-flex align-items-center"
             xs={{ span: 7 }}

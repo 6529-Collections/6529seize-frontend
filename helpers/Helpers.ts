@@ -1,4 +1,5 @@
 import { GRADIENT_CONTRACT, MEMES_CONTRACT } from "../constants";
+import { BaseNFT, NFT, VolumeType } from "../entities/INFT";
 
 export function formatAddress(address: string) {
   if (!address || !address.startsWith("0x")) {
@@ -46,7 +47,9 @@ export function fromGWEI(from: number) {
 
 export function numberWithCommas(x: number) {
   if (x == null || x == 0) return "-";
-  return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  const parts = x.toString().split(".");
+  parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  return parts.join(".");
 }
 
 export function getDateDisplay(date: Date) {
@@ -134,4 +137,30 @@ export function splitArtists(artists: string) {
     .split(" and ")
     .join(",");
   return a;
+}
+
+export function removeProtocol(link: string) {
+  if (!link) {
+    return link;
+  }
+
+  return link.replace(/(^\w+:|^)\/\//, "");
+}
+
+export function getValuesForVolumeType(
+  volumeType: VolumeType | undefined,
+  a: BaseNFT
+) {
+  switch (volumeType) {
+    case VolumeType.ALL_TIME:
+      return a.total_volume;
+    case VolumeType.DAYS_30:
+      return a.total_volume_last_1_month;
+    case VolumeType.DAYS_7:
+      return a.total_volume_last_7_days;
+    case VolumeType.HOURS_24:
+      return a.total_volume_last_24_hours;
+  }
+
+  return 0;
 }

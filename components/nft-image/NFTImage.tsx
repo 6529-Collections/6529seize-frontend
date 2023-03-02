@@ -14,13 +14,12 @@ interface Props {
   showOwned?: boolean;
   transparentBG?: boolean;
   id?: string;
-  missing?: boolean;
+  showUnseized: boolean;
   onLoad?: () => void;
 }
 
 export default function NFTImage(props: Props) {
-  const [showBalance, setShowBalance] = useState(false)
-
+  const [showBalance, setShowBalance] = useState(false);
   useEffect(() => {
     if (props.onLoad) {
       props.onLoad();
@@ -34,23 +33,27 @@ export default function NFTImage(props: Props) {
   ) {
     return (
       <Col
-        className={`text-center ${styles.nftAnimation} ${
+        className={`${styles.nftAnimation} ${
           props.transparentBG ? styles.transparentBG : ""
-        }`}>
+        } d-flex justify-content-center align-items-center`}>
         {props.balance > 0 && showBalance && (
           <span
             className={`${styles.balance}  ${
               props.height == 650 ? styles.balanceBigger : ""
             }`}>
-            <span>{props.height == 650 && "SEIZED "}x</span>
-            {props.balance}
+            <span>SEIZED{!props.showOwned ? ` x${props.balance}` : ""}</span>
           </span>
+        )}
+        {props.showUnseized && props.balance == 0 && (
+          <span className={`${styles.balance}`}>UNSEIZED</span>
         )}
         <iframe
           src={props.nft.animation}
-          onLoad={() =>setShowBalance(true)}
+          onLoad={() => setShowBalance(true)}
           onError={({ currentTarget }) => {
-            currentTarget.src = props.nft.metadata.animation;
+            currentTarget.src = props.nft.metadata.animation
+              ? props.nft.metadata.animation
+              : props.nft.metadata.animation_url;
           }}
           id={`${props.id && `${props.id}`}`}
         />
@@ -65,7 +68,7 @@ export default function NFTImage(props: Props) {
   ) {
     return (
       <Col
-        className={`text-center ${styles.nftAnimation} ${
+        className={`${styles.nftAnimation} ${
           props.height == 650 ? styles.height650 : styles.height300
         } ${
           props.transparentBG ? styles.transparentBG : ""
@@ -75,9 +78,11 @@ export default function NFTImage(props: Props) {
             className={`${styles.balance}  ${
               props.height == 650 ? styles.balanceBigger : ""
             }`}>
-            <span>{props.height == 650 && "SEIZED "}x</span>
-            {props.balance}
+            <span>SEIZED{!props.showOwned ? ` x${props.balance}` : ""}</span>
           </span>
+        )}
+        {props.showUnseized && props.balance == 0 && (
+          <span className={`${styles.balance}`}>UNSEIZED</span>
         )}
         <video
           id={`${props.id && `${props.id}`}`}
@@ -92,7 +97,7 @@ export default function NFTImage(props: Props) {
               : props.nft.animation
           }
           poster={props.nft.scaled ? props.nft.scaled : props.nft.image}
-          onLoadStart={() =>setShowBalance(true)}
+          onLoadStart={() => setShowBalance(true)}
           onError={({ currentTarget }) => {
             if (currentTarget.src == props.nft.compressed_animation) {
               currentTarget.src = props.nft.animation;
@@ -107,7 +112,7 @@ export default function NFTImage(props: Props) {
   return (
     <Col
       xs={12}
-      className={`text-center d-flex align-items-center justify-content-center ${
+      className={`mb-2 text-center d-flex align-items-center justify-content-center ${
         styles.imageWrapper
       } ${props.height == 300 ? styles.height300 : ""} ${
         props.transparentBG && styles.transparentBG
@@ -131,7 +136,7 @@ export default function NFTImage(props: Props) {
             ? props.nft.scaled
             : props.nft.image
         }
-        onLoad={() =>setShowBalance(true)}
+        onLoad={() => setShowBalance(true)}
         onError={({ currentTarget }) => {
           if (currentTarget.src == props.nft.thumbnail) {
             currentTarget.src = props.nft.scaled
@@ -151,18 +156,14 @@ export default function NFTImage(props: Props) {
           className={`${styles.balance}  ${
             props.height == 650 ? styles.balanceBigger : ""
           }`}>
-          <span>{props.height == 650 && "SEIZED "}x</span>
-          {props.balance}
+          <span>SEIZED{!props.showOwned ? ` x${props.balance}` : ""}</span>
         </span>
       )}
-      {props.missing && <span className={`${styles.balance}`}>NOT SEIZED</span>}
-      {props.showOwned && (
-        <span
-          className={`${styles.balance}  ${
-            props.height == 650 ? styles.balanceBigger : ""
-          }`}>
-          SEIZED
-        </span>
+      {props.showUnseized && props.balance == 0 && (
+        <span className={`${styles.balance}`}>UNSEIZED</span>
+      )}
+      {props.showUnseized && props.balance == 0 && (
+        <span className={`${styles.balance}`}>UNSEIZED</span>
       )}
     </Col>
   );
