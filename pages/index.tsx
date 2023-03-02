@@ -272,7 +272,11 @@ export default function Home() {
                       <Row className="pt-3">
                         <Col>
                           Mint price:{" "}
-                          {nft.mint_price > 0 ? `${nft.mint_price} ETH` : `N/A`}
+                          {nft.mint_price > 0
+                            ? `${numberWithCommas(
+                                Math.round(nft.mint_price * 100000) / 100000
+                              )} ETH`
+                            : `N/A`}
                         </Col>
                       </Row>
                       <Row>

@@ -131,57 +131,66 @@ export default function UserPage(props: Props) {
           const newOwned = [...myowned].concat(response.data);
           if (newOwned.length > 0) {
             setOwned(newOwned);
-            setOwnerAddress(newOwned[0].wallet);
-            let walletDisplay = newOwned[0].wallet as string;
+            const walletAddress = newOwned[0].wallet;
+            setOwnerAddress(walletAddress);
+            let walletDisplay = newOwned[0].wallet_display as string | null;
             if (
-              walletDisplay &&
-              areEqualAddresses(walletDisplay, SIX529_MUSEUM)
+              !walletDisplay &&
+              areEqualAddresses(walletAddress, SIX529_MUSEUM)
             ) {
               walletDisplay = "6529Museum";
             }
-            if (walletDisplay && areEqualAddresses(walletDisplay, MANIFOLD)) {
+            if (!walletDisplay && areEqualAddresses(walletAddress, MANIFOLD)) {
               walletDisplay = "Manifold Minting Wallet";
             }
-            walletDisplay = newOwned[0].wallet_display
-              ? newOwned[0].wallet_display
-              : walletDisplay.endsWith(".eth")
-              ? ""
-              : walletDisplay;
+            walletDisplay = walletDisplay ? walletDisplay : null;
             if (walletDisplay) {
               setOwnerENS(walletDisplay);
               router.push(walletDisplay.replaceAll(" ", "-"), undefined, {
                 shallow: true,
               });
+
+              const ownerLink = `${
+                process.env.BASE_ENDPOINT
+                  ? process.env.BASE_ENDPOINT
+                  : "https://seize.io"
+              }/${walletDisplay ? walletDisplay : formatAddress(user)}`;
+              setOwnerLink(ownerLink);
+
+              let walletCrumb = walletDisplay
+                ? walletDisplay
+                : walletAddress
+                ? walletAddress
+                : props.user;
+
+              setBreadcrumbs([
+                { display: "Home", href: "/" },
+                { display: walletCrumb },
+              ]);
             }
           } else {
-            if (user.startsWith("0x") && user.length > 20) {
+            if (user.endsWith(".eth") || user.startsWith("0x")) {
               setOwnerAddress(user as `0x${string}`);
-            } else if (user.endsWith(".eth")) {
-              setOwnerAddress(user as `0x${string}`);
-              setOwnerENS(user);
+
+              const walletDisplay = user.endsWith(".eth") ? user : null;
+              if (walletDisplay) {
+                setOwnerENS(user);
+              }
+              setBreadcrumbs([
+                { display: "Home", href: "/" },
+                { display: walletDisplay ? walletDisplay : user },
+              ]);
+              const ownerLink = `${
+                process.env.BASE_ENDPOINT
+                  ? process.env.BASE_ENDPOINT
+                  : "https://seize.io"
+              }/${walletDisplay ? walletDisplay : user}`;
+              setOwnerLink(ownerLink);
             } else {
               window.location.href = "/404";
             }
           }
-          const ownerLink = `${
-            process.env.BASE_ENDPOINT
-              ? process.env.BASE_ENDPOINT
-              : "https://seize.io"
-          }/${ownerENS ? ownerENS : formatAddress(user)}`;
-          setOwnerLink(ownerLink);
 
-          let walletCrumb = ownerENS
-            ? ownerENS
-            : newOwned.length > 0
-            ? newOwned[0].wallet
-            : props.user;
-
-          setBreadcrumbs([
-            { display: "Home", href: "/" },
-            {
-              display: walletCrumb,
-            },
-          ]);
           setOwnerLoaded(true);
         }
       });
@@ -300,9 +309,7 @@ export default function UserPage(props: Props) {
 
             setBreadcrumbs([
               { display: "Home", href: "/" },
-              {
-                display: ownerEnsTemp,
-              },
+              { display: ownerEnsTemp },
             ]);
           }
 
