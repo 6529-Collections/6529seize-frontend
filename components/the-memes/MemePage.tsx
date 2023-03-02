@@ -976,19 +976,30 @@ export default function MemePage() {
                           />
                         </Col>
                       </Row>
-                      {nft.metadata.animation && (
+                      {(nft.metadata.animation ||
+                        nft.metadata.animation_url) && (
                         <Row className="pt-3">
                           <Col>
                             {nft.metadata.animation_details.format}{" "}
                             <a
                               className={styles.arweaveLink}
-                              href={nft.metadata.animation}
+                              href={
+                                nft.metadata.animation
+                                  ? nft.metadata.animation
+                                  : nft.metadata.animation_url
+                              }
                               target="_blank"
                               rel="noreferrer">
-                              {nft.metadata.animation}
+                              {nft.metadata.animation
+                                ? nft.metadata.animation
+                                : nft.metadata.animation_url}
                             </a>
                             <Download
-                              href={nft.metadata.animation}
+                              href={
+                                nft.metadata.animation
+                                  ? nft.metadata.animation
+                                  : nft.metadata.animation_url
+                              }
                               name={nft.name}
                               extension={nft.metadata.animation_details.format}
                             />

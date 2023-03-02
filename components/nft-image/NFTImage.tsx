@@ -33,9 +33,9 @@ export default function NFTImage(props: Props) {
   ) {
     return (
       <Col
-        className={`text-center ${styles.nftAnimation} ${
+        className={`${styles.nftAnimation} ${
           props.transparentBG ? styles.transparentBG : ""
-        }`}>
+        } d-flex justify-content-center align-items-center`}>
         {props.balance > 0 && showBalance && (
           <span
             className={`${styles.balance}  ${
@@ -51,7 +51,9 @@ export default function NFTImage(props: Props) {
           src={props.nft.animation}
           onLoad={() => setShowBalance(true)}
           onError={({ currentTarget }) => {
-            currentTarget.src = props.nft.metadata.animation;
+            currentTarget.src = props.nft.metadata.animation
+              ? props.nft.metadata.animation
+              : props.nft.metadata.animation_url;
           }}
           id={`${props.id && `${props.id}`}`}
         />
@@ -66,7 +68,7 @@ export default function NFTImage(props: Props) {
   ) {
     return (
       <Col
-        className={`text-center ${styles.nftAnimation} ${
+        className={`${styles.nftAnimation} ${
           props.height == 650 ? styles.height650 : styles.height300
         } ${
           props.transparentBG ? styles.transparentBG : ""
