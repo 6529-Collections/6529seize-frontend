@@ -20,6 +20,10 @@ export interface BaseNFT {
   metadata?: any;
   market_cap: number;
   floor_price: number;
+  total_volume_last_24_hours: number;
+  total_volume_last_7_days: number;
+  total_volume_last_1_month: number;
+  total_volume: number;
 }
 
 export interface LabNFT extends BaseNFT {
@@ -89,4 +93,11 @@ export interface LabExtendedData {
   percent_unique_cleaned: number;
   percent_unique_cleaned_rank: number;
   metadata_collection: string;
+}
+
+export enum VolumeType {
+  HOURS_24 = "24 Hours",
+  DAYS_7 = "7 Days",
+  DAYS_30 = "30 Days",
+  ALL_TIME = "All Time",
 }

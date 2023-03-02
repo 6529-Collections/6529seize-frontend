@@ -3,17 +3,20 @@ import Image from "next/image";
 import { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { Container, Row, Col } from "react-bootstrap";
+import { Container, Row, Col, Dropdown } from "react-bootstrap";
 import { useAccount } from "wagmi";
 import { MEMES_CONTRACT } from "../../constants";
-import { DBResponse } from "../../entities/IDBResponse";
-import { NFT, MemesExtendedData } from "../../entities/INFT";
+import { NFT, MemesExtendedData, VolumeType } from "../../entities/INFT";
 import { Owner } from "../../entities/IOwner";
 import { SortDirection } from "../../entities/ISort";
 import { Crumb } from "../breadcrumb/Breadcrumb";
-import { getDateDisplay, numberWithCommas } from "../../helpers/Helpers";
+import {
+  getDateDisplay,
+  getValuesForVolumeType,
+  numberWithCommas,
+} from "../../helpers/Helpers";
 import { useRouter } from "next/router";
-import { fetchAllPages, fetchUrl } from "../../services/6529api";
+import { fetchAllPages } from "../../services/6529api";
 
 const NFTImage = dynamic(() => import("../nft-image/NFTImage"), {
   ssr: false,
@@ -29,6 +32,7 @@ enum Sort {
   UNIQUE_PERCENT_EX_MUSEUM = "unique-ex-museum",
   FLOOR_PRICE = "floor-price",
   MARKET_CAP = "market-cap",
+  VOLUME = "volume",
 }
 
 interface Meme {
@@ -96,6 +100,8 @@ export default function TheMemesComponent(props: Props) {
   const [nftBalances, setNftBalances] = useState<Owner[]>([]);
   const [nftsLoaded, setNftsLoaded] = useState(false);
   const [nftMemes, setNftMemes] = useState<Meme[]>([]);
+
+  const [volumeType, setVolumeType] = useState<VolumeType>(VolumeType.HOURS_24);
 
   function getBalance(id: number) {
     const balance = nftBalances.find((b) => b.token_id == id);
@@ -410,8 +416,33 @@ export default function TheMemesComponent(props: Props) {
           );
         }
       }
+      if (sort == Sort.VOLUME) {
+        setNfts([...nfts].sort((a, b) => (a.mint_date > b.mint_date ? 1 : -1)));
+        if (sortDir == SortDirection.ASC) {
+          setNfts(
+            [...nfts].sort((a, b) => {
+              const aVolume = getValuesForVolumeType(volumeType, a);
+              const bVolume = getValuesForVolumeType(volumeType, b);
+
+              if (aVolume > bVolume) return -1;
+              if (aVolume < bVolume) return 1;
+              return a.mint_date > b.mint_date ? 1 : -1;
+            })
+          );
+        } else {
+          setNfts(
+            [...nfts].sort((a, b) => {
+              const aVolume = getValuesForVolumeType(volumeType, a);
+              const bVolume = getValuesForVolumeType(volumeType, b);
+              if (aVolume > bVolume) return 1;
+              if (aVolume < bVolume) return -1;
+              return a.mint_date > b.mint_date ? 1 : -1;
+            })
+          );
+        }
+      }
     }
-  }, [sort, sortDir, nftsLoaded]);
+  }, [sort, sortDir, nftsLoaded, volumeType]);
 
   function printMintDate(nft: NFT) {
     const mintDate = new Date(nft.mint_date);
@@ -440,13 +471,16 @@ export default function TheMemesComponent(props: Props) {
           lg={{ span: 3 }}>
           <Container fluid className="no-padding">
             <Row>
-              <a href={`/the-memes/${nft.id}`}>
+              <a
+                href={`/the-memes/${nft.id}`}
+                className={address && styles.nftImagePadding}>
                 <NFTImage
                   nft={nft}
                   animation={false}
                   height={300}
                   balance={getBalance(nft.id)}
                   showThumbnail={true}
+                  showUnseized={address != undefined && address != null}
                 />
               </a>
             </Row>
@@ -497,6 +531,20 @@ export default function TheMemesComponent(props: Props) {
                         Math.round(nft.market_cap * 100) / 100
                       )} ETH`
                     : `Market Cap: N/A`)}
+                {sort == Sort.VOLUME &&
+                  (nft.total_volume_last_7_days > 0
+                    ? `Volume (${volumeType}): ${numberWithCommas(
+                        Math.round(
+                          (volumeType == VolumeType.HOURS_24
+                            ? nft.total_volume_last_24_hours
+                            : volumeType == VolumeType.DAYS_7
+                            ? nft.total_volume_last_7_days
+                            : volumeType == VolumeType.DAYS_30
+                            ? nft.total_volume_last_1_month
+                            : nft.total_volume) * 100
+                        ) / 100
+                      )} ETH`
+                    : `Volume: N/A`)}
               </Col>
             </Row>
           </Container>
@@ -656,6 +704,29 @@ export default function TheMemesComponent(props: Props) {
                       sort != Sort.MARKET_CAP ? styles.disabled : ""
                     }`}>
                     Market Cap
+                  </span>
+                  <span>
+                    <Dropdown
+                      className={`${styles.volumeDropdown} ${
+                        sort == Sort.VOLUME ? styles.volumeDropdownEnabled : ""
+                      }`}
+                      drop={"down-centered"}>
+                      <Dropdown.Toggle>Volume</Dropdown.Toggle>
+                      <Dropdown.Menu>
+                        {Object.values(VolumeType).map((vol) => (
+                          <Dropdown.Item
+                            key={vol}
+                            onClick={() => {
+                              setVolumeType(vol);
+                              if (sort != Sort.VOLUME) {
+                                setSort(Sort.VOLUME);
+                              }
+                            }}>
+                            {vol}
+                          </Dropdown.Item>
+                        ))}
+                      </Dropdown.Menu>
+                    </Dropdown>
                   </span>
                 </Col>
               </Row>
