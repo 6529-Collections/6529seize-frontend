@@ -7,12 +7,14 @@ import { Owner, OwnerTags } from "../../entities/IOwner";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/router";
 import Breadcrumb, { Crumb } from "../breadcrumb/Breadcrumb";
-import { NFT } from "../../entities/INFT";
+import { MemesExtendedData, NFT } from "../../entities/INFT";
 import {
   areEqualAddresses,
+  formatAddress,
   isGradientsContract,
   isMemesContract,
   numberWithCommas,
+  removeProtocol,
 } from "../../helpers/Helpers";
 import {
   GRADIENT_CONTRACT,
@@ -24,11 +26,13 @@ import { TDHMetrics } from "../../entities/ITDH";
 import { useAccount } from "wagmi";
 import { SortDirection } from "../../entities/ISort";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { fetchUrl } from "../../services/6529api";
+import { fetchAllPages, fetchUrl } from "../../services/6529api";
 import Pagination from "../pagination/Pagination";
 import { TypeFilter } from "../latest-activity/LatestActivity";
 import LatestActivityRow from "../latest-activity/LatestActivityRow";
 import { Transaction } from "../../entities/ITransaction";
+import { ReservedUser } from "../../pages/[user]";
+import Tippy from "@tippyjs/react";
 
 const NFTImage = dynamic(() => import("../nft-image/NFTImage"), {
   ssr: false,
@@ -58,11 +62,15 @@ export default function UserPage(props: Props) {
   const [focus, setFocus] = useState<Focus>(Focus.COLLECTION);
   const [sortDir, setSortDir] = useState<SortDirection>(SortDirection.ASC);
   const [sort, setSort] = useState<Sort>(Sort.ID);
+  const [seasons, setSeasons] = useState<number[]>([]);
+  const [selectedSeason, setSelectedSeason] = useState(0);
+  const [nftMetas, setNftMetas] = useState<MemesExtendedData[]>([]);
+  const [ownerLinkCopied, setIsOwnerLinkCopied] = useState(false);
 
   const [user, setUser] = useState(
-    props.user.toUpperCase() == "6529Museum".toUpperCase()
+    props.user.toUpperCase() == ReservedUser.MUSEUM.toUpperCase()
       ? SIX529_MUSEUM
-      : props.user.toUpperCase() == "Manifold-Minting-Wallet".toUpperCase()
+      : props.user.toUpperCase() == ReservedUser.MANIFOLD.toUpperCase()
       ? MANIFOLD
       : props.user
   );
@@ -74,6 +82,7 @@ export default function UserPage(props: Props) {
   const [ownerAddress, setOwnerAddress] = useState<`0x${string}` | undefined>(
     undefined
   );
+  const [ownerLinkDisplay, setOwnerLinkDisplay] = useState("");
   const [ownerENS, setOwnerENS] = useState("");
   const [owned, setOwned] = useState<Owner[]>([]);
   const [nfts, setNfts] = useState<NFT[]>([]);
@@ -122,52 +131,70 @@ export default function UserPage(props: Props) {
           const newOwned = [...myowned].concat(response.data);
           if (newOwned.length > 0) {
             setOwned(newOwned);
-            setOwnerAddress(newOwned[0].wallet);
-            let walletDisplay = newOwned[0].wallet as string;
+            const walletAddress = newOwned[0].wallet;
+            setOwnerAddress(walletAddress);
+            let walletDisplay = newOwned[0].wallet_display as string | null;
             if (
-              walletDisplay &&
-              areEqualAddresses(walletDisplay, SIX529_MUSEUM)
+              !walletDisplay &&
+              areEqualAddresses(walletAddress, SIX529_MUSEUM)
             ) {
               walletDisplay = "6529Museum";
             }
-            if (walletDisplay && areEqualAddresses(walletDisplay, MANIFOLD)) {
+            if (!walletDisplay && areEqualAddresses(walletAddress, MANIFOLD)) {
               walletDisplay = "Manifold Minting Wallet";
             }
-            walletDisplay = newOwned[0].wallet_display
-              ? newOwned[0].wallet_display
-              : walletDisplay.startsWith("0x")
-              ? ""
-              : walletDisplay;
+            walletDisplay = walletDisplay ? walletDisplay : null;
             if (walletDisplay) {
               setOwnerENS(walletDisplay);
               router.push(walletDisplay.replaceAll(" ", "-"), undefined, {
                 shallow: true,
               });
             }
+            let oLink = process.env.BASE_ENDPOINT
+              ? process.env.BASE_ENDPOINT
+              : "https://seize.io";
+            setOwnerLinkDisplay(
+              `${oLink}/${
+                walletDisplay ? walletDisplay : formatAddress(walletAddress)
+              }`
+            );
 
             let walletCrumb = walletDisplay
               ? walletDisplay
-              : newOwned[0].wallet;
+              : walletAddress
+              ? walletAddress
+              : props.user;
 
             setBreadcrumbs([
               { display: "Home", href: "/" },
-              {
-                display: walletCrumb,
-              },
+              { display: walletCrumb },
             ]);
-            setOwnerLoaded(true);
           } else {
-            if (user.startsWith("0x") && user.length > 20) {
+            if (user.endsWith(".eth") || user.startsWith("0x")) {
               setOwnerAddress(user as `0x${string}`);
-              setOwnerLoaded(true);
-            } else if (user.endsWith(".eth")) {
-              setOwnerAddress(user as `0x${string}`);
-              setOwnerENS(user);
-              setOwnerLoaded(true);
+
+              const walletDisplay = user.endsWith(".eth") ? user : null;
+              if (walletDisplay) {
+                setOwnerENS(user);
+              }
+              setBreadcrumbs([
+                { display: "Home", href: "/" },
+                { display: walletDisplay ? walletDisplay : user },
+              ]);
+              let oLink = process.env.BASE_ENDPOINT
+                ? process.env.BASE_ENDPOINT
+                : "https://seize.io";
+              setOwnerLinkDisplay(
+                `${oLink}/${
+                  walletDisplay ? walletDisplay : formatAddress(user)
+                }`
+              );
             } else {
               window.location.href = "/404";
             }
           }
+
+          setOwnerLoaded(true);
         }
       });
     }
@@ -179,27 +206,34 @@ export default function UserPage(props: Props) {
   }, [user, router.isReady]);
 
   useEffect(() => {
-    async function fetchNfts(url: string, mynfts: NFT[]) {
-      return fetchUrl(url).then((response: DBResponse) => {
-        if (response.next) {
-          fetchNfts(response.next, [...mynfts].concat(response.data));
-        } else {
-          const newnfts = [...mynfts].concat(response.data);
-          setNfts(newnfts);
-          setNftsLoaded(true);
-        }
-      });
-    }
+    const nftsUrl = `${process.env.API_ENDPOINT}/api/memes_extended_data`;
+    fetchAllPages(nftsUrl).then((responseNftMetas: any[]) => {
+      setNftMetas(responseNftMetas);
+      setSeasons(
+        Array.from(new Set(responseNftMetas.map((meme) => meme.season))).sort(
+          (a, b) => a - b
+        )
+      );
+      if (responseNftMetas.length > 0) {
+        fetchAllPages(`${process.env.API_ENDPOINT}/api/nfts`).then(
+          (responseNfts: any[]) => {
+            setNfts(responseNfts);
+            setNftsLoaded(true);
+          }
+        );
+      } else {
+        setNfts([]);
+        setNftsLoaded(true);
+      }
+    });
+  }, []);
 
+  useEffect(() => {
     if (ownerAddress && router.isReady) {
-      let initialNftsUrl = `${process.env.API_ENDPOINT}/api/nfts?sort_direction=ASC`;
       if (isConnected && areEqualAddresses(ownerAddress, address)) {
         setUserIsOwner(true);
       } else {
         setUserIsOwner(false);
-      }
-      if (!nftsLoaded) {
-        fetchNfts(initialNftsUrl, []);
       }
     }
   }, [ownerAddress, router.isReady, isConnected]);
@@ -251,6 +285,49 @@ export default function UserPage(props: Props) {
       fetchUrl(url).then((response: DBResponse) => {
         setActivityTotalResults(response.count);
         setActivity(response.data);
+        if (response.data.length > 0) {
+          const first = response.data[0];
+
+          const ownerEnsTemp = areEqualAddresses(
+            first.from_address,
+            ownerAddress
+          )
+            ? first.from_display
+            : areEqualAddresses(first.to_address, ownerAddress)
+            ? first.to_diplay
+            : null;
+
+          if (ownerEnsTemp) {
+            setOwnerENS(ownerEnsTemp);
+            router.push(ownerEnsTemp.replaceAll(" ", "-"), undefined, {
+              shallow: true,
+            });
+
+            const ownerLink = `${
+              process.env.BASE_ENDPOINT
+                ? process.env.BASE_ENDPOINT
+                : "https://seize.io"
+            }/${ownerEnsTemp}`;
+            setOwnerLinkDisplay(ownerLink);
+
+            setBreadcrumbs([
+              { display: "Home", href: "/" },
+              { display: ownerEnsTemp },
+            ]);
+          }
+
+          const ownerAddressTemp =
+            areEqualAddresses(first.from_address, ownerAddress) ||
+            areEqualAddresses(first.from_display, ownerAddress)
+              ? first.from_address
+              : areEqualAddresses(first.to_address, ownerAddress) ||
+                areEqualAddresses(first.to_display, ownerAddress)
+              ? first.to_address
+              : null;
+          if (ownerAddressTemp) {
+            setOwnerAddress(ownerAddressTemp);
+          }
+        }
       });
     }
   }, [activityPage, ownerAddress, router.isReady, activityTypeFilter]);
@@ -449,7 +526,15 @@ export default function UserPage(props: Props) {
         }
       }
     }
-  }, [sortDir, sort]);
+  }, [
+    sortDir,
+    sort,
+    hideMemes,
+    hideGradients,
+    hideSeized,
+    hideNonSeized,
+    nftsLoaded,
+  ]);
 
   function printNft(nft: NFT) {
     let nfttdh;
@@ -480,6 +565,11 @@ export default function UserPage(props: Props) {
       return;
     }
 
+    const season = nftMetas.find((a) => a.id == nft.id)?.season;
+    if (selectedSeason != 0 && selectedSeason != season) {
+      return;
+    }
+
     return (
       <Col
         key={`${nft.contract}-${nft.id}`}
@@ -490,33 +580,28 @@ export default function UserPage(props: Props) {
         lg={{ span: 3 }}>
         <Container fluid className="no-padding">
           <Row>
-            <Col>
-              <a
-                href={`/${
-                  areEqualAddresses(nft.contract, MEMES_CONTRACT)
-                    ? "the-memes"
-                    : "6529-gradient"
-                }/${nft.id}`}>
-                <NFTImage
-                  nft={nft}
-                  animation={false}
-                  height={300}
-                  missing={nftbalance == 0}
-                  balance={
-                    areEqualAddresses(nft.contract, GRADIENT_CONTRACT)
-                      ? 0
-                      : nftbalance
-                  }
-                  showOwned={
-                    areEqualAddresses(nft.contract, GRADIENT_CONTRACT) &&
-                    nftbalance > 0
-                      ? true
-                      : false
-                  }
-                  showThumbnail={true}
-                />
-              </a>
-            </Col>
+            <a
+              className={styles.nftImagePadding}
+              href={`/${
+                areEqualAddresses(nft.contract, MEMES_CONTRACT)
+                  ? "the-memes"
+                  : "6529-gradient"
+              }/${nft.id}`}>
+              <NFTImage
+                nft={nft}
+                animation={false}
+                height={300}
+                balance={nftbalance}
+                showOwned={
+                  areEqualAddresses(nft.contract, GRADIENT_CONTRACT) &&
+                  nftbalance > 0
+                    ? true
+                    : false
+                }
+                showThumbnail={true}
+                showUnseized={true}
+              />
+            </a>
           </Row>
           <Row>
             <Col className="text-center pt-2">
@@ -556,18 +641,37 @@ export default function UserPage(props: Props) {
       <Row className="pt-3">
         <Col>
           <Form.Check
-            type="switch"
+            type="radio"
+            name="hide"
+            checked={!hideSeized && !hideNonSeized}
             className={`${styles.seizedToggle}`}
-            label={`Hide Non-Seized`}
-            checked={hideNonSeized}
-            onChange={() => setHideNonSeized(!hideNonSeized)}
+            label={`All`}
+            onChange={() => {
+              setHideSeized(false);
+              setHideNonSeized(false);
+            }}
           />
           <Form.Check
-            type="switch"
+            type="radio"
+            checked={!hideSeized && hideNonSeized}
             className={`${styles.seizedToggle}`}
-            label={`Hide Seized`}
-            checked={hideSeized}
-            onChange={() => setHideSeized(!hideSeized)}
+            name="hide"
+            label={`Seized`}
+            onChange={() => {
+              setHideSeized(false);
+              setHideNonSeized(true);
+            }}
+          />
+          <Form.Check
+            type="radio"
+            checked={hideSeized && !hideNonSeized}
+            className={`${styles.seizedToggle}`}
+            name="hide"
+            label={`Unseized`}
+            onChange={() => {
+              setHideSeized(true);
+              setHideNonSeized(false);
+            }}
           />
           {ownerTags &&
             ownerTags?.memes_balance > 0 &&
@@ -680,6 +784,35 @@ export default function UserPage(props: Props) {
                             )}
                           </h2>
                         </Row>
+                        <Row className="pt-2 pb-2">
+                          <Col>
+                            <Tippy
+                              content={ownerLinkCopied ? "Copied" : "Copy"}
+                              placement={"right"}
+                              theme={"light"}
+                              hideOnClick={false}>
+                              <span
+                                className={styles.ownerLink}
+                                onClick={() => {
+                                  if (navigator.clipboard) {
+                                    navigator.clipboard.writeText(
+                                      window.location.href
+                                    );
+                                  }
+                                  setIsOwnerLinkCopied(true);
+                                  setTimeout(() => {
+                                    setIsOwnerLinkCopied(false);
+                                  }, 1000);
+                                }}>
+                                {removeProtocol(ownerLinkDisplay)}{" "}
+                                <FontAwesomeIcon
+                                  icon="link"
+                                  className={styles.ownerLinkIcon}
+                                />
+                              </span>
+                            </Tippy>
+                          </Col>
+                        </Row>
                         <Row className="pt-3">
                           <Col>
                             <a
@@ -719,210 +852,218 @@ export default function UserPage(props: Props) {
                     sm={{ span: 12 }}
                     md={{ span: 6 }}
                     lg={{ span: 6 }}>
-                    <Table className={styles.primaryTable}>
-                      <tbody>
-                        <tr>
-                          <td colSpan={3}>
-                            <h4>Cards Collected</h4>
-                          </td>
-                        </tr>
-                        <tr>
-                          <td></td>
-                          <td>
-                            <b>Total</b>
-                          </td>
-                          <td>
-                            <b>Memes</b>
-                          </td>
-                          <td>
-                            <b>Memes SZN1</b>
-                          </td>
-                          <td>
-                            <b>Memes SZN2</b>
-                          </td>
-                          <td>
-                            <b>6529 Gradient</b>
-                          </td>
-                        </tr>
-                        <tr className={styles.primaryTableGap}></tr>
-                        <tr>
-                          <td>
-                            <b>Cards</b>
-                          </td>
-                          <td>
-                            x
-                            {numberWithCommas(
-                              tdh.memes_balance + tdh.gradients_balance
-                            )}
-                          </td>
-                          <td>
-                            {tdh.memes_balance > 0
-                              ? `x${numberWithCommas(tdh.memes_balance)}`
-                              : "-"}
-                          </td>
-                          <td>
-                            {tdh.memes_balance_season1 > 0
-                              ? `x${numberWithCommas(
-                                  tdh.memes_balance_season1
-                                )}`
-                              : "-"}
-                          </td>
-                          <td>
-                            {tdh.memes_balance_season2 > 0
-                              ? `x${numberWithCommas(
-                                  tdh.memes_balance_season2
-                                )}`
-                              : "-"}
-                          </td>
-                          <td>
-                            {tdh.gradients_balance > 0
-                              ? `x${numberWithCommas(tdh.gradients_balance)}`
-                              : "-"}
-                          </td>
-                        </tr>
-                        <tr>
-                          <td>
-                            <b>Unique</b>
-                          </td>
-                          <td>
-                            x
-                            {numberWithCommas(
-                              tdh.unique_memes + tdh.gradients_balance
-                            )}
-                          </td>
-                          <td>
-                            {tdh.unique_memes > 0
-                              ? `x${numberWithCommas(tdh.unique_memes)}`
-                              : "-"}
-                          </td>
-                          <td>
-                            {tdh.unique_memes_szn1 > 0
-                              ? `x${numberWithCommas(tdh.unique_memes_szn1)}`
-                              : "-"}
-                          </td>
-                          <td>
-                            {tdh.unique_memes_szn2 > 0
-                              ? `x${numberWithCommas(tdh.unique_memes_szn2)}`
-                              : "-"}
-                          </td>
-                          <td>
-                            {tdh.gradients_balance > 0
-                              ? `x${numberWithCommas(tdh.gradients_balance)}`
-                              : "-"}
-                          </td>
-                        </tr>
-                        <tr>
-                          <td>
-                            <b>Rank</b>
-                          </td>
-                          <td>
-                            #{numberWithCommas(tdh.dense_rank_balance)}
-                            {tdh.dense_rank_balance__ties > 1 && ` (tie)`}
-                          </td>
-                          <td>
-                            {tdh.memes_balance > 0
-                              ? `#${numberWithCommas(
-                                  tdh.dense_rank_balance_memes
-                                )}${
-                                  tdh.dense_rank_balance_memes__ties > 1
-                                    ? ` (tie)`
-                                    : ""
-                                }`
-                              : "-"}
-                          </td>
-                          <td>
-                            {tdh.memes_balance_season1 > 0
-                              ? `#${numberWithCommas(
-                                  tdh.dense_rank_balance_memes_season1
-                                )}${
-                                  tdh.dense_rank_balance_memes_season1__ties > 1
-                                    ? ` (tie)`
-                                    : ""
-                                }`
-                              : "-"}
-                          </td>
-                          <td>
-                            {tdh.memes_balance_season2 > 0
-                              ? `#${numberWithCommas(
-                                  tdh.dense_rank_balance_memes_season2
-                                )}${
-                                  tdh.dense_rank_balance_memes_season2__ties > 1
-                                    ? ` (tie)`
-                                    : ""
-                                }`
-                              : "-"}
-                          </td>
-                          <td>
-                            {tdh.gradients_balance > 0
-                              ? `#${numberWithCommas(
-                                  tdh.dense_rank_balance_gradients
-                                )}${
-                                  tdh.dense_rank_balance_gradients__ties > 1
-                                    ? ` (tie)`
-                                    : ""
-                                }`
-                              : "-"}
-                          </td>
-                        </tr>
-                        <tr className={styles.primaryTableGap}></tr>
-                        <tr>
-                          <td>
-                            <b>TDH</b>
-                          </td>
-                          <td>{numberWithCommas(tdh.boosted_tdh)}</td>
-                          <td>
-                            {numberWithCommas(
-                              Math.round(tdh.boosted_memes_tdh)
-                            )}
-                          </td>
-                          <td>
-                            {numberWithCommas(
-                              Math.round(tdh.boosted_memes_tdh_season1)
-                            )}
-                          </td>
-                          <td>
-                            {numberWithCommas(
-                              Math.round(tdh.boosted_memes_tdh_season2)
-                            )}
-                          </td>
-                          <td>
-                            {numberWithCommas(
-                              Math.round(tdh.boosted_gradients_tdh)
-                            )}
-                          </td>
-                        </tr>
-                        <tr>
-                          <td>
-                            <b>Rank</b>
-                          </td>
-                          <td>
-                            {tdh.tdh_rank > 0
-                              ? `#${numberWithCommas(tdh.tdh_rank)}`
-                              : "-"}
-                          </td>
-                          <td>
-                            {tdh.tdh_rank_memes > 0
-                              ? `#${numberWithCommas(tdh.tdh_rank_memes)}`
-                              : "-"}
-                          </td>
-                          <td>
-                            {tdh.tdh_rank_memes_szn1 > 0
-                              ? `#${numberWithCommas(tdh.tdh_rank_memes_szn1)}`
-                              : "-"}
-                          </td>
-                          <td>
-                            {tdh.tdh_rank_memes_szn2 > 0
-                              ? `#${numberWithCommas(tdh.tdh_rank_memes_szn2)}`
-                              : "-"}
-                          </td>
-                          <td>
-                            {tdh.tdh_rank_gradients > 0
-                              ? `#${numberWithCommas(tdh.tdh_rank_gradients)}`
-                              : "-"}
-                          </td>
-                        </tr>
-                      </tbody>
-                    </Table>
+                    {tdh.balance > 0 && (
+                      <Table className={styles.primaryTable}>
+                        <tbody>
+                          <tr>
+                            <td colSpan={3}>
+                              <h4>Cards Collected</h4>
+                            </td>
+                          </tr>
+                          <tr>
+                            <td></td>
+                            <td>
+                              <b>Total</b>
+                            </td>
+                            <td>
+                              <b>Memes</b>
+                            </td>
+                            <td>
+                              <b>Memes SZN1</b>
+                            </td>
+                            <td>
+                              <b>Memes SZN2</b>
+                            </td>
+                            <td>
+                              <b>6529 Gradient</b>
+                            </td>
+                          </tr>
+                          <tr className={styles.primaryTableGap}></tr>
+                          <tr>
+                            <td>
+                              <b>Cards</b>
+                            </td>
+                            <td>
+                              x
+                              {numberWithCommas(
+                                tdh.memes_balance + tdh.gradients_balance
+                              )}
+                            </td>
+                            <td>
+                              {tdh.memes_balance > 0
+                                ? `x${numberWithCommas(tdh.memes_balance)}`
+                                : "-"}
+                            </td>
+                            <td>
+                              {tdh.memes_balance_season1 > 0
+                                ? `x${numberWithCommas(
+                                    tdh.memes_balance_season1
+                                  )}`
+                                : "-"}
+                            </td>
+                            <td>
+                              {tdh.memes_balance_season2 > 0
+                                ? `x${numberWithCommas(
+                                    tdh.memes_balance_season2
+                                  )}`
+                                : "-"}
+                            </td>
+                            <td>
+                              {tdh.gradients_balance > 0
+                                ? `x${numberWithCommas(tdh.gradients_balance)}`
+                                : "-"}
+                            </td>
+                          </tr>
+                          <tr>
+                            <td>
+                              <b>Unique</b>
+                            </td>
+                            <td>
+                              x
+                              {numberWithCommas(
+                                tdh.unique_memes + tdh.gradients_balance
+                              )}
+                            </td>
+                            <td>
+                              {tdh.unique_memes > 0
+                                ? `x${numberWithCommas(tdh.unique_memes)}`
+                                : "-"}
+                            </td>
+                            <td>
+                              {tdh.unique_memes_szn1 > 0
+                                ? `x${numberWithCommas(tdh.unique_memes_szn1)}`
+                                : "-"}
+                            </td>
+                            <td>
+                              {tdh.unique_memes_szn2 > 0
+                                ? `x${numberWithCommas(tdh.unique_memes_szn2)}`
+                                : "-"}
+                            </td>
+                            <td>
+                              {tdh.gradients_balance > 0
+                                ? `x${numberWithCommas(tdh.gradients_balance)}`
+                                : "-"}
+                            </td>
+                          </tr>
+                          <tr>
+                            <td>
+                              <b>Rank</b>
+                            </td>
+                            <td>
+                              #{numberWithCommas(tdh.dense_rank_balance)}
+                              {tdh.dense_rank_balance__ties > 1 && ` (tie)`}
+                            </td>
+                            <td>
+                              {tdh.memes_balance > 0
+                                ? `#${numberWithCommas(
+                                    tdh.dense_rank_balance_memes
+                                  )}${
+                                    tdh.dense_rank_balance_memes__ties > 1
+                                      ? ` (tie)`
+                                      : ""
+                                  }`
+                                : "-"}
+                            </td>
+                            <td>
+                              {tdh.memes_balance_season1 > 0
+                                ? `#${numberWithCommas(
+                                    tdh.dense_rank_balance_memes_season1
+                                  )}${
+                                    tdh.dense_rank_balance_memes_season1__ties >
+                                    1
+                                      ? ` (tie)`
+                                      : ""
+                                  }`
+                                : "-"}
+                            </td>
+                            <td>
+                              {tdh.memes_balance_season2 > 0
+                                ? `#${numberWithCommas(
+                                    tdh.dense_rank_balance_memes_season2
+                                  )}${
+                                    tdh.dense_rank_balance_memes_season2__ties >
+                                    1
+                                      ? ` (tie)`
+                                      : ""
+                                  }`
+                                : "-"}
+                            </td>
+                            <td>
+                              {tdh.gradients_balance > 0
+                                ? `#${numberWithCommas(
+                                    tdh.dense_rank_balance_gradients
+                                  )}${
+                                    tdh.dense_rank_balance_gradients__ties > 1
+                                      ? ` (tie)`
+                                      : ""
+                                  }`
+                                : "-"}
+                            </td>
+                          </tr>
+                          <tr className={styles.primaryTableGap}></tr>
+                          <tr>
+                            <td>
+                              <b>TDH</b>
+                            </td>
+                            <td>{numberWithCommas(tdh.boosted_tdh)}</td>
+                            <td>
+                              {numberWithCommas(
+                                Math.round(tdh.boosted_memes_tdh)
+                              )}
+                            </td>
+                            <td>
+                              {numberWithCommas(
+                                Math.round(tdh.boosted_memes_tdh_season1)
+                              )}
+                            </td>
+                            <td>
+                              {numberWithCommas(
+                                Math.round(tdh.boosted_memes_tdh_season2)
+                              )}
+                            </td>
+                            <td>
+                              {numberWithCommas(
+                                Math.round(tdh.boosted_gradients_tdh)
+                              )}
+                            </td>
+                          </tr>
+                          <tr>
+                            <td>
+                              <b>Rank</b>
+                            </td>
+                            <td>
+                              {tdh.tdh_rank > 0
+                                ? `#${numberWithCommas(tdh.tdh_rank)}`
+                                : "-"}
+                            </td>
+                            <td>
+                              {tdh.tdh_rank_memes > 0
+                                ? `#${numberWithCommas(tdh.tdh_rank_memes)}`
+                                : "-"}
+                            </td>
+                            <td>
+                              {tdh.tdh_rank_memes_szn1 > 0
+                                ? `#${numberWithCommas(
+                                    tdh.tdh_rank_memes_szn1
+                                  )}`
+                                : "-"}
+                            </td>
+                            <td>
+                              {tdh.tdh_rank_memes_szn2 > 0
+                                ? `#${numberWithCommas(
+                                    tdh.tdh_rank_memes_szn2
+                                  )}`
+                                : "-"}
+                            </td>
+                            <td>
+                              {tdh.tdh_rank_gradients > 0
+                                ? `#${numberWithCommas(tdh.tdh_rank_gradients)}`
+                                : "-"}
+                            </td>
+                          </tr>
+                        </tbody>
+                      </Table>
+                    )}
                     <Table className={styles.secondaryTable}>
                       <tbody>
                         <tr>
@@ -1000,7 +1141,7 @@ export default function UserPage(props: Props) {
             </Container>
             <Container>
               <Row className="pt-3 pb-3">
-                {focus == Focus.COLLECTION && (
+                {/* {focus == Focus.COLLECTION && (
                   <Col>
                     Sort&nbsp;&nbsp;
                     <FontAwesomeIcon
@@ -1018,8 +1159,8 @@ export default function UserPage(props: Props) {
                       }`}
                     />
                   </Col>
-                )}
-                <Col className="d-flex justify-content-end">
+                )} */}
+                <Col className="d-flex align-items-center justify-content-center">
                   <h3
                     className={
                       focus == Focus.COLLECTION
@@ -1043,29 +1184,76 @@ export default function UserPage(props: Props) {
               </Row>
               {focus == Focus.COLLECTION && (
                 <>
-                  <Row className="pt-2">
-                    <Col>
-                      <span
-                        onClick={() => setSort(Sort.ID)}
-                        className={`${styles.sort} ${
-                          sort != Sort.ID ? styles.disabled : ""
-                        }`}>
-                        ID
-                      </span>
-                      <span
-                        onClick={() => setSort(Sort.TDH)}
-                        className={`${styles.sort} ${
-                          sort != Sort.TDH ? styles.disabled : ""
-                        }`}>
-                        TDH
-                      </span>
-                      <span
-                        onClick={() => setSort(Sort.RANK)}
-                        className={`${styles.sort} ${
-                          sort != Sort.RANK ? styles.disabled : ""
-                        }`}>
-                        RANK
-                      </span>
+                  <Row>
+                    <Col xs={5}>
+                      <Col xs={12}>
+                        Sort&nbsp;&nbsp;
+                        <FontAwesomeIcon
+                          icon="chevron-circle-up"
+                          onClick={() => setSortDir(SortDirection.ASC)}
+                          className={`${styles.sortDirection} ${
+                            sortDir != SortDirection.ASC ? styles.disabled : ""
+                          }`}
+                        />{" "}
+                        <FontAwesomeIcon
+                          icon="chevron-circle-down"
+                          onClick={() => setSortDir(SortDirection.DESC)}
+                          className={`${styles.sortDirection} ${
+                            sortDir != SortDirection.DESC ? styles.disabled : ""
+                          }`}
+                        />
+                      </Col>
+                      <Col xs={12} className="pt-2">
+                        <span
+                          onClick={() => setSort(Sort.ID)}
+                          className={`${styles.sort} ${
+                            sort != Sort.ID ? styles.disabled : ""
+                          }`}>
+                          ID
+                        </span>
+                        <span
+                          onClick={() => setSort(Sort.TDH)}
+                          className={`${styles.sort} ${
+                            sort != Sort.TDH ? styles.disabled : ""
+                          }`}>
+                          TDH
+                        </span>
+                        <span
+                          onClick={() => setSort(Sort.RANK)}
+                          className={`${styles.sort} ${
+                            sort != Sort.RANK ? styles.disabled : ""
+                          }`}>
+                          RANK
+                        </span>
+                      </Col>
+                    </Col>
+                    <Col
+                      className="d-flex align-items-center justify-content-end"
+                      xs={7}>
+                      <h3>
+                        <span
+                          onClick={() => setSelectedSeason(0)}
+                          className={`${styles.season} ${
+                            selectedSeason > 0 ? styles.disabled : ""
+                          }`}>
+                          All
+                        </span>
+                      </h3>
+                      {seasons.map((s) => (
+                        <span key={`season-${s}-span`}>
+                          <h3>&nbsp;&nbsp;|&nbsp;&nbsp;</h3>
+                          <h3>
+                            <span
+                              key={`season-${s}-h3-2-span`}
+                              onClick={() => setSelectedSeason(s)}
+                              className={`${styles.season} ${
+                                selectedSeason != s ? styles.disabled : ""
+                              }`}>
+                              SZN{s}
+                            </span>
+                          </h3>
+                        </span>
+                      ))}
                     </Col>
                   </Row>
                   {printUserControls()}

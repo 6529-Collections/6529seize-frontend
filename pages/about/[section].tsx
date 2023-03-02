@@ -21,6 +21,7 @@ import AboutTermsOfService from "../../components/about/AboutTermsOfService";
 import AboutPrivacyPolicy from "../../components/about/AboutPrivacyPolicy";
 import AboutCookiePolicy from "../../components/about/AboutCookiePolicy";
 import Head from "next/head";
+import AboutDataDecentral from "../../components/about/AboutDataDecentral";
 
 export enum AboutSection {
   MEMES = "the-memes",
@@ -37,6 +38,7 @@ export enum AboutSection {
   LICENSE = "license",
   MINTING = "minting",
   APPLY = "apply",
+  DATA_DECENTR = "data-decentralization",
 }
 
 const Header = dynamic(() => import("../../components/header/Header"), {
@@ -111,6 +113,8 @@ export default function About(props: Props) {
         return <AboutPrivacyPolicy />;
       case AboutSection.COOKIE_POLICY:
         return <AboutCookiePolicy />;
+      case AboutSection.DATA_DECENTR:
+        return <AboutDataDecentral />;
     }
   }
 
@@ -271,6 +275,19 @@ export default function About(props: Props) {
                               : ""
                           }`}>
                           Release Notes
+                        </Col>
+                      </Row>
+                      <Row className="pt-1 pb-1">
+                        <Col
+                          onClick={() =>
+                            setNewSection(AboutSection.DATA_DECENTR)
+                          }
+                          className={`${menuStyles.aboutMenuLeftItem} ${
+                            section == AboutSection.DATA_DECENTR
+                              ? menuStyles.aboutMenuLeftItemActive
+                              : ""
+                          }`}>
+                          Data Decentralization
                         </Col>
                       </Row>
                       <Row>
@@ -455,6 +472,19 @@ export default function About(props: Props) {
                               : ""
                           }`}>
                           Release Notes
+                        </Col>
+                      </Row>
+                      <Row className="pt-1 pb-1">
+                        <Col
+                          onClick={() =>
+                            setNewSection(AboutSection.DATA_DECENTR)
+                          }
+                          className={`${menuStyles.aboutMenuLeftItem} ${
+                            section == AboutSection.DATA_DECENTR
+                              ? menuStyles.aboutMenuLeftItemActive
+                              : ""
+                          }`}>
+                          Data Decentralization
                         </Col>
                       </Row>
                       <Row>

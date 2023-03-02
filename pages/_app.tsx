@@ -1,5 +1,8 @@
 import "../styles/seize-bootstrap.scss";
 import "../styles/globals.scss";
+import "tippy.js/dist/tippy.css";
+import "tippy.js/themes/light.css";
+
 import type { AppProps } from "next/app";
 import SSRProvider from "react-bootstrap/SSRProvider";
 
@@ -9,7 +12,7 @@ import { alchemyProvider } from "wagmi/providers/alchemy";
 
 import { CoinbaseWalletConnector } from "wagmi/connectors/coinbaseWallet";
 import { WalletConnectConnector } from "wagmi/connectors/walletConnect";
-import { InjectedConnector } from "wagmi/connectors/injected";
+import { MetaMaskConnector } from "wagmi/connectors/metaMask";
 import { mainnet } from "wagmi/chains";
 import { configureChains, createClient, WagmiConfig } from "wagmi";
 
@@ -40,6 +43,10 @@ import {
   faXmark,
   faCartPlus,
   faTimesCircle,
+  faLink,
+  faSearch,
+  faX,
+  faSquareMinus,
 } from "@fortawesome/free-solid-svg-icons";
 import Head from "next/head";
 
@@ -68,7 +75,11 @@ library.add(
   faCheck,
   faXmark,
   faCartPlus,
-  faTimesCircle
+  faTimesCircle,
+  faLink,
+  faSearch,
+  faX,
+  faSquareMinus
 );
 
 const { chains, provider } = configureChains(
@@ -79,7 +90,7 @@ const { chains, provider } = configureChains(
 const client = createClient({
   autoConnect: true,
   connectors: [
-    new InjectedConnector({
+    new MetaMaskConnector({
       chains,
     }),
     new WalletConnectConnector({

@@ -5,6 +5,7 @@ import { MANIFOLD, SIX529_MUSEUM } from "../../constants";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useState } from "react";
 import { Dropdown } from "react-bootstrap";
+import Tippy from "@tippyjs/react";
 
 interface Props {
   address: `0x${string}` | undefined;
@@ -50,7 +51,7 @@ export default function Address(props: Props) {
     setIsCopied(true);
     setTimeout(() => {
       setIsCopied(false);
-    }, 300);
+    }, 1000);
   }
 
   function resolveAddress() {
@@ -98,71 +99,93 @@ export default function Address(props: Props) {
                 className={`${styles.address} ${
                   props.isUserPage ? styles.addressUserPage : ""
                 }`}>
-                <a href={`/${props.address}`}>{resolveAddress()}</a>
+                {props.disableLink && resolveAddress()}
+                {!props.disableLink && (
+                  <a href={`/${props.address}`}>{resolveAddress()}</a>
+                )}
               </span>
             )}
             {props.ens ? (
-              <Dropdown className={`${styles.copyDropdown}`}>
-                <Dropdown.Toggle
-                  name={`copy-toggle`}
-                  aria-label={`copy-toggle`}>
-                  {props.isUserPage && (
-                    <span
-                      className={`${styles.address} ${
-                        props.isUserPage ? styles.addressUserPage : ""
-                      }`}>
-                      {resolveAddress()}
-                    </span>
-                  )}
-                  <FontAwesomeIcon
-                    icon="copy"
-                    name={`copy-btn`}
-                    aria-label={`copy-btn`}
-                    className={`${styles.copy} ${
-                      isCopied ? styles.copyActive : ""
-                    }`}
-                  />
-                </Dropdown.Toggle>
-
+              <Dropdown
+                className={`${styles.copyDropdown}`}
+                autoClose="outside">
+                <Tippy
+                  content={isCopied ? "Copied" : "Copy"}
+                  placement={"right"}
+                  theme={"light"}
+                  hideOnClick={false}>
+                  <Dropdown.Toggle
+                    name={`copy-toggle`}
+                    aria-label={`copy-toggle`}>
+                    {props.isUserPage && (
+                      <span
+                        className={`${styles.address} ${
+                          props.isUserPage ? styles.addressUserPage : ""
+                        }`}>
+                        {resolveAddress()}
+                      </span>
+                    )}
+                    <FontAwesomeIcon
+                      icon="copy"
+                      name={`copy-btn`}
+                      aria-label={`copy-btn`}
+                      className={`${styles.copy}`}
+                    />
+                  </Dropdown.Toggle>
+                </Tippy>
                 <Dropdown.Menu>
                   {props.ens && (
+                    <Tippy
+                      content={isCopied ? "Copied" : "Copy"}
+                      placement={"right"}
+                      theme={"light"}
+                      hideOnClick={false}>
+                      <Dropdown.Item
+                        name={`copy-ens-btn`}
+                        aria-label={`copy-ens-btn`}
+                        onClick={() => copy(props.ens)}>
+                        {props.ens}
+                      </Dropdown.Item>
+                    </Tippy>
+                  )}
+                  <Tippy
+                    content={isCopied ? "Copied" : "Copy"}
+                    placement={"right"}
+                    theme={"light"}
+                    hideOnClick={false}>
                     <Dropdown.Item
                       className={styles.copyDropdownItem}
-                      name={`copy-ens-btn`}
-                      aria-label={`copy-ens-btn`}
-                      onClick={() => copy(props.ens)}>
-                      {props.ens}
+                      name={`copy-address-btn`}
+                      aria-label={`copy-address-btn`}
+                      onClick={() => copy(props.address)}>
+                      {formatAddress(props.address as string)}
                     </Dropdown.Item>
-                  )}
-                  <Dropdown.Item
-                    className={styles.copyDropdownItem}
-                    name={`copy-address-btn`}
-                    aria-label={`copy-address-btn`}
-                    onClick={() => copy(props.address)}>
-                    {formatAddress(props.address as string)}
-                  </Dropdown.Item>
+                  </Tippy>
                 </Dropdown.Menu>
               </Dropdown>
             ) : (
               <>
                 {props.isUserPage && (
                   <span
-                    onClick={() => copy(props.address)}
                     className={`${styles.address} ${
                       props.isUserPage ? styles.addressUserPage : ""
                     }`}>
                     {resolveAddress()}
                   </span>
                 )}
-                <FontAwesomeIcon
-                  icon="copy"
-                  onClick={() => copy(props.address)}
-                  name={`copy-btn`}
-                  aria-label={`copy-btn`}
-                  className={`${styles.copy} ${
-                    isCopied ? styles.copyActive : ""
-                  }`}
-                />
+                <Tippy
+                  content={isCopied ? "Copied" : "Copy"}
+                  placement={"right"}
+                  theme={"light"}
+                  hideOnClick={false}>
+                  <FontAwesomeIcon
+                    icon="copy"
+                    onClick={() => copy(props.address)}
+                    name={`copy-btn`}
+                    aria-label={`copy-btn`}
+                    className={`${styles.copy}`}
+                  />
+                </Tippy>
               </>
             )}
           </>

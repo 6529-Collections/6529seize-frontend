@@ -91,6 +91,7 @@ export default function LabPage() {
   const [myOwner, setMyOwner] = useState<TDHMetrics>();
 
   const [userLoaded, setUserLoaded] = useState(false);
+  const [originalMemesLoaded, setOriginalMemesLoaded] = useState(false);
 
   const [activityPage, setActivityPage] = useState(1);
   const [activityTotalResults, setActivityTotalResults] = useState(0);
@@ -186,15 +187,20 @@ export default function LabPage() {
               { display: `Card ${nftId} - ${nft.name}` },
             ]);
 
-            fetchUrl(
-              `${
-                process.env.API_ENDPOINT
-              }/api/nfts?sort_direction=asc&contract=${MEMES_CONTRACT}&id=${nft.meme_references.join(
-                ","
-              )}`
-            ).then((response: DBResponse) => {
-              setOriginalMemes(response.data);
-            });
+            if (nft.meme_references.length > 0) {
+              fetchUrl(
+                `${
+                  process.env.API_ENDPOINT
+                }/api/nfts?sort_direction=asc&contract=${MEMES_CONTRACT}&id=${nft.meme_references.join(
+                  ","
+                )}`
+              ).then((response: DBResponse) => {
+                setOriginalMemes(response.data);
+                setOriginalMemesLoaded(true);
+              });
+            } else {
+              setOriginalMemesLoaded(true);
+            }
           });
         } else {
           setNftMeta(undefined);
@@ -227,6 +233,8 @@ export default function LabPage() {
         setUserLoaded(true);
         setNftBalance(countIn - countOut);
       });
+    } else {
+      setNftBalance(0);
     }
   }, [nftId, address]);
 
@@ -289,12 +297,13 @@ export default function LabPage() {
                   sm={{ span: 12 }}
                   md={{ span: 6 }}
                   lg={{ span: 6 }}
-                  className="pt-2">
+                  className={`pt-2 pb-5`}>
                   <NFTImage
                     nft={nft}
                     animation={true}
                     height={650}
                     balance={nftBalance}
+                    showUnseized={address != undefined && address != null}
                   />
                 </Col>
                 {activeTab == MEME_FOCUS.LIVE && <>{printLive()}</>}
@@ -313,65 +322,75 @@ export default function LabPage() {
   function printLiveSub() {
     return (
       <>
-        <Row className="pt-5">
+        <Row className="pt-3">
           <Col>
-            <Image
-              loading={"lazy"}
-              width="0"
-              height="0"
-              style={{ width: "250px", height: "auto" }}
-              src="/memelab.png"
-              alt="memelab"
-            />
+            <h1>THE MEMES</h1>
           </Col>
         </Row>
-        <Row className="pt-4 pb-4">
+        <Row className="pt-2 pb-2">
           <Col>
             References from <a href="/the-memes">The Memes</a> collection
           </Col>
         </Row>
-        {originalMemes.length > 0 && (
-          <Row className="pt-2 pb-2">
-            {originalMemes.map((nft) => {
-              return (
-                <Col
-                  key={`${nft.contract}-${nft.id}`}
-                  className="pt-3 pb-3"
-                  xs={{ span: 6 }}
-                  sm={{ span: 4 }}
-                  md={{ span: 3 }}
-                  lg={{ span: 3 }}>
-                  <Container fluid className="no-padding">
-                    <Row>
-                      <Col>
-                        <a href={`/the-memes/${nft.id}`}>
-                          <NFTImage
-                            nft={nft}
-                            animation={false}
-                            height={300}
-                            balance={0}
-                            showThumbnail={true}
-                          />
-                        </a>
-                      </Col>
-                    </Row>
-                    <Row>
-                      <Col className="text-center pt-2">
-                        <b>
-                          #{nft.id} - {nft.name}
-                        </b>
-                      </Col>
-                    </Row>
-                    <Row>
-                      <Col className="text-center pt-2">
-                        Artist: {nft.artist}
-                      </Col>
-                    </Row>
-                  </Container>
-                </Col>
-              );
-            })}
-          </Row>
+        {originalMemesLoaded && (
+          <>
+            {originalMemes.length > 0 ? (
+              <Row className="pt-2 pb-2">
+                {originalMemes.map((nft) => {
+                  return (
+                    <Col
+                      key={`${nft.contract}-${nft.id}`}
+                      className="pt-3 pb-3"
+                      xs={{ span: 6 }}
+                      sm={{ span: 4 }}
+                      md={{ span: 3 }}
+                      lg={{ span: 3 }}>
+                      <Container fluid className="no-padding">
+                        <Row>
+                          <Col>
+                            <a href={`/the-memes/${nft.id}`}>
+                              <NFTImage
+                                nft={nft}
+                                animation={false}
+                                height={300}
+                                balance={0}
+                                showThumbnail={true}
+                                showUnseized={false}
+                              />
+                            </a>
+                          </Col>
+                        </Row>
+                        <Row>
+                          <Col className="text-center pt-2">
+                            <b>
+                              #{nft.id} - {nft.name}
+                            </b>
+                          </Col>
+                        </Row>
+                        <Row>
+                          <Col className="text-center pt-2">
+                            Artist: {nft.artist}
+                          </Col>
+                        </Row>
+                      </Container>
+                    </Col>
+                  );
+                })}
+              </Row>
+            ) : (
+              <Col>
+                <Image
+                  loading={"lazy"}
+                  width="0"
+                  height="0"
+                  style={{ height: "auto", width: "100px" }}
+                  src="/SummerGlasses.svg"
+                  alt="SummerGlasses"
+                />{" "}
+                No Meme References
+              </Col>
+            )}
+          </>
         )}
       </>
     );
@@ -419,7 +438,11 @@ export default function LabPage() {
                     <tr>
                       <td>Mint Price</td>
                       <td>
-                        {nft.mint_price ? `${nft.mint_price} ETH` : `N/A`}
+                        {nft.mint_price
+                          ? `${numberWithCommas(
+                              Math.round(nft.mint_price * 100000) / 100000
+                            )} ETH`
+                          : `N/A`}
                       </td>
                     </tr>
                     <tr>
@@ -805,6 +828,7 @@ export default function LabPage() {
                       balance={0}
                       transparentBG={true}
                       showOriginal={true}
+                      showUnseized={false}
                       id="the-art-fullscreen-animation"
                     />
                   </Carousel.Item>
@@ -819,6 +843,7 @@ export default function LabPage() {
                       balance={0}
                       transparentBG={true}
                       showOriginal={true}
+                      showUnseized={false}
                       id="the-art-fullscreen-img"
                     />
                   </Carousel.Item>
@@ -835,6 +860,7 @@ export default function LabPage() {
                     balance={0}
                     transparentBG={true}
                     showOriginal={true}
+                    showUnseized={false}
                     id="the-art-fullscreen-img"
                   />
                 </>
@@ -869,19 +895,30 @@ export default function LabPage() {
                           />
                         </Col>
                       </Row>
-                      {nft.metadata.animation && (
+                      {(nft.metadata.animation ||
+                        nft.metadata.animation_url) && (
                         <Row className="pt-3">
                           <Col>
                             {nft.metadata.animation_details.format}{" "}
                             <a
                               className={styles.arweaveLink}
-                              href={nft.metadata.animation}
+                              href={
+                                nft.metadata.animation
+                                  ? nft.metadata.animation
+                                  : nft.metadata.animation_url
+                              }
                               target="_blank"
                               rel="noreferrer">
-                              {nft.metadata.animation}
+                              {nft.metadata.animation
+                                ? nft.metadata.animation
+                                : nft.metadata.animation_url}
                             </a>
                             <Download
-                              href={nft.metadata.animation}
+                              href={
+                                nft.metadata.animation
+                                  ? nft.metadata.animation
+                                  : nft.metadata.animation_url
+                              }
                               name={nft.name}
                               extension={nft.metadata.animation_details.format}
                             />
@@ -948,42 +985,49 @@ export default function LabPage() {
                   </Row>
                 </Container>
               </Col>
-              <Col
-                xs={{ span: 12 }}
-                sm={{ span: 6 }}
-                md={{ span: 6 }}
-                lg={{ span: 6 }}>
-                <Container>
-                  <Row>
-                    <Col>
-                      <h3>References</h3>
-                    </Col>
-                  </Row>
-                  <Row>
-                    <Col>
-                      <Table>
-                        <tbody>
-                          {nft.metadata.attributes
-                            .filter(
-                              (a: any) =>
-                                a.trait_type.startsWith(
-                                  "Meme Card Reference"
-                                ) &&
-                                a.value != "None" &&
-                                a.value
-                            )
-                            .map((a: any) => (
-                              <tr key={`${a.trait_type}-${a.value}`}>
-                                <td>{a.trait_type}</td>
-                                <td>{a.value}</td>
-                              </tr>
-                            ))}
-                        </tbody>
-                      </Table>
-                    </Col>
-                  </Row>
-                </Container>
-              </Col>
+              {nft.metadata.attributes.some(
+                (a: any) =>
+                  a.trait_type.startsWith("Meme Card Reference") &&
+                  a.value != "None" &&
+                  a.value
+              ) && (
+                <Col
+                  xs={{ span: 12 }}
+                  sm={{ span: 6 }}
+                  md={{ span: 6 }}
+                  lg={{ span: 6 }}>
+                  <Container>
+                    <Row>
+                      <Col>
+                        <h3>References</h3>
+                      </Col>
+                    </Row>
+                    <Row>
+                      <Col>
+                        <Table>
+                          <tbody>
+                            {nft.metadata.attributes
+                              .filter(
+                                (a: any) =>
+                                  a.trait_type.startsWith(
+                                    "Meme Card Reference"
+                                  ) &&
+                                  a.value != "None" &&
+                                  a.value
+                              )
+                              .map((a: any) => (
+                                <tr key={`${a.trait_type}-${a.value}`}>
+                                  <td>{a.trait_type}</td>
+                                  <td>{a.value}</td>
+                                </tr>
+                              ))}
+                          </tbody>
+                        </Table>
+                      </Col>
+                    </Row>
+                  </Container>
+                </Col>
+              )}
             </Row>
           </Container>
           <Container className="pt-3 pb-3">
@@ -1073,7 +1117,65 @@ export default function LabPage() {
   function printActivity() {
     return (
       <Container className="p-0">
-        <Row>
+        {nft && (
+          <>
+            <Row className="pt-2">
+              <Col>
+                <h3>Card Volumes</h3>
+              </Col>
+            </Row>
+            <Row className="pt-2">
+              <Col>
+                <Table className="text-center">
+                  <thead>
+                    <tr>
+                      <th>24 Hours</th>
+                      <th>7 Days</th>
+                      <th>30 Days</th>
+                      <th>All Time</th>
+                    </tr>
+                  </thead>
+                  <tbody className="pt-3">
+                    <tr>
+                      <td>
+                        {nft.total_volume_last_24_hours > 0
+                          ? `${numberWithCommas(
+                              Math.round(nft.total_volume_last_24_hours * 100) /
+                                100
+                            )} ETH`
+                          : `N/A`}
+                      </td>
+                      <td>
+                        {nft.total_volume_last_7_days > 0
+                          ? `${numberWithCommas(
+                              Math.round(nft.total_volume_last_7_days * 100) /
+                                100
+                            )} ETH`
+                          : `N/A`}
+                      </td>
+                      <td>
+                        {nft.total_volume_last_1_month > 0
+                          ? `${numberWithCommas(
+                              Math.round(nft.total_volume_last_1_month * 100) /
+                                100
+                            )} ETH`
+                          : `N/A`}
+                      </td>
+                      <td>
+                        {nft.total_volume > 0
+                          ? `${numberWithCommas(
+                              Math.round(nft.total_volume * 100) / 100
+                            )} ETH`
+                          : `N/A`}
+                      </td>
+                    </tr>
+                  </tbody>
+                </Table>
+              </Col>
+            </Row>
+          </>
+        )}
+        <Row className="pt-3">
           <Col
             className="d-flex align-items-center"
             xs={{ span: 7 }}

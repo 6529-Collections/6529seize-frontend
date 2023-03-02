@@ -1,4 +1,5 @@
 import { Col, Container, Row } from "react-bootstrap";
+import { AboutSection } from "../../pages/about/[section]";
 
 export default function AboutReleaseNotes() {
   return (
@@ -22,6 +23,84 @@ export default function AboutReleaseNotes() {
               <li>Major site-wide releases are incremented as 1.x.x</li>
               <li>New features are incremented as x.1.x</li>
               <li>Small updates or bug fixes are incremented as x.x.1</li>
+            </ul>
+            <br />
+            <p>
+              <b>Release 1.1.0</b>
+              <br />
+              Mar 02, 2023
+            </p>
+            <ul>
+              <li>
+                Fixed bug where in some cases wallet connectors would be
+                duplicated under the Connect button dropdown.
+              </li>
+              <li>
+                All NFT Images
+                <ul>
+                  <li>Reposition card balance to not hide the art</li>
+                </ul>
+              </li>
+              <li>
+                Community page
+                <ul>
+                  <li>
+                    Introduced search functionality by wallet address and ENS
+                  </li>
+                  <li>Added &apos;Hide 6529Team&apos; toggle</li>
+                </ul>
+              </li>
+              <li>
+                User Page
+                <ul>
+                  <li>
+                    Changed to use radio buttons for &apos;All&apos;,
+                    &apos;Seized&apos;, &apos;Unseized&apos; as opposed to
+                    &apos;Hide Seized&apos;, &apos;Hide Non-Seized&apos;
+                    switches
+                  </li>
+                  <li>Added profile link</li>
+                  <li>Added SZN filter</li>
+                  <li>
+                    Now showing wallet activity and transactions even if no
+                    Cards are currently owned
+                  </li>
+                </ul>
+              </li>
+              <li>
+                The Memes, Meme Lab, Meme Lab Collections
+                <ul>
+                  <li>
+                    Added Volume tab for:
+                    <ul>
+                      <li>24 Hours</li>
+                      <li>7 Days</li>
+                      <li>30 Days</li>
+                      <li>All Time</li>
+                    </ul>
+                  </li>
+                </ul>
+              </li>
+              <li>
+                The Memes card page, Meme Lab card page
+                <ul>
+                  <li>Added Volumes table under Activity tab</li>
+                </ul>
+              </li>
+              <li>
+                About
+                <ul>
+                  <li>
+                    New section added{" "}
+                    <a
+                      href={`/about/${AboutSection.DATA_DECENTR}`}
+                      target="_blank"
+                      rel="noreferrer">
+                      Data Decentralization
+                    </a>
+                  </li>
+                </ul>
+              </li>
             </ul>
             <br />
             <p>

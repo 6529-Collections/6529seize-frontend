@@ -243,3 +243,37 @@
 .tabFocusActive {
   color: white !important;
 }
+
+.nftImagePadding {
+  padding-bottom: 35px;
+}
+
+.volumeDropdown {
+  text-align: center;
+  background-color: transparent;
+  border: none;
+  display: inline-block;
+
+  a {
+    line-height: 30px;
+  }
+  button {
+    color: $lightest-grey !important;
+    font-size: inherit;
+    padding: 0;
+    background-color: transparent !important;
+    border-color: transparent !important;
+    &::after {
+      margin-top: 0.8rem;
+    }
+  }
+  div {
+    width: 60%;
+  }
+}
+
+.volumeDropdownEnabled {
+  button {
+    color: white !important;
+  }
+}
