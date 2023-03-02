@@ -184,7 +184,6 @@ export default function UserPage(props: Props) {
                   ? process.env.BASE_ENDPOINT
                   : "https://seize.io"
               }/${walletDisplay ? walletDisplay : user}`;
-              alert(ownerLink);
               setOwnerLink(ownerLink);
             } else {
               window.location.href = "/404";
