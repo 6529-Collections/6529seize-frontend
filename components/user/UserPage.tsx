@@ -144,7 +144,7 @@ export default function UserPage(props: Props) {
             }
             walletDisplay = newOwned[0].wallet_display
               ? newOwned[0].wallet_display
-              : walletDisplay.startsWith("0x")
+              : walletDisplay.endsWith(".eth")
               ? ""
               : walletDisplay;
             if (walletDisplay) {
@@ -153,37 +153,36 @@ export default function UserPage(props: Props) {
                 shallow: true,
               });
             }
-
-            const ownerLink = `${
-              process.env.BASE_ENDPOINT
-                ? process.env.BASE_ENDPOINT
-                : "https://seize.io"
-            }/${walletDisplay ? walletDisplay : formatAddress(user)}`;
-            setOwnerLink(ownerLink);
-
-            let walletCrumb = walletDisplay
-              ? walletDisplay
-              : newOwned[0].wallet;
-
-            setBreadcrumbs([
-              { display: "Home", href: "/" },
-              {
-                display: walletCrumb,
-              },
-            ]);
-            setOwnerLoaded(true);
           } else {
             if (user.startsWith("0x") && user.length > 20) {
               setOwnerAddress(user as `0x${string}`);
-              setOwnerLoaded(true);
             } else if (user.endsWith(".eth")) {
               setOwnerAddress(user as `0x${string}`);
               setOwnerENS(user);
-              setOwnerLoaded(true);
             } else {
               window.location.href = "/404";
             }
           }
+          const ownerLink = `${
+            process.env.BASE_ENDPOINT
+              ? process.env.BASE_ENDPOINT
+              : "https://seize.io"
+          }/${ownerENS ? ownerENS : formatAddress(user)}`;
+          setOwnerLink(ownerLink);
+
+          let walletCrumb = ownerENS
+            ? ownerENS
+            : newOwned.length > 0
+            ? newOwned[0].wallet
+            : props.user;
+
+          setBreadcrumbs([
+            { display: "Home", href: "/" },
+            {
+              display: walletCrumb,
+            },
+          ]);
+          setOwnerLoaded(true);
         }
       });
     }
@@ -274,6 +273,51 @@ export default function UserPage(props: Props) {
       fetchUrl(url).then((response: DBResponse) => {
         setActivityTotalResults(response.count);
         setActivity(response.data);
+        if (response.data.length > 0) {
+          const first = response.data[0];
+
+          const ownerEnsTemp = areEqualAddresses(
+            first.from_address,
+            ownerAddress
+          )
+            ? first.from_display
+            : areEqualAddresses(first.to_address, ownerAddress)
+            ? first.to_diplay
+            : null;
+
+          if (ownerEnsTemp) {
+            setOwnerENS(ownerEnsTemp);
+            router.push(ownerEnsTemp.replaceAll(" ", "-"), undefined, {
+              shallow: true,
+            });
+
+            const ownerLink = `${
+              process.env.BASE_ENDPOINT
+                ? process.env.BASE_ENDPOINT
+                : "https://seize.io"
+            }/${ownerEnsTemp}`;
+            setOwnerLink(ownerLink);
+
+            setBreadcrumbs([
+              { display: "Home", href: "/" },
+              {
+                display: ownerEnsTemp,
+              },
+            ]);
+          }
+
+          const ownerAddressTemp =
+            areEqualAddresses(first.from_address, ownerAddress) ||
+            areEqualAddresses(first.from_display, ownerAddress)
+              ? first.from_address
+              : areEqualAddresses(first.to_address, ownerAddress) ||
+                areEqualAddresses(first.to_display, ownerAddress)
+              ? first.to_address
+              : null;
+          if (ownerAddressTemp) {
+            setOwnerAddress(ownerAddressTemp);
+          }
+        }
       });
     }
   }, [activityPage, ownerAddress, router.isReady, activityTypeFilter]);
@@ -796,210 +840,218 @@ export default function UserPage(props: Props) {
                     sm={{ span: 12 }}
                     md={{ span: 6 }}
                     lg={{ span: 6 }}>
-                    <Table className={styles.primaryTable}>
-                      <tbody>
-                        <tr>
-                          <td colSpan={3}>
-                            <h4>Cards Collected</h4>
-                          </td>
-                        </tr>
-                        <tr>
-                          <td></td>
-                          <td>
-                            <b>Total</b>
-                          </td>
-                          <td>
-                            <b>Memes</b>
-                          </td>
-                          <td>
-                            <b>Memes SZN1</b>
-                          </td>
-                          <td>
-                            <b>Memes SZN2</b>
-                          </td>
-                          <td>
-                            <b>6529 Gradient</b>
-                          </td>
-                        </tr>
-                        <tr className={styles.primaryTableGap}></tr>
-                        <tr>
-                          <td>
-                            <b>Cards</b>
-                          </td>
-                          <td>
-                            x
-                            {numberWithCommas(
-                              tdh.memes_balance + tdh.gradients_balance
-                            )}
-                          </td>
-                          <td>
-                            {tdh.memes_balance > 0
-                              ? `x${numberWithCommas(tdh.memes_balance)}`
-                              : "-"}
-                          </td>
-                          <td>
-                            {tdh.memes_balance_season1 > 0
-                              ? `x${numberWithCommas(
-                                  tdh.memes_balance_season1
-                                )}`
-                              : "-"}
-                          </td>
-                          <td>
-                            {tdh.memes_balance_season2 > 0
-                              ? `x${numberWithCommas(
-                                  tdh.memes_balance_season2
-                                )}`
-                              : "-"}
-                          </td>
-                          <td>
-                            {tdh.gradients_balance > 0
-                              ? `x${numberWithCommas(tdh.gradients_balance)}`
-                              : "-"}
-                          </td>
-                        </tr>
-                        <tr>
-                          <td>
-                            <b>Unique</b>
-                          </td>
-                          <td>
-                            x
-                            {numberWithCommas(
-                              tdh.unique_memes + tdh.gradients_balance
-                            )}
-                          </td>
-                          <td>
-                            {tdh.unique_memes > 0
-                              ? `x${numberWithCommas(tdh.unique_memes)}`
-                              : "-"}
-                          </td>
-                          <td>
-                            {tdh.unique_memes_szn1 > 0
-                              ? `x${numberWithCommas(tdh.unique_memes_szn1)}`
-                              : "-"}
-                          </td>
-                          <td>
-                            {tdh.unique_memes_szn2 > 0
-                              ? `x${numberWithCommas(tdh.unique_memes_szn2)}`
-                              : "-"}
-                          </td>
-                          <td>
-                            {tdh.gradients_balance > 0
-                              ? `x${numberWithCommas(tdh.gradients_balance)}`
-                              : "-"}
-                          </td>
-                        </tr>
-                        <tr>
-                          <td>
-                            <b>Rank</b>
-                          </td>
-                          <td>
-                            #{numberWithCommas(tdh.dense_rank_balance)}
-                            {tdh.dense_rank_balance__ties > 1 && ` (tie)`}
-                          </td>
-                          <td>
-                            {tdh.memes_balance > 0
-                              ? `#${numberWithCommas(
-                                  tdh.dense_rank_balance_memes
-                                )}${
-                                  tdh.dense_rank_balance_memes__ties > 1
-                                    ? ` (tie)`
-                                    : ""
-                                }`
-                              : "-"}
-                          </td>
-                          <td>
-                            {tdh.memes_balance_season1 > 0
-                              ? `#${numberWithCommas(
-                                  tdh.dense_rank_balance_memes_season1
-                                )}${
-                                  tdh.dense_rank_balance_memes_season1__ties > 1
-                                    ? ` (tie)`
-                                    : ""
-                                }`
-                              : "-"}
-                          </td>
-                          <td>
-                            {tdh.memes_balance_season2 > 0
-                              ? `#${numberWithCommas(
-                                  tdh.dense_rank_balance_memes_season2
-                                )}${
-                                  tdh.dense_rank_balance_memes_season2__ties > 1
-                                    ? ` (tie)`
-                                    : ""
-                                }`
-                              : "-"}
-                          </td>
-                          <td>
-                            {tdh.gradients_balance > 0
-                              ? `#${numberWithCommas(
-                                  tdh.dense_rank_balance_gradients
-                                )}${
-                                  tdh.dense_rank_balance_gradients__ties > 1
-                                    ? ` (tie)`
-                                    : ""
-                                }`
-                              : "-"}
-                          </td>
-                        </tr>
-                        <tr className={styles.primaryTableGap}></tr>
-                        <tr>
-                          <td>
-                            <b>TDH</b>
-                          </td>
-                          <td>{numberWithCommas(tdh.boosted_tdh)}</td>
-                          <td>
-                            {numberWithCommas(
-                              Math.round(tdh.boosted_memes_tdh)
-                            )}
-                          </td>
-                          <td>
-                            {numberWithCommas(
-                              Math.round(tdh.boosted_memes_tdh_season1)
-                            )}
-                          </td>
-                          <td>
-                            {numberWithCommas(
-                              Math.round(tdh.boosted_memes_tdh_season2)
-                            )}
-                          </td>
-                          <td>
-                            {numberWithCommas(
-                              Math.round(tdh.boosted_gradients_tdh)
-                            )}
-                          </td>
-                        </tr>
-                        <tr>
-                          <td>
-                            <b>Rank</b>
-                          </td>
-                          <td>
-                            {tdh.tdh_rank > 0
-                              ? `#${numberWithCommas(tdh.tdh_rank)}`
-                              : "-"}
-                          </td>
-                          <td>
-                            {tdh.tdh_rank_memes > 0
-                              ? `#${numberWithCommas(tdh.tdh_rank_memes)}`
-                              : "-"}
-                          </td>
-                          <td>
-                            {tdh.tdh_rank_memes_szn1 > 0
-                              ? `#${numberWithCommas(tdh.tdh_rank_memes_szn1)}`
-                              : "-"}
-                          </td>
-                          <td>
-                            {tdh.tdh_rank_memes_szn2 > 0
-                              ? `#${numberWithCommas(tdh.tdh_rank_memes_szn2)}`
-                              : "-"}
-                          </td>
-                          <td>
-                            {tdh.tdh_rank_gradients > 0
-                              ? `#${numberWithCommas(tdh.tdh_rank_gradients)}`
-                              : "-"}
-                          </td>
-                        </tr>
-                      </tbody>
-                    </Table>
+                    {tdh.balance > 0 && (
+                      <Table className={styles.primaryTable}>
+                        <tbody>
+                          <tr>
+                            <td colSpan={3}>
+                              <h4>Cards Collected</h4>
+                            </td>
+                          </tr>
+                          <tr>
+                            <td></td>
+                            <td>
+                              <b>Total</b>
+                            </td>
+                            <td>
+                              <b>Memes</b>
+                            </td>
+                            <td>
+                              <b>Memes SZN1</b>
+                            </td>
+                            <td>
+                              <b>Memes SZN2</b>
+                            </td>
+                            <td>
+                              <b>6529 Gradient</b>
+                            </td>
+                          </tr>
+                          <tr className={styles.primaryTableGap}></tr>
+                          <tr>
+                            <td>
+                              <b>Cards</b>
+                            </td>
+                            <td>
+                              x
+                              {numberWithCommas(
+                                tdh.memes_balance + tdh.gradients_balance
+                              )}
+                            </td>
+                            <td>
+                              {tdh.memes_balance > 0
+                                ? `x${numberWithCommas(tdh.memes_balance)}`
+                                : "-"}
+                            </td>
+                            <td>
+                              {tdh.memes_balance_season1 > 0
+                                ? `x${numberWithCommas(
+                                    tdh.memes_balance_season1
+                                  )}`
+                                : "-"}
+                            </td>
+                            <td>
+                              {tdh.memes_balance_season2 > 0
+                                ? `x${numberWithCommas(
+                                    tdh.memes_balance_season2
+                                  )}`
+                                : "-"}
+                            </td>
+                            <td>
+                              {tdh.gradients_balance > 0
+                                ? `x${numberWithCommas(tdh.gradients_balance)}`
+                                : "-"}
+                            </td>
+                          </tr>
+                          <tr>
+                            <td>
+                              <b>Unique</b>
+                            </td>
+                            <td>
+                              x
+                              {numberWithCommas(
+                                tdh.unique_memes + tdh.gradients_balance
+                              )}
+                            </td>
+                            <td>
+                              {tdh.unique_memes > 0
+                                ? `x${numberWithCommas(tdh.unique_memes)}`
+                                : "-"}
+                            </td>
+                            <td>
+                              {tdh.unique_memes_szn1 > 0
+                                ? `x${numberWithCommas(tdh.unique_memes_szn1)}`
+                                : "-"}
+                            </td>
+                            <td>
+                              {tdh.unique_memes_szn2 > 0
+                                ? `x${numberWithCommas(tdh.unique_memes_szn2)}`
+                                : "-"}
+                            </td>
+                            <td>
+                              {tdh.gradients_balance > 0
+                                ? `x${numberWithCommas(tdh.gradients_balance)}`
+                                : "-"}
+                            </td>
+                          </tr>
+                          <tr>
+                            <td>
+                              <b>Rank</b>
+                            </td>
+                            <td>
+                              #{numberWithCommas(tdh.dense_rank_balance)}
+                              {tdh.dense_rank_balance__ties > 1 && ` (tie)`}
+                            </td>
+                            <td>
+                              {tdh.memes_balance > 0
+                                ? `#${numberWithCommas(
+                                    tdh.dense_rank_balance_memes
+                                  )}${
+                                    tdh.dense_rank_balance_memes__ties > 1
+                                      ? ` (tie)`
+                                      : ""
+                                  }`
+                                : "-"}
+                            </td>
+                            <td>
+                              {tdh.memes_balance_season1 > 0
+                                ? `#${numberWithCommas(
+                                    tdh.dense_rank_balance_memes_season1
+                                  )}${
+                                    tdh.dense_rank_balance_memes_season1__ties >
+                                    1
+                                      ? ` (tie)`
+                                      : ""
+                                  }`
+                                : "-"}
+                            </td>
+                            <td>
+                              {tdh.memes_balance_season2 > 0
+                                ? `#${numberWithCommas(
+                                    tdh.dense_rank_balance_memes_season2
+                                  )}${
+                                    tdh.dense_rank_balance_memes_season2__ties >
+                                    1
+                                      ? ` (tie)`
+                                      : ""
+                                  }`
+                                : "-"}
+                            </td>
+                            <td>
+                              {tdh.gradients_balance > 0
+                                ? `#${numberWithCommas(
+                                    tdh.dense_rank_balance_gradients
+                                  )}${
+                                    tdh.dense_rank_balance_gradients__ties > 1
+                                      ? ` (tie)`
+                                      : ""
+                                  }`
+                                : "-"}
+                            </td>
+                          </tr>
+                          <tr className={styles.primaryTableGap}></tr>
+                          <tr>
+                            <td>
+                              <b>TDH</b>
+                            </td>
+                            <td>{numberWithCommas(tdh.boosted_tdh)}</td>
+                            <td>
+                              {numberWithCommas(
+                                Math.round(tdh.boosted_memes_tdh)
+                              )}
+                            </td>
+                            <td>
+                              {numberWithCommas(
+                                Math.round(tdh.boosted_memes_tdh_season1)
+                              )}
+                            </td>
+                            <td>
+                              {numberWithCommas(
+                                Math.round(tdh.boosted_memes_tdh_season2)
+                              )}
+                            </td>
+                            <td>
+                              {numberWithCommas(
+                                Math.round(tdh.boosted_gradients_tdh)
+                              )}
+                            </td>
+                          </tr>
+                          <tr>
+                            <td>
+                              <b>Rank</b>
+                            </td>
+                            <td>
+                              {tdh.tdh_rank > 0
+                                ? `#${numberWithCommas(tdh.tdh_rank)}`
+                                : "-"}
+                            </td>
+                            <td>
+                              {tdh.tdh_rank_memes > 0
+                                ? `#${numberWithCommas(tdh.tdh_rank_memes)}`
+                                : "-"}
+                            </td>
+                            <td>
+                              {tdh.tdh_rank_memes_szn1 > 0
+                                ? `#${numberWithCommas(
+                                    tdh.tdh_rank_memes_szn1
+                                  )}`
+                                : "-"}
+                            </td>
+                            <td>
+                              {tdh.tdh_rank_memes_szn2 > 0
+                                ? `#${numberWithCommas(
+                                    tdh.tdh_rank_memes_szn2
+                                  )}`
+                                : "-"}
+                            </td>
+                            <td>
+                              {tdh.tdh_rank_gradients > 0
+                                ? `#${numberWithCommas(tdh.tdh_rank_gradients)}`
+                                : "-"}
+                            </td>
+                          </tr>
+                        </tbody>
+                      </Table>
+                    )}
                     <Table className={styles.secondaryTable}>
                       <tbody>
                         <tr>

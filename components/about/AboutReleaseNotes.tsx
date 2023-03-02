@@ -61,6 +61,10 @@ export default function AboutReleaseNotes() {
                   </li>
                   <li>Added profile link</li>
                   <li>Added SZN filter</li>
+                  <li>
+                    Now showing wallet activity and transactions even if no
+                    Cards are currently owned
+                  </li>
                 </ul>
               </li>
               <li>
