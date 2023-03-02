@@ -149,25 +149,24 @@ export default function UserPage(props: Props) {
               router.push(walletDisplay.replaceAll(" ", "-"), undefined, {
                 shallow: true,
               });
-
-              const ownerLink = `${
-                process.env.BASE_ENDPOINT
-                  ? process.env.BASE_ENDPOINT
-                  : "https://seize.io"
-              }/${walletDisplay ? walletDisplay : formatAddress(user)}`;
-              setOwnerLink(ownerLink);
-
-              let walletCrumb = walletDisplay
-                ? walletDisplay
-                : walletAddress
-                ? walletAddress
-                : props.user;
-
-              setBreadcrumbs([
-                { display: "Home", href: "/" },
-                { display: walletCrumb },
-              ]);
             }
+            const ownerLink = `${
+              process.env.BASE_ENDPOINT
+                ? process.env.BASE_ENDPOINT
+                : "https://seize.io"
+            }/${walletDisplay ? walletDisplay : formatAddress(walletAddress)}`;
+            setOwnerLink(ownerLink);
+
+            let walletCrumb = walletDisplay
+              ? walletDisplay
+              : walletAddress
+              ? walletAddress
+              : props.user;
+
+            setBreadcrumbs([
+              { display: "Home", href: "/" },
+              { display: walletCrumb },
+            ]);
           } else {
             if (user.endsWith(".eth") || user.startsWith("0x")) {
               setOwnerAddress(user as `0x${string}`);
@@ -185,6 +184,7 @@ export default function UserPage(props: Props) {
                   ? process.env.BASE_ENDPOINT
                   : "https://seize.io"
               }/${walletDisplay ? walletDisplay : user}`;
+              alert(ownerLink);
               setOwnerLink(ownerLink);
             } else {
               window.location.href = "/404";
