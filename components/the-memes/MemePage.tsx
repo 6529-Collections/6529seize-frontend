@@ -1103,7 +1103,11 @@ export default function MemePage() {
                   <Row>
                     <Col>
                       Mint price:{" "}
-                      {nft.mint_price > 0 ? `${nft.mint_price} ETH` : `N/A`}
+                      {nft.mint_price > 0
+                        ? `${numberWithCommas(
+                            Math.round(nft.mint_price * 100000) / 100000
+                          )} ETH`
+                        : `N/A`}
                     </Col>
                   </Row>
                 </Container>
@@ -1312,6 +1316,16 @@ export default function MemePage() {
                     <tr>
                       <td>Mint Date</td>
                       <td>{printMintDate(nft.mint_date)}</td>
+                    </tr>
+                    <tr>
+                      <td>Mint Price</td>
+                      <td>
+                        {nft.mint_price > 0
+                          ? `${numberWithCommas(
+                              Math.round(nft.mint_price * 100000) / 100000
+                            )} ETH`
+                          : `N/A`}
+                      </td>
                     </tr>
                     <tr>
                       <td>TDH Rate</td>

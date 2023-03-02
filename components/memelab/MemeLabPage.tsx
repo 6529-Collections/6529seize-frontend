@@ -438,7 +438,11 @@ export default function LabPage() {
                     <tr>
                       <td>Mint Price</td>
                       <td>
-                        {nft.mint_price ? `${nft.mint_price} ETH` : `N/A`}
+                        {nft.mint_price
+                          ? `${numberWithCommas(
+                              Math.round(nft.mint_price * 100000) / 100000
+                            )} ETH`
+                          : `N/A`}
                       </td>
                     </tr>
                     <tr>
