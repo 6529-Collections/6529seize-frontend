@@ -366,7 +366,7 @@ export default function MemeLabComponent() {
         }
       }
     }
-  }, [sort, sortDir, nftsLoaded]);
+  }, [sort, sortDir, nftsLoaded, volumeType]);
 
   function printMintDate(nft: LabNFT) {
     const mintDate = new Date(nft.mint_date);
