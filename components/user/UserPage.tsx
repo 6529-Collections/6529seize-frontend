@@ -82,7 +82,6 @@ export default function UserPage(props: Props) {
   const [ownerAddress, setOwnerAddress] = useState<`0x${string}` | undefined>(
     undefined
   );
-  const [ownerLink, setOwnerLink] = useState("");
   const [ownerLinkDisplay, setOwnerLinkDisplay] = useState("");
   const [ownerENS, setOwnerENS] = useState("");
   const [owned, setOwned] = useState<Owner[]>([]);
@@ -159,9 +158,6 @@ export default function UserPage(props: Props) {
                 walletDisplay ? walletDisplay : formatAddress(walletAddress)
               }`
             );
-            setOwnerLink(
-              `${oLink}/${walletDisplay ? walletDisplay : walletAddress}`
-            );
 
             let walletCrumb = walletDisplay
               ? walletDisplay
@@ -193,7 +189,6 @@ export default function UserPage(props: Props) {
                   walletDisplay ? walletDisplay : formatAddress(user)
                 }`
               );
-              setOwnerLink(`${oLink}/${walletDisplay ? walletDisplay : user}`);
             } else {
               window.location.href = "/404";
             }
@@ -314,7 +309,6 @@ export default function UserPage(props: Props) {
                 : "https://seize.io"
             }/${ownerEnsTemp}`;
             setOwnerLinkDisplay(ownerLink);
-            setOwnerLink(ownerLink);
 
             setBreadcrumbs([
               { display: "Home", href: "/" },
@@ -801,7 +795,9 @@ export default function UserPage(props: Props) {
                                 className={styles.ownerLink}
                                 onClick={() => {
                                   if (navigator.clipboard) {
-                                    navigator.clipboard.writeText(ownerLink);
+                                    navigator.clipboard.writeText(
+                                      window.location.href
+                                    );
                                   }
                                   setIsOwnerLinkCopied(true);
                                   setTimeout(() => {
