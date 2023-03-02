@@ -41,7 +41,7 @@ export default function NFTLeaderboard(props: Props) {
   const [sort, setSort] = useState<{
     sort: Sort;
     sort_direction: SortDirection;
-  }>({ sort: Sort.card_balance, sort_direction: SortDirection.DESC });
+  }>({ sort: Sort.card_tdh, sort_direction: SortDirection.DESC });
 
   const [ownerTags, setOwnersTags] = useState<OwnerTags[]>([]);
   const [ownerTagsLoaded, setOwnerTagsLoaded] = useState(false);
