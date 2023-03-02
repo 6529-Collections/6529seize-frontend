@@ -99,7 +99,10 @@ export default function Address(props: Props) {
                 className={`${styles.address} ${
                   props.isUserPage ? styles.addressUserPage : ""
                 }`}>
-                <a href={`/${props.address}`}>{resolveAddress()}</a>
+                {props.disableLink && resolveAddress()}
+                {!props.disableLink && (
+                  <a href={`/${props.address}`}>{resolveAddress()}</a>
+                )}
               </span>
             )}
             {props.ens ? (
