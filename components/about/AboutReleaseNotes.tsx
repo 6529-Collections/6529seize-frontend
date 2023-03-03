@@ -26,6 +26,18 @@ export default function AboutReleaseNotes() {
             </ul>
             <br />
             <p>
+              <b>Release 1.1.1</b>
+              <br />
+              Mar 03, 2023
+            </p>
+            <ul>
+              <li>
+                Fixed bug Card titles links in Meme Lab would navigate to the
+                wrong page.
+              </li>
+            </ul>
+            <br />
+            <p>
               <b>Release 1.1.0</b>
               <br />
               Mar 02, 2023
