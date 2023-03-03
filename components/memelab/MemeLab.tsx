@@ -408,7 +408,7 @@ export default function MemeLabComponent() {
           </Row>
           <Row>
             <Col className="text-center pt-2">
-              <a href={`/the-memes/${nft.id}`}>{nft.name}</a>
+              <a href={`/meme-lab/${nft.id}`}>{nft.name}</a>
             </Col>
           </Row>
           <Row>
