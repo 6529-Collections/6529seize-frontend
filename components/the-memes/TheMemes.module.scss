@@ -277,3 +277,62 @@
     color: white !important;
   }
 }
+
+.distributionsTable {
+  tr {
+    border-bottom: 1px solid #333 !important;
+  }
+  tr td {
+    white-space: nowrap;
+  }
+}
+
+.distributionsScrollContainer {
+  -ms-overflow-style: none; /* Internet Explorer 10+ */
+  scrollbar-width: none; /* Firefox */
+  overflow-x: scroll;
+}
+
+.distributionsScrollContainer::-webkit-scrollbar {
+  display: none;
+}
+
+.distributionsTable > :not(caption) > * > * {
+  padding: 0.5rem !important;
+}
+
+.distributionPlanLink {
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.distributionCarousel {
+  img {
+    width: 80%;
+    margin-left: 10%;
+    height: auto;
+  }
+}
+
+@media only screen and (max-width: 800px) {
+  .distributionCarousel {
+    img {
+      width: 100%;
+      margin-left: 0%;
+      height: auto;
+    }
+  }
+}
+
+.distributionPhaseLink {
+  margin-right: 15px;
+  font-size: larger;
+  font-weight: bolder;
+  text-decoration: none;
+  cursor: pointer;
+  color: white;
+
+  &:hover {
+    color: $font-color-h;
+  }
+}

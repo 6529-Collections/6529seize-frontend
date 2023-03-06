@@ -234,10 +234,11 @@ export default function Home() {
                         <Col>
                           <a
                             href={
-                              `https://github.com/6529-Collections/thememecards/tree/main/card` +
-                              nft.id
+                              nft.has_distribution
+                                ? `/the-memes/${nft.id}?focus=distribution`
+                                : `https://github.com/6529-Collections/thememecards/tree/main/card${nft.id}`
                             }
-                            target="_blank"
+                            target={nft.has_distribution ? "_self" : "_blank"}
                             rel="noreferrer">
                             Distribution Plan
                           </a>
