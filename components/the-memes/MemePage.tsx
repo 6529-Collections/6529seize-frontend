@@ -1495,6 +1495,7 @@ export default function MemePage() {
             <Col className="text-center">
               {phases.map((phase) => (
                 <Link
+                  key={phase.phase}
                   className={styles.distributionPhaseLink}
                   activeClass="active"
                   to={`${phase.phase}-table`}
@@ -1526,7 +1527,8 @@ export default function MemePage() {
                   id={`${phase.phase}-table`}>
                   <tbody>
                     {phase.distributions.map((d) => (
-                      <tr>
+                      <tr
+                        key={`${d.contract}-${d.card_id}-${d.phase}-${d.wallet}`}>
                         <td className="col-5">{d.wallet}</td>
                         <td className="col-3 text-center">{d.display}</td>
                         <td className="col-2 text-center">{d.phase}</td>
