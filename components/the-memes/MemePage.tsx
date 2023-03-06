@@ -1,4 +1,5 @@
 import styles from "./TheMemes.module.scss";
+import { Link } from "react-scroll";
 
 import { useEffect, useState } from "react";
 import Image from "next/image";
@@ -29,9 +30,14 @@ import LatestActivityRow from "../latest-activity/LatestActivityRow";
 import { Transaction } from "../../entities/ITransaction";
 import { useRouter } from "next/router";
 import { TDHMetrics } from "../../entities/ITDH";
-import { fetchUrl } from "../../services/6529api";
+import { fetchAllPages, fetchUrl } from "../../services/6529api";
 import Pagination from "../pagination/Pagination";
 import { TypeFilter } from "../latest-activity/LatestActivity";
+import {
+  IDistribution,
+  IDistributionPhoto,
+} from "../../entities/IDistribution";
+import ScrollToButton from "../scrollTo/ScrollToButton";
 
 const NFTImage = dynamic(() => import("../nft-image/NFTImage"), {
   ssr: false,
@@ -51,6 +57,7 @@ export enum MEME_FOCUS {
   YOUR_CARDS = "your-cards",
   THE_ART = "the-art",
   HODLERS = "collectors",
+  DISTRIBUTION = "distribution",
   ACTIVITY = "activity",
 }
 
@@ -78,6 +85,10 @@ export default function MemePage() {
   const [nftBalance, setNftBalance] = useState<number>(0);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [activity, setActivity] = useState<Transaction[]>([]);
+  const [distributions, setDistributions] = useState<IDistribution[]>([]);
+  const [distributionPhotos, setDistributionPhotos] = useState<
+    IDistributionPhoto[]
+  >([]);
 
   const [myOwner, setMyOwner] = useState<TDHMetrics>();
   const [myTDH, setMyTDH] = useState<NftTDH>();
@@ -116,9 +127,14 @@ export default function MemePage() {
     focus: MEME_FOCUS.ACTIVITY,
     title: "Activity",
   };
+  const distributionTab = {
+    focus: MEME_FOCUS.DISTRIBUTION,
+    title: "Distribution",
+  };
 
   const MEME_TABS: MemeTab[] = [
     liveTab,
+    distributionTab,
     cardsTab,
     artTab,
     hodlersTab,
@@ -175,7 +191,8 @@ export default function MemePage() {
           fetchUrl(
             `${process.env.API_ENDPOINT}/api/nfts?id=${nftId}&contract=${MEMES_CONTRACT}`
           ).then((response: DBResponse) => {
-            setNft(response.data[0]);
+            const mynft = response.data[0];
+            setNft(mynft);
             setBreadcrumbs([
               { display: "Home", href: "/" },
               { display: "The Memes", href: "/the-memes" },
@@ -183,8 +200,29 @@ export default function MemePage() {
                 display: `SZN${nftMetas[0].season}`,
                 href: `/the-memes?szn=${nftMetas[0].season}&sort=age&sort_dir=ASC`,
               },
-              { display: `Card ${nftId} - ${response.data[0].name}` },
+              { display: `Card ${nftId} - ${mynft.name}` },
             ]);
+
+            if (
+              !mynft.has_distribution &&
+              activeTab == MEME_FOCUS.DISTRIBUTION
+            ) {
+              setActiveTab(MEME_FOCUS.LIVE);
+            } else {
+              const distributionPhotosUrl = `${process.env.API_ENDPOINT}/api/distribution_photos/${mynft.contract}/${mynft.id}`;
+              const distributionUrl = `${process.env.API_ENDPOINT}/api/distribution/${mynft.contract}/${mynft.id}`;
+
+              fetchAllPages(distributionPhotosUrl).then(
+                (distributionPhotos: any[]) => {
+                  setDistributionPhotos(distributionPhotos);
+                  fetchAllPages(distributionUrl).then(
+                    (distributions: any[]) => {
+                      setDistributions(distributions);
+                    }
+                  );
+                }
+              );
+            }
 
             fetchUrl(
               `${process.env.API_ENDPOINT}/api/nfts_memelab?sort_direction=asc&meme_id=${nftId}`
@@ -320,6 +358,10 @@ export default function MemePage() {
   function printContent() {
     if (activeTab == MEME_FOCUS.ACTIVITY) {
       return printActivity();
+    }
+
+    if (activeTab == MEME_FOCUS.DISTRIBUTION) {
+      return printDistribution();
     }
 
     if (activeTab == MEME_FOCUS.THE_ART) {
@@ -1088,14 +1130,23 @@ export default function MemePage() {
                   <Row>
                     <Col>
                       <a
-                        href={
-                          nft.id > 3
-                            ? `https://github.com/6529-Collections/thememecards/tree/main/card` +
-                              nft.id
-                            : `https://github.com/6529-Collections/thememecards/tree/main/card1-3`
-                        }
-                        target="_blank"
-                        rel="noreferrer">
+                        onClick={() => {
+                          if (nft.has_distribution) {
+                            window.scrollTo(0, 0);
+                            setActiveTab(MEME_FOCUS.DISTRIBUTION);
+                          } else {
+                            let link;
+                            if (nft.id > 3) {
+                              link = `https://github.com/6529-Collections/thememecards/tree/main/card${nft.id}`;
+                            } else {
+                              link = `https://github.com/6529-Collections/thememecards/tree/main/card1-3`;
+                            }
+                            window.open(link, "_blank");
+                          }
+                        }}
+                        target={nft.has_distribution ? "_self" : "_blank"}
+                        rel="noreferrer"
+                        className={styles.distributionPlanLink}>
                         Distribution Plan
                       </a>
                     </Col>
@@ -1402,6 +1453,96 @@ export default function MemePage() {
     return d;
   }
 
+  function printDistributionPhotos() {
+    return (
+      <Carousel
+        id={`distribution-carousel`}
+        interval={null}
+        wrap={false}
+        touch={true}
+        fade={true}
+        className={styles.distributionCarousel}>
+        {distributionPhotos.map((dp) => (
+          <Carousel.Item key={dp.id}>
+            <Image width="0" height="0" src={dp.link} alt={dp.link} />
+          </Carousel.Item>
+        ))}
+      </Carousel>
+    );
+  }
+
+  function printDistribution() {
+    const uniquePhases = new Set([...distributions].map((d) => d.phase));
+    const phases: { phase: string; distributions: IDistribution[] }[] = [];
+    Array.from(uniquePhases).map((phase) => {
+      const distr = distributions.filter((d) => d.phase == phase);
+      phases.push({
+        phase: phase,
+        distributions: distr,
+      });
+    });
+
+    return (
+      <>
+        <ScrollToButton threshhold={400} to="distribution-carousel" />
+        <Container className="pt-2 pb-5">
+          <Row>
+            <Col>{printDistributionPhotos()}</Col>
+          </Row>
+        </Container>
+        <Container className="pt-3 pb-3">
+          <Row>
+            <Col className="text-center">
+              {phases.map((phase) => (
+                <Link
+                  className={styles.distributionPhaseLink}
+                  activeClass="active"
+                  to={`${phase.phase}-table`}
+                  smooth={true}
+                  offset={-60}
+                  duration={250}>
+                  {phase.phase}
+                </Link>
+              ))}
+            </Col>
+          </Row>
+        </Container>
+        {phases.map((phase) => (
+          <Container key={phase.phase} className="pt-4 pb-4">
+            <Row>
+              <Col>
+                <h4>{phase.phase}</h4>
+              </Col>
+            </Row>
+            <Row className={`${styles.distributionsScrollContainer}`}>
+              <Col
+                xs={{ span: 12 }}
+                sm={{ span: 12 }}
+                md={{ span: 12 }}
+                lg={{ span: 12 }}>
+                <Table
+                  bordered={false}
+                  className={styles.distributionsTable}
+                  id={`${phase.phase}-table`}>
+                  <tbody>
+                    {phase.distributions.map((d) => (
+                      <tr>
+                        <td className="col-5">{d.wallet}</td>
+                        <td className="col-3 text-center">{d.display}</td>
+                        <td className="col-2 text-center">{d.phase}</td>
+                        <td className="col-2 text-center">{d.count}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </Table>
+              </Col>
+            </Row>
+          </Container>
+        ))}
+      </>
+    );
+  }
+
   function printActivity() {
     return (
       <Container className="p-0">
@@ -1607,18 +1748,25 @@ export default function MemePage() {
                   </Row>
                   <Row className="pt-3 pb-3">
                     <Col>
-                      {MEME_TABS.map((tab) => (
-                        <span
-                          key={`${nft.id}-${nft.contract}-${tab.focus}-tab`}
-                          className={`${styles.tabFocus} ${
-                            activeTab == tab.focus ? styles.tabFocusActive : ""
-                          }`}
-                          onClick={() => {
-                            setActiveTab(tab.focus);
-                          }}>
-                          {tab.title}
-                        </span>
-                      ))}
+                      {MEME_TABS.map((tab) =>
+                        tab.focus != MEME_FOCUS.DISTRIBUTION ||
+                        nft.has_distribution ? (
+                          <span
+                            key={`${nft.id}-${nft.contract}-${tab.focus}-tab`}
+                            className={`${styles.tabFocus} ${
+                              activeTab == tab.focus
+                                ? styles.tabFocusActive
+                                : ""
+                            }`}
+                            onClick={() => {
+                              setActiveTab(tab.focus);
+                            }}>
+                            {tab.title}
+                          </span>
+                        ) : (
+                          ""
+                        )
+                      )}
                     </Col>
                   </Row>
                   {printContent()}
