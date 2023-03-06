@@ -1,0 +1,26 @@
+@import "../../styles/variables.scss";
+
+.btn {
+  background-color: $almost-very-dark-grey;
+  position: fixed;
+  bottom: 25px;
+  right: 25px;
+  width: 40px;
+  height: 40px;
+  border-radius: 20px;
+  color: white;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  &:hover {
+    background-color: $dark-grey !important;
+  }
+}
+
+.icon {
+  width: 25px;
+  height: 25px;
+}
