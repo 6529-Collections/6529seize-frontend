@@ -8,6 +8,8 @@ export interface IDistribution {
   display: string;
   count: number;
   mint_count: number;
+  wallet_tdh?: number;
+  wallet_balance?: number;
 }
 
 export interface IDistributionPhoto {
