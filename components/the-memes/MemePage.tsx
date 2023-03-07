@@ -1504,7 +1504,7 @@ export default function MemePage() {
     d: IDistribution;
   }) {
     return (
-      <tr key={`${d.contract}-${d.card_id}-${d.phase}-${d.wallet}`}>
+      <tr>
         <td className="col-5">
           <a
             className={styles.distributionWalletLink}
@@ -1535,7 +1535,7 @@ export default function MemePage() {
     distributions: IDistribution[];
   }) {
     return (
-      <Container key={phase} className="pt-4 pb-4">
+      <Container className="pt-4 pb-4">
         <Row>
           <Col>
             <h4>{phase}</h4>
@@ -1567,7 +1567,11 @@ export default function MemePage() {
               </thead>
               <tbody>
                 {distributions.map((d) => (
-                  <MemoizedPrintDistributionRow phase={phase} d={d} />
+                  <MemoizedPrintDistributionRow
+                    key={`${d.contract}-${d.card_id}-${d.phase}-${d.wallet}`}
+                    phase={phase}
+                    d={d}
+                  />
                 ))}
               </tbody>
             </Table>
@@ -1607,6 +1611,7 @@ export default function MemePage() {
         </Container>
         {phases.map((phase) => (
           <MemoizedPrintDistributionPhase
+            key={phase.phase}
             phase={phase.phase}
             distributions={phase.distributions}
           />
