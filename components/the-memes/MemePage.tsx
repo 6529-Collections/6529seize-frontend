@@ -141,6 +141,15 @@ export default function MemePage() {
     activityTab,
   ];
 
+  function fetchDistribution(url: string) {
+    fetchUrl(url).then((response: DBResponse) => {
+      setDistributions((distr) => [...distr, ...response.data]);
+      if (response.next) {
+        fetchDistribution(response.next);
+      }
+    });
+  }
+
   useEffect(() => {
     if (router.isReady) {
       setIsFullScreenSupported(fullScreenSupported());
@@ -210,16 +219,12 @@ export default function MemePage() {
               setActiveTab(MEME_FOCUS.LIVE);
             } else {
               const distributionPhotosUrl = `${process.env.API_ENDPOINT}/api/distribution_photos/${mynft.contract}/${mynft.id}`;
-              const distributionUrl = `${process.env.API_ENDPOINT}/api/distribution/${mynft.contract}/${mynft.id}`;
 
               fetchAllPages(distributionPhotosUrl).then(
                 (distributionPhotos: any[]) => {
                   setDistributionPhotos(distributionPhotos);
-                  fetchAllPages(distributionUrl).then(
-                    (distributions: any[]) => {
-                      setDistributions(distributions);
-                    }
-                  );
+                  const distributionUrl = `${process.env.API_ENDPOINT}/api/distribution/${mynft.contract}/${mynft.id}`;
+                  fetchDistribution(distributionUrl);
                 }
               );
             }
