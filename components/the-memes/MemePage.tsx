@@ -1,7 +1,7 @@
 import styles from "./TheMemes.module.scss";
 import { Link } from "react-scroll";
 
-import { useEffect, useState } from "react";
+import { memo, useEffect, useState } from "react";
 import Image from "next/image";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import dynamic from "next/dynamic";
@@ -383,7 +383,7 @@ export default function MemePage() {
     }
 
     if (activeTab == MEME_FOCUS.DISTRIBUTION) {
-      return printDistribution();
+      return <MemoizedPrintDistribution />;
     }
 
     if (activeTab == MEME_FOCUS.THE_ART) {
@@ -1495,7 +1495,14 @@ export default function MemePage() {
     }
   }
 
-  function printDistributionRow(phase: string, d: IDistribution) {
+  const MemoizedPrintDistributionRow = memo(printDistributionRow);
+  function printDistributionRow({
+    phase,
+    d,
+  }: {
+    phase: string;
+    d: IDistribution;
+  }) {
     return (
       <tr key={`${d.contract}-${d.card_id}-${d.phase}-${d.wallet}`}>
         <td className="col-5">
@@ -1519,15 +1526,19 @@ export default function MemePage() {
     );
   }
 
-  function printDistributionPhase(phase: {
+  const MemoizedPrintDistributionPhase = memo(printDistributionPhase);
+  function printDistributionPhase({
+    phase,
+    distributions,
+  }: {
     phase: string;
     distributions: IDistribution[];
   }) {
     return (
-      <Container key={phase.phase} className="pt-4 pb-4">
+      <Container key={phase} className="pt-4 pb-4">
         <Row>
           <Col>
-            <h4>{phase.phase}</h4>
+            <h4>{phase}</h4>
           </Col>
         </Row>
         <Row className={`${styles.distributionsScrollContainer}`}>
@@ -1539,12 +1550,12 @@ export default function MemePage() {
             <Table
               bordered={false}
               className={styles.distributionsTable}
-              id={`${phase.phase}-table`}>
+              id={`${phase}-table`}>
               <thead>
                 <tr>
                   <th colSpan={2}>Wallet </th>
                   <th className="text-center">Phase</th>
-                  {phase.phase == "Airdrop" ? (
+                  {phase == "Airdrop" ? (
                     <th className="text-center">Count</th>
                   ) : (
                     <>
@@ -1555,9 +1566,9 @@ export default function MemePage() {
                 </tr>
               </thead>
               <tbody>
-                {phase.distributions.map((d) =>
-                  printDistributionRow(phase.phase, d)
-                )}
+                {distributions.map((d) => (
+                  <MemoizedPrintDistributionRow phase={phase} d={d} />
+                ))}
               </tbody>
             </Table>
           </Col>
@@ -1566,6 +1577,7 @@ export default function MemePage() {
     );
   }
 
+  const MemoizedPrintDistribution = memo(printDistribution);
   function printDistribution() {
     return (
       <>
@@ -1593,7 +1605,12 @@ export default function MemePage() {
             </Col>
           </Row>
         </Container>
-        {phases.map((phase) => printDistributionPhase(phase))}
+        {phases.map((phase) => (
+          <MemoizedPrintDistributionPhase
+            phase={phase.phase}
+            distributions={phase.distributions}
+          />
+        ))}
       </>
     );
   }
