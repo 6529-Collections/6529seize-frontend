@@ -282,8 +282,13 @@
   tr {
     border-bottom: 1px solid #333 !important;
   }
-  tr td {
+  tr td,
+  tr th {
     white-space: nowrap;
+  }
+
+  tr td a {
+    text-decoration: none;
   }
 }
 

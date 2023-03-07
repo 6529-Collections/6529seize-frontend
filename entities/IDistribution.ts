@@ -7,6 +7,7 @@ export interface IDistribution {
   wallet: string;
   display: string;
   count: number;
+  mint_count: number;
 }
 
 export interface IDistributionPhoto {
