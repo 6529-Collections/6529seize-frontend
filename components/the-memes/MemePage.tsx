@@ -1495,6 +1495,71 @@ export default function MemePage() {
     }
   }
 
+  function printPhase(phase: {
+    phase: string;
+    distributions: IDistribution[];
+  }) {
+    return (
+      <Container key={phase.phase} className="pt-4 pb-4">
+        <Row>
+          <Col>
+            <h4>{phase.phase}</h4>
+          </Col>
+        </Row>
+        <Row className={`${styles.distributionsScrollContainer}`}>
+          <Col
+            xs={{ span: 12 }}
+            sm={{ span: 12 }}
+            md={{ span: 12 }}
+            lg={{ span: 12 }}>
+            <Table
+              bordered={false}
+              className={styles.distributionsTable}
+              id={`${phase.phase}-table`}>
+              <thead>
+                <tr>
+                  <th colSpan={2}>Wallet </th>
+                  <th className="text-center">Phase</th>
+                  {phase.phase == "Airdrop" ? (
+                    <th className="text-center">Count</th>
+                  ) : (
+                    <>
+                      <th className="text-center">Available</th>
+                      <th className="text-center">Used</th>
+                    </>
+                  )}
+                </tr>
+              </thead>
+              <tbody>
+                {phase.distributions.map((d) => (
+                  <tr key={`${d.contract}-${d.card_id}-${d.phase}-${d.wallet}`}>
+                    <td className="col-5">
+                      <a
+                        className={styles.distributionWalletLink}
+                        href={`/${d.wallet}`}
+                        target="_blank"
+                        rel="noreferrer">
+                        {d.wallet}
+                      </a>
+                    </td>
+                    <td className="col-3 text-center">{d.display}</td>
+                    <td className="col-2 text-center">{d.phase}</td>
+                    <td className="col-2 text-center">{d.count}</td>
+                    {phase.phase != "Airdrop" && (
+                      <td className="col-2 text-center">
+                        {d.mint_count ? d.mint_count : "-"}
+                      </td>
+                    )}
+                  </tr>
+                ))}
+              </tbody>
+            </Table>
+          </Col>
+        </Row>
+      </Container>
+    );
+  }
+
   function printDistribution() {
     return (
       <>
@@ -1522,66 +1587,7 @@ export default function MemePage() {
             </Col>
           </Row>
         </Container>
-        {phases.map((phase) => (
-          <Container key={phase.phase} className="pt-4 pb-4">
-            <Row>
-              <Col>
-                <h4>{phase.phase}</h4>
-              </Col>
-            </Row>
-            <Row className={`${styles.distributionsScrollContainer}`}>
-              <Col
-                xs={{ span: 12 }}
-                sm={{ span: 12 }}
-                md={{ span: 12 }}
-                lg={{ span: 12 }}>
-                <Table
-                  bordered={false}
-                  className={styles.distributionsTable}
-                  id={`${phase.phase}-table`}>
-                  <thead>
-                    <tr>
-                      <th colSpan={2}>Wallet </th>
-                      <th className="text-center">Phase</th>
-                      {phase.phase == "Airdrop" ? (
-                        <th className="text-center">Count</th>
-                      ) : (
-                        <>
-                          <th className="text-center">Available</th>
-                          <th className="text-center">Used</th>
-                        </>
-                      )}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {phase.distributions.map((d) => (
-                      <tr
-                        key={`${d.contract}-${d.card_id}-${d.phase}-${d.wallet}`}>
-                        <td className="col-5">
-                          <a
-                            className={styles.distributionWalletLink}
-                            href={`/${d.wallet}`}
-                            target="_blank"
-                            rel="noreferrer">
-                            {d.wallet}
-                          </a>
-                        </td>
-                        <td className="col-3 text-center">{d.display}</td>
-                        <td className="col-2 text-center">{d.phase}</td>
-                        <td className="col-2 text-center">{d.count}</td>
-                        {phase.phase != "Airdrop" && (
-                          <td className="col-2 text-center">
-                            {d.mint_count ? d.mint_count : "-"}
-                          </td>
-                        )}
-                      </tr>
-                    ))}
-                  </tbody>
-                </Table>
-              </Col>
-            </Row>
-          </Container>
-        ))}
+        {phases.map((phase) => printPhase(phase))}
       </>
     );
   }
