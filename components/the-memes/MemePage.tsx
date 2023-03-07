@@ -1495,7 +1495,31 @@ export default function MemePage() {
     }
   }
 
-  function printPhase(phase: {
+  function printDistributionRow(phase: string, d: IDistribution) {
+    return (
+      <tr key={`${d.contract}-${d.card_id}-${d.phase}-${d.wallet}`}>
+        <td className="col-5">
+          <a
+            className={styles.distributionWalletLink}
+            href={`/${d.wallet}`}
+            target="_blank"
+            rel="noreferrer">
+            {d.wallet}
+          </a>
+        </td>
+        <td className="col-3 text-center">{d.display}</td>
+        <td className="col-2 text-center">{d.phase}</td>
+        <td className="col-2 text-center">{d.count}</td>
+        {phase != "Airdrop" && (
+          <td className="col-2 text-center">
+            {d.mint_count ? d.mint_count : "-"}
+          </td>
+        )}
+      </tr>
+    );
+  }
+
+  function printDistributionPhase(phase: {
     phase: string;
     distributions: IDistribution[];
   }) {
@@ -1531,27 +1555,9 @@ export default function MemePage() {
                 </tr>
               </thead>
               <tbody>
-                {phase.distributions.map((d) => (
-                  <tr key={`${d.contract}-${d.card_id}-${d.phase}-${d.wallet}`}>
-                    <td className="col-5">
-                      <a
-                        className={styles.distributionWalletLink}
-                        href={`/${d.wallet}`}
-                        target="_blank"
-                        rel="noreferrer">
-                        {d.wallet}
-                      </a>
-                    </td>
-                    <td className="col-3 text-center">{d.display}</td>
-                    <td className="col-2 text-center">{d.phase}</td>
-                    <td className="col-2 text-center">{d.count}</td>
-                    {phase.phase != "Airdrop" && (
-                      <td className="col-2 text-center">
-                        {d.mint_count ? d.mint_count : "-"}
-                      </td>
-                    )}
-                  </tr>
-                ))}
+                {phase.distributions.map((d) =>
+                  printDistributionRow(phase.phase, d)
+                )}
               </tbody>
             </Table>
           </Col>
@@ -1587,7 +1593,7 @@ export default function MemePage() {
             </Col>
           </Row>
         </Container>
-        {phases.map((phase) => printPhase(phase))}
+        {phases.map((phase) => printDistributionPhase(phase))}
       </>
     );
   }
