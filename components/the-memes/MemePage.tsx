@@ -1549,7 +1549,8 @@ export default function MemePage() {
                           <a
                             className={styles.distributionWalletLink}
                             href={`/${d.wallet}`}
-                            target="_blank">
+                            target="_blank"
+                            rel="noreferrer">
                             {d.wallet}
                           </a>
                         </td>
