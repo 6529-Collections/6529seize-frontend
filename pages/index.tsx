@@ -235,7 +235,7 @@ export default function Home() {
                           <a
                             href={
                               nft.has_distribution
-                                ? `/the-memes/${nft.id}?focus=distribution`
+                                ? `/the-memes/${nft.id}/distribution`
                                 : `https://github.com/6529-Collections/thememecards/tree/main/card${nft.id}`
                             }
                             target={nft.has_distribution ? "_self" : "_blank"}

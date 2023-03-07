@@ -86,9 +86,6 @@ export default function MemePage() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [activity, setActivity] = useState<Transaction[]>([]);
   const [distributions, setDistributions] = useState<IDistribution[]>([]);
-  const [phases, setPhases] = useState<
-    { phase: string; distributions: IDistribution[] }[]
-  >([]);
   const [distributionPhotos, setDistributionPhotos] = useState<
     IDistributionPhoto[]
   >([]);
@@ -152,20 +149,6 @@ export default function MemePage() {
       }
     });
   }
-
-  useEffect(() => {
-    const uniquePhases = new Set([...distributions].map((d) => d.phase));
-    const phases: { phase: string; distributions: IDistribution[] }[] = [];
-    Array.from(uniquePhases).map((phase) => {
-      const distr = distributions.filter((d) => d.phase == phase);
-      phases.push({
-        phase: phase,
-        distributions: distr,
-      });
-    });
-
-    setPhases(phases);
-  }, [distributions]);
 
   useEffect(() => {
     if (router.isReady) {
@@ -378,6 +361,7 @@ export default function MemePage() {
   }
 
   function printContent() {
+    console.log("printing content");
     if (activeTab == MEME_FOCUS.ACTIVITY) {
       return printActivity();
     }
@@ -647,6 +631,20 @@ export default function MemePage() {
                     </tr>
                   </tbody>
                 </Table>
+              </Col>
+            </Row>
+            <Row>
+              <Col>
+                <a
+                  href={
+                    nft.has_distribution
+                      ? `/the-memes/${nft.id}/distribution`
+                      : `https://github.com/6529-Collections/thememecards/tree/main/card${nft.id}`
+                  }
+                  target={nft.has_distribution ? "_self" : "_blank"}
+                  rel="noreferrer">
+                  Distribution Plan
+                </a>
               </Col>
             </Row>
             {nftBalance > 0 && (
@@ -1154,8 +1152,7 @@ export default function MemePage() {
                       <a
                         onClick={() => {
                           if (nft.has_distribution) {
-                            window.scrollTo(0, 0);
-                            setActiveTab(MEME_FOCUS.DISTRIBUTION);
+                            router.push(`/the-memes/${nft.id}/distribution`);
                           } else {
                             let link;
                             if (nft.id > 3) {
@@ -1583,9 +1580,23 @@ export default function MemePage() {
 
   const MemoizedPrintDistribution = memo(printDistribution);
   function printDistribution() {
+    console.log("printing distribution");
+    const uniquePhases = new Set([...distributions].map((d) => d.phase));
+    const phases: { phase: string; distributions: IDistribution[] }[] = [];
+    Array.from(uniquePhases).map((phase) => {
+      const distr = distributions.filter((d) => d.phase == phase);
+      phases.push({
+        phase: phase,
+        distributions: distr,
+      });
+    });
     return (
       <>
-        <ScrollToButton threshhold={400} to="distribution-carousel" />
+        <ScrollToButton
+          offset={0}
+          threshhold={400}
+          to="distribution-carousel"
+        />
         <Container className="pt-2 pb-5">
           <Row>
             <Col>{printDistributionPhotos()}</Col>
@@ -1826,8 +1837,8 @@ export default function MemePage() {
                   <Row className="pt-3 pb-3">
                     <Col>
                       {MEME_TABS.map((tab) =>
-                        tab.focus != MEME_FOCUS.DISTRIBUTION ||
-                        nft.has_distribution ? (
+                        tab.focus != MEME_FOCUS.DISTRIBUTION ? (
+                          // || nft.has_distribution
                           <span
                             key={`${nft.id}-${nft.contract}-${tab.focus}-tab`}
                             className={`${styles.tabFocus} ${

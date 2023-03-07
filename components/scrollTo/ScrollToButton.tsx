@@ -6,6 +6,7 @@ import { Link } from "react-scroll";
 interface Props {
   to: string;
   threshhold: number;
+  offset: number;
 }
 
 export default function ScrollToButton(props: Props) {
@@ -33,7 +34,7 @@ export default function ScrollToButton(props: Props) {
       activeClass="active"
       to={props.to}
       smooth={true}
-      offset={-60}
+      offset={props.offset}
       style={{ display: showButton ? "flex" : "none" }}
       duration={250}>
       <FontAwesomeIcon icon="chevron-up" className={styles.icon} />

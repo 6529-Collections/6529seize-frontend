@@ -1,19 +1,19 @@
 import Head from "next/head";
-import styles from "../../styles/Home.module.scss";
+import styles from "../../../styles/Home.module.scss";
 
 import dynamic from "next/dynamic";
 import { useRouter } from "next/router";
-import { MEMES_CONTRACT } from "../../constants";
-import { fetchUrl } from "../../services/6529api";
-import HeaderPlaceholder from "../../components/header/HeaderPlaceholder";
+import { MEMES_CONTRACT } from "../../../constants";
+import { fetchUrl } from "../../../services/6529api";
+import HeaderPlaceholder from "../../../components/header/HeaderPlaceholder";
 
-const Header = dynamic(() => import("../../components/header/Header"), {
+const Header = dynamic(() => import("../../../components/header/Header"), {
   ssr: false,
   loading: () => <HeaderPlaceholder />,
 });
 
 const MemePageComponent = dynamic(
-  () => import("../../components/the-memes/MemePage"),
+  () => import("../../../components/the-memes/MemePage"),
   {
     ssr: false,
   }
