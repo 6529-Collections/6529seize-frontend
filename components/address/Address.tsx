@@ -8,7 +8,7 @@ import { Dropdown } from "react-bootstrap";
 import Tippy from "@tippyjs/react";
 
 interface Props {
-  address: `0x${string}` | undefined;
+  address: `0x${string}` | string | undefined;
   ens: string | null;
   hideCopy?: boolean;
   resolveEns?: boolean;

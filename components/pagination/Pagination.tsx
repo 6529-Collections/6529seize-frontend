@@ -18,10 +18,14 @@ export default function Pagination(props: Props) {
   }, [props.page]);
 
   function pageNext() {
-    setPage(parseInt(inputPage) + 1);
+    if (!isLastPage()) {
+      setPage(parseInt(inputPage) + 1);
+    }
   }
   function pagePrevious() {
-    setPage(parseInt(inputPage) - 1);
+    if (props.page > 1) {
+      setPage(parseInt(inputPage) - 1);
+    }
   }
   function goToLast() {
     setPage(getLastPage());

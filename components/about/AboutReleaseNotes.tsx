@@ -26,6 +26,27 @@ export default function AboutReleaseNotes() {
             </ul>
             <br />
             <p>
+              <b>Release 1.2.0</b>
+              <br />
+              Mar TBC, 2023
+            </p>
+            <ul>
+              <li>
+                Fixed link of card titles in{" "}
+                <a href={`/meme-lab`} target="_blank" rel="noreferrer">
+                  Meme Lab
+                </a>
+              </li>
+              <li>
+                Added support for pagination in{" "}
+                <a href={`/downloads`} target="_blank" rel="noreferrer">
+                  Downloads
+                </a>
+              </li>
+              <li>Added support for card Distribution</li>
+            </ul>
+            <br />
+            <p>
               <b>Release 1.1.1</b>
               <br />
               Mar 03, 2023

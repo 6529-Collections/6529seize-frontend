@@ -1454,21 +1454,23 @@ export default function MemePage() {
   }
 
   function printDistributionPhotos() {
-    return (
-      <Carousel
-        id={`distribution-carousel`}
-        interval={null}
-        wrap={false}
-        touch={true}
-        fade={true}
-        className={styles.distributionCarousel}>
-        {distributionPhotos.map((dp) => (
-          <Carousel.Item key={dp.id}>
-            <Image width="0" height="0" src={dp.link} alt={dp.link} />
-          </Carousel.Item>
-        ))}
-      </Carousel>
-    );
+    if (distributionPhotos.length > 0) {
+      return (
+        <Carousel
+          id={`distribution-carousel`}
+          interval={null}
+          wrap={false}
+          touch={true}
+          fade={true}
+          className={styles.distributionCarousel}>
+          {distributionPhotos.map((dp) => (
+            <Carousel.Item key={dp.id}>
+              <Image width="0" height="0" src={dp.link} alt={dp.link} />
+            </Carousel.Item>
+          ))}
+        </Carousel>
+      );
+    }
   }
 
   function printDistribution() {
@@ -1525,14 +1527,40 @@ export default function MemePage() {
                   bordered={false}
                   className={styles.distributionsTable}
                   id={`${phase.phase}-table`}>
+                  <thead>
+                    <tr>
+                      <th colSpan={2}>Wallet </th>
+                      <th className="text-center">Phase</th>
+                      {phase.phase == "Airdrop" ? (
+                        <th className="text-center">Count</th>
+                      ) : (
+                        <>
+                          <th className="text-center">Available</th>
+                          <th className="text-center">Used</th>
+                        </>
+                      )}
+                    </tr>
+                  </thead>
                   <tbody>
                     {phase.distributions.map((d) => (
                       <tr
                         key={`${d.contract}-${d.card_id}-${d.phase}-${d.wallet}`}>
-                        <td className="col-5">{d.wallet}</td>
+                        <td className="col-5">
+                          <a
+                            className={styles.distributionWalletLink}
+                            href={`/${d.wallet}`}
+                            target="_blank">
+                            {d.wallet}
+                          </a>
+                        </td>
                         <td className="col-3 text-center">{d.display}</td>
                         <td className="col-2 text-center">{d.phase}</td>
                         <td className="col-2 text-center">{d.count}</td>
+                        {phase.phase != "Airdrop" && (
+                          <td className="col-2 text-center">
+                            {d.mint_count ? d.mint_count : "-"}
+                          </td>
+                        )}
                       </tr>
                     ))}
                   </tbody>
