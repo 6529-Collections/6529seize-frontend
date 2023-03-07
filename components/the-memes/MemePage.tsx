@@ -86,6 +86,9 @@ export default function MemePage() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [activity, setActivity] = useState<Transaction[]>([]);
   const [distributions, setDistributions] = useState<IDistribution[]>([]);
+  const [phases, setPhases] = useState<
+    { phase: string; distributions: IDistribution[] }[]
+  >([]);
   const [distributionPhotos, setDistributionPhotos] = useState<
     IDistributionPhoto[]
   >([]);
@@ -149,6 +152,20 @@ export default function MemePage() {
       }
     });
   }
+
+  useEffect(() => {
+    const uniquePhases = new Set([...distributions].map((d) => d.phase));
+    const phases: { phase: string; distributions: IDistribution[] }[] = [];
+    Array.from(uniquePhases).map((phase) => {
+      const distr = distributions.filter((d) => d.phase == phase);
+      phases.push({
+        phase: phase,
+        distributions: distr,
+      });
+    });
+
+    setPhases(phases);
+  }, [distributions]);
 
   useEffect(() => {
     if (router.isReady) {
@@ -1479,16 +1496,6 @@ export default function MemePage() {
   }
 
   function printDistribution() {
-    const uniquePhases = new Set([...distributions].map((d) => d.phase));
-    const phases: { phase: string; distributions: IDistribution[] }[] = [];
-    Array.from(uniquePhases).map((phase) => {
-      const distr = distributions.filter((d) => d.phase == phase);
-      phases.push({
-        phase: phase,
-        distributions: distr,
-      });
-    });
-
     return (
       <>
         <ScrollToButton threshhold={400} to="distribution-carousel" />
