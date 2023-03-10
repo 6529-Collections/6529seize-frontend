@@ -273,6 +273,16 @@
   }
 }
 
+@media only screen and (max-width: 800px) {
+  .volumeDropdown {
+    button {
+      &::after {
+        margin-top: 0.5rem;
+      }
+    }
+  }
+}
+
 .volumeDropdownEnabled {
   button {
     color: white !important;
@@ -331,7 +341,7 @@
 }
 
 .distributionPhaseLink {
-  margin-right: 15px;
+  margin-right: 20px;
   font-size: larger;
   font-weight: bolder;
   text-decoration: none;
@@ -341,4 +351,37 @@
   &:hover {
     color: $font-color-h;
   }
+}
+.searchBtn {
+  background-color: white;
+  color: black;
+  width: 40px;
+  height: 40px;
+  text-align: center;
+  border-radius: 20px;
+  padding: 10px;
+  cursor: pointer;
+  &:hover {
+    background-color: $off-white;
+  }
+}
+
+@media only screen and (max-width: 800px) {
+  .searchBtn {
+    width: 32px;
+    height: 32px;
+  }
+}
+
+.searchBtnActive {
+  background-color: lighten($color: $green, $amount: 10);
+
+  &:hover {
+    background-color: $green;
+  }
+}
+
+.searchBtnIcon {
+  width: 20px;
+  font-size: 20px;
 }
