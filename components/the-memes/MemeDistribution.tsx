@@ -40,16 +40,12 @@ export default function MemeDistribution() {
   const [searchWallets, setSearchWallets] = useState<string[]>([]);
 
   function fetchDistribution(url: string) {
-    fetchUrl(url).then((response: DBResponse) => {
-      setLoaded(true);
-      const results: IDistribution[] = response.data;
-      const currentDistributions = [...phases].flatMap((p) => p.distributions);
-      const merged = [...results, ...currentDistributions];
-      const uniquePhases = new Set([...merged].map((d) => d.phase));
-      console.log(uniquePhases, merged.length);
+    fetchAllPages(url).then((response: IDistribution[]) => {
+      const uniquePhases = new Set([...response].map((d) => d.phase));
+
       const newPhases: { phase: string; distributions: IDistribution[] }[] = [];
       Array.from(uniquePhases).map((phase) => {
-        const distr = merged.filter((d) => d.phase == phase);
+        const distr = response.filter((d) => d.phase == phase);
         console.log("distr", distr.length);
         newPhases.push({
           phase: phase,
@@ -57,10 +53,7 @@ export default function MemeDistribution() {
         });
       });
       setPhases(newPhases);
-      console.log(newPhases);
-      if (response.next) {
-        fetchDistribution(response.next);
-      }
+      setLoaded(true);
     });
   }
 
