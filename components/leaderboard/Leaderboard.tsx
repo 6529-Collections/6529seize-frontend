@@ -1,15 +1,5 @@
 import { useState, useEffect } from "react";
-import {
-  Container,
-  Row,
-  Col,
-  Table,
-  Dropdown,
-  Form,
-  Button,
-  Modal,
-  InputGroup,
-} from "react-bootstrap";
+import { Container, Row, Col, Table, Dropdown, Form } from "react-bootstrap";
 import { DBResponse } from "../../entities/IDBResponse";
 import { TDHCalc, TDHMetrics } from "../../entities/ITDH";
 import styles from "./Leaderboard.module.scss";
@@ -24,6 +14,9 @@ import { MEMES_CONTRACT } from "../../constants";
 import { MemesExtendedData } from "../../entities/INFT";
 
 const Address = dynamic(() => import("../address/Address"), { ssr: false });
+const SearchModal = dynamic(() => import("../searchModal/SearchModal"), {
+  ssr: false,
+});
 
 interface Props {
   page: number;
@@ -154,26 +147,9 @@ export default function Leaderboard(props: Props) {
 
   const [showSearchModal, setShowSearchModal] = useState(false);
   const [searchWallets, setSearchWallets] = useState<string[]>([]);
-  const [searchValue, setSearchValue] = useState("");
-  const [invalidWalletAdded, setInvalidWalletAdded] = useState(false);
 
   if (props.showLastTdh) {
     printNextTdhCountdown();
-  }
-
-  function addSearchWallet() {
-    if (
-      (searchValue.startsWith("0x") || searchValue.endsWith(".eth")) &&
-      !searchWallets.some((sw) => sw == searchValue)
-    ) {
-      setSearchWallets((w) => [...w, searchValue]);
-      setSearchValue("");
-    } else {
-      setInvalidWalletAdded(true);
-      setTimeout(() => {
-        setInvalidWalletAdded(false);
-      }, 200);
-    }
   }
 
   function getRank(index: number, lead: TDHMetrics) {
@@ -1951,55 +1927,22 @@ export default function Leaderboard(props: Props) {
           />
         </Row>
       )}
-      <Modal
+      <SearchModal
         show={showSearchModal}
-        centered={true}
-        onHide={() => setShowSearchModal(false)}>
-        <Modal.Header closeButton>
-          <Modal.Title>Wallet Search</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <InputGroup
-            className={`${
-              invalidWalletAdded ? styles.shakeWalletInput : ""
-            } mb-3`}>
-            <Form.Control
-              value={searchValue}
-              onChange={(e) => setSearchValue(e.target.value)}
-              onKeyDown={(target) => {
-                if (target.key == "Enter") {
-                  addSearchWallet();
-                }
-              }}
-              autoFocus
-              className={`${styles.modalInput}`}
-              placeholder="Search wallet address or ENS"
-            />
-            <Button className={styles.modalButton} onClick={addSearchWallet}>
-              +
-            </Button>
-          </InputGroup>
-          {searchWallets.map((w) => (
-            <div key={w} className="pt-1 pb-1">
-              <FontAwesomeIcon
-                onClick={() => {
-                  setSearchWallets([...searchWallets].filter((sw) => sw != w));
-                }}
-                className={styles.removeWalletBtn}
-                icon="square-minus"></FontAwesomeIcon>
-              {"  "}
-              {w}
-            </div>
-          ))}
-          {searchWallets.length > 0 && (
-            <Button
-              className={`${styles.modalButtonClear} mt-3 mb-2`}
-              onClick={() => setSearchWallets([])}>
-              Clear All
-            </Button>
-          )}
-        </Modal.Body>
-      </Modal>
+        searchWallets={searchWallets}
+        setShow={function (show: boolean) {
+          setShowSearchModal(show);
+        }}
+        addSearchWallet={function (newW: string) {
+          setSearchWallets((searchWallets) => [...searchWallets, newW]);
+        }}
+        removeSearchWallet={function (removeW: string) {
+          setSearchWallets([...searchWallets].filter((sw) => sw != removeW));
+        }}
+        clearSearchWallets={function () {
+          setSearchWallets([]);
+        }}
+      />
     </Container>
   );
 }
