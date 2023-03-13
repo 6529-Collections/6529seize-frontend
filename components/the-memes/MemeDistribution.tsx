@@ -205,6 +205,8 @@ export default function MemeDistribution() {
                       <td className="text-center">
                         {d.phase == "Airdrop" || !d.mint_count
                           ? "-"
+                          : d.mint_count == 0
+                          ? d.mint_count
                           : numberWithCommas(d.mint_count)}
                       </td>
                     </tr>
