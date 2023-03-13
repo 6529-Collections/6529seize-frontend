@@ -92,4 +92,22 @@
     background-color: $lightest-grey !important;
     border-color: $lightest-grey !important;
   }
+
+  &:disabled {
+    background-color: $lightest-grey !important;
+    border-color: $lightest-grey !important;
+  }
+}
+
+.modalButtonDone {
+  float: right;
+  border-color: $very-dark-grey;
+  background-color: $very-dark-grey;
+  color: $font-color;
+  border-radius: 0;
+
+  &:hover {
+    background-color: $dark-grey;
+    border-color: $dark-grey;
+  }
 }

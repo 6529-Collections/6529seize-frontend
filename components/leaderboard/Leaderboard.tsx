@@ -5,13 +5,18 @@ import { TDHCalc, TDHMetrics } from "../../entities/ITDH";
 import styles from "./Leaderboard.module.scss";
 import dynamic from "next/dynamic";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { nextTdh, numberWithCommas } from "../../helpers/Helpers";
+import {
+  formatAddress,
+  nextTdh,
+  numberWithCommas,
+} from "../../helpers/Helpers";
 import Pagination from "../pagination/Pagination";
 import { SortDirection } from "../../entities/ISort";
 import { useRouter } from "next/router";
 import { fetchAllPages, fetchUrl } from "../../services/6529api";
 import { MEMES_CONTRACT } from "../../constants";
 import { MemesExtendedData } from "../../entities/INFT";
+import Tippy from "@tippyjs/react";
 
 const Address = dynamic(() => import("../address/Address"), { ssr: false });
 const SearchModal = dynamic(() => import("../searchModal/SearchModal"), {
@@ -1008,8 +1013,8 @@ export default function Leaderboard(props: Props) {
               className={`${styles.pageHeader}`}
               xs={{ span: 10 }}
               sm={{ span: 10 }}
-              md={{ span: 4 }}
-              lg={{ span: 4 }}>
+              md={{ span: 6 }}
+              lg={{ span: 6 }}>
               <div
                 className={`${styles.headerMenuFocus} d-flex justify-content-center align-items-center`}>
                 <span>
@@ -1043,7 +1048,7 @@ export default function Leaderboard(props: Props) {
                 </span>
               </div>
             </Col>
-            <Col
+            {/* <Col
               className="d-flex align-items-center justify-content-center"
               xs={2}
               sm={2}>
@@ -1057,10 +1062,14 @@ export default function Leaderboard(props: Props) {
                   className={styles.searchBtnIcon}
                   icon="search"></FontAwesomeIcon>
               </span>
-            </Col>
+            </Col> */}
           </Row>
           <Row className="pt-1 pb-1">
             <Col
+              xs={{ span: 12 }}
+              sm={{ span: 12 }}
+              md={{ span: 6 }}
+              lg={{ span: 4 }}
               className={`${styles.pageHeader} d-flex justify-content-center align-items-center`}>
               <Form.Check
                 type="switch"
@@ -1076,6 +1085,64 @@ export default function Leaderboard(props: Props) {
                 label={`Hide 6529Team`}
                 onChange={() => setHideTeam(!hideTeam)}
               />
+            </Col>
+            <Col
+              className={`d-flex justify-content-end align-items-center`}
+              xs={{ span: 12 }}
+              sm={{ span: 12 }}
+              md={{ span: 6 }}
+              lg={{ span: 8 }}>
+              <>
+                <span>
+                  {searchWallets.length > 0 &&
+                    searchWallets.map((sw) => (
+                      <span className={styles.searchWalletDisplayWrapper}>
+                        <Tippy
+                          delay={250}
+                          content={"Clear"}
+                          placement={"top"}
+                          theme={"dark"}>
+                          <span
+                            className={styles.searchWalletDisplayBtn}
+                            onClick={() =>
+                              setSearchWallets((sr) =>
+                                sr.filter((s) => s != sw)
+                              )
+                            }>
+                            x
+                          </span>
+                        </Tippy>
+                        <span className={styles.searchWalletDisplay}>
+                          {sw.endsWith(".eth") ? sw : formatAddress(sw)}
+                        </span>
+                      </span>
+                    ))}
+                </span>
+                {searchWallets.length > 0 && (
+                  <Tippy
+                    delay={250}
+                    content={"Clear All"}
+                    placement={"top"}
+                    theme={"dark"}>
+                    <span>
+                      <FontAwesomeIcon
+                        onClick={() => setSearchWallets([])}
+                        className={styles.clearSearchBtnIcon}
+                        icon="times-circle"></FontAwesomeIcon>
+                    </span>
+                  </Tippy>
+                )}
+                <span
+                  onClick={() => setShowSearchModal(true)}
+                  className={`${styles.searchBtn} ${
+                    searchWallets.length > 0 ? styles.searchBtnActive : ""
+                  } d-inline-flex align-items-center justify-content-center`}>
+                  {" "}
+                  <FontAwesomeIcon
+                    className={styles.searchBtnIcon}
+                    icon="search"></FontAwesomeIcon>
+                </span>
+              </>
             </Col>
           </Row>
         </>

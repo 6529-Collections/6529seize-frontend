@@ -46,7 +46,7 @@ import {
   faLink,
   faSearch,
   faX,
-  faSquareMinus,
+  faSquareXmark,
   faChevronUp,
 } from "@fortawesome/free-solid-svg-icons";
 import Head from "next/head";
@@ -80,7 +80,7 @@ library.add(
   faLink,
   faSearch,
   faX,
-  faSquareMinus,
+  faSquareXmark,
   faChevronUp
 );
 
