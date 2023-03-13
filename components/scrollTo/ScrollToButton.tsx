@@ -16,7 +16,7 @@ export default function ScrollToButton(props: Props) {
     const target = document.getElementById(props.to);
     function handleScroll() {
       const threshhold = props.threshhold + (target ? target.offsetTop : 0);
-      console.log(threshhold);
+
       if (window.pageYOffset > threshhold) {
         setShowButton(true);
       } else {

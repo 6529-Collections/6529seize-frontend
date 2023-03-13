@@ -5,7 +5,7 @@ import { Col, Container, Row, Table } from "react-bootstrap";
 import { useEffect, useState } from "react";
 import { MEMES_CONTRACT } from "../constants";
 import { DBResponse } from "../entities/IDBResponse";
-import { NFT, MemesExtendedData, LabNFT } from "../entities/INFT";
+import { NFT, MemesExtendedData, LabNFT, BaseNFT } from "../entities/INFT";
 
 import dynamic from "next/dynamic";
 import { getDateDisplay, numberWithCommas } from "../helpers/Helpers";
@@ -61,15 +61,7 @@ export default function Home() {
     fetchUrl(`${process.env.API_ENDPOINT}/api/nfts_memelab?page_size=1`).then(
       (response: DBResponse) => {
         const labNft = response.data[0];
-        console.log(labNft);
         setLabNft(labNft);
-        // fetchUrl(
-        //   `${process.env.API_ENDPOINT}/api/memes_extended_data?id=${nft.id}`
-        // ).then((response: DBResponse) => {
-        //   const nftExtended = response.data[0];
-        //   setNFT(nft);
-        //   setnftExtended(nftExtended);
-        // });
       }
     );
   }, [nft]);
@@ -88,7 +80,7 @@ export default function Home() {
     }
   }, [address, nft]);
 
-  function printMintDate(nft: NFT) {
+  function printMintDate(nft: BaseNFT) {
     const mintDate = new Date(nft.mint_date);
     return (
       <>
@@ -363,27 +355,6 @@ export default function Home() {
                 )}
               </Row>
             </Container>
-            {isNftImageLoaded && labNft && (
-              <Container>
-                <Row className="pt-2 pb-2">
-                  <Col className={styles.memeLabHeader}>
-                    <h1>LATEST MEME LAB DROP</h1>
-                  </Col>
-                </Row>
-                <Row>
-                  <Col>{labNft.name}</Col>
-                  <Col>
-                    <NFTImage
-                      nft={labNft}
-                      animation={true}
-                      height={300}
-                      balance={0}
-                      showUnseized={false}
-                    />
-                  </Col>
-                </Row>
-              </Container>
-            )}
             {isNftImageLoaded && (
               <>
                 <Container className={styles.mainContainer}>
