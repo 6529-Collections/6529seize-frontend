@@ -22,6 +22,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import dynamic from "next/dynamic";
 import Pagination from "../pagination/Pagination";
 import { SortDirection } from "../../entities/ISort";
+import Tippy from "@tippyjs/react";
 
 const SearchModal = dynamic(() => import("../searchModal/SearchModal"), {
   ssr: false,
@@ -147,8 +148,8 @@ export default function MemeDistribution() {
               className={styles.leaderboardNavigationLeft}
               xs={{ span: 12 }}
               sm={{ span: 12 }}
-              md={{ span: 8 }}
-              lg={{ span: 8 }}>
+              md={{ span: 6 }}
+              lg={{ span: 6 }}>
               <span
                 onClick={() => {
                   setActivePhase("All");
@@ -174,17 +175,48 @@ export default function MemeDistribution() {
               ))}
             </Col>
             <Col
-              className={styles.leaderboardNavigationRight}
+              className={`${styles.leaderboardNavigationRight} d-flex justify-content-end align-items-center`}
               xs={{ span: 12 }}
               sm={{ span: 12 }}
-              md={{ span: 4 }}
-              lg={{ span: 4 }}>
-              <span>
+              md={{ span: 6 }}
+              lg={{ span: 6 }}>
+              <>
+                <span>
+                  {searchWallets.length > 0 &&
+                    searchWallets.map((sw) => (
+                      <span className={styles.searchWalletDisplayWrapper}>
+                        <Tippy
+                          delay={250}
+                          content={"Clear"}
+                          placement={"top"}
+                          theme={"dark"}>
+                          <span
+                            className={styles.searchWalletDisplayBtn}
+                            onClick={() =>
+                              setSearchWallets((sr) =>
+                                sr.filter((s) => s != sw)
+                              )
+                            }>
+                            x
+                          </span>
+                        </Tippy>
+                        <span className={styles.searchWalletDisplay}>
+                          {sw.endsWith(".eth") ? sw : formatAddress(sw)}
+                        </span>
+                      </span>
+                    ))}
+                </span>
                 {searchWallets.length > 0 && (
-                  <span className={styles.clearSearchText}>
-                    search: {searchWallets.length} wallet
-                    {searchWallets.length > 1 ? `s` : ``}{" "}
-                  </span>
+                  <Tippy
+                    delay={250}
+                    content={"Clear All"}
+                    placement={"top"}
+                    theme={"dark"}>
+                    <FontAwesomeIcon
+                      onClick={() => setSearchWallets([])}
+                      className={styles.clearSearchBtnIcon}
+                      icon="times-circle"></FontAwesomeIcon>
+                  </Tippy>
                 )}
                 <span
                   onClick={() => setShowSearchModal(true)}
@@ -196,15 +228,7 @@ export default function MemeDistribution() {
                     className={styles.searchBtnIcon}
                     icon="search"></FontAwesomeIcon>
                 </span>
-                {searchWallets.length > 0 && (
-                  <span
-                    className={styles.distributionPhaseLink}
-                    onClick={() => setSearchWallets([])}>
-                    {" "}
-                    clear
-                  </span>
-                )}
-              </span>
+              </>
             </Col>
           </Row>
         </Container>

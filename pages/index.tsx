@@ -5,7 +5,7 @@ import { Col, Container, Row, Table } from "react-bootstrap";
 import { useEffect, useState } from "react";
 import { MEMES_CONTRACT } from "../constants";
 import { DBResponse } from "../entities/IDBResponse";
-import { NFT, MemesExtendedData } from "../entities/INFT";
+import { NFT, MemesExtendedData, LabNFT } from "../entities/INFT";
 
 import dynamic from "next/dynamic";
 import { getDateDisplay, numberWithCommas } from "../helpers/Helpers";
@@ -37,6 +37,7 @@ export default function Home() {
   const [isNftImageLoaded, setIsNftImageLoaded] = useState(false);
 
   const [nft, setNFT] = useState<NFT>();
+  const [labNft, setLabNft] = useState<LabNFT>();
   const [nftExtended, setnftExtended] = useState<MemesExtendedData>();
   const { address, connector, isConnected } = useAccount();
   const [nftBalance, setNftBalance] = useState<number>(0);
@@ -55,6 +56,23 @@ export default function Home() {
       });
     });
   }, []);
+
+  useEffect(() => {
+    fetchUrl(`${process.env.API_ENDPOINT}/api/nfts_memelab?page_size=1`).then(
+      (response: DBResponse) => {
+        const labNft = response.data[0];
+        console.log(labNft);
+        setLabNft(labNft);
+        // fetchUrl(
+        //   `${process.env.API_ENDPOINT}/api/memes_extended_data?id=${nft.id}`
+        // ).then((response: DBResponse) => {
+        //   const nftExtended = response.data[0];
+        //   setNFT(nft);
+        //   setnftExtended(nftExtended);
+        // });
+      }
+    );
+  }, [nft]);
 
   useEffect(() => {
     if (address && nft && nft.id) {
@@ -345,6 +363,27 @@ export default function Home() {
                 )}
               </Row>
             </Container>
+            {isNftImageLoaded && labNft && (
+              <Container>
+                <Row className="pt-2 pb-2">
+                  <Col className={styles.memeLabHeader}>
+                    <h1>LATEST MEME LAB DROP</h1>
+                  </Col>
+                </Row>
+                <Row>
+                  <Col>{labNft.name}</Col>
+                  <Col>
+                    <NFTImage
+                      nft={labNft}
+                      animation={true}
+                      height={300}
+                      balance={0}
+                      showUnseized={false}
+                    />
+                  </Col>
+                </Row>
+              </Container>
+            )}
             {isNftImageLoaded && (
               <>
                 <Container className={styles.mainContainer}>

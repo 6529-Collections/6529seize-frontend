@@ -2,6 +2,7 @@ import styles from "./SearchModal.module.scss";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useState } from "react";
 import { Modal, InputGroup, Form, Button } from "react-bootstrap";
+import Tippy from "@tippyjs/react";
 
 interface Props {
   show: boolean;
@@ -36,7 +37,7 @@ export default function SearchModal(props: Props) {
       show={props.show}
       centered={true}
       onHide={() => props.setShow(false)}>
-      <Modal.Header closeButton>
+      <Modal.Header>
         <Modal.Title>Wallet Search</Modal.Title>
       </Modal.Header>
       <Modal.Body>
@@ -62,23 +63,33 @@ export default function SearchModal(props: Props) {
         </InputGroup>
         {props.searchWallets.map((w) => (
           <div key={w} className="pt-1 pb-1">
-            <FontAwesomeIcon
-              onClick={() => {
-                props.removeSearchWallet(w);
-              }}
-              className={styles.removeWalletBtn}
-              icon="square-minus"></FontAwesomeIcon>
+            <Tippy
+              delay={250}
+              content={"Clear"}
+              placement={"top"}
+              theme={"dark"}>
+              <FontAwesomeIcon
+                onClick={() => {
+                  props.removeSearchWallet(w);
+                }}
+                className={styles.removeWalletBtn}
+                icon="square-xmark"></FontAwesomeIcon>
+            </Tippy>
             {"  "}
             {w}
           </div>
         ))}
-        {props.searchWallets.length > 0 && (
-          <Button
-            className={`${styles.modalButtonClear} mt-3 mb-2`}
-            onClick={() => props.clearSearchWallets()}>
-            Clear All
-          </Button>
-        )}
+        <Button
+          disabled={props.searchWallets.length == 0}
+          className={`${styles.modalButtonClear} mt-3 mb-2`}
+          onClick={() => props.clearSearchWallets()}>
+          Clear All
+        </Button>
+        <Button
+          className={`${styles.modalButtonDone} mt-3 mb-2`}
+          onClick={() => props.setShow(false)}>
+          Done
+        </Button>
       </Modal.Body>
     </Modal>
   );
