@@ -337,7 +337,6 @@ export default function MemePage() {
   }
 
   function printContent() {
-    console.log("printing content");
     if (activeTab == MEME_FOCUS.ACTIVITY) {
       return printActivity();
     }

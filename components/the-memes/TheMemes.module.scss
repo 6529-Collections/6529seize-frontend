@@ -295,9 +295,9 @@
   }
   tr td {
     white-space: nowrap;
-    // font-size: smaller;
   }
   tr th {
+    min-width: 80px;
     white-space: nowrap;
   }
 
