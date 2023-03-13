@@ -130,7 +130,13 @@ export default function MemeDistribution() {
           className={styles.distributionCarousel}>
           {distributionPhotos.map((dp) => (
             <Carousel.Item key={dp.id}>
-              <Image width="0" height="0" src={dp.link} alt={dp.link} />
+              <Image
+                priority
+                width="0"
+                height="0"
+                src={dp.link}
+                alt={dp.link}
+              />
             </Carousel.Item>
           ))}
         </Carousel>
