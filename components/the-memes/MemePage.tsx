@@ -1,7 +1,6 @@
 import styles from "./TheMemes.module.scss";
-import { Link } from "react-scroll";
 
-import { memo, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import dynamic from "next/dynamic";
@@ -57,7 +56,6 @@ export enum MEME_FOCUS {
   YOUR_CARDS = "your-cards",
   THE_ART = "the-art",
   HODLERS = "collectors",
-  DISTRIBUTION = "distribution",
   ACTIVITY = "activity",
 }
 
@@ -127,14 +125,9 @@ export default function MemePage() {
     focus: MEME_FOCUS.ACTIVITY,
     title: "Activity",
   };
-  const distributionTab = {
-    focus: MEME_FOCUS.DISTRIBUTION,
-    title: "Distribution",
-  };
 
   const MEME_TABS: MemeTab[] = [
     liveTab,
-    distributionTab,
     cardsTab,
     artTab,
     hodlersTab,
@@ -211,23 +204,6 @@ export default function MemePage() {
               },
               { display: `Card ${nftId} - ${mynft.name}` },
             ]);
-
-            if (
-              !mynft.has_distribution &&
-              activeTab == MEME_FOCUS.DISTRIBUTION
-            ) {
-              setActiveTab(MEME_FOCUS.LIVE);
-            } else {
-              const distributionPhotosUrl = `${process.env.API_ENDPOINT}/api/distribution_photos/${mynft.contract}/${mynft.id}`;
-
-              fetchAllPages(distributionPhotosUrl).then(
-                (distributionPhotos: any[]) => {
-                  setDistributionPhotos(distributionPhotos);
-                  const distributionUrl = `${process.env.API_ENDPOINT}/api/distribution/${mynft.contract}/${mynft.id}`;
-                  fetchDistribution(distributionUrl);
-                }
-              );
-            }
 
             fetchUrl(
               `${process.env.API_ENDPOINT}/api/nfts_memelab?sort_direction=asc&meme_id=${nftId}`
@@ -364,10 +340,6 @@ export default function MemePage() {
     console.log("printing content");
     if (activeTab == MEME_FOCUS.ACTIVITY) {
       return printActivity();
-    }
-
-    if (activeTab == MEME_FOCUS.DISTRIBUTION) {
-      return <MemoizedPrintDistribution />;
     }
 
     if (activeTab == MEME_FOCUS.THE_ART) {
@@ -1492,145 +1464,6 @@ export default function MemePage() {
     }
   }
 
-  const MemoizedPrintDistributionRow = memo(printDistributionRow);
-  function printDistributionRow({
-    phase,
-    d,
-  }: {
-    phase: string;
-    d: IDistribution;
-  }) {
-    return (
-      <tr>
-        <td className="col-5">
-          <a
-            className={styles.distributionWalletLink}
-            href={`/${d.wallet}`}
-            target="_blank"
-            rel="noreferrer">
-            {d.wallet}
-          </a>
-        </td>
-        <td className="col-3 text-center">{d.display}</td>
-        <td className="col-2 text-center">{d.phase}</td>
-        <td className="col-2 text-center">{d.count}</td>
-        {phase != "Airdrop" && (
-          <td className="col-2 text-center">
-            {d.mint_count ? d.mint_count : "-"}
-          </td>
-        )}
-      </tr>
-    );
-  }
-
-  const MemoizedPrintDistributionPhase = memo(printDistributionPhase);
-  function printDistributionPhase({
-    phase,
-    distributions,
-  }: {
-    phase: string;
-    distributions: IDistribution[];
-  }) {
-    return (
-      <Container className="pt-4 pb-4">
-        <Row>
-          <Col>
-            <h4>{phase}</h4>
-          </Col>
-        </Row>
-        <Row className={`${styles.distributionsScrollContainer}`}>
-          <Col
-            xs={{ span: 12 }}
-            sm={{ span: 12 }}
-            md={{ span: 12 }}
-            lg={{ span: 12 }}>
-            <Table
-              bordered={false}
-              className={styles.distributionsTable}
-              id={`${phase}-table`}>
-              <thead>
-                <tr>
-                  <th colSpan={2}>Wallet </th>
-                  <th className="text-center">Phase</th>
-                  {phase == "Airdrop" ? (
-                    <th className="text-center">Count</th>
-                  ) : (
-                    <>
-                      <th className="text-center">Available</th>
-                      <th className="text-center">Used</th>
-                    </>
-                  )}
-                </tr>
-              </thead>
-              <tbody>
-                {distributions.map((d) => (
-                  <MemoizedPrintDistributionRow
-                    key={`${d.contract}-${d.card_id}-${d.phase}-${d.wallet}`}
-                    phase={phase}
-                    d={d}
-                  />
-                ))}
-              </tbody>
-            </Table>
-          </Col>
-        </Row>
-      </Container>
-    );
-  }
-
-  const MemoizedPrintDistribution = memo(printDistribution);
-  function printDistribution() {
-    console.log("printing distribution");
-    const uniquePhases = new Set([...distributions].map((d) => d.phase));
-    const phases: { phase: string; distributions: IDistribution[] }[] = [];
-    Array.from(uniquePhases).map((phase) => {
-      const distr = distributions.filter((d) => d.phase == phase);
-      phases.push({
-        phase: phase,
-        distributions: distr,
-      });
-    });
-    return (
-      <>
-        <ScrollToButton
-          offset={0}
-          threshhold={400}
-          to="distribution-carousel"
-        />
-        <Container className="pt-2 pb-5">
-          <Row>
-            <Col>{printDistributionPhotos()}</Col>
-          </Row>
-        </Container>
-        <Container className="pt-3 pb-3">
-          <Row>
-            <Col className="text-center">
-              {phases.map((phase) => (
-                <Link
-                  key={phase.phase}
-                  className={styles.distributionPhaseLink}
-                  activeClass="active"
-                  to={`${phase.phase}-table`}
-                  smooth={true}
-                  offset={-60}
-                  duration={250}>
-                  {phase.phase}
-                </Link>
-              ))}
-            </Col>
-          </Row>
-        </Container>
-        {phases.map((phase) => (
-          <MemoizedPrintDistributionPhase
-            key={phase.phase}
-            phase={phase.phase}
-            distributions={phase.distributions}
-          />
-        ))}
-      </>
-    );
-  }
-
   function printActivity() {
     return (
       <Container className="p-0">
@@ -1836,25 +1669,18 @@ export default function MemePage() {
                   </Row>
                   <Row className="pt-3 pb-3">
                     <Col>
-                      {MEME_TABS.map((tab) =>
-                        tab.focus != MEME_FOCUS.DISTRIBUTION ? (
-                          // || nft.has_distribution
-                          <span
-                            key={`${nft.id}-${nft.contract}-${tab.focus}-tab`}
-                            className={`${styles.tabFocus} ${
-                              activeTab == tab.focus
-                                ? styles.tabFocusActive
-                                : ""
-                            }`}
-                            onClick={() => {
-                              setActiveTab(tab.focus);
-                            }}>
-                            {tab.title}
-                          </span>
-                        ) : (
-                          ""
-                        )
-                      )}
+                      {MEME_TABS.map((tab) => (
+                        <span
+                          key={`${nft.id}-${nft.contract}-${tab.focus}-tab`}
+                          className={`${styles.tabFocus} ${
+                            activeTab == tab.focus ? styles.tabFocusActive : ""
+                          }`}
+                          onClick={() => {
+                            setActiveTab(tab.focus);
+                          }}>
+                          {tab.title}
+                        </span>
+                      ))}
                     </Col>
                   </Row>
                   {printContent()}
