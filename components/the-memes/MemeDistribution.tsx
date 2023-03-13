@@ -17,10 +17,20 @@ import { areEqualAddresses, numberWithCommas } from "../../helpers/Helpers";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import dynamic from "next/dynamic";
 import Pagination from "../pagination/Pagination";
+import { SortDirection } from "../../entities/ISort";
 
 const SearchModal = dynamic(() => import("../searchModal/SearchModal"), {
   ssr: false,
 });
+
+enum Sort {
+  phase = "phase",
+  mint_count = "mint_count",
+  count = "count",
+  wallet_tdh = "wallet_tdh",
+  wallet_balance = "wallet_balance",
+  wallet_unique_balance = "wallet_unique_balance",
+}
 
 export default function MemeDistribution() {
   const router = useRouter();
@@ -44,11 +54,16 @@ export default function MemeDistribution() {
   const [showSearchModal, setShowSearchModal] = useState(false);
   const [searchWallets, setSearchWallets] = useState<string[]>([]);
 
+  const [sort, setSort] = useState<{
+    sort: Sort;
+    sort_direction: SortDirection;
+  }>({ sort: Sort.phase, sort_direction: SortDirection.DESC });
+
   function fetchDistribution() {
     const phasefilter = activePhase == "All" ? "" : `&phase=${activePhase}`;
     const walletFilter =
       searchWallets.length == 0 ? "" : `&wallet=${searchWallets.join(",")}`;
-    const distributionUrl = `${process.env.API_ENDPOINT}/api/distribution/${MEMES_CONTRACT}/${nftId}?&page=${pageProps.page}${phasefilter}${walletFilter}`;
+    const distributionUrl = `${process.env.API_ENDPOINT}/api/distribution/${MEMES_CONTRACT}/${nftId}?&page=${pageProps.page}&sort=${sort.sort}&sort_direction=${sort.sort_direction}${phasefilter}${walletFilter}`;
 
     fetchUrl(distributionUrl).then((r: DBResponse) => {
       setTotalResults(r.count);
@@ -91,7 +106,7 @@ export default function MemeDistribution() {
     if (nftId) {
       setPageProps({ ...pageProps, page: 1 });
     }
-  }, [activePhase, searchWallets]);
+  }, [activePhase, searchWallets, sort]);
 
   useEffect(() => {
     if (nftId && pageProps) {
@@ -121,12 +136,8 @@ export default function MemeDistribution() {
   function printDistribution() {
     return (
       <>
-        <ScrollToButton
-          threshhold={500}
-          to="distribution-header"
-          offset={-200}
-        />
-        <Container className="pt-5 pb-3">
+        <ScrollToButton threshhold={500} to="distribution-table" offset={0} />
+        <Container className="pt-5 pb-3" id={`distribution-table`}>
           <Row>
             <Col
               className={styles.leaderboardNavigationLeft}
@@ -205,19 +216,231 @@ export default function MemeDistribution() {
                         x{totalResults}
                       </span>
                     </th>
-                    <th className="text-center">Cards</th>
-                    <th className="text-center">Unique</th>
-                    <th className="text-center">TDH</th>
-                    <th className="text-center">Phase</th>
-                    <th className="text-center">Count</th>
-                    <th className="text-center">Minted</th>
+                    <th className="text-center">
+                      Cards&nbsp;
+                      <span
+                        className={`${styles.distributionsCaretWrapper} d-flex flex-column`}>
+                        <FontAwesomeIcon
+                          icon="square-caret-up"
+                          onClick={() =>
+                            setSort({
+                              sort: Sort.wallet_balance,
+                              sort_direction: SortDirection.ASC,
+                            })
+                          }
+                          className={`${styles.distributionsCaret} ${
+                            sort.sort_direction != SortDirection.ASC ||
+                            sort.sort != Sort.wallet_balance
+                              ? styles.distributionsCaretDisabled
+                              : ""
+                          }`}
+                        />
+                        <FontAwesomeIcon
+                          icon="square-caret-down"
+                          onClick={() =>
+                            setSort({
+                              sort: Sort.wallet_balance,
+                              sort_direction: SortDirection.DESC,
+                            })
+                          }
+                          className={`${styles.distributionsCaret} ${
+                            sort.sort_direction != SortDirection.DESC ||
+                            sort.sort != Sort.wallet_balance
+                              ? styles.distributionsCaretDisabled
+                              : ""
+                          }`}
+                        />
+                      </span>
+                    </th>
+                    <th className="text-center">
+                      Unique&nbsp;
+                      <span
+                        className={`${styles.distributionsCaretWrapper} d-flex flex-column`}>
+                        <FontAwesomeIcon
+                          icon="square-caret-up"
+                          onClick={() =>
+                            setSort({
+                              sort: Sort.wallet_unique_balance,
+                              sort_direction: SortDirection.ASC,
+                            })
+                          }
+                          className={`${styles.distributionsCaret} ${
+                            sort.sort_direction != SortDirection.ASC ||
+                            sort.sort != Sort.wallet_unique_balance
+                              ? styles.distributionsCaretDisabled
+                              : ""
+                          }`}
+                        />
+                        <FontAwesomeIcon
+                          icon="square-caret-down"
+                          onClick={() =>
+                            setSort({
+                              sort: Sort.wallet_unique_balance,
+                              sort_direction: SortDirection.DESC,
+                            })
+                          }
+                          className={`${styles.distributionsCaret} ${
+                            sort.sort_direction != SortDirection.DESC ||
+                            sort.sort != Sort.wallet_unique_balance
+                              ? styles.distributionsCaretDisabled
+                              : ""
+                          }`}
+                        />
+                      </span>
+                    </th>
+                    <th className="text-center">
+                      TDH&nbsp;
+                      <span
+                        className={`${styles.distributionsCaretWrapper} d-flex flex-column`}>
+                        <FontAwesomeIcon
+                          icon="square-caret-up"
+                          onClick={() =>
+                            setSort({
+                              sort: Sort.wallet_tdh,
+                              sort_direction: SortDirection.ASC,
+                            })
+                          }
+                          className={`${styles.distributionsCaret} ${
+                            sort.sort_direction != SortDirection.ASC ||
+                            sort.sort != Sort.wallet_tdh
+                              ? styles.distributionsCaretDisabled
+                              : ""
+                          }`}
+                        />
+                        <FontAwesomeIcon
+                          icon="square-caret-down"
+                          onClick={() =>
+                            setSort({
+                              sort: Sort.wallet_tdh,
+                              sort_direction: SortDirection.DESC,
+                            })
+                          }
+                          className={`${styles.distributionsCaret} ${
+                            sort.sort_direction != SortDirection.DESC ||
+                            sort.sort != Sort.wallet_tdh
+                              ? styles.distributionsCaretDisabled
+                              : ""
+                          }`}
+                        />
+                      </span>
+                    </th>
+                    <th className="text-center">
+                      Phase&nbsp;
+                      <span
+                        className={`${styles.distributionsCaretWrapper} d-flex flex-column`}>
+                        <FontAwesomeIcon
+                          icon="square-caret-up"
+                          onClick={() =>
+                            setSort({
+                              sort: Sort.phase,
+                              sort_direction: SortDirection.ASC,
+                            })
+                          }
+                          className={`${styles.distributionsCaret} ${
+                            sort.sort_direction != SortDirection.ASC ||
+                            sort.sort != Sort.phase
+                              ? styles.distributionsCaretDisabled
+                              : ""
+                          }`}
+                        />
+                        <FontAwesomeIcon
+                          icon="square-caret-down"
+                          onClick={() =>
+                            setSort({
+                              sort: Sort.phase,
+                              sort_direction: SortDirection.DESC,
+                            })
+                          }
+                          className={`${styles.distributionsCaret} ${
+                            sort.sort_direction != SortDirection.DESC ||
+                            sort.sort != Sort.phase
+                              ? styles.distributionsCaretDisabled
+                              : ""
+                          }`}
+                        />
+                      </span>
+                    </th>
+                    <th className="text-center">
+                      Count&nbsp;
+                      <span
+                        className={`${styles.distributionsCaretWrapper} d-flex flex-column`}>
+                        <FontAwesomeIcon
+                          icon="square-caret-up"
+                          onClick={() =>
+                            setSort({
+                              sort: Sort.count,
+                              sort_direction: SortDirection.ASC,
+                            })
+                          }
+                          className={`${styles.distributionsCaret} ${
+                            sort.sort_direction != SortDirection.ASC ||
+                            sort.sort != Sort.count
+                              ? styles.distributionsCaretDisabled
+                              : ""
+                          }`}
+                        />
+                        <FontAwesomeIcon
+                          icon="square-caret-down"
+                          onClick={() =>
+                            setSort({
+                              sort: Sort.count,
+                              sort_direction: SortDirection.DESC,
+                            })
+                          }
+                          className={`${styles.distributionsCaret} ${
+                            sort.sort_direction != SortDirection.DESC ||
+                            sort.sort != Sort.count
+                              ? styles.distributionsCaretDisabled
+                              : ""
+                          }`}
+                        />
+                      </span>
+                    </th>
+                    <th className="text-center">
+                      Minted&nbsp;
+                      <span
+                        className={`${styles.distributionsCaretWrapper} d-flex flex-column`}>
+                        <FontAwesomeIcon
+                          icon="square-caret-up"
+                          onClick={() =>
+                            setSort({
+                              sort: Sort.mint_count,
+                              sort_direction: SortDirection.ASC,
+                            })
+                          }
+                          className={`${styles.distributionsCaret} ${
+                            sort.sort_direction != SortDirection.ASC ||
+                            sort.sort != Sort.mint_count
+                              ? styles.distributionsCaretDisabled
+                              : ""
+                          }`}
+                        />
+                        <FontAwesomeIcon
+                          icon="square-caret-down"
+                          onClick={() =>
+                            setSort({
+                              sort: Sort.mint_count,
+                              sort_direction: SortDirection.DESC,
+                            })
+                          }
+                          className={`${styles.distributionsCaret} ${
+                            sort.sort_direction != SortDirection.DESC ||
+                            sort.sort != Sort.mint_count
+                              ? styles.distributionsCaretDisabled
+                              : ""
+                          }`}
+                        />
+                      </span>
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
                   {distributions.map((d) => (
                     <tr
                       key={`${d.contract}-${d.card_id}-${d.phase}-${d.wallet}}`}>
-                      <td>{d.wallet}</td>
+                      <td className={styles.distributionsTableWallet}>
+                        {d.wallet}
+                      </td>
                       <td className="text-center">{d.display}</td>
                       <td className="text-center">
                         {d.wallet_balance
@@ -263,9 +486,7 @@ export default function MemeDistribution() {
             <Container className="pt-4 pb-4">
               <Row>
                 <Col>
-                  <h1 id={`distribution-header`}>
-                    MEME CARD #{nftId} DISTRIBUTION
-                  </h1>
+                  <h1>MEME CARD #{nftId} DISTRIBUTION</h1>
                 </Col>
               </Row>
               {distributionPhotos.length > 0 && (

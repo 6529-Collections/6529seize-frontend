@@ -293,7 +293,10 @@
   tr {
     border-bottom: 1px solid #333 !important;
   }
-  tr td,
+  tr td {
+    white-space: nowrap;
+    // font-size: smaller;
+  }
   tr th {
     white-space: nowrap;
   }
@@ -301,6 +304,10 @@
   tr td a {
     text-decoration: none;
   }
+}
+
+.distributionsTableWallet {
+  font-size: smaller;
 }
 
 .distributionsScrollContainer {
@@ -425,5 +432,21 @@
     text-align: center;
     padding-top: 10px;
     padding-bottom: 10px;
+  }
+}
+
+.distributionsCaretWrapper {
+  float: right;
+}
+
+.distributionsCaret {
+  height: 14px;
+  cursor: pointer;
+}
+
+.distributionsCaretDisabled {
+  color: $lightest-grey;
+  &:hover {
+    color: white;
   }
 }
