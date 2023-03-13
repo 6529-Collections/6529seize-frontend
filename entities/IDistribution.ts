@@ -10,6 +10,7 @@ export interface IDistribution {
   mint_count: number;
   wallet_tdh?: number;
   wallet_balance?: number;
+  wallet_unique_balance?: number;
 }
 
 export interface IDistributionPhoto {
