@@ -13,7 +13,11 @@ import {
   IDistributionPhoto,
 } from "../../entities/IDistribution";
 import ScrollToButton from "../scrollTo/ScrollToButton";
-import { areEqualAddresses, numberWithCommas } from "../../helpers/Helpers";
+import {
+  areEqualAddresses,
+  formatAddress,
+  numberWithCommas,
+} from "../../helpers/Helpers";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import dynamic from "next/dynamic";
 import Pagination from "../pagination/Pagination";
@@ -441,7 +445,18 @@ export default function MemeDistribution() {
                       <td className={styles.distributionsTableWallet}>
                         {d.wallet}
                       </td>
-                      <td className="text-center">{d.display}</td>
+                      <td className="text-center">
+                        <a
+                          href={`/${d.wallet}`}
+                          target="_blank"
+                          rel="noreferrer">
+                          {d.wallet == SIX529_MUSEUM
+                            ? "6529Museum"
+                            : d.display
+                            ? d.display
+                            : formatAddress(d.wallet)}
+                        </a>
+                      </td>
                       <td className="text-center">
                         {d.wallet_balance
                           ? numberWithCommas(d.wallet_balance)
