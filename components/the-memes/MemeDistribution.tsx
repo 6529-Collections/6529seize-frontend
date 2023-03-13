@@ -1,5 +1,4 @@
 import styles from "./TheMemes.module.scss";
-import { Link } from "react-scroll";
 
 import { useEffect, useState } from "react";
 import Image from "next/image";
@@ -17,6 +16,7 @@ import ScrollToButton from "../scrollTo/ScrollToButton";
 import { areEqualAddresses, numberWithCommas } from "../../helpers/Helpers";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import dynamic from "next/dynamic";
+import Pagination from "../pagination/Pagination";
 
 const SearchModal = dynamic(() => import("../searchModal/SearchModal"), {
   ssr: false,
@@ -24,37 +24,35 @@ const SearchModal = dynamic(() => import("../searchModal/SearchModal"), {
 
 export default function MemeDistribution() {
   const router = useRouter();
+  const [pageProps, setPageProps] = useState<{
+    page: number;
+    pageSize: number;
+  }>({ page: 1, pageSize: 250 });
 
   const [nftId, setNftId] = useState<string>();
   const [breadcrumbs, setBreadcrumbs] = useState<Crumb[]>([]);
 
-  const [activePhase, setActivePhase] = useState("");
-  const [phases, setPhases] = useState<
-    { phase: string; distributions: IDistribution[] }[]
-  >([]);
+  const [activePhase, setActivePhase] = useState("All");
+  const [phases, setPhases] = useState<string[]>([]);
+  const [distributions, setDistributions] = useState<IDistribution[]>([]);
   const [distributionPhotos, setDistributionPhotos] = useState<
     IDistributionPhoto[]
   >([]);
   const [loaded, setLoaded] = useState(false);
+  const [totalResults, setTotalResults] = useState(0);
 
   const [showSearchModal, setShowSearchModal] = useState(false);
   const [searchWallets, setSearchWallets] = useState<string[]>([]);
 
-  function fetchDistribution(url: string) {
-    fetchAllPages(url).then((response: IDistribution[]) => {
-      const uniquePhases = new Set([...response].map((d) => d.phase));
+  function fetchDistribution() {
+    const phasefilter = activePhase == "All" ? "" : `&phase=${activePhase}`;
+    const walletFilter =
+      searchWallets.length == 0 ? "" : `&wallet=${searchWallets.join(",")}`;
+    const distributionUrl = `${process.env.API_ENDPOINT}/api/distribution/${MEMES_CONTRACT}/${nftId}?&page=${pageProps.page}${phasefilter}${walletFilter}`;
 
-      const newPhases: { phase: string; distributions: IDistribution[] }[] = [];
-      Array.from(uniquePhases).map((phase) => {
-        const distr = response.filter((d) => d.phase == phase);
-        newPhases.push({
-          phase: phase,
-          distributions: distr,
-        });
-      });
-      setPhases(newPhases);
-      setActivePhase(newPhases[0].phase);
-      setLoaded(true);
+    fetchUrl(distributionUrl).then((r: DBResponse) => {
+      setTotalResults(r.count);
+      setDistributions(r.data);
     });
   }
 
@@ -79,24 +77,27 @@ export default function MemeDistribution() {
 
       fetchAllPages(distributionPhotosUrl).then((distributionPhotos: any[]) => {
         setDistributionPhotos(distributionPhotos);
-        const distributionUrl = `${process.env.API_ENDPOINT}/api/distribution/${MEMES_CONTRACT}/${nftId}`;
-        fetchDistribution(distributionUrl);
+        const distributionPhasesUrl = `${process.env.API_ENDPOINT}/api/distribution_phases/${MEMES_CONTRACT}/${nftId}`;
+        fetchUrl(distributionPhasesUrl).then((result: DBResponse) => {
+          setPhases(result.data);
+          setLoaded(true);
+        });
+        fetchDistribution();
       });
     }
   }, [nftId]);
 
   useEffect(() => {
-    if (nftId && router.isReady) {
-      let walletFilter = "";
-      if (searchWallets) {
-        walletFilter = `&wallet=${searchWallets.join(",")}`;
-      }
-      const distributionUrl = `${process.env.API_ENDPOINT}/api/distribution/${MEMES_CONTRACT}/${nftId}?${walletFilter}`;
-      setPhases([]);
-      setLoaded(false);
-      fetchDistribution(distributionUrl);
+    if (nftId) {
+      setPageProps({ ...pageProps, page: 1 });
     }
-  }, [searchWallets, router.isReady]);
+  }, [activePhase, searchWallets]);
+
+  useEffect(() => {
+    if (nftId && pageProps) {
+      fetchDistribution();
+    }
+  }, [pageProps]);
 
   function printDistributionPhotos() {
     if (distributionPhotos.length > 0) {
@@ -117,99 +118,6 @@ export default function MemeDistribution() {
     }
   }
 
-  function printDistributionRow(phase: string, d: IDistribution) {}
-
-  function printDistributionPhase(
-    phase: string,
-    distributions: IDistribution[]
-  ) {
-    return (
-      <Container className="pt-4 pb-4" key={phase}>
-        <Row>
-          <Col>
-            <h4>{phase}</h4>
-          </Col>
-        </Row>
-        <Row className={`${styles.distributionsScrollContainer}`}>
-          <Col
-            xs={{ span: 12 }}
-            sm={{ span: 12 }}
-            md={{ span: 12 }}
-            lg={{ span: 12 }}>
-            <Table
-              bordered={false}
-              className={styles.distributionsTable}
-              id={`${phase}-table`}>
-              {" "}
-              <thead>
-                <tr>
-                  <th colSpan={2}>Wallet </th>
-                  <th className="text-center">Card Balance</th>
-                  <th className="text-center">TDH</th>
-                  <th className="text-center">Phase</th>
-                  {phase == "Airdrop" ? (
-                    <th className="text-center">Count</th>
-                  ) : (
-                    <>
-                      <th className="text-center">Available</th>
-                      <th className="text-center">Used</th>
-                    </>
-                  )}
-                </tr>
-              </thead>
-              <tbody>
-                {distributions.map((d) => {
-                  const reservedDisplay = areEqualAddresses(
-                    d.wallet,
-                    SIX529_MUSEUM
-                  )
-                    ? "6529Museum"
-                    : areEqualAddresses(d.wallet, MANIFOLD)
-                    ? "Manifold Minting Wallet"
-                    : null;
-                  const display =
-                    reservedDisplay && !d.display ? reservedDisplay : d.display;
-                  return (
-                    <tr
-                      key={`${d.contract}-${d.card_id}-${d.phase}-${d.wallet}`}>
-                      <td>
-                        <a
-                          className={styles.distributionWalletLink}
-                          href={`/${d.wallet}`}
-                          target="_blank"
-                          rel="noreferrer">
-                          {d.wallet}
-                        </a>
-                      </td>
-                      <td className="text-center">{display}</td>
-                      <td className="text-center">
-                        {d.wallet_balance
-                          ? numberWithCommas(d.wallet_balance)
-                          : "-"}
-                      </td>
-                      <td className="text-center">
-                        {d.wallet_tdh ? numberWithCommas(d.wallet_tdh) : "-"}
-                      </td>
-                      <td className="text-center">{d.phase}</td>
-                      <td className="text-center">
-                        {numberWithCommas(d.count)}
-                      </td>
-                      {phase != "Airdrop" && (
-                        <td className="text-center">
-                          {d.mint_count ? numberWithCommas(d.mint_count) : "-"}
-                        </td>
-                      )}
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </Table>
-          </Col>
-        </Row>
-      </Container>
-    );
-  }
-
   function printDistribution() {
     return (
       <>
@@ -218,24 +126,30 @@ export default function MemeDistribution() {
           to="distribution-header"
           offset={-200}
         />
-        <Container className="pt-2 pb-5">
-          <Row>
-            <Col>{printDistributionPhotos()}</Col>
-          </Row>
-        </Container>
         <Container className="pt-3 pb-3">
           <Row>
             <Col className="text-center">
+              <span
+                onClick={() => {
+                  setActivePhase("All");
+                }}
+                className={`${styles.distributionPhaseLink} ${
+                  "All" == activePhase ? styles.distributionPhaseLinkActive : ""
+                }`}>
+                All
+              </span>
               {phases.map((phase) => (
                 <span
-                  key={phase.phase}
-                  onClick={() => setActivePhase(phase.phase)}
+                  key={phase}
+                  onClick={() => {
+                    setActivePhase(phase);
+                  }}
                   className={`${styles.distributionPhaseLink} ${
-                    phase.phase == activePhase
+                    phase == activePhase
                       ? styles.distributionPhaseLinkActive
                       : ""
                   }`}>
-                  {phase.phase}
+                  {phase}
                 </span>
               ))}
               <span
@@ -251,10 +165,59 @@ export default function MemeDistribution() {
             </Col>
           </Row>
         </Container>
-        {phases.map((phase) => {
-          if (phase.phase == activePhase || searchWallets.length > 0) {
+        <Container>
+          <Row>
+            <Col>
+              <Table className={styles.distributionsTable}>
+                <thead>
+                  <tr>
+                    <th colSpan={2}>
+                      Wallet{" "}
+                      <span className={styles.totalResults}>
+                        x{totalResults}
+                      </span>
+                    </th>
+                    <th className="text-center">Card Balance</th>
+                    <th className="text-center">TDH</th>
+                    <th className="text-center">Phase</th>
+                    <th className="text-center">Count</th>
+                    <th className="text-center">Used</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {distributions.map((d) => (
+                    <tr
+                      key={`${d.contract}-${d.card_id}-${d.phase}-${d.wallet}}`}>
+                      <td>{d.wallet}</td>
+                      <td className="text-center">{d.display}</td>
+                      <td className="text-center">
+                        {d.wallet_balance
+                          ? numberWithCommas(d.wallet_balance)
+                          : "-"}
+                      </td>
+                      <td className="text-center">
+                        {d.wallet_tdh ? numberWithCommas(d.wallet_tdh) : "-"}
+                      </td>
+                      <td className="text-center">{d.phase}</td>
+                      <td className="text-center">
+                        {numberWithCommas(d.count)}
+                      </td>
+                      <td className="text-center">
+                        {d.phase == "Airdrop" || !d.mint_count
+                          ? "-"
+                          : numberWithCommas(d.mint_count)}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </Table>
+            </Col>
+          </Row>
+        </Container>
+        {/* {phases.map((phase) => {
+          if (phase == activePhase || searchWallets.length > 0) {
             return (
-              <Container className="pt-4 pb-4" key={phase.phase}>
+              <Container className="pt-4 pb-4" key={phase}>
                 <Row>
                   <Col>
                     <h4>{phase.phase}</h4>
@@ -343,7 +306,7 @@ export default function MemeDistribution() {
               </Container>
             );
           }
-        })}
+        })} */}
       </>
     );
   }
@@ -362,6 +325,11 @@ export default function MemeDistribution() {
                   </h1>
                 </Col>
               </Row>
+              {distributionPhotos.length > 0 && (
+                <Row className="pt-2 pb-5">
+                  <Col>{printDistributionPhotos()}</Col>
+                </Row>
+              )}
               <Row>
                 <Col>
                   {nftId &&
@@ -388,6 +356,18 @@ export default function MemeDistribution() {
           </Col>
         </Row>
       </Container>
+      {totalResults > pageProps.pageSize && (
+        <Row className="text-center pt-2 pb-3">
+          <Pagination
+            page={pageProps.page}
+            pageSize={pageProps.pageSize}
+            totalResults={totalResults}
+            setPage={function (newPage: number) {
+              setPageProps({ ...pageProps, page: newPage });
+            }}
+          />
+        </Row>
+      )}
       <SearchModal
         show={showSearchModal}
         searchWallets={searchWallets}
