@@ -166,7 +166,7 @@ export default function MemeDistribution() {
           </Row>
         </Container>
         <Container>
-          <Row>
+          <Row className={styles.distributionsScrollContainer}>
             <Col>
               <Table className={styles.distributionsTable}>
                 <thead>
@@ -357,19 +357,19 @@ export default function MemeDistribution() {
             </Container>
           </Col>
         </Row>
+        {totalResults > pageProps.pageSize && (
+          <Row className="text-center pt-2 pb-3">
+            <Pagination
+              page={pageProps.page}
+              pageSize={pageProps.pageSize}
+              totalResults={totalResults}
+              setPage={function (newPage: number) {
+                setPageProps({ ...pageProps, page: newPage });
+              }}
+            />
+          </Row>
+        )}
       </Container>
-      {totalResults > pageProps.pageSize && (
-        <Row className="text-center pt-2 pb-3">
-          <Pagination
-            page={pageProps.page}
-            pageSize={pageProps.pageSize}
-            totalResults={totalResults}
-            setPage={function (newPage: number) {
-              setPageProps({ ...pageProps, page: newPage });
-            }}
-          />
-        </Row>
-      )}
       <SearchModal
         show={showSearchModal}
         searchWallets={searchWallets}
