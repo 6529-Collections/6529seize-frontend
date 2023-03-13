@@ -343,6 +343,7 @@
 }
 
 .distributionPhaseLink {
+  line-height: 40px;
   color: $font-color-h;
   margin-right: 20px;
   font-size: larger;
@@ -353,6 +354,19 @@
   &:hover {
     color: $font-color;
   }
+}
+
+@media only screen and (max-width: 800px) {
+  .distributionPhaseLink {
+    line-height: 32px;
+  }
+}
+
+.clearSearchText {
+  color: $font-color-h;
+  font-size: larger;
+  font-weight: bolder;
+  text-decoration: none;
 }
 
 .distributionPhaseLinkActive {
@@ -395,4 +409,21 @@
 
 .totalResults {
   font-size: larger;
+}
+
+.leaderboardNavigationLeft {
+  text-align: left;
+}
+
+.leaderboardNavigationRight {
+  text-align: right;
+}
+
+@media only screen and (max-width: 770px) {
+  .leaderboardNavigationLeft,
+  .leaderboardNavigationRight {
+    text-align: center;
+    padding-top: 10px;
+    padding-bottom: 10px;
+  }
 }

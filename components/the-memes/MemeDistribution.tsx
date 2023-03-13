@@ -126,9 +126,14 @@ export default function MemeDistribution() {
           to="distribution-header"
           offset={-200}
         />
-        <Container className="pt-3 pb-3">
+        <Container className="pt-5 pb-3">
           <Row>
-            <Col className="text-center">
+            <Col
+              className={styles.leaderboardNavigationLeft}
+              xs={{ span: 12 }}
+              sm={{ span: 12 }}
+              md={{ span: 8 }}
+              lg={{ span: 8 }}>
               <span
                 onClick={() => {
                   setActivePhase("All");
@@ -152,15 +157,38 @@ export default function MemeDistribution() {
                   {phase}
                 </span>
               ))}
-              <span
-                onClick={() => setShowSearchModal(true)}
-                className={`${styles.searchBtn} ${
-                  searchWallets.length > 0 ? styles.searchBtnActive : ""
-                } d-inline-flex align-items-center justify-content-center`}>
-                {" "}
-                <FontAwesomeIcon
-                  className={styles.searchBtnIcon}
-                  icon="search"></FontAwesomeIcon>
+            </Col>
+            <Col
+              className={styles.leaderboardNavigationRight}
+              xs={{ span: 12 }}
+              sm={{ span: 12 }}
+              md={{ span: 4 }}
+              lg={{ span: 4 }}>
+              <span>
+                {searchWallets.length > 0 && (
+                  <span className={styles.clearSearchText}>
+                    search: {searchWallets.length} wallet
+                    {searchWallets.length > 1 ? `s` : ``}{" "}
+                  </span>
+                )}
+                <span
+                  onClick={() => setShowSearchModal(true)}
+                  className={`${styles.searchBtn} ${
+                    searchWallets.length > 0 ? styles.searchBtnActive : ""
+                  } d-inline-flex align-items-center justify-content-center`}>
+                  {" "}
+                  <FontAwesomeIcon
+                    className={styles.searchBtnIcon}
+                    icon="search"></FontAwesomeIcon>
+                </span>
+                {searchWallets.length > 0 && (
+                  <span
+                    className={styles.distributionPhaseLink}
+                    onClick={() => setSearchWallets([])}>
+                    {" "}
+                    clear
+                  </span>
+                )}
               </span>
             </Col>
           </Row>
@@ -177,11 +205,12 @@ export default function MemeDistribution() {
                         x{totalResults}
                       </span>
                     </th>
-                    <th className="text-center">Card Balance</th>
+                    <th className="text-center">Cards</th>
+                    <th className="text-center">Unique</th>
                     <th className="text-center">TDH</th>
                     <th className="text-center">Phase</th>
                     <th className="text-center">Count</th>
-                    <th className="text-center">Used</th>
+                    <th className="text-center">Minted</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -193,6 +222,11 @@ export default function MemeDistribution() {
                       <td className="text-center">
                         {d.wallet_balance
                           ? numberWithCommas(d.wallet_balance)
+                          : "-"}
+                      </td>
+                      <td className="text-center">
+                        {d.wallet_unique_balance
+                          ? numberWithCommas(d.wallet_unique_balance)
                           : "-"}
                       </td>
                       <td className="text-center">
@@ -216,99 +250,6 @@ export default function MemeDistribution() {
             </Col>
           </Row>
         </Container>
-        {/* {phases.map((phase) => {
-          if (phase == activePhase || searchWallets.length > 0) {
-            return (
-              <Container className="pt-4 pb-4" key={phase}>
-                <Row>
-                  <Col>
-                    <h4>{phase.phase}</h4>
-                  </Col>
-                </Row>
-                <Row className={`${styles.distributionsScrollContainer}`}>
-                  <Col
-                    xs={{ span: 12 }}
-                    sm={{ span: 12 }}
-                    md={{ span: 12 }}
-                    lg={{ span: 12 }}>
-                    <Table
-                      className={styles.distributionsTable}
-                      id={`${phase}-table`}>
-                      <thead>
-                        <tr>
-                          <th colSpan={2}>Wallet </th>
-                          <th className="text-center">Card Balance</th>
-                          <th className="text-center">TDH</th>
-                          <th className="text-center">Phase</th>
-                          {phase.phase == "Airdrop" ? (
-                            <th className="text-center">Count</th>
-                          ) : (
-                            <>
-                              <th className="text-center">Available</th>
-                              <th className="text-center">Used</th>
-                            </>
-                          )}
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {phase.distributions.map((d) => {
-                          const reservedDisplay = areEqualAddresses(
-                            d.wallet,
-                            SIX529_MUSEUM
-                          )
-                            ? "6529Museum"
-                            : areEqualAddresses(d.wallet, MANIFOLD)
-                            ? "Manifold Minting Wallet"
-                            : null;
-                          const display =
-                            reservedDisplay && !d.display
-                              ? reservedDisplay
-                              : d.display;
-                          return (
-                            <tr
-                              key={`${d.contract}-${d.card_id}-${d.phase}-${d.wallet}`}>
-                              <td>
-                                <a
-                                  className={styles.distributionWalletLink}
-                                  href={`/${d.wallet}`}
-                                  target="_blank"
-                                  rel="noreferrer">
-                                  {d.wallet}
-                                </a>
-                              </td>
-                              <td className="text-center">{display}</td>
-                              <td className="text-center">
-                                {d.wallet_balance
-                                  ? numberWithCommas(d.wallet_balance)
-                                  : "-"}
-                              </td>
-                              <td className="text-center">
-                                {d.wallet_tdh
-                                  ? numberWithCommas(d.wallet_tdh)
-                                  : "-"}
-                              </td>
-                              <td className="text-center">{d.phase}</td>
-                              <td className="text-center">
-                                {numberWithCommas(d.count)}
-                              </td>
-                              {phase.phase != "Airdrop" && (
-                                <td className="text-center">
-                                  {d.mint_count
-                                    ? numberWithCommas(d.mint_count)
-                                    : "-"}
-                                </td>
-                              )}
-                            </tr>
-                          );
-                        })}
-                      </tbody>
-                    </Table>
-                  </Col>
-                </Row>
-              </Container>
-            );
-          }
-        })} */}
       </>
     );
   }
