@@ -13,8 +13,11 @@ export default function ScrollToButton(props: Props) {
   const [showButton, setShowButton] = useState(false);
 
   useEffect(() => {
+    const target = document.getElementById(props.to);
     function handleScroll() {
-      if (window.pageYOffset > props.threshhold) {
+      const threshhold = props.threshhold + (target ? target.offsetTop : 0);
+      console.log(threshhold);
+      if (window.pageYOffset > threshhold) {
         setShowButton(true);
       } else {
         setShowButton(false);
