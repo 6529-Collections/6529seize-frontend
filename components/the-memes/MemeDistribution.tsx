@@ -28,6 +28,7 @@ export default function MemeDistribution() {
   const [nftId, setNftId] = useState<string>();
   const [breadcrumbs, setBreadcrumbs] = useState<Crumb[]>([]);
 
+  const [activePhase, setActivePhase] = useState("");
   const [phases, setPhases] = useState<
     { phase: string; distributions: IDistribution[] }[]
   >([]);
@@ -46,13 +47,13 @@ export default function MemeDistribution() {
       const newPhases: { phase: string; distributions: IDistribution[] }[] = [];
       Array.from(uniquePhases).map((phase) => {
         const distr = response.filter((d) => d.phase == phase);
-        console.log("distr", distr.length);
         newPhases.push({
           phase: phase,
           distributions: distr,
         });
       });
       setPhases(newPhases);
+      setActivePhase(newPhases[0].phase);
       setLoaded(true);
     });
   }
@@ -92,6 +93,7 @@ export default function MemeDistribution() {
       }
       const distributionUrl = `${process.env.API_ENDPOINT}/api/distribution/${MEMES_CONTRACT}/${nftId}?${walletFilter}`;
       setPhases([]);
+      setLoaded(false);
       fetchDistribution(distributionUrl);
     }
   }, [searchWallets, router.isReady]);
@@ -209,7 +211,6 @@ export default function MemeDistribution() {
   }
 
   function printDistribution() {
-    console.log("printing distribution");
     return (
       <>
         <ScrollToButton
@@ -226,16 +227,16 @@ export default function MemeDistribution() {
           <Row>
             <Col className="text-center">
               {phases.map((phase) => (
-                <Link
+                <span
                   key={phase.phase}
-                  className={styles.distributionPhaseLink}
-                  activeClass="active"
-                  to={`${phase.phase}-table`}
-                  smooth={true}
-                  offset={-60}
-                  duration={250}>
+                  onClick={() => setActivePhase(phase.phase)}
+                  className={`${styles.distributionPhaseLink} ${
+                    phase.phase == activePhase
+                      ? styles.distributionPhaseLinkActive
+                      : ""
+                  }`}>
                   {phase.phase}
-                </Link>
+                </span>
               ))}
               <span
                 onClick={() => setShowSearchModal(true)}
@@ -251,95 +252,97 @@ export default function MemeDistribution() {
           </Row>
         </Container>
         {phases.map((phase) => {
-          return (
-            <Container className="pt-4 pb-4" key={phase.phase}>
-              <Row>
-                <Col>
-                  <h4>{phase.phase}</h4>
-                </Col>
-              </Row>
-              <Row className={`${styles.distributionsScrollContainer}`}>
-                <Col
-                  xs={{ span: 12 }}
-                  sm={{ span: 12 }}
-                  md={{ span: 12 }}
-                  lg={{ span: 12 }}>
-                  <table
-                    className={styles.distributionsTable}
-                    id={`${phase}-table`}>
-                    <thead>
-                      <tr>
-                        <th colSpan={2}>Wallet </th>
-                        <th className="text-center">Card Balance</th>
-                        <th className="text-center">TDH</th>
-                        <th className="text-center">Phase</th>
-                        {phase.phase == "Airdrop" ? (
-                          <th className="text-center">Count</th>
-                        ) : (
-                          <>
-                            <th className="text-center">Available</th>
-                            <th className="text-center">Used</th>
-                          </>
-                        )}
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {phase.distributions.map((d) => {
-                        const reservedDisplay = areEqualAddresses(
-                          d.wallet,
-                          SIX529_MUSEUM
-                        )
-                          ? "6529Museum"
-                          : areEqualAddresses(d.wallet, MANIFOLD)
-                          ? "Manifold Minting Wallet"
-                          : null;
-                        const display =
-                          reservedDisplay && !d.display
-                            ? reservedDisplay
-                            : d.display;
-                        return (
-                          <tr
-                            key={`${d.contract}-${d.card_id}-${d.phase}-${d.wallet}`}>
-                            <td>
-                              <a
-                                className={styles.distributionWalletLink}
-                                href={`/${d.wallet}`}
-                                target="_blank"
-                                rel="noreferrer">
-                                {d.wallet}
-                              </a>
-                            </td>
-                            <td className="text-center">{display}</td>
-                            <td className="text-center">
-                              {d.wallet_balance
-                                ? numberWithCommas(d.wallet_balance)
-                                : "-"}
-                            </td>
-                            <td className="text-center">
-                              {d.wallet_tdh
-                                ? numberWithCommas(d.wallet_tdh)
-                                : "-"}
-                            </td>
-                            <td className="text-center">{d.phase}</td>
-                            <td className="text-center">
-                              {numberWithCommas(d.count)}
-                            </td>
-                            {phase.phase != "Airdrop" && (
+          if (phase.phase == activePhase || searchWallets.length > 0) {
+            return (
+              <Container className="pt-4 pb-4" key={phase.phase}>
+                <Row>
+                  <Col>
+                    <h4>{phase.phase}</h4>
+                  </Col>
+                </Row>
+                <Row className={`${styles.distributionsScrollContainer}`}>
+                  <Col
+                    xs={{ span: 12 }}
+                    sm={{ span: 12 }}
+                    md={{ span: 12 }}
+                    lg={{ span: 12 }}>
+                    <Table
+                      className={styles.distributionsTable}
+                      id={`${phase}-table`}>
+                      <thead>
+                        <tr>
+                          <th colSpan={2}>Wallet </th>
+                          <th className="text-center">Card Balance</th>
+                          <th className="text-center">TDH</th>
+                          <th className="text-center">Phase</th>
+                          {phase.phase == "Airdrop" ? (
+                            <th className="text-center">Count</th>
+                          ) : (
+                            <>
+                              <th className="text-center">Available</th>
+                              <th className="text-center">Used</th>
+                            </>
+                          )}
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {phase.distributions.map((d) => {
+                          const reservedDisplay = areEqualAddresses(
+                            d.wallet,
+                            SIX529_MUSEUM
+                          )
+                            ? "6529Museum"
+                            : areEqualAddresses(d.wallet, MANIFOLD)
+                            ? "Manifold Minting Wallet"
+                            : null;
+                          const display =
+                            reservedDisplay && !d.display
+                              ? reservedDisplay
+                              : d.display;
+                          return (
+                            <tr
+                              key={`${d.contract}-${d.card_id}-${d.phase}-${d.wallet}`}>
+                              <td>
+                                <a
+                                  className={styles.distributionWalletLink}
+                                  href={`/${d.wallet}`}
+                                  target="_blank"
+                                  rel="noreferrer">
+                                  {d.wallet}
+                                </a>
+                              </td>
+                              <td className="text-center">{display}</td>
                               <td className="text-center">
-                                {d.mint_count
-                                  ? numberWithCommas(d.mint_count)
+                                {d.wallet_balance
+                                  ? numberWithCommas(d.wallet_balance)
                                   : "-"}
                               </td>
-                            )}
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
-                </Col>
-              </Row>
-            </Container>
-          );
+                              <td className="text-center">
+                                {d.wallet_tdh
+                                  ? numberWithCommas(d.wallet_tdh)
+                                  : "-"}
+                              </td>
+                              <td className="text-center">{d.phase}</td>
+                              <td className="text-center">
+                                {numberWithCommas(d.count)}
+                              </td>
+                              {phase.phase != "Airdrop" && (
+                                <td className="text-center">
+                                  {d.mint_count
+                                    ? numberWithCommas(d.mint_count)
+                                    : "-"}
+                                </td>
+                              )}
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </Table>
+                  </Col>
+                </Row>
+              </Container>
+            );
+          }
         })}
       </>
     );

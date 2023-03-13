@@ -341,17 +341,22 @@
 }
 
 .distributionPhaseLink {
+  color: $font-color-h;
   margin-right: 20px;
   font-size: larger;
   font-weight: bolder;
   text-decoration: none;
   cursor: pointer;
-  color: white;
 
   &:hover {
-    color: $font-color-h;
+    color: $font-color;
   }
 }
+
+.distributionPhaseLinkActive {
+  color: $font-color;
+}
+
 .searchBtn {
   background-color: white;
   color: black;
