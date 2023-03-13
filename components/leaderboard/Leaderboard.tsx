@@ -1096,7 +1096,9 @@ export default function Leaderboard(props: Props) {
                 <span>
                   {searchWallets.length > 0 &&
                     searchWallets.map((sw) => (
-                      <span className={styles.searchWalletDisplayWrapper}>
+                      <span
+                        className={styles.searchWalletDisplayWrapper}
+                        key={sw}>
                         <Tippy
                           delay={250}
                           content={"Clear"}
