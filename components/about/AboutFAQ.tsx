@@ -277,10 +277,10 @@ export default function AboutFAQ() {
                 <br />
                 <br />
                 <a
-                  href="https://thememes.6529.io"
+                  href="https://thememes.seize.io"
                   target="_blank"
                   rel="noreferrer">
-                  https://thememes.6529.io
+                  https://thememes.seize.io
                 </a>
               </li>
               <br />
