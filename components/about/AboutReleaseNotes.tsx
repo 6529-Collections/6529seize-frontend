@@ -50,6 +50,20 @@ export default function AboutReleaseNotes() {
                 allowlists directly on seize.io and not github. This will be
                 visible on the release of The Memes #79.
               </li>
+              <li>
+                About
+                <ul>
+                  <li>
+                    New section to show our support for{" "}
+                    <a
+                      href={`/about/${AboutSection.GDRC1}`}
+                      target="_blank"
+                      rel="noreferrer">
+                      The Global Digital Rights Charter v1
+                    </a>
+                  </li>
+                </ul>
+              </li>
             </ul>
             <br />
             <p>
