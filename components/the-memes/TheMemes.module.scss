@@ -299,6 +299,7 @@
   tr th {
     min-width: 80px;
     white-space: nowrap;
+    line-height: 30px;
   }
 
   tr td a {
@@ -416,6 +417,8 @@
 
 .totalResults {
   font-size: larger;
+  display: inline-block;
+  margin-bottom: -5px;
 }
 
 .leaderboardNavigationLeft {

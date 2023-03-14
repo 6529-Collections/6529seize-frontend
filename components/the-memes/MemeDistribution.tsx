@@ -42,7 +42,7 @@ export default function MemeDistribution() {
   const [pageProps, setPageProps] = useState<{
     page: number;
     pageSize: number;
-  }>({ page: 1, pageSize: 250 });
+  }>({ page: 1, pageSize: 150 });
 
   const [nftId, setNftId] = useState<string>();
   const [breadcrumbs, setBreadcrumbs] = useState<Crumb[]>([]);

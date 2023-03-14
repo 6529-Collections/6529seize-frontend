@@ -28,14 +28,15 @@ export default function AboutReleaseNotes() {
             <p>
               <b>Release 1.2.0</b>
               <br />
-              Mar TBC, 2023
+              Mar 14, 2023
             </p>
             <ul>
               <li>
-                Fixed link of card titles in{" "}
-                <a href={`/meme-lab`} target="_blank" rel="noreferrer">
-                  Meme Lab
-                </a>
+                Optimized the search functionality in{" "}
+                <a href={`/community`} target="_blank" rel="noreferrer">
+                  Community
+                </a>{" "}
+                table
               </li>
               <li>
                 Added support for pagination in{" "}
@@ -43,7 +44,12 @@ export default function AboutReleaseNotes() {
                   Downloads
                 </a>
               </li>
-              <li>Added support for card Distribution</li>
+              <li>
+                Developed a new Distribution plan page to display the
+                distribution plan for each NFT as well as the airdrop list and
+                allowlists directly on seize.io and not github. This will be
+                visible on the release of The Memes #79.
+              </li>
             </ul>
             <br />
             <p>
@@ -53,8 +59,8 @@ export default function AboutReleaseNotes() {
             </p>
             <ul>
               <li>
-                Fixed bug Card titles links in Meme Lab would navigate to the
-                wrong page.
+                Fixed bug that was appearing on the Card titles links on the
+                Meme Lab Section causing them to navigate to a wrong page.
               </li>
             </ul>
             <br />
