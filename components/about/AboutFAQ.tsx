@@ -583,12 +583,24 @@ export default function AboutFAQ() {
             </p>
             <ol start={36}>
               <li>
-                <b>What Is the Meme Lab?</b>
+                <b>What is the Meme Lab?</b>
                 <br />
                 <br />
                 The Meme Lab is an experimental CC0 contract for artists who
                 have already minted a Meme Card. They can use the Meme Lab
                 contract to mint NFTs that they like, in any way that they like.
+              </li>
+              <br />
+              <li>
+                <b>What is the minting site for the Meme Lab?</b>
+                <br />
+                <br />
+                <a
+                  href="https://memelab.seize.io"
+                  target="_blank"
+                  rel="noreferrer">
+                  https://memelab.seize.io
+                </a>
               </li>
               <br />
               <li>
