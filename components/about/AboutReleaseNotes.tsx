@@ -51,6 +51,23 @@ export default function AboutReleaseNotes() {
                 visible on the release of The Memes #79.
               </li>
               <li>
+                Moved minting links from 6529.io to seize.io domain:
+                <br />
+                <a
+                  href={`https://thememes.seize.io`}
+                  target="_blank"
+                  rel="noreferrer">
+                  https://thememes.seize.io
+                </a>
+                <br />
+                <a
+                  href={`https://memelab.seize.io`}
+                  target="_blank"
+                  rel="noreferrer">
+                  https://memelab.seize.io
+                </a>
+              </li>
+              <li>
                 About
                 <ul>
                   <li>
