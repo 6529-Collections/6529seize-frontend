@@ -306,6 +306,18 @@ export default function Header(props: Props) {
                 </Row>
                 <Row className="pt-3">
                   <Col>
+                    <a href={`/about/${AboutSection.GDRC1}`}>
+                      <h3>GDRC1</h3>
+                    </a>
+                  </Col>
+                </Row>
+                <Row>
+                  <Col xs={{ span: 6, offset: 3 }}>
+                    <hr />
+                  </Col>
+                </Row>
+                <Row className="pt-3">
+                  <Col>
                     <a href={`/about/${AboutSection.FAQ}`}>
                       <h3>FAQ</h3>
                     </a>
@@ -558,6 +570,14 @@ export default function Header(props: Props) {
                                   (window.location.href = `/about/${AboutSection.GRADIENTS}`)
                                 }>
                                 Gradient
+                              </NavDropdown.Item>
+                              <NavDropdown.Divider />
+                              <NavDropdown.Item
+                                className={styles.dropdownItem}
+                                onClick={() =>
+                                  (window.location.href = `/about/${AboutSection.GDRC1}`)
+                                }>
+                                GDRC1
                               </NavDropdown.Item>
                               <NavDropdown.Divider />
                               <NavDropdown.Item

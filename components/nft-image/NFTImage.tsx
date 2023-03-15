@@ -48,13 +48,12 @@ export default function NFTImage(props: Props) {
           <span className={`${styles.balance}`}>UNSEIZED</span>
         )}
         <iframe
-          src={props.nft.animation}
-          onLoad={() => setShowBalance(true)}
-          onError={({ currentTarget }) => {
-            currentTarget.src = props.nft.metadata.animation
+          src={
+            props.nft.metadata.animation
               ? props.nft.metadata.animation
-              : props.nft.metadata.animation_url;
-          }}
+              : props.nft.metadata.animation_url
+          }
+          onLoad={() => setShowBalance(true)}
           id={`${props.id && `${props.id}`}`}
         />
       </Col>
