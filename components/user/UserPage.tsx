@@ -116,8 +116,8 @@ export default function UserPage(props: Props) {
   function printDistributionDate(dateString: any) {
     const d = new Date(
       dateString.substring(0, 4),
-      dateString.substring(6, 7) - 1,
-      dateString.substring(9, 10)
+      dateString.substring(5, 7) - 1,
+      dateString.substring(8, 10)
     );
     return d.toDateString();
   }
