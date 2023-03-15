@@ -29,9 +29,14 @@ import LatestActivityRow from "../latest-activity/LatestActivityRow";
 import { Transaction } from "../../entities/ITransaction";
 import { useRouter } from "next/router";
 import { TDHMetrics } from "../../entities/ITDH";
-import { fetchUrl } from "../../services/6529api";
+import { fetchAllPages, fetchUrl } from "../../services/6529api";
 import Pagination from "../pagination/Pagination";
 import { TypeFilter } from "../latest-activity/LatestActivity";
+import {
+  IDistribution,
+  IDistributionPhoto,
+} from "../../entities/IDistribution";
+import ScrollToButton from "../scrollTo/ScrollToButton";
 
 const NFTImage = dynamic(() => import("../nft-image/NFTImage"), {
   ssr: false,
@@ -78,6 +83,10 @@ export default function MemePage() {
   const [nftBalance, setNftBalance] = useState<number>(0);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [activity, setActivity] = useState<Transaction[]>([]);
+  const [distributions, setDistributions] = useState<IDistribution[]>([]);
+  const [distributionPhotos, setDistributionPhotos] = useState<
+    IDistributionPhoto[]
+  >([]);
 
   const [myOwner, setMyOwner] = useState<TDHMetrics>();
   const [myTDH, setMyTDH] = useState<NftTDH>();
@@ -124,6 +133,15 @@ export default function MemePage() {
     hodlersTab,
     activityTab,
   ];
+
+  function fetchDistribution(url: string) {
+    fetchUrl(url).then((response: DBResponse) => {
+      setDistributions((distr) => [...distr, ...response.data]);
+      if (response.next) {
+        fetchDistribution(response.next);
+      }
+    });
+  }
 
   useEffect(() => {
     if (router.isReady) {
@@ -175,7 +193,8 @@ export default function MemePage() {
           fetchUrl(
             `${process.env.API_ENDPOINT}/api/nfts?id=${nftId}&contract=${MEMES_CONTRACT}`
           ).then((response: DBResponse) => {
-            setNft(response.data[0]);
+            const mynft = response.data[0];
+            setNft(mynft);
             setBreadcrumbs([
               { display: "Home", href: "/" },
               { display: "The Memes", href: "/the-memes" },
@@ -183,7 +202,7 @@ export default function MemePage() {
                 display: `SZN${nftMetas[0].season}`,
                 href: `/the-memes?szn=${nftMetas[0].season}&sort=age&sort_dir=ASC`,
               },
-              { display: `Card ${nftId} - ${response.data[0].name}` },
+              { display: `Card ${nftId} - ${mynft.name}` },
             ]);
 
             fetchUrl(
@@ -583,6 +602,20 @@ export default function MemePage() {
                     </tr>
                   </tbody>
                 </Table>
+              </Col>
+            </Row>
+            <Row>
+              <Col>
+                <a
+                  href={
+                    nft.has_distribution
+                      ? `/the-memes/${nft.id}/distribution`
+                      : `https://github.com/6529-Collections/thememecards/tree/main/card${nft.id}`
+                  }
+                  target={nft.has_distribution ? "_self" : "_blank"}
+                  rel="noreferrer">
+                  Distribution Plan
+                </a>
               </Col>
             </Row>
             {nftBalance > 0 && (
@@ -1088,14 +1121,22 @@ export default function MemePage() {
                   <Row>
                     <Col>
                       <a
-                        href={
-                          nft.id > 3
-                            ? `https://github.com/6529-Collections/thememecards/tree/main/card` +
-                              nft.id
-                            : `https://github.com/6529-Collections/thememecards/tree/main/card1-3`
-                        }
-                        target="_blank"
-                        rel="noreferrer">
+                        onClick={() => {
+                          if (nft.has_distribution) {
+                            router.push(`/the-memes/${nft.id}/distribution`);
+                          } else {
+                            let link;
+                            if (nft.id > 3) {
+                              link = `https://github.com/6529-Collections/thememecards/tree/main/card${nft.id}`;
+                            } else {
+                              link = `https://github.com/6529-Collections/thememecards/tree/main/card1-3`;
+                            }
+                            window.open(link, "_blank");
+                          }
+                        }}
+                        target={nft.has_distribution ? "_self" : "_blank"}
+                        rel="noreferrer"
+                        className={styles.distributionPlanLink}>
                         Distribution Plan
                       </a>
                     </Col>
@@ -1400,6 +1441,26 @@ export default function MemePage() {
       '<a href=\'$1\' target="blank" rel="noreferrer">$1</a>'
     );
     return d;
+  }
+
+  function printDistributionPhotos() {
+    if (distributionPhotos.length > 0) {
+      return (
+        <Carousel
+          id={`distribution-carousel`}
+          interval={null}
+          wrap={false}
+          touch={true}
+          fade={true}
+          className={styles.distributionCarousel}>
+          {distributionPhotos.map((dp) => (
+            <Carousel.Item key={dp.id}>
+              <Image width="0" height="0" src={dp.link} alt={dp.link} />
+            </Carousel.Item>
+          ))}
+        </Carousel>
+      );
+    }
   }
 
   function printActivity() {

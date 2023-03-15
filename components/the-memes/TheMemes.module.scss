@@ -229,6 +229,7 @@
 }
 
 .tabFocus {
+  float: left;
   white-space: nowrap;
   cursor: pointer;
   margin-right: 20px;
@@ -272,8 +273,230 @@
   }
 }
 
+@media only screen and (max-width: 800px) {
+  .volumeDropdown {
+    button {
+      &::after {
+        margin-top: 0.5rem;
+      }
+    }
+  }
+}
+
 .volumeDropdownEnabled {
   button {
     color: white !important;
+  }
+}
+
+.distributionsTable {
+  tr {
+    border-bottom: 1px solid #333 !important;
+  }
+  tr td {
+    white-space: nowrap;
+  }
+  tr th {
+    min-width: 80px;
+    white-space: nowrap;
+    line-height: 30px;
+  }
+
+  tr td a {
+    text-decoration: none;
+  }
+}
+
+.distributionsTableWallet {
+  font-size: smaller;
+}
+
+.distributionsScrollContainer {
+  -ms-overflow-style: none; /* Internet Explorer 10+ */
+  scrollbar-width: none; /* Firefox */
+  overflow-x: scroll;
+}
+
+.distributionsScrollContainer::-webkit-scrollbar {
+  display: none;
+}
+
+.distributionsTable > :not(caption) > * > * {
+  padding: 0.5rem !important;
+}
+
+.distributionPlanLink {
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.distributionCarousel {
+  width: 90%;
+  margin-left: 5%;
+  img {
+    width: 80%;
+    margin-left: 10%;
+    height: auto;
+  }
+}
+
+@media only screen and (max-width: 800px) {
+  .distributionCarousel {
+    img {
+      width: 100%;
+      margin-left: 0%;
+      height: auto;
+    }
+  }
+}
+
+.distributionPhaseLink {
+  line-height: 40px;
+  color: $font-color-h;
+  margin-right: 20px;
+  font-size: larger;
+  font-weight: bolder;
+  text-decoration: none;
+  cursor: pointer;
+
+  &:hover {
+    color: $font-color;
+  }
+}
+
+@media only screen and (max-width: 800px) {
+  .distributionPhaseLink {
+    line-height: 32px;
+  }
+}
+
+.clearSearchText {
+  color: $font-color-h;
+  font-size: larger;
+  font-weight: bolder;
+  text-decoration: none;
+}
+
+.distributionPhaseLinkActive {
+  color: $font-color;
+}
+
+.searchBtn {
+  background-color: white;
+  color: black;
+  width: 40px;
+  height: 40px;
+  text-align: center;
+  border-radius: 20px;
+  padding: 10px;
+  cursor: pointer;
+  &:hover {
+    background-color: $off-white;
+  }
+}
+
+@media only screen and (max-width: 800px) {
+  .searchBtn {
+    width: 32px;
+    height: 32px;
+  }
+}
+
+.searchBtnActive {
+  background-color: lighten($color: $green, $amount: 10);
+
+  &:hover {
+    background-color: $green;
+  }
+}
+
+.searchBtnIcon {
+  width: 20px;
+  font-size: 20px;
+}
+
+.totalResults {
+  font-size: larger;
+  display: inline-block;
+  margin-bottom: -5px;
+}
+
+.leaderboardNavigationLeft {
+  text-align: left;
+}
+
+.leaderboardNavigationRight {
+  text-align: right;
+}
+
+@media only screen and (max-width: 770px) {
+  .leaderboardNavigationLeft,
+  .leaderboardNavigationRight {
+    text-align: center;
+    padding-top: 10px;
+    padding-bottom: 10px;
+  }
+}
+
+.distributionsCaretWrapper {
+  float: right;
+}
+
+.distributionsCaret {
+  height: 14px;
+  cursor: pointer;
+}
+
+.distributionsCaretDisabled {
+  color: $lightest-grey;
+  &:hover {
+    color: white;
+  }
+}
+
+.searchWalletDisplayWrapper {
+  white-space: nowrap;
+  float: none;
+  line-height: 250%;
+}
+
+.searchWalletDisplay {
+  background-color: #333;
+  padding: 5px 10px;
+  margin-right: 10px;
+  border-top-right-radius: 5px;
+  border-bottom-right-radius: 5px;
+}
+
+.searchWalletDisplayBtn {
+  width: 30px;
+  background-color: #333;
+  padding: 5px 10px;
+  border-right: 1px solid #999;
+  border-top-left-radius: 5px;
+  border-bottom-left-radius: 5px;
+  cursor: pointer;
+  outline: 0 !important;
+
+  &:hover {
+    background-color: $lighter-grey;
+  }
+}
+
+.clearSearchBtnIcon {
+  width: 40px;
+  height: 40px;
+  margin-right: 10px;
+  cursor: pointer;
+
+  &:hover {
+    color: $lightest-grey;
+  }
+}
+
+@media only screen and (max-width: 800px) {
+  .clearSearchBtnIcon {
+    width: 32px;
+    height: 32px;
   }
 }
