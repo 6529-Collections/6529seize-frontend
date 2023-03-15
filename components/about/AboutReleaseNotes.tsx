@@ -26,14 +26,72 @@ export default function AboutReleaseNotes() {
             </ul>
             <br />
             <p>
+              <b>Release 1.2.0</b>
+              <br />
+              Mar 14, 2023
+            </p>
+            <ul>
+              <li>
+                Optimized the search functionality in{" "}
+                <a href={`/community`} target="_blank" rel="noreferrer">
+                  Community
+                </a>{" "}
+                table
+              </li>
+              <li>
+                Added support for pagination in{" "}
+                <a href={`/downloads`} target="_blank" rel="noreferrer">
+                  Downloads
+                </a>
+              </li>
+              <li>
+                Developed a new Distribution plan page to display the
+                distribution plan for each NFT as well as the airdrop list and
+                allowlists directly on seize.io and not github. This will be
+                visible on the release of The Memes #79.
+              </li>
+              <li>
+                Moved minting links from 6529.io to seize.io domain:
+                <br />
+                <a
+                  href={`https://thememes.seize.io`}
+                  target="_blank"
+                  rel="noreferrer">
+                  https://thememes.seize.io
+                </a>
+                <br />
+                <a
+                  href={`https://memelab.seize.io`}
+                  target="_blank"
+                  rel="noreferrer">
+                  https://memelab.seize.io
+                </a>
+              </li>
+              <li>
+                About
+                <ul>
+                  <li>
+                    New section to show our support for{" "}
+                    <a
+                      href={`/about/${AboutSection.GDRC1}`}
+                      target="_blank"
+                      rel="noreferrer">
+                      The Global Digital Rights Charter v1
+                    </a>
+                  </li>
+                </ul>
+              </li>
+            </ul>
+            <br />
+            <p>
               <b>Release 1.1.1</b>
               <br />
               Mar 03, 2023
             </p>
             <ul>
               <li>
-                Fixed bug Card titles links in Meme Lab would navigate to the
-                wrong page.
+                Fixed bug that was appearing on the Card titles links on the
+                Meme Lab Section causing them to navigate to a wrong page.
               </li>
             </ul>
             <br />

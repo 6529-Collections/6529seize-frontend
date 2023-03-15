@@ -5,7 +5,7 @@ import { Col, Container, Row, Table } from "react-bootstrap";
 import { useEffect, useState } from "react";
 import { MEMES_CONTRACT } from "../constants";
 import { DBResponse } from "../entities/IDBResponse";
-import { NFT, MemesExtendedData } from "../entities/INFT";
+import { NFT, MemesExtendedData, LabNFT, BaseNFT } from "../entities/INFT";
 
 import dynamic from "next/dynamic";
 import { getDateDisplay, numberWithCommas } from "../helpers/Helpers";
@@ -37,6 +37,7 @@ export default function Home() {
   const [isNftImageLoaded, setIsNftImageLoaded] = useState(false);
 
   const [nft, setNFT] = useState<NFT>();
+  const [labNft, setLabNft] = useState<LabNFT>();
   const [nftExtended, setnftExtended] = useState<MemesExtendedData>();
   const { address, connector, isConnected } = useAccount();
   const [nftBalance, setNftBalance] = useState<number>(0);
@@ -57,6 +58,15 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
+    fetchUrl(`${process.env.API_ENDPOINT}/api/nfts_memelab?page_size=1`).then(
+      (response: DBResponse) => {
+        const labNft = response.data[0];
+        setLabNft(labNft);
+      }
+    );
+  }, [nft]);
+
+  useEffect(() => {
     if (address && nft && nft.id) {
       fetchUrl(
         `${process.env.API_ENDPOINT}/api/owners?contract=${nft.contract}&wallet=${address}&id=${nft.id}`
@@ -70,7 +80,7 @@ export default function Home() {
     }
   }, [address, nft]);
 
-  function printMintDate(nft: NFT) {
+  function printMintDate(nft: BaseNFT) {
     const mintDate = new Date(nft.mint_date);
     return (
       <>
@@ -234,10 +244,11 @@ export default function Home() {
                         <Col>
                           <a
                             href={
-                              `https://github.com/6529-Collections/thememecards/tree/main/card` +
-                              nft.id
+                              nft.has_distribution
+                                ? `/the-memes/${nft.id}/distribution`
+                                : `https://github.com/6529-Collections/thememecards/tree/main/card${nft.id}`
                             }
-                            target="_blank"
+                            target={nft.has_distribution ? "_self" : "_blank"}
                             rel="noreferrer">
                             Distribution Plan
                           </a>

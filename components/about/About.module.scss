@@ -71,3 +71,15 @@
 .lastUpdateText {
   color: $font-color-h !important;
 }
+
+.aboutGDRC1Container {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5 {
+    font-family: $main-font !important;
+    float: none;
+    color: $font-color;
+  }
+}

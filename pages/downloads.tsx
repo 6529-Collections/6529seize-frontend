@@ -7,14 +7,16 @@ import dynamic from "next/dynamic";
 import Breadcrumb, { Crumb } from "../components/breadcrumb/Breadcrumb";
 import { useRouter } from "next/router";
 import { DBResponse } from "../entities/IDBResponse";
-import Download from "../components/download/Download";
 import { fetchUrl } from "../services/6529api";
 import HeaderPlaceholder from "../components/header/HeaderPlaceholder";
+import Pagination from "../components/pagination/Pagination";
 
 const Header = dynamic(() => import("../components/header/Header"), {
   ssr: false,
   loading: () => <HeaderPlaceholder />,
 });
+
+const PAGE_SIZE = 25;
 
 export default function Downloads() {
   const router = useRouter();
@@ -24,14 +26,18 @@ export default function Downloads() {
   ]);
 
   const [downloads, setDownloads] = useState<any[]>();
+  const [totalResults, setTotalResults] = useState(0);
+  const [page, setPage] = useState(1);
+  const [next, setNext] = useState(null);
 
   useEffect(() => {
-    fetchUrl(`${process.env.API_ENDPOINT}/api/uploads?page_size=${50}`).then(
-      (response: DBResponse) => {
-        setDownloads(response.data);
-      }
-    );
-  }, [router.isReady]);
+    let url = `${process.env.API_ENDPOINT}/api/uploads?page_size=${PAGE_SIZE}&page=${page}`;
+    fetchUrl(url).then((response: DBResponse) => {
+      setTotalResults(response.count);
+      setNext(response.next);
+      setDownloads(response.data);
+    });
+  }, [page, router.isReady]);
 
   function printDate(dateString: any) {
     const d = new Date(
@@ -114,6 +120,19 @@ export default function Downloads() {
                     />{" "}
                     Nothing here yet
                   </>
+                )}
+                {totalResults > 0 && totalResults / PAGE_SIZE > 1 && (
+                  <Row className="text-center pt-2 pb-3">
+                    <Pagination
+                      page={page}
+                      pageSize={PAGE_SIZE}
+                      totalResults={totalResults}
+                      setPage={function (newPage: number) {
+                        setPage(newPage);
+                        window.scrollTo(0, 0);
+                      }}
+                    />
+                  </Row>
                 )}
               </Container>
             </Col>

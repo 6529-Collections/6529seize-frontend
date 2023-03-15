@@ -208,3 +208,15 @@ th {
     }
   }
 }
+
+.carousel-indicators {
+  bottom: -50px !important;
+}
+
+.carousel-control-prev {
+  left: -40px;
+}
+
+.carousel-control-next {
+  right: -40px;
+}

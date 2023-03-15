@@ -22,6 +22,7 @@ import AboutPrivacyPolicy from "../../components/about/AboutPrivacyPolicy";
 import AboutCookiePolicy from "../../components/about/AboutCookiePolicy";
 import Head from "next/head";
 import AboutDataDecentral from "../../components/about/AboutDataDecentral";
+import AboutGDRC1 from "../../components/about/AboutGDRC1";
 
 export enum AboutSection {
   MEMES = "the-memes",
@@ -39,6 +40,7 @@ export enum AboutSection {
   MINTING = "minting",
   APPLY = "apply",
   DATA_DECENTR = "data-decentralization",
+  GDRC1 = "gdrc1",
 }
 
 const Header = dynamic(() => import("../../components/header/Header"), {
@@ -49,6 +51,7 @@ const Header = dynamic(() => import("../../components/header/Header"), {
 interface Props {
   section: AboutSection;
   sectionTitle: string;
+  gdrc1Text: string;
 }
 
 export default function About(props: Props) {
@@ -115,6 +118,8 @@ export default function About(props: Props) {
         return <AboutCookiePolicy />;
       case AboutSection.DATA_DECENTR:
         return <AboutDataDecentral />;
+      case AboutSection.GDRC1:
+        return <AboutGDRC1 html={props.gdrc1Text} />;
     }
   }
 
@@ -197,6 +202,22 @@ export default function About(props: Props) {
                               : ""
                           }`}>
                           Gradient
+                        </Col>
+                      </Row>
+                      <Row>
+                        <Col>
+                          <hr />
+                        </Col>
+                      </Row>
+                      <Row className="pt-1 pb-1">
+                        <Col
+                          onClick={() => setNewSection(AboutSection.GDRC1)}
+                          className={`${menuStyles.aboutMenuLeftItem} ${
+                            section == AboutSection.GDRC1
+                              ? menuStyles.aboutMenuLeftItemActive
+                              : ""
+                          }`}>
+                          GDRC1
                         </Col>
                       </Row>
                       <Row>
@@ -403,6 +424,22 @@ export default function About(props: Props) {
                       </Row>
                       <Row className="pt-1 pb-1">
                         <Col
+                          onClick={() => setNewSection(AboutSection.GDRC1)}
+                          className={`${menuStyles.aboutMenuLeftItem} ${
+                            section == AboutSection.GDRC1
+                              ? menuStyles.aboutMenuLeftItemActive
+                              : ""
+                          }`}>
+                          GDRC1
+                        </Col>
+                      </Row>
+                      <Row>
+                        <Col>
+                          <hr />
+                        </Col>
+                      </Row>
+                      <Row className="pt-1 pb-1">
+                        <Col
                           onClick={() => setNewSection(AboutSection.FAQ)}
                           className={`${menuStyles.aboutMenuLeftItem} ${
                             section == AboutSection.FAQ
@@ -552,10 +589,18 @@ export async function getServerSideProps(req: any, res: any, resolvedUrl: any) {
   ) {
     const section = sectionPath as AboutSection;
     const sectionTitle = section.toUpperCase().replaceAll("-", " ");
+
+    const gdrc1Request = await fetch(
+      `https://digitalrightscharter-bucket.s3.eu-west-1.amazonaws.com/index.html`
+    );
+    const gdrc1Text =
+      gdrc1Request.status == 200 ? await gdrc1Request.text() : "";
+
     return {
       props: {
         section,
         sectionTitle,
+        gdrc1Text,
       },
     };
   } else {
