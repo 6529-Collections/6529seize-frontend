@@ -61,33 +61,41 @@ export default function Pagination(props: Props) {
   }
 
   return (
-    <Col>
-      <FontAwesomeIcon
-        icon="caret-left"
-        onClick={pagePrevious}
-        className={
-          props.page > 1 ? `${styles.iconEnabled}` : `${styles.iconDisabled}`
-        }
-      />{" "}
-      <input
-        id="page-number"
-        type="text"
-        className={styles.pageInput}
-        onKeyDown={enterValue}
-        onChange={setValue}
-        value={inputPage}
-      />
-      {" of "}
-      <span onClick={goToLast} className={isLastPage() ? styles.goToLast : ""}>
-        {Math.ceil(props.totalResults / props.pageSize)}
-      </span>{" "}
-      <FontAwesomeIcon
-        icon="caret-right"
-        onClick={pageNext}
-        className={
-          isLastPage() ? `${styles.iconDisabled}` : `${styles.iconEnabled}`
-        }
-      />
-    </Col>
+    <>
+      {props.totalResults > props.pageSize && (
+        <Col>
+          <FontAwesomeIcon
+            icon="caret-left"
+            onClick={pagePrevious}
+            className={
+              props.page > 1
+                ? `${styles.iconEnabled}`
+                : `${styles.iconDisabled}`
+            }
+          />{" "}
+          <input
+            id="page-number"
+            type="text"
+            className={styles.pageInput}
+            onKeyDown={enterValue}
+            onChange={setValue}
+            value={inputPage}
+          />
+          {" of "}
+          <span
+            onClick={goToLast}
+            className={isLastPage() ? styles.goToLast : ""}>
+            {Math.ceil(props.totalResults / props.pageSize)}
+          </span>{" "}
+          <FontAwesomeIcon
+            icon="caret-right"
+            onClick={pageNext}
+            className={
+              isLastPage() ? `${styles.iconDisabled}` : `${styles.iconEnabled}`
+            }
+          />
+        </Col>
+      )}
+    </>
   );
 }
