@@ -1179,7 +1179,7 @@ export default function UserPage(props: Props) {
               </Row>
             </Container>
             <Container>
-              <Row className="pt-3 pb-3">
+              <Row className="pt-5 pb-5">
                 <Col className="d-flex align-items-center justify-content-center">
                   <h3
                     className={
