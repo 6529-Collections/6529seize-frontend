@@ -55,7 +55,7 @@ export default function SearchModal(props: Props) {
             }}
             autoFocus
             className={`${styles.modalInput}`}
-            placeholder="Search wallet address or ENS"
+            placeholder="Type wallet address or ENS and press '+'"
           />
           <Button className={styles.modalButton} onClick={addSearchWallet}>
             +
@@ -79,6 +79,11 @@ export default function SearchModal(props: Props) {
             {w}
           </div>
         ))}
+        {props.searchWallets.length == 0 && (
+          <div className={styles.noSearchWalletsText}>
+            No search wallets added
+          </div>
+        )}
         <Button
           disabled={props.searchWallets.length == 0}
           className={`${styles.modalButtonClear} mt-3 mb-2`}

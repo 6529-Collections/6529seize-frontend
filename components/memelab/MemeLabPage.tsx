@@ -297,7 +297,7 @@ export default function LabPage() {
                   sm={{ span: 12 }}
                   md={{ span: 6 }}
                   lg={{ span: 6 }}
-                  className={`pt-2 pb-5`}>
+                  className={`${styles.nftImageWrapper} pt-2 pb-5`}>
                   <NFTImage
                     nft={nft}
                     animation={true}
@@ -534,6 +534,17 @@ export default function LabPage() {
                 </Table>
               </Col>
             </Row>
+            {nft.has_distribution ? (
+              <Row className="pt-3 pb-3">
+                <Col>
+                  <a href={`/meme-lab/${nft.id}/distribution`}>
+                    Distribution Plan
+                  </a>
+                </Col>
+              </Row>
+            ) : (
+              ""
+            )}
             {nftBalance > 0 && (
               <Row className="pt-3">
                 <Col>
