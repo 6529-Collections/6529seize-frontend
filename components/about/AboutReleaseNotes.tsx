@@ -37,7 +37,7 @@ export default function AboutReleaseNotes() {
                 Distribution
                 <ul>
                   <li>
-                    Small UX changes around Search functionality:{" "}
+                    Small UX changes around Search functionality:
                     <ul>
                       <li>adjusted placeholder</li>
                       <li>
@@ -45,7 +45,9 @@ export default function AboutReleaseNotes() {
                       </li>
                     </ul>
                   </li>
-                  <li>Introduced 'Distribution' section in User Page</li>
+                  <li>
+                    Introduced &apos;Distribution&apos; section in User Page
+                  </li>
                   <li>Added Distribution page for Meme Lab</li>
                 </ul>
               </li>
