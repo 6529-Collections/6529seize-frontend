@@ -56,11 +56,11 @@ export default function AboutReleaseNotes() {
                 </ul>
               </li>
               <li>
-                Bug Fix
+                Community
                 <ul>
                   <li>
-                    Fixed bug in Community where sometimes the Rank column would
-                    glitch while searching
+                    Fixed bug in Community table where sometimes the Rank column
+                    would glitch while searching
                   </li>
                 </ul>
               </li>
