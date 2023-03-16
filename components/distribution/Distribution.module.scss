@@ -186,6 +186,10 @@
   &:hover {
     color: $lightest-grey;
   }
+
+  &:focus {
+    outline: none !important;
+  }
 }
 
 @media only screen and (max-width: 800px) {
