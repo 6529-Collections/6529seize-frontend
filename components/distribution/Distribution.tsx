@@ -30,7 +30,7 @@ const SearchModal = dynamic(() => import("../searchModal/SearchModal"), {
 
 enum Sort {
   phase = "phase",
-  mint_count = "mint_count",
+  card_mint_count = "card_mint_count",
   count = "count",
   wallet_tdh = "wallet_tdh",
   wallet_balance = "wallet_balance",
@@ -445,13 +445,13 @@ export default function Distribution(props: Props) {
                           icon="square-caret-up"
                           onClick={() =>
                             setSort({
-                              sort: Sort.mint_count,
+                              sort: Sort.card_mint_count,
                               sort_direction: SortDirection.ASC,
                             })
                           }
                           className={`${styles.distributionsCaret} ${
                             sort.sort_direction != SortDirection.ASC ||
-                            sort.sort != Sort.mint_count
+                            sort.sort != Sort.card_mint_count
                               ? styles.distributionsCaretDisabled
                               : ""
                           }`}
@@ -460,13 +460,13 @@ export default function Distribution(props: Props) {
                           icon="square-caret-down"
                           onClick={() =>
                             setSort({
-                              sort: Sort.mint_count,
+                              sort: Sort.card_mint_count,
                               sort_direction: SortDirection.DESC,
                             })
                           }
                           className={`${styles.distributionsCaret} ${
                             sort.sort_direction != SortDirection.DESC ||
-                            sort.sort != Sort.mint_count
+                            sort.sort != Sort.card_mint_count
                               ? styles.distributionsCaretDisabled
                               : ""
                           }`}
