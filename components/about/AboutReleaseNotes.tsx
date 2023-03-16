@@ -49,10 +49,14 @@ export default function AboutReleaseNotes() {
                     Introduced &apos;Distribution&apos; section in User Page
                   </li>
                   <li>Added Distribution page for Meme Lab</li>
+                  <li>
+                    Fixed bug where for some wallets &apos;Minted&apos; count
+                    was showing wrong value
+                  </li>
                 </ul>
               </li>
               <li>
-                Bug Fixes
+                Bug Fix
                 <ul>
                   <li>
                     Fixed bug in Community where sometimes the Rank column would
