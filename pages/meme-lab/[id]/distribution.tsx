@@ -1,23 +1,25 @@
 import Head from "next/head";
-import styles from "../../styles/Home.module.scss";
+import styles from "../../../styles/Home.module.scss";
 
 import dynamic from "next/dynamic";
-import { fetchUrl } from "../../services/6529api";
-import HeaderPlaceholder from "../../components/header/HeaderPlaceholder";
+import { useRouter } from "next/router";
+import { MEMELAB_CONTRACT, MEMES_CONTRACT } from "../../../constants";
+import { fetchUrl } from "../../../services/6529api";
+import HeaderPlaceholder from "../../../components/header/HeaderPlaceholder";
 
-const Header = dynamic(() => import("../../components/header/Header"), {
+const Header = dynamic(() => import("../../../components/header/Header"), {
   ssr: false,
   loading: () => <HeaderPlaceholder />,
 });
 
-const LabPageComponent = dynamic(
-  () => import("../../components/memelab/MemeLabPage"),
+const DistributionComponent = dynamic(
+  () => import("../../../components/distribution/Distribution"),
   {
     ssr: false,
   }
 );
 
-export default function MemeLabPage(props: any) {
+export default function MemeDistributionPage(props: any) {
   const pagenameFull = `${props.name} | 6529 SEIZE`;
 
   return (
@@ -42,7 +44,11 @@ export default function MemeLabPage(props: any) {
 
       <main className={styles.main}>
         <Header />
-        <LabPageComponent />
+        <DistributionComponent
+          header="Meme Lab"
+          contract={MEMELAB_CONTRACT}
+          link="/meme-lab"
+        />
       </main>
     </>
   );
@@ -51,9 +57,9 @@ export default function MemeLabPage(props: any) {
 export async function getServerSideProps(req: any, res: any, resolvedUrl: any) {
   const id = req.query.id;
   const response = await fetchUrl(
-    `${process.env.API_ENDPOINT}/api/nfts_memelab?id=${id}`
+    `${process.env.API_ENDPOINT}/api/nfts?contract=${MEMES_CONTRACT}&id=${id}`
   );
-  let name = `Meme Lab Card #${id}`;
+  let name = `Meme Card #${id} Distribution`;
   let image = `${process.env.BASE_ENDPOINT}/Seize_Logo_Glasses_2.png`;
   if (response && response.data && response.data.length > 0) {
     name = `${response.data[0].name} | ${name}`;

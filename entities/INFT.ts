@@ -24,6 +24,7 @@ export interface BaseNFT {
   total_volume_last_7_days: number;
   total_volume_last_1_month: number;
   total_volume: number;
+  has_distribution?: boolean;
 }
 
 export interface LabNFT extends BaseNFT {
@@ -31,7 +32,6 @@ export interface LabNFT extends BaseNFT {
 }
 
 export interface NFT extends BaseNFT {
-  has_distribution?: boolean;
   tdh: number;
   tdh__raw: number;
   tdh_rank: number;

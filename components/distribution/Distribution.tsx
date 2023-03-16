@@ -1,9 +1,9 @@
-import styles from "./TheMemes.module.scss";
+import styles from "./Distribution.module.scss";
 
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import { Container, Row, Col, Carousel, Table } from "react-bootstrap";
-import { MANIFOLD, MEMES_CONTRACT, SIX529_MUSEUM } from "../../constants";
+import { SIX529_MUSEUM } from "../../constants";
 import { DBResponse } from "../../entities/IDBResponse";
 import Breadcrumb, { Crumb } from "../breadcrumb/Breadcrumb";
 import { useRouter } from "next/router";
@@ -37,7 +37,13 @@ enum Sort {
   wallet_unique_balance = "wallet_unique_balance",
 }
 
-export default function MemeDistribution() {
+interface Props {
+  header: string;
+  contract: string;
+  link: string;
+}
+
+export default function Distribution(props: Props) {
   const router = useRouter();
   const [pageProps, setPageProps] = useState<{
     page: number;
@@ -68,7 +74,7 @@ export default function MemeDistribution() {
     const phasefilter = activePhase == "All" ? "" : `&phase=${activePhase}`;
     const walletFilter =
       searchWallets.length == 0 ? "" : `&wallet=${searchWallets.join(",")}`;
-    const distributionUrl = `${process.env.API_ENDPOINT}/api/distribution/${MEMES_CONTRACT}/${nftId}?&page=${pageProps.page}&sort=${sort.sort}&sort_direction=${sort.sort_direction}${phasefilter}${walletFilter}`;
+    const distributionUrl = `${process.env.API_ENDPOINT}/api/distribution/${props.contract}/${nftId}?&page=${pageProps.page}&sort=${sort.sort}&sort_direction=${sort.sort_direction}${phasefilter}${walletFilter}`;
 
     fetchUrl(distributionUrl).then((r: DBResponse) => {
       setTotalResults(r.count);
@@ -88,16 +94,16 @@ export default function MemeDistribution() {
     if (nftId) {
       setBreadcrumbs([
         { display: "Home", href: "/" },
-        { display: "The Memes", href: "/the-memes" },
-        { display: `Card ${nftId}`, href: `/the-memes/${nftId}` },
+        { display: props.header, href: props.link },
+        { display: `Card ${nftId}`, href: `${props.link}/${nftId}` },
         { display: `Distribution` },
       ]);
 
-      const distributionPhotosUrl = `${process.env.API_ENDPOINT}/api/distribution_photos/${MEMES_CONTRACT}/${nftId}`;
+      const distributionPhotosUrl = `${process.env.API_ENDPOINT}/api/distribution_photos/${props.contract}/${nftId}`;
 
       fetchAllPages(distributionPhotosUrl).then((distributionPhotos: any[]) => {
         setDistributionPhotos(distributionPhotos);
-        const distributionPhasesUrl = `${process.env.API_ENDPOINT}/api/distribution_phases/${MEMES_CONTRACT}/${nftId}`;
+        const distributionPhasesUrl = `${process.env.API_ENDPOINT}/api/distribution_phases/${props.contract}/${nftId}`;
         fetchUrl(distributionPhasesUrl).then((result: DBResponse) => {
           setPhases(result.data);
           setLoaded(true);
@@ -151,7 +157,6 @@ export default function MemeDistribution() {
         <Container className="pt-5 pb-3" id={`distribution-table`}>
           <Row>
             <Col
-              className={styles.leaderboardNavigationLeft}
               xs={{ span: 12 }}
               sm={{ span: 12 }}
               md={{ span: 6 }}
@@ -181,7 +186,7 @@ export default function MemeDistribution() {
               ))}
             </Col>
             <Col
-              className={`${styles.leaderboardNavigationRight} d-flex justify-content-end align-items-center`}
+              className={`d-flex justify-content-end align-items-center`}
               xs={{ span: 12 }}
               sm={{ span: 12 }}
               md={{ span: 6 }}
@@ -533,7 +538,9 @@ export default function MemeDistribution() {
             <Container className="pt-4 pb-4">
               <Row>
                 <Col>
-                  <h1>MEME CARD #{nftId} DISTRIBUTION</h1>
+                  <h1>
+                    {props.header.toUpperCase()} CARD #{nftId} DISTRIBUTION
+                  </h1>
                 </Col>
               </Row>
               {distributionPhotos.length > 0 && (
