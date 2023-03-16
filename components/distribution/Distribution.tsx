@@ -512,11 +512,11 @@ export default function Distribution(props: Props) {
                         {numberWithCommas(d.count)}
                       </td>
                       <td className="text-center">
-                        {d.phase == "Airdrop" || !d.mint_count
+                        {d.phase == "Airdrop" || !d.card_mint_count
                           ? "-"
-                          : d.mint_count == 0
-                          ? d.mint_count
-                          : numberWithCommas(d.mint_count)}
+                          : d.card_mint_count == 0
+                          ? d.card_mint_count
+                          : numberWithCommas(d.card_mint_count)}
                       </td>
                     </tr>
                   ))}

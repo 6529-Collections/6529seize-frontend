@@ -9,7 +9,7 @@ export interface IDistribution {
   wallet: string;
   display: string;
   count: number;
-  mint_count: number;
+  card_mint_count: number;
   wallet_tdh?: number;
   wallet_balance?: number;
   wallet_unique_balance?: number;
