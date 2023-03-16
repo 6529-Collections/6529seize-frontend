@@ -1462,11 +1462,11 @@ export default function UserPage(props: Props) {
                                 <td className="text-center">{d.phase}</td>
                                 <td className="text-center">{d.count}</td>
                                 <td className="text-center">
-                                  {!d.mint_count
+                                  {!d.card_mint_count
                                     ? "-"
-                                    : d.mint_count == 0
-                                    ? d.mint_count
-                                    : numberWithCommas(d.mint_count)}
+                                    : d.card_mint_count == 0
+                                    ? d.card_mint_count
+                                    : numberWithCommas(d.card_mint_count)}
                                 </td>
                               </tr>
                             ))}
