@@ -122,16 +122,6 @@ export default function UserPage(props: Props) {
     return d.toDateString();
   }
 
-  function getCardName(contract: string, id: number) {
-    const mynft = nfts.find(
-      (n) => areEqualAddresses(n.contract, contract) && n.id == id
-    );
-    if (mynft) {
-      return ` - ${mynft.name}`;
-    }
-    return ``;
-  }
-
   function getBalance(nft: NFT) {
     const balance = owned.find(
       (b) => b.token_id == nft.id && areEqualAddresses(b.contract, nft.contract)
@@ -1418,9 +1408,39 @@ export default function UserPage(props: Props) {
                             {distributions.map((d) => (
                               <tr
                                 key={`${d.contract}-${d.card_id}-${d.phase}-${d.wallet}}`}>
-                                <td>{printDistributionDate(d.created_at)}</td>
+                                <td>
+                                  {printDistributionDate(d.card_mint_date)}
+                                </td>
                                 <td className={styles.distributionsTableWallet}>
-                                  {`Card #${d.card_id} - ${
+                                  {d.card_name ? (
+                                    <a
+                                      className={
+                                        styles.distributionsTableCardLink
+                                      }
+                                      href={
+                                        areEqualAddresses(
+                                          d.contract,
+                                          MEMES_CONTRACT
+                                        )
+                                          ? `/the-memes/${d.card_id}`
+                                          : areEqualAddresses(
+                                              d.contract,
+                                              GRADIENT_CONTRACT
+                                            )
+                                          ? `/6529-gradient/${d.card_id}`
+                                          : areEqualAddresses(
+                                              d.contract,
+                                              MEMELAB_CONTRACT
+                                            )
+                                          ? `/meme-lab/${d.card_id}`
+                                          : d.contract
+                                      }>
+                                      Card #{d.card_id}
+                                    </a>
+                                  ) : (
+                                    `Card #${d.card_id}`
+                                  )}
+                                  {` - ${
                                     areEqualAddresses(
                                       d.contract,
                                       MEMES_CONTRACT
@@ -1437,7 +1457,7 @@ export default function UserPage(props: Props) {
                                         )
                                       ? `Meme Lab`
                                       : d.contract
-                                  }${getCardName(d.contract, d.card_id)}`}
+                                  }${d.card_name ? ` - ${d.card_name}` : ""}`}
                                 </td>
                                 <td className="text-center">{d.phase}</td>
                                 <td className="text-center">{d.count}</td>
