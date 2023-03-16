@@ -359,7 +359,7 @@ export default function MemePage() {
                   sm={{ span: 12 }}
                   md={{ span: 6 }}
                   lg={{ span: 6 }}
-                  className={`pt-2 pb-5`}>
+                  className={`${styles.nftImageWrapper} pt-2 pb-5`}>
                   <NFTImage
                     nft={nft}
                     animation={true}

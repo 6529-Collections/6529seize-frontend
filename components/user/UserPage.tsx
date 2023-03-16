@@ -19,6 +19,7 @@ import {
 import {
   GRADIENT_CONTRACT,
   MANIFOLD,
+  MEMELAB_CONTRACT,
   MEMES_CONTRACT,
   SIX529_MUSEUM,
 } from "../../constants";
@@ -33,6 +34,7 @@ import LatestActivityRow from "../latest-activity/LatestActivityRow";
 import { Transaction } from "../../entities/ITransaction";
 import { ReservedUser } from "../../pages/[user]";
 import Tippy from "@tippyjs/react";
+import { IDistribution } from "../../entities/IDistribution";
 
 const NFTImage = dynamic(() => import("../nft-image/NFTImage"), {
   ssr: false,
@@ -47,7 +49,9 @@ interface Props {
 enum Focus {
   COLLECTION,
   ACTIVITY,
+  DISTRIBUTIONS,
 }
+
 enum Sort {
   ID = "id",
   TDH = "tdh",
@@ -55,6 +59,7 @@ enum Sort {
 }
 
 const ACTIVITY_PAGE_SIZE = 25;
+const DISTRIBUTIONS_PAGE_SIZE = 25;
 
 export default function UserPage(props: Props) {
   const router = useRouter();
@@ -103,6 +108,19 @@ export default function UserPage(props: Props) {
   );
   const [activityPage, setActivityPage] = useState(1);
   const [activityTotalResults, setActivityTotalResults] = useState(0);
+
+  const [distributions, setDistributions] = useState<IDistribution[]>([]);
+  const [distributionsPage, setDistributionsPage] = useState(1);
+  const [distributionsTotalResults, setDistributionsTotalResults] = useState(0);
+
+  function printDistributionDate(dateString: any) {
+    const d = new Date(
+      dateString.substring(0, 4),
+      dateString.substring(5, 7) - 1,
+      dateString.substring(8, 10)
+    );
+    return d.toDateString();
+  }
 
   function getBalance(nft: NFT) {
     const balance = owned.find(
@@ -331,6 +349,17 @@ export default function UserPage(props: Props) {
       });
     }
   }, [activityPage, ownerAddress, router.isReady, activityTypeFilter]);
+
+  useEffect(() => {
+    if (ownerAddress && router.isReady) {
+      let url = `${process.env.API_ENDPOINT}/api/distributions?wallet=${ownerAddress}&page_size=${DISTRIBUTIONS_PAGE_SIZE}&page=${distributionsPage}`;
+      fetchUrl(url).then((response: DBResponse) => {
+        console.log(response);
+        setDistributionsTotalResults(response.count);
+        setDistributions(response.data);
+      });
+    }
+  }, [distributionsPage, ownerAddress, router.isReady]);
 
   useEffect(() => {
     if (sort && sortDir) {
@@ -1140,26 +1169,7 @@ export default function UserPage(props: Props) {
               </Row>
             </Container>
             <Container>
-              <Row className="pt-3 pb-3">
-                {/* {focus == Focus.COLLECTION && (
-                  <Col>
-                    Sort&nbsp;&nbsp;
-                    <FontAwesomeIcon
-                      icon="chevron-circle-up"
-                      onClick={() => setSortDir(SortDirection.ASC)}
-                      className={`${styles.sortDirection} ${
-                        sortDir != SortDirection.ASC ? styles.disabled : ""
-                      }`}
-                    />{" "}
-                    <FontAwesomeIcon
-                      icon="chevron-circle-down"
-                      onClick={() => setSortDir(SortDirection.DESC)}
-                      className={`${styles.sortDirection} ${
-                        sortDir != SortDirection.DESC ? styles.disabled : ""
-                      }`}
-                    />
-                  </Col>
-                )} */}
+              <Row className="pt-5 pb-5">
                 <Col className="d-flex align-items-center justify-content-center">
                   <h3
                     className={
@@ -1179,6 +1189,16 @@ export default function UserPage(props: Props) {
                     }
                     onClick={() => setFocus(Focus.ACTIVITY)}>
                     Activity
+                  </h3>
+                  <h3>&nbsp;|&nbsp;</h3>
+                  <h3
+                    className={
+                      focus == Focus.DISTRIBUTIONS
+                        ? styles.focusActive
+                        : styles.focus
+                    }
+                    onClick={() => setFocus(Focus.DISTRIBUTIONS)}>
+                    Distributions
                   </h3>
                 </Col>
               </Row>
@@ -1351,6 +1371,130 @@ export default function UserPage(props: Props) {
                         totalResults={activityTotalResults}
                         setPage={function (newPage: number) {
                           setActivityPage(newPage);
+                          window.scrollTo(0, 0);
+                        }}
+                      />
+                    </Row>
+                  )}
+                </>
+              )}
+              {focus == Focus.DISTRIBUTIONS && (
+                <>
+                  <Row>
+                    <Col
+                      className="d-flex align-items-center"
+                      xs={{ span: 7 }}
+                      sm={{ span: 7 }}
+                      md={{ span: 9 }}
+                      lg={{ span: 10 }}>
+                      <h3>Distributions</h3>
+                    </Col>
+                  </Row>
+                  <Row
+                    className={`pt-2 ${styles.distributionsScrollContainer}`}>
+                    <Col>
+                      {distributions.length > 0 ? (
+                        <Table className={styles.distributionsTable}>
+                          <thead>
+                            <tr>
+                              <th>Date</th>
+                              <th>Card</th>
+                              <th className="text-center">Phase</th>
+                              <th className="text-center">Count</th>
+                              <th className="text-center">Minted</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {distributions.map((d) => (
+                              <tr
+                                key={`${d.contract}-${d.card_id}-${d.phase}-${d.wallet}}`}>
+                                <td>
+                                  {printDistributionDate(d.card_mint_date)}
+                                </td>
+                                <td className={styles.distributionsTableWallet}>
+                                  {d.card_name ? (
+                                    <a
+                                      className={
+                                        styles.distributionsTableCardLink
+                                      }
+                                      href={
+                                        areEqualAddresses(
+                                          d.contract,
+                                          MEMES_CONTRACT
+                                        )
+                                          ? `/the-memes/${d.card_id}`
+                                          : areEqualAddresses(
+                                              d.contract,
+                                              GRADIENT_CONTRACT
+                                            )
+                                          ? `/6529-gradient/${d.card_id}`
+                                          : areEqualAddresses(
+                                              d.contract,
+                                              MEMELAB_CONTRACT
+                                            )
+                                          ? `/meme-lab/${d.card_id}`
+                                          : d.contract
+                                      }>
+                                      Card #{d.card_id}
+                                    </a>
+                                  ) : (
+                                    `Card #${d.card_id}`
+                                  )}
+                                  {` - ${
+                                    areEqualAddresses(
+                                      d.contract,
+                                      MEMES_CONTRACT
+                                    )
+                                      ? `The Memes`
+                                      : areEqualAddresses(
+                                          d.contract,
+                                          GRADIENT_CONTRACT
+                                        )
+                                      ? `6529Gradient`
+                                      : areEqualAddresses(
+                                          d.contract,
+                                          MEMELAB_CONTRACT
+                                        )
+                                      ? `Meme Lab`
+                                      : d.contract
+                                  }${d.card_name ? ` - ${d.card_name}` : ""}`}
+                                </td>
+                                <td className="text-center">{d.phase}</td>
+                                <td className="text-center">{d.count}</td>
+                                <td className="text-center">
+                                  {!d.card_mint_count
+                                    ? "-"
+                                    : d.card_mint_count == 0
+                                    ? d.card_mint_count
+                                    : numberWithCommas(d.card_mint_count)}
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </Table>
+                      ) : (
+                        <>
+                          <Image
+                            loading={"lazy"}
+                            width="0"
+                            height="0"
+                            style={{ height: "auto", width: "100px" }}
+                            src="/SummerGlasses.svg"
+                            alt="SummerGlasses"
+                          />{" "}
+                          Nothing here yet
+                        </>
+                      )}
+                    </Col>
+                  </Row>
+                  {distributions.length > 0 && (
+                    <Row className="text-center pt-2 pb-3">
+                      <Pagination
+                        page={distributionsPage}
+                        pageSize={DISTRIBUTIONS_PAGE_SIZE}
+                        totalResults={distributionsTotalResults}
+                        setPage={function (newPage: number) {
+                          setDistributionsPage(newPage);
                           window.scrollTo(0, 0);
                         }}
                       />

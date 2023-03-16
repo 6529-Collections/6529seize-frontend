@@ -25,6 +25,49 @@ export default function AboutReleaseNotes() {
               <li>Small updates or bug fixes are incremented as x.x.1</li>
             </ul>
             <br />
+            <hr />
+            <br />
+            <p>
+              <b>Release 1.2.1</b>
+              <br />
+              Mar 16, 2023
+            </p>
+            <ul>
+              <li>
+                Distribution
+                <ul>
+                  <li>
+                    Small UX changes around Search functionality:
+                    <ul>
+                      <li>adjusted placeholder</li>
+                      <li>
+                        display message when not searching for any wallets
+                      </li>
+                    </ul>
+                  </li>
+                  <li>
+                    Introduced &apos;Distribution&apos; section in User Page
+                  </li>
+                  <li>Added Distribution page for Meme Lab</li>
+                  <li>
+                    Fixed bug where for some wallets &apos;Minted&apos; count
+                    was showing wrong value
+                  </li>
+                </ul>
+              </li>
+              <li>
+                Community
+                <ul>
+                  <li>
+                    Fixed bug in Community table where sometimes the Rank column
+                    would glitch while searching
+                  </li>
+                </ul>
+              </li>
+            </ul>
+            <br />
+            <hr />
+            <br />
             <p>
               <b>Release 1.2.0</b>
               <br />
@@ -83,6 +126,8 @@ export default function AboutReleaseNotes() {
               </li>
             </ul>
             <br />
+            <hr />
+            <br />
             <p>
               <b>Release 1.1.1</b>
               <br />
@@ -94,6 +139,8 @@ export default function AboutReleaseNotes() {
                 Meme Lab Section causing them to navigate to a wrong page.
               </li>
             </ul>
+            <br />
+            <hr />
             <br />
             <p>
               <b>Release 1.1.0</b>
@@ -172,6 +219,8 @@ export default function AboutReleaseNotes() {
                 </ul>
               </li>
             </ul>
+            <br />
+            <hr />
             <br />
             <p>
               <b>Release 1.0.0</b>

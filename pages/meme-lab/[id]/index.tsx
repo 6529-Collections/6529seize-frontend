@@ -2,8 +2,6 @@ import Head from "next/head";
 import styles from "../../../styles/Home.module.scss";
 
 import dynamic from "next/dynamic";
-import { useRouter } from "next/router";
-import { MEMES_CONTRACT } from "../../../constants";
 import { fetchUrl } from "../../../services/6529api";
 import HeaderPlaceholder from "../../../components/header/HeaderPlaceholder";
 
@@ -12,14 +10,14 @@ const Header = dynamic(() => import("../../../components/header/Header"), {
   loading: () => <HeaderPlaceholder />,
 });
 
-const DistributionComponent = dynamic(
-  () => import("../../../components/distribution/Distribution"),
+const LabPageComponent = dynamic(
+  () => import("../../../components/memelab/MemeLabPage"),
   {
     ssr: false,
   }
 );
 
-export default function MemeDistributionPage(props: any) {
+export default function MemeLabPage(props: any) {
   const pagenameFull = `${props.name} | 6529 SEIZE`;
 
   return (
@@ -44,11 +42,7 @@ export default function MemeDistributionPage(props: any) {
 
       <main className={styles.main}>
         <Header />
-        <DistributionComponent
-          header="The Memes"
-          contract={MEMES_CONTRACT}
-          link="/the-memes"
-        />
+        <LabPageComponent />
       </main>
     </>
   );
@@ -57,9 +51,9 @@ export default function MemeDistributionPage(props: any) {
 export async function getServerSideProps(req: any, res: any, resolvedUrl: any) {
   const id = req.query.id;
   const response = await fetchUrl(
-    `${process.env.API_ENDPOINT}/api/nfts?contract=${MEMES_CONTRACT}&id=${id}`
+    `${process.env.API_ENDPOINT}/api/nfts_memelab?id=${id}`
   );
-  let name = `Meme Card #${id} Distribution`;
+  let name = `Meme Lab Card #${id}`;
   let image = `${process.env.BASE_ENDPOINT}/Seize_Logo_Glasses_2.png`;
   if (response && response.data && response.data.length > 0) {
     name = `${response.data[0].name} | ${name}`;

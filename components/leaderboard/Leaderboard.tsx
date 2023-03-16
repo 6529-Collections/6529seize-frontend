@@ -157,14 +157,6 @@ export default function Leaderboard(props: Props) {
     printNextTdhCountdown();
   }
 
-  function getRank(index: number, lead: TDHMetrics) {
-    if (searchWallets.length > 0 && lead.dense_rank_sort) {
-      return lead.dense_rank_sort;
-    } else {
-      return index + 1 + (pageProps.page - 1) * pageProps.pageSize;
-    }
-  }
-
   async function fetchResults() {
     setShowLoader(true);
     let tagFilter = "";
@@ -1863,7 +1855,11 @@ export default function Leaderboard(props: Props) {
                       <tr key={`${index}-${lead.wallet}`}>
                         <td className={styles.rank}>
                           {/* {lead.tdh_rank} */}
-                          {getRank(index, lead)}
+                          {searchWallets.length > 0 && lead.dense_rank_sort
+                            ? lead.dense_rank_sort
+                            : index +
+                              1 +
+                              (pageProps.page - 1) * pageProps.pageSize}
                         </td>
                         <td className={styles.hodler}>
                           <Address

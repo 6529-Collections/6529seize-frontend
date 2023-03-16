@@ -218,3 +218,31 @@
 .nftImagePadding {
   padding-bottom: 35px;
 }
+
+.distributionsTable {
+  tr {
+    border-bottom: 1px solid #333 !important;
+  }
+  tr td {
+    white-space: nowrap;
+  }
+  tr th {
+    min-width: 80px;
+    white-space: nowrap;
+    line-height: 30px;
+  }
+}
+
+.distributionsScrollContainer {
+  -ms-overflow-style: none; /* Internet Explorer 10+ */
+  scrollbar-width: none; /* Firefox */
+  overflow-x: scroll;
+}
+
+.distributionsScrollContainer::-webkit-scrollbar {
+  display: none;
+}
+
+.distributionsTable > :not(caption) > * > * {
+  padding: 0.5rem !important;
+}
