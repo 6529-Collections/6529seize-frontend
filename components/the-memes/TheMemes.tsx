@@ -532,19 +532,17 @@ export default function TheMemesComponent(props: Props) {
                       )} ETH`
                     : `Market Cap: N/A`)}
                 {sort == Sort.VOLUME &&
-                  (nft.total_volume_last_7_days > 0
-                    ? `Volume (${volumeType}): ${numberWithCommas(
-                        Math.round(
-                          (volumeType == VolumeType.HOURS_24
-                            ? nft.total_volume_last_24_hours
-                            : volumeType == VolumeType.DAYS_7
-                            ? nft.total_volume_last_7_days
-                            : volumeType == VolumeType.DAYS_30
-                            ? nft.total_volume_last_1_month
-                            : nft.total_volume) * 100
-                        ) / 100
-                      )} ETH`
-                    : `Volume: N/A`)}
+                  `Volume (${volumeType}): ${numberWithCommas(
+                    Math.round(
+                      (volumeType == VolumeType.HOURS_24
+                        ? nft.total_volume_last_24_hours
+                        : volumeType == VolumeType.DAYS_7
+                        ? nft.total_volume_last_7_days
+                        : volumeType == VolumeType.DAYS_30
+                        ? nft.total_volume_last_1_month
+                        : nft.total_volume) * 100
+                    ) / 100
+                  )} ETH`}
               </Col>
             </Row>
           </Container>
