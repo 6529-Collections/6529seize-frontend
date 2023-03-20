@@ -2,8 +2,6 @@
 
 .connectBtn {
   background-color: white;
-  padding-left: 12px;
-  padding-right: 22px;
   color: black !important;
   border: none;
   padding: 8px;
@@ -67,6 +65,19 @@
 
 .collectionDelegationsAccordionItem {
   border-radius: 0 !important;
+  background-color: rgb(240, 240, 240);
+  button {
+    background-color: rgb(240, 240, 240);
+  }
+}
+
+.closeNewDelegationForm {
+  height: 28px;
+  cursor: pointer;
+
+  &:focus {
+    outline: none !important;
+  }
 }
 
 .useCaseWalletLink {
@@ -76,5 +87,107 @@
 
   &:hover {
     color: $dark-grey;
+  }
+}
+
+.useCaseWalletRevoke {
+  background-color: $raspberry;
+  color: white;
+  padding: 8px 10px;
+  margin-left: 15px;
+  cursor: pointer;
+
+  &:hover {
+    background-color: lighten($color: $raspberry, $amount: 5);
+  }
+}
+
+.addNewDelegationBtn {
+  background-color: white;
+  color: black;
+  width: fit-content;
+  padding: 15px 25px;
+  cursor: pointer;
+
+  &:hover {
+    background-color: darken($color: white, $amount: 15);
+  }
+}
+
+.formInput {
+  color: $dark-grey !important;
+  border-radius: 0 !important;
+  border-color: $lightest-grey;
+
+  &:focus {
+    border-color: $blue !important;
+  }
+}
+
+.formInputDisabled {
+  cursor: not-allowed !important;
+}
+
+.newDelegationFormToggle {
+  line-height: 24px;
+  display: inline-block;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  margin-right: 15px;
+
+  input {
+    border-color: transparent !important;
+    background-color: white !important;
+    cursor: pointer;
+  }
+
+  input:checked {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='2.3' fill='%23000'/%3e%3c/svg%3e") !important;
+  }
+}
+
+@media only screen and (max-width: 800px) {
+  .newDelegationFormToggle {
+    margin-left: 8px;
+  }
+}
+
+.newDelegationSubmitBtn {
+  background-color: lighten($color: green, $amount: 5);
+  padding-left: 15px;
+  padding-right: 25px;
+  border: none;
+  padding: 12px 20px;
+  cursor: pointer;
+  margin-right: 20px;
+  color: white !important;
+
+  &:hover {
+    background-color: lighten($color: green, $amount: 10);
+  }
+}
+
+.newDelegationCancelBtn {
+  background-color: white;
+  padding-left: 15px;
+  padding-right: 25px;
+  color: black !important;
+  border: none;
+  padding: 12px 20px;
+  cursor: pointer;
+
+  &:hover {
+    background-color: darken($color: white, $amount: 15);
+  }
+}
+
+.newDelegationError {
+  color: lighten($color: $raspberry, $amount: 12);
+  ul {
+    padding-left: 1rem;
+  }
+
+  ul li {
+    line-height: 42px;
   }
 }

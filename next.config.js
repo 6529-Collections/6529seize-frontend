@@ -17,7 +17,7 @@ const securityHeaders = [
   },
   {
     key: "Content-Security-Policy",
-    value: `default-src 'none'; script-src 'self' 'unsafe-inline' https://www.google-analytics.com https://www.googletagmanager.com/ 'unsafe-eval'; connect-src 'self' ${process.env.REACT_APP_API_ENDPOINT} https://www.googletagmanager.com https://*.google-analytics.com; font-src 'self'; img-src 'self' data: https://*.cloudfront.net https://arweave.net https://*.arweave.net; frame-src 'self' https://arweave.net https://*.arweave.net; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net;`,
+    value: `default-src 'none'; script-src 'self' 'unsafe-inline' https://www.google-analytics.com https://www.googletagmanager.com/ 'unsafe-eval'; connect-src 'self' ${process.env.REACT_APP_API_ENDPOINT} https://www.googletagmanager.com https://*.google-analytics.com; font-src 'self'; img-src 'self' data: https://*.cloudfront.net https://arweave.net https://*.arweave.net; media-src 'self' https://*.cloudfront.net https://arweave.net https://*.arweave.net; frame-src 'self' https://arweave.net https://*.arweave.net; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net;`,
   },
   {
     key: "X-Frame-Options",
