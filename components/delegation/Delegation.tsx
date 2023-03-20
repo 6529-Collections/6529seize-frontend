@@ -102,11 +102,11 @@ export default function DelegationComponent() {
           {isConnected && address && (
             <Container>
               <Row className="pt-5 pb-3">
-                <Col className="text-center">
+                <Col className="text-left">
                   <h4 className={styles.connectedAsHeader}>
-                    Connected as{" "}
+                    Connected as:{" "}
                     {ensResolution.data && `${ensResolution.data} - `}
-                    {formatAddress(address)}
+                    {address}
                   </h4>
                 </Col>
               </Row>
