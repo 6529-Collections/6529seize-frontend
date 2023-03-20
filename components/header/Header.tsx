@@ -124,6 +124,11 @@ export default function Header(props: Props) {
                     </h4>
                     <h4
                       className="pt-3"
+                      onClick={() => (window.location.href = `/delegations`)}>
+                      Delegations
+                    </h4>
+                    <h4
+                      className="pt-3"
                       onClick={() => {
                         disconnect();
                         setShowBurgerMenuConnectOptions(false);
@@ -677,6 +682,14 @@ export default function Header(props: Props) {
                                     }`)
                                   }>
                                   Profile
+                                </NavDropdown.Item>
+                                <NavDropdown.Item
+                                  key="delegations-dropdown-item"
+                                  className={styles.dropdownItem}
+                                  onClick={() =>
+                                    (window.location.href = `/delegations`)
+                                  }>
+                                  Delegations
                                 </NavDropdown.Item>
                                 <NavDropdown.Item
                                   key="disconnect-dropdown-item"
