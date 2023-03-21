@@ -16,11 +16,6 @@
   }
 }
 
-.connectedAsHeader {
-  float: none;
-  color: $font-color;
-}
-
 .collectionSelectionWrapper {
   text-align: center;
   &:hover {
@@ -90,6 +85,18 @@
   }
 }
 
+.useCaseWalletUpdate {
+  background-color: $blue;
+  color: white;
+  padding: 8px 10px;
+  margin-left: 15px;
+  cursor: pointer;
+
+  &:hover {
+    background-color: lighten($color: $blue, $amount: 5);
+  }
+}
+
 .useCaseWalletRevoke {
   background-color: $raspberry;
   color: white;
@@ -103,14 +110,48 @@
 }
 
 .addNewDelegationBtn {
-  background-color: white;
-  color: black;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background-color: $green;
+  color: white;
   width: fit-content;
-  padding: 15px 25px;
+  padding: 12px 25px;
   cursor: pointer;
 
   &:hover {
-    background-color: darken($color: white, $amount: 15);
+    background-color: darken($color: $green, $amount: 5);
+  }
+}
+
+.revokeDelegationBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background-color: $raspberry;
+  color: white;
+  width: fit-content;
+  padding: 12px 25px;
+  cursor: pointer;
+
+  &:hover {
+    background-color: darken($color: $raspberry, $amount: 5);
+  }
+}
+
+.lockDelegationBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 15px;
+  background-color: lighten($color: $lightest-grey, $amount: 10);
+  color: black;
+  width: fit-content;
+  padding: 12px 25px;
+  cursor: pointer;
+
+  &:hover {
+    background-color: lighten($color: $lightest-grey, $amount: 15);
   }
 }
 
@@ -153,7 +194,7 @@
 }
 
 .newDelegationSubmitBtn {
-  background-color: lighten($color: green, $amount: 5);
+  background-color: $green;
   padding-left: 15px;
   padding-right: 25px;
   border: none;
@@ -163,7 +204,7 @@
   color: white !important;
 
   &:hover {
-    background-color: lighten($color: green, $amount: 10);
+    background-color: darken($color: $green, $amount: 5);
   }
 }
 
@@ -190,4 +231,10 @@
   ul li {
     line-height: 42px;
   }
+}
+
+.buttonIcon {
+  width: 14px;
+  height: 14px;
+  margin-right: 3px;
 }

@@ -48,6 +48,10 @@ import {
   faX,
   faSquareXmark,
   faChevronUp,
+  faLock,
+  faLockOpen,
+  faPlus,
+  faMinus,
 } from "@fortawesome/free-solid-svg-icons";
 import Head from "next/head";
 
@@ -81,7 +85,11 @@ library.add(
   faSearch,
   faX,
   faSquareXmark,
-  faChevronUp
+  faChevronUp,
+  faLock,
+  faLockOpen,
+  faMinus,
+  faPlus
 );
 
 const { chains, provider } = configureChains(

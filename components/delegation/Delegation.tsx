@@ -6,6 +6,7 @@ import { useState } from "react";
 import Image from "next/image";
 
 import { SUPPORTED_COLLECTIONS } from "../../pages/delegations/[contract]";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 export default function DelegationComponent() {
   const { address, connector, isConnected } = useAccount();
@@ -14,17 +15,34 @@ export default function DelegationComponent() {
     address: address,
   });
 
-  const [collection, setCollection] = useState<string | undefined>(undefined);
-
-  function printCollectionSelection() {
+  function printWalletActions() {
     return (
       <Container>
-        <Row className="pt-4 pb-4">
+        <Row className="pt-5 pb-3">
+          <Col>
+            <h4>Wallet Actions</h4>
+          </Col>
+        </Row>
+        <Row className="pt-2 pb-3">
+          <Col>
+            <span className={styles.lockDelegationBtn}>
+              <FontAwesomeIcon icon="lock" className={styles.buttonIcon} />
+              Lock Wallet
+            </span>
+          </Col>
+        </Row>
+      </Container>
+    );
+  }
+  function printCollectionSelection() {
+    return (
+      <Container className="pt-3 pb-5">
+        <Row className="pt-2 pb-2">
           <Col>
             <h4>Choose Collection</h4>
           </Col>
         </Row>
-        <Row className="pt-3 pb-3">
+        <Row>
           {Object.values(SUPPORTED_COLLECTIONS).map((c) => (
             <Col
               key={c.contract}
@@ -100,18 +118,10 @@ export default function DelegationComponent() {
       <Row>
         <Col>
           {isConnected && address && (
-            <Container>
-              <Row className="pt-5 pb-3">
-                <Col className="text-left">
-                  <h4 className={styles.connectedAsHeader}>
-                    Connected as:{" "}
-                    {ensResolution.data && `${ensResolution.data} - `}
-                    {address}
-                  </h4>
-                </Col>
-              </Row>
-              {!collection && printCollectionSelection()}
-            </Container>
+            <>
+              {printWalletActions()}
+              {printCollectionSelection()}
+            </>
           )}
           {!isConnected && printConnect()}
         </Col>
