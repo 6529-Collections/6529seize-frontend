@@ -142,7 +142,7 @@ export default function CollectionDelegationComponent(props: Props) {
 
   function printLive() {
     return (
-      <Container className="pt-3 pb-5">
+      <Container className="pt-3 pb-5 no-padding">
         <Row className="pt-2 pb-2">
           <Col>
             <h4>Current Delegations</h4>
@@ -177,6 +177,15 @@ export default function CollectionDelegationComponent(props: Props) {
                                 view
                               </a>
                               <span
+                                className={styles.useCaseWalletUpdate}
+                                onClick={() =>
+                                  alert(
+                                    `\nupdating delegation... \n\ndelegator: ${address}\nuse case: ${ds.uc}\naddress: ${w} `
+                                  )
+                                }>
+                                Update
+                              </span>
+                              <span
                                 className={styles.useCaseWalletRevoke}
                                 onClick={() =>
                                   alert(
@@ -188,6 +197,14 @@ export default function CollectionDelegationComponent(props: Props) {
                             </li>
                           ))}
                         </ul>
+                        <span
+                          className={`${styles.lockDelegationBtn} mr-2 mb-3`}>
+                          <FontAwesomeIcon
+                            icon="lock"
+                            className={styles.buttonIcon}
+                          />
+                          Lock Use Case
+                        </span>
                       </Accordion.Body>
                     </Accordion.Item>
                   );
@@ -196,9 +213,9 @@ export default function CollectionDelegationComponent(props: Props) {
             </Accordion>
           </Col>
         </Row>
-        <Row className="pt-4 pb-2">
+        <Row className="pt-5 pb-2">
           <Col>
-            <h4>Actions</h4>
+            <h4>Register</h4>
           </Col>
         </Row>
         <Row className="pt-2 pb-3">
@@ -206,7 +223,38 @@ export default function CollectionDelegationComponent(props: Props) {
             <span
               className={styles.addNewDelegationBtn}
               onClick={() => setShowCreateNew(true)}>
-              + Add New Delegation
+              <FontAwesomeIcon icon="plus" className={styles.buttonIcon} />
+              Register New Delegation
+            </span>
+          </Col>
+        </Row>
+        <Row className="pt-5 pb-2">
+          <Col>
+            <h4>Revoke</h4>
+          </Col>
+        </Row>
+        <Row className="pt-2 pb-3">
+          <Col>
+            <span className={styles.revokeDelegationBtn}>
+              <FontAwesomeIcon icon="minus" className={styles.buttonIcon} />
+              Revoke Delegations
+            </span>
+          </Col>
+        </Row>
+        <Row className="pt-5 pb-2">
+          <Col>
+            <h4>Lock</h4>
+          </Col>
+        </Row>
+        <Row className="pt-2 pb-3">
+          <Col>
+            <span className={styles.lockDelegationBtn}>
+              <FontAwesomeIcon icon="lock" className={styles.buttonIcon} />
+              Lock Collection
+            </span>
+            <span className={styles.lockDelegationBtn}>
+              <FontAwesomeIcon icon="lock" className={styles.buttonIcon} />
+              Lock Use Case
             </span>
           </Col>
         </Row>
@@ -216,10 +264,10 @@ export default function CollectionDelegationComponent(props: Props) {
 
   function printCreateNew() {
     return (
-      <Container className="pt-3 pb-5">
+      <Container className="pt-3 pb-5 no-padding">
         <Row className="pt-2 pb-2">
           <Col xs={10}>
-            <h4>New Delegation</h4>
+            <h4>Register New Delegation</h4>
           </Col>
           <Col xs={2} className="text-right">
             <Tippy
@@ -459,22 +507,10 @@ export default function CollectionDelegationComponent(props: Props) {
       <Row>
         <Col>
           {isConnected && address && props.collection && (
-            <Container>
-              <Row className="pt-5 pb-2">
-                <Col className="text-left">
-                  <h4 className={styles.connectedAsHeader}>
-                    Connected as:{" "}
-                    {ensResolution.data && `${ensResolution.data} - `}
-                    {address}
-                  </h4>
-                </Col>
-              </Row>
-              <Row className="pt-2 pb-3">
-                <Col className="text-left">
-                  <h4 className={styles.connectedAsHeader}>
-                    Collection: {props.collection.display} -{" "}
-                    {props.collection.contract}
-                  </h4>
+            <Container className="pt-3 -b-3">
+              <Row className="pt-2 pb-2">
+                <Col>
+                  <h1>{props.collection.display.toUpperCase()} DELEGATIONS</h1>
                 </Col>
               </Row>
               {!showCreateNew && printLive()}
