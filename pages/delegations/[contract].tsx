@@ -8,6 +8,7 @@ import {
   MEMES_CONTRACT,
   MEMELAB_CONTRACT,
   GRADIENT_CONTRACT,
+  DELEGATION_ALL_ADDRESS,
 } from "../../constants";
 import { areEqualAddresses } from "../../helpers/Helpers";
 
@@ -23,6 +24,8 @@ const CollectionDelegationComponent = dynamic(
   }
 );
 
+export const MAX_BULK_ACTIONS = 5;
+
 export interface DelegationCollection {
   display: string;
   contract: string;
@@ -30,6 +33,11 @@ export interface DelegationCollection {
 }
 
 export const SUPPORTED_COLLECTIONS: DelegationCollection[] = [
+  {
+    display: "All",
+    contract: "all",
+    preview: "/Seize_Logo_Glasses_2-nobeta.png",
+  },
   {
     display: "The Memes",
     contract: MEMES_CONTRACT,
@@ -43,7 +51,7 @@ export const SUPPORTED_COLLECTIONS: DelegationCollection[] = [
       "https://d3lqz0a4bldqgf.cloudfront.net/images/scaled_x450/0x4db52a61dc491e15a2f78f5ac001c14ffe3568cb/1.WEBP",
   },
   {
-    display: "6529 Gradient",
+    display: "6529Gradient",
     contract: GRADIENT_CONTRACT,
     preview:
       "https://d3lqz0a4bldqgf.cloudfront.net/images/scaled_x450/0x0c58ef43ff3032005e472cb5709f8908acb00205/0.WEBP",
