@@ -135,6 +135,9 @@ export default function DelegationComponent() {
                     ens={ensResolution.data}
                     showCancel={false}
                     showAddMore={false}
+                    onHide={() => {
+                      //donothing
+                    }}
                   />
                 </Col>
                 <Col xs={12} sm={12} md={6} className={`pt-3 pb-3`}>
