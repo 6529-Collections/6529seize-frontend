@@ -7,24 +7,33 @@ import Image from "next/image";
 
 import { SUPPORTED_COLLECTIONS } from "../../pages/delegations/[contract]";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import dynamic from "next/dynamic";
+
+const NewDelegationComponent = dynamic(() => import("./NewDelegation"), {
+  ssr: false,
+});
 
 export default function DelegationComponent() {
-  const { address, connector, isConnected } = useAccount();
-  const connectResolution = useConnect();
+  const accountResolution = useAccount();
   const ensResolution = useEnsName({
-    address: address,
+    address: accountResolution.address,
   });
+  const connectResolution = useConnect();
 
   function printWalletActions() {
     return (
       <Container>
-        <Row className="pt-5 pb-3">
+        <Row>
           <Col>
-            <h4>Wallet Actions</h4>
+            <h4>Actions</h4>
           </Col>
         </Row>
         <Row className="pt-2 pb-3">
           <Col>
+            <span className={styles.addNewDelegationBtn}>
+              <FontAwesomeIcon icon="plus" className={styles.buttonIcon} />
+              Bulk Delegations
+            </span>
             <span className={styles.lockDelegationBtn}>
               <FontAwesomeIcon icon="lock" className={styles.buttonIcon} />
               Lock Wallet
@@ -36,10 +45,10 @@ export default function DelegationComponent() {
   }
   function printCollectionSelection() {
     return (
-      <Container className="pt-3 pb-5">
-        <Row className="pt-2 pb-2">
-          <Col>
-            <h4>Choose Collection</h4>
+      <Container>
+        <Row>
+          <Col className="pt-3 pb-3">
+            <h4>Manage Delegations by Collection</h4>
           </Col>
         </Row>
         <Row>
@@ -48,14 +57,14 @@ export default function DelegationComponent() {
               key={c.contract}
               xs={12}
               xm={12}
-              md={4}
+              md={6}
               onClick={() => {
                 window.location.href = `/delegations/${c.contract}`;
               }}
               className={styles.collectionSelectionWrapper}>
-              <Container className="pb-3">
+              <Container className="pb-4">
                 <Row>
-                  <Col className="pt-3 pb-3">
+                  <Col>
                     <h4 className="font-color float-none">{c.display}</h4>
                   </Col>
                 </Row>
@@ -117,13 +126,35 @@ export default function DelegationComponent() {
     <Container fluid>
       <Row>
         <Col>
-          {isConnected && address && (
-            <>
-              {printWalletActions()}
-              {printCollectionSelection()}
-            </>
+          {accountResolution.isConnected && accountResolution.address && (
+            <Container>
+              <Row>
+                <Col xs={12} sm={12} md={6} className="pt-3 pb-3">
+                  <NewDelegationComponent
+                    address={accountResolution.address}
+                    ens={ensResolution.data}
+                    showCancel={false}
+                    showAddMore={false}
+                  />
+                </Col>
+                <Col xs={12} sm={12} md={6} className={`pt-3 pb-3`}>
+                  {/* {printCollectionSelection()} */}
+                  <Container className={styles.leftBorder}>
+                    <Row>
+                      <Col>{printCollectionSelection()}</Col>
+                    </Row>
+                    <Row className="pt-4 pb-4">
+                      <Col>{printWalletActions()}</Col>
+                    </Row>
+                  </Container>
+                </Col>
+              </Row>
+              {/* <Row className="pt-2 pb-5">
+                <Col>{printWalletActions()}</Col>
+              </Row> */}
+            </Container>
           )}
-          {!isConnected && printConnect()}
+          {!accountResolution.isConnected && printConnect()}
         </Col>
       </Row>
     </Container>

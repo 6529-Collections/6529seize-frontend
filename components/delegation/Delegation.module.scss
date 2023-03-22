@@ -31,7 +31,7 @@
 
 .collectionSelectionImage {
   width: 100%;
-  height: 300px;
+  // height: 300px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -40,7 +40,7 @@
     height: auto;
     width: auto;
     max-width: 100%;
-    max-height: 300px;
+    max-height: 80px;
   }
 }
 
@@ -60,10 +60,7 @@
 
 .collectionDelegationsAccordionItem {
   border-radius: 0 !important;
-  background-color: rgb(240, 240, 240);
-  button {
-    background-color: rgb(240, 240, 240);
-  }
+  background-color: transparent;
 }
 
 .closeNewDelegationForm {
@@ -88,8 +85,8 @@
 .useCaseWalletUpdate {
   background-color: $blue;
   color: white;
-  padding: 8px 10px;
-  margin-left: 15px;
+  padding: 10px 15px;
+  margin-right: 15px;
   cursor: pointer;
 
   &:hover {
@@ -97,11 +94,17 @@
   }
 }
 
+.useCaseWalletUpdateDisabled {
+  pointer-events: none !important;
+  background-color: darken($color: $blue, $amount: 10);
+  color: $font-color-h;
+}
+
 .useCaseWalletRevoke {
   background-color: $raspberry;
   color: white;
-  padding: 8px 10px;
-  margin-left: 15px;
+  padding: 10px 15px;
+  margin-right: 15px;
   cursor: pointer;
 
   &:hover {
@@ -109,18 +112,25 @@
   }
 }
 
+.useCaseWalletRevokeDisabled {
+  pointer-events: none !important;
+  background-color: darken($color: $raspberry, $amount: 10);
+  color: $font-color-h;
+}
+
 .addNewDelegationBtn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background-color: $green;
+  margin-right: 15px;
+  background-color: $blue;
   color: white;
   width: fit-content;
   padding: 12px 25px;
   cursor: pointer;
 
   &:hover {
-    background-color: darken($color: $green, $amount: 5);
+    background-color: darken($color: $blue, $amount: 5);
   }
 }
 
@@ -128,6 +138,7 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  margin-right: 15px;
   background-color: $raspberry;
   color: white;
   width: fit-content;
@@ -159,6 +170,8 @@
   color: $dark-grey !important;
   border-radius: 0 !important;
   border-color: $lightest-grey;
+  font-size: smaller !important;
+  height: 100%;
 
   &:focus {
     border-color: $blue !important;
@@ -213,6 +226,7 @@
   padding-left: 15px;
   padding-right: 25px;
   color: black !important;
+  margin-right: 15px;
   border: none;
   padding: 12px 20px;
   cursor: pointer;
@@ -237,4 +251,45 @@
   width: 14px;
   height: 14px;
   margin-right: 3px;
+}
+
+.leftBorder {
+  height: 100%;
+  border-left: 1px solid $lighter-grey;
+}
+
+.delegationsTableUseCaseHeader {
+  padding-top: 0.2rem !important;
+  padding-bottom: 0.2rem !important;
+  font-weight: bolder;
+}
+
+.delegationsTableScrollContainer {
+  -ms-overflow-style: none; /* Internet Explorer 10+ */
+  scrollbar-width: none; /* Firefox */
+  overflow-x: scroll;
+}
+
+.delegationsTable {
+  tr td {
+    white-space: nowrap;
+  }
+  tr th {
+    white-space: nowrap;
+    line-height: 30px;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+  }
+
+  tr td a {
+    text-decoration: none;
+  }
+}
+
+.delegationsTable > :not(header) > * > * {
+  padding: 0.7rem;
+}
+
+.incomingDelegationAddress {
+  text-indent: 1rem;
 }

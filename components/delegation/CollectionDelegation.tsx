@@ -1,16 +1,27 @@
 import styles from "./Delegation.module.scss";
-import { Container, Row, Col, Accordion, Button, Form } from "react-bootstrap";
+import {
+  Container,
+  Row,
+  Col,
+  Accordion,
+  Table,
+  FormCheck,
+} from "react-bootstrap";
 import { useAccount, useConnect, useEnsName } from "wagmi";
-import { formatAddress } from "../../helpers/Helpers";
-import { useState } from "react";
-import Image from "next/image";
+import { Fragment, useState } from "react";
 
 import {
   DelegationCollection,
-  SUPPORTED_COLLECTIONS,
+  MAX_BULK_ACTIONS,
 } from "../../pages/delegations/[contract]";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import Tippy from "@tippyjs/react";
+import dynamic from "next/dynamic";
+import { NewDelegationParams } from "../../entities/IDelegation";
+import { areEqualAddresses } from "../../helpers/Helpers";
+
+const NewDelegationComponent = dynamic(() => import("./NewDelegation"), {
+  ssr: false,
+});
 
 interface Props {
   collection: DelegationCollection;
@@ -87,7 +98,7 @@ export const USE_CASES = [
   },
 ];
 
-const DELEGATIONS_SAMPLE = [
+const DELEGATOR_SAMPLE = [
   {
     uc: 2,
     wallets: [
@@ -108,6 +119,29 @@ const DELEGATIONS_SAMPLE = [
     ],
   },
 ];
+
+const DELEGATED_SAMPLE = [
+  {
+    uc: 4,
+    wallets: [
+      "0x0000000000e43e0c383403dd18066ff60d5003b3",
+      "0x00000000174b0ba12b89da994258020837ad8818",
+    ],
+  },
+  {
+    uc: 12,
+    wallets: ["0x0000007370af0000ad00be0efd2f1eb6e6e9d700"],
+  },
+  {
+    uc: 13,
+    wallets: [
+      "0x000000004b5ad44f70781462233d177d32d993f1",
+      "0x0000000765306855601b70d930ac579b23a18d44",
+      "0x0000000f20b778d2424e95120652e2d40d8f5aac",
+    ],
+  },
+];
+
 export default function CollectionDelegationComponent(props: Props) {
   const { address, connector, isConnected } = useAccount();
   const connectResolution = useConnect();
@@ -115,43 +149,143 @@ export default function CollectionDelegationComponent(props: Props) {
     address: address,
   });
 
+  const [bulkDelegations, setBulkDelegations] = useState<any[]>([]);
+
+  const [delegationParams, setDelegationParams] = useState<
+    NewDelegationParams[]
+  >([]);
+
   const [showCreateNew, setShowCreateNew] = useState(false);
-  const [showExpiryCalendar, setShowExpiryCalendar] = useState(false);
-  const [showTokensInput, setShowTokensInput] = useState(false);
 
-  const [newDelegationDate, setNewDelegationDate] = useState<Date | undefined>(
-    undefined
-  );
-  const [newDelegationToken, setNewDelegationToken] = useState<
-    number | undefined
-  >(undefined);
-
-  const [errors, setErrors] = useState<string[]>([]);
-
-  function submitDelegation() {
-    const newErrors: string[] = [];
-    if (showExpiryCalendar && !newDelegationDate) {
-      newErrors.push("Missing or invalid Expiry");
-    }
-    if (showTokensInput && !newDelegationToken) {
-      newErrors.push("Missing or invalid Token");
-    }
-    setErrors(newErrors);
-    window.scrollTo(0, document.body.scrollHeight);
+  function printDelegations() {
+    return (
+      <Accordion className={styles.collectionDelegationsAccordion}>
+        <Accordion.Item
+          className={styles.collectionDelegationsAccordionItem}
+          eventKey={"0"}>
+          <Accordion.Header>Outgoing Delegations</Accordion.Header>
+          <Accordion.Body>{printOutgoingDelegations()}</Accordion.Body>
+        </Accordion.Item>
+        <Accordion.Item
+          className={`${styles.collectionDelegationsAccordionItem} mt-4`}
+          eventKey={"1"}>
+          <Accordion.Header>Incoming Delegations</Accordion.Header>
+          <Accordion.Body>{printIncomingDelegations()}</Accordion.Body>
+        </Accordion.Item>
+      </Accordion>
+    );
   }
 
-  function printLive() {
+  function printOutgoingDelegations() {
     return (
-      <Container className="pt-3 pb-5 no-padding">
-        <Row className="pt-2 pb-2">
-          <Col>
-            <h4>Current Delegations</h4>
-          </Col>
-        </Row>
-        <Row>
+      <Container className="no-padding">
+        <Row className={styles.delegationsTableScrollContainer}>
           <Col className="pt-2 pb-3">
-            <Accordion className={styles.collectionDelegationsAccordion}>
-              {DELEGATIONS_SAMPLE.map((ds, index) => {
+            <Table className={styles.delegationsTable}>
+              <tbody>
+                {DELEGATOR_SAMPLE.map((ds, index) => {
+                  const useCase = USE_CASES.find((uc) => uc.use_case == ds.uc);
+                  return (
+                    <Fragment key={`${ds.uc}-${index}`}>
+                      <tr>
+                        <td
+                          colSpan={4}
+                          className={styles.delegationsTableUseCaseHeader}>
+                          #{ds.uc} - {useCase?.display}
+                        </td>
+                      </tr>
+                      {ds.wallets.map((w) => (
+                        <tr key={`${ds.uc}-${w}`}>
+                          <td>
+                            <FormCheck
+                              disabled={
+                                bulkDelegations.length == MAX_BULK_ACTIONS &&
+                                !bulkDelegations.some(
+                                  (bd) =>
+                                    bd.use_case == ds.uc &&
+                                    areEqualAddresses(bd.wallet, w)
+                                )
+                              }
+                              onChange={(e) => {
+                                if (e.target.checked) {
+                                  setBulkDelegations((bd) => [
+                                    ...bd,
+                                    {
+                                      use_case: ds.uc,
+                                      wallet: w,
+                                    },
+                                  ]);
+                                } else {
+                                  setBulkDelegations((bd) =>
+                                    bd.filter(
+                                      (x) =>
+                                        !(
+                                          x.use_case == ds.uc &&
+                                          areEqualAddresses(x.wallet, w)
+                                        )
+                                    )
+                                  );
+                                }
+                              }}
+                            />
+                          </td>
+                          <td>{w}</td>
+                          <td className="text-right">
+                            <span
+                              className={styles.useCaseWalletUpdate}
+                              onClick={() =>
+                                alert(
+                                  `\nupdating delegation... \n\ndelegator: ${address}\nuse case: ${ds.uc}\naddress: ${w} `
+                                )
+                              }>
+                              Update
+                            </span>
+                          </td>
+                          <td>
+                            <span
+                              className={styles.useCaseWalletRevoke}
+                              onClick={() =>
+                                alert(
+                                  `\nrevoking delegation... \n\ndelegator: ${address}\nuse case: ${ds.uc}\naddress: ${w} `
+                                )
+                              }>
+                              Revoke
+                            </span>
+                          </td>
+                        </tr>
+                      ))}
+                    </Fragment>
+                  );
+                })}
+                <tr>
+                  <td colSpan={4} className="pt-3">
+                    selected:{" "}
+                    {bulkDelegations.length == 5
+                      ? `5 (max)`
+                      : bulkDelegations.length}
+                  </td>
+                </tr>
+                <tr>
+                  <td colSpan={4}>
+                    <span
+                      className={`${styles.useCaseWalletRevoke} ${
+                        bulkDelegations.length == 0
+                          ? `${styles.useCaseWalletRevokeDisabled}`
+                          : ``
+                      }`}
+                      onClick={() =>
+                        alert(
+                          `\nrevoking delegation... \n\ndelegator: ${address}\nuse case: `
+                        )
+                      }>
+                      Bulk Revoke
+                    </span>
+                  </td>
+                </tr>
+              </tbody>
+            </Table>
+            {/* <Accordion className={styles.collectionDelegationsAccordion}>
+              {DELEGATOR_SAMPLE.map((ds, index) => {
                 const useCase = USE_CASES.find((uc) => uc.use_case == ds.uc);
                 if (useCase) {
                   return (
@@ -197,25 +331,60 @@ export default function CollectionDelegationComponent(props: Props) {
                             </li>
                           ))}
                         </ul>
-                        <span
-                          className={`${styles.lockDelegationBtn} mr-2 mb-3`}>
-                          <FontAwesomeIcon
-                            icon="lock"
-                            className={styles.buttonIcon}
-                          />
-                          Lock Use Case
-                        </span>
                       </Accordion.Body>
                     </Accordion.Item>
                   );
                 }
               })}
-            </Accordion>
+            </Accordion> */}
           </Col>
         </Row>
+      </Container>
+    );
+  }
+
+  function printIncomingDelegations() {
+    return (
+      <Container className="no-padding">
+        <Row className={styles.delegationsTableScrollContainer}>
+          <Col className="pt-2 pb-3">
+            <Table className={styles.delegationsTable}>
+              <tbody>
+                {DELEGATED_SAMPLE.map((ds, index) => {
+                  const useCase = USE_CASES.find((uc) => uc.use_case == ds.uc);
+                  return (
+                    <Fragment key={`${ds.uc}-${index}`}>
+                      <tr>
+                        <td
+                          colSpan={4}
+                          className={styles.delegationsTableUseCaseHeader}>
+                          #{ds.uc} - {useCase?.display}
+                        </td>
+                      </tr>
+                      {ds.wallets.map((w) => (
+                        <tr key={`${ds.uc}-${w}`}>
+                          <td className={styles.incomingDelegationAddress}>
+                            &bull; {w}
+                          </td>
+                        </tr>
+                      ))}
+                    </Fragment>
+                  );
+                })}
+              </tbody>
+            </Table>
+          </Col>
+        </Row>
+      </Container>
+    );
+  }
+
+  function printActions() {
+    return (
+      <Container>
         <Row className="pt-5 pb-2">
           <Col>
-            <h4>Register</h4>
+            <h4>Actions</h4>
           </Col>
         </Row>
         <Row className="pt-2 pb-3">
@@ -224,244 +393,22 @@ export default function CollectionDelegationComponent(props: Props) {
               className={styles.addNewDelegationBtn}
               onClick={() => setShowCreateNew(true)}>
               <FontAwesomeIcon icon="plus" className={styles.buttonIcon} />
-              Register New Delegation
+              Register Delegation
             </span>
-          </Col>
-        </Row>
-        <Row className="pt-5 pb-2">
-          <Col>
-            <h4>Revoke</h4>
-          </Col>
-        </Row>
-        <Row className="pt-2 pb-3">
-          <Col>
-            <span className={styles.revokeDelegationBtn}>
-              <FontAwesomeIcon icon="minus" className={styles.buttonIcon} />
-              Revoke Delegations
-            </span>
-          </Col>
-        </Row>
-        <Row className="pt-5 pb-2">
-          <Col>
-            <h4>Lock</h4>
-          </Col>
-        </Row>
-        <Row className="pt-2 pb-3">
-          <Col>
-            <span className={styles.lockDelegationBtn}>
-              <FontAwesomeIcon icon="lock" className={styles.buttonIcon} />
-              Lock Collection
+            <span
+              className={styles.addNewDelegationBtn}
+              onClick={() => setShowCreateNew(true)}>
+              <FontAwesomeIcon icon="plus" className={styles.buttonIcon} />
+              Register Delegation with Sub-delegation Rights
             </span>
             <span className={styles.lockDelegationBtn}>
               <FontAwesomeIcon icon="lock" className={styles.buttonIcon} />
               Lock Use Case
             </span>
-          </Col>
-        </Row>
-      </Container>
-    );
-  }
-
-  function printCreateNew() {
-    return (
-      <Container className="pt-3 pb-5 no-padding">
-        <Row className="pt-2 pb-2">
-          <Col xs={10}>
-            <h4>Register New Delegation</h4>
-          </Col>
-          <Col xs={2} className="text-right">
-            <Tippy
-              content={"Cancel Delegation"}
-              delay={250}
-              placement={"top"}
-              theme={"light"}>
-              <FontAwesomeIcon
-                className={styles.closeNewDelegationForm}
-                icon="times-circle"
-                onClick={() => setShowCreateNew(false)}></FontAwesomeIcon>
-            </Tippy>
-          </Col>
-        </Row>
-        <Row className="pt-4">
-          <Col>
-            <Form>
-              <Form.Group as={Row} className="pb-4">
-                <Form.Label column sm={2}>
-                  Delegator
-                </Form.Label>
-                <Col sm={10}>
-                  <Form.Control
-                    className={`${styles.formInput} ${styles.formInputDisabled}`}
-                    type="text"
-                    defaultValue={
-                      ensResolution.data
-                        ? `${ensResolution.data} - ${address}`
-                        : `${address}`
-                    }
-                    disabled
-                  />
-                </Col>
-              </Form.Group>
-              <Form.Group as={Row} className="pb-4">
-                <Form.Label column sm={2}>
-                  Collection
-                </Form.Label>
-                <Col sm={10}>
-                  <Form.Control
-                    className={`${styles.formInput} ${styles.formInputDisabled}`}
-                    type="text"
-                    defaultValue={`${props.collection.display} - ${props.collection.contract}`}
-                    disabled
-                  />
-                </Col>
-              </Form.Group>
-              <Form.Group as={Row} className="pb-4">
-                <Form.Label column sm={2}>
-                  Use Case
-                </Form.Label>
-                <Col sm={10}>
-                  <Form.Select
-                    className={`${styles.formInput}`}
-                    defaultValue="0">
-                    <option value="0" disabled>
-                      Select use case
-                    </option>
-                    {USE_CASES.map((uc) => (
-                      <option
-                        key={`add-delegation-select-${uc.use_case}`}
-                        value={uc.use_case}>
-                        #{uc.use_case} - {uc.display}
-                      </option>
-                    ))}
-                  </Form.Select>
-                </Col>
-              </Form.Group>
-              <Form.Group as={Row} className="pb-4">
-                <Form.Label column sm={2}>
-                  Expiry
-                </Form.Label>
-                <Col sm={10}>
-                  <Form.Check
-                    defaultChecked
-                    className={styles.newDelegationFormToggle}
-                    type="radio"
-                    label="Never"
-                    name="expiryRadio"
-                    onChange={() => setShowExpiryCalendar(false)}
-                  />
-                  &nbsp;&nbsp;
-                  <Form.Check
-                    className={styles.newDelegationFormToggle}
-                    type="radio"
-                    label="Select Date"
-                    name="expiryRadio"
-                    onChange={() => setShowExpiryCalendar(true)}
-                  />
-                  {showExpiryCalendar && (
-                    <Container fluid className="no-padding pt-3">
-                      <Row>
-                        <Col xs={12} xm={12} md={6} lg={4}>
-                          <Form.Control
-                            min={new Date().toISOString().slice(0, 10)}
-                            className={`${styles.formInput}`}
-                            type="date"
-                            placeholder="Expiry Date"
-                            onChange={(e) => {
-                              const value = e.target.value;
-                              if (value) {
-                                setNewDelegationDate(new Date(value));
-                              } else {
-                                setNewDelegationDate(undefined);
-                              }
-                            }}
-                          />
-                        </Col>
-                      </Row>
-                    </Container>
-                  )}
-                </Col>
-              </Form.Group>
-              <Form.Group as={Row} className="pb-4">
-                <Form.Label column sm={2}>
-                  Tokens
-                </Form.Label>
-                <Col sm={10}>
-                  <Form.Check
-                    defaultChecked
-                    className={styles.newDelegationFormToggle}
-                    type="radio"
-                    label="All"
-                    name="tokenIdRadio"
-                    onChange={() => setShowTokensInput(false)}
-                  />
-                  &nbsp;&nbsp;
-                  <Form.Check
-                    className={styles.newDelegationFormToggle}
-                    type="radio"
-                    label="Select Token ID"
-                    name="tokenIdRadio"
-                    onChange={() => setShowTokensInput(true)}
-                  />
-                  {showTokensInput && (
-                    <Container fluid className="no-padding pt-3">
-                      <Row>
-                        <Col xs={12} xm={12} md={6} lg={4}>
-                          <Form.Control
-                            min={0}
-                            className={`${styles.formInput}`}
-                            type="number"
-                            placeholder="Token ID"
-                            onChange={(e) => {
-                              const value = e.target.value;
-                              try {
-                                const intValue = parseInt(value);
-                                setNewDelegationToken(intValue);
-                              } catch {
-                                setNewDelegationToken(undefined);
-                              }
-                            }}
-                          />
-                        </Col>
-                      </Row>
-                    </Container>
-                  )}
-                </Col>
-              </Form.Group>
-              <Form.Group as={Row} className="pt-4 pb-4">
-                <Form.Label column sm={2}></Form.Label>
-                <Col sm={10} className="">
-                  <span
-                    className={styles.newDelegationSubmitBtn}
-                    onClick={() => {
-                      setErrors([]);
-                      submitDelegation();
-                    }}>
-                    Submit
-                  </span>
-                  <span
-                    className={styles.newDelegationCancelBtn}
-                    onClick={() => setShowCreateNew(false)}>
-                    Cancel
-                  </span>
-                </Col>
-              </Form.Group>
-              {errors.length > 0 && (
-                <Form.Group
-                  as={Row}
-                  className={`pt-4 pb-4 ${styles.newDelegationError}`}>
-                  <Form.Label column sm={2}>
-                    Errors
-                  </Form.Label>
-                  <Col sm={10}>
-                    <ul>
-                      {errors.map((e, index) => (
-                        <li key={`new-delegation-error-${index}`}>{e}</li>
-                      ))}
-                    </ul>
-                  </Col>
-                </Form.Group>
-              )}
-            </Form>
+            <span className={styles.lockDelegationBtn}>
+              <FontAwesomeIcon icon="lock" className={styles.buttonIcon} />
+              Lock Collection
+            </span>
           </Col>
         </Row>
       </Container>
@@ -513,8 +460,24 @@ export default function CollectionDelegationComponent(props: Props) {
                   <h1>{props.collection.display.toUpperCase()} DELEGATIONS</h1>
                 </Col>
               </Row>
-              {!showCreateNew && printLive()}
-              {showCreateNew && printCreateNew()}
+              {!showCreateNew && (
+                <>
+                  {/* {printOutgoingDelegations()}
+                  {printIncomingDelegations()} */}
+                  {printDelegations()}
+                  {printActions()}
+                </>
+              )}
+              {showCreateNew && (
+                <NewDelegationComponent
+                  collection={props.collection}
+                  address={address}
+                  ens={ensResolution.data}
+                  showAddMore={true}
+                  showCancel={true}
+                  onHide={() => setShowCreateNew(false)}
+                />
+              )}
             </Container>
           )}
           {!isConnected && printConnect()}
