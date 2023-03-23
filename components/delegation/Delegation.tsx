@@ -176,8 +176,8 @@ export default function DelegationComponent() {
           {Object.values(SUPPORTED_COLLECTIONS).map((c) => (
             <Col
               key={c.contract}
-              xs={12}
-              xm={12}
+              xs={6}
+              xm={6}
               md={6}
               onClick={() => {
                 window.location.href = `/delegations/${c.contract}`;
