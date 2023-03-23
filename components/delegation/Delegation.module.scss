@@ -87,6 +87,7 @@
   color: white;
   padding: 10px 15px;
   margin-right: 15px;
+  margin-top: 15px;
   cursor: pointer;
 
   &:hover {
@@ -105,6 +106,7 @@
   color: white;
   padding: 10px 15px;
   margin-right: 15px;
+  margin-top: 15px;
   cursor: pointer;
 
   &:hover {
@@ -123,6 +125,7 @@
   align-items: center;
   justify-content: center;
   margin-right: 15px;
+  margin-top: 15px;
   background-color: $blue;
   color: white;
   width: fit-content;
@@ -139,6 +142,7 @@
   align-items: center;
   justify-content: center;
   margin-right: 15px;
+  margin-top: 15px;
   background-color: $raspberry;
   color: white;
   width: fit-content;
@@ -155,6 +159,7 @@
   align-items: center;
   justify-content: center;
   margin-right: 15px;
+  margin-top: 15px;
   background-color: lighten($color: $lightest-grey, $amount: 10);
   color: black;
   width: fit-content;
@@ -233,6 +238,7 @@
   padding-right: 25px;
   color: black !important;
   margin-right: 15px;
+  margin-top: 15px;
   border: none;
   padding: 12px 20px;
   cursor: pointer;
@@ -270,6 +276,12 @@
 .leftBorder {
   height: 100%;
   border-left: 1px solid $lighter-grey;
+}
+
+@media only screen and (max-width: 767px) {
+  .leftBorder {
+    border-left: none !important;
+  }
 }
 
 .delegationsTableUseCaseHeader {
