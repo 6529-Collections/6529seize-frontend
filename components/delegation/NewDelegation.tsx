@@ -50,7 +50,7 @@ export default function NewDelegationComponent(props: Props) {
     args: [
       newDelegationCollection,
       newDelegationToAddress,
-      showExpiryCalendar ? newDelegationDate?.getMilliseconds() : 2 ^ (63 - 1),
+      showExpiryCalendar ? newDelegationDate?.getMilliseconds() : 64060588800,
       newDelegationUseCase,
       showTokensInput ? false : true,
       showTokensInput ? newDelegationToken : 0,
