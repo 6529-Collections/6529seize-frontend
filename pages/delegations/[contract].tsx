@@ -58,6 +58,77 @@ export const SUPPORTED_COLLECTIONS: DelegationCollection[] = [
   },
 ];
 
+export const DELEGATION_USE_CASES = [
+  {
+    use_case: 1,
+    display: "All (1-15)",
+  },
+  {
+    use_case: 2,
+    display: "Minting / Allowlist",
+  },
+  {
+    use_case: 3,
+    display: "Airdrops",
+  },
+  {
+    use_case: 4,
+    display: "Voting / Governance",
+  },
+  {
+    use_case: 5,
+    display: "Avatar Display",
+  },
+  {
+    use_case: 6,
+    display: "Social Media",
+  },
+  {
+    use_case: 7,
+    display: "Physical Events Access",
+  },
+  {
+    use_case: 8,
+    display: "Virtual Events Access",
+  },
+  {
+    use_case: 9,
+    display: "Club Access",
+  },
+  {
+    use_case: 10,
+    display: "Metaverse Access",
+  },
+  {
+    use_case: 11,
+    display: "Metaverse Land",
+  },
+  {
+    use_case: 12,
+    display: "Gameplay",
+  },
+  {
+    use_case: 13,
+    display: "IP Licensing",
+  },
+  {
+    use_case: 14,
+    display: "NFT rentals",
+  },
+  {
+    use_case: 15,
+    display: "View Access",
+  },
+  {
+    use_case: 16,
+    display: "Sub-delegation",
+  },
+  {
+    use_case: 99,
+    display: "Consolidation",
+  },
+];
+
 interface Props {
   collection: DelegationCollection;
 }

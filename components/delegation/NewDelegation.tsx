@@ -1,17 +1,22 @@
 import styles from "./Delegation.module.scss";
 import { Container, Row, Col, Form } from "react-bootstrap";
-import { useContractWrite, usePrepareContractWrite } from "wagmi";
+import {
+  useContractWrite,
+  usePrepareContractWrite,
+  useWaitForTransaction,
+} from "wagmi";
 import { useEffect, useState } from "react";
 
 import {
   DelegationCollection,
+  DELEGATION_USE_CASES,
   SUPPORTED_COLLECTIONS,
 } from "../../pages/delegations/[contract]";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Tippy from "@tippyjs/react";
-import { USE_CASES } from "./CollectionDelegation";
 import { DELEGATION_CONTRACT } from "../../constants";
 import { DELEGATION_ABI } from "../../abis";
+import { getTransactionLink, isValidEthAddress } from "../../helpers/Helpers";
 
 interface Props {
   address: string;
@@ -36,11 +41,10 @@ export default function NewDelegationComponent(props: Props) {
   const [newDelegationCollection, setNewDelegationCollection] =
     useState<string>(props.collection ? props.collection.contract : "0");
   const [newDelegationToAddress, setNewDelegationToAddress] = useState("");
-  const [submitting, setSubmitting] = useState(false);
   const [errors, setErrors] = useState<string[]>([]);
 
-  const { config } = usePrepareContractWrite({
-    address: submitting ? DELEGATION_CONTRACT.contract : undefined,
+  const contractWriteDelegationConfig = usePrepareContractWrite({
+    address: DELEGATION_CONTRACT.contract,
     abi: DELEGATION_ABI,
     chainId: DELEGATION_CONTRACT.chain_id,
     args: [
@@ -51,10 +55,39 @@ export default function NewDelegationComponent(props: Props) {
       showTokensInput ? false : true,
       showTokensInput ? newDelegationToken : 0,
     ],
-    functionName: "registerDelegationAddress",
+    functionName:
+      validate().length == 0 ? "registerDelegationAddress" : undefined,
     onError: (e) => {},
   });
-  const contractWrite = useContractWrite(config);
+  const contractWriteDelegation = useContractWrite(
+    contractWriteDelegationConfig.config
+  );
+
+  const waitContractWriteDelegation = useWaitForTransaction({
+    confirmations: 1,
+    hash: contractWriteDelegation.data?.hash,
+  });
+
+  function validate() {
+    const newErrors: string[] = [];
+    if (!newDelegationCollection || newDelegationCollection == "0") {
+      newErrors.push("Missing or invalid Collection");
+    }
+    if (!newDelegationUseCase) {
+      newErrors.push("Missing or invalid Use Case");
+    }
+    if (!newDelegationToAddress || !isValidEthAddress(newDelegationToAddress)) {
+      newErrors.push("Missing or invalid delegation Address");
+    }
+    if (showExpiryCalendar && !newDelegationDate) {
+      newErrors.push("Missing or invalid Expiry");
+    }
+    if (showTokensInput && !newDelegationToken) {
+      newErrors.push("Missing or invalid Token ID");
+    }
+
+    return newErrors;
+  }
 
   function clearForm() {
     setErrors([]);
@@ -66,22 +99,6 @@ export default function NewDelegationComponent(props: Props) {
   }
 
   function submitDelegation() {
-    const newErrors: string[] = [];
-    if (!newDelegationCollection || newDelegationCollection == "0") {
-      newErrors.push("Missing or invalid Collection");
-    }
-    if (!newDelegationUseCase) {
-      newErrors.push("Missing or invalid Use Case");
-    }
-    if (!newDelegationToAddress) {
-      newErrors.push("Missing or invalid delegation Address");
-    }
-    if (showExpiryCalendar && !newDelegationDate) {
-      newErrors.push("Missing or invalid Expiry");
-    }
-    if (showTokensInput && !newDelegationToken) {
-      newErrors.push("Missing or invalid Token ID");
-    }
     console.log(
       "registerDelegationAddress",
       newDelegationCollection,
@@ -91,27 +108,21 @@ export default function NewDelegationComponent(props: Props) {
       showTokensInput ? false : true,
       showTokensInput ? newDelegationToken : 0
     );
+    const newErrors = validate();
     if (newErrors.length > 0) {
       setErrors(newErrors);
       window.scrollTo(0, document.body.scrollHeight);
     } else {
-      setSubmitting(true);
+      contractWriteDelegation.write?.();
     }
   }
 
   useEffect(() => {
-    if (submitting) {
-      setErrors([]);
-      contractWrite.write?.();
+    if (contractWriteDelegation.error) {
+      setErrors((err) => [...err, contractWriteDelegation.error!.message]);
+      window.scrollTo(0, document.body.scrollHeight);
     }
-  }, [submitting]);
-
-  useEffect(() => {
-    if (contractWrite.error) {
-      setSubmitting(false);
-      setErrors((err) => [...err, contractWrite.error!.message]);
-    }
-  }, [contractWrite.error]);
+  }, [contractWriteDelegation.error]);
 
   return (
     <Container className="no-padding">
@@ -192,7 +203,7 @@ export default function NewDelegationComponent(props: Props) {
                   <option value={0} disabled>
                     Select Use Case
                   </option>
-                  {USE_CASES.map((uc) => (
+                  {DELEGATION_USE_CASES.map((uc) => (
                     <option
                       key={`add-delegation-select-use-case-${uc.use_case}`}
                       value={uc.use_case}>
@@ -311,14 +322,29 @@ export default function NewDelegationComponent(props: Props) {
             </Form.Group>
             <Form.Group as={Row} className="pt-2 pb-4">
               <Form.Label column sm={2}></Form.Label>
-              <Col sm={10} className="">
+              <Col sm={10} className="d-flex align-items-center">
                 <span
-                  className={styles.newDelegationSubmitBtn}
+                  className={`${styles.newDelegationSubmitBtn} ${
+                    contractWriteDelegation.isLoading ||
+                    waitContractWriteDelegation.isLoading
+                      ? `${styles.newDelegationSubmitBtnDisabled}`
+                      : ``
+                  }`}
                   onClick={() => {
                     setErrors([]);
                     submitDelegation();
                   }}>
-                  Submit
+                  Submit{" "}
+                  {(contractWriteDelegation.isLoading ||
+                    waitContractWriteDelegation.isLoading) && (
+                    <div className="d-inline">
+                      <div
+                        className={`spinner-border ${styles.loader}`}
+                        role="status">
+                        <span className="sr-only"></span>
+                      </div>
+                    </div>
+                  )}
                 </span>
                 {props.showCancel && (
                   <span
@@ -342,6 +368,67 @@ export default function NewDelegationComponent(props: Props) {
                       <li key={`new-delegation-error-${index}`}>{e}</li>
                     ))}
                   </ul>
+                </Col>
+              </Form.Group>
+            )}
+            {contractWriteDelegation.data && (
+              <Form.Group
+                as={Row}
+                className={`pt-2 pb-2 ${styles.newDelegationRedultsList} ${
+                  waitContractWriteDelegation.data &&
+                  waitContractWriteDelegation.data.status
+                    ? styles.newDelegationSuccess
+                    : waitContractWriteDelegation.data &&
+                      !waitContractWriteDelegation.data.status
+                    ? styles.newDelegationError
+                    : ``
+                }`}>
+                <Form.Label
+                  column
+                  sm={2}
+                  className={`${styles.newDelegationRedultsList} ${
+                    waitContractWriteDelegation.data &&
+                    waitContractWriteDelegation.data.status
+                      ? styles.newDelegationSuccess
+                      : waitContractWriteDelegation.data &&
+                        !waitContractWriteDelegation.data.status
+                      ? styles.newDelegationError
+                      : ``
+                  }`}>
+                  Status
+                </Form.Label>
+                <Col sm={10}>
+                  <ul>
+                    <li
+                      className={`${styles.newDelegationRedultsList} ${
+                        waitContractWriteDelegation.data &&
+                        waitContractWriteDelegation.data.status
+                          ? styles.newDelegationSuccess
+                          : waitContractWriteDelegation.data &&
+                            !waitContractWriteDelegation.data.status
+                          ? styles.newDelegationError
+                          : ``
+                      }`}>
+                      {waitContractWriteDelegation.isLoading
+                        ? `Transaction Submitted...`
+                        : waitContractWriteDelegation.data?.status
+                        ? `Transaction Successful!`
+                        : `Transaction Failed`}
+                    </li>
+                    {waitContractWriteDelegation.isLoading && (
+                      <li>Waiting for confirmation...</li>
+                    )}
+                  </ul>
+                  <a
+                    href={getTransactionLink(
+                      DELEGATION_CONTRACT.chain_id,
+                      contractWriteDelegation.data.hash
+                    )}
+                    target="_blank"
+                    rel="noreferrer"
+                    className={styles.etherscanLink}>
+                    view txn
+                  </a>
                 </Col>
               </Form.Group>
             )}

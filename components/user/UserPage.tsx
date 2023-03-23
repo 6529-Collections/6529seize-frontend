@@ -354,7 +354,6 @@ export default function UserPage(props: Props) {
     if (ownerAddress && router.isReady) {
       let url = `${process.env.API_ENDPOINT}/api/distributions?wallet=${ownerAddress}&page_size=${DISTRIBUTIONS_PAGE_SIZE}&page=${distributionsPage}`;
       fetchUrl(url).then((response: DBResponse) => {
-        console.log(response);
         setDistributionsTotalResults(response.count);
         setDistributions(response.data);
       });

@@ -1,13 +1,23 @@
 import styles from "./Delegation.module.scss";
-import { Container, Row, Col } from "react-bootstrap";
-import { useAccount, useConnect, useEnsName } from "wagmi";
-import { formatAddress } from "../../helpers/Helpers";
-import { useState } from "react";
+import { Container, Row, Col, ToastContainer, Toast } from "react-bootstrap";
+import {
+  useAccount,
+  useConnect,
+  useContractRead,
+  useContractWrite,
+  useEnsName,
+  usePrepareContractWrite,
+  useWaitForTransaction,
+} from "wagmi";
+import { formatAddress, getTransactionLink } from "../../helpers/Helpers";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 
 import { SUPPORTED_COLLECTIONS } from "../../pages/delegations/[contract]";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import dynamic from "next/dynamic";
+import { DELEGATION_CONTRACT } from "../../constants";
+import { DELEGATION_ABI } from "../../abis";
 
 const NewDelegationComponent = dynamic(() => import("./NewDelegation"), {
   ssr: false,
@@ -20,6 +30,89 @@ export default function DelegationComponent() {
   });
   const connectResolution = useConnect();
 
+  const [toast, setToast] = useState<
+    { title: string; message: string } | undefined
+  >(undefined);
+  const [showToast, setShowToast] = useState(false);
+
+  const globalLockRead = useContractRead({
+    address: DELEGATION_CONTRACT.contract,
+    abi: DELEGATION_ABI,
+    chainId: DELEGATION_CONTRACT.chain_id,
+    functionName: "retrieveGloballockStatus",
+    args: [accountResolution.address],
+    watch: true,
+  });
+
+  const globalLockWriteConfig = usePrepareContractWrite({
+    address: DELEGATION_CONTRACT.contract,
+    abi: DELEGATION_ABI,
+    chainId: DELEGATION_CONTRACT.chain_id,
+    args: [globalLockRead.data ? false : true],
+    functionName: "setglobalLock",
+    onError: (e) => {},
+  });
+  const globalLockWrite = useContractWrite(globalLockWriteConfig.config);
+  const waitGlobalLockWrite = useWaitForTransaction({
+    confirmations: 1,
+    hash: globalLockWrite.data?.hash,
+  });
+
+  useEffect(() => {
+    if (globalLockWrite.error) {
+      setToast({
+        title: `${globalLockRead.data ? `Unlocking` : `Locking`} Wallet`,
+        message: globalLockWrite.error.message,
+      });
+    }
+    if (globalLockWrite.data) {
+      if (globalLockWrite.data?.hash) {
+        if (waitGlobalLockWrite.isLoading) {
+          setToast({
+            title: "Locking Wallet",
+            message: `Transaction submitted...
+                    <a
+                    href=${getTransactionLink(
+                      DELEGATION_CONTRACT.chain_id,
+                      globalLockWrite.data.hash
+                    )}
+                    target="_blank"
+                    rel="noreferrer"
+                    className=${styles.etherscanLink}>
+                    view
+                  </a><br />Waiting for confirmation...`,
+          });
+        } else {
+          setToast({
+            title: "Locking Wallet",
+            message: `Transaction Successful!
+                    <a
+                    href=${getTransactionLink(
+                      DELEGATION_CONTRACT.chain_id,
+                      globalLockWrite.data.hash
+                    )}
+                    target="_blank"
+                    rel="noreferrer"
+                    className=${styles.etherscanLink}>
+                    view
+                  </a>`,
+          });
+        }
+      }
+    }
+  }, [
+    globalLockWrite.error,
+    globalLockWrite.data,
+    waitGlobalLockWrite.isLoading,
+  ]);
+
+  useEffect(() => {
+    if (!showToast) {
+      setToast(undefined);
+      globalLockWrite.error = null;
+    }
+  }, [showToast]);
+
   function printWalletActions() {
     return (
       <Container>
@@ -30,14 +123,42 @@ export default function DelegationComponent() {
         </Row>
         <Row className="pt-2 pb-3">
           <Col>
-            <span className={styles.addNewDelegationBtn}>
-              <FontAwesomeIcon icon="plus" className={styles.buttonIcon} />
-              Bulk Delegations
-            </span>
-            <span className={styles.lockDelegationBtn}>
-              <FontAwesomeIcon icon="lock" className={styles.buttonIcon} />
-              Lock Wallet
-            </span>
+            <>
+              <span className={styles.addNewDelegationBtn}>
+                <FontAwesomeIcon icon="plus" className={styles.buttonIcon} />
+                Bulk Delegations
+              </span>
+              {globalLockRead.data != null && (
+                <span
+                  className={styles.lockDelegationBtn}
+                  onClick={() => {
+                    setToast({
+                      title: `${
+                        globalLockRead.data ? `Unlocking` : `Locking`
+                      } Wallet`,
+                      message: "Confirm in your wallet...",
+                    });
+                    setShowToast(true);
+                    globalLockWrite.write?.();
+                  }}>
+                  <FontAwesomeIcon
+                    icon={globalLockRead.data ? "lock" : "lock-open"}
+                    className={styles.buttonIcon}
+                  />
+                  {globalLockRead.data ? "Unlock" : "Lock"} Wallet
+                  {(globalLockWrite.isLoading ||
+                    waitGlobalLockWrite.isLoading) && (
+                    <div className="d-inline">
+                      <div
+                        className={`spinner-border ${styles.loader}`}
+                        role="status">
+                        <span className="sr-only"></span>
+                      </div>
+                    </div>
+                  )}
+                </span>
+              )}
+            </>
           </Col>
         </Row>
       </Container>
@@ -160,6 +281,19 @@ export default function DelegationComponent() {
           {!accountResolution.isConnected && printConnect()}
         </Col>
       </Row>
+      {toast && (
+        <ToastContainer position={"top-center"} className={styles.toast}>
+          <Toast onClose={() => setShowToast(false)} show={showToast}>
+            <Toast.Header>
+              <strong className="me-auto">{toast.title}</strong>
+            </Toast.Header>
+            <Toast.Body
+              dangerouslySetInnerHTML={{
+                __html: toast.message,
+              }}></Toast.Body>
+          </Toast>
+        </ToastContainer>
+      )}
     </Container>
   );
 }

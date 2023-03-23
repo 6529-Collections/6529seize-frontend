@@ -1,3 +1,4 @@
+import { Web3Button } from "@web3modal/react";
 import styles from "./Header.module.scss";
 import { Container, Row, Col, Nav, Navbar, NavDropdown } from "react-bootstrap";
 import { useAccount, useConnect, useDisconnect } from "wagmi";
@@ -17,12 +18,7 @@ interface Props {
 export default function Header(props: Props) {
   const router = useRouter();
   const { address, connector, isConnected } = useAccount();
-  const { connect, connectors, error, isLoading, pendingConnector } =
-    useConnect();
-  const { disconnect } = useDisconnect();
   const [burgerMenuOpen, setBurgerMenuOpen] = useState(false);
-  const [showBurgerMenuConnectOptions, setShowBurgerMenuConnectOptions] =
-    useState(false);
 
   const [showBurgerMenuAbout, setShowBurgerMenuAbout] = useState(false);
   const [setShowBurgerMenuCommunity, setsetShowBurgerMenuCommunity] =
@@ -33,7 +29,6 @@ export default function Header(props: Props) {
       setBurgerMenuOpen(false);
       setShowBurgerMenuAbout(false);
       setsetShowBurgerMenuCommunity(false);
-      setShowBurgerMenuConnectOptions(false);
     }
 
     window.addEventListener("resize", handleResize);
@@ -59,7 +54,6 @@ export default function Header(props: Props) {
             setBurgerMenuOpen(false);
             setShowBurgerMenuAbout(false);
             setsetShowBurgerMenuCommunity(false);
-            setShowBurgerMenuConnectOptions(false);
           }}></FontAwesomeIcon>
         <Container className="text-center">
           <Row className="pt-5 pb-4">
@@ -77,87 +71,49 @@ export default function Header(props: Props) {
           </Row>
           <Row className="pt-3 pb-3">
             <Col>
-              <h3>
-                <button
-                  name="show menu"
-                  className={
-                    showBurgerMenuConnectOptions
-                      ? styles.burgerMenuCaretClose
-                      : styles.burgerMenuCaretOpen
-                  }
-                  onClick={() => {
-                    setShowBurgerMenuConnectOptions(
-                      !showBurgerMenuConnectOptions
-                    );
-                    setsetShowBurgerMenuCommunity(false);
-                    setShowBurgerMenuAbout(false);
-                  }}>
-                  {isConnected ? (
-                    <Address
-                      address={address}
-                      ens={null}
-                      resolveEns={true}
-                      hideCopy={true}
-                      disableLink={true}
-                    />
-                  ) : (
-                    "Connect"
-                  )}
-                </button>
-              </h3>
-            </Col>
-            {showBurgerMenuConnectOptions && (
-              <Container>
-                <Row>
-                  <Col xs={{ span: 6, offset: 3 }}>
-                    <hr />
-                  </Col>
-                </Row>
+              <h3 className="d-flex justify-content-center">
                 {isConnected ? (
                   <>
-                    <h4
-                      className="pt-3"
-                      onClick={() =>
-                        (window.location.href = `/${address as string}`)
-                      }>
-                      Profile
-                    </h4>
-                    <h4
-                      className="pt-3"
-                      onClick={() => (window.location.href = `/delegations`)}>
-                      Delegations
-                    </h4>
-                    <h4
-                      className="pt-3"
-                      onClick={() => {
-                        disconnect();
-                        setShowBurgerMenuConnectOptions(false);
-                      }}>
-                      Disconnect
-                    </h4>
+                    <Web3Button
+                      label="Connect"
+                      icon="hide"
+                      avatar="hide"
+                      balance="hide"
+                    />
+                    <NavDropdown
+                      title={
+                        <button className={styles.userDropdownBtn}>
+                          <span className={styles.userDropdownBtnIcon}></span>
+                        </button>
+                      }
+                      className={`${styles.userDropdown}`}
+                      align={"end"}>
+                      <NavDropdown.Item
+                        key="profile-dropdown-item"
+                        className={styles.dropdownItem}
+                        onClick={() =>
+                          (window.location.href = `/${address as string}`)
+                        }>
+                        Profile
+                      </NavDropdown.Item>
+                      <NavDropdown.Item
+                        key="delegations-dropdown-item"
+                        className={styles.dropdownItem}
+                        onClick={() => (window.location.href = `/delegations`)}>
+                        Delegations
+                      </NavDropdown.Item>
+                    </NavDropdown>
                   </>
                 ) : (
-                  connectors
-                    .filter((a) => a.ready)
-                    .map((connector) => (
-                      <h4
-                        onClick={() => {
-                          connect({ connector });
-                          setShowBurgerMenuConnectOptions(false);
-                        }}
-                        className="pt-3"
-                        key={`${connector.name}-dropdown-item-burger-menu`}>
-                        {connector.name}
-                      </h4>
-                    ))
+                  <Web3Button
+                    label="Connect"
+                    icon="hide"
+                    avatar="hide"
+                    balance="hide"
+                  />
                 )}
-                <Row>
-                  <Col xs={{ span: 6, offset: 3 }}>
-                    <hr />
-                  </Col>
-                </Row>
-              </Container>
-            )}
+              </h3>
+            </Col>
           </Row>
           <Row className="pt-3 pb-3">
             <Col>
@@ -199,7 +155,6 @@ export default function Header(props: Props) {
               <h3
                 onClick={() => {
                   setsetShowBurgerMenuCommunity(!setShowBurgerMenuCommunity);
-                  setShowBurgerMenuConnectOptions(false);
                   setShowBurgerMenuAbout(false);
                 }}
                 className={
@@ -258,7 +213,6 @@ export default function Header(props: Props) {
               <h3
                 onClick={() => {
                   setShowBurgerMenuAbout(!showBurgerMenuAbout);
-                  setShowBurgerMenuConnectOptions(false);
                   setsetShowBurgerMenuCommunity(false);
                 }}
                 className={
@@ -510,7 +464,7 @@ export default function Header(props: Props) {
                             <NavDropdown
                               title="Community"
                               align={"start"}
-                              className={`${styles.mainNavLink}`}>
+                              className={`${styles.mainNavLink} ${styles.mainNavLinkPadding}`}>
                               <NavDropdown.Item
                                 className={styles.dropdownItem}
                                 onClick={() =>
@@ -543,6 +497,8 @@ export default function Header(props: Props) {
                             <NavDropdown
                               title="About"
                               className={`${styles.mainNavLink} ${
+                                styles.mainNavLinkPadding
+                              } ${
                                 router.pathname.includes("/about")
                                   ? "active"
                                   : ""
@@ -659,68 +615,51 @@ export default function Header(props: Props) {
                               </NavDropdown.Item>
                             </NavDropdown>
                             {isConnected ? (
-                              <NavDropdown
-                                title={
-                                  <Address
-                                    address={address}
-                                    ens={null}
-                                    resolveEns={true}
-                                    hideCopy={true}
-                                    disableLink={true}
-                                  />
-                                }
-                                className={`${styles.mainNavLink} ${
-                                  router.pathname == "" ? "active" : ""
-                                }`}
-                                align={"start"}>
-                                <NavDropdown.Item
-                                  key="profile-dropdown-item"
-                                  className={styles.dropdownItem}
-                                  onClick={() =>
-                                    (window.location.href = `/${
-                                      address as string
-                                    }`)
-                                  }>
-                                  Profile
-                                </NavDropdown.Item>
-                                <NavDropdown.Item
-                                  key="delegations-dropdown-item"
-                                  className={styles.dropdownItem}
-                                  onClick={() =>
-                                    (window.location.href = `/delegations`)
-                                  }>
-                                  Delegations
-                                </NavDropdown.Item>
-                                <NavDropdown.Item
-                                  key="disconnect-dropdown-item"
-                                  className={styles.dropdownItem}
-                                  onClick={() => disconnect()}>
-                                  Disconnect
-                                </NavDropdown.Item>
-                              </NavDropdown>
-                            ) : (
-                              <NavDropdown
-                                title="Connect"
-                                className={`${styles.mainNavLink} ${styles.connectBtn} ${styles.fontBlack}`}
-                                align={"start"}>
-                                {connectors.map((connector) => (
+                              <>
+                                <Web3Button
+                                  label="Connect"
+                                  icon="hide"
+                                  avatar="hide"
+                                  balance="hide"
+                                />
+                                <NavDropdown
+                                  title={
+                                    <button className={styles.userDropdownBtn}>
+                                      <span
+                                        className={
+                                          styles.userDropdownBtnIcon
+                                        }></span>
+                                    </button>
+                                  }
+                                  className={`${styles.userDropdown}`}
+                                  align={"end"}>
                                   <NavDropdown.Item
-                                    key={`${connector.name}-dropdown-item`}
-                                    className={`${styles.dropdownItem}`}
-                                    onClick={() => {
-                                      if (connector.ready) {
-                                        connect({ connector });
-                                      } else if (connector.name == "MetaMask") {
-                                        window.open(
-                                          "https://metamask.io/download/",
-                                          "_blank"
-                                        );
-                                      }
-                                    }}>
-                                    {connector.name}
+                                    key="profile-dropdown-item"
+                                    className={styles.dropdownItem}
+                                    onClick={() =>
+                                      (window.location.href = `/${
+                                        address as string
+                                      }`)
+                                    }>
+                                    Profile
                                   </NavDropdown.Item>
-                                ))}
-                              </NavDropdown>
+                                  <NavDropdown.Item
+                                    key="delegations-dropdown-item"
+                                    className={styles.dropdownItem}
+                                    onClick={() =>
+                                      (window.location.href = `/delegations`)
+                                    }>
+                                    Delegations
+                                  </NavDropdown.Item>
+                                </NavDropdown>
+                              </>
+                            ) : (
+                              <Web3Button
+                                label="Connect"
+                                icon="hide"
+                                avatar="hide"
+                                balance="hide"
+                              />
                             )}
                           </Nav>
                         </Navbar>
