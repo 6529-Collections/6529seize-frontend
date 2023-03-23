@@ -111,7 +111,7 @@ export default function NewDelegationComponent(props: Props) {
     const newErrors = validate();
     if (newErrors.length > 0) {
       setErrors(newErrors);
-      window.scrollTo(0, document.body.scrollHeight);
+      window.scrollBy(0, 100);
     } else {
       contractWriteDelegation.write?.();
     }
@@ -120,7 +120,7 @@ export default function NewDelegationComponent(props: Props) {
   useEffect(() => {
     if (contractWriteDelegation.error) {
       setErrors((err) => [...err, contractWriteDelegation.error!.message]);
-      window.scrollTo(0, document.body.scrollHeight);
+      window.scrollBy(0, 100);
     }
   }, [contractWriteDelegation.error]);
 
