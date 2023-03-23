@@ -399,7 +399,7 @@ export default function CollectionDelegationComponent(props: Props) {
                     <td colSpan={4}>No outgoing delegations found</td>
                   </tr>
                 )}
-                {delegations > 0 && (
+                {delegations > 1 && (
                   <>
                     <tr>
                       <td colSpan={4} className="pt-3">

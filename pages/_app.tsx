@@ -152,6 +152,7 @@ export default function App({ Component, pageProps }: AppProps) {
         defaultChain={mainnet}
         projectId={CW_PROJECT_ID}
         ethereumClient={ethereumClient}
+        themeMode={"dark"}
         themeVariables={{
           "--w3m-background-color": "#282828",
           "--w3m-logo-image-url": "/Seize_Logo_Glasses_3.png",
