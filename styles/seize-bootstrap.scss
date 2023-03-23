@@ -107,7 +107,14 @@
   border-top: 3px solid white;
   border-top-right-radius: 0;
   border-top-left-radius: 0;
-  min-width: fit-content;
+}
+
+@media (max-width: 1000px) {
+  .navbar-expand .navbar-nav .dropdown-menu,
+  .dropdown .dropdown-menu,
+  .dropdown-center .dropdown-menu {
+    box-shadow: 0 2px 2px rgba(150, 150, 150, 0.3);
+  }
 }
 
 .dropdown-item {
@@ -136,6 +143,7 @@
 
 .nav-link {
   color: $font-color;
+  padding: 0 !important;
 }
 
 .navbar-nav .show > .nav-link,
@@ -240,4 +248,18 @@ th {
 
 .form-select:focus {
   border-color: $dark-grey;
+}
+
+.toast-header {
+  color: black !important;
+  background-color: $lightest-grey;
+  border-radius: 0 !important;
+  font-size: larger;
+  font-weight: bolder !important;
+}
+
+.toast-body {
+  color: black !important;
+  background-color: $off-white !important;
+  font-size: larger;
 }

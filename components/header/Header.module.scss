@@ -55,20 +55,6 @@
     float: none;
   }
 
-  button {
-    color: $bg-color-1 !important;
-    span {
-      color: $bg-color-1 !important;
-    }
-    border: none;
-    background-color: $font-color;
-    padding: 12px 20px;
-  }
-
-  button::after {
-    top: 1px !important;
-  }
-
   .burgerMenuCaretOpen::after {
     display: inline-block;
     margin-left: 0.255em;
@@ -112,11 +98,16 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  margin-left: 18px;
+  margin-right: 18px;
   white-space: nowrap;
   a span {
     text-decoration: none !important;
   }
+}
+
+.mainNavLinkPadding {
+  padding-left: 8px;
+  padding-right: 8px;
 }
 
 .connectBtn {
@@ -145,4 +136,40 @@
   position: relative;
   min-height: $header-height;
   background-color: $bg-color-1;
+}
+
+.userDropdown {
+  background-color: white;
+  border-left: 0.5px solid black;
+  display: inline-block;
+
+  ::after {
+    display: none !important;
+  }
+}
+
+.userDropdownBtn {
+  border: none;
+  height: 40px;
+  padding: 0;
+  padding-left: 8px;
+  padding-right: 8px;
+  width: 30px !important;
+  background-color: white;
+  color: black !important;
+  display: inline-block;
+  position: relative;
+  width: 10px;
+}
+
+.userDropdownBtnIcon {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 0;
+  height: 0;
+  border-top: 7px solid #000;
+  border-right: 7px solid transparent;
+  border-left: 7px solid transparent;
 }

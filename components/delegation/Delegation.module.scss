@@ -214,11 +214,17 @@
   padding: 12px 20px;
   cursor: pointer;
   margin-right: 20px;
-  color: white !important;
+  color: white;
 
   &:hover {
     background-color: darken($color: $green, $amount: 5);
   }
+}
+
+.newDelegationSubmitBtnDisabled {
+  pointer-events: none !important;
+  background-color: darken($color: $green, $amount: 10);
+  color: $font-color-h;
 }
 
 .newDelegationCancelBtn {
@@ -238,8 +244,16 @@
 
 .newDelegationError {
   color: lighten($color: $raspberry, $amount: 12);
+}
+
+.newDelegationSuccess {
+  color: lighten($color: $green, $amount: 12);
+}
+
+.newDelegationRedultsList {
   ul {
     padding-left: 1rem;
+    margin-bottom: 0.5rem;
   }
 
   ul li {
@@ -271,6 +285,7 @@
 }
 
 .delegationsTable {
+  margin-bottom: 0;
   tr td {
     white-space: nowrap;
   }
@@ -292,4 +307,26 @@
 
 .incomingDelegationAddress {
   text-indent: 1rem;
+}
+
+.etherscanLink {
+  color: $font-color-h;
+
+  &:hover {
+    color: $font-color;
+  }
+}
+
+.loader {
+  width: 20px;
+  height: 20px;
+  margin-left: 5px;
+}
+
+.toast {
+  top: 140px !important;
+
+  a {
+    color: black !important;
+  }
 }
