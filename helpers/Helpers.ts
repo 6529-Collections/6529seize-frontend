@@ -164,3 +164,12 @@ export function getValuesForVolumeType(
 
   return 0;
 }
+
+export const isValidEthAddress = (address: string) =>
+  /^0x[0-9a-fA-F]{40}$/.test(address);
+
+export function getTransactionLink(chain_id: number, hash: string) {
+  return chain_id == 5
+    ? `https://goerli.etherscan.io/tx/${hash}`
+    : `https://etherscan.io/tx/${hash}`;
+}
