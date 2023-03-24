@@ -10,7 +10,11 @@ import { useEffect, useState } from "react";
 import { DelegationCollection } from "../../pages/delegations/[contract]";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Tippy from "@tippyjs/react";
-import { DELEGATION_ALL_ADDRESS, DELEGATION_CONTRACT } from "../../constants";
+import {
+  DELEGATION_ALL_ADDRESS,
+  DELEGATION_CONTRACT,
+  NEVER_DATE,
+} from "../../constants";
 import { DELEGATION_ABI } from "../../abis";
 import { getTransactionLink, isValidEthAddress } from "../../helpers/Helpers";
 
@@ -48,7 +52,7 @@ export default function NewDelegationComponent(props: Props) {
         : props.collection.contract,
       props.delegation.wallet,
       delegationToAddress,
-      showExpiryCalendar ? delegationDate?.getTime() : 64060588800000,
+      showExpiryCalendar ? delegationDate?.getTime() : NEVER_DATE,
       props.delegation.use_case,
       showTokensInput ? false : true,
       showTokensInput ? delegationToken : 0,
