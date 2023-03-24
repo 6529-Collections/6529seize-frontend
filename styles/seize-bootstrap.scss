@@ -252,14 +252,16 @@ th {
 
 .toast-header {
   color: black !important;
-  background-color: $lightest-grey;
+  background-color: $off-white !important;
   border-radius: 0 !important;
   font-size: larger;
   font-weight: bolder !important;
+  padding: 10px 20px;
 }
 
 .toast-body {
   color: black !important;
-  background-color: $off-white !important;
+  background-color: white !important;
   font-size: larger;
+  padding: 20px;
 }
