@@ -34,6 +34,7 @@ import { areEqualAddresses, getTransactionLink } from "../../helpers/Helpers";
 import {
   DELEGATION_ALL_ADDRESS,
   DELEGATION_CONTRACT,
+  NEVER_DATE,
   NULL_ADDRESS,
 } from "../../constants";
 import { DELEGATION_ABI } from "../../abis";
@@ -98,7 +99,7 @@ function getActiveDelegationsReadParams(
       abi: DELEGATION_ABI,
       chainId: DELEGATION_CONTRACT.chain_id,
       functionName: functionName,
-      args: [address, collection, date.getTime(), uc.use_case],
+      args: [address, collection, uc.use_case],
     });
   });
   return params;
@@ -164,7 +165,7 @@ export default function CollectionDelegationComponent(props: Props) {
         ? DELEGATION_ALL_ADDRESS
         : props.collection.contract,
       currentDate,
-      "retrieveActiveDelegations"
+      "retrieveDelegationAddressesTokensIDsandExpiredDates"
     ),
     watch: true,
     enabled: outgoingDelegations.data && outgoingDelegations.data?.length > 0,
@@ -177,7 +178,7 @@ export default function CollectionDelegationComponent(props: Props) {
         ? DELEGATION_ALL_ADDRESS
         : props.collection.contract,
       currentDate,
-      "retrieveActiveDelegators"
+      "retrieveDelegatorsTokensIDsandExpiredDates"
     ),
     watch: true,
     enabled: incomingDelegations.data && incomingDelegations.data?.length > 0,
@@ -536,6 +537,37 @@ export default function CollectionDelegationComponent(props: Props) {
     }
   }, [batchRevokeDelegationParams, contractWriteBatchRevoke.write]);
 
+  function formatExpiry(myDate: Date) {
+    const date = new Date(myDate);
+    const year = date.getUTCFullYear();
+    const month = String(date.getUTCMonth() + 1).padStart(2, "0");
+    const day = String(date.getUTCDate()).padStart(2, "0");
+    const hours = String(date.getUTCHours()).padStart(2, "0");
+    const minutes = String(date.getUTCMinutes()).padStart(2, "0");
+    return `${year}-${month}-${day} ${hours}:${minutes}`;
+  }
+
+  function getActiveStatus(delegations: any, w: string, useCase: number) {
+    if (delegations.data) {
+      const myCase = delegations.data[useCase - 1] as any[];
+      const index = myCase[0].indexOf(w);
+      if (index > -1) {
+        const myDate = myCase[1][0].toNumber();
+        const myDateDisplay =
+          myDate >= NEVER_DATE
+            ? `active`
+            : `active - expires ${formatExpiry(myDate)}`;
+        const active = {
+          expiry: myDateDisplay,
+          all: myCase[2][index],
+          tokens: myCase[3][index].toNumber(),
+        };
+        return active;
+      }
+    }
+    return false;
+  }
+
   function printDelegations() {
     return (
       <Accordion className={styles.collectionDelegationsAccordion}>
@@ -584,128 +616,134 @@ export default function CollectionDelegationComponent(props: Props) {
                               #{useCase.use_case} - {useCase.display}
                             </td>
                           </tr>
-                          {data.map((w: string) => (
-                            <tr key={`outgoing-${useCase}-${index}-${w}`}>
-                              <td>
-                                <FormCheck
-                                  disabled={
-                                    delegations < 2 ||
-                                    (bulkRevocations.length ==
-                                      MAX_BULK_ACTIONS &&
-                                      !bulkRevocations.some(
-                                        (bd) =>
-                                          bd.use_case == useCase.use_case &&
-                                          areEqualAddresses(bd.wallet, w)
-                                      ))
-                                  }
-                                  onChange={(e) => {
-                                    if (e.target.checked) {
-                                      setBulkRevocations((bd) => [
-                                        ...bd,
-                                        {
-                                          use_case: useCase.use_case,
-                                          wallet: w,
-                                        },
-                                      ]);
-                                    } else {
-                                      setBulkRevocations((bd) =>
-                                        bd.filter(
-                                          (x) =>
-                                            !(
-                                              x.use_case == useCase.use_case &&
-                                              areEqualAddresses(x.wallet, w)
-                                            )
-                                        )
-                                      );
+                          {data.map((w: string) => {
+                            const isActive = getActiveStatus(
+                              outgoingActiveDelegations,
+                              w,
+                              useCase.use_case
+                            );
+                            return (
+                              <tr key={`outgoing-${useCase}-${index}-${w}`}>
+                                <td>
+                                  <FormCheck
+                                    disabled={
+                                      delegations < 2 ||
+                                      (bulkRevocations.length ==
+                                        MAX_BULK_ACTIONS &&
+                                        !bulkRevocations.some(
+                                          (bd) =>
+                                            bd.use_case == useCase.use_case &&
+                                            areEqualAddresses(bd.wallet, w)
+                                        ))
                                     }
-                                  }}
-                                />
-                              </td>
-                              <td>
-                                {w}{" "}
-                                {outgoingActiveDelegations.data ? (
-                                  <>
-                                    {(
-                                      outgoingActiveDelegations.data[
-                                        useCase.use_case - 1
-                                      ] as string[]
-                                    ).includes(w) ? (
-                                      <span
-                                        className={
-                                          styles.delegationActiveLabel
-                                        }>
-                                        active
-                                      </span>
-                                    ) : (
-                                      <span
-                                        className={
-                                          styles.delegationExpiredLabel
-                                        }>
-                                        expired
-                                      </span>
-                                    )}
-                                  </>
-                                ) : (
+                                    onChange={(e) => {
+                                      if (e.target.checked) {
+                                        setBulkRevocations((bd) => [
+                                          ...bd,
+                                          {
+                                            use_case: useCase.use_case,
+                                            wallet: w,
+                                          },
+                                        ]);
+                                      } else {
+                                        setBulkRevocations((bd) =>
+                                          bd.filter(
+                                            (x) =>
+                                              !(
+                                                x.use_case ==
+                                                  useCase.use_case &&
+                                                areEqualAddresses(x.wallet, w)
+                                              )
+                                          )
+                                        );
+                                      }
+                                    }}
+                                  />
+                                </td>
+                                <td>
+                                  {w}{" "}
+                                  {outgoingActiveDelegations.data ? (
+                                    <>
+                                      {isActive ? (
+                                        <span
+                                          className={
+                                            styles.delegationActiveLabel
+                                          }>
+                                          {isActive.expiry}
+                                        </span>
+                                      ) : (
+                                        <span
+                                          className={
+                                            styles.delegationExpiredLabel
+                                          }>
+                                          expired
+                                        </span>
+                                      )}
+                                    </>
+                                  ) : (
+                                    <span
+                                      className={
+                                        styles.delegationFetchingLabel
+                                      }>
+                                      fetching status
+                                    </span>
+                                  )}
+                                </td>
+                                <td className="text-right">
                                   <span
-                                    className={styles.delegationFetchingLabel}>
-                                    fetching status
+                                    className={styles.useCaseWalletUpdate}
+                                    onClick={() => {
+                                      setUpdateDelegationParams({
+                                        wallet: w,
+                                        use_case: useCase.use_case,
+                                        display: useCase.display,
+                                      });
+                                      setShowUpdateDelegation(true);
+                                      window.scrollTo(0, 0);
+                                    }}>
+                                    Update
                                   </span>
-                                )}
-                              </td>
-                              <td className="text-right">
-                                <span
-                                  className={styles.useCaseWalletUpdate}
-                                  onClick={() => {
-                                    setUpdateDelegationParams({
-                                      wallet: w,
-                                      use_case: useCase.use_case,
-                                      display: useCase.display,
-                                    });
-                                    setShowUpdateDelegation(true);
-                                    window.scrollTo(0, 0);
-                                  }}>
-                                  Update
-                                </span>
-                              </td>
-                              <td>
-                                <span
-                                  className={styles.useCaseWalletRevoke}
-                                  onClick={() => {
-                                    setRevokeDelegationParams({
-                                      collection:
-                                        props.collection.contract == "all"
-                                          ? DELEGATION_ALL_ADDRESS
-                                          : props.collection.contract,
-                                      address: w,
-                                      use_case: useCase.use_case,
-                                    });
-                                    setToast({
-                                      title: "Revoking Delegation",
-                                      message: "Confirm in your wallet...",
-                                    });
-                                    setShowToast(true);
-                                  }}>
-                                  Revoke
-                                  {(contractWriteRevoke.isLoading ||
-                                    waitContractWriteRevoke.isLoading) &&
-                                    areEqualAddresses(
-                                      revokeDelegationParams.address,
-                                      w
-                                    ) &&
-                                    revokeDelegationParams.use_case ==
-                                      useCase.use_case && (
-                                      <div className="d-inline">
-                                        <div
-                                          className={`spinner-border ${styles.loader}`}
-                                          role="status">
-                                          <span className="sr-only"></span>
+                                </td>
+                                <td>
+                                  <span
+                                    className={styles.useCaseWalletRevoke}
+                                    onClick={() => {
+                                      setRevokeDelegationParams({
+                                        collection:
+                                          props.collection.contract == "all"
+                                            ? DELEGATION_ALL_ADDRESS
+                                            : props.collection.contract,
+                                        address: w,
+                                        use_case: useCase.use_case,
+                                      });
+                                      setToast({
+                                        title: "Revoking Delegation",
+                                        message: "Confirm in your wallet...",
+                                      });
+                                      setShowToast(true);
+                                    }}>
+                                    Revoke
+                                    {(contractWriteRevoke.isLoading ||
+                                      waitContractWriteRevoke.isLoading) &&
+                                      areEqualAddresses(
+                                        revokeDelegationParams.address,
+                                        w
+                                      ) &&
+                                      revokeDelegationParams.use_case ==
+                                        useCase.use_case && (
+                                        <div className="d-inline">
+                                          <div
+                                            className={`spinner-border ${styles.loader}`}
+                                            role="status">
+                                            <span className="sr-only"></span>
+                                          </div>
                                         </div>
-                                      </div>
-                                    )}
-                                </span>
-                              </td>
-                            </tr>
-                          ))}
+                                      )}
+                                  </span>
+                                </td>
+                              </tr>
+                            );
+                          })}
                         </Fragment>
                       );
                     }
@@ -807,41 +845,47 @@ export default function CollectionDelegationComponent(props: Props) {
                               #{useCase.use_case} - {useCase.display}
                             </td>
                           </tr>
-                          {data.map((w: string) => (
-                            <tr key={`incoming-${useCase}-${index}-${w}`}>
-                              <td className={styles.incomingDelegationAddress}>
-                                &bull; {w}{" "}
-                                {incomingActiveDelegations.data ? (
-                                  <>
-                                    {(
-                                      incomingActiveDelegations.data[
-                                        useCase.use_case - 1
-                                      ] as string[]
-                                    ).includes(w) ? (
-                                      <span
-                                        className={
-                                          styles.delegationActiveLabel
-                                        }>
-                                        active
-                                      </span>
-                                    ) : (
-                                      <span
-                                        className={
-                                          styles.delegationExpiredLabel
-                                        }>
-                                        expired
-                                      </span>
-                                    )}
-                                  </>
-                                ) : (
-                                  <span
-                                    className={styles.delegationFetchingLabel}>
-                                    fetching status
-                                  </span>
-                                )}
-                              </td>
-                            </tr>
-                          ))}
+                          {data.map((w: string) => {
+                            const isActive = getActiveStatus(
+                              incomingActiveDelegations,
+                              w,
+                              useCase.use_case
+                            );
+                            return (
+                              <tr key={`incoming-${useCase}-${index}-${w}`}>
+                                <td
+                                  className={styles.incomingDelegationAddress}>
+                                  &bull; {w}{" "}
+                                  {incomingActiveDelegations.data ? (
+                                    <>
+                                      {isActive ? (
+                                        <span
+                                          className={
+                                            styles.delegationActiveLabel
+                                          }>
+                                          {isActive.expiry}
+                                        </span>
+                                      ) : (
+                                        <span
+                                          className={
+                                            styles.delegationExpiredLabel
+                                          }>
+                                          expired
+                                        </span>
+                                      )}
+                                    </>
+                                  ) : (
+                                    <span
+                                      className={
+                                        styles.delegationFetchingLabel
+                                      }>
+                                      fetching status
+                                    </span>
+                                  )}
+                                </td>
+                              </tr>
+                            );
+                          })}
                         </Fragment>
                       );
                     }
