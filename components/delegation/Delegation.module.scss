@@ -154,6 +154,12 @@
   }
 }
 
+.revokeDelegationBtnDisabled {
+  pointer-events: none !important;
+  background-color: darken($color: $raspberry, $amount: 10);
+  color: $font-color-h;
+}
+
 .lockDelegationBtn {
   display: inline-flex;
   align-items: center;

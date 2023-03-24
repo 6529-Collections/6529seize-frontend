@@ -10,7 +10,6 @@ import { useEffect, useState } from "react";
 import {
   DelegationCollection,
   DELEGATION_USE_CASES,
-  SUPPORTED_COLLECTIONS,
 } from "../../pages/delegations/[contract]";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Tippy from "@tippyjs/react";
@@ -21,13 +20,14 @@ import { getTransactionLink, isValidEthAddress } from "../../helpers/Helpers";
 interface Props {
   address: string;
   ens: string | null | undefined;
-  collection?: DelegationCollection;
+  incomingDelegations: string[];
+  collection: DelegationCollection;
   showCancel: boolean;
   showAddMore: boolean;
   onHide(): any;
 }
 
-export default function NewDelegationComponent(props: Props) {
+export default function NewDelegationWithSubComponent(props: Props) {
   const [showExpiryCalendar, setShowExpiryCalendar] = useState(false);
   const [showTokensInput, setShowTokensInput] = useState(false);
 
@@ -38,9 +38,11 @@ export default function NewDelegationComponent(props: Props) {
     number | undefined
   >(undefined);
   const [newDelegationUseCase, setNewDelegationUseCase] = useState<number>(0);
-  const [newDelegationCollection, setNewDelegationCollection] =
-    useState<string>(props.collection ? props.collection.contract : "0");
   const [newDelegationToAddress, setNewDelegationToAddress] = useState("");
+  const [newDelegationOriginalDelegator, setNewDelegationOriginalDelegator] =
+    useState(
+      props.incomingDelegations.length == 1 ? props.incomingDelegations[0] : ""
+    );
   const [errors, setErrors] = useState<string[]>([]);
 
   const contractWriteDelegationConfig = usePrepareContractWrite({
@@ -48,9 +50,10 @@ export default function NewDelegationComponent(props: Props) {
     abi: DELEGATION_ABI,
     chainId: DELEGATION_CONTRACT.chain_id,
     args: [
-      newDelegationCollection == "all"
+      newDelegationOriginalDelegator,
+      props.collection.contract == "all"
         ? DELEGATION_ALL_ADDRESS
-        : newDelegationCollection,
+        : props.collection.contract,
       newDelegationToAddress,
       showExpiryCalendar ? newDelegationDate?.getTime() : 64060588800000,
       newDelegationUseCase,
@@ -58,7 +61,9 @@ export default function NewDelegationComponent(props: Props) {
       showTokensInput ? newDelegationToken : 0,
     ],
     functionName:
-      validate().length == 0 ? "registerDelegationAddress" : undefined,
+      validate().length == 0
+        ? "registerDelegationAddressUsingSubDelegation"
+        : undefined,
     onError: (e) => {},
   });
   const contractWriteDelegation = useContractWrite(
@@ -72,8 +77,11 @@ export default function NewDelegationComponent(props: Props) {
 
   function validate() {
     const newErrors: string[] = [];
-    if (!newDelegationCollection || newDelegationCollection == "0") {
-      newErrors.push("Missing or invalid Collection");
+    if (
+      !newDelegationOriginalDelegator ||
+      newDelegationOriginalDelegator == ""
+    ) {
+      newErrors.push("Missing or invalid Original Delegator");
     }
     if (!newDelegationUseCase) {
       newErrors.push("Missing or invalid Use Case");
@@ -121,7 +129,7 @@ export default function NewDelegationComponent(props: Props) {
     <Container className="no-padding">
       <Row>
         <Col xs={10} className="pt-3 pb-3">
-          <h4>Register Delegation</h4>
+          <h4>Register Delegation With Sub-Delegation Rights</h4>
         </Col>
         {props.showCancel && (
           <Col xs={2} className="d-flex align-items-center justify-content-end">
@@ -160,26 +168,45 @@ export default function NewDelegationComponent(props: Props) {
             </Form.Group>
             <Form.Group as={Row} className="pb-4">
               <Form.Label column sm={2}>
-                Collection
+                Original Delegator
               </Form.Label>
               <Col sm={10}>
                 <Form.Select
                   className={`${styles.formInput}`}
-                  value={newDelegationCollection}
-                  onChange={(e) => setNewDelegationCollection(e.target.value)}>
-                  <option value="0" disabled>
-                    Select Collection
-                  </option>
-                  {SUPPORTED_COLLECTIONS.map((sc) => (
+                  value={newDelegationOriginalDelegator}
+                  onChange={(e) =>
+                    setNewDelegationOriginalDelegator(e.target.value)
+                  }>
+                  {props.incomingDelegations.length > 1 && (
+                    <option value="" disabled>
+                      Select
+                    </option>
+                  )}
+                  {props.incomingDelegations.map((id) => (
                     <option
-                      key={`add-delegation-select-collection-${sc.contract}`}
-                      value={sc.contract}>
-                      {`${sc.display}${
-                        sc.contract == "all" ? "" : `- ${sc.contract}`
-                      }`}
+                      key={`add-delegation-select-delegator-${id}`}
+                      value={id}>
+                      {id}
                     </option>
                   ))}
                 </Form.Select>
+              </Col>
+            </Form.Group>
+            <Form.Group as={Row} className="pb-4">
+              <Form.Label column sm={2}>
+                Collection
+              </Form.Label>
+              <Col sm={10}>
+                <Form.Control
+                  className={`${styles.formInput} ${styles.formInputDisabled}`}
+                  type="text"
+                  defaultValue={`${props.collection.display}${
+                    props.collection.contract == "all"
+                      ? ""
+                      : `- ${props.collection.contract}`
+                  }`}
+                  disabled
+                />
               </Col>
             </Form.Group>
             <Form.Group as={Row} className="pb-4">
