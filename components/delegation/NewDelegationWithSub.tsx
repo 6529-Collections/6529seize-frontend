@@ -13,7 +13,11 @@ import {
 } from "../../pages/delegations/[contract]";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Tippy from "@tippyjs/react";
-import { DELEGATION_ALL_ADDRESS, DELEGATION_CONTRACT } from "../../constants";
+import {
+  DELEGATION_ALL_ADDRESS,
+  DELEGATION_CONTRACT,
+  NEVER_DATE,
+} from "../../constants";
 import { DELEGATION_ABI } from "../../abis";
 import { getTransactionLink, isValidEthAddress } from "../../helpers/Helpers";
 
@@ -55,7 +59,7 @@ export default function NewDelegationWithSubComponent(props: Props) {
         ? DELEGATION_ALL_ADDRESS
         : props.collection.contract,
       newDelegationToAddress,
-      showExpiryCalendar ? newDelegationDate?.getTime() : 64060588800000,
+      showExpiryCalendar ? newDelegationDate?.getTime() : NEVER_DATE,
       newDelegationUseCase,
       showTokensInput ? false : true,
       showTokensInput ? newDelegationToken : 0,
