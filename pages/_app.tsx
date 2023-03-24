@@ -99,7 +99,8 @@ library.add(
   faLockOpen,
   faMinus,
   faPlus,
-  faCaretDown
+  faCaretDown,
+  faMinus
 );
 
 const { chains, provider } = configureChains(

@@ -187,6 +187,19 @@
   cursor: not-allowed !important;
 }
 
+.formInputLockUseCase {
+  color: $dark-grey !important;
+  border-radius: 0 !important;
+  border-color: $lightest-grey;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  height: 50px;
+
+  &:focus {
+    border-color: $blue !important;
+  }
+}
+
 .newDelegationFormToggle {
   line-height: 24px;
   display: inline-block;
@@ -255,6 +268,21 @@
 
 .newDelegationSuccess {
   color: lighten($color: $green, $amount: 12);
+}
+
+.lockUseCaseBtn {
+  background-color: lighten($color: $lightest-grey, $amount: 10);
+  padding-left: 15px;
+  padding-right: 25px;
+  border: none;
+  padding: 12px 20px;
+  cursor: pointer;
+  color: black !important;
+  height: 50px;
+
+  &:hover {
+    background-color: lighten($color: $lightest-grey, $amount: 15);
+  }
 }
 
 .newDelegationRedultsList {
@@ -336,10 +364,46 @@
   margin-left: 5px;
 }
 
+.toastWrapper {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 100;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.4);
+}
+
 .toast {
+  position: fixed;
+  z-index: 101;
   top: 140px !important;
 
   a {
     color: black !important;
   }
+}
+
+.connectWalletButton {
+  background-color: white !important;
+  color: black !important;
+  font-size: larger !important;
+  font-weight: bolder !important;
+  border: none !important;
+  padding: 10px 25px;
+}
+
+.delegationFetchingLabel {
+  color: $font-color-h;
+  margin-left: 10px;
+}
+
+.delegationActiveLabel {
+  color: $green;
+  margin-left: 10px;
+}
+
+.delegationExpiredLabel {
+  color: $raspberry;
+  margin-left: 10px;
 }

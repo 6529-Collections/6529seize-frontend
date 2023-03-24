@@ -173,7 +173,10 @@ export default function Delegations(props: Props) {
       <main className={styles.main}>
         <Header />
         <Breadcrumb breadcrumbs={breadcrumbs} />
-        <CollectionDelegationComponent collection={props.collection} />
+        <CollectionDelegationComponent
+          collection={props.collection}
+          date={new Date()}
+        />
       </main>
     </>
   );
