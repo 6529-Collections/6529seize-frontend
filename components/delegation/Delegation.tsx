@@ -1,3 +1,4 @@
+import { Web3Button } from "@web3modal/react";
 import styles from "./Delegation.module.scss";
 import { Container, Row, Col, ToastContainer, Toast } from "react-bootstrap";
 import {
@@ -20,6 +21,10 @@ import { DELEGATION_CONTRACT } from "../../constants";
 import { DELEGATION_ABI } from "../../abis";
 
 const NewDelegationComponent = dynamic(() => import("./NewDelegation"), {
+  ssr: false,
+});
+
+const ConnectWalletButton = dynamic(() => import("./ConnectWalletButton"), {
   ssr: false,
 });
 
@@ -209,40 +214,6 @@ export default function DelegationComponent() {
     );
   }
 
-  function printConnect() {
-    return (
-      <Container className={styles.mainContainer}>
-        <Row className="pt-5 pb-3">
-          <Col className="text-center">
-            <h3 className="float-none">Connect your wallet</h3>
-          </Col>
-        </Row>
-        <Row className="pt-5">
-          {connectResolution.connectors.map((connector) => (
-            <Col
-              key={`${connector.name}`}
-              xs={12}
-              xm={12}
-              md={4}
-              className="pt-3 pb-3 d-flex justify-content-center">
-              <div
-                className={styles.connectBtn}
-                onClick={() => {
-                  if (connector.ready) {
-                    connectResolution.connect({ connector });
-                  } else if (connector.name == "MetaMask") {
-                    window.open("https://metamask.io/download/", "_blank");
-                  }
-                }}>
-                {connector.name}
-              </div>
-            </Col>
-          ))}
-        </Row>
-      </Container>
-    );
-  }
-
   return (
     <Container fluid>
       <Row>
@@ -278,7 +249,7 @@ export default function DelegationComponent() {
               </Row> */}
             </Container>
           )}
-          {!accountResolution.isConnected && printConnect()}
+          {!accountResolution.isConnected && <ConnectWalletButton />}
         </Col>
       </Row>
       {toast && (

@@ -14,7 +14,7 @@ import {
 } from "../../pages/delegations/[contract]";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Tippy from "@tippyjs/react";
-import { DELEGATION_CONTRACT } from "../../constants";
+import { DELEGATION_ALL_ADDRESS, DELEGATION_CONTRACT } from "../../constants";
 import { DELEGATION_ABI } from "../../abis";
 import { getTransactionLink, isValidEthAddress } from "../../helpers/Helpers";
 
@@ -48,9 +48,11 @@ export default function NewDelegationComponent(props: Props) {
     abi: DELEGATION_ABI,
     chainId: DELEGATION_CONTRACT.chain_id,
     args: [
-      newDelegationCollection,
+      newDelegationCollection == "all"
+        ? DELEGATION_ALL_ADDRESS
+        : newDelegationCollection,
       newDelegationToAddress,
-      showExpiryCalendar ? newDelegationDate?.getMilliseconds() : 64060588800,
+      showExpiryCalendar ? newDelegationDate?.getTime() : 64060588800000,
       newDelegationUseCase,
       showTokensInput ? false : true,
       showTokensInput ? newDelegationToken : 0,
@@ -99,15 +101,6 @@ export default function NewDelegationComponent(props: Props) {
   }
 
   function submitDelegation() {
-    console.log(
-      "registerDelegationAddress",
-      newDelegationCollection,
-      newDelegationToAddress,
-      showExpiryCalendar ? newDelegationDate?.getMilliseconds() : 2 ^ (63 - 1),
-      newDelegationUseCase,
-      showTokensInput ? false : true,
-      showTokensInput ? newDelegationToken : 0
-    );
     const newErrors = validate();
     if (newErrors.length > 0) {
       setErrors(newErrors);
