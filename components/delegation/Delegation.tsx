@@ -129,10 +129,10 @@ export default function DelegationComponent() {
         <Row className="pt-2 pb-3">
           <Col>
             <>
-              <span className={styles.addNewDelegationBtn}>
+              {/* <span className={styles.addNewDelegationBtn}>
                 <FontAwesomeIcon icon="plus" className={styles.buttonIcon} />
-                Bulk Delegations
-              </span>
+                Batch Delegations
+              </span> */}
               {globalLockRead.data != null && (
                 <span
                   className={styles.lockDelegationBtn}
