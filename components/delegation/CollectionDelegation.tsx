@@ -31,13 +31,35 @@ import {
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import dynamic from "next/dynamic";
 import { areEqualAddresses, getTransactionLink } from "../../helpers/Helpers";
-import { DELEGATION_ALL_ADDRESS, DELEGATION_CONTRACT } from "../../constants";
+import {
+  DELEGATION_ALL_ADDRESS,
+  DELEGATION_CONTRACT,
+  NULL_ADDRESS,
+} from "../../constants";
 import { DELEGATION_ABI } from "../../abis";
 import ConnectWalletButton from "./ConnectWalletButton";
 
 const NewDelegationComponent = dynamic(() => import("./NewDelegation"), {
   ssr: false,
 });
+
+const UpdateDelegationComponent = dynamic(() => import("./UpdateDelegation"), {
+  ssr: false,
+});
+
+const NewDelegationWithSubComponent = dynamic(
+  () => import("./NewDelegationWithSub"),
+  {
+    ssr: false,
+  }
+);
+
+const RevokeDelegationWithSubComponent = dynamic(
+  () => import("./RevokeDelegationWithSub"),
+  {
+    ssr: false,
+  }
+);
 
 interface Props {
   collection: DelegationCollection;
@@ -83,6 +105,7 @@ function getActiveDelegationsReadParams(
 }
 
 export default function CollectionDelegationComponent(props: Props) {
+  const [currentDate, setCurrentDate] = useState<Date>(props.date);
   const toastRef = useRef<HTMLDivElement>(null);
   const { address, connector, isConnected } = useAccount();
   const ensResolution = useEnsName({
@@ -90,9 +113,21 @@ export default function CollectionDelegationComponent(props: Props) {
   });
 
   const [bulkRevocations, setBulkRevocations] = useState<any[]>([]);
-  const [showCreateNew, setShowCreateNew] = useState(false);
+  const [showCreateNewDelegation, setShowCreateNewDelegation] = useState(false);
+  const [showUpdateDelegation, setShowUpdateDelegation] = useState(false);
+  const [showCreateNewDelegationWithSub, setShowCreateNewDelegationWithSub] =
+    useState(false);
+  const [showRevokeDelegationWithSub, setShowRevokeDelegationWithSub] =
+    useState(false);
+
+  const [updateDelegationParams, setUpdateDelegationParams] = useState<
+    { wallet: string; use_case: number; display: string } | undefined
+  >();
 
   const [lockUseCaseValue, setLockUseCaseValue] = useState(0);
+  const [incomingSubdelegations, setIncomingSubdelegations] = useState<any[]>(
+    []
+  );
 
   const outgoingDelegations = useContractReads({
     contracts: getReadParams(
@@ -114,6 +149,12 @@ export default function CollectionDelegationComponent(props: Props) {
       "retrieveDelegators"
     ),
     watch: true,
+    onSettled(data, error) {
+      if (data) {
+        const subdelegations = (data as any)[15];
+        setIncomingSubdelegations(subdelegations);
+      }
+    },
   });
 
   const outgoingActiveDelegations = useContractReads({
@@ -122,9 +163,10 @@ export default function CollectionDelegationComponent(props: Props) {
       props.collection.contract == "all"
         ? DELEGATION_ALL_ADDRESS
         : props.collection.contract,
-      props.date,
+      currentDate,
       "retrieveActiveDelegations"
     ),
+    watch: true,
     enabled: outgoingDelegations.data && outgoingDelegations.data?.length > 0,
   });
 
@@ -134,9 +176,10 @@ export default function CollectionDelegationComponent(props: Props) {
       props.collection.contract == "all"
         ? DELEGATION_ALL_ADDRESS
         : props.collection.contract,
-      props.date,
+      currentDate,
       "retrieveActiveDelegators"
     ),
+    watch: true,
     enabled: incomingDelegations.data && incomingDelegations.data?.length > 0,
   });
 
@@ -152,20 +195,19 @@ export default function CollectionDelegationComponent(props: Props) {
   });
 
   const [revokeDelegationParams, setRevokeDelegationParams] = useState<any>();
+  const [batchRevokeDelegationParams, setBatchRevokeDelegationParams] =
+    useState<any>();
 
   const contractWriteRevokeConfig = usePrepareContractWrite({
     address: DELEGATION_CONTRACT.contract,
     abi: DELEGATION_ABI,
     chainId: DELEGATION_CONTRACT.chain_id,
     args: [
-      revokeDelegationParams && revokeDelegationParams.collection,
-      revokeDelegationParams && revokeDelegationParams.address,
-      revokeDelegationParams && revokeDelegationParams.use_case,
+      revokeDelegationParams ? revokeDelegationParams.collection : NULL_ADDRESS,
+      revokeDelegationParams ? revokeDelegationParams.address : NULL_ADDRESS,
+      revokeDelegationParams ? revokeDelegationParams.use_case : 0,
     ],
-    functionName: revokeDelegationParams
-      ? "revokeDelegationAddress"
-      : undefined,
-    onError: (e) => {},
+    functionName: "revokeDelegationAddress",
   });
   const contractWriteRevoke = useContractWrite(
     contractWriteRevokeConfig.config
@@ -173,6 +215,25 @@ export default function CollectionDelegationComponent(props: Props) {
   const waitContractWriteRevoke = useWaitForTransaction({
     confirmations: 1,
     hash: contractWriteRevoke.data?.hash,
+  });
+
+  const contractWriteBatchRevokeConfig = usePrepareContractWrite({
+    address: DELEGATION_CONTRACT.contract,
+    abi: DELEGATION_ABI,
+    chainId: DELEGATION_CONTRACT.chain_id,
+    args: [
+      batchRevokeDelegationParams && batchRevokeDelegationParams.collections,
+      batchRevokeDelegationParams && batchRevokeDelegationParams.addresses,
+      batchRevokeDelegationParams && batchRevokeDelegationParams.use_cases,
+    ],
+    functionName: batchRevokeDelegationParams ? "batchRevocations" : undefined,
+  });
+  const contractWriteBatchRevoke = useContractWrite(
+    contractWriteBatchRevokeConfig.config
+  );
+  const waitContractWriteBatchRevoke = useWaitForTransaction({
+    confirmations: 1,
+    hash: contractWriteBatchRevoke.data?.hash,
   });
 
   const [toast, setToast] = useState<
@@ -205,7 +266,6 @@ export default function CollectionDelegationComponent(props: Props) {
       collectionLockRead.data ? false : true,
     ],
     functionName: "setcollectionLock",
-    onError: (e) => {},
   });
   const collectionLockWrite = useContractWrite(
     collectionLockWriteConfig.config
@@ -229,7 +289,6 @@ export default function CollectionDelegationComponent(props: Props) {
         : true,
     ],
     functionName: "setcollectionUsecaseLock",
-    onError: (e) => {},
   });
   const useCaseLockWrite = useContractWrite(useCaseLockWriteConfig.config);
   const waitUseCaseLockWrite = useWaitForTransaction({
@@ -243,7 +302,6 @@ export default function CollectionDelegationComponent(props: Props) {
 
   useEffect(() => {
     if (contractWriteRevoke.error) {
-      setRevokeDelegationParams(undefined);
       setToast({
         title: "Revoking Delegation Failed",
         message: contractWriteRevoke.error.message,
@@ -267,7 +325,6 @@ export default function CollectionDelegationComponent(props: Props) {
                   </a><br />Waiting for confirmation...`,
           });
         } else {
-          setRevokeDelegationParams(undefined);
           setToast({
             title: "Revoking Delegation",
             message: `Transaction Successful!
@@ -289,6 +346,54 @@ export default function CollectionDelegationComponent(props: Props) {
     contractWriteRevoke.error,
     contractWriteRevoke.data,
     waitContractWriteRevoke.isLoading,
+  ]);
+
+  useEffect(() => {
+    if (contractWriteBatchRevoke.error) {
+      setToast({
+        title: "Revoking Delegations Failed",
+        message: contractWriteBatchRevoke.error.message,
+      });
+    }
+    if (contractWriteBatchRevoke.data) {
+      if (contractWriteBatchRevoke.data?.hash) {
+        if (waitContractWriteBatchRevoke.isLoading) {
+          setToast({
+            title: "Batch Revoking Delegations",
+            message: `Transaction submitted...
+                    <a
+                    href=${getTransactionLink(
+                      DELEGATION_CONTRACT.chain_id,
+                      contractWriteBatchRevoke.data.hash
+                    )}
+                    target="_blank"
+                    rel="noreferrer"
+                    className=${styles.etherscanLink}>
+                    view
+                  </a><br />Waiting for confirmation...`,
+          });
+        } else {
+          setToast({
+            title: "Batch Revoking Delegations",
+            message: `Transaction Successful!
+                    <a
+                    href=${getTransactionLink(
+                      DELEGATION_CONTRACT.chain_id,
+                      contractWriteBatchRevoke.data.hash
+                    )}
+                    target="_blank"
+                    rel="noreferrer"
+                    className=${styles.etherscanLink}>
+                    view
+                  </a>`,
+          });
+        }
+      }
+    }
+  }, [
+    contractWriteBatchRevoke.error,
+    contractWriteBatchRevoke.data,
+    waitContractWriteBatchRevoke.isLoading,
   ]);
 
   useEffect(() => {
@@ -340,7 +445,64 @@ export default function CollectionDelegationComponent(props: Props) {
   ]);
 
   useEffect(() => {
+    const useCase = DELEGATION_USE_CASES[lockUseCaseValue - 1];
+    const title = `${
+      useCaseLockStatuses.data && useCaseLockStatuses.data[lockUseCaseValue - 1]
+        ? "Unlocking"
+        : "Locking"
+    } Use Case #${useCase?.use_case} - ${useCase?.display}`;
+
+    if (useCaseLockWrite.error) {
+      setToast({
+        title: title,
+        message: useCaseLockWrite.error.message,
+      });
+    }
+    if (useCaseLockWrite.data) {
+      if (useCaseLockWrite.data?.hash) {
+        if (waitUseCaseLockWrite.isLoading) {
+          setToast({
+            title: title,
+            message: `Transaction submitted...
+                    <a
+                    href=${getTransactionLink(
+                      DELEGATION_CONTRACT.chain_id,
+                      useCaseLockWrite.data.hash
+                    )}
+                    target="_blank"
+                    rel="noreferrer"
+                    className=${styles.etherscanLink}>
+                    view
+                  </a><br />Waiting for confirmation...`,
+          });
+        } else {
+          setToast({
+            title: title,
+            message: `Transaction Successful!
+                    <a
+                    href=${getTransactionLink(
+                      DELEGATION_CONTRACT.chain_id,
+                      useCaseLockWrite.data.hash
+                    )}
+                    target="_blank"
+                    rel="noreferrer"
+                    className=${styles.etherscanLink}>
+                    view
+                  </a>`,
+          });
+        }
+      }
+    }
+  }, [
+    useCaseLockWrite.error,
+    useCaseLockWrite.data,
+    waitUseCaseLockWrite.isLoading,
+  ]);
+
+  useEffect(() => {
     if (!showToast) {
+      setRevokeDelegationParams(undefined);
+      setBatchRevokeDelegationParams(undefined);
       setToast(undefined);
       setLockUseCaseValue(0);
       useCaseLockWrite.reset();
@@ -350,10 +512,29 @@ export default function CollectionDelegationComponent(props: Props) {
   }, [showToast]);
 
   useEffect(() => {
-    if (revokeDelegationParams) {
-      contractWriteRevoke.write?.();
+    if (
+      revokeDelegationParams &&
+      !revokeDelegationParams.loading &&
+      contractWriteRevoke.write
+    ) {
+      setRevokeDelegationParams({ ...revokeDelegationParams, loading: true });
+      contractWriteRevoke.write();
     }
-  }, [revokeDelegationParams]);
+  }, [revokeDelegationParams, contractWriteRevoke.write]);
+
+  useEffect(() => {
+    if (
+      batchRevokeDelegationParams &&
+      !batchRevokeDelegationParams.loading &&
+      contractWriteBatchRevoke.write
+    ) {
+      setBatchRevokeDelegationParams({
+        ...batchRevokeDelegationParams,
+        loading: true,
+      });
+      contractWriteBatchRevoke.write();
+    }
+  }, [batchRevokeDelegationParams, contractWriteBatchRevoke.write]);
 
   function printDelegations() {
     return (
@@ -474,11 +655,15 @@ export default function CollectionDelegationComponent(props: Props) {
                               <td className="text-right">
                                 <span
                                   className={styles.useCaseWalletUpdate}
-                                  onClick={() =>
-                                    alert(
-                                      `\nupdating delegation... \n\ndelegator: ${address}\nuse case: ${useCase.use_case}\naddress: ${w} `
-                                    )
-                                  }>
+                                  onClick={() => {
+                                    setUpdateDelegationParams({
+                                      wallet: w,
+                                      use_case: useCase.use_case,
+                                      display: useCase.display,
+                                    });
+                                    setShowUpdateDelegation(true);
+                                    window.scrollTo(0, 0);
+                                  }}>
                                   Update
                                 </span>
                               </td>
@@ -537,27 +722,49 @@ export default function CollectionDelegationComponent(props: Props) {
                 {delegations > 1 && (
                   <>
                     <tr>
-                      <td colSpan={4} className="pt-3">
+                      <td colSpan={4} className="pt-5">
                         selected:{" "}
                         {bulkRevocations.length == 5
                           ? `5 (max)`
                           : bulkRevocations.length}
-                      </td>
-                    </tr>
-                    <tr>
-                      <td colSpan={4}>
+                        &nbsp;&nbsp;
                         <span
                           className={`${styles.useCaseWalletRevoke} ${
                             bulkRevocations.length < 2
                               ? `${styles.useCaseWalletRevokeDisabled}`
                               : ``
                           }`}
-                          onClick={() =>
-                            alert(
-                              `\nrevoking delegation... \n\ndelegator: ${address}\nuse case: `
-                            )
-                          }>
-                          Bulk Revoke
+                          onClick={() => {
+                            setBatchRevokeDelegationParams({
+                              collections: [...bulkRevocations].map((br) =>
+                                props.collection.contract == "all"
+                                  ? DELEGATION_ALL_ADDRESS
+                                  : props.collection.contract
+                              ),
+                              addresses: [...bulkRevocations].map(
+                                (br) => br.wallet
+                              ),
+                              use_cases: [...bulkRevocations].map(
+                                (br) => br.use_case
+                              ),
+                            });
+                            setToast({
+                              title: "Batch Revoking Delegations",
+                              message: "Confirm in your wallet...",
+                            });
+                            setShowToast(true);
+                          }}>
+                          Batch Revoke
+                          {(contractWriteBatchRevoke.isLoading ||
+                            waitContractWriteBatchRevoke.isLoading) && (
+                            <div className="d-inline">
+                              <div
+                                className={`spinner-border ${styles.loader}`}
+                                role="status">
+                                <span className="sr-only"></span>
+                              </div>
+                            </div>
+                          )}
                         </span>
                       </td>
                     </tr>
@@ -669,7 +876,10 @@ export default function CollectionDelegationComponent(props: Props) {
             <>
               <span
                 className={styles.addNewDelegationBtn}
-                onClick={() => setShowCreateNew(true)}>
+                onClick={() => {
+                  setShowCreateNewDelegation(true);
+                  window.scrollTo(0, 0);
+                }}>
                 <FontAwesomeIcon icon="plus" className={styles.buttonIcon} />
                 Register Delegation
               </span>
@@ -707,7 +917,7 @@ export default function CollectionDelegationComponent(props: Props) {
           </Col>
         </Row>
         <Row className="pt-3 pb-3">
-          <Col xs={12} sm={12} md={4} lg={4}>
+          <Col xs={12} sm={12} md={4} lg={4} className="pt-2 pb-2">
             <Form.Select
               className={`${styles.formInputLockUseCase}`}
               value={lockUseCaseValue}
@@ -715,7 +925,7 @@ export default function CollectionDelegationComponent(props: Props) {
                 setLockUseCaseValue(parseInt(e.target.value));
                 useCaseLockWrite.reset();
               }}>
-              <option value={0}>Select Use Case</option>
+              <option value={0}>Select Use Case to lock/unlock</option>
               {DELEGATION_USE_CASES.map((uc, index) => {
                 return (
                   <option
@@ -732,10 +942,21 @@ export default function CollectionDelegationComponent(props: Props) {
             </Form.Select>
           </Col>
           {lockUseCaseValue != 0 && (
-            <Col xs={12} sm={12} md={3} lg={3}>
+            <Col xs={12} sm={12} md={8} lg={8} className="pt-2 pb-2">
               <button
                 className={`${styles.lockUseCaseBtn}`}
                 onClick={() => {
+                  const useCase = DELEGATION_USE_CASES[lockUseCaseValue - 1];
+                  setToast({
+                    title: `${
+                      useCaseLockStatuses.data &&
+                      useCaseLockStatuses.data[lockUseCaseValue - 1]
+                        ? "Unlocking"
+                        : "Locking"
+                    } Use Case #${useCase.use_case} - ${useCase.display}`,
+                    message: "Confirm in your wallet...",
+                  });
+                  setShowToast(true);
                   useCaseLockWrite.write?.();
                 }}>
                 <FontAwesomeIcon
@@ -765,81 +986,13 @@ export default function CollectionDelegationComponent(props: Props) {
               </button>
             </Col>
           )}
-          <Col xs={12} sm={12} md={5} lg={5}>
-            {useCaseLockWrite.isLoading && (
-              <span className="d-block pt-2">Confirm in your wallet...</span>
-            )}
-            {useCaseLockWrite.error && (
-              <>
-                <span className="d-block pt-2">
-                  {useCaseLockWrite.error.message}
-                </span>
-                <a
-                  href={""}
-                  onClick={(e) => {
-                    e.preventDefault();
-                    useCaseLockWrite.reset();
-                  }}
-                  className={styles.etherscanLink}>
-                  clear
-                </a>
-              </>
-            )}
-            {useCaseLockWrite.data && (
-              <>
-                <span className="d-block pt-2">
-                  Transaction{" "}
-                  {waitUseCaseLockWrite.isLoading
-                    ? `Submitted`
-                    : waitUseCaseLockWrite.data
-                    ? `Successful!`
-                    : `Failed`}
-                  &nbsp;&nbsp;
-                  <a
-                    href={getTransactionLink(
-                      DELEGATION_CONTRACT.chain_id,
-                      useCaseLockWrite.data.hash
-                    )}
-                    target="_blank"
-                    rel="noreferrer"
-                    className={styles.etherscanLink}>
-                    view
-                  </a>
-                  &nbsp;&nbsp;
-                  <a
-                    href={""}
-                    onClick={(e) => {
-                      e.preventDefault();
-                      useCaseLockWrite.reset();
-                    }}
-                    className={styles.etherscanLink}>
-                    clear
-                  </a>
-                </span>
-                {waitUseCaseLockWrite.isLoading && (
-                  <span className="d-block pt-2">
-                    Waiting for Confirmation...
-                  </span>
-                )}
-                {waitUseCaseLockWrite.error && (
-                  <span className="d-block pt-2">
-                    {waitUseCaseLockWrite.error.message}
-                  </span>
-                )}
-              </>
-            )}
-          </Col>
         </Row>
       </Container>
     );
   }
 
   function printSubDelegationActions() {
-    const hasSubDelegations =
-      incomingDelegations.data &&
-      (incomingDelegations.data as any)[15] &&
-      (incomingDelegations.data as any)[15].length > 0;
-    if (hasSubDelegations) {
+    if (incomingSubdelegations.length > 0) {
       return (
         <Container className="pt-2 pb-5">
           <Row className="pt-5 pb-2">
@@ -852,11 +1005,19 @@ export default function CollectionDelegationComponent(props: Props) {
               <>
                 <span
                   className={styles.addNewDelegationBtn}
-                  onClick={() => setShowCreateNew(true)}>
+                  onClick={() => {
+                    setShowCreateNewDelegationWithSub(true);
+                    window.scrollTo(0, 0);
+                  }}>
                   <FontAwesomeIcon icon="plus" className={styles.buttonIcon} />
                   Register Delegation
                 </span>
-                <span className={styles.revokeDelegationBtn}>
+                <span
+                  className={styles.revokeDelegationBtn}
+                  onClick={() => {
+                    setShowRevokeDelegationWithSub(true);
+                    window.scrollTo(0, 0);
+                  }}>
                   <FontAwesomeIcon icon="minus" className={styles.buttonIcon} />
                   Revoke Delegation
                 </span>
@@ -879,21 +1040,77 @@ export default function CollectionDelegationComponent(props: Props) {
                   <h1>{props.collection.display.toUpperCase()} DELEGATIONS</h1>
                 </Col>
               </Row>
-              {!showCreateNew && (
-                <>
-                  {printDelegations()}
-                  {printActions()}
-                  {printSubDelegationActions()}
-                </>
-              )}
-              {showCreateNew && (
+              {!showCreateNewDelegation &&
+                !showUpdateDelegation &&
+                !showCreateNewDelegationWithSub &&
+                !showRevokeDelegationWithSub && (
+                  <>
+                    {printDelegations()}
+                    {printActions()}
+                    {printSubDelegationActions()}
+                  </>
+                )}
+              {showCreateNewDelegation && (
                 <NewDelegationComponent
                   collection={props.collection}
                   address={address}
                   ens={ensResolution.data}
                   showAddMore={true}
                   showCancel={true}
-                  onHide={() => setShowCreateNew(false)}
+                  onHide={() => {
+                    setShowCreateNewDelegation(false);
+                    setCurrentDate(new Date());
+                    incomingActiveDelegations.refetch();
+                    outgoingActiveDelegations.refetch();
+                  }}
+                />
+              )}
+              {showUpdateDelegation && updateDelegationParams && (
+                <UpdateDelegationComponent
+                  collection={props.collection}
+                  address={address}
+                  delegation={updateDelegationParams}
+                  ens={ensResolution.data}
+                  showAddMore={true}
+                  showCancel={true}
+                  onHide={() => {
+                    setShowUpdateDelegation(false);
+                    setCurrentDate(new Date());
+                    incomingActiveDelegations.refetch();
+                    outgoingActiveDelegations.refetch();
+                  }}
+                />
+              )}
+              {showCreateNewDelegationWithSub && (
+                <NewDelegationWithSubComponent
+                  incomingDelegations={incomingSubdelegations}
+                  collection={props.collection}
+                  address={address}
+                  ens={ensResolution.data}
+                  showAddMore={true}
+                  showCancel={true}
+                  onHide={() => {
+                    setShowCreateNewDelegationWithSub(false);
+                    setCurrentDate(new Date());
+                    incomingActiveDelegations.refetch();
+                    outgoingActiveDelegations.refetch();
+                  }}
+                />
+              )}
+              {showRevokeDelegationWithSub && (
+                <RevokeDelegationWithSubComponent
+                  incomingDelegations={incomingSubdelegations}
+                  collection={props.collection}
+                  address={address}
+                  ens={ensResolution.data}
+                  showAddMore={true}
+                  showCancel={true}
+                  onHide={() => {
+                    setShowRevokeDelegationWithSub(false);
+                    setCurrentDate(new Date());
+                    incomingActiveDelegations.refetch();
+                    outgoingActiveDelegations.refetch();
+                  }}
                 />
               )}
             </Container>
