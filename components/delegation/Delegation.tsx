@@ -1,16 +1,15 @@
-import { Web3Button } from "@web3modal/react";
 import styles from "./Delegation.module.scss";
 import { Container, Row, Col, ToastContainer, Toast } from "react-bootstrap";
 import {
   useAccount,
-  useConnect,
   useContractRead,
   useContractWrite,
   useEnsName,
+  useNetwork,
   usePrepareContractWrite,
   useWaitForTransaction,
 } from "wagmi";
-import { formatAddress, getTransactionLink } from "../../helpers/Helpers";
+import { getTransactionLink } from "../../helpers/Helpers";
 import { useState, useEffect } from "react";
 import Image from "next/image";
 
@@ -28,17 +27,26 @@ const ConnectWalletButton = dynamic(() => import("./ConnectWalletButton"), {
   ssr: false,
 });
 
+const SwitchNetworkButton = dynamic(() => import("./SwitchNetworkButton"), {
+  ssr: false,
+});
+
 export default function DelegationComponent() {
   const accountResolution = useAccount();
+  const networkResolution = useNetwork();
+
   const ensResolution = useEnsName({
     address: accountResolution.address,
   });
-  const connectResolution = useConnect();
 
   const [toast, setToast] = useState<
     { title: string; message: string } | undefined
   >(undefined);
   const [showToast, setShowToast] = useState(false);
+
+  function chainsMatch() {
+    return networkResolution.chain?.id == DELEGATION_CONTRACT.chain_id;
+  }
 
   const globalLockRead = useContractRead({
     address: DELEGATION_CONTRACT.contract,
@@ -47,6 +55,7 @@ export default function DelegationComponent() {
     functionName: "retrieveGloballockStatus",
     args: [accountResolution.address],
     watch: true,
+    enabled: chainsMatch(),
   });
 
   const globalLockWriteConfig = usePrepareContractWrite({
@@ -55,7 +64,7 @@ export default function DelegationComponent() {
     chainId: DELEGATION_CONTRACT.chain_id,
     args: [globalLockRead.data ? false : true],
     functionName: "setglobalLock",
-    onError: (e) => {},
+    enabled: chainsMatch(),
   });
   const globalLockWrite = useContractWrite(globalLockWriteConfig.config);
   const waitGlobalLockWrite = useWaitForTransaction({
@@ -218,38 +227,40 @@ export default function DelegationComponent() {
     <Container fluid>
       <Row>
         <Col>
-          {accountResolution.isConnected && accountResolution.address && (
-            <Container>
-              <Row>
-                <Col xs={12} sm={12} md={6} className="pt-3 pb-3">
-                  <NewDelegationComponent
-                    address={accountResolution.address}
-                    ens={ensResolution.data}
-                    showCancel={false}
-                    showAddMore={false}
-                    onHide={() => {
-                      //donothing
-                    }}
-                  />
-                </Col>
-                <Col xs={12} sm={12} md={6} className={`pt-3 pb-3`}>
-                  {/* {printCollectionSelection()} */}
-                  <Container className={styles.leftBorder}>
-                    <Row>
-                      <Col>{printCollectionSelection()}</Col>
-                    </Row>
-                    <Row className="pt-4 pb-4">
-                      <Col>{printWalletActions()}</Col>
-                    </Row>
-                  </Container>
-                </Col>
-              </Row>
-              {/* <Row className="pt-2 pb-5">
-                <Col>{printWalletActions()}</Col>
-              </Row> */}
-            </Container>
-          )}
+          {accountResolution.isConnected &&
+            accountResolution.address &&
+            DELEGATION_CONTRACT.chain_id == networkResolution.chain?.id && (
+              <Container>
+                <Row>
+                  <Col xs={12} sm={12} md={6} className="pt-3 pb-3">
+                    <NewDelegationComponent
+                      address={accountResolution.address}
+                      ens={ensResolution.data}
+                      showCancel={false}
+                      showAddMore={false}
+                      onHide={() => {
+                        //donothing
+                      }}
+                    />
+                  </Col>
+                  <Col xs={12} sm={12} md={6} className={`pt-3 pb-3`}>
+                    <Container className={styles.leftBorder}>
+                      <Row>
+                        <Col>{printCollectionSelection()}</Col>
+                      </Row>
+                      <Row className="pt-4 pb-4">
+                        <Col>{printWalletActions()}</Col>
+                      </Row>
+                    </Container>
+                  </Col>
+                </Row>
+              </Container>
+            )}
           {!accountResolution.isConnected && <ConnectWalletButton />}
+          {accountResolution.isConnected &&
+            networkResolution.chain?.id != DELEGATION_CONTRACT.chain_id && (
+              <SwitchNetworkButton />
+            )}
         </Col>
       </Row>
       {toast && (
