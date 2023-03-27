@@ -12,11 +12,11 @@ import {
 } from "react-bootstrap";
 import {
   useAccount,
-  useConnect,
   useContractRead,
   useContractReads,
   useContractWrite,
   useEnsName,
+  useNetwork,
   usePrepareContractWrite,
   useWaitForTransaction,
 } from "wagmi";
@@ -38,7 +38,14 @@ import {
   NULL_ADDRESS,
 } from "../../constants";
 import { DELEGATION_ABI } from "../../abis";
-import ConnectWalletButton from "./ConnectWalletButton";
+
+const ConnectWalletButton = dynamic(() => import("./ConnectWalletButton"), {
+  ssr: false,
+});
+
+const SwitchNetworkButton = dynamic(() => import("./SwitchNetworkButton"), {
+  ssr: false,
+});
 
 const NewDelegationComponent = dynamic(() => import("./NewDelegation"), {
   ssr: false,
@@ -108,9 +115,10 @@ function getActiveDelegationsReadParams(
 export default function CollectionDelegationComponent(props: Props) {
   const [currentDate, setCurrentDate] = useState<Date>(props.date);
   const toastRef = useRef<HTMLDivElement>(null);
-  const { address, connector, isConnected } = useAccount();
+  const accountResolution = useAccount();
+  const networkResolution = useNetwork();
   const ensResolution = useEnsName({
-    address: address,
+    address: accountResolution.address,
   });
 
   const [bulkRevocations, setBulkRevocations] = useState<any[]>([]);
@@ -130,25 +138,31 @@ export default function CollectionDelegationComponent(props: Props) {
     []
   );
 
+  function chainsMatch() {
+    return networkResolution.chain?.id == DELEGATION_CONTRACT.chain_id;
+  }
+
   const outgoingDelegations = useContractReads({
     contracts: getReadParams(
-      address,
+      accountResolution.address,
       props.collection.contract == "all"
         ? DELEGATION_ALL_ADDRESS
         : props.collection.contract,
       "retrieveDelegationAddresses"
     ),
+    enabled: chainsMatch() && accountResolution.isConnected,
     watch: true,
   });
 
   const incomingDelegations = useContractReads({
     contracts: getReadParams(
-      address,
+      accountResolution.address,
       props.collection.contract == "all"
         ? DELEGATION_ALL_ADDRESS
         : props.collection.contract,
       "retrieveDelegators"
     ),
+    enabled: chainsMatch() && accountResolution.isConnected,
     watch: true,
     onSettled(data, error) {
       if (data) {
@@ -160,7 +174,7 @@ export default function CollectionDelegationComponent(props: Props) {
 
   const outgoingActiveDelegations = useContractReads({
     contracts: getActiveDelegationsReadParams(
-      address,
+      accountResolution.address,
       props.collection.contract == "all"
         ? DELEGATION_ALL_ADDRESS
         : props.collection.contract,
@@ -168,12 +182,16 @@ export default function CollectionDelegationComponent(props: Props) {
       "retrieveDelegationAddressesTokensIDsandExpiredDates"
     ),
     watch: true,
-    enabled: outgoingDelegations.data && outgoingDelegations.data?.length > 0,
+    enabled:
+      chainsMatch() &&
+      accountResolution.isConnected &&
+      outgoingDelegations.data &&
+      outgoingDelegations.data?.length > 0,
   });
 
   const incomingActiveDelegations = useContractReads({
     contracts: getActiveDelegationsReadParams(
-      address,
+      accountResolution.address,
       props.collection.contract == "all"
         ? DELEGATION_ALL_ADDRESS
         : props.collection.contract,
@@ -181,7 +199,11 @@ export default function CollectionDelegationComponent(props: Props) {
       "retrieveDelegatorsTokensIDsandExpiredDates"
     ),
     watch: true,
-    enabled: incomingDelegations.data && incomingDelegations.data?.length > 0,
+    enabled:
+      chainsMatch() &&
+      accountResolution.isConnected &&
+      incomingDelegations.data &&
+      incomingDelegations.data?.length > 0,
   });
 
   const useCaseLockStatuses = useContractReads({
@@ -189,9 +211,10 @@ export default function CollectionDelegationComponent(props: Props) {
       props.collection.contract == "all"
         ? DELEGATION_ALL_ADDRESS
         : props.collection.contract,
-      address,
+      accountResolution.address,
       "retrieveCollectionUseCaseLockStatus"
     ),
+    enabled: chainsMatch() && accountResolution.isConnected,
     watch: true,
   });
 
@@ -208,6 +231,7 @@ export default function CollectionDelegationComponent(props: Props) {
       revokeDelegationParams ? revokeDelegationParams.address : NULL_ADDRESS,
       revokeDelegationParams ? revokeDelegationParams.use_case : 0,
     ],
+    enabled: chainsMatch(),
     functionName: "revokeDelegationAddress",
   });
   const contractWriteRevoke = useContractWrite(
@@ -227,6 +251,7 @@ export default function CollectionDelegationComponent(props: Props) {
       batchRevokeDelegationParams && batchRevokeDelegationParams.addresses,
       batchRevokeDelegationParams && batchRevokeDelegationParams.use_cases,
     ],
+    enabled: chainsMatch(),
     functionName: batchRevokeDelegationParams ? "batchRevocations" : undefined,
   });
   const contractWriteBatchRevoke = useContractWrite(
@@ -251,8 +276,9 @@ export default function CollectionDelegationComponent(props: Props) {
       props.collection.contract == "all"
         ? DELEGATION_ALL_ADDRESS
         : props.collection.contract,
-      address,
+      accountResolution.address,
     ],
+    enabled: chainsMatch() && accountResolution.isConnected,
     watch: true,
   });
 
@@ -266,6 +292,7 @@ export default function CollectionDelegationComponent(props: Props) {
         : props.collection.contract,
       collectionLockRead.data ? false : true,
     ],
+    enabled: chainsMatch(),
     functionName: "setcollectionLock",
   });
   const collectionLockWrite = useContractWrite(
@@ -289,6 +316,7 @@ export default function CollectionDelegationComponent(props: Props) {
         ? false
         : true,
     ],
+    enabled: chainsMatch(),
     functionName: "setcollectionUsecaseLock",
   });
   const useCaseLockWrite = useContractWrite(useCaseLockWriteConfig.config);
@@ -1077,89 +1105,98 @@ export default function CollectionDelegationComponent(props: Props) {
     <Container fluid>
       <Row>
         <Col>
-          {isConnected && address && props.collection && (
-            <Container className="pt-3 -b-3">
-              <Row className="pt-2 pb-2">
-                <Col>
-                  <h1>{props.collection.display.toUpperCase()} DELEGATIONS</h1>
-                </Col>
-              </Row>
-              {!showCreateNewDelegation &&
-                !showUpdateDelegation &&
-                !showCreateNewDelegationWithSub &&
-                !showRevokeDelegationWithSub && (
-                  <>
-                    {printDelegations()}
-                    {printActions()}
-                    {printSubDelegationActions()}
-                  </>
+          {accountResolution.isConnected &&
+            accountResolution.address &&
+            DELEGATION_CONTRACT.chain_id == networkResolution.chain?.id &&
+            props.collection && (
+              <Container className="pt-3 -b-3">
+                <Row className="pt-2 pb-2">
+                  <Col>
+                    <h1>
+                      {props.collection.display.toUpperCase()} DELEGATIONS
+                    </h1>
+                  </Col>
+                </Row>
+                {!showCreateNewDelegation &&
+                  !showUpdateDelegation &&
+                  !showCreateNewDelegationWithSub &&
+                  !showRevokeDelegationWithSub && (
+                    <>
+                      {printDelegations()}
+                      {printActions()}
+                      {printSubDelegationActions()}
+                    </>
+                  )}
+                {showCreateNewDelegation && (
+                  <NewDelegationComponent
+                    collection={props.collection}
+                    address={accountResolution.address}
+                    ens={ensResolution.data}
+                    showAddMore={true}
+                    showCancel={true}
+                    onHide={() => {
+                      setShowCreateNewDelegation(false);
+                      setCurrentDate(new Date());
+                      incomingActiveDelegations.refetch();
+                      outgoingActiveDelegations.refetch();
+                    }}
+                  />
                 )}
-              {showCreateNewDelegation && (
-                <NewDelegationComponent
-                  collection={props.collection}
-                  address={address}
-                  ens={ensResolution.data}
-                  showAddMore={true}
-                  showCancel={true}
-                  onHide={() => {
-                    setShowCreateNewDelegation(false);
-                    setCurrentDate(new Date());
-                    incomingActiveDelegations.refetch();
-                    outgoingActiveDelegations.refetch();
-                  }}
-                />
-              )}
-              {showUpdateDelegation && updateDelegationParams && (
-                <UpdateDelegationComponent
-                  collection={props.collection}
-                  address={address}
-                  delegation={updateDelegationParams}
-                  ens={ensResolution.data}
-                  showAddMore={true}
-                  showCancel={true}
-                  onHide={() => {
-                    setShowUpdateDelegation(false);
-                    setCurrentDate(new Date());
-                    incomingActiveDelegations.refetch();
-                    outgoingActiveDelegations.refetch();
-                  }}
-                />
-              )}
-              {showCreateNewDelegationWithSub && (
-                <NewDelegationWithSubComponent
-                  incomingDelegations={incomingSubdelegations}
-                  collection={props.collection}
-                  address={address}
-                  ens={ensResolution.data}
-                  showAddMore={true}
-                  showCancel={true}
-                  onHide={() => {
-                    setShowCreateNewDelegationWithSub(false);
-                    setCurrentDate(new Date());
-                    incomingActiveDelegations.refetch();
-                    outgoingActiveDelegations.refetch();
-                  }}
-                />
-              )}
-              {showRevokeDelegationWithSub && (
-                <RevokeDelegationWithSubComponent
-                  incomingDelegations={incomingSubdelegations}
-                  collection={props.collection}
-                  address={address}
-                  ens={ensResolution.data}
-                  showAddMore={true}
-                  showCancel={true}
-                  onHide={() => {
-                    setShowRevokeDelegationWithSub(false);
-                    setCurrentDate(new Date());
-                    incomingActiveDelegations.refetch();
-                    outgoingActiveDelegations.refetch();
-                  }}
-                />
-              )}
-            </Container>
-          )}
-          {!isConnected && <ConnectWalletButton />}
+                {showUpdateDelegation && updateDelegationParams && (
+                  <UpdateDelegationComponent
+                    collection={props.collection}
+                    address={accountResolution.address}
+                    delegation={updateDelegationParams}
+                    ens={ensResolution.data}
+                    showAddMore={true}
+                    showCancel={true}
+                    onHide={() => {
+                      setShowUpdateDelegation(false);
+                      setCurrentDate(new Date());
+                      incomingActiveDelegations.refetch();
+                      outgoingActiveDelegations.refetch();
+                    }}
+                  />
+                )}
+                {showCreateNewDelegationWithSub && (
+                  <NewDelegationWithSubComponent
+                    incomingDelegations={incomingSubdelegations}
+                    collection={props.collection}
+                    address={accountResolution.address}
+                    ens={ensResolution.data}
+                    showAddMore={true}
+                    showCancel={true}
+                    onHide={() => {
+                      setShowCreateNewDelegationWithSub(false);
+                      setCurrentDate(new Date());
+                      incomingActiveDelegations.refetch();
+                      outgoingActiveDelegations.refetch();
+                    }}
+                  />
+                )}
+                {showRevokeDelegationWithSub && (
+                  <RevokeDelegationWithSubComponent
+                    incomingDelegations={incomingSubdelegations}
+                    collection={props.collection}
+                    address={accountResolution.address}
+                    ens={ensResolution.data}
+                    showAddMore={true}
+                    showCancel={true}
+                    onHide={() => {
+                      setShowRevokeDelegationWithSub(false);
+                      setCurrentDate(new Date());
+                      incomingActiveDelegations.refetch();
+                      outgoingActiveDelegations.refetch();
+                    }}
+                  />
+                )}
+              </Container>
+            )}
+          {!accountResolution.isConnected && <ConnectWalletButton />}
+          {accountResolution.isConnected &&
+            networkResolution.chain?.id != DELEGATION_CONTRACT.chain_id && (
+              <SwitchNetworkButton />
+            )}
         </Col>
       </Row>
       {toast && (
