@@ -1,5 +1,9 @@
 @import "./variables.scss";
 
+#seize-web3-network-switch {
+  display: none;
+}
+
 body {
   background: $bg-color-1;
   background-color: $bg-color-2 !important;

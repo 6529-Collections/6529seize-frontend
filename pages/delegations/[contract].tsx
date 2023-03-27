@@ -9,6 +9,7 @@ import {
   MEMELAB_CONTRACT,
   GRADIENT_CONTRACT,
   DELEGATION_ALL_ADDRESS,
+  DELEGATION_CONTRACT,
 } from "../../constants";
 import { areEqualAddresses } from "../../helpers/Helpers";
 
