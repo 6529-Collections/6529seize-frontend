@@ -1,5 +1,9 @@
 @import "./variables.scss";
 
+#seize-web3-network-switch {
+  display: none;
+}
+
 body {
   background: $bg-color-1;
   background-color: $bg-color-2 !important;
@@ -12,7 +16,8 @@ textarea,
 select,
 input,
 button,
-video {
+video,
+select {
   font-size: $font-size !important;
   outline: 0 !important;
   box-shadow: none !important;
@@ -21,7 +26,6 @@ video {
 
 a {
   outline: 0 !important;
-  color: $font-color;
   text-decoration: underline;
   color: $font-color;
 }
@@ -122,6 +126,15 @@ h4 {
   a {
     color: black !important;
   }
+
+  input {
+    color: black !important;
+  }
+}
+
+.-cbwsdk-try-extension-cta {
+  background-color: #0052ff !important;
+  padding: 10px !important;
 }
 
 #footer {
