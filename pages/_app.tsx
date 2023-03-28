@@ -104,8 +104,7 @@ library.add(
 );
 
 const { chains, provider } = configureChains(
-  // [goerli, mainnet],
-  [mainnet],
+  [goerli, mainnet],
   [
     alchemyProvider({ apiKey: process.env.ALCHEMY_API_KEY! }),
     w3mProvider({ projectId: CW_PROJECT_ID }),
