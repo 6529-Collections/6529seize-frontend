@@ -28,6 +28,26 @@ export default function AboutReleaseNotes() {
             <hr />
             <br />
             <p>
+              <b>Release 1.3.0</b>
+              <br />
+              Mar 28, 2023
+            </p>
+            <ul>
+              <li>
+                Changed wallet connector to use{" "}
+                <a
+                  href="https://web3modal.com/"
+                  target="_blank"
+                  rel="noreferrer">
+                  Web3Modal
+                </a>
+              </li>
+              <li>Groundwork for Delegations Implementation</li>
+            </ul>
+            <br />
+            <hr />
+            <br />
+            <p>
               <b>Release 1.2.1</b>
               <br />
               Mar 16, 2023
