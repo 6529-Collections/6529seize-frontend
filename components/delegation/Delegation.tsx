@@ -225,19 +225,7 @@ export default function DelegationComponent() {
 
   return (
     <Container fluid>
-      <Row className="pt-5 pb-5">
-        <Col className="pt-5 pb-5 text-center">
-          <Image
-            width="0"
-            height="0"
-            style={{ height: "auto", width: "100px" }}
-            src="/SummerGlasses.svg"
-            alt="SummerGlasses"
-          />
-          <h1 className="float-none">COMING SOON</h1>
-        </Col>
-      </Row>
-      {/* <Row>
+      <Row>
         <Col>
           {accountResolution.isConnected &&
             accountResolution.address &&
@@ -274,7 +262,7 @@ export default function DelegationComponent() {
               <SwitchNetworkButton />
             )}
         </Col>
-      </Row> */}
+      </Row>
       {toast && (
         <ToastContainer position={"top-center"} className={styles.toast}>
           <Toast onClose={() => setShowToast(false)} show={showToast}>
