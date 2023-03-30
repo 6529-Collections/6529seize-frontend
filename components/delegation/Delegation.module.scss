@@ -417,3 +417,20 @@
   color: $raspberry;
   margin-left: 10px;
 }
+
+.delegationLink {
+  text-decoration: none;
+  margin-right: 25px;
+
+  img {
+    margin-right: 10px;
+  }
+
+  span {
+    display: inline-block;
+    line-height: 40px;
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}
