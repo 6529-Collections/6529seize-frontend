@@ -263,6 +263,51 @@ export default function DelegationComponent() {
             )}
         </Col>
       </Row>
+      <Row className="pt-4 pb-4">
+        <Col>
+          <Container>
+            <Row>
+              <Col>
+                <h4>Delegation Contract Links</h4>
+              </Col>
+            </Row>
+            <Row className="pt-3">
+              <Col>
+                <a
+                  href={
+                    DELEGATION_CONTRACT.chain_id == 5
+                      ? `https://goerli.etherscan.io/address/${DELEGATION_CONTRACT.contract}`
+                      : `https://etherscan.io/address/${DELEGATION_CONTRACT.contract}`
+                  }
+                  target="_blank"
+                  rel="noreferrer"
+                  className={styles.delegationLink}>
+                  <Image
+                    src="/etherscan_w.png"
+                    alt="etherscan"
+                    width={40}
+                    height={40}
+                  />
+                  <span>Etherscan</span>
+                </a>
+                <a
+                  href={`https://github.com/6529-Collections/nftdelegation`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className={styles.delegationLink}>
+                  <Image
+                    src="/github_w.png"
+                    alt="github"
+                    width={40}
+                    height={40}
+                  />
+                  <span>Github</span>
+                </a>
+              </Col>
+            </Row>
+          </Container>
+        </Col>
+      </Row>
       {toast && (
         <ToastContainer position={"top-center"} className={styles.toast}>
           <Toast onClose={() => setShowToast(false)} show={showToast}>
