@@ -324,7 +324,7 @@
 }
 
 .delegationsTableUseCaseHeader {
-  padding-top: 0.2rem !important;
+  padding-top: 2rem !important;
   padding-bottom: 0.2rem !important;
   font-weight: bolder;
 }
@@ -405,17 +405,27 @@
 
 .delegationFetchingLabel {
   color: $font-color-h;
-  margin-left: 10px;
+  margin-left: 15px;
 }
 
 .delegationActiveLabel {
-  color: $green;
-  margin-left: 10px;
+  color: lighten($color: $green, $amount: 10);
+  margin-left: 15px;
 }
 
 .delegationExpiredLabel {
-  color: $raspberry;
-  margin-left: 10px;
+  color: lighten($color: $raspberry, $amount: 10);
+  margin-left: 15px;
+}
+
+.consolidationActiveLabel {
+  color: lighten($color: $blue, $amount: 10);
+  margin-left: 15px;
+}
+
+.consolidationNotAcceptedLabel {
+  color: lighten($color: $orange, $amount: 10);
+  margin-left: 15px;
 }
 
 .delegationLink {
