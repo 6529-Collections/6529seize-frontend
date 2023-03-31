@@ -733,7 +733,7 @@ export default function CollectionDelegationComponent(props: Props) {
                                         className={
                                           styles.consolidationNotAcceptedLabel
                                         }>
-                                        consolidation not accepted
+                                        consolidation pending
                                       </span>
                                     ))}
                                 </td>
@@ -946,7 +946,7 @@ export default function CollectionDelegationComponent(props: Props) {
                                         className={
                                           styles.delegationExpiredLabel
                                         }>
-                                        consolidation not accepted
+                                        consolidation pending
                                       </span>
                                     ))}
                                 </td>
