@@ -18,6 +18,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import dynamic from "next/dynamic";
 import { DELEGATION_CONTRACT } from "../../constants";
 import { DELEGATION_ABI } from "../../abis";
+import { sepolia } from "wagmi/chains";
 
 const NewDelegationComponent = dynamic(() => import("./NewDelegation"), {
   ssr: false,
@@ -52,7 +53,7 @@ export default function DelegationComponent() {
     address: DELEGATION_CONTRACT.contract,
     abi: DELEGATION_ABI,
     chainId: DELEGATION_CONTRACT.chain_id,
-    functionName: "retrieveGloballockStatus",
+    functionName: "retrieveGlobalLockStatus",
     args: [accountResolution.address],
     watch: true,
     enabled: chainsMatch(),
@@ -63,7 +64,7 @@ export default function DelegationComponent() {
     abi: DELEGATION_ABI,
     chainId: DELEGATION_CONTRACT.chain_id,
     args: [globalLockRead.data ? false : true],
-    functionName: "setglobalLock",
+    functionName: "setGlobalLock",
     enabled: chainsMatch(),
   });
   const globalLockWrite = useContractWrite(globalLockWriteConfig.config);
@@ -128,55 +129,49 @@ export default function DelegationComponent() {
   }, [showToast]);
 
   function printWalletActions() {
-    return (
-      <Container>
-        <Row>
-          <Col>
-            <h4>Actions</h4>
-          </Col>
-        </Row>
-        <Row className="pt-2 pb-3">
-          <Col>
-            <>
-              {/* <span className={styles.addNewDelegationBtn}>
-                <FontAwesomeIcon icon="plus" className={styles.buttonIcon} />
-                Batch Delegations
-              </span> */}
-              {globalLockRead.data != null && (
-                <span
-                  className={styles.lockDelegationBtn}
-                  onClick={() => {
-                    setToast({
-                      title: `${
-                        globalLockRead.data ? `Unlocking` : `Locking`
-                      } Wallet`,
-                      message: "Confirm in your wallet...",
-                    });
-                    setShowToast(true);
-                    globalLockWrite.write?.();
-                  }}>
-                  <FontAwesomeIcon
-                    icon={globalLockRead.data ? "lock" : "lock-open"}
-                    className={styles.buttonIcon}
-                  />
-                  {globalLockRead.data ? "Unlock" : "Lock"} Wallet
-                  {(globalLockWrite.isLoading ||
-                    waitGlobalLockWrite.isLoading) && (
-                    <div className="d-inline">
-                      <div
-                        className={`spinner-border ${styles.loader}`}
-                        role="status">
-                        <span className="sr-only"></span>
-                      </div>
+    if (globalLockRead.data != null) {
+      return (
+        <Container>
+          <Row>
+            <Col>
+              <h4>Actions</h4>
+            </Col>
+          </Row>
+          <Row className="pt-2 pb-3">
+            <Col>
+              <span
+                className={styles.lockDelegationBtn}
+                onClick={() => {
+                  setToast({
+                    title: `${
+                      globalLockRead.data ? `Unlocking` : `Locking`
+                    } Wallet`,
+                    message: "Confirm in your wallet...",
+                  });
+                  setShowToast(true);
+                  globalLockWrite.write?.();
+                }}>
+                <FontAwesomeIcon
+                  icon={globalLockRead.data ? "lock" : "lock-open"}
+                  className={styles.buttonIcon}
+                />
+                {globalLockRead.data ? "Unlock" : "Lock"} Wallet
+                {(globalLockWrite.isLoading ||
+                  waitGlobalLockWrite.isLoading) && (
+                  <div className="d-inline">
+                    <div
+                      className={`spinner-border ${styles.loader}`}
+                      role="status">
+                      <span className="sr-only"></span>
                     </div>
-                  )}
-                </span>
-              )}
-            </>
-          </Col>
-        </Row>
-      </Container>
-    );
+                  </div>
+                )}
+              </span>
+            </Col>
+          </Row>
+        </Container>
+      );
+    }
   }
   function printCollectionSelection() {
     return (
@@ -263,51 +258,54 @@ export default function DelegationComponent() {
             )}
         </Col>
       </Row>
-      <Row className="pt-4 pb-4">
-        <Col>
-          <Container>
-            <Row>
-              <Col>
-                <h4>Delegation Contract Links</h4>
-              </Col>
-            </Row>
-            <Row className="pt-3">
-              <Col>
-                <a
-                  href={
-                    DELEGATION_CONTRACT.chain_id == 5
-                      ? `https://goerli.etherscan.io/address/${DELEGATION_CONTRACT.contract}`
-                      : `https://etherscan.io/address/${DELEGATION_CONTRACT.contract}`
-                  }
-                  target="_blank"
-                  rel="noreferrer"
-                  className={styles.delegationLink}>
-                  <Image
-                    src="/etherscan_w.png"
-                    alt="etherscan"
-                    width={40}
-                    height={40}
-                  />
-                  <span>Etherscan</span>
-                </a>
-                <a
-                  href={`https://github.com/6529-Collections/nftdelegation`}
-                  target="_blank"
-                  rel="noreferrer"
-                  className={styles.delegationLink}>
-                  <Image
-                    src="/github_w.png"
-                    alt="github"
-                    width={40}
-                    height={40}
-                  />
-                  <span>Github</span>
-                </a>
-              </Col>
-            </Row>
-          </Container>
-        </Col>
-      </Row>
+      {accountResolution.isConnected &&
+        networkResolution.chain?.id == DELEGATION_CONTRACT.chain_id && (
+          <Row className="pt-5 pb-5">
+            <Col>
+              <Container>
+                <Row>
+                  <Col>
+                    <h4>Delegation Contract Links</h4>
+                  </Col>
+                </Row>
+                <Row className="pt-3">
+                  <Col>
+                    <a
+                      href={
+                        DELEGATION_CONTRACT.chain_id == sepolia.id
+                          ? `https://sepolia.etherscan.io/address/${DELEGATION_CONTRACT.contract}`
+                          : `https://etherscan.io/address/${DELEGATION_CONTRACT.contract}`
+                      }
+                      target="_blank"
+                      rel="noreferrer"
+                      className={styles.delegationLink}>
+                      <Image
+                        src="/etherscan_w.png"
+                        alt="etherscan"
+                        width={40}
+                        height={40}
+                      />
+                      <span>Etherscan</span>
+                    </a>
+                    <a
+                      href={`https://github.com/6529-Collections/nftdelegation`}
+                      target="_blank"
+                      rel="noreferrer"
+                      className={styles.delegationLink}>
+                      <Image
+                        src="/github_w.png"
+                        alt="github"
+                        width={40}
+                        height={40}
+                      />
+                      <span>Github</span>
+                    </a>
+                  </Col>
+                </Row>
+              </Container>
+            </Col>
+          </Row>
+        )}
       {toast && (
         <ToastContainer position={"top-center"} className={styles.toast}>
           <Toast onClose={() => setShowToast(false)} show={showToast}>

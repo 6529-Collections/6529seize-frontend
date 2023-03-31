@@ -18,11 +18,8 @@ import {
 import { Web3Modal } from "@web3modal/react";
 import { publicProvider } from "@wagmi/core/providers/public";
 
-import { CoinbaseWalletConnector } from "wagmi/connectors/coinbaseWallet";
-import { WalletConnectConnector } from "wagmi/connectors/walletConnect";
-import { MetaMaskConnector } from "wagmi/connectors/metaMask";
-import { mainnet } from "wagmi/chains";
-import { configureChains, createClient, goerli, WagmiConfig } from "wagmi";
+import { mainnet, sepolia } from "wagmi/chains";
+import { configureChains, createClient, WagmiConfig } from "wagmi";
 
 import { library } from "@fortawesome/fontawesome-svg-core";
 import {
@@ -104,7 +101,7 @@ library.add(
 );
 
 const { chains, provider } = configureChains(
-  [goerli, mainnet],
+  [sepolia, mainnet],
   [
     alchemyProvider({ apiKey: process.env.ALCHEMY_API_KEY! }),
     w3mProvider({ projectId: CW_PROJECT_ID }),
