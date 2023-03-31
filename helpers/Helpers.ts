@@ -1,3 +1,4 @@
+import { sepolia } from "wagmi/chains";
 import { GRADIENT_CONTRACT, MEMES_CONTRACT } from "../constants";
 import { BaseNFT, NFT, VolumeType } from "../entities/INFT";
 
@@ -169,7 +170,7 @@ export const isValidEthAddress = (address: string) =>
   /^0x[0-9a-fA-F]{40}$/.test(address);
 
 export function getTransactionLink(chain_id: number, hash: string) {
-  return chain_id == 5
-    ? `https://goerli.etherscan.io/tx/${hash}`
+  return chain_id == sepolia.id
+    ? `https://sepolia.etherscan.io/tx/${hash}`
     : `https://etherscan.io/tx/${hash}`;
 }

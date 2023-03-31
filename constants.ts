@@ -1,3 +1,5 @@
+import { sepolia } from "wagmi/chains";
+
 export const PROJECT_NAME = "6529SEIZE";
 export const CW_PROJECT_ID = "0ba285cc179045bec37f7c9b9e7f9fbf";
 
@@ -16,7 +18,7 @@ export const DELEGATION_CONTRACT: {
   chain_id: number;
   contract: `0x${string}`;
 } = {
-  chain_id: 5,
+  chain_id: sepolia.id,
   contract: "0x6a89AFF3B4ea4CF323C32740289C8a1d703aBeC8",
 };
 export const DELEGATION_ALL_ADDRESS =
