@@ -293,7 +293,7 @@ export default function CollectionDelegationComponent(props: Props) {
       collectionLockRead.data ? false : true,
     ],
     enabled: chainsMatch(),
-    functionName: "setcollectionLock",
+    functionName: "setCollectionLock",
   });
   const collectionLockWrite = useContractWrite(
     collectionLockWriteConfig.config
@@ -317,7 +317,7 @@ export default function CollectionDelegationComponent(props: Props) {
         : true,
     ],
     enabled: chainsMatch(),
-    functionName: "setcollectionUsecaseLock",
+    functionName: "setCollectionUsecaseLock",
   });
   const useCaseLockWrite = useContractWrite(useCaseLockWriteConfig.config);
   const waitUseCaseLockWrite = useWaitForTransaction({
@@ -790,8 +790,8 @@ export default function CollectionDelegationComponent(props: Props) {
                     <tr>
                       <td colSpan={4} className="pt-5">
                         selected:{" "}
-                        {bulkRevocations.length == 5
-                          ? `5 (max)`
+                        {bulkRevocations.length == MAX_BULK_ACTIONS
+                          ? `${MAX_BULK_ACTIONS} (max)`
                           : bulkRevocations.length}
                         &nbsp;&nbsp;
                         <span
