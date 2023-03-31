@@ -23,6 +23,7 @@ import {
 import { Fragment, useEffect, useRef, useState } from "react";
 
 import {
+  CONSOLIDATION_USE_CASE,
   DelegationCollection,
   DELEGATION_USE_CASES,
   MAX_BULK_ACTIONS,
@@ -575,9 +576,9 @@ export default function CollectionDelegationComponent(props: Props) {
     return `${year}-${month}-${day} ${hours}:${minutes}`;
   }
 
-  function getActiveStatus(delegations: any, w: string, useCase: number) {
+  function getActiveStatus(delegations: any, w: string, useCaseIndex: number) {
     if (delegations.data) {
-      const myCase = delegations.data[useCase - 1] as any[];
+      const myCase = delegations.data[useCaseIndex] as any[];
       const index = myCase[0].indexOf(w);
       if (index > -1) {
         const myDate = myCase[1][0].toNumber();
@@ -628,11 +629,11 @@ export default function CollectionDelegationComponent(props: Props) {
     return (
       <Container className="no-padding">
         <Row className={styles.delegationsTableScrollContainer}>
-          <Col className="pt-2 pb-3">
+          <Col className="pb-3">
             <Table className={styles.delegationsTable}>
               <tbody>
                 {delegations > 0 ? (
-                  outgoingDelegations.data!.map((data: any, index) => {
+                  outgoingDelegations.data!.map((data: any, index: number) => {
                     if (data.length > 0) {
                       const useCase = DELEGATION_USE_CASES[index];
                       return (
@@ -648,7 +649,7 @@ export default function CollectionDelegationComponent(props: Props) {
                             const isActive = getActiveStatus(
                               outgoingActiveDelegations,
                               w,
-                              useCase.use_case
+                              index
                             );
                             return (
                               <tr key={`outgoing-${useCase}-${index}-${w}`}>
@@ -716,6 +717,25 @@ export default function CollectionDelegationComponent(props: Props) {
                                       fetching status
                                     </span>
                                   )}
+                                  {useCase.use_case == CONSOLIDATION_USE_CASE &&
+                                    (incomingDelegations.data &&
+                                    (
+                                      incomingDelegations.data as any[]
+                                    )[16].includes(w) ? (
+                                      <span
+                                        className={
+                                          styles.consolidationActiveLabel
+                                        }>
+                                        consolidation active
+                                      </span>
+                                    ) : (
+                                      <span
+                                        className={
+                                          styles.consolidationNotAcceptedLabel
+                                        }>
+                                        consolidation not accepted
+                                      </span>
+                                    ))}
                                 </td>
                                 <td className="text-right">
                                   <span
@@ -857,7 +877,7 @@ export default function CollectionDelegationComponent(props: Props) {
     return (
       <Container className="no-padding">
         <Row className={styles.delegationsTableScrollContainer}>
-          <Col className="pt-2 pb-3">
+          <Col className="pb-3">
             <Table className={styles.delegationsTable}>
               <tbody>
                 {delegations > 0 ? (
@@ -877,7 +897,7 @@ export default function CollectionDelegationComponent(props: Props) {
                             const isActive = getActiveStatus(
                               incomingActiveDelegations,
                               w,
-                              useCase.use_case
+                              index
                             );
                             return (
                               <tr key={`incoming-${useCase}-${index}-${w}`}>
@@ -910,6 +930,25 @@ export default function CollectionDelegationComponent(props: Props) {
                                       fetching status
                                     </span>
                                   )}
+                                  {useCase.use_case == CONSOLIDATION_USE_CASE &&
+                                    (outgoingDelegations.data &&
+                                    (
+                                      outgoingDelegations.data as any[]
+                                    )[16].includes(w) ? (
+                                      <span
+                                        className={
+                                          styles.consolidationActiveLabel
+                                        }>
+                                        consolidation active
+                                      </span>
+                                    ) : (
+                                      <span
+                                        className={
+                                          styles.delegationExpiredLabel
+                                        }>
+                                        consolidation not accepted
+                                      </span>
+                                    ))}
                                 </td>
                               </tr>
                             );
