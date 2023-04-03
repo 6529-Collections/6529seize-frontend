@@ -16,11 +16,13 @@ interface Props {
     memesCardsSets: number;
     memesCardsSetS1: number;
     memesCardsSetS2: number;
+    memesCardsSetS3: number;
     memesBalance: number;
     genesis: number;
     gradientsBalance: number;
     tdh_rank?: number;
     balance_rank?: number;
+    unique_rank?: number;
   };
   expandedTags?: boolean;
   isUserPage?: boolean;
@@ -34,6 +36,8 @@ const UNIQUE_MEMES_ICON = "";
 const SZN_1_ICON = "";
 
 const SZN_2_ICON = "";
+
+const SZN_3_ICON = "";
 
 const GRADIENT_ICON = "";
 
@@ -199,7 +203,15 @@ export default function Address(props: Props) {
                 props.tags.balance_rank > 0 &&
                 props.expandedTags && (
                   <span className={`${styles.tag} ${styles.rankTag}`}>
-                    Cards Rank #{numberWithCommas(props.tags.balance_rank)}
+                    All Cards Rank #{numberWithCommas(props.tags.balance_rank)}
+                  </span>
+                )}
+              {props.tags.unique_rank &&
+                props.tags.unique_rank > 0 &&
+                props.expandedTags && (
+                  <span className={`${styles.tag} ${styles.rankTag}`}>
+                    Unique Cards Rank #
+                    {numberWithCommas(props.tags.unique_rank)}
                   </span>
                 )}
               {props.tags.tdh_rank &&
@@ -299,6 +311,24 @@ export default function Address(props: Props) {
                         src={SZN_2_ICON}
                         className={styles.tagIcon}
                         alt="Memes SZN2"
+                      />
+                    )}
+                  </span>
+                )}
+              {props.tags.memesCardsSetS3 > 0 &&
+                (props.tags.memesCardsSets == 0 || props.expandedTags) && (
+                  <span
+                    className={`${styles.tag} ${
+                      !SZN_1_ICON ? styles.memeSzn3Tag : ""
+                    }`}>
+                    {props.tags.memesCardsSetS3}x{" "}
+                    {(props.isUserPage || !SZN_3_ICON) &&
+                      `SZN3 Set${props.tags.memesCardsSetS3 > 1 ? "s " : " "}`}
+                    {SZN_1_ICON && (
+                      <img
+                        src={SZN_3_ICON}
+                        className={styles.tagIcon}
+                        alt="Memes SZN3"
                       />
                     )}
                   </span>

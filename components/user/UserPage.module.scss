@@ -101,21 +101,23 @@
 
 .primaryTable {
   tr td {
-    width: calc(100% / 6);
+    width: calc(100% / 7);
     line-height: 25px;
     vertical-align: middle;
+    white-space: nowrap;
   }
   tr:not(:first-child) {
     border-bottom: 1px solid $dark-grey !important;
 
     td:not(:first-child) {
-      text-align: right;
+      text-align: center;
     }
   }
 
   tr:nth-child(2),
   tr:nth-child(3),
-  tr:nth-child(7) {
+  tr:nth-child(6),
+  tr:nth-child(9) {
     border-bottom: none !important;
   }
 }
@@ -245,4 +247,15 @@
 
 .distributionsTable > :not(caption) > * > * {
   padding: 0.5rem !important;
+}
+
+.avatar {
+  height: 200px;
+  width: auto;
+}
+
+@media only screen and (max-width: 767px) {
+  .avatar {
+    height: 120px;
+  }
 }
