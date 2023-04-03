@@ -46,7 +46,7 @@ export function fromGWEI(from: number) {
 }
 
 export function numberWithCommas(x: number) {
-  if (x == null || x == 0) return "-";
+  if (x == null || x == 0 || isNaN(x)) return "-";
   const parts = x.toString().split(".");
   parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
   return parts.join(".");
