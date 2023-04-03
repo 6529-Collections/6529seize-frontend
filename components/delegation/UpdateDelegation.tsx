@@ -176,7 +176,7 @@ export default function NewDelegationComponent(props: Props) {
               </Form.Label>
               <Col sm={10}>
                 <Form.Control
-                  placeholder="Deligate to"
+                  placeholder="Delegate to"
                   className={`${styles.formInput}`}
                   type="text"
                   value={props.delegation.wallet}
@@ -190,7 +190,7 @@ export default function NewDelegationComponent(props: Props) {
               </Form.Label>
               <Col sm={10}>
                 <Form.Control
-                  placeholder="Deligate to"
+                  placeholder="Delegate to"
                   className={`${styles.formInput}`}
                   type="text"
                   value={delegationToAddress}
