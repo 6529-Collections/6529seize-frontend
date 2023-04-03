@@ -430,17 +430,29 @@
 
 .delegationLink {
   text-decoration: none;
-  margin-right: 25px;
+  margin-left: 10px;
+  margin-right: 10px;
+  height: 32px;
+  display: inline-block;
 
   img {
     margin-right: 10px;
+    margin-right: 10px;
+    margin-top: -2px;
   }
 
   span {
+    font-size: smaller;
     display: inline-block;
-    line-height: 40px;
+    line-height: 32px;
     &:hover {
       text-decoration: underline;
     }
   }
+}
+
+.delegationContractLinksHeader {
+  font-weight: bolder;
+  color: $font-color-h;
+  text-align: center;
 }
