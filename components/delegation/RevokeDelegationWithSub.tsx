@@ -29,6 +29,8 @@ interface Props {
 }
 
 export default function RevokeDelegationWithSubComponent(props: Props) {
+  const [newDelegationCollection, setNewDelegationCollection] =
+    useState<string>(props.collection ? props.collection.contract : "0");
   const [newDelegationUseCase, setNewDelegationUseCase] = useState<number>(0);
   const [newDelegationToAddress, setNewDelegationToAddress] = useState("");
   const [newDelegationOriginalDelegator, setNewDelegationOriginalDelegator] =
@@ -43,9 +45,9 @@ export default function RevokeDelegationWithSubComponent(props: Props) {
     chainId: DELEGATION_CONTRACT.chain_id,
     args: [
       newDelegationOriginalDelegator,
-      props.collection.contract == "all"
+      newDelegationCollection == "all"
         ? DELEGATION_ALL_ADDRESS
-        : props.collection.contract,
+        : newDelegationCollection,
       newDelegationToAddress,
       newDelegationUseCase,
     ],
@@ -53,7 +55,10 @@ export default function RevokeDelegationWithSubComponent(props: Props) {
       validate().length == 0
         ? "revokeDelegationAddressUsingSubdelegation"
         : undefined,
-    onError: (e) => {},
+    onError: (e) => {
+      setErrors(["CANNOT ESTIMATE GAS"]);
+      window.scrollBy(0, 100);
+    },
   });
   const contractWriteDelegation = useContractWrite(
     contractWriteDelegationConfig.config
@@ -176,16 +181,38 @@ export default function RevokeDelegationWithSubComponent(props: Props) {
                 Collection
               </Form.Label>
               <Col sm={10}>
-                <Form.Control
-                  className={`${styles.formInput} ${styles.formInputDisabled}`}
-                  type="text"
-                  defaultValue={`${props.collection.display}${
-                    props.collection.contract == "all"
-                      ? ""
-                      : `- ${props.collection.contract}`
-                  }`}
-                  disabled
-                />
+                {props.collection.contract == "all" ? (
+                  <Form.Select
+                    className={`${styles.formInput}`}
+                    value={newDelegationCollection}
+                    onChange={(e) =>
+                      setNewDelegationCollection(e.target.value)
+                    }>
+                    <option value="0" disabled>
+                      Select Collection
+                    </option>
+                    {SUPPORTED_COLLECTIONS.map((sc) => (
+                      <option
+                        key={`add-delegation-select-collection-${sc.contract}`}
+                        value={sc.contract}>
+                        {`${sc.display}${
+                          sc.contract == "all" ? "" : `- ${sc.contract}`
+                        }`}
+                      </option>
+                    ))}
+                  </Form.Select>
+                ) : (
+                  <Form.Control
+                    className={`${styles.formInput} ${styles.formInputDisabled}`}
+                    type="text"
+                    defaultValue={`${props.collection.display}${
+                      props.collection.contract == "all"
+                        ? ""
+                        : `- ${props.collection.contract}`
+                    }`}
+                    disabled
+                  />
+                )}
               </Col>
             </Form.Group>
             <Form.Group as={Row} className="pb-4">
@@ -269,7 +296,7 @@ export default function RevokeDelegationWithSubComponent(props: Props) {
                   Errors
                 </Form.Label>
                 <Col sm={10}>
-                  <ul>
+                  <ul className="mb-0">
                     {errors.map((e, index) => (
                       <li key={`new-delegation-error-${index}`}>{e}</li>
                     ))}
@@ -304,7 +331,7 @@ export default function RevokeDelegationWithSubComponent(props: Props) {
                   Status
                 </Form.Label>
                 <Col sm={10}>
-                  <ul>
+                  <ul className="mb-0">
                     <li
                       className={`${styles.newDelegationRedultsList} ${
                         waitContractWriteDelegation.data &&

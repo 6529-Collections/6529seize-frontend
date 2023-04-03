@@ -268,34 +268,55 @@ export default function CollectionDelegationComponent(props: Props) {
   >(undefined);
   const [showToast, setShowToast] = useState(false);
 
-  const collectionLockRead = useContractRead({
-    address: DELEGATION_CONTRACT.contract,
-    abi: DELEGATION_ABI,
-    chainId: DELEGATION_CONTRACT.chain_id,
-    functionName: "retrieveCollectionLockStatus",
-    args: [
-      props.collection.contract == "all"
-        ? DELEGATION_ALL_ADDRESS
-        : props.collection.contract,
-      accountResolution.address,
-    ],
-    enabled: chainsMatch() && accountResolution.isConnected,
-    watch: true,
-  });
+  const collectionLockRead =
+    props.collection.contract == "all"
+      ? useContractRead({
+          address: DELEGATION_CONTRACT.contract,
+          abi: DELEGATION_ABI,
+          chainId: DELEGATION_CONTRACT.chain_id,
+          functionName: "retrieveGlobalLockStatus",
+          args: [accountResolution.address],
+          watch: true,
+          enabled: chainsMatch(),
+        })
+      : useContractRead({
+          address: DELEGATION_CONTRACT.contract,
+          abi: DELEGATION_ABI,
+          chainId: DELEGATION_CONTRACT.chain_id,
+          functionName: "retrieveCollectionLockStatus",
+          args: [
+            props.collection.contract == "all"
+              ? DELEGATION_ALL_ADDRESS
+              : props.collection.contract,
+            accountResolution.address,
+          ],
+          enabled: chainsMatch() && accountResolution.isConnected,
+          watch: true,
+        });
 
-  const collectionLockWriteConfig = usePrepareContractWrite({
-    address: DELEGATION_CONTRACT.contract,
-    abi: DELEGATION_ABI,
-    chainId: DELEGATION_CONTRACT.chain_id,
-    args: [
-      props.collection.contract == "all"
-        ? DELEGATION_ALL_ADDRESS
-        : props.collection.contract,
-      collectionLockRead.data ? false : true,
-    ],
-    enabled: chainsMatch(),
-    functionName: "setCollectionLock",
-  });
+  const collectionLockWriteConfig =
+    props.collection.contract == "all"
+      ? usePrepareContractWrite({
+          address: DELEGATION_CONTRACT.contract,
+          abi: DELEGATION_ABI,
+          chainId: DELEGATION_CONTRACT.chain_id,
+          args: [collectionLockRead.data ? false : true],
+          functionName: "setGlobalLock",
+          enabled: chainsMatch(),
+        })
+      : usePrepareContractWrite({
+          address: DELEGATION_CONTRACT.contract,
+          abi: DELEGATION_ABI,
+          chainId: DELEGATION_CONTRACT.chain_id,
+          args: [
+            props.collection.contract == "all"
+              ? DELEGATION_ALL_ADDRESS
+              : props.collection.contract,
+            collectionLockRead.data ? false : true,
+          ],
+          enabled: chainsMatch(),
+          functionName: "setCollectionLock",
+        });
   const collectionLockWrite = useContractWrite(
     collectionLockWriteConfig.config
   );
@@ -429,7 +450,9 @@ export default function CollectionDelegationComponent(props: Props) {
   useEffect(() => {
     if (collectionLockWrite.error) {
       setToast({
-        title: `${collectionLockRead.data ? `Unlocking` : `Locking`} Wallet`,
+        title: `${collectionLockRead.data ? `Unlocking` : `Locking`} ${
+          props.collection.contract == "all" ? `All Collections` : `Collection`
+        }`,
         message: collectionLockWrite.error.message,
       });
     }
@@ -437,7 +460,11 @@ export default function CollectionDelegationComponent(props: Props) {
       if (collectionLockWrite.data?.hash) {
         if (waitCollectionLockWrite.isLoading) {
           setToast({
-            title: "Locking Collection",
+            title: `Locking ${
+              props.collection.contract == "all"
+                ? `All Collections`
+                : `Collection`
+            }`,
             message: `Transaction submitted...
                     <a
                     href=${getTransactionLink(
@@ -452,7 +479,11 @@ export default function CollectionDelegationComponent(props: Props) {
           });
         } else {
           setToast({
-            title: "Locking Collection",
+            title: `Locking ${
+              props.collection.contract == "all"
+                ? `All Collections`
+                : `Collection`
+            }`,
             message: `Transaction Successful!
                     <a
                     href=${getTransactionLink(
@@ -999,7 +1030,11 @@ export default function CollectionDelegationComponent(props: Props) {
                     setToast({
                       title: `${
                         collectionLockRead.data ? `Unlocking` : `Locking`
-                      } Collection`,
+                      } ${
+                        props.collection.contract == "all"
+                          ? `All Collections`
+                          : `Collection`
+                      }`,
                       message: "Confirm in your wallet...",
                     });
                     setShowToast(true);
@@ -1009,7 +1044,10 @@ export default function CollectionDelegationComponent(props: Props) {
                     icon={collectionLockRead.data ? "lock" : "lock-open"}
                     className={styles.buttonIcon}
                   />
-                  {collectionLockRead.data ? "Unlock" : "Lock"} Collection
+                  {collectionLockRead.data ? "Unlock" : "Lock"}{" "}
+                  {props.collection.contract == "all"
+                    ? `All Collections`
+                    : `Collection`}
                   {(collectionLockWrite.isLoading ||
                     waitCollectionLockWrite.isLoading) && (
                     <div className="d-inline">
@@ -1025,77 +1063,79 @@ export default function CollectionDelegationComponent(props: Props) {
             </>
           </Col>
         </Row>
-        <Row className="pt-3 pb-3">
-          <Col xs={12} sm={12} md={4} lg={4} className="pt-2 pb-2">
-            <Form.Select
-              className={`${styles.formInputLockUseCase}`}
-              value={lockUseCaseValue}
-              onChange={(e) => {
-                setLockUseCaseValue(parseInt(e.target.value));
-                useCaseLockWrite.reset();
-              }}>
-              <option value={0}>Select Use Case to lock/unlock</option>
-              {DELEGATION_USE_CASES.map((uc, index) => {
-                return (
-                  <option
-                    key={`collection-delegation-select-use-case-${uc.use_case}`}
-                    value={uc.use_case}>
-                    #{uc.use_case} - {uc.display}
-                    {useCaseLockStatuses.data &&
-                    useCaseLockStatuses.data[index] == true
-                      ? " - LOCKED"
-                      : ` - UNLOCKED`}
-                  </option>
-                );
-              })}
-            </Form.Select>
-          </Col>
-          {lockUseCaseValue != 0 && (
-            <Col xs={12} sm={12} md={8} lg={8} className="pt-2 pb-2">
-              <button
-                className={`${styles.lockUseCaseBtn}`}
-                onClick={() => {
-                  const useCase = DELEGATION_USE_CASES[lockUseCaseValue - 1];
-                  setToast({
-                    title: `${
+        {props.collection.contract != "all" && (
+          <Row className="pt-3 pb-3">
+            <Col xs={12} sm={12} md={4} lg={4} className="pt-2 pb-2">
+              <Form.Select
+                className={`${styles.formInputLockUseCase}`}
+                value={lockUseCaseValue}
+                onChange={(e) => {
+                  setLockUseCaseValue(parseInt(e.target.value));
+                  useCaseLockWrite.reset();
+                }}>
+                <option value={0}>Select Use Case to lock/unlock</option>
+                {DELEGATION_USE_CASES.map((uc, index) => {
+                  return (
+                    <option
+                      key={`collection-delegation-select-use-case-${uc.use_case}`}
+                      value={uc.use_case}>
+                      #{uc.use_case} - {uc.display}
+                      {useCaseLockStatuses.data &&
+                      useCaseLockStatuses.data[index] == true
+                        ? " - LOCKED"
+                        : ` - UNLOCKED`}
+                    </option>
+                  );
+                })}
+              </Form.Select>
+            </Col>
+            {lockUseCaseValue != 0 && (
+              <Col xs={12} sm={12} md={8} lg={8} className="pt-2 pb-2">
+                <button
+                  className={`${styles.lockUseCaseBtn}`}
+                  onClick={() => {
+                    const useCase = DELEGATION_USE_CASES[lockUseCaseValue - 1];
+                    setToast({
+                      title: `${
+                        useCaseLockStatuses.data &&
+                        useCaseLockStatuses.data[lockUseCaseValue - 1]
+                          ? "Unlocking"
+                          : "Locking"
+                      } Use Case #${useCase.use_case} - ${useCase.display}`,
+                      message: "Confirm in your wallet...",
+                    });
+                    setShowToast(true);
+                    useCaseLockWrite.write?.();
+                  }}>
+                  <FontAwesomeIcon
+                    icon={
                       useCaseLockStatuses.data &&
                       useCaseLockStatuses.data[lockUseCaseValue - 1]
-                        ? "Unlocking"
-                        : "Locking"
-                    } Use Case #${useCase.use_case} - ${useCase.display}`,
-                    message: "Confirm in your wallet...",
-                  });
-                  setShowToast(true);
-                  useCaseLockWrite.write?.();
-                }}>
-                <FontAwesomeIcon
-                  icon={
-                    useCaseLockStatuses.data &&
-                    useCaseLockStatuses.data[lockUseCaseValue - 1]
-                      ? "lock"
-                      : "lock-open"
-                  }
-                  className={styles.buttonIcon}
-                />
-                {useCaseLockStatuses.data &&
-                useCaseLockStatuses.data[lockUseCaseValue - 1]
-                  ? "Unlock"
-                  : "Lock"}{" "}
-                Use Case
-                {(useCaseLockWrite.isLoading ||
-                  waitUseCaseLockWrite.isLoading) && (
-                  <div className="d-inline">
-                    <div
-                      className={`spinner-border ${styles.loader}`}
-                      role="status">
-                      <span className="sr-only"></span>
+                        ? "lock"
+                        : "lock-open"
+                    }
+                    className={styles.buttonIcon}
+                  />
+                  {useCaseLockStatuses.data &&
+                  useCaseLockStatuses.data[lockUseCaseValue - 1]
+                    ? "Unlock"
+                    : "Lock"}{" "}
+                  Use Case
+                  {(useCaseLockWrite.isLoading ||
+                    waitUseCaseLockWrite.isLoading) && (
+                    <div className="d-inline">
+                      <div
+                        className={`spinner-border ${styles.loader}`}
+                        role="status">
+                        <span className="sr-only"></span>
+                      </div>
                     </div>
-                  </div>
-                )}
-              </button>
-            </Col>
-          )}
-        </Row>
+                  )}
+                </button>
+              </Col>
+            )}
+          </Row>
+        )}
       </Container>
     );
   }
