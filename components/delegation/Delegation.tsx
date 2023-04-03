@@ -49,130 +49,12 @@ export default function DelegationComponent() {
     return networkResolution.chain?.id == DELEGATION_CONTRACT.chain_id;
   }
 
-  const globalLockRead = useContractRead({
-    address: DELEGATION_CONTRACT.contract,
-    abi: DELEGATION_ABI,
-    chainId: DELEGATION_CONTRACT.chain_id,
-    functionName: "retrieveGlobalLockStatus",
-    args: [accountResolution.address],
-    watch: true,
-    enabled: chainsMatch(),
-  });
-
-  const globalLockWriteConfig = usePrepareContractWrite({
-    address: DELEGATION_CONTRACT.contract,
-    abi: DELEGATION_ABI,
-    chainId: DELEGATION_CONTRACT.chain_id,
-    args: [globalLockRead.data ? false : true],
-    functionName: "setGlobalLock",
-    enabled: chainsMatch(),
-  });
-  const globalLockWrite = useContractWrite(globalLockWriteConfig.config);
-  const waitGlobalLockWrite = useWaitForTransaction({
-    confirmations: 1,
-    hash: globalLockWrite.data?.hash,
-  });
-
-  useEffect(() => {
-    if (globalLockWrite.error) {
-      setToast({
-        title: `${globalLockRead.data ? `Unlocking` : `Locking`} Wallet`,
-        message: globalLockWrite.error.message,
-      });
-    }
-    if (globalLockWrite.data) {
-      if (globalLockWrite.data?.hash) {
-        if (waitGlobalLockWrite.isLoading) {
-          setToast({
-            title: "Locking Wallet",
-            message: `Transaction submitted...
-                    <a
-                    href=${getTransactionLink(
-                      DELEGATION_CONTRACT.chain_id,
-                      globalLockWrite.data.hash
-                    )}
-                    target="_blank"
-                    rel="noreferrer"
-                    className=${styles.etherscanLink}>
-                    view
-                  </a><br />Waiting for confirmation...`,
-          });
-        } else {
-          setToast({
-            title: "Locking Wallet",
-            message: `Transaction Successful!
-                    <a
-                    href=${getTransactionLink(
-                      DELEGATION_CONTRACT.chain_id,
-                      globalLockWrite.data.hash
-                    )}
-                    target="_blank"
-                    rel="noreferrer"
-                    className=${styles.etherscanLink}>
-                    view
-                  </a>`,
-          });
-        }
-      }
-    }
-  }, [
-    globalLockWrite.error,
-    globalLockWrite.data,
-    waitGlobalLockWrite.isLoading,
-  ]);
-
   useEffect(() => {
     if (!showToast) {
       setToast(undefined);
-      globalLockWrite.error = null;
     }
   }, [showToast]);
 
-  function printWalletActions() {
-    if (globalLockRead.data != null) {
-      return (
-        <Container>
-          <Row>
-            <Col>
-              <h4>Actions</h4>
-            </Col>
-          </Row>
-          <Row className="pt-2 pb-3">
-            <Col>
-              <span
-                className={styles.lockDelegationBtn}
-                onClick={() => {
-                  setToast({
-                    title: `${
-                      globalLockRead.data ? `Unlocking` : `Locking`
-                    } Wallet`,
-                    message: "Confirm in your wallet...",
-                  });
-                  setShowToast(true);
-                  globalLockWrite.write?.();
-                }}>
-                <FontAwesomeIcon
-                  icon={globalLockRead.data ? "lock" : "lock-open"}
-                  className={styles.buttonIcon}
-                />
-                {globalLockRead.data ? "Unlock" : "Lock"} Wallet
-                {(globalLockWrite.isLoading ||
-                  waitGlobalLockWrite.isLoading) && (
-                  <div className="d-inline">
-                    <div
-                      className={`spinner-border ${styles.loader}`}
-                      role="status">
-                      <span className="sr-only"></span>
-                    </div>
-                  </div>
-                )}
-              </span>
-            </Col>
-          </Row>
-        </Container>
-      );
-    }
-  }
   function printCollectionSelection() {
     return (
       <Container>
@@ -242,9 +124,6 @@ export default function DelegationComponent() {
                     <Container className={styles.leftBorder}>
                       <Row>
                         <Col>{printCollectionSelection()}</Col>
-                      </Row>
-                      <Row className="pt-4 pb-4">
-                        <Col>{printWalletActions()}</Col>
                       </Row>
                     </Container>
                   </Col>
