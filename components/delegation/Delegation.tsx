@@ -261,14 +261,12 @@ export default function DelegationComponent() {
       {accountResolution.isConnected &&
         networkResolution.chain?.id == DELEGATION_CONTRACT.chain_id && (
           <Row className="pt-5 pb-5">
-            <Col>
+            <Col className="pt-3">
               <Container>
-                <Row>
-                  <Col>
-                    <h4>Delegation Contract Links</h4>
-                  </Col>
+                <Row className={styles.delegationContractLinksHeader}>
+                  <Col>Delegation Contract Links</Col>
                 </Row>
-                <Row className="pt-3">
+                <Row className="pt-3 text-center">
                   <Col>
                     <a
                       href={
@@ -282,8 +280,8 @@ export default function DelegationComponent() {
                       <Image
                         src="/etherscan_w.png"
                         alt="etherscan"
-                        width={40}
-                        height={40}
+                        width={30}
+                        height={30}
                       />
                       <span>Etherscan</span>
                     </a>
@@ -295,8 +293,8 @@ export default function DelegationComponent() {
                       <Image
                         src="/github_w.png"
                         alt="github"
-                        width={40}
-                        height={40}
+                        width={30}
+                        height={30}
                       />
                       <span>Github</span>
                     </a>

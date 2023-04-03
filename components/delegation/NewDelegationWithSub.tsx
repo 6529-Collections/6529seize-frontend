@@ -59,7 +59,9 @@ export default function NewDelegationWithSubComponent(props: Props) {
         ? DELEGATION_ALL_ADDRESS
         : props.collection.contract,
       newDelegationToAddress,
-      showExpiryCalendar ? newDelegationDate?.getTime() : NEVER_DATE,
+      showExpiryCalendar && newDelegationDate
+        ? newDelegationDate.getTime() / 1000
+        : NEVER_DATE,
       newDelegationUseCase,
       showTokensInput ? false : true,
       showTokensInput ? newDelegationToken : 0,

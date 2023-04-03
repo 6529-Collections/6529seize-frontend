@@ -52,7 +52,9 @@ export default function NewDelegationComponent(props: Props) {
         : props.collection.contract,
       props.delegation.wallet,
       delegationToAddress,
-      showExpiryCalendar ? delegationDate?.getTime() : NEVER_DATE,
+      showExpiryCalendar && delegationDate
+        ? delegationDate.getTime() / 1000
+        : NEVER_DATE,
       props.delegation.use_case,
       showTokensInput ? false : true,
       showTokensInput ? delegationToken : 0,

@@ -566,14 +566,12 @@ export default function CollectionDelegationComponent(props: Props) {
     }
   }, [batchRevokeDelegationParams, contractWriteBatchRevoke.write]);
 
-  function formatExpiry(myDate: Date) {
-    const date = new Date(myDate);
+  function formatExpiry(myDate: number) {
+    const date = new Date(myDate * 1000);
     const year = date.getUTCFullYear();
     const month = String(date.getUTCMonth() + 1).padStart(2, "0");
     const day = String(date.getUTCDate()).padStart(2, "0");
-    const hours = String(date.getUTCHours()).padStart(2, "0");
-    const minutes = String(date.getUTCMinutes()).padStart(2, "0");
-    return `${year}-${month}-${day} ${hours}:${minutes}`;
+    return `${year}-${month}-${day}`;
   }
 
   function getActiveStatus(delegations: any, w: string, useCaseIndex: number) {
