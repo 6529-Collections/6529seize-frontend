@@ -61,7 +61,10 @@ export default function NewDelegationComponent(props: Props) {
     ],
     functionName:
       validate().length == 0 ? "updateDelegationAddress" : undefined,
-    onError: (e) => {},
+    onError: (e) => {
+      setErrors(["CANNOT ESTIMATE GAS"]);
+      window.scrollBy(0, 100);
+    },
   });
   const contractWriteDelegation = useContractWrite(
     contractWriteDelegationConfig.config
@@ -355,7 +358,7 @@ export default function NewDelegationComponent(props: Props) {
                   Errors
                 </Form.Label>
                 <Col sm={10}>
-                  <ul>
+                  <ul className="mb-0">
                     {errors.map((e, index) => (
                       <li key={`new-delegation-error-${index}`}>{e}</li>
                     ))}
@@ -390,7 +393,7 @@ export default function NewDelegationComponent(props: Props) {
                   Status
                 </Form.Label>
                 <Col sm={10}>
-                  <ul>
+                  <ul className="mb-0">
                     <li
                       className={`${styles.newDelegationRedultsList} ${
                         waitContractWriteDelegation.data &&
