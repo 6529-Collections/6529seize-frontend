@@ -335,6 +335,10 @@
   overflow-x: scroll;
 }
 
+.delegationsTableScrollContainer::-webkit-scrollbar {
+  display: none;
+}
+
 .delegationsTable {
   margin-bottom: 0;
   tr td {
