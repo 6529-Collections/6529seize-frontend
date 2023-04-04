@@ -10,11 +10,7 @@ import { useEffect, useState } from "react";
 import { DelegationCollection } from "../../pages/delegations/[contract]";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Tippy from "@tippyjs/react";
-import {
-  DELEGATION_ALL_ADDRESS,
-  DELEGATION_CONTRACT,
-  NEVER_DATE,
-} from "../../constants";
+import { DELEGATION_CONTRACT, NEVER_DATE } from "../../constants";
 import { DELEGATION_ABI } from "../../abis";
 import { getTransactionLink, isValidEthAddress } from "../../helpers/Helpers";
 
@@ -26,6 +22,8 @@ interface Props {
   showCancel: boolean;
   showAddMore: boolean;
   onHide(): any;
+  onSetToast(toast: any): any;
+  onSetShowToast(show: boolean): any;
 }
 
 export default function NewDelegationComponent(props: Props) {
@@ -41,15 +39,14 @@ export default function NewDelegationComponent(props: Props) {
 
   const [delegationToAddress, setDelegationToAddress] = useState("");
   const [errors, setErrors] = useState<string[]>([]);
+  const [gasError, setGasError] = useState(false);
 
   const contractWriteDelegationConfig = usePrepareContractWrite({
     address: DELEGATION_CONTRACT.contract,
     abi: DELEGATION_ABI,
     chainId: DELEGATION_CONTRACT.chain_id,
     args: [
-      props.collection.contract == "all"
-        ? DELEGATION_ALL_ADDRESS
-        : props.collection.contract,
+      props.collection.contract,
       props.delegation.wallet,
       delegationToAddress,
       showExpiryCalendar && delegationDate
@@ -62,8 +59,7 @@ export default function NewDelegationComponent(props: Props) {
     functionName:
       validate().length == 0 ? "updateDelegationAddress" : undefined,
     onError: (e) => {
-      setErrors(["CANNOT ESTIMATE GAS"]);
-      window.scrollBy(0, 100);
+      setGasError(true);
     },
   });
   const contractWriteDelegation = useContractWrite(
@@ -100,20 +96,68 @@ export default function NewDelegationComponent(props: Props) {
 
   function submitDelegation() {
     const newErrors = validate();
+    if (gasError) {
+      newErrors.push("CANNOT ESTIMATE GAS");
+    }
     if (newErrors.length > 0) {
       setErrors(newErrors);
       window.scrollBy(0, 100);
     } else {
       contractWriteDelegation.write?.();
+      props.onSetToast({
+        title: `Updating Delegation`,
+        message: "Confirm in your wallet...",
+      });
     }
   }
 
   useEffect(() => {
     if (contractWriteDelegation.error) {
-      setErrors((err) => [...err, contractWriteDelegation.error!.message]);
-      window.scrollBy(0, 100);
+      props.onSetToast({
+        title: `Updating Delegation`,
+        message: contractWriteDelegation.error.message,
+      });
     }
-  }, [contractWriteDelegation.error]);
+    if (contractWriteDelegation.data) {
+      if (contractWriteDelegation.data?.hash) {
+        if (waitContractWriteDelegation.isLoading) {
+          props.onSetToast({
+            title: "Updating Delegation",
+            message: `Transaction submitted...
+                    <a
+                    href=${getTransactionLink(
+                      DELEGATION_CONTRACT.chain_id,
+                      contractWriteDelegation.data.hash
+                    )}
+                    target="_blank"
+                    rel="noreferrer"
+                    className=${styles.etherscanLink}>
+                    view
+                  </a><br />Waiting for confirmation...`,
+          });
+        } else {
+          props.onSetToast({
+            title: "Updating Delegation",
+            message: `Transaction Successful!
+                    <a
+                    href=${getTransactionLink(
+                      DELEGATION_CONTRACT.chain_id,
+                      contractWriteDelegation.data.hash
+                    )}
+                    target="_blank"
+                    rel="noreferrer"
+                    className=${styles.etherscanLink}>
+                    view
+                  </a>`,
+          });
+        }
+      }
+    }
+  }, [
+    contractWriteDelegation.error,
+    contractWriteDelegation.data,
+    waitContractWriteDelegation.isLoading,
+  ]);
 
   return (
     <Container className="no-padding">
@@ -147,7 +191,7 @@ export default function NewDelegationComponent(props: Props) {
                 <Form.Control
                   className={`${styles.formInput} ${styles.formInputDisabled}`}
                   type="text"
-                  defaultValue={
+                  value={
                     props.ens
                       ? `${props.ens} - ${props.address}`
                       : `${props.address}`
@@ -164,11 +208,7 @@ export default function NewDelegationComponent(props: Props) {
                 <Form.Control
                   className={`${styles.formInput} ${styles.formInputDisabled}`}
                   type="text"
-                  defaultValue={`${props.collection.display}${
-                    props.collection.contract == "all"
-                      ? ""
-                      : `- ${props.collection.contract}`
-                  }`}
+                  value={`${props.collection.display}`}
                   disabled
                 />
               </Col>
@@ -209,7 +249,7 @@ export default function NewDelegationComponent(props: Props) {
                 <Form.Control
                   className={`${styles.formInput} ${styles.formInputDisabled}`}
                   type="text"
-                  defaultValue={`#${props.delegation.use_case} - ${props.delegation.display}`}
+                  value={`#${props.delegation.use_case} - ${props.delegation.display}`}
                   disabled
                 />
               </Col>
@@ -363,67 +403,6 @@ export default function NewDelegationComponent(props: Props) {
                       <li key={`new-delegation-error-${index}`}>{e}</li>
                     ))}
                   </ul>
-                </Col>
-              </Form.Group>
-            )}
-            {contractWriteDelegation.data && (
-              <Form.Group
-                as={Row}
-                className={`pt-2 pb-2 ${styles.newDelegationRedultsList} ${
-                  waitContractWriteDelegation.data &&
-                  waitContractWriteDelegation.data.status
-                    ? styles.newDelegationSuccess
-                    : waitContractWriteDelegation.data &&
-                      !waitContractWriteDelegation.data.status
-                    ? styles.newDelegationError
-                    : ``
-                }`}>
-                <Form.Label
-                  column
-                  sm={2}
-                  className={`${styles.newDelegationRedultsList} ${
-                    waitContractWriteDelegation.data &&
-                    waitContractWriteDelegation.data.status
-                      ? styles.newDelegationSuccess
-                      : waitContractWriteDelegation.data &&
-                        !waitContractWriteDelegation.data.status
-                      ? styles.newDelegationError
-                      : ``
-                  }`}>
-                  Status
-                </Form.Label>
-                <Col sm={10}>
-                  <ul className="mb-0">
-                    <li
-                      className={`${styles.newDelegationRedultsList} ${
-                        waitContractWriteDelegation.data &&
-                        waitContractWriteDelegation.data.status
-                          ? styles.newDelegationSuccess
-                          : waitContractWriteDelegation.data &&
-                            !waitContractWriteDelegation.data.status
-                          ? styles.newDelegationError
-                          : ``
-                      }`}>
-                      {waitContractWriteDelegation.isLoading
-                        ? `Transaction Submitted...`
-                        : waitContractWriteDelegation.data?.status
-                        ? `Transaction Successful!`
-                        : `Transaction Failed`}
-                    </li>
-                    {waitContractWriteDelegation.isLoading && (
-                      <li>Waiting for confirmation...</li>
-                    )}
-                  </ul>
-                  <a
-                    href={getTransactionLink(
-                      DELEGATION_CONTRACT.chain_id,
-                      contractWriteDelegation.data.hash
-                    )}
-                    target="_blank"
-                    rel="noreferrer"
-                    className={styles.etherscanLink}>
-                    view txn
-                  </a>
                 </Col>
               </Form.Group>
             )}

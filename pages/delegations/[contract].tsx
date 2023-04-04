@@ -28,31 +28,38 @@ const CollectionDelegationComponent = dynamic(
 export const MAX_BULK_ACTIONS = 5;
 
 export interface DelegationCollection {
+  title: string;
   display: string;
   contract: string;
   preview: string;
 }
 
+export const ANY_COLLECTION_PATH = "any-collection";
+
 export const SUPPORTED_COLLECTIONS: DelegationCollection[] = [
   {
-    display: "All",
-    contract: "all",
+    title: "Any Collection",
+    display: "Any Collection",
+    contract: DELEGATION_ALL_ADDRESS,
     preview: "/Seize_Logo_Glasses_2-nobeta.png",
   },
   {
-    display: "The Memes",
+    title: "The Memes",
+    display: `The Memes - ${MEMES_CONTRACT}`,
     contract: MEMES_CONTRACT,
     preview:
       "https://d3lqz0a4bldqgf.cloudfront.net/images/scaled_x450/0x33FD426905F149f8376e227d0C9D3340AaD17aF1/1.WEBP",
   },
   {
-    display: "Meme Lab",
+    title: "Meme Lab",
+    display: `Meme Lab - ${MEMELAB_CONTRACT}`,
     contract: MEMELAB_CONTRACT,
     preview:
       "https://d3lqz0a4bldqgf.cloudfront.net/images/scaled_x450/0x4db52a61dc491e15a2f78f5ac001c14ffe3568cb/1.WEBP",
   },
   {
-    display: "6529Gradient",
+    title: "6529Gradient",
+    display: `6529Gradient - ${GRADIENT_CONTRACT}`,
     contract: GRADIENT_CONTRACT,
     preview:
       "https://d3lqz0a4bldqgf.cloudfront.net/images/scaled_x450/0x0c58ef43ff3032005e472cb5709f8908acb00205/0.WEBP",
@@ -139,7 +146,7 @@ export default function Delegations(props: Props) {
   const [breadcrumbs, setBreadcrumbs] = useState<Crumb[]>([
     { display: "Home", href: "/" },
     { display: "Delegations", href: "/delegations" },
-    { display: props.collection.display },
+    { display: props.collection?.display },
   ]);
 
   useEffect(() => {
@@ -148,54 +155,60 @@ export default function Delegations(props: Props) {
     }
   }, []);
 
-  return (
-    <>
-      <Head>
-        <title>{`${props.collection.display} Delegations | 6529 SEIZE`}</title>
-        <link rel="icon" href="/favicon.ico" />
-        <meta
-          name="description"
-          content={`${props.collection.display} Delegations | 6529 SEIZE`}
-        />
-        <meta
-          property="og:url"
-          content={`${process.env.BASE_ENDPOINT}/delagations/${props.collection.contract}`}
-        />
-        <meta
-          property="og:title"
-          content={`${props.collection.display} Delegations`}
-        />
-        <meta property="og:description" content="6529 SEIZE" />
-        <meta
-          property="og:image"
-          content={`${process.env.BASE_ENDPOINT}/Seize_Logo_Glasses_2.png`}
-        />
-      </Head>
+  if (props.collection) {
+    return (
+      <>
+        <Head>
+          <title>{`${props.collection.display} Delegations | 6529 SEIZE`}</title>
+          <link rel="icon" href="/favicon.ico" />
+          <meta
+            name="description"
+            content={`${props.collection.display} Delegations | 6529 SEIZE`}
+          />
+          <meta
+            property="og:url"
+            content={`${process.env.BASE_ENDPOINT}/delagations/${props.collection.contract}`}
+          />
+          <meta
+            property="og:title"
+            content={`${props.collection.display} Delegations`}
+          />
+          <meta property="og:description" content="6529 SEIZE" />
+          <meta
+            property="og:image"
+            content={`${process.env.BASE_ENDPOINT}/Seize_Logo_Glasses_2.png`}
+          />
+        </Head>
 
-      <main className={styles.main}>
-        <Header />
-        <Breadcrumb breadcrumbs={breadcrumbs} />
-        <CollectionDelegationComponent
-          collection={props.collection}
-          date={new Date()}
-        />
-      </main>
-    </>
-  );
+        <main className={styles.main}>
+          <Header />
+          <Breadcrumb breadcrumbs={breadcrumbs} />
+          <CollectionDelegationComponent
+            collection={props.collection}
+            date={new Date()}
+          />
+        </main>
+      </>
+    );
+  }
 }
 
 export async function getServerSideProps(req: any, res: any, resolvedUrl: any) {
   const contract = req.query.contract;
-  let collection: DelegationCollection | null = null;
+  let collection: DelegationCollection | undefined = undefined;
   SUPPORTED_COLLECTIONS.map((c) => {
     if (areEqualAddresses(c.contract, contract)) {
       collection = c;
+    } else if (areEqualAddresses(ANY_COLLECTION_PATH, contract)) {
+      collection = SUPPORTED_COLLECTIONS.find((c) =>
+        areEqualAddresses(c.contract, DELEGATION_ALL_ADDRESS)
+      );
     }
   });
 
   return {
     props: {
-      collection: collection,
+      collection: collection ? collection : null,
     },
   };
 }

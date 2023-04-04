@@ -23,11 +23,11 @@ import {
 import { Fragment, useEffect, useRef, useState } from "react";
 
 import {
+  ANY_COLLECTION_PATH,
   CONSOLIDATION_USE_CASE,
   DelegationCollection,
   DELEGATION_USE_CASES,
   MAX_BULK_ACTIONS,
-  SUPPORTED_COLLECTIONS,
 } from "../../pages/delegations/[contract]";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import dynamic from "next/dynamic";
@@ -96,7 +96,6 @@ function getReadParams(
 function getActiveDelegationsReadParams(
   address: `0x${string}` | string | undefined,
   collection: `0x${string}` | string | undefined,
-  date: Date,
   functionName: string
 ) {
   const params: any = [];
@@ -111,6 +110,27 @@ function getActiveDelegationsReadParams(
     });
   });
   return params;
+}
+
+function getConsolidationReadParams(
+  address: `0x${string}` | string | undefined,
+  collection: `0x${string}` | string | undefined,
+  consolidationAddresses: any[] | undefined
+) {
+  if (consolidationAddresses) {
+    const params: any = [];
+    consolidationAddresses.map((ca) => {
+      params.push({
+        address: DELEGATION_CONTRACT.contract,
+        abi: DELEGATION_ABI,
+        chainId: DELEGATION_CONTRACT.chain_id,
+        functionName: "checkConsolidationStatus",
+        args: [address, ca, collection],
+      });
+    });
+    return params;
+  }
+  return null;
 }
 
 export default function CollectionDelegationComponent(props: Props) {
@@ -135,6 +155,7 @@ export default function CollectionDelegationComponent(props: Props) {
   >();
 
   const [lockUseCaseValue, setLockUseCaseValue] = useState(0);
+  const [lockUseCaseIndex, setLockUseCaseIndex] = useState(0);
   const [incomingSubdelegations, setIncomingSubdelegations] = useState<any[]>(
     []
   );
@@ -146,21 +167,47 @@ export default function CollectionDelegationComponent(props: Props) {
   const outgoingDelegations = useContractReads({
     contracts: getReadParams(
       accountResolution.address,
-      props.collection.contract == "all"
-        ? DELEGATION_ALL_ADDRESS
-        : props.collection.contract,
+      props.collection.contract,
       "retrieveDelegationAddresses"
     ),
     enabled: chainsMatch() && accountResolution.isConnected,
     watch: true,
   });
 
+  const outgoingActiveDelegations = useContractReads({
+    contracts: getActiveDelegationsReadParams(
+      accountResolution.address,
+      props.collection.contract,
+      "retrieveDelegationAddressesTokensIDsandExpiredDates"
+    ),
+    watch: true,
+    enabled:
+      chainsMatch() &&
+      accountResolution.isConnected &&
+      outgoingDelegations.data &&
+      outgoingDelegations.data?.length > 0,
+  });
+
+  const outgoingConsolidationsStatus = useContractReads({
+    contracts: getConsolidationReadParams(
+      accountResolution.address,
+      props.collection.contract,
+      outgoingDelegations.data
+        ? ([...outgoingDelegations.data].slice(-1)[0] as any[])
+        : undefined
+    ),
+    watch: true,
+    enabled:
+      chainsMatch() &&
+      accountResolution.isConnected &&
+      outgoingDelegations.data &&
+      outgoingDelegations.data?.length > 0,
+  });
+
   const incomingDelegations = useContractReads({
     contracts: getReadParams(
       accountResolution.address,
-      props.collection.contract == "all"
-        ? DELEGATION_ALL_ADDRESS
-        : props.collection.contract,
+      props.collection.contract,
       "retrieveDelegators"
     ),
     enabled: chainsMatch() && accountResolution.isConnected,
@@ -173,30 +220,10 @@ export default function CollectionDelegationComponent(props: Props) {
     },
   });
 
-  const outgoingActiveDelegations = useContractReads({
-    contracts: getActiveDelegationsReadParams(
-      accountResolution.address,
-      props.collection.contract == "all"
-        ? DELEGATION_ALL_ADDRESS
-        : props.collection.contract,
-      currentDate,
-      "retrieveDelegationAddressesTokensIDsandExpiredDates"
-    ),
-    watch: true,
-    enabled:
-      chainsMatch() &&
-      accountResolution.isConnected &&
-      outgoingDelegations.data &&
-      outgoingDelegations.data?.length > 0,
-  });
-
   const incomingActiveDelegations = useContractReads({
     contracts: getActiveDelegationsReadParams(
       accountResolution.address,
-      props.collection.contract == "all"
-        ? DELEGATION_ALL_ADDRESS
-        : props.collection.contract,
-      currentDate,
+      props.collection.contract,
       "retrieveDelegatorsTokensIDsandExpiredDates"
     ),
     watch: true,
@@ -207,11 +234,40 @@ export default function CollectionDelegationComponent(props: Props) {
       incomingDelegations.data?.length > 0,
   });
 
+  const incomingConsolidationsStatus = useContractReads({
+    contracts: getConsolidationReadParams(
+      accountResolution.address,
+      props.collection.contract,
+      incomingDelegations.data
+        ? ([...incomingDelegations.data].slice(-1)[0] as any[])
+        : undefined
+    ),
+    watch: true,
+    enabled:
+      chainsMatch() &&
+      accountResolution.isConnected &&
+      incomingDelegations.data &&
+      incomingDelegations.data?.length > 0,
+  });
+
+  const useCaseLockStatusesGlobal = areEqualAddresses(
+    props.collection.contract,
+    DELEGATION_ALL_ADDRESS
+  )
+    ? null
+    : useContractReads({
+        contracts: getReadParams(
+          DELEGATION_ALL_ADDRESS,
+          accountResolution.address,
+          "retrieveCollectionUseCaseLockStatus"
+        ),
+        enabled: chainsMatch() && accountResolution.isConnected,
+        watch: true,
+      });
+
   const useCaseLockStatuses = useContractReads({
     contracts: getReadParams(
-      props.collection.contract == "all"
-        ? DELEGATION_ALL_ADDRESS
-        : props.collection.contract,
+      props.collection.contract,
       accountResolution.address,
       "retrieveCollectionUseCaseLockStatus"
     ),
@@ -268,55 +324,39 @@ export default function CollectionDelegationComponent(props: Props) {
   >(undefined);
   const [showToast, setShowToast] = useState(false);
 
-  const collectionLockRead =
-    props.collection.contract == "all"
-      ? useContractRead({
-          address: DELEGATION_CONTRACT.contract,
-          abi: DELEGATION_ABI,
-          chainId: DELEGATION_CONTRACT.chain_id,
-          functionName: "retrieveGlobalLockStatus",
-          args: [accountResolution.address],
-          watch: true,
-          enabled: chainsMatch(),
-        })
-      : useContractRead({
-          address: DELEGATION_CONTRACT.contract,
-          abi: DELEGATION_ABI,
-          chainId: DELEGATION_CONTRACT.chain_id,
-          functionName: "retrieveCollectionLockStatus",
-          args: [
-            props.collection.contract == "all"
-              ? DELEGATION_ALL_ADDRESS
-              : props.collection.contract,
-            accountResolution.address,
-          ],
-          enabled: chainsMatch() && accountResolution.isConnected,
-          watch: true,
-        });
+  const collectionLockReadGlobal = areEqualAddresses(
+    props.collection.contract,
+    DELEGATION_ALL_ADDRESS
+  )
+    ? null
+    : useContractRead({
+        address: DELEGATION_CONTRACT.contract,
+        abi: DELEGATION_ABI,
+        chainId: DELEGATION_CONTRACT.chain_id,
+        functionName: "retrieveCollectionLockStatus",
+        args: [DELEGATION_ALL_ADDRESS, accountResolution.address],
+        enabled: chainsMatch() && accountResolution.isConnected,
+        watch: true,
+      });
 
-  const collectionLockWriteConfig =
-    props.collection.contract == "all"
-      ? usePrepareContractWrite({
-          address: DELEGATION_CONTRACT.contract,
-          abi: DELEGATION_ABI,
-          chainId: DELEGATION_CONTRACT.chain_id,
-          args: [collectionLockRead.data ? false : true],
-          functionName: "setGlobalLock",
-          enabled: chainsMatch(),
-        })
-      : usePrepareContractWrite({
-          address: DELEGATION_CONTRACT.contract,
-          abi: DELEGATION_ABI,
-          chainId: DELEGATION_CONTRACT.chain_id,
-          args: [
-            props.collection.contract == "all"
-              ? DELEGATION_ALL_ADDRESS
-              : props.collection.contract,
-            collectionLockRead.data ? false : true,
-          ],
-          enabled: chainsMatch(),
-          functionName: "setCollectionLock",
-        });
+  const collectionLockRead = useContractRead({
+    address: DELEGATION_CONTRACT.contract,
+    abi: DELEGATION_ABI,
+    chainId: DELEGATION_CONTRACT.chain_id,
+    functionName: "retrieveCollectionLockStatus",
+    args: [props.collection.contract, accountResolution.address],
+    enabled: chainsMatch() && accountResolution.isConnected,
+    watch: true,
+  });
+
+  const collectionLockWriteConfig = usePrepareContractWrite({
+    address: DELEGATION_CONTRACT.contract,
+    abi: DELEGATION_ABI,
+    chainId: DELEGATION_CONTRACT.chain_id,
+    args: [props.collection.contract, collectionLockRead.data ? false : true],
+    enabled: chainsMatch(),
+    functionName: "setCollectionLock",
+  });
   const collectionLockWrite = useContractWrite(
     collectionLockWriteConfig.config
   );
@@ -330,11 +370,9 @@ export default function CollectionDelegationComponent(props: Props) {
     abi: DELEGATION_ABI,
     chainId: DELEGATION_CONTRACT.chain_id,
     args: [
-      props.collection.contract == "all"
-        ? DELEGATION_ALL_ADDRESS
-        : props.collection.contract,
+      props.collection.contract,
       lockUseCaseValue,
-      useCaseLockStatuses.data && useCaseLockStatuses.data[lockUseCaseValue - 1]
+      useCaseLockStatuses.data && useCaseLockStatuses.data[lockUseCaseIndex]
         ? false
         : true,
     ],
@@ -451,7 +489,9 @@ export default function CollectionDelegationComponent(props: Props) {
     if (collectionLockWrite.error) {
       setToast({
         title: `${collectionLockRead.data ? `Unlocking` : `Locking`} ${
-          props.collection.contract == "all" ? `All Collections` : `Collection`
+          areEqualAddresses(props.collection.contract, DELEGATION_ALL_ADDRESS)
+            ? `All Collections`
+            : `Collection`
         }`,
         message: collectionLockWrite.error.message,
       });
@@ -461,7 +501,10 @@ export default function CollectionDelegationComponent(props: Props) {
         if (waitCollectionLockWrite.isLoading) {
           setToast({
             title: `Locking ${
-              props.collection.contract == "all"
+              areEqualAddresses(
+                props.collection.contract,
+                DELEGATION_ALL_ADDRESS
+              )
                 ? `All Collections`
                 : `Collection`
             }`,
@@ -480,7 +523,10 @@ export default function CollectionDelegationComponent(props: Props) {
         } else {
           setToast({
             title: `Locking ${
-              props.collection.contract == "all"
+              areEqualAddresses(
+                props.collection.contract,
+                DELEGATION_ALL_ADDRESS
+              )
                 ? `All Collections`
                 : `Collection`
             }`,
@@ -506,9 +552,9 @@ export default function CollectionDelegationComponent(props: Props) {
   ]);
 
   useEffect(() => {
-    const useCase = DELEGATION_USE_CASES[lockUseCaseValue - 1];
+    const useCase = DELEGATION_USE_CASES[lockUseCaseIndex];
     const title = `${
-      useCaseLockStatuses.data && useCaseLockStatuses.data[lockUseCaseValue - 1]
+      useCaseLockStatuses.data && useCaseLockStatuses.data[lockUseCaseIndex]
         ? "Unlocking"
         : "Locking"
     } Use Case #${useCase?.use_case} - ${useCase?.display}`;
@@ -566,6 +612,7 @@ export default function CollectionDelegationComponent(props: Props) {
       setBatchRevokeDelegationParams(undefined);
       setToast(undefined);
       setLockUseCaseValue(0);
+      setLockUseCaseIndex(0);
       useCaseLockWrite.reset();
       collectionLockWrite.reset();
       contractWriteRevoke.reset();
@@ -628,7 +675,7 @@ export default function CollectionDelegationComponent(props: Props) {
 
   function printDelegations() {
     return (
-      <Accordion className={styles.collectionDelegationsAccordion}>
+      <Accordion alwaysOpen className={styles.collectionDelegationsAccordion}>
         <Accordion.Item
           className={styles.collectionDelegationsAccordionItem}
           eventKey={"0"}>
@@ -674,7 +721,7 @@ export default function CollectionDelegationComponent(props: Props) {
                               #{useCase.use_case} - {useCase.display}
                             </td>
                           </tr>
-                          {data.map((w: string) => {
+                          {data.map((w: string, addressIndex: number) => {
                             const isActive = getActiveStatus(
                               outgoingActiveDelegations,
                               w,
@@ -747,10 +794,10 @@ export default function CollectionDelegationComponent(props: Props) {
                                     </span>
                                   )}
                                   {useCase.use_case == CONSOLIDATION_USE_CASE &&
-                                    (incomingDelegations.data &&
+                                    (outgoingConsolidationsStatus.data &&
                                     (
-                                      incomingDelegations.data as any[]
-                                    )[16].includes(w) ? (
+                                      outgoingConsolidationsStatus.data as any[]
+                                    )[addressIndex] ? (
                                       <span
                                         className={
                                           styles.consolidationActiveLabel
@@ -786,10 +833,12 @@ export default function CollectionDelegationComponent(props: Props) {
                                     className={styles.useCaseWalletRevoke}
                                     onClick={() => {
                                       setRevokeDelegationParams({
-                                        collection:
-                                          props.collection.contract == "all"
-                                            ? DELEGATION_ALL_ADDRESS
-                                            : props.collection.contract,
+                                        collection: areEqualAddresses(
+                                          props.collection.contract,
+                                          DELEGATION_ALL_ADDRESS
+                                        )
+                                          ? DELEGATION_ALL_ADDRESS
+                                          : props.collection.contract,
                                         address: w,
                                         use_case: useCase.use_case,
                                       });
@@ -852,7 +901,10 @@ export default function CollectionDelegationComponent(props: Props) {
                           onClick={() => {
                             setBatchRevokeDelegationParams({
                               collections: [...bulkRevocations].map((br) =>
-                                props.collection.contract == "all"
+                                areEqualAddresses(
+                                  props.collection.contract,
+                                  DELEGATION_ALL_ADDRESS
+                                )
                                   ? DELEGATION_ALL_ADDRESS
                                   : props.collection.contract
                               ),
@@ -922,7 +974,7 @@ export default function CollectionDelegationComponent(props: Props) {
                               #{useCase.use_case} - {useCase.display}
                             </td>
                           </tr>
-                          {data.map((w: string) => {
+                          {data.map((w: string, addressIndex: number) => {
                             const isActive = getActiveStatus(
                               incomingActiveDelegations,
                               w,
@@ -960,10 +1012,10 @@ export default function CollectionDelegationComponent(props: Props) {
                                     </span>
                                   )}
                                   {useCase.use_case == CONSOLIDATION_USE_CASE &&
-                                    (outgoingDelegations.data &&
+                                    (incomingConsolidationsStatus.data &&
                                     (
-                                      outgoingDelegations.data as any[]
-                                    )[16].includes(w) ? (
+                                      incomingConsolidationsStatus.data as any[]
+                                    )[addressIndex] ? (
                                       <span
                                         className={
                                           styles.consolidationActiveLabel
@@ -973,7 +1025,7 @@ export default function CollectionDelegationComponent(props: Props) {
                                     ) : (
                                       <span
                                         className={
-                                          styles.delegationExpiredLabel
+                                          styles.consolidationNotAcceptedLabel
                                         }>
                                         consolidation pending
                                       </span>
@@ -1005,137 +1057,225 @@ export default function CollectionDelegationComponent(props: Props) {
 
   function printActions() {
     return (
-      <Container>
-        <Row className="pt-5 pb-2">
-          <Col>
-            <h4>Actions</h4>
-          </Col>
-        </Row>
-        <Row className="pt-2 pb-2">
-          <Col>
-            <>
-              <span
-                className={styles.addNewDelegationBtn}
-                onClick={() => {
-                  setShowCreateNewDelegation(true);
-                  window.scrollTo(0, 0);
-                }}>
-                <FontAwesomeIcon icon="plus" className={styles.buttonIcon} />
-                Register Delegation
-              </span>
-              {collectionLockRead.data != null && (
+      <Container className="no-padding">
+        <>
+          <Row className="pt-5 pb-2">
+            <Col>
+              <h4>Actions</h4>
+            </Col>
+          </Row>
+          <Row className="pt-2 pb-2">
+            <Col>
+              <>
                 <span
-                  className={styles.lockDelegationBtn}
+                  className={styles.addNewDelegationBtn}
                   onClick={() => {
-                    setToast({
-                      title: `${
-                        collectionLockRead.data ? `Unlocking` : `Locking`
-                      } ${
-                        props.collection.contract == "all"
-                          ? `All Collections`
-                          : `Collection`
-                      }`,
-                      message: "Confirm in your wallet...",
-                    });
-                    setShowToast(true);
-                    collectionLockWrite.write?.();
+                    setShowCreateNewDelegation(true);
+                    window.scrollTo(0, 0);
                   }}>
-                  <FontAwesomeIcon
-                    icon={collectionLockRead.data ? "lock" : "lock-open"}
-                    className={styles.buttonIcon}
-                  />
-                  {collectionLockRead.data ? "Unlock" : "Lock"}{" "}
-                  {props.collection.contract == "all"
-                    ? `All Collections`
-                    : `Collection`}
-                  {(collectionLockWrite.isLoading ||
-                    waitCollectionLockWrite.isLoading) && (
-                    <div className="d-inline">
-                      <div
-                        className={`spinner-border ${styles.loader}`}
-                        role="status">
-                        <span className="sr-only"></span>
-                      </div>
-                    </div>
-                  )}
+                  <FontAwesomeIcon icon="plus" className={styles.buttonIcon} />
+                  Register Delegation
                 </span>
-              )}
-            </>
-          </Col>
-        </Row>
-        {props.collection.contract != "all" && (
-          <Row className="pt-3 pb-3">
+                {collectionLockRead.data != null && (
+                  <span
+                    className={`${styles.lockDelegationBtn} ${
+                      collectionLockReadGlobal?.data
+                        ? styles.lockDelegationBtnDisabled
+                        : ""
+                    }`}
+                    onClick={() => {
+                      setToast({
+                        title: `${
+                          collectionLockRead.data ? `Unlocking` : `Locking`
+                        } ${
+                          areEqualAddresses(
+                            props.collection.contract,
+                            DELEGATION_ALL_ADDRESS
+                          )
+                            ? `All Collections`
+                            : `Collection`
+                        }`,
+                        message: "Confirm in your wallet...",
+                      });
+                      setShowToast(true);
+                      collectionLockWrite.write?.();
+                    }}>
+                    <FontAwesomeIcon
+                      icon={collectionLockRead.data ? "lock" : "lock-open"}
+                      className={styles.buttonIcon}
+                    />
+                    {collectionLockRead.data ? "Unlock" : "Lock"}{" "}
+                    {areEqualAddresses(
+                      props.collection.contract,
+                      DELEGATION_ALL_ADDRESS
+                    )
+                      ? `All Collections`
+                      : `Collection`}
+                    {collectionLockReadGlobal?.data &&
+                    !areEqualAddresses(
+                      props.collection.contract,
+                      DELEGATION_ALL_ADDRESS
+                    )
+                      ? ` *`
+                      : ``}
+                    {(collectionLockWrite.isLoading ||
+                      waitCollectionLockWrite.isLoading) && (
+                      <div className="d-inline">
+                        <div
+                          className={`spinner-border ${styles.loader}`}
+                          role="status">
+                          <span className="sr-only"></span>
+                        </div>
+                      </div>
+                    )}
+                  </span>
+                )}
+              </>
+            </Col>
+          </Row>
+          <Row className="pt-3 pb-2">
             <Col xs={12} sm={12} md={4} lg={4} className="pt-2 pb-2">
               <Form.Select
-                className={`${styles.formInputLockUseCase}`}
+                disabled={collectionLockRead.data ? true : false}
+                className={`${styles.formInputLockUseCase} ${
+                  collectionLockRead.data || collectionLockReadGlobal?.data
+                    ? styles.formInputDisabled
+                    : ""
+                }`}
                 value={lockUseCaseValue}
                 onChange={(e) => {
-                  setLockUseCaseValue(parseInt(e.target.value));
+                  const value = parseInt(e.target.value);
+                  setLockUseCaseValue(value);
+                  if (value == CONSOLIDATION_USE_CASE) {
+                    setLockUseCaseIndex(16);
+                  } else {
+                    setLockUseCaseIndex(value - 1);
+                  }
                   useCaseLockWrite.reset();
                 }}>
-                <option value={0}>Select Use Case to lock/unlock</option>
+                <option value={0}>
+                  <>
+                    Select Use Case to lock/unlock
+                    {collectionLockRead.data || collectionLockReadGlobal?.data
+                      ? ` *`
+                      : ``}
+                  </>
+                </option>
                 {DELEGATION_USE_CASES.map((uc, index) => {
-                  return (
-                    <option
-                      key={`collection-delegation-select-use-case-${uc.use_case}`}
-                      value={uc.use_case}>
-                      #{uc.use_case} - {uc.display}
-                      {useCaseLockStatuses.data &&
-                      useCaseLockStatuses.data[index] == true
-                        ? " - LOCKED"
-                        : ` - UNLOCKED`}
-                    </option>
-                  );
+                  if (uc.use_case != 1) {
+                    return (
+                      <option
+                        key={`collection-delegation-select-use-case-${uc.use_case}`}
+                        value={uc.use_case}>
+                        #{uc.use_case} - {uc.display}
+                        {(useCaseLockStatuses.data &&
+                          useCaseLockStatuses.data[index] == true) ||
+                        (useCaseLockStatusesGlobal?.data &&
+                          useCaseLockStatusesGlobal?.data[index] == true) ||
+                        collectionLockRead.data
+                          ? ` - LOCKED${
+                              useCaseLockStatusesGlobal?.data &&
+                              useCaseLockStatusesGlobal?.data[index] == true
+                                ? ` *`
+                                : ``
+                            }`
+                          : ` - UNLOCKED`}
+                      </option>
+                    );
+                  }
                 })}
               </Form.Select>
             </Col>
             {lockUseCaseValue != 0 && (
-              <Col xs={12} sm={12} md={8} lg={8} className="pt-2 pb-2">
-                <button
-                  className={`${styles.lockUseCaseBtn}`}
-                  onClick={() => {
-                    const useCase = DELEGATION_USE_CASES[lockUseCaseValue - 1];
-                    setToast({
-                      title: `${
+              <Col
+                xs={12}
+                sm={12}
+                md={8}
+                lg={8}
+                className="pt-2 pb-2 d-flex align-items-center">
+                {!useCaseLockStatusesGlobal ||
+                (useCaseLockStatusesGlobal?.data &&
+                  useCaseLockStatusesGlobal?.data[lockUseCaseIndex] ==
+                    false) ? (
+                  <button
+                    className={`${styles.lockUseCaseBtn}`}
+                    onClick={() => {
+                      const useCase = DELEGATION_USE_CASES[lockUseCaseIndex];
+                      setToast({
+                        title: `${
+                          useCaseLockStatuses.data &&
+                          useCaseLockStatuses.data[lockUseCaseIndex]
+                            ? "Unlocking"
+                            : "Locking"
+                        } Use Case #${useCase.use_case} - ${useCase.display}`,
+                        message: "Confirm in your wallet...",
+                      });
+                      setShowToast(true);
+                      useCaseLockWrite.write?.();
+                    }}>
+                    <FontAwesomeIcon
+                      icon={
                         useCaseLockStatuses.data &&
-                        useCaseLockStatuses.data[lockUseCaseValue - 1]
-                          ? "Unlocking"
-                          : "Locking"
-                      } Use Case #${useCase.use_case} - ${useCase.display}`,
-                      message: "Confirm in your wallet...",
-                    });
-                    setShowToast(true);
-                    useCaseLockWrite.write?.();
-                  }}>
-                  <FontAwesomeIcon
-                    icon={
-                      useCaseLockStatuses.data &&
-                      useCaseLockStatuses.data[lockUseCaseValue - 1]
-                        ? "lock"
-                        : "lock-open"
-                    }
-                    className={styles.buttonIcon}
-                  />
-                  {useCaseLockStatuses.data &&
-                  useCaseLockStatuses.data[lockUseCaseValue - 1]
-                    ? "Unlock"
-                    : "Lock"}{" "}
-                  Use Case
-                  {(useCaseLockWrite.isLoading ||
-                    waitUseCaseLockWrite.isLoading) && (
-                    <div className="d-inline">
-                      <div
-                        className={`spinner-border ${styles.loader}`}
-                        role="status">
-                        <span className="sr-only"></span>
+                        useCaseLockStatuses.data[lockUseCaseIndex]
+                          ? "lock"
+                          : "lock-open"
+                      }
+                      className={styles.buttonIcon}
+                    />
+                    {useCaseLockStatuses.data &&
+                    useCaseLockStatuses.data[lockUseCaseIndex]
+                      ? "Unlock"
+                      : "Lock"}{" "}
+                    Use Case
+                    {(useCaseLockWrite.isLoading ||
+                      waitUseCaseLockWrite.isLoading) && (
+                      <div className="d-inline">
+                        <div
+                          className={`spinner-border ${styles.loader}`}
+                          role="status">
+                          <span className="sr-only"></span>
+                        </div>
                       </div>
-                    </div>
-                  )}
-                </button>
+                    )}
+                  </button>
+                ) : (
+                  <div>
+                    <span className={styles.hint}>* Hint:</span> Unlock use case
+                    in{" "}
+                    <a href={`/delegations/${ANY_COLLECTION_PATH}`}>
+                      All Collections
+                    </a>
+                  </div>
+                )}
               </Col>
             )}
           </Row>
-        )}
+          {collectionLockRead.data && (
+            <Row className="pb-3">
+              <Col>
+                <span className={styles.hint}>* Hint:</span> Unlock{" "}
+                {areEqualAddresses(
+                  props.collection.contract,
+                  DELEGATION_ALL_ADDRESS
+                )
+                  ? `All Collections`
+                  : `Collection`}{" "}
+                to lock/unlock specific use cases
+              </Col>
+            </Row>
+          )}
+          {collectionLockReadGlobal?.data && (
+            <Row className="pb-3">
+              <Col>
+                <span className={styles.hint}>* Hint:</span> Unlock{" "}
+                <a href={`/delegations/${ANY_COLLECTION_PATH}`}>
+                  All Collections
+                </a>{" "}
+                to lock/unlock specific collections and use cases
+              </Col>
+            </Row>
+          )}
+        </>
       </Container>
     );
   }
@@ -1189,9 +1329,7 @@ export default function CollectionDelegationComponent(props: Props) {
               <Container className="pt-3 -b-3">
                 <Row className="pt-2 pb-2">
                   <Col>
-                    <h1>
-                      {props.collection.display.toUpperCase()} DELEGATIONS
-                    </h1>
+                    <h1>{props.collection.title.toUpperCase()} DELEGATIONS</h1>
                   </Col>
                 </Row>
                 {!showCreateNewDelegation &&
@@ -1204,6 +1342,14 @@ export default function CollectionDelegationComponent(props: Props) {
                       {printSubDelegationActions()}
                     </>
                   )}
+                <Row className="pt-5 pb-3">
+                  <Col className="d-flex align-items-center justify-content-start">
+                    <a href={`/delegations`} className={styles.backBtn}>
+                      <FontAwesomeIcon icon="circle-arrow-left" />
+                      Back to Delegations
+                    </a>
+                  </Col>
+                </Row>
                 {showCreateNewDelegation && (
                   <NewDelegationComponent
                     collection={props.collection}
@@ -1216,6 +1362,15 @@ export default function CollectionDelegationComponent(props: Props) {
                       setCurrentDate(new Date());
                       incomingActiveDelegations.refetch();
                       outgoingActiveDelegations.refetch();
+                    }}
+                    onSetToast={(toast: any) => {
+                      setToast({
+                        title: toast.title,
+                        message: toast.message,
+                      });
+                    }}
+                    onSetShowToast={(show: boolean) => {
+                      setShowToast(show);
                     }}
                   />
                 )}

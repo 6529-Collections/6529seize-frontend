@@ -170,15 +170,21 @@
   justify-content: center;
   margin-right: 15px;
   margin-top: 15px;
-  background-color: lighten($color: $lightest-grey, $amount: 10);
-  color: black;
+  background-color: darken($color: #f28c28, $amount: 10);
+  color: white;
   width: fit-content;
   padding: 12px 25px;
   cursor: pointer;
 
   &:hover {
-    background-color: lighten($color: $lightest-grey, $amount: 15);
+    background-color: darken($color: #f28c28, $amount: 15);
   }
+}
+
+.lockDelegationBtnDisabled {
+  pointer-events: none !important;
+  background-color: darken($color: #f28c28, $amount: 20);
+  color: $font-color-h;
 }
 
 .formInput {
@@ -191,10 +197,6 @@
   &:focus {
     border-color: $blue !important;
   }
-}
-
-.formInputDisabled {
-  cursor: not-allowed !important;
 }
 
 .formInputLockUseCase {
@@ -281,7 +283,7 @@
 }
 
 .lockUseCaseBtn {
-  background-color: lighten($color: $lightest-grey, $amount: 10);
+  background-color: lighten($color: $lightest-grey, $amount: 25);
   padding-left: 15px;
   padding-right: 25px;
   border: none;
@@ -291,7 +293,7 @@
   height: 50px;
 
   &:hover {
-    background-color: lighten($color: $lightest-grey, $amount: 15);
+    background-color: lighten($color: $lightest-grey, $amount: 20);
   }
 }
 
@@ -310,6 +312,17 @@
   width: 14px;
   height: 14px;
   margin-right: 3px;
+}
+
+.backBtn {
+  text-decoration: none;
+  font-size: 20px;
+  svg {
+    width: 20px;
+    height: 20px;
+    margin-right: 8px;
+    margin-top: -2px;
+  }
 }
 
 .leftBorder {
@@ -455,8 +468,17 @@
   }
 }
 
+.formInputDisabled {
+  pointer-events: none !important;
+  color: $font-color-h !important;
+}
+
 .delegationContractLinksHeader {
   font-weight: bolder;
   color: $font-color-h;
   text-align: center;
+}
+
+.hint {
+  font-weight: bolder;
 }

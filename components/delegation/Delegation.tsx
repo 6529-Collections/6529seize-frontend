@@ -9,15 +9,17 @@ import {
   usePrepareContractWrite,
   useWaitForTransaction,
 } from "wagmi";
-import { getTransactionLink } from "../../helpers/Helpers";
-import { useState, useEffect } from "react";
+import { areEqualAddresses, getTransactionLink } from "../../helpers/Helpers";
+import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 
-import { SUPPORTED_COLLECTIONS } from "../../pages/delegations/[contract]";
+import {
+  ANY_COLLECTION_PATH,
+  SUPPORTED_COLLECTIONS,
+} from "../../pages/delegations/[contract]";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import dynamic from "next/dynamic";
-import { DELEGATION_CONTRACT } from "../../constants";
-import { DELEGATION_ABI } from "../../abis";
+import { DELEGATION_ALL_ADDRESS, DELEGATION_CONTRACT } from "../../constants";
 import { sepolia } from "wagmi/chains";
 
 const NewDelegationComponent = dynamic(() => import("./NewDelegation"), {
@@ -40,14 +42,11 @@ export default function DelegationComponent() {
     address: accountResolution.address,
   });
 
+  const toastRef = useRef<HTMLDivElement>(null);
   const [toast, setToast] = useState<
     { title: string; message: string } | undefined
   >(undefined);
   const [showToast, setShowToast] = useState(false);
-
-  function chainsMatch() {
-    return networkResolution.chain?.id == DELEGATION_CONTRACT.chain_id;
-  }
 
   useEffect(() => {
     if (!showToast) {
@@ -71,13 +70,17 @@ export default function DelegationComponent() {
               xm={6}
               md={6}
               onClick={() => {
-                window.location.href = `/delegations/${c.contract}`;
+                if (areEqualAddresses(c.contract, DELEGATION_ALL_ADDRESS)) {
+                  window.location.href = `/delegations/${ANY_COLLECTION_PATH}`;
+                } else {
+                  window.location.href = `/delegations/${c.contract}`;
+                }
               }}
               className={styles.collectionSelectionWrapper}>
               <Container className="pb-4">
                 <Row>
                   <Col>
-                    <h4 className="font-color float-none">{c.display}</h4>
+                    <h4 className="font-color float-none">{c.title}</h4>
                   </Col>
                 </Row>
                 <Row>
@@ -117,6 +120,15 @@ export default function DelegationComponent() {
                       showAddMore={false}
                       onHide={() => {
                         //donothing
+                      }}
+                      onSetToast={(toast: any) => {
+                        setToast({
+                          title: toast.title,
+                          message: toast.message,
+                        });
+                      }}
+                      onSetShowToast={(show: boolean) => {
+                        setShowToast(show);
                       }}
                     />
                   </Col>
@@ -184,17 +196,33 @@ export default function DelegationComponent() {
           </Row>
         )}
       {toast && (
-        <ToastContainer position={"top-center"} className={styles.toast}>
-          <Toast onClose={() => setShowToast(false)} show={showToast}>
-            <Toast.Header>
-              <strong className="me-auto">{toast.title}</strong>
-            </Toast.Header>
-            <Toast.Body
-              dangerouslySetInnerHTML={{
-                __html: toast.message,
-              }}></Toast.Body>
-          </Toast>
-        </ToastContainer>
+        <div
+          className={styles.toastWrapper}
+          onClick={(e) => {
+            if (
+              !toastRef.current ||
+              !toastRef.current.contains(e.target as Node)
+            ) {
+              setShowToast(false);
+            }
+          }}>
+          <ToastContainer
+            position={"top-center"}
+            className={styles.toast}
+            ref={toastRef}>
+            <Toast onClose={() => setShowToast(false)} show={showToast}>
+              <Toast.Header>
+                <strong className="me-auto">{toast.title}</strong>
+              </Toast.Header>
+              {toast.message && (
+                <Toast.Body
+                  dangerouslySetInnerHTML={{
+                    __html: toast.message,
+                  }}></Toast.Body>
+              )}
+            </Toast>
+          </ToastContainer>
+        </div>
       )}
     </Container>
   );
