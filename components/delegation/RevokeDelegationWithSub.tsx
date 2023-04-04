@@ -16,7 +16,11 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Tippy from "@tippyjs/react";
 import { DELEGATION_ALL_ADDRESS, DELEGATION_CONTRACT } from "../../constants";
 import { DELEGATION_ABI } from "../../abis";
-import { getTransactionLink, isValidEthAddress } from "../../helpers/Helpers";
+import {
+  areEqualAddresses,
+  getTransactionLink,
+  isValidEthAddress,
+} from "../../helpers/Helpers";
 
 interface Props {
   address: string;
@@ -26,6 +30,8 @@ interface Props {
   showCancel: boolean;
   showAddMore: boolean;
   onHide(): any;
+  onSetToast(toast: any): any;
+  onSetShowToast(show: boolean): any;
 }
 
 export default function RevokeDelegationWithSubComponent(props: Props) {
@@ -37,7 +43,9 @@ export default function RevokeDelegationWithSubComponent(props: Props) {
     useState(
       props.incomingDelegations.length == 1 ? props.incomingDelegations[0] : ""
     );
+
   const [errors, setErrors] = useState<string[]>([]);
+  const [gasError, setGasError] = useState(false);
 
   const contractWriteDelegationConfig = usePrepareContractWrite({
     address: DELEGATION_CONTRACT.contract,
@@ -45,9 +53,7 @@ export default function RevokeDelegationWithSubComponent(props: Props) {
     chainId: DELEGATION_CONTRACT.chain_id,
     args: [
       newDelegationOriginalDelegator,
-      newDelegationCollection == "all"
-        ? DELEGATION_ALL_ADDRESS
-        : newDelegationCollection,
+      newDelegationCollection,
       newDelegationToAddress,
       newDelegationUseCase,
     ],
@@ -56,8 +62,7 @@ export default function RevokeDelegationWithSubComponent(props: Props) {
         ? "revokeDelegationAddressUsingSubdelegation"
         : undefined,
     onError: (e) => {
-      setErrors(["CANNOT ESTIMATE GAS"]);
-      window.scrollBy(0, 100);
+      setGasError(true);
     },
   });
   const contractWriteDelegation = useContractWrite(
@@ -94,20 +99,68 @@ export default function RevokeDelegationWithSubComponent(props: Props) {
 
   function submitDelegation() {
     const newErrors = validate();
+    if (gasError) {
+      newErrors.push("CANNOT ESTIMATE GAS");
+    }
     if (newErrors.length > 0) {
       setErrors(newErrors);
       window.scrollBy(0, 100);
     } else {
       contractWriteDelegation.write?.();
+      props.onSetToast({
+        title: `Revoking Delegation With Sub-Delegation Rights`,
+        message: "Confirm in your wallet...",
+      });
     }
   }
 
   useEffect(() => {
     if (contractWriteDelegation.error) {
-      setErrors((err) => [...err, contractWriteDelegation.error!.message]);
-      window.scrollBy(0, 100);
+      props.onSetToast({
+        title: `Revoking Delegation With Sub-Delegation Rights`,
+        message: contractWriteDelegation.error.message,
+      });
     }
-  }, [contractWriteDelegation.error]);
+    if (contractWriteDelegation.data) {
+      if (contractWriteDelegation.data?.hash) {
+        if (waitContractWriteDelegation.isLoading) {
+          props.onSetToast({
+            title: "Revoking Delegation With Sub-Delegation Rights",
+            message: `Transaction submitted...
+                    <a
+                    href=${getTransactionLink(
+                      DELEGATION_CONTRACT.chain_id,
+                      contractWriteDelegation.data.hash
+                    )}
+                    target="_blank"
+                    rel="noreferrer"
+                    className=${styles.etherscanLink}>
+                    view
+                  </a><br />Waiting for confirmation...`,
+          });
+        } else {
+          props.onSetToast({
+            title: "Revoking Delegation With Sub-Delegation Rights",
+            message: `Transaction Successful!
+                    <a
+                    href=${getTransactionLink(
+                      DELEGATION_CONTRACT.chain_id,
+                      contractWriteDelegation.data.hash
+                    )}
+                    target="_blank"
+                    rel="noreferrer"
+                    className=${styles.etherscanLink}>
+                    view
+                  </a>`,
+          });
+        }
+      }
+    }
+  }, [
+    contractWriteDelegation.error,
+    contractWriteDelegation.data,
+    waitContractWriteDelegation.isLoading,
+  ]);
 
   return (
     <Container className="no-padding">
@@ -141,7 +194,7 @@ export default function RevokeDelegationWithSubComponent(props: Props) {
                 <Form.Control
                   className={`${styles.formInput} ${styles.formInputDisabled}`}
                   type="text"
-                  defaultValue={
+                  value={
                     props.ens
                       ? `${props.ens} - ${props.address}`
                       : `${props.address}`
@@ -181,7 +234,10 @@ export default function RevokeDelegationWithSubComponent(props: Props) {
                 Collection
               </Form.Label>
               <Col sm={10}>
-                {props.collection.contract == "all" ? (
+                {areEqualAddresses(
+                  props.collection.contract,
+                  DELEGATION_ALL_ADDRESS
+                ) ? (
                   <Form.Select
                     className={`${styles.formInput}`}
                     value={newDelegationCollection}
@@ -195,9 +251,7 @@ export default function RevokeDelegationWithSubComponent(props: Props) {
                       <option
                         key={`add-delegation-select-collection-${sc.contract}`}
                         value={sc.contract}>
-                        {`${sc.display}${
-                          sc.contract == "all" ? "" : `- ${sc.contract}`
-                        }`}
+                        {`${sc.display}`}
                       </option>
                     ))}
                   </Form.Select>
@@ -205,11 +259,7 @@ export default function RevokeDelegationWithSubComponent(props: Props) {
                   <Form.Control
                     className={`${styles.formInput} ${styles.formInputDisabled}`}
                     type="text"
-                    defaultValue={`${props.collection.display}${
-                      props.collection.contract == "all"
-                        ? ""
-                        : `- ${props.collection.contract}`
-                    }`}
+                    value={`${props.collection.display}`}
                     disabled
                   />
                 )}
@@ -301,67 +351,6 @@ export default function RevokeDelegationWithSubComponent(props: Props) {
                       <li key={`new-delegation-error-${index}`}>{e}</li>
                     ))}
                   </ul>
-                </Col>
-              </Form.Group>
-            )}
-            {contractWriteDelegation.data && (
-              <Form.Group
-                as={Row}
-                className={`pt-2 pb-2 ${styles.newDelegationRedultsList} ${
-                  waitContractWriteDelegation.data &&
-                  waitContractWriteDelegation.data.status
-                    ? styles.newDelegationSuccess
-                    : waitContractWriteDelegation.data &&
-                      !waitContractWriteDelegation.data.status
-                    ? styles.newDelegationError
-                    : ``
-                }`}>
-                <Form.Label
-                  column
-                  sm={2}
-                  className={`${styles.newDelegationRedultsList} ${
-                    waitContractWriteDelegation.data &&
-                    waitContractWriteDelegation.data.status
-                      ? styles.newDelegationSuccess
-                      : waitContractWriteDelegation.data &&
-                        !waitContractWriteDelegation.data.status
-                      ? styles.newDelegationError
-                      : ``
-                  }`}>
-                  Status
-                </Form.Label>
-                <Col sm={10}>
-                  <ul className="mb-0">
-                    <li
-                      className={`${styles.newDelegationRedultsList} ${
-                        waitContractWriteDelegation.data &&
-                        waitContractWriteDelegation.data.status
-                          ? styles.newDelegationSuccess
-                          : waitContractWriteDelegation.data &&
-                            !waitContractWriteDelegation.data.status
-                          ? styles.newDelegationError
-                          : ``
-                      }`}>
-                      {waitContractWriteDelegation.isLoading
-                        ? `Transaction Submitted...`
-                        : waitContractWriteDelegation.data?.status
-                        ? `Transaction Successful!`
-                        : `Transaction Failed`}
-                    </li>
-                    {waitContractWriteDelegation.isLoading && (
-                      <li>Waiting for confirmation...</li>
-                    )}
-                  </ul>
-                  <a
-                    href={getTransactionLink(
-                      DELEGATION_CONTRACT.chain_id,
-                      contractWriteDelegation.data.hash
-                    )}
-                    target="_blank"
-                    rel="noreferrer"
-                    className={styles.etherscanLink}>
-                    view txn
-                  </a>
                 </Col>
               </Form.Group>
             )}

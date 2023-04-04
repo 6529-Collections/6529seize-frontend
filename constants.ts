@@ -19,7 +19,7 @@ export const DELEGATION_CONTRACT: {
   contract: `0x${string}`;
 } = {
   chain_id: sepolia.id,
-  contract: "0x6a89AFF3B4ea4CF323C32740289C8a1d703aBeC8",
+  contract: "0xf94423086613c6c1f1d3098d8cad99427b9fd0e7",
 };
 export const DELEGATION_ALL_ADDRESS =
   "0x8888888888888888888888888888888888888888";

@@ -58,12 +58,14 @@ import {
   faPlus,
   faMinus,
   faCaretDown,
+  faCircleArrowLeft,
 } from "@fortawesome/free-solid-svg-icons";
 import Head from "next/head";
 
 library.add(
   faArrowUp,
   faArrowDown,
+  faCircleArrowLeft,
   faCopy,
   faCaretRight,
   faCaretLeft,
