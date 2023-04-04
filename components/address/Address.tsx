@@ -41,7 +41,7 @@ export default function Address(props: Props) {
   let ensResolution: any = null;
 
   if (props.resolveEns) {
-    ensResolution = useEnsName({ address: props.address });
+    ensResolution = useEnsName({ address: props.address, chainId: 1 });
   }
 
   const [isCopied, setIsCopied] = useState(false);
