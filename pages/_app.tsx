@@ -119,22 +119,6 @@ const client = createClient({
 
 const ethereumClient = new EthereumClient(client, chains);
 
-const customButton = {
-  onClick: async () => {
-    // Your custom logic here
-    console.log("Custom button clicked");
-  },
-  text: "Custom Button",
-  style: {
-    background: "purple",
-    color: "white",
-    borderRadius: "4px",
-    padding: "8px",
-    margin: "4px",
-    cursor: "pointer",
-  },
-};
-
 export default function App({ Component, pageProps }: AppProps) {
   pageProps.provider = provider;
 
