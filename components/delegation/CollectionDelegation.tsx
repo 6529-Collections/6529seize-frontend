@@ -1388,6 +1388,15 @@ export default function CollectionDelegationComponent(props: Props) {
                       incomingActiveDelegations.refetch();
                       outgoingActiveDelegations.refetch();
                     }}
+                    onSetToast={(toast: any) => {
+                      setToast({
+                        title: toast.title,
+                        message: toast.message,
+                      });
+                    }}
+                    onSetShowToast={(show: boolean) => {
+                      setShowToast(show);
+                    }}
                   />
                 )}
                 {showCreateNewDelegationWithSub && (
@@ -1404,6 +1413,15 @@ export default function CollectionDelegationComponent(props: Props) {
                       incomingActiveDelegations.refetch();
                       outgoingActiveDelegations.refetch();
                     }}
+                    onSetToast={(toast: any) => {
+                      setToast({
+                        title: toast.title,
+                        message: toast.message,
+                      });
+                    }}
+                    onSetShowToast={(show: boolean) => {
+                      setShowToast(show);
+                    }}
                   />
                 )}
                 {showRevokeDelegationWithSub && (
@@ -1419,6 +1437,15 @@ export default function CollectionDelegationComponent(props: Props) {
                       setCurrentDate(new Date());
                       incomingActiveDelegations.refetch();
                       outgoingActiveDelegations.refetch();
+                    }}
+                    onSetToast={(toast: any) => {
+                      setToast({
+                        title: toast.title,
+                        message: toast.message,
+                      });
+                    }}
+                    onSetShowToast={(show: boolean) => {
+                      setShowToast(show);
                     }}
                   />
                 )}
