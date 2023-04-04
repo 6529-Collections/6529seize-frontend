@@ -40,6 +40,7 @@ export default function DelegationComponent() {
 
   const ensResolution = useEnsName({
     address: accountResolution.address,
+    chainId: 1,
   });
 
   const toastRef = useRef<HTMLDivElement>(null);

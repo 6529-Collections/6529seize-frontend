@@ -140,6 +140,7 @@ export default function CollectionDelegationComponent(props: Props) {
   const networkResolution = useNetwork();
   const ensResolution = useEnsName({
     address: accountResolution.address,
+    chainId: 1,
   });
 
   const [bulkRevocations, setBulkRevocations] = useState<any[]>([]);
@@ -713,7 +714,7 @@ export default function CollectionDelegationComponent(props: Props) {
                     if (data.length > 0) {
                       const useCase = DELEGATION_USE_CASES[index];
                       return (
-                        <Fragment key={`outgoing-${useCase}-${index}`}>
+                        <Fragment key={`outgoing-${useCase.use_case}-${index}`}>
                           <tr>
                             <td
                               colSpan={4}
@@ -728,7 +729,8 @@ export default function CollectionDelegationComponent(props: Props) {
                               index
                             );
                             return (
-                              <tr key={`outgoing-${useCase}-${index}-${w}`}>
+                              <tr
+                                key={`outgoing-${useCase.use_case}-${index}-${w}-${addressIndex}`}>
                                 <td>
                                   <FormCheck
                                     disabled={

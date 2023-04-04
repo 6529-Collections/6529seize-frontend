@@ -55,6 +55,7 @@ export default function NewDelegationComponent(props: Props) {
       newDelegationToInput && newDelegationToInput.startsWith("0x")
         ? (newDelegationToInput as `0x${string}`)
         : undefined,
+    chainId: 1,
   });
 
   useEffect(() => {
@@ -71,6 +72,7 @@ export default function NewDelegationComponent(props: Props) {
       newDelegationToInput && newDelegationToInput.endsWith(".eth")
         ? newDelegationToInput
         : undefined,
+    chainId: 1,
   });
 
   useEffect(() => {
