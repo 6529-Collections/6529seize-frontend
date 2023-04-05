@@ -36,14 +36,26 @@ a:hover {
 
 @media only screen and (max-width: 1200px) {
   body,
-  button {
+  button,
+  textarea,
+  select,
+  input,
+  button,
+  video,
+  select {
     font-size: $font-smaller !important;
   }
 }
 
 @media only screen and (max-width: 800px) {
   body,
-  button {
+  button,
+  textarea,
+  select,
+  input,
+  button,
+  video,
+  select {
     font-size: $font-smallest !important;
   }
 }

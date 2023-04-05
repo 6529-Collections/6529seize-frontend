@@ -463,6 +463,7 @@ export default function CollectionDelegationComponent(props: Props) {
                   </a><br />Waiting for confirmation...`,
           });
         } else {
+          setBulkRevocations([]);
           setToast({
             title: "Batch Revoking Delegations",
             message: `Transaction Successful!
@@ -489,11 +490,7 @@ export default function CollectionDelegationComponent(props: Props) {
   useEffect(() => {
     if (collectionLockWrite.error) {
       setToast({
-        title: `${collectionLockRead.data ? `Unlocking` : `Locking`} ${
-          areEqualAddresses(props.collection.contract, DELEGATION_ALL_ADDRESS)
-            ? `All Collections`
-            : `Collection`
-        }`,
+        title: `${collectionLockRead.data ? `Unlocking` : `Locking`} Wallet`,
         message: collectionLockWrite.error.message,
       });
     }
@@ -501,14 +498,7 @@ export default function CollectionDelegationComponent(props: Props) {
       if (collectionLockWrite.data?.hash) {
         if (waitCollectionLockWrite.isLoading) {
           setToast({
-            title: `Locking ${
-              areEqualAddresses(
-                props.collection.contract,
-                DELEGATION_ALL_ADDRESS
-              )
-                ? `All Collections`
-                : `Collection`
-            }`,
+            title: `Locking Wallet`,
             message: `Transaction submitted...
                     <a
                     href=${getTransactionLink(
@@ -523,14 +513,7 @@ export default function CollectionDelegationComponent(props: Props) {
           });
         } else {
           setToast({
-            title: `Locking ${
-              areEqualAddresses(
-                props.collection.contract,
-                DELEGATION_ALL_ADDRESS
-              )
-                ? `All Collections`
-                : `Collection`
-            }`,
+            title: `Locking Wallet`,
             message: `Transaction Successful!
                     <a
                     href=${getTransactionLink(
@@ -558,7 +541,7 @@ export default function CollectionDelegationComponent(props: Props) {
       useCaseLockStatuses.data && useCaseLockStatuses.data[lockUseCaseIndex]
         ? "Unlocking"
         : "Locking"
-    } Use Case #${useCase?.use_case} - ${useCase?.display}`;
+    } Wallet on Use Case #${useCase?.use_case} - ${useCase?.display}`;
 
     if (useCaseLockWrite.error) {
       setToast({
@@ -777,6 +760,9 @@ export default function CollectionDelegationComponent(props: Props) {
                                             styles.delegationActiveLabel
                                           }>
                                           {isActive.expiry}
+                                          {isActive.all
+                                            ? ` - all tokens`
+                                            : ` - token ID: ${isActive.tokens}`}
                                         </span>
                                       ) : (
                                         <span
@@ -1089,14 +1075,7 @@ export default function CollectionDelegationComponent(props: Props) {
                       setToast({
                         title: `${
                           collectionLockRead.data ? `Unlocking` : `Locking`
-                        } ${
-                          areEqualAddresses(
-                            props.collection.contract,
-                            DELEGATION_ALL_ADDRESS
-                          )
-                            ? `All Collections`
-                            : `Collection`
-                        }`,
+                        } Wallet`,
                         message: "Confirm in your wallet...",
                       });
                       setShowToast(true);
@@ -1106,13 +1085,7 @@ export default function CollectionDelegationComponent(props: Props) {
                       icon={collectionLockRead.data ? "lock" : "lock-open"}
                       className={styles.buttonIcon}
                     />
-                    {collectionLockRead.data ? "Unlock" : "Lock"}{" "}
-                    {areEqualAddresses(
-                      props.collection.contract,
-                      DELEGATION_ALL_ADDRESS
-                    )
-                      ? `All Collections`
-                      : `Collection`}
+                    {collectionLockRead.data ? "Unlock" : "Lock"} Wallet
                     {collectionLockReadGlobal?.data &&
                     !areEqualAddresses(
                       props.collection.contract,
@@ -1157,7 +1130,7 @@ export default function CollectionDelegationComponent(props: Props) {
                 }}>
                 <option value={0}>
                   <>
-                    Select Use Case to lock/unlock
+                    Lock/Unlock Wallet - Select Use Case
                     {collectionLockRead.data || collectionLockReadGlobal?.data
                       ? ` *`
                       : ``}
@@ -1209,7 +1182,9 @@ export default function CollectionDelegationComponent(props: Props) {
                           useCaseLockStatuses.data[lockUseCaseIndex]
                             ? "Unlocking"
                             : "Locking"
-                        } Use Case #${useCase.use_case} - ${useCase.display}`,
+                        } Wallet on Use Case #${useCase.use_case} - ${
+                          useCase.display
+                        }`,
                         message: "Confirm in your wallet...",
                       });
                       setShowToast(true);
@@ -1255,21 +1230,15 @@ export default function CollectionDelegationComponent(props: Props) {
           {collectionLockRead.data && (
             <Row className="pb-3">
               <Col>
-                <span className={styles.hint}>* Note:</span> Unlock{" "}
-                {areEqualAddresses(
-                  props.collection.contract,
-                  DELEGATION_ALL_ADDRESS
-                )
-                  ? `All Collections`
-                  : `Collection`}{" "}
-                to lock/unlock specific use cases
+                <span className={styles.hint}>* Note:</span> Unlock Wallet to
+                lock/unlock specific use cases
               </Col>
             </Row>
           )}
           {collectionLockReadGlobal?.data && (
             <Row className="pb-3">
               <Col>
-                <span className={styles.hint}>* Note:</span> Unlock{" "}
+                <span className={styles.hint}>* Note:</span> Unlock Wallet on{" "}
                 <a href={`/delegations/${ANY_COLLECTION_PATH}`}>
                   All Collections
                 </a>{" "}
@@ -1285,7 +1254,7 @@ export default function CollectionDelegationComponent(props: Props) {
   function printSubDelegationActions() {
     if (incomingSubdelegations.length > 0) {
       return (
-        <Container className="pt-2 pb-5">
+        <Container className="no-padding">
           <Row className="pt-5 pb-2">
             <Col>
               <h4>Sub-Delegation Actions</h4>
@@ -1342,14 +1311,16 @@ export default function CollectionDelegationComponent(props: Props) {
                       {printDelegations()}
                       {printActions()}
                       {printSubDelegationActions()}
-                      <Row className="pt-5 pb-3">
-                        <Col className="d-flex align-items-center justify-content-start">
-                          <a href={`/delegations`} className={styles.backBtn}>
-                            <FontAwesomeIcon icon="circle-arrow-left" />
-                            Back to Delegations
-                          </a>
-                        </Col>
-                      </Row>
+                      <Container className="no-padding">
+                        <Row className="pt-5 pb-3">
+                          <Col className="d-flex align-items-center justify-content-start">
+                            <a href={`/delegations`} className={styles.backBtn}>
+                              <FontAwesomeIcon icon="circle-arrow-left" />
+                              Back to Delegations
+                            </a>
+                          </Col>
+                        </Row>
+                      </Container>
                     </>
                   )}
                 {showCreateNewDelegation && (
