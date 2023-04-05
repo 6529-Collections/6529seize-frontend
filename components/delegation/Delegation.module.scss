@@ -482,3 +482,14 @@
 .hint {
   font-weight: bolder;
 }
+
+.registerHeading {
+  cursor: pointer;
+  &:hover {
+    color: $font-color;
+  }
+}
+
+.registerHeadingActive {
+  color: $font-color;
+}

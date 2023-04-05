@@ -10,6 +10,7 @@ import {
 import { useEffect, useState } from "react";
 
 import {
+  CONSOLIDATION_USE_CASE,
   DelegationCollection,
   DELEGATION_USE_CASES,
   SUPPORTED_COLLECTIONS,
@@ -37,6 +38,7 @@ interface Props {
 }
 
 export default function RevokeDelegationWithSubComponent(props: Props) {
+  const [showingConsolidation, setShowingConsolidation] = useState(false);
   const [newDelegationCollection, setNewDelegationCollection] =
     useState<string>(props.collection ? props.collection.contract : "0");
   const [newDelegationUseCase, setNewDelegationUseCase] = useState<number>(0);
@@ -97,9 +99,9 @@ export default function RevokeDelegationWithSubComponent(props: Props) {
     chainId: DELEGATION_CONTRACT.chain_id,
     args: [
       newDelegationOriginalDelegator,
-      newDelegationCollection,
+      showingConsolidation ? DELEGATION_ALL_ADDRESS : newDelegationCollection,
       newDelegationToAddress,
-      newDelegationUseCase,
+      showingConsolidation ? CONSOLIDATION_USE_CASE : newDelegationUseCase,
     ],
     functionName:
       validate().length == 0
@@ -123,6 +125,11 @@ export default function RevokeDelegationWithSubComponent(props: Props) {
     hash: contractWriteDelegation.data?.hash,
   });
 
+  function clearErrors() {
+    setGasError(false);
+    setErrors([]);
+  }
+
   function validate() {
     const newErrors: string[] = [];
     if (
@@ -131,7 +138,13 @@ export default function RevokeDelegationWithSubComponent(props: Props) {
     ) {
       newErrors.push("Missing or invalid Original Delegator");
     }
-    if (!newDelegationUseCase) {
+    if (
+      (!newDelegationCollection || newDelegationCollection == "0") &&
+      !showingConsolidation
+    ) {
+      newErrors.push("Missing or invalid Collection");
+    }
+    if (!newDelegationUseCase && !showingConsolidation) {
       newErrors.push("Missing or invalid Use Case");
     }
     if (!newDelegationToAddress || !isValidEthAddress(newDelegationToAddress)) {
@@ -154,7 +167,9 @@ export default function RevokeDelegationWithSubComponent(props: Props) {
     } else {
       contractWriteDelegation.write?.();
       props.onSetToast({
-        title: `Revoking Delegation With Sub-Delegation Rights`,
+        title: `Revoking ${
+          showingConsolidation ? `Consolidation` : `Delegation`
+        } With Sub-Delegation Rights`,
         message: "Confirm in your wallet...",
       });
       props.onSetShowToast(true);
@@ -164,7 +179,9 @@ export default function RevokeDelegationWithSubComponent(props: Props) {
   useEffect(() => {
     if (contractWriteDelegation.error) {
       props.onSetToast({
-        title: `Revoking Delegation With Sub-Delegation Rights`,
+        title: `Revoking ${
+          showingConsolidation ? `Consolidation` : `Delegation`
+        } With Sub-Delegation Rights`,
         message: contractWriteDelegation.error.message,
       });
     }
@@ -172,7 +189,9 @@ export default function RevokeDelegationWithSubComponent(props: Props) {
       if (contractWriteDelegation.data?.hash) {
         if (waitContractWriteDelegation.isLoading) {
           props.onSetToast({
-            title: "Revoking Delegation With Sub-Delegation Rights",
+            title: `Revoking ${
+              showingConsolidation ? `Consolidation` : `Delegation`
+            } With Sub-Delegation Rights`,
             message: `Transaction submitted...
                     <a
                     href=${getTransactionLink(
@@ -187,7 +206,9 @@ export default function RevokeDelegationWithSubComponent(props: Props) {
           });
         } else {
           props.onSetToast({
-            title: "Revoking Delegation With Sub-Delegation Rights",
+            title: `Revoking ${
+              showingConsolidation ? `Consolidation` : `Delegation`
+            } With Sub-Delegation Rights`,
             message: `Transaction Successful!
                     <a
                     href=${getTransactionLink(
@@ -213,7 +234,28 @@ export default function RevokeDelegationWithSubComponent(props: Props) {
     <Container className="no-padding">
       <Row>
         <Col xs={10} className="pt-3 pb-3">
-          <h4>Revoke Delegation With Sub-Delegation Rights</h4>
+          <h5
+            onClick={() => setShowingConsolidation(false)}
+            className={`
+              ${styles.registerHeading} ${
+              !showingConsolidation ? styles.registerHeadingActive : ``
+            }
+            `}>
+            Revoke Delegation
+          </h5>
+          <h5>&nbsp;&nbsp;|&nbsp;&nbsp;</h5>
+          <h5
+            onClick={() => setShowingConsolidation(true)}
+            className={`
+              ${styles.registerHeading} ${
+              showingConsolidation ? styles.registerHeadingActive : ``
+            }
+            `}>
+            Revoke Consolidation
+          </h5>
+          <h5 className={styles.registerHeadingActive}>
+            &nbsp;&nbsp;With Sub-Delegation Rights
+          </h5>
         </Col>
         {props.showCancel && (
           <Col xs={2} className="d-flex align-items-center justify-content-end">
@@ -280,43 +322,45 @@ export default function RevokeDelegationWithSubComponent(props: Props) {
                 </Form.Select>
               </Col>
             </Form.Group>
-            <Form.Group as={Row} className="pb-4">
-              <Form.Label column sm={2}>
-                Collection
-              </Form.Label>
-              <Col sm={10}>
-                {areEqualAddresses(
-                  props.collection.contract,
-                  DELEGATION_ALL_ADDRESS
-                ) ? (
-                  <Form.Select
-                    className={`${styles.formInput}`}
-                    value={newDelegationCollection}
-                    onChange={(e) => {
-                      setNewDelegationCollection(e.target.value);
-                      setGasError(false);
-                    }}>
-                    <option value="0" disabled>
-                      Select Collection
-                    </option>
-                    {SUPPORTED_COLLECTIONS.map((sc) => (
-                      <option
-                        key={`revoke-delegation-select-collection-${sc.contract}`}
-                        value={sc.contract}>
-                        {`${sc.display}`}
+            {!showingConsolidation && (
+              <Form.Group as={Row} className="pb-4">
+                <Form.Label column sm={2}>
+                  Collection
+                </Form.Label>
+                <Col sm={10}>
+                  {areEqualAddresses(
+                    props.collection.contract,
+                    DELEGATION_ALL_ADDRESS
+                  ) ? (
+                    <Form.Select
+                      className={`${styles.formInput}`}
+                      value={newDelegationCollection}
+                      onChange={(e) => {
+                        setNewDelegationCollection(e.target.value);
+                        clearErrors();
+                      }}>
+                      <option value="0" disabled>
+                        Select Collection
                       </option>
-                    ))}
-                  </Form.Select>
-                ) : (
-                  <Form.Control
-                    className={`${styles.formInput} ${styles.formInputDisabled}`}
-                    type="text"
-                    value={`${props.collection.display}`}
-                    disabled
-                  />
-                )}
-              </Col>
-            </Form.Group>
+                      {SUPPORTED_COLLECTIONS.map((sc) => (
+                        <option
+                          key={`revoke-delegation-select-collection-${sc.contract}`}
+                          value={sc.contract}>
+                          {`${sc.display}`}
+                        </option>
+                      ))}
+                    </Form.Select>
+                  ) : (
+                    <Form.Control
+                      className={`${styles.formInput} ${styles.formInputDisabled}`}
+                      type="text"
+                      value={`${props.collection.display}`}
+                      disabled
+                    />
+                  )}
+                </Col>
+              </Form.Group>
+            )}
             <Form.Group as={Row} className="pb-4">
               <Form.Label column sm={2}>
                 Address
@@ -330,36 +374,38 @@ export default function RevokeDelegationWithSubComponent(props: Props) {
                   onChange={(e) => {
                     setNewDelegationToInput(e.target.value);
                     setNewDelegationToAddress(e.target.value);
-                    setGasError(false);
+                    clearErrors();
                   }}
                 />
               </Col>
             </Form.Group>
-            <Form.Group as={Row} className="pb-4">
-              <Form.Label column sm={2}>
-                Use Case
-              </Form.Label>
-              <Col sm={10}>
-                <Form.Select
-                  className={`${styles.formInput}`}
-                  value={newDelegationUseCase}
-                  onChange={(e) => {
-                    setNewDelegationUseCase(parseInt(e.target.value));
-                    setGasError(false);
-                  }}>
-                  <option value={0} disabled>
-                    Select Use Case
-                  </option>
-                  {DELEGATION_USE_CASES.map((uc) => (
-                    <option
-                      key={`revoke-delegation-select-use-case-${uc.use_case}`}
-                      value={uc.use_case}>
-                      #{uc.use_case} - {uc.display}
+            {!showingConsolidation && (
+              <Form.Group as={Row} className="pb-4">
+                <Form.Label column sm={2}>
+                  Use Case
+                </Form.Label>
+                <Col sm={10}>
+                  <Form.Select
+                    className={`${styles.formInput}`}
+                    value={newDelegationUseCase}
+                    onChange={(e) => {
+                      setNewDelegationUseCase(parseInt(e.target.value));
+                      clearErrors();
+                    }}>
+                    <option value={0} disabled>
+                      Select Use Case
                     </option>
-                  ))}
-                </Form.Select>
-              </Col>
-            </Form.Group>
+                    {DELEGATION_USE_CASES.map((uc) => (
+                      <option
+                        key={`revoke-delegation-select-use-case-${uc.use_case}`}
+                        value={uc.use_case}>
+                        #{uc.use_case} - {uc.display}
+                      </option>
+                    ))}
+                  </Form.Select>
+                </Col>
+              </Form.Group>
+            )}
             <Form.Group as={Row} className="pt-2 pb-4">
               <Form.Label column sm={2}></Form.Label>
               <Col sm={10} className="d-flex align-items-center">

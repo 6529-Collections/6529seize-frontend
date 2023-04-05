@@ -66,6 +66,7 @@ export const SUPPORTED_COLLECTIONS: DelegationCollection[] = [
   },
 ];
 
+export const SUB_DELEGATION_USE_CASE = 16;
 export const CONSOLIDATION_USE_CASE = 99;
 export const DELEGATION_USE_CASES = [
   {
@@ -129,7 +130,7 @@ export const DELEGATION_USE_CASES = [
     display: "View Access",
   },
   {
-    use_case: 16,
+    use_case: SUB_DELEGATION_USE_CASE,
     display: "Sub-delegation",
   },
   {
