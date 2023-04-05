@@ -2,6 +2,8 @@ import styles from "./Delegation.module.scss";
 import { Container, Row, Col, Form } from "react-bootstrap";
 import {
   useContractWrite,
+  useEnsAddress,
+  useEnsName,
   usePrepareContractWrite,
   useWaitForTransaction,
 } from "wagmi";
@@ -38,6 +40,7 @@ export default function RevokeDelegationWithSubComponent(props: Props) {
   const [newDelegationCollection, setNewDelegationCollection] =
     useState<string>(props.collection ? props.collection.contract : "0");
   const [newDelegationUseCase, setNewDelegationUseCase] = useState<number>(0);
+  const [newDelegationToInput, setNewDelegationToInput] = useState("");
   const [newDelegationToAddress, setNewDelegationToAddress] = useState("");
   const [newDelegationOriginalDelegator, setNewDelegationOriginalDelegator] =
     useState(
@@ -46,6 +49,47 @@ export default function RevokeDelegationWithSubComponent(props: Props) {
 
   const [errors, setErrors] = useState<string[]>([]);
   const [gasError, setGasError] = useState(false);
+
+  const newDelegationToAddressEns = useEnsName({
+    address:
+      newDelegationToInput && newDelegationToInput.startsWith("0x")
+        ? (newDelegationToInput as `0x${string}`)
+        : undefined,
+    chainId: 1,
+  });
+
+  const incomingDelegationsEns = props.incomingDelegations.map((id) => {
+    return useEnsName({
+      address: id as `0x${string}`,
+      chainId: 1,
+    });
+  });
+
+  useEffect(() => {
+    if (newDelegationToAddressEns.data) {
+      setNewDelegationToAddress(newDelegationToInput);
+      setNewDelegationToInput(
+        `${newDelegationToAddressEns.data} - ${newDelegationToInput}`
+      );
+    }
+  }, [newDelegationToAddressEns.data]);
+
+  const newDelegationToAddressFromEns = useEnsAddress({
+    name:
+      newDelegationToInput && newDelegationToInput.endsWith(".eth")
+        ? newDelegationToInput
+        : undefined,
+    chainId: 1,
+  });
+
+  useEffect(() => {
+    if (newDelegationToAddressFromEns.data) {
+      setNewDelegationToAddress(newDelegationToAddressFromEns.data);
+      setNewDelegationToInput(
+        `${newDelegationToInput} - ${newDelegationToAddressFromEns.data}`
+      );
+    }
+  }, [newDelegationToAddressFromEns.data]);
 
   const contractWriteDelegationConfig = usePrepareContractWrite({
     address: DELEGATION_CONTRACT.contract,
@@ -222,10 +266,14 @@ export default function RevokeDelegationWithSubComponent(props: Props) {
                       Select
                     </option>
                   )}
-                  {props.incomingDelegations.map((id) => (
+                  {props.incomingDelegations.map((id, index) => (
                     <option
-                      key={`add-delegation-select-delegator-${id}`}
+                      key={`revoke-delegation-select-delegator-${id}`}
                       value={id}>
+                      {incomingDelegationsEns?.length > 0 &&
+                      incomingDelegationsEns[index].data
+                        ? `${incomingDelegationsEns[index].data} - `
+                        : ``}
                       {id}
                     </option>
                   ))}
@@ -253,7 +301,7 @@ export default function RevokeDelegationWithSubComponent(props: Props) {
                     </option>
                     {SUPPORTED_COLLECTIONS.map((sc) => (
                       <option
-                        key={`add-delegation-select-collection-${sc.contract}`}
+                        key={`revoke-delegation-select-collection-${sc.contract}`}
                         value={sc.contract}>
                         {`${sc.display}`}
                       </option>
@@ -278,8 +326,9 @@ export default function RevokeDelegationWithSubComponent(props: Props) {
                   placeholder="Delegation Address"
                   className={`${styles.formInput}`}
                   type="text"
-                  value={newDelegationToAddress}
+                  value={newDelegationToInput}
                   onChange={(e) => {
+                    setNewDelegationToInput(e.target.value);
                     setNewDelegationToAddress(e.target.value);
                     setGasError(false);
                   }}
@@ -303,7 +352,7 @@ export default function RevokeDelegationWithSubComponent(props: Props) {
                   </option>
                   {DELEGATION_USE_CASES.map((uc) => (
                     <option
-                      key={`add-delegation-select-use-case-${uc.use_case}`}
+                      key={`revoke-delegation-select-use-case-${uc.use_case}`}
                       value={uc.use_case}>
                       #{uc.use_case} - {uc.display}
                     </option>
@@ -314,6 +363,13 @@ export default function RevokeDelegationWithSubComponent(props: Props) {
             <Form.Group as={Row} className="pt-2 pb-4">
               <Form.Label column sm={2}></Form.Label>
               <Col sm={10} className="d-flex align-items-center">
+                {props.showCancel && (
+                  <span
+                    className={styles.newDelegationCancelBtn}
+                    onClick={() => props.onHide()}>
+                    Cancel
+                  </span>
+                )}
                 <span
                   className={`${styles.revokeDelegationBtn} ${
                     contractWriteDelegation.isLoading ||
@@ -337,13 +393,6 @@ export default function RevokeDelegationWithSubComponent(props: Props) {
                     </div>
                   )}
                 </span>
-                {props.showCancel && (
-                  <span
-                    className={styles.newDelegationCancelBtn}
-                    onClick={() => props.onHide()}>
-                    Cancel
-                  </span>
-                )}
               </Col>
             </Form.Group>
             {(errors.length > 0 || gasError) && (

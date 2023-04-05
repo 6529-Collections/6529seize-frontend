@@ -146,6 +146,9 @@ export default function NewDelegationComponent(props: Props) {
     setNewDelegationDate(undefined);
     setNewDelegationToken(undefined);
     setNewDelegationUseCase(0);
+    setNewDelegationToAddress("");
+    setNewDelegationToInput("");
+    setNewDelegationCollection("0");
   }
 
   function submitDelegation() {
@@ -429,6 +432,13 @@ export default function NewDelegationComponent(props: Props) {
             <Form.Group as={Row} className="pt-2 pb-4">
               <Form.Label column sm={2}></Form.Label>
               <Col sm={10} className="d-flex align-items-center">
+                {props.showCancel && (
+                  <span
+                    className={styles.newDelegationCancelBtn}
+                    onClick={() => props.onHide()}>
+                    Cancel
+                  </span>
+                )}
                 <span
                   className={`${styles.newDelegationSubmitBtn} ${
                     contractWriteDelegation.isLoading ||
@@ -452,13 +462,6 @@ export default function NewDelegationComponent(props: Props) {
                     </div>
                   )}
                 </span>
-                {props.showCancel && (
-                  <span
-                    className={styles.newDelegationCancelBtn}
-                    onClick={() => props.onHide()}>
-                    Cancel
-                  </span>
-                )}
               </Col>
             </Form.Group>
             {(errors.length > 0 || gasError) && (

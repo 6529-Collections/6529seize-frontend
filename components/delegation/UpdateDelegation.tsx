@@ -2,6 +2,8 @@ import styles from "./Delegation.module.scss";
 import { Container, Row, Col, Form } from "react-bootstrap";
 import {
   useContractWrite,
+  useEnsAddress,
+  useEnsName,
   usePrepareContractWrite,
   useWaitForTransaction,
 } from "wagmi";
@@ -37,9 +39,49 @@ export default function NewDelegationComponent(props: Props) {
     undefined
   );
 
+  const [delegationToInput, setDelegationToInput] = useState("");
   const [delegationToAddress, setDelegationToAddress] = useState("");
   const [errors, setErrors] = useState<string[]>([]);
   const [gasError, setGasError] = useState(false);
+
+  const previousDelegationEns = useEnsName({
+    address: props.delegation.wallet as `0x${string}`,
+    chainId: 1,
+  });
+
+  const newDelegationToAddressEns = useEnsName({
+    address:
+      delegationToInput && delegationToInput.startsWith("0x")
+        ? (delegationToInput as `0x${string}`)
+        : undefined,
+    chainId: 1,
+  });
+
+  useEffect(() => {
+    if (newDelegationToAddressEns.data) {
+      setDelegationToAddress(delegationToInput);
+      setDelegationToInput(
+        `${newDelegationToAddressEns.data} - ${delegationToInput}`
+      );
+    }
+  }, [newDelegationToAddressEns.data]);
+
+  const newDelegationToAddressFromEns = useEnsAddress({
+    name:
+      delegationToInput && delegationToInput.endsWith(".eth")
+        ? delegationToInput
+        : undefined,
+    chainId: 1,
+  });
+
+  useEffect(() => {
+    if (newDelegationToAddressFromEns.data) {
+      setDelegationToAddress(newDelegationToAddressFromEns.data);
+      setDelegationToInput(
+        `${delegationToInput} - ${newDelegationToAddressFromEns.data}`
+      );
+    }
+  }, [newDelegationToAddressFromEns.data]);
 
   const contractWriteDelegationConfig = usePrepareContractWrite({
     address: DELEGATION_CONTRACT.contract,
@@ -222,10 +264,13 @@ export default function NewDelegationComponent(props: Props) {
               </Form.Label>
               <Col sm={10}>
                 <Form.Control
-                  placeholder="Delegate to"
                   className={`${styles.formInput}`}
                   type="text"
-                  value={props.delegation.wallet}
+                  value={
+                    previousDelegationEns.data
+                      ? `${previousDelegationEns.data} - ${props.delegation.wallet}`
+                      : props.delegation.wallet
+                  }
                   disabled
                 />
               </Col>
@@ -239,8 +284,9 @@ export default function NewDelegationComponent(props: Props) {
                   placeholder="Delegate to"
                   className={`${styles.formInput}`}
                   type="text"
-                  value={delegationToAddress}
+                  value={delegationToInput}
                   onChange={(e) => {
+                    setDelegationToInput(e.target.value);
                     setDelegationToAddress(e.target.value);
                     setGasError(false);
                   }}
@@ -364,6 +410,13 @@ export default function NewDelegationComponent(props: Props) {
             <Form.Group as={Row} className="pt-2 pb-4">
               <Form.Label column sm={2}></Form.Label>
               <Col sm={10} className="d-flex align-items-center">
+                {props.showCancel && (
+                  <span
+                    className={styles.newDelegationCancelBtn}
+                    onClick={() => props.onHide()}>
+                    Cancel
+                  </span>
+                )}
                 <span
                   className={`${styles.newDelegationSubmitBtn} ${
                     contractWriteDelegation.isLoading ||
@@ -387,13 +440,6 @@ export default function NewDelegationComponent(props: Props) {
                     </div>
                   )}
                 </span>
-                {props.showCancel && (
-                  <span
-                    className={styles.newDelegationCancelBtn}
-                    onClick={() => props.onHide()}>
-                    Cancel
-                  </span>
-                )}
               </Col>
             </Form.Group>
             {(errors.length > 0 || gasError) && (
