@@ -78,13 +78,13 @@ export default function DelegationComponent() {
                 }
               }}
               className={styles.collectionSelectionWrapper}>
-              <Container className="pb-4">
-                <Row>
+              <Container className="pt-2 pb-4">
+                <Row className="pb-2">
                   <Col>
                     <h4 className="font-color float-none">{c.title}</h4>
                   </Col>
                 </Row>
-                <Row>
+                <Row className="pb-4">
                   <Col className={styles.collectionSelectionImage}>
                     <Image
                       loading="eager"
