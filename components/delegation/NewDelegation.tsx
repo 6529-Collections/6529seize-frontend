@@ -100,8 +100,13 @@ export default function NewDelegationComponent(props: Props) {
     ],
     functionName:
       validate().length == 0 ? "registerDelegationAddress" : undefined,
-    onError: (e) => {
-      setGasError(true);
+    onSettled(data, error) {
+      if (data) {
+        setGasError(false);
+      }
+      if (error) {
+        setGasError(true);
+      }
     },
   });
   const contractWriteDelegation = useContractWrite(
@@ -145,16 +150,13 @@ export default function NewDelegationComponent(props: Props) {
 
   function submitDelegation() {
     const newErrors = validate();
-    if (gasError) {
-      newErrors.push("CANNOT ESTIMATE GAS");
-    }
-    if (newErrors.length > 0) {
+    if (newErrors.length > 0 || gasError) {
       setErrors(newErrors);
       window.scrollBy(0, 100);
     } else {
       contractWriteDelegation.write?.();
       props.onSetToast({
-        title: `Registering Deligation`,
+        title: `Registering Delegation`,
         message: "Confirm in your wallet...",
       });
       props.onSetShowToast(true);
@@ -164,7 +166,7 @@ export default function NewDelegationComponent(props: Props) {
   useEffect(() => {
     if (contractWriteDelegation.error) {
       props.onSetToast({
-        title: `Registering Deligation`,
+        title: `Registering Delegation`,
         message: contractWriteDelegation.error.message,
       });
     }
@@ -172,7 +174,7 @@ export default function NewDelegationComponent(props: Props) {
       if (contractWriteDelegation.data?.hash) {
         if (waitContractWriteDelegation.isLoading) {
           props.onSetToast({
-            title: "Registering Deligation",
+            title: "Registering Delegation",
             message: `Transaction submitted...
                     <a
                     href=${getTransactionLink(
@@ -187,7 +189,7 @@ export default function NewDelegationComponent(props: Props) {
           });
         } else {
           props.onSetToast({
-            title: "Registering Deligation",
+            title: "Registering Delegation",
             message: `Transaction Successful!
                     <a
                     href=${getTransactionLink(
@@ -258,7 +260,10 @@ export default function NewDelegationComponent(props: Props) {
                 <Form.Select
                   className={`${styles.formInput}`}
                   value={newDelegationCollection}
-                  onChange={(e) => setNewDelegationCollection(e.target.value)}>
+                  onChange={(e) => {
+                    setNewDelegationCollection(e.target.value);
+                    setGasError(false);
+                  }}>
                   <option value="0" disabled>
                     Select Collection
                   </option>
@@ -285,6 +290,7 @@ export default function NewDelegationComponent(props: Props) {
                   onChange={(e) => {
                     setNewDelegationToInput(e.target.value);
                     setNewDelegationToAddress(e.target.value);
+                    setGasError(false);
                   }}
                 />
               </Col>
@@ -306,6 +312,7 @@ export default function NewDelegationComponent(props: Props) {
                       setNewDelegationToken(undefined);
                       setShowTokensInput(false);
                     }
+                    setGasError(false);
                   }}>
                   <option value={0} disabled>
                     Select Use Case
@@ -454,7 +461,7 @@ export default function NewDelegationComponent(props: Props) {
                 )}
               </Col>
             </Form.Group>
-            {errors.length > 0 && (
+            {(errors.length > 0 || gasError) && (
               <Form.Group
                 as={Row}
                 className={`pt-2 pb-2 ${styles.newDelegationError}`}>
@@ -466,6 +473,12 @@ export default function NewDelegationComponent(props: Props) {
                     {errors.map((e, index) => (
                       <li key={`new-delegation-error-${index}`}>{e}</li>
                     ))}
+                    {gasError && (
+                      <li>
+                        CANNOT ESTIMATE GAS - This can be caused by locked
+                        collections/use-cases
+                      </li>
+                    )}
                   </ul>
                 </Col>
               </Form.Group>

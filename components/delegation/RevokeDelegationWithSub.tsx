@@ -61,8 +61,13 @@ export default function RevokeDelegationWithSubComponent(props: Props) {
       validate().length == 0
         ? "revokeDelegationAddressUsingSubdelegation"
         : undefined,
-    onError: (e) => {
-      setGasError(true);
+    onSettled(data, error) {
+      if (data) {
+        setGasError(false);
+      }
+      if (error) {
+        setGasError(true);
+      }
     },
   });
   const contractWriteDelegation = useContractWrite(
@@ -99,10 +104,7 @@ export default function RevokeDelegationWithSubComponent(props: Props) {
 
   function submitDelegation() {
     const newErrors = validate();
-    if (gasError) {
-      newErrors.push("CANNOT ESTIMATE GAS");
-    }
-    if (newErrors.length > 0) {
+    if (newErrors.length > 0 || gasError) {
       setErrors(newErrors);
       window.scrollBy(0, 100);
     } else {
@@ -111,6 +113,7 @@ export default function RevokeDelegationWithSubComponent(props: Props) {
         title: `Revoking Delegation With Sub-Delegation Rights`,
         message: "Confirm in your wallet...",
       });
+      props.onSetShowToast(true);
     }
   }
 
@@ -241,9 +244,10 @@ export default function RevokeDelegationWithSubComponent(props: Props) {
                   <Form.Select
                     className={`${styles.formInput}`}
                     value={newDelegationCollection}
-                    onChange={(e) =>
-                      setNewDelegationCollection(e.target.value)
-                    }>
+                    onChange={(e) => {
+                      setNewDelegationCollection(e.target.value);
+                      setGasError(false);
+                    }}>
                     <option value="0" disabled>
                       Select Collection
                     </option>
@@ -271,11 +275,14 @@ export default function RevokeDelegationWithSubComponent(props: Props) {
               </Form.Label>
               <Col sm={10}>
                 <Form.Control
-                  placeholder="Deligation Address"
+                  placeholder="Delegation Address"
                   className={`${styles.formInput}`}
                   type="text"
                   value={newDelegationToAddress}
-                  onChange={(e) => setNewDelegationToAddress(e.target.value)}
+                  onChange={(e) => {
+                    setNewDelegationToAddress(e.target.value);
+                    setGasError(false);
+                  }}
                 />
               </Col>
             </Form.Group>
@@ -287,9 +294,10 @@ export default function RevokeDelegationWithSubComponent(props: Props) {
                 <Form.Select
                   className={`${styles.formInput}`}
                   value={newDelegationUseCase}
-                  onChange={(e) =>
-                    setNewDelegationUseCase(parseInt(e.target.value))
-                  }>
+                  onChange={(e) => {
+                    setNewDelegationUseCase(parseInt(e.target.value));
+                    setGasError(false);
+                  }}>
                   <option value={0} disabled>
                     Select Use Case
                   </option>
@@ -338,7 +346,7 @@ export default function RevokeDelegationWithSubComponent(props: Props) {
                 )}
               </Col>
             </Form.Group>
-            {errors.length > 0 && (
+            {(errors.length > 0 || gasError) && (
               <Form.Group
                 as={Row}
                 className={`pt-2 pb-2 ${styles.newDelegationError}`}>
@@ -350,6 +358,12 @@ export default function RevokeDelegationWithSubComponent(props: Props) {
                     {errors.map((e, index) => (
                       <li key={`new-delegation-error-${index}`}>{e}</li>
                     ))}
+                    {gasError && (
+                      <li>
+                        CANNOT ESTIMATE GAS - This can be caused by locked
+                        collections/use-cases
+                      </li>
+                    )}
                   </ul>
                 </Col>
               </Form.Group>
