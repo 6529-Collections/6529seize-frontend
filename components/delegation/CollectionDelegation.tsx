@@ -1242,7 +1242,7 @@ export default function CollectionDelegationComponent(props: Props) {
                   </button>
                 ) : (
                   <div>
-                    <span className={styles.hint}>* Hint:</span> Unlock use case
+                    <span className={styles.hint}>* Note:</span> Unlock use case
                     in{" "}
                     <a href={`/delegations/${ANY_COLLECTION_PATH}`}>
                       All Collections
@@ -1255,7 +1255,7 @@ export default function CollectionDelegationComponent(props: Props) {
           {collectionLockRead.data && (
             <Row className="pb-3">
               <Col>
-                <span className={styles.hint}>* Hint:</span> Unlock{" "}
+                <span className={styles.hint}>* Note:</span> Unlock{" "}
                 {areEqualAddresses(
                   props.collection.contract,
                   DELEGATION_ALL_ADDRESS
@@ -1269,7 +1269,7 @@ export default function CollectionDelegationComponent(props: Props) {
           {collectionLockReadGlobal?.data && (
             <Row className="pb-3">
               <Col>
-                <span className={styles.hint}>* Hint:</span> Unlock{" "}
+                <span className={styles.hint}>* Note:</span> Unlock{" "}
                 <a href={`/delegations/${ANY_COLLECTION_PATH}`}>
                   All Collections
                 </a>{" "}
@@ -1342,16 +1342,16 @@ export default function CollectionDelegationComponent(props: Props) {
                       {printDelegations()}
                       {printActions()}
                       {printSubDelegationActions()}
+                      <Row className="pt-5 pb-3">
+                        <Col className="d-flex align-items-center justify-content-start">
+                          <a href={`/delegations`} className={styles.backBtn}>
+                            <FontAwesomeIcon icon="circle-arrow-left" />
+                            Back to Delegations
+                          </a>
+                        </Col>
+                      </Row>
                     </>
                   )}
-                <Row className="pt-5 pb-3">
-                  <Col className="d-flex align-items-center justify-content-start">
-                    <a href={`/delegations`} className={styles.backBtn}>
-                      <FontAwesomeIcon icon="circle-arrow-left" />
-                      Back to Delegations
-                    </a>
-                  </Col>
-                </Row>
                 {showCreateNewDelegation && (
                   <NewDelegationComponent
                     collection={props.collection}
