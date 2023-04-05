@@ -97,6 +97,13 @@ h4 {
   color: $font-color-h;
 }
 
+h5 {
+  font-size: 20px;
+  font-weight: bold;
+  float: left;
+  color: $font-color-h;
+}
+
 @media only screen and (max-width: 800px) {
   h1 {
     font-family: $square-font !important;
@@ -121,6 +128,13 @@ h4 {
     font-size: 18px;
     font-weight: bold;
     float: left;
+  }
+
+  h5 {
+    font-size: 16px;
+    font-weight: bold;
+    float: left;
+    color: $font-color-h;
   }
 }
 
