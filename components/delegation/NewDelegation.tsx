@@ -241,11 +241,14 @@ export default function NewDelegationComponent(props: Props) {
 
   return (
     <Container className="no-padding">
-      {props.showCancel && (
-        <Row>
+      <Row>
+        <Col xs={10} className="pt-3 pb-1">
+          <h4>Register</h4>
+        </Col>
+        {props.showCancel && (
           <Col
-            xs={12}
-            className="d-flex align-items-center justify-content-end">
+            xs={2}
+            className="pt-3 pb-1 d-flex align-items-center justify-content-end">
             <Tippy
               content={"Cancel Delegation"}
               delay={250}
@@ -257,13 +260,10 @@ export default function NewDelegationComponent(props: Props) {
                 onClick={() => props.onHide()}></FontAwesomeIcon>
             </Tippy>
           </Col>
-        </Row>
-      )}
-      <Row>
-        <Col xs={12} className="pt-3 pb-3">
-          <h5 className={styles.registerHeadingActive}>
-            Register&nbsp;&nbsp;-&nbsp;&nbsp;
-          </h5>
+        )}
+        <Col
+          xs={12}
+          className="pt-1 pb-4 d-flex align-items-center justify-content-start">
           <h5
             onClick={() => setShowingConsolidation(false)}
             className={`
@@ -354,7 +354,7 @@ export default function NewDelegationComponent(props: Props) {
               <Form.Label column sm={3} className="d-flex align-items-center">
                 Address
                 <Tippy
-                  content={"Delegate to Address"}
+                  content={"Delegate to Address e.g. your hot wallet"}
                   placement={"top"}
                   theme={"light"}>
                   <FontAwesomeIcon
@@ -365,7 +365,7 @@ export default function NewDelegationComponent(props: Props) {
               </Form.Label>
               <Col sm={9}>
                 <Form.Control
-                  placeholder="Delegate to"
+                  placeholder="Delegate to - 0x... or ENS"
                   className={`${styles.formInput}`}
                   type="text"
                   value={newDelegationToInput}
@@ -501,7 +501,7 @@ export default function NewDelegationComponent(props: Props) {
                     checked={!showTokensInput}
                     className={styles.newDelegationFormToggle}
                     type="radio"
-                    label="All"
+                    label="All&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"
                     name="tokenIdRadio"
                     onChange={() => setShowTokensInput(false)}
                   />
@@ -546,7 +546,9 @@ export default function NewDelegationComponent(props: Props) {
                 column
                 sm={3}
                 className="d-flex align-items-center"></Form.Label>
-              <Col sm={9} className="d-flex align-items-center">
+              <Col
+                sm={9}
+                className="d-flex align-items-center justify-content-center">
                 {props.showCancel && (
                   <span
                     className={styles.newDelegationCancelBtn}

@@ -1,15 +1,7 @@
 import styles from "./Delegation.module.scss";
 import { Container, Row, Col, ToastContainer, Toast } from "react-bootstrap";
-import {
-  useAccount,
-  useContractRead,
-  useContractWrite,
-  useEnsName,
-  useNetwork,
-  usePrepareContractWrite,
-  useWaitForTransaction,
-} from "wagmi";
-import { areEqualAddresses, getTransactionLink } from "../../helpers/Helpers";
+import { useAccount, useEnsName, useNetwork } from "wagmi";
+import { areEqualAddresses } from "../../helpers/Helpers";
 import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 
@@ -17,7 +9,6 @@ import {
   ANY_COLLECTION_PATH,
   SUPPORTED_COLLECTIONS,
 } from "../../pages/delegations/[contract]";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import dynamic from "next/dynamic";
 import { DELEGATION_ALL_ADDRESS, DELEGATION_CONTRACT } from "../../constants";
 import { sepolia } from "wagmi/chains";
@@ -59,7 +50,7 @@ export default function DelegationComponent() {
     return (
       <Container>
         <Row>
-          <Col className="pt-3 pb-3">
+          <Col className="pt-3 pb-5">
             <h4>Manage Delegations by Collection</h4>
           </Col>
         </Row>
@@ -81,7 +72,7 @@ export default function DelegationComponent() {
               <Container className="pt-2 pb-4">
                 <Row className="pb-2">
                   <Col>
-                    <h4 className="font-color float-none">{c.title}</h4>
+                    <h5 className="font-color float-none">{c.title}</h5>
                   </Col>
                 </Row>
                 <Row className="pb-4">

@@ -169,7 +169,7 @@ export default function RevokeDelegationWithSubComponent(props: Props) {
       props.onSetToast({
         title: `Revoking ${
           showingConsolidation ? `Consolidation` : `Delegation`
-        } With Sub-Delegation Rights`,
+        } Using Sub-Delegation Rights`,
         message: "Confirm in your wallet...",
       });
       props.onSetShowToast(true);
@@ -181,7 +181,7 @@ export default function RevokeDelegationWithSubComponent(props: Props) {
       props.onSetToast({
         title: `Revoking ${
           showingConsolidation ? `Consolidation` : `Delegation`
-        } With Sub-Delegation Rights`,
+        } Using Sub-Delegation Rights`,
         message: contractWriteDelegation.error.message,
       });
     }
@@ -191,7 +191,7 @@ export default function RevokeDelegationWithSubComponent(props: Props) {
           props.onSetToast({
             title: `Revoking ${
               showingConsolidation ? `Consolidation` : `Delegation`
-            } With Sub-Delegation Rights`,
+            } Using Sub-Delegation Rights`,
             message: `Transaction submitted...
                     <a
                     href=${getTransactionLink(
@@ -208,7 +208,7 @@ export default function RevokeDelegationWithSubComponent(props: Props) {
           props.onSetToast({
             title: `Revoking ${
               showingConsolidation ? `Consolidation` : `Delegation`
-            } With Sub-Delegation Rights`,
+            } Using Sub-Delegation Rights`,
             message: `Transaction Successful!
                     <a
                     href=${getTransactionLink(
@@ -232,11 +232,14 @@ export default function RevokeDelegationWithSubComponent(props: Props) {
 
   return (
     <Container className="no-padding">
-      {props.showCancel && (
-        <Row>
+      <Row>
+        <Col xs={10} className="pt-3 pb-1">
+          <h4>Revoke Using Sub-Delegation Rights</h4>
+        </Col>
+        {props.showCancel && (
           <Col
-            xs={12}
-            className="d-flex align-items-center justify-content-end">
+            xs={2}
+            className="pt-3 pb-1 d-flex align-items-center justify-content-end">
             <Tippy
               content={"Cancel Delegation"}
               delay={250}
@@ -248,13 +251,10 @@ export default function RevokeDelegationWithSubComponent(props: Props) {
                 onClick={() => props.onHide()}></FontAwesomeIcon>
             </Tippy>
           </Col>
-        </Row>
-      )}
-      <Row>
-        <Col xs={12} className="pt-3 pb-3">
-          <h5 className={styles.registerHeadingActive}>
-            Revoke&nbsp;&nbsp;-&nbsp;&nbsp;
-          </h5>
+        )}
+        <Col
+          xs={12}
+          className="pt-1 pb-4 d-flex align-items-center justify-content-start">
           <h5
             onClick={() => setShowingConsolidation(false)}
             className={`
@@ -273,9 +273,6 @@ export default function RevokeDelegationWithSubComponent(props: Props) {
             }
             `}>
             Consolidation
-          </h5>
-          <h5 className={styles.registerHeadingActive}>
-            &nbsp;&nbsp;-&nbsp;&nbsp;With Sub-Delegation Rights
           </h5>
         </Col>
       </Row>
@@ -399,7 +396,7 @@ export default function RevokeDelegationWithSubComponent(props: Props) {
               <Form.Label column sm={3} className="d-flex align-items-center">
                 Address
                 <Tippy
-                  content={"Delegate to Address"}
+                  content={"Delegate to Address e.g. your hot wallet"}
                   placement={"top"}
                   theme={"light"}>
                   <FontAwesomeIcon
@@ -463,7 +460,9 @@ export default function RevokeDelegationWithSubComponent(props: Props) {
                 column
                 sm={3}
                 className="d-flex align-items-center"></Form.Label>
-              <Col sm={9} className="d-flex align-items-center">
+              <Col
+                sm={9}
+                className="d-flex align-items-center justify-content-center">
                 {props.showCancel && (
                   <span
                     className={styles.newDelegationCancelBtn}
