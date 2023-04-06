@@ -206,11 +206,12 @@ export default function NewDelegationComponent(props: Props) {
 
   return (
     <Container className="no-padding">
-      {props.showCancel && (
-        <Row>
-          <Col
-            xs={12}
-            className="d-flex align-items-center justify-content-end">
+      <Row>
+        <Col xs={10} className="pt-3 pb-4">
+          <h4>Update Delegation</h4>
+        </Col>
+        {props.showCancel && (
+          <Col xs={2} className="d-flex align-items-center justify-content-end">
             <Tippy
               content={"Cancel Delegation"}
               delay={250}
@@ -222,12 +223,7 @@ export default function NewDelegationComponent(props: Props) {
                 onClick={() => props.onHide()}></FontAwesomeIcon>
             </Tippy>
           </Col>
-        </Row>
-      )}
-      <Row>
-        <Col xs={12} className="pt-3 pb-3">
-          <h4>Update Delegation</h4>
-        </Col>
+        )}
       </Row>
       <Row>
         <Col>
@@ -321,7 +317,7 @@ export default function NewDelegationComponent(props: Props) {
               </Form.Label>
               <Col sm={9}>
                 <Form.Control
-                  placeholder="Delegate to"
+                  placeholder="Delegate to - 0x... or ENS"
                   className={`${styles.formInput}`}
                   type="text"
                   value={delegationToInput}
@@ -432,7 +428,7 @@ export default function NewDelegationComponent(props: Props) {
                   checked={!showTokensInput}
                   className={styles.newDelegationFormToggle}
                   type="radio"
-                  label="All"
+                  label="All&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"
                   name="tokenIdRadio"
                   onChange={() => setShowTokensInput(false)}
                 />
@@ -479,7 +475,9 @@ export default function NewDelegationComponent(props: Props) {
                 column
                 sm={3}
                 className="d-flex align-items-center"></Form.Label>
-              <Col sm={9} className="d-flex align-items-center">
+              <Col
+                sm={9}
+                className="d-flex align-items-center  justify-content-center">
                 {props.showCancel && (
                   <span
                     className={styles.newDelegationCancelBtn}
