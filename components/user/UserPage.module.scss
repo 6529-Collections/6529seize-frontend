@@ -117,13 +117,15 @@
   tr:nth-child(2),
   tr:nth-child(3),
   tr:nth-child(6),
-  tr:nth-child(9) {
+  tr:nth-child(9),
+  tr:nth-child(12),
+  tr:nth-child(16) {
     border-bottom: none !important;
   }
 }
 
 .primaryTableGap {
-  height: 15px;
+  height: 20px;
 }
 
 .focus {
