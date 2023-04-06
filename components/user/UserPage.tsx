@@ -24,7 +24,7 @@ import {
   SIX529_MUSEUM,
 } from "../../constants";
 import { TDHMetrics } from "../../entities/ITDH";
-import { useAccount } from "wagmi";
+import { useAccount, useEnsAvatar } from "wagmi";
 import { SortDirection } from "../../entities/ISort";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { fetchAllPages, fetchUrl } from "../../services/6529api";
@@ -87,6 +87,7 @@ export default function UserPage(props: Props) {
   const [ownerAddress, setOwnerAddress] = useState<`0x${string}` | undefined>(
     undefined
   );
+  const ensAvatar = useEnsAvatar({ address: ownerAddress });
   const [ownerLinkDisplay, setOwnerLinkDisplay] = useState("");
   const [ownerENS, setOwnerENS] = useState("");
   const [owned, setOwned] = useState<Owner[]>([]);
@@ -769,13 +770,25 @@ export default function UserPage(props: Props) {
                   )} */}
                 </Col>
               </Row>
-              <Row className="pt-3">
+              <Row className="pt-3 pb-3">
+                {ensAvatar.data && (
+                  <Col
+                    xs={12}
+                    md={{ span: 2, offset: 2 }}
+                    className="pb-3 d-flex align-items-center justify-content-center">
+                    <Image
+                      className={styles.avatar}
+                      src={ensAvatar.data}
+                      alt={`avatar-${address}`}
+                      width={0}
+                      height={0}
+                    />
+                  </Col>
+                )}
                 <Col
-                  className="text-center d-flex align-items-center justify-content-center"
-                  xs={{ span: 12 }}
-                  sm={{ span: 12 }}
-                  md={{ span: 6 }}
-                  lg={{ span: 6 }}>
+                  xs={12}
+                  md={ensAvatar.data ? 6 : 12}
+                  className="text-center d-flex align-items-center justify-content-center">
                   <Container className="p-0">
                     {ownerAddress && (
                       <>
@@ -791,13 +804,16 @@ export default function UserPage(props: Props) {
                                     ownerTags.memes_cards_sets_szn1,
                                   memesCardsSetS2:
                                     ownerTags.memes_cards_sets_szn2,
+                                  memesCardsSetS3:
+                                    ownerTags.memes_cards_sets_szn3,
                                   memesBalance: ownerTags.unique_memes,
                                   gradientsBalance: ownerTags.gradients_balance,
                                   genesis: ownerTags.genesis,
-                                  tdh_rank: tdh ? tdh?.tdh_rank : -1,
+                                  tdh_rank: tdh ? tdh.tdh_rank : -1,
                                   balance_rank: tdh
-                                    ? tdh?.dense_rank_balance
+                                    ? tdh.dense_rank_balance
                                     : -1,
+                                  unique_rank: tdh ? tdh.dense_rank_unique : -1,
                                 }}
                                 expandedTags={true}
                                 isUserPage={true}
@@ -873,13 +889,10 @@ export default function UserPage(props: Props) {
                     )}
                   </Container>
                 </Col>
+              </Row>
+              <Row className="pt-3 pb-3">
                 {tdh && (
-                  <Col
-                    className="text-left pt-2"
-                    xs={{ span: 12 }}
-                    sm={{ span: 12 }}
-                    md={{ span: 6 }}
-                    lg={{ span: 6 }}>
+                  <Col className="text-left">
                     {tdh.balance > 0 && (
                       <Table className={styles.primaryTable}>
                         <tbody>
@@ -897,10 +910,13 @@ export default function UserPage(props: Props) {
                               <b>Memes</b>
                             </td>
                             <td>
-                              <b>Memes SZN1</b>
+                              <b>SZN1</b>
                             </td>
                             <td>
-                              <b>Memes SZN2</b>
+                              <b>SZN2</b>
+                            </td>
+                            <td>
+                              <b>SZN3</b>
                             </td>
                             <td>
                               <b>6529 Gradient</b>
@@ -909,7 +925,7 @@ export default function UserPage(props: Props) {
                           <tr className={styles.primaryTableGap}></tr>
                           <tr>
                             <td>
-                              <b>Cards</b>
+                              <b>All Cards</b>
                             </td>
                             <td>
                               x
@@ -937,34 +953,10 @@ export default function UserPage(props: Props) {
                                 : "-"}
                             </td>
                             <td>
-                              {tdh.gradients_balance > 0
-                                ? `x${numberWithCommas(tdh.gradients_balance)}`
-                                : "-"}
-                            </td>
-                          </tr>
-                          <tr>
-                            <td>
-                              <b>Unique</b>
-                            </td>
-                            <td>
-                              x
-                              {numberWithCommas(
-                                tdh.unique_memes + tdh.gradients_balance
-                              )}
-                            </td>
-                            <td>
-                              {tdh.unique_memes > 0
-                                ? `x${numberWithCommas(tdh.unique_memes)}`
-                                : "-"}
-                            </td>
-                            <td>
-                              {tdh.unique_memes_szn1 > 0
-                                ? `x${numberWithCommas(tdh.unique_memes_szn1)}`
-                                : "-"}
-                            </td>
-                            <td>
-                              {tdh.unique_memes_szn2 > 0
-                                ? `x${numberWithCommas(tdh.unique_memes_szn2)}`
+                              {tdh.memes_balance_season3 > 0
+                                ? `x${numberWithCommas(
+                                    tdh.memes_balance_season3
+                                  )}`
                                 : "-"}
                             </td>
                             <td>
@@ -1017,6 +1009,122 @@ export default function UserPage(props: Props) {
                                 : "-"}
                             </td>
                             <td>
+                              {tdh.memes_balance_season3 > 0
+                                ? `#${numberWithCommas(
+                                    tdh.dense_rank_balance_memes_season3
+                                  )}${
+                                    tdh.dense_rank_balance_memes_season3__ties >
+                                    1
+                                      ? ` (tie)`
+                                      : ""
+                                  }`
+                                : "-"}
+                            </td>
+                            <td>
+                              {tdh.gradients_balance > 0
+                                ? `#${numberWithCommas(
+                                    tdh.dense_rank_balance_gradients
+                                  )}${
+                                    tdh.dense_rank_balance_gradients__ties > 1
+                                      ? ` (tie)`
+                                      : ""
+                                  }`
+                                : "-"}
+                            </td>
+                          </tr>
+                          <tr className={styles.primaryTableGap}></tr>
+                          <tr>
+                            <td>
+                              <b>Unique Cards</b>
+                            </td>
+                            <td>
+                              x
+                              {numberWithCommas(
+                                tdh.unique_memes + tdh.gradients_balance
+                              )}
+                            </td>
+                            <td>
+                              {tdh.unique_memes > 0
+                                ? `x${numberWithCommas(tdh.unique_memes)}`
+                                : "-"}
+                            </td>
+                            <td>
+                              {tdh.unique_memes_szn1 > 0
+                                ? `x${numberWithCommas(tdh.unique_memes_szn1)}`
+                                : "-"}
+                            </td>
+                            <td>
+                              {tdh.unique_memes_szn2 > 0
+                                ? `x${numberWithCommas(tdh.unique_memes_szn2)}`
+                                : "-"}
+                            </td>
+                            <td>
+                              {tdh.unique_memes_szn3 > 0
+                                ? `x${numberWithCommas(tdh.unique_memes_szn3)}`
+                                : "-"}
+                            </td>
+                            <td>
+                              {tdh.gradients_balance > 0
+                                ? `x${numberWithCommas(tdh.gradients_balance)}`
+                                : "-"}
+                            </td>
+                          </tr>
+                          <tr>
+                            <td>
+                              <b>Rank</b>
+                            </td>
+                            <td>
+                              #{numberWithCommas(tdh.dense_rank_unique)}
+                              {tdh.dense_rank_unique__ties > 1 && ` (tie)`}
+                            </td>
+                            <td>
+                              {tdh.memes_balance > 0
+                                ? `#${numberWithCommas(
+                                    tdh.dense_rank_unique_memes
+                                  )}${
+                                    tdh.dense_rank_unique_memes__ties > 1
+                                      ? ` (tie)`
+                                      : ""
+                                  }`
+                                : "-"}
+                            </td>
+                            <td>
+                              {tdh.dense_rank_unique_memes_season1 > 0
+                                ? `#${numberWithCommas(
+                                    tdh.dense_rank_unique_memes_season1
+                                  )}${
+                                    tdh.dense_rank_unique_memes_season1__ties >
+                                    1
+                                      ? ` (tie)`
+                                      : ""
+                                  }`
+                                : "-"}
+                            </td>
+                            <td>
+                              {tdh.dense_rank_unique_memes_season2 > 0
+                                ? `#${numberWithCommas(
+                                    tdh.dense_rank_unique_memes_season2
+                                  )}${
+                                    tdh.dense_rank_unique_memes_season2__ties >
+                                    1
+                                      ? ` (tie)`
+                                      : ""
+                                  }`
+                                : "-"}
+                            </td>
+                            <td>
+                              {tdh.dense_rank_unique_memes_season3 > 0
+                                ? `#${numberWithCommas(
+                                    tdh.dense_rank_unique_memes_season3
+                                  )}${
+                                    tdh.dense_rank_unique_memes_season3__ties >
+                                    1
+                                      ? ` (tie)`
+                                      : ""
+                                  }`
+                                : "-"}
+                            </td>
+                            <td>
                               {tdh.gradients_balance > 0
                                 ? `#${numberWithCommas(
                                     tdh.dense_rank_balance_gradients
@@ -1047,6 +1155,11 @@ export default function UserPage(props: Props) {
                             <td>
                               {numberWithCommas(
                                 Math.round(tdh.boosted_memes_tdh_season2)
+                              )}
+                            </td>
+                            <td>
+                              {numberWithCommas(
+                                Math.round(tdh.boosted_memes_tdh_season3)
                               )}
                             </td>
                             <td>
@@ -1084,85 +1197,312 @@ export default function UserPage(props: Props) {
                                 : "-"}
                             </td>
                             <td>
+                              {tdh.tdh_rank_memes_szn3 > 0
+                                ? `#${numberWithCommas(
+                                    tdh.tdh_rank_memes_szn3
+                                  )}`
+                                : "-"}
+                            </td>
+                            <td>
                               {tdh.tdh_rank_gradients > 0
                                 ? `#${numberWithCommas(tdh.tdh_rank_gradients)}`
+                                : "-"}
+                            </td>
+                          </tr>
+                          <tr className={styles.primaryTableGap}></tr>
+                          <tr>
+                            <td>
+                              <b>Purchases</b>
+                            </td>
+                            <td>
+                              {tdh.purchases_count > 0
+                                ? `x${numberWithCommas(tdh.purchases_count)}`
+                                : "-"}
+                            </td>
+                            <td>
+                              {tdh.purchases_count_memes > 0
+                                ? `x${numberWithCommas(
+                                    tdh.purchases_count_memes
+                                  )}`
+                                : "-"}
+                            </td>
+                            <td>
+                              {tdh.purchases_count_memes_season1 > 0
+                                ? `x${numberWithCommas(
+                                    tdh.purchases_count_memes_season1
+                                  )}`
+                                : "-"}
+                            </td>
+                            <td>
+                              {tdh.purchases_count_memes_season2 > 0
+                                ? `x${numberWithCommas(
+                                    tdh.purchases_count_memes_season2
+                                  )}`
+                                : "-"}
+                            </td>
+                            <td>
+                              {tdh.purchases_count_memes_season3 > 0
+                                ? `x${numberWithCommas(
+                                    tdh.purchases_count_memes_season3
+                                  )}`
+                                : "-"}
+                            </td>
+                            <td>
+                              {tdh.purchases_count_gradients > 0
+                                ? `x${numberWithCommas(
+                                    tdh.purchases_count_gradients
+                                  )}`
+                                : "-"}
+                            </td>
+                          </tr>
+                          <tr>
+                            <td>
+                              <b>Purchases (ETH)</b>
+                            </td>
+                            <td>
+                              {tdh.purchases_value > 0
+                                ? `x${numberWithCommas(
+                                    Math.round(tdh.purchases_value * 100) / 100
+                                  )}`
+                                : "-"}
+                            </td>
+                            <td>
+                              {tdh.purchases_value_memes > 0
+                                ? `x${numberWithCommas(
+                                    Math.round(
+                                      tdh.purchases_value_memes * 100
+                                    ) / 100
+                                  )}`
+                                : "-"}
+                            </td>
+                            <td>
+                              {tdh.purchases_value_memes_season1 > 0
+                                ? `x${numberWithCommas(
+                                    Math.round(
+                                      tdh.purchases_value_memes_season1 * 100
+                                    ) / 100
+                                  )}`
+                                : "-"}
+                            </td>
+                            <td>
+                              {tdh.purchases_value_memes_season2 > 0
+                                ? `x${numberWithCommas(
+                                    Math.round(
+                                      tdh.purchases_value_memes_season2 * 100
+                                    ) / 100
+                                  )}`
+                                : "-"}
+                            </td>
+                            <td>
+                              {tdh.purchases_value_memes_season3 > 0
+                                ? `${numberWithCommas(
+                                    Math.round(
+                                      tdh.purchases_value_memes_season3 * 100
+                                    ) / 100
+                                  )}`
+                                : "-"}
+                            </td>
+                            <td>
+                              {tdh.purchases_value_gradients > 0
+                                ? `${numberWithCommas(
+                                    Math.round(
+                                      tdh.purchases_value_gradients * 100
+                                    ) / 100
+                                  )}`
+                                : "-"}
+                            </td>
+                          </tr>
+                          <tr>
+                            <td>
+                              <b>Transfers In</b>
+                            </td>
+                            <td>
+                              {tdh.transfers_in > 0
+                                ? `x${numberWithCommas(tdh.transfers_in)}`
+                                : "-"}
+                            </td>
+                            <td>
+                              {tdh.transfers_in_memes > 0
+                                ? `x${numberWithCommas(tdh.transfers_in_memes)}`
+                                : "-"}
+                            </td>
+                            <td>
+                              {tdh.transfers_in_memes_season1 > 0
+                                ? `x${numberWithCommas(
+                                    tdh.transfers_in_memes_season1
+                                  )}`
+                                : "-"}
+                            </td>
+                            <td>
+                              {tdh.transfers_in_memes_season2 > 0
+                                ? `x${numberWithCommas(
+                                    tdh.transfers_in_memes_season2
+                                  )}`
+                                : "-"}
+                            </td>
+                            <td>
+                              {tdh.transfers_in_memes_season3 > 0
+                                ? `x${numberWithCommas(
+                                    tdh.transfers_in_memes_season3
+                                  )}`
+                                : "-"}
+                            </td>
+                            <td>
+                              {tdh.transfers_in_gradients > 0
+                                ? `x${numberWithCommas(
+                                    tdh.transfers_in_gradients
+                                  )}`
+                                : "-"}
+                            </td>
+                          </tr>
+                          <tr className={styles.primaryTableGap}></tr>
+                          <tr>
+                            <td>
+                              <b>Sales</b>
+                            </td>
+                            <td>
+                              {tdh.sales_count > 0
+                                ? `x${numberWithCommas(tdh.sales_count)}`
+                                : "-"}
+                            </td>
+                            <td>
+                              {tdh.sales_count_memes > 0
+                                ? `x${numberWithCommas(tdh.sales_count_memes)}`
+                                : "-"}
+                            </td>
+                            <td>
+                              {tdh.sales_count_memes_season1 > 0
+                                ? `x${numberWithCommas(
+                                    tdh.sales_count_memes_season1
+                                  )}`
+                                : "-"}
+                            </td>
+                            <td>
+                              {tdh.sales_count_memes_season2 > 0
+                                ? `x${numberWithCommas(
+                                    tdh.sales_count_memes_season2
+                                  )}`
+                                : "-"}
+                            </td>
+                            <td>
+                              {tdh.sales_count_memes_season3 > 0
+                                ? `x${numberWithCommas(
+                                    tdh.sales_count_memes_season3
+                                  )}`
+                                : "-"}
+                            </td>
+                            <td>
+                              {tdh.sales_count_gradients > 0
+                                ? `x${numberWithCommas(
+                                    tdh.sales_count_gradients
+                                  )}`
+                                : "-"}
+                            </td>
+                          </tr>
+                          <tr>
+                            <td>
+                              <b>Sales (ETH)</b>
+                            </td>
+                            <td>
+                              {tdh.sales_value > 0
+                                ? `x${numberWithCommas(
+                                    Math.round(tdh.sales_value * 100) / 100
+                                  )}`
+                                : "-"}
+                            </td>
+                            <td>
+                              {tdh.sales_value_memes > 0
+                                ? `x${numberWithCommas(
+                                    Math.round(tdh.sales_value_memes * 100) /
+                                      100
+                                  )}`
+                                : "-"}
+                            </td>
+                            <td>
+                              {tdh.sales_value_memes_season1 > 0
+                                ? `x${numberWithCommas(
+                                    Math.round(
+                                      tdh.sales_value_memes_season1 * 100
+                                    ) / 100
+                                  )}`
+                                : "-"}
+                            </td>
+                            <td>
+                              {tdh.sales_value_memes_season2 > 0
+                                ? `x${numberWithCommas(
+                                    Math.round(
+                                      tdh.sales_value_memes_season2 * 100
+                                    ) / 100
+                                  )}`
+                                : "-"}
+                            </td>
+                            <td>
+                              {tdh.sales_value_memes_season3 > 0
+                                ? `${numberWithCommas(
+                                    Math.round(
+                                      tdh.sales_value_memes_season3 * 100
+                                    ) / 100
+                                  )}`
+                                : "-"}
+                            </td>
+                            <td>
+                              {tdh.sales_value_gradients > 0
+                                ? `${numberWithCommas(
+                                    Math.round(
+                                      tdh.sales_value_gradients * 100
+                                    ) / 100
+                                  )}`
+                                : "-"}
+                            </td>
+                          </tr>
+                          <tr>
+                            <td>
+                              <b>Transfers Out</b>
+                            </td>
+                            <td>
+                              {tdh.transfers_out > 0
+                                ? `x${numberWithCommas(tdh.transfers_out)}`
+                                : "-"}
+                            </td>
+                            <td>
+                              {tdh.transfers_out_memes > 0
+                                ? `x${numberWithCommas(
+                                    tdh.transfers_out_memes
+                                  )}`
+                                : "-"}
+                            </td>
+                            <td>
+                              {tdh.transfers_out_memes_season1 > 0
+                                ? `x${numberWithCommas(
+                                    tdh.transfers_out_memes_season1
+                                  )}`
+                                : "-"}
+                            </td>
+                            <td>
+                              {tdh.transfers_out_memes_season2 > 0
+                                ? `x${numberWithCommas(
+                                    tdh.transfers_out_memes_season2
+                                  )}`
+                                : "-"}
+                            </td>
+                            <td>
+                              {tdh.transfers_out_memes_season3 > 0
+                                ? `x${numberWithCommas(
+                                    tdh.transfers_out_memes_season3
+                                  )}`
+                                : "-"}
+                            </td>
+                            <td>
+                              {tdh.transfers_out_gradients > 0
+                                ? `x${numberWithCommas(
+                                    tdh.transfers_out_gradients
+                                  )}`
                                 : "-"}
                             </td>
                           </tr>
                         </tbody>
                       </Table>
                     )}
-                    <Table className={styles.secondaryTable}>
-                      <tbody>
-                        <tr>
-                          <td>
-                            <h4>In</h4>
-                          </td>
-                        </tr>
-                        <tr>
-                          <td>Purchases</td>
-                          <td>
-                            {tdh.purchases_count > 0
-                              ? `x${numberWithCommas(tdh.purchases_count)}`
-                              : "-"}
-                          </td>
-                        </tr>
-                        <tr>
-                          <td>Purchases (ETH)</td>
-                          <td>
-                            {tdh.purchases_value > 0
-                              ? `${numberWithCommas(
-                                  Math.round(tdh.purchases_value * 100) / 100
-                                )}`
-                              : "-"}
-                          </td>
-                        </tr>
-                        <tr>
-                          <td>Transfers In</td>
-                          <td>
-                            {tdh.transfers_in > 0
-                              ? `x${numberWithCommas(tdh.transfers_in)}`
-                              : "-"}
-                          </td>
-                        </tr>
-                      </tbody>
-                    </Table>
-                    <Table
-                      className={`${styles.secondaryTable} ${styles.secondaryTableMargin} pt-2`}>
-                      <tbody>
-                        <tr>
-                          <td>
-                            <h4>Out</h4>
-                          </td>
-                        </tr>
-                        <tr>
-                          <td>Sales</td>
-                          <td>
-                            {tdh.sales_count > 0
-                              ? `x${numberWithCommas(tdh.sales_count)}`
-                              : "-"}
-                          </td>
-                        </tr>
-                        <tr>
-                          <td>Sales (ETH)</td>
-                          <td>
-                            {tdh.sales_value > 0
-                              ? `${numberWithCommas(
-                                  Math.round(tdh.sales_value * 100) / 100
-                                )}`
-                              : "-"}
-                          </td>
-                        </tr>
-                        <tr>
-                          <td>Transfers Out</td>
-                          <td>
-                            {tdh.transfers_out > 0
-                              ? `x${numberWithCommas(tdh.transfers_out)}`
-                              : "-"}
-                          </td>
-                        </tr>
-                      </tbody>
-                    </Table>
                   </Col>
                 )}
               </Row>
