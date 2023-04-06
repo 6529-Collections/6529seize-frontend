@@ -905,7 +905,8 @@ export default function UserPage(props: Props) {
                       className={styles.userPageAccordionItem}
                       eventKey={"0"}>
                       <Accordion.Header>Cards Collected</Accordion.Header>
-                      <Accordion.Body>
+                      <Accordion.Body
+                        className={styles.primaryTableScrollContainer}>
                         <Table className={styles.primaryTable}>
                           <tbody>
                             <tr>
@@ -1236,7 +1237,8 @@ export default function UserPage(props: Props) {
                       className={`${styles.userPageAccordionItem} mt-4`}
                       eventKey={"1"}>
                       <Accordion.Header>Activity Overview</Accordion.Header>
-                      <Accordion.Body>
+                      <Accordion.Body
+                        className={styles.primaryTableScrollContainer}>
                         <Table className={styles.primaryTableActivity}>
                           <tbody>
                             <tr>
