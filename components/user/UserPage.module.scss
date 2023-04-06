@@ -99,10 +99,17 @@
   }
 }
 
+.primaryTableScrollContainer {
+  -ms-overflow-style: none; /* Internet Explorer 10+ */
+  scrollbar-width: none; /* Firefox */
+  overflow-x: scroll;
+}
+
 .primaryTable,
 .primaryTableActivity {
   tr td {
     width: calc(100% / 7);
+    min-width: 80px;
     line-height: 25px;
     vertical-align: middle;
     white-space: nowrap;
