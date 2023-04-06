@@ -99,27 +99,36 @@
   }
 }
 
-.primaryTable {
+.primaryTable,
+.primaryTableActivity {
   tr td {
     width: calc(100% / 7);
     line-height: 25px;
     vertical-align: middle;
     white-space: nowrap;
   }
-  tr:not(:first-child) {
+  tr {
     border-bottom: 1px solid $dark-grey !important;
 
     td:not(:first-child) {
       text-align: center;
     }
   }
+}
 
+.primaryTable {
+  tr:nth-child(1),
   tr:nth-child(2),
-  tr:nth-child(3),
-  tr:nth-child(6),
-  tr:nth-child(9),
-  tr:nth-child(12),
-  tr:nth-child(16) {
+  tr:nth-child(5),
+  tr:nth-child(8) {
+    border-bottom: none !important;
+  }
+}
+
+.primaryTableActivity {
+  tr:nth-child(1),
+  tr:nth-child(2),
+  tr:nth-child(6) {
     border-bottom: none !important;
   }
 }
@@ -260,4 +269,23 @@
   .avatar {
     height: 120px;
   }
+}
+
+.userPageAccordion {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5 {
+    float: none;
+  }
+
+  button {
+    color: black !important;
+  }
+}
+
+.userPageAccordionItem {
+  border-radius: 0 !important;
+  background-color: transparent;
 }
