@@ -59,6 +59,7 @@ import {
   faMinus,
   faCaretDown,
   faCircleArrowLeft,
+  faInfoCircle,
 } from "@fortawesome/free-solid-svg-icons";
 import Head from "next/head";
 
@@ -99,7 +100,8 @@ library.add(
   faMinus,
   faPlus,
   faCaretDown,
-  faMinus
+  faMinus,
+  faInfoCircle
 );
 
 const { chains, provider } = configureChains(

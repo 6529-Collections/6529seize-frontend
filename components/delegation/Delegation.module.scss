@@ -493,3 +493,12 @@
 .registerHeadingActive {
   color: $font-color;
 }
+
+.infoIcon {
+  height: 18px;
+  margin-left: 8px;
+  cursor: help;
+  &:focus {
+    outline: none !important;
+  }
+}
