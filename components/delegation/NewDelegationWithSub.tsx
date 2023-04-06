@@ -263,33 +263,11 @@ export default function NewDelegationWithSubComponent(props: Props) {
 
   return (
     <Container className="no-padding">
-      <Row>
-        <Col xs={10} className="pt-3 pb-3">
-          <h5
-            onClick={() => setShowingConsolidation(false)}
-            className={`
-              ${styles.registerHeading} ${
-              !showingConsolidation ? styles.registerHeadingActive : ``
-            }
-            `}>
-            Register Delegation
-          </h5>
-          <h5>&nbsp;&nbsp;|&nbsp;&nbsp;</h5>
-          <h5
-            onClick={() => setShowingConsolidation(true)}
-            className={`
-              ${styles.registerHeading} ${
-              showingConsolidation ? styles.registerHeadingActive : ``
-            }
-            `}>
-            Register Consolidation
-          </h5>
-          <h5 className={styles.registerHeadingActive}>
-            &nbsp;&nbsp;With Sub-Delegation Rights
-          </h5>
-        </Col>
-        {props.showCancel && (
-          <Col xs={2} className="d-flex align-items-center justify-content-end">
+      {props.showCancel && (
+        <Row>
+          <Col
+            xs={12}
+            className="d-flex align-items-center justify-content-end">
             <Tippy
               content={"Cancel Delegation"}
               delay={250}
@@ -301,16 +279,54 @@ export default function NewDelegationWithSubComponent(props: Props) {
                 onClick={() => props.onHide()}></FontAwesomeIcon>
             </Tippy>
           </Col>
-        )}
+        </Row>
+      )}
+      <Row>
+        <Col xs={12} className="pt-3 pb-3">
+          <h5 className={styles.registerHeadingActive}>
+            Register&nbsp;&nbsp;-&nbsp;&nbsp;
+          </h5>
+          <h5
+            onClick={() => setShowingConsolidation(false)}
+            className={`
+              ${styles.registerHeading} ${
+              !showingConsolidation ? styles.registerHeadingActive : ``
+            }
+            `}>
+            Delegation
+          </h5>
+          <h5>&nbsp;&nbsp;|&nbsp;&nbsp;</h5>
+          <h5
+            onClick={() => setShowingConsolidation(true)}
+            className={`
+              ${styles.registerHeading} ${
+              showingConsolidation ? styles.registerHeadingActive : ``
+            }
+            `}>
+            Consolidation
+          </h5>
+          <h5 className={styles.registerHeadingActive}>
+            &nbsp;&nbsp;-&nbsp;&nbsp;With Sub-Delegation Rights
+          </h5>
+        </Col>
       </Row>
       <Row>
         <Col>
           <Form>
             <Form.Group as={Row} className="pb-4">
-              <Form.Label column sm={2}>
+              <Form.Label column sm={3} className="d-flex align-items-center">
                 Delegator
+                <Tippy
+                  content={"Address initiating the delegation"}
+                  placement={"top"}
+                  theme={"light"}>
+                  <FontAwesomeIcon
+                    className={styles.infoIcon}
+                    icon="info-circle"
+                    onClick={() => props.onHide()}></FontAwesomeIcon>
+                </Tippy>
               </Form.Label>
-              <Col sm={10}>
+              <Col sm={9}>
                 <Form.Control
                   className={`${styles.formInput} ${styles.formInputDisabled}`}
                   type="text"
@@ -324,10 +340,19 @@ export default function NewDelegationWithSubComponent(props: Props) {
               </Col>
             </Form.Group>
             <Form.Group as={Row} className="pb-4">
-              <Form.Label column sm={2}>
+              <Form.Label column sm={3} className="d-flex align-items-center">
                 Original Delegator
+                <Tippy
+                  content={"Original Delegator of Sub Delegation"}
+                  placement={"top"}
+                  theme={"light"}>
+                  <FontAwesomeIcon
+                    className={styles.infoIcon}
+                    icon="info-circle"
+                    onClick={() => props.onHide()}></FontAwesomeIcon>
+                </Tippy>
               </Form.Label>
-              <Col sm={10}>
+              <Col sm={9}>
                 <Form.Select
                   className={`${styles.formInput}`}
                   value={newDelegationOriginalDelegator}
@@ -355,10 +380,19 @@ export default function NewDelegationWithSubComponent(props: Props) {
             </Form.Group>
             {!showingConsolidation && (
               <Form.Group as={Row} className="pb-4">
-                <Form.Label column sm={2}>
+                <Form.Label column sm={3} className="d-flex align-items-center">
                   Collection
+                  <Tippy
+                    content={"Collection address for delegation"}
+                    placement={"top"}
+                    theme={"light"}>
+                    <FontAwesomeIcon
+                      className={styles.infoIcon}
+                      icon="info-circle"
+                      onClick={() => props.onHide()}></FontAwesomeIcon>
+                  </Tippy>
                 </Form.Label>
-                <Col sm={10}>
+                <Col sm={9}>
                   {areEqualAddresses(
                     props.collection.contract,
                     DELEGATION_ALL_ADDRESS
@@ -393,10 +427,19 @@ export default function NewDelegationWithSubComponent(props: Props) {
               </Form.Group>
             )}
             <Form.Group as={Row} className="pb-4">
-              <Form.Label column sm={2}>
+              <Form.Label column sm={3} className="d-flex align-items-center">
                 Address
+                <Tippy
+                  content={"Delegate to Address"}
+                  placement={"top"}
+                  theme={"light"}>
+                  <FontAwesomeIcon
+                    className={styles.infoIcon}
+                    icon="info-circle"
+                    onClick={() => props.onHide()}></FontAwesomeIcon>
+                </Tippy>
               </Form.Label>
-              <Col sm={10}>
+              <Col sm={9}>
                 <Form.Control
                   placeholder="Delegate to"
                   className={`${styles.formInput}`}
@@ -412,10 +455,19 @@ export default function NewDelegationWithSubComponent(props: Props) {
             </Form.Group>
             {!showingConsolidation && (
               <Form.Group as={Row} className="pb-4">
-                <Form.Label column sm={2}>
+                <Form.Label column sm={3} className="d-flex align-items-center">
                   Use Case
+                  <Tippy
+                    content={"Delegation Use Case"}
+                    placement={"top"}
+                    theme={"light"}>
+                    <FontAwesomeIcon
+                      className={styles.infoIcon}
+                      icon="info-circle"
+                      onClick={() => props.onHide()}></FontAwesomeIcon>
+                  </Tippy>
                 </Form.Label>
-                <Col sm={10}>
+                <Col sm={9}>
                   <Form.Select
                     className={`${styles.formInput}`}
                     value={newDelegationUseCase}
@@ -450,10 +502,19 @@ export default function NewDelegationWithSubComponent(props: Props) {
             )}
             {!showingConsolidation && (
               <Form.Group as={Row} className="pb-4">
-                <Form.Label column sm={2}>
-                  Expiry
+                <Form.Label column sm={3} className="d-flex align-items-center">
+                  Expiry Date
+                  <Tippy
+                    content={"Expiry date for delegation (optional)"}
+                    placement={"top"}
+                    theme={"light"}>
+                    <FontAwesomeIcon
+                      className={styles.infoIcon}
+                      icon="info-circle"
+                      onClick={() => props.onHide()}></FontAwesomeIcon>
+                  </Tippy>
                 </Form.Label>
-                <Col sm={10}>
+                <Col sm={9}>
                   <Form.Check
                     checked={!showExpiryCalendar}
                     className={styles.newDelegationFormToggle}
@@ -499,10 +560,19 @@ export default function NewDelegationWithSubComponent(props: Props) {
             )}
             {!showingConsolidation && (
               <Form.Group as={Row} className="pb-4">
-                <Form.Label column sm={2}>
+                <Form.Label column sm={3} className="d-flex align-items-center">
                   Tokens
+                  <Tippy
+                    content={"Tokens involved in the delegation (optional)"}
+                    placement={"top"}
+                    theme={"light"}>
+                    <FontAwesomeIcon
+                      className={styles.infoIcon}
+                      icon="info-circle"
+                      onClick={() => props.onHide()}></FontAwesomeIcon>
+                  </Tippy>
                 </Form.Label>
-                <Col sm={10}>
+                <Col sm={9}>
                   <Form.Check
                     checked={!showTokensInput}
                     className={styles.newDelegationFormToggle}
@@ -548,8 +618,11 @@ export default function NewDelegationWithSubComponent(props: Props) {
               </Form.Group>
             )}
             <Form.Group as={Row} className="pt-2 pb-4">
-              <Form.Label column sm={2}></Form.Label>
-              <Col sm={10} className="d-flex align-items-center">
+              <Form.Label
+                column
+                sm={3}
+                className="d-flex align-items-center"></Form.Label>
+              <Col sm={9} className="d-flex align-items-center">
                 {props.showCancel && (
                   <span
                     className={styles.newDelegationCancelBtn}
@@ -586,10 +659,10 @@ export default function NewDelegationWithSubComponent(props: Props) {
               <Form.Group
                 as={Row}
                 className={`pt-2 pb-2 ${styles.newDelegationError}`}>
-                <Form.Label column sm={2}>
+                <Form.Label column sm={3} className="d-flex align-items-center">
                   Errors
                 </Form.Label>
-                <Col sm={10}>
+                <Col sm={9}>
                   <ul className="mb-0">
                     {errors.map((e, index) => (
                       <li key={`new-delegation-error-${index}`}>{e}</li>
