@@ -1265,6 +1265,51 @@ export default function UserPage(props: Props) {
                             <tr className={styles.primaryTableGap}></tr>
                             <tr>
                               <td>
+                                <b>Transfers In</b>
+                              </td>
+                              <td>
+                                {tdh.transfers_in > 0
+                                  ? `x${numberWithCommas(tdh.transfers_in)}`
+                                  : "-"}
+                              </td>
+                              <td>
+                                {tdh.transfers_in_memes > 0
+                                  ? `x${numberWithCommas(
+                                      tdh.transfers_in_memes
+                                    )}`
+                                  : "-"}
+                              </td>
+                              <td>
+                                {tdh.transfers_in_memes_season1 > 0
+                                  ? `x${numberWithCommas(
+                                      tdh.transfers_in_memes_season1
+                                    )}`
+                                  : "-"}
+                              </td>
+                              <td>
+                                {tdh.transfers_in_memes_season2 > 0
+                                  ? `x${numberWithCommas(
+                                      tdh.transfers_in_memes_season2
+                                    )}`
+                                  : "-"}
+                              </td>
+                              <td>
+                                {tdh.transfers_in_memes_season3 > 0
+                                  ? `x${numberWithCommas(
+                                      tdh.transfers_in_memes_season3
+                                    )}`
+                                  : "-"}
+                              </td>
+                              <td>
+                                {tdh.transfers_in_gradients > 0
+                                  ? `x${numberWithCommas(
+                                      tdh.transfers_in_gradients
+                                    )}`
+                                  : "-"}
+                              </td>
+                            </tr>
+                            <tr>
+                              <td>
                                 <b>Purchases</b>
                               </td>
                               <td>
@@ -1314,7 +1359,7 @@ export default function UserPage(props: Props) {
                               </td>
                               <td>
                                 {tdh.purchases_value > 0
-                                  ? `x${numberWithCommas(
+                                  ? `${numberWithCommas(
                                       Math.round(tdh.purchases_value * 100) /
                                         100
                                     )}`
@@ -1322,7 +1367,7 @@ export default function UserPage(props: Props) {
                               </td>
                               <td>
                                 {tdh.purchases_value_memes > 0
-                                  ? `x${numberWithCommas(
+                                  ? `${numberWithCommas(
                                       Math.round(
                                         tdh.purchases_value_memes * 100
                                       ) / 100
@@ -1331,7 +1376,7 @@ export default function UserPage(props: Props) {
                               </td>
                               <td>
                                 {tdh.purchases_value_memes_season1 > 0
-                                  ? `x${numberWithCommas(
+                                  ? `${numberWithCommas(
                                       Math.round(
                                         tdh.purchases_value_memes_season1 * 100
                                       ) / 100
@@ -1340,7 +1385,7 @@ export default function UserPage(props: Props) {
                               </td>
                               <td>
                                 {tdh.purchases_value_memes_season2 > 0
-                                  ? `x${numberWithCommas(
+                                  ? `${numberWithCommas(
                                       Math.round(
                                         tdh.purchases_value_memes_season2 * 100
                                       ) / 100
@@ -1366,52 +1411,52 @@ export default function UserPage(props: Props) {
                                   : "-"}
                               </td>
                             </tr>
+                            <tr className={styles.primaryTableGap}></tr>
                             <tr>
                               <td>
-                                <b>Transfers In</b>
+                                <b>Transfers Out</b>
                               </td>
                               <td>
-                                {tdh.transfers_in > 0
-                                  ? `x${numberWithCommas(tdh.transfers_in)}`
+                                {tdh.transfers_out > 0
+                                  ? `x${numberWithCommas(tdh.transfers_out)}`
                                   : "-"}
                               </td>
                               <td>
-                                {tdh.transfers_in_memes > 0
+                                {tdh.transfers_out_memes > 0
                                   ? `x${numberWithCommas(
-                                      tdh.transfers_in_memes
+                                      tdh.transfers_out_memes
                                     )}`
                                   : "-"}
                               </td>
                               <td>
-                                {tdh.transfers_in_memes_season1 > 0
+                                {tdh.transfers_out_memes_season1 > 0
                                   ? `x${numberWithCommas(
-                                      tdh.transfers_in_memes_season1
+                                      tdh.transfers_out_memes_season1
                                     )}`
                                   : "-"}
                               </td>
                               <td>
-                                {tdh.transfers_in_memes_season2 > 0
+                                {tdh.transfers_out_memes_season2 > 0
                                   ? `x${numberWithCommas(
-                                      tdh.transfers_in_memes_season2
+                                      tdh.transfers_out_memes_season2
                                     )}`
                                   : "-"}
                               </td>
                               <td>
-                                {tdh.transfers_in_memes_season3 > 0
+                                {tdh.transfers_out_memes_season3 > 0
                                   ? `x${numberWithCommas(
-                                      tdh.transfers_in_memes_season3
+                                      tdh.transfers_out_memes_season3
                                     )}`
                                   : "-"}
                               </td>
                               <td>
-                                {tdh.transfers_in_gradients > 0
+                                {tdh.transfers_out_gradients > 0
                                   ? `x${numberWithCommas(
-                                      tdh.transfers_in_gradients
+                                      tdh.transfers_out_gradients
                                     )}`
                                   : "-"}
                               </td>
                             </tr>
-                            <tr className={styles.primaryTableGap}></tr>
                             <tr>
                               <td>
                                 <b>Sales</b>
@@ -1463,14 +1508,14 @@ export default function UserPage(props: Props) {
                               </td>
                               <td>
                                 {tdh.sales_value > 0
-                                  ? `x${numberWithCommas(
+                                  ? `${numberWithCommas(
                                       Math.round(tdh.sales_value * 100) / 100
                                     )}`
                                   : "-"}
                               </td>
                               <td>
                                 {tdh.sales_value_memes > 0
-                                  ? `x${numberWithCommas(
+                                  ? `${numberWithCommas(
                                       Math.round(tdh.sales_value_memes * 100) /
                                         100
                                     )}`
@@ -1478,7 +1523,7 @@ export default function UserPage(props: Props) {
                               </td>
                               <td>
                                 {tdh.sales_value_memes_season1 > 0
-                                  ? `x${numberWithCommas(
+                                  ? `${numberWithCommas(
                                       Math.round(
                                         tdh.sales_value_memes_season1 * 100
                                       ) / 100
@@ -1487,7 +1532,7 @@ export default function UserPage(props: Props) {
                               </td>
                               <td>
                                 {tdh.sales_value_memes_season2 > 0
-                                  ? `x${numberWithCommas(
+                                  ? `${numberWithCommas(
                                       Math.round(
                                         tdh.sales_value_memes_season2 * 100
                                       ) / 100
@@ -1509,51 +1554,6 @@ export default function UserPage(props: Props) {
                                       Math.round(
                                         tdh.sales_value_gradients * 100
                                       ) / 100
-                                    )}`
-                                  : "-"}
-                              </td>
-                            </tr>
-                            <tr>
-                              <td>
-                                <b>Transfers Out</b>
-                              </td>
-                              <td>
-                                {tdh.transfers_out > 0
-                                  ? `x${numberWithCommas(tdh.transfers_out)}`
-                                  : "-"}
-                              </td>
-                              <td>
-                                {tdh.transfers_out_memes > 0
-                                  ? `x${numberWithCommas(
-                                      tdh.transfers_out_memes
-                                    )}`
-                                  : "-"}
-                              </td>
-                              <td>
-                                {tdh.transfers_out_memes_season1 > 0
-                                  ? `x${numberWithCommas(
-                                      tdh.transfers_out_memes_season1
-                                    )}`
-                                  : "-"}
-                              </td>
-                              <td>
-                                {tdh.transfers_out_memes_season2 > 0
-                                  ? `x${numberWithCommas(
-                                      tdh.transfers_out_memes_season2
-                                    )}`
-                                  : "-"}
-                              </td>
-                              <td>
-                                {tdh.transfers_out_memes_season3 > 0
-                                  ? `x${numberWithCommas(
-                                      tdh.transfers_out_memes_season3
-                                    )}`
-                                  : "-"}
-                              </td>
-                              <td>
-                                {tdh.transfers_out_gradients > 0
-                                  ? `x${numberWithCommas(
-                                      tdh.transfers_out_gradients
                                     )}`
                                   : "-"}
                               </td>
