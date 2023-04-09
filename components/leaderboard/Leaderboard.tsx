@@ -664,31 +664,30 @@ export default function Leaderboard(props: Props) {
   function getUniqueMemes(lead: TDHMetrics) {
     let unique;
     let uniqueTotal;
-    if (memesCount && memesCountS1 && memesCountS2 && memesCountS3) {
-      switch (content) {
-        case Content.MEMES1:
-          unique = lead.unique_memes_szn1;
-          uniqueTotal = memesCountS1;
-          break;
-        case Content.MEMES2:
-          unique = lead.unique_memes_szn2;
-          uniqueTotal = memesCountS2;
-          break;
-        case Content.MEMES3:
-          unique = lead.unique_memes_szn3;
-          uniqueTotal = memesCountS3;
-          break;
-        default:
-          unique = lead.unique_memes;
-          uniqueTotal = memesCount;
-          break;
-      }
-      if (unique > 0) {
-        return `${numberWithCommas(unique)}/${uniqueTotal} (${Math.round(
-          (unique / uniqueTotal) * 100
-        )}%)`;
-      }
+    switch (content) {
+      case Content.MEMES1:
+        unique = lead.unique_memes_szn1;
+        uniqueTotal = memesCountS1;
+        break;
+      case Content.MEMES2:
+        unique = lead.unique_memes_szn2;
+        uniqueTotal = memesCountS2;
+        break;
+      case Content.MEMES3:
+        unique = lead.unique_memes_szn3;
+        uniqueTotal = memesCountS3;
+        break;
+      default:
+        unique = lead.unique_memes;
+        uniqueTotal = memesCount;
+        break;
     }
+    if (unique > 0 && uniqueTotal) {
+      return `${numberWithCommas(unique)}/${uniqueTotal} (${Math.round(
+        (unique / uniqueTotal) * 100
+      )}%)`;
+    }
+
     return "-";
   }
 
