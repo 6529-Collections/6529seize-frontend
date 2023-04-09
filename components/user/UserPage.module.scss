@@ -100,6 +100,7 @@
 }
 
 .primaryTableScrollContainer {
+  background-color: rgb(30, 30, 30);
   -ms-overflow-style: none; /* Internet Explorer 10+ */
   scrollbar-width: none; /* Firefox */
   overflow-x: scroll;
@@ -138,6 +139,11 @@
   tr:nth-child(6) {
     border-bottom: none !important;
   }
+}
+
+.primaryTable > :not(caption) > * > *,
+.primaryTableActivity > :not(caption) > * > * {
+  padding: 0.3rem !important;
 }
 
 .primaryTableGap {
@@ -288,7 +294,7 @@
   }
 
   button {
-    color: black !important;
+    font-weight: bolder;
   }
 }
 
