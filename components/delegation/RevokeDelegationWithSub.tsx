@@ -396,7 +396,7 @@ export default function RevokeDelegationWithSubComponent(props: Props) {
               <Form.Label column sm={3} className="d-flex align-items-center">
                 Address
                 <Tippy
-                  content={"Delegate to Address e.g. your hot wallet"}
+                  content={"Revoke from Address e.g. your hot wallet"}
                   placement={"top"}
                   theme={"light"}>
                   <FontAwesomeIcon
