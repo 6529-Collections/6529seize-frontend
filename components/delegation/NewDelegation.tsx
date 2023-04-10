@@ -354,7 +354,11 @@ export default function NewDelegationComponent(props: Props) {
               <Form.Label column sm={3} className="d-flex align-items-center">
                 Address
                 <Tippy
-                  content={"Delegate to Address e.g. your hot wallet"}
+                  content={
+                    showingConsolidation
+                      ? "Consolidate with Address e.g. your hot wallet"
+                      : "Delegate to Address e.g. your hot wallet"
+                  }
                   placement={"top"}
                   theme={"light"}>
                   <FontAwesomeIcon
@@ -365,7 +369,11 @@ export default function NewDelegationComponent(props: Props) {
               </Form.Label>
               <Col sm={9}>
                 <Form.Control
-                  placeholder="Delegate to - 0x... or ENS"
+                  placeholder={
+                    showingConsolidation
+                      ? "Consolidate with - 0x... or ENS"
+                      : "Delegate to - 0x... or ENS"
+                  }
                   className={`${styles.formInput}`}
                   type="text"
                   value={newDelegationToInput}
