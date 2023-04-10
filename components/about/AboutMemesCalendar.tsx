@@ -53,11 +53,11 @@ export default function AboutMemesCalendar() {
                   <td>Winter SZN2</td>
                 </tr>
                 <tr>
-                  <td>April 1 to April 8</td>
+                  <td>April 1 to April 16</td>
                   <td>Awakening</td>
                 </tr>
                 <tr>
-                  <td>April 9 to June 30</td>
+                  <td>April 17 to June 30</td>
                   <td>Spring SZN3</td>
                 </tr>
                 <tr>
