@@ -25,7 +25,6 @@ interface Props {
   showAddMore: boolean;
   onHide(): any;
   onSetToast(toast: any): any;
-  onSetShowToast(show: boolean): any;
 }
 
 export default function NewDelegationComponent(props: Props) {
@@ -152,7 +151,6 @@ export default function NewDelegationComponent(props: Props) {
         title: `Updating Delegation`,
         message: "Confirm in your wallet...",
       });
-      props.onSetShowToast(true);
     }
   }
 

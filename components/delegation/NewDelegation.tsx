@@ -34,7 +34,6 @@ interface Props {
   showAddMore: boolean;
   onHide(): any;
   onSetToast(toast: any): any;
-  onSetShowToast(show: boolean): any;
 }
 
 export default function NewDelegationComponent(props: Props) {
@@ -146,6 +145,12 @@ export default function NewDelegationComponent(props: Props) {
     if (!newDelegationToAddress || !isValidEthAddress(newDelegationToAddress)) {
       newErrors.push("Missing or invalid Address");
     }
+    if (
+      newDelegationToAddress &&
+      newDelegationToAddress.toUpperCase() == props.address.toUpperCase()
+    ) {
+      newErrors.push("Invalid Address - cannot delegate to your own wallet");
+    }
     if (showExpiryCalendar && !newDelegationDate) {
       newErrors.push("Missing or invalid Expiry");
     }
@@ -181,7 +186,6 @@ export default function NewDelegationComponent(props: Props) {
         }`,
         message: "Confirm in your wallet...",
       });
-      props.onSetShowToast(true);
     }
   }
 
