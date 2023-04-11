@@ -39,7 +39,6 @@ interface Props {
   showAddMore: boolean;
   onHide(): any;
   onSetToast(toast: any): any;
-  onSetShowToast(show: boolean): any;
 }
 
 export default function NewDelegationWithSubComponent(props: Props) {
@@ -203,7 +202,6 @@ export default function NewDelegationWithSubComponent(props: Props) {
         } Using Sub-Delegation Rights`,
         message: "Confirm in your wallet...",
       });
-      props.onSetShowToast(true);
     }
   }
 
