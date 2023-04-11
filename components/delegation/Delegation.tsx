@@ -46,6 +46,12 @@ export default function DelegationComponent() {
     }
   }, [showToast]);
 
+  useEffect(() => {
+    if (toast) {
+      setShowToast(true);
+    }
+  }, [toast]);
+
   function printCollectionSelection() {
     return (
       <Container>
@@ -118,9 +124,6 @@ export default function DelegationComponent() {
                           title: toast.title,
                           message: toast.message,
                         });
-                      }}
-                      onSetShowToast={(show: boolean) => {
-                        setShowToast(show);
                       }}
                     />
                   </Col>

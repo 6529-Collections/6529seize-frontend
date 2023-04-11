@@ -604,6 +604,12 @@ export default function CollectionDelegationComponent(props: Props) {
   }, [showToast]);
 
   useEffect(() => {
+    if (toast) {
+      setShowToast(true);
+    }
+  }, [toast]);
+
+  useEffect(() => {
     if (
       revokeDelegationParams &&
       !revokeDelegationParams.loading &&
@@ -834,7 +840,6 @@ export default function CollectionDelegationComponent(props: Props) {
                                         title: "Revoking Delegation",
                                         message: "Confirm in your wallet...",
                                       });
-                                      setShowToast(true);
                                     }}>
                                     Revoke
                                     {(contractWriteRevoke.isLoading ||
@@ -907,7 +912,6 @@ export default function CollectionDelegationComponent(props: Props) {
                               title: "Batch Revoking Delegations",
                               message: "Confirm in your wallet...",
                             });
-                            setShowToast(true);
                           }}>
                           Batch Revoke
                           {(contractWriteBatchRevoke.isLoading ||
@@ -1078,7 +1082,6 @@ export default function CollectionDelegationComponent(props: Props) {
                         } Wallet`,
                         message: "Confirm in your wallet...",
                       });
-                      setShowToast(true);
                       collectionLockWrite.write?.();
                     }}>
                     <FontAwesomeIcon
@@ -1187,7 +1190,6 @@ export default function CollectionDelegationComponent(props: Props) {
                         }`,
                         message: "Confirm in your wallet...",
                       });
-                      setShowToast(true);
                       useCaseLockWrite.write?.();
                     }}>
                     <FontAwesomeIcon
@@ -1342,9 +1344,6 @@ export default function CollectionDelegationComponent(props: Props) {
                         message: toast.message,
                       });
                     }}
-                    onSetShowToast={(show: boolean) => {
-                      setShowToast(show);
-                    }}
                   />
                 )}
                 {showUpdateDelegation && updateDelegationParams && (
@@ -1366,9 +1365,6 @@ export default function CollectionDelegationComponent(props: Props) {
                         title: toast.title,
                         message: toast.message,
                       });
-                    }}
-                    onSetShowToast={(show: boolean) => {
-                      setShowToast(show);
                     }}
                   />
                 )}
@@ -1392,9 +1388,6 @@ export default function CollectionDelegationComponent(props: Props) {
                         message: toast.message,
                       });
                     }}
-                    onSetShowToast={(show: boolean) => {
-                      setShowToast(show);
-                    }}
                   />
                 )}
                 {showRevokeDelegationWithSub && (
@@ -1416,9 +1409,6 @@ export default function CollectionDelegationComponent(props: Props) {
                         title: toast.title,
                         message: toast.message,
                       });
-                    }}
-                    onSetShowToast={(show: boolean) => {
-                      setShowToast(show);
                     }}
                   />
                 )}
