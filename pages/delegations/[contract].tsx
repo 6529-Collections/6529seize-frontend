@@ -168,7 +168,7 @@ export default function Delegations(props: Props) {
           />
           <meta
             property="og:url"
-            content={`${process.env.BASE_ENDPOINT}/delagations/${props.collection.contract}`}
+            content={`${process.env.BASE_ENDPOINT}/delegations/${props.collection.contract}`}
           />
           <meta
             property="og:title"
