@@ -61,10 +61,9 @@ export default function DelegationComponent() {
             <h4>Delegations by Collection</h4>
           </Col>
         </Row>
-
         {Object.values(SUPPORTED_COLLECTIONS).map((c) => (
-          <Row>
-            <Col key={c.contract} className={styles.collectionSelectionWrapper}>
+          <Row key={c.contract}>
+            <Col className={styles.collectionSelectionWrapper}>
               <Container className="pt-2 pb-3">
                 <Row className="pt-2 pb-2">
                   <Col
@@ -103,21 +102,6 @@ export default function DelegationComponent() {
                     </span>
                   </Col>
                 </Row>
-                {/* <Row className="pb-4">
-                  <Col className={styles.collectionSelectionImage}>
-                    <Image
-                      loading="eager"
-                      priority
-                      width={0}
-                      height={0}
-                      src={c.preview}
-                      alt={c.display}
-                    />
-                    <div className={styles.collectionSelectionImageView}>
-                      <span>VIEW</span>
-                    </div>
-                  </Col>
-                </Row> */}
               </Container>
             </Col>
           </Row>
