@@ -1,0 +1,45 @@
+@import "../../../styles/variables.scss";
+
+.menuLeft {
+  width: 20%;
+  flex: none;
+
+  a {
+    cursor: pointer;
+    text-decoration: none !important;
+  }
+}
+
+.menuLeftItem {
+  cursor: pointer;
+  &:hover {
+    color: $lightest-grey;
+  }
+}
+
+.menuLeftItemActive {
+  text-decoration: underline;
+}
+
+.menuRight {
+  width: 80%;
+}
+
+.menuLeftFull {
+  width: 100%;
+  display: none;
+}
+
+@media only screen and (max-width: 1000px) {
+  .menuLeft {
+    display: none;
+  }
+
+  .menuLeftFull {
+    display: block;
+  }
+
+  .menuRight {
+    width: 100%;
+  }
+}
