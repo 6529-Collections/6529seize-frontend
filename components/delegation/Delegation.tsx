@@ -12,6 +12,7 @@ import {
 import dynamic from "next/dynamic";
 import { DELEGATION_ALL_ADDRESS, DELEGATION_CONTRACT } from "../../constants";
 import { sepolia } from "wagmi/chains";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 const NewDelegationComponent = dynamic(() => import("./NewDelegation"), {
   ssr: false,
@@ -57,31 +58,52 @@ export default function DelegationComponent() {
       <Container>
         <Row>
           <Col className="pt-3 pb-5">
-            <h4>Manage Delegations by Collection</h4>
+            <h4>Delegations by Collection</h4>
           </Col>
         </Row>
-        <Row>
-          {Object.values(SUPPORTED_COLLECTIONS).map((c) => (
-            <Col
-              key={c.contract}
-              xs={6}
-              xm={6}
-              md={6}
-              onClick={() => {
-                if (areEqualAddresses(c.contract, DELEGATION_ALL_ADDRESS)) {
-                  window.location.href = `/delegations/${ANY_COLLECTION_PATH}`;
-                } else {
-                  window.location.href = `/delegations/${c.contract}`;
-                }
-              }}
-              className={styles.collectionSelectionWrapper}>
-              <Container className="pt-2 pb-4">
-                <Row className="pb-2">
-                  <Col>
-                    <h5 className="font-color float-none">{c.title}</h5>
+
+        {Object.values(SUPPORTED_COLLECTIONS).map((c) => (
+          <Row>
+            <Col key={c.contract} className={styles.collectionSelectionWrapper}>
+              <Container className="pt-2 pb-3">
+                <Row className="pt-2 pb-2">
+                  <Col
+                    xs={3}
+                    className="d-flex align-items-center justify-content-center">
+                    <Image
+                      className={styles.collectionSelectionImage2}
+                      loading="eager"
+                      priority
+                      width={0}
+                      height={0}
+                      src={c.preview}
+                      alt={c.display}
+                    />
+                  </Col>
+                  <Col
+                    xs={6}
+                    className="d-flex align-items-center justify-content-start">
+                    <h5 className="font-color">{c.title}</h5>
+                  </Col>
+                  <Col
+                    xs={3}
+                    className="d-flex align-items-center justify-content-end">
+                    <span
+                      className={styles.viewManageBtn}
+                      onClick={() => {
+                        if (
+                          areEqualAddresses(c.contract, DELEGATION_ALL_ADDRESS)
+                        ) {
+                          window.location.href = `/delegations/${ANY_COLLECTION_PATH}`;
+                        } else {
+                          window.location.href = `/delegations/${c.contract}`;
+                        }
+                      }}>
+                      View/Manage
+                    </span>
                   </Col>
                 </Row>
-                <Row className="pb-4">
+                {/* <Row className="pb-4">
                   <Col className={styles.collectionSelectionImage}>
                     <Image
                       loading="eager"
@@ -91,12 +113,15 @@ export default function DelegationComponent() {
                       src={c.preview}
                       alt={c.display}
                     />
+                    <div className={styles.collectionSelectionImageView}>
+                      <span>VIEW</span>
+                    </div>
                   </Col>
-                </Row>
+                </Row> */}
               </Container>
             </Col>
-          ))}
-        </Row>
+          </Row>
+        ))}
       </Container>
     );
   }
@@ -183,6 +208,14 @@ export default function DelegationComponent() {
                         height={30}
                       />
                       <span>Github</span>
+                    </a>
+                    <a
+                      href={`/delegations/documentation`}
+                      className={styles.delegationLink}>
+                      <span>
+                        <FontAwesomeIcon icon="info-circle"></FontAwesomeIcon>
+                        Documentation
+                      </span>
                     </a>
                   </Col>
                 </Row>

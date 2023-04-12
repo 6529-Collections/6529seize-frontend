@@ -4,36 +4,39 @@ import { useState } from "react";
 import Breadcrumb, { Crumb } from "../../components/breadcrumb/Breadcrumb";
 import dynamic from "next/dynamic";
 import HeaderPlaceholder from "../../components/header/HeaderPlaceholder";
+import { Container, Row, Col, Tabs, Tab } from "react-bootstrap";
 
 const Header = dynamic(() => import("../../components/header/Header"), {
   ssr: false,
   loading: () => <HeaderPlaceholder />,
 });
 
-const Delegation = dynamic(
-  () => import("../../components/delegation/Delegation"),
-  {
-    ssr: false,
-  }
+const Documentation = dynamic(
+  () =>
+    import("../../components/delegation/documentation/DelegationDocumentation")
 );
 
-export default function Delegations() {
+export default function DelegationsDocumentation() {
   const [breadcrumbs, setBreadcrumbs] = useState<Crumb[]>([
     { display: "Home", href: "/" },
-    { display: "Delegations" },
+    { display: "Delegations", href: "/delegations" },
+    { display: "Documentation" },
   ]);
 
   return (
     <>
       <Head>
-        <title>Delegations | 6529 SEIZE</title>
+        <title>Delegations Documentation | 6529 SEIZE</title>
         <link rel="icon" href="/favicon.ico" />
-        <meta name="description" content="Delegations | 6529 SEIZE" />
+        <meta
+          name="description"
+          content="Delegations Documentation | 6529 SEIZE"
+        />
         <meta
           property="og:url"
-          content={`${process.env.BASE_ENDPOINT}/delegations`}
+          content={`${process.env.BASE_ENDPOINT}/delegations/documentation`}
         />
-        <meta property="og:title" content="Delegations" />
+        <meta property="og:title" content="Delegations Documentation" />
         <meta property="og:description" content="6529 SEIZE" />
         <meta
           property="og:image"
@@ -44,7 +47,7 @@ export default function Delegations() {
       <main className={styles.main}>
         <Header />
         <Breadcrumb breadcrumbs={breadcrumbs} />
-        <Delegation />
+        <Documentation />
       </main>
     </>
   );
