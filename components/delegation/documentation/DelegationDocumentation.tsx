@@ -2,23 +2,25 @@ import { useState } from "react";
 import styles from "./DelegationDocumentation.module.scss";
 import { Container, Row, Col } from "react-bootstrap";
 
-export enum Section {
-  REGISTER_DELEGATION = "Register Delegation",
-  REVOKE_DELEGATION = "Revoke Delegation",
-  REGISTER_CONSOLIDATION = "Register Consolidation",
-  REGISTER_CONSOLIDATION_WITH_SUB_DEL = "Register Delegation With Sub-Delegation Rights",
+export enum DocumentationSection {
+  REGISTER_DELEGATION = "register-delegation",
+  REVOKE_DELEGATION = "revoke-delegation",
+  REGISTER_CONSOLIDATION = "register-consolidation",
+  REGISTER_CONSOLIDATION_WITH_SUB_DEL = "register-delegation-with-sub-delegation-rights",
+  CONSOLIDATE_TDH = "consolidate-tdh",
 }
 
-export default function DelegationDocumentation() {
-  const [activeSection, setActiveSection] = useState<Section>(
-    Section.REGISTER_DELEGATION
-  );
+interface Props {
+  section: DocumentationSection;
+  setActiveSection(section: DocumentationSection): any;
+}
 
+export default function DelegationDocumentation(props: Props) {
   function printRegisterDelegation() {
     return (
       <Container>
         <Row>
-          <Col>{Section.REGISTER_DELEGATION} Documentation</Col>
+          <Col>{DocumentationSection.REGISTER_DELEGATION} Documentation</Col>
         </Row>
       </Container>
     );
@@ -28,7 +30,7 @@ export default function DelegationDocumentation() {
     return (
       <Container>
         <Row>
-          <Col>{Section.REVOKE_DELEGATION} Documentation</Col>
+          <Col>{DocumentationSection.REVOKE_DELEGATION} Documentation</Col>
         </Row>
       </Container>
     );
@@ -38,32 +40,60 @@ export default function DelegationDocumentation() {
     return (
       <Container>
         <Row>
-          <Col>{Section.REGISTER_CONSOLIDATION} Documentation</Col>
+          <Col>{DocumentationSection.REGISTER_CONSOLIDATION} Documentation</Col>
         </Row>
       </Container>
     );
+  }
+
+  function getSectionTitle(section: DocumentationSection) {
+    let title = section
+      .replace(/-/g, ",")
+      .split(",")
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(" ");
+    title = title.replaceAll("Tdh", "TDH");
+    return title;
   }
 
   function printRegisterDelegationWithSubDelegation() {
     return (
       <Container>
         <Row>
-          <Col>{Section.REGISTER_CONSOLIDATION_WITH_SUB_DEL} Documentation</Col>
+          <Col>
+            {DocumentationSection.REGISTER_CONSOLIDATION_WITH_SUB_DEL}{" "}
+            Documentation
+          </Col>
+        </Row>
+      </Container>
+    );
+  }
+
+  function printConsolidateTDH() {
+    return (
+      <Container>
+        <Row>
+          <Col>
+            Explain that it needs to be registered on 'The Memes' contract etc
+            etc
+          </Col>
         </Row>
       </Container>
     );
   }
 
   function printSection() {
-    switch (activeSection) {
-      case Section.REGISTER_DELEGATION:
+    switch (props.section) {
+      case DocumentationSection.REGISTER_DELEGATION:
         return printRegisterDelegation();
-      case Section.REVOKE_DELEGATION:
+      case DocumentationSection.REVOKE_DELEGATION:
         return printRevokeDelegation();
-      case Section.REGISTER_CONSOLIDATION:
+      case DocumentationSection.REGISTER_CONSOLIDATION:
         return printRegisterConsolidation();
-      case Section.REGISTER_CONSOLIDATION_WITH_SUB_DEL:
+      case DocumentationSection.REGISTER_CONSOLIDATION_WITH_SUB_DEL:
         return printRegisterDelegationWithSubDelegation();
+      case DocumentationSection.CONSOLIDATE_TDH:
+        return printConsolidateTDH();
     }
   }
 
@@ -75,34 +105,34 @@ export default function DelegationDocumentation() {
             <Row>
               <Col className={styles.menuLeft}>
                 <Container>
-                  {Object.values(Section).map((section) => (
+                  {Object.values(DocumentationSection).map((section) => (
                     <Row className="pt-1 pb-1" key={`${section}`}>
                       <Col
-                        onClick={() => setActiveSection(section)}
+                        onClick={() => props.setActiveSection(section)}
                         className={`${styles.menuLeftItem} ${
-                          activeSection == section
+                          props.section == section
                             ? styles.menuLeftItemActive
                             : ""
                         }`}>
-                        {section}
+                        {getSectionTitle(section)}
                       </Col>
                     </Row>
                   ))}
                 </Container>
               </Col>
-              {activeSection && (
+              {props.section && (
                 <Col className={styles.menuRight}>{printSection()}</Col>
               )}
             </Row>
             <Row className="pt-4">
               <Col className={styles.menuLeftFull}>
                 <Container>
-                  {Object.values(Section).map((section) => (
+                  {Object.values(DocumentationSection).map((section) => (
                     <Row className="pt-1 pb-1" key={`${section}-full`}>
                       <Col
-                        onClick={() => setActiveSection(section)}
+                        onClick={() => props.setActiveSection(section)}
                         className={`${styles.menuLeftItem} ${
-                          activeSection == section
+                          props.section == section
                             ? styles.menuLeftItemActive
                             : ""
                         }`}>
