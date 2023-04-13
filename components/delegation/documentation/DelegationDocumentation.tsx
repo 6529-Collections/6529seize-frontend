@@ -74,8 +74,8 @@ export default function DelegationDocumentation(props: Props) {
       <Container>
         <Row>
           <Col>
-            Explain that it needs to be registered on 'The Memes' contract etc
-            etc
+            Explain that it needs to be registered on &apos;The Memes&apos;
+            contract etc etc
           </Col>
         </Row>
       </Container>

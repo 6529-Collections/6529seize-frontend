@@ -622,7 +622,8 @@ export default function NewDelegationWithSubComponent(props: Props) {
                   column
                   sm={12}
                   className="d-flex align-items-center">
-                  Note: For TDH Consolidation use 'The Memes' Collection
+                  Note: For TDH Consolidation use &apos;The Memes&apos;
+                  Collection
                   <a
                     href={`/delegations/documentation/${DocumentationSection.CONSOLIDATE_TDH}`}
                     target="_blank"
