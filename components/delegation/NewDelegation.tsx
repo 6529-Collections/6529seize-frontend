@@ -25,6 +25,7 @@ import {
 } from "../../constants";
 import { DELEGATION_ABI } from "../../abis";
 import { getTransactionLink, isValidEthAddress } from "../../helpers/Helpers";
+import { DocumentationSection } from "./documentation/DelegationDocumentation";
 
 interface Props {
   address: string;
@@ -95,7 +96,7 @@ export default function NewDelegationComponent(props: Props) {
     abi: DELEGATION_ABI,
     chainId: DELEGATION_CONTRACT.chain_id,
     args: [
-      showingConsolidation ? DELEGATION_ALL_ADDRESS : newDelegationCollection,
+      newDelegationCollection,
       newDelegationToAddress,
       showingConsolidation
         ? NEVER_DATE
@@ -133,10 +134,7 @@ export default function NewDelegationComponent(props: Props) {
 
   function validate() {
     const newErrors: string[] = [];
-    if (
-      (!newDelegationCollection || newDelegationCollection == "0") &&
-      !showingConsolidation
-    ) {
+    if (!newDelegationCollection || newDelegationCollection == "0") {
       newErrors.push("Missing or invalid Collection");
     }
     if (!newDelegationUseCase && !showingConsolidation) {
@@ -318,42 +316,40 @@ export default function NewDelegationComponent(props: Props) {
                 />
               </Col>
             </Form.Group>
-            {!showingConsolidation && (
-              <Form.Group as={Row} className="pb-4">
-                <Form.Label column sm={3} className="d-flex align-items-center">
-                  Collection{" "}
-                  <Tippy
-                    content={"Collection address for delegation"}
-                    placement={"top"}
-                    theme={"light"}>
-                    <FontAwesomeIcon
-                      className={styles.infoIcon}
-                      icon="info-circle"
-                      onClick={() => props.onHide()}></FontAwesomeIcon>
-                  </Tippy>
-                </Form.Label>
-                <Col sm={9}>
-                  <Form.Select
-                    className={`${styles.formInput}`}
-                    value={newDelegationCollection}
-                    onChange={(e) => {
-                      setNewDelegationCollection(e.target.value);
-                      clearErrors();
-                    }}>
-                    <option value="0" disabled>
-                      Select Collection
+            <Form.Group as={Row} className="pb-4">
+              <Form.Label column sm={3} className="d-flex align-items-center">
+                Collection{" "}
+                <Tippy
+                  content={"Collection address for delegation"}
+                  placement={"top"}
+                  theme={"light"}>
+                  <FontAwesomeIcon
+                    className={styles.infoIcon}
+                    icon="info-circle"
+                    onClick={() => props.onHide()}></FontAwesomeIcon>
+                </Tippy>
+              </Form.Label>
+              <Col sm={9}>
+                <Form.Select
+                  className={`${styles.formInput}`}
+                  value={newDelegationCollection}
+                  onChange={(e) => {
+                    setNewDelegationCollection(e.target.value);
+                    clearErrors();
+                  }}>
+                  <option value="0" disabled>
+                    Select Collection
+                  </option>
+                  {SUPPORTED_COLLECTIONS.map((sc) => (
+                    <option
+                      key={`add-delegation-select-collection-${sc.contract}`}
+                      value={sc.contract}>
+                      {`${sc.display}`}
                     </option>
-                    {SUPPORTED_COLLECTIONS.map((sc) => (
-                      <option
-                        key={`add-delegation-select-collection-${sc.contract}`}
-                        value={sc.contract}>
-                        {`${sc.display}`}
-                      </option>
-                    ))}
-                  </Form.Select>
-                </Col>
-              </Form.Group>
-            )}
+                  ))}
+                </Form.Select>
+              </Col>
+            </Form.Group>
             <Form.Group as={Row} className="pb-4">
               <Form.Label column sm={3} className="d-flex align-items-center">
                 Address
@@ -551,6 +547,25 @@ export default function NewDelegationComponent(props: Props) {
                     </Container>
                   )}
                 </Col>
+              </Form.Group>
+            )}
+            {showingConsolidation && (
+              <Form.Group as={Row} className="pb-4">
+                <Form.Label
+                  column
+                  sm={12}
+                  className="d-flex align-items-center">
+                  Note: For TDH Consolidation use 'The Memes' Collection
+                  <a
+                    href={`/delegations/documentation/${DocumentationSection.CONSOLIDATE_TDH}`}
+                    target="_blank"
+                    rel="noreferrer">
+                    <FontAwesomeIcon
+                      className={styles.infoIcon}
+                      icon="info-circle"
+                      onClick={() => props.onHide()}></FontAwesomeIcon>
+                  </a>
+                </Form.Label>
               </Form.Group>
             )}
             <Form.Group as={Row} className="pt-2 pb-4">
