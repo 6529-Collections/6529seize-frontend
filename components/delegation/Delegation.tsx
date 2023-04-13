@@ -13,6 +13,7 @@ import dynamic from "next/dynamic";
 import { DELEGATION_ALL_ADDRESS, DELEGATION_CONTRACT } from "../../constants";
 import { sepolia } from "wagmi/chains";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { DocumentationSection } from "./documentation/DelegationDocumentation";
 
 const NewDelegationComponent = dynamic(() => import("./NewDelegation"), {
   ssr: false,
@@ -194,7 +195,7 @@ export default function DelegationComponent() {
                       <span>Github</span>
                     </a>
                     <a
-                      href={`/delegations/documentation`}
+                      href={`/delegations/documentation/${DocumentationSection.REGISTER_DELEGATION}`}
                       className={styles.delegationLink}>
                       <span>
                         <FontAwesomeIcon icon="info-circle"></FontAwesomeIcon>
