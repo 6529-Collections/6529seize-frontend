@@ -30,7 +30,7 @@ export default function AboutReleaseNotes() {
             <p>
               <b>Release 1.3.1</b>
               <br />
-              April 10, 2023
+              April 14, 2023
             </p>
             <ul>
               <li>SNZ3</li>
