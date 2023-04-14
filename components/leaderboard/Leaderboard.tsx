@@ -44,6 +44,9 @@ enum Sort {
   szn2_tdh = "memes_tdh_season2",
   boosted_szn2_tdh = "boosted_memes_tdh_season2",
   szn2_tdh__raw = "memes_tdh_season2__raw",
+  szn3_tdh = "memes_tdh_season3",
+  boosted_szn3_tdh = "boosted_memes_tdh_season3",
+  szn3_tdh__raw = "memes_tdh_season3__raw",
   gradients_tdh = "gradients_tdh",
   boosted_gradients_tdh = "boosted_gradients_tdh",
   gradients_tdh__raw = "gradients_tdh__raw",
@@ -51,6 +54,7 @@ enum Sort {
   memes_balance = "memes_balance",
   szn1_balance = "memes_balance_season1",
   szn2_balance = "memes_balance_season2",
+  szn3_balance = "memes_balance_season3",
   gradients_balance = "gradients_balance",
   purchases_value = "purchases_value",
   purchases_count = "purchases_count",
@@ -59,47 +63,57 @@ enum Sort {
   purchases_count_memes = "purchases_count_memes",
   purchases_count_memes_season1 = "purchases_count_memes_season1",
   purchases_count_memes_season2 = "purchases_count_memes_season2",
+  purchases_count_memes_season3 = "purchases_count_memes_season3",
   purchases_count_gradients = "purchases_count_gradients",
   purchases_value_memes = "purchases_value_memes",
   purchases_value_memes_season1 = "purchases_value_memes_season1",
   purchases_value_memes_season2 = "purchases_value_memes_season2",
+  purchases_value_memes_season3 = "purchases_value_memes_season3",
   purchases_value_gradients = "purchases_value_gradients",
   sales_count_memes = "sales_count_memes",
   sales_count_memes_season1 = "sales_count_memes_season1",
   sales_count_memes_season2 = "sales_count_memes_season2",
+  sales_count_memes_season3 = "sales_count_memes_season3",
   sales_count_gradients = "sales_count_gradients",
   sales_value_memes = "sales_value_memes",
   sales_value_memes_season1 = "sales_value_memes_season1",
   sales_value_memes_season2 = "sales_value_memes_season2",
+  sales_value_memes_season3 = "sales_value_memes_season3",
   sales_value_gradients = "sales_value_gradients",
   transfers_in = "transfers_in",
   transfers_in_memes = "transfers_in_memes",
   transfers_in_memes_season1 = "transfers_in_memes_season1",
   transfers_in_memes_season2 = "transfers_in_memes_season2",
+  transfers_in_memes_season3 = "transfers_in_memes_season3",
   transfers_in_gradients = "transfers_in_gradients",
   transfers_out = "transfers_out",
   transfers_out_memes = "transfers_out_memes",
   transfers_out_memes_season1 = "transfers_out_memes_season1",
   transfers_out_memes_season2 = "transfers_out_memes_season2",
+  transfers_out_memes_season3 = "transfers_out_memes_season3",
   transfers_out_gradients = "transfers_out_gradients",
   boosted_memes_tdh_season1 = "boosted_memes_tdh_season1",
   boosted_memes_tdh_season2 = "boosted_memes_tdh_season2",
+  boosted_memes_tdh_season3 = "boosted_memes_tdh_season3",
   memes_cards_sets = "memes_cards_sets",
   memes_cards_sets_szn1 = "memes_cards_sets_szn1",
   memes_cards_sets_szn2 = "memes_cards_sets_szn2",
+  memes_cards_sets_szn3 = "memes_cards_sets_szn3",
   memes_cards_sets_minus1 = "memes_cards_sets_minus1",
   memes_cards_sets_minus2 = "memes_cards_sets_minus2",
   memes_cards_sets_genesis = "genesis",
   unique_memes = "unique_memes",
   unique_memes_szn1 = "unique_memes_szn1",
   unique_memes_szn2 = "unique_memes_szn2",
+  unique_memes_szn3 = "unique_memes_szn3",
 }
 
 enum Content {
   ALL = "All",
   MEMES = "Memes",
-  MEMES1 = "Memes SZN1",
-  MEMES2 = "Memes SZN2",
+  MEMES1 = "SZN1",
+  MEMES2 = "SZN2",
+  MEMES3 = "SZN3",
   GRADIENTS = "Gradient",
 }
 
@@ -110,6 +124,7 @@ enum OwnerTagFilter {
   MEMES_SETS_MINUS1 = "Meme Set -1",
   MEMES_SETS_SZN1 = "SZN1 Set",
   MEMES_SETS_SZN2 = "SZN2 Set",
+  MEMES_SETS_SZN3 = "SZN3 Set",
   GENESIS = "Genesis Set",
   GRADIENTS = "Gradient",
 }
@@ -134,6 +149,7 @@ export default function Leaderboard(props: Props) {
   const [memesCount, setMemesCount] = useState<number>();
   const [memesCountS1, setMemesCountS1] = useState<number>();
   const [memesCountS2, setMemesCountS2] = useState<number>();
+  const [memesCountS3, setMemesCountS3] = useState<number>();
 
   const [pageProps, setPageProps] = useState<Props>(props);
   const [totalResults, setTotalResults] = useState(0);
@@ -175,6 +191,9 @@ export default function Leaderboard(props: Props) {
         break;
       case OwnerTagFilter.MEMES_SETS_SZN2:
         tagFilter = "&filter=memes_set_szn2";
+        break;
+      case OwnerTagFilter.MEMES_SETS_SZN3:
+        tagFilter = "&filter=memes_set_szn3";
         break;
       case OwnerTagFilter.GENESIS:
         tagFilter = "&filter=memes_genesis";
@@ -235,6 +254,7 @@ export default function Leaderboard(props: Props) {
       setMemesCount(newNfts.length);
       setMemesCountS1([...newNfts].filter((n) => n.season == 1).length);
       setMemesCountS2([...newNfts].filter((n) => n.season == 2).length);
+      setMemesCountS3([...newNfts].filter((n) => n.season == 3).length);
     });
   }, []);
 
@@ -254,6 +274,7 @@ export default function Leaderboard(props: Props) {
           Sort.memes_balance,
           Sort.szn1_balance,
           Sort.szn2_balance,
+          Sort.szn3_balance,
           Sort.gradients_balance,
         ].includes(sort.sort)
       ) {
@@ -268,6 +289,7 @@ export default function Leaderboard(props: Props) {
           Sort.boosted_memes_tdh,
           Sort.boosted_szn1_tdh,
           Sort.boosted_szn2_tdh,
+          Sort.boosted_szn3_tdh,
           Sort.boosted_gradients_tdh,
         ].includes(sort.sort)
       ) {
@@ -282,6 +304,7 @@ export default function Leaderboard(props: Props) {
           Sort.memes_tdh,
           Sort.szn1_tdh,
           Sort.szn2_tdh,
+          Sort.szn3_tdh,
           Sort.gradients_tdh,
         ].includes(sort.sort)
       ) {
@@ -296,6 +319,7 @@ export default function Leaderboard(props: Props) {
           Sort.memes_tdh__raw,
           Sort.szn1_tdh__raw,
           Sort.szn2_tdh__raw,
+          Sort.szn3_tdh__raw,
           Sort.gradients_tdh__raw,
         ].includes(sort.sort)
       ) {
@@ -310,6 +334,7 @@ export default function Leaderboard(props: Props) {
           Sort.purchases_value_memes,
           Sort.purchases_value_memes_season1,
           Sort.purchases_value_memes_season2,
+          Sort.purchases_value_memes_season3,
           Sort.purchases_value_gradients,
         ].includes(sort.sort)
       ) {
@@ -324,6 +349,7 @@ export default function Leaderboard(props: Props) {
           Sort.purchases_count_memes,
           Sort.purchases_count_memes_season1,
           Sort.purchases_count_memes_season2,
+          Sort.purchases_count_memes_season3,
           Sort.purchases_count_gradients,
         ].includes(sort.sort)
       ) {
@@ -338,6 +364,7 @@ export default function Leaderboard(props: Props) {
           Sort.sales_count_memes,
           Sort.sales_count_memes_season1,
           Sort.sales_count_memes_season2,
+          Sort.sales_count_memes_season3,
           Sort.sales_count_gradients,
         ].includes(sort.sort)
       ) {
@@ -352,6 +379,7 @@ export default function Leaderboard(props: Props) {
           Sort.sales_value_memes,
           Sort.sales_value_memes_season1,
           Sort.sales_value_memes_season2,
+          Sort.sales_value_memes_season3,
           Sort.sales_value_gradients,
         ].includes(sort.sort)
       ) {
@@ -366,6 +394,7 @@ export default function Leaderboard(props: Props) {
           Sort.transfers_in_memes,
           Sort.transfers_in_memes_season1,
           Sort.transfers_in_memes_season2,
+          Sort.transfers_in_memes_season3,
           Sort.transfers_in_gradients,
         ].includes(sort.sort)
       ) {
@@ -380,6 +409,7 @@ export default function Leaderboard(props: Props) {
           Sort.transfers_out_memes,
           Sort.transfers_out_memes_season1,
           Sort.transfers_out_memes_season2,
+          Sort.transfers_out_memes_season3,
           Sort.transfers_out_gradients,
         ].includes(sort.sort)
       ) {
@@ -393,6 +423,7 @@ export default function Leaderboard(props: Props) {
           Sort.memes_cards_sets,
           Sort.memes_cards_sets_szn1,
           Sort.memes_cards_sets_szn2,
+          Sort.memes_cards_sets_szn3,
         ].includes(sort.sort)
       ) {
         setSort({
@@ -405,6 +436,7 @@ export default function Leaderboard(props: Props) {
           Sort.unique_memes,
           Sort.unique_memes_szn1,
           Sort.unique_memes_szn2,
+          Sort.unique_memes_szn3,
         ].includes(sort.sort)
       ) {
         setSort({
@@ -450,6 +482,8 @@ export default function Leaderboard(props: Props) {
         return lead.memes_balance_season1;
       case Content.MEMES2:
         return lead.memes_balance_season2;
+      case Content.MEMES3:
+        return lead.memes_balance_season3;
       case Content.GRADIENTS:
         return lead.gradients_balance;
       default:
@@ -468,6 +502,9 @@ export default function Leaderboard(props: Props) {
         break;
       case Content.MEMES2:
         count = lead.purchases_count_memes_season2;
+        break;
+      case Content.MEMES3:
+        count = lead.purchases_count_memes_season3;
         break;
       case Content.GRADIENTS:
         count = lead.purchases_count_gradients;
@@ -494,6 +531,9 @@ export default function Leaderboard(props: Props) {
       case Content.MEMES2:
         value = lead.purchases_value_memes_season2;
         break;
+      case Content.MEMES3:
+        value = lead.purchases_value_memes_season3;
+        break;
       case Content.GRADIENTS:
         value = lead.purchases_value_gradients;
         break;
@@ -518,6 +558,9 @@ export default function Leaderboard(props: Props) {
         break;
       case Content.MEMES2:
         count = lead.sales_count_memes_season2;
+        break;
+      case Content.MEMES3:
+        count = lead.sales_count_memes_season3;
         break;
       case Content.GRADIENTS:
         count = lead.sales_count_gradients;
@@ -544,6 +587,9 @@ export default function Leaderboard(props: Props) {
       case Content.MEMES2:
         value = lead.sales_value_memes_season2;
         break;
+      case Content.MEMES3:
+        value = lead.sales_value_memes_season3;
+        break;
       case Content.GRADIENTS:
         value = lead.sales_value_gradients;
         break;
@@ -568,6 +614,9 @@ export default function Leaderboard(props: Props) {
         break;
       case Content.MEMES2:
         trf = lead.transfers_in_memes_season2;
+        break;
+      case Content.MEMES3:
+        trf = lead.transfers_in_memes_season3;
         break;
       case Content.GRADIENTS:
         trf = lead.transfers_in_gradients;
@@ -595,6 +644,9 @@ export default function Leaderboard(props: Props) {
       case Content.MEMES2:
         trf = lead.transfers_out_memes_season2;
         break;
+      case Content.MEMES3:
+        trf = lead.transfers_out_memes_season3;
+        break;
       case Content.GRADIENTS:
         trf = lead.transfers_out_gradients;
         break;
@@ -612,27 +664,30 @@ export default function Leaderboard(props: Props) {
   function getUniqueMemes(lead: TDHMetrics) {
     let unique;
     let uniqueTotal;
-    if (memesCount && memesCountS1 && memesCountS2) {
-      switch (content) {
-        case Content.MEMES1:
-          unique = lead.unique_memes_szn1;
-          uniqueTotal = memesCountS1;
-          break;
-        case Content.MEMES2:
-          unique = lead.unique_memes_szn2;
-          uniqueTotal = memesCountS2;
-          break;
-        default:
-          unique = lead.unique_memes;
-          uniqueTotal = memesCount;
-          break;
-      }
-      if (unique > 0) {
-        return `${numberWithCommas(unique)}/${uniqueTotal} (${Math.round(
-          (unique / uniqueTotal) * 100
-        )}%)`;
-      }
+    switch (content) {
+      case Content.MEMES1:
+        unique = lead.unique_memes_szn1;
+        uniqueTotal = memesCountS1;
+        break;
+      case Content.MEMES2:
+        unique = lead.unique_memes_szn2;
+        uniqueTotal = memesCountS2;
+        break;
+      case Content.MEMES3:
+        unique = lead.unique_memes_szn3;
+        uniqueTotal = memesCountS3;
+        break;
+      default:
+        unique = lead.unique_memes;
+        uniqueTotal = memesCount;
+        break;
     }
+    if (unique > 0 && uniqueTotal) {
+      return `${numberWithCommas(unique)}/${uniqueTotal} (${Math.round(
+        (unique / uniqueTotal) * 100
+      )}%)`;
+    }
+
     return "-";
   }
 
@@ -644,6 +699,9 @@ export default function Leaderboard(props: Props) {
         break;
       case Content.MEMES2:
         sets = lead.memes_cards_sets_szn2;
+        break;
+      case Content.MEMES3:
+        sets = lead.memes_cards_sets_szn3;
         break;
       default:
         sets = lead.memes_cards_sets;
@@ -663,6 +721,8 @@ export default function Leaderboard(props: Props) {
         return lead.boosted_memes_tdh_season1;
       case Content.MEMES2:
         return lead.boosted_memes_tdh_season2;
+      case Content.MEMES3:
+        return lead.boosted_memes_tdh_season3;
       case Content.GRADIENTS:
         return lead.boosted_gradients_tdh;
       default:
@@ -678,6 +738,8 @@ export default function Leaderboard(props: Props) {
         return lead.memes_tdh_season1;
       case Content.MEMES2:
         return lead.memes_tdh_season2;
+      case Content.MEMES3:
+        return lead.memes_tdh_season3;
       case Content.GRADIENTS:
         return lead.gradients_tdh;
       default:
@@ -693,6 +755,8 @@ export default function Leaderboard(props: Props) {
         return lead.memes_tdh_season1__raw;
       case Content.MEMES2:
         return lead.memes_tdh_season2__raw;
+      case Content.MEMES3:
+        return lead.memes_tdh_season3__raw;
       case Content.GRADIENTS:
         return lead.gradients_tdh__raw;
       default:
@@ -708,6 +772,8 @@ export default function Leaderboard(props: Props) {
         return Sort.szn1_balance;
       case Content.MEMES2:
         return Sort.szn2_balance;
+      case Content.MEMES3:
+        return Sort.szn3_balance;
       case Content.GRADIENTS:
         return Sort.gradients_balance;
       default:
@@ -721,6 +787,8 @@ export default function Leaderboard(props: Props) {
         return Sort.unique_memes_szn1;
       case Content.MEMES2:
         return Sort.unique_memes_szn2;
+      case Content.MEMES3:
+        return Sort.unique_memes_szn3;
       default:
         return Sort.unique_memes;
     }
@@ -732,6 +800,8 @@ export default function Leaderboard(props: Props) {
         return Sort.memes_cards_sets_szn1;
       case Content.MEMES2:
         return Sort.memes_cards_sets_szn2;
+      case Content.MEMES3:
+        return Sort.memes_cards_sets_szn3;
       default:
         return Sort.memes_cards_sets;
     }
@@ -745,6 +815,8 @@ export default function Leaderboard(props: Props) {
         return Sort.boosted_szn1_tdh;
       case Content.MEMES2:
         return Sort.boosted_szn2_tdh;
+      case Content.MEMES3:
+        return Sort.boosted_szn3_tdh;
       case Content.GRADIENTS:
         return Sort.boosted_gradients_tdh;
       default:
@@ -760,6 +832,8 @@ export default function Leaderboard(props: Props) {
         return Sort.szn1_tdh;
       case Content.MEMES2:
         return Sort.szn2_tdh;
+      case Content.MEMES3:
+        return Sort.szn3_tdh;
       case Content.GRADIENTS:
         return Sort.gradients_tdh;
       default:
@@ -775,6 +849,8 @@ export default function Leaderboard(props: Props) {
         return Sort.szn1_tdh__raw;
       case Content.MEMES2:
         return Sort.szn2_tdh__raw;
+      case Content.MEMES3:
+        return Sort.szn3_tdh__raw;
       case Content.GRADIENTS:
         return Sort.gradients_tdh__raw;
       default:
@@ -790,6 +866,8 @@ export default function Leaderboard(props: Props) {
         return Sort.purchases_count_memes_season1;
       case Content.MEMES2:
         return Sort.purchases_count_memes_season2;
+      case Content.MEMES3:
+        return Sort.purchases_count_memes_season3;
       case Content.GRADIENTS:
         return Sort.purchases_count_gradients;
       default:
@@ -805,6 +883,8 @@ export default function Leaderboard(props: Props) {
         return Sort.purchases_value_memes_season1;
       case Content.MEMES2:
         return Sort.purchases_value_memes_season2;
+      case Content.MEMES3:
+        return Sort.purchases_value_memes_season3;
       case Content.GRADIENTS:
         return Sort.purchases_value_gradients;
       default:
@@ -820,6 +900,8 @@ export default function Leaderboard(props: Props) {
         return Sort.sales_count_memes_season1;
       case Content.MEMES2:
         return Sort.sales_count_memes_season2;
+      case Content.MEMES3:
+        return Sort.sales_count_memes_season3;
       case Content.GRADIENTS:
         return Sort.sales_count_gradients;
       default:
@@ -835,6 +917,8 @@ export default function Leaderboard(props: Props) {
         return Sort.sales_value_memes_season1;
       case Content.MEMES2:
         return Sort.sales_value_memes_season2;
+      case Content.MEMES3:
+        return Sort.sales_value_memes_season3;
       case Content.GRADIENTS:
         return Sort.sales_value_gradients;
       default:
@@ -850,6 +934,8 @@ export default function Leaderboard(props: Props) {
         return Sort.transfers_in_memes_season1;
       case Content.MEMES2:
         return Sort.transfers_in_memes_season2;
+      case Content.MEMES3:
+        return Sort.transfers_in_memes_season3;
       case Content.GRADIENTS:
         return Sort.transfers_in_gradients;
       default:
@@ -879,6 +965,8 @@ export default function Leaderboard(props: Props) {
         return Sort.transfers_out_memes_season1;
       case Content.MEMES2:
         return Sort.transfers_out_memes_season2;
+      case Content.MEMES3:
+        return Sort.transfers_out_memes_season3;
       case Content.GRADIENTS:
         return Sort.transfers_out_gradients;
       default:
@@ -900,6 +988,7 @@ export default function Leaderboard(props: Props) {
                 OwnerTagFilter.MEMES_SETS_MINUS1,
                 OwnerTagFilter.MEMES_SETS_SZN1,
                 OwnerTagFilter.MEMES_SETS_SZN2,
+                OwnerTagFilter.MEMES_SETS_SZN3,
                 OwnerTagFilter.GENESIS,
               ].includes(tagFilter) ? (
                 <>&nbsp;&nbsp;{tagFilter}</>
@@ -929,6 +1018,9 @@ export default function Leaderboard(props: Props) {
           </Dropdown.Item>
           <Dropdown.Item onClick={() => setContent(Content.MEMES2)}>
             &nbsp;&nbsp;{Content.MEMES2}
+          </Dropdown.Item>
+          <Dropdown.Item onClick={() => setContent(Content.MEMES3)}>
+            &nbsp;&nbsp;{Content.MEMES3}
           </Dropdown.Item>
           <Dropdown.Item onClick={() => setContent(Content.GRADIENTS)}>
             {Content.GRADIENTS}
@@ -1465,6 +1557,8 @@ export default function Leaderboard(props: Props) {
                             ? "SZN1"
                             : content == Content.MEMES2
                             ? "SZN2"
+                            : content == Content.MEMES3
+                            ? "SZN3"
                             : "Meme"}{" "}
                           Sets&nbsp;
                           <span className="d-flex flex-column">
@@ -1735,7 +1829,7 @@ export default function Leaderboard(props: Props) {
                       </th>
                       <th className={styles.tdhSub}>
                         <span className="d-flex align-items-center justify-content-center">
-                          Meme SZN1 Sets&nbsp;
+                          SZN1 Sets&nbsp;
                           <span className="d-flex flex-column">
                             <FontAwesomeIcon
                               icon="square-caret-up"
@@ -1772,7 +1866,44 @@ export default function Leaderboard(props: Props) {
                       </th>
                       <th className={styles.tdhSub}>
                         <span className="d-flex align-items-center justify-content-center">
-                          Meme SZN2 Sets&nbsp;
+                          SZN3 Sets&nbsp;
+                          <span className="d-flex flex-column">
+                            <FontAwesomeIcon
+                              icon="square-caret-up"
+                              onClick={() =>
+                                setSort({
+                                  sort: Sort.memes_cards_sets_szn3,
+                                  sort_direction: SortDirection.ASC,
+                                })
+                              }
+                              className={`${styles.caret} ${
+                                sort.sort_direction != SortDirection.ASC ||
+                                sort.sort != Sort.memes_cards_sets_szn3
+                                  ? styles.disabled
+                                  : ""
+                              }`}
+                            />
+                            <FontAwesomeIcon
+                              icon="square-caret-down"
+                              onClick={() =>
+                                setSort({
+                                  sort: Sort.memes_cards_sets_szn3,
+                                  sort_direction: SortDirection.DESC,
+                                })
+                              }
+                              className={`${styles.caret} ${
+                                sort.sort_direction != SortDirection.DESC ||
+                                sort.sort != Sort.memes_cards_sets_szn3
+                                  ? styles.disabled
+                                  : ""
+                              }`}
+                            />
+                          </span>
+                        </span>
+                      </th>
+                      <th className={styles.tdhSub}>
+                        <span className="d-flex align-items-center justify-content-center">
+                          SZN2 Sets&nbsp;
                           <span className="d-flex flex-column">
                             <FontAwesomeIcon
                               icon="square-caret-up"
@@ -1869,6 +2000,7 @@ export default function Leaderboard(props: Props) {
                               memesCardsSets: lead.memes_cards_sets,
                               memesCardsSetS1: lead.memes_cards_sets_szn1,
                               memesCardsSetS2: lead.memes_cards_sets_szn2,
+                              memesCardsSetS3: lead.memes_cards_sets_szn3,
                               memesBalance: lead.unique_memes,
                               gradientsBalance: lead.gradients_balance,
                               genesis: lead.genesis,
@@ -1962,6 +2094,13 @@ export default function Leaderboard(props: Props) {
                               {lead.memes_cards_sets_szn2 > 0
                                 ? `x${numberWithCommas(
                                     lead.memes_cards_sets_szn2
+                                  )}`
+                                : "-"}
+                            </td>
+                            <td className={styles.tdhSub}>
+                              {lead.memes_cards_sets_szn3 > 0
+                                ? `x${numberWithCommas(
+                                    lead.memes_cards_sets_szn3
                                   )}`
                                 : "-"}
                             </td>
