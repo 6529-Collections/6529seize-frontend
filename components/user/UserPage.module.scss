@@ -99,29 +99,55 @@
   }
 }
 
-.primaryTable {
+.primaryTableScrollContainer {
+  background-color: rgb(30, 30, 30);
+  -ms-overflow-style: none; /* Internet Explorer 10+ */
+  scrollbar-width: none; /* Firefox */
+  overflow-x: scroll;
+}
+
+.primaryTable,
+.primaryTableActivity {
   tr td {
-    width: calc(100% / 6);
+    width: calc(100% / 7);
+    min-width: 80px;
     line-height: 25px;
     vertical-align: middle;
+    white-space: nowrap;
   }
-  tr:not(:first-child) {
+  tr {
     border-bottom: 1px solid $dark-grey !important;
 
     td:not(:first-child) {
-      text-align: right;
+      text-align: center;
     }
   }
+}
 
+.primaryTable {
+  tr:nth-child(1),
   tr:nth-child(2),
-  tr:nth-child(3),
-  tr:nth-child(7) {
+  tr:nth-child(5),
+  tr:nth-child(8) {
     border-bottom: none !important;
   }
 }
 
+.primaryTableActivity {
+  tr:nth-child(1),
+  tr:nth-child(2),
+  tr:nth-child(6) {
+    border-bottom: none !important;
+  }
+}
+
+.primaryTable > :not(caption) > * > *,
+.primaryTableActivity > :not(caption) > * > * {
+  padding: 0.3rem !important;
+}
+
 .primaryTableGap {
-  height: 15px;
+  height: 20px;
 }
 
 .focus {
@@ -245,4 +271,34 @@
 
 .distributionsTable > :not(caption) > * > * {
   padding: 0.5rem !important;
+}
+
+.avatar {
+  height: 200px;
+  width: auto;
+}
+
+@media only screen and (max-width: 767px) {
+  .avatar {
+    height: 120px;
+  }
+}
+
+.userPageAccordion {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5 {
+    float: none;
+  }
+
+  button {
+    font-weight: bolder;
+  }
+}
+
+.userPageAccordionItem {
+  border-radius: 0 !important;
+  background-color: transparent;
 }

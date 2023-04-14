@@ -175,6 +175,9 @@ export default function MemeLabLeaderboard(props: Props) {
                               memesCardsSetS2: tags
                                 ? tags.memes_cards_sets_szn2
                                 : 0,
+                              memesCardsSetS3: tags
+                                ? tags.memes_cards_sets_szn3
+                                : 0,
                               memesBalance: tags ? tags.unique_memes : 0,
                               gradientsBalance: tags
                                 ? tags.gradients_balance
