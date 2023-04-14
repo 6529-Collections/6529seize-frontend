@@ -146,8 +146,8 @@ interface Props {
 export default function Delegations(props: Props) {
   const [breadcrumbs, setBreadcrumbs] = useState<Crumb[]>([
     { display: "Home", href: "/" },
-    { display: "Delegations", href: "/delegations" },
-    { display: props.collection?.display },
+    { display: "Delegations Center", href: "/delegations-center" },
+    { display: props.collection.display },
   ]);
 
   useEffect(() => {

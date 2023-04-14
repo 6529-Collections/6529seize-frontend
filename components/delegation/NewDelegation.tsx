@@ -15,7 +15,7 @@ import {
   DelegationCollection,
   DELEGATION_USE_CASES,
   SUPPORTED_COLLECTIONS,
-} from "../../pages/delegations/[contract]";
+} from "../../pages/delegations-center/[contract]";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Tippy from "@tippyjs/react";
 import {

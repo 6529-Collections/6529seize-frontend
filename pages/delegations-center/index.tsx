@@ -20,7 +20,7 @@ const Delegation = dynamic(
 export default function Delegations() {
   const [breadcrumbs, setBreadcrumbs] = useState<Crumb[]>([
     { display: "Home", href: "/" },
-    { display: "Delegations" },
+    { display: "Delegations Center" },
   ]);
 
   return (

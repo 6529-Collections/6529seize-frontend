@@ -14,9 +14,7 @@ import {
   CONSOLIDATION_USE_CASE,
   DelegationCollection,
   DELEGATION_USE_CASES,
-  SUB_DELEGATION_USE_CASE,
-  SUPPORTED_COLLECTIONS,
-} from "../../pages/delegations/[contract]";
+} from "../../pages/delegations-center/[contract]";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Tippy from "@tippyjs/react";
 import {
