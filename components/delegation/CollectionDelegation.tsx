@@ -28,7 +28,8 @@ import {
   DelegationCollection,
   DELEGATION_USE_CASES,
   MAX_BULK_ACTIONS,
-} from "../../pages/delegations/[contract]";
+  SUPPORTED_COLLECTIONS,
+} from "../../pages/delegations-center/[contract]";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import dynamic from "next/dynamic";
 import { areEqualAddresses, getTransactionLink } from "../../helpers/Helpers";

@@ -5,10 +5,8 @@ import { areEqualAddresses } from "../../helpers/Helpers";
 import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 
-import {
-  ANY_COLLECTION_PATH,
-  SUPPORTED_COLLECTIONS,
-} from "../../pages/delegations/[contract]";
+import { SUPPORTED_COLLECTIONS } from "../../pages/delegations-center/[contract]";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import dynamic from "next/dynamic";
 import { DELEGATION_ALL_ADDRESS, DELEGATION_CONTRACT } from "../../constants";
 import { sepolia } from "wagmi/chains";
@@ -62,14 +60,25 @@ export default function DelegationComponent() {
             <h4>Delegations by Collection</h4>
           </Col>
         </Row>
-        {Object.values(SUPPORTED_COLLECTIONS).map((c) => (
-          <Row key={c.contract}>
-            <Col className={styles.collectionSelectionWrapper}>
-              <Container className="pt-2 pb-3">
-                <Row className="pt-2 pb-2">
-                  <Col
-                    xs={3}
-                    className="d-flex align-items-center justify-content-center">
+        <Row>
+          {Object.values(SUPPORTED_COLLECTIONS).map((c) => (
+            <Col
+              key={c.contract}
+              xs={6}
+              xm={6}
+              md={6}
+              onClick={() => {
+                window.location.href = `/delegations-center/${c.contract}`;
+              }}
+              className={styles.collectionSelectionWrapper}>
+              <Container className="pb-4">
+                <Row>
+                  <Col>
+                    <h4 className="font-color float-none">{c.display}</h4>
+                  </Col>
+                </Row>
+                <Row>
+                  <Col className={styles.collectionSelectionImage}>
                     <Image
                       className={styles.collectionSelectionImage2}
                       loading="eager"

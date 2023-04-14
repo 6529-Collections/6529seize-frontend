@@ -9,7 +9,7 @@ import {
 } from "wagmi";
 import { useEffect, useState } from "react";
 
-import { DelegationCollection } from "../../pages/delegations/[contract]";
+import { DelegationCollection } from "../../pages/delegations-center/[contract]";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Tippy from "@tippyjs/react";
 import { DELEGATION_CONTRACT, NEVER_DATE } from "../../constants";
