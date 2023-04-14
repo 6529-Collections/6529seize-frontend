@@ -99,8 +99,10 @@ export default function Header(props: Props) {
                       <NavDropdown.Item
                         key="delegations-dropdown-item"
                         className={styles.dropdownItem}
-                        onClick={() => (window.location.href = `/delegations`)}>
-                        Delegations
+                        onClick={() =>
+                          (window.location.href = `/delegations-center`)
+                        }>
+                        Delegations Center
                       </NavDropdown.Item>
                     </NavDropdown>
                   </>
@@ -647,9 +649,9 @@ export default function Header(props: Props) {
                                     key="delegations-dropdown-item"
                                     className={styles.dropdownItem}
                                     onClick={() =>
-                                      (window.location.href = `/delegations`)
+                                      (window.location.href = `/delegations-center`)
                                     }>
-                                    Delegations
+                                    Delegations Center
                                   </NavDropdown.Item>
                                 </NavDropdown>
                               </>
