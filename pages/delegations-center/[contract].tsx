@@ -12,6 +12,7 @@ import {
   DELEGATION_CONTRACT,
 } from "../../constants";
 import { areEqualAddresses } from "../../helpers/Helpers";
+import { DocumentationSection } from "../../components/delegation/documentation/DelegationDocumentation";
 
 const Header = dynamic(() => import("../../components/header/Header"), {
   ssr: false,
@@ -66,8 +67,18 @@ export const SUPPORTED_COLLECTIONS: DelegationCollection[] = [
   },
 ];
 
-export const SUB_DELEGATION_USE_CASE = 16;
-export const CONSOLIDATION_USE_CASE = 99;
+export const SUB_DELEGATION_USE_CASE = {
+  index: 15,
+  use_case: 998,
+  display: "Sub-Delegation",
+};
+
+export const CONSOLIDATION_USE_CASE = {
+  index: 16,
+  use_case: 999,
+  display: "Consolidation",
+};
+
 export const DELEGATION_USE_CASES = [
   {
     use_case: 1,
@@ -129,14 +140,12 @@ export const DELEGATION_USE_CASES = [
     use_case: 15,
     display: "View Access",
   },
-  {
-    use_case: SUB_DELEGATION_USE_CASE,
-    display: "Sub-delegation",
-  },
-  {
-    use_case: CONSOLIDATION_USE_CASE,
-    display: "Consolidation",
-  },
+];
+
+export const ALL_USE_CASES = [
+  ...DELEGATION_USE_CASES,
+  SUB_DELEGATION_USE_CASE,
+  CONSOLIDATION_USE_CASE,
 ];
 
 interface Props {
@@ -168,7 +177,7 @@ export default function Delegations(props: Props) {
           />
           <meta
             property="og:url"
-            content={`${process.env.BASE_ENDPOINT}/delegations/${props.collection.contract}`}
+            content={`${process.env.BASE_ENDPOINT}/delegations-center/${props.collection.contract}`}
           />
           <meta
             property="og:title"
@@ -184,10 +193,7 @@ export default function Delegations(props: Props) {
         <main className={styles.main}>
           <Header />
           <Breadcrumb breadcrumbs={breadcrumbs} />
-          <CollectionDelegationComponent
-            collection={props.collection}
-            date={new Date()}
-          />
+          <CollectionDelegationComponent collection={props.collection} />
         </main>
       </>
     );
@@ -195,6 +201,16 @@ export default function Delegations(props: Props) {
 }
 
 export async function getServerSideProps(req: any, res: any, resolvedUrl: any) {
+  if (req.query.contract == "documentation") {
+    return {
+      redirect: {
+        permanent: false,
+        destination: `/delegations-center/documentation/${DocumentationSection.REGISTER_DELEGATION}`,
+      },
+      props: {},
+    };
+  }
+
   const contract = req.query.contract;
   let collection: DelegationCollection | undefined = undefined;
   SUPPORTED_COLLECTIONS.map((c) => {

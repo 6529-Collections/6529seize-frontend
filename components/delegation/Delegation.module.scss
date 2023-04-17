@@ -145,8 +145,14 @@
   cursor: pointer;
 
   &:hover {
-    background-color: darken($color: $blue, $amount: 5);
+    background-color: lighten($color: $blue, $amount: 5);
   }
+}
+
+.addNewDelegationBtnDisabled {
+  pointer-events: none !important;
+  background-color: darken($color: $blue, $amount: 10);
+  color: $font-color-h;
 }
 
 .revokeDelegationBtn {
@@ -345,7 +351,7 @@
 }
 
 .delegationsTableUseCaseHeader {
-  padding-top: 2rem !important;
+  padding-top: 1rem !important;
   padding-bottom: 0.2rem !important;
   font-weight: bolder;
 }
@@ -353,7 +359,7 @@
 .delegationsTableScrollContainer {
   -ms-overflow-style: none; /* Internet Explorer 10+ */
   scrollbar-width: none; /* Firefox */
-  overflow-x: scroll;
+  overflow-x: auto;
 }
 
 .delegationsTableScrollContainer::-webkit-scrollbar {
@@ -379,10 +385,6 @@
 
 .delegationsTable > :not(header) > * > * {
   padding: 0.7rem;
-}
-
-.incomingDelegationAddress {
-  text-indent: 1rem;
 }
 
 .etherscanLink {
@@ -453,6 +455,28 @@
   margin-left: 15px;
 }
 
+.documentationLink {
+  text-decoration: none;
+  height: 32px;
+  display: inline-block;
+
+  svg {
+    margin-right: 10px;
+    margin-top: -2px;
+    width: 30px;
+    height: 30px;
+  }
+
+  span {
+    font-size: smaller;
+    display: inline-block;
+    line-height: 32px;
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}
+
 .delegationLink {
   text-decoration: none;
   margin-left: 10px;
@@ -460,8 +484,7 @@
   height: 32px;
   display: inline-block;
 
-  img,
-  svg {
+  img {
     margin-right: 10px;
     margin-top: -2px;
     width: 30px;
@@ -511,4 +534,8 @@
   &:focus {
     outline: none !important;
   }
+}
+
+.formCheckColumn {
+  width: 5%;
 }
