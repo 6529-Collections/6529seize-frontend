@@ -836,27 +836,6 @@ export default function CollectionDelegationComponent(props: Props) {
     return `${year}-${month}-${day}`;
   }
 
-  function getActiveStatus(delegations: any, w: string, useCaseIndex: number) {
-    if (delegations.data) {
-      const myCase = delegations.data[useCaseIndex] as any[];
-      const index = myCase[0].indexOf(w);
-      if (index > -1) {
-        const myDate = myCase[1][0].toNumber();
-        const myDateDisplay =
-          myDate >= NEVER_DATE
-            ? `active`
-            : `active - expires ${formatExpiry(myDate)}`;
-        const active = {
-          expiry: myDateDisplay,
-          all: myCase[2][index],
-          tokens: myCase[3][index].toNumber(),
-        };
-        return active;
-      }
-    }
-    return false;
-  }
-
   function printDelegations() {
     return (
       <>
@@ -1007,7 +986,7 @@ export default function CollectionDelegationComponent(props: Props) {
                           {del.wallets.map((w, addressIndex: number) => {
                             return (
                               <tr
-                                key={`outgoing-${del.useCase.use_case}-${index}-${w}-${addressIndex}`}>
+                                key={`outgoing-${del.useCase.use_case}-${index}-${w.wallet}-${addressIndex}`}>
                                 <td className={styles.formCheckColumn}>
                                   <FormCheck
                                     disabled={
@@ -1018,7 +997,10 @@ export default function CollectionDelegationComponent(props: Props) {
                                           (bd) =>
                                             bd.use_case ==
                                               del.useCase.use_case &&
-                                            areEqualAddresses(bd.wallet, w)
+                                            areEqualAddresses(
+                                              bd.wallet,
+                                              w.wallet
+                                            )
                                         ))
                                     }
                                     onChange={(e) => {
@@ -1027,7 +1009,7 @@ export default function CollectionDelegationComponent(props: Props) {
                                           ...bd,
                                           {
                                             use_case: del.useCase.use_case,
-                                            wallet: w,
+                                            wallet: w.wallet,
                                           },
                                         ]);
                                       } else {
@@ -1037,7 +1019,10 @@ export default function CollectionDelegationComponent(props: Props) {
                                               !(
                                                 x.use_case ==
                                                   del.useCase.use_case &&
-                                                areEqualAddresses(x.wallet, w)
+                                                areEqualAddresses(
+                                                  x.wallet,
+                                                  w.wallet
+                                                )
                                               )
                                           )
                                         );
@@ -1102,7 +1087,7 @@ export default function CollectionDelegationComponent(props: Props) {
                                         )
                                           ? DELEGATION_ALL_ADDRESS
                                           : props.collection.contract,
-                                        address: w,
+                                        address: w.wallet,
                                         use_case: del.useCase.use_case,
                                       });
                                       setToast({
@@ -1115,7 +1100,7 @@ export default function CollectionDelegationComponent(props: Props) {
                                       waitContractWriteRevoke.isLoading) &&
                                       areEqualAddresses(
                                         revokeDelegationParams.address,
-                                        w
+                                        w.wallet
                                       ) &&
                                       revokeDelegationParams.use_case ==
                                         del.useCase.use_case && (
@@ -1239,7 +1224,8 @@ export default function CollectionDelegationComponent(props: Props) {
                           </tr>
                           {del.wallets.map((w) => {
                             return (
-                              <tr key={`incoming-${del.useCase}-${index}-${w}`}>
+                              <tr
+                                key={`incoming-${del.useCase}-${index}-${w.wallet}`}>
                                 <td className={styles.formCheckColumn}>
                                   {del.useCase.use_case ==
                                   SUB_DELEGATION_USE_CASE.use_case ? (
