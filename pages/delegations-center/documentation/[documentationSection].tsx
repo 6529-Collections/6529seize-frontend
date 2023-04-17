@@ -31,7 +31,7 @@ export default function DelegationsDocumentation(props: Props) {
 
   const [breadcrumbs, setBreadcrumbs] = useState<Crumb[]>([
     { display: "Home", href: "/" },
-    { display: "Delegations", href: "/delegations" },
+    { display: "Delegations Center", href: "/delegations-center" },
     { display: "Documentation" },
   ]);
 
@@ -60,7 +60,7 @@ export default function DelegationsDocumentation(props: Props) {
         />
         <meta
           property="og:url"
-          content={`${process.env.BASE_ENDPOINT}/delegations/documentation`}
+          content={`${process.env.BASE_ENDPOINT}/delegations-center/documentation`}
         />
         <meta property="og:title" content="Delegations Documentation" />
         <meta property="og:description" content="6529 SEIZE" />
