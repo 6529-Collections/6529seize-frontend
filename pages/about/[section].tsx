@@ -23,6 +23,7 @@ import AboutCookiePolicy from "../../components/about/AboutCookiePolicy";
 import Head from "next/head";
 import AboutDataDecentral from "../../components/about/AboutDataDecentral";
 import AboutGDRC1 from "../../components/about/AboutGDRC1";
+import AboutNFTDelegation from "../../components/about/AboutNFTDelegation";
 
 export enum AboutSection {
   MEMES = "the-memes",
@@ -41,6 +42,7 @@ export enum AboutSection {
   APPLY = "apply",
   DATA_DECENTR = "data-decentralization",
   GDRC1 = "gdrc1",
+  NFT_DELEGATION = "nft-delegation",
 }
 
 const Header = dynamic(() => import("../../components/header/Header"), {
@@ -52,6 +54,7 @@ interface Props {
   section: AboutSection;
   sectionTitle: string;
   gdrc1Text: string;
+  nftDelegationText: string;
 }
 
 export default function About(props: Props) {
@@ -120,6 +123,8 @@ export default function About(props: Props) {
         return <AboutDataDecentral />;
       case AboutSection.GDRC1:
         return <AboutGDRC1 html={props.gdrc1Text} />;
+      case AboutSection.NFT_DELEGATION:
+        return <AboutNFTDelegation html={props.nftDelegationText} />;
     }
   }
 
@@ -218,6 +223,24 @@ export default function About(props: Props) {
                               : ""
                           }`}>
                           GDRC1
+                        </Col>
+                      </Row>
+                      <Row>
+                        <Col>
+                          <hr />
+                        </Col>
+                      </Row>
+                      <Row className="pt-1 pb-1">
+                        <Col
+                          onClick={() =>
+                            setNewSection(AboutSection.NFT_DELEGATION)
+                          }
+                          className={`${menuStyles.aboutMenuLeftItem} ${
+                            section == AboutSection.NFT_DELEGATION
+                              ? menuStyles.aboutMenuLeftItemActive
+                              : ""
+                          }`}>
+                          NFT Delegation
                         </Col>
                       </Row>
                       <Row>
@@ -440,6 +463,24 @@ export default function About(props: Props) {
                       </Row>
                       <Row className="pt-1 pb-1">
                         <Col
+                          onClick={() =>
+                            setNewSection(AboutSection.NFT_DELEGATION)
+                          }
+                          className={`${menuStyles.aboutMenuLeftItem} ${
+                            section == AboutSection.NFT_DELEGATION
+                              ? menuStyles.aboutMenuLeftItemActive
+                              : ""
+                          }`}>
+                          NFT Delegation
+                        </Col>
+                      </Row>
+                      <Row>
+                        <Col>
+                          <hr />
+                        </Col>
+                      </Row>
+                      <Row className="pt-1 pb-1">
+                        <Col
                           onClick={() => setNewSection(AboutSection.FAQ)}
                           className={`${menuStyles.aboutMenuLeftItem} ${
                             section == AboutSection.FAQ
@@ -596,11 +637,20 @@ export async function getServerSideProps(req: any, res: any, resolvedUrl: any) {
     const gdrc1Text =
       gdrc1Request.status == 200 ? await gdrc1Request.text() : "";
 
+    const nftDelegationTextRequest = await fetch(
+      `https://6529bucket.s3.eu-west-1.amazonaws.com/seize_html/about/NFTDelegation.html`
+    );
+    const nftDelegationText =
+      nftDelegationTextRequest.status == 200
+        ? await nftDelegationTextRequest.text()
+        : "";
+
     return {
       props: {
         section,
         sectionTitle,
         gdrc1Text,
+        nftDelegationText,
       },
     };
   } else {

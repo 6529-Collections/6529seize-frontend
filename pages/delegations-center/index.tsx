@@ -10,8 +10,8 @@ const Header = dynamic(() => import("../../components/header/Header"), {
   loading: () => <HeaderPlaceholder />,
 });
 
-const Delegation = dynamic(
-  () => import("../../components/delegation/Delegation"),
+const DelegationCenterComponent = dynamic(
+  () => import("../../components/delegation/DelegationCenter"),
   {
     ssr: false,
   }
@@ -26,14 +26,14 @@ export default function Delegations() {
   return (
     <>
       <Head>
-        <title>Delegations | 6529 SEIZE</title>
+        <title>Delegations Center | 6529 SEIZE</title>
         <link rel="icon" href="/favicon.ico" />
-        <meta name="description" content="Delegations | 6529 SEIZE" />
+        <meta name="description" content="Delegations Center | 6529 SEIZE" />
         <meta
           property="og:url"
-          content={`${process.env.BASE_ENDPOINT}/delegations`}
+          content={`${process.env.BASE_ENDPOINT}/delegations-center`}
         />
-        <meta property="og:title" content="Delegations" />
+        <meta property="og:title" content="Delegations Center" />
         <meta property="og:description" content="6529 SEIZE" />
         <meta
           property="og:image"
@@ -44,7 +44,7 @@ export default function Delegations() {
       <main className={styles.main}>
         <Header />
         <Breadcrumb breadcrumbs={breadcrumbs} />
-        <Delegation />
+        <DelegationCenterComponent />
       </main>
     </>
   );
