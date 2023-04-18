@@ -129,16 +129,6 @@ export default function DelegationDocumentation(props: Props) {
     { section: DocumentationSection; html: string }[]
   >([]);
 
-  function getSectionTitle(section: DocumentationSection) {
-    let title = section
-      .replace(/-/g, ",")
-      .split(",")
-      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-      .join(" ");
-    title = title.replaceAll("Tdh", "TDH");
-    return title;
-  }
-
   function printContent(html: string) {
     return (
       <Container>
@@ -184,25 +174,28 @@ export default function DelegationDocumentation(props: Props) {
             <Row>
               <Col className={styles.menuLeft}>
                 <Container>
-                  <Row className="pt-1 pb-1">
+                  <Row className="pt-2 pb-2">
+                    <Col xs={12} className="font-color-h">
+                      General{" "}
+                    </Col>
                     <Col
+                      xs={12}
                       onClick={() =>
                         props.setActiveSection(DocumentationSection.GENERAL)
                       }
-                      className={`${styles.menuLeftItem} ${
+                      className={`indented ${styles.menuLeftItem} ${
                         props.section == DocumentationSection.GENERAL
                           ? styles.menuLeftItemActive
                           : ""
                       }`}>
-                      General
+                      Reference Architecture
                     </Col>
-                  </Row>
-                  <Row className="pt-1 pb-1">
                     <Col
+                      xs={12}
                       onClick={() =>
                         props.setActiveSection(DocumentationSection.ACCESS)
                       }
-                      className={`${styles.menuLeftItem} ${
+                      className={`indented ${styles.menuLeftItem} ${
                         props.section == DocumentationSection.ACCESS
                           ? styles.menuLeftItemActive
                           : ""
@@ -258,6 +251,88 @@ export default function DelegationDocumentation(props: Props) {
                           : ""
                       }`}>
                       Consolidation
+                    </Col>
+                  </Row>
+                  <Row className="pt-2 pb-2">
+                    <Col xs={12} className="font-color-h">
+                      View
+                    </Col>
+                    <Col
+                      xs={12}
+                      onClick={() =>
+                        props.setActiveSection(
+                          DocumentationSection.VIEW_DELEGATIONS
+                        )
+                      }
+                      className={`indented ${styles.menuLeftItem} ${
+                        props.section == DocumentationSection.VIEW_DELEGATIONS
+                          ? styles.menuLeftItemActive
+                          : ""
+                      }`}>
+                      Delegations
+                    </Col>
+                    <Col
+                      xs={12}
+                      onClick={() =>
+                        props.setActiveSection(
+                          DocumentationSection.VIEW_SUB_DELEGATIONS
+                        )
+                      }
+                      className={`indented ${styles.menuLeftItem} ${
+                        props.section ==
+                        DocumentationSection.VIEW_SUB_DELEGATIONS
+                          ? styles.menuLeftItemActive
+                          : ""
+                      }`}>
+                      Sub-delegations
+                    </Col>
+                    <Col
+                      xs={12}
+                      onClick={() =>
+                        props.setActiveSection(
+                          DocumentationSection.VIEW_CONSOLIDATIONS
+                        )
+                      }
+                      className={`indented ${styles.menuLeftItem} ${
+                        props.section ==
+                        DocumentationSection.VIEW_CONSOLIDATIONS
+                          ? styles.menuLeftItemActive
+                          : ""
+                      }`}>
+                      Consolidations
+                    </Col>
+                  </Row>
+                  <Row className="pt-2 pb-2">
+                    <Col xs={12} className="font-color-h">
+                      Manage
+                    </Col>
+                    <Col
+                      xs={12}
+                      onClick={() =>
+                        props.setActiveSection(
+                          DocumentationSection.MANAGE_UPDATE
+                        )
+                      }
+                      className={`indented ${styles.menuLeftItem} ${
+                        props.section == DocumentationSection.MANAGE_UPDATE
+                          ? styles.menuLeftItemActive
+                          : ""
+                      }`}>
+                      Update
+                    </Col>
+                    <Col
+                      xs={12}
+                      onClick={() =>
+                        props.setActiveSection(
+                          DocumentationSection.MANAGE_REVOKE
+                        )
+                      }
+                      className={`indented ${styles.menuLeftItem} ${
+                        props.section == DocumentationSection.MANAGE_REVOKE
+                          ? styles.menuLeftItemActive
+                          : ""
+                      }`}>
+                      Revoke
                     </Col>
                   </Row>
                   <Row className="pt-2 pb-2">
@@ -385,37 +460,92 @@ export default function DelegationDocumentation(props: Props) {
                       Revoke
                     </Col>
                   </Row>
+                </Container>
+              </Col>
+              {props.section && (
+                <Col className={styles.menuRight}>{printSection()}</Col>
+              )}
+            </Row>
+            <Row className="pt-4">
+              <Col className={styles.menuLeftFull}>
+                <Container>
                   <Row className="pt-2 pb-2">
                     <Col xs={12} className="font-color-h">
-                      Manage
+                      General{" "}
+                    </Col>
+                    <Col
+                      xs={12}
+                      onClick={() =>
+                        props.setActiveSection(DocumentationSection.GENERAL)
+                      }
+                      className={`indented ${styles.menuLeftItem} ${
+                        props.section == DocumentationSection.GENERAL
+                          ? styles.menuLeftItemActive
+                          : ""
+                      }`}>
+                      Reference Architecture
+                    </Col>
+                    <Col
+                      xs={12}
+                      onClick={() =>
+                        props.setActiveSection(DocumentationSection.ACCESS)
+                      }
+                      className={`indented ${styles.menuLeftItem} ${
+                        props.section == DocumentationSection.ACCESS
+                          ? styles.menuLeftItemActive
+                          : ""
+                      }`}>
+                      How to Access Delegations Center
+                    </Col>
+                  </Row>
+                  <Row className="pt-2 pb-2">
+                    <Col xs={12} className="font-color-h">
+                      How to Register
                     </Col>
                     <Col
                       xs={12}
                       onClick={() =>
                         props.setActiveSection(
-                          DocumentationSection.MANAGE_UPDATE
+                          DocumentationSection.REGISTER_DELEGATION
                         )
                       }
                       className={`indented ${styles.menuLeftItem} ${
-                        props.section == DocumentationSection.MANAGE_UPDATE
+                        props.section ==
+                        DocumentationSection.REGISTER_DELEGATION
                           ? styles.menuLeftItemActive
                           : ""
                       }`}>
-                      Update
+                      Delegation
                     </Col>
                     <Col
                       xs={12}
                       onClick={() =>
                         props.setActiveSection(
-                          DocumentationSection.MANAGE_REVOKE
+                          DocumentationSection.REGISTER_SUB_DELEGATION
                         )
                       }
                       className={`indented ${styles.menuLeftItem} ${
-                        props.section == DocumentationSection.MANAGE_REVOKE
+                        props.section ==
+                        DocumentationSection.REGISTER_SUB_DELEGATION
                           ? styles.menuLeftItemActive
                           : ""
                       }`}>
-                      Revoke
+                      Sub-Delegation
+                    </Col>
+                    <Col
+                      xs={12}
+                      onClick={() =>
+                        props.setActiveSection(
+                          DocumentationSection.REGISTER_CONSOLIDATION
+                        )
+                      }
+                      className={`indented ${styles.menuLeftItem} ${
+                        props.section ==
+                        DocumentationSection.REGISTER_CONSOLIDATION
+                          ? styles.menuLeftItemActive
+                          : ""
+                      }`}>
+                      Consolidation
                     </Col>
                   </Row>
                   <Row className="pt-2 pb-2">
@@ -467,28 +597,164 @@ export default function DelegationDocumentation(props: Props) {
                       Consolidations
                     </Col>
                   </Row>
-                </Container>
-              </Col>
-              {props.section && (
-                <Col className={styles.menuRight}>{printSection()}</Col>
-              )}
-            </Row>
-            <Row className="pt-4">
-              <Col className={styles.menuLeftFull}>
-                <Container>
-                  {Object.values(DocumentationSection).map((section) => (
-                    <Row className="pt-1 pb-1" key={`${section}-full`}>
-                      <Col
-                        onClick={() => props.setActiveSection(section)}
-                        className={`${styles.menuLeftItem} ${
-                          props.section == section
-                            ? styles.menuLeftItemActive
-                            : ""
-                        }`}>
-                        {section}
-                      </Col>
-                    </Row>
-                  ))}
+                  <Row className="pt-2 pb-2">
+                    <Col xs={12} className="font-color-h">
+                      Manage
+                    </Col>
+                    <Col
+                      xs={12}
+                      onClick={() =>
+                        props.setActiveSection(
+                          DocumentationSection.MANAGE_UPDATE
+                        )
+                      }
+                      className={`indented ${styles.menuLeftItem} ${
+                        props.section == DocumentationSection.MANAGE_UPDATE
+                          ? styles.menuLeftItemActive
+                          : ""
+                      }`}>
+                      Update
+                    </Col>
+                    <Col
+                      xs={12}
+                      onClick={() =>
+                        props.setActiveSection(
+                          DocumentationSection.MANAGE_REVOKE
+                        )
+                      }
+                      className={`indented ${styles.menuLeftItem} ${
+                        props.section == DocumentationSection.MANAGE_REVOKE
+                          ? styles.menuLeftItemActive
+                          : ""
+                      }`}>
+                      Revoke
+                    </Col>
+                  </Row>
+                  <Row className="pt-2 pb-2">
+                    <Col xs={12} className="font-color-h">
+                      How to Lock Wallet
+                    </Col>
+                    <Col
+                      xs={12}
+                      onClick={() =>
+                        props.setActiveSection(DocumentationSection.LOCK_GLOBAL)
+                      }
+                      className={`indented ${styles.menuLeftItem} ${
+                        props.section == DocumentationSection.LOCK_GLOBAL
+                          ? styles.menuLeftItemActive
+                          : ""
+                      }`}>
+                      Global
+                    </Col>
+                    <Col
+                      xs={12}
+                      onClick={() =>
+                        props.setActiveSection(
+                          DocumentationSection.LOCK_COLLECTION
+                        )
+                      }
+                      className={`indented ${styles.menuLeftItem} ${
+                        props.section == DocumentationSection.LOCK_COLLECTION
+                          ? styles.menuLeftItemActive
+                          : ""
+                      }`}>
+                      Collection
+                    </Col>
+                    <Col
+                      xs={12}
+                      onClick={() =>
+                        props.setActiveSection(
+                          DocumentationSection.LOCK_USE_CASE
+                        )
+                      }
+                      className={`indented ${styles.menuLeftItem} ${
+                        props.section == DocumentationSection.LOCK_USE_CASE
+                          ? styles.menuLeftItemActive
+                          : ""
+                      }`}>
+                      Use Case
+                    </Col>
+                  </Row>
+                  <Row className="pt-2 pb-2">
+                    <Col xs={12} className="font-color-h">
+                      How to Unlock Wallet
+                    </Col>
+                    <Col
+                      xs={12}
+                      onClick={() =>
+                        props.setActiveSection(
+                          DocumentationSection.UNLOCK_GLOBAL
+                        )
+                      }
+                      className={`indented ${styles.menuLeftItem} ${
+                        props.section == DocumentationSection.UNLOCK_GLOBAL
+                          ? styles.menuLeftItemActive
+                          : ""
+                      }`}>
+                      Global
+                    </Col>
+                    <Col
+                      xs={12}
+                      onClick={() =>
+                        props.setActiveSection(
+                          DocumentationSection.UNLOCK_COLLECTION
+                        )
+                      }
+                      className={`indented ${styles.menuLeftItem} ${
+                        props.section == DocumentationSection.UNLOCK_COLLECTION
+                          ? styles.menuLeftItemActive
+                          : ""
+                      }`}>
+                      Collection
+                    </Col>
+                    <Col
+                      xs={12}
+                      onClick={() =>
+                        props.setActiveSection(
+                          DocumentationSection.UNLOCK_USE_CASE
+                        )
+                      }
+                      className={`indented ${styles.menuLeftItem} ${
+                        props.section == DocumentationSection.UNLOCK_USE_CASE
+                          ? styles.menuLeftItemActive
+                          : ""
+                      }`}>
+                      Use Case
+                    </Col>
+                  </Row>
+                  <Row className="pt-2 pb-2">
+                    <Col xs={12} className="font-color-h">
+                      Using Sub-Delegation Rights
+                    </Col>
+                    <Col
+                      xs={12}
+                      onClick={() =>
+                        props.setActiveSection(
+                          DocumentationSection.SUB_DEL_REGISTER
+                        )
+                      }
+                      className={`indented ${styles.menuLeftItem} ${
+                        props.section == DocumentationSection.SUB_DEL_REGISTER
+                          ? styles.menuLeftItemActive
+                          : ""
+                      }`}>
+                      Register
+                    </Col>
+                    <Col
+                      xs={12}
+                      onClick={() =>
+                        props.setActiveSection(
+                          DocumentationSection.SUB_DEL_REVOKE
+                        )
+                      }
+                      className={`indented ${styles.menuLeftItem} ${
+                        props.section == DocumentationSection.SUB_DEL_REVOKE
+                          ? styles.menuLeftItemActive
+                          : ""
+                      }`}>
+                      Revoke
+                    </Col>
+                  </Row>
                 </Container>
               </Col>
             </Row>
