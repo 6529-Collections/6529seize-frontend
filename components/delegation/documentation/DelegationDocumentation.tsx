@@ -17,6 +17,7 @@ const DOCUMENTATION_SECTION_HTML: {
 }[] = [
   {
     section: DocumentationSection.GENERAL,
+    // url: "/html/NFTDelegation.html",
     url: "https://6529bucket.s3.eu-west-1.amazonaws.com/seize_html/about/NFTDelegation.html",
   },
   {
