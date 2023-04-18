@@ -898,8 +898,10 @@ export default function UserPage(props: Props) {
                   </Container>
                 </Col>
               </Row>
+            </Container>
+            <Container className="pt-3 pb-3">
               {tdh && tdh.balance > 0 && (
-                <Row className="pt-3 pb-3">
+                <Row>
                   <Accordion alwaysOpen className={styles.userPageAccordion}>
                     <Accordion.Item
                       className={styles.userPageAccordionItem}
@@ -1233,6 +1235,12 @@ export default function UserPage(props: Props) {
                         </Table>
                       </Accordion.Body>
                     </Accordion.Item>
+                  </Accordion>
+                </Row>
+              )}
+              {tdh && (
+                <Row>
+                  <Accordion alwaysOpen className={styles.userPageAccordion}>
                     <Accordion.Item
                       className={`${styles.userPageAccordionItem} mt-4`}
                       eventKey={"1"}>
