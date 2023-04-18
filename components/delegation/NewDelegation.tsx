@@ -326,9 +326,11 @@ export default function NewDelegationComponent(props: Props) {
             )}
             <Form.Group as={Row} className="pb-4">
               <Form.Label column sm={3} className="d-flex align-items-center">
-                Delegator
+                {props.subdelegation ? `Sub-Delegator` : `Delegator`}
                 <Tippy
-                  content={"Address registering the delegation"}
+                  content={`Address ${
+                    props.subdelegation ? `executing` : `registering`
+                  } the delegation`}
                   placement={"top"}
                   theme={"light"}>
                   <FontAwesomeIcon

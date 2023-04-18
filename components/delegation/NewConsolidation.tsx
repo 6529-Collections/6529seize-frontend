@@ -28,6 +28,7 @@ import {
   isValidEthAddress,
 } from "../../helpers/Helpers";
 import { DocumentationSection } from "./documentation/DelegationDocumentation";
+import { AboutSection } from "../../pages/about/[section]";
 
 interface Props {
   address: string;
@@ -299,9 +300,11 @@ export default function NewConsolidationComponent(props: Props) {
             )}
             <Form.Group as={Row} className="pb-4">
               <Form.Label column sm={3} className="d-flex align-items-center">
-                Delegator
+                {props.subdelegation ? `Sub-Delegator` : `Delegator`}
                 <Tippy
-                  content={"Address registering the delegation"}
+                  content={`Address ${
+                    props.subdelegation ? `executing` : `registering`
+                  } the sub-consolidation`}
                   placement={"top"}
                   theme={"light"}>
                   <FontAwesomeIcon
@@ -397,11 +400,12 @@ export default function NewConsolidationComponent(props: Props) {
               <Form.Label column sm={12} className="d-flex align-items-center">
                 Note: For TDH Consolidation use &apos;The Memes&apos; Collection
                 <a
-                  href={`/delegations-center/documentation/${DocumentationSection.CONSOLIDATE_TDH}`}
+                  // href={`/delegations-center/documentation/${DocumentationSection.CONSOLIDATE_TDH}`}
+                  href={`/about/${AboutSection.NFT_DELEGATION}#nftdelegation-consolidations`}
                   target="_blank"
                   rel="noreferrer">
                   <FontAwesomeIcon
-                    className={styles.infoIcon}
+                    className={styles.infoIconLink}
                     icon="info-circle"></FontAwesomeIcon>
                 </a>
               </Form.Label>

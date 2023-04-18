@@ -230,31 +230,6 @@ export default function RevokeDelegationWithSubComponent(props: Props) {
           <Form>
             <Form.Group as={Row} className="pb-4">
               <Form.Label column sm={3} className="d-flex align-items-center">
-                Delegator
-                <Tippy
-                  content={"Address registering the delegation"}
-                  placement={"top"}
-                  theme={"light"}>
-                  <FontAwesomeIcon
-                    className={styles.infoIcon}
-                    icon="info-circle"></FontAwesomeIcon>
-                </Tippy>
-              </Form.Label>
-              <Col sm={9}>
-                <Form.Control
-                  className={`${styles.formInput} ${styles.formInputDisabled}`}
-                  type="text"
-                  value={
-                    props.ens
-                      ? `${props.ens} - ${props.address}`
-                      : `${props.address}`
-                  }
-                  disabled
-                />
-              </Col>
-            </Form.Group>
-            <Form.Group as={Row} className="pb-4">
-              <Form.Label column sm={3} className="d-flex align-items-center">
                 Original Delegator
                 <Tippy
                   content={
@@ -275,6 +250,31 @@ export default function RevokeDelegationWithSubComponent(props: Props) {
                     orignalDelegatorEnsResolution.data
                       ? `${orignalDelegatorEnsResolution.data} - ${props.originalDelegator}`
                       : `${props.originalDelegator}`
+                  }
+                  disabled
+                />
+              </Col>
+            </Form.Group>
+            <Form.Group as={Row} className="pb-4">
+              <Form.Label column sm={3} className="d-flex align-items-center">
+                Sub-Delegator
+                <Tippy
+                  content={"Address executing the revocation"}
+                  placement={"top"}
+                  theme={"light"}>
+                  <FontAwesomeIcon
+                    className={styles.infoIcon}
+                    icon="info-circle"></FontAwesomeIcon>
+                </Tippy>
+              </Form.Label>
+              <Col sm={9}>
+                <Form.Control
+                  className={`${styles.formInput} ${styles.formInputDisabled}`}
+                  type="text"
+                  value={
+                    props.ens
+                      ? `${props.ens} - ${props.address}`
+                      : `${props.address}`
                   }
                   disabled
                 />
