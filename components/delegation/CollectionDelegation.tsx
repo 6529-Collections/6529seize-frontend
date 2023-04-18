@@ -581,7 +581,9 @@ export default function CollectionDelegationComponent(props: Props) {
   });
 
   useEffect(() => {
-    useCaseLockStatuses.refetch();
+    if (accountResolution.isConnected) {
+      useCaseLockStatuses.refetch();
+    }
   }, [waitUseCaseLockWrite.isSuccess]);
 
   useEffect(() => {
@@ -785,7 +787,7 @@ export default function CollectionDelegationComponent(props: Props) {
   ]);
 
   useEffect(() => {
-    if (!showToast) {
+    if (!showToast && outgoingDelegationsLoaded && incomingDelegationsLoaded) {
       setOutgoingDelegations([]);
       setOutgoingDelegationsLoaded(false);
       retrieveOutgoingDelegations.refetch();
@@ -1741,20 +1743,22 @@ export default function CollectionDelegationComponent(props: Props) {
             )}
           {(!accountResolution.isConnected ||
             networkResolution.chain?.id != DELEGATION_CONTRACT.chain_id) && (
-            <Row className="pt-5">
-              <Col className="d-flex justify-content-center">
-                <h4>
-                  <a
-                    href={`/delegations-center/getting-started`}
-                    className={styles.documentationLink}>
-                    <span>
-                      <FontAwesomeIcon icon="info-circle"></FontAwesomeIcon>
-                      Documentation
-                    </span>
-                  </a>
-                </h4>
-              </Col>
-            </Row>
+            <Container>
+              <Row className="pt-5">
+                <Col className="d-flex justify-content-center">
+                  <h4>
+                    <a
+                      href={`/delegations-center/getting-started`}
+                      className={styles.documentationLink}>
+                      <span>
+                        <FontAwesomeIcon icon="info-circle"></FontAwesomeIcon>
+                        Getting Started
+                      </span>
+                    </a>
+                  </h4>
+                </Col>
+              </Row>
+            </Container>
           )}
           {!accountResolution.isConnected && <ConnectWalletButton />}
           {accountResolution.isConnected &&
