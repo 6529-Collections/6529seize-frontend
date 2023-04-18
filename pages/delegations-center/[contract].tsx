@@ -82,7 +82,7 @@ export const CONSOLIDATION_USE_CASE = {
 export const DELEGATION_USE_CASES = [
   {
     use_case: 1,
-    display: "All (1-15)",
+    display: "All",
   },
   {
     use_case: 2,
