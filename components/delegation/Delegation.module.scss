@@ -527,6 +527,15 @@
   color: $font-color;
 }
 
+.infoIconLink {
+  height: 18px;
+  margin-left: 8px;
+  cursor: pointer;
+  &:focus {
+    outline: none !important;
+  }
+}
+
 .infoIcon {
   height: 18px;
   margin-left: 8px;
