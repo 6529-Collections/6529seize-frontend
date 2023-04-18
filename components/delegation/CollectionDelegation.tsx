@@ -215,7 +215,7 @@ export default function CollectionDelegationComponent(props: Props) {
 
   const [subDelegationOriginalDelegator, setSubDelegationOriginalDelegator] =
     useState<string | undefined>(undefined);
-  const [showCreateNewDelegationWithSub, setshowCreateNewDelegationWithSub] =
+  const [showCreateNewDelegationWithSub, setShowCreateNewDelegationWithSub] =
     useState(false);
   const [
     showCreateNewSubDelegationWithSub,
@@ -1309,7 +1309,7 @@ export default function CollectionDelegationComponent(props: Props) {
                               : ""
                           }`}
                           onClick={() => {
-                            setshowCreateNewDelegationWithSub(true);
+                            setShowCreateNewDelegationWithSub(true);
                             window.scrollTo(0, 0);
                           }}>
                           <FontAwesomeIcon
@@ -1653,7 +1653,7 @@ export default function CollectionDelegationComponent(props: Props) {
                       address={accountResolution.address as string}
                       ens={ensResolution.data}
                       onHide={() => {
-                        setshowCreateNewDelegationWithSub(false);
+                        setShowCreateNewDelegationWithSub(false);
                         setSubDelegationOriginalDelegator(undefined);
                       }}
                       onSetToast={(toast: any) => {
@@ -1674,7 +1674,7 @@ export default function CollectionDelegationComponent(props: Props) {
                       address={accountResolution.address as string}
                       ens={ensResolution.data}
                       onHide={() => {
-                        setshowCreateNewDelegationWithSub(false);
+                        setShowCreateNewSubDelegationWithSub(false);
                         setSubDelegationOriginalDelegator(undefined);
                       }}
                       onSetToast={(toast: any) => {
@@ -1695,7 +1695,7 @@ export default function CollectionDelegationComponent(props: Props) {
                       address={accountResolution.address as string}
                       ens={ensResolution.data}
                       onHide={() => {
-                        setshowCreateNewDelegationWithSub(false);
+                        setShowCreateNewConsolidationWithSub(false);
                         setSubDelegationOriginalDelegator(undefined);
                       }}
                       onSetToast={(toast: any) => {
@@ -1716,8 +1716,8 @@ export default function CollectionDelegationComponent(props: Props) {
                       ens={ensResolution.data}
                       showAddMore={true}
                       onHide={() => {
-                        setSubDelegationOriginalDelegator(undefined);
                         setShowRevokeDelegationWithSub(false);
+                        setSubDelegationOriginalDelegator(undefined);
                       }}
                       onSetToast={(toast: any) => {
                         setToast({

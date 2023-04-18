@@ -68,13 +68,13 @@ export const SUPPORTED_COLLECTIONS: DelegationCollection[] = [
 ];
 
 export const SUB_DELEGATION_USE_CASE = {
-  index: 15,
+  index: 16,
   use_case: 998,
   display: "Sub-Delegation",
 };
 
 export const CONSOLIDATION_USE_CASE = {
-  index: 16,
+  index: 17,
   use_case: 999,
   display: "Consolidation",
 };
@@ -139,6 +139,10 @@ export const DELEGATION_USE_CASES = [
   {
     use_case: 15,
     display: "View Access",
+  },
+  {
+    use_case: 16,
+    display: "Manage Access",
   },
 ];
 
