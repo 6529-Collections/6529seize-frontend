@@ -35,17 +35,17 @@ const DOCUMENTATION_SECTION_HTML: {
   {
     section: DocumentationSection.ACCESS,
     // url: "/html/access.html",
-    url: "https:6529bucket.s3.eu-west-1.amazonaws.com/seize_html/delegations-center-getting-started/html/access.html",
+    url: "https://6529bucket.s3.eu-west-1.amazonaws.com/seize_html/delegations-center-getting-started/html/access.html",
   },
   {
     section: DocumentationSection.REGISTER_DELEGATION,
     // url: "/html/register-delegation.html",
-    url: "https:6529bucket.s3.eu-west-1.amazonaws.com/seize_html/delegations-center-getting-started/html/register-delegation.html",
+    url: "https://6529bucket.s3.eu-west-1.amazonaws.com/seize_html/delegations-center-getting-started/html/register-delegation.html",
   },
   {
     section: DocumentationSection.REGISTER_SUB_DELEGATION,
     // url: "/html/register-sub-delegation.html",
-    url: "https:6529bucket.s3.eu-west-1.amazonaws.com/seize_html/delegations-center-getting-started/html/register-sub-delegation.html",
+    url: "https://6529bucket.s3.eu-west-1.amazonaws.com/seize_html/delegations-center-getting-started/html/register-sub-delegation.html",
   },
   {
     section: DocumentationSection.REGISTER_CONSOLIDATION,
