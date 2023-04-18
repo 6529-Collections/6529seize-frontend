@@ -145,7 +145,7 @@ export default function DelegationCenterComponent() {
                         <Col>
                           <h4>
                             <a
-                              href={`/delegations-center/documentation`}
+                              href={`/delegations-center/getting-started`}
                               className={styles.documentationLink}>
                               <span>
                                 <FontAwesomeIcon icon="info-circle"></FontAwesomeIcon>
