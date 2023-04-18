@@ -129,7 +129,7 @@ export default function DelegationCenterComponent() {
 
   return (
     <Container>
-      <Row className="pt-4">
+      <Row>
         <Col>
           {!showCreateNewDelegation &&
             !showCreateNewSubDelegation &&
@@ -137,7 +137,7 @@ export default function DelegationCenterComponent() {
             accountResolution.isConnected &&
             accountResolution.address &&
             DELEGATION_CONTRACT.chain_id == networkResolution.chain?.id && (
-              <Container>
+              <Container className="pt-4">
                 <Row>
                   <Col xs={12} sm={12} md={4} className="pb-3">
                     <Container>
@@ -300,6 +300,25 @@ export default function DelegationCenterComponent() {
                 });
               }}
             />
+          )}
+          {(!accountResolution.isConnected ||
+            networkResolution.chain?.id != DELEGATION_CONTRACT.chain_id) && (
+            <Container>
+              <Row className="pt-5">
+                <Col className="d-flex justify-content-center">
+                  <h4>
+                    <a
+                      href={`/delegations-center/getting-started`}
+                      className={styles.documentationLink}>
+                      <span>
+                        <FontAwesomeIcon icon="info-circle"></FontAwesomeIcon>
+                        Getting Started
+                      </span>
+                    </a>
+                  </h4>
+                </Col>
+              </Row>
+            </Container>
           )}
           {!accountResolution.isConnected && <ConnectWalletButton />}
           {accountResolution.isConnected &&
