@@ -52,17 +52,17 @@ export default function DelegationsDocumentation(props: Props) {
   return (
     <>
       <Head>
-        <title>Delegations Documentation | 6529 SEIZE</title>
+        <title>Delegations - Getting Started | 6529 SEIZE</title>
         <link rel="icon" href="/favicon.ico" />
         <meta
           name="description"
-          content="Delegations Documentation | 6529 SEIZE"
+          content="Delegations - Getting Started | 6529 SEIZE"
         />
         <meta
           property="og:url"
           content={`${process.env.BASE_ENDPOINT}/delegations-center/getting-started`}
         />
-        <meta property="og:title" content="Delegations Documentation" />
+        <meta property="og:title" content="Delegations - Getting Started" />
         <meta property="og:description" content="6529 SEIZE" />
         <meta
           property="og:image"
