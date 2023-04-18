@@ -43,3 +43,15 @@
     width: 100%;
   }
 }
+
+.htmlContainer {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5 {
+    font-family: $main-font !important;
+    float: none;
+    color: $font-color;
+  }
+}
