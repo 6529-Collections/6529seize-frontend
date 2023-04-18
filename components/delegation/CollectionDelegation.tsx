@@ -239,7 +239,7 @@ export default function CollectionDelegationComponent(props: Props) {
     setIncomingDelegationsLoaded(false);
   }, [accountResolution.address]);
 
-  useContractReads({
+  const retrieveOutgoingDelegations = useContractReads({
     contracts: getReadParams(
       accountResolution.address,
       props.collection.contract,
@@ -276,7 +276,7 @@ export default function CollectionDelegationComponent(props: Props) {
     },
   });
 
-  useContractReads({
+  const retrieveOutgoingDelegationsStatuses = useContractReads({
     contracts: getActiveDelegationsReadParams(
       accountResolution.address,
       props.collection.contract,
@@ -314,7 +314,7 @@ export default function CollectionDelegationComponent(props: Props) {
     },
   });
 
-  useContractReads({
+  const retrieveIncomingDelegations = useContractReads({
     contracts: getConsolidationReadParams(
       accountResolution.address,
       props.collection.contract,
@@ -343,7 +343,7 @@ export default function CollectionDelegationComponent(props: Props) {
     },
   });
 
-  useContractReads({
+  const retrieveIncomingDelegationsStatuses = useContractReads({
     contracts: getReadParams(
       accountResolution.address,
       props.collection.contract,
@@ -786,6 +786,16 @@ export default function CollectionDelegationComponent(props: Props) {
 
   useEffect(() => {
     if (!showToast) {
+      setOutgoingDelegations([]);
+      setOutgoingDelegationsLoaded(false);
+      retrieveOutgoingDelegations.refetch();
+      retrieveOutgoingDelegationsStatuses.refetch();
+
+      setIncomingDelegations([]);
+      setIncomingDelegationsLoaded(false);
+      retrieveIncomingDelegations.refetch();
+      retrieveIncomingDelegationsStatuses.refetch();
+
       setRevokeDelegationParams(undefined);
       setBatchRevokeDelegationParams(undefined);
       setToast(undefined);
