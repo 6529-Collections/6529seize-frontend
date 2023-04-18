@@ -205,11 +205,11 @@ export default function Delegations(props: Props) {
 }
 
 export async function getServerSideProps(req: any, res: any, resolvedUrl: any) {
-  if (req.query.contract == "documentation") {
+  if (req.query.contract == "getting-started") {
     return {
       redirect: {
         permanent: false,
-        destination: `/delegations-center/documentation/${DocumentationSection.GENERAL}`,
+        destination: `/delegations-center/getting-started/${DocumentationSection.REFERENCE}`,
       },
       props: {},
     };
