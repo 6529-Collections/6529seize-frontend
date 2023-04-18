@@ -3,7 +3,7 @@ import styles from "./DelegationDocumentation.module.scss";
 import { Container, Row, Col } from "react-bootstrap";
 
 export enum DocumentationSection {
-  GENERAL = "general",
+  REFERENCE = "reference-architecture",
   ACCESS = "access-delegations-center",
   REGISTER_DELEGATION = "register-delegation",
   REGISTER_SUB_DELEGATION = "register-sub-delegation",
@@ -28,7 +28,7 @@ const DOCUMENTATION_SECTION_HTML: {
   url: string;
 }[] = [
   {
-    section: DocumentationSection.GENERAL,
+    section: DocumentationSection.REFERENCE,
     // url: "/html/NFTDelegation.html",
     url: "https://6529bucket.s3.eu-west-1.amazonaws.com/seize_html/about/NFTDelegation.html",
   },
@@ -181,10 +181,10 @@ export default function DelegationDocumentation(props: Props) {
                     <Col
                       xs={12}
                       onClick={() =>
-                        props.setActiveSection(DocumentationSection.GENERAL)
+                        props.setActiveSection(DocumentationSection.REFERENCE)
                       }
                       className={`indented ${styles.menuLeftItem} ${
-                        props.section == DocumentationSection.GENERAL
+                        props.section == DocumentationSection.REFERENCE
                           ? styles.menuLeftItemActive
                           : ""
                       }`}>
@@ -476,10 +476,10 @@ export default function DelegationDocumentation(props: Props) {
                     <Col
                       xs={12}
                       onClick={() =>
-                        props.setActiveSection(DocumentationSection.GENERAL)
+                        props.setActiveSection(DocumentationSection.REFERENCE)
                       }
                       className={`indented ${styles.menuLeftItem} ${
-                        props.section == DocumentationSection.GENERAL
+                        props.section == DocumentationSection.REFERENCE
                           ? styles.menuLeftItemActive
                           : ""
                       }`}>
