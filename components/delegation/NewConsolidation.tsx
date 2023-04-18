@@ -399,7 +399,7 @@ export default function NewConsolidationComponent(props: Props) {
               <Form.Label column sm={12} className="d-flex align-items-center">
                 Note: For TDH Consolidation use &apos;The Memes&apos; Collection
                 <a
-                  href={`/delegations-center/documentation/${DocumentationSection.REGISTER}`}
+                  href={`/delegations-center/documentation/${DocumentationSection.REGISTER_CONSOLIDATION}`}
                   target="_blank"
                   rel="noreferrer">
                   <FontAwesomeIcon
