@@ -209,7 +209,7 @@ export async function getServerSideProps(req: any, res: any, resolvedUrl: any) {
     return {
       redirect: {
         permanent: false,
-        destination: `/delegations-center/documentation/${DocumentationSection.REGISTER_DELEGATION}`,
+        destination: `/delegations-center/documentation/${DocumentationSection.GENERAL}`,
       },
       props: {},
     };

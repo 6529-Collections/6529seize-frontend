@@ -28,7 +28,6 @@ import {
   isValidEthAddress,
 } from "../../helpers/Helpers";
 import { DocumentationSection } from "./documentation/DelegationDocumentation";
-import { AboutSection } from "../../pages/about/[section]";
 
 interface Props {
   address: string;
@@ -400,8 +399,7 @@ export default function NewConsolidationComponent(props: Props) {
               <Form.Label column sm={12} className="d-flex align-items-center">
                 Note: For TDH Consolidation use &apos;The Memes&apos; Collection
                 <a
-                  // href={`/delegations-center/documentation/${DocumentationSection.CONSOLIDATE_TDH}`}
-                  href={`/about/${AboutSection.NFT_DELEGATION}#nftdelegation-consolidations`}
+                  href={`/delegations-center/documentation/${DocumentationSection.CONSOLIDATE_TDH}`}
                   target="_blank"
                   rel="noreferrer">
                   <FontAwesomeIcon
