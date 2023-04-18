@@ -1,14 +1,30 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import styles from "./DelegationDocumentation.module.scss";
 import { Container, Row, Col } from "react-bootstrap";
 
 export enum DocumentationSection {
-  REGISTER_DELEGATION = "register-delegation",
-  REVOKE_DELEGATION = "revoke-delegation",
-  REGISTER_CONSOLIDATION = "register-consolidation",
-  REGISTER_CONSOLIDATION_WITH_SUB_DEL = "register-delegation-with-sub-delegation-rights",
-  CONSOLIDATE_TDH = "consolidate-tdh",
+  GENERAL = "general",
+  ACCESS = "how-to-access",
+  REGISTER = "how-to-register",
+  REVOKE = "how-to-revoke",
+  UPDATE = "how-to-update",
+  LOCK = "how-to-lock",
 }
+
+const DOCUMENTATION_SECTION_HTML: {
+  section: DocumentationSection;
+  url: string;
+}[] = [
+  {
+    section: DocumentationSection.GENERAL,
+    url: "https://6529bucket.s3.eu-west-1.amazonaws.com/seize_html/about/NFTDelegation.html",
+  },
+  {
+    section: DocumentationSection.REGISTER,
+    // url: "/html/how-to-register.html",
+    url: "https://6529bucket.s3.eu-west-1.amazonaws.com/seize_html/delegations-center-getting-started/html/how-to-register.html",
+  },
+];
 
 interface Props {
   section: DocumentationSection;
@@ -16,35 +32,9 @@ interface Props {
 }
 
 export default function DelegationDocumentation(props: Props) {
-  function printRegisterDelegation() {
-    return (
-      <Container>
-        <Row>
-          <Col>{DocumentationSection.REGISTER_DELEGATION} Documentation</Col>
-        </Row>
-      </Container>
-    );
-  }
-
-  function printRevokeDelegation() {
-    return (
-      <Container>
-        <Row>
-          <Col>{DocumentationSection.REVOKE_DELEGATION} Documentation</Col>
-        </Row>
-      </Container>
-    );
-  }
-
-  function printRegisterConsolidation() {
-    return (
-      <Container>
-        <Row>
-          <Col>{DocumentationSection.REGISTER_CONSOLIDATION} Documentation</Col>
-        </Row>
-      </Container>
-    );
-  }
+  const [sectionHtml, setSectionHtml] = useState<
+    { section: DocumentationSection; html: string }[]
+  >([]);
 
   function getSectionTitle(section: DocumentationSection) {
     let title = section
@@ -56,45 +46,41 @@ export default function DelegationDocumentation(props: Props) {
     return title;
   }
 
-  function printRegisterDelegationWithSubDelegation() {
+  function printContent(html: string) {
     return (
       <Container>
         <Row>
-          <Col>
-            {DocumentationSection.REGISTER_CONSOLIDATION_WITH_SUB_DEL}{" "}
-            Documentation
-          </Col>
-        </Row>
-      </Container>
-    );
-  }
-
-  function printConsolidateTDH() {
-    return (
-      <Container>
-        <Row>
-          <Col>
-            Explain that it needs to be registered on &apos;The Memes&apos;
-            contract etc etc
-          </Col>
+          <Col
+            className={styles.htmlContainer}
+            dangerouslySetInnerHTML={{
+              __html: html,
+            }}></Col>
         </Row>
       </Container>
     );
   }
 
   function printSection() {
-    switch (props.section) {
-      case DocumentationSection.REGISTER_DELEGATION:
-        return printRegisterDelegation();
-      case DocumentationSection.REVOKE_DELEGATION:
-        return printRevokeDelegation();
-      case DocumentationSection.REGISTER_CONSOLIDATION:
-        return printRegisterConsolidation();
-      case DocumentationSection.REGISTER_CONSOLIDATION_WITH_SUB_DEL:
-        return printRegisterDelegationWithSubDelegation();
-      case DocumentationSection.CONSOLIDATE_TDH:
-        return printConsolidateTDH();
+    const html = sectionHtml.find((s) => s.section == props.section);
+    if (html) return printContent(html.html);
+  }
+
+  useEffect(() => {
+    if (props.section && !sectionHtml.some((s) => s.section == props.section))
+      fetchSection(props.section);
+  }, [props.section]);
+
+  async function fetchSection(mySection: DocumentationSection) {
+    let htmlText = "";
+    const url = DOCUMENTATION_SECTION_HTML.find((d) => d.section == mySection);
+    if (url) {
+      const htmlRequest = await fetch(url.url);
+      htmlText = htmlRequest.status == 200 ? await htmlRequest.text() : "";
     }
+    setSectionHtml((sectionHtml) => [
+      ...sectionHtml,
+      { section: mySection, html: htmlText },
+    ]);
   }
 
   return (

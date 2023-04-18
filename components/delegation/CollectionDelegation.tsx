@@ -1735,8 +1735,7 @@ export default function CollectionDelegationComponent(props: Props) {
               <Col className="d-flex justify-content-center">
                 <h4>
                   <a
-                    // href={`/delegations-center/documentation`}
-                    href={`/about/${AboutSection.NFT_DELEGATION}`}
+                    href={`/delegations-center/documentation`}
                     className={styles.documentationLink}>
                     <span>
                       <FontAwesomeIcon icon="info-circle"></FontAwesomeIcon>

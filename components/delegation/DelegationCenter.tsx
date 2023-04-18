@@ -145,12 +145,11 @@ export default function DelegationCenterComponent() {
                         <Col>
                           <h4>
                             <a
-                              // href={`/delegations-center/documentation`}
-                              href={`/about/${AboutSection.NFT_DELEGATION}`}
+                              href={`/delegations-center/documentation`}
                               className={styles.documentationLink}>
                               <span>
                                 <FontAwesomeIcon icon="info-circle"></FontAwesomeIcon>
-                                Documentation
+                                Getting Started
                               </span>
                             </a>
                           </h4>
