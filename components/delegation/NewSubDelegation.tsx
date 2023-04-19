@@ -13,7 +13,7 @@ import {
   DelegationCollection,
   SUB_DELEGATION_USE_CASE,
   SUPPORTED_COLLECTIONS,
-} from "../../pages/delegations-center/[contract]";
+} from "../../pages/delegation-center/[contract]";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Tippy from "@tippyjs/react";
 import {
@@ -160,10 +160,12 @@ export default function NewDelegationComponent(props: Props) {
     }
     if (!newDelegationToAddress || !isValidEthAddress(newDelegationToAddress)) {
       newErrors.push("Missing or invalid Address");
-    }
-    if (
-      newDelegationToAddress &&
-      newDelegationToAddress.toUpperCase() == props.address.toUpperCase()
+    } else if (
+      (props.subdelegation &&
+        newDelegationToAddress.toUpperCase() ==
+          props.subdelegation.originalDelegator.toUpperCase()) ||
+      (!props.subdelegation &&
+        newDelegationToAddress.toUpperCase() == props.address.toUpperCase())
     ) {
       newErrors.push("Invalid Address - cannot delegate to your own wallet");
     }

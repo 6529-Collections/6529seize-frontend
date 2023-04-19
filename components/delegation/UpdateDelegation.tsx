@@ -13,7 +13,7 @@ import {
   CONSOLIDATION_USE_CASE,
   DelegationCollection,
   SUB_DELEGATION_USE_CASE,
-} from "../../pages/delegations-center/[contract]";
+} from "../../pages/delegation-center/[contract]";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Tippy from "@tippyjs/react";
 import { DELEGATION_CONTRACT, NEVER_DATE } from "../../constants";

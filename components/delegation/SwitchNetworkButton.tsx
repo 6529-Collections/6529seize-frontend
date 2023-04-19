@@ -20,21 +20,19 @@ export default function SwitchNetworkButton() {
 
   return (
     <Container>
-      <Row className="pt-5 pb-5">
-        <Col xs={12} className="text-center">
-          <h3 className="float-none">
-            Unsupported Network: {currentNetwork?.name}
-          </h3>
-        </Col>
-        <Col xs={12} className="text-center pt-4">
-          <h3 className="float-none">Switch to {targetNetwork?.name}</h3>
+      <Row className="pb-2">
+        <Col className="d-flex align-items-center justify-content-center">
+          <h5 className="mb-0 text-center">
+            Unsupported Network: {currentNetwork?.name} - Switch to{" "}
+            {targetNetwork?.name}
+          </h5>
         </Col>
       </Row>
-      <Row>
-        <Col className="text-center">
+      <Row className="pb-2">
+        <Col className="d-flex align-items-center justify-content-center">
           <Web3NetworkSwitch id="seize-web3-network-switch" />
           <button
-            className={styles.connectWalletButton}
+            className={styles.switchNetworkButton}
             onClick={() => clickSwitchNetwork()}>
             Switch Network
           </button>
