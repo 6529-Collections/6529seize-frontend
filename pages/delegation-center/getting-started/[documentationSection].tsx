@@ -31,7 +31,7 @@ export default function DelegationsDocumentation(props: Props) {
 
   const [breadcrumbs, setBreadcrumbs] = useState<Crumb[]>([
     { display: "Home", href: "/" },
-    { display: "Delegations Center", href: "/delegations-center" },
+    { display: "Delegation Center", href: "/delegation-center" },
     { display: "Getting Started" },
   ]);
 

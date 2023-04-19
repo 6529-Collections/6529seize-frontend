@@ -96,14 +96,6 @@ export default function Header(props: Props) {
                         }>
                         Profile
                       </NavDropdown.Item>
-                      <NavDropdown.Item
-                        key="delegations-dropdown-item"
-                        className={styles.dropdownItem}
-                        onClick={() =>
-                          (window.location.href = `/delegations-center`)
-                        }>
-                        Delegations Center
-                      </NavDropdown.Item>
                     </NavDropdown>
                   </>
                 ) : (
@@ -115,13 +107,6 @@ export default function Header(props: Props) {
                   />
                 )}
               </h3>
-            </Col>
-          </Row>
-          <Row className="pt-3 pb-3">
-            <Col>
-              <a href="/">
-                <h3>Home</h3>
-              </a>
             </Col>
           </Row>
           <Row className="pt-3 pb-3">
@@ -149,6 +134,13 @@ export default function Header(props: Props) {
             <Col>
               <a href="/rememes">
                 <h3>ReMemes</h3>
+              </a>
+            </Col>
+          </Row>
+          <Row className="pt-3 pb-3">
+            <Col>
+              <a href="/delegation-center">
+                <h3>Delegation</h3>
               </a>
             </Col>
           </Row>
@@ -440,13 +432,6 @@ export default function Header(props: Props) {
                           <Nav className="justify-content-end ml-auto">
                             <Nav.Link
                               className={`${styles.mainNavLink} ${
-                                router.pathname == "/" ? "active" : ""
-                              }`}
-                              href="/">
-                              Home
-                            </Nav.Link>
-                            <Nav.Link
-                              className={`${styles.mainNavLink} ${
                                 router.pathname == "/the-memes" ? "active" : ""
                               }`}
                               href="/the-memes?sort=age&sort_dir=ASC">
@@ -508,6 +493,15 @@ export default function Header(props: Props) {
                                 Downloads
                               </NavDropdown.Item>
                             </NavDropdown>
+                            <Nav.Link
+                              className={`${styles.mainNavLink} ${
+                                router.pathname == "/delegation-center"
+                                  ? "active"
+                                  : ""
+                              }`}
+                              href="/delegation-center">
+                              Delegation
+                            </Nav.Link>
                             <NavDropdown
                               title="About"
                               className={`${styles.mainNavLink} ${
@@ -664,14 +658,6 @@ export default function Header(props: Props) {
                                       }`)
                                     }>
                                     Profile
-                                  </NavDropdown.Item>
-                                  <NavDropdown.Item
-                                    key="delegations-dropdown-item"
-                                    className={styles.dropdownItem}
-                                    onClick={() =>
-                                      (window.location.href = `/delegations-center`)
-                                    }>
-                                    Delegations Center
                                   </NavDropdown.Item>
                                 </NavDropdown>
                               </>

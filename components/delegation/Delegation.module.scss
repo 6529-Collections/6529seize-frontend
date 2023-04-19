@@ -38,8 +38,14 @@
   cursor: pointer;
 
   &:hover {
-    background-color: darken($color: white, $amount: 20);
+    background-color: darken($color: white, $amount: 10);
   }
+}
+
+.viewManageBtnDisabled {
+  pointer-events: none !important;
+  background-color: darken($color: white, $amount: 20);
+  color: $lighter-grey-2;
 }
 
 .collectionSelectionImage {
@@ -73,6 +79,15 @@
 .collectionDelegationsAccordionItem {
   border-radius: 0 !important;
   background-color: rgb(30, 30, 30);
+}
+
+.collectionDelegationsAccordionItemDisabled {
+  pointer-events: none !important;
+  background-color: darken($color: $blue, $amount: 10);
+
+  button {
+    color: $font-color-h !important;
+  }
 }
 
 .closeNewDelegationForm {
@@ -427,7 +442,17 @@
   font-size: larger !important;
   font-weight: bolder !important;
   border: none !important;
-  padding: 10px 25px;
+  padding: 6px 20px;
+  margin-left: 20px;
+}
+
+.switchNetworkButton {
+  background-color: white !important;
+  color: black !important;
+  font-size: larger !important;
+  font-weight: bolder !important;
+  border: none !important;
+  padding: 6px 20px;
 }
 
 .delegationFetchingLabel {
