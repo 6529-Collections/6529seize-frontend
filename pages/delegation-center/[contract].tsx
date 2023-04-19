@@ -42,7 +42,7 @@ export const SUPPORTED_COLLECTIONS: DelegationCollection[] = [
     title: "Any Collection",
     display: "Any Collection",
     contract: DELEGATION_ALL_ADDRESS,
-    preview: "/Seize_Logo_Glasses_2-nobeta.png",
+    preview: "/nftdelegation.jpg",
   },
   {
     title: "The Memes",
@@ -159,7 +159,7 @@ interface Props {
 export default function Delegations(props: Props) {
   const [breadcrumbs, setBreadcrumbs] = useState<Crumb[]>([
     { display: "Home", href: "/" },
-    { display: "Delegations Center", href: "/delegations-center" },
+    { display: "Delegation Center", href: "/delegation-center" },
     { display: props.collection.display },
   ]);
 
@@ -209,7 +209,7 @@ export async function getServerSideProps(req: any, res: any, resolvedUrl: any) {
     return {
       redirect: {
         permanent: false,
-        destination: `/delegations-center/getting-started/${DocumentationSection.REFERENCE}`,
+        destination: `/delegation-center/getting-started/${DocumentationSection.REFERENCE_OVERVIEW}`,
       },
       props: {},
     };

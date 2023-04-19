@@ -13,7 +13,7 @@ import {
   CONSOLIDATION_USE_CASE,
   DelegationCollection,
   SUPPORTED_COLLECTIONS,
-} from "../../pages/delegations-center/[contract]";
+} from "../../pages/delegation-center/[contract]";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Tippy from "@tippyjs/react";
 import {
@@ -161,10 +161,12 @@ export default function NewConsolidationComponent(props: Props) {
     }
     if (!newDelegationToAddress || !isValidEthAddress(newDelegationToAddress)) {
       newErrors.push("Missing or invalid Address");
-    }
-    if (
-      newDelegationToAddress &&
-      newDelegationToAddress.toUpperCase() == props.address.toUpperCase()
+    } else if (
+      (props.subdelegation &&
+        newDelegationToAddress.toUpperCase() ==
+          props.subdelegation.originalDelegator.toUpperCase()) ||
+      (!props.subdelegation &&
+        newDelegationToAddress.toUpperCase() == props.address.toUpperCase())
     ) {
       newErrors.push("Invalid Address - cannot delegate to your own wallet");
     }
@@ -399,7 +401,7 @@ export default function NewConsolidationComponent(props: Props) {
               <Form.Label column sm={12} className="d-flex align-items-center">
                 Note: For TDH Consolidation use &apos;The Memes&apos; Collection
                 <a
-                  href={`/delegations-center/getting-started/${DocumentationSection.REGISTER_CONSOLIDATION}`}
+                  href={`/delegation-center/getting-started/${DocumentationSection.REGISTER_CONSOLIDATION}`}
                   target="_blank"
                   rel="noreferrer">
                   <FontAwesomeIcon

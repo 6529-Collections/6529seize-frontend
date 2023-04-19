@@ -54,7 +54,6 @@ interface Props {
   section: AboutSection;
   sectionTitle: string;
   gdrc1Text: string;
-  nftDelegationText: string;
 }
 
 export default function About(props: Props) {
@@ -124,7 +123,7 @@ export default function About(props: Props) {
       case AboutSection.GDRC1:
         return <AboutGDRC1 html={props.gdrc1Text} />;
       case AboutSection.NFT_DELEGATION:
-        return <AboutNFTDelegation html={props.nftDelegationText} />;
+        return <AboutNFTDelegation />;
     }
   }
 
@@ -637,20 +636,11 @@ export async function getServerSideProps(req: any, res: any, resolvedUrl: any) {
     const gdrc1Text =
       gdrc1Request.status == 200 ? await gdrc1Request.text() : "";
 
-    const nftDelegationTextRequest = await fetch(
-      `https://6529bucket.s3.eu-west-1.amazonaws.com/seize_html/about/NFTDelegation.html`
-    );
-    const nftDelegationText =
-      nftDelegationTextRequest.status == 200
-        ? await nftDelegationTextRequest.text()
-        : "";
-
     return {
       props: {
         section,
         sectionTitle,
         gdrc1Text,
-        nftDelegationText,
       },
     };
   } else {

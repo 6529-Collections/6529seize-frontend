@@ -3,8 +3,10 @@ import styles from "./DelegationDocumentation.module.scss";
 import { Container, Row, Col } from "react-bootstrap";
 
 export enum DocumentationSection {
-  REFERENCE = "reference-architecture",
-  ACCESS = "access-delegations-center",
+  REFERENCE_OVERVIEW = "reference-overview",
+  REFERENCE_ARCHITECTURE = "reference-architecture",
+  REFERENCE_DELEGATIONS = "reference-delegations",
+  REFERENCE_CONSOLIDATIONS = "reference-consolidations",
   REGISTER_DELEGATION = "register-delegation",
   REGISTER_SUB_DELEGATION = "register-sub-delegation",
   REGISTER_CONSOLIDATION = "register-consolidation",
@@ -28,14 +30,24 @@ const DOCUMENTATION_SECTION_HTML: {
   url: string;
 }[] = [
   {
-    section: DocumentationSection.REFERENCE,
+    section: DocumentationSection.REFERENCE_OVERVIEW,
     // url: "/html/NFTDelegation.html",
-    url: "https://6529bucket.s3.eu-west-1.amazonaws.com/seize_html/about/NFTDelegation.html",
+    url: "https://6529bucket.s3.eu-west-1.amazonaws.com/seize_html/delegations-center-getting-started/html/reference-overview.html",
   },
   {
-    section: DocumentationSection.ACCESS,
-    // url: "/html/access.html",
-    url: "https://6529bucket.s3.eu-west-1.amazonaws.com/seize_html/delegations-center-getting-started/html/access.html",
+    section: DocumentationSection.REFERENCE_ARCHITECTURE,
+    // url: "/html/NFTDelegation.html",
+    url: "https://6529bucket.s3.eu-west-1.amazonaws.com/seize_html/delegations-center-getting-started/html/reference-wallet-arch.html",
+  },
+  {
+    section: DocumentationSection.REFERENCE_DELEGATIONS,
+    // url: "/html/NFTDelegation.html",
+    url: "https://6529bucket.s3.eu-west-1.amazonaws.com/seize_html/delegations-center-getting-started/html/reference-delegations-page.html",
+  },
+  {
+    section: DocumentationSection.REFERENCE_CONSOLIDATIONS,
+    // url: "/html/NFTDelegation.html",
+    url: "https://6529bucket.s3.eu-west-1.amazonaws.com/seize_html/delegations-center-getting-started/html/reference-consolidations-page.html",
   },
   {
     section: DocumentationSection.REGISTER_DELEGATION,
@@ -131,7 +143,7 @@ export default function DelegationDocumentation(props: Props) {
 
   function printContent(html: string) {
     return (
-      <Container>
+      <Container className="pt-2">
         <Row>
           <Col
             className={styles.htmlContainer}
@@ -176,31 +188,66 @@ export default function DelegationDocumentation(props: Props) {
                 <Container>
                   <Row className="pt-2 pb-2">
                     <Col xs={12} className="font-color-h">
-                      General{" "}
+                      Reference
                     </Col>
                     <Col
                       xs={12}
                       onClick={() =>
-                        props.setActiveSection(DocumentationSection.REFERENCE)
+                        props.setActiveSection(
+                          DocumentationSection.REFERENCE_OVERVIEW
+                        )
                       }
                       className={`indented ${styles.menuLeftItem} ${
-                        props.section == DocumentationSection.REFERENCE
+                        props.section == DocumentationSection.REFERENCE_OVERVIEW
                           ? styles.menuLeftItemActive
                           : ""
                       }`}>
-                      Reference Architecture
+                      Overview
                     </Col>
                     <Col
                       xs={12}
                       onClick={() =>
-                        props.setActiveSection(DocumentationSection.ACCESS)
+                        props.setActiveSection(
+                          DocumentationSection.REFERENCE_ARCHITECTURE
+                        )
                       }
                       className={`indented ${styles.menuLeftItem} ${
-                        props.section == DocumentationSection.ACCESS
+                        props.section ==
+                        DocumentationSection.REFERENCE_ARCHITECTURE
                           ? styles.menuLeftItemActive
                           : ""
                       }`}>
-                      How to Access Delegations Center
+                      Wallet Architecture
+                    </Col>
+                    <Col
+                      xs={12}
+                      onClick={() =>
+                        props.setActiveSection(
+                          DocumentationSection.REFERENCE_DELEGATIONS
+                        )
+                      }
+                      className={`indented ${styles.menuLeftItem} ${
+                        props.section ==
+                        DocumentationSection.REFERENCE_DELEGATIONS
+                          ? styles.menuLeftItemActive
+                          : ""
+                      }`}>
+                      Delegations
+                    </Col>
+                    <Col
+                      xs={12}
+                      onClick={() =>
+                        props.setActiveSection(
+                          DocumentationSection.REFERENCE_CONSOLIDATIONS
+                        )
+                      }
+                      className={`indented ${styles.menuLeftItem} ${
+                        props.section ==
+                        DocumentationSection.REFERENCE_CONSOLIDATIONS
+                          ? styles.menuLeftItemActive
+                          : ""
+                      }`}>
+                      Consolidations
                     </Col>
                   </Row>
                   <Row className="pt-2 pb-2">
@@ -471,31 +518,66 @@ export default function DelegationDocumentation(props: Props) {
                 <Container>
                   <Row className="pt-2 pb-2">
                     <Col xs={12} className="font-color-h">
-                      General{" "}
+                      Reference
                     </Col>
                     <Col
                       xs={12}
                       onClick={() =>
-                        props.setActiveSection(DocumentationSection.REFERENCE)
+                        props.setActiveSection(
+                          DocumentationSection.REFERENCE_OVERVIEW
+                        )
                       }
                       className={`indented ${styles.menuLeftItem} ${
-                        props.section == DocumentationSection.REFERENCE
+                        props.section == DocumentationSection.REFERENCE_OVERVIEW
                           ? styles.menuLeftItemActive
                           : ""
                       }`}>
-                      Reference Architecture
+                      Overview
                     </Col>
                     <Col
                       xs={12}
                       onClick={() =>
-                        props.setActiveSection(DocumentationSection.ACCESS)
+                        props.setActiveSection(
+                          DocumentationSection.REFERENCE_ARCHITECTURE
+                        )
                       }
                       className={`indented ${styles.menuLeftItem} ${
-                        props.section == DocumentationSection.ACCESS
+                        props.section ==
+                        DocumentationSection.REFERENCE_ARCHITECTURE
                           ? styles.menuLeftItemActive
                           : ""
                       }`}>
-                      How to Access Delegations Center
+                      Wallet Architecture
+                    </Col>
+                    <Col
+                      xs={12}
+                      onClick={() =>
+                        props.setActiveSection(
+                          DocumentationSection.REFERENCE_DELEGATIONS
+                        )
+                      }
+                      className={`indented ${styles.menuLeftItem} ${
+                        props.section ==
+                        DocumentationSection.REFERENCE_DELEGATIONS
+                          ? styles.menuLeftItemActive
+                          : ""
+                      }`}>
+                      Delegations
+                    </Col>
+                    <Col
+                      xs={12}
+                      onClick={() =>
+                        props.setActiveSection(
+                          DocumentationSection.REFERENCE_CONSOLIDATIONS
+                        )
+                      }
+                      className={`indented ${styles.menuLeftItem} ${
+                        props.section ==
+                        DocumentationSection.REFERENCE_CONSOLIDATIONS
+                          ? styles.menuLeftItemActive
+                          : ""
+                      }`}>
+                      Consolidations
                     </Col>
                   </Row>
                   <Row className="pt-2 pb-2">
