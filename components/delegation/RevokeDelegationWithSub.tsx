@@ -15,7 +15,7 @@ import {
   DELEGATION_USE_CASES,
   SUPPORTED_COLLECTIONS,
   ALL_USE_CASES,
-} from "../../pages/delegation-center/[contract]";
+} from "../../pages/delegation/[...section]";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Tippy from "@tippyjs/react";
 import { DELEGATION_ALL_ADDRESS, DELEGATION_CONTRACT } from "../../constants";
@@ -46,7 +46,7 @@ export default function RevokeDelegationWithSubComponent(props: Props) {
   const [newDelegationToAddress, setNewDelegationToAddress] = useState("");
 
   const [errors, setErrors] = useState<string[]>([]);
-  const [gasError, setGasError] = useState(false);
+  const [gasError, setGasError] = useState<string>();
 
   const newDelegationToAddressEns = useEnsName({
     address:
@@ -103,10 +103,22 @@ export default function RevokeDelegationWithSubComponent(props: Props) {
         : undefined,
     onSettled(data, error) {
       if (data) {
-        setGasError(false);
+        setGasError(undefined);
       }
       if (error) {
-        setGasError(true);
+        if (error.message.includes("Chain mismatch")) {
+          setGasError(
+            `Switch to ${
+              DELEGATION_CONTRACT.chain_id == 1
+                ? "Ethereum Mainnet"
+                : "Sepolia Network"
+            }`
+          );
+        } else {
+          setGasError(
+            "CANNOT ESTIMATE GAS - This can be caused by locked collections/use-cases"
+          );
+        }
       }
     },
   });
@@ -120,7 +132,7 @@ export default function RevokeDelegationWithSubComponent(props: Props) {
   });
 
   function clearErrors() {
-    setGasError(false);
+    setGasError(undefined);
     setErrors([]);
   }
 
@@ -439,12 +451,7 @@ export default function RevokeDelegationWithSubComponent(props: Props) {
                     {errors.map((e, index) => (
                       <li key={`new-delegation-error-${index}`}>{e}</li>
                     ))}
-                    {gasError && (
-                      <li>
-                        CANNOT ESTIMATE GAS - This can be caused by locked
-                        collections/use-cases
-                      </li>
-                    )}
+                    {gasError && <li>{gasError}</li>}
                   </ul>
                 </Col>
               </Form.Group>

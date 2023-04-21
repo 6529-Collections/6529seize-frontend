@@ -1,22 +1,20 @@
 import Head from "next/head";
-import styles from "../../../styles/Home.module.scss";
+import styles from "../../styles/Home.module.scss";
 import { useEffect, useState } from "react";
-import Breadcrumb, { Crumb } from "../../../components/breadcrumb/Breadcrumb";
+import Breadcrumb, { Crumb } from "../../components/breadcrumb/Breadcrumb";
 import dynamic from "next/dynamic";
-import HeaderPlaceholder from "../../../components/header/HeaderPlaceholder";
-import { DocumentationSection } from "../../../components/delegation/documentation/DelegationDocumentation";
+import HeaderPlaceholder from "../../components/header/HeaderPlaceholder";
+import { DocumentationSection } from "../../components/delegation/documentation/DelegationDocumentation";
 import { useRouter } from "next/router";
 
-const Header = dynamic(() => import("../../../components/header/Header"), {
+const Header = dynamic(() => import("../../components/header/Header"), {
   ssr: false,
   loading: () => <HeaderPlaceholder />,
 });
 
 const Documentation = dynamic(
   () =>
-    import(
-      "../../../components/delegation/documentation/DelegationDocumentation"
-    )
+    import("../../components/delegation/documentation/DelegationDocumentation")
 );
 
 interface Props {
@@ -31,7 +29,7 @@ export default function DelegationsDocumentation(props: Props) {
 
   const [breadcrumbs, setBreadcrumbs] = useState<Crumb[]>([
     { display: "Home", href: "/" },
-    { display: "Delegation Center", href: "/delegation-center" },
+    { display: "Delegation", href: "/delegation/delegation-center" },
     { display: "Getting Started" },
   ]);
 
@@ -60,7 +58,7 @@ export default function DelegationsDocumentation(props: Props) {
         />
         <meta
           property="og:url"
-          content={`${process.env.BASE_ENDPOINT}/delegations-center/getting-started`}
+          content={`${process.env.BASE_ENDPOINT}/delegation-documentation/getting-started`}
         />
         <meta property="og:title" content="Delegations - Getting Started" />
         <meta property="og:description" content="6529 SEIZE" />

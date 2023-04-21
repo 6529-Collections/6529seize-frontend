@@ -31,7 +31,7 @@ import {
   SUPPORTED_COLLECTIONS,
   SUB_DELEGATION_USE_CASE,
   ALL_USE_CASES,
-} from "../../pages/delegation-center/[contract]";
+} from "../../pages/delegation/[...section]";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import dynamic from "next/dynamic";
 import { areEqualAddresses, getTransactionLink } from "../../helpers/Helpers";
@@ -43,11 +43,7 @@ import {
 } from "../../constants";
 import { DELEGATION_ABI } from "../../abis";
 import Tippy from "@tippyjs/react";
-import { useRouter } from "next/router";
-
-const SwitchNetworkButton = dynamic(() => import("./SwitchNetworkButton"), {
-  ssr: false,
-});
+import { DelegationCenterSection } from "./DelegationCenterMenu";
 
 const DelegationWallet = dynamic(() => import("./DelegationWallet"), {
   ssr: false,
@@ -75,6 +71,7 @@ const RevokeDelegationWithSubComponent = dynamic(
 );
 
 interface Props {
+  setSection(section: DelegationCenterSection): any;
   collection: DelegationCollection;
 }
 
@@ -192,19 +189,6 @@ export default function CollectionDelegationComponent(props: Props) {
     chainId: 1,
   });
 
-  function isEnabled() {
-    return (
-      accountResolution.isConnected &&
-      networkResolution.chain?.id == DELEGATION_CONTRACT.chain_id
-    );
-  }
-
-  const [enabled, setEnabled] = useState(isEnabled());
-
-  useEffect(() => {
-    setEnabled(isEnabled());
-  }, [accountResolution.isConnected, networkResolution.chain]);
-
   const [outgoingDelegations, setOutgoingDelegations] = useState<
     ContractDelegation[]
   >([]);
@@ -245,12 +229,6 @@ export default function CollectionDelegationComponent(props: Props) {
   function chainsMatch() {
     return networkResolution.chain?.id == DELEGATION_CONTRACT.chain_id;
   }
-
-  useEffect(() => {
-    if (!accountResolution.isConnected) {
-      window.location.href = "/delegation-center";
-    }
-  }, []);
 
   useEffect(() => {
     reset();
@@ -829,9 +807,7 @@ export default function CollectionDelegationComponent(props: Props) {
         <h5 className="float-none pt-3 pb-1">Delegations</h5>
         <Accordion alwaysOpen className={styles.collectionDelegationsAccordion}>
           <Accordion.Item
-            className={`${styles.collectionDelegationsAccordionItem} ${
-              !enabled ? styles.collectionDelegationsAccordionItemDisabled : ""
-            }`}
+            className={`${styles.collectionDelegationsAccordionItem}`}
             eventKey={"0"}>
             <Accordion.Header>Outgoing Delegations</Accordion.Header>
             <Accordion.Body>
@@ -846,9 +822,7 @@ export default function CollectionDelegationComponent(props: Props) {
             </Accordion.Body>
           </Accordion.Item>
           <Accordion.Item
-            className={`${styles.collectionDelegationsAccordionItem} ${
-              !enabled ? styles.collectionDelegationsAccordionItemDisabled : ""
-            } mt-3`}
+            className={`${styles.collectionDelegationsAccordionItem} mt-3`}
             eventKey={"1"}>
             <Accordion.Header>Incoming Delegations</Accordion.Header>
             <Accordion.Body>
@@ -875,9 +849,7 @@ export default function CollectionDelegationComponent(props: Props) {
           alwaysOpen
           className={`${styles.collectionDelegationsAccordion} `}>
           <Accordion.Item
-            className={`${styles.collectionDelegationsAccordionItem} ${
-              !enabled ? styles.collectionDelegationsAccordionItemDisabled : ""
-            }`}
+            className={`${styles.collectionDelegationsAccordionItem}`}
             eventKey={"0"}>
             <Accordion.Header>Outgoing Sub-Delegations</Accordion.Header>
             <Accordion.Body>
@@ -890,9 +862,7 @@ export default function CollectionDelegationComponent(props: Props) {
             </Accordion.Body>
           </Accordion.Item>
           <Accordion.Item
-            className={`${styles.collectionDelegationsAccordionItem} ${
-              !enabled ? styles.collectionDelegationsAccordionItemDisabled : ""
-            } mt-3`}
+            className={`${styles.collectionDelegationsAccordionItem} mt-3`}
             eventKey={"1"}>
             <Accordion.Header>Incoming Sub-Delegations</Accordion.Header>
             <Accordion.Body>
@@ -918,9 +888,7 @@ export default function CollectionDelegationComponent(props: Props) {
           alwaysOpen
           className={`${styles.collectionDelegationsAccordion}`}>
           <Accordion.Item
-            className={`${styles.collectionDelegationsAccordionItem} ${
-              !enabled ? styles.collectionDelegationsAccordionItemDisabled : ""
-            }`}
+            className={`${styles.collectionDelegationsAccordionItem}`}
             eventKey={"0"}>
             <Accordion.Header>Outgoing Consolidations</Accordion.Header>
             <Accordion.Body>
@@ -933,9 +901,7 @@ export default function CollectionDelegationComponent(props: Props) {
             </Accordion.Body>
           </Accordion.Item>
           <Accordion.Item
-            className={`${styles.collectionDelegationsAccordionItem} ${
-              !enabled ? styles.collectionDelegationsAccordionItemDisabled : ""
-            } mt-3`}
+            className={`${styles.collectionDelegationsAccordionItem} mt-3`}
             eventKey={"1"}>
             <Accordion.Header>Incoming Consolidations</Accordion.Header>
             <Accordion.Body>
@@ -1385,7 +1351,7 @@ export default function CollectionDelegationComponent(props: Props) {
                 {collectionLockRead.data != null && (
                   <span
                     className={`${styles.lockDelegationBtn} ${
-                      collectionLockReadGlobal?.data || !enabled
+                      collectionLockReadGlobal?.data
                         ? styles.lockDelegationBtnDisabled
                         : ""
                     }`}
@@ -1430,9 +1396,7 @@ export default function CollectionDelegationComponent(props: Props) {
               <Form.Select
                 disabled={collectionLockRead.data ? true : false}
                 className={`${styles.formInputLockUseCase} ${
-                  collectionLockRead.data ||
-                  collectionLockReadGlobal?.data ||
-                  !enabled
+                  collectionLockRead.data || collectionLockReadGlobal?.data
                     ? styles.formInputDisabled
                     : ""
                 }`}
@@ -1537,7 +1501,7 @@ export default function CollectionDelegationComponent(props: Props) {
                   <div>
                     <span className={styles.hint}>* Note:</span> Unlock use case
                     in{" "}
-                    <a href={`/delegation-center/${ANY_COLLECTION_PATH}`}>
+                    <a href={`/delegation/${ANY_COLLECTION_PATH}`}>
                       All Collections
                     </a>
                   </div>
@@ -1557,7 +1521,7 @@ export default function CollectionDelegationComponent(props: Props) {
             <Row className="pb-3">
               <Col>
                 <span className={styles.hint}>* Note:</span> Unlock Wallet on{" "}
-                <a href={`/delegation-center/${ANY_COLLECTION_PATH}`}>
+                <a href={`/delegation/${ANY_COLLECTION_PATH}`}>
                   All Collections
                 </a>{" "}
                 to lock/unlock specific collections and use cases
@@ -1570,16 +1534,12 @@ export default function CollectionDelegationComponent(props: Props) {
   }
 
   return (
-    <Container className="pt-4 pb-4 no-padding">
+    <Container className="no-padding">
       <Row>
         <Col>
-          {accountResolution.isConnected &&
-            networkResolution.chain?.id != DELEGATION_CONTRACT.chain_id && (
-              <SwitchNetworkButton />
-            )}
           {props.collection && (
             <Container>
-              <Row className="pt-2 pb-2">
+              <Row className="pb-2">
                 <Col>
                   <h1>{props.collection.title.toUpperCase()}</h1>
                 </Col>
@@ -1597,12 +1557,14 @@ export default function CollectionDelegationComponent(props: Props) {
                     <Container className="no-padding">
                       <Row className="pt-5 pb-3">
                         <Col className="d-flex align-items-center justify-content-start">
-                          <a
-                            href={`/delegation-center`}
-                            className={styles.backBtn}>
+                          <span
+                            className={styles.backBtn}
+                            onClick={() =>
+                              props.setSection(DelegationCenterSection.CENTER)
+                            }>
                             <FontAwesomeIcon icon="circle-arrow-left" />
                             Back to Delegation Center
-                          </a>
+                          </span>
                         </Col>
                       </Row>
                     </Container>

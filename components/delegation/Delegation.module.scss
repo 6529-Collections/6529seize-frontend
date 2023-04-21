@@ -151,7 +151,6 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  margin-right: 15px;
   margin-top: 15px;
   background-color: $blue;
   color: white;
@@ -344,6 +343,7 @@
 }
 
 .backBtn {
+  cursor: pointer;
   text-decoration: none;
   font-size: 20px;
   svg {
@@ -504,8 +504,6 @@
 
 .delegationLink {
   text-decoration: none;
-  margin-left: 10px;
-  margin-right: 10px;
   height: 32px;
   display: inline-block;
 
@@ -572,4 +570,53 @@
 
 .formCheckColumn {
   width: 5%;
+}
+
+.menuLeft {
+  width: 20%;
+  flex: none;
+
+  a {
+    cursor: pointer;
+    text-decoration: none !important;
+  }
+}
+
+.menuLeftItem {
+  cursor: pointer;
+  &:hover {
+    color: $lightest-grey;
+  }
+}
+
+.menuLeftItemActive {
+  text-decoration: underline;
+}
+
+.menuRight {
+  width: 80%;
+}
+
+.menuLeftFull {
+  width: 100%;
+  display: none;
+}
+
+@media only screen and (max-width: 1000px) {
+  .menuLeft {
+    display: none;
+  }
+
+  .menuLeftFull {
+    display: block;
+  }
+
+  .menuRight {
+    width: 100%;
+  }
+}
+
+.delegationCenterSection {
+  background-color: $lighter-grey;
+  height: 100%;
 }
