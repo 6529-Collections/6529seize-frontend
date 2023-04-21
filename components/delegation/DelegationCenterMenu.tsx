@@ -247,7 +247,7 @@ export default function DelegationCenterMenu(props: Props) {
                     ? styles.menuLeftItemActive
                     : ""
                 }`}>
-                - Sub-Delegation
+                Sub-Delegation
               </Col>
               <Col
                 xs={12}
@@ -259,7 +259,7 @@ export default function DelegationCenterMenu(props: Props) {
                     ? styles.menuLeftItemActive
                     : ""
                 }`}>
-                - Wallet Locking
+                Wallet Locking
               </Col>
             </Row>
             <Row className="pt-4 pb-2">
