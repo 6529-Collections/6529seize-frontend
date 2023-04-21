@@ -13,7 +13,7 @@ import {
   DELEGATION_USE_CASES,
   DelegationCollection,
   SUPPORTED_COLLECTIONS,
-} from "../../pages/delegation-center/[contract]";
+} from "../../pages/delegation/[...section]";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Tippy from "@tippyjs/react";
 import {
@@ -63,7 +63,7 @@ export default function NewDelegationComponent(props: Props) {
   const [newDelegationToAddress, setNewDelegationToAddress] = useState("");
 
   const [errors, setErrors] = useState<string[]>([]);
-  const [gasError, setGasError] = useState(false);
+  const [gasError, setGasError] = useState<string>();
 
   const newDelegationToAddressEns = useEnsName({
     address:
@@ -121,10 +121,22 @@ export default function NewDelegationComponent(props: Props) {
             : undefined,
         onSettled(data, error) {
           if (data) {
-            setGasError(false);
+            setGasError(undefined);
           }
           if (error) {
-            setGasError(true);
+            if (error.message.includes("Chain mismatch")) {
+              setGasError(
+                `Switch to ${
+                  DELEGATION_CONTRACT.chain_id == 1
+                    ? "Ethereum Mainnet"
+                    : "Sepolia Network"
+                }`
+              );
+            } else {
+              setGasError(
+                "CANNOT ESTIMATE GAS - This can be caused by locked collections/use-cases"
+              );
+            }
           }
         },
       })
@@ -146,10 +158,22 @@ export default function NewDelegationComponent(props: Props) {
           validate().length == 0 ? "registerDelegationAddress" : undefined,
         onSettled(data, error) {
           if (data) {
-            setGasError(false);
+            setGasError(undefined);
           }
           if (error) {
-            setGasError(true);
+            if (error.message.includes("Chain mismatch")) {
+              setGasError(
+                `Switch to ${
+                  DELEGATION_CONTRACT.chain_id == 1
+                    ? "Ethereum Mainnet"
+                    : "Sepolia Network"
+                }`
+              );
+            } else {
+              setGasError(
+                "CANNOT ESTIMATE GAS - This can be caused by locked collections/use-cases"
+              );
+            }
           }
         },
       });
@@ -163,7 +187,7 @@ export default function NewDelegationComponent(props: Props) {
   });
 
   function clearErrors() {
-    setGasError(false);
+    setGasError(undefined);
     setErrors([]);
   }
 
@@ -272,7 +296,7 @@ export default function NewDelegationComponent(props: Props) {
 
   return (
     <Container>
-      <Row className="pt-2">
+      <Row>
         <Col xs={10} className="pt-3 pb-1">
           <h4>
             Register Delegation{" "}
@@ -621,12 +645,7 @@ export default function NewDelegationComponent(props: Props) {
                     {errors.map((e, index) => (
                       <li key={`new-delegation-error-${index}`}>{e}</li>
                     ))}
-                    {gasError && (
-                      <li>
-                        CANNOT ESTIMATE GAS - This can be caused by locked
-                        collections/use-cases
-                      </li>
-                    )}
+                    {gasError && <li>{gasError}</li>}
                   </ul>
                 </Col>
               </Form.Group>

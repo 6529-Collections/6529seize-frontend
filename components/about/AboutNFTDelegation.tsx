@@ -15,7 +15,8 @@ export default function AboutNFTDelegation() {
         </Row>
         <Row className="pt-5">
           <Col className="text-center">
-            Visit our <a href="/delegation-center">Delegation Center</a> to get
+            Visit our{" "}
+            <a href="/delegation/delegation-center">Delegation Center</a> to get
             started
           </Col>
         </Row>

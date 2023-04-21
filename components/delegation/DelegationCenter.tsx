@@ -3,53 +3,75 @@ import { Container, Row, Col } from "react-bootstrap";
 import { useAccount, useNetwork } from "wagmi";
 import { areEqualAddresses } from "../../helpers/Helpers";
 import Image from "next/image";
+import { useWeb3Modal } from "@web3modal/react";
 
 import {
   ANY_COLLECTION_PATH,
   SUPPORTED_COLLECTIONS,
-} from "../../pages/delegation-center/[contract]";
+} from "../../pages/delegation/[...section]";
 import dynamic from "next/dynamic";
-import { DELEGATION_ALL_ADDRESS, DELEGATION_CONTRACT } from "../../constants";
+import {
+  DELEGATION_ALL_ADDRESS,
+  DELEGATION_CONTRACT,
+  GRADIENT_CONTRACT,
+  MEMELAB_CONTRACT,
+  MEMES_CONTRACT,
+} from "../../constants";
 import { sepolia } from "wagmi/chains";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useEffect, useState } from "react";
+import { DelegationCenterSection } from "./DelegationCenterMenu";
 
-const ConnectWalletButton = dynamic(() => import("./ConnectWalletButton"), {
-  ssr: false,
-});
+interface Props {
+  setSection(section: DelegationCenterSection): any;
+}
 
-const SwitchNetworkButton = dynamic(() => import("./SwitchNetworkButton"), {
-  ssr: false,
-});
-
-export default function DelegationCenterComponent() {
+export default function DelegationCenterComponent(props: Props) {
+  const [redirect, setRedirect] = useState<DelegationCenterSection>();
   const accountResolution = useAccount();
-  const networkResolution = useNetwork();
+  const web3Modal = useWeb3Modal();
 
-  function isEnabled() {
-    return (
-      accountResolution.isConnected &&
-      networkResolution.chain?.id == DELEGATION_CONTRACT.chain_id
-    );
-  }
-
-  const [enabled, setEnabled] = useState(isEnabled());
+  const [openConnect, setOpenConnect] = useState(false);
 
   useEffect(() => {
-    setEnabled(isEnabled());
-  }, [accountResolution.isConnected, networkResolution.chain]);
+    if (redirect) {
+      if (!accountResolution.isConnected) {
+        setOpenConnect(true);
+        web3Modal.open();
+      } else {
+        props.setSection(redirect);
+      }
+    }
+  }, [redirect]);
+
+  useEffect(() => {
+    if (!web3Modal.isOpen) {
+      if (openConnect) {
+        if (accountResolution.isConnected && redirect) {
+          props.setSection(redirect);
+        }
+      }
+      setRedirect(undefined);
+    }
+  }, [web3Modal.isOpen]);
 
   function printCollectionSelection() {
     return (
-      <Container>
-        <Row className="pt-3 pb-3">
+      <Container className="no-padding">
+        <Row className="pt-4 pb-4">
           <Col>
             <h4>Delegations/Consolidations by Collection</h4>
           </Col>
         </Row>
-        {Object.values(SUPPORTED_COLLECTIONS).map((c) => (
-          <Row key={c.contract}>
-            <Col className={styles.collectionSelectionWrapper}>
+        <Row>
+          {Object.values(SUPPORTED_COLLECTIONS).map((c) => (
+            <Col
+              key={c.contract}
+              xs={12}
+              sm={12}
+              md={6}
+              lg={6}
+              className={styles.collectionSelectionWrapper}>
               <Container className="pt-2 pb-3">
                 <Row className="pt-2 pb-2">
                   <Col
@@ -76,16 +98,22 @@ export default function DelegationCenterComponent() {
                     xs={4}
                     className="no-padding d-flex align-items-center justify-content-end">
                     <span
-                      className={`${styles.viewManageBtn} ${
-                        !enabled ? styles.viewManageBtnDisabled : ""
-                      }`}
+                      className={`${styles.viewManageBtn}`}
                       onClick={() => {
-                        if (
-                          areEqualAddresses(c.contract, DELEGATION_ALL_ADDRESS)
-                        ) {
-                          window.location.href = `/delegation-center/${ANY_COLLECTION_PATH}`;
-                        } else {
-                          window.location.href = `/delegation-center/${c.contract}`;
+                        const newSection = areEqualAddresses(
+                          c.contract,
+                          DELEGATION_ALL_ADDRESS
+                        )
+                          ? DelegationCenterSection.ANY_COLLECTION
+                          : areEqualAddresses(c.contract, MEMES_CONTRACT)
+                          ? DelegationCenterSection.MEMES_COLLECTION
+                          : areEqualAddresses(c.contract, MEMELAB_CONTRACT)
+                          ? DelegationCenterSection.MEME_LAB_COLLECTION
+                          : areEqualAddresses(c.contract, GRADIENT_CONTRACT)
+                          ? DelegationCenterSection.GRADIENTS_COLLECTION
+                          : null;
+                        if (newSection) {
+                          setRedirect(newSection);
                         }
                       }}>
                       View/Manage
@@ -94,144 +122,116 @@ export default function DelegationCenterComponent() {
                 </Row>
               </Container>
             </Col>
-          </Row>
-        ))}
+          ))}
+        </Row>
       </Container>
     );
   }
 
   return (
-    <Container className="pt-4 no-padding">
-      <Row>
+    <Container className="no-padding">
+      <Row className="pb-2">
         <Col>
-          {!accountResolution.isConnected && <ConnectWalletButton />}
-          {accountResolution.isConnected &&
-            networkResolution.chain?.id != DELEGATION_CONTRACT.chain_id && (
-              <SwitchNetworkButton />
-            )}
-          <Container>
+          <h1>DELEGATION CENTER</h1>
+        </Col>
+      </Row>
+      <Row className="pt-2 pb-3">
+        <Col xs={12} sm={12} md={6} lg={6}>
+          <Container className={`${styles.delegationCenterSection} pt-4 pb-4`}>
             <Row>
-              <Col xs={12} sm={12} md={4} className="pb-3">
-                <Container className="no-padding">
-                  <Row className="pt-3">
-                    <Col>
-                      <h4>
-                        <a
-                          href={`/delegation-center/getting-started`}
-                          className={styles.documentationLink}>
-                          <span>
-                            <FontAwesomeIcon icon="info-circle"></FontAwesomeIcon>
-                            Getting Started
-                          </span>
-                        </a>
-                      </h4>
-                    </Col>
-                  </Row>
-                  <Row className="pt-2 pb-2">
-                    <Col>
-                      <span
-                        className={`${styles.addNewDelegationBtn} ${
-                          !enabled ? styles.addNewDelegationBtnDisabled : ""
-                        }`}
-                        onClick={() => {
-                          window.location.href =
-                            "/delegation-center/register-delegation";
-                        }}>
-                        <FontAwesomeIcon
-                          icon="plus"
-                          className={styles.buttonIcon}
-                        />
-                        Register Delegation
-                      </span>
-                    </Col>
-                  </Row>
-                  <Row className="pt-2 pb-2">
-                    <Col>
-                      <span
-                        className={`${styles.addNewDelegationBtn} ${
-                          !enabled ? styles.addNewDelegationBtnDisabled : ""
-                        }`}
-                        onClick={() => {
-                          window.location.href =
-                            "/delegation-center/register-sub-delegation";
-                        }}>
-                        <FontAwesomeIcon
-                          icon="plus"
-                          className={styles.buttonIcon}
-                        />
-                        Register Sub-Delegation
-                      </span>
-                    </Col>
-                  </Row>
-                  <Row className="pt-2 pb-2">
-                    <Col>
-                      <span
-                        className={`${styles.addNewDelegationBtn} ${
-                          !enabled ? styles.addNewDelegationBtnDisabled : ""
-                        }`}
-                        onClick={() => {
-                          window.location.href =
-                            "/delegation-center/register-consolidation";
-                        }}>
-                        <FontAwesomeIcon
-                          icon="plus"
-                          className={styles.buttonIcon}
-                        />
-                        Register Consolidation
-                      </span>
-                    </Col>
-                  </Row>
-                  <Row className="pt-5">
-                    <Col>
-                      <h4>NFTDelegation.com Links</h4>
-                    </Col>
-                  </Row>
-                  <Row className="pt-3">
-                    <Col>
-                      <a
-                        href={
-                          DELEGATION_CONTRACT.chain_id == sepolia.id
-                            ? `https://sepolia.etherscan.io/address/${DELEGATION_CONTRACT.contract}`
-                            : `https://etherscan.io/address/${DELEGATION_CONTRACT.contract}`
-                        }
-                        target="_blank"
-                        rel="noreferrer"
-                        className={styles.delegationLink}>
-                        <Image
-                          src="/etherscan_w.png"
-                          alt="etherscan"
-                          width={30}
-                          height={30}
-                        />
-                        <span>Etherscan</span>
-                      </a>
-                      <a
-                        href={`https://github.com/6529-Collections/nftdelegation`}
-                        target="_blank"
-                        rel="noreferrer"
-                        className={styles.delegationLink}>
-                        <Image
-                          src="/github_w.png"
-                          alt="github"
-                          width={30}
-                          height={30}
-                        />
-                        <span>Github</span>
-                      </a>
-                    </Col>
-                  </Row>
-                </Container>
+              <Col className="text-center">
+                <Image
+                  src="/delegation-icon.png"
+                  alt="delegation"
+                  width={75}
+                  height={75}
+                />
               </Col>
-              <Col xs={12} sm={12} md={8} className={`pb-3`}>
-                <Container>
-                  <Row>
-                    <Col>{printCollectionSelection()}</Col>
-                  </Row>
-                </Container>
+            </Row>
+            <Row className="pt-3 pb-3">
+              <Col>
+                <h3 className="text-center float-none mb-0">Delegation</h3>
+              </Col>
+            </Row>
+            <Row>
+              <Col>
+                <ul>
+                  <li>
+                    Mint with your hot wallet on behalf of your vault wallet
+                  </li>
+                  <li>Eliminate manual wallet mapping</li>
+                  <li>Increase your wallet security</li>
+                </ul>
+              </Col>
+            </Row>
+            <Row>
+              <Col className="d-flex align-items-center justify-content-around">
+                <span
+                  className={`${styles.addNewDelegationBtn}`}
+                  onClick={() =>
+                    setRedirect(DelegationCenterSection.REGISTER_DELEGATION)
+                  }>
+                  <FontAwesomeIcon icon="plus" className={styles.buttonIcon} />
+                  Register Delegation
+                </span>
+                <span
+                  className={`${styles.addNewDelegationBtn} ml-2`}
+                  onClick={() => {
+                    setRedirect(
+                      DelegationCenterSection.REGISTER_SUB_DELEGATION
+                    );
+                  }}>
+                  <FontAwesomeIcon icon="plus" className={styles.buttonIcon} />
+                  Register Sub-Delegation
+                </span>
               </Col>
             </Row>
           </Container>
         </Col>
+        <Col xs={12} sm={12} md={6} lg={6}>
+          <Container className={`${styles.delegationCenterSection} pt-4 pb-4`}>
+            <Row>
+              <Col className="text-center">
+                <Image
+                  src="/consolidation-icon.png"
+                  alt="consolidation"
+                  width={75}
+                  height={75}
+                />
+              </Col>
+            </Row>
+            <Row className="pt-3 pb-3">
+              <Col>
+                <h3 className="text-center float-none mb-0">Consolidation</h3>
+              </Col>
+            </Row>
+            <Row>
+              <Col>
+                <ul>
+                  <li>
+                    Use up to 3 wallets to manage your 6529 Collections NFTs
+                  </li>
+                  <li>Transfer NFTs between wallets without losing TDH</li>
+                </ul>
+              </Col>
+            </Row>
+            <Row>
+              <Col className="d-flex align-items-center justify-content-around">
+                <span
+                  className={`${styles.addNewDelegationBtn} ml-2`}
+                  onClick={() => {
+                    setRedirect(DelegationCenterSection.REGISTER_CONSOLIDATION);
+                  }}>
+                  <FontAwesomeIcon icon="plus" className={styles.buttonIcon} />
+                  Register Consolidation
+                </span>
+              </Col>
+            </Row>
+          </Container>
+        </Col>
+      </Row>
+      <Row>
+        <Col>{printCollectionSelection()}</Col>
       </Row>
     </Container>
   );
