@@ -13,7 +13,7 @@ import {
   CONSOLIDATION_USE_CASE,
   DelegationCollection,
   SUB_DELEGATION_USE_CASE,
-} from "../../pages/delegation-center/[contract]";
+} from "../../pages/delegation/[...section]";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Tippy from "@tippyjs/react";
 import { DELEGATION_CONTRACT, NEVER_DATE } from "../../constants";
@@ -51,7 +51,7 @@ export default function NewDelegationComponent(props: Props) {
   const [delegationToInput, setDelegationToInput] = useState("");
   const [delegationToAddress, setDelegationToAddress] = useState("");
   const [errors, setErrors] = useState<string[]>([]);
-  const [gasError, setGasError] = useState(false);
+  const [gasError, setGasError] = useState<string>();
 
   const previousDelegationEns = useEnsName({
     address: props.delegation.wallet as `0x${string}`,
@@ -111,10 +111,22 @@ export default function NewDelegationComponent(props: Props) {
       validate().length == 0 ? "updateDelegationAddress" : undefined,
     onSettled(data, error) {
       if (data) {
-        setGasError(false);
+        setGasError(undefined);
       }
       if (error) {
-        setGasError(true);
+        if (error.message.includes("Chain mismatch")) {
+          setGasError(
+            `Switch to ${
+              DELEGATION_CONTRACT.chain_id == 1
+                ? "Ethereum Mainnet"
+                : "Sepolia Network"
+            }`
+          );
+        } else {
+          setGasError(
+            "CANNOT ESTIMATE GAS - This can be caused by locked collections/use-cases"
+          );
+        }
       }
     },
   });
@@ -358,7 +370,7 @@ export default function NewDelegationComponent(props: Props) {
                   onChange={(e) => {
                     setDelegationToInput(e.target.value);
                     setDelegationToAddress(e.target.value);
-                    setGasError(false);
+                    setGasError(undefined);
                   }}
                 />
               </Col>
@@ -536,12 +548,7 @@ export default function NewDelegationComponent(props: Props) {
                     {errors.map((e, index) => (
                       <li key={`new-delegation-error-${index}`}>{e}</li>
                     ))}
-                    {gasError && (
-                      <li>
-                        CANNOT ESTIMATE GAS - This can be caused by locked
-                        collections/use-cases
-                      </li>
-                    )}
+                    {gasError && <li>{gasError}</li>}
                   </ul>
                 </Col>
               </Form.Group>

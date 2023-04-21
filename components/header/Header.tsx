@@ -139,7 +139,7 @@ export default function Header(props: Props) {
           </Row>
           <Row className="pt-3 pb-3">
             <Col>
-              <a href="/delegation-center">
+              <a href="/delegation/delegation-center">
                 <h3>Delegation</h3>
               </a>
             </Col>
@@ -409,7 +409,7 @@ export default function Header(props: Props) {
                   <Container>
                     <Navbar expand="lg" variant="dark">
                       <Container
-                        className={`d-flex align-items-center justify-content-end`}>
+                        className={`d-flex align-items-center justify-content-end no-padding`}>
                         <Image
                           loading="eager"
                           priority
@@ -495,11 +495,11 @@ export default function Header(props: Props) {
                             </NavDropdown>
                             <Nav.Link
                               className={`${styles.mainNavLink} ${
-                                router.pathname == "/delegation-center"
+                                router.pathname.includes("/delegation/")
                                   ? "active"
                                   : ""
                               }`}
-                              href="/delegation-center">
+                              href="/delegation/delegation-center">
                               Delegation
                             </Nav.Link>
                             <NavDropdown
