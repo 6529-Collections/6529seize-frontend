@@ -148,6 +148,8 @@
 }
 
 .addNewDelegationWrapper {
+  position: absolute;
+  bottom: 1.5rem;
   display: flex;
   align-items: center;
   justify-content: space-around;
@@ -632,4 +634,15 @@
 .delegationCenterSection {
   background-color: $lighter-grey;
   height: 100%;
+  position: relative;
+}
+
+.delegationCenterSectionList {
+  height: 160px;
+}
+
+@media only screen and (max-width: 1400px) {
+  .delegationCenterSectionList {
+    height: 180px;
+  }
 }
