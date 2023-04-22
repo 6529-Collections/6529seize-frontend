@@ -31,102 +31,82 @@ const DOCUMENTATION_SECTION_HTML: {
 }[] = [
   {
     section: DocumentationSection.REFERENCE_OVERVIEW,
-    // url: "/html/NFTDelegation.html",
     url: "https://6529bucket.s3.eu-west-1.amazonaws.com/seize_html/delegations-center-getting-started/html/reference-overview.html",
   },
   {
     section: DocumentationSection.REFERENCE_ARCHITECTURE,
-    // url: "/html/NFTDelegation.html",
     url: "https://6529bucket.s3.eu-west-1.amazonaws.com/seize_html/delegations-center-getting-started/html/reference-wallet-arch.html",
   },
   {
     section: DocumentationSection.REFERENCE_DELEGATIONS,
-    // url: "/html/NFTDelegation.html",
     url: "https://6529bucket.s3.eu-west-1.amazonaws.com/seize_html/delegations-center-getting-started/html/reference-delegations-page.html",
   },
   {
     section: DocumentationSection.REFERENCE_CONSOLIDATIONS,
-    // url: "/html/NFTDelegation.html",
     url: "https://6529bucket.s3.eu-west-1.amazonaws.com/seize_html/delegations-center-getting-started/html/reference-consolidations-page.html",
   },
   {
     section: DocumentationSection.REGISTER_DELEGATION,
-    // url: "/html/register-delegation.html",
     url: "https://6529bucket.s3.eu-west-1.amazonaws.com/seize_html/delegations-center-getting-started/html/register-delegation.html",
   },
   {
     section: DocumentationSection.REGISTER_SUB_DELEGATION,
-    // url: "/html/register-sub-delegation.html",
     url: "https://6529bucket.s3.eu-west-1.amazonaws.com/seize_html/delegations-center-getting-started/html/register-sub-delegation.html",
   },
   {
     section: DocumentationSection.REGISTER_CONSOLIDATION,
-    // url: "/html/register-consolidation.html",
     url: "https://6529bucket.s3.eu-west-1.amazonaws.com/seize_html/delegations-center-getting-started/html/register-consolidation.html",
   },
   {
     section: DocumentationSection.LOCK_GLOBAL,
-    // url: "/html/lock-global.html",
     url: "https://6529bucket.s3.eu-west-1.amazonaws.com/seize_html/delegations-center-getting-started/html/lock-global.html",
   },
   {
     section: DocumentationSection.LOCK_COLLECTION,
-    // url: "/html/lock-collection.html",
     url: "https://6529bucket.s3.eu-west-1.amazonaws.com/seize_html/delegations-center-getting-started/html/lock-collection.html",
   },
   {
     section: DocumentationSection.LOCK_USE_CASE,
-    // url: "/html/lock-use-case.html",
     url: "https://6529bucket.s3.eu-west-1.amazonaws.com/seize_html/delegations-center-getting-started/html/lock-use-case.html",
   },
   {
     section: DocumentationSection.UNLOCK_GLOBAL,
-    // url: "/html/unlock-global.html",
     url: "https://6529bucket.s3.eu-west-1.amazonaws.com/seize_html/delegations-center-getting-started/html/unlock-global.html",
   },
   {
     section: DocumentationSection.UNLOCK_COLLECTION,
-    // url: "/html/unlock-collection.html",
     url: "https://6529bucket.s3.eu-west-1.amazonaws.com/seize_html/delegations-center-getting-started/html/unlock-collection.html",
   },
   {
     section: DocumentationSection.UNLOCK_USE_CASE,
-    // url: "/html/unlock-use-case.html",
     url: "https://6529bucket.s3.eu-west-1.amazonaws.com/seize_html/delegations-center-getting-started/html/unlock-use-case.html",
   },
   {
     section: DocumentationSection.SUB_DEL_REGISTER,
-    // url: "/html/sub-del-register.html",
     url: "https://6529bucket.s3.eu-west-1.amazonaws.com/seize_html/delegations-center-getting-started/html/sub-del-register.html",
   },
   {
     section: DocumentationSection.SUB_DEL_REVOKE,
-    // url: "/html/sub-del-revoke.html",
     url: "https://6529bucket.s3.eu-west-1.amazonaws.com/seize_html/delegations-center-getting-started/html/sub-del-revoke.html",
   },
   {
     section: DocumentationSection.MANAGE_UPDATE,
-    // url: "/html/manage-update.html",
     url: "https://6529bucket.s3.eu-west-1.amazonaws.com/seize_html/delegations-center-getting-started/html/manage-update.html",
   },
   {
     section: DocumentationSection.MANAGE_REVOKE,
-    // url: "/html/manage-revoke.html",
     url: "https://6529bucket.s3.eu-west-1.amazonaws.com/seize_html/delegations-center-getting-started/html/manage-revoke.html",
   },
   {
     section: DocumentationSection.VIEW_DELEGATIONS,
-    // url: "/html/view-delegations.html",
     url: "https://6529bucket.s3.eu-west-1.amazonaws.com/seize_html/delegations-center-getting-started/html/view-delegations.html",
   },
   {
     section: DocumentationSection.VIEW_SUB_DELEGATIONS,
-    // url: "/html/view-sub-delegations.html",
     url: "https://6529bucket.s3.eu-west-1.amazonaws.com/seize_html/delegations-center-getting-started/html/view-sub-delegations.html",
   },
   {
     section: DocumentationSection.VIEW_CONSOLIDATIONS,
-    // url: "/html/view-consolidations.html",
     url: "https://6529bucket.s3.eu-west-1.amazonaws.com/seize_html/delegations-center-getting-started/html/view-consolidations.html",
   },
 ];
