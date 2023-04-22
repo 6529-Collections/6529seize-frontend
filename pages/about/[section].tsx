@@ -54,6 +54,7 @@ interface Props {
   section: AboutSection;
   sectionTitle: string;
   gdrc1Text: string;
+  memesCalendarText: string;
 }
 
 export default function About(props: Props) {
@@ -95,7 +96,7 @@ export default function About(props: Props) {
       case AboutSection.MEMES:
         return <AboutMemes />;
       case AboutSection.MEMES_CALENDAR:
-        return <AboutMemesCalendar />;
+        return <AboutMemesCalendar html={props.memesCalendarText} />;
       case AboutSection.MEME_LAB:
         return <AboutMemeLab />;
       case AboutSection.GRADIENTS:
@@ -636,11 +637,20 @@ export async function getServerSideProps(req: any, res: any, resolvedUrl: any) {
     const gdrc1Text =
       gdrc1Request.status == 200 ? await gdrc1Request.text() : "";
 
+    const memesCalendarRequest = await fetch(
+      `https://6529bucket.s3.eu-west-1.amazonaws.com/seize_html/about/memes_calendar.html`
+    );
+    const memesCalendarText =
+      memesCalendarRequest.status == 200
+        ? await memesCalendarRequest.text()
+        : "";
+
     return {
       props: {
         section,
         sectionTitle,
         gdrc1Text,
+        memesCalendarText,
       },
     };
   } else {
