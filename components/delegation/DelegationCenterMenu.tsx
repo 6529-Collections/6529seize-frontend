@@ -324,32 +324,142 @@ export default function DelegationCenterMenu(props: Props) {
       <Row className="pt-4">
         <Col className={styles.menuLeftFull}>
           <Container>
-            <Row className="pt-1 pb-1">
-              <Col
-                onClick={() =>
-                  props.setActiveSection(DelegationCenterSection.CENTER)
-                }
-                className={`${styles.menuLeftItem} ${
-                  props.section == DelegationCenterSection.CENTER
-                    ? styles.menuLeftItemActive
-                    : ""
-                }`}>
-                Delegation Center
+            <Row>
+              <Col>
+                <Container className="no-padding">
+                  <Row className="pt-2 pb-2">
+                    <Col
+                      onClick={() =>
+                        props.setActiveSection(DelegationCenterSection.CENTER)
+                      }
+                      className={`${styles.menuLeftItem} ${
+                        props.section == DelegationCenterSection.CENTER
+                          ? styles.menuLeftItemActive
+                          : ""
+                      }`}>
+                      Delegation Center
+                    </Col>
+                  </Row>
+                  <Row className="pt-1 pb-2">
+                    <Col
+                      onClick={() =>
+                        props.setActiveSection(
+                          DelegationCenterSection.WALLET_ARCHITECTURE
+                        )
+                      }
+                      className={`${styles.menuLeftItem} ${
+                        props.section ==
+                        DelegationCenterSection.WALLET_ARCHITECTURE
+                          ? styles.menuLeftItemActive
+                          : ""
+                      }`}>
+                      Wallet Architecture
+                    </Col>
+                  </Row>
+                  <Row className="pt-1 pb-2">
+                    <Col
+                      onClick={() =>
+                        props.setActiveSection(DelegationCenterSection.FAQ)
+                      }
+                      className={`${styles.menuLeftItem} ${
+                        props.section == DelegationCenterSection.FAQ
+                          ? styles.menuLeftItemActive
+                          : ""
+                      }`}>
+                      Delegation FAQs
+                    </Col>
+                  </Row>
+                  <Row className="pt-2 pb-2">
+                    <Col xs={12} className="font-color-h">
+                      Advanced
+                    </Col>
+                    <Col
+                      xs={12}
+                      onClick={() =>
+                        props.setActiveSection(
+                          DelegationCenterSection.SUB_DEL_FAQ
+                        )
+                      }
+                      className={`indented ${styles.menuLeftItem} ${
+                        props.section == DelegationCenterSection.SUB_DEL_FAQ
+                          ? styles.menuLeftItemActive
+                          : ""
+                      }`}>
+                      Sub-Delegation
+                    </Col>
+                    <Col
+                      xs={12}
+                      onClick={() =>
+                        props.setActiveSection(DelegationCenterSection.LOCK_FAQ)
+                      }
+                      className={`indented ${styles.menuLeftItem} ${
+                        props.section == DelegationCenterSection.LOCK_FAQ
+                          ? styles.menuLeftItemActive
+                          : ""
+                      }`}>
+                      Wallet Locking
+                    </Col>
+                  </Row>
+                </Container>
               </Col>
-            </Row>
-            <Row className="pt-1 pb-1">
-              <Col
-                onClick={() =>
-                  props.setActiveSection(
-                    DelegationCenterSection.WALLET_ARCHITECTURE
-                  )
-                }
-                className={`${styles.menuLeftItem} ${
-                  props.section == DelegationCenterSection.WALLET_ARCHITECTURE
-                    ? styles.menuLeftItemActive
-                    : ""
-                }`}>
-                Wallet Architecture
+              <Col>
+                <Container className="no-padding">
+                  <Row className="pt-2 pb-2">
+                    <Col>
+                      <a
+                        href="https://nftdelegation.com/"
+                        target="_blank"
+                        rel="noreferrer"
+                        className={styles.delegationLink}>
+                        <Image
+                          src="/nftdelegation.jpg"
+                          alt="nftdelegation"
+                          width={30}
+                          height={30}
+                        />
+                        <span>NFTDelegation.com</span>
+                      </a>
+                    </Col>
+                  </Row>
+                  <Row className="pt-2 pb-2">
+                    <Col>
+                      <a
+                        href={
+                          DELEGATION_CONTRACT.chain_id == sepolia.id
+                            ? `https://sepolia.etherscan.io/address/${DELEGATION_CONTRACT.contract}`
+                            : `https://etherscan.io/address/${DELEGATION_CONTRACT.contract}`
+                        }
+                        target="_blank"
+                        rel="noreferrer"
+                        className={styles.delegationLink}>
+                        <Image
+                          src="/etherscan_w.png"
+                          alt="etherscan"
+                          width={30}
+                          height={30}
+                        />
+                        <span>Etherscan</span>
+                      </a>
+                    </Col>
+                  </Row>
+                  <Row className="pt-2 pb-2">
+                    <Col>
+                      <a
+                        href={`https://github.com/6529-Collections/nftdelegation`}
+                        target="_blank"
+                        rel="noreferrer"
+                        className={styles.delegationLink}>
+                        <Image
+                          src="/github_w.png"
+                          alt="github"
+                          width={30}
+                          height={30}
+                        />
+                        <span>Github</span>
+                      </a>
+                    </Col>
+                  </Row>
+                </Container>
               </Col>
             </Row>
           </Container>

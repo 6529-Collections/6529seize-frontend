@@ -1,23 +1,17 @@
 import styles from "./Delegation.module.scss";
 import { Container, Row, Col } from "react-bootstrap";
-import { useAccount, useNetwork } from "wagmi";
+import { useAccount } from "wagmi";
 import { areEqualAddresses } from "../../helpers/Helpers";
 import Image from "next/image";
 import { useWeb3Modal } from "@web3modal/react";
 
-import {
-  ANY_COLLECTION_PATH,
-  SUPPORTED_COLLECTIONS,
-} from "../../pages/delegation/[...section]";
-import dynamic from "next/dynamic";
+import { SUPPORTED_COLLECTIONS } from "../../pages/delegation/[...section]";
 import {
   DELEGATION_ALL_ADDRESS,
-  DELEGATION_CONTRACT,
   GRADIENT_CONTRACT,
   MEMELAB_CONTRACT,
   MEMES_CONTRACT,
 } from "../../constants";
-import { sepolia } from "wagmi/chains";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useEffect, useState } from "react";
 import { DelegationCenterSection } from "./DelegationCenterMenu";
@@ -75,8 +69,7 @@ export default function DelegationCenterComponent(props: Props) {
               <Container className="pt-2 pb-3">
                 <Row className="pt-2 pb-2">
                   <Col
-                    xs={4}
-                    sm={3}
+                    xs={3}
                     className="d-flex align-items-center justify-content-center">
                     <Image
                       className={styles.collectionSelectionImage2}
@@ -89,8 +82,7 @@ export default function DelegationCenterComponent(props: Props) {
                     />
                   </Col>
                   <Col
-                    xs={4}
-                    sm={5}
+                    xs={5}
                     className="d-flex align-items-center justify-content-start">
                     <h5 className="font-color mb-0">{c.title}</h5>
                   </Col>
@@ -129,18 +121,20 @@ export default function DelegationCenterComponent(props: Props) {
   }
 
   return (
-    <Container className="no-padding">
+    <Container>
       <Row className="pb-2">
         <Col>
           <h1>DELEGATION CENTER</h1>
         </Col>
       </Row>
-      <Row className="pt-2 pb-3">
-        <Col xs={12} sm={12} md={6} lg={6}>
+      <Row>
+        <Col xs={12} sm={12} md={6} lg={6} className="pt-2 pb-3">
           <Container className={`${styles.delegationCenterSection} pt-4 pb-4`}>
             <Row>
               <Col className="text-center">
                 <Image
+                  loading="eager"
+                  priority
                   src="/delegation-icon.png"
                   alt="delegation"
                   width={75}
@@ -165,7 +159,7 @@ export default function DelegationCenterComponent(props: Props) {
               </Col>
             </Row>
             <Row>
-              <Col className="d-flex align-items-center justify-content-around">
+              <Col className={`${styles.addNewDelegationWrapper}`}>
                 <span
                   className={`${styles.addNewDelegationBtn}`}
                   onClick={() =>
@@ -188,11 +182,13 @@ export default function DelegationCenterComponent(props: Props) {
             </Row>
           </Container>
         </Col>
-        <Col xs={12} sm={12} md={6} lg={6}>
+        <Col xs={12} sm={12} md={6} lg={6} className="pt-2 pb-3">
           <Container className={`${styles.delegationCenterSection} pt-4 pb-4`}>
             <Row>
               <Col className="text-center">
                 <Image
+                  loading="eager"
+                  priority
                   src="/consolidation-icon.png"
                   alt="consolidation"
                   width={75}
