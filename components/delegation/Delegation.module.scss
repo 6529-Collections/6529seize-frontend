@@ -147,6 +147,18 @@
   color: $font-color-h;
 }
 
+.addNewDelegationWrapper {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+}
+
+@media only screen and (max-width: 1400px) {
+  .addNewDelegationWrapper {
+    flex-direction: column;
+  }
+}
+
 .addNewDelegationBtn {
   display: inline-flex;
   align-items: center;
@@ -157,6 +169,7 @@
   width: fit-content;
   padding: 12px 16px;
   cursor: pointer;
+  white-space: nowrap;
 
   &:hover {
     background-color: lighten($color: $blue, $amount: 5);
