@@ -149,7 +149,7 @@ export default function DelegationCenterComponent(props: Props) {
             </Row>
             <Row>
               <Col>
-                <ul>
+                <ul className={styles.delegationCenterSectionList}>
                   <li>
                     Mint with your hot wallet on behalf of your vault wallet
                   </li>
@@ -203,7 +203,7 @@ export default function DelegationCenterComponent(props: Props) {
             </Row>
             <Row>
               <Col>
-                <ul>
+                <ul className={styles.delegationCenterSectionList}>
                   <li>
                     Use up to 3 wallets to manage your 6529 Collections NFTs
                   </li>
@@ -212,7 +212,7 @@ export default function DelegationCenterComponent(props: Props) {
               </Col>
             </Row>
             <Row>
-              <Col className="d-flex align-items-center justify-content-around">
+              <Col className={`${styles.addNewDelegationWrapper}`}>
                 <span
                   className={`${styles.addNewDelegationBtn} ml-2`}
                   onClick={() => {
