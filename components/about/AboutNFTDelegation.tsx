@@ -1,8 +1,4 @@
 import { Col, Container, Row } from "react-bootstrap";
-import styles from "./About.module.scss";
-import Image from "next/image";
-import { DELEGATION_CONTRACT } from "../../constants";
-import { sepolia } from "wagmi/chains";
 
 export default function AboutNFTDelegation() {
   return (
