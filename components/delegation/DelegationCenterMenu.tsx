@@ -233,35 +233,6 @@ export default function DelegationCenterMenu(props: Props) {
                 Delegation FAQs
               </Col>
             </Row>
-            <Row className="pt-2 pb-2">
-              <Col xs={12} className="font-color-h">
-                Advanced
-              </Col>
-              <Col
-                xs={12}
-                onClick={() =>
-                  props.setActiveSection(DelegationCenterSection.SUB_DEL_FAQ)
-                }
-                className={`indented ${styles.menuLeftItem} ${
-                  props.section == DelegationCenterSection.SUB_DEL_FAQ
-                    ? styles.menuLeftItemActive
-                    : ""
-                }`}>
-                Sub-Delegation
-              </Col>
-              <Col
-                xs={12}
-                onClick={() =>
-                  props.setActiveSection(DelegationCenterSection.LOCK_FAQ)
-                }
-                className={`indented ${styles.menuLeftItem} ${
-                  props.section == DelegationCenterSection.LOCK_FAQ
-                    ? styles.menuLeftItemActive
-                    : ""
-                }`}>
-                Wallet Locking
-              </Col>
-            </Row>
             <Row className="pt-4 pb-2">
               <Col>
                 <a
@@ -367,37 +338,6 @@ export default function DelegationCenterMenu(props: Props) {
                           : ""
                       }`}>
                       Delegation FAQs
-                    </Col>
-                  </Row>
-                  <Row className="pt-2 pb-2">
-                    <Col xs={12} className="font-color-h">
-                      Advanced
-                    </Col>
-                    <Col
-                      xs={12}
-                      onClick={() =>
-                        props.setActiveSection(
-                          DelegationCenterSection.SUB_DEL_FAQ
-                        )
-                      }
-                      className={`indented ${styles.menuLeftItem} ${
-                        props.section == DelegationCenterSection.SUB_DEL_FAQ
-                          ? styles.menuLeftItemActive
-                          : ""
-                      }`}>
-                      Sub-Delegation
-                    </Col>
-                    <Col
-                      xs={12}
-                      onClick={() =>
-                        props.setActiveSection(DelegationCenterSection.LOCK_FAQ)
-                      }
-                      className={`indented ${styles.menuLeftItem} ${
-                        props.section == DelegationCenterSection.LOCK_FAQ
-                          ? styles.menuLeftItemActive
-                          : ""
-                      }`}>
-                      Wallet Locking
                     </Col>
                   </Row>
                 </Container>
