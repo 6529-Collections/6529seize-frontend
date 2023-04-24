@@ -105,7 +105,7 @@ library.add(
 );
 
 const { chains, provider } = configureChains(
-  [mainnet, sepolia],
+  [mainnet],
   [
     alchemyProvider({ apiKey: process.env.ALCHEMY_API_KEY! }),
     w3mProvider({ projectId: CW_PROJECT_ID }),
