@@ -55,6 +55,7 @@ interface Props {
   sectionTitle: string;
   gdrc1Text: string;
   memesCalendarText: string;
+  releaseNotesText: string;
 }
 
 export default function About(props: Props) {
@@ -112,7 +113,7 @@ export default function About(props: Props) {
       case AboutSection.CONTACT_US:
         return <AboutContactUs />;
       case AboutSection.RELEASE_NOTES:
-        return <AboutReleaseNotes />;
+        return <AboutReleaseNotes html={props.releaseNotesText} />;
       case AboutSection.TERMS_OF_SERVICE:
         return <AboutTermsOfService />;
       case AboutSection.PRIVACY_POLICY:
@@ -645,12 +646,19 @@ export async function getServerSideProps(req: any, res: any, resolvedUrl: any) {
         ? await memesCalendarRequest.text()
         : "";
 
+    const releaseNotesRequest = await fetch(
+      `https://6529bucket.s3.eu-west-1.amazonaws.com/seize_html/about/release_notes.html`
+    );
+    const releaseNotesText =
+      releaseNotesRequest.status == 200 ? await releaseNotesRequest.text() : "";
+
     return {
       props: {
         section,
         sectionTitle,
         gdrc1Text,
         memesCalendarText,
+        releaseNotesText,
       },
     };
   } else {
