@@ -234,6 +234,12 @@ export default function CollectionDelegationComponent(props: Props) {
     reset();
   }, [accountResolution.address]);
 
+  function getSwitchToHtml() {
+    return `<span style="color: red !important;">Switch to ${
+      DELEGATION_CONTRACT.chain_id == 1 ? "Ethereum Mainnet" : "Sepolia Network"
+    }</span>`;
+  }
+
   const retrieveOutgoingDelegations = useContractReads({
     contracts: getActiveDelegationsReadParams(
       accountResolution.address,
@@ -241,7 +247,7 @@ export default function CollectionDelegationComponent(props: Props) {
       "retrieveDelegationAddressesTokensIDsandExpiredDates"
     ),
     watch: true,
-    enabled: chainsMatch() && accountResolution.isConnected,
+    enabled: accountResolution.isConnected,
     onSettled(data, error) {
       if (data) {
         const myDelegations: ContractDelegation[] = [];
@@ -291,10 +297,7 @@ export default function CollectionDelegationComponent(props: Props) {
       outgoingDelegations[CONSOLIDATION_USE_CASE.index]
     ),
     watch: true,
-    enabled:
-      chainsMatch() &&
-      accountResolution.isConnected &&
-      outgoingDelegations.length > 0,
+    enabled: accountResolution.isConnected && outgoingDelegations.length > 0,
     onSettled(data, error) {
       if (data) {
         outgoingDelegations.map((d) => {
@@ -320,10 +323,7 @@ export default function CollectionDelegationComponent(props: Props) {
       "retrieveDelegatorsTokensIDsandExpiredDates"
     ),
     watch: true,
-    enabled:
-      chainsMatch() &&
-      accountResolution.isConnected &&
-      incomingDelegations.length > 0,
+    enabled: accountResolution.isConnected && incomingDelegations.length > 0,
     onSettled(data, error) {
       if (data) {
         const myDelegations: ContractDelegation[] = [];
@@ -373,10 +373,7 @@ export default function CollectionDelegationComponent(props: Props) {
       incomingDelegations[CONSOLIDATION_USE_CASE.index]
     ),
     watch: true,
-    enabled:
-      chainsMatch() &&
-      accountResolution.isConnected &&
-      incomingDelegations.length > 0,
+    enabled: accountResolution.isConnected && incomingDelegations.length > 0,
     onSettled(data, error) {
       if (data) {
         incomingDelegations.map((d) => {
@@ -406,7 +403,7 @@ export default function CollectionDelegationComponent(props: Props) {
           accountResolution.address,
           "retrieveCollectionUseCaseLockStatus"
         ),
-        enabled: chainsMatch() && accountResolution.isConnected,
+        enabled: accountResolution.isConnected,
         watch: true,
       });
 
@@ -417,7 +414,7 @@ export default function CollectionDelegationComponent(props: Props) {
       "retrieveCollectionUseCaseLockStatus",
       ALL_USE_CASES
     ),
-    enabled: chainsMatch() && accountResolution.isConnected,
+    enabled: accountResolution.isConnected,
     watch: true,
   });
 
@@ -481,7 +478,7 @@ export default function CollectionDelegationComponent(props: Props) {
         chainId: DELEGATION_CONTRACT.chain_id,
         functionName: "retrieveCollectionLockStatus",
         args: [DELEGATION_ALL_ADDRESS, accountResolution.address],
-        enabled: chainsMatch() && accountResolution.isConnected,
+        enabled: accountResolution.isConnected,
         watch: true,
       });
 
@@ -491,7 +488,7 @@ export default function CollectionDelegationComponent(props: Props) {
     chainId: DELEGATION_CONTRACT.chain_id,
     functionName: "retrieveCollectionLockStatus",
     args: [props.collection.contract, accountResolution.address],
-    enabled: chainsMatch() && accountResolution.isConnected,
+    enabled: accountResolution.isConnected,
     watch: true,
   });
 
@@ -1036,20 +1033,24 @@ export default function CollectionDelegationComponent(props: Props) {
                                   <span
                                     className={styles.useCaseWalletRevoke}
                                     onClick={() => {
-                                      setRevokeDelegationParams({
-                                        collection: areEqualAddresses(
-                                          props.collection.contract,
-                                          DELEGATION_ALL_ADDRESS
-                                        )
-                                          ? DELEGATION_ALL_ADDRESS
-                                          : props.collection.contract,
-                                        address: w.wallet,
-                                        use_case: del.useCase.use_case,
-                                      });
-                                      setToast({
-                                        title: "Revoking Delegation",
-                                        message: "Confirm in your wallet...",
-                                      });
+                                      const title = "Revoking Delegation";
+                                      let message = "Confirm in your wallet...";
+
+                                      if (chainsMatch()) {
+                                        setRevokeDelegationParams({
+                                          collection: areEqualAddresses(
+                                            props.collection.contract,
+                                            DELEGATION_ALL_ADDRESS
+                                          )
+                                            ? DELEGATION_ALL_ADDRESS
+                                            : props.collection.contract,
+                                          address: w.wallet,
+                                          use_case: del.useCase.use_case,
+                                        });
+                                      } else {
+                                        message = getSwitchToHtml();
+                                      }
+                                      setToast({ title, message });
                                     }}>
                                     Revoke
                                     {(contractWriteRevoke.isLoading ||
@@ -1102,26 +1103,30 @@ export default function CollectionDelegationComponent(props: Props) {
                               : ``
                           }`}
                           onClick={() => {
-                            setBatchRevokeDelegationParams({
-                              collections: [...bulkRevocations].map((br) =>
-                                areEqualAddresses(
-                                  props.collection.contract,
-                                  DELEGATION_ALL_ADDRESS
-                                )
-                                  ? DELEGATION_ALL_ADDRESS
-                                  : props.collection.contract
-                              ),
-                              addresses: [...bulkRevocations].map(
-                                (br) => br.wallet
-                              ),
-                              use_cases: [...bulkRevocations].map(
-                                (br) => br.use_case
-                              ),
-                            });
-                            setToast({
-                              title: "Batch Revoking Delegations",
-                              message: "Confirm in your wallet...",
-                            });
+                            const title = "Batch Revoking Delegations";
+                            let message = "Confirm in your wallet...";
+
+                            if (chainsMatch()) {
+                              setBatchRevokeDelegationParams({
+                                collections: [...bulkRevocations].map((br) =>
+                                  areEqualAddresses(
+                                    props.collection.contract,
+                                    DELEGATION_ALL_ADDRESS
+                                  )
+                                    ? DELEGATION_ALL_ADDRESS
+                                    : props.collection.contract
+                                ),
+                                addresses: [...bulkRevocations].map(
+                                  (br) => br.wallet
+                                ),
+                                use_cases: [...bulkRevocations].map(
+                                  (br) => br.use_case
+                                ),
+                              });
+                            } else {
+                              message = getSwitchToHtml();
+                            }
+                            setToast({ title, message });
                           }}>
                           Batch Revoke
                           {(contractWriteBatchRevoke.isLoading ||
@@ -1348,46 +1353,50 @@ export default function CollectionDelegationComponent(props: Props) {
           <Row className="pt-2 pb-2">
             <Col>
               <>
-                {collectionLockRead.data != null && (
-                  <span
-                    className={`${styles.lockDelegationBtn} ${
-                      collectionLockReadGlobal?.data
-                        ? styles.lockDelegationBtnDisabled
-                        : ""
-                    }`}
-                    onClick={() => {
-                      setToast({
-                        title: `${
-                          collectionLockRead.data ? `Unlocking` : `Locking`
-                        } Wallet`,
-                        message: "Confirm in your wallet...",
-                      });
+                {/* {collectionLockRead.data != null && ( */}
+                <span
+                  className={`${styles.lockDelegationBtn} ${
+                    collectionLockReadGlobal?.data
+                      ? styles.lockDelegationBtnDisabled
+                      : ""
+                  }`}
+                  onClick={() => {
+                    const title = `${
+                      collectionLockRead.data ? `Unlocking` : `Locking`
+                    } Wallet`;
+                    let message = "Confirm in your wallet...";
+
+                    if (chainsMatch()) {
                       collectionLockWrite.write?.();
-                    }}>
-                    <FontAwesomeIcon
-                      icon={collectionLockRead.data ? "lock" : "lock-open"}
-                      className={styles.buttonIcon}
-                    />
-                    {collectionLockRead.data ? "Unlock" : "Lock"} Wallet
-                    {collectionLockReadGlobal?.data &&
-                    !areEqualAddresses(
-                      props.collection.contract,
-                      DELEGATION_ALL_ADDRESS
-                    )
-                      ? ` *`
-                      : ``}
-                    {(collectionLockWrite.isLoading ||
-                      waitCollectionLockWrite.isLoading) && (
-                      <div className="d-inline">
-                        <div
-                          className={`spinner-border ${styles.loader}`}
-                          role="status">
-                          <span className="sr-only"></span>
-                        </div>
+                    } else {
+                      message = getSwitchToHtml();
+                    }
+                    setToast({ title, message });
+                  }}>
+                  <FontAwesomeIcon
+                    icon={collectionLockRead.data ? "lock" : "lock-open"}
+                    className={styles.buttonIcon}
+                  />
+                  {collectionLockRead.data ? "Unlock" : "Lock"} Wallet
+                  {collectionLockReadGlobal?.data &&
+                  !areEqualAddresses(
+                    props.collection.contract,
+                    DELEGATION_ALL_ADDRESS
+                  )
+                    ? ` *`
+                    : ``}
+                  {(collectionLockWrite.isLoading ||
+                    waitCollectionLockWrite.isLoading) && (
+                    <div className="d-inline">
+                      <div
+                        className={`spinner-border ${styles.loader}`}
+                        role="status">
+                        <span className="sr-only"></span>
                       </div>
-                    )}
-                  </span>
-                )}
+                    </div>
+                  )}
+                </span>
+                {/* )} */}
               </>
             </Col>
           </Row>
@@ -1459,18 +1468,22 @@ export default function CollectionDelegationComponent(props: Props) {
                     className={`${styles.lockUseCaseBtn}`}
                     onClick={() => {
                       const useCase = DELEGATION_USE_CASES[lockUseCaseIndex];
-                      setToast({
-                        title: `${
-                          useCaseLockStatuses.data &&
-                          useCaseLockStatuses.data[lockUseCaseIndex]
-                            ? "Unlocking"
-                            : "Locking"
-                        } Wallet on Use Case #${useCase.use_case} - ${
-                          useCase.display
-                        }`,
-                        message: "Confirm in your wallet...",
-                      });
-                      useCaseLockWrite.write?.();
+                      const title = `${
+                        useCaseLockStatuses.data &&
+                        useCaseLockStatuses.data[lockUseCaseIndex]
+                          ? "Unlocking"
+                          : "Locking"
+                      } Wallet on Use Case #${useCase.use_case} - ${
+                        useCase.display
+                      }`;
+                      let message = "Confirm in your wallet...";
+
+                      if (chainsMatch()) {
+                        useCaseLockWrite.write?.();
+                      } else {
+                        message = getSwitchToHtml();
+                      }
+                      setToast({ title, message });
                     }}>
                     <FontAwesomeIcon
                       icon={
