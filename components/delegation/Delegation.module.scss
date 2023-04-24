@@ -623,6 +623,12 @@
   position: relative;
 }
 
+@media only screen and (min-width: 787px) {
+  .delegationCenterSectionList {
+    height: 100px;
+  }
+}
+
 .addNewDelegationWrapper {
   display: flex;
   align-items: center;
