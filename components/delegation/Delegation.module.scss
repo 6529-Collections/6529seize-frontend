@@ -147,20 +147,6 @@
   color: $font-color-h;
 }
 
-.addNewDelegationWrapper {
-  position: absolute;
-  bottom: 1.5rem;
-  display: flex;
-  align-items: center;
-  justify-content: space-around;
-}
-
-@media only screen and (max-width: 1400px) {
-  .addNewDelegationWrapper {
-    flex-direction: column;
-  }
-}
-
 .addNewDelegationBtn {
   display: inline-flex;
   align-items: center;
@@ -637,12 +623,15 @@
   position: relative;
 }
 
-.delegationCenterSectionList {
-  height: 160px;
+.addNewDelegationWrapper {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
 }
 
 @media only screen and (max-width: 1400px) {
-  .delegationCenterSectionList {
-    height: 180px;
+  .addNewDelegationWrapper {
+    height: 120px;
+    flex-direction: column;
   }
 }
