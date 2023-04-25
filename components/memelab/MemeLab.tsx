@@ -506,9 +506,8 @@ export default function MemeLabComponent() {
               {collection}&nbsp;
               <a
                 className={styles.collectionLink}
-                href={`/meme-lab/collection/${collection.replaceAll(
-                  " ",
-                  "-"
+                href={`/meme-lab/collection/${encodeURIComponent(
+                  collection.replace(" ", "-")
                 )}`}>
                 view
               </a>
