@@ -81,7 +81,6 @@ interface ContractWalletDelegation {
   expiry?: string;
   all?: boolean;
   tokens?: number;
-  consolidationStatus?: string;
 }
 
 interface ContractDelegation {
@@ -192,12 +191,16 @@ export default function CollectionDelegationComponent(props: Props) {
   const [outgoingDelegations, setOutgoingDelegations] = useState<
     ContractDelegation[]
   >([]);
+  const [outgoingActiveConsolidations, setOutgoingActiveConsolidations] =
+    useState<{ wallet: string; status: string }[]>([]);
   const [outgoingDelegationsLoaded, setOutgoingDelegationsLoaded] =
     useState(false);
 
   const [incomingDelegations, setIncomingDelegations] = useState<
     ContractDelegation[]
   >([]);
+  const [incomingActiveConsolidations, setIncomingActiveConsolidations] =
+    useState<{ wallet: string; status: string }[]>([]);
   const [incomingDelegationsLoaded, setIncomingDelegationsLoaded] =
     useState(false);
 
@@ -299,19 +302,19 @@ export default function CollectionDelegationComponent(props: Props) {
     watch: true,
     enabled: accountResolution.isConnected && outgoingDelegations.length > 0,
     onSettled(data, error) {
-      if (data) {
-        outgoingDelegations.map((d) => {
-          if (d.useCase.use_case == CONSOLIDATION_USE_CASE.use_case) {
-            d.wallets.map((w, index) => {
-              const active = data[index];
-              if (active) {
-                w.consolidationStatus = "consolidation active";
-              } else {
-                w.consolidationStatus = "consolidation pending";
-              }
+      if (data && outgoingDelegations[CONSOLIDATION_USE_CASE.index]) {
+        const activeConsolidations: any[] = [];
+        outgoingDelegations[CONSOLIDATION_USE_CASE.index].wallets.map(
+          (w, index) => {
+            activeConsolidations.push({
+              wallet: w.wallet,
+              status: data[index]
+                ? "consolidation active"
+                : "consolidation pending",
             });
           }
-        });
+        );
+        setOutgoingActiveConsolidations(activeConsolidations);
       }
     },
   });
@@ -375,19 +378,19 @@ export default function CollectionDelegationComponent(props: Props) {
     watch: true,
     enabled: accountResolution.isConnected && incomingDelegations.length > 0,
     onSettled(data, error) {
-      if (data) {
-        incomingDelegations.map((d) => {
-          if (d.useCase.use_case == CONSOLIDATION_USE_CASE.use_case) {
-            d.wallets.map((w, index) => {
-              const active = data[index];
-              if (active) {
-                w.consolidationStatus = "consolidation active";
-              } else {
-                w.consolidationStatus = "consolidation pending";
-              }
+      if (data && incomingDelegations[CONSOLIDATION_USE_CASE.index]) {
+        const activeConsolidations: any[] = [];
+        incomingDelegations[CONSOLIDATION_USE_CASE.index].wallets.map(
+          (w, index) => {
+            activeConsolidations.push({
+              wallet: w.wallet,
+              status: data[index]
+                ? "consolidation active"
+                : "consolidation pending",
             });
           }
-        });
+        );
+        setIncomingActiveConsolidations(activeConsolidations);
       }
     },
   });
@@ -935,6 +938,8 @@ export default function CollectionDelegationComponent(props: Props) {
                 {delegations > 0 ? (
                   myDelegations.map((del, index: number) => {
                     if (del.wallets.length > 0) {
+                      const isConsolidation =
+                        del.useCase.use_case == CONSOLIDATION_USE_CASE.use_case;
                       return (
                         <Fragment
                           key={`outgoing-${del.useCase.use_case}-${index}`}>
@@ -946,6 +951,13 @@ export default function CollectionDelegationComponent(props: Props) {
                             </td>
                           </tr>
                           {del.wallets.map((w, addressIndex: number) => {
+                            const consolidationStatus =
+                              outgoingActiveConsolidations.find((i) =>
+                                areEqualAddresses(w.wallet, i.wallet)
+                              )?.status;
+                            if (isConsolidation) {
+                              console.log(w.wallet, consolidationStatus);
+                            }
                             return (
                               <tr
                                 key={`outgoing-${del.useCase.use_case}-${index}-${w.wallet}-${addressIndex}`}>
@@ -1001,16 +1013,15 @@ export default function CollectionDelegationComponent(props: Props) {
                                       ? ` - all tokens`
                                       : ` - token ID: ${w.tokens}`}
                                   </span>
-                                  {del.useCase.use_case ==
-                                    CONSOLIDATION_USE_CASE.use_case && (
+                                  {isConsolidation && (
                                     <span
                                       className={
-                                        w.consolidationStatus ==
+                                        consolidationStatus ==
                                         "consolidation active"
                                           ? styles.consolidationActiveLabel
                                           : styles.consolidationNotAcceptedLabel
                                       }>
-                                      {w.consolidationStatus}
+                                      {consolidationStatus}
                                     </span>
                                   )}
                                 </td>
@@ -1173,6 +1184,8 @@ export default function CollectionDelegationComponent(props: Props) {
                 {delegations > 0 ? (
                   myDelegations.map((del, index: number) => {
                     if (del.wallets.length > 0) {
+                      const isConsolidation =
+                        del.useCase.use_case == CONSOLIDATION_USE_CASE.use_case;
                       return (
                         <Fragment
                           key={`incoming-${del.useCase.use_case}-${index}`}>
@@ -1184,6 +1197,10 @@ export default function CollectionDelegationComponent(props: Props) {
                             </td>
                           </tr>
                           {del.wallets.map((w) => {
+                            const consolidationStatus =
+                              incomingActiveConsolidations.find((i) =>
+                                areEqualAddresses(w.wallet, i.wallet)
+                              )?.status;
                             return (
                               <tr
                                 key={`incoming-${del.useCase}-${index}-${w.wallet}`}>
@@ -1220,16 +1237,15 @@ export default function CollectionDelegationComponent(props: Props) {
                                       ? ` - all tokens`
                                       : ` - token ID: ${w.tokens}`}
                                   </span>
-                                  {del.useCase.use_case ==
-                                    CONSOLIDATION_USE_CASE.use_case && (
+                                  {isConsolidation && (
                                     <span
                                       className={
-                                        w.consolidationStatus ==
+                                        consolidationStatus ==
                                         "consolidation active"
                                           ? styles.consolidationActiveLabel
                                           : styles.consolidationNotAcceptedLabel
                                       }>
-                                      {w.consolidationStatus}
+                                      {consolidationStatus}
                                     </span>
                                   )}
                                 </td>
