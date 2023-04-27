@@ -3,7 +3,7 @@ import { GRADIENT_CONTRACT, MEMES_CONTRACT } from "../constants";
 import { BaseNFT, NFT, VolumeType } from "../entities/INFT";
 
 export function formatAddress(address: string) {
-  if (!address || !address.startsWith("0x")) {
+  if (!address || !address.startsWith("0x") || address.includes(" ")) {
     return address;
   }
   return `${address.substring(0, 6)}...${address.substring(

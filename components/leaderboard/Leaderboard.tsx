@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Container, Row, Col, Table, Dropdown, Form } from "react-bootstrap";
 import { DBResponse } from "../../entities/IDBResponse";
-import { TDHCalc, TDHMetrics } from "../../entities/ITDH";
+import { TDHCalc, ConsolidatedTDHMetrics } from "../../entities/ITDH";
 import styles from "./Leaderboard.module.scss";
 import dynamic from "next/dynamic";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -153,7 +153,7 @@ export default function Leaderboard(props: Props) {
 
   const [pageProps, setPageProps] = useState<Props>(props);
   const [totalResults, setTotalResults] = useState(0);
-  const [leaderboard, setLeaderboard] = useState<TDHMetrics[]>();
+  const [leaderboard, setLeaderboard] = useState<ConsolidatedTDHMetrics[]>();
   const [lastTDH, setLastTDH] = useState<TDHCalc>();
   const [next, setNext] = useState(null);
   const [sort, setSort] = useState<{
@@ -209,7 +209,7 @@ export default function Leaderboard(props: Props) {
       walletFilter = `&wallet=${searchWallets.join(",")}`;
     }
     fetchUrl(
-      `${process.env.API_ENDPOINT}/api/owner_metrics?page_size=${props.pageSize}&page=${pageProps.page}&sort=${sort.sort}&sort_direction=${sort.sort_direction}${tagFilter}${museumFilter}${teamFilter}${walletFilter}`
+      `${process.env.API_ENDPOINT}/api/consolidated_owner_metrics?page_size=${props.pageSize}&page=${pageProps.page}&sort=${sort.sort}&sort_direction=${sort.sort_direction}${tagFilter}${museumFilter}${teamFilter}${walletFilter}`
     ).then((response: DBResponse) => {
       setTotalResults(response.count);
       setNext(response.next);
@@ -474,7 +474,7 @@ export default function Leaderboard(props: Props) {
     }
   }, [focus]);
 
-  function getCardsHodled(lead: TDHMetrics) {
+  function getCardsHodled(lead: ConsolidatedTDHMetrics) {
     switch (content) {
       case Content.MEMES:
         return lead.memes_balance;
@@ -491,7 +491,7 @@ export default function Leaderboard(props: Props) {
     }
   }
 
-  function getPurchasesCount(lead: TDHMetrics) {
+  function getPurchasesCount(lead: ConsolidatedTDHMetrics) {
     let count = 0;
     switch (content) {
       case Content.MEMES:
@@ -519,7 +519,7 @@ export default function Leaderboard(props: Props) {
     return "-";
   }
 
-  function getPurchasesValue(lead: TDHMetrics) {
+  function getPurchasesValue(lead: ConsolidatedTDHMetrics) {
     let value = 0;
     switch (content) {
       case Content.MEMES:
@@ -547,7 +547,7 @@ export default function Leaderboard(props: Props) {
     return "-";
   }
 
-  function getSalesCount(lead: TDHMetrics) {
+  function getSalesCount(lead: ConsolidatedTDHMetrics) {
     let count = 0;
     switch (content) {
       case Content.MEMES:
@@ -575,7 +575,7 @@ export default function Leaderboard(props: Props) {
     return "-";
   }
 
-  function getSalesValue(lead: TDHMetrics) {
+  function getSalesValue(lead: ConsolidatedTDHMetrics) {
     let value = 0;
     switch (content) {
       case Content.MEMES:
@@ -603,7 +603,7 @@ export default function Leaderboard(props: Props) {
     return "-";
   }
 
-  function getTransfersIn(lead: TDHMetrics) {
+  function getTransfersIn(lead: ConsolidatedTDHMetrics) {
     let trf = 0;
     switch (content) {
       case Content.MEMES:
@@ -632,7 +632,7 @@ export default function Leaderboard(props: Props) {
     return "-";
   }
 
-  function getTransfersOut(lead: TDHMetrics) {
+  function getTransfersOut(lead: ConsolidatedTDHMetrics) {
     let trf = 0;
     switch (content) {
       case Content.MEMES:
@@ -661,7 +661,7 @@ export default function Leaderboard(props: Props) {
     return "-";
   }
 
-  function getUniqueMemes(lead: TDHMetrics) {
+  function getUniqueMemes(lead: ConsolidatedTDHMetrics) {
     let unique;
     let uniqueTotal;
     switch (content) {
@@ -691,7 +691,7 @@ export default function Leaderboard(props: Props) {
     return "-";
   }
 
-  function getSets(lead: TDHMetrics) {
+  function getSets(lead: ConsolidatedTDHMetrics) {
     let sets;
     switch (content) {
       case Content.MEMES1:
@@ -713,7 +713,7 @@ export default function Leaderboard(props: Props) {
     return "-";
   }
 
-  function getDaysHodledTdhBoosted(lead: TDHMetrics) {
+  function getDaysHodledTdhBoosted(lead: ConsolidatedTDHMetrics) {
     switch (content) {
       case Content.MEMES:
         return lead.boosted_memes_tdh;
@@ -730,7 +730,7 @@ export default function Leaderboard(props: Props) {
     }
   }
 
-  function getDaysHodledTdh(lead: TDHMetrics) {
+  function getDaysHodledTdh(lead: ConsolidatedTDHMetrics) {
     switch (content) {
       case Content.MEMES:
         return lead.memes_tdh;
@@ -747,7 +747,7 @@ export default function Leaderboard(props: Props) {
     }
   }
 
-  function getDaysHodledTdhRaw(lead: TDHMetrics) {
+  function getDaysHodledTdhRaw(lead: ConsolidatedTDHMetrics) {
     switch (content) {
       case Content.MEMES:
         return lead.memes_tdh__raw;
@@ -1994,8 +1994,8 @@ export default function Leaderboard(props: Props) {
                         </td>
                         <td className={styles.hodler}>
                           <Address
-                            address={lead.wallet}
-                            ens={lead.wallet_display}
+                            wallets={lead.wallets}
+                            display={lead.consolidation_display}
                             tags={{
                               memesCardsSets: lead.memes_cards_sets,
                               memesCardsSetS1: lead.memes_cards_sets_szn1,

@@ -165,8 +165,8 @@ export default function MemeLabLeaderboard(props: Props) {
                         </td>
                         <td className={styles.hodler}>
                           <Address
-                            address={lead.wallet}
-                            ens={lead.wallet_display}
+                            wallets={[lead.wallet]}
+                            display={lead.wallet_display}
                             tags={{
                               memesCardsSets: tags ? tags.memes_cards_sets : 0,
                               memesCardsSetS1: tags
