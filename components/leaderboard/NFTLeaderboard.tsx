@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Container, Row, Col, Table } from "react-bootstrap";
 import { DBResponse } from "../../entities/IDBResponse";
-import { TDH, TDHCalc } from "../../entities/ITDH";
+import { ConsolidatedTDH, TDHCalc } from "../../entities/ITDH";
 import styles from "./Leaderboard.module.scss";
 import dynamic from "next/dynamic";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -34,7 +34,7 @@ export default function NFTLeaderboard(props: Props) {
   const router = useRouter();
   const [pageProps, setPageProps] = useState<Props>(props);
   const [totalResults, setTotalResults] = useState(0);
-  const [leaderboard, setLeaderboard] = useState<TDH[]>();
+  const [leaderboard, setLeaderboard] = useState<ConsolidatedTDH[]>();
   const [leaderboardLoaded, setLeaderboardLoaded] = useState(false);
   const [lastTDH, setLastTDH] = useState<TDHCalc>();
   const [next, setNext] = useState(null);
@@ -42,9 +42,6 @@ export default function NFTLeaderboard(props: Props) {
     sort: Sort;
     sort_direction: SortDirection;
   }>({ sort: Sort.card_tdh, sort_direction: SortDirection.DESC });
-
-  const [ownerTags, setOwnersTags] = useState<OwnerTags[]>([]);
-  const [ownerTagsLoaded, setOwnerTagsLoaded] = useState(false);
 
   async function fetchResults() {
     fetchUrl(
@@ -57,22 +54,22 @@ export default function NFTLeaderboard(props: Props) {
     });
   }
 
-  useEffect(() => {
-    async function fetchOwnersTags(url: string) {
-      return fetchAllPages(url).then((newOwnersTags: OwnerTags[]) => {
-        setOwnersTags(newOwnersTags);
-        setOwnerTagsLoaded(true);
-      });
-    }
+  // useEffect(() => {
+  //   async function fetchOwnersTags(url: string) {
+  //     return fetchAllPages(url).then((newOwnersTags: OwnerTags[]) => {
+  //       setOwnersTags(newOwnersTags);
+  //       setOwnerTagsLoaded(true);
+  //     });
+  //   }
 
-    if (leaderboard && router.isReady && leaderboard.length > 0) {
-      const uniqueWallets = [...leaderboard].map((l) => l.wallet);
-      const initialUrlOwners = `${
-        process.env.API_ENDPOINT
-      }/api/owners_tags?wallet=${uniqueWallets.join(",")}`;
-      fetchOwnersTags(initialUrlOwners);
-    }
-  }, [router.isReady, leaderboard]);
+  //   if (leaderboard && router.isReady && leaderboard.length > 0) {
+  //     const uniqueWallets = [...leaderboard].map((l) => l.consolidation_display);
+  //     const initialUrlOwners = `${
+  //       process.env.API_ENDPOINT
+  //     }/api/owners_tags?wallet=${uniqueWallets.join(",")}`;
+  //     fetchOwnersTags(initialUrlOwners);
+  //   }
+  // }, [router.isReady, leaderboard]);
 
   useEffect(() => {
     fetchUrl(`${process.env.API_ENDPOINT}/api/blocks?page_size=${1}`).then(
@@ -372,17 +369,17 @@ export default function NFTLeaderboard(props: Props) {
               <tbody>
                 <tr className={styles.gap}></tr>
                 {leaderboard &&
-                  ownerTagsLoaded &&
                   leaderboard.map((lead, index) => {
                     const thisCard = lead.memes.find(
                       (m) => m.id == props.nftId
                     );
-                    const tags = ownerTags.find((ot) =>
-                      areEqualAddresses(ot.wallet, lead.wallet)
-                    );
                     if (thisCard)
                       return (
-                        <tr key={`${index}-${lead.wallet}`}>
+                        <tr
+                          key={`${index}-${lead.consolidation_display.replace(
+                            " ",
+                            "-"
+                          )}`}>
                           <td className={styles.rank}>
                             {/* {lead.tdh_rank} */}
                             {index +
@@ -391,26 +388,26 @@ export default function NFTLeaderboard(props: Props) {
                           </td>
                           <td className={styles.hodler}>
                             <Address
-                              address={lead.wallet}
-                              ens={lead.wallet_display}
+                              wallets={lead.wallets}
+                              display={lead.consolidation_display}
                               tags={{
-                                memesCardsSets: tags
-                                  ? tags.memes_cards_sets
+                                memesCardsSets: lead
+                                  ? lead.memes_cards_sets
                                   : 0,
-                                memesCardsSetS1: tags
-                                  ? tags.memes_cards_sets_szn1
+                                memesCardsSetS1: lead
+                                  ? lead.memes_cards_sets_szn1
                                   : 0,
-                                memesCardsSetS2: tags
-                                  ? tags.memes_cards_sets_szn2
+                                memesCardsSetS2: lead
+                                  ? lead.memes_cards_sets_szn2
                                   : 0,
-                                memesCardsSetS3: tags
-                                  ? tags.memes_cards_sets_szn3
+                                memesCardsSetS3: lead
+                                  ? lead.memes_cards_sets_szn3
                                   : 0,
-                                memesBalance: tags ? tags.unique_memes : 0,
-                                gradientsBalance: tags
-                                  ? tags.gradients_balance
+                                memesBalance: lead ? lead.unique_memes : 0,
+                                gradientsBalance: lead
+                                  ? lead.gradients_balance
                                   : 0,
-                                genesis: tags ? tags.genesis : 0,
+                                genesis: lead ? lead.genesis : 0,
                               }}
                             />
                           </td>

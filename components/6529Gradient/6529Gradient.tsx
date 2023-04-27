@@ -177,8 +177,8 @@ export default function GradientsComponent() {
               {owner && address == owner.wallet ? "*" : ""}
               {owner && (
                 <Address
-                  address={owner.wallet}
-                  ens={owner.wallet_display}
+                  wallets={[owner.wallet]}
+                  display={owner.wallet_display}
                   hideCopy={true}
                 />
               )}
