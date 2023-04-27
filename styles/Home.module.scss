@@ -82,7 +82,7 @@
 .downloadsScrollContainer {
   -ms-overflow-style: none; /* Internet Explorer 10+ */
   scrollbar-width: none; /* Firefox */
-  overflow-x: scroll;
+  overflow-x: auto;
 }
 
 .downloadsScrollContainer::-webkit-scrollbar {

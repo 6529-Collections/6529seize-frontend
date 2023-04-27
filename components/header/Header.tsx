@@ -96,12 +96,6 @@ export default function Header(props: Props) {
                         }>
                         Profile
                       </NavDropdown.Item>
-                      <NavDropdown.Item
-                        key="delegations-dropdown-item"
-                        className={styles.dropdownItem}
-                        onClick={() => (window.location.href = `/delegations`)}>
-                        Delegations
-                      </NavDropdown.Item>
                     </NavDropdown>
                   </>
                 ) : (
@@ -113,13 +107,6 @@ export default function Header(props: Props) {
                   />
                 )}
               </h3>
-            </Col>
-          </Row>
-          <Row className="pt-3 pb-3">
-            <Col>
-              <a href="/">
-                <h3>Home</h3>
-              </a>
             </Col>
           </Row>
           <Row className="pt-3 pb-3">
@@ -147,6 +134,13 @@ export default function Header(props: Props) {
             <Col>
               <a href="/rememes">
                 <h3>ReMemes</h3>
+              </a>
+            </Col>
+          </Row>
+          <Row className="pt-3 pb-3">
+            <Col>
+              <a href="/delegation/delegation-center">
+                <h3>Delegation</h3>
               </a>
             </Col>
           </Row>
@@ -267,6 +261,18 @@ export default function Header(props: Props) {
                   <Col>
                     <a href={`/about/${AboutSection.GDRC1}`}>
                       <h3>GDRC1</h3>
+                    </a>
+                  </Col>
+                </Row>
+                <Row>
+                  <Col xs={{ span: 6, offset: 3 }}>
+                    <hr />
+                  </Col>
+                </Row>
+                <Row className="pt-3">
+                  <Col>
+                    <a href={`/about/${AboutSection.NFT_DELEGATION}`}>
+                      <h3>NFT Delegation</h3>
                     </a>
                   </Col>
                 </Row>
@@ -403,7 +409,7 @@ export default function Header(props: Props) {
                   <Container>
                     <Navbar expand="lg" variant="dark">
                       <Container
-                        className={`d-flex align-items-center justify-content-end`}>
+                        className={`d-flex align-items-center justify-content-end no-padding`}>
                         <Image
                           loading="eager"
                           priority
@@ -424,13 +430,6 @@ export default function Header(props: Props) {
                           id="seize-navbar-nav"
                           className={`justify-content-end d-none ${styles.dMdBlock}`}>
                           <Nav className="justify-content-end ml-auto">
-                            <Nav.Link
-                              className={`${styles.mainNavLink} ${
-                                router.pathname == "/" ? "active" : ""
-                              }`}
-                              href="/">
-                              Home
-                            </Nav.Link>
                             <Nav.Link
                               className={`${styles.mainNavLink} ${
                                 router.pathname == "/the-memes" ? "active" : ""
@@ -494,6 +493,15 @@ export default function Header(props: Props) {
                                 Downloads
                               </NavDropdown.Item>
                             </NavDropdown>
+                            <Nav.Link
+                              className={`${styles.mainNavLink} ${
+                                router.pathname.includes("/delegation/")
+                                  ? "active"
+                                  : ""
+                              }`}
+                              href="/delegation/delegation-center">
+                              Delegation
+                            </Nav.Link>
                             <NavDropdown
                               title="About"
                               className={`${styles.mainNavLink} ${
@@ -539,6 +547,14 @@ export default function Header(props: Props) {
                                   (window.location.href = `/about/${AboutSection.GDRC1}`)
                                 }>
                                 GDRC1
+                              </NavDropdown.Item>
+                              <NavDropdown.Divider />
+                              <NavDropdown.Item
+                                className={styles.dropdownItem}
+                                onClick={() =>
+                                  (window.location.href = `/about/${AboutSection.NFT_DELEGATION}`)
+                                }>
+                                NFT Delegation
                               </NavDropdown.Item>
                               <NavDropdown.Divider />
                               <NavDropdown.Item
@@ -642,14 +658,6 @@ export default function Header(props: Props) {
                                       }`)
                                     }>
                                     Profile
-                                  </NavDropdown.Item>
-                                  <NavDropdown.Item
-                                    key="delegations-dropdown-item"
-                                    className={styles.dropdownItem}
-                                    onClick={() =>
-                                      (window.location.href = `/delegations`)
-                                    }>
-                                    Delegations
                                   </NavDropdown.Item>
                                 </NavDropdown>
                               </>

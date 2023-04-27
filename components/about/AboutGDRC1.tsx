@@ -26,7 +26,7 @@ export default function AboutGDRC1(props: Props) {
         </Row>
         <Row className="pt-3 pb-3">
           <Col
-            className={styles.aboutGDRC1Container}
+            className={styles.htmlContainer}
             dangerouslySetInnerHTML={{
               __html: props.html,
             }}></Col>
