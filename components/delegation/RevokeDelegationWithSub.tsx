@@ -2,50 +2,98 @@ import styles from "./Delegation.module.scss";
 import { Container, Row, Col, Form } from "react-bootstrap";
 import {
   useContractWrite,
+  useEnsAddress,
+  useEnsName,
   usePrepareContractWrite,
   useWaitForTransaction,
 } from "wagmi";
 import { useEffect, useState } from "react";
 
 import {
+  CONSOLIDATION_USE_CASE,
   DelegationCollection,
   DELEGATION_USE_CASES,
   SUPPORTED_COLLECTIONS,
-} from "../../pages/delegations/[contract]";
+  ALL_USE_CASES,
+} from "../../pages/delegation/[...section]";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Tippy from "@tippyjs/react";
 import { DELEGATION_ALL_ADDRESS, DELEGATION_CONTRACT } from "../../constants";
 import { DELEGATION_ABI } from "../../abis";
-import { getTransactionLink, isValidEthAddress } from "../../helpers/Helpers";
+import {
+  areEqualAddresses,
+  getTransactionLink,
+  isValidEthAddress,
+} from "../../helpers/Helpers";
 
 interface Props {
   address: string;
   ens: string | null | undefined;
-  incomingDelegations: string[];
+  originalDelegator: string;
   collection: DelegationCollection;
-  showCancel: boolean;
   showAddMore: boolean;
   onHide(): any;
+  onSetToast(toast: any): any;
 }
 
 export default function RevokeDelegationWithSubComponent(props: Props) {
+  const [newDelegationCollection, setNewDelegationCollection] =
+    useState<string>("0");
   const [newDelegationUseCase, setNewDelegationUseCase] = useState<number>(0);
+  const [newDelegationUseCaseDisplay, setNewDelegationUseCaseDisplay] =
+    useState("");
+  const [newDelegationToInput, setNewDelegationToInput] = useState("");
   const [newDelegationToAddress, setNewDelegationToAddress] = useState("");
-  const [newDelegationOriginalDelegator, setNewDelegationOriginalDelegator] =
-    useState(
-      props.incomingDelegations.length == 1 ? props.incomingDelegations[0] : ""
-    );
+
   const [errors, setErrors] = useState<string[]>([]);
+  const [gasError, setGasError] = useState<string>();
+
+  const newDelegationToAddressEns = useEnsName({
+    address:
+      newDelegationToInput && newDelegationToInput.startsWith("0x")
+        ? (newDelegationToInput as `0x${string}`)
+        : undefined,
+    chainId: 1,
+  });
+
+  const orignalDelegatorEnsResolution = useEnsName({
+    address: props.originalDelegator as `0x${string}`,
+    chainId: 1,
+  });
+
+  useEffect(() => {
+    if (newDelegationToAddressEns.data) {
+      setNewDelegationToAddress(newDelegationToInput);
+      setNewDelegationToInput(
+        `${newDelegationToAddressEns.data} - ${newDelegationToInput}`
+      );
+    }
+  }, [newDelegationToAddressEns.data]);
+
+  const newDelegationToAddressFromEns = useEnsAddress({
+    name:
+      newDelegationToInput && newDelegationToInput.endsWith(".eth")
+        ? newDelegationToInput
+        : undefined,
+    chainId: 1,
+  });
+
+  useEffect(() => {
+    if (newDelegationToAddressFromEns.data) {
+      setNewDelegationToAddress(newDelegationToAddressFromEns.data);
+      setNewDelegationToInput(
+        `${newDelegationToInput} - ${newDelegationToAddressFromEns.data}`
+      );
+    }
+  }, [newDelegationToAddressFromEns.data]);
 
   const contractWriteDelegationConfig = usePrepareContractWrite({
     address: DELEGATION_CONTRACT.contract,
     abi: DELEGATION_ABI,
     chainId: DELEGATION_CONTRACT.chain_id,
     args: [
-      newDelegationOriginalDelegator,
-      props.collection.contract == "all"
-        ? DELEGATION_ALL_ADDRESS
-        : props.collection.contract,
+      props.originalDelegator,
+      newDelegationCollection,
       newDelegationToAddress,
       newDelegationUseCase,
     ],
@@ -53,7 +101,26 @@ export default function RevokeDelegationWithSubComponent(props: Props) {
       validate().length == 0
         ? "revokeDelegationAddressUsingSubdelegation"
         : undefined,
-    onError: (e) => {},
+    onSettled(data, error) {
+      if (data) {
+        setGasError(undefined);
+      }
+      if (error) {
+        if (error.message.includes("Chain mismatch")) {
+          setGasError(
+            `Switch to ${
+              DELEGATION_CONTRACT.chain_id == 1
+                ? "Ethereum Mainnet"
+                : "Sepolia Network"
+            }`
+          );
+        } else {
+          setGasError(
+            "CANNOT ESTIMATE GAS - This can be caused by locked collections/use-cases"
+          );
+        }
+      }
+    },
   });
   const contractWriteDelegation = useContractWrite(
     contractWriteDelegationConfig.config
@@ -64,13 +131,18 @@ export default function RevokeDelegationWithSubComponent(props: Props) {
     hash: contractWriteDelegation.data?.hash,
   });
 
+  function clearErrors() {
+    setGasError(undefined);
+    setErrors([]);
+  }
+
   function validate() {
     const newErrors: string[] = [];
-    if (
-      !newDelegationOriginalDelegator ||
-      newDelegationOriginalDelegator == ""
-    ) {
+    if (!props.originalDelegator || props.originalDelegator == "") {
       newErrors.push("Missing or invalid Original Delegator");
+    }
+    if (!newDelegationCollection || newDelegationCollection == "0") {
+      newErrors.push("Missing or invalid Collection");
     }
     if (!newDelegationUseCase) {
       newErrors.push("Missing or invalid Use Case");
@@ -82,61 +154,136 @@ export default function RevokeDelegationWithSubComponent(props: Props) {
     return newErrors;
   }
 
-  function clearForm() {
-    setErrors([]);
-    setNewDelegationUseCase(0);
-  }
-
   function submitDelegation() {
     const newErrors = validate();
-    if (newErrors.length > 0) {
+    if (newErrors.length > 0 || gasError) {
       setErrors(newErrors);
       window.scrollBy(0, 100);
     } else {
       contractWriteDelegation.write?.();
+      props.onSetToast({
+        title: `Revoking #${newDelegationUseCase} - ${newDelegationUseCaseDisplay} Using Sub-Delegation Rights`,
+        message: "Confirm in your wallet...",
+      });
     }
   }
 
   useEffect(() => {
     if (contractWriteDelegation.error) {
-      setErrors((err) => [...err, contractWriteDelegation.error!.message]);
-      window.scrollBy(0, 100);
+      props.onSetToast({
+        title: `Revoking #${newDelegationUseCase} - ${newDelegationUseCaseDisplay} Using Sub-Delegation Rights`,
+        message: contractWriteDelegation.error.message,
+      });
     }
-  }, [contractWriteDelegation.error]);
+    if (contractWriteDelegation.data) {
+      if (contractWriteDelegation.data?.hash) {
+        if (waitContractWriteDelegation.isLoading) {
+          props.onSetToast({
+            title: `Revoking #${newDelegationUseCase} - ${newDelegationUseCaseDisplay} Using Sub-Delegation Rights`,
+            message: `Transaction submitted...
+                    <a
+                    href=${getTransactionLink(
+                      DELEGATION_CONTRACT.chain_id,
+                      contractWriteDelegation.data.hash
+                    )}
+                    target="_blank"
+                    rel="noreferrer"
+                    className=${styles.etherscanLink}>
+                    view
+                  </a><br />Waiting for confirmation...`,
+          });
+        } else {
+          props.onSetToast({
+            title: `Revoking #${newDelegationUseCase} - ${newDelegationUseCaseDisplay} Using Sub-Delegation Rights`,
+            message: `Transaction Successful!
+                    <a
+                    href=${getTransactionLink(
+                      DELEGATION_CONTRACT.chain_id,
+                      contractWriteDelegation.data.hash
+                    )}
+                    target="_blank"
+                    rel="noreferrer"
+                    className=${styles.etherscanLink}>
+                    view
+                  </a>`,
+          });
+        }
+      }
+    }
+  }, [
+    contractWriteDelegation.error,
+    contractWriteDelegation.data,
+    waitContractWriteDelegation.isLoading,
+  ]);
 
   return (
     <Container className="no-padding">
-      <Row>
-        <Col xs={10} className="pt-3 pb-3">
-          <h4>Revoke Delegation With Sub-Delegation Rights</h4>
+      <Row className="pt-2">
+        <Col xs={10} className="pt-3 pb-1">
+          <h4>Revoke Using Sub-Delegation Rights</h4>
         </Col>
-        {props.showCancel && (
-          <Col xs={2} className="d-flex align-items-center justify-content-end">
-            <Tippy
-              content={"Cancel Delegation"}
-              delay={250}
-              placement={"top"}
-              theme={"light"}>
-              <FontAwesomeIcon
-                className={styles.closeNewDelegationForm}
-                icon="times-circle"
-                onClick={() => props.onHide()}></FontAwesomeIcon>
-            </Tippy>
-          </Col>
-        )}
+        <Col
+          xs={2}
+          className="pt-3 pb-1 d-flex align-items-center justify-content-end">
+          <Tippy
+            content={"Cancel Delegation"}
+            delay={250}
+            placement={"top"}
+            theme={"light"}>
+            <FontAwesomeIcon
+              className={styles.closeNewDelegationForm}
+              icon="times-circle"
+              onClick={() => props.onHide()}></FontAwesomeIcon>
+          </Tippy>
+        </Col>
       </Row>
-      <Row>
+      <Row className="pt-4">
         <Col>
           <Form>
             <Form.Group as={Row} className="pb-4">
-              <Form.Label column sm={2}>
-                Delegator
+              <Form.Label column sm={3} className="d-flex align-items-center">
+                Original Delegator
+                <Tippy
+                  content={
+                    "Original Delegator of Sub Delegation - The address the delegation will be revoked for"
+                  }
+                  placement={"top"}
+                  theme={"light"}>
+                  <FontAwesomeIcon
+                    className={styles.infoIcon}
+                    icon="info-circle"></FontAwesomeIcon>
+                </Tippy>
               </Form.Label>
-              <Col sm={10}>
+              <Col sm={9}>
                 <Form.Control
                   className={`${styles.formInput} ${styles.formInputDisabled}`}
                   type="text"
-                  defaultValue={
+                  value={
+                    orignalDelegatorEnsResolution.data
+                      ? `${orignalDelegatorEnsResolution.data} - ${props.originalDelegator}`
+                      : `${props.originalDelegator}`
+                  }
+                  disabled
+                />
+              </Col>
+            </Form.Group>
+            <Form.Group as={Row} className="pb-4">
+              <Form.Label column sm={3} className="d-flex align-items-center">
+                Sub-Delegator
+                <Tippy
+                  content={"Address executing the revocation"}
+                  placement={"top"}
+                  theme={"light"}>
+                  <FontAwesomeIcon
+                    className={styles.infoIcon}
+                    icon="info-circle"></FontAwesomeIcon>
+                </Tippy>
+              </Form.Label>
+              <Col sm={9}>
+                <Form.Control
+                  className={`${styles.formInput} ${styles.formInputDisabled}`}
+                  type="text"
+                  value={
                     props.ens
                       ? `${props.ens} - ${props.address}`
                       : `${props.address}`
@@ -146,79 +293,107 @@ export default function RevokeDelegationWithSubComponent(props: Props) {
               </Col>
             </Form.Group>
             <Form.Group as={Row} className="pb-4">
-              <Form.Label column sm={2}>
-                Original Delegator
+              <Form.Label column sm={3} className="d-flex align-items-center">
+                Collection
+                <Tippy
+                  content={"Collection address for delegation"}
+                  placement={"top"}
+                  theme={"light"}>
+                  <FontAwesomeIcon
+                    className={styles.infoIcon}
+                    icon="info-circle"></FontAwesomeIcon>
+                </Tippy>
               </Form.Label>
-              <Col sm={10}>
+              <Col sm={9}>
                 <Form.Select
                   className={`${styles.formInput}`}
-                  value={newDelegationOriginalDelegator}
-                  onChange={(e) =>
-                    setNewDelegationOriginalDelegator(e.target.value)
-                  }>
-                  {props.incomingDelegations.length > 1 && (
-                    <option value="" disabled>
-                      Select
+                  value={newDelegationCollection}
+                  onChange={(e) => {
+                    setNewDelegationCollection(e.target.value);
+                    clearErrors();
+                  }}>
+                  <option value="0" disabled>
+                    Select Collection
+                  </option>
+                  {!props ||
+                  areEqualAddresses(
+                    props.collection.contract,
+                    DELEGATION_ALL_ADDRESS
+                  ) ? (
+                    SUPPORTED_COLLECTIONS.map((sc) => (
+                      <option
+                        key={`add-delegation-select-collection-${sc.contract}`}
+                        value={sc.contract}>
+                        {`${sc.display}`}
+                      </option>
+                    ))
+                  ) : (
+                    <option
+                      key={`add-delegation-select-collection`}
+                      value={props.collection.contract}>
+                      {`${props.collection.display}`}
                     </option>
                   )}
-                  {props.incomingDelegations.map((id) => (
-                    <option
-                      key={`add-delegation-select-delegator-${id}`}
-                      value={id}>
-                      {id}
-                    </option>
-                  ))}
                 </Form.Select>
               </Col>
             </Form.Group>
             <Form.Group as={Row} className="pb-4">
-              <Form.Label column sm={2}>
-                Collection
-              </Form.Label>
-              <Col sm={10}>
-                <Form.Control
-                  className={`${styles.formInput} ${styles.formInputDisabled}`}
-                  type="text"
-                  defaultValue={`${props.collection.display}${
-                    props.collection.contract == "all"
-                      ? ""
-                      : `- ${props.collection.contract}`
-                  }`}
-                  disabled
-                />
-              </Col>
-            </Form.Group>
-            <Form.Group as={Row} className="pb-4">
-              <Form.Label column sm={2}>
+              <Form.Label column sm={3} className="d-flex align-items-center">
                 Address
+                <Tippy
+                  content={"Revoke wallet Address"}
+                  placement={"top"}
+                  theme={"light"}>
+                  <FontAwesomeIcon
+                    className={styles.infoIcon}
+                    icon="info-circle"></FontAwesomeIcon>
+                </Tippy>
               </Form.Label>
-              <Col sm={10}>
+              <Col sm={9}>
                 <Form.Control
-                  placeholder="Deligation Address"
+                  placeholder="Delegation Address"
                   className={`${styles.formInput}`}
                   type="text"
-                  value={newDelegationToAddress}
-                  onChange={(e) => setNewDelegationToAddress(e.target.value)}
+                  value={newDelegationToInput}
+                  onChange={(e) => {
+                    setNewDelegationToInput(e.target.value);
+                    setNewDelegationToAddress(e.target.value);
+                    clearErrors();
+                  }}
                 />
               </Col>
             </Form.Group>
             <Form.Group as={Row} className="pb-4">
-              <Form.Label column sm={2}>
+              <Form.Label column sm={3} className="d-flex align-items-center">
                 Use Case
+                <Tippy
+                  content={"Delegation Use Case"}
+                  placement={"top"}
+                  theme={"light"}>
+                  <FontAwesomeIcon
+                    className={styles.infoIcon}
+                    icon="info-circle"></FontAwesomeIcon>
+                </Tippy>
               </Form.Label>
-              <Col sm={10}>
+              <Col sm={9}>
                 <Form.Select
                   className={`${styles.formInput}`}
                   value={newDelegationUseCase}
-                  onChange={(e) =>
-                    setNewDelegationUseCase(parseInt(e.target.value))
-                  }>
+                  onChange={(e) => {
+                    const i = parseInt(e.target.value);
+                    const display = ALL_USE_CASES.find((u) => u.use_case == i);
+                    setNewDelegationUseCase(i);
+                    setNewDelegationUseCaseDisplay(
+                      display ? display.display : ""
+                    );
+                    clearErrors();
+                  }}>
                   <option value={0} disabled>
                     Select Use Case
                   </option>
-                  {DELEGATION_USE_CASES.map((uc) => (
+                  {ALL_USE_CASES.map((uc) => (
                     <option
-                      key={`add-delegation-select-use-case-${uc.use_case}`}
+                      key={`revoke-delegation-select-use-case-${uc.use_case}`}
                       value={uc.use_case}>
                       #{uc.use_case} - {uc.display}
                     </option>
@@ -227,8 +402,18 @@ export default function RevokeDelegationWithSubComponent(props: Props) {
               </Col>
             </Form.Group>
             <Form.Group as={Row} className="pt-2 pb-4">
-              <Form.Label column sm={2}></Form.Label>
-              <Col sm={10} className="d-flex align-items-center">
+              <Form.Label
+                column
+                sm={3}
+                className="d-flex align-items-center"></Form.Label>
+              <Col
+                sm={9}
+                className="d-flex align-items-center justify-content-center">
+                <span
+                  className={styles.newDelegationCancelBtn}
+                  onClick={() => props.onHide()}>
+                  Cancel
+                </span>
                 <span
                   className={`${styles.revokeDelegationBtn} ${
                     contractWriteDelegation.isLoading ||
@@ -252,89 +437,22 @@ export default function RevokeDelegationWithSubComponent(props: Props) {
                     </div>
                   )}
                 </span>
-                {props.showCancel && (
-                  <span
-                    className={styles.newDelegationCancelBtn}
-                    onClick={() => props.onHide()}>
-                    Cancel
-                  </span>
-                )}
               </Col>
             </Form.Group>
-            {errors.length > 0 && (
+            {(errors.length > 0 || gasError) && (
               <Form.Group
                 as={Row}
                 className={`pt-2 pb-2 ${styles.newDelegationError}`}>
-                <Form.Label column sm={2}>
+                <Form.Label column sm={3} className="d-flex align-items-center">
                   Errors
                 </Form.Label>
-                <Col sm={10}>
-                  <ul>
+                <Col sm={9}>
+                  <ul className="mb-0">
                     {errors.map((e, index) => (
                       <li key={`new-delegation-error-${index}`}>{e}</li>
                     ))}
+                    {gasError && <li>{gasError}</li>}
                   </ul>
-                </Col>
-              </Form.Group>
-            )}
-            {contractWriteDelegation.data && (
-              <Form.Group
-                as={Row}
-                className={`pt-2 pb-2 ${styles.newDelegationRedultsList} ${
-                  waitContractWriteDelegation.data &&
-                  waitContractWriteDelegation.data.status
-                    ? styles.newDelegationSuccess
-                    : waitContractWriteDelegation.data &&
-                      !waitContractWriteDelegation.data.status
-                    ? styles.newDelegationError
-                    : ``
-                }`}>
-                <Form.Label
-                  column
-                  sm={2}
-                  className={`${styles.newDelegationRedultsList} ${
-                    waitContractWriteDelegation.data &&
-                    waitContractWriteDelegation.data.status
-                      ? styles.newDelegationSuccess
-                      : waitContractWriteDelegation.data &&
-                        !waitContractWriteDelegation.data.status
-                      ? styles.newDelegationError
-                      : ``
-                  }`}>
-                  Status
-                </Form.Label>
-                <Col sm={10}>
-                  <ul>
-                    <li
-                      className={`${styles.newDelegationRedultsList} ${
-                        waitContractWriteDelegation.data &&
-                        waitContractWriteDelegation.data.status
-                          ? styles.newDelegationSuccess
-                          : waitContractWriteDelegation.data &&
-                            !waitContractWriteDelegation.data.status
-                          ? styles.newDelegationError
-                          : ``
-                      }`}>
-                      {waitContractWriteDelegation.isLoading
-                        ? `Transaction Submitted...`
-                        : waitContractWriteDelegation.data?.status
-                        ? `Transaction Successful!`
-                        : `Transaction Failed`}
-                    </li>
-                    {waitContractWriteDelegation.isLoading && (
-                      <li>Waiting for confirmation...</li>
-                    )}
-                  </ul>
-                  <a
-                    href={getTransactionLink(
-                      DELEGATION_CONTRACT.chain_id,
-                      contractWriteDelegation.data.hash
-                    )}
-                    target="_blank"
-                    rel="noreferrer"
-                    className={styles.etherscanLink}>
-                    view txn
-                  </a>
                 </Col>
               </Form.Group>
             )}

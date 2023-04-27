@@ -423,9 +423,8 @@ export default function LabPage() {
                       <td>Collection</td>
                       <td>
                         <a
-                          href={`/meme-lab/collection/${nftMeta.metadata_collection.replace(
-                            " ",
-                            "-"
+                          href={`/meme-lab/collection/${encodeURIComponent(
+                            nftMeta.metadata_collection.replace(" ", "-")
                           )}`}>
                           {nftMeta.metadata_collection}
                         </a>

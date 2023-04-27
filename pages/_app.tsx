@@ -18,11 +18,8 @@ import {
 import { Web3Modal } from "@web3modal/react";
 import { publicProvider } from "@wagmi/core/providers/public";
 
-import { CoinbaseWalletConnector } from "wagmi/connectors/coinbaseWallet";
-import { WalletConnectConnector } from "wagmi/connectors/walletConnect";
-import { MetaMaskConnector } from "wagmi/connectors/metaMask";
-import { mainnet } from "wagmi/chains";
-import { configureChains, createClient, goerli, WagmiConfig } from "wagmi";
+import { mainnet, sepolia } from "wagmi/chains";
+import { configureChains, createClient, WagmiConfig } from "wagmi";
 
 import { library } from "@fortawesome/fontawesome-svg-core";
 import {
@@ -61,12 +58,15 @@ import {
   faPlus,
   faMinus,
   faCaretDown,
+  faCircleArrowLeft,
+  faInfoCircle,
 } from "@fortawesome/free-solid-svg-icons";
 import Head from "next/head";
 
 library.add(
   faArrowUp,
   faArrowDown,
+  faCircleArrowLeft,
   faCopy,
   faCaretRight,
   faCaretLeft,
@@ -100,18 +100,18 @@ library.add(
   faMinus,
   faPlus,
   faCaretDown,
-  faMinus
+  faMinus,
+  faInfoCircle
 );
 
-const { chains, provider } = configureChains(
-  // [goerli, mainnet],
-  [mainnet],
-  [
-    alchemyProvider({ apiKey: process.env.ALCHEMY_API_KEY! }),
-    w3mProvider({ projectId: CW_PROJECT_ID }),
-    publicProvider(),
-  ]
-);
+const CONTRACT_CHAINS =
+  DELEGATION_CONTRACT.chain_id == mainnet.id ? [mainnet] : [mainnet, sepolia];
+
+const { chains, provider } = configureChains(CONTRACT_CHAINS, [
+  alchemyProvider({ apiKey: process.env.ALCHEMY_API_KEY! }),
+  w3mProvider({ projectId: CW_PROJECT_ID }),
+  publicProvider(),
+]);
 
 const client = createClient({
   autoConnect: true,
@@ -120,22 +120,6 @@ const client = createClient({
 });
 
 const ethereumClient = new EthereumClient(client, chains);
-
-const customButton = {
-  onClick: async () => {
-    // Your custom logic here
-    console.log("Custom button clicked");
-  },
-  text: "Custom Button",
-  style: {
-    background: "purple",
-    color: "white",
-    borderRadius: "4px",
-    padding: "8px",
-    margin: "4px",
-    cursor: "pointer",
-  },
-};
 
 export default function App({ Component, pageProps }: AppProps) {
   pageProps.provider = provider;
