@@ -898,8 +898,10 @@ export default function UserPage(props: Props) {
                   </Container>
                 </Col>
               </Row>
+            </Container>
+            <Container className="pt-3 pb-3">
               {tdh && tdh.balance > 0 && (
-                <Row className="pt-3 pb-3">
+                <Row>
                   <Accordion alwaysOpen className={styles.userPageAccordion}>
                     <Accordion.Item
                       className={styles.userPageAccordionItem}
@@ -1233,6 +1235,12 @@ export default function UserPage(props: Props) {
                         </Table>
                       </Accordion.Body>
                     </Accordion.Item>
+                  </Accordion>
+                </Row>
+              )}
+              {tdh && (
+                <Row>
+                  <Accordion alwaysOpen className={styles.userPageAccordion}>
                     <Accordion.Item
                       className={`${styles.userPageAccordionItem} mt-4`}
                       eventKey={"1"}>
@@ -1648,30 +1656,30 @@ export default function UserPage(props: Props) {
                     <Col
                       className="d-flex align-items-center justify-content-end"
                       xs={7}>
-                      <h3>
-                        <span
-                          onClick={() => setSelectedSeason(0)}
-                          className={`${styles.season} ${
-                            selectedSeason > 0 ? styles.disabled : ""
-                          }`}>
-                          All
-                        </span>
-                      </h3>
-                      {seasons.map((s) => (
-                        <span key={`season-${s}-span`}>
-                          <h3>&nbsp;&nbsp;|&nbsp;&nbsp;</h3>
-                          <h3>
-                            <span
-                              key={`season-${s}-h3-2-span`}
-                              onClick={() => setSelectedSeason(s)}
-                              className={`${styles.season} ${
-                                selectedSeason != s ? styles.disabled : ""
-                              }`}>
-                              SZN{s}
-                            </span>
-                          </h3>
-                        </span>
-                      ))}
+                      <Dropdown
+                        className={styles.seasonDropdown}
+                        drop={"down-centered"}>
+                        <Dropdown.Toggle>
+                          SZN: {selectedSeason == 0 ? `All` : selectedSeason}
+                        </Dropdown.Toggle>
+                        <Dropdown.Menu>
+                          <Dropdown.Item
+                            onClick={() => {
+                              setSelectedSeason(0);
+                            }}>
+                            All
+                          </Dropdown.Item>
+                          {seasons.map((s) => (
+                            <Dropdown.Item
+                              key={`season-${s}`}
+                              onClick={() => {
+                                setSelectedSeason(s);
+                              }}>
+                              SNZ{s}
+                            </Dropdown.Item>
+                          ))}
+                        </Dropdown.Menu>
+                      </Dropdown>
                     </Col>
                   </Row>
                   {printUserControls()}

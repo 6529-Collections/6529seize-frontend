@@ -103,7 +103,7 @@
   background-color: rgb(30, 30, 30);
   -ms-overflow-style: none; /* Internet Explorer 10+ */
   scrollbar-width: none; /* Firefox */
-  overflow-x: scroll;
+  overflow-x: auto;
 }
 
 .primaryTable,
@@ -182,7 +182,7 @@
 .transactionsScrollContainer {
   -ms-overflow-style: none; /* Internet Explorer 10+ */
   scrollbar-width: none; /* Firefox */
-  overflow-x: scroll;
+  overflow-x: auto;
 }
 
 .transactionsScrollContainer::-webkit-scrollbar {
@@ -262,7 +262,7 @@
 .distributionsScrollContainer {
   -ms-overflow-style: none; /* Internet Explorer 10+ */
   scrollbar-width: none; /* Firefox */
-  overflow-x: scroll;
+  overflow-x: auto;
 }
 
 .distributionsScrollContainer::-webkit-scrollbar {
@@ -301,4 +301,39 @@
 .userPageAccordionItem {
   border-radius: 0 !important;
   background-color: transparent;
+}
+
+.seasonDropdown {
+  line-height: 48px;
+  text-align: center;
+  background-color: transparent;
+  border: none;
+  padding-right: 25px;
+  a {
+    line-height: 30px;
+  }
+  button {
+    font-size: larger !important;
+    font-weight: bolder !important;
+    cursor: copy;
+    padding: 0;
+    background-color: transparent !important;
+    border-color: transparent !important;
+    &::after {
+      margin-top: 0.8rem;
+    }
+  }
+  div {
+    width: 60%;
+  }
+}
+
+@media only screen and (max-width: 800px) {
+  .seasonDropdown {
+    button {
+      &::after {
+        margin-top: 0.5rem;
+      }
+    }
+  }
 }

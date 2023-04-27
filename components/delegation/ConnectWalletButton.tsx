@@ -7,13 +7,8 @@ export default function ConnectWalletButton() {
 
   return (
     <Container>
-      <Row className="pt-5 pb-5">
-        <Col className="text-center">
-          <h3 className="float-none">Connect your wallet</h3>
-        </Col>
-      </Row>
-      <Row>
-        <Col className="text-center">
+      <Row className="pb-2">
+        <Col className="d-flex align-items-center justify-content-center">
           <button
             disabled={isOpen}
             className={styles.connectWalletButton}
@@ -27,7 +22,7 @@ export default function ConnectWalletButton() {
                 </div>
               </div>
             )}{" "}
-            {isOpen ? `Connecting...` : `Connect`}
+            {isOpen ? `Connecting...` : `Connect Wallet`}
           </button>
         </Col>
       </Row>

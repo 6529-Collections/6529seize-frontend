@@ -1,3 +1,5 @@
+import { mainnet } from "wagmi/chains";
+
 export const PROJECT_NAME = "6529SEIZE";
 export const CW_PROJECT_ID = "0ba285cc179045bec37f7c9b9e7f9fbf";
 
@@ -16,11 +18,11 @@ export const DELEGATION_CONTRACT: {
   chain_id: number;
   contract: `0x${string}`;
 } = {
-  chain_id: 5,
-  contract: "0x6a89AFF3B4ea4CF323C32740289C8a1d703aBeC8",
+  chain_id: mainnet.id,
+  contract: "0x2202CB9c00487e7e8EF21e6d8E914B32e709f43d",
 };
 export const DELEGATION_ALL_ADDRESS =
   "0x8888888888888888888888888888888888888888";
 
 export const API_AUTH_COOKIE = "x-6529-auth";
-export const NEVER_DATE = 64060588800000;
+export const NEVER_DATE = 64060588800;

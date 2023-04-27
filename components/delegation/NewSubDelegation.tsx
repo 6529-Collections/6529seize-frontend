@@ -10,8 +10,8 @@ import {
 import { useEffect, useState } from "react";
 
 import {
-  DELEGATION_USE_CASES,
   DelegationCollection,
+  SUB_DELEGATION_USE_CASE,
   SUPPORTED_COLLECTIONS,
 } from "../../pages/delegation/[...section]";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -40,9 +40,6 @@ interface Props {
 }
 
 export default function NewDelegationComponent(props: Props) {
-  const [showExpiryCalendar, setShowExpiryCalendar] = useState(false);
-  const [showTokensInput, setShowTokensInput] = useState(false);
-
   const orignalDelegatorEnsResolution = useEnsName({
     address: props.subdelegation
       ? (props.subdelegation.originalDelegator as `0x${string}`)
@@ -50,13 +47,6 @@ export default function NewDelegationComponent(props: Props) {
     chainId: 1,
   });
 
-  const [newDelegationDate, setNewDelegationDate] = useState<Date | undefined>(
-    undefined
-  );
-  const [newDelegationToken, setNewDelegationToken] = useState<
-    number | undefined
-  >(undefined);
-  const [newDelegationUseCase, setNewDelegationUseCase] = useState<number>(0);
   const [newDelegationCollection, setNewDelegationCollection] =
     useState<string>("0");
   const [newDelegationToInput, setNewDelegationToInput] = useState("");
@@ -108,12 +98,10 @@ export default function NewDelegationComponent(props: Props) {
           props.subdelegation.originalDelegator,
           newDelegationCollection,
           newDelegationToAddress,
-          showExpiryCalendar && newDelegationDate
-            ? newDelegationDate.getTime() / 1000
-            : NEVER_DATE,
-          newDelegationUseCase,
-          showTokensInput ? false : true,
-          showTokensInput ? newDelegationToken : 0,
+          NEVER_DATE,
+          SUB_DELEGATION_USE_CASE.use_case,
+          true,
+          0,
         ],
         functionName:
           validate().length == 0
@@ -147,12 +135,10 @@ export default function NewDelegationComponent(props: Props) {
         args: [
           newDelegationCollection,
           newDelegationToAddress,
-          showExpiryCalendar && newDelegationDate
-            ? newDelegationDate.getTime() / 1000
-            : NEVER_DATE,
-          newDelegationUseCase,
-          showTokensInput ? false : true,
-          showTokensInput ? newDelegationToken : 0,
+          NEVER_DATE,
+          SUB_DELEGATION_USE_CASE.use_case,
+          true,
+          0,
         ],
         functionName:
           validate().length == 0 ? "registerDelegationAddress" : undefined,
@@ -196,9 +182,6 @@ export default function NewDelegationComponent(props: Props) {
     if (!newDelegationCollection || newDelegationCollection == "0") {
       newErrors.push("Missing or invalid Collection");
     }
-    if (!newDelegationUseCase) {
-      newErrors.push("Missing or invalid Use Case");
-    }
     if (!newDelegationToAddress || !isValidEthAddress(newDelegationToAddress)) {
       newErrors.push("Missing or invalid Address");
     } else if (
@@ -210,23 +193,12 @@ export default function NewDelegationComponent(props: Props) {
     ) {
       newErrors.push("Invalid Address - cannot delegate to your own wallet");
     }
-    if (showExpiryCalendar && !newDelegationDate) {
-      newErrors.push("Missing or invalid Expiry");
-    }
-    if (showTokensInput && !newDelegationToken) {
-      newErrors.push("Missing or invalid Token ID");
-    }
 
     return newErrors;
   }
 
   function clearForm() {
     setErrors([]);
-    setShowExpiryCalendar(false);
-    setShowTokensInput(false);
-    setNewDelegationDate(undefined);
-    setNewDelegationToken(undefined);
-    setNewDelegationUseCase(0);
     setNewDelegationToAddress("");
     setNewDelegationToInput("");
     setNewDelegationCollection("0");
@@ -240,7 +212,7 @@ export default function NewDelegationComponent(props: Props) {
     } else {
       contractWriteDelegation.write?.();
       props.onSetToast({
-        title: `Registering Delegation`,
+        title: `Registering Sub-Delegation`,
         message: "Confirm in your wallet...",
       });
     }
@@ -249,7 +221,7 @@ export default function NewDelegationComponent(props: Props) {
   useEffect(() => {
     if (contractWriteDelegation.error) {
       props.onSetToast({
-        title: `Registering Delegation`,
+        title: `Registering Sub-Delegation`,
         message: contractWriteDelegation.error.message,
       });
     }
@@ -257,7 +229,7 @@ export default function NewDelegationComponent(props: Props) {
       if (contractWriteDelegation.data?.hash) {
         if (waitContractWriteDelegation.isLoading) {
           props.onSetToast({
-            title: `Registering Delegation`,
+            title: `Registering Sub-Delegation`,
             message: `Transaction submitted...
                     <a
                     href=${getTransactionLink(
@@ -272,7 +244,7 @@ export default function NewDelegationComponent(props: Props) {
           });
         } else {
           props.onSetToast({
-            title: `Registering Delegation`,
+            title: `Registering Sub-Delegation`,
             message: `Transaction Successful!
                     <a
                     href=${getTransactionLink(
@@ -299,7 +271,7 @@ export default function NewDelegationComponent(props: Props) {
       <Row>
         <Col xs={10} className="pt-3 pb-1">
           <h4>
-            Register Delegation{" "}
+            Register Sub-Delegation{" "}
             {props.subdelegation && `Using Sub-Delegation Rights`}
           </h4>
         </Col>
@@ -307,7 +279,7 @@ export default function NewDelegationComponent(props: Props) {
           xs={2}
           className="pt-3 pb-1 d-flex align-items-center justify-content-end">
           <Tippy
-            content={"Cancel Delegation"}
+            content={"Cancel Sub-Delegation"}
             delay={250}
             placement={"top"}
             theme={"light"}>
@@ -356,7 +328,7 @@ export default function NewDelegationComponent(props: Props) {
                 <Tippy
                   content={`Address ${
                     props.subdelegation ? `executing` : `registering`
-                  } the delegation`}
+                  } the sub-delegation`}
                   placement={"top"}
                   theme={"light"}>
                   <FontAwesomeIcon
@@ -377,7 +349,6 @@ export default function NewDelegationComponent(props: Props) {
                 />
               </Col>
             </Form.Group>
-
             <Form.Group as={Row} className="pb-4">
               <Form.Label column sm={3} className="d-flex align-items-center">
                 Collection{" "}
@@ -423,7 +394,6 @@ export default function NewDelegationComponent(props: Props) {
                 </Form.Select>
               </Col>
             </Form.Group>
-
             <Form.Group as={Row} className="pb-4">
               <Form.Label column sm={3} className="d-flex align-items-center">
                 Address
@@ -449,165 +419,6 @@ export default function NewDelegationComponent(props: Props) {
                   }}
                 />
               </Col>
-            </Form.Group>
-            <Form.Group as={Row} className="pb-4">
-              <Form.Label column sm={3} className="d-flex align-items-center">
-                Use Case
-                <Tippy
-                  content={"Delegation Use Case"}
-                  placement={"top"}
-                  theme={"light"}>
-                  <FontAwesomeIcon
-                    className={styles.infoIcon}
-                    icon="info-circle"></FontAwesomeIcon>
-                </Tippy>
-              </Form.Label>
-              <Col sm={9}>
-                <Form.Select
-                  className={`${styles.formInput}`}
-                  value={newDelegationUseCase}
-                  onChange={(e) => {
-                    const newCase = parseInt(e.target.value);
-                    setNewDelegationUseCase(newCase);
-                    clearErrors();
-                  }}>
-                  <option value={0} disabled>
-                    Select Use Case
-                  </option>
-                  {DELEGATION_USE_CASES.map((uc) => {
-                    return (
-                      <option
-                        key={`add-delegation-select-use-case-${uc.use_case}`}
-                        value={uc.use_case}>
-                        #{uc.use_case} - {uc.display}
-                      </option>
-                    );
-                  })}
-                </Form.Select>
-              </Col>
-            </Form.Group>
-            <Form.Group as={Row} className="pb-4">
-              <Form.Label column sm={3} className="d-flex align-items-center">
-                Expiry Date
-                <Tippy
-                  content={"Expiry date for delegation (optional)"}
-                  placement={"top"}
-                  theme={"light"}>
-                  <FontAwesomeIcon
-                    className={styles.infoIcon}
-                    icon="info-circle"></FontAwesomeIcon>
-                </Tippy>
-              </Form.Label>
-              <Col sm={9}>
-                <Form.Check
-                  checked={!showExpiryCalendar}
-                  className={styles.newDelegationFormToggle}
-                  type="radio"
-                  label="Never"
-                  name="expiryRadio"
-                  onChange={() => setShowExpiryCalendar(false)}
-                />
-                &nbsp;&nbsp;
-                <Form.Check
-                  checked={showExpiryCalendar}
-                  className={styles.newDelegationFormToggle}
-                  type="radio"
-                  label="Select Date"
-                  name="expiryRadio"
-                  onChange={() => setShowExpiryCalendar(true)}
-                />
-                {showExpiryCalendar && (
-                  <Container fluid className="no-padding pt-3">
-                    <Row>
-                      <Col xs={12} xm={12} md={6} lg={4}>
-                        <Form.Control
-                          min={new Date().toISOString().slice(0, 10)}
-                          className={`${styles.formInput}`}
-                          type="date"
-                          placeholder="Expiry Date"
-                          onChange={(e) => {
-                            const value = e.target.value;
-                            if (value) {
-                              setNewDelegationDate(new Date(value));
-                            } else {
-                              setNewDelegationDate(undefined);
-                            }
-                          }}
-                        />
-                      </Col>
-                    </Row>
-                  </Container>
-                )}
-              </Col>
-            </Form.Group>
-            <Form.Group as={Row} className="pb-4">
-              <Form.Label column sm={3} className="d-flex align-items-center">
-                Tokens
-                <Tippy
-                  content={"Tokens involved in the delegation (optional)"}
-                  placement={"top"}
-                  theme={"light"}>
-                  <FontAwesomeIcon
-                    className={styles.infoIcon}
-                    icon="info-circle"></FontAwesomeIcon>
-                </Tippy>
-              </Form.Label>
-              <Col sm={9}>
-                <Form.Check
-                  checked={!showTokensInput}
-                  className={styles.newDelegationFormToggle}
-                  type="radio"
-                  label="All&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"
-                  name="tokenIdRadio"
-                  onChange={() => setShowTokensInput(false)}
-                />
-                &nbsp;&nbsp;
-                <Form.Check
-                  checked={showTokensInput}
-                  className={styles.newDelegationFormToggle}
-                  type="radio"
-                  label="Select Token ID"
-                  name="tokenIdRadio"
-                  onChange={() => setShowTokensInput(true)}
-                />
-                {showTokensInput && (
-                  <Container fluid className="no-padding pt-3">
-                    <Row>
-                      <Col xs={12} xm={12} md={6} lg={4}>
-                        <Form.Control
-                          min={0}
-                          className={`${styles.formInput}`}
-                          type="number"
-                          placeholder="Token ID"
-                          onChange={(e) => {
-                            const value = e.target.value;
-                            try {
-                              const intValue = parseInt(value);
-                              setNewDelegationToken(intValue);
-                            } catch {
-                              setNewDelegationToken(undefined);
-                            }
-                          }}
-                        />
-                      </Col>
-                    </Row>
-                  </Container>
-                )}
-              </Col>
-            </Form.Group>
-            <Form.Group as={Row} className="pb-4">
-              <Form.Label column sm={12} className="d-flex align-items-center">
-                Note: The currently supported use cases on seize.io are: #1 -
-                All, #2 - Minting/Allowlist, #3 - Airdrops{" "}
-                <a
-                  href={`/delegation/delegation-faq/use-cases-overview`}
-                  target="_blank"
-                  rel="noreferrer">
-                  <FontAwesomeIcon
-                    className={styles.infoIconLink}
-                    icon="info-circle"></FontAwesomeIcon>
-                </a>
-              </Form.Label>
             </Form.Group>
             <Form.Group as={Row} className="pt-2 pb-4">
               <Form.Label
