@@ -337,3 +337,27 @@
     }
   }
 }
+
+.consolidationSwitch {
+  background-color: $dark-grey;
+  border: none !important;
+  border-radius: 0;
+  width: 50%;
+  padding-top: 6px;
+  padding-bottom: 6px;
+
+  &:hover {
+    background-color: lighten($color: $dark-grey, $amount: 10);
+  }
+  &:active {
+    background-color: white !important;
+    color: black !important;
+  }
+}
+
+.consolidationSwitchActive {
+  background-color: white !important;
+  color: black !important;
+  border: none !important;
+  border-radius: 0;
+}

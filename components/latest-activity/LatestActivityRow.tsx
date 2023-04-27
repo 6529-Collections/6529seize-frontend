@@ -54,8 +54,8 @@ export default function LatestActivityRow(props: Props) {
             {props.tr.value > 0 ? (
               <>
                 <Address
-                  address={props.tr.to_address}
-                  ens={props.tr.to_display}
+                  wallets={[props.tr.to_address]}
+                  display={props.tr.to_display}
                 />
                 minted
               </>
@@ -101,8 +101,8 @@ export default function LatestActivityRow(props: Props) {
                 {" "}
                 to{" "}
                 <Address
-                  address={props.tr.to_address}
-                  ens={props.tr.to_display}
+                  wallets={[props.tr.to_address]}
+                  display={props.tr.to_display}
                 />
               </>
             )}
@@ -120,7 +120,10 @@ export default function LatestActivityRow(props: Props) {
         )}
         {!areEqualAddresses(NULL_ADDRESS, props.tr.from_address) && (
           <>
-            <Address address={props.tr.to_address} ens={props.tr.to_display} />{" "}
+            <Address
+              wallets={[props.tr.to_address]}
+              display={props.tr.to_display}
+            />{" "}
             {props.tr.value > 0 ? "bought" : "received"} {props.tr.token_count}x{" "}
             {props.nft ? (
               <a
@@ -167,8 +170,8 @@ export default function LatestActivityRow(props: Props) {
             )}{" "}
             from{" "}
             <Address
-              address={props.tr.from_address}
-              ens={props.tr.from_display}
+              wallets={[props.tr.from_address]}
+              display={props.tr.from_display}
             />
             {props.tr.value > 0 &&
               ` for ${Math.round(props.tr.value * 100000) / 100000} ETH`}

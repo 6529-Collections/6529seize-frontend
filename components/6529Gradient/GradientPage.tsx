@@ -198,8 +198,8 @@ export default function GradientPage() {
                       {nftOwner && address == nftOwner.wallet ? "*" : ""}
                       {nftOwner && (
                         <Address
-                          address={nftOwner.wallet}
-                          ens={nftOwner.wallet_display}
+                          wallets={[nftOwner.wallet]}
+                          display={nftOwner.wallet_display}
                         />
                       )}
                     </h4>
