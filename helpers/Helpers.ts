@@ -1,6 +1,6 @@
 import { sepolia } from "wagmi/chains";
 import { GRADIENT_CONTRACT, MEMES_CONTRACT } from "../constants";
-import { BaseNFT, NFT, VolumeType } from "../entities/INFT";
+import { BaseNFT, VolumeType } from "../entities/INFT";
 
 export function formatAddress(address: string) {
   if (!address || !address.startsWith("0x") || address.includes(" ")) {

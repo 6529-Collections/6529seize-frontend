@@ -1,7 +1,7 @@
 export interface Owner {
   created_at: Date;
   wallet: `0x${string}`;
-  wallet_display: string | null;
+  wallet_display: string | undefined;
   token_id: number;
   contract: string;
   balance: number;
