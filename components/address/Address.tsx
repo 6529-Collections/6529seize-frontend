@@ -236,7 +236,11 @@ export default function Address(props: Props) {
           className={`${styles.consolidationDropdown}`}
           autoClose="outside">
           <Dropdown.Toggle
-            onClick={() => setConsolidationExpanded(!consolidationExpanded)}
+            onClick={() => {
+              if (!props.isUserPage) {
+                setConsolidationExpanded(!consolidationExpanded);
+              }
+            }}
             name={`consolidation-toggle`}
             aria-label={`consolidation-toggle`}>
             <Image
@@ -257,7 +261,7 @@ export default function Address(props: Props) {
           </Dropdown.Toggle>
         </Dropdown>
       )}
-      {consolidationExpanded &&
+      {(consolidationExpanded || props.isUserPage) &&
         props.wallets.length > 1 &&
         props.wallets.map((w, index) => (
           <div
