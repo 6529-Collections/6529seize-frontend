@@ -443,7 +443,7 @@ export default function UserPage(props: Props) {
         setDistributions(response.data);
       });
     }
-  }, [distributionsPage, ownerAddress, router.isReady]);
+  }, [distributionsPage, ownerAddress, router.isReady, view]);
 
   useEffect(() => {
     if (sort && sortDir) {
@@ -1920,6 +1920,8 @@ export default function UserPage(props: Props) {
                             <tr>
                               <th>Date</th>
                               <th>Card</th>
+                              {isConsolidation &&
+                                view == VIEW.CONSOLIDATION && <th>Wallet</th>}
                               <th className="text-center">Phase</th>
                               <th className="text-center">Count</th>
                               <th className="text-center">Minted</th>
@@ -1980,6 +1982,14 @@ export default function UserPage(props: Props) {
                                       : d.contract
                                   }${d.card_name ? ` - ${d.card_name}` : ""}`}
                                 </td>
+                                {isConsolidation &&
+                                  view == VIEW.CONSOLIDATION && (
+                                    <td>
+                                      {d.display
+                                        ? d.display
+                                        : formatAddress(d.wallet)}
+                                    </td>
+                                  )}
                                 <td className="text-center">{d.phase}</td>
                                 <td className="text-center">{d.count}</td>
                                 <td className="text-center">
