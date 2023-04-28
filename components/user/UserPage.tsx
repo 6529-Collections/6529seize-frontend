@@ -346,7 +346,7 @@ export default function UserPage(props: Props) {
 
   useEffect(() => {
     async function fetchConsolidatedTDH() {
-      const url = `${process.env.API_ENDPOINT}/api/consolidated_owner_metrics/?wallet=${ownerAddress}`;
+      const url = `${process.env.API_ENDPOINT}/api/consolidated_owner_metrics/?wallet=${ownerAddress}&profile_page=true`;
       return fetchUrl(url).then((response: DBResponse) => {
         if (response && response.data.length == 1) {
           setConsolidatedTDH(response.data[0]);
@@ -364,7 +364,7 @@ export default function UserPage(props: Props) {
 
   useEffect(() => {
     async function fetchTDH() {
-      const url = `${process.env.API_ENDPOINT}/api/owner_metrics/?wallet=${ownerAddress}`;
+      const url = `${process.env.API_ENDPOINT}/api/owner_metrics/?wallet=${ownerAddress}&profile_page=true`;
       return fetchUrl(url).then((response: DBResponse) => {
         if (response && response.data.length == 1) {
           setWalletTDH(response.data[0]);
@@ -396,8 +396,20 @@ export default function UserPage(props: Props) {
   }, [view, walletOwned, consolidationOwned]);
 
   useEffect(() => {
+    setActivityPage(1);
+    setDistributionsPage(1);
+  }, [view]);
+
+  useEffect(() => {
+    let url = `${process.env.API_ENDPOINT}/api/transactions?contract=${MEMES_CONTRACT}&wallet=${ownerAddress}&page_size=${ACTIVITY_PAGE_SIZE}&page=${activityPage}`;
+    if (view == VIEW.CONSOLIDATION && consolidatedTDH) {
+      url = `${
+        process.env.API_ENDPOINT
+      }/api/transactions?contract=${MEMES_CONTRACT}&wallet=${consolidatedTDH.wallets.join(
+        ","
+      )}&page_size=${ACTIVITY_PAGE_SIZE}&page=${activityPage}`;
+    }
     if (ownerAddress && router.isReady) {
-      let url = `${process.env.API_ENDPOINT}/api/transactions?contract=${MEMES_CONTRACT}&wallet=${ownerAddress}&page_size=${ACTIVITY_PAGE_SIZE}&page=${activityPage}`;
       switch (activityTypeFilter) {
         case TypeFilter.SALES:
           url += `&filter=sales`;
@@ -414,11 +426,18 @@ export default function UserPage(props: Props) {
         setActivity(response.data);
       });
     }
-  }, [activityPage, ownerAddress, router.isReady, activityTypeFilter]);
+  }, [activityPage, ownerAddress, router.isReady, activityTypeFilter, view]);
 
   useEffect(() => {
+    let url = `${process.env.API_ENDPOINT}/api/distributions?wallet=${ownerAddress}&page_size=${DISTRIBUTIONS_PAGE_SIZE}&page=${distributionsPage}`;
+    if (view == VIEW.CONSOLIDATION && consolidatedTDH) {
+      url = url = `${
+        process.env.API_ENDPOINT
+      }/api/distributions?wallet=${consolidatedTDH.wallets.join(
+        ","
+      )}&page_size=${DISTRIBUTIONS_PAGE_SIZE}&page=${distributionsPage}`;
+    }
     if (ownerAddress && router.isReady) {
-      let url = `${process.env.API_ENDPOINT}/api/distributions?wallet=${ownerAddress}&page_size=${DISTRIBUTIONS_PAGE_SIZE}&page=${distributionsPage}`;
       fetchUrl(url).then((response: DBResponse) => {
         setDistributionsTotalResults(response.count);
         setDistributions(response.data);
