@@ -27,7 +27,6 @@ import {
   getTransactionLink,
   isValidEthAddress,
 } from "../../helpers/Helpers";
-import { DocumentationSection } from "./documentation/DelegationDocumentation";
 
 interface Props {
   address: string;
