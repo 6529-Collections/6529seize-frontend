@@ -176,7 +176,7 @@ export default function DelegationCenterComponent(props: Props) {
                     );
                   }}>
                   <FontAwesomeIcon icon="plus" className={styles.buttonIcon} />
-                  Register Sub-Delegation
+                  Register Delegation Manager
                 </span>
               </Col>
             </Row>

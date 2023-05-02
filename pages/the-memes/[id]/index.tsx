@@ -6,6 +6,7 @@ import { useRouter } from "next/router";
 import { MEMES_CONTRACT } from "../../../constants";
 import { fetchUrl } from "../../../services/6529api";
 import HeaderPlaceholder from "../../../components/header/HeaderPlaceholder";
+import { useState } from "react";
 
 const Header = dynamic(() => import("../../../components/header/Header"), {
   ssr: false,
@@ -21,6 +22,7 @@ const MemePageComponent = dynamic(
 
 export default function MemePage(props: any) {
   const pagenameFull = `${props.name} | 6529 SEIZE`;
+  const [connectedWallets, setConnectedWallets] = useState<string[]>([]);
 
   return (
     <>
@@ -43,8 +45,8 @@ export default function MemePage(props: any) {
       </Head>
 
       <main className={styles.main}>
-        <Header />
-        <MemePageComponent />
+        <Header onSetWallets={(wallets) => setConnectedWallets(wallets)} />
+        <MemePageComponent wallets={connectedWallets} />
       </main>
     </>
   );

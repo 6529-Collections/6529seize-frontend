@@ -44,17 +44,15 @@ import { Transaction } from "../../entities/ITransaction";
 import { ReservedUser } from "../../pages/[user]";
 import Tippy from "@tippyjs/react";
 import { IDistribution } from "../../entities/IDistribution";
-
-enum VIEW {
-  CONSOLIDATION,
-  WALLET,
-}
+import Tag, { TagType } from "../address/Tag";
+import ConsolidationSwitch, {
+  VIEW,
+} from "../consolidation-switch/ConsolidationSwitch";
+import Address from "../address/Address";
 
 const NFTImage = dynamic(() => import("../nft-image/NFTImage"), {
   ssr: false,
 });
-
-const Address = dynamic(() => import("../address/Address"), { ssr: false });
 
 interface Props {
   user: string;
@@ -853,53 +851,216 @@ export default function UserPage(props: Props) {
                 </Col>
               </Row> */}
               {isConsolidation && (
-                <Row className="pt-2 pb-2">
-                  <Col className="text-center">
-                    <Button
-                      onClick={() => setView(VIEW.WALLET)}
-                      className={`${styles.consolidationSwitch} ${
-                        view == VIEW.WALLET
-                          ? styles.consolidationSwitchActive
-                          : ""
-                      }`}>
-                      Wallet
-                    </Button>
-                    <Button
-                      onClick={() => setView(VIEW.CONSOLIDATION)}
-                      className={`${styles.consolidationSwitch} ${
-                        view == VIEW.CONSOLIDATION
-                          ? styles.consolidationSwitchActive
-                          : ""
-                      }`}>
-                      Consolidation
-                    </Button>
+                <Row>
+                  <Col className="d-flex justify-content-end">
+                    <ConsolidationSwitch
+                      view={view}
+                      onSetView={(v) => setView(v)}
+                    />
                   </Col>
                 </Row>
               )}
-              <Row className="pt-3 pb-3">
-                {/* {ensAvatar.data && (
-                  <Col
-                    xs={12}
-                    md={{ span: 2, offset: 2 }}
-                    className="d-flex align-items-center justify-content-center">
-                    <Image
-                      className={styles.avatar}
-                      src={ensAvatar.data}
-                      alt={`avatar-${address}`}
-                      width={0}
-                      height={0}
-                    />
+              {ownerAddress && (
+                <Row className={isConsolidation ? "pt-2" : "pt-3"}>
+                  <Col xs={6}>
+                    <Container className="no-padding">
+                      <Row className="pb-1">
+                        <Col>
+                          {tdh && consolidatedTDH ? (
+                            <Address
+                              wallets={
+                                view == VIEW.CONSOLIDATION
+                                  ? consolidatedTDH.wallets
+                                  : [ownerAddress]
+                              }
+                              display={
+                                view == VIEW.CONSOLIDATION &&
+                                consolidatedTDH.consolidation_display
+                                  ? consolidatedTDH.consolidation_display
+                                  : ownerENS
+                              }
+                              isUserPage={true}
+                              disableLink={true}
+                              viewingWallet={ownerAddress}
+                            />
+                          ) : (
+                            <Address
+                              wallets={[ownerAddress]}
+                              display={ownerENS}
+                              disableLink={true}
+                            />
+                          )}
+                        </Col>
+                      </Row>
+                      <Row className="pt-1">
+                        <Tippy
+                          content={ownerLinkCopied ? "Copied" : "Copy"}
+                          placement={"right"}
+                          theme={"light"}
+                          hideOnClick={false}>
+                          <span
+                            className={styles.ownerLink}
+                            onClick={() => {
+                              if (navigator.clipboard) {
+                                navigator.clipboard.writeText(
+                                  window.location.href
+                                );
+                              }
+                              setIsOwnerLinkCopied(true);
+                              setTimeout(() => {
+                                setIsOwnerLinkCopied(false);
+                              }, 1000);
+                            }}>
+                            {removeProtocol(ownerLinkDisplay)}{" "}
+                            <FontAwesomeIcon
+                              icon="link"
+                              className={styles.ownerLinkIcon}
+                            />
+                          </span>
+                        </Tippy>
+                      </Row>
+                      <Row className="pt-3">
+                        <Col>
+                          <a
+                            href={`https://opensea.io/${ownerAddress}`}
+                            target="_blank"
+                            rel="noreferrer">
+                            <Image
+                              className={styles.marketplace}
+                              src="/opensea.png"
+                              alt="opensea"
+                              width={40}
+                              height={40}
+                            />
+                          </a>
+                          <a
+                            href={`https://x2y2.io/user/${ownerAddress}`}
+                            target="_blank"
+                            rel="noreferrer">
+                            <Image
+                              className={styles.marketplace}
+                              src="/x2y2.png"
+                              alt="x2y2"
+                              width={40}
+                              height={40}
+                            />
+                          </a>
+                        </Col>
+                      </Row>
+                    </Container>
                   </Col>
-                )} */}
-                <Col
-                  xs={12}
-                  // md={ensAvatar.data ? 6 : 12}
-                  className="text-center d-flex align-items-center justify-content-center">
+                  {tdh && tdh.balance > 0 && (
+                    <>
+                      <Col xs={3}>
+                        <Container className="no-padding">
+                          <Row className="pt-2 pb-1">
+                            <Col>
+                              <Tag
+                                type={TagType.RANK}
+                                text={"All Cards Rank #"}
+                                value={tdh.dense_rank_balance}
+                              />
+                            </Col>
+                          </Row>
+                          <Row className="pt-1 pb-1">
+                            <Col>
+                              <Tag
+                                type={TagType.RANK}
+                                text={"Unique Cards Rank #"}
+                                value={tdh.dense_rank_unique}
+                              />
+                            </Col>
+                          </Row>
+                          <Row className="pt-1 pb-1">
+                            <Col>
+                              <Tag
+                                type={TagType.RANK}
+                                text={"TDH Rank #"}
+                                value={tdh.tdh_rank}
+                              />
+                            </Col>
+                          </Row>
+                        </Container>
+                      </Col>
+                      <Col xs={3}>
+                        <Container className="no-padding">
+                          <Row className="pt-2 pb-1">
+                            <Col>
+                              {tdh.memes_cards_sets > 0 ? (
+                                <Tag
+                                  type={TagType.MEME_SETS}
+                                  text={"Memes Sets x"}
+                                  value={tdh.memes_cards_sets}
+                                />
+                              ) : (
+                                <Tag
+                                  type={TagType.MEMES}
+                                  text={"Memes x"}
+                                  value={tdh.unique_memes}
+                                  text_after={
+                                    tdh.genesis > 0 ? ` (+Genesis) ` : ""
+                                  }
+                                />
+                              )}
+                            </Col>
+                          </Row>
+                          {tdh.memes_cards_sets_szn1 > 0 && (
+                            <Row className="pt-1 pb-1">
+                              <Col>
+                                <Tag
+                                  type={TagType.SZN1}
+                                  text={"SZN1 Sets x"}
+                                  value={tdh.memes_cards_sets_szn1}
+                                />
+                              </Col>
+                            </Row>
+                          )}
+                          {tdh.memes_cards_sets_szn2 > 0 && (
+                            <Row className="pt-1 pb-1">
+                              <Col>
+                                <Tag
+                                  type={TagType.SZN2}
+                                  text={"SZN2 Sets x"}
+                                  value={tdh.memes_cards_sets_szn2}
+                                />
+                              </Col>
+                            </Row>
+                          )}
+                          {tdh.memes_cards_sets_szn3 > 0 && (
+                            <Row className="pt-1 pb-1">
+                              <Col>
+                                <Tag
+                                  type={TagType.SZN3}
+                                  text={"SZN3 Sets x"}
+                                  value={tdh.memes_cards_sets_szn3}
+                                />
+                              </Col>
+                            </Row>
+                          )}
+                          {tdh.gradients_balance > 0 && (
+                            <Row className="pt-1 pb-1">
+                              <Col>
+                                <Tag
+                                  type={TagType.GRADIENT}
+                                  text={"Gradients x"}
+                                  value={tdh.gradients_balance}
+                                />
+                              </Col>
+                            </Row>
+                          )}
+                        </Container>
+                      </Col>
+                    </>
+                  )}
+                </Row>
+              )}
+              {/* <Row className="pt-3 pb-3">
+                <Col xs={12}>
                   <Container className="p-0">
                     {ownerAddress && (
                       <>
                         <Row>
-                          <h2 className={styles.ownerAddress}>
+                          <Col className={styles.ownerAddress}>
                             {tdh && consolidatedTDH ? (
                               <Address
                                 wallets={
@@ -948,7 +1109,7 @@ export default function UserPage(props: Props) {
                                 disableLink={true}
                               />
                             )}
-                          </h2>
+                          </Col>
                         </Row>
                         <Row className="pt-2 pb-2">
                           <Col>
@@ -1011,9 +1172,9 @@ export default function UserPage(props: Props) {
                     )}
                   </Container>
                 </Col>
-              </Row>
+              </Row> */}
             </Container>
-            <Container className="pt-3 pb-3">
+            <Container className="pt-5 pb-3">
               {tdh && tdh.balance > 0 && (
                 <Row>
                   <Accordion alwaysOpen className={styles.userPageAccordion}>
