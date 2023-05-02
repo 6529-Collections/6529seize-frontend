@@ -271,7 +271,7 @@ export default function NewDelegationComponent(props: Props) {
       <Row>
         <Col xs={10} className="pt-3 pb-1">
           <h4>
-            Register Sub-Delegation{" "}
+            Register Delegation Manager{" "}
             {props.subdelegation && `Using Sub-Delegation Rights`}
           </h4>
         </Col>

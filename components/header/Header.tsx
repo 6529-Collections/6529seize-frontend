@@ -1,28 +1,69 @@
 import { Web3Button } from "@web3modal/react";
 import styles from "./Header.module.scss";
-import { Container, Row, Col, Nav, Navbar, NavDropdown } from "react-bootstrap";
-import { useAccount, useConnect, useDisconnect } from "wagmi";
+import {
+  Container,
+  Row,
+  Col,
+  Nav,
+  Navbar,
+  NavDropdown,
+  Dropdown,
+} from "react-bootstrap";
+import { useAccount } from "wagmi";
 import { useRouter } from "next/router";
-import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import { AboutSection } from "../../pages/about/[section]";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-
-const Address = dynamic(() => import("../address/Address"), { ssr: false });
+import { DBResponse } from "../../entities/IDBResponse";
+import { fetchUrl } from "../../services/6529api";
+import Cookies from "js-cookie";
+import { VIEW_MODE_COOKIE } from "../../constants";
 
 interface Props {
   onLoad?: () => void;
+  onSetWallets?(wallets: string[]): any;
+}
+
+enum VIEW {
+  CONSOLIDATION = "Consolidation",
+  WALLET = "Wallet",
 }
 
 export default function Header(props: Props) {
   const router = useRouter();
+  const [consolidations, setConsolidations] = useState<string[]>([]);
+  const [isConsolidation, setIsConsolidation] = useState(false);
   const { address, connector, isConnected } = useAccount();
   const [burgerMenuOpen, setBurgerMenuOpen] = useState(false);
-
+  const [viewModeOpen, setViewModeOpen] = useState(false);
+  const [view, setView] = useState<VIEW>();
   const [showBurgerMenuAbout, setShowBurgerMenuAbout] = useState(false);
   const [setShowBurgerMenuCommunity, setsetShowBurgerMenuCommunity] =
     useState(false);
+
+  useEffect(() => {
+    const viewMode = Cookies.get(VIEW_MODE_COOKIE);
+    console.log(viewMode);
+    if (viewMode == VIEW.CONSOLIDATION) {
+      setView(VIEW.CONSOLIDATION);
+    } else {
+      setView(VIEW.WALLET);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (view) {
+      Cookies.set(VIEW_MODE_COOKIE, view);
+      if (props.onSetWallets) {
+        if (isConsolidation && view == VIEW.CONSOLIDATION) {
+          props.onSetWallets(consolidations);
+        } else if (address) {
+          props.onSetWallets([address]);
+        }
+      }
+    }
+  }, [view, isConsolidation]);
 
   useEffect(() => {
     function handleResize() {
@@ -40,6 +81,33 @@ export default function Header(props: Props) {
     }
     return () => window.removeEventListener("resize", handleResize);
   }, []);
+
+  useEffect(() => {
+    if (isConnected && address) {
+      fetchUrl(
+        `${process.env.API_ENDPOINT}/api/consolidations/${address}`
+      ).then((response: DBResponse) => {
+        if (response.data.length) {
+          const walletConsolidations = new Set<string>();
+          response.data.map((d) => {
+            walletConsolidations.add(d.wallet1);
+            walletConsolidations.add(d.wallet2);
+          });
+          setConsolidations(Array.from(walletConsolidations));
+        } else {
+          setConsolidations([]);
+        }
+      });
+    }
+  }, [isConnected, address]);
+
+  useEffect(() => {
+    if (consolidations.length > 0) {
+      setIsConsolidation(true);
+    } else {
+      setIsConsolidation(false);
+    }
+  }, [consolidations]);
 
   function printBurgerMenu() {
     return (
@@ -659,6 +727,53 @@ export default function Header(props: Props) {
                                     }>
                                     Profile
                                   </NavDropdown.Item>
+                                  {isConsolidation && (
+                                    <NavDropdown.Item
+                                      className={styles.dropdownItem}>
+                                      <Dropdown
+                                        onMouseEnter={() =>
+                                          setViewModeOpen(true)
+                                        }
+                                        onMouseLeave={() =>
+                                          setViewModeOpen(false)
+                                        }
+                                        className={styles.viewModeDropdown}
+                                        drop={"start"}
+                                        show={viewModeOpen}>
+                                        <Dropdown.Toggle>
+                                          View Mode
+                                        </Dropdown.Toggle>
+                                        <Dropdown.Menu>
+                                          <Dropdown.Item
+                                            className="d-flex align-items-center"
+                                            onClick={() =>
+                                              setView(VIEW.WALLET)
+                                            }>
+                                            {view == VIEW.WALLET && (
+                                              // <span>&#x2713;&nbsp;&nbsp;</span>
+                                              <FontAwesomeIcon
+                                                className={styles.viewModeIcon}
+                                                icon="check-circle"></FontAwesomeIcon>
+                                            )}
+                                            Wallet
+                                          </Dropdown.Item>
+                                          <Dropdown.Item
+                                            className="d-flex align-items-center"
+                                            onClick={() =>
+                                              setView(VIEW.CONSOLIDATION)
+                                            }>
+                                            {view == VIEW.CONSOLIDATION && (
+                                              // <span>&#x2713;&nbsp;&nbsp;</span>
+                                              <FontAwesomeIcon
+                                                className={styles.viewModeIcon}
+                                                icon="check-circle"></FontAwesomeIcon>
+                                            )}
+                                            Consolidation
+                                          </Dropdown.Item>
+                                        </Dropdown.Menu>
+                                      </Dropdown>
+                                    </NavDropdown.Item>
+                                  )}
                                 </NavDropdown>
                               </>
                             ) : (

@@ -11,6 +11,7 @@ import { Owner } from "../../entities/IOwner";
 import { SortDirection } from "../../entities/ISort";
 import { Crumb } from "../breadcrumb/Breadcrumb";
 import {
+  areEqualAddresses,
   getDateDisplay,
   getValuesForVolumeType,
   numberWithCommas,
@@ -42,12 +43,11 @@ interface Meme {
 
 interface Props {
   setCrumbs(crumbs: Crumb[]): any;
+  wallets: string[];
 }
 
 export default function TheMemesComponent(props: Props) {
   const router = useRouter();
-
-  const { address, connector, isConnected } = useAccount();
 
   useEffect(() => {
     if (router.isReady) {
@@ -182,16 +182,38 @@ export default function TheMemesComponent(props: Props) {
   }, []);
 
   useEffect(() => {
-    if (address && nftMetas.length > 0) {
+    if (props.wallets && nftMetas.length > 0) {
       fetchAllPages(
-        `${process.env.API_ENDPOINT}/api/owners?contract=${MEMES_CONTRACT}&wallet=${address}`
+        `${
+          process.env.API_ENDPOINT
+        }/api/owners?contract=${MEMES_CONTRACT}&wallet=${props.wallets.join(
+          ","
+        )}`
       ).then((owners: Owner[]) => {
-        setNftBalances(owners);
+        const mergedOwners = owners.reduce(
+          (accumulator: Owner[], currentOwner: Owner) => {
+            const existingOwner = accumulator.find(
+              (owner) =>
+                areEqualAddresses(owner.contract, currentOwner.contract) &&
+                owner.token_id === currentOwner.token_id
+            );
+
+            if (existingOwner) {
+              existingOwner.balance += currentOwner.balance;
+            } else {
+              accumulator.push(currentOwner);
+            }
+
+            return accumulator;
+          },
+          [] as Owner[]
+        );
+        setNftBalances(mergedOwners);
       });
     } else {
       setNftBalances([]);
     }
-  }, [nftMetas, address]);
+  }, [nftMetas, props.wallets]);
 
   useEffect(() => {
     if (sort && sortDir && nftsLoaded) {
@@ -473,14 +495,14 @@ export default function TheMemesComponent(props: Props) {
             <Row>
               <a
                 href={`/the-memes/${nft.id}`}
-                className={address && styles.nftImagePadding}>
+                className={props.wallets && styles.nftImagePadding}>
                 <NFTImage
                   nft={nft}
                   animation={false}
                   height={300}
                   balance={getBalance(nft.id)}
                   showThumbnail={true}
-                  showUnseized={address != undefined && address != null}
+                  showUnseized={props.wallets.length > 0}
                 />
               </a>
             </Row>

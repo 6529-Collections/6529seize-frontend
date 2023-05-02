@@ -235,6 +235,7 @@
 .ownerLink {
   font-size: larger;
   cursor: pointer;
+  width: fit-content;
 }
 
 .ownerLinkIcon {
@@ -339,25 +340,25 @@
 }
 
 .consolidationSwitch {
-  background-color: $dark-grey;
-  border: none !important;
-  border-radius: 0;
-  width: 50%;
-  padding-top: 6px;
-  padding-bottom: 6px;
+  float: left;
+  font-size: larger;
+  font-weight: bolder;
+  margin-top: 3px;
 
-  &:hover {
-    background-color: lighten($color: $dark-grey, $amount: 10);
-  }
-  &:active {
+  input {
+    border-color: transparent !important;
     background-color: white !important;
-    color: black !important;
+    cursor: pointer;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='%23000'/%3e%3c/svg%3e") !important;
+  }
+
+  input:checked {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='%23c51d34'/%3e%3c/svg%3e") !important;
   }
 }
 
-.consolidationSwitchActive {
-  background-color: white !important;
-  color: black !important;
-  border: none !important;
-  border-radius: 0;
+.consolidationSwitchLabel {
+  float: left;
+  font-size: larger;
+  font-weight: bolder;
 }
