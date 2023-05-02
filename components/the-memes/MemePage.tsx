@@ -12,7 +12,6 @@ import {
   Carousel,
   Dropdown,
 } from "react-bootstrap";
-import { useAccount } from "wagmi";
 import { MEMES_CONTRACT, NULL_ADDRESS } from "../../constants";
 import { DBResponse } from "../../entities/IDBResponse";
 import { NFT, MemesExtendedData, NftTDH, NftRank } from "../../entities/INFT";
@@ -61,7 +60,11 @@ export enum MEME_FOCUS {
 
 const ACTIVITY_PAGE_SIZE = 25;
 
-export default function MemePage() {
+interface Props {
+  wallets: string[];
+}
+
+export default function MemePage(props: Props) {
   const router = useRouter();
 
   const [isFullScreenSupported, setIsFullScreenSupported] = useState(false);
@@ -74,8 +77,6 @@ export default function MemePage() {
   const [activeTab, setActiveTab] = useState<MEME_FOCUS>();
 
   const [breadcrumbs, setBreadcrumbs] = useState<Crumb[]>([]);
-
-  const { address, connector, isConnected } = useAccount();
 
   const [nft, setNft] = useState<NFT>();
   const [memeLabNfts, setMemeLabNfts] = useState<NFT[]>([]);
@@ -225,18 +226,22 @@ export default function MemePage() {
   }, [nftId]);
 
   useEffect(() => {
-    if (address && nftId) {
+    if (props.wallets && nftId) {
       fetchUrl(
-        `${process.env.API_ENDPOINT}/api/transactions?contract=${MEMES_CONTRACT}&wallet=${address}&id=${nftId}`
+        `${
+          process.env.API_ENDPOINT
+        }/api/transactions?contract=${MEMES_CONTRACT}&wallet=${props.wallets.join(
+          ","
+        )}&id=${nftId}`
       ).then((response: DBResponse) => {
         setTransactions(response.data);
         let countIn = 0;
         let countOut = 0;
         response.data.map((d: Transaction) => {
-          if (areEqualAddresses(address, d.from_address)) {
+          if (props.wallets.some((w) => areEqualAddresses(w, d.from_address))) {
             countOut += d.token_count;
           }
-          if (areEqualAddresses(address, d.to_address)) {
+          if (props.wallets.some((w) => areEqualAddresses(w, d.to_address))) {
             countIn += d.token_count;
           }
         });
@@ -246,12 +251,12 @@ export default function MemePage() {
     } else {
       setNftBalance(0);
     }
-  }, [nftId, address]);
+  }, [nftId, props.wallets]);
 
   useEffect(() => {
-    if (address && nftId) {
+    if (props.wallets && nftId) {
       fetchUrl(
-        `${process.env.API_ENDPOINT}/api/tdh/${MEMES_CONTRACT}/${nftId}?wallet=${address}`
+        `${process.env.API_ENDPOINT}/api/tdh/${MEMES_CONTRACT}/${nftId}?wallet=${props.wallets[0]}`
       ).then((response: DBResponse) => {
         if (response.data.length > 0) {
           const mine: TDHMetrics = response.data[0];
@@ -261,7 +266,7 @@ export default function MemePage() {
         }
       });
     }
-  }, [address, nftId]);
+  }, [props.wallets, nftId]);
 
   useEffect(() => {
     if (nftId) {
@@ -365,7 +370,7 @@ export default function MemePage() {
                     animation={true}
                     height={650}
                     balance={nftBalance}
-                    showUnseized={address != undefined && address != null}
+                    showUnseized={props.wallets.length > 0}
                   />
                 </Col>
                 {activeTab == MEME_FOCUS.LIVE && <>{printLive()}</>}
@@ -720,25 +725,29 @@ export default function MemePage() {
       areEqualAddresses(t.from_address, NULL_ADDRESS)
     );
 
-    const transferredIn = !address
+    const transferredIn = !props.wallets
       ? []
       : transactions.filter(
           (t) =>
             !areEqualAddresses(t.from_address, NULL_ADDRESS) &&
-            areEqualAddresses(t.to_address, address) &&
+            props.wallets.some((w) => areEqualAddresses(t.to_address, w)) &&
             t.value == 0
         );
 
-    const transferredOut = !address
+    const transferredOut = !props.wallets
       ? []
       : transactions.filter(
-          (t) => areEqualAddresses(t.from_address, address) && t.value == 0
+          (t) =>
+            props.wallets.some((w) => areEqualAddresses(t.from_address, w)) &&
+            t.value == 0
         );
 
-    const bought = !address
+    const bought = !props.wallets
       ? []
       : transactions.filter(
-          (t) => areEqualAddresses(t.to_address, address) && t.value > 0
+          (t) =>
+            props.wallets.some((w) => areEqualAddresses(t.to_address, w)) &&
+            t.value > 0
         );
 
     let boughtSum = 0;
@@ -746,10 +755,12 @@ export default function MemePage() {
       boughtSum += b.value;
     });
 
-    const sold = !address
+    const sold = !props.wallets
       ? []
       : transactions.filter(
-          (t) => areEqualAddresses(t.from_address, address) && t.value > 0
+          (t) =>
+            props.wallets.some((w) => areEqualAddresses(t.from_address, w)) &&
+            t.value > 0
         );
 
     let soldSum = 0;
@@ -765,21 +776,21 @@ export default function MemePage() {
         lg={{ span: 6 }}>
         <Container className="p-0">
           <Row>
-            {!address && (
+            {!props.wallets && (
               <Row className="pt-2">
                 <Col>
                   <h4>Connect your wallet to view your cards.</h4>
                 </Col>
               </Row>
             )}
-            {nftBalance == 0 && address && nft && userLoaded && (
+            {nftBalance == 0 && props.wallets && nft && userLoaded && (
               <Row className="pt-2">
                 <Col>
                   <h3>You don&apos;t own any editions of Card {nft.id}</h3>
                 </Col>
               </Row>
             )}
-            {transactions.length > 0 && address && (
+            {transactions.length > 0 && props.wallets && (
               <>
                 {nftBalance > 0 && myOwner && (
                   <>

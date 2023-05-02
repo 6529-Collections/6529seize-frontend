@@ -1300,7 +1300,7 @@ export default function CollectionDelegationComponent(props: Props) {
                             icon="plus"
                             className={styles.buttonIcon}
                           />
-                          Register Sub-Delegation
+                          Register Delegation Manager
                         </span>
                         <span
                           className={`${styles.useCaseWalletUpdate} ${

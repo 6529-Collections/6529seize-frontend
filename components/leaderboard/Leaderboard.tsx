@@ -1,7 +1,15 @@
 import { useState, useEffect } from "react";
-import { Container, Row, Col, Table, Dropdown, Form } from "react-bootstrap";
+import {
+  Container,
+  Row,
+  Col,
+  Table,
+  Dropdown,
+  Form,
+  Button,
+} from "react-bootstrap";
 import { DBResponse } from "../../entities/IDBResponse";
-import { TDHCalc, ConsolidatedTDHMetrics } from "../../entities/ITDH";
+import { TDHCalc, TDHMetrics, BaseTDHMetrics } from "../../entities/ITDH";
 import styles from "./Leaderboard.module.scss";
 import dynamic from "next/dynamic";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -17,6 +25,7 @@ import { fetchAllPages, fetchUrl } from "../../services/6529api";
 import { MEMES_CONTRACT } from "../../constants";
 import { MemesExtendedData } from "../../entities/INFT";
 import Tippy from "@tippyjs/react";
+import ConsolidationSwitch from "../consolidation-switch/ConsolidationSwitch";
 
 const Address = dynamic(() => import("../address/Address"), { ssr: false });
 const SearchModal = dynamic(() => import("../searchModal/SearchModal"), {
@@ -28,6 +37,11 @@ interface Props {
   pageSize: number;
   showMore?: boolean;
   showLastTdh?: boolean;
+}
+
+enum VIEW {
+  CONSOLIDATION,
+  WALLET,
 }
 
 enum Sort {
@@ -138,6 +152,7 @@ enum Focus {
 export default function Leaderboard(props: Props) {
   const router = useRouter();
 
+  const [view, setView] = useState<VIEW>(VIEW.CONSOLIDATION);
   const [content, setContent] = useState<Content>(Content.ALL);
   const [ownerTagFilter, setOwnerTagFilter] = useState<OwnerTagFilter>(
     OwnerTagFilter.ALL
@@ -153,7 +168,7 @@ export default function Leaderboard(props: Props) {
 
   const [pageProps, setPageProps] = useState<Props>(props);
   const [totalResults, setTotalResults] = useState(0);
-  const [leaderboard, setLeaderboard] = useState<ConsolidatedTDHMetrics[]>();
+  const [leaderboard, setLeaderboard] = useState<BaseTDHMetrics[]>();
   const [lastTDH, setLastTDH] = useState<TDHCalc>();
   const [next, setNext] = useState(null);
   const [sort, setSort] = useState<{
@@ -208,8 +223,12 @@ export default function Leaderboard(props: Props) {
     if (searchWallets) {
       walletFilter = `&wallet=${searchWallets.join(",")}`;
     }
+    let url = `${process.env.API_ENDPOINT}/api/consolidated_owner_metrics`;
+    if (view == VIEW.WALLET) {
+      url = `${process.env.API_ENDPOINT}/api/owner_metrics`;
+    }
     fetchUrl(
-      `${process.env.API_ENDPOINT}/api/consolidated_owner_metrics?page_size=${props.pageSize}&page=${pageProps.page}&sort=${sort.sort}&sort_direction=${sort.sort_direction}${tagFilter}${museumFilter}${teamFilter}${walletFilter}`
+      `${url}?page_size=${props.pageSize}&page=${pageProps.page}&sort=${sort.sort}&sort_direction=${sort.sort_direction}${tagFilter}${museumFilter}${teamFilter}${walletFilter}`
     ).then((response: DBResponse) => {
       setTotalResults(response.count);
       setNext(response.next);
@@ -234,6 +253,7 @@ export default function Leaderboard(props: Props) {
     hideMuseum,
     hideTeam,
     searchWallets,
+    view,
   ]);
 
   useEffect(() => {
@@ -474,7 +494,21 @@ export default function Leaderboard(props: Props) {
     }
   }, [focus]);
 
-  function getCardsHodled(lead: ConsolidatedTDHMetrics) {
+  function getWallets(lead: any) {
+    if (lead.wallets) {
+      return lead.wallets;
+    }
+    return [lead.wallet];
+  }
+
+  function getDisplay(lead: any) {
+    if (lead.consolidation_display) {
+      return lead.consolidation_display;
+    }
+    return lead.wallet_display;
+  }
+
+  function getCardsHodled(lead: TDHMetrics) {
     switch (content) {
       case Content.MEMES:
         return lead.memes_balance;
@@ -491,7 +525,7 @@ export default function Leaderboard(props: Props) {
     }
   }
 
-  function getPurchasesCount(lead: ConsolidatedTDHMetrics) {
+  function getPurchasesCount(lead: TDHMetrics) {
     let count = 0;
     switch (content) {
       case Content.MEMES:
@@ -519,7 +553,7 @@ export default function Leaderboard(props: Props) {
     return "-";
   }
 
-  function getPurchasesValue(lead: ConsolidatedTDHMetrics) {
+  function getPurchasesValue(lead: TDHMetrics) {
     let value = 0;
     switch (content) {
       case Content.MEMES:
@@ -547,7 +581,7 @@ export default function Leaderboard(props: Props) {
     return "-";
   }
 
-  function getSalesCount(lead: ConsolidatedTDHMetrics) {
+  function getSalesCount(lead: TDHMetrics) {
     let count = 0;
     switch (content) {
       case Content.MEMES:
@@ -575,7 +609,7 @@ export default function Leaderboard(props: Props) {
     return "-";
   }
 
-  function getSalesValue(lead: ConsolidatedTDHMetrics) {
+  function getSalesValue(lead: TDHMetrics) {
     let value = 0;
     switch (content) {
       case Content.MEMES:
@@ -603,7 +637,7 @@ export default function Leaderboard(props: Props) {
     return "-";
   }
 
-  function getTransfersIn(lead: ConsolidatedTDHMetrics) {
+  function getTransfersIn(lead: TDHMetrics) {
     let trf = 0;
     switch (content) {
       case Content.MEMES:
@@ -632,7 +666,7 @@ export default function Leaderboard(props: Props) {
     return "-";
   }
 
-  function getTransfersOut(lead: ConsolidatedTDHMetrics) {
+  function getTransfersOut(lead: TDHMetrics) {
     let trf = 0;
     switch (content) {
       case Content.MEMES:
@@ -661,7 +695,7 @@ export default function Leaderboard(props: Props) {
     return "-";
   }
 
-  function getUniqueMemes(lead: ConsolidatedTDHMetrics) {
+  function getUniqueMemes(lead: TDHMetrics) {
     let unique;
     let uniqueTotal;
     switch (content) {
@@ -691,7 +725,7 @@ export default function Leaderboard(props: Props) {
     return "-";
   }
 
-  function getSets(lead: ConsolidatedTDHMetrics) {
+  function getSets(lead: TDHMetrics) {
     let sets;
     switch (content) {
       case Content.MEMES1:
@@ -713,7 +747,7 @@ export default function Leaderboard(props: Props) {
     return "-";
   }
 
-  function getDaysHodledTdhBoosted(lead: ConsolidatedTDHMetrics) {
+  function getDaysHodledTdhBoosted(lead: TDHMetrics) {
     switch (content) {
       case Content.MEMES:
         return lead.boosted_memes_tdh;
@@ -730,7 +764,7 @@ export default function Leaderboard(props: Props) {
     }
   }
 
-  function getDaysHodledTdh(lead: ConsolidatedTDHMetrics) {
+  function getDaysHodledTdh(lead: TDHMetrics) {
     switch (content) {
       case Content.MEMES:
         return lead.memes_tdh;
@@ -747,7 +781,7 @@ export default function Leaderboard(props: Props) {
     }
   }
 
-  function getDaysHodledTdhRaw(lead: ConsolidatedTDHMetrics) {
+  function getDaysHodledTdhRaw(lead: TDHMetrics) {
     switch (content) {
       case Content.MEMES:
         return lead.memes_tdh__raw;
@@ -1043,8 +1077,8 @@ export default function Leaderboard(props: Props) {
           className={`d-flex align-items-center`}
           xs={{ span: showViewAll ? 12 : 6 }}
           sm={{ span: 6 }}
-          md={{ span: 6 }}
-          lg={{ span: 6 }}>
+          md={{ span: 4 }}
+          lg={{ span: 4 }}>
           <h1>
             COMMUNITY{" "}
             {showViewAll && (
@@ -1054,14 +1088,22 @@ export default function Leaderboard(props: Props) {
             )}
           </h1>
         </Col>
-
+        <Col
+          className={`d-flex justify-content-center align-items-center d-none ${styles.dMdFlex}`}
+          xs={4}>
+          <ConsolidationSwitch
+            view={view}
+            onSetView={(v) => setView(v)}
+            plural={true}
+          />
+        </Col>
         {lastTDH && props.showLastTdh && (
           <Col
             className={`${styles.lastTDH} d-flex align-items-center justify-content-end`}
             xs={{ span: 6 }}
             sm={{ span: 6 }}
-            md={{ span: 6 }}
-            lg={{ span: 6 }}>
+            md={{ span: 4 }}
+            lg={{ span: 4 }}>
             * TDH Block&nbsp;
             <a
               href={`https://etherscan.io/block/${lastTDH.block}`}
@@ -1073,6 +1115,15 @@ export default function Leaderboard(props: Props) {
             <span id="next-tdh-div-1">{nextTdh()}</span> */}
           </Col>
         )}
+        <Col
+          className={`pt-2 d-flex justify-content-center align-items-center d-block ${styles.dMdNone}`}
+          xs={12}>
+          <ConsolidationSwitch
+            view={view}
+            onSetView={(v) => setView(v)}
+            plural={true}
+          />
+        </Col>
       </Row>
       {!showViewAll && (
         <>
@@ -1095,8 +1146,8 @@ export default function Leaderboard(props: Props) {
             </Col>
             <Col
               className={`${styles.pageHeader}`}
-              xs={{ span: 10 }}
-              sm={{ span: 10 }}
+              xs={{ span: 12 }}
+              sm={{ span: 12 }}
               md={{ span: 6 }}
               lg={{ span: 6 }}>
               <div
@@ -1132,21 +1183,6 @@ export default function Leaderboard(props: Props) {
                 </span>
               </div>
             </Col>
-            {/* <Col
-              className="d-flex align-items-center justify-content-center"
-              xs={2}
-              sm={2}>
-              <span
-                onClick={() => setShowSearchModal(true)}
-                className={`${styles.searchBtn} ${
-                  searchWallets.length > 0 ? styles.searchBtnActive : ""
-                } d-flex align-items-center justify-content-center`}>
-                {" "}
-                <FontAwesomeIcon
-                  className={styles.searchBtnIcon}
-                  icon="search"></FontAwesomeIcon>
-              </span>
-            </Col> */}
           </Row>
           <Row className="pt-1 pb-1">
             <Col
@@ -1155,20 +1191,26 @@ export default function Leaderboard(props: Props) {
               md={{ span: 6 }}
               lg={{ span: 4 }}
               className={`${styles.pageHeader} d-flex justify-content-center align-items-center`}>
-              <Form.Check
-                type="switch"
-                checked={hideMuseum}
-                className={`${styles.museumToggle}`}
-                label={`Hide 6529Museum`}
-                onChange={() => setHideMuseum(!hideMuseum)}
-              />
-              <Form.Check
-                type="switch"
-                checked={hideTeam}
-                className={`${styles.museumToggle}`}
-                label={`Hide 6529Team`}
-                onChange={() => setHideTeam(!hideTeam)}
-              />
+              <Container className="no-padding">
+                <Row>
+                  <Col className="d-flex align-items-center justify-content-center">
+                    <Form.Check
+                      type="switch"
+                      checked={hideMuseum}
+                      className={`${styles.museumToggle}`}
+                      label={`Hide 6529Museum`}
+                      onChange={() => setHideMuseum(!hideMuseum)}
+                    />
+                    <Form.Check
+                      type="switch"
+                      checked={hideTeam}
+                      className={`${styles.museumToggle}`}
+                      label={`Hide 6529Team`}
+                      onChange={() => setHideTeam(!hideTeam)}
+                    />
+                  </Col>
+                </Row>
+              </Container>
             </Col>
             <Col
               className={`d-flex justify-content-end align-items-center`}
@@ -1982,9 +2024,9 @@ export default function Leaderboard(props: Props) {
               <tbody>
                 {leaderboard &&
                   leaderboard.map((lead, index) => {
-                    if (lead.wallets) {
+                    if (lead.balance > 0) {
                       return (
-                        <tr key={`${index}-${lead.wallet}`}>
+                        <tr key={`wallet-${index}`}>
                           <td className={styles.rank}>
                             {/* {lead.tdh_rank} */}
                             {searchWallets.length > 0 && lead.dense_rank_sort
@@ -1995,8 +2037,8 @@ export default function Leaderboard(props: Props) {
                           </td>
                           <td className={styles.hodler}>
                             <Address
-                              wallets={lead.wallets}
-                              display={lead.consolidation_display}
+                              wallets={getWallets(lead)}
+                              display={getDisplay(lead)}
                               tags={{
                                 memesCardsSets: lead.memes_cards_sets,
                                 memesCardsSetS1: lead.memes_cards_sets_szn1,

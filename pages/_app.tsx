@@ -61,6 +61,7 @@ import {
   faCircleArrowLeft,
   faInfoCircle,
   faArrowTurnRight,
+  faCheckCircle,
 } from "@fortawesome/free-solid-svg-icons";
 import Head from "next/head";
 
@@ -103,7 +104,8 @@ library.add(
   faCaretDown,
   faMinus,
   faInfoCircle,
-  faArrowTurnRight
+  faArrowTurnRight,
+  faCheckCircle
 );
 
 const CONTRACT_CHAINS =

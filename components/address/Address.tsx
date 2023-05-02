@@ -27,10 +27,10 @@ interface Props {
     balance_rank?: number;
     unique_rank?: number;
   };
-  expandedTags?: boolean;
   isUserPage?: boolean;
   disableLink?: boolean;
   viewingWallet?: `0x${string}`;
+  expandedTags?: boolean;
 }
 
 export const MEMES_SETS_ICON = "";
@@ -52,7 +52,6 @@ export function WalletAddress(props: {
   disableLink?: boolean;
   hideCopy?: boolean;
 }) {
-  let ensResolution: any = null;
   const [isCopied, setIsCopied] = useState(false);
 
   function resolveAddress() {
@@ -61,10 +60,6 @@ export function WalletAddress(props: {
     }
     if (props.wallet.toUpperCase() == MANIFOLD.toUpperCase()) {
       return "Manifold Minting Wallet";
-    }
-
-    if (ensResolution && ensResolution.data) {
-      return ensResolution.data;
     }
 
     if (props.display) {
@@ -93,12 +88,7 @@ export function WalletAddress(props: {
   }
 
   return (
-    <span
-      className={
-        props.isUserPage
-          ? "d-flex justify-content-center align-items-center"
-          : ""
-      }>
+    <span>
       {(props.hideCopy || !navigator.clipboard) && (
         <span className={styles.address}>
           {props.disableLink && resolveAddress()}
@@ -266,11 +256,9 @@ export default function Address(props: Props) {
         props.wallets.map((w, index) => (
           <div
             key={w}
-            className={`d-flex align-items-center ${
-              props.isUserPage
-                ? `pt-2 pb-2 justify-content-center`
-                : `justify-content-start`
-            } ${props.isUserPage ? styles.consolidationDiv : ""}`}>
+            className={`d-flex align-items-center justify-content-start ${
+              props.isUserPage ? styles.consolidationDiv : ""
+            }`}>
             <FontAwesomeIcon
               icon="arrow-turn-right"
               name={`arrow-turn-right`}
@@ -323,9 +311,8 @@ export default function Address(props: Props) {
               className={`${styles.tag} ${
                 !MEMES_SETS_ICON ? styles.memesSetTag : ""
               }`}>
-              {props.tags.memesCardsSets}x{" "}
-              {(props.isUserPage || !MEMES_SETS_ICON) &&
-                `Memes Set${props.tags.memesCardsSets > 1 ? "s " : " "}`}
+              {(props.isUserPage || !MEMES_SETS_ICON) && `Memes Sets x`}
+              {props.tags.memesCardsSets}
               {MEMES_SETS_ICON && (
                 <img
                   src={MEMES_SETS_ICON}
@@ -339,11 +326,9 @@ export default function Address(props: Props) {
               className={`${styles.tag} ${
                 !UNIQUE_MEMES_ICON ? styles.memesTag : ""
               }`}>
-              {props.tags.memesBalance}x{" "}
-              {(props.isUserPage || !UNIQUE_MEMES_ICON) &&
-                `Meme${props.tags.memesBalance > 1 ? "s " : " "}${
-                  props.tags.genesis > 0 ? ` (+Genesis) ` : ""
-                }`}
+              {(props.isUserPage || !UNIQUE_MEMES_ICON) && `Memes x`}
+              {props.tags.memesBalance}
+              {props.tags.genesis > 0 ? ` (+Genesis) ` : ""}
               {UNIQUE_MEMES_ICON && (
                 <img
                   src={UNIQUE_MEMES_ICON}
@@ -360,9 +345,8 @@ export default function Address(props: Props) {
               className={`${styles.tag} ${
                 !GRADIENT_ICON ? styles.gradientTag : ""
               }`}>
-              {props.tags.gradientsBalance}x{" "}
-              {(props.isUserPage || !GRADIENT_ICON) &&
-                `Gradient${props.tags.gradientsBalance > 1 ? "s " : " "}`}
+              {(props.isUserPage || !GRADIENT_ICON) && `Gradients x`}
+              {props.tags.gradientsBalance}
               {GRADIENT_ICON && (
                 <img
                   src={GRADIENT_ICON}
@@ -379,9 +363,8 @@ export default function Address(props: Props) {
                     className={`${styles.tag} ${
                       !SZN_1_ICON ? styles.memeSzn1Tag : ""
                     }`}>
-                    {props.tags.memesCardsSetS1}x{" "}
-                    {(props.isUserPage || !SZN_1_ICON) &&
-                      `SZN1 Set${props.tags.memesCardsSetS1 > 1 ? "s " : " "}`}
+                    {(props.isUserPage || !SZN_1_ICON) && `SZN1 Sets x`}
+                    {props.tags.memesCardsSetS1}
                     {SZN_1_ICON && (
                       <img
                         src={SZN_1_ICON}
@@ -397,9 +380,8 @@ export default function Address(props: Props) {
                     className={`${styles.tag} ${
                       !SZN_2_ICON ? styles.memeSzn2Tag : ""
                     }`}>
-                    {props.tags.memesCardsSetS2}x{" "}
-                    {(props.isUserPage || !SZN_2_ICON) &&
-                      `SZN2 Set${props.tags.memesCardsSetS2 > 1 ? "s " : " "}`}
+                    {(props.isUserPage || !SZN_2_ICON) && `SZN2 Sets x`}
+                    {props.tags.memesCardsSetS2}
                     {SZN_2_ICON && (
                       <img
                         src={SZN_2_ICON}
@@ -415,9 +397,8 @@ export default function Address(props: Props) {
                     className={`${styles.tag} ${
                       !SZN_1_ICON ? styles.memeSzn3Tag : ""
                     }`}>
-                    {props.tags.memesCardsSetS3}x{" "}
-                    {(props.isUserPage || !SZN_3_ICON) &&
-                      `SZN3 Set${props.tags.memesCardsSetS3 > 1 ? "s " : " "}`}
+                    {(props.isUserPage || !SZN_3_ICON) && `SZN3 Sets x`}
+                    {props.tags.memesCardsSetS2}
                     {SZN_3_ICON && (
                       <img
                         src={SZN_3_ICON}
@@ -432,9 +413,8 @@ export default function Address(props: Props) {
                   className={`${styles.tag} ${
                     !GRADIENT_ICON ? styles.gradientTag : ""
                   }`}>
-                  {props.tags.gradientsBalance}x{" "}
-                  {(props.isUserPage || !GRADIENT_ICON) &&
-                    `Gradient${props.tags.gradientsBalance > 1 ? "s " : " "}`}
+                  {(props.isUserPage || !GRADIENT_ICON) && `Gradients x`}
+                  {props.tags.gradientsBalance}
                   {GRADIENT_ICON && (
                     <img
                       src={GRADIENT_ICON}

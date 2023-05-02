@@ -422,7 +422,8 @@ export default function NewConsolidationComponent(props: Props) {
             </Form.Group>
             <Form.Group as={Row} className="pb-4">
               <Form.Label column sm={12} className="d-flex align-items-center">
-                Note: For TDH Consolidation use &apos;The Memes&apos; Collection
+                Note: For TDH Consolidation use either &apos;Any
+                Collection&apos; or &apos;The Memes&apos;
                 <a
                   href={`/delegation/delegation-faq/register-consolidation`}
                   target="_blank"
