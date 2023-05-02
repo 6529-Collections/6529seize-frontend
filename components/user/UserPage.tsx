@@ -849,7 +849,7 @@ export default function UserPage(props: Props) {
               </Row> */}
               {isConsolidation && (
                 <Row>
-                  <Col className="d-flex justify-content-end">
+                  <Col className={styles.consolidationSwitch}>
                     <ConsolidationSwitch
                       view={view}
                       onSetView={(v) => setView(v)}
@@ -858,8 +858,11 @@ export default function UserPage(props: Props) {
                 </Row>
               )}
               {ownerAddress && (
-                <Row className={isConsolidation ? "pt-2" : "pt-3"}>
-                  <Col xs={6}>
+                <Row>
+                  <Col
+                    xs={12}
+                    sm={6}
+                    className={isConsolidation ? "pt-2" : "pt-3"}>
                     <Container className="no-padding">
                       <Row className="pb-1">
                         <Col
@@ -964,7 +967,11 @@ export default function UserPage(props: Props) {
                   </Col>
                   {tdh && tdh.balance > 0 && (
                     <>
-                      <Col xs={3}>
+                      <Col
+                        xs={6}
+                        sm={6}
+                        md={3}
+                        className={isConsolidation ? "pt-2" : "pt-3"}>
                         <Container className="no-padding">
                           <Row className="pt-2 pb-1">
                             <Col>
@@ -995,7 +1002,11 @@ export default function UserPage(props: Props) {
                           </Row>
                         </Container>
                       </Col>
-                      <Col xs={3}>
+                      <Col
+                        xs={6}
+                        sm={6}
+                        md={3}
+                        className={isConsolidation ? "pt-2" : "pt-3"}>
                         <Container className="no-padding">
                           <Row className="pt-2 pb-1">
                             <Col>
@@ -1067,125 +1078,6 @@ export default function UserPage(props: Props) {
                   )}
                 </Row>
               )}
-              {/* <Row className="pt-3 pb-3">
-                <Col xs={12}>
-                  <Container className="p-0">
-                    {ownerAddress && (
-                      <>
-                        <Row>
-                          <Col className={styles.ownerAddress}>
-                            {tdh && consolidatedTDH ? (
-                              <Address
-                                wallets={
-                                  view == VIEW.CONSOLIDATION
-                                    ? consolidatedTDH.wallets
-                                    : [ownerAddress]
-                                }
-                                display={
-                                  view == VIEW.CONSOLIDATION &&
-                                  consolidatedTDH.consolidation_display
-                                    ? consolidatedTDH.consolidation_display
-                                    : ownerENS
-                                }
-                                tags={
-                                  tdh.balance > 0
-                                    ? {
-                                        memesCardsSets: tdh.memes_cards_sets,
-                                        memesCardsSetS1:
-                                          tdh.memes_cards_sets_szn1,
-                                        memesCardsSetS2:
-                                          tdh.memes_cards_sets_szn2,
-                                        memesCardsSetS3:
-                                          tdh.memes_cards_sets_szn3,
-                                        memesBalance: tdh.unique_memes,
-                                        gradientsBalance: tdh.gradients_balance,
-                                        genesis: tdh.genesis,
-                                        tdh_rank: tdh ? tdh.tdh_rank : -1,
-                                        balance_rank: tdh
-                                          ? tdh.dense_rank_balance
-                                          : -1,
-                                        unique_rank: tdh
-                                          ? tdh.dense_rank_unique
-                                          : -1,
-                                      }
-                                    : undefined
-                                }
-                                expandedTags={true}
-                                isUserPage={true}
-                                disableLink={true}
-                                viewingWallet={ownerAddress}
-                              />
-                            ) : (
-                              <Address
-                                wallets={[ownerAddress]}
-                                display={ownerENS}
-                                disableLink={true}
-                              />
-                            )}
-                          </Col>
-                        </Row>
-                        <Row className="pt-2 pb-2">
-                          <Col>
-                            <Tippy
-                              content={ownerLinkCopied ? "Copied" : "Copy"}
-                              placement={"right"}
-                              theme={"light"}
-                              hideOnClick={false}>
-                              <span
-                                className={styles.ownerLink}
-                                onClick={() => {
-                                  if (navigator.clipboard) {
-                                    navigator.clipboard.writeText(
-                                      window.location.href
-                                    );
-                                  }
-                                  setIsOwnerLinkCopied(true);
-                                  setTimeout(() => {
-                                    setIsOwnerLinkCopied(false);
-                                  }, 1000);
-                                }}>
-                                {removeProtocol(ownerLinkDisplay)}{" "}
-                                <FontAwesomeIcon
-                                  icon="link"
-                                  className={styles.ownerLinkIcon}
-                                />
-                              </span>
-                            </Tippy>
-                          </Col>
-                        </Row>
-                        <Row className="pt-3">
-                          <Col>
-                            <a
-                              href={`https://opensea.io/${ownerAddress}`}
-                              target="_blank"
-                              rel="noreferrer">
-                              <Image
-                                className={styles.marketplace}
-                                src="/opensea.png"
-                                alt="opensea"
-                                width={40}
-                                height={40}
-                              />
-                            </a>
-                            <a
-                              href={`https://x2y2.io/user/${ownerAddress}`}
-                              target="_blank"
-                              rel="noreferrer">
-                              <Image
-                                className={styles.marketplace}
-                                src="/x2y2.png"
-                                alt="x2y2"
-                                width={40}
-                                height={40}
-                              />
-                            </a>
-                          </Col>
-                        </Row>
-                      </>
-                    )}
-                  </Container>
-                </Col>
-              </Row> */}
             </Container>
             <Container className="pt-5 pb-3">
               {tdh && tdh.balance > 0 && (
