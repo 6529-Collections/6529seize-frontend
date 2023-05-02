@@ -11,8 +11,7 @@ import {
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { NULL_ADDRESS } from "../../constants";
 import { BaseNFT } from "../../entities/INFT";
-
-const Address = dynamic(() => import("../address/Address"), { ssr: false });
+import Address from "../address/Address";
 
 interface Props {
   nft?: BaseNFT;

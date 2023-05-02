@@ -31,7 +31,7 @@ interface Props {
   onSetToast(toast: any): any;
 }
 
-export default function NewDelegationComponent(props: Props) {
+export default function UpdateDelegationComponent(props: Props) {
   const [isDelegation, setIsDelegation] = useState(
     ![
       CONSOLIDATION_USE_CASE.use_case,
@@ -233,7 +233,7 @@ export default function NewDelegationComponent(props: Props) {
             {props.delegation.use_case == CONSOLIDATION_USE_CASE.use_case
               ? "Consolidation"
               : props.delegation.use_case == SUB_DELEGATION_USE_CASE.use_case
-              ? "Sub-Delegation"
+              ? "Delegation Manager"
               : "Delegation"}
           </h4>
         </Col>

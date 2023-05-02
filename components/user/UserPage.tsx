@@ -49,10 +49,7 @@ import ConsolidationSwitch, {
   VIEW,
 } from "../consolidation-switch/ConsolidationSwitch";
 import Address from "../address/Address";
-
-const NFTImage = dynamic(() => import("../nft-image/NFTImage"), {
-  ssr: false,
-});
+import NFTImage from "../nft-image/NFTImage";
 
 interface Props {
   user: string;
@@ -888,6 +885,8 @@ export default function UserPage(props: Props) {
                               wallets={[ownerAddress]}
                               display={ownerENS}
                               disableLink={true}
+                              isUserPage={true}
+                              viewingWallet={ownerAddress}
                             />
                           )}
                         </Col>

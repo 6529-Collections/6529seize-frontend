@@ -11,8 +11,6 @@ import { NFT } from "../../entities/INFT";
 import { areEqualAddresses } from "../../helpers/Helpers";
 import { fetchAllPages, fetchUrl } from "../../services/6529api";
 
-const Address = dynamic(() => import("../address/Address"), { ssr: false });
-
 interface Props {
   page: number;
   pageSize: number;

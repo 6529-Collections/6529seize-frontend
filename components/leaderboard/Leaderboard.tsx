@@ -26,11 +26,8 @@ import { MEMES_CONTRACT } from "../../constants";
 import { MemesExtendedData } from "../../entities/INFT";
 import Tippy from "@tippyjs/react";
 import ConsolidationSwitch from "../consolidation-switch/ConsolidationSwitch";
-
-const Address = dynamic(() => import("../address/Address"), { ssr: false });
-const SearchModal = dynamic(() => import("../searchModal/SearchModal"), {
-  ssr: false,
-});
+import Address from "../address/Address";
+import SearchModal from "../searchModal/SearchModal";
 
 interface Props {
   page: number;

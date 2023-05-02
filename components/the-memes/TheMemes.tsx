@@ -18,10 +18,7 @@ import {
 } from "../../helpers/Helpers";
 import { useRouter } from "next/router";
 import { fetchAllPages } from "../../services/6529api";
-
-const NFTImage = dynamic(() => import("../nft-image/NFTImage"), {
-  ssr: false,
-});
+import NFTImage from "../nft-image/NFTImage";
 
 enum Sort {
   AGE = "age",

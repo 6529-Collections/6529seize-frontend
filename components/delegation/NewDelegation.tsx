@@ -299,8 +299,7 @@ export default function NewDelegationComponent(props: Props) {
       <Row>
         <Col xs={10} className="pt-3 pb-1">
           <h4>
-            Register Delegation{" "}
-            {props.subdelegation && `Using Sub-Delegation Rights`}
+            Register Delegation {props.subdelegation && `as Delegation Manager`}
           </h4>
         </Col>
         <Col
@@ -352,7 +351,7 @@ export default function NewDelegationComponent(props: Props) {
             )}
             <Form.Group as={Row} className="pb-4">
               <Form.Label column sm={3} className="d-flex align-items-center">
-                {props.subdelegation ? `Sub-Delegator` : `Delegator`}
+                {props.subdelegation ? `Delegation Manager` : `Delegator`}
                 <Tippy
                   content={`Address ${
                     props.subdelegation ? `executing` : `registering`

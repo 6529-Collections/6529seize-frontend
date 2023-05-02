@@ -23,12 +23,8 @@ import { useRouter } from "next/router";
 import { Owner } from "../../entities/IOwner";
 import { TwitterIcon, TwitterShareButton } from "react-share";
 import { fetchUrl } from "../../services/6529api";
-
-const NFTImage = dynamic(() => import("../nft-image/NFTImage"), {
-  ssr: false,
-});
-
-const Address = dynamic(() => import("../address/Address"), { ssr: false });
+import NFTImage from "../nft-image/NFTImage";
+import Address from "../address/Address";
 
 export default function GradientPage() {
   const router = useRouter();

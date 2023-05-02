@@ -38,17 +38,8 @@ import { TwitterIcon, TwitterShareButton } from "react-share";
 import { fetchUrl } from "../../services/6529api";
 import Pagination from "../pagination/Pagination";
 import { TypeFilter } from "../latest-activity/LatestActivity";
-
-const NFTImage = dynamic(() => import("../nft-image/NFTImage"), {
-  ssr: false,
-});
-
-const MemeLabLeaderboard = dynamic(
-  () => import("../leaderboard/MemeLabLeaderboard"),
-  {
-    ssr: false,
-  }
-);
+import NFTImage from "../nft-image/NFTImage";
+import MemeLabLeaderboard from "../leaderboard/MemeLabLeaderboard";
 
 interface MemeTab {
   focus: MEME_FOCUS;

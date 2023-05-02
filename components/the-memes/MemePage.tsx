@@ -36,14 +36,8 @@ import {
   IDistributionPhoto,
 } from "../../entities/IDistribution";
 import ScrollToButton from "../scrollTo/ScrollToButton";
-
-const NFTImage = dynamic(() => import("../nft-image/NFTImage"), {
-  ssr: false,
-});
-
-const NFTLeaderboard = dynamic(() => import("../leaderboard/NFTLeaderboard"), {
-  ssr: false,
-});
+import NFTImage from "../nft-image/NFTImage";
+import NFTLeaderboard from "../leaderboard/NFTLeaderboard";
 
 interface MemeTab {
   focus: MEME_FOCUS;
