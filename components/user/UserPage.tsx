@@ -862,7 +862,21 @@ export default function UserPage(props: Props) {
                   <Col xs={6}>
                     <Container className="no-padding">
                       <Row className="pb-1">
-                        <Col>
+                        <Col
+                          className={
+                            view == VIEW.WALLET
+                              ? "d-flex align-items-center"
+                              : ""
+                          }>
+                          {ensAvatar.data && view == VIEW.WALLET && (
+                            <Image
+                              className={styles.avatar}
+                              src={ensAvatar.data}
+                              alt="opensea"
+                              width={0}
+                              height={0}
+                            />
+                          )}
                           {tdh && consolidatedTDH ? (
                             <Address
                               wallets={
