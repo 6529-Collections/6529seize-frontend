@@ -44,31 +44,12 @@ import {
 import { DELEGATION_ABI } from "../../abis";
 import Tippy from "@tippyjs/react";
 import { DelegationCenterSection } from "./DelegationCenterMenu";
-
-const DelegationWallet = dynamic(() => import("./DelegationWallet"), {
-  ssr: false,
-});
-
-const UpdateDelegationComponent = dynamic(() => import("./UpdateDelegation"), {
-  ssr: false,
-});
-
-const NewDelegationComponent = dynamic(() => import("./NewDelegation"), {
-  ssr: false,
-});
-
-const NewSubDelegationComponent = dynamic(() => import("./NewSubDelegation"), {
-  ssr: false,
-});
-
-const NewConsolidationComponent = dynamic(() => import("./NewConsolidation"), {
-  ssr: false,
-});
-
-const RevokeDelegationWithSubComponent = dynamic(
-  () => import("./RevokeDelegationWithSub"),
-  { ssr: false }
-);
+import DelegationWallet from "./DelegationWallet";
+import NewConsolidationComponent from "./NewConsolidation";
+import NewDelegationComponent from "./NewDelegation";
+import NewSubDelegationComponent from "./NewSubDelegation";
+import UpdateDelegationComponent from "./UpdateDelegation";
+import RevokeDelegationWithSubComponent from "./RevokeDelegationWithSub";
 
 interface Props {
   setSection(section: DelegationCenterSection): any;
@@ -844,17 +825,17 @@ export default function CollectionDelegationComponent(props: Props) {
   function printSubDelegations() {
     return (
       <>
-        <h5 className="float-none pt-5 pb-1">Sub-Delegations</h5>
+        <h5 className="float-none pt-5 pb-1">Delegation Managers</h5>
         <Accordion
           alwaysOpen
           className={`${styles.collectionDelegationsAccordion} `}>
           <Accordion.Item
             className={`${styles.collectionDelegationsAccordionItem}`}
             eventKey={"0"}>
-            <Accordion.Header>Outgoing Sub-Delegations</Accordion.Header>
+            <Accordion.Header>Outgoing Delegation Managers</Accordion.Header>
             <Accordion.Body>
               {printOutgoingDelegations(
-                "sub-delegations",
+                "Delegation Managers",
                 [...outgoingDelegations].filter(
                   (d) => d.useCase.use_case == SUB_DELEGATION_USE_CASE.use_case
                 )
@@ -864,10 +845,10 @@ export default function CollectionDelegationComponent(props: Props) {
           <Accordion.Item
             className={`${styles.collectionDelegationsAccordionItem} mt-3`}
             eventKey={"1"}>
-            <Accordion.Header>Incoming Sub-Delegations</Accordion.Header>
+            <Accordion.Header>Incoming Delegation Managers</Accordion.Header>
             <Accordion.Body>
               {printIncomingDelegations(
-                "sub-delegations",
+                "Delegation Managers",
                 [...incomingDelegations].filter(
                   (d) => d.useCase.use_case == SUB_DELEGATION_USE_CASE.use_case
                 ),

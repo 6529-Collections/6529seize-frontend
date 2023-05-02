@@ -11,8 +11,7 @@ import { SortDirection } from "../../entities/ISort";
 import { Owner, OwnerTags } from "../../entities/IOwner";
 import { useRouter } from "next/router";
 import { fetchAllPages, fetchUrl } from "../../services/6529api";
-
-const Address = dynamic(() => import("../address/Address"), { ssr: false });
+import Address from "../address/Address";
 
 interface Props {
   contract: string;

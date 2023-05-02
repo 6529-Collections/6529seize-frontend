@@ -16,10 +16,7 @@ import { fetchAllPages } from "../../services/6529api";
 import { Owner } from "../../entities/IOwner";
 import { SortDirection } from "../../entities/ISort";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-
-const NFTImage = dynamic(() => import("../nft-image/NFTImage"), {
-  ssr: false,
-});
+import NFTImage from "../nft-image/NFTImage";
 
 enum Sort {
   AGE = "age",
