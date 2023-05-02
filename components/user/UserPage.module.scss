@@ -280,12 +280,6 @@
   width: auto;
 }
 
-@media only screen and (max-width: 767px) {
-  .avatar {
-    height: 120px;
-  }
-}
-
 .userPageAccordion {
   h1,
   h2,
@@ -341,25 +335,12 @@
 }
 
 .consolidationSwitch {
-  float: left;
-  font-size: larger;
-  font-weight: bolder;
-  margin-top: 3px;
-
-  input {
-    border-color: transparent !important;
-    background-color: white !important;
-    cursor: pointer;
-    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='%23000'/%3e%3c/svg%3e") !important;
-  }
-
-  input:checked {
-    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='%23c51d34'/%3e%3c/svg%3e") !important;
-  }
+  display: flex;
+  justify-content: end;
 }
 
-.consolidationSwitchLabel {
-  float: left;
-  font-size: larger;
-  font-weight: bolder;
+@media only screen and (max-width: 767px) {
+  .consolidationSwitch {
+    justify-content: center;
+  }
 }
