@@ -75,7 +75,7 @@ export const SUPPORTED_COLLECTIONS: DelegationCollection[] = [
 export const SUB_DELEGATION_USE_CASE = {
   index: 16,
   use_case: 998,
-  display: "Sub-Delegation",
+  display: "Delegation Management",
 };
 
 export const CONSOLIDATION_USE_CASE = {
@@ -190,8 +190,7 @@ export default function DelegationsDocumentation(props: Props) {
           const title = p
             .replaceAll("-", " ")
             .replace(/(^\w{1})|(\s+\w{1})/g, (letter) => letter.toUpperCase())
-            .replace("Faq", "FAQ")
-            .replace("Sub Delegation", "Sub-Delegation");
+            .replace("Faq", "FAQ");
 
           sectionTitle.push({ display: title });
         });
@@ -213,8 +212,7 @@ export default function DelegationsDocumentation(props: Props) {
         const sectionTitle = activeSection
           .replaceAll("-", " ")
           .replace(/(^\w{1})|(\s+\w{1})/g, (letter) => letter.toUpperCase())
-          .replace("Faq", "FAQ")
-          .replace("Sub Delegation", "Sub-Delegation");
+          .replace("Faq", "FAQ");
 
         setBreadcrumbs([
           { display: "Home", href: "/" },

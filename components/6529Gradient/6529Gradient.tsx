@@ -12,12 +12,8 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { areEqualAddresses, numberWithCommas } from "../../helpers/Helpers";
 import { useRouter } from "next/router";
 import { fetchAllPages } from "../../services/6529api";
-
-const NFTImage = dynamic(() => import("../nft-image/NFTImage"), {
-  ssr: false,
-});
-
-const Address = dynamic(() => import("../address/Address"), { ssr: false });
+import NFTImage from "../nft-image/NFTImage";
+import Address from "../address/Address";
 
 enum Sort {
   ID = "id",
