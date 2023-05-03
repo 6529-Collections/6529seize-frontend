@@ -1,6 +1,5 @@
 import Image from "next/image";
 import styles from "./LatestActivity.module.scss";
-import dynamic from "next/dynamic";
 import { Transaction } from "../../entities/ITransaction";
 import {
   areEqualAddresses,

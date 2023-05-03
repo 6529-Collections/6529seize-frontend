@@ -174,6 +174,24 @@ export default function DelegationsDocumentation(props: Props) {
   ]);
 
   useEffect(() => {
+    const mySection = router.asPath.replace("/delegation/", "");
+    if (
+      Object.values(DelegationCenterSection).includes(
+        mySection as DelegationCenterSection
+      )
+    ) {
+      const pathSection = mySection as DelegationCenterSection;
+      if (pathSection != activeSection) {
+        setActiveSection(pathSection);
+      }
+    } else {
+      if (activeSection != DelegationCenterSection.HTML) {
+        setActiveSection(DelegationCenterSection.HTML);
+      }
+    }
+  }, [router.asPath]);
+
+  useEffect(() => {
     if (activeSection) {
       if (activeSection == DelegationCenterSection.HTML && props.path) {
         router.push(
@@ -190,7 +208,8 @@ export default function DelegationsDocumentation(props: Props) {
           const title = p
             .replaceAll("-", " ")
             .replace(/(^\w{1})|(\s+\w{1})/g, (letter) => letter.toUpperCase())
-            .replace("Faq", "FAQ");
+            .replace("Faq", "FAQ")
+            .replace("Sub Delegation", "Sub-Delegation");
 
           sectionTitle.push({ display: title });
         });
@@ -212,7 +231,8 @@ export default function DelegationsDocumentation(props: Props) {
         const sectionTitle = activeSection
           .replaceAll("-", " ")
           .replace(/(^\w{1})|(\s+\w{1})/g, (letter) => letter.toUpperCase())
-          .replace("Faq", "FAQ");
+          .replace("Faq", "FAQ")
+          .replace("Sub Delegation", "Sub-Delegation");
 
         setBreadcrumbs([
           { display: "Home", href: "/" },

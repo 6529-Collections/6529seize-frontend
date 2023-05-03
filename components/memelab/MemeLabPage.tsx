@@ -3,7 +3,6 @@ import styles from "./MemeLab.module.scss";
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import dynamic from "next/dynamic";
 import {
   Container,
   Row,
@@ -12,7 +11,6 @@ import {
   Carousel,
   Dropdown,
 } from "react-bootstrap";
-import { useAccount } from "wagmi";
 import {
   MEMELAB_CONTRACT,
   MEMES_CONTRACT,
@@ -26,7 +24,6 @@ import {
   enterArtFullScreen,
   fullScreenSupported,
   numberWithCommas,
-  splitArtists,
 } from "../../helpers/Helpers";
 import Breadcrumb, { Crumb } from "../breadcrumb/Breadcrumb";
 import Download from "../download/Download";
@@ -34,7 +31,6 @@ import LatestActivityRow from "../latest-activity/LatestActivityRow";
 import { Transaction } from "../../entities/ITransaction";
 import { useRouter } from "next/router";
 import { TDHMetrics } from "../../entities/ITDH";
-import { TwitterIcon, TwitterShareButton } from "react-share";
 import { fetchUrl } from "../../services/6529api";
 import Pagination from "../pagination/Pagination";
 import { TypeFilter } from "../latest-activity/LatestActivity";
@@ -56,7 +52,11 @@ export enum MEME_FOCUS {
 
 const ACTIVITY_PAGE_SIZE = 25;
 
-export default function LabPage() {
+interface Props {
+  wallets: string[];
+}
+
+export default function LabPage(props: Props) {
   const router = useRouter();
 
   const [isFullScreenSupported, setIsFullScreenSupported] = useState(false);
@@ -69,8 +69,6 @@ export default function LabPage() {
   const [activeTab, setActiveTab] = useState<MEME_FOCUS>();
 
   const [breadcrumbs, setBreadcrumbs] = useState<Crumb[]>([]);
-
-  const { address, connector, isConnected } = useAccount();
 
   const [nft, setNft] = useState<LabNFT>();
   const [originalMemes, setOriginalMemes] = useState<NFT[]>([]);
@@ -206,18 +204,22 @@ export default function LabPage() {
   }, [nftId]);
 
   useEffect(() => {
-    if (address && nftId) {
+    if (props.wallets && nftId) {
       fetchUrl(
-        `${process.env.API_ENDPOINT}/api/transactions_memelab?wallet=${address}&id=${nftId}`
+        `${
+          process.env.API_ENDPOINT
+        }/api/transactions_memelab?wallet=${props.wallets.join(
+          ","
+        )}&id=${nftId}`
       ).then((response: DBResponse) => {
         setTransactions(response.data);
         let countIn = 0;
         let countOut = 0;
         response.data.map((d: Transaction) => {
-          if (areEqualAddresses(address, d.from_address)) {
+          if (props.wallets.some((w) => areEqualAddresses(w, d.from_address))) {
             countOut += d.token_count;
           }
-          if (areEqualAddresses(address, d.to_address)) {
+          if (props.wallets.some((w) => areEqualAddresses(w, d.to_address))) {
             countIn += d.token_count;
           }
         });
@@ -227,7 +229,7 @@ export default function LabPage() {
     } else {
       setNftBalance(0);
     }
-  }, [nftId, address]);
+  }, [nftId, props.wallets]);
 
   useEffect(() => {
     if (nftId) {
@@ -294,7 +296,7 @@ export default function LabPage() {
                     animation={true}
                     height={650}
                     balance={nftBalance}
-                    showUnseized={address != undefined && address != null}
+                    showUnseized={props.wallets.length > 0}
                   />
                 </Col>
                 {activeTab == MEME_FOCUS.LIVE && <>{printLive()}</>}
@@ -637,25 +639,29 @@ export default function LabPage() {
       areEqualAddresses(t.from_address, NULL_ADDRESS)
     );
 
-    const transferredIn = !address
+    const transferredIn = !props.wallets
       ? []
       : transactions.filter(
           (t) =>
             !areEqualAddresses(t.from_address, NULL_ADDRESS) &&
-            areEqualAddresses(t.to_address, address) &&
+            props.wallets.some((w) => areEqualAddresses(t.to_address, w)) &&
             t.value == 0
         );
 
-    const transferredOut = !address
+    const transferredOut = !props.wallets
       ? []
       : transactions.filter(
-          (t) => areEqualAddresses(t.from_address, address) && t.value == 0
+          (t) =>
+            props.wallets.some((w) => areEqualAddresses(t.from_address, w)) &&
+            t.value == 0
         );
 
-    const bought = !address
+    const bought = !props.wallets
       ? []
       : transactions.filter(
-          (t) => areEqualAddresses(t.to_address, address) && t.value > 0
+          (t) =>
+            props.wallets.some((w) => areEqualAddresses(t.to_address, w)) &&
+            t.value > 0
         );
 
     let boughtSum = 0;
@@ -663,10 +669,12 @@ export default function LabPage() {
       boughtSum += b.value;
     });
 
-    const sold = !address
+    const sold = !props.wallets
       ? []
       : transactions.filter(
-          (t) => areEqualAddresses(t.from_address, address) && t.value > 0
+          (t) =>
+            props.wallets.some((w) => areEqualAddresses(t.from_address, w)) &&
+            t.value > 0
         );
 
     let soldSum = 0;
@@ -682,21 +690,21 @@ export default function LabPage() {
         lg={{ span: 6 }}>
         <Container className="p-0">
           <Row>
-            {!address && (
+            {!props.wallets && (
               <Row className="pt-2">
                 <Col>
                   <h4>Connect your wallet to view your cards.</h4>
                 </Col>
               </Row>
             )}
-            {nftBalance == 0 && address && nft && userLoaded && (
+            {nftBalance == 0 && props.wallets && nft && userLoaded && (
               <Row className="pt-2">
                 <Col>
                   <h3>You don&apos;t own any editions of Card {nft.id}</h3>
                 </Col>
               </Row>
             )}
-            {transactions.length > 0 && address && (
+            {transactions.length > 0 && props.wallets && (
               <>
                 {nftBalance > 0 && myOwner && (
                   <>

@@ -22,6 +22,8 @@ export default function MemeLabIndex(props: {
   collection: string;
   name: string;
 }) {
+  const [connectedWallets, setConnectedWallets] = useState<string[]>([]);
+
   const [breadcrumbs, setBreadcrumbs] = useState<Crumb[]>([
     { display: "Home", href: "/" },
     { display: "Meme Lab", href: "/meme-lab" },
@@ -57,9 +59,9 @@ export default function MemeLabIndex(props: {
       </Head>
 
       <main className={styles.main}>
-        <Header />
+        <Header onSetWallets={(wallets) => setConnectedWallets(wallets)} />
         <Breadcrumb breadcrumbs={breadcrumbs} />
-        <LabCollectionComponent />
+        <LabCollectionComponent wallets={connectedWallets} />
       </main>
     </>
   );
