@@ -425,7 +425,7 @@ export default function NewDelegationComponent(props: Props) {
 
             <Form.Group as={Row} className="pb-4">
               <Form.Label column sm={3} className="d-flex align-items-center">
-                Address
+                Delegate Address
                 <Tippy
                   content={"Delegate to Address e.g. your hot wallet"}
                   placement={"top"}
