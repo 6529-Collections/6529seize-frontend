@@ -148,6 +148,7 @@
 }
 
 .addNewDelegationBtn {
+  position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -155,7 +156,7 @@
   background-color: $blue;
   color: white;
   width: fit-content;
-  padding: 12px 10px;
+  padding: 20px 10px;
   cursor: pointer;
   white-space: nowrap;
 
@@ -199,20 +200,20 @@
   justify-content: center;
   margin-right: 15px;
   margin-top: 15px;
-  background-color: darken($color: #f28c28, $amount: 10);
+  background-color: darken($color: #d7710d, $amount: 10);
   color: white;
   width: fit-content;
   padding: 12px 16px;
   cursor: pointer;
 
   &:hover {
-    background-color: darken($color: #f28c28, $amount: 15);
+    background-color: darken($color: #d7710d, $amount: 15);
   }
 }
 
 .lockDelegationBtnDisabled {
   pointer-events: none !important;
-  background-color: darken($color: #f28c28, $amount: 20);
+  background-color: darken($color: #d7710d, $amount: 20);
   color: $font-color-h;
 }
 
@@ -640,4 +641,10 @@
     height: 120px;
     flex-direction: column;
   }
+}
+
+.subDelegationSubHeading {
+  font-size: smaller;
+  position: absolute;
+  bottom: 3px;
 }

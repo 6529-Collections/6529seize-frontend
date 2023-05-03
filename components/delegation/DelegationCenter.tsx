@@ -169,7 +169,7 @@ export default function DelegationCenterComponent(props: Props) {
                   Register Delegation
                 </span>
                 <span
-                  className={`${styles.addNewDelegationBtn} ml-2`}
+                  className={`text-center ${styles.addNewDelegationBtn} ml-2`}
                   onClick={() => {
                     setRedirect(
                       DelegationCenterSection.REGISTER_SUB_DELEGATION
@@ -177,6 +177,9 @@ export default function DelegationCenterComponent(props: Props) {
                   }}>
                   <FontAwesomeIcon icon="plus" className={styles.buttonIcon} />
                   Register Delegation Manager
+                  <span className={styles.subDelegationSubHeading}>
+                    (Sub-Delegation)
+                  </span>
                 </span>
               </Col>
             </Row>

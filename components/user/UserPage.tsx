@@ -972,7 +972,7 @@ export default function UserPage(props: Props) {
                         sm={6}
                         md={3}
                         className={isConsolidation ? "pt-2" : "pt-3"}>
-                        <Container className="no-padding">
+                        <Container className="no-padding text-right">
                           <Row className="pt-2 pb-1">
                             <Col>
                               <Tag
@@ -1007,7 +1007,7 @@ export default function UserPage(props: Props) {
                         sm={6}
                         md={3}
                         className={isConsolidation ? "pt-2" : "pt-3"}>
-                        <Container className="no-padding">
+                        <Container className="no-padding text-right">
                           <Row className="pt-2 pb-1">
                             <Col>
                               {tdh.memes_cards_sets > 0 ? (

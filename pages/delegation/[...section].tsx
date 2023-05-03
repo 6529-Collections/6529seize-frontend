@@ -75,7 +75,7 @@ export const SUPPORTED_COLLECTIONS: DelegationCollection[] = [
 export const SUB_DELEGATION_USE_CASE = {
   index: 16,
   use_case: 998,
-  display: "Delegation Management",
+  display: "Delegation Management (Sub-Delegation)",
 };
 
 export const CONSOLIDATION_USE_CASE = {
