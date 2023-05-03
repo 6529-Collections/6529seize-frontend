@@ -1,17 +1,8 @@
 import { useState, useEffect } from "react";
-import {
-  Container,
-  Row,
-  Col,
-  Table,
-  Dropdown,
-  Form,
-  Button,
-} from "react-bootstrap";
+import { Container, Row, Col, Table, Dropdown, Form } from "react-bootstrap";
 import { DBResponse } from "../../entities/IDBResponse";
 import { TDHCalc, TDHMetrics, BaseTDHMetrics } from "../../entities/ITDH";
 import styles from "./Leaderboard.module.scss";
-import dynamic from "next/dynamic";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   formatAddress,
@@ -167,7 +158,6 @@ export default function Leaderboard(props: Props) {
   const [totalResults, setTotalResults] = useState(0);
   const [leaderboard, setLeaderboard] = useState<BaseTDHMetrics[]>();
   const [lastTDH, setLastTDH] = useState<TDHCalc>();
-  const [next, setNext] = useState(null);
   const [sort, setSort] = useState<{
     sort: Sort;
     sort_direction: SortDirection;
@@ -220,15 +210,13 @@ export default function Leaderboard(props: Props) {
     if (searchWallets) {
       walletFilter = `&wallet=${searchWallets.join(",")}`;
     }
-    let url = `${process.env.API_ENDPOINT}/api/consolidated_owner_metrics`;
-    if (view == VIEW.WALLET) {
-      url = `${process.env.API_ENDPOINT}/api/owner_metrics`;
-    }
+    const url = `${process.env.API_ENDPOINT}/api/${
+      view == VIEW.WALLET ? "owner_metrics" : "consolidated_owner_metrics"
+    }`;
     fetchUrl(
       `${url}?page_size=${props.pageSize}&page=${pageProps.page}&sort=${sort.sort}&sort_direction=${sort.sort_direction}${tagFilter}${museumFilter}${teamFilter}${walletFilter}`
     ).then((response: DBResponse) => {
       setTotalResults(response.count);
-      setNext(response.next);
       setLeaderboard(response.data);
       setShowLoader(false);
     });

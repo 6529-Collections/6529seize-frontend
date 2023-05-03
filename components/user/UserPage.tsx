@@ -13,7 +13,6 @@ import {
 import { useEffect, useState } from "react";
 import { DBResponse } from "../../entities/IDBResponse";
 import { Owner, OwnerTags } from "../../entities/IOwner";
-import dynamic from "next/dynamic";
 import { useRouter } from "next/router";
 import Breadcrumb, { Crumb } from "../breadcrumb/Breadcrumb";
 import { MemesExtendedData, NFT } from "../../entities/INFT";
@@ -33,7 +32,7 @@ import {
   SIX529_MUSEUM,
 } from "../../constants";
 import { ConsolidatedTDHMetrics, TDHMetrics } from "../../entities/ITDH";
-import { useAccount, useEnsAvatar } from "wagmi";
+import { useEnsAvatar } from "wagmi";
 import { SortDirection } from "../../entities/ISort";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { fetchAllPages, fetchUrl } from "../../services/6529api";
@@ -73,7 +72,6 @@ const DISTRIBUTIONS_PAGE_SIZE = 25;
 export default function UserPage(props: Props) {
   const router = useRouter();
   const [view, setView] = useState<VIEW>(VIEW.WALLET);
-  const { address, connector, isConnected } = useAccount();
   const [focus, setFocus] = useState<Focus>(Focus.COLLECTION);
   const [sortDir, setSortDir] = useState<SortDirection>(SortDirection.ASC);
   const [sort, setSort] = useState<Sort>(Sort.ID);
@@ -108,7 +106,6 @@ export default function UserPage(props: Props) {
 
   const [hideSeized, setHideSeized] = useState(false);
   const [hideNonSeized, setHideNonSeized] = useState(true);
-  const [userIsOwner, setUserIsOwner] = useState(false);
 
   const [hideMemes, setHideMemes] = useState(false);
   const [hideGradients, setHideGradients] = useState(false);
@@ -328,16 +325,6 @@ export default function UserPage(props: Props) {
       }
     });
   }, []);
-
-  useEffect(() => {
-    if (ownerAddress && router.isReady) {
-      if (isConnected && areEqualAddresses(ownerAddress, address)) {
-        setUserIsOwner(true);
-      } else {
-        setUserIsOwner(false);
-      }
-    }
-  }, [ownerAddress, router.isReady, isConnected]);
 
   useEffect(() => {
     async function fetchConsolidatedTDH() {

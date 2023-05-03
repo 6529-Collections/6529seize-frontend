@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { Container, Row, Col, Table, Dropdown } from "react-bootstrap";
 import { DBResponse } from "../../entities/IDBResponse";
 import styles from "./LatestActivity.module.scss";
-import dynamic from "next/dynamic";
 import { Transaction } from "../../entities/ITransaction";
 import Pagination from "../pagination/Pagination";
 import LatestActivityRow from "./LatestActivityRow";

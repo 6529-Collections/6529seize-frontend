@@ -3,7 +3,6 @@ import { Container, Row, Col, Table } from "react-bootstrap";
 import { DBResponse } from "../../entities/IDBResponse";
 import { TDH, TDHCalc } from "../../entities/ITDH";
 import styles from "./Leaderboard.module.scss";
-import dynamic from "next/dynamic";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { areEqualAddresses, numberWithCommas } from "../../helpers/Helpers";
 import Pagination from "../pagination/Pagination";

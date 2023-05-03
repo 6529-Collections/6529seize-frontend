@@ -15,7 +15,6 @@ import {
   w3mConnectors,
   w3mProvider,
 } from "@web3modal/ethereum";
-import { Web3Modal } from "@web3modal/react";
 import { publicProvider } from "@wagmi/core/providers/public";
 
 import { mainnet, sepolia } from "wagmi/chains";
@@ -138,20 +137,6 @@ export default function App({ Component, pageProps }: AppProps) {
           <Component {...pageProps} />
         </WagmiConfig>
       </SSRProvider>
-      <Web3Modal
-        defaultChain={mainnet}
-        projectId={CW_PROJECT_ID}
-        ethereumClient={ethereumClient}
-        themeMode={"dark"}
-        themeVariables={{
-          "--w3m-background-color": "#282828",
-          "--w3m-logo-image-url": "/Seize_Logo_Glasses_3.png",
-          "--w3m-accent-color": "#fff",
-          "--w3m-accent-fill-color": "#000",
-          "--w3m-button-border-radius": "0",
-          "--w3m-font-family": "Arial",
-        }}
-      />
     </>
   );
 }

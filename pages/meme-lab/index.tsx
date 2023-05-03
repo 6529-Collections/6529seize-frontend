@@ -13,12 +13,12 @@ const Header = dynamic(() => import("../../components/header/Header"), {
 
 const MemeLabComponent = dynamic(
   () => import("../../components/memelab/MemeLab"),
-  {
-    ssr: false,
-  }
+  { ssr: false }
 );
 
 export default function MemeLab() {
+  const [connectedWallets, setConnectedWallets] = useState<string[]>([]);
+
   const [breadcrumbs, setBreadcrumbs] = useState<Crumb[]>([
     { display: "Home", href: "/" },
     { display: "Meme Lab" },
@@ -43,9 +43,9 @@ export default function MemeLab() {
       </Head>
 
       <main className={styles.main}>
-        <Header />
+        <Header onSetWallets={(wallets) => setConnectedWallets(wallets)} />
         <Breadcrumb breadcrumbs={breadcrumbs} />
-        <MemeLabComponent />
+        <MemeLabComponent wallets={connectedWallets} />
       </main>
     </>
   );
