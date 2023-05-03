@@ -326,9 +326,9 @@ export default function UpdateDelegationComponent(props: Props) {
             )}
             <Form.Group as={Row} className="pb-4">
               <Form.Label column sm={3} className="d-flex align-items-center">
-                Previous Address
+                Current Delegate Address
                 <Tippy
-                  content={"Previous Delegate to Address"}
+                  content={"Current Delegate to Address"}
                   placement={"top"}
                   theme={"light"}>
                   <FontAwesomeIcon
@@ -351,7 +351,7 @@ export default function UpdateDelegationComponent(props: Props) {
             </Form.Group>
             <Form.Group as={Row} className="pb-4">
               <Form.Label column sm={3} className="d-flex align-items-center">
-                New Address
+                New Delegate Address
                 <Tippy
                   content={"New Delegate to Address"}
                   placement={"top"}

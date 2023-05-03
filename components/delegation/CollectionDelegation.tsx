@@ -790,7 +790,7 @@ export default function CollectionDelegationComponent(props: Props) {
           <Accordion.Item
             className={`${styles.collectionDelegationsAccordionItem}`}
             eventKey={"0"}>
-            <Accordion.Header>Outgoing Delegations</Accordion.Header>
+            <Accordion.Header>Outgoing</Accordion.Header>
             <Accordion.Body>
               {printOutgoingDelegations(
                 "delegations",
@@ -805,7 +805,7 @@ export default function CollectionDelegationComponent(props: Props) {
           <Accordion.Item
             className={`${styles.collectionDelegationsAccordionItem} mt-3`}
             eventKey={"1"}>
-            <Accordion.Header>Incoming Delegations</Accordion.Header>
+            <Accordion.Header>Incoming</Accordion.Header>
             <Accordion.Body>
               {printIncomingDelegations(
                 "delegations",
@@ -825,17 +825,19 @@ export default function CollectionDelegationComponent(props: Props) {
   function printSubDelegations() {
     return (
       <>
-        <h5 className="float-none pt-5 pb-1">Delegation Managers</h5>
+        <h5 className="float-none pt-5 pb-1">
+          Delegation Managers (Sub-Delegations)
+        </h5>
         <Accordion
           alwaysOpen
           className={`${styles.collectionDelegationsAccordion} `}>
           <Accordion.Item
             className={`${styles.collectionDelegationsAccordionItem}`}
             eventKey={"0"}>
-            <Accordion.Header>Outgoing Delegation Managers</Accordion.Header>
+            <Accordion.Header>Outgoing</Accordion.Header>
             <Accordion.Body>
               {printOutgoingDelegations(
-                "Delegation Managers",
+                "Delegation Managers (Sub-Delegations)",
                 [...outgoingDelegations].filter(
                   (d) => d.useCase.use_case == SUB_DELEGATION_USE_CASE.use_case
                 )
@@ -845,7 +847,7 @@ export default function CollectionDelegationComponent(props: Props) {
           <Accordion.Item
             className={`${styles.collectionDelegationsAccordionItem} mt-3`}
             eventKey={"1"}>
-            <Accordion.Header>Incoming Delegation Managers</Accordion.Header>
+            <Accordion.Header>Incoming</Accordion.Header>
             <Accordion.Body>
               {printIncomingDelegations(
                 "Delegation Managers",
@@ -871,7 +873,7 @@ export default function CollectionDelegationComponent(props: Props) {
           <Accordion.Item
             className={`${styles.collectionDelegationsAccordionItem}`}
             eventKey={"0"}>
-            <Accordion.Header>Outgoing Consolidations</Accordion.Header>
+            <Accordion.Header>Outgoing</Accordion.Header>
             <Accordion.Body>
               {printOutgoingDelegations(
                 "consolidations",
@@ -884,7 +886,7 @@ export default function CollectionDelegationComponent(props: Props) {
           <Accordion.Item
             className={`${styles.collectionDelegationsAccordionItem} mt-3`}
             eventKey={"1"}>
-            <Accordion.Header>Incoming Consolidations</Accordion.Header>
+            <Accordion.Header>Incoming</Accordion.Header>
             <Accordion.Body>
               {printIncomingDelegations(
                 "consolidations",
