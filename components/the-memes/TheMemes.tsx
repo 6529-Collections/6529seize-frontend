@@ -1,10 +1,8 @@
 import styles from "./TheMemes.module.scss";
 import Image from "next/image";
 import { useEffect, useState } from "react";
-import dynamic from "next/dynamic";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Container, Row, Col, Dropdown } from "react-bootstrap";
-import { useAccount } from "wagmi";
 import { MEMES_CONTRACT } from "../../constants";
 import { NFT, MemesExtendedData, VolumeType } from "../../entities/INFT";
 import { Owner } from "../../entities/IOwner";

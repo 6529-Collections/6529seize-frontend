@@ -1,8 +1,6 @@
 import styles from "./Delegation.module.scss";
 import { Container, Row, Col, Toast, ToastContainer } from "react-bootstrap";
-import router from "next/router";
 import { useState, useEffect, useRef } from "react";
-import dynamic from "next/dynamic";
 import Image from "next/image";
 import { DELEGATION_CONTRACT } from "../../constants";
 import { sepolia } from "wagmi/chains";

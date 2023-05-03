@@ -33,7 +33,6 @@ import {
   ALL_USE_CASES,
 } from "../../pages/delegation/[...section]";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import dynamic from "next/dynamic";
 import { areEqualAddresses, getTransactionLink } from "../../helpers/Helpers";
 import {
   DELEGATION_ALL_ADDRESS,
@@ -938,9 +937,6 @@ export default function CollectionDelegationComponent(props: Props) {
                               outgoingActiveConsolidations.find((i) =>
                                 areEqualAddresses(w.wallet, i.wallet)
                               )?.status;
-                            if (isConsolidation) {
-                              console.log(w.wallet, consolidationStatus);
-                            }
                             return (
                               <tr
                                 key={`outgoing-${del.useCase.use_case}-${index}-${w.wallet}-${addressIndex}`}>

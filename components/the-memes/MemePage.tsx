@@ -3,7 +3,6 @@ import styles from "./TheMemes.module.scss";
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import dynamic from "next/dynamic";
 import {
   Container,
   Row,
@@ -28,14 +27,13 @@ import LatestActivityRow from "../latest-activity/LatestActivityRow";
 import { Transaction } from "../../entities/ITransaction";
 import { useRouter } from "next/router";
 import { TDHMetrics } from "../../entities/ITDH";
-import { fetchAllPages, fetchUrl } from "../../services/6529api";
+import { fetchUrl } from "../../services/6529api";
 import Pagination from "../pagination/Pagination";
 import { TypeFilter } from "../latest-activity/LatestActivity";
 import {
   IDistribution,
   IDistributionPhoto,
 } from "../../entities/IDistribution";
-import ScrollToButton from "../scrollTo/ScrollToButton";
 import NFTImage from "../nft-image/NFTImage";
 import NFTLeaderboard from "../leaderboard/NFTLeaderboard";
 
@@ -249,9 +247,10 @@ export default function MemePage(props: Props) {
 
   useEffect(() => {
     if (props.wallets && nftId) {
-      fetchUrl(
-        `${process.env.API_ENDPOINT}/api/tdh/${MEMES_CONTRACT}/${nftId}?wallet=${props.wallets[0]}`
-      ).then((response: DBResponse) => {
+      const url = `${process.env.API_ENDPOINT}/api/${
+        props.wallets.length > 1 ? "consolidated_tdh" : "tdh"
+      }/${MEMES_CONTRACT}/${nftId}?wallet=${props.wallets[0]}`;
+      fetchUrl(url).then((response: DBResponse) => {
         if (response.data.length > 0) {
           const mine: TDHMetrics = response.data[0];
           setMyOwner(mine);
@@ -800,14 +799,14 @@ export default function MemePage(props: Props) {
                               <td>Cards</td>
                               <td className="text-right">{`x${nftBalance}`}</td>
                             </tr>
-                            <tr className={`pt-1 ${styles.overviewColumn}`}>
+                            {/* <tr className={`pt-1 ${styles.overviewColumn}`}>
                               <td>Rank</td>
                               <td className="text-right">
                                 {`#${numberWithCommas(
                                   myOwner.dense_rank_balance
                                 )}`}
                               </td>
-                            </tr>
+                            </tr> */}
                           </tbody>
                         </Table>
                       </Col>

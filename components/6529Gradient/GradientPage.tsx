@@ -3,9 +3,7 @@ import styles from "./6529Gradient.module.scss";
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import dynamic from "next/dynamic";
 import { Container, Row, Col, Table } from "react-bootstrap";
-import { useAccount } from "wagmi";
 import { GRADIENT_CONTRACT } from "../../constants";
 import { DBResponse } from "../../entities/IDBResponse";
 import { NFT } from "../../entities/INFT";
@@ -26,7 +24,11 @@ import { fetchUrl } from "../../services/6529api";
 import NFTImage from "../nft-image/NFTImage";
 import Address from "../address/Address";
 
-export default function GradientPage() {
+interface Props {
+  wallets: string[];
+}
+
+export default function GradientPage(props: Props) {
   const router = useRouter();
 
   const [nftId, setNftId] = useState<string>();
@@ -35,8 +37,6 @@ export default function GradientPage() {
   );
 
   const [breadcrumbs, setBreadcrumbs] = useState<Crumb[]>([]);
-
-  const { address, connector, isConnected } = useAccount();
 
   const [nft, setNft] = useState<NFT>();
   const [transactions, setTransactions] = useState<Transaction[]>([]);
@@ -125,7 +125,7 @@ export default function GradientPage() {
   }, [router.isReady, nftId]);
 
   useEffect(() => {
-    if (address && nftId) {
+    if (props.wallets && nftId) {
       fetchUrl(
         `${process.env.API_ENDPOINT}/api/transactions?contract=${GRADIENT_CONTRACT}&id=${nftId}`
       ).then((response: DBResponse) => {
@@ -167,9 +167,11 @@ export default function GradientPage() {
                 height={650}
                 balance={0}
                 showOwned={
-                  address &&
+                  props.wallets &&
                   nftOwner &&
-                  areEqualAddresses(address, nftOwner.wallet)
+                  props.wallets.some((w) =>
+                    areEqualAddresses(w, nftOwner.wallet)
+                  )
                 }
                 showUnseized={false}
               />
@@ -191,7 +193,12 @@ export default function GradientPage() {
                 <Row>
                   <Col>
                     <h4 className={styles.subheading}>
-                      {nftOwner && address == nftOwner.wallet ? "*" : ""}
+                      {nftOwner &&
+                      props.wallets.some((w) =>
+                        areEqualAddresses(w, nftOwner.wallet)
+                      )
+                        ? "*"
+                        : ""}
                       {nftOwner && (
                         <Address
                           wallets={[nftOwner.wallet]}

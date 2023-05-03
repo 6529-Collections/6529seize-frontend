@@ -1,4 +1,7 @@
+import { Web3Modal, useWeb3Modal } from "@web3modal/react";
 import { Web3Button } from "@web3modal/react";
+import { mainnet } from "wagmi/chains";
+
 import styles from "./Header.module.scss";
 import {
   Container,
@@ -9,7 +12,7 @@ import {
   NavDropdown,
   Dropdown,
 } from "react-bootstrap";
-import { useAccount } from "wagmi";
+import { useAccount, useClient } from "wagmi";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import Image from "next/image";
@@ -18,7 +21,8 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { DBResponse } from "../../entities/IDBResponse";
 import { fetchUrl } from "../../services/6529api";
 import Cookies from "js-cookie";
-import { VIEW_MODE_COOKIE } from "../../constants";
+import { CW_PROJECT_ID, VIEW_MODE_COOKIE } from "../../constants";
+import { EthereumClient } from "@web3modal/ethereum";
 
 interface Props {
   onLoad?: () => void;
@@ -32,6 +36,9 @@ enum VIEW {
 
 export default function Header(props: Props) {
   const router = useRouter();
+  const client = useClient();
+  const web3Modal = useWeb3Modal();
+  const ethereumClient = new EthereumClient(client, [mainnet]);
   const [consolidations, setConsolidations] = useState<string[]>([]);
   const [isConsolidation, setIsConsolidation] = useState(false);
   const { address, connector, isConnected } = useAccount();
@@ -44,7 +51,7 @@ export default function Header(props: Props) {
 
   useEffect(() => {
     const viewMode = Cookies.get(VIEW_MODE_COOKIE);
-    console.log(viewMode);
+    console.log(VIEW_MODE_COOKIE, viewMode);
     if (viewMode == VIEW.CONSOLIDATION) {
       setView(VIEW.CONSOLIDATION);
     } else {
@@ -87,22 +94,13 @@ export default function Header(props: Props) {
       fetchUrl(
         `${process.env.API_ENDPOINT}/api/consolidations/${address}`
       ).then((response: DBResponse) => {
-        if (response.data.length) {
-          const walletConsolidations = new Set<string>();
-          response.data.map((d) => {
-            walletConsolidations.add(d.wallet1);
-            walletConsolidations.add(d.wallet2);
-          });
-          setConsolidations(Array.from(walletConsolidations));
-        } else {
-          setConsolidations([]);
-        }
+        setConsolidations(Array.from(response.data));
       });
     }
   }, [isConnected, address]);
 
   useEffect(() => {
-    if (consolidations.length > 0) {
+    if (consolidations.length > 1) {
       setIsConsolidation(true);
     } else {
       setIsConsolidation(false);
@@ -150,20 +148,61 @@ export default function Header(props: Props) {
                     />
                     <NavDropdown
                       title={
-                        <button className={styles.userDropdownBtn}>
+                        <button
+                          className={`${styles.userDropdownBtn} ${
+                            view == VIEW.CONSOLIDATION &&
+                            isConsolidation &&
+                            !web3Modal.isOpen
+                              ? styles.userDropdownBtnConsolidation
+                              : ""
+                          }`}>
                           <span className={styles.userDropdownBtnIcon}></span>
                         </button>
                       }
                       className={`${styles.userDropdown}`}
                       align={"end"}>
                       <NavDropdown.Item
-                        key="profile-dropdown-item"
-                        className={styles.dropdownItem}
+                        className={styles.dropdownItemProfile}
                         onClick={() =>
                           (window.location.href = `/${address as string}`)
                         }>
                         Profile
                       </NavDropdown.Item>
+                      {isConsolidation && (
+                        <NavDropdown.Item
+                          className={styles.dropdownItemViewMode}>
+                          <Dropdown
+                            onMouseEnter={() => setViewModeOpen(true)}
+                            onMouseLeave={() => setViewModeOpen(false)}
+                            className={styles.viewModeDropdown}
+                            drop={"down-centered"}
+                            show={viewModeOpen}>
+                            <Dropdown.Toggle>View Mode</Dropdown.Toggle>
+                            <Dropdown.Menu>
+                              <Dropdown.Item
+                                className="d-flex align-items-center"
+                                onClick={() => setView(VIEW.WALLET)}>
+                                {view == VIEW.WALLET && (
+                                  <FontAwesomeIcon
+                                    className={styles.viewModeIcon}
+                                    icon="check-circle"></FontAwesomeIcon>
+                                )}
+                                Wallet
+                              </Dropdown.Item>
+                              <Dropdown.Item
+                                className="d-flex align-items-center"
+                                onClick={() => setView(VIEW.CONSOLIDATION)}>
+                                {view == VIEW.CONSOLIDATION && (
+                                  <FontAwesomeIcon
+                                    className={`${styles.viewModeIcon} ${styles.viewModeIconConsolidation}`}
+                                    icon="check-circle"></FontAwesomeIcon>
+                                )}
+                                Consolidation
+                              </Dropdown.Item>
+                            </Dropdown.Menu>
+                          </Dropdown>
+                        </NavDropdown.Item>
+                      )}
                     </NavDropdown>
                   </>
                 ) : (
@@ -708,7 +747,14 @@ export default function Header(props: Props) {
                                 />
                                 <NavDropdown
                                   title={
-                                    <button className={styles.userDropdownBtn}>
+                                    <button
+                                      className={`${styles.userDropdownBtn} ${
+                                        view == VIEW.CONSOLIDATION &&
+                                        isConsolidation &&
+                                        !web3Modal.isOpen
+                                          ? styles.userDropdownBtnConsolidation
+                                          : ""
+                                      }`}>
                                       <span
                                         className={
                                           styles.userDropdownBtnIcon
@@ -718,8 +764,7 @@ export default function Header(props: Props) {
                                   className={`${styles.userDropdown}`}
                                   align={"end"}>
                                   <NavDropdown.Item
-                                    key="profile-dropdown-item"
-                                    className={styles.dropdownItem}
+                                    className={styles.dropdownItemProfile}
                                     onClick={() =>
                                       (window.location.href = `/${
                                         address as string
@@ -729,7 +774,7 @@ export default function Header(props: Props) {
                                   </NavDropdown.Item>
                                   {isConsolidation && (
                                     <NavDropdown.Item
-                                      className={styles.dropdownItem}>
+                                      className={styles.dropdownItemViewMode}>
                                       <Dropdown
                                         onMouseEnter={() =>
                                           setViewModeOpen(true)
@@ -750,7 +795,6 @@ export default function Header(props: Props) {
                                               setView(VIEW.WALLET)
                                             }>
                                             {view == VIEW.WALLET && (
-                                              // <span>&#x2713;&nbsp;&nbsp;</span>
                                               <FontAwesomeIcon
                                                 className={styles.viewModeIcon}
                                                 icon="check-circle"></FontAwesomeIcon>
@@ -763,9 +807,8 @@ export default function Header(props: Props) {
                                               setView(VIEW.CONSOLIDATION)
                                             }>
                                             {view == VIEW.CONSOLIDATION && (
-                                              // <span>&#x2713;&nbsp;&nbsp;</span>
                                               <FontAwesomeIcon
-                                                className={styles.viewModeIcon}
+                                                className={`${styles.viewModeIcon} ${styles.viewModeIconConsolidation}`}
                                                 icon="check-circle"></FontAwesomeIcon>
                                             )}
                                             Consolidation
@@ -810,6 +853,25 @@ export default function Header(props: Props) {
           </Col>
         </Row>
       </Container>
+      {client && ethereumClient && (
+        <Web3Modal
+          defaultChain={mainnet}
+          projectId={CW_PROJECT_ID}
+          ethereumClient={ethereumClient}
+          themeMode={"dark"}
+          themeVariables={{
+            "--w3m-background-color": "#282828",
+            "--w3m-logo-image-url": "/Seize_Logo_Glasses_3.png",
+            "--w3m-accent-color":
+              view == VIEW.CONSOLIDATION && isConsolidation && !web3Modal.isOpen
+                ? "#e8c9cc"
+                : "#fff",
+            "--w3m-accent-fill-color": "#000",
+            "--w3m-button-border-radius": "0",
+            "--w3m-font-family": "Arial",
+          }}
+        />
+      )}
     </>
   );
 }
