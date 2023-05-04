@@ -12,7 +12,7 @@ const Header = dynamic(() => import("../components/header/Header"), {
   loading: () => <HeaderPlaceholder />,
 });
 
-export default function TDH() {
+export default function CommunityMetrics() {
   const [breadcrumbs, setBreadcrumbs] = useState<Crumb[]>([
     { display: "Home", href: "/" },
     { display: "Community Metrics" },
@@ -246,13 +246,6 @@ export default function TDH() {
                       Each address uses the highest value that it is eligible
                       for from #1, #2 or #3
                     </p>
-                  </Col>
-                </Row>
-                <Row className="pb-3">
-                  <Col>
-                    <a href={`/community-metrics-consolidations`}>
-                      Consolidation Use Cases
-                    </a>
                   </Col>
                 </Row>
               </Container>
