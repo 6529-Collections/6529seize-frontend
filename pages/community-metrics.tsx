@@ -248,6 +248,13 @@ export default function TDH() {
                     </p>
                   </Col>
                 </Row>
+                <Row className="pb-3">
+                  <Col>
+                    <a href={`/community-metrics-consolidations`}>
+                      Consolidation Use Cases
+                    </a>
+                  </Col>
+                </Row>
               </Container>
             </Col>
           </Row>
