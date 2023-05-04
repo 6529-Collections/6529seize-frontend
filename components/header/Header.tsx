@@ -296,6 +296,13 @@ export default function Header(props: Props) {
                 </Row>
                 <Row className="pt-3">
                   <Col>
+                    <a href="/consolidation-use-cases">
+                      <h3>Consolidation Use Cases</h3>
+                    </a>
+                  </Col>
+                </Row>
+                <Row className="pt-3">
+                  <Col>
                     <a href="/downloads">
                       <h3>Downloads</h3>
                     </a>
@@ -591,6 +598,14 @@ export default function Header(props: Props) {
                                   (window.location.href = "/community-metrics")
                                 }>
                                 Community Metrics
+                              </NavDropdown.Item>
+                              <NavDropdown.Item
+                                className={styles.dropdownItem}
+                                onClick={() =>
+                                  (window.location.href =
+                                    "/consolidation-use-cases")
+                                }>
+                                Consolidation Use Cases
                               </NavDropdown.Item>
                               <NavDropdown.Item
                                 className={styles.dropdownItem}
