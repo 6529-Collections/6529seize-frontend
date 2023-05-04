@@ -879,7 +879,7 @@ export default function Header(props: Props) {
             "--w3m-logo-image-url": "/Seize_Logo_Glasses_3.png",
             "--w3m-accent-color":
               view == VIEW.CONSOLIDATION && isConsolidation && !web3Modal.isOpen
-                ? "#ffffc7"
+                ? "#ffff00"
                 : "#fff",
             "--w3m-accent-fill-color": "#000",
             "--w3m-button-border-radius": "0",
