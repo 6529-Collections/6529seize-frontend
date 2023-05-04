@@ -19,7 +19,7 @@ const Header = dynamic(() => import("../components/header/Header"), {
   loading: () => <HeaderPlaceholder />,
 });
 
-const PAGE_SIZE = 5;
+const PAGE_SIZE = 25;
 
 export default function Downloads() {
   const router = useRouter();
