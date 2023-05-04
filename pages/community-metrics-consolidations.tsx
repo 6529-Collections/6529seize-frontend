@@ -155,8 +155,8 @@ export default function TDH() {
                           </li>
                           <li>
                             Note: I still have access to WalletA (otherwise you
-                            can't call delegation contract as WalletA so you
-                            can't prove ownership)
+                            can&apos;t call delegation contract as WalletA so
+                            you can&apos;t prove ownership)
                           </li>
                         </ul>
                         <p>Best Solution</p>
@@ -217,9 +217,9 @@ export default function TDH() {
                                 If in reality only Wallets C,D can actually hold
                                 cards right now (i.e. WalletA is emptied,
                                 WalletB was temporary and not being used
-                                anymore) then there shouldn't be any issue apart
-                                from having to cross-consolidate all wallets
-                                between them (?)
+                                anymore) then there shouldn&apos;t be any issue
+                                apart from having to cross-consolidate all
+                                wallets between them (?)
                               </li>
                               <br />
                               <li>
@@ -244,11 +244,12 @@ export default function TDH() {
                                 consolidation
                               </li>
                               <li>
-                                Note: At this point although WalletA 'donated'
-                                some TDH to other wallets, it would appear as
-                                it's own entry within the consolidated TDH table
-                                i.e. from the setup above the following 2
-                                entries are added to consolidated table:
+                                Note: At this point although WalletA
+                                &apos;donated&apos; some TDH to other wallets,
+                                it would appear as it&apos;s own entry within
+                                the consolidated TDH table i.e. from the setup
+                                above the following 2 entries are added to
+                                consolidated table:
                                 <ul>
                                   <li>Consolidation of Wallets B,C,D</li>
                                   <li>WalletA</li>
