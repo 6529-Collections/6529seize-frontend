@@ -978,15 +978,17 @@ export default function UserPage(props: Props) {
                               />
                             </Col>
                           </Row>
-                          <Row className="pt-1 pb-1">
-                            <Col>
-                              <Tag
-                                type={TagType.RANK}
-                                text={"TDH Rank #"}
-                                value={tdh.tdh_rank}
-                              />
-                            </Col>
-                          </Row>
+                          {tdh.tdh_rank && (
+                            <Row className="pt-1 pb-1">
+                              <Col>
+                                <Tag
+                                  type={TagType.RANK}
+                                  text={"TDH Rank #"}
+                                  value={tdh.tdh_rank}
+                                />
+                              </Col>
+                            </Row>
+                          )}
                         </Container>
                       </Col>
                       <Col
