@@ -483,7 +483,10 @@ export default function Leaderboard(props: Props) {
     if (lead.wallets) {
       return lead.wallets;
     }
-    return [lead.wallet];
+    if (lead.wallet) {
+      return [lead.wallet];
+    }
+    return [];
   }
 
   function getDisplay(lead: any) {
@@ -2009,7 +2012,7 @@ export default function Leaderboard(props: Props) {
               <tbody>
                 {leaderboard &&
                   leaderboard.map((lead, index) => {
-                    if (lead.balance > 0) {
+                    if (lead.balance > 0 && getWallets(lead).length > 0) {
                       return (
                         <tr key={`wallet-${index}`}>
                           <td className={styles.rank}>

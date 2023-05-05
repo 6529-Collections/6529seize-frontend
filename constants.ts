@@ -28,13 +28,6 @@ export const DELEGATION_CONTRACT: {
   chain_id: 11155111,
   contract: "0x8f86c644f845a077999939c69bc787662377d915",
 };
-// export const DELEGATION_CONTRACT: {
-//   chain_id: number;
-//   contract: `0x${string}`;
-// } = {
-//   chain_id: 11155111,
-//   contract: "0x8f86c644f845a077999939c69bc787662377d915",
-// };
 export const DELEGATION_ALL_ADDRESS =
   "0x8888888888888888888888888888888888888888";
 
