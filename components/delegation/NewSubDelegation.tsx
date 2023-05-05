@@ -39,7 +39,7 @@ interface Props {
   onSetToast(toast: any): any;
 }
 
-export default function NewDelegationComponent(props: Props) {
+export default function NewSubDelegationComponent(props: Props) {
   const orignalDelegatorEnsResolution = useEnsName({
     address: props.subdelegation
       ? (props.subdelegation.originalDelegator as `0x${string}`)
@@ -212,7 +212,7 @@ export default function NewDelegationComponent(props: Props) {
     } else {
       contractWriteDelegation.write?.();
       props.onSetToast({
-        title: `Registering Sub-Delegation`,
+        title: `Registering Delegation Manager`,
         message: "Confirm in your wallet...",
       });
     }
@@ -221,7 +221,7 @@ export default function NewDelegationComponent(props: Props) {
   useEffect(() => {
     if (contractWriteDelegation.error) {
       props.onSetToast({
-        title: `Registering Sub-Delegation`,
+        title: `Registering Delegation Manager`,
         message: contractWriteDelegation.error.message,
       });
     }
@@ -229,7 +229,7 @@ export default function NewDelegationComponent(props: Props) {
       if (contractWriteDelegation.data?.hash) {
         if (waitContractWriteDelegation.isLoading) {
           props.onSetToast({
-            title: `Registering Sub-Delegation`,
+            title: `Registering Delegation Manager`,
             message: `Transaction submitted...
                     <a
                     href=${getTransactionLink(
@@ -244,7 +244,7 @@ export default function NewDelegationComponent(props: Props) {
           });
         } else {
           props.onSetToast({
-            title: `Registering Sub-Delegation`,
+            title: `Registering Delegation Manager`,
             message: `Transaction Successful!
                     <a
                     href=${getTransactionLink(
@@ -270,16 +270,13 @@ export default function NewDelegationComponent(props: Props) {
     <Container>
       <Row>
         <Col xs={10} className="pt-3 pb-1">
-          <h4>
-            Register Sub-Delegation{" "}
-            {props.subdelegation && `Using Sub-Delegation Rights`}
-          </h4>
+          <h4>Register Delegation Manager (Sub-Delegation)</h4>
         </Col>
         <Col
           xs={2}
           className="pt-3 pb-1 d-flex align-items-center justify-content-end">
           <Tippy
-            content={"Cancel Sub-Delegation"}
+            content={"Cancel Delegation Manager"}
             delay={250}
             placement={"top"}
             theme={"light"}>
@@ -324,7 +321,7 @@ export default function NewDelegationComponent(props: Props) {
             )}
             <Form.Group as={Row} className="pb-4">
               <Form.Label column sm={3} className="d-flex align-items-center">
-                {props.subdelegation ? `Sub-Delegator` : `Delegator`}
+                {props.subdelegation ? `Delegation Manager` : `Delegator`}
                 <Tippy
                   content={`Address ${
                     props.subdelegation ? `executing` : `registering`
@@ -396,7 +393,7 @@ export default function NewDelegationComponent(props: Props) {
             </Form.Group>
             <Form.Group as={Row} className="pb-4">
               <Form.Label column sm={3} className="d-flex align-items-center">
-                Address
+                Delegate Address
                 <Tippy
                   content={"Delegate to Address e.g. your hot wallet"}
                   placement={"top"}

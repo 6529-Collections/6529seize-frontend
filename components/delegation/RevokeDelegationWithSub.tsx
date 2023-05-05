@@ -162,7 +162,7 @@ export default function RevokeDelegationWithSubComponent(props: Props) {
     } else {
       contractWriteDelegation.write?.();
       props.onSetToast({
-        title: `Revoking #${newDelegationUseCase} - ${newDelegationUseCaseDisplay} Using Sub-Delegation Rights`,
+        title: `Revoking #${newDelegationUseCase} - ${newDelegationUseCaseDisplay} as Delegation Manager`,
         message: "Confirm in your wallet...",
       });
     }
@@ -171,7 +171,7 @@ export default function RevokeDelegationWithSubComponent(props: Props) {
   useEffect(() => {
     if (contractWriteDelegation.error) {
       props.onSetToast({
-        title: `Revoking #${newDelegationUseCase} - ${newDelegationUseCaseDisplay} Using Sub-Delegation Rights`,
+        title: `Revoking #${newDelegationUseCase} - ${newDelegationUseCaseDisplay} as Delegation Manager`,
         message: contractWriteDelegation.error.message,
       });
     }
@@ -179,7 +179,7 @@ export default function RevokeDelegationWithSubComponent(props: Props) {
       if (contractWriteDelegation.data?.hash) {
         if (waitContractWriteDelegation.isLoading) {
           props.onSetToast({
-            title: `Revoking #${newDelegationUseCase} - ${newDelegationUseCaseDisplay} Using Sub-Delegation Rights`,
+            title: `Revoking #${newDelegationUseCase} - ${newDelegationUseCaseDisplay} as Delegation Manager`,
             message: `Transaction submitted...
                     <a
                     href=${getTransactionLink(
@@ -194,7 +194,7 @@ export default function RevokeDelegationWithSubComponent(props: Props) {
           });
         } else {
           props.onSetToast({
-            title: `Revoking #${newDelegationUseCase} - ${newDelegationUseCaseDisplay} Using Sub-Delegation Rights`,
+            title: `Revoking #${newDelegationUseCase} - ${newDelegationUseCaseDisplay} as Delegation Manager`,
             message: `Transaction Successful!
                     <a
                     href=${getTransactionLink(
@@ -220,7 +220,7 @@ export default function RevokeDelegationWithSubComponent(props: Props) {
     <Container className="no-padding">
       <Row className="pt-2">
         <Col xs={10} className="pt-3 pb-1">
-          <h4>Revoke Using Sub-Delegation Rights</h4>
+          <h4>Revoke as Delegation Manager</h4>
         </Col>
         <Col
           xs={2}
@@ -269,7 +269,7 @@ export default function RevokeDelegationWithSubComponent(props: Props) {
             </Form.Group>
             <Form.Group as={Row} className="pb-4">
               <Form.Label column sm={3} className="d-flex align-items-center">
-                Sub-Delegator
+                Delegation Manager
                 <Tippy
                   content={"Address executing the revocation"}
                   placement={"top"}
@@ -339,7 +339,7 @@ export default function RevokeDelegationWithSubComponent(props: Props) {
             </Form.Group>
             <Form.Group as={Row} className="pb-4">
               <Form.Label column sm={3} className="d-flex align-items-center">
-                Address
+                Revoke Address
                 <Tippy
                   content={"Revoke wallet Address"}
                   placement={"top"}
@@ -351,7 +351,7 @@ export default function RevokeDelegationWithSubComponent(props: Props) {
               </Form.Label>
               <Col sm={9}>
                 <Form.Control
-                  placeholder="Delegation Address"
+                  placeholder="Revoke Address - 0x... or ENS"
                   className={`${styles.formInput}`}
                   type="text"
                   value={newDelegationToInput}

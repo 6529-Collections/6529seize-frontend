@@ -33,7 +33,6 @@ import {
   ALL_USE_CASES,
 } from "../../pages/delegation/[...section]";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import dynamic from "next/dynamic";
 import { areEqualAddresses, getTransactionLink } from "../../helpers/Helpers";
 import {
   DELEGATION_ALL_ADDRESS,
@@ -44,31 +43,12 @@ import {
 import { DELEGATION_ABI } from "../../abis";
 import Tippy from "@tippyjs/react";
 import { DelegationCenterSection } from "./DelegationCenterMenu";
-
-const DelegationWallet = dynamic(() => import("./DelegationWallet"), {
-  ssr: false,
-});
-
-const UpdateDelegationComponent = dynamic(() => import("./UpdateDelegation"), {
-  ssr: false,
-});
-
-const NewDelegationComponent = dynamic(() => import("./NewDelegation"), {
-  ssr: false,
-});
-
-const NewSubDelegationComponent = dynamic(() => import("./NewSubDelegation"), {
-  ssr: false,
-});
-
-const NewConsolidationComponent = dynamic(() => import("./NewConsolidation"), {
-  ssr: false,
-});
-
-const RevokeDelegationWithSubComponent = dynamic(
-  () => import("./RevokeDelegationWithSub"),
-  { ssr: false }
-);
+import DelegationWallet from "./DelegationWallet";
+import NewConsolidationComponent from "./NewConsolidation";
+import NewDelegationComponent from "./NewDelegation";
+import NewSubDelegationComponent from "./NewSubDelegation";
+import UpdateDelegationComponent from "./UpdateDelegation";
+import RevokeDelegationWithSubComponent from "./RevokeDelegationWithSub";
 
 interface Props {
   setSection(section: DelegationCenterSection): any;
@@ -809,7 +789,7 @@ export default function CollectionDelegationComponent(props: Props) {
           <Accordion.Item
             className={`${styles.collectionDelegationsAccordionItem}`}
             eventKey={"0"}>
-            <Accordion.Header>Outgoing Delegations</Accordion.Header>
+            <Accordion.Header>Outgoing</Accordion.Header>
             <Accordion.Body>
               {printOutgoingDelegations(
                 "delegations",
@@ -824,7 +804,7 @@ export default function CollectionDelegationComponent(props: Props) {
           <Accordion.Item
             className={`${styles.collectionDelegationsAccordionItem} mt-3`}
             eventKey={"1"}>
-            <Accordion.Header>Incoming Delegations</Accordion.Header>
+            <Accordion.Header>Incoming</Accordion.Header>
             <Accordion.Body>
               {printIncomingDelegations(
                 "delegations",
@@ -844,17 +824,19 @@ export default function CollectionDelegationComponent(props: Props) {
   function printSubDelegations() {
     return (
       <>
-        <h5 className="float-none pt-5 pb-1">Sub-Delegations</h5>
+        <h5 className="float-none pt-5 pb-1">
+          Delegation Managers (Sub-Delegations)
+        </h5>
         <Accordion
           alwaysOpen
           className={`${styles.collectionDelegationsAccordion} `}>
           <Accordion.Item
             className={`${styles.collectionDelegationsAccordionItem}`}
             eventKey={"0"}>
-            <Accordion.Header>Outgoing Sub-Delegations</Accordion.Header>
+            <Accordion.Header>Outgoing</Accordion.Header>
             <Accordion.Body>
               {printOutgoingDelegations(
-                "sub-delegations",
+                "Delegation Managers (Sub-Delegations)",
                 [...outgoingDelegations].filter(
                   (d) => d.useCase.use_case == SUB_DELEGATION_USE_CASE.use_case
                 )
@@ -864,10 +846,10 @@ export default function CollectionDelegationComponent(props: Props) {
           <Accordion.Item
             className={`${styles.collectionDelegationsAccordionItem} mt-3`}
             eventKey={"1"}>
-            <Accordion.Header>Incoming Sub-Delegations</Accordion.Header>
+            <Accordion.Header>Incoming</Accordion.Header>
             <Accordion.Body>
               {printIncomingDelegations(
-                "sub-delegations",
+                "Delegation Managers",
                 [...incomingDelegations].filter(
                   (d) => d.useCase.use_case == SUB_DELEGATION_USE_CASE.use_case
                 ),
@@ -890,7 +872,7 @@ export default function CollectionDelegationComponent(props: Props) {
           <Accordion.Item
             className={`${styles.collectionDelegationsAccordionItem}`}
             eventKey={"0"}>
-            <Accordion.Header>Outgoing Consolidations</Accordion.Header>
+            <Accordion.Header>Outgoing</Accordion.Header>
             <Accordion.Body>
               {printOutgoingDelegations(
                 "consolidations",
@@ -903,7 +885,7 @@ export default function CollectionDelegationComponent(props: Props) {
           <Accordion.Item
             className={`${styles.collectionDelegationsAccordionItem} mt-3`}
             eventKey={"1"}>
-            <Accordion.Header>Incoming Consolidations</Accordion.Header>
+            <Accordion.Header>Incoming</Accordion.Header>
             <Accordion.Body>
               {printIncomingDelegations(
                 "consolidations",
@@ -955,9 +937,6 @@ export default function CollectionDelegationComponent(props: Props) {
                               outgoingActiveConsolidations.find((i) =>
                                 areEqualAddresses(w.wallet, i.wallet)
                               )?.status;
-                            if (isConsolidation) {
-                              console.log(w.wallet, consolidationStatus);
-                            }
                             return (
                               <tr
                                 key={`outgoing-${del.useCase.use_case}-${index}-${w.wallet}-${addressIndex}`}>
@@ -1300,7 +1279,7 @@ export default function CollectionDelegationComponent(props: Props) {
                             icon="plus"
                             className={styles.buttonIcon}
                           />
-                          Register Sub-Delegation
+                          Register Delegation Manager
                         </span>
                         <span
                           className={`${styles.useCaseWalletUpdate} ${
