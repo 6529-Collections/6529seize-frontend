@@ -635,8 +635,8 @@ export default function LabPage(props: Props) {
       a.transaction_date > b.transaction_date ? 1 : -1
     )[0];
 
-    const airdropped = transactions.filter((t) =>
-      areEqualAddresses(t.from_address, NULL_ADDRESS)
+    const airdropped = transactions.filter(
+      (t) => t.value == 0 && areEqualAddresses(t.from_address, NULL_ADDRESS)
     );
 
     const transferredIn = !props.wallets
