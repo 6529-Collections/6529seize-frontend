@@ -31,7 +31,7 @@ interface Props {
   onSetToast(toast: any): any;
 }
 
-export default function NewDelegationComponent(props: Props) {
+export default function UpdateDelegationComponent(props: Props) {
   const [isDelegation, setIsDelegation] = useState(
     ![
       CONSOLIDATION_USE_CASE.use_case,
@@ -233,7 +233,7 @@ export default function NewDelegationComponent(props: Props) {
             {props.delegation.use_case == CONSOLIDATION_USE_CASE.use_case
               ? "Consolidation"
               : props.delegation.use_case == SUB_DELEGATION_USE_CASE.use_case
-              ? "Sub-Delegation"
+              ? "Delegation Manager"
               : "Delegation"}
           </h4>
         </Col>
@@ -326,9 +326,9 @@ export default function NewDelegationComponent(props: Props) {
             )}
             <Form.Group as={Row} className="pb-4">
               <Form.Label column sm={3} className="d-flex align-items-center">
-                Previous Address
+                Current Delegate Address
                 <Tippy
-                  content={"Previous Delegate to Address"}
+                  content={"Current Delegate to Address"}
                   placement={"top"}
                   theme={"light"}>
                   <FontAwesomeIcon
@@ -351,7 +351,7 @@ export default function NewDelegationComponent(props: Props) {
             </Form.Group>
             <Form.Group as={Row} className="pb-4">
               <Form.Label column sm={3} className="d-flex align-items-center">
-                New Address
+                New Delegate Address
                 <Tippy
                   content={"New Delegate to Address"}
                   placement={"top"}

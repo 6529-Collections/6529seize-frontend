@@ -1,8 +1,6 @@
 import styles from "./Delegation.module.scss";
 import { Container, Row, Col, Toast, ToastContainer } from "react-bootstrap";
-import router from "next/router";
 import { useState, useEffect, useRef } from "react";
-import dynamic from "next/dynamic";
 import Image from "next/image";
 import { DELEGATION_CONTRACT } from "../../constants";
 import { sepolia } from "wagmi/chains";
@@ -13,31 +11,12 @@ import {
   MEMES_COLLECTION,
   MEME_LAB_COLLECTION,
 } from "../../pages/delegation/[...section]";
-
-const DelegationCenterComponent = dynamic(() => import("./DelegationCenter"), {
-  ssr: false,
-});
-
-const NewDelegationComponent = dynamic(() => import("./NewDelegation"), {
-  ssr: false,
-});
-
-const NewSubDelegationComponent = dynamic(() => import("./NewSubDelegation"), {
-  ssr: false,
-});
-
-const NewConsolidationComponent = dynamic(() => import("./NewConsolidation"), {
-  ssr: false,
-});
-
-const DelegationHTML = dynamic(() => import("./html/DelegationHTML"), {
-  ssr: false,
-});
-
-const CollectionDelegationComponent = dynamic(
-  () => import("../../components/delegation/CollectionDelegation"),
-  { ssr: false }
-);
+import DelegationCenterComponent from "./DelegationCenter";
+import CollectionDelegationComponent from "./CollectionDelegation";
+import NewConsolidationComponent from "./NewConsolidation";
+import NewDelegationComponent from "./NewDelegation";
+import NewSubDelegationComponent from "./NewSubDelegation";
+import DelegationHTML from "./html/DelegationHTML";
 
 export enum DelegationCenterSection {
   CENTER = "delegation-center",
@@ -50,8 +29,6 @@ export enum DelegationCenterSection {
   GRADIENTS_COLLECTION = "6529-gradient",
   WALLET_ARCHITECTURE = "wallet-architecture",
   FAQ = "delegation-faq",
-  LOCK_FAQ = "lock-unlock-faq",
-  SUB_DEL_FAQ = "sub-delegation-faq",
   HTML = "html",
 }
 
@@ -174,10 +151,6 @@ export default function DelegationCenterMenu(props: Props) {
         return <DelegationHTML path="reference-overview-wallet-architecture" />;
       case DelegationCenterSection.FAQ:
         return <DelegationHTML path="delegation-faq" />;
-      case DelegationCenterSection.LOCK_FAQ:
-        return <DelegationHTML path="lock-unlock-faq" />;
-      case DelegationCenterSection.SUB_DEL_FAQ:
-        return <DelegationHTML path="sub-delegation-faq" />;
       case DelegationCenterSection.HTML:
         return (
           <DelegationHTML
