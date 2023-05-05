@@ -27,7 +27,6 @@ import {
   getTransactionLink,
   isValidEthAddress,
 } from "../../helpers/Helpers";
-import { DocumentationSection } from "./documentation/DelegationDocumentation";
 
 interface Props {
   address: string;
@@ -273,7 +272,7 @@ export default function NewConsolidationComponent(props: Props) {
         <Col xs={10} className="pt-3 pb-1">
           <h4>
             Register Consolidation{" "}
-            {props.subdelegation && `Using Sub-Delegation Rights`}
+            {props.subdelegation && `as Delegation Manager`}
           </h4>
         </Col>
         <Col
@@ -325,7 +324,7 @@ export default function NewConsolidationComponent(props: Props) {
             )}
             <Form.Group as={Row} className="pb-4">
               <Form.Label column sm={3} className="d-flex align-items-center">
-                {props.subdelegation ? `Sub-Delegator` : `Delegator`}
+                {props.subdelegation ? `Delegation Manager` : `Delegator`}
                 <Tippy
                   content={`Address ${
                     props.subdelegation ? `executing` : `registering`
@@ -397,7 +396,7 @@ export default function NewConsolidationComponent(props: Props) {
             </Form.Group>
             <Form.Group as={Row} className="pb-4">
               <Form.Label column sm={3} className="d-flex align-items-center">
-                Address
+                Delegate Address
                 <Tippy
                   content={"Consolidate with Address e.g. your hot wallet"}
                   placement={"top"}
@@ -423,7 +422,8 @@ export default function NewConsolidationComponent(props: Props) {
             </Form.Group>
             <Form.Group as={Row} className="pb-4">
               <Form.Label column sm={12} className="d-flex align-items-center">
-                Note: For TDH Consolidation use &apos;The Memes&apos; Collection
+                Note: For TDH Consolidation use either &apos;Any
+                Collection&apos; or &apos;The Memes&apos;
                 <a
                   href={`/delegation/delegation-faq/register-consolidation`}
                   target="_blank"
