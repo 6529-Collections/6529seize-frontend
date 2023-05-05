@@ -75,7 +75,7 @@ export const SUPPORTED_COLLECTIONS: DelegationCollection[] = [
 export const SUB_DELEGATION_USE_CASE = {
   index: 16,
   use_case: 998,
-  display: "Sub-Delegation",
+  display: "Delegation Management (Sub-Delegation)",
 };
 
 export const CONSOLIDATION_USE_CASE = {
@@ -87,7 +87,7 @@ export const CONSOLIDATION_USE_CASE = {
 export const DELEGATION_USE_CASES = [
   {
     use_case: 1,
-    display: "All",
+    display: "All (#1 - #16)",
   },
   {
     use_case: 2,
@@ -172,6 +172,24 @@ export default function DelegationsDocumentation(props: Props) {
     { display: "Home", href: "/" },
     { display: "Delegation", href: "/delegation/delegation-center" },
   ]);
+
+  useEffect(() => {
+    const mySection = router.asPath.replace("/delegation/", "");
+    if (
+      Object.values(DelegationCenterSection).includes(
+        mySection as DelegationCenterSection
+      )
+    ) {
+      const pathSection = mySection as DelegationCenterSection;
+      if (pathSection != activeSection) {
+        setActiveSection(pathSection);
+      }
+    } else {
+      if (activeSection != DelegationCenterSection.HTML) {
+        setActiveSection(DelegationCenterSection.HTML);
+      }
+    }
+  }, [router.asPath]);
 
   useEffect(() => {
     if (activeSection) {
