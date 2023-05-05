@@ -14,12 +14,19 @@ export const SIX529_COLLECTIONS = "0x4B76837F8D8Ad0A28590d06E53dCD44b6B7D4554";
 export const SIX529_MUSEUM = "0xc6400A5584db71e41B0E5dFbdC769b54B91256CD";
 export const PIRAVLOS_TEST = "0x2ec4a2BCd4f33c7c9AaFaB7Cfa865ec15508bf62";
 export const MANIFOLD = "0x3A3548e060Be10c2614d0a4Cb0c03CC9093fD799";
+// export const DELEGATION_CONTRACT: {
+//   chain_id: number;
+//   contract: `0x${string}`;
+// } = {
+//   chain_id: mainnet.id,
+//   contract: "0x2202CB9c00487e7e8EF21e6d8E914B32e709f43d",
+// };
 export const DELEGATION_CONTRACT: {
   chain_id: number;
   contract: `0x${string}`;
 } = {
-  chain_id: mainnet.id,
-  contract: "0x2202CB9c00487e7e8EF21e6d8E914B32e709f43d",
+  chain_id: 11155111,
+  contract: "0x8f86c644f845a077999939c69bc787662377d915",
 };
 export const DELEGATION_ALL_ADDRESS =
   "0x8888888888888888888888888888888888888888";
