@@ -108,7 +108,7 @@ export default function LabCollection(props: Props) {
   }, [collectionName]);
 
   useEffect(() => {
-    if (props.wallets && nftMetas.length > 0) {
+    if (props.wallets.length > 0 && nftMetas.length > 0) {
       fetchAllPages(
         `${
           process.env.API_ENDPOINT
@@ -392,7 +392,9 @@ export default function LabCollection(props: Props) {
           <Row>
             <a
               href={`/meme-lab/${nft.id}`}
-              className={props.wallets ? styles.nftImagePadding : ""}>
+              className={
+                props.wallets.length > 0 ? styles.nftImagePadding : ""
+              }>
               <NFTImage
                 nft={nft}
                 animation={false}

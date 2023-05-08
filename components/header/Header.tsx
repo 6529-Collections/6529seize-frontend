@@ -67,10 +67,12 @@ export default function Header(props: Props) {
           props.onSetWallets(consolidations);
         } else if (address) {
           props.onSetWallets([address]);
+        } else {
+          props.onSetWallets([]);
         }
       }
     }
-  }, [view, isConsolidation]);
+  }, [view, isConsolidation, isConnected]);
 
   useEffect(() => {
     function handleResize() {
@@ -96,6 +98,8 @@ export default function Header(props: Props) {
       ).then((response: DBResponse) => {
         setConsolidations(Array.from(response.data));
       });
+    } else {
+      setConsolidations([]);
     }
   }, [isConnected, address]);
 

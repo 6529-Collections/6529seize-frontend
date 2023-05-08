@@ -218,7 +218,7 @@ export default function MemePage(props: Props) {
   }, [nftId]);
 
   useEffect(() => {
-    if (props.wallets && nftId) {
+    if (props.wallets.length > 0 && nftId) {
       fetchUrl(
         `${
           process.env.API_ENDPOINT
@@ -246,7 +246,7 @@ export default function MemePage(props: Props) {
   }, [nftId, props.wallets]);
 
   useEffect(() => {
-    if (props.wallets && nftId) {
+    if (props.wallets.length > 0 && nftId) {
       const url = `${process.env.API_ENDPOINT}/api/${
         props.wallets.length > 1 ? "consolidated_tdh" : "tdh"
       }/${MEMES_CONTRACT}/${nftId}?wallet=${props.wallets[0]}`;
@@ -718,43 +718,47 @@ export default function MemePage(props: Props) {
       (t) => t.value == 0 && areEqualAddresses(t.from_address, NULL_ADDRESS)
     );
 
-    const transferredIn = !props.wallets
-      ? []
-      : transactions.filter(
-          (t) =>
-            !areEqualAddresses(t.from_address, NULL_ADDRESS) &&
-            props.wallets.some((w) => areEqualAddresses(t.to_address, w)) &&
-            t.value == 0
-        );
+    const transferredIn =
+      props.wallets.length == 0
+        ? []
+        : transactions.filter(
+            (t) =>
+              !areEqualAddresses(t.from_address, NULL_ADDRESS) &&
+              props.wallets.some((w) => areEqualAddresses(t.to_address, w)) &&
+              t.value == 0
+          );
 
-    const transferredOut = !props.wallets
-      ? []
-      : transactions.filter(
-          (t) =>
-            props.wallets.some((w) => areEqualAddresses(t.from_address, w)) &&
-            t.value == 0
-        );
+    const transferredOut =
+      props.wallets.length == 0
+        ? []
+        : transactions.filter(
+            (t) =>
+              props.wallets.some((w) => areEqualAddresses(t.from_address, w)) &&
+              t.value == 0
+          );
 
-    const bought = !props.wallets
-      ? []
-      : transactions.filter(
-          (t) =>
-            props.wallets.some((w) => areEqualAddresses(t.to_address, w)) &&
-            t.value > 0
-        );
+    const bought =
+      props.wallets.length == 0
+        ? []
+        : transactions.filter(
+            (t) =>
+              props.wallets.some((w) => areEqualAddresses(t.to_address, w)) &&
+              t.value > 0
+          );
 
     let boughtSum = 0;
     bought.map((b) => {
       boughtSum += b.value;
     });
 
-    const sold = !props.wallets
-      ? []
-      : transactions.filter(
-          (t) =>
-            props.wallets.some((w) => areEqualAddresses(t.from_address, w)) &&
-            t.value > 0
-        );
+    const sold =
+      props.wallets.length == 0
+        ? []
+        : transactions.filter(
+            (t) =>
+              props.wallets.some((w) => areEqualAddresses(t.from_address, w)) &&
+              t.value > 0
+          );
 
     let soldSum = 0;
     sold.map((b) => {
@@ -769,21 +773,24 @@ export default function MemePage(props: Props) {
         lg={{ span: 6 }}>
         <Container className="p-0">
           <Row>
-            {!props.wallets && (
+            {props.wallets.length == 0 && (
               <Row className="pt-2">
                 <Col>
                   <h4>Connect your wallet to view your cards.</h4>
                 </Col>
               </Row>
             )}
-            {nftBalance == 0 && props.wallets && nft && userLoaded && (
-              <Row className="pt-2">
-                <Col>
-                  <h3>You don&apos;t own any editions of Card {nft.id}</h3>
-                </Col>
-              </Row>
-            )}
-            {transactions.length > 0 && props.wallets && (
+            {nftBalance == 0 &&
+              props.wallets.length > 0 &&
+              nft &&
+              userLoaded && (
+                <Row className="pt-2">
+                  <Col>
+                    <h3>You don&apos;t own any editions of Card {nft.id}</h3>
+                  </Col>
+                </Row>
+              )}
+            {transactions.length > 0 && props.wallets.length > 0 && (
               <>
                 {nftBalance > 0 && myOwner && (
                   <>
