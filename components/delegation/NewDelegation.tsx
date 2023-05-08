@@ -376,7 +376,6 @@ export default function NewDelegationComponent(props: Props) {
                 />
               </Col>
             </Form.Group>
-
             <Form.Group as={Row} className="pb-4">
               <Form.Label column sm={3} className="d-flex align-items-center">
                 Collection{" "}

@@ -1,0 +1,44 @@
+@import "../../styles/variables.scss";
+
+.formInput {
+  color: $dark-grey !important;
+  border-radius: 0 !important;
+  border-color: $lightest-grey;
+
+  &:focus {
+    border-color: $blue !important;
+  }
+}
+
+.submitBtn {
+  border-radius: 0;
+  background-color: $green;
+  padding-left: 15px;
+  padding-right: 25px;
+  border: none;
+  padding: 12px 20px;
+  cursor: pointer;
+  margin-right: 20px;
+  margin-top: 15px;
+  color: white;
+
+  &:active {
+    background-color: $green !important;
+  }
+
+  &:hover {
+    background-color: darken($color: $green, $amount: 5);
+  }
+}
+
+.submitBtnDisabled {
+  pointer-events: none !important;
+  background-color: darken($color: $green, $amount: 10);
+  color: $font-color-h;
+}
+
+.loader {
+  width: 20px;
+  height: 20px;
+  margin-left: 5px;
+}

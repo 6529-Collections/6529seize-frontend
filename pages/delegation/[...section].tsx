@@ -72,6 +72,16 @@ export const SUPPORTED_COLLECTIONS: DelegationCollection[] = [
   GRADIENTS_COLLECTION,
 ];
 
+export const MINTING_USE_CASE = {
+  use_case: 2,
+  display: "Minting / Allowlist",
+};
+
+export const AIRDROPS_USE_CASE = {
+  use_case: 3,
+  display: "Airdrops",
+};
+
 export const SUB_DELEGATION_USE_CASE = {
   index: 16,
   use_case: 998,
@@ -89,14 +99,8 @@ export const DELEGATION_USE_CASES = [
     use_case: 1,
     display: "All (#1 - #16)",
   },
-  {
-    use_case: 2,
-    display: "Minting / Allowlist",
-  },
-  {
-    use_case: 3,
-    display: "Airdrops",
-  },
+  MINTING_USE_CASE,
+  AIRDROPS_USE_CASE,
   {
     use_case: 4,
     display: "Voting / Governance",
