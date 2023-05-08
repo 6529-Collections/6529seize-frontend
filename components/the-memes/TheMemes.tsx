@@ -177,7 +177,7 @@ export default function TheMemesComponent(props: Props) {
   }, []);
 
   useEffect(() => {
-    if (props.wallets && nftMetas.length > 0) {
+    if (props.wallets.length > 0 && nftMetas.length > 0) {
       fetchAllPages(
         `${
           process.env.API_ENDPOINT
@@ -490,14 +490,18 @@ export default function TheMemesComponent(props: Props) {
             <Row>
               <a
                 href={`/the-memes/${nft.id}`}
-                className={props.wallets && styles.nftImagePadding}>
+                className={
+                  props.wallets.length > 0 ? styles.nftImagePadding : ""
+                }>
                 <NFTImage
                   nft={nft}
                   animation={false}
                   height={300}
                   balance={getBalance(nft.id)}
                   showThumbnail={true}
-                  showUnseized={props.wallets.length > 0}
+                  showUnseized={
+                    props.wallets.length > 0 && nftBalances.length > 0
+                  }
                 />
               </a>
             </Row>
