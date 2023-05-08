@@ -28,7 +28,6 @@ import {
   DelegationCollection,
   DELEGATION_USE_CASES,
   MAX_BULK_ACTIONS,
-  SUPPORTED_COLLECTIONS,
   SUB_DELEGATION_USE_CASE,
   ALL_USE_CASES,
 } from "../../pages/delegation/[...section]";

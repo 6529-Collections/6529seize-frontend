@@ -6,3 +6,10 @@ export interface NewDelegationParams {
   all_tokens: boolean;
   token_id: number;
 }
+
+export interface Delegation {
+  from_address: string;
+  to_address: string;
+  collection: string;
+  use_case: number;
+}

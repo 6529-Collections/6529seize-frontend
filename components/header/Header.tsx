@@ -307,6 +307,13 @@ export default function Header(props: Props) {
                 </Row>
                 <Row className="pt-3">
                   <Col>
+                    <a href="/delegation-mapping-tool">
+                      <h3>Delegation Mapping Tool</h3>
+                    </a>
+                  </Col>
+                </Row>
+                <Row className="pt-3">
+                  <Col>
                     <a href="/downloads">
                       <h3>Downloads</h3>
                     </a>
@@ -610,6 +617,14 @@ export default function Header(props: Props) {
                                     "/consolidation-use-cases")
                                 }>
                                 Consolidation Use Cases
+                              </NavDropdown.Item>
+                              <NavDropdown.Item
+                                className={styles.dropdownItem}
+                                onClick={() =>
+                                  (window.location.href =
+                                    "/delegation-mapping-tool")
+                                }>
+                                Delegation Mapping Tool
                               </NavDropdown.Item>
                               <NavDropdown.Item
                                 className={styles.dropdownItem}
