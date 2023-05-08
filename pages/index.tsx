@@ -9,7 +9,6 @@ import { NFT, MemesExtendedData, LabNFT, BaseNFT } from "../entities/INFT";
 
 import dynamic from "next/dynamic";
 import { getDateDisplay, numberWithCommas } from "../helpers/Helpers";
-import { useAccount } from "wagmi";
 import { fetchUrl } from "../services/6529api";
 import HeaderPlaceholder from "../components/header/HeaderPlaceholder";
 

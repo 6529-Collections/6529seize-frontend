@@ -125,7 +125,7 @@ export default function GradientPage(props: Props) {
   }, [router.isReady, nftId]);
 
   useEffect(() => {
-    if (props.wallets && nftId) {
+    if (props.wallets.length > 0 && nftId) {
       fetchUrl(
         `${process.env.API_ENDPOINT}/api/transactions?contract=${GRADIENT_CONTRACT}&id=${nftId}`
       ).then((response: DBResponse) => {
@@ -167,7 +167,7 @@ export default function GradientPage(props: Props) {
                 height={650}
                 balance={0}
                 showOwned={
-                  props.wallets &&
+                  props.wallets.length > 0 &&
                   nftOwner &&
                   props.wallets.some((w) =>
                     areEqualAddresses(w, nftOwner.wallet)
