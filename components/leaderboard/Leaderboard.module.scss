@@ -493,3 +493,12 @@
     height: 32px;
   }
 }
+
+@media (min-width: 1300px) {
+  .dMdNone {
+    display: none !important;
+  }
+  .dMdFlex {
+    display: flex !important;
+  }
+}

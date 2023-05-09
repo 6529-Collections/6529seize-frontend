@@ -1,13 +1,24 @@
 @import "../../styles/variables.scss";
 
 .address {
-  text-decoration: underline;
   font-weight: bolder;
   color: white;
   margin-bottom: 0 !important;
 }
 
 .addressUserPage {
+  font-size: xx-large;
+  font-weight: bold;
+}
+
+.consolidationDisplay {
+  font-weight: bolder;
+  color: white;
+  margin-bottom: 0 !important;
+  float: none !important;
+}
+
+.consolidationDisplayUserPage {
   font-size: xx-large;
   font-weight: bold;
 }
@@ -27,6 +38,21 @@
   }
 }
 
+.consolidationDropdown {
+  button {
+    padding: 0;
+    background-color: transparent !important;
+    border-color: transparent !important;
+    &::after {
+      border: none !important;
+    }
+  }
+  div {
+    width: 100%;
+    min-width: fit-content;
+  }
+}
+
 .copyDropdown {
   display: inline-block;
   button {
@@ -39,12 +65,14 @@
   }
   div {
     width: 100%;
+    min-width: fit-content;
   }
 }
 
 .tag {
   font-family: $main-font;
   font-size: $font-size;
+  font-weight: bolder;
   color: $font-color !important;
   margin-right: 10px;
   padding: 2px 5px;
@@ -116,7 +144,7 @@
 }
 
 .memeSzn3Tag {
-  background-color: #f28c28;
+  background-color: #d7710d;
   line-height: 24px;
   margin-top: 8px !important;
 }
@@ -125,4 +153,23 @@
   background-color: $lighter-grey;
   line-height: 24px;
   margin-top: 8px !important;
+}
+
+.arrowTurnRight {
+  margin-left: 6px;
+  margin-right: 10px;
+  font-size: 15px;
+  width: 15px;
+  -moz-transform: scaleY(-1);
+  -webkit-transform: scaleY(-1);
+  -o-transform: scaleY(-1);
+  transform: scaleY(-1);
+
+  &:focus {
+    outline: none !important;
+  }
+}
+
+.consolidationDiv {
+  font-size: larger;
 }

@@ -18,10 +18,7 @@ export default function SearchModal(props: Props) {
   const [searchValue, setSearchValue] = useState("");
 
   function addSearchWallet() {
-    if (
-      (searchValue.startsWith("0x") || searchValue.endsWith(".eth")) &&
-      !props.searchWallets.some((sw) => sw == searchValue)
-    ) {
+    if (!props.searchWallets.some((sw) => sw == searchValue)) {
       props.addSearchWallet(searchValue);
       setSearchValue("");
     } else {

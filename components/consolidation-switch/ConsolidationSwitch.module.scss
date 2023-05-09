@@ -1,0 +1,63 @@
+@import "../../styles/variables.scss";
+
+.consolidationSwitch {
+  float: left;
+  font-size: larger;
+  font-weight: bolder;
+  margin-top: 3px;
+
+  input {
+    border-color: transparent !important;
+    background-color: white !important;
+    cursor: pointer;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='%23000'/%3e%3c/svg%3e") !important;
+  }
+
+  input:checked {
+    background-color: $yellow !important;
+  }
+}
+
+.consolidationSwitchLabel {
+  float: left;
+  font-size: larger;
+  font-weight: bolder;
+}
+
+// .consolidationSwitch {
+//   background-color: transparent;
+//   border-color: white !important;
+//   min-width: 150px;
+//   height: fit-content;
+
+//   &:active {
+//     background-color: transparent !important;
+//   }
+
+//   &:hover {
+//     color: $off-white !important;
+//     background-color: $almost-very-dark-grey;
+//   }
+// }
+
+// .consolidationSwitchActive {
+//   height: fit-content;
+//   border-color: white !important;
+//   min-width: 150px;
+//   background-color: white !important;
+//   color: $very-dark-grey !important;
+// }
+
+// .consolidationSwitchLeft {
+//   border-top-left-radius: 5px;
+//   border-bottom-left-radius: 5px;
+//   border-top-right-radius: 0px;
+//   border-bottom-right-radius: 0px;
+// }
+
+// .consolidationSwitchRight {
+//   border-top-right-radius: 5px;
+//   border-bottom-right-radius: 5px;
+//   border-top-left-radius: 0px;
+//   border-bottom-left-radius: 0px;
+// }
