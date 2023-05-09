@@ -35,6 +35,7 @@ interface Props {
 export default function LabCollection(props: Props) {
   const router = useRouter();
   const [collectionName, setCollectionName] = useState<string>();
+  const [secondaryLink, setSecondaryLink] = useState<string>();
 
   const [nfts, setNfts] = useState<LabNFT[]>([]);
   const [nftMetas, setNftMetas] = useState<LabExtendedData[]>([]);
@@ -99,6 +100,13 @@ export default function LabCollection(props: Props) {
             setNfts(responseNfts);
             setNftsLoaded(true);
           });
+          let collectionSecondaryLink: any = responseNftMetas[0].secondary_link;
+          responseNftMetas.map((nftm) => {
+            if (nftm.secondary_link != collectionSecondaryLink) {
+              collectionSecondaryLink = undefined;
+            }
+          });
+          setSecondaryLink(collectionSecondaryLink);
         } else {
           setNfts([]);
           setNftsLoaded(true);
@@ -492,6 +500,15 @@ export default function LabCollection(props: Props) {
                   <h2 className="font-color">{collectionName}</h2>
                 </Col>
               </Row>
+              {secondaryLink && (
+                <Row className="pb-3">
+                  <Col>
+                    {secondaryLink && (
+                      <a href={secondaryLink}>{secondaryLink}</a>
+                    )}
+                  </Col>
+                </Row>
+              )}
               <Row className="pt-2">
                 <Col>
                   Sort by&nbsp;&nbsp;
