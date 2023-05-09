@@ -1,11 +1,10 @@
 import Head from "next/head";
 import styles from "../styles/Home.module.scss";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Breadcrumb, { Crumb } from "../components/breadcrumb/Breadcrumb";
 import { Container, Row, Col } from "react-bootstrap";
 import dynamic from "next/dynamic";
 import HeaderPlaceholder from "../components/header/HeaderPlaceholder";
-import Image from "next/image";
 import DelegationMappingToolPlaceholder from "../components/delegation-mapping-tool/DelegationMappingToolPlaceholder";
 
 const Header = dynamic(() => import("../components/header/Header"), {
@@ -19,28 +18,17 @@ const DelegationMappingTool = dynamic(
   { ssr: false, loading: () => <DelegationMappingToolPlaceholder /> }
 );
 
+const HtmlModal = dynamic(() => import("../components/htmlModal/HtmlModal"), {
+  ssr: false,
+});
+
 export default function DelegationMappingToolPage() {
   const [breadcrumbs, setBreadcrumbs] = useState<Crumb[]>([
     { display: "Home", href: "/" },
     { display: "Delegation Mapping Tool" },
   ]);
 
-  const [html, setHtml] = useState("");
-  const [htmlError, setHtmlError] = useState(false);
-
-  useEffect(() => {
-    const url = `https://6529bucket.s3.eu-west-1.amazonaws.com/seize_html/delegation-mapping-tool/how-to-use.html`;
-    fetch(url).then((response) => {
-      if (response.status == 200) {
-        response.text().then((htmlText) => {
-          setHtml(htmlText);
-          setHtmlError(false);
-        });
-      } else {
-        setHtmlError(true);
-      }
-    });
-  }, []);
+  const [showInstructionsModal, setShowInstructionsModal] = useState(false);
 
   return (
     <>
@@ -83,9 +71,11 @@ export default function DelegationMappingToolPage() {
                 </Row>
                 <Row className="pt-2 pb-4">
                   <Col className="text-center">
-                    <a href="#mapping-tool-instructions">
+                    <span
+                      className={styles.instructionsLink}
+                      onClick={() => setShowInstructionsModal(true)}>
                       How to use this tool?
-                    </a>
+                    </span>
                   </Col>
                 </Row>
                 <Row className="pt-4">
@@ -97,28 +87,14 @@ export default function DelegationMappingToolPage() {
             </Col>
           </Row>
         </Container>
-        <Container className="pt-4 pb-4" id="mapping-tool-instructions">
-          <Row className="pt-3 pb-3">
-            {htmlError ? (
-              <div>
-                <Image
-                  width="0"
-                  height="0"
-                  style={{ height: "auto", width: "100px" }}
-                  src="/SummerGlasses.svg"
-                  alt="SummerGlasses"
-                />
-                <h2>Loading HTML Failed</h2>
-              </div>
-            ) : (
-              <Col
-                className={styles.htmlContainer}
-                dangerouslySetInnerHTML={{
-                  __html: html,
-                }}></Col>
-            )}
-          </Row>
-        </Container>
+        <HtmlModal
+          title="How to use Delegation Mapping Tool?"
+          link="https://6529bucket.s3.eu-west-1.amazonaws.com/seize_html/delegation-mapping-tool/how-to-use.html"
+          show={showInstructionsModal}
+          setShow={function (show: boolean) {
+            setShowInstructionsModal(show);
+          }}
+        />
       </main>
     </>
   );
