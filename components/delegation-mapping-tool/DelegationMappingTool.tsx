@@ -1,6 +1,6 @@
 import styles from "./DelegationMappingTool.module.scss";
-import { Form, Row, Col, Button } from "react-bootstrap";
-import { useEffect, useState } from "react";
+import { Form, Row, Col, Button, Container } from "react-bootstrap";
+import { useEffect, useRef, useState } from "react";
 import {
   AIRDROPS_USE_CASE,
   ANY_COLLECTION,
@@ -10,10 +10,14 @@ import { fetchAllPages } from "../../services/6529api";
 import { Delegation } from "../../entities/IDelegation";
 import { areEqualAddresses } from "../../helpers/Helpers";
 import { DELEGATION_ALL_ADDRESS, MEMES_CONTRACT } from "../../constants";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 const csvParser = require("csv-parser");
 
 export default function Download() {
+  const inputRef = useRef(null);
+  const [dragActive, setDragActive] = useState(false);
+
   const [file, setFile] = useState<any>();
   const [useCase, setUseCase] = useState<number>(0);
   const [processing, setProcessing] = useState(false);
@@ -23,6 +27,30 @@ export default function Download() {
   function submit() {
     setProcessing(true);
   }
+
+  const handleUpload = () => {
+    (inputRef.current as any).click();
+  };
+
+  const handleDrag = function (e: any) {
+    e.preventDefault();
+    e.stopPropagation();
+    if (e.type === "dragenter" || e.type === "dragover") {
+      setDragActive(true);
+    } else if (e.type === "dragleave") {
+      setDragActive(false);
+    }
+  };
+
+  const handleDrop = function (e: any) {
+    e.preventDefault();
+    e.stopPropagation();
+    console.log("drop");
+    setDragActive(false);
+    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+      setFile(e.dataTransfer.files[0]);
+    }
+  };
 
   function getForAddress(address: string, collection: string, useCase: number) {
     const myDelegations = delegations.find(
@@ -120,31 +148,42 @@ export default function Download() {
   }, [csvData]);
 
   return (
-    <Form>
-      <Form.Group as={Row} className="pb-4">
-        <Form.Label column sm={3} className="d-flex align-items-center">
-          File
-        </Form.Label>
-        <Col sm={9}>
-          <Form.Control
-            className={`${styles.formInput}`}
-            type="file"
-            accept=".csv"
-            value={file?.fileName}
-            onChange={(e: any) => {
-              if (e.target.files) {
-                const f = e.target.files[0];
-                setFile(f);
-              }
-            }}
-          />
+    <Container className={styles.toolArea} id="mapping-tool-form">
+      <Row>
+        <Col>
+          Upload File <span className="font-color-h">(.csv)</span>
         </Col>
-      </Form.Group>
-      <Form.Group as={Row} className="pb-4">
-        <Form.Label column sm={3} className="d-flex align-items-center">
-          Use Case
-        </Form.Label>
-        <Col sm={9}>
+      </Row>
+      <Row className="pt-2">
+        <Col>
+          <Container
+            className={`${styles.uploadArea} ${
+              dragActive ? styles.uploadAreaActive : ""
+            }`}
+            onClick={handleUpload}
+            onDrop={handleDrop}
+            onDragEnter={handleDrag}
+            onDragLeave={handleDrag}
+            onDragOver={handleDrag}>
+            <div>
+              <FontAwesomeIcon
+                icon="file-upload"
+                className={styles.uploadIcon}
+              />
+            </div>
+            {file ? (
+              <div>{file.name}</div>
+            ) : (
+              <div>Drag and drop your file here, or click to upload</div>
+            )}
+          </Container>
+        </Col>
+      </Row>
+      <Row className="pt-4">
+        <Col>Select Use Case</Col>
+      </Row>
+      <Row className="pt-2">
+        <Col>
           <Form.Select
             className={`${styles.formInput}`}
             value={useCase}
@@ -153,7 +192,7 @@ export default function Download() {
               setUseCase(newCase);
             }}>
             <option value={0} disabled>
-              Select Use Case
+              ...
             </option>
             {[MINTING_USE_CASE, AIRDROPS_USE_CASE].map((uc) => {
               return (
@@ -166,10 +205,9 @@ export default function Download() {
             })}
           </Form.Select>
         </Col>
-      </Form.Group>
-      <Form.Group as={Row} className="pb-4">
-        <Form.Label column sm={3}></Form.Label>
-        <Col sm={9} className="text-center">
+      </Row>
+      <Row className="pt-3">
+        <Col>
           <Button
             className={`${styles.submitBtn} ${
               useCase == 0 || processing || !file
@@ -189,7 +227,20 @@ export default function Download() {
             )}
           </Button>
         </Col>
-      </Form.Group>
-    </Form>
+      </Row>
+      <Form.Control
+        ref={inputRef}
+        className={`${styles.formInputHidden}`}
+        type="file"
+        accept=".csv"
+        value={file?.fileName}
+        onChange={(e: any) => {
+          if (e.target.files) {
+            const f = e.target.files[0];
+            setFile(f);
+          }
+        }}
+      />
+    </Container>
   );
 }
