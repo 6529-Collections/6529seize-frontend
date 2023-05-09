@@ -165,3 +165,12 @@
     margin-bottom: 5px;
   }
 }
+
+.instructionsLink {
+  cursor: pointer;
+  text-decoration: underline;
+
+  &:hover {
+    color: darken($color: $font-color, $amount: $darken-percentage);
+  }
+}
