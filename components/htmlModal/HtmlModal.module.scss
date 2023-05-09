@@ -1,1 +1,11 @@
 @import "../../styles/variables.scss";
+
+.modal {
+  a {
+    color: black;
+
+    &:hover {
+      color: $lighter-grey-2;
+    }
+  }
+}
