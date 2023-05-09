@@ -151,6 +151,13 @@ export function removeProtocol(link: string) {
   return link.replace(/(^\w+:|^)\/\//, "");
 }
 
+export function addProtocol(link: string) {
+  if (!link || link.startsWith("http")) {
+    return link;
+  }
+  return `https://${link}`;
+}
+
 export function getValuesForVolumeType(
   volumeType: VolumeType | undefined,
   a: BaseNFT
