@@ -16,12 +16,12 @@
   color: white;
   margin-bottom: 0 !important;
   float: none !important;
+  white-space: break-spaces;
 }
 
 .consolidationDisplayUserPage {
   font-size: xx-large;
   font-weight: bold;
-  white-space: break-spaces;
 }
 
 .copy {
@@ -41,6 +41,7 @@
 
 .consolidationDropdown {
   button {
+    text-align: left;
     padding: 0;
     background-color: transparent !important;
     border-color: transparent !important;
