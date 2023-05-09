@@ -1,9 +1,6 @@
 import { NftRank, NftTDH } from "./INFT";
 
-export interface TDH {
-  date: Date;
-  wallet: `0x${string}`;
-  wallet_display: string | null;
+export interface BaseTDH {
   block: number;
   tdh: number;
   boost: number;
@@ -53,7 +50,17 @@ export interface TDH {
   memes_cards_sets_szn3: number;
 }
 
-export interface TDHMetrics extends TDH {
+export interface TDH extends BaseTDH {
+  wallet: `0x${string}`;
+  wallet_display: string | undefined;
+}
+
+export interface ConsolidatedTDH extends BaseTDH {
+  wallets: `0x${string}`[];
+  consolidation_display: string;
+}
+
+export interface BaseTDHMetrics extends TDH {
   purchases_value: number;
   purchases_count: number;
   purchases_value_memes: number;
@@ -139,14 +146,10 @@ export interface TDHMetrics extends TDH {
   dense_rank_unique_memes_season3__ties: number;
 }
 
-export interface RankedTDH extends TDH {
-  rank: number;
-}
-
-export interface TagsTDH extends TDH {
-  memes_total: number;
-  gradients_total: number;
-}
+export interface TDHMetrics extends TDH, BaseTDHMetrics {}
+export interface ConsolidatedTDHMetrics
+  extends ConsolidatedTDH,
+    BaseTDHMetrics {}
 
 export interface TDHCalc {
   date: Date;

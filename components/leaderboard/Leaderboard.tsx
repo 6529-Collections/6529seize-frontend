@@ -1,9 +1,8 @@
 import { useState, useEffect } from "react";
 import { Container, Row, Col, Table, Dropdown, Form } from "react-bootstrap";
 import { DBResponse } from "../../entities/IDBResponse";
-import { TDHCalc, TDHMetrics } from "../../entities/ITDH";
+import { TDHCalc, TDHMetrics, BaseTDHMetrics } from "../../entities/ITDH";
 import styles from "./Leaderboard.module.scss";
-import dynamic from "next/dynamic";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   formatAddress,
@@ -17,17 +16,20 @@ import { fetchAllPages, fetchUrl } from "../../services/6529api";
 import { MEMES_CONTRACT } from "../../constants";
 import { MemesExtendedData } from "../../entities/INFT";
 import Tippy from "@tippyjs/react";
-
-const Address = dynamic(() => import("../address/Address"), { ssr: false });
-const SearchModal = dynamic(() => import("../searchModal/SearchModal"), {
-  ssr: false,
-});
+import ConsolidationSwitch from "../consolidation-switch/ConsolidationSwitch";
+import Address from "../address/Address";
+import SearchModal from "../searchModal/SearchModal";
 
 interface Props {
   page: number;
   pageSize: number;
   showMore?: boolean;
   showLastTdh?: boolean;
+}
+
+enum VIEW {
+  CONSOLIDATION,
+  WALLET,
 }
 
 enum Sort {
@@ -138,6 +140,7 @@ enum Focus {
 export default function Leaderboard(props: Props) {
   const router = useRouter();
 
+  const [view, setView] = useState<VIEW>(VIEW.CONSOLIDATION);
   const [content, setContent] = useState<Content>(Content.ALL);
   const [ownerTagFilter, setOwnerTagFilter] = useState<OwnerTagFilter>(
     OwnerTagFilter.ALL
@@ -153,9 +156,8 @@ export default function Leaderboard(props: Props) {
 
   const [pageProps, setPageProps] = useState<Props>(props);
   const [totalResults, setTotalResults] = useState(0);
-  const [leaderboard, setLeaderboard] = useState<TDHMetrics[]>();
+  const [leaderboard, setLeaderboard] = useState<BaseTDHMetrics[]>();
   const [lastTDH, setLastTDH] = useState<TDHCalc>();
-  const [next, setNext] = useState(null);
   const [sort, setSort] = useState<{
     sort: Sort;
     sort_direction: SortDirection;
@@ -208,11 +210,13 @@ export default function Leaderboard(props: Props) {
     if (searchWallets) {
       walletFilter = `&wallet=${searchWallets.join(",")}`;
     }
+    const url = `${process.env.API_ENDPOINT}/api/${
+      view == VIEW.WALLET ? "owner_metrics" : "consolidated_owner_metrics"
+    }`;
     fetchUrl(
-      `${process.env.API_ENDPOINT}/api/owner_metrics?page_size=${props.pageSize}&page=${pageProps.page}&sort=${sort.sort}&sort_direction=${sort.sort_direction}${tagFilter}${museumFilter}${teamFilter}${walletFilter}`
+      `${url}?page_size=${props.pageSize}&page=${pageProps.page}&sort=${sort.sort}&sort_direction=${sort.sort_direction}${tagFilter}${museumFilter}${teamFilter}${walletFilter}`
     ).then((response: DBResponse) => {
       setTotalResults(response.count);
-      setNext(response.next);
       setLeaderboard(response.data);
       setShowLoader(false);
     });
@@ -234,6 +238,7 @@ export default function Leaderboard(props: Props) {
     hideMuseum,
     hideTeam,
     searchWallets,
+    view,
   ]);
 
   useEffect(() => {
@@ -473,6 +478,23 @@ export default function Leaderboard(props: Props) {
       }
     }
   }, [focus]);
+
+  function getWallets(lead: any) {
+    if (lead.wallets) {
+      return lead.wallets;
+    }
+    if (lead.wallet) {
+      return [lead.wallet];
+    }
+    return [];
+  }
+
+  function getDisplay(lead: any) {
+    if (lead.consolidation_display) {
+      return lead.consolidation_display;
+    }
+    return lead.wallet_display;
+  }
 
   function getCardsHodled(lead: TDHMetrics) {
     switch (content) {
@@ -1043,8 +1065,8 @@ export default function Leaderboard(props: Props) {
           className={`d-flex align-items-center`}
           xs={{ span: showViewAll ? 12 : 6 }}
           sm={{ span: 6 }}
-          md={{ span: 6 }}
-          lg={{ span: 6 }}>
+          md={{ span: 4 }}
+          lg={{ span: 4 }}>
           <h1>
             COMMUNITY{" "}
             {showViewAll && (
@@ -1054,14 +1076,22 @@ export default function Leaderboard(props: Props) {
             )}
           </h1>
         </Col>
-
+        <Col
+          className={`d-flex justify-content-center align-items-center d-none ${styles.dMdFlex}`}
+          xs={4}>
+          <ConsolidationSwitch
+            view={view}
+            onSetView={(v) => setView(v)}
+            plural={true}
+          />
+        </Col>
         {lastTDH && props.showLastTdh && (
           <Col
             className={`${styles.lastTDH} d-flex align-items-center justify-content-end`}
             xs={{ span: 6 }}
             sm={{ span: 6 }}
-            md={{ span: 6 }}
-            lg={{ span: 6 }}>
+            md={{ span: 4 }}
+            lg={{ span: 4 }}>
             * TDH Block&nbsp;
             <a
               href={`https://etherscan.io/block/${lastTDH.block}`}
@@ -1073,6 +1103,15 @@ export default function Leaderboard(props: Props) {
             <span id="next-tdh-div-1">{nextTdh()}</span> */}
           </Col>
         )}
+        <Col
+          className={`pt-2 d-flex justify-content-center align-items-center d-block ${styles.dMdNone}`}
+          xs={12}>
+          <ConsolidationSwitch
+            view={view}
+            onSetView={(v) => setView(v)}
+            plural={true}
+          />
+        </Col>
       </Row>
       {!showViewAll && (
         <>
@@ -1095,8 +1134,8 @@ export default function Leaderboard(props: Props) {
             </Col>
             <Col
               className={`${styles.pageHeader}`}
-              xs={{ span: 10 }}
-              sm={{ span: 10 }}
+              xs={{ span: 12 }}
+              sm={{ span: 12 }}
               md={{ span: 6 }}
               lg={{ span: 6 }}>
               <div
@@ -1132,21 +1171,6 @@ export default function Leaderboard(props: Props) {
                 </span>
               </div>
             </Col>
-            {/* <Col
-              className="d-flex align-items-center justify-content-center"
-              xs={2}
-              sm={2}>
-              <span
-                onClick={() => setShowSearchModal(true)}
-                className={`${styles.searchBtn} ${
-                  searchWallets.length > 0 ? styles.searchBtnActive : ""
-                } d-flex align-items-center justify-content-center`}>
-                {" "}
-                <FontAwesomeIcon
-                  className={styles.searchBtnIcon}
-                  icon="search"></FontAwesomeIcon>
-              </span>
-            </Col> */}
           </Row>
           <Row className="pt-1 pb-1">
             <Col
@@ -1155,20 +1179,26 @@ export default function Leaderboard(props: Props) {
               md={{ span: 6 }}
               lg={{ span: 4 }}
               className={`${styles.pageHeader} d-flex justify-content-center align-items-center`}>
-              <Form.Check
-                type="switch"
-                checked={hideMuseum}
-                className={`${styles.museumToggle}`}
-                label={`Hide 6529Museum`}
-                onChange={() => setHideMuseum(!hideMuseum)}
-              />
-              <Form.Check
-                type="switch"
-                checked={hideTeam}
-                className={`${styles.museumToggle}`}
-                label={`Hide 6529Team`}
-                onChange={() => setHideTeam(!hideTeam)}
-              />
+              <Container className="no-padding">
+                <Row>
+                  <Col className="d-flex align-items-center justify-content-center">
+                    <Form.Check
+                      type="switch"
+                      checked={hideMuseum}
+                      className={`${styles.museumToggle}`}
+                      label={`Hide 6529Museum`}
+                      onChange={() => setHideMuseum(!hideMuseum)}
+                    />
+                    <Form.Check
+                      type="switch"
+                      checked={hideTeam}
+                      className={`${styles.museumToggle}`}
+                      label={`Hide 6529Team`}
+                      onChange={() => setHideTeam(!hideTeam)}
+                    />
+                  </Col>
+                </Row>
+              </Container>
             </Col>
             <Col
               className={`d-flex justify-content-end align-items-center`}
@@ -1982,137 +2012,141 @@ export default function Leaderboard(props: Props) {
               <tbody>
                 {leaderboard &&
                   leaderboard.map((lead, index) => {
-                    return (
-                      <tr key={`${index}-${lead.wallet}`}>
-                        <td className={styles.rank}>
-                          {/* {lead.tdh_rank} */}
-                          {searchWallets.length > 0 && lead.dense_rank_sort
-                            ? lead.dense_rank_sort
-                            : index +
-                              1 +
-                              (pageProps.page - 1) * pageProps.pageSize}
-                        </td>
-                        <td className={styles.hodler}>
-                          <Address
-                            address={lead.wallet}
-                            ens={lead.wallet_display}
-                            tags={{
-                              memesCardsSets: lead.memes_cards_sets,
-                              memesCardsSetS1: lead.memes_cards_sets_szn1,
-                              memesCardsSetS2: lead.memes_cards_sets_szn2,
-                              memesCardsSetS3: lead.memes_cards_sets_szn3,
-                              memesBalance: lead.unique_memes,
-                              gradientsBalance: lead.gradients_balance,
-                              genesis: lead.genesis,
-                            }}
-                          />
-                        </td>
-                        {focus == Focus.TDH && (
-                          <td className={styles.tdhSub}>
-                            {numberWithCommas(getCardsHodled(lead))}
+                    if (lead.balance > 0 && getWallets(lead).length > 0) {
+                      return (
+                        <tr key={`wallet-${index}`}>
+                          <td className={styles.rank}>
+                            {/* {lead.tdh_rank} */}
+                            {searchWallets.length > 0 && lead.dense_rank_sort
+                              ? lead.dense_rank_sort
+                              : index +
+                                1 +
+                                (pageProps.page - 1) * pageProps.pageSize}
                           </td>
-                        )}
-                        {focus == Focus.INTERACTIONS && (
-                          <>
+                          <td className={styles.hodler}>
+                            <Address
+                              wallets={getWallets(lead)}
+                              display={getDisplay(lead)}
+                              tags={{
+                                memesCardsSets: lead.memes_cards_sets,
+                                memesCardsSetS1: lead.memes_cards_sets_szn1,
+                                memesCardsSetS2: lead.memes_cards_sets_szn2,
+                                memesCardsSetS3: lead.memes_cards_sets_szn3,
+                                memesBalance: lead.unique_memes,
+                                gradientsBalance: lead.gradients_balance,
+                                genesis: lead.genesis,
+                              }}
+                            />
+                          </td>
+                          {focus == Focus.TDH && (
                             <td className={styles.tdhSub}>
-                              {getPurchasesCount(lead)}
+                              {numberWithCommas(getCardsHodled(lead))}
                             </td>
-                            <td className={styles.tdhSub}>
-                              {getPurchasesValue(lead)}
-                            </td>
-                            <td className={styles.tdhSub}>
-                              {getSalesCount(lead)}
-                            </td>
-                            <td className={styles.tdhSub}>
-                              {getSalesValue(lead)}
-                            </td>
-                            <td className={styles.tdhSub}>
-                              {getTransfersIn(lead)}
-                            </td>
-                            <td className={styles.tdhSub}>
-                              {getTransfersOut(lead)}
-                            </td>
-                          </>
-                        )}
-                        {focus == Focus.TDH && (
-                          <>
-                            <td className={styles.tdhSub}>
-                              {getUniqueMemes(lead)}
-                            </td>
-                            <td className={styles.tdhSub}>{getSets(lead)}</td>
-                            <td className={styles.tdhSub}>
-                              {numberWithCommas(
-                                Math.round(getDaysHodledTdhBoosted(lead))
-                              )}
-                            </td>
-                            <td className={styles.tdhSub}>
-                              {numberWithCommas(
-                                Math.round(getDaysHodledTdh(lead))
-                              )}
-                              {lead.boost && (
-                                <span className={styles.tdhBoost}>
-                                  &nbsp;(x{lead.boost})
-                                </span>
-                              )}
-                            </td>
-                            <td className={styles.tdhSub}>
-                              {numberWithCommas(
-                                Math.round(getDaysHodledTdhRaw(lead))
-                              )}
-                            </td>
-                          </>
-                        )}
-                        {focus == Focus.SETS && (
-                          <>
-                            <td className={styles.tdhSub}>
-                              {lead.memes_cards_sets > 0
-                                ? `x${numberWithCommas(lead.memes_cards_sets)}`
-                                : "-"}
-                            </td>
-                            <td className={styles.tdhSub}>
-                              {lead.memes_cards_sets_minus1 > 0
-                                ? `x${numberWithCommas(
-                                    lead.memes_cards_sets_minus1
-                                  )}`
-                                : "-"}
-                            </td>
-                            <td className={styles.tdhSub}>
-                              {lead.memes_cards_sets_minus2 > 0
-                                ? `x${numberWithCommas(
-                                    lead.memes_cards_sets_minus2
-                                  )}`
-                                : "-"}
-                            </td>
-                            <td className={styles.tdhSub}>
-                              {lead.memes_cards_sets_szn1 > 0
-                                ? `x${numberWithCommas(
-                                    lead.memes_cards_sets_szn1
-                                  )}`
-                                : "-"}
-                            </td>
-                            <td className={styles.tdhSub}>
-                              {lead.memes_cards_sets_szn2 > 0
-                                ? `x${numberWithCommas(
-                                    lead.memes_cards_sets_szn2
-                                  )}`
-                                : "-"}
-                            </td>
-                            <td className={styles.tdhSub}>
-                              {lead.memes_cards_sets_szn3 > 0
-                                ? `x${numberWithCommas(
-                                    lead.memes_cards_sets_szn3
-                                  )}`
-                                : "-"}
-                            </td>
-                            <td className={styles.tdhSub}>
-                              {lead.genesis > 0
-                                ? `x${numberWithCommas(lead.genesis)}`
-                                : "-"}
-                            </td>
-                          </>
-                        )}
-                      </tr>
-                    );
+                          )}
+                          {focus == Focus.INTERACTIONS && (
+                            <>
+                              <td className={styles.tdhSub}>
+                                {getPurchasesCount(lead)}
+                              </td>
+                              <td className={styles.tdhSub}>
+                                {getPurchasesValue(lead)}
+                              </td>
+                              <td className={styles.tdhSub}>
+                                {getSalesCount(lead)}
+                              </td>
+                              <td className={styles.tdhSub}>
+                                {getSalesValue(lead)}
+                              </td>
+                              <td className={styles.tdhSub}>
+                                {getTransfersIn(lead)}
+                              </td>
+                              <td className={styles.tdhSub}>
+                                {getTransfersOut(lead)}
+                              </td>
+                            </>
+                          )}
+                          {focus == Focus.TDH && (
+                            <>
+                              <td className={styles.tdhSub}>
+                                {getUniqueMemes(lead)}
+                              </td>
+                              <td className={styles.tdhSub}>{getSets(lead)}</td>
+                              <td className={styles.tdhSub}>
+                                {numberWithCommas(
+                                  Math.round(getDaysHodledTdhBoosted(lead))
+                                )}
+                              </td>
+                              <td className={styles.tdhSub}>
+                                {numberWithCommas(
+                                  Math.round(getDaysHodledTdh(lead))
+                                )}
+                                {lead.boost && (
+                                  <span className={styles.tdhBoost}>
+                                    &nbsp;(x{lead.boost})
+                                  </span>
+                                )}
+                              </td>
+                              <td className={styles.tdhSub}>
+                                {numberWithCommas(
+                                  Math.round(getDaysHodledTdhRaw(lead))
+                                )}
+                              </td>
+                            </>
+                          )}
+                          {focus == Focus.SETS && (
+                            <>
+                              <td className={styles.tdhSub}>
+                                {lead.memes_cards_sets > 0
+                                  ? `x${numberWithCommas(
+                                      lead.memes_cards_sets
+                                    )}`
+                                  : "-"}
+                              </td>
+                              <td className={styles.tdhSub}>
+                                {lead.memes_cards_sets_minus1 > 0
+                                  ? `x${numberWithCommas(
+                                      lead.memes_cards_sets_minus1
+                                    )}`
+                                  : "-"}
+                              </td>
+                              <td className={styles.tdhSub}>
+                                {lead.memes_cards_sets_minus2 > 0
+                                  ? `x${numberWithCommas(
+                                      lead.memes_cards_sets_minus2
+                                    )}`
+                                  : "-"}
+                              </td>
+                              <td className={styles.tdhSub}>
+                                {lead.memes_cards_sets_szn1 > 0
+                                  ? `x${numberWithCommas(
+                                      lead.memes_cards_sets_szn1
+                                    )}`
+                                  : "-"}
+                              </td>
+                              <td className={styles.tdhSub}>
+                                {lead.memes_cards_sets_szn2 > 0
+                                  ? `x${numberWithCommas(
+                                      lead.memes_cards_sets_szn2
+                                    )}`
+                                  : "-"}
+                              </td>
+                              <td className={styles.tdhSub}>
+                                {lead.memes_cards_sets_szn3 > 0
+                                  ? `x${numberWithCommas(
+                                      lead.memes_cards_sets_szn3
+                                    )}`
+                                  : "-"}
+                              </td>
+                              <td className={styles.tdhSub}>
+                                {lead.genesis > 0
+                                  ? `x${numberWithCommas(lead.genesis)}`
+                                  : "-"}
+                              </td>
+                            </>
+                          )}
+                        </tr>
+                      );
+                    }
                   })}
               </tbody>
             </Table>

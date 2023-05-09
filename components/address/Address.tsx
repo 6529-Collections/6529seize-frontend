@@ -1,17 +1,20 @@
 import styles from "./Address.module.scss";
-import { formatAddress, numberWithCommas } from "../../helpers/Helpers";
-import { useEnsName } from "wagmi";
+import {
+  areEqualAddresses,
+  formatAddress,
+  numberWithCommas,
+} from "../../helpers/Helpers";
 import { MANIFOLD, SIX529_MUSEUM } from "../../constants";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useState } from "react";
-import { Dropdown } from "react-bootstrap";
+import { Button, Dropdown, DropdownButton } from "react-bootstrap";
 import Tippy from "@tippyjs/react";
+import Image from "next/image";
 
 interface Props {
-  address: `0x${string}` | undefined;
-  ens: string | null;
+  wallets: `0x${string}`[];
+  display: string | undefined;
   hideCopy?: boolean;
-  resolveEns?: boolean;
   tags?: {
     memesCardsSets: number;
     memesCardsSetS1: number;
@@ -24,31 +27,57 @@ interface Props {
     balance_rank?: number;
     unique_rank?: number;
   };
-  expandedTags?: boolean;
   isUserPage?: boolean;
   disableLink?: boolean;
+  viewingWallet?: `0x${string}`;
+  expandedTags?: boolean;
 }
 
-const MEMES_SETS_ICON = "";
+export const MEMES_SETS_ICON = "";
 
-const UNIQUE_MEMES_ICON = "";
+export const UNIQUE_MEMES_ICON = "";
 
-const SZN_1_ICON = "";
+export const SZN_1_ICON = "";
 
-const SZN_2_ICON = "";
+export const SZN_2_ICON = "";
 
-const SZN_3_ICON = "";
+export const SZN_3_ICON = "";
 
-const GRADIENT_ICON = "";
+export const GRADIENT_ICON = "";
 
-export default function Address(props: Props) {
-  let ensResolution: any = null;
+export function WalletAddress(props: {
+  wallet: string;
+  display: string | undefined;
+  isUserPage?: boolean;
+  disableLink?: boolean;
+  hideCopy?: boolean;
+}) {
+  const [isCopied, setIsCopied] = useState(false);
 
-  if (props.resolveEns) {
-    ensResolution = useEnsName({ address: props.address, chainId: 1 });
+  function resolveAddress() {
+    if (props.wallet.toUpperCase() == SIX529_MUSEUM.toUpperCase()) {
+      return "6529Museum";
+    }
+    if (props.wallet.toUpperCase() == MANIFOLD.toUpperCase()) {
+      return "Manifold Minting Wallet";
+    }
+
+    if (props.display) {
+      return formatAddress(props.display);
+    }
+
+    return formatAddress(props.wallet);
   }
 
-  const [isCopied, setIsCopied] = useState(false);
+  function getLink() {
+    let path = "";
+    if (props.display) {
+      path = props.display;
+    } else {
+      path = props.wallet;
+    }
+    return `/${encodeURIComponent(path)}`;
+  }
 
   function copy(text: any) {
     navigator.clipboard.writeText(text);
@@ -58,59 +87,88 @@ export default function Address(props: Props) {
     }, 1000);
   }
 
-  function resolveAddress() {
-    if (props.ens) {
-      return props.ens;
-    }
-    if (!props.address) {
-      return "";
-    }
-
-    if (props.address?.toUpperCase() == SIX529_MUSEUM.toUpperCase()) {
-      return "6529Museum";
-    }
-    if (props.address?.toUpperCase() == MANIFOLD.toUpperCase()) {
-      return "Manifold Minting Wallet";
-    }
-
-    if (ensResolution && ensResolution.data) {
-      return ensResolution.data;
-    }
-
-    return formatAddress(props.address);
-  }
-
   return (
-    <>
-      <span
-        className={
-          props.isUserPage
-            ? "d-flex justify-content-center align-items-center"
-            : ""
-        }>
-        {(props.hideCopy || !navigator.clipboard) && (
-          <span className={styles.address}>
-            {props.disableLink && resolveAddress()}
-            {!props.disableLink && (
-              <a href={`/${props.address}`}>{resolveAddress()}</a>
-            )}
-          </span>
-        )}
-        {!props.hideCopy && navigator.clipboard && (
-          <>
-            {!props.isUserPage && (
-              <span
-                className={`${styles.address} ${
-                  props.isUserPage ? styles.addressUserPage : ""
-                }`}>
-                {props.disableLink && resolveAddress()}
-                {!props.disableLink && (
-                  <a href={`/${props.address}`}>{resolveAddress()}</a>
+    <span>
+      {(props.hideCopy || !navigator.clipboard) && (
+        <span className={styles.address}>
+          {props.disableLink && resolveAddress()}
+          {!props.disableLink && <a href={getLink()}>{resolveAddress()}</a>}
+        </span>
+      )}
+      {!props.hideCopy && navigator.clipboard && (
+        <>
+          {!props.isUserPage && (
+            <span
+              className={`${styles.address} ${
+                props.isUserPage ? styles.addressUserPage : ""
+              }`}>
+              {props.disableLink && resolveAddress()}
+              {!props.disableLink && <a href={getLink()}>{resolveAddress()}</a>}
+            </span>
+          )}
+          {props.display && !props.display.startsWith("0x") ? (
+            <Dropdown
+              drop={"down-centered"}
+              className={`${styles.copyDropdown}`}
+              autoClose="outside">
+              <Tippy
+                content={isCopied ? "Copied" : "Copy"}
+                placement={"right"}
+                theme={"light"}
+                hideOnClick={false}>
+                <Dropdown.Toggle
+                  name={`copy-toggle`}
+                  aria-label={`copy-toggle`}>
+                  {props.isUserPage && (
+                    <span
+                      className={`${styles.address} ${
+                        props.isUserPage ? styles.addressUserPage : ""
+                      }`}>
+                      {resolveAddress()}
+                    </span>
+                  )}
+                  <FontAwesomeIcon
+                    icon="copy"
+                    name={`copy-btn`}
+                    aria-label={`copy-btn`}
+                    className={`${styles.copy}`}
+                  />
+                </Dropdown.Toggle>
+              </Tippy>
+              <Dropdown.Menu>
+                {props.display && (
+                  <Tippy
+                    content={isCopied ? "Copied" : "Copy"}
+                    placement={"right"}
+                    theme={"light"}
+                    hideOnClick={false}>
+                    <Dropdown.Item
+                      name={`copy-ens-btn`}
+                      aria-label={`copy-ens-btn`}
+                      onClick={() => copy(props.display)}>
+                      {props.display}
+                    </Dropdown.Item>
+                  </Tippy>
                 )}
-              </span>
-            )}
-            {props.ens ? (
+                <Tippy
+                  content={isCopied ? "Copied" : "Copy"}
+                  placement={"right"}
+                  theme={"light"}
+                  hideOnClick={false}>
+                  <Dropdown.Item
+                    className={styles.copyDropdownItem}
+                    name={`copy-address-btn`}
+                    aria-label={`copy-address-btn`}
+                    onClick={() => copy(props.wallet)}>
+                    {formatAddress(props.wallet as string)}
+                  </Dropdown.Item>
+                </Tippy>
+              </Dropdown.Menu>
+            </Dropdown>
+          ) : (
+            <>
               <Dropdown
+                drop={"down-centered"}
                 className={`${styles.copyDropdown}`}
                 autoClose="outside">
                 <Tippy
@@ -120,7 +178,8 @@ export default function Address(props: Props) {
                   hideOnClick={false}>
                   <Dropdown.Toggle
                     name={`copy-toggle`}
-                    aria-label={`copy-toggle`}>
+                    aria-label={`copy-toggle`}
+                    onClick={() => copy(props.wallet)}>
                     {props.isUserPage && (
                       <span
                         className={`${styles.address} ${
@@ -137,64 +196,87 @@ export default function Address(props: Props) {
                     />
                   </Dropdown.Toggle>
                 </Tippy>
-                <Dropdown.Menu>
-                  {props.ens && (
-                    <Tippy
-                      content={isCopied ? "Copied" : "Copy"}
-                      placement={"right"}
-                      theme={"light"}
-                      hideOnClick={false}>
-                      <Dropdown.Item
-                        name={`copy-ens-btn`}
-                        aria-label={`copy-ens-btn`}
-                        onClick={() => copy(props.ens)}>
-                        {props.ens}
-                      </Dropdown.Item>
-                    </Tippy>
-                  )}
-                  <Tippy
-                    content={isCopied ? "Copied" : "Copy"}
-                    placement={"right"}
-                    theme={"light"}
-                    hideOnClick={false}>
-                    <Dropdown.Item
-                      className={styles.copyDropdownItem}
-                      name={`copy-address-btn`}
-                      aria-label={`copy-address-btn`}
-                      onClick={() => copy(props.address)}>
-                      {formatAddress(props.address as string)}
-                    </Dropdown.Item>
-                  </Tippy>
-                </Dropdown.Menu>
               </Dropdown>
-            ) : (
-              <>
-                {props.isUserPage && (
-                  <span
-                    className={`${styles.address} ${
-                      props.isUserPage ? styles.addressUserPage : ""
-                    }`}>
-                    {resolveAddress()}
-                  </span>
-                )}
-                <Tippy
-                  content={isCopied ? "Copied" : "Copy"}
-                  placement={"right"}
-                  theme={"light"}
-                  hideOnClick={false}>
-                  <FontAwesomeIcon
-                    icon="copy"
-                    onClick={() => copy(props.address)}
-                    name={`copy-btn`}
-                    aria-label={`copy-btn`}
-                    className={`${styles.copy}`}
-                  />
-                </Tippy>
-              </>
-            )}
-          </>
-        )}
-      </span>
+            </>
+          )}
+        </>
+      )}
+    </span>
+  );
+}
+
+export default function Address(props: Props) {
+  const [consolidationExpanded, setConsolidationExpanded] = useState(
+    props.isUserPage ? true : false
+  );
+
+  return (
+    <>
+      {props.wallets.length == 1 ? (
+        <WalletAddress
+          wallet={props.wallets[0]}
+          display={props.display}
+          hideCopy={props.hideCopy}
+          disableLink={props.disableLink}
+          isUserPage={props.isUserPage}
+        />
+      ) : (
+        <Dropdown
+          drop={"down-centered"}
+          className={`${styles.consolidationDropdown}`}
+          autoClose="outside">
+          <Dropdown.Toggle
+            onClick={() => {
+              if (!props.isUserPage) {
+                setConsolidationExpanded(!consolidationExpanded);
+              }
+            }}
+            name={`consolidation-toggle`}
+            aria-label={`consolidation-toggle`}>
+            <Image
+              loading="eager"
+              priority
+              src="/consolidation-icon.png"
+              alt="consolidation"
+              width={25}
+              height={25}
+            />
+            &nbsp;&nbsp;
+            <span
+              className={`${styles.consolidationDisplay} ${
+                props.isUserPage ? styles.consolidationDisplayUserPage : ""
+              }`}>
+              {props.display}
+            </span>
+          </Dropdown.Toggle>
+        </Dropdown>
+      )}
+      {(consolidationExpanded || props.isUserPage) &&
+        props.wallets.length > 1 &&
+        props.wallets.map((w, index) => (
+          <div
+            key={w}
+            className={`d-flex align-items-center justify-content-start ${
+              props.isUserPage ? styles.consolidationDiv : ""
+            }`}>
+            <FontAwesomeIcon
+              icon="arrow-turn-right"
+              name={`arrow-turn-right`}
+              aria-label={`arrow-turn-right`}
+              className={`${styles.arrowTurnRight}`}
+            />
+            <WalletAddress
+              wallet={w}
+              display={
+                props.display?.split(" - ")[index].endsWith(".eth")
+                  ? props.display?.split(" - ")[index]
+                  : undefined
+              }
+              hideCopy={props.hideCopy}
+              disableLink={areEqualAddresses(w, props.viewingWallet)}
+            />
+          </div>
+        ))}
       {props.tags && (
         <span className={styles.noWrap}>
           {(props.tags.tdh_rank || props.tags.balance_rank) && (
@@ -229,9 +311,8 @@ export default function Address(props: Props) {
               className={`${styles.tag} ${
                 !MEMES_SETS_ICON ? styles.memesSetTag : ""
               }`}>
-              {props.tags.memesCardsSets}x{" "}
-              {(props.isUserPage || !MEMES_SETS_ICON) &&
-                `Memes Set${props.tags.memesCardsSets > 1 ? "s " : " "}`}
+              {(props.isUserPage || !MEMES_SETS_ICON) && `Memes Sets x`}
+              {props.tags.memesCardsSets}
               {MEMES_SETS_ICON && (
                 <img
                   src={MEMES_SETS_ICON}
@@ -245,11 +326,9 @@ export default function Address(props: Props) {
               className={`${styles.tag} ${
                 !UNIQUE_MEMES_ICON ? styles.memesTag : ""
               }`}>
-              {props.tags.memesBalance}x{" "}
-              {(props.isUserPage || !UNIQUE_MEMES_ICON) &&
-                `Meme${props.tags.memesBalance > 1 ? "s " : " "}${
-                  props.tags.genesis > 0 ? ` (+Genesis) ` : ""
-                }`}
+              {(props.isUserPage || !UNIQUE_MEMES_ICON) && `Memes x`}
+              {props.tags.memesBalance}
+              {props.tags.genesis > 0 ? ` (+Genesis) ` : ""}
               {UNIQUE_MEMES_ICON && (
                 <img
                   src={UNIQUE_MEMES_ICON}
@@ -266,9 +345,8 @@ export default function Address(props: Props) {
               className={`${styles.tag} ${
                 !GRADIENT_ICON ? styles.gradientTag : ""
               }`}>
-              {props.tags.gradientsBalance}x{" "}
-              {(props.isUserPage || !GRADIENT_ICON) &&
-                `Gradient${props.tags.gradientsBalance > 1 ? "s " : " "}`}
+              {(props.isUserPage || !GRADIENT_ICON) && `Gradients x`}
+              {props.tags.gradientsBalance}
               {GRADIENT_ICON && (
                 <img
                   src={GRADIENT_ICON}
@@ -285,9 +363,8 @@ export default function Address(props: Props) {
                     className={`${styles.tag} ${
                       !SZN_1_ICON ? styles.memeSzn1Tag : ""
                     }`}>
-                    {props.tags.memesCardsSetS1}x{" "}
-                    {(props.isUserPage || !SZN_1_ICON) &&
-                      `SZN1 Set${props.tags.memesCardsSetS1 > 1 ? "s " : " "}`}
+                    {(props.isUserPage || !SZN_1_ICON) && `SZN1 Sets x`}
+                    {props.tags.memesCardsSetS1}
                     {SZN_1_ICON && (
                       <img
                         src={SZN_1_ICON}
@@ -303,9 +380,8 @@ export default function Address(props: Props) {
                     className={`${styles.tag} ${
                       !SZN_2_ICON ? styles.memeSzn2Tag : ""
                     }`}>
-                    {props.tags.memesCardsSetS2}x{" "}
-                    {(props.isUserPage || !SZN_2_ICON) &&
-                      `SZN2 Set${props.tags.memesCardsSetS2 > 1 ? "s " : " "}`}
+                    {(props.isUserPage || !SZN_2_ICON) && `SZN2 Sets x`}
+                    {props.tags.memesCardsSetS2}
                     {SZN_2_ICON && (
                       <img
                         src={SZN_2_ICON}
@@ -321,10 +397,9 @@ export default function Address(props: Props) {
                     className={`${styles.tag} ${
                       !SZN_1_ICON ? styles.memeSzn3Tag : ""
                     }`}>
-                    {props.tags.memesCardsSetS3}x{" "}
-                    {(props.isUserPage || !SZN_3_ICON) &&
-                      `SZN3 Set${props.tags.memesCardsSetS3 > 1 ? "s " : " "}`}
-                    {SZN_1_ICON && (
+                    {(props.isUserPage || !SZN_3_ICON) && `SZN3 Sets x`}
+                    {props.tags.memesCardsSetS2}
+                    {SZN_3_ICON && (
                       <img
                         src={SZN_3_ICON}
                         className={styles.tagIcon}
@@ -338,9 +413,8 @@ export default function Address(props: Props) {
                   className={`${styles.tag} ${
                     !GRADIENT_ICON ? styles.gradientTag : ""
                   }`}>
-                  {props.tags.gradientsBalance}x{" "}
-                  {(props.isUserPage || !GRADIENT_ICON) &&
-                    `Gradient${props.tags.gradientsBalance > 1 ? "s " : " "}`}
+                  {(props.isUserPage || !GRADIENT_ICON) && `Gradients x`}
+                  {props.tags.gradientsBalance}
                   {GRADIENT_ICON && (
                     <img
                       src={GRADIENT_ICON}

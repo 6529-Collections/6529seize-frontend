@@ -14,9 +14,7 @@ const Header = dynamic(() => import("../../components/header/Header"), {
 
 const GradientsComponent = dynamic(
   () => import("../../components/6529Gradient/6529Gradient"),
-  {
-    ssr: false,
-  }
+  { ssr: false }
 );
 
 export default function GradientsPage() {
@@ -24,6 +22,7 @@ export default function GradientsPage() {
     { display: "Home", href: "/" },
     { display: "6529 Gradient" },
   ]);
+  const [connectedWallets, setConnectedWallets] = useState<string[]>([]);
 
   return (
     <>
@@ -44,9 +43,9 @@ export default function GradientsPage() {
       </Head>
 
       <main className={styles.main}>
-        <Header />
+        <Header onSetWallets={(wallets) => setConnectedWallets(wallets)} />
         <Breadcrumb breadcrumbs={breadcrumbs} />
-        <GradientsComponent />
+        <GradientsComponent wallets={connectedWallets} />
       </main>
     </>
   );

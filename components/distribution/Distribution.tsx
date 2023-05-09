@@ -13,20 +13,12 @@ import {
   IDistributionPhoto,
 } from "../../entities/IDistribution";
 import ScrollToButton from "../scrollTo/ScrollToButton";
-import {
-  areEqualAddresses,
-  formatAddress,
-  numberWithCommas,
-} from "../../helpers/Helpers";
+import { formatAddress, numberWithCommas } from "../../helpers/Helpers";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import dynamic from "next/dynamic";
 import Pagination from "../pagination/Pagination";
 import { SortDirection } from "../../entities/ISort";
 import Tippy from "@tippyjs/react";
-
-const SearchModal = dynamic(() => import("../searchModal/SearchModal"), {
-  ssr: false,
-});
+import SearchModal from "../searchModal/SearchModal";
 
 enum Sort {
   phase = "phase",

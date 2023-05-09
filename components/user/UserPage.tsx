@@ -8,11 +8,11 @@ import {
   Form,
   Row,
   Table,
+  Button,
 } from "react-bootstrap";
 import { useEffect, useState } from "react";
 import { DBResponse } from "../../entities/IDBResponse";
 import { Owner, OwnerTags } from "../../entities/IOwner";
-import dynamic from "next/dynamic";
 import { useRouter } from "next/router";
 import Breadcrumb, { Crumb } from "../breadcrumb/Breadcrumb";
 import { MemesExtendedData, NFT } from "../../entities/INFT";
@@ -31,8 +31,8 @@ import {
   MEMES_CONTRACT,
   SIX529_MUSEUM,
 } from "../../constants";
-import { TDHMetrics } from "../../entities/ITDH";
-import { useAccount, useEnsAvatar } from "wagmi";
+import { ConsolidatedTDHMetrics, TDHMetrics } from "../../entities/ITDH";
+import { useEnsAvatar } from "wagmi";
 import { SortDirection } from "../../entities/ISort";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { fetchAllPages, fetchUrl } from "../../services/6529api";
@@ -43,12 +43,12 @@ import { Transaction } from "../../entities/ITransaction";
 import { ReservedUser } from "../../pages/[user]";
 import Tippy from "@tippyjs/react";
 import { IDistribution } from "../../entities/IDistribution";
-
-const NFTImage = dynamic(() => import("../nft-image/NFTImage"), {
-  ssr: false,
-});
-
-const Address = dynamic(() => import("../address/Address"), { ssr: false });
+import Tag, { TagType } from "../address/Tag";
+import ConsolidationSwitch, {
+  VIEW,
+} from "../consolidation-switch/ConsolidationSwitch";
+import Address from "../address/Address";
+import NFTImage from "../nft-image/NFTImage";
 
 interface Props {
   user: string;
@@ -71,7 +71,7 @@ const DISTRIBUTIONS_PAGE_SIZE = 25;
 
 export default function UserPage(props: Props) {
   const router = useRouter();
-  const { address, connector, isConnected } = useAccount();
+  const [view, setView] = useState<VIEW>(VIEW.WALLET);
   const [focus, setFocus] = useState<Focus>(Focus.COLLECTION);
   const [sortDir, setSortDir] = useState<SortDirection>(SortDirection.ASC);
   const [sort, setSort] = useState<Sort>(Sort.ID);
@@ -80,33 +80,32 @@ export default function UserPage(props: Props) {
   const [nftMetas, setNftMetas] = useState<MemesExtendedData[]>([]);
   const [ownerLinkCopied, setIsOwnerLinkCopied] = useState(false);
 
-  const [user, setUser] = useState(
-    props.user.toUpperCase() == ReservedUser.MUSEUM.toUpperCase()
-      ? SIX529_MUSEUM
-      : props.user.toUpperCase() == ReservedUser.MANIFOLD.toUpperCase()
-      ? MANIFOLD
-      : props.user
-  );
-
   const [breadcrumbs, setBreadcrumbs] = useState<Crumb[]>([]);
 
-  const [ownerLoaded, setOwnerLoaded] = useState(false);
+  const [walletOwnedLoaded, setWalletOwnedLoaded] = useState(false);
+  const [consolidationOwnedLoaded, setConsolidationOwnedLoaded] =
+    useState(false);
 
   const [ownerAddress, setOwnerAddress] = useState<`0x${string}` | undefined>(
     undefined
   );
-  const ensAvatar = useEnsAvatar({ address: ownerAddress });
-  const [ownerLinkDisplay, setOwnerLinkDisplay] = useState("");
   const [ownerENS, setOwnerENS] = useState("");
+
+  const ensAvatar = useEnsAvatar({ address: ownerAddress, chainId: 1 });
+  const [ownerLinkDisplay, setOwnerLinkDisplay] = useState("");
   const [owned, setOwned] = useState<Owner[]>([]);
+  const [walletOwned, setWalletOwned] = useState<Owner[]>([]);
+  const [consolidationOwned, setConsolidationOwned] = useState<Owner[]>([]);
   const [nfts, setNfts] = useState<NFT[]>([]);
   const [nftsLoaded, setNftsLoaded] = useState(false);
-  const [tdh, setTDH] = useState<TDHMetrics>();
-  const [ownerTags, setOwnerTags] = useState<OwnerTags>();
+  const [walletTDH, setWalletTDH] = useState<TDHMetrics>();
+  const [consolidatedTDH, setConsolidatedTDH] =
+    useState<ConsolidatedTDHMetrics>();
+  const [tdh, setTDH] = useState<ConsolidatedTDHMetrics | TDHMetrics>();
+  const [isConsolidation, setIsConsolidation] = useState(false);
 
   const [hideSeized, setHideSeized] = useState(false);
   const [hideNonSeized, setHideNonSeized] = useState(true);
-  const [userIsOwner, setUserIsOwner] = useState(false);
 
   const [hideMemes, setHideMemes] = useState(false);
   const [hideGradients, setHideGradients] = useState(false);
@@ -150,6 +149,90 @@ export default function UserPage(props: Props) {
   }
 
   useEffect(() => {
+    async function fetchENS() {
+      let oLink = process.env.BASE_ENDPOINT
+        ? process.env.BASE_ENDPOINT
+        : "https://seize.io";
+      if (props.user.startsWith("0x") || props.user.endsWith(".eth")) {
+        const url = `${process.env.API_ENDPOINT}/api/ens/${props.user}`;
+        return fetchUrl(url).then((response: any) => {
+          const oAddress = response.wallet ? response.wallet : props.user;
+          setOwnerAddress(oAddress);
+          setOwnerENS(response.display ? response.display : oAddress);
+          let reservedDisplay;
+          if (props.user.toUpperCase() == SIX529_MUSEUM.toUpperCase()) {
+            reservedDisplay = ReservedUser.MUSEUM;
+          } else if (props.user.toUpperCase() == MANIFOLD.toUpperCase()) {
+            reservedDisplay = ReservedUser.MANIFOLD;
+          }
+          setOwnerLinkDisplay(
+            `${oLink}/${
+              reservedDisplay
+                ? reservedDisplay
+                : response.display
+                ? response.display
+                : formatAddress(oAddress)
+            }`
+          );
+          setBreadcrumbs([
+            { display: "Home", href: "/" },
+            {
+              display: reservedDisplay
+                ? reservedDisplay
+                : response.display
+                ? response.display
+                : oAddress,
+            },
+          ]);
+          router.push(
+            reservedDisplay
+              ? reservedDisplay
+              : response.display
+              ? response.display.replaceAll(" ", "-")
+              : oAddress,
+            undefined,
+            {
+              shallow: true,
+            }
+          );
+        });
+      } else {
+        if (props.user.toUpperCase() == ReservedUser.MUSEUM.toUpperCase()) {
+          setOwnerAddress(SIX529_MUSEUM);
+          setOwnerENS(ReservedUser.MUSEUM);
+          setOwnerLinkDisplay(`${oLink}/${ReservedUser.MUSEUM}`);
+          setBreadcrumbs([
+            { display: "Home", href: "/" },
+            { display: ReservedUser.MUSEUM },
+          ]);
+          router.push(ReservedUser.MUSEUM, undefined, {
+            shallow: true,
+          });
+        } else if (
+          props.user.toUpperCase() == ReservedUser.MANIFOLD.toUpperCase()
+        ) {
+          setOwnerAddress(MANIFOLD);
+          setOwnerENS(ReservedUser.MANIFOLD);
+          setOwnerLinkDisplay(`${oLink}/${ReservedUser.MANIFOLD}`);
+          setBreadcrumbs([
+            { display: "Home", href: "/" },
+            { display: ReservedUser.MANIFOLD },
+          ]);
+          router.push(ReservedUser.MANIFOLD, undefined, {
+            shallow: true,
+          });
+        } else {
+          window.location.href = "/404";
+        }
+      }
+    }
+
+    if (router.isReady) {
+      fetchENS();
+    }
+  }, [router.isReady]);
+
+  useEffect(() => {
     async function fetchOwned(url: string, myowned: Owner[]) {
       return fetchUrl(url).then((response: DBResponse) => {
         if (response.next) {
@@ -157,80 +240,68 @@ export default function UserPage(props: Props) {
         } else {
           const newOwned = [...myowned].concat(response.data);
           if (newOwned.length > 0) {
-            setOwned(newOwned);
-            const walletAddress = newOwned[0].wallet;
-            setOwnerAddress(walletAddress);
-            let walletDisplay = newOwned[0].wallet_display as string | null;
-            if (
-              !walletDisplay &&
-              areEqualAddresses(walletAddress, SIX529_MUSEUM)
-            ) {
-              walletDisplay = "6529Museum";
-            }
-            if (!walletDisplay && areEqualAddresses(walletAddress, MANIFOLD)) {
-              walletDisplay = "Manifold Minting Wallet";
-            }
-            walletDisplay = walletDisplay ? walletDisplay : null;
-            if (walletDisplay) {
-              setOwnerENS(walletDisplay);
-              router.push(walletDisplay.replaceAll(" ", "-"), undefined, {
-                shallow: true,
-              });
-            }
-            let oLink = process.env.BASE_ENDPOINT
-              ? process.env.BASE_ENDPOINT
-              : "https://seize.io";
-            setOwnerLinkDisplay(
-              `${oLink}/${
-                walletDisplay ? walletDisplay : formatAddress(walletAddress)
-              }`
+            const mergedOwners = newOwned.reduce(
+              (accumulator: Owner[], currentOwner: Owner) => {
+                const existingOwner = accumulator.find(
+                  (owner) =>
+                    areEqualAddresses(owner.contract, currentOwner.contract) &&
+                    owner.token_id === currentOwner.token_id
+                );
+
+                if (existingOwner) {
+                  existingOwner.balance += currentOwner.balance;
+                } else {
+                  accumulator.push(currentOwner);
+                }
+
+                return accumulator;
+              },
+              [] as Owner[]
             );
-
-            let walletCrumb = walletDisplay
-              ? walletDisplay
-              : walletAddress
-              ? walletAddress
-              : props.user;
-
-            setBreadcrumbs([
-              { display: "Home", href: "/" },
-              { display: walletCrumb },
-            ]);
-          } else {
-            if (user.endsWith(".eth") || user.startsWith("0x")) {
-              setOwnerAddress(user as `0x${string}`);
-
-              const walletDisplay = user.endsWith(".eth") ? user : null;
-              if (walletDisplay) {
-                setOwnerENS(user);
-              }
-              setBreadcrumbs([
-                { display: "Home", href: "/" },
-                { display: walletDisplay ? walletDisplay : user },
-              ]);
-              let oLink = process.env.BASE_ENDPOINT
-                ? process.env.BASE_ENDPOINT
-                : "https://seize.io";
-              setOwnerLinkDisplay(
-                `${oLink}/${
-                  walletDisplay ? walletDisplay : formatAddress(user)
-                }`
-              );
-            } else {
-              window.location.href = "/404";
-            }
+            setConsolidationOwned(mergedOwners);
           }
-
-          setOwnerLoaded(true);
+          setConsolidationOwnedLoaded(true);
         }
       });
     }
 
-    if (user && router.isReady) {
-      const initialOwnersUrl = `${process.env.API_ENDPOINT}/api/owners?wallet=${user}`;
-      fetchOwned(initialOwnersUrl, []);
+    if (consolidatedTDH) {
+      if (consolidatedTDH.balance > 0) {
+        const ownedUrl = `${
+          process.env.API_ENDPOINT
+        }/api/owners?wallet=${consolidatedTDH.wallets.join(",")}`;
+        fetchOwned(ownedUrl, []);
+      } else {
+        setConsolidationOwnedLoaded(true);
+        setWalletOwnedLoaded(true);
+      }
     }
-  }, [user, router.isReady]);
+  }, [consolidatedTDH]);
+
+  useEffect(() => {
+    async function fetchOwned(url: string, myowned: Owner[]) {
+      return fetchUrl(url).then((response: DBResponse) => {
+        if (response.next) {
+          fetchOwned(response.next, [...myowned].concat(response.data));
+        } else {
+          const newOwned = [...myowned].concat(response.data);
+          if (newOwned.length > 0) {
+            setWalletOwned(newOwned);
+          }
+          setWalletOwnedLoaded(true);
+        }
+      });
+    }
+
+    if (walletTDH && walletTDH.balance > 0) {
+      if (walletTDH.balance > 0) {
+        const ownedUrl = `${process.env.API_ENDPOINT}/api/owners?wallet=${walletTDH.wallet}`;
+        fetchOwned(ownedUrl, []);
+      } else {
+        setWalletOwnedLoaded(true);
+      }
+    }
+  }, [walletTDH]);
 
   useEffect(() => {
     const nftsUrl = `${process.env.API_ENDPOINT}/api/memes_extended_data`;
@@ -256,48 +327,71 @@ export default function UserPage(props: Props) {
   }, []);
 
   useEffect(() => {
-    if (ownerAddress && router.isReady) {
-      if (isConnected && areEqualAddresses(ownerAddress, address)) {
-        setUserIsOwner(true);
-      } else {
-        setUserIsOwner(false);
-      }
-    }
-  }, [ownerAddress, router.isReady, isConnected]);
-
-  useEffect(() => {
-    async function fetchTDH() {
-      const url = `${process.env.API_ENDPOINT}/api/owner_metrics/?wallet=${ownerAddress}`;
+    async function fetchConsolidatedTDH() {
+      const url = `${process.env.API_ENDPOINT}/api/consolidated_owner_metrics/?wallet=${ownerAddress}&profile_page=true`;
       return fetchUrl(url).then((response: DBResponse) => {
         if (response && response.data.length == 1) {
-          setTDH(response.data[0]);
+          setConsolidatedTDH(response.data[0]);
+          if (response.data[0].wallets && response.data[0].wallets.length > 1) {
+            setIsConsolidation(true);
+          }
         }
       });
     }
 
     if (ownerAddress && router.isReady) {
-      fetchTDH();
+      fetchConsolidatedTDH();
     }
   }, [ownerAddress, router.isReady]);
 
   useEffect(() => {
-    async function fetchOwnerTags(url: string) {
+    async function fetchTDH() {
+      const url = `${process.env.API_ENDPOINT}/api/owner_metrics/?wallet=${ownerAddress}&profile_page=true`;
       return fetchUrl(url).then((response: DBResponse) => {
-        if (response.data.length == 1) {
-          setOwnerTags(response.data[0]);
+        if (response && response.data.length == 1) {
+          setWalletTDH(response.data[0]);
         }
       });
     }
 
-    if (tdh && router.isReady) {
-      const initialUrlOwners = `${process.env.API_ENDPOINT}/api/owners_tags?wallet=${tdh.wallet}`;
-      fetchOwnerTags(initialUrlOwners);
+    if (isConsolidation && router.isReady) {
+      fetchTDH();
+    } else {
+      setWalletOwnedLoaded(true);
     }
-  }, [router.isReady, tdh]);
+  }, [isConsolidation, router.isReady]);
 
   useEffect(() => {
+    if (view == VIEW.CONSOLIDATION || !isConsolidation) {
+      setTDH(consolidatedTDH);
+    } else {
+      setTDH(walletTDH);
+    }
+  }, [view, walletTDH, consolidatedTDH]);
+
+  useEffect(() => {
+    if (view == VIEW.CONSOLIDATION || !isConsolidation) {
+      setOwned(consolidationOwned);
+    } else {
+      setOwned(walletOwned);
+    }
+  }, [view, walletOwned, consolidationOwned]);
+
+  useEffect(() => {
+    setActivityPage(1);
+    setDistributionsPage(1);
+  }, [view]);
+
+  useEffect(() => {
+    let url = `${process.env.API_ENDPOINT}/api/transactions?contract=${MEMES_CONTRACT}&wallet=${ownerAddress}&page_size=${ACTIVITY_PAGE_SIZE}&page=${activityPage}`;
+    if (view == VIEW.CONSOLIDATION && consolidatedTDH) {
+      url = `${
+        process.env.API_ENDPOINT
+      }/api/transactions?contract=${MEMES_CONTRACT}&wallet=${consolidatedTDH.wallets.join(
+        ","
+      )}&page_size=${ACTIVITY_PAGE_SIZE}&page=${activityPage}`;
+    }
     if (ownerAddress && router.isReady) {
-      let url = `${process.env.API_ENDPOINT}/api/transactions?contract=${MEMES_CONTRACT}&wallet=${ownerAddress}&page_size=${ACTIVITY_PAGE_SIZE}&page=${activityPage}`;
       switch (activityTypeFilter) {
         case TypeFilter.SALES:
           url += `&filter=sales`;
@@ -312,62 +406,26 @@ export default function UserPage(props: Props) {
       fetchUrl(url).then((response: DBResponse) => {
         setActivityTotalResults(response.count);
         setActivity(response.data);
-        if (response.data.length > 0) {
-          const first = response.data[0];
-
-          const ownerEnsTemp = areEqualAddresses(
-            first.from_address,
-            ownerAddress
-          )
-            ? first.from_display
-            : areEqualAddresses(first.to_address, ownerAddress)
-            ? first.to_diplay
-            : null;
-
-          if (ownerEnsTemp) {
-            setOwnerENS(ownerEnsTemp);
-            router.push(ownerEnsTemp.replaceAll(" ", "-"), undefined, {
-              shallow: true,
-            });
-
-            const ownerLink = `${
-              process.env.BASE_ENDPOINT
-                ? process.env.BASE_ENDPOINT
-                : "https://seize.io"
-            }/${ownerEnsTemp}`;
-            setOwnerLinkDisplay(ownerLink);
-
-            setBreadcrumbs([
-              { display: "Home", href: "/" },
-              { display: ownerEnsTemp },
-            ]);
-          }
-
-          const ownerAddressTemp =
-            areEqualAddresses(first.from_address, ownerAddress) ||
-            areEqualAddresses(first.from_display, ownerAddress)
-              ? first.from_address
-              : areEqualAddresses(first.to_address, ownerAddress) ||
-                areEqualAddresses(first.to_display, ownerAddress)
-              ? first.to_address
-              : null;
-          if (ownerAddressTemp) {
-            setOwnerAddress(ownerAddressTemp);
-          }
-        }
       });
     }
-  }, [activityPage, ownerAddress, router.isReady, activityTypeFilter]);
+  }, [activityPage, ownerAddress, router.isReady, activityTypeFilter, view]);
 
   useEffect(() => {
+    let url = `${process.env.API_ENDPOINT}/api/distributions?wallet=${ownerAddress}&page_size=${DISTRIBUTIONS_PAGE_SIZE}&page=${distributionsPage}`;
+    if (view == VIEW.CONSOLIDATION && consolidatedTDH) {
+      url = url = `${
+        process.env.API_ENDPOINT
+      }/api/distributions?wallet=${consolidatedTDH.wallets.join(
+        ","
+      )}&page_size=${DISTRIBUTIONS_PAGE_SIZE}&page=${distributionsPage}`;
+    }
     if (ownerAddress && router.isReady) {
-      let url = `${process.env.API_ENDPOINT}/api/distributions?wallet=${ownerAddress}&page_size=${DISTRIBUTIONS_PAGE_SIZE}&page=${distributionsPage}`;
       fetchUrl(url).then((response: DBResponse) => {
         setDistributionsTotalResults(response.count);
         setDistributions(response.data);
       });
     }
-  }, [distributionsPage, ownerAddress, router.isReady]);
+  }, [distributionsPage, ownerAddress, router.isReady, view]);
 
   useEffect(() => {
     if (sort && sortDir) {
@@ -710,30 +768,28 @@ export default function UserPage(props: Props) {
               setHideNonSeized(false);
             }}
           />
-          {ownerTags &&
-            ownerTags?.memes_balance > 0 &&
-            ownerTags?.gradients_balance > 0 && (
-              <>
-                <Form.Check
-                  type="switch"
-                  className={`${styles.seizedToggle}`}
-                  label={`Hide Gradients`}
-                  checked={hideGradients}
-                  onChange={() => {
-                    setHideGradients(!hideGradients);
-                  }}
-                />
-                <Form.Check
-                  type="switch"
-                  className={`${styles.seizedToggle}`}
-                  label={`Hide Memes`}
-                  checked={hideMemes}
-                  onChange={() => {
-                    setHideMemes(!hideMemes);
-                  }}
-                />
-              </>
-            )}
+          {tdh && tdh?.memes_balance > 0 && tdh?.gradients_balance > 0 && (
+            <>
+              <Form.Check
+                type="switch"
+                className={`${styles.seizedToggle}`}
+                label={`Hide Gradients`}
+                checked={hideGradients}
+                onChange={() => {
+                  setHideGradients(!hideGradients);
+                }}
+              />
+              <Form.Check
+                type="switch"
+                className={`${styles.seizedToggle}`}
+                label={`Hide Memes`}
+                checked={hideMemes}
+                onChange={() => {
+                  setHideMemes(!hideMemes);
+                }}
+              />
+            </>
+          )}
         </Col>
       </Row>
     );
@@ -746,9 +802,9 @@ export default function UserPage(props: Props) {
         <Row>
           <Col>
             <Container className="mt-2 pt-2 pb-2">
-              <Row>
+              {/* <Row>
                 <Col className="text-right">
-                  {/* {ownerAddress && (
+                  {ownerAddress && (
                     <TwitterShareButton
                       className="twitter-share-button"
                       url={window.location.href.split("?")[0]}
@@ -775,131 +831,244 @@ export default function UserPage(props: Props) {
                       />
                       Tweet
                     </TwitterShareButton>
-                  )} */}
+                  )}
                 </Col>
-              </Row>
-              <Row className="pt-3 pb-3">
-                {ensAvatar.data && (
-                  <Col
-                    xs={12}
-                    md={{ span: 2, offset: 2 }}
-                    className="pb-3 d-flex align-items-center justify-content-center">
-                    <Image
-                      className={styles.avatar}
-                      src={ensAvatar.data}
-                      alt={`avatar-${address}`}
-                      width={0}
-                      height={0}
+              </Row> */}
+              {isConsolidation && (
+                <Row>
+                  <Col className={styles.consolidationSwitch}>
+                    <ConsolidationSwitch
+                      view={view}
+                      onSetView={(v) => setView(v)}
                     />
                   </Col>
-                )}
-                <Col
-                  xs={12}
-                  md={ensAvatar.data ? 6 : 12}
-                  className="text-center d-flex align-items-center justify-content-center">
-                  <Container className="p-0">
-                    {ownerAddress && (
-                      <>
-                        <Row>
-                          <h2 className={styles.ownerAddress}>
-                            {ownerTags ? (
-                              <Address
-                                address={ownerAddress}
-                                ens={ownerENS}
-                                tags={{
-                                  memesCardsSets: ownerTags.memes_cards_sets,
-                                  memesCardsSetS1:
-                                    ownerTags.memes_cards_sets_szn1,
-                                  memesCardsSetS2:
-                                    ownerTags.memes_cards_sets_szn2,
-                                  memesCardsSetS3:
-                                    ownerTags.memes_cards_sets_szn3,
-                                  memesBalance: ownerTags.unique_memes,
-                                  gradientsBalance: ownerTags.gradients_balance,
-                                  genesis: ownerTags.genesis,
-                                  tdh_rank: tdh ? tdh.tdh_rank : -1,
-                                  balance_rank: tdh
-                                    ? tdh.dense_rank_balance
-                                    : -1,
-                                  unique_rank: tdh ? tdh.dense_rank_unique : -1,
-                                }}
-                                expandedTags={true}
-                                isUserPage={true}
-                                disableLink={true}
+                </Row>
+              )}
+              {ownerAddress && (
+                <Row>
+                  <Col
+                    xs={12}
+                    sm={6}
+                    className={isConsolidation ? "pt-2" : "pt-3"}>
+                    <Container className="no-padding">
+                      <Row className="pb-1">
+                        <Col
+                          className={
+                            view == VIEW.WALLET
+                              ? "d-flex align-items-center"
+                              : ""
+                          }>
+                          {ensAvatar.data && view == VIEW.WALLET && (
+                            <Image
+                              className={styles.avatar}
+                              src={ensAvatar.data}
+                              alt="opensea"
+                              width={0}
+                              height={0}
+                            />
+                          )}
+                          {tdh && consolidatedTDH ? (
+                            <Address
+                              wallets={
+                                view == VIEW.CONSOLIDATION
+                                  ? consolidatedTDH.wallets
+                                  : [ownerAddress]
+                              }
+                              display={
+                                view == VIEW.CONSOLIDATION &&
+                                consolidatedTDH.consolidation_display
+                                  ? consolidatedTDH.consolidation_display
+                                  : ownerENS
+                              }
+                              isUserPage={true}
+                              disableLink={true}
+                              viewingWallet={ownerAddress}
+                            />
+                          ) : (
+                            <Address
+                              wallets={[ownerAddress]}
+                              display={ownerENS}
+                              disableLink={true}
+                              isUserPage={true}
+                              viewingWallet={ownerAddress}
+                            />
+                          )}
+                        </Col>
+                      </Row>
+                      <Row className="pt-1">
+                        <Tippy
+                          content={ownerLinkCopied ? "Copied" : "Copy"}
+                          placement={"right"}
+                          theme={"light"}
+                          hideOnClick={false}>
+                          <span
+                            className={styles.ownerLink}
+                            onClick={() => {
+                              if (navigator.clipboard) {
+                                navigator.clipboard.writeText(
+                                  window.location.href
+                                );
+                              }
+                              setIsOwnerLinkCopied(true);
+                              setTimeout(() => {
+                                setIsOwnerLinkCopied(false);
+                              }, 1000);
+                            }}>
+                            {removeProtocol(ownerLinkDisplay)}{" "}
+                            <FontAwesomeIcon
+                              icon="link"
+                              className={styles.ownerLinkIcon}
+                            />
+                          </span>
+                        </Tippy>
+                      </Row>
+                      <Row className="pt-3">
+                        <Col>
+                          <a
+                            href={`https://opensea.io/${ownerAddress}`}
+                            target="_blank"
+                            rel="noreferrer">
+                            <Image
+                              className={styles.marketplace}
+                              src="/opensea.png"
+                              alt="opensea"
+                              width={40}
+                              height={40}
+                            />
+                          </a>
+                          <a
+                            href={`https://x2y2.io/user/${ownerAddress}`}
+                            target="_blank"
+                            rel="noreferrer">
+                            <Image
+                              className={styles.marketplace}
+                              src="/x2y2.png"
+                              alt="x2y2"
+                              width={40}
+                              height={40}
+                            />
+                          </a>
+                        </Col>
+                      </Row>
+                    </Container>
+                  </Col>
+                  {tdh && tdh.balance > 0 && (
+                    <>
+                      <Col
+                        xs={6}
+                        sm={6}
+                        md={3}
+                        className={isConsolidation ? "pt-2" : "pt-3"}>
+                        <Container className="no-padding text-right">
+                          <Row className="pt-2 pb-1">
+                            <Col>
+                              <Tag
+                                type={TagType.RANK}
+                                text={"All Cards Rank #"}
+                                value={tdh.dense_rank_balance}
                               />
-                            ) : (
-                              <Address
-                                address={ownerAddress}
-                                ens={ownerENS}
-                                disableLink={true}
+                            </Col>
+                          </Row>
+                          <Row className="pt-1 pb-1">
+                            <Col>
+                              <Tag
+                                type={TagType.RANK}
+                                text={"Unique Cards Rank #"}
+                                value={tdh.dense_rank_unique}
                               />
-                            )}
-                          </h2>
-                        </Row>
-                        <Row className="pt-2 pb-2">
-                          <Col>
-                            <Tippy
-                              content={ownerLinkCopied ? "Copied" : "Copy"}
-                              placement={"right"}
-                              theme={"light"}
-                              hideOnClick={false}>
-                              <span
-                                className={styles.ownerLink}
-                                onClick={() => {
-                                  if (navigator.clipboard) {
-                                    navigator.clipboard.writeText(
-                                      window.location.href
-                                    );
-                                  }
-                                  setIsOwnerLinkCopied(true);
-                                  setTimeout(() => {
-                                    setIsOwnerLinkCopied(false);
-                                  }, 1000);
-                                }}>
-                                {removeProtocol(ownerLinkDisplay)}{" "}
-                                <FontAwesomeIcon
-                                  icon="link"
-                                  className={styles.ownerLinkIcon}
+                            </Col>
+                          </Row>
+                          {tdh.tdh_rank && (
+                            <Row className="pt-1 pb-1">
+                              <Col>
+                                <Tag
+                                  type={TagType.RANK}
+                                  text={"TDH Rank #"}
+                                  value={tdh.tdh_rank}
                                 />
-                              </span>
-                            </Tippy>
-                          </Col>
-                        </Row>
-                        <Row className="pt-3">
-                          <Col>
-                            <a
-                              href={`https://opensea.io/${ownerAddress}`}
-                              target="_blank"
-                              rel="noreferrer">
-                              <Image
-                                className={styles.marketplace}
-                                src="/opensea.png"
-                                alt="opensea"
-                                width={40}
-                                height={40}
-                              />
-                            </a>
-                            <a
-                              href={`https://x2y2.io/user/${ownerAddress}`}
-                              target="_blank"
-                              rel="noreferrer">
-                              <Image
-                                className={styles.marketplace}
-                                src="/x2y2.png"
-                                alt="x2y2"
-                                width={40}
-                                height={40}
-                              />
-                            </a>
-                          </Col>
-                        </Row>
-                      </>
-                    )}
-                  </Container>
-                </Col>
-              </Row>
+                              </Col>
+                            </Row>
+                          )}
+                        </Container>
+                      </Col>
+                      <Col
+                        xs={6}
+                        sm={6}
+                        md={3}
+                        className={isConsolidation ? "pt-2" : "pt-3"}>
+                        <Container className="no-padding text-right">
+                          <Row className="pt-2 pb-1">
+                            <Col>
+                              {tdh.memes_cards_sets > 0 ? (
+                                <Tag
+                                  type={TagType.MEME_SETS}
+                                  text={"Memes Sets x"}
+                                  value={tdh.memes_cards_sets}
+                                />
+                              ) : (
+                                <Tag
+                                  type={TagType.MEMES}
+                                  text={"Memes x"}
+                                  value={tdh.unique_memes}
+                                  text_after={
+                                    tdh.genesis > 0 ? ` (+Genesis) ` : ""
+                                  }
+                                />
+                              )}
+                            </Col>
+                          </Row>
+                          {tdh.memes_cards_sets_szn1 > 0 && (
+                            <Row className="pt-1 pb-1">
+                              <Col>
+                                <Tag
+                                  type={TagType.SZN1}
+                                  text={"SZN1 Sets x"}
+                                  value={tdh.memes_cards_sets_szn1}
+                                />
+                              </Col>
+                            </Row>
+                          )}
+                          {tdh.memes_cards_sets_szn2 > 0 && (
+                            <Row className="pt-1 pb-1">
+                              <Col>
+                                <Tag
+                                  type={TagType.SZN2}
+                                  text={"SZN2 Sets x"}
+                                  value={tdh.memes_cards_sets_szn2}
+                                />
+                              </Col>
+                            </Row>
+                          )}
+                          {tdh.memes_cards_sets_szn3 > 0 && (
+                            <Row className="pt-1 pb-1">
+                              <Col>
+                                <Tag
+                                  type={TagType.SZN3}
+                                  text={"SZN3 Sets x"}
+                                  value={tdh.memes_cards_sets_szn3}
+                                />
+                              </Col>
+                            </Row>
+                          )}
+                          {tdh.gradients_balance > 0 && (
+                            <Row className="pt-1 pb-1">
+                              <Col>
+                                <Tag
+                                  type={TagType.GRADIENT}
+                                  text={"Gradients x"}
+                                  value={tdh.gradients_balance}
+                                />
+                              </Col>
+                            </Row>
+                          )}
+                        </Container>
+                      </Col>
+                    </>
+                  )}
+                </Row>
+              )}
             </Container>
-            <Container className="pt-3 pb-3">
+            <Container className="pt-5 pb-3">
               {tdh && tdh.balance > 0 && (
                 <Row>
                   <Accordion alwaysOpen className={styles.userPageAccordion}>
@@ -1683,7 +1852,8 @@ export default function UserPage(props: Props) {
                     </Col>
                   </Row>
                   {printUserControls()}
-                  {ownerLoaded &&
+                  {walletOwnedLoaded &&
+                    consolidationOwnedLoaded &&
                     (owned.length > 0 ? (
                       printNfts()
                     ) : (
@@ -1805,6 +1975,8 @@ export default function UserPage(props: Props) {
                             <tr>
                               <th>Date</th>
                               <th>Card</th>
+                              {isConsolidation &&
+                                view == VIEW.CONSOLIDATION && <th>Wallet</th>}
                               <th className="text-center">Phase</th>
                               <th className="text-center">Count</th>
                               <th className="text-center">Minted</th>
@@ -1865,6 +2037,14 @@ export default function UserPage(props: Props) {
                                       : d.contract
                                   }${d.card_name ? ` - ${d.card_name}` : ""}`}
                                 </td>
+                                {isConsolidation &&
+                                  view == VIEW.CONSOLIDATION && (
+                                    <td>
+                                      {d.display
+                                        ? d.display
+                                        : formatAddress(d.wallet)}
+                                    </td>
+                                  )}
                                 <td className="text-center">{d.phase}</td>
                                 <td className="text-center">{d.count}</td>
                                 <td className="text-center">

@@ -161,6 +161,10 @@
   width: 10px;
 }
 
+.userDropdownBtnConsolidation {
+  background-color: #ffff00;
+}
+
 .userDropdownBtnIcon {
   position: absolute;
   right: 8px;
@@ -171,4 +175,37 @@
   border-top: 7px solid #000;
   border-right: 7px solid transparent;
   border-left: 7px solid transparent;
+}
+
+.viewModeDropdown {
+  button {
+    width: 100%;
+    height: 100%;
+    background-color: transparent !important;
+    border-color: transparent !important;
+    font-size: inherit !important;
+    text-align: left;
+    padding: 6px 12px 6px 20px;
+  }
+  button::before {
+    left: 6px;
+    top: calc((100% - 10px) / 2);
+  }
+}
+
+.viewModeIcon {
+  height: $font-size;
+  padding-right: 8px;
+}
+
+.viewModeIconConsolidation {
+  color: #ffff00;
+}
+
+.dropdownItemViewMode {
+  padding: 0;
+}
+
+.dropdownItemProfile {
+  padding: 6px 12px 6px 20px;
 }

@@ -12,7 +12,7 @@ const Header = dynamic(() => import("../components/header/Header"), {
   loading: () => <HeaderPlaceholder />,
 });
 
-export default function TDH() {
+export default function CommunityMetrics() {
   const [breadcrumbs, setBreadcrumbs] = useState<Crumb[]>([
     { display: "Home", href: "/" },
     { display: "Community Metrics" },

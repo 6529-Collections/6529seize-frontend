@@ -9,7 +9,6 @@ import { NFT, MemesExtendedData, LabNFT, BaseNFT } from "../entities/INFT";
 
 import dynamic from "next/dynamic";
 import { getDateDisplay, numberWithCommas } from "../helpers/Helpers";
-import { useAccount } from "wagmi";
 import { fetchUrl } from "../services/6529api";
 import HeaderPlaceholder from "../components/header/HeaderPlaceholder";
 
@@ -35,11 +34,11 @@ const LatestActivity = dynamic(
 export default function Home() {
   const [isHeaderLoaded, setIsHeaderLoaded] = useState(false);
   const [isNftImageLoaded, setIsNftImageLoaded] = useState(false);
+  const [connectedWallets, setConnectedWallets] = useState<string[]>([]);
 
   const [nft, setNFT] = useState<NFT>();
   const [labNft, setLabNft] = useState<LabNFT>();
   const [nftExtended, setnftExtended] = useState<MemesExtendedData>();
-  const { address, connector, isConnected } = useAccount();
   const [nftBalance, setNftBalance] = useState<number>(0);
 
   useEffect(() => {
@@ -67,18 +66,24 @@ export default function Home() {
   }, [nft]);
 
   useEffect(() => {
-    if (address && nft && nft.id) {
+    if (connectedWallets && nft && nft.id) {
       fetchUrl(
-        `${process.env.API_ENDPOINT}/api/owners?contract=${nft.contract}&wallet=${address}&id=${nft.id}`
+        `${process.env.API_ENDPOINT}/api/owners?contract=${
+          nft.contract
+        }&wallet=${connectedWallets.join(",")}&id=${nft.id}`
       ).then((response: DBResponse) => {
         if (response.data.length > 0) {
-          setNftBalance(response.data[0].balance);
+          let balance = 0;
+          response.data.map((d) => {
+            balance += d.balance;
+          });
+          setNftBalance(balance);
         }
       });
     } else {
       setNftBalance(0);
     }
-  }, [address, nft]);
+  }, [connectedWallets, nft]);
 
   function printMintDate(nft: BaseNFT) {
     const mintDate = new Date(nft.mint_date);
@@ -111,11 +116,11 @@ export default function Home() {
 
       <main className={styles.main}>
         <Header
+          onSetWallets={(wallets) => setConnectedWallets(wallets)}
           onLoad={() => {
             setIsHeaderLoaded(true);
           }}
         />
-
         {isHeaderLoaded && nft && nftExtended && (
           <>
             <Container className={`pt-4 ${styles.mainContainer}`}>
@@ -134,7 +139,10 @@ export default function Home() {
                   <Container className="no-padding">
                     <Row>
                       {nft.animation ? (
-                        <span className={address && styles.nftImagePadding}>
+                        <span
+                          className={
+                            connectedWallets && styles.nftImagePadding
+                          }>
                           <NFTImage
                             nft={nft}
                             animation={true}
@@ -143,15 +151,15 @@ export default function Home() {
                             onLoad={() => {
                               setIsNftImageLoaded(true);
                             }}
-                            showUnseized={
-                              address != undefined && address != null
-                            }
+                            showUnseized={connectedWallets.length > 0}
                           />
                         </span>
                       ) : (
                         <a
                           href={`/the-memes/${nft.id}`}
-                          className={address && styles.nftImagePadding}>
+                          className={
+                            connectedWallets && styles.nftImagePadding
+                          }>
                           <NFTImage
                             nft={nft}
                             animation={true}
@@ -160,9 +168,7 @@ export default function Home() {
                             onLoad={() => {
                               setIsNftImageLoaded(true);
                             }}
-                            showUnseized={
-                              address != undefined && address != null
-                            }
+                            showUnseized={connectedWallets.length > 0}
                           />
                         </a>
                       )}
