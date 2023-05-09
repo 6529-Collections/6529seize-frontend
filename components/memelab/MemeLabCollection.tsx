@@ -104,7 +104,10 @@ export default function LabCollection(props: Props) {
           });
           let collectionSecondaryLink: string = "";
           responseNftMetas.map((nftm) => {
-            if (nftm.website) {
+            if (
+              nftm.website &&
+              !collectionSecondaryLink.includes(nftm.website)
+            ) {
               collectionSecondaryLink += nftm.website;
             }
           });
