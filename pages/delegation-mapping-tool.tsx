@@ -55,6 +55,22 @@ export default function DelegationMappingToolPage() {
         <Header />
         <Breadcrumb breadcrumbs={breadcrumbs} />
         <Container fluid className={`${styles.mainContainer}`}>
+          <Row className="pt-4">
+            <Col>
+              <h1 className="float-none text-center">
+                DELEGATION MAPPING TOOL
+              </h1>
+            </Col>
+          </Row>
+          <Row className="pt-2 pb-2">
+            <Col className="text-center">
+              <span
+                className={styles.instructionsLink}
+                onClick={() => setShowInstructionsModal(true)}>
+                How to use this tool?
+              </span>
+            </Col>
+          </Row>
           <Row>
             <Col
               xs={{ span: 12 }}
@@ -62,22 +78,6 @@ export default function DelegationMappingToolPage() {
               md={{ span: 8, offset: 2 }}
               lg={{ span: 6, offset: 3 }}>
               <Container className="pt-3 pb-5">
-                <Row>
-                  <Col>
-                    <h1 className="float-none text-center">
-                      DELEGATION MAPPING TOOL
-                    </h1>
-                  </Col>
-                </Row>
-                <Row className="pt-2 pb-4">
-                  <Col className="text-center">
-                    <span
-                      className={styles.instructionsLink}
-                      onClick={() => setShowInstructionsModal(true)}>
-                      How to use this tool?
-                    </span>
-                  </Col>
-                </Row>
                 <Row className="pt-4">
                   <Col>
                     <DelegationMappingTool />
