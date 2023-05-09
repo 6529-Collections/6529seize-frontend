@@ -505,9 +505,7 @@ export default function LabCollection(props: Props) {
                 <Row className="pb-3">
                   <Col>
                     {secondaryLink && (
-                      <a href={secondaryLink}>
-                        {removeProtocol(secondaryLink)}
-                      </a>
+                      <a href={secondaryLink}>{secondaryLink}</a>
                     )}
                   </Col>
                 </Row>
