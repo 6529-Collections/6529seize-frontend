@@ -72,6 +72,7 @@ export default function MemeLabComponent(props: Props) {
   const [nfts, setNfts] = useState<LabNFT[]>([]);
   const [nftMetas, setNftMetas] = useState<LabExtendedData[]>([]);
   const [nftBalances, setNftBalances] = useState<Owner[]>([]);
+  const [balancesLoaded, setBalancesLoaded] = useState(false);
   const [nftsLoaded, setNftsLoaded] = useState(false);
   const [labArtists, setLabArtists] = useState<string[]>([]);
   const [labCollections, setLabCollections] = useState<string[]>([]);
@@ -139,6 +140,7 @@ export default function MemeLabComponent(props: Props) {
           [] as Owner[]
         );
         setNftBalances(mergedOwners);
+        setBalancesLoaded(true);
       });
     } else {
       setNftBalances([]);
@@ -420,11 +422,9 @@ export default function MemeLabComponent(props: Props) {
                 nft={nft}
                 animation={false}
                 height={300}
-                balance={getBalance(nft.id)}
+                balance={balancesLoaded ? getBalance(nft.id) : -1}
                 showThumbnail={true}
-                showUnseized={
-                  props.wallets.length > 0 && nftBalances.length > 0
-                }
+                showUnseized={props.wallets.length > 0}
               />
             </a>
           </Row>
