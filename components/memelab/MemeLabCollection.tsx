@@ -5,6 +5,7 @@ import Image from "next/image";
 import { Container, Row, Col, Dropdown } from "react-bootstrap";
 import { LabNFT, LabExtendedData, VolumeType } from "../../entities/INFT";
 import {
+  addProtocol,
   areEqualAddresses,
   getDateDisplay,
   getValuesForVolumeType,
@@ -36,7 +37,7 @@ interface Props {
 export default function LabCollection(props: Props) {
   const router = useRouter();
   const [collectionName, setCollectionName] = useState<string>();
-  const [secondaryLink, setSecondaryLink] = useState<string>();
+  const [website, setWebsite] = useState<string>();
 
   const [nfts, setNfts] = useState<LabNFT[]>([]);
   const [nftMetas, setNftMetas] = useState<LabExtendedData[]>([]);
@@ -101,13 +102,13 @@ export default function LabCollection(props: Props) {
             setNfts(responseNfts);
             setNftsLoaded(true);
           });
-          let collectionSecondaryLink: any = responseNftMetas[0].secondary_link;
+          let collectionSecondaryLink: string = "";
           responseNftMetas.map((nftm) => {
-            if (nftm.secondary_link != collectionSecondaryLink) {
-              collectionSecondaryLink = undefined;
+            if (nftm.website) {
+              collectionSecondaryLink += nftm.website;
             }
           });
-          setSecondaryLink(collectionSecondaryLink);
+          setWebsite(collectionSecondaryLink);
         } else {
           setNfts([]);
           setNftsLoaded(true);
@@ -501,12 +502,20 @@ export default function LabCollection(props: Props) {
                   <h2 className="font-color">{collectionName}</h2>
                 </Col>
               </Row>
-              {secondaryLink && (
+              {website && (
                 <Row className="pb-3">
                   <Col>
-                    {secondaryLink && (
-                      <a href={secondaryLink}>{secondaryLink}</a>
-                    )}
+                    {website.split(" ").map((w) => (
+                      <>
+                        <a
+                          href={addProtocol(w)}
+                          target="_blank"
+                          rel="noreferrer">
+                          {w}
+                        </a>
+                        &nbsp;&nbsp;
+                      </>
+                    ))}
                   </Col>
                 </Row>
               )}

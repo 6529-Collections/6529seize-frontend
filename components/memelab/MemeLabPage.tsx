@@ -24,6 +24,7 @@ import {
   enterArtFullScreen,
   fullScreenSupported,
   numberWithCommas,
+  addProtocol,
 } from "../../helpers/Helpers";
 import Breadcrumb, { Crumb } from "../breadcrumb/Breadcrumb";
 import Download from "../download/Download";
@@ -423,16 +424,21 @@ export default function LabPage(props: Props) {
                         </a>
                       </td>
                     </tr>
-                    {nftMeta.secondary_link && (
+                    {nftMeta.website && (
                       <tr>
-                        <td>External Link</td>
+                        <td>Website</td>
                         <td>
-                          <a
-                            href={nftMeta.secondary_link}
-                            target="_blank"
-                            rel="noreferrer">
-                            {nftMeta.secondary_link}
-                          </a>
+                          {nftMeta.website.split(" ").map((w) => (
+                            <>
+                              <a
+                                href={addProtocol(w)}
+                                target="_blank"
+                                rel="noreferrer">
+                                {w}
+                              </a>
+                              &nbsp;&nbsp;
+                            </>
+                          ))}
                         </td>
                       </tr>
                     )}
