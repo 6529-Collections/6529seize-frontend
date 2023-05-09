@@ -8,6 +8,7 @@
   color: $dark-grey !important;
   border-radius: 0 !important;
   border-color: $lightest-grey;
+  cursor: pointer;
 
   &:focus {
     border-color: $blue !important;
