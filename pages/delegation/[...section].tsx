@@ -153,6 +153,10 @@ export const DELEGATION_USE_CASES = [
     use_case: 16,
     display: "Manage Access",
   },
+  {
+    use_case: 17,
+    display: "Mint To Address",
+  },
 ];
 
 export const ALL_USE_CASES = [

@@ -1,10 +1,12 @@
 import Head from "next/head";
 import styles from "../styles/Home.module.scss";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Breadcrumb, { Crumb } from "../components/breadcrumb/Breadcrumb";
 import { Container, Row, Col } from "react-bootstrap";
 import dynamic from "next/dynamic";
 import HeaderPlaceholder from "../components/header/HeaderPlaceholder";
+import Image from "next/image";
+import DelegationMappingToolPlaceholder from "../components/delegation-mapping-tool/DelegationMappingToolPlaceholder";
 
 const Header = dynamic(() => import("../components/header/Header"), {
   ssr: false,
@@ -13,7 +15,8 @@ const Header = dynamic(() => import("../components/header/Header"), {
 
 const DelegationMappingTool = dynamic(
   () => import("../components/delegation-mapping-tool/DelegationMappingTool"),
-  { ssr: false }
+
+  { ssr: false, loading: () => <DelegationMappingToolPlaceholder /> }
 );
 
 export default function DelegationMappingToolPage() {
@@ -21,6 +24,23 @@ export default function DelegationMappingToolPage() {
     { display: "Home", href: "/" },
     { display: "Delegation Mapping Tool" },
   ]);
+
+  const [html, setHtml] = useState("");
+  const [htmlError, setHtmlError] = useState(false);
+
+  useEffect(() => {
+    const url = `https://6529bucket.s3.eu-west-1.amazonaws.com/seize_html/delegation-mapping-tool/how-to-use.html`;
+    fetch(url).then((response) => {
+      if (response.status == 200) {
+        response.text().then((htmlText) => {
+          setHtml(htmlText);
+          setHtmlError(false);
+        });
+      } else {
+        setHtmlError(true);
+      }
+    });
+  }, []);
 
   return (
     <>
@@ -48,24 +68,55 @@ export default function DelegationMappingToolPage() {
         <Breadcrumb breadcrumbs={breadcrumbs} />
         <Container fluid className={`${styles.mainContainer}`}>
           <Row>
-            <Col>
-              <Container className="pt-3 pb-3">
+            <Col
+              xs={{ span: 12 }}
+              sm={{ span: 10, offset: 1 }}
+              md={{ span: 8, offset: 2 }}
+              lg={{ span: 6, offset: 3 }}>
+              <Container className="pt-3 pb-5">
                 <Row>
                   <Col>
-                    <h1>DELEGATION MAPPING TOOL</h1>
+                    <h1 className="float-none text-center">
+                      DELEGATION MAPPING TOOL
+                    </h1>
+                  </Col>
+                </Row>
+                <Row className="pt-2 pb-4">
+                  <Col className="text-center">
+                    <a href="#mapping-tool-instructions">
+                      How to use this tool?
+                    </a>
                   </Col>
                 </Row>
                 <Row className="pt-4">
-                  <Col
-                    xs={{ span: 12 }}
-                    sm={{ span: 12 }}
-                    md={{ span: 10, offset: 1 }}
-                    lg={{ span: 8, offset: 2 }}>
+                  <Col>
                     <DelegationMappingTool />
                   </Col>
                 </Row>
               </Container>
             </Col>
+          </Row>
+        </Container>
+        <Container className="pt-4 pb-4" id="mapping-tool-instructions">
+          <Row className="pt-3 pb-3">
+            {htmlError ? (
+              <div>
+                <Image
+                  width="0"
+                  height="0"
+                  style={{ height: "auto", width: "100px" }}
+                  src="/SummerGlasses.svg"
+                  alt="SummerGlasses"
+                />
+                <h2>Loading HTML Failed</h2>
+              </div>
+            ) : (
+              <Col
+                className={styles.htmlContainer}
+                dangerouslySetInnerHTML={{
+                  __html: html,
+                }}></Col>
+            )}
           </Row>
         </Container>
       </main>

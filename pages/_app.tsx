@@ -61,6 +61,7 @@ import {
   faInfoCircle,
   faArrowTurnRight,
   faCheckCircle,
+  faFileUpload,
 } from "@fortawesome/free-solid-svg-icons";
 import Head from "next/head";
 
@@ -104,7 +105,8 @@ library.add(
   faMinus,
   faInfoCircle,
   faArrowTurnRight,
-  faCheckCircle
+  faCheckCircle,
+  faFileUpload
 );
 
 const CONTRACT_CHAINS =
