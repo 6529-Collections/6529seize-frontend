@@ -94,6 +94,7 @@ export interface LabExtendedData {
   percent_unique_cleaned: number;
   percent_unique_cleaned_rank: number;
   metadata_collection: string;
+  secondary_link: string;
 }
 
 export enum VolumeType {

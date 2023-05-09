@@ -423,6 +423,19 @@ export default function LabPage(props: Props) {
                         </a>
                       </td>
                     </tr>
+                    {nftMeta.secondary_link && (
+                      <tr>
+                        <td>External Link</td>
+                        <td>
+                          <a
+                            href={nftMeta.secondary_link}
+                            target="_blank"
+                            rel="noreferrer">
+                            {nftMeta.secondary_link}
+                          </a>
+                        </td>
+                      </tr>
+                    )}
                     <tr>
                       <td>Mint Date</td>
                       <td>{printMintDate(nft.mint_date)}</td>
