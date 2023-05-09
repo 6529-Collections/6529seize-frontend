@@ -9,6 +9,7 @@ import {
   getDateDisplay,
   getValuesForVolumeType,
   numberWithCommas,
+  removeProtocol,
 } from "../../helpers/Helpers";
 import { useRouter } from "next/router";
 import { fetchAllPages } from "../../services/6529api";
@@ -504,7 +505,9 @@ export default function LabCollection(props: Props) {
                 <Row className="pb-3">
                   <Col>
                     {secondaryLink && (
-                      <a href={secondaryLink}>{secondaryLink}</a>
+                      <a href={secondaryLink}>
+                        {removeProtocol(secondaryLink)}
+                      </a>
                     )}
                   </Col>
                 </Row>
