@@ -4,6 +4,7 @@ import styles from "../../../styles/Home.module.scss";
 import dynamic from "next/dynamic";
 import { fetchUrl } from "../../../services/6529api";
 import HeaderPlaceholder from "../../../components/header/HeaderPlaceholder";
+import { useState } from "react";
 
 const Header = dynamic(() => import("../../../components/header/Header"), {
   ssr: false,
@@ -19,6 +20,7 @@ const LabPageComponent = dynamic(
 
 export default function MemeLabPage(props: any) {
   const pagenameFull = `${props.name} | 6529 SEIZE`;
+  const [connectedWallets, setConnectedWallets] = useState<string[]>([]);
 
   return (
     <>
@@ -41,8 +43,8 @@ export default function MemeLabPage(props: any) {
       </Head>
 
       <main className={styles.main}>
-        <Header />
-        <LabPageComponent />
+        <Header onSetWallets={(wallets) => setConnectedWallets(wallets)} />
+        <LabPageComponent wallets={connectedWallets} />
       </main>
     </>
   );

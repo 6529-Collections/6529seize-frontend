@@ -235,6 +235,7 @@
 .ownerLink {
   font-size: larger;
   cursor: pointer;
+  width: fit-content;
 }
 
 .ownerLinkIcon {
@@ -274,14 +275,9 @@
 }
 
 .avatar {
-  height: 200px;
+  height: 35px;
+  padding-right: 10px;
   width: auto;
-}
-
-@media only screen and (max-width: 767px) {
-  .avatar {
-    height: 120px;
-  }
 }
 
 .userPageAccordion {
@@ -335,5 +331,16 @@
         margin-top: 0.5rem;
       }
     }
+  }
+}
+
+.consolidationSwitch {
+  display: flex;
+  justify-content: flex-end;
+}
+
+@media only screen and (max-width: 767px) {
+  .consolidationSwitch {
+    justify-content: center;
   }
 }

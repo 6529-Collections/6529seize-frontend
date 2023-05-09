@@ -1,18 +1,17 @@
 import { useState, useEffect } from "react";
 import { Container, Row, Col, Table } from "react-bootstrap";
 import { DBResponse } from "../../entities/IDBResponse";
-import { TDH, TDHCalc } from "../../entities/ITDH";
 import styles from "./Leaderboard.module.scss";
-import dynamic from "next/dynamic";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { areEqualAddresses, numberWithCommas } from "../../helpers/Helpers";
+import { numberWithCommas } from "../../helpers/Helpers";
 import Pagination from "../pagination/Pagination";
 import { SortDirection } from "../../entities/ISort";
-import { OwnerTags } from "../../entities/IOwner";
-import { useRouter } from "next/router";
-import { fetchAllPages, fetchUrl } from "../../services/6529api";
-
-const Address = dynamic(() => import("../address/Address"), { ssr: false });
+import { fetchUrl } from "../../services/6529api";
+import Address from "../address/Address";
+import { BaseTDHMetrics } from "../../entities/ITDH";
+import ConsolidationSwitch, {
+  VIEW,
+} from "../consolidation-switch/ConsolidationSwitch";
 
 interface Props {
   contract: string;
@@ -31,61 +30,28 @@ enum Sort {
 }
 
 export default function NFTLeaderboard(props: Props) {
-  const router = useRouter();
+  const [view, setView] = useState<VIEW>(VIEW.CONSOLIDATION);
   const [pageProps, setPageProps] = useState<Props>(props);
   const [totalResults, setTotalResults] = useState(0);
-  const [leaderboard, setLeaderboard] = useState<TDH[]>();
+  const [leaderboard, setLeaderboard] = useState<BaseTDHMetrics[]>();
   const [leaderboardLoaded, setLeaderboardLoaded] = useState(false);
-  const [lastTDH, setLastTDH] = useState<TDHCalc>();
-  const [next, setNext] = useState(null);
   const [sort, setSort] = useState<{
     sort: Sort;
     sort_direction: SortDirection;
   }>({ sort: Sort.card_tdh, sort_direction: SortDirection.DESC });
 
-  const [ownerTags, setOwnersTags] = useState<OwnerTags[]>([]);
-  const [ownerTagsLoaded, setOwnerTagsLoaded] = useState(false);
-
   async function fetchResults() {
+    const url = `${process.env.API_ENDPOINT}/api/${
+      view == VIEW.WALLET ? "tdh" : "consolidated_tdh"
+    }`;
     fetchUrl(
-      `${process.env.API_ENDPOINT}/api/tdh/${props.contract}/${props.nftId}?page_size=${props.pageSize}&page=${pageProps.page}&sort=${sort.sort}&sort_direction=${sort.sort_direction}`
+      `${url}/${props.contract}/${props.nftId}?page_size=${props.pageSize}&page=${pageProps.page}&sort=${sort.sort}&sort_direction=${sort.sort_direction}`
     ).then((response: DBResponse) => {
       setTotalResults(response.count);
-      setNext(response.next);
       setLeaderboard(response.data);
       setLeaderboardLoaded(true);
     });
   }
-
-  useEffect(() => {
-    async function fetchOwnersTags(url: string) {
-      return fetchAllPages(url).then((newOwnersTags: OwnerTags[]) => {
-        setOwnersTags(newOwnersTags);
-        setOwnerTagsLoaded(true);
-      });
-    }
-
-    if (leaderboard && router.isReady && leaderboard.length > 0) {
-      const uniqueWallets = [...leaderboard].map((l) => l.wallet);
-      const initialUrlOwners = `${
-        process.env.API_ENDPOINT
-      }/api/owners_tags?wallet=${uniqueWallets.join(",")}`;
-      fetchOwnersTags(initialUrlOwners);
-    }
-  }, [router.isReady, leaderboard]);
-
-  useEffect(() => {
-    fetchUrl(`${process.env.API_ENDPOINT}/api/blocks?page_size=${1}`).then(
-      (response: DBResponse) => {
-        if (response.data.length > 0) {
-          setLastTDH({
-            block: response.data[0].block_number,
-            date: new Date(response.data[0].timestamp),
-          });
-        }
-      }
-    );
-  }, []);
 
   useEffect(() => {
     if (pageProps.page == 1) {
@@ -93,11 +59,25 @@ export default function NFTLeaderboard(props: Props) {
     } else {
       setPageProps({ ...pageProps, page: 1 });
     }
-  }, [sort]);
+  }, [sort, view]);
 
   useEffect(() => {
     fetchResults();
   }, [pageProps.page]);
+
+  function getWallets(lead: any) {
+    if (lead.wallets) {
+      return lead.wallets;
+    }
+    return [lead.wallet];
+  }
+
+  function getDisplay(lead: any) {
+    if (lead.consolidation_display) {
+      return lead.consolidation_display;
+    }
+    return lead.wallet_display;
+  }
 
   return (
     <Container className={`no-padding pt-3`} id={`leaderboard-${props.nftId}`}>
@@ -106,17 +86,13 @@ export default function NFTLeaderboard(props: Props) {
           <h1>COMMUNITY -</h1>
           <h1>&nbsp;CARD {props.nftId}</h1>
         </Col>
-        {/* {lastTDH && (
-          <Col className={`text-right ${styles.lastTDH}`}>
-            * LAST TDH: {getDateDisplay(lastTDH.date)} BLOCK:{" "}
-            <a
-              href={`https://etherscan.io/block/${lastTDH.block}`}
-              rel="noreferrer"
-              target="_blank">
-              {lastTDH.block}
-            </a>
-          </Col>
-        )} */}
+        <Col className={`d-flex justify-content-center align-items-center`}>
+          <ConsolidationSwitch
+            view={view}
+            onSetView={(v) => setView(v)}
+            plural={true}
+          />
+        </Col>
       </Row>
       {leaderboard && leaderboard.length > 0 && (
         <Row className={styles.scrollContainer}>
@@ -372,17 +348,13 @@ export default function NFTLeaderboard(props: Props) {
               <tbody>
                 <tr className={styles.gap}></tr>
                 {leaderboard &&
-                  ownerTagsLoaded &&
                   leaderboard.map((lead, index) => {
                     const thisCard = lead.memes.find(
                       (m) => m.id == props.nftId
                     );
-                    const tags = ownerTags.find((ot) =>
-                      areEqualAddresses(ot.wallet, lead.wallet)
-                    );
                     if (thisCard)
                       return (
-                        <tr key={`${index}-${lead.wallet}`}>
+                        <tr key={`display-${index}-${view}`}>
                           <td className={styles.rank}>
                             {/* {lead.tdh_rank} */}
                             {index +
@@ -391,26 +363,16 @@ export default function NFTLeaderboard(props: Props) {
                           </td>
                           <td className={styles.hodler}>
                             <Address
-                              address={lead.wallet}
-                              ens={lead.wallet_display}
+                              wallets={getWallets(lead)}
+                              display={getDisplay(lead)}
                               tags={{
-                                memesCardsSets: tags
-                                  ? tags.memes_cards_sets
-                                  : 0,
-                                memesCardsSetS1: tags
-                                  ? tags.memes_cards_sets_szn1
-                                  : 0,
-                                memesCardsSetS2: tags
-                                  ? tags.memes_cards_sets_szn2
-                                  : 0,
-                                memesCardsSetS3: tags
-                                  ? tags.memes_cards_sets_szn3
-                                  : 0,
-                                memesBalance: tags ? tags.unique_memes : 0,
-                                gradientsBalance: tags
-                                  ? tags.gradients_balance
-                                  : 0,
-                                genesis: tags ? tags.genesis : 0,
+                                memesCardsSets: lead.memes_cards_sets,
+                                memesCardsSetS1: lead.memes_cards_sets_szn1,
+                                memesCardsSetS2: lead.memes_cards_sets_szn2,
+                                memesCardsSetS3: lead.memes_cards_sets_szn3,
+                                memesBalance: lead.unique_memes,
+                                gradientsBalance: lead.gradients_balance,
+                                genesis: lead.genesis,
                               }}
                             />
                           </td>

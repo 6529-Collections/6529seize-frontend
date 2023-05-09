@@ -10,6 +10,9 @@ import { DBResponse } from "../entities/IDBResponse";
 import { fetchUrl } from "../services/6529api";
 import HeaderPlaceholder from "../components/header/HeaderPlaceholder";
 import Pagination from "../components/pagination/Pagination";
+import ConsolidationSwitch, {
+  VIEW,
+} from "../components/consolidation-switch/ConsolidationSwitch";
 
 const Header = dynamic(() => import("../components/header/Header"), {
   ssr: false,
@@ -24,20 +27,33 @@ export default function Downloads() {
     { display: "Home", href: "/" },
     { display: "Downloads" },
   ]);
+  const [view, setView] = useState<VIEW>(VIEW.CONSOLIDATION);
 
   const [downloads, setDownloads] = useState<any[]>();
   const [totalResults, setTotalResults] = useState(0);
   const [page, setPage] = useState(1);
-  const [next, setNext] = useState(null);
 
-  useEffect(() => {
-    let url = `${process.env.API_ENDPOINT}/api/uploads?page_size=${PAGE_SIZE}&page=${page}`;
+  function fetchResults(myview: VIEW, mypage: number) {
+    let url = `${process.env.API_ENDPOINT}/api/${
+      myview == VIEW.WALLET ? "uploads" : "consolidated_uploads"
+    }?page_size=${PAGE_SIZE}&page=${mypage}`;
     fetchUrl(url).then((response: DBResponse) => {
       setTotalResults(response.count);
-      setNext(response.next);
       setDownloads(response.data);
     });
+  }
+
+  useEffect(() => {
+    fetchResults(view, page);
   }, [page, router.isReady]);
+
+  useEffect(() => {
+    if (page == 1) {
+      fetchResults(view, page);
+    } else {
+      setPage(1);
+    }
+  }, [view]);
 
   function printDate(dateString: any) {
     const d = new Date(
@@ -75,8 +91,18 @@ export default function Downloads() {
             <Col>
               <Container className="pt-4">
                 <Row>
-                  <Col>
+                  <Col xs={12} sm={6}>
                     <h1>DOWNLOADS</h1>
+                  </Col>
+                  <Col
+                    className="d-flex align-items-center justify-content-center"
+                    xs={12}
+                    sm={6}>
+                    <ConsolidationSwitch
+                      view={view}
+                      onSetView={(v) => setView(v)}
+                      plural={true}
+                    />
                   </Col>
                 </Row>
                 <Row>

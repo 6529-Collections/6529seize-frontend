@@ -3,7 +3,6 @@ import { Container, Row, Col, Table } from "react-bootstrap";
 import { DBResponse } from "../../entities/IDBResponse";
 import { TDH, TDHCalc } from "../../entities/ITDH";
 import styles from "./Leaderboard.module.scss";
-import dynamic from "next/dynamic";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { areEqualAddresses, numberWithCommas } from "../../helpers/Helpers";
 import Pagination from "../pagination/Pagination";
@@ -11,8 +10,7 @@ import { SortDirection } from "../../entities/ISort";
 import { Owner, OwnerTags } from "../../entities/IOwner";
 import { useRouter } from "next/router";
 import { fetchAllPages, fetchUrl } from "../../services/6529api";
-
-const Address = dynamic(() => import("../address/Address"), { ssr: false });
+import Address from "../address/Address";
 
 interface Props {
   contract: string;
@@ -165,8 +163,8 @@ export default function MemeLabLeaderboard(props: Props) {
                         </td>
                         <td className={styles.hodler}>
                           <Address
-                            address={lead.wallet}
-                            ens={lead.wallet_display}
+                            wallets={[lead.wallet]}
+                            display={lead.wallet_display}
                             tags={{
                               memesCardsSets: tags ? tags.memes_cards_sets : 0,
                               memesCardsSetS1: tags

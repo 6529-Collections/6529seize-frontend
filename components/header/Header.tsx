@@ -1,28 +1,78 @@
+import { Web3Modal, useWeb3Modal } from "@web3modal/react";
 import { Web3Button } from "@web3modal/react";
+import { mainnet } from "wagmi/chains";
+
 import styles from "./Header.module.scss";
-import { Container, Row, Col, Nav, Navbar, NavDropdown } from "react-bootstrap";
-import { useAccount, useConnect, useDisconnect } from "wagmi";
+import {
+  Container,
+  Row,
+  Col,
+  Nav,
+  Navbar,
+  NavDropdown,
+  Dropdown,
+} from "react-bootstrap";
+import { useAccount, useClient } from "wagmi";
 import { useRouter } from "next/router";
-import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import { AboutSection } from "../../pages/about/[section]";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-
-const Address = dynamic(() => import("../address/Address"), { ssr: false });
+import { DBResponse } from "../../entities/IDBResponse";
+import { fetchUrl } from "../../services/6529api";
+import Cookies from "js-cookie";
+import { CW_PROJECT_ID, VIEW_MODE_COOKIE } from "../../constants";
+import { EthereumClient } from "@web3modal/ethereum";
 
 interface Props {
   onLoad?: () => void;
+  onSetWallets?(wallets: string[]): any;
+}
+
+enum VIEW {
+  CONSOLIDATION = "Consolidation",
+  WALLET = "Wallet",
 }
 
 export default function Header(props: Props) {
   const router = useRouter();
+  const client = useClient();
+  const web3Modal = useWeb3Modal();
+  const ethereumClient = new EthereumClient(client, [mainnet]);
+  const [consolidations, setConsolidations] = useState<string[]>([]);
+  const [isConsolidation, setIsConsolidation] = useState(false);
   const { address, connector, isConnected } = useAccount();
   const [burgerMenuOpen, setBurgerMenuOpen] = useState(false);
-
+  const [viewModeOpen, setViewModeOpen] = useState(false);
+  const [view, setView] = useState<VIEW>();
   const [showBurgerMenuAbout, setShowBurgerMenuAbout] = useState(false);
   const [setShowBurgerMenuCommunity, setsetShowBurgerMenuCommunity] =
     useState(false);
+
+  useEffect(() => {
+    const viewMode = Cookies.get(VIEW_MODE_COOKIE);
+    console.log(VIEW_MODE_COOKIE, viewMode);
+    if (viewMode == VIEW.CONSOLIDATION) {
+      setView(VIEW.CONSOLIDATION);
+    } else {
+      setView(VIEW.WALLET);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (view) {
+      Cookies.set(VIEW_MODE_COOKIE, view);
+      if (props.onSetWallets) {
+        if (isConsolidation && view == VIEW.CONSOLIDATION) {
+          props.onSetWallets(consolidations);
+        } else if (address) {
+          props.onSetWallets([address]);
+        } else {
+          props.onSetWallets([]);
+        }
+      }
+    }
+  }, [view, isConsolidation, isConnected]);
 
   useEffect(() => {
     function handleResize() {
@@ -40,6 +90,26 @@ export default function Header(props: Props) {
     }
     return () => window.removeEventListener("resize", handleResize);
   }, []);
+
+  useEffect(() => {
+    if (isConnected && address) {
+      fetchUrl(
+        `${process.env.API_ENDPOINT}/api/consolidations/${address}`
+      ).then((response: DBResponse) => {
+        setConsolidations(Array.from(response.data));
+      });
+    } else {
+      setConsolidations([]);
+    }
+  }, [isConnected, address]);
+
+  useEffect(() => {
+    if (consolidations.length > 1) {
+      setIsConsolidation(true);
+    } else {
+      setIsConsolidation(false);
+    }
+  }, [consolidations]);
 
   function printBurgerMenu() {
     return (
@@ -82,20 +152,61 @@ export default function Header(props: Props) {
                     />
                     <NavDropdown
                       title={
-                        <button className={styles.userDropdownBtn}>
+                        <button
+                          className={`${styles.userDropdownBtn} ${
+                            view == VIEW.CONSOLIDATION &&
+                            isConsolidation &&
+                            !web3Modal.isOpen
+                              ? styles.userDropdownBtnConsolidation
+                              : ""
+                          }`}>
                           <span className={styles.userDropdownBtnIcon}></span>
                         </button>
                       }
                       className={`${styles.userDropdown}`}
                       align={"end"}>
                       <NavDropdown.Item
-                        key="profile-dropdown-item"
-                        className={styles.dropdownItem}
+                        className={styles.dropdownItemProfile}
                         onClick={() =>
                           (window.location.href = `/${address as string}`)
                         }>
                         Profile
                       </NavDropdown.Item>
+                      {isConsolidation && (
+                        <NavDropdown.Item
+                          className={styles.dropdownItemViewMode}>
+                          <Dropdown
+                            onMouseEnter={() => setViewModeOpen(true)}
+                            onMouseLeave={() => setViewModeOpen(false)}
+                            className={styles.viewModeDropdown}
+                            drop={"down-centered"}
+                            show={viewModeOpen}>
+                            <Dropdown.Toggle>View Mode</Dropdown.Toggle>
+                            <Dropdown.Menu>
+                              <Dropdown.Item
+                                className="d-flex align-items-center"
+                                onClick={() => setView(VIEW.WALLET)}>
+                                {view == VIEW.WALLET && (
+                                  <FontAwesomeIcon
+                                    className={styles.viewModeIcon}
+                                    icon="check-circle"></FontAwesomeIcon>
+                                )}
+                                Wallet
+                              </Dropdown.Item>
+                              <Dropdown.Item
+                                className="d-flex align-items-center"
+                                onClick={() => setView(VIEW.CONSOLIDATION)}>
+                                {view == VIEW.CONSOLIDATION && (
+                                  <FontAwesomeIcon
+                                    className={`${styles.viewModeIcon} ${styles.viewModeIconConsolidation}`}
+                                    icon="check-circle"></FontAwesomeIcon>
+                                )}
+                                Consolidation
+                              </Dropdown.Item>
+                            </Dropdown.Menu>
+                          </Dropdown>
+                        </NavDropdown.Item>
+                      )}
                     </NavDropdown>
                   </>
                 ) : (
@@ -184,6 +295,13 @@ export default function Header(props: Props) {
                   <Col>
                     <a href="/community-metrics">
                       <h3>Community Metrics</h3>
+                    </a>
+                  </Col>
+                </Row>
+                <Row className="pt-3">
+                  <Col>
+                    <a href="/consolidation-use-cases">
+                      <h3>Consolidation Use Cases</h3>
                     </a>
                   </Col>
                 </Row>
@@ -488,6 +606,14 @@ export default function Header(props: Props) {
                               <NavDropdown.Item
                                 className={styles.dropdownItem}
                                 onClick={() =>
+                                  (window.location.href =
+                                    "/consolidation-use-cases")
+                                }>
+                                Consolidation Use Cases
+                              </NavDropdown.Item>
+                              <NavDropdown.Item
+                                className={styles.dropdownItem}
+                                onClick={() =>
                                   (window.location.href = "/downloads")
                                 }>
                                 Downloads
@@ -640,7 +766,14 @@ export default function Header(props: Props) {
                                 />
                                 <NavDropdown
                                   title={
-                                    <button className={styles.userDropdownBtn}>
+                                    <button
+                                      className={`${styles.userDropdownBtn} ${
+                                        view == VIEW.CONSOLIDATION &&
+                                        isConsolidation &&
+                                        !web3Modal.isOpen
+                                          ? styles.userDropdownBtnConsolidation
+                                          : ""
+                                      }`}>
                                       <span
                                         className={
                                           styles.userDropdownBtnIcon
@@ -650,8 +783,7 @@ export default function Header(props: Props) {
                                   className={`${styles.userDropdown}`}
                                   align={"end"}>
                                   <NavDropdown.Item
-                                    key="profile-dropdown-item"
-                                    className={styles.dropdownItem}
+                                    className={styles.dropdownItemProfile}
                                     onClick={() =>
                                       (window.location.href = `/${
                                         address as string
@@ -659,6 +791,51 @@ export default function Header(props: Props) {
                                     }>
                                     Profile
                                   </NavDropdown.Item>
+                                  {isConsolidation && (
+                                    <NavDropdown.Item
+                                      className={styles.dropdownItemViewMode}>
+                                      <Dropdown
+                                        onMouseEnter={() =>
+                                          setViewModeOpen(true)
+                                        }
+                                        onMouseLeave={() =>
+                                          setViewModeOpen(false)
+                                        }
+                                        className={styles.viewModeDropdown}
+                                        drop={"start"}
+                                        show={viewModeOpen}>
+                                        <Dropdown.Toggle>
+                                          View Mode
+                                        </Dropdown.Toggle>
+                                        <Dropdown.Menu>
+                                          <Dropdown.Item
+                                            className="d-flex align-items-center"
+                                            onClick={() =>
+                                              setView(VIEW.WALLET)
+                                            }>
+                                            {view == VIEW.WALLET && (
+                                              <FontAwesomeIcon
+                                                className={styles.viewModeIcon}
+                                                icon="check-circle"></FontAwesomeIcon>
+                                            )}
+                                            Wallet
+                                          </Dropdown.Item>
+                                          <Dropdown.Item
+                                            className="d-flex align-items-center"
+                                            onClick={() =>
+                                              setView(VIEW.CONSOLIDATION)
+                                            }>
+                                            {view == VIEW.CONSOLIDATION && (
+                                              <FontAwesomeIcon
+                                                className={`${styles.viewModeIcon} ${styles.viewModeIconConsolidation}`}
+                                                icon="check-circle"></FontAwesomeIcon>
+                                            )}
+                                            Consolidation
+                                          </Dropdown.Item>
+                                        </Dropdown.Menu>
+                                      </Dropdown>
+                                    </NavDropdown.Item>
+                                  )}
                                 </NavDropdown>
                               </>
                             ) : (
@@ -695,6 +872,25 @@ export default function Header(props: Props) {
           </Col>
         </Row>
       </Container>
+      {client && ethereumClient && (
+        <Web3Modal
+          defaultChain={mainnet}
+          projectId={CW_PROJECT_ID}
+          ethereumClient={ethereumClient}
+          themeMode={"dark"}
+          themeVariables={{
+            "--w3m-background-color": "#282828",
+            "--w3m-logo-image-url": "/Seize_Logo_Glasses_3.png",
+            "--w3m-accent-color":
+              view == VIEW.CONSOLIDATION && isConsolidation && !web3Modal.isOpen
+                ? "#ffff00"
+                : "#fff",
+            "--w3m-accent-fill-color": "#000",
+            "--w3m-button-border-radius": "0",
+            "--w3m-font-family": "Arial",
+          }}
+        />
+      )}
     </>
   );
 }

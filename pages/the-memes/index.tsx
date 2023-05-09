@@ -13,9 +13,7 @@ const Header = dynamic(() => import("../../components/header/Header"), {
 
 const TheMemesComponent = dynamic(
   () => import("../../components/the-memes/TheMemes"),
-  {
-    ssr: false,
-  }
+  { ssr: false }
 );
 
 export default function TheMemesPage() {
@@ -23,6 +21,8 @@ export default function TheMemesPage() {
     { display: "Home", href: "/" },
     { display: "The Memes" },
   ]);
+
+  const [connectedWallets, setConnectedWallets] = useState<string[]>([]);
 
   return (
     <>
@@ -43,9 +43,10 @@ export default function TheMemesPage() {
       </Head>
 
       <main className={styles.main}>
-        <Header />
+        <Header onSetWallets={(wallets) => setConnectedWallets(wallets)} />
         <Breadcrumb breadcrumbs={breadcrumbs} />
         <TheMemesComponent
+          wallets={connectedWallets}
           setCrumbs={function (crumbs: Crumb[]) {
             setBreadcrumbs(crumbs);
           }}

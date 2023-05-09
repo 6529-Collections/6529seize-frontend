@@ -1,9 +1,7 @@
 import styles from "./6529Gradient.module.scss";
 import Image from "next/image";
 import { useEffect, useState } from "react";
-import dynamic from "next/dynamic";
 import { Container, Row, Col } from "react-bootstrap";
-import { useAccount } from "wagmi";
 import { GRADIENT_CONTRACT } from "../../constants";
 import { NFT } from "../../entities/INFT";
 import { Owner } from "../../entities/IOwner";
@@ -12,22 +10,20 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { areEqualAddresses, numberWithCommas } from "../../helpers/Helpers";
 import { useRouter } from "next/router";
 import { fetchAllPages } from "../../services/6529api";
-
-const NFTImage = dynamic(() => import("../nft-image/NFTImage"), {
-  ssr: false,
-});
-
-const Address = dynamic(() => import("../address/Address"), { ssr: false });
+import NFTImage from "../nft-image/NFTImage";
+import Address from "../address/Address";
 
 enum Sort {
   ID = "id",
   TDH = "tdh_rank",
 }
 
-export default function GradientsComponent() {
-  const router = useRouter();
+interface Props {
+  wallets: string[];
+}
 
-  const { address, connector, isConnected } = useAccount();
+export default function GradientsComponent(props: Props) {
+  const router = useRouter();
 
   const [nfts, setNfts] = useState<NFT[]>([]);
   const [nftOwners, setNftOwners] = useState<Owner[]>([]);
@@ -160,7 +156,12 @@ export default function GradientsComponent() {
                   animation={false}
                   height={300}
                   balance={0}
-                  showOwned={owner && areEqualAddresses(address, owner?.wallet)}
+                  showOwned={
+                    owner &&
+                    props.wallets.some((w) =>
+                      areEqualAddresses(w, owner.wallet)
+                    )
+                  }
                   showUnseized={false}
                   showThumbnail={true}
                 />
@@ -174,11 +175,14 @@ export default function GradientsComponent() {
           </Row>
           <Row>
             <Col className="text-center">
-              {owner && address == owner.wallet ? "*" : ""}
+              {owner &&
+              props.wallets.some((w) => areEqualAddresses(w, owner.wallet))
+                ? "*"
+                : ""}
               {owner && (
                 <Address
-                  address={owner.wallet}
-                  ens={owner.wallet_display}
+                  wallets={[owner.wallet]}
+                  display={owner.wallet_display}
                   hideCopy={true}
                 />
               )}
