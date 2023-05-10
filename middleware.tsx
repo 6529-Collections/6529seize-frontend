@@ -1,4 +1,3 @@
-import Cookies from "js-cookie";
 import { NextRequest, NextResponse } from "next/server";
 import { API_AUTH_COOKIE } from "./constants";
 
