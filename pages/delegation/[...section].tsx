@@ -72,6 +72,11 @@ export const SUPPORTED_COLLECTIONS: DelegationCollection[] = [
   GRADIENTS_COLLECTION,
 ];
 
+export const ALL_USE_CASE = {
+  use_case: 1,
+  display: "All (#1 - #16)",
+};
+
 export const MINTING_USE_CASE = {
   use_case: 2,
   display: "Minting / Allowlist",
@@ -95,10 +100,7 @@ export const CONSOLIDATION_USE_CASE = {
 };
 
 export const DELEGATION_USE_CASES = [
-  {
-    use_case: 1,
-    display: "All (#1 - #16)",
-  },
+  ALL_USE_CASE,
   MINTING_USE_CASE,
   AIRDROPS_USE_CASE,
   {
