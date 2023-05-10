@@ -74,7 +74,7 @@ export const SUPPORTED_COLLECTIONS: DelegationCollection[] = [
 
 export const ALL_USE_CASE = {
   use_case: 1,
-  display: "All (#1 - #16)",
+  display: "All",
 };
 
 export const MINTING_USE_CASE = {
