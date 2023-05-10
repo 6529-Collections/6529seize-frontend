@@ -1,6 +1,6 @@
 import Head from "next/head";
 import styles from "../styles/Home.module.scss";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Breadcrumb, { Crumb } from "../components/breadcrumb/Breadcrumb";
 import { Container, Row, Col } from "react-bootstrap";
 import dynamic from "next/dynamic";
@@ -18,17 +18,29 @@ const DelegationMappingTool = dynamic(
   { ssr: false, loading: () => <DelegationMappingToolPlaceholder /> }
 );
 
-const HtmlModal = dynamic(() => import("../components/htmlModal/HtmlModal"), {
-  ssr: false,
-});
-
 export default function DelegationMappingToolPage() {
   const [breadcrumbs, setBreadcrumbs] = useState<Crumb[]>([
     { display: "Home", href: "/" },
     { display: "Delegation Mapping Tool" },
   ]);
 
-  const [showInstructionsModal, setShowInstructionsModal] = useState(false);
+  const [html, setHtml] = useState("");
+  const [htmlError, setHtmlError] = useState(false);
+
+  useEffect(() => {
+    fetch(
+      "https://6529bucket.s3.eu-west-1.amazonaws.com/seize_html/delegation-mapping-tool/how-to-use.html"
+    ).then((response) => {
+      if (response.status == 200) {
+        response.text().then((htmlText) => {
+          setHtml(htmlText);
+          setHtmlError(false);
+        });
+      } else {
+        setHtmlError(true);
+      }
+    });
+  }, []);
 
   return (
     <>
@@ -55,46 +67,73 @@ export default function DelegationMappingToolPage() {
         <Header />
         <Breadcrumb breadcrumbs={breadcrumbs} />
         <Container fluid className={`${styles.mainContainer}`}>
-          <Row className="pt-4">
-            <Col>
-              <h1 className="float-none text-center">
-                DELEGATION MAPPING TOOL
-              </h1>
-            </Col>
-          </Row>
-          <Row className="pt-2 pb-2">
-            <Col className="text-center">
-              <span
-                className={styles.instructionsLink}
-                onClick={() => setShowInstructionsModal(true)}>
-                How to use this tool?
-              </span>
-            </Col>
-          </Row>
           <Row>
-            <Col
-              xs={{ span: 12 }}
-              sm={{ span: 10, offset: 1 }}
-              md={{ span: 8, offset: 2 }}
-              lg={{ span: 6, offset: 3 }}>
-              <Container className="pt-3 pb-5">
+            <Col>
+              <Container>
                 <Row className="pt-4">
-                  <Col>
-                    <DelegationMappingTool />
+                  <Col
+                    xs={{ span: 12 }}
+                    sm={{ span: 12 }}
+                    md={{ span: 10, offset: 1 }}
+                    lg={{ span: 8, offset: 2 }}>
+                    <h1 className="float-none text-center">
+                      DELEGATION MAPPING TOOL
+                    </h1>
+                  </Col>
+                </Row>
+                <Row className="pt-2">
+                  <Col
+                    xs={{ span: 12 }}
+                    sm={{ span: 12 }}
+                    md={{ span: 10, offset: 1 }}
+                    lg={{ span: 8, offset: 2 }}>
+                    <h5>Overview</h5>
+                  </Col>
+                </Row>
+                <Row>
+                  <Col
+                    xs={{ span: 12 }}
+                    sm={{ span: 12 }}
+                    md={{ span: 10, offset: 1 }}
+                    lg={{ span: 8, offset: 2 }}>
+                    The Delegation Mapping tool allows anyone to easily update a
+                    CSV file with Ethereum to receive delegated addresses in
+                    return (from the NFTDelegation.com contract).{" "}
+                    <a href="#how-to-use">How to use this tool?</a>
+                  </Col>
+                </Row>
+                <Row>
+                  <Col
+                    xs={{ span: 12 }}
+                    sm={{ span: 10, offset: 1 }}
+                    md={{ span: 8, offset: 2 }}
+                    lg={{ span: 6, offset: 3 }}>
+                    <Container className="pt-5 pb-5">
+                      <Row>
+                        <Col>
+                          <DelegationMappingTool />
+                        </Col>
+                      </Row>
+                    </Container>
                   </Col>
                 </Row>
               </Container>
             </Col>
           </Row>
         </Container>
-        <HtmlModal
-          title="How to use Delegation Mapping Tool?"
-          link="https://6529bucket.s3.eu-west-1.amazonaws.com/seize_html/delegation-mapping-tool/how-to-use.html"
-          show={showInstructionsModal}
-          setShow={function (show: boolean) {
-            setShowInstructionsModal(show);
-          }}
-        />
+        <Container id="how-to-use">
+          <Row>
+            <Col
+              className={styles.htmlContainer}
+              xs={{ span: 12 }}
+              sm={{ span: 10, offset: 1 }}
+              md={{ span: 8, offset: 2 }}
+              lg={{ span: 6, offset: 3 }}
+              dangerouslySetInnerHTML={{
+                __html: html,
+              }}></Col>
+          </Row>
+        </Container>
       </main>
     </>
   );
