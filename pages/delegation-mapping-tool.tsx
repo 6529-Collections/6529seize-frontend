@@ -121,7 +121,7 @@ export default function DelegationMappingToolPage() {
             </Col>
           </Row>
         </Container>
-        <Container id="how-to-use">
+        <Container id="how-to-use" className="pt-1 pb-5">
           <Row>
             <Col
               className={styles.htmlContainer}
