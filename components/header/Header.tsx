@@ -133,7 +133,7 @@ export default function Header(props: Props) {
                 priority
                 className={styles.logoIcon}
                 src="/Seize_Logo_Glasses.png"
-                alt="6539Seize"
+                alt="6529Seize"
                 width={319}
                 height={50}
               />
@@ -519,7 +519,7 @@ export default function Header(props: Props) {
                       priority
                       className={styles.logoIcon}
                       src="/Seize_Logo_Glasses.png"
-                      alt="6539Seize"
+                      alt="6529Seize"
                       width={319}
                       height={50}
                     />
@@ -548,7 +548,7 @@ export default function Header(props: Props) {
                           }}
                           className={`${styles.burgerMenuBtn} d-block ${styles.dMdNone}`}
                           src="/Seize_Logo_2.png"
-                          alt="6539Seize"
+                          alt="6529Seize"
                           onClick={() => setBurgerMenuOpen(true)}
                         />
                         <Navbar
@@ -876,7 +876,7 @@ export default function Header(props: Props) {
                           }}
                           className={`d-none ${styles.dMdBlock}`}
                           src="/Seize_Logo_2.png"
-                          alt="6539Seize"
+                          alt="6529Seize"
                         />
                       </Container>
                     </Navbar>

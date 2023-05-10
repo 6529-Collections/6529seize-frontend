@@ -2,9 +2,10 @@ import styles from "./DelegationMappingTool.module.scss";
 import { Form, Row, Col, Button, Container } from "react-bootstrap";
 import { useEffect, useRef, useState } from "react";
 import {
-  AIRDROPS_USE_CASE,
-  ANY_COLLECTION,
-  MINTING_USE_CASE,
+  ALL_USE_CASE,
+  ALL_USE_CASES,
+  DELEGATION_USE_CASES,
+  SUPPORTED_COLLECTIONS,
 } from "../../pages/delegation/[...section]";
 import { fetchAllPages } from "../../services/6529api";
 import { Delegation } from "../../entities/IDelegation";
@@ -19,6 +20,7 @@ export default function Download() {
   const [dragActive, setDragActive] = useState(false);
 
   const [file, setFile] = useState<any>();
+  const [collection, setCollection] = useState<string>("0");
   const [useCase, setUseCase] = useState<number>(0);
   const [processing, setProcessing] = useState(false);
   const [delegations, setDelegations] = useState<Delegation[]>([]);
@@ -107,7 +109,10 @@ export default function Download() {
       });
     }
     if (processing) {
-      const initialUrl = `${process.env.API_ENDPOINT}/api/delegations?use_case=1,${useCase}`;
+      const useCaseFilter = `&use_case=1,${useCase}`;
+
+      const collectionFilter = `&collection=${DELEGATION_ALL_ADDRESS},${collection}`;
+      const initialUrl = `${process.env.API_ENDPOINT}/api/delegations?${useCaseFilter}${collectionFilter}`;
       fetchDelegations(initialUrl);
     }
   }, [processing]);
@@ -180,6 +185,32 @@ export default function Download() {
         </Col>
       </Row>
       <Row className="pt-4">
+        <Col>Select Collection</Col>
+      </Row>
+      <Row className="pt-2">
+        <Col>
+          <Form.Select
+            className={`${styles.formInput}`}
+            value={collection}
+            onChange={(e) => {
+              setCollection(e.target.value);
+            }}>
+            <option value="0" disabled>
+              ...
+            </option>
+            {SUPPORTED_COLLECTIONS.map((sc) => {
+              return (
+                <option
+                  key={`delegation-tool-select-collection-${sc.contract}`}
+                  value={sc.contract}>
+                  {sc.display}
+                </option>
+              );
+            })}
+          </Form.Select>
+        </Col>
+      </Row>
+      <Row className="pt-4">
         <Col>Select Use Case</Col>
       </Row>
       <Row className="pt-2">
@@ -194,7 +225,7 @@ export default function Download() {
             <option value={0} disabled>
               ...
             </option>
-            {[MINTING_USE_CASE, AIRDROPS_USE_CASE].map((uc) => {
+            {DELEGATION_USE_CASES.map((uc) => {
               return (
                 <option
                   key={`delegation-tool-select-use-case-${uc.use_case}`}
@@ -204,6 +235,13 @@ export default function Download() {
               );
             })}
           </Form.Select>
+        </Col>
+      </Row>
+      <Row className="pt-4">
+        <Col className="font-color-h font-smaller">
+          Note: If the selected collection or use case delegation is not found,
+          the tool will automatically switch to using delegations for "Any" or
+          "All" options respectively.
         </Col>
       </Row>
       <Row className="pt-3">
