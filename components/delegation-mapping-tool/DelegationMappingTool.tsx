@@ -240,8 +240,8 @@ export default function Download() {
       <Row className="pt-4">
         <Col className="font-color-h font-smaller">
           Note: If the selected collection or use case delegation is not found,
-          the tool will automatically switch to using delegations for "Any" or
-          "All" options respectively.
+          the tool will automatically switch to using delegations for
+          &quot;Any&quot; or &quot;All&quot; options respectively.
         </Col>
       </Row>
       <Row className="pt-3">
