@@ -19,7 +19,7 @@ interface Props {
 }
 
 export default function NFTImage(props: Props) {
-  const [showBalance, setShowBalance] = useState(false);
+  const [showBalance, setShowBalance] = useState(true);
   useEffect(() => {
     if (props.onLoad) {
       props.onLoad();
@@ -53,7 +53,7 @@ export default function NFTImage(props: Props) {
               ? props.nft.metadata.animation
               : props.nft.metadata.animation_url
           }
-          onLoad={() => setShowBalance(true)}
+          // onLoad={() => setShowBalance(true)}
           id={`${props.id && `${props.id}`}`}
         />
       </Col>
@@ -96,7 +96,7 @@ export default function NFTImage(props: Props) {
               : props.nft.animation
           }
           poster={props.nft.scaled ? props.nft.scaled : props.nft.image}
-          onLoadStart={() => setShowBalance(true)}
+          // onLoadStart={() => setShowBalance(true)}
           onError={({ currentTarget }) => {
             if (currentTarget.src == props.nft.compressed_animation) {
               currentTarget.src = props.nft.animation;
@@ -135,7 +135,7 @@ export default function NFTImage(props: Props) {
             ? props.nft.scaled
             : props.nft.image
         }
-        onLoad={() => setShowBalance(true)}
+        // onLoad={() => setShowBalance(true)}
         onError={({ currentTarget }) => {
           if (currentTarget.src == props.nft.thumbnail) {
             currentTarget.src = props.nft.scaled
