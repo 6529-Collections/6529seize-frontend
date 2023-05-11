@@ -133,7 +133,7 @@ export default function Header(props: Props) {
                 priority
                 className={styles.logoIcon}
                 src="/Seize_Logo_Glasses.png"
-                alt="6539Seize"
+                alt="6529Seize"
                 width={319}
                 height={50}
               />
@@ -302,6 +302,13 @@ export default function Header(props: Props) {
                   <Col>
                     <a href="/consolidation-use-cases">
                       <h3>Consolidation Use Cases</h3>
+                    </a>
+                  </Col>
+                </Row>
+                <Row className="pt-3">
+                  <Col>
+                    <a href="/delegation-mapping-tool">
+                      <h3>Delegation Mapping Tool</h3>
                     </a>
                   </Col>
                 </Row>
@@ -512,7 +519,7 @@ export default function Header(props: Props) {
                       priority
                       className={styles.logoIcon}
                       src="/Seize_Logo_Glasses.png"
-                      alt="6539Seize"
+                      alt="6529Seize"
                       width={319}
                       height={50}
                     />
@@ -541,7 +548,7 @@ export default function Header(props: Props) {
                           }}
                           className={`${styles.burgerMenuBtn} d-block ${styles.dMdNone}`}
                           src="/Seize_Logo_2.png"
-                          alt="6539Seize"
+                          alt="6529Seize"
                           onClick={() => setBurgerMenuOpen(true)}
                         />
                         <Navbar
@@ -610,6 +617,14 @@ export default function Header(props: Props) {
                                     "/consolidation-use-cases")
                                 }>
                                 Consolidation Use Cases
+                              </NavDropdown.Item>
+                              <NavDropdown.Item
+                                className={styles.dropdownItem}
+                                onClick={() =>
+                                  (window.location.href =
+                                    "/delegation-mapping-tool")
+                                }>
+                                Delegation Mapping Tool
                               </NavDropdown.Item>
                               <NavDropdown.Item
                                 className={styles.dropdownItem}
@@ -861,7 +876,7 @@ export default function Header(props: Props) {
                           }}
                           className={`d-none ${styles.dMdBlock}`}
                           src="/Seize_Logo_2.png"
-                          alt="6539Seize"
+                          alt="6529Seize"
                         />
                       </Container>
                     </Navbar>

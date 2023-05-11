@@ -16,6 +16,7 @@
   color: white;
   margin-bottom: 0 !important;
   float: none !important;
+  white-space: break-spaces;
 }
 
 .consolidationDisplayUserPage {
@@ -40,6 +41,7 @@
 
 .consolidationDropdown {
   button {
+    text-align: left;
     padding: 0;
     background-color: transparent !important;
     border-color: transparent !important;
@@ -69,12 +71,23 @@
   }
 }
 
-.tag {
+.addressTag {
   font-family: $main-font;
   font-size: $font-size;
   font-weight: bolder;
   color: $font-color !important;
   margin-right: 10px;
+  padding: 2px 5px;
+  white-space: nowrap;
+  box-shadow: 0 4px 4px rgb(0 0 0 / 25%);
+  background-color: $dark-grey;
+}
+
+.tag {
+  font-family: $main-font;
+  font-size: $font-size;
+  font-weight: bolder;
+  color: $font-color !important;
   padding: 2px 5px;
   white-space: nowrap;
   box-shadow: 0 4px 4px rgb(0 0 0 / 25%);

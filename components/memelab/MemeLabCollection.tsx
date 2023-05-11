@@ -5,10 +5,12 @@ import Image from "next/image";
 import { Container, Row, Col, Dropdown } from "react-bootstrap";
 import { LabNFT, LabExtendedData, VolumeType } from "../../entities/INFT";
 import {
+  addProtocol,
   areEqualAddresses,
   getDateDisplay,
   getValuesForVolumeType,
   numberWithCommas,
+  removeProtocol,
 } from "../../helpers/Helpers";
 import { useRouter } from "next/router";
 import { fetchAllPages } from "../../services/6529api";
@@ -35,6 +37,7 @@ interface Props {
 export default function LabCollection(props: Props) {
   const router = useRouter();
   const [collectionName, setCollectionName] = useState<string>();
+  const [website, setWebsite] = useState<string>();
 
   const [nfts, setNfts] = useState<LabNFT[]>([]);
   const [nftMetas, setNftMetas] = useState<LabExtendedData[]>([]);
@@ -99,6 +102,16 @@ export default function LabCollection(props: Props) {
             setNfts(responseNfts);
             setNftsLoaded(true);
           });
+          let collectionSecondaryLink: string = "";
+          responseNftMetas.map((nftm) => {
+            if (
+              nftm.website &&
+              !collectionSecondaryLink.includes(nftm.website)
+            ) {
+              collectionSecondaryLink += nftm.website;
+            }
+          });
+          setWebsite(collectionSecondaryLink);
         } else {
           setNfts([]);
           setNftsLoaded(true);
@@ -492,6 +505,23 @@ export default function LabCollection(props: Props) {
                   <h2 className="font-color">{collectionName}</h2>
                 </Col>
               </Row>
+              {website && (
+                <Row className="pb-3">
+                  <Col>
+                    {website.split(" ").map((w) => (
+                      <>
+                        <a
+                          href={addProtocol(w)}
+                          target="_blank"
+                          rel="noreferrer">
+                          {w}
+                        </a>
+                        &nbsp;&nbsp;
+                      </>
+                    ))}
+                  </Col>
+                </Row>
+              )}
               <Row className="pt-2">
                 <Col>
                   Sort by&nbsp;&nbsp;
