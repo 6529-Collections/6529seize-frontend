@@ -93,6 +93,7 @@ export default function TheMemesComponent(props: Props) {
   const [seasons, setSeasons] = useState<number[]>([]);
   const [nftMetas, setNftMetas] = useState<MemesExtendedData[]>([]);
   const [nftBalances, setNftBalances] = useState<Owner[]>([]);
+  const [balancesLoaded, setBalancesLoaded] = useState(false);
   const [nftsLoaded, setNftsLoaded] = useState(false);
   const [nftMemes, setNftMemes] = useState<Meme[]>([]);
 
@@ -204,6 +205,7 @@ export default function TheMemesComponent(props: Props) {
           [] as Owner[]
         );
         setNftBalances(mergedOwners);
+        setBalancesLoaded(true);
       });
     } else {
       setNftBalances([]);
@@ -497,11 +499,9 @@ export default function TheMemesComponent(props: Props) {
                   nft={nft}
                   animation={false}
                   height={300}
-                  balance={getBalance(nft.id)}
+                  balance={balancesLoaded ? getBalance(nft.id) : -1}
                   showThumbnail={true}
-                  showUnseized={
-                    props.wallets.length > 0 && nftBalances.length > 0
-                  }
+                  showUnseized={props.wallets.length > 0}
                 />
               </a>
             </Row>
