@@ -88,13 +88,13 @@ export const AIRDROPS_USE_CASE = {
 };
 
 export const SUB_DELEGATION_USE_CASE = {
-  index: 16,
+  index: 17,
   use_case: 998,
   display: "Delegation Management (Sub-Delegation)",
 };
 
 export const CONSOLIDATION_USE_CASE = {
-  index: 17,
+  index: 18,
   use_case: 999,
   display: "Consolidation",
 };
