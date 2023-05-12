@@ -142,73 +142,65 @@ export default function Header(props: Props) {
           <Row className="pt-3 pb-3">
             <Col>
               <h3 className="d-flex justify-content-center">
-                {isConnected ? (
+                <Web3Button
+                  label="Connect"
+                  icon="hide"
+                  avatar="hide"
+                  balance="hide"
+                />
+                {isConnected && (
                   <>
-                    <Web3Button
-                      label="Connect"
-                      icon="hide"
-                      avatar="hide"
-                      balance="hide"
-                    />
-                    <NavDropdown
-                      title={
-                        <button className={`${styles.userBtn}`}>
-                          <span className={styles.userBtnIcon}></span>
-                        </button>
-                      }
-                      className={`${styles.userDropdown}`}
-                      align={"end"}>
-                      <NavDropdown.Item
-                        className={styles.dropdownItemProfile}
-                        onClick={() =>
-                          (window.location.href = `/${address as string}`)
-                        }>
-                        Profile
-                      </NavDropdown.Item>
-                      {isConsolidation && (
+                    <button
+                      className={`${styles.userProfileBtn}`}
+                      onClick={() =>
+                        (window.location.href = `/${address as string}`)
+                      }>
+                      <FontAwesomeIcon icon="user"></FontAwesomeIcon>
+                    </button>
+                    {isConsolidation && (
+                      <NavDropdown
+                        className={`${styles.consolidationDropDown}`}
+                        title={
+                          <button
+                            className={`${styles.consolidationDropdownBtn} ${
+                              isConsolidation && view == VIEW.CONSOLIDATION
+                                ? styles.consolidationBtnActive
+                                : ""
+                            }`}>
+                            <Image
+                              loading="eager"
+                              priority
+                              src="/consolidation-icon_b.png"
+                              alt="consolidation"
+                              width={20}
+                              height={20}
+                            />
+                          </button>
+                        }
+                        align={"end"}>
                         <NavDropdown.Item
-                          className={styles.dropdownItemViewMode}>
-                          <Dropdown
-                            onMouseEnter={() => setViewModeOpen(true)}
-                            onMouseLeave={() => setViewModeOpen(false)}
-                            className={styles.viewModeDropdown}
-                            drop={"down-centered"}
-                            show={viewModeOpen}>
-                            <Dropdown.Toggle>View Mode</Dropdown.Toggle>
-                            <Dropdown.Menu>
-                              <Dropdown.Item
-                                className="d-flex align-items-center"
-                                onClick={() => setView(VIEW.WALLET)}>
-                                {view == VIEW.WALLET && (
-                                  <FontAwesomeIcon
-                                    className={styles.viewModeIcon}
-                                    icon="check-circle"></FontAwesomeIcon>
-                                )}
-                                Wallet
-                              </Dropdown.Item>
-                              <Dropdown.Item
-                                className="d-flex align-items-center"
-                                onClick={() => setView(VIEW.CONSOLIDATION)}>
-                                {view == VIEW.CONSOLIDATION && (
-                                  <FontAwesomeIcon
-                                    className={`${styles.viewModeIcon} ${styles.viewModeIconConsolidation}`}
-                                    icon="check-circle"></FontAwesomeIcon>
-                                )}
-                                Consolidation
-                              </Dropdown.Item>
-                            </Dropdown.Menu>
-                          </Dropdown>
+                          className={styles.dropdownItemViewMode}
+                          onClick={() => setView(VIEW.WALLET)}>
+                          {view == VIEW.WALLET && (
+                            <FontAwesomeIcon
+                              className={styles.viewModeIcon}
+                              icon="check-circle"></FontAwesomeIcon>
+                          )}
+                          Wallet
                         </NavDropdown.Item>
-                      )}
-                    </NavDropdown>
+                        <NavDropdown.Item
+                          onClick={() => setView(VIEW.CONSOLIDATION)}
+                          className={styles.dropdownItemViewMode}>
+                          {view == VIEW.CONSOLIDATION && (
+                            <FontAwesomeIcon
+                              className={`${styles.viewModeIcon} ${styles.viewModeIconConsolidation}`}
+                              icon="check-circle"></FontAwesomeIcon>
+                          )}
+                          Consolidation
+                        </NavDropdown.Item>
+                      </NavDropdown>
+                    )}
                   </>
-                ) : (
-                  <Web3Button
-                    label="Connect"
-                    icon="hide"
-                    avatar="hide"
-                    balance="hide"
-                  />
                 )}
               </h3>
             </Col>
@@ -764,14 +756,14 @@ export default function Header(props: Props) {
                                 Cookie Policy
                               </NavDropdown.Item>
                             </NavDropdown>
-                            {isConnected ? (
+                            <Web3Button
+                              label="Connect"
+                              icon="hide"
+                              avatar="hide"
+                              balance="hide"
+                            />
+                            {isConnected && (
                               <>
-                                <Web3Button
-                                  label="Connect"
-                                  icon="hide"
-                                  avatar="hide"
-                                  balance="hide"
-                                />
                                 <button
                                   className={`${styles.userProfileBtn}`}
                                   onClick={() =>
@@ -827,56 +819,9 @@ export default function Header(props: Props) {
                                       )}
                                       Consolidation
                                     </NavDropdown.Item>
-                                    {/* <Dropdown
-                                        onMouseEnter={() =>
-                                          setViewModeOpen(true)
-                                        }
-                                        onMouseLeave={() =>
-                                          setViewModeOpen(false)
-                                        }
-                                        className={styles.viewModeDropdown}
-                                        drop={"start"}
-                                        show={viewModeOpen}>
-                                        <Dropdown.Toggle>
-                                          View Mode
-                                        </Dropdown.Toggle>
-                                        <Dropdown.Menu>
-                                          <Dropdown.Item
-                                            className="d-flex align-items-center"
-                                            onClick={() =>
-                                              setView(VIEW.WALLET)
-                                            }>
-                                            {view == VIEW.WALLET && (
-                                              <FontAwesomeIcon
-                                                className={styles.viewModeIcon}
-                                                icon="check-circle"></FontAwesomeIcon>
-                                            )}
-                                            Wallet
-                                          </Dropdown.Item>
-                                          <Dropdown.Item
-                                            className="d-flex align-items-center"
-                                            onClick={() =>
-                                              setView(VIEW.CONSOLIDATION)
-                                            }>
-                                            {view == VIEW.CONSOLIDATION && (
-                                              <FontAwesomeIcon
-                                                className={`${styles.viewModeIcon} ${styles.viewModeIconConsolidation}`}
-                                                icon="check-circle"></FontAwesomeIcon>
-                                            )}
-                                            Consolidation
-                                          </Dropdown.Item>
-                                        </Dropdown.Menu>
-                                      </Dropdown> */}
                                   </NavDropdown>
                                 )}
                               </>
-                            ) : (
-                              <Web3Button
-                                label="Connect"
-                                icon="hide"
-                                avatar="hide"
-                                balance="hide"
-                              />
                             )}
                           </Nav>
                         </Navbar>
