@@ -160,7 +160,11 @@ function getConsolidationReadParams(
 
 export default function CollectionDelegationComponent(props: Props) {
   const toastRef = useRef<HTMLDivElement>(null);
-  const accountResolution = useAccount();
+  // const accountResolution = useAccount();
+  const accountResolution = {
+    address: "0xE6d5EC576a21924Dfbca631d8128f5B4272a7FE6" as `0x${string}`,
+    isConnected: true,
+  };
   const networkResolution = useNetwork();
   const ensResolution = useEnsName({
     address: accountResolution.address,
@@ -293,6 +297,7 @@ export default function CollectionDelegationComponent(props: Props) {
             });
           }
         );
+        console.log("activeConsolidations", activeConsolidations);
         setOutgoingActiveConsolidations(activeConsolidations);
       }
     },
