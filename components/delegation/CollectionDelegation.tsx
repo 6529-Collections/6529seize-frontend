@@ -293,7 +293,6 @@ export default function CollectionDelegationComponent(props: Props) {
             });
           }
         );
-        console.log("activeConsolidations", activeConsolidations);
         setOutgoingActiveConsolidations(activeConsolidations);
       }
     },
