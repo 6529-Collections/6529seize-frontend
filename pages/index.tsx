@@ -72,13 +72,11 @@ export default function Home() {
           nft.contract
         }&wallet=${connectedWallets.join(",")}&id=${nft.id}`
       ).then((response: DBResponse) => {
-        if (response.data.length > 0) {
-          let balance = 0;
-          response.data.map((d) => {
-            balance += d.balance;
-          });
-          setNftBalance(balance);
-        }
+        let balance = 0;
+        response.data.map((d) => {
+          balance += d.balance;
+        });
+        setNftBalance(balance);
       });
     } else {
       setNftBalance(0);
