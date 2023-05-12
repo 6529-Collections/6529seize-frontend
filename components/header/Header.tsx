@@ -152,15 +152,8 @@ export default function Header(props: Props) {
                     />
                     <NavDropdown
                       title={
-                        <button
-                          className={`${styles.userDropdownBtn} ${
-                            view == VIEW.CONSOLIDATION &&
-                            isConsolidation &&
-                            !web3Modal.isOpen
-                              ? styles.userDropdownBtnConsolidation
-                              : ""
-                          }`}>
-                          <span className={styles.userDropdownBtnIcon}></span>
+                        <button className={`${styles.userBtn}`}>
+                          <span className={styles.userBtnIcon}></span>
                         </button>
                       }
                       className={`${styles.userDropdown}`}
@@ -779,37 +772,62 @@ export default function Header(props: Props) {
                                   avatar="hide"
                                   balance="hide"
                                 />
-                                <NavDropdown
-                                  title={
-                                    <button
-                                      className={`${styles.userDropdownBtn} ${
-                                        view == VIEW.CONSOLIDATION &&
-                                        isConsolidation &&
-                                        !web3Modal.isOpen
-                                          ? styles.userDropdownBtnConsolidation
-                                          : ""
-                                      }`}>
-                                      <span
-                                        className={
-                                          styles.userDropdownBtnIcon
-                                        }></span>
-                                    </button>
-                                  }
-                                  className={`${styles.userDropdown}`}
-                                  align={"end"}>
-                                  <NavDropdown.Item
-                                    className={styles.dropdownItemProfile}
-                                    onClick={() =>
-                                      (window.location.href = `/${
-                                        address as string
-                                      }`)
-                                    }>
-                                    Profile
-                                  </NavDropdown.Item>
-                                  {isConsolidation && (
+                                <button
+                                  className={`${styles.userProfileBtn}`}
+                                  onClick={() =>
+                                    (window.location.href = `/${
+                                      address as string
+                                    }`)
+                                  }>
+                                  <FontAwesomeIcon icon="user"></FontAwesomeIcon>
+                                </button>
+                                {isConsolidation && (
+                                  <NavDropdown
+                                    className={`${styles.consolidationDropDown}`}
+                                    title={
+                                      <button
+                                        className={`${
+                                          styles.consolidationDropdownBtn
+                                        } ${
+                                          isConsolidation &&
+                                          view == VIEW.CONSOLIDATION
+                                            ? styles.consolidationBtnActive
+                                            : ""
+                                        }`}>
+                                        <Image
+                                          loading="eager"
+                                          priority
+                                          src="/consolidation-icon_b.png"
+                                          alt="consolidation"
+                                          width={20}
+                                          height={20}
+                                        />
+                                      </button>
+                                    }
+                                    align={"end"}>
                                     <NavDropdown.Item
+                                      className={styles.dropdownItemViewMode}
+                                      onClick={() => setView(VIEW.WALLET)}>
+                                      {view == VIEW.WALLET && (
+                                        <FontAwesomeIcon
+                                          className={styles.viewModeIcon}
+                                          icon="check-circle"></FontAwesomeIcon>
+                                      )}
+                                      Wallet
+                                    </NavDropdown.Item>
+                                    <NavDropdown.Item
+                                      onClick={() =>
+                                        setView(VIEW.CONSOLIDATION)
+                                      }
                                       className={styles.dropdownItemViewMode}>
-                                      <Dropdown
+                                      {view == VIEW.CONSOLIDATION && (
+                                        <FontAwesomeIcon
+                                          className={`${styles.viewModeIcon} ${styles.viewModeIconConsolidation}`}
+                                          icon="check-circle"></FontAwesomeIcon>
+                                      )}
+                                      Consolidation
+                                    </NavDropdown.Item>
+                                    {/* <Dropdown
                                         onMouseEnter={() =>
                                           setViewModeOpen(true)
                                         }
@@ -848,10 +866,9 @@ export default function Header(props: Props) {
                                             Consolidation
                                           </Dropdown.Item>
                                         </Dropdown.Menu>
-                                      </Dropdown>
-                                    </NavDropdown.Item>
-                                  )}
-                                </NavDropdown>
+                                      </Dropdown> */}
+                                  </NavDropdown>
+                                )}
                               </>
                             ) : (
                               <Web3Button
@@ -896,10 +913,7 @@ export default function Header(props: Props) {
           themeVariables={{
             "--w3m-background-color": "#282828",
             "--w3m-logo-image-url": "/Seize_Logo_Glasses_3.png",
-            "--w3m-accent-color":
-              view == VIEW.CONSOLIDATION && isConsolidation && !web3Modal.isOpen
-                ? "#ffff00"
-                : "#fff",
+            "--w3m-accent-color": "#fff",
             "--w3m-accent-fill-color": "#000",
             "--w3m-button-border-radius": "0",
             "--w3m-font-family": "Arial",
