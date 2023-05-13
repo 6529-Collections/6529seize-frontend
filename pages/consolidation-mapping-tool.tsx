@@ -12,50 +12,50 @@ const Header = dynamic(() => import("../components/header/Header"), {
   loading: () => <HeaderPlaceholder />,
 });
 
-const DelegationMappingTool = dynamic(
-  () => import("../components/mapping-tools/DelegationMappingTool"),
+const ConsolidationMappingTool = dynamic(
+  () => import("../components/mapping-tools/ConsolidationMappingTool"),
 
   { ssr: false, loading: () => <MappingToolPlaceholder /> }
 );
 
-export default function DelegationMappingToolPage() {
+export default function ConsolidationMappingToolPage() {
   const [breadcrumbs, setBreadcrumbs] = useState<Crumb[]>([
     { display: "Home", href: "/" },
-    { display: "Delegation Mapping Tool" },
+    { display: "Consolidation Mapping Tool" },
   ]);
 
-  const [html, setHtml] = useState("");
-  const [htmlError, setHtmlError] = useState(false);
+  // const [html, setHtml] = useState("");
+  // const [htmlError, setHtmlError] = useState(false);
 
-  useEffect(() => {
-    fetch(
-      "https://6529bucket.s3.eu-west-1.amazonaws.com/seize_html/delegation-mapping-tool/how-to-use.html"
-    ).then((response) => {
-      if (response.status == 200) {
-        response.text().then((htmlText) => {
-          setHtml(htmlText);
-          setHtmlError(false);
-        });
-      } else {
-        setHtmlError(true);
-      }
-    });
-  }, []);
+  // useEffect(() => {
+  //   fetch(
+  //     "https://6529bucket.s3.eu-west-1.amazonaws.com/seize_html/consolidation-mapping-tool/how-to-use.html"
+  //   ).then((response) => {
+  //     if (response.status == 200) {
+  //       response.text().then((htmlText) => {
+  //         setHtml(htmlText);
+  //         setHtmlError(false);
+  //       });
+  //     } else {
+  //       setHtmlError(true);
+  //     }
+  //   });
+  // }, []);
 
   return (
     <>
       <Head>
-        <title>Delegation Mapping Tool | 6529 SEIZE</title>
+        <title>Consolidation Mapping Tool | 6529 SEIZE</title>
         <link rel="icon" href="/favicon.ico" />
         <meta
           name="description"
-          content="Delegation Mapping Tool | 6529 SEIZE"
+          content="Consolidation Mapping Tool | 6529 SEIZE"
         />
         <meta
           property="og:url"
-          content={`${process.env.BASE_ENDPOINT}/delegation-mapping-tool`}
+          content={`${process.env.BASE_ENDPOINT}/consolidation-mapping-tool`}
         />
-        <meta property="og:title" content="Delegation Mapping Tool" />
+        <meta property="og:title" content="Consolidation Mapping Tool" />
         <meta property="og:description" content="6529 SEIZE" />
         <meta
           property="og:image"
@@ -77,11 +77,11 @@ export default function DelegationMappingToolPage() {
                     md={{ span: 10, offset: 1 }}
                     lg={{ span: 8, offset: 2 }}>
                     <h1 className="float-none text-center">
-                      DELEGATION MAPPING TOOL
+                      CONSOLIDATION MAPPING TOOL
                     </h1>
                   </Col>
                 </Row>
-                <Row className="pt-2">
+                {/* <Row className="pt-2">
                   <Col
                     xs={{ span: 12 }}
                     sm={{ span: 12 }}
@@ -101,7 +101,7 @@ export default function DelegationMappingToolPage() {
                     return (from the NFTDelegation.com contract).{" "}
                     <a href="#how-to-use">How to use this tool?</a>
                   </Col>
-                </Row>
+                </Row> */}
                 <Row>
                   <Col
                     xs={{ span: 12 }}
@@ -111,7 +111,7 @@ export default function DelegationMappingToolPage() {
                     <Container className="pt-5 pb-5">
                       <Row>
                         <Col>
-                          <DelegationMappingTool />
+                          <ConsolidationMappingTool />
                         </Col>
                       </Row>
                     </Container>
@@ -121,7 +121,7 @@ export default function DelegationMappingToolPage() {
             </Col>
           </Row>
         </Container>
-        <Container id="how-to-use" className="pt-1 pb-5">
+        {/* <Container id="how-to-use" className="pt-1 pb-5">
           <Row>
             <Col
               className={styles.htmlContainer}
@@ -133,7 +133,7 @@ export default function DelegationMappingToolPage() {
                 __html: html,
               }}></Col>
           </Row>
-        </Container>
+        </Container> */}
       </main>
     </>
   );
