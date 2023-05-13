@@ -87,7 +87,7 @@ export default function ConsolidationMappingTool() {
 
     const link = document.createElement("a");
     link.setAttribute("href", url);
-    link.setAttribute("download", "output.csv");
+    link.setAttribute("download", "consolidation_output.csv");
 
     document.body.appendChild(link);
     link.click();
