@@ -1,4 +1,4 @@
-import styles from "./DelegationMappingTool.module.scss";
+import styles from "./MappingTool.module.scss";
 import { Form, Row, Col, Button, Container } from "react-bootstrap";
 import { useEffect, useRef, useState } from "react";
 import {
@@ -15,7 +15,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 const csvParser = require("csv-parser");
 
-export default function Download() {
+export default function DelegationMappingTool() {
   const inputRef = useRef(null);
   const [dragActive, setDragActive] = useState(false);
 
@@ -47,7 +47,6 @@ export default function Download() {
   const handleDrop = function (e: any) {
     e.preventDefault();
     e.stopPropagation();
-    console.log("drop");
     setDragActive(false);
     if (e.dataTransfer.files && e.dataTransfer.files[0]) {
       setFile(e.dataTransfer.files[0]);
