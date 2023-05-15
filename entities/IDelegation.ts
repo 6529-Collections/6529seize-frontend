@@ -13,3 +13,9 @@ export interface Delegation {
   collection: string;
   use_case: number;
 }
+
+export interface Consolidation {
+  consolidation_display: string;
+  primary: string;
+  wallets: string[];
+}

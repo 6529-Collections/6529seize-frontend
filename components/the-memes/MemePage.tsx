@@ -830,7 +830,7 @@ export default function MemePage(props: Props) {
                               <tr className={`pt-1 ${styles.overviewColumn}`}>
                                 <td>TDH</td>
                                 <td className="text-right">
-                                  {Math.round(myTDH.tdh)}
+                                  {numberWithCommas(Math.round(myTDH.tdh))}
                                 </td>
                               </tr>
                               <tr className={`${styles.overviewColumn}`}>

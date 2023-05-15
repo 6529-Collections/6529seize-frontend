@@ -835,7 +835,7 @@ export default function CollectionDelegationComponent(props: Props) {
             <Accordion.Header>Outgoing</Accordion.Header>
             <Accordion.Body>
               {printOutgoingDelegations(
-                "Delegation Managers (Sub-Delegations)",
+                "Delegation Managers",
                 [...outgoingDelegations].filter(
                   (d) => d.useCase.use_case == SUB_DELEGATION_USE_CASE.use_case
                 )
