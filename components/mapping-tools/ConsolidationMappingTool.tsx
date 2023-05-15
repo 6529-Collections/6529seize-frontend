@@ -1,31 +1,30 @@
-import styles from "./DelegationMappingTool.module.scss";
+import styles from "./MappingTool.module.scss";
 import { Form, Row, Col, Button, Container } from "react-bootstrap";
 import { useEffect, useRef, useState } from "react";
-import {
-  ALL_USE_CASE,
-  ALL_USE_CASES,
-  DELEGATION_USE_CASES,
-  SUPPORTED_COLLECTIONS,
-} from "../../pages/delegation/[...section]";
 import { fetchAllPages } from "../../services/6529api";
-import { Delegation } from "../../entities/IDelegation";
+import { Consolidation } from "../../entities/IDelegation";
 import { areEqualAddresses } from "../../helpers/Helpers";
-import { DELEGATION_ALL_ADDRESS, MEMES_CONTRACT } from "../../constants";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 const csvParser = require("csv-parser");
 
-export default function Download() {
+interface ConsolidationData {
+  address: string;
+  token_id: number;
+  balance: number;
+  contract: string;
+  name: string;
+}
+
+export default function ConsolidationMappingTool() {
   const inputRef = useRef(null);
   const [dragActive, setDragActive] = useState(false);
 
   const [file, setFile] = useState<any>();
-  const [collection, setCollection] = useState<string>("0");
-  const [useCase, setUseCase] = useState<number>(0);
   const [processing, setProcessing] = useState(false);
-  const [delegations, setDelegations] = useState<Delegation[]>([]);
+  const [consolidations, setConsolidations] = useState<Consolidation[]>([]);
 
-  const [csvData, setCsvData] = useState<any[]>([]);
+  const [csvData, setCsvData] = useState<ConsolidationData[]>([]);
   function submit() {
     setProcessing(true);
   }
@@ -47,25 +46,40 @@ export default function Download() {
   const handleDrop = function (e: any) {
     e.preventDefault();
     e.stopPropagation();
-    console.log("drop");
     setDragActive(false);
     if (e.dataTransfer.files && e.dataTransfer.files[0]) {
       setFile(e.dataTransfer.files[0]);
     }
   };
 
-  function getForAddress(address: string, collection: string, useCase: number) {
-    const myDelegations = delegations.find(
-      (d) =>
-        areEqualAddresses(address, d.from_address) &&
-        areEqualAddresses(collection, d.collection) &&
-        useCase == d.use_case
+  function getForAddress(address: string) {
+    const myConsolidations = consolidations.find((c) =>
+      c.wallets.some((w) => areEqualAddresses(address, w))
     );
-    return myDelegations;
+    return myConsolidations;
   }
 
-  function downloadCsvFile(data: string[]) {
-    const csvString = data.map((d) => d.toLowerCase()).join("\n");
+  function sumForAddresses(
+    addresses: string[],
+    token_id: number,
+    contract: string
+  ) {
+    const myConsolidations = csvData.filter(
+      (d) =>
+        addresses.some((a) => areEqualAddresses(a, d.address)) &&
+        areEqualAddresses(contract, d.contract) &&
+        token_id === d.token_id
+    );
+    const balance = myConsolidations.reduce((a, b) => a + b.balance, 0);
+    return balance;
+  }
+
+  function downloadCsvFile(data: ConsolidationData[]) {
+    const csvHeader = "address,token_id,balance,contract,name";
+    const csvData = data.map((d) => {
+      return `${d.address},${d.token_id},${d.balance},${d.contract},${d.name}`;
+    });
+    const csvString = `${csvHeader}\n${csvData.join("\n")}`;
 
     const blob = new Blob([csvString], { type: "text/csv;charset=utf-8;" });
 
@@ -73,7 +87,7 @@ export default function Download() {
 
     const link = document.createElement("a");
     link.setAttribute("href", url);
-    link.setAttribute("download", "output.csv");
+    link.setAttribute("download", "consolidation_output.csv");
 
     document.body.appendChild(link);
     link.click();
@@ -81,18 +95,28 @@ export default function Download() {
   }
 
   useEffect(() => {
-    async function fetchDelegations(url: string) {
-      fetchAllPages(url).then((delegations: Delegation[]) => {
-        setDelegations(delegations);
+    async function fetchConsolidations(url: string) {
+      fetchAllPages(url).then((consolidations: Consolidation[]) => {
+        setConsolidations(consolidations);
         const reader = new FileReader();
 
         reader.onload = async () => {
           const data = reader.result;
-          const results: any[] = [];
+          const results: ConsolidationData[] = [];
+          let isFirstRow = true;
 
           const parser = csvParser({ headers: true })
             .on("data", (row: any) => {
-              results.push(row["_0"]);
+              if (isFirstRow) {
+                isFirstRow = false;
+              } else {
+                const address = row["_0"];
+                const token_id = parseInt(row["_1"]);
+                const balance = parseInt(row["_2"]);
+                const contract = row["_3"];
+                const name = row["_4"];
+                results.push({ address, token_id, balance, contract, name });
+              }
             })
             .on("end", () => {
               setCsvData(results);
@@ -109,42 +133,35 @@ export default function Download() {
       });
     }
     if (processing) {
-      const useCaseFilter = `&use_case=1,${useCase}`;
-
-      const collectionFilter = `&collection=${DELEGATION_ALL_ADDRESS},${collection}`;
-      const initialUrl = `${process.env.API_ENDPOINT}/api/delegations?${useCaseFilter}${collectionFilter}`;
-      fetchDelegations(initialUrl);
+      const initialUrl = `${process.env.API_ENDPOINT}/api/consolidations`;
+      fetchConsolidations(initialUrl);
     }
   }, [processing]);
 
   useEffect(() => {
-    const out: string[] = [];
-    if (csvData.length > 0 && delegations.length > 0) {
-      csvData.map((address) => {
-        const memesUseCase = getForAddress(address, MEMES_CONTRACT, useCase);
-        if (memesUseCase) {
-          out.push(memesUseCase.to_address);
-        } else {
-          const memesAll = getForAddress(address, MEMES_CONTRACT, 1);
-          if (memesAll) {
-            out.push(memesAll.to_address);
-          } else {
-            const anyUseCase = getForAddress(
-              address,
-              DELEGATION_ALL_ADDRESS,
-              useCase
+    const out: ConsolidationData[] = [];
+    if (csvData.length > 0 && consolidations.length > 0) {
+      csvData.map((consolidationData) => {
+        const addressConsolidations = getForAddress(consolidationData.address);
+        if (addressConsolidations) {
+          if (
+            areEqualAddresses(
+              consolidationData.address,
+              addressConsolidations.primary
+            )
+          ) {
+            const sum = sumForAddresses(
+              addressConsolidations.wallets,
+              consolidationData.token_id,
+              consolidationData.contract
             );
-            if (anyUseCase) {
-              out.push(anyUseCase.to_address);
-            } else {
-              const anyAll = getForAddress(address, DELEGATION_ALL_ADDRESS, 1);
-              if (anyAll) {
-                out.push(anyAll.to_address);
-              } else {
-                out.push(address);
-              }
-            }
+            out.push({
+              ...consolidationData,
+              balance: sum,
+            });
           }
+        } else {
+          out.push(consolidationData);
         }
       });
       downloadCsvFile(out);
@@ -184,73 +201,18 @@ export default function Download() {
           </Container>
         </Col>
       </Row>
-      <Row className="pt-4">
-        <Col>Select Collection</Col>
-      </Row>
-      <Row className="pt-2">
-        <Col>
-          <Form.Select
-            className={`${styles.formInput}`}
-            value={collection}
-            onChange={(e) => {
-              setCollection(e.target.value);
-            }}>
-            <option value="0" disabled>
-              ...
-            </option>
-            {SUPPORTED_COLLECTIONS.map((sc) => {
-              return (
-                <option
-                  key={`delegation-tool-select-collection-${sc.contract}`}
-                  value={sc.contract}>
-                  {sc.display}
-                </option>
-              );
-            })}
-          </Form.Select>
-        </Col>
-      </Row>
-      <Row className="pt-4">
-        <Col>Select Use Case</Col>
-      </Row>
-      <Row className="pt-2">
-        <Col>
-          <Form.Select
-            className={`${styles.formInput}`}
-            value={useCase}
-            onChange={(e) => {
-              const newCase = parseInt(e.target.value);
-              setUseCase(newCase);
-            }}>
-            <option value={0} disabled>
-              ...
-            </option>
-            {DELEGATION_USE_CASES.map((uc) => {
-              return (
-                <option
-                  key={`delegation-tool-select-use-case-${uc.use_case}`}
-                  value={uc.use_case}>
-                  #{uc.use_case} - {uc.display}
-                </option>
-              );
-            })}
-          </Form.Select>
-        </Col>
-      </Row>
-      <Row className="pt-4">
+      {/* <Row className="pt-4">
         <Col className="font-color-h font-smaller">
           Note: If the selected collection or use case delegation is not found,
           the tool will automatically switch to using delegations for
           &quot;Any&quot; or &quot;All&quot; options respectively.
         </Col>
-      </Row>
+      </Row> */}
       <Row className="pt-3">
         <Col>
           <Button
             className={`${styles.submitBtn} ${
-              useCase == 0 || processing || !file
-                ? styles.submitBtnDisabled
-                : ""
+              processing || !file ? styles.submitBtnDisabled : ""
             }`}
             onClick={() => submit()}>
             {processing ? "Processing" : "Submit"}
