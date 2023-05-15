@@ -144,19 +144,21 @@ export default function ConsolidationMappingTool() {
       csvData.map((consolidationData) => {
         const addressConsolidations = getForAddress(consolidationData.address);
         if (addressConsolidations) {
+          const sum = sumForAddresses(
+            addressConsolidations.wallets,
+            consolidationData.token_id,
+            consolidationData.contract
+          );
           if (
             areEqualAddresses(
               consolidationData.address,
               addressConsolidations.primary
-            )
+            ) ||
+            sum == consolidationData.balance
           ) {
-            const sum = sumForAddresses(
-              addressConsolidations.wallets,
-              consolidationData.token_id,
-              consolidationData.contract
-            );
             out.push({
               ...consolidationData,
+              address: addressConsolidations.primary,
               balance: sum,
             });
           }

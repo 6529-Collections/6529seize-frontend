@@ -24,23 +24,23 @@ export default function ConsolidationMappingToolPage() {
     { display: "Consolidation Mapping Tool" },
   ]);
 
-  // const [html, setHtml] = useState("");
-  // const [htmlError, setHtmlError] = useState(false);
+  const [html, setHtml] = useState("");
+  const [htmlError, setHtmlError] = useState(false);
 
-  // useEffect(() => {
-  //   fetch(
-  //     "https://6529bucket.s3.eu-west-1.amazonaws.com/seize_html/consolidation-mapping-tool/how-to-use.html"
-  //   ).then((response) => {
-  //     if (response.status == 200) {
-  //       response.text().then((htmlText) => {
-  //         setHtml(htmlText);
-  //         setHtmlError(false);
-  //       });
-  //     } else {
-  //       setHtmlError(true);
-  //     }
-  //   });
-  // }, []);
+  useEffect(() => {
+    fetch(
+      "https://6529bucket.s3.eu-west-1.amazonaws.com/seize_html/consolidation-mapping-tool/how-to-use.html"
+    ).then((response) => {
+      if (response.status == 200) {
+        response.text().then((htmlText) => {
+          setHtml(htmlText);
+          setHtmlError(false);
+        });
+      } else {
+        setHtmlError(true);
+      }
+    });
+  }, []);
 
   return (
     <>
@@ -81,7 +81,7 @@ export default function ConsolidationMappingToolPage() {
                     </h1>
                   </Col>
                 </Row>
-                {/* <Row className="pt-2">
+                <Row className="pt-2">
                   <Col
                     xs={{ span: 12 }}
                     sm={{ span: 12 }}
@@ -96,12 +96,12 @@ export default function ConsolidationMappingToolPage() {
                     sm={{ span: 12 }}
                     md={{ span: 10, offset: 1 }}
                     lg={{ span: 8, offset: 2 }}>
-                    The Delegation Mapping tool allows anyone to easily upload a
-                    CSV file with addresses to receive delegated addresses in
-                    return (from the NFTDelegation.com contract).{" "}
-                    <a href="#how-to-use">How to use this tool?</a>
+                    The Consolidation Mapping tool allows anyone to easily
+                    upload a CSV file with addresses and balances to receive
+                    consolidated addresses in return (from the NFTDelegation.com
+                    contract). <a href="#how-to-use">How to use this tool?</a>
                   </Col>
-                </Row> */}
+                </Row>
                 <Row>
                   <Col
                     xs={{ span: 12 }}
@@ -121,7 +121,7 @@ export default function ConsolidationMappingToolPage() {
             </Col>
           </Row>
         </Container>
-        {/* <Container id="how-to-use" className="pt-1 pb-5">
+        <Container id="how-to-use" className="pt-1 pb-5">
           <Row>
             <Col
               className={styles.htmlContainer}
@@ -133,7 +133,7 @@ export default function ConsolidationMappingToolPage() {
                 __html: html,
               }}></Col>
           </Row>
-        </Container> */}
+        </Container>
       </main>
     </>
   );
