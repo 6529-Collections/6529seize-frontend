@@ -37,7 +37,6 @@ enum VIEW {
 export default function Header(props: Props) {
   const router = useRouter();
   const client = useClient();
-  const web3Modal = useWeb3Modal();
   const ethereumClient = new EthereumClient(client, [mainnet]);
   const [consolidations, setConsolidations] = useState<string[]>([]);
   const [isConsolidation, setIsConsolidation] = useState(false);
@@ -149,7 +148,8 @@ export default function Header(props: Props) {
           </Row>
           <Row className="pt-3 pb-3">
             <Col>
-              <h3 className="d-flex justify-content-center">
+              <h3
+                className={`d-flex justify-content-center ${styles.burgerMenuHeader}`}>
                 <Web3Button
                   label="Connect"
                   icon="hide"
@@ -255,11 +255,12 @@ export default function Header(props: Props) {
                   setsetShowBurgerMenuCommunity(!setShowBurgerMenuCommunity);
                   setShowBurgerMenuAbout(false);
                 }}
-                className={
-                  setShowBurgerMenuCommunity
-                    ? styles.burgerMenuCaretClose
-                    : styles.burgerMenuCaretOpen
-                }>
+                className={`${styles.burgerMenuHeader}
+                  ${
+                    setShowBurgerMenuCommunity
+                      ? styles.burgerMenuCaretClose
+                      : styles.burgerMenuCaretOpen
+                  }`}>
                 Community
               </h3>
             </Col>
@@ -298,11 +299,36 @@ export default function Header(props: Props) {
                     </a>
                   </Col>
                 </Row>
+                <Row>
+                  <Col xs={{ span: 6, offset: 3 }}>
+                    <hr />
+                  </Col>
+                </Row>
+                <Row className="pt-3">
+                  <Col>
+                    <h3
+                      className={`${styles.dropdownItemHeader} ${styles.burgerMenuHeader}`}>
+                      Tools
+                    </h3>
+                  </Col>
+                </Row>
                 <Row className="pt-3">
                   <Col>
                     <a href="/delegation-mapping-tool">
-                      <h3>Delegation Mapping Tool</h3>
+                      <h3>Delegation Mapping</h3>
                     </a>
+                  </Col>
+                </Row>
+                <Row className="pt-3">
+                  <Col>
+                    <a href="/consolidation-mapping-tool">
+                      <h3>Consolidation Mapping</h3>
+                    </a>
+                  </Col>
+                </Row>
+                <Row>
+                  <Col xs={{ span: 6, offset: 3 }}>
+                    <hr />
                   </Col>
                 </Row>
                 <Row className="pt-3">
@@ -327,11 +353,12 @@ export default function Header(props: Props) {
                   setShowBurgerMenuAbout(!showBurgerMenuAbout);
                   setsetShowBurgerMenuCommunity(false);
                 }}
-                className={
-                  showBurgerMenuAbout
-                    ? styles.burgerMenuCaretClose
-                    : styles.burgerMenuCaretOpen
-                }>
+                className={`${styles.burgerMenuHeader}
+                  ${
+                    showBurgerMenuAbout
+                      ? styles.burgerMenuCaretClose
+                      : styles.burgerMenuCaretOpen
+                  }`}>
                 About
               </h3>
             </Col>
@@ -611,14 +638,29 @@ export default function Header(props: Props) {
                                 }>
                                 Consolidation Use Cases
                               </NavDropdown.Item>
+                              <NavDropdown.Divider />
+                              <NavDropdown.Item
+                                disabled
+                                className={styles.dropdownItemHeader}>
+                                Tools
+                              </NavDropdown.Item>
                               <NavDropdown.Item
                                 className={styles.dropdownItem}
                                 onClick={() =>
                                   (window.location.href =
                                     "/delegation-mapping-tool")
                                 }>
-                                Delegation Mapping Tool
+                                Delegation Mapping
                               </NavDropdown.Item>
+                              <NavDropdown.Item
+                                className={styles.dropdownItem}
+                                onClick={() =>
+                                  (window.location.href =
+                                    "/consolidation-mapping-tool")
+                                }>
+                                Consolidation Mapping
+                              </NavDropdown.Item>
+                              <NavDropdown.Divider />
                               <NavDropdown.Item
                                 className={styles.dropdownItem}
                                 onClick={() =>
