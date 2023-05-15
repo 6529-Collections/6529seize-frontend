@@ -147,7 +147,53 @@
   }
 }
 
-.userDropdownBtn {
+.consolidationDropDown {
+  ::after {
+    display: none;
+  }
+}
+
+.consolidationDropdownBtn {
+  border: none;
+  height: 40px;
+  background-color: white;
+  color: black !important;
+  text-align: center;
+  margin-left: 2px;
+
+  svg {
+    height: 20px;
+    width: 20px;
+  }
+
+  &:hover {
+    background-color: $off-white;
+  }
+
+  &::after {
+    display: none !important;
+  }
+}
+
+.userProfileBtn {
+  border: none;
+  height: 40px;
+  background-color: white;
+  color: black !important;
+  text-align: center;
+  margin-left: 2px;
+
+  svg {
+    height: 20px;
+    width: 20px;
+  }
+
+  &:hover {
+    background-color: $off-white;
+  }
+}
+
+.userBtn {
   border: none;
   height: 40px;
   padding: 0;
@@ -161,11 +207,15 @@
   width: 10px;
 }
 
-.userDropdownBtnConsolidation {
+.consolidationBtnActive {
   background-color: #ffff00;
+
+  &:hover {
+    background-color: darken(#ffff00, 5%);
+  }
 }
 
-.userDropdownBtnIcon {
+.userBtnIcon {
   position: absolute;
   right: 8px;
   top: 50%;
@@ -200,10 +250,6 @@
 
 .viewModeIconConsolidation {
   color: #ffff00;
-}
-
-.dropdownItemViewMode {
-  padding: 0;
 }
 
 .dropdownItemProfile {
