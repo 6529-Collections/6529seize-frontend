@@ -96,7 +96,15 @@ export default function Header(props: Props) {
       fetchUrl(
         `${process.env.API_ENDPOINT}/api/consolidations/${address}`
       ).then((response: DBResponse) => {
-        setConsolidations(Array.from(response.data));
+        if (
+          response.data.length == 1 &&
+          consolidations.length == 1 &&
+          props.onSetWallets
+        ) {
+          props.onSetWallets([address]);
+        } else {
+          setConsolidations(Array.from(response.data));
+        }
       });
     } else {
       setConsolidations([]);
