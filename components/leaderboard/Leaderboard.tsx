@@ -19,12 +19,14 @@ import Tippy from "@tippyjs/react";
 import ConsolidationSwitch from "../consolidation-switch/ConsolidationSwitch";
 import Address from "../address/Address";
 import SearchModal from "../searchModal/SearchModal";
+import DownloadUrlWidget from "../downloadUrlWidget/DownloadUrlWidget";
 
 interface Props {
   page: number;
   pageSize: number;
   showMore?: boolean;
   showLastTdh?: boolean;
+  showDownload?: boolean;
 }
 
 enum VIEW {
@@ -171,6 +173,8 @@ export default function Leaderboard(props: Props) {
   const [showSearchModal, setShowSearchModal] = useState(false);
   const [searchWallets, setSearchWallets] = useState<string[]>([]);
 
+  const [myFetchUrl, setMyFetchUrl] = useState<string>();
+
   if (props.showLastTdh) {
     printNextTdhCountdown();
   }
@@ -207,15 +211,15 @@ export default function Leaderboard(props: Props) {
     let museumFilter = hideMuseum ? "&hide_museum=true" : "";
     let teamFilter = hideTeam ? "&hide_team=true" : "";
     let walletFilter = "";
-    if (searchWallets) {
+    if (searchWallets && searchWallets.length > 0) {
       walletFilter = `&wallet=${searchWallets.join(",")}`;
     }
-    const url = `${process.env.API_ENDPOINT}/api/${
+    let url = `${process.env.API_ENDPOINT}/api/${
       view == VIEW.WALLET ? "owner_metrics" : "consolidated_owner_metrics"
     }`;
-    fetchUrl(
-      `${url}?page_size=${props.pageSize}&page=${pageProps.page}&sort=${sort.sort}&sort_direction=${sort.sort_direction}${tagFilter}${museumFilter}${teamFilter}${walletFilter}`
-    ).then((response: DBResponse) => {
+    url = `${url}?page_size=${props.pageSize}&page=${pageProps.page}&sort=${sort.sort}&sort_direction=${sort.sort_direction}${tagFilter}${museumFilter}${teamFilter}${walletFilter}`;
+    setMyFetchUrl(url);
+    fetchUrl(url).then((response: DBResponse) => {
       setTotalResults(response.count);
       setLeaderboard(response.data);
       setShowLoader(false);
@@ -2153,16 +2157,48 @@ export default function Leaderboard(props: Props) {
           )}
         </Col>
       </Row>
-      {props.showMore && totalResults > pageProps.pageSize && leaderboard && (
-        <Row className="text-center pt-2 pb-3">
-          <Pagination
-            page={pageProps.page}
-            pageSize={pageProps.pageSize}
-            totalResults={totalResults}
-            setPage={function (newPage: number) {
-              setPageProps({ ...pageProps, page: newPage });
-            }}
-          />
+      {props.showDownload && totalResults > 0 && leaderboard && myFetchUrl && (
+        <Row>
+          <Col
+            xs={12}
+            sm={12}
+            md={6}
+            className="pt-4 pb-3 d-flex justify-content-center">
+            <DownloadUrlWidget
+              preview="Page"
+              name={`${
+                view == VIEW.CONSOLIDATION ? `consolidated-` : ""
+              }community-download${lastTDH ? `-${lastTDH.block}` : ""}`}
+              url={`${myFetchUrl}${
+                view == VIEW.CONSOLIDATION ? `&include_primary_wallet=true` : ""
+              }&download_page=true`}
+            />
+            <DownloadUrlWidget
+              preview="All Pages"
+              name={`${
+                view == VIEW.CONSOLIDATION ? `consolidated-` : ""
+              }community-download${lastTDH ? `-${lastTDH.block}` : ""}`}
+              url={`${myFetchUrl}${
+                view == VIEW.CONSOLIDATION ? `&include_primary_wallet=true` : ""
+              }&download_all=true`}
+            />
+          </Col>
+          {props.showMore && totalResults > pageProps.pageSize && (
+            <Col
+              xs={12}
+              sm={12}
+              md={6}
+              className="pt-4 pb-3 d-flex justify-content-center">
+              <Pagination
+                page={pageProps.page}
+                pageSize={pageProps.pageSize}
+                totalResults={totalResults}
+                setPage={function (newPage: number) {
+                  setPageProps({ ...pageProps, page: newPage });
+                }}
+              />
+            </Col>
+          )}
         </Row>
       )}
       <SearchModal
