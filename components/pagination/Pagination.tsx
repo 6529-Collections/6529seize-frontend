@@ -63,7 +63,7 @@ export default function Pagination(props: Props) {
   return (
     <>
       {props.totalResults > props.pageSize && (
-        <Col>
+        <span>
           <FontAwesomeIcon
             icon="caret-left"
             onClick={pagePrevious}
@@ -94,7 +94,7 @@ export default function Pagination(props: Props) {
               isLastPage() ? `${styles.iconDisabled}` : `${styles.iconEnabled}`
             }
           />
-        </Col>
+        </span>
       )}
     </>
   );
