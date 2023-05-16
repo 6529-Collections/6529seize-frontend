@@ -1,8 +1,8 @@
 import styles from "./DownloadUrlWidget.module.scss";
-import { Container, Row, Col, Nav, Navbar, NavDropdown } from "react-bootstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { useEffect, useState } from "react";
 import useDownloader from "react-use-downloader";
+import { API_AUTH_COOKIE } from "../../constants";
+import Cookies from "js-cookie";
 
 interface Props {
   preview: string;
@@ -11,8 +11,13 @@ interface Props {
 }
 
 export default function DownloadUrlWidget(props: Props) {
+  const apiAuth = Cookies.get(API_AUTH_COOKIE);
+  let headers = {};
+  if (apiAuth) {
+    headers = { "x-6529-auth": apiAuth };
+  }
   const { size, elapsed, percentage, download, cancel, error, isInProgress } =
-    useDownloader();
+    useDownloader({ headers });
 
   function startDownload() {
     if (!isInProgress) {
