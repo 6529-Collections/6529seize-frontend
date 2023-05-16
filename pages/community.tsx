@@ -51,6 +51,7 @@ export default function TheMemesPage() {
                 page={1}
                 pageSize={50}
                 showMore={true}
+                showDownload={true}
                 showLastTdh={true}
               />
             </Col>

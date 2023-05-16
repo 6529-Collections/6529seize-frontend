@@ -126,8 +126,6 @@ const client = createClient({
   provider,
 });
 
-const ethereumClient = new EthereumClient(client, chains);
-
 export default function App({ Component, pageProps }: AppProps) {
   pageProps.provider = provider;
 

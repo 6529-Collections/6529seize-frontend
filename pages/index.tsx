@@ -66,7 +66,7 @@ export default function Home() {
   }, [nft]);
 
   useEffect(() => {
-    if (connectedWallets && nft && nft.id) {
+    if (connectedWallets && connectedWallets.length > 0 && nft && nft.id) {
       fetchUrl(
         `${process.env.API_ENDPOINT}/api/owners?contract=${
           nft.contract
@@ -102,9 +102,9 @@ export default function Home() {
       <Head>
         <title>6529 SEIZE</title>
         <link rel="icon" href="/favicon.ico" />
-        <meta name="description" content="Home | 6529 SEIZE" />
+        <meta name="description" content="6529 SEIZE" />
         <meta property="og:url" content={`${process.env.BASE_ENDPOINT}`} />
-        <meta property="og:title" content="Home" />
+        <meta property="og:title" content="6529 SEIZE" />
         <meta property="og:description" content="6529 SEIZE" />
         <meta
           property="og:image"
