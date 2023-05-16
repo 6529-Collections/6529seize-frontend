@@ -289,7 +289,7 @@ export default function CollectionDelegationComponent(props: Props) {
               wallet: w.wallet,
               status: data[index]
                 ? "consolidation active"
-                : "consolidation pending",
+                : "consolidation incomplete",
             });
           }
         );
@@ -365,7 +365,7 @@ export default function CollectionDelegationComponent(props: Props) {
               wallet: w.wallet,
               status: data[index]
                 ? "consolidation active"
-                : "consolidation pending",
+                : "consolidation incomplete",
             });
           }
         );
@@ -936,6 +936,8 @@ export default function CollectionDelegationComponent(props: Props) {
                               outgoingActiveConsolidations.find((i) =>
                                 areEqualAddresses(w.wallet, i.wallet)
                               )?.status;
+                            const pending =
+                              consolidationStatus == "consolidation incomplete";
                             return (
                               <tr
                                 key={`outgoing-${del.useCase.use_case}-${index}-${w.wallet}-${addressIndex}`}>
@@ -994,12 +996,23 @@ export default function CollectionDelegationComponent(props: Props) {
                                   {isConsolidation && (
                                     <span
                                       className={
-                                        consolidationStatus ==
-                                        "consolidation active"
+                                        !pending
                                           ? styles.consolidationActiveLabel
                                           : styles.consolidationNotAcceptedLabel
                                       }>
                                       {consolidationStatus}
+                                      {pending && (
+                                        <Tippy
+                                          content={
+                                            "Incoming consolidation missing"
+                                          }
+                                          placement={"top"}
+                                          theme={"light"}>
+                                          <FontAwesomeIcon
+                                            className={styles.infoIcon}
+                                            icon="info-circle"></FontAwesomeIcon>
+                                        </Tippy>
+                                      )}
                                     </span>
                                   )}
                                 </td>
@@ -1179,6 +1192,8 @@ export default function CollectionDelegationComponent(props: Props) {
                               incomingActiveConsolidations.find((i) =>
                                 areEqualAddresses(w.wallet, i.wallet)
                               )?.status;
+                            const pending =
+                              consolidationStatus == "consolidation incomplete";
                             return (
                               <tr
                                 key={`incoming-${del.useCase}-${index}-${w.wallet}`}>
@@ -1218,12 +1233,23 @@ export default function CollectionDelegationComponent(props: Props) {
                                   {isConsolidation && (
                                     <span
                                       className={
-                                        consolidationStatus ==
-                                        "consolidation active"
+                                        !pending
                                           ? styles.consolidationActiveLabel
                                           : styles.consolidationNotAcceptedLabel
                                       }>
                                       {consolidationStatus}
+                                      {pending && (
+                                        <Tippy
+                                          content={
+                                            "Outgoing consolidation missing"
+                                          }
+                                          placement={"top"}
+                                          theme={"light"}>
+                                          <FontAwesomeIcon
+                                            className={styles.infoIcon}
+                                            icon="info-circle"></FontAwesomeIcon>
+                                        </Tippy>
+                                      )}
                                     </span>
                                   )}
                                 </td>
