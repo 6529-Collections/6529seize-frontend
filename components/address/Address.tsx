@@ -395,10 +395,10 @@ export default function Address(props: Props) {
                 (props.tags.memesCardsSets == 0 || props.expandedTags) && (
                   <span
                     className={`${styles.addressTag} ${
-                      !SZN_1_ICON ? styles.memeSzn3Tag : ""
+                      !SZN_3_ICON ? styles.memeSzn3Tag : ""
                     }`}>
                     {(props.isUserPage || !SZN_3_ICON) && `SZN3 Sets x`}
-                    {props.tags.memesCardsSetS2}
+                    {props.tags.memesCardsSetS3}
                     {SZN_3_ICON && (
                       <img
                         src={SZN_3_ICON}
