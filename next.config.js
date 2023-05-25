@@ -57,7 +57,8 @@ const nextConfig = {
     VERSION: VERSION,
   },
   async generateBuildId() {
-    return VERSION;
+    // return VERSION;
+    return "6529Seize";
   },
   poweredByHeader: false,
   async headers() {
