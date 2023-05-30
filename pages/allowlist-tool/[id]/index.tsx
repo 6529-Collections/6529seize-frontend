@@ -8,12 +8,11 @@ const Header = dynamic(() => import("../../../components/header/Header"), {
 });
 
 export default function AllowlistToolAllowlistId() {
-    const router = useRouter()
+  const router = useRouter();
   return (
     <>
       <Header />
       <div className="row justify-content-evenly">
-        
         <div>{router.query.id}</div>
       </div>
     </>
