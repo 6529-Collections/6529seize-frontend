@@ -13,7 +13,13 @@ import {
 } from "react-bootstrap";
 import { MEMES_CONTRACT, NULL_ADDRESS } from "../../constants";
 import { DBResponse } from "../../entities/IDBResponse";
-import { NFT, MemesExtendedData, NftTDH, NftRank } from "../../entities/INFT";
+import {
+  NFT,
+  MemesExtendedData,
+  NftTDH,
+  NftRank,
+  NFTHistory,
+} from "../../entities/INFT";
 import {
   getDateDisplay,
   areEqualAddresses,
@@ -27,7 +33,7 @@ import LatestActivityRow from "../latest-activity/LatestActivityRow";
 import { Transaction } from "../../entities/ITransaction";
 import { useRouter } from "next/router";
 import { TDHMetrics } from "../../entities/ITDH";
-import { fetchUrl } from "../../services/6529api";
+import { fetchAllPages, fetchUrl } from "../../services/6529api";
 import Pagination from "../pagination/Pagination";
 import { TypeFilter } from "../latest-activity/LatestActivity";
 import {
@@ -36,6 +42,7 @@ import {
 } from "../../entities/IDistribution";
 import NFTImage from "../nft-image/NFTImage";
 import NFTLeaderboard from "../leaderboard/NFTLeaderboard";
+import Timeline from "../timeline/Timeline";
 
 interface MemeTab {
   focus: MEME_FOCUS;
@@ -48,6 +55,7 @@ export enum MEME_FOCUS {
   THE_ART = "the-art",
   HODLERS = "collectors",
   ACTIVITY = "activity",
+  TIMELINE = "timeline",
 }
 
 const ACTIVITY_PAGE_SIZE = 25;
@@ -87,7 +95,6 @@ export default function MemePage(props: Props) {
 
   const [collectionCount, setCollectionCount] = useState(-1);
   const [collectionRank, setCollectionRank] = useState(-1);
-  const [totalNftCount, setTotalNftCount] = useState(-1);
 
   const [userLoaded, setUserLoaded] = useState(false);
   const [memeLabNftsLoaded, setMemeLabNftsLoaded] = useState(false);
@@ -97,6 +104,8 @@ export default function MemePage(props: Props) {
   const [activityTypeFilter, setActivityTypeFilter] = useState<TypeFilter>(
     TypeFilter.ALL
   );
+
+  const [nftHistory, setNftHistory] = useState<NFTHistory[]>([]);
 
   const liveTab = {
     focus: MEME_FOCUS.LIVE,
@@ -118,6 +127,10 @@ export default function MemePage(props: Props) {
     focus: MEME_FOCUS.ACTIVITY,
     title: "Activity",
   };
+  const timelineTab = {
+    focus: MEME_FOCUS.TIMELINE,
+    title: "Timeline",
+  };
 
   const MEME_TABS: MemeTab[] = [
     liveTab,
@@ -125,16 +138,8 @@ export default function MemePage(props: Props) {
     artTab,
     hodlersTab,
     activityTab,
+    timelineTab,
   ];
-
-  function fetchDistribution(url: string) {
-    fetchUrl(url).then((response: DBResponse) => {
-      setDistributions((distr) => [...distr, ...response.data]);
-      if (response.next) {
-        fetchDistribution(response.next);
-      }
-    });
-  }
 
   useEffect(() => {
     if (router.isReady) {
@@ -283,14 +288,6 @@ export default function MemePage(props: Props) {
   }, [nftId, activityPage, activityTypeFilter]);
 
   useEffect(() => {
-    fetchUrl(`${process.env.API_ENDPOINT}/api/nfts`).then(
-      (response: DBResponse) => {
-        setTotalNftCount(response.count);
-      }
-    );
-  }, []);
-
-  useEffect(() => {
     async function fetchNfts(url: string, mynfts: NFT[]) {
       return fetchUrl(url).then((response: DBResponse) => {
         if (response.next) {
@@ -320,6 +317,18 @@ export default function MemePage(props: Props) {
     }
   }, [router.isReady, nftId]);
 
+  useEffect(() => {
+    async function fetchHistory(url: string) {
+      return fetchAllPages(url).then((response: NFTHistory[]) => {
+        setNftHistory(response);
+      });
+    }
+    if (router.isReady && nftId) {
+      const initialUrlHistory = `${process.env.API_ENDPOINT}/api/nft_history/${MEMES_CONTRACT}/${nftId}`;
+      fetchHistory(initialUrlHistory);
+    }
+  }, [router.isReady, nftId]);
+
   function printMintDate(date: Date) {
     const mintDate = new Date(date);
     return (
@@ -337,6 +346,10 @@ export default function MemePage(props: Props) {
   function printContent() {
     if (activeTab == MEME_FOCUS.ACTIVITY) {
       return printActivity();
+    }
+
+    if (activeTab == MEME_FOCUS.TIMELINE) {
+      return printTimeline();
     }
 
     if (activeTab == MEME_FOCUS.THE_ART) {
@@ -1454,24 +1467,16 @@ export default function MemePage(props: Props) {
     return d;
   }
 
-  function printDistributionPhotos() {
-    if (distributionPhotos.length > 0) {
-      return (
-        <Carousel
-          id={`distribution-carousel`}
-          interval={null}
-          wrap={false}
-          touch={true}
-          fade={true}
-          className={styles.distributionCarousel}>
-          {distributionPhotos.map((dp) => (
-            <Carousel.Item key={dp.id}>
-              <Image width="0" height="0" src={dp.link} alt={dp.link} />
-            </Carousel.Item>
-          ))}
-        </Carousel>
-      );
-    }
+  function printTimeline() {
+    return (
+      <Container className="pb-5">
+        <Row>
+          <Col>
+            <Timeline steps={nftHistory} />
+          </Col>
+        </Row>
+      </Container>
+    );
   }
 
   function printActivity() {

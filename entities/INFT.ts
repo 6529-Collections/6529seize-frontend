@@ -103,3 +103,14 @@ export enum VolumeType {
   DAYS_30 = "30 Days",
   ALL_TIME = "All Time",
 }
+
+export interface NFTHistory {
+  nft_id: number;
+  contract: string;
+  uri: string;
+  created_at: Date;
+  transaction_date: Date;
+  transaction_hash: string;
+  block: number;
+  description: string;
+}
