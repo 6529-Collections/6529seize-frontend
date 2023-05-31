@@ -13,7 +13,15 @@ module.exports = {
     preflight: false,
   },
   theme: {
-    extend: {},
+    extend: {
+      colors: {
+        primary: "#406AFE",
+        "primary-hover": "#395FE4",
+        dark: "#171B22"
+      }
+    },
   },
-  plugins: [],
+  plugins: [
+    require('@tailwindcss/forms'),
+  ],
 }

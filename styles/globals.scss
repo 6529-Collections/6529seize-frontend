@@ -19,8 +19,8 @@ body {
 
 textarea,
 select,
-input,
-button,
+input:not(#allowlist-tool input),
+button:not(#allowlist-tool button),
 video,
 select {
   font-size: $font-size !important;
