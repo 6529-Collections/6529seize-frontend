@@ -12,7 +12,7 @@ export default function AllowlistToolAllowlistId() {
   return (
     <>
       <Header />
-      <div className="row justify-content-evenly">
+      <div className="tw-bg-blue-500">
         <div>{router.query.id}</div>
       </div>
     </>
