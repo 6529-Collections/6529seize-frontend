@@ -1,6 +1,65 @@
 import dynamic from "next/dynamic";
 import HeaderPlaceholder from "../../../components/header/HeaderPlaceholder";
-import { useRouter } from "next/router";
+
+const AllowlistToolBuilderHeader = dynamic(
+  () =>
+    import(
+      "../../../components/allowlist-tool/builder/AllowlistToolBuilderHeader"
+    ),
+  {
+    ssr: false,
+  }
+);
+
+const AllowlistToolBuilderTransferPools = dynamic(
+  () =>
+    import(
+      "../../../components/allowlist-tool/builder/transfer-pools/AllowlistToolBuilderTransferPools"
+    ),
+  {
+    ssr: false,
+  }
+);
+
+const AllowlistToolBuilderTokenPools = dynamic(
+  () =>
+    import(
+      "../../../components/allowlist-tool/builder/token-pools/AllowlistToolBuilderTokenPools"
+    ),
+  {
+    ssr: false,
+  }
+);
+
+const AllowlistToolBuilderCustomPools = dynamic(
+  () =>
+    import(
+      "../../../components/allowlist-tool/builder/custom-pools/AllowlistToolBuilderCustomPools"
+    ),
+  {
+    ssr: false,
+  }
+);
+
+const AllowlistToolBuilderWalletPools = dynamic(
+  () =>
+    import(
+      "../../../components/allowlist-tool/builder/wallet-pools/AllowlistToolBuilderWalletPools"
+    ),
+  {
+    ssr: false,
+  }
+);
+
+const AllowlistToolBuilderPhases = dynamic(
+  () =>
+    import(
+      "../../../components/allowlist-tool/builder/phases/AllowlistToolBuilderPhases"
+    ),
+  {
+    ssr: false,
+  }
+);
 
 const Header = dynamic(() => import("../../../components/header/Header"), {
   ssr: false,
@@ -8,13 +67,15 @@ const Header = dynamic(() => import("../../../components/header/Header"), {
 });
 
 export default function AllowlistToolAllowlistId() {
-  const router = useRouter();
   return (
     <>
       <Header />
-      <div className="tw-bg-blue-500">
-        <div>{router.query.id}</div>
-      </div>
+      <AllowlistToolBuilderHeader />
+      <AllowlistToolBuilderTransferPools />
+      <AllowlistToolBuilderTokenPools />
+      <AllowlistToolBuilderCustomPools />
+      <AllowlistToolBuilderWalletPools />
+      <AllowlistToolBuilderPhases />
     </>
   );
 }
