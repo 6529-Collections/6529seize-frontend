@@ -1,0 +1,167 @@
+@import "../../styles/variables.scss";
+
+.timeline {
+  position: relative;
+  margin: 0 auto;
+  word-wrap: break-word;
+
+  h4,
+  h5,
+  p {
+    color: $very-dark-grey;
+  }
+
+  a {
+    color: $very-dark-grey;
+    margin-top: 5px;
+    margin-bottom: 5px;
+    display: inline-block;
+    overflow-wrap: anywhere;
+
+    &:hover {
+      opacity: 0.8;
+    }
+  }
+}
+
+.timeline::after {
+  content: "";
+  position: absolute;
+  width: 6px;
+  background-color: white;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  margin-left: -3px;
+}
+
+.timelineContainer {
+  padding: 10px 26px;
+  position: relative;
+  background-color: inherit;
+  width: 50%;
+}
+
+.timelineContainer::after {
+  content: "";
+  position: absolute;
+  width: 25px;
+  height: 25px;
+  right: -13px;
+  background-color: white;
+  border: 6px solid $salmon;
+  top: 20px;
+  border-radius: 50%;
+  z-index: 1;
+}
+
+.left {
+  left: 0;
+}
+
+.right {
+  left: 50%;
+}
+
+.left::before {
+  content: " ";
+  height: 0;
+  position: absolute;
+  top: 22px;
+  width: 0;
+  z-index: 1;
+  right: 16px;
+  border: medium solid white;
+  border-width: 10px 0 10px 10px;
+  border-color: transparent transparent transparent white;
+}
+
+.right::before {
+  content: " ";
+  height: 0;
+  position: absolute;
+  top: 22px;
+  width: 0;
+  z-index: 1;
+  left: 16px;
+  border: medium solid white;
+  border-width: 10px 10px 10px 0;
+  border-color: transparent white transparent transparent;
+}
+
+.right::after {
+  left: -13px;
+}
+
+.content {
+  padding: 20px;
+  background-color: white;
+  position: relative;
+  border-radius: 6px;
+}
+
+@media screen and (max-width: 600px) {
+  .timeline::after {
+    left: 31px;
+  }
+
+  .timelineContainer {
+    width: 100%;
+    padding-left: 70px;
+    padding-right: 25px;
+  }
+
+  .timelineContainer::before {
+    left: 60px;
+    border: medium solid white;
+    border-width: 10px 10px 10px 0;
+    border-color: transparent white transparent transparent;
+  }
+
+  .left::after,
+  .right::after {
+    left: 18px;
+  }
+
+  .right {
+    left: 0%;
+  }
+}
+
+.externalLink {
+  text-decoration: none;
+}
+
+.linkIcon {
+  height: 25px;
+  width: 25px;
+  cursor: pointer;
+}
+
+.timelineTable {
+  tr {
+    border-bottom: 1px solid #333 !important;
+  }
+  tr td {
+    white-space: nowrap;
+  }
+  tr th {
+    min-width: 80px;
+    white-space: nowrap;
+    line-height: 30px;
+  }
+}
+
+.timelineTableScrollContainer {
+  -ms-overflow-style: none; /* Internet Explorer 10+ */
+  scrollbar-width: none; /* Firefox */
+  overflow-x: auto;
+}
+
+.timelineTableScrollContainer::-webkit-scrollbar {
+  display: none;
+}
+
+.timelineTable > :not(caption) > * > * {
+  padding: 1.5rem !important;
+}
