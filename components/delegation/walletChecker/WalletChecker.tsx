@@ -4,7 +4,6 @@ import { Container, Row, Col, Form, Button, Accordion } from "react-bootstrap";
 import { useEnsName, useEnsAddress } from "wagmi";
 import { isValidEthAddress } from "../../../helpers/Helpers";
 import CheckDelegation from "./CheckDelegation";
-import CheckConsolidation from "./CheckConsolidation";
 
 interface Props {
   path?: string;
