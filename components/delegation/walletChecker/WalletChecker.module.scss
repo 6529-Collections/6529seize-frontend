@@ -1,0 +1,49 @@
+@import "../../../styles/variables.scss";
+
+.formInput {
+  color: $dark-grey !important;
+  border-radius: 0 !important;
+  border-color: $lightest-grey;
+
+  &:focus {
+    border-color: $blue !important;
+  }
+}
+
+.checkBtn {
+  background-color: $blue;
+  border: none;
+  border-radius: 0;
+  color: white;
+  padding: 10px 15px;
+
+  &:hover {
+    background-color: lighten($color: $blue, $amount: 5);
+  }
+
+  &:active,
+  &:disabled {
+    background-color: darken($color: $blue, $amount: 5) !important;
+  }
+}
+
+.error {
+  font-size: 1em;
+  color: $raspberry;
+}
+
+.selectedAddress {
+  a {
+    color: $yellow;
+    &:hover {
+      color: darken($color: $yellow, $amount: 10);
+    }
+  }
+
+  svg {
+    color: $yellow;
+    &:hover {
+      color: darken($color: $yellow, $amount: 10);
+    }
+  }
+}

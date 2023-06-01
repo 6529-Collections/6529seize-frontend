@@ -184,3 +184,15 @@ export function getTransactionLink(chain_id: number, hash: string) {
     ? `https://sepolia.etherscan.io/tx/${hash}`
     : `https://etherscan.io/tx/${hash}`;
 }
+
+export async function getContentTypeFromURL(url: string) {
+  try {
+    const response = await fetch(url, { method: "HEAD" });
+    console.log("response", response);
+    const contentType = response.headers.get("Content-Type");
+    return contentType;
+  } catch (error) {
+    console.error("Error retrieving content type:", error);
+    return null;
+  }
+}
