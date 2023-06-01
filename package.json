@@ -19,6 +19,7 @@
     "@web3modal/react": "^2.3.0",
     "bootstrap": "^5.2.3",
     "csv-parser": "^3.0.0",
+    "framer-motion": "^10.12.16",
     "fs": "^0.0.1-security",
     "js-cookie": "^3.0.1",
     "next": "^13.1.6",
