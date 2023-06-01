@@ -1,6 +1,13 @@
+import AllowlistToolHistoryIcon from "../../icons/AllowlistToolHistoryIcon";
+import AllowlistToolJsonIcon from "../../icons/AllowlistToolJsonIcon";
+import AllowlistToolPlusIcon from "../../icons/AllowlistToolPlusIcon";
+
 export default function AllowlistToolBuilderTransferPools() {
   return (
     <>
+      <AllowlistToolJsonIcon />
+      <AllowlistToolPlusIcon />
+      <AllowlistToolHistoryIcon />
       <div>
         <div className="tw-cursor-pointer tw-bg-[#1E1E23] tw-rounded-xl tw-py-5  tw-transition tw-duration-300 tw-ease-out">
           {" "}
@@ -118,9 +125,7 @@ export default function AllowlistToolBuilderTransferPools() {
                             <th
                               scope="col"
                               className="tw-relative tw-py-3.5 tw-pl-3 tw-pr-4 sm:tw-pr-6"
-                            >
-                             
-                            </th>
+                            ></th>
                           </tr>
                         </thead>
                         <tbody className="tw-divide-y tw-divide-neutral-800">
