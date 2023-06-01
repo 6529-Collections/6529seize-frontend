@@ -112,5 +112,12 @@ export interface NFTHistory {
   transaction_date: Date;
   transaction_hash: string;
   block: number;
-  description: string;
+  description: {
+    event: string;
+    changes: {
+      key: string;
+      from: string;
+      to: string;
+    }[];
+  };
 }

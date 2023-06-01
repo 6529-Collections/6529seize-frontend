@@ -13,10 +13,6 @@
 
   a {
     color: $very-dark-grey;
-    margin-top: 5px;
-    margin-bottom: 5px;
-    display: inline-block;
-    overflow-wrap: anywhere;
 
     &:hover {
       opacity: 0.8;
@@ -94,6 +90,7 @@
 }
 
 .content {
+  color: $very-dark-grey;
   padding: 20px;
   background-color: white;
   position: relative;
@@ -145,6 +142,9 @@
   tr td {
     white-space: nowrap;
   }
+  tr td:first-child {
+    width: 0px;
+  }
   tr th {
     min-width: 80px;
     white-space: nowrap;
@@ -164,4 +164,20 @@
 
 .timelineTable > :not(caption) > * > * {
   padding: 1.5rem !important;
+}
+
+.imageChange {
+  max-width: 100%;
+  max-height: 75vh;
+}
+
+.changesUl {
+  padding-left: 1rem;
+}
+
+.changeLink {
+  margin-top: 0;
+  margin-bottom: 0;
+  font-size: smaller;
+  overflow-wrap: anywhere;
 }
