@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { AllowlistToolResponse } from "./allowlist-tool.types";
 import { AllowlistDescription } from "./builder/AllowlistToolBuilderHeader";
 import { useRouter } from "next/router";
+import { useClickAway, useKeyPressEvent } from "react-use";
 
 export default function AllowlistToolAddAllowlistModal({
   onClose,
@@ -16,6 +17,8 @@ export default function AllowlistToolAddAllowlistModal({
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [errors, setErrors] = useState<string[]>([]);
   const router = useRouter();
+
+  const modalRef = useRef<HTMLDivElement>(null);
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     // Event handler for input changes
@@ -53,16 +56,20 @@ export default function AllowlistToolAddAllowlistModal({
       });
   };
 
+  useClickAway(modalRef, () => onClose(null));
+  useKeyPressEvent("Escape", () => onClose(null));
+
   return (
     <>
       <div className="tw-relative tw-z-10" role="dialog">
-        <div
-          className="tw-fixed tw-inset-0 tw-bg-gray-500 tw-bg-opacity-75"
-        ></div>
+        <div className="tw-fixed tw-inset-0 tw-bg-gray-500 tw-bg-opacity-75"></div>
 
         <div className="tw-fixed tw-inset-0 tw-z-10 tw-overflow-y-auto">
           <div className="tw-flex tw-min-h-full tw-items-end tw-justify-center tw-p-4 tw-text-center sm:tw-items-center sm:tw-p-0">
-            <div className="tw-relative tw-w-full tw-transform tw-overflow-hidden tw-rounded-xl tw-bg-neutral-900 tw-px-4 tw-pb-4 tw-pt-5 tw-text-left tw-shadow-xl tw-transition-all sm:tw-my-8 sm:tw-w-full sm:tw-max-w-lg sm:tw-p-6">
+            <div
+              ref={modalRef}
+              className="tw-relative tw-w-full tw-transform tw-overflow-hidden tw-rounded-xl tw-bg-neutral-900 tw-px-4 tw-pb-4 tw-pt-5 tw-text-left tw-shadow-xl tw-transition-all sm:tw-my-8 sm:tw-w-full sm:tw-max-w-lg sm:tw-p-6"
+            >
               <div className="tw-flex tw-justify-between tw-items-center">
                 <p className="tw-text-lg tw-text-white tw-font-medium tw-mb-0">
                   Add allowlist
