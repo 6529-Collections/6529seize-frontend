@@ -1,15 +1,14 @@
 export default function AllowlistToolPlusIcon() {
   return (
     <svg
-      width="24"
-      height="24"
+      className="tw-h-auto tw-w-auto tw-text-neutral-300 group-hover:tw-text-white tw-transition tw-duration-300 tw-ease-out"
       viewBox="0 0 24 24"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
     >
       <path
         d="M12 5V19M5 12H19"
-        stroke="black"
+        stroke="currentColor"
         stroke-width="2"
         stroke-linecap="round"
         stroke-linejoin="round"

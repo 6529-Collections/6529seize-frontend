@@ -5,14 +5,11 @@ import AllowlistToolPlusIcon from "../../icons/AllowlistToolPlusIcon";
 export default function AllowlistToolBuilderTransferPools() {
   return (
     <>
-      <AllowlistToolJsonIcon />
-      <AllowlistToolPlusIcon />
-      <AllowlistToolHistoryIcon />
       <div>
         <div className="tw-cursor-pointer tw-bg-[#1E1E23] tw-rounded-xl tw-py-5  tw-transition tw-duration-300 tw-ease-out">
           {" "}
           {/* hover:tw-bg-[#1E1E23] */}
-          <div className="tw-px-6 tw-flex tw-items-center tw-gap-x-4">
+          <div className=" tw-px-6 tw-flex tw-items-center tw-gap-x-4">
             <div className="tw-flex tw-items-center tw-justify-center tw-bg-[#303035] tw-rounded-md">
               <svg
                 className="tw-h-6 tw-w-6 tw-text-neutral-300"
@@ -42,7 +39,7 @@ export default function AllowlistToolBuilderTransferPools() {
                 <div className="tw-mt-2">
                   <input
                     required
-                    className="tw-block tw-w-full tw-rounded-lg tw-border-0 tw-py-3 tw-px-3 tw-bg-[#2D2E32] tw-text-white tw-font-light tw-caret-primary tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-[#2D2E32] placeholder:tw-text-neutral-500 focus:tw-outline-none focus:tw-bg-transparent focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary tw-text-base sm:tw-leading-6 tw-transition tw-duration-300 tw-ease-out"
+                    className="tw-block tw-w-full tw-rounded-lg tw-border-0 tw-py-3 tw-px-3 tw-bg-[#2D2E32] tw-text-white tw-font-light tw-caret-primary tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-neutral-700 placeholder:tw-text-neutral-500 focus:tw-outline-none focus:tw-bg-transparent focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary tw-text-base sm:tw-leading-6 tw-transition tw-duration-300 tw-ease-out"
                   />
                 </div>
               </div>
@@ -53,7 +50,7 @@ export default function AllowlistToolBuilderTransferPools() {
                 <div className="tw-mt-2">
                   <input
                     required
-                    className="tw-block tw-w-full tw-rounded-lg tw-border-0 tw-py-3 tw-px-3 tw-bg-[#2D2E32] tw-text-white tw-font-light tw-caret-primary tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-[#2D2E32] placeholder:tw-text-neutral-500 focus:tw-outline-none focus:tw-bg-transparent focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary tw-text-base sm:tw-leading-6 tw-transition tw-duration-300 tw-ease-out"
+                    className="tw-block tw-w-full tw-rounded-lg tw-border-0 tw-py-3 tw-px-3 tw-bg-[#2D2E32] tw-text-white tw-font-light tw-caret-primary tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-neutral-700 placeholder:tw-text-neutral-500 focus:tw-outline-none focus:tw-bg-transparent focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary tw-text-base sm:tw-leading-6 tw-transition tw-duration-300 tw-ease-out"
                   />
                 </div>
               </div>
@@ -64,7 +61,7 @@ export default function AllowlistToolBuilderTransferPools() {
                 <div className="tw-mt-2">
                   <input
                     required
-                    className="tw-block tw-w-full tw-rounded-lg tw-border-0 tw-py-3 tw-px-3 tw-bg-[#2D2E32] tw-text-white tw-font-light tw-caret-primary tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-[#2D2E32] placeholder:tw-text-neutral-500 focus:tw-outline-none focus:tw-bg-transparent focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary tw-text-base sm:tw-leading-6 tw-transition tw-duration-300 tw-ease-out"
+                    className="tw-block tw-w-full tw-rounded-lg tw-border-0 tw-py-3 tw-px-3 tw-bg-[#2D2E32] tw-text-white tw-font-light tw-caret-primary tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-neutral-700  placeholder:tw-text-neutral-500 focus:tw-outline-none focus:tw-bg-transparent focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary tw-text-base sm:tw-leading-6 tw-transition tw-duration-300 tw-ease-out"
                   />
                 </div>
               </div>
@@ -75,7 +72,7 @@ export default function AllowlistToolBuilderTransferPools() {
                 <div className="tw-mt-2">
                   <input
                     required
-                    className="tw-block tw-w-full tw-rounded-lg tw-border-0 tw-py-3 tw-px-3 tw-bg-[#2D2E32] tw-text-white tw-font-light tw-caret-primary tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-[#2D2E32] placeholder:tw-text-neutral-500 focus:tw-outline-none focus:tw-bg-transparent focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary tw-text-base sm:tw-leading-6 tw-transition tw-duration-300 tw-ease-out"
+                    className="tw-block tw-w-full tw-rounded-lg tw-border-0 tw-py-3 tw-px-3 tw-bg-[#2D2E32] tw-text-white tw-font-light tw-caret-primary tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-neutral-700  placeholder:tw-text-neutral-500 focus:tw-outline-none focus:tw-bg-transparent focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary tw-text-base sm:tw-leading-6 tw-transition tw-duration-300 tw-ease-out"
                   />
                 </div>
               </div>
@@ -128,7 +125,7 @@ export default function AllowlistToolBuilderTransferPools() {
                             ></th>
                           </tr>
                         </thead>
-                        <tbody className="tw-divide-y tw-divide-neutral-800">
+                        <tbody className="tw-divide-y tw-divide-neutral-700/40">
                           <tr>
                             <td className="tw-whitespace-nowrap tw-py-4 tw-pl-4 tw-pr-3 tw-text-sm tw-font-medium tw-text-white sm:tw-pl-6">
                               Memes collection
@@ -142,8 +139,33 @@ export default function AllowlistToolBuilderTransferPools() {
                             <td className="tw-whitespace-nowrap tw-px-3 tw-py-4 tw-text-sm tw-font-normal  tw-text-neutral-300">
                               32536673
                             </td>
-                            <td className="tw-relative tw-whitespace-nowrap tw-py-4 tw-pl-3 tw-pr-4 tw-text-right tw-text-sm tw-font-normal  sm:tw-pr-6">
-                              icons
+                            <td className="tw-w-40 tw-py-4 tw-pl-3 tw-pr-4 tw-text-sm tw-font-normal sm:tw-pr-6">
+                              <div className="tw-flex tw-items-center tw-justify-end tw-gap-x-6">
+                                <button
+                                  type="button"
+                                  className="tw-group tw-rounded-full tw-bg-transparent tw-p-2 tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-indigo-600"
+                                >
+                                 <div className="tw-h-[1.125rem] tw-w-[1.125rem]">
+                                  <AllowlistToolJsonIcon />
+                                </div>
+                                </button>
+                                <button
+                                  type="button"
+                                  className="tw-group tw-rounded-full tw-bg-transparent tw-p-2 tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-indigo-600"
+                                >
+                                 <div className="tw-h-5 tw-w-5">
+                                 <AllowlistToolPlusIcon />
+                                </div>
+                                </button>
+                                <button
+                                  type="button"
+                                  className="tw-group tw-rounded-full tw-bg-transparent tw-p-2 tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-indigo-600"
+                                >
+                                 <div className="tw-h-5 tw-w-5">
+                                 <AllowlistToolHistoryIcon />
+                                </div>
+                                </button>
+                              </div>
                             </td>
                           </tr>
                         </tbody>
