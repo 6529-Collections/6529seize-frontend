@@ -27,8 +27,7 @@ export default function AllowlistToolHeader() {
         <button
           onClick={() => setShowModal(true)}
           type="button"
-          style={{ fontSize: "14px !important" }}
-          className="tw-inline-flex tw-items-center tw-gap-x-2 tw-px-4 tw-py-2.5 tw-bg-primary tw-text-white tw-font-medium tw-border tw-border-primary tw-rounded-lg hover:tw-bg-primary-hover hover:tw-border-primary-hover tw-transition tw-duration-300 tw-ease-out"
+          className="tw-inline-flex tw-items-center tw-gap-x-2 tw-px-4 tw-py-2.5 tw-bg-primary tw-text-white tw-font-medium tw-text-sm tw-border tw-border-primary tw-rounded-lg hover:tw-bg-primary-hover hover:tw-border-primary-hover tw-transition tw-duration-300 tw-ease-out"
         >
           <svg
             className="tw-h-5 tw-w-5 -tw-ml-1"
