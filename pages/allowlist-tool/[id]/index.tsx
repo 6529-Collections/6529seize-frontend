@@ -81,15 +81,14 @@ export default function AllowlistToolAllowlistId() {
       <div className={`tw-min-h-screen tw-bg-[#131315] ${poppins.className}`}>
         <div className="container tw-mx-auto tw-pt-12">
           <AllowlistToolBuilderHeader />
-          
-         <div className="tw-pt-8 tw-space-y-8">
-         <AllowlistToolBuilderTransferPools />
-          <AllowlistToolBuilderTokenPools />
-          <AllowlistToolBuilderCustomPools />
-          <AllowlistToolBuilderWalletPools />
-          <AllowlistToolBuilderPhases />
-         </div>
-         
+
+          <div id="allowlist-tool" className="tw-pt-8 tw-space-y-8">
+            <AllowlistToolBuilderTransferPools />
+            <AllowlistToolBuilderTokenPools />
+            <AllowlistToolBuilderCustomPools />
+            <AllowlistToolBuilderWalletPools />
+            <AllowlistToolBuilderPhases />
+          </div>
         </div>
       </div>
     </>
