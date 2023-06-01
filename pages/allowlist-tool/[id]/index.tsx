@@ -1,5 +1,13 @@
 import dynamic from "next/dynamic";
 import HeaderPlaceholder from "../../../components/header/HeaderPlaceholder";
+import { Poppins } from "next/font/google";
+
+const poppins = Poppins({
+  weight: ["300", "400", "500", "600", "700"],
+  style: ["normal", "italic"],
+  subsets: ["latin"],
+  display: "swap",
+});
 
 const AllowlistToolBuilderHeader = dynamic(
   () =>
@@ -70,12 +78,20 @@ export default function AllowlistToolAllowlistId() {
   return (
     <>
       <Header />
-      <AllowlistToolBuilderHeader />
-      <AllowlistToolBuilderTransferPools />
-      <AllowlistToolBuilderTokenPools />
-      <AllowlistToolBuilderCustomPools />
-      <AllowlistToolBuilderWalletPools />
-      <AllowlistToolBuilderPhases />
+      <div className={`tw-min-h-screen tw-bg-[#131315] ${poppins.className}`}>
+        <div className="container tw-mx-auto tw-pt-12">
+          <AllowlistToolBuilderHeader />
+          
+         <div className="tw-pt-8 tw-space-y-8">
+         <AllowlistToolBuilderTransferPools />
+          <AllowlistToolBuilderTokenPools />
+          <AllowlistToolBuilderCustomPools />
+          <AllowlistToolBuilderWalletPools />
+          <AllowlistToolBuilderPhases />
+         </div>
+         
+        </div>
+      </div>
     </>
   );
 }
