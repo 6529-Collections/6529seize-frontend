@@ -152,13 +152,13 @@
   color: $lightest-grey;
 }
 
-table::not(#allowlist-tool table),
-thead::not(#allowlist-tool thead),
-tbody::not(#allowlist-tool tbody),
-tfoot::not(#allowlist-tool tfoot),
-tr::not(#allowlist-tool tr),
-td::not(#allowlist-tool td),
-th::not(#allowlist-tool th) {
+table:not(#allowlist-tool table),
+thead:not(#allowlist-tool thead),
+tbody:not(#allowlist-tool tbody),
+tfoot:not(#allowlist-tool tfoot),
+tr:not(#allowlist-tool tr),
+td:not(#allowlist-tool td),
+th:not(#allowlist-tool th) {
   color: $font-color !important;
   border: none !important;
 }
