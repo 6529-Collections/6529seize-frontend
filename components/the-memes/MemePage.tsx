@@ -1469,10 +1469,10 @@ export default function MemePage(props: Props) {
 
   function printTimeline() {
     return (
-      <Container className="pb-5">
+      <Container className="pt-3 pb-5 no-padding">
         <Row>
-          <Col>
-            <Timeline steps={nftHistory} />
+          <Col xs={12} md={{ span: 10, offset: 1 }}>
+            {nft && <Timeline nft={nft} steps={nftHistory} />}
           </Col>
         </Row>
       </Container>
