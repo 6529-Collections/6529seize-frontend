@@ -32,23 +32,10 @@
   color: $raspberry;
 }
 
-.selectedAddress {
-  // a {
-  //   color: $off-white;
-  //   &:hover {
-  //     color: darken($color: $yellow, $amount: 10);
-  //   }
-  // }
-
-  // svg {
-  //   color: $yellow;
-  //   &:hover {
-  //     color: darken($color: $yellow, $amount: 10);
-  //   }
-  // }
-  // // border: 1px solid rgb(154, 154, 154);
-  // // padding: 6px 4px 6px 10px;
-  // // border-radius: 21px;
+.supportingAddress {
+  a {
+    font-weight: normal;
+  }
 }
 
 .consolidationPlusIcon {
@@ -86,8 +73,7 @@
 }
 
 .recommendationsList {
-  padding: 0;
-  list-style-type: none;
+  padding-left: 1rem;
 }
 
 .consolidationRecommendationIcon {
