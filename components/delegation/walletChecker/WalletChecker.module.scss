@@ -47,3 +47,48 @@
     }
   }
 }
+
+.consolidationPlusIcon {
+  height: 20px;
+  margin-left: 10px;
+  margin-right: 15px;
+}
+
+.arrowHead {
+  display: inline-block;
+  width: 0;
+  height: 0;
+  border-top: 8px solid transparent;
+  border-bottom: 8px solid transparent;
+  border-left: 8px solid white; /* Customize the color and style as needed */
+  margin-right: 25px;
+}
+
+.arrowBody {
+  display: inline-block;
+  margin-left: 20px;
+  width: 75px;
+  height: 4px;
+  background-color: white;
+}
+
+.arrowBody::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 100%;
+  transform: translate(-50%, -50%);
+  width: 50px; /* Adjust the length of the line */
+  height: 2px; /* Adjust the thickness of the line */
+}
+
+.recommendationsList {
+  padding: 0;
+  list-style-type: none;
+}
+
+.consolidationRecommendationIcon {
+  height: 30px;
+  color: red;
+  margin-right: 10px;
+}
