@@ -33,19 +33,22 @@
 }
 
 .selectedAddress {
-  a {
-    color: $yellow;
-    &:hover {
-      color: darken($color: $yellow, $amount: 10);
-    }
-  }
+  // a {
+  //   color: $off-white;
+  //   &:hover {
+  //     color: darken($color: $yellow, $amount: 10);
+  //   }
+  // }
 
-  svg {
-    color: $yellow;
-    &:hover {
-      color: darken($color: $yellow, $amount: 10);
-    }
-  }
+  // svg {
+  //   color: $yellow;
+  //   &:hover {
+  //     color: darken($color: $yellow, $amount: 10);
+  //   }
+  // }
+  // // border: 1px solid rgb(154, 154, 154);
+  // // padding: 6px 4px 6px 10px;
+  // // border-radius: 21px;
 }
 
 .consolidationPlusIcon {
@@ -91,4 +94,14 @@
   height: 30px;
   color: red;
   margin-right: 10px;
+}
+
+.consolidationActiveIcon {
+  width: 30px;
+  height: 30px;
+  color: white;
+  margin-left: 25px;
+  background-color: green;
+  padding: 5px;
+  border-radius: 18px;
 }
