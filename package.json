@@ -27,6 +27,7 @@
     "react-bootstrap": "^2.7.2",
     "react-scroll": "^1.8.9",
     "react-share": "^4.4.1",
+    "react-use": "^17.4.0",
     "react-use-downloader": "^1.2.2",
     "sass": "^1.58.1",
     "wagmi": "^0.12.6"

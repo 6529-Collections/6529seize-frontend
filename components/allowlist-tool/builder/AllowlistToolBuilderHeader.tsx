@@ -21,27 +21,27 @@ export default function AllowlistToolBuilderHeader() {
   const [errors, setErrors] = useState<string[]>([]);
   const [isLoading, setLoading] = useState<boolean>(false);
 
-  useEffect(() => {
-    if (router.query.id) {
-      setLoading(true);
-      setData(null);
-      setErrors([]);
-      const url = `${process.env.ALLOWLIST_API_ENDPOINT}/allowlists/${router.query.id}`;
-      fetch(url)
-        .then((response) => response.json())
-        .then((data: AllowlistToolResponse<AllowlistDescription>) => {
-          if ("error" in data) {
-            typeof data.message === "string"
-              ? setErrors([data.message])
-              : setErrors(data.message);
-          } else {
-            setData(data);
-          }
+  // useEffect(() => {
+  //   if (router.query.id) {
+  //     setLoading(true);
+  //     setData(null);
+  //     setErrors([]);
+  //     const url = `${process.env.ALLOWLIST_API_ENDPOINT}/allowlists/${router.query.id}`;
+  //     fetch(url)
+  //       .then((response) => response.json())
+  //       .then((data: AllowlistToolResponse<AllowlistDescription>) => {
+  //         if ("error" in data) {
+  //           typeof data.message === "string"
+  //             ? setErrors([data.message])
+  //             : setErrors(data.message);
+  //         } else {
+  //           setData(data);
+  //         }
 
-          setLoading(false);
-        });
-    }
-  }, [router.query.id]);
+  //         setLoading(false);
+  //       });
+  //   }
+  // }, [router.query.id]);
 
   return (
     <>

@@ -1,17 +1,36 @@
+import { useEffect, useState } from "react";
 import AllowlistToolHistoryIcon from "../../icons/AllowlistToolHistoryIcon";
 import AllowlistToolJsonIcon from "../../icons/AllowlistToolJsonIcon";
 import AllowlistToolPlusIcon from "../../icons/AllowlistToolPlusIcon";
+import { useAnimate } from "framer-motion";
 
 export default function AllowlistToolBuilderTransferPools() {
+  const [isOpen, setIsOpen] = useState<boolean>(false);
+  const [tableScope, animateTable] = useAnimate();
+  const [iconScope, animateIcon] = useAnimate();
+
+  useEffect(() => {
+    if (isOpen) {
+      animateTable(tableScope.current, { height: "auto" });
+      animateIcon(iconScope.current, { rotate: 90 });
+    } else {
+      animateTable(tableScope.current, { height: 0 });
+      animateIcon(iconScope.current, { rotate: 0 });
+    }
+  });
   return (
     <>
       <div>
         <div className="tw-cursor-pointer tw-bg-[#1E1E23] tw-rounded-xl tw-py-5  tw-transition tw-duration-300 tw-ease-out">
           {" "}
           {/* hover:tw-bg-[#1E1E23] */}
-          <div className=" tw-px-6 tw-flex tw-items-center tw-gap-x-4">
+          <div
+            onClick={() => setIsOpen(!isOpen)}
+            className=" tw-px-6 tw-flex tw-items-center tw-gap-x-4"
+          >
             <div className="tw-flex tw-items-center tw-justify-center tw-bg-[#303035] tw-rounded-md">
               <svg
+                ref={iconScope}
                 className="tw-h-6 tw-w-6 tw-text-neutral-300"
                 viewBox="0 0 24 24"
                 fill="none"
@@ -30,8 +49,9 @@ export default function AllowlistToolBuilderTransferPools() {
               Transfer pools
             </p>
           </div>
-          <div className="tw-border tw-border-solid tw-border-l-0 tw-border-r-0 tw-border-b-0 tw-border-neutral-700/60 tw-mt-5 tw-pt-5 tw-w-full">
-            <div className="tw-px-6 tw-flex tw-gap-x-4 tw-items-end">
+          <div ref={tableScope} className="tw-w-full tw-overflow-hidden tw-h-0">
+            <div className="tw-border  tw-border-neutral-700/60 tw-border-solid tw-border-l-0 tw-border-r-0 tw-border-b-0 tw-mt-5 tw-w-full"></div>
+            <div className="tw-px-6 tw-flex tw-gap-x-4 tw-pt-5 tw-items-end">
               <div className="tw-flex-1">
                 <label className="tw-block tw-text-sm tw-font-normal tw-leading-5 tw-text-neutral-100">
                   Pool name
@@ -145,25 +165,25 @@ export default function AllowlistToolBuilderTransferPools() {
                                   type="button"
                                   className="tw-group tw-rounded-full tw-bg-transparent tw-p-2 tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-indigo-600"
                                 >
-                                 <div className="tw-h-[1.125rem] tw-w-[1.125rem]">
-                                  <AllowlistToolJsonIcon />
-                                </div>
+                                  <div className="tw-h-[1.125rem] tw-w-[1.125rem]">
+                                    <AllowlistToolJsonIcon />
+                                  </div>
                                 </button>
                                 <button
                                   type="button"
                                   className="tw-group tw-rounded-full tw-bg-transparent tw-p-2 tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-indigo-600"
                                 >
-                                 <div className="tw-h-5 tw-w-5">
-                                 <AllowlistToolPlusIcon />
-                                </div>
+                                  <div className="tw-h-5 tw-w-5">
+                                    <AllowlistToolPlusIcon />
+                                  </div>
                                 </button>
                                 <button
                                   type="button"
                                   className="tw-group tw-rounded-full tw-bg-transparent tw-p-2 tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-indigo-600"
                                 >
-                                 <div className="tw-h-5 tw-w-5">
-                                 <AllowlistToolHistoryIcon />
-                                </div>
+                                  <div className="tw-h-5 tw-w-5">
+                                    <AllowlistToolHistoryIcon />
+                                  </div>
                                 </button>
                               </div>
                             </td>
