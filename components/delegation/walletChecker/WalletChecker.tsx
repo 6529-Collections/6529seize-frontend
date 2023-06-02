@@ -253,8 +253,9 @@ export default function WalletCheckerComponent(props: Props) {
   const formDisabled =
     checking ||
     !walletAddress ||
-    (!isValidEthAddress(walletAddress) && !walletAddress.endsWith(".eth"));
-  walletAddressFromEns.isLoading || walletAddressEns.isLoading;
+    (!isValidEthAddress(walletAddress) && !walletAddress.endsWith(".eth")) ||
+    walletAddressFromEns.isLoading ||
+    walletAddressEns.isLoading;
 
   return (
     <Container className="pt-3 pb-3">
@@ -330,6 +331,7 @@ export default function WalletCheckerComponent(props: Props) {
                                   delegation.from_address
                                 ) ? (
                                   <span className={styles.selectedAddress}>
+                                    *
                                     <Address
                                       wallets={[
                                         delegation.from_address as `0x${string}`,
@@ -352,6 +354,7 @@ export default function WalletCheckerComponent(props: Props) {
                                   delegation.to_address
                                 ) ? (
                                   <span className={styles.selectedAddress}>
+                                    *
                                     <Address
                                       wallets={[
                                         delegation.to_address as `0x${string}`,
@@ -412,6 +415,7 @@ export default function WalletCheckerComponent(props: Props) {
                                   delegation.from_address
                                 ) ? (
                                   <span className={styles.selectedAddress}>
+                                    *
                                     <Address
                                       wallets={[
                                         delegation.from_address as `0x${string}`,
@@ -434,6 +438,7 @@ export default function WalletCheckerComponent(props: Props) {
                                   delegation.to_address
                                 ) ? (
                                   <span className={styles.selectedAddress}>
+                                    *
                                     <Address
                                       wallets={[
                                         delegation.to_address as `0x${string}`,
@@ -481,6 +486,7 @@ export default function WalletCheckerComponent(props: Props) {
                                 consolidation.from
                               ) ? (
                                 <span className={styles.selectedAddress}>
+                                  *
                                   <Address
                                     wallets={[
                                       consolidation.from as `0x${string}`,
@@ -505,6 +511,7 @@ export default function WalletCheckerComponent(props: Props) {
                                 consolidation.to
                               ) ? (
                                 <span className={styles.selectedAddress}>
+                                  *
                                   <Address
                                     wallets={[
                                       consolidation.to as `0x${string}`,
@@ -532,14 +539,16 @@ export default function WalletCheckerComponent(props: Props) {
                         <h5 className="pt-2 pb-2 float-none">
                           Active Consolidation
                         </h5>
-                        {consolidatedWallets.length > 1
-                          ? consolidatedWallets.map((wallet, index) => (
+                        {consolidatedWallets.length > 1 ? (
+                          <div className="d-flex align-items-center">
+                            {consolidatedWallets.map((wallet, index) => (
                               <Fragment key={`consolidated-wallets-${index}`}>
                                 {areEqualAddresses(
                                   fetchedAddress,
                                   wallet.address
                                 ) ? (
                                   <span className={styles.selectedAddress}>
+                                    *
                                     <Address
                                       wallets={[
                                         wallet.address as `0x${string}`,
@@ -560,8 +569,15 @@ export default function WalletCheckerComponent(props: Props) {
                                   />
                                 )}
                               </Fragment>
-                            ))
-                          : `No Active consolidations found`}
+                            ))}
+                            <FontAwesomeIcon
+                              icon="check"
+                              className={styles.consolidationActiveIcon}
+                            />
+                          </div>
+                        ) : (
+                          `No Active consolidations found`
+                        )}
                       </div>
                     )}
                   {consolidationActions.length > 0 && (
@@ -579,6 +595,7 @@ export default function WalletCheckerComponent(props: Props) {
                             Register Consolidation from{" "}
                             {areEqualAddresses(fetchedAddress, c.to) ? (
                               <span className={styles.selectedAddress}>
+                                *
                                 <Address
                                   wallets={[c.to as `0x${string}`]}
                                   display={c.to_display}
@@ -593,6 +610,7 @@ export default function WalletCheckerComponent(props: Props) {
                             to{" "}
                             {areEqualAddresses(fetchedAddress, c.from) ? (
                               <span className={styles.selectedAddress}>
+                                *
                                 <Address
                                   wallets={[c.from as `0x${string}`]}
                                   display={c.from_display}
