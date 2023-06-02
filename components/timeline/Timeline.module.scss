@@ -32,7 +32,7 @@
 }
 
 .timelineContainer {
-  padding: 10px 26px;
+  padding: 20px 26px;
   position: relative;
   background-color: inherit;
   width: 50%;
@@ -46,24 +46,21 @@
   right: -13px;
   background-color: white;
   border: 6px solid $salmon;
-  top: 20px;
+  top: 25px;
   border-radius: 50%;
   z-index: 1;
 }
 
-.left {
-  left: 0;
-}
-
+.left,
 .right {
-  left: 50%;
+  left: 0;
 }
 
 .left::before {
   content: " ";
   height: 0;
   position: absolute;
-  top: 22px;
+  top: 28px;
   width: 0;
   z-index: 1;
   right: 16px;
@@ -76,17 +73,13 @@
   content: " ";
   height: 0;
   position: absolute;
-  top: 22px;
+  top: 28px;
   width: 0;
   z-index: 1;
   left: 16px;
   border: medium solid white;
   border-width: 10px 10px 10px 0;
   border-color: transparent white transparent transparent;
-}
-
-.right::after {
-  left: -13px;
 }
 
 .content {
@@ -97,32 +90,26 @@
   border-radius: 6px;
 }
 
-@media screen and (max-width: 600px) {
-  .timeline::after {
-    left: 31px;
-  }
+.timeline::after {
+  left: 31px;
+}
 
-  .timelineContainer {
-    width: 100%;
-    padding-left: 70px;
-    padding-right: 25px;
-  }
+.timelineContainer {
+  width: 100%;
+  padding-left: 70px;
+  padding-right: 25px;
+}
 
-  .timelineContainer::before {
-    left: 60px;
-    border: medium solid white;
-    border-width: 10px 10px 10px 0;
-    border-color: transparent white transparent transparent;
-  }
+.timelineContainer::before {
+  left: 60px;
+  border: medium solid white;
+  border-width: 10px 10px 10px 0;
+  border-color: transparent white transparent transparent;
+}
 
-  .left::after,
-  .right::after {
-    left: 18px;
-  }
-
-  .right {
-    left: 0%;
-  }
+.left::after,
+.right::after {
+  left: 18px;
 }
 
 .externalLink {
@@ -166,13 +153,14 @@
   padding: 1.5rem !important;
 }
 
-.imageChange {
-  max-width: 100%;
-  max-height: 75vh;
+.timelineMediaImage {
+  width: 100%;
+  min-width: 150px;
 }
 
 .changesUl {
-  padding-left: 1rem;
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
 }
 
 .changeLink {

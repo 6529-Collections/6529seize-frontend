@@ -1,11 +1,15 @@
 import { Col, Container, Row, Table } from "react-bootstrap";
-import { NFTHistory } from "../../entities/INFT";
+import { NFT, NFTHistory } from "../../entities/INFT";
 import styles from "./Timeline.module.scss";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { getContentTypeFromURL } from "../../helpers/Helpers";
-import TimelineMediaComponent from "./TimelineMedia";
+import {
+  getContentTypeFromURL,
+  numberWithCommasFromString,
+} from "../../helpers/Helpers";
+import TimelineMediaComponent, { MediaType } from "./TimelineMedia";
 
 interface Props {
+  nft: NFT;
   steps: NFTHistory[];
 }
 
@@ -23,6 +27,16 @@ export default function Timeline(props: Props) {
       .padStart(2, "0")}:${date.getUTCMinutes().toString().padStart(2, "0")}`;
   };
 
+  const getType = () => {
+    if (props.nft.metadata.animation_details?.format == "HTML") {
+      return MediaType.HTML;
+    } else if (props.nft.metadata.animation_details?.format == "MP4") {
+      return MediaType.VIDEO;
+    } else {
+      return MediaType.IMAGE;
+    }
+  };
+
   const getKeyDisplay = (key: string) => {
     key = key.replaceAll("_", " ");
     key = key.replaceAll("::", " - ");
@@ -31,16 +45,20 @@ export default function Timeline(props: Props) {
   };
 
   const isImage = (key: string) => {
-    return ["image", "image_url"].includes(key);
+    return ["image"].includes(key);
   };
 
   const isAnimation = (key: string) => {
-    return ["animation", "animation_url"].includes(key);
+    return ["animation"].includes(key);
+  };
+
+  const isUrl = (key: string) => {
+    return ["animation_url", "image_url"].includes(key);
   };
 
   return (
     <>
-      <Container className="mb-5 no-padding">
+      {/* <Container className="mb-5 no-padding">
         <Row className={styles.timelineTableScrollContainer}>
           <Col className="no-padding">
             <Table className={styles.timelineTable}>
@@ -101,31 +119,36 @@ export default function Timeline(props: Props) {
                                         <Col className="d-flex align-items-start flex-column gap-1">
                                           <b>From:</b>
                                           <TimelineMediaComponent
+                                            type={MediaType.IMAGE}
                                             url={change.from}
                                           />
-                                          <a
-                                            className={styles.changeLink}
-                                            href={change.from}
-                                            target="_blank"
-                                            rel="noreferrer">
-                                            link
-                                          </a>
                                         </Col>
                                         <Col className="d-flex align-items-start flex-column gap-1">
                                           <b>To:</b>
                                           <TimelineMediaComponent
+                                            type={MediaType.IMAGE}
                                             url={change.to}
                                           />
-                                          <a
-                                            className={styles.changeLink}
-                                            href={change.to}
-                                            target="_blank"
-                                            rel="noreferrer">
-                                            link
-                                          </a>
                                         </Col>
                                       </>
                                     ) : isAnimation(change.key) ? (
+                                      <>
+                                        <Col className="d-flex align-items-start flex-column gap-1">
+                                          <b>From:</b>
+                                          <TimelineMediaComponent
+                                            type={getType()}
+                                            url={change.from}
+                                          />
+                                        </Col>
+                                        <Col className="d-flex align-items-start flex-column gap-1">
+                                          <b>To:</b>
+                                          <TimelineMediaComponent
+                                            type={getType()}
+                                            url={change.to}
+                                          />
+                                        </Col>
+                                      </>
+                                    ) : isUrl(change.key) ? (
                                       <>
                                         <Col xs={12}>
                                           <b>From:</b>{" "}
@@ -150,10 +173,17 @@ export default function Timeline(props: Props) {
                                       <>
                                         <Col xs={12}>
                                           <b>From:</b>{" "}
-                                          <span>{change.from}</span>
+                                          <span>
+                                            {numberWithCommasFromString(
+                                              change.from
+                                            )}
+                                          </span>
                                         </Col>
                                         <Col xs={12} className="pt-2">
-                                          <b>To:</b> {change.to}
+                                          <b>To:</b>{" "}
+                                          {numberWithCommasFromString(
+                                            change.to
+                                          )}
                                         </Col>
                                       </>
                                     )}
@@ -171,7 +201,7 @@ export default function Timeline(props: Props) {
             </Table>
           </Col>
         </Row>
-      </Container>
+      </Container> */}
       <div className={styles.timeline}>
         {props.steps.map((step, index) => {
           return (
@@ -182,7 +212,7 @@ export default function Timeline(props: Props) {
               }`}>
               <div className={styles.content}>
                 <h5 className="float-none m-0 mb-3">
-                  {getDateDisplay(step.transaction_date)}
+                  {`${getDateDisplay(step.transaction_date)} UTC`}
                 </h5>
                 <Container className="no-padding">
                   <Row className="pb-1">
@@ -215,7 +245,7 @@ export default function Timeline(props: Props) {
                     </Col>
                   </Row>
                   {step.description.changes.length > 0 && (
-                    <ul>
+                    <ul className={styles.changesUl}>
                       {step.description.changes.map((change, index) => (
                         <li key={`timeline-table-${index}`}>
                           <Row className="pt-3 pb-1">
@@ -228,34 +258,68 @@ export default function Timeline(props: Props) {
                               <>
                                 <Col className="d-flex align-items-start flex-column gap-1">
                                   <b>From:</b>
-                                  <TimelineMediaComponent url={change.from} />
-                                  <a
-                                    className={styles.changeLink}
-                                    href={change.from}
-                                    target="_blank"
-                                    rel="noreferrer">
-                                    link
-                                  </a>
+                                  <TimelineMediaComponent
+                                    type={MediaType.IMAGE}
+                                    url={change.from}
+                                  />
                                 </Col>
                                 <Col className="d-flex align-items-start flex-column gap-1">
                                   <b>To:</b>
-                                  <TimelineMediaComponent url={change.to} />
+                                  <TimelineMediaComponent
+                                    type={MediaType.IMAGE}
+                                    url={change.to}
+                                  />
+                                </Col>
+                              </>
+                            ) : isAnimation(change.key) ? (
+                              <>
+                                <Col className="d-flex align-items-start flex-column gap-1">
+                                  <b>From:</b>
+                                  <TimelineMediaComponent
+                                    type={getType()}
+                                    url={change.from}
+                                  />
+                                </Col>
+                                <Col className="d-flex align-items-start flex-column gap-1">
+                                  <b>To:</b>
+                                  <TimelineMediaComponent
+                                    type={getType()}
+                                    url={change.to}
+                                  />
+                                </Col>
+                              </>
+                            ) : isUrl(change.key) ? (
+                              <>
+                                <Col xs={12}>
+                                  <b>From:</b>{" "}
                                   <a
-                                    className={styles.changeLink}
+                                    href={change.from}
+                                    target="_blank"
+                                    rel="noreferrer">
+                                    {change.from}
+                                  </a>
+                                </Col>
+                                <Col xs={12} className="pt-2">
+                                  <b>To:</b>{" "}
+                                  <a
                                     href={change.to}
                                     target="_blank"
                                     rel="noreferrer">
-                                    link
+                                    {change.to}
                                   </a>
                                 </Col>
                               </>
                             ) : (
                               <>
                                 <Col xs={12}>
-                                  <b>From:</b> <span>{change.from}</span>
+                                  <b>From:</b>{" "}
+                                  <span>
+                                    {numberWithCommasFromString(change.from)}
+                                  </span>
                                 </Col>
                                 <Col xs={12} className="pt-2">
-                                  <b>To:</b> {change.to}
+                                  <b>To:</b>{" "}
+                                  {numberWithCommasFromString(change.to)}
                                 </Col>
                               </>
                             )}
