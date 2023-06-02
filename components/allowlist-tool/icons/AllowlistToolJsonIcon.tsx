@@ -6,7 +6,7 @@ export default function AllowlistToolJsonIcon() {
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
     >
-      <g clip-path="url(#clip0_1138_5877)">
+      <g clipPath="url(#clip0_1138_5877)">
         <mask
           id="mask0_1138_5877"
           style={{ maskType: "luminance" }}

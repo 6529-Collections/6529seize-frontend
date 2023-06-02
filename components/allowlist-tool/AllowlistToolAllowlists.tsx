@@ -1,7 +1,6 @@
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
-import { AllowlistDescription } from "./builder/AllowlistToolBuilderHeader";
-import { AllowlistToolResponse } from "./allowlist-tool.types";
+import { AllowlistDescription, AllowlistToolResponse } from "./allowlist-tool.types";
 import dynamic from "next/dynamic";
 
 const AllowlistToolAllowlistsEmpty = dynamic(
@@ -46,6 +45,10 @@ export default function AllowlistToolAllowlists() {
 
   useEffect(() => fetchData(), []);
 
+  const removeAllowlist = (id: string) => {
+    setAllowlists(allowlists.filter((allowlist) => allowlist.id !== id));
+  };
+
   return (
     <>
       {allowlists.length === 0 ? (
@@ -53,7 +56,7 @@ export default function AllowlistToolAllowlists() {
       ) : (
         <AllowlistToolAllowlistsTable
           allowlists={allowlists}
-          onAllowlistRemoved={fetchData}
+          onAllowlistRemoved={removeAllowlist}
         />
       )}
     </>

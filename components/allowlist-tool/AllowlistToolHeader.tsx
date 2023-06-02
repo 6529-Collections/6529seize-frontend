@@ -1,7 +1,8 @@
-import { AnimatePresence, motion } from "framer-motion";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/router";
 import { useState } from "react";
+import AllowlistToolModelWrapper from "./common/AllowlistToolModelWrapper";
+import { AllowlistDescription } from "./allowlist-tool.types";
 
 const AddAllowlistModal = dynamic(
   () => import("./AllowlistToolAddAllowlistModal"),
@@ -14,11 +15,8 @@ export default function AllowlistToolHeader() {
   const [showModal, setShowModal] = useState<boolean>(false);
   const router = useRouter();
 
-  const onModalClose = (addedAllowlistId: string | null) => {
-    setShowModal(false);
-    if (addedAllowlistId) {
-      router.push(`/allowlist-tool/${addedAllowlistId}`);
-    }
+  const onAllowlistAdded = (allowlist: AllowlistDescription) => {
+    router.push(`/allowlist-tool/${allowlist.id}`)
   };
 
   return (
@@ -47,21 +45,11 @@ export default function AllowlistToolHeader() {
           New allowlist
         </button>
       </div>
-      <AnimatePresence>
-        {showModal && (
-          <motion.div
-            key="modal"
-            className="tw-relative tw-z-10" role="dialog"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-          >
-            <AddAllowlistModal
-              onClose={(addedAllowlistId) => onModalClose(addedAllowlistId)}
-            />
-          </motion.div>
-        )}
-      </AnimatePresence>
+      <AllowlistToolModelWrapper showModal={showModal} onClose={() => setShowModal(false)} title="Add allowlist">
+        <AddAllowlistModal
+          onAllowlistAdded={onAllowlistAdded}
+        />
+      </AllowlistToolModelWrapper>
     </>
   );
 }

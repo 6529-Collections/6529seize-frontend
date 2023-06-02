@@ -1,5 +1,5 @@
 import dynamic from "next/dynamic";
-import { AllowlistDescription } from "./builder/AllowlistToolBuilderHeader";
+import { AllowlistDescription } from "./allowlist-tool.types";
 
 const AllowlistToolAllowlistsTableItem = dynamic(
   () => import("./AllowlistToolAllowlistsTableItem"),
@@ -13,7 +13,7 @@ export default function AllowlistToolAllowlistsTable({
   onAllowlistRemoved,
 }: {
   allowlists: AllowlistDescription[];
-  onAllowlistRemoved: () => void;
+  onAllowlistRemoved: (id: string) => void;
 }) {
   return (
     <>

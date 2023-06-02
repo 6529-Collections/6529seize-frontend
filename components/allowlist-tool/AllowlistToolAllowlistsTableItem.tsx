@@ -1,14 +1,15 @@
 import { useState } from "react";
-import { AllowlistDescription } from "./builder/AllowlistToolBuilderHeader";
 import { useRouter } from "next/router";
+import { AllowlistDescription } from "./allowlist-tool.types";
 
 export default function AllowlistToolAllowlistsTableItem({
   allowlist,
   onAllowlistRemoved,
 }: {
   allowlist: AllowlistDescription;
-  onAllowlistRemoved: () => void;
+  onAllowlistRemoved: (id: string) => void;
 }) {
+  const router = useRouter();
   const [errors, setErrors] = useState<string[]>([]);
   const [isLoading, setLoading] = useState<boolean>(false);
   const deleteAllowlist = () => {
@@ -20,7 +21,7 @@ export default function AllowlistToolAllowlistsTableItem({
     })
       .then((response) => {
         if (response.status === 200 && response.statusText === "OK") {
-          onAllowlistRemoved();
+          onAllowlistRemoved(allowlist.id);
           return;
         }
         response
@@ -39,9 +40,16 @@ export default function AllowlistToolAllowlistsTableItem({
       .finally(() => setLoading(false));
   };
 
+  const goToAllowlist = () => {
+    router.push(`/allowlist-tool/${allowlist.id}`);
+  };
+
   return (
     <>
-      <div className="tw-w-full tw-inline-flex tw-justify-between">
+      <div
+        className="tw-w-full tw-inline-flex tw-justify-between"
+        onClick={goToAllowlist}
+      >
         <div>{allowlist.name}</div>
         {errors.length > 0 &&
           errors.map((error, index) => (

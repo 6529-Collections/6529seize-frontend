@@ -1,6 +1,18 @@
 import dynamic from "next/dynamic";
 import HeaderPlaceholder from "../../../components/header/HeaderPlaceholder";
 import { Poppins } from "next/font/google";
+import { createContext, useState } from "react";
+import Breadcrumb, { Crumb } from "../../../components/breadcrumb/Breadcrumb";
+import {
+  AllowlistCustomTokenPool,
+  AllowlistDescription,
+  AllowlistOperation,
+  AllowlistPhaseWithComponentAndItems,
+  AllowlistTokenPool,
+  AllowlistTransferPool,
+  AllowlistWalletPool,
+} from "../../../components/allowlist-tool/allowlist-tool.types";
+import AllowlistToolBuilderOperations from "../../../components/allowlist-tool/builder/operations/AllowlistToolBuilderOperations";
 
 const poppins = Poppins({
   weight: ["300", "400", "500", "600", "700"],
@@ -8,16 +20,6 @@ const poppins = Poppins({
   subsets: ["latin"],
   display: "swap",
 });
-
-const AllowlistToolBuilderHeader = dynamic(
-  () =>
-    import(
-      "../../../components/allowlist-tool/builder/AllowlistToolBuilderHeader"
-    ),
-  {
-    ssr: false,
-  }
-);
 
 const AllowlistToolBuilderTransferPools = dynamic(
   () =>
@@ -39,10 +41,10 @@ const AllowlistToolBuilderTokenPools = dynamic(
   }
 );
 
-const AllowlistToolBuilderCustomPools = dynamic(
+const AllowlistToolBuilderCustomTokenPools = dynamic(
   () =>
     import(
-      "../../../components/allowlist-tool/builder/custom-pools/AllowlistToolBuilderCustomPools"
+      "../../../components/allowlist-tool/builder/custom-token-pools/AllowlistToolBuilderCustomTokenPools"
     ),
   {
     ssr: false,
@@ -74,23 +76,116 @@ const Header = dynamic(() => import("../../../components/header/Header"), {
   loading: () => <HeaderPlaceholder />,
 });
 
-export default function AllowlistToolAllowlistId() {
+type AllowlistToolBuilderContextType = {
+  operations: AllowlistOperation[];
+  setOperations: (operations: AllowlistOperation[]) => void;
+  transferPools: AllowlistTransferPool[];
+  setTransferPools: (transferPools: AllowlistTransferPool[]) => void;
+  tokenPools: AllowlistTokenPool[];
+  setTokenPools: (tokenPools: AllowlistTokenPool[]) => void;
+  customTokenPools: AllowlistCustomTokenPool[];
+  setCustomTokenPools: (customTokenPools: AllowlistCustomTokenPool[]) => void;
+  walletPools: AllowlistWalletPool[];
+  setWalletPools: (walletPools: AllowlistWalletPool[]) => void;
+  phases: AllowlistPhaseWithComponentAndItems[];
+  setPhases: (phases: AllowlistPhaseWithComponentAndItems[]) => void;
+};
+
+export const AllowlistToolBuilderContext =
+  createContext<AllowlistToolBuilderContextType>({
+    operations: [],
+    setOperations: () => {},
+    transferPools: [],
+    setTransferPools: () => {},
+    tokenPools: [],
+    setTokenPools: () => {},
+    customTokenPools: [],
+    setCustomTokenPools: () => {},
+    walletPools: [],
+    setWalletPools: () => {},
+    phases: [],
+    setPhases: () => {},
+  });
+
+export default function AllowlistToolAllowlistId({
+  allowlist,
+}: {
+  allowlist: AllowlistDescription;
+}) {
+  const [breadcrumbs, setBreadcrumbs] = useState<Crumb[]>([
+    { display: "Home", href: "/" },
+    { display: "Allowlist tool", href: "/allowlist-tool" },
+    { display: allowlist.name },
+  ]);
+  const [operations, setOperations] = useState<AllowlistOperation[]>([]);
+  const [transferPools, setTransferPools] = useState<AllowlistTransferPool[]>(
+    []
+  );
+  const [tokenPools, setTokenPools] = useState<AllowlistTokenPool[]>([]);
+  const [customTokenPools, setCustomTokenPools] = useState<
+    AllowlistCustomTokenPool[]
+  >([]);
+  const [walletPools, setWalletPools] = useState<AllowlistWalletPool[]>([]);
+  const [phases, setPhases] = useState<AllowlistPhaseWithComponentAndItems[]>(
+    []
+  );
   return (
     <>
       <Header />
+      <Breadcrumb breadcrumbs={breadcrumbs} />
       <div className={`tw-min-h-screen tw-bg-[#131315] ${poppins.className}`}>
-        <div className="container tw-mx-auto tw-pt-12">
-          <AllowlistToolBuilderHeader />
+        <div className="container tw-mx-auto tw-pt-4">
+          <h1 className="tw-uppercase tw-float-none tw-mb-0">
+            {allowlist.name}
+          </h1>
 
-          <div id="allowlist-tool" className="tw-pt-8 tw-space-y-8">
-            <AllowlistToolBuilderTransferPools />
-            <AllowlistToolBuilderTokenPools />
-            <AllowlistToolBuilderCustomPools />
-            <AllowlistToolBuilderWalletPools />
-            <AllowlistToolBuilderPhases />
+          <div id="allowlist-tool" className="tw-pt-8">
+            <AllowlistToolBuilderContext.Provider
+              value={{
+                operations,
+                setOperations,
+                transferPools,
+                setTransferPools,
+                tokenPools,
+                setTokenPools,
+                customTokenPools,
+                setCustomTokenPools,
+                walletPools,
+                setWalletPools,
+                phases,
+                setPhases,
+              }}
+            >
+              <AllowlistToolBuilderOperations>
+                <div className="tw-space-y-8">
+                  <AllowlistToolBuilderTransferPools />
+                  <AllowlistToolBuilderTokenPools />
+                  <AllowlistToolBuilderCustomTokenPools />
+                  <AllowlistToolBuilderWalletPools />
+                  <AllowlistToolBuilderPhases />
+                </div>
+              </AllowlistToolBuilderOperations>
+            </AllowlistToolBuilderContext.Provider>
           </div>
         </div>
       </div>
     </>
   );
+}
+
+export async function getServerSideProps(req: { query: { id: string } }) {
+  const allowlistResponse = await fetch(
+    `${process.env.ALLOWLIST_API_ENDPOINT}/allowlists/${req.query.id}`
+  );
+  const allowlist: AllowlistDescription = await allowlistResponse.json();
+  if ("error" in allowlist) {
+    return {
+      redirect: {
+        destination: "/allowlist-tool",
+        permanent: false,
+      },
+    };
+  }
+
+  return { props: { allowlist } };
 }
