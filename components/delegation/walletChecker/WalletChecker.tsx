@@ -330,8 +330,14 @@ export default function WalletCheckerComponent(props: Props) {
                                   fetchedAddress,
                                   delegation.from_address
                                 ) ? (
-                                  <span className={styles.selectedAddress}>
-                                    *
+                                  <Address
+                                    wallets={[
+                                      delegation.from_address as `0x${string}`,
+                                    ]}
+                                    display={delegation.from_display}
+                                  />
+                                ) : (
+                                  <span className={styles.supportingAddress}>
                                     <Address
                                       wallets={[
                                         delegation.from_address as `0x${string}`,
@@ -339,13 +345,6 @@ export default function WalletCheckerComponent(props: Props) {
                                       display={delegation.from_display}
                                     />
                                   </span>
-                                ) : (
-                                  <Address
-                                    wallets={[
-                                      delegation.from_address as `0x${string}`,
-                                    ]}
-                                    display={delegation.from_display}
-                                  />
                                 )}
                               </td>
                               <td>
@@ -353,8 +352,14 @@ export default function WalletCheckerComponent(props: Props) {
                                   fetchedAddress,
                                   delegation.to_address
                                 ) ? (
-                                  <span className={styles.selectedAddress}>
-                                    *
+                                  <Address
+                                    wallets={[
+                                      delegation.to_address as `0x${string}`,
+                                    ]}
+                                    display={delegation.to_display}
+                                  />
+                                ) : (
+                                  <span className={styles.supportingAddress}>
                                     <Address
                                       wallets={[
                                         delegation.to_address as `0x${string}`,
@@ -362,13 +367,6 @@ export default function WalletCheckerComponent(props: Props) {
                                       display={delegation.to_display}
                                     />
                                   </span>
-                                ) : (
-                                  <Address
-                                    wallets={[
-                                      delegation.to_address as `0x${string}`,
-                                    ]}
-                                    display={delegation.to_display}
-                                  />
                                 )}
                               </td>
                               <td>
@@ -414,8 +412,14 @@ export default function WalletCheckerComponent(props: Props) {
                                   fetchedAddress,
                                   delegation.from_address
                                 ) ? (
-                                  <span className={styles.selectedAddress}>
-                                    *
+                                  <Address
+                                    wallets={[
+                                      delegation.from_address as `0x${string}`,
+                                    ]}
+                                    display={delegation.from_display}
+                                  />
+                                ) : (
+                                  <span className={styles.supportingAddress}>
                                     <Address
                                       wallets={[
                                         delegation.from_address as `0x${string}`,
@@ -423,13 +427,6 @@ export default function WalletCheckerComponent(props: Props) {
                                       display={delegation.from_display}
                                     />
                                   </span>
-                                ) : (
-                                  <Address
-                                    wallets={[
-                                      delegation.from_address as `0x${string}`,
-                                    ]}
-                                    display={delegation.from_display}
-                                  />
                                 )}
                               </td>
                               <td>
@@ -437,8 +434,14 @@ export default function WalletCheckerComponent(props: Props) {
                                   fetchedAddress,
                                   delegation.to_address
                                 ) ? (
-                                  <span className={styles.selectedAddress}>
-                                    *
+                                  <Address
+                                    wallets={[
+                                      delegation.to_address as `0x${string}`,
+                                    ]}
+                                    display={delegation.to_display}
+                                  />
+                                ) : (
+                                  <span className={styles.supportingAddress}>
                                     <Address
                                       wallets={[
                                         delegation.to_address as `0x${string}`,
@@ -446,13 +449,6 @@ export default function WalletCheckerComponent(props: Props) {
                                       display={delegation.to_display}
                                     />
                                   </span>
-                                ) : (
-                                  <Address
-                                    wallets={[
-                                      delegation.to_address as `0x${string}`,
-                                    ]}
-                                    display={delegation.to_display}
-                                  />
                                 )}
                               </td>
                               <td>
@@ -485,8 +481,14 @@ export default function WalletCheckerComponent(props: Props) {
                                 fetchedAddress,
                                 consolidation.from
                               ) ? (
-                                <span className={styles.selectedAddress}>
-                                  *
+                                <Address
+                                  wallets={[
+                                    consolidation.from as `0x${string}`,
+                                  ]}
+                                  display={consolidation.from_display}
+                                />
+                              ) : (
+                                <span className={styles.supportingAddress}>
                                   <Address
                                     wallets={[
                                       consolidation.from as `0x${string}`,
@@ -494,13 +496,6 @@ export default function WalletCheckerComponent(props: Props) {
                                     display={consolidation.from_display}
                                   />
                                 </span>
-                              ) : (
-                                <Address
-                                  wallets={[
-                                    consolidation.from as `0x${string}`,
-                                  ]}
-                                  display={consolidation.from_display}
-                                />
                               )}
                               <span className="d-inline-flex align-items-center justify-content-center">
                                 <span className={styles.arrowBody}></span>
@@ -510,8 +505,12 @@ export default function WalletCheckerComponent(props: Props) {
                                 fetchedAddress,
                                 consolidation.to
                               ) ? (
-                                <span className={styles.selectedAddress}>
-                                  *
+                                <Address
+                                  wallets={[consolidation.to as `0x${string}`]}
+                                  display={consolidation.to_display}
+                                />
+                              ) : (
+                                <span className={styles.supportingAddress}>
                                   <Address
                                     wallets={[
                                       consolidation.to as `0x${string}`,
@@ -519,11 +518,6 @@ export default function WalletCheckerComponent(props: Props) {
                                     display={consolidation.to_display}
                                   />
                                 </span>
-                              ) : (
-                                <Address
-                                  wallets={[consolidation.to as `0x${string}`]}
-                                  display={consolidation.to_display}
-                                />
                               )}
                             </td>
                           </tr>
@@ -533,99 +527,95 @@ export default function WalletCheckerComponent(props: Props) {
                   ) : (
                     `No consolidations found`
                   )}
-                  {consolidations.length > 0 &&
-                    consolidatedWallets.length > 0 && (
+                  {consolidations.length > 1 &&
+                    consolidatedWallets.length > 1 && (
                       <div className="pt-2">
                         <h5 className="pt-2 pb-2 float-none">
                           Active Consolidation
                         </h5>
-                        {consolidatedWallets.length > 1 ? (
-                          <div className="d-flex align-items-center">
-                            {consolidatedWallets.map((wallet, index) => (
-                              <Fragment key={`consolidated-wallets-${index}`}>
-                                {areEqualAddresses(
-                                  fetchedAddress,
-                                  wallet.address
-                                ) ? (
-                                  <span className={styles.selectedAddress}>
-                                    *
-                                    <Address
-                                      wallets={[
-                                        wallet.address as `0x${string}`,
-                                      ]}
-                                      display={wallet.display}
-                                    />
-                                  </span>
-                                ) : (
+                        <div className="d-flex align-items-center">
+                          {consolidatedWallets.map((wallet, index) => (
+                            <Fragment key={`consolidated-wallets-${index}`}>
+                              {areEqualAddresses(
+                                fetchedAddress,
+                                wallet.address
+                              ) ? (
+                                <Address
+                                  wallets={[wallet.address as `0x${string}`]}
+                                  display={wallet.display}
+                                />
+                              ) : (
+                                <span className={styles.supportingAddress}>
                                   <Address
                                     wallets={[wallet.address as `0x${string}`]}
                                     display={wallet.display}
                                   />
-                                )}
-                                {consolidatedWallets.length - 1 > index && (
-                                  <FontAwesomeIcon
-                                    icon="plus-circle"
-                                    className={styles.consolidationPlusIcon}
-                                  />
-                                )}
-                              </Fragment>
-                            ))}
-                            <FontAwesomeIcon
-                              icon="check"
-                              className={styles.consolidationActiveIcon}
-                            />
-                          </div>
-                        ) : (
-                          `No Active consolidations found`
-                        )}
+                                </span>
+                              )}
+                              {consolidatedWallets.length - 1 > index && (
+                                <FontAwesomeIcon
+                                  icon="plus-circle"
+                                  className={styles.consolidationPlusIcon}
+                                />
+                              )}
+                            </Fragment>
+                          ))}
+                          <FontAwesomeIcon
+                            icon="check"
+                            className={styles.consolidationActiveIcon}
+                          />
+                        </div>
                       </div>
                     )}
                   {consolidationActions.length > 0 && (
-                    <div className="pt-4">
-                      Recommended Actions:
-                      <ul className={`${styles.recommendationsList} pt-2`}>
-                        {consolidationActions.map((c, index) => (
-                          <li
-                            key={`consolidated-wallets-${index}`}
-                            className="d-flex align-items-center gap-2">
-                            <FontAwesomeIcon
-                              icon="xmark"
-                              className={styles.consolidationRecommendationIcon}
-                            />
-                            Register Consolidation from{" "}
-                            {areEqualAddresses(fetchedAddress, c.to) ? (
-                              <span className={styles.selectedAddress}>
-                                *
+                    <>
+                      <div className="pt-2 pb-2 d-flex-align-items-center">
+                        <FontAwesomeIcon
+                          icon="xmark"
+                          className={styles.consolidationRecommendationIcon}
+                        />
+                        Incomplete Consolidation
+                      </div>
+                      <div className="pt-2 pb-2">
+                        Recommended Actions:
+                        <ul className={`${styles.recommendationsList} pt-2`}>
+                          {consolidationActions.map((c, index) => (
+                            <li
+                              key={`consolidated-wallets-${index}`}
+                              className="d-flex align-items-center gap-2">
+                              &bull;&nbsp;Register Consolidation from{" "}
+                              {areEqualAddresses(fetchedAddress, c.to) ? (
                                 <Address
                                   wallets={[c.to as `0x${string}`]}
                                   display={c.to_display}
                                 />
-                              </span>
-                            ) : (
-                              <Address
-                                wallets={[c.to as `0x${string}`]}
-                                display={c.to_display}
-                              />
-                            )}{" "}
-                            to{" "}
-                            {areEqualAddresses(fetchedAddress, c.from) ? (
-                              <span className={styles.selectedAddress}>
-                                *
+                              ) : (
+                                <span className={styles.supportingAddress}>
+                                  <Address
+                                    wallets={[c.to as `0x${string}`]}
+                                    display={c.to_display}
+                                  />
+                                </span>
+                              )}{" "}
+                              to{" "}
+                              {areEqualAddresses(fetchedAddress, c.from) ? (
                                 <Address
                                   wallets={[c.from as `0x${string}`]}
                                   display={c.from_display}
                                 />
-                              </span>
-                            ) : (
-                              <Address
-                                wallets={[c.from as `0x${string}`]}
-                                display={c.from_display}
-                              />
-                            )}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
+                              ) : (
+                                <span className={styles.supportingAddress}>
+                                  <Address
+                                    wallets={[c.from as `0x${string}`]}
+                                    display={c.from_display}
+                                  />
+                                </span>
+                              )}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    </>
                   )}
                 </Col>
               </Form.Group>
