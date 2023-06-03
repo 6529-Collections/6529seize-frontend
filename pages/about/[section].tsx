@@ -85,8 +85,7 @@ export default function About(props: Props) {
 
       setBreadcrumbs([
         { display: "Home", href: "/" },
-        { display: "About" },
-        { display: sectionTitle },
+        { display: `About - ${sectionTitle}` },
       ]);
       window.scrollTo(0, 0);
     }
