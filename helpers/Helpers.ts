@@ -49,6 +49,12 @@ export function fromGWEI(from: number) {
   return from / 1e18;
 }
 
+export function numberWithCommasFromString(x: string) {
+  if (!/^\d+$/.test(x)) return x;
+  if (isNaN(parseInt(x))) return x;
+  return numberWithCommas(parseInt(x));
+}
+
 export function numberWithCommas(x: number) {
   if (x == null || x == 0 || isNaN(x)) return "-";
   const parts = x.toString().split(".");
@@ -183,4 +189,16 @@ export function getTransactionLink(chain_id: number, hash: string) {
   return chain_id == sepolia.id
     ? `https://sepolia.etherscan.io/tx/${hash}`
     : `https://etherscan.io/tx/${hash}`;
+}
+
+export async function getContentTypeFromURL(url: string) {
+  try {
+    const response = await fetch(url, { method: "HEAD" });
+    console.log("response", response);
+    const contentType = response.headers.get("Content-Type");
+    return contentType;
+  } catch (error) {
+    console.error("Error retrieving content type:", error);
+    return null;
+  }
 }

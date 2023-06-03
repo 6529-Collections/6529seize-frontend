@@ -221,3 +221,27 @@ h5 {
 .font-smaller {
   font-size: smaller;
 }
+
+.icon-black {
+  background-color: $very-dark-grey;
+  color: white;
+  display: block;
+  height: 30px;
+  width: 30px;
+  text-align: center;
+  border-radius: 15px;
+}
+
+.icon-white {
+  background-color: white;
+  color: $very-dark-grey;
+  display: block;
+  height: 30px;
+  width: 30px;
+  text-align: center;
+  border-radius: 15px;
+}
+
+.decoration-none {
+  text-decoration: none;
+}
