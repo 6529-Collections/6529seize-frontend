@@ -7,6 +7,9 @@ import {
 import AllowlistToolExpandableTableWrapper from "../../common/AllowlistToolExpandableTableWrapper";
 import AllowlistToolBuilderTokenPoolsPool from "./AllowlistToolBuilderTokenPoolsPool";
 import { AllowlistToolBuilderContext } from "../../../../pages/allowlist-tool/[id]";
+import AllowlistToolHistoryIcon from "../../icons/AllowlistToolHistoryIcon";
+import AllowlistToolJsonIcon from "../../icons/AllowlistToolJsonIcon";
+import AllowlistToolPlusIcon from "../../icons/AllowlistToolPlusIcon";
 
 export default function AllowlistToolBuilderTokenPools() {
   const router = useRouter();
@@ -52,7 +55,7 @@ export default function AllowlistToolBuilderTokenPools() {
             <div className="tw-mt-2">
               <input
                 required
-                className="tw-block tw-w-full tw-rounded-lg tw-border-0 tw-py-3 tw-px-3 tw-bg-[#2D2E32] tw-text-white tw-font-light tw-caret-primary tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-neutral-700 placeholder:tw-text-neutral-500 focus:tw-outline-none focus:tw-bg-transparent focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary tw-text-base sm:tw-leading-6 tw-transition tw-duration-300 tw-ease-out"
+                className="tw-block tw-w-full tw-rounded-lg tw-border-0 tw-py-3 tw-px-3 tw-bg-[#2D2E32] tw-text-white tw-font-light tw-caret-primary tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-neutral-700 placeholder:tw-text-neutral-500 focus:tw-outline-none focus:tw-bg-transparent focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-focus tw-text-base sm:tw-leading-6 tw-transition tw-duration-300 tw-ease-out"
               />
             </div>
           </div>
@@ -63,7 +66,7 @@ export default function AllowlistToolBuilderTokenPools() {
             <div className="tw-mt-2">
               <input
                 required
-                className="tw-block tw-w-full tw-rounded-lg tw-border-0 tw-py-3 tw-px-3 tw-bg-[#2D2E32] tw-text-white tw-font-light tw-caret-primary tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-neutral-700 placeholder:tw-text-neutral-500 focus:tw-outline-none focus:tw-bg-transparent focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary tw-text-base sm:tw-leading-6 tw-transition tw-duration-300 tw-ease-out"
+                className="tw-block tw-w-full tw-rounded-lg tw-border-0 tw-py-3 tw-px-3 tw-bg-[#2D2E32] tw-text-white tw-font-light tw-caret-primary tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-neutral-700 placeholder:tw-text-neutral-500 focus:tw-outline-none focus:tw-bg-transparent focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-focus tw-text-base sm:tw-leading-6 tw-transition tw-duration-300 tw-ease-out"
               />
             </div>
           </div>
@@ -74,7 +77,7 @@ export default function AllowlistToolBuilderTokenPools() {
             <div className="tw-mt-2">
               <input
                 required
-                className="tw-block tw-w-full tw-rounded-lg tw-border-0 tw-py-3 tw-px-3 tw-bg-[#2D2E32] tw-text-white tw-font-light tw-caret-primary tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-neutral-700  placeholder:tw-text-neutral-500 focus:tw-outline-none focus:tw-bg-transparent focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary tw-text-base sm:tw-leading-6 tw-transition tw-duration-300 tw-ease-out"
+                className="tw-block tw-w-full tw-rounded-lg tw-border-0 tw-py-3 tw-px-3 tw-bg-[#2D2E32] tw-text-white tw-font-light tw-caret-primary tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-neutral-700  placeholder:tw-text-neutral-500 focus:tw-outline-none focus:tw-bg-transparent focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-focus tw-text-base sm:tw-leading-6 tw-transition tw-duration-300 tw-ease-out"
               />
             </div>
           </div>
@@ -85,15 +88,14 @@ export default function AllowlistToolBuilderTokenPools() {
             <div className="tw-mt-2">
               <input
                 required
-                className="tw-block tw-w-full tw-rounded-lg tw-border-0 tw-py-3 tw-px-3 tw-bg-[#2D2E32] tw-text-white tw-font-light tw-caret-primary tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-neutral-700  placeholder:tw-text-neutral-500 focus:tw-outline-none focus:tw-bg-transparent focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary tw-text-base sm:tw-leading-6 tw-transition tw-duration-300 tw-ease-out"
+                className="tw-block tw-w-full tw-rounded-lg tw-border-0 tw-py-3 tw-px-3 tw-bg-[#2D2E32] tw-text-white tw-font-light tw-caret-primary tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-neutral-700  placeholder:tw-text-neutral-500 focus:tw-outline-none focus:tw-bg-transparent focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-focus tw-text-base sm:tw-leading-6 tw-transition tw-duration-300 tw-ease-out"
               />
             </div>
           </div>
           <div>
             <button
               type="submit"
-              style={{ fontSize: "14px !important" }}
-              className="tw-bg-primary tw-px-4 tw-py-3 tw-text-sm tw-font-medium tw-text-white tw-w-full tw-border tw-border-primary tw-rounded-lg hover:tw-bg-primary-hover hover:tw-border-primary-hover tw-transition tw-duration-300 tw-ease-out"
+              className="tw-bg-primary tw-px-4 tw-py-3 tw-text-sm tw-font-medium tw-text-white tw-w-full tw-border tw-border-solid tw-border-primary tw-rounded-lg hover:tw-bg-primary-hover hover:tw-border-primary-hover tw-transition tw-duration-300 tw-ease-out"
             >
               Add token pool
             </button>
@@ -109,32 +111,59 @@ export default function AllowlistToolBuilderTokenPools() {
                       <tr>
                         <th
                           scope="col"
-                          className="tw-py-3.5 tw-pl-4 tw-pr-3 tw-text-left tw-text-[0.6875rem] tw-leading-[1.125rem] tw-font-medium tw-text-neutral-500 tw-uppercase tw-tracking-[0.25px] sm:tw-pl-6"
+                          className="tw-py-2 tw-pl-4 tw-pr-3 tw-text-left tw-text-[0.6875rem] tw-leading-[1.125rem] tw-font-medium tw-text-neutral-500 tw-uppercase tw-tracking-[0.25px] sm:tw-pl-6"
                         >
                           Pool name
                         </th>
                         <th
                           scope="col"
-                          className="tw-px-3 tw-py-3.5 tw-text-left tw-text-[0.6875rem] tw-leading-[1.125rem] tw-font-medium tw-text-neutral-500 tw-uppercase tw-tracking-[0.25px]"
+                          className="tw-px-3 tw-py-2 tw-text-left tw-text-[0.6875rem] tw-leading-[1.125rem] tw-font-medium tw-text-neutral-500 tw-uppercase tw-tracking-[0.25px]"
                         >
                           Description
                         </th>
                         <th
                           scope="col"
-                          className="tw-px-3 tw-py-3.5 tw-text-left tw-text-[0.6875rem] tw-leading-[1.125rem] tw-font-medium tw-text-neutral-500 tw-uppercase tw-tracking-[0.25px]"
+                          className="tw-px-3 tw-py-2 tw-text-left tw-text-[0.6875rem] tw-leading-[1.125rem] tw-font-medium tw-text-neutral-500 tw-uppercase tw-tracking-[0.25px]"
                         >
                           Transfer pool
                         </th>
                         <th
                           scope="col"
-                          className="tw-px-3 tw-py-3.5 tw-text-left tw-text-[0.6875rem] tw-leading-[1.125rem] tw-font-medium tw-text-neutral-500 tw-uppercase tw-tracking-[0.25px]"
+                          className="tw-px-3 tw-py-2 tw-text-left tw-text-[0.6875rem] tw-leading-[1.125rem] tw-font-medium tw-text-neutral-500 tw-uppercase tw-tracking-[0.25px]"
                         >
                           Token ID(s)
                         </th>
                         <th
                           scope="col"
-                          className="tw-relative tw-py-3.5 tw-pl-3 tw-pr-4 sm:tw-pr-6"
-                        ></th>
+                          className="tw-w-40 tw-py-2 tw-pl-6 tw-pr-4 sm:tw-pr-6"
+                        >
+                          <div className="tw-flex tw-items-center tw-justify-end tw-gap-x-3">
+                            <button
+                              type="button"
+                              className="tw-group tw-rounded-full tw-bg-transparent tw-p-2 tw-text-white tw-border-none hover:tw-bg-neutral-700 tw-transition-all tw-duration-300 tw-ease-out"
+                            >
+                              <div className="tw-h-[1.125rem] tw-w-[1.125rem] tw-flex tw-items-center tw-justify-center">
+                                <AllowlistToolJsonIcon />
+                              </div>
+                            </button>
+                            <button
+                              type="button"
+                              className="tw-group tw-rounded-full tw-bg-transparent tw-p-2 tw-text-white tw-border-none hover:tw-bg-neutral-700 tw-transition-all tw-duration-300 tw-ease-out"
+                            >
+                              <div className="tw-h-5 tw-w-5 tw-flex tw-items-center tw-justify-center">
+                                <AllowlistToolPlusIcon />
+                              </div>
+                            </button>
+                            <button
+                              type="button"
+                              className="tw-group tw-rounded-full tw-bg-transparent tw-p-2 tw-text-white tw-border-none hover:tw-bg-neutral-700 tw-transition-all tw-duration-300 tw-ease-out"
+                            >
+                              <div className="tw-h-5 tw-w-5 tw-flex tw-items-center tw-justify-center">
+                                <AllowlistToolHistoryIcon />
+                              </div>
+                            </button>
+                          </div>
+                        </th>
                       </tr>
                     </thead>
                     <tbody className="tw-divide-y tw-divide-neutral-700/40">

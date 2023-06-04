@@ -9,6 +9,9 @@ import AllowlistToolBuilderTransferPoolsPool from "./AllowlistToolBuilderTransfe
 import AllowlistToolExpandableTableWrapper from "../../common/AllowlistToolExpandableTableWrapper";
 import AllowlistToolBuilderTransferPoolsAdd from "./AllowlistToolBuilderTransferPoolsAdd";
 import { AllowlistToolBuilderContext } from "../../../../pages/allowlist-tool/[id]";
+import AllowlistToolHistoryIcon from "../../icons/AllowlistToolHistoryIcon";
+import AllowlistToolJsonIcon from "../../icons/AllowlistToolJsonIcon";
+import AllowlistToolPlusIcon from "../../icons/AllowlistToolPlusIcon";
 
 export default function AllowlistToolBuilderTransferPools() {
   const router = useRouter();
@@ -49,7 +52,7 @@ export default function AllowlistToolBuilderTransferPools() {
   return (
     <AllowlistToolExpandableTableWrapper title="Transfer Pools">
       <div className="tw-w-full tw-overflow-hidden tw-h-0">
-        <div className="tw-border  tw-border-neutral-700/60 tw-border-solid tw-border-l-0 tw-border-r-0 tw-border-b-0 tw-mt-5 tw-w-full"></div>
+        <div className="tw-border tw-border-neutral-700/60 tw-border-solid tw-border-l-0 tw-border-r-0 tw-border-b-0 tw-mt-5 tw-w-full"></div>
         <AllowlistToolBuilderTransferPoolsAdd />
         <div className="tw-bg-[#1E1E23]">
           <div className="tw-px-4 sm:tw-px-6 lg:tw-px-8">
@@ -61,32 +64,59 @@ export default function AllowlistToolBuilderTransferPools() {
                       <tr>
                         <th
                           scope="col"
-                          className="tw-py-3.5 tw-pl-4 tw-pr-3 tw-text-left tw-text-[0.6875rem] tw-leading-[1.125rem] tw-font-medium tw-text-neutral-500 tw-uppercase tw-tracking-[0.25px] sm:tw-pl-6"
+                          className="tw-py-2 tw-pl-4 tw-pr-3 tw-whitespace-nowrap tw-text-left tw-text-[0.6875rem] tw-leading-[1.125rem] tw-font-medium tw-text-neutral-500 tw-uppercase tw-tracking-[0.25px] sm:tw-pl-6"
                         >
                           Pool name
                         </th>
                         <th
                           scope="col"
-                          className="tw-px-3 tw-py-3.5 tw-text-left tw-text-[0.6875rem] tw-leading-[1.125rem] tw-font-medium tw-text-neutral-500 tw-uppercase tw-tracking-[0.25px]"
+                          className="tw-px-3 tw-py-2 tw-whitespace-nowrap tw-text-left tw-text-[0.6875rem] tw-leading-[1.125rem] tw-font-medium tw-text-neutral-500 tw-uppercase tw-tracking-[0.25px]"
                         >
                           Description
                         </th>
                         <th
                           scope="col"
-                          className="tw-px-3 tw-py-3.5 tw-text-left tw-text-[0.6875rem] tw-leading-[1.125rem] tw-font-medium tw-text-neutral-500 tw-uppercase tw-tracking-[0.25px]"
+                          className="tw-px-3 tw-py-2 tw-whitespace-nowrap tw-text-left tw-text-[0.6875rem] tw-leading-[1.125rem] tw-font-medium tw-text-neutral-500 tw-uppercase tw-tracking-[0.25px]"
                         >
                           Contract number
                         </th>
                         <th
                           scope="col"
-                          className="tw-px-3 tw-py-3.5 tw-text-left tw-text-[0.6875rem] tw-leading-[1.125rem] tw-font-medium tw-text-neutral-500 tw-uppercase tw-tracking-[0.25px]"
+                          className="tw-px-3 tw-py-2 tw-whitespace-nowrap tw-text-left tw-text-[0.6875rem] tw-leading-[1.125rem] tw-font-medium tw-text-neutral-500 tw-uppercase tw-tracking-[0.25px]"
                         >
                           Block number
                         </th>
                         <th
                           scope="col"
-                          className="tw-relative tw-py-3.5 tw-pl-3 tw-pr-4 sm:tw-pr-6"
-                        ></th>
+                          className="tw-w-40 tw-py-2 tw-pl-6 tw-pr-4 sm:tw-pr-6"
+                        >
+                          <div className="tw-flex tw-items-center tw-justify-end tw-gap-x-3">
+                            <button
+                              type="button"
+                              className="tw-group tw-rounded-full tw-bg-transparent tw-p-2 tw-text-white tw-border-none hover:tw-bg-neutral-700 tw-transition-all tw-duration-300 tw-ease-out"
+                            >
+                              <div className="tw-h-[1.125rem] tw-w-[1.125rem] tw-flex tw-items-center tw-justify-center">
+                                <AllowlistToolJsonIcon />
+                              </div>
+                            </button>
+                            <button
+                              type="button"
+                              className="tw-group tw-rounded-full tw-bg-transparent tw-p-2 tw-text-white tw-border-none hover:tw-bg-neutral-700 tw-transition-all tw-duration-300 tw-ease-out"
+                            >
+                              <div className="tw-h-5 tw-w-5 tw-flex tw-items-center tw-justify-center">
+                                <AllowlistToolPlusIcon />
+                              </div>
+                            </button>
+                            <button
+                              type="button"
+                              className="tw-group tw-rounded-full tw-bg-transparent tw-p-2 tw-text-white tw-border-none hover:tw-bg-neutral-700 tw-transition-all tw-duration-300 tw-ease-out"
+                            >
+                              <div className="tw-h-5 tw-w-5 tw-flex tw-items-center tw-justify-center">
+                                <AllowlistToolHistoryIcon />
+                              </div>
+                            </button>
+                          </div>
+                        </th>
                       </tr>
                     </thead>
                     <tbody className="tw-divide-y tw-divide-neutral-700/40">
