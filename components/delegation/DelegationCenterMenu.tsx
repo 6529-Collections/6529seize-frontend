@@ -17,6 +17,7 @@ import NewConsolidationComponent from "./NewConsolidation";
 import NewDelegationComponent from "./NewDelegation";
 import NewSubDelegationComponent from "./NewSubDelegation";
 import DelegationHTML from "./html/DelegationHTML";
+import WalletCheckerComponent from "./walletChecker/WalletChecker";
 
 export enum DelegationCenterSection {
   CENTER = "delegation-center",
@@ -29,6 +30,7 @@ export enum DelegationCenterSection {
   GRADIENTS_COLLECTION = "6529-gradient",
   WALLET_ARCHITECTURE = "wallet-architecture",
   FAQ = "delegation-faq",
+  CHECKER = "wallet-checker",
   HTML = "html",
 }
 
@@ -157,6 +159,8 @@ export default function DelegationCenterMenu(props: Props) {
             path={props.path && props.path[props.path?.length - 1]}
           />
         );
+      case DelegationCenterSection.CHECKER:
+        return <WalletCheckerComponent />;
     }
   }
 
@@ -204,6 +208,19 @@ export default function DelegationCenterMenu(props: Props) {
                     : ""
                 }`}>
                 Delegation FAQs
+              </Col>
+            </Row>
+            <Row className="pt-1 pb-2">
+              <Col
+                onClick={() =>
+                  props.setActiveSection(DelegationCenterSection.CHECKER)
+                }
+                className={`${styles.menuLeftItem} ${
+                  props.section == DelegationCenterSection.CHECKER
+                    ? styles.menuLeftItemActive
+                    : ""
+                }`}>
+                Wallet Checker
               </Col>
             </Row>
             <Row className="pt-4 pb-2">
