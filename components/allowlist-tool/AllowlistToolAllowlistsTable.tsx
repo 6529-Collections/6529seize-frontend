@@ -17,13 +17,17 @@ export default function AllowlistToolAllowlistsTable({
 }) {
   return (
     <>
-      {allowlists.map((allowlist) => (
-        <AllowlistToolAllowlistsTableItem
-          key={allowlist.id}
-          allowlist={allowlist}
-          onAllowlistRemoved={onAllowlistRemoved}
-        />
-      ))}
+      <div className="tw-pt-6">
+        <ul className="tw-pl-0 tw-mb-0 tw-space-y-6 tw-list-none">
+          {allowlists.map((allowlist) => (
+            <AllowlistToolAllowlistsTableItem
+              key={allowlist.id}
+              allowlist={allowlist}
+              onAllowlistRemoved={onAllowlistRemoved}
+            />
+          ))}
+        </ul>
+      </div>
     </>
   );
 }

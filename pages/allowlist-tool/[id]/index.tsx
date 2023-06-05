@@ -133,7 +133,7 @@ export default function AllowlistToolAllowlistId({
     <>
       <Header />
       <Breadcrumb breadcrumbs={breadcrumbs} />
-      <div className={`tw-min-h-screen tw-bg-[#131315] ${poppins.className}`}>
+      <div className={`tw-min-h-screen tw-bg-zinc-950 ${poppins.className}`}>
         <div className="container tw-mx-auto tw-t-4 tw-pb-12">
           <h1 className="tw-uppercase tw-float-none tw-mb-0">
             {allowlist.name}

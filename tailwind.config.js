@@ -18,7 +18,8 @@ module.exports = {
         primary: "#406AFE",
         "primary-hover": "#395FE4",
         "primary-focus":"#528BFF",
-        dark: "#171B22"
+        dark: "#171B22",
+        error: "#F97066"
       }
     },
   },
