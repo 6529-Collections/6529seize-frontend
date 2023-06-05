@@ -86,6 +86,8 @@ export interface AllowlistPhaseComponentItem {
   readonly insertionOrder: number;
   readonly name: string;
   readonly description: string;
+  readonly poolId: string;
+  readonly poolType: Pool;
 }
 
 export interface AllowlistPhaseComponentWithItems
@@ -123,4 +125,10 @@ export interface AllowlistOperation {
   readonly allowlistId: string;
   readonly code: AllowlistOperationCode;
   readonly params: any;
+}
+
+export enum Pool {
+  TOKEN_POOL = "TOKEN_POOL",
+  CUSTOM_TOKEN_POOL = "CUSTOM_TOKEN_POOL",
+  WALLET_POOL = "WALLET_POOL"
 }

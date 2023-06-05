@@ -141,7 +141,12 @@ export default function AllowlistToolBuilderPhases() {
                       </tr>
                     </thead>
                     <tbody className="tw-divide-y tw-divide-neutral-700/40">
-                      <AllowlistToolBuilderPhasesPhase />
+                      {phases.map((phase) => (
+                        <AllowlistToolBuilderPhasesPhase
+                          phase={phase}
+                          key={phase.id}
+                        />
+                      ))}
                     </tbody>
                   </table>
                 </div>
