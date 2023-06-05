@@ -1,15 +1,15 @@
-import { useEffect, useState } from "react";
-import { AllowlistPhaseWithComponentAndItems } from "../../allowlist-tool.types";
+import { useAnimate } from "framer-motion";
+import { AllowlistPhaseComponentWithItems } from "../../allowlist-tool.types";
 import AllowlistToolHistoryIcon from "../../icons/AllowlistToolHistoryIcon";
 import AllowlistToolJsonIcon from "../../icons/AllowlistToolJsonIcon";
 import AllowlistToolPlusIcon from "../../icons/AllowlistToolPlusIcon";
-import AllowlistToolBuilderPhasesPhaseComponent from "./AllowlistToolBuilderPhasesPhaseComponent";
-import { useAnimate } from "framer-motion";
+import AllowlistToolBuilderPhasesPhaseComponentItem from "./AllowlistToolBuilderPhasesPhaseComponentItem";
+import React, { useEffect, useState } from "react";
 
-export default function AllowlistToolBuilderPhasesPhase({
-  phase,
+export default function AllowlistToolBuilderPhasesPhaseComponent({
+  phaseComponent,
 }: {
-  phase: AllowlistPhaseWithComponentAndItems;
+  phaseComponent: AllowlistPhaseComponentWithItems;
 }) {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [tableScope, animateTable] = useAnimate();
@@ -26,7 +26,7 @@ export default function AllowlistToolBuilderPhasesPhase({
   return (
     <>
       <tr onClick={() => setIsOpen(!isOpen)}>
-        <td className="tw-whitespace-nowrap tw-py-2 tw-pl-4 tw-pr-3 tw-text-sm tw-font-medium tw-text-white sm:tw-pl-6">
+        <td className="tw-whitespace-nowrap tw-py-2 tw-pl-4 tw-pr-3 tw-text-sm tw-font-normal tw-text-neutral-50 sm:tw-pl-14">
           <div className="tw-inline-flex tw-items-center tw-gap-x-2">
             <svg
               ref={iconScope}
@@ -44,7 +44,7 @@ export default function AllowlistToolBuilderPhasesPhase({
               />
             </svg>
             <div className="tw-inline-flex tw-items-center tw-gap-x-3">
-              {phase.name}
+              <span>{phaseComponent.name}</span>
               <svg
                 className="tw-h-6 tw-w-6 tw-text-neutral-400"
                 viewBox="0 0 24 24"
@@ -63,9 +63,9 @@ export default function AllowlistToolBuilderPhasesPhase({
           </div>
         </td>
         <td className="tw-whitespace-nowrap tw-px-3 tw-py-2 tw-text-sm tw-font-normal tw-text-neutral-300">
-          {phase.description}
+          {phaseComponent.description}
         </td>
-        <td className="tw-px-3 tw-py-2"></td>
+        <td className="tw-whitespace-nowrap tw-px-3 tw-py-2 tw-text-sm tw-font-normal tw-text-neutral-300"></td>
         <td className="tw-w-40 tw-py-2 tw-pl-6 tw-pr-4 tw-text-sm tw-font-normal sm:tw-pr-6">
           <div className="tw-flex tw-items-center tw-justify-end tw-gap-x-3">
             <button
@@ -96,14 +96,14 @@ export default function AllowlistToolBuilderPhasesPhase({
         </td>
       </tr>
       <tr>
-        <td colSpan={4}>
+        <td colSpan={4} >
           <div className="tw-overflow-hidden tw-h-0" ref={tableScope}>
             <table className="tw-min-w-full">
               <tbody className="tw-divide-y tw-divide-neutral-700/40">
-                {phase.components.map((phaseComponent) => (
-                  <AllowlistToolBuilderPhasesPhaseComponent
-                    phaseComponent={phaseComponent}
-                    key={phaseComponent.id}
+                {phaseComponent.items.map((phaseComponentItem) => (
+                  <AllowlistToolBuilderPhasesPhaseComponentItem
+                    phaseComponentItem={phaseComponentItem}
+                    key={phaseComponentItem.id}
                   />
                 ))}
               </tbody>
