@@ -1,13 +1,36 @@
-import { AllowlistPhaseComponentItem } from "../../allowlist-tool.types";
-import AllowlistToolHistoryIcon from "../../icons/AllowlistToolHistoryIcon";
-import AllowlistToolJsonIcon from "../../icons/AllowlistToolJsonIcon";
-import AllowlistToolPlusIcon from "../../icons/AllowlistToolPlusIcon";
+import { useContext, useState } from "react";
+import {
+  AllowlistPhaseComponentItem,
+  Pool,
+} from "../../../../allowlist-tool.types";
+import AllowlistToolHistoryIcon from "../../../../icons/AllowlistToolHistoryIcon";
+import AllowlistToolJsonIcon from "../../../../icons/AllowlistToolJsonIcon";
+import AllowlistToolPlusIcon from "../../../../icons/AllowlistToolPlusIcon";
+import { AllowlistToolBuilderContext } from "../../../../../../pages/allowlist-tool/[id]";
+import AllowlistToolModelWrapper from "../../../../common/AllowlistToolModelWrapper";
+import AllowlistToolBuilderAddItemOperationModal from "../../../operations/add-modal/item/AllowlistToolBuilderAddItemOperationModal";
 
 export default function AllowlistToolBuilderPhasesPhaseComponentItem({
   phaseComponentItem,
 }: {
   phaseComponentItem: AllowlistPhaseComponentItem;
 }) {
+  const { tokenPools, customTokenPools } = useContext(
+    AllowlistToolBuilderContext
+  );
+  let tokenPool;
+
+  if (phaseComponentItem.poolType === Pool.TOKEN_POOL) {
+    tokenPool = tokenPools.find(
+      (pool) => pool.tokenPoolId === phaseComponentItem.poolId
+    );
+  } else if (phaseComponentItem.poolType === Pool.CUSTOM_TOKEN_POOL) {
+    tokenPool = customTokenPools.find(
+      (pool) => pool.customTokenPoolId === phaseComponentItem.poolId
+    );
+  }
+
+  const [showModal, setShowModal] = useState(false);
   return (
     <>
       <tr>
@@ -18,7 +41,7 @@ export default function AllowlistToolBuilderPhasesPhaseComponentItem({
           {phaseComponentItem.description}
         </td>
         <td className="tw-whitespace-nowrap tw-px-3 tw-py-2 tw-text-sm tw-font-normal tw-text-neutral-400">
-          {phaseComponentItem.poolId}
+          {tokenPool?.name}
         </td>
         <td className="tw-w-40 tw-py-2 tw-pl-6 tw-pr-4 tw-text-sm tw-font-normal sm:tw-pr-6">
           <div className="tw-flex tw-items-center tw-justify-end tw-gap-x-3">
@@ -31,6 +54,7 @@ export default function AllowlistToolBuilderPhasesPhaseComponentItem({
               </div>
             </button>
             <button
+              onClick={() => setShowModal(true)}
               type="button"
               className="tw-group tw-rounded-full tw-bg-transparent tw-p-2 tw-text-white tw-border-none hover:tw-bg-neutral-700 tw-transition-all tw-duration-300 tw-ease-out"
             >
@@ -38,6 +62,7 @@ export default function AllowlistToolBuilderPhasesPhaseComponentItem({
                 <AllowlistToolPlusIcon />
               </div>
             </button>
+
             <button
               type="button"
               className="tw-group tw-rounded-full tw-bg-transparent tw-p-2 tw-text-white tw-border-none hover:tw-bg-neutral-700 tw-transition-all tw-duration-300 tw-ease-out"
@@ -47,6 +72,16 @@ export default function AllowlistToolBuilderPhasesPhaseComponentItem({
               </div>
             </button>
           </div>
+          <AllowlistToolModelWrapper
+            showModal={showModal}
+            onClose={() => setShowModal(false)}
+            title={`Add operation for item "${phaseComponentItem.name}"`}
+          >
+            <AllowlistToolBuilderAddItemOperationModal
+              itemId={phaseComponentItem.phaseComponentItemId}
+              onClose={() => setShowModal(false)}
+            />
+          </AllowlistToolModelWrapper>
         </td>
       </tr>
     </>

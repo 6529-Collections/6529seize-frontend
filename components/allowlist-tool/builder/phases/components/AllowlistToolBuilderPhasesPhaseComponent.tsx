@@ -1,10 +1,15 @@
 import { useAnimate } from "framer-motion";
-import { AllowlistPhaseComponentWithItems } from "../../allowlist-tool.types";
-import AllowlistToolHistoryIcon from "../../icons/AllowlistToolHistoryIcon";
-import AllowlistToolJsonIcon from "../../icons/AllowlistToolJsonIcon";
-import AllowlistToolPlusIcon from "../../icons/AllowlistToolPlusIcon";
-import AllowlistToolBuilderPhasesPhaseComponentItem from "./AllowlistToolBuilderPhasesPhaseComponentItem";
+import {
+  AllowlistOperationCode,
+  AllowlistPhaseComponentWithItems,
+} from "../../../allowlist-tool.types";
+import AllowlistToolHistoryIcon from "../../../icons/AllowlistToolHistoryIcon";
+import AllowlistToolJsonIcon from "../../../icons/AllowlistToolJsonIcon";
+import AllowlistToolPlusIcon from "../../../icons/AllowlistToolPlusIcon";
+import AllowlistToolBuilderPhasesPhaseComponentItem from "./items/AllowlistToolBuilderPhasesPhaseComponentItem";
 import React, { useEffect, useState } from "react";
+import AllowlistToolModelWrapper from "../../../common/AllowlistToolModelWrapper";
+import AllowlistToolBuilderAddComponentOperationModal from "../../operations/add-modal/component/AllowlistToolBuilderAddComponentOperationModal";
 
 export default function AllowlistToolBuilderPhasesPhaseComponent({
   phaseComponent,
@@ -23,6 +28,22 @@ export default function AllowlistToolBuilderPhasesPhaseComponent({
       animateIcon(iconScope.current, { rotate: -90 });
     }
   });
+  const [defaultOperation, setDefaultOperation] =
+    useState<AllowlistOperationCode | null>(null);
+
+  const [showModal, setShowModal] = useState(false);
+
+  const setDefaultOperationAndOpenModal = (
+    operation: AllowlistOperationCode | null
+  ) => {
+    setDefaultOperation(operation);
+    setShowModal(true);
+  };
+
+  const closeModal = () => {
+    setShowModal(false);
+    setDefaultOperation(null);
+  };
   return (
     <>
       <tr onClick={() => setIsOpen(!isOpen)}>
@@ -46,6 +67,12 @@ export default function AllowlistToolBuilderPhasesPhaseComponent({
             <div className="tw-inline-flex tw-items-center tw-gap-x-3">
               <span>{phaseComponent.name}</span>
               <svg
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setDefaultOperationAndOpenModal(
+                    AllowlistOperationCode.ADD_ITEM
+                  );
+                }}
                 className="tw-h-6 tw-w-6 tw-text-neutral-400"
                 viewBox="0 0 24 24"
                 fill="none"
@@ -77,6 +104,7 @@ export default function AllowlistToolBuilderPhasesPhaseComponent({
               </div>
             </button>
             <button
+              onClick={() => setDefaultOperationAndOpenModal(null)}
               type="button"
               className="tw-group tw-rounded-full tw-bg-transparent tw-p-2 tw-text-white tw-border-none hover:tw-bg-neutral-700 tw-transition-all tw-duration-300 tw-ease-out"
             >
@@ -96,7 +124,7 @@ export default function AllowlistToolBuilderPhasesPhaseComponent({
         </td>
       </tr>
       <tr>
-        <td colSpan={4} >
+        <td colSpan={4}>
           <div className="tw-overflow-hidden tw-h-0" ref={tableScope}>
             <table className="tw-min-w-full">
               <tbody className="tw-divide-y tw-divide-neutral-700/40">
@@ -109,6 +137,17 @@ export default function AllowlistToolBuilderPhasesPhaseComponent({
               </tbody>
             </table>
           </div>
+          <AllowlistToolModelWrapper
+            showModal={showModal}
+            onClose={() => closeModal()}
+            title={`Add operation for component "${phaseComponent.name}"`}
+          >
+            <AllowlistToolBuilderAddComponentOperationModal
+              componentId={phaseComponent.componentId}
+              defaultOperation={defaultOperation}
+              onClose={() => closeModal()}
+            />
+          </AllowlistToolModelWrapper>
         </td>
       </tr>
     </>
