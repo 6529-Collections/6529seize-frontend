@@ -6,6 +6,9 @@ import {
   AllowlistOperationCode,
   AllowlistToolResponse,
 } from "../../../../allowlist-tool.types";
+import AllowlistToolSelectMenu, {
+  AllowlistToolSelectMenuOption,
+} from "../../../../common/select-menu/AllowlistToolSelectMenu";
 
 export default function AllowlistToolBuilderAddComponentAddItemOperation({
   componentId,
@@ -15,7 +18,29 @@ export default function AllowlistToolBuilderAddComponentAddItemOperation({
   onClose: () => void;
 }) {
   const router = useRouter();
-  const { operations, setOperations } = useContext(AllowlistToolBuilderContext);
+  const { operations, setOperations, tokenPools, customTokenPools } =
+    useContext(AllowlistToolBuilderContext);
+
+  const tokenPoolOptions: AllowlistToolSelectMenuOption[] = tokenPools.map(
+    (tokenPool) => ({
+      title: tokenPool.name,
+      subTitle: "Token pool",
+      value: tokenPool.id,
+    })
+  );
+
+  const customTokenPoolOptions: AllowlistToolSelectMenuOption[] =
+    customTokenPools.map((customTokenPool) => ({
+      title: customTokenPool.name,
+      subTitle: "Custom token pool",
+      value: customTokenPool.id,
+    }));
+
+  const options: AllowlistToolSelectMenuOption[] = [
+    ...tokenPoolOptions,
+    ...customTokenPoolOptions,
+  ];
+
   const [formValues, setFormValues] = useState<{
     name: string;
     description: string;
@@ -109,6 +134,7 @@ export default function AllowlistToolBuilderAddComponentAddItemOperation({
             />
           </div>
         </div>
+
         <div>
           <button
             type="submit"
@@ -118,6 +144,7 @@ export default function AllowlistToolBuilderAddComponentAddItemOperation({
           </button>
         </div>
       </div>
+      <AllowlistToolSelectMenu label="Select token pool" options={options} />
     </form>
   );
 }

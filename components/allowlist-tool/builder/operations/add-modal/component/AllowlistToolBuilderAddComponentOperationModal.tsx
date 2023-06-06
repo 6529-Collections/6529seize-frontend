@@ -6,6 +6,7 @@ import {
 import { AllowlistToolBuilderContext } from "../../../../../../pages/allowlist-tool/[id]";
 import AllowlistToolBuilderAddModalSelectOperation from "../AllowlistToolBuilderAddModalSelectOperation";
 import AllowlistToolBuilderAddComponentAddSpotsToAllItemWalletsOperation from "./AllowlistToolBuilderAddComponentAddSpotsToAllItemWalletsOperation";
+import AllowlistToolBuilderAddComponentAddItemOperation from "./AllowlistToolBuilderAddComponentAddItemOperation";
 
 export default function AllowlistToolBuilderAddComponentOperationModal({
   componentId,
@@ -67,9 +68,10 @@ export default function AllowlistToolBuilderAddComponentOperationModal({
                     onClose={onClose}
                   />
                 );
+              case AllowlistOperationCode.ADD_ITEM:
                 return (
-                  <AllowlistToolBuilderAddItemSelectLastNTokensOperation
-                    itemId={itemId}
+                  <AllowlistToolBuilderAddComponentAddItemOperation
+                    componentId={componentId}
                     onClose={onClose}
                   />
                 );
