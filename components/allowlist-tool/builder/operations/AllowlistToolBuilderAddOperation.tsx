@@ -11,7 +11,7 @@ export default function AllowlistToolBuilderAddOperation({
   validOperations,
 }: {
   title: string;
-  targetItemId: string;
+  targetItemId: string | null;
   defaultOperation: AllowlistOperationCode | null;
   validOperations: AllowlistOperationCode[];
 }) {

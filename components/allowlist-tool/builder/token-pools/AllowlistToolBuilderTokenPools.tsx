@@ -1,6 +1,7 @@
 import { useRouter } from "next/router";
 import { useContext, useEffect, useState } from "react";
 import {
+  AllowlistOperationCode,
   AllowlistTokenPool,
   AllowlistToolResponse,
 } from "../../allowlist-tool.types";
@@ -11,6 +12,7 @@ import AllowlistToolHistoryIcon from "../../icons/AllowlistToolHistoryIcon";
 import AllowlistToolJsonIcon from "../../icons/AllowlistToolJsonIcon";
 import AllowlistToolPlusIcon from "../../icons/AllowlistToolPlusIcon";
 import AllowlistToolBuilderTokenPoolsAdd from "./AllowlistToolBuilderTokenPoolsAdd";
+import AllowlistToolBuilderAddOperation from "../operations/AllowlistToolBuilderAddOperation";
 
 export default function AllowlistToolBuilderTokenPools() {
   const router = useRouter();
@@ -46,6 +48,9 @@ export default function AllowlistToolBuilderTokenPools() {
     }
     fetchTokenPools();
   }, [router.query.id]);
+
+  const validOperations = [AllowlistOperationCode.CREATE_TOKEN_POOL];
+  const defaultOperation = AllowlistOperationCode.CREATE_TOKEN_POOL;
 
   return (
     <AllowlistToolExpandableTableWrapper title="Token Pools">
@@ -97,14 +102,12 @@ export default function AllowlistToolBuilderTokenPools() {
                                 <AllowlistToolJsonIcon />
                               </div>
                             </button>
-                            <button
-                              type="button"
-                              className="tw-group tw-rounded-full tw-bg-transparent tw-p-2 tw-text-white tw-border-none hover:tw-bg-neutral-800 tw-transition-all tw-duration-300 tw-ease-out"
-                            >
-                              <div className="tw-h-5 tw-w-5 tw-flex tw-items-center tw-justify-center">
-                                <AllowlistToolPlusIcon />
-                              </div>
-                            </button>
+                            <AllowlistToolBuilderAddOperation
+                              validOperations={validOperations}
+                              title={`Add operation for token pools`}
+                              targetItemId={null}
+                              defaultOperation={defaultOperation}
+                            />
                             <button
                               type="button"
                               className="tw-group tw-rounded-full tw-bg-transparent tw-p-2 tw-text-white tw-border-none hover:tw-bg-neutral-800 tw-transition-all tw-duration-300 tw-ease-out"

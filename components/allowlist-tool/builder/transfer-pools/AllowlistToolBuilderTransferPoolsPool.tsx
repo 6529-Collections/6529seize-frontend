@@ -2,8 +2,13 @@ import { AllowlistTransferPool } from "../../allowlist-tool.types";
 import AllowlistToolHistoryIcon from "../../icons/AllowlistToolHistoryIcon";
 import AllowlistToolJsonIcon from "../../icons/AllowlistToolJsonIcon";
 import AllowlistToolPlusIcon from "../../icons/AllowlistToolPlusIcon";
+import AllowlistToolBuilderAddOperation from "../operations/AllowlistToolBuilderAddOperation";
 
-export default function AllowlistToolBuilderTransferPoolsPool({ transferPool }: { transferPool: AllowlistTransferPool }) {
+export default function AllowlistToolBuilderTransferPoolsPool({
+  transferPool,
+}: {
+  transferPool: AllowlistTransferPool;
+}) {
   return (
     <tr>
       <td className="tw-whitespace-nowrap tw-py-4 tw-pl-4 tw-pr-3 tw-text-sm tw-font-medium tw-text-white sm:tw-pl-6">
@@ -28,14 +33,12 @@ export default function AllowlistToolBuilderTransferPoolsPool({ transferPool }: 
               <AllowlistToolJsonIcon />
             </div>
           </button>
-          <button
-            type="button"
-            className="tw-group tw-rounded-full tw-bg-transparent tw-p-2 tw-text-white tw-border-none hover:tw-bg-neutral-700 tw-transition-all tw-duration-300 tw-ease-out"
-          >
-            <div className="tw-h-5 tw-w-5">
-              <AllowlistToolPlusIcon />
-            </div>
-          </button>
+          <AllowlistToolBuilderAddOperation
+            validOperations={[]}
+            title={`Add operation for transfer pool "${transferPool.name}"`}
+            targetItemId={null}
+            defaultOperation={null}
+          />
           <button
             type="button"
             className="tw-group tw-rounded-full tw-bg-transparent tw-p-2 tw-text-white tw-border-none hover:tw-bg-neutral-700 tw-transition-all tw-duration-300 tw-ease-out"

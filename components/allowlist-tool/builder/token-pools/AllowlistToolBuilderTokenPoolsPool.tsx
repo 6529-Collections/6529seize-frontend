@@ -4,6 +4,7 @@ import AllowlistToolHistoryIcon from "../../icons/AllowlistToolHistoryIcon";
 import AllowlistToolJsonIcon from "../../icons/AllowlistToolJsonIcon";
 import AllowlistToolPlusIcon from "../../icons/AllowlistToolPlusIcon";
 import { AllowlistToolBuilderContext } from "../../../../pages/allowlist-tool/[id]";
+import AllowlistToolBuilderAddOperation from "../operations/AllowlistToolBuilderAddOperation";
 
 export default function AllowlistToolBuilderTokenPoolsPool({
   tokenPool,
@@ -39,14 +40,12 @@ export default function AllowlistToolBuilderTokenPoolsPool({
               <AllowlistToolJsonIcon />
             </div>
           </button>
-          <button
-            type="button"
-            className="tw-group tw-rounded-full tw-bg-transparent tw-p-2 tw-text-white tw-border-none hover:tw-bg-neutral-800 tw-transition-all tw-duration-300 tw-ease-out"
-          >
-            <div className="tw-h-5 tw-w-5">
-              <AllowlistToolPlusIcon />
-            </div>
-          </button>
+          <AllowlistToolBuilderAddOperation
+            validOperations={[]}
+            title={`Add operation for token pool "${tokenPool.name}"`}
+            targetItemId={null}
+            defaultOperation={null}
+          />
           <button
             type="button"
             className="tw-group tw-rounded-full tw-bg-transparent tw-p-2 tw-text-white tw-border-none hover:tw-bg-neutral-800 tw-transition-all tw-duration-300 tw-ease-out"

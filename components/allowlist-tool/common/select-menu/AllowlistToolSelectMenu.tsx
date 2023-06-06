@@ -44,7 +44,7 @@ export default function AllowlistToolSelectMenu({
   }, [selectedOption, placeholder]);
 
   return (
-    <div>
+    <div ref={listRef}>
       <label
         id="listbox-label"
         className="tw-block tw-text-sm tw-font-normal tw-leading-5 tw-text-neutral-100"
@@ -84,7 +84,6 @@ export default function AllowlistToolSelectMenu({
         <AnimatePresence>
           {isOpen && (
             <motion.div
-              ref={listRef}
               className="tw-origin-top-right tw-absolute tw-right-0 tw-mt-2 tw-w-full tw-rounded-md tw-shadow-lg tw-bg-neutral-800 tw-ring-1 tw-ring-black tw-ring-opacity-5"
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}

@@ -1,15 +1,24 @@
 import { useRouter } from "next/router";
 import { useContext, useState } from "react";
-import { AllowlistToolBuilderContext } from "../../../../pages/allowlist-tool/[id]";
-import csvParser from "csv-parser";
+import { AllowlistToolBuilderContext } from "../../../../../../pages/allowlist-tool/[id]";
+import AllowlistToolSelectMenu, {
+  AllowlistToolSelectMenuOption,
+} from "../../../../common/select-menu/AllowlistToolSelectMenu";
+import { getRandomObjectId } from "../../../../../../helpers/AllowlistToolHelpers";
 import {
   AllowlistOperation,
   AllowlistOperationCode,
   AllowlistToolResponse,
-} from "../../allowlist-tool.types";
-import { getRandomObjectId } from "../../../../helpers/AllowlistToolHelpers";
+  CustomTokenPoolParamsToken,
+  Mutable,
+} from "../../../../allowlist-tool.types";
+import csvParser from "csv-parser";
 
-export default function AllowlistToolBuilderWalletPoolsAdd() {
+export default function AllowlistToolBuilderCreateWalletPoolOperation({
+  onClose,
+}: {
+  onClose: () => void;
+}) {
   const router = useRouter();
   const { operations, setOperations } = useContext(AllowlistToolBuilderContext);
   const [formValues, setFormValues] = useState<{
@@ -19,6 +28,7 @@ export default function AllowlistToolBuilderWalletPoolsAdd() {
     name: "",
     description: "",
   });
+
   const [wallets, setWallets] = useState<string[]>([]);
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -59,8 +69,10 @@ export default function AllowlistToolBuilderWalletPoolsAdd() {
     };
     reader.readAsText(file);
   };
+
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [errors, setErrors] = useState<string[]>([]);
+
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setIsLoading(true);
@@ -70,14 +82,16 @@ export default function AllowlistToolBuilderWalletPoolsAdd() {
       setIsLoading(false);
       return;
     }
+
     const url = `${process.env.ALLOWLIST_API_ENDPOINT}/allowlists/${router.query.id}/operations`;
+
     fetch(url, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        code: AllowlistOperationCode.CREATE_WALLET_POOL,
+        code: AllowlistOperationCode.CREATE_CUSTOM_TOKEN_POOL,
         params: {
           id: getRandomObjectId(),
           name: formValues.name,
@@ -99,11 +113,11 @@ export default function AllowlistToolBuilderWalletPoolsAdd() {
             description: "",
           });
           setWallets([]);
+          onClose();
         }
         setIsLoading(false);
       });
   };
-
   return (
     <form onSubmit={handleSubmit}>
       <div className="tw-px-6 tw-flex tw-gap-x-4 tw-pt-5 tw-items-end">

@@ -13,6 +13,10 @@ import AllowlistToolBuilderItemRemoveLastNTokensOperation from "./item/Allowlist
 import AllowlistToolBuilderItemSelectFirstNTokensOperation from "./item/AllowlistToolBuilderAddItemSelectFirstNTokensOperation";
 import AllowlistToolBuilderItemSelectLastNTokensOperation from "./item/AllowlistToolBuilderAddItemSelectLastNTokensOperation";
 import { assertUnreachable } from "../../../../../helpers/AllowlistToolHelpers";
+import AllowlistToolBuilderGetCollectionTransfersOperation from "./transfer-pools/AllowlistToolBuilderGetCollectionTransfersOperation";
+import AllowlistToolBuilderCreateTokenPoolOperation from "./token-pools/AllowlistToolBuilderCreateTokenPoolOperation";
+import AllowlistToolBuilderCreateCustomTokenPoolOperation from "./custom-token-pools/AllowlistToolBuilderCreateCustomTokenPoolOperation";
+import AllowlistToolBuilderCreateWalletPoolOperation from "./wallet-pools/AllowlistToolBuilderCreateWalletPoolOperation";
 
 export default function AllowlistToolAddOperationModal({
   targetItemId,
@@ -20,7 +24,7 @@ export default function AllowlistToolAddOperationModal({
   defaultOperation,
   onClose,
 }: {
-  targetItemId: string;
+  targetItemId: string | null;
   validOperations: AllowlistOperationCode[];
   defaultOperation: AllowlistOperationCode | null;
   onClose: () => void;
@@ -86,67 +90,103 @@ export default function AllowlistToolAddOperationModal({
               case AllowlistOperationCode.CREATE_ALLOWLIST:
                 return null;
               case AllowlistOperationCode.GET_COLLECTION_TRANSFERS:
+                return (
+                  <AllowlistToolBuilderGetCollectionTransfersOperation
+                    onClose={onClose}
+                  />
+                );
               case AllowlistOperationCode.CREATE_TOKEN_POOL:
+                return (
+                  <AllowlistToolBuilderCreateTokenPoolOperation
+                    onClose={onClose}
+                  />
+                );
               case AllowlistOperationCode.CREATE_CUSTOM_TOKEN_POOL:
+                return (
+                  <AllowlistToolBuilderCreateCustomTokenPoolOperation
+                    onClose={onClose}
+                  />
+                );
               case AllowlistOperationCode.CREATE_WALLET_POOL:
+                return (
+                  <AllowlistToolBuilderCreateWalletPoolOperation
+                    onClose={onClose}
+                  />
+                );
               case AllowlistOperationCode.ADD_PHASE:
               case AllowlistOperationCode.ADD_COMPONENT:
                 return <div>{selectedOperationCode}</div>;
               case AllowlistOperationCode.COMPONENT_ADD_SPOTS_TO_ALL_ITEM_WALLETS:
                 return (
-                  <AllowlistToolBuilderComponentAddSpotsToAllItemWalletsOperation
-                    componentId={targetItemId}
-                    onClose={onClose}
-                  />
+                  targetItemId && (
+                    <AllowlistToolBuilderComponentAddSpotsToAllItemWalletsOperation
+                      componentId={targetItemId}
+                      onClose={onClose}
+                    />
+                  )
                 );
               case AllowlistOperationCode.ADD_ITEM:
                 return (
-                  <AllowlistToolBuilderComponentAddItemOperation
-                    componentId={targetItemId}
-                    onClose={onClose}
-                  />
+                  targetItemId && (
+                    <AllowlistToolBuilderComponentAddItemOperation
+                      componentId={targetItemId}
+                      onClose={onClose}
+                    />
+                  )
                 );
               case AllowlistOperationCode.ITEM_EXCLUE_TOKEN_IDS:
                 return (
-                  <AllowlistToolBuilderItemExcludeTokenIdsOperation
-                    itemId={targetItemId}
-                    onClose={onClose}
-                  />
+                  targetItemId && (
+                    <AllowlistToolBuilderItemExcludeTokenIdsOperation
+                      itemId={targetItemId}
+                      onClose={onClose}
+                    />
+                  )
                 );
               case AllowlistOperationCode.ITEM_SELECT_TOKEN_IDS:
                 return (
-                  <AllowlistToolBuilderItemSelectTokenIdsOperation
-                    itemId={targetItemId}
-                    onClose={onClose}
-                  />
+                  targetItemId && (
+                    <AllowlistToolBuilderItemSelectTokenIdsOperation
+                      itemId={targetItemId}
+                      onClose={onClose}
+                    />
+                  )
                 );
               case AllowlistOperationCode.ITEM_REMOVE_FIRST_N_TOKENS:
                 return (
-                  <AllowlistToolBuilderItemRemoveFirstNTokensOperation
-                    itemId={targetItemId}
-                    onClose={onClose}
-                  />
+                  targetItemId && (
+                    <AllowlistToolBuilderItemRemoveFirstNTokensOperation
+                      itemId={targetItemId}
+                      onClose={onClose}
+                    />
+                  )
                 );
               case AllowlistOperationCode.ITEM_REMOVE_LAST_N_TOKENS:
                 return (
-                  <AllowlistToolBuilderItemRemoveLastNTokensOperation
-                    itemId={targetItemId}
-                    onClose={onClose}
-                  />
+                  targetItemId && (
+                    <AllowlistToolBuilderItemRemoveLastNTokensOperation
+                      itemId={targetItemId}
+                      onClose={onClose}
+                    />
+                  )
                 );
               case AllowlistOperationCode.ITEM_SELECT_FIRST_N_TOKENS:
                 return (
-                  <AllowlistToolBuilderItemSelectFirstNTokensOperation
-                    itemId={targetItemId}
-                    onClose={onClose}
-                  />
+                  targetItemId && (
+                    <AllowlistToolBuilderItemSelectFirstNTokensOperation
+                      itemId={targetItemId}
+                      onClose={onClose}
+                    />
+                  )
                 );
               case AllowlistOperationCode.ITEM_SELECT_LAST_N_TOKENS:
                 return (
-                  <AllowlistToolBuilderItemSelectLastNTokensOperation
-                    itemId={targetItemId}
-                    onClose={onClose}
-                  />
+                  targetItemId && (
+                    <AllowlistToolBuilderItemSelectLastNTokensOperation
+                      itemId={targetItemId}
+                      onClose={onClose}
+                    />
+                  )
                 );
               default:
                 assertUnreachable(selectedOperationCode);

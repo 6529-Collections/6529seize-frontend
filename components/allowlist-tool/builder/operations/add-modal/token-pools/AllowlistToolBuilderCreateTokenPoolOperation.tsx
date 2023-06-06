@@ -1,17 +1,19 @@
-import { useContext, useState } from "react";
-import { AllowlistToolBuilderContext } from "../../../../pages/allowlist-tool/[id]";
-import AllowlistToolSelectMenu, {
-  AllowlistToolSelectMenuOption,
-} from "../../common/select-menu/AllowlistToolSelectMenu";
 import { useRouter } from "next/router";
+import { useContext, useState } from "react";
+import { AllowlistToolBuilderContext } from "../../../../../../pages/allowlist-tool/[id]";
+import AllowlistToolSelectMenu, { AllowlistToolSelectMenuOption } from "../../../../common/select-menu/AllowlistToolSelectMenu";
+import { getRandomObjectId } from "../../../../../../helpers/AllowlistToolHelpers";
 import {
   AllowlistOperation,
   AllowlistOperationCode,
   AllowlistToolResponse,
-} from "../../allowlist-tool.types";
-import { getRandomObjectId } from "../../../../helpers/AllowlistToolHelpers";
+} from "../../../../allowlist-tool.types";
 
-export default function AllowlistToolBuilderTokenPoolsAdd() {
+export default function AllowlistToolBuilderCreateTokenPoolOperation({
+  onClose,
+}: {
+  onClose: () => void;
+}) {
   const router = useRouter();
   const { transferPools, operations, setOperations } = useContext(
     AllowlistToolBuilderContext
@@ -36,10 +38,10 @@ export default function AllowlistToolBuilderTokenPoolsAdd() {
     });
   };
 
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [errors, setErrors] = useState<string[]>([]);
 
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (!selectedTransferPool) {
       return;
@@ -89,11 +91,11 @@ export default function AllowlistToolBuilderTokenPoolsAdd() {
             tokenIds: "",
           });
           setSelectedTransferPool(null);
+          onClose();
         }
         setIsLoading(false);
       });
   };
-
   return (
     <form onSubmit={handleSubmit}>
       <div className="tw-px-6 tw-flex tw-gap-x-4 tw-pt-5 tw-items-end">

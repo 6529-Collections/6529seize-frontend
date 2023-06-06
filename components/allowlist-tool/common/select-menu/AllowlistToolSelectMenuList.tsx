@@ -17,14 +17,20 @@ export default function AllowlistToolSelectMenuList({
       aria-labelledby="listbox-label"
       aria-activedescendant="listbox-option-3"
     >
-      {options.map((option) => (
-        <AllowlistToolSelectMenuListItem
-          option={option}
-          selectedOption={selectedOption}
-          setSelectedOption={setSelectedOption}
-          key={option.value}
-        />
-      ))}
+      {!!options.length &&
+        options.map((option) => (
+          <AllowlistToolSelectMenuListItem
+            option={option}
+            selectedOption={selectedOption}
+            setSelectedOption={setSelectedOption}
+            key={option.value}
+          />
+        ))}
+      {options.length === 0 && (
+        <li className="tw-p-2 tw-text-center tw-text-neutral-300">
+          No options found
+        </li>
+      )}
     </ul>
   );
 }
