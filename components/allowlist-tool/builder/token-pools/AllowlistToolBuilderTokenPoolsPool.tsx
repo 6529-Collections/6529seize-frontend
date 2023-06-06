@@ -26,7 +26,7 @@ export default function AllowlistToolBuilderTokenPoolsPool({
         <div className="tw-flex tw-items-center tw-justify-end tw-gap-x-3">
           <button
             type="button"
-            className="tw-group tw-rounded-full tw-bg-transparent tw-p-2 tw-text-white tw-border-none hover:tw-bg-neutral-700 tw-transition-all tw-duration-300 tw-ease-out"
+            className="tw-group tw-rounded-full tw-bg-transparent tw-p-2 tw-text-white tw-border-none hover:tw-bg-neutral-800 tw-transition-all tw-duration-300 tw-ease-out"
           >
             <div className="tw-h-[1.125rem] tw-w-[1.125rem]">
               <AllowlistToolJsonIcon />
@@ -34,7 +34,7 @@ export default function AllowlistToolBuilderTokenPoolsPool({
           </button>
           <button
             type="button"
-            className="tw-group tw-rounded-full tw-bg-transparent tw-p-2 tw-text-white tw-border-none hover:tw-bg-neutral-700 tw-transition-all tw-duration-300 tw-ease-out"
+            className="tw-group tw-rounded-full tw-bg-transparent tw-p-2 tw-text-white tw-border-none hover:tw-bg-neutral-800 tw-transition-all tw-duration-300 tw-ease-out"
           >
             <div className="tw-h-5 tw-w-5">
               <AllowlistToolPlusIcon />
@@ -42,7 +42,7 @@ export default function AllowlistToolBuilderTokenPoolsPool({
           </button>
           <button
             type="button"
-            className="tw-group tw-rounded-full tw-bg-transparent tw-p-2 tw-text-white tw-border-none hover:tw-bg-neutral-700 tw-transition-all tw-duration-300 tw-ease-out"
+            className="tw-group tw-rounded-full tw-bg-transparent tw-p-2 tw-text-white tw-border-none hover:tw-bg-neutral-800 tw-transition-all tw-duration-300 tw-ease-out"
           >
             <div className="tw-h-5 tw-w-5">
               <AllowlistToolHistoryIcon />

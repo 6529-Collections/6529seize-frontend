@@ -8,27 +8,24 @@ module.exports = {
     // Or if using `src` directory:
     "./src/**/*.{js,ts,jsx,tsx}",
   ],
-  prefix: 'tw-',
+  prefix: "tw-",
   corePlugins: {
     preflight: false,
   },
   theme: {
     extend: {
       colors: {
-        primary: "#406AFE",
-        "primary-hover": "#395FE4",
-        "primary-focus":"#528BFF",
-        dark: "#171B22",
-        error: "#F97066"
-      }
+        "primary-400": "#528BFF",
+        "primary-500": "#406AFE",
+        "primary-600": "#395FE4",
+        error: "#F97066",
+      },
     },
   },
   variants: {
     extend: {
-      fontSize: ['placeholder'],
-    }
+      fontSize: ["placeholder"],
+    },
   },
-  plugins: [
-    require('@tailwindcss/forms'),
-  ],
-}
+  plugins: [require("@tailwindcss/forms")],
+};

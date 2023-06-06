@@ -17,12 +17,12 @@ body {
   overflow: auto;
 }
 
-textarea,
-select,
+textarea:not(#allowlist-tool textarea),
+select:not(#allowlist-tool select),
 input:not(#allowlist-tool input),
 button:not(#allowlist-tool button),
 video,
-select {
+select:not(#allowlist-tool select) {
   font-size: $font-size !important;
   outline: 0 !important;
   box-shadow: none !important;

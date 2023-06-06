@@ -133,13 +133,13 @@ export default function AllowlistToolAllowlistId({
     <>
       <Header />
       <Breadcrumb breadcrumbs={breadcrumbs} />
-      <div className={`tw-min-h-screen tw-bg-zinc-950 ${poppins.className}`}>
-        <div className="container tw-mx-auto tw-t-4 tw-pb-12">
+      <div className={`tw-min-h-screen tw-bg-neutral-950 ${poppins.className}`}>
+        <div className="container tw-mx-auto tw-pt-6 tw-pb-12">
           <h1 className="tw-uppercase tw-float-none tw-mb-0">
             {allowlist.name}
           </h1>
 
-          <div id="allowlist-tool" className="tw-pt-8">
+          <div id="allowlist-tool" className="tw-pt-6">
             <AllowlistToolBuilderContext.Provider
               value={{
                 operations,
@@ -157,7 +157,7 @@ export default function AllowlistToolAllowlistId({
               }}
             >
               <AllowlistToolBuilderOperations>
-                <div className="tw-space-y-8">
+                <div className="tw-space-y-6">
                   <AllowlistToolBuilderTransferPools />
                   <AllowlistToolBuilderTokenPools />
                   <AllowlistToolBuilderCustomTokenPools />
