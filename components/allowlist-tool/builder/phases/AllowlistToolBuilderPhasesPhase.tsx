@@ -27,7 +27,7 @@ export default function AllowlistToolBuilderPhasesPhase({
     <>
       <tr onClick={() => setIsOpen(!isOpen)}>
         <td className="tw-whitespace-nowrap tw-py-2 tw-pl-4 tw-pr-3 tw-text-sm tw-font-medium tw-text-white sm:tw-pl-6">
-          <div className="tw-inline-flex tw-items-center tw-gap-x-2">
+          <div className="tw-flex tw-items-center tw-gap-x-2">
             <svg
               ref={iconScope}
               className="tw-h-6 tw-w-6 tw-text-neutral-300"
@@ -99,7 +99,7 @@ export default function AllowlistToolBuilderPhasesPhase({
         <td colSpan={4}>
           <div className="tw-overflow-hidden tw-h-0" ref={tableScope}>
             <table className="tw-min-w-full">
-              <tbody className="tw-divide-y tw-divide-neutral-700/40">
+              <tbody className="tw-divide-y tw-divide-neutral-800">
                 {phase.components.map((phaseComponent) => (
                   <AllowlistToolBuilderPhasesPhaseComponent
                     phaseComponent={phaseComponent}

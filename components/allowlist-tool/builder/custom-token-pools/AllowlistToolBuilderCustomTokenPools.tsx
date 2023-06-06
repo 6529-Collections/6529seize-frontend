@@ -60,23 +60,23 @@ export default function AllowlistToolBuilderCustomTokenPools() {
               <div className="-tw-mx-4 -tw-my-2 tw-overflow-x-auto sm:-tw-mx-6 lg:-tw-mx-8">
                 <div className="tw-inline-block tw-min-w-full tw-py-2 tw-align-middle">
                   <table className="tw-min-w-full tw-border tw-border-solid tw-border-l-0 tw-border-r-0 tw-border-b-0 tw-border-neutral-700/60 tw-divide-solid tw-divide-y tw-divide-neutral-700/60">
-                    <thead className="tw-bg-[#222327]">
+                    <thead className="tw-bg-neutral-800/50">
                       <tr>
                         <th
                           scope="col"
-                          className="tw-py-2 tw-pl-4 tw-pr-3 tw-text-left tw-text-[0.6875rem] tw-leading-[1.125rem] tw-font-medium tw-text-neutral-500 tw-uppercase tw-tracking-[0.25px] sm:tw-pl-6"
+                          className="tw-py-1.5 tw-pl-4 tw-pr-3 tw-text-left tw-text-[0.6875rem] tw-leading-[1.125rem] tw-font-medium tw-text-neutral-400 tw-uppercase tw-tracking-[0.25px] sm:tw-pl-6"
                         >
                           Pool name
                         </th>
                         <th
                           scope="col"
-                          className="tw-px-3 tw-py-2 tw-text-left tw-text-[0.6875rem] tw-leading-[1.125rem] tw-font-medium tw-text-neutral-500 tw-uppercase tw-tracking-[0.25px]"
+                          className="tw-px-3 tw-py-1.5 tw-text-left tw-text-[0.6875rem] tw-leading-[1.125rem] tw-font-medium tw-text-neutral-400 tw-uppercase tw-tracking-[0.25px]"
                         >
                           Description
                         </th>
                         <th
                           scope="col"
-                          className="tw-w-40 tw-py-2 tw-pl-6 tw-pr-4 sm:tw-pr-6"
+                          className="tw-w-40 tw-py-1.5 tw-pl-6 tw-pr-4 sm:tw-pr-6"
                         >
                           <div className="tw-flex tw-items-center tw-justify-end tw-gap-x-3">
                             <button

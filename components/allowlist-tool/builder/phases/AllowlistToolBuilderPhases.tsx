@@ -57,30 +57,30 @@ export default function AllowlistToolBuilderPhases() {
             <div className="tw-mt-8 tw-flow-root">
               <div className="-tw-mx-4 -tw-my-2 tw-overflow-x-auto sm:-tw-mx-6 lg:-tw-mx-8">
                 <div className="tw-inline-block tw-min-w-full tw-py-2 tw-align-middle">
-                  <table className="tw-min-w-full tw-border tw-border-solid tw-border-l-0 tw-border-r-0 tw-border-b-0 tw-border-neutral-700/60 tw-divide-solid tw-divide-y tw-divide-neutral-700/60">
-                    <thead className="tw-bg-[#222327]">
+                  <table className="tw-min-w-full tw-border tw-border-solid tw-border-l-0 tw-border-r-0 tw-border-b-0 tw-border-neutral-800 tw-divide-solid tw-divide-y tw-divide-neutral-800">
+                    <thead className="tw-bg-neutral-800/50">
                       <tr>
                         <th
                           scope="col"
-                          className="tw-py-3.5 tw-pl-4 tw-pr-3 tw-text-left tw-text-[0.6875rem] tw-leading-[1.125rem] tw-font-medium tw-text-neutral-500 tw-uppercase tw-tracking-[0.25px] sm:tw-pl-6"
+                          className="tw-py-1.5 tw-pl-4 tw-pr-3 tw-text-left tw-text-[0.6875rem] tw-leading-[1.125rem] tw-font-medium tw-text-neutral-400 tw-uppercase tw-tracking-[0.25px] sm:tw-pl-6"
                         >
                           Phase name
                         </th>
                         <th
                           scope="col"
-                          className="tw-px-3 tw-py-3.5 tw-text-left tw-text-[0.6875rem] tw-leading-[1.125rem] tw-font-medium tw-text-neutral-500 tw-uppercase tw-tracking-[0.25px]"
+                          className="tw-px-3 tw-py-1.5 tw-text-left tw-text-[0.6875rem] tw-leading-[1.125rem] tw-font-medium tw-text-neutral-400 tw-uppercase tw-tracking-[0.25px]"
                         >
                           Description
                         </th>
                         <th
                           scope="col"
-                          className="tw-px-3 tw-py-3.5 tw-text-left tw-text-[0.6875rem] tw-leading-[1.125rem] tw-font-medium tw-text-neutral-500 tw-uppercase tw-tracking-[0.25px]"
+                          className="tw-px-3 tw-py-1.5 tw-text-left tw-text-[0.6875rem] tw-leading-[1.125rem] tw-font-medium tw-text-neutral-400 tw-uppercase tw-tracking-[0.25px]"
                         >
                           Pool name
                         </th>
                         <th
                           scope="col"
-                          className="tw-py-2 tw-pl-3 tw-pr-4 sm:tw-pr-6"
+                          className="tw-py-1.5 tw-pl-3 tw-pr-4 sm:tw-pr-6"
                         >
                           <div className="tw-flex tw-items-center tw-justify-end tw-gap-x-3">
                             <button
@@ -111,7 +111,7 @@ export default function AllowlistToolBuilderPhases() {
                         </th>
                       </tr>
                     </thead>
-                    <tbody className="tw-divide-y tw-divide-neutral-700/40">
+                    <tbody className="tw-divide-y tw-divide-neutral-800">
                       {phases.map((phase) => (
                         <AllowlistToolBuilderPhasesPhase
                           phase={phase}
