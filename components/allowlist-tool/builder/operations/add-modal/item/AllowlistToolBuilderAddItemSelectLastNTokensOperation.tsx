@@ -7,7 +7,7 @@ import {
   AllowlistToolResponse,
 } from "../../../../allowlist-tool.types";
 
-export default function AllowlistToolBuilderAddItemSelectLastNTokensOperation({
+export default function AllowlistToolBuilderItemSelectLastNTokensOperation({
   itemId,
   onClose,
 }: {

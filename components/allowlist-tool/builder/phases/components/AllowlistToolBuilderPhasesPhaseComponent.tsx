@@ -9,7 +9,8 @@ import AllowlistToolPlusIcon from "../../../icons/AllowlistToolPlusIcon";
 import AllowlistToolBuilderPhasesPhaseComponentItem from "./items/AllowlistToolBuilderPhasesPhaseComponentItem";
 import React, { useEffect, useState } from "react";
 import AllowlistToolModelWrapper from "../../../common/AllowlistToolModelWrapper";
-import AllowlistToolBuilderAddComponentOperationModal from "../../operations/add-modal/component/AllowlistToolBuilderAddComponentOperationModal";
+import AllowlistToolAddOperationModal from "../../operations/add-modal/AllowlistToolAddOperationModal";
+import AllowlistToolBuilderAddOperation from "../../operations/AllowlistToolBuilderAddOperation";
 
 export default function AllowlistToolBuilderPhasesPhaseComponent({
   phaseComponent,
@@ -44,6 +45,10 @@ export default function AllowlistToolBuilderPhasesPhaseComponent({
     setShowModal(false);
     setDefaultOperation(null);
   };
+  const validOperations: AllowlistOperationCode[] = [
+    AllowlistOperationCode.COMPONENT_ADD_SPOTS_TO_ALL_ITEM_WALLETS,
+    AllowlistOperationCode.ADD_ITEM,
+  ];
   return (
     <>
       <tr onClick={() => setIsOpen(!isOpen)}>
@@ -103,15 +108,12 @@ export default function AllowlistToolBuilderPhasesPhaseComponent({
                 <AllowlistToolJsonIcon />
               </div>
             </button>
-            <button
-              onClick={() => setDefaultOperationAndOpenModal(null)}
-              type="button"
-              className="tw-group tw-rounded-full tw-bg-transparent tw-p-2 tw-text-white tw-border-none hover:tw-bg-neutral-700 tw-transition-all tw-duration-300 tw-ease-out"
-            >
-              <div className="tw-h-5 tw-w-5">
-                <AllowlistToolPlusIcon />
-              </div>
-            </button>
+            <AllowlistToolBuilderAddOperation
+              validOperations={validOperations}
+              title={`Add operation for component "${phaseComponent.name}"`}
+              targetItemId={phaseComponent.componentId}
+              defaultOperation={null}
+            />
             <button
               type="button"
               className="tw-group tw-rounded-full tw-bg-transparent tw-p-2 tw-text-white tw-border-none hover:tw-bg-neutral-700 tw-transition-all tw-duration-300 tw-ease-out"
@@ -137,17 +139,6 @@ export default function AllowlistToolBuilderPhasesPhaseComponent({
               </tbody>
             </table>
           </div>
-          <AllowlistToolModelWrapper
-            showModal={showModal}
-            onClose={() => closeModal()}
-            title={`Add operation for component "${phaseComponent.name}"`}
-          >
-            <AllowlistToolBuilderAddComponentOperationModal
-              componentId={phaseComponent.componentId}
-              defaultOperation={defaultOperation}
-              onClose={() => closeModal()}
-            />
-          </AllowlistToolModelWrapper>
         </td>
       </tr>
     </>

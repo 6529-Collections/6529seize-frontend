@@ -7,7 +7,7 @@ import {
   AllowlistToolResponse,
 } from "../../../../allowlist-tool.types";
 
-export default function AllowlistToolBuilderAddComponentAddSpotsToAllItemWalletsOperation({
+export default function AllowlistToolBuilderComponentAddSpotsToAllItemWalletsOperation({
   componentId,
   onClose,
 }: {
