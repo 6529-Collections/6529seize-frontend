@@ -7,9 +7,8 @@ import {
   AllowlistToolResponse,
 } from "../../../../allowlist-tool.types";
 import { getRandomObjectId } from "../../../../../../helpers/AllowlistToolHelpers";
-import styles from "../../../../AllowlistTool.module.scss";
 
-export default function AllowlistToolBuilderGetCollectionTransfersOperation({
+export default function AllowlistToolBuilderAddPhaseOperation({
   onClose,
 }: {
   onClose: () => void;
@@ -19,13 +18,9 @@ export default function AllowlistToolBuilderGetCollectionTransfersOperation({
   const [formValues, setFormValues] = useState<{
     name: string;
     description: string;
-    contract: string;
-    blockNo: string;
   }>({
     name: "",
     description: "",
-    contract: "",
-    blockNo: "",
   });
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -42,20 +37,20 @@ export default function AllowlistToolBuilderGetCollectionTransfersOperation({
     event.preventDefault();
     setIsLoading(true);
     setErrors([]);
+
     const url = `${process.env.ALLOWLIST_API_ENDPOINT}/allowlists/${router.query.id}/operations`;
+
     fetch(url, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        code: AllowlistOperationCode.GET_COLLECTION_TRANSFERS,
+        code: AllowlistOperationCode.ADD_PHASE,
         params: {
           id: getRandomObjectId(),
           name: formValues.name,
           description: formValues.description,
-          contract: formValues.contract,
-          blockNo: +formValues.blockNo,
         },
       }),
     })
@@ -70,20 +65,19 @@ export default function AllowlistToolBuilderGetCollectionTransfersOperation({
           setFormValues({
             name: "",
             description: "",
-            contract: "",
-            blockNo: "",
           });
           onClose();
         }
         setIsLoading(false);
       });
   };
+
   return (
     <form onSubmit={handleSubmit}>
       <div className="tw-px-6 tw-flex tw-gap-x-4 tw-pt-5 tw-items-end">
-        <div className="tw-flex-1">
+        <div className="tw-flex-1 tw-max-w-[15.25rem]">
           <label className="tw-block tw-text-sm tw-font-normal tw-leading-5 tw-text-neutral-100">
-            Pool name
+            Phase name
           </label>
           <div className="tw-mt-2">
             <input
@@ -97,7 +91,7 @@ export default function AllowlistToolBuilderGetCollectionTransfersOperation({
             />
           </div>
         </div>
-        <div className="tw-flex-1">
+        <div className="tw-flex-1 tw-max-w-[15.25rem]">
           <label className="tw-block tw-text-sm tw-font-normal tw-leading-5 tw-text-neutral-100">
             Description
           </label>
@@ -113,43 +107,10 @@ export default function AllowlistToolBuilderGetCollectionTransfersOperation({
             />
           </div>
         </div>
-        <div className="tw-flex-1">
-          <label className="tw-block tw-text-sm tw-font-normal tw-leading-5 tw-text-neutral-100">
-            Block number
-          </label>
-          <div className="tw-mt-2">
-            <input
-              type="number"
-              name="blockNo"
-              value={formValues.blockNo}
-              onChange={handleChange}
-              required
-              autoComplete="off"
-              className={`tw-block tw-w-full tw-rounded-lg tw-border-0 tw-py-3 tw-px-3 tw-bg-neutral-800 tw-text-white tw-font-light tw-caret-primary tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-neutral-800 placeholder:tw-text-neutral-500 focus:tw-outline-none focus:tw-bg-transparent focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-focus tw-text-base sm:tw-leading-6 tw-transition tw-duration-300 tw-ease-out ${styles.numberInput}`}
-            />
-          </div>
-        </div>
-        <div className="tw-flex-1">
-          <label className="tw-block tw-text-sm tw-font-normal tw-leading-5 tw-text-neutral-100">
-            Contract number
-          </label>
-          <div className="tw-mt-2">
-            <input
-              type="text"
-              name="contract"
-              value={formValues.contract}
-              onChange={handleChange}
-              required
-              autoComplete="off"
-              className="tw-block tw-w-full tw-rounded-lg tw-border-0 tw-py-3 tw-px-3 tw-bg-neutral-800 tw-text-white tw-font-light tw-caret-primary tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-neutral-800 placeholder:tw-text-neutral-500 focus:tw-outline-none focus:tw-bg-transparent focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-focus tw-text-base sm:tw-leading-6 tw-transition tw-duration-300 tw-ease-out"
-            />
-          </div>
-        </div>
         <div>
           <button
             type="submit"
-            style={{ fontSize: "14px !important" }}
-            className="tw-bg-primary-500 tw-px-4 tw-py-3 tw-text-sm tw-font-medium tw-text-white tw-w-full tw-border tw-border-solid  tw-rounded-lg hover:tw-bg-primary-600hover:tw-border-primary-hover tw-transition tw-duration-300 tw-ease-out"
+            className="tw-bg-primary-500 tw-px-4 tw-py-3 tw-text-sm tw-font-medium tw-text-white tw-w-full tw-border tw-border-solid tw-border-primary-500 tw-rounded-lg hover:tw-bg-primary-600 hover:tw-border-primary-600 tw-transition tw-duration-300 tw-ease-out"
           >
             Add operation
           </button>

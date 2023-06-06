@@ -4,8 +4,7 @@ import {
   AllowlistOperation,
   AllowlistToolResponse,
 } from "../../allowlist-tool.types";
-import AllowlistToolBuilderOperationsDone from "./AllowlistToolBuilderOperationsDone";
-import AllowlistToolBuilderOperationsPending from "./AllowlistToolBuilderOperationsPending";
+
 import { AllowlistToolBuilderContext } from "../../../../pages/allowlist-tool/[id]";
 
 export default function AllowlistToolBuilderOperations({
@@ -14,7 +13,7 @@ export default function AllowlistToolBuilderOperations({
   children: React.ReactNode;
 }) {
   const router = useRouter();
-  const { setOperations } = useContext(AllowlistToolBuilderContext);
+  const { operations, setOperations } = useContext(AllowlistToolBuilderContext);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [errors, setErrors] = useState<string[]>([]);
 
@@ -43,16 +42,24 @@ export default function AllowlistToolBuilderOperations({
       }
     }
     fetchOperations();
-  }, [router.query.id]);
+  }, [router.query.id, setOperations]);
   return (
     <>
       <div className="tw-w-full tw-inline-flex">
-       {/*  <div className="tw-w-1/4">
-          <AllowlistToolBuilderOperationsDone />
-        </div> */}
         <div>{children}</div>
         <div className="tw-w-[17.5rem]">
-          <AllowlistToolBuilderOperationsPending />
+          {operations.map((operation) => (
+            <div
+              key={operation.id}
+              className={`tw-flex tw-items-center tw-text-xs ${
+                operation.activeRunId
+                  ? "tw-text-green-500"
+                  : "tw-text-neutral-300"
+              }`}
+            >
+              {operation.code}
+            </div>
+          ))}
         </div>
       </div>
     </>

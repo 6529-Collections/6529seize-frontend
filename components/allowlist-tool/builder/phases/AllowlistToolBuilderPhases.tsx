@@ -2,6 +2,7 @@ import { useRouter } from "next/router";
 import AllowlistToolExpandableTableWrapper from "../../common/AllowlistToolExpandableTableWrapper";
 import { useContext, useEffect, useState } from "react";
 import {
+  AllowlistOperationCode,
   AllowlistPhaseWithComponentAndItems,
   AllowlistToolResponse,
 } from "../../allowlist-tool.types";
@@ -11,6 +12,7 @@ import AllowlistToolHistoryIcon from "../../icons/AllowlistToolHistoryIcon";
 import AllowlistToolJsonIcon from "../../icons/AllowlistToolJsonIcon";
 import AllowlistToolPlusIcon from "../../icons/AllowlistToolPlusIcon";
 import AllowlistToolBuilderPhasesAdd from "./AllowlistToolBuilderPhasesAdd";
+import AllowlistToolBuilderAddOperation from "../operations/AllowlistToolBuilderAddOperation";
 
 export default function AllowlistToolBuilderPhases() {
   const router = useRouter();
@@ -45,6 +47,9 @@ export default function AllowlistToolBuilderPhases() {
     }
     fetchPhases();
   }, [router.query.id]);
+
+  const validOperations = [AllowlistOperationCode.ADD_PHASE];
+  const defaultOperation = AllowlistOperationCode.ADD_PHASE;
 
   return (
     <AllowlistToolExpandableTableWrapper title="Phases">
@@ -91,14 +96,12 @@ export default function AllowlistToolBuilderPhases() {
                                 <AllowlistToolJsonIcon />
                               </div>
                             </button>
-                            <button
-                              type="button"
-                              className="tw-group tw-rounded-full tw-bg-transparent tw-p-2 tw-text-white tw-border-none hover:tw-bg-neutral-700 tw-transition-all tw-duration-300 tw-ease-out"
-                            >
-                              <div className="tw-h-5 tw-w-5 tw-flex tw-items-center tw-justify-center">
-                                <AllowlistToolPlusIcon />
-                              </div>
-                            </button>
+                            <AllowlistToolBuilderAddOperation
+                              validOperations={validOperations}
+                              title={`Add operation for phases`}
+                              targetItemId={null}
+                              defaultOperation={defaultOperation}
+                            />
                             <button
                               type="button"
                               className="tw-group tw-rounded-full tw-bg-transparent tw-p-2 tw-text-white tw-border-none hover:tw-bg-neutral-700 tw-transition-all tw-duration-300 tw-ease-out"

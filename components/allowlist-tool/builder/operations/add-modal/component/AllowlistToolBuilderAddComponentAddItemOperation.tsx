@@ -5,10 +5,12 @@ import {
   AllowlistOperation,
   AllowlistOperationCode,
   AllowlistToolResponse,
+  Pool,
 } from "../../../../allowlist-tool.types";
 import AllowlistToolSelectMenu, {
   AllowlistToolSelectMenuOption,
 } from "../../../../common/select-menu/AllowlistToolSelectMenu";
+import { getRandomObjectId } from "../../../../../../helpers/AllowlistToolHelpers";
 
 export default function AllowlistToolBuilderComponentAddItemOperation({
   componentId,
@@ -63,43 +65,54 @@ export default function AllowlistToolBuilderComponentAddItemOperation({
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    // setIsLoading(true);
-    // setErrors([]);
-    // const spots = +formValues.spots;
-    // if (spots <= 0) {
-    //   setErrors(["Spots must be greater than 0"]);
-    //   setIsLoading(false);
-    //   return;
-    // }
-    // const url = `${process.env.ALLOWLIST_API_ENDPOINT}/allowlists/${router.query.id}/operations`;
-    // fetch(url, {
-    //   method: "POST",
-    //   headers: {
-    //     "Content-Type": "application/json",
-    //   },
-    //   body: JSON.stringify({
-    //     code: AllowlistOperationCode.COMPONENT_ADD_SPOTS_TO_ALL_ITEM_WALLETS,
-    //     params: {
-    //       componentId,
-    //       spots,
-    //     },
-    //   }),
-    // })
-    //   .then((response) => response.json())
-    //   .then((data: AllowlistToolResponse<AllowlistOperation>) => {
-    //     if ("error" in data) {
-    //       typeof data.message === "string"
-    //         ? setErrors([data.message])
-    //         : setErrors(data.message);
-    //     } else {
-    //       setOperations([...operations, data]);
-    //       setFormValues({
-    //         spots: "",
-    //       });
-    //       onClose();
-    //     }
-    //     setIsLoading(false);
-    //   });
+    if (!selectedTokenPool) {
+      return;
+    }
+
+    setIsLoading(true);
+    setErrors([]);
+
+    const url = `${process.env.ALLOWLIST_API_ENDPOINT}/allowlists/${router.query.id}/operations`;
+
+    const params = {
+      id: getRandomObjectId(),
+      name: formValues.name,
+      description: formValues.description,
+      componentId: componentId,
+      poolId: selectedTokenPool.value,
+      poolType: tokenPools.find(
+        (tokenPool) => tokenPool.id === selectedTokenPool.value
+      )
+        ? Pool.TOKEN_POOL
+        : Pool.CUSTOM_TOKEN_POOL,
+    };
+    fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        code: AllowlistOperationCode.ADD_ITEM,
+        params,
+      }),
+    })
+      .then((response) => response.json())
+      .then((data: AllowlistToolResponse<AllowlistOperation>) => {
+        if ("error" in data) {
+          typeof data.message === "string"
+            ? setErrors([data.message])
+            : setErrors(data.message);
+        } else {
+          setOperations([...operations, data]);
+          setFormValues({
+            name: "",
+            description: "",
+          });
+          setSelectedTokenPool(null);
+          onClose();
+        }
+        setIsLoading(false);
+      });
   };
 
   return (

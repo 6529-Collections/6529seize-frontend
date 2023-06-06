@@ -1,10 +1,14 @@
 import { useEffect, useState } from "react";
-import { AllowlistPhaseWithComponentAndItems } from "../../allowlist-tool.types";
+import {
+  AllowlistOperationCode,
+  AllowlistPhaseWithComponentAndItems,
+} from "../../allowlist-tool.types";
 import AllowlistToolHistoryIcon from "../../icons/AllowlistToolHistoryIcon";
 import AllowlistToolJsonIcon from "../../icons/AllowlistToolJsonIcon";
 import AllowlistToolPlusIcon from "../../icons/AllowlistToolPlusIcon";
 import AllowlistToolBuilderPhasesPhaseComponent from "./components/AllowlistToolBuilderPhasesPhaseComponent";
 import { useAnimate } from "framer-motion";
+import AllowlistToolBuilderAddOperation from "../operations/AllowlistToolBuilderAddOperation";
 
 export default function AllowlistToolBuilderPhasesPhase({
   phase,
@@ -22,7 +26,9 @@ export default function AllowlistToolBuilderPhasesPhase({
       animateTable(tableScope.current, { height: 0 });
       animateIcon(iconScope.current, { rotate: -90 });
     }
-  });
+  }, [isOpen, animateTable, animateIcon, tableScope, iconScope]);
+  const validOperations = [AllowlistOperationCode.ADD_COMPONENT];
+  const defaultOperation = AllowlistOperationCode.ADD_COMPONENT;
   return (
     <>
       <tr onClick={() => setIsOpen(!isOpen)}>
@@ -45,20 +51,6 @@ export default function AllowlistToolBuilderPhasesPhase({
             </svg>
             <div className="tw-inline-flex tw-items-center tw-gap-x-3">
               {phase.name}
-              <svg
-                className="tw-h-6 tw-w-6 tw-text-neutral-400"
-                viewBox="0 0 24 24"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  d="M12 8V16M8 12H16M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12Z"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
             </div>
           </div>
         </td>
@@ -76,14 +68,12 @@ export default function AllowlistToolBuilderPhasesPhase({
                 <AllowlistToolJsonIcon />
               </div>
             </button>
-            <button
-              type="button"
-              className="tw-group tw-rounded-full tw-bg-transparent tw-p-2 tw-text-white tw-border-none hover:tw-bg-neutral-700 tw-transition-all tw-duration-300 tw-ease-out"
-            >
-              <div className="tw-h-5 tw-w-5">
-                <AllowlistToolPlusIcon />
-              </div>
-            </button>
+            <AllowlistToolBuilderAddOperation
+              validOperations={validOperations}
+              title={`Add operation for phase "${phase.name}"`}
+              targetItemId={phase.phaseId}
+              defaultOperation={defaultOperation}
+            />
             <button
               type="button"
               className="tw-group tw-rounded-full tw-bg-transparent tw-p-2 tw-text-white tw-border-none hover:tw-bg-neutral-700 tw-transition-all tw-duration-300 tw-ease-out"

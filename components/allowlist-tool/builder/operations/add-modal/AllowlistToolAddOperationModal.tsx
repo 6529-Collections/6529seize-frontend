@@ -17,6 +17,8 @@ import AllowlistToolBuilderGetCollectionTransfersOperation from "./transfer-pool
 import AllowlistToolBuilderCreateTokenPoolOperation from "./token-pools/AllowlistToolBuilderCreateTokenPoolOperation";
 import AllowlistToolBuilderCreateCustomTokenPoolOperation from "./custom-token-pools/AllowlistToolBuilderCreateCustomTokenPoolOperation";
 import AllowlistToolBuilderCreateWalletPoolOperation from "./wallet-pools/AllowlistToolBuilderCreateWalletPoolOperation";
+import AllowlistToolBuilderAddPhaseOperation from "./phases/AllowlistToolBuilderAddPhaseOperation";
+import AllowlistToolBuilderAddComponentOperation from "../phase/AllowlistToolBuilderAddComponentOperation";
 
 export default function AllowlistToolAddOperationModal({
   targetItemId,
@@ -114,8 +116,18 @@ export default function AllowlistToolAddOperationModal({
                   />
                 );
               case AllowlistOperationCode.ADD_PHASE:
+                return (
+                  <AllowlistToolBuilderAddPhaseOperation onClose={onClose} />
+                );
               case AllowlistOperationCode.ADD_COMPONENT:
-                return <div>{selectedOperationCode}</div>;
+                return (
+                  targetItemId && (
+                    <AllowlistToolBuilderAddComponentOperation
+                      phaseId={targetItemId}
+                      onClose={onClose}
+                    />
+                  )
+                );
               case AllowlistOperationCode.COMPONENT_ADD_SPOTS_TO_ALL_ITEM_WALLETS:
                 return (
                   targetItemId && (

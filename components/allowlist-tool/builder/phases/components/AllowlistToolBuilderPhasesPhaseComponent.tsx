@@ -5,11 +5,8 @@ import {
 } from "../../../allowlist-tool.types";
 import AllowlistToolHistoryIcon from "../../../icons/AllowlistToolHistoryIcon";
 import AllowlistToolJsonIcon from "../../../icons/AllowlistToolJsonIcon";
-import AllowlistToolPlusIcon from "../../../icons/AllowlistToolPlusIcon";
 import AllowlistToolBuilderPhasesPhaseComponentItem from "./items/AllowlistToolBuilderPhasesPhaseComponentItem";
 import React, { useEffect, useState } from "react";
-import AllowlistToolModelWrapper from "../../../common/AllowlistToolModelWrapper";
-import AllowlistToolAddOperationModal from "../../operations/add-modal/AllowlistToolAddOperationModal";
 import AllowlistToolBuilderAddOperation from "../../operations/AllowlistToolBuilderAddOperation";
 
 export default function AllowlistToolBuilderPhasesPhaseComponent({
@@ -28,23 +25,8 @@ export default function AllowlistToolBuilderPhasesPhaseComponent({
       animateTable(tableScope.current, { height: 0 });
       animateIcon(iconScope.current, { rotate: -90 });
     }
-  });
-  const [defaultOperation, setDefaultOperation] =
-    useState<AllowlistOperationCode | null>(null);
+  }, [isOpen, animateTable, animateIcon, tableScope, iconScope]);
 
-  const [showModal, setShowModal] = useState(false);
-
-  const setDefaultOperationAndOpenModal = (
-    operation: AllowlistOperationCode | null
-  ) => {
-    setDefaultOperation(operation);
-    setShowModal(true);
-  };
-
-  const closeModal = () => {
-    setShowModal(false);
-    setDefaultOperation(null);
-  };
   const validOperations: AllowlistOperationCode[] = [
     AllowlistOperationCode.COMPONENT_ADD_SPOTS_TO_ALL_ITEM_WALLETS,
     AllowlistOperationCode.ADD_ITEM,
@@ -70,27 +52,7 @@ export default function AllowlistToolBuilderPhasesPhaseComponent({
               />
             </svg>
             <div className="tw-inline-flex tw-items-center tw-gap-x-3">
-              <span>{phaseComponent.name}</span>
-              <svg
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setDefaultOperationAndOpenModal(
-                    AllowlistOperationCode.ADD_ITEM
-                  );
-                }}
-                className="tw-h-6 tw-w-6 tw-text-neutral-400"
-                viewBox="0 0 24 24"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  d="M12 8V16M8 12H16M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12Z"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
+              {phaseComponent.name}
             </div>
           </div>
         </td>
