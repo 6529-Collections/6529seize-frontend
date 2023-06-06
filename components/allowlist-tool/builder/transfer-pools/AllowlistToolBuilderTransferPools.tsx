@@ -1,7 +1,7 @@
 import { useContext, useEffect, useState } from "react";
-import { useAnimate } from "framer-motion";
 import { useRouter } from "next/router";
 import {
+  AllowlistOperationCode,
   AllowlistToolResponse,
   AllowlistTransferPool,
 } from "../../allowlist-tool.types";
@@ -11,7 +11,7 @@ import AllowlistToolBuilderTransferPoolsAdd from "./AllowlistToolBuilderTransfer
 import { AllowlistToolBuilderContext } from "../../../../pages/allowlist-tool/[id]";
 import AllowlistToolHistoryIcon from "../../icons/AllowlistToolHistoryIcon";
 import AllowlistToolJsonIcon from "../../icons/AllowlistToolJsonIcon";
-import AllowlistToolPlusIcon from "../../icons/AllowlistToolPlusIcon";
+import AllowlistToolBuilderAddOperation from "../operations/AllowlistToolBuilderAddOperation";
 
 export default function AllowlistToolBuilderTransferPools() {
   const router = useRouter();
@@ -48,6 +48,9 @@ export default function AllowlistToolBuilderTransferPools() {
 
     fetchTransferPools();
   }, [router.query.id]);
+
+  const validOperations = [AllowlistOperationCode.GET_COLLECTION_TRANSFERS];
+  const defaultOperation = AllowlistOperationCode.GET_COLLECTION_TRANSFERS;
 
   return (
     <AllowlistToolExpandableTableWrapper title="Transfer Pools">
@@ -99,14 +102,12 @@ export default function AllowlistToolBuilderTransferPools() {
                                 <AllowlistToolJsonIcon />
                               </div>
                             </button>
-                            <button
-                              type="button"
-                              className="tw-group tw-rounded-full tw-bg-transparent tw-p-2 tw-text-white tw-border-none hover:tw-bg-neutral-700 tw-transition-all tw-duration-300 tw-ease-out"
-                            >
-                              <div className="tw-h-5 tw-w-5 tw-flex tw-items-center tw-justify-center">
-                                <AllowlistToolPlusIcon />
-                              </div>
-                            </button>
+                            <AllowlistToolBuilderAddOperation
+                              validOperations={validOperations}
+                              title={`Add operation for transfer pools`}
+                              targetItemId={null}
+                              defaultOperation={defaultOperation}
+                            />
                             <button
                               type="button"
                               className="tw-group tw-rounded-full tw-bg-transparent tw-p-2 tw-text-white tw-border-none hover:tw-bg-neutral-700 tw-transition-all tw-duration-300 tw-ease-out"

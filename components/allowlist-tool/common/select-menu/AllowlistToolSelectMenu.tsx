@@ -1,3 +1,8 @@
+import { useEffect, useRef, useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import AllowlistToolSelectMenuList from "./AllowlistToolSelectMenuList";
+import { useClickAway, useKeyPressEvent } from "react-use";
+
 export interface AllowlistToolSelectMenuOption {
   title: string;
   subTitle: string | null;
@@ -6,87 +11,93 @@ export interface AllowlistToolSelectMenuOption {
 
 export default function AllowlistToolSelectMenu({
   label,
+  placeholder,
+  selectedOption,
+  setSelectedOption,
   options,
 }: {
   label: string;
+  placeholder: string;
+  selectedOption: AllowlistToolSelectMenuOption | null;
+  setSelectedOption: (option: AllowlistToolSelectMenuOption) => void;
   options: AllowlistToolSelectMenuOption[];
 }) {
+  const [isOpen, setIsOpen] = useState(false);
+  const toggleOpen = () => setIsOpen(!isOpen);
+  const onSelect = (option: AllowlistToolSelectMenuOption) => {
+    setSelectedOption(option);
+    setIsOpen(false);
+  };
+
+  const listRef = useRef<HTMLDivElement>(null);
+  useClickAway(listRef, () => setIsOpen(false));
+  useKeyPressEvent("Escape", () => setIsOpen(false));
+
+  const [title, setTitle] = useState("");
+
+  useEffect(() => {
+    if (selectedOption) {
+      setTitle(selectedOption.title);
+    } else {
+      setTitle(placeholder);
+    }
+  }, [selectedOption, placeholder]);
+
   return (
-    <div>
+    <div ref={listRef}>
       <label
         id="listbox-label"
-        className="tw-block tw-text-sm tw-font-medium tw-leading-6 text-text-neutral-900"
+        className="tw-block tw-text-sm tw-font-normal tw-leading-5 tw-text-neutral-100"
       >
         {label}
       </label>
       <div className="tw-relative tw-mt-2">
         <button
           type="button"
-          className="tw-relative tw-w-full tw-cursor-default tw-rounded-md tw-bg-white tw-py-1.5 tw-pl-3 tw-pr-10 tw-text-left text-text-neutral-900 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-gray-300 tw-focus:tw-outline-none tw-focus:tw-ring-2 tw-focus:tw-ring-indigo-500 tw-sm:tw-text-sm tw-sm:tw-leading-6"
+          className="tw-relative tw-flex tw-items-center tw-w-full tw-rounded-lg tw-border-0 tw-py-3 tw-px-3 tw-bg-neutral-800 tw-text-white tw-font-light tw-caret-primary tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-neutral-800 placeholder:tw-text-neutral-500 focus:tw-outline-none focus:tw-bg-transparent focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-focus tw-text-base sm:tw-leading-6 tw-transition tw-duration-300 tw-ease-out"
           aria-haspopup="listbox"
-          aria-expanded="true"
+          aria-expanded={isOpen}
           aria-labelledby="listbox-label"
+          onClick={(e) => {
+            e.stopPropagation();
+            toggleOpen();
+          }}
         >
-          <span className="tw-inline-flex tw-w-full tw-truncate">
-            <span className="tw-truncate">Tom Cook</span>
-            <span className="tw-ml-2 tw-truncate text-text-neutral-500">
-              @tomcook
-            </span>
-          </span>
+          <span className="tw-block tw-truncate">{title}</span>
           <span className="tw-pointer-events-none tw-absolute tw-inset-y-0 tw-right-0 tw-flex tw-items-center tw-pr-2">
             <svg
-              className="tw-h-5 tw-w-5 text-text-neutral-400"
-              viewBox="0 0 20 20"
-              fill="currentColor"
-              aria-hidden="true"
+              className="tw-h-5 tw-w-5 tw-text-zinc-400"
+              viewBox="0 0 24 24"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
             >
               <path
-                fillRule="evenodd"
-                d="M10 3a.75.75 0 01.55.24l3.25 3.5a.75.75 0 11-1.1 1.02L10 4.852 7.3 7.76a.75.75 0 01-1.1-1.02l3.25-3.5A.75.75 0 0110 3zm-3.76 9.2a.75.75 0 011.06.04l2.7 2.908 2.7-2.908a.75.75 0 111.1 1.02l-3.25 3.5a.75.75 0 01-1.1 0l-3.25-3.5a.75.75 0 01.04-1.06z"
-                clipRule="evenodd"
+                d="M6 9L12 15L18 9"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
               />
             </svg>
           </span>
         </button>
-        <ul
-          className="tw-absolute tw-z-10 tw-mt-1 tw-max-h-60 tw-w-full tw-overflow-auto tw-rounded-md tw-bg-white tw-py-1 tw-text-base tw-shadow-lg tw-ring-1 tw-ring-black tw-ring-opacity-5 tw-focus:tw-outline-none tw-sm:tw-text-sm"
-          tabIndex={-1}
-          role="listbox"
-          aria-labelledby="listbox-label"
-          aria-activedescendant="listbox-option-3"
-        >
-          {options.map((option) => (
-            <li
-              key={option.value}
-              className="text-text-neutral-900 tw-relative tw-cursor-default tw-select-none tw-py-2 tw-pl-3 tw-pr-9"
-              id="listbox-option-0"
-              role="option"
-              aria-selected="true"
+        <AnimatePresence>
+          {isOpen && (
+            <motion.div
+              className="tw-origin-top-right tw-absolute tw-right-0 tw-mt-2 tw-w-full tw-rounded-md tw-shadow-lg tw-bg-neutral-800 tw-ring-1 tw-ring-black tw-ring-opacity-5"
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.2 }}
             >
-              <div className="tw-flex">
-                <span className="tw-font-normal tw-truncate">{option.title}</span>
-                <span className="text-text-neutral-500 tw-ml-2 tw-truncate">
-                  {option.subTitle}
-                </span>
-              </div>
-
-              <span className="tw-text-indigo-600 tw-absolute tw-inset-y-0 tw-right-0 tw-flex tw-items-center tw-pr-4">
-                <svg
-                  className="tw-h-5 tw-w-5"
-                  viewBox="0 0 20 20"
-                  fill="currentColor"
-                  aria-hidden="true"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-              </span>
-            </li>
-          ))}
-        </ul>
+              <AllowlistToolSelectMenuList
+                options={options}
+                setSelectedOption={onSelect}
+                selectedOption={selectedOption}
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </div>
   );

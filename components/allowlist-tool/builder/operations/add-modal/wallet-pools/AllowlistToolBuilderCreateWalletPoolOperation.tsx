@@ -1,15 +1,24 @@
 import { useRouter } from "next/router";
 import { useContext, useState } from "react";
-import { AllowlistToolBuilderContext } from "../../../../pages/allowlist-tool/[id]";
-import csvParser from "csv-parser";
+import { AllowlistToolBuilderContext } from "../../../../../../pages/allowlist-tool/[id]";
+import AllowlistToolSelectMenu, {
+  AllowlistToolSelectMenuOption,
+} from "../../../../common/select-menu/AllowlistToolSelectMenu";
+import { getRandomObjectId } from "../../../../../../helpers/AllowlistToolHelpers";
 import {
   AllowlistOperation,
   AllowlistOperationCode,
   AllowlistToolResponse,
-} from "../../allowlist-tool.types";
-import { getRandomObjectId } from "../../../../helpers/AllowlistToolHelpers";
+  CustomTokenPoolParamsToken,
+  Mutable,
+} from "../../../../allowlist-tool.types";
+import csvParser from "csv-parser";
 
-export default function AllowlistToolBuilderWalletPoolsAdd() {
+export default function AllowlistToolBuilderCreateWalletPoolOperation({
+  onClose,
+}: {
+  onClose: () => void;
+}) {
   const router = useRouter();
   const { operations, setOperations } = useContext(AllowlistToolBuilderContext);
   const [formValues, setFormValues] = useState<{
@@ -19,6 +28,7 @@ export default function AllowlistToolBuilderWalletPoolsAdd() {
     name: "",
     description: "",
   });
+
   const [wallets, setWallets] = useState<string[]>([]);
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -59,8 +69,10 @@ export default function AllowlistToolBuilderWalletPoolsAdd() {
     };
     reader.readAsText(file);
   };
+
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [errors, setErrors] = useState<string[]>([]);
+
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setIsLoading(true);
@@ -70,14 +82,16 @@ export default function AllowlistToolBuilderWalletPoolsAdd() {
       setIsLoading(false);
       return;
     }
+
     const url = `${process.env.ALLOWLIST_API_ENDPOINT}/allowlists/${router.query.id}/operations`;
+
     fetch(url, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        code: AllowlistOperationCode.CREATE_WALLET_POOL,
+        code: AllowlistOperationCode.CREATE_CUSTOM_TOKEN_POOL,
         params: {
           id: getRandomObjectId(),
           name: formValues.name,
@@ -99,11 +113,11 @@ export default function AllowlistToolBuilderWalletPoolsAdd() {
             description: "",
           });
           setWallets([]);
+          onClose();
         }
         setIsLoading(false);
       });
   };
-
   return (
     <form onSubmit={handleSubmit}>
       <div className="tw-px-6 tw-flex tw-gap-x-4 tw-pt-5 tw-items-end">
@@ -119,7 +133,7 @@ export default function AllowlistToolBuilderWalletPoolsAdd() {
               onChange={handleChange}
               required
               autoComplete="off"
-              className="tw-block tw-w-full tw-rounded-lg tw-border-0 tw-py-3 tw-px-3 tw-bg-neutral-800 tw-text-white tw-font-light tw-caret-primary tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-neutral-800 placeholder:tw-text-neutral-500 focus:tw-outline-none focus:tw-bg-transparent focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary tw-text-base sm:tw-leading-6 tw-transition tw-duration-300 tw-ease-out"
+              className="tw-block tw-w-full tw-rounded-lg tw-border-0 tw-py-3 tw-px-3 tw-bg-[#2D2E32] tw-text-white tw-font-light tw-caret-primary tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-neutral-700 placeholder:tw-text-neutral-500 focus:tw-outline-none focus:tw-bg-transparent focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary tw-text-base sm:tw-leading-6 tw-transition tw-duration-300 tw-ease-out"
             />
           </div>
         </div>
@@ -135,14 +149,14 @@ export default function AllowlistToolBuilderWalletPoolsAdd() {
               onChange={handleChange}
               required
               autoComplete="off"
-              className="tw-block tw-w-full tw-rounded-lg tw-border-0 tw-py-3 tw-px-3 tw-bg-neutral-800 tw-text-white tw-font-light tw-caret-primary tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-neutral-800 placeholder:tw-text-neutral-500 focus:tw-outline-none focus:tw-bg-transparent focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary tw-text-base sm:tw-leading-6 tw-transition tw-duration-300 tw-ease-out"
+              className="tw-block tw-w-full tw-rounded-lg tw-border-0 tw-py-3 tw-px-3 tw-bg-[#2D2E32] tw-text-white tw-font-light tw-caret-primary tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-neutral-700 placeholder:tw-text-neutral-500 focus:tw-outline-none focus:tw-bg-transparent focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary tw-text-base sm:tw-leading-6 tw-transition tw-duration-300 tw-ease-out"
             />
           </div>
         </div>
         <div>
           <label
             htmlFor="walletPoolFile"
-            className="tw-cursor-pointer tw-bg-transparent hover:tw-bg-neutral-800/80 tw-px-4 tw-py-3 tw-text-sm tw-font-medium tw-text-white tw-w-full tw-border tw-border-solid tw-border-neutral-800 tw-rounded-lg tw-transition tw-duration-300 tw-ease-out"
+            className="tw-cursor-pointer tw-bg-transparent hover:tw-bg-neutral-800/80 tw-px-4 tw-py-3 tw-text-sm tw-font-medium tw-text-white tw-w-full tw-border tw-border-solid tw-border-neutral-700 tw-rounded-lg tw-transition tw-duration-300 tw-ease-out"
           >
             Upload a CSV
           </label>
@@ -158,7 +172,7 @@ export default function AllowlistToolBuilderWalletPoolsAdd() {
         <div>
           <button
             type="submit"
-            className="tw-bg-primary-500 tw-px-4 tw-py-3 tw-text-sm tw-font-medium tw-text-white tw-w-full tw-border tw-border-solid tw-border-primary-500 tw-rounded-lg hover:tw-bg-primary-600 hover:tw-border-primary-600 tw-transition tw-duration-300 tw-ease-out"
+            className="tw-bg-primary-500 tw-px-4 tw-py-3 tw-text-sm tw-font-medium tw-text-white tw-w-full tw-border tw-border-solid tw-border-primary-500 tw-rounded-lg hover:tw-bg-primary-600hover:tw-border-primary-hover tw-transition tw-duration-300 tw-ease-out"
           >
             Add wallet pool
           </button>

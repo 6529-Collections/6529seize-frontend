@@ -10,7 +10,7 @@ import AllowlistToolSelectMenu, {
   AllowlistToolSelectMenuOption,
 } from "../../../../common/select-menu/AllowlistToolSelectMenu";
 
-export default function AllowlistToolBuilderAddComponentAddItemOperation({
+export default function AllowlistToolBuilderComponentAddItemOperation({
   componentId,
   onClose,
 }: {
@@ -40,6 +40,9 @@ export default function AllowlistToolBuilderAddComponentAddItemOperation({
     ...tokenPoolOptions,
     ...customTokenPoolOptions,
   ];
+
+  const [selectedTokenPool, setSelectedTokenPool] =
+    useState<AllowlistToolSelectMenuOption | null>(null);
 
   const [formValues, setFormValues] = useState<{
     name: string;
@@ -144,7 +147,13 @@ export default function AllowlistToolBuilderAddComponentAddItemOperation({
           </button>
         </div>
       </div>
-      <AllowlistToolSelectMenu label="Select token pool" options={options} />
+      <AllowlistToolSelectMenu
+        label="Select token pool"
+        placeholder="Select"
+        options={options}
+        selectedOption={selectedTokenPool}
+        setSelectedOption={setSelectedTokenPool}
+      />
     </form>
   );
 }

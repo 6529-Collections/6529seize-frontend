@@ -1,5 +1,6 @@
 import { useRouter } from "next/router";
 import {
+  AllowlistOperationCode,
   AllowlistToolResponse,
   AllowlistWalletPool,
 } from "../../allowlist-tool.types";
@@ -11,6 +12,7 @@ import AllowlistToolHistoryIcon from "../../icons/AllowlistToolHistoryIcon";
 import AllowlistToolJsonIcon from "../../icons/AllowlistToolJsonIcon";
 import AllowlistToolPlusIcon from "../../icons/AllowlistToolPlusIcon";
 import AllowlistToolBuilderWalletPoolsAdd from "./AllowlistToolBuilderWalletPoolsAdd";
+import AllowlistToolBuilderAddOperation from "../operations/AllowlistToolBuilderAddOperation";
 
 export default function AllowlistToolBuilderWalletPools() {
   const router = useRouter();
@@ -47,6 +49,10 @@ export default function AllowlistToolBuilderWalletPools() {
 
     fetchWalletPools();
   }, [router.query.id]);
+
+
+  const validOperations = [AllowlistOperationCode.CREATE_WALLET_POOL];
+  const defaultOperation = AllowlistOperationCode.CREATE_WALLET_POOL;
 
   return (
     <AllowlistToolExpandableTableWrapper title="Wallet Pools">
@@ -87,14 +93,12 @@ export default function AllowlistToolBuilderWalletPools() {
                                 <AllowlistToolJsonIcon />
                               </div>
                             </button>
-                            <button
-                              type="button"
-                              className="tw-group tw-rounded-full tw-bg-transparent tw-p-2 tw-text-white tw-border-none hover:tw-bg-neutral-700 tw-transition-all tw-duration-300 tw-ease-out"
-                            >
-                              <div className="tw-h-5 tw-w-5 tw-flex tw-items-center tw-justify-center">
-                                <AllowlistToolPlusIcon />
-                              </div>
-                            </button>
+                            <AllowlistToolBuilderAddOperation
+                              validOperations={validOperations}
+                              title={`Add operation for wallet pools`}
+                              targetItemId={null}
+                              defaultOperation={defaultOperation}
+                            />
                             <button
                               type="button"
                               className="tw-group tw-rounded-full tw-bg-transparent tw-p-2 tw-text-white tw-border-none hover:tw-bg-neutral-700 tw-transition-all tw-duration-300 tw-ease-out"

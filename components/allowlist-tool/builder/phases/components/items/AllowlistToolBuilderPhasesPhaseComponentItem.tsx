@@ -1,5 +1,6 @@
 import { useContext, useState } from "react";
 import {
+  AllowlistOperationCode,
   AllowlistPhaseComponentItem,
   Pool,
 } from "../../../../allowlist-tool.types";
@@ -8,9 +9,8 @@ import AllowlistToolJsonIcon from "../../../../icons/AllowlistToolJsonIcon";
 import AllowlistToolPlusIcon from "../../../../icons/AllowlistToolPlusIcon";
 import { AllowlistToolBuilderContext } from "../../../../../../pages/allowlist-tool/[id]";
 import AllowlistToolModelWrapper from "../../../../common/AllowlistToolModelWrapper";
-import AllowlistToolBuilderAddItemOperationModal from "../../../operations/add-modal/item/AllowlistToolBuilderAddItemOperationModal";
-
-
+import AllowlistToolAddOperationModal from "../../../operations/add-modal/AllowlistToolAddOperationModal";
+import AllowlistToolBuilderAddOperation from "../../../operations/AllowlistToolBuilderAddOperation";
 
 export default function AllowlistToolBuilderPhasesPhaseComponentItem({
   phaseComponentItem,
@@ -32,7 +32,14 @@ export default function AllowlistToolBuilderPhasesPhaseComponentItem({
     );
   }
 
-  const [showModal, setShowModal] = useState(false);
+  const validOperations: AllowlistOperationCode[] = [
+    AllowlistOperationCode.ITEM_EXCLUE_TOKEN_IDS,
+    AllowlistOperationCode.ITEM_SELECT_TOKEN_IDS,
+    AllowlistOperationCode.ITEM_REMOVE_FIRST_N_TOKENS,
+    AllowlistOperationCode.ITEM_REMOVE_LAST_N_TOKENS,
+    AllowlistOperationCode.ITEM_SELECT_FIRST_N_TOKENS,
+    AllowlistOperationCode.ITEM_SELECT_LAST_N_TOKENS,
+  ];
   return (
     <>
       <tr>
@@ -55,15 +62,13 @@ export default function AllowlistToolBuilderPhasesPhaseComponentItem({
                 <AllowlistToolJsonIcon />
               </div>
             </button>
-            <button
-              onClick={() => setShowModal(true)}
-              type="button"
-              className="tw-group tw-rounded-full tw-bg-transparent tw-p-2 tw-text-white tw-border-none hover:tw-bg-neutral-700 tw-transition-all tw-duration-300 tw-ease-out"
-            >
-              <div className="tw-h-5 tw-w-5">
-                <AllowlistToolPlusIcon />
-              </div>
-            </button>
+
+            <AllowlistToolBuilderAddOperation
+              validOperations={validOperations}
+              title={`Add operation for item "${phaseComponentItem.name}"`}
+              targetItemId={phaseComponentItem.phaseComponentItemId}
+              defaultOperation={null}
+            />
 
             <button
               type="button"
@@ -74,16 +79,6 @@ export default function AllowlistToolBuilderPhasesPhaseComponentItem({
               </div>
             </button>
           </div>
-          <AllowlistToolModelWrapper
-            showModal={showModal}
-            onClose={() => setShowModal(false)}
-            title={`Add operation for item "${phaseComponentItem.name}"`}
-          >
-            <AllowlistToolBuilderAddItemOperationModal
-              itemId={phaseComponentItem.phaseComponentItemId}
-              onClose={() => setShowModal(false)}
-            />
-          </AllowlistToolModelWrapper>
         </td>
       </tr>
     </>

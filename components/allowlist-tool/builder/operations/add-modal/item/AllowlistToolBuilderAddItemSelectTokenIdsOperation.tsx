@@ -7,7 +7,7 @@ import {
   AllowlistToolResponse,
 } from "../../../../allowlist-tool.types";
 
-export default function AllowlistToolBuilderAddItemSelectTokenIdsOperation({
+export default function AllowlistToolBuilderItemSelectTokenIdsOperation({
   itemId,
   onClose,
 }: {
