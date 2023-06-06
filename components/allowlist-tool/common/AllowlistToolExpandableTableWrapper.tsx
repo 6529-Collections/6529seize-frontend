@@ -23,10 +23,10 @@ export default function AllowlistToolExpandableTableWrapper({ children, title }:
   return (
     <>
       <div>
-        <div className="tw-cursor-pointer tw-bg-neutral-900 tw-border tw-border-solid tw-border-white/5 tw-rounded-xl tw-py-5 tw-transition tw-duration-300 tw-ease-out">
+        <div className="tw-cursor-pointer tw-bg-neutral-900 tw-border tw-border-solid tw-border-white/5 tw-rounded-xl tw-pt-5 tw-transition tw-duration-300 tw-ease-out">
           <div
             onClick={() => setIsOpen(!isOpen)}
-            className="tw-px-6 tw-flex tw-items-center tw-gap-x-4"
+            className="tw-px-6 tw-flex tw-items-center tw-gap-x-4 tw-pb-5"
           >
             <div className="tw-h-6 tw-w-6 tw-flex tw-items-center tw-justify-center tw-bg-neutral-700 tw-rounded-md">
               <svg

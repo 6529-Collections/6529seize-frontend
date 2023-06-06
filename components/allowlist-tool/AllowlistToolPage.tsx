@@ -24,7 +24,7 @@ export default function AllowlistToolPage() {
   return (
     <>
       <div
-        className={`tw-min-h-screen tw-bg-[#131315] ${poppins.className}`}
+        className={`tw-min-h-screen tw-bg-neutral-900 ${poppins.className}`}
         id="allowlist-tool"
       >
         <div className="container tw-mx-auto tw-pt-6">

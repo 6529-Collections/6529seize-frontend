@@ -47,11 +47,11 @@ export default function AllowlistToolBuilderOperations({
   return (
     <>
       <div className="tw-w-full tw-inline-flex">
-        <div className="tw-w-1/4">
+       {/*  <div className="tw-w-1/4">
           <AllowlistToolBuilderOperationsDone />
-        </div>
+        </div> */}
         <div>{children}</div>
-        <div className="tw-w-1/4">
+        <div className="tw-w-[17.5rem]">
           <AllowlistToolBuilderOperationsPending />
         </div>
       </div>
