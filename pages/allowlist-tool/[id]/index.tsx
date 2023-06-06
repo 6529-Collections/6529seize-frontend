@@ -7,6 +7,7 @@ import {
   AllowlistCustomTokenPool,
   AllowlistDescription,
   AllowlistOperation,
+  AllowlistOperationDescription,
   AllowlistPhaseWithComponentAndItems,
   AllowlistTokenPool,
   AllowlistTransferPool,
@@ -79,6 +80,7 @@ const Header = dynamic(() => import("../../../components/header/Header"), {
 type AllowlistToolBuilderContextType = {
   operations: AllowlistOperation[];
   setOperations: (operations: AllowlistOperation[]) => void;
+  operationDescriptions: AllowlistOperationDescription[];
   transferPools: AllowlistTransferPool[];
   setTransferPools: (transferPools: AllowlistTransferPool[]) => void;
   tokenPools: AllowlistTokenPool[];
@@ -95,6 +97,7 @@ export const AllowlistToolBuilderContext =
   createContext<AllowlistToolBuilderContextType>({
     operations: [],
     setOperations: () => {},
+    operationDescriptions: [],
     transferPools: [],
     setTransferPools: () => {},
     tokenPools: [],
@@ -109,8 +112,10 @@ export const AllowlistToolBuilderContext =
 
 export default function AllowlistToolAllowlistId({
   allowlist,
+  operationDescriptions,
 }: {
   allowlist: AllowlistDescription;
+  operationDescriptions: AllowlistOperationDescription[];
 }) {
   const [breadcrumbs, setBreadcrumbs] = useState<Crumb[]>([
     { display: "Home", href: "/" },
@@ -118,6 +123,7 @@ export default function AllowlistToolAllowlistId({
     { display: allowlist.name },
   ]);
   const [operations, setOperations] = useState<AllowlistOperation[]>([]);
+
   const [transferPools, setTransferPools] = useState<AllowlistTransferPool[]>(
     []
   );
@@ -144,6 +150,7 @@ export default function AllowlistToolAllowlistId({
               value={{
                 operations,
                 setOperations,
+                operationDescriptions,
                 transferPools,
                 setTransferPools,
                 tokenPools,
@@ -177,7 +184,13 @@ export async function getServerSideProps(req: { query: { id: string } }) {
   const allowlistResponse = await fetch(
     `${process.env.ALLOWLIST_API_ENDPOINT}/allowlists/${req.query.id}`
   );
+  const operationDescriptionsResponse = await fetch(
+    `${process.env.ALLOWLIST_API_ENDPOINT}/other/operations`
+  );
   const allowlist: AllowlistDescription = await allowlistResponse.json();
+  const operationDescriptions: AllowlistOperationDescription[] =
+    await operationDescriptionsResponse.json();
+
   if ("error" in allowlist) {
     return {
       redirect: {
@@ -187,5 +200,5 @@ export async function getServerSideProps(req: { query: { id: string } }) {
     };
   }
 
-  return { props: { allowlist } };
+  return { props: { allowlist, operationDescriptions } };
 }

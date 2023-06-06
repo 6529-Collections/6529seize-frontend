@@ -3,7 +3,7 @@ import { AllowlistPhaseWithComponentAndItems } from "../../allowlist-tool.types"
 import AllowlistToolHistoryIcon from "../../icons/AllowlistToolHistoryIcon";
 import AllowlistToolJsonIcon from "../../icons/AllowlistToolJsonIcon";
 import AllowlistToolPlusIcon from "../../icons/AllowlistToolPlusIcon";
-import AllowlistToolBuilderPhasesPhaseComponent from "./AllowlistToolBuilderPhasesPhaseComponent";
+import AllowlistToolBuilderPhasesPhaseComponent from "./components/AllowlistToolBuilderPhasesPhaseComponent";
 import { useAnimate } from "framer-motion";
 
 export default function AllowlistToolBuilderPhasesPhase({

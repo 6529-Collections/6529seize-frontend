@@ -1,13 +1,20 @@
+import { useContext } from "react";
 import { AllowlistTokenPool } from "../../allowlist-tool.types";
 import AllowlistToolHistoryIcon from "../../icons/AllowlistToolHistoryIcon";
 import AllowlistToolJsonIcon from "../../icons/AllowlistToolJsonIcon";
 import AllowlistToolPlusIcon from "../../icons/AllowlistToolPlusIcon";
+import { AllowlistToolBuilderContext } from "../../../../pages/allowlist-tool/[id]";
 
 export default function AllowlistToolBuilderTokenPoolsPool({
   tokenPool,
 }: {
   tokenPool: AllowlistTokenPool;
 }) {
+  const { transferPools } = useContext(AllowlistToolBuilderContext);
+
+  const transferPool = transferPools.find(
+    (pool) => pool.transferPoolId === tokenPool.transferPoolId
+  );
   return (
     <tr>
       <td className="tw-whitespace-nowrap tw-py-4 tw-pl-4 tw-pr-3 tw-text-sm tw-font-medium tw-text-white sm:tw-pl-6">
@@ -17,7 +24,7 @@ export default function AllowlistToolBuilderTokenPoolsPool({
         {tokenPool.description}
       </td>
       <td className="tw-whitespace-nowrap tw-px-3 tw-py-4 tw-text-sm tw-font-normal  tw-text-neutral-300">
-        {tokenPool.transferPoolId}
+        {transferPool?.name}
       </td>
       <td className="tw-whitespace-nowrap tw-px-3 tw-py-4 tw-text-sm tw-font-normal  tw-text-neutral-300">
         {tokenPool.tokenIds}
