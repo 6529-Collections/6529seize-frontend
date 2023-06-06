@@ -15,27 +15,27 @@ export default function AllowlistToolSelectMenu({
     <div>
       <label
         id="listbox-label"
-        className="tw-block tw-text-sm tw-font-medium tw-leading-6 tw-text-gray-900"
+        className="tw-block tw-text-sm tw-font-medium tw-leading-6 text-text-neutral-900"
       >
         {label}
       </label>
       <div className="tw-relative tw-mt-2">
         <button
           type="button"
-          className="tw-relative tw-w-full tw-cursor-default tw-rounded-md tw-bg-white tw-py-1.5 tw-pl-3 tw-pr-10 tw-text-left tw-text-gray-900 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-gray-300 tw-focus:tw-outline-none tw-focus:tw-ring-2 tw-focus:tw-ring-indigo-500 tw-sm:tw-text-sm tw-sm:tw-leading-6"
+          className="tw-relative tw-w-full tw-cursor-default tw-rounded-md tw-bg-white tw-py-1.5 tw-pl-3 tw-pr-10 tw-text-left text-text-neutral-900 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-gray-300 tw-focus:tw-outline-none tw-focus:tw-ring-2 tw-focus:tw-ring-indigo-500 tw-sm:tw-text-sm tw-sm:tw-leading-6"
           aria-haspopup="listbox"
           aria-expanded="true"
           aria-labelledby="listbox-label"
         >
           <span className="tw-inline-flex tw-w-full tw-truncate">
             <span className="tw-truncate">Tom Cook</span>
-            <span className="tw-ml-2 tw-truncate tw-text-gray-500">
+            <span className="tw-ml-2 tw-truncate text-text-neutral-500">
               @tomcook
             </span>
           </span>
           <span className="tw-pointer-events-none tw-absolute tw-inset-y-0 tw-right-0 tw-flex tw-items-center tw-pr-2">
             <svg
-              className="tw-h-5 tw-w-5 tw-text-gray-400"
+              className="tw-h-5 tw-w-5 text-text-neutral-400"
               viewBox="0 0 20 20"
               fill="currentColor"
               aria-hidden="true"
@@ -58,14 +58,14 @@ export default function AllowlistToolSelectMenu({
           {options.map((option) => (
             <li
               key={option.value}
-              className="tw-text-gray-900 tw-relative tw-cursor-default tw-select-none tw-py-2 tw-pl-3 tw-pr-9"
+              className="text-text-neutral-900 tw-relative tw-cursor-default tw-select-none tw-py-2 tw-pl-3 tw-pr-9"
               id="listbox-option-0"
               role="option"
               aria-selected="true"
             >
               <div className="tw-flex">
                 <span className="tw-font-normal tw-truncate">{option.title}</span>
-                <span className="tw-text-gray-500 tw-ml-2 tw-truncate">
+                <span className="text-text-neutral-500 tw-ml-2 tw-truncate">
                   {option.subTitle}
                 </span>
               </div>

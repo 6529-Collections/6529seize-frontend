@@ -51,10 +51,10 @@ export default function AllowlistToolBuilderWalletPools() {
   return (
     <AllowlistToolExpandableTableWrapper title="Wallet Pools">
       <div className="tw-w-full tw-overflow-hidden tw-h-0">
-        <div className="tw-border  tw-border-neutral-700/60 tw-border-solid tw-border-l-0 tw-border-r-0 tw-border-b-0 tw-mt-5 tw-w-full"></div>
+        <div className="tw-border tw-border-neutral-800 tw-border-solid tw-border-l-0 tw-border-r-0 tw-border-b-0  tw-w-full"></div>
 
         <AllowlistToolBuilderWalletPoolsAdd />
-        <div className="tw-bg-[#1E1E23]">
+        <div className="tw-bg-neutral-900">
           <div className="tw-px-4 sm:tw-px-6 lg:tw-px-8">
             <div className="tw-mt-8 tw-flow-root">
               <div className="-tw-mx-4 -tw-my-2 tw-overflow-x-auto sm:-tw-mx-6 lg:-tw-mx-8">
@@ -107,7 +107,7 @@ export default function AllowlistToolBuilderWalletPools() {
                         </th>
                       </tr>
                     </thead>
-                    <tbody className="tw-divide-y tw-divide-neutral-700/40">
+                    <tbody className="tw-divide-y tw-divide-neutral-800">
                       {walletPools.map((walletPool) => (
                         <AllowlistToolBuilderWalletPoolsPool
                           walletPool={walletPool}

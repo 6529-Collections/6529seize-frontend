@@ -38,7 +38,7 @@ export default function AllowlistToolModelWrapper({ children, showModal, onClose
                     <button
                       onClick={() => onClose()}
                       type="button"
-                      className="tw-p-2.5 tw-flex tw-items-center tw-justify-center tw-rounded-lg tw-bg-neutral-900 tw-border-0 tw-text-neutral-400 hover:tw-text-neutral-50 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-neutral-600 tw-transition tw-duration-300 tw-ease-out"
+                      className="tw-p-2.5 tw-flex tw-items-center tw-justify-center tw-rounded-full tw-bg-neutral-900 tw-border-0 tw-text-neutral-400 hover:tw-text-neutral-50 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-neutral-600 tw-transition tw-duration-300 tw-ease-out"
                     >
                       <span className="sr-only tw-text-sm">Close</span>
                       <svg
