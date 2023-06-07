@@ -139,31 +139,34 @@ export default function AllowlistToolAllowlistId({
     <>
       <Header />
       <Breadcrumb breadcrumbs={breadcrumbs} />
-      <div className={`tw-min-h-screen tw-bg-neutral-950 ${poppins.className}`}>
-        <div className="container tw-mx-auto tw-pt-6 tw-pb-12">
-          <h1 className="tw-uppercase tw-float-none tw-mb-0">
-            {allowlist.name}
-          </h1>
+      <AllowlistToolBuilderContext.Provider
+        value={{
+          operations,
+          setOperations,
+          operationDescriptions,
+          transferPools,
+          setTransferPools,
+          tokenPools,
+          setTokenPools,
+          customTokenPools,
+          setCustomTokenPools,
+          walletPools,
+          setWalletPools,
+          phases,
+          setPhases,
+        }}
+      >
+        <div
+          id="allowlist-tool"
+          className={`tw-min-h-screen tw-bg-neutral-950 ${poppins.className}`}
+        >
+          <div className="container tw-mx-auto tw-pt-6 tw-pb-12">
+            <h1 className="tw-uppercase tw-float-none tw-mb-0">
+              {allowlist.name}
+            </h1>
 
-          <div id="allowlist-tool" className="tw-pt-6">
-            <AllowlistToolBuilderContext.Provider
-              value={{
-                operations,
-                setOperations,
-                operationDescriptions,
-                transferPools,
-                setTransferPools,
-                tokenPools,
-                setTokenPools,
-                customTokenPools,
-                setCustomTokenPools,
-                walletPools,
-                setWalletPools,
-                phases,
-                setPhases,
-              }}
-            >
-              <AllowlistToolBuilderOperations>
+            <div className="tw-pt-6">
+              <div className="tw-w-full tw-inline-flex">
                 <div className="tw-space-y-6">
                   <AllowlistToolBuilderTransferPools />
                   <AllowlistToolBuilderTokenPools />
@@ -171,11 +174,12 @@ export default function AllowlistToolAllowlistId({
                   <AllowlistToolBuilderWalletPools />
                   <AllowlistToolBuilderPhases />
                 </div>
-              </AllowlistToolBuilderOperations>
-            </AllowlistToolBuilderContext.Provider>
+                <AllowlistToolBuilderOperations />
+              </div>
+            </div>
           </div>
         </div>
-      </div>
+      </AllowlistToolBuilderContext.Provider>
     </>
   );
 }
