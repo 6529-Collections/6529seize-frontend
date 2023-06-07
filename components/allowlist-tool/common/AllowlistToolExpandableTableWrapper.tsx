@@ -7,7 +7,10 @@ interface AllowlistToolExpandableTableWrapperProps {
   title: string;
 }
 
-export default function AllowlistToolExpandableTableWrapper({ children, title }: AllowlistToolExpandableTableWrapperProps) {
+export default function AllowlistToolExpandableTableWrapper({
+  children,
+  title,
+}: AllowlistToolExpandableTableWrapperProps) {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [tableScope, animateTable] = useAnimate();
   const [iconScope, animateIcon] = useAnimate();
@@ -23,10 +26,17 @@ export default function AllowlistToolExpandableTableWrapper({ children, title }:
   return (
     <>
       <div>
-        <div className="tw-cursor-pointer tw-bg-neutral-900 tw-border tw-border-solid tw-border-white/5 tw-rounded-xl tw-pt-5 tw-transition tw-duration-300 tw-ease-out">
+        <div className="tw-bg-neutral-900 tw-border tw-border-solid tw-border-white/5 tw-rounded-xl  tw-transition tw-duration-300 tw-ease-out">
           <div
-            onClick={() => setIsOpen(!isOpen)}
-            className="tw-px-6 tw-flex tw-items-center tw-gap-x-4 tw-pb-5"
+            onClick={(e) => {
+              e.stopPropagation();
+              setIsOpen(!isOpen);
+            }}
+            className={`tw-cursor-pointer tw-px-6 tw-flex tw-items-center tw-gap-x-4 tw-py-5  ${
+              isOpen
+                ? "tw-rounded-t-xl"
+                : "tw-rounded-xl hover:tw-bg-neutral-800/80"
+            }`}
           >
             <div className="tw-h-6 tw-w-6 tw-flex tw-items-center tw-justify-center tw-bg-neutral-700 tw-rounded-md">
               <svg
@@ -55,6 +65,5 @@ export default function AllowlistToolExpandableTableWrapper({ children, title }:
         </div>
       </div>
     </>
-  )
-
+  );
 }

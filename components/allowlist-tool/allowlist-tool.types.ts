@@ -30,7 +30,7 @@ export interface AllowlistTokenPool {
   readonly id: string;
   readonly allowlistId: string;
   readonly tokenPoolId: string;
-  readonly activeRunId: string;
+  readonly activeRunId?: string;
   readonly transferPoolId: string;
   readonly tokenIds?: string;
   readonly name: string;
@@ -107,11 +107,8 @@ export enum AllowlistOperationCode {
   CREATE_WALLET_POOL = "CREATE_WALLET_POOL",
   ADD_PHASE = "ADD_PHASE",
   ADD_COMPONENT = "ADD_COMPONENT",
-  
   ADD_ITEM = "ADD_ITEM",
   COMPONENT_ADD_SPOTS_TO_ALL_ITEM_WALLETS = "COMPONENT_ADD_SPOTS_TO_ALL_ITEM_WALLETS",
-
-
   ITEM_EXCLUE_TOKEN_IDS = "ITEM_EXCLUE_TOKEN_IDS",
   ITEM_SELECT_TOKEN_IDS = "ITEM_SELECT_TOKEN_IDS",
   ITEM_REMOVE_FIRST_N_TOKENS = "ITEM_REMOVE_FIRST_N_TOKENS",

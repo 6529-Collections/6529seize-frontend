@@ -43,6 +43,9 @@ export default function AllowlistToolModelWrapper({
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
+          onClick={(e) => {
+            e.stopPropagation();
+          }}
         >
           <div className="tw-relative tw-z-10" role="dialog">
             <div className="tw-fixed tw-inset-0 tw-bg-gray-500 tw-bg-opacity-75"></div>

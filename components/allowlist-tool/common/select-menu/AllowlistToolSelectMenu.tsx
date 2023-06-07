@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useAnimate } from "framer-motion";
 import AllowlistToolSelectMenuList from "./AllowlistToolSelectMenuList";
 import { useClickAway, useKeyPressEvent } from "react-use";
 
@@ -23,7 +23,16 @@ export default function AllowlistToolSelectMenu({
   options: AllowlistToolSelectMenuOption[];
 }) {
   const [isOpen, setIsOpen] = useState(false);
+  const [iconScope, animateIcon] = useAnimate();
   const toggleOpen = () => setIsOpen(!isOpen);
+  useEffect(() => {
+    if (isOpen) {
+      animateIcon(iconScope.current, { rotate: 0 });
+    } else {
+      animateIcon(iconScope.current, { rotate: -90 });
+    }
+  });
+
   const onSelect = (option: AllowlistToolSelectMenuOption) => {
     setSelectedOption(option);
     setIsOpen(false);
@@ -35,13 +44,10 @@ export default function AllowlistToolSelectMenu({
 
   const [title, setTitle] = useState("");
 
-  useEffect(() => {
-    if (selectedOption) {
-      setTitle(selectedOption.title);
-    } else {
-      setTitle(placeholder);
-    }
-  }, [selectedOption, placeholder]);
+  useEffect(
+    () => setTitle(selectedOption?.title ?? placeholder),
+    [selectedOption, placeholder]
+  );
 
   return (
     <div ref={listRef}>
@@ -66,6 +72,7 @@ export default function AllowlistToolSelectMenu({
           <span className="tw-block tw-truncate">{title}</span>
           <span className="tw-pointer-events-none tw-absolute tw-inset-y-0 tw-right-0 tw-flex tw-items-center tw-pr-3.5">
             <svg
+              ref={iconScope}
               className="tw-h-5 tw-w-5 tw-text-zinc-400"
               viewBox="0 0 24 24"
               fill="none"

@@ -62,7 +62,7 @@ export default function AllowlistToolBuilderTokenPoolsAdd() {
       transferPoolId: selectedTransferPool?.value,
     };
 
-    if (formValues.tokenIds) {
+    if (!!formValues.tokenIds.length) {
       params.tokenIds = formValues.tokenIds;
     }
 
@@ -93,13 +93,13 @@ export default function AllowlistToolBuilderTokenPoolsAdd() {
           });
           setSelectedTransferPool(null);
         }
-        setIsLoading(false);
-      });
+      })
+      .finally(() => setIsLoading(false));
   };
 
   return (
     <form onSubmit={handleSubmit}>
-      <div className="tw-px-6 tw-flex tw-gap-x-4 tw-pt-5 tw-items-end">
+      <div className="tw-px-6 tw-flex tw-gap-x-4 tw-pt-5 tw-items-end ">
         <div className="tw-flex-1">
           <label className="tw-block tw-text-sm tw-font-normal tw-leading-5 tw-text-neutral-100">
             Pool name
@@ -142,7 +142,7 @@ export default function AllowlistToolBuilderTokenPoolsAdd() {
             options={transferPools.map((transferPool) => ({
               title: transferPool.name,
               subTitle: null,
-              value: transferPool.id,
+              value: transferPool.transferPoolId,
             }))}
           />
         </div>
@@ -156,7 +156,6 @@ export default function AllowlistToolBuilderTokenPoolsAdd() {
               name="tokenIds"
               value={formValues.tokenIds}
               onChange={handleChange}
-              required
               autoComplete="off"
               className="tw-block tw-w-full tw-rounded-lg tw-border-0 tw-py-3 tw-px-3 tw-bg-neutral-700/40 tw-text-white tw-font-light tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-neutral-700/40  placeholder:tw-text-neutral-500 focus:tw-outline-none focus:tw-bg-transparent focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 tw-text-base sm:tw-leading-6 tw-transition tw-duration-300 tw-ease-out"
             />

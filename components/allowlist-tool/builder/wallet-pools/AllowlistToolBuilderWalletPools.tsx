@@ -94,7 +94,7 @@ export default function AllowlistToolBuilderWalletPools() {
                             </button>
                             <AllowlistToolBuilderAddOperation
                               validOperations={validOperations}
-                              title={`Add operation for wallet pools`}
+                              title={`Wallet pools`}
                               targetItemId={null}
                               defaultOperation={defaultOperation}
                             />

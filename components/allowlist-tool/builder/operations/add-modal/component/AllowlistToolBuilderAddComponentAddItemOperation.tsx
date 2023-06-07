@@ -27,7 +27,7 @@ export default function AllowlistToolBuilderComponentAddItemOperation({
     (tokenPool) => ({
       title: tokenPool.name,
       subTitle: "Token pool",
-      value: tokenPool.id,
+      value: tokenPool.tokenPoolId,
     })
   );
 
@@ -35,7 +35,7 @@ export default function AllowlistToolBuilderComponentAddItemOperation({
     customTokenPools.map((customTokenPool) => ({
       title: customTokenPool.name,
       subTitle: "Custom token pool",
-      value: customTokenPool.id,
+      value: customTokenPool.customTokenPoolId,
     }));
 
   const options: AllowlistToolSelectMenuOption[] = [
@@ -61,7 +61,6 @@ export default function AllowlistToolBuilderComponentAddItemOperation({
   };
 
   const [isLoading, setIsLoading] = useState<boolean>(false);
-
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (!selectedTokenPool) {
@@ -69,7 +68,6 @@ export default function AllowlistToolBuilderComponentAddItemOperation({
       return;
     }
     setIsLoading(true);
-
     const url = `${process.env.ALLOWLIST_API_ENDPOINT}/allowlists/${router.query.id}/operations`;
 
     const params = {
@@ -79,7 +77,7 @@ export default function AllowlistToolBuilderComponentAddItemOperation({
       componentId: componentId,
       poolId: selectedTokenPool.value,
       poolType: tokenPools.find(
-        (tokenPool) => tokenPool.id === selectedTokenPool.value
+        (tokenPool) => tokenPool.tokenPoolId === selectedTokenPool.value
       )
         ? Pool.TOKEN_POOL
         : Pool.CUSTOM_TOKEN_POOL,
@@ -111,8 +109,8 @@ export default function AllowlistToolBuilderComponentAddItemOperation({
           setSelectedTokenPool(null);
           onClose();
         }
-        setIsLoading(false);
-      });
+      })
+      .finally(() => setIsLoading(false));
   };
 
   return (

@@ -104,7 +104,7 @@ export default function AllowlistToolBuilderTransferPools() {
                             </button>
                             <AllowlistToolBuilderAddOperation
                               validOperations={validOperations}
-                              title={`Add operation for transfer pools`}
+                              title={`Transfer pools`}
                               targetItemId={null}
                               defaultOperation={defaultOperation}
                             />
