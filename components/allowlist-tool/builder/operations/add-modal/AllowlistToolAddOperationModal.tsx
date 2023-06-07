@@ -78,15 +78,17 @@ export default function AllowlistToolAddOperationModal({
 
   return (
     <div className="tw-mt-5">
-      <AllowlistToolSelectMenu
-        label="Select operation"
-        placeholder="Select"
-        options={operations}
-        selectedOption={selectedOperation}
-        setSelectedOption={setSelectedOperation}
-      />
+      <div className="tw-px-4 sm:tw-px-6">
+        <AllowlistToolSelectMenu
+          label="Select operation"
+          placeholder="Select"
+          options={operations}
+          selectedOption={selectedOperation}
+          setSelectedOption={setSelectedOperation}
+        />
+      </div>
       {selectedOperationCode && (
-        <>
+        <div className="tw-mt-5 tw-border-t tw-border-solid tw-border-l-0 tw-border-r-0 tw-border-b-0 tw-border-neutral-800">
           {(() => {
             switch (selectedOperationCode) {
               case AllowlistOperationCode.CREATE_ALLOWLIST:
@@ -205,7 +207,7 @@ export default function AllowlistToolAddOperationModal({
                 return null;
             }
           })()}
-        </>
+        </div>
       )}
     </div>
   );

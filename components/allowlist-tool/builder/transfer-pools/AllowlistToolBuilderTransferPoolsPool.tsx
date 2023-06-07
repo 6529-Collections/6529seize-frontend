@@ -24,12 +24,12 @@ export default function AllowlistToolBuilderTransferPoolsPool({
         {transferPool.blockNo}
       </td>
       <td className="tw-w-40 tw-py-4 tw-pl-6 tw-pr-4 tw-text-sm tw-font-normal sm:tw-pr-6">
-        <div className="tw-flex tw-items-center tw-justify-end tw-gap-x-3">
+        <div className="tw-flex tw-items-center tw-justify-end tw-gap-x-2.5">
           <button
             type="button"
-            className="tw-group tw-rounded-full tw-bg-transparent tw-p-2 tw-text-white tw-border-none hover:tw-bg-neutral-700 tw-transition-all tw-duration-300 tw-ease-out"
+            className="tw-group tw-flex tw-items-center tw-justify-center tw-rounded-full tw-bg-transparent tw-h-8 tw-w-8 tw-text-white tw-border-none hover:tw-bg-neutral-700 tw-transition-all tw-duration-300 tw-ease-out"
           >
-            <div className="tw-h-[1.125rem] tw-w-[1.125rem]">
+            <div className="tw-h-4 tw-w-4 tw-flex tw-items-center tw-justify-center">
               <AllowlistToolJsonIcon />
             </div>
           </button>
@@ -41,9 +41,9 @@ export default function AllowlistToolBuilderTransferPoolsPool({
           />
           <button
             type="button"
-            className="tw-group tw-rounded-full tw-bg-transparent tw-p-2 tw-text-white tw-border-none hover:tw-bg-neutral-700 tw-transition-all tw-duration-300 tw-ease-out"
+            className="tw-group tw-flex tw-items-center tw-justify-center tw-rounded-full tw-bg-transparent tw-w-8 tw-h-8 tw-text-white tw-border-none hover:tw-bg-neutral-700 tw-transition-all tw-duration-300 tw-ease-out"
           >
-            <div className="tw-h-5 tw-w-5">
+            <div className="tw-h-[1.125rem] tw-w-[1.125rem] tw-flex tw-items-center tw-justify-center">
               <AllowlistToolHistoryIcon />
             </div>
           </button>

@@ -12,7 +12,7 @@ export default function AllowlistToolSelectMenuList({
 }) {
   return (
     <ul
-      className="tw-absolute tw-z-10 tw-pl-1.5 tw-pr-1.5 tw-list-none tw-mt-1 tw-max-h-60 tw-w-full tw-overflow-auto tw-rounded-md tw-bg-neutral-800 tw-py-2 tw-text-base tw-shadow-lg tw-ring-1 tw-ring-black tw-ring-opacity-5 focus:tw-outline-none sm:tw-text-sm"
+      className="tw-absolute tw-z-10 tw-pl-1.5 tw-pr-1.5 tw-list-none tw-mt-1 tw-max-h-60 tw-w-full tw-overflow-auto tw-rounded-lg tw-bg-[#282828] tw-py-2 tw-text-base tw-shadow-xl  tw-ring-1 tw-ring-inset tw-ring-white/10 focus:tw-outline-none sm:tw-text-sm"
       role="listbox"
       aria-labelledby="listbox-label"
       aria-activedescendant="listbox-option-3"
@@ -27,7 +27,7 @@ export default function AllowlistToolSelectMenuList({
           />
         ))}
       {options.length === 0 && (
-        <li className="tw-p-2 tw-text-center tw-text-neutral-300">
+        <li className="tw-p-2 tw-text-neutral-300">
           No options found
         </li>
       )}

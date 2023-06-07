@@ -22,23 +22,23 @@ export default function AllowlistToolSelectMenuListItem({
         e.stopPropagation();
         setSelectedOption(option);
       }}
-      className="tw-text-white tw-relative tw-cursor-pointer tw-select-none tw-py-2.5 tw-pl-3 tw-pr-9"
+      className="tw-group tw-text-white tw-rounded-lg tw-relative tw-cursor-pointer tw-select-none tw-py-2.5 tw-pl-3 tw-pr-9 hover:tw-bg-neutral-700 tw-transition tw-duration-300 tw-ease-out"
       role="option"
       aria-selected="true"
     >
-      <div className="tw-w-full tw-inline-flex tw-justify-between tw-pr-4">
+      <div className="tw-w-full tw-flex tw-justify-between tw-items-center tw-pr-4">
         <span className="tw-font-normal tw-block tw-truncate">
           {option.title}
         </span>
         {option.subTitle && (
-          <span className="tw-font-light tw-text-gray-500 tw-text-xs tw-block tw-truncate">
+          <span className="tw-font-light tw-text-neutral-500 tw-text-xs tw-block tw-truncate group-hover:tw-text-neutral-400 tw-transition tw-duration-300 tw-ease-out">
             {option.subTitle}
           </span>
         )}
       </div>
 
       {isSelected && (
-        <span className="tw-text-primary-400 tw-absolute tw-inset-y-0 tw-right-0 tw-flex tw-items-center tw-pr-4">
+        <span className="tw-text-white tw-absolute tw-inset-y-0 tw-right-0 tw-flex tw-items-center tw-pr-4">
           <svg
             className="tw-h-5 tw-w-5"
             viewBox="0 0 20 20"

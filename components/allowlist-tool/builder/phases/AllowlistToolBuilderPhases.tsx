@@ -87,12 +87,12 @@ export default function AllowlistToolBuilderPhases() {
                           scope="col"
                           className="tw-py-1.5 tw-pl-3 tw-pr-4 sm:tw-pr-6"
                         >
-                          <div className="tw-flex tw-items-center tw-justify-end tw-gap-x-3">
+                          <div className="tw-flex tw-items-center tw-justify-end tw-gap-x-2.5">
                             <button
                               type="button"
-                              className="tw-group tw-rounded-full tw-bg-transparent tw-p-2 tw-text-white tw-border-none hover:tw-bg-neutral-700 tw-transition-all tw-duration-300 tw-ease-out"
+                              className="tw-group tw-flex tw-items-center tw-justify-center tw-rounded-full tw-bg-transparent tw-h-8 tw-w-8 tw-text-white tw-border-none hover:tw-bg-neutral-700 tw-transition-all tw-duration-300 tw-ease-out"
                             >
-                              <div className="tw-h-[1.125rem] tw-w-[1.125rem] tw-flex tw-items-center tw-justify-center">
+                              <div className="tw-h-4 tw-w-4 tw-flex tw-items-center tw-justify-center">
                                 <AllowlistToolJsonIcon />
                               </div>
                             </button>
@@ -106,7 +106,7 @@ export default function AllowlistToolBuilderPhases() {
                               type="button"
                               className="tw-group tw-rounded-full tw-bg-transparent tw-p-2 tw-text-white tw-border-none hover:tw-bg-neutral-700 tw-transition-all tw-duration-300 tw-ease-out"
                             >
-                              <div className="tw-h-5 tw-w-5 tw-flex tw-items-center tw-justify-center">
+                              <div className="tw-h-[1.125rem] tw-w-[1.125rem] tw-flex tw-items-center tw-justify-center">
                                 <AllowlistToolHistoryIcon />
                               </div>
                             </button>

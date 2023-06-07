@@ -1,7 +1,9 @@
 import { useRouter } from "next/router";
 import { useContext, useState } from "react";
 import { AllowlistToolBuilderContext } from "../../../../../../pages/allowlist-tool/[id]";
-import AllowlistToolSelectMenu, { AllowlistToolSelectMenuOption } from "../../../../common/select-menu/AllowlistToolSelectMenu";
+import AllowlistToolSelectMenu, {
+  AllowlistToolSelectMenuOption,
+} from "../../../../common/select-menu/AllowlistToolSelectMenu";
 import { getRandomObjectId } from "../../../../../../helpers/AllowlistToolHelpers";
 import {
   AllowlistOperation,
@@ -97,13 +99,13 @@ export default function AllowlistToolBuilderCreateTokenPoolOperation({
       });
   };
   return (
-    <form onSubmit={handleSubmit}>
-      <div className="tw-px-6 tw-flex tw-gap-x-4 tw-pt-5 tw-items-end">
-        <div className="tw-flex-1">
+    <form onSubmit={handleSubmit} className="tw-px-4 sm:tw-px-6">
+      <div className="tw-grid tw-grid-cols-1 tw-gap-4 tw-pt-5">
+        <div className="tw-col-span-1">
           <label className="tw-block tw-text-sm tw-font-normal tw-leading-5 tw-text-neutral-100">
             Pool name
           </label>
-          <div className="tw-mt-2">
+          <div className="tw-mt-1.5">
             <input
               type="text"
               name="name"
@@ -111,15 +113,15 @@ export default function AllowlistToolBuilderCreateTokenPoolOperation({
               onChange={handleChange}
               required
               autoComplete="off"
-              className="tw-block tw-w-full tw-rounded-lg tw-border-0 tw-py-3 tw-px-3 tw-bg-neutral-800 tw-text-white tw-font-light tw-caret-primary tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-neutral-800 placeholder:tw-text-neutral-500 focus:tw-outline-none focus:tw-bg-transparent focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-focus tw-text-base sm:tw-leading-6 tw-transition tw-duration-300 tw-ease-out"
+              className="tw-block tw-w-full tw-rounded-lg tw-border-0 tw-py-3 tw-px-3 tw-bg-neutral-700/40 tw-text-white tw-font-light tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-neutral-700/40 placeholder:tw-text-neutral-500 focus:tw-outline-none focus:tw-bg-transparent focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 tw-text-base sm:tw-leading-6 tw-transition tw-duration-300 tw-ease-out"
             />
           </div>
         </div>
-        <div className="tw-flex-1">
+        <div className="tw-col-span-1">
           <label className="tw-block tw-text-sm tw-font-normal tw-leading-5 tw-text-neutral-100">
             Description
           </label>
-          <div className="tw-mt-2">
+          <div className="tw-mt-1.5">
             <input
               type="text"
               name="description"
@@ -127,12 +129,12 @@ export default function AllowlistToolBuilderCreateTokenPoolOperation({
               onChange={handleChange}
               required
               autoComplete="off"
-              className="tw-block tw-w-full tw-rounded-lg tw-border-0 tw-py-3 tw-px-3 tw-bg-neutral-800 tw-text-white tw-font-light tw-caret-primary tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-neutral-800 placeholder:tw-text-neutral-500 focus:tw-outline-none focus:tw-bg-transparent focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-focus tw-text-base sm:tw-leading-6 tw-transition tw-duration-300 tw-ease-out"
+              className="tw-block tw-w-full tw-rounded-lg tw-border-0 tw-py-3 tw-px-3 tw-bg-neutral-700/40 tw-text-white tw-font-light tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-neutral-700/40 placeholder:tw-text-neutral-500 focus:tw-outline-none focus:tw-bg-transparent focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 tw-text-base sm:tw-leading-6 tw-transition tw-duration-300 tw-ease-out"
             />
           </div>
         </div>
 
-        <div className="tw-flex-1">
+        <div className="tw-col-span-1">
           <AllowlistToolSelectMenu
             label="Transfer pool"
             placeholder="Select"
@@ -145,11 +147,11 @@ export default function AllowlistToolBuilderCreateTokenPoolOperation({
             }))}
           />
         </div>
-        <div className="tw-flex-1">
+        <div className="tw-col-span-1">
           <label className="tw-block tw-text-sm tw-font-normal tw-leading-5 tw-text-neutral-100">
             Token ID(s)
           </label>
-          <div className="tw-mt-2">
+          <div className="tw-mt-1.5">
             <input
               type="text"
               name="tokenIds"
@@ -157,18 +159,18 @@ export default function AllowlistToolBuilderCreateTokenPoolOperation({
               onChange={handleChange}
               required
               autoComplete="off"
-              className="tw-block tw-w-full tw-rounded-lg tw-border-0 tw-py-3 tw-px-3 tw-bg-neutral-800 tw-text-white tw-font-light tw-caret-primary tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-neutral-800  placeholder:tw-text-neutral-500 focus:tw-outline-none focus:tw-bg-transparent focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-focus tw-text-base sm:tw-leading-6 tw-transition tw-duration-300 tw-ease-out"
+              className="tw-block tw-w-full tw-rounded-lg tw-border-0 tw-py-3 tw-px-3 tw-bg-neutral-700/40 tw-text-white tw-font-light tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-neutral-700/40  placeholder:tw-text-neutral-500 focus:tw-outline-none focus:tw-bg-transparent focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 tw-text-base sm:tw-leading-6 tw-transition tw-duration-300 tw-ease-out"
             />
           </div>
         </div>
-        <div>
-          <button
-            type="submit"
-            className="tw-bg-primary-500 tw-px-4 tw-py-3 tw-text-sm tw-font-medium tw-text-white tw-w-full tw-border tw-border-solid tw-border-primary-500 tw-rounded-lg hover:tw-bg-primary-600 hover:tw-border-primary-hover tw-transition tw-duration-300 tw-ease-out"
-          >
-            Add operation
-          </button>
-        </div>
+      </div>
+      <div className="tw-mt-6 tw-flex tw-justify-end">
+        <button
+          type="submit"
+          className="tw-bg-primary-500 tw-px-4 tw-py-3 tw-text-sm tw-font-medium tw-text-white tw-w-full sm:tw-w-auto tw-border tw-border-solid tw-border-primary-500 tw-rounded-lg hover:tw-bg-primary-600 hover:tw-border-primary-600 tw-transition tw-duration-300 tw-ease-out"
+        >
+          Add operation
+        </button>
       </div>
     </form>
   );

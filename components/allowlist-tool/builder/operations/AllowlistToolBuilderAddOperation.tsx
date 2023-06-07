@@ -27,7 +27,7 @@ export default function AllowlistToolBuilderAddOperation({
           setShowModal(true);
         }}
         type="button"
-        className="tw-group tw-rounded-full tw-bg-transparent tw-p-2 tw-text-white tw-border-none hover:tw-bg-neutral-700 tw-transition-all tw-duration-300 tw-ease-out"
+        className="tw-group tw-flex tw-justify-center tw-items-center tw-rounded-full tw-bg-transparent tw-h-8 tw-w-8 tw-text-white tw-border-none hover:tw-bg-neutral-700 tw-transition-all tw-duration-300 tw-ease-out"
       >
         <div className="tw-h-5 tw-w-5 tw-flex tw-items-center tw-justify-center">
           <AllowlistToolPlusIcon />

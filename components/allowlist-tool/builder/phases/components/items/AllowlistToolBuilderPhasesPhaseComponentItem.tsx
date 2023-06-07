@@ -53,9 +53,9 @@ export default function AllowlistToolBuilderPhasesPhaseComponentItem({
           <div className="tw-flex tw-items-center tw-justify-end tw-gap-x-3">
             <button
               type="button"
-              className="tw-group tw-rounded-full tw-bg-transparent tw-p-2 tw-text-white tw-border-none hover:tw-bg-neutral-700 tw-transition-all tw-duration-300 tw-ease-out"
+              className="tw-group tw-flex tw-justify-center tw-items-center tw-rounded-full tw-bg-transparent tw-h-8 tw-w-8 tw-text-white tw-border-none hover:tw-bg-neutral-700 tw-transition-all tw-duration-300 tw-ease-out"
             >
-              <div className="tw-h-[1.125rem] tw-w-[1.125rem]">
+              <div className="tw-h-4 tw-w-4 tw-flex tw-justify-center tw-items-center">
                 <AllowlistToolJsonIcon />
               </div>
             </button>
@@ -69,9 +69,9 @@ export default function AllowlistToolBuilderPhasesPhaseComponentItem({
 
             <button
               type="button"
-              className="tw-group tw-rounded-full tw-bg-transparent tw-p-2 tw-text-white tw-border-none hover:tw-bg-neutral-700 tw-transition-all tw-duration-300 tw-ease-out"
+              className="tw-group tw-flex tw-justify-center tw-items-center tw-rounded-full tw-bg-transparent tw-h-8 tw-w-8 tw-text-white tw-border-none hover:tw-bg-neutral-700 tw-transition-all tw-duration-300 tw-ease-out"
             >
-              <div className="tw-h-5 tw-w-5">
+              <div className="tw-h-[1.125rem] tw-w-[1.125rem] tw-flex tw-justify-center tw-items-center">
                 <AllowlistToolHistoryIcon />
               </div>
             </button>
