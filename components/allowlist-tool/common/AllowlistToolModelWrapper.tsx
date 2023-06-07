@@ -35,7 +35,7 @@ export default function AllowlistToolModelWrapper({
               <div className="tw-flex tw-min-h-full tw-items-end tw-justify-center tw-p-4 tw-text-center sm:tw-items-center sm:tw-p-0">
                 <div
                   ref={modalRef}
-                  className="tw-relative tw-w-full tw-transform  tw-rounded-xl tw-bg-neutral-900 tw-px-4 tw-pb-4 tw-pt-5 tw-text-left tw-shadow-xl tw-transition-all sm:tw-my-8 sm:tw-w-full sm:tw-max-w-lg sm:tw-p-6"
+                  className="tw-relative tw-w-full tw-transform tw-rounded-xl tw-bg-neutral-900 tw-px-4 tw-pb-4 tw-pt-5 tw-text-left tw-shadow-xl tw-transition-all sm:tw-my-8 sm:tw-w-full sm:tw-max-w-lg sm:tw-p-6"
                 >
                   <div className="tw-flex tw-justify-between tw-items-center">
                     <p className="tw-text-lg tw-text-white tw-font-medium tw-mb-0">
@@ -47,7 +47,7 @@ export default function AllowlistToolModelWrapper({
                         onClose();
                       }}
                       type="button"
-                      className="tw-p-2.5 tw-flex tw-items-center tw-justify-center tw-rounded-full tw-bg-neutral-900 tw-border-0 tw-text-neutral-400 hover:tw-text-neutral-50 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-neutral-600 tw-transition tw-duration-300 tw-ease-out"
+                      className="tw-p-2.5 tw-flex tw-items-center tw-justify-center tw-rounded-full tw-bg-neutral-900 tw-border-0 tw-text-neutral-400 hover:tw-text-neutral-50 focus:tw-outline-none tw-transition tw-duration-300 tw-ease-out"
                     >
                       <span className="sr-only tw-text-sm">Close</span>
                       <svg

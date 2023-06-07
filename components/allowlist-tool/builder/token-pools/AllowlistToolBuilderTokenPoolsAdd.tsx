@@ -96,7 +96,6 @@ export default function AllowlistToolBuilderTokenPoolsAdd() {
 
   return (
     <form onSubmit={handleSubmit}>
-      <div className="tw-border tw-border-neutral-700/60 tw-border-solid tw-border-l-0 tw-border-r-0 tw-border-b-0 tw-w-full"></div>
       <div className="tw-px-6 tw-flex tw-gap-x-4 tw-pt-5 tw-items-end">
         <div className="tw-flex-1">
           <label className="tw-block tw-text-sm tw-font-normal tw-leading-5 tw-text-neutral-100">
