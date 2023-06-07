@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useContext, useState } from "react";
 import { useRouter } from "next/router";
 import { AllowlistDescription } from "./allowlist-tool.types";
+import { AllowlistToolContext } from "../../pages/allowlist-tool";
 
 export default function AllowlistToolAllowlistsTableItem({
   allowlist,
@@ -9,12 +10,11 @@ export default function AllowlistToolAllowlistsTableItem({
   allowlist: AllowlistDescription;
   onAllowlistRemoved: (id: string) => void;
 }) {
+  const { setToasts } = useContext(AllowlistToolContext);
   const router = useRouter();
-  const [errors, setErrors] = useState<string[]>([]);
   const [isLoading, setLoading] = useState<boolean>(false);
   const deleteAllowlist = () => {
     setLoading(true);
-    setErrors([]);
     const url = `${process.env.ALLOWLIST_API_ENDPOINT}/allowlists/${allowlist.id}`;
     fetch(url, {
       method: "DELETE",
@@ -28,14 +28,26 @@ export default function AllowlistToolAllowlistsTableItem({
           .json()
           .then((data) => {
             if ("error" in data) {
-              typeof data.message === "string"
-                ? setErrors([data.message])
-                : setErrors(data.message);
+              setToasts({
+                messages:
+                  typeof data.message === "string"
+                    ? [data.message]
+                    : data.message,
+                type: "error",
+              });
             } else {
-              setErrors(["Something went wrong. Please try again."]);
+              setToasts({
+                messages: ["Something went wrong. Please try again."],
+                type: "error",
+              });
             }
           })
-          .catch(() => setErrors(["Something went wrong. Please try again."]));
+          .catch(() =>
+            setToasts({
+              messages: ["Something went wrong. Please try again."],
+              type: "error",
+            })
+          );
       })
       .finally(() => setLoading(false));
   };

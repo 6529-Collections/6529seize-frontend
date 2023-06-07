@@ -13,7 +13,7 @@ import { getRandomObjectId } from "../../../../helpers/AllowlistToolHelpers";
 
 export default function AllowlistToolBuilderTokenPoolsAdd() {
   const router = useRouter();
-  const { transferPools, operations, setOperations } = useContext(
+  const { transferPools, operations, setOperations, setToasts } = useContext(
     AllowlistToolBuilderContext
   );
   const [formValues, setFormValues] = useState<{
@@ -37,15 +37,16 @@ export default function AllowlistToolBuilderTokenPoolsAdd() {
   };
 
   const [isLoading, setIsLoading] = useState(false);
-  const [errors, setErrors] = useState<string[]>([]);
-
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (!selectedTransferPool) {
+      setToasts({
+        messages: ["Please select a transfer pool"],
+        type: "error",
+      });
       return;
     }
     setIsLoading(true);
-    setErrors([]);
     const url = `${process.env.ALLOWLIST_API_ENDPOINT}/allowlists/${router.query.id}/operations`;
 
     const params: {
@@ -78,9 +79,11 @@ export default function AllowlistToolBuilderTokenPoolsAdd() {
       .then((response) => response.json())
       .then((data: AllowlistToolResponse<AllowlistOperation>) => {
         if ("error" in data) {
-          typeof data.message === "string"
-            ? setErrors([data.message])
-            : setErrors(data.message);
+          setToasts({
+            messages:
+              typeof data.message === "string" ? [data.message] : data.message,
+            type: "error",
+          });
         } else {
           setOperations([...operations, data]);
           setFormValues({

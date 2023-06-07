@@ -20,7 +20,9 @@ export default function AllowlistToolBuilderCreateCustomTokenPoolOperation({
   onClose: () => void;
 }) {
   const router = useRouter();
-  const { operations, setOperations } = useContext(AllowlistToolBuilderContext);
+  const { operations, setOperations, setToasts } = useContext(
+    AllowlistToolBuilderContext
+  );
   const [formValues, setFormValues] = useState<{
     name: string;
     description: string;
@@ -82,14 +84,11 @@ export default function AllowlistToolBuilderCreateCustomTokenPoolOperation({
   };
 
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [errors, setErrors] = useState<string[]>([]);
-
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setIsLoading(true);
-    setErrors([]);
     if (tokens.length === 0) {
-      setErrors(["No tokens provided"]);
+      setToasts({ messages: ["No tokens provided"], type: "error" });
       setIsLoading(false);
       return;
     }
@@ -114,9 +113,11 @@ export default function AllowlistToolBuilderCreateCustomTokenPoolOperation({
       .then((response) => response.json())
       .then((data: AllowlistToolResponse<AllowlistOperation>) => {
         if ("error" in data) {
-          typeof data.message === "string"
-            ? setErrors([data.message])
-            : setErrors(data.message);
+          setToasts({
+            messages:
+              typeof data.message === "string" ? [data.message] : data.message,
+            type: "error",
+          });
         } else {
           setOperations([...operations, data]);
           setFormValues({

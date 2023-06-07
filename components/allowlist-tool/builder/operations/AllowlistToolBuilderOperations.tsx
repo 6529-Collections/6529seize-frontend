@@ -11,14 +11,14 @@ import AllowlistToolBuilderOperationsList from "./AllowlistToolBuilderOperations
 
 export default function AllowlistToolBuilderOperations() {
   const router = useRouter();
-  const { operations, setOperations } = useContext(AllowlistToolBuilderContext);
+  const { operations, setOperations, setToasts } = useContext(
+    AllowlistToolBuilderContext
+  );
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [errors, setErrors] = useState<string[]>([]);
 
   useEffect(() => {
     async function fetchOperations() {
       setIsLoading(true);
-      setErrors([]);
       setOperations([]);
       try {
         const response = await fetch(
@@ -27,23 +27,27 @@ export default function AllowlistToolBuilderOperations() {
         const data: AllowlistToolResponse<AllowlistOperation[]> =
           await response.json();
         if ("error" in data) {
-          typeof data.message === "string"
-            ? setErrors([data.message])
-            : setErrors(data.message);
+          setToasts({
+            messages:
+              typeof data.message === "string" ? [data.message] : data.message,
+            type: "error",
+          });
         } else {
           setOperations(data);
         }
       } catch (error: any) {
-        setErrors([error.message]);
+        setToasts({ messages: [error.message], type: "error" });
       } finally {
         setIsLoading(false);
       }
     }
     fetchOperations();
-  }, [router.query.id, setOperations]);
+  }, [router.query.id, setOperations, setToasts]);
 
   const [isOpen, setIsOpen] = useState<boolean>(false);
-  const toggleIsOpen = () => setIsOpen((isOpen) => !isOpen);
+  const toggleIsOpen = () => {
+    setIsOpen((isOpen) => !isOpen);
+  };
   const [sidebarScope, animateSidebar] = useAnimate();
   useEffect(() => {
     if (isOpen) {

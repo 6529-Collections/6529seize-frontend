@@ -1,7 +1,10 @@
-import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
-import { AllowlistDescription, AllowlistToolResponse } from "./allowlist-tool.types";
+import { useContext, useEffect, useState } from "react";
+import {
+  AllowlistDescription,
+  AllowlistToolResponse,
+} from "./allowlist-tool.types";
 import dynamic from "next/dynamic";
+import { AllowlistToolContext } from "../../pages/allowlist-tool";
 
 const AllowlistToolAllowlistsEmpty = dynamic(
   () => import("./AllowlistToolAllowlistsEmpty"),
@@ -18,24 +21,23 @@ const AllowlistToolAllowlistsTable = dynamic(
 );
 
 export default function AllowlistToolAllowlists() {
-  const router = useRouter();
+  const { setToasts } = useContext(AllowlistToolContext);
   const [allowlists, setAllowlists] = useState<AllowlistDescription[]>([]);
-  const [errors, setErrors] = useState<string[]>([]);
   const [isLoading, setLoading] = useState<boolean>(false);
-
 
   const fetchData = () => {
     setLoading(true);
     setAllowlists([]);
-    setErrors([]);
     const url = `${process.env.ALLOWLIST_API_ENDPOINT}/allowlists`;
     fetch(url)
       .then((response) => response.json())
       .then((data: AllowlistToolResponse<AllowlistDescription[]>) => {
         if ("error" in data) {
-          typeof data.message === "string"
-            ? setErrors([data.message])
-            : setErrors(data.message);
+          setToasts({
+            messages:
+              typeof data.message === "string" ? [data.message] : data.message,
+            type: "error",
+          });
         } else {
           setAllowlists(data);
         }

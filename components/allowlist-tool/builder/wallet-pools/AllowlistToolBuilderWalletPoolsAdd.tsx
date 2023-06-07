@@ -11,7 +11,9 @@ import { getRandomObjectId } from "../../../../helpers/AllowlistToolHelpers";
 
 export default function AllowlistToolBuilderWalletPoolsAdd() {
   const router = useRouter();
-  const { operations, setOperations } = useContext(AllowlistToolBuilderContext);
+  const { operations, setOperations, setToasts } = useContext(
+    AllowlistToolBuilderContext
+  );
   const [formValues, setFormValues] = useState<{
     name: string;
     description: string;
@@ -51,7 +53,7 @@ export default function AllowlistToolBuilderWalletPoolsAdd() {
           setWallets(results);
         })
         .on("error", (err: any) => {
-          console.error(err);
+          setToasts({ messages: [err.message], type: "error" });
         });
 
       parser.write(data);
@@ -60,13 +62,14 @@ export default function AllowlistToolBuilderWalletPoolsAdd() {
     reader.readAsText(file);
   };
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [errors, setErrors] = useState<string[]>([]);
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setIsLoading(true);
-    setErrors([]);
     if (wallets.length === 0) {
-      setErrors(["No wallets provided"]);
+      setToasts({
+        messages: ["Please upload a CSV file with wallets"],
+        type: "error",
+      });
       setIsLoading(false);
       return;
     }
@@ -89,9 +92,11 @@ export default function AllowlistToolBuilderWalletPoolsAdd() {
       .then((response) => response.json())
       .then((data: AllowlistToolResponse<AllowlistOperation>) => {
         if ("error" in data) {
-          typeof data.message === "string"
-            ? setErrors([data.message])
-            : setErrors(data.message);
+          setToasts({
+            messages:
+              typeof data.message === "string" ? [data.message] : data.message,
+            type: "error",
+          });
         } else {
           setOperations([...operations, data]);
           setFormValues({
@@ -147,7 +152,6 @@ export default function AllowlistToolBuilderWalletPoolsAdd() {
             Upload a CSV
           </label>
           <input
-            required
             id="walletPoolFile"
             type="file"
             accept="text/csv"

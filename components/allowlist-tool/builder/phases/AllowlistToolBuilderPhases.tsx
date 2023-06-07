@@ -10,20 +10,19 @@ import AllowlistToolBuilderPhasesPhase from "./AllowlistToolBuilderPhasesPhase";
 import { AllowlistToolBuilderContext } from "../../../../pages/allowlist-tool/[id]";
 import AllowlistToolHistoryIcon from "../../icons/AllowlistToolHistoryIcon";
 import AllowlistToolJsonIcon from "../../icons/AllowlistToolJsonIcon";
-import AllowlistToolPlusIcon from "../../icons/AllowlistToolPlusIcon";
 import AllowlistToolBuilderPhasesAdd from "./AllowlistToolBuilderPhasesAdd";
 import AllowlistToolBuilderAddOperation from "../operations/AllowlistToolBuilderAddOperation";
 
 export default function AllowlistToolBuilderPhases() {
   const router = useRouter();
-  const { phases, setPhases } = useContext(AllowlistToolBuilderContext);
+  const { phases, setPhases, setToasts } = useContext(
+    AllowlistToolBuilderContext
+  );
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [errors, setErrors] = useState<string[]>([]);
 
   useEffect(() => {
     async function fetchPhases() {
       setIsLoading(true);
-      setErrors([]);
       setPhases([]);
       try {
         const response = await fetch(
@@ -33,20 +32,22 @@ export default function AllowlistToolBuilderPhases() {
           AllowlistPhaseWithComponentAndItems[]
         > = await response.json();
         if ("error" in data) {
-          typeof data.message === "string"
-            ? setErrors([data.message])
-            : setErrors(data.message);
+          setToasts({
+            messages:
+              typeof data.message === "string" ? [data.message] : data.message,
+            type: "error",
+          });
         } else {
           setPhases(data);
         }
       } catch (error: any) {
-        setErrors([error.message]);
+        setToasts({ messages: [error.message], type: "error" });
       } finally {
         setIsLoading(false);
       }
     }
     fetchPhases();
-  }, [router.query.id]);
+  }, [router.query.id, setPhases, setToasts]);
 
   const validOperations = [AllowlistOperationCode.ADD_PHASE];
   const defaultOperation = AllowlistOperationCode.ADD_PHASE;

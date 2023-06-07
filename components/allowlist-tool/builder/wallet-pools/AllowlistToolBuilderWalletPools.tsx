@@ -16,16 +16,14 @@ import AllowlistToolBuilderAddOperation from "../operations/AllowlistToolBuilder
 
 export default function AllowlistToolBuilderWalletPools() {
   const router = useRouter();
-  const { walletPools, setWalletPools } = useContext(
+  const { walletPools, setWalletPools, setToasts } = useContext(
     AllowlistToolBuilderContext
   );
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [errors, setErrors] = useState<string[]>([]);
 
   useEffect(() => {
     async function fetchWalletPools() {
       setIsLoading(true);
-      setErrors([]);
       setWalletPools([]);
       try {
         const response = await fetch(
@@ -34,22 +32,23 @@ export default function AllowlistToolBuilderWalletPools() {
         const data: AllowlistToolResponse<AllowlistWalletPool[]> =
           await response.json();
         if ("error" in data) {
-          typeof data.message === "string"
-            ? setErrors([data.message])
-            : setErrors(data.message);
+          setToasts({
+            messages:
+              typeof data.message === "string" ? [data.message] : data.message,
+            type: "error",
+          });
         } else {
           setWalletPools(data);
         }
       } catch (error: any) {
-        setErrors([error.message]);
+        setToasts({ messages: [error.message], type: "error" });
       } finally {
         setIsLoading(false);
       }
     }
 
     fetchWalletPools();
-  }, [router.query.id]);
-
+  }, [router.query.id, setWalletPools, setToasts]);
 
   const validOperations = [AllowlistOperationCode.CREATE_WALLET_POOL];
   const defaultOperation = AllowlistOperationCode.CREATE_WALLET_POOL;

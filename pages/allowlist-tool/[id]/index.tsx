@@ -14,6 +14,8 @@ import {
   AllowlistWalletPool,
 } from "../../../components/allowlist-tool/allowlist-tool.types";
 import AllowlistToolBuilderOperations from "../../../components/allowlist-tool/builder/operations/AllowlistToolBuilderOperations";
+import { ToastContainer, toast, Slide, TypeOptions } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const poppins = Poppins({
   weight: ["300", "400", "500", "600", "700"],
@@ -91,7 +93,27 @@ type AllowlistToolBuilderContextType = {
   setWalletPools: (walletPools: AllowlistWalletPool[]) => void;
   phases: AllowlistPhaseWithComponentAndItems[];
   setPhases: (phases: AllowlistPhaseWithComponentAndItems[]) => void;
+  setToasts: ({messages, type}: { messages: string[]; type: TypeOptions }) => void;
 };
+
+
+
+const setToast = ({message, type}: { message: string; type: TypeOptions }) => {
+  toast(message, {
+    position: toast.POSITION.TOP_RIGHT,
+    autoClose: 3000,
+    hideProgressBar: false,
+    draggable: false,
+    closeOnClick: true,
+    transition: Slide,
+    theme: "dark",
+    type,
+  });
+};
+
+const setToasts = ({messages, type}: { messages: string[]; type: TypeOptions }) => {
+  messages.forEach((message) => setToast({message, type}));
+}
 
 export const AllowlistToolBuilderContext =
   createContext<AllowlistToolBuilderContextType>({
@@ -108,6 +130,7 @@ export const AllowlistToolBuilderContext =
     setWalletPools: () => {},
     phases: [],
     setPhases: () => {},
+    setToasts: () => {},
   });
 
 export default function AllowlistToolAllowlistId({
@@ -135,6 +158,7 @@ export default function AllowlistToolAllowlistId({
   const [phases, setPhases] = useState<AllowlistPhaseWithComponentAndItems[]>(
     []
   );
+
   return (
     <>
       <Header />
@@ -154,6 +178,7 @@ export default function AllowlistToolAllowlistId({
           setWalletPools,
           phases,
           setPhases,
+          setToasts,
         }}
       >
         <div
@@ -179,6 +204,7 @@ export default function AllowlistToolAllowlistId({
             </div>
           </div>
         </div>
+        <ToastContainer />
       </AllowlistToolBuilderContext.Provider>
     </>
   );

@@ -1,7 +1,9 @@
 import { useRouter } from "next/router";
 import { useContext, useState } from "react";
 import { AllowlistToolBuilderContext } from "../../../../../../pages/allowlist-tool/[id]";
-import AllowlistToolSelectMenu, { AllowlistToolSelectMenuOption } from "../../../../common/select-menu/AllowlistToolSelectMenu";
+import AllowlistToolSelectMenu, {
+  AllowlistToolSelectMenuOption,
+} from "../../../../common/select-menu/AllowlistToolSelectMenu";
 import { getRandomObjectId } from "../../../../../../helpers/AllowlistToolHelpers";
 import {
   AllowlistOperation,
@@ -15,7 +17,7 @@ export default function AllowlistToolBuilderCreateTokenPoolOperation({
   onClose: () => void;
 }) {
   const router = useRouter();
-  const { transferPools, operations, setOperations } = useContext(
+  const { transferPools, operations, setOperations, setToasts } = useContext(
     AllowlistToolBuilderContext
   );
   const [formValues, setFormValues] = useState<{
@@ -39,17 +41,13 @@ export default function AllowlistToolBuilderCreateTokenPoolOperation({
   };
 
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [errors, setErrors] = useState<string[]>([]);
-
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (!selectedTransferPool) {
       return;
     }
     setIsLoading(true);
-    setErrors([]);
     const url = `${process.env.ALLOWLIST_API_ENDPOINT}/allowlists/${router.query.id}/operations`;
-
     const params: {
       id: string;
       name: string;
@@ -80,9 +78,11 @@ export default function AllowlistToolBuilderCreateTokenPoolOperation({
       .then((response) => response.json())
       .then((data: AllowlistToolResponse<AllowlistOperation>) => {
         if ("error" in data) {
-          typeof data.message === "string"
-            ? setErrors([data.message])
-            : setErrors(data.message);
+          setToasts({
+            messages:
+              typeof data.message === "string" ? [data.message] : data.message,
+            type: "error",
+          });
         } else {
           setOperations([...operations, data]);
           setFormValues({

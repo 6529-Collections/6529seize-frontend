@@ -14,7 +14,7 @@ export default function AllowlistToolBuilderAddPhaseOperation({
   onClose: () => void;
 }) {
   const router = useRouter();
-  const { operations, setOperations } = useContext(AllowlistToolBuilderContext);
+  const { operations, setOperations, setToasts } = useContext(AllowlistToolBuilderContext);
   const [formValues, setFormValues] = useState<{
     name: string;
     description: string;
@@ -31,13 +31,9 @@ export default function AllowlistToolBuilderAddPhaseOperation({
   };
 
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [errors, setErrors] = useState<string[]>([]);
-
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setIsLoading(true);
-    setErrors([]);
-
     const url = `${process.env.ALLOWLIST_API_ENDPOINT}/allowlists/${router.query.id}/operations`;
 
     fetch(url, {
@@ -57,9 +53,11 @@ export default function AllowlistToolBuilderAddPhaseOperation({
       .then((response) => response.json())
       .then((data: AllowlistToolResponse<AllowlistOperation>) => {
         if ("error" in data) {
-          typeof data.message === "string"
-            ? setErrors([data.message])
-            : setErrors(data.message);
+          setToasts({
+            messages:
+              typeof data.message === "string" ? [data.message] : data.message,
+            type: "error",
+          });
         } else {
           setOperations([...operations, data]);
           setFormValues({
