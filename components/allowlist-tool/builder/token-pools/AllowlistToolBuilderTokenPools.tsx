@@ -16,16 +16,14 @@ import AllowlistToolBuilderAddOperation from "../operations/AllowlistToolBuilder
 
 export default function AllowlistToolBuilderTokenPools() {
   const router = useRouter();
-  const { tokenPools, setTokenPools, transferPools } = useContext(
+  const { tokenPools, setTokenPools, setToasts } = useContext(
     AllowlistToolBuilderContext
   );
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [errors, setErrors] = useState<string[]>([]);
 
   useEffect(() => {
     async function fetchTokenPools() {
       setIsLoading(true);
-      setErrors([]);
       setTokenPools([]);
       try {
         const response = await fetch(
@@ -34,20 +32,22 @@ export default function AllowlistToolBuilderTokenPools() {
         const data: AllowlistToolResponse<AllowlistTokenPool[]> =
           await response.json();
         if ("error" in data) {
-          typeof data.message === "string"
-            ? setErrors([data.message])
-            : setErrors(data.message);
+          setToasts({
+            messages:
+              typeof data.message === "string" ? [data.message] : data.message,
+            type: "error",
+          });
         } else {
           setTokenPools(data);
         }
       } catch (error: any) {
-        setErrors([error.message]);
+        setToasts({ messages: [error.message], type: "error" });
       } finally {
         setIsLoading(false);
       }
     }
     fetchTokenPools();
-  }, [router.query.id]);
+  }, [router.query.id, setTokenPools, setToasts]);
 
   const validOperations = [AllowlistOperationCode.CREATE_TOKEN_POOL];
   const defaultOperation = AllowlistOperationCode.CREATE_TOKEN_POOL;

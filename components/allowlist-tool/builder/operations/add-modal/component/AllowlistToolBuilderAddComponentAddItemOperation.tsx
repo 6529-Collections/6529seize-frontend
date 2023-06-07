@@ -20,7 +20,7 @@ export default function AllowlistToolBuilderComponentAddItemOperation({
   onClose: () => void;
 }) {
   const router = useRouter();
-  const { operations, setOperations, tokenPools, customTokenPools } =
+  const { operations, setOperations, tokenPools, customTokenPools, setToasts } =
     useContext(AllowlistToolBuilderContext);
 
   const tokenPoolOptions: AllowlistToolSelectMenuOption[] = tokenPools.map(
@@ -61,16 +61,14 @@ export default function AllowlistToolBuilderComponentAddItemOperation({
   };
 
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [errors, setErrors] = useState<string[]>([]);
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (!selectedTokenPool) {
+      setToasts({ messages: ["Please select a token pool"], type: "error" });
       return;
     }
-
     setIsLoading(true);
-    setErrors([]);
 
     const url = `${process.env.ALLOWLIST_API_ENDPOINT}/allowlists/${router.query.id}/operations`;
 
@@ -99,9 +97,11 @@ export default function AllowlistToolBuilderComponentAddItemOperation({
       .then((response) => response.json())
       .then((data: AllowlistToolResponse<AllowlistOperation>) => {
         if ("error" in data) {
-          typeof data.message === "string"
-            ? setErrors([data.message])
-            : setErrors(data.message);
+          setToasts({
+            messages:
+              typeof data.message === "string" ? [data.message] : data.message,
+            type: "error",
+          });
         } else {
           setOperations([...operations, data]);
           setFormValues({

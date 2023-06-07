@@ -15,7 +15,9 @@ export default function AllowlistToolBuilderItemRemoveFirstNTokensOperation({
   onClose: () => void;
 }) {
   const router = useRouter();
-  const { operations, setOperations } = useContext(AllowlistToolBuilderContext);
+  const { operations, setOperations, setToasts } = useContext(
+    AllowlistToolBuilderContext
+  );
   const [formValues, setFormValues] = useState<{
     count: string;
   }>({
@@ -29,15 +31,13 @@ export default function AllowlistToolBuilderItemRemoveFirstNTokensOperation({
   };
 
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [errors, setErrors] = useState<string[]>([]);
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setIsLoading(true);
-    setErrors([]);
     const count = +formValues.count;
     if (count <= 0) {
-      setErrors(["Count must be greater than 0"]);
+      setToasts({ messages: ["Count must be greater than 0"], type: "error" });
       setIsLoading(false);
       return;
     }
@@ -58,9 +58,11 @@ export default function AllowlistToolBuilderItemRemoveFirstNTokensOperation({
       .then((response) => response.json())
       .then((data: AllowlistToolResponse<AllowlistOperation>) => {
         if ("error" in data) {
-          typeof data.message === "string"
-            ? setErrors([data.message])
-            : setErrors(data.message);
+          setToasts({
+            messages:
+              typeof data.message === "string" ? [data.message] : data.message,
+            type: "error",
+          });
         } else {
           setOperations([...operations, data]);
           setFormValues({

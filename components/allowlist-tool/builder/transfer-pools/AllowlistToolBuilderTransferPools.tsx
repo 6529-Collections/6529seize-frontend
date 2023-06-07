@@ -15,16 +15,14 @@ import AllowlistToolBuilderAddOperation from "../operations/AllowlistToolBuilder
 
 export default function AllowlistToolBuilderTransferPools() {
   const router = useRouter();
-  const { transferPools, setTransferPools } = useContext(
+  const { transferPools, setTransferPools, setToasts } = useContext(
     AllowlistToolBuilderContext
   );
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [errors, setErrors] = useState<string[]>([]);
 
   useEffect(() => {
     async function fetchTransferPools() {
       setIsLoading(true);
-      setErrors([]);
       setTransferPools([]);
       try {
         const response = await fetch(
@@ -33,21 +31,23 @@ export default function AllowlistToolBuilderTransferPools() {
         const data: AllowlistToolResponse<AllowlistTransferPool[]> =
           await response.json();
         if ("error" in data) {
-          typeof data.message === "string"
-            ? setErrors([data.message])
-            : setErrors(data.message);
+          setToasts({
+            messages:
+              typeof data.message === "string" ? [data.message] : data.message,
+            type: "error",
+          });
         } else {
           setTransferPools(data);
         }
       } catch (error: any) {
-        setErrors([error.message]);
+        setToasts({ messages: [error.message], type: "error" });
       } finally {
         setIsLoading(false);
       }
     }
 
     fetchTransferPools();
-  }, [router.query.id]);
+  }, [router.query.id, setTransferPools, setToasts]);
 
   const validOperations = [AllowlistOperationCode.GET_COLLECTION_TRANSFERS];
   const defaultOperation = AllowlistOperationCode.GET_COLLECTION_TRANSFERS;

@@ -15,7 +15,9 @@ export default function AllowlistToolBuilderItemSelectTokenIdsOperation({
   onClose: () => void;
 }) {
   const router = useRouter();
-  const { operations, setOperations } = useContext(AllowlistToolBuilderContext);
+  const { operations, setOperations, setToasts } = useContext(
+    AllowlistToolBuilderContext
+  );
   const [formValues, setFormValues] = useState<{
     tokenIds: string;
   }>({
@@ -27,17 +29,13 @@ export default function AllowlistToolBuilderItemSelectTokenIdsOperation({
       [event.target.name]: event.target.value,
     });
   };
-
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [errors, setErrors] = useState<string[]>([]);
-
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setIsLoading(true);
-    setErrors([]);
     const tokenIds = formValues.tokenIds;
     if (tokenIds.length === 0) {
-      setErrors(["No tokens provided"]);
+      setToasts({ messages: ["Token IDs must not be empty"], type: "error" });
       setIsLoading(false);
       return;
     }
@@ -58,9 +56,11 @@ export default function AllowlistToolBuilderItemSelectTokenIdsOperation({
       .then((response) => response.json())
       .then((data: AllowlistToolResponse<AllowlistOperation>) => {
         if ("error" in data) {
-          typeof data.message === "string"
-            ? setErrors([data.message])
-            : setErrors(data.message);
+          setToasts({
+            messages:
+              typeof data.message === "string" ? [data.message] : data.message,
+            type: "error",
+          });
         } else {
           setOperations([...operations, data]);
           setFormValues({

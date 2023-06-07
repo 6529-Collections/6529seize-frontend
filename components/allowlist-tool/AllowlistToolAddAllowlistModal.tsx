@@ -1,18 +1,22 @@
-import { useState } from "react";
-import { AllowlistDescription, AllowlistToolResponse } from "./allowlist-tool.types";
-
+import { useContext, useState } from "react";
+import {
+  AllowlistDescription,
+  AllowlistToolResponse,
+} from "./allowlist-tool.types";
+import { AllowlistToolContext } from "../../pages/allowlist-tool";
 
 export default function AllowlistToolAddAllowlistModal({
   onAllowlistAdded,
 }: {
   onAllowlistAdded: (allowlist: AllowlistDescription) => void;
 }) {
+  const { setToasts } = useContext(AllowlistToolContext);
+
   const [formValues, setFormValues] = useState({
     name: "",
     description: "",
   });
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [errors, setErrors] = useState<string[]>([]);
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setFormValues({
@@ -24,7 +28,6 @@ export default function AllowlistToolAddAllowlistModal({
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setIsLoading(true);
-    setErrors([]);
     const url = `${process.env.ALLOWLIST_API_ENDPOINT}/allowlists`;
     fetch(url, {
       method: "POST",
@@ -39,17 +42,17 @@ export default function AllowlistToolAddAllowlistModal({
       .then((response) => response.json())
       .then((data: AllowlistToolResponse<AllowlistDescription>) => {
         if ("error" in data) {
-          typeof data.message === "string"
-            ? setErrors([data.message])
-            : setErrors(data.message);
+          setToasts({
+            messages:
+              typeof data.message === "string" ? [data.message] : data.message,
+            type: "error",
+          });
         } else {
           onAllowlistAdded(data);
         }
         setIsLoading(false);
       });
   };
-
-
 
   return (
     <div className="tw-mt-5">

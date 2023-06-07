@@ -16,17 +16,15 @@ import AllowlistToolBuilderAddOperation from "../operations/AllowlistToolBuilder
 
 export default function AllowlistToolBuilderCustomTokenPools() {
   const router = useRouter();
-  const { customTokenPools, setCustomTokenPools } = useContext(
+  const { customTokenPools, setCustomTokenPools, setToasts } = useContext(
     AllowlistToolBuilderContext
   );
 
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [errors, setErrors] = useState<string[]>([]);
 
   useEffect(() => {
     async function fetchCustomTokenPools() {
       setIsLoading(true);
-      setErrors([]);
       setCustomTokenPools([]);
       try {
         const response = await fetch(
@@ -35,20 +33,22 @@ export default function AllowlistToolBuilderCustomTokenPools() {
         const data: AllowlistToolResponse<AllowlistCustomTokenPool[]> =
           await response.json();
         if ("error" in data) {
-          typeof data.message === "string"
-            ? setErrors([data.message])
-            : setErrors(data.message);
+          setToasts({
+            messages:
+              typeof data.message === "string" ? [data.message] : data.message,
+            type: "error",
+          });
         } else {
           setCustomTokenPools(data);
         }
       } catch (error: any) {
-        setErrors([error.message]);
+        setToasts({ messages: [error.message], type: "error" });
       } finally {
         setIsLoading(false);
       }
     }
     fetchCustomTokenPools();
-  }, [router.query.id]);
+  }, [router.query.id, setCustomTokenPools, setToasts]);
 
   const validOperations = [AllowlistOperationCode.CREATE_CUSTOM_TOKEN_POOL];
   const defaultOperation = AllowlistOperationCode.CREATE_CUSTOM_TOKEN_POOL;
