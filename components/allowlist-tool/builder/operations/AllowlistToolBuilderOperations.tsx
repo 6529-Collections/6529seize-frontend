@@ -65,10 +65,30 @@ export default function AllowlistToolBuilderOperations() {
   return (
     <>
       <div className="tw-w-0 tw-relative" ref={sidebarScope}>
-        <button className="tw-absolute -tw-left-12" onClick={toggleIsOpen}>
+        <button
+          className="tw-absolute -tw-left-12 tw-hidden"
+          onClick={toggleIsOpen}
+        >
           toggle
         </button>
-        <AllowlistToolBuilderOperationsList operations={operations} />
+        <div className="tw-hidden">
+          <AllowlistToolBuilderOperationsList operations={operations} />
+        </div>
+        <div className="tw-hidden xl:tw-fixed xl:tw-inset-y-0 tw-right-0 xl:tw-z-0 xl:tw-flex xl:tw-w-72 xl:tw-flex-col">
+          <div className="tw-pt-[150px]  tw-flex tw-grow tw-flex-col tw-gap-y-5 tw-overflow-y-auto tw-bg-neutral-900 tw-px-6 tw-ring-1 tw-ring-white/5">
+            <span className="tw-text-lg tw-font-semibold tw-text-white">Operations</span>
+            <ul
+              role="list"
+              className="tw-list-none tw-flex tw-flex-1 tw-flex-col tw-gap-y-7"
+            >
+              <li>
+                <ul role="list" className="-tw-mx-2 tw-space-y-1">
+                  sisu
+                </ul>
+              </li>
+            </ul>
+          </div>
+        </div>
       </div>
     </>
   );

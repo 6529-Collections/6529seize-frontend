@@ -93,12 +93,22 @@ type AllowlistToolBuilderContextType = {
   setWalletPools: (walletPools: AllowlistWalletPool[]) => void;
   phases: AllowlistPhaseWithComponentAndItems[];
   setPhases: (phases: AllowlistPhaseWithComponentAndItems[]) => void;
-  setToasts: ({messages, type}: { messages: string[]; type: TypeOptions }) => void;
+  setToasts: ({
+    messages,
+    type,
+  }: {
+    messages: string[];
+    type: TypeOptions;
+  }) => void;
 };
 
-
-
-const setToast = ({message, type}: { message: string; type: TypeOptions }) => {
+const setToast = ({
+  message,
+  type,
+}: {
+  message: string;
+  type: TypeOptions;
+}) => {
   toast(message, {
     position: toast.POSITION.TOP_RIGHT,
     autoClose: 3000,
@@ -111,9 +121,15 @@ const setToast = ({message, type}: { message: string; type: TypeOptions }) => {
   });
 };
 
-const setToasts = ({messages, type}: { messages: string[]; type: TypeOptions }) => {
-  messages.forEach((message) => setToast({message, type}));
-}
+const setToasts = ({
+  messages,
+  type,
+}: {
+  messages: string[];
+  type: TypeOptions;
+}) => {
+  messages.forEach((message) => setToast({ message, type }));
+};
 
 export const AllowlistToolBuilderContext =
   createContext<AllowlistToolBuilderContextType>({
@@ -191,16 +207,14 @@ export default function AllowlistToolAllowlistId({
             </h1>
 
             <div className="tw-pt-6">
-              <div className="tw-w-full tw-inline-flex">
-                <div className="tw-space-y-6">
-                  <AllowlistToolBuilderTransferPools />
-                  <AllowlistToolBuilderTokenPools />
-                  <AllowlistToolBuilderCustomTokenPools />
-                  <AllowlistToolBuilderWalletPools />
-                  <AllowlistToolBuilderPhases />
-                </div>
-                <AllowlistToolBuilderOperations />
+              <div className="tw-space-y-6 tw-mr-72">
+                <AllowlistToolBuilderTransferPools />
+                <AllowlistToolBuilderTokenPools />
+                <AllowlistToolBuilderCustomTokenPools />
+                <AllowlistToolBuilderWalletPools />
+                <AllowlistToolBuilderPhases />
               </div>
+              <AllowlistToolBuilderOperations />
             </div>
           </div>
         </div>
