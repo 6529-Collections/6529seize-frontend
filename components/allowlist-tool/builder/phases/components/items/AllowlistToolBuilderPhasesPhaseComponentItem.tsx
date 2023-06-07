@@ -62,7 +62,7 @@ export default function AllowlistToolBuilderPhasesPhaseComponentItem({
 
             <AllowlistToolBuilderAddOperation
               validOperations={validOperations}
-              title={`Add operation for item "${phaseComponentItem.name}"`}
+              title={`Item "${phaseComponentItem.name}"`}
               targetItemId={phaseComponentItem.phaseComponentItemId}
               defaultOperation={null}
             />

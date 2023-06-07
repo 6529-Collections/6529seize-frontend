@@ -35,7 +35,7 @@ export default function AllowlistToolBuilderTransferPoolsPool({
           </button>
           <AllowlistToolBuilderAddOperation
             validOperations={[]}
-            title={`Add operation for transfer pool "${transferPool.name}"`}
+            title={`Transfer pool "${transferPool.name}"`}
             targetItemId={null}
             defaultOperation={null}
           />

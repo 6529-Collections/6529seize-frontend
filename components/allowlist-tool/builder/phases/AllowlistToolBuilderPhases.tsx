@@ -99,7 +99,7 @@ export default function AllowlistToolBuilderPhases() {
                             </button>
                             <AllowlistToolBuilderAddOperation
                               validOperations={validOperations}
-                              title={`Add operation for phases`}
+                              title={`Phases`}
                               targetItemId={null}
                               defaultOperation={defaultOperation}
                             />

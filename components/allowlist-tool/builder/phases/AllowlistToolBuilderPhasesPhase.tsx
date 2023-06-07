@@ -31,8 +31,13 @@ export default function AllowlistToolBuilderPhasesPhase({
   const defaultOperation = AllowlistOperationCode.ADD_COMPONENT;
   return (
     <>
-      <tr onClick={() => setIsOpen(!isOpen)}>
-        <td className="tw-whitespace-nowrap tw-py-2 tw-pl-4 tw-pr-3 tw-text-sm tw-font-medium tw-text-white sm:tw-pl-6">
+      <tr
+        onClick={(e) => {
+          e.stopPropagation();
+          setIsOpen(!isOpen);
+        }}
+      >
+        <td className="tw-cursor-pointer tw-whitespace-nowrap tw-py-2 tw-pl-4 tw-pr-3 tw-text-sm tw-font-medium tw-text-white sm:tw-pl-6 ">
           <div className="tw-flex tw-items-center tw-gap-x-2">
             <svg
               ref={iconScope}
@@ -70,7 +75,7 @@ export default function AllowlistToolBuilderPhasesPhase({
             </button>
             <AllowlistToolBuilderAddOperation
               validOperations={validOperations}
-              title={`Add operation for phase "${phase.name}"`}
+              title={`Phase "${phase.name}"`}
               targetItemId={phase.phaseId}
               defaultOperation={defaultOperation}
             />

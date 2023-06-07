@@ -1,12 +1,13 @@
 import dynamic from "next/dynamic";
 import HeaderPlaceholder from "../../../components/header/HeaderPlaceholder";
 import { Poppins } from "next/font/google";
-import { createContext, useState } from "react";
+import { createContext, useEffect, useState } from "react";
 import Breadcrumb, { Crumb } from "../../../components/breadcrumb/Breadcrumb";
 import {
   AllowlistCustomTokenPool,
   AllowlistDescription,
   AllowlistOperation,
+  AllowlistOperationCode,
   AllowlistOperationDescription,
   AllowlistPhaseWithComponentAndItems,
   AllowlistTokenPool,
@@ -16,6 +17,10 @@ import {
 import AllowlistToolBuilderOperations from "../../../components/allowlist-tool/builder/operations/AllowlistToolBuilderOperations";
 import { ToastContainer, toast, Slide, TypeOptions } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import {
+  assertUnreachable,
+  getRandomObjectId,
+} from "../../../helpers/AllowlistToolHelpers";
 
 const poppins = Poppins({
   weight: ["300", "400", "500", "600", "700"],
@@ -93,12 +98,22 @@ type AllowlistToolBuilderContextType = {
   setWalletPools: (walletPools: AllowlistWalletPool[]) => void;
   phases: AllowlistPhaseWithComponentAndItems[];
   setPhases: (phases: AllowlistPhaseWithComponentAndItems[]) => void;
-  setToasts: ({messages, type}: { messages: string[]; type: TypeOptions }) => void;
+  setToasts: ({
+    messages,
+    type,
+  }: {
+    messages: string[];
+    type: TypeOptions;
+  }) => void;
 };
 
-
-
-const setToast = ({message, type}: { message: string; type: TypeOptions }) => {
+const setToast = ({
+  message,
+  type,
+}: {
+  message: string;
+  type: TypeOptions;
+}) => {
   toast(message, {
     position: toast.POSITION.TOP_RIGHT,
     autoClose: 3000,
@@ -111,9 +126,15 @@ const setToast = ({message, type}: { message: string; type: TypeOptions }) => {
   });
 };
 
-const setToasts = ({messages, type}: { messages: string[]; type: TypeOptions }) => {
-  messages.forEach((message) => setToast({message, type}));
-}
+const setToasts = ({
+  messages,
+  type,
+}: {
+  messages: string[];
+  type: TypeOptions;
+}) => {
+  messages.forEach((message) => setToast({ message, type }));
+};
 
 export const AllowlistToolBuilderContext =
   createContext<AllowlistToolBuilderContextType>({
@@ -146,7 +167,6 @@ export default function AllowlistToolAllowlistId({
     { display: allowlist.name },
   ]);
   const [operations, setOperations] = useState<AllowlistOperation[]>([]);
-
   const [transferPools, setTransferPools] = useState<AllowlistTransferPool[]>(
     []
   );

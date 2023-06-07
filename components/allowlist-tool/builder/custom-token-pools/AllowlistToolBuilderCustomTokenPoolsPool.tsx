@@ -30,7 +30,7 @@ export default function AllowlistToolBuilderCustomTokenPoolsPool({
           </button>
           <AllowlistToolBuilderAddOperation
             validOperations={[]}
-            title={`Add operation for custom token pool "${customTokenPool.name}"`}
+            title={`Custom token pool "${customTokenPool.name}"`}
             targetItemId={null}
             defaultOperation={null}
           />

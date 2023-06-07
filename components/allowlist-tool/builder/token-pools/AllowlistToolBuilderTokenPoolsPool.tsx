@@ -42,7 +42,7 @@ export default function AllowlistToolBuilderTokenPoolsPool({
           </button>
           <AllowlistToolBuilderAddOperation
             validOperations={[]}
-            title={`Add operation for token pool "${tokenPool.name}"`}
+            title={`Token pool "${tokenPool.name}"`}
             targetItemId={null}
             defaultOperation={null}
           />

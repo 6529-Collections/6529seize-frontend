@@ -33,8 +33,14 @@ export default function AllowlistToolBuilderPhasesPhaseComponent({
   ];
   return (
     <>
-      <tr onClick={() => setIsOpen(!isOpen)}>
-        <td className="tw-whitespace-nowrap tw-py-2 tw-pl-4 tw-pr-3 tw-text-sm tw-font-normal tw-text-neutral-50 sm:tw-pl-14">
+      <tr>
+        <td
+          onClick={(e) => {
+            e.stopPropagation();
+            setIsOpen(!isOpen);
+          }}
+          className="tw-cursor-pointer tw-whitespace-nowrap tw-py-2 tw-pl-4 tw-pr-3 tw-text-sm tw-font-normal tw-text-neutral-50 sm:tw-pl-14"
+        >
           <div className="tw-inline-flex tw-items-center tw-gap-x-2">
             <svg
               ref={iconScope}
@@ -72,7 +78,7 @@ export default function AllowlistToolBuilderPhasesPhaseComponent({
             </button>
             <AllowlistToolBuilderAddOperation
               validOperations={validOperations}
-              title={`Add operation for component "${phaseComponent.name}"`}
+              title={`Component "${phaseComponent.name}"`}
               targetItemId={phaseComponent.componentId}
               defaultOperation={null}
             />
