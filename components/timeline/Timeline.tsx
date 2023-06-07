@@ -1,5 +1,5 @@
 import { Col, Container, Row, Table } from "react-bootstrap";
-import { NFT, NFTHistory } from "../../entities/INFT";
+import { BaseNFT, NFT, NFTHistory } from "../../entities/INFT";
 import styles from "./Timeline.module.scss";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -9,7 +9,7 @@ import {
 import TimelineMediaComponent, { MediaType } from "./TimelineMedia";
 
 interface Props {
-  nft: NFT;
+  nft: BaseNFT;
   steps: NFTHistory[];
 }
 
@@ -58,150 +58,6 @@ export default function Timeline(props: Props) {
 
   return (
     <>
-      {/* <Container className="mb-5 no-padding">
-        <Row className={styles.timelineTableScrollContainer}>
-          <Col className="no-padding">
-            <Table className={styles.timelineTable}>
-              <thead>
-                <tr>
-                  <th>Date - Time</th>
-                  <th>Event</th>
-                </tr>
-              </thead>
-              <tbody>
-                {props.steps.map((step, index) => {
-                  return (
-                    <tr key={`timeline-table-${index}`}>
-                      <td>{getDateDisplay(step.transaction_date)}</td>
-                      <td>
-                        <Container className="no-padding">
-                          <Row className="pb-1">
-                            <Col className="d-flex justify-content-between align-items-center gap-4">
-                              <b>{step.description.event}</b>
-                              <span className="d-flex gap-4">
-                                <a
-                                  href={step.uri}
-                                  target="_blank"
-                                  rel="noreferrer"
-                                  className="d-flex align-items-center justify-content-center gap-2 decoration-none">
-                                  URI
-                                  <FontAwesomeIcon
-                                    icon="external-link-square"
-                                    className={styles.linkIcon}
-                                  />
-                                </a>
-                                <a
-                                  href={`https://etherscan.io/tx/${step.transaction_hash}`}
-                                  target="_blank"
-                                  rel="noreferrer"
-                                  className="d-flex align-items-center justify-content-center gap-2 decoration-none">
-                                  TXN
-                                  <FontAwesomeIcon
-                                    icon="external-link-square"
-                                    className={styles.linkIcon}
-                                  />
-                                </a>
-                              </span>
-                            </Col>
-                          </Row>
-                          {step.description.changes.length > 0 && (
-                            <ul className={styles.changesUl}>
-                              {step.description.changes.map((change, index) => (
-                                <li key={`timeline-table-${index}`}>
-                                  <Row className="pt-3 pb-1">
-                                    <Col>
-                                      <b>{getKeyDisplay(change.key)}</b>
-                                    </Col>
-                                  </Row>
-                                  <Row className="pt-1 pb-3">
-                                    {isImage(change.key) ? (
-                                      <>
-                                        <Col className="d-flex align-items-start flex-column gap-1">
-                                          <b>From:</b>
-                                          <TimelineMediaComponent
-                                            type={MediaType.IMAGE}
-                                            url={change.from}
-                                          />
-                                        </Col>
-                                        <Col className="d-flex align-items-start flex-column gap-1">
-                                          <b>To:</b>
-                                          <TimelineMediaComponent
-                                            type={MediaType.IMAGE}
-                                            url={change.to}
-                                          />
-                                        </Col>
-                                      </>
-                                    ) : isAnimation(change.key) ? (
-                                      <>
-                                        <Col className="d-flex align-items-start flex-column gap-1">
-                                          <b>From:</b>
-                                          <TimelineMediaComponent
-                                            type={getType()}
-                                            url={change.from}
-                                          />
-                                        </Col>
-                                        <Col className="d-flex align-items-start flex-column gap-1">
-                                          <b>To:</b>
-                                          <TimelineMediaComponent
-                                            type={getType()}
-                                            url={change.to}
-                                          />
-                                        </Col>
-                                      </>
-                                    ) : isUrl(change.key) ? (
-                                      <>
-                                        <Col xs={12}>
-                                          <b>From:</b>{" "}
-                                          <a
-                                            href={change.from}
-                                            target="_blank"
-                                            rel="noreferrer">
-                                            {change.from}
-                                          </a>
-                                        </Col>
-                                        <Col xs={12} className="pt-2">
-                                          <b>To:</b>{" "}
-                                          <a
-                                            href={change.to}
-                                            target="_blank"
-                                            rel="noreferrer">
-                                            {change.to}
-                                          </a>
-                                        </Col>
-                                      </>
-                                    ) : (
-                                      <>
-                                        <Col xs={12}>
-                                          <b>From:</b>{" "}
-                                          <span>
-                                            {numberWithCommasFromString(
-                                              change.from
-                                            )}
-                                          </span>
-                                        </Col>
-                                        <Col xs={12} className="pt-2">
-                                          <b>To:</b>{" "}
-                                          {numberWithCommasFromString(
-                                            change.to
-                                          )}
-                                        </Col>
-                                      </>
-                                    )}
-                                  </Row>
-                                </li>
-                              ))}
-                            </ul>
-                          )}
-                        </Container>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </Table>
-          </Col>
-        </Row>
-      </Container> */}
       <div className={styles.timeline}>
         {props.steps.map((step, index) => {
           return (

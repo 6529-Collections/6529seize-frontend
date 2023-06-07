@@ -17,7 +17,7 @@ import {
   NULL_ADDRESS,
 } from "../../constants";
 import { DBResponse } from "../../entities/IDBResponse";
-import { LabNFT, LabExtendedData, NFT } from "../../entities/INFT";
+import { LabNFT, LabExtendedData, NFT, NFTHistory } from "../../entities/INFT";
 import {
   getDateDisplay,
   areEqualAddresses,
@@ -32,11 +32,12 @@ import LatestActivityRow from "../latest-activity/LatestActivityRow";
 import { Transaction } from "../../entities/ITransaction";
 import { useRouter } from "next/router";
 import { TDHMetrics } from "../../entities/ITDH";
-import { fetchUrl } from "../../services/6529api";
+import { fetchAllPages, fetchUrl } from "../../services/6529api";
 import Pagination from "../pagination/Pagination";
 import { TypeFilter } from "../latest-activity/LatestActivity";
 import NFTImage from "../nft-image/NFTImage";
 import MemeLabLeaderboard from "../leaderboard/MemeLabLeaderboard";
+import Timeline from "../timeline/Timeline";
 
 interface MemeTab {
   focus: MEME_FOCUS;
@@ -49,6 +50,7 @@ export enum MEME_FOCUS {
   THE_ART = "the-art",
   HODLERS = "collectors",
   ACTIVITY = "activity",
+  TIMELINE = "timeline",
 }
 
 const ACTIVITY_PAGE_SIZE = 25;
@@ -86,6 +88,8 @@ export default function LabPage(props: Props) {
   const [activityPage, setActivityPage] = useState(1);
   const [activityTotalResults, setActivityTotalResults] = useState(0);
 
+  const [nftHistory, setNftHistory] = useState<NFTHistory[]>([]);
+
   const [activityTypeFilter, setActivityTypeFilter] = useState<TypeFilter>(
     TypeFilter.ALL
   );
@@ -110,6 +114,10 @@ export default function LabPage(props: Props) {
     focus: MEME_FOCUS.ACTIVITY,
     title: "Activity",
   };
+  const timelineTab = {
+    focus: MEME_FOCUS.TIMELINE,
+    title: "Timeline",
+  };
 
   const MEME_TABS: MemeTab[] = [
     liveTab,
@@ -117,6 +125,7 @@ export default function LabPage(props: Props) {
     artTab,
     hodlersTab,
     activityTab,
+    timelineTab,
   ];
 
   useEffect(() => {
@@ -253,6 +262,18 @@ export default function LabPage(props: Props) {
     }
   }, [nftId, activityPage, activityTypeFilter]);
 
+  useEffect(() => {
+    async function fetchHistory(url: string) {
+      return fetchAllPages(url).then((response: NFTHistory[]) => {
+        setNftHistory(response);
+      });
+    }
+    if (router.isReady && nftId) {
+      const initialUrlHistory = `${process.env.API_ENDPOINT}/api/nft_history/${MEMELAB_CONTRACT}/${nftId}`;
+      fetchHistory(initialUrlHistory);
+    }
+  }, [router.isReady, nftId]);
+
   function printMintDate(date: Date) {
     const mintDate = new Date(date);
     return (
@@ -278,6 +299,10 @@ export default function LabPage(props: Props) {
 
     if (activeTab == MEME_FOCUS.HODLERS) {
       return printHodlers();
+    }
+
+    if (activeTab == MEME_FOCUS.TIMELINE) {
+      return printTimeline();
     }
 
     return (
@@ -580,7 +605,7 @@ export default function LabPage(props: Props) {
                   />
                 </a>
                 {/* <a
-                      href={`https://looksrare.org/collections/${MEMES_CONTRACT}/${nft.id}`}
+                      href={`https://looksrare.org/collections/${MEMELAB_CONTRACT}/${nft.id}`}
                       target="_blank"
                       rel="noreferrer">
                       <Image
@@ -1138,6 +1163,18 @@ export default function LabPage(props: Props) {
         </Row>
       );
     }
+  }
+
+  function printTimeline() {
+    return (
+      <Container className="pt-3 pb-5 no-padding">
+        <Row>
+          <Col xs={12} md={{ span: 10, offset: 1 }}>
+            {nft && <Timeline nft={nft} steps={nftHistory} />}
+          </Col>
+        </Row>
+      </Container>
+    );
   }
 
   function parseDescription(description: string) {
