@@ -8,6 +8,7 @@ import {
 import { getRandomObjectId } from "../../../../helpers/AllowlistToolHelpers";
 import { AllowlistToolBuilderContext } from "../../../../pages/allowlist-tool/[id]";
 import styles from "../../AllowlistTool.module.scss";
+import AllowlistToolPrimaryBtn from "../../common/AllowlistToolPrimaryBtn";
 
 export default function AllowlistToolBuilderTransferPoolsAdd() {
   const router = useRouter();
@@ -34,46 +35,59 @@ export default function AllowlistToolBuilderTransferPoolsAdd() {
     });
   };
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
+  const addTransferPool = async () => {
     setIsLoading(true);
     const url = `${process.env.ALLOWLIST_API_ENDPOINT}/allowlists/${router.query.id}/operations`;
-    fetch(url, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        code: AllowlistOperationCode.GET_COLLECTION_TRANSFERS,
-        params: {
-          id: getRandomObjectId(),
-          name: formValues.name,
-          description: formValues.description,
-          contract: formValues.contract,
-          blockNo: +formValues.blockNo,
+    try {
+      const response = await fetch(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
         },
-      }),
-    })
-      .then((response) => response.json())
-      .then((data: AllowlistToolResponse<AllowlistOperation>) => {
-        if ("error" in data) {
-          setToasts({
-            messages:
-              typeof data.message === "string" ? [data.message] : data.message,
-            type: "error",
-          });
-        } else {
-          setOperations([...operations, data]);
-          setFormValues({
-            name: "",
-            description: "",
-            contract: "",
-            blockNo: "",
-          });
-        }
-        setIsLoading(false);
+        body: JSON.stringify({
+          code: AllowlistOperationCode.GET_COLLECTION_TRANSFERS,
+          params: {
+            id: getRandomObjectId(),
+            name: formValues.name,
+            description: formValues.description,
+            contract: formValues.contract,
+            blockNo: +formValues.blockNo,
+          },
+        }),
       });
+
+      const data: AllowlistToolResponse<AllowlistOperation> =
+        await response.json();
+      if ("error" in data) {
+        setToasts({
+          messages:
+            typeof data.message === "string" ? [data.message] : data.message,
+          type: "error",
+        });
+        return;
+      }
+      setOperations([...operations, data]);
+      setFormValues({
+        name: "",
+        description: "",
+        contract: "",
+        blockNo: "",
+      });
+    } catch (error) {
+      setToasts({
+        messages: ["Something went wrong. Please try again."],
+        type: "error",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
+
+  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    addTransferPool();
+  };
+
   return (
     <form onSubmit={handleSubmit}>
       <div className="tw-px-6 tw-flex tw-gap-x-4 tw-pt-5 tw-items-end">
@@ -142,12 +156,13 @@ export default function AllowlistToolBuilderTransferPoolsAdd() {
           </div>
         </div>
         <div>
-          <button
+          <AllowlistToolPrimaryBtn
+            onClick={() => {}}
+            loading={isLoading}
             type="submit"
-            className="tw-bg-primary-500 tw-px-4 tw-py-3 tw-text-sm tw-font-medium tw-text-white tw-w-full tw-border tw-border-solid tw-border-primary-500 tw-rounded-lg hover:tw-bg-primary-600 hover:tw-border-primary-600 tw-transition tw-duration-300 tw-ease-out"
           >
             Add transfer pool
-          </button>
+          </AllowlistToolPrimaryBtn>
         </div>
       </div>
     </form>

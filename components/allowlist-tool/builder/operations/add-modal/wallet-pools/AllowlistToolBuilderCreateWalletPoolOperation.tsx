@@ -1,28 +1,26 @@
-import { useRouter } from "next/router";
 import { useContext, useState } from "react";
 import { AllowlistToolBuilderContext } from "../../../../../../pages/allowlist-tool/[id]";
-import AllowlistToolSelectMenu, {
-  AllowlistToolSelectMenuOption,
-} from "../../../../common/select-menu/AllowlistToolSelectMenu";
 import { getRandomObjectId } from "../../../../../../helpers/AllowlistToolHelpers";
 import {
-  AllowlistOperation,
   AllowlistOperationCode,
-  AllowlistToolResponse,
-  CustomTokenPoolParamsToken,
-  Mutable,
 } from "../../../../allowlist-tool.types";
 import csvParser from "csv-parser";
+import AllowlistToolPrimaryBtn from "../../../../common/AllowlistToolPrimaryBtn";
 
 export default function AllowlistToolBuilderCreateWalletPoolOperation({
-  onClose,
+  addOperation,
+  isLoading,
 }: {
-  onClose: () => void;
+  addOperation: ({
+    code,
+    params,
+  }: {
+    code: AllowlistOperationCode;
+    params: any;
+  }) => Promise<{ success: boolean }>;
+  isLoading: boolean;
 }) {
-  const router = useRouter();
-  const { operations, setOperations, setToasts } = useContext(
-    AllowlistToolBuilderContext
-  );
+  const { setToasts } = useContext(AllowlistToolBuilderContext);
   const [formValues, setFormValues] = useState<{
     name: string;
     description: string;
@@ -72,55 +70,24 @@ export default function AllowlistToolBuilderCreateWalletPoolOperation({
     reader.readAsText(file);
   };
 
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    setIsLoading(true);
     if (wallets.length === 0) {
       setToasts({
         messages: ["Please upload a CSV file with wallets"],
         type: "error",
       });
-      setIsLoading(false);
       return;
     }
-
-    const url = `${process.env.ALLOWLIST_API_ENDPOINT}/allowlists/${router.query.id}/operations`;
-
-    fetch(url, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
+    await addOperation({
+      code: AllowlistOperationCode.CREATE_CUSTOM_TOKEN_POOL,
+      params: {
+        id: getRandomObjectId(),
+        name: formValues.name,
+        description: formValues.description,
+        wallets,
       },
-      body: JSON.stringify({
-        code: AllowlistOperationCode.CREATE_CUSTOM_TOKEN_POOL,
-        params: {
-          id: getRandomObjectId(),
-          name: formValues.name,
-          description: formValues.description,
-          wallets,
-        },
-      }),
-    })
-      .then((response) => response.json())
-      .then((data: AllowlistToolResponse<AllowlistOperation>) => {
-        if ("error" in data) {
-          setToasts({
-            messages:
-              typeof data.message === "string" ? [data.message] : data.message,
-            type: "error",
-          });
-        } else {
-          setOperations([...operations, data]);
-          setFormValues({
-            name: "",
-            description: "",
-          });
-          setWallets([]);
-          onClose();
-        }
-        setIsLoading(false);
-      });
+    });
   };
   return (
     <form onSubmit={handleSubmit} className="tw-px-4 sm:tw-px-6">
@@ -175,12 +142,13 @@ export default function AllowlistToolBuilderCreateWalletPoolOperation({
             onChange={onFileUpload}
           />
         </div>
-        <button
+        <AllowlistToolPrimaryBtn
+          onClick={() => {}}
+          loading={isLoading}
           type="submit"
-          className="tw-bg-primary-500 tw-px-4 tw-py-3 tw-text-sm tw-font-medium tw-text-white tw-w-full sm:tw-w-auto tw-border tw-border-solid tw-border-primary-500 tw-rounded-lg hover:tw-bg-primary-600 hover:tw-border-primary-400 tw-transition tw-duration-300 tw-ease-out"
         >
           Add operation
-        </button>
+        </AllowlistToolPrimaryBtn>
       </div>
     </form>
   );

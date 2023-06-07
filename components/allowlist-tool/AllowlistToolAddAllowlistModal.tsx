@@ -25,33 +25,44 @@ export default function AllowlistToolAddAllowlistModal({
     });
   };
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
+  const addAllowlist = async () => {
     setIsLoading(true);
     const url = `${process.env.ALLOWLIST_API_ENDPOINT}/allowlists`;
-    fetch(url, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        name: formValues.name,
-        description: formValues.description,
-      }),
-    })
-      .then((response) => response.json())
-      .then((data: AllowlistToolResponse<AllowlistDescription>) => {
-        if ("error" in data) {
-          setToasts({
-            messages:
-              typeof data.message === "string" ? [data.message] : data.message,
-            type: "error",
-          });
-        } else {
-          onAllowlistAdded(data);
-        }
-        setIsLoading(false);
+    try {
+      const response = await fetch(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: formValues.name,
+          description: formValues.description,
+        }),
       });
+      const data: AllowlistToolResponse<AllowlistDescription> =
+        await response.json();
+      if ("error" in data) {
+        setToasts({
+          messages:
+            typeof data.message === "string" ? [data.message] : data.message,
+          type: "error",
+        });
+        return;
+      }
+      onAllowlistAdded(data);
+    } catch (error) {
+      setToasts({
+        messages: ["Something went wrong. Please try again."],
+        type: "error",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    addAllowlist();
   };
 
   return (

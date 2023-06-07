@@ -8,6 +8,7 @@ import {
   AllowlistToolResponse,
 } from "../../allowlist-tool.types";
 import { getRandomObjectId } from "../../../../helpers/AllowlistToolHelpers";
+import AllowlistToolPrimaryBtn from "../../common/AllowlistToolPrimaryBtn";
 
 export default function AllowlistToolBuilderWalletPoolsAdd() {
   const router = useRouter();
@@ -62,8 +63,8 @@ export default function AllowlistToolBuilderWalletPoolsAdd() {
     reader.readAsText(file);
   };
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
+
+  const addWalletPool = async () => {
     setIsLoading(true);
     if (wallets.length === 0) {
       setToasts({
@@ -74,39 +75,50 @@ export default function AllowlistToolBuilderWalletPoolsAdd() {
       return;
     }
     const url = `${process.env.ALLOWLIST_API_ENDPOINT}/allowlists/${router.query.id}/operations`;
-    fetch(url, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        code: AllowlistOperationCode.CREATE_WALLET_POOL,
-        params: {
-          id: getRandomObjectId(),
-          name: formValues.name,
-          description: formValues.description,
-          wallets,
+    try {
+      const response = await fetch(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
         },
-      }),
-    })
-      .then((response) => response.json())
-      .then((data: AllowlistToolResponse<AllowlistOperation>) => {
-        if ("error" in data) {
-          setToasts({
-            messages:
-              typeof data.message === "string" ? [data.message] : data.message,
-            type: "error",
-          });
-        } else {
-          setOperations([...operations, data]);
-          setFormValues({
-            name: "",
-            description: "",
-          });
-          setWallets([]);
-        }
-        setIsLoading(false);
+        body: JSON.stringify({
+          code: AllowlistOperationCode.CREATE_WALLET_POOL,
+          params: {
+            id: getRandomObjectId(),
+            name: formValues.name,
+            description: formValues.description,
+            wallets,
+          },
+        }),
       });
+      const data: AllowlistToolResponse<AllowlistOperation> =
+        await response.json();
+      if ("error" in data) {
+        setToasts({
+          messages:
+            typeof data.message === "string" ? [data.message] : data.message,
+          type: "error",
+        });
+        return;
+      }
+      setOperations([...operations, data]);
+      setFormValues({
+        name: "",
+        description: "",
+      });
+      setWallets([]);
+    } catch (error) {
+      setToasts({
+        messages: ["Something went wrong, please try again"],
+        type: "error",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    addWalletPool();
   };
 
   return (
@@ -160,12 +172,13 @@ export default function AllowlistToolBuilderWalletPoolsAdd() {
           />
         </div>
         <div>
-          <button
+          <AllowlistToolPrimaryBtn
+            onClick={() => {}}
             type="submit"
-            className="tw-bg-primary-500 tw-px-4 tw-py-3 tw-text-sm tw-font-medium tw-text-white tw-w-full tw-border tw-border-solid tw-border-primary-500 tw-rounded-lg hover:tw-bg-primary-600 hover:tw-border-primary-600 tw-transition tw-duration-300 tw-ease-out"
+            loading={isLoading}
           >
             Add wallet pool
-          </button>
+          </AllowlistToolPrimaryBtn>
         </div>
       </div>
     </form>

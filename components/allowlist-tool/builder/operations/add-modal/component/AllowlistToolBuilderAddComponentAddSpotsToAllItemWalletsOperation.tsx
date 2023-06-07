@@ -1,23 +1,24 @@
 import { useContext, useState } from "react";
 import { AllowlistToolBuilderContext } from "../../../../../../pages/allowlist-tool/[id]";
-import { useRouter } from "next/router";
-import {
-  AllowlistOperation,
-  AllowlistOperationCode,
-  AllowlistToolResponse,
-} from "../../../../allowlist-tool.types";
+import { AllowlistOperationCode } from "../../../../allowlist-tool.types";
+import AllowlistToolPrimaryBtn from "../../../../common/AllowlistToolPrimaryBtn";
 
 export default function AllowlistToolBuilderComponentAddSpotsToAllItemWalletsOperation({
   componentId,
-  onClose,
+  addOperation,
+  isLoading,
 }: {
   componentId: string;
-  onClose: () => void;
+  addOperation: ({
+    code,
+    params,
+  }: {
+    code: AllowlistOperationCode;
+    params: any;
+  }) => Promise<{ success: boolean }>;
+  isLoading: boolean;
 }) {
-  const router = useRouter();
-  const { operations, setOperations, setToasts } = useContext(
-    AllowlistToolBuilderContext
-  );
+  const { setToasts } = useContext(AllowlistToolBuilderContext);
   const [formValues, setFormValues] = useState<{
     spots: string;
   }>({
@@ -30,48 +31,20 @@ export default function AllowlistToolBuilderComponentAddSpotsToAllItemWalletsOpe
     });
   };
 
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    setIsLoading(true);
     const spots = +formValues.spots;
     if (spots <= 0) {
       setToasts({ messages: ["Spots must be greater than 0"], type: "error" });
-      setIsLoading(false);
       return;
     }
-    const url = `${process.env.ALLOWLIST_API_ENDPOINT}/allowlists/${router.query.id}/operations`;
-    fetch(url, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
+    await addOperation({
+      code: AllowlistOperationCode.COMPONENT_ADD_SPOTS_TO_ALL_ITEM_WALLETS,
+      params: {
+        componentId,
+        spots,
       },
-      body: JSON.stringify({
-        code: AllowlistOperationCode.COMPONENT_ADD_SPOTS_TO_ALL_ITEM_WALLETS,
-        params: {
-          componentId,
-          spots,
-        },
-      }),
-    })
-      .then((response) => response.json())
-      .then((data: AllowlistToolResponse<AllowlistOperation>) => {
-        if ("error" in data) {
-          setToasts({
-            messages:
-              typeof data.message === "string" ? [data.message] : data.message,
-            type: "error",
-          });
-        } else {
-          setOperations([...operations, data]);
-          setFormValues({
-            spots: "",
-          });
-          onClose();
-        }
-        setIsLoading(false);
-      });
+    });
   };
 
   return (
@@ -95,12 +68,13 @@ export default function AllowlistToolBuilderComponentAddSpotsToAllItemWalletsOpe
         </div>
       </div>
       <div className="tw-mt-6 tw-flex tw-justify-end">
-        <button
+        <AllowlistToolPrimaryBtn
+          onClick={() => {}}
+          loading={isLoading}
           type="submit"
-          className="tw-bg-primary-500 tw-px-4 tw-py-3 tw-text-sm tw-font-medium tw-text-white tw-w-full sm:tw-w-auto tw-border tw-border-solid tw-border-primary-500 tw-rounded-lg hover:tw-bg-primary-600 hover:tw-border-primary-400 tw-transition tw-duration-300 tw-ease-out"
         >
           Add operation
-        </button>
+        </AllowlistToolPrimaryBtn>
       </div>
     </form>
   );

@@ -7,6 +7,7 @@ import {
   AllowlistToolResponse,
 } from "../../allowlist-tool.types";
 import { getRandomObjectId } from "../../../../helpers/AllowlistToolHelpers";
+import AllowlistToolPrimaryBtn from "../../common/AllowlistToolPrimaryBtn";
 
 export default function AllowlistToolBuilderPhasesAdd() {
   const router = useRouter();
@@ -29,41 +30,53 @@ export default function AllowlistToolBuilderPhasesAdd() {
   };
 
   const [isLoading, setIsLoading] = useState(false);
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
+
+  const addPhase = async () => {
     setIsLoading(true);
     const url = `${process.env.ALLOWLIST_API_ENDPOINT}/allowlists/${router.query.id}/operations`;
-    fetch(url, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        code: AllowlistOperationCode.ADD_PHASE,
-        params: {
-          id: getRandomObjectId(),
-          name: formValues.name,
-          description: formValues.description,
+    try {
+      const response = await fetch(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
         },
-      }),
-    })
-      .then((response) => response.json())
-      .then((data: AllowlistToolResponse<AllowlistOperation>) => {
-        if ("error" in data) {
-          setToasts({
-            messages:
-              typeof data.message === "string" ? [data.message] : data.message,
-            type: "error",
-          });
-        } else {
-          setOperations([...operations, data]);
-          setFormValues({
-            name: "",
-            description: "",
-          });
-        }
-        setIsLoading(false);
+        body: JSON.stringify({
+          code: AllowlistOperationCode.ADD_PHASE,
+          params: {
+            id: getRandomObjectId(),
+            name: formValues.name,
+            description: formValues.description,
+          },
+        }),
       });
+      const data: AllowlistToolResponse<AllowlistOperation> =
+        await response.json();
+      if ("error" in data) {
+        setToasts({
+          messages:
+            typeof data.message === "string" ? [data.message] : data.message,
+          type: "error",
+        });
+        return;
+      }
+      setOperations([...operations, data]);
+      setFormValues({
+        name: "",
+        description: "",
+      });
+    } catch (error) {
+      setToasts({
+        messages: ["Something went wrong. Please try again later."],
+        type: "error",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    addPhase();
   };
 
   return (
@@ -102,12 +115,13 @@ export default function AllowlistToolBuilderPhasesAdd() {
           </div>
         </div>
         <div>
-          <button
+          <AllowlistToolPrimaryBtn
+            onClick={() => {}}
             type="submit"
-            className="tw-bg-primary-500 tw-px-4 tw-py-3 tw-text-sm tw-font-medium tw-text-white tw-w-full tw-border tw-border-solid tw-border-primary-500 tw-rounded-lg hover:tw-bg-primary-600 hover:tw-border-primary-600 tw-transition tw-duration-300 tw-ease-out"
+            loading={isLoading}
           >
             Add phase
-          </button>
+          </AllowlistToolPrimaryBtn>
         </div>
       </div>
     </form>

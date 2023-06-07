@@ -1,23 +1,24 @@
 import { useContext, useState } from "react";
 import { AllowlistToolBuilderContext } from "../../../../../../pages/allowlist-tool/[id]";
-import { useRouter } from "next/router";
-import {
-  AllowlistOperation,
-  AllowlistOperationCode,
-  AllowlistToolResponse,
-} from "../../../../allowlist-tool.types";
+import { AllowlistOperationCode } from "../../../../allowlist-tool.types";
+import AllowlistToolPrimaryBtn from "../../../../common/AllowlistToolPrimaryBtn";
 
 export default function AllowlistToolBuilderItemSelectTokenIdsOperation({
   itemId,
-  onClose,
+  addOperation,
+  isLoading,
 }: {
   itemId: string;
-  onClose: () => void;
+  addOperation: ({
+    code,
+    params,
+  }: {
+    code: AllowlistOperationCode;
+    params: any;
+  }) => Promise<{ success: boolean }>;
+  isLoading: boolean;
 }) {
-  const router = useRouter();
-  const { operations, setOperations, setToasts } = useContext(
-    AllowlistToolBuilderContext
-  );
+  const { setToasts } = useContext(AllowlistToolBuilderContext);
   const [formValues, setFormValues] = useState<{
     tokenIds: string;
   }>({
@@ -29,47 +30,21 @@ export default function AllowlistToolBuilderItemSelectTokenIdsOperation({
       [event.target.name]: event.target.value,
     });
   };
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    setIsLoading(true);
     const tokenIds = formValues.tokenIds;
-    if (tokenIds.length === 0) {
+    if (!tokenIds.length) {
       setToasts({ messages: ["Token IDs must not be empty"], type: "error" });
-      setIsLoading(false);
       return;
     }
-    const url = `${process.env.ALLOWLIST_API_ENDPOINT}/allowlists/${router.query.id}/operations`;
-    fetch(url, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
+    await addOperation({
+      code: AllowlistOperationCode.ITEM_SELECT_TOKEN_IDS,
+      params: {
+        itemId,
+        tokenIds,
       },
-      body: JSON.stringify({
-        code: AllowlistOperationCode.ITEM_SELECT_TOKEN_IDS,
-        params: {
-          itemId,
-          tokenIds: tokenIds,
-        },
-      }),
-    })
-      .then((response) => response.json())
-      .then((data: AllowlistToolResponse<AllowlistOperation>) => {
-        if ("error" in data) {
-          setToasts({
-            messages:
-              typeof data.message === "string" ? [data.message] : data.message,
-            type: "error",
-          });
-        } else {
-          setOperations([...operations, data]);
-          setFormValues({
-            tokenIds: "",
-          });
-          onClose();
-        }
-        setIsLoading(false);
-      });
+    });
   };
 
   return (
@@ -93,12 +68,13 @@ export default function AllowlistToolBuilderItemSelectTokenIdsOperation({
         </div>
       </div>
       <div className="tw-mt-6 tw-flex tw-justify-end">
-        <button
+        <AllowlistToolPrimaryBtn
+          onClick={() => {}}
+          loading={isLoading}
           type="submit"
-          className="tw-bg-primary-500 tw-px-4 tw-py-3 tw-font-medium tw-text-sm tw-text-white tw-w-full sm:tw-w-auto tw-border tw-border-primary-500 tw-rounded-lg hover:tw-bg-primary-600 hover:tw-border-primary-600 tw-transition tw-duration-300 tw-ease-out"
         >
           Add operation
-        </button>
+        </AllowlistToolPrimaryBtn>
       </div>
     </form>
   );

@@ -10,6 +10,7 @@ import {
   AllowlistToolResponse,
 } from "../../allowlist-tool.types";
 import { getRandomObjectId } from "../../../../helpers/AllowlistToolHelpers";
+import AllowlistToolPrimaryBtn from "../../common/AllowlistToolPrimaryBtn";
 
 export default function AllowlistToolBuilderTokenPoolsAdd() {
   const router = useRouter();
@@ -37,8 +38,8 @@ export default function AllowlistToolBuilderTokenPoolsAdd() {
   };
 
   const [isLoading, setIsLoading] = useState(false);
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
+
+  const addTokenPool = async () => {
     if (!selectedTransferPool) {
       setToasts({
         messages: ["Please select a transfer pool"],
@@ -47,54 +48,68 @@ export default function AllowlistToolBuilderTokenPoolsAdd() {
       return;
     }
     setIsLoading(true);
-    const url = `${process.env.ALLOWLIST_API_ENDPOINT}/allowlists/${router.query.id}/operations`;
+    try {
+      const url = `${process.env.ALLOWLIST_API_ENDPOINT}/allowlists/${router.query.id}/operations`;
 
-    const params: {
-      id: string;
-      name: string;
-      description: string;
-      transferPoolId: string;
-      tokenIds?: string;
-    } = {
-      id: getRandomObjectId(),
-      name: formValues.name,
-      description: formValues.description,
-      transferPoolId: selectedTransferPool?.value,
-    };
+      const params: {
+        id: string;
+        name: string;
+        description: string;
+        transferPoolId: string;
+        tokenIds?: string;
+      } = {
+        id: getRandomObjectId(),
+        name: formValues.name,
+        description: formValues.description,
+        transferPoolId: selectedTransferPool?.value,
+      };
 
-    if (!!formValues.tokenIds.length) {
-      params.tokenIds = formValues.tokenIds;
+      if (!!formValues.tokenIds.length) {
+        params.tokenIds = formValues.tokenIds;
+      }
+
+      const response = await fetch(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          code: AllowlistOperationCode.CREATE_TOKEN_POOL,
+          params,
+        }),
+      });
+
+      const data: AllowlistToolResponse<AllowlistOperation> =
+        await response.json();
+
+      if ("error" in data) {
+        setToasts({
+          messages:
+            typeof data.message === "string" ? [data.message] : data.message,
+          type: "error",
+        });
+        return;
+      }
+      setOperations([...operations, data]);
+      setFormValues({
+        name: "",
+        description: "",
+        tokenIds: "",
+      });
+      setSelectedTransferPool(null);
+    } catch (error) {
+      setToasts({
+        messages: ["Something went wrong"],
+        type: "error",
+      });
+    } finally {
+      setIsLoading(false);
     }
+  };
 
-    fetch(url, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        code: AllowlistOperationCode.CREATE_TOKEN_POOL,
-        params,
-      }),
-    })
-      .then((response) => response.json())
-      .then((data: AllowlistToolResponse<AllowlistOperation>) => {
-        if ("error" in data) {
-          setToasts({
-            messages:
-              typeof data.message === "string" ? [data.message] : data.message,
-            type: "error",
-          });
-        } else {
-          setOperations([...operations, data]);
-          setFormValues({
-            name: "",
-            description: "",
-            tokenIds: "",
-          });
-          setSelectedTransferPool(null);
-        }
-      })
-      .finally(() => setIsLoading(false));
+  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    addTokenPool();
   };
 
   return (
@@ -162,12 +177,13 @@ export default function AllowlistToolBuilderTokenPoolsAdd() {
           </div>
         </div>
         <div>
-          <button
+          <AllowlistToolPrimaryBtn
+            onClick={() => {}}
             type="submit"
-            className="tw-bg-primary-500 tw-px-4 tw-py-3 tw-text-sm tw-font-medium tw-text-white tw-w-full tw-border tw-border-solid tw-border-primary-500 tw-rounded-lg hover:tw-bg-primary-600 hover:tw-border-primary-600 tw-transition tw-duration-300 tw-ease-out"
+            loading={isLoading}
           >
             Add token pool
-          </button>
+          </AllowlistToolPrimaryBtn>
         </div>
       </div>
     </form>

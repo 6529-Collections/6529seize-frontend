@@ -10,6 +10,7 @@ import {
 } from "../../allowlist-tool.types";
 import { getRandomObjectId } from "../../../../helpers/AllowlistToolHelpers";
 import csvParser from "csv-parser";
+import AllowlistToolPrimaryBtn from "../../common/AllowlistToolPrimaryBtn";
 
 export default function AllowlistToolBuilderCustomTokenPoolsAdd() {
   const router = useRouter();
@@ -76,48 +77,60 @@ export default function AllowlistToolBuilderCustomTokenPoolsAdd() {
   };
 
   const [isLoading, setIsLoading] = useState<boolean>(false);
+
+  const addCustomTokenPool = async () => {
+    setIsLoading(true);
+    try {
+      if (tokens.length === 0) {
+        setToasts({ messages: ["No tokens provided"], type: "error" });
+        setIsLoading(false);
+        return;
+      }
+      const url = `${process.env.ALLOWLIST_API_ENDPOINT}/allowlists/${router.query.id}/operations`;
+      const response = await fetch(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          code: AllowlistOperationCode.CREATE_CUSTOM_TOKEN_POOL,
+          params: {
+            id: getRandomObjectId(),
+            name: formValues.name,
+            description: formValues.description,
+            tokens: tokens,
+          },
+        }),
+      });
+      const data: AllowlistToolResponse<AllowlistOperation> =
+        await response.json();
+      if ("error" in data) {
+        setToasts({
+          messages:
+            typeof data.message === "string" ? [data.message] : data.message,
+          type: "error",
+        });
+        return;
+      }
+      setOperations([...operations, data]);
+      setFormValues({
+        name: "",
+        description: "",
+      });
+      setTokens([]);
+    } catch (error) {
+      setToasts({
+        messages: ["Something went wrong"],
+        type: "error",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    setIsLoading(true);
-    if (tokens.length === 0) {
-      setToasts({ messages: ["No tokens provided"], type: "error" });
-      setIsLoading(false);
-      return;
-    }
-    const url = `${process.env.ALLOWLIST_API_ENDPOINT}/allowlists/${router.query.id}/operations`;
-    fetch(url, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        code: AllowlistOperationCode.CREATE_CUSTOM_TOKEN_POOL,
-        params: {
-          id: getRandomObjectId(),
-          name: formValues.name,
-          description: formValues.description,
-          tokens: tokens,
-        },
-      }),
-    })
-      .then((response) => response.json())
-      .then((data: AllowlistToolResponse<AllowlistOperation>) => {
-        if ("error" in data) {
-          setToasts({
-            messages:
-              typeof data.message === "string" ? [data.message] : data.message,
-            type: "error",
-          });
-        } else {
-          setOperations([...operations, data]);
-          setFormValues({
-            name: "",
-            description: "",
-          });
-          setTokens([]);
-        }
-        setIsLoading(false);
-      });
+    addCustomTokenPool();
   };
 
   return (
@@ -172,12 +185,13 @@ export default function AllowlistToolBuilderCustomTokenPoolsAdd() {
         </div>
 
         <div>
-          <button
+          <AllowlistToolPrimaryBtn
+            onClick={() => {}}
             type="submit"
-            className="tw-bg-primary-500 tw-px-4 tw-py-3 tw-text-sm tw-font-medium tw-text-white tw-w-full tw-border tw-border-solid tw-border-primary-500 tw-rounded-lg hover:tw-bg-primary-600 hover:tw-border-primary-600 tw-transition tw-duration-300 tw-ease-out"
+            loading={isLoading}
           >
             Add custom token pool
-          </button>
+          </AllowlistToolPrimaryBtn>
         </div>
       </div>
     </form>
