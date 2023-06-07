@@ -1,7 +1,9 @@
 import { useState } from "react";
 import { AllowlistOperationCode } from "../../allowlist-tool.types";
 import AllowlistToolPlusIcon from "../../icons/AllowlistToolPlusIcon";
-import AllowlistToolModelWrapper from "../../common/AllowlistToolModelWrapper";
+import AllowlistToolModelWrapper, {
+  AllowlistToolModalSize,
+} from "../../common/AllowlistToolModelWrapper";
 import AllowlistToolAddOperationModal from "./add-modal/AllowlistToolAddOperationModal";
 
 export default function AllowlistToolBuilderAddOperation({
@@ -35,6 +37,7 @@ export default function AllowlistToolBuilderAddOperation({
         showModal={showModal}
         onClose={() => setShowModal(false)}
         title={title}
+        modalSize={AllowlistToolModalSize.LARGE}
       >
         <AllowlistToolAddOperationModal
           targetItemId={targetItemId}

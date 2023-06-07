@@ -1,7 +1,7 @@
 import dynamic from "next/dynamic";
 import { useRouter } from "next/router";
 import { useState } from "react";
-import AllowlistToolModelWrapper from "./common/AllowlistToolModelWrapper";
+import AllowlistToolModelWrapper, { AllowlistToolModalSize } from "./common/AllowlistToolModelWrapper";
 import { AllowlistDescription } from "./allowlist-tool.types";
 
 const AddAllowlistModal = dynamic(
@@ -45,7 +45,7 @@ export default function AllowlistToolHeader() {
           New allowlist
         </button>
       </div>
-      <AllowlistToolModelWrapper showModal={showModal} onClose={() => setShowModal(false)} title="Add allowlist">
+      <AllowlistToolModelWrapper showModal={showModal} onClose={() => setShowModal(false)} title="Add allowlist" modalSize={AllowlistToolModalSize.SMALL}>
         <AddAllowlistModal
           onAllowlistAdded={onAllowlistAdded}
         />

@@ -2,11 +2,17 @@ import { AnimatePresence, motion } from "framer-motion";
 import React, { useRef } from "react";
 import { useClickAway, useKeyPressEvent } from "react-use";
 
+export enum AllowlistToolModalSize {
+  SMALL = "SMALL",
+  LARGE = "LARGE",
+}
+
 interface AllowlistToolModelWrapperProps {
   children: React.ReactNode;
   showModal: boolean;
   onClose: () => void;
   title: string;
+  modalSize?: AllowlistToolModalSize;
 }
 
 export default function AllowlistToolModelWrapper({
@@ -14,10 +20,19 @@ export default function AllowlistToolModelWrapper({
   showModal,
   onClose,
   title,
+  modalSize = AllowlistToolModalSize.SMALL,
 }: AllowlistToolModelWrapperProps) {
   const modalRef = useRef<HTMLDivElement>(null);
   useClickAway(modalRef, () => onClose());
   useKeyPressEvent("Escape", () => onClose());
+
+  const modalSizeClasses: Record<AllowlistToolModalSize, string> = {
+    [AllowlistToolModalSize.SMALL]: "sm:tw-max-w-lg",
+    [AllowlistToolModalSize.LARGE]: "sm:tw-max-w-2xl",
+  };
+
+  const modalSizeClass = modalSizeClasses[modalSize];
+
   return (
     <AnimatePresence>
       {showModal && (
@@ -35,7 +50,7 @@ export default function AllowlistToolModelWrapper({
               <div className="tw-flex tw-min-h-full tw-items-end tw-justify-center tw-p-4 tw-text-center sm:tw-items-center sm:tw-p-0">
                 <div
                   ref={modalRef}
-                  className="tw-relative tw-w-full tw-transform tw-rounded-xl tw-bg-neutral-900 tw-px-4 tw-pb-4 tw-pt-5 tw-text-left tw-shadow-xl tw-transition-all sm:tw-my-8 sm:tw-w-full sm:tw-max-w-lg sm:tw-p-6"
+                  className={`tw-relative tw-w-full tw-transform tw-rounded-xl tw-bg-neutral-900 tw-px-4 tw-pb-4 tw-pt-5 tw-text-left tw-shadow-xl tw-transition-all sm:tw-my-8 sm:tw-w-full sm:tw-p-6 ${modalSizeClass}`}
                 >
                   <div className="tw-flex tw-justify-between tw-items-center">
                     <p className="tw-text-lg tw-text-white tw-font-medium tw-mb-0">
