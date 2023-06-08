@@ -1,10 +1,58 @@
-export default function AllowlistToolBuilderOperationsRun(){
-    return (
-        <button
-        type="submit"
-        className="tw-bg-primary-500 tw-px-4 tw-py-2.5 tw-font-medium tw-text-sm tw-text-white tw-w-full tw-border tw-border-primary-500 tw-rounded-lg hover:tw-bg-primary-600 hover:tw-border-primary-600 tw-transition tw-duration-300 tw-ease-out"
-      >
-        Run operations
-      </button>
-    )
+import { useRouter } from "next/router";
+import { useContext, useState } from "react";
+import { AllowlistToolBuilderContext } from "../../../../pages/allowlist-tool/[id]";
+import AllowlistToolPrimaryBtn from "../../common/AllowlistToolPrimaryBtn";
+import {
+  AllowlistRun,
+  AllowlistToolResponse,
+} from "../../allowlist-tool.types";
+
+export default function AllowlistToolBuilderOperationsRun() {
+  const router = useRouter();
+  const { setToasts } = useContext(AllowlistToolBuilderContext);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const runOperations = async () => {
+    setIsLoading(true);
+    const url = `${process.env.ALLOWLIST_API_ENDPOINT}/allowlists/${router.query.id}/runs`;
+    try {
+      const response = await fetch(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          allowlistId: router.query.id,
+        }),
+      });
+      const data: AllowlistToolResponse<AllowlistRun> = await response.json();
+      if ("error" in data) {
+        setToasts({
+          messages:
+            typeof data.message === "string" ? [data.message] : data.message,
+          type: "error",
+        });
+        return;
+      }
+      setToasts({
+        messages: ["Started running operations"],
+        type: "success",
+      });
+    } catch (error) {
+      setToasts({
+        messages: ["Something went wrong"],
+        type: "error",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  return (
+    <AllowlistToolPrimaryBtn
+      onClick={() => runOperations()}
+      type="button"
+      loading={isLoading}
+    >
+      Run operations
+    </AllowlistToolPrimaryBtn>
+  );
 }
