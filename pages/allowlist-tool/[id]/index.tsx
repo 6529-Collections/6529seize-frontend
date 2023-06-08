@@ -203,15 +203,12 @@ export default function AllowlistToolAllowlistId({
       >
         <div
           id="allowlist-tool"
-          className={`tw-min-h-screen tw-bg-neutral-950 ${poppins.className}`}
+          className={`tw-min-h-screen tw-relative tw-bg-neutral-950 ${poppins.className}`}
         >
           <div className="container tw-mx-auto tw-pt-6 tw-pb-12">
-            <h1 className="tw-uppercase tw-float-none tw-mb-0">
-              {allowlist.name}
-            </h1>
-
-            <div className="tw-pt-6">
-              <div className="tw-space-y-6 tw-mr-72">
+         
+              <div className="tw-space-y-6 tw-ml-80">
+                <h1 className="tw-uppercase tw-mb-0 tw-float-none">{allowlist.name}</h1>
                 <AllowlistToolBuilderTransferPools />
                 <AllowlistToolBuilderTokenPools />
                 <AllowlistToolBuilderCustomTokenPools />
@@ -220,7 +217,7 @@ export default function AllowlistToolAllowlistId({
               </div>
               <AllowlistToolBuilderOperations />
             </div>
-          </div>
+         
         </div>
         <ToastContainer />
       </AllowlistToolBuilderContext.Provider>

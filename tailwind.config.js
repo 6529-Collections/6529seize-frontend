@@ -18,7 +18,8 @@ module.exports = {
         "primary-400": "#528BFF",
         "primary-500": "#406AFE",
         "primary-600": "#395FE4",
-        error: "#F97066",
+          error: "#F97066",
+          success: "#039855"
       },
     },
   },
