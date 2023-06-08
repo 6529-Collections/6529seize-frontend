@@ -148,3 +148,18 @@ export interface AllowlistOperationDescription {
   readonly title: string;
   readonly description: string;
 }
+
+export enum AllowlistRunStatus {
+  PENDING = "PENDING",
+  CLAIMED = "CLAIMED",
+  COMPLETED = "COMPLETED",
+  FAILED = "FAILED",
+}
+
+export interface AllowlistRun {
+  readonly id: string;
+  readonly allowlistId: string;
+  readonly status: AllowlistRunStatus;
+  readonly createdAt: number;
+  readonly claimedAt?: number;
+}
