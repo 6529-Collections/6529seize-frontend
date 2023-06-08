@@ -57,21 +57,34 @@ export default function AllowlistToolAllowlistsTableItem({
 
   return (
     <>
-      <tr onClick={goToAllowlist} className="tw-cursor-pointer">
-        <td className="tw-rounded-l-lg tw-whitespace-nowrap tw-py-4 tw-pl-4 tw-pr-3 tw-text-sm tw-font-medium tw-text-white">
-          {allowlist.name}
-        </td>
-        <td className="tw-whitespace-nowrap tw-px-3 tw-py-4 tw-text-sm tw-text-neutral-300">
-          Lorem ipsum dolor sit.
-        </td>
-        <td className="tw-rounded-r-lg tw-relative tw-whitespace-nowrap tw-py-4 tw-pl-3 tw-pr-4 tw-text-right tw-text-sm tw-font-medium">
+      <li
+        onClick={goToAllowlist}
+        className="tw-cursor-pointer tw-relative tw-flex tw-items-center tw-space-x-4 tw-px-4 sm:tw-px-6 tw-py-5 tw-bg-[#1E1E1E] tw-border tw-border-solid tw-border-white/5 tw-rounded-xl hover:tw-bg-neutral-800 tw-transition tw-duration-300 tw-ease-out"
+      >
+        <div className="tw-min-w-0 tw-flex-auto">
+          <div className="tw-flex tw-items-center tw-gap-x-3">
+            <div className="tw-flex-none tw-rounded-full tw-p-1 tw-text-neutral-500 tw-bg-neutral-100/10">
+              <div className="tw-h-2 tw-w-2 tw-rounded-full tw-bg-current"></div>
+            </div>
+            <div className="tw-min-w-0 tw-text-sm tw-font-semibold tw-leading-6 tw-text-white">
+              {allowlist.name}
+            </div>
+          </div>
+          <div className="tw-mt-3">
+            <p className="tw-truncate tw-mb-0 tw-text-sm tw-leading-5 tw-text-neutral-400">
+              Lorem ipsum dolor sit amet.
+            </p>
+          </div>
+        </div>
+        <div className="tw-flex tw-items-center tw-gap-x-6">
           <button
-            onClick={deleteAllowlist}
             type="button"
-            className="tw-group tw-p-2 tw-rounded-full tw-bg-transparent tw-text-neutral-300 tw-font-medium tw-text-sm tw-border-none hover:tw-text-white hover:tw-bg-neutral-800 tw-transition tw-duration-300 tw-ease-out"
+            title="Delete"
+            onClick={deleteAllowlist}
+            className="tw-rounded-full tw-group tw-flex tw-items-center tw-justify-center tw-p-2 tw-text-xs tw-font-medium tw-border-none tw-ring-1 tw-ring-inset tw-text-neutral-400 tw-bg-neutral-400/10 tw-ring-neutral-400/20"
           >
             <svg
-              className="tw-h-5 tw-w-5 group-hover:tw-text-error tw-transition tw-duration-300 tw-ease-out"
+              className="tw-h-4 tw-w-4 group-hover:tw-text-error tw-transition tw-duration-300 tw-ease-out"
               viewBox="0 0 24 24"
               fill="none"
               xmlns="http://www.w3.org/2000/svg"
@@ -85,8 +98,20 @@ export default function AllowlistToolAllowlistsTableItem({
               />
             </svg>
           </button>
-        </td>
-      </tr>
+          <svg
+            className="tw-h-5 tw-w-5 tw-flex-none tw-text-neutral-400"
+            viewBox="0 0 20 20"
+            fill="currentColor"
+            aria-hidden="true"
+          >
+            <path
+              fill-rule="evenodd"
+              d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z"
+              clip-rule="evenodd"
+            />
+          </svg>
+        </div>
+      </li>
     </>
   );
 }

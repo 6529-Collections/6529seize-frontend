@@ -26,16 +26,16 @@ export default function AllowlistToolExpandableTableWrapper({
   return (
     <>
       <div>
-        <div className="tw-bg-neutral-900 tw-border tw-border-solid tw-border-white/5 tw-rounded-xl  tw-transition tw-duration-300 tw-ease-out">
+        <div className="tw-bg-neutral-900 tw-border tw-border-solid tw-border-white/5 tw-rounded-xl tw-transition tw-duration-300 tw-ease-out">
           <div
             onClick={(e) => {
               e.stopPropagation();
               setIsOpen(!isOpen);
             }}
-            className={`tw-cursor-pointer tw-px-6 tw-flex tw-items-center tw-gap-x-4 tw-py-5  ${
+            className={`tw-cursor-pointer tw-px-6 tw-flex tw-items-center tw-gap-x-4 tw-py-5 tw-transition tw-duration-300 tw-ease-out  ${
               isOpen
                 ? "tw-rounded-t-xl"
-                : "tw-rounded-xl hover:tw-bg-neutral-800/80"
+                : "tw-rounded-xl hover:tw-bg-neutral-800"
             }`}
           >
             <div className="tw-h-6 tw-w-6 tw-flex tw-items-center tw-justify-center tw-bg-neutral-700 tw-rounded-md">
