@@ -42,7 +42,10 @@ export default function AllowlistToolBuilderCustomTokenPools() {
           setCustomTokenPools(data);
         }
       } catch (error: any) {
-        setToasts({ messages: [error.message], type: "error" });
+        setToasts({
+          messages: ["Something went wrong. Please try again."],
+          type: "error",
+        });
       } finally {
         setIsLoading(false);
       }

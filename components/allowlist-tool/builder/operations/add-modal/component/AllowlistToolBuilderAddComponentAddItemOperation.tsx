@@ -1,27 +1,30 @@
 import { useContext, useState } from "react";
 import { AllowlistToolBuilderContext } from "../../../../../../pages/allowlist-tool/[id]";
-import { useRouter } from "next/router";
-import {
-  AllowlistOperation,
-  AllowlistOperationCode,
-  AllowlistToolResponse,
-  Pool,
-} from "../../../../allowlist-tool.types";
+import { AllowlistOperationCode, Pool } from "../../../../allowlist-tool.types";
 import AllowlistToolSelectMenu, {
   AllowlistToolSelectMenuOption,
 } from "../../../../common/select-menu/AllowlistToolSelectMenu";
 import { getRandomObjectId } from "../../../../../../helpers/AllowlistToolHelpers";
+import AllowlistToolPrimaryBtn from "../../../../common/AllowlistToolPrimaryBtn";
 
 export default function AllowlistToolBuilderComponentAddItemOperation({
   componentId,
-  onClose,
+  addOperation,
+  isLoading,
 }: {
   componentId: string;
-  onClose: () => void;
+  addOperation: ({
+    code,
+    params,
+  }: {
+    code: AllowlistOperationCode;
+    params: any;
+  }) => Promise<{ success: boolean }>;
+  isLoading: boolean;
 }) {
-  const router = useRouter();
-  const { operations, setOperations, tokenPools, customTokenPools, setToasts } =
-    useContext(AllowlistToolBuilderContext);
+  const { tokenPools, customTokenPools, setToasts } = useContext(
+    AllowlistToolBuilderContext
+  );
 
   const tokenPoolOptions: AllowlistToolSelectMenuOption[] = tokenPools.map(
     (tokenPool) => ({
@@ -60,57 +63,27 @@ export default function AllowlistToolBuilderComponentAddItemOperation({
     });
   };
 
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (!selectedTokenPool) {
       setToasts({ messages: ["Please select a token pool"], type: "error" });
       return;
     }
-    setIsLoading(true);
-    const url = `${process.env.ALLOWLIST_API_ENDPOINT}/allowlists/${router.query.id}/operations`;
-
-    const params = {
-      id: getRandomObjectId(),
-      name: formValues.name,
-      description: formValues.description,
-      componentId: componentId,
-      poolId: selectedTokenPool.value,
-      poolType: tokenPools.find(
-        (tokenPool) => tokenPool.tokenPoolId === selectedTokenPool.value
-      )
-        ? Pool.TOKEN_POOL
-        : Pool.CUSTOM_TOKEN_POOL,
-    };
-    fetch(url, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
+    await addOperation({
+      code: AllowlistOperationCode.ADD_ITEM,
+      params: {
+        id: getRandomObjectId(),
+        name: formValues.name,
+        description: formValues.description,
+        componentId: componentId,
+        poolId: selectedTokenPool.value,
+        poolType: tokenPools.find(
+          (tokenPool) => tokenPool.tokenPoolId === selectedTokenPool.value
+        )
+          ? Pool.TOKEN_POOL
+          : Pool.CUSTOM_TOKEN_POOL,
       },
-      body: JSON.stringify({
-        code: AllowlistOperationCode.ADD_ITEM,
-        params,
-      }),
-    })
-      .then((response) => response.json())
-      .then((data: AllowlistToolResponse<AllowlistOperation>) => {
-        if ("error" in data) {
-          setToasts({
-            messages:
-              typeof data.message === "string" ? [data.message] : data.message,
-            type: "error",
-          });
-        } else {
-          setOperations([...operations, data]);
-          setFormValues({
-            name: "",
-            description: "",
-          });
-          setSelectedTokenPool(null);
-          onClose();
-        }
-      })
-      .finally(() => setIsLoading(false));
+    });
   };
 
   return (
@@ -159,12 +132,13 @@ export default function AllowlistToolBuilderComponentAddItemOperation({
         </div>
       </div>
       <div className="tw-mt-6 tw-flex tw-justify-end">
-        <button
+        <AllowlistToolPrimaryBtn
+          onClick={() => {}}
+          loading={isLoading}
           type="submit"
-          className="tw-bg-primary-500 tw-px-4 tw-py-3 tw-text-sm tw-font-medium tw-text-white tw-w-full sm:tw-w-auto tw-border tw-border-solid tw-border-primary-500 tw-rounded-lg hover:tw-bg-primary-600 hover:tw-border-primary-600 tw-transition tw-duration-300 tw-ease-out"
         >
           Add operation
-        </button>
+        </AllowlistToolPrimaryBtn>
       </div>
     </form>
   );

@@ -1,6 +1,9 @@
 import { useContext, useState } from "react";
 import { useRouter } from "next/router";
-import { AllowlistDescription } from "./allowlist-tool.types";
+import {
+  AllowlistDescription,
+  AllowlistToolResponse,
+} from "./allowlist-tool.types";
 import { AllowlistToolContext } from "../../pages/allowlist-tool";
 
 export default function AllowlistToolAllowlistsTableItem({
@@ -12,44 +15,40 @@ export default function AllowlistToolAllowlistsTableItem({
 }) {
   const { setToasts } = useContext(AllowlistToolContext);
   const router = useRouter();
-  const [isLoading, setLoading] = useState<boolean>(false);
-  const deleteAllowlist = () => {
-    setLoading(true);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const deleteAllowlist = async () => {
+    setIsLoading(true);
     const url = `${process.env.ALLOWLIST_API_ENDPOINT}/allowlists/${allowlist.id}`;
-    fetch(url, {
-      method: "DELETE",
-    })
-      .then((response) => {
-        if (response.status === 200 && response.statusText === "OK") {
-          onAllowlistRemoved(allowlist.id);
-          return;
-        }
-        response
-          .json()
-          .then((data) => {
-            if ("error" in data) {
-              setToasts({
-                messages:
-                  typeof data.message === "string"
-                    ? [data.message]
-                    : data.message,
-                type: "error",
-              });
-            } else {
-              setToasts({
-                messages: ["Something went wrong. Please try again."],
-                type: "error",
-              });
-            }
-          })
-          .catch(() =>
-            setToasts({
-              messages: ["Something went wrong. Please try again."],
-              type: "error",
-            })
-          );
-      })
-      .finally(() => setLoading(false));
+    try {
+      const response = await fetch(url, {
+        method: "DELETE",
+      });
+      if (response.status === 200 && response.statusText === "OK") {
+        onAllowlistRemoved(allowlist.id);
+        return;
+      }
+
+      const data: AllowlistToolResponse<any> = await response.json();
+      if ("error" in data) {
+        setToasts({
+          messages:
+            typeof data.message === "string" ? [data.message] : data.message,
+          type: "error",
+        });
+        return;
+      }
+      setToasts({
+        messages: ["Something went wrong. Please try again."],
+        type: "error",
+      });
+    } catch (error: any) {
+      setToasts({
+        messages: ["Something went wrong. Please try again."],
+        type: "error",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const goToAllowlist = () => {

@@ -23,29 +23,35 @@ const AllowlistToolAllowlistsTable = dynamic(
 export default function AllowlistToolAllowlists() {
   const { setToasts } = useContext(AllowlistToolContext);
   const [allowlists, setAllowlists] = useState<AllowlistDescription[]>([]);
-  const [isLoading, setLoading] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  const fetchData = () => {
-    setLoading(true);
+  const getAllowlists = async () => {
+    setIsLoading(true);
     setAllowlists([]);
     const url = `${process.env.ALLOWLIST_API_ENDPOINT}/allowlists`;
-    fetch(url)
-      .then((response) => response.json())
-      .then((data: AllowlistToolResponse<AllowlistDescription[]>) => {
-        if ("error" in data) {
-          setToasts({
-            messages:
-              typeof data.message === "string" ? [data.message] : data.message,
-            type: "error",
-          });
-        } else {
-          setAllowlists(data);
-        }
-        setLoading(false);
-      });
+    try {
+      const response = await fetch(url);
+      const data: AllowlistToolResponse<AllowlistDescription[]> =
+        await response.json();
+      if ("error" in data) {
+        setToasts({
+          messages:
+            typeof data.message === "string" ? [data.message] : data.message,
+          type: "error",
+        });
+        return;
+      }
+      setAllowlists(data);
+    } catch (error: any) {
+      setToasts({ messages: [error.message], type: "error" });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  useEffect(() => fetchData(), []);
+  useEffect(() => {
+    getAllowlists();
+  }, []);
 
   const removeAllowlist = (id: string) => {
     setAllowlists(allowlists.filter((allowlist) => allowlist.id !== id));

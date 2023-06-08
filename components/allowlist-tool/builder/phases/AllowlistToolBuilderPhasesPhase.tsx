@@ -31,13 +31,14 @@ export default function AllowlistToolBuilderPhasesPhase({
   const defaultOperation = AllowlistOperationCode.ADD_COMPONENT;
   return (
     <>
-      <tr
-        onClick={(e) => {
-          e.stopPropagation();
-          setIsOpen(!isOpen);
-        }}
-      >
-        <td className="tw-cursor-pointer tw-whitespace-nowrap tw-py-2 tw-pl-4 tw-pr-3 tw-text-sm tw-font-medium tw-text-white sm:tw-pl-6 ">
+      <tr>
+        <td
+          onClick={(e) => {
+            e.stopPropagation();
+            setIsOpen(!isOpen);
+          }}
+          className="tw-cursor-pointer tw-whitespace-nowrap tw-py-2 tw-pl-4 tw-pr-3 tw-text-sm tw-font-medium tw-text-white sm:tw-pl-6 "
+        >
           <div className="tw-flex tw-items-center tw-gap-x-2">
             <svg
               ref={iconScope}
