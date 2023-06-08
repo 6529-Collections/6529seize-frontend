@@ -1,17 +1,111 @@
-import { AllowlistOperation } from "../../allowlist-tool.types";
+import { AllowlistToolBuilderOperationMeta } from "./AllowlistToolBuilderOperationsList";
 
 export default function AllowlistToolBuilderOperationsListitem({
   operation,
 }: {
-  operation: AllowlistOperation;
+  operation: AllowlistToolBuilderOperationMeta;
 }) {
-  return (
-    <div
-      className={`tw-flex tw-items-center tw-text-xs ${
-        operation.activeRunId ? "tw-text-green-500" : "tw-text-neutral-300"
-      }`}
-    >
-      {operation.code}
-    </div>
-  );
+  if (operation.run) {
+    return (
+      <li className="tw-p-5 tw-rounded-lg tw-bg-neutral-800/50">
+        <div className="tw-flex tw-items-center tw-gap-x-3.5">
+          <svg
+            className="tw-h-5 tw-w-5"
+            viewBox="0 0 24 24"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <rect
+              className="tw-text-success"
+              width="24"
+              height="24"
+              rx="12"
+              fill="currentColor"
+            />
+            <path
+              className="tw-text-white"
+              d="M7.5 12L10.5 15L16.5 9"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+          <span className="tw-text-sm tw-font-medium tw-text-neutral-400">
+            {operation.title}
+          </span>
+        </div>
+        <div className="tw-mt-3 tw-flex tw-flex-col">
+          {operation.params.map((param, i) => (
+            <div
+              className="tw-flex tw-gap-x-1"
+              key={`operation-param-run-${i}`}
+            >
+              <div className="tw-w-20">
+                <span className="tw-whitespace-nowrap tw-text-xs tw-leading-3 tw-font-medium tw-text-neutral-400">
+                  {param.title}
+                </span>
+              </div>
+              <div className="max-w-[10rem] tw-truncate tw-text-neutral-500">
+                <span className="tw-text-xs tw-leading-3 tw-font-normal tw-text-neutral-500">
+                  {param.description}
+                </span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </li>
+    );
+  } else {
+    return (
+      <li className="tw-p-5 tw-rounded-lg tw-bg-neutral-800/50">
+        <div className="tw-flex tw-items-center tw-gap-x-3.5">
+          <svg
+            className="tw-h-5 tw-w-5"
+            viewBox="0 0 24 24"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <rect
+              className="tw-text-neutral-700"
+              width="24"
+              height="24"
+              rx="12"
+              fill="currentColor"
+            />
+            <path
+              className="tw-text-neutral-500"
+              d="M7.5 12L10.5 15L16.5 9"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+          <span className="tw-whitespace-nowrap tw-text-sm tw-font-medium tw-text-white">
+            {operation.title}
+          </span>
+        </div>
+        <div className="tw-mt-3 tw-flex tw-flex-col">
+          {operation.params.map((param, i) => (
+            <div
+              className="tw-flex tw-gap-x-1"
+              key={`operation-param-not-run-${i}`}
+            >
+              <div className="tw-w-20">
+                <span className="tw-whitespace-nowrap tw-text-xs tw-leading-3 tw-font-medium tw-text-neutral-200">
+                  {param.title}
+                </span>
+              </div>
+              <div className="max-w-[10rem] tw-truncate tw-text-neutral-300">
+                <span className="tw-text-xs tw-leading-3 tw-font-normal tw-text-neutral-300">
+                  {param.description}
+                </span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </li>
+    );
+  }
 }
