@@ -1,15 +1,15 @@
 import dynamic from "next/dynamic";
 import HeaderPlaceholder from "../../../components/header/HeaderPlaceholder";
 import { Poppins } from "next/font/google";
-import { createContext, useEffect, useState } from "react";
+import { createContext, useState } from "react";
 import Breadcrumb, { Crumb } from "../../../components/breadcrumb/Breadcrumb";
 import {
   AllowlistCustomTokenPool,
   AllowlistDescription,
   AllowlistOperation,
-  AllowlistOperationCode,
   AllowlistOperationDescription,
   AllowlistPhaseWithComponentAndItems,
+  AllowlistRun,
   AllowlistTokenPool,
   AllowlistTransferPool,
   AllowlistWalletPool,
@@ -17,10 +17,6 @@ import {
 import AllowlistToolBuilderOperations from "../../../components/allowlist-tool/builder/operations/AllowlistToolBuilderOperations";
 import { ToastContainer, toast, Slide, TypeOptions } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import {
-  assertUnreachable,
-  getRandomObjectId,
-} from "../../../helpers/AllowlistToolHelpers";
 
 const poppins = Poppins({
   weight: ["300", "400", "500", "600", "700"],
@@ -85,6 +81,8 @@ const Header = dynamic(() => import("../../../components/header/Header"), {
 });
 
 type AllowlistToolBuilderContextType = {
+  activeRun: AllowlistRun | null;
+  setActiveRun: (run: AllowlistRun | null) => void;
   operations: AllowlistOperation[];
   setOperations: (operations: AllowlistOperation[]) => void;
   operationDescriptions: AllowlistOperationDescription[];
@@ -138,6 +136,8 @@ const setToasts = ({
 
 export const AllowlistToolBuilderContext =
   createContext<AllowlistToolBuilderContextType>({
+    activeRun: null,
+    setActiveRun: () => {},
     operations: [],
     setOperations: () => {},
     operationDescriptions: [],
@@ -166,6 +166,8 @@ export default function AllowlistToolAllowlistId({
     { display: "Allowlist tool", href: "/allowlist-tool" },
     { display: allowlist.name },
   ]);
+
+  const [activeRun, setActiveRun] = useState<AllowlistRun | null>(null);
   const [operations, setOperations] = useState<AllowlistOperation[]>([]);
   const [transferPools, setTransferPools] = useState<AllowlistTransferPool[]>(
     []
@@ -185,6 +187,8 @@ export default function AllowlistToolAllowlistId({
       <Breadcrumb breadcrumbs={breadcrumbs} />
       <AllowlistToolBuilderContext.Provider
         value={{
+          activeRun,
+          setActiveRun,
           operations,
           setOperations,
           operationDescriptions,

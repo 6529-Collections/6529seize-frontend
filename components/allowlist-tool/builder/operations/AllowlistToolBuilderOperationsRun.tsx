@@ -9,8 +9,11 @@ import {
 
 export default function AllowlistToolBuilderOperationsRun() {
   const router = useRouter();
-  const { setToasts } = useContext(AllowlistToolBuilderContext);
+  const { setToasts, setActiveRun } = useContext(AllowlistToolBuilderContext);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+
+
+
   const runOperations = async () => {
     setIsLoading(true);
     const url = `${process.env.ALLOWLIST_API_ENDPOINT}/allowlists/${router.query.id}/runs`;
@@ -37,6 +40,7 @@ export default function AllowlistToolBuilderOperationsRun() {
         messages: ["Started running operations"],
         type: "success",
       });
+      setActiveRun(data);
     } catch (error) {
       setToasts({
         messages: ["Something went wrong"],
