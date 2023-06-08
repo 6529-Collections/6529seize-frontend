@@ -8,9 +8,9 @@ export default function AllowlistToolBuilderOperationsListitem({
   if (operation.run) {
     return (
       <li className="tw-p-5 tw-rounded-lg tw-bg-neutral-800/50">
-        <div className="tw-flex tw-items-center tw-gap-x-3.5">
+        <div className="tw-flex tw-items-center tw-gap-x-3">
           <svg
-            className="tw-h-5 tw-w-5"
+            className="tw-h-4 tw-w-4 tw-flex-shrink-0"
             viewBox="0 0 24 24"
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
@@ -31,22 +31,24 @@ export default function AllowlistToolBuilderOperationsListitem({
               strokeLinejoin="round"
             />
           </svg>
-          <span className="tw-text-sm tw-font-medium tw-text-neutral-400">
-            {operation.title}
-          </span>
+          <div className="tw-w-72 tw-text-sm tw-leading-5 tw-truncate tw-text-neutral-400">
+            <span className="tw-text-sm tw-font-medium tw-text-neutral-400">
+              {operation.title}
+            </span>
+          </div>
         </div>
-        <div className="tw-mt-3 tw-flex tw-flex-col">
+        <div className="tw-mt-3 tw-flex tw-flex-col tw-gap-y-2.5">
           {operation.params.map((param, i) => (
             <div
               className="tw-flex tw-gap-x-1"
               key={`operation-param-run-${i}`}
             >
-              <div className="tw-w-20">
+              <div className="tw-w-20 tw-text-xs tw-leading-3">
                 <span className="tw-whitespace-nowrap tw-text-xs tw-leading-3 tw-font-medium tw-text-neutral-400">
                   {param.title}
                 </span>
               </div>
-              <div className="max-w-[10rem] tw-truncate tw-text-neutral-500">
+              <div className="tw-text-xs tw-leading-3 max-w-[10rem] tw-truncate tw-text-neutral-500">
                 <span className="tw-text-xs tw-leading-3 tw-font-normal tw-text-neutral-500">
                   {param.description}
                 </span>
@@ -59,9 +61,9 @@ export default function AllowlistToolBuilderOperationsListitem({
   } else {
     return (
       <li className="tw-p-5 tw-rounded-lg tw-bg-neutral-800/50">
-        <div className="tw-flex tw-items-center tw-gap-x-3.5">
+        <div className="tw-flex tw-items-center tw-gap-x-3">
           <svg
-            className="tw-h-5 tw-w-5"
+            className="tw-h-4 tw-w-4 tw-flex-shrink-0"
             viewBox="0 0 24 24"
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
@@ -82,22 +84,24 @@ export default function AllowlistToolBuilderOperationsListitem({
               strokeLinejoin="round"
             />
           </svg>
-          <span className="tw-whitespace-nowrap tw-text-sm tw-font-medium tw-text-white">
-            {operation.title}
-          </span>
+          <div className="tw-w-72 tw-text-sm tw-leading-5 tw-truncate tw-text-white">
+            <span className="tw-whitespace-nowrap tw-text-sm tw-font-medium tw-text-white">
+              {operation.title}
+            </span>
+          </div>
         </div>
-        <div className="tw-mt-3 tw-flex tw-flex-col">
+        <div className="tw-mt-3 tw-flex tw-flex-col gap-y-2.5">
           {operation.params.map((param, i) => (
             <div
               className="tw-flex tw-gap-x-1"
               key={`operation-param-not-run-${i}`}
             >
-              <div className="tw-w-20">
+              <div className="tw-w-20 tw-leading-3 tw-text-xs">
                 <span className="tw-whitespace-nowrap tw-text-xs tw-leading-3 tw-font-medium tw-text-neutral-200">
                   {param.title}
                 </span>
               </div>
-              <div className="max-w-[10rem] tw-truncate tw-text-neutral-300">
+              <div className="tw-leading-3 tw-text-xs max-w-[10rem] tw-truncate tw-text-neutral-300">
                 <span className="tw-text-xs tw-leading-3 tw-font-normal tw-text-neutral-300">
                   {param.description}
                 </span>
