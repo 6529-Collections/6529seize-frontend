@@ -1,48 +1,40 @@
-# 6529SEIZE WEB
+# 6529SEIZE-FRONTEND
 
-PORT: 3001
+PORT: 3000
 
-# Setup
-
-## Install
+### Install
 
 ```
 npm i
 ```
 
-## Build
+### Build
 
 ```
 npm run build
 ```
 
-# Services
+### Environment
 
-## LOCAL
+To run the project you need a .env file.
+
+[Sample .env file](https://github.com/6529-Collections/6529seize-frontend/tree/main/.env.sample)
+
+### Run
+
+- Locally
 
 ```
 npm run dev
 ```
 
-## STAGING
+- Production
 
 ```
 npm run start
 ```
 
-PM2
-
-```
-pm2 start npm --name=6529seize -- run start
-```
-
-## LIVE
-
-```
-npm run start
-```
-
-PM2
+### RUN USING PM2
 
 ```
 pm2 start npm --name=6529seize -- run start
