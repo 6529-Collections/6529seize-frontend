@@ -106,7 +106,7 @@ export function WalletAddress(props: {
               {!props.disableLink && <a href={getLink()}>{resolveAddress()}</a>}
             </span>
           )}
-          {props.display && !props.display.startsWith("0x") ? (
+          {props.display && props.display.endsWith(".eth") ? (
             <Dropdown
               drop={"down-centered"}
               className={`${styles.copyDropdown}`}
