@@ -8,10 +8,11 @@ import {
 import { AllowlistToolBuilderContext } from "../../../../pages/allowlist-tool/[id]";
 import AllowlistToolBuilderOperationsList from "./AllowlistToolBuilderOperationsList";
 import AllowlistToolBuilderOperationsRun from "./AllowlistToolBuilderOperationsRun";
+import AllowlistToolBuilderOperationsActiveRun from "./AllowlistToolBuilderOperationsActiveRun";
 
 export default function AllowlistToolBuilderOperations() {
   const router = useRouter();
-  const { operations, setOperations, setToasts } = useContext(
+  const { operations, setOperations, setToasts, activeRun } = useContext(
     AllowlistToolBuilderContext
   );
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -49,9 +50,12 @@ export default function AllowlistToolBuilderOperations() {
       <div className="tw-absolute tw-left-0 -tw-z-0 tw-inset-y-0 tw-w-80 tw-bg-neutral-900 tw-overflow-y-auto  tw-ring-1 tw-ring-white/5">
         <div className="tw-pt-8 tw-pb-4 tw-flex tw-flex-col tw-gap-y-5 tw-bg-neutral-900 tw-px-5">
           <div>
-            <span className="tw-text-lg tw-font-medium tw-text-white">
-              Operations
-            </span>
+            <div className="tw-w-full tw-inline-flex tw-justify-between">
+              <span className="tw-text-lg tw-font-medium tw-text-white">
+                Operations
+              </span>
+              <AllowlistToolBuilderOperationsActiveRun />
+            </div>
             <div className="tw-mt-2">
               <AllowlistToolBuilderOperationsRun />
             </div>
