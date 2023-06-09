@@ -3,7 +3,12 @@ import { GRADIENT_CONTRACT, MEMES_CONTRACT } from "../constants";
 import { BaseNFT, VolumeType } from "../entities/INFT";
 
 export function formatAddress(address: string) {
-  if (!address || !address.startsWith("0x") || address.includes(" ")) {
+  if (
+    !address ||
+    !address.startsWith("0x") ||
+    address.endsWith(".eth") ||
+    address.includes(" ")
+  ) {
     return address;
   }
   if (address.length > 11) {
