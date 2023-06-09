@@ -56,7 +56,6 @@ export default function AllowlistToolBuilderOperations() {
               <AllowlistToolBuilderOperationsRun />
             </div>
           </div>
-
           <AllowlistToolBuilderOperationsList operations={operations} />
         </div>
       </div>

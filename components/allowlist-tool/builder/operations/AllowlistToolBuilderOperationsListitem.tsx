@@ -90,7 +90,7 @@ export default function AllowlistToolBuilderOperationsListitem({
             </span>
           </div>
         </div>
-        <div className="tw-mt-3 tw-flex tw-flex-col gap-y-2.5">
+        <div className="tw-mt-3 tw-flex tw-flex-col tw-gap-y-2.5">
           {operation.params.map((param, i) => (
             <div
               className="tw-flex tw-gap-x-1"
