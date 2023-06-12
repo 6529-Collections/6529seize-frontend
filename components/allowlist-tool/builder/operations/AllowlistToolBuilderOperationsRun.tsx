@@ -3,13 +3,13 @@ import { useContext, useState } from "react";
 import { AllowlistToolBuilderContext } from "../../../../pages/allowlist-tool/[id]";
 import AllowlistToolPrimaryBtn from "../../common/AllowlistToolPrimaryBtn";
 import {
-  AllowlistRun,
+  AllowlistDescription,
   AllowlistToolResponse,
 } from "../../allowlist-tool.types";
 
 export default function AllowlistToolBuilderOperationsRun() {
   const router = useRouter();
-  const { setToasts, setActiveRun } = useContext(AllowlistToolBuilderContext);
+  const { setToasts, setAllowlist } = useContext(AllowlistToolBuilderContext);
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
 
@@ -27,7 +27,7 @@ export default function AllowlistToolBuilderOperationsRun() {
           allowlistId: router.query.id,
         }),
       });
-      const data: AllowlistToolResponse<AllowlistRun> = await response.json();
+      const data: AllowlistToolResponse<AllowlistDescription> = await response.json();
       if ("error" in data) {
         setToasts({
           messages:
@@ -36,11 +36,11 @@ export default function AllowlistToolBuilderOperationsRun() {
         });
         return;
       }
+      setAllowlist(data);
       setToasts({
         messages: ["Started running operations"],
         type: "success",
       });
-      setActiveRun(data);
     } catch (error) {
       setToasts({
         messages: ["Something went wrong"],

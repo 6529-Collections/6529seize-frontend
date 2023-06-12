@@ -14,7 +14,7 @@ import AllowlistToolPrimaryBtn from "../../common/AllowlistToolPrimaryBtn";
 
 export default function AllowlistToolBuilderTokenPoolsAdd() {
   const router = useRouter();
-  const { transferPools, operations, setOperations, setToasts } = useContext(
+  const { transferPools, addNewOperation, setToasts } = useContext(
     AllowlistToolBuilderContext
   );
   const [formValues, setFormValues] = useState<{
@@ -90,7 +90,7 @@ export default function AllowlistToolBuilderTokenPoolsAdd() {
         });
         return;
       }
-      setOperations([...operations, data]);
+      addNewOperation(data);
       setFormValues({
         name: "",
         description: "",
@@ -157,7 +157,7 @@ export default function AllowlistToolBuilderTokenPoolsAdd() {
             options={transferPools.map((transferPool) => ({
               title: transferPool.name,
               subTitle: null,
-              value: transferPool.transferPoolId,
+              value: transferPool.id,
             }))}
           />
         </div>

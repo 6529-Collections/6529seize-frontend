@@ -14,7 +14,7 @@ export default function AllowlistToolBuilderTokenPoolsPool({
   const { transferPools } = useContext(AllowlistToolBuilderContext);
 
   const transferPool = transferPools.find(
-    (pool) => pool.transferPoolId === tokenPool.transferPoolId
+    (pool) => pool.id === tokenPool.transferPoolId
   );
   return (
     <tr>

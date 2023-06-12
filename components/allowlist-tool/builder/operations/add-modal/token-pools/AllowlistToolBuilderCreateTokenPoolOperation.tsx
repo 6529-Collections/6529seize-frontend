@@ -117,7 +117,7 @@ export default function AllowlistToolBuilderCreateTokenPoolOperation({
             options={transferPools.map((transferPool) => ({
               title: transferPool.name,
               subTitle: null,
-              value: transferPool.transferPoolId,
+              value: transferPool.id,
             }))}
           />
         </div>

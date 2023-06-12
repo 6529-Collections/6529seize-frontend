@@ -7,9 +7,9 @@ import {
   AllowlistCustomTokenPool,
   AllowlistDescription,
   AllowlistOperation,
+  AllowlistOperationCode,
   AllowlistOperationDescription,
   AllowlistPhaseWithComponentAndItems,
-  AllowlistRun,
   AllowlistTokenPool,
   AllowlistTransferPool,
   AllowlistWalletPool,
@@ -17,6 +17,8 @@ import {
 import AllowlistToolBuilderOperations from "../../../components/allowlist-tool/builder/operations/AllowlistToolBuilderOperations";
 import { ToastContainer, toast, Slide, TypeOptions } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { assertUnreachable } from "../../../helpers/AllowlistToolHelpers";
+import { useRouter } from "next/router";
 
 const poppins = Poppins({
   weight: ["300", "400", "500", "600", "700"],
@@ -81,10 +83,12 @@ const Header = dynamic(() => import("../../../components/header/Header"), {
 });
 
 type AllowlistToolBuilderContextType = {
-  activeRun: AllowlistRun | null;
-  setActiveRun: (run: AllowlistRun | null) => void;
+  allowlist: AllowlistDescription | null;
+  setAllowlist: (allowlist: AllowlistDescription) => void;
   operations: AllowlistOperation[];
   setOperations: (operations: AllowlistOperation[]) => void;
+  addNewOperation: (operation: AllowlistOperation) => void;
+  addOperations: (operations: AllowlistOperation[]) => void;
   operationDescriptions: AllowlistOperationDescription[];
   transferPools: AllowlistTransferPool[];
   setTransferPools: (transferPools: AllowlistTransferPool[]) => void;
@@ -136,10 +140,12 @@ const setToasts = ({
 
 export const AllowlistToolBuilderContext =
   createContext<AllowlistToolBuilderContextType>({
-    activeRun: null,
-    setActiveRun: () => {},
+    allowlist: null,
+    setAllowlist: () => {},
     operations: [],
     setOperations: () => {},
+    addNewOperation: () => {},
+    addOperations: () => {},
     operationDescriptions: [],
     transferPools: [],
     setTransferPools: () => {},
@@ -155,23 +161,29 @@ export const AllowlistToolBuilderContext =
   });
 
 export default function AllowlistToolAllowlistId({
-  allowlist,
+  allowlistState,
   operationDescriptions,
 }: {
-  allowlist: AllowlistDescription;
+  allowlistState: AllowlistDescription;
   operationDescriptions: AllowlistOperationDescription[];
 }) {
-  const [breadcrumbs, setBreadcrumbs] = useState<Crumb[]>([
+  const router = useRouter();
+  const [breadcrumbs] = useState<Crumb[]>([
     { display: "Home", href: "/" },
     { display: "Allowlist tool", href: "/allowlist-tool" },
-    { display: allowlist.name },
+    { display: allowlistState.name },
   ]);
 
-  const [activeRun, setActiveRun] = useState<AllowlistRun | null>(null);
+  const [allowlist, setAllowlist] =
+    useState<AllowlistDescription>(allowlistState);
   const [operations, setOperations] = useState<AllowlistOperation[]>([]);
+
   const [transferPools, setTransferPools] = useState<AllowlistTransferPool[]>(
     []
   );
+  const [optimisticTransferPools, setOptimisticTransferPools] = useState<
+    AllowlistTransferPool[]
+  >([]);
   const [tokenPools, setTokenPools] = useState<AllowlistTokenPool[]>([]);
   const [customTokenPools, setCustomTokenPools] = useState<
     AllowlistCustomTokenPool[]
@@ -181,18 +193,75 @@ export default function AllowlistToolAllowlistId({
     []
   );
 
+  const doOperationOptimisticUpdate = (operation: AllowlistOperation) => {
+    const { code } = operation;
+    switch (code) {
+      case AllowlistOperationCode.GET_COLLECTION_TRANSFERS:
+        setOptimisticTransferPools([
+          ...optimisticTransferPools,
+          {
+            id: operation.params.id,
+            allowlistId: router.query.id as string,
+            name: operation.params.name,
+            description: operation.params.description,
+            contract: operation.params.contract,
+            blockNo: operation.params.blockNo,
+          },
+        ]);
+        break;
+      case AllowlistOperationCode.CREATE_TOKEN_POOL:
+      case AllowlistOperationCode.CREATE_CUSTOM_TOKEN_POOL:
+      case AllowlistOperationCode.CREATE_WALLET_POOL:
+      case AllowlistOperationCode.ADD_PHASE:
+      case AllowlistOperationCode.ADD_COMPONENT:
+      case AllowlistOperationCode.ADD_ITEM:
+        break;
+      case AllowlistOperationCode.CREATE_ALLOWLIST:
+      case AllowlistOperationCode.COMPONENT_ADD_SPOTS_TO_ALL_ITEM_WALLETS:
+      case AllowlistOperationCode.ITEM_EXCLUE_TOKEN_IDS:
+      case AllowlistOperationCode.ITEM_SELECT_TOKEN_IDS:
+      case AllowlistOperationCode.ITEM_REMOVE_FIRST_N_TOKENS:
+      case AllowlistOperationCode.ITEM_REMOVE_LAST_N_TOKENS:
+      case AllowlistOperationCode.ITEM_SELECT_FIRST_N_TOKENS:
+      case AllowlistOperationCode.ITEM_SELECT_LAST_N_TOKENS:
+        break;
+      default:
+        assertUnreachable(code);
+    }
+  };
+
+  const addOperations = (newOperations: AllowlistOperation[]) => {
+    setOptimisticTransferPools([]);
+    newOperations.forEach((operation) => {
+      if (operation.hasRan) {
+        return;
+      }
+      doOperationOptimisticUpdate(operation);
+    });
+    setOperations([...operations, ...newOperations]);
+  };
+
+  const addNewOperation = (operation: AllowlistOperation) => {
+    if (!operation.hasRan) {
+      doOperationOptimisticUpdate(operation);
+    }
+    setOperations([...operations, operation]);
+  };
+
   return (
     <>
       <Header />
       <Breadcrumb breadcrumbs={breadcrumbs} />
       <AllowlistToolBuilderContext.Provider
         value={{
-          activeRun,
-          setActiveRun,
+          allowlist,
+          setAllowlist,
           operations,
           setOperations,
+          addNewOperation,
+          addOperations,
           operationDescriptions,
-          transferPools,
+          transferPools: [...transferPools, ...optimisticTransferPools],
           setTransferPools,
           tokenPools,
           setTokenPools,
@@ -210,18 +279,18 @@ export default function AllowlistToolAllowlistId({
           className={`tw-min-h-screen tw-relative tw-bg-neutral-950 ${poppins.className}`}
         >
           <div className="container tw-mx-auto tw-pt-6 tw-pb-12">
-         
-              <div className="tw-space-y-6 tw-ml-80">
-                <h1 className="tw-uppercase tw-mb-0 tw-float-none">{allowlist.name}</h1>
-                <AllowlistToolBuilderTransferPools />
-                <AllowlistToolBuilderTokenPools />
-                <AllowlistToolBuilderCustomTokenPools />
-                <AllowlistToolBuilderWalletPools />
-                <AllowlistToolBuilderPhases />
-              </div>
-              <AllowlistToolBuilderOperations />
+            <div className="tw-space-y-6 tw-ml-80">
+              <h1 className="tw-uppercase tw-mb-0 tw-float-none">
+                {allowlist.name}
+              </h1>
+              <AllowlistToolBuilderTransferPools />
+              <AllowlistToolBuilderTokenPools />
+              <AllowlistToolBuilderCustomTokenPools />
+              <AllowlistToolBuilderWalletPools />
+              <AllowlistToolBuilderPhases />
             </div>
-         
+            <AllowlistToolBuilderOperations />
+          </div>
         </div>
         <ToastContainer />
       </AllowlistToolBuilderContext.Provider>
@@ -236,11 +305,11 @@ export async function getServerSideProps(req: { query: { id: string } }) {
   const operationDescriptionsResponse = await fetch(
     `${process.env.ALLOWLIST_API_ENDPOINT}/other/operations`
   );
-  const allowlist: AllowlistDescription = await allowlistResponse.json();
+  const allowlistState: AllowlistDescription = await allowlistResponse.json();
   const operationDescriptions: AllowlistOperationDescription[] =
     await operationDescriptionsResponse.json();
 
-  if ("error" in allowlist) {
+  if ("error" in allowlistState) {
     return {
       redirect: {
         destination: "/allowlist-tool",
@@ -249,5 +318,5 @@ export async function getServerSideProps(req: { query: { id: string } }) {
     };
   }
 
-  return { props: { allowlist, operationDescriptions } };
+  return { props: { allowlistState, operationDescriptions } };
 }

@@ -40,47 +40,34 @@ export default function AllowlistToolBuilderOperationsList({
   >([]);
 
   useEffect(() => {
-    const getTransferPool = (
-      transferPoolId: string
-    ): AllowlistTransferPool | null => {
-      return (
-        transferPools.find((pool) => pool.transferPoolId === transferPoolId) ||
-        null
-      );
+    const getTransferPool = (id: string): AllowlistTransferPool | null => {
+      return transferPools.find((pool) => pool.id === id) || null;
     };
 
-    const getPhase = (phaseId: string): AllowlistPhase | null => {
-      return phases.find((phase) => phase.phaseId === phaseId) || null;
+    const getPhase = (id: string): AllowlistPhase | null => {
+      return phases.find((phase) => phase.id === id) || null;
     };
 
     const getPhaseForComponent = (
-      componentId: string
+      id: string
     ): AllowlistPhaseWithComponentAndItems | null => {
       return (
         phases.find((phase) =>
-          phase.components.find(
-            (component) => component.componentId === componentId
-          )
+          phase.components.find((component) => component.id === id)
         ) || null
       );
     };
 
-    const getComponent = (
-      componentId: string
-    ): AllowlistPhaseComponent | null => {
-      const phase = getPhaseForComponent(componentId);
-      return (
-        phase?.components.find(
-          (component) => component.componentId === componentId
-        ) ?? null
-      );
+    const getComponent = (id: string): AllowlistPhaseComponent | null => {
+      const phase = getPhaseForComponent(id);
+      return phase?.components.find((component) => component.id === id) ?? null;
     };
 
-    const getItem = (itemId: string): AllowlistPhaseComponentItem | null => {
+    const getItem = (id: string): AllowlistPhaseComponentItem | null => {
       const items = phases.flatMap((phase) =>
         phase.components.flatMap((component) => component.items)
       );
-      return items.find((item) => item.phaseComponentItemId === itemId) ?? null;
+      return items.find((item) => item.id === id) ?? null;
     };
 
     const getPhaseForComponentItem = (
@@ -88,7 +75,7 @@ export default function AllowlistToolBuilderOperationsList({
     ): AllowlistPhaseWithComponentAndItems | null => {
       const item = getItem(itemId);
       return item
-        ? phases.find((phase) => phase.phaseId === item.phaseId) ?? null
+        ? phases.find((phase) => phase.id === item.phaseId) ?? null
         : null;
     };
 
@@ -105,13 +92,9 @@ export default function AllowlistToolBuilderOperationsList({
     ): AllowlistTokenPool | AllowlistCustomTokenPool | null => {
       switch (poolType) {
         case Pool.TOKEN_POOL:
-          return tokenPools.find((pool) => pool.tokenPoolId === poolId) ?? null;
+          return tokenPools.find((pool) => pool.id === poolId) ?? null;
         case Pool.CUSTOM_TOKEN_POOL:
-          return (
-            customTokenPools.find(
-              (pool) => pool.customTokenPoolId === poolId
-            ) ?? null
-          );
+          return customTokenPools.find((pool) => pool.id === poolId) ?? null;
         case Pool.WALLET_POOL:
           return null;
         default:
@@ -431,7 +414,7 @@ export default function AllowlistToolBuilderOperationsList({
           code: operation.code,
           title: operationDescription?.title || operation.code,
           params: getOperationParams(operation),
-          run: !!operation.activeRunId
+          run: operation.hasRan,
         };
       })
     );

@@ -3,8 +3,9 @@ export type AllowlistToolResponse<T> =
   | { statusCode: number; message: string | string[]; error: string };
 
 export interface AllowlistDescriptionActiveRun {
-  readonly id: string;
   readonly createdAt: number;
+  readonly updatedAt?: number;
+  readonly status?: AllowlistRunStatus;
 }
 
 export interface AllowlistDescription {
@@ -18,8 +19,6 @@ export interface AllowlistDescription {
 export interface AllowlistTransferPool {
   readonly id: string;
   readonly allowlistId: string;
-  readonly transferPoolId: string;
-  readonly activeRunId: string;
   readonly name: string;
   readonly description: string;
   readonly contract: string;
@@ -29,8 +28,6 @@ export interface AllowlistTransferPool {
 export interface AllowlistTokenPool {
   readonly id: string;
   readonly allowlistId: string;
-  readonly tokenPoolId: string;
-  readonly activeRunId?: string;
   readonly transferPoolId: string;
   readonly tokenIds?: string;
   readonly name: string;
@@ -40,8 +37,6 @@ export interface AllowlistTokenPool {
 export interface AllowlistCustomTokenPool {
   readonly id: string;
   readonly allowlistId: string;
-  readonly customTokenPoolId: string;
-  readonly activeRunId: string;
   readonly name: string;
   readonly description: string;
 }
@@ -49,8 +44,6 @@ export interface AllowlistCustomTokenPool {
 export interface AllowlistWalletPool {
   readonly id: string;
   readonly allowlistId: string;
-  readonly walletPoolId: string;
-  readonly activeRunId: string;
   readonly name: string;
   readonly description: string;
 }
@@ -58,8 +51,6 @@ export interface AllowlistWalletPool {
 export interface AllowlistPhase {
   readonly id: string;
   readonly allowlistId: string;
-  readonly activeRunId: string;
-  readonly phaseId: string;
   readonly name: string;
   readonly description: string;
   readonly insertionOrder: number;
@@ -69,8 +60,6 @@ export interface AllowlistPhaseComponent {
   readonly id: string;
   readonly allowlistId: string;
   readonly phaseId: string;
-  readonly componentId: string;
-  readonly activeRunId: string;
   readonly insertionOrder: number;
   readonly name: string;
   readonly description: string;
@@ -81,8 +70,6 @@ export interface AllowlistPhaseComponentItem {
   readonly allowlistId: string;
   readonly phaseId: string;
   readonly phaseComponentId: string;
-  readonly phaseComponentItemId: string;
-  readonly activeRunId: string;
   readonly insertionOrder: number;
   readonly name: string;
   readonly description: string;
@@ -121,10 +108,10 @@ export interface AllowlistOperation {
   readonly id: string;
   readonly createdAt: number;
   readonly order: number;
-  readonly activeRunId?: string;
   readonly allowlistId: string;
   readonly code: AllowlistOperationCode;
   readonly params: any;
+  readonly hasRan: boolean;
 }
 
 export enum Pool {
@@ -154,12 +141,4 @@ export enum AllowlistRunStatus {
   CLAIMED = "CLAIMED",
   COMPLETED = "COMPLETED",
   FAILED = "FAILED",
-}
-
-export interface AllowlistRun {
-  readonly id: string;
-  readonly allowlistId: string;
-  readonly status: AllowlistRunStatus;
-  readonly createdAt: number;
-  readonly claimedAt?: number;
 }

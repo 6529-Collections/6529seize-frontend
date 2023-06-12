@@ -72,7 +72,7 @@ export default function AllowlistToolAllowlistsTableItem({
           </div>
           <div className="tw-mt-3">
             <p className="tw-truncate tw-mb-0 tw-text-sm tw-leading-5 tw-text-neutral-400">
-              Lorem ipsum dolor sit amet.
+              {allowlist.description}
             </p>
           </div>
         </div>
@@ -105,9 +105,9 @@ export default function AllowlistToolAllowlistsTableItem({
             aria-hidden="true"
           >
             <path
-              fill-rule="evenodd"
+              fillRule="evenodd"
               d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z"
-              clip-rule="evenodd"
+              clipRule="evenodd"
             />
           </svg>
         </div>

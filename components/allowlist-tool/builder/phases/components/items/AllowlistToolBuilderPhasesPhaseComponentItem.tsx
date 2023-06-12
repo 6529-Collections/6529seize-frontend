@@ -21,11 +21,11 @@ export default function AllowlistToolBuilderPhasesPhaseComponentItem({
 
   if (phaseComponentItem.poolType === Pool.TOKEN_POOL) {
     tokenPool = tokenPools.find(
-      (pool) => pool.tokenPoolId === phaseComponentItem.poolId
+      (pool) => pool.id === phaseComponentItem.poolId
     );
   } else if (phaseComponentItem.poolType === Pool.CUSTOM_TOKEN_POOL) {
     tokenPool = customTokenPools.find(
-      (pool) => pool.customTokenPoolId === phaseComponentItem.poolId
+      (pool) => pool.id === phaseComponentItem.poolId
     );
   }
 
@@ -70,7 +70,7 @@ export default function AllowlistToolBuilderPhasesPhaseComponentItem({
               <AllowlistToolBuilderAddOperation
                 validOperations={validOperations}
                 title={`Item "${phaseComponentItem.name}"`}
-                targetItemId={phaseComponentItem.phaseComponentItemId}
+                targetItemId={phaseComponentItem.id}
                 defaultOperation={null}
               />
 
@@ -86,46 +86,6 @@ export default function AllowlistToolBuilderPhasesPhaseComponentItem({
           </div>
         </div>
       </div>
-
-      {/*  <tr className="tw-hidden">
-        <td className="tw-w-[25%] tw-whitespace-nowrap tw-py-2 tw-pl-4 tw-pr-3 tw-text-sm tw-font-normal tw-text-neutral-400 sm:tw-pl-24">
-          {phaseComponentItem.name}
-        </td>
-        <td className="tw-w-[25%] tw-whitespace-nowrap tw-px-3 tw-py-2 tw-text-sm tw-font-normal tw-text-neutral-400">
-          {phaseComponentItem.description}
-        </td>
-        <td className="tw-w-[25%] tw-whitespace-nowrap tw-px-3 tw-py-2 tw-text-sm tw-font-normal tw-text-neutral-400">
-          {tokenPool?.name}
-        </td>
-        <td className="tw-w-[25%] tw-py-2 tw-pl-6 tw-pr-4 tw-text-sm tw-font-normal sm:tw-pr-6">
-          <div className="tw-flex tw-items-center tw-justify-end tw-gap-x-3">
-            <button
-              type="button"
-              className="tw-group tw-flex tw-justify-center tw-items-center tw-rounded-full tw-bg-transparent tw-h-8 tw-w-8 tw-text-white tw-border-none hover:tw-bg-neutral-700 tw-transition-all tw-duration-300 tw-ease-out"
-            >
-              <div className="tw-h-4 tw-w-4 tw-flex tw-justify-center tw-items-center">
-                <AllowlistToolJsonIcon />
-              </div>
-            </button>
-
-            <AllowlistToolBuilderAddOperation
-              validOperations={validOperations}
-              title={`Item "${phaseComponentItem.name}"`}
-              targetItemId={phaseComponentItem.phaseComponentItemId}
-              defaultOperation={null}
-            />
-
-            <button
-              type="button"
-              className="tw-group tw-flex tw-justify-center tw-items-center tw-rounded-full tw-bg-transparent tw-h-8 tw-w-8 tw-text-white tw-border-none hover:tw-bg-neutral-700 tw-transition-all tw-duration-300 tw-ease-out"
-            >
-              <div className="tw-h-[1.125rem] tw-w-[1.125rem] tw-flex tw-justify-center tw-items-center">
-                <AllowlistToolHistoryIcon />
-              </div>
-            </button>
-          </div>
-        </td>
-      </tr> */}
     </>
   );
 }

@@ -11,7 +11,7 @@ import AllowlistToolPrimaryBtn from "../../common/AllowlistToolPrimaryBtn";
 
 export default function AllowlistToolBuilderPhasesAdd() {
   const router = useRouter();
-  const { operations, setOperations, setToasts } = useContext(
+  const { addNewOperation, setToasts } = useContext(
     AllowlistToolBuilderContext
   );
   const [formValues, setFormValues] = useState<{
@@ -59,7 +59,7 @@ export default function AllowlistToolBuilderPhasesAdd() {
         });
         return;
       }
-      setOperations([...operations, data]);
+      addNewOperation(data);
       setFormValues({
         name: "",
         description: "",

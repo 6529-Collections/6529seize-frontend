@@ -12,15 +12,13 @@ import AllowlistToolBuilderOperationsActiveRun from "./AllowlistToolBuilderOpera
 
 export default function AllowlistToolBuilderOperations() {
   const router = useRouter();
-  const { operations, setOperations, setToasts, activeRun } = useContext(
-    AllowlistToolBuilderContext
-  );
+  const { operations, addOperations, setToasts } =
+    useContext(AllowlistToolBuilderContext);
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   useEffect(() => {
     async function fetchOperations() {
       setIsLoading(true);
-      setOperations([]);
       try {
         const response = await fetch(
           `${process.env.ALLOWLIST_API_ENDPOINT}/allowlists/${router.query.id}/operations`
@@ -34,7 +32,7 @@ export default function AllowlistToolBuilderOperations() {
             type: "error",
           });
         } else {
-          setOperations(data);
+          addOperations(data);
         }
       } catch (error: any) {
         setToasts({ messages: [error.message], type: "error" });
@@ -43,7 +41,7 @@ export default function AllowlistToolBuilderOperations() {
       }
     }
     fetchOperations();
-  }, [router.query.id, setOperations, setToasts]);
+  }, []);
 
   return (
     <>

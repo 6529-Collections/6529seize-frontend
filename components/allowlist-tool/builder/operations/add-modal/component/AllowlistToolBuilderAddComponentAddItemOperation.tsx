@@ -30,7 +30,7 @@ export default function AllowlistToolBuilderComponentAddItemOperation({
     (tokenPool) => ({
       title: tokenPool.name,
       subTitle: "Token pool",
-      value: tokenPool.tokenPoolId,
+      value: tokenPool.id,
     })
   );
 
@@ -38,7 +38,7 @@ export default function AllowlistToolBuilderComponentAddItemOperation({
     customTokenPools.map((customTokenPool) => ({
       title: customTokenPool.name,
       subTitle: "Custom token pool",
-      value: customTokenPool.customTokenPoolId,
+      value: customTokenPool.id,
     }));
 
   const options: AllowlistToolSelectMenuOption[] = [
@@ -78,7 +78,7 @@ export default function AllowlistToolBuilderComponentAddItemOperation({
         componentId: componentId,
         poolId: selectedTokenPool.value,
         poolType: tokenPools.find(
-          (tokenPool) => tokenPool.tokenPoolId === selectedTokenPool.value
+          (tokenPool) => tokenPool.id === selectedTokenPool.value
         )
           ? Pool.TOKEN_POOL
           : Pool.CUSTOM_TOKEN_POOL,

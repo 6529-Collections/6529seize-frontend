@@ -26,7 +26,7 @@ export default function AllowlistToolBuilderPhases() {
       setPhases([]);
       try {
         const response = await fetch(
-          `${process.env.ALLOWLIST_API_ENDPOINT}/allowlists/${router.query.id}/phases-with-components-and-items`
+          `${process.env.ALLOWLIST_API_ENDPOINT}/allowlists/${router.query.id}/phases?withComponentsAndItems=true`
         );
         const data: AllowlistToolResponse<
           AllowlistPhaseWithComponentAndItems[]
