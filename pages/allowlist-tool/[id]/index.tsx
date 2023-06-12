@@ -185,13 +185,25 @@ export default function AllowlistToolAllowlistId({
     AllowlistTransferPool[]
   >([]);
   const [tokenPools, setTokenPools] = useState<AllowlistTokenPool[]>([]);
+  const [optimisticTokenPools, setOptimisticTokenPools] = useState<
+    AllowlistTokenPool[]
+  >([]);
   const [customTokenPools, setCustomTokenPools] = useState<
     AllowlistCustomTokenPool[]
   >([]);
+  const [optimisticCustomTokenPools, setOptimisticCustomTokenPools] = useState<
+    AllowlistCustomTokenPool[]
+  >([]);
   const [walletPools, setWalletPools] = useState<AllowlistWalletPool[]>([]);
+  const [optimisticWalletPools, setOptimisticWalletPools] = useState<
+    AllowlistWalletPool[]
+  >([]);
   const [phases, setPhases] = useState<AllowlistPhaseWithComponentAndItems[]>(
     []
   );
+  const [optimisticPhases, setOptimisticPhases] = useState<
+    AllowlistPhaseWithComponentAndItems[]
+  >([]);
 
   const doOperationOptimisticUpdate = (operation: AllowlistOperation) => {
     const { code } = operation;
@@ -210,9 +222,52 @@ export default function AllowlistToolAllowlistId({
         ]);
         break;
       case AllowlistOperationCode.CREATE_TOKEN_POOL:
+        setOptimisticTokenPools([
+          ...optimisticTokenPools,
+          {
+            id: operation.params.id,
+            allowlistId: router.query.id as string,
+            name: operation.params.name,
+            description: operation.params.description,
+            transferPoolId: operation.params.transferPoolId,
+            tokenIds: operation.params.tokenIds,
+          },
+        ]);
+        break;
       case AllowlistOperationCode.CREATE_CUSTOM_TOKEN_POOL:
+        setOptimisticCustomTokenPools([
+          ...optimisticCustomTokenPools,
+          {
+            id: operation.params.id,
+            allowlistId: router.query.id as string,
+            name: operation.params.name,
+            description: operation.params.description,
+          },
+        ]);
+        break;
       case AllowlistOperationCode.CREATE_WALLET_POOL:
+        setOptimisticWalletPools([
+          ...optimisticWalletPools,
+          {
+            id: operation.params.id,
+            allowlistId: router.query.id as string,
+            name: operation.params.name,
+            description: operation.params.description,
+          },
+        ]);
+        break;
       case AllowlistOperationCode.ADD_PHASE:
+        setOptimisticPhases([
+          ...optimisticPhases,
+          {
+            id: operation.params.id,
+            allowlistId: router.query.id as string,
+            name: operation.params.name,
+            description: operation.params.description,
+            insertionOrder: 0,
+            components: [],
+          },
+        ]);
       case AllowlistOperationCode.ADD_COMPONENT:
       case AllowlistOperationCode.ADD_ITEM:
         break;
@@ -232,6 +287,10 @@ export default function AllowlistToolAllowlistId({
 
   const addOperations = (newOperations: AllowlistOperation[]) => {
     setOptimisticTransferPools([]);
+    setOptimisticTokenPools([]);
+    setOptimisticCustomTokenPools([]);
+    setOptimisticWalletPools([]);
+    setOptimisticPhases([]);
     newOperations.forEach((operation) => {
       if (operation.hasRan) {
         return;
@@ -263,13 +322,16 @@ export default function AllowlistToolAllowlistId({
           operationDescriptions,
           transferPools: [...transferPools, ...optimisticTransferPools],
           setTransferPools,
-          tokenPools,
+          tokenPools: [...tokenPools, ...optimisticTokenPools],
           setTokenPools,
-          customTokenPools,
+          customTokenPools: [
+            ...customTokenPools,
+            ...optimisticCustomTokenPools,
+          ],
           setCustomTokenPools,
-          walletPools,
+          walletPools: [...walletPools, ...optimisticWalletPools],
           setWalletPools,
-          phases,
+          phases: [...phases, ...optimisticPhases],
           setPhases,
           setToasts,
         }}
