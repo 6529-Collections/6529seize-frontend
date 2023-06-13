@@ -12,8 +12,9 @@ import AllowlistToolBuilderOperationsActiveRun from "./AllowlistToolBuilderOpera
 
 export default function AllowlistToolBuilderOperations() {
   const router = useRouter();
-  const { operations, addOperations, setToasts } =
-    useContext(AllowlistToolBuilderContext);
+  const { operations, addOperations, setToasts } = useContext(
+    AllowlistToolBuilderContext
+  );
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   useEffect(() => {
@@ -31,9 +32,9 @@ export default function AllowlistToolBuilderOperations() {
               typeof data.message === "string" ? [data.message] : data.message,
             type: "error",
           });
-        } else {
-          addOperations(data);
+          return;
         }
+        addOperations(data);
       } catch (error: any) {
         setToasts({ messages: [error.message], type: "error" });
       } finally {

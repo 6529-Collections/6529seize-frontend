@@ -1,7 +1,7 @@
 import dynamic from "next/dynamic";
 import HeaderPlaceholder from "../../../components/header/HeaderPlaceholder";
 import { Poppins } from "next/font/google";
-import { createContext, useState } from "react";
+import { createContext, useEffect, useState } from "react";
 import Breadcrumb, { Crumb } from "../../../components/breadcrumb/Breadcrumb";
 import {
   AllowlistCustomTokenPool,
@@ -9,6 +9,9 @@ import {
   AllowlistOperation,
   AllowlistOperationCode,
   AllowlistOperationDescription,
+  AllowlistPhase,
+  AllowlistPhaseComponent,
+  AllowlistPhaseComponentItem,
   AllowlistPhaseWithComponentAndItems,
   AllowlistTokenPool,
   AllowlistTransferPool,
@@ -86,8 +89,6 @@ type AllowlistToolBuilderContextType = {
   allowlist: AllowlistDescription | null;
   setAllowlist: (allowlist: AllowlistDescription) => void;
   operations: AllowlistOperation[];
-  setOperations: (operations: AllowlistOperation[]) => void;
-  addNewOperation: (operation: AllowlistOperation) => void;
   addOperations: (operations: AllowlistOperation[]) => void;
   operationDescriptions: AllowlistOperationDescription[];
   transferPools: AllowlistTransferPool[];
@@ -143,8 +144,6 @@ export const AllowlistToolBuilderContext =
     allowlist: null,
     setAllowlist: () => {},
     operations: [],
-    setOperations: () => {},
-    addNewOperation: () => {},
     addOperations: () => {},
     operationDescriptions: [],
     transferPools: [],
@@ -198,113 +197,209 @@ export default function AllowlistToolAllowlistId({
   const [optimisticWalletPools, setOptimisticWalletPools] = useState<
     AllowlistWalletPool[]
   >([]);
+
   const [phases, setPhases] = useState<AllowlistPhaseWithComponentAndItems[]>(
     []
   );
-  const [optimisticPhases, setOptimisticPhases] = useState<
+  const [optimisticPhases, setOptimisticPhases] = useState<AllowlistPhase[]>(
+    []
+  );
+
+  const [optimisticComponents, setOptimisticComponents] = useState<
+    AllowlistPhaseComponent[]
+  >([]);
+
+  const [optimisticItems, setOptimisticItems] = useState<
+    AllowlistPhaseComponentItem[]
+  >([]);
+
+  const [finalPhases, setFinalPhases] = useState<
     AllowlistPhaseWithComponentAndItems[]
   >([]);
 
-  const doOperationOptimisticUpdate = (operation: AllowlistOperation) => {
-    const { code } = operation;
-    switch (code) {
-      case AllowlistOperationCode.GET_COLLECTION_TRANSFERS:
-        setOptimisticTransferPools([
-          ...optimisticTransferPools,
-          {
-            id: operation.params.id,
-            allowlistId: router.query.id as string,
-            name: operation.params.name,
-            description: operation.params.description,
-            contract: operation.params.contract,
-            blockNo: operation.params.blockNo,
-          },
-        ]);
-        break;
-      case AllowlistOperationCode.CREATE_TOKEN_POOL:
-        setOptimisticTokenPools([
-          ...optimisticTokenPools,
-          {
-            id: operation.params.id,
-            allowlistId: router.query.id as string,
-            name: operation.params.name,
-            description: operation.params.description,
-            transferPoolId: operation.params.transferPoolId,
-            tokenIds: operation.params.tokenIds,
-          },
-        ]);
-        break;
-      case AllowlistOperationCode.CREATE_CUSTOM_TOKEN_POOL:
-        setOptimisticCustomTokenPools([
-          ...optimisticCustomTokenPools,
-          {
-            id: operation.params.id,
-            allowlistId: router.query.id as string,
-            name: operation.params.name,
-            description: operation.params.description,
-          },
-        ]);
-        break;
-      case AllowlistOperationCode.CREATE_WALLET_POOL:
-        setOptimisticWalletPools([
-          ...optimisticWalletPools,
-          {
-            id: operation.params.id,
-            allowlistId: router.query.id as string,
-            name: operation.params.name,
-            description: operation.params.description,
-          },
-        ]);
-        break;
-      case AllowlistOperationCode.ADD_PHASE:
-        setOptimisticPhases([
-          ...optimisticPhases,
-          {
-            id: operation.params.id,
-            allowlistId: router.query.id as string,
-            name: operation.params.name,
-            description: operation.params.description,
-            insertionOrder: 0,
-            components: [],
-          },
-        ]);
-      case AllowlistOperationCode.ADD_COMPONENT:
-      case AllowlistOperationCode.ADD_ITEM:
-        break;
-      case AllowlistOperationCode.CREATE_ALLOWLIST:
-      case AllowlistOperationCode.COMPONENT_ADD_SPOTS_TO_ALL_ITEM_WALLETS:
-      case AllowlistOperationCode.ITEM_EXCLUE_TOKEN_IDS:
-      case AllowlistOperationCode.ITEM_SELECT_TOKEN_IDS:
-      case AllowlistOperationCode.ITEM_REMOVE_FIRST_N_TOKENS:
-      case AllowlistOperationCode.ITEM_REMOVE_LAST_N_TOKENS:
-      case AllowlistOperationCode.ITEM_SELECT_FIRST_N_TOKENS:
-      case AllowlistOperationCode.ITEM_SELECT_LAST_N_TOKENS:
-        break;
-      default:
-        assertUnreachable(code);
-    }
+  const getPhaseIdForComponent = (componentId: string) =>
+    phases.find((phase) => phase.components.some((c) => c.id === componentId))
+      ?.id ??
+    optimisticComponents.find((c) => c.id === componentId)?.phaseId ??
+    null;
+
+  useEffect(() => {
+    const getOptimisticComponents = (phaseId: string) =>
+      optimisticComponents.filter((component) => component.phaseId === phaseId);
+
+    const getOptimisticItems = (componentId: string) =>
+      optimisticItems.filter((item) => item.phaseComponentId === componentId);
+
+    const results: AllowlistPhaseWithComponentAndItems[] = [];
+    results.push(
+      ...phases.map((phase) => ({
+        ...phase,
+        components: [
+          ...phase.components.map((component) => ({
+            ...component,
+            items: [...component.items, ...getOptimisticItems(component.id)],
+          })),
+          ...getOptimisticComponents(phase.id).map((component) => ({
+            ...component,
+            items: getOptimisticItems(component.id),
+          })),
+        ],
+      })),
+      ...optimisticPhases.map((phase) => ({
+        ...phase,
+        components: getOptimisticComponents(phase.id).map((component) => ({
+          ...component,
+          items: getOptimisticItems(component.id),
+        })),
+      }))
+    );
+    setFinalPhases(results);
+  }, [
+    setFinalPhases,
+    phases,
+    optimisticPhases,
+    optimisticComponents,
+    optimisticItems,
+  ]);
+
+  const doOperationsOptimisticUpdates = (
+    newOperations: AllowlistOperation[]
+  ) => {
+    const optimisticPools = newOperations
+      .filter((operation) => !operation.hasRan)
+      .reduce<{
+        transferPools: AllowlistTransferPool[];
+        tokenPools: AllowlistTokenPool[];
+        customTokenPools: AllowlistCustomTokenPool[];
+        walletPools: AllowlistWalletPool[];
+        phases: AllowlistPhase[];
+        components: AllowlistPhaseComponent[];
+        items: AllowlistPhaseComponentItem[];
+      }>(
+        (acc, operation) => {
+          const { code } = operation;
+          switch (code) {
+            case AllowlistOperationCode.GET_COLLECTION_TRANSFERS:
+              acc.transferPools.push({
+                id: operation.params.id,
+                allowlistId: router.query.id as string,
+                name: operation.params.name,
+                description: operation.params.description,
+                contract: operation.params.contract,
+                blockNo: operation.params.blockNo,
+              });
+              break;
+            case AllowlistOperationCode.CREATE_TOKEN_POOL:
+              acc.tokenPools.push({
+                id: operation.params.id,
+                allowlistId: router.query.id as string,
+                name: operation.params.name,
+                description: operation.params.description,
+                transferPoolId: operation.params.transferPoolId,
+                tokenIds: operation.params.tokenIds,
+              });
+              break;
+            case AllowlistOperationCode.CREATE_CUSTOM_TOKEN_POOL:
+              acc.customTokenPools.push({
+                id: operation.params.id,
+                allowlistId: router.query.id as string,
+                name: operation.params.name,
+                description: operation.params.description,
+              });
+              break;
+            case AllowlistOperationCode.CREATE_WALLET_POOL:
+              acc.walletPools.push({
+                id: operation.params.id,
+                allowlistId: router.query.id as string,
+                name: operation.params.name,
+                description: operation.params.description,
+              });
+              break;
+            case AllowlistOperationCode.ADD_PHASE:
+              acc.phases.push({
+                id: operation.params.id,
+                allowlistId: router.query.id as string,
+                name: operation.params.name,
+                description: operation.params.description,
+                insertionOrder: 0,
+              });
+              break;
+            case AllowlistOperationCode.ADD_COMPONENT:
+              acc.components.push({
+                id: operation.params.id,
+                allowlistId: router.query.id as string,
+                phaseId: operation.params.phaseId,
+                name: operation.params.name,
+                description: operation.params.description,
+                insertionOrder: 0,
+              });
+
+              break;
+            case AllowlistOperationCode.ADD_ITEM:
+              acc.items.push({
+                id: operation.params.id,
+                allowlistId: router.query.id as string,
+                phaseId:
+                  getPhaseIdForComponent(operation.params.componentId) ?? "",
+                phaseComponentId: operation.params.componentId,
+                poolId: operation.params.poolId,
+                poolType: operation.params.poolType,
+                name: operation.params.name,
+                description: operation.params.description,
+                insertionOrder: 0,
+              });
+              break;
+            case AllowlistOperationCode.CREATE_ALLOWLIST:
+            case AllowlistOperationCode.COMPONENT_ADD_SPOTS_TO_ALL_ITEM_WALLETS:
+            case AllowlistOperationCode.ITEM_EXCLUE_TOKEN_IDS:
+            case AllowlistOperationCode.ITEM_SELECT_TOKEN_IDS:
+            case AllowlistOperationCode.ITEM_REMOVE_FIRST_N_TOKENS:
+            case AllowlistOperationCode.ITEM_REMOVE_LAST_N_TOKENS:
+            case AllowlistOperationCode.ITEM_SELECT_FIRST_N_TOKENS:
+            case AllowlistOperationCode.ITEM_SELECT_LAST_N_TOKENS:
+              break;
+            default:
+              assertUnreachable(code);
+          }
+          return acc;
+        },
+        {
+          transferPools: [],
+          tokenPools: [],
+          customTokenPools: [],
+          walletPools: [],
+          phases: [],
+          components: [],
+          items: [],
+        }
+      );
+    setOptimisticTransferPools([
+      ...optimisticTransferPools,
+      ...optimisticPools.transferPools,
+    ]);
+    setOptimisticTokenPools([
+      ...optimisticTokenPools,
+      ...optimisticPools.tokenPools,
+    ]);
+    setOptimisticCustomTokenPools([
+      ...optimisticCustomTokenPools,
+      ...optimisticPools.customTokenPools,
+    ]);
+    setOptimisticWalletPools([
+      ...optimisticWalletPools,
+      ...optimisticPools.walletPools,
+    ]);
+    setOptimisticPhases([...optimisticPhases, ...optimisticPools.phases]);
+    setOptimisticComponents([
+      ...optimisticComponents,
+      ...optimisticPools.components,
+    ]);
+    setOptimisticItems([...optimisticItems, ...optimisticPools.items]);
   };
 
   const addOperations = (newOperations: AllowlistOperation[]) => {
-    setOptimisticTransferPools([]);
-    setOptimisticTokenPools([]);
-    setOptimisticCustomTokenPools([]);
-    setOptimisticWalletPools([]);
-    setOptimisticPhases([]);
-    newOperations.forEach((operation) => {
-      if (operation.hasRan) {
-        return;
-      }
-      doOperationOptimisticUpdate(operation);
-    });
+    doOperationsOptimisticUpdates(newOperations);
     setOperations([...operations, ...newOperations]);
-  };
-
-  const addNewOperation = (operation: AllowlistOperation) => {
-    if (!operation.hasRan) {
-      doOperationOptimisticUpdate(operation);
-    }
-    setOperations([...operations, operation]);
   };
 
   return (
@@ -316,8 +411,6 @@ export default function AllowlistToolAllowlistId({
           allowlist,
           setAllowlist,
           operations,
-          setOperations,
-          addNewOperation,
           addOperations,
           operationDescriptions,
           transferPools: [...transferPools, ...optimisticTransferPools],
@@ -331,7 +424,7 @@ export default function AllowlistToolAllowlistId({
           setCustomTokenPools,
           walletPools: [...walletPools, ...optimisticWalletPools],
           setWalletPools,
-          phases: [...phases, ...optimisticPhases],
+          phases: finalPhases,
           setPhases,
           setToasts,
         }}

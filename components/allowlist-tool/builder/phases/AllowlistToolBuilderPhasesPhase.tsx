@@ -5,7 +5,6 @@ import {
 } from "../../allowlist-tool.types";
 import AllowlistToolHistoryIcon from "../../icons/AllowlistToolHistoryIcon";
 import AllowlistToolJsonIcon from "../../icons/AllowlistToolJsonIcon";
-import AllowlistToolPlusIcon from "../../icons/AllowlistToolPlusIcon";
 import AllowlistToolBuilderPhasesPhaseComponent from "./components/AllowlistToolBuilderPhasesPhaseComponent";
 import { useAnimate } from "framer-motion";
 import AllowlistToolBuilderAddOperation from "../operations/AllowlistToolBuilderAddOperation";
@@ -29,6 +28,7 @@ export default function AllowlistToolBuilderPhasesPhase({
   }, [isOpen, animateTable, animateIcon, tableScope, iconScope]);
   const validOperations = [AllowlistOperationCode.ADD_COMPONENT];
   const defaultOperation = AllowlistOperationCode.ADD_COMPONENT;
+  
   return (
     <>
       <div

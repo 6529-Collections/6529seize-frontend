@@ -39,7 +39,7 @@ export default function AllowlistToolAddOperationModal({
   onClose: () => void;
 }) {
   const router = useRouter();
-  const { operationDescriptions, setToasts, addNewOperation } = useContext(
+  const { operationDescriptions, setToasts, addOperations } = useContext(
     AllowlistToolBuilderContext
   );
   const options = validOperations.reduce<AllowlistToolSelectMenuOption[]>(
@@ -117,7 +117,7 @@ export default function AllowlistToolAddOperationModal({
         });
         return { success: false };
       }
-      addNewOperation(data);
+      addOperations([data]);
       onClose();
       return { success: true };
     } catch (error) {
