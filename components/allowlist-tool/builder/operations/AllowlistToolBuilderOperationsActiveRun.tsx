@@ -7,10 +7,13 @@ import {
   AllowlistRunStatus,
   AllowlistToolResponse,
 } from "../../allowlist-tool.types";
+import { getRandomObjectId } from "../../../../helpers/AllowlistToolHelpers";
 
 export default function AllowlistToolBuilderOperationsActiveRun() {
   const router = useRouter();
-  const { allowlist, setAllowlist } = useContext(AllowlistToolBuilderContext);
+  const { allowlist, setAllowlist, refreshState } = useContext(
+    AllowlistToolBuilderContext
+  );
 
   useInterval(async () => {
     const fetchActiveRun = async () => {
@@ -26,6 +29,14 @@ export default function AllowlistToolBuilderOperationsActiveRun() {
         if ("error" in data) {
           return;
         }
+        if (
+          allowlist?.activeRun?.status &&
+          allowlist.activeRun.status !== AllowlistRunStatus.COMPLETED &&
+          data.activeRun?.status === AllowlistRunStatus.COMPLETED
+        ) {
+          refreshState();
+        }
+        console.log(allowlist?.activeRun?.status, data.activeRun?.status);
         setAllowlist(data);
       } catch (error) {
         console.log(error);
