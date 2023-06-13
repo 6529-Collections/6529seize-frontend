@@ -20,7 +20,10 @@ import {
 import AllowlistToolBuilderOperations from "../../../components/allowlist-tool/builder/operations/AllowlistToolBuilderOperations";
 import { ToastContainer, toast, Slide, TypeOptions } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { assertUnreachable } from "../../../helpers/AllowlistToolHelpers";
+import {
+  assertUnreachable,
+  getRandomObjectId,
+} from "../../../helpers/AllowlistToolHelpers";
 import { useRouter } from "next/router";
 
 const poppins = Poppins({
@@ -86,6 +89,7 @@ const Header = dynamic(() => import("../../../components/header/Header"), {
 });
 
 type AllowlistToolBuilderContextType = {
+  refreshState: () => void;
   allowlist: AllowlistDescription | null;
   setAllowlist: (allowlist: AllowlistDescription) => void;
   operations: AllowlistOperation[];
@@ -141,6 +145,7 @@ const setToasts = ({
 
 export const AllowlistToolBuilderContext =
   createContext<AllowlistToolBuilderContextType>({
+    refreshState: () => {},
     allowlist: null,
     setAllowlist: () => {},
     operations: [],
@@ -172,6 +177,8 @@ export default function AllowlistToolAllowlistId({
     { display: "Allowlist tool", href: "/allowlist-tool" },
     { display: allowlistState.name },
   ]);
+
+  const [refreshKey, setRefreshKey] = useState<string>(getRandomObjectId());
 
   const [allowlist, setAllowlist] =
     useState<AllowlistDescription>(allowlistState);
@@ -397,6 +404,24 @@ export default function AllowlistToolAllowlistId({
     setOptimisticItems([...optimisticItems, ...optimisticPools.items]);
   };
 
+  const refreshState = () => {
+    setOperations([]);
+    setTransferPools([]);
+    setTokenPools([]);
+    setCustomTokenPools([]);
+    setWalletPools([]);
+    setPhases([]);
+    setOptimisticTransferPools([]);
+    setOptimisticTokenPools([]);
+    setOptimisticCustomTokenPools([]);
+    setOptimisticWalletPools([]);
+    setOptimisticPhases([]);
+    setOptimisticComponents([]);
+    setOptimisticItems([]);
+    setFinalPhases([]);
+    setRefreshKey(getRandomObjectId());
+  };
+
   const addOperations = (newOperations: AllowlistOperation[]) => {
     doOperationsOptimisticUpdates(newOperations);
     setOperations([...operations, ...newOperations]);
@@ -408,6 +433,7 @@ export default function AllowlistToolAllowlistId({
       <Breadcrumb breadcrumbs={breadcrumbs} />
       <AllowlistToolBuilderContext.Provider
         value={{
+          refreshState,
           allowlist,
           setAllowlist,
           operations,
@@ -438,13 +464,21 @@ export default function AllowlistToolAllowlistId({
               <h1 className="tw-uppercase tw-mb-0 tw-float-none">
                 {allowlist.name}
               </h1>
-              <AllowlistToolBuilderTransferPools />
-              <AllowlistToolBuilderTokenPools />
-              <AllowlistToolBuilderCustomTokenPools />
-              <AllowlistToolBuilderWalletPools />
-              <AllowlistToolBuilderPhases />
+              <AllowlistToolBuilderTransferPools
+                key={`transfer-pools-${refreshKey}`}
+              />
+              <AllowlistToolBuilderTokenPools
+                key={`token-pools-${refreshKey}`}
+              />
+              <AllowlistToolBuilderCustomTokenPools
+                key={`custom-token-pools-${refreshKey}`}
+              />
+              <AllowlistToolBuilderWalletPools
+                key={`wallet-pools-${refreshKey}`}
+              />
+              <AllowlistToolBuilderPhases key={`phases-${refreshKey}`} />
             </div>
-            <AllowlistToolBuilderOperations />
+            <AllowlistToolBuilderOperations key={`operations-${refreshKey}`} />
           </div>
         </div>
         <ToastContainer />
