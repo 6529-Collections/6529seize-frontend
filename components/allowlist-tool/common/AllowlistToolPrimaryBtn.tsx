@@ -3,18 +3,25 @@ export default function AllowlistToolPrimaryBtn({
   onClick,
   loading,
   type,
+  size = "large",
 }: {
   children: React.ReactNode;
   loading: boolean;
   onClick: () => void;
   type: "submit" | "reset" | "button";
+  size: "medium" | "large";
 }) {
+  const sizes: Record<"medium" | "large", string> = {
+    medium: "tw-py-2.5",
+    large: "tw-py-3",
+  };
+
   return (
     <button
       disabled={loading}
       onClick={onClick}
       type={type}
-      className="tw-relative tw-bg-primary-500 tw-px-4 tw-py-3 tw-text-sm tw-font-medium tw-text-white tw-w-full tw-border tw-border-solid tw-border-primary-500 tw-rounded-lg hover:tw-bg-primary-600 hover:tw-border-primary-600 tw-transition tw-duration-300 tw-ease-out"
+      className={`tw-relative tw-bg-primary-500 tw-px-4 ${sizes[size]} tw-text-sm tw-font-medium tw-text-white tw-w-full tw-border tw-border-solid tw-border-primary-500 tw-rounded-lg hover:tw-bg-primary-600 hover:tw-border-primary-600 tw-transition tw-duration-300 tw-ease-out`}
     >
       <div style={{ visibility: loading ? "hidden" : "visible" }}>
         {children}

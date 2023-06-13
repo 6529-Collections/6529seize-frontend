@@ -12,8 +12,6 @@ export default function AllowlistToolBuilderOperationsRun() {
   const { setToasts, setAllowlist } = useContext(AllowlistToolBuilderContext);
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
-
-
   const runOperations = async () => {
     setIsLoading(true);
     const url = `${process.env.ALLOWLIST_API_ENDPOINT}/allowlists/${router.query.id}/runs`;
@@ -27,7 +25,8 @@ export default function AllowlistToolBuilderOperationsRun() {
           allowlistId: router.query.id,
         }),
       });
-      const data: AllowlistToolResponse<AllowlistDescription> = await response.json();
+      const data: AllowlistToolResponse<AllowlistDescription> =
+        await response.json();
       if ("error" in data) {
         setToasts({
           messages:
@@ -55,6 +54,7 @@ export default function AllowlistToolBuilderOperationsRun() {
       onClick={() => runOperations()}
       type="button"
       loading={isLoading}
+      size="medium"
     >
       Run operations
     </AllowlistToolPrimaryBtn>

@@ -57,10 +57,10 @@ export default function AllowlistToolBuilderOperationsActiveRun() {
   }, [router.query.id]);
 
   const statusColors: Record<AllowlistRunStatus, string> = {
-    [AllowlistRunStatus.PENDING]: "tw-fill-yellow-400",
-    [AllowlistRunStatus.CLAIMED]: "tw-fill-yellow-400",
-    [AllowlistRunStatus.COMPLETED]: "tw-fill-green-400",
-    [AllowlistRunStatus.FAILED]: "tw-fill-red-400",
+    [AllowlistRunStatus.PENDING]: "tw-text-yellow-400 tw-bg-yellow-400/10",
+    [AllowlistRunStatus.CLAIMED]: "tw-text-yellow-400 tw-bg-yellow-400/10",
+    [AllowlistRunStatus.COMPLETED]: "tw-text-green-400 tw-bg-green-400/10",
+    [AllowlistRunStatus.FAILED]: "tw-text-error tw-bg-red-400/10",
   };
 
   const titles: Record<AllowlistRunStatus, string> = {
@@ -73,20 +73,20 @@ export default function AllowlistToolBuilderOperationsActiveRun() {
   return (
     <div>
       {allowlist?.activeRun && (
-        <span className="tw-inline-flex tw-items-center tw-gap-x-1.5 tw-rounded-md tw-px-2 tw-py-1 tw-text-xs tw-font-medium tw-text-white tw-ring-1 tw-ring-inset tw-ring-gray-800">
-          <svg
-            className={`tw-h-1.5 tw-w-1.5 ${
+        <div className="tw-flex tw-items-center tw-justify-end tw-gap-x-2 sm:tw-justify-start">
+          <div
+            className={`tw-flex-none tw-rounded-full tw-p-1 ${
               statusColors[
                 allowlist.activeRun.status ?? AllowlistRunStatus.COMPLETED
               ]
             }`}
-            viewBox="0 0 6 6"
-            aria-hidden="true"
           >
-            <circle cx="3" cy="3" r="3" />
-          </svg>
-          {titles[allowlist.activeRun.status ?? AllowlistRunStatus.COMPLETED]}
-        </span>
+            <div className="tw-h-1.5 tw-w-1.5 tw-rounded-full tw-bg-current"></div>
+          </div>
+          <div className="tw-hidden tw-text-xs tw-font-medium tw-text-white sm:tw-block">
+            {titles[allowlist.activeRun.status ?? AllowlistRunStatus.COMPLETED]}
+          </div>
+        </div>
       )}
     </div>
   );

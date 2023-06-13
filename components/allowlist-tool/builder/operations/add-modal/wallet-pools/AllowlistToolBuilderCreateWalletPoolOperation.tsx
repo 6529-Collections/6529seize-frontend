@@ -1,9 +1,7 @@
 import { useContext, useState } from "react";
 import { AllowlistToolBuilderContext } from "../../../../../../pages/allowlist-tool/[id]";
 import { getRandomObjectId } from "../../../../../../helpers/AllowlistToolHelpers";
-import {
-  AllowlistOperationCode,
-} from "../../../../allowlist-tool.types";
+import { AllowlistOperationCode } from "../../../../allowlist-tool.types";
 import csvParser from "csv-parser";
 import AllowlistToolPrimaryBtn from "../../../../common/AllowlistToolPrimaryBtn";
 
@@ -124,14 +122,26 @@ export default function AllowlistToolBuilderCreateWalletPoolOperation({
             />
           </div>
         </div>
-      </div>
-      <div className="tw-mt-6 tw-flex tw-justify-end tw-gap-x-4">
         <div>
           <label
             htmlFor="walletPoolFile"
-            className="tw-cursor-pointer tw-bg-transparent hover:tw-bg-neutral-800/80 tw-px-4 tw-py-3 tw-text-sm tw-font-medium tw-text-white tw-w-full tw-border tw-border-solid tw-border-neutral-700 tw-rounded-lg tw-transition tw-duration-300 tw-ease-out"
+            className="tw-inline-flex tw-items-center tw-justify-center tw-cursor-pointer tw-bg-transparent hover:tw-bg-neutral-800/80 tw-px-4 tw-py-3 tw-text-sm tw-font-medium tw-text-white tw-border tw-border-solid tw-border-neutral-700 tw-rounded-lg tw-transition tw-duration-300 tw-ease-out"
           >
-            Upload a CSV
+            <svg
+              className="tw-h-5 tw-w-5 tw-mr-2 -tw-ml-1"
+              viewBox="0 0 24 24"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M21 15V16.2C21 17.8802 21 18.7202 20.673 19.362C20.3854 19.9265 19.9265 20.3854 19.362 20.673C18.7202 21 17.8802 21 16.2 21H7.8C6.11984 21 5.27976 21 4.63803 20.673C4.07354 20.3854 3.6146 19.9265 3.32698 19.362C3 18.7202 3 17.8802 3 16.2V15M17 8L12 3M12 3L7 8M12 3V15"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+            <span>Upload a CSV</span>
           </label>
           <input
             required
@@ -142,6 +152,9 @@ export default function AllowlistToolBuilderCreateWalletPoolOperation({
             onChange={onFileUpload}
           />
         </div>
+      </div>
+
+      <div className="tw-mt-6">
         <AllowlistToolPrimaryBtn
           onClick={() => {}}
           loading={isLoading}
