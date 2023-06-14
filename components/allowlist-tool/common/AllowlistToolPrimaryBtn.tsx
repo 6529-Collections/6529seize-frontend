@@ -9,7 +9,7 @@ export default function AllowlistToolPrimaryBtn({
   loading: boolean;
   onClick: () => void;
   type: "submit" | "reset" | "button";
-  size: "medium" | "large";
+  size?: "medium" | "large";
 }) {
   const sizes: Record<"medium" | "large", string> = {
     medium: "tw-py-2.5",
