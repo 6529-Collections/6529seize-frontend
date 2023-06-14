@@ -80,7 +80,10 @@ export default function AllowlistToolAllowlistsTableItem({
           <button
             type="button"
             title="Delete"
-            onClick={deleteAllowlist}
+            onClick={(e) => {
+              e.preventDefault();
+              deleteAllowlist();
+            }}
             className="tw-rounded-full tw-group tw-flex tw-items-center tw-justify-center tw-p-2 tw-text-xs tw-font-medium tw-border-none tw-ring-1 tw-ring-inset tw-text-neutral-400 tw-bg-neutral-400/10 tw-ring-neutral-400/20"
           >
             <svg

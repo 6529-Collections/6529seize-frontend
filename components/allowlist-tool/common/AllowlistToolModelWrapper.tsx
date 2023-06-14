@@ -1,6 +1,8 @@
 import { AnimatePresence, motion } from "framer-motion";
 import React, { useRef } from "react";
 import { useClickAway, useKeyPressEvent } from "react-use";
+import AllowlistToolAnimationWrapper from "./animation/AllowlistToolAnimationWrapper";
+import AllowlistToolAnimationOpacity from "./animation/AllowlistToolAnimationOpacity";
 
 export enum AllowlistToolModalSize {
   SMALL = "SMALL",
@@ -34,18 +36,13 @@ export default function AllowlistToolModelWrapper({
   const modalSizeClass = modalSizeClasses[modalSize];
 
   return (
-    <AnimatePresence>
+    <AllowlistToolAnimationWrapper mode="sync" initial={true}>
       {showModal && (
-        <motion.div
+        <AllowlistToolAnimationOpacity
           key="modal"
-          className="tw-relative tw-z-10"
-          role="dialog"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          onClick={(e) => {
-            e.stopPropagation();
-          }}
+          elementClasses="tw-relative tw-z-10"
+          elementRole="dialog"
+          onClicked={(e) => e.stopPropagation()}
         >
           <div className="tw-relative tw-z-10" role="dialog">
             <div className="tw-fixed tw-inset-0 tw-bg-gray-500 tw-bg-opacity-75"></div>
@@ -88,8 +85,8 @@ export default function AllowlistToolModelWrapper({
               </div>
             </div>
           </div>
-        </motion.div>
+        </AllowlistToolAnimationOpacity>
       )}
-    </AnimatePresence>
+    </AllowlistToolAnimationWrapper>
   );
 }

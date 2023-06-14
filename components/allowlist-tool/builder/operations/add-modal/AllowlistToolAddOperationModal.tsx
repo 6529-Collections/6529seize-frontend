@@ -26,6 +26,8 @@ import AllowlistToolBuilderAddComponentOperation from "../phase/AllowlistToolBui
 import { useRouter } from "next/router";
 import { on } from "events";
 import { AnimatePresence, motion } from "framer-motion";
+import AllowlistToolAnimationWrapper from "../../../common/animation/AllowlistToolAnimationWrapper";
+import AllowlistToolAnimationHeightOpacity from "../../../common/animation/AllowlistToolAnimationHeightOpacity";
 
 export default function AllowlistToolAddOperationModal({
   targetItemId,
@@ -145,150 +147,146 @@ export default function AllowlistToolAddOperationModal({
 
       {selectedOperationCode && (
         <div className="tw-mt-5 tw-border-t tw-border-solid tw-border-l-0 tw-border-r-0 tw-border-b-0 tw-border-neutral-800">
-          <AnimatePresence>
-            <motion.div
-              layout
-              initial={{ height: "0", opacity: 0 }}
-              animate={{ height: "auto", opacity: 1 }}
-              exit={{ height: "0", opacity: 0 }}
-              transition={{ duration: 0.3 }}
-            >
-              {(() => {
-                switch (selectedOperationCode) {
-                  case AllowlistOperationCode.CREATE_ALLOWLIST:
-                    return null;
-                  case AllowlistOperationCode.GET_COLLECTION_TRANSFERS:
-                    return (
-                      <AllowlistToolBuilderGetCollectionTransfersOperation
+          <AllowlistToolAnimationWrapper mode="sync" initial={true}>
+            {(() => {
+              switch (selectedOperationCode) {
+                case AllowlistOperationCode.CREATE_ALLOWLIST:
+                  return null;
+                case AllowlistOperationCode.GET_COLLECTION_TRANSFERS:
+                  return (
+                    <AllowlistToolBuilderGetCollectionTransfersOperation
+                      isLoading={isLoading}
+                      addOperation={addOperation}
+                    />
+                  );
+                case AllowlistOperationCode.CREATE_TOKEN_POOL:
+                  return (
+                    <AllowlistToolBuilderCreateTokenPoolOperation
+                      isLoading={isLoading}
+                      addOperation={addOperation}
+                    />
+                  );
+                case AllowlistOperationCode.CREATE_CUSTOM_TOKEN_POOL:
+                  return (
+                    <AllowlistToolBuilderCreateCustomTokenPoolOperation
+                      isLoading={isLoading}
+                      addOperation={addOperation}
+                    />
+                  );
+                case AllowlistOperationCode.CREATE_WALLET_POOL:
+                  return (
+                    <AllowlistToolBuilderCreateWalletPoolOperation
+                      isLoading={isLoading}
+                      addOperation={addOperation}
+                    />
+                  );
+                case AllowlistOperationCode.ADD_PHASE:
+                  return (
+                    <AllowlistToolBuilderAddPhaseOperation
+                      isLoading={isLoading}
+                      addOperation={addOperation}
+                    />
+                  );
+                case AllowlistOperationCode.ADD_COMPONENT:
+                  return (
+                    targetItemId && (
+                      <AllowlistToolBuilderAddComponentOperation
+                        phaseId={targetItemId}
                         isLoading={isLoading}
                         addOperation={addOperation}
                       />
-                    );
-                  case AllowlistOperationCode.CREATE_TOKEN_POOL:
-                    return (
-                      <AllowlistToolBuilderCreateTokenPoolOperation
-                        isLoading={isLoading}
-                        addOperation={addOperation}
-                      />
-                    );
-                  case AllowlistOperationCode.CREATE_CUSTOM_TOKEN_POOL:
-                    return (
-                      <AllowlistToolBuilderCreateCustomTokenPoolOperation
-                        isLoading={isLoading}
-                        addOperation={addOperation}
-                      />
-                    );
-                  case AllowlistOperationCode.CREATE_WALLET_POOL:
-                    return (
-                      <AllowlistToolBuilderCreateWalletPoolOperation
-                        isLoading={isLoading}
-                        addOperation={addOperation}
-                      />
-                    );
-                  case AllowlistOperationCode.ADD_PHASE:
-                    return (
-                      <AllowlistToolBuilderAddPhaseOperation
-                        isLoading={isLoading}
-                        addOperation={addOperation}
-                      />
-                    );
-                  case AllowlistOperationCode.ADD_COMPONENT:
-                    return (
-                      targetItemId && (
-                        <AllowlistToolBuilderAddComponentOperation
-                          phaseId={targetItemId}
-                          isLoading={isLoading}
-                          addOperation={addOperation}
-                        />
-                      )
-                    );
-                  case AllowlistOperationCode.COMPONENT_ADD_SPOTS_TO_ALL_ITEM_WALLETS:
-                    return (
-                      targetItemId && (
+                    )
+                  );
+                case AllowlistOperationCode.COMPONENT_ADD_SPOTS_TO_ALL_ITEM_WALLETS:
+                  return (
+                    targetItemId && (
+                      <AllowlistToolAnimationHeightOpacity key="COMPONENT_ADD_SPOTS_TO_ALL_ITEM_WALLETS">
                         <AllowlistToolBuilderComponentAddSpotsToAllItemWalletsOperation
                           componentId={targetItemId}
                           isLoading={isLoading}
                           addOperation={addOperation}
                         />
-                      )
-                    );
-                  case AllowlistOperationCode.ADD_ITEM:
-                    return (
-                      targetItemId && (
+                      </AllowlistToolAnimationHeightOpacity>
+                    )
+                  );
+                case AllowlistOperationCode.ADD_ITEM:
+                  return (
+                    targetItemId && (
+                      <AllowlistToolAnimationHeightOpacity key="ADD_ITEM">
                         <AllowlistToolBuilderComponentAddItemOperation
                           componentId={targetItemId}
                           isLoading={isLoading}
                           addOperation={addOperation}
                         />
-                      )
-                    );
-                  case AllowlistOperationCode.ITEM_EXCLUE_TOKEN_IDS:
-                    return (
-                      targetItemId && (
-                        <AllowlistToolBuilderItemExcludeTokenIdsOperation
-                          itemId={targetItemId}
-                          isLoading={isLoading}
-                          addOperation={addOperation}
-                        />
-                      )
-                    );
-                  case AllowlistOperationCode.ITEM_SELECT_TOKEN_IDS:
-                    return (
-                      targetItemId && (
-                        <AllowlistToolBuilderItemSelectTokenIdsOperation
-                          itemId={targetItemId}
-                          isLoading={isLoading}
-                          addOperation={addOperation}
-                        />
-                      )
-                    );
-                  case AllowlistOperationCode.ITEM_REMOVE_FIRST_N_TOKENS:
-                    return (
-                      targetItemId && (
-                        <AllowlistToolBuilderItemRemoveFirstNTokensOperation
-                          itemId={targetItemId}
-                          isLoading={isLoading}
-                          addOperation={addOperation}
-                        />
-                      )
-                    );
-                  case AllowlistOperationCode.ITEM_REMOVE_LAST_N_TOKENS:
-                    return (
-                      targetItemId && (
-                        <AllowlistToolBuilderItemRemoveLastNTokensOperation
-                          itemId={targetItemId}
-                          isLoading={isLoading}
-                          addOperation={addOperation}
-                        />
-                      )
-                    );
-                  case AllowlistOperationCode.ITEM_SELECT_FIRST_N_TOKENS:
-                    return (
-                      targetItemId && (
-                        <AllowlistToolBuilderItemSelectFirstNTokensOperation
-                          itemId={targetItemId}
-                          isLoading={isLoading}
-                          addOperation={addOperation}
-                        />
-                      )
-                    );
-                  case AllowlistOperationCode.ITEM_SELECT_LAST_N_TOKENS:
-                    return (
-                      targetItemId && (
-                        <AllowlistToolBuilderItemSelectLastNTokensOperation
-                          itemId={targetItemId}
-                          isLoading={isLoading}
-                          addOperation={addOperation}
-                        />
-                      )
-                    );
-                  default:
-                    assertUnreachable(selectedOperationCode);
-                    return null;
-                }
-              })()}
-            </motion.div>
-          </AnimatePresence>
+                      </AllowlistToolAnimationHeightOpacity>
+                    )
+                  );
+                case AllowlistOperationCode.ITEM_EXCLUE_TOKEN_IDS:
+                  return (
+                    targetItemId && (
+                      <AllowlistToolBuilderItemExcludeTokenIdsOperation
+                        itemId={targetItemId}
+                        isLoading={isLoading}
+                        addOperation={addOperation}
+                      />
+                    )
+                  );
+                case AllowlistOperationCode.ITEM_SELECT_TOKEN_IDS:
+                  return (
+                    targetItemId && (
+                      <AllowlistToolBuilderItemSelectTokenIdsOperation
+                        itemId={targetItemId}
+                        isLoading={isLoading}
+                        addOperation={addOperation}
+                      />
+                    )
+                  );
+                case AllowlistOperationCode.ITEM_REMOVE_FIRST_N_TOKENS:
+                  return (
+                    targetItemId && (
+                      <AllowlistToolBuilderItemRemoveFirstNTokensOperation
+                        itemId={targetItemId}
+                        isLoading={isLoading}
+                        addOperation={addOperation}
+                      />
+                    )
+                  );
+                case AllowlistOperationCode.ITEM_REMOVE_LAST_N_TOKENS:
+                  return (
+                    targetItemId && (
+                      <AllowlistToolBuilderItemRemoveLastNTokensOperation
+                        itemId={targetItemId}
+                        isLoading={isLoading}
+                        addOperation={addOperation}
+                      />
+                    )
+                  );
+                case AllowlistOperationCode.ITEM_SELECT_FIRST_N_TOKENS:
+                  return (
+                    targetItemId && (
+                      <AllowlistToolBuilderItemSelectFirstNTokensOperation
+                        itemId={targetItemId}
+                        isLoading={isLoading}
+                        addOperation={addOperation}
+                      />
+                    )
+                  );
+                case AllowlistOperationCode.ITEM_SELECT_LAST_N_TOKENS:
+                  return (
+                    targetItemId && (
+                      <AllowlistToolBuilderItemSelectLastNTokensOperation
+                        itemId={targetItemId}
+                        isLoading={isLoading}
+                        addOperation={addOperation}
+                      />
+                    )
+                  );
+                default:
+                  assertUnreachable(selectedOperationCode);
+                  return null;
+              }
+            })()}
+          </AllowlistToolAnimationWrapper>
         </div>
       )}
     </div>

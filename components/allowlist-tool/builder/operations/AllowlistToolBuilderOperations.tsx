@@ -2,6 +2,7 @@ import { useRouter } from "next/router";
 import { useContext, useEffect, useState } from "react";
 import {
   AllowlistOperation,
+  AllowlistRunStatus,
   AllowlistToolResponse,
 } from "../../allowlist-tool.types";
 
@@ -9,13 +10,28 @@ import { AllowlistToolBuilderContext } from "../../../../pages/allowlist-tool/[i
 import AllowlistToolBuilderOperationsList from "./AllowlistToolBuilderOperationsList";
 import AllowlistToolBuilderOperationsRun from "./AllowlistToolBuilderOperationsRun";
 import AllowlistToolBuilderOperationsActiveRun from "./AllowlistToolBuilderOperationsActiveRun";
+import AllowlistToolBuilderOperationsLoading from "./AllowlistToolBuilderOperationsLoading";
+import AllowlistToolBuilderOperationsEmpty from "./AllowlistToolBuilderOperationsEmpty";
+import AllowlistToolAnimationWrapper from "../../common/animation/AllowlistToolAnimationWrapper";
+import AllowlistToolAnimationOpacity from "../../common/animation/AllowlistToolAnimationOpacity";
 
 export default function AllowlistToolBuilderOperations() {
   const router = useRouter();
-  const { operations, addOperations, setToasts } = useContext(
+  const { allowlist, operations, addOperations, setToasts } = useContext(
     AllowlistToolBuilderContext
   );
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [showLoading, setShowLoading] = useState<boolean>(true);
+
+  useEffect(() => {
+    setShowLoading(
+      isLoading ||
+        (!!allowlist?.activeRun?.status &&
+          [AllowlistRunStatus.PENDING, AllowlistRunStatus.CLAIMED].includes(
+            allowlist?.activeRun?.status
+          ))
+    );
+  }, [isLoading, allowlist]);
 
   useEffect(() => {
     async function fetchOperations() {
@@ -59,7 +75,21 @@ export default function AllowlistToolBuilderOperations() {
               <AllowlistToolBuilderOperationsRun />
             </div>
           </div>
-          <AllowlistToolBuilderOperationsList operations={operations} />
+          <AllowlistToolAnimationWrapper mode="wait" initial={true}>
+            {showLoading ? (
+              <AllowlistToolAnimationOpacity key="loading">
+                <AllowlistToolBuilderOperationsLoading />
+              </AllowlistToolAnimationOpacity>
+            ) : operations.length ? (
+              <AllowlistToolAnimationOpacity key="table">
+                <AllowlistToolBuilderOperationsList operations={operations} />
+              </AllowlistToolAnimationOpacity>
+            ) : (
+              <AllowlistToolAnimationOpacity key="empty">
+                <AllowlistToolBuilderOperationsEmpty />
+              </AllowlistToolAnimationOpacity>
+            )}
+          </AllowlistToolAnimationWrapper>
         </div>
       </div>
     </>

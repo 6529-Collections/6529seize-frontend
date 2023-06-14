@@ -1,16 +1,30 @@
 import { useRouter } from "next/router";
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { AllowlistToolBuilderContext } from "../../../../pages/allowlist-tool/[id]";
 import AllowlistToolPrimaryBtn from "../../common/AllowlistToolPrimaryBtn";
 import {
   AllowlistDescription,
+  AllowlistRunStatus,
   AllowlistToolResponse,
 } from "../../allowlist-tool.types";
 
 export default function AllowlistToolBuilderOperationsRun() {
   const router = useRouter();
-  const { setToasts, setAllowlist } = useContext(AllowlistToolBuilderContext);
+  const { allowlist, setToasts, setAllowlist } = useContext(
+    AllowlistToolBuilderContext
+  );
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [showLoading, setShowLoading] = useState<boolean>(true);
+
+  useEffect(() => {
+    setShowLoading(
+      isLoading ||
+        (!!allowlist?.activeRun?.status &&
+          [AllowlistRunStatus.PENDING, AllowlistRunStatus.CLAIMED].includes(
+            allowlist?.activeRun?.status
+          ))
+    );
+  }, [isLoading, allowlist]);
 
   const runOperations = async () => {
     setIsLoading(true);
@@ -53,7 +67,7 @@ export default function AllowlistToolBuilderOperationsRun() {
     <AllowlistToolPrimaryBtn
       onClick={() => runOperations()}
       type="button"
-      loading={isLoading}
+      loading={showLoading}
       size="medium"
     >
       Run operations

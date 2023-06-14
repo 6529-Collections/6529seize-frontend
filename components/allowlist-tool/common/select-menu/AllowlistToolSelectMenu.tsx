@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence, useAnimate } from "framer-motion";
 import AllowlistToolSelectMenuList from "./AllowlistToolSelectMenuList";
 import { useClickAway, useKeyPressEvent } from "react-use";
+import AllowlistToolAnimationWrapper from "../animation/AllowlistToolAnimationWrapper";
 
 export interface AllowlistToolSelectMenuOption {
   title: string;
@@ -88,7 +89,7 @@ export default function AllowlistToolSelectMenu({
             </svg>
           </span>
         </button>
-        <AnimatePresence>
+        <AllowlistToolAnimationWrapper>
           {isOpen && (
             <motion.div
               className="tw-origin-top-right tw-absolute tw-right-0 tw-mt-1 tw-w-full tw-rounded-lg tw-shadow-xl tw-bg-neutral-800 tw-ring-1 tw-ring-black tw-ring-opacity-5"
@@ -104,7 +105,7 @@ export default function AllowlistToolSelectMenu({
               />
             </motion.div>
           )}
-        </AnimatePresence>
+        </AllowlistToolAnimationWrapper>
       </div>
     </div>
   );

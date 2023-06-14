@@ -5,6 +5,9 @@ import {
 } from "./allowlist-tool.types";
 import dynamic from "next/dynamic";
 import { AllowlistToolContext } from "../../pages/allowlist-tool";
+import AllowlistToolAllowlistsLoading from "./AllowlistToolAllowlistsLoading";
+import AllowlistToolAnimationWrapper from "./common/animation/AllowlistToolAnimationWrapper";
+import AllowlistToolAnimationOpacity from "./common/animation/AllowlistToolAnimationOpacity";
 
 const AllowlistToolAllowlistsEmpty = dynamic(
   () => import("./AllowlistToolAllowlistsEmpty"),
@@ -23,7 +26,7 @@ const AllowlistToolAllowlistsTable = dynamic(
 export default function AllowlistToolAllowlists() {
   const { setToasts } = useContext(AllowlistToolContext);
   const [allowlists, setAllowlists] = useState<AllowlistDescription[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   const getAllowlists = async () => {
     setIsLoading(true);
@@ -59,14 +62,24 @@ export default function AllowlistToolAllowlists() {
 
   return (
     <>
-      {allowlists.length === 0 ? (
-        <AllowlistToolAllowlistsEmpty />
-      ) : (
-        <AllowlistToolAllowlistsTable
-          allowlists={allowlists}
-          onAllowlistRemoved={removeAllowlist}
-        />
-      )}
+      <AllowlistToolAnimationWrapper mode="wait" initial={true}>
+        {isLoading ? (
+          <AllowlistToolAnimationOpacity key="loading">
+            <AllowlistToolAllowlistsLoading />
+          </AllowlistToolAnimationOpacity>
+        ) : allowlists.length ? (
+          <AllowlistToolAnimationOpacity key="table">
+            <AllowlistToolAllowlistsTable
+              allowlists={allowlists}
+              onAllowlistRemoved={removeAllowlist}
+            />
+          </AllowlistToolAnimationOpacity>
+        ) : (
+          <AllowlistToolAnimationOpacity key="empty">
+            <AllowlistToolAllowlistsEmpty />
+          </AllowlistToolAnimationOpacity>
+        )}
+      </AllowlistToolAnimationWrapper>
     </>
   );
 }
