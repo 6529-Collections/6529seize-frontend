@@ -429,7 +429,7 @@ export default function AllowlistToolBuilderOperationsList({
   return (
     <ul
       role="list"
-      className="tw-mt-4 tw-ml-0 tw-pl-0 tw-list-none tw-flex tw-flex-1 tw-flex-col tw-gap-y-6"
+      className="tw-mt-4 tw-ml-0 tw-pl-0 tw-list-none tw-flex tw-flex-1 tw-flex-col tw-gap-y-4"
     >
       {operationsWithMeta.map((operation) => (
         <AllowlistToolBuilderOperationsListitem

@@ -59,7 +59,7 @@ export default function AllowlistToolAllowlistsTableItem({
     <>
       <li
         onClick={goToAllowlist}
-        className="tw-cursor-pointer tw-relative tw-flex tw-items-center tw-space-x-4 tw-px-4 sm:tw-px-6 tw-py-5 tw-bg-[#1E1E1E] tw-border tw-border-solid tw-border-white/5 tw-rounded-xl hover:tw-bg-neutral-800 tw-transition tw-duration-300 tw-ease-out"
+        className="tw-cursor-pointer tw-relative tw-flex tw-items-center tw-space-x-4 tw-px-4 sm:tw-px-6 tw-py-5 tw-bg-[#1E1E1E] tw-border tw-border-solid tw-border-white/5 tw-rounded-lg hover:tw-bg-neutral-800 tw-transition tw-duration-300 tw-ease-out"
       >
         <div className="tw-min-w-0 tw-flex-auto">
           <div className="tw-flex tw-items-center tw-gap-x-3">
