@@ -294,6 +294,7 @@ export default function AllowlistToolAllowlistId({
                 description: operation.params.description,
                 contract: operation.params.contract,
                 blockNo: operation.params.blockNo,
+                transfersCount: 0
               });
               break;
             case AllowlistOperationCode.CREATE_TOKEN_POOL:
@@ -304,6 +305,8 @@ export default function AllowlistToolAllowlistId({
                 description: operation.params.description,
                 transferPoolId: operation.params.transferPoolId,
                 tokenIds: operation.params.tokenIds,
+                walletsCount: 0,
+                tokensCount: 0
               });
               break;
             case AllowlistOperationCode.CREATE_CUSTOM_TOKEN_POOL:
@@ -312,6 +315,8 @@ export default function AllowlistToolAllowlistId({
                 allowlistId: router.query.id as string,
                 name: operation.params.name,
                 description: operation.params.description,
+                walletsCount: 0,
+                tokensCount: 0
               });
               break;
             case AllowlistOperationCode.CREATE_WALLET_POOL:
@@ -320,6 +325,7 @@ export default function AllowlistToolAllowlistId({
                 allowlistId: router.query.id as string,
                 name: operation.params.name,
                 description: operation.params.description,
+                walletsCount:0
               });
               break;
             case AllowlistOperationCode.ADD_PHASE:
@@ -329,6 +335,8 @@ export default function AllowlistToolAllowlistId({
                 name: operation.params.name,
                 description: operation.params.description,
                 insertionOrder: 0,
+                walletsCount: 0,
+                tokensCount: 0
               });
               break;
             case AllowlistOperationCode.ADD_COMPONENT:
@@ -339,6 +347,8 @@ export default function AllowlistToolAllowlistId({
                 name: operation.params.name,
                 description: operation.params.description,
                 insertionOrder: 0,
+                walletsCount: 0,
+                tokensCount: 0
               });
 
               break;
@@ -354,6 +364,8 @@ export default function AllowlistToolAllowlistId({
                 name: operation.params.name,
                 description: operation.params.description,
                 insertionOrder: 0,
+                walletsCount: 0,
+                tokensCount: 0
               });
               break;
             case AllowlistOperationCode.CREATE_ALLOWLIST:
