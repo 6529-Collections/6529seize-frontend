@@ -17,6 +17,7 @@ import {
 import { useRouter } from "next/router";
 import { fetchAllPages } from "../../services/6529api";
 import NFTImage from "../nft-image/NFTImage";
+import SeasonsDropdown from "../seasons-dropdown/SeasonsDropdown";
 
 enum Sort {
   AGE = "age",
@@ -110,9 +111,15 @@ export default function TheMemesComponent(props: Props) {
   useEffect(() => {
     const crumbs = [];
     crumbs.push({ display: "Home", href: "/" });
-    crumbs.push({ display: "The Memes" });
+
     if (selectedSeason > 0) {
+      crumbs.push({
+        display: "The Memes",
+        href: `/the-memes?sort=${sort}&sort_dir=${sortDir}`,
+      });
       crumbs.push({ display: `SZN${selectedSeason}` });
+    } else {
+      crumbs.push({ display: "The Memes" });
     }
     props.setCrumbs(crumbs);
 
@@ -605,37 +612,15 @@ export default function TheMemesComponent(props: Props) {
           <Container className="pt-4">
             <>
               <Row>
-                <Col>
+                <Col className="d-flex align-items-center justify-content-start">
                   <h1>THE MEMES</h1>
                 </Col>
-                <Col
-                  className="d-flex align-items-center justify-content-end"
-                  xs={12}
-                  sm={6}>
-                  <h3>
-                    <span
-                      onClick={() => setSelectedSeason(0)}
-                      className={`${styles.season} ${
-                        selectedSeason > 0 ? styles.disabled : ""
-                      }`}>
-                      All
-                    </span>
-                  </h3>
-                  {seasons.map((s) => (
-                    <span key={`season-${s}-span`}>
-                      <h3>&nbsp;&nbsp;|&nbsp;&nbsp;</h3>
-                      <h3>
-                        <span
-                          key={`season-${s}-h3-2-span`}
-                          onClick={() => setSelectedSeason(s)}
-                          className={`${styles.season} ${
-                            selectedSeason != s ? styles.disabled : ""
-                          }`}>
-                          SZN{s}
-                        </span>
-                      </h3>
-                    </span>
-                  ))}
+                <Col className="d-flex align-items-center justify-content-end">
+                  <SeasonsDropdown
+                    seasons={seasons}
+                    selectedSeason={selectedSeason}
+                    setSelectedSeason={setSelectedSeason}
+                  />
                 </Col>
               </Row>
               <Row className="pt-2">

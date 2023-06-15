@@ -42,7 +42,6 @@ export default function Header(props: Props) {
   const [isConsolidation, setIsConsolidation] = useState(false);
   const { address, connector, isConnected } = useAccount();
   const [burgerMenuOpen, setBurgerMenuOpen] = useState(false);
-  const [viewModeOpen, setViewModeOpen] = useState(false);
   const [view, setView] = useState<VIEW>();
   const [showBurgerMenuAbout, setShowBurgerMenuAbout] = useState(false);
   const [setShowBurgerMenuCommunity, setsetShowBurgerMenuCommunity] =
@@ -139,7 +138,7 @@ export default function Header(props: Props) {
                 loading="eager"
                 priority
                 className={styles.logoIcon}
-                src="/Seize_Logo_Glasses.png"
+                src="https://d3lqz0a4bldqgf.cloudfront.net/seize_images/Seize_Logo_Glasses.png"
                 alt="6529Seize"
                 width={319}
                 height={50}
@@ -538,7 +537,7 @@ export default function Header(props: Props) {
                       loading="eager"
                       priority
                       className={styles.logoIcon}
-                      src="/Seize_Logo_Glasses.png"
+                      src="https://d3lqz0a4bldqgf.cloudfront.net/seize_images/Seize_Logo_Glasses.png"
                       alt="6529Seize"
                       width={319}
                       height={50}
@@ -567,7 +566,7 @@ export default function Header(props: Props) {
                             paddingLeft: "35px",
                           }}
                           className={`${styles.burgerMenuBtn} d-block ${styles.dMdNone}`}
-                          src="/Seize_Logo_2.png"
+                          src="https://d3lqz0a4bldqgf.cloudfront.net/seize_images/Seize_Logo_Icon.png"
                           alt="6529Seize"
                           onClick={() => setBurgerMenuOpen(true)}
                         />
@@ -887,7 +886,7 @@ export default function Header(props: Props) {
                             paddingLeft: "35px",
                           }}
                           className={`d-none ${styles.dMdBlock}`}
-                          src="/Seize_Logo_2.png"
+                          src="https://d3lqz0a4bldqgf.cloudfront.net/seize_images/Seize_Logo_Icon.png"
                           alt="6529Seize"
                         />
                       </Container>
@@ -907,7 +906,8 @@ export default function Header(props: Props) {
           themeMode={"dark"}
           themeVariables={{
             "--w3m-background-color": "#282828",
-            "--w3m-logo-image-url": "/Seize_Logo_Glasses_3.png",
+            "--w3m-logo-image-url":
+              "https://d3lqz0a4bldqgf.cloudfront.net/seize_images/Seize_Logo_Glasses_3.png",
             "--w3m-accent-color": "#fff",
             "--w3m-accent-fill-color": "#000",
             "--w3m-button-border-radius": "0",

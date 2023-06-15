@@ -45,7 +45,7 @@ export default function MemeLabIndex(props: {
         <meta property="og:title" content={props.name} />
         <meta
           property="og:image"
-          content={`${process.env.BASE_ENDPOINT}/Seize_Logo_Glasses_2.png`}
+          content={`https://d3lqz0a4bldqgf.cloudfront.net/seize_images/Seize_Logo_Glasses_2.png`}
         />
         <meta property="og:description" content="6529 SEIZE" />
         <meta name="twitter:card" content={pagenameFull} />
@@ -54,7 +54,7 @@ export default function MemeLabIndex(props: {
         <meta name="twitter:description" content="6529 SEIZE" />
         <meta
           name="twitter:image"
-          content={`${process.env.BASE_ENDPOINT}/Seize_Logo_Glasses_2.png`}
+          content={`https://d3lqz0a4bldqgf.cloudfront.net/seize_images/Seize_Logo_Glasses_2.png`}
         />
       </Head>
 

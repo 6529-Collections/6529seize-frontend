@@ -21,7 +21,7 @@ export default function Seize404() {
         <meta property="og:description" content="6529 Seize" />
         <meta
           property="og:image"
-          content={`${process.env.BASE_ENDPOINT}/Seize_Logo_Glasses_2.png`}
+          content={`https://d3lqz0a4bldqgf.cloudfront.net/seize_images/Seize_Logo_Glasses_2.png`}
         />
       </Head>
 

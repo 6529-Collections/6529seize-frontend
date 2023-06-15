@@ -2,10 +2,7 @@ import { Col, Container, Row, Table } from "react-bootstrap";
 import { BaseNFT, NFT, NFTHistory } from "../../entities/INFT";
 import styles from "./Timeline.module.scss";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  getContentTypeFromURL,
-  numberWithCommasFromString,
-} from "../../helpers/Helpers";
+import { numberWithCommasFromString } from "../../helpers/Helpers";
 import TimelineMediaComponent, { MediaType } from "./TimelineMedia";
 
 interface Props {

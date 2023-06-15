@@ -56,7 +56,7 @@ export async function getServerSideProps(req: any, res: any, resolvedUrl: any) {
     `${process.env.API_ENDPOINT}/api/nfts_memelab?id=${id}`
   );
   let name = `Meme Lab Card #${id}`;
-  let image = `${process.env.BASE_ENDPOINT}/Seize_Logo_Glasses_2.png`;
+  let image = `https://d3lqz0a4bldqgf.cloudfront.net/seize_images/Seize_Logo_Glasses_2.png`;
   if (response && response.data && response.data.length > 0) {
     name = `${response.data[0].name} | ${name}`;
     image = response.data[0].thumbnail
