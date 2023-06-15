@@ -21,7 +21,7 @@ export default function AllowlistToolPrimaryBtn({
       disabled={loading}
       onClick={onClick}
       type={type}
-      className={`tw-relative tw-bg-primary-500 tw-px-4 ${sizes[size]} tw-text-sm tw-font-medium tw-text-white tw-w-full tw-border tw-border-solid tw-border-primary-500 tw-rounded-lg hover:tw-bg-primary-600 hover:tw-border-primary-600 tw-transition tw-duration-300 tw-ease-out`}
+      className={`tw-flex tw-items-center tw-justify-center tw-relative tw-bg-primary-500 tw-px-4 ${sizes[size]} tw-text-sm tw-font-medium tw-text-white tw-w-full tw-border tw-border-solid tw-border-primary-500 tw-rounded-lg hover:tw-bg-primary-600 hover:tw-border-primary-600 tw-transition tw-duration-300 tw-ease-out`}
     >
       <div style={{ visibility: loading ? "hidden" : "visible" }}>
         {children}
@@ -30,7 +30,7 @@ export default function AllowlistToolPrimaryBtn({
         <svg
           aria-hidden="true"
           role="status"
-          className="tw-inline tw-w-6 tw-h-6 tw-top-3 tw-text-white tw-animate-spin tw-absolute"
+          className="tw-inline tw-w-5 tw-h-5 tw-text-white tw-animate-spin tw-absolute"
           viewBox="0 0 100 101"
           fill="none"
           xmlns="http://www.w3.org/2000/svg"
