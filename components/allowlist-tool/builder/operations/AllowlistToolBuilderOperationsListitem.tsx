@@ -60,7 +60,7 @@ export default function AllowlistToolBuilderOperationsListitem({
     );
   } else {
     return (
-      <li className="tw-p-5 tw-rounded-lg tw-bg-neutral-800/50">
+      <li className="tw-p-5 tw-rounded-lg tw-bg-neutral-800">
         <div className="tw-flex tw-items-center tw-gap-x-3">
           <svg
             className="tw-h-4 tw-w-4 tw-flex-shrink-0"

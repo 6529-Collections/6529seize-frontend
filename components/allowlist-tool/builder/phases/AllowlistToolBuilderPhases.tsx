@@ -76,24 +76,34 @@ export default function AllowlistToolBuilderPhases() {
           <div className="tw-mt-8 tw-flex tw-flex-col">
             <div className="tw-overflow-x-auto tw-rounded-b-lg">
               <div className="tw-inline-block tw-min-w-full tw-divide-y tw-divide-solid tw-divide-x-0 tw-divide-neutral-800">
-                <div className="tw-bg-neutral-800/50 tw-border tw-border-solid tw-border-l-0 tw-border-r-0 tw-border-b-0 tw-border-neutral-800 tw-grid tw-grid-cols-11 tw-items-center tw-gap-x-4 sm:tw-gap-x-6">
-                  <div className="tw-col-span-3">
+                <div className="tw-bg-neutral-800/50 tw-border tw-border-solid tw-border-l-0 tw-border-r-0 tw-border-b-0 tw-border-neutral-800 tw-grid tw-grid-cols-12 tw-items-center tw-gap-x-4 sm:tw-gap-x-6">
+                  <div className="tw-col-span-2">
                     <div className="tw-py-1.5 tw-pl-4 tw-pr-3 tw-text-left tw-text-[0.6875rem] tw-leading-[1.125rem] tw-font-medium tw-text-neutral-400 tw-uppercase tw-tracking-[0.25px] sm:tw-pl-6">
                       Phase name
                     </div>
                   </div>
-                  <div className="tw-col-span-3">
+                  <div className="tw-col-span-2">
                     <div className="tw-px-3 tw-py-1.5 tw-text-left tw-text-[0.6875rem] tw-leading-[1.125rem] tw-font-medium tw-text-neutral-400 tw-uppercase tw-tracking-[0.25px]">
                       Description
                     </div>
                   </div>
-                  <div className="tw-col-span-3">
+                  <div className="tw-col-span-2">
                     <div className="tw-px-3 tw-py-1.5 tw-text-left tw-text-[0.6875rem] tw-leading-[1.125rem] tw-font-medium tw-text-neutral-400 tw-uppercase tw-tracking-[0.25px]">
                       Pool name
                     </div>
                   </div>
                   <div className="tw-col-span-2">
-                    <div className="tw-px-3 tw-py-1.5 tw-pl-3 tw-pr-4 sm:tw-pr-6 tw-text-left tw-text-[0.6875rem] tw-leading-[1.125rem] tw-font-medium tw-text-neutral-400 tw-uppercase tw-tracking-[0.25px]">
+                    <div className="tw-px-3 tw-py-1.5 tw-text-left tw-text-[0.6875rem] tw-leading-[1.125rem] tw-font-medium tw-text-neutral-400 tw-uppercase tw-tracking-[0.25px]">
+                     Wallets
+                    </div>
+                  </div>
+                  <div className="tw-col-span-2">
+                    <div className="tw-px-3 tw-py-1.5 tw-text-left tw-text-[0.6875rem] tw-leading-[1.125rem] tw-font-medium tw-text-neutral-400 tw-uppercase tw-tracking-[0.25px]">
+                      Tokens
+                    </div>
+                  </div>
+                  <div className="tw-col-span-2">
+                    <div className="tw-px-3 tw-py-1.5 tw-pl-3 tw-pr-4 sm:tw-pr-6 tw-text-left tw-text-[0.6875rem] tw-leading-[1.125rem] tw-font-medium tw-text-neutral-400">
                       <div className="tw-flex tw-items-center tw-justify-end tw-gap-x-2.5">
                         <button
                           type="button"

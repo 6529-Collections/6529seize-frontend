@@ -17,9 +17,8 @@ import AllowlistToolPoolsWrapper from "../../common/pools/AllowlistToolPoolsWrap
 
 export default function AllowlistToolBuilderCustomTokenPools() {
   const router = useRouter();
-  const {allowlist, customTokenPools, setCustomTokenPools, setToasts } = useContext(
-    AllowlistToolBuilderContext
-  );
+  const { allowlist, customTokenPools, setCustomTokenPools, setToasts } =
+    useContext(AllowlistToolBuilderContext);
 
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [showLoading, setShowLoading] = useState<boolean>(true);
@@ -94,6 +93,18 @@ export default function AllowlistToolBuilderCustomTokenPools() {
                             className="tw-px-3 tw-py-1.5 tw-text-left tw-text-[0.6875rem] tw-leading-[1.125rem] tw-font-medium tw-text-neutral-400 tw-uppercase tw-tracking-[0.25px]"
                           >
                             Description
+                          </th>
+                          <th
+                            scope="col"
+                            className="tw-px-3 tw-py-1.5 tw-whitespace-nowrap tw-text-left tw-text-[0.6875rem] tw-leading-[1.125rem] tw-font-medium tw-text-neutral-400 tw-uppercase tw-tracking-[0.25px]"
+                          >
+                            Wallets
+                          </th>
+                          <th
+                            scope="col"
+                            className="tw-px-3 tw-py-1.5 tw-whitespace-nowrap tw-text-left tw-text-[0.6875rem] tw-leading-[1.125rem] tw-font-medium tw-text-neutral-400 tw-uppercase tw-tracking-[0.25px]"
+                          >
+                            Tokens
                           </th>
                           <th
                             scope="col"

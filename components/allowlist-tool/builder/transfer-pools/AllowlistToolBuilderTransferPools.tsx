@@ -105,6 +105,12 @@ export default function AllowlistToolBuilderTransferPools() {
                           </th>
                           <th
                             scope="col"
+                            className="tw-px-3 tw-py-1.5 tw-whitespace-nowrap tw-text-left tw-text-[0.6875rem] tw-leading-[1.125rem] tw-font-medium tw-text-neutral-400 tw-uppercase tw-tracking-[0.25px]"
+                          >
+                            Transfers count
+                          </th>
+                          <th
+                            scope="col"
                             className="tw-w-40 tw-py-1.5 tw-pl-6 tw-pr-4 sm:tw-pr-6"
                           >
                             <div className="tw-flex tw-items-center tw-justify-end tw-gap-x-2.5">

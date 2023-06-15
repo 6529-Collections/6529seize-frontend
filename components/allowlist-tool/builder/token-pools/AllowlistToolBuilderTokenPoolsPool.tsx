@@ -30,6 +30,12 @@ export default function AllowlistToolBuilderTokenPoolsPool({
       <td className="tw-whitespace-nowrap tw-px-3 tw-py-4 tw-text-sm tw-font-normal  tw-text-neutral-300">
         {tokenPool.tokenIds}
       </td>
+      <td className="tw-whitespace-nowrap tw-px-3 tw-py-4 tw-text-sm tw-font-normal  tw-text-neutral-300">
+       Wallets
+      </td>
+      <td className="tw-whitespace-nowrap tw-px-3 tw-py-4 tw-text-sm tw-font-normal  tw-text-neutral-300">
+       Tokens
+      </td>
       <td className="tw-w-40 tw-py-4 tw-pl-6 tw-pr-4 tw-text-sm tw-font-normal sm:tw-pr-6">
         <div className="tw-flex tw-items-center tw-justify-end tw-gap-x-2.5">
           <button
