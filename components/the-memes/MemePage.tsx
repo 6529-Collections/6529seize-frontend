@@ -201,6 +201,8 @@ export default function MemePage(props: Props) {
       });
     } else {
       setNftBalance(0);
+      setUserLoaded(true);
+      setTransactions([]);
     }
   }, [nftId, props.wallets]);
 
