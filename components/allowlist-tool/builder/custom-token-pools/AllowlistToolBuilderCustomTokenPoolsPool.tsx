@@ -18,10 +18,10 @@ export default function AllowlistToolBuilderCustomTokenPoolsPool({
         {customTokenPool.description}
       </td>
       <td className="tw-whitespace-nowrap tw-px-3 tw-py-4 tw-text-sm tw-font-normal tw-text-neutral-300">
-       Wallets
+        {customTokenPool.walletsCount}
       </td>
       <td className="tw-whitespace-nowrap tw-px-3 tw-py-4 tw-text-sm tw-font-normal tw-text-neutral-300">
-        Tokens
+        {customTokenPool.tokensCount}
       </td>
 
       <td className="tw-w-40 tw-py-4 tw-pl-6 tw-pr-4 tw-text-sm tw-font-normal sm:tw-pr-6">

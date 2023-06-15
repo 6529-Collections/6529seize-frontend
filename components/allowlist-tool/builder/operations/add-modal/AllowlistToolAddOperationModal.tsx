@@ -24,8 +24,6 @@ import AllowlistToolBuilderCreateWalletPoolOperation from "./wallet-pools/Allowl
 import AllowlistToolBuilderAddPhaseOperation from "./phases/AllowlistToolBuilderAddPhaseOperation";
 import AllowlistToolBuilderAddComponentOperation from "../phase/AllowlistToolBuilderAddComponentOperation";
 import { useRouter } from "next/router";
-import { on } from "events";
-import { AnimatePresence, motion } from "framer-motion";
 import AllowlistToolAnimationWrapper from "../../../common/animation/AllowlistToolAnimationWrapper";
 import AllowlistToolAnimationHeightOpacity from "../../../common/animation/AllowlistToolAnimationHeightOpacity";
 

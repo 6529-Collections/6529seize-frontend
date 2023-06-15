@@ -13,7 +13,12 @@ import {
 } from "../../allowlist-tool.types";
 import AllowlistToolBuilderOperationsListitem from "./AllowlistToolBuilderOperationsListitem";
 import { AllowlistToolBuilderContext } from "../../../../pages/allowlist-tool/[id]";
-import { assertUnreachable } from "../../../../helpers/AllowlistToolHelpers";
+import {
+  assertUnreachable,
+  truncateTextMiddle,
+} from "../../../../helpers/AllowlistToolHelpers";
+import AllowlistToolAnimationWrapper from "../../common/animation/AllowlistToolAnimationWrapper";
+import AllowlistToolAnimationHeightOpacity from "../../common/animation/AllowlistToolAnimationHeightOpacity";
 
 export interface AllowlistToolBuilderOperationMeta {
   readonly id: string;
@@ -135,7 +140,7 @@ export default function AllowlistToolBuilderOperationsList({
             },
             {
               title: "Contract",
-              description: operation.params.contract,
+              description: truncateTextMiddle(operation.params.contract, 11),
             },
             {
               title: "blockNo",
@@ -431,12 +436,13 @@ export default function AllowlistToolBuilderOperationsList({
       role="list"
       className="tw-mt-4 tw-ml-0 tw-pl-0 tw-list-none tw-flex tw-flex-1 tw-flex-col tw-gap-y-4"
     >
-      {operationsWithMeta.map((operation) => (
-        <AllowlistToolBuilderOperationsListitem
-          key={operation.id}
-          operation={operation}
-        />
-      ))}
+      <AllowlistToolAnimationWrapper initial={true}>
+        {operationsWithMeta.map((operation) => (
+          <AllowlistToolAnimationHeightOpacity key={operation.id}>
+            <AllowlistToolBuilderOperationsListitem operation={operation} />
+          </AllowlistToolAnimationHeightOpacity>
+        ))}
+      </AllowlistToolAnimationWrapper>
     </ul>
   );
 }

@@ -70,8 +70,16 @@ export default function AllowlistToolBuilderPhasesPhaseComponent({
           </div>
         </div>
         <div className="tw-col-span-2 tw-px-3 tw-py-2"></div>
-        <div className="tw-col-span-2 tw-px-3 tw-py-2"></div>
-        <div className="tw-col-span-2 tw-px-3 tw-py-2"></div>
+        <div className="tw-col-span-2 tw-px-3 tw-py-2">
+          <div className="tw-whitespace-nowrap tw-px-3 tw-py-2 tw-text-sm tw-font-normal tw-text-neutral-300">
+            {phaseComponent.walletsCount}
+          </div>
+        </div>
+        <div className="tw-col-span-2 tw-px-3 tw-py-2">
+          <div className="tw-whitespace-nowrap tw-px-3 tw-py-2 tw-text-sm tw-font-normal tw-text-neutral-300">
+            {phaseComponent.tokensCount}
+          </div>
+        </div>
         <div className="tw-col-span-2">
           <div className="tw-py-2 tw-pl-3 tw-pr-4 sm:tw-pr-6">
             <div className="tw-flex tw-items-center tw-justify-end tw-gap-x-3">

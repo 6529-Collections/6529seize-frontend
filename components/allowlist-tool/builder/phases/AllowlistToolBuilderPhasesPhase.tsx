@@ -28,7 +28,7 @@ export default function AllowlistToolBuilderPhasesPhase({
   }, [isOpen, animateTable, animateIcon, tableScope, iconScope]);
   const validOperations = [AllowlistOperationCode.ADD_COMPONENT];
   const defaultOperation = AllowlistOperationCode.ADD_COMPONENT;
-  
+
   return (
     <>
       <div
@@ -68,8 +68,16 @@ export default function AllowlistToolBuilderPhasesPhase({
           </div>
         </div>
         <div className="tw-col-span-2 tw-px-3 tw-py-2"></div>
-        <div className="tw-col-span-2 tw-px-3 tw-py-2"></div>
-        <div className="tw-col-span-2 tw-px-3 tw-py-2"></div>
+        <div className="tw-col-span-2 tw-px-3 tw-py-2">
+          <div className="tw-whitespace-nowrap tw-px-3 tw-py-2 tw-text-sm tw-font-normal tw-text-neutral-300">
+            {phase.walletsCount}
+          </div>
+        </div>
+        <div className="tw-col-span-2 tw-px-3 tw-py-2">
+          <div className="tw-whitespace-nowrap tw-px-3 tw-py-2 tw-text-sm tw-font-normal tw-text-neutral-300">
+            {phase.tokensCount}
+          </div>
+        </div>
         <div className="tw-col-span-2">
           <div className="tw-py-2 tw-pl-3 tw-pr-4 sm:tw-pr-6">
             <div className="tw-flex tw-items-center tw-justify-end tw-gap-x-2.5">

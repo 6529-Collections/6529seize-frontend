@@ -1,4 +1,4 @@
-import { AnimatePresence, motion } from "framer-motion";
+
 import React, { useRef } from "react";
 import { useClickAway, useKeyPressEvent } from "react-use";
 import AllowlistToolAnimationWrapper from "./animation/AllowlistToolAnimationWrapper";

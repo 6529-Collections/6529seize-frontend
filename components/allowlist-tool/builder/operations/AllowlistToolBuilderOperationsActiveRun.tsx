@@ -36,7 +36,7 @@ export default function AllowlistToolBuilderOperationsActiveRun() {
         ) {
           refreshState();
         }
-        console.log(allowlist?.activeRun?.status, data.activeRun?.status);
+
         setAllowlist(data);
       } catch (error) {
         console.log(error);
