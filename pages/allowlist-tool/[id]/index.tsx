@@ -25,6 +25,7 @@ import {
   getRandomObjectId,
 } from "../../../helpers/AllowlistToolHelpers";
 import { useRouter } from "next/router";
+import AllowlistToolBuilderRaports from "../../../components/allowlist-tool/builder/raports/AllowlistToolBuilderRaports";
 
 const poppins = Poppins({
   weight: ["300", "400", "500", "600", "700"],
@@ -489,6 +490,7 @@ export default function AllowlistToolAllowlistId({
                 key={`wallet-pools-${refreshKey}`}
               />
               <AllowlistToolBuilderPhases key={`phases-${refreshKey}`} />
+              <AllowlistToolBuilderRaports key={`raports-${refreshKey}`} />
             </div>
             <AllowlistToolBuilderOperations key={`operations-${refreshKey}`} />
           </div>
