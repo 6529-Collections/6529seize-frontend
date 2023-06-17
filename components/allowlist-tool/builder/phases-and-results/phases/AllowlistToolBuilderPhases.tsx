@@ -1,67 +1,22 @@
-import { useRouter } from "next/router";
-import AllowlistToolExpandableTableWrapper from "../../common/AllowlistToolExpandableTableWrapper";
-import { useContext, useEffect, useState } from "react";
+import AllowlistToolExpandableTableWrapper from "../../../common/AllowlistToolExpandableTableWrapper";
 import {
   AllowlistOperationCode,
   AllowlistPhaseWithComponentAndItems,
-  AllowlistRunStatus,
-  AllowlistToolResponse,
-} from "../../allowlist-tool.types";
+} from "../../../allowlist-tool.types";
 import AllowlistToolBuilderPhasesPhase from "./AllowlistToolBuilderPhasesPhase";
-import { AllowlistToolBuilderContext } from "../../../../pages/allowlist-tool/[id]";
-import AllowlistToolHistoryIcon from "../../icons/AllowlistToolHistoryIcon";
-import AllowlistToolJsonIcon from "../../icons/AllowlistToolJsonIcon";
+import AllowlistToolHistoryIcon from "../../../icons/AllowlistToolHistoryIcon";
+import AllowlistToolJsonIcon from "../../../icons/AllowlistToolJsonIcon";
 import AllowlistToolBuilderPhasesAdd from "./AllowlistToolBuilderPhasesAdd";
-import AllowlistToolBuilderAddOperation from "../operations/AllowlistToolBuilderAddOperation";
-import AllowlistToolPoolsWrapper from "../../common/pools/AllowlistToolPoolsWrapper";
+import AllowlistToolBuilderAddOperation from "../../operations/AllowlistToolBuilderAddOperation";
+import AllowlistToolPoolsWrapper from "../../../common/pools/AllowlistToolPoolsWrapper";
 
-export default function AllowlistToolBuilderPhases() {
-  const router = useRouter();
-  const { allowlist, phases, setPhases, setToasts } = useContext(
-    AllowlistToolBuilderContext
-  );
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [showLoading, setShowLoading] = useState<boolean>(true);
-
-  useEffect(() => {
-    setShowLoading(
-      isLoading ||
-        (!!allowlist?.activeRun?.status &&
-          [AllowlistRunStatus.PENDING, AllowlistRunStatus.CLAIMED].includes(
-            allowlist?.activeRun?.status
-          ))
-    );
-  }, [isLoading, allowlist]);
-
-  useEffect(() => {
-    async function fetchPhases() {
-      setIsLoading(true);
-      setPhases([]);
-      try {
-        const response = await fetch(
-          `${process.env.ALLOWLIST_API_ENDPOINT}/allowlists/${router.query.id}/phases?withComponentsAndItems=true`
-        );
-        const data: AllowlistToolResponse<
-          AllowlistPhaseWithComponentAndItems[]
-        > = await response.json();
-        if ("error" in data) {
-          setToasts({
-            messages:
-              typeof data.message === "string" ? [data.message] : data.message,
-            type: "error",
-          });
-        } else {
-          setPhases(data);
-        }
-      } catch (error: any) {
-        setToasts({ messages: [error.message], type: "error" });
-      } finally {
-        setIsLoading(false);
-      }
-    }
-    fetchPhases();
-  }, [router.query.id, setPhases, setToasts]);
-
+export default function AllowlistToolBuilderPhases({
+  showLoading,
+  phases,
+}: {
+  showLoading: boolean;
+  phases: AllowlistPhaseWithComponentAndItems[];
+}) {
   const validOperations = [AllowlistOperationCode.ADD_PHASE];
   const defaultOperation = AllowlistOperationCode.ADD_PHASE;
 
@@ -94,7 +49,7 @@ export default function AllowlistToolBuilderPhases() {
                   </div>
                   <div className="tw-col-span-2">
                     <div className="tw-px-3 tw-py-1.5 tw-text-left tw-text-[0.6875rem] tw-leading-[1.125rem] tw-font-medium tw-text-neutral-400 tw-uppercase tw-tracking-[0.25px]">
-                     Wallets
+                      Wallets
                     </div>
                   </div>
                   <div className="tw-col-span-2">

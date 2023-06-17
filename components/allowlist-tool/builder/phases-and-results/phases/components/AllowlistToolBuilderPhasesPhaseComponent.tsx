@@ -2,12 +2,12 @@ import { useAnimate } from "framer-motion";
 import {
   AllowlistOperationCode,
   AllowlistPhaseComponentWithItems,
-} from "../../../allowlist-tool.types";
-import AllowlistToolHistoryIcon from "../../../icons/AllowlistToolHistoryIcon";
-import AllowlistToolJsonIcon from "../../../icons/AllowlistToolJsonIcon";
+} from "../../../../allowlist-tool.types";
+import AllowlistToolHistoryIcon from "../../../../icons/AllowlistToolHistoryIcon";
+import AllowlistToolJsonIcon from "../../../../icons/AllowlistToolJsonIcon";
 import AllowlistToolBuilderPhasesPhaseComponentItem from "./items/AllowlistToolBuilderPhasesPhaseComponentItem";
 import React, { useEffect, useState } from "react";
-import AllowlistToolBuilderAddOperation from "../../operations/AllowlistToolBuilderAddOperation";
+import AllowlistToolBuilderAddOperation from "../../../operations/AllowlistToolBuilderAddOperation";
 
 export default function AllowlistToolBuilderPhasesPhaseComponent({
   phaseComponent,

@@ -25,7 +25,8 @@ import {
   getRandomObjectId,
 } from "../../../helpers/AllowlistToolHelpers";
 import { useRouter } from "next/router";
-import AllowlistToolBuilderRaports from "../../../components/allowlist-tool/builder/raports/AllowlistToolBuilderRaports";
+import AllowlistToolBuilderResults from "../../../components/allowlist-tool/builder/phases-and-results/results/AllowlistToolBuilderResults";
+import AllowlistToolBuilderPhasesAndResults from "../../../components/allowlist-tool/builder/phases-and-results/AllowlistToolBuilderPhasesAndWinners";
 
 const poppins = Poppins({
   weight: ["300", "400", "500", "600", "700"],
@@ -77,7 +78,7 @@ const AllowlistToolBuilderWalletPools = dynamic(
 const AllowlistToolBuilderPhases = dynamic(
   () =>
     import(
-      "../../../components/allowlist-tool/builder/phases/AllowlistToolBuilderPhases"
+      "../../../components/allowlist-tool/builder/phases-and-results/phases/AllowlistToolBuilderPhases"
     ),
   {
     ssr: false,
@@ -295,7 +296,7 @@ export default function AllowlistToolAllowlistId({
                 description: operation.params.description,
                 contract: operation.params.contract,
                 blockNo: operation.params.blockNo,
-                transfersCount: 0
+                transfersCount: 0,
               });
               break;
             case AllowlistOperationCode.CREATE_TOKEN_POOL:
@@ -307,7 +308,7 @@ export default function AllowlistToolAllowlistId({
                 transferPoolId: operation.params.transferPoolId,
                 tokenIds: operation.params.tokenIds,
                 walletsCount: 0,
-                tokensCount: 0
+                tokensCount: 0,
               });
               break;
             case AllowlistOperationCode.CREATE_CUSTOM_TOKEN_POOL:
@@ -317,7 +318,7 @@ export default function AllowlistToolAllowlistId({
                 name: operation.params.name,
                 description: operation.params.description,
                 walletsCount: 0,
-                tokensCount: 0
+                tokensCount: 0,
               });
               break;
             case AllowlistOperationCode.CREATE_WALLET_POOL:
@@ -326,7 +327,7 @@ export default function AllowlistToolAllowlistId({
                 allowlistId: router.query.id as string,
                 name: operation.params.name,
                 description: operation.params.description,
-                walletsCount:0
+                walletsCount: 0,
               });
               break;
             case AllowlistOperationCode.ADD_PHASE:
@@ -337,7 +338,9 @@ export default function AllowlistToolAllowlistId({
                 description: operation.params.description,
                 insertionOrder: 0,
                 walletsCount: 0,
-                tokensCount: 0
+                tokensCount: 0,
+                winnersWalletsCount: 0,
+                winnersSpotsCount: 0,
               });
               break;
             case AllowlistOperationCode.ADD_COMPONENT:
@@ -349,7 +352,9 @@ export default function AllowlistToolAllowlistId({
                 description: operation.params.description,
                 insertionOrder: 0,
                 walletsCount: 0,
-                tokensCount: 0
+                tokensCount: 0,
+                winnersWalletsCount: 0,
+                winnersSpotsCount: 0,
               });
 
               break;
@@ -366,7 +371,7 @@ export default function AllowlistToolAllowlistId({
                 description: operation.params.description,
                 insertionOrder: 0,
                 walletsCount: 0,
-                tokensCount: 0
+                tokensCount: 0,
               });
               break;
             case AllowlistOperationCode.CREATE_ALLOWLIST:
@@ -489,8 +494,9 @@ export default function AllowlistToolAllowlistId({
               <AllowlistToolBuilderWalletPools
                 key={`wallet-pools-${refreshKey}`}
               />
-              <AllowlistToolBuilderPhases key={`phases-${refreshKey}`} />
-              <AllowlistToolBuilderRaports key={`raports-${refreshKey}`} />
+              <AllowlistToolBuilderPhasesAndResults
+                key={`phases-and-results-${refreshKey}`}
+              />
             </div>
             <AllowlistToolBuilderOperations key={`operations-${refreshKey}`} />
           </div>

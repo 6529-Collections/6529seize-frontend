@@ -42,8 +42,8 @@ export interface AllowlistCustomTokenPool {
   readonly allowlistId: string;
   readonly name: string;
   readonly description: string;
-  readonly walletsCount: number
-  readonly tokensCount: number
+  readonly walletsCount: number;
+  readonly tokensCount: number;
 }
 
 export interface AllowlistWalletPool {
@@ -51,7 +51,7 @@ export interface AllowlistWalletPool {
   readonly allowlistId: string;
   readonly name: string;
   readonly description: string;
-  readonly walletsCount: number
+  readonly walletsCount: number;
 }
 
 export interface AllowlistPhase {
@@ -60,8 +60,10 @@ export interface AllowlistPhase {
   readonly name: string;
   readonly description: string;
   readonly insertionOrder: number;
-  readonly walletsCount: number
-  readonly tokensCount: number
+  readonly walletsCount: number;
+  readonly tokensCount: number;
+  readonly winnersWalletsCount: number;
+  readonly winnersSpotsCount: number;
 }
 
 export interface AllowlistPhaseComponent {
@@ -71,8 +73,10 @@ export interface AllowlistPhaseComponent {
   readonly insertionOrder: number;
   readonly name: string;
   readonly description: string;
-  readonly walletsCount: number
-  readonly tokensCount: number
+  readonly walletsCount: number;
+  readonly tokensCount: number;
+  readonly winnersWalletsCount: number;
+  readonly winnersSpotsCount: number;
 }
 
 export interface AllowlistPhaseComponentItem {
@@ -85,8 +89,8 @@ export interface AllowlistPhaseComponentItem {
   readonly description: string;
   readonly poolId: string;
   readonly poolType: Pool;
-  readonly walletsCount: number
-  readonly tokensCount: number
+  readonly walletsCount: number;
+  readonly tokensCount: number;
 }
 
 export interface AllowlistPhaseComponentWithItems
