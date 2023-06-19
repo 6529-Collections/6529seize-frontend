@@ -6,6 +6,7 @@ export interface AllowlistDescriptionActiveRun {
   readonly createdAt: number;
   readonly updatedAt?: number;
   readonly status?: AllowlistRunStatus;
+  readonly errorReason: string | null;
 }
 
 export interface AllowlistDescription {
