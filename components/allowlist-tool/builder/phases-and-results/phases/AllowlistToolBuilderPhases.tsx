@@ -97,6 +97,7 @@ export default function AllowlistToolBuilderPhases({
               </div>
             </div>
           </div>
+          
         </div>
       </AllowlistToolExpandableTableWrapper>
     </AllowlistToolPoolsWrapper>
