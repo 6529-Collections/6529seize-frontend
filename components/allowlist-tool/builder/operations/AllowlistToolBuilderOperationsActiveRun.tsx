@@ -1,12 +1,12 @@
 import { useRouter } from "next/router";
-import { useContext, useEffect, useState } from "react";
-import { AllowlistToolBuilderContext } from "../../../../pages/allowlist-tool/[id]";
+import { useContext, useEffect } from "react";
 import { useInterval } from "react-use";
 import {
   AllowlistDescription,
   AllowlistRunStatus,
   AllowlistToolResponse,
 } from "../../allowlist-tool.types";
+import { AllowlistToolBuilderContext } from "../AllowlistToolBuilderContextWrapper";
 
 export default function AllowlistToolBuilderOperationsActiveRun() {
   const router = useRouter();

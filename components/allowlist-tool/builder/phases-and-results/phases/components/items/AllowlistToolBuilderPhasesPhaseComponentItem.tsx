@@ -6,8 +6,9 @@ import {
 } from "../../../../../allowlist-tool.types";
 import AllowlistToolHistoryIcon from "../../../../../icons/AllowlistToolHistoryIcon";
 import AllowlistToolJsonIcon from "../../../../../icons/AllowlistToolJsonIcon";
-import { AllowlistToolBuilderContext } from "../../../../../../../pages/allowlist-tool/[id]";
+
 import AllowlistToolBuilderAddOperation from "../../../../operations/AllowlistToolBuilderAddOperation";
+import { AllowlistToolBuilderContext } from "../../../../AllowlistToolBuilderContextWrapper";
 
 export default function AllowlistToolBuilderPhasesPhaseComponentItem({
   phaseComponentItem,

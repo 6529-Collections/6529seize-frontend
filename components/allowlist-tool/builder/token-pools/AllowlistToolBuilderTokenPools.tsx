@@ -8,12 +8,12 @@ import {
 } from "../../allowlist-tool.types";
 import AllowlistToolExpandableTableWrapper from "../../common/AllowlistToolExpandableTableWrapper";
 import AllowlistToolBuilderTokenPoolsPool from "./AllowlistToolBuilderTokenPoolsPool";
-import { AllowlistToolBuilderContext } from "../../../../pages/allowlist-tool/[id]";
 import AllowlistToolHistoryIcon from "../../icons/AllowlistToolHistoryIcon";
 import AllowlistToolJsonIcon from "../../icons/AllowlistToolJsonIcon";
 import AllowlistToolBuilderTokenPoolsAdd from "./AllowlistToolBuilderTokenPoolsAdd";
 import AllowlistToolBuilderAddOperation from "../operations/AllowlistToolBuilderAddOperation";
 import AllowlistToolPoolsWrapper from "../../common/pools/AllowlistToolPoolsWrapper";
+import { AllowlistToolBuilderContext } from "../AllowlistToolBuilderContextWrapper";
 
 export default function AllowlistToolBuilderTokenPools() {
   const router = useRouter();

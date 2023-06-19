@@ -6,9 +6,9 @@ import {
   AllowlistToolResponse,
 } from "../../allowlist-tool.types";
 import { getRandomObjectId } from "../../../../helpers/AllowlistToolHelpers";
-import { AllowlistToolBuilderContext } from "../../../../pages/allowlist-tool/[id]";
 import styles from "../../AllowlistTool.module.scss";
 import AllowlistToolPrimaryBtn from "../../common/AllowlistToolPrimaryBtn";
+import { AllowlistToolBuilderContext } from "../AllowlistToolBuilderContextWrapper";
 
 export default function AllowlistToolBuilderTransferPoolsAdd() {
   const router = useRouter();

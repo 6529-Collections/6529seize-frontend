@@ -6,7 +6,6 @@ import {
   AllowlistToolResponse,
 } from "../../allowlist-tool.types";
 
-import { AllowlistToolBuilderContext } from "../../../../pages/allowlist-tool/[id]";
 import AllowlistToolBuilderOperationsList from "./AllowlistToolBuilderOperationsList";
 import AllowlistToolBuilderOperationsRun from "./AllowlistToolBuilderOperationsRun";
 import AllowlistToolBuilderOperationsActiveRun from "./AllowlistToolBuilderOperationsActiveRun";
@@ -14,6 +13,7 @@ import AllowlistToolBuilderOperationsLoading from "./AllowlistToolBuilderOperati
 import AllowlistToolBuilderOperationsEmpty from "./AllowlistToolBuilderOperationsEmpty";
 import AllowlistToolAnimationWrapper from "../../common/animation/AllowlistToolAnimationWrapper";
 import AllowlistToolAnimationOpacity from "../../common/animation/AllowlistToolAnimationOpacity";
+import { AllowlistToolBuilderContext } from "../AllowlistToolBuilderContextWrapper";
 
 export default function AllowlistToolBuilderOperations() {
   const router = useRouter();

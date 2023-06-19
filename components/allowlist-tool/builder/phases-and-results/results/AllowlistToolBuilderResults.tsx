@@ -1,5 +1,3 @@
-import { useContext } from "react";
-import { AllowlistToolBuilderContext } from "../../../../../pages/allowlist-tool/[id]";
 import AllowlistToolExpandableTableWrapper from "../../../common/AllowlistToolExpandableTableWrapper";
 import AllowlistToolPoolsWrapper from "../../../common/pools/AllowlistToolPoolsWrapper";
 import AllowlistToolJsonIcon from "../../../icons/AllowlistToolJsonIcon";

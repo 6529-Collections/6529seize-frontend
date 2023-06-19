@@ -1,5 +1,4 @@
 import { useContext, useEffect, useState } from "react";
-import { AllowlistToolBuilderContext } from "../../../../../pages/allowlist-tool/[id]";
 import {
   AllowlistOperation,
   AllowlistOperationCode,
@@ -26,6 +25,7 @@ import AllowlistToolBuilderAddComponentOperation from "../phase/AllowlistToolBui
 import { useRouter } from "next/router";
 import AllowlistToolAnimationWrapper from "../../../common/animation/AllowlistToolAnimationWrapper";
 import AllowlistToolAnimationHeightOpacity from "../../../common/animation/AllowlistToolAnimationHeightOpacity";
+import { AllowlistToolBuilderContext } from "../../AllowlistToolBuilderContextWrapper";
 
 export default function AllowlistToolAddOperationModal({
   targetItemId,

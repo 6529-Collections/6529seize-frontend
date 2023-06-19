@@ -1,0 +1,49 @@
+import { useContext } from "react";
+import AllowlistToolBuilderAlert from "./AllowlistToolBuilderAlert";
+import AllowlistToolBuilderCustomTokenPools from "./custom-token-pools/AllowlistToolBuilderCustomTokenPools";
+import AllowlistToolBuilderOperations from "./operations/AllowlistToolBuilderOperations";
+import AllowlistToolBuilderPhasesAndResults from "./phases-and-results/AllowlistToolBuilderPhasesAndWinners";
+import AllowlistToolBuilderTokenPools from "./token-pools/AllowlistToolBuilderTokenPools";
+import AllowlistToolBuilderTransferPools from "./transfer-pools/AllowlistToolBuilderTransferPools";
+import AllowlistToolBuilderWalletPools from "./wallet-pools/AllowlistToolBuilderWalletPools";
+import { Poppins } from "next/font/google";
+import { AllowlistToolBuilderContext } from "./AllowlistToolBuilderContextWrapper";
+
+const poppins = Poppins({
+  weight: ["300", "400", "500", "600", "700"],
+  style: ["normal", "italic"],
+  subsets: ["latin"],
+  display: "swap",
+});
+
+export default function AllowlistToolBuilderPage() {
+  const { allowlist, refreshKey } = useContext(AllowlistToolBuilderContext);
+  return (
+    <div
+      id="allowlist-tool"
+      className={`tw-min-h-screen tw-relative tw-bg-neutral-950 ${poppins.className}`}
+    >
+      <div className="container tw-mx-auto tw-pt-6 tw-pb-12">
+        <div className="tw-space-y-6 tw-ml-80">
+          <AllowlistToolBuilderAlert />
+
+          <h1 className="tw-uppercase tw-mb-0 tw-float-none">
+            {allowlist?.name}
+          </h1>
+          <AllowlistToolBuilderTransferPools
+            key={`transfer-pools-${refreshKey}`}
+          />
+          <AllowlistToolBuilderTokenPools key={`token-pools-${refreshKey}`} />
+          <AllowlistToolBuilderCustomTokenPools
+            key={`custom-token-pools-${refreshKey}`}
+          />
+          <AllowlistToolBuilderWalletPools key={`wallet-pools-${refreshKey}`} />
+          <AllowlistToolBuilderPhasesAndResults
+            key={`phases-and-results-${refreshKey}`}
+          />
+        </div>
+        <AllowlistToolBuilderOperations key={`operations-${refreshKey}`} />
+      </div>
+    </div>
+  );
+}

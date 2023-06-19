@@ -1,7 +1,7 @@
 import { useContext, useState } from "react";
-import { AllowlistToolBuilderContext } from "../../../../../../pages/allowlist-tool/[id]";
 import { AllowlistOperationCode } from "../../../../allowlist-tool.types";
 import AllowlistToolPrimaryBtn from "../../../../common/AllowlistToolPrimaryBtn";
+import { AllowlistToolBuilderContext } from "../../../AllowlistToolBuilderContextWrapper";
 
 export default function AllowlistToolBuilderItemSelectLastNTokensOperation({
   itemId,

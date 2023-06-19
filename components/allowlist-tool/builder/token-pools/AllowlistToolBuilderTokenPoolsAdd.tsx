@@ -1,5 +1,4 @@
 import { useContext, useState } from "react";
-import { AllowlistToolBuilderContext } from "../../../../pages/allowlist-tool/[id]";
 import AllowlistToolSelectMenu, {
   AllowlistToolSelectMenuOption,
 } from "../../common/select-menu/AllowlistToolSelectMenu";
@@ -11,6 +10,7 @@ import {
 } from "../../allowlist-tool.types";
 import { getRandomObjectId } from "../../../../helpers/AllowlistToolHelpers";
 import AllowlistToolPrimaryBtn from "../../common/AllowlistToolPrimaryBtn";
+import { AllowlistToolBuilderContext } from "../AllowlistToolBuilderContextWrapper";
 
 export default function AllowlistToolBuilderTokenPoolsAdd() {
   const router = useRouter();

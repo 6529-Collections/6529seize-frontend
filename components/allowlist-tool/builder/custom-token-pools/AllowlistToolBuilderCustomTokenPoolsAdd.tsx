@@ -1,6 +1,5 @@
 import { useRouter } from "next/router";
 import { useContext, useState } from "react";
-import { AllowlistToolBuilderContext } from "../../../../pages/allowlist-tool/[id]";
 import {
   AllowlistOperation,
   AllowlistOperationCode,
@@ -13,6 +12,7 @@ import csvParser from "csv-parser";
 import AllowlistToolPrimaryBtn from "../../common/AllowlistToolPrimaryBtn";
 import AllowlistToolAnimationWrapper from "../../common/animation/AllowlistToolAnimationWrapper";
 import AllowlistToolAnimationHeightOpacity from "../../common/animation/AllowlistToolAnimationHeightOpacity";
+import { AllowlistToolBuilderContext } from "../AllowlistToolBuilderContextWrapper";
 
 export default function AllowlistToolBuilderCustomTokenPoolsAdd() {
   const router = useRouter();

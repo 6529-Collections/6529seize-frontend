@@ -8,12 +8,12 @@ import {
 import { useContext, useEffect, useState } from "react";
 import AllowlistToolExpandableTableWrapper from "../../common/AllowlistToolExpandableTableWrapper";
 import AllowlistToolBuilderCustomTokenPoolsPool from "./AllowlistToolBuilderCustomTokenPoolsPool";
-import { AllowlistToolBuilderContext } from "../../../../pages/allowlist-tool/[id]";
 import AllowlistToolHistoryIcon from "../../icons/AllowlistToolHistoryIcon";
 import AllowlistToolJsonIcon from "../../icons/AllowlistToolJsonIcon";
 import AllowlistToolBuilderCustomTokenPoolsAdd from "./AllowlistToolBuilderCustomTokenPoolsAdd";
 import AllowlistToolBuilderAddOperation from "../operations/AllowlistToolBuilderAddOperation";
 import AllowlistToolPoolsWrapper from "../../common/pools/AllowlistToolPoolsWrapper";
+import { AllowlistToolBuilderContext } from "../AllowlistToolBuilderContextWrapper";
 
 export default function AllowlistToolBuilderCustomTokenPools() {
   const router = useRouter();

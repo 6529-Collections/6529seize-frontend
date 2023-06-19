@@ -1,8 +1,8 @@
 import { useContext, useEffect, useState } from "react";
-import { AllowlistToolBuilderContext } from "../../../pages/allowlist-tool/[id]";
 import AllowlistToolAnimationWrapper from "../common/animation/AllowlistToolAnimationWrapper";
 import AllowlistToolAnimationHeightOpacity from "../common/animation/AllowlistToolAnimationHeightOpacity";
 import { AllowlistRunStatus } from "../allowlist-tool.types";
+import { AllowlistToolBuilderContext } from "./AllowlistToolBuilderContextWrapper";
 
 export default function AllowlistToolBuilderAlert() {
   const { allowlist } = useContext(AllowlistToolBuilderContext);

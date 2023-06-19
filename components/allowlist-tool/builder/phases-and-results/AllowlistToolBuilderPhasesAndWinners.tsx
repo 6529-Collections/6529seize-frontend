@@ -2,12 +2,13 @@ import { useRouter } from "next/router";
 import AllowlistToolBuilderPhases from "./phases/AllowlistToolBuilderPhases";
 import AllowlistToolBuilderResults from "./results/AllowlistToolBuilderResults";
 import { useContext, useEffect, useState } from "react";
-import { AllowlistToolBuilderContext } from "../../../../pages/allowlist-tool/[id]";
+
 import {
   AllowlistPhaseWithComponentAndItems,
   AllowlistRunStatus,
   AllowlistToolResponse,
 } from "../../allowlist-tool.types";
+import { AllowlistToolBuilderContext } from "../AllowlistToolBuilderContextWrapper";
 
 export default function AllowlistToolBuilderPhasesAndResults() {
   const router = useRouter();

@@ -12,13 +12,13 @@ import {
   Pool,
 } from "../../allowlist-tool.types";
 import AllowlistToolBuilderOperationsListitem from "./AllowlistToolBuilderOperationsListitem";
-import { AllowlistToolBuilderContext } from "../../../../pages/allowlist-tool/[id]";
 import {
   assertUnreachable,
   truncateTextMiddle,
 } from "../../../../helpers/AllowlistToolHelpers";
 import AllowlistToolAnimationWrapper from "../../common/animation/AllowlistToolAnimationWrapper";
 import AllowlistToolAnimationHeightOpacity from "../../common/animation/AllowlistToolAnimationHeightOpacity";
+import { AllowlistToolBuilderContext } from "../AllowlistToolBuilderContextWrapper";
 
 export interface AllowlistToolBuilderOperationMeta {
   readonly id: string;

@@ -1,6 +1,6 @@
 import { useRouter } from "next/router";
 import { useContext, useState } from "react";
-import { AllowlistToolBuilderContext } from "../../../../pages/allowlist-tool/[id]";
+
 import csvParser from "csv-parser";
 import {
   AllowlistOperation,
@@ -10,8 +10,8 @@ import {
 import { getRandomObjectId } from "../../../../helpers/AllowlistToolHelpers";
 import AllowlistToolPrimaryBtn from "../../common/AllowlistToolPrimaryBtn";
 import AllowlistToolAnimationWrapper from "../../common/animation/AllowlistToolAnimationWrapper";
-import AllowlistToolAnimationOpacity from "../../common/animation/AllowlistToolAnimationOpacity";
 import AllowlistToolAnimationHeightOpacity from "../../common/animation/AllowlistToolAnimationHeightOpacity";
+import { AllowlistToolBuilderContext } from "../AllowlistToolBuilderContextWrapper";
 
 export default function AllowlistToolBuilderWalletPoolsAdd() {
   const router = useRouter();

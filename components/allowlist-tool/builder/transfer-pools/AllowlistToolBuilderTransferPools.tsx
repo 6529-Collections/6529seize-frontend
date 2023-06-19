@@ -9,11 +9,11 @@ import {
 import AllowlistToolBuilderTransferPoolsPool from "./AllowlistToolBuilderTransferPoolsPool";
 import AllowlistToolExpandableTableWrapper from "../../common/AllowlistToolExpandableTableWrapper";
 import AllowlistToolBuilderTransferPoolsAdd from "./AllowlistToolBuilderTransferPoolsAdd";
-import { AllowlistToolBuilderContext } from "../../../../pages/allowlist-tool/[id]";
 import AllowlistToolHistoryIcon from "../../icons/AllowlistToolHistoryIcon";
 import AllowlistToolJsonIcon from "../../icons/AllowlistToolJsonIcon";
 import AllowlistToolBuilderAddOperation from "../operations/AllowlistToolBuilderAddOperation";
 import AllowlistToolPoolsWrapper from "../../common/pools/AllowlistToolPoolsWrapper";
+import { AllowlistToolBuilderContext } from "../AllowlistToolBuilderContextWrapper";
 
 export default function AllowlistToolBuilderTransferPools() {
   const router = useRouter();

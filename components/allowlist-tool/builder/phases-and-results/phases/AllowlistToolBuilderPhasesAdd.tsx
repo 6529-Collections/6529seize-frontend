@@ -1,6 +1,6 @@
 import { useRouter } from "next/router";
 import { useContext, useState } from "react";
-import { AllowlistToolBuilderContext } from "../../../../../pages/allowlist-tool/[id]";
+
 import {
   AllowlistOperation,
   AllowlistOperationCode,
@@ -8,6 +8,7 @@ import {
 } from "../../../allowlist-tool.types";
 import { getRandomObjectId } from "../../../../../helpers/AllowlistToolHelpers";
 import AllowlistToolPrimaryBtn from "../../../common/AllowlistToolPrimaryBtn";
+import { AllowlistToolBuilderContext } from "../../AllowlistToolBuilderContextWrapper";
 
 export default function AllowlistToolBuilderPhasesAdd() {
   const router = useRouter();
