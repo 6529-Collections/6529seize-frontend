@@ -1,15 +1,15 @@
 
 import React, { useRef } from "react";
 import { useClickAway, useKeyPressEvent } from "react-use";
-import AllowlistToolAnimationWrapper from "./animation/AllowlistToolAnimationWrapper";
-import AllowlistToolAnimationOpacity from "./animation/AllowlistToolAnimationOpacity";
+import AllowlistToolAnimationWrapper from "../animation/AllowlistToolAnimationWrapper";
+import AllowlistToolAnimationOpacity from "../animation/AllowlistToolAnimationOpacity";
 
 export enum AllowlistToolModalSize {
   SMALL = "SMALL",
   LARGE = "LARGE",
 }
 
-interface AllowlistToolModelWrapperProps {
+interface AllowlistToolCommonModalWrapperProps {
   children: React.ReactNode;
   showModal: boolean;
   onClose: () => void;
@@ -17,13 +17,13 @@ interface AllowlistToolModelWrapperProps {
   modalSize?: AllowlistToolModalSize;
 }
 
-export default function AllowlistToolModelWrapper({
+export default function AllowlistToolCommonModalWrapper({
   children,
   showModal,
   onClose,
   title,
   modalSize = AllowlistToolModalSize.SMALL,
-}: AllowlistToolModelWrapperProps) {
+}: AllowlistToolCommonModalWrapperProps) {
   const modalRef = useRef<HTMLDivElement>(null);
   useClickAway(modalRef, () => onClose());
   useKeyPressEvent("Escape", () => onClose());

@@ -7,10 +7,6 @@ import {
   AllowlistRunStatus,
   AllowlistToolResponse,
 } from "../../allowlist-tool.types";
-import { getRandomObjectId } from "../../../../helpers/AllowlistToolHelpers";
-import AllowlistToolModelWrapper, {
-  AllowlistToolModalSize,
-} from "../../common/AllowlistToolModelWrapper";
 
 export default function AllowlistToolBuilderOperationsActiveRun() {
   const router = useRouter();
@@ -83,14 +79,6 @@ export default function AllowlistToolBuilderOperationsActiveRun() {
     [AllowlistRunStatus.COMPLETED]: "Completed",
     [AllowlistRunStatus.FAILED]: "Failed",
   };
-  const [isErrorModalOpen, setIsErrorModalOpen] = useState<boolean>(false);
-
-  useEffect(() => {
-    setIsErrorModalOpen(
-      allowlist?.activeRun?.status === AllowlistRunStatus.FAILED
-    );
-  }, [allowlist]);
-
   return (
     <div>
       {allowlist?.activeRun && (
@@ -107,14 +95,6 @@ export default function AllowlistToolBuilderOperationsActiveRun() {
           <div className="tw-hidden tw-text-xs tw-font-medium tw-text-white sm:tw-block">
             {titles[allowlist.activeRun.status ?? AllowlistRunStatus.COMPLETED]}
           </div>
-          <AllowlistToolModelWrapper
-            showModal={isErrorModalOpen}
-            onClose={() => setIsErrorModalOpen(false)}
-            title="Failed to execute operations on the allowlist"
-            modalSize={AllowlistToolModalSize.SMALL}
-          >
-            <div>{allowlist.activeRun.errorReason}</div>
-          </AllowlistToolModelWrapper>
         </div>
       )}
     </div>

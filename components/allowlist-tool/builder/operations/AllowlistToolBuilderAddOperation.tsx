@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { AllowlistOperationCode } from "../../allowlist-tool.types";
 import AllowlistToolPlusIcon from "../../icons/AllowlistToolPlusIcon";
-import AllowlistToolModelWrapper, {
+import AllowlistToolCommonModalWrapper, {
   AllowlistToolModalSize,
-} from "../../common/AllowlistToolModelWrapper";
+} from "../../common/modals/AllowlistToolCommonModalWrapper";
 import AllowlistToolAddOperationModal from "./add-modal/AllowlistToolAddOperationModal";
 
 export default function AllowlistToolBuilderAddOperation({
@@ -33,7 +33,7 @@ export default function AllowlistToolBuilderAddOperation({
           <AllowlistToolPlusIcon />
         </div>
       </button>
-      <AllowlistToolModelWrapper
+      <AllowlistToolCommonModalWrapper
         showModal={showModal}
         onClose={() => setShowModal(false)}
         title={title}
@@ -45,7 +45,7 @@ export default function AllowlistToolBuilderAddOperation({
           validOperations={validOperations}
           onClose={() => setShowModal(false)}
         />
-      </AllowlistToolModelWrapper>
+      </AllowlistToolCommonModalWrapper>
     </div>
   );
 }
