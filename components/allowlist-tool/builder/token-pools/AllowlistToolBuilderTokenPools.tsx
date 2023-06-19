@@ -17,7 +17,7 @@ import AllowlistToolPoolsWrapper from "../../common/pools/AllowlistToolPoolsWrap
 
 export default function AllowlistToolBuilderTokenPools() {
   const router = useRouter();
-  const {allowlist, tokenPools, setTokenPools, setToasts } = useContext(
+  const { allowlist, tokenPools, setTokenPools, setToasts } = useContext(
     AllowlistToolBuilderContext
   );
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -64,10 +64,17 @@ export default function AllowlistToolBuilderTokenPools() {
   const validOperations = [AllowlistOperationCode.CREATE_TOKEN_POOL];
   const defaultOperation = AllowlistOperationCode.CREATE_TOKEN_POOL;
 
+  const [isOpen, setIsOpen] = useState<boolean>(false);
+
   return (
     <AllowlistToolPoolsWrapper isLoading={showLoading}>
-      <AllowlistToolExpandableTableWrapper title="Token Pools">
-        <div className="tw-w-full tw-overflow-hidden tw-h-0">
+      <AllowlistToolExpandableTableWrapper
+        title="Token Pools"
+        onStateChange={setIsOpen}
+      >
+        <div
+          className={`tw-w-full tw-h-0 ${isOpen ? "" : "tw-overflow-hidden"}`}
+        >
           <div className="tw-border tw-border-neutral-700/60 tw-border-solid tw-border-l-0 tw-border-r-0 tw-border-b-0 tw-w-full"></div>
           <AllowlistToolBuilderTokenPoolsAdd />
           <div className="tw-bg-neutral-900">

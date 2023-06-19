@@ -5,20 +5,35 @@ import { useEffect, useState } from "react";
 interface AllowlistToolExpandableTableWrapperProps {
   children: React.ReactNode;
   title: string;
+  onStateChange?: (state: boolean) => void;
 }
 
 export default function AllowlistToolExpandableTableWrapper({
   children,
   title,
+  onStateChange,
 }: AllowlistToolExpandableTableWrapperProps) {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [tableScope, animateTable] = useAnimate();
   const [iconScope, animateIcon] = useAnimate();
+
+  const triggerStateChange = (state: boolean) => {
+    if (!onStateChange) return;
+    onStateChange(state);
+  };
+
   useEffect(() => {
     if (isOpen) {
-      animateTable(tableScope.current, { height: "auto" });
+      animateTable(
+        tableScope.current,
+        {
+          height: "auto",
+        },
+        { onComplete: () => triggerStateChange(true) }
+      );
       animateIcon(iconScope.current, { rotate: 90 });
     } else {
+      triggerStateChange(false);
       animateTable(tableScope.current, { height: 0 });
       animateIcon(iconScope.current, { rotate: 0 });
     }

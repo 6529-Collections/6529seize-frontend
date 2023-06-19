@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { motion, AnimatePresence, useAnimate } from "framer-motion";
+import { motion,  useAnimate } from "framer-motion";
 import AllowlistToolSelectMenuList from "./AllowlistToolSelectMenuList";
 import { useClickAway, useKeyPressEvent } from "react-use";
 import AllowlistToolAnimationWrapper from "../animation/AllowlistToolAnimationWrapper";
