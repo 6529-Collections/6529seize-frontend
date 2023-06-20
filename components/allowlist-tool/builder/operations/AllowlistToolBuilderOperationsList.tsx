@@ -14,6 +14,7 @@ import {
 import AllowlistToolBuilderOperationsListitem from "./AllowlistToolBuilderOperationsListitem";
 import {
   assertUnreachable,
+  getRandomObjectId,
   truncateTextMiddle,
 } from "../../../../helpers/AllowlistToolHelpers";
 import AllowlistToolAnimationWrapper from "../../common/animation/AllowlistToolAnimationWrapper";
@@ -30,9 +31,12 @@ export interface AllowlistToolBuilderOperationMeta {
 
 export default function AllowlistToolBuilderOperationsList({
   operations,
+  uniqueKey,
 }: {
   operations: AllowlistOperation[];
+  uniqueKey: string;
 }) {
+  const randomKey = getRandomObjectId();
   const {
     operationDescriptions,
     transferPools,
@@ -438,7 +442,7 @@ export default function AllowlistToolBuilderOperationsList({
     >
       <AllowlistToolAnimationWrapper initial={true}>
         {operationsWithMeta.map((operation) => (
-          <AllowlistToolAnimationHeightOpacity key={operation.id}>
+          <AllowlistToolAnimationHeightOpacity key={`${uniqueKey}-${operation.id}`}>
             <AllowlistToolBuilderOperationsListitem operation={operation} />
           </AllowlistToolAnimationHeightOpacity>
         ))}

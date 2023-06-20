@@ -2,12 +2,14 @@ import { useEffect, useState } from "react";
 import {
   AllowlistOperationCode,
   AllowlistPhaseWithComponentAndItems,
+  AllowlistToolEntity,
 } from "../../../allowlist-tool.types";
 import AllowlistToolHistoryIcon from "../../../icons/AllowlistToolHistoryIcon";
 import AllowlistToolJsonIcon from "../../../icons/AllowlistToolJsonIcon";
 import AllowlistToolBuilderPhasesPhaseComponent from "./components/AllowlistToolBuilderPhasesPhaseComponent";
 import { useAnimate } from "framer-motion";
 import AllowlistToolBuilderAddOperation from "../../operations/AllowlistToolBuilderAddOperation";
+import AllowlistTooBuilderOperationsHistory from "../../operations/history/AllowlistTooBuilderOperationsHistory";
 
 export default function AllowlistToolBuilderPhasesPhase({
   phase,
@@ -95,14 +97,10 @@ export default function AllowlistToolBuilderPhasesPhase({
                 targetItemId={phase.id}
                 defaultOperation={defaultOperation}
               />
-              <button
-                type="button"
-                className="tw-group tw-rounded-full tw-bg-transparent tw-p-2 tw-text-white tw-border-none hover:tw-bg-neutral-700 tw-transition-all tw-duration-300 tw-ease-out"
-              >
-                <div className="tw-h-[1.125rem] tw-w-[1.125rem] tw-flex tw-justify-center tw-items-center">
-                  <AllowlistToolHistoryIcon />
-                </div>
-              </button>
+              <AllowlistTooBuilderOperationsHistory
+                entityType={AllowlistToolEntity.PHASE}
+                targetItemId={phase.id}
+              />
             </div>
           </div>
         </div>

@@ -1,4 +1,4 @@
-import { createContext, useEffect, useState } from "react";
+import { createContext, use, useEffect, useState } from "react";
 import {
   AllowlistCustomTokenPool,
   AllowlistDescription,
@@ -8,18 +8,26 @@ import {
   AllowlistPhase,
   AllowlistPhaseComponent,
   AllowlistPhaseComponentItem,
+  AllowlistPhaseComponentWithItems,
   AllowlistPhaseWithComponentAndItems,
+  AllowlistRunStatus,
   AllowlistTokenPool,
   AllowlistTransferPool,
   AllowlistWalletPool,
 } from "../allowlist-tool.types";
 import { Slide, ToastContainer, TypeOptions, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import {
   assertUnreachable,
   getRandomObjectId,
 } from "../../../helpers/AllowlistToolHelpers";
 import { useRouter } from "next/router";
-import { get } from "http";
+
+export interface AllowlistToolBuilderContextActiveHistory {
+  operations: AllowlistOperation[];
+  title: string;
+  subTitle: string | null;
+}
 
 type AllowlistToolBuilderContextType = {
   refreshState: () => void;
@@ -29,6 +37,11 @@ type AllowlistToolBuilderContextType = {
   operations: AllowlistOperation[];
   addOperations: (operations: AllowlistOperation[]) => void;
   operationDescriptions: AllowlistOperationDescription[];
+  operationsGrouped: AllowlistToolOperationsGrouped;
+  activeHistory: AllowlistToolBuilderContextActiveHistory | null;
+  setActiveHistory: (
+    entity: AllowlistToolBuilderContextActiveHistory | null
+  ) => void;
   transferPools: AllowlistTransferPool[];
   setTransferPools: (transferPools: AllowlistTransferPool[]) => void;
   tokenPools: AllowlistTokenPool[];
@@ -38,6 +51,7 @@ type AllowlistToolBuilderContextType = {
   walletPools: AllowlistWalletPool[];
   setWalletPools: (walletPools: AllowlistWalletPool[]) => void;
   phases: AllowlistPhaseWithComponentAndItems[];
+  isGlobalLoading: boolean;
   setPhases: (phases: AllowlistPhaseWithComponentAndItems[]) => void;
   setToasts: ({
     messages,
@@ -84,6 +98,30 @@ export const AllowlistToolBuilderContext =
     allowlist: null,
     setAllowlist: () => {},
     operations: [],
+    operationsGrouped: {
+      transferPools: {
+        operations: [],
+        pools: {},
+      },
+      tokenPools: {
+        operations: [],
+        pools: {},
+      },
+      customTokenPools: {
+        operations: [],
+        pools: {},
+      },
+      walletPools: {
+        operations: [],
+        pools: {},
+      },
+      phases: {
+        operations: [],
+        phases: {},
+      },
+    },
+    activeHistory: null,
+    setActiveHistory: () => {},
     addOperations: () => {},
     operationDescriptions: [],
     transferPools: [],
@@ -97,7 +135,43 @@ export const AllowlistToolBuilderContext =
     phases: [],
     setPhases: () => {},
     setToasts: () => {},
+    isGlobalLoading: false,
   });
+
+export interface AllowlistToolOperationsGrouped {
+  transferPools: {
+    operations: AllowlistOperation[];
+    pools: Record<string, AllowlistOperation[]>;
+  };
+  tokenPools: {
+    operations: AllowlistOperation[];
+    pools: Record<string, AllowlistOperation[]>;
+  };
+  customTokenPools: {
+    operations: AllowlistOperation[];
+    pools: Record<string, AllowlistOperation[]>;
+  };
+  walletPools: {
+    operations: AllowlistOperation[];
+    pools: Record<string, AllowlistOperation[]>;
+  };
+  phases: {
+    operations: AllowlistOperation[];
+    phases: Record<
+      string,
+      {
+        operations: AllowlistOperation[];
+        components: Record<
+          string,
+          {
+            operations: AllowlistOperation[];
+            items: Record<string, AllowlistOperation[]>;
+          }
+        >;
+      }
+    >;
+  };
+}
 
 export default function AllowlistToolBuilderContextWrapper({
   children,
@@ -155,28 +229,34 @@ export default function AllowlistToolBuilderContextWrapper({
     AllowlistPhaseWithComponentAndItems[]
   >([]);
 
-  const refreshState = () => {
-    setOperations([]);
-    setTransferPools([]);
-    setTokenPools([]);
-    setCustomTokenPools([]);
-    setWalletPools([]);
-    setPhases([]);
-    setOptimisticTransferPools([]);
-    setOptimisticTokenPools([]);
-    setOptimisticCustomTokenPools([]);
-    setOptimisticWalletPools([]);
-    setOptimisticPhases([]);
-    setOptimisticComponents([]);
-    setOptimisticItems([]);
-    setFinalPhases([]);
-    setRefreshKey(getRandomObjectId());
-  };
+  const getPhaseIdForComponent = ({
+    phasesClone,
+    optimisticComponentsClone,
+    componentId,
+  }: {
+    phasesClone: AllowlistPhaseWithComponentAndItems[];
+    optimisticComponentsClone: AllowlistPhaseComponent[];
+    componentId: string;
+  }) =>
+    phasesClone.find((phase) =>
+      phase.components.some((c) => c.id === componentId)
+    )?.id ??
+    optimisticComponentsClone.find((c) => c.id === componentId)?.phaseId ??
+    null;
 
-  const getPhaseIdForComponent = (componentId: string) =>
-    phases.find((phase) => phase.components.some((c) => c.id === componentId))
-      ?.id ??
-    optimisticComponents.find((c) => c.id === componentId)?.phaseId ??
+  const getComponentIdForItem = ({
+    phasesClone,
+    optimisticItemsClone,
+    itemId,
+  }: {
+    phasesClone: AllowlistPhaseWithComponentAndItems[];
+    optimisticItemsClone: AllowlistPhaseComponentItem[];
+    itemId: string;
+  }) =>
+    phasesClone
+      .flatMap((phase) => phase.components)
+      .find((component) => component.items.some((i) => i.id === itemId))?.id ??
+    optimisticItemsClone.find((item) => item.id === itemId)?.phaseId ??
     null;
 
   useEffect(() => {
@@ -310,7 +390,11 @@ export default function AllowlistToolBuilderContextWrapper({
                 id: operation.params.id,
                 allowlistId: router.query.id as string,
                 phaseId:
-                  getPhaseIdForComponent(operation.params.componentId) ?? "",
+                  getPhaseIdForComponent({
+                    componentId: operation.params.componentId,
+                    phasesClone: phases,
+                    optimisticComponentsClone: optimisticComponents,
+                  }) ?? "",
                 phaseComponentId: operation.params.componentId,
                 poolId: operation.params.poolId,
                 poolType: operation.params.poolType,
@@ -375,6 +459,244 @@ export default function AllowlistToolBuilderContextWrapper({
     setOperations(allOperations);
   };
 
+  const [operationsGrouped, setOperationsGrouped] =
+    useState<AllowlistToolOperationsGrouped>({
+      transferPools: {
+        operations: [],
+        pools: {},
+      },
+      tokenPools: {
+        operations: [],
+        pools: {},
+      },
+      customTokenPools: {
+        operations: [],
+        pools: {},
+      },
+      walletPools: {
+        operations: [],
+        pools: {},
+      },
+      phases: {
+        operations: [],
+        phases: {},
+      },
+    });
+
+  useEffect(() => {
+    const state: AllowlistToolOperationsGrouped = {
+      transferPools: {
+        operations: [],
+        pools: {},
+      },
+      tokenPools: {
+        operations: [],
+        pools: {},
+      },
+      customTokenPools: {
+        operations: [],
+        pools: {},
+      },
+      walletPools: {
+        operations: [],
+        pools: {},
+      },
+      phases: {
+        operations: [],
+        phases: {},
+      },
+    };
+
+    const addOperationToComponent = (operation: AllowlistOperation) => {
+      const phaseId = getPhaseIdForComponent({
+        componentId: operation.params.componentId,
+        phasesClone: phases,
+        optimisticComponentsClone: optimisticComponents,
+      });
+      if (!phaseId) return;
+      if (!state.phases.phases[phaseId]) {
+        state.phases.phases[phaseId] = {
+          operations: [],
+          components: {},
+        };
+      }
+      if (
+        !state.phases.phases[phaseId].components[operation.params.componentId]
+      ) {
+        state.phases.phases[phaseId].components[operation.params.componentId] =
+          {
+            operations: [],
+            items: {},
+          };
+      }
+      state.phases.phases[phaseId].components[
+        operation.params.componentId
+      ].operations.push(operation);
+    };
+
+    const addOperationToItem = (operation: AllowlistOperation) => {
+      const componentId = getComponentIdForItem({
+        phasesClone: phases,
+        optimisticItemsClone: optimisticItems,
+        itemId: operation.params.itemId,
+      });
+      if (!componentId) return;
+      const phaseId = getPhaseIdForComponent({
+        componentId,
+        phasesClone: phases,
+        optimisticComponentsClone: optimisticComponents,
+      });
+      if (!phaseId) return;
+      if (!state.phases.phases[phaseId]) {
+        state.phases.phases[phaseId] = {
+          operations: [],
+          components: {},
+        };
+      }
+      if (!state.phases.phases[phaseId].components[componentId]) {
+        state.phases.phases[phaseId].components[componentId] = {
+          operations: [],
+          items: {},
+        };
+      }
+      if (
+        !state.phases.phases[phaseId].components[componentId].items[
+          operation.params.itemId
+        ]
+      ) {
+        state.phases.phases[phaseId].components[componentId].items[
+          operation.params.itemId
+        ] = [];
+      }
+      state.phases.phases[phaseId].components[componentId].items[
+        operation.params.itemId
+      ].push(operation);
+    };
+
+    for (const operation of operations) {
+      const { code } = operation;
+      switch (code) {
+        case AllowlistOperationCode.CREATE_ALLOWLIST:
+          break;
+        case AllowlistOperationCode.GET_COLLECTION_TRANSFERS:
+          state.transferPools.operations.push(operation);
+          break;
+        case AllowlistOperationCode.CREATE_TOKEN_POOL:
+          state.tokenPools.operations.push(operation);
+          break;
+        case AllowlistOperationCode.CREATE_CUSTOM_TOKEN_POOL:
+          state.customTokenPools.operations.push(operation);
+          break;
+        case AllowlistOperationCode.CREATE_WALLET_POOL:
+          state.walletPools.operations.push(operation);
+          break;
+        case AllowlistOperationCode.ADD_PHASE:
+          state.phases.operations.push(operation);
+          if (!state.phases.phases[operation.params.id]) {
+            state.phases.phases[operation.params.id] = {
+              operations: [],
+              components: {},
+            };
+          }
+          break;
+        case AllowlistOperationCode.ADD_COMPONENT:
+          if (!state.phases.phases[operation.params.phaseId]) {
+            state.phases.phases[operation.params.phaseId] = {
+              operations: [],
+              components: {},
+            };
+          }
+
+          state.phases.phases[operation.params.phaseId].operations.push(
+            operation
+          );
+          break;
+
+        case AllowlistOperationCode.ADD_ITEM:
+          addOperationToComponent(operation);
+          break;
+        case AllowlistOperationCode.COMPONENT_ADD_SPOTS_TO_ALL_ITEM_WALLETS:
+          addOperationToComponent(operation);
+          break;
+        case AllowlistOperationCode.ITEM_EXCLUE_TOKEN_IDS:
+          addOperationToItem(operation);
+          break;
+        case AllowlistOperationCode.ITEM_SELECT_TOKEN_IDS:
+          addOperationToItem(operation);
+          break;
+        case AllowlistOperationCode.ITEM_REMOVE_FIRST_N_TOKENS:
+          addOperationToItem(operation);
+          break;
+        case AllowlistOperationCode.ITEM_REMOVE_LAST_N_TOKENS:
+          addOperationToItem(operation);
+          break;
+        case AllowlistOperationCode.ITEM_SELECT_FIRST_N_TOKENS:
+          addOperationToItem(operation);
+          break;
+        case AllowlistOperationCode.ITEM_SELECT_LAST_N_TOKENS:
+          addOperationToItem(operation);
+          break;
+        default:
+          assertUnreachable(code);
+      }
+    }
+    setOperationsGrouped(structuredClone(state));
+  }, [operations, phases, optimisticComponents]);
+
+  const [activeHistory, setActiveHistory] =
+    useState<AllowlistToolBuilderContextActiveHistory | null>(null);
+
+  const [isGlobalLoading, setIsGlobalLoading] = useState(false);
+  useEffect(() => {
+    setIsGlobalLoading(
+      !!allowlist?.activeRun?.status &&
+        [AllowlistRunStatus.PENDING, AllowlistRunStatus.CLAIMED].includes(
+          allowlist?.activeRun?.status
+        )
+    );
+  }, [allowlist]);
+
+  const refreshState = () => {
+    setOperations([]);
+    setTransferPools([]);
+    setTokenPools([]);
+    setCustomTokenPools([]);
+    setWalletPools([]);
+    setPhases([]);
+    setOptimisticTransferPools([]);
+    setOptimisticTokenPools([]);
+    setOptimisticCustomTokenPools([]);
+    setOptimisticWalletPools([]);
+    setOptimisticPhases([]);
+    setOptimisticComponents([]);
+    setOptimisticItems([]);
+    setFinalPhases([]);
+    setOperationsGrouped({
+      transferPools: {
+        operations: [],
+        pools: {},
+      },
+      tokenPools: {
+        operations: [],
+        pools: {},
+      },
+      customTokenPools: {
+        operations: [],
+        pools: {},
+      },
+      walletPools: {
+        operations: [],
+        pools: {},
+      },
+      phases: {
+        operations: [],
+        phases: {},
+      },
+    });
+    setActiveHistory(null);
+    setRefreshKey(getRandomObjectId());
+  };
+
   return (
     <AllowlistToolBuilderContext.Provider
       value={{
@@ -385,6 +707,9 @@ export default function AllowlistToolBuilderContextWrapper({
         operations,
         addOperations,
         operationDescriptions,
+        operationsGrouped,
+        activeHistory,
+        setActiveHistory,
         transferPools: [...transferPools, ...optimisticTransferPools],
         setTransferPools,
         tokenPools: [...tokenPools, ...optimisticTokenPools],
@@ -394,6 +719,7 @@ export default function AllowlistToolBuilderContextWrapper({
         walletPools: [...walletPools, ...optimisticWalletPools],
         setWalletPools,
         phases: finalPhases,
+        isGlobalLoading,
         setPhases,
         setToasts,
       }}

@@ -10,21 +10,15 @@ import { AllowlistToolBuilderContext } from "../AllowlistToolBuilderContextWrapp
 
 export default function AllowlistToolBuilderOperationsRun() {
   const router = useRouter();
-  const { allowlist, setToasts, setAllowlist } = useContext(
+  const { allowlist, setToasts, setAllowlist, isGlobalLoading } = useContext(
     AllowlistToolBuilderContext
   );
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [showLoading, setShowLoading] = useState<boolean>(true);
 
   useEffect(() => {
-    setShowLoading(
-      isLoading ||
-        (!!allowlist?.activeRun?.status &&
-          [AllowlistRunStatus.PENDING, AllowlistRunStatus.CLAIMED].includes(
-            allowlist?.activeRun?.status
-          ))
-    );
-  }, [isLoading, allowlist]);
+    setShowLoading(isLoading || isGlobalLoading);
+  }, [isLoading, isGlobalLoading]);
 
   const runOperations = async () => {
     setIsLoading(true);

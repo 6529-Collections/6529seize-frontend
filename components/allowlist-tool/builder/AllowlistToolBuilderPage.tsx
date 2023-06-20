@@ -8,6 +8,9 @@ import AllowlistToolBuilderTransferPools from "./transfer-pools/AllowlistToolBui
 import AllowlistToolBuilderWalletPools from "./wallet-pools/AllowlistToolBuilderWalletPools";
 import { Poppins } from "next/font/google";
 import { AllowlistToolBuilderContext } from "./AllowlistToolBuilderContextWrapper";
+import AllowlistToolBuilderEntityOperations from "./operations/AllowlistToolBuilderEntityOperations";
+import AllowlistToolAnimationWrapper from "../common/animation/AllowlistToolAnimationWrapper";
+import AllowlistToolAnimationWidth from "../common/animation/AllowlistToolAnimationWidth";
 
 const poppins = Poppins({
   weight: ["300", "400", "500", "600", "700"],
@@ -17,13 +20,16 @@ const poppins = Poppins({
 });
 
 export default function AllowlistToolBuilderPage() {
-  const { allowlist, refreshKey } = useContext(AllowlistToolBuilderContext);
+  const { allowlist, refreshKey, activeHistory } = useContext(
+    AllowlistToolBuilderContext
+  );
   return (
     <div
       id="allowlist-tool"
       className={`tw-min-h-screen tw-relative tw-bg-neutral-950 ${poppins.className}`}
     >
       <div className="container tw-mx-auto tw-pt-6 tw-pb-12">
+        <AllowlistToolBuilderOperations key={`operations-${refreshKey}`} />
         <div className="tw-space-y-6 tw-ml-80">
           <AllowlistToolBuilderAlert />
 
@@ -42,7 +48,16 @@ export default function AllowlistToolBuilderPage() {
             key={`phases-and-results-${refreshKey}`}
           />
         </div>
-        <AllowlistToolBuilderOperations key={`operations-${refreshKey}`} />
+        <AllowlistToolAnimationWrapper mode="sync" initial={true}>
+          {activeHistory && (
+            <AllowlistToolAnimationWidth elementClasses="tw-absolute tw-right-0 -tw-z-0 tw-inset-y-0 tw-w-80 tw-overflow-y-auto">
+              <AllowlistToolBuilderEntityOperations
+                activeHistory={activeHistory}
+                key={`entity-operations-${refreshKey}`}
+              />
+            </AllowlistToolAnimationWidth>
+          )}
+        </AllowlistToolAnimationWrapper>
       </div>
     </div>
   );

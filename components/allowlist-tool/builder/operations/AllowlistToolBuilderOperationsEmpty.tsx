@@ -21,7 +21,7 @@ export default function AllowlistToolBuilderOperationsEmpty() {
             No operations
           </p>
           <p className="tw-mt-2 tw-text-sm tw-font-light tw-text-neutral-400 tw-mb-0">
-            Get started by creating adding operations.
+            Get started by creating operations.
           </p>
         </div>
       </div>

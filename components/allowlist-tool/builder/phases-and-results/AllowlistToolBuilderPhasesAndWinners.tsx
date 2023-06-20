@@ -12,21 +12,14 @@ import { AllowlistToolBuilderContext } from "../AllowlistToolBuilderContextWrapp
 
 export default function AllowlistToolBuilderPhasesAndResults() {
   const router = useRouter();
-  const { allowlist, phases, setPhases, setToasts } = useContext(
-    AllowlistToolBuilderContext
-  );
+  const { allowlist, phases, setPhases, setToasts, isGlobalLoading } =
+    useContext(AllowlistToolBuilderContext);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [showLoading, setShowLoading] = useState<boolean>(true);
 
   useEffect(() => {
-    setShowLoading(
-      isLoading ||
-        (!!allowlist?.activeRun?.status &&
-          [AllowlistRunStatus.PENDING, AllowlistRunStatus.CLAIMED].includes(
-            allowlist?.activeRun?.status
-          ))
-    );
-  }, [isLoading, allowlist]);
+    setShowLoading(isLoading || isGlobalLoading);
+  }, [isLoading, isGlobalLoading]);
 
   useEffect(() => {
     async function fetchPhases() {

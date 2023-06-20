@@ -2,6 +2,7 @@ import { useContext, useState } from "react";
 import {
   AllowlistOperationCode,
   AllowlistPhaseComponentItem,
+  AllowlistToolEntity,
   Pool,
 } from "../../../../../allowlist-tool.types";
 import AllowlistToolHistoryIcon from "../../../../../icons/AllowlistToolHistoryIcon";
@@ -9,6 +10,7 @@ import AllowlistToolJsonIcon from "../../../../../icons/AllowlistToolJsonIcon";
 
 import AllowlistToolBuilderAddOperation from "../../../../operations/AllowlistToolBuilderAddOperation";
 import { AllowlistToolBuilderContext } from "../../../../AllowlistToolBuilderContextWrapper";
+import AllowlistTooBuilderOperationsHistory from "../../../../operations/history/AllowlistTooBuilderOperationsHistory";
 
 export default function AllowlistToolBuilderPhasesPhaseComponentItem({
   phaseComponentItem,
@@ -85,14 +87,10 @@ export default function AllowlistToolBuilderPhasesPhaseComponentItem({
                 defaultOperation={null}
               />
 
-              <button
-                type="button"
-                className="tw-group tw-flex tw-justify-center tw-items-center tw-rounded-full tw-bg-transparent tw-h-8 tw-w-8 tw-text-white tw-border-none hover:tw-bg-neutral-700 tw-transition-all tw-duration-300 tw-ease-out"
-              >
-                <div className="tw-h-[1.125rem] tw-w-[1.125rem] tw-flex tw-justify-center tw-items-center">
-                  <AllowlistToolHistoryIcon />
-                </div>
-              </button>
+              <AllowlistTooBuilderOperationsHistory
+                entityType={AllowlistToolEntity.ITEM}
+                targetItemId={phaseComponentItem.id}
+              />
             </div>
           </div>
         </div>

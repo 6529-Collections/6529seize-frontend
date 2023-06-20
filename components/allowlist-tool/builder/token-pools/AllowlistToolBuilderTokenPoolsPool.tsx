@@ -1,9 +1,13 @@
 import { useContext } from "react";
-import { AllowlistTokenPool } from "../../allowlist-tool.types";
+import {
+  AllowlistTokenPool,
+  AllowlistToolEntity,
+} from "../../allowlist-tool.types";
 import AllowlistToolHistoryIcon from "../../icons/AllowlistToolHistoryIcon";
 import AllowlistToolJsonIcon from "../../icons/AllowlistToolJsonIcon";
 import AllowlistToolBuilderAddOperation from "../operations/AllowlistToolBuilderAddOperation";
 import { AllowlistToolBuilderContext } from "../AllowlistToolBuilderContextWrapper";
+import AllowlistTooBuilderOperationsHistory from "../operations/history/AllowlistTooBuilderOperationsHistory";
 
 export default function AllowlistToolBuilderTokenPoolsPool({
   tokenPool,
@@ -27,7 +31,7 @@ export default function AllowlistToolBuilderTokenPoolsPool({
         {transferPool?.name}
       </td>
       <td className="tw-whitespace-nowrap tw-px-3 tw-py-4 tw-text-sm tw-font-normal  tw-text-neutral-300">
-        {tokenPool.tokenIds ?? 'All tokens'}
+        {tokenPool.tokenIds ?? "All tokens"}
       </td>
       <td className="tw-whitespace-nowrap tw-px-3 tw-py-4 tw-text-sm tw-font-normal  tw-text-neutral-300">
         {tokenPool.walletsCount}
@@ -51,14 +55,10 @@ export default function AllowlistToolBuilderTokenPoolsPool({
             targetItemId={null}
             defaultOperation={null}
           />
-          <button
-            type="button"
-            className="tw-group tw-flex tw-items-center tw-justify-center tw-rounded-full tw-bg-transparent tw-h-8 tw-w-8 tw-text-white tw-border-none hover:tw-bg-neutral-700 tw-transition-all tw-duration-300 tw-ease-out"
-          >
-            <div className="tw-h-[1.125rem] tw-w-[1.125rem] tw-flex tw-items-center tw-justify-center">
-              <AllowlistToolHistoryIcon />
-            </div>
-          </button>
+          <AllowlistTooBuilderOperationsHistory
+            entityType={AllowlistToolEntity.TOKEN_POOL}
+            targetItemId={tokenPool.id}
+          />
         </div>
       </td>
     </tr>

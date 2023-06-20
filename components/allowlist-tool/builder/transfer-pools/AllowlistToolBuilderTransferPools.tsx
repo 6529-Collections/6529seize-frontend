@@ -3,6 +3,7 @@ import { useRouter } from "next/router";
 import {
   AllowlistOperationCode,
   AllowlistRunStatus,
+  AllowlistToolEntity,
   AllowlistToolResponse,
   AllowlistTransferPool,
 } from "../../allowlist-tool.types";
@@ -14,24 +15,23 @@ import AllowlistToolJsonIcon from "../../icons/AllowlistToolJsonIcon";
 import AllowlistToolBuilderAddOperation from "../operations/AllowlistToolBuilderAddOperation";
 import AllowlistToolPoolsWrapper from "../../common/pools/AllowlistToolPoolsWrapper";
 import { AllowlistToolBuilderContext } from "../AllowlistToolBuilderContextWrapper";
+import AllowlistTooBuilderOperationsHistory from "../operations/history/AllowlistTooBuilderOperationsHistory";
 
 export default function AllowlistToolBuilderTransferPools() {
   const router = useRouter();
-  const { allowlist, transferPools, setTransferPools, setToasts } = useContext(
-    AllowlistToolBuilderContext
-  );
+  const {
+    allowlist,
+    transferPools,
+    setTransferPools,
+    setToasts,
+    isGlobalLoading,
+  } = useContext(AllowlistToolBuilderContext);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [showLoading, setShowLoading] = useState<boolean>(true);
 
   useEffect(() => {
-    setShowLoading(
-      isLoading ||
-        (!!allowlist?.activeRun?.status &&
-          [AllowlistRunStatus.PENDING, AllowlistRunStatus.CLAIMED].includes(
-            allowlist?.activeRun?.status
-          ))
-    );
-  }, [isLoading, allowlist]);
+    setShowLoading(isLoading || isGlobalLoading);
+  }, [isLoading, isGlobalLoading]);
 
   useEffect(() => {
     async function fetchTransferPools() {
@@ -128,14 +128,10 @@ export default function AllowlistToolBuilderTransferPools() {
                                 targetItemId={null}
                                 defaultOperation={defaultOperation}
                               />
-                              <button
-                                type="button"
-                                className="tw-group tw-flex tw-justify-center tw-items-center tw-rounded-full tw-bg-transparent tw-h-8 tw-w-8 tw-text-white tw-border-none hover:tw-bg-neutral-700 tw-transition-all tw-duration-300 tw-ease-out"
-                              >
-                                <div className="tw-h-[1.125rem] tw-w-[1.125rem] tw-flex tw-items-center tw-justify-center">
-                                  <AllowlistToolHistoryIcon />
-                                </div>
-                              </button>
+                              <AllowlistTooBuilderOperationsHistory
+                                entityType={AllowlistToolEntity.TRANSFER_POOLS}
+                                targetItemId={null}
+                              />
                             </div>
                           </th>
                         </tr>

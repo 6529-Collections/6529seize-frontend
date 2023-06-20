@@ -2,13 +2,14 @@ import AllowlistToolExpandableTableWrapper from "../../../common/AllowlistToolEx
 import {
   AllowlistOperationCode,
   AllowlistPhaseWithComponentAndItems,
+  AllowlistToolEntity,
 } from "../../../allowlist-tool.types";
 import AllowlistToolBuilderPhasesPhase from "./AllowlistToolBuilderPhasesPhase";
-import AllowlistToolHistoryIcon from "../../../icons/AllowlistToolHistoryIcon";
 import AllowlistToolJsonIcon from "../../../icons/AllowlistToolJsonIcon";
 import AllowlistToolBuilderPhasesAdd from "./AllowlistToolBuilderPhasesAdd";
 import AllowlistToolBuilderAddOperation from "../../operations/AllowlistToolBuilderAddOperation";
 import AllowlistToolPoolsWrapper from "../../../common/pools/AllowlistToolPoolsWrapper";
+import AllowlistTooBuilderOperationsHistory from "../../operations/history/AllowlistTooBuilderOperationsHistory";
 
 export default function AllowlistToolBuilderPhases({
   showLoading,
@@ -74,14 +75,10 @@ export default function AllowlistToolBuilderPhases({
                           targetItemId={null}
                           defaultOperation={defaultOperation}
                         />
-                        <button
-                          type="button"
-                          className="tw-group tw-rounded-full tw-bg-transparent tw-p-2 tw-text-white tw-border-none hover:tw-bg-neutral-700 tw-transition-all tw-duration-300 tw-ease-out"
-                        >
-                          <div className="tw-h-[1.125rem] tw-w-[1.125rem] tw-flex tw-items-center tw-justify-center">
-                            <AllowlistToolHistoryIcon />
-                          </div>
-                        </button>
+                        <AllowlistTooBuilderOperationsHistory
+                          entityType={AllowlistToolEntity.PHASES}
+                          targetItemId={null}
+                        />
                       </div>
                     </div>
                   </div>
@@ -97,7 +94,6 @@ export default function AllowlistToolBuilderPhases({
               </div>
             </div>
           </div>
-          
         </div>
       </AllowlistToolExpandableTableWrapper>
     </AllowlistToolPoolsWrapper>

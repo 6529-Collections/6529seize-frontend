@@ -17,21 +17,14 @@ import { AllowlistToolBuilderContext } from "../AllowlistToolBuilderContextWrapp
 
 export default function AllowlistToolBuilderOperations() {
   const router = useRouter();
-  const { allowlist, operations, addOperations, setToasts } = useContext(
-    AllowlistToolBuilderContext
-  );
+  const { operations, addOperations, setToasts, isGlobalLoading } =
+    useContext(AllowlistToolBuilderContext);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [showLoading, setShowLoading] = useState<boolean>(true);
 
   useEffect(() => {
-    setShowLoading(
-      isLoading ||
-        (!!allowlist?.activeRun?.status &&
-          [AllowlistRunStatus.PENDING, AllowlistRunStatus.CLAIMED].includes(
-            allowlist?.activeRun?.status
-          ))
-    );
-  }, [isLoading, allowlist]);
+    setShowLoading(isLoading || isGlobalLoading);
+  }, [isLoading, isGlobalLoading]);
 
   useEffect(() => {
     async function fetchOperations() {
@@ -82,7 +75,10 @@ export default function AllowlistToolBuilderOperations() {
               </AllowlistToolAnimationOpacity>
             ) : operations.length ? (
               <AllowlistToolAnimationOpacity key="table">
-                <AllowlistToolBuilderOperationsList operations={operations} />
+                <AllowlistToolBuilderOperationsList
+                  operations={operations}
+                  uniqueKey="operations"
+                />
               </AllowlistToolAnimationOpacity>
             ) : (
               <AllowlistToolAnimationOpacity key="empty">

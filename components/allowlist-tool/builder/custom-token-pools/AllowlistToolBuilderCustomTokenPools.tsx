@@ -3,6 +3,7 @@ import {
   AllowlistCustomTokenPool,
   AllowlistOperationCode,
   AllowlistRunStatus,
+  AllowlistToolEntity,
   AllowlistToolResponse,
 } from "../../allowlist-tool.types";
 import { useContext, useEffect, useState } from "react";
@@ -14,24 +15,24 @@ import AllowlistToolBuilderCustomTokenPoolsAdd from "./AllowlistToolBuilderCusto
 import AllowlistToolBuilderAddOperation from "../operations/AllowlistToolBuilderAddOperation";
 import AllowlistToolPoolsWrapper from "../../common/pools/AllowlistToolPoolsWrapper";
 import { AllowlistToolBuilderContext } from "../AllowlistToolBuilderContextWrapper";
+import AllowlistTooBuilderOperationsHistory from "../operations/history/AllowlistTooBuilderOperationsHistory";
 
 export default function AllowlistToolBuilderCustomTokenPools() {
   const router = useRouter();
-  const { allowlist, customTokenPools, setCustomTokenPools, setToasts } =
-    useContext(AllowlistToolBuilderContext);
+  const {
+    allowlist,
+    customTokenPools,
+    setCustomTokenPools,
+    setToasts,
+    isGlobalLoading,
+  } = useContext(AllowlistToolBuilderContext);
 
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [showLoading, setShowLoading] = useState<boolean>(true);
 
   useEffect(() => {
-    setShowLoading(
-      isLoading ||
-        (!!allowlist?.activeRun?.status &&
-          [AllowlistRunStatus.PENDING, AllowlistRunStatus.CLAIMED].includes(
-            allowlist?.activeRun?.status
-          ))
-    );
-  }, [isLoading, allowlist]);
+    setShowLoading(isLoading || isGlobalLoading);
+  }, [isLoading, isGlobalLoading]);
 
   useEffect(() => {
     async function fetchCustomTokenPools() {
@@ -125,14 +126,12 @@ export default function AllowlistToolBuilderCustomTokenPools() {
                                 targetItemId={null}
                                 defaultOperation={defaultOperation}
                               />
-                              <button
-                                type="button"
-                                className="tw-group tw-flex tw-justify-center tw-items-center tw-rounded-full tw-bg-transparent tw-w-8 tw-h-8 tw-text-white tw-border-none hover:tw-bg-neutral-700 tw-transition-all tw-duration-300 tw-ease-out"
-                              >
-                                <div className="tw-h-[1.125rem] tw-w-[1.125rem] tw-flex tw-items-center tw-justify-center">
-                                  <AllowlistToolHistoryIcon />
-                                </div>
-                              </button>
+                              <AllowlistTooBuilderOperationsHistory
+                                entityType={
+                                  AllowlistToolEntity.CUSTOM_TOKEN_POOLS
+                                }
+                                targetItemId={null}
+                              />
                             </div>
                           </th>
                         </tr>

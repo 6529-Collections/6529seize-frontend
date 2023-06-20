@@ -1,38 +1,31 @@
 import { useRouter } from "next/router";
 import {
   AllowlistOperationCode,
-  AllowlistRunStatus,
+  AllowlistToolEntity,
   AllowlistToolResponse,
   AllowlistWalletPool,
 } from "../../allowlist-tool.types";
 import { useContext, useEffect, useState } from "react";
 import AllowlistToolExpandableTableWrapper from "../../common/AllowlistToolExpandableTableWrapper";
 import AllowlistToolBuilderWalletPoolsPool from "./AllowlistToolBuilderWalletPoolsPool";
-import AllowlistToolHistoryIcon from "../../icons/AllowlistToolHistoryIcon";
 import AllowlistToolJsonIcon from "../../icons/AllowlistToolJsonIcon";
 import AllowlistToolBuilderWalletPoolsAdd from "./AllowlistToolBuilderWalletPoolsAdd";
 import AllowlistToolBuilderAddOperation from "../operations/AllowlistToolBuilderAddOperation";
 
 import AllowlistToolPoolsWrapper from "../../common/pools/AllowlistToolPoolsWrapper";
 import { AllowlistToolBuilderContext } from "../AllowlistToolBuilderContextWrapper";
+import AllowlistTooBuilderOperationsHistory from "../operations/history/AllowlistTooBuilderOperationsHistory";
 
 export default function AllowlistToolBuilderWalletPools() {
   const router = useRouter();
-  const {allowlist, walletPools, setWalletPools, setToasts } = useContext(
-    AllowlistToolBuilderContext
-  );
+  const { walletPools, setWalletPools, setToasts, isGlobalLoading } =
+    useContext(AllowlistToolBuilderContext);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [showLoading, setShowLoading] = useState<boolean>(true);
 
   useEffect(() => {
-    setShowLoading(
-      isLoading ||
-        (!!allowlist?.activeRun?.status &&
-          [AllowlistRunStatus.PENDING, AllowlistRunStatus.CLAIMED].includes(
-            allowlist?.activeRun?.status
-          ))
-    );
-  }, [isLoading, allowlist]);
+    setShowLoading(isLoading || isGlobalLoading);
+  }, [isLoading, isGlobalLoading]);
 
   useEffect(() => {
     async function fetchWalletPools() {
@@ -118,14 +111,10 @@ export default function AllowlistToolBuilderWalletPools() {
                                 targetItemId={null}
                                 defaultOperation={defaultOperation}
                               />
-                              <button
-                                type="button"
-                                className="tw-group tw-flex tw-items-center tw-justify-center tw-rounded-full tw-bg-transparent tw-w-8 tw-h-8 tw-text-white tw-border-none hover:tw-bg-neutral-700 tw-transition-all tw-duration-300 tw-ease-out"
-                              >
-                                <div className="tw-h-[1.125rem] tw-w-[1.125rem] tw-flex tw-items-center tw-justify-center">
-                                  <AllowlistToolHistoryIcon />
-                                </div>
-                              </button>
+                              <AllowlistTooBuilderOperationsHistory
+                                entityType={AllowlistToolEntity.WALLET_POOLS}
+                                targetItemId={null}
+                              />
                             </div>
                           </th>
                         </tr>

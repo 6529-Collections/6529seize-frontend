@@ -1,10 +1,14 @@
 import { useCopyToClipboard } from "react-use";
 import { truncateTextMiddle } from "../../../../helpers/AllowlistToolHelpers";
-import { AllowlistTransferPool } from "../../allowlist-tool.types";
+import {
+  AllowlistToolEntity,
+  AllowlistTransferPool,
+} from "../../allowlist-tool.types";
 import AllowlistToolHistoryIcon from "../../icons/AllowlistToolHistoryIcon";
 import AllowlistToolJsonIcon from "../../icons/AllowlistToolJsonIcon";
 import AllowlistToolBuilderAddOperation from "../operations/AllowlistToolBuilderAddOperation";
 import { useEffect, useState } from "react";
+import AllowlistTooBuilderOperationsHistory from "../operations/history/AllowlistTooBuilderOperationsHistory";
 
 export default function AllowlistToolBuilderTransferPoolsPool({
   transferPool,
@@ -73,14 +77,10 @@ export default function AllowlistToolBuilderTransferPoolsPool({
             targetItemId={null}
             defaultOperation={null}
           />
-          <button
-            type="button"
-            className="tw-group tw-flex tw-items-center tw-justify-center tw-rounded-full tw-bg-transparent tw-w-8 tw-h-8 tw-text-white tw-border-none hover:tw-bg-neutral-700 tw-transition-all tw-duration-300 tw-ease-out"
-          >
-            <div className="tw-h-[1.125rem] tw-w-[1.125rem] tw-flex tw-items-center tw-justify-center">
-              <AllowlistToolHistoryIcon />
-            </div>
-          </button>
+          <AllowlistTooBuilderOperationsHistory
+            entityType={AllowlistToolEntity.TRANSFER_POOL}
+            targetItemId={transferPool.id}
+          />
         </div>
       </td>
     </tr>
