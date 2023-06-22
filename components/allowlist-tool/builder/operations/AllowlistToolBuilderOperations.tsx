@@ -55,7 +55,7 @@ export default function AllowlistToolBuilderOperations() {
 
   return (
     <>
-      <div className="tw-absolute tw-left-0 -tw-z-0 tw-inset-y-0 tw-w-80 tw-bg-neutral-900 tw-overflow-y-auto  tw-ring-1 tw-ring-white/5">
+      <div className="tw-hidden lg:tw-block tw-fixed tw-right-auto tw-z-0 tw-top-[150px] tw-inset-0 tw-w-80 tw-bg-neutral-900 tw-overflow-y-auto tw-ring-1 tw-ring-white/5">
         <div className="tw-pt-8 tw-pb-4 tw-flex tw-flex-col tw-gap-y-5 tw-bg-neutral-900 tw-px-5">
           <div>
             <div className="tw-w-full tw-flex tw-items-center tw-justify-between">

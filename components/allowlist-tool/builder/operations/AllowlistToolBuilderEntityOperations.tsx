@@ -24,7 +24,7 @@ export default function AllowlistToolBuilderEntityOperations({
   }, [isGlobalLoading, setActiveHistory]);
 
   return (
-    <div className="tw-absolute tw-right-0 -tw-z-0 tw-inset-y-0 tw-w-80 tw-bg-neutral-900  tw-ring-1 tw-ring-white/5">
+    <div className="tw-fixed tw-right-0 tw-z-0 tw-inset-y-0 tw-top-[150px] tw-overflow-y-auto tw-w-80 tw-bg-neutral-900 tw-ring-1 tw-ring-white/5">
       <div className="tw-pt-8 tw-pb-4 tw-flex tw-flex-col tw-gap-y-5 tw-bg-neutral-900 tw-px-5">
         <div>
           <div className="tw-w-full tw-flex tw-items-center tw-justify-between">

@@ -26,9 +26,9 @@ export default function AllowlistToolBuilderPage() {
   return (
     <div
       id="allowlist-tool"
-      className={`tw-min-h-screen tw-relative tw-bg-neutral-950 ${poppins.className}`}
+      className={`tw-min-h-screen tw-overflow-y-auto tw-relative tw-bg-neutral-950 ${poppins.className}`}
     >
-      <div className="container tw-mx-auto tw-pt-6 tw-pb-12">
+      <div className="container tw-overflow-y-auto tw-mx-auto tw-pt-6 tw-pb-12">
         <AllowlistToolBuilderOperations key={`operations-${refreshKey}`} />
         <div className="tw-space-y-6 tw-ml-80">
           <AllowlistToolBuilderAlert />

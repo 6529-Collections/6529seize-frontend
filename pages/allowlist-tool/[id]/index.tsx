@@ -7,6 +7,7 @@ import {
   AllowlistOperationDescription,
 } from "../../../components/allowlist-tool/allowlist-tool.types";
 import AllowlistToolBuilderContextWrapper from "../../../components/allowlist-tool/builder/AllowlistToolBuilderContextWrapper";
+import Head from "next/head";
 
 const AllowlistToolBuilderPage = dynamic(
   () =>
@@ -38,8 +39,17 @@ export default function AllowlistToolAllowlistId({
 
   return (
     <>
-      <Header />
-      <Breadcrumb breadcrumbs={breadcrumbs} />
+      <Head>
+        {/*  <style>{`
+          html {
+            overflow: hidden;
+          }
+        `}</style>  */}
+      </Head>
+      <div className="tw-sticky tw-top-0 tw-z-50">
+        <Header />
+        <Breadcrumb breadcrumbs={breadcrumbs} />
+      </div>
       <AllowlistToolBuilderContextWrapper
         allowlistState={allowlistState}
         operationDescriptions={operationDescriptions}
