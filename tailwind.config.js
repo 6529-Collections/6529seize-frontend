@@ -22,6 +22,9 @@ module.exports = {
           error: "#F97066",
           success: "#12B76A"
       },
+      gridTemplateColumns: {
+        '13': 'repeat(13, minmax(0, 1fr))'
+      }
     },
   },
   variants: {

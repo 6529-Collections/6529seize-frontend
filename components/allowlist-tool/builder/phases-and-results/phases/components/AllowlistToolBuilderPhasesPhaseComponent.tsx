@@ -40,11 +40,11 @@ export default function AllowlistToolBuilderPhasesPhaseComponent({
           e.stopPropagation();
           setIsOpen(!isOpen);
         }}
-        className="tw-cursor-pointer tw-grid tw-grid-cols-12 tw-items-center tw-gap-x-4 hover:tw-bg-neutral-800/50 tw-transition tw-duration-300 tw-ease-out"
+        className="tw-cursor-pointer tw-grid tw-grid-cols-13 tw-items-center tw-gap-x-4 hover:tw-bg-neutral-800/50 tw-transition tw-duration-300 tw-ease-out"
       >
-        <div className="tw-col-span-2">
-          <div className="tw-whitespace-nowrap tw-py-2 tw-pl-4 tw-pr-3 tw-text-sm tw-font-normal tw-text-neutral-50 sm:tw-pl-[3.25rem]">
-            <div className="tw-inline-flex tw-items-center tw-gap-x-2">
+        <div className="tw-col-span-3">
+          <div className="tw-py-2 tw-pl-4 tw-pr-3 tw-text-sm tw-font-normal tw-text-neutral-50 sm:tw-pl-[3.25rem]">
+            <div className="tw-flex tw-items-center tw-gap-x-2">
               <svg
                 ref={iconScope}
                 className="tw-h-6 tw-w-6 tw-text-neutral-300 tw-flex-shrink-0"
@@ -60,14 +60,14 @@ export default function AllowlistToolBuilderPhasesPhaseComponent({
                   strokeLinejoin="round"
                 />
               </svg>
-              <div className="tw-inline-flex tw-items-center tw-gap-x-3">
+              <div className="tw-whitespace-nowrap tw-truncate tw-text-neutral-50">
                 {phaseComponent.name}
               </div>
             </div>
           </div>
         </div>
         <div className="tw-col-span-2">
-          <div className="tw-px-3 tw-py-2 tw-text-sm tw-font-normal tw-text-neutral-300">
+          <div className="tw-whitespace-nowrap tw-truncate tw-px-3 tw-py-2 tw-text-sm tw-font-normal tw-text-neutral-300">
             {phaseComponent.description}
           </div>
         </div>

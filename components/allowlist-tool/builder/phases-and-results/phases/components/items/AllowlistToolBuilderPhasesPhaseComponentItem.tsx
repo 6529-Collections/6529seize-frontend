@@ -42,19 +42,19 @@ export default function AllowlistToolBuilderPhasesPhaseComponentItem({
   ];
   return (
     <>
-      <div className="tw-grid tw-grid-cols-12 tw-items-center tw-gap-x-4">
-        <div className="tw-col-span-2">
-          <div className="tw-whitespace-nowrap tw-py-2 tw-pl-4 tw-pr-3 tw-text-sm tw-font-normal tw-text-neutral-400 sm:tw-pl-[5.25rem]">
+      <div className="tw-grid tw-grid-cols-13 tw-items-center tw-gap-x-4">
+        <div className="tw-col-span-3">
+          <div className="tw-whitespace-nowrap tw-truncate tw-py-2 tw-pl-4 tw-pr-3 tw-text-sm tw-font-normal tw-text-neutral-400 sm:tw-pl-[5.25rem]">
             {phaseComponentItem.name}
           </div>
         </div>
         <div className="tw-col-span-2">
-          <div className="tw-px-3 tw-py-2 tw-text-sm tw-font-normal tw-text-neutral-400">
+          <div className="tw-whitespace-nowrap tw-truncate tw-px-3 tw-py-2 tw-text-sm tw-font-normal tw-text-neutral-400">
             {phaseComponentItem.description}
           </div>
         </div>
         <div className="tw-col-span-2">
-          <div className="tw-px-3 tw-py-2 tw-text-sm tw-font-normal tw-text-neutral-400">
+          <div className="tw-whitespace-nowrap tw-truncate tw-px-3 tw-py-2 tw-text-sm tw-font-normal tw-text-neutral-400">
             {tokenPool?.name}
           </div>
         </div>
