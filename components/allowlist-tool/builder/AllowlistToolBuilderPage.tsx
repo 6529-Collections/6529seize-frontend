@@ -52,7 +52,7 @@ export default function AllowlistToolBuilderPage() {
         </div>
         <AllowlistToolAnimationWrapper mode="sync" initial={true}>
           {activeHistory && (
-            <AllowlistToolAnimationWidth elementClasses="tw-absolute tw-right-0 -tw-z-0 tw-inset-y-0 tw-w-80 tw-overflow-y-auto">
+            <AllowlistToolAnimationWidth elementClasses="tw-fixed tw-right-0 tw-z-0 tw-inset-y-0 tw-top-[150px] tw-overflow-y-auto tw-w-80 tw-bg-neutral-900 tw-ring-1 tw-ring-white/5">
               <AllowlistToolBuilderEntityOperations
                 activeHistory={activeHistory}
                 key={`entity-operations-${refreshKey}`}
