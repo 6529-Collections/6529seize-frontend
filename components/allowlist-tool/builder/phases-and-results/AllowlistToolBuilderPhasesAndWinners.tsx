@@ -12,7 +12,7 @@ import { AllowlistToolBuilderContext } from "../AllowlistToolBuilderContextWrapp
 
 export default function AllowlistToolBuilderPhasesAndResults() {
   const router = useRouter();
-  const { allowlist, phases, setPhases, setToasts, isGlobalLoading } =
+  const { phases, setPhases, setToasts, isGlobalLoading } =
     useContext(AllowlistToolBuilderContext);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [showLoading, setShowLoading] = useState<boolean>(true);

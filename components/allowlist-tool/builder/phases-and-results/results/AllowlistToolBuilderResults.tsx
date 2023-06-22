@@ -3,6 +3,9 @@ import AllowlistToolPoolsWrapper from "../../../common/pools/AllowlistToolPoolsW
 import AllowlistToolJsonIcon from "../../../icons/AllowlistToolJsonIcon";
 import AllowlistToolBuilderResultsPhase from "./AllowlistToolBuilderResultsPhase";
 import { AllowlistPhaseWithComponentAndItems } from "../../../allowlist-tool.types";
+import AllowlistToolBuilderResultsGetJson from "./AllowlistToolBuilderResultsGetJson";
+import { useRouter } from "next/router";
+import { useEffect, useState } from "react";
 
 export default function AllowlistToolBuilderResults({
   showLoading,
@@ -11,6 +14,13 @@ export default function AllowlistToolBuilderResults({
   showLoading: boolean;
   phases: AllowlistPhaseWithComponentAndItems[];
 }) {
+  const router = useRouter();
+  const [allowlistId, setAllowlistId] = useState<string | null>(null);
+  useEffect(() => {
+    if (router.query.id) {
+      setAllowlistId(router.query.id as string);
+    }
+  }, [router.query.id]);
   return (
     <AllowlistToolPoolsWrapper isLoading={showLoading}>
       <AllowlistToolExpandableTableWrapper title="Results">
@@ -42,14 +52,13 @@ export default function AllowlistToolBuilderResults({
                   <div className="tw-col-span-1">
                     <div className="tw-px-3 tw-py-1.5 tw-pl-3 tw-pr-4 sm:tw-pr-6 tw-text-left tw-text-[0.6875rem] tw-leading-[1.125rem] tw-font-medium tw-text-neutral-400">
                       <div className="tw-flex tw-items-center tw-justify-end tw-gap-x-2.5">
-                        <button
-                          type="button"
-                          className="tw-group tw-flex tw-items-center tw-justify-center tw-rounded-full tw-bg-transparent tw-h-8 tw-w-8 tw-text-white tw-border-none hover:tw-bg-neutral-700 tw-transition-all tw-duration-300 tw-ease-out"
-                        >
-                          <div className="tw-h-4 tw-w-4 tw-flex tw-items-center tw-justify-center">
-                            <AllowlistToolJsonIcon />
-                          </div>
-                        </button>
+                        {allowlistId && (
+                          <AllowlistToolBuilderResultsGetJson
+                            allowlistId={allowlistId}
+                            phaseId={null}
+                            phaseComponentId={null}
+                          />
+                        )}
                       </div>
                     </div>
                   </div>

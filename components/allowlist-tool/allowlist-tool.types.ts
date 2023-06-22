@@ -160,7 +160,6 @@ export enum AllowlistRunStatus {
   FAILED = "FAILED",
 }
 
-
 export enum AllowlistToolEntity {
   TRANSFER_POOLS = "TRANSFER_POOLS",
   TRANSFER_POOL = "TRANSFER_POOL",
@@ -174,4 +173,13 @@ export enum AllowlistToolEntity {
   PHASE = "PHASE",
   COMPONENT = "COMPONENT",
   ITEM = "ITEM",
+}
+
+export interface AllowlistResult {
+  readonly id: string;
+  readonly wallet: string;
+  readonly phaseId: string;
+  readonly allowlistId: string;
+  readonly phaseComponentId: string;
+  readonly amount: number;
 }

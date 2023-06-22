@@ -1,5 +1,6 @@
-import {  AllowlistPhaseComponentWithItems } from "../../../allowlist-tool.types";
+import { AllowlistPhaseComponentWithItems } from "../../../allowlist-tool.types";
 import AllowlistToolJsonIcon from "../../../icons/AllowlistToolJsonIcon";
+import AllowlistToolBuilderResultsGetJson from "./AllowlistToolBuilderResultsGetJson";
 
 export default function AllowlistToolBuilderResultsPhaseComponent({
   phaseComponent,
@@ -33,14 +34,11 @@ export default function AllowlistToolBuilderResultsPhaseComponent({
       <div className="tw-col-span-1">
         <div className="tw-py-2 tw-pl-3 tw-pr-4 sm:tw-pr-6">
           <div className="tw-flex tw-items-center tw-justify-end tw-gap-x-3">
-            <button
-              type="button"
-              className="tw-group tw-flex tw-justify-center tw-items-center tw-rounded-full tw-bg-transparent tw-h-8 tw-w-8 tw-text-white tw-border-none hover:tw-bg-neutral-700 tw-transition-all tw-duration-300 tw-ease-out"
-            >
-              <div className="tw-h-4 tw-w-4 tw-flex tw-justify-center tw-items-center">
-                <AllowlistToolJsonIcon />
-              </div>
-            </button>
+            <AllowlistToolBuilderResultsGetJson
+              allowlistId={phaseComponent.allowlistId}
+              phaseId={phaseComponent.phaseId}
+              phaseComponentId={phaseComponent.id}
+            />
           </div>
         </div>
       </div>
