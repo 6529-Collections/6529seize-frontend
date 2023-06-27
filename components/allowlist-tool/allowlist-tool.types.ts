@@ -183,3 +183,39 @@ export interface AllowlistResult {
   readonly phaseComponentId: string;
   readonly amount: number;
 }
+
+
+export interface AllowlistToolOperationsGrouped {
+  transferPools: {
+    operations: AllowlistOperation[];
+    pools: Record<string, AllowlistOperation[]>;
+  };
+  tokenPools: {
+    operations: AllowlistOperation[];
+    pools: Record<string, AllowlistOperation[]>;
+  };
+  customTokenPools: {
+    operations: AllowlistOperation[];
+    pools: Record<string, AllowlistOperation[]>;
+  };
+  walletPools: {
+    operations: AllowlistOperation[];
+    pools: Record<string, AllowlistOperation[]>;
+  };
+  phases: {
+    operations: AllowlistOperation[];
+    phases: Record<
+      string,
+      {
+        operations: AllowlistOperation[];
+        components: Record<
+          string,
+          {
+            operations: AllowlistOperation[];
+            items: Record<string, AllowlistOperation[]>;
+          }
+        >;
+      }
+    >;
+  };
+}
