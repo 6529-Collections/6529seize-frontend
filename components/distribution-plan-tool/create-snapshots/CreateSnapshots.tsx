@@ -8,7 +8,6 @@ import {
   AllowlistDescription,
   AllowlistOperation,
   AllowlistOperationCode,
-  AllowlistTokenPool,
   AllowlistToolResponse,
 } from "../../allowlist-tool/allowlist-tool.types";
 import { getRandomObjectId } from "../../../helpers/AllowlistToolHelpers";
@@ -16,7 +15,6 @@ import CreateSnapshotRow from "./CreateSnapshotRow";
 
 interface CreateSnapshotFormValues {
   name: string;
-  description: string;
   contract: string;
   blockNo: string;
   tokenIds: string;
@@ -37,17 +35,14 @@ export default function CreateSnapshots() {
 
   const [formValues, setFormValues] = useState<CreateSnapshotFormValues>({
     name: "",
-    description: "",
     contract: "",
     blockNo: "",
     tokenIds: "",
   });
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setFormValues({
-      ...formValues,
-      [event.target.name]: event.target.value,
-    });
+    const { name, value } = event.target;
+    setFormValues((prev) => ({ ...prev, [name]: value }));
   };
 
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -69,7 +64,7 @@ export default function CreateSnapshots() {
       } = {
         id: tokenPoolId,
         name: formValues.name,
-        description: formValues.description,
+        description: formValues.name,
         transferPoolId,
       };
 
@@ -128,7 +123,7 @@ export default function CreateSnapshots() {
           params: {
             id: transferPoolId,
             name: formValues.name,
-            description: formValues.description,
+            description: formValues.name,
             contract: formValues.contract,
             blockNo: +formValues.blockNo,
           },
@@ -202,7 +197,6 @@ export default function CreateSnapshots() {
     await runOperations();
     setFormValues({
       name: "",
-      description: "",
       contract: "",
       blockNo: "",
       tokenIds: "",
@@ -224,10 +218,7 @@ export default function CreateSnapshots() {
           velit quis.
         </p>
       </div>
-      {tokenPools.length > 0 &&
-        tokenPools.map((tokenPool: AllowlistTokenPool) => (
-          <CreateSnapshotRow key={tokenPool.id} tokenPool={tokenPool} />
-        ))}
+
       <div className="tw-mt-12">
         <form
           className="tw-flex tw-items-end tw-gap-x-4"
@@ -246,23 +237,6 @@ export default function CreateSnapshots() {
                 required
                 autoComplete="off"
                 placeholder="Name of Distribution Plan"
-                className="tw-block tw-w-full tw-rounded-lg tw-border-0 tw-py-3 tw-px-3 tw-bg-neutral-900 tw-text-white tw-font-light tw-caret-primary-400-focus tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-neutral-700 placeholder:tw-text-neutral-400 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 tw-text-base sm:tw-leading-6 tw-transition tw-duration-300 tw-ease-out"
-              />
-            </div>
-          </div>
-          <div className="tw-flex-1 tw-hidden">
-            <label className="tw-block tw-text-sm tw-font-normal tw-leading-5 tw-text-neutral-100">
-              Description
-            </label>
-            <div className="tw-mt-2">
-              <input
-                type="text"
-                name="description"
-                value={formValues.description}
-                onChange={handleChange}
-                required
-                autoComplete="off"
-                placeholder="Short description about Distribution Plan"
                 className="tw-block tw-w-full tw-rounded-lg tw-border-0 tw-py-3 tw-px-3 tw-bg-neutral-900 tw-text-white tw-font-light tw-caret-primary-400-focus tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-neutral-700 placeholder:tw-text-neutral-400 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 tw-text-base sm:tw-leading-6 tw-transition tw-duration-300 tw-ease-out"
               />
             </div>
@@ -335,7 +309,7 @@ export default function CreateSnapshots() {
           </div>
           <div>
             <button
-              type="button"
+              type="submit"
               className="tw-inline-flex tw-items-center tw-justify-center tw-cursor-pointer tw-bg-transparent hover:tw-bg-neutral-800/80 tw-px-4 tw-py-3 tw-text-sm tw-font-medium tw-text-white tw-w-full tw-border tw-border-solid tw-border-neutral-700 tw-rounded-lg tw-transition tw-duration-300 tw-ease-out"
             >
               Add snapshot
@@ -356,23 +330,25 @@ export default function CreateSnapshots() {
                       >
                         Name
                       </th>
+
                       <th
                         scope="col"
                         className="tw-px-3 tw-py-3 tw-whitespace-nowrap tw-text-left tw-text-[0.6875rem] tw-leading-[1.125rem] tw-font-medium tw-text-neutral-400 tw-uppercase tw-tracking-[0.25px]"
                       >
                         Contract number
                       </th>
-                      <th
-                        scope="col"
-                        className="tw-px-3 tw-py-3 tw-whitespace-nowrap tw-text-left tw-text-[0.6875rem] tw-leading-[1.125rem] tw-font-medium tw-text-neutral-400 tw-uppercase tw-tracking-[0.25px]"
-                      >
-                        Token ID(s)
-                      </th>
+
                       <th
                         scope="col"
                         className="tw-px-3 tw-py-3 tw-whitespace-nowrap tw-text-left tw-text-[0.6875rem] tw-leading-[1.125rem] tw-font-medium tw-text-neutral-400 tw-uppercase tw-tracking-[0.25px]"
                       >
                         Block number
+                      </th>
+                      <th
+                        scope="col"
+                        className="tw-px-3 tw-py-3 tw-whitespace-nowrap tw-text-left tw-text-[0.6875rem] tw-leading-[1.125rem] tw-font-medium tw-text-neutral-400 tw-uppercase tw-tracking-[0.25px]"
+                      >
+                        Token ID(s)
                       </th>
                       <th
                         scope="col"
@@ -389,26 +365,12 @@ export default function CreateSnapshots() {
                     </tr>
                   </thead>
                   <tbody className="tw-bg-transparent tw-divide-y tw-divide-neutral-700/40">
-                    <tr>
-                      <td className="tw-whitespace-nowrap tw-py-4 tw-pl-4 tw-pr-3 tw-text-sm tw-font-medium tw-text-white sm:tw-pl-6">
-                        Name
-                      </td>
-                      <td className="tw-whitespace-nowrap tw-px-3 tw-py-4 tw-text-sm tw-font-normal tw-text-neutral-300">
-                        Contract number
-                      </td>
-                      <td className="tw-whitespace-nowrap tw-px-3 tw-py-4 tw-text-sm tw-font-normal tw-text-neutral-300">
-                        Block No
-                      </td>
-                      <td className="tw-whitespace-nowrap tw-px-3 tw-py-4 tw-text-sm tw-font-normal tw-text-neutral-300">
-                        Token ID
-                      </td>
-                      <td className="tw-whitespace-nowrap tw-px-3 tw-py-4 tw-text-sm tw-font-normal tw-text-neutral-300">
-                        Wallets
-                      </td>
-                      <td className="tw-whitespace-nowrap tw-px-3 tw-py-4 tw-text-sm tw-font-normal tw-text-neutral-300">
-                        Tokens
-                      </td>
-                    </tr>
+                    {tokenPools.map((tokenPool) => (
+                      <CreateSnapshotRow
+                        key={tokenPool.id}
+                        tokenPool={tokenPool}
+                      />
+                    ))}
                   </tbody>
                 </table>
               </div>

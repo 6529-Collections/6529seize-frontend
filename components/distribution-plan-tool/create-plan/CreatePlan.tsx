@@ -71,7 +71,7 @@ export default function CreatePlan() {
 
   useEffect(() => {
     const fetchAllowlist = async () => {
-      const url = `${process.env.ALLOWLIST_API_ENDPOINT}/allowlists/9e620772-96d2-4d3b-9b03-ef71c5bfc5e1`;
+      const url = `${process.env.ALLOWLIST_API_ENDPOINT}/allowlists/97d47f82-8a70-473a-824d-54491a204e48`;
       const response = await fetch(url, {
         headers: {
           "Content-Type": "application/json",

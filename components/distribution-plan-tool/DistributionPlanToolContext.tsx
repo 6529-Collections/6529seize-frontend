@@ -9,6 +9,7 @@ import {
   AllowlistPhaseWithComponentAndItems,
   AllowlistTokenPool,
   AllowlistToolResponse,
+  AllowlistTransferPool,
 } from "../allowlist-tool/allowlist-tool.types";
 
 import RunOperations from "./run-operations/RunOperations";
@@ -37,6 +38,8 @@ type DistributionPlanToolContextType = {
   setState: (distributionPlan: AllowlistDescription | null) => void;
   operations: AllowlistOperation[];
   addOperations: (operations: AllowlistOperation[]) => void;
+  transferPools: AllowlistTransferPool[];
+  setTransferPools: (transferPools: AllowlistTransferPool[]) => void;
   tokenPools: AllowlistTokenPool[];
   setTokenPools: (tokenPools: AllowlistTokenPool[]) => void;
   customTokenPools: AllowlistCustomTokenPool[];
@@ -90,6 +93,8 @@ export const DistributionPlanToolContext =
     addOperations: () => {},
     distributionPlan: null,
     setState: () => {},
+    transferPools: [],
+    setTransferPools: () => {},
     tokenPools: [],
     setTokenPools: () => {},
     customTokenPools: [],
@@ -114,7 +119,9 @@ export default function DistributionPlanToolContextWrapper({
   };
   const [distributionPlan, setDistributionPlan] =
     useState<AllowlistDescription | null>(null);
-
+  const [transferPools, setTransferPools] = useState<AllowlistTransferPool[]>(
+    []
+  );
   const [tokenPools, setTokenPools] = useState<AllowlistTokenPool[]>([]);
   const [customTokenPools, setCustomTokenPools] = useState<
     AllowlistCustomTokenPool[]
@@ -122,6 +129,27 @@ export default function DistributionPlanToolContextWrapper({
   const [phases, setPhases] = useState<AllowlistPhaseWithComponentAndItems[]>(
     []
   );
+
+  const fetchTransferPools = async (distributionPlanId: string) => {
+    try {
+      const response = await fetch(
+        `${process.env.ALLOWLIST_API_ENDPOINT}/allowlists/${distributionPlanId}/transfer-pools`
+      );
+      const data: AllowlistToolResponse<AllowlistTransferPool[]> =
+        await response.json();
+      if ("error" in data) {
+        setToasts({
+          messages:
+            typeof data.message === "string" ? [data.message] : data.message,
+          type: "error",
+        });
+      } else {
+        setTransferPools(data);
+      }
+    } catch (error: any) {
+      setToasts({ messages: [error.message], type: "error" });
+    }
+  };
 
   const fetchTokenPools = async (distributionPlanId: string) => {
     try {
@@ -183,7 +211,7 @@ export default function DistributionPlanToolContextWrapper({
         });
         return;
       }
-      addOperations(structuredClone(data));
+      setOperations(structuredClone(data));
     } catch (error: any) {
       setToasts({ messages: [error.message], type: "error" });
     }
@@ -212,10 +240,11 @@ export default function DistributionPlanToolContextWrapper({
 
   const initState = async (distributionPlanId: string) => {
     setFetching(true);
+    await fetchTransferPools(distributionPlanId);
     await fetchTokenPools(distributionPlanId);
     await fetchCustomTokenPools(distributionPlanId);
-    await fetchPhases(distributionPlanId);
     await fetchOperations(distributionPlanId);
+    await fetchPhases(distributionPlanId);
     setFetching(false);
   };
 
@@ -223,6 +252,7 @@ export default function DistributionPlanToolContextWrapper({
     if (!distributionPlan) {
       setStep(DistributionPlanToolStep.CREATE_PLAN);
       setDistributionPlan(null);
+      setTransferPools([]);
       setTokenPools([]);
       setCustomTokenPools([]);
       setOperations([]);
@@ -235,9 +265,7 @@ export default function DistributionPlanToolContextWrapper({
   };
 
   return (
-    <div
-      className={`tw-bg-neutral-900 ${poppins.className}`}
-    >
+    <div className={`tw-bg-neutral-900 ${poppins.className}`}>
       <div
         id="allowlist-tool"
         className="tw-max-w-[1250px] min-[1400px]:tw-max-w-[1350px] min-[1500px]:tw-max-w-[1450px] min-[1600px]:tw-max-w-[96.875rem] 
@@ -252,6 +280,8 @@ export default function DistributionPlanToolContextWrapper({
             addOperations,
             setState,
             distributionPlan,
+            transferPools,
+            setTransferPools,
             tokenPools,
             setTokenPools,
             customTokenPools,
