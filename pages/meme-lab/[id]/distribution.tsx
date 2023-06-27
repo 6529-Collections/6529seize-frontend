@@ -56,7 +56,7 @@ export default function MemeLabDistributionPage(props: any) {
 export async function getServerSideProps(req: any, res: any, resolvedUrl: any) {
   const id = req.query.id;
   const response = await fetchUrl(
-    `${process.env.API_ENDPOINT}/api/nfts?contract=${MEMELAB_CONTRACT}&id=${id}`
+    `${process.env.API_ENDPOINT}/api/nfts_memelab?contract=${MEMELAB_CONTRACT}&id=${id}`
   );
   let name = `Meme Lab Card #${id} Distribution`;
   let image = `${process.env.BASE_ENDPOINT}/Seize_Logo_Glasses_2.png`;
