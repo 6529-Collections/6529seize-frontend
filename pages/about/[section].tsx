@@ -167,7 +167,7 @@ export default function About(props: Props) {
                         <Col
                           onClick={() => setNewSection(AboutSection.MEMES)}
                           className={`${menuStyles.aboutMenuLeftItem} ${
-                            section == AboutSection.MEMES
+                            section === AboutSection.MEMES
                               ? menuStyles.aboutMenuLeftItemActive
                               : ""
                           }`}>
@@ -180,7 +180,7 @@ export default function About(props: Props) {
                             setNewSection(AboutSection.MEMES_CALENDAR)
                           }
                           className={`${menuStyles.aboutMenuLeftItem} ${
-                            section == AboutSection.MEMES_CALENDAR
+                            section === AboutSection.MEMES_CALENDAR
                               ? menuStyles.aboutMenuLeftItemActive
                               : ""
                           }`}>
@@ -191,7 +191,7 @@ export default function About(props: Props) {
                         <Col
                           onClick={() => setNewSection(AboutSection.MEME_LAB)}
                           className={`${menuStyles.aboutMenuLeftItem} ${
-                            section == AboutSection.MEME_LAB
+                            section === AboutSection.MEME_LAB
                               ? menuStyles.aboutMenuLeftItemActive
                               : ""
                           }`}>
@@ -202,7 +202,7 @@ export default function About(props: Props) {
                         <Col
                           onClick={() => setNewSection(AboutSection.GRADIENTS)}
                           className={`${menuStyles.aboutMenuLeftItem} ${
-                            section == AboutSection.GRADIENTS
+                            section === AboutSection.GRADIENTS
                               ? menuStyles.aboutMenuLeftItemActive
                               : ""
                           }`}>
@@ -218,7 +218,7 @@ export default function About(props: Props) {
                         <Col
                           onClick={() => setNewSection(AboutSection.GDRC1)}
                           className={`${menuStyles.aboutMenuLeftItem} ${
-                            section == AboutSection.GDRC1
+                            section === AboutSection.GDRC1
                               ? menuStyles.aboutMenuLeftItemActive
                               : ""
                           }`}>
@@ -236,7 +236,7 @@ export default function About(props: Props) {
                             setNewSection(AboutSection.NFT_DELEGATION)
                           }
                           className={`${menuStyles.aboutMenuLeftItem} ${
-                            section == AboutSection.NFT_DELEGATION
+                            section === AboutSection.NFT_DELEGATION
                               ? menuStyles.aboutMenuLeftItemActive
                               : ""
                           }`}>
@@ -252,7 +252,7 @@ export default function About(props: Props) {
                         <Col
                           onClick={() => setNewSection(AboutSection.FAQ)}
                           className={`${menuStyles.aboutMenuLeftItem} ${
-                            section == AboutSection.FAQ
+                            section === AboutSection.FAQ
                               ? menuStyles.aboutMenuLeftItemActive
                               : ""
                           }`}>
@@ -263,7 +263,7 @@ export default function About(props: Props) {
                         <Col
                           onClick={() => setNewSection(AboutSection.MINTING)}
                           className={`${menuStyles.aboutMenuLeftItem} ${
-                            section == AboutSection.MINTING
+                            section === AboutSection.MINTING
                               ? menuStyles.aboutMenuLeftItemActive
                               : ""
                           }`}>
@@ -274,7 +274,7 @@ export default function About(props: Props) {
                         <Col
                           onClick={() => setNewSection(AboutSection.LICENSE)}
                           className={`${menuStyles.aboutMenuLeftItem} ${
-                            section == AboutSection.LICENSE
+                            section === AboutSection.LICENSE
                               ? menuStyles.aboutMenuLeftItemActive
                               : ""
                           }`}>
@@ -290,7 +290,7 @@ export default function About(props: Props) {
                         <Col
                           onClick={() => setNewSection(AboutSection.APPLY)}
                           className={`${menuStyles.aboutMenuLeftItem} ${
-                            section == AboutSection.APPLY
+                            section === AboutSection.APPLY
                               ? menuStyles.aboutMenuLeftItemActive
                               : ""
                           }`}>
@@ -301,7 +301,7 @@ export default function About(props: Props) {
                         <Col
                           onClick={() => setNewSection(AboutSection.CONTACT_US)}
                           className={`${menuStyles.aboutMenuLeftItem} ${
-                            section == AboutSection.CONTACT_US
+                            section === AboutSection.CONTACT_US
                               ? menuStyles.aboutMenuLeftItemActive
                               : ""
                           }`}>
@@ -314,7 +314,7 @@ export default function About(props: Props) {
                             setNewSection(AboutSection.RELEASE_NOTES)
                           }
                           className={`${menuStyles.aboutMenuLeftItem} ${
-                            section == AboutSection.RELEASE_NOTES
+                            section === AboutSection.RELEASE_NOTES
                               ? menuStyles.aboutMenuLeftItemActive
                               : ""
                           }`}>
@@ -327,7 +327,7 @@ export default function About(props: Props) {
                             setNewSection(AboutSection.DATA_DECENTR)
                           }
                           className={`${menuStyles.aboutMenuLeftItem} ${
-                            section == AboutSection.DATA_DECENTR
+                            section === AboutSection.DATA_DECENTR
                               ? menuStyles.aboutMenuLeftItemActive
                               : ""
                           }`}>
@@ -345,7 +345,7 @@ export default function About(props: Props) {
                             setNewSection(AboutSection.TERMS_OF_SERVICE)
                           }
                           className={`${menuStyles.aboutMenuLeftItem} ${
-                            section == AboutSection.TERMS_OF_SERVICE
+                            section === AboutSection.TERMS_OF_SERVICE
                               ? menuStyles.aboutMenuLeftItemActive
                               : ""
                           }`}>
@@ -358,7 +358,7 @@ export default function About(props: Props) {
                             setNewSection(AboutSection.PRIVACY_POLICY)
                           }
                           className={`${menuStyles.aboutMenuLeftItem} ${
-                            section == AboutSection.PRIVACY_POLICY
+                            section === AboutSection.PRIVACY_POLICY
                               ? menuStyles.aboutMenuLeftItemActive
                               : ""
                           }`}>
@@ -371,7 +371,7 @@ export default function About(props: Props) {
                             setNewSection(AboutSection.COOKIE_POLICY)
                           }
                           className={`${menuStyles.aboutMenuLeftItem} ${
-                            section == AboutSection.COOKIE_POLICY
+                            section === AboutSection.COOKIE_POLICY
                               ? menuStyles.aboutMenuLeftItemActive
                               : ""
                           }`}>
@@ -398,7 +398,7 @@ export default function About(props: Props) {
                         <Col
                           onClick={() => setNewSection(AboutSection.MEMES)}
                           className={`${menuStyles.aboutMenuLeftItem} ${
-                            section == AboutSection.MEMES
+                            section === AboutSection.MEMES
                               ? menuStyles.aboutMenuLeftItemActive
                               : ""
                           }`}>
@@ -411,7 +411,7 @@ export default function About(props: Props) {
                             setNewSection(AboutSection.MEMES_CALENDAR)
                           }
                           className={`${menuStyles.aboutMenuLeftItem} ${
-                            section == AboutSection.MEMES_CALENDAR
+                            section === AboutSection.MEMES_CALENDAR
                               ? menuStyles.aboutMenuLeftItemActive
                               : ""
                           }`}>
@@ -422,7 +422,7 @@ export default function About(props: Props) {
                         <Col
                           onClick={() => setNewSection(AboutSection.MEME_LAB)}
                           className={`${menuStyles.aboutMenuLeftItem} ${
-                            section == AboutSection.MEME_LAB
+                            section === AboutSection.MEME_LAB
                               ? menuStyles.aboutMenuLeftItemActive
                               : ""
                           }`}>
@@ -433,7 +433,7 @@ export default function About(props: Props) {
                         <Col
                           onClick={() => setNewSection(AboutSection.GRADIENTS)}
                           className={`${menuStyles.aboutMenuLeftItem} ${
-                            section == AboutSection.GRADIENTS
+                            section === AboutSection.GRADIENTS
                               ? menuStyles.aboutMenuLeftItemActive
                               : ""
                           }`}>
@@ -449,7 +449,7 @@ export default function About(props: Props) {
                         <Col
                           onClick={() => setNewSection(AboutSection.GDRC1)}
                           className={`${menuStyles.aboutMenuLeftItem} ${
-                            section == AboutSection.GDRC1
+                            section === AboutSection.GDRC1
                               ? menuStyles.aboutMenuLeftItemActive
                               : ""
                           }`}>
@@ -467,7 +467,7 @@ export default function About(props: Props) {
                             setNewSection(AboutSection.NFT_DELEGATION)
                           }
                           className={`${menuStyles.aboutMenuLeftItem} ${
-                            section == AboutSection.NFT_DELEGATION
+                            section === AboutSection.NFT_DELEGATION
                               ? menuStyles.aboutMenuLeftItemActive
                               : ""
                           }`}>
@@ -483,7 +483,7 @@ export default function About(props: Props) {
                         <Col
                           onClick={() => setNewSection(AboutSection.FAQ)}
                           className={`${menuStyles.aboutMenuLeftItem} ${
-                            section == AboutSection.FAQ
+                            section === AboutSection.FAQ
                               ? menuStyles.aboutMenuLeftItemActive
                               : ""
                           }`}>
@@ -494,7 +494,7 @@ export default function About(props: Props) {
                         <Col
                           onClick={() => setNewSection(AboutSection.MINTING)}
                           className={`${menuStyles.aboutMenuLeftItem} ${
-                            section == AboutSection.MINTING
+                            section === AboutSection.MINTING
                               ? menuStyles.aboutMenuLeftItemActive
                               : ""
                           }`}>
@@ -505,7 +505,7 @@ export default function About(props: Props) {
                         <Col
                           onClick={() => setNewSection(AboutSection.LICENSE)}
                           className={`${menuStyles.aboutMenuLeftItem} ${
-                            section == AboutSection.LICENSE
+                            section === AboutSection.LICENSE
                               ? menuStyles.aboutMenuLeftItemActive
                               : ""
                           }`}>
@@ -521,7 +521,7 @@ export default function About(props: Props) {
                         <Col
                           onClick={() => setNewSection(AboutSection.APPLY)}
                           className={`${menuStyles.aboutMenuLeftItem} ${
-                            section == AboutSection.APPLY
+                            section === AboutSection.APPLY
                               ? menuStyles.aboutMenuLeftItemActive
                               : ""
                           }`}>
@@ -532,7 +532,7 @@ export default function About(props: Props) {
                         <Col
                           onClick={() => setNewSection(AboutSection.CONTACT_US)}
                           className={`${menuStyles.aboutMenuLeftItem} ${
-                            section == AboutSection.CONTACT_US
+                            section === AboutSection.CONTACT_US
                               ? menuStyles.aboutMenuLeftItemActive
                               : ""
                           }`}>
@@ -545,7 +545,7 @@ export default function About(props: Props) {
                             setNewSection(AboutSection.RELEASE_NOTES)
                           }
                           className={`${menuStyles.aboutMenuLeftItem} ${
-                            section == AboutSection.RELEASE_NOTES
+                            section === AboutSection.RELEASE_NOTES
                               ? menuStyles.aboutMenuLeftItemActive
                               : ""
                           }`}>
@@ -558,7 +558,7 @@ export default function About(props: Props) {
                             setNewSection(AboutSection.DATA_DECENTR)
                           }
                           className={`${menuStyles.aboutMenuLeftItem} ${
-                            section == AboutSection.DATA_DECENTR
+                            section === AboutSection.DATA_DECENTR
                               ? menuStyles.aboutMenuLeftItemActive
                               : ""
                           }`}>
@@ -576,7 +576,7 @@ export default function About(props: Props) {
                             setNewSection(AboutSection.TERMS_OF_SERVICE)
                           }
                           className={`${menuStyles.aboutMenuLeftItem} ${
-                            section == AboutSection.TERMS_OF_SERVICE
+                            section === AboutSection.TERMS_OF_SERVICE
                               ? menuStyles.aboutMenuLeftItemActive
                               : ""
                           }`}>
@@ -589,7 +589,7 @@ export default function About(props: Props) {
                             setNewSection(AboutSection.PRIVACY_POLICY)
                           }
                           className={`${menuStyles.aboutMenuLeftItem} ${
-                            section == AboutSection.PRIVACY_POLICY
+                            section === AboutSection.PRIVACY_POLICY
                               ? menuStyles.aboutMenuLeftItemActive
                               : ""
                           }`}>
@@ -602,7 +602,7 @@ export default function About(props: Props) {
                             setNewSection(AboutSection.COOKIE_POLICY)
                           }
                           className={`${menuStyles.aboutMenuLeftItem} ${
-                            section == AboutSection.COOKIE_POLICY
+                            section === AboutSection.COOKIE_POLICY
                               ? menuStyles.aboutMenuLeftItemActive
                               : ""
                           }`}>
@@ -635,13 +635,13 @@ export async function getServerSideProps(req: any, res: any, resolvedUrl: any) {
       `https://digitalrightscharter-bucket.s3.eu-west-1.amazonaws.com/index.html`
     );
     const gdrc1Text =
-      gdrc1Request.status == 200 ? await gdrc1Request.text() : "";
+      gdrc1Request.status === 200 ? await gdrc1Request.text() : "";
 
     const memesCalendarRequest = await fetch(
       `https://6529bucket.s3.eu-west-1.amazonaws.com/seize_html/about/memes_calendar.html`
     );
     const memesCalendarText =
-      memesCalendarRequest.status == 200
+      memesCalendarRequest.status === 200
         ? await memesCalendarRequest.text()
         : "";
 
@@ -649,7 +649,9 @@ export async function getServerSideProps(req: any, res: any, resolvedUrl: any) {
       `https://6529bucket.s3.eu-west-1.amazonaws.com/seize_html/about/release_notes.html`
     );
     const releaseNotesText =
-      releaseNotesRequest.status == 200 ? await releaseNotesRequest.text() : "";
+      releaseNotesRequest.status === 200
+        ? await releaseNotesRequest.text()
+        : "";
 
     return {
       props: {

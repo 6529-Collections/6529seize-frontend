@@ -11,7 +11,7 @@ export default function SeasonsDropdown(props: Props) {
   return (
     <Dropdown className={styles.seasonDropdown} drop={"down-centered"}>
       <Dropdown.Toggle>
-        SZN: {props.selectedSeason == 0 ? `All` : props.selectedSeason}
+        SZN: {props.selectedSeason === 0 ? `All` : props.selectedSeason}
       </Dropdown.Toggle>
       <Dropdown.Menu>
         <Dropdown.Item

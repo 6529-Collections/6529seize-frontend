@@ -54,7 +54,7 @@ export default function TheMemesComponent(props: Props) {
       const routerSortDir = router.query.sort_dir;
       if (routerSortDir) {
         const resolvedRouterSortDir = Object.values(SortDirection).find(
-          (sd) => sd == routerSortDir
+          (sd) => sd === routerSortDir
         );
         if (resolvedRouterSortDir) {
           initialSortDir = resolvedRouterSortDir;
@@ -64,7 +64,7 @@ export default function TheMemesComponent(props: Props) {
       const routerSort = router.query.sort;
       if (routerSort) {
         const resolvedRouterSort = Object.values(Sort).find(
-          (sd) => sd == routerSort
+          (sd) => sd === routerSort
         );
         if (resolvedRouterSort) {
           initialSort = resolvedRouterSort;
@@ -101,7 +101,7 @@ export default function TheMemesComponent(props: Props) {
   const [volumeType, setVolumeType] = useState<VolumeType>(VolumeType.HOURS_24);
 
   function getBalance(id: number) {
-    const balance = nftBalances.find((b) => b.token_id == id);
+    const balance = nftBalances.find((b) => b.token_id === id);
     if (balance) {
       return balance.balance;
     }
@@ -147,7 +147,7 @@ export default function TheMemesComponent(props: Props) {
   useEffect(() => {
     const myMemes: Meme[] = [];
     [...nftMetas].map((nftm) => {
-      if (!myMemes.some((m) => m.meme == nftm.meme)) {
+      if (!myMemes.some((m) => m.meme === nftm.meme)) {
         myMemes.push({
           meme: nftm.meme,
           meme_name: nftm.meme_name,
@@ -239,8 +239,8 @@ export default function TheMemesComponent(props: Props) {
         );
       }
 
-      if (sort == Sort.AGE) {
-        if (sortDir == SortDirection.ASC) {
+      if (sort === Sort.AGE) {
+        if (sortDir === SortDirection.ASC) {
           setNfts(
             [...nfts].sort((a, b) => (a.mint_date > b.mint_date ? -1 : 1))
           );
@@ -250,9 +250,9 @@ export default function TheMemesComponent(props: Props) {
           );
         }
       }
-      if (sort == Sort.EDITION_SIZE) {
+      if (sort === Sort.EDITION_SIZE) {
         setNfts([...nfts].sort((a, b) => (a.mint_date > b.mint_date ? 1 : -1)));
-        if (sortDir == SortDirection.ASC) {
+        if (sortDir === SortDirection.ASC) {
           setNfts(
             [...nfts].sort((a, b) => {
               if (a.supply > b.supply) return 1;
@@ -270,25 +270,25 @@ export default function TheMemesComponent(props: Props) {
           );
         }
       }
-      if (sort == Sort.MEME) {
-        if (sortDir == SortDirection.ASC) {
+      if (sort === Sort.MEME) {
+        if (sortDir === SortDirection.ASC) {
           setNftMemes([...nftMemes].sort((a, b) => (a.meme > b.meme ? 1 : -1)));
         } else {
           setNftMemes([...nftMemes].sort((a, b) => (a.meme > b.meme ? -1 : 1)));
         }
       }
-      if (sort == Sort.HODLERS) {
-        if (sortDir == SortDirection.ASC) {
+      if (sort === Sort.HODLERS) {
+        if (sortDir === SortDirection.ASC) {
           setNfts(
             [...nfts].sort((a, b) => {
               if (
-                nftMetas.find((t1) => a.id == t1.id)!.hodlers >
-                nftMetas.find((t2) => b.id == t2.id)!.hodlers
+                nftMetas.find((t1) => a.id === t1.id)!.hodlers >
+                nftMetas.find((t2) => b.id === t2.id)!.hodlers
               )
                 return 1;
               if (
-                nftMetas.find((t1) => a.id == t1.id)!.hodlers <
-                nftMetas.find((t2) => b.id == t2.id)!.hodlers
+                nftMetas.find((t1) => a.id === t1.id)!.hodlers <
+                nftMetas.find((t2) => b.id === t2.id)!.hodlers
               )
                 return -1;
               return a.mint_date > b.mint_date ? 1 : -1;
@@ -298,13 +298,13 @@ export default function TheMemesComponent(props: Props) {
           setNfts(
             [...nfts].sort((a, b) => {
               if (
-                nftMetas.find((t1) => a.id == t1.id)!.hodlers >
-                nftMetas.find((t2) => b.id == t2.id)!.hodlers
+                nftMetas.find((t1) => a.id === t1.id)!.hodlers >
+                nftMetas.find((t2) => b.id === t2.id)!.hodlers
               )
                 return -1;
               if (
-                nftMetas.find((t1) => a.id == t1.id)!.hodlers <
-                nftMetas.find((t2) => b.id == t2.id)!.hodlers
+                nftMetas.find((t1) => a.id === t1.id)!.hodlers <
+                nftMetas.find((t2) => b.id === t2.id)!.hodlers
               )
                 return 1;
               return a.mint_date > b.mint_date ? 1 : -1;
@@ -312,9 +312,9 @@ export default function TheMemesComponent(props: Props) {
           );
         }
       }
-      if (sort == Sort.TDH) {
+      if (sort === Sort.TDH) {
         setNfts([...nfts].sort((a, b) => (a.mint_date > b.mint_date ? 1 : -1)));
-        if (sortDir == SortDirection.ASC) {
+        if (sortDir === SortDirection.ASC) {
           setNfts(
             [...nfts].sort((a, b) => {
               if (a.tdh > b.tdh) return 1;
@@ -332,18 +332,18 @@ export default function TheMemesComponent(props: Props) {
           );
         }
       }
-      if (sort == Sort.UNIQUE_PERCENT) {
-        if (sortDir == SortDirection.ASC) {
+      if (sort === Sort.UNIQUE_PERCENT) {
+        if (sortDir === SortDirection.ASC) {
           setNfts(
             [...nfts].sort((a, b) => {
               if (
-                nftMetas.find((t1) => a.id == t1.id)!.percent_unique >
-                nftMetas.find((t2) => b.id == t2.id)!.percent_unique
+                nftMetas.find((t1) => a.id === t1.id)!.percent_unique >
+                nftMetas.find((t2) => b.id === t2.id)!.percent_unique
               )
                 return 1;
               if (
-                nftMetas.find((t1) => a.id == t1.id)!.percent_unique <
-                nftMetas.find((t2) => b.id == t2.id)!.percent_unique
+                nftMetas.find((t1) => a.id === t1.id)!.percent_unique <
+                nftMetas.find((t2) => b.id === t2.id)!.percent_unique
               )
                 return -1;
               return a.mint_date > b.mint_date ? 1 : -1;
@@ -353,13 +353,13 @@ export default function TheMemesComponent(props: Props) {
           setNfts(
             [...nfts].sort((a, b) => {
               if (
-                nftMetas.find((t1) => a.id == t1.id)!.percent_unique >
-                nftMetas.find((t2) => b.id == t2.id)!.percent_unique
+                nftMetas.find((t1) => a.id === t1.id)!.percent_unique >
+                nftMetas.find((t2) => b.id === t2.id)!.percent_unique
               )
                 return -1;
               if (
-                nftMetas.find((t1) => a.id == t1.id)!.percent_unique <
-                nftMetas.find((t2) => b.id == t2.id)!.percent_unique
+                nftMetas.find((t1) => a.id === t1.id)!.percent_unique <
+                nftMetas.find((t2) => b.id === t2.id)!.percent_unique
               )
                 return 1;
               return a.mint_date > b.mint_date ? 1 : -1;
@@ -367,18 +367,18 @@ export default function TheMemesComponent(props: Props) {
           );
         }
       }
-      if (sort == Sort.UNIQUE_PERCENT_EX_MUSEUM) {
-        if (sortDir == SortDirection.ASC) {
+      if (sort === Sort.UNIQUE_PERCENT_EX_MUSEUM) {
+        if (sortDir === SortDirection.ASC) {
           setNfts(
             [...nfts].sort((a, b) => {
               if (
-                nftMetas.find((t1) => a.id == t1.id)!.percent_unique_cleaned >
-                nftMetas.find((t2) => b.id == t2.id)!.percent_unique_cleaned
+                nftMetas.find((t1) => a.id === t1.id)!.percent_unique_cleaned >
+                nftMetas.find((t2) => b.id === t2.id)!.percent_unique_cleaned
               )
                 return 1;
               if (
-                nftMetas.find((t1) => a.id == t1.id)!.percent_unique_cleaned <
-                nftMetas.find((t2) => b.id == t2.id)!.percent_unique_cleaned
+                nftMetas.find((t1) => a.id === t1.id)!.percent_unique_cleaned <
+                nftMetas.find((t2) => b.id === t2.id)!.percent_unique_cleaned
               )
                 return -1;
               return a.mint_date > b.mint_date ? 1 : -1;
@@ -388,13 +388,13 @@ export default function TheMemesComponent(props: Props) {
           setNfts(
             [...nfts].sort((a, b) => {
               if (
-                nftMetas.find((t1) => a.id == t1.id)!.percent_unique_cleaned >
-                nftMetas.find((t2) => b.id == t2.id)!.percent_unique_cleaned
+                nftMetas.find((t1) => a.id === t1.id)!.percent_unique_cleaned >
+                nftMetas.find((t2) => b.id === t2.id)!.percent_unique_cleaned
               )
                 return -1;
               if (
-                nftMetas.find((t1) => a.id == t1.id)!.percent_unique_cleaned <
-                nftMetas.find((t2) => b.id == t2.id)!.percent_unique_cleaned
+                nftMetas.find((t1) => a.id === t1.id)!.percent_unique_cleaned <
+                nftMetas.find((t2) => b.id === t2.id)!.percent_unique_cleaned
               )
                 return 1;
               return a.mint_date > b.mint_date ? 1 : -1;
@@ -402,9 +402,9 @@ export default function TheMemesComponent(props: Props) {
           );
         }
       }
-      if (sort == Sort.FLOOR_PRICE) {
+      if (sort === Sort.FLOOR_PRICE) {
         setNfts([...nfts].sort((a, b) => (a.mint_date > b.mint_date ? 1 : -1)));
-        if (sortDir == SortDirection.ASC) {
+        if (sortDir === SortDirection.ASC) {
           setNfts(
             [...nfts].sort((a, b) => {
               if (a.floor_price > b.floor_price) return 1;
@@ -422,9 +422,9 @@ export default function TheMemesComponent(props: Props) {
           );
         }
       }
-      if (sort == Sort.MARKET_CAP) {
+      if (sort === Sort.MARKET_CAP) {
         setNfts([...nfts].sort((a, b) => (a.mint_date > b.mint_date ? 1 : -1)));
-        if (sortDir == SortDirection.ASC) {
+        if (sortDir === SortDirection.ASC) {
           setNfts(
             [...nfts].sort((a, b) => {
               if (a.market_cap > b.market_cap) return 1;
@@ -442,9 +442,9 @@ export default function TheMemesComponent(props: Props) {
           );
         }
       }
-      if (sort == Sort.VOLUME) {
+      if (sort === Sort.VOLUME) {
         setNfts([...nfts].sort((a, b) => (a.mint_date > b.mint_date ? 1 : -1)));
-        if (sortDir == SortDirection.ASC) {
+        if (sortDir === SortDirection.ASC) {
           setNfts(
             [...nfts].sort((a, b) => {
               const aVolume = getValuesForVolumeType(volumeType, a);
@@ -485,8 +485,8 @@ export default function TheMemesComponent(props: Props) {
   }
 
   function printNft(nft: NFT) {
-    const season = nftMetas.find((a) => a.id == nft.id)?.season;
-    if (selectedSeason == 0 || selectedSeason == season) {
+    const season = nftMetas.find((a) => a.id === nft.id)?.season;
+    if (selectedSeason === 0 || selectedSeason === season) {
       return (
         <Col
           key={`${nft.contract}-${nft.id}`}
@@ -520,53 +520,53 @@ export default function TheMemesComponent(props: Props) {
             <Row>
               <Col className="text-center pt-1">
                 {sort &&
-                  (sort == Sort.AGE || sort == Sort.MEME) &&
+                  (sort === Sort.AGE || sort === Sort.MEME) &&
                   printMintDate(nft)}
-                {sort == Sort.EDITION_SIZE && `Edition Size: ${nft.supply}`}
-                {sort == Sort.TDH &&
+                {sort === Sort.EDITION_SIZE && `Edition Size: ${nft.supply}`}
+                {sort === Sort.TDH &&
                   `TDH: ${numberWithCommas(Math.round(nft.tdh))}`}
-                {sort == Sort.HODLERS &&
+                {sort === Sort.HODLERS &&
                   `Collectors: ${
-                    nftMetas.find((nftm) => nftm.id == nft.id)?.hodlers
+                    nftMetas.find((nftm) => nftm.id === nft.id)?.hodlers
                   }`}
-                {sort == Sort.UNIQUE_PERCENT &&
+                {sort === Sort.UNIQUE_PERCENT &&
                   `Unique: ${
                     Math.round(
-                      nftMetas.find((nftm) => nftm.id == nft.id)
+                      nftMetas.find((nftm) => nftm.id === nft.id)
                         ?.percent_unique! *
                         100 *
                         10
                     ) / 10
                   }%`}
-                {sort == Sort.UNIQUE_PERCENT_EX_MUSEUM &&
+                {sort === Sort.UNIQUE_PERCENT_EX_MUSEUM &&
                   `Unique Ex-Museum: ${
                     Math.round(
-                      nftMetas.find((nftm) => nftm.id == nft.id)
+                      nftMetas.find((nftm) => nftm.id === nft.id)
                         ?.percent_unique_cleaned! *
                         100 *
                         10
                     ) / 10
                   }%`}
-                {sort == Sort.FLOOR_PRICE &&
+                {sort === Sort.FLOOR_PRICE &&
                   (nft.floor_price > 0
                     ? `Floor Price: ${numberWithCommas(
                         Math.round(nft.floor_price * 100) / 100
                       )} ETH`
                     : `Floor Price: N/A`)}
-                {sort == Sort.MARKET_CAP &&
+                {sort === Sort.MARKET_CAP &&
                   (nft.market_cap > 0
                     ? `Market Cap: ${numberWithCommas(
                         Math.round(nft.market_cap * 100) / 100
                       )} ETH`
                     : `Market Cap: N/A`)}
-                {sort == Sort.VOLUME &&
+                {sort === Sort.VOLUME &&
                   `Volume (${volumeType}): ${numberWithCommas(
                     Math.round(
-                      (volumeType == VolumeType.HOURS_24
+                      (volumeType === VolumeType.HOURS_24
                         ? nft.total_volume_last_24_hours
-                        : volumeType == VolumeType.DAYS_7
+                        : volumeType === VolumeType.DAYS_7
                         ? nft.total_volume_last_7_days
-                        : volumeType == VolumeType.DAYS_30
+                        : volumeType === VolumeType.DAYS_30
                         ? nft.total_volume_last_1_month
                         : nft.total_volume) * 100
                     ) / 100
@@ -586,7 +586,7 @@ export default function TheMemesComponent(props: Props) {
   function printMemes() {
     return nftMemes.map((meme) => {
       const memeNfts = [...nfts].filter((n) =>
-        nftMetas.find((m) => n.id == m.id && m.meme == meme.meme)
+        nftMetas.find((m) => n.id === m.id && m.meme === meme.meme)
       );
       return (
         <Row key={`${meme.meme}-${meme.meme_name}`}>
@@ -712,7 +712,7 @@ export default function TheMemesComponent(props: Props) {
                   <span>
                     <Dropdown
                       className={`${styles.volumeDropdown} ${
-                        sort == Sort.VOLUME ? styles.volumeDropdownEnabled : ""
+                        sort === Sort.VOLUME ? styles.volumeDropdownEnabled : ""
                       }`}
                       drop={"down-centered"}>
                       <Dropdown.Toggle>Volume</Dropdown.Toggle>
@@ -737,7 +737,7 @@ export default function TheMemesComponent(props: Props) {
 
               {nftsLoaded &&
                 (nfts.length > 0 ? (
-                  sort == Sort.MEME ? (
+                  sort === Sort.MEME ? (
                     printMemes()
                   ) : (
                     printNfts()

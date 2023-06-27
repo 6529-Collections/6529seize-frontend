@@ -245,3 +245,40 @@ h5 {
 .decoration-none {
   text-decoration: none;
 }
+
+.cursor-pointer {
+  cursor: pointer;
+}
+
+.unselectable {
+  user-select: none;
+}
+
+.traffic-light {
+  height: $font-size;
+  width: $font-size;
+  border-radius: 50%;
+  display: inline-block;
+  animation: flashing 1s infinite;
+  background-color: $lightest-grey;
+}
+
+@keyframes flashing {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.75;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+.green {
+  background-color: green;
+}
+
+.red {
+  background-color: red;
+}

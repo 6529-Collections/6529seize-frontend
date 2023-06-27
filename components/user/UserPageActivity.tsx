@@ -39,7 +39,7 @@ export default function UserPageActivity(props: Props) {
 
   useEffect(() => {
     let url = `${process.env.API_ENDPOINT}/api/transactions?contract=${MEMES_CONTRACT}&wallet=${props.ownerAddress}&page_size=${ACTIVITY_PAGE_SIZE}&page=${activityPage}`;
-    if (props.view == VIEW.CONSOLIDATION && props.consolidatedTDH) {
+    if (props.view === VIEW.CONSOLIDATION && props.consolidatedTDH) {
       url = `${
         process.env.API_ENDPOINT
       }/api/transactions?contract=${MEMES_CONTRACT}&wallet=${props.consolidatedTDH.wallets.join(
@@ -75,7 +75,7 @@ export default function UserPageActivity(props: Props) {
 
   function findNftOrNull(tr: Transaction) {
     const nft = [...nfts].find(
-      (n) => areEqualAddresses(tr.contract, n.contract) && tr.token_id == n.id
+      (n) => areEqualAddresses(tr.contract, n.contract) && tr.token_id === n.id
     );
 
     return nft;

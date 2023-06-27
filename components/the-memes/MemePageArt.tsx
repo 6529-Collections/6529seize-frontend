@@ -42,7 +42,7 @@ export function MemePageArt(props: {
   }
 
   function carouselHandlerSlide(event: any) {
-    if (event == 0) {
+    if (event === 0) {
       setFullscreenElementId("the-art-fullscreen-animation");
     } else {
       setFullscreenElementId("the-art-fullscreen-img");
@@ -385,7 +385,7 @@ export function MemePageArt(props: {
                           <td className="text-right">
                             {
                               props.nft.metadata.attributes.find(
-                                (a: any) => a.trait_type == "Type - Season"
+                                (a: any) => a.trait_type === "Type - Season"
                               ).value
                             }
                           </td>
@@ -395,7 +395,7 @@ export function MemePageArt(props: {
                           <td className="text-right">
                             {
                               props.nft.metadata.attributes.find(
-                                (a: any) => a.trait_type == "Type - Meme"
+                                (a: any) => a.trait_type === "Type - Meme"
                               ).value
                             }
                           </td>
@@ -405,7 +405,7 @@ export function MemePageArt(props: {
                           <td className="text-right">
                             {
                               props.nft.metadata.attributes.find(
-                                (a: any) => a.trait_type == "Type - Card"
+                                (a: any) => a.trait_type === "Type - Card"
                               ).value
                             }
                           </td>
@@ -437,7 +437,7 @@ export function MemePageArt(props: {
                       <tbody>
                         {props.nft.metadata.attributes
                           .filter(
-                            (a: any) => a.display_type == "boost_percentage"
+                            (a: any) => a.display_type === "boost_percentage"
                           )
                           .map((a: any) => (
                             <tr key={a.trait_type}>

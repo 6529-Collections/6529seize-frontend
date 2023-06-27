@@ -63,9 +63,9 @@ export default function Distribution(props: Props) {
   }>({ sort: Sort.phase, sort_direction: SortDirection.DESC });
 
   function fetchDistribution() {
-    const phasefilter = activePhase == "All" ? "" : `&phase=${activePhase}`;
+    const phasefilter = activePhase === "All" ? "" : `&phase=${activePhase}`;
     const walletFilter =
-      searchWallets.length == 0 ? "" : `&wallet=${searchWallets.join(",")}`;
+      searchWallets.length === 0 ? "" : `&wallet=${searchWallets.join(",")}`;
     const distributionUrl = `${process.env.API_ENDPOINT}/api/distribution/${props.contract}/${nftId}?&page=${pageProps.page}&sort=${sort.sort}&sort_direction=${sort.sort_direction}${phasefilter}${walletFilter}`;
 
     fetchUrl(distributionUrl).then((r: DBResponse) => {
@@ -158,7 +158,9 @@ export default function Distribution(props: Props) {
                   setActivePhase("All");
                 }}
                 className={`${styles.distributionPhaseLink} ${
-                  "All" == activePhase ? styles.distributionPhaseLinkActive : ""
+                  "All" === activePhase
+                    ? styles.distributionPhaseLinkActive
+                    : ""
                 }`}>
                 All
               </span>
@@ -169,7 +171,7 @@ export default function Distribution(props: Props) {
                     setActivePhase(phase);
                   }}
                   className={`${styles.distributionPhaseLink} ${
-                    phase == activePhase
+                    phase === activePhase
                       ? styles.distributionPhaseLinkActive
                       : ""
                   }`}>
@@ -479,7 +481,7 @@ export default function Distribution(props: Props) {
                           href={`/${d.wallet}`}
                           target="_blank"
                           rel="noreferrer">
-                          {d.wallet == SIX529_MUSEUM
+                          {d.wallet === SIX529_MUSEUM
                             ? "6529Museum"
                             : d.display
                             ? d.display
@@ -504,9 +506,9 @@ export default function Distribution(props: Props) {
                         {numberWithCommas(d.count)}
                       </td>
                       <td className="text-center">
-                        {d.phase == "Airdrop" || !d.card_mint_count
+                        {d.phase === "Airdrop" || !d.card_mint_count
                           ? "-"
-                          : d.card_mint_count == 0
+                          : d.card_mint_count === 0
                           ? d.card_mint_count
                           : numberWithCommas(d.card_mint_count)}
                       </td>
@@ -548,7 +550,7 @@ export default function Distribution(props: Props) {
                 </Col>
               </Row>
               <Row>
-                {loaded && phases.length == 0 && (
+                {loaded && phases.length === 0 && (
                   <Col>
                     <Image
                       loading={"lazy"}

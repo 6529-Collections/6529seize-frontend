@@ -59,7 +59,7 @@ export default function UserPageDetails(props: Props) {
         <Col className="d-flex align-items-center justify-content-center">
           <h3
             className={
-              focus == Focus.COLLECTION ? styles.focusActive : styles.focus
+              focus === Focus.COLLECTION ? styles.focusActive : styles.focus
             }
             onClick={() => setFocus(Focus.COLLECTION)}>
             Collection
@@ -67,7 +67,7 @@ export default function UserPageDetails(props: Props) {
           <h3>&nbsp;|&nbsp;</h3>
           <h3
             className={
-              focus == Focus.ACTIVITY ? styles.focusActive : styles.focus
+              focus === Focus.ACTIVITY ? styles.focusActive : styles.focus
             }
             onClick={() => setFocus(Focus.ACTIVITY)}>
             Activity
@@ -75,7 +75,7 @@ export default function UserPageDetails(props: Props) {
           <h3>&nbsp;|&nbsp;</h3>
           <h3
             className={
-              focus == Focus.DISTRIBUTIONS ? styles.focusActive : styles.focus
+              focus === Focus.DISTRIBUTIONS ? styles.focusActive : styles.focus
             }
             onClick={() => setFocus(Focus.DISTRIBUTIONS)}>
             Distributions
@@ -83,18 +83,18 @@ export default function UserPageDetails(props: Props) {
         </Col>
       </Row>
       <UserPageCollection
-        show={focus == Focus.COLLECTION}
+        show={focus === Focus.COLLECTION}
         owned={props.owned}
         tdh={props.tdh}
       />
       <UserPageActivity
-        show={focus == Focus.ACTIVITY}
+        show={focus === Focus.ACTIVITY}
         ownerAddress={props.ownerAddress}
         view={props.view}
         consolidatedTDH={props.consolidatedTDH}
       />
       <UserPageDistributions
-        show={focus == Focus.DISTRIBUTIONS}
+        show={focus === Focus.DISTRIBUTIONS}
         ownerAddress={props.ownerAddress}
         view={props.view}
         consolidatedTDH={props.consolidatedTDH}

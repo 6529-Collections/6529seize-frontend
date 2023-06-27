@@ -110,7 +110,7 @@ export default function MemePage(props: Props) {
       const routerFocus = router.query.focus;
       if (routerFocus) {
         const resolvedRouterFocus = Object.values(MEME_FOCUS).find(
-          (sd) => sd == routerFocus
+          (sd) => sd === routerFocus
         );
         if (resolvedRouterFocus) {
           initialFocus = resolvedRouterFocus;
@@ -147,7 +147,7 @@ export default function MemePage(props: Props) {
         `${process.env.API_ENDPOINT}/api/memes_extended_data?id=${nftId}`
       ).then((response: DBResponse) => {
         const nftMetas = response.data;
-        if (nftMetas.length == 1) {
+        if (nftMetas.length === 1) {
           setNftMeta(nftMetas[0]);
           fetchUrl(
             `${process.env.API_ENDPOINT}/api/nfts?id=${nftId}&contract=${MEMES_CONTRACT}`
@@ -215,8 +215,8 @@ export default function MemePage(props: Props) {
         if (response.data.length > 0) {
           const mine: TDHMetrics = response.data[0];
           setMyOwner(mine);
-          setMyTDH(mine.memes.find((m) => m.id == parseInt(nftId)));
-          setMyRank(mine.memes_ranks.find((m) => m.id == parseInt(nftId)));
+          setMyTDH(mine.memes.find((m) => m.id === parseInt(nftId)));
+          setMyRank(mine.memes_ranks.find((m) => m.id === parseInt(nftId)));
         }
       });
     }
@@ -279,14 +279,14 @@ export default function MemePage(props: Props) {
                     />
                   </Col>
                   <MemePageLiveRightMenu
-                    show={activeTab == MEME_FOCUS.LIVE}
+                    show={activeTab === MEME_FOCUS.LIVE}
                     nft={nft}
                     nftMeta={nftMeta}
                     nftBalance={nftBalance}
                   />
                   {userLoaded && (
                     <MemePageYourCardsRightMenu
-                      show={activeTab == MEME_FOCUS.YOUR_CARDS}
+                      show={activeTab === MEME_FOCUS.YOUR_CARDS}
                       transactions={transactions}
                       wallets={props.wallets}
                       nft={nft}
@@ -297,7 +297,7 @@ export default function MemePage(props: Props) {
                     />
                   )}
                   <MemePageCollectorsRightMenu
-                    show={activeTab == MEME_FOCUS.COLLECTORS}
+                    show={activeTab === MEME_FOCUS.COLLECTORS}
                     nft={nft}
                     collectionCount={collectionCount}
                     collectionRank={collectionRank}
@@ -307,33 +307,33 @@ export default function MemePage(props: Props) {
           </Row>
           <Row>
             <MemePageLiveSubMenu
-              show={activeTab == MEME_FOCUS.LIVE}
+              show={activeTab === MEME_FOCUS.LIVE}
               nft={nft}
             />
             {userLoaded && (
               <MemePageYourCardsSubMenu
-                show={activeTab == MEME_FOCUS.YOUR_CARDS}
+                show={activeTab === MEME_FOCUS.YOUR_CARDS}
                 transactions={transactions}
               />
             )}
             <MemePageCollectorsSubMenu
-              show={activeTab == MEME_FOCUS.COLLECTORS}
+              show={activeTab === MEME_FOCUS.COLLECTORS}
               nft={nft}
               pageSize={ACTIVITY_PAGE_SIZE}
             />
           </Row>
         </Container>
         <MemePageArt
-          show={activeTab == MEME_FOCUS.THE_ART}
+          show={activeTab === MEME_FOCUS.THE_ART}
           nft={nft}
           nftMeta={nftMeta}
         />
         <MemePageActivity
-          show={activeTab == MEME_FOCUS.ACTIVITY}
+          show={activeTab === MEME_FOCUS.ACTIVITY}
           nft={nft}
           pageSize={ACTIVITY_PAGE_SIZE}
         />
-        <MemePageTimeline show={activeTab == MEME_FOCUS.TIMELINE} nft={nft} />
+        <MemePageTimeline show={activeTab === MEME_FOCUS.TIMELINE} nft={nft} />
       </>
     );
   }
@@ -378,7 +378,7 @@ export default function MemePage(props: Props) {
                                 parseInt(nftId) - 1
                               }?focus=${activeTab}`}
                               className={`${styles.nextPreviousNft} ${
-                                parseInt(nftId) == 1
+                                parseInt(nftId) === 1
                                   ? styles.nftPreviousdisabled
                                   : ""
                               }`}>
@@ -392,7 +392,7 @@ export default function MemePage(props: Props) {
                                 parseInt(nftId) + 1
                               }?focus=${activeTab}`}
                               className={`${styles.nextPreviousNft} ${
-                                parseInt(nftId) == nftMeta.collection_size
+                                parseInt(nftId) === nftMeta.collection_size
                                   ? styles.nftNextdisabled
                                   : ""
                               }`}>
@@ -421,7 +421,7 @@ export default function MemePage(props: Props) {
                         <span
                           key={`${nft.id}-${nft.contract}-${tab.focus}-tab`}
                           className={`${styles.tabFocus} ${
-                            activeTab == tab.focus ? styles.tabFocusActive : ""
+                            activeTab === tab.focus ? styles.tabFocusActive : ""
                           }`}
                           onClick={() => {
                             setActiveTab(tab.focus);

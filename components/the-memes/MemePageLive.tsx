@@ -251,7 +251,7 @@ export function MemePageLiveSubMenu(props: {
           <Col>
             The Meme Lab is the lab for Meme Artists to release work that is
             related to The Meme Cards.
-            {memeLabNftsLoaded && memeLabNfts.length == 0 && (
+            {memeLabNftsLoaded && memeLabNfts.length === 0 && (
               <>
                 <br />
                 Meme Lab NFTs that reference this NFT will appear here once the

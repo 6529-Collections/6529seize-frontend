@@ -58,7 +58,7 @@ export default function DelegationMappingTool() {
       (d) =>
         areEqualAddresses(address, d.from_address) &&
         areEqualAddresses(collection, d.collection) &&
-        useCase == d.use_case
+        useCase === d.use_case
     );
     return myDelegations;
   }
@@ -152,7 +152,7 @@ export default function DelegationMappingTool() {
   }, [csvData]);
 
   return (
-    <Container className={styles.toolArea} id="mapping-tool-form">
+    <Container className={styles.toolArea}>
       <Row>
         <Col>
           Upload File <span className="font-color-h">(.csv)</span>
@@ -247,7 +247,7 @@ export default function DelegationMappingTool() {
         <Col>
           <Button
             className={`${styles.submitBtn} ${
-              useCase == 0 || processing || !file
+              useCase === 0 || processing || !file
                 ? styles.submitBtnDisabled
                 : ""
             }`}

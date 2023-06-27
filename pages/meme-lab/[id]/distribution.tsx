@@ -2,7 +2,6 @@ import Head from "next/head";
 import styles from "../../../styles/Home.module.scss";
 
 import dynamic from "next/dynamic";
-import { useRouter } from "next/router";
 import { MEMELAB_CONTRACT, MEMES_CONTRACT } from "../../../constants";
 import { fetchUrl } from "../../../services/6529api";
 import HeaderPlaceholder from "../../../components/header/HeaderPlaceholder";
@@ -30,7 +29,7 @@ export default function MemeDistributionPage(props: any) {
         <meta name="description" content={pagenameFull} />
         <meta
           property="og:url"
-          content={`${process.env.BASE_ENDPOINT}/the-memes/${props.id}`}
+          content={`${process.env.BASE_ENDPOINT}/meme-lab/${props.id}`}
         />
         <meta property="og:title" content={props.name} />
         <meta property="og:image" content={props.image} />
@@ -57,7 +56,7 @@ export default function MemeDistributionPage(props: any) {
 export async function getServerSideProps(req: any, res: any, resolvedUrl: any) {
   const id = req.query.id;
   const response = await fetchUrl(
-    `${process.env.API_ENDPOINT}/api/nfts?contract=${MEMES_CONTRACT}&id=${id}`
+    `${process.env.API_ENDPOINT}/api/nfts?contract=${MEMELAB_CONTRACT}&id=${id}`
   );
   let name = `Meme Card #${id} Distribution`;
   let image = `https://d3lqz0a4bldqgf.cloudfront.net/seize_images/Seize_Logo_Glasses_2.png`;

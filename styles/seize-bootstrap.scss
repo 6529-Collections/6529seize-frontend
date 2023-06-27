@@ -159,12 +159,17 @@ tfoot,
 tr,
 td,
 th {
-  color: $font-color !important;
+  color: $font-color;
   border: none !important;
 }
 
 .table > :not(caption) > * > * {
   padding: 0.1rem 0.1rem;
+}
+
+.table {
+  --bs-table-bg: transparent;
+  --bs-table-color: $font-color;
 }
 
 // .nav-tabs {

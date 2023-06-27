@@ -33,7 +33,7 @@ export default function Login() {
     fetch(`${process.env.API_ENDPOINT}/api/`, {
       headers: { "x-6529-auth": pass },
     }).then((r: any) => {
-      if (r.status == 401) {
+      if (r.status === 401) {
         alert("Access Denied!");
       } else {
         alert("gm!");
@@ -82,7 +82,7 @@ export default function Login() {
             type="text"
             placeholder={inputDisabled ? "Go to seize.io" : "Team Login"}
             onKeyDown={(event: React.KeyboardEvent<HTMLDivElement>): void => {
-              if (event.key.toLowerCase() == "enter") {
+              if (event.key.toLowerCase() === "enter") {
                 doLogin(event.target);
               }
             }}

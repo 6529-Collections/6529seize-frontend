@@ -203,7 +203,7 @@ export default function DelegationsDocumentation(props: Props) {
 
   useEffect(() => {
     if (activeSection) {
-      if (activeSection == DelegationCenterSection.HTML && props.path) {
+      if (activeSection === DelegationCenterSection.HTML && props.path) {
         router.push(
           {
             pathname: `${props.path.join("/")}`,

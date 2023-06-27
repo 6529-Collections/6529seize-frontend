@@ -31,7 +31,7 @@ export default function DelegationMappingToolPage() {
     fetch(
       "https://6529bucket.s3.eu-west-1.amazonaws.com/seize_html/delegation-mapping-tool/how-to-use.html"
     ).then((response) => {
-      if (response.status == 200) {
+      if (response.status === 200) {
         response.text().then((htmlText) => {
           setHtml(htmlText);
           setHtmlError(false);

@@ -40,30 +40,30 @@ export function MemePageYourCardsRightMenu(props: {
     )[0];
 
     const airdropped = props.transactions.filter(
-      (t) => t.value == 0 && areEqualAddresses(t.from_address, NULL_ADDRESS)
+      (t) => t.value === 0 && areEqualAddresses(t.from_address, NULL_ADDRESS)
     );
 
     const transferredIn =
-      props.wallets.length == 0
+      props.wallets.length === 0
         ? []
         : props.transactions.filter(
             (t) =>
               !areEqualAddresses(t.from_address, NULL_ADDRESS) &&
               props.wallets.some((w) => areEqualAddresses(t.to_address, w)) &&
-              t.value == 0
+              t.value === 0
           );
 
     const transferredOut =
-      props.wallets.length == 0
+      props.wallets.length === 0
         ? []
         : props.transactions.filter(
             (t) =>
               props.wallets.some((w) => areEqualAddresses(t.from_address, w)) &&
-              t.value == 0
+              t.value === 0
           );
 
     const bought =
-      props.wallets.length == 0
+      props.wallets.length === 0
         ? []
         : props.transactions.filter(
             (t) =>
@@ -77,7 +77,7 @@ export function MemePageYourCardsRightMenu(props: {
     });
 
     const sold =
-      props.wallets.length == 0
+      props.wallets.length === 0
         ? []
         : props.transactions.filter(
             (t) =>
@@ -98,22 +98,24 @@ export function MemePageYourCardsRightMenu(props: {
         lg={{ span: 6 }}>
         <Container className="p-0">
           <Row>
-            {props.wallets.length == 0 && (
+            {props.wallets.length === 0 && (
               <Row className="pt-2">
                 <Col>
                   <h4>Connect your wallet to view your cards.</h4>
                 </Col>
               </Row>
             )}
-            {props.nftBalance == 0 && props.wallets.length > 0 && props.nft && (
-              <Row className="pt-2">
-                <Col>
-                  <h3>
-                    You don&apos;t own any editions of Card {props.nft.id}
-                  </h3>
-                </Col>
-              </Row>
-            )}
+            {props.nftBalance === 0 &&
+              props.wallets.length > 0 &&
+              props.nft && (
+                <Row className="pt-2">
+                  <Col>
+                    <h3>
+                      You don&apos;t own any editions of Card {props.nft.id}
+                    </h3>
+                  </Col>
+                </Row>
+              )}
             {props.transactions.length > 0 && props.wallets.length > 0 && (
               <>
                 {props.nftBalance > 0 && props.myOwner && (
@@ -277,7 +279,7 @@ export function MemePageLiveSubMenu(props: {
           <Col>
             The Meme Lab is the lab for Meme Artists to release work that is
             related to The Meme Cards.
-            {memeLabNftsLoaded && memeLabNfts.length == 0 && (
+            {memeLabNftsLoaded && memeLabNfts.length === 0 && (
               <>
                 <br />
                 Meme Lab NFTs that reference this NFT will appear here once the

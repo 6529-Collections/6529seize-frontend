@@ -62,7 +62,7 @@ export default function UserPageDistributions(props: Props) {
 
   useEffect(() => {
     let url = `${process.env.API_ENDPOINT}/api/distributions?wallet=${props.ownerAddress}&page_size=${DISTRIBUTIONS_PAGE_SIZE}&page=${distributionsPage}`;
-    if (props.view == VIEW.CONSOLIDATION && props.consolidatedTDH) {
+    if (props.view === VIEW.CONSOLIDATION && props.consolidatedTDH) {
       url = url = `${
         process.env.API_ENDPOINT
       }/api/distributions?wallet=${props.consolidatedTDH.wallets.join(
@@ -99,7 +99,7 @@ export default function UserPageDistributions(props: Props) {
                     <th>Date</th>
                     <th>Card</th>
                     {props.isConsolidation &&
-                      props.view == VIEW.CONSOLIDATION && <th>Wallet</th>}
+                      props.view === VIEW.CONSOLIDATION && <th>Wallet</th>}
                     <th className="text-center">Phase</th>
                     <th className="text-center">Count</th>
                     <th className="text-center">Minted</th>
@@ -145,7 +145,7 @@ export default function UserPageDistributions(props: Props) {
                         }${d.card_name ? ` - ${d.card_name}` : ""}`}
                       </td>
                       {props.isConsolidation &&
-                        props.view == VIEW.CONSOLIDATION && (
+                        props.view === VIEW.CONSOLIDATION && (
                           <td>
                             {d.display ? d.display : formatAddress(d.wallet)}
                           </td>
@@ -155,7 +155,7 @@ export default function UserPageDistributions(props: Props) {
                       <td className="text-center">
                         {!d.card_mint_count
                           ? "-"
-                          : d.card_mint_count == 0
+                          : d.card_mint_count === 0
                           ? d.card_mint_count
                           : numberWithCommas(d.card_mint_count)}
                       </td>

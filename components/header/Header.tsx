@@ -1,4 +1,4 @@
-import { Web3Modal, useWeb3Modal } from "@web3modal/react";
+import { Web3Modal } from "@web3modal/react";
 import { Web3Button } from "@web3modal/react";
 import { mainnet } from "wagmi/chains";
 
@@ -12,7 +12,7 @@ import {
   NavDropdown,
   Dropdown,
 } from "react-bootstrap";
-import { useAccount, useClient } from "wagmi";
+import { useAccount } from "wagmi";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import Image from "next/image";
@@ -36,8 +36,6 @@ enum VIEW {
 
 export default function Header(props: Props) {
   const router = useRouter();
-  const client = useClient();
-  const ethereumClient = new EthereumClient(client, [mainnet]);
   const [consolidations, setConsolidations] = useState<string[]>([]);
   const [isConsolidation, setIsConsolidation] = useState(false);
   const { address, connector, isConnected } = useAccount();
@@ -50,7 +48,7 @@ export default function Header(props: Props) {
   useEffect(() => {
     const viewMode = Cookies.get(VIEW_MODE_COOKIE);
     console.log(VIEW_MODE_COOKIE, viewMode);
-    if (viewMode == VIEW.CONSOLIDATION) {
+    if (viewMode === VIEW.CONSOLIDATION) {
       setView(VIEW.CONSOLIDATION);
     } else {
       setView(VIEW.WALLET);
@@ -61,7 +59,7 @@ export default function Header(props: Props) {
     if (view) {
       Cookies.set(VIEW_MODE_COOKIE, view);
       if (props.onSetWallets) {
-        if (isConsolidation && view == VIEW.CONSOLIDATION) {
+        if (isConsolidation && view === VIEW.CONSOLIDATION) {
           props.onSetWallets(consolidations);
         } else if (address) {
           props.onSetWallets([address]);
@@ -95,8 +93,8 @@ export default function Header(props: Props) {
         `${process.env.API_ENDPOINT}/api/consolidations/${address}`
       ).then((response: DBResponse) => {
         if (
-          response.data.length == 1 &&
-          consolidations.length == 1 &&
+          response.data.length === 1 &&
+          consolidations.length === 1 &&
           props.onSetWallets
         ) {
           props.onSetWallets([address]);
@@ -170,7 +168,7 @@ export default function Header(props: Props) {
                         title={
                           <button
                             className={`${styles.consolidationDropdownBtn} ${
-                              isConsolidation && view == VIEW.CONSOLIDATION
+                              isConsolidation && view === VIEW.CONSOLIDATION
                                 ? styles.consolidationBtnActive
                                 : ""
                             }`}>
@@ -188,7 +186,7 @@ export default function Header(props: Props) {
                         <NavDropdown.Item
                           className={styles.dropdownItemViewMode}
                           onClick={() => setView(VIEW.WALLET)}>
-                          {view == VIEW.WALLET && (
+                          {view === VIEW.WALLET && (
                             <FontAwesomeIcon
                               className={styles.viewModeIcon}
                               icon="check-circle"></FontAwesomeIcon>
@@ -198,7 +196,7 @@ export default function Header(props: Props) {
                         <NavDropdown.Item
                           onClick={() => setView(VIEW.CONSOLIDATION)}
                           className={styles.dropdownItemViewMode}>
-                          {view == VIEW.CONSOLIDATION && (
+                          {view === VIEW.CONSOLIDATION && (
                             <FontAwesomeIcon
                               className={`${styles.viewModeIcon} ${styles.viewModeIconConsolidation}`}
                               icon="check-circle"></FontAwesomeIcon>
@@ -237,6 +235,11 @@ export default function Header(props: Props) {
             <Col>
               <a href="/rememes">
                 <h3>ReMemes</h3>
+              </a>
+            </Col>
+            <Col>
+              <a href="/nextgen">
+                <h3>NextGen</h3>
               </a>
             </Col>
           </Row>
@@ -576,14 +579,14 @@ export default function Header(props: Props) {
                           <Nav className="justify-content-end ml-auto">
                             <Nav.Link
                               className={`${styles.mainNavLink} ${
-                                router.pathname == "/the-memes" ? "active" : ""
+                                router.pathname === "/the-memes" ? "active" : ""
                               }`}
                               href="/the-memes?sort=age&sort_dir=ASC">
                               The Memes
                             </Nav.Link>
                             <Nav.Link
                               className={`${styles.mainNavLink} ${
-                                router.pathname == "/6529-gradient"
+                                router.pathname === "/6529-gradient"
                                   ? "active"
                                   : ""
                               }`}
@@ -592,17 +595,24 @@ export default function Header(props: Props) {
                             </Nav.Link>
                             <Nav.Link
                               className={`${styles.mainNavLink} ${
-                                router.pathname == "/meme-lab" ? "active" : ""
+                                router.pathname === "/meme-lab" ? "active" : ""
                               }`}
                               href="/meme-lab">
                               Meme Lab
                             </Nav.Link>
                             <Nav.Link
                               className={`${styles.mainNavLink} ${
-                                router.pathname == "/rememes" ? "active" : ""
+                                router.pathname === "/rememes" ? "active" : ""
                               }`}
                               href="/rememes">
                               ReMemes
+                            </Nav.Link>
+                            <Nav.Link
+                              className={`${styles.mainNavLink} ${
+                                router.pathname === "/nextgen" ? "active" : ""
+                              }`}
+                              href="/nextgen">
+                              NextGen
                             </Nav.Link>
                             <NavDropdown
                               title="Community"
@@ -831,7 +841,7 @@ export default function Header(props: Props) {
                                           styles.consolidationDropdownBtn
                                         } ${
                                           isConsolidation &&
-                                          view == VIEW.CONSOLIDATION
+                                          view === VIEW.CONSOLIDATION
                                             ? styles.consolidationBtnActive
                                             : ""
                                         }`}>
@@ -849,7 +859,7 @@ export default function Header(props: Props) {
                                     <NavDropdown.Item
                                       className={styles.dropdownItemViewMode}
                                       onClick={() => setView(VIEW.WALLET)}>
-                                      {view == VIEW.WALLET && (
+                                      {view === VIEW.WALLET && (
                                         <FontAwesomeIcon
                                           className={styles.viewModeIcon}
                                           icon="check-circle"></FontAwesomeIcon>
@@ -861,7 +871,7 @@ export default function Header(props: Props) {
                                         setView(VIEW.CONSOLIDATION)
                                       }
                                       className={styles.dropdownItemViewMode}>
-                                      {view == VIEW.CONSOLIDATION && (
+                                      {view === VIEW.CONSOLIDATION && (
                                         <FontAwesomeIcon
                                           className={`${styles.viewModeIcon} ${styles.viewModeIconConsolidation}`}
                                           icon="check-circle"></FontAwesomeIcon>
@@ -898,23 +908,6 @@ export default function Header(props: Props) {
           </Col>
         </Row>
       </Container>
-      {client && ethereumClient && (
-        <Web3Modal
-          defaultChain={mainnet}
-          projectId={CW_PROJECT_ID}
-          ethereumClient={ethereumClient}
-          themeMode={"dark"}
-          themeVariables={{
-            "--w3m-background-color": "#282828",
-            "--w3m-logo-image-url":
-              "https://d3lqz0a4bldqgf.cloudfront.net/seize_images/Seize_Logo_Glasses_3.png",
-            "--w3m-accent-color": "#fff",
-            "--w3m-accent-fill-color": "#000",
-            "--w3m-button-border-radius": "0",
-            "--w3m-font-family": "Arial",
-          }}
-        />
-      )}
     </>
   );
 }

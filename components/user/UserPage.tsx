@@ -48,7 +48,7 @@ export default function UserPage(props: Props) {
   );
   const [ownerENS, setOwnerENS] = useState("");
 
-  const ensAvatar = useEnsAvatar({ address: ownerAddress, chainId: 1 });
+  const ensAvatar = useEnsAvatar({ chainId: 1 });
   const [ownerLinkDisplay, setOwnerLinkDisplay] = useState("");
   const [owned, setOwned] = useState<Owner[]>([]);
   const [walletOwned, setWalletOwned] = useState<Owner[]>([]);
@@ -72,9 +72,9 @@ export default function UserPage(props: Props) {
           setOwnerAddress(oAddress);
           setOwnerENS(response.display ? response.display : oAddress);
           let reservedDisplay;
-          if (props.user.toUpperCase() == SIX529_MUSEUM.toUpperCase()) {
+          if (props.user.toUpperCase() === SIX529_MUSEUM.toUpperCase()) {
             reservedDisplay = ReservedUser.MUSEUM;
-          } else if (props.user.toUpperCase() == MANIFOLD.toUpperCase()) {
+          } else if (props.user.toUpperCase() === MANIFOLD.toUpperCase()) {
             reservedDisplay = ReservedUser.MANIFOLD;
           }
           setOwnerLinkDisplay(
@@ -109,7 +109,7 @@ export default function UserPage(props: Props) {
           );
         });
       } else {
-        if (props.user.toUpperCase() == ReservedUser.MUSEUM.toUpperCase()) {
+        if (props.user.toUpperCase() === ReservedUser.MUSEUM.toUpperCase()) {
           setOwnerAddress(SIX529_MUSEUM);
           setOwnerENS(ReservedUser.MUSEUM);
           setOwnerLinkDisplay(`${oLink}/${ReservedUser.MUSEUM}`);
@@ -121,7 +121,7 @@ export default function UserPage(props: Props) {
             shallow: true,
           });
         } else if (
-          props.user.toUpperCase() == ReservedUser.MANIFOLD.toUpperCase()
+          props.user.toUpperCase() === ReservedUser.MANIFOLD.toUpperCase()
         ) {
           setOwnerAddress(MANIFOLD);
           setOwnerENS(ReservedUser.MANIFOLD);
@@ -219,7 +219,7 @@ export default function UserPage(props: Props) {
     async function fetchConsolidatedTDH() {
       const url = `${process.env.API_ENDPOINT}/api/consolidated_owner_metrics/?wallet=${ownerAddress}&profile_page=true`;
       return fetchUrl(url).then((response: DBResponse) => {
-        if (response && response.data.length == 1) {
+        if (response && response.data.length === 1) {
           setConsolidatedTDH(response.data[0]);
           if (response.data[0].wallets && response.data[0].wallets.length > 1) {
             setIsConsolidation(true);
@@ -237,7 +237,7 @@ export default function UserPage(props: Props) {
     async function fetchTDH() {
       const url = `${process.env.API_ENDPOINT}/api/owner_metrics/?wallet=${ownerAddress}&profile_page=true`;
       return fetchUrl(url).then((response: DBResponse) => {
-        if (response && response.data.length == 1) {
+        if (response && response.data.length === 1) {
           setWalletTDH(response.data[0]);
         }
       });
@@ -251,7 +251,7 @@ export default function UserPage(props: Props) {
   }, [isConsolidation, router.isReady]);
 
   useEffect(() => {
-    if (view == VIEW.CONSOLIDATION || !isConsolidation) {
+    if (view === VIEW.CONSOLIDATION || !isConsolidation) {
       setTDH(consolidatedTDH);
     } else {
       setTDH(walletTDH);
@@ -259,7 +259,7 @@ export default function UserPage(props: Props) {
   }, [view, walletTDH, consolidatedTDH]);
 
   useEffect(() => {
-    if (view == VIEW.CONSOLIDATION || !isConsolidation) {
+    if (view === VIEW.CONSOLIDATION || !isConsolidation) {
       setOwned(consolidationOwned);
     } else {
       setOwned(walletOwned);
@@ -325,11 +325,11 @@ export default function UserPage(props: Props) {
                       <Row className="pb-1">
                         <Col
                           className={
-                            view == VIEW.WALLET
+                            view === VIEW.WALLET
                               ? "d-flex align-items-center"
                               : ""
                           }>
-                          {ensAvatar.data && view == VIEW.WALLET && (
+                          {ensAvatar.data && view === VIEW.WALLET && (
                             <Image
                               className={styles.avatar}
                               src={ensAvatar.data}
@@ -341,12 +341,12 @@ export default function UserPage(props: Props) {
                           {tdh && consolidatedTDH ? (
                             <Address
                               wallets={
-                                view == VIEW.CONSOLIDATION
+                                view === VIEW.CONSOLIDATION
                                   ? consolidatedTDH.wallets
                                   : [ownerAddress]
                               }
                               display={
-                                view == VIEW.CONSOLIDATION &&
+                                view === VIEW.CONSOLIDATION &&
                                 consolidatedTDH.consolidation_display
                                   ? consolidatedTDH.consolidation_display
                                   : ownerENS

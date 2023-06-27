@@ -48,8 +48,8 @@ export default function UserPageCollection(props: Props) {
 
   useEffect(() => {
     if (sort && sortDir) {
-      if (sort == Sort.ID) {
-        if (sortDir == SortDirection.ASC) {
+      if (sort === Sort.ID) {
+        if (sortDir === SortDirection.ASC) {
           setNfts(
             [...nfts].sort((a, b) => {
               if (a.contract > b.contract) {
@@ -75,8 +75,8 @@ export default function UserPageCollection(props: Props) {
           );
         }
       }
-      if (sort == Sort.TDH) {
-        if (sortDir == SortDirection.ASC) {
+      if (sort === Sort.TDH) {
+        if (sortDir === SortDirection.ASC) {
           setNfts(
             [...nfts].sort((a, b) => {
               let atdh;
@@ -86,14 +86,14 @@ export default function UserPageCollection(props: Props) {
               const bBalance = getBalance(b);
 
               if (areEqualAddresses(a.contract, MEMES_CONTRACT)) {
-                atdh = props.tdh?.memes.find((m) => m.id == a.id)?.tdh;
+                atdh = props.tdh?.memes.find((m) => m.id === a.id)?.tdh;
               } else if (areEqualAddresses(a.contract, GRADIENT_CONTRACT)) {
-                atdh = props.tdh?.gradients.find((m) => m.id == a.id)?.tdh;
+                atdh = props.tdh?.gradients.find((m) => m.id === a.id)?.tdh;
               }
               if (areEqualAddresses(b.contract, MEMES_CONTRACT)) {
-                btdh = props.tdh?.memes.find((m) => m.id == b.id)?.tdh;
+                btdh = props.tdh?.memes.find((m) => m.id === b.id)?.tdh;
               } else if (areEqualAddresses(b.contract, GRADIENT_CONTRACT)) {
-                btdh = props.tdh?.gradients.find((m) => m.id == b.id)?.tdh;
+                btdh = props.tdh?.gradients.find((m) => m.id === b.id)?.tdh;
               }
 
               if (aBalance > 0 && !atdh) {
@@ -126,14 +126,14 @@ export default function UserPageCollection(props: Props) {
               const bBalance = getBalance(b);
 
               if (areEqualAddresses(a.contract, MEMES_CONTRACT)) {
-                atdh = props.tdh?.memes.find((m) => m.id == a.id)?.tdh;
+                atdh = props.tdh?.memes.find((m) => m.id === a.id)?.tdh;
               } else if (areEqualAddresses(a.contract, GRADIENT_CONTRACT)) {
-                atdh = props.tdh?.gradients.find((m) => m.id == a.id)?.tdh;
+                atdh = props.tdh?.gradients.find((m) => m.id === a.id)?.tdh;
               }
               if (areEqualAddresses(b.contract, MEMES_CONTRACT)) {
-                btdh = props.tdh?.memes.find((m) => m.id == b.id)?.tdh;
+                btdh = props.tdh?.memes.find((m) => m.id === b.id)?.tdh;
               } else if (areEqualAddresses(b.contract, GRADIENT_CONTRACT)) {
-                btdh = props.tdh?.gradients.find((m) => m.id == b.id)?.tdh;
+                btdh = props.tdh?.gradients.find((m) => m.id === b.id)?.tdh;
               }
 
               if (aBalance > 0 && !atdh) {
@@ -157,8 +157,8 @@ export default function UserPageCollection(props: Props) {
           );
         }
       }
-      if (sort == Sort.RANK) {
-        if (sortDir == SortDirection.ASC) {
+      if (sort === Sort.RANK) {
+        if (sortDir === SortDirection.ASC) {
           setNfts(
             [...nfts].sort((a, b) => {
               let atdh;
@@ -168,17 +168,17 @@ export default function UserPageCollection(props: Props) {
               const bBalance = getBalance(b);
 
               if (areEqualAddresses(a.contract, MEMES_CONTRACT)) {
-                atdh = props.tdh?.memes_ranks.find((m) => m.id == a.id)?.rank;
+                atdh = props.tdh?.memes_ranks.find((m) => m.id === a.id)?.rank;
               } else if (areEqualAddresses(a.contract, GRADIENT_CONTRACT)) {
                 atdh = props.tdh?.gradients_ranks.find(
-                  (m) => m.id == a.id
+                  (m) => m.id === a.id
                 )?.rank;
               }
               if (areEqualAddresses(b.contract, MEMES_CONTRACT)) {
-                btdh = props.tdh?.memes_ranks.find((m) => m.id == b.id)?.rank;
+                btdh = props.tdh?.memes_ranks.find((m) => m.id === b.id)?.rank;
               } else if (areEqualAddresses(b.contract, GRADIENT_CONTRACT)) {
                 btdh = props.tdh?.gradients_ranks.find(
-                  (m) => m.id == b.id
+                  (m) => m.id === b.id
                 )?.rank;
               }
 
@@ -212,17 +212,17 @@ export default function UserPageCollection(props: Props) {
               const bBalance = getBalance(b);
 
               if (areEqualAddresses(a.contract, MEMES_CONTRACT)) {
-                atdh = props.tdh?.memes_ranks.find((m) => m.id == a.id)?.rank;
+                atdh = props.tdh?.memes_ranks.find((m) => m.id === a.id)?.rank;
               } else if (areEqualAddresses(a.contract, GRADIENT_CONTRACT)) {
                 atdh = props.tdh?.gradients_ranks.find(
-                  (m) => m.id == a.id
+                  (m) => m.id === a.id
                 )?.rank;
               }
               if (areEqualAddresses(b.contract, MEMES_CONTRACT)) {
-                btdh = props.tdh?.memes_ranks.find((m) => m.id == b.id)?.rank;
+                btdh = props.tdh?.memes_ranks.find((m) => m.id === b.id)?.rank;
               } else if (areEqualAddresses(b.contract, GRADIENT_CONTRACT)) {
                 btdh = props.tdh?.gradients_ranks.find(
-                  (m) => m.id == b.id
+                  (m) => m.id === b.id
                 )?.rank;
               }
 
@@ -283,7 +283,8 @@ export default function UserPageCollection(props: Props) {
 
   function getBalance(nft: NFT) {
     const balance = props.owned.find(
-      (b) => b.token_id == nft.id && areEqualAddresses(b.contract, nft.contract)
+      (b) =>
+        b.token_id === nft.id && areEqualAddresses(b.contract, nft.contract)
     );
     if (balance) {
       return balance.balance;
@@ -300,17 +301,17 @@ export default function UserPageCollection(props: Props) {
     const isGradients = isGradientsContract(nft.contract);
 
     if (isMemes && props.tdh?.memes) {
-      nfttdh = props.tdh?.memes.find((m) => m.id == nft.id)?.tdh;
-      nftrank = props.tdh?.memes_ranks.find((g) => g.id == nft.id)?.rank;
+      nfttdh = props.tdh?.memes.find((m) => m.id === nft.id)?.tdh;
+      nftrank = props.tdh?.memes_ranks.find((g) => g.id === nft.id)?.rank;
     } else if (isGradients && props.tdh?.gradients) {
-      nfttdh = props.tdh?.gradients.find((m) => m.id == nft.id)?.tdh;
-      nftrank = props.tdh?.gradients_ranks.find((g) => g.id == nft.id)?.rank;
+      nfttdh = props.tdh?.gradients.find((m) => m.id === nft.id)?.tdh;
+      nftrank = props.tdh?.gradients_ranks.find((g) => g.id === nft.id)?.rank;
     }
 
     if (nftbalance > 0 && hideSeized) {
       return;
     }
-    if (nftbalance == 0 && (hideNonSeized || isGradients)) {
+    if (nftbalance === 0 && (hideNonSeized || isGradients)) {
       return;
     }
     if (nftbalance > 0 && isGradients && hideGradients) {
@@ -320,7 +321,7 @@ export default function UserPageCollection(props: Props) {
       return;
     }
 
-    const season = nftMetas.find((a) => a.id == nft.id)?.season;
+    const season = nftMetas.find((a) => a.id === nft.id)?.season;
     if (selectedSeason != 0 && selectedSeason != season) {
       return;
     }

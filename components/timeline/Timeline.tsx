@@ -25,9 +25,9 @@ export default function Timeline(props: Props) {
   };
 
   const getType = () => {
-    if (props.nft.metadata.animation_details?.format == "HTML") {
+    if (props.nft.metadata.animation_details?.format === "HTML") {
       return MediaType.HTML;
-    } else if (props.nft.metadata.animation_details?.format == "MP4") {
+    } else if (props.nft.metadata.animation_details?.format === "MP4") {
       return MediaType.VIDEO;
     } else {
       return MediaType.IMAGE;

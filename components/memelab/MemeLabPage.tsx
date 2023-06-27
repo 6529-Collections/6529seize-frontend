@@ -136,7 +136,7 @@ export default function LabPage(props: Props) {
       const routerFocus = router.query.focus;
       if (routerFocus) {
         const resolvedRouterFocus = Object.values(MEME_FOCUS).find(
-          (sd) => sd == routerFocus
+          (sd) => sd === routerFocus
         );
         if (resolvedRouterFocus) {
           initialFocus = resolvedRouterFocus;
@@ -173,7 +173,7 @@ export default function LabPage(props: Props) {
         `${process.env.API_ENDPOINT}/api/lab_extended_data?id=${nftId}`
       ).then((response: DBResponse) => {
         const nftMetas = response.data;
-        if (nftMetas.length == 1) {
+        if (nftMetas.length === 1) {
           setNftMeta(nftMetas[0]);
           fetchUrl(
             `${process.env.API_ENDPOINT}/api/nfts_memelab?id=${nftId}`
@@ -289,19 +289,19 @@ export default function LabPage(props: Props) {
   }
 
   function printContent() {
-    if (activeTab == MEME_FOCUS.ACTIVITY) {
+    if (activeTab === MEME_FOCUS.ACTIVITY) {
       return printActivity();
     }
 
-    if (activeTab == MEME_FOCUS.THE_ART) {
+    if (activeTab === MEME_FOCUS.THE_ART) {
       return printTheArt();
     }
 
-    if (activeTab == MEME_FOCUS.HODLERS) {
+    if (activeTab === MEME_FOCUS.HODLERS) {
       return printHodlers();
     }
 
-    if (activeTab == MEME_FOCUS.TIMELINE) {
+    if (activeTab === MEME_FOCUS.TIMELINE) {
       return printTimeline();
     }
 
@@ -325,14 +325,14 @@ export default function LabPage(props: Props) {
                     showUnseized={props.wallets.length > 0}
                   />
                 </Col>
-                {activeTab == MEME_FOCUS.LIVE && <>{printLive()}</>}
-                {activeTab == MEME_FOCUS.YOUR_CARDS && <>{printYourCards()}</>}
+                {activeTab === MEME_FOCUS.LIVE && <>{printLive()}</>}
+                {activeTab === MEME_FOCUS.YOUR_CARDS && <>{printYourCards()}</>}
               </>
             )}
         </Row>
         <Row>
-          {activeTab == MEME_FOCUS.LIVE && <>{printLiveSub()}</>}
-          {activeTab == MEME_FOCUS.YOUR_CARDS && <>{printYourCardsSub()}</>}
+          {activeTab === MEME_FOCUS.LIVE && <>{printLiveSub()}</>}
+          {activeTab === MEME_FOCUS.YOUR_CARDS && <>{printYourCardsSub()}</>}
         </Row>
       </Container>
     );
@@ -680,30 +680,30 @@ export default function LabPage(props: Props) {
     )[0];
 
     const airdropped = transactions.filter(
-      (t) => t.value == 0 && areEqualAddresses(t.from_address, NULL_ADDRESS)
+      (t) => t.value === 0 && areEqualAddresses(t.from_address, NULL_ADDRESS)
     );
 
     const transferredIn =
-      props.wallets.length == 0
+      props.wallets.length === 0
         ? []
         : transactions.filter(
             (t) =>
               !areEqualAddresses(t.from_address, NULL_ADDRESS) &&
               props.wallets.some((w) => areEqualAddresses(t.to_address, w)) &&
-              t.value == 0
+              t.value === 0
           );
 
     const transferredOut =
-      props.wallets.length == 0
+      props.wallets.length === 0
         ? []
         : transactions.filter(
             (t) =>
               props.wallets.some((w) => areEqualAddresses(t.from_address, w)) &&
-              t.value == 0
+              t.value === 0
           );
 
     const bought =
-      props.wallets.length == 0
+      props.wallets.length === 0
         ? []
         : transactions.filter(
             (t) =>
@@ -717,7 +717,7 @@ export default function LabPage(props: Props) {
     });
 
     const sold =
-      props.wallets.length == 0
+      props.wallets.length === 0
         ? []
         : transactions.filter(
             (t) =>
@@ -738,14 +738,14 @@ export default function LabPage(props: Props) {
         lg={{ span: 6 }}>
         <Container className="p-0">
           <Row>
-            {props.wallets.length == 0 && (
+            {props.wallets.length === 0 && (
               <Row className="pt-2">
                 <Col>
                   <h4>Connect your wallet to view your cards.</h4>
                 </Col>
               </Row>
             )}
-            {nftBalance == 0 &&
+            {nftBalance === 0 &&
               props.wallets.length > 0 &&
               nft &&
               userLoaded && (
@@ -846,7 +846,7 @@ export default function LabPage(props: Props) {
   }
 
   function carouselHandlerSlide(event: any) {
-    if (event == 0) {
+    if (event === 0) {
       setFullscreenElementId("the-art-fullscreen-animation");
     } else {
       setFullscreenElementId("the-art-fullscreen-img");
@@ -1352,7 +1352,7 @@ export default function LabPage(props: Props) {
                                 parseInt(nftId) - 1
                               }?focus=${activeTab}`}
                               className={`${styles.nextPreviousNft} ${
-                                parseInt(nftId) == 1
+                                parseInt(nftId) === 1
                                   ? styles.nftPreviousdisabled
                                   : ""
                               }`}>
@@ -1366,7 +1366,7 @@ export default function LabPage(props: Props) {
                                 parseInt(nftId) + 1
                               }?focus=${activeTab}`}
                               className={`${styles.nextPreviousNft} ${
-                                parseInt(nftId) == nftMeta.collection_size
+                                parseInt(nftId) === nftMeta.collection_size
                                   ? styles.nftNextdisabled
                                   : ""
                               }`}>
@@ -1389,7 +1389,7 @@ export default function LabPage(props: Props) {
                         <span
                           key={`${nft.id}-${nft.contract}-${tab.focus}-tab`}
                           className={`${styles.tabFocus} ${
-                            activeTab == tab.focus ? styles.tabFocusActive : ""
+                            activeTab === tab.focus ? styles.tabFocusActive : ""
                           }`}
                           onClick={() => {
                             setActiveTab(tab.focus);

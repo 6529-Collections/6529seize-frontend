@@ -14,8 +14,9 @@
     "@fortawesome/free-solid-svg-icons": "^6.4.0",
     "@fortawesome/react-fontawesome": "^0.2.0",
     "@tippyjs/react": "^4.2.6",
-    "@web3modal/ethereum": "^2.3.0",
-    "@web3modal/react": "^2.3.0",
+    "@wagmi/connectors": "^2.3.0",
+    "@web3modal/ethereum": "^2.4.7",
+    "@web3modal/react": "^2.4.7",
     "bootstrap": "^5.2.3",
     "csv-parser": "^3.0.0",
     "fs": "^0.0.1-security",
@@ -23,21 +24,23 @@
     "next": "^13.1.6",
     "react": "18.2.0",
     "react-bootstrap": "^2.7.2",
+    "react-helmet": "^6.1.0",
     "react-scroll": "^1.8.9",
     "react-share": "^4.4.1",
     "react-use-downloader": "^1.2.2",
     "sass": "^1.58.1",
-    "wagmi": "^0.12.6"
+    "wagmi": "^1.2.1"
   },
   "devDependencies": {
     "@next/bundle-analyzer": "^13.1.6",
     "@types/js-cookie": "^3.0.2",
     "@types/node": "18.13.0",
     "@types/react": "18.0.28",
+    "@types/react-helmet": "^6.1.6",
     "@types/react-scroll": "^1.8.6",
     "eslint": "8.34.0",
     "eslint-config-next": "13.1.6",
     "next-unused": "^0.0.6",
-    "typescript": "4.9.5"
+    "typescript": "5.0.4"
   }
 }
