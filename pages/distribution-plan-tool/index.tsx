@@ -23,8 +23,12 @@ export default function DistributionPlanTool() {
         <Breadcrumb breadcrumbs={breadcrumbs} />
       </div>
       <DistributionPlanToolContextWrapper>
+        <div className="tw-flex tw-h-full tw-min-h-screen">
+        <div className="tw-flex-1 tw-pl-4 tw-pr-14 tw-pt-8 tw-pb-12">
         <DistributionPlanToolPage />
-        <DistributionPlanToolSidebar />
+        </div>
+         <DistributionPlanToolSidebar />
+        </div>
       </DistributionPlanToolContextWrapper>
     </>
   );
