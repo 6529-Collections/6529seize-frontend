@@ -23,8 +23,14 @@ interface CreateSnapshotFormValues {
 }
 
 export default function CreateSnapshots() {
-  const { setStep, distributionPlan, tokenPools, setToasts, setState, addOperations } =
-    useContext(DistributionPlanToolContext);
+  const {
+    setStep,
+    distributionPlan,
+    tokenPools,
+    setToasts,
+    setState,
+    addOperations,
+  } = useContext(DistributionPlanToolContext);
   useEffect(() => {
     if (!distributionPlan) setStep(DistributionPlanToolStep.CREATE_PLAN);
   }, [distributionPlan, setStep]);
@@ -327,10 +333,12 @@ export default function CreateSnapshots() {
         </form>
         <div className="tw-mt-8 tw-w-full">
           <button
-            onClick={() => setStep(DistributionPlanToolStep.CREATE_PHASES)}
+            onClick={() =>
+              setStep(DistributionPlanToolStep.CREATE_CUSTOM_SNAPSHOT)
+            }
             className="tw-bg-primary-500 tw-px-4 tw-py-3 tw-font-medium tw-text-base tw-text-white tw-w-full tw-border tw-border-primary-500 tw-rounded-lg hover:tw-bg-primary-600 hover:tw-border-primary-600 tw-transition tw-duration-300 tw-ease-out"
           >
-            Create Phases
+            Create Custom Snapshots
           </button>
         </div>
       </div>

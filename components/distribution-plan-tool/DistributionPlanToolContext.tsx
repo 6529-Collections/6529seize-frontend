@@ -1,12 +1,12 @@
 import { Slide, ToastContainer, TypeOptions, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { createContext, useEffect, useState } from "react";
+import { createContext, useState } from "react";
 import { Poppins } from "next/font/google";
 import {
+  AllowlistCustomTokenPool,
   AllowlistDescription,
   AllowlistOperation,
   AllowlistPhaseWithComponentAndItems,
-  AllowlistRunStatus,
   AllowlistTokenPool,
   AllowlistToolResponse,
 } from "../allowlist-tool/allowlist-tool.types";
@@ -23,6 +23,7 @@ const poppins = Poppins({
 export enum DistributionPlanToolStep {
   CREATE_PLAN = "CREATE_PLAN",
   CREATE_SNAPSHOTS = "CREATE_SNAPSHOTS",
+  CREATE_CUSTOM_SNAPSHOT = "CREATE_CUSTOM_SNAPSHOT",
   CREATE_PHASES = "CREATE_PHASES",
   BUILD_PHASES = "BUILD_PHASES",
 }
@@ -38,6 +39,8 @@ type DistributionPlanToolContextType = {
   addOperations: (operations: AllowlistOperation[]) => void;
   tokenPools: AllowlistTokenPool[];
   setTokenPools: (tokenPools: AllowlistTokenPool[]) => void;
+  customTokenPools: AllowlistCustomTokenPool[];
+  setCustomTokenPools: (customTokenPools: AllowlistCustomTokenPool[]) => void;
   phases: AllowlistPhaseWithComponentAndItems[];
   setPhases: (phases: AllowlistPhaseWithComponentAndItems[]) => void;
   setToasts: ({
@@ -89,6 +92,8 @@ export const DistributionPlanToolContext =
     setState: () => {},
     tokenPools: [],
     setTokenPools: () => {},
+    customTokenPools: [],
+    setCustomTokenPools: () => {},
     phases: [],
     setPhases: () => {},
     setToasts: () => {},
@@ -111,6 +116,9 @@ export default function DistributionPlanToolContextWrapper({
     useState<AllowlistDescription | null>(null);
 
   const [tokenPools, setTokenPools] = useState<AllowlistTokenPool[]>([]);
+  const [customTokenPools, setCustomTokenPools] = useState<
+    AllowlistCustomTokenPool[]
+  >([]);
   const [phases, setPhases] = useState<AllowlistPhaseWithComponentAndItems[]>(
     []
   );
@@ -133,6 +141,30 @@ export default function DistributionPlanToolContextWrapper({
       }
     } catch (error: any) {
       setToasts({ messages: [error.message], type: "error" });
+    }
+  };
+
+  const fetchCustomTokenPools = async (distributionPlanId: string) => {
+    try {
+      const response = await fetch(
+        `${process.env.ALLOWLIST_API_ENDPOINT}/allowlists/${distributionPlanId}/custom-token-pools`
+      );
+      const data: AllowlistToolResponse<AllowlistCustomTokenPool[]> =
+        await response.json();
+      if ("error" in data) {
+        setToasts({
+          messages:
+            typeof data.message === "string" ? [data.message] : data.message,
+          type: "error",
+        });
+      } else {
+        setCustomTokenPools(data);
+      }
+    } catch (error: any) {
+      setToasts({
+        messages: ["Something went wrong. Please try again."],
+        type: "error",
+      });
     }
   };
 
@@ -181,6 +213,7 @@ export default function DistributionPlanToolContextWrapper({
   const initState = async (distributionPlanId: string) => {
     setFetching(true);
     await fetchTokenPools(distributionPlanId);
+    await fetchCustomTokenPools(distributionPlanId);
     await fetchPhases(distributionPlanId);
     await fetchOperations(distributionPlanId);
     setFetching(false);
@@ -191,6 +224,7 @@ export default function DistributionPlanToolContextWrapper({
       setStep(DistributionPlanToolStep.CREATE_PLAN);
       setDistributionPlan(null);
       setTokenPools([]);
+      setCustomTokenPools([]);
       setOperations([]);
       setPhases([]);
       return;
@@ -216,6 +250,8 @@ export default function DistributionPlanToolContextWrapper({
           distributionPlan,
           tokenPools,
           setTokenPools,
+          customTokenPools,
+          setCustomTokenPools,
           phases,
           setPhases,
           setToasts,
