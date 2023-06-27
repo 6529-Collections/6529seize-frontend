@@ -29,7 +29,7 @@ export default function MemeLabDistributionPage(props: any) {
         <meta name="description" content={pagenameFull} />
         <meta
           property="og:url"
-          content={`${process.env.BASE_ENDPOINT}/meme-lab/${props.id}`}
+          content={`${process.env.BASE_ENDPOINT}/meme-lab/${props.id}/distribution`}
         />
         <meta property="og:title" content={props.name} />
         <meta property="og:image" content={props.image} />
