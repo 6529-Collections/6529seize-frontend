@@ -2,7 +2,7 @@ import Head from "next/head";
 import styles from "../../../styles/Home.module.scss";
 
 import dynamic from "next/dynamic";
-import { MEMELAB_CONTRACT, MEMES_CONTRACT } from "../../../constants";
+import { MEMELAB_CONTRACT } from "../../../constants";
 import { fetchUrl } from "../../../services/6529api";
 import HeaderPlaceholder from "../../../components/header/HeaderPlaceholder";
 
@@ -18,7 +18,7 @@ const DistributionComponent = dynamic(
   }
 );
 
-export default function MemeDistributionPage(props: any) {
+export default function MemeLabDistributionPage(props: any) {
   const pagenameFull = `${props.name} | 6529 SEIZE`;
 
   return (
@@ -29,7 +29,7 @@ export default function MemeDistributionPage(props: any) {
         <meta name="description" content={pagenameFull} />
         <meta
           property="og:url"
-          content={`${process.env.BASE_ENDPOINT}/meme-lab/${props.id}`}
+          content={`${process.env.BASE_ENDPOINT}/meme-lab/${props.id}/distribution`}
         />
         <meta property="og:title" content={props.name} />
         <meta property="og:image" content={props.image} />
@@ -56,10 +56,10 @@ export default function MemeDistributionPage(props: any) {
 export async function getServerSideProps(req: any, res: any, resolvedUrl: any) {
   const id = req.query.id;
   const response = await fetchUrl(
-    `${process.env.API_ENDPOINT}/api/nfts?contract=${MEMELAB_CONTRACT}&id=${id}`
+    `${process.env.API_ENDPOINT}/api/nfts_memelab?id=${id}`
   );
-  let name = `Meme Card #${id} Distribution`;
-  let image = `https://d3lqz0a4bldqgf.cloudfront.net/seize_images/Seize_Logo_Glasses_2.png`;
+  let name = `Meme Lab Card #${id} Distribution`;
+  let image = `${process.env.BASE_ENDPOINT}/Seize_Logo_Glasses_2.png`;
   if (response && response.data && response.data.length > 0) {
     name = `${response.data[0].name} | ${name}`;
     image = response.data[0].thumbnail
