@@ -4,6 +4,7 @@ import Breadcrumb, { Crumb } from "../../components/breadcrumb/Breadcrumb";
 import { useState } from "react";
 import DistributionPlanToolContextWrapper from "../../components/distribution-plan-tool/DistributionPlanToolContext";
 import DistributionPlanToolPage from "../../components/distribution-plan-tool/DistributionPlanToolPage";
+import DistributionPlanToolSidebar from "../../components/distribution-plan-tool/distribution-plan-tool-sidebar/DistributionPlanToolSidebar";
 
 const Header = dynamic(() => import("../../components/header/Header"), {
   ssr: false,
@@ -23,6 +24,7 @@ export default function DistributionPlanTool() {
       </div>
       <DistributionPlanToolContextWrapper>
         <DistributionPlanToolPage />
+        <DistributionPlanToolSidebar />
       </DistributionPlanToolContextWrapper>
     </>
   );
