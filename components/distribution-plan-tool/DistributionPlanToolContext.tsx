@@ -268,8 +268,7 @@ export default function DistributionPlanToolContextWrapper({
     <div className={`tw-bg-neutral-900 ${poppins.className}`}>
       <div
         id="allowlist-tool"
-        className="tw-max-w-[1250px] min-[1400px]:tw-max-w-[1350px] min-[1500px]:tw-max-w-[1450px] min-[1600px]:tw-max-w-[96.875rem] 
-        min-[1800px]:tw-max-w-[109.375rem] min-[2000px]:tw-max-w-[121.875rem] tw-overflow-y-auto tw-mx-auto tw-min-h-screen tw-relative"
+        className="tw-overflow-y-auto tw-min-h-screen tw-relative"
       >
         <DistributionPlanToolContext.Provider
           value={{

@@ -8,15 +8,15 @@ export default function DistributionPlanStepDone({
   return (
     <li className="tw-relative tw-pb-10">
       <div
-        className="tw-absolute tw-left-4 tw-top-4 -ml-tw-px tw-mt-0.5 tw-h-full tw-w-0.5 tw-bg-neutral-100"
+        className="tw-absolute tw-left-[13.25px] tw-top-4 -ml-tw-px tw-mt-0.5 tw-h-full tw-w-0.5 tw-bg-neutral-100"
         aria-hidden="true"
       ></div>
 
       <div className="tw-group tw-relative tw-flex tw-items-start">
-        <span className="tw-flex tw-h-9 tw-items-center">
-          <span className="tw-relative tw-z-10 tw-flex tw-h-8 tw-w-8 tw-items-center tw-justify-center tw-rounded-full tw-bg-neutral-100">
+        <span className="tw-flex tw-h-8 tw-items-center">
+          <span className="tw-relative tw-z-10 tw-flex tw-h-7 tw-w-7 tw-items-center tw-justify-center tw-rounded-full tw-bg-neutral-100">
             <svg
-              className="tw-h-3.5 tw-w-auto tw-text-primary-500"
+              className="tw-h-3 tw-w-auto tw-text-primary-500"
               viewBox="0 0 21 19"
               fill="none"
               xmlns="http://www.w3.org/2000/svg"

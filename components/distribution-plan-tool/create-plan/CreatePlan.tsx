@@ -90,16 +90,16 @@ export default function CreatePlan() {
   }, []);
 
   return (
-    <div className="tw-max-w-3xl tw-mx-auto">
+    <div>
       <div className="tw-flex tw-flex-col">
-        <h1 className="tw-uppercase tw-text-white">Distribution Plan Tool</h1>
+        <h1 className="tw-uppercase">Distribution Plan Tool</h1>
         <p className="tw-mt-2 tw-m-0 tw-block tw-font-light tw-text-lg tw-text-neutral-400">
           The Seize distribution plan tool allows you to build a distribution
           plan for your mint that includes airdrops, allowlists and public
           minting in one more phases.
         </p>
       </div>
-      <div className="tw-mt-12">
+      <div className="tw-mt-8 tw-pt-8 tw-border-t tw-border-solid tw-border-l-0 tw-border-r-0 tw-border-b-0 tw-border-t-neutral-700 tw-mx-auto">
         <p className="tw-m-0 tw-block tw-text-white tw-text-lg tw-font-medium">Let’s Get Started</p>
         <form className="tw-mt-6" onSubmit={handleSubmit}>
           <div>

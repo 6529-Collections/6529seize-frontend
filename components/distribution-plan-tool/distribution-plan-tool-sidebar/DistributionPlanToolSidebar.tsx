@@ -53,7 +53,7 @@ export default function DistributionPlanToolSidebar() {
   return (
     <nav
       aria-label="Progress"
-      className="tw-w-80 tw-p-8 tw-min-h-screen tw-border-l tw-border-solid tw-border-r-0 tw-border-t-0 tw-border-b-0 tw-border-neutral-600"
+      className="tw-w-80 tw-px-8 tw-pt-12 tw-min-h-screen tw-border-l tw-border-solid tw-border-r-0 tw-border-t-0 tw-border-b-0 tw-border-neutral-600"
     >
       <ol role="list" className="tw-list-none tw-pl-0 tw-overflow-hidden">
         {Object.values(DISTRIBUTION_PLAN_STEPS).map((stepItem) => (

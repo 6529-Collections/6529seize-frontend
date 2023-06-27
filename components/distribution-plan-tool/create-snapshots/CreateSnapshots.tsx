@@ -212,14 +212,13 @@ export default function CreateSnapshots() {
     <div>
       <div className="tw-max-w-2xl tw-flex tw-flex-col">
         <h1 className="tw-uppercase tw-text-white">Collection snapshots</h1>
-        <p className="tw-mt-2 tw-m-0 tw-block tw-font-light tw-text-base tw-text-neutral-400">
+        <p className="tw-mb-0 tw-mt-1 tw-block tw-font-light tw-text-base tw-text-neutral-400">
           Lorem ipsum dolor sit amet consectetur. Nisi scelerisque dolor quis
-          sed tellus ipsum senectus in gravida. Donec in ipsum odio enim feugiat
-          velit quis.
+          sed tellus.
         </p>
       </div>
 
-      <div className="tw-mt-12">
+      <div className="tw-mt-8 tw-pt-8 tw-border-t tw-border-solid tw-border-l-0 tw-border-r-0 tw-border-b-0 tw-border-t-neutral-700 tw-mx-auto">
         <form
           className="tw-flex tw-items-end tw-gap-x-4"
           onSubmit={handleSubmit}

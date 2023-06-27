@@ -18,13 +18,11 @@ export default function DistributionPlanTool() {
   ]);
   return (
     <>
-      <div className="tw-sticky tw-top-0 tw-z-50">
         <Header />
         <Breadcrumb breadcrumbs={breadcrumbs} />
-      </div>
       <DistributionPlanToolContextWrapper>
         <div className="tw-flex tw-h-full tw-min-h-screen">
-        <div className="tw-flex-1 tw-pl-4 tw-pr-14 tw-pt-8 tw-pb-12">
+        <div className="tw-flex-1 tw-pt-8 tw-pb-12 tw-max-w-[65.625rem] min-[1101px]:tw-max-w-[960px] min-[1200px]:tw-max-w-[1150px] tw-min-[1400px]:-max-w-[1250px] tw-mx-auto tw-px-14">
         <DistributionPlanToolPage />
         </div>
          <DistributionPlanToolSidebar />

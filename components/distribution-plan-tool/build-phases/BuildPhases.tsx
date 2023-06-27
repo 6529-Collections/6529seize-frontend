@@ -35,13 +35,7 @@ export default function BuildPhases() {
 
   return (
     <>
-      <div className="tw-w-full tw-inline-flex tw-justify-between tw-mb-2">
-        {phases.map((phase) => (
-          <div key={phase.id} onClick={() => setSelectedPhase(phase)}>
-            {phase.name}
-          </div>
-        ))}
-      </div>
+
       {selectedPhase && (
         <BuildPhase
           phase={selectedPhase}
