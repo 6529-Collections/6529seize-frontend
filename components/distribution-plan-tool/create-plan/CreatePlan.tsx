@@ -71,7 +71,7 @@ export default function CreatePlan() {
 
   useEffect(() => {
     const fetchAllowlist = async () => {
-      const url = `${process.env.ALLOWLIST_API_ENDPOINT}/allowlists/9bb05a18-af0b-48d8-9005-e69149f141b6`;
+      const url = `${process.env.ALLOWLIST_API_ENDPOINT}/allowlists/9e620772-96d2-4d3b-9b03-ef71c5bfc5e1`;
       const response = await fetch(url, {
         headers: {
           "Content-Type": "application/json",
@@ -83,58 +83,69 @@ export default function CreatePlan() {
         return;
       }
 
-      setState(data);
-      setStep(DistributionPlanToolStep.CREATE_SNAPSHOTS);
+     setState(data);
+     setStep(DistributionPlanToolStep.CREATE_SNAPSHOTS);
     };
     fetchAllowlist();
   }, []);
 
   return (
-    <div className="tw-mt-5">
-      <form onSubmit={handleSubmit} className="px-4 sm:px-6">
-        <div>
-          <label className="tw-block tw-text-sm tw-font-normal tw-leading-5 tw-text-neutral-100">
-            Name
-          </label>
-          <div className="tw-mt-2">
-            <input
-              type="text"
-              name="name"
-              value={formValues.name}
-              onChange={handleChange}
-              required
-              autoComplete="off"
-              placeholder="Name of Distribution Plan"
-              className="tw-block tw-w-full tw-rounded-lg tw-border-0 tw-py-3 tw-px-3 tw-bg-neutral-900 tw-text-white tw-font-light tw-caret-primary-400-focus tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-neutral-700 placeholder:tw-text-neutral-400 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 tw-text-base sm:tw-leading-6 tw-transition tw-duration-300 tw-ease-out"
-            />
+    <div className="tw-max-w-3xl tw-mx-auto">
+      <div className="tw-flex tw-flex-col">
+        <h1 className="tw-uppercase tw-text-white">Distribution Plan Tool</h1>
+        <p className="tw-mt-2 tw-m-0 tw-block tw-font-light tw-text-lg tw-text-neutral-400">
+          The Seize distribution plan tool allows you to build a distribution
+          plan for your mint that includes airdrops, allowlists and public
+          minting in one more phases.
+        </p>
+      </div>
+      <div className="tw-mt-12">
+        <p className="tw-m-0 tw-block tw-text-white tw-text-lg tw-font-medium">Let’s Get Started</p>
+        <form className="tw-mt-6" onSubmit={handleSubmit}>
+          <div>
+            <label className="tw-block tw-text-sm tw-font-normal tw-leading-5 tw-text-neutral-100">
+              Name
+            </label>
+            <div className="tw-mt-2">
+              <input
+                type="text"
+                name="name"
+                value={formValues.name}
+                onChange={handleChange}
+                required
+                autoComplete="off"
+                placeholder="Make a name for your distribution"
+                className="tw-block tw-w-full tw-rounded-lg tw-border-0 tw-py-3.5 tw-px-3 tw-bg-neutral-900 tw-text-white tw-font-light tw-caret-primary-400-focus tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-neutral-700 placeholder:tw-text-neutral-500 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 tw-text-base sm:tw-leading-6 tw-transition tw-duration-300 tw-ease-out"
+              />
+            </div>
           </div>
-        </div>
-        <div className="tw-mt-6">
-          <label className="tw-block tw-text-sm tw-font-normal tw-leading-5 tw-text-neutral-100">
-            Description
-          </label>
-          <div className="tw-mt-2">
-            <input
-              type="text"
-              name="description"
-              value={formValues.description}
-              onChange={handleChange}
-              required
-              autoComplete="off"
-              placeholder="Short description about Distribution Plan"
-              className="tw-block tw-w-full tw-rounded-lg tw-border-0 tw-py-3 tw-px-3 tw-bg-neutral-900 tw-text-white tw-font-light tw-caret-primary-400-focus tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-neutral-700 placeholder:tw-text-neutral-500 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 tw-text-base sm:tw-leading-6 tw-transition tw-duration-300 tw-ease-out"
-            />
+          <div className="tw-mt-6">
+            <label className="tw-block tw-text-sm tw-font-normal tw-leading-5 tw-text-neutral-100">
+              Description
+            </label>
+            <div className="tw-mt-2">
+              <input
+                type="text"
+                name="description"
+                value={formValues.description}
+                onChange={handleChange}
+                required
+                autoComplete="off"
+                placeholder="Description of your drop"
+                className="tw-block tw-w-full tw-rounded-lg tw-border-0 tw-py-3.5 tw-px-3 tw-bg-neutral-900 tw-text-white tw-font-light tw-caret-primary-400-focus tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-neutral-700 placeholder:tw-text-neutral-500 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 tw-text-base sm:tw-leading-6 tw-transition tw-duration-300 tw-ease-out"
+              />
+            </div>
           </div>
-        </div>
-        <div className="tw-mt-8 tw-w-full">
-          <button
-            type="submit"
-            className="tw-bg-primary-500 tw-px-4 tw-py-3 tw-font-medium tw-text-base tw-text-white tw-w-full tw-border tw-border-primary-500 tw-rounded-lg hover:tw-bg-primary-600 hover:tw-border-primary-600 tw-transition tw-duration-300 tw-ease-out"
-          >
-            Create Distribution Plan
-          </button>
-        </div>
-      </form>
+          <div className="tw-mt-8 tw-flex tw-justify-end">
+            <button
+              type="submit"
+              className="tw-bg-primary-500 tw-px-4 tw-py-3 tw-font-medium tw-text-sm tw-text-white tw-border tw-border-primary-500 tw-rounded-lg hover:tw-bg-primary-600 hover:tw-border-primary-600 tw-transition tw-duration-300 tw-ease-out"
+            >
+              Create Distribution Plan
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
   );
 }
