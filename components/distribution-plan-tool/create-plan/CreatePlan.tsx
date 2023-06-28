@@ -83,24 +83,26 @@ export default function CreatePlan() {
         return;
       }
 
-     setState(data);
-     setStep(DistributionPlanToolStep.CREATE_SNAPSHOTS);
+    setState(data);
+     setStep(DistributionPlanToolStep.CREATE_SNAPSHOTS); 
     };
     fetchAllowlist();
   }, []);
 
   return (
     <div>
-      <div className="tw-flex tw-flex-col">
-        <h1 className="tw-uppercase">Distribution Plan Tool</h1>
-        <p className="tw-mt-2 tw-m-0 tw-block tw-font-light tw-text-lg tw-text-neutral-400">
+      <div className="tw-max-w-2xl tw-mx-auto tw-flex tw-flex-col">
+        <h1 className="tw-uppercase tw-text-white">Distribution Plan Tool</h1>
+        <p className="tw-mt-1 tw-mb-0 tw-block tw-font-light tw-text-base tw-text-neutral-400">
           The Seize distribution plan tool allows you to build a distribution
           plan for your mint that includes airdrops, allowlists and public
           minting in one more phases.
         </p>
       </div>
-      <div className="tw-mt-8 tw-pt-8 tw-border-t tw-border-solid tw-border-l-0 tw-border-r-0 tw-border-b-0 tw-border-t-neutral-700 tw-mx-auto">
-        <p className="tw-m-0 tw-block tw-text-white tw-text-lg tw-font-medium">Let’s Get Started</p>
+      <div className="tw-max-w-2xl tw-mx-auto tw-mt-8 tw-pt-8 tw-border-t tw-border-solid tw-border-l-0 tw-border-r-0 tw-border-b-0 tw-border-t-neutral-700">
+        <p className="tw-m-0 tw-block tw-text-primary-400 tw-text-lg tw-font-medium">
+          Let’s Get Started
+        </p>
         <form className="tw-mt-6" onSubmit={handleSubmit}>
           <div>
             <label className="tw-block tw-text-sm tw-font-normal tw-leading-5 tw-text-neutral-100">
@@ -115,7 +117,7 @@ export default function CreatePlan() {
                 required
                 autoComplete="off"
                 placeholder="Make a name for your distribution"
-                className="tw-block tw-w-full tw-rounded-lg tw-border-0 tw-py-3.5 tw-px-3 tw-bg-neutral-900 tw-text-white tw-font-light tw-caret-primary-400-focus tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-neutral-700 placeholder:tw-text-neutral-500 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 tw-text-base sm:tw-leading-6 tw-transition tw-duration-300 tw-ease-out"
+                className="tw-block tw-w-full tw-rounded-lg tw-border-0 tw-py-3 tw-px-3 tw-bg-neutral-900 tw-text-white tw-font-light tw-caret-primary-400-focus tw-shadow-sm tw-ring-2 tw-ring-inset tw-ring-neutral-700 placeholder:tw-text-neutral-400 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 tw-text-base sm:tw-leading-6 tw-transition tw-duration-300 tw-ease-out"
               />
             </div>
           </div>
@@ -132,7 +134,7 @@ export default function CreatePlan() {
                 required
                 autoComplete="off"
                 placeholder="Description of your drop"
-                className="tw-block tw-w-full tw-rounded-lg tw-border-0 tw-py-3.5 tw-px-3 tw-bg-neutral-900 tw-text-white tw-font-light tw-caret-primary-400-focus tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-neutral-700 placeholder:tw-text-neutral-500 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 tw-text-base sm:tw-leading-6 tw-transition tw-duration-300 tw-ease-out"
+                className="tw-block tw-w-full tw-rounded-lg tw-border-0 tw-py-3 tw-px-3 tw-bg-neutral-900 tw-text-white tw-font-light tw-caret-primary-400-focus tw-shadow-sm tw-ring-2 tw-ring-inset tw-ring-neutral-700 placeholder:tw-text-neutral-400 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 tw-text-base sm:tw-leading-6 tw-transition tw-duration-300 tw-ease-out"
               />
             </div>
           </div>

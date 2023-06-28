@@ -110,56 +110,57 @@ export default function CreatePhases() {
         phases.map((phase: CreatePhasesPhase) => (
           <div key={phase.id}>{phase.name}</div>
         ))}
-      <div className="tw-mt-5">
-        <form onSubmit={handleSubmit} className="tw-px-4 tw-sm:px-6">
-          <div>
-            <label className="tw-block tw-text-sm tw-font-normal tw-leading-5 tw-text-neutral-100">
-              Name
-            </label>
-            <div className="tw-mt-2">
-              <input
-                type="text"
-                name="name"
-                value={formValues.name}
-                onChange={handleChange}
-                required
-                autoComplete="off"
-                placeholder="Name of Distribution Plan"
-                className="tw-block tw-w-full tw-rounded-lg tw-border-0 tw-py-3 tw-px-3 tw-bg-neutral-900 tw-text-white tw-font-light tw-caret-primary-400-focus tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-neutral-700 placeholder:tw-text-neutral-400 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 tw-text-base sm:tw-leading-6 tw-transition tw-duration-300 tw-ease-out"
-              />
+      <div>
+        <form onSubmit={handleSubmit}>
+          <div className="tw-flex tw-gap-x-4 tw-items-end">
+            <div className="tw-flex-1">
+              <label className="tw-block tw-text-sm tw-font-normal tw-leading-5 tw-text-neutral-100">
+                Name
+              </label>
+              <div className="tw-mt-2">
+                <input
+                  type="text"
+                  name="name"
+                  value={formValues.name}
+                  onChange={handleChange}
+                  required
+                  autoComplete="off"
+                  placeholder="Name of Distribution Plan"
+                  className="tw-block tw-w-full tw-rounded-lg tw-border-0 tw-py-3 tw-px-3 tw-bg-neutral-900 tw-text-white tw-font-light tw-caret-primary-400-focus tw-shadow-sm tw-ring-2 tw-ring-inset tw-ring-neutral-700 placeholder:tw-text-neutral-400 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 tw-text-base sm:tw-leading-6 tw-transition tw-duration-300 tw-ease-out"
+                />
+              </div>
             </div>
-          </div>
-          <div className="tw-mt-6">
-            <label className="tw-block tw-text-sm tw-font-normal tw-leading-5 tw-text-neutral-100">
-              Description
-            </label>
-            <div className="tw-mt-2">
-              <input
-                type="text"
-                name="description"
-                value={formValues.description}
-                onChange={handleChange}
-                required
-                autoComplete="off"
-                placeholder="Short description about Distribution Plan"
-                className="tw-block tw-w-full tw-rounded-lg tw-border-0 tw-py-3 tw-px-3 tw-bg-neutral-900 tw-text-white tw-font-light tw-caret-primary-400-focus tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-neutral-700 placeholder:tw-text-neutral-500 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 tw-text-base sm:tw-leading-6 tw-transition tw-duration-300 tw-ease-out"
-              />
+            <div className="tw-flex-1">
+              <label className="tw-block tw-text-sm tw-font-normal tw-leading-5 tw-text-neutral-100">
+                Description
+              </label>
+              <div className="tw-mt-2">
+                <input
+                  type="text"
+                  name="description"
+                  value={formValues.description}
+                  onChange={handleChange}
+                  required
+                  autoComplete="off"
+                  placeholder="Short description about Distribution Plan"
+                  className="tw-block tw-w-full tw-rounded-lg tw-border-0 tw-py-3 tw-px-3 tw-bg-neutral-900 tw-text-white tw-font-light tw-caret-primary-400-focus tw-shadow-sm tw-ring-2 tw-ring-inset tw-ring-neutral-700 placeholder:tw-text-neutral-400 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 tw-text-base sm:tw-leading-6 tw-transition tw-duration-300 tw-ease-out"
+                />
+              </div>
             </div>
-          </div>
-
-          <div className="tw-mt-8 tw-w-full">
-            <button
-              type="submit"
-              className="tw-bg-primary-500 tw-px-4 tw-py-3 tw-font-medium tw-text-base tw-text-white tw-w-full tw-border tw-border-primary-500 tw-rounded-lg hover:tw-bg-primary-600 hover:tw-border-primary-600 tw-transition tw-duration-300 tw-ease-out"
-            >
-              Add Phase
-            </button>
+            <div>
+              <button
+                type="submit"
+                className="tw-inline-flex tw-items-center tw-justify-center tw-cursor-pointer tw-bg-transparent hover:tw-bg-neutral-800/80 tw-px-4 tw-py-3 tw-text-sm tw-font-medium tw-text-white tw-w-full tw-border-2 tw-border-solid tw-border-neutral-700 tw-rounded-lg tw-transition tw-duration-300 tw-ease-out"
+              >
+                Add Phase
+              </button>
+            </div>
           </div>
         </form>
-        <div className="tw-mt-8 tw-w-full">
+        <div className="tw-mt-8 tw-flex tw-justify-end">
           <button
             onClick={() => setStep(DistributionPlanToolStep.BUILD_PHASES)}
-            className="tw-bg-primary-500 tw-px-4 tw-py-3 tw-font-medium tw-text-base tw-text-white tw-w-full tw-border tw-border-primary-500 tw-rounded-lg hover:tw-bg-primary-600 hover:tw-border-primary-600 tw-transition tw-duration-300 tw-ease-out"
+            className="tw-bg-primary-500 tw-px-4 tw-py-3 tw-font-medium tw-text-sm tw-text-white tw-border tw-border-primary-500 tw-rounded-lg hover:tw-bg-primary-600 hover:tw-border-primary-600 tw-transition tw-duration-300 tw-ease-out"
           >
             Build Phases
           </button>

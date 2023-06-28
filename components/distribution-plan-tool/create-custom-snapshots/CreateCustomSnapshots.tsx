@@ -174,12 +174,15 @@ export default function CreateCustomSnapshots() {
     <div>
       {customSnapshots.length > 0 &&
         customSnapshots.map((customSnapshot) => (
-          <div key={customSnapshot.id}>{customSnapshot.name}-{customSnapshot.walletsCount}-{customSnapshot.tokensCount}</div>
+          <div key={customSnapshot.id}>
+            {customSnapshot.name}-{customSnapshot.walletsCount}-
+            {customSnapshot.tokensCount}
+          </div>
         ))}
-      <div className="tw-mt-5">
+      <div>
         <form onSubmit={handleSubmit}>
-          <div className="tw-px-6 tw-flex tw-gap-x-4 tw-pt-5 tw-items-end">
-            <div className="tw-flex-1 tw-max-w-[15.25rem]">
+          <div className="tw-flex tw-gap-x-4 tw-items-end">
+            <div className="tw-flex-1">
               <label className="tw-block tw-text-sm tw-font-normal tw-leading-5 tw-text-neutral-100">
                 Pool name
               </label>
@@ -191,11 +194,11 @@ export default function CreateCustomSnapshots() {
                   autoComplete="off"
                   value={formValues.name}
                   onChange={handleChange}
-                  className="tw-block tw-w-full tw-rounded-lg tw-border-0 tw-py-3 tw-px-3 tw-bg-neutral-700/40 tw-text-white tw-font-light tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-neutral-700/40 placeholder:tw-text-neutral-500 focus:tw-outline-none focus:tw-bg-transparent focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 tw-text-base sm:tw-leading-6 tw-transition tw-duration-300 tw-ease-out"
+                  className="tw-block tw-w-full tw-rounded-lg tw-border-0 tw-py-3 tw-px-3 tw-bg-neutral-900 tw-text-white tw-font-light tw-caret-primary-400-focus tw-shadow-sm tw-ring-2 tw-ring-inset tw-ring-neutral-700 placeholder:tw-text-neutral-400 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 tw-text-base sm:tw-leading-6 tw-transition tw-duration-300 tw-ease-out"
                 />
               </div>
             </div>
-            <div className="tw-flex-1 tw-max-w-[15.25rem]">
+            <div className="tw-flex-1">
               <label className="tw-block tw-text-sm tw-font-normal tw-leading-5 tw-text-neutral-100">
                 Description
               </label>
@@ -207,14 +210,14 @@ export default function CreateCustomSnapshots() {
                   autoComplete="off"
                   value={formValues.description}
                   onChange={handleChange}
-                  className="tw-block tw-w-full tw-rounded-lg tw-border-0 tw-py-3 tw-px-3 tw-bg-neutral-700/40 tw-text-white tw-font-light tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-neutral-700/40 placeholder:tw-text-neutral-500 focus:tw-outline-none focus:tw-bg-transparent focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 tw-text-base sm:tw-leading-6 tw-transition tw-duration-300 tw-ease-out"
+                  className="tw-block tw-w-full tw-rounded-lg tw-border-0 tw-py-3 tw-px-3 tw-bg-neutral-900 tw-text-white tw-font-light tw-caret-primary-400-focus tw-shadow-sm tw-ring-2 tw-ring-inset tw-ring-neutral-700 placeholder:tw-text-neutral-400 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 tw-text-base sm:tw-leading-6 tw-transition tw-duration-300 tw-ease-out"
                 />
               </div>
             </div>
             <div>
               <label
                 htmlFor="fileInput"
-                className="tw-inline-flex tw-items-center tw-justify-center tw-cursor-pointer tw-bg-transparent hover:tw-bg-neutral-800/80 tw-px-4 tw-py-3 tw-text-sm tw-font-medium tw-text-white tw-w-full tw-border tw-border-solid tw-border-neutral-700 tw-rounded-lg tw-transition tw-duration-300 tw-ease-out"
+                className="tw-inline-flex tw-items-center tw-justify-center tw-cursor-pointer tw-bg-transparent hover:tw-bg-neutral-800/80 tw-px-4 tw-py-3 tw-text-sm tw-font-medium tw-text-white tw-w-full tw-border-none tw-underline tw-rounded-lg tw-transition tw-duration-300 tw-ease-out"
               >
                 <svg
                   className="tw-h-5 tw-w-5 tw-mr-2 -tw-ml-1"
@@ -244,19 +247,77 @@ export default function CreateCustomSnapshots() {
             <div>
               <button
                 type="submit"
-                className={`tw-flex tw-items-center tw-justify-center tw-relative tw-bg-primary-500 tw-px-4 tw-py-3 tw-text-sm tw-font-medium tw-text-white tw-w-full tw-border tw-border-solid tw-border-primary-500 tw-rounded-lg hover:tw-bg-primary-600 hover:tw-border-primary-600 tw-transition tw-duration-300 tw-ease-out`}
+                className="tw-inline-flex tw-items-center tw-justify-center tw-cursor-pointer tw-bg-transparent hover:tw-bg-neutral-800/80 tw-px-4 tw-py-3 tw-text-sm tw-font-medium tw-text-white tw-w-full tw-border-2 tw-border-solid tw-border-neutral-700 tw-rounded-lg tw-transition tw-duration-300 tw-ease-out"
               >
                 Add custom token pool
               </button>
             </div>
           </div>
         </form>
-        <div className="tw-mt-8 tw-w-full">
+
+        <div className="tw-mt-8 tw-flow-root">
+          <div className="-tw-mx-4 -tw-my-2 tw-overflow-x-auto sm:-tw-mx-6 lg:-tw-mx-8">
+            <div className="tw-inline-block tw-min-w-full tw-py-2 tw-align-middle sm:tw-px-6 lg:tw-px-8">
+              <div className="tw-overflow-hidden tw-shadow tw-ring-1 tw-ring-neutral-700 tw-rounded-lg">
+                <table className="tw-min-w-full tw-divide-y tw-divide-neutral-700">
+                  <thead className="tw-bg-neutral-800/50">
+                    <tr>
+                      <th
+                        scope="col"
+                        className="tw-py-3 tw-pl-4 tw-pr-3 tw-whitespace-nowrap tw-text-left 
+                        tw-text-[0.6875rem] tw-leading-[1.125rem] tw-font-medium tw-text-neutral-400 tw-uppercase tw-tracking-[0.25px] sm:tw-pl-6"
+                      >
+                        Name
+                      </th>
+                      <th
+                        scope="col"
+                        className="tw-px-3 tw-py-3 tw-whitespace-nowrap tw-text-left tw-text-[0.6875rem] tw-leading-[1.125rem] tw-font-medium tw-text-neutral-400 tw-uppercase 
+                        tw-tracking-[0.25px]"
+                      >
+                        Description
+                      </th>
+                      <th
+                        scope="col"
+                        className="tw-px-3 tw-py-3 tw-whitespace-nowrap tw-text-left tw-text-[0.6875rem] tw-leading-[1.125rem] tw-font-medium tw-text-neutral-400 tw-uppercase 
+                        tw-tracking-[0.25px]"
+                      >
+                        Wallets
+                      </th>
+                      <th
+                        scope="col"
+                        className="tw-pl-3 tw-pr-4 tw-py-3 tw-whitespace-nowrap tw-text-left 
+                        tw-text-[0.6875rem] tw-leading-[1.125rem] tw-font-medium tw-text-neutral-400 tw-uppercase tw-tracking-[0.25px]"
+                      >
+                        Tokens
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="tw-bg-neutral-900 tw-divide-y tw-divide-neutral-700/40">
+                    <tr>
+                      <td className="tw-whitespace-nowrap tw-py-4 tw-pl-4 tw-pr-3 tw-text-sm tw-font-medium tw-text-white sm:tw-pl-6">
+                        Name
+                      </td>
+                      <td className="tw-whitespace-nowrap tw-px-3 tw-py-4 tw-text-sm tw-font-normal tw-text-neutral-300">
+                        Description
+                      </td>
+                      <td className="tw-whitespace-nowrap tw-px-3 tw-py-4 tw-text-sm tw-font-normal tw-text-neutral-300">
+                        Wallets
+                      </td>
+                      <td className="tw-whitespace-nowrap tw-pl-3 tw-pr-4 tw-py-4 tw-text-sm tw-font-normal tw-text-neutral-300">
+                        Tokens
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="tw-mt-8 tw-flex tw-justify-end">
           <button
-            onClick={() =>
-              setStep(DistributionPlanToolStep.CREATE_PHASES)
-            }
-            className="tw-bg-primary-500 tw-px-4 tw-py-3 tw-font-medium tw-text-base tw-text-white tw-w-full tw-border tw-border-primary-500 tw-rounded-lg hover:tw-bg-primary-600 hover:tw-border-primary-600 tw-transition tw-duration-300 tw-ease-out"
+            onClick={() => setStep(DistributionPlanToolStep.CREATE_PHASES)}
+            className="tw-bg-primary-500 tw-px-4 tw-py-3 tw-font-medium tw-text-base tw-text-white tw-border tw-border-primary-500 tw-rounded-lg hover:tw-bg-primary-600 hover:tw-border-primary-600 tw-transition tw-duration-300 tw-ease-out"
           >
             Create Phases
           </button>
