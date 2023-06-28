@@ -83,8 +83,8 @@ export default function CreatePlan() {
         return;
       }
 
-    setState(data);
-     setStep(DistributionPlanToolStep.CREATE_SNAPSHOTS); 
+      setState(data);
+      setStep(DistributionPlanToolStep.CREATE_PHASES);
     };
     fetchAllowlist();
   }, []);

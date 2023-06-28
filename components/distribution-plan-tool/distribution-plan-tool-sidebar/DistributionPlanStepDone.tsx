@@ -1,16 +1,23 @@
-import { DistributionPlanStepDescription } from "./DistributionPlanToolSidebar";
+import {
+  DISTRIBUTION_PLAN_STEPS,
+  DistributionPlanStepDescription,
+} from "./DistributionPlanToolSidebar";
 
 export default function DistributionPlanStepDone({
   step,
 }: {
   step: DistributionPlanStepDescription;
 }) {
+  const isLastStep =
+    step.order === Object.values(DISTRIBUTION_PLAN_STEPS).at(-1)!.order;
   return (
     <li className="tw-relative tw-pb-10">
-      <div
-        className="tw-absolute tw-left-[13.25px] tw-top-4 -ml-tw-px tw-mt-0.5 tw-h-full tw-w-0.5 tw-bg-neutral-100"
-        aria-hidden="true"
-      ></div>
+      {!isLastStep && (
+        <div
+          className="tw-absolute tw-left-[13.25px] tw-top-4 -ml-tw-px tw-mt-0.5 tw-h-full tw-w-0.5 tw-bg-neutral-100"
+          aria-hidden="true"
+        ></div>
+      )}
 
       <div className="tw-group tw-relative tw-flex tw-items-start">
         <span className="tw-flex tw-h-8 tw-items-center">
@@ -31,11 +38,9 @@ export default function DistributionPlanStepDone({
           </span>
         </span>
         <span className="tw-ml-4 tw-flex tw-min-w-0 tw-flex-col">
-          <span className="tw-text-sm tw-font-medium">
-            Distribution Plan Tool
-          </span>
+          <span className="tw-text-sm tw-font-medium">{step.label}</span>
           <span className="tw-text-sm tw-text-neutral-500">
-            Vitae sed mi luctus laoreet.
+            {step.description}
           </span>
         </span>
       </div>

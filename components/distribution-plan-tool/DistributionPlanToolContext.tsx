@@ -115,7 +115,7 @@ export default function DistributionPlanToolContextWrapper({
   const [fetching, setFetching] = useState(false);
   const [operations, setOperations] = useState<AllowlistOperation[]>([]);
   const addOperations = (newOperations: AllowlistOperation[]) => {
-    setOperations(structuredClone([...operations, ...newOperations]));
+    setOperations((prev) => structuredClone([...prev, ...newOperations]));
   };
   const [distributionPlan, setDistributionPlan] =
     useState<AllowlistDescription | null>(null);

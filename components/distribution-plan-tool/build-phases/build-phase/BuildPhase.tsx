@@ -1,6 +1,243 @@
+import { useContext, useEffect, useState } from "react";
 import { BuildPhasesPhase } from "../BuildPhases";
 
+import {
+  AllowlistOperation,
+  AllowlistOperationCode,
+  AllowlistToolResponse,
+  Pool,
+} from "../../../allowlist-tool/allowlist-tool.types";
+
+import { DistributionPlanToolContext } from "../../DistributionPlanToolContext";
+import AllowlistToolSelectMenuMultiple, {
+  AllowlistToolSelectMenuMultipleOption,
+} from "../../../allowlist-tool/common/select-menu-multiple/AllowlistToolSelectMenuMultiple";
+import { getRandomObjectId } from "../../../../helpers/AllowlistToolHelpers";
+
 export default function BuildPhase({ phase }: { phase: BuildPhasesPhase }) {
+  const { operations, distributionPlan, addOperations, setToasts, phases } =
+    useContext(DistributionPlanToolContext);
+
+  const [components, setComponents] = useState<
+    {
+      id: string;
+      name: string;
+      description: string;
+      spotsNotRan: boolean;
+      spots: number | null;
+    }[]
+  >([]);
+
+  useEffect(() => {
+    setComponents(
+      operations
+        .filter(
+          (operation) => operation.code === AllowlistOperationCode.ADD_COMPONENT
+        )
+        .map((operation) => ({
+          id: operation.params.id,
+          name: operation.params.name,
+          description: operation.params.description,
+          spotsNotRan: operations.some(
+            (operation2) =>
+              operation2.code ===
+                AllowlistOperationCode.COMPONENT_ADD_SPOTS_TO_ALL_ITEM_WALLETS &&
+              operation2.params.componentId === operation.params.id &&
+              !operation2.hasRan
+          ),
+          spots:
+            phases
+              .find((p) => p.id === phase.id)
+              ?.components.find((c) => c.id === operation.params.id)
+              ?.winnersSpotsCount || null,
+        }))
+    );
+  }, [operations, phases, phase]);
+
+  const [snapshots, setSnapshots] = useState<
+    AllowlistToolSelectMenuMultipleOption[]
+  >([]);
+
+  useEffect(() => {
+    const tokenPools = operations
+      .filter(
+        (operation) =>
+          operation.code === AllowlistOperationCode.CREATE_TOKEN_POOL
+      )
+      .map((operation) => ({
+        value: operation.params.id,
+        title: operation.params.name,
+        subTitle: "Snapshot",
+      }));
+
+    const customTokenPools = operations
+      .filter(
+        (operation) =>
+          operation.code === AllowlistOperationCode.CREATE_CUSTOM_TOKEN_POOL
+      )
+      .map((operation) => ({
+        value: operation.params.id,
+        title: operation.params.name,
+        subTitle: "Custom Snapshot",
+      }));
+
+    setSnapshots([...tokenPools, ...customTokenPools]);
+  }, [operations]);
+
+  const [selectedSnapshots, setSelectedSnapshots] = useState<
+    AllowlistToolSelectMenuMultipleOption[]
+  >([]);
+
+  const toggleSelectedOption = (
+    option: AllowlistToolSelectMenuMultipleOption
+  ) => {
+    const isSelected = selectedSnapshots.find(
+      (selectedOption) => selectedOption.value === option.value
+    );
+    if (isSelected) {
+      setSelectedSnapshots(
+        selectedSnapshots.filter(
+          (selectedOption) => selectedOption.value !== option.value
+        )
+      );
+    } else {
+      setSelectedSnapshots([...selectedSnapshots, option]);
+    }
+  };
+
+  const [formValues, setFormValues] = useState<{
+    name: string;
+    description: string;
+    mintCap: string;
+  }>({
+    name: "",
+    description: "",
+    mintCap: "",
+  });
+
+  const handleFormChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setFormValues({
+      ...formValues,
+      [event.target.name]: event.target.value,
+    });
+  };
+
+  const [isLoading, setIsLoading] = useState(false);
+
+  const addOperation = async ({
+    code,
+    params,
+  }: {
+    code: AllowlistOperationCode;
+    params: any;
+  }): Promise<string | null> => {
+    if (!distributionPlan) return null;
+    const url = `${process.env.ALLOWLIST_API_ENDPOINT}/allowlists/${distributionPlan.id}/operations`;
+    setIsLoading(true);
+    try {
+      const response = await fetch(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          code,
+          params,
+        }),
+      });
+      const data: AllowlistToolResponse<AllowlistOperation> =
+        await response.json();
+      if ("error" in data) {
+        setToasts({
+          messages:
+            typeof data.message === "string" ? [data.message] : data.message,
+          type: "error",
+        });
+        return null;
+      }
+      addOperations([data]);
+      return data.params.id;
+    } catch (error) {
+      setToasts({
+        messages: ["Something went wrong. Please try again."],
+        type: "error",
+      });
+      return null;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const addComponent = async (): Promise<string | null> => {
+    if (!distributionPlan) return null;
+    return await addOperation({
+      code: AllowlistOperationCode.ADD_COMPONENT,
+      params: {
+        id: getRandomObjectId(),
+        name: formValues.name,
+        description: formValues.description,
+        phaseId: phase.id,
+      },
+    });
+  };
+
+  const addItem = async ({
+    componentId,
+    snapshot,
+  }: {
+    componentId: string;
+    snapshot: AllowlistToolSelectMenuMultipleOption;
+  }): Promise<string | null> => {
+    if (!distributionPlan) return null;
+    return await addOperation({
+      code: AllowlistOperationCode.ADD_ITEM,
+      params: {
+        id: getRandomObjectId(),
+        name: snapshot.title,
+        description: snapshot.subTitle,
+        componentId,
+        poolId: snapshot.value,
+        poolType:
+          snapshot.subTitle === "Snapshot"
+            ? Pool.TOKEN_POOL
+            : Pool.CUSTOM_TOKEN_POOL,
+      },
+    });
+  };
+
+  const addSpots = async ({
+    componentId,
+    spots,
+  }: {
+    componentId: string;
+    spots: number;
+  }): Promise<void> => {
+    if (!distributionPlan) return;
+    await addOperation({
+      code: AllowlistOperationCode.COMPONENT_ADD_SPOTS_TO_ALL_ITEM_WALLETS,
+      params: {
+        componentId,
+        spots,
+      },
+    });
+  };
+
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const componentId = await addComponent();
+    if (!componentId) return;
+    for (const snapshot of selectedSnapshots) {
+      const itemId = await addItem({ componentId, snapshot });
+      if (!itemId) return;
+    }
+    await addSpots({ componentId, spots: +formValues.mintCap });
+    setFormValues({
+      name: "",
+      description: "",
+      mintCap: "",
+    });
+  };
+
   return (
     <>
       <div className="tw-flex tw-flex-col">
@@ -11,7 +248,10 @@ export default function BuildPhase({ phase }: { phase: BuildPhasesPhase }) {
       </div>
 
       <div className="tw-mt-8 tw-pt-8 tw-border-t tw-border-solid tw-border-l-0 tw-border-r-0 tw-border-b-0 tw-border-t-neutral-700 tw-mx-auto">
-        <form className="tw-flex tw-items-end tw-gap-x-4">
+        <form
+          onSubmit={handleSubmit}
+          className="tw-flex tw-items-end tw-gap-x-4"
+        >
           <div className="tw-flex-1">
             <label className="tw-block tw-text-sm tw-font-normal tw-leading-5 tw-text-neutral-100">
               Name
@@ -19,6 +259,9 @@ export default function BuildPhase({ phase }: { phase: BuildPhasesPhase }) {
             <div className="tw-mt-2">
               <input
                 type="text"
+                name="name"
+                value={formValues.name}
+                onChange={handleFormChange}
                 required
                 autoComplete="off"
                 className="tw-block tw-w-full tw-rounded-lg tw-border-0 tw-py-3 tw-px-3 tw-bg-neutral-900 tw-text-white tw-font-light tw-caret-primary-400-focus tw-shadow-sm tw-ring-2 tw-ring-inset tw-ring-neutral-700 placeholder:tw-text-neutral-400 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 tw-text-base sm:tw-leading-6 tw-transition tw-duration-300 tw-ease-out"
@@ -32,24 +275,23 @@ export default function BuildPhase({ phase }: { phase: BuildPhasesPhase }) {
             <div className="tw-mt-2">
               <input
                 type="text"
+                name="description"
                 required
+                value={formValues.description}
+                onChange={handleFormChange}
                 autoComplete="off"
                 className="tw-block tw-w-full tw-rounded-lg tw-border-0 tw-py-3 tw-px-3 tw-bg-neutral-900 tw-text-white tw-font-light tw-caret-primary-400-focus tw-shadow-sm tw-ring-2 tw-ring-inset tw-ring-neutral-700 placeholder:tw-text-neutral-400 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 tw-text-base sm:tw-leading-6 tw-transition tw-duration-300 tw-ease-out"
               />
             </div>
           </div>
           <div className="tw-flex-1">
-            <label className="tw-block tw-text-sm tw-font-normal tw-leading-5 tw-text-neutral-100">
-              Select pools
-            </label>
-            <div className="tw-mt-2">
-              <input
-                type="number"
-                required
-                placeholder="Select"
-                className="tw-block tw-w-full tw-rounded-lg tw-border-0 tw-py-3 tw-px-3 tw-bg-neutral-900 tw-text-white tw-font-light tw-caret-primary-400-focus tw-shadow-sm tw-ring-2 tw-ring-inset tw-ring-neutral-700 placeholder:tw-text-neutral-400 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 tw-text-base sm:tw-leading-6 tw-transition tw-duration-300 tw-ease-out"
-              />
-            </div>
+            <AllowlistToolSelectMenuMultiple
+              label="Select snapshots"
+              placeholder="Select"
+              options={snapshots}
+              selectedOptions={selectedSnapshots}
+              toggleSelectedOption={toggleSelectedOption}
+            />
           </div>
           <div className="tw-flex-1">
             <label className="tw-block tw-text-sm tw-font-normal tw-leading-5 tw-text-neutral-100">
@@ -58,39 +300,15 @@ export default function BuildPhase({ phase }: { phase: BuildPhasesPhase }) {
             <div className="tw-mt-2">
               <input
                 type="number"
+                name="mintCap"
+                value={formValues.mintCap}
+                onChange={handleFormChange}
                 required
                 className="tw-block tw-w-full tw-rounded-lg tw-border-0 tw-py-3 tw-px-3 tw-bg-neutral-900 tw-text-white tw-font-light tw-caret-primary-400-focus tw-shadow-sm tw-ring-2 tw-ring-inset tw-ring-neutral-700 placeholder:tw-text-neutral-400 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 tw-text-base sm:tw-leading-6 tw-transition tw-duration-300 tw-ease-out"
               />
             </div>
           </div>
-          <div className="tw-mr-4">
-            <div className="tw-flex tw-flex-col">
-              <div className="tw-block tw-text-sm tw-font-normal tw-leading-5 tw-text-neutral-100">
-                Exclude previous
-              </div>
-              <div className="tw-flex tw-gap-x-6 tw-py-3 tw-mt-2">
-                <div className="tw-flex tw-items-center">
-                  <input
-                    type="radio"
-                    checked
-                    className="tw-h-4 tw-w-4 tw-border-neutral-300 tw-text-primary-500 focus:tw-ring-primary-500"
-                  />
-                  <label className="tw-ml-3 tw-block tw-text-sm tw-font-medium tw-leading-6 tw-text-neutral-100">
-                    Yes
-                  </label>
-                </div>
-                <div className="tw-flex tw-items-center">
-                  <input
-                    type="radio"
-                    className="tw-h-4 tw-w-4 tw-border-neutral-300 tw-text-primary-500 focus:tw-ring-primary-500"
-                  />
-                  <label className="tw-ml-3 tw-block tw-text-sm tw-font-medium tw-leading-6 tw-text-neutral-100">
-                    No
-                  </label>
-                </div>
-              </div>
-            </div>
-          </div>
+
           <div>
             <button
               type="submit"
@@ -126,62 +344,22 @@ export default function BuildPhase({ phase }: { phase: BuildPhasesPhase }) {
                       >
                         Spots
                       </th>
-                      <th
-                        scope="col"
-                        className="tw-px-3 tw-py-3 tw-whitespace-nowrap tw-text-left tw-text-[0.6875rem] tw-leading-[1.125rem] tw-font-medium tw-text-neutral-400 tw-uppercase tw-tracking-[0.25px]"
-                      >
-                        <span className="sr-only">Details</span>
-                      </th>
-                      <th
-                        scope="col"
-                        className="tw-w-20 tw-px-3 tw-py-3 tw-whitespace-nowrap tw-text-left tw-text-[0.6875rem] tw-leading-[1.125rem] tw-font-medium tw-text-neutral-400 tw-uppercase tw-tracking-[0.25px]"
-                      >
-                        <span className="sr-only">Delete</span>
-                      </th>
                     </tr>
                   </thead>
                   <tbody className="tw-bg-neutral-900 tw-divide-y tw-divide-neutral-700/40">
-                    <tr>
-                      <td className="tw-whitespace-nowrap tw-py-4 tw-pl-4 tw-pr-3 tw-text-sm tw-font-medium tw-text-white sm:tw-pl-6">
-                        Name
-                      </td>
-                      <td className="tw-whitespace-nowrap tw-px-3 tw-py-4 tw-text-sm tw-font-normal tw-text-neutral-300">
-                        Description
-                      </td>
-                      <td className="tw-whitespace-nowrap tw-px-3 tw-py-4 tw-text-sm tw-font-normal tw-text-neutral-300">
-                        Spots
-                      </td>
-                      <td className="tw-whitespace-nowrap tw-px-3 tw-py-4 tw-text-sm tw-font-normal">
-                        <span
-                          className="tw-cursor-pointer tw-text-primary-400 
-                        hover:tw-text-[#74a2ff] tw-transition tw-duration-300 tw-ease-out"
-                        >
-                          Details
-                        </span>
-                      </td>
-                      <td className="tw-w-20 tw-whitespace-nowrap tw-px-3 tw-py-4 tw-text-sm tw-font-normal tw-text-neutral-300">
-                        <button
-                          type="button"
-                          title="Delete"
-                          className="tw-rounded-full tw-group tw-flex tw-items-center tw-justify-center tw-p-2 tw-text-xs tw-font-medium tw-border-none tw-ring-1 tw-ring-inset tw-text-neutral-400 tw-bg-neutral-400/10 tw-ring-neutral-400/20"
-                        >
-                          <svg
-                            className="tw-h-4 tw-w-4 group-hover:tw-text-error tw-transition tw-duration-300 tw-ease-out"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            xmlns="http://www.w3.org/2000/svg"
-                          >
-                            <path
-                              d="M9 3H15M3 6H21M19 6L18.2987 16.5193C18.1935 18.0975 18.1409 18.8867 17.8 19.485C17.4999 20.0118 17.0472 20.4353 16.5017 20.6997C15.882 21 15.0911 21 13.5093 21H10.4907C8.90891 21 8.11803 21 7.49834 20.6997C6.95276 20.4353 6.50009 20.0118 6.19998 19.485C5.85911 18.8867 5.8065 18.0975 5.70129 16.5193L5 6M10 10.5V15.5M14 10.5V15.5"
-                              stroke="currentColor"
-                              strokeWidth="2"
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                            />
-                          </svg>
-                        </button>
-                      </td>
-                    </tr>
+                    {components.map((component) => (
+                      <tr key={component.id}>
+                        <td className="tw-whitespace-nowrap tw-py-4 tw-pl-4 tw-pr-3 tw-text-sm tw-font-medium tw-text-white sm:tw-pl-6">
+                          {component.name}
+                        </td>
+                        <td className="tw-whitespace-nowrap tw-px-3 tw-py-4 tw-text-sm tw-font-normal tw-text-neutral-300">
+                          {component.description}
+                        </td>
+                        <td className="tw-whitespace-nowrap tw-px-3 tw-py-4 tw-text-sm tw-font-normal tw-text-neutral-300">
+                          {component.spotsNotRan ? "-" : component.spots}
+                        </td>
+                      </tr>
+                    ))}
                   </tbody>
                 </table>
               </div>
