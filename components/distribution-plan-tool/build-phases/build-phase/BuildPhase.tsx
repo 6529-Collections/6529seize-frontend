@@ -14,45 +14,26 @@ import AllowlistToolSelectMenuMultiple, {
 } from "../../../allowlist-tool/common/select-menu-multiple/AllowlistToolSelectMenuMultiple";
 import { getRandomObjectId } from "../../../../helpers/AllowlistToolHelpers";
 
-export default function BuildPhase({ phase }: { phase: BuildPhasesPhase }) {
-  const { operations, distributionPlan, addOperations, setToasts, phases } =
-    useContext(DistributionPlanToolContext);
+export default function BuildPhase({
+  phase,
+  onNextStep,
+}: {
+  phase: BuildPhasesPhase;
+  onNextStep: () => void;
+}) {
+  const {
+    operations,
+    distributionPlan,
+    addOperations,
+    setToasts,
+    runOperations,
+  } = useContext(DistributionPlanToolContext);
 
-  const [components, setComponents] = useState<
-    {
-      id: string;
-      name: string;
-      description: string;
-      spotsNotRan: boolean;
-      spots: number | null;
-    }[]
-  >([]);
+  const [haveRan, setHaveRan] = useState(false);
 
   useEffect(() => {
-    setComponents(
-      operations
-        .filter(
-          (operation) => operation.code === AllowlistOperationCode.ADD_COMPONENT
-        )
-        .map((operation) => ({
-          id: operation.params.id,
-          name: operation.params.name,
-          description: operation.params.description,
-          spotsNotRan: operations.some(
-            (operation2) =>
-              operation2.code ===
-                AllowlistOperationCode.COMPONENT_ADD_SPOTS_TO_ALL_ITEM_WALLETS &&
-              operation2.params.componentId === operation.params.id &&
-              !operation2.hasRan
-          ),
-          spots:
-            phases
-              .find((p) => p.id === phase.id)
-              ?.components.find((c) => c.id === operation.params.id)
-              ?.winnersSpotsCount || null,
-        }))
-    );
-  }, [operations, phases, phase]);
+    setHaveRan(!phase.components.some((component) => component.spotsNotRan));
+  }, [phase]);
 
   const [snapshots, setSnapshots] = useState<
     AllowlistToolSelectMenuMultipleOption[]
@@ -224,6 +205,25 @@ export default function BuildPhase({ phase }: { phase: BuildPhasesPhase }) {
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    if (!distributionPlan) return;
+    if (!selectedSnapshots.length) {
+      setToasts({
+        messages: ["Please select at least one snapshot."],
+        type: "error",
+      });
+      return;
+    }
+    if (
+      !formValues.mintCap ||
+      isNaN(+formValues.mintCap) ||
+      +formValues.mintCap < 1
+    ) {
+      setToasts({
+        messages: ["Please enter a valid maximum mints."],
+        type: "error",
+      });
+      return;
+    }
     const componentId = await addComponent();
     if (!componentId) return;
     for (const snapshot of selectedSnapshots) {
@@ -347,7 +347,7 @@ export default function BuildPhase({ phase }: { phase: BuildPhasesPhase }) {
                     </tr>
                   </thead>
                   <tbody className="tw-bg-neutral-900 tw-divide-y tw-divide-neutral-700/40">
-                    {components.map((component) => (
+                    {phase.components.map((component) => (
                       <tr key={component.id}>
                         <td className="tw-whitespace-nowrap tw-py-4 tw-pl-4 tw-pr-3 tw-text-sm tw-font-medium tw-text-white sm:tw-pl-6">
                           {component.name}
@@ -356,7 +356,7 @@ export default function BuildPhase({ phase }: { phase: BuildPhasesPhase }) {
                           {component.description}
                         </td>
                         <td className="tw-whitespace-nowrap tw-px-3 tw-py-4 tw-text-sm tw-font-normal tw-text-neutral-300">
-                          {component.spotsNotRan ? "-" : component.spots}
+                          {component.spotsNotRan ? "N/A" : component.spots}
                         </td>
                       </tr>
                     ))}
@@ -367,10 +367,25 @@ export default function BuildPhase({ phase }: { phase: BuildPhasesPhase }) {
           </div>
         </div>
 
-        <div className="tw-mt-8 tw-flex tw-justify-end">
-          <button className="tw-bg-primary-500 tw-px-4 tw-py-3 tw-font-medium tw-text-sm tw-text-white tw-border tw-border-primary-500 tw-rounded-lg hover:tw-bg-primary-600 hover:tw-border-primary-600 tw-transition tw-duration-300 tw-ease-out">
-            Next
-          </button>
+        <div className="tw-mt-8 tw-flex tw-justify-end tw-space-x-4">
+          {!haveRan && (
+            <button
+              onClick={runOperations}
+              type="button"
+              className="tw-inline-flex tw-items-center tw-justify-center tw-cursor-pointer tw-bg-transparent hover:tw-bg-neutral-800/80 tw-px-4 tw-py-3 tw-text-sm tw-font-medium tw-text-white tw-border-2 tw-border-solid tw-border-neutral-700 tw-rounded-lg tw-transition tw-duration-300 tw-ease-out"
+            >
+              Run analysis
+            </button>
+          )}
+
+          {haveRan && (
+            <button
+              onClick={onNextStep}
+              className="tw-bg-primary-500 tw-px-4 tw-py-3 tw-font-medium tw-text-sm tw-text-white tw-border tw-border-primary-500 tw-rounded-lg hover:tw-bg-primary-600 hover:tw-border-primary-600 tw-transition tw-duration-300 tw-ease-out"
+            >
+              Next
+            </button>
+          )}
         </div>
       </div>
     </>

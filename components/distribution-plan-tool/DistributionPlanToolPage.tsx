@@ -9,6 +9,7 @@ import CreateSnapshots from "./create-snapshots/CreateSnapshots";
 import CreatePhases from "./create-phases/CreatePhases";
 import BuildPhases from "./build-phases/BuildPhases";
 import CreateCustomSnapshots from "./create-custom-snapshots/CreateCustomSnapshots";
+import ReviewDistributionPlan from "./review-distribution-plan/ReviewDistributionPlan";
 
 export default function DistributionPlanToolPage() {
   const { step } = useContext(DistributionPlanToolContext);
@@ -24,6 +25,8 @@ export default function DistributionPlanToolPage() {
       return <CreatePhases />;
     case DistributionPlanToolStep.BUILD_PHASES:
       return <BuildPhases />;
+    case DistributionPlanToolStep.REVIEW:
+      return <ReviewDistributionPlan />;
     default:
       assertUnreachable(step);
       return null;

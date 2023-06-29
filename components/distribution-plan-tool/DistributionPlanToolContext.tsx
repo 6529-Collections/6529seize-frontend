@@ -11,8 +11,8 @@ import {
   AllowlistToolResponse,
   AllowlistTransferPool,
 } from "../allowlist-tool/allowlist-tool.types";
-
 import RunOperations from "./run-operations/RunOperations";
+
 
 const poppins = Poppins({
   weight: ["300", "400", "500", "600", "700"],
@@ -27,14 +27,15 @@ export enum DistributionPlanToolStep {
   CREATE_CUSTOM_SNAPSHOT = "CREATE_CUSTOM_SNAPSHOT",
   CREATE_PHASES = "CREATE_PHASES",
   BUILD_PHASES = "BUILD_PHASES",
+  REVIEW = "REVIEW",
 }
 
 type DistributionPlanToolContextType = {
   step: DistributionPlanToolStep;
   setStep: (step: DistributionPlanToolStep) => void;
   fetching: boolean;
-
   distributionPlan: AllowlistDescription | null;
+  runOperations: () => void;
   setState: (distributionPlan: AllowlistDescription | null) => void;
   operations: AllowlistOperation[];
   addOperations: (operations: AllowlistOperation[]) => void;
@@ -89,6 +90,7 @@ export const DistributionPlanToolContext =
     step: DistributionPlanToolStep.CREATE_PLAN,
     setStep: () => {},
     fetching: false,
+    runOperations: () => {},
     operations: [],
     addOperations: () => {},
     distributionPlan: null,
@@ -129,6 +131,42 @@ export default function DistributionPlanToolContextWrapper({
   const [phases, setPhases] = useState<AllowlistPhaseWithComponentAndItems[]>(
     []
   );
+
+  const runOperations = async () => {
+    if (!distributionPlan) return;
+    const url = `${process.env.ALLOWLIST_API_ENDPOINT}/allowlists/${distributionPlan.id}/runs`;
+    try {
+      const response = await fetch(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          allowlistId: distributionPlan.id,
+        }),
+      });
+      const data: AllowlistToolResponse<AllowlistDescription> =
+        await response.json();
+      if ("error" in data) {
+        setToasts({
+          messages:
+            typeof data.message === "string" ? [data.message] : data.message,
+          type: "error",
+        });
+        return;
+      }
+      setState(data);
+      setToasts({
+        messages: ["Started running operations"],
+        type: "success",
+      });
+    } catch (error) {
+      setToasts({
+        messages: ["Something went wrong"],
+        type: "error",
+      });
+    }
+  };
 
   const fetchTransferPools = async (distributionPlanId: string) => {
     try {
@@ -261,7 +299,10 @@ export default function DistributionPlanToolContextWrapper({
     }
     setDistributionPlan(distributionPlan);
     await initState(distributionPlan.id);
-    setStep(DistributionPlanToolStep.CREATE_SNAPSHOTS);
+    if (step === DistributionPlanToolStep.CREATE_PLAN) {
+      setStep(DistributionPlanToolStep.CREATE_SNAPSHOTS);
+    }
+    // setStep(DistributionPlanToolStep.CREATE_PHASES);
   };
 
   return (
@@ -275,6 +316,7 @@ export default function DistributionPlanToolContextWrapper({
             step,
             setStep,
             fetching,
+            runOperations,
             operations,
             addOperations,
             setState,

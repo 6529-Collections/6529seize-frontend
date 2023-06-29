@@ -46,6 +46,12 @@ export const DISTRIBUTION_PLAN_STEPS: Record<
     key: DistributionPlanToolStep.BUILD_PHASES,
     order: 4,
   },
+  [DistributionPlanToolStep.REVIEW]: {
+    label: "Review",
+    description: "Review the distribution plan",
+    key: DistributionPlanToolStep.REVIEW,
+    order: 5,
+  },
 };
 
 export default function DistributionPlanToolSidebar() {
