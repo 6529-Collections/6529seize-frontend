@@ -1462,13 +1462,19 @@ export default function CollectionDelegationComponent(props: Props) {
                         value={uc.use_case}>
                         #{uc.use_case} - {uc.display}
                         {(useCaseLockStatuses.data &&
-                          useCaseLockStatuses.data[index] === true) ||
+                          (useCaseLockStatuses.data[
+                            index
+                          ] as any as boolean) === true) ||
                         (useCaseLockStatusesGlobal?.data &&
-                          useCaseLockStatusesGlobal?.data[index] === true) ||
+                          (useCaseLockStatusesGlobal?.data[
+                            index
+                          ] as any as boolean) === true) ||
                         collectionLockRead.data
                           ? ` - LOCKED${
                               useCaseLockStatusesGlobal?.data &&
-                              useCaseLockStatusesGlobal?.data[index] === true
+                              (useCaseLockStatusesGlobal?.data[
+                                index
+                              ] as any as boolean) === true
                                 ? ` *`
                                 : ``
                             }`
@@ -1488,8 +1494,9 @@ export default function CollectionDelegationComponent(props: Props) {
                 className="pt-2 pb-2 d-flex align-items-center">
                 {!useCaseLockStatusesGlobal ||
                 (useCaseLockStatusesGlobal?.data &&
-                  useCaseLockStatusesGlobal?.data[lockUseCaseIndex] ==
-                    false) ? (
+                  (useCaseLockStatusesGlobal?.data[
+                    lockUseCaseIndex
+                  ] as any as boolean) == false) ? (
                   <button
                     className={`${styles.lockUseCaseBtn}`}
                     onClick={() => {

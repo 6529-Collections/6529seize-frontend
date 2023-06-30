@@ -99,7 +99,7 @@
   background-color: $almost-very-dark-grey;
 }
 
-.mintCountSelect {
+.mintSelect {
   color: $dark-grey !important;
 }
 
@@ -113,4 +113,12 @@
   input:checked {
     background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='2.3' fill='%23000'/%3e%3c/svg%3e") !important;
   }
+}
+
+.tokenImageOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
 }

@@ -6,46 +6,26 @@ import { NEXT_GEN_ABI } from "../../abis";
 import { useState } from "react";
 import { COLLECTION_PREVIEWS } from "./NextGen";
 import Image from "next/image";
-
-interface Info1 {
-  name: string;
-  artist: string;
-  description: string;
-  website: string;
-  licence: string;
-  base_uri: string;
-}
-
-interface AdditionalData1 {
-  artist_address: string;
-  mint_cost: number;
-  max_purchases: number;
-  circulation_supply: number;
-  total_supply: number;
-  available: number;
-}
+import { Info } from "./entities";
 
 interface Props {
   collection: number;
 }
 
 export default function NextGenCollectionPreview(props: Props) {
-  const account = useAccount();
-  const chainId = useChainId();
-  const [info1, setInfo1] = useState<Info1>();
-  const [additionalData1, setAdditionalData1] = useState<AdditionalData1>();
+  const [info, setInfo] = useState<Info>();
 
   useContractRead({
     address: NEXT_GEN_CONTRACT.contract,
     abi: NEXT_GEN_ABI,
     chainId: NEXT_GEN_CONTRACT.chain_id,
-    functionName: "retrieveCollectionInfo1",
+    functionName: "retrieveCollectionInfo",
     watch: true,
     args: [props.collection],
     onSettled(data: any, error: any) {
       if (data) {
         const d = data as any[];
-        const i1: Info1 = {
+        const i1: Info = {
           name: d[0],
           artist: d[1],
           description: d[2],
@@ -53,30 +33,7 @@ export default function NextGenCollectionPreview(props: Props) {
           licence: d[4],
           base_uri: d[5],
         };
-        setInfo1(i1);
-      }
-    },
-  });
-
-  useContractRead({
-    address: NEXT_GEN_CONTRACT.contract,
-    abi: NEXT_GEN_ABI,
-    chainId: NEXT_GEN_CONTRACT.chain_id,
-    functionName: "retrieveCollectionAdditionalData1",
-    watch: true,
-    args: [props.collection],
-    onSettled(data: any, error: any) {
-      if (data) {
-        const d = data as any[];
-        const ad1: AdditionalData1 = {
-          artist_address: d[0],
-          mint_cost: Math.round(parseInt(d[1]) * 100000) / 100000,
-          max_purchases: parseInt(d[2]),
-          circulation_supply: parseInt(d[3]),
-          total_supply: parseInt(d[4]),
-          available: parseInt(d[4]) - parseInt(d[3]),
-        };
-        setAdditionalData1(ad1);
+        setInfo(i1);
       }
     },
   });
@@ -95,18 +52,18 @@ export default function NextGenCollectionPreview(props: Props) {
         <Row>
           <Col>
             <Container className={styles.collectionPreview}>
-              {info1 && (
+              {info && (
                 <>
                   <Row>
                     <Col>
                       <b>
-                        {props.collection} - {info1.name}
+                        {props.collection} - {info.name}
                       </b>
                     </Col>
                   </Row>
                   <Row>
                     <Col>
-                      by <b>{info1.artist}</b>
+                      by <b>{info.artist}</b>
                     </Col>
                   </Row>
                 </>

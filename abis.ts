@@ -834,7 +834,6 @@ export const NEXT_GEN_ABI = [
         name: "_collectionSalesPercentage",
         type: "uint256",
       },
-      { internalType: "bytes32", name: "_merkleRoot", type: "bytes32" },
     ],
     name: "addCollectionData",
     outputs: [],
@@ -851,6 +850,8 @@ export const NEXT_GEN_ABI = [
   {
     inputs: [
       { internalType: "address[]", name: "_recipients", type: "address[]" },
+      { internalType: "uint256[]", name: "TDH", type: "uint256[]" },
+      { internalType: "uint256[][]", name: "memesIds", type: "uint256[][]" },
       { internalType: "uint256", name: "_collectionID", type: "uint256" },
       { internalType: "uint256", name: "_numberOfTokens", type: "uint256" },
     ],
@@ -877,6 +878,13 @@ export const NEXT_GEN_ABI = [
     name: "artistSignature",
     outputs: [],
     stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [{ internalType: "uint256", name: "", type: "uint256" }],
+    name: "artistsSignatures",
+    outputs: [{ internalType: "string", name: "", type: "string" }],
+    stateMutability: "view",
     type: "function",
   },
   {
@@ -912,16 +920,6 @@ export const NEXT_GEN_ABI = [
     name: "burnToMint",
     outputs: [],
     stateMutability: "payable",
-    type: "function",
-  },
-  {
-    inputs: [
-      { internalType: "uint256", name: "", type: "uint256" },
-      { internalType: "uint256", name: "", type: "uint256" },
-    ],
-    name: "burnToMintCollections",
-    outputs: [{ internalType: "bool", name: "", type: "bool" }],
-    stateMutability: "view",
     type: "function",
   },
   {
@@ -982,19 +980,6 @@ export const NEXT_GEN_ABI = [
     type: "function",
   },
   {
-    inputs: [],
-    name: "dmc",
-    outputs: [
-      {
-        internalType: "contract IDelegationManagementContract",
-        name: "",
-        type: "address",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
     inputs: [{ internalType: "uint256", name: "tokenId", type: "uint256" }],
     name: "getApproved",
     outputs: [{ internalType: "address", name: "", type: "address" }],
@@ -1023,24 +1008,12 @@ export const NEXT_GEN_ABI = [
     type: "function",
   },
   {
-    inputs: [{ internalType: "uint256", name: "", type: "uint256" }],
-    name: "isArtistPaid",
-    outputs: [{ internalType: "bool", name: "", type: "bool" }],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [{ internalType: "uint256", name: "", type: "uint256" }],
-    name: "isCollectionCreated",
-    outputs: [{ internalType: "bool", name: "", type: "bool" }],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
     inputs: [
       { internalType: "uint256", name: "_collectionID", type: "uint256" },
       { internalType: "uint256", name: "_numberOfTokens", type: "uint256" },
       { internalType: "uint256", name: "_maxAllowance", type: "uint256" },
+      { internalType: "uint256", name: "TDH", type: "uint256" },
+      { internalType: "uint256[]", name: "memesIds", type: "uint256[]" },
       { internalType: "address", name: "_mintTo", type: "address" },
       { internalType: "bytes32[]", name: "merkleProof", type: "bytes32[]" },
       { internalType: "address", name: "_delegator", type: "address" },
@@ -1126,26 +1099,15 @@ export const NEXT_GEN_ABI = [
     inputs: [
       { internalType: "uint256", name: "_collectionID", type: "uint256" },
     ],
-    name: "retrieveCollectionAdditionalData1",
+    name: "retrieveCollectionAdditionalData",
     outputs: [
       { internalType: "address", name: "", type: "address" },
       { internalType: "uint256", name: "", type: "uint256" },
       { internalType: "uint256", name: "", type: "uint256" },
       { internalType: "uint256", name: "", type: "uint256" },
       { internalType: "uint256", name: "", type: "uint256" },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [
-      { internalType: "uint256", name: "_collectionID", type: "uint256" },
-    ],
-    name: "retrieveCollectionAdditionalData2",
-    outputs: [
       { internalType: "uint256", name: "", type: "uint256" },
       { internalType: "bool", name: "", type: "bool" },
-      { internalType: "bytes32", name: "", type: "bytes32" },
     ],
     stateMutability: "view",
     type: "function",
@@ -1154,7 +1116,7 @@ export const NEXT_GEN_ABI = [
     inputs: [
       { internalType: "uint256", name: "_collectionID", type: "uint256" },
     ],
-    name: "retrieveCollectionInfo1",
+    name: "retrieveCollectionInfo",
     outputs: [
       { internalType: "string", name: "", type: "string" },
       { internalType: "string", name: "", type: "string" },
@@ -1170,7 +1132,7 @@ export const NEXT_GEN_ABI = [
     inputs: [
       { internalType: "uint256", name: "_collectionID", type: "uint256" },
     ],
-    name: "retrieveCollectionInfo2",
+    name: "retrieveCollectionLibraryAndScript",
     outputs: [
       { internalType: "string", name: "", type: "string" },
       { internalType: "string[]", name: "", type: "string[]" },
@@ -1182,12 +1144,14 @@ export const NEXT_GEN_ABI = [
     inputs: [
       { internalType: "uint256", name: "_collectionID", type: "uint256" },
     ],
-    name: "retrieveCollectionPhasesTimes",
+    name: "retrieveCollectionPhases",
     outputs: [
       { internalType: "uint256", name: "", type: "uint256" },
       { internalType: "uint256", name: "", type: "uint256" },
+      { internalType: "bytes32", name: "", type: "bytes32" },
       { internalType: "uint256", name: "", type: "uint256" },
       { internalType: "uint256", name: "", type: "uint256" },
+      { internalType: "uint256[]", name: "", type: "uint256[]" },
     ],
     stateMutability: "view",
     type: "function",
@@ -1200,13 +1164,22 @@ export const NEXT_GEN_ABI = [
     type: "function",
   },
   {
+    inputs: [{ internalType: "uint256", name: "tokenId", type: "uint256" }],
+    name: "retrieveMemesIds",
+    outputs: [{ internalType: "uint256[]", name: "", type: "uint256[]" }],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
     inputs: [
       { internalType: "uint256", name: "_collectionID", type: "uint256" },
+      { internalType: "address", name: "_address", type: "address" },
     ],
-    name: "retrieveSignature",
+    name: "retrieveTokensPerAddress",
     outputs: [
-      { internalType: "address", name: "", type: "address" },
-      { internalType: "string", name: "", type: "string" },
+      { internalType: "uint256", name: "", type: "uint256" },
+      { internalType: "uint256", name: "", type: "uint256" },
+      { internalType: "uint256", name: "", type: "uint256" },
     ],
     stateMutability: "view",
     type: "function",
@@ -1251,8 +1224,10 @@ export const NEXT_GEN_ABI = [
       { internalType: "uint256", name: "_allowlistEndTime", type: "uint256" },
       { internalType: "uint256", name: "_publicStartTime", type: "uint256" },
       { internalType: "uint256", name: "_publicEndTime", type: "uint256" },
+      { internalType: "bytes32", name: "_merkleRoot", type: "bytes32" },
+      { internalType: "uint256[]", name: "_memesIDs", type: "uint256[]" },
     ],
-    name: "setCollectionTimes",
+    name: "setCollectionPhases",
     outputs: [],
     stateMutability: "nonpayable",
     type: "function",
@@ -1272,15 +1247,15 @@ export const NEXT_GEN_ABI = [
     type: "function",
   },
   {
-    inputs: [{ internalType: "uint256", name: "index", type: "uint256" }],
-    name: "tokenByIndex",
+    inputs: [{ internalType: "uint256", name: "", type: "uint256" }],
+    name: "tdhBalance",
     outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
     stateMutability: "view",
     type: "function",
   },
   {
-    inputs: [{ internalType: "uint256", name: "", type: "uint256" }],
-    name: "tokenIdsToCollectionIds",
+    inputs: [{ internalType: "uint256", name: "index", type: "uint256" }],
+    name: "tokenByIndex",
     outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
     stateMutability: "view",
     type: "function",
@@ -1306,36 +1281,6 @@ export const NEXT_GEN_ABI = [
     inputs: [{ internalType: "uint256", name: "tokenId", type: "uint256" }],
     name: "tokenURI",
     outputs: [{ internalType: "string", name: "", type: "string" }],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [
-      { internalType: "uint256", name: "", type: "uint256" },
-      { internalType: "address", name: "", type: "address" },
-    ],
-    name: "tokensAirdropPerAddress",
-    outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [
-      { internalType: "uint256", name: "", type: "uint256" },
-      { internalType: "address", name: "", type: "address" },
-    ],
-    name: "tokensMintedAllowlistAddress",
-    outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [
-      { internalType: "uint256", name: "", type: "uint256" },
-      { internalType: "address", name: "", type: "address" },
-    ],
-    name: "tokensMintedPerAddress",
-    outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
     stateMutability: "view",
     type: "function",
   },
@@ -1415,15 +1360,6 @@ export const NEXT_GEN_ABI = [
       { internalType: "string", name: "_newCollectionWebsite", type: "string" },
       { internalType: "string", name: "_newCollectionLicense", type: "string" },
       { internalType: "string", name: "_newCollectionBaseURI", type: "string" },
-    ],
-    name: "updateCollectionInfo",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [
-      { internalType: "uint256", name: "_collectionID", type: "uint256" },
       { internalType: "string", name: "_newCollectionLibrary", type: "string" },
       {
         internalType: "string[]",
@@ -1431,21 +1367,7 @@ export const NEXT_GEN_ABI = [
         type: "string[]",
       },
     ],
-    name: "updateCollectionLibraryAndScript",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [
-      { internalType: "uint256", name: "_collectionID", type: "uint256" },
-      { internalType: "uint256", name: "_allowlistStartTime", type: "uint256" },
-      { internalType: "uint256", name: "_allowlistEndTime", type: "uint256" },
-      { internalType: "bytes32", name: "_merkleRoot", type: "bytes32" },
-      { internalType: "uint256", name: "_publicStartTime", type: "uint256" },
-      { internalType: "uint256", name: "_publicEndTime", type: "uint256" },
-    ],
-    name: "updateCollectionMintingTimesAndMerkleRoot",
+    name: "updateCollectionInfo",
     outputs: [],
     stateMutability: "nonpayable",
     type: "function",
@@ -1474,13 +1396,6 @@ export const NEXT_GEN_ABI = [
       { internalType: "uint256", name: "", type: "uint256" },
       { internalType: "uint256", name: "", type: "uint256" },
     ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [{ internalType: "uint256", name: "", type: "uint256" }],
-    name: "wereDataAdded",
-    outputs: [{ internalType: "bool", name: "", type: "bool" }],
     stateMutability: "view",
     type: "function",
   },

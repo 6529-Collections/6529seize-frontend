@@ -1,4 +1,4 @@
-export interface Info1 {
+export interface Info {
   name: string;
   artist: string;
   description: string;
@@ -7,34 +7,46 @@ export interface Info1 {
   base_uri: string;
 }
 
-export interface Info2 {
+export interface TokenIndexes {
+  start: number;
+  end: number;
+}
+
+export interface LibraryScript {
   library: string;
   script: string[];
 }
 
-export interface AdditionalData1 {
+export interface AdditionalData {
   artist_address: string;
   mint_cost: number;
   max_purchases: number;
   circulation_supply: number;
   total_supply: number;
-}
-
-export interface AdditionalData2 {
   sales_percentage: number;
   is_collection_active: boolean;
+}
+
+export interface PhaseTimes {
+  allowlist_start_time: number;
+  allowlist_end_time: number;
   merkle_root: string;
+  public_start_time: number;
+  public_end_time: number;
+  ids: number[];
+}
+
+export interface TokensPerAddress {
+  airdrop: number;
+  allowlist: number;
+  public: number;
+  total: number;
 }
 
 export interface ProofResponse {
   keccak: string;
   spots: number;
   proof: string[];
-}
-
-export interface TokenIndexes {
-  start: number;
-  end: number;
 }
 
 export interface TokenURI {

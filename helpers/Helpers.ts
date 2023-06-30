@@ -1,4 +1,4 @@
-import { sepolia } from "wagmi/chains";
+import { goerli, mainnet, sepolia } from "wagmi/chains";
 import { GRADIENT_CONTRACT, MEMES_CONTRACT } from "../constants";
 import { BaseNFT, VolumeType } from "../entities/INFT";
 
@@ -218,4 +218,16 @@ export function printMintDate(date: Date) {
       })} 
       (${getDateDisplay(mintDate)})
     `;
+}
+
+export function getNetworkName(chainId: number) {
+  if (chainId == mainnet.id) {
+    return "Etherium Mainnet";
+  } else if (chainId == sepolia.id) {
+    return "Sepolia Testnet";
+  } else if (chainId == goerli.id) {
+    return "Goerli Testnet";
+  } else {
+    return `Network ID ${chainId}`;
+  }
 }

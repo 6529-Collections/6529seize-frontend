@@ -4,7 +4,7 @@ import { Col, Container, Row, Table } from "react-bootstrap";
 import { NEXT_GEN_CONTRACT } from "../../constants";
 import { NEXT_GEN_ABI } from "../../abis";
 import { useState } from "react";
-import { Info1 } from "./entities";
+import { Info } from "./entities";
 import NextGenTokenImage from "./NextGenTokenImage";
 
 interface Props {
@@ -13,7 +13,7 @@ interface Props {
 }
 
 export default function NextGenToken(props: Props) {
-  const [info1, setInfo1] = useState<Info1>();
+  const [info1, setInfo1] = useState<Info>();
   const [codeCopied, setCodeCopied] = useState(false);
   const [copyText, setCopyText] = useState<string>();
 
@@ -21,13 +21,13 @@ export default function NextGenToken(props: Props) {
     address: NEXT_GEN_CONTRACT.contract,
     abi: NEXT_GEN_ABI,
     chainId: NEXT_GEN_CONTRACT.chain_id,
-    functionName: "retrieveCollectionInfo1",
+    functionName: "retrieveCollectionInfo",
     watch: true,
     args: [props.collection],
     onSettled(data: any, error: any) {
       if (data) {
         const d = data as any[];
-        const i1: Info1 = {
+        const i1: Info = {
           name: d[0],
           artist: d[1],
           description: d[2],

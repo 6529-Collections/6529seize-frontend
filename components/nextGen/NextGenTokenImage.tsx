@@ -50,7 +50,7 @@ export default function NextGenTokenImage(props: Props) {
   return (
     <Container className="no-padding">
       <Row>
-        <Col>
+        <Col style={{ position: "relative" }}>
           <iframe
             srcDoc={htmlContent}
             className={
@@ -59,6 +59,15 @@ export default function NextGenTokenImage(props: Props) {
                 : styles.renderedHtmlContainer
             }
           />
+          <div
+            className={`${styles.tokenImageOverlay} ${
+              props.preview ? `cursor-pointer` : ``
+            }`}
+            onClick={() => {
+              if (props.preview) {
+                window.location.href = `/nextgen/${props.collection}/${props.id}`;
+              }
+            }}></div>
         </Col>
       </Row>
     </Container>

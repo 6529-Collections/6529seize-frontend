@@ -8,7 +8,7 @@ import {
   useContractWrite,
   usePrepareContractWrite,
 } from "wagmi";
-import { NEXT_GEN_CONTRACT, NULL_ADDRESS } from "../../constants";
+import { NEVER_DATE, NEXT_GEN_CONTRACT, NULL_ADDRESS } from "../../constants";
 import { NEXT_GEN_ABI } from "../../abis";
 import { Fragment, useEffect, useState } from "react";
 import { fetchUrl } from "../../services/6529api";
@@ -18,12 +18,12 @@ import RenderHTML from "./NextGenToken";
 import NextGenTokenList from "./NextGenTokenList";
 import {
   TokenIndexes,
-  Info1,
-  Info2,
-  AdditionalData1,
-  AdditionalData2,
+  Info,
+  AdditionalData,
   ProofResponse,
   TokenURI,
+  LibraryScript,
+  PhaseTimes,
 } from "./entities";
 import { fromGWEI } from "../../helpers/Helpers";
 import { COLLECTION_BANNERS } from "./NextGen";
@@ -34,6 +34,9 @@ interface Props {
 }
 
 const getDateDisplay = (numberDate: number) => {
+  if (numberDate >= NEVER_DATE * 1000) {
+    return "Never";
+  }
   const date = new Date(numberDate);
   return `${date.getUTCFullYear()}/${(date.getUTCMonth() + 1)
     .toString()
@@ -46,6 +49,11 @@ const getDateDisplay = (numberDate: number) => {
 export function isMintingOpen(startTime: number, endTime: number) {
   const now = new Date().getTime();
   return now > startTime && now < endTime;
+}
+
+export function isMintingUpcoming(startTime: number) {
+  const now = new Date().getTime();
+  return startTime > now;
 }
 
 export function getMintingTimesDisplay(startTime: number, endTime: number) {
@@ -73,16 +81,10 @@ export default function NextGenCollection(props: Props) {
 
   const [tokenIndexes, setTokenIndexes] = useState<TokenIndexes>();
 
-  const [info1, setInfo1] = useState<Info1>();
-  const [info2, setInfo2] = useState<Info2>();
-
-  const [additionalData1, setAdditionalData1] = useState<AdditionalData1>();
-  const [additionalData2, setAdditionalData2] = useState<AdditionalData2>();
-
-  const [allowlistStartTime, setAllowlistStartTime] = useState<number>(0);
-  const [allowlistEndTime, setAllowlistEndTime] = useState<number>(0);
-  const [publicStartTime, setPublicStartTime] = useState<number>(0);
-  const [publicEndTime, setPublicEndTime] = useState<number>(0);
+  const [info, setInfo] = useState<Info>();
+  const [libraryScript, setLibraryScript] = useState<LibraryScript>();
+  const [phaseTimes, setPhaseTimes] = useState<PhaseTimes>();
+  const [additionalData, setAdditionalData] = useState<AdditionalData>();
 
   const [tokenURIs, setTokenURIs] = useState<TokenURI[]>();
 
@@ -91,7 +93,7 @@ export default function NextGenCollection(props: Props) {
   const [burnAmount, setBurnAmount] = useState<number>(0);
 
   function getTokenUriReadParams() {
-    const params = [];
+    const params: any[] = [];
     if (tokenIndexes) {
       for (let i = tokenIndexes.start; i <= tokenIndexes.end; i++) {
         params.push({
@@ -102,9 +104,8 @@ export default function NextGenCollection(props: Props) {
           args: [i],
         });
       }
-      return params;
     }
-    return null;
+    return params;
   }
 
   useContractRead({
@@ -130,27 +131,29 @@ export default function NextGenCollection(props: Props) {
     contracts: getTokenUriReadParams(),
     watch: true,
     enabled: tokenIndexes != undefined,
-    onSettled(data: any[], error: any) {
+    onSettled(data, error) {
       const tokens: TokenURI[] = [];
-      data.map((d, index: number) => {
-        if (d.result && tokenIndexes) {
-          const r: string = d.result;
-          if (r.startsWith("data")) {
-            const uri = extractUri(r);
-            tokens.push({
-              id: index + tokenIndexes.start,
-              uri: uri,
-              is_data: true,
-            });
-          } else {
-            tokens.push({
-              id: index + tokenIndexes.start,
-              uri: r,
-              is_data: false,
-            });
+      if (data) {
+        data.map((d, index: number) => {
+          if (d.result && tokenIndexes) {
+            const r: string = d.result as string;
+            if (r.startsWith("data")) {
+              const uri = extractUri(r);
+              tokens.push({
+                id: index + tokenIndexes.start,
+                uri: uri,
+                is_data: true,
+              });
+            } else {
+              tokens.push({
+                id: index + tokenIndexes.start,
+                uri: r,
+                is_data: false,
+              });
+            }
           }
-        }
-      });
+        });
+      }
       setTokenURIs(tokens);
     },
   });
@@ -159,13 +162,13 @@ export default function NextGenCollection(props: Props) {
     address: NEXT_GEN_CONTRACT.contract,
     abi: NEXT_GEN_ABI,
     chainId: NEXT_GEN_CONTRACT.chain_id,
-    functionName: "retrieveCollectionInfo1",
+    functionName: "retrieveCollectionInfo",
     watch: true,
     args: [props.collection],
     onSettled(data: any, error: any) {
       if (data) {
         const d = data as any[];
-        const i1: Info1 = {
+        const i1: Info = {
           name: d[0],
           artist: d[1],
           description: d[2],
@@ -173,7 +176,7 @@ export default function NextGenCollection(props: Props) {
           licence: d[4],
           base_uri: d[5],
         };
-        setInfo1(i1);
+        setInfo(i1);
       }
     },
   });
@@ -182,17 +185,17 @@ export default function NextGenCollection(props: Props) {
     address: NEXT_GEN_CONTRACT.contract,
     abi: NEXT_GEN_ABI,
     chainId: NEXT_GEN_CONTRACT.chain_id,
-    functionName: "retrieveCollectionInfo2",
+    functionName: "retrieveCollectionLibraryAndScript",
     watch: true,
     args: [props.collection],
     onSettled(data: any, error: any) {
       if (data) {
         const d = data as any[];
-        const i2: Info2 = {
+        const ls: LibraryScript = {
           library: d[0],
           script: d[1],
         };
-        setInfo2(i2);
+        setLibraryScript(ls);
       }
     },
   });
@@ -201,20 +204,22 @@ export default function NextGenCollection(props: Props) {
     address: NEXT_GEN_CONTRACT.contract,
     abi: NEXT_GEN_ABI,
     chainId: NEXT_GEN_CONTRACT.chain_id,
-    functionName: "retrieveCollectionAdditionalData1",
+    functionName: "retrieveCollectionAdditionalData",
     watch: true,
     args: [props.collection],
     onSettled(data: any, error: any) {
       if (data) {
         const d = data as any[];
-        const ad1: AdditionalData1 = {
+        const ad1: AdditionalData = {
           artist_address: d[0],
           mint_cost: Math.round(parseInt(d[1]) * 100000) / 100000,
           max_purchases: parseInt(d[2]),
           circulation_supply: parseInt(d[3]),
           total_supply: parseInt(d[4]),
+          sales_percentage: parseInt(d[5]),
+          is_collection_active: d[6] as boolean,
         };
-        setAdditionalData1(ad1);
+        setAdditionalData(ad1);
       }
     },
   });
@@ -223,36 +228,21 @@ export default function NextGenCollection(props: Props) {
     address: NEXT_GEN_CONTRACT.contract,
     abi: NEXT_GEN_ABI,
     chainId: NEXT_GEN_CONTRACT.chain_id,
-    functionName: "retrieveCollectionAdditionalData2",
+    functionName: "retrieveCollectionPhases",
     watch: true,
     args: [props.collection],
     onSettled(data: any, error: any) {
       if (data) {
         const d = data as any[];
-        const ad2: AdditionalData2 = {
-          sales_percentage: parseInt(d[0]),
-          is_collection_active: d[1] as boolean,
+        const phases: PhaseTimes = {
+          allowlist_start_time: parseInt(d[0]) * 1000,
+          allowlist_end_time: parseInt(d[1]) * 1000,
           merkle_root: d[2],
+          public_start_time: parseInt(d[3]) * 1000,
+          public_end_time: parseInt(d[4]) * 1000,
+          ids: d[5],
         };
-        setAdditionalData2(ad2);
-      }
-    },
-  });
-
-  useContractRead({
-    address: NEXT_GEN_CONTRACT.contract,
-    abi: NEXT_GEN_ABI,
-    chainId: NEXT_GEN_CONTRACT.chain_id,
-    functionName: "retrieveCollectionPhasesTimes",
-    watch: true,
-    args: [props.collection],
-    onSettled(data: any, error: any) {
-      if (data) {
-        const times = data as any[];
-        setAllowlistStartTime(parseInt(times[0]) * 1000);
-        setAllowlistEndTime(parseInt(times[1]) * 1000);
-        setPublicStartTime(parseInt(times[2]) * 1000);
-        setPublicEndTime(parseInt(times[3]) * 1000);
+        setPhaseTimes(phases);
       }
     },
   });
@@ -282,22 +272,26 @@ export default function NextGenCollection(props: Props) {
         alt={`${props.collection}-banner`}
       />
       <Container className="no-padding pt-2 pb-2">
-        {tokenIndexes && additionalData1 && info1 && additionalData2 && (
+        {tokenIndexes && additionalData && info && phaseTimes && (
           <Fragment>
             <Row className="pt-2">
               <Col
                 xs={12}
                 className="d-flex justify-content-between align-items-center">
-                <h1>{info1.name.toUpperCase()}</h1>
+                <h1>{info.name.toUpperCase()}</h1>
                 <FontAwesomeIcon
                   className={styles.globeIcon}
                   icon="globe"
-                  onClick={() =>
-                    window.open(info1.website, "_blank")
-                  }></FontAwesomeIcon>
+                  onClick={() => {
+                    let url = info.website;
+                    if (!url.startsWith("http")) {
+                      url = `http://${url}`;
+                    }
+                    window.open(url, "_blank");
+                  }}></FontAwesomeIcon>
               </Col>
               <Col xs={12} className="lead">
-                by {info1.artist.toUpperCase()}
+                by {info.artist.toUpperCase()}
               </Col>
             </Row>
             <Row className="pt-4">
@@ -305,29 +299,45 @@ export default function NextGenCollection(props: Props) {
                 <span className="d-inline-flex align-items-center gap-2">
                   <span
                     className={`traffic-light ${
-                      additionalData2.is_collection_active ? `green` : `red`
+                      additionalData.is_collection_active ? `green` : `red`
                     }`}></span>
                   Active
                 </span>
                 <span className="d-inline-flex align-items-center gap-2">
                   <span
                     className={`traffic-light ${
-                      isMintingOpen(allowlistStartTime, allowlistEndTime)
+                      isMintingOpen(
+                        phaseTimes.allowlist_start_time,
+                        phaseTimes.allowlist_end_time
+                      )
                         ? `green`
+                        : isMintingUpcoming(phaseTimes.allowlist_start_time)
+                        ? `orange`
                         : `red`
                     }`}></span>
                   Allowlist Minting{" "}
-                  {getMintingTimesDisplay(allowlistStartTime, allowlistEndTime)}
+                  {getMintingTimesDisplay(
+                    phaseTimes.allowlist_start_time,
+                    phaseTimes.allowlist_end_time
+                  )}
                 </span>
                 <span className="d-inline-flex align-items-center gap-2">
                   <span
                     className={`traffic-light ${
-                      isMintingOpen(publicStartTime, publicEndTime)
+                      isMintingOpen(
+                        phaseTimes.public_start_time,
+                        phaseTimes.public_end_time
+                      )
                         ? `green`
+                        : isMintingUpcoming(phaseTimes.public_start_time)
+                        ? `orange`
                         : `red`
                     }`}></span>
                   Public Minting{" "}
-                  {getMintingTimesDisplay(publicStartTime, publicEndTime)}
+                  {getMintingTimesDisplay(
+                    phaseTimes.public_start_time,
+                    phaseTimes.public_end_time
+                  )}
                 </span>
               </Col>
               <Col sm={12} md={2} className="text-center">
@@ -337,10 +347,17 @@ export default function NextGenCollection(props: Props) {
                   }}
                   className={styles.mintBtn}
                   disabled={
-                    !additionalData2 ||
-                    !additionalData2.is_collection_active ||
-                    (!isMintingOpen(allowlistStartTime, allowlistEndTime) &&
-                      !isMintingOpen(publicStartTime, publicEndTime))
+                    !additionalData ||
+                    !additionalData.is_collection_active ||
+                    !phaseTimes ||
+                    (!isMintingOpen(
+                      phaseTimes.allowlist_start_time,
+                      phaseTimes.allowlist_end_time
+                    ) &&
+                      !isMintingOpen(
+                        phaseTimes.public_start_time,
+                        phaseTimes.public_end_time
+                      ))
                   }>
                   Mint Now
                 </Button>
@@ -356,11 +373,11 @@ export default function NextGenCollection(props: Props) {
                 </span>
                 &bull;
                 <span>
-                  Total Supply <b>x{additionalData1.total_supply}</b>
+                  Total Supply <b>x{additionalData.total_supply}</b>
                 </span>
                 &bull;
                 <span>
-                  Minted <b>x{additionalData1.circulation_supply}</b>
+                  Minted <b>x{additionalData.circulation_supply}</b>
                 </span>
                 {burnAmount > 0 && (
                   <>
@@ -374,13 +391,13 @@ export default function NextGenCollection(props: Props) {
                 <span>
                   Available{" "}
                   <b>
-                    {additionalData1.total_supply -
-                      additionalData1.circulation_supply -
+                    {additionalData.total_supply -
+                      additionalData.circulation_supply -
                       burnAmount >
                     0
                       ? `x${
-                          additionalData1.total_supply -
-                          additionalData1.circulation_supply -
+                          additionalData.total_supply -
+                          additionalData.circulation_supply -
                           burnAmount
                         }`
                       : `-`}
@@ -390,10 +407,10 @@ export default function NextGenCollection(props: Props) {
                 <span>
                   Mint Cost{" "}
                   <b>
-                    {additionalData1.mint_cost > 0
-                      ? fromGWEI(additionalData1.mint_cost)
+                    {additionalData.mint_cost > 0
+                      ? fromGWEI(additionalData.mint_cost)
                       : `Free`}{" "}
-                    {additionalData1.mint_cost > 0 ? `ETH` : ``}
+                    {additionalData.mint_cost > 0 ? `ETH` : ``}
                   </b>
                 </span>
               </Col>
@@ -416,24 +433,24 @@ export default function NextGenCollection(props: Props) {
               className={`pt-1 ${styles.overview} ${
                 isOverviewExpanded ? styles.expandedOverview : ``
               }`}>
-              <Col xs={12}>{info1.description}</Col>
+              <Col xs={12}>{info.description}</Col>
               <Col xs={12} className="pt-2">
-                Licence <b>{info1.licence}</b>
+                Licence <b>{info.licence}</b>
               </Col>
               <Col xs={12} className="pt-1">
-                Base URI <b>{info1.base_uri}</b>
+                Base URI <b>{info.base_uri}</b>
               </Col>
               <Col xs={12} className="pt-1">
-                Sales Percentage <b>{additionalData2.sales_percentage}</b>
+                Sales Percentage <b>{additionalData.sales_percentage}%</b>
               </Col>
               <Col xs={12} className="pt-1">
-                Merkle Root <b>{additionalData2.merkle_root}</b>
+                Merkle Root <b>{phaseTimes.merkle_root}</b>
               </Col>
             </Row>
             <Row className="pt-4">
               <Col>
                 <h4>
-                  Tokens x{additionalData1.circulation_supply - burnAmount}
+                  Tokens x{additionalData.circulation_supply - burnAmount}
                 </h4>
               </Col>
             </Row>
