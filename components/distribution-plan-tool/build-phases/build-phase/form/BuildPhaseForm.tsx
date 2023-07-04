@@ -188,43 +188,43 @@ export default function BuildPhaseForm({ phase }: { phase: BuildPhasesPhase }) {
     });
   };
 
-  const [isConfigModalOpen, setIsConfigModalOpen] = useState(false);
+  const [isConfigModalOpen, setIsConfigModalOpen] = useState(true);
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (!distributionPlan) return;
-    if (!selectedSnapshots.length) {
-      setToasts({
-        messages: ["Please select at least one snapshot."],
-        type: "error",
-      });
-      return;
-    }
-    if (
-      !formValues.mintCap ||
-      isNaN(+formValues.mintCap) ||
-      +formValues.mintCap < 1
-    ) {
-      setToasts({
-        messages: ["Please enter a valid maximum mints."],
-        type: "error",
-      });
-      return;
-    }
-    // setIsConfigModalOpen(true);
-    const componentId = await addComponent();
-    if (!componentId) return;
-    for (const snapshot of selectedSnapshots) {
-      const itemId = await addItem({ componentId, snapshot });
-      if (!itemId) return;
-    }
-    await addSpots({ componentId, spots: +formValues.mintCap });
-    setFormValues({
-      name: "",
-      description: "",
-      mintCap: "",
-    });
-    setSelectedSnapshots([]);
+    // if (!distributionPlan) return;
+    // if (!selectedSnapshots.length) {
+    //   setToasts({
+    //     messages: ["Please select at least one snapshot."],
+    //     type: "error",
+    //   });
+    //   return;
+    // }
+    // if (
+    //   !formValues.mintCap ||
+    //   isNaN(+formValues.mintCap) ||
+    //   +formValues.mintCap < 1
+    // ) {
+    //   setToasts({
+    //     messages: ["Please enter a valid maximum mints."],
+    //     type: "error",
+    //   });
+    //   return;
+    // }
+    //  setIsConfigModalOpen(true);
+    // const componentId = await addComponent();
+    // if (!componentId) return;
+    // for (const snapshot of selectedSnapshots) {
+    //   const itemId = await addItem({ componentId, snapshot });
+    //   if (!itemId) return;
+    // }
+    // await addSpots({ componentId, spots: +formValues.mintCap });
+    // setFormValues({
+    //   name: "",
+    //   description: "",
+    //   mintCap: "",
+    // });
+    // setSelectedSnapshots([]);
   };
   return (
     <form onSubmit={handleSubmit} className="tw-flex tw-items-end tw-gap-x-4">
