@@ -174,3 +174,10 @@
     color: darken($color: $font-color, $amount: $darken-percentage);
   }
 }
+
+.nextGenQuestion {
+  height: calc(100vh - $header-height - 20px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
