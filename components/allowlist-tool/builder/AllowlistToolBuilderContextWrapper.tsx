@@ -138,8 +138,6 @@ export const AllowlistToolBuilderContext =
     isGlobalLoading: false,
   });
 
-
-
 export default function AllowlistToolBuilderContextWrapper({
   children,
   allowlistState,
@@ -374,6 +372,7 @@ export default function AllowlistToolBuilderContextWrapper({
               break;
             case AllowlistOperationCode.CREATE_ALLOWLIST:
             case AllowlistOperationCode.COMPONENT_ADD_SPOTS_TO_ALL_ITEM_WALLETS:
+            case AllowlistOperationCode.COMPONENT_ADD_SPOTS_TO_WALLETS_EXCLUDING_CERTAIN_COMPONENTS:
             case AllowlistOperationCode.ITEM_EXCLUE_TOKEN_IDS:
             case AllowlistOperationCode.ITEM_SELECT_TOKEN_IDS:
             case AllowlistOperationCode.ITEM_REMOVE_FIRST_N_TOKENS:
@@ -583,6 +582,9 @@ export default function AllowlistToolBuilderContextWrapper({
           addOperationToComponent(operation);
           break;
         case AllowlistOperationCode.COMPONENT_ADD_SPOTS_TO_ALL_ITEM_WALLETS:
+          addOperationToComponent(operation);
+          break;
+        case AllowlistOperationCode.COMPONENT_ADD_SPOTS_TO_WALLETS_EXCLUDING_CERTAIN_COMPONENTS:
           addOperationToComponent(operation);
           break;
         case AllowlistOperationCode.ITEM_EXCLUE_TOKEN_IDS:

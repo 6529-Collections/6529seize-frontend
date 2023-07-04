@@ -275,6 +275,23 @@ export default function AllowlistToolBuilderOperationsList({
               description: operation.params.spots,
             },
           ];
+        case AllowlistOperationCode.COMPONENT_ADD_SPOTS_TO_WALLETS_EXCLUDING_CERTAIN_COMPONENTS:
+          return [
+            {
+              title: "Phase",
+              description:
+                getPhaseForComponent(operation.params.componentId)?.name ?? "",
+            },
+            {
+              title: "Component",
+              description:
+                getComponent(operation.params.componentId)?.name ?? "",
+            },
+            {
+              title: "Spots",
+              description: operation.params.spots,
+            },
+          ];
         case AllowlistOperationCode.ITEM_EXCLUE_TOKEN_IDS:
           return [
             {
@@ -442,7 +459,9 @@ export default function AllowlistToolBuilderOperationsList({
     >
       <AllowlistToolAnimationWrapper initial={true}>
         {operationsWithMeta.map((operation) => (
-          <AllowlistToolAnimationHeightOpacity key={`${uniqueKey}-${operation.id}`}>
+          <AllowlistToolAnimationHeightOpacity
+            key={`${uniqueKey}-${operation.id}`}
+          >
             <AllowlistToolBuilderOperationsListitem operation={operation} />
           </AllowlistToolAnimationHeightOpacity>
         ))}

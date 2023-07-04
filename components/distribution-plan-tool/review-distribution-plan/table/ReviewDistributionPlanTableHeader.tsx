@@ -1,6 +1,6 @@
 import DistributionPlanTableHeaderWrapper from "../../common/DistributionPlanTableHeaderWrapper";
 
-export default function CreateSnapshotTableHeader() {
+export default function ReviewDistributionPlanTableHeader() {
   return (
     <DistributionPlanTableHeaderWrapper>
       <th
@@ -14,20 +14,7 @@ export default function CreateSnapshotTableHeader() {
         scope="col"
         className="tw-px-3 tw-py-3 tw-whitespace-nowrap tw-text-left tw-text-[0.6875rem] tw-leading-[1.125rem] tw-font-medium tw-text-neutral-400 tw-uppercase tw-tracking-[0.25px]"
       >
-        Contract number
-      </th>
-
-      <th
-        scope="col"
-        className="tw-px-3 tw-py-3 tw-whitespace-nowrap tw-text-left tw-text-[0.6875rem] tw-leading-[1.125rem] tw-font-medium tw-text-neutral-400 tw-uppercase tw-tracking-[0.25px]"
-      >
-        Block number
-      </th>
-      <th
-        scope="col"
-        className="tw-px-3 tw-py-3 tw-whitespace-nowrap tw-text-left tw-text-[0.6875rem] tw-leading-[1.125rem] tw-font-medium tw-text-neutral-400 tw-uppercase tw-tracking-[0.25px]"
-      >
-        Token ID(s)
+        Description
       </th>
       <th
         scope="col"
@@ -39,7 +26,7 @@ export default function CreateSnapshotTableHeader() {
         scope="col"
         className="tw-px-3 tw-py-3 tw-whitespace-nowrap tw-text-left tw-text-[0.6875rem] tw-leading-[1.125rem] tw-font-medium tw-text-neutral-400 tw-uppercase tw-tracking-[0.25px]"
       >
-        Tokens
+        Spots
       </th>
     </DistributionPlanTableHeaderWrapper>
   );

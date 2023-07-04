@@ -11,7 +11,7 @@ export default function AllowlistToolAnimationWrapper({
   initial?: AnimatePresenceProps["initial"];
 }) {
   return (
-    <AnimatePresence mode={mode} initial={initial}>
+    <AnimatePresence mode={mode} initial={initial} >
       {children}
     </AnimatePresence>
   );

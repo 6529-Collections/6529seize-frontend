@@ -7,11 +7,11 @@ import DistributionPlanPrimaryBtn from "./DistributionPlanPrimaryBtn";
 
 export default function DistributionPlanNextStepBtn({
   showRunAnalysisBtn,
-  nextStep,
+  onNextStep,
   loading,
 }: {
   showRunAnalysisBtn: boolean;
-  nextStep: DistributionPlanToolStep;
+  onNextStep: () => void;
   loading: boolean;
 }) {
   const { setStep, runOperations } = useContext(DistributionPlanToolContext);
@@ -30,7 +30,7 @@ export default function DistributionPlanNextStepBtn({
         <DistributionPlanPrimaryBtn
           loading={loading}
           type="button"
-          onClick={() => setStep(nextStep)}
+          onClick={onNextStep}
         >
           Next
         </DistributionPlanPrimaryBtn>

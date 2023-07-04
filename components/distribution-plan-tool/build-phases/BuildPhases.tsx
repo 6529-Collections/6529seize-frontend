@@ -5,6 +5,8 @@ import {
 } from "../DistributionPlanToolContext";
 import { AllowlistOperationCode } from "../../allowlist-tool/allowlist-tool.types";
 import BuildPhase from "./build-phase/BuildPhase";
+import AllowlistToolAnimationWrapper from "../../allowlist-tool/common/animation/AllowlistToolAnimationWrapper";
+import AllowlistToolAnimationOpacity from "../../allowlist-tool/common/animation/AllowlistToolAnimationOpacity";
 
 export interface BuildPhasesPhase {
   readonly id: string;
@@ -50,8 +52,10 @@ export default function BuildPhases() {
             description: operation.params.description,
             spotsNotRan: operations.some(
               (operation2) =>
-                operation2.code ===
-                  AllowlistOperationCode.COMPONENT_ADD_SPOTS_TO_ALL_ITEM_WALLETS &&
+                [
+                  AllowlistOperationCode.COMPONENT_ADD_SPOTS_TO_ALL_ITEM_WALLETS,
+                  AllowlistOperationCode.COMPONENT_ADD_SPOTS_TO_WALLETS_EXCLUDING_CERTAIN_COMPONENTS,
+                ].includes(operation2.code) &&
                 operation2.params.componentId === operation.params.id &&
                 !operation2.hasRan
             ),
@@ -91,11 +95,20 @@ export default function BuildPhases() {
   return (
     <>
       {selectedPhase && (
-        <BuildPhase
-          onNextStep={onNextStep}
-          phase={selectedPhase}
-          key={`selected-phase-${selectedPhase.id}`}
-        />
+        <AllowlistToolAnimationWrapper mode="wait" initial={true}>
+          <AllowlistToolAnimationOpacity
+            key={`selected-phase-${selectedPhase.id}`}
+          >
+            <BuildPhase
+              onNextStep={onNextStep}
+              phase={selectedPhase}
+              totalPhases={phasesByOp.length}
+              currentPhase={
+                phasesByOp.findIndex((p) => p.id === selectedPhase.id) + 1
+              }
+            />
+          </AllowlistToolAnimationOpacity>
+        </AllowlistToolAnimationWrapper>
       )}
     </>
   );

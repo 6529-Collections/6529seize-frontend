@@ -5,7 +5,7 @@ import { useState } from "react";
 import DistributionPlanToolContextWrapper from "../../components/distribution-plan-tool/DistributionPlanToolContext";
 import DistributionPlanToolPage from "../../components/distribution-plan-tool/DistributionPlanToolPage";
 import DistributionPlanToolSidebar from "../../components/distribution-plan-tool/distribution-plan-tool-sidebar/DistributionPlanToolSidebar";
-import DistributionPlanWarnings from "../../components/distribution-plan-tool/warnings/DistributionPlanWarnings";
+import DistributionPlanWarnings from "../../components/distribution-plan-tool/common/DistributionPlanWarnings";
 
 const Header = dynamic(() => import("../../components/header/Header"), {
   ssr: false,

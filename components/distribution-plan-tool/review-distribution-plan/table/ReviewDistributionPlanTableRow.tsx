@@ -1,30 +1,24 @@
+import { AllowlistPhaseWithComponentAndItems } from "../../../allowlist-tool/allowlist-tool.types";
 import DistributionPlanTableRowWrapper from "../../common/DistributionPlanTableRowWrapper";
-import { CreateSnapshotSnapshot } from "./CreateSnapshotTableBody";
 
-export default function CreateSnapshotTableRow({
-  snapshot,
+export default function ReviewDistributionPlanTableRow({
+  phase,
 }: {
-  snapshot: CreateSnapshotSnapshot;
+  phase: AllowlistPhaseWithComponentAndItems;
 }) {
   return (
     <DistributionPlanTableRowWrapper>
       <td className="tw-whitespace-nowrap tw-py-4 tw-pl-4 tw-pr-3 tw-text-sm tw-font-medium tw-text-white sm:tw-pl-6">
-        {snapshot.name}
+        {phase.name}
       </td>
       <td className="tw-whitespace-nowrap tw-px-3 tw-py-4 tw-text-sm tw-font-normal tw-text-neutral-300">
-        {snapshot.contract}
+        {phase.description}
       </td>
       <td className="tw-whitespace-nowrap tw-px-3 tw-py-4 tw-text-sm tw-font-normal tw-text-neutral-300">
-        {snapshot.blockNo}
+        {phase.walletsCount}
       </td>
       <td className="tw-whitespace-nowrap tw-px-3 tw-py-4 tw-text-sm tw-font-normal tw-text-neutral-300">
-        {snapshot.tokenIds ?? "All"}
-      </td>
-      <td className="tw-whitespace-nowrap tw-px-3 tw-py-4 tw-text-sm tw-font-normal tw-text-neutral-300">
-        {snapshot.walletsCount ?? "N/A"}
-      </td>
-      <td className="tw-whitespace-nowrap tw-px-3 tw-py-4 tw-text-sm tw-font-normal tw-text-neutral-300">
-        {snapshot.tokensCount ?? "N/A"}
+        {phase.tokensCount}
       </td>
     </DistributionPlanTableRowWrapper>
   );

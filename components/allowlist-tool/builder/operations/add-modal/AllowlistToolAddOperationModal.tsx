@@ -26,6 +26,7 @@ import { useRouter } from "next/router";
 import AllowlistToolAnimationWrapper from "../../../common/animation/AllowlistToolAnimationWrapper";
 import AllowlistToolAnimationHeightOpacity from "../../../common/animation/AllowlistToolAnimationHeightOpacity";
 import { AllowlistToolBuilderContext } from "../../AllowlistToolBuilderContextWrapper";
+import AllowlistToolBuilderAddComponentAddSpotsToAllItemWalletsExcludingComponentsOperation from "./component/AllowlistToolBuilderAddComponentAddSpotsToAllItemWalletsExcludingComponentsOperation";
 
 export default function AllowlistToolAddOperationModal({
   targetItemId,
@@ -200,6 +201,18 @@ export default function AllowlistToolAddOperationModal({
                     targetItemId && (
                       <AllowlistToolAnimationHeightOpacity key="COMPONENT_ADD_SPOTS_TO_ALL_ITEM_WALLETS">
                         <AllowlistToolBuilderComponentAddSpotsToAllItemWalletsOperation
+                          componentId={targetItemId}
+                          isLoading={isLoading}
+                          addOperation={addOperation}
+                        />
+                      </AllowlistToolAnimationHeightOpacity>
+                    )
+                  );
+                case AllowlistOperationCode.COMPONENT_ADD_SPOTS_TO_WALLETS_EXCLUDING_CERTAIN_COMPONENTS:
+                  return (
+                    targetItemId && (
+                      <AllowlistToolAnimationHeightOpacity key="COMPONENT_ADD_SPOTS_TO_WALLETS_EXCLUDING_CERTAIN_COMPONENTS">
+                        <AllowlistToolBuilderAddComponentAddSpotsToAllItemWalletsExcludingComponentsOperation
                           componentId={targetItemId}
                           isLoading={isLoading}
                           addOperation={addOperation}

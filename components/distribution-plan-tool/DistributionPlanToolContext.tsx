@@ -13,7 +13,6 @@ import {
 } from "../allowlist-tool/allowlist-tool.types";
 import RunOperations from "./run-operations/RunOperations";
 
-
 const poppins = Poppins({
   weight: ["300", "400", "500", "600", "700"],
   style: ["normal", "italic"],
@@ -300,7 +299,7 @@ export default function DistributionPlanToolContextWrapper({
     setDistributionPlan(distributionPlan);
     await initState(distributionPlan.id);
     if (step === DistributionPlanToolStep.CREATE_PLAN) {
-      setStep(DistributionPlanToolStep.CREATE_SNAPSHOTS);
+      setStep(DistributionPlanToolStep.BUILD_PHASES);
     }
     // setStep(DistributionPlanToolStep.CREATE_PHASES);
   };

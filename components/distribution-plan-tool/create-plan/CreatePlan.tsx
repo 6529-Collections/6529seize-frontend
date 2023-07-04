@@ -4,7 +4,7 @@ import {
   DistributionPlanToolStep,
 } from "../DistributionPlanToolContext";
 
-import StepHeader from "../utils/StepHeader";
+import StepHeader from "../common/StepHeader";
 import CreatePlanForm from "./CreatePlanForm";
 import {
   AllowlistDescription,

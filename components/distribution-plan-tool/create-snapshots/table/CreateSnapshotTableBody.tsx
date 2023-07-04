@@ -2,6 +2,7 @@ import { useContext, useEffect, useState } from "react";
 import { DistributionPlanToolContext } from "../../DistributionPlanToolContext";
 import CreateSnapshotTableRow from "./CreateSnapshotTableRow";
 import { AllowlistOperationCode } from "../../../allowlist-tool/allowlist-tool.types";
+import DistributionPlanTableBodyWrapper from "../../common/DistributionPlanTableBodyWrapper";
 
 export interface CreateSnapshotSnapshot {
   id: string;
@@ -51,10 +52,10 @@ export default function CreateSnapshotTableBody() {
     );
   }, [operations, tokenPools]);
   return (
-    <tbody className="tw-bg-transparent tw-divide-y tw-divide-neutral-700/40">
+    <DistributionPlanTableBodyWrapper>
       {snapshots.map((snapshot) => (
         <CreateSnapshotTableRow key={snapshot.id} snapshot={snapshot} />
       ))}
-    </tbody>
+    </DistributionPlanTableBodyWrapper>
   );
 }

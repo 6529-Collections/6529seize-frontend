@@ -31,6 +31,7 @@ export default function AllowlistToolBuilderPhasesPhaseComponent({
 
   const validOperations: AllowlistOperationCode[] = [
     AllowlistOperationCode.COMPONENT_ADD_SPOTS_TO_ALL_ITEM_WALLETS,
+    AllowlistOperationCode.COMPONENT_ADD_SPOTS_TO_WALLETS_EXCLUDING_CERTAIN_COMPONENTS,
     AllowlistOperationCode.ADD_ITEM,
   ];
   return (
@@ -100,9 +101,7 @@ export default function AllowlistToolBuilderPhasesPhaseComponent({
                 defaultOperation={null}
               />
               <AllowlistTooBuilderOperationsHistory
-                               entityType={
-                                AllowlistToolEntity.COMPONENT
-                              }
+                entityType={AllowlistToolEntity.COMPONENT}
                 targetItemId={phaseComponent.id}
               />
             </div>

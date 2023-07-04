@@ -5,7 +5,6 @@ import { useContext, useEffect, useState } from "react";
 
 import {
   AllowlistPhaseWithComponentAndItems,
-  AllowlistRunStatus,
   AllowlistToolResponse,
 } from "../../allowlist-tool.types";
 import { AllowlistToolBuilderContext } from "../AllowlistToolBuilderContextWrapper";

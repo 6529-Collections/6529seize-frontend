@@ -6,8 +6,9 @@ import {
 import { AllowlistOperationCode } from "../../allowlist-tool/allowlist-tool.types";
 import CreateSnapshotTable from "./table/CreateSnapshotTable";
 import CreateSnapshotForm from "./form/CreateSnapshotForm";
-import StepHeader from "../utils/StepHeader";
+import StepHeader from "../common/StepHeader";
 import DistributionPlanNextStepBtn from "../common/DistributionPlanNextStepBtn";
+import DistributionPlanStepWrapper from "../common/DistributionPlanStepWrapper";
 
 export default function CreateSnapshots() {
   const { setStep, distributionPlan, operations, runOperations } = useContext(
@@ -33,15 +34,17 @@ export default function CreateSnapshots() {
   return (
     <div>
       <StepHeader step={DistributionPlanToolStep.CREATE_SNAPSHOTS} />
-      <div className="tw-mt-8 tw-pt-8 tw-border-t tw-border-solid tw-border-l-0 tw-border-r-0 tw-border-b-0 tw-border-t-neutral-700 tw-mx-auto">
+      <DistributionPlanStepWrapper>
         <CreateSnapshotForm />
         <CreateSnapshotTable />
         <DistributionPlanNextStepBtn
           showRunAnalysisBtn={haveUnRunOperations}
-          nextStep={DistributionPlanToolStep.CREATE_CUSTOM_SNAPSHOT}
+          onNextStep={() =>
+            setStep(DistributionPlanToolStep.CREATE_CUSTOM_SNAPSHOT)
+          }
           loading={false}
         />
-      </div>
+      </DistributionPlanStepWrapper>
     </div>
   );
 }
