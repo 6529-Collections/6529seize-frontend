@@ -171,7 +171,7 @@ export default function CreateSnapshotForm() {
             onChange={handleChange}
             required
             autoComplete="off"
-            placeholder="Name of Distribution Plan"
+            placeholder="Snapshot name"
             className="tw-block tw-w-full tw-rounded-lg tw-border-0 tw-py-3 tw-px-3 tw-bg-neutral-900 tw-text-white tw-font-light tw-caret-primary-400-focus tw-shadow-sm tw-ring-2 tw-ring-inset tw-ring-neutral-700 placeholder:tw-text-neutral-400 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 tw-text-base sm:tw-leading-6 tw-transition tw-duration-300 tw-ease-out"
           />
         </div>
