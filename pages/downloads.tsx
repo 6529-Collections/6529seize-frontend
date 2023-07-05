@@ -35,7 +35,7 @@ export default function Downloads() {
 
   function fetchResults(myview: VIEW, mypage: number) {
     let url = `${process.env.API_ENDPOINT}/api/${
-      myview == VIEW.WALLET ? "uploads" : "consolidated_uploads"
+      myview === VIEW.WALLET ? "uploads" : "consolidated_uploads"
     }?page_size=${PAGE_SIZE}&page=${mypage}`;
     fetchUrl(url).then((response: DBResponse) => {
       setTotalResults(response.count);
@@ -48,7 +48,7 @@ export default function Downloads() {
   }, [page, router.isReady]);
 
   useEffect(() => {
-    if (page == 1) {
+    if (page === 1) {
       fetchResults(view, page);
     } else {
       setPage(1);
@@ -79,7 +79,7 @@ export default function Downloads() {
         <meta property="og:description" content="6529 SEIZE" />
         <meta
           property="og:image"
-          content={`${process.env.BASE_ENDPOINT}/Seize_Logo_Glasses_2.png`}
+          content={`https://d3lqz0a4bldqgf.cloudfront.net/seize_images/Seize_Logo_Glasses_2.png`}
         />
       </Head>
 
@@ -134,7 +134,7 @@ export default function Downloads() {
                     </Col>
                   </Row>
                 )}
-                {downloads != undefined && downloads.length == 0 && (
+                {downloads != undefined && downloads.length === 0 && (
                   <>
                     <Image
                       loading={"lazy"}

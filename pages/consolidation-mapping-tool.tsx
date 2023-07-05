@@ -31,7 +31,7 @@ export default function ConsolidationMappingToolPage() {
     fetch(
       "https://6529bucket.s3.eu-west-1.amazonaws.com/seize_html/consolidation-mapping-tool/how-to-use.html"
     ).then((response) => {
-      if (response.status == 200) {
+      if (response.status === 200) {
         response.text().then((htmlText) => {
           setHtml(htmlText);
           setHtmlError(false);
@@ -59,7 +59,7 @@ export default function ConsolidationMappingToolPage() {
         <meta property="og:description" content="6529 SEIZE" />
         <meta
           property="og:image"
-          content={`${process.env.BASE_ENDPOINT}/Seize_Logo_Glasses_2.png`}
+          content={`https://d3lqz0a4bldqgf.cloudfront.net/seize_images/Seize_Logo_Glasses_2.png`}
         />
       </Head>
 

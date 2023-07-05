@@ -62,16 +62,6 @@
   background-color: white;
 }
 
-.arrowBody::after {
-  content: "";
-  position: absolute;
-  top: 50%;
-  left: 100%;
-  transform: translate(-50%, -50%);
-  width: 50px; /* Adjust the length of the line */
-  height: 2px; /* Adjust the thickness of the line */
-}
-
 .recommendationsList {
   padding-left: 1rem;
 }

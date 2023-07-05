@@ -18,7 +18,7 @@ export default function SearchModal(props: Props) {
   const [searchValue, setSearchValue] = useState("");
 
   function addSearchWallet() {
-    if (!props.searchWallets.some((sw) => sw == searchValue)) {
+    if (!props.searchWallets.some((sw) => sw === searchValue)) {
       props.addSearchWallet(searchValue);
       setSearchValue("");
     } else {
@@ -46,7 +46,7 @@ export default function SearchModal(props: Props) {
             value={searchValue}
             onChange={(e) => setSearchValue(e.target.value)}
             onKeyDown={(target) => {
-              if (target.key == "Enter") {
+              if (target.key === "Enter") {
                 addSearchWallet();
               }
             }}
@@ -76,13 +76,13 @@ export default function SearchModal(props: Props) {
             {w}
           </div>
         ))}
-        {props.searchWallets.length == 0 && (
+        {props.searchWallets.length === 0 && (
           <div className={styles.noSearchWalletsText}>
             No search wallets added
           </div>
         )}
         <Button
-          disabled={props.searchWallets.length == 0}
+          disabled={props.searchWallets.length === 0}
           className={`${styles.modalButtonClear} mt-3 mb-2`}
           onClick={() => props.clearSearchWallets()}>
           Clear All

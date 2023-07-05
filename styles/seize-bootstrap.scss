@@ -167,6 +167,11 @@ th:not(#allowlist-tool th) {
   padding: 0.1rem 0.1rem;
 }
 
+.table {
+  --bs-table-bg: transparent;
+  --bs-table-color: $font-color;
+}
+
 // .nav-tabs {
 //   border: none !important;
 // }

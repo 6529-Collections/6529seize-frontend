@@ -15,12 +15,11 @@ export default function DistributionPlanStepUpcoming({
       {!isLastStep && (
         <div
           className="tw-absolute tw-left-[13.25px] tw-top-4 -tw-ml-px tw-mt-0.5 tw-h-full tw-w-0.5 tw-bg-neutral-600"
-          aria-hidden="true"
-        ></div>
+          aria-hidden="true"></div>
       )}
       <div className="tw-group tw-relative tw-flex tw-items-start">
         <span className="tw-flex tw-h-8 tw-items-center" aria-hidden="true">
-          <span className="tw-relative tw-z-10 tw-flex tw-h-7 tw-w-7 tw-items-center tw-justify-center tw-rounded-full tw-border-solid tw-border-2 tw-border-neutral-300 tw-bg-neutral-900">
+          <span className="tw-relative tw-z-10 tw-flex tw-h-7 tw-w-7 tw-items-center tw-justify-center tw-rounded-full tw-border-solid tw-border-2 tw-border-neutral-300 tw-bg-neutral-900 z-0">
             <span className="tw-h-2.5 tw-w-2.5 tw-rounded-full tw-bg-transparent tw-bg-neutral-300"></span>
           </span>
         </span>

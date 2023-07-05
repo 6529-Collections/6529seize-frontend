@@ -24,7 +24,7 @@ export default function ConsolidationUseCases() {
   useEffect(() => {
     const url = `https://6529bucket.s3.eu-west-1.amazonaws.com/seize_html/consolidation-use-cases.html`;
     fetch(url).then((response) => {
-      if (response.status == 200) {
+      if (response.status === 200) {
         response.text().then((htmlText) => {
           setHtml(htmlText);
           setError(false);
@@ -52,7 +52,7 @@ export default function ConsolidationUseCases() {
         <meta property="og:description" content="6529 SEIZE" />
         <meta
           property="og:image"
-          content={`${process.env.BASE_ENDPOINT}/Seize_Logo_Glasses_2.png`}
+          content={`https://d3lqz0a4bldqgf.cloudfront.net/seize_images/Seize_Logo_Glasses_2.png`}
         />
       </Head>
       <main className={`${styles.main} ${styles.tdhMain}`}>

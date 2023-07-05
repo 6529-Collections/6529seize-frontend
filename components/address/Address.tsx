@@ -55,10 +55,10 @@ export function WalletAddress(props: {
   const [isCopied, setIsCopied] = useState(false);
 
   function resolveAddress() {
-    if (props.wallet.toUpperCase() == SIX529_MUSEUM.toUpperCase()) {
+    if (props.wallet.toUpperCase() === SIX529_MUSEUM.toUpperCase()) {
       return "6529Museum";
     }
-    if (props.wallet.toUpperCase() == MANIFOLD.toUpperCase()) {
+    if (props.wallet.toUpperCase() === MANIFOLD.toUpperCase()) {
       return "Manifold Minting Wallet";
     }
 
@@ -212,7 +212,7 @@ export default function Address(props: Props) {
 
   return (
     <>
-      {props.wallets.length == 1 ? (
+      {props.wallets.length === 1 ? (
         <WalletAddress
           wallet={props.wallets[0]}
           display={props.display}
@@ -358,7 +358,7 @@ export default function Address(props: Props) {
           ) : (
             <>
               {props.tags.memesCardsSetS1 > 0 &&
-                (props.tags.memesCardsSets == 0 || props.expandedTags) && (
+                (props.tags.memesCardsSets === 0 || props.expandedTags) && (
                   <span
                     className={`${styles.addressTag} ${
                       !SZN_1_ICON ? styles.memeSzn1Tag : ""
@@ -375,7 +375,7 @@ export default function Address(props: Props) {
                   </span>
                 )}
               {props.tags.memesCardsSetS2 > 0 &&
-                (props.tags.memesCardsSets == 0 || props.expandedTags) && (
+                (props.tags.memesCardsSets === 0 || props.expandedTags) && (
                   <span
                     className={`${styles.addressTag} ${
                       !SZN_2_ICON ? styles.memeSzn2Tag : ""
@@ -392,7 +392,7 @@ export default function Address(props: Props) {
                   </span>
                 )}
               {props.tags.memesCardsSetS3 > 0 &&
-                (props.tags.memesCardsSets == 0 || props.expandedTags) && (
+                (props.tags.memesCardsSets === 0 || props.expandedTags) && (
                   <span
                     className={`${styles.addressTag} ${
                       !SZN_3_ICON ? styles.memeSzn3Tag : ""

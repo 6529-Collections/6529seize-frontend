@@ -1,4 +1,4 @@
-import { sepolia } from "wagmi/chains";
+import { goerli, mainnet, sepolia } from "wagmi/chains";
 import { GRADIENT_CONTRACT, MEMES_CONTRACT } from "../constants";
 import { BaseNFT, VolumeType } from "../entities/INFT";
 
@@ -20,11 +20,11 @@ export function formatAddress(address: string) {
 }
 
 export function isMemesContract(contract: string) {
-  return contract.toUpperCase() == MEMES_CONTRACT.toUpperCase();
+  return contract.toUpperCase() === MEMES_CONTRACT.toUpperCase();
 }
 
 export function isGradientsContract(contract: string) {
-  return contract.toUpperCase() == GRADIENT_CONTRACT.toUpperCase();
+  return contract.toUpperCase() === GRADIENT_CONTRACT.toUpperCase();
 }
 
 export const fetchMeta = async (uri: string) => {
@@ -61,7 +61,7 @@ export function numberWithCommasFromString(x: string) {
 }
 
 export function numberWithCommas(x: number) {
-  if (x == null || x == 0 || isNaN(x)) return "-";
+  if (x === null || x === 0 || isNaN(x)) return "-";
   const parts = x.toString().split(".");
   parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
   return parts.join(".");
@@ -191,19 +191,58 @@ export const isValidEthAddress = (address: string) =>
   /^0x[0-9a-fA-F]{40}$/.test(address);
 
 export function getTransactionLink(chain_id: number, hash: string) {
-  return chain_id == sepolia.id
+  return chain_id === sepolia.id
     ? `https://sepolia.etherscan.io/tx/${hash}`
+    : chain_id === goerli.id
+    ? `https://goerli.etherscan.io/tx/${hash}`
     : `https://etherscan.io/tx/${hash}`;
 }
 
 export async function getContentTypeFromURL(url: string) {
   try {
     const response = await fetch(url, { method: "HEAD" });
-    console.log("response", response);
     const contentType = response.headers.get("Content-Type");
     return contentType;
   } catch (error) {
     console.error("Error retrieving content type:", error);
     return null;
   }
+}
+
+export function printMintDate(date: Date) {
+  const mintDate = new Date(date);
+  return `
+      ${mintDate.toLocaleString("default", {
+        day: "numeric",
+        month: "short",
+        year: "numeric",
+      })} 
+      (${getDateDisplay(mintDate)})
+    `;
+}
+
+export function getNetworkName(chainId: number) {
+  if (chainId === mainnet.id) {
+    return "Etherium Mainnet";
+  } else if (chainId === sepolia.id) {
+    return "Sepolia Testnet";
+  } else if (chainId === goerli.id) {
+    return "Goerli Testnet";
+  } else {
+    return `Network ID ${chainId}`;
+  }
+}
+
+export function createArray(startNum: number, endNum: number) {
+  let result = [];
+
+  if (startNum <= endNum) {
+    for (let i = startNum; i <= endNum; i++) {
+      result.push(i);
+    }
+  } else {
+    result.push(0);
+  }
+
+  return result;
 }

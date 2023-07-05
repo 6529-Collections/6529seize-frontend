@@ -42,7 +42,7 @@ export default function GradientsComponent(props: Props) {
       const routerSortDir = router.query.sort_dir;
       if (routerSortDir) {
         const resolvedRouterSortDir = Object.values(SortDirection).find(
-          (sd) => sd == routerSortDir
+          (sd) => sd === routerSortDir
         );
         if (resolvedRouterSortDir) {
           initialSortDir = resolvedRouterSortDir;
@@ -52,7 +52,7 @@ export default function GradientsComponent(props: Props) {
       const routerSort = router.query.sort;
       if (routerSort) {
         const resolvedRouterSort = Object.values(Sort).find(
-          (sd) => sd == routerSort
+          (sd) => sd === routerSort
         );
         if (resolvedRouterSort) {
           initialSort = resolvedRouterSort;
@@ -92,7 +92,7 @@ export default function GradientsComponent(props: Props) {
           [...nfts]
             .sort((a, b) => (a.tdh > b.tdh ? -1 : 1))
             .map((nft) => {
-              const owner = newOwners.find((o) => o.token_id == nft.id);
+              const owner = newOwners.find((o) => o.token_id === nft.id);
               if (owner) {
                 allOwners.push(owner);
               }
@@ -119,15 +119,15 @@ export default function GradientsComponent(props: Props) {
         { shallow: true }
       );
 
-      if (sort == Sort.ID) {
-        if (sortDir == SortDirection.ASC) {
+      if (sort === Sort.ID) {
+        if (sortDir === SortDirection.ASC) {
           setNfts([...nfts].sort((a, b) => (a.id > b.id ? 1 : -1)));
         } else {
           setNfts([...nfts].sort((a, b) => (a.id > b.id ? -1 : 1)));
         }
       }
-      if (sort == Sort.TDH) {
-        if (sortDir == SortDirection.ASC) {
+      if (sort === Sort.TDH) {
+        if (sortDir === SortDirection.ASC) {
           setNfts([...nfts].sort((a, b) => (a.tdh > b.tdh ? -1 : 1)));
         } else {
           setNfts([...nfts].sort((a, b) => (a.tdh > b.tdh ? 1 : -1)));
@@ -138,7 +138,7 @@ export default function GradientsComponent(props: Props) {
   }, [sortDir, sort]);
 
   function printNft(nft: NFT) {
-    const owner = nftOwners.find((o) => o.token_id == nft.id);
+    const owner = nftOwners.find((o) => o.token_id === nft.id);
     return (
       <Col
         key={`${nft.contract}-${nft.id}`}

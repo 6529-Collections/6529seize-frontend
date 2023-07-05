@@ -203,7 +203,7 @@ export default function DelegationsDocumentation(props: Props) {
 
   useEffect(() => {
     if (activeSection) {
-      if (activeSection == DelegationCenterSection.HTML && props.path) {
+      if (activeSection === DelegationCenterSection.HTML && props.path) {
         router.push(
           {
             pathname: `${props.path.join("/")}`,
@@ -268,7 +268,7 @@ export default function DelegationsDocumentation(props: Props) {
         <meta property="og:description" content="6529 SEIZE" />
         <meta
           property="og:image"
-          content={`${process.env.BASE_ENDPOINT}/Seize_Logo_Glasses_2.png`}
+          content={`https://d3lqz0a4bldqgf.cloudfront.net/seize_images/Seize_Logo_Glasses_2.png`}
         />
       </Head>
 

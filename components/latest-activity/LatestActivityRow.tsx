@@ -94,7 +94,7 @@ export default function LatestActivityRow(props: Props) {
             ) : (
               `#${props.tr.token_id}`
             )}
-            {props.tr.value == 0 && (
+            {props.tr.value === 0 && (
               <>
                 {" "}
                 to{" "}

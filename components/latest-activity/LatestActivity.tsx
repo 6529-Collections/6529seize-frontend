@@ -126,7 +126,7 @@ export default function LatestActivity(props: Props) {
                 activity.map((tr) => {
                   const nft = nfts.find(
                     (n) =>
-                      n.id == tr.token_id &&
+                      n.id === tr.token_id &&
                       areEqualAddresses(n.contract, tr.contract)
                   );
                   return (

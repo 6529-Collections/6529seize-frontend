@@ -33,7 +33,7 @@ export default function AboutTermsOfService() {
                 <br />
                 <br />
                 &quot;6529 NFTs&quot;: The Memes, 6529 Gradient, Meme Lab,
-                GenMemes, 6529 Intern and other NFTs that may be added from time
+                NextGen, 6529 Intern and other NFTs that may be added from time
                 to time.
                 <br />
                 <br />
@@ -77,8 +77,8 @@ export default function AboutTermsOfService() {
                 <ol>
                   <li>
                     Our main ongoing activity is primary minting CC0 NFTs (The
-                    Memes, Meme Lab, GenMemes are CC0) with a mission-based
-                    focus at fairly affordable prices.
+                    Memes, Meme Lab, NextGen are CC0) with a mission-based focus
+                    at fairly affordable prices.
                     <br />
                     <br />
                     Once the NFTs have been primary minted:
@@ -97,8 +97,8 @@ export default function AboutTermsOfService() {
                   <br />
                   <li>
                     We do not have control of what someone does with The Memes,
-                    Meme Lab and GenMemes NFTs after minting, either at the
-                    level of the token or the art.
+                    Meme Lab and NextGen NFTs after minting, either at the level
+                    of the token or the art.
                   </li>
                 </ol>
                 <br />

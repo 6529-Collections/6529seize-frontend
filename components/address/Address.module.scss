@@ -100,7 +100,8 @@
 }
 
 @media only screen and (max-width: 1200px) {
-  .tag {
+  .tag,
+  .addressTag {
     font-size: $font-smaller !important;
   }
   .copy {
@@ -110,7 +111,8 @@
 }
 
 @media only screen and (max-width: 1000px) {
-  .tag {
+  .tag,
+  .addressTag {
     font-size: $font-smallest !important;
   }
   .copy {

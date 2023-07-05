@@ -154,7 +154,7 @@ export default function ConsolidationMappingTool() {
               consolidationData.address,
               addressConsolidations.primary
             ) ||
-            sum == consolidationData.balance
+            sum === consolidationData.balance
           ) {
             out.push({
               ...consolidationData,
@@ -172,7 +172,7 @@ export default function ConsolidationMappingTool() {
   }, [csvData]);
 
   return (
-    <Container className={styles.toolArea} id="mapping-tool-form">
+    <Container className={styles.toolArea}>
       <Row>
         <Col>
           Upload File <span className="font-color-h">(.csv)</span>

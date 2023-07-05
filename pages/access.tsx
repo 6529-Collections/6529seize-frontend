@@ -33,7 +33,7 @@ export default function Login() {
     fetch(`${process.env.API_ENDPOINT}/api/`, {
       headers: { "x-6529-auth": pass },
     }).then((r: any) => {
-      if (r.status == 401) {
+      if (r.status === 401) {
         alert("Access Denied!");
       } else {
         alert("gm!");
@@ -57,7 +57,7 @@ export default function Login() {
         <meta property="og:description" content="6529 SEIZE" />
         <meta
           property="og:image"
-          content={`${process.env.BASE_ENDPOINT}/Seize_Logo_Glasses_2.png`}
+          content={`https://d3lqz0a4bldqgf.cloudfront.net/seize_images/Seize_Logo_Glasses_2.png`}
         />
       </Head>
       <main className={styles.login}>
@@ -82,7 +82,7 @@ export default function Login() {
             type="text"
             placeholder={inputDisabled ? "Go to seize.io" : "Team Login"}
             onKeyDown={(event: React.KeyboardEvent<HTMLDivElement>): void => {
-              if (event.key.toLowerCase() == "enter") {
+              if (event.key.toLowerCase() === "enter") {
                 doLogin(event.target);
               }
             }}
