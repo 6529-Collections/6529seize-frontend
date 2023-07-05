@@ -64,9 +64,15 @@ export function extractURI(s: string) {
     const animationUrl = match[1];
     const base64Data = animationUrl.split(",")[1];
     const uri = Buffer.from(base64Data, "base64").toString("utf-8");
-    return uri;
+    return {
+      uri: uri,
+      data: animationUrl,
+    };
   } else {
-    return "";
+    return {
+      uri: "",
+      data: "",
+    };
   }
 }
 
@@ -149,10 +155,10 @@ export default function NextGenCollection(props: Props) {
               tokens.push({
                 id: index + tokenIndexes.start,
                 collection: props.collection,
-                uri: uri,
+                uri: uri.uri,
+                data: uri.data,
                 name: name,
                 description: description,
-                is_data: true,
               });
             } else {
               tokens.push({
@@ -161,7 +167,6 @@ export default function NextGenCollection(props: Props) {
                 uri: r,
                 name: "",
                 description: "",
-                is_data: false,
               });
             }
           }

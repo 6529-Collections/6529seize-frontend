@@ -348,6 +348,7 @@ export default function NextGenMint(props: Props) {
         fetchUrl(
           `${process.env.API_ENDPOINT}/api/next_gen/${phaseTimes.merkle_root}/${wallet}`
         ).then((response: ProofResponse) => {
+          alert("proof");
           setProofResponse(response);
         });
       }
@@ -786,11 +787,13 @@ export default function NextGenMint(props: Props) {
                           onChange={(e: any) =>
                             setMintCount(parseInt(e.currentTarget.value))
                           }>
-                          {phaseTimes && addressMintCounts && proofResponse ? (
+                          {phaseTimes && addressMintCounts ? (
                             isMintingOpen(
                               phaseTimes.allowlist_start_time,
                               phaseTimes.allowlist_end_time
-                            ) && proofResponse.spots > 0 ? (
+                            ) &&
+                            proofResponse &&
+                            proofResponse.spots > 0 ? (
                               createArray(
                                 1,
                                 proofResponse.spots -
@@ -806,7 +809,7 @@ export default function NextGenMint(props: Props) {
                             ) : isMintingOpen(
                                 phaseTimes.public_start_time,
                                 phaseTimes.public_end_time
-                              ) && addressMintCounts ? (
+                              ) ? (
                               createArray(
                                 1,
                                 additionalData.max_purchases -

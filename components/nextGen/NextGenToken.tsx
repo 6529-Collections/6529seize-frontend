@@ -21,8 +21,10 @@ export default function NextGenToken(props: Props) {
   const [info1, setInfo1] = useState<Info>();
   const [owner, setOwner] = useState<`0x${string}`>();
   const [ownerENS, setOwnerENS] = useState<string>();
+  const [metadata, setMetadata] = useState<string>();
+  const [name, setName] = useState<string>();
+  const [description, setDescription] = useState<string>();
   const [codeCopied, setCodeCopied] = useState(false);
-  const [copyText, setCopyText] = useState<string>();
 
   useContractRead({
     address: NEXT_GEN_CONTRACT.contract,
@@ -39,10 +41,10 @@ export default function NextGenToken(props: Props) {
         setToken({
           id: props.id,
           collection: props.collection,
-          uri: uri,
+          uri: uri.uri,
+          data: uri.data,
           name: name,
           description: description,
-          is_data: true,
         });
       } else {
         setToken({
@@ -51,7 +53,6 @@ export default function NextGenToken(props: Props) {
           uri: data,
           name: "",
           description: "",
-          is_data: false,
         });
       }
     },
@@ -109,17 +110,22 @@ export default function NextGenToken(props: Props) {
       {token && (
         <Row>
           <Col xs={12} md={6} className="pt-2">
-            <NextGenTokenImage token={token} />
+            <NextGenTokenImage
+              token={token}
+              setMetadata={(url) => setMetadata(url)}
+              setName={(name) => setName(name)}
+              setDescription={(description) => setDescription(description)}
+            />
           </Col>
           <Col className="pt-2">
             <Container className="no-padding">
               <Row>
                 <Col>
-                  <h2>{token.name}</h2>
+                  <h2>{token.name ? token.name : name}</h2>
                 </Col>
               </Row>
               <Row>
-                <Col>{token.description}</Col>
+                <Col>{token.description ? token.description : description}</Col>
               </Row>
               <Row className="pt-3">
                 <Col>
@@ -156,14 +162,14 @@ export default function NextGenToken(props: Props) {
                           <td className="text-right">{info1.artist}</td>
                         </tr>
                       )}
-                      {copyText && (
+                      {token.data && (
                         <tr>
                           <td
                             className={`${styles.copyData} pt-3`}
                             colSpan={2}
                             onClick={() => {
                               if (navigator.clipboard) {
-                                navigator.clipboard.writeText(copyText);
+                                navigator.clipboard.writeText(token.data);
                                 setCodeCopied(true);
                                 setTimeout(() => {
                                   setCodeCopied(false);
@@ -173,6 +179,15 @@ export default function NextGenToken(props: Props) {
                             {codeCopied
                               ? `Copied - Paste in brower search bar to view`
                               : `Copy Image Data to Clipboard`}
+                          </td>
+                        </tr>
+                      )}
+                      {metadata && (
+                        <tr>
+                          <td className={`${styles.copyData} pt-3`} colSpan={2}>
+                            <a href={metadata} target="_blank" rel="noreferrer">
+                              View Metadata
+                            </a>
                           </td>
                         </tr>
                       )}

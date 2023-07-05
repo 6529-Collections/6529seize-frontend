@@ -6,7 +6,6 @@ import { useState } from "react";
 import { useContractRead, useEnsName } from "wagmi";
 import { NEXT_GEN_ABI } from "../../abis";
 import { NEXT_GEN_CONTRACT } from "../../constants";
-import Address from "../address/Address";
 
 interface Props {
   token: TokenURI;
@@ -15,6 +14,7 @@ interface Props {
 export default function NextGenTokenPreview(props: Props) {
   const [owner, setOwner] = useState<`0x${string}`>();
   const [ownerENS, setOwnerENS] = useState<string>();
+  const [name, setName] = useState<string>();
 
   useContractRead({
     address: NEXT_GEN_CONTRACT.contract,
@@ -47,14 +47,20 @@ export default function NextGenTokenPreview(props: Props) {
       <Container className="no-padding pt-3 pb-3">
         <Row>
           <Col className="text-center">
-            <NextGenTokenImage token={props.token} preview={true} />
+            <NextGenTokenImage
+              token={props.token}
+              preview={true}
+              setName={(name) => setName(name)}
+            />
           </Col>
         </Row>
         <Row className="pt-1">
           <Col className="text-center">#{props.token.id}</Col>
         </Row>
         <Row className="pt-1">
-          <Col className="text-center">{props.token.name}</Col>
+          <Col className="text-center">
+            {props.token.name ? props.token.name : name}
+          </Col>
         </Row>
         {/* {owner && (
           <Row className="pt-1">
