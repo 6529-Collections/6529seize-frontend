@@ -1,6 +1,6 @@
 import styles from "./NextGen.module.scss";
-import { Container, Row, Col, Table } from "react-bootstrap";
-import { useAccount, useChainId, useContractRead } from "wagmi";
+import { Container, Row, Col } from "react-bootstrap";
+import { useContractRead } from "wagmi";
 import { NEXT_GEN_CONTRACT } from "../../constants";
 import { NEXT_GEN_ABI } from "../../abis";
 import { useState } from "react";

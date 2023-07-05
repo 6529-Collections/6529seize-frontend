@@ -10,7 +10,7 @@
   border: none;
   background-color: $green !important;
   padding: 10px 50px;
-  width: 100%;
+  // width: 100%;
 
   &:hover {
     background-color: lighten($color: $green, $amount: 10) !important;
@@ -28,10 +28,16 @@
 
 .infoIcon {
   height: 18px;
-  margin-left: 8px;
+  margin-left: 6px;
   cursor: help;
   &:focus {
     outline: none !important;
+  }
+}
+
+@media only screen and (max-width: 800px) {
+  .infoIcon {
+    height: 15px;
   }
 }
 
@@ -46,13 +52,25 @@
 }
 
 .renderedHtmlContainer {
-  width: 50vw;
+  width: 100%;
   height: calc(90vh - $header-height);
 }
 
 .renderedHtmlContainerPreview {
   height: 300px;
   width: 300px;
+  max-width: 100%;
+}
+
+@media only screen and (max-width: 800px) {
+  .renderedHtmlContainerPreview {
+    height: 175px;
+  }
+
+  .renderedHtmlContainer {
+    width: 100%;
+    height: 300px;
+  }
 }
 
 .overview {
@@ -95,7 +113,7 @@
 }
 
 .mintArea {
-  padding: 25px 30px;
+  padding: 15px 25px;
   background-color: $almost-very-dark-grey;
 }
 
@@ -104,6 +122,8 @@
 }
 
 .mintingForRadio {
+  margin-bottom: 0;
+  min-height: unset;
   input {
     border-color: transparent !important;
     background-color: white !important;
@@ -121,4 +141,18 @@
   left: 0;
   width: 100%;
   height: 100%;
+}
+
+.loader {
+  width: 20px;
+  height: 20px;
+  margin-left: 5px;
+}
+
+.marketplace {
+  margin-right: 15px;
+}
+
+.marketplace:hover {
+  opacity: 0.75;
 }

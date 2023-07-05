@@ -41,9 +41,10 @@ export default function Header(props: Props) {
   const { address, connector, isConnected } = useAccount();
   const [burgerMenuOpen, setBurgerMenuOpen] = useState(false);
   const [view, setView] = useState<VIEW>();
+
   const [showBurgerMenuAbout, setShowBurgerMenuAbout] = useState(false);
-  const [setShowBurgerMenuCommunity, setsetShowBurgerMenuCommunity] =
-    useState(false);
+  const [showBurgerMenuCommunity, setShowBurgerMenuCommunity] = useState(false);
+  const [showBurgerMenuTools, setShowBurgerMenuTools] = useState(false);
 
   useEffect(() => {
     const viewMode = Cookies.get(VIEW_MODE_COOKIE);
@@ -74,7 +75,8 @@ export default function Header(props: Props) {
     function handleResize() {
       setBurgerMenuOpen(false);
       setShowBurgerMenuAbout(false);
-      setsetShowBurgerMenuCommunity(false);
+      setShowBurgerMenuCommunity(false);
+      setShowBurgerMenuTools(false);
     }
 
     window.addEventListener("resize", handleResize);
@@ -127,7 +129,8 @@ export default function Header(props: Props) {
           onClick={() => {
             setBurgerMenuOpen(false);
             setShowBurgerMenuAbout(false);
-            setsetShowBurgerMenuCommunity(false);
+            setShowBurgerMenuCommunity(false);
+            setShowBurgerMenuTools(false);
           }}></FontAwesomeIcon>
         <Container className="text-center">
           <Row className="pt-5 pb-4">
@@ -237,6 +240,8 @@ export default function Header(props: Props) {
                 <h3>ReMemes</h3>
               </a>
             </Col>
+          </Row>
+          <Row className="pt-3 pb-3">
             <Col>
               <a href="/nextgen">
                 <h3>NextGen</h3>
@@ -245,28 +250,22 @@ export default function Header(props: Props) {
           </Row>
           <Row className="pt-3 pb-3">
             <Col>
-              <a href="/delegation/delegation-center">
-                <h3>Delegation</h3>
-              </a>
-            </Col>
-          </Row>
-          <Row className="pt-3 pb-3">
-            <Col>
               <h3
                 onClick={() => {
-                  setsetShowBurgerMenuCommunity(!setShowBurgerMenuCommunity);
+                  setShowBurgerMenuCommunity(!showBurgerMenuCommunity);
                   setShowBurgerMenuAbout(false);
+                  setShowBurgerMenuTools(false);
                 }}
                 className={`${styles.burgerMenuHeader}
                   ${
-                    setShowBurgerMenuCommunity
+                    showBurgerMenuCommunity
                       ? styles.burgerMenuCaretClose
                       : styles.burgerMenuCaretOpen
                   }`}>
                 Community
               </h3>
             </Col>
-            {setShowBurgerMenuCommunity && (
+            {showBurgerMenuCommunity && (
               <Container>
                 <Row>
                   <Col xs={{ span: 6, offset: 3 }}>
@@ -287,6 +286,11 @@ export default function Header(props: Props) {
                     </a>
                   </Col>
                 </Row>
+                <Row>
+                  <Col xs={{ span: 6, offset: 3 }}>
+                    <hr />
+                  </Col>
+                </Row>
                 <Row className="pt-3">
                   <Col>
                     <a href="/community-metrics">
@@ -298,33 +302,6 @@ export default function Header(props: Props) {
                   <Col>
                     <a href="/consolidation-use-cases">
                       <h3>Consolidation Use Cases</h3>
-                    </a>
-                  </Col>
-                </Row>
-                <Row>
-                  <Col xs={{ span: 6, offset: 3 }}>
-                    <hr />
-                  </Col>
-                </Row>
-                <Row className="pt-3">
-                  <Col>
-                    <h3
-                      className={`${styles.dropdownItemHeader} ${styles.burgerMenuHeader}`}>
-                      Tools
-                    </h3>
-                  </Col>
-                </Row>
-                <Row className="pt-3">
-                  <Col>
-                    <a href="/delegation-mapping-tool">
-                      <h3>Delegation Mapping</h3>
-                    </a>
-                  </Col>
-                </Row>
-                <Row className="pt-3">
-                  <Col>
-                    <a href="/consolidation-mapping-tool">
-                      <h3>Consolidation Mapping</h3>
                     </a>
                   </Col>
                 </Row>
@@ -352,8 +329,86 @@ export default function Header(props: Props) {
             <Col>
               <h3
                 onClick={() => {
+                  setShowBurgerMenuTools(!showBurgerMenuTools);
+                  setShowBurgerMenuCommunity(false);
+                  setShowBurgerMenuAbout(false);
+                }}
+                className={`${styles.burgerMenuHeader}
+                  ${
+                    showBurgerMenuTools
+                      ? styles.burgerMenuCaretClose
+                      : styles.burgerMenuCaretOpen
+                  }`}>
+                Tools
+              </h3>
+            </Col>
+            {showBurgerMenuTools && (
+              <Container>
+                <Row>
+                  <Col xs={{ span: 6, offset: 3 }}>
+                    <hr />
+                  </Col>
+                </Row>
+                <Row className="pt-3">
+                  <Col>
+                    <a href="/delegation/delegation-center">
+                      <h3>Delegation Center</h3>
+                    </a>
+                  </Col>
+                </Row>
+                <Row>
+                  <Col xs={{ span: 6, offset: 3 }}>
+                    <hr />
+                  </Col>
+                </Row>
+                <Row className="pt-3">
+                  <Col>
+                    <a href="/allowlist-tool">
+                      <h3>Allowlist Plan</h3>
+                    </a>
+                  </Col>
+                </Row>
+                <Row className="pt-3">
+                  <Col>
+                    <a href="/distribution-plan-tool">
+                      <h3>Distribution Plan</h3>
+                    </a>
+                  </Col>
+                </Row>
+                <Row>
+                  <Col xs={{ span: 6, offset: 3 }}>
+                    <hr />
+                  </Col>
+                </Row>
+                <Row className="pt-3">
+                  <Col>
+                    <a href="/delegation-mapping-tool">
+                      <h3>Delegation Mapping</h3>
+                    </a>
+                  </Col>
+                </Row>
+                <Row className="pt-3">
+                  <Col>
+                    <a href="/consolidation-mapping-tool">
+                      <h3>Consolidation Mapping</h3>
+                    </a>
+                  </Col>
+                </Row>
+                <Row>
+                  <Col xs={{ span: 6, offset: 3 }}>
+                    <hr />
+                  </Col>
+                </Row>
+              </Container>
+            )}
+          </Row>
+          <Row className="pt-3 pb-3">
+            <Col>
+              <h3
+                onClick={() => {
                   setShowBurgerMenuAbout(!showBurgerMenuAbout);
-                  setsetShowBurgerMenuCommunity(false);
+                  setShowBurgerMenuCommunity(false);
+                  setShowBurgerMenuTools(false);
                 }}
                 className={`${styles.burgerMenuHeader}
                   ${
@@ -632,6 +687,7 @@ export default function Header(props: Props) {
                                 }>
                                 Latest Activity
                               </NavDropdown.Item>
+                              <NavDropdown.Divider />
                               <NavDropdown.Item
                                 className={styles.dropdownItem}
                                 onClick={() =>
@@ -649,10 +705,42 @@ export default function Header(props: Props) {
                               </NavDropdown.Item>
                               <NavDropdown.Divider />
                               <NavDropdown.Item
-                                disabled
-                                className={styles.dropdownItemHeader}>
-                                Tools
+                                className={styles.dropdownItem}
+                                onClick={() =>
+                                  (window.location.href = "/downloads")
+                                }>
+                                Downloads
                               </NavDropdown.Item>
+                            </NavDropdown>
+                            <NavDropdown
+                              title="Tools"
+                              align={"start"}
+                              className={`${styles.mainNavLink} ${styles.mainNavLinkPadding}`}>
+                              <NavDropdown.Item
+                                className={styles.dropdownItem}
+                                onClick={() =>
+                                  (window.location.href =
+                                    "/delegation/delegation-center")
+                                }>
+                                Delegation Center
+                              </NavDropdown.Item>
+                              <NavDropdown.Divider />
+                              <NavDropdown.Item
+                                className={styles.dropdownItem}
+                                onClick={() =>
+                                  (window.location.href = "/allowlist-tool")
+                                }>
+                                Allowlist Plan
+                              </NavDropdown.Item>
+                              <NavDropdown.Item
+                                className={styles.dropdownItem}
+                                onClick={() =>
+                                  (window.location.href =
+                                    "/distribution-plan-tool")
+                                }>
+                                Distribution Plan
+                              </NavDropdown.Item>
+                              <NavDropdown.Divider />
                               <NavDropdown.Item
                                 className={styles.dropdownItem}
                                 onClick={() =>
@@ -669,24 +757,7 @@ export default function Header(props: Props) {
                                 }>
                                 Consolidation Mapping
                               </NavDropdown.Item>
-                              <NavDropdown.Divider />
-                              <NavDropdown.Item
-                                className={styles.dropdownItem}
-                                onClick={() =>
-                                  (window.location.href = "/downloads")
-                                }>
-                                Downloads
-                              </NavDropdown.Item>
                             </NavDropdown>
-                            <Nav.Link
-                              className={`${styles.mainNavLink} ${
-                                router.pathname.includes("/delegation/")
-                                  ? "active"
-                                  : ""
-                              }`}
-                              href="/delegation/delegation-center">
-                              Delegation
-                            </Nav.Link>
                             <NavDropdown
                               title="About"
                               className={`${styles.mainNavLink} ${

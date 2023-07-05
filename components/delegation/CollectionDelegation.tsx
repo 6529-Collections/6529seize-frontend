@@ -1496,7 +1496,7 @@ export default function CollectionDelegationComponent(props: Props) {
                 (useCaseLockStatusesGlobal?.data &&
                   (useCaseLockStatusesGlobal?.data[
                     lockUseCaseIndex
-                  ] as any as boolean) == false) ? (
+                  ] as any as boolean) === false) ? (
                   <button
                     className={`${styles.lockUseCaseBtn}`}
                     onClick={() => {

@@ -31,7 +31,11 @@ export default function NextGen() {
         <Col>
           <h1>
             NEXTGEN
-            {collectionIndex ? ` [${collectionIndex} COLLECTIONS]` : ``}
+            {collectionIndex
+              ? ` [${collectionIndex} COLLECTION${
+                  collectionIndex > 1 ? `S` : ``
+                }]`
+              : ``}
           </h1>
         </Col>
       </Row>

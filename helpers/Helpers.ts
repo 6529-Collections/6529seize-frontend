@@ -193,13 +193,14 @@ export const isValidEthAddress = (address: string) =>
 export function getTransactionLink(chain_id: number, hash: string) {
   return chain_id === sepolia.id
     ? `https://sepolia.etherscan.io/tx/${hash}`
+    : chain_id === goerli.id
+    ? `https://goerli.etherscan.io/tx/${hash}`
     : `https://etherscan.io/tx/${hash}`;
 }
 
 export async function getContentTypeFromURL(url: string) {
   try {
     const response = await fetch(url, { method: "HEAD" });
-    console.log("response", response);
     const contentType = response.headers.get("Content-Type");
     return contentType;
   } catch (error) {
@@ -221,13 +222,27 @@ export function printMintDate(date: Date) {
 }
 
 export function getNetworkName(chainId: number) {
-  if (chainId == mainnet.id) {
+  if (chainId === mainnet.id) {
     return "Etherium Mainnet";
-  } else if (chainId == sepolia.id) {
+  } else if (chainId === sepolia.id) {
     return "Sepolia Testnet";
-  } else if (chainId == goerli.id) {
+  } else if (chainId === goerli.id) {
     return "Goerli Testnet";
   } else {
     return `Network ID ${chainId}`;
   }
+}
+
+export function createArray(startNum: number, endNum: number) {
+  let result = [];
+
+  if (startNum <= endNum) {
+    for (let i = startNum; i <= endNum; i++) {
+      result.push(i);
+    }
+  } else {
+    result.push(0);
+  }
+
+  return result;
 }

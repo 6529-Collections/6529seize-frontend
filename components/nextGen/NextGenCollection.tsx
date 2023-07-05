@@ -1,26 +1,20 @@
 import styles from "./NextGen.module.scss";
-import { Container, Row, Col, Button, Form, Table } from "react-bootstrap";
+import { Container, Row, Col, Button } from "react-bootstrap";
 import {
   useAccount,
   useChainId,
   useContractRead,
   useContractReads,
-  useContractWrite,
-  usePrepareContractWrite,
 } from "wagmi";
-import { NEVER_DATE, NEXT_GEN_CONTRACT, NULL_ADDRESS } from "../../constants";
+import { NEVER_DATE, NEXT_GEN_CONTRACT } from "../../constants";
 import { NEXT_GEN_ABI } from "../../abis";
-import { Fragment, useEffect, useState } from "react";
-import { fetchUrl } from "../../services/6529api";
+import { Fragment, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import Tippy from "@tippyjs/react";
-import RenderHTML from "./NextGenToken";
 import NextGenTokenList from "./NextGenTokenList";
 import {
   TokenIndexes,
   Info,
   AdditionalData,
-  ProofResponse,
   TokenURI,
   LibraryScript,
   PhaseTimes,
@@ -57,12 +51,13 @@ export function isMintingUpcoming(startTime: number) {
 }
 
 export function getMintingTimesDisplay(startTime: number, endTime: number) {
-  if (startTime > 0 && endTime > 0) {
-    return `${getDateDisplay(startTime)} - ${getDateDisplay(endTime)}`;
+  if (startTime === 0 && endTime === 0) {
+    return "";
   }
+  return `${getDateDisplay(startTime)} - ${getDateDisplay(endTime)}`;
 }
 
-function extractUri(s: string) {
+export function extractURI(s: string) {
   const regex = /"animation_url":"([^"]+)"/;
   const match = s.match(regex);
   if (match && match.length >= 2) {
@@ -70,6 +65,16 @@ function extractUri(s: string) {
     const base64Data = animationUrl.split(",")[1];
     const uri = Buffer.from(base64Data, "base64").toString("utf-8");
     return uri;
+  } else {
+    return "";
+  }
+}
+
+export function extractField(field: string, s: string) {
+  const regex = new RegExp(`"${field}":"([^"]+)"`);
+  const match = s.match(regex);
+  if (match && match.length >= 2) {
+    return match[1];
   } else {
     return "";
   }
@@ -138,16 +143,24 @@ export default function NextGenCollection(props: Props) {
           if (d.result && tokenIndexes) {
             const r: string = d.result as string;
             if (r.startsWith("data")) {
-              const uri = extractUri(r);
+              const uri = extractURI(r);
+              const name = extractField("name", r);
+              const description = extractField("description", r);
               tokens.push({
                 id: index + tokenIndexes.start,
+                collection: props.collection,
                 uri: uri,
+                name: name,
+                description: description,
                 is_data: true,
               });
             } else {
               tokens.push({
                 id: index + tokenIndexes.start,
+                collection: props.collection,
                 uri: r,
+                name: "",
+                description: "",
                 is_data: false,
               });
             }
@@ -240,7 +253,6 @@ export default function NextGenCollection(props: Props) {
           merkle_root: d[2],
           public_start_time: parseInt(d[3]) * 1000,
           public_end_time: parseInt(d[4]) * 1000,
-          ids: d[5],
         };
         setPhaseTimes(phases);
       }
@@ -266,36 +278,58 @@ export default function NextGenCollection(props: Props) {
       <Image
         loading={"lazy"}
         width="0"
-        height="150"
-        style={{ width: "100%" }}
+        height="0"
+        style={{ width: "100%", height: "auto" }}
         src={`${COLLECTION_BANNERS}/${props.collection}.png`}
         alt={`${props.collection}-banner`}
       />
-      <Container className="no-padding pt-2 pb-2">
+      <Container className="pt-2 pb-2">
         {tokenIndexes && additionalData && info && phaseTimes && (
           <Fragment>
             <Row className="pt-2">
-              <Col
-                xs={12}
-                className="d-flex justify-content-between align-items-center">
-                <h1>{info.name.toUpperCase()}</h1>
-                <FontAwesomeIcon
-                  className={styles.globeIcon}
-                  icon="globe"
-                  onClick={() => {
-                    let url = info.website;
-                    if (!url.startsWith("http")) {
-                      url = `http://${url}`;
-                    }
-                    window.open(url, "_blank");
-                  }}></FontAwesomeIcon>
+              <Col className="d-flex justify-content-between align-items-center flex-wrap">
+                <span>
+                  <h1 className="mb-0">{info.name.toUpperCase()}</h1>
+                </span>
+                <span className="d-flex align-items-center gap-4">
+                  <FontAwesomeIcon
+                    className={styles.globeIcon}
+                    icon="globe"
+                    onClick={() => {
+                      let url = info.website;
+                      if (!url.startsWith("http")) {
+                        url = `http://${url}`;
+                      }
+                      window.open(url, "_blank");
+                    }}></FontAwesomeIcon>
+                  <Button
+                    onClick={() => {
+                      window.location.href = `/nextgen/${props.collection}/mint`;
+                    }}
+                    className={styles.mintBtn}
+                    disabled={
+                      !additionalData ||
+                      !additionalData.is_collection_active ||
+                      !phaseTimes ||
+                      (!isMintingOpen(
+                        phaseTimes.allowlist_start_time,
+                        phaseTimes.allowlist_end_time
+                      ) &&
+                        !isMintingOpen(
+                          phaseTimes.public_start_time,
+                          phaseTimes.public_end_time
+                        ))
+                    }>
+                    Go to Minting
+                  </Button>
+                </span>
               </Col>
-              <Col xs={12} className="lead">
+              <Col className="pt-2" xs={12}>
                 by {info.artist.toUpperCase()}
               </Col>
             </Row>
             <Row className="pt-4">
-              <Col sm={12} md={10} className="d-flex gap-4">
+              <Col className="d-flex  align-items-center flex-wrap gap-4">
                 <span className="d-inline-flex align-items-center gap-2">
                   <span
                     className={`traffic-light ${
@@ -340,31 +374,9 @@ export default function NextGenCollection(props: Props) {
                   )}
                 </span>
               </Col>
-              <Col sm={12} md={2} className="text-center">
-                <Button
-                  onClick={() => {
-                    window.location.href = `/nextgen/${props.collection}/mint`;
-                  }}
-                  className={styles.mintBtn}
-                  disabled={
-                    !additionalData ||
-                    !additionalData.is_collection_active ||
-                    !phaseTimes ||
-                    (!isMintingOpen(
-                      phaseTimes.allowlist_start_time,
-                      phaseTimes.allowlist_end_time
-                    ) &&
-                      !isMintingOpen(
-                        phaseTimes.public_start_time,
-                        phaseTimes.public_end_time
-                      ))
-                  }>
-                  Mint Now
-                </Button>
-              </Col>
             </Row>
             <Row className="pt-4">
-              <Col className="d-flex align-tems-center justify-content-start gap-5">
+              <Col className="d-flex align-tems-center justify-content-start gap-3 flex-wrap">
                 <span>
                   Token Indexes{" "}
                   <b>

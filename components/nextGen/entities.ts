@@ -33,7 +33,6 @@ export interface PhaseTimes {
   merkle_root: string;
   public_start_time: number;
   public_end_time: number;
-  ids: number[];
 }
 
 export interface TokensPerAddress {
@@ -46,12 +45,16 @@ export interface TokensPerAddress {
 export interface ProofResponse {
   keccak: string;
   spots: number;
+  info: any;
   proof: string[];
 }
 
 export interface TokenURI {
   id: number;
+  collection: number;
   uri: string;
+  name: string;
+  description: string;
   is_data: boolean;
   data?: string;
 }

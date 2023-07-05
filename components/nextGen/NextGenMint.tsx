@@ -5,6 +5,9 @@ import {
   useAccount,
   useChainId,
   useContractReads,
+  useWaitForTransaction,
+  useEnsAddress,
+  useEnsName,
 } from "wagmi";
 import { DELEGATION_ABI, NEXT_GEN_ABI } from "../../abis";
 import {
@@ -31,12 +34,30 @@ import {
 } from "./NextGenCollection";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Tippy from "@tippyjs/react";
-import { fromGWEI, getNetworkName } from "../../helpers/Helpers";
+import {
+  createArray,
+  fromGWEI,
+  getNetworkName,
+  getTransactionLink,
+} from "../../helpers/Helpers";
 import { useWeb3Modal } from "@web3modal/react";
 import {
   ALL_USE_CASE,
   MINTING_USE_CASE,
 } from "../../pages/delegation/[...section]";
+
+function NextGenDelegatorOption(props: { address: string }) {
+  const ens = useEnsName({
+    address: props.address as `0x${string}`,
+    chainId: 1,
+  });
+
+  return (
+    <option value={props.address}>
+      {ens.data ? `${ens.data} - ${props.address}` : props.address}
+    </option>
+  );
+}
 
 interface Props {
   collection: number;
@@ -59,7 +80,9 @@ export default function NextGenMint(props: Props) {
   const [info, setInfo] = useState<Info>();
   const [additionalData, setAdditionalData] = useState<AdditionalData>();
 
-  const [mintToAddress, setMintToAddress] = useState<string>("");
+  const [mintToInput, setMintToInput] = useState("");
+  const [mintToAddress, setMintToAddress] = useState("");
+
   const [mintingForDelegator, setMintingForDelegator] = useState(false);
   const [mintForAddress, setMintForAddress] = useState<string>("");
   const [mintCount, setMintCount] = useState<number>(1);
@@ -123,7 +146,9 @@ export default function NextGenMint(props: Props) {
     address: NEXT_GEN_CONTRACT.contract,
     abi: NEXT_GEN_ABI,
     chainId: NEXT_GEN_CONTRACT.chain_id,
-    value: BigInt(additionalData ? additionalData.mint_cost * mintCount : 0),
+    value: mintCount
+      ? BigInt(additionalData ? additionalData.mint_cost * mintCount : 0)
+      : BigInt(0),
     functionName: "mint",
     args: [
       props.collection,
@@ -137,8 +162,7 @@ export default function NextGenMint(props: Props) {
       )
         ? proofResponse.spots
         : 0,
-      0, //tdh
-      phaseTimes ? phaseTimes.ids : [],
+      proofResponse ? proofResponse.info : "",
       mintToAddress,
       phaseTimes &&
       proofResponse &&
@@ -152,10 +176,19 @@ export default function NextGenMint(props: Props) {
     ],
     enabled: isMinting,
     onError(error: any) {
-      setErrors(["Something went wrong during contract call"]);
+      mintWrite.reset();
+      const e = error.message.split("\n");
+      const message = [e[0], e[1]].join(" ");
+      setErrors([message]);
+      setIsMinting(false);
     },
   });
   const mintWrite = useContractWrite(mintWriteConfig.config);
+
+  const waitMintWrite = useWaitForTransaction({
+    confirmations: 1,
+    hash: mintWrite.data?.hash,
+  });
 
   function validate() {
     let e: string[] = [];
@@ -174,9 +207,8 @@ export default function NextGenMint(props: Props) {
   }
 
   const handleMintClick = () => {
-    setErrors([]);
     if (account.isConnected) {
-      if (chainId == NEXT_GEN_CONTRACT.chain_id) {
+      if (chainId === NEXT_GEN_CONTRACT.chain_id) {
         const e = validate();
         if (e.length > 0) {
           setErrors(e);
@@ -190,6 +222,12 @@ export default function NextGenMint(props: Props) {
       web3Modal.open();
     }
   };
+
+  useEffect(() => {
+    if (mintWrite.isError || waitMintWrite.isSuccess) {
+      setIsMinting(false);
+    }
+  }, [mintWrite.isError, waitMintWrite.isSuccess]);
 
   useEffect(() => {
     if (isMinting) {
@@ -265,11 +303,8 @@ export default function NextGenMint(props: Props) {
         const del: string[] = [];
         const d = data as any[];
         d.map((r) => {
-          del.concat(r);
+          r.result.map((a: string) => del.push(a));
         });
-        del.push("0x3558C942EeA9e9Bb9b1a6A02d272756EDD3A1Fe4");
-        del.push("0x7f3774EAdae4beB01919deC7f32A72e417Ab5DE3");
-        del.push("0xc03e57b6ace9dd62c84a095e11e494e3c8fd4d42");
         setMintForAddress(del[0]);
         setDelegators(del);
       }
@@ -311,7 +346,7 @@ export default function NextGenMint(props: Props) {
       const wallet = mintingForDelegator ? mintForAddress : account.address;
       if (wallet) {
         fetchUrl(
-          `${process.env.API_ENDPOINT}/api/gen_memes/${phaseTimes.merkle_root}/${wallet}`
+          `${process.env.API_ENDPOINT}/api/next_gen/${phaseTimes.merkle_root}/${wallet}`
         ).then((response: ProofResponse) => {
           setProofResponse(response);
         });
@@ -319,11 +354,49 @@ export default function NextGenMint(props: Props) {
     }
   }, [phaseTimes, account.address, mintingForDelegator]);
 
+  const mintToAddressEns = useEnsName({
+    address:
+      mintToInput && mintToInput.startsWith("0x")
+        ? (mintToInput as `0x${string}`)
+        : undefined,
+    chainId: 1,
+  });
+
+  const delegatorsEns = useEnsName({
+    address:
+      mintToInput && mintToInput.startsWith("0x")
+        ? (mintToInput as `0x${string}`)
+        : undefined,
+    chainId: 1,
+  });
+
   useEffect(() => {
-    setMintToAddress("");
+    if (mintToAddressEns.data) {
+      setMintToAddress(mintToInput);
+      setMintToInput(`${mintToAddressEns.data} - ${mintToInput}`);
+    }
+  }, [mintToAddressEns.data]);
+
+  const mintToAddressFromEns = useEnsAddress({
+    name: mintToInput && mintToInput.endsWith(".eth") ? mintToInput : undefined,
+    chainId: 1,
+  });
+
+  useEffect(() => {
+    if (mintToAddressFromEns.data) {
+      setMintToAddress(mintToAddressFromEns.data);
+      setMintToInput(`${mintToInput} - ${mintToAddressFromEns.data}`);
+    }
+  }, [mintToAddressFromEns.data]);
+
+  useEffect(() => {
     setProofResponse(undefined);
     if (account.address) {
       setMintToAddress(account.address);
+      setMintToInput(account.address);
+    } else {
+      setMintToInput("");
+      setMintToAddress("");
     }
   }, [account.address]);
 
@@ -343,12 +416,42 @@ export default function NextGenMint(props: Props) {
           merkle_root: d[2],
           public_start_time: parseInt(d[3]) * 1000,
           public_end_time: parseInt(d[4]) * 1000,
-          ids: d[5],
         };
         setPhaseTimes(phases);
       }
     },
   });
+
+  function disableMint() {
+    return (
+      !phaseTimes ||
+      !additionalData ||
+      !phaseTimes ||
+      !addressMintCounts ||
+      !proofResponse ||
+      !additionalData.is_collection_active ||
+      (!isMintingOpen(
+        phaseTimes.allowlist_start_time,
+        phaseTimes.allowlist_end_time
+      ) &&
+        !isMintingOpen(
+          phaseTimes.public_start_time,
+          phaseTimes.public_end_time
+        )) ||
+      (isMintingOpen(
+        phaseTimes.allowlist_start_time,
+        phaseTimes.allowlist_end_time
+      ) &&
+        0 >= proofResponse.spots - addressMintCounts.allowlist) ||
+      (isMintingOpen(
+        phaseTimes.public_start_time,
+        phaseTimes.public_end_time
+      ) &&
+        0 >= additionalData.max_purchases - addressMintCounts.public) ||
+      0 >= availableSupply ||
+      isMinting
+    );
+  }
 
   useContractRead({
     address: NEXT_GEN_CONTRACT.contract,
@@ -375,24 +478,20 @@ export default function NextGenMint(props: Props) {
   }, [mintingForDelegator]);
 
   return (
-    <Container className="no-padding pt-4 pb-5">
+    <Container className="pt-4 pb-5">
       <Row>
         <Col xs={12}>
-          <h1>
+          <h1 className="mb-0">
             {info
               ? `${info.name.toUpperCase()}`
               : `COLLECTION #${props.collection}`}{" "}
             MINTING PAGE
           </h1>
         </Col>
-        {info && (
-          <Col xs={12} className="lead">
-            by {info.artist.toUpperCase()}
-          </Col>
-        )}
+        {info && <Col xs={12}>by {info.artist.toUpperCase()}</Col>}
       </Row>
       <Row className="pt-4">
-        <Col sm={12} md={10} className="d-flex gap-4">
+        <Col className="d-flex gap-4 flex-wrap">
           <span className="d-inline-flex align-items-center gap-2">
             <span
               className={`traffic-light ${
@@ -404,7 +503,7 @@ export default function NextGenMint(props: Props) {
               }`}></span>
             Active
           </span>
-          {phaseTimes && phaseTimes.allowlist_end_time > 0 && (
+          {phaseTimes && (
             <span className="d-inline-flex align-items-center gap-2">
               <span
                 className={`traffic-light ${
@@ -424,7 +523,7 @@ export default function NextGenMint(props: Props) {
               )}
             </span>
           )}
-          {phaseTimes && phaseTimes.public_end_time > 0 && (
+          {phaseTimes && (
             <span className="d-inline-flex align-items-center gap-2">
               <span
                 className={`traffic-light ${
@@ -447,7 +546,7 @@ export default function NextGenMint(props: Props) {
         </Col>
       </Row>
       {additionalData && (
-        <Row className="pt-5">
+        <Row className="pt-4">
           <Col sm={12} md={6}>
             <Table>
               <tbody>
@@ -574,8 +673,15 @@ export default function NextGenMint(props: Props) {
                       setIsMinting(false);
                     }}>
                     <Form.Group as={Row} className="pb-2">
-                      <Col sm={12} className="d-flex align-items-center gap-3">
-                        Minting For{" "}
+                      <Form.Label
+                        column
+                        sm={12}
+                        className="d-flex align-items-center">
+                        Minting For
+                      </Form.Label>
+                      <Col
+                        sm={12}
+                        className="d-flex align-items-center gap-3 flex-wrap">
                         <span className="d-flex align-items-center">
                           <Form.Check
                             checked={!mintingForDelegator}
@@ -612,7 +718,7 @@ export default function NextGenMint(props: Props) {
                           <Tippy
                             content={`Mint for an address that has delegated to you${
                               delegators.length === 0
-                                ? ` - you have no delegators currently`
+                                ? ` - you currently have no delegators`
                                 : ``
                             }`}
                             placement={"top"}
@@ -648,11 +754,10 @@ export default function NextGenMint(props: Props) {
                               setMintForAddress(e.currentTarget.value)
                             }>
                             {delegators.map((delegator) => (
-                              <option
-                                value={delegator}
-                                key={`delegator-${delegator}`}>
-                                {delegator}
-                              </option>
+                              <NextGenDelegatorOption
+                                address={delegator}
+                                key={`delegator-${delegator}`}
+                              />
                             ))}
                           </Form.Select>
                         </Col>
@@ -681,52 +786,43 @@ export default function NextGenMint(props: Props) {
                           onChange={(e: any) =>
                             setMintCount(parseInt(e.currentTarget.value))
                           }>
-                          {phaseTimes ? (
+                          {phaseTimes && addressMintCounts && proofResponse ? (
                             isMintingOpen(
                               phaseTimes.allowlist_start_time,
                               phaseTimes.allowlist_end_time
-                            ) &&
-                            addressMintCounts &&
-                            proofResponse &&
-                            proofResponse.spots > 0 ? (
-                              Array.from(
-                                {
-                                  length:
-                                    proofResponse.spots -
-                                    addressMintCounts.allowlist,
-                                },
-                                (_, index) =>
-                                  addressMintCounts.allowlist + index
+                            ) && proofResponse.spots > 0 ? (
+                              createArray(
+                                1,
+                                proofResponse.spots -
+                                  addressMintCounts.allowlist
                               ).map((i) => (
                                 <option
+                                  selected
                                   key={`allowlist-mint-count-${i}`}
-                                  value={i + 1}>
-                                  {i + 1}
+                                  value={i}>
+                                  {i > 0 ? i : `n/a`}
                                 </option>
                               ))
                             ) : isMintingOpen(
                                 phaseTimes.public_start_time,
                                 phaseTimes.public_end_time
                               ) && addressMintCounts ? (
-                              Array.from(
-                                {
-                                  length:
-                                    additionalData.max_purchases -
-                                    addressMintCounts.public,
-                                },
-                                (_, index) => addressMintCounts.public + index
+                              createArray(
+                                1,
+                                additionalData.max_purchases -
+                                  addressMintCounts.public
                               ).map((i) => (
                                 <option
                                   key={`public-mint-count-${i}`}
-                                  value={i + 1}>
-                                  {i + 1}
+                                  value={i}>
+                                  {i > 0 ? i : `n/a`}
                                 </option>
                               ))
                             ) : (
-                              <option value={0}>0</option>
+                              <option value={0}>n/a</option>
                             )
                           ) : (
-                            <option value={0}>0</option>
+                            <option value={0}>n/a</option>
                           )}
                         </Form.Select>
                       </Col>
@@ -750,45 +846,45 @@ export default function NextGenMint(props: Props) {
                         <Form.Control
                           className={`${styles.formInput} ${styles.formInputDisabled}`}
                           type="text"
-                          value={mintToAddress}
                           placeholder="0x..."
                           disabled={!account.isConnected}
-                          onChange={(e) => setMintToAddress(e.target.value)}
+                          value={mintToInput}
+                          onChange={(e) => {
+                            setMintToInput(e.target.value);
+                            setMintToAddress(e.target.value);
+                          }}
                         />
                       </Col>
                     </Form.Group>
                     <Form.Group as={Row} className="pt-4">
                       <Col sm={12}>
                         <Button
-                          className={styles.mintBtn}
-                          disabled={
-                            !phaseTimes ||
-                            !additionalData.is_collection_active ||
-                            (!isMintingOpen(
-                              phaseTimes.allowlist_start_time,
-                              phaseTimes.allowlist_end_time
-                            ) &&
-                              !isMintingOpen(
-                                phaseTimes.public_start_time,
-                                phaseTimes.public_end_time
-                              )) ||
-                            0 >= availableSupply
-                          }
+                          className={`${styles.mintBtn} btn-block`}
+                          disabled={disableMint()}
                           onClick={handleMintClick}>
                           {account.isConnected
-                            ? chainId == NEXT_GEN_CONTRACT.chain_id
-                              ? `Mint Now`
+                            ? chainId === NEXT_GEN_CONTRACT.chain_id
+                              ? isMinting
+                                ? `Processing...`
+                                : `Mint Now`
                               : `Switch to ${getNetworkName(
                                   NEXT_GEN_CONTRACT.chain_id
                                 )}`
                             : `Connect Wallet`}
+                          {isMinting && (
+                            <div className="d-inline">
+                              <div
+                                className={`spinner-border ${styles.loader}`}
+                                role="status">
+                                <span className="sr-only"></span>
+                              </div>
+                            </div>
+                          )}
                         </Button>
                       </Col>
                     </Form.Group>
                     {(errors.length > 0 || mintWrite.isError) && (
-                      <Form.Group
-                        as={Row}
-                        className={`pt-2 pb-2 ${styles.newDelegationError}`}>
+                      <Form.Group as={Row} className={`pt-2 pb-2`}>
                         <Form.Label
                           column
                           sm={12}
@@ -798,15 +894,78 @@ export default function NextGenMint(props: Props) {
                         <Col sm={12} className="d-flex align-items-center">
                           <ul className="mb-0">
                             {mintWrite.error && (
-                              <li>{mintWrite.error.message}</li>
+                              <li>
+                                {mintWrite.error.name}:{" "}
+                                {mintWrite.error.message.split("\n")[0]}
+                              </li>
                             )}
                             {errors.map((e, index) => (
-                              <li key={`new-delegation-error-${index}`}>{e}</li>
+                              <li key={`mint-error-${index}`}>{e}</li>
                             ))}
                           </ul>
                         </Col>
                       </Form.Group>
                     )}
+                    {mintWrite.isLoading && (
+                      <Form.Group as={Row} className={`pt-3`}>
+                        <Col sm={12} className="d-flex align-items-center">
+                          Confirm in your wallet...
+                        </Col>
+                      </Form.Group>
+                    )}
+                    {mintWrite.data && (
+                      <Form.Group as={Row} className={`pt-3`}>
+                        <Col sm={12} className="d-flex align-items-center">
+                          Transaction{" "}
+                          {waitMintWrite.isSuccess
+                            ? `Successful!`
+                            : `Submitted.`}
+                          &nbsp;&nbsp;
+                          <a
+                            href={getTransactionLink(
+                              NEXT_GEN_CONTRACT.chain_id,
+                              mintWrite.data.hash
+                            )}
+                            target="_blank"
+                            rel="noreferrer">
+                            view
+                          </a>
+                        </Col>
+                      </Form.Group>
+                    )}
+                    {waitMintWrite.isLoading && (
+                      <Form.Group as={Row} className={`pt-1`}>
+                        <Col sm={12} className="d-flex align-items-center">
+                          Waiting for confirmation...
+                        </Col>
+                      </Form.Group>
+                    )}
+                    {phaseTimes &&
+                      proofResponse &&
+                      addressMintCounts &&
+                      proofResponse.spots > 0 &&
+                      0 >=
+                        proofResponse.spots - addressMintCounts.allowlist && (
+                        <Form.Group as={Row} className={`pt-3`}>
+                          <Col sm={12} className="d-flex align-items-center">
+                            Max allowlist spots reached (x
+                            {addressMintCounts.allowlist})
+                          </Col>
+                        </Form.Group>
+                      )}
+                    {phaseTimes &&
+                      proofResponse &&
+                      addressMintCounts &&
+                      0 >=
+                        additionalData.max_purchases -
+                          addressMintCounts.public && (
+                        <Form.Group as={Row} className={`pt-3`}>
+                          <Col sm={12} className="d-flex align-items-center">
+                            Max public spots reached (x
+                            {addressMintCounts.public})
+                          </Col>
+                        </Form.Group>
+                      )}
                   </Form>
                 </Col>
               </Row>

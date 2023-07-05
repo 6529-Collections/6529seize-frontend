@@ -22,7 +22,7 @@ import {
   w3mProvider,
 } from "@web3modal/ethereum";
 
-import { mainnet, sepolia } from "wagmi/chains";
+import { goerli, mainnet, sepolia } from "wagmi/chains";
 import { configureChains, createConfig, WagmiConfig } from "wagmi";
 
 import { library } from "@fortawesome/fontawesome-svg-core";
@@ -135,7 +135,7 @@ const CONTRACT_CHAINS =
   DELEGATION_CONTRACT.chain_id === mainnet.id &&
   NEXT_GEN_CONTRACT.chain_id === mainnet.id
     ? [mainnet]
-    : [mainnet, sepolia];
+    : [mainnet, sepolia, goerli];
 
 const { chains, publicClient } = configureChains(CONTRACT_CHAINS, [
   alchemyProvider({ apiKey: process.env.ALCHEMY_API_KEY! }),
