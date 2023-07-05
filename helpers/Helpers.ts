@@ -246,3 +246,10 @@ export function createArray(startNum: number, endNum: number) {
 
   return result;
 }
+
+export function parseIpfsUrl(url: string) {
+  if (url.startsWith("ipfs")) {
+    return `https://ipfs.io/ipfs/${url.split("://")[1]}`;
+  }
+  return url;
+}

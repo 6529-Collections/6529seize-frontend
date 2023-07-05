@@ -53,8 +53,7 @@ export interface TokenURI {
   id: number;
   collection: number;
   uri: string;
+  data?: any;
   name: string;
   description: string;
-  is_data: boolean;
-  data?: string;
 }
