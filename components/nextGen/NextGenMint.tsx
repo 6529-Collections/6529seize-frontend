@@ -449,6 +449,7 @@ export default function NextGenMint(props: Props) {
         phaseTimes.allowlist_start_time,
         phaseTimes.allowlist_end_time
       ) &&
+        proofResponse &&
         0 >= proofResponse.spots - addressMintCounts.allowlist) ||
       (isMintingOpen(
         phaseTimes.public_start_time,
