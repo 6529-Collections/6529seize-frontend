@@ -75,7 +75,7 @@ export default function BuildPhases() {
       setSelectedPhase(phasesByOp.find((p) => p.id === selectedPhase.id));
       return;
     }
-    setSelectedPhase(phasesByOp.at(0));
+    setSelectedPhase(phasesByOp.at(1));
   }, [phasesByOp, selectedPhase]);
 
   const onNextStep = async () => {
@@ -101,11 +101,8 @@ export default function BuildPhases() {
           >
             <BuildPhase
               onNextStep={onNextStep}
-              phase={selectedPhase}
-              totalPhases={phasesByOp.length}
-              currentPhase={
-                phasesByOp.findIndex((p) => p.id === selectedPhase.id) + 1
-              }
+              selectedPhase={selectedPhase}
+              phases={phasesByOp}
             />
           </AllowlistToolAnimationOpacity>
         </AllowlistToolAnimationWrapper>

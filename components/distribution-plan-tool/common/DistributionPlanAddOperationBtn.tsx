@@ -1,8 +1,3 @@
-import { useEffect, useState } from "react";
-import AllowlistToolAnimationOpacity from "../../allowlist-tool/common/animation/AllowlistToolAnimationOpacity";
-import AllowlistToolAnimationWrapper from "../../allowlist-tool/common/animation/AllowlistToolAnimationWrapper";
-import { getRandomObjectId } from "../../../helpers/AllowlistToolHelpers";
-
 export default function DistributionPlanAddOperationBtn({
   children,
   loading,
@@ -10,10 +5,6 @@ export default function DistributionPlanAddOperationBtn({
   children: React.ReactNode;
   loading: boolean;
 }) {
-  const [randomKey, setRandomKey] = useState<string>(getRandomObjectId());
-  useEffect(() => {
-    setRandomKey(getRandomObjectId());
-  }, [loading]);
   return (
     <button
       disabled={loading}

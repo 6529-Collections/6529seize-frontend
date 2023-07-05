@@ -1,4 +1,5 @@
 import { DistributionPlanToolStep } from "../DistributionPlanToolContext";
+import DistributionPlanSecondaryText from "./DistributionPlanSecondaryText";
 
 const STEP_META: Record<
   DistributionPlanToolStep,
@@ -52,9 +53,9 @@ export default function StepHeader({
       <h1 className="tw-uppercase tw-text-white">
         {STEP_META[step].title} {title}
       </h1>
-      <p className="tw-mt-1 tw-mb-0 tw-block tw-font-light tw-text-base tw-text-neutral-400">
+      <DistributionPlanSecondaryText>
         {STEP_META[step].description} {description}
-      </p>
+      </DistributionPlanSecondaryText>
     </div>
   );
 }

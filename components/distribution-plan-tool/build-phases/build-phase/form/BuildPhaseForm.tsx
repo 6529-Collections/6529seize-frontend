@@ -17,7 +17,7 @@ import AllowlistToolCommonModalWrapper, {
 } from "../../../../allowlist-tool/common/modals/AllowlistToolCommonModalWrapper";
 import BuildPhaseFormConfigModal from "./BuildPhaseFormConfigModal";
 
-export default function BuildPhaseForm({ phase }: { phase: BuildPhasesPhase }) {
+export default function BuildPhaseForm({ selectedPhase, phases }: { selectedPhase: BuildPhasesPhase, phases: BuildPhasesPhase[] }) {
   const { operations, distributionPlan, addOperations, setToasts } = useContext(
     DistributionPlanToolContext
   );
@@ -143,7 +143,7 @@ export default function BuildPhaseForm({ phase }: { phase: BuildPhasesPhase }) {
         id: getRandomObjectId(),
         name: formValues.name,
         description: formValues.description,
-        phaseId: phase.id,
+        phaseId: selectedPhase.id,
       },
     });
   };
@@ -188,43 +188,43 @@ export default function BuildPhaseForm({ phase }: { phase: BuildPhasesPhase }) {
     });
   };
 
-  const [isConfigModalOpen, setIsConfigModalOpen] = useState(false);
+  const [isConfigModalOpen, setIsConfigModalOpen] = useState(true);
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (!distributionPlan) return;
-    if (!selectedSnapshots.length) {
-      setToasts({
-        messages: ["Please select at least one snapshot."],
-        type: "error",
-      });
-      return;
-    }
-    if (
-      !formValues.mintCap ||
-      isNaN(+formValues.mintCap) ||
-      +formValues.mintCap < 1
-    ) {
-      setToasts({
-        messages: ["Please enter a valid maximum mints."],
-        type: "error",
-      });
-      return;
-    }
-    //  setIsConfigModalOpen(true);
-    const componentId = await addComponent();
-    if (!componentId) return;
-    for (const snapshot of selectedSnapshots) {
-      const itemId = await addItem({ componentId, snapshot });
-      if (!itemId) return;
-    }
-    await addSpots({ componentId, spots: +formValues.mintCap });
-    setFormValues({
-      name: "",
-      description: "",
-      mintCap: "",
-    });
-    setSelectedSnapshots([]);
+    // if (!selectedSnapshots.length) {
+    //   setToasts({
+    //     messages: ["Please select at least one snapshot."],
+    //     type: "error",
+    //   });
+    //   return;
+    // }
+    // if (
+    //   !formValues.mintCap ||
+    //   isNaN(+formValues.mintCap) ||
+    //   +formValues.mintCap < 1
+    // ) {
+    //   setToasts({
+    //     messages: ["Please enter a valid maximum mints."],
+    //     type: "error",
+    //   });
+    //   return;
+    // }
+    setIsConfigModalOpen(true);
+    // const componentId = await addComponent();
+    // if (!componentId) return;
+    // for (const snapshot of selectedSnapshots) {
+    //   const itemId = await addItem({ componentId, snapshot });
+    //   if (!itemId) return;
+    // }
+    // await addSpots({ componentId, spots: +formValues.mintCap });
+    // setFormValues({
+    //   name: "",
+    //   description: "",
+    //   mintCap: "",
+    // });
+    // setSelectedSnapshots([]);
   };
   return (
     <form onSubmit={handleSubmit} className="tw-flex tw-items-end tw-gap-x-4">
@@ -260,7 +260,7 @@ export default function BuildPhaseForm({ phase }: { phase: BuildPhasesPhase }) {
           />
         </div>
       </div>
-      <div className="tw-flex-1">
+      {/* <div className="tw-flex-1">
         <AllowlistToolSelectMenuMultiple
           label="Select snapshots"
           placeholder="Select"
@@ -283,20 +283,25 @@ export default function BuildPhaseForm({ phase }: { phase: BuildPhasesPhase }) {
             className="tw-block tw-w-full tw-rounded-lg tw-border-0 tw-py-3 tw-px-3 tw-bg-neutral-900 tw-text-white tw-font-light tw-caret-primary-400-focus tw-shadow-sm tw-ring-2 tw-ring-inset tw-ring-neutral-700 placeholder:tw-text-neutral-400 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 tw-text-base sm:tw-leading-6 tw-transition tw-duration-300 tw-ease-out"
           />
         </div>
-      </div>
+      </div> */}
 
       <div>
         <DistributionPlanAddOperationBtn loading={isLoading}>
-          Add group
+          Configure group
         </DistributionPlanAddOperationBtn>
       </div>
       <AllowlistToolCommonModalWrapper
         showModal={isConfigModalOpen}
         onClose={() => setIsConfigModalOpen(false)}
-        title="Configure group"
+        title={`Configure group "${formValues.name}"`}
         modalSize={AllowlistToolModalSize.LARGE}
       >
-        <BuildPhaseFormConfigModal />
+        <BuildPhaseFormConfigModal
+          name={formValues.name}
+          description={formValues.description}
+          selectedPhase={selectedPhase}
+          phases={phases}
+        />
       </AllowlistToolCommonModalWrapper>
     </form>
   );
