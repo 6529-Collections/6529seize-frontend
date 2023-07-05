@@ -30,9 +30,6 @@ export default function AllowlistToolBuilderTransferPoolsPool({
       <td className="tw-whitespace-nowrap tw-py-4 tw-pl-4 tw-pr-3 tw-text-sm tw-font-medium tw-text-white sm:tw-pl-6">
         {transferPool.name}
       </td>
-      <td className="tw-whitespace-nowrap tw-px-3 tw-py-4 tw-text-sm tw-font-normal tw-text-neutral-300">
-        {transferPool.description}
-      </td>
       <td
         onClick={copyContract}
         className="tw-cursor-pointer tw-group tw-whitespace-nowrap tw-px-3 tw-py-4 tw-text-sm tw-font-normal tw-text-neutral-300 hover:tw-text-white tw-transition tw-duration-300 tw-ease-out"
@@ -74,7 +71,7 @@ export default function AllowlistToolBuilderTransferPoolsPool({
           </svg>
         </div>
       </td>
-      <td className="tw-whitespace-nowrap tw-px-3 tw-py-4 tw-text-sm tw-font-normal tw-text-neutral-300">
+      <td className="tw-whitespace-nowrap tw-px-3 tw-py-4 tw-text-sm tw-text-right tw-font-normal tw-text-neutral-300">
         {transferPool.transfersCount}
       </td>
       <td className="tw-w-40 tw-py-4 tw-pl-6 tw-pr-4 tw-text-sm tw-font-normal sm:tw-pr-6">
