@@ -236,6 +236,13 @@ export default function Header(props: Props) {
           </Row>
           <Row className="pt-3 pb-3">
             <Col>
+              <a href="/nextgen">
+                <h3>NextGen</h3>
+              </a>
+            </Col>
+          </Row>
+          <Row className="pt-3 pb-3">
+            <Col>
               <a href="/rememes">
                 <h3>ReMemes</h3>
               </a>
