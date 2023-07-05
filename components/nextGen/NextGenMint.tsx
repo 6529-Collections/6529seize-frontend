@@ -348,7 +348,6 @@ export default function NextGenMint(props: Props) {
         fetchUrl(
           `${process.env.API_ENDPOINT}/api/next_gen/${phaseTimes.merkle_root}/${wallet}`
         ).then((response: ProofResponse) => {
-          alert("proof");
           setProofResponse(response);
         });
       }
@@ -424,12 +423,19 @@ export default function NextGenMint(props: Props) {
   });
 
   function disableMint() {
+    if (!account.isConnected || chainId !== NEXT_GEN_CONTRACT.chain_id) {
+      return false;
+    }
     return (
       !phaseTimes ||
       !additionalData ||
       !phaseTimes ||
       !addressMintCounts ||
-      !proofResponse ||
+      (isMintingOpen(
+        phaseTimes.allowlist_start_time,
+        phaseTimes.allowlist_end_time
+      ) &&
+        !proofResponse) ||
       !additionalData.is_collection_active ||
       (!isMintingOpen(
         phaseTimes.allowlist_start_time,
