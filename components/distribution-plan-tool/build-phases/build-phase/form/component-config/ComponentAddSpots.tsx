@@ -12,7 +12,7 @@ export default function ComponentAddSpots({
 }) {
   const { setToasts } = useContext(DistributionPlanToolContext);
 
-  const [maxMints, setMaxMints] = useState<number | undefined>(undefined);
+  const [maxMints, setMaxMints] = useState<number | string>('');
 
   const onAddSpots = () => {
     if (typeof maxMints !== "number") {
@@ -49,7 +49,7 @@ export default function ComponentAddSpots({
               onChange={(event) =>
                 event.target.value
                   ? setMaxMints(Number(event.target.value))
-                  : setMaxMints(undefined)
+                  : setMaxMints('')
               }
               className="tw-flex-1 tw-border-0 tw-bg-transparent placeholder:tw-text-neutral-500 tw-py-3 tw-px-3 tw-text-white focus:tw-ring-0 sm:tw-text-sm sm:tw-leading-6"
               placeholder="Max mint count per wallet"

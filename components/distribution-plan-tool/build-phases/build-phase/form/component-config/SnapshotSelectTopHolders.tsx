@@ -21,8 +21,8 @@ export default function SnapshotSelectTopHolders({
     null
   );
 
-  const [from, setFrom] = useState<number | undefined>(undefined);
-  const [to, setTo] = useState<number | undefined>(undefined);
+  const [from, setFrom] = useState<number | string>('');
+  const [to, setTo] = useState<number | string>('');
 
   const onSelectTopHolders = () => {
     if (!topHolderType) {
@@ -81,10 +81,10 @@ export default function SnapshotSelectTopHolders({
         <button
           onClick={() => setTopHolderType(TopHolderType.TOTAL_TOKENS_COUNT)}
           type="button"
-          className={`tw-w-1/2 tw-inline-flex tw-items-center tw-justify-center tw-cursor-pointer tw-bg-transparent hover:tw-bg-neutral-800/80 tw-px-4 tw-py-3 tw-text-sm tw-font-medium tw-text-white tw-border-2 tw-border-solid tw-border-neutral-700 tw-rounded-lg tw-transition tw-duration-300 tw-ease-out ${
+          className={`tw-w-1/2 tw-inline-flex tw-items-center tw-justify-center tw-cursor-pointer  hover:tw-bg-neutral-800/80 tw-px-4 tw-py-3 tw-text-sm tw-font-medium tw-text-white tw-border-2 tw-border-solid tw-border-neutral-700 tw-rounded-lg tw-transition tw-duration-300 tw-ease-out ${
             topHolderType === TopHolderType.TOTAL_TOKENS_COUNT
               ? "tw-bg-blue-700"
-              : ""
+              : "tw-bg-transparent"
           }`}
         >
           Total tokens count
@@ -92,10 +92,10 @@ export default function SnapshotSelectTopHolders({
         <button
           onClick={() => setTopHolderType(TopHolderType.UNIQUE_TOKENS_COUNT)}
           type="button"
-          className={`tw-w-1/2 tw-inline-flex tw-items-center tw-justify-center tw-cursor-pointer tw-bg-transparent hover:tw-bg-neutral-800/80 tw-px-4 tw-py-3 tw-text-sm tw-font-medium tw-text-white tw-border-2 tw-border-solid tw-border-neutral-700 tw-rounded-lg tw-transition tw-duration-300 tw-ease-out ${
+          className={`tw-w-1/2 tw-inline-flex tw-items-center tw-justify-center tw-cursor-pointer  hover:tw-bg-neutral-800/80 tw-px-4 tw-py-3 tw-text-sm tw-font-medium tw-text-white tw-border-2 tw-border-solid tw-border-neutral-700 tw-rounded-lg tw-transition tw-duration-300 tw-ease-out ${
             topHolderType === TopHolderType.UNIQUE_TOKENS_COUNT
               ? "tw-bg-blue-700"
-              : ""
+              : "tw-bg-transparent"
           }`}
         >
           Unique tokens count
@@ -114,7 +114,7 @@ export default function SnapshotSelectTopHolders({
               onChange={(event) =>
                 event.target.value
                   ? setFrom(Number(event.target.value))
-                  : setFrom(undefined)
+                  : setFrom('')
               }
               className="tw-flex-1 tw-border-0 tw-bg-transparent placeholder:tw-text-neutral-500 tw-py-3 tw-px-3 tw-text-white focus:tw-ring-0 sm:tw-text-sm sm:tw-leading-6"
               placeholder="From"
@@ -134,7 +134,7 @@ export default function SnapshotSelectTopHolders({
               onChange={(event) =>
                 event.target.value
                   ? setTo(Number(event.target.value))
-                  : setTo(undefined)
+                  : setTo('')
               }
               className="tw-flex-1 tw-border-0 tw-bg-transparent placeholder:tw-text-neutral-500 tw-py-3 tw-px-3 tw-text-white focus:tw-ring-0 sm:tw-text-sm sm:tw-leading-6"
               placeholder="To"

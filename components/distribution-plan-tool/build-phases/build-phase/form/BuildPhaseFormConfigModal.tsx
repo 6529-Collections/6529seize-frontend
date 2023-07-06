@@ -193,6 +193,22 @@ export default function BuildPhaseFormConfigModal({
     onNextStep(PhaseConfigStep.SELECT_SNAPSHOT);
   };
 
+  const onConfigureGroup = () => {
+    setPhaseGroupConfig((prev) => ({
+      ...prev,
+      snapshots: [...prev.snapshots, phaseGroupSnapshotConfig],
+    }));
+    setPhaseGroupSnapshotConfig({
+      groupSnapshotId: null,
+      snapshotId: null,
+      snapshotType: null,
+      excludeComponentWinners: [],
+      topHoldersFilter: null,
+    });
+
+    onNextStep(PhaseConfigStep.COMPONENT_SELECT_RANDOM_HOLDERS);
+  };
+
   const onSelectRandomHolders = (randomHoldersCount: number) => {
     setPhaseGroupConfig((prev) => ({
       ...prev,
@@ -276,7 +292,7 @@ export default function BuildPhaseFormConfigModal({
                   .filter((s) => !!s.groupSnapshotId)
                   .reverse()}
                 snapshots={snapshots}
-                onNextStep={onNextStep}
+                onConfigureGroup={onConfigureGroup}
                 onAddAnotherSnapshot={onAddAnotherSnapshot}
                 onRemoveGroupSnapshot={onRemoveGroupSnapshot}
               />

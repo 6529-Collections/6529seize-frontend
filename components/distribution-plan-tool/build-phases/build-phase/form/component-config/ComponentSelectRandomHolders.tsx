@@ -13,7 +13,7 @@ export default function ComponentSelectRandomHolders({
 }) {
   const { setToasts } = useContext(DistributionPlanToolContext);
 
-  const [count, setCount] = useState<number | undefined>(undefined);
+  const [count, setCount] = useState<number | string>('');
 
   const onRandomHolders = () => {
     if (typeof count !== "number") {
@@ -52,7 +52,7 @@ export default function ComponentSelectRandomHolders({
               onChange={(event) =>
                 event.target.value
                   ? setCount(Number(event.target.value))
-                  : setCount(undefined)
+                  : setCount('')
               }
               className="tw-flex-1 tw-border-0 tw-bg-transparent placeholder:tw-text-neutral-500 tw-py-3 tw-px-3 tw-text-white focus:tw-ring-0 sm:tw-text-sm sm:tw-leading-6"
               placeholder="Random holders count"
