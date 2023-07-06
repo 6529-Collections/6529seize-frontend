@@ -75,7 +75,7 @@ export default function BuildPhases() {
       setSelectedPhase(phasesByOp.find((p) => p.id === selectedPhase.id));
       return;
     }
-    setSelectedPhase(phasesByOp.at(1));
+    setSelectedPhase(phasesByOp.at(0));
   }, [phasesByOp, selectedPhase]);
 
   const onNextStep = async () => {
