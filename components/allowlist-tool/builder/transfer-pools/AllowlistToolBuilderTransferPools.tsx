@@ -67,7 +67,7 @@ export default function AllowlistToolBuilderTransferPools() {
 
   return (
     <AllowlistToolPoolsWrapper isLoading={showLoading}>
-      <AllowlistToolExpandableTableWrapper title="Collection Snapshots">
+      <AllowlistToolExpandableTableWrapper title="Collection">
        
         <div className="tw-w-full tw-overflow-hidden tw-h-0">
         <p className="tw-px-6 tw-text-sm tw-text-neutral-500">By taking a snapshot at certain block, we can determine the eligible token holders and allowlist wallets accordingly.</p>
@@ -85,7 +85,7 @@ export default function AllowlistToolBuilderTransferPools() {
                             scope="col"
                             className="tw-py-1.5 tw-pl-4 tw-pr-3 tw-whitespace-nowrap tw-text-left tw-text-[0.6875rem] tw-leading-[1.125rem] tw-font-medium tw-text-neutral-400 tw-uppercase tw-tracking-[0.25px] sm:tw-pl-6"
                           >
-                            Snapshot name
+                            Collection name
                           </th>
                           <th
                             scope="col"

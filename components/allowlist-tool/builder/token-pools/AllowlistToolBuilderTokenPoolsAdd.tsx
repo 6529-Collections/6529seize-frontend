@@ -117,29 +117,13 @@ export default function AllowlistToolBuilderTokenPoolsAdd() {
       <div className="tw-px-6 tw-flex tw-gap-x-4 tw-pt-5 tw-items-end ">
         <div className="tw-flex-1">
           <label className="tw-block tw-text-sm tw-font-normal tw-leading-5 tw-text-neutral-100">
-            Pool name
+            Snapshot name
           </label>
           <div className="tw-mt-2">
             <input
               type="text"
               name="name"
               value={formValues.name}
-              onChange={handleChange}
-              required
-              autoComplete="off"
-              className="tw-block tw-w-full tw-rounded-lg tw-border-0 tw-py-3 tw-px-3 tw-bg-neutral-700/40 tw-text-white tw-font-light tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-neutral-700/40 placeholder:tw-text-neutral-500 focus:tw-outline-none focus:tw-bg-transparent focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 tw-text-base sm:tw-leading-6 tw-transition tw-duration-300 tw-ease-out"
-            />
-          </div>
-        </div>
-        <div className="tw-flex-1">
-          <label className="tw-block tw-text-sm tw-font-normal tw-leading-5 tw-text-neutral-100">
-            Description
-          </label>
-          <div className="tw-mt-2">
-            <input
-              type="text"
-              name="description"
-              value={formValues.description}
               onChange={handleChange}
               required
               autoComplete="off"
@@ -199,7 +183,7 @@ export default function AllowlistToolBuilderTokenPoolsAdd() {
             type="submit"
             loading={isLoading}
           >
-            Add token pool
+            Add snapshot
           </AllowlistToolPrimaryBtn>
         </div>
       </div>

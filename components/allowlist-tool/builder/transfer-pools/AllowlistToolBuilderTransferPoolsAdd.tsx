@@ -91,7 +91,7 @@ export default function AllowlistToolBuilderTransferPoolsAdd() {
       <div className="tw-px-6 tw-flex tw-gap-x-4 tw-pt-5 tw-items-end">
         <div className="tw-flex-1">
           <label className="tw-block tw-text-sm tw-font-normal tw-leading-5 tw-text-neutral-100">
-            Snapshot name
+            Collection name
           </label>
           <div className="tw-mt-2">
             <input
@@ -160,7 +160,7 @@ export default function AllowlistToolBuilderTransferPoolsAdd() {
             loading={isLoading}
             type="submit"
           >
-            Add collection snapshot
+            Add collection
           </AllowlistToolPrimaryBtn>
         </div>
       </div>
