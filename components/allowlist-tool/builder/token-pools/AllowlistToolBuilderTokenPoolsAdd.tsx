@@ -11,6 +11,7 @@ import {
 import { getRandomObjectId } from "../../../../helpers/AllowlistToolHelpers";
 import AllowlistToolPrimaryBtn from "../../common/AllowlistToolPrimaryBtn";
 import { AllowlistToolBuilderContext } from "../AllowlistToolBuilderContextWrapper";
+import Tippy from "@tippyjs/react";
 
 export default function AllowlistToolBuilderTokenPoolsAdd() {
   const router = useRouter();
@@ -19,11 +20,9 @@ export default function AllowlistToolBuilderTokenPoolsAdd() {
   );
   const [formValues, setFormValues] = useState<{
     name: string;
-    description: string;
     tokenIds: string;
   }>({
     name: "",
-    description: "",
     tokenIds: "",
   });
 
@@ -60,7 +59,7 @@ export default function AllowlistToolBuilderTokenPoolsAdd() {
       } = {
         id: getRandomObjectId(),
         name: formValues.name,
-        description: formValues.description,
+        description: formValues.name,
         transferPoolId: selectedTransferPool?.value,
       };
 
@@ -93,7 +92,6 @@ export default function AllowlistToolBuilderTokenPoolsAdd() {
       addOperations([data]);
       setFormValues({
         name: "",
-        description: "",
         tokenIds: "",
       });
       setSelectedTransferPool(null);
@@ -149,20 +147,26 @@ export default function AllowlistToolBuilderTokenPoolsAdd() {
           <label className="tw-block tw-text-sm tw-font-normal tw-leading-5 tw-text-neutral-100">
             <label className="tw-flex tw-items-center tw-gap-x-2 tw-text-sm tw-font-normal tw-leading-5 tw-text-neutral-100">
               <span>Token ID(s)</span>
-              <svg
-                className="tw-h-5 tw-w-5 tw-text-neutral-400"
-                viewBox="0 0 24 24"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
+              <Tippy
+                content="Example: 1,2,3,10-20"
+                placement="top"
+                theme="dark"
               >
-                <path
-                  d="M12 16V12M12 8H12.01M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12Z"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
+                <svg
+                  className="tw-h-5 tw-w-5 tw-text-neutral-400 tw-cursor-pointer"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M12 16V12M12 8H12.01M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12Z"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </Tippy>
             </label>
           </label>
           <div className="tw-mt-2">
