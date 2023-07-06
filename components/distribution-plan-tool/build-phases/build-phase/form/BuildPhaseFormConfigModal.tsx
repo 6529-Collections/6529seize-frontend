@@ -137,6 +137,15 @@ export default function BuildPhaseFormConfigModal({
       excludeComponentWinners: [],
       topHoldersFilter: null,
     });
+
+    const haveComponents = targetPhases.some(
+      (phase) => phase.components.length > 0
+    );
+
+    if (!haveComponents) {
+      onNextStep(PhaseConfigStep.SNAPSHOT_SELECT_TOP_HOLDERS);
+      return;
+    }
     onNextStep(PhaseConfigStep.SNAPSHOT_EXCLUDE_COMPONENT_WINNERS);
   };
 
@@ -246,14 +255,6 @@ export default function BuildPhaseFormConfigModal({
     console.log(phaseGroupConfig);
   };
 
-  useEffect(() => {
-    console.log("***********");
-    console.log("CURRENT SNAPSHOT CONFIG");
-    console.log(phaseGroupSnapshotConfig);
-    console.log("CURRENT PHASE GROUP CONFIG");
-    console.log(phaseGroupConfig);
-  }, [phaseGroupSnapshotConfig, phaseGroupConfig]);
-
   return (
     <div className="tw-px-6 tw-gap-y-6 tw-flex tw-flex-col tw-divide-y tw-divide-solid tw-divide-neutral-700 tw-divide-x-0">
       {(() => {
@@ -292,6 +293,7 @@ export default function BuildPhaseFormConfigModal({
                   .filter((s) => !!s.groupSnapshotId)
                   .reverse()}
                 snapshots={snapshots}
+                onStartAgain={onStartAgain}
                 onConfigureGroup={onConfigureGroup}
                 onAddAnotherSnapshot={onAddAnotherSnapshot}
                 onRemoveGroupSnapshot={onRemoveGroupSnapshot}

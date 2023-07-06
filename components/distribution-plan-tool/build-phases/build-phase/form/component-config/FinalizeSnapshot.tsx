@@ -16,15 +16,23 @@ export default function FinalizeSnapshot({
   onConfigureGroup,
   onAddAnotherSnapshot,
   onRemoveGroupSnapshot,
+  onStartAgain,
   groupSnapshots,
   snapshots,
 }: {
   onConfigureGroup: () => void;
   onAddAnotherSnapshot: () => void;
   onRemoveGroupSnapshot: (groupSnapshotId: string) => void;
+  onStartAgain: () => void;
   groupSnapshots: PhaseGroupSnapshotConfig[];
   snapshots: AllowlistToolSelectMenuOption[];
 }) {
+  // useEffect(() => {
+  //   if (!groupSnapshots.length) {
+  //     onStartAgain();
+  //   }
+  // }, [groupSnapshots, onStartAgain]);
+
   return (
     <div>
       <DistributionPlanSecondaryText>

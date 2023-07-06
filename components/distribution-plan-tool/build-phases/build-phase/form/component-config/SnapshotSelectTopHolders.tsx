@@ -107,26 +107,6 @@ export default function SnapshotSelectTopHolders({
       <div className="tw-mt-6 tw-flex tw-flex-col tw-gap-y-4">
         <div>
           <label className="tw-block tw-text-sm tw-font-medium tw-leading-6 tw-text-white">
-            To
-          </label>
-          <div className="tw-mt-1.5">
-            <div className="tw-flex tw-rounded-md tw-bg-white/5 tw-ring-1 tw-ring-inset tw-ring-white/10 focus-within:tw-ring-2 focus-within:tw-ring-inset focus-within:tw-ring-primary-500">
-              <input
-                type="number"
-                value={to}
-                onChange={(event) =>
-                  event.target.value
-                    ? setTo(Number(event.target.value))
-                    : setTo("")
-                }
-                className="tw-flex-1 tw-border-0 tw-bg-transparent placeholder:tw-text-neutral-500 tw-py-3 tw-px-3 tw-text-white focus:tw-ring-0 sm:tw-text-sm sm:tw-leading-6"
-                placeholder="To"
-              />
-            </div>
-          </div>
-        </div>
-        <div>
-          <label className="tw-block tw-text-sm tw-font-medium tw-leading-6 tw-text-white">
             From
           </label>
           <div className="tw-mt-1.5">
@@ -141,6 +121,26 @@ export default function SnapshotSelectTopHolders({
                 }
                 className="tw-flex-1 tw-border-0 tw-bg-transparent placeholder:tw-text-neutral-500 tw-py-3 tw-px-3 tw-text-white focus:tw-ring-0 sm:tw-text-sm sm:tw-leading-6"
                 placeholder="From"
+              />
+            </div>
+          </div>
+        </div>
+        <div>
+          <label className="tw-block tw-text-sm tw-font-medium tw-leading-6 tw-text-white">
+            To
+          </label>
+          <div className="tw-mt-1.5">
+            <div className="tw-flex tw-rounded-md tw-bg-white/5 tw-ring-1 tw-ring-inset tw-ring-white/10 focus-within:tw-ring-2 focus-within:tw-ring-inset focus-within:tw-ring-primary-500">
+              <input
+                type="number"
+                value={to}
+                onChange={(event) =>
+                  event.target.value
+                    ? setTo(Number(event.target.value))
+                    : setTo("")
+                }
+                className="tw-flex-1 tw-border-0 tw-bg-transparent placeholder:tw-text-neutral-500 tw-py-3 tw-px-3 tw-text-white focus:tw-ring-0 sm:tw-text-sm sm:tw-leading-6"
+                placeholder="To"
               />
             </div>
           </div>
