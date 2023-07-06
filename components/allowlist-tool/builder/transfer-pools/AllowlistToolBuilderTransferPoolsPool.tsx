@@ -25,6 +25,16 @@ export default function AllowlistToolBuilderTransferPoolsPool({
     setContractText("Copied");
     setTimeout(() => setContractText(getContractTruncated()), 3000);
   };
+
+  const [blockNoText, setBlockNoText] = useState(
+    transferPool.blockNo.toString()
+  );
+  const copyBlockNumber = () => {
+    copyToClipboard(transferPool.blockNo.toString());
+    setBlockNoText("Copied");
+    setTimeout(() => setBlockNoText(transferPool.blockNo.toString()), 3000);
+  };
+
   return (
     <tr>
       <td className="tw-whitespace-nowrap tw-py-4 tw-pl-4 tw-pr-3 tw-text-sm tw-font-medium tw-text-white sm:tw-pl-6">
@@ -52,9 +62,12 @@ export default function AllowlistToolBuilderTransferPoolsPool({
           </svg>
         </div>
       </td>
-      <td className="tw-cursor-pointer tw-group tw-whitespace-nowrap tw-px-3 tw-py-4 tw-text-sm tw-font-normal tw-text-neutral-300 hover:tw-text-white tw-transition tw-duration-300 tw-ease-out">
+      <td
+        onClick={copyBlockNumber}
+        className="tw-cursor-pointer tw-group tw-whitespace-nowrap tw-px-3 tw-py-4 tw-text-sm tw-font-normal tw-text-neutral-300 hover:tw-text-white tw-transition tw-duration-300 tw-ease-out"
+      >
         <div className="tw-h-full tw-flex tw-items-center">
-          <span> {transferPool.blockNo}</span>
+          <span> {blockNoText}</span>
           <svg
             className="tw-h-5 tw-w-5 tw-ml-2.5 group-hover:tw-text-white tw-transition tw-duration-300 tw-ease-out"
             viewBox="0 0 24 24"
