@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { AllowlistToolSelectMenuOption } from "../../../../../allowlist-tool/common/select-menu/AllowlistToolSelectMenu";
 import DistributionPlanSecondaryText from "../../../../common/DistributionPlanSecondaryText";
 import {
@@ -19,6 +20,19 @@ export default function FinalizeComponent({
   phaseGroupConfig: PhaseGroupConfig;
   snapshots: AllowlistToolSelectMenuOption[];
 }) {
+  const [groupSnapshots, setGroupSnapshots] = useState<
+    PhaseGroupSnapshotConfig[]
+  >(phaseGroupConfig.snapshots);
+
+  useEffect(() => {
+    setGroupSnapshots([...phaseGroupConfig.snapshots].reverse());
+  }, [phaseGroupConfig.snapshots]);
+
+  useEffect(() => {
+    if (!groupSnapshots.length) {
+      onStartAgain();
+    }
+  }, [groupSnapshots, onStartAgain]);
   return (
     <div>
       <DistributionPlanSecondaryText>
@@ -30,19 +44,21 @@ export default function FinalizeComponent({
       {!!phaseGroupConfig.snapshots.length && (
         <FinalizeSnapshotsTable
           onRemoveGroupSnapshot={onRemoveGroupSnapshot}
-          groupSnapshots={[...phaseGroupConfig.snapshots].reverse()}
+          groupSnapshots={groupSnapshots}
           snapshots={snapshots}
         />
       )}
       <div className="tw-mt-2 tw-inline-flex tw-gap-x-6">
-        <span className="tw-block tw-text-sm tw-text-neutral-100 tw-font-light">
-          Random:{" "}
-          <span className="tw-font-medium  tw-text-neutral-100">
-            {phaseGroupConfig.randomHoldersCount}
+        {!!phaseGroupConfig.randomHoldersCount && (
+          <span className="tw-block tw-text-sm tw-text-neutral-400 tw-font-light">
+            Random wallets:{" "}
+            <span className="tw-font-medium  tw-text-neutral-100">
+              {phaseGroupConfig.randomHoldersCount}
+            </span>
           </span>
-        </span>
+        )}
         <span className="tw-block tw-text-sm tw-text-neutral-400 tw-font-light">
-          Max mints:{" "}
+          Max mints per wallet:{" "}
           <span className="tw-font-medium tw-text-neutral-100">
             {" "}
             {phaseGroupConfig.maxMintCount}

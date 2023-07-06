@@ -17,6 +17,8 @@ import FinalizeSnapshot from "./component-config/FinalizeSnapshot";
 import ComponentSelectRandomHolders from "./component-config/ComponentSelectRandomHolders";
 import ComponentAddSpots from "./component-config/ComponentAddSpots";
 import FinalizeComponent from "./component-config/FinalizeComponent";
+import AllowlistToolAnimationWrapper from "../../../../allowlist-tool/common/animation/AllowlistToolAnimationWrapper";
+import AllowlistToolAnimationHeightOpacity from "../../../../allowlist-tool/common/animation/AllowlistToolAnimationHeightOpacity";
 
 export enum PhaseConfigStep {
   SELECT_SNAPSHOT = "SELECT_SNAPSHOT",
@@ -159,15 +161,40 @@ export default function BuildPhaseFormConfigModal({
     onNextStep(PhaseConfigStep.SNAPSHOT_SELECT_TOP_HOLDERS);
   };
 
+  const onSelectTopHoldersSkip = () => {
+    setPhaseGroupConfig((prev) => ({
+      ...prev,
+      snapshots: [...prev.snapshots, phaseGroupSnapshotConfig],
+    }));
+    setPhaseGroupSnapshotConfig({
+      groupSnapshotId: null,
+      snapshotId: null,
+      snapshotType: null,
+      excludeComponentWinners: [],
+      topHoldersFilter: null,
+    });
+    onNextStep(PhaseConfigStep.FINALIZE_SNAPSHOT);
+  };
+
   const onSelectTopHoldersFilter = (params: {
     type: TopHolderType;
     from: number | null;
     to: number | null;
   }) => {
-    setPhaseGroupSnapshotConfig((prev) => ({
+    setPhaseGroupConfig((prev) => ({
       ...prev,
-      topHoldersFilter: params,
+      snapshots: [
+        ...prev.snapshots,
+        { ...phaseGroupSnapshotConfig, topHoldersFilter: params },
+      ],
     }));
+    setPhaseGroupSnapshotConfig({
+      groupSnapshotId: null,
+      snapshotId: null,
+      snapshotType: null,
+      excludeComponentWinners: [],
+      topHoldersFilter: null,
+    });
     onNextStep(PhaseConfigStep.FINALIZE_SNAPSHOT);
   };
 
@@ -178,20 +205,9 @@ export default function BuildPhaseFormConfigModal({
         (s) => s.groupSnapshotId !== groupSnapshotId
       ),
     }));
-    setPhaseGroupSnapshotConfig({
-      groupSnapshotId: null,
-      snapshotId: null,
-      snapshotType: null,
-      excludeComponentWinners: [],
-      topHoldersFilter: null,
-    });
   };
 
   const onAddAnotherSnapshot = () => {
-    setPhaseGroupConfig((prev) => ({
-      ...prev,
-      snapshots: [...prev.snapshots, phaseGroupSnapshotConfig],
-    }));
     setPhaseGroupSnapshotConfig({
       groupSnapshotId: null,
       snapshotId: null,
@@ -203,10 +219,6 @@ export default function BuildPhaseFormConfigModal({
   };
 
   const onConfigureGroup = () => {
-    setPhaseGroupConfig((prev) => ({
-      ...prev,
-      snapshots: [...prev.snapshots, phaseGroupSnapshotConfig],
-    }));
     setPhaseGroupSnapshotConfig({
       groupSnapshotId: null,
       snapshotId: null,
@@ -255,75 +267,97 @@ export default function BuildPhaseFormConfigModal({
     console.log(phaseGroupConfig);
   };
 
+  useEffect(() => {
+    console.log([...phaseGroupConfig.snapshots, phaseGroupSnapshotConfig]);
+  }, [phaseGroupConfig, phaseGroupSnapshotConfig]);
+
   return (
     <div className="tw-px-6 tw-gap-y-6 tw-flex tw-flex-col tw-divide-y tw-divide-solid tw-divide-neutral-700 tw-divide-x-0">
-      {(() => {
-        switch (configStep) {
-          case PhaseConfigStep.SELECT_SNAPSHOT:
-            return (
-              <SelectSnapshot
-                snapshots={snapshots}
-                onSelectSnapshot={onSelectSnapshot}
-              />
-            );
-          case PhaseConfigStep.SNAPSHOT_EXCLUDE_COMPONENT_WINNERS:
-            return (
-              <SnapshotExcludeComponentWinners
-                phases={targetPhases}
-                onNextStep={onNextStep}
-                onSelectExcludeComponentWinners={
-                  onSelectExcludeComponentWinners
-                }
-              />
-            );
-          case PhaseConfigStep.SNAPSHOT_SELECT_TOP_HOLDERS:
-            return (
-              <SnapshotSelectTopHolders
-                onNextStep={onNextStep}
-                onSelectTopHoldersFilter={onSelectTopHoldersFilter}
-              />
-            );
-          case PhaseConfigStep.FINALIZE_SNAPSHOT:
-            return (
-              <FinalizeSnapshot
-                groupSnapshots={[
-                  ...phaseGroupConfig.snapshots,
-                  phaseGroupSnapshotConfig,
-                ]
-                  .filter((s) => !!s.groupSnapshotId)
-                  .reverse()}
-                snapshots={snapshots}
-                onStartAgain={onStartAgain}
-                onConfigureGroup={onConfigureGroup}
-                onAddAnotherSnapshot={onAddAnotherSnapshot}
-                onRemoveGroupSnapshot={onRemoveGroupSnapshot}
-              />
-            );
-          case PhaseConfigStep.COMPONENT_SELECT_RANDOM_HOLDERS:
-            return (
-              <ComponentSelectRandomHolders
-                onNextStep={onNextStep}
-                onSelectRandomHolders={onSelectRandomHolders}
-              />
-            );
-          case PhaseConfigStep.COMPONENT_ADD_SPOTS:
-            return (
-              <ComponentAddSpots onSelectMaxMintCount={onSelectMaxMintCount} />
-            );
-          case PhaseConfigStep.FINALIZE_COMPONENTS:
-            return (
-              <FinalizeComponent
-                onSave={onSave}
-                onStartAgain={onStartAgain}
-                phaseGroupConfig={phaseGroupConfig}
-                snapshots={snapshots}
-                onRemoveGroupSnapshot={onRemoveGroupSnapshot}
-              />
-            );
-          default:
-            assertUnreachable(configStep);
-        }
-      })()}
+      <AllowlistToolAnimationWrapper mode="sync" initial={true}>
+        {(() => {
+          switch (configStep) {
+            case PhaseConfigStep.SELECT_SNAPSHOT:
+              return (
+                <AllowlistToolAnimationHeightOpacity key="SELECT_SNAPSHOT">
+                  <SelectSnapshot
+                    snapshots={snapshots}
+                    onSelectSnapshot={onSelectSnapshot}
+                  />
+                </AllowlistToolAnimationHeightOpacity>
+              );
+            case PhaseConfigStep.SNAPSHOT_EXCLUDE_COMPONENT_WINNERS:
+              return (
+                <AllowlistToolAnimationHeightOpacity key="SNAPSHOT_EXCLUDE_COMPONENT_WINNERS">
+                  <SnapshotExcludeComponentWinners
+                    phases={targetPhases}
+                    onNextStep={onNextStep}
+                    onSelectExcludeComponentWinners={
+                      onSelectExcludeComponentWinners
+                    }
+                  />
+                </AllowlistToolAnimationHeightOpacity>
+              );
+            case PhaseConfigStep.SNAPSHOT_SELECT_TOP_HOLDERS:
+              return (
+                <AllowlistToolAnimationHeightOpacity key="SNAPSHOT_SELECT_TOP_HOLDERS">
+                  <SnapshotSelectTopHolders
+                    onSelectTopHoldersSkip={onSelectTopHoldersSkip}
+                    onSelectTopHoldersFilter={onSelectTopHoldersFilter}
+                  />
+                </AllowlistToolAnimationHeightOpacity>
+              );
+            case PhaseConfigStep.FINALIZE_SNAPSHOT:
+              return (
+                <AllowlistToolAnimationHeightOpacity key="FINALIZE_SNAPSHOT">
+                  <FinalizeSnapshot
+                    groupSnapshots={[
+                      ...phaseGroupConfig.snapshots,
+                      phaseGroupSnapshotConfig,
+                    ]
+                      .filter((s) => !!s.groupSnapshotId)
+                      .reverse()}
+                    snapshots={snapshots}
+                    onStartAgain={onStartAgain}
+                    onConfigureGroup={onConfigureGroup}
+                    onAddAnotherSnapshot={onAddAnotherSnapshot}
+                    onRemoveGroupSnapshot={onRemoveGroupSnapshot}
+                  />
+                </AllowlistToolAnimationHeightOpacity>
+              );
+            case PhaseConfigStep.COMPONENT_SELECT_RANDOM_HOLDERS:
+              return (
+                <AllowlistToolAnimationHeightOpacity key="COMPONENT_SELECT_RANDOM_HOLDERS">
+                  <ComponentSelectRandomHolders
+                    onNextStep={onNextStep}
+                    onSelectRandomHolders={onSelectRandomHolders}
+                  />
+                </AllowlistToolAnimationHeightOpacity>
+              );
+            case PhaseConfigStep.COMPONENT_ADD_SPOTS:
+              return (
+                <AllowlistToolAnimationHeightOpacity key="COMPONENT_ADD_SPOTS">
+                  <ComponentAddSpots
+                    onSelectMaxMintCount={onSelectMaxMintCount}
+                  />
+                </AllowlistToolAnimationHeightOpacity>
+              );
+            case PhaseConfigStep.FINALIZE_COMPONENTS:
+              return (
+                <AllowlistToolAnimationHeightOpacity key="FINALIZE_COMPONENTS">
+                  <FinalizeComponent
+                    onSave={onSave}
+                    onStartAgain={onStartAgain}
+                    phaseGroupConfig={phaseGroupConfig}
+                    snapshots={snapshots}
+                    onRemoveGroupSnapshot={onRemoveGroupSnapshot}
+                  />
+                </AllowlistToolAnimationHeightOpacity>
+              );
+            default:
+              assertUnreachable(configStep);
+          }
+        })()}
+      </AllowlistToolAnimationWrapper>
     </div>
   );
 }

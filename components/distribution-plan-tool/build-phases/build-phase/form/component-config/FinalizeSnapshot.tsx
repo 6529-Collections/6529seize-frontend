@@ -1,14 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import DistributionPlanSecondaryText from "../../../../common/DistributionPlanSecondaryText";
-import DistributionPlanTableBodyWrapper from "../../../../common/DistributionPlanTableBodyWrapper";
-import DistributionPlanTableHeaderWrapper from "../../../../common/DistributionPlanTableHeaderWrapper";
-import DistributionPlanTableRowWrapper from "../../../../common/DistributionPlanTableRowWrapper";
-import DistributionPlanTableWrapper from "../../../../common/DistributionPlanTableWrapper";
-import {
-  PhaseConfigStep,
-  PhaseGroupSnapshotConfig,
-  TopHolderType,
-} from "../BuildPhaseFormConfigModal";
+import { PhaseGroupSnapshotConfig } from "../BuildPhaseFormConfigModal";
 import { AllowlistToolSelectMenuOption } from "../../../../../allowlist-tool/common/select-menu/AllowlistToolSelectMenu";
 import FinalizeSnapshotsTable from "./snapshots-table/FinalizeSnapshotsTable";
 
@@ -27,11 +19,11 @@ export default function FinalizeSnapshot({
   groupSnapshots: PhaseGroupSnapshotConfig[];
   snapshots: AllowlistToolSelectMenuOption[];
 }) {
-  // useEffect(() => {
-  //   if (!groupSnapshots.length) {
-  //     onStartAgain();
-  //   }
-  // }, [groupSnapshots, onStartAgain]);
+  useEffect(() => {
+    if (!groupSnapshots.length) {
+      onStartAgain();
+    }
+  }, [groupSnapshots, onStartAgain]);
 
   return (
     <div>

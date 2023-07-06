@@ -5,10 +5,10 @@ import ComponentConfigNextBtn from "./ComponentConfigNextBtn";
 import { DistributionPlanToolContext } from "../../../../DistributionPlanToolContext";
 
 export default function SnapshotSelectTopHolders({
-  onNextStep,
+  onSelectTopHoldersSkip,
   onSelectTopHoldersFilter,
 }: {
-  onNextStep: (step: PhaseConfigStep) => void;
+  onSelectTopHoldersSkip: () => void;
   onSelectTopHoldersFilter: (params: {
     type: TopHolderType;
     from: number | null;
@@ -149,7 +149,7 @@ export default function SnapshotSelectTopHolders({
 
       <ComponentConfigNextBtn
         showSkip={true}
-        onSkip={() => onNextStep(PhaseConfigStep.FINALIZE_SNAPSHOT)}
+        onSkip={onSelectTopHoldersSkip}
         onNext={onSelectTopHolders}
       />
     </div>
