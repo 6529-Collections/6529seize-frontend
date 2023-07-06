@@ -46,16 +46,16 @@ export default function StepHeader({
 }) {
   return (
     <div
-      className={`tw-max-w-2xl ${
+      className={`tw-max-w-4xl ${
         step === DistributionPlanToolStep.CREATE_PLAN ? "tw-mx-auto" : ""
       } tw-flex tw-flex-col`}
     >
       <h1 className="tw-uppercase tw-text-white">
         {STEP_META[step].title} {title}
       </h1>
-      <DistributionPlanSecondaryText>
+      <p className="tw-mb-0 tw-block tw-font-light tw-text-base tw-text-neutral-400">
         {STEP_META[step].description} {description}
-      </DistributionPlanSecondaryText>
+      </p>
     </div>
   );
 }

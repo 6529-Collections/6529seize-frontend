@@ -255,7 +255,7 @@ export default function BuildPhaseFormConfigModal({
   }, [phaseGroupSnapshotConfig, phaseGroupConfig]);
 
   return (
-    <div className="tw-px-6 tw-pt-6 tw-gap-y-6 tw-flex tw-flex-col tw-divide-y tw-divide-solid tw-divide-neutral-700 tw-divide-x-0">
+    <div className="tw-px-6 tw-gap-y-6 tw-flex tw-flex-col tw-divide-y tw-divide-solid tw-divide-neutral-700 tw-divide-x-0">
       {(() => {
         switch (configStep) {
           case PhaseConfigStep.SELECT_SNAPSHOT:

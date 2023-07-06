@@ -108,7 +108,7 @@ export default function SnapshotExcludeComponentWinners({
       <DistributionPlanSecondaryText>
         Do you want to exclude previous winners from other groups?
       </DistributionPlanSecondaryText>
-      <div className="tw-mt-4">
+      <div className="tw-mt-6">
         <AllowlistToolSelectMenuMultiple
           label="Remove previous winners"
           placeholder="Select groups"

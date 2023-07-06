@@ -37,11 +37,11 @@ export default function ComponentAddSpots({
       <DistributionPlanSecondaryText>
         What is maximum mint per wallet for this group each wallet?
       </DistributionPlanSecondaryText>
-      <div className="col-span-1 tw-my-4">
+      <div className="tw-mt-6">
         <label className="tw-block tw-text-sm tw-font-medium tw-leading-6 tw-text-white">
           Count
         </label>
-        <div className="tw-mt-2">
+        <div className="tw-mt-1.5">
           <div className="tw-flex tw-rounded-md tw-bg-white/5 tw-ring-1 tw-ring-inset tw-ring-white/10 focus-within:tw-ring-2 focus-within:tw-ring-inset focus-within:tw-ring-primary-500">
             <input
               type="number"

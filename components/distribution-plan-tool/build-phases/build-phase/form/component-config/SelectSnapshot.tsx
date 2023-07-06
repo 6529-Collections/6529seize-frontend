@@ -43,10 +43,10 @@ export default function SelectSnapshot({
       <DistributionPlanSecondaryText>
         First, select a snapshot to include in this group.
         <br />
-        You can later add more snapshots.
+        You can add more snapshots later.
       </DistributionPlanSecondaryText>
 
-      <div className="tw-mt-4">
+      <div className="tw-mt-6">
         <AllowlistToolSelectMenu
           label="Snapshot"
           options={snapshots}
