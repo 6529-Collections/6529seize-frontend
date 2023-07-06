@@ -1,11 +1,23 @@
+import { AllowlistToolSelectMenuOption } from "../../../../../allowlist-tool/common/select-menu/AllowlistToolSelectMenu";
 import DistributionPlanSecondaryText from "../../../../common/DistributionPlanSecondaryText";
+import {
+  PhaseGroupConfig,
+  PhaseGroupSnapshotConfig,
+} from "../BuildPhaseFormConfigModal";
+import FinalizeSnapshotsTable from "./snapshots-table/FinalizeSnapshotsTable";
 
 export default function FinalizeComponent({
-    onSave,
+  onSave,
   onStartAgain,
+  onRemoveGroupSnapshot,
+  phaseGroupConfig,
+  snapshots,
 }: {
   onSave: () => void;
   onStartAgain: () => void;
+  onRemoveGroupSnapshot: (groupSnapshotId: string) => void;
+  phaseGroupConfig: PhaseGroupConfig;
+  snapshots: AllowlistToolSelectMenuOption[];
 }) {
   return (
     <div>
@@ -15,7 +27,16 @@ export default function FinalizeComponent({
         If you are happy with the group, click &ldquo;Save&rdquo;, otherwise
         click &ldquo;Start again&rdquo;.
       </DistributionPlanSecondaryText>
-      <div className="tw-w-full tw-inline-flex tw-space-x-2 tw-justify-around">
+      {!!phaseGroupConfig.snapshots.length && (
+        <FinalizeSnapshotsTable
+          onRemoveGroupSnapshot={onRemoveGroupSnapshot}
+          groupSnapshots={[...phaseGroupConfig.snapshots].reverse()}
+          snapshots={snapshots}
+        />
+      )}
+      <div>Random: {phaseGroupConfig.randomHoldersCount}</div>
+      <div>Max mints: {phaseGroupConfig.maxMintCount}</div>
+      <div className="tw-w-full tw-inline-flex tw-space-x-2 tw-justify-around tw-mt-4">
         <button
           onClick={onStartAgain}
           type="button"

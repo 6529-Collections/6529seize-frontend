@@ -1,10 +1,29 @@
+import { useEffect, useState } from "react";
 import DistributionPlanSecondaryText from "../../../../common/DistributionPlanSecondaryText";
-import { PhaseConfigStep } from "../BuildPhaseFormConfigModal";
+import DistributionPlanTableBodyWrapper from "../../../../common/DistributionPlanTableBodyWrapper";
+import DistributionPlanTableHeaderWrapper from "../../../../common/DistributionPlanTableHeaderWrapper";
+import DistributionPlanTableRowWrapper from "../../../../common/DistributionPlanTableRowWrapper";
+import DistributionPlanTableWrapper from "../../../../common/DistributionPlanTableWrapper";
+import {
+  PhaseConfigStep,
+  PhaseGroupSnapshotConfig,
+  TopHolderType,
+} from "../BuildPhaseFormConfigModal";
+import { AllowlistToolSelectMenuOption } from "../../../../../allowlist-tool/common/select-menu/AllowlistToolSelectMenu";
+import FinalizeSnapshotsTable from "./snapshots-table/FinalizeSnapshotsTable";
 
 export default function FinalizeSnapshot({
   onNextStep,
+  onAddAnotherSnapshot,
+  onRemoveGroupSnapshot,
+  groupSnapshots,
+  snapshots,
 }: {
   onNextStep: (step: PhaseConfigStep) => void;
+  onAddAnotherSnapshot: () => void;
+  onRemoveGroupSnapshot: (groupSnapshotId: string) => void;
+  groupSnapshots: PhaseGroupSnapshotConfig[];
+  snapshots: AllowlistToolSelectMenuOption[];
 }) {
   return (
     <div>
@@ -14,9 +33,16 @@ export default function FinalizeSnapshot({
         If you would like to add another snapshot, click &ldquo;Add another
         snapshot&rdquo;, otherwise click &ldquo;Configure Group&rdquo;.
       </DistributionPlanSecondaryText>
-      <div className="tw-w-full tw-inline-flex tw-space-x-2 tw-justify-around">
+      {!!groupSnapshots.length && (
+        <FinalizeSnapshotsTable
+          onRemoveGroupSnapshot={onRemoveGroupSnapshot}
+          groupSnapshots={groupSnapshots}
+          snapshots={snapshots}
+        />
+      )}
+      <div className="tw-w-full tw-inline-flex tw-space-x-2 tw-justify-around tw-my-4">
         <button
-          onClick={() => onNextStep(PhaseConfigStep.SELECT_SNAPSHOT)}
+          onClick={onAddAnotherSnapshot}
           type="button"
           className="tw-w-1/3 tw-inline-flex tw-items-center tw-justify-center tw-cursor-pointer tw-bg-transparent hover:tw-bg-neutral-800/80 tw-px-4 tw-py-3 tw-text-sm tw-font-medium tw-text-white tw-border-2 tw-border-solid tw-border-neutral-700 tw-rounded-lg tw-transition tw-duration-300 tw-ease-out"
         >
@@ -24,7 +50,7 @@ export default function FinalizeSnapshot({
         </button>
         <button
           onClick={() =>
-            onNextStep(PhaseConfigStep.COMPONENT_ASK_SELECT_RANDOM_HOLDERS)
+            onNextStep(PhaseConfigStep.COMPONENT_SELECT_RANDOM_HOLDERS)
           }
           type="button"
           className="tw-w-1/3 tw-inline-flex tw-items-center tw-justify-center tw-cursor-pointer tw-bg-transparent hover:tw-bg-neutral-800/80 tw-px-4 tw-py-3 tw-text-sm tw-font-medium tw-text-white tw-border-2 tw-border-solid tw-border-neutral-700 tw-rounded-lg tw-transition tw-duration-300 tw-ease-out"

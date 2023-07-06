@@ -1,10 +1,12 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import AllowlistToolSelectMenuMultiple, {
   AllowlistToolSelectMenuMultipleOption,
 } from "../../../../../allowlist-tool/common/select-menu-multiple/AllowlistToolSelectMenuMultiple";
 import DistributionPlanSecondaryText from "../../../../common/DistributionPlanSecondaryText";
 import { BuildPhasesPhase } from "../../../BuildPhases";
 import { PhaseConfigStep } from "../BuildPhaseFormConfigModal";
+import ComponentConfigNextBtn from "./ComponentConfigNextBtn";
+import { DistributionPlanToolContext } from "../../../../DistributionPlanToolContext";
 
 const SELECT_ALL_OPTION: AllowlistToolSelectMenuMultipleOption = {
   title: "Select all",
@@ -15,10 +17,13 @@ const SELECT_ALL_OPTION: AllowlistToolSelectMenuMultipleOption = {
 export default function SnapshotExcludeComponentWinners({
   phases,
   onNextStep,
+  onSelectExcludeComponentWinners,
 }: {
   phases: BuildPhasesPhase[];
   onNextStep: (step: PhaseConfigStep) => void;
+  onSelectExcludeComponentWinners: (componentIds: string[]) => void;
 }) {
+  const { setToasts } = useContext(DistributionPlanToolContext);
   const [options, setOptions] = useState<
     AllowlistToolSelectMenuMultipleOption[]
   >([
@@ -82,34 +87,41 @@ export default function SnapshotExcludeComponentWinners({
       prev.length === options.length - 2 ? options : [...prev, option]
     );
   };
+
+  const onExcludePreviousWinners = () => {
+    if (selectedOptions.length === 0) {
+      setToasts({
+        messages: ["Please select at least one component."],
+        type: "error",
+      });
+      return;
+    }
+    onSelectExcludeComponentWinners(
+      selectedOptions
+        .filter((o) => o.value !== SELECT_ALL_OPTION.value)
+        .map((o) => o.value)
+    );
+  };
+
   return (
     <div>
       <DistributionPlanSecondaryText>
-        You can pick other groups from which you want to remove this snapshot.
-        <br />
-        If you don&apos;t want anyone who has already won a spot to be included,
-        you should choose all the groups.
+        Do you want to exclude previous winners from other groups?
       </DistributionPlanSecondaryText>
-      <AllowlistToolSelectMenuMultiple
-        label="Remove previous winners"
-        placeholder="Select groups"
-        options={options}
-        selectedOptions={selectedOptions}
-        toggleSelectedOption={toggleSelectedOption}
+      <div className="tw-mt-4">
+        <AllowlistToolSelectMenuMultiple
+          label="Remove previous winners"
+          placeholder="Select groups"
+          options={options}
+          selectedOptions={selectedOptions}
+          toggleSelectedOption={toggleSelectedOption}
+        />
+      </div>
+      <ComponentConfigNextBtn
+        showSkip={true}
+        onSkip={() => onNextStep(PhaseConfigStep.SNAPSHOT_SELECT_TOP_HOLDERS)}
+        onNext={onExcludePreviousWinners}
       />
-      {!!selectedOptions.length && (
-        <div className="tw-mt-8 tw-flex tw-justify-end">
-          <button
-            onClick={() =>
-              onNextStep(PhaseConfigStep.SNAPSHOT_ASK_SELECT_TOP_HOLDERS)
-            }
-            type="button"
-            className="tw-inline-flex tw-items-center tw-justify-center tw-cursor-pointer tw-bg-transparent hover:tw-bg-neutral-800/80 tw-px-4 tw-py-3 tw-text-sm tw-font-medium tw-text-white tw-border-2 tw-border-solid tw-border-neutral-700 tw-rounded-lg tw-transition tw-duration-300 tw-ease-out"
-          >
-            Remove winners
-          </button>
-        </div>
-      )}
     </div>
   );
 }
