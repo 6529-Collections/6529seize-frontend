@@ -685,10 +685,9 @@ export async function getServerSideProps(req: any, res: any, resolvedUrl: any) {
     );
     const faqText = faqRequest.status == 200 ? await faqRequest.text() : "";
 
-    // const ensRequest = await fetch(
-    //   `https://6529bucket.s3.eu-west-1.amazonaws.com/seize_html/about/ens.html`
-    // );
-    const ensRequest = await fetch(`http://air.local:3001/ens.html`);
+    const ensRequest = await fetch(
+      `https://6529bucket.s3.eu-west-1.amazonaws.com/seize_html/about/ens.html`
+    );
     const ensText = ensRequest.status == 200 ? await ensRequest.text() : "";
 
     return {
