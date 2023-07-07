@@ -56,6 +56,7 @@ interface Props {
   gdrc1Text: string;
   memesCalendarText: string;
   releaseNotesText: string;
+  faqText: string;
 }
 
 export default function About(props: Props) {
@@ -102,7 +103,7 @@ export default function About(props: Props) {
       case AboutSection.GRADIENTS:
         return <AboutGradients />;
       case AboutSection.FAQ:
-        return <AboutFAQ />;
+        return <AboutFAQ html={props.faqText} />;
       case AboutSection.MINTING:
         return <AboutMinting />;
       case AboutSection.LICENSE:
@@ -651,6 +652,11 @@ export async function getServerSideProps(req: any, res: any, resolvedUrl: any) {
     const releaseNotesText =
       releaseNotesRequest.status == 200 ? await releaseNotesRequest.text() : "";
 
+    const faqRequest = await fetch(
+      `https://6529bucket.s3.eu-west-1.amazonaws.com/seize_html/about/faq.html`
+    );
+    const faqText = faqRequest.status == 200 ? await faqRequest.text() : "";
+
     return {
       props: {
         section,
@@ -658,6 +664,7 @@ export async function getServerSideProps(req: any, res: any, resolvedUrl: any) {
         gdrc1Text,
         memesCalendarText,
         releaseNotesText,
+        faqText,
       },
     };
   } else {
