@@ -5,6 +5,7 @@ export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
   if (
+    pathname.startsWith("/api/generator") ||
     pathname.startsWith("/_next") ||
     pathname.endsWith("favicon.ico") ||
     pathname.endsWith(".jpeg") ||
