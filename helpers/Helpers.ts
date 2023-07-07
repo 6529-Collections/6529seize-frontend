@@ -253,3 +253,7 @@ export function parseIpfsUrl(url: string) {
   }
   return url;
 }
+
+export function isEmptyObject(obj: any) {
+  return Object.keys(obj).length === 0 && obj.constructor === Object;
+}

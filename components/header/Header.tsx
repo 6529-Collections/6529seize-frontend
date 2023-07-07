@@ -499,6 +499,13 @@ export default function Header(props: Props) {
                 </Row>
                 <Row className="pt-3">
                   <Col>
+                    <a href={`/about/${AboutSection.ENS}`}>
+                      <h3>ENS</h3>
+                    </a>
+                  </Col>
+                </Row>
+                <Row className="pt-3">
+                  <Col>
                     <a href={`/about/${AboutSection.MINTING}`}>
                       <h3>Minting</h3>
                     </a>
@@ -826,6 +833,13 @@ export default function Header(props: Props) {
                                   (window.location.href = `/about/${AboutSection.FAQ}`)
                                 }>
                                 FAQ
+                              </NavDropdown.Item>
+                              <NavDropdown.Item
+                                className={styles.dropdownItem}
+                                onClick={() =>
+                                  (window.location.href = `/about/${AboutSection.ENS}`)
+                                }>
+                                ENS
                               </NavDropdown.Item>
                               <NavDropdown.Item
                                 className={styles.dropdownItem}
