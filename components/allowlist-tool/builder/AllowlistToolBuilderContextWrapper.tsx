@@ -379,6 +379,11 @@ export default function AllowlistToolBuilderContextWrapper({
             case AllowlistOperationCode.ITEM_REMOVE_LAST_N_TOKENS:
             case AllowlistOperationCode.ITEM_SELECT_FIRST_N_TOKENS:
             case AllowlistOperationCode.ITEM_SELECT_LAST_N_TOKENS:
+            case AllowlistOperationCode.ITEM_REMOVE_WALLETS_FROM_CERTAIN_COMPONENTS:
+            case AllowlistOperationCode.ITEM_SORT_WALLETS_BY_TOTAL_TOKENS_COUNT:
+            case AllowlistOperationCode.ITEM_SORT_WALLETS_BY_UNIQUE_TOKENS_COUNT:
+            case AllowlistOperationCode.ITEM_REMOVE_FIRST_N_WALLETS:
+            case AllowlistOperationCode.ITEM_SELECT_FIRST_N_WALLETS:
               break;
             default:
               assertUnreachable(code);
@@ -603,6 +608,21 @@ export default function AllowlistToolBuilderContextWrapper({
           addOperationToItem(operation);
           break;
         case AllowlistOperationCode.ITEM_SELECT_LAST_N_TOKENS:
+          addOperationToItem(operation);
+          break;
+        case AllowlistOperationCode.ITEM_REMOVE_WALLETS_FROM_CERTAIN_COMPONENTS:
+          addOperationToItem(operation);
+          break;
+        case AllowlistOperationCode.ITEM_SORT_WALLETS_BY_TOTAL_TOKENS_COUNT:
+          addOperationToItem(operation);
+          break;
+        case AllowlistOperationCode.ITEM_SORT_WALLETS_BY_UNIQUE_TOKENS_COUNT:
+          addOperationToItem(operation);
+          break;
+        case AllowlistOperationCode.ITEM_REMOVE_FIRST_N_WALLETS:
+          addOperationToItem(operation);
+          break;
+        case AllowlistOperationCode.ITEM_SELECT_FIRST_N_WALLETS:
           addOperationToItem(operation);
           break;
         default:

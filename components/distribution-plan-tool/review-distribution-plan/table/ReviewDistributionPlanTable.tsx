@@ -54,8 +54,8 @@ export default function ReviewDistributionPlanTable() {
           type: ReviewDistributionPlanTableItemType.COMPONENT,
           name: component.name,
           description: component.description,
-          walletsCount: component.walletsCount,
-          tokensCount: component.tokensCount,
+          walletsCount: component.winnersWalletsCount,
+          tokensCount: component.winnersSpotsCount,
         })),
       }))
     );

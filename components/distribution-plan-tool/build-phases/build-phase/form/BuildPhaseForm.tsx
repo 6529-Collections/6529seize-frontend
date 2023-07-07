@@ -83,6 +83,7 @@ export default function BuildPhaseForm({
         modalSize={AllowlistToolModalSize.LARGE}
       >
         <BuildPhaseFormConfigModal
+          onClose={() => setIsConfigModalOpen(false)}
           name={formValues.name}
           description={formValues.description}
           selectedPhase={selectedPhase}
