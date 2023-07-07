@@ -29,13 +29,12 @@ export default async function handler(
       // @ts-ignore
       .retrieveCollectionInfo(collection)
       .call();
-    const name = data[1];
     const description = data[2];
     const external_url = data[3];
     const image = `${process.env.REACT_APP_BASE_ENDPOINT}/api/generator/png/${token}`;
     const animation_url = `${process.env.REACT_APP_BASE_ENDPOINT}/api/generator/html/${token}`;
     res.setHeader("Content-Type", "application/json");
-    res.send({ name, description, external_url, image, animation_url });
+    res.send({ name: token, description, external_url, image, animation_url });
   } catch (error) {
     console.log("error", error);
     res.setHeader("Content-Type", "text/html");
