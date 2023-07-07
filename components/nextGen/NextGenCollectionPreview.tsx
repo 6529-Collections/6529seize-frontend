@@ -39,7 +39,9 @@ export default function NextGenCollectionPreview(props: Props) {
   });
 
   return (
-    <a href={`/nextgen/${props.collection}`} className="decoration-none">
+    <a
+      href={`/nextgen/collection/${props.collection}`}
+      className="decoration-none">
       <Container className="no-padding">
         <Image
           loading={"lazy"}
@@ -57,7 +59,7 @@ export default function NextGenCollectionPreview(props: Props) {
                   <Row>
                     <Col>
                       <b>
-                        {props.collection} - {info.name}
+                        #{props.collection} - {info.name}
                       </b>
                     </Col>
                   </Row>

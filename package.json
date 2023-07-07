@@ -22,6 +22,7 @@
     "fs": "^0.0.1-security",
     "js-cookie": "^3.0.1",
     "next": "^13.1.6",
+    "puppeteer": "^20.7.4",
     "react": "18.2.0",
     "react-bootstrap": "^2.7.2",
     "react-helmet": "^6.1.0",
@@ -29,7 +30,8 @@
     "react-share": "^4.4.1",
     "react-use-downloader": "^1.2.2",
     "sass": "^1.58.1",
-    "wagmi": "^1.2.1"
+    "wagmi": "^1.2.1",
+    "web3": "^4.0.2"
   },
   "devDependencies": {
     "@next/bundle-analyzer": "^13.1.6",

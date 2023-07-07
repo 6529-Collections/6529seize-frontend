@@ -18,8 +18,14 @@
 }
 
 .globeIcon {
-  height: 22px;
+  height: 28px;
   cursor: pointer;
+}
+
+.collectionIcon {
+  &:hover {
+    opacity: 0.75;
+  }
 }
 
 .caret {
@@ -151,8 +157,7 @@
 
 .marketplace {
   margin-right: 15px;
-}
-
-.marketplace:hover {
-  opacity: 0.75;
+  &:hover {
+    opacity: 0.75;
+  }
 }

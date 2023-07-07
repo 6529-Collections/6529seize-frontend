@@ -41,9 +41,7 @@ export default function NextGenTokenPreview(props: Props) {
   });
 
   return (
-    <a
-      href={`/nextgen/${props.token.collection}/${props.token.id}`}
-      className="decoration-none">
+    <a href={`/nextgen/token/${props.token.id}`} className="decoration-none">
       <Container className="no-padding pt-3 pb-3">
         <Row>
           <Col className="text-center">

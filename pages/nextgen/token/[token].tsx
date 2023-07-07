@@ -28,15 +28,22 @@ export default function NextGenCollectionToken(props: any) {
   const pagenameFull = `${props.name} | 6529 SEIZE`;
   const [connectedWallets, setConnectedWallets] = useState<string[]>([]);
 
-  const [breadcrumbs, setBreadcrumbs] = useState<Crumb[]>([
-    { display: "Home", href: "/" },
-    { display: "NextGen", href: "/nextgen" },
-    {
-      display: `Collection #${props.collection}`,
-      href: `/nextgen/${props.collection}`,
-    },
-    { display: `Token #${props.token}` },
-  ]);
+  const [breadcrumbs, setBreadcrumbs] = useState<Crumb[]>(
+    props.collection > 0
+      ? [
+          { display: "Home", href: "/" },
+          { display: "NextGen", href: "/nextgen" },
+          {
+            display: `Collection #${props.collection}`,
+            href: `/nextgen/collection/${props.collection}`,
+          },
+          { display: `Token #${props.token}` },
+        ]
+      : [
+          { display: "Home", href: "/" },
+          { display: "NextGen", href: "/nextgen" },
+        ]
+  );
 
   return (
     <>
@@ -46,7 +53,7 @@ export default function NextGenCollectionToken(props: any) {
         <meta name="description" content={pagenameFull} />
         <meta
           property="og:url"
-          content={`${process.env.BASE_ENDPOINT}/nextgen/${props.id}`}
+          content={`${process.env.BASE_ENDPOINT}/nextgen/token/${props.token}`}
         />
         <meta property="og:title" content={props.name} />
         <meta property="og:image" content={props.image} />
@@ -61,17 +68,26 @@ export default function NextGenCollectionToken(props: any) {
       <main className={styles.main}>
         <Header onSetWallets={(wallets) => setConnectedWallets(wallets)} />
         <Breadcrumb breadcrumbs={breadcrumbs} />
-        <NextGenTokenComponent collection={props.collection} id={props.token} />
+        <NextGenTokenComponent
+          collection={props.collection}
+          token={props.token}
+        />
       </main>
     </>
   );
 }
 
 export async function getServerSideProps(req: any, res: any, resolvedUrl: any) {
-  const collection = req.query.collection;
   const token = req.query.token;
+  const tokenparts = token.toString().split(`0`);
+  let collection = 0;
+  if (tokenparts.length >= 2) {
+    collection = tokenparts[0];
+  }
 
-  let name = `NextGen Collection #${collection} Token #${token}`;
+  let name = `NextGen ${
+    collection > 0 ? `Collection #${collection}` : ``
+  } Token #${token}`;
   const props: Props = {
     collection,
     token,

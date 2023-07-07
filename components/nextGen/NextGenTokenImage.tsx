@@ -76,7 +76,7 @@ export default function NextGenTokenImage(props: Props) {
             }`}
             onClick={() => {
               if (props.preview) {
-                window.location.href = `/nextgen/${props.token.collection}/${props.token.id}`;
+                window.location.href = `/nextgen/token/${props.token.id}`;
               }
             }}></div>
         </Col>

@@ -1,6 +1,5 @@
-import styles from "./NextGen.module.scss";
-import { Container, Row, Col, Button } from "react-bootstrap";
-import { useContractRead, useContractReads } from "wagmi";
+import { Container, Row, Col } from "react-bootstrap";
+import { useContractRead } from "wagmi";
 import { NEXT_GEN_CONTRACT } from "../../constants";
 import { NEXT_GEN_ABI } from "../../abis";
 import { useState } from "react";
@@ -28,15 +27,15 @@ export default function NextGen() {
   return (
     <Container>
       <Row className="d-flex align-items-center pt-4">
-        <Col>
-          <h1>
-            NEXTGEN
-            {collectionIndex
-              ? ` [${collectionIndex} COLLECTION${
-                  collectionIndex > 1 ? `S` : ``
-                }]`
-              : ``}
-          </h1>
+        <Col xs={12}>
+          <h1>NEXTGEN</h1>
+        </Col>
+        <Col xs={12}>
+          {collectionIndex
+            ? ` [${collectionIndex} COLLECTION${
+                collectionIndex > 1 ? `S` : ``
+              }]`
+            : ``}
         </Col>
       </Row>
       <Row className="pt-4 pb-4">
