@@ -24,6 +24,7 @@ import Head from "next/head";
 import AboutDataDecentral from "../../components/about/AboutDataDecentral";
 import AboutGDRC1 from "../../components/about/AboutGDRC1";
 import AboutNFTDelegation from "../../components/about/AboutNFTDelegation";
+import AboutHTML from "../../components/about/AboutHTML";
 
 export enum AboutSection {
   MEMES = "the-memes",
@@ -43,6 +44,7 @@ export enum AboutSection {
   DATA_DECENTR = "data-decentralization",
   GDRC1 = "gdrc1",
   NFT_DELEGATION = "nft-delegation",
+  ENS = "ens",
 }
 
 const Header = dynamic(() => import("../../components/header/Header"), {
@@ -57,6 +59,7 @@ interface Props {
   memesCalendarText: string;
   releaseNotesText: string;
   faqText: string;
+  ensText: string;
 }
 
 export default function About(props: Props) {
@@ -103,7 +106,7 @@ export default function About(props: Props) {
       case AboutSection.GRADIENTS:
         return <AboutGradients />;
       case AboutSection.FAQ:
-        return <AboutFAQ html={props.faqText} />;
+        return <AboutHTML html={props.faqText} />;
       case AboutSection.MINTING:
         return <AboutMinting />;
       case AboutSection.LICENSE:
@@ -126,6 +129,8 @@ export default function About(props: Props) {
         return <AboutGDRC1 html={props.gdrc1Text} />;
       case AboutSection.NFT_DELEGATION:
         return <AboutNFTDelegation />;
+      case AboutSection.ENS:
+        return <AboutHTML html={props.ensText} />;
     }
   }
 
@@ -258,6 +263,17 @@ export default function About(props: Props) {
                               : ""
                           }`}>
                           FAQ
+                        </Col>
+                      </Row>
+                      <Row className="pt-1 pb-1">
+                        <Col
+                          onClick={() => setNewSection(AboutSection.ENS)}
+                          className={`${menuStyles.aboutMenuLeftItem} ${
+                            section == AboutSection.ENS
+                              ? menuStyles.aboutMenuLeftItemActive
+                              : ""
+                          }`}>
+                          ENS
                         </Col>
                       </Row>
                       <Row className="pt-1 pb-1">
@@ -493,6 +509,17 @@ export default function About(props: Props) {
                       </Row>
                       <Row className="pt-1 pb-1">
                         <Col
+                          onClick={() => setNewSection(AboutSection.ENS)}
+                          className={`${menuStyles.aboutMenuLeftItem} ${
+                            section == AboutSection.ENS
+                              ? menuStyles.aboutMenuLeftItemActive
+                              : ""
+                          }`}>
+                          ENS
+                        </Col>
+                      </Row>
+                      <Row className="pt-1 pb-1">
+                        <Col
                           onClick={() => setNewSection(AboutSection.MINTING)}
                           className={`${menuStyles.aboutMenuLeftItem} ${
                             section == AboutSection.MINTING
@@ -657,6 +684,12 @@ export async function getServerSideProps(req: any, res: any, resolvedUrl: any) {
     );
     const faqText = faqRequest.status == 200 ? await faqRequest.text() : "";
 
+    // const ensRequest = await fetch(
+    //   `https://6529bucket.s3.eu-west-1.amazonaws.com/seize_html/about/ens.html`
+    // );
+    const ensRequest = await fetch(`http://air.local:3001/ens.html`);
+    const ensText = ensRequest.status == 200 ? await ensRequest.text() : "";
+
     return {
       props: {
         section,
@@ -665,6 +698,7 @@ export async function getServerSideProps(req: any, res: any, resolvedUrl: any) {
         memesCalendarText,
         releaseNotesText,
         faqText,
+        ensText,
       },
     };
   } else {
