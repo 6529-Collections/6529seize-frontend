@@ -33,6 +33,7 @@ export default async function handler(
     </html>`);
   } catch (error) {
     console.log("error", error);
+    res.setHeader("X-Frame-Options", "ALLOW-FROM *");
     res.setHeader("Content-Type", "text/html");
     res.send(error);
   }
