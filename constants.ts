@@ -24,7 +24,7 @@ export const NEXT_GEN_CONTRACT: {
   // chain_id: sepolia.id,
   // contract: "0x3148c619708821d3a6554bdbcb7593c61659b183",
   chain_id: goerli.id,
-  contract: "0xa2d2f725139ab76ab9e6ee6f72f876f74c6c4ed6",
+  contract: "0x56A80F508c77cE23bb9A9EF7E26c505c9c6C4A3f",
 };
 export const DELEGATION_CONTRACT: {
   chain_id: number;
