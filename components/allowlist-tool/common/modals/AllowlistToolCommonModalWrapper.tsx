@@ -30,7 +30,7 @@ export default function AllowlistToolCommonModalWrapper({
 
   const modalSizeClasses: Record<AllowlistToolModalSize, string> = {
     [AllowlistToolModalSize.SMALL]: "sm:tw-max-w-lg",
-    [AllowlistToolModalSize.LARGE]: "sm:tw-max-w-xl",
+    [AllowlistToolModalSize.LARGE]: "sm:tw-max-w-2xl",
   };
 
   const modalSizeClass = modalSizeClasses[modalSize];
