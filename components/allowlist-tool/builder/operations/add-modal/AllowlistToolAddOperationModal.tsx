@@ -297,6 +297,7 @@ export default function AllowlistToolAddOperationModal({
                 case AllowlistOperationCode.ITEM_SORT_WALLETS_BY_UNIQUE_TOKENS_COUNT:
                 case AllowlistOperationCode.ITEM_REMOVE_FIRST_N_WALLETS:
                 case AllowlistOperationCode.ITEM_SELECT_FIRST_N_WALLETS:
+                case AllowlistOperationCode.COMPONENT_SELECT_RANDOM_WALLETS:
                   return null;
                 default:
                   assertUnreachable(selectedOperationCode);

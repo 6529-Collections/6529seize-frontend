@@ -607,6 +607,28 @@ export default function BuildPhaseFormConfigModal({
     });
   };
 
+  const componentSelectRandomWallets = async ({
+    distributionPlanId,
+    componentId,
+    count,
+    seed,
+  }: {
+    distributionPlanId: string;
+    componentId: string;
+    count: number;
+    seed: string;
+  }): Promise<{ success: boolean }> => {
+    return await addOperation({
+      code: AllowlistOperationCode.COMPONENT_SELECT_RANDOM_WALLETS,
+      params: {
+        componentId,
+        count,
+        seed,
+      },
+      distributionPlanId,
+    });
+  };
+
   const onSave = async () => {
     if (
       !distributionPlan ||
@@ -636,7 +658,17 @@ export default function BuildPhaseFormConfigModal({
       });
     }
     // 5. Random holders (if any)
-    console.log("Random holders is not implemented yet");
+    if (
+      typeof phaseGroupConfig.randomHoldersCount === "number" &&
+      phaseGroupConfig.randomHoldersCount > 0
+    ) {
+      await componentSelectRandomWallets({
+        distributionPlanId: distributionPlan.id,
+        componentId,
+        count: phaseGroupConfig.randomHoldersCount,
+        seed: distributionPlan.id,
+      });
+    }
     // 6. Max mint count
     await componentAddSpotsToWallets({
       distributionPlanId: distributionPlan.id,
