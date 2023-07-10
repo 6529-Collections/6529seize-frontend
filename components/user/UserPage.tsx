@@ -12,7 +12,7 @@ import {
 } from "react-bootstrap";
 import { useEffect, useState } from "react";
 import { DBResponse } from "../../entities/IDBResponse";
-import { Owner, OwnerTags } from "../../entities/IOwner";
+import { Owner } from "../../entities/IOwner";
 import { useRouter } from "next/router";
 import Breadcrumb, { Crumb } from "../breadcrumb/Breadcrumb";
 import { MemesExtendedData, NFT } from "../../entities/INFT";
