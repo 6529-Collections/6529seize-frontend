@@ -21,7 +21,7 @@ export default function DistributionPlanStepDone({
 
       <div className="tw-group tw-relative tw-flex tw-items-start">
         <span className="tw-flex tw-h-8 tw-items-center">
-          <span className="tw-relative tw-z-10 tw-flex tw-h-7 tw-w-7 tw-items-center tw-justify-center tw-rounded-full tw-bg-neutral-100">
+          <span className="tw-relative tw-z-0 tw-flex tw-h-7 tw-w-7 tw-items-center tw-justify-center tw-rounded-full tw-bg-neutral-100">
             <svg
               className="tw-h-3 tw-w-auto tw-text-primary-500"
               viewBox="0 0 21 19"

@@ -23,7 +23,7 @@ export default function DistributionPlanStepCurrent({
         aria-current="step"
       >
         <span className="tw-flex tw-h-8 tw-items-center" aria-hidden="true">
-          <span className="tw-relative tw-z-10 tw-flex tw-h-7 tw-w-7 tw-items-center tw-justify-center tw-rounded-full tw-border-2 tw-border-primary-500 tw-bg-white">
+          <span className="tw-relative tw-z-0 tw-flex tw-h-7 tw-w-7 tw-items-center tw-justify-center tw-rounded-full tw-border-2 tw-border-primary-500 tw-bg-white">
             <span className="tw-h-2.5 tw-w-2.5 tw-rounded-full tw-bg-primary-500"></span>
           </span>
         </span>

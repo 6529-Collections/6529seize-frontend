@@ -46,9 +46,9 @@ export default function StepHeader({
 }) {
   return (
     <div
-      className={`tw-max-w-4xl ${
-        step === DistributionPlanToolStep.CREATE_PLAN ? "tw-mx-auto" : ""
-      } tw-flex tw-flex-col`}
+      className={` ${
+        step === DistributionPlanToolStep.CREATE_PLAN ? "tw-max-w-2xl tw-mx-auto" : "tw-max-w-4xl"
+      } tw-flex tw-flex-col `}
     >
       <h1 className="tw-uppercase tw-text-white">
         {STEP_META[step].title} {title}
