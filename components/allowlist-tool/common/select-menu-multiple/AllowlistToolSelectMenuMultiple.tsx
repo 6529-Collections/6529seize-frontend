@@ -51,9 +51,11 @@ export default function AllowlistToolSelectMenuMultiple({
           ? placeholder
           : selectedOptions.length === 1
           ? selectedOptions.at(0)!?.title
+          : selectedOptions.length === options.length
+          ? "All selected"
           : `${selectedOptions.length} selected`
       ),
-    [selectedOptions, placeholder]
+    [selectedOptions, placeholder, options]
   );
 
   return (

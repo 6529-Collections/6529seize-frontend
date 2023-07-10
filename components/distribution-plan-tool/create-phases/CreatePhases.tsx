@@ -22,7 +22,9 @@ export default function CreatePhases() {
       <StepHeader step={DistributionPlanToolStep.CREATE_PHASES} />
       <DistributionPlanStepWrapper>
         <CreatePhasesForm />
-        <CreatePhasesTable />
+        <div className="tw-mt-6">
+          <CreatePhasesTable />
+        </div>
         <DistributionPlanNextStepBtn
           showRunAnalysisBtn={false}
           onNextStep={() => setStep(DistributionPlanToolStep.BUILD_PHASES)}

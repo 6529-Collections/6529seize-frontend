@@ -373,12 +373,18 @@ export default function AllowlistToolBuilderContextWrapper({
             case AllowlistOperationCode.CREATE_ALLOWLIST:
             case AllowlistOperationCode.COMPONENT_ADD_SPOTS_TO_ALL_ITEM_WALLETS:
             case AllowlistOperationCode.COMPONENT_ADD_SPOTS_TO_WALLETS_EXCLUDING_CERTAIN_COMPONENTS:
+            case AllowlistOperationCode.COMPONENT_SELECT_RANDOM_WALLETS:
             case AllowlistOperationCode.ITEM_EXCLUE_TOKEN_IDS:
             case AllowlistOperationCode.ITEM_SELECT_TOKEN_IDS:
             case AllowlistOperationCode.ITEM_REMOVE_FIRST_N_TOKENS:
             case AllowlistOperationCode.ITEM_REMOVE_LAST_N_TOKENS:
             case AllowlistOperationCode.ITEM_SELECT_FIRST_N_TOKENS:
             case AllowlistOperationCode.ITEM_SELECT_LAST_N_TOKENS:
+            case AllowlistOperationCode.ITEM_REMOVE_WALLETS_FROM_CERTAIN_COMPONENTS:
+            case AllowlistOperationCode.ITEM_SORT_WALLETS_BY_TOTAL_TOKENS_COUNT:
+            case AllowlistOperationCode.ITEM_SORT_WALLETS_BY_UNIQUE_TOKENS_COUNT:
+            case AllowlistOperationCode.ITEM_REMOVE_FIRST_N_WALLETS:
+            case AllowlistOperationCode.ITEM_SELECT_FIRST_N_WALLETS:
               break;
             default:
               assertUnreachable(code);
@@ -587,6 +593,9 @@ export default function AllowlistToolBuilderContextWrapper({
         case AllowlistOperationCode.COMPONENT_ADD_SPOTS_TO_WALLETS_EXCLUDING_CERTAIN_COMPONENTS:
           addOperationToComponent(operation);
           break;
+        case AllowlistOperationCode.COMPONENT_SELECT_RANDOM_WALLETS:
+          addOperationToComponent(operation);
+          break;
         case AllowlistOperationCode.ITEM_EXCLUE_TOKEN_IDS:
           addOperationToItem(operation);
           break;
@@ -603,6 +612,21 @@ export default function AllowlistToolBuilderContextWrapper({
           addOperationToItem(operation);
           break;
         case AllowlistOperationCode.ITEM_SELECT_LAST_N_TOKENS:
+          addOperationToItem(operation);
+          break;
+        case AllowlistOperationCode.ITEM_REMOVE_WALLETS_FROM_CERTAIN_COMPONENTS:
+          addOperationToItem(operation);
+          break;
+        case AllowlistOperationCode.ITEM_SORT_WALLETS_BY_TOTAL_TOKENS_COUNT:
+          addOperationToItem(operation);
+          break;
+        case AllowlistOperationCode.ITEM_SORT_WALLETS_BY_UNIQUE_TOKENS_COUNT:
+          addOperationToItem(operation);
+          break;
+        case AllowlistOperationCode.ITEM_REMOVE_FIRST_N_WALLETS:
+          addOperationToItem(operation);
+          break;
+        case AllowlistOperationCode.ITEM_SELECT_FIRST_N_WALLETS:
           addOperationToItem(operation);
           break;
         default:

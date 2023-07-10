@@ -64,12 +64,13 @@ export default function AllowlistToolBuilderTokenPools() {
   return (
     <AllowlistToolPoolsWrapper isLoading={showLoading}>
       <AllowlistToolExpandableTableWrapper
-        title="Token Pools"
+        title="Snapshots"
         onStateChange={setIsOpen}
       >
         <div
           className={`tw-w-full tw-h-0 ${isOpen ? "" : "tw-overflow-hidden"}`}
         >
+          <p className="tw-px-6 tw-text-sm tw-text-neutral-500">By taking a snapshot, we can determine the eligible token holders and allowlist wallets accordingly.</p>
           <div className="tw-border tw-border-neutral-700/60 tw-border-solid tw-border-l-0 tw-border-r-0 tw-border-b-0 tw-w-full"></div>
           <AllowlistToolBuilderTokenPoolsAdd />
           <div className="tw-bg-neutral-900">
@@ -78,25 +79,19 @@ export default function AllowlistToolBuilderTokenPools() {
                 <div className="-tw-mx-4 -tw-my-2 tw-overflow-x-auto sm:-tw-mx-6 lg:-tw-mx-8">
                   <div className="tw-inline-block tw-min-w-full tw-py-2 tw-align-middle">
                     <table className="tw-min-w-full tw-border tw-border-solid tw-border-l-0 tw-border-r-0 tw-border-b-0 tw-border-neutral-800 tw-divide-solid tw-divide-y tw-divide-neutral-800">
-                      <thead className="tw-bg-neutral-800/50">
+                      <thead className="tw-bg-neutral-800">
                         <tr>
                           <th
                             scope="col"
                             className="tw-py-1.5 tw-pl-4 tw-pr-3 tw-text-left tw-text-[0.6875rem] tw-leading-[1.125rem] tw-font-medium tw-text-neutral-400 tw-uppercase tw-tracking-[0.25px] sm:tw-pl-6"
                           >
-                            Pool name
+                            Snapshot name
                           </th>
                           <th
                             scope="col"
                             className="tw-px-3 tw-py-1.5 tw-text-left tw-text-[0.6875rem] tw-leading-[1.125rem] tw-font-medium tw-text-neutral-400 tw-uppercase tw-tracking-[0.25px]"
                           >
-                            Description
-                          </th>
-                          <th
-                            scope="col"
-                            className="tw-px-3 tw-py-1.5 tw-text-left tw-text-[0.6875rem] tw-leading-[1.125rem] tw-font-medium tw-text-neutral-400 tw-uppercase tw-tracking-[0.25px]"
-                          >
-                            Transfer pool
+                            Collection name
                           </th>
                           <th
                             scope="col"
@@ -106,13 +101,13 @@ export default function AllowlistToolBuilderTokenPools() {
                           </th>
                           <th
                             scope="col"
-                            className="tw-px-3 tw-py-1.5 tw-whitespace-nowrap tw-text-left tw-text-[0.6875rem] tw-leading-[1.125rem] tw-font-medium tw-text-neutral-400 tw-uppercase tw-tracking-[0.25px]"
+                            className="tw-px-3 tw-py-1.5 tw-whitespace-nowrap tw-text-right tw-text-[0.6875rem] tw-leading-[1.125rem] tw-font-medium tw-text-neutral-400 tw-uppercase tw-tracking-[0.25px]"
                           >
                             Wallets
                           </th>
                           <th
                             scope="col"
-                            className="tw-px-3 tw-py-1.5 tw-whitespace-nowrap tw-text-left tw-text-[0.6875rem] tw-leading-[1.125rem] tw-font-medium tw-text-neutral-400 tw-uppercase tw-tracking-[0.25px]"
+                            className="tw-px-3 tw-py-1.5 tw-whitespace-nowrap tw-text-right tw-text-[0.6875rem] tw-leading-[1.125rem] tw-font-medium tw-text-neutral-400 tw-uppercase tw-tracking-[0.25px]"
                           >
                             Tokens
                           </th>

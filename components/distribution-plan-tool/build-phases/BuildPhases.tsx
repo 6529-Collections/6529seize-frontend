@@ -101,11 +101,8 @@ export default function BuildPhases() {
           >
             <BuildPhase
               onNextStep={onNextStep}
-              phase={selectedPhase}
-              totalPhases={phasesByOp.length}
-              currentPhase={
-                phasesByOp.findIndex((p) => p.id === selectedPhase.id) + 1
-              }
+              selectedPhase={selectedPhase}
+              phases={phasesByOp}
             />
           </AllowlistToolAnimationOpacity>
         </AllowlistToolAnimationWrapper>

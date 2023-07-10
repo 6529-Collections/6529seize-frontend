@@ -9,18 +9,17 @@ import { getRandomObjectId } from "../../../../helpers/AllowlistToolHelpers";
 import styles from "../../AllowlistTool.module.scss";
 import AllowlistToolPrimaryBtn from "../../common/AllowlistToolPrimaryBtn";
 import { AllowlistToolBuilderContext } from "../AllowlistToolBuilderContextWrapper";
+import Tippy from "@tippyjs/react";
 
 export default function AllowlistToolBuilderTransferPoolsAdd() {
   const router = useRouter();
   const { addOperations, setToasts } = useContext(AllowlistToolBuilderContext);
   const [formValues, setFormValues] = useState<{
     name: string;
-    description: string;
     contract: string;
     blockNo: string;
   }>({
     name: "",
-    description: "",
     contract: "",
     blockNo: "",
   });
@@ -47,7 +46,7 @@ export default function AllowlistToolBuilderTransferPoolsAdd() {
           params: {
             id: getRandomObjectId(),
             name: formValues.name,
-            description: formValues.description,
+            description: formValues.name,
             contract: formValues.contract,
             blockNo: +formValues.blockNo,
           },
@@ -67,7 +66,6 @@ export default function AllowlistToolBuilderTransferPoolsAdd() {
       addOperations([data]);
       setFormValues({
         name: "",
-        description: "",
         contract: "",
         blockNo: "",
       });
@@ -91,29 +89,13 @@ export default function AllowlistToolBuilderTransferPoolsAdd() {
       <div className="tw-px-6 tw-flex tw-gap-x-4 tw-pt-5 tw-items-end">
         <div className="tw-flex-1">
           <label className="tw-block tw-text-sm tw-font-normal tw-leading-5 tw-text-neutral-100">
-            Pool name
+            Collection name
           </label>
           <div className="tw-mt-2">
             <input
               type="text"
               name="name"
               value={formValues.name}
-              onChange={handleChange}
-              required
-              autoComplete="off"
-              className="tw-block tw-w-full tw-rounded-lg tw-border-0 tw-py-3 tw-px-3 tw-bg-neutral-700/40 tw-text-white tw-font-light tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-neutral-700/40 placeholder:tw-text-neutral-500 focus:tw-outline-none focus:tw-bg-transparent focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 tw-text-base sm:tw-leading-6 tw-transition tw-duration-300 tw-ease-out"
-            />
-          </div>
-        </div>
-        <div className="tw-flex-1">
-          <label className="tw-block tw-text-sm tw-font-normal tw-leading-5 tw-text-neutral-100">
-            Description
-          </label>
-          <div className="tw-mt-2">
-            <input
-              type="text"
-              name="description"
-              value={formValues.description}
               onChange={handleChange}
               required
               autoComplete="off"
@@ -138,9 +120,31 @@ export default function AllowlistToolBuilderTransferPoolsAdd() {
           </div>
         </div>
         <div className="tw-flex-1">
-          <label className="tw-block tw-text-sm tw-font-normal tw-leading-5 tw-text-neutral-100">
-            Block number
-          </label>
+          <div className="tw-inline-flex tw-items-center tw-gap-x-2">
+            <label className="tw-block tw-text-sm tw-font-normal tw-leading-5 tw-text-neutral-100">
+              Block number
+            </label>
+            <Tippy
+              content="Unique identifier assigned to a specific block within a blockchain"
+              placement="top"
+              theme="dark"
+            >
+              <svg
+                className="tw-h-5 tw-w-5 tw-text-neutral-500 tw-cursor-pointer"
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M12 16V12M12 8H12.01M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12Z"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
+            </Tippy>
+          </div>
           <div className="tw-mt-2">
             <input
               type="number"
@@ -160,7 +164,7 @@ export default function AllowlistToolBuilderTransferPoolsAdd() {
             loading={isLoading}
             type="submit"
           >
-            Add transfer pool
+            Add collection
           </AllowlistToolPrimaryBtn>
         </div>
       </div>
