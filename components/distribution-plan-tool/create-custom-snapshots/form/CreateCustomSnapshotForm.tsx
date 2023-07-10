@@ -177,7 +177,7 @@ export default function CreateCustomSnapshotForm() {
           <div>
             <label
               htmlFor="fileInput"
-              className="tw-inline-flex tw-items-center tw-justify-center tw-cursor-pointer tw-bg-transparent hover:tw-bg-neutral-800/80 tw-px-4 tw-py-3 tw-text-sm tw-font-medium tw-text-white tw-w-full tw-border-none tw-underline tw-rounded-lg tw-transition tw-duration-300 tw-ease-out"
+              className="tw-inline-flex tw-items-center tw-justify-center tw-cursor-pointer tw-bg-transparent hover:tw-bg-neutral-800/80 tw-border tw-border-solid tw-border-transparent hover:tw-border-neutral-800/80 tw-px-4 tw-py-3 tw-text-sm tw-font-medium tw-text-white tw-w-full tw-underline tw-rounded-lg tw-transition tw-duration-300 tw-ease-out"
             >
               <svg
                 className="tw-h-5 tw-w-5 tw-mr-2 -tw-ml-1"

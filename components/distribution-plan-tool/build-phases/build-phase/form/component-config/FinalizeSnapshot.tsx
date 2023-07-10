@@ -34,11 +34,13 @@ export default function FinalizeSnapshot({
         snapshot&rdquo;, otherwise click &ldquo;Configure Group&rdquo;.
       </DistributionPlanSecondaryText>
       {!!groupSnapshots.length && (
-        <FinalizeSnapshotsTable
+       <div className="tw-mt-6">
+         <FinalizeSnapshotsTable
           onRemoveGroupSnapshot={onRemoveGroupSnapshot}
           groupSnapshots={groupSnapshots}
           snapshots={snapshots}
         />
+       </div>
       )}
       <div className="tw-mt-8 tw-gap-x-4 tw-flex tw-justify-end">
         <button
