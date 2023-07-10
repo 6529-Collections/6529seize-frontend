@@ -36,7 +36,9 @@ export default function CreateSnapshots() {
       <StepHeader step={DistributionPlanToolStep.CREATE_SNAPSHOTS} />
       <DistributionPlanStepWrapper>
         <CreateSnapshotForm />
-        <CreateSnapshotTable />
+        <div className="tw-mt-6">
+          <CreateSnapshotTable />
+        </div>
         <DistributionPlanNextStepBtn
           showRunAnalysisBtn={haveUnRunOperations}
           onNextStep={() =>

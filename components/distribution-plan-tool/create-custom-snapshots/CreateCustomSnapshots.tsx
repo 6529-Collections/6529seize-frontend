@@ -21,7 +21,9 @@ export default function CreateCustomSnapshots() {
       <StepHeader step={DistributionPlanToolStep.CREATE_CUSTOM_SNAPSHOT} />
       <DistributionPlanStepWrapper>
         <CreateCustomSnapshotForm />
-        <CreateCustomSnapshotTable />
+        <div className="tw-mt-6">
+          <CreateCustomSnapshotTable />
+        </div>
         <DistributionPlanNextStepBtn
           showRunAnalysisBtn={false}
           onNextStep={() => setStep(DistributionPlanToolStep.CREATE_PHASES)}

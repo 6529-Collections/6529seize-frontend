@@ -43,7 +43,9 @@ export default function BuildPhase({
 
       <DistributionPlanStepWrapper>
         <BuildPhaseForm selectedPhase={selectedPhase} phases={phases} />
-        <BuildPhaseTable phase={selectedPhase} />
+        <div className="tw-mt-6">
+          <BuildPhaseTable phase={selectedPhase} />
+        </div>
         <DistributionPlanNextStepBtn
           showRunAnalysisBtn={!haveRan}
           onNextStep={onNextStep}
