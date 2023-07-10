@@ -37,6 +37,14 @@ export default function BuildPhaseForm({
     if (!distributionPlan) return;
     setIsConfigModalOpen(true);
   };
+
+  const handleConfigModalClose = () => {
+    setFormValues({
+      name: "",
+      description: "",
+    });
+    setIsConfigModalOpen(false);
+  };
   return (
     <form onSubmit={handleSubmit} className="tw-flex tw-items-end tw-gap-x-4">
       <div className="tw-flex-1">
@@ -83,7 +91,7 @@ export default function BuildPhaseForm({
         modalSize={AllowlistToolModalSize.LARGE}
       >
         <BuildPhaseFormConfigModal
-          onClose={() => setIsConfigModalOpen(false)}
+          onClose={() => handleConfigModalClose()}
           name={formValues.name}
           description={formValues.description}
           selectedPhase={selectedPhase}
