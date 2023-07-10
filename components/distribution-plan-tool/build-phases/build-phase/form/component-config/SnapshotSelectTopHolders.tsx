@@ -18,7 +18,7 @@ export default function SnapshotSelectTopHolders({
   const { setToasts } = useContext(DistributionPlanToolContext);
 
   const [topHolderType, setTopHolderType] = useState<TopHolderType | null>(
-    null
+    TopHolderType.TOTAL_TOKENS_COUNT
   );
 
   const [from, setFrom] = useState<number | string>("");
