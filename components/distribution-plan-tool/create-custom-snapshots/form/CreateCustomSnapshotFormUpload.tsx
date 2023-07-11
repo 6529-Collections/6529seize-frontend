@@ -1,54 +1,50 @@
 import { useState } from "react";
 import AllowlistToolAnimationHeightOpacity from "../../../allowlist-tool/common/animation/AllowlistToolAnimationHeightOpacity";
 import AllowlistToolAnimationWrapper from "../../../allowlist-tool/common/animation/AllowlistToolAnimationWrapper";
-import { CustomTokenPoolParamsToken, Mutable } from "../../../allowlist-tool/allowlist-tool.types";
-import csvParser from "csv-parser";
+import {
+  CustomTokenPoolParamsToken,
+  Mutable,
+} from "../../../allowlist-tool/allowlist-tool.types";
 
-export default function CreateCustomSnapshotFormUpload() {
-    const [fileName, setFileName] = useState<string | null>(null);
-    const onFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-      const file = event.target.files?.[0];
-      if (!file) {
-        return;
-      }
-  
-      const reader = new FileReader();
-      reader.onload = async () => {
-        const data = reader.result;
-        const results: CustomTokenPoolParamsToken[] = [];
-  
-        const parser = csvParser({
-          headers: ["owner", "tokenid", "since"],
-          mapHeaders: ({ header }) => header.toLowerCase(),
-          skipLines: 1,
-          separator: ";",
-        })
-          .on("data", (row: any) => {
-            const token: Mutable<CustomTokenPoolParamsToken, "id" | "since"> = {
-              owner: row.owner,
-            };
-            if (row.tokenid) {
-              token.id = row.tokenid;
-            }
-  
-            if (row.since) {
-              token.since = row.since;
-            }
-            results.push(token);
-          })
-          .on("end", () => {
-            //setTokens(results);
-            setFileName(file.name);
-          })
-          .on("error", (err: any) => {
-            console.error(err);
-          });
-  
-        parser.write(data);
-        parser.end();
-      };
-      reader.readAsText(file);
+export default function CreateCustomSnapshotFormUpload({
+    fileName,
+    setFileName,
+    setTokens,
+}: {
+    fileName: string | null;
+    setFileName: (fileName: string | null) => void;
+    setTokens: (tokens: CustomTokenPoolParamsToken[]) => void;
+}) {
+
+  const onFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) {
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = async () => {
+      const csvString = reader.result as string;
+      const lines = csvString.split("\n");
+      lines.shift();
+      const results: CustomTokenPoolParamsToken[] = lines.map((line) => {
+        const row = line.split(";");
+        const result: Mutable<CustomTokenPoolParamsToken, "id" | "since"> = {
+          owner: row.at(0) || "",
+        };
+        if (!!row.at(1)?.length) {
+          result.id = row.at(1);
+        }
+        if (!!row.at(2)?.length && !isNaN(Number(row.at(2)))) {
+          result.since = Number(row.at(2));
+        }
+        return result;
+      });
+      setTokens(results);
+      setFileName(file.name);
     };
+    reader.readAsText(file);
+  };
   return (
     <div>
       <div>
