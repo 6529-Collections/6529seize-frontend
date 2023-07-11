@@ -17,7 +17,7 @@ const STEP_META: Record<
   [DistributionPlanToolStep.CREATE_CUSTOM_SNAPSHOT]: {
     title: "Custom snapshots",
     description:
-      'To add wallets manually you need to create a CSV file: In the first column of the first row, write "Owner". Under that, add wallet numbers with each number in a separate row',
+      'To add wallets manually you need to create a CSV file: In the first column of the first row, write "Owner". Under that, add wallet numbers with each number in a separate row.',
   },
   [DistributionPlanToolStep.CREATE_PHASES]: {
     title: "Create phases",
