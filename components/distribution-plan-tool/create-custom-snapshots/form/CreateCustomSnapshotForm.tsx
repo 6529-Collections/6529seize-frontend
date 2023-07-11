@@ -33,50 +33,6 @@ export default function CreateCustomSnapshotForm() {
   };
 
   const [fileName, setFileName] = useState<string | null>(null);
-  const onFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) {
-      return;
-    }
-
-    const reader = new FileReader();
-    reader.onload = async () => {
-      const data = reader.result;
-      const results: CustomTokenPoolParamsToken[] = [];
-
-      const parser = csvParser({
-        headers: ["owner", "tokenid", "since"],
-        mapHeaders: ({ header }) => header.toLowerCase(),
-        skipLines: 1,
-        separator: ";",
-      })
-        .on("data", (row: any) => {
-          const token: Mutable<CustomTokenPoolParamsToken, "id" | "since"> = {
-            owner: row.owner,
-          };
-          if (row.tokenid) {
-            token.id = row.tokenid;
-          }
-
-          if (row.since) {
-            token.since = row.since;
-          }
-          results.push(token);
-        })
-        .on("end", () => {
-          setTokens(results);
-          setFileName(file.name);
-        })
-        .on("error", (err: any) => {
-          console.error(err);
-        });
-
-      parser.write(data);
-      parser.end();
-    };
-    reader.readAsText(file);
-  };
-
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const addCustomTokenPool = async (): Promise<string | null> => {
     if (!distributionPlan) return null;
@@ -156,7 +112,11 @@ export default function CreateCustomSnapshotForm() {
           </div>
         </div>
 
-        <CreateCustomSnapshotFormUpload />
+        <CreateCustomSnapshotFormUpload
+          fileName={fileName}
+          setFileName={setFileName}
+          setTokens={setTokens}
+        />
 
         <div>
           <DistributionPlanAddOperationBtn loading={isLoading}>
