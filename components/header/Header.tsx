@@ -139,7 +139,7 @@ export default function Header(props: Props) {
                 loading="eager"
                 priority
                 className={styles.logoIcon}
-                src="/Seize_Logo_Glasses.png"
+                src="https://d3lqz0a4bldqgf.cloudfront.net/seize_images/Seize_Logo_Glasses.png"
                 alt="6529Seize"
                 width={319}
                 height={50}
@@ -545,7 +545,7 @@ export default function Header(props: Props) {
                       loading="eager"
                       priority
                       className={styles.logoIcon}
-                      src="/Seize_Logo_Glasses.png"
+                      src="https://d3lqz0a4bldqgf.cloudfront.net/seize_images/Seize_Logo_Glasses.png"
                       alt="6529Seize"
                       width={319}
                       height={50}
@@ -574,7 +574,7 @@ export default function Header(props: Props) {
                             paddingLeft: "35px",
                           }}
                           className={`${styles.burgerMenuBtn} d-block ${styles.dMdNone}`}
-                          src="/Seize_Logo_2.png"
+                          src="https://d3lqz0a4bldqgf.cloudfront.net/seize_images/Seize_Logo_Icon.png"
                           alt="6529Seize"
                           onClick={() => setBurgerMenuOpen(true)}
                         />
@@ -901,7 +901,7 @@ export default function Header(props: Props) {
                             paddingLeft: "35px",
                           }}
                           className={`d-none ${styles.dMdBlock}`}
-                          src="/Seize_Logo_2.png"
+                          src="https://d3lqz0a4bldqgf.cloudfront.net/seize_images/Seize_Logo_Icon.png"
                           alt="6529Seize"
                         />
                       </Container>
