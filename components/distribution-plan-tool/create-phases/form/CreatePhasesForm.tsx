@@ -82,7 +82,7 @@ export default function CreatePhasesForm() {
   return (
     <form onSubmit={handleSubmit}>
       <div className="tw-flex tw-gap-x-4 tw-items-end">
-        <div className="tw-flex-1">
+        <div className="tw-w-80">
           <label className="tw-block tw-text-sm tw-font-normal tw-leading-5 tw-text-neutral-100">
             Name
           </label>
@@ -99,7 +99,7 @@ export default function CreatePhasesForm() {
             />
           </div>
         </div>
-        <div className="tw-flex-1">
+        <div className="tw-w-80">
           <label className="tw-block tw-text-sm tw-font-normal tw-leading-5 tw-text-neutral-100">
             Description
           </label>
