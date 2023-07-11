@@ -1,5 +1,4 @@
 import { DistributionPlanToolStep } from "../DistributionPlanToolContext";
-import DistributionPlanSecondaryText from "./DistributionPlanSecondaryText";
 
 const STEP_META: Record<
   DistributionPlanToolStep,
@@ -47,7 +46,9 @@ export default function StepHeader({
   return (
     <div
       className={` ${
-        step === DistributionPlanToolStep.CREATE_PLAN ? "tw-max-w-2xl tw-mx-auto" : "tw-max-w-4xl"
+        step === DistributionPlanToolStep.CREATE_PLAN
+          ? "tw-max-w-2xl tw-mx-auto"
+          : "tw-max-w-4xl"
       } tw-flex tw-flex-col `}
     >
       <h1 className="tw-uppercase tw-text-white">
