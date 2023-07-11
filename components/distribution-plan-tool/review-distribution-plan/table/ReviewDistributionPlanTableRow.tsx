@@ -131,7 +131,7 @@ export default function ReviewDistributionPlanTableRow({
             : "tw-font-normal"
         }`}
       >
-        {item.tokensCount}
+        {item.spotsCount}
       </td>
       <td
         className={`tw-whitespace-nowrap tw-px-3 tw-py-4 tw-text-sm tw-text-neutral-300 ${

@@ -13,12 +13,12 @@ const STEP_META: Record<
   [DistributionPlanToolStep.CREATE_SNAPSHOTS]: {
     title: "Collection snapshots",
     description:
-      " Lorem ipsum dolor sit amet consectetur. Nisi scelerisque dolor quis sed tellus.",
+      "By taking a snapshot at certain block, we can determine the eligible token holders and allowlist wallets accordingly.",
   },
   [DistributionPlanToolStep.CREATE_CUSTOM_SNAPSHOT]: {
     title: "Custom snapshots",
     description:
-      "Lorem ipsum dolor sit amet consectetur. Nisi scelerisque dolor quis sed tellus.",
+      'To add wallets manually you need to create a CSV file: In the first column of the first row, write "Owner". Under that, add wallet numbers with each number in a separate row',
   },
   [DistributionPlanToolStep.CREATE_PHASES]: {
     title: "Create phases",

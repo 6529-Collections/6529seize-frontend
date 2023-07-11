@@ -19,10 +19,8 @@ export default function CreateCustomSnapshotForm() {
   );
   const [formValues, setFormValues] = useState<{
     name: string;
-    description: string;
   }>({
     name: "",
-    description: "",
   });
   const [tokens, setTokens] = useState<CustomTokenPoolParamsToken[]>([]);
 
@@ -100,7 +98,7 @@ export default function CreateCustomSnapshotForm() {
           params: {
             id: customTokenPoolId,
             name: formValues.name,
-            description: formValues.description,
+            description: formValues.name,
             tokens: tokens,
           },
         }),
@@ -118,7 +116,6 @@ export default function CreateCustomSnapshotForm() {
       addOperations([structuredClone(data)]);
       setFormValues({
         name: "",
-        description: "",
       });
       setTokens([]);
       setFileName(null);
@@ -157,22 +154,7 @@ export default function CreateCustomSnapshotForm() {
             />
           </div>
         </div>
-        <div className="tw-flex-1">
-          <label className="tw-block tw-text-sm tw-font-normal tw-leading-5 tw-text-neutral-100">
-            Description
-          </label>
-          <div className="tw-mt-2">
-            <input
-              type="text"
-              name="description"
-              required
-              autoComplete="off"
-              value={formValues.description}
-              onChange={handleChange}
-              className="tw-block tw-w-full tw-rounded-lg tw-border-0 tw-py-3 tw-px-3 tw-bg-neutral-700/40 tw-text-white tw-font-light tw-caret-primary-500 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-neutral-700/40 placeholder:tw-text-neutral-500 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-500 tw-text-base sm:tw-leading-6 tw-transition tw-duration-300 tw-ease-out"
-            />
-          </div>
-        </div>
+
         <div>
           <div>
             <label

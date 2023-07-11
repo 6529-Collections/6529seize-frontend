@@ -17,7 +17,7 @@ export interface ReviewDistributionPlanTableItem {
   name: string;
   description: string;
   walletsCount: number;
-  tokensCount: number;
+  spotsCount: number;
 }
 
 export interface ReviewDistributionPlanTablePhase {
@@ -36,28 +36,42 @@ export default function ReviewDistributionPlanTable() {
 
   useEffect(() => {
     setRows(
-      phases.map((phase) => ({
-        phase: {
-          id: phase.id,
-          phaseId: phase.id,
-          componentId: null,
-          type: ReviewDistributionPlanTableItemType.PHASE,
-          name: phase.name,
-          description: phase.description,
-          walletsCount: phase.walletsCount,
-          tokensCount: phase.tokensCount,
-        },
-        components: phase.components.map((component) => ({
-          id: component.id,
-          phaseId: phase.id,
-          componentId: component.id,
-          type: ReviewDistributionPlanTableItemType.COMPONENT,
-          name: component.name,
-          description: component.description,
-          walletsCount: component.winnersWalletsCount,
-          tokensCount: component.winnersSpotsCount,
-        })),
-      }))
+      phases.map((phase) => {
+        const { components, spotsCount } = phase.components.reduce<{
+          components: ReviewDistributionPlanTableItem[];
+          spotsCount: number;
+        }>(
+          (acc, component) => {
+            acc.components.push({
+              id: component.id,
+              phaseId: phase.id,
+              componentId: component.id,
+              type: ReviewDistributionPlanTableItemType.COMPONENT,
+              name: component.name,
+              description: component.description,
+              walletsCount: component.winnersWalletsCount,
+              spotsCount: component.winnersSpotsCount,
+            });
+            acc.spotsCount += component.winnersSpotsCount;
+            return acc;
+          },
+          { components: [], spotsCount: 0 }
+        );
+
+        return {
+          phase: {
+            id: phase.id,
+            phaseId: phase.id,
+            componentId: null,
+            type: ReviewDistributionPlanTableItemType.PHASE,
+            name: phase.name,
+            description: phase.description,
+            walletsCount: phase.walletsCount,
+            spotsCount,
+          },
+          components,
+        };
+      })
     );
   }, [phases]);
   return (

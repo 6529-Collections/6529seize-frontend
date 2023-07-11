@@ -12,25 +12,25 @@ import {
 } from "../../allowlist-tool/allowlist-tool.types";
 
 export default function CreatePlan() {
-  // const { setState } = useContext(DistributionPlanToolContext);
-  // useEffect(() => {
-  //   const fetchAllowlist = async () => {
-  //     const url = `${process.env.ALLOWLIST_API_ENDPOINT}/allowlists/610d2cbe-80d4-4ee1-b315-140fbb377e48`;
-  //     const response = await fetch(url, {
-  //       headers: {
-  //         "Content-Type": "application/json",
-  //       },
-  //     });
-  //     const data: AllowlistToolResponse<AllowlistDescription> =
-  //       await response.json();
-  //     if ("error" in data) {
-  //       return;
-  //     }
+  const { setState } = useContext(DistributionPlanToolContext);
+  useEffect(() => {
+    const fetchAllowlist = async () => {
+      const url = `${process.env.ALLOWLIST_API_ENDPOINT}/allowlists/380e963a-e9de-41cd-bef4-062add19e98f`;
+      const response = await fetch(url, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      const data: AllowlistToolResponse<AllowlistDescription> =
+        await response.json();
+      if ("error" in data) {
+        return;
+      }
 
-  //     setState(data);
-  //   };
-  //   fetchAllowlist();
-  // }, []);
+      setState(data);
+    };
+    fetchAllowlist();
+  }, []);
 
   return (
     <div>
