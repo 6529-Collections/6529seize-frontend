@@ -5,13 +5,11 @@ import "tippy.js/themes/light.css";
 
 import type { AppProps } from "next/app";
 import SSRProvider from "react-bootstrap/SSRProvider";
-import { Web3Modal } from "@web3modal/react";
 
 import {
   CW_PROJECT_ID,
   DELEGATION_CONTRACT,
   NEXT_GEN_CONTRACT,
-  PROJECT_NAME,
 } from "../constants";
 
 import { alchemyProvider } from "wagmi/providers/alchemy";
@@ -22,7 +20,7 @@ import {
   w3mProvider,
 } from "@web3modal/ethereum";
 
-import { goerli, mainnet, sepolia } from "wagmi/chains";
+import { Chain, goerli, mainnet, sepolia } from "wagmi/chains";
 import { configureChains, createConfig, WagmiConfig } from "wagmi";
 
 import { library } from "@fortawesome/fontawesome-svg-core";
@@ -72,11 +70,9 @@ import {
   faExternalLinkSquare,
   faPlusCircle,
   faXmarkCircle,
-  faCaretUp,
-  faChevronDown,
-  faGlobe,
 } from "@fortawesome/free-solid-svg-icons";
 import Head from "next/head";
+import { Web3Modal } from "@web3modal/react";
 
 library.add(
   faArrowUp,
@@ -85,10 +81,6 @@ library.add(
   faCopy,
   faCaretRight,
   faCaretLeft,
-  faCaretUp,
-  faCaretDown,
-  faChevronUp,
-  faChevronDown,
   faExchange,
   faShoppingCart,
   faSquareCaretUp,
@@ -118,6 +110,7 @@ library.add(
   faLockOpen,
   faMinus,
   faPlus,
+  faCaretDown,
   faMinus,
   faInfoCircle,
   faArrowTurnRight,
@@ -127,24 +120,33 @@ library.add(
   faArrowCircleDown,
   faExternalLinkSquare,
   faPlusCircle,
-  faXmarkCircle,
-  faGlobe
+  faXmarkCircle
 );
 
-const CONTRACT_CHAINS =
-  DELEGATION_CONTRACT.chain_id === mainnet.id &&
-  NEXT_GEN_CONTRACT.chain_id === mainnet.id
-    ? [mainnet]
-    : [mainnet, sepolia, goerli];
+const CONTRACT_CHAINS: Chain[] = [mainnet];
+if (
+  DELEGATION_CONTRACT.chain_id == sepolia.id ||
+  NEXT_GEN_CONTRACT.chain_id == sepolia.id
+) {
+  CONTRACT_CHAINS.push(sepolia);
+}
+if (
+  DELEGATION_CONTRACT.chain_id == goerli.id ||
+  NEXT_GEN_CONTRACT.chain_id == goerli.id
+) {
+  CONTRACT_CHAINS.push(goerli);
+}
 
-const { chains, publicClient } = configureChains(CONTRACT_CHAINS, [
+DELEGATION_CONTRACT.chain_id == mainnet.id ? [mainnet] : [mainnet, sepolia];
+
+const { publicClient, chains } = configureChains(CONTRACT_CHAINS, [
   alchemyProvider({ apiKey: process.env.ALCHEMY_API_KEY! }),
   w3mProvider({ projectId: CW_PROJECT_ID }),
 ]);
 
 const wagmiConfig = createConfig({
   autoConnect: true,
-  connectors: w3mConnectors({ projectId: CW_PROJECT_ID, version: 2, chains }),
+  connectors: w3mConnectors({ projectId: CW_PROJECT_ID, chains }),
   publicClient,
 });
 const ethereumClient = new EthereumClient(wagmiConfig, chains);
@@ -160,7 +162,6 @@ export default function App({ Component, pageProps }: AppProps) {
           <Component {...pageProps} />
         </WagmiConfig>
       </SSRProvider>
-
       <Web3Modal
         defaultChain={mainnet}
         projectId={CW_PROJECT_ID}
