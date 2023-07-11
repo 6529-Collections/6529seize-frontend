@@ -1,5 +1,4 @@
 import { DistributionPlanToolStep } from "../DistributionPlanToolContext";
-import DistributionPlanSecondaryText from "./DistributionPlanSecondaryText";
 
 const STEP_META: Record<
   DistributionPlanToolStep,
@@ -13,12 +12,12 @@ const STEP_META: Record<
   [DistributionPlanToolStep.CREATE_SNAPSHOTS]: {
     title: "Collection snapshots",
     description:
-      " Lorem ipsum dolor sit amet consectetur. Nisi scelerisque dolor quis sed tellus.",
+      "By taking a snapshot at certain block, we can determine the eligible token holders and allowlist wallets accordingly.",
   },
   [DistributionPlanToolStep.CREATE_CUSTOM_SNAPSHOT]: {
     title: "Custom snapshots",
     description:
-      "Lorem ipsum dolor sit amet consectetur. Nisi scelerisque dolor quis sed tellus.",
+      'To add wallets manually you need to create a CSV file: In the first column of the first row, write "Owner". Under that, add wallet numbers with each number in a separate row.',
   },
   [DistributionPlanToolStep.CREATE_PHASES]: {
     title: "Create phases",
@@ -47,7 +46,9 @@ export default function StepHeader({
   return (
     <div
       className={` ${
-        step === DistributionPlanToolStep.CREATE_PLAN ? "tw-max-w-2xl tw-mx-auto" : "tw-max-w-4xl"
+        step === DistributionPlanToolStep.CREATE_PLAN
+          ? "tw-max-w-2xl tw-mx-auto"
+          : "tw-max-w-4xl"
       } tw-flex tw-flex-col `}
     >
       <h1 className="tw-uppercase tw-text-white">

@@ -12,9 +12,6 @@ export default function CreateCustomSnapshotTableRow({
         {snapshot.name}
       </td>
       <td className="tw-whitespace-nowrap tw-px-3 tw-py-4 tw-text-sm tw-font-normal tw-text-neutral-300">
-        {snapshot.description}
-      </td>
-      <td className="tw-whitespace-nowrap tw-px-3 tw-py-4 tw-text-sm tw-font-normal tw-text-neutral-300">
         {snapshot.walletsCount}
       </td>
       <td className="tw-whitespace-nowrap tw-pl-3 tw-pr-4 tw-py-4 tw-text-sm tw-font-normal tw-text-neutral-300">

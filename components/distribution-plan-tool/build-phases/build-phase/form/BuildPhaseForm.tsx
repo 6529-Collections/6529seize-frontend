@@ -48,7 +48,7 @@ export default function BuildPhaseForm({
   return (
     <>
       <form onSubmit={handleSubmit} className="tw-flex tw-items-end tw-gap-x-4">
-        <div className="tw-flex-1">
+        <div className="tw-w-80">
           <label className="tw-block tw-text-sm tw-font-normal tw-leading-5 tw-text-neutral-100">
             Name
           </label>
@@ -64,7 +64,7 @@ export default function BuildPhaseForm({
             />
           </div>
         </div>
-        <div className="tw-flex-1">
+        <div className="tw-w-80">
           <label className="tw-block tw-text-sm tw-font-normal tw-leading-5 tw-text-neutral-100">
             Description
           </label>
