@@ -268,7 +268,7 @@ export default function About(props: Props) {
                         <Col
                           onClick={() => setNewSection(AboutSection.ENS)}
                           className={`${menuStyles.aboutMenuLeftItem} ${
-                            section == AboutSection.ENS
+                            section === AboutSection.ENS
                               ? menuStyles.aboutMenuLeftItemActive
                               : ""
                           }`}>
@@ -510,7 +510,7 @@ export default function About(props: Props) {
                         <Col
                           onClick={() => setNewSection(AboutSection.ENS)}
                           className={`${menuStyles.aboutMenuLeftItem} ${
-                            section == AboutSection.ENS
+                            section === AboutSection.ENS
                               ? menuStyles.aboutMenuLeftItemActive
                               : ""
                           }`}>
@@ -683,12 +683,12 @@ export async function getServerSideProps(req: any, res: any, resolvedUrl: any) {
     const faqRequest = await fetch(
       `https://6529bucket.s3.eu-west-1.amazonaws.com/seize_html/about/faq.html`
     );
-    const faqText = faqRequest.status == 200 ? await faqRequest.text() : "";
+    const faqText = faqRequest.status === 200 ? await faqRequest.text() : "";
 
     const ensRequest = await fetch(
       `https://6529bucket.s3.eu-west-1.amazonaws.com/seize_html/about/ens.html`
     );
-    const ensText = ensRequest.status == 200 ? await ensRequest.text() : "";
+    const ensText = ensRequest.status === 200 ? await ensRequest.text() : "";
 
     return {
       props: {

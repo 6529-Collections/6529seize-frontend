@@ -370,6 +370,7 @@ export default function NFTLeaderboard(props: Props) {
                                 memesCardsSetS1: lead.memes_cards_sets_szn1,
                                 memesCardsSetS2: lead.memes_cards_sets_szn2,
                                 memesCardsSetS3: lead.memes_cards_sets_szn3,
+                                memesCardsSetS4: lead.memes_cards_sets_szn4,
                                 memesBalance: lead.unique_memes,
                                 gradientsBalance: lead.gradients_balance,
                                 genesis: lead.genesis,

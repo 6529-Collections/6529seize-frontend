@@ -173,6 +173,63 @@ export default function CommunityMetrics() {
                       fun qualitative factor based on which NFTS were collected.
                       The boosters are as follows:
                     </p>
+                    <h5 className="text-white">
+                      <u>TDH 1.1 (July 17, 2023 - present)</u>
+                    </h5>
+                    <br />
+                    <br />
+                    <p>
+                      Higher of Category A and Category B Boosters, plus
+                      Category C Boosters
+                    </p>
+                    <p>
+                      <u>Category A</u>
+                    </p>
+                    <ol>
+                      <li>
+                        A complete set of Meme Cards (SZN1 to SZN3): 1.20x
+                      </li>
+                      <li>
+                        Additional complete set of Meme Cards: 1.02x (up to a
+                        maximum of 2 additional sets)
+                      </li>
+                    </ol>
+                    <p>
+                      <u>Category B</u>
+                    </p>
+                    <ol>
+                      <li>
+                        SZN1:
+                        <ol type="a">
+                          <li>Complete Set: 1.05x or</li>
+                          <li>Genesis Set: 1.01x and</li>
+                          <li>Nakamoto Freedom: 1.01x</li>
+                        </ol>
+                      </li>
+                      <li>SZN2: Complete Set: 1.05x</li>
+                      <li>SZN3: Complete Set: 1.05x </li>
+                    </ol>
+                    <p>
+                      <u>Category C</u>
+                    </p>
+                    <ol>
+                      <li>
+                        Gradient: 1.02x per Gradient (up to a maximum of 3
+                        Gradients)
+                      </li>
+                      <li>
+                        1.02x for having an ENS domain/subdomain active on all
+                        addresses in a consolidation. The purpose of this boost
+                        is to improve legibility of the collector profiles. The
+                        ENS domain can be anonymous or pseudo.
+                      </li>
+                    </ol>
+                    <br />
+                    <h5 className="text-white">
+                      <u>TDH 1.0 (January 30, 2023 - July 16,2023)</u>
+                    </h5>
+                    <br />
+                    <br />
                     &#40;1&#41;
                     <Table className={styles.tdhFormulaTable} bordered={false}>
                       <tbody>

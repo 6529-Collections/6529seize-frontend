@@ -339,11 +339,11 @@ export default function NextGenCollection(props: Props) {
                         }}></FontAwesomeIcon>
                       <a
                         href={`https://${
-                          NEXT_GEN_CONTRACT.chain_id == goerli.id
+                          NEXT_GEN_CONTRACT.chain_id === goerli.id
                             ? `testnets.opensea`
                             : `opensea`
                         }.io/assets/${
-                          NEXT_GEN_CONTRACT.chain_id == goerli.id
+                          NEXT_GEN_CONTRACT.chain_id === goerli.id
                             ? `goerli`
                             : `ethereum`
                         }/${NEXT_GEN_CONTRACT.contract}`}
@@ -359,7 +359,7 @@ export default function NextGenCollection(props: Props) {
                       </a>
                       <a
                         href={`https://${
-                          NEXT_GEN_CONTRACT.chain_id == goerli.id
+                          NEXT_GEN_CONTRACT.chain_id === goerli.id
                             ? `goerli.x2y2`
                             : `x2y2`
                         }.io/eth/${NEXT_GEN_CONTRACT.contract}`}
