@@ -4,14 +4,14 @@ export default function DistributionPlanTableWrapper({
   children: React.ReactNode;
 }) {
   return (
-    <div className="tw-mt-6 tw-flow-root">
+    <div className="tw-flow-root">
       <div className="-tw-mx-4 -tw-my-2 tw-overflow-x-auto sm:-tw-mx-6 lg:-tw-mx-8">
         <div className="tw-inline-block tw-min-w-full tw-py-2 tw-align-middle sm:tw-px-6 lg:tw-px-8">
           <div className="tw-overflow-hidden tw-shadow tw-ring-1 tw-ring-white/10 tw-rounded-lg">
             <table className="tw-min-w-full tw-divide-y tw-divide-neutral-700/60">
               {children}
             </table>
-            <div className="tw-py-8 tw-text-center tw-flex tw-flex-col tw-items-center">
+            {/* <div className="tw-py-8 tw-text-center tw-flex tw-flex-col tw-items-center">
               <div className="tw-h-10 tw-w-10 tw-rounded-full tw-flex tw-items-center tw-justify-center tw-bg-neutral-700/60 tw-ring-[8px] tw-ring-neutral-800/60">
                 <svg
                   className="tw-mx-auto tw-flex-shrink-0 tw-h-6 tw-w-6 tw-text-neutral-400"
@@ -34,7 +34,7 @@ export default function DistributionPlanTableWrapper({
               <p className="tw-mb-0 tw-mt-1 tw-text-sm tw-text-neutral-500">
                 Get started by creating a new project.
               </p>
-            </div>
+            </div> */}
           </div>
         </div>
       </div>
