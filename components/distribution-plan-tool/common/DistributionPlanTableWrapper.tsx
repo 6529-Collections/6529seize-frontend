@@ -12,7 +12,7 @@ export default function DistributionPlanTableWrapper({
               {children}
             </table>
 
-            <div className="tw-py-8 tw-text-center tw-flex tw-flex-col tw-items-center">
+            {/* <div className="tw-py-8 tw-text-center tw-flex tw-flex-col tw-items-center">
               <div className="tw-h-10 tw-w-10 tw-rounded-full tw-flex tw-items-center tw-justify-center tw-bg-neutral-700/60 tw-ring-[8px] tw-ring-neutral-800/60">
                 <svg
                   className="tw-mx-auto tw-flex-shrink-0 tw-h-6 tw-w-6 tw-text-neutral-400"
@@ -35,7 +35,7 @@ export default function DistributionPlanTableWrapper({
               <p className="tw-mb-0 tw-mt-1 tw-text-sm tw-text-neutral-500">
                 Get started by filling in the upper fields.
               </p>
-            </div>
+            </div> */}
           </div>
         </div>
       </div>

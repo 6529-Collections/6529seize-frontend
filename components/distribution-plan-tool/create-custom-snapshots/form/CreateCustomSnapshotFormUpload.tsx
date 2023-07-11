@@ -7,15 +7,14 @@ import {
 } from "../../../allowlist-tool/allowlist-tool.types";
 
 export default function CreateCustomSnapshotFormUpload({
-    fileName,
-    setFileName,
-    setTokens,
+  fileName,
+  setFileName,
+  setTokens,
 }: {
-    fileName: string | null;
-    setFileName: (fileName: string | null) => void;
-    setTokens: (tokens: CustomTokenPoolParamsToken[]) => void;
+  fileName: string | null;
+  setFileName: (fileName: string | null) => void;
+  setTokens: (tokens: CustomTokenPoolParamsToken[]) => void;
 }) {
-
   const onFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) {
