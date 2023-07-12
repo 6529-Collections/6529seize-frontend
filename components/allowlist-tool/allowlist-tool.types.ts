@@ -126,6 +126,7 @@ export enum AllowlistOperationCode {
   ITEM_SORT_WALLETS_BY_UNIQUE_TOKENS_COUNT = "ITEM_SORT_WALLETS_BY_UNIQUE_TOKENS_COUNT", // Not fully implemented to Allowlist-Tool
   ITEM_REMOVE_FIRST_N_WALLETS = "ITEM_REMOVE_FIRST_N_WALLETS", // Not fully implemented to Allowlist-Tool
   ITEM_SELECT_FIRST_N_WALLETS = "ITEM_SELECT_FIRST_N_WALLETS", // Not fully implemented to Allowlist-Tool
+  ITEM_SORT_WALLETS_BY_MEMES_TDH = "ITEM_SORT_WALLETS_BY_MEMES_TDH", // Not fully implemented to Allowlist-Tool
 }
 
 export interface AllowlistOperation {

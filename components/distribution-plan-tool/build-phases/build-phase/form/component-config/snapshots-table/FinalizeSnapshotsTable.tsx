@@ -75,6 +75,9 @@ export default function FinalizeSnapshotsTable({
       if (param.type === TopHolderType.UNIQUE_TOKENS_COUNT) {
         return `Unique Tokens Top ${subTitle}`;
       }
+      if (param.type === TopHolderType.MEMES_TDH) {
+        return `Memes TDH Top ${subTitle}`;
+      }
       return "";
     };
 
@@ -108,34 +111,36 @@ export default function FinalizeSnapshotsTable({
       <div className="tw-overflow-x-auto tw-ring-1 tw-ring-white/10 tw-rounded-lg">
         <table className="tw-min-w-full tw-divide-y tw-divide-neutral-700/60">
           <thead className="tw-bg-neutral-800/60">
-            <th
-              scope="col"
-              className="tw-py-3 tw-pl-4 tw-pr-3 tw-whitespace-nowrap tw-text-left tw-text-[0.6875rem] tw-leading-[1.125rem] tw-font-medium tw-text-neutral-400 tw-uppercase tw-tracking-[0.25px] sm:tw-pl-6"
-            >
-              Name
-            </th>
-            <th
-              scope="col"
-              className="tw-px-3 tw-py-3 tw-whitespace-nowrap tw-text-left tw-text-[0.6875rem] tw-leading-[1.125rem] tw-font-medium tw-text-neutral-400 tw-uppercase tw-tracking-[0.25px]"
-            >
-              Type
-            </th>
-            <th
-              scope="col"
-              className="tw-px-3 tw-py-3 tw-whitespace-nowrap tw-text-left tw-text-[0.6875rem] tw-leading-[1.125rem] tw-font-medium tw-text-neutral-400 tw-uppercase tw-tracking-[0.25px]"
-            >
-              Exclude components
-            </th>
-            <th
-              scope="col"
-              className="tw-px-3 tw-py-3 tw-whitespace-nowrap tw-text-left tw-text-[0.6875rem] tw-leading-[1.125rem] tw-font-medium tw-text-neutral-400 tw-uppercase tw-tracking-[0.25px]"
-            >
-              Top holders
-            </th>
-            <th
-              scope="col"
-              className="tw-px-3 tw-py-3 tw-whitespace-nowrap tw-text-left tw-text-[0.6875rem] tw-leading-[1.125rem] tw-font-medium tw-text-neutral-400 tw-uppercase tw-tracking-[0.25px]"
-            ></th>
+            <tr>
+              <th
+                scope="col"
+                className="tw-py-3 tw-pl-4 tw-pr-3 tw-whitespace-nowrap tw-text-left tw-text-[0.6875rem] tw-leading-[1.125rem] tw-font-medium tw-text-neutral-400 tw-uppercase tw-tracking-[0.25px] sm:tw-pl-6"
+              >
+                Name
+              </th>
+              <th
+                scope="col"
+                className="tw-px-3 tw-py-3 tw-whitespace-nowrap tw-text-left tw-text-[0.6875rem] tw-leading-[1.125rem] tw-font-medium tw-text-neutral-400 tw-uppercase tw-tracking-[0.25px]"
+              >
+                Type
+              </th>
+              <th
+                scope="col"
+                className="tw-px-3 tw-py-3 tw-whitespace-nowrap tw-text-left tw-text-[0.6875rem] tw-leading-[1.125rem] tw-font-medium tw-text-neutral-400 tw-uppercase tw-tracking-[0.25px]"
+              >
+                Exclude components
+              </th>
+              <th
+                scope="col"
+                className="tw-px-3 tw-py-3 tw-whitespace-nowrap tw-text-left tw-text-[0.6875rem] tw-leading-[1.125rem] tw-font-medium tw-text-neutral-400 tw-uppercase tw-tracking-[0.25px]"
+              >
+                Top holders
+              </th>
+              <th
+                scope="col"
+                className="tw-px-3 tw-py-3 tw-whitespace-nowrap tw-text-left tw-text-[0.6875rem] tw-leading-[1.125rem] tw-font-medium tw-text-neutral-400 tw-uppercase tw-tracking-[0.25px]"
+              ></th>
+            </tr>
           </thead>
           <tbody className="tw-bg-neutral-900 tw-divide-y tw-divide-neutral-700/40">
             <AllowlistToolAnimationWrapper mode="wait" initial={false}>

@@ -19,8 +19,6 @@ import FinalizeSnapshot from "./component-config/FinalizeSnapshot";
 import ComponentSelectRandomHolders from "./component-config/ComponentSelectRandomHolders";
 import ComponentAddSpots from "./component-config/ComponentAddSpots";
 import FinalizeComponent from "./component-config/FinalizeComponent";
-import AllowlistToolAnimationWrapper from "../../../../allowlist-tool/common/animation/AllowlistToolAnimationWrapper";
-import AllowlistToolAnimationHeightOpacity from "../../../../allowlist-tool/common/animation/AllowlistToolAnimationHeightOpacity";
 
 export enum PhaseConfigStep {
   SELECT_SNAPSHOT = "SELECT_SNAPSHOT",
@@ -35,6 +33,7 @@ export enum PhaseConfigStep {
 export enum TopHolderType {
   TOTAL_TOKENS_COUNT = "TOTAL_TOKENS_COUNT",
   UNIQUE_TOKENS_COUNT = "UNIQUE_TOKENS_COUNT",
+  MEMES_TDH = "MEMES_TDH",
 }
 
 export interface PhaseGroupSnapshotConfig {
@@ -46,6 +45,7 @@ export interface PhaseGroupSnapshotConfig {
     type: TopHolderType;
     from: number | null;
     to: number | null;
+    tdhBlockNumber: number | null;
   } | null;
 }
 
@@ -186,6 +186,7 @@ export default function BuildPhaseFormConfigModal({
     type: TopHolderType;
     from: number | null;
     to: number | null;
+    tdhBlockNumber: number | null;
   }) => {
     setPhaseGroupConfig((prev) => ({
       ...prev,
@@ -428,13 +429,34 @@ export default function BuildPhaseFormConfigModal({
     });
   };
 
+  const itemSortWalletsByMemesTdh = async ({
+    distributionPlanId,
+    itemId,
+    tdhBlockNumber,
+  }: {
+    distributionPlanId: string;
+    itemId: string;
+    tdhBlockNumber: number;
+  }): Promise<{ success: boolean }> => {
+    return await addOperation({
+      code: AllowlistOperationCode.ITEM_SORT_WALLETS_BY_MEMES_TDH,
+      params: {
+        itemId,
+        tdhBlockNumber,
+      },
+      distributionPlanId,
+    });
+  };
+
   const sortItemWallets = async ({
     itemId,
     filterType,
+    tdhBlockNumber,
     distributionPlanId,
   }: {
     itemId: string;
     filterType: TopHolderType;
+    tdhBlockNumber: number | null;
     distributionPlanId: string;
   }): Promise<{ success: boolean }> => {
     switch (filterType) {
@@ -447,6 +469,15 @@ export default function BuildPhaseFormConfigModal({
         return await itemSortWalletsByUniqueTokensCount({
           distributionPlanId,
           itemId,
+        });
+      case TopHolderType.MEMES_TDH:
+        if (!tdhBlockNumber) {
+          return { success: false };
+        }
+        return await itemSortWalletsByMemesTdh({
+          distributionPlanId,
+          itemId,
+          tdhBlockNumber,
         });
       default:
         assertUnreachable(filterType);
@@ -498,17 +529,20 @@ export default function BuildPhaseFormConfigModal({
     filterType,
     from,
     to,
+    tdhBlockNumber,
   }: {
     distributionPlanId: string;
     itemId: string;
     filterType: TopHolderType;
     from: number | null;
     to: number | null;
+    tdhBlockNumber: number | null;
   }): Promise<{ success: boolean }> => {
     const { success: sortSuccess } = await sortItemWallets({
       itemId,
       filterType,
       distributionPlanId,
+      tdhBlockNumber,
     });
     if (!sortSuccess) {
       return { success: false };
@@ -579,6 +613,7 @@ export default function BuildPhaseFormConfigModal({
         filterType: topHoldersFilter.type,
         from: topHoldersFilter.from,
         to: topHoldersFilter.to,
+        tdhBlockNumber: topHoldersFilter.tdhBlockNumber,
       });
       if (!success) {
         return { success: false };
@@ -705,6 +740,7 @@ export default function BuildPhaseFormConfigModal({
               <SnapshotSelectTopHolders
                 onSelectTopHoldersSkip={onSelectTopHoldersSkip}
                 onSelectTopHoldersFilter={onSelectTopHoldersFilter}
+                config={phaseGroupSnapshotConfig}
               />
             );
           case PhaseConfigStep.FINALIZE_SNAPSHOT:

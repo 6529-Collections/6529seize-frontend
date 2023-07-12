@@ -385,6 +385,7 @@ export default function AllowlistToolBuilderContextWrapper({
             case AllowlistOperationCode.ITEM_SORT_WALLETS_BY_UNIQUE_TOKENS_COUNT:
             case AllowlistOperationCode.ITEM_REMOVE_FIRST_N_WALLETS:
             case AllowlistOperationCode.ITEM_SELECT_FIRST_N_WALLETS:
+            case AllowlistOperationCode.ITEM_SORT_WALLETS_BY_MEMES_TDH:
               break;
             default:
               assertUnreachable(code);
@@ -627,6 +628,9 @@ export default function AllowlistToolBuilderContextWrapper({
           addOperationToItem(operation);
           break;
         case AllowlistOperationCode.ITEM_SELECT_FIRST_N_WALLETS:
+          addOperationToItem(operation);
+          break;
+        case AllowlistOperationCode.ITEM_SORT_WALLETS_BY_MEMES_TDH:
           addOperationToItem(operation);
           break;
         default:
