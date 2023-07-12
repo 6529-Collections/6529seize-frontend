@@ -1,21 +1,71 @@
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import DistributionPlanSecondaryText from "../../../../common/DistributionPlanSecondaryText";
-import { PhaseConfigStep, TopHolderType } from "../BuildPhaseFormConfigModal";
+import {
+  PhaseGroupSnapshotConfig,
+  TopHolderType,
+} from "../BuildPhaseFormConfigModal";
 import ComponentConfigNextBtn from "./ComponentConfigNextBtn";
 import { DistributionPlanToolContext } from "../../../../DistributionPlanToolContext";
+import {
+  AllowlistOperationCode,
+  Pool,
+} from "../../../../../allowlist-tool/allowlist-tool.types";
 
 export default function SnapshotSelectTopHolders({
   onSelectTopHoldersSkip,
   onSelectTopHoldersFilter,
+  config,
 }: {
   onSelectTopHoldersSkip: () => void;
   onSelectTopHoldersFilter: (params: {
     type: TopHolderType;
     from: number | null;
     to: number | null;
+    tdhBlockNumber: number | null;
   }) => void;
+  config: PhaseGroupSnapshotConfig;
 }) {
-  const { setToasts } = useContext(DistributionPlanToolContext);
+  const { setToasts, operations } = useContext(DistributionPlanToolContext);
+
+  const [isMemes, setIsMemes] = useState<boolean>(false);
+  const [tdhBlockNumber, setTdhBlockNumber] = useState<number | null>(null);
+
+  useEffect(() => {
+    const { snapshotId, snapshotType } = config;
+    if (!snapshotId || !snapshotType) {
+      setIsMemes(false);
+      return;
+    }
+    if (snapshotType !== Pool.TOKEN_POOL) {
+      setIsMemes(false);
+      return;
+    }
+    const transferPoolId = operations.find(
+      (operation) =>
+        operation.code === AllowlistOperationCode.CREATE_TOKEN_POOL &&
+        operation.params.id === snapshotId
+    )?.params.transferPoolId;
+    if (!transferPoolId) {
+      setIsMemes(false);
+      return;
+    }
+
+    const { contract, blockNo } = operations.find(
+      (operation) =>
+        operation.code === AllowlistOperationCode.GET_COLLECTION_TRANSFERS &&
+        operation.params.id === transferPoolId
+    )?.params;
+
+    if (!contract || !blockNo) {
+      setIsMemes(false);
+      return;
+    }
+
+    setIsMemes(
+      contract.toLowerCase() === "0x33fd426905f149f8376e227d0c9d3340aad17af1"
+    );
+    setTdhBlockNumber(blockNo);
+  }, [operations, config]);
 
   const [topHolderType, setTopHolderType] = useState<TopHolderType | null>(
     TopHolderType.TOTAL_TOKENS_COUNT
@@ -69,8 +119,75 @@ export default function SnapshotSelectTopHolders({
       type: topHolderType,
       from: typeof from === "number" ? from : null,
       to: typeof to === "number" ? to : null,
+      tdhBlockNumber,
     });
   };
+
+  const activeClasses = "tw-bg-primary-500 tw-border-primary-500";
+  const inactiveClasses =
+    "tw-bg-transparent hover:tw-bg-neutral-800/80 tw-border-neutral-700";
+  const totalTokensCountBaseClasses =
+    "tw-inline-flex tw-items-center tw-justify-center tw-rounded-l-lg tw-cursor-pointer tw-px-4 tw-py-3 tw-text-sm tw-font-medium tw-text-white tw-border-2 tw-border-solid  tw-transition tw-duration-300 tw-ease-out";
+
+  const memesTdhBaseClasses =
+    "-tw-ml-px tw-inline-flex tw-items-center tw-justify-center tw-rounded-r-lg tw-cursor-pointer   tw-px-4 tw-py-3 tw-text-sm tw-font-medium tw-text-white tw-border-2 tw-border-solid  tw-transition tw-duration-300 tw-ease-out";
+
+  const [uniqueTokensCountBaseClasses, setUniqueTokensCountBaseClasses] =
+    useState(
+      "-tw-ml-px tw-inline-flex tw-items-center tw-justify-center tw-rounded-r-lg tw-cursor-pointer tw-px-4 tw-py-3 tw-text-sm tw-font-medium tw-text-white tw-border-2 tw-border-solid  tw-transition tw-duration-300 tw-ease-out"
+    );
+
+  useEffect(() => {
+    setUniqueTokensCountBaseClasses(
+      `-tw-ml-px tw-inline-flex tw-items-center tw-justify-center tw-cursor-pointer tw-px-4 tw-py-3 tw-text-sm tw-font-medium tw-text-white tw-border-2 tw-border-solid  tw-transition tw-duration-300 tw-ease-out ${
+        isMemes ? "" : "tw-rounded-r-lg"
+      }`
+    );
+  }, [isMemes]);
+
+  const [totalTokensCountClasses, setTotalTokensCountClasses] =
+    useState<string>(`${totalTokensCountBaseClasses} ${activeClasses}`);
+  const [uniqueTokensCountClasses, setUniqueTokensCountClasses] =
+    useState<string>(`${uniqueTokensCountBaseClasses} ${inactiveClasses}`);
+  const [memesTdhClasses, setMemesTdhClasses] = useState<string>(
+    `${memesTdhBaseClasses} ${inactiveClasses}`
+  );
+
+  useEffect(() => {
+    if (topHolderType === TopHolderType.TOTAL_TOKENS_COUNT) {
+      setTotalTokensCountClasses(
+        `${totalTokensCountBaseClasses} ${activeClasses}`
+      );
+      setUniqueTokensCountClasses(
+        `${uniqueTokensCountBaseClasses} ${inactiveClasses}`
+      );
+      setMemesTdhClasses(`${memesTdhBaseClasses} ${inactiveClasses}`);
+    } else if (topHolderType === TopHolderType.UNIQUE_TOKENS_COUNT) {
+      setTotalTokensCountClasses(
+        `${totalTokensCountBaseClasses} ${inactiveClasses}`
+      );
+      setUniqueTokensCountClasses(
+        `${uniqueTokensCountBaseClasses} ${activeClasses}`
+      );
+      setMemesTdhClasses(`${memesTdhBaseClasses} ${inactiveClasses}`);
+    } else if (topHolderType === TopHolderType.MEMES_TDH) {
+      setTotalTokensCountClasses(
+        `${totalTokensCountBaseClasses} ${inactiveClasses}`
+      );
+      setUniqueTokensCountClasses(
+        `${uniqueTokensCountBaseClasses} ${inactiveClasses}`
+      );
+      setMemesTdhClasses(`${memesTdhBaseClasses} ${activeClasses}`);
+    } else {
+      setTotalTokensCountClasses(
+        `${totalTokensCountBaseClasses} ${inactiveClasses}`
+      );
+      setUniqueTokensCountClasses(
+        `${uniqueTokensCountBaseClasses} ${inactiveClasses}`
+      );
+      setMemesTdhClasses(`${memesTdhBaseClasses} ${inactiveClasses}`);
+    }
+  }, [topHolderType, uniqueTokensCountBaseClasses]);
 
   return (
     <div>
@@ -82,25 +199,26 @@ export default function SnapshotSelectTopHolders({
           <button
             onClick={() => setTopHolderType(TopHolderType.TOTAL_TOKENS_COUNT)}
             type="button"
-            className={`tw-inline-flex tw-items-center tw-justify-center tw-rounded-l-lg tw-cursor-pointer tw-px-4 tw-py-3 tw-text-sm tw-font-medium tw-text-white tw-border-2 tw-border-solid  tw-transition tw-duration-300 tw-ease-out ${
-              topHolderType === TopHolderType.TOTAL_TOKENS_COUNT
-                ? "tw-bg-primary-500 tw-border-primary-500"
-                : "tw-bg-transparent hover:tw-bg-neutral-800/80 tw-border-neutral-700"
-            }`}
+            className={totalTokensCountClasses}
           >
             Total tokens count
           </button>
           <button
             onClick={() => setTopHolderType(TopHolderType.UNIQUE_TOKENS_COUNT)}
             type="button"
-            className={`-tw-ml-px tw-inline-flex tw-items-center tw-justify-center tw-rounded-r-lg tw-cursor-pointer   tw-px-4 tw-py-3 tw-text-sm tw-font-medium tw-text-white tw-border-2 tw-border-solid  tw-transition tw-duration-300 tw-ease-out ${
-              topHolderType === TopHolderType.UNIQUE_TOKENS_COUNT
-                ? "tw-bg-primary-500 tw-border-primary-500"
-                : "tw-bg-transparent hover:tw-bg-neutral-800/80 tw-border-neutral-700"
-            }`}
+            className={uniqueTokensCountClasses}
           >
             Unique tokens count
           </button>
+          {isMemes && (
+            <button
+              onClick={() => setTopHolderType(TopHolderType.MEMES_TDH)}
+              type="button"
+              className={memesTdhClasses}
+            >
+              TDH
+            </button>
+          )}
         </span>
       </div>
 
