@@ -98,12 +98,12 @@ export default function CreateSnapshotForm() {
   const addSnapshot = async () => {
     const tokenPoolId = await addTokenPool();
     if (!tokenPoolId) return;
-    setFormValues({
+    setFormValues((prev) => ({
+      ...prev,
       name: "",
       contract: "",
-      blockNo: "",
       tokenIds: "",
-    });
+    }));
   };
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {

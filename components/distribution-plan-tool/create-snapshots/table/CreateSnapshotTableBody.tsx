@@ -31,11 +31,6 @@ export default function CreateSnapshotTableBody() {
           tokenPools.find(
             (tokenPool) => tokenPool.id === createTokenPoolOperation.params.id
           ) ?? null;
-        const transferPoolOp = operations.find(
-          (op) =>
-            op.code === AllowlistOperationCode.GET_COLLECTION_TRANSFERS &&
-            op.params.id === createTokenPoolOperation.params.transferPoolId
-        );
 
         return {
           id: createTokenPoolOperation.params.id,
@@ -45,8 +40,8 @@ export default function CreateSnapshotTableBody() {
           tokenIds: createTokenPoolOperation.params.tokenIds,
           walletsCount: tokenPool?.walletsCount ?? null,
           tokensCount: tokenPool?.tokensCount ?? null,
-          contract: transferPoolOp?.params.contract ?? null,
-          blockNo: transferPoolOp?.params.blockNo ?? null,
+          contract: createTokenPoolOperation?.params.contract ?? null,
+          blockNo: createTokenPoolOperation?.params.blockNo ?? null,
         };
       })
     );

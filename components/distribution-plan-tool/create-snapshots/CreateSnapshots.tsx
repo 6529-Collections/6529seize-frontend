@@ -25,7 +25,7 @@ export default function CreateSnapshots() {
     setHaveUnRunOperations(
       !!operations.filter(
         (operation) =>
-          operation.code === AllowlistOperationCode.GET_COLLECTION_TRANSFERS &&
+          operation.code === AllowlistOperationCode.CREATE_TOKEN_POOL &&
           operation.hasRan === false
       ).length
     );
