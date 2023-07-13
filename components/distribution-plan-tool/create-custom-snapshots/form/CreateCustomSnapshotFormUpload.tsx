@@ -5,6 +5,7 @@ import {
   CustomTokenPoolParamsToken,
   Mutable,
 } from "../../../allowlist-tool/allowlist-tool.types";
+import { isEthereumAddress } from "../../../../helpers/AllowlistToolHelpers";
 
 export default function CreateCustomSnapshotFormUpload({
   fileName,
@@ -24,21 +25,33 @@ export default function CreateCustomSnapshotFormUpload({
     const reader = new FileReader();
     reader.onload = async () => {
       const csvString = reader.result as string;
-      const lines = csvString.split("\n");
-      lines.shift();
-      const results: CustomTokenPoolParamsToken[] = lines.map((line) => {
-        const row = line.split(";");
-        const result: Mutable<CustomTokenPoolParamsToken, "id" | "since"> = {
-          owner: row.at(0) || "",
-        };
-        if (!!row.at(1)?.length) {
-          result.id = row.at(1);
-        }
-        if (!!row.at(2)?.length && !isNaN(Number(row.at(2)))) {
-          result.since = Number(row.at(2));
-        }
-        return result;
-      });
+      const lines = csvString.split(/\r?\n/);
+      const headerRow = lines
+        .at(0)
+        ?.split(/[;,]/)
+        .map((cell) => cell.toLowerCase().trim());
+      if (headerRow?.at(0) === "owner") {
+        lines.shift();
+      }
+      const results: CustomTokenPoolParamsToken[] = lines
+        .filter((line) => line.trim().length > 0)
+        .map((line) => {
+          const row = line.split(/[;,]/).map((cell) => cell.trim());
+          const result: Mutable<CustomTokenPoolParamsToken, "id" | "since"> = {
+            owner: row.at(0)?.toLowerCase() || "",
+          };
+          if (!!row.at(1)?.length) {
+            result.id = row.at(1);
+          }
+          if (!!row.at(2)?.length && !isNaN(Number(row.at(2)))) {
+            result.since = Number(row.at(2));
+          }
+          return result;
+        })
+        .filter((token) => {
+          console.log(token);
+          return isEthereumAddress(token.owner);
+        });
       setTokens(results);
       setFileName(file.name);
     };

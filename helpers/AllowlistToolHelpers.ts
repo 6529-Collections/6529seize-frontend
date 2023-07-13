@@ -23,7 +23,6 @@ export class ObjectId {
   }
 }
 
-
 export const truncateTextMiddle = (
   fullStr: string,
   strLen: number,
@@ -37,18 +36,16 @@ export const truncateTextMiddle = (
   const backChars = Math.floor(charsToShow / 2);
 
   return (
-    fullStr.substr(0, frontChars) +
+    fullStr.substring(0, frontChars) +
     separator +
-    fullStr.substr(fullStr.length - backChars)
+    fullStr.substring(fullStr.length - backChars)
   );
 };
-
 
 // This function generates a new random ObjectId and returns it as a string.
 export const getRandomObjectId = () => {
   return new ObjectId().toString();
 };
-
 
 // The `assertUnreachable` function takes an input `_x` of type `never` and always throws
 // an error. This function is typically used in TypeScript to assert exhaustiveness in
@@ -59,3 +56,15 @@ export const assertUnreachable = (_x: never): never => {
   // introduced without updating the relevant switch-case or if-else constructs.
   throw new Error("Didn't expect to get here");
 };
+
+
+// This function takes a string value and checks if it is a valid Ethereum address.
+// It returns a boolean value indicating whether the input string is a valid Ethereum address.
+export function isEthereumAddress(value: string): boolean {
+  if (typeof value !== "string") {
+    return false;
+  }
+  // The regular expression used here checks if the input string starts with "0x" and is followed by
+  // 40 hexadecimal characters (0-9, a-f, A-F).
+  return /^0x[a-fA-F0-9]{40}$/.test(value);
+}

@@ -8,6 +8,7 @@ import {
 } from "../../../allowlist-tool/allowlist-tool.types";
 import styles from "../../DistributionPlan.module.scss";
 import DistributionPlanAddOperationBtn from "../../common/DistributionPlanAddOperationBtn";
+import Tippy from "@tippyjs/react";
 interface CreateSnapshotFormValues {
   name: string;
   contract: string;
@@ -214,20 +215,26 @@ export default function CreateSnapshotForm() {
         <label className="tw-block tw-text-sm tw-font-normal tw-leading-5 tw-text-neutral-100">
           <label className="tw-flex tw-items-center tw-gap-x-2 tw-text-sm tw-font-normal tw-leading-5 tw-text-neutral-100">
             <span>Token ID(s)</span>
-            <svg
-              className="tw-h-5 tw-w-5 tw-text-neutral-400"
-              viewBox="0 0 24 24"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
+            <Tippy
+              content="Example: 1,3,54-78"
+              placement="top"
+              theme="dark"
             >
-              <path
-                d="M12 16V12M12 8H12.01M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12Z"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
+              <svg
+                className="tw-h-5 tw-w-5 tw-text-neutral-500 tw-cursor-pointer"
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M12 16V12M12 8H12.01M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12Z"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </Tippy>
           </label>
         </label>
         <div className="tw-mt-2">
