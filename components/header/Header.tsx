@@ -139,7 +139,7 @@ export default function Header(props: Props) {
                 loading="eager"
                 priority
                 className={styles.logoIcon}
-                src="/Seize_Logo_Glasses.png"
+                src="https://d3lqz0a4bldqgf.cloudfront.net/seize_images/Seize_Logo_Glasses.png"
                 alt="6529Seize"
                 width={319}
                 height={50}
@@ -442,6 +442,13 @@ export default function Header(props: Props) {
                 </Row>
                 <Row className="pt-3">
                   <Col>
+                    <a href={`/about/${AboutSection.ENS}`}>
+                      <h3>ENS</h3>
+                    </a>
+                  </Col>
+                </Row>
+                <Row className="pt-3">
+                  <Col>
                     <a href={`/about/${AboutSection.MINTING}`}>
                       <h3>Minting</h3>
                     </a>
@@ -545,7 +552,7 @@ export default function Header(props: Props) {
                       loading="eager"
                       priority
                       className={styles.logoIcon}
-                      src="/Seize_Logo_Glasses.png"
+                      src="https://d3lqz0a4bldqgf.cloudfront.net/seize_images/Seize_Logo_Glasses.png"
                       alt="6529Seize"
                       width={319}
                       height={50}
@@ -574,7 +581,7 @@ export default function Header(props: Props) {
                             paddingLeft: "35px",
                           }}
                           className={`${styles.burgerMenuBtn} d-block ${styles.dMdNone}`}
-                          src="/Seize_Logo_2.png"
+                          src="https://d3lqz0a4bldqgf.cloudfront.net/seize_images/Seize_Logo_Icon.png"
                           alt="6529Seize"
                           onClick={() => setBurgerMenuOpen(true)}
                         />
@@ -757,6 +764,13 @@ export default function Header(props: Props) {
                               <NavDropdown.Item
                                 className={styles.dropdownItem}
                                 onClick={() =>
+                                  (window.location.href = `/about/${AboutSection.ENS}`)
+                                }>
+                                ENS
+                              </NavDropdown.Item>
+                              <NavDropdown.Item
+                                className={styles.dropdownItem}
+                                onClick={() =>
                                   (window.location.href = `/about/${AboutSection.MINTING}`)
                                 }>
                                 Minting
@@ -901,7 +915,7 @@ export default function Header(props: Props) {
                             paddingLeft: "35px",
                           }}
                           className={`d-none ${styles.dMdBlock}`}
-                          src="/Seize_Logo_2.png"
+                          src="https://d3lqz0a4bldqgf.cloudfront.net/seize_images/Seize_Logo_Icon.png"
                           alt="6529Seize"
                         />
                       </Container>
