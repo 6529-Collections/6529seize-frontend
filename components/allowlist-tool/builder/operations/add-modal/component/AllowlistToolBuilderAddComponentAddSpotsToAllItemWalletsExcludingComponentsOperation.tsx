@@ -121,6 +121,8 @@ export default function AllowlistToolBuilderAddComponentAddSpotsToAllItemWallets
               selectedOptions={selectedComponents}
               toggleSelectedOption={toggleSelectedComponent}
               options={components}
+              allSelectedTitle="All selected"
+              someSelectedTitleSuffix="selected"
             />
           </div>
         </div>

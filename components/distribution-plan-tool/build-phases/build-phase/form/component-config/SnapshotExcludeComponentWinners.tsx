@@ -9,7 +9,7 @@ import ComponentConfigNextBtn from "./ComponentConfigNextBtn";
 import { DistributionPlanToolContext } from "../../../../DistributionPlanToolContext";
 
 const SELECT_ALL_OPTION: AllowlistToolSelectMenuMultipleOption = {
-  title: "Select all",
+  title: "Exclude All Prior Groups",
   subTitle: null,
   value: "select-all",
 };
@@ -106,12 +106,14 @@ export default function SnapshotExcludeComponentWinners({
   return (
     <div>
       <DistributionPlanSecondaryText>
-        Do you want to exclude previous winners from other groups?
+        Exclude Allowlist Members From Prior Groups
       </DistributionPlanSecondaryText>
       <div className="tw-mt-6">
         <AllowlistToolSelectMenuMultiple
-          label="Remove previous winners"
-          placeholder="Select groups"
+          label="Select Groups To Exclude"
+          placeholder="No groups excluded"
+          allSelectedTitle="All Groups Excluded"
+          someSelectedTitleSuffix="Groups Excluded"
           options={options}
           selectedOptions={selectedOptions}
           toggleSelectedOption={toggleSelectedOption}

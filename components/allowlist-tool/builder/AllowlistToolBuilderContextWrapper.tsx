@@ -297,7 +297,6 @@ export default function AllowlistToolBuilderContextWrapper({
                 allowlistId: router.query.id as string,
                 name: operation.params.name,
                 description: operation.params.description,
-                transferPoolId: operation.params.transferPoolId,
                 tokenIds: operation.params.tokenIds,
                 walletsCount: 0,
                 tokensCount: 0,

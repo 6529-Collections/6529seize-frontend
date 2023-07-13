@@ -65,7 +65,7 @@ export default function ReviewDistributionPlanTable() {
             componentId: null,
             type: ReviewDistributionPlanTableItemType.PHASE,
             name: phase.name,
-            description: phase.description,
+            description: '',
             walletsCount: phase.walletsCount,
             spotsCount,
           },

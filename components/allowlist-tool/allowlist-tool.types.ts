@@ -30,7 +30,6 @@ export interface AllowlistTransferPool {
 export interface AllowlistTokenPool {
   readonly id: string;
   readonly allowlistId: string;
-  readonly transferPoolId: string;
   readonly tokenIds?: string;
   readonly name: string;
   readonly description: string;
@@ -148,7 +147,6 @@ export enum Pool {
 export interface CustomTokenPoolParamsToken {
   readonly owner: string;
   readonly id?: string;
-  readonly since?: number;
 }
 
 export type Mutable<T, K extends keyof T> = Omit<T, K> & {

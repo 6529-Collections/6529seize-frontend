@@ -37,14 +37,11 @@ export default function CreateCustomSnapshotFormUpload({
         .filter((line) => line.trim().length > 0)
         .map((line) => {
           const row = line.split(/[;,]/).map((cell) => cell.trim());
-          const result: Mutable<CustomTokenPoolParamsToken, "id" | "since"> = {
+          const result: Mutable<CustomTokenPoolParamsToken, "id"> = {
             owner: row.at(0)?.toLowerCase() || "",
           };
           if (!!row.at(1)?.length) {
             result.id = row.at(1);
-          }
-          if (!!row.at(2)?.length && !isNaN(Number(row.at(2)))) {
-            result.since = Number(row.at(2));
           }
           return result;
         })

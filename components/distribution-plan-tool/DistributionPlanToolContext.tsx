@@ -1,6 +1,6 @@
 import { Slide, ToastContainer, TypeOptions, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { createContext, useState } from "react";
+import { createContext, useEffect, useState } from "react";
 import { Poppins } from "next/font/google";
 import {
   AllowlistCustomTokenPool,
@@ -12,6 +12,7 @@ import {
   AllowlistTransferPool,
 } from "../allowlist-tool/allowlist-tool.types";
 import RunOperations from "./run-operations/RunOperations";
+import Breadcrumb, { Crumb } from "../../components/breadcrumb/Breadcrumb";
 
 const poppins = Poppins({
   weight: ["300", "400", "500", "600", "700"],
@@ -303,38 +304,59 @@ export default function DistributionPlanToolContextWrapper({
     }
   };
 
+  const [defaultBreadCrumbs] = useState<Crumb[]>([
+    { display: "Home", href: "/" },
+    { display: "Distribution plan tool" },
+  ]);
+
+  const [breadcrumbs, setBreadCrumbs] = useState<Crumb[]>(defaultBreadCrumbs);
+
+  useEffect(() => {
+    if (distributionPlan) {
+      setBreadCrumbs([
+        ...defaultBreadCrumbs,
+        { display: distributionPlan.name },
+      ]);
+      return;
+    }
+
+    setBreadCrumbs(defaultBreadCrumbs);
+  }, [distributionPlan, defaultBreadCrumbs]);
   return (
-    <div className={`tw-bg-neutral-900 ${poppins.className}`}>
-      <div
-        id="allowlist-tool"
-        className="tw-overflow-y-auto tw-min-h-screen tw-relative"
-      >
-        <DistributionPlanToolContext.Provider
-          value={{
-            step,
-            setStep,
-            fetching,
-            runOperations,
-            operations,
-            addOperations,
-            setState,
-            distributionPlan,
-            transferPools,
-            setTransferPools,
-            tokenPools,
-            setTokenPools,
-            customTokenPools,
-            setCustomTokenPools,
-            phases,
-            setPhases,
-            setToasts,
-          }}
+    <>
+      <Breadcrumb breadcrumbs={breadcrumbs} />
+      <div className={`tw-bg-neutral-900 ${poppins.className}`}>
+        <div
+          id="allowlist-tool"
+          className="tw-overflow-y-auto tw-min-h-screen tw-relative"
         >
-          <div>{children}</div>
-          <RunOperations />
-          <ToastContainer />
-        </DistributionPlanToolContext.Provider>
+          <DistributionPlanToolContext.Provider
+            value={{
+              step,
+              setStep,
+              fetching,
+              runOperations,
+              operations,
+              addOperations,
+              setState,
+              distributionPlan,
+              transferPools,
+              setTransferPools,
+              tokenPools,
+              setTokenPools,
+              customTokenPools,
+              setCustomTokenPools,
+              phases,
+              setPhases,
+              setToasts,
+            }}
+          >
+            <div>{children}</div>
+            <RunOperations />
+            <ToastContainer />
+          </DistributionPlanToolContext.Provider>
+        </div>
       </div>
-    </div>
+    </>
   );
 }

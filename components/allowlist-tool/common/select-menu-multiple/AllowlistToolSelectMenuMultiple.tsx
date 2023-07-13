@@ -16,12 +16,16 @@ export default function AllowlistToolSelectMenuMultiple({
   selectedOptions,
   toggleSelectedOption,
   options,
+  allSelectedTitle,
+  someSelectedTitleSuffix,
 }: {
   label: string;
   placeholder: string;
   selectedOptions: AllowlistToolSelectMenuMultipleOption[];
   toggleSelectedOption: (option: AllowlistToolSelectMenuMultipleOption) => void;
   options: AllowlistToolSelectMenuMultipleOption[];
+  allSelectedTitle: string;
+  someSelectedTitleSuffix: string;
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const [iconScope, animateIcon] = useAnimate();
@@ -52,10 +56,16 @@ export default function AllowlistToolSelectMenuMultiple({
           : selectedOptions.length === 1
           ? selectedOptions.at(0)!?.title
           : selectedOptions.length === options.length
-          ? "All selected"
-          : `${selectedOptions.length} selected`
+          ? allSelectedTitle
+          : `${selectedOptions.length} ${someSelectedTitleSuffix}`
       ),
-    [selectedOptions, placeholder, options]
+    [
+      selectedOptions,
+      placeholder,
+      options,
+      allSelectedTitle,
+      someSelectedTitleSuffix,
+    ]
   );
 
   return (

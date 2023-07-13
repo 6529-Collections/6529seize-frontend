@@ -11,7 +11,7 @@ import DistributionPlanNextStepBtn from "../common/DistributionPlanNextStepBtn";
 import DistributionPlanStepWrapper from "../common/DistributionPlanStepWrapper";
 
 export default function CreateSnapshots() {
-  const { setStep, distributionPlan, operations, runOperations } = useContext(
+  const { setStep, distributionPlan, operations } = useContext(
     DistributionPlanToolContext
   );
 

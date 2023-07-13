@@ -51,7 +51,7 @@ export default function BuildPhaseForm({
       <form onSubmit={handleSubmit} className="tw-flex tw-items-end tw-gap-x-4">
         <div className="tw-w-80">
           <label className="tw-text-sm tw-font-normal tw-leading-5 tw-text-neutral-100 tw-inline-flex">
-            Name
+            Group Name
             <div className="tw-pl-2">
               <Tippy content="Example: Memes" placement="top" theme="dark">
                 <svg

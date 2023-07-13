@@ -192,7 +192,7 @@ export default function SnapshotSelectTopHolders({
   return (
     <div>
       <DistributionPlanSecondaryText>
-        Do you want to include only some top position wallets?
+        Do you want to include only some members of this group?
       </DistributionPlanSecondaryText>
       <div className="tw-mt-6">
         <span className="tw-isolate tw-inline-flex tw-rounded-lg tw-shadow-sm">

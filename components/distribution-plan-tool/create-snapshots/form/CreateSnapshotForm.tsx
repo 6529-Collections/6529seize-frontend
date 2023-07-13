@@ -1,4 +1,4 @@
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { DistributionPlanToolContext } from "../../DistributionPlanToolContext";
 import { getRandomObjectId } from "../../../../helpers/AllowlistToolHelpers";
 import {
@@ -35,9 +35,7 @@ export default function CreateSnapshotForm() {
 
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  const addTokenPool = async (
-    transferPoolId: string
-  ): Promise<string | null> => {
+  const addTokenPool = async (): Promise<string | null> => {
     if (!distributionPlan) return null;
     setIsLoading(true);
     try {
@@ -47,13 +45,15 @@ export default function CreateSnapshotForm() {
         id: string;
         name: string;
         description: string;
-        transferPoolId: string;
+        contract: string;
+        blockNo: number;
         tokenIds?: string;
       } = {
         id: tokenPoolId,
         name: formValues.name,
         description: formValues.name,
-        transferPoolId,
+        contract: formValues.contract,
+        blockNo: parseInt(formValues.blockNo),
       };
 
       if (!!formValues.tokenIds.length) {
@@ -95,56 +95,8 @@ export default function CreateSnapshotForm() {
     }
   };
 
-  const addTransferPool = async (): Promise<string | null> => {
-    if (!distributionPlan) return null;
-    setIsLoading(true);
-    const url = `${process.env.ALLOWLIST_API_ENDPOINT}/allowlists/${distributionPlan.id}/operations`;
-    const transferPoolId = getRandomObjectId();
-    try {
-      const response = await fetch(url, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          code: AllowlistOperationCode.GET_COLLECTION_TRANSFERS,
-          params: {
-            id: transferPoolId,
-            name: formValues.name,
-            description: formValues.name,
-            contract: formValues.contract,
-            blockNo: +formValues.blockNo,
-          },
-        }),
-      });
-
-      const data: AllowlistToolResponse<AllowlistOperation> =
-        await response.json();
-      if ("error" in data) {
-        setToasts({
-          messages:
-            typeof data.message === "string" ? [data.message] : data.message,
-          type: "error",
-        });
-        return null;
-      }
-      addOperations([structuredClone(data)]);
-      return transferPoolId;
-    } catch (error) {
-      setToasts({
-        messages: ["Something went wrong. Please try again."],
-        type: "error",
-      });
-      return null;
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   const addSnapshot = async () => {
-    const transferPoolId = await addTransferPool();
-    if (!transferPoolId) return;
-    const tokenPoolId = await addTokenPool(transferPoolId);
+    const tokenPoolId = await addTokenPool();
     if (!tokenPoolId) return;
     setFormValues({
       name: "",
@@ -158,6 +110,25 @@ export default function CreateSnapshotForm() {
     event.preventDefault();
     await addSnapshot();
   };
+
+  useEffect(() => {
+    const fetchLatestBlock = async () => {
+      try {
+        const response = await fetch(
+          `${process.env.ALLOWLIST_API_ENDPOINT}/other/latest-block-number`
+        );
+        const data: AllowlistToolResponse<number> = await response.json();
+        if (typeof data === "number") {
+          setFormValues((prev) => ({ ...prev, blockNo: data.toString() }));
+        }
+      } catch (error: any) {
+        return;
+      }
+    };
+
+    fetchLatestBlock();
+  }, []);
+
   return (
     <form className="tw-flex tw-items-end tw-gap-x-4" onSubmit={handleSubmit}>
       <div className="tw-flex-1">
@@ -215,11 +186,7 @@ export default function CreateSnapshotForm() {
         <label className="tw-block tw-text-sm tw-font-normal tw-leading-5 tw-text-neutral-100">
           <label className="tw-flex tw-items-center tw-gap-x-2 tw-text-sm tw-font-normal tw-leading-5 tw-text-neutral-100">
             <span>Token ID(s)</span>
-            <Tippy
-              content="Example: 1,3,54-78"
-              placement="top"
-              theme="dark"
-            >
+            <Tippy content="Example: 1,3,54-78" placement="top" theme="dark">
               <svg
                 className="tw-h-5 tw-w-5 tw-text-neutral-500 tw-cursor-pointer"
                 viewBox="0 0 24 24"

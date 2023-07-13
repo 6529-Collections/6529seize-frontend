@@ -1,4 +1,4 @@
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import AllowlistToolJsonIcon from "../../../allowlist-tool/icons/AllowlistToolJsonIcon";
 import DistributionPlanTableRowWrapper from "../../common/DistributionPlanTableRowWrapper";
 import {
@@ -95,51 +95,37 @@ export default function ReviewDistributionPlanTableRow({
     }
   };
 
+  const [nameClasses, setNameClasses] = useState<string>(
+    "tw-whitespace-nowrap tw-py-4 tw-pr-3 tw-text-sm  tw-text-white tw-pl-8 sm:tw-pl-12 tw-font-light"
+  );
+  const [commonClasses, setCommonClasses] = useState<string>(
+    "tw-whitespace-nowrap tw-px-3 tw-py-4 tw-text-sm tw-text-neutral-300 tw-font-light"
+  );
+  useEffect(() => {
+    if (item.type === ReviewDistributionPlanTableItemType.COMPONENT) {
+      setNameClasses(
+        "tw-whitespace-nowrap tw-py-4 tw-pr-3 tw-text-sm  tw-text-white tw-pl-8 sm:tw-pl-12 tw-font-light"
+      );
+      setCommonClasses(
+        "tw-whitespace-nowrap tw-px-3 tw-py-4 tw-text-sm tw-text-neutral-300 tw-font-light"
+      );
+    } else {
+      setNameClasses(
+        "tw-whitespace-nowrap tw-py-4 tw-pr-3 tw-text-sm  tw-text-white tw-pl-4 sm:tw-pl-6 tw-font-bold"
+      );
+      setCommonClasses(
+        "tw-whitespace-nowrap tw-px-3 tw-py-4 tw-text-sm tw-text-neutral-300 tw-font-bold"
+      );
+    }
+  }, [item.type]);
+
   return (
     <DistributionPlanTableRowWrapper>
-      <td
-        className={`tw-whitespace-nowrap tw-py-4 tw-pr-3 tw-text-sm  tw-text-white  ${
-          item.type === ReviewDistributionPlanTableItemType.COMPONENT
-            ? "tw-pl-8 sm:tw-pl-12 tw-font-light"
-            : "tw-pl-4 sm:tw-pl-6 tw-font-medium"
-        }`}
-      >
-        {item.name}
-      </td>
-      <td
-        className={`tw-whitespace-nowrap tw-px-3 tw-py-4 tw-text-sm tw-text-neutral-300 ${
-          item.type === ReviewDistributionPlanTableItemType.COMPONENT
-            ? "tw-font-light"
-            : "tw-font-normal"
-        }`}
-      >
-        {item.description}
-      </td>
-      <td
-        className={`tw-whitespace-nowrap tw-px-3 tw-py-4 tw-text-sm tw-text-neutral-300 ${
-          item.type === ReviewDistributionPlanTableItemType.COMPONENT
-            ? "tw-font-light"
-            : "tw-font-normal"
-        }`}
-      >
-        {item.walletsCount}
-      </td>
-      <td
-        className={`tw-whitespace-nowrap tw-px-3 tw-py-4 tw-text-sm tw-text-neutral-300 ${
-          item.type === ReviewDistributionPlanTableItemType.COMPONENT
-            ? "tw-font-light"
-            : "tw-font-normal"
-        }`}
-      >
-        {item.spotsCount}
-      </td>
-      <td
-        className={`tw-whitespace-nowrap tw-px-3 tw-py-4 tw-text-sm tw-text-neutral-300 ${
-          item.type === ReviewDistributionPlanTableItemType.COMPONENT
-            ? "tw-font-light"
-            : "tw-font-normal"
-        }`}
-      >
+      <td className={nameClasses}>{item.name}</td>
+      <td className={commonClasses}>{item.description}</td>
+      <td className={commonClasses}>{item.walletsCount}</td>
+      <td className={commonClasses}>{item.spotsCount}</td>
+      <td className={commonClasses}>
         <button
           onClick={fetchResults}
           type="button"

@@ -368,13 +368,7 @@ export default function Header(props: Props) {
                     <hr />
                   </Col>
                 </Row>
-                <Row className="pt-3">
-                  <Col>
-                    <a href="/allowlist-tool">
-                      <h3>Allowlist Plan</h3>
-                    </a>
-                  </Col>
-                </Row>
+
                 <Row className="pt-3">
                   <Col>
                     <a href="/distribution-plan-tool">
@@ -739,13 +733,7 @@ export default function Header(props: Props) {
                                 Delegation Center
                               </NavDropdown.Item>
                               <NavDropdown.Divider />
-                              <NavDropdown.Item
-                                className={styles.dropdownItem}
-                                onClick={() =>
-                                  (window.location.href = "/allowlist-tool")
-                                }>
-                                Allowlist Plan
-                              </NavDropdown.Item>
+      
                               <NavDropdown.Item
                                 className={styles.dropdownItem}
                                 onClick={() =>

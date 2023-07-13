@@ -47,21 +47,17 @@ export default function AllowlistToolBuilderCustomTokenPoolsAdd() {
       const results: CustomTokenPoolParamsToken[] = [];
 
       const parser = csvParser({
-        headers: ["owner", "tokenid", "since"],
+        headers: ["owner", "tokenid"],
         mapHeaders: ({ header }) => header.toLowerCase(),
         skipLines: 1,
         separator: ";",
       })
         .on("data", (row: any) => {
-          const token: Mutable<CustomTokenPoolParamsToken, "id" | "since"> = {
+          const token: Mutable<CustomTokenPoolParamsToken, "id"> = {
             owner: row.owner,
           };
           if (row.tokenid) {
             token.id = row.tokenid;
-          }
-
-          if (row.since) {
-            token.since = row.since;
           }
           results.push(token);
         })
