@@ -1,0 +1,17 @@
+@import "../../styles/variables.scss";
+
+.formInput {
+  color: $dark-grey !important;
+  border-radius: 0 !important;
+  border-color: $lightest-grey;
+
+  &:focus {
+    border-color: $blue !important;
+  }
+}
+
+.loader {
+  width: 20px;
+  height: 20px;
+  margin-left: 5px;
+}
