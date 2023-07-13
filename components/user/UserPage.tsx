@@ -12,13 +12,14 @@ import {
 } from "react-bootstrap";
 import { useEffect, useState } from "react";
 import { DBResponse } from "../../entities/IDBResponse";
-import { Owner, OwnerTags } from "../../entities/IOwner";
+import { Owner } from "../../entities/IOwner";
 import { useRouter } from "next/router";
 import Breadcrumb, { Crumb } from "../breadcrumb/Breadcrumb";
 import { MemesExtendedData, NFT } from "../../entities/INFT";
 import {
   areEqualAddresses,
   formatAddress,
+  isEmptyObject,
   isGradientsContract,
   isMemesContract,
   numberWithCommas,
@@ -49,6 +50,7 @@ import ConsolidationSwitch, {
 } from "../consolidation-switch/ConsolidationSwitch";
 import Address from "../address/Address";
 import NFTImage from "../nft-image/NFTImage";
+import NotFound from "../notFound/NotFound";
 
 interface Props {
   user: string;
@@ -121,6 +123,9 @@ export default function UserPage(props: Props) {
   const [distributionsPage, setDistributionsPage] = useState(1);
   const [distributionsTotalResults, setDistributionsTotalResults] = useState(0);
 
+  const [userError, setUserError] = useState(false);
+  const [fetchingUser, setFetchingUser] = useState(true);
+
   function printDistributionDate(dateString: any) {
     const d = new Date(
       dateString.substring(0, 4),
@@ -156,6 +161,10 @@ export default function UserPage(props: Props) {
       if (props.user.startsWith("0x") || props.user.endsWith(".eth")) {
         const url = `${process.env.API_ENDPOINT}/api/ens/${props.user}`;
         return fetchUrl(url).then((response: any) => {
+          if (isEmptyObject(response)) {
+            setUserError(true);
+          }
+          setFetchingUser(false);
           const oAddress = response.wallet ? response.wallet : props.user;
           setOwnerAddress(oAddress);
           setOwnerENS(response.display ? response.display : oAddress);
@@ -792,6 +801,27 @@ export default function UserPage(props: Props) {
           )}
         </Col>
       </Row>
+    );
+  }
+
+  if (fetchingUser) {
+    return (
+      <Container className="pt-5 text-center">
+        <Row>
+          <Col>
+            <h4 className="mb-0 float-none">Fetching User...</h4>
+          </Col>
+        </Row>
+      </Container>
+    );
+  }
+
+  if (userError) {
+    return (
+      <NotFound
+        title="User Not found"
+        links={[{ href: "/", display: "BACK TO HOME" }]}
+      />
     );
   }
 
