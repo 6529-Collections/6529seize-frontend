@@ -37,7 +37,6 @@ export default function CreateCustomSnapshotForm() {
   const addCustomTokenPool = async (): Promise<string | null> => {
     if (!distributionPlan) return null;
     setIsLoading(true);
-    console.log(tokens)
     try {
       if (tokens.length === 0) {
         setToasts({ messages: ["No tokens provided"], type: "error" });

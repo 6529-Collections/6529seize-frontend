@@ -46,7 +46,6 @@ export default function CreateCustomSnapshotFormUpload({
           return result;
         })
         .filter((token) => {
-          console.log(token);
           return isEthereumAddress(token.owner);
         });
       setTokens(results);

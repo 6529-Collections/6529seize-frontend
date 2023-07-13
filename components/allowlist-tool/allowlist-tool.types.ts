@@ -224,3 +224,13 @@ export interface AllowlistToolOperationsGrouped {
     >;
   };
 }
+
+export interface DistributionPlanSearchContractMetadataResult {
+  readonly id: string;
+  readonly address: string;
+  readonly name: string;
+  readonly tokenType: string;
+  readonly floorPrice: number | null;
+  readonly imageUrl: string | null;
+  readonly description: string | null;
+}

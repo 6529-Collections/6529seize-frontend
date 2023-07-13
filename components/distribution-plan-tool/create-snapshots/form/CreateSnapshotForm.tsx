@@ -9,6 +9,7 @@ import {
 import styles from "../../DistributionPlan.module.scss";
 import DistributionPlanAddOperationBtn from "../../common/DistributionPlanAddOperationBtn";
 import Tippy from "@tippyjs/react";
+import CreateSnapshotFormSearchCollection from "./CreateSnapshotFormSearchCollection";
 interface CreateSnapshotFormValues {
   name: string;
   contract: string;
@@ -129,6 +130,14 @@ export default function CreateSnapshotForm() {
     fetchLatestBlock();
   }, []);
 
+  const setCollection = (param: { name: string; address: string }) => {
+    setFormValues((prev) => ({
+      ...prev,
+      contract: param.address.toLowerCase(),
+      name: param.name,
+    }));
+  };
+
   return (
     <form className="tw-flex tw-items-end tw-gap-x-4" onSubmit={handleSubmit}>
       <div className="tw-flex-1">
@@ -164,6 +173,9 @@ export default function CreateSnapshotForm() {
             className="tw-block tw-w-full tw-rounded-lg tw-border-0 tw-py-3 tw-px-3 tw-bg-neutral-700/40 tw-text-white tw-font-light tw-caret-primary-500 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-neutral-700/40 placeholder:tw-text-neutral-500 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-500 tw-text-base sm:tw-leading-6 tw-transition tw-duration-300 tw-ease-out"
           />
         </div>
+      </div>
+      <div className="tw-flex-1">
+        <CreateSnapshotFormSearchCollection setCollection={setCollection} />
       </div>
       <div className="tw-flex-1">
         <label className="tw-block tw-text-sm tw-font-normal tw-leading-5 tw-text-neutral-100">
