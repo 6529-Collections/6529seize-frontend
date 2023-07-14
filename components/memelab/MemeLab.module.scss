@@ -233,11 +233,11 @@
 }
 
 .tabFocus {
+  float: left;
   white-space: nowrap;
   cursor: pointer;
   margin-right: 20px;
   color: $lightest-grey;
-  // font-size: larger;
 
   &:hover {
     color: white;
