@@ -1,5 +1,9 @@
 import { goerli, mainnet, sepolia } from "wagmi/chains";
-import { GRADIENT_CONTRACT, MEMES_CONTRACT } from "../constants";
+import {
+  GRADIENT_CONTRACT,
+  MEMELAB_CONTRACT,
+  MEMES_CONTRACT,
+} from "../constants";
 import { BaseNFT, VolumeType } from "../entities/INFT";
 
 export function formatAddress(address: string) {
@@ -25,6 +29,10 @@ export function isMemesContract(contract: string) {
 
 export function isGradientsContract(contract: string) {
   return contract.toUpperCase() === GRADIENT_CONTRACT.toUpperCase();
+}
+
+export function isMemeLabContract(contract: string) {
+  return contract.toUpperCase() === MEMELAB_CONTRACT.toUpperCase();
 }
 
 export const fetchMeta = async (uri: string) => {

@@ -120,6 +120,7 @@ export default function UserPage(props: Props) {
           setOwnerAddress(SIX529_MUSEUM);
           setOwnerENS(ReservedUser.MUSEUM);
           setOwnerLinkDisplay(`${oLink}/${ReservedUser.MUSEUM}`);
+          setFetchingUser(false);
           setBreadcrumbs([
             { display: "Home", href: "/" },
             { display: ReservedUser.MUSEUM },
@@ -133,6 +134,7 @@ export default function UserPage(props: Props) {
           setOwnerAddress(MANIFOLD);
           setOwnerENS(ReservedUser.MANIFOLD);
           setOwnerLinkDisplay(`${oLink}/${ReservedUser.MANIFOLD}`);
+          setFetchingUser(false);
           setBreadcrumbs([
             { display: "Home", href: "/" },
             { display: ReservedUser.MANIFOLD },
