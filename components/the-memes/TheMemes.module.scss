@@ -10,11 +10,6 @@
   padding-bottom: 20px;
 }
 
-.season {
-  color: $font-color;
-  cursor: pointer;
-}
-
 .tab {
   padding: 0;
 }
@@ -234,7 +229,6 @@
   cursor: pointer;
   margin-right: 20px;
   color: $lightest-grey;
-  // font-size: larger;
 
   &:hover {
     color: white;
@@ -309,4 +303,39 @@
 .nftImageWrapper {
   display: flex;
   align-items: center;
+}
+
+.seasonDropdown {
+  line-height: 48px;
+  text-align: center;
+  background-color: transparent;
+  border: none;
+  padding-right: 25px;
+  a {
+    line-height: 30px;
+  }
+  button {
+    font-size: larger !important;
+    font-weight: bolder !important;
+    cursor: copy;
+    padding: 0;
+    background-color: transparent !important;
+    border-color: transparent !important;
+    &::after {
+      margin-top: 0.8rem;
+    }
+  }
+  div {
+    width: 60%;
+  }
+}
+
+@media only screen and (max-width: 800px) {
+  .seasonDropdown {
+    button {
+      &::after {
+        margin-top: 0.5rem;
+      }
+    }
+  }
 }

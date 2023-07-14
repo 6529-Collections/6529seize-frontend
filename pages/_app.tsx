@@ -70,6 +70,7 @@ import {
   faExternalLinkSquare,
   faPlusCircle,
   faXmarkCircle,
+  faFire,
 } from "@fortawesome/free-solid-svg-icons";
 import Head from "next/head";
 import { Web3Modal } from "@web3modal/react";
@@ -120,24 +121,25 @@ library.add(
   faArrowCircleDown,
   faExternalLinkSquare,
   faPlusCircle,
-  faXmarkCircle
+  faXmarkCircle,
+  faFire
 );
 
 const CONTRACT_CHAINS: Chain[] = [mainnet];
 if (
-  DELEGATION_CONTRACT.chain_id == sepolia.id ||
-  NEXT_GEN_CONTRACT.chain_id == sepolia.id
+  DELEGATION_CONTRACT.chain_id === sepolia.id ||
+  NEXT_GEN_CONTRACT.chain_id === sepolia.id
 ) {
   CONTRACT_CHAINS.push(sepolia);
 }
 if (
-  DELEGATION_CONTRACT.chain_id == goerli.id ||
-  NEXT_GEN_CONTRACT.chain_id == goerli.id
+  DELEGATION_CONTRACT.chain_id === goerli.id ||
+  NEXT_GEN_CONTRACT.chain_id === goerli.id
 ) {
   CONTRACT_CHAINS.push(goerli);
 }
 
-DELEGATION_CONTRACT.chain_id == mainnet.id ? [mainnet] : [mainnet, sepolia];
+DELEGATION_CONTRACT.chain_id === mainnet.id ? [mainnet] : [mainnet, sepolia];
 
 const { publicClient, chains } = configureChains(CONTRACT_CHAINS, [
   alchemyProvider({ apiKey: process.env.ALCHEMY_API_KEY! }),

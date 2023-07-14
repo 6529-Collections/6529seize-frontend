@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Container, Row, Col, Table } from "react-bootstrap";
 import { DBResponse } from "../../entities/IDBResponse";
-import { TDH, TDHCalc } from "../../entities/ITDH";
+import { TDHCalc } from "../../entities/ITDH";
 import styles from "./Leaderboard.module.scss";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { areEqualAddresses, numberWithCommas } from "../../helpers/Helpers";
@@ -175,6 +175,9 @@ export default function MemeLabLeaderboard(props: Props) {
                                 : 0,
                               memesCardsSetS3: tags
                                 ? tags.memes_cards_sets_szn3
+                                : 0,
+                              memesCardsSetS4: tags
+                                ? tags.memes_cards_sets_szn4
                                 : 0,
                               memesBalance: tags ? tags.unique_memes : 0,
                               gradientsBalance: tags

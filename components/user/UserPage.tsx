@@ -1,6 +1,6 @@
 import styles from "./UserPage.module.scss";
 import Image from "next/image";
-import { Accordion, Col, Container, Row, Table } from "react-bootstrap";
+import { Col, Container, Row } from "react-bootstrap";
 import { useEffect, useState } from "react";
 import { DBResponse } from "../../entities/IDBResponse";
 import { Owner } from "../../entities/IOwner";
@@ -9,7 +9,7 @@ import Breadcrumb, { Crumb } from "../breadcrumb/Breadcrumb";
 import {
   areEqualAddresses,
   formatAddress,
-  numberWithCommas,
+  isEmptyObject,
   removeProtocol,
 } from "../../helpers/Helpers";
 import { MANIFOLD, SIX529_MUSEUM } from "../../constants";
@@ -26,6 +26,7 @@ import ConsolidationSwitch, {
 import Address from "../address/Address";
 import UserPageDetails from "./UserPageDetails";
 import UserPageOverview from "./UserPageOverview";
+import NotFound from "../notFound/NotFound";
 
 interface Props {
   user: string;
@@ -59,6 +60,17 @@ export default function UserPage(props: Props) {
     useState<ConsolidatedTDHMetrics>();
   const [tdh, setTDH] = useState<ConsolidatedTDHMetrics | TDHMetrics>();
   const [isConsolidation, setIsConsolidation] = useState(false);
+  const [userError, setUserError] = useState(false);
+  const [fetchingUser, setFetchingUser] = useState(true);
+
+  function printDistributionDate(dateString: any) {
+    const d = new Date(
+      dateString.substring(0, 4),
+      dateString.substring(5, 7) - 1,
+      dateString.substring(8, 10)
+    );
+    return d.toDateString();
+  }
 
   useEffect(() => {
     async function fetchENS() {
@@ -68,6 +80,10 @@ export default function UserPage(props: Props) {
       if (props.user.startsWith("0x") || props.user.endsWith(".eth")) {
         const url = `${process.env.API_ENDPOINT}/api/ens/${props.user}`;
         return fetchUrl(url).then((response: any) => {
+          if (isEmptyObject(response)) {
+            setUserError(true);
+          }
+          setFetchingUser(false);
           const oAddress = response.wallet ? response.wallet : props.user;
           setOwnerAddress(oAddress);
           setOwnerENS(response.display ? response.display : oAddress);
@@ -113,6 +129,7 @@ export default function UserPage(props: Props) {
           setOwnerAddress(SIX529_MUSEUM);
           setOwnerENS(ReservedUser.MUSEUM);
           setOwnerLinkDisplay(`${oLink}/${ReservedUser.MUSEUM}`);
+          setFetchingUser(false);
           setBreadcrumbs([
             { display: "Home", href: "/" },
             { display: ReservedUser.MUSEUM },
@@ -126,6 +143,7 @@ export default function UserPage(props: Props) {
           setOwnerAddress(MANIFOLD);
           setOwnerENS(ReservedUser.MANIFOLD);
           setOwnerLinkDisplay(`${oLink}/${ReservedUser.MANIFOLD}`);
+          setFetchingUser(false);
           setBreadcrumbs([
             { display: "Home", href: "/" },
             { display: ReservedUser.MANIFOLD },
@@ -265,6 +283,27 @@ export default function UserPage(props: Props) {
       setOwned(walletOwned);
     }
   }, [view, walletOwned, consolidationOwned]);
+
+  if (fetchingUser) {
+    return (
+      <Container className="pt-5 text-center">
+        <Row>
+          <Col>
+            <h4 className="mb-0 float-none">Fetching User...</h4>
+          </Col>
+        </Row>
+      </Container>
+    );
+  }
+
+  if (userError) {
+    return (
+      <NotFound
+        title="User Not found"
+        links={[{ href: "/", display: "BACK TO HOME" }]}
+      />
+    );
+  }
 
   return (
     <>
