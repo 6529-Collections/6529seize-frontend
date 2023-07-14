@@ -6,15 +6,11 @@ import "tippy.js/themes/light.css";
 import type { AppProps } from "next/app";
 import SSRProvider from "react-bootstrap/SSRProvider";
 
-import { CW_PROJECT_ID, DELEGATION_CONTRACT, PROJECT_NAME } from "../constants";
+import { CW_PROJECT_ID, DELEGATION_CONTRACT } from "../constants";
 
 import { alchemyProvider } from "wagmi/providers/alchemy";
 
-import {
-  EthereumClient,
-  w3mConnectors,
-  w3mProvider,
-} from "@web3modal/ethereum";
+import { w3mConnectors, w3mProvider } from "@web3modal/ethereum";
 import { publicProvider } from "@wagmi/core/providers/public";
 
 import { mainnet, sepolia } from "wagmi/chains";
@@ -67,6 +63,7 @@ import {
   faExternalLinkSquare,
   faPlusCircle,
   faXmarkCircle,
+  faFire,
 } from "@fortawesome/free-solid-svg-icons";
 import Head from "next/head";
 
@@ -116,7 +113,8 @@ library.add(
   faArrowCircleDown,
   faExternalLinkSquare,
   faPlusCircle,
-  faXmarkCircle
+  faXmarkCircle,
+  faFire
 );
 
 const CONTRACT_CHAINS =
