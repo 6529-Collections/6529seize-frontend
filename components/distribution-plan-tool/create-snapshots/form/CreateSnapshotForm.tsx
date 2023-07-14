@@ -174,9 +174,9 @@ export default function CreateSnapshotForm() {
           />
         </div>
       </div>
-      <div className="tw-flex-1">
+      {/* <div className="tw-flex-1">
         <CreateSnapshotFormSearchCollection setCollection={setCollection} />
-      </div>
+      </div> */}
       <div className="tw-flex-1">
         <label className="tw-block tw-text-sm tw-font-normal tw-leading-5 tw-text-neutral-100">
           Block number
