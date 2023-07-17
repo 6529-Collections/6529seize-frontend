@@ -1080,6 +1080,17 @@ export default function UserPage(props: Props) {
                               </Col>
                             </Row>
                           )}
+                          {tdh.memes_cards_sets_szn4 > 0 && (
+                            <Row className="pt-1 pb-1">
+                              <Col>
+                                <Tag
+                                  type={TagType.SZN4}
+                                  text={"SZN4 Sets x"}
+                                  value={tdh.memes_cards_sets_szn4}
+                                />
+                              </Col>
+                            </Row>
+                          )}
                           {tdh.gradients_balance > 0 && (
                             <Row className="pt-1 pb-1">
                               <Col>
