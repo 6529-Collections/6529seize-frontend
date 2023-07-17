@@ -13,7 +13,7 @@ export default function ComponentSelectRandomHolders({
 }) {
   const { setToasts } = useContext(DistributionPlanToolContext);
 
-  const [count, setCount] = useState<number | string>('');
+  const [count, setCount] = useState<number | string>("");
 
   const onRandomHolders = () => {
     if (typeof count !== "number") {
@@ -40,7 +40,30 @@ export default function ComponentSelectRandomHolders({
       <DistributionPlanSecondaryText>
         Do you want to select random holders?
       </DistributionPlanSecondaryText>
-      <div className="tw-mt-6">
+      <fieldset className="tw-mt-6">
+        <div className="tw-space-y-4 sm:tw-flex sm:tw-items-center sm:tw-space-x-10 sm:tw-space-y-0">
+          <div className="tw-flex tw-items-center">
+            <input
+              type="radio"
+              checked
+              className="tw-h-4 tw-w-4 tw-border-neutral-300 tw-text-primary-500 focus:tw-ring-primary-500"
+            />
+            <label className="tw-ml-3 tw-block tw-text-sm tw-font-normal tw-leading-6 tw-text-neutral-200">
+              Randomized count
+            </label>
+          </div>
+          <div className="tw-flex tw-items-center">
+            <input
+              type="radio"
+              className="tw-h-4 tw-w-4 tw-border-neutral-300 tw-text-primary-500 focus:tw-ring-primary-500"
+            />
+            <label className="tw-ml-3 tw-block tw-text-sm tw-font-normal tw-leading-6 tw-text-neutral-200">
+              Randomized % count
+            </label>
+          </div>
+        </div>
+      </fieldset>
+      <div className="tw-mt-4">
         <label className="tw-block tw-text-sm tw-font-medium tw-leading-6 tw-text-white ">
           Count
         </label>
@@ -52,7 +75,7 @@ export default function ComponentSelectRandomHolders({
               onChange={(event) =>
                 event.target.value
                   ? setCount(Number(event.target.value))
-                  : setCount('')
+                  : setCount("")
               }
               className="tw-flex-1 tw-border-0 tw-bg-transparent placeholder:tw-text-neutral-500 tw-py-3 tw-px-3 tw-text-white focus:tw-ring-0 sm:tw-text-sm sm:tw-leading-6"
               placeholder="Random holders count"
