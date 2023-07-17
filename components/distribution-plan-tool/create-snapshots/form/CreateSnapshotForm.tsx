@@ -1,10 +1,14 @@
 import { useContext, useEffect, useState } from "react";
 import { DistributionPlanToolContext } from "../../DistributionPlanToolContext";
-import { getRandomObjectId } from "../../../../helpers/AllowlistToolHelpers";
+import {
+  getRandomObjectId,
+  isEthereumAddress,
+} from "../../../../helpers/AllowlistToolHelpers";
 import {
   AllowlistOperation,
   AllowlistOperationCode,
   AllowlistToolResponse,
+  DistributionPlanSearchContractMetadataResult,
 } from "../../../allowlist-tool/allowlist-tool.types";
 import styles from "../../DistributionPlan.module.scss";
 import DistributionPlanAddOperationBtn from "../../common/DistributionPlanAddOperationBtn";
@@ -29,9 +33,45 @@ export default function CreateSnapshotForm() {
     tokenIds: "",
   });
 
+  const getContractMetadata = async (contract: string) => {
+    const url = `${process.env.ALLOWLIST_API_ENDPOINT}/other/contract-metadata/${contract}`;
+    try {
+      const response = await fetch(url, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      const data: AllowlistToolResponse<DistributionPlanSearchContractMetadataResult | null> =
+        await response.json();
+
+      if (data && "error" in data) {
+        setToasts({
+          messages:
+            typeof data.message === "string" ? [data.message] : data.message,
+          type: "error",
+        });
+        return null;
+      }
+      if (data?.name && !formValues.name) {
+        setFormValues((prev) => ({ ...prev, name: data.name }));
+      }
+    } catch (error) {
+      setToasts({
+        messages: ["Something went wrong"],
+        type: "error",
+      });
+      return null;
+    }
+  };
+
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
     setFormValues((prev) => ({ ...prev, [name]: value }));
+    if (name === "contract" && isEthereumAddress(value) && !formValues.name) {
+      getContractMetadata(value);
+    }
   };
 
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -140,8 +180,11 @@ export default function CreateSnapshotForm() {
 
   return (
     <>
-    <CreateSnapshotFormSearchCollection setCollection={setCollection} />
-      <form className="tw-flex tw-flex-wrap tw-gap-y-5 tw-mt-8" onSubmit={handleSubmit}>
+      <CreateSnapshotFormSearchCollection setCollection={setCollection} />
+      <form
+        className="tw-flex tw-flex-wrap tw-gap-y-5 tw-mt-8"
+        onSubmit={handleSubmit}
+      >
         <div className="tw-flex tw-w-full tw-gap-x-4">
           <div className="tw-flex-1">
             <label className="tw-block tw-text-sm tw-font-normal tw-leading-5 tw-text-neutral-100">
