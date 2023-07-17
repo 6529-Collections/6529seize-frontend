@@ -191,75 +191,93 @@ export default function SnapshotSelectTopHolders({
 
   return (
     <div>
-      <DistributionPlanSecondaryText>
-        Do you want to include only some members of this group?
-      </DistributionPlanSecondaryText>
-      <div className="tw-mt-6">
-        <span className="tw-isolate tw-inline-flex tw-rounded-lg tw-shadow-sm">
-          <button
-            onClick={() => setTopHolderType(TopHolderType.TOTAL_TOKENS_COUNT)}
-            type="button"
-            className={totalTokensCountClasses}
-          >
-            Total tokens count
-          </button>
-          <button
-            onClick={() => setTopHolderType(TopHolderType.UNIQUE_TOKENS_COUNT)}
-            type="button"
-            className={uniqueTokensCountClasses}
-          >
-            Unique tokens count
-          </button>
-          {isMemes && (
-            <button
-              onClick={() => setTopHolderType(TopHolderType.MEMES_TDH)}
-              type="button"
-              className={memesTdhClasses}
-            >
-              TDH
-            </button>
-          )}
-        </span>
-      </div>
+      <div className="tw-flex tw-gap-x-8">
+        <div>
+          <nav className="tw-flex tw-flex-1 tw-flex-col" aria-label="Sidebar">
+            <ul role="list" className="tw-list-none tw-m-0 tw-p-0 tw-space-y-1">
+              <li className="tw-bg-neutral-800 tw-text-neutral-200 tw-cursor-pointer tw-whitespace-nowrap tw-no-underline tw-group tw-flex tw-gap-x-3 tw-rounded-md tw-p-2 tw-pl-3 tw-text-sm tw-leading-6 tw-font-semibold tw-transition tw-duration-300 tw-ease-out">
+                Total tokens count
+              </li>
+              <li className="tw-whitespace-nowrap tw-text-neutral-500 tw-cursor-pointer tw-no-underline hover:tw-text-neutral-200 hover:tw-bg-neutral-900 tw-group tw-flex tw-gap-x-3 tw-rounded-md tw-p-2 tw-pl-3 tw-text-sm tw-leading-6 tw-font-semibold tw-transition tw-duration-300 tw-ease-out">
+                Unique tokens count
+              </li>
+            </ul>
+          </nav>
 
-      <div className="tw-mt-6 tw-flex tw-flex-col tw-gap-y-4">
-        <div>
-          <label className="tw-block tw-text-sm tw-font-medium tw-leading-6 tw-text-white">
-            From
-          </label>
-          <div className="tw-mt-1.5">
-            <div className="tw-flex tw-rounded-md tw-bg-white/5 tw-ring-1 tw-ring-inset tw-ring-white/10 focus-within:tw-ring-2 focus-within:tw-ring-inset focus-within:tw-ring-primary-500">
-              <input
-                type="number"
-                value={from}
-                onChange={(event) =>
-                  event.target.value
-                    ? setFrom(Number(event.target.value))
-                    : setFrom("")
-                }
-                className="tw-flex-1 tw-border-0 tw-bg-transparent placeholder:tw-text-neutral-500 tw-py-3 tw-px-3 tw-text-white focus:tw-ring-0 sm:tw-text-sm sm:tw-leading-6"
-                placeholder="From"
-              />
-            </div>
-          </div>
+          <span className="tw-hidden tw-isolate tw-inline-flex tw-rounded-lg tw-shadow-sm">
+            <button
+              onClick={() => setTopHolderType(TopHolderType.TOTAL_TOKENS_COUNT)}
+              type="button"
+              className={totalTokensCountClasses}
+            >
+              Total tokens count
+            </button>
+            <button
+              onClick={() =>
+                setTopHolderType(TopHolderType.UNIQUE_TOKENS_COUNT)
+              }
+              type="button"
+              className={uniqueTokensCountClasses}
+            >
+              Unique tokens count
+            </button>
+            {isMemes && (
+              <button
+                onClick={() => setTopHolderType(TopHolderType.MEMES_TDH)}
+                type="button"
+                className={memesTdhClasses}
+              >
+                TDH
+              </button>
+            )}
+          </span>
         </div>
+
         <div>
-          <label className="tw-block tw-text-sm tw-font-medium tw-leading-6 tw-text-white">
-            To
-          </label>
-          <div className="tw-mt-1.5">
-            <div className="tw-flex tw-rounded-md tw-bg-white/5 tw-ring-1 tw-ring-inset tw-ring-white/10 focus-within:tw-ring-2 focus-within:tw-ring-inset focus-within:tw-ring-primary-500">
-              <input
-                type="number"
-                value={to}
-                onChange={(event) =>
-                  event.target.value
-                    ? setTo(Number(event.target.value))
-                    : setTo("")
-                }
-                className="tw-flex-1 tw-border-0 tw-bg-transparent placeholder:tw-text-neutral-500 tw-py-3 tw-px-3 tw-text-white focus:tw-ring-0 sm:tw-text-sm sm:tw-leading-6"
-                placeholder="To"
-              />
+          <DistributionPlanSecondaryText>
+            Do you want to include only some members of this group?
+          </DistributionPlanSecondaryText>
+
+          <div className="tw-mt-6 tw-flex tw-flex-col tw-gap-y-4">
+            <div>
+              <label className="tw-block tw-text-sm tw-font-medium tw-leading-6 tw-text-white">
+                From
+              </label>
+              <div className="tw-mt-1.5">
+                <div className="tw-flex tw-rounded-md tw-bg-white/5 tw-ring-1 tw-ring-inset tw-ring-white/10 focus-within:tw-ring-2 focus-within:tw-ring-inset focus-within:tw-ring-primary-500">
+                  <input
+                    type="number"
+                    value={from}
+                    onChange={(event) =>
+                      event.target.value
+                        ? setFrom(Number(event.target.value))
+                        : setFrom("")
+                    }
+                    className="tw-flex-1 tw-border-0 tw-bg-transparent placeholder:tw-text-neutral-500 tw-py-3 tw-px-3 tw-text-white focus:tw-ring-0 sm:tw-text-sm sm:tw-leading-6"
+                    placeholder="From"
+                  />
+                </div>
+              </div>
+            </div>
+            <div>
+              <label className="tw-block tw-text-sm tw-font-medium tw-leading-6 tw-text-white">
+                To
+              </label>
+              <div className="tw-mt-1.5">
+                <div className="tw-flex tw-rounded-md tw-bg-white/5 tw-ring-1 tw-ring-inset tw-ring-white/10 focus-within:tw-ring-2 focus-within:tw-ring-inset focus-within:tw-ring-primary-500">
+                  <input
+                    type="number"
+                    value={to}
+                    onChange={(event) =>
+                      event.target.value
+                        ? setTo(Number(event.target.value))
+                        : setTo("")
+                    }
+                    className="tw-flex-1 tw-border-0 tw-bg-transparent placeholder:tw-text-neutral-500 tw-py-3 tw-px-3 tw-text-white focus:tw-ring-0 sm:tw-text-sm sm:tw-leading-6"
+                    placeholder="To"
+                  />
+                </div>
+              </div>
             </div>
           </div>
         </div>
