@@ -186,7 +186,7 @@ export default function SnapshotSelectTopHolders({
           setSelectedOption={(type) => setTopHolderType(type as TopHolderType)}
         />
 
-        <div>
+        <div className="tw-w-full">
           <BuildPhaseFormConfigModalTitle title={title} onClose={onClose} />
           <DistributionPlanSecondaryText>
             Do you want to include only some members of this group?
@@ -198,7 +198,7 @@ export default function SnapshotSelectTopHolders({
                 From
               </label>
               <div className="tw-mt-1.5">
-                <div className="tw-flex tw-rounded-md tw-bg-white/5 tw-ring-1 tw-ring-inset tw-ring-white/10 focus-within:tw-ring-2 focus-within:tw-ring-inset focus-within:tw-ring-primary-500">
+                <div className="tw-flex tw-rounded-md tw-bg-white/5 tw-ring-1 tw-ring-inset tw-ring-white/10 focus-within:tw-ring-1 focus-within:tw-ring-inset focus-within:tw-ring-primary-400">
                   <input
                     type="number"
                     value={from}
@@ -218,7 +218,7 @@ export default function SnapshotSelectTopHolders({
                 To
               </label>
               <div className="tw-mt-1.5">
-                <div className="tw-flex tw-rounded-md tw-bg-white/5 tw-ring-1 tw-ring-inset tw-ring-white/10 focus-within:tw-ring-2 focus-within:tw-ring-inset focus-within:tw-ring-primary-500">
+                <div className="tw-flex tw-rounded-md tw-bg-white/5 tw-ring-1 tw-ring-inset tw-ring-white/10 focus-within:tw-ring-1 focus-within:tw-ring-inset focus-within:tw-ring-primary-400">
                   <input
                     type="number"
                     value={to}

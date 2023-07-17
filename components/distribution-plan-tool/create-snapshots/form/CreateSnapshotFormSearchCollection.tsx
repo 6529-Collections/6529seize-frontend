@@ -124,7 +124,7 @@ export default function CreateSnapshotFormSearchCollection({
   }, [debouncedKeyword, setToasts]);
 
   return (
-    <div className="tw-relative tw-w-full" ref={searchCollectionRef}>
+    <div className="tw-relative tw-max-w-lg" ref={searchCollectionRef}>
       <CreateSnapshotFormSearchCollectionInput
         openDropdown={openDropdown}
         keyword={keyword}

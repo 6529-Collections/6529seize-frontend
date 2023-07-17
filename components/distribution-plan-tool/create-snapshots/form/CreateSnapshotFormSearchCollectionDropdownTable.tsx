@@ -10,7 +10,7 @@ export default function CreateSnapshotFormSearchCollectionDropdownTable({
 }) {
   return (
     <table className="tw-min-w-full">
-      <thead className="tw-border-b tw-border-solid tw-border-x-0 tw-border-t-0 tw-border-neutral-700/60">
+      <thead className="tw-border-b tw-border-solid tw-border-x-0 tw-border-neutral-700/60">
         <tr>
           <th
             scope="col"

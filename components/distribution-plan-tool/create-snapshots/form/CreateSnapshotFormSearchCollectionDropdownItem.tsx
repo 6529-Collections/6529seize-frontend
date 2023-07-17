@@ -38,7 +38,7 @@ export default function CreateSnapshotFormSearchCollectionDropdownItem({
   };
   return (
     <tr
-      className="tw-cursor-pointer hover:tw-bg-neutral-800 tw-duration-300 tw-ease-out"
+      className="tw-cursor-pointer hover:tw-bg-neutral-700 tw-duration-300 tw-ease-out"
       onClick={() =>
         onCollection({ name: collection.name, address: collection.address })
       }
