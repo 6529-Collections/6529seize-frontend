@@ -233,4 +233,6 @@ export interface DistributionPlanSearchContractMetadataResult {
   readonly floorPrice: number | null;
   readonly imageUrl: string | null;
   readonly description: string | null;
+  readonly allTimeVolume: number | null;
+  readonly openseaVerified: boolean;
 }

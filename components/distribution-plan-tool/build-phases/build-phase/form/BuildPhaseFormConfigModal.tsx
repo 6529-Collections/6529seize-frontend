@@ -69,7 +69,7 @@ export default function BuildPhaseFormConfigModal({
   onClose: () => void;
 }) {
   const [configStep, setConfigStep] = useState<PhaseConfigStep>(
-    PhaseConfigStep.COMPONENT_SELECT_RANDOM_HOLDERS
+    PhaseConfigStep.SELECT_SNAPSHOT
   );
   const { operations, distributionPlan, setToasts, addOperations } = useContext(
     DistributionPlanToolContext

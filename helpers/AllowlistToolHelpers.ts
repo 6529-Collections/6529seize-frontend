@@ -57,7 +57,6 @@ export const assertUnreachable = (_x: never): never => {
   throw new Error("Didn't expect to get here");
 };
 
-
 // This function takes a string value and checks if it is a valid Ethereum address.
 // It returns a boolean value indicating whether the input string is a valid Ethereum address.
 export function isEthereumAddress(value: string): boolean {
@@ -67,4 +66,21 @@ export function isEthereumAddress(value: string): boolean {
   // The regular expression used here checks if the input string starts with "0x" and is followed by
   // 40 hexadecimal characters (0-9, a-f, A-F).
   return /^0x[a-fA-F0-9]{40}$/.test(value);
+}
+
+export function formatNumber(num: number): string {
+  
+  if (num < 10) {
+    return num.toFixed(3);
+  } else if (num < 100) {
+    return num.toFixed(2);
+  } else if (num < 10000) {
+    return num.toFixed(0);
+  } else {
+    const suffixes = ["", "k", "M", "B", "T"];
+    const suffixIndex = Math.floor(Math.log10(num) / 3);
+    const suffix = suffixes[suffixIndex];
+    const scaledNum = num / Math.pow(10, suffixIndex * 3);
+    return scaledNum.toFixed(1) + suffix;
+  }
 }
