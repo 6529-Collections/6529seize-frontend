@@ -141,7 +141,7 @@ export default function CreateSnapshotForm() {
   return (
     <>
     <CreateSnapshotFormSearchCollection setCollection={setCollection} />
-      <form className="tw-flex tw-flex-wrap tw-gap-y-5" onSubmit={handleSubmit}>
+      <form className="tw-flex tw-flex-wrap tw-gap-y-5 tw-mt-8" onSubmit={handleSubmit}>
         <div className="tw-flex tw-w-full tw-gap-x-4">
           <div className="tw-flex-1">
             <label className="tw-block tw-text-sm tw-font-normal tw-leading-5 tw-text-neutral-100">

@@ -14,7 +14,7 @@ export default function CreateSnapshotFormSearchCollectionInput({
     setKeyword(value);
   };
   return (
-    <div className="tw-max-w-md">
+    <div className="tw-max-w-lg">
       <div className="tw-pointer-events-none tw-absolute tw-inset-y-0 tw-flex tw-items-center tw-pl-3">
         <svg
           className="tw-h-5 tw-w-5 tw-text-neutral-300"

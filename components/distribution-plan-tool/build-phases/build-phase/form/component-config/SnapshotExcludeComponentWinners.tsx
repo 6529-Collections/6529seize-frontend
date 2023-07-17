@@ -7,6 +7,7 @@ import { BuildPhasesPhase } from "../../../BuildPhases";
 import { PhaseConfigStep } from "../BuildPhaseFormConfigModal";
 import ComponentConfigNextBtn from "./ComponentConfigNextBtn";
 import { DistributionPlanToolContext } from "../../../../DistributionPlanToolContext";
+import BuildPhaseFormConfigModalTitle from "./BuildPhaseFormConfigModalTitle";
 
 const SELECT_ALL_OPTION: AllowlistToolSelectMenuMultipleOption = {
   title: "Exclude All Prior Groups",
@@ -18,10 +19,14 @@ export default function SnapshotExcludeComponentWinners({
   phases,
   onNextStep,
   onSelectExcludeComponentWinners,
+  title,
+  onClose,
 }: {
   phases: BuildPhasesPhase[];
   onNextStep: (step: PhaseConfigStep) => void;
   onSelectExcludeComponentWinners: (componentIds: string[]) => void;
+  title: string;
+  onClose: () => void;
 }) {
   const { setToasts } = useContext(DistributionPlanToolContext);
   const [options, setOptions] = useState<
@@ -105,6 +110,7 @@ export default function SnapshotExcludeComponentWinners({
 
   return (
     <div>
+      <BuildPhaseFormConfigModalTitle title={title} onClose={onClose} />
       <DistributionPlanSecondaryText>
         Exclude Allowlist Members From Prior Groups
       </DistributionPlanSecondaryText>

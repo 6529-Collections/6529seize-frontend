@@ -36,6 +36,11 @@ export enum TopHolderType {
   MEMES_TDH = "MEMES_TDH",
 }
 
+export enum RandomHoldersType {
+  BY_COUNT = "BY_COUNT",
+  BY_PERCENTAGE = "BY_PERCENTAGE",
+}
+
 export interface PhaseGroupSnapshotConfig {
   groupSnapshotId: string | null;
   snapshotId: string | null;
@@ -51,7 +56,10 @@ export interface PhaseGroupSnapshotConfig {
 
 export interface PhaseGroupConfig {
   snapshots: PhaseGroupSnapshotConfig[];
-  randomHoldersCount: number | null;
+  randomHoldersFilter: {
+    type: RandomHoldersType;
+    value: number;
+  } | null;
   maxMintCount: number | null;
 }
 
@@ -69,7 +77,7 @@ export default function BuildPhaseFormConfigModal({
   onClose: () => void;
 }) {
   const [configStep, setConfigStep] = useState<PhaseConfigStep>(
-    PhaseConfigStep.SNAPSHOT_SELECT_TOP_HOLDERS
+    PhaseConfigStep.SELECT_SNAPSHOT
   );
   const { operations, distributionPlan, setToasts, addOperations } = useContext(
     DistributionPlanToolContext
@@ -118,7 +126,7 @@ export default function BuildPhaseFormConfigModal({
   //
   const [phaseGroupConfig, setPhaseGroupConfig] = useState<PhaseGroupConfig>({
     snapshots: [],
-    randomHoldersCount: null,
+    randomHoldersFilter: null,
     maxMintCount: null,
   });
 
@@ -237,10 +245,16 @@ export default function BuildPhaseFormConfigModal({
     onNextStep(PhaseConfigStep.COMPONENT_SELECT_RANDOM_HOLDERS);
   };
 
-  const onSelectRandomHolders = (randomHoldersCount: number) => {
+  const onSelectRandomHolders = (param: {
+    value: number;
+    randomHoldersType: RandomHoldersType;
+  }) => {
     setPhaseGroupConfig((prev) => ({
       ...prev,
-      randomHoldersCount,
+      randomHoldersFilter: {
+        type: param.randomHoldersType,
+        value: param.value,
+      },
     }));
     onNextStep(PhaseConfigStep.COMPONENT_ADD_SPOTS);
   };
@@ -263,7 +277,7 @@ export default function BuildPhaseFormConfigModal({
     });
     setPhaseGroupConfig({
       snapshots: [],
-      randomHoldersCount: null,
+      randomHoldersFilter: null,
       maxMintCount: null,
     });
     setConfigStep(PhaseConfigStep.SELECT_SNAPSHOT);
@@ -645,23 +659,41 @@ export default function BuildPhaseFormConfigModal({
   const componentSelectRandomWallets = async ({
     distributionPlanId,
     componentId,
-    count,
+    value,
+    randomHoldersType,
     seed,
   }: {
     distributionPlanId: string;
     componentId: string;
-    count: number;
+    value: number | null;
+    randomHoldersType: RandomHoldersType;
     seed: string;
   }): Promise<{ success: boolean }> => {
-    return await addOperation({
-      code: AllowlistOperationCode.COMPONENT_SELECT_RANDOM_WALLETS,
-      params: {
-        componentId,
-        count,
-        seed,
-      },
-      distributionPlanId,
-    });
+    switch (randomHoldersType) {
+      case RandomHoldersType.BY_COUNT:
+        return await addOperation({
+          code: AllowlistOperationCode.COMPONENT_SELECT_RANDOM_WALLETS,
+          params: {
+            componentId,
+            count: value,
+            seed,
+          },
+          distributionPlanId,
+        });
+      case RandomHoldersType.BY_PERCENTAGE:
+        return await addOperation({
+          code: AllowlistOperationCode.COMPONENT_SELECT_RANDOM_PERCENTAGE_WALLETS,
+          params: {
+            componentId,
+            percentage: value,
+            seed,
+          },
+          distributionPlanId,
+        });
+      default:
+        assertUnreachable(randomHoldersType);
+        return { success: false };
+    }
   };
 
   const onSave = async () => {
@@ -693,14 +725,12 @@ export default function BuildPhaseFormConfigModal({
       });
     }
     // 5. Random holders (if any)
-    if (
-      typeof phaseGroupConfig.randomHoldersCount === "number" &&
-      phaseGroupConfig.randomHoldersCount > 0
-    ) {
+    if (phaseGroupConfig.randomHoldersFilter) {
       await componentSelectRandomWallets({
         distributionPlanId: distributionPlan.id,
         componentId,
-        count: phaseGroupConfig.randomHoldersCount,
+        value: phaseGroupConfig.randomHoldersFilter.value,
+        randomHoldersType: phaseGroupConfig.randomHoldersFilter.type,
         seed: distributionPlan.id,
       });
     }
@@ -714,6 +744,11 @@ export default function BuildPhaseFormConfigModal({
     onClose();
   };
 
+  const [modalTitle, setModalTitle] = useState(`Configure group "${name}"`);
+  useEffect(() => {
+    setModalTitle(`Configure group "${name}"`);
+  }, [name]);
+
   return (
     <div className="tw-px-6 tw-gap-y-6 tw-flex tw-flex-col tw-divide-y tw-divide-solid tw-divide-neutral-700 tw-divide-x-0">
       {(() => {
@@ -723,6 +758,8 @@ export default function BuildPhaseFormConfigModal({
               <SelectSnapshot
                 snapshots={snapshots}
                 onSelectSnapshot={onSelectSnapshot}
+                title={modalTitle}
+                onClose={onClose}
               />
             );
           case PhaseConfigStep.SNAPSHOT_EXCLUDE_COMPONENT_WINNERS:
@@ -733,6 +770,8 @@ export default function BuildPhaseFormConfigModal({
                 onSelectExcludeComponentWinners={
                   onSelectExcludeComponentWinners
                 }
+                title={modalTitle}
+                onClose={onClose}
               />
             );
           case PhaseConfigStep.SNAPSHOT_SELECT_TOP_HOLDERS:
@@ -741,6 +780,8 @@ export default function BuildPhaseFormConfigModal({
                 onSelectTopHoldersSkip={onSelectTopHoldersSkip}
                 onSelectTopHoldersFilter={onSelectTopHoldersFilter}
                 config={phaseGroupSnapshotConfig}
+                title={modalTitle}
+                onClose={onClose}
               />
             );
           case PhaseConfigStep.FINALIZE_SNAPSHOT:
@@ -757,6 +798,8 @@ export default function BuildPhaseFormConfigModal({
                 onConfigureGroup={onConfigureGroup}
                 onAddAnotherSnapshot={onAddAnotherSnapshot}
                 onRemoveGroupSnapshot={onRemoveGroupSnapshot}
+                title={modalTitle}
+                onClose={onClose}
               />
             );
           case PhaseConfigStep.COMPONENT_SELECT_RANDOM_HOLDERS:
@@ -764,11 +807,17 @@ export default function BuildPhaseFormConfigModal({
               <ComponentSelectRandomHolders
                 onNextStep={onNextStep}
                 onSelectRandomHolders={onSelectRandomHolders}
+                title={modalTitle}
+                onClose={onClose}
               />
             );
           case PhaseConfigStep.COMPONENT_ADD_SPOTS:
             return (
-              <ComponentAddSpots onSelectMaxMintCount={onSelectMaxMintCount} />
+              <ComponentAddSpots
+                onSelectMaxMintCount={onSelectMaxMintCount}
+                title={modalTitle}
+                onClose={onClose}
+              />
             );
           case PhaseConfigStep.FINALIZE_COMPONENTS:
             return (
@@ -779,6 +828,8 @@ export default function BuildPhaseFormConfigModal({
                 snapshots={snapshots}
                 onRemoveGroupSnapshot={onRemoveGroupSnapshot}
                 loading={isLoading}
+                title={modalTitle}
+                onClose={onClose}
               />
             );
           default:

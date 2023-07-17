@@ -6,6 +6,7 @@ import {
   PhaseGroupSnapshotConfig,
 } from "../BuildPhaseFormConfigModal";
 import FinalizeSnapshotsTable from "./snapshots-table/FinalizeSnapshotsTable";
+import BuildPhaseFormConfigModalTitle from "./BuildPhaseFormConfigModalTitle";
 
 export default function FinalizeComponent({
   onSave,
@@ -14,6 +15,8 @@ export default function FinalizeComponent({
   phaseGroupConfig,
   snapshots,
   loading,
+  title,
+  onClose,
 }: {
   onSave: () => void;
   onStartAgain: () => void;
@@ -21,6 +24,8 @@ export default function FinalizeComponent({
   phaseGroupConfig: PhaseGroupConfig;
   snapshots: AllowlistToolSelectMenuOption[];
   loading: boolean;
+  title: string;
+  onClose: () => void;
 }) {
   const [groupSnapshots, setGroupSnapshots] = useState<
     PhaseGroupSnapshotConfig[]
@@ -37,6 +42,7 @@ export default function FinalizeComponent({
   }, [groupSnapshots, onStartAgain]);
   return (
     <div>
+      <BuildPhaseFormConfigModalTitle title={title} onClose={onClose} />
       <DistributionPlanSecondaryText>
         Here you can see your group configurations.
         <br />
@@ -51,11 +57,11 @@ export default function FinalizeComponent({
         />
       )}
       <div className="tw-mt-2 tw-inline-flex tw-gap-x-6">
-        {!!phaseGroupConfig.randomHoldersCount && (
+        {!!phaseGroupConfig.randomHoldersFilter?.value && (
           <span className="tw-block tw-text-sm tw-text-neutral-400 tw-font-light">
             Random wallets:{" "}
             <span className="tw-font-medium  tw-text-neutral-100">
-              {phaseGroupConfig.randomHoldersCount}
+              {phaseGroupConfig.randomHoldersFilter.value}
             </span>
           </span>
         )}

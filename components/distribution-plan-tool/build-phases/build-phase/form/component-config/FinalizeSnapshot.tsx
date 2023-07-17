@@ -3,6 +3,7 @@ import DistributionPlanSecondaryText from "../../../../common/DistributionPlanSe
 import { PhaseGroupSnapshotConfig } from "../BuildPhaseFormConfigModal";
 import { AllowlistToolSelectMenuOption } from "../../../../../allowlist-tool/common/select-menu/AllowlistToolSelectMenu";
 import FinalizeSnapshotsTable from "./snapshots-table/FinalizeSnapshotsTable";
+import BuildPhaseFormConfigModalTitle from "./BuildPhaseFormConfigModalTitle";
 
 export default function FinalizeSnapshot({
   onConfigureGroup,
@@ -11,6 +12,8 @@ export default function FinalizeSnapshot({
   onStartAgain,
   groupSnapshots,
   snapshots,
+  title,
+  onClose,
 }: {
   onConfigureGroup: () => void;
   onAddAnotherSnapshot: () => void;
@@ -18,6 +21,8 @@ export default function FinalizeSnapshot({
   onStartAgain: () => void;
   groupSnapshots: PhaseGroupSnapshotConfig[];
   snapshots: AllowlistToolSelectMenuOption[];
+  title: string;
+  onClose: () => void;
 }) {
   useEffect(() => {
     if (!groupSnapshots.length) {
@@ -27,6 +32,7 @@ export default function FinalizeSnapshot({
 
   return (
     <div>
+      <BuildPhaseFormConfigModalTitle title={title} onClose={onClose} />
       <DistributionPlanSecondaryText>
         Here you can see your snapshot configurations.
         <br />
@@ -34,13 +40,13 @@ export default function FinalizeSnapshot({
         snapshot&rdquo;, otherwise click &ldquo;Configure Group&rdquo;.
       </DistributionPlanSecondaryText>
       {!!groupSnapshots.length && (
-       <div className="tw-mt-6">
-         <FinalizeSnapshotsTable
-          onRemoveGroupSnapshot={onRemoveGroupSnapshot}
-          groupSnapshots={groupSnapshots}
-          snapshots={snapshots}
-        />
-       </div>
+        <div className="tw-mt-6">
+          <FinalizeSnapshotsTable
+            onRemoveGroupSnapshot={onRemoveGroupSnapshot}
+            groupSnapshots={groupSnapshots}
+            snapshots={snapshots}
+          />
+        </div>
       )}
       <div className="tw-mt-8 tw-gap-x-4 tw-flex tw-justify-end">
         <button

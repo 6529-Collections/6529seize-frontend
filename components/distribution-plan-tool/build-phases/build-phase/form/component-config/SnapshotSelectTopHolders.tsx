@@ -10,11 +10,17 @@ import {
   AllowlistOperationCode,
   Pool,
 } from "../../../../../allowlist-tool/allowlist-tool.types";
+import BuildPhaseFormConfigModalTitle from "./BuildPhaseFormConfigModalTitle";
+import BuildPhaseFormConfigModalSidebar, {
+  BuildPhaseFormConfigModalSidebarOption,
+} from "./BuildPhaseFormConfigModalSidebar";
 
 export default function SnapshotSelectTopHolders({
   onSelectTopHoldersSkip,
   onSelectTopHoldersFilter,
   config,
+  title,
+  onClose,
 }: {
   onSelectTopHoldersSkip: () => void;
   onSelectTopHoldersFilter: (params: {
@@ -24,6 +30,8 @@ export default function SnapshotSelectTopHolders({
     tdhBlockNumber: number | null;
   }) => void;
   config: PhaseGroupSnapshotConfig;
+  title: string;
+  onClose: () => void;
 }) {
   const { setToasts, operations } = useContext(DistributionPlanToolContext);
 
@@ -40,21 +48,20 @@ export default function SnapshotSelectTopHolders({
       setIsMemes(false);
       return;
     }
-    const transferPoolId = operations.find(
+
+    const tokenPool = operations.find(
       (operation) =>
         operation.code === AllowlistOperationCode.CREATE_TOKEN_POOL &&
-        operation.params.id === snapshotId
-    )?.params.transferPoolId;
-    if (!transferPoolId) {
+        operation.params.id === snapshotId &&
+        operation.params.contract.toLowerCase() ===
+          "0x33fd426905f149f8376e227d0c9d3340aad17af1"
+    );
+    if (!tokenPool) {
       setIsMemes(false);
       return;
     }
 
-    const { contract, blockNo } = operations.find(
-      (operation) =>
-        operation.code === AllowlistOperationCode.GET_COLLECTION_TRANSFERS &&
-        operation.params.id === transferPoolId
-    )?.params;
+    const { contract, blockNo } = tokenPool.params;
 
     if (!contract || !blockNo) {
       setIsMemes(false);
@@ -123,117 +130,64 @@ export default function SnapshotSelectTopHolders({
     });
   };
 
-  const activeClasses = "tw-bg-primary-500 tw-border-primary-500";
-  const inactiveClasses =
-    "tw-bg-transparent hover:tw-bg-neutral-800/80 tw-border-neutral-700";
-  const totalTokensCountBaseClasses =
-    "tw-inline-flex tw-items-center tw-justify-center tw-rounded-l-lg tw-cursor-pointer tw-px-4 tw-py-3 tw-text-sm tw-font-medium tw-text-white tw-border-2 tw-border-solid  tw-transition tw-duration-300 tw-ease-out";
-
-  const memesTdhBaseClasses =
-    "-tw-ml-px tw-inline-flex tw-items-center tw-justify-center tw-rounded-r-lg tw-cursor-pointer   tw-px-4 tw-py-3 tw-text-sm tw-font-medium tw-text-white tw-border-2 tw-border-solid  tw-transition tw-duration-300 tw-ease-out";
-
-  const [uniqueTokensCountBaseClasses, setUniqueTokensCountBaseClasses] =
-    useState(
-      "-tw-ml-px tw-inline-flex tw-items-center tw-justify-center tw-rounded-r-lg tw-cursor-pointer tw-px-4 tw-py-3 tw-text-sm tw-font-medium tw-text-white tw-border-2 tw-border-solid  tw-transition tw-duration-300 tw-ease-out"
-    );
-
-  useEffect(() => {
-    setUniqueTokensCountBaseClasses(
-      `-tw-ml-px tw-inline-flex tw-items-center tw-justify-center tw-cursor-pointer tw-px-4 tw-py-3 tw-text-sm tw-font-medium tw-text-white tw-border-2 tw-border-solid  tw-transition tw-duration-300 tw-ease-out ${
-        isMemes ? "" : "tw-rounded-r-lg"
-      }`
-    );
-  }, [isMemes]);
-
-  const [totalTokensCountClasses, setTotalTokensCountClasses] =
-    useState<string>(`${totalTokensCountBaseClasses} ${activeClasses}`);
-  const [uniqueTokensCountClasses, setUniqueTokensCountClasses] =
-    useState<string>(`${uniqueTokensCountBaseClasses} ${inactiveClasses}`);
-  const [memesTdhClasses, setMemesTdhClasses] = useState<string>(
-    `${memesTdhBaseClasses} ${inactiveClasses}`
-  );
+  const [sideBarOptions, setSideBarOptions] = useState<
+    BuildPhaseFormConfigModalSidebarOption[]
+  >([
+    {
+      label: "Total tokens count",
+      value: TopHolderType.TOTAL_TOKENS_COUNT,
+    },
+    {
+      label: "Unique tokens count",
+      value: TopHolderType.UNIQUE_TOKENS_COUNT,
+    },
+    {
+      label: "TDH",
+      value: TopHolderType.MEMES_TDH,
+    },
+  ]);
 
   useEffect(() => {
-    if (topHolderType === TopHolderType.TOTAL_TOKENS_COUNT) {
-      setTotalTokensCountClasses(
-        `${totalTokensCountBaseClasses} ${activeClasses}`
-      );
-      setUniqueTokensCountClasses(
-        `${uniqueTokensCountBaseClasses} ${inactiveClasses}`
-      );
-      setMemesTdhClasses(`${memesTdhBaseClasses} ${inactiveClasses}`);
-    } else if (topHolderType === TopHolderType.UNIQUE_TOKENS_COUNT) {
-      setTotalTokensCountClasses(
-        `${totalTokensCountBaseClasses} ${inactiveClasses}`
-      );
-      setUniqueTokensCountClasses(
-        `${uniqueTokensCountBaseClasses} ${activeClasses}`
-      );
-      setMemesTdhClasses(`${memesTdhBaseClasses} ${inactiveClasses}`);
-    } else if (topHolderType === TopHolderType.MEMES_TDH) {
-      setTotalTokensCountClasses(
-        `${totalTokensCountBaseClasses} ${inactiveClasses}`
-      );
-      setUniqueTokensCountClasses(
-        `${uniqueTokensCountBaseClasses} ${inactiveClasses}`
-      );
-      setMemesTdhClasses(`${memesTdhBaseClasses} ${activeClasses}`);
+    if (isMemes) {
+      setSideBarOptions([
+        {
+          label: "Total tokens count",
+          value: TopHolderType.TOTAL_TOKENS_COUNT,
+        },
+        {
+          label: "Unique tokens count",
+          value: TopHolderType.UNIQUE_TOKENS_COUNT,
+        },
+        {
+          label: "TDH",
+          value: TopHolderType.MEMES_TDH,
+        },
+      ]);
     } else {
-      setTotalTokensCountClasses(
-        `${totalTokensCountBaseClasses} ${inactiveClasses}`
-      );
-      setUniqueTokensCountClasses(
-        `${uniqueTokensCountBaseClasses} ${inactiveClasses}`
-      );
-      setMemesTdhClasses(`${memesTdhBaseClasses} ${inactiveClasses}`);
+      setSideBarOptions([
+        {
+          label: "Total tokens count",
+          value: TopHolderType.TOTAL_TOKENS_COUNT,
+        },
+        {
+          label: "Unique tokens count",
+          value: TopHolderType.UNIQUE_TOKENS_COUNT,
+        },
+      ]);
     }
-  }, [topHolderType, uniqueTokensCountBaseClasses]);
+  }, [isMemes]);
 
   return (
     <div>
       <div className="tw-flex tw-gap-x-8">
-        <div>
-          <nav className="tw-flex tw-flex-1 tw-flex-col" aria-label="Sidebar">
-            <ul role="list" className="tw-list-none tw-m-0 tw-p-0 tw-space-y-1">
-              <li className="tw-bg-neutral-800 tw-text-neutral-200 tw-cursor-pointer tw-whitespace-nowrap tw-no-underline tw-group tw-flex tw-gap-x-3 tw-rounded-md tw-p-2 tw-pl-3 tw-text-sm tw-leading-6 tw-font-semibold tw-transition tw-duration-300 tw-ease-out">
-                Total tokens count
-              </li>
-              <li className="tw-whitespace-nowrap tw-text-neutral-500 tw-cursor-pointer tw-no-underline hover:tw-text-neutral-200 hover:tw-bg-neutral-900 tw-group tw-flex tw-gap-x-3 tw-rounded-md tw-p-2 tw-pl-3 tw-text-sm tw-leading-6 tw-font-semibold tw-transition tw-duration-300 tw-ease-out">
-                Unique tokens count
-              </li>
-            </ul>
-          </nav>
-
-          <span className="tw-hidden tw-isolate tw-inline-flex tw-rounded-lg tw-shadow-sm">
-            <button
-              onClick={() => setTopHolderType(TopHolderType.TOTAL_TOKENS_COUNT)}
-              type="button"
-              className={totalTokensCountClasses}
-            >
-              Total tokens count
-            </button>
-            <button
-              onClick={() =>
-                setTopHolderType(TopHolderType.UNIQUE_TOKENS_COUNT)
-              }
-              type="button"
-              className={uniqueTokensCountClasses}
-            >
-              Unique tokens count
-            </button>
-            {isMemes && (
-              <button
-                onClick={() => setTopHolderType(TopHolderType.MEMES_TDH)}
-                type="button"
-                className={memesTdhClasses}
-              >
-                TDH
-              </button>
-            )}
-          </span>
-        </div>
+        <BuildPhaseFormConfigModalSidebar
+          options={sideBarOptions}
+          selectedOption={topHolderType}
+          setSelectedOption={(type) => setTopHolderType(type as TopHolderType)}
+        />
 
         <div>
+          <BuildPhaseFormConfigModalTitle title={title} onClose={onClose} />
           <DistributionPlanSecondaryText>
             Do you want to include only some members of this group?
           </DistributionPlanSecondaryText>

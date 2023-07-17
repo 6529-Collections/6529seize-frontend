@@ -6,16 +6,21 @@ import DistributionPlanSecondaryText from "../../../../common/DistributionPlanSe
 import ComponentConfigNextBtn from "./ComponentConfigNextBtn";
 import { DistributionPlanToolContext } from "../../../../DistributionPlanToolContext";
 import { Pool } from "../../../../../allowlist-tool/allowlist-tool.types";
+import BuildPhaseFormConfigModalTitle from "./BuildPhaseFormConfigModalTitle";
 
 export default function SelectSnapshot({
   snapshots,
   onSelectSnapshot,
+  title,
+  onClose,
 }: {
   snapshots: AllowlistToolSelectMenuOption[];
   onSelectSnapshot: (param: {
     snapshotId: string;
     snapshotType: Pool.TOKEN_POOL | Pool.CUSTOM_TOKEN_POOL;
   }) => void;
+  title: string;
+  onClose: () => void;
 }) {
   const { setToasts } = useContext(DistributionPlanToolContext);
 
@@ -40,6 +45,7 @@ export default function SelectSnapshot({
   };
   return (
     <div>
+      <BuildPhaseFormConfigModalTitle title={title} onClose={onClose} />
       <DistributionPlanSecondaryText>
         First, select a snapshot to include in this group.
         <br />

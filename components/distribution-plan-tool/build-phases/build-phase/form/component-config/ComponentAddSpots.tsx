@@ -4,11 +4,16 @@ import { PhaseConfigStep } from "../BuildPhaseFormConfigModal";
 import ComponentConfigNextBtn from "./ComponentConfigNextBtn";
 import { useContext, useState } from "react";
 import { DistributionPlanToolContext } from "../../../../DistributionPlanToolContext";
+import BuildPhaseFormConfigModalTitle from "./BuildPhaseFormConfigModalTitle";
 
 export default function ComponentAddSpots({
   onSelectMaxMintCount,
+  title,
+  onClose,
 }: {
   onSelectMaxMintCount: (maxMints: number) => void;
+  title: string;
+  onClose: () => void;
 }) {
   const { setToasts } = useContext(DistributionPlanToolContext);
 
@@ -34,6 +39,7 @@ export default function ComponentAddSpots({
   };
   return (
     <div>
+      <BuildPhaseFormConfigModalTitle title={title} onClose={onClose} />
       <DistributionPlanSecondaryText>
         What is the maximum number of mints allowed per address?
       </DistributionPlanSecondaryText>

@@ -21,8 +21,8 @@ export default function BuildPhaseForm({
     name: string;
     description: string;
   }>({
-    name: "name",
-    description: "description",
+    name: "",
+    description: "",
   });
   const handleFormChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setFormValues({
@@ -31,7 +31,7 @@ export default function BuildPhaseForm({
     });
   };
 
-  const [isConfigModalOpen, setIsConfigModalOpen] = useState(true);
+  const [isConfigModalOpen, setIsConfigModalOpen] = useState(false);
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
