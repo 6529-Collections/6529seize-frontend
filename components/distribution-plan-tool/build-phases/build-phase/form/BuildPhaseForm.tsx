@@ -87,7 +87,11 @@ export default function BuildPhaseForm({
           <label className="tw-inline-flex tw-text-sm tw-font-normal tw-leading-5 tw-text-neutral-100">
             Description
             <div className="tw-pl-2">
-              <Tippy content="Example: Top 250 Memes collectors (ranked by Set Size)" placement="top" theme="dark">
+              <Tippy
+                content="Example: Top 250 Memes collectors (ranked by Set Size)"
+                placement="top"
+                theme="dark"
+              >
                 <svg
                   className="tw-h-5 tw-w-5 tw-text-neutral-500 tw-cursor-pointer"
                   viewBox="0 0 24 24"
@@ -127,7 +131,8 @@ export default function BuildPhaseForm({
         showModal={isConfigModalOpen}
         onClose={handleConfigModalClose}
         title={`Configure group "${formValues.name}"`}
-        modalSize={AllowlistToolModalSize.LARGE}
+        modalSize={AllowlistToolModalSize.X_LARGE}
+        showTitle={false}
       >
         <BuildPhaseFormConfigModal
           onClose={handleConfigModalClose}

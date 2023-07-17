@@ -6,6 +6,7 @@ import AllowlistToolAnimationOpacity from "../animation/AllowlistToolAnimationOp
 export enum AllowlistToolModalSize {
   SMALL = "SMALL",
   LARGE = "LARGE",
+  X_LARGE = "X_LARGE"
 }
 
 interface AllowlistToolCommonModalWrapperProps {
@@ -14,6 +15,7 @@ interface AllowlistToolCommonModalWrapperProps {
   onClose: () => void;
   title: string;
   modalSize?: AllowlistToolModalSize;
+  showTitle?: boolean;
 }
 
 export default function AllowlistToolCommonModalWrapper({
@@ -22,6 +24,7 @@ export default function AllowlistToolCommonModalWrapper({
   onClose,
   title,
   modalSize = AllowlistToolModalSize.SMALL,
+  showTitle = true,
 }: AllowlistToolCommonModalWrapperProps) {
   const modalRef = useRef<HTMLDivElement>(null);
   useClickAway(modalRef, () => onClose());
@@ -30,6 +33,7 @@ export default function AllowlistToolCommonModalWrapper({
   const modalSizeClasses: Record<AllowlistToolModalSize, string> = {
     [AllowlistToolModalSize.SMALL]: "sm:tw-max-w-lg",
     [AllowlistToolModalSize.LARGE]: "sm:tw-max-w-xl",
+    [AllowlistToolModalSize.X_LARGE]: 'sm:tw-max-w-2xl'
   };
 
   const modalSizeClass = modalSizeClasses[modalSize];
@@ -51,34 +55,36 @@ export default function AllowlistToolCommonModalWrapper({
                   ref={modalRef}
                   className={`tw-relative tw-w-full tw-transform tw-rounded-lg tw-bg-neutral-900 tw-pb-4 tw-pt-5 sm:tw-pb-6 tw-text-left tw-shadow-xl tw-transition-all sm:tw-my-8 sm:tw-w-full  ${modalSizeClass}`}
                 >
-                  <div className="tw-px-4 sm:tw-pl-6 sm:tw-pr-4 tw-flex tw-justify-between tw-items-center">
-                    <p className="tw-max-w-sm tw-text-lg tw-text-white tw-font-medium tw-mb-0">
-                      {title}
-                    </p>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onClose();
-                      }}
-                      type="button"
-                      className="tw-p-2.5 tw-flex tw-items-center tw-justify-center tw-rounded-full tw-bg-neutral-900 tw-border-0 tw-text-neutral-400 hover:tw-text-neutral-50 focus:tw-outline-none tw-transition tw-duration-300 tw-ease-out"
-                    >
-                      <span className="sr-only tw-text-sm">Close</span>
-                      <svg
-                        className="tw-h-6 tw-w-6"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        strokeWidth="1.5"
-                        stroke="currentColor"
+                  {showTitle && (
+                    <div className="tw-px-4 sm:tw-pl-6 sm:tw-pr-4 tw-flex tw-justify-between tw-items-center">
+                      <p className="tw-max-w-sm tw-text-lg tw-text-white tw-font-medium tw-mb-0">
+                        {title}
+                      </p>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onClose();
+                        }}
+                        type="button"
+                        className="tw-p-2.5 tw-flex tw-items-center tw-justify-center tw-rounded-full tw-bg-neutral-900 tw-border-0 tw-text-neutral-400 hover:tw-text-neutral-50 focus:tw-outline-none tw-transition tw-duration-300 tw-ease-out"
                       >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          d="M6 18L18 6M6 6l12 12"
-                        />
-                      </svg>
-                    </button>
-                  </div>
+                        <span className="sr-only tw-text-sm">Close</span>
+                        <svg
+                          className="tw-h-6 tw-w-6"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          strokeWidth="1.5"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            d="M6 18L18 6M6 6l12 12"
+                          />
+                        </svg>
+                      </button>
+                    </div>
+                  )}
                   {children}
                 </div>
               </div>
