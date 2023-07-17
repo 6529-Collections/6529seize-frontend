@@ -1,8 +1,4 @@
 import { useContext, useEffect, useRef, useState } from "react";
-import AllowlistToolCommonModalWrapper, {
-  AllowlistToolModalSize,
-} from "../../../allowlist-tool/common/modals/AllowlistToolCommonModalWrapper";
-import CreateSnapshotFormSearchCollectionModal from "./CreateSnapshotFormSearchCollectionModal";
 import CreateSnapshotFormSearchCollectionDropdown from "./CreateSnapshotFormSearchCollectionDropdown";
 import CreateSnapshotFormSearchCollectionInput from "./CreateSnapshotFormSearchCollectionInput";
 import { useClickAway, useDebounce, useKeyPressEvent } from "react-use";
@@ -32,16 +28,55 @@ export default function CreateSnapshotFormSearchCollection({
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const { setToasts } = useContext(DistributionPlanToolContext);
   const [keyword, setKeyword] = useState<string>("");
-  const handleKeywordChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const { value } = event.target;
-    setKeyword(value);
-  };
+
   const [debouncedKeyword, setDebouncedKeyword] = useState<string>("");
   useDebounce(() => setDebouncedKeyword(keyword), 500, [keyword]);
 
   const [collections, setCollections] = useState<
     DistributionPlanSearchContractMetadataResult[]
   >([]);
+
+  const [defaultCollections, setDefaultCollections] = useState<
+    DistributionPlanSearchContractMetadataResult[]
+  >([]);
+
+  useEffect(() => {
+    const fetchDefaultCollections = async () => {
+      setIsLoading(true);
+      try {
+        const url = `${process.env.ALLOWLIST_API_ENDPOINT}/other/memes-collections`;
+        const response = await fetch(url, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+
+        const data: AllowlistToolResponse<
+          DistributionPlanSearchContractMetadataResult[]
+        > = await response.json();
+
+        if ("error" in data) {
+          setToasts({
+            messages:
+              typeof data.message === "string" ? [data.message] : data.message,
+            type: "error",
+          });
+          return null;
+        }
+        setDefaultCollections(data);
+      } catch (error) {
+        setToasts({
+          messages: ["Something went wrong"],
+          type: "error",
+        });
+        return null;
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchDefaultCollections();
+  }, []);
 
   useEffect(() => {
     const fetchCollections = async () => {
@@ -90,8 +125,18 @@ export default function CreateSnapshotFormSearchCollection({
 
   return (
     <div className="tw-relative tw-w-full" ref={searchCollectionRef}>
-      <CreateSnapshotFormSearchCollectionInput openDropdown={openDropdown} />
-      {isOpen && <CreateSnapshotFormSearchCollectionDropdown />}
+      <CreateSnapshotFormSearchCollectionInput
+        openDropdown={openDropdown}
+        keyword={keyword}
+        setKeyword={setKeyword}
+      />
+      {isOpen && (
+        <CreateSnapshotFormSearchCollectionDropdown
+          collections={collections}
+          defaultCollections={defaultCollections}
+          onCollection={onCollection}
+        />
+      )}
     </div>
   );
 }
