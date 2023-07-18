@@ -1019,6 +1019,17 @@ export default function UserPage(props: Props) {
                               </Col>
                             </Row>
                           )}
+                          {tdh.boost && (
+                            <Row className="pt-1 pb-1">
+                              <Col>
+                                <Tag
+                                  type={TagType.RANK}
+                                  text={"Boost x"}
+                                  value={tdh.boost}
+                                />
+                              </Col>
+                            </Row>
+                          )}
                         </Container>
                       </Col>
                       <Col
