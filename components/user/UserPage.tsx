@@ -741,67 +741,69 @@ export default function UserPage(props: Props) {
   }
 
   function printUserControls() {
-    return (
-      <Row className="pt-3">
-        <Col>
-          <Form.Check
-            type="radio"
-            name="hide"
-            checked={!hideSeized && !hideNonSeized}
-            className={`${styles.seizedToggle}`}
-            label={`All`}
-            onChange={() => {
-              setHideSeized(false);
-              setHideNonSeized(false);
-            }}
-          />
-          <Form.Check
-            type="radio"
-            checked={!hideSeized && hideNonSeized}
-            className={`${styles.seizedToggle}`}
-            name="hide"
-            label={`Seized`}
-            onChange={() => {
-              setHideSeized(false);
-              setHideNonSeized(true);
-            }}
-          />
-          <Form.Check
-            type="radio"
-            checked={hideSeized && !hideNonSeized}
-            className={`${styles.seizedToggle}`}
-            name="hide"
-            label={`Unseized`}
-            onChange={() => {
-              setHideSeized(true);
-              setHideNonSeized(false);
-            }}
-          />
-          {tdh && tdh?.memes_balance > 0 && tdh?.gradients_balance > 0 && (
-            <>
-              <Form.Check
-                type="switch"
-                className={`${styles.seizedToggle}`}
-                label={`Hide Gradients`}
-                checked={hideGradients}
-                onChange={() => {
-                  setHideGradients(!hideGradients);
-                }}
-              />
-              <Form.Check
-                type="switch"
-                className={`${styles.seizedToggle}`}
-                label={`Hide Memes`}
-                checked={hideMemes}
-                onChange={() => {
-                  setHideMemes(!hideMemes);
-                }}
-              />
-            </>
-          )}
-        </Col>
-      </Row>
-    );
+    if (tdh?.balance) {
+      return (
+        <Row className="pt-3">
+          <Col>
+            <Form.Check
+              type="radio"
+              name="hide"
+              checked={!hideSeized && !hideNonSeized}
+              className={`${styles.seizedToggle}`}
+              label={`All`}
+              onChange={() => {
+                setHideSeized(false);
+                setHideNonSeized(false);
+              }}
+            />
+            <Form.Check
+              type="radio"
+              checked={!hideSeized && hideNonSeized}
+              className={`${styles.seizedToggle}`}
+              name="hide"
+              label={`Seized`}
+              onChange={() => {
+                setHideSeized(false);
+                setHideNonSeized(true);
+              }}
+            />
+            <Form.Check
+              type="radio"
+              checked={hideSeized && !hideNonSeized}
+              className={`${styles.seizedToggle}`}
+              name="hide"
+              label={`Unseized`}
+              onChange={() => {
+                setHideSeized(true);
+                setHideNonSeized(false);
+              }}
+            />
+            {tdh && tdh?.memes_balance > 0 && tdh?.gradients_balance > 0 && (
+              <>
+                <Form.Check
+                  type="switch"
+                  className={`${styles.seizedToggle}`}
+                  label={`Hide Gradients`}
+                  checked={hideGradients}
+                  onChange={() => {
+                    setHideGradients(!hideGradients);
+                  }}
+                />
+                <Form.Check
+                  type="switch"
+                  className={`${styles.seizedToggle}`}
+                  label={`Hide Memes`}
+                  checked={hideMemes}
+                  onChange={() => {
+                    setHideMemes(!hideMemes);
+                  }}
+                />
+              </>
+            )}
+          </Col>
+        </Row>
+      );
+    }
   }
 
   if (fetchingUser) {
@@ -1831,78 +1833,84 @@ export default function UserPage(props: Props) {
               </Row>
               {focus == Focus.COLLECTION && (
                 <>
-                  <Row>
-                    <Col xs={5}>
-                      <Col xs={12}>
-                        Sort&nbsp;&nbsp;
-                        <FontAwesomeIcon
-                          icon="chevron-circle-up"
-                          onClick={() => setSortDir(SortDirection.ASC)}
-                          className={`${styles.sortDirection} ${
-                            sortDir != SortDirection.ASC ? styles.disabled : ""
-                          }`}
-                        />{" "}
-                        <FontAwesomeIcon
-                          icon="chevron-circle-down"
-                          onClick={() => setSortDir(SortDirection.DESC)}
-                          className={`${styles.sortDirection} ${
-                            sortDir != SortDirection.DESC ? styles.disabled : ""
-                          }`}
-                        />
+                  {tdh?.balance && (
+                    <Row>
+                      <Col xs={5}>
+                        <Col xs={12}>
+                          Sort&nbsp;&nbsp;
+                          <FontAwesomeIcon
+                            icon="chevron-circle-up"
+                            onClick={() => setSortDir(SortDirection.ASC)}
+                            className={`${styles.sortDirection} ${
+                              sortDir != SortDirection.ASC
+                                ? styles.disabled
+                                : ""
+                            }`}
+                          />{" "}
+                          <FontAwesomeIcon
+                            icon="chevron-circle-down"
+                            onClick={() => setSortDir(SortDirection.DESC)}
+                            className={`${styles.sortDirection} ${
+                              sortDir != SortDirection.DESC
+                                ? styles.disabled
+                                : ""
+                            }`}
+                          />
+                        </Col>
+                        <Col xs={12} className="pt-2">
+                          <span
+                            onClick={() => setSort(Sort.ID)}
+                            className={`${styles.sort} ${
+                              sort != Sort.ID ? styles.disabled : ""
+                            }`}>
+                            ID
+                          </span>
+                          <span
+                            onClick={() => setSort(Sort.TDH)}
+                            className={`${styles.sort} ${
+                              sort != Sort.TDH ? styles.disabled : ""
+                            }`}>
+                            TDH
+                          </span>
+                          <span
+                            onClick={() => setSort(Sort.RANK)}
+                            className={`${styles.sort} ${
+                              sort != Sort.RANK ? styles.disabled : ""
+                            }`}>
+                            RANK
+                          </span>
+                        </Col>
                       </Col>
-                      <Col xs={12} className="pt-2">
-                        <span
-                          onClick={() => setSort(Sort.ID)}
-                          className={`${styles.sort} ${
-                            sort != Sort.ID ? styles.disabled : ""
-                          }`}>
-                          ID
-                        </span>
-                        <span
-                          onClick={() => setSort(Sort.TDH)}
-                          className={`${styles.sort} ${
-                            sort != Sort.TDH ? styles.disabled : ""
-                          }`}>
-                          TDH
-                        </span>
-                        <span
-                          onClick={() => setSort(Sort.RANK)}
-                          className={`${styles.sort} ${
-                            sort != Sort.RANK ? styles.disabled : ""
-                          }`}>
-                          RANK
-                        </span>
-                      </Col>
-                    </Col>
-                    <Col
-                      className="d-flex align-items-center justify-content-end"
-                      xs={7}>
-                      <Dropdown
-                        className={styles.seasonDropdown}
-                        drop={"down-centered"}>
-                        <Dropdown.Toggle>
-                          SZN: {selectedSeason == 0 ? `All` : selectedSeason}
-                        </Dropdown.Toggle>
-                        <Dropdown.Menu>
-                          <Dropdown.Item
-                            onClick={() => {
-                              setSelectedSeason(0);
-                            }}>
-                            All
-                          </Dropdown.Item>
-                          {seasons.map((s) => (
+                      <Col
+                        className="d-flex align-items-center justify-content-end"
+                        xs={7}>
+                        <Dropdown
+                          className={styles.seasonDropdown}
+                          drop={"down-centered"}>
+                          <Dropdown.Toggle>
+                            SZN: {selectedSeason == 0 ? `All` : selectedSeason}
+                          </Dropdown.Toggle>
+                          <Dropdown.Menu>
                             <Dropdown.Item
-                              key={`season-${s}`}
                               onClick={() => {
-                                setSelectedSeason(s);
+                                setSelectedSeason(0);
                               }}>
-                              SNZ{s}
+                              All
                             </Dropdown.Item>
-                          ))}
-                        </Dropdown.Menu>
-                      </Dropdown>
-                    </Col>
-                  </Row>
+                            {seasons.map((s) => (
+                              <Dropdown.Item
+                                key={`season-${s}`}
+                                onClick={() => {
+                                  setSelectedSeason(s);
+                                }}>
+                                SNZ{s}
+                              </Dropdown.Item>
+                            ))}
+                          </Dropdown.Menu>
+                        </Dropdown>
+                      </Col>
+                    </Row>
+                  )}
                   {printUserControls()}
                   {walletOwnedLoaded &&
                     consolidationOwnedLoaded &&
