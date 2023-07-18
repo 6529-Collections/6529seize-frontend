@@ -1,10 +1,15 @@
-import { DistributionPlanSearchContractMetadataResult } from "../../../allowlist-tool/allowlist-tool.types";
+import {
+  AllowlistToolResponse,
+  DistributionPlanSearchContractMetadataResult,
+} from "../../../allowlist-tool/allowlist-tool.types";
 import Image from "next/image";
 import DistributionPlanVerifiedIcon from "../../common/DistributionPlanVerifiedIcon";
 import {
   formatNumber,
   truncateTextMiddle,
 } from "../../../../helpers/AllowlistToolHelpers";
+import { useContext, useState } from "react";
+import { DistributionPlanToolContext } from "../../DistributionPlanToolContext";
 
 interface CollectionMeta {
   readonly imgUrl: string;
@@ -20,8 +25,13 @@ export default function CreateSnapshotFormSearchCollectionDropdownItem({
   onCollection,
 }: {
   collection: DistributionPlanSearchContractMetadataResult;
-  onCollection: (param: { address: string; name: string }) => void;
+  onCollection: (param: {
+    address: string;
+    name: string;
+    tokenIds: string | null;
+  }) => void;
 }) {
+  const { setToasts } = useContext(DistributionPlanToolContext);
   const collectionMeta: CollectionMeta = {
     imgUrl: collection.imageUrl ?? "",
     openseaVerified: collection.openseaVerified,
@@ -36,12 +46,68 @@ export default function CreateSnapshotFormSearchCollectionDropdownItem({
         ? formatNumber(collection.floorPrice)
         : "N/A",
   };
+
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+
+  const getTokenIdsString = async (
+    collectionId: string
+  ): Promise<string | null> => {
+    const url = `${process.env.ALLOWLIST_API_ENDPOINT}/other/contract-token-ids-as-string/${collectionId}`;
+    setIsLoading(true);
+    try {
+      const response = await fetch(url, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      const data: AllowlistToolResponse<{ tokenIds: string }> =
+        await response.json();
+
+      if ("error" in data) {
+        setToasts({
+          messages:
+            typeof data.message === "string" ? [data.message] : data.message,
+          type: "error",
+        });
+        return null;
+      }
+      return data.tokenIds;
+    } catch (error) {
+      setToasts({
+        messages: ["Something went wrong"],
+        type: "error",
+      });
+      return null;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const onCollectionClick = async () => {
+    const regex = /^0x[0-9a-fA-F]{40}:.+$/;
+    const isSubCollection = regex.test(collection.id);
+    if (isSubCollection) {
+      const tokenIdsString = await getTokenIdsString(collection.id);
+      onCollection({
+        name: collection.name,
+        address: collection.address,
+        tokenIds: tokenIdsString?.length ? tokenIdsString : null,
+      });
+      return;
+    }
+    onCollection({
+      name: collection.name,
+      address: collection.address,
+      tokenIds: null,
+    });
+  };
+
   return (
     <tr
       className="tw-cursor-pointer hover:tw-bg-neutral-700 tw-duration-300 tw-ease-out"
-      onClick={() =>
-        onCollection({ name: collection.name, address: collection.address })
-      }
+      onClick={onCollectionClick}
     >
       <td className="tw-whitespace-nowrap tw-py-2.5 tw-pl-4 tw-pr-3">
         <div className="tw-flex tw-items-center tw-gap-x-2">

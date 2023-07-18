@@ -4,11 +4,15 @@ import CreateSnapshotFormSearchCollectionDropdownTable from "./CreateSnapshotFor
 export default function CreateSnapshotFormSearchCollectionDropdown({
   collections,
   defaultCollections,
-  onCollection
+  onCollection,
 }: {
   collections: DistributionPlanSearchContractMetadataResult[];
   defaultCollections: DistributionPlanSearchContractMetadataResult[];
-  onCollection: (param: { address: string; name: string }) => void
+  onCollection: (param: {
+    address: string;
+    name: string;
+    tokenIds: string | null;
+  }) => void;
 }) {
   return (
     <div className="tw-absolute tw-z-10 tw-mt-1 tw-overflow-hidden tw-max-w-lg tw-w-full tw-rounded-md tw-bg-neutral-800 tw-shadow-lg tw-ring-1 tw-ring-white/10">
@@ -20,12 +24,12 @@ export default function CreateSnapshotFormSearchCollectionDropdown({
           />
         )}
         <div className="tw-pt-1">
-        {!!defaultCollections.length && (
-          <CreateSnapshotFormSearchCollectionDropdownTable
-            collections={defaultCollections}
-            onCollection={onCollection}
-          />
-        )}
+          {!!defaultCollections.length && (
+            <CreateSnapshotFormSearchCollectionDropdownTable
+              collections={defaultCollections}
+              onCollection={onCollection}
+            />
+          )}
         </div>
       </div>
     </div>

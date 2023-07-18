@@ -11,7 +11,11 @@ import {
 export default function CreateSnapshotFormSearchCollection({
   setCollection,
 }: {
-  setCollection: (param: { address: string; name: string }) => void;
+  setCollection: (param: {
+    address: string;
+    name: string;
+    tokenIds: string | null;
+  }) => void;
 }) {
   const searchCollectionRef = useRef<HTMLDivElement>(null);
   const [isOpen, setIsOpen] = useState(false);
@@ -20,7 +24,11 @@ export default function CreateSnapshotFormSearchCollection({
   useClickAway(searchCollectionRef, () => closeDropdown());
   useKeyPressEvent("Escape", () => closeDropdown());
 
-  const onCollection = (param: { address: string; name: string }) => {
+  const onCollection = (param: {
+    address: string;
+    name: string;
+    tokenIds: string | null;
+  }) => {
     setCollection(param);
     closeDropdown();
   };

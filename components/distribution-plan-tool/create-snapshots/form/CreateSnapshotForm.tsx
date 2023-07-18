@@ -76,7 +76,10 @@ export default function CreateSnapshotForm() {
 
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  const addTokenPool = async (): Promise<string | null> => {
+  const addTokenPool = async (): Promise<{
+    tokenPoolId: string;
+    consolidationBlockNumber: number;
+  } | null> => {
     if (!distributionPlan) return null;
     setIsLoading(true);
     try {
@@ -124,7 +127,7 @@ export default function CreateSnapshotForm() {
         return null;
       }
       addOperations([structuredClone(data)]);
-      return tokenPoolId;
+      return { tokenPoolId, consolidationBlockNumber: params.blockNo };
     } catch (error) {
       setToasts({
         messages: ["Something went wrong"],
@@ -136,9 +139,69 @@ export default function CreateSnapshotForm() {
     }
   };
 
+  const addTokenPoolConsolidation = async ({
+    tokenPoolId,
+    consolidationBlockNumber,
+  }: {
+    tokenPoolId: string;
+    consolidationBlockNumber: number;
+  }): Promise<void> => {
+    if (!distributionPlan) return;
+    setIsLoading(true);
+    try {
+      const url = `${process.env.ALLOWLIST_API_ENDPOINT}/allowlists/${distributionPlan.id}/operations`;
+      const params: {
+        tokenPoolId: string;
+        consolidationBlockNumber: number;
+      } = {
+        tokenPoolId,
+        consolidationBlockNumber,
+      };
+
+      const response = await fetch(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          code: AllowlistOperationCode.TOKEN_POOL_CONSOLIDATE_WALLETS,
+          params,
+        }),
+      });
+
+      const data: AllowlistToolResponse<AllowlistOperation> =
+        await response.json();
+
+      if ("error" in data) {
+        setToasts({
+          messages:
+            typeof data.message === "string" ? [data.message] : data.message,
+          type: "error",
+        });
+        return;
+      }
+      addOperations([structuredClone(data)]);
+      return;
+    } catch (error) {
+      setToasts({
+        messages: ["Something went wrong"],
+        type: "error",
+      });
+      return;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const addSnapshot = async () => {
-    const tokenPoolId = await addTokenPool();
-    if (!tokenPoolId) return;
+    const tokenPoolResponse = await addTokenPool();
+    if (!tokenPoolResponse) return;
+    const { tokenPoolId, consolidationBlockNumber } = tokenPoolResponse;
+    await addTokenPoolConsolidation({
+      tokenPoolId,
+      consolidationBlockNumber,
+    });
+
     setFormValues((prev) => ({
       ...prev,
       name: "",
@@ -170,11 +233,16 @@ export default function CreateSnapshotForm() {
     fetchLatestBlock();
   }, []);
 
-  const setCollection = (param: { name: string; address: string }) => {
+  const setCollection = (param: {
+    name: string;
+    address: string;
+    tokenIds: string | null;
+  }) => {
     setFormValues((prev) => ({
       ...prev,
       contract: param.address.toLowerCase(),
       name: param.name,
+      tokenIds: param.tokenIds ?? "",
     }));
   };
 

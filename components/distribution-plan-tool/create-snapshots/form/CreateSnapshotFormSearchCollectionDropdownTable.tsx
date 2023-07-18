@@ -3,10 +3,14 @@ import CreateSnapshotFormSearchCollectionDropdownItem from "./CreateSnapshotForm
 
 export default function CreateSnapshotFormSearchCollectionDropdownTable({
   collections,
-  onCollection
+  onCollection,
 }: {
   collections: DistributionPlanSearchContractMetadataResult[];
-  onCollection: (param: { address: string; name: string }) => void
+  onCollection: (param: {
+    address: string;
+    name: string;
+    tokenIds: string | null;
+  }) => void;
 }) {
   return (
     <table className="tw-min-w-full">
