@@ -126,7 +126,9 @@ export default function SnapshotExcludeComponentWinners({
         />
       </div>
       <ComponentConfigNextBtn
-        showSkip={true}
+        showSkipBtn={true}
+        showNextBtn={!!selectedOptions.length}
+        isDisabled={!selectedOptions.length}
         onSkip={() => onNextStep(PhaseConfigStep.SNAPSHOT_SELECT_TOP_HOLDERS)}
         onNext={onExcludePreviousWinners}
       />
