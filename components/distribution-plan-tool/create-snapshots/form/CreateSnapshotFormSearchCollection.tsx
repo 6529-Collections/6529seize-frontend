@@ -33,7 +33,16 @@ export default function CreateSnapshotFormSearchCollection({
     closeDropdown();
   };
 
+  const [isLoadingDefaultCollections, setIsLoadingDefaultCollections] =
+    useState<boolean>(false);
+  const [isLoadingCollections, setIsLoadingCollections] =
+    useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+
+  useEffect(() => {
+    setIsLoading(isLoadingDefaultCollections || isLoadingCollections);
+  }, [isLoadingDefaultCollections, isLoadingCollections]);
+
   const { setToasts } = useContext(DistributionPlanToolContext);
   const [keyword, setKeyword] = useState<string>("");
 
@@ -50,7 +59,7 @@ export default function CreateSnapshotFormSearchCollection({
 
   useEffect(() => {
     const fetchDefaultCollections = async () => {
-      setIsLoading(true);
+      setIsLoadingDefaultCollections(true);
       try {
         const url = `${process.env.ALLOWLIST_API_ENDPOINT}/other/memes-collections`;
         const response = await fetch(url, {
@@ -80,7 +89,7 @@ export default function CreateSnapshotFormSearchCollection({
         });
         return null;
       } finally {
-        setIsLoading(false);
+        setIsLoadingDefaultCollections(false);
       }
     };
     fetchDefaultCollections();
@@ -92,7 +101,7 @@ export default function CreateSnapshotFormSearchCollection({
         setCollections([]);
         return;
       }
-      setIsLoading(true);
+      setIsLoadingCollections(true);
       try {
         const url = `${process.env.ALLOWLIST_API_ENDPOINT}/other/search-contract-metadata`;
         const response = await fetch(url, {
@@ -125,7 +134,7 @@ export default function CreateSnapshotFormSearchCollection({
         });
         return null;
       } finally {
-        setIsLoading(false);
+        setIsLoadingCollections(false);
       }
     };
     fetchCollections();
@@ -137,6 +146,7 @@ export default function CreateSnapshotFormSearchCollection({
         openDropdown={openDropdown}
         keyword={keyword}
         setKeyword={setKeyword}
+        loading={isLoading}
       />
       {isOpen && (
         <CreateSnapshotFormSearchCollectionDropdown

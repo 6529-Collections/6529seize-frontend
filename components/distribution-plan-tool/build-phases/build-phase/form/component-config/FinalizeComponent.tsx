@@ -4,6 +4,7 @@ import DistributionPlanSecondaryText from "../../../../common/DistributionPlanSe
 import {
   PhaseGroupConfig,
   PhaseGroupSnapshotConfig,
+  RandomHoldersType,
 } from "../BuildPhaseFormConfigModal";
 import FinalizeSnapshotsTable from "./snapshots-table/FinalizeSnapshotsTable";
 import BuildPhaseFormConfigModalTitle from "./BuildPhaseFormConfigModalTitle";
@@ -40,6 +41,21 @@ export default function FinalizeComponent({
       onStartAgain();
     }
   }, [groupSnapshots, onStartAgain]);
+
+  const [randomWalletsText, setRandomWalletsText] = useState<string>("");
+
+  useEffect(() => {
+    if (
+      phaseGroupConfig.randomHoldersFilter?.type ===
+      RandomHoldersType.BY_PERCENTAGE
+    ) {
+      setRandomWalletsText(`${phaseGroupConfig.randomHoldersFilter.value}%`);
+    } else {
+      setRandomWalletsText(
+        phaseGroupConfig.randomHoldersFilter?.value?.toString() ?? ""
+      );
+    }
+  }, [phaseGroupConfig.randomHoldersFilter]);
   return (
     <div>
       <BuildPhaseFormConfigModalTitle title={title} onClose={onClose} />
@@ -61,7 +77,7 @@ export default function FinalizeComponent({
           <span className="tw-block tw-text-sm tw-text-neutral-400 tw-font-light">
             Random wallets:{" "}
             <span className="tw-font-medium  tw-text-neutral-100">
-              {phaseGroupConfig.randomHoldersFilter.value}
+              {randomWalletsText}
             </span>
           </span>
         )}
