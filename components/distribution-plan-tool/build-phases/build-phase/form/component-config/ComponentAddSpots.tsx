@@ -2,7 +2,7 @@ import { on } from "events";
 import DistributionPlanSecondaryText from "../../../../common/DistributionPlanSecondaryText";
 import { PhaseConfigStep } from "../BuildPhaseFormConfigModal";
 import ComponentConfigNextBtn from "./ComponentConfigNextBtn";
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { DistributionPlanToolContext } from "../../../../DistributionPlanToolContext";
 import BuildPhaseFormConfigModalTitle from "./BuildPhaseFormConfigModalTitle";
 
@@ -37,6 +37,28 @@ export default function ComponentAddSpots({
     }
     onSelectMaxMintCount(maxMints);
   };
+
+  const [isDisabled, setIsDisabled] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (!maxMints) {
+      setIsDisabled(true);
+      return;
+    }
+
+    if (typeof maxMints !== "number") {
+      setIsDisabled(true);
+      return;
+    }
+
+    if (typeof maxMints === "number" && maxMints < 1) {
+      setIsDisabled(true);
+      return;
+    }
+
+    setIsDisabled(false);
+  }, [maxMints]);
+
   return (
     <div>
       <BuildPhaseFormConfigModalTitle title={title} onClose={onClose} />
@@ -65,9 +87,11 @@ export default function ComponentAddSpots({
       </div>
 
       <ComponentConfigNextBtn
-        showSkip={false}
+        showSkipBtn={false}
+        showNextBtn={!isDisabled}
         onSkip={() => undefined}
         onNext={onAddSpots}
+        isDisabled={isDisabled}
       />
     </div>
   );

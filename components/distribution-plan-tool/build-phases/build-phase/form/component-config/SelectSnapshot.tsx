@@ -63,9 +63,11 @@ export default function SelectSnapshot({
       </div>
 
       <ComponentConfigNextBtn
-        showSkip={false}
+        showSkipBtn={false}
+        showNextBtn={!!selectedSnapshot}
         onSkip={() => undefined}
         onNext={onAddSnapshot}
+        isDisabled={false}
       />
     </div>
   );

@@ -1,4 +1,4 @@
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import DistributionPlanSecondaryText from "../../../../common/DistributionPlanSecondaryText";
 import {
   PhaseConfigStep,
@@ -83,6 +83,27 @@ export default function ComponentSelectRandomHolders({
     [RandomHoldersType.BY_PERCENTAGE]: "Enter random holders percentage",
   };
 
+  const [isDisabled, setIsDisabled] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (typeof value !== "number") {
+      setIsDisabled(true);
+      return;
+    }
+
+    if (value < 1) {
+      setIsDisabled(true);
+      return;
+    }
+
+    if (randomHoldersType === RandomHoldersType.BY_PERCENTAGE && value > 100) {
+      setIsDisabled(true);
+      return;
+    }
+
+    setIsDisabled(false);
+  }, [value, randomHoldersType]);
+
   return (
     <div>
       <div className="tw-w-full tw-inline-flex tw-gap-x-8">
@@ -124,9 +145,11 @@ export default function ComponentSelectRandomHolders({
         </div>
       </div>
       <ComponentConfigNextBtn
-        showSkip={true}
+        showSkipBtn={true}
+        showNextBtn={!isDisabled}
         onSkip={() => onNextStep(PhaseConfigStep.COMPONENT_ADD_SPOTS)}
         onNext={onRandomHolders}
+        isDisabled={isDisabled}
       />
     </div>
   );

@@ -130,6 +130,37 @@ export default function SnapshotSelectTopHolders({
     });
   };
 
+  const [isDisabled, setIsDisabled] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (!topHolderType) {
+      setIsDisabled(true);
+      return;
+    }
+
+    if (typeof from !== "number" && typeof to !== "number") {
+      setIsDisabled(true);
+      return;
+    }
+
+    if (typeof from === "number" && typeof to === "number" && from > to) {
+      setIsDisabled(true);
+      return;
+    }
+
+    if (typeof from === "number" && from < 1) {
+      setIsDisabled(true);
+      return;
+    }
+
+    if (typeof to === "number" && to < 1) {
+      setIsDisabled(true);
+      return;
+    }
+
+    setIsDisabled(false);
+  }, [topHolderType, from, to]);
+
   const [sideBarOptions, setSideBarOptions] = useState<
     BuildPhaseFormConfigModalSidebarOption[]
   >([
@@ -238,9 +269,12 @@ export default function SnapshotSelectTopHolders({
       </div>
 
       <ComponentConfigNextBtn
-        showSkip={true}
+        showSkipBtn={true}
+        showNextBtn={!isDisabled}
+        isDisabled={isDisabled}
         onSkip={onSelectTopHoldersSkip}
         onNext={onSelectTopHolders}
+        
       />
     </div>
   );

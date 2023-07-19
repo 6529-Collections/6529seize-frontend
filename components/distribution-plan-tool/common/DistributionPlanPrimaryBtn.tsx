@@ -1,20 +1,48 @@
+import { useState, useEffect } from "react";
+
 export default function DistributionPlanPrimaryBtn({
   children,
   onClick,
   loading,
   type,
+  isDisabled,
 }: {
   children: React.ReactNode;
   loading: boolean;
   onClick: () => void;
   type: "submit" | "reset" | "button";
+  isDisabled: boolean;
 }) {
+  const [isDisabledOrLoading, setIsDisabledOrLoading] = useState(
+    isDisabled || loading
+  );
+
+  useEffect(() => {
+    setIsDisabledOrLoading(isDisabled || loading);
+  }, [isDisabled, loading]);
+
+  const [buttonClasses, setButtonClasses] = useState(
+    "tw-flex tw-items-center tw-justify-center tw-relative tw-bg-primary-500 tw-px-4 tw-py-3 tw-font-medium tw-text-sm tw-text-white tw-border tw-border-primary-500 tw-rounded-lg hover:tw-bg-primary-600 hover:tw-border-primary-600 tw-transition tw-duration-300 tw-ease-out"
+  );
+
+  useEffect(() => {
+    if (isDisabled) {
+      setButtonClasses(
+        "tw-flex tw-items-center tw-justify-center tw-relative tw-bg-neutral-500 tw-px-4 tw-py-3 tw-font-medium tw-text-sm tw-text-white tw-border tw-border-neutral-500 tw-rounded-lg tw-transition tw-duration-300 tw-ease-out"
+      );
+    } else {
+      setButtonClasses(
+        "tw-flex tw-items-center tw-justify-center tw-relative tw-bg-primary-500 tw-px-4 tw-py-3 tw-font-medium tw-text-sm tw-text-white tw-border tw-border-primary-500 tw-rounded-lg hover:tw-bg-primary-600 hover:tw-border-primary-600 tw-transition tw-duration-300 tw-ease-out"
+      );
+    }
+  }, [isDisabled]);
+
   return (
     <button
-      disabled={loading}
+      disabled={isDisabledOrLoading}
       onClick={onClick}
       type={type}
-      className="tw-flex tw-items-center tw-justify-center tw-relative tw-bg-primary-500 tw-px-4 tw-py-3 tw-font-medium tw-text-sm tw-text-white tw-border tw-border-primary-500 tw-rounded-lg hover:tw-bg-primary-600 hover:tw-border-primary-600 tw-transition tw-duration-300 tw-ease-out"
+      className={buttonClasses}
     >
       <div style={{ visibility: loading ? "hidden" : "visible" }}>
         {children}

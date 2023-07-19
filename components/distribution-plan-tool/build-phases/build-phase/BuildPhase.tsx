@@ -6,6 +6,7 @@ import BuildPhaseForm from "./form/BuildPhaseForm";
 import DistributionPlanStepWrapper from "../../common/DistributionPlanStepWrapper";
 import DistributionPlanNextStepBtn from "../../common/DistributionPlanNextStepBtn";
 import BuildPhaseTable from "./table/BuildPhaseTable";
+import DistributionPlanEmptyTablePlaceholder from "../../common/DistributionPlanEmptyTablePlaceholder";
 
 export default function BuildPhase({
   selectedPhase,
@@ -33,6 +34,12 @@ export default function BuildPhase({
     );
   }, [selectedPhase, phases]);
 
+  const [haveComponents, setHaveComponents] = useState(false);
+
+  useEffect(() => {
+    setHaveComponents(!!selectedPhase.components.length);
+  }, [selectedPhase]);
+
   return (
     <div>
       <StepHeader
@@ -44,12 +51,21 @@ export default function BuildPhase({
       <DistributionPlanStepWrapper>
         <BuildPhaseForm selectedPhase={selectedPhase} phases={phases} />
         <div className="tw-mt-6">
-          <BuildPhaseTable phase={selectedPhase} />
+          {haveComponents ? (
+            <BuildPhaseTable phase={selectedPhase} />
+          ) : (
+            <DistributionPlanEmptyTablePlaceholder
+              title="No Collection Groups Added"
+              description="To proceed, please add your collection groups. This space will showcase your collection groups once they're added."
+            />
+          )}
         </div>
         <DistributionPlanNextStepBtn
           showRunAnalysisBtn={!haveRan}
           onNextStep={onNextStep}
           loading={false}
+          showNextBtn={haveComponents}
+          showSkipBtn={false}
         />
       </DistributionPlanStepWrapper>
     </div>
