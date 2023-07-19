@@ -10,6 +10,7 @@ import {
   AllowlistOperation,
   AllowlistOperationCode,
   AllowlistToolResponse,
+  DistributionPlanSearchContractMetadataResult,
   Pool,
 } from "../../../../allowlist-tool/allowlist-tool.types";
 import SnapshotExcludeComponentWinners from "./component-config/SnapshotExcludeComponentWinners";
@@ -45,6 +46,7 @@ export interface PhaseGroupSnapshotConfig {
   groupSnapshotId: string | null;
   snapshotId: string | null;
   snapshotType: Pool.TOKEN_POOL | Pool.CUSTOM_TOKEN_POOL | null;
+  snapshotSchema: string | null;
   excludeComponentWinners: string[];
   topHoldersFilter: {
     type: TopHolderType;
@@ -135,21 +137,76 @@ export default function BuildPhaseFormConfigModal({
       groupSnapshotId: selectedPhase.id,
       snapshotId: null,
       snapshotType: null,
+      snapshotSchema: null,
       excludeComponentWinners: [],
       topHoldersFilter: null,
     });
 
-  const onSelectSnapshot = ({
+  const resetPhaseGroupSnapshotConfig = () => {
+    setPhaseGroupSnapshotConfig({
+      groupSnapshotId: null,
+      snapshotId: null,
+      snapshotType: null,
+      snapshotSchema: null,
+      excludeComponentWinners: [],
+      topHoldersFilter: null,
+    });
+  };
+
+  const [isLoadingContractSchema, setIsLoadingContractSchema] = useState(false);
+
+  const getContractSchema = async (
+    snapshotId: string
+  ): Promise<string | null> => {
+    const tokenPool = operations.find(
+      (operation) =>
+        operation.code === AllowlistOperationCode.CREATE_TOKEN_POOL &&
+        operation.params.id === snapshotId
+    );
+    if (!tokenPool) {
+      return null;
+    }
+    const contract = tokenPool.params.contract;
+    const url = `${process.env.ALLOWLIST_API_ENDPOINT}/other/contract-metadata/${contract}`;
+    setIsLoadingContractSchema(true);
+    try {
+      const response = await fetch(url, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      const data: AllowlistToolResponse<DistributionPlanSearchContractMetadataResult | null> =
+        await response.json();
+
+      if (data && "error" in data) {
+        return null;
+      }
+      return data?.tokenType ?? null;
+    } catch (error) {
+      return null;
+    } finally {
+      setIsLoadingContractSchema(false);
+    }
+  };
+
+  const onSelectSnapshot = async ({
     snapshotId,
     snapshotType,
   }: {
     snapshotId: string;
     snapshotType: Pool.TOKEN_POOL | Pool.CUSTOM_TOKEN_POOL;
   }) => {
+    const contractSchema =
+      snapshotType === Pool.TOKEN_POOL
+        ? await getContractSchema(snapshotId)
+        : null;
     setPhaseGroupSnapshotConfig({
       groupSnapshotId: getRandomObjectId(),
       snapshotId,
       snapshotType,
+      snapshotSchema: contractSchema,
       excludeComponentWinners: [],
       topHoldersFilter: null,
     });
@@ -180,13 +237,7 @@ export default function BuildPhaseFormConfigModal({
       ...prev,
       snapshots: [...prev.snapshots, phaseGroupSnapshotConfig],
     }));
-    setPhaseGroupSnapshotConfig({
-      groupSnapshotId: null,
-      snapshotId: null,
-      snapshotType: null,
-      excludeComponentWinners: [],
-      topHoldersFilter: null,
-    });
+    resetPhaseGroupSnapshotConfig();
     onNextStep(PhaseConfigStep.FINALIZE_SNAPSHOT);
   };
 
@@ -203,13 +254,7 @@ export default function BuildPhaseFormConfigModal({
         { ...phaseGroupSnapshotConfig, topHoldersFilter: params },
       ],
     }));
-    setPhaseGroupSnapshotConfig({
-      groupSnapshotId: null,
-      snapshotId: null,
-      snapshotType: null,
-      excludeComponentWinners: [],
-      topHoldersFilter: null,
-    });
+    resetPhaseGroupSnapshotConfig();
     onNextStep(PhaseConfigStep.FINALIZE_SNAPSHOT);
   };
 
@@ -223,25 +268,12 @@ export default function BuildPhaseFormConfigModal({
   };
 
   const onAddAnotherSnapshot = () => {
-    setPhaseGroupSnapshotConfig({
-      groupSnapshotId: null,
-      snapshotId: null,
-      snapshotType: null,
-      excludeComponentWinners: [],
-      topHoldersFilter: null,
-    });
+    resetPhaseGroupSnapshotConfig();
     onNextStep(PhaseConfigStep.SELECT_SNAPSHOT);
   };
 
   const onConfigureGroup = () => {
-    setPhaseGroupSnapshotConfig({
-      groupSnapshotId: null,
-      snapshotId: null,
-      snapshotType: null,
-      excludeComponentWinners: [],
-      topHoldersFilter: null,
-    });
-
+    resetPhaseGroupSnapshotConfig();
     onNextStep(PhaseConfigStep.COMPONENT_SELECT_RANDOM_HOLDERS);
   };
 
@@ -268,13 +300,7 @@ export default function BuildPhaseFormConfigModal({
   };
 
   const onStartAgain = () => {
-    setPhaseGroupSnapshotConfig({
-      groupSnapshotId: null,
-      snapshotId: null,
-      snapshotType: null,
-      excludeComponentWinners: [],
-      topHoldersFilter: null,
-    });
+    resetPhaseGroupSnapshotConfig();
     setPhaseGroupConfig({
       snapshots: [],
       randomHoldersFilter: null,
@@ -760,6 +786,7 @@ export default function BuildPhaseFormConfigModal({
                 onSelectSnapshot={onSelectSnapshot}
                 title={modalTitle}
                 onClose={onClose}
+                isLoading={isLoadingContractSchema}
               />
             );
           case PhaseConfigStep.SNAPSHOT_EXCLUDE_COMPONENT_WINNERS:

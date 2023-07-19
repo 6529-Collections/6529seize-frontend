@@ -13,6 +13,7 @@ export default function SelectSnapshot({
   onSelectSnapshot,
   title,
   onClose,
+  isLoading,
 }: {
   snapshots: AllowlistToolSelectMenuOption[];
   onSelectSnapshot: (param: {
@@ -21,13 +22,14 @@ export default function SelectSnapshot({
   }) => void;
   title: string;
   onClose: () => void;
+  isLoading: boolean;
 }) {
   const { setToasts } = useContext(DistributionPlanToolContext);
 
   const [selectedSnapshot, setSelectedSnapshot] =
     useState<AllowlistToolSelectMenuOption | null>(null);
 
-  const onAddSnapshot = () => {
+  const onAddSnapshot = async () => {
     if (!selectedSnapshot) {
       setToasts({
         messages: ["Please select a snapshot."],
@@ -68,6 +70,7 @@ export default function SelectSnapshot({
         onSkip={() => undefined}
         onNext={onAddSnapshot}
         isDisabled={false}
+        isLoading={isLoading}
       />
     </div>
   );

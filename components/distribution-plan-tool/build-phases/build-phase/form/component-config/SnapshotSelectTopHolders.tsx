@@ -168,45 +168,31 @@ export default function SnapshotSelectTopHolders({
       label: "Total tokens count",
       value: TopHolderType.TOTAL_TOKENS_COUNT,
     },
-    {
-      label: "Unique tokens count",
-      value: TopHolderType.UNIQUE_TOKENS_COUNT,
-    },
-    {
-      label: "TDH",
-      value: TopHolderType.MEMES_TDH,
-    },
   ]);
 
   useEffect(() => {
-    if (isMemes) {
-      setSideBarOptions([
-        {
-          label: "Total tokens count",
-          value: TopHolderType.TOTAL_TOKENS_COUNT,
-        },
-        {
-          label: "Unique tokens count",
-          value: TopHolderType.UNIQUE_TOKENS_COUNT,
-        },
-        {
-          label: "TDH",
-          value: TopHolderType.MEMES_TDH,
-        },
-      ]);
-    } else {
-      setSideBarOptions([
-        {
-          label: "Total tokens count",
-          value: TopHolderType.TOTAL_TOKENS_COUNT,
-        },
-        {
-          label: "Unique tokens count",
-          value: TopHolderType.UNIQUE_TOKENS_COUNT,
-        },
-      ]);
+    const options: BuildPhaseFormConfigModalSidebarOption[] = [
+      {
+        label: "Total tokens count",
+        value: TopHolderType.TOTAL_TOKENS_COUNT,
+      },
+    ];
+    if (config.snapshotSchema === "erc1155") {
+      options.push({
+        label: "Unique tokens count",
+        value: TopHolderType.UNIQUE_TOKENS_COUNT,
+      });
     }
-  }, [isMemes]);
+
+    if (isMemes) {
+      options.push({
+        label: "TDH",
+        value: TopHolderType.MEMES_TDH,
+      });
+    }
+
+    setSideBarOptions(options);
+  }, [isMemes, config.snapshotSchema]);
 
   return (
     <div>
@@ -274,7 +260,6 @@ export default function SnapshotSelectTopHolders({
         isDisabled={isDisabled}
         onSkip={onSelectTopHoldersSkip}
         onNext={onSelectTopHolders}
-        
       />
     </div>
   );
