@@ -1,4 +1,4 @@
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import {
   DistributionPlanToolContext,
   DistributionPlanToolStep,
@@ -69,6 +69,17 @@ export default function CreatePlanForm() {
     event.preventDefault();
     await createPlan();
   };
+
+  const [showNextBtn, setShowNextBtn] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (!formValues.name || !formValues.description) {
+      setShowNextBtn(false);
+      return;
+    }
+
+    setShowNextBtn(true);
+  }, [formValues]);
   return (
     <form className="tw-mt-6" onSubmit={handleSubmit}>
       <div>
@@ -106,13 +117,16 @@ export default function CreatePlanForm() {
         </div>
       </div>
       <div className="tw-mt-8 tw-flex tw-justify-end">
-        <DistributionPlanPrimaryBtn
-          loading={isLoading}
-          type="submit"
-          onClick={() => undefined}
-        >
-          Next
-        </DistributionPlanPrimaryBtn>
+        {showNextBtn && (
+          <DistributionPlanPrimaryBtn
+            loading={isLoading}
+            type="submit"
+            onClick={() => undefined}
+            isDisabled={isLoading}
+          >
+            Next
+          </DistributionPlanPrimaryBtn>
+        )}
       </div>
     </form>
   );

@@ -1,5 +1,5 @@
 import DistributionPlanTableRowWrapper from "../../common/DistributionPlanTableRowWrapper";
-import { CreatePhasesPhase } from "./CreatePhasesTableBody";
+import { CreatePhasesPhase } from "../CreatePhases";
 
 export default function CreateTablePhasesRow({
   phase,

@@ -1,9 +1,9 @@
 import { useCopyToClipboard } from "react-use";
 import DistributionPlanTableRowWrapper from "../../common/DistributionPlanTableRowWrapper";
-import { CreateSnapshotSnapshot } from "./CreateSnapshotTableBody";
 import { truncateTextMiddle } from "../../../../helpers/AllowlistToolHelpers";
 import { useEffect, useState } from "react";
 import Tippy from "@tippyjs/react";
+import { CreateSnapshotSnapshot } from "../CreateSnapshots";
 
 export default function CreateSnapshotTableRow({
   snapshot,
