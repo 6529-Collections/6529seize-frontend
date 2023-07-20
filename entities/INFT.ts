@@ -121,3 +121,30 @@ export interface NFTHistory {
     }[];
   };
 }
+
+export interface Rememe {
+  created_at: Date;
+  contract: string;
+  id: number;
+  deployer: string;
+  token_uri: string;
+  token_type: string;
+  image: string;
+  animation: string;
+  meme_references: number[];
+  metadata: any;
+  contract_opensea_data: {
+    imageUrl: string;
+    discordUrl: string;
+    externalUrl: string;
+    collectionName: string;
+    twitterUsername: string;
+  };
+  media: {
+    raw: string;
+    bytes: number;
+    format: string;
+    gateway: string;
+    thumbnail: string;
+  }[];
+}
