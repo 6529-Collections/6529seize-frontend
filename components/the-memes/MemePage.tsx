@@ -5,26 +5,36 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Container, Row, Col } from "react-bootstrap";
 import { MEMES_CONTRACT } from "../../constants";
 import { DBResponse } from "../../entities/IDBResponse";
-import { NFT, MemesExtendedData, NftTDH, NftRank } from "../../entities/INFT";
-import { areEqualAddresses } from "../../helpers/Helpers";
+
 import Breadcrumb, { Crumb } from "../breadcrumb/Breadcrumb";
 import { Transaction } from "../../entities/ITransaction";
 import { useRouter } from "next/router";
 import { TDHMetrics } from "../../entities/ITDH";
 import { fetchUrl } from "../../services/6529api";
 import NFTImage from "../nft-image/NFTImage";
-import { MemePageLiveRightMenu, MemePageLiveSubMenu } from "./MemePageLive";
+import NFTLeaderboard from "../leaderboard/NFTLeaderboard";
+import Timeline from "../timeline/Timeline";
+import RememeImage from "../nft-image/RememeImage";
 import {
-  MemePageYourCardsRightMenu,
-  MemePageYourCardsSubMenu,
-} from "./MemePageYourCards";
+  NFT,
+  MemesExtendedData,
+  NftTDH,
+  NftRank,
+  Rememe,
+} from "../../entities/INFT";
+import { areEqualAddresses } from "../../helpers/Helpers";
+import { MemePageActivity } from "./MemePageActivity";
+import { MemePageArt } from "./MemePageArt";
 import {
   MemePageCollectorsRightMenu,
   MemePageCollectorsSubMenu,
 } from "./MemePageCollectors";
-import { MemePageArt } from "./MemePageArt";
-import { MemePageActivity } from "./MemePageActivity";
+import { MemePageLiveRightMenu, MemePageLiveSubMenu } from "./MemePageLive";
 import { MemePageTimeline } from "./MemePageTimeline";
+import {
+  MemePageYourCardsRightMenu,
+  MemePageYourCardsSubMenu,
+} from "./MemePageYourCards";
 
 interface MemeTab {
   focus: MEME_FOCUS;
@@ -68,6 +78,9 @@ export default function MemePage(props: Props) {
   const [collectionRank, setCollectionRank] = useState(-1);
 
   const [userLoaded, setUserLoaded] = useState(false);
+
+  const [rememes, setRememes] = useState<Rememe[]>([]);
+  const [rememesLoaded, setRememesLoaded] = useState(false);
 
   const liveTab = {
     focus: MEME_FOCUS.LIVE,
@@ -215,8 +228,8 @@ export default function MemePage(props: Props) {
         if (response.data.length > 0) {
           const mine: TDHMetrics = response.data[0];
           setMyOwner(mine);
-          setMyTDH(mine.memes.find((m) => m.id === parseInt(nftId)));
-          setMyRank(mine.memes_ranks.find((m) => m.id === parseInt(nftId)));
+          setMyTDH(mine.memes.find((m) => m.id == parseInt(nftId)));
+          setMyRank(mine.memes_ranks.find((m) => m.id == parseInt(nftId)));
         }
       });
     }

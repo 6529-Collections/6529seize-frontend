@@ -364,10 +364,12 @@ export default function LabPage(props: Props) {
                       sm={{ span: 4 }}
                       md={{ span: 3 }}
                       lg={{ span: 3 }}>
-                      <Container fluid className="no-padding">
-                        <Row>
-                          <Col>
-                            <a href={`/the-memes/${nft.id}`}>
+                      <a
+                        href={`/the-memes/${nft.id}`}
+                        className="decoration-none decoration-hover-underline scale-hover">
+                        <Container fluid className="no-padding">
+                          <Row>
+                            <Col>
                               <NFTImage
                                 nft={nft}
                                 animation={false}
@@ -376,22 +378,22 @@ export default function LabPage(props: Props) {
                                 showThumbnail={true}
                                 showUnseized={false}
                               />
-                            </a>
-                          </Col>
-                        </Row>
-                        <Row>
-                          <Col className="text-center pt-2">
-                            <b>
-                              #{nft.id} - {nft.name}
-                            </b>
-                          </Col>
-                        </Row>
-                        <Row>
-                          <Col className="text-center pt-2">
-                            Artist: {nft.artist}
-                          </Col>
-                        </Row>
-                      </Container>
+                            </Col>
+                          </Row>
+                          <Row>
+                            <Col className="text-center pt-2">
+                              <b>
+                                #{nft.id} - {nft.name}
+                              </b>
+                            </Col>
+                          </Row>
+                          <Row>
+                            <Col className="text-center pt-2">
+                              Artist: {nft.artist}
+                            </Col>
+                          </Row>
+                        </Container>
+                      </a>
                     </Col>
                   );
                 })}

@@ -91,3 +91,15 @@
 .transparentBG {
   background-color: transparent !important;
 }
+
+@media only screen and (max-width: 1200px) {
+  .balance {
+    font-size: $font-smaller !important;
+  }
+}
+
+@media only screen and (max-width: 1000px) {
+  .balance {
+    font-size: $font-smallest !important;
+  }
+}

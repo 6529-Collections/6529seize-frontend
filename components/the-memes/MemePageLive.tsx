@@ -1,13 +1,18 @@
 import styles from "./TheMemes.module.scss";
 import { Col, Container, Row, Table } from "react-bootstrap";
 import { MEMES_CONTRACT } from "../../constants";
-import { NFT, MemesExtendedData } from "../../entities/INFT";
-import { numberWithCommas, printMintDate } from "../../helpers/Helpers";
+import { NFT, MemesExtendedData, Rememe } from "../../entities/INFT";
+import {
+  formatAddress,
+  numberWithCommas,
+  printMintDate,
+} from "../../helpers/Helpers";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import { DBResponse } from "../../entities/IDBResponse";
 import { fetchUrl } from "../../services/6529api";
 import NFTImage from "../nft-image/NFTImage";
+import RememeImage from "../nft-image/RememeImage";
 
 export function MemePageLiveRightMenu(props: {
   show: boolean;
@@ -221,6 +226,9 @@ export function MemePageLiveSubMenu(props: {
   const [memeLabNftsLoaded, setMemeLabNftsLoaded] = useState(false);
   const [memeLabNfts, setMemeLabNfts] = useState<NFT[]>([]);
 
+  const [rememes, setRememes] = useState<Rememe[]>([]);
+  const [rememesLoaded, setRememesLoaded] = useState(false);
+
   useEffect(() => {
     if (props.nft) {
       fetchUrl(
@@ -228,6 +236,13 @@ export function MemePageLiveSubMenu(props: {
       ).then((response: DBResponse) => {
         setMemeLabNfts(response.data);
         setMemeLabNftsLoaded(true);
+      });
+
+      fetchUrl(
+        `${process.env.API_ENDPOINT}/api/rememes?meme_id=${props.nft.id}&page_size=4`
+      ).then((response: DBResponse) => {
+        setRememes(response.data);
+        setRememesLoaded(true);
       });
     }
   }, [props.nft]);
@@ -306,29 +321,75 @@ export function MemePageLiveSubMenu(props: {
         )}
         <Row className="pt-5">
           <Col>
-            <Image
-              loading={"lazy"}
-              width="0"
-              height="0"
-              style={{ width: "250px", height: "auto" }}
-              src="/re-memes.png"
-              alt="re-memes"
-            />
+            <h1 className="d-flex align-items-center mb-0">
+              <Image
+                loading={"lazy"}
+                width="0"
+                height="0"
+                style={{ width: "250px", height: "auto", float: "left" }}
+                src="/re-memes.png"
+                alt="re-memes"
+              />
+              {rememes.length > 0 && (
+                <a href={`/rememes?meme_id=${props.nft?.id}`}>
+                  <span className={styles.viewAllLink}>VIEW ALL</span>
+                </a>
+              )}
+            </h1>
           </Col>
         </Row>
         <Row className="pt-4 pb-4">
           <Col>
-            ReMemes are community-driven derivatives inspired by the Meme Cards.
-            We hope to display them here once we find a &quot;safe&quot; way to
-            do so.
-            <br />
-            Learn more{" "}
-            <a href="/rememes" target="_blank">
-              here
-            </a>
-            .
+            {rememesLoaded && rememes.length == 0 && (
+              <>
+                <br />
+                ReMemes that reference this NFT will appear here.
+              </>
+            )}
           </Col>
         </Row>
+        {rememes.length > 0 && (
+          <Row className="pt-2 pb-2">
+            {rememes.map((rememe) => {
+              return (
+                <Col
+                  key={`${rememe.contract}-${rememe.id}`}
+                  className="pt-3 pb-3"
+                  xs={{ span: 6 }}
+                  sm={{ span: 4 }}
+                  md={{ span: 3 }}
+                  lg={{ span: 3 }}>
+                  <a
+                    href={`/rememes/${rememe.contract}/${rememe.id}`}
+                    className="decoration-none decoration-hover-underline scale-hover">
+                    <Container fluid className="no-padding">
+                      <Row>
+                        <Col>
+                          <RememeImage
+                            nft={rememe}
+                            animation={false}
+                            height={300}
+                          />
+                        </Col>
+                      </Row>
+                      <Row>
+                        <Col className="text-center pt-2">
+                          <b>
+                            {rememe.metadata.name
+                              ? rememe.metadata.name
+                              : `${formatAddress(rememe.contract)} #${
+                                  rememe.id
+                                }`}
+                          </b>
+                        </Col>
+                      </Row>
+                    </Container>
+                  </a>
+                </Col>
+              );
+            })}
+          </Row>
+        )}
       </>
     );
   } else {

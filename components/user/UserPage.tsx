@@ -8,15 +8,20 @@ import { useRouter } from "next/router";
 import Breadcrumb, { Crumb } from "../breadcrumb/Breadcrumb";
 import {
   areEqualAddresses,
+  containsEmojis,
   formatAddress,
   isEmptyObject,
+  isGradientsContract,
+  isMemesContract,
+  numberWithCommas,
+  parseEmojis,
   removeProtocol,
 } from "../../helpers/Helpers";
 import { MANIFOLD, SIX529_MUSEUM } from "../../constants";
 import { ConsolidatedTDHMetrics, TDHMetrics } from "../../entities/ITDH";
 import { useEnsAvatar } from "wagmi";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { fetchUrl } from "../../services/6529api";
+import { fetchAllPages, fetchUrl } from "../../services/6529api";
 import { ReservedUser } from "../../pages/[user]";
 import Tippy from "@tippyjs/react";
 import Tag, { TagType } from "../address/Tag";
@@ -43,6 +48,7 @@ export default function UserPage(props: Props) {
   const [walletOwnedLoaded, setWalletOwnedLoaded] = useState(false);
   const [consolidationOwnedLoaded, setConsolidationOwnedLoaded] =
     useState(false);
+  const [ownedLoaded, setOwnedLoaded] = useState(false);
 
   const [ownerAddress, setOwnerAddress] = useState<`0x${string}` | undefined>(
     undefined
@@ -88,8 +94,8 @@ export default function UserPage(props: Props) {
             `${oLink}/${
               reservedDisplay
                 ? reservedDisplay
-                : response.display
-                ? response.display
+                : response.display && !containsEmojis(response.display)
+                ? response.display.replaceAll(" ", "-")
                 : formatAddress(oAddress)
             }`
           );
@@ -99,14 +105,14 @@ export default function UserPage(props: Props) {
               display: reservedDisplay
                 ? reservedDisplay
                 : response.display
-                ? response.display
+                ? parseEmojis(response.display)
                 : oAddress,
             },
           ]);
           router.push(
             reservedDisplay
               ? reservedDisplay
-              : response.display
+              : response.display && !containsEmojis(response.display)
               ? response.display.replaceAll(" ", "-")
               : oAddress,
             undefined,
@@ -125,6 +131,7 @@ export default function UserPage(props: Props) {
             { display: "Home", href: "/" },
             { display: ReservedUser.MUSEUM },
           ]);
+          setFetchingUser(false);
           router.push(ReservedUser.MUSEUM, undefined, {
             shallow: true,
           });
@@ -139,6 +146,7 @@ export default function UserPage(props: Props) {
             { display: "Home", href: "/" },
             { display: ReservedUser.MANIFOLD },
           ]);
+          setFetchingUser(false);
           router.push(ReservedUser.MANIFOLD, undefined, {
             shallow: true,
           });
@@ -201,16 +209,9 @@ export default function UserPage(props: Props) {
 
   useEffect(() => {
     async function fetchOwned(url: string, myowned: Owner[]) {
-      return fetchUrl(url).then((response: DBResponse) => {
-        if (response.next) {
-          fetchOwned(response.next, [...myowned].concat(response.data));
-        } else {
-          const newOwned = [...myowned].concat(response.data);
-          if (newOwned.length > 0) {
-            setWalletOwned(newOwned);
-          }
-          setWalletOwnedLoaded(true);
-        }
+      fetchAllPages(url).then((response: Owner[]) => {
+        setWalletOwned(response);
+        setWalletOwnedLoaded(true);
       });
     }
 
@@ -252,12 +253,14 @@ export default function UserPage(props: Props) {
       });
     }
 
-    if (isConsolidation && router.isReady) {
-      fetchTDH();
-    } else {
-      setWalletOwnedLoaded(true);
+    if (consolidatedTDH) {
+      if (isConsolidation) {
+        fetchTDH();
+      } else {
+        setWalletOwnedLoaded(true);
+      }
     }
-  }, [isConsolidation, router.isReady]);
+  }, [isConsolidation, consolidatedTDH]);
 
   useEffect(() => {
     if (view === VIEW.CONSOLIDATION || !isConsolidation) {
@@ -268,12 +271,15 @@ export default function UserPage(props: Props) {
   }, [view, walletTDH, consolidatedTDH]);
 
   useEffect(() => {
-    if (view === VIEW.CONSOLIDATION || !isConsolidation) {
-      setOwned(consolidationOwned);
-    } else {
-      setOwned(walletOwned);
+    if (walletOwnedLoaded && consolidationOwnedLoaded) {
+      if (view == VIEW.CONSOLIDATION || !isConsolidation) {
+        setOwned(consolidationOwned);
+      } else {
+        setOwned(walletOwned);
+      }
+      setOwnedLoaded(true);
     }
-  }, [view, walletOwned, consolidationOwned]);
+  }, [view, walletOwnedLoaded, consolidationOwnedLoaded]);
 
   if (fetchingUser) {
     return (
@@ -490,6 +496,17 @@ export default function UserPage(props: Props) {
                               </Col>
                             </Row>
                           )}
+                          {tdh.boost && (
+                            <Row className="pt-1 pb-1">
+                              <Col>
+                                <Tag
+                                  type={TagType.RANK}
+                                  text={"Boost x"}
+                                  value={tdh.boost}
+                                />
+                              </Col>
+                            </Row>
+                          )}
                         </Container>
                       </Col>
                       <Col
@@ -547,6 +564,17 @@ export default function UserPage(props: Props) {
                                   type={TagType.SZN3}
                                   text={"SZN3 Sets x"}
                                   value={tdh.memes_cards_sets_szn3}
+                                />
+                              </Col>
+                            </Row>
+                          )}
+                          {tdh.memes_cards_sets_szn4 > 0 && (
+                            <Row className="pt-1 pb-1">
+                              <Col>
+                                <Tag
+                                  type={TagType.SZN4}
+                                  text={"SZN4 Sets x"}
+                                  value={tdh.memes_cards_sets_szn4}
                                 />
                               </Col>
                             </Row>

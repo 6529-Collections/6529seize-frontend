@@ -298,3 +298,12 @@ h5 {
 .red {
   background-color: red;
 }
+.scale-hover {
+  img {
+    transition: transform 0.3s ease;
+
+    &:hover {
+      transform: scale(1.02);
+    }
+  }
+}
