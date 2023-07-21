@@ -220,6 +220,7 @@ export default function Rememes(props: Props) {
                     <Dropdown.Item
                       onClick={() => {
                         setUrlMemeId(undefined);
+                        setTotalResults(0);
                         setSelectedMeme(undefined);
                       }}>
                       All
@@ -228,6 +229,7 @@ export default function Rememes(props: Props) {
                       <Dropdown.Item
                         key={`meme-${m.id}`}
                         onClick={() => {
+                          setTotalResults(0);
                           setSelectedMeme(m);
                         }}>
                         #{m.id} - {m.name}
