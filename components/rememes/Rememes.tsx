@@ -101,7 +101,7 @@ export default function Rememes(props: Props) {
               <Col>
                 <Container>
                   <Row>
-                    <Col className="font-smaller font-color-h d-flex justify-content-start gap-2">
+                    <Col className="font-smaller font-color-h d-flex justify-content-center gap-2">
                       <span>
                         {rememe.contract_opensea_data.collectionName
                           ? rememe.contract_opensea_data.collectionName
@@ -111,24 +111,12 @@ export default function Rememes(props: Props) {
                     </Col>
                   </Row>
                   <Row>
-                    <Col className="d-flex justify-content-between align-items-start gap-3">
+                    <Col className="d-flex justify-content-center align-items-center">
                       <span>
                         {rememe.metadata.name
                           ? rememe.metadata.name
                           : `${formatAddress(rememe.contract)} #${rememe.id}`}
                       </span>
-                      <a
-                        href={`https://opensea.io/assets/ethereum/${rememe.contract}/${rememe.id}`}
-                        target="_blank"
-                        rel="noreferrer">
-                        <Image
-                          className={styles.marketplace}
-                          src="/opensea.png"
-                          alt="opensea"
-                          width={25}
-                          height={25}
-                        />
-                      </a>
                     </Col>
                   </Row>
                 </Container>
