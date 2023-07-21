@@ -3,7 +3,11 @@ import styles from "../styles/Home.module.scss";
 
 import dynamic from "next/dynamic";
 import { useRouter } from "next/router";
-import { areEqualAddresses, formatAddress } from "../helpers/Helpers";
+import {
+  areEqualAddresses,
+  containsEmojis,
+  formatAddress,
+} from "../helpers/Helpers";
 import { MANIFOLD, SIX529_MUSEUM } from "../constants";
 import HeaderPlaceholder from "../components/header/HeaderPlaceholder";
 import { useEffect, useState } from "react";
@@ -87,13 +91,14 @@ export async function getServerSideProps(req: any, res: any, resolvedUrl: any) {
   const responseText = await ensRequest.text();
   if (responseText) {
     const response = await JSON.parse(responseText);
-    userDisplay = response.display
-      ? response.display
-      : areEqualAddresses(user, SIX529_MUSEUM)
-      ? ReservedUser.MUSEUM
-      : areEqualAddresses(user, MANIFOLD)
-      ? ReservedUser.MANIFOLD
-      : userDisplay;
+    userDisplay =
+      response.display && !containsEmojis(response.display)
+        ? response.display
+        : areEqualAddresses(user, SIX529_MUSEUM)
+        ? ReservedUser.MUSEUM
+        : areEqualAddresses(user, MANIFOLD)
+        ? ReservedUser.MANIFOLD
+        : userDisplay;
   }
 
   return {
