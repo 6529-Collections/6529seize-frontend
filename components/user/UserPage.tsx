@@ -18,11 +18,13 @@ import Breadcrumb, { Crumb } from "../breadcrumb/Breadcrumb";
 import { MemesExtendedData, NFT } from "../../entities/INFT";
 import {
   areEqualAddresses,
+  containsEmojis,
   formatAddress,
   isEmptyObject,
   isGradientsContract,
   isMemesContract,
   numberWithCommas,
+  parseEmojis,
   removeProtocol,
 } from "../../helpers/Helpers";
 import {
@@ -178,8 +180,8 @@ export default function UserPage(props: Props) {
             `${oLink}/${
               reservedDisplay
                 ? reservedDisplay
-                : response.display
-                ? response.display
+                : response.display && !containsEmojis(response.display)
+                ? response.display.replaceAll(" ", "-")
                 : formatAddress(oAddress)
             }`
           );
@@ -189,14 +191,14 @@ export default function UserPage(props: Props) {
               display: reservedDisplay
                 ? reservedDisplay
                 : response.display
-                ? response.display
+                ? parseEmojis(response.display)
                 : oAddress,
             },
           ]);
           router.push(
             reservedDisplay
               ? reservedDisplay
-              : response.display
+              : response.display && !containsEmojis(response.display)
               ? response.display.replaceAll(" ", "-")
               : oAddress,
             undefined,
