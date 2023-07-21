@@ -1,8 +1,10 @@
 import styles from "./Address.module.scss";
 import {
   areEqualAddresses,
+  containsEmojis,
   formatAddress,
   numberWithCommas,
+  parseEmojis,
 } from "../../helpers/Helpers";
 import { MANIFOLD, SIX529_MUSEUM } from "../../constants";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -66,6 +68,9 @@ export function WalletAddress(props: {
     }
 
     if (props.display) {
+      if (containsEmojis(props.display)) {
+        return parseEmojis(props.display);
+      }
       return formatAddress(props.display);
     }
 
@@ -74,7 +79,7 @@ export function WalletAddress(props: {
 
   function getLink() {
     let path = "";
-    if (props.display) {
+    if (props.display && !containsEmojis(props.display)) {
       path = props.display;
     } else {
       path = props.wallet;
@@ -90,13 +95,22 @@ export function WalletAddress(props: {
     }, 1000);
   }
 
+  function getInnerHTML() {
+    if (props.disableLink) {
+      return resolveAddress();
+    }
+
+    return `<a href="${getLink()}">${resolveAddress()}</a>`;
+  }
+
   return (
     <span>
       {(props.hideCopy || !navigator.clipboard) && (
-        <span className={styles.address}>
-          {props.disableLink && resolveAddress()}
-          {!props.disableLink && <a href={getLink()}>{resolveAddress()}</a>}
-        </span>
+        <span
+          className={styles.address}
+          dangerouslySetInnerHTML={{
+            __html: getInnerHTML(),
+          }}></span>
       )}
       {!props.hideCopy && navigator.clipboard && (
         <>
@@ -105,8 +119,11 @@ export function WalletAddress(props: {
               className={`${styles.address} ${
                 props.isUserPage ? styles.addressUserPage : ""
               }`}>
-              {props.disableLink && resolveAddress()}
-              {!props.disableLink && <a href={getLink()}>{resolveAddress()}</a>}
+              <span
+                className={styles.address}
+                dangerouslySetInnerHTML={{
+                  __html: getInnerHTML(),
+                }}></span>
             </span>
           )}
           {props.display && props.display.endsWith(".eth") ? (
@@ -126,9 +143,10 @@ export function WalletAddress(props: {
                     <span
                       className={`${styles.address} ${
                         props.isUserPage ? styles.addressUserPage : ""
-                      }`}>
-                      {resolveAddress()}
-                    </span>
+                      }`}
+                      dangerouslySetInnerHTML={{
+                        __html: resolveAddress(),
+                      }}></span>
                   )}
                   <FontAwesomeIcon
                     icon="copy"
@@ -187,9 +205,10 @@ export function WalletAddress(props: {
                       <span
                         className={`${styles.address} ${
                           props.isUserPage ? styles.addressUserPage : ""
-                        }`}>
-                        {resolveAddress()}
-                      </span>
+                        }`}
+                        dangerouslySetInnerHTML={{
+                          __html: resolveAddress(),
+                        }}></span>
                     )}
                     <FontAwesomeIcon
                       icon="copy"
