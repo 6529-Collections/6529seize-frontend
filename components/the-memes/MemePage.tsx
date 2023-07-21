@@ -79,9 +79,6 @@ export default function MemePage(props: Props) {
 
   const [userLoaded, setUserLoaded] = useState(false);
 
-  const [rememes, setRememes] = useState<Rememe[]>([]);
-  const [rememesLoaded, setRememesLoaded] = useState(false);
-
   const liveTab = {
     focus: MEME_FOCUS.LIVE,
     title: "Live",

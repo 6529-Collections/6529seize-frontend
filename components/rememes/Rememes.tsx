@@ -104,7 +104,7 @@ export default function Rememes(props: Props) {
         lg={{ span: 3 }}>
         <a
           href={`/rememes/${rememe.contract}/${rememe.id}`}
-          className="decoration-none decoration-hover-underline scale-hover">
+          className="decoration-none scale-hover">
           <Container fluid>
             <Row>
               <RememeImage nft={rememe} animation={false} height={300} />
@@ -124,11 +124,9 @@ export default function Rememes(props: Props) {
                   </Row>
                   <Row>
                     <Col className="d-flex justify-content-center align-items-center">
-                      <span>
-                        {rememe.metadata.name
-                          ? rememe.metadata.name
-                          : `${formatAddress(rememe.contract)} #${rememe.id}`}
-                      </span>
+                      {rememe.metadata.name
+                        ? rememe.metadata.name
+                        : `${formatAddress(rememe.contract)} #${rememe.id}`}
                     </Col>
                   </Row>
                 </Container>

@@ -286,10 +286,12 @@ export function MemePageLiveSubMenu(props: {
                   sm={{ span: 4 }}
                   md={{ span: 3 }}
                   lg={{ span: 3 }}>
-                  <Container fluid className="no-padding">
-                    <Row>
-                      <Col>
-                        <a href={`/meme-lab/${nft.id}`}>
+                  <a
+                    href={`/meme-lab/${nft.id}`}
+                    className="decoration-none scale-hover">
+                    <Container fluid className="no-padding">
+                      <Row>
+                        <Col>
                           <NFTImage
                             nft={nft}
                             animation={false}
@@ -298,22 +300,22 @@ export function MemePageLiveSubMenu(props: {
                             showThumbnail={true}
                             showUnseized={false}
                           />
-                        </a>
-                      </Col>
-                    </Row>
-                    <Row>
-                      <Col className="text-center pt-2">
-                        <b>
-                          #{nft.id} - {nft.name}
-                        </b>
-                      </Col>
-                    </Row>
-                    <Row>
-                      <Col className="text-center pt-2">
-                        Artists: {nft.artist}
-                      </Col>
-                    </Row>
-                  </Container>
+                        </Col>
+                      </Row>
+                      <Row>
+                        <Col className="text-center pt-2">
+                          <b>
+                            #{nft.id} - {nft.name}
+                          </b>
+                        </Col>
+                      </Row>
+                      <Row>
+                        <Col className="text-center pt-2">
+                          Artists: {nft.artist}
+                        </Col>
+                      </Row>
+                    </Container>
+                  </a>
                 </Col>
               );
             })}
@@ -338,16 +340,11 @@ export function MemePageLiveSubMenu(props: {
             </h1>
           </Col>
         </Row>
-        <Row className="pt-4 pb-4">
-          <Col>
-            {rememesLoaded && rememes.length == 0 && (
-              <>
-                <br />
-                ReMemes that reference this NFT will appear here.
-              </>
-            )}
-          </Col>
-        </Row>
+        {rememesLoaded && rememes.length == 0 && (
+          <Row className="pt-4 pb-4">
+            <Col>ReMemes that reference this NFT will appear here.</Col>
+          </Row>
+        )}
         {rememes.length > 0 && (
           <Row className="pt-2 pb-2">
             {rememes.map((rememe) => {
@@ -361,7 +358,7 @@ export function MemePageLiveSubMenu(props: {
                   lg={{ span: 3 }}>
                   <a
                     href={`/rememes/${rememe.contract}/${rememe.id}`}
-                    className="decoration-none decoration-hover-underline scale-hover">
+                    className="decoration-none scale-hover">
                     <Container fluid className="no-padding">
                       <Row>
                         <Col>
