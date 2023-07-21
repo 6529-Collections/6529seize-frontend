@@ -52,6 +52,15 @@
   }
 }
 
+.fileIcon {
+  margin-left: 8px;
+  width: 30px;
+
+  @media only screen and (max-width: 800px) {
+    width: 22px;
+  }
+}
+
 .globeIcon {
   margin-right: 8px;
   width: 30px;
