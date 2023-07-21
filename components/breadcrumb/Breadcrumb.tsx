@@ -23,11 +23,13 @@ export default function Breadcrumb(props: Props) {
                     <a
                       key={`${index}-${crumb.display}`}
                       className={styles.breadcrumbLink}
-                      href={crumb.href}>
-                      {crumb.display}
-                    </a>
+                      href={crumb.href}
+                      dangerouslySetInnerHTML={{ __html: crumb.display }}></a>
                   ) : (
-                    <>{crumb.display}</>
+                    <span
+                      dangerouslySetInnerHTML={{
+                        __html: crumb.display,
+                      }}></span>
                   );
                   if (index > 0) {
                     return (
