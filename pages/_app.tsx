@@ -66,6 +66,7 @@ import {
   faFire,
   faGlobe,
   faExternalLink,
+  faFileCsv,
 } from "@fortawesome/free-solid-svg-icons";
 import Head from "next/head";
 
@@ -118,7 +119,8 @@ library.add(
   faXmarkCircle,
   faFire,
   faGlobe,
-  faExternalLink
+  faExternalLink,
+  faFileCsv
 );
 
 const CONTRACT_CHAINS =

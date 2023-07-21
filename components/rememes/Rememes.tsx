@@ -11,6 +11,7 @@ import Image from "next/image";
 import Pagination from "../pagination/Pagination";
 import { url } from "inspector";
 import { formatAddress } from "../../helpers/Helpers";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 const PAGE_SIZE = 20;
 
@@ -28,6 +29,8 @@ export default function Rememes(props: Props) {
   const [totalResults, setTotalResults] = useState(0);
   const [page, setPage] = useState(1);
   const [rememesLoaded, setRememesLoaded] = useState(false);
+
+  const [upload, setUpload] = useState<string>();
 
   const [urlMemeId, setUrlMemeId] = useState<number | undefined>(props.meme_id);
   const [selectedMeme, setSelectedMeme] = useState<NFT>();
@@ -76,6 +79,15 @@ export default function Rememes(props: Props) {
       );
     }
   }, [selectedMeme || urlMemeId]);
+
+  useEffect(() => {
+    const url = `${process.env.API_ENDPOINT}/api/rememes_uploads?page_size=${PAGE_SIZE}&page=${page}`;
+    fetchUrl(url).then((response: DBResponse) => {
+      if (response.data && response.data.length > 0) {
+        setUpload(response.data[0].url);
+      }
+    });
+  }, []);
 
   useEffect(() => {
     fetchResults(page);
@@ -174,6 +186,18 @@ export default function Rememes(props: Props) {
                   <span className="font-color-h">&nbsp;(x{totalResults})</span>
                 ) : (
                   ``
+                )}
+                {upload && (
+                  <a
+                    className={styles.userLink}
+                    href={upload}
+                    target="_blank"
+                    rel="noreferrer">
+                    <FontAwesomeIcon
+                      icon="file-csv"
+                      className={styles.fileIcon}
+                    />
+                  </a>
                 )}
               </Col>
               <Col
