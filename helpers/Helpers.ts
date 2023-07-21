@@ -219,3 +219,16 @@ export async function getContentTypeFromURL(url: string) {
 export function isEmptyObject(obj: any) {
   return Object.keys(obj).length === 0 && obj.constructor === Object;
 }
+
+export function containsEmojis(s: string) {
+  const regex = /U\+([\dA-Fa-f]{1,6})/g;
+  return regex.test(s);
+}
+
+export function parseEmojis(s: string) {
+  const regex = /U\+([\dA-Fa-f]{1,6})/g;
+  return s.replace(regex, (_, hexValue) => {
+    const codePoint = parseInt(hexValue, 16);
+    return `&#x${hexValue};`;
+  });
+}
