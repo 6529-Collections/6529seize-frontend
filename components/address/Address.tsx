@@ -166,9 +166,10 @@ export function WalletAddress(props: {
                     <Dropdown.Item
                       name={`copy-ens-btn`}
                       aria-label={`copy-ens-btn`}
-                      onClick={() => copy(props.display)}>
-                      {props.display}
-                    </Dropdown.Item>
+                      onClick={() => copy(props.display)}
+                      dangerouslySetInnerHTML={{
+                        __html: resolveAddress(),
+                      }}></Dropdown.Item>
                   </Tippy>
                 )}
                 <Tippy
