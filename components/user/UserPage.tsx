@@ -89,6 +89,7 @@ export default function UserPage(props: Props) {
   const [walletOwnedLoaded, setWalletOwnedLoaded] = useState(false);
   const [consolidationOwnedLoaded, setConsolidationOwnedLoaded] =
     useState(false);
+  const [ownedLoaded, setOwnedLoaded] = useState(false);
 
   const [ownerAddress, setOwnerAddress] = useState<`0x${string}` | undefined>(
     undefined
@@ -291,16 +292,9 @@ export default function UserPage(props: Props) {
 
   useEffect(() => {
     async function fetchOwned(url: string, myowned: Owner[]) {
-      return fetchUrl(url).then((response: DBResponse) => {
-        if (response.next) {
-          fetchOwned(response.next, [...myowned].concat(response.data));
-        } else {
-          const newOwned = [...myowned].concat(response.data);
-          if (newOwned.length > 0) {
-            setWalletOwned(newOwned);
-          }
-          setWalletOwnedLoaded(true);
-        }
+      fetchAllPages(url).then((response: Owner[]) => {
+        setWalletOwned(response);
+        setWalletOwnedLoaded(true);
       });
     }
 
@@ -365,12 +359,14 @@ export default function UserPage(props: Props) {
       });
     }
 
-    if (isConsolidation && router.isReady) {
-      fetchTDH();
-    } else {
-      setWalletOwnedLoaded(true);
+    if (consolidatedTDH) {
+      if (isConsolidation) {
+        fetchTDH();
+      } else {
+        setWalletOwnedLoaded(true);
+      }
     }
-  }, [isConsolidation, router.isReady]);
+  }, [isConsolidation, consolidatedTDH]);
 
   useEffect(() => {
     if (view == VIEW.CONSOLIDATION || !isConsolidation) {
@@ -381,12 +377,15 @@ export default function UserPage(props: Props) {
   }, [view, walletTDH, consolidatedTDH]);
 
   useEffect(() => {
-    if (view == VIEW.CONSOLIDATION || !isConsolidation) {
-      setOwned(consolidationOwned);
-    } else {
-      setOwned(walletOwned);
+    if (walletOwnedLoaded && consolidationOwnedLoaded) {
+      if (view == VIEW.CONSOLIDATION || !isConsolidation) {
+        setOwned(consolidationOwned);
+      } else {
+        setOwned(walletOwned);
+      }
+      setOwnedLoaded(true);
     }
-  }, [view, walletOwned, consolidationOwned]);
+  }, [view, walletOwnedLoaded, consolidationOwnedLoaded]);
 
   useEffect(() => {
     setActivityPage(1);
@@ -1914,8 +1913,7 @@ export default function UserPage(props: Props) {
                     </Row>
                   )}
                   {printUserControls()}
-                  {walletOwnedLoaded &&
-                    consolidationOwnedLoaded &&
+                  {ownedLoaded &&
                     (owned.length > 0 ? (
                       printNfts()
                     ) : (
