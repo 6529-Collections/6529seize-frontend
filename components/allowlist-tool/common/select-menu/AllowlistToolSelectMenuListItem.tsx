@@ -26,21 +26,30 @@ export default function AllowlistToolSelectMenuListItem({
       role="option"
       aria-selected="true"
     >
-      <div className="tw-w-full tw-flex tw-justify-between tw-items-center tw-pr-4">
-        <span className="tw-font-normal tw-block tw-truncate">
-          {option.title}
-        </span>
-        {option.subTitle && (
-          <span className="tw-font-light tw-text-neutral-500 tw-text-xs tw-block tw-truncate group-hover:tw-text-neutral-400 tw-transition tw-duration-300 tw-ease-out">
-            {option.subTitle}
+      <div className="tw-w-full tw-flex tw-justify-between tw-items-center tw-gap-x-4 tw-pr-4">
+        <div className="tw-flex-1">
+          <span className="tw-font-normal tw-block tw-truncate">
+            {option.title}
           </span>
-        )}
+        </div>
+        <div className="tw-flex-1 tw-text-right">
+          <span className="tw-pl-2 tw-font-light tw-text-neutral-500 tw-text-xs tw-truncate group-hover:tw-text-neutral-400 tw-transition tw-duration-300 tw-ease-out">
+            2340 wallets
+          </span>
+        </div>
+        <div className="tw-flex-1 tw-text-right">
+          {option.subTitle && (
+            <span className="tw-font-light tw-text-neutral-500 tw-text-xs tw-block tw-truncate group-hover:tw-text-neutral-400 tw-transition tw-duration-300 tw-ease-out">
+              {option.subTitle}
+            </span>
+          )}
+        </div>
       </div>
 
       {isSelected && (
         <span className="tw-text-white tw-absolute tw-inset-y-0 tw-right-0 tw-flex tw-items-center tw-pr-4">
           <svg
-            className="tw-h-5 tw-w-5"
+            className="tw-h-5 tw-w-5 tw-text-white"
             viewBox="0 0 20 20"
             fill="currentColor"
             aria-hidden="true"

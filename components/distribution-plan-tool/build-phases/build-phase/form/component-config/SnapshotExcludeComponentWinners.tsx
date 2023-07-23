@@ -109,10 +109,10 @@ export default function SnapshotExcludeComponentWinners({
   };
 
   return (
-    <div>
+    <div className="tw-relative">
       <BuildPhaseFormConfigModalTitle title={title} onClose={onClose} />
       <DistributionPlanSecondaryText>
-        Exclude Allowlist Members From Prior Groups
+        Exclude Allowlist Members From Prior Groups.
       </DistributionPlanSecondaryText>
       <div className="tw-mt-6">
         <AllowlistToolSelectMenuMultiple

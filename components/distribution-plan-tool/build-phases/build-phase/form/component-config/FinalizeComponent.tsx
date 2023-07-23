@@ -81,9 +81,9 @@ export default function FinalizeComponent({
             </span>
           </span>
         )}
-        <span className="tw-block tw-text-sm tw-text-neutral-400 tw-font-light">
+        <span className="tw-block tw-text-xs tw-text-neutral-400 tw-font-light">
           Max mints per wallet:{" "}
-          <span className="tw-font-medium tw-text-neutral-100">
+          <span className="tw-pl-1 tw-font-medium tw-text-neutral-100">
             {" "}
             {phaseGroupConfig.maxMintCount}
           </span>
