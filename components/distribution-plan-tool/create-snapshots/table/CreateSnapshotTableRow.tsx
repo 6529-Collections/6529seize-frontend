@@ -59,7 +59,6 @@ export default function CreateSnapshotTableRow({
       return;
     }
     setTokenIdsTruncated(snapshot.tokenIds);
-    
   }, [snapshot.tokenIds]);
 
   return (
@@ -137,6 +136,9 @@ export default function CreateSnapshotTableRow({
       </td>
       <td className="tw-whitespace-nowrap tw-px-3 tw-py-4 tw-text-sm tw-font-normal tw-text-neutral-300">
         {snapshot.tokensCount ?? "N/A"}
+      </td>
+      <td className="tw-whitespace-nowrap tw-px-3 tw-py-4 tw-text-sm tw-font-normal tw-text-neutral-300">
+        {snapshot.downloaderStatus}
       </td>
     </DistributionPlanTableRowWrapper>
   );

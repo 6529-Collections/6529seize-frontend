@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { AllowlistToolSelectMenuOption } from "../../../../../allowlist-tool/common/select-menu/AllowlistToolSelectMenu";
 import DistributionPlanSecondaryText from "../../../../common/DistributionPlanSecondaryText";
 import {
+  DistributionPlanSnapshot,
   PhaseGroupConfig,
   PhaseGroupSnapshotConfig,
   RandomHoldersType,
@@ -23,7 +24,7 @@ export default function FinalizeComponent({
   onStartAgain: () => void;
   onRemoveGroupSnapshot: (groupSnapshotId: string) => void;
   phaseGroupConfig: PhaseGroupConfig;
-  snapshots: AllowlistToolSelectMenuOption[];
+  snapshots: DistributionPlanSnapshot[];
   loading: boolean;
   title: string;
   onClose: () => void;

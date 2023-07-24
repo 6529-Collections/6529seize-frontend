@@ -238,3 +238,19 @@ export interface DistributionPlanSearchContractMetadataResult {
   readonly allTimeVolume: number | null;
   readonly openseaVerified: boolean;
 }
+
+export enum DistributionPlanTokenPoolDownloadStatus {
+  PENDING = "PENDING",
+  CLAIMED = "CLAIMED",
+  FAILED = "FAILED",
+  COMPLETED = "COMPLETED",
+}
+
+export interface DistributionPlanTokenPoolDownload {
+  readonly contract: string;
+  readonly tokenIds?: string;
+  readonly tokenPoolId: string;
+  readonly allowlistId: string;
+  readonly blockNo: number;
+  readonly status: DistributionPlanTokenPoolDownloadStatus;
+}

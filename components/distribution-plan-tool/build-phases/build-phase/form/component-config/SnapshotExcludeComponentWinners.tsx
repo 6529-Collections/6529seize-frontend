@@ -8,6 +8,8 @@ import { PhaseConfigStep } from "../BuildPhaseFormConfigModal";
 import ComponentConfigNextBtn from "./ComponentConfigNextBtn";
 import { DistributionPlanToolContext } from "../../../../DistributionPlanToolContext";
 import BuildPhaseFormConfigModalTitle from "./BuildPhaseFormConfigModalTitle";
+import ComponentConfigMeta from "./ComponentConfigMeta";
+import { AllowlistToolResponse } from "../../../../../allowlist-tool/allowlist-tool.types";
 
 const SELECT_ALL_OPTION: AllowlistToolSelectMenuMultipleOption = {
   title: "Exclude All Prior Groups",
@@ -16,19 +18,25 @@ const SELECT_ALL_OPTION: AllowlistToolSelectMenuMultipleOption = {
 };
 
 export default function SnapshotExcludeComponentWinners({
+  snapshotId,
   phases,
   onNextStep,
   onSelectExcludeComponentWinners,
   title,
   onClose,
+  setUniqueWalletsCount,
 }: {
+  snapshotId: string;
   phases: BuildPhasesPhase[];
   onNextStep: (step: PhaseConfigStep) => void;
   onSelectExcludeComponentWinners: (componentIds: string[]) => void;
   title: string;
   onClose: () => void;
+  setUniqueWalletsCount: (count: number | null) => void;
 }) {
-  const { setToasts } = useContext(DistributionPlanToolContext);
+  const { setToasts, distributionPlan } = useContext(
+    DistributionPlanToolContext
+  );
   const [options, setOptions] = useState<
     AllowlistToolSelectMenuMultipleOption[]
   >([
@@ -93,6 +101,18 @@ export default function SnapshotExcludeComponentWinners({
     );
   };
 
+  const [excludeComponentWinners, setExcludeComponentWinners] = useState<
+    string[]
+  >([]);
+
+  useEffect(() => {
+    setExcludeComponentWinners(
+      selectedOptions
+        .filter((o) => o.value !== SELECT_ALL_OPTION.value)
+        .map((o) => o.value)
+    );
+  }, [selectedOptions]);
+
   const onExcludePreviousWinners = () => {
     if (selectedOptions.length === 0) {
       setToasts({
@@ -101,12 +121,61 @@ export default function SnapshotExcludeComponentWinners({
       });
       return;
     }
-    onSelectExcludeComponentWinners(
-      selectedOptions
-        .filter((o) => o.value !== SELECT_ALL_OPTION.value)
-        .map((o) => o.value)
-    );
+    onSelectExcludeComponentWinners(excludeComponentWinners);
   };
+  const [loading, setLoading] = useState<boolean>(false);
+
+  const [localUniqueWalletsCount, setLocalUniqueWalletsCount] = useState<
+    number | null
+  >(null);
+
+  useEffect(() => {
+    const fetchUniqueWalletsCount = async () => {
+      if (!distributionPlan) return;
+      setLoading(true);
+      const url = `${process.env.ALLOWLIST_API_ENDPOINT}/allowlists/${
+        distributionPlan.id
+      }/token-pool-downloads/${snapshotId}/unique-wallets-count${
+        !!excludeComponentWinners.length
+          ? `?exclude-component-winners=${excludeComponentWinners.join(",")}`
+          : ""
+      }`;
+      try {
+        const response = await fetch(url, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+        const data: AllowlistToolResponse<number> = await response.json();
+        if (typeof data !== "number" && "error" in data) {
+          setToasts({
+            messages:
+              typeof data.message === "string" ? [data.message] : data.message,
+            type: "error",
+          });
+          return { success: false };
+        }
+        setLocalUniqueWalletsCount(data);
+        return { success: true };
+      } catch (error) {
+        setToasts({
+          messages: ["Something went wrong. Please try again."],
+          type: "error",
+        });
+        return;
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchUniqueWalletsCount();
+  }, [
+    excludeComponentWinners,
+    distributionPlan,
+    snapshotId,
+    setToasts,
+    setUniqueWalletsCount,
+  ]);
 
   return (
     <div className="tw-relative">
@@ -114,6 +183,7 @@ export default function SnapshotExcludeComponentWinners({
       <DistributionPlanSecondaryText>
         Exclude Allowlist Members From Prior Groups.
       </DistributionPlanSecondaryText>
+
       <div className="tw-mt-6">
         <AllowlistToolSelectMenuMultiple
           label="Select Groups To Exclude"
@@ -130,8 +200,13 @@ export default function SnapshotExcludeComponentWinners({
         showNextBtn={!!selectedOptions.length}
         isDisabled={!selectedOptions.length}
         onSkip={() => onNextStep(PhaseConfigStep.SNAPSHOT_SELECT_TOP_HOLDERS)}
-        onNext={onExcludePreviousWinners}
-      />
+        onNext={() => {
+          setUniqueWalletsCount(localUniqueWalletsCount);
+          onExcludePreviousWinners();
+        }}
+      >
+        <ComponentConfigMeta tags={[]} walletsCount={localUniqueWalletsCount} />
+      </ComponentConfigNextBtn>
     </div>
   );
 }

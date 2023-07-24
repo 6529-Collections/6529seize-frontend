@@ -32,11 +32,7 @@ export default function AllowlistToolSelectMenuListItem({
             {option.title}
           </span>
         </div>
-        <div className="tw-flex-1 tw-text-right">
-          <span className="tw-pl-2 tw-font-light tw-text-neutral-500 tw-text-xs tw-truncate group-hover:tw-text-neutral-400 tw-transition tw-duration-300 tw-ease-out">
-            2340 wallets
-          </span>
-        </div>
+
         <div className="tw-flex-1 tw-text-right">
           {option.subTitle && (
             <span className="tw-font-light tw-text-neutral-500 tw-text-xs tw-block tw-truncate group-hover:tw-text-neutral-400 tw-transition tw-duration-300 tw-ease-out">

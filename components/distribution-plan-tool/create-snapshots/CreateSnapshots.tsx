@@ -3,13 +3,20 @@ import {
   DistributionPlanToolContext,
   DistributionPlanToolStep,
 } from "../DistributionPlanToolContext";
-import { AllowlistOperationCode } from "../../allowlist-tool/allowlist-tool.types";
+import {
+  AllowlistOperationCode,
+  AllowlistRunStatus,
+  AllowlistToolResponse,
+  DistributionPlanTokenPoolDownload,
+  DistributionPlanTokenPoolDownloadStatus,
+} from "../../allowlist-tool/allowlist-tool.types";
 import CreateSnapshotTable from "./table/CreateSnapshotTable";
 import CreateSnapshotForm from "./form/CreateSnapshotForm";
 import StepHeader from "../common/StepHeader";
 import DistributionPlanNextStepBtn from "../common/DistributionPlanNextStepBtn";
 import DistributionPlanStepWrapper from "../common/DistributionPlanStepWrapper";
 import DistributionPlanEmptyTablePlaceholder from "../common/DistributionPlanEmptyTablePlaceholder";
+import { useInterval } from "react-use";
 
 export interface CreateSnapshotSnapshot {
   id: string;
@@ -21,6 +28,7 @@ export interface CreateSnapshotSnapshot {
   tokensCount: number | null;
   contract: string | null;
   blockNo: number | null;
+  downloaderStatus: DistributionPlanTokenPoolDownloadStatus | null;
 }
 
 export default function CreateSnapshots() {
@@ -45,6 +53,9 @@ export default function CreateSnapshots() {
   }, [operations]);
 
   const [snapshots, setSnapshots] = useState<CreateSnapshotSnapshot[]>([]);
+  const [tokenPoolDownloads, setTokenPoolDownloads] = useState<
+    DistributionPlanTokenPoolDownload[]
+  >([]);
 
   useEffect(() => {
     const createTokenPoolOperations = operations.filter(
@@ -58,6 +69,11 @@ export default function CreateSnapshots() {
             (tokenPool) => tokenPool.id === createTokenPoolOperation.params.id
           ) ?? null;
 
+        const tokenPoolDownload = tokenPoolDownloads.find(
+          (tokenPoolDownload) =>
+            tokenPoolDownload.tokenPoolId === createTokenPoolOperation.params.id
+        );
+
         return {
           id: createTokenPoolOperation.params.id,
           name: createTokenPoolOperation.params.name,
@@ -68,16 +84,66 @@ export default function CreateSnapshots() {
           tokensCount: tokenPool?.tokensCount ?? null,
           contract: createTokenPoolOperation?.params.contract ?? null,
           blockNo: createTokenPoolOperation?.params.blockNo ?? null,
+          downloaderStatus: tokenPoolDownload?.status ?? null,
         };
       })
     );
-  }, [operations, tokenPools]);
+  }, [operations, tokenPools, tokenPoolDownloads]);
 
   const [haveSnapshots, setHaveSnapshots] = useState(false);
+  const [shouldRunDownloadCheck, setShouldRunDownloadCheck] = useState(false);
+
+  useEffect(() => {
+    if (!distributionPlan) {
+      setShouldRunDownloadCheck(false);
+    }
+
+    const haveActiveDownloads = snapshots.some(
+      (snapshot) =>
+        !snapshot.downloaderStatus ||
+        [
+          DistributionPlanTokenPoolDownloadStatus.PENDING,
+          DistributionPlanTokenPoolDownloadStatus.CLAIMED,
+        ].includes(snapshot.downloaderStatus)
+    );
+    setShouldRunDownloadCheck(haveActiveDownloads);
+  }, [distributionPlan, snapshots]);
 
   useEffect(() => {
     setHaveSnapshots(!!snapshots.length);
   }, [snapshots]);
+
+  const fetchTokenPoolStatuses = async () => {
+    if (!distributionPlan) return;
+    const url = `${process.env.ALLOWLIST_API_ENDPOINT}/allowlists/${distributionPlan.id}/token-pool-downloads`;
+    try {
+      const response = await fetch(url, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      const data: AllowlistToolResponse<DistributionPlanTokenPoolDownload[]> =
+        await response.json();
+      if ("error" in data) {
+        setTokenPoolDownloads([]);
+        return;
+      }
+      setTokenPoolDownloads(data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  useEffect(() => {
+    fetchTokenPoolStatuses();
+  }, []);
+
+  useInterval(
+    async () => {
+      await fetchTokenPoolStatuses();
+    },
+    shouldRunDownloadCheck ? 2000 : null
+  );
 
   return (
     <div>
@@ -95,12 +161,12 @@ export default function CreateSnapshots() {
           )}
         </div>
         <DistributionPlanNextStepBtn
-          showRunAnalysisBtn={haveUnRunOperations}
+          showRunAnalysisBtn={!shouldRunDownloadCheck && haveUnRunOperations}
           onNextStep={() =>
             setStep(DistributionPlanToolStep.CREATE_CUSTOM_SNAPSHOT)
           }
           loading={false}
-          showNextBtn={haveSnapshots}
+          showNextBtn={!shouldRunDownloadCheck && haveSnapshots}
           showSkipBtn={false}
         />
       </DistributionPlanStepWrapper>

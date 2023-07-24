@@ -1,7 +1,6 @@
 import { useEffect } from "react";
 import DistributionPlanSecondaryText from "../../../../common/DistributionPlanSecondaryText";
-import { PhaseGroupSnapshotConfig } from "../BuildPhaseFormConfigModal";
-import { AllowlistToolSelectMenuOption } from "../../../../../allowlist-tool/common/select-menu/AllowlistToolSelectMenu";
+import { DistributionPlanSnapshot, PhaseGroupSnapshotConfig } from "../BuildPhaseFormConfigModal";
 import FinalizeSnapshotsTable from "./snapshots-table/FinalizeSnapshotsTable";
 import BuildPhaseFormConfigModalTitle from "./BuildPhaseFormConfigModalTitle";
 
@@ -20,7 +19,7 @@ export default function FinalizeSnapshot({
   onRemoveGroupSnapshot: (groupSnapshotId: string) => void;
   onStartAgain: () => void;
   groupSnapshots: PhaseGroupSnapshotConfig[];
-  snapshots: AllowlistToolSelectMenuOption[];
+  snapshots: DistributionPlanSnapshot[];
   title: string;
   onClose: () => void;
 }) {

@@ -7,6 +7,7 @@ export default function ComponentConfigNextBtn({
   onSkip,
   isDisabled,
   isLoading = false,
+  children,
 }: {
   showSkipBtn: boolean;
   showNextBtn: boolean;
@@ -14,6 +15,7 @@ export default function ComponentConfigNextBtn({
   onSkip: () => void;
   isDisabled: boolean;
   isLoading?: boolean;
+  children: React.ReactNode;
 }) {
   const [disabled, setDisabled] = useState<boolean>(false);
 
@@ -39,19 +41,7 @@ export default function ComponentConfigNextBtn({
 
   return (
     <div className="tw-mt-8 tw-flex tw-justify-between tw-items-center">
-      <div className="tw-space-y-1">
-        <div className="tw-flex">
-          <span className="tw-font-normal tw-text-primary-400 tw-text-xs tw-truncate group-hover:tw-text-neutral-400 tw-transition tw-duration-300 tw-ease-out">
-            The Memes by 6529
-          </span>
-        </div>
-        <div className="tw-text-xs tw-space-x-2">
-          <span className="tw-text-neutral-400 tw-font-light">
-            Total wallets:
-          </span>
-          <span className="tw-font-normal">2424</span>
-        </div>
-      </div>
+      {children}
       <div className="tw-flex tw-ml-auto tw-space-x-4">
         {showSkipBtn && (
           <button

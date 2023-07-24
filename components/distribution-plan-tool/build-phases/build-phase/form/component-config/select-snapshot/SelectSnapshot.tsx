@@ -1,0 +1,101 @@
+import { useContext, useEffect, useState } from "react";
+import DistributionPlanSecondaryText from "../../../../../common/DistributionPlanSecondaryText";
+import ComponentConfigNextBtn from "../ComponentConfigNextBtn";
+import { DistributionPlanToolContext } from "../../../../../DistributionPlanToolContext";
+import { Pool } from "../../../../../../allowlist-tool/allowlist-tool.types";
+import BuildPhaseFormConfigModalTitle from "../BuildPhaseFormConfigModalTitle";
+import SelectSnapshotDropdown from "./SelectSnapshotDropdown";
+import { DistributionPlanSnapshot } from "../../BuildPhaseFormConfigModal";
+import ComponentConfigMeta, {
+  ComponentConfigMetaPropsTag,
+} from "../ComponentConfigMeta";
+import { getRandomObjectId } from "../../../../../../../helpers/AllowlistToolHelpers";
+
+export default function SelectSnapshot({
+  snapshots,
+  onSelectSnapshot,
+  title,
+  onClose,
+  isLoading,
+  uniqueWalletsCount,
+  setUniqueWalletsCount,
+}: {
+  snapshots: DistributionPlanSnapshot[];
+  onSelectSnapshot: (param: {
+    snapshotId: string;
+    snapshotType: Pool.TOKEN_POOL | Pool.CUSTOM_TOKEN_POOL;
+  }) => void;
+  title: string;
+  onClose: () => void;
+  isLoading: boolean;
+  uniqueWalletsCount: number | null;
+  setUniqueWalletsCount: (count: number | null) => void;
+}) {
+  const { setToasts } = useContext(DistributionPlanToolContext);
+
+  const [selectedSnapshot, setSelectedSnapshot] =
+    useState<DistributionPlanSnapshot | null>(null);
+
+  const onAddSnapshot = async () => {
+    if (!selectedSnapshot) {
+      setToasts({
+        messages: ["Please select a snapshot."],
+        type: "error",
+      });
+      return;
+    }
+    onSelectSnapshot({
+      snapshotId: selectedSnapshot.id,
+      snapshotType: selectedSnapshot.poolType,
+    });
+  };
+
+  useEffect(() => {
+    setUniqueWalletsCount(selectedSnapshot?.walletsCount ?? null);
+  }, [selectedSnapshot, setUniqueWalletsCount]);
+
+  const [tags, setTags] = useState<ComponentConfigMetaPropsTag[]>([]);
+
+  useEffect(() => {
+    if (!selectedSnapshot) {
+      setTags([]);
+      return;
+    }
+
+    setTags([
+      {
+        id: getRandomObjectId(),
+        name: selectedSnapshot.name,
+      },
+    ]);
+  }, [selectedSnapshot]);
+
+  return (
+    <div>
+      <BuildPhaseFormConfigModalTitle title={title} onClose={onClose} />
+      <DistributionPlanSecondaryText>
+        First, select a snapshot to include in this group.
+        <br />
+        You can add more snapshots later.
+      </DistributionPlanSecondaryText>
+
+      <div className="tw-mt-6">
+        <SelectSnapshotDropdown
+          snapshots={snapshots}
+          selectedSnapshot={selectedSnapshot}
+          setSelectedSnapshot={setSelectedSnapshot}
+        />
+      </div>
+      <ComponentConfigNextBtn
+        showSkipBtn={false}
+        showNextBtn={!!selectedSnapshot}
+        onSkip={() => undefined}
+        onNext={onAddSnapshot}
+        isDisabled={false}
+        isLoading={isLoading}
+      >
+        <ComponentConfigMeta tags={tags} walletsCount={uniqueWalletsCount} />
+      </ComponentConfigNextBtn>
+    </div>
+  );
+}
