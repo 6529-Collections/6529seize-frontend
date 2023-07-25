@@ -10,7 +10,7 @@ import RememeImage from "../nft-image/RememeImage";
 import Image from "next/image";
 import Pagination from "../pagination/Pagination";
 import { url } from "inspector";
-import { formatAddress } from "../../helpers/Helpers";
+import { formatAddress, numberWithCommas } from "../../helpers/Helpers";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 const PAGE_SIZE = 20;
@@ -35,8 +35,6 @@ export default function Rememes(props: Props) {
   const [totalResults, setTotalResults] = useState(0);
   const [page, setPage] = useState(1);
   const [rememesLoaded, setRememesLoaded] = useState(false);
-
-  const [upload, setUpload] = useState<string>();
 
   const [urlMemeId, setUrlMemeId] = useState<number | undefined>(props.meme_id);
 
@@ -94,17 +92,6 @@ export default function Rememes(props: Props) {
       );
     }
   }, [selectedMeme || urlMemeId]);
-
-  useEffect(() => {
-    const url = `${
-      process.env.API_ENDPOINT
-    }/api/rememes_uploads?page_size=${1}`;
-    fetchUrl(url).then((response: DBResponse) => {
-      if (response.data && response.data.length > 0) {
-        setUpload(response.data[0].url);
-      }
-    });
-  }, []);
 
   useEffect(() => {
     fetchResults(page);
@@ -184,7 +171,7 @@ export default function Rememes(props: Props) {
         <Col>
           <Container className="pt-4">
             <Row className="pt-2 pb-2">
-              <Col sm={12} md={4} className="d-flex align-items-center gap-1">
+              <Col sm={12} md={4} className="d-flex align-items-center gap-2">
                 <Image
                   loading={"lazy"}
                   width="0"
@@ -194,7 +181,9 @@ export default function Rememes(props: Props) {
                   alt="re-memes"
                 />
                 {memesLoaded && rememesLoaded && totalResults > 0 ? (
-                  <span className="font-color-h">&nbsp;(x{totalResults})</span>
+                  <span className="font-color-h font-larger">
+                    &nbsp;(x{numberWithCommas(totalResults)})
+                  </span>
                 ) : (
                   ``
                 )}
@@ -209,7 +198,7 @@ export default function Rememes(props: Props) {
               <Col
                 sm={12}
                 md={8}
-                className="d-flex align-items-center justify-content-around flex-wrap">
+                className="d-flex align-items-center justify-content-end flex-wrap gap-4">
                 <Dropdown
                   className={styles.memeRefDropdown}
                   drop={"down-centered"}>
