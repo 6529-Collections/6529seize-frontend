@@ -71,36 +71,6 @@
   padding-left: 20px;
 }
 
-.downloadsScrollContainer {
-  -ms-overflow-style: none; /* Internet Explorer 10+ */
-  scrollbar-width: none; /* Firefox */
-  overflow-x: auto;
-}
-
-.downloadsScrollContainer::-webkit-scrollbar {
-  display: none;
-}
-
-.downloadsTable {
-  tr td {
-    white-space: nowrap;
-    align-items: center;
-    vertical-align: middle;
-  }
-
-  td {
-    line-height: 40px;
-  }
-
-  tr:nth-child(odd) {
-    background-color: $almost-very-dark-grey;
-  }
-}
-
-.downloadsTable > :not(caption) > * > * {
-  padding: 0.5rem 1rem;
-}
-
 .login {
   height: 100vh;
   text-align: center;

@@ -222,6 +222,10 @@ h5 {
   font-size: smaller;
 }
 
+.font-larger {
+  font-size: larger;
+}
+
 .icon-black {
   background-color: $very-dark-grey;
   color: white;
@@ -244,4 +248,14 @@ h5 {
 
 .decoration-none {
   text-decoration: none;
+}
+
+.scale-hover {
+  img {
+    transition: transform 0.3s ease;
+
+    &:hover {
+      transform: scale(1.02);
+    }
+  }
 }
