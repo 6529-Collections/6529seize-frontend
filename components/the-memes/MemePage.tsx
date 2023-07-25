@@ -19,6 +19,7 @@ import {
   NftTDH,
   NftRank,
   NFTHistory,
+  Rememe,
 } from "../../entities/INFT";
 import {
   getDateDisplay,
@@ -26,6 +27,7 @@ import {
   enterArtFullScreen,
   fullScreenSupported,
   numberWithCommas,
+  formatAddress,
 } from "../../helpers/Helpers";
 import Breadcrumb, { Crumb } from "../breadcrumb/Breadcrumb";
 import Download from "../download/Download";
@@ -43,6 +45,7 @@ import {
 import NFTImage from "../nft-image/NFTImage";
 import NFTLeaderboard from "../leaderboard/NFTLeaderboard";
 import Timeline from "../timeline/Timeline";
+import RememeImage from "../nft-image/RememeImage";
 
 interface MemeTab {
   focus: MEME_FOCUS;
@@ -84,12 +87,7 @@ export default function MemePage(props: Props) {
   const [nftBalance, setNftBalance] = useState<number>(0);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [activity, setActivity] = useState<Transaction[]>([]);
-  const [distributions, setDistributions] = useState<IDistribution[]>([]);
-  const [distributionPhotos, setDistributionPhotos] = useState<
-    IDistributionPhoto[]
-  >([]);
 
-  const [myOwner, setMyOwner] = useState<TDHMetrics>();
   const [myTDH, setMyTDH] = useState<NftTDH>();
   const [myRank, setMyRank] = useState<NftRank>();
 
@@ -106,6 +104,9 @@ export default function MemePage(props: Props) {
   );
 
   const [nftHistory, setNftHistory] = useState<NFTHistory[]>([]);
+
+  const [rememes, setRememes] = useState<Rememe[]>([]);
+  const [rememesLoaded, setRememesLoaded] = useState(false);
 
   const liveTab = {
     focus: MEME_FOCUS.LIVE,
@@ -209,6 +210,13 @@ export default function MemePage(props: Props) {
               setMemeLabNfts(response.data);
               setMemeLabNftsLoaded(true);
             });
+
+            fetchUrl(
+              `${process.env.API_ENDPOINT}/api/rememes?meme_id=${nftId}&page_size=4`
+            ).then((response: DBResponse) => {
+              setRememes(response.data);
+              setRememesLoaded(true);
+            });
           });
         } else {
           setNftMeta(undefined);
@@ -258,7 +266,6 @@ export default function MemePage(props: Props) {
       fetchUrl(url).then((response: DBResponse) => {
         if (response.data.length > 0) {
           const mine: TDHMetrics = response.data[0];
-          setMyOwner(mine);
           setMyTDH(mine.memes.find((m) => m.id == parseInt(nftId)));
           setMyRank(mine.memes_ranks.find((m) => m.id == parseInt(nftId)));
         }
@@ -433,10 +440,12 @@ export default function MemePage(props: Props) {
                   sm={{ span: 4 }}
                   md={{ span: 3 }}
                   lg={{ span: 3 }}>
-                  <Container fluid className="no-padding">
-                    <Row>
-                      <Col>
-                        <a href={`/meme-lab/${nft.id}`}>
+                  <a
+                    href={`/meme-lab/${nft.id}`}
+                    className="decoration-none decoration-hover-underline scale-hover">
+                    <Container fluid className="no-padding">
+                      <Row>
+                        <Col>
                           <NFTImage
                             nft={nft}
                             animation={false}
@@ -445,22 +454,22 @@ export default function MemePage(props: Props) {
                             showThumbnail={true}
                             showUnseized={false}
                           />
-                        </a>
-                      </Col>
-                    </Row>
-                    <Row>
-                      <Col className="text-center pt-2">
-                        <b>
-                          #{nft.id} - {nft.name}
-                        </b>
-                      </Col>
-                    </Row>
-                    <Row>
-                      <Col className="text-center pt-2">
-                        Artists: {nft.artist}
-                      </Col>
-                    </Row>
-                  </Container>
+                        </Col>
+                      </Row>
+                      <Row>
+                        <Col className="text-center pt-2">
+                          <b>
+                            #{nft.id} - {nft.name}
+                          </b>
+                        </Col>
+                      </Row>
+                      <Row>
+                        <Col className="text-center pt-2">
+                          Artists: {nft.artist}
+                        </Col>
+                      </Row>
+                    </Container>
+                  </a>
                 </Col>
               );
             })}
@@ -468,14 +477,21 @@ export default function MemePage(props: Props) {
         )}
         <Row className="pt-5">
           <Col>
-            <Image
-              loading={"lazy"}
-              width="0"
-              height="0"
-              style={{ width: "250px", height: "auto" }}
-              src="/re-memes.png"
-              alt="re-memes"
-            />
+            <h1 className="d-flex align-items-center mb-0">
+              <Image
+                loading={"lazy"}
+                width="0"
+                height="0"
+                style={{ width: "250px", height: "auto", float: "left" }}
+                src="/re-memes.png"
+                alt="re-memes"
+              />
+              {rememes.length > 0 && (
+                <a href={`/rememes?meme_id=${nft?.id}`}>
+                  <span className={styles.viewAllLink}>VIEW ALL</span>
+                </a>
+              )}
+            </h1>
           </Col>
         </Row>
         <Row className="pt-4 pb-4">
@@ -483,14 +499,56 @@ export default function MemePage(props: Props) {
             ReMemes are community-driven derivatives inspired by the Meme Cards.
             We hope to display them here once we find a &quot;safe&quot; way to
             do so.
-            <br />
-            Learn more{" "}
-            <a href="/rememes" target="_blank">
-              here
-            </a>
-            .
+            {rememesLoaded && rememes.length == 0 && (
+              <>
+                <br />
+                ReMemes that reference this NFT will appear here.
+              </>
+            )}
           </Col>
         </Row>
+        {rememes.length > 0 && (
+          <Row className="pt-2 pb-2">
+            {rememes.map((rememe) => {
+              return (
+                <Col
+                  key={`${rememe.contract}-${rememe.id}`}
+                  className="pt-3 pb-3"
+                  xs={{ span: 6 }}
+                  sm={{ span: 4 }}
+                  md={{ span: 3 }}
+                  lg={{ span: 3 }}>
+                  <a
+                    href={`/rememes/${rememe.contract}/${rememe.id}`}
+                    className="decoration-none decoration-hover-underline scale-hover">
+                    <Container fluid className="no-padding">
+                      <Row>
+                        <Col>
+                          <RememeImage
+                            nft={rememe}
+                            animation={false}
+                            height={300}
+                          />
+                        </Col>
+                      </Row>
+                      <Row>
+                        <Col className="text-center pt-2">
+                          <b>
+                            {rememe.metadata.name
+                              ? rememe.metadata.name
+                              : `${formatAddress(rememe.contract)} #${
+                                  rememe.id
+                                }`}
+                          </b>
+                        </Col>
+                      </Row>
+                    </Container>
+                  </a>
+                </Col>
+              );
+            })}
+          </Row>
+        )}
       </>
     );
   }
@@ -805,7 +863,7 @@ export default function MemePage(props: Props) {
               )}
             {transactions.length > 0 && props.wallets.length > 0 && (
               <>
-                {nftBalance > 0 && myOwner && (
+                {nftBalance > 0 && (
                   <>
                     <Row className="pt-2">
                       <Col

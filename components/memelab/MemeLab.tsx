@@ -411,10 +411,11 @@ export default function MemeLabComponent(props: Props) {
         sm={{ span: 4 }}
         md={{ span: 3 }}
         lg={{ span: 3 }}>
-        <Container fluid className="no-padding">
-          <Row>
-            <a
-              href={`/meme-lab/${nft.id}`}
+        <a
+          href={`/meme-lab/${nft.id}`}
+          className="decoration-none decoration-hover-underline scale-hover">
+          <Container fluid>
+            <Row
               className={
                 props.wallets.length > 0 ? styles.nftImagePadding : ""
               }>
@@ -426,69 +427,69 @@ export default function MemeLabComponent(props: Props) {
                 showThumbnail={true}
                 showUnseized={props.wallets.length > 0}
               />
-            </a>
-          </Row>
-          <Row>
-            <Col className="text-center pt-2">
-              <a href={`/meme-lab/${nft.id}`}>{nft.name}</a>
-            </Col>
-          </Row>
-          <Row>
-            <Col className="text-center pt-1">
-              {sort &&
-                (sort == Sort.AGE || sort == Sort.ARTISTS) &&
-                printMintDate(nft)}
-              {sort == Sort.COLLECTIONS && `Artists: ${nft.artist}`}
-              {sort == Sort.EDITION_SIZE && `Edition Size: ${nft.supply}`}
-              {sort == Sort.HODLERS &&
-                `Collectors: ${
-                  nftMetas.find((nftm) => nftm.id == nft.id)?.hodlers
-                }`}
-              {sort == Sort.UNIQUE_PERCENT &&
-                `Unique: ${
-                  Math.round(
-                    nftMetas.find((nftm) => nftm.id == nft.id)
-                      ?.percent_unique! *
-                      100 *
-                      10
-                  ) / 10
-                }%`}
-              {sort == Sort.UNIQUE_PERCENT_EX_MUSEUM &&
-                `Unique Ex-Museum: ${
-                  Math.round(
-                    nftMetas.find((nftm) => nftm.id == nft.id)
-                      ?.percent_unique_cleaned! *
-                      100 *
-                      10
-                  ) / 10
-                }%`}
-              {sort == Sort.FLOOR_PRICE &&
-                (nft.floor_price > 0
-                  ? `Floor Price: ${numberWithCommas(
-                      Math.round(nft.floor_price * 100) / 100
-                    )} ETH`
-                  : `Floor Price: N/A`)}
-              {sort == Sort.MARKET_CAP &&
-                (nft.market_cap > 0
-                  ? `Market Cap: ${numberWithCommas(
-                      Math.round(nft.market_cap * 100) / 100
-                    )} ETH`
-                  : `Market Cap: N/A`)}
-              {sort == Sort.VOLUME &&
-                `Volume (${volumeType}): ${numberWithCommas(
-                  Math.round(
-                    (volumeType == VolumeType.HOURS_24
-                      ? nft.total_volume_last_24_hours
-                      : volumeType == VolumeType.DAYS_7
-                      ? nft.total_volume_last_7_days
-                      : volumeType == VolumeType.DAYS_30
-                      ? nft.total_volume_last_1_month
-                      : nft.total_volume) * 100
-                  ) / 100
-                )} ETH`}
-            </Col>
-          </Row>
-        </Container>
+            </Row>
+            <Row>
+              <Col className="text-center pt-2">
+                #{nft.id} - {nft.name}
+              </Col>
+            </Row>
+            <Row>
+              <Col className="text-center pt-1">
+                {sort &&
+                  (sort == Sort.AGE || sort == Sort.ARTISTS) &&
+                  printMintDate(nft)}
+                {sort == Sort.COLLECTIONS && `Artists: ${nft.artist}`}
+                {sort == Sort.EDITION_SIZE && `Edition Size: ${nft.supply}`}
+                {sort == Sort.HODLERS &&
+                  `Collectors: ${
+                    nftMetas.find((nftm) => nftm.id == nft.id)?.hodlers
+                  }`}
+                {sort == Sort.UNIQUE_PERCENT &&
+                  `Unique: ${
+                    Math.round(
+                      nftMetas.find((nftm) => nftm.id == nft.id)
+                        ?.percent_unique! *
+                        100 *
+                        10
+                    ) / 10
+                  }%`}
+                {sort == Sort.UNIQUE_PERCENT_EX_MUSEUM &&
+                  `Unique Ex-Museum: ${
+                    Math.round(
+                      nftMetas.find((nftm) => nftm.id == nft.id)
+                        ?.percent_unique_cleaned! *
+                        100 *
+                        10
+                    ) / 10
+                  }%`}
+                {sort == Sort.FLOOR_PRICE &&
+                  (nft.floor_price > 0
+                    ? `Floor Price: ${numberWithCommas(
+                        Math.round(nft.floor_price * 100) / 100
+                      )} ETH`
+                    : `Floor Price: N/A`)}
+                {sort == Sort.MARKET_CAP &&
+                  (nft.market_cap > 0
+                    ? `Market Cap: ${numberWithCommas(
+                        Math.round(nft.market_cap * 100) / 100
+                      )} ETH`
+                    : `Market Cap: N/A`)}
+                {sort == Sort.VOLUME &&
+                  `Volume (${volumeType}): ${numberWithCommas(
+                    Math.round(
+                      (volumeType == VolumeType.HOURS_24
+                        ? nft.total_volume_last_24_hours
+                        : volumeType == VolumeType.DAYS_7
+                        ? nft.total_volume_last_7_days
+                        : volumeType == VolumeType.DAYS_30
+                        ? nft.total_volume_last_1_month
+                        : nft.total_volume) * 100
+                    ) / 100
+                  )} ETH`}
+              </Col>
+            </Row>
+          </Container>
+        </a>
       </Col>
     );
   }
