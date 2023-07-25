@@ -52,9 +52,18 @@
   }
 }
 
-.fileIcon {
+.refreshLink {
   margin-left: 8px;
   width: 30px;
+  cursor: pointer;
+
+  &:hover {
+    opacity: 0.75;
+  }
+
+  @media only screen and (max-width: 1200px) {
+    width: 26px;
+  }
 
   @media only screen and (max-width: 800px) {
     width: 22px;
