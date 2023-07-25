@@ -15,6 +15,12 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 const PAGE_SIZE = 20;
 
+enum TokenType {
+  ALL = "All",
+  ERC721 = "ERC-721",
+  ERC1155 = "ERC-1155",
+}
+
 interface Props {
   meme_id?: number;
 }
@@ -33,6 +39,11 @@ export default function Rememes(props: Props) {
   const [upload, setUpload] = useState<string>();
 
   const [urlMemeId, setUrlMemeId] = useState<number | undefined>(props.meme_id);
+
+  const tokenTypes = [TokenType.ALL, TokenType.ERC721, TokenType.ERC1155];
+  const [selectedTokenType, setSelectedTokenType] = useState<TokenType>(
+    TokenType.ALL
+  );
   const [selectedMeme, setSelectedMeme] = useState<NFT>();
 
   useEffect(() => {
@@ -50,7 +61,11 @@ export default function Rememes(props: Props) {
     if (urlMemeId) {
       memeFilter = `&meme_id=${urlMemeId}`;
     }
-    let url = `${process.env.API_ENDPOINT}/api/rememes?page_size=${PAGE_SIZE}&page=${mypage}${memeFilter}`;
+    let tokenTypeFilter = "";
+    if (selectedTokenType !== TokenType.ALL) {
+      tokenTypeFilter = `&token_type=${selectedTokenType.replaceAll("-", "")}`;
+    }
+    let url = `${process.env.API_ENDPOINT}/api/rememes?page_size=${PAGE_SIZE}&page=${mypage}${memeFilter}${tokenTypeFilter}`;
     fetchUrl(url).then((response: DBResponse) => {
       setTotalResults(response.count);
       setRememes(response.data);
@@ -81,7 +96,9 @@ export default function Rememes(props: Props) {
   }, [selectedMeme || urlMemeId]);
 
   useEffect(() => {
-    const url = `${process.env.API_ENDPOINT}/api/rememes_uploads?page_size=${PAGE_SIZE}&page=${page}`;
+    const url = `${
+      process.env.API_ENDPOINT
+    }/api/rememes_uploads?page_size=${1}`;
     fetchUrl(url).then((response: DBResponse) => {
       if (response.data && response.data.length > 0) {
         setUpload(response.data[0].url);
@@ -91,7 +108,7 @@ export default function Rememes(props: Props) {
 
   useEffect(() => {
     fetchResults(page);
-  }, [page, router.isReady, urlMemeId]);
+  }, [page, router.isReady, urlMemeId, selectedTokenType]);
 
   function printRememe(rememe: Rememe) {
     return (
@@ -167,11 +184,7 @@ export default function Rememes(props: Props) {
         <Col>
           <Container className="pt-4">
             <Row className="pt-2 pb-2">
-              <Col
-                xs={12}
-                sm={4}
-                md={6}
-                className="d-flex align-items-center gap-1">
+              <Col sm={12} md={4} className="d-flex align-items-center gap-1">
                 <Image
                   loading={"lazy"}
                   width="0"
@@ -185,24 +198,37 @@ export default function Rememes(props: Props) {
                 ) : (
                   ``
                 )}
-                {upload && (
-                  <a
-                    className={styles.userLink}
-                    href={upload}
-                    target="_blank"
-                    rel="noreferrer">
-                    <FontAwesomeIcon
-                      icon="file-csv"
-                      className={styles.fileIcon}
-                    />
-                  </a>
-                )}
+                <FontAwesomeIcon
+                  icon="refresh"
+                  className={styles.refreshLink}
+                  onClick={() => {
+                    fetchResults(page);
+                  }}
+                />
               </Col>
               <Col
-                xs={12}
-                sm={8}
-                md={6}
-                className="d-flex align-items-center justify-content-center">
+                sm={12}
+                md={8}
+                className="d-flex align-items-center justify-content-around flex-wrap">
+                <Dropdown
+                  className={styles.memeRefDropdown}
+                  drop={"down-centered"}>
+                  <Dropdown.Toggle>
+                    Token Type: {selectedTokenType}
+                  </Dropdown.Toggle>
+                  <Dropdown.Menu>
+                    {tokenTypes.map((t) => (
+                      <Dropdown.Item
+                        key={`token-type-${t}`}
+                        onClick={() => {
+                          setTotalResults(0);
+                          setSelectedTokenType(t);
+                        }}>
+                        {t}
+                      </Dropdown.Item>
+                    ))}
+                  </Dropdown.Menu>
+                </Dropdown>
                 <Dropdown
                   className={styles.memeRefDropdown}
                   drop={"down-centered"}>

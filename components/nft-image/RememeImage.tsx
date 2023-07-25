@@ -11,6 +11,28 @@ interface Props {
 }
 
 export default function RememeImage(props: Props) {
+  const fallbackUrls = getFallbackUrls();
+
+  function getFallbackUrls() {
+    const urls = [];
+    if (props.height === 300 && props.nft.s3_image_thumbnail) {
+      urls.push(props.nft.s3_image_thumbnail);
+    }
+    if (props.nft.s3_image_scaled) {
+      urls.push(props.nft.s3_image_scaled);
+    }
+    if (props.nft.s3_image_original) {
+      urls.push(props.nft.s3_image_original);
+    }
+    urls.push(parseIpfsUrl(props.nft.image));
+    if (props.nft.metadata.image) {
+      urls.push(parseIpfsUrl(props.nft.metadata.image));
+      urls.push(parseIpfsUrlToGateway(props.nft.metadata.image));
+    }
+    urls.push(props.nft.contract_opensea_data.imageUrl);
+    return urls;
+  }
+
   function isMp4() {
     return (
       props.nft.metadata.animation_details &&
@@ -65,16 +87,11 @@ export default function RememeImage(props: Props) {
           maxHeight: "100%",
         }}
         id={`${props.nft.contract}-${props.nft.id}`}
-        src={parseIpfsUrl(props.nft.image)}
+        src={fallbackUrls[0]}
         onError={({ currentTarget }) => {
-          if (currentTarget.src == props.nft.image) {
-            currentTarget.src = parseIpfsUrl(props.nft.metadata.image);
-          } else if (
-            currentTarget.src == parseIpfsUrl(props.nft.metadata.image)
-          ) {
-            currentTarget.src = parseIpfsUrlToGateway(props.nft.metadata.image);
-          } else if (currentTarget.src == props.nft.metadata.image) {
-            currentTarget.src = props.nft.contract_opensea_data.imageUrl;
+          const nextFallback = fallbackUrls.shift();
+          if (nextFallback) {
+            currentTarget.src = nextFallback;
           }
         }}
         alt={props.nft.metadata.name}

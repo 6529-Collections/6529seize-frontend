@@ -74,6 +74,7 @@ import {
   faGlobe,
   faExternalLink,
   faFileCsv,
+  faRefresh,
 } from "@fortawesome/free-solid-svg-icons";
 import Head from "next/head";
 import { Web3Modal } from "@web3modal/react";
@@ -128,7 +129,8 @@ library.add(
   faFire,
   faGlobe,
   faExternalLink,
-  faFileCsv
+  faFileCsv,
+  faRefresh
 );
 
 const CONTRACT_CHAINS: Chain[] = [mainnet];
