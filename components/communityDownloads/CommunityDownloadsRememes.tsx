@@ -46,7 +46,7 @@ export default function CommunityDownloadsRememes() {
           <Container className="pt-4">
             <Row>
               <Col>
-                <h1>Rememes DOWNLOADS</h1>
+                <h1>REMEMES DOWNLOADS</h1>
               </Col>
             </Row>
             {downloads && downloads.length > 0 && (

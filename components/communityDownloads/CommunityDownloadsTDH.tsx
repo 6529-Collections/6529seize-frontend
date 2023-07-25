@@ -3,28 +3,27 @@ import { useState, useEffect } from "react";
 import { Container, Row, Col, Table } from "react-bootstrap";
 import { DBResponse } from "../../entities/IDBResponse";
 import { fetchUrl } from "../../services/6529api";
-import { Crumb } from "../breadcrumb/Breadcrumb";
-import ConsolidationSwitch, {
-  VIEW,
-} from "../consolidation-switch/ConsolidationSwitch";
+import { VIEW } from "../consolidation-switch/ConsolidationSwitch";
 import styles from "./CommunityDownloads.module.scss";
 import Image from "next/image";
 import Pagination from "../pagination/Pagination";
 
 const PAGE_SIZE = 25;
 
-export default function CommunityDownloadsTDH() {
-  const router = useRouter();
+interface Props {
+  view: VIEW;
+}
 
-  const [view, setView] = useState<VIEW>(VIEW.CONSOLIDATION);
+export default function CommunityDownloadsTDH(props: Props) {
+  const router = useRouter();
 
   const [downloads, setDownloads] = useState<any[]>();
   const [totalResults, setTotalResults] = useState(0);
   const [page, setPage] = useState(1);
 
-  function fetchResults(myview: VIEW, mypage: number) {
+  function fetchResults(mypage: number) {
     let url = `${process.env.API_ENDPOINT}/api/${
-      myview == VIEW.WALLET ? "uploads" : "consolidated_uploads"
+      props.view == VIEW.WALLET ? "uploads" : "consolidated_uploads"
     }?page_size=${PAGE_SIZE}&page=${mypage}`;
     fetchUrl(url).then((response: DBResponse) => {
       setTotalResults(response.count);
@@ -33,16 +32,8 @@ export default function CommunityDownloadsTDH() {
   }
 
   useEffect(() => {
-    fetchResults(view, page);
+    fetchResults(page);
   }, [page, router.isReady]);
-
-  useEffect(() => {
-    if (page == 1) {
-      fetchResults(view, page);
-    } else {
-      setPage(1);
-    }
-  }, [view]);
 
   function printDate(dateString: any) {
     const d = new Date(
@@ -60,18 +51,11 @@ export default function CommunityDownloadsTDH() {
         <Col>
           <Container className="pt-4">
             <Row>
-              <Col xs={12} sm={6}>
-                <h1>TDH DOWNLOADS</h1>
-              </Col>
-              <Col
-                className="d-flex align-items-center justify-content-center"
-                xs={12}
-                sm={6}>
-                <ConsolidationSwitch
-                  view={view}
-                  onSetView={(v) => setView(v)}
-                  plural={true}
-                />
+              <Col>
+                <h1>
+                  {props.view == VIEW.CONSOLIDATION ? `CONSOLIDATED ` : ``}
+                  COMMUNITY METRICS DOWNLOADS
+                </h1>
               </Col>
             </Row>
             <Row>
