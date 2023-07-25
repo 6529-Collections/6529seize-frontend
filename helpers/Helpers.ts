@@ -216,8 +216,38 @@ export async function getContentTypeFromURL(url: string) {
   }
 }
 
+export function parseIpfsUrl(url: string) {
+  if (!url) {
+    return url;
+  }
+  if (url.startsWith("ipfs")) {
+    return `https://ipfs.io/ipfs/${url.split("://")[1]}`;
+  }
+  return url;
+}
+
+export function parseIpfsUrlToGateway(url: string) {
+  if (!url) {
+    return url;
+  }
+  if (url.startsWith("ipfs")) {
+    return `https://cf-ipfs.com/ipfs/${url.split("://")[1]}`;
+  }
+  return url;
+}
+
 export function isEmptyObject(obj: any) {
   return Object.keys(obj).length === 0 && obj.constructor === Object;
+}
+
+export function isUrl(s: string) {
+  const pattern =
+    /(https:\/\/www\.|http:\/\/www\.|https:\/\/|http:\/\/)?[a-zA-Z]{2,}(\.[a-zA-Z]{2,})(\.[a-zA-Z]{2,})?\/[a-zA-Z0-9]{2,}|((https:\/\/www\.|http:\/\/www\.|https:\/\/|http:\/\/)?[a-zA-Z]{2,}(\.[a-zA-Z]{2,})(\.[a-zA-Z]{2,})?)|(https:\/\/www\.|http:\/\/www\.|https:\/\/|http:\/\/)?[a-zA-Z0-9]{2,}\.[a-zA-Z0-9]{2,}\.[a-zA-Z0-9]{2,}(\.[a-zA-Z0-9]{2,})?/g;
+  return pattern.test(s);
+}
+
+export function isIPFS(s: string) {
+  return s.startsWith("ipfs://");
 }
 
 export function containsEmojis(s: string) {

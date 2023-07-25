@@ -217,6 +217,7 @@ export default function UserPage(props: Props) {
             { display: "Home", href: "/" },
             { display: ReservedUser.MUSEUM },
           ]);
+          setFetchingUser(false);
           router.push(ReservedUser.MUSEUM, undefined, {
             shallow: true,
           });
@@ -230,6 +231,7 @@ export default function UserPage(props: Props) {
             { display: "Home", href: "/" },
             { display: ReservedUser.MANIFOLD },
           ]);
+          setFetchingUser(false);
           router.push(ReservedUser.MANIFOLD, undefined, {
             shallow: true,
           });
@@ -716,7 +718,9 @@ export default function UserPage(props: Props) {
                     ? "the-memes"
                     : "6529-gradient"
                 }/${nft.id}`}>
-                {nft.name}
+                {areEqualAddresses(nft.contract, MEMES_CONTRACT)
+                  ? `#${nft.id} - ${nft.name}`
+                  : nft.name}
               </a>
             </Col>
           </Row>
