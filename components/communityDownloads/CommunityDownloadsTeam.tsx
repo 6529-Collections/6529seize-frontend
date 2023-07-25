@@ -39,7 +39,7 @@ export default function CommunityDownloadsTeam() {
           <Container className="pt-4">
             <Row>
               <Col>
-                <h1>Rememes DOWNLOADS</h1>
+                <h1>TEAM DOWNLOADS</h1>
               </Col>
             </Row>
             {downloads && downloads.length > 0 && (
