@@ -60,6 +60,7 @@ export interface PhaseGroupSnapshotConfig {
     to: number | null;
     tdhBlockNumber: number | null;
   } | null;
+  uniqueWalletsCount: number | null;
 }
 
 export interface PhaseGroupConfig {
@@ -175,6 +176,7 @@ export default function BuildPhaseFormConfigModal({
       snapshotSchema: null,
       excludeComponentWinners: [],
       topHoldersFilter: null,
+      uniqueWalletsCount: null,
     });
 
   const resetPhaseGroupSnapshotConfig = () => {
@@ -185,6 +187,7 @@ export default function BuildPhaseFormConfigModal({
       snapshotSchema: null,
       excludeComponentWinners: [],
       topHoldersFilter: null,
+      uniqueWalletsCount: null,
     });
   };
 
@@ -244,6 +247,7 @@ export default function BuildPhaseFormConfigModal({
       snapshotSchema: contractSchema,
       excludeComponentWinners: [],
       topHoldersFilter: null,
+      uniqueWalletsCount: null,
     });
 
     const haveComponents = targetPhases.some(
