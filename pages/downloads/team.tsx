@@ -21,20 +21,20 @@ export default function Downloads() {
   const [breadcrumbs, setBreadcrumbs] = useState<Crumb[]>([
     { display: "Home", href: "/" },
     { display: "Downloads", href: "/downloads" },
-    { display: "TDH" },
+    { display: "Team" },
   ]);
 
   return (
     <>
       <Head>
-        <title>TDH Downloads | 6529 SEIZE</title>
+        <title>Team Downloads | 6529 SEIZE</title>
         <link rel="icon" href="/favicon.ico" />
-        <meta name="description" content="TDH Downloads | 6529 SEIZE" />
+        <meta name="description" content="Team Downloads | 6529 SEIZE" />
         <meta
           property="og:url"
-          content={`${process.env.BASE_ENDPOINT}/downloads/tdh`}
+          content={`${process.env.BASE_ENDPOINT}/downloads/team`}
         />
-        <meta property="og:title" content={`TDH Downloads`} />
+        <meta property="og:title" content={`Team Downloads`} />
         <meta property="og:description" content="6529 SEIZE" />
         <meta
           property="og:image"
