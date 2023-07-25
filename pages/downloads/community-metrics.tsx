@@ -4,6 +4,7 @@ import { useState } from "react";
 import dynamic from "next/dynamic";
 import Breadcrumb, { Crumb } from "../../components/breadcrumb/Breadcrumb";
 import HeaderPlaceholder from "../../components/header/HeaderPlaceholder";
+import { VIEW } from "../../components/consolidation-switch/ConsolidationSwitch";
 
 const Header = dynamic(() => import("../../components/header/Header"), {
   ssr: false,
@@ -21,20 +22,23 @@ export default function Downloads() {
   const [breadcrumbs, setBreadcrumbs] = useState<Crumb[]>([
     { display: "Home", href: "/" },
     { display: "Downloads", href: "/downloads" },
-    { display: "TDH" },
+    { display: "Community Metrics" },
   ]);
 
   return (
     <>
       <Head>
-        <title>TDH Downloads | 6529 SEIZE</title>
+        <title>Community Metrics Downloads | 6529 SEIZE</title>
         <link rel="icon" href="/favicon.ico" />
-        <meta name="description" content="TDH Downloads | 6529 SEIZE" />
+        <meta
+          name="description"
+          content="Community Metrics Downloads | 6529 SEIZE"
+        />
         <meta
           property="og:url"
-          content={`${process.env.BASE_ENDPOINT}/downloads/tdh`}
+          content={`${process.env.BASE_ENDPOINT}/downloads/community-metrics`}
         />
-        <meta property="og:title" content={`TDH Downloads`} />
+        <meta property="og:title" content={`Community Metrics Downloads`} />
         <meta property="og:description" content="6529 SEIZE" />
         <meta
           property="og:image"
@@ -45,7 +49,7 @@ export default function Downloads() {
       <main className={styles.main}>
         <Header />
         <Breadcrumb breadcrumbs={breadcrumbs} />
-        <CommunityDownloadsTDH />
+        <CommunityDownloadsTDH view={VIEW.WALLET} />
       </main>
     </>
   );
