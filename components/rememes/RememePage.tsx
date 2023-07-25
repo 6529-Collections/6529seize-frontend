@@ -233,6 +233,8 @@ export default function RememePage(props: Props) {
                     <td>
                       <a
                         href={rememe.token_uri}
+                        target="_blank"
+                        rel="noreferrer"
                         className={`d-inline-flex align-items-center justify-content-start ${styles.userLink}`}>
                         {rememe.token_uri}
                         <FontAwesomeIcon

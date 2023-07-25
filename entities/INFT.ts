@@ -147,4 +147,8 @@ export interface Rememe {
     gateway: string;
     thumbnail: string;
   }[];
+  s3_image_original: string;
+  s3_image_scaled: string;
+  s3_image_thumbnail: string;
+  s3_image_icon: string;
 }

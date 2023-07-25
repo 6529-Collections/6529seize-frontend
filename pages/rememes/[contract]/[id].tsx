@@ -5,7 +5,7 @@ import Breadcrumb, { Crumb } from "../../../components/breadcrumb/Breadcrumb";
 import dynamic from "next/dynamic";
 import HeaderPlaceholder from "../../../components/header/HeaderPlaceholder";
 import { fetchUrl } from "../../../services/6529api";
-import { parseIpfsUrl } from "../../../helpers/Helpers";
+import { formatAddress, parseIpfsUrl } from "../../../helpers/Helpers";
 
 const Header = dynamic(() => import("../../../components/header/Header"), {
   ssr: false,
@@ -71,7 +71,9 @@ export async function getServerSideProps(req: any, res: any, resolvedUrl: any) {
   const response = await fetchUrl(
     `${process.env.API_ENDPOINT}/api/rememes?contract=${contract}&id=${id}`
   );
-  let name = `Rememe #${id} from contract ${contract}`;
+
+  let name = `${formatAddress(contract)} #${id}`;
+
   let image = `${process.env.BASE_ENDPOINT}/Seize_Logo_Glasses_2.png`;
   if (response && response.data && response.data.length > 0) {
     if (response.data[0].metadata?.name) {
