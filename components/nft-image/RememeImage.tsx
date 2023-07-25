@@ -36,6 +36,7 @@ export default function RememeImage(props: Props) {
   function isMp4() {
     return (
       props.nft.metadata.animation_details &&
+      props.nft.metadata.animation_details.format &&
       props.nft.metadata.animation_details.format.toLowerCase() == "mp4"
     );
   }
