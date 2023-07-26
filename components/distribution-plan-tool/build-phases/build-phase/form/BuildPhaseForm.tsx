@@ -31,7 +31,7 @@ export default function BuildPhaseForm({
     });
   };
 
-  const [isConfigModalOpen, setIsConfigModalOpen] = useState(true);
+  const [isConfigModalOpen, setIsConfigModalOpen] = useState(false);
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();

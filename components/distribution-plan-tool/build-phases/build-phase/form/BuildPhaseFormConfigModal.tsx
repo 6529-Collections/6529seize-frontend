@@ -7,6 +7,7 @@ import SelectSnapshot from "./component-config/select-snapshot/SelectSnapshot";
 import { DistributionPlanToolContext } from "../../../DistributionPlanToolContext";
 import {
   AllowlistOperation,
+  AllowlistOperationBase,
   AllowlistOperationCode,
   AllowlistToolResponse,
   DistributionPlanSearchContractMetadataResult,
@@ -70,6 +71,7 @@ export interface PhaseGroupConfig {
     value: number;
   } | null;
   maxMintCount: number | null;
+  uniqueWalletsCount: number | null;
 }
 
 export default function BuildPhaseFormConfigModal({
@@ -117,7 +119,7 @@ export default function BuildPhaseFormConfigModal({
       return tokenPool.walletsCount;
     };
 
-    const constCustomTokenPoolWalletsCount = (
+    const getCustomTokenPoolWalletsCount = (
       operation: AllowlistOperation
     ): number | null => {
       if (operation.code !== AllowlistOperationCode.CREATE_CUSTOM_TOKEN_POOL) {
@@ -153,7 +155,7 @@ export default function BuildPhaseFormConfigModal({
         id: operation.params.id,
         name: operation.params.name,
         poolType: Pool.CUSTOM_TOKEN_POOL,
-        walletsCount: constCustomTokenPoolWalletsCount(operation),
+        walletsCount: getCustomTokenPoolWalletsCount(operation),
       }));
 
     setSnapshots([...pools, ...customPools]);
@@ -166,6 +168,7 @@ export default function BuildPhaseFormConfigModal({
     snapshots: [],
     randomHoldersFilter: null,
     maxMintCount: null,
+    uniqueWalletsCount: null,
   });
 
   const [phaseGroupSnapshotConfig, setPhaseGroupSnapshotConfig] =
@@ -356,6 +359,7 @@ export default function BuildPhaseFormConfigModal({
       snapshots: [],
       randomHoldersFilter: null,
       maxMintCount: null,
+      uniqueWalletsCount: null,
     });
     setConfigStep(PhaseConfigStep.SELECT_SNAPSHOT);
   };
@@ -403,375 +407,231 @@ export default function BuildPhaseFormConfigModal({
     }
   };
 
-  const addComponent = async ({
-    distributionPlanId,
-    phaseId,
-    componentName,
-    componentDescription,
-  }: {
-    distributionPlanId: string;
-    phaseId: string;
-    componentName: string;
-    componentDescription: string;
-  }): Promise<{ componentId: string | null }> => {
-    const componentId = getRandomObjectId();
-    const { success } = await addOperation({
-      code: AllowlistOperationCode.ADD_COMPONENT,
-      params: {
-        id: componentId,
-        phaseId,
-        name: componentName,
-        description: componentDescription,
-      },
-      distributionPlanId,
-    });
-    if (!success) {
-      return { componentId: null };
-    }
-    return { componentId };
-  };
+  const [newOperations, setNewOperations] = useState<AllowlistOperationBase[]>(
+    []
+  );
 
-  const addItem = async ({
-    componentId,
-    distributionPlanId,
-    config,
-  }: {
-    componentId: string;
-    distributionPlanId: string;
-    config: PhaseGroupSnapshotConfig;
-  }) => {
-    const { snapshotId, snapshotType } = config;
-    if (!snapshotId || !snapshotType) {
-      return { itemId: null };
-    }
-    const snapshot = snapshots.find((s) => s.id === snapshotId);
-    if (!snapshot) {
-      return { itemId: null };
-    }
-    const itemId = getRandomObjectId();
-    const { success } = await addOperation({
-      code: AllowlistOperationCode.ADD_ITEM,
-      params: {
-        id: itemId,
-        name: snapshot.name,
-        description: snapshot.name,
-        componentId,
-        poolId: snapshotId,
-        poolType: snapshotType,
-      },
-      distributionPlanId,
-    });
-    if (!success) {
-      return { itemId: null };
-    }
-    return { itemId };
-  };
-
-  const excludeComponentWinnersFromItem = async ({
-    itemId,
-    componentIds,
-    distributionPlanId,
-  }: {
-    itemId: string;
-    componentIds: string[];
-    distributionPlanId: string;
-  }): Promise<{
-    success: boolean;
-  }> => {
-    return await addOperation({
-      code: AllowlistOperationCode.ITEM_REMOVE_WALLETS_FROM_CERTAIN_COMPONENTS,
-      params: {
-        itemId,
-        componentIds,
-      },
-      distributionPlanId,
-    });
-  };
-
-  const itemSortWalletsByTotalTokensCount = async ({
-    distributionPlanId,
-    itemId,
-  }: {
-    distributionPlanId: string;
-    itemId: string;
-  }): Promise<{ success: boolean }> => {
-    return await addOperation({
-      code: AllowlistOperationCode.ITEM_SORT_WALLETS_BY_TOTAL_TOKENS_COUNT,
-      params: {
-        itemId,
-      },
-      distributionPlanId,
-    });
-  };
-
-  const itemSortWalletsByUniqueTokensCount = async ({
-    distributionPlanId,
-    itemId,
-  }: {
-    distributionPlanId: string;
-    itemId: string;
-  }): Promise<{ success: boolean }> => {
-    return await addOperation({
-      code: AllowlistOperationCode.ITEM_SORT_WALLETS_BY_UNIQUE_TOKENS_COUNT,
-      params: {
-        itemId,
-      },
-      distributionPlanId,
-    });
-  };
-
-  const itemSortWalletsByMemesTdh = async ({
-    distributionPlanId,
-    itemId,
-    tdhBlockNumber,
-  }: {
-    distributionPlanId: string;
-    itemId: string;
-    tdhBlockNumber: number;
-  }): Promise<{ success: boolean }> => {
-    return await addOperation({
-      code: AllowlistOperationCode.ITEM_SORT_WALLETS_BY_MEMES_TDH,
-      params: {
-        itemId,
-        tdhBlockNumber,
-      },
-      distributionPlanId,
-    });
-  };
-
-  const sortItemWallets = async ({
-    itemId,
-    filterType,
-    tdhBlockNumber,
-    distributionPlanId,
-  }: {
-    itemId: string;
-    filterType: TopHolderType;
-    tdhBlockNumber: number | null;
-    distributionPlanId: string;
-  }): Promise<{ success: boolean }> => {
-    switch (filterType) {
-      case TopHolderType.TOTAL_TOKENS_COUNT:
-        return await itemSortWalletsByTotalTokensCount({
-          distributionPlanId,
-          itemId,
-        });
-      case TopHolderType.UNIQUE_TOKENS_COUNT:
-        return await itemSortWalletsByUniqueTokensCount({
-          distributionPlanId,
-          itemId,
-        });
-      case TopHolderType.MEMES_TDH:
-        if (!tdhBlockNumber) {
-          return { success: false };
-        }
-        return await itemSortWalletsByMemesTdh({
-          distributionPlanId,
-          itemId,
-          tdhBlockNumber,
-        });
-      default:
-        assertUnreachable(filterType);
-        return { success: false };
-    }
-  };
-
-  const itemRemoveFirstNWallets = async ({
-    itemId,
-    count,
-    distributionPlanId,
-  }: {
-    itemId: string;
-    distributionPlanId: string;
-    count: number;
-  }): Promise<{ success: boolean }> => {
-    return await addOperation({
-      code: AllowlistOperationCode.ITEM_REMOVE_FIRST_N_WALLETS,
-      params: {
-        itemId,
-        count,
-      },
-      distributionPlanId,
-    });
-  };
-
-  const itemSelectFirstNWallets = async ({
-    itemId,
-    count,
-    distributionPlanId,
-  }: {
-    itemId: string;
-    distributionPlanId: string;
-    count: number;
-  }): Promise<{ success: boolean }> => {
-    return await addOperation({
-      code: AllowlistOperationCode.ITEM_SELECT_FIRST_N_WALLETS,
-      params: {
-        itemId,
-        count,
-      },
-      distributionPlanId,
-    });
-  };
-
-  const filterItemTopWallets = async ({
-    distributionPlanId,
-    itemId,
-    filterType,
-    from,
-    to,
-    tdhBlockNumber,
-  }: {
-    distributionPlanId: string;
-    itemId: string;
-    filterType: TopHolderType;
-    from: number | null;
-    to: number | null;
-    tdhBlockNumber: number | null;
-  }): Promise<{ success: boolean }> => {
-    const { success: sortSuccess } = await sortItemWallets({
+  useEffect(() => {
+    const getSortItemWalletsOperation = ({
       itemId,
       filterType,
-      distributionPlanId,
       tdhBlockNumber,
-    });
-    if (!sortSuccess) {
-      return { success: false };
-    }
-
-    if (typeof from === "number" && from > 1) {
-      const { success: removeSuccess } = await itemRemoveFirstNWallets({
-        itemId,
-        count: from - 1,
-        distributionPlanId,
-      });
-      if (!removeSuccess) {
-        return { success: false };
+    }: {
+      itemId: string;
+      filterType: TopHolderType;
+      tdhBlockNumber: number | null;
+    }): AllowlistOperationBase | null => {
+      switch (filterType) {
+        case TopHolderType.TOTAL_TOKENS_COUNT:
+          return {
+            code: AllowlistOperationCode.ITEM_SORT_WALLETS_BY_TOTAL_TOKENS_COUNT,
+            params: {
+              itemId,
+            },
+          };
+        case TopHolderType.UNIQUE_TOKENS_COUNT:
+          return {
+            code: AllowlistOperationCode.ITEM_SORT_WALLETS_BY_UNIQUE_TOKENS_COUNT,
+            params: {
+              itemId,
+            },
+          };
+        case TopHolderType.MEMES_TDH:
+          if (!tdhBlockNumber) {
+            return null;
+          }
+          return {
+            code: AllowlistOperationCode.ITEM_SORT_WALLETS_BY_MEMES_TDH,
+            params: {
+              itemId,
+              tdhBlockNumber,
+            },
+          };
+        default:
+          assertUnreachable(filterType);
+          return null;
       }
-    }
-
-    if (typeof to === "number") {
-      const count = to - (typeof from === "number" && from > 1 ? from - 1 : 0);
-      const { success: selectSuccess } = await itemSelectFirstNWallets({
-        itemId,
-        count,
-        distributionPlanId,
+    };
+    const getOperations = (): AllowlistOperationBase[] => {
+      const result: AllowlistOperationBase[] = [];
+      const componentId = getRandomObjectId();
+      result.push({
+        code: AllowlistOperationCode.ADD_COMPONENT,
+        params: {
+          id: componentId,
+          phaseId: selectedPhase.id,
+          name: name,
+          description: description,
+        },
       });
-      if (!selectSuccess) {
-        return { success: false };
+      const {
+        snapshots: groupSnapshots,
+        randomHoldersFilter,
+        maxMintCount,
+      } = phaseGroupConfig;
+      for (const groupSnapshot of groupSnapshots) {
+        const {
+          snapshotType,
+          snapshotId,
+          excludeComponentWinners,
+          topHoldersFilter,
+        } = groupSnapshot;
+        if (!snapshotType || !snapshotId) continue;
+        const itemId = getRandomObjectId();
+        const snapshot = snapshots.find(
+          (s) => s.id === groupSnapshot.snapshotId
+        );
+        if (!snapshot) continue;
+        result.push({
+          code: AllowlistOperationCode.ADD_ITEM,
+          params: {
+            id: itemId,
+            name: name,
+            description: name,
+            componentId,
+            poolId: snapshotId,
+            poolType: snapshotType,
+          },
+        });
+
+        if (excludeComponentWinners.length > 0) {
+          result.push({
+            code: AllowlistOperationCode.ITEM_REMOVE_WALLETS_FROM_CERTAIN_COMPONENTS,
+            params: {
+              itemId,
+              componentIds: excludeComponentWinners,
+            },
+          });
+        }
+
+        if (topHoldersFilter) {
+          const {
+            type: filterType,
+            tdhBlockNumber,
+            from,
+            to,
+          } = topHoldersFilter;
+          const sortOperation = getSortItemWalletsOperation({
+            itemId,
+            filterType,
+            tdhBlockNumber,
+          });
+          if (!sortOperation) {
+            continue;
+          }
+          result.push(sortOperation);
+
+          if (typeof from === "number" && from > 1) {
+            const removeOperation = {
+              code: AllowlistOperationCode.ITEM_REMOVE_FIRST_N_WALLETS,
+              params: {
+                itemId,
+                count: from - 1,
+              },
+            };
+            result.push(removeOperation);
+          }
+
+          if (typeof to === "number") {
+            const count =
+              to - (typeof from === "number" && from > 1 ? from - 1 : 0);
+            const selectOperation = {
+              code: AllowlistOperationCode.ITEM_SELECT_FIRST_N_WALLETS,
+              params: {
+                itemId,
+                count,
+              },
+            };
+            result.push(selectOperation);
+          }
+        }
       }
-    }
 
-    return { success: true };
-  };
-
-  const addSnapshot = async ({
-    componentId,
-    distributionPlanId,
-    config,
-  }: {
-    componentId: string;
-    distributionPlanId: string;
-    config: PhaseGroupSnapshotConfig;
-  }): Promise<{ success: boolean }> => {
-    const { itemId } = await addItem({
-      componentId,
-      distributionPlanId,
-      config,
-    });
-
-    if (!itemId) {
-      return { success: false };
-    }
-
-    const { excludeComponentWinners, topHoldersFilter } = config;
-
-    if (excludeComponentWinners.length > 0) {
-      const { success } = await excludeComponentWinnersFromItem({
-        itemId,
-        componentIds: excludeComponentWinners,
-        distributionPlanId,
-      });
-      if (!success) {
-        return { success: false };
+      if (randomHoldersFilter && distributionPlan?.id) {
+        const { type: randomHoldersType, value } = randomHoldersFilter;
+        const seed = distributionPlan.id;
+        switch (randomHoldersType) {
+          case RandomHoldersType.BY_COUNT:
+            result.push({
+              code: AllowlistOperationCode.COMPONENT_SELECT_RANDOM_WALLETS,
+              params: {
+                componentId,
+                count: value,
+                seed,
+              },
+            });
+            break;
+          case RandomHoldersType.BY_PERCENTAGE:
+            result.push({
+              code: AllowlistOperationCode.COMPONENT_SELECT_RANDOM_PERCENTAGE_WALLETS,
+              params: {
+                componentId,
+                percentage: value,
+                seed,
+              },
+            });
+            break;
+          default:
+            assertUnreachable(randomHoldersType);
+        }
       }
-    }
 
-    if (topHoldersFilter) {
-      const { success } = await filterItemTopWallets({
-        distributionPlanId,
-        itemId,
-        filterType: topHoldersFilter.type,
-        from: topHoldersFilter.from,
-        to: topHoldersFilter.to,
-        tdhBlockNumber: topHoldersFilter.tdhBlockNumber,
-      });
-      if (!success) {
-        return { success: false };
-      }
-    }
-
-    return { success: true };
-  };
-
-  const componentAddSpotsToWallets = async ({
-    distributionPlanId,
-    componentId,
-    spots,
-  }: {
-    distributionPlanId: string;
-    componentId: string;
-    spots: number;
-  }): Promise<{ success: boolean }> => {
-    return await addOperation({
-      code: AllowlistOperationCode.COMPONENT_ADD_SPOTS_TO_ALL_ITEM_WALLETS,
-      params: {
-        componentId,
-        spots,
-      },
-      distributionPlanId,
-    });
-  };
-
-  const componentSelectRandomWallets = async ({
-    distributionPlanId,
-    componentId,
-    value,
-    randomHoldersType,
-    seed,
-  }: {
-    distributionPlanId: string;
-    componentId: string;
-    value: number | null;
-    randomHoldersType: RandomHoldersType;
-    seed: string;
-  }): Promise<{ success: boolean }> => {
-    switch (randomHoldersType) {
-      case RandomHoldersType.BY_COUNT:
-        return await addOperation({
-          code: AllowlistOperationCode.COMPONENT_SELECT_RANDOM_WALLETS,
+      if (typeof maxMintCount === "number" && maxMintCount > 0) {
+        result.push({
+          code: AllowlistOperationCode.COMPONENT_ADD_SPOTS_TO_ALL_ITEM_WALLETS,
           params: {
             componentId,
-            count: value,
-            seed,
+            spots: maxMintCount,
           },
-          distributionPlanId,
         });
-      case RandomHoldersType.BY_PERCENTAGE:
-        return await addOperation({
-          code: AllowlistOperationCode.COMPONENT_SELECT_RANDOM_PERCENTAGE_WALLETS,
-          params: {
-            componentId,
-            percentage: value,
-            seed,
-          },
-          distributionPlanId,
-        });
-      default:
-        assertUnreachable(randomHoldersType);
-        return { success: false };
-    }
-  };
+      }
+
+      return result;
+    };
+
+    setNewOperations(getOperations());
+  }, [
+    phaseGroupConfig,
+    snapshots,
+    distributionPlan?.id,
+    selectedPhase.id,
+    name,
+    description,
+  ]);
+
+  const [
+    uniqueWalletsCountRequestOperations,
+    setUniqueWalletsCountRequestOperations,
+  ] = useState<AllowlistOperationBase[]>([]);
+
+  useEffect(() => {
+    const customTokenPoolIds = new Set(
+      newOperations
+        .filter(
+          (o) =>
+            o.code === AllowlistOperationCode.ADD_ITEM &&
+            o.params.poolType === Pool.CUSTOM_TOKEN_POOL
+        )
+        .map((o) => o.params.poolId)
+    );
+
+    const customTokenPoolOperations = operations
+      .filter(
+        (o) =>
+          o.code === AllowlistOperationCode.CREATE_CUSTOM_TOKEN_POOL &&
+          customTokenPoolIds.has(o.params.id)
+      )
+      .map((o) => ({
+        code: o.code,
+        params: o.params,
+      }));
+    setUniqueWalletsCountRequestOperations([
+      ...customTokenPoolOperations,
+      ...newOperations,
+    ]);
+  }, [newOperations, operations]);
+
+
 
   const onSave = async () => {
     if (
@@ -781,42 +641,16 @@ export default function BuildPhaseFormConfigModal({
     ) {
       return;
     }
+
     setIsLoading(true);
-    // 1. create component
-    const { componentId } = await addComponent({
-      distributionPlanId: distributionPlan.id,
-      phaseId: selectedPhase.id,
-      componentName: name,
-      componentDescription: description,
-    });
-    if (!componentId) {
-      setIsLoading(false);
-      return;
-    }
-    // 2. create item (repeat for each snapshot)
-    for (const snapshot of phaseGroupConfig.snapshots) {
-      await addSnapshot({
-        componentId: componentId,
+
+    for (const operation of newOperations) {
+      await addOperation({
+        code: operation.code,
+        params: operation.params,
         distributionPlanId: distributionPlan.id,
-        config: snapshot,
       });
     }
-    // 5. Random holders (if any)
-    if (phaseGroupConfig.randomHoldersFilter) {
-      await componentSelectRandomWallets({
-        distributionPlanId: distributionPlan.id,
-        componentId,
-        value: phaseGroupConfig.randomHoldersFilter.value,
-        randomHoldersType: phaseGroupConfig.randomHoldersFilter.type,
-        seed: distributionPlan.id,
-      });
-    }
-    // 6. Max mint count
-    await componentAddSpotsToWallets({
-      distributionPlanId: distributionPlan.id,
-      componentId,
-      spots: phaseGroupConfig.maxMintCount,
-    });
     setIsLoading(false);
     runOperations();
     onClose();
@@ -881,6 +715,9 @@ export default function BuildPhaseFormConfigModal({
                 onAddAnotherSnapshot={onAddAnotherSnapshot}
                 onRemoveGroupSnapshot={onRemoveGroupSnapshot}
                 title={modalTitle}
+                uniqueWalletsCountRequestOperations={
+                  uniqueWalletsCountRequestOperations
+                }
                 onClose={onClose}
               />
             );
@@ -890,6 +727,7 @@ export default function BuildPhaseFormConfigModal({
                 onNextStep={onNextStep}
                 onSelectRandomHolders={onSelectRandomHolders}
                 title={modalTitle}
+                uniqueWalletsCountRequestOperations={uniqueWalletsCountRequestOperations}
                 onClose={onClose}
               />
             );
@@ -898,6 +736,7 @@ export default function BuildPhaseFormConfigModal({
               <ComponentAddSpots
                 onSelectMaxMintCount={onSelectMaxMintCount}
                 title={modalTitle}
+                uniqueWalletsCountRequestOperations={uniqueWalletsCountRequestOperations}
                 onClose={onClose}
               />
             );
@@ -911,6 +750,7 @@ export default function BuildPhaseFormConfigModal({
                 onRemoveGroupSnapshot={onRemoveGroupSnapshot}
                 loading={isLoading}
                 title={modalTitle}
+                uniqueWalletsCountRequestOperations={uniqueWalletsCountRequestOperations}
                 onClose={onClose}
               />
             );

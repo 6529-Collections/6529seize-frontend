@@ -10,11 +10,18 @@ import BuildPhaseFormConfigModalTitle from "./BuildPhaseFormConfigModalTitle";
 import BuildPhaseFormConfigModalSidebar, {
   BuildPhaseFormConfigModalSidebarOption,
 } from "./BuildPhaseFormConfigModalSidebar";
+import ComponentConfigMeta from "./ComponentConfigMeta";
+import {
+  AllowlistOperationBase,
+  AllowlistToolResponse,
+} from "../../../../../allowlist-tool/allowlist-tool.types";
+import { assertUnreachable } from "../../../../../../helpers/AllowlistToolHelpers";
 
 export default function ComponentSelectRandomHolders({
   onNextStep,
   onSelectRandomHolders,
   title,
+  uniqueWalletsCountRequestOperations,
   onClose,
 }: {
   onNextStep: (step: PhaseConfigStep) => void;
@@ -23,9 +30,12 @@ export default function ComponentSelectRandomHolders({
     randomHoldersType: RandomHoldersType;
   }) => void;
   title: string;
+  uniqueWalletsCountRequestOperations: AllowlistOperationBase[];
   onClose: () => void;
 }) {
-  const { setToasts } = useContext(DistributionPlanToolContext);
+  const { setToasts, distributionPlan } = useContext(
+    DistributionPlanToolContext
+  );
   const [value, setValue] = useState<number | string>("");
   const [randomHoldersType, setRandomHoldersType] = useState<RandomHoldersType>(
     RandomHoldersType.BY_COUNT
@@ -104,6 +114,78 @@ export default function ComponentSelectRandomHolders({
     setIsDisabled(false);
   }, [value, randomHoldersType]);
 
+  const [uniqueWalletsCount, setUniqueWalletsCount] = useState<number | null>(
+    null
+  );
+
+  const [localUniqueWalletsCount, setLocalUniqueWalletsCount] = useState<
+    number | null
+  >(null);
+
+  useEffect(() => {
+    if (typeof uniqueWalletsCount !== "number") {
+      setLocalUniqueWalletsCount(null);
+      return;
+    }
+
+    if (typeof value !== "number") {
+      setLocalUniqueWalletsCount(uniqueWalletsCount);
+      return;
+    }
+
+    switch (randomHoldersType) {
+      case RandomHoldersType.BY_COUNT:
+        setLocalUniqueWalletsCount(uniqueWalletsCount - value);
+        break;
+      case RandomHoldersType.BY_PERCENTAGE:
+        const count = Math.floor((uniqueWalletsCount * value) / 100);
+        setLocalUniqueWalletsCount(count);
+        break;
+      default:
+        assertUnreachable(randomHoldersType);
+    }
+  }, [uniqueWalletsCount, value, randomHoldersType]);
+
+  useEffect(() => {
+    const setUniqueWalletsCountByOperations = async (
+      distributionPlanId: string
+    ) => {
+      const url = `${process.env.ALLOWLIST_API_ENDPOINT}/allowlists/${distributionPlanId}/unique-wallets-count`;
+      try {
+        const response = await fetch(url, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(uniqueWalletsCountRequestOperations),
+        });
+        const data: AllowlistToolResponse<number> = await response.json();
+        if (typeof data !== "number" && "error" in data) {
+          setToasts({
+            messages:
+              typeof data.message === "string" ? [data.message] : data.message,
+            type: "error",
+          });
+          return { success: false };
+        }
+        setUniqueWalletsCount(data);
+        return { success: true };
+      } catch (error) {
+        setToasts({
+          messages: ["Something went wrong. Please try again."],
+          type: "error",
+        });
+        return { success: false };
+      }
+    };
+    if (!uniqueWalletsCountRequestOperations.length || !distributionPlan) {
+      setUniqueWalletsCount(null);
+      return;
+    }
+
+    setUniqueWalletsCountByOperations(distributionPlan.id);
+  }, [uniqueWalletsCountRequestOperations, distributionPlan, setToasts]);
+
   return (
     <div>
       <div className="tw-w-full tw-inline-flex tw-gap-x-8">
@@ -150,7 +232,9 @@ export default function ComponentSelectRandomHolders({
         onSkip={() => onNextStep(PhaseConfigStep.COMPONENT_ADD_SPOTS)}
         onNext={onRandomHolders}
         isDisabled={isDisabled}
-      />
+      >
+        <ComponentConfigMeta tags={[]} walletsCount={localUniqueWalletsCount} />
+      </ComponentConfigNextBtn>
     </div>
   );
 }
