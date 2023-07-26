@@ -22,8 +22,6 @@ export default function SnapshotSelectTopHolders({
   config,
   title,
   onClose,
-  uniqueWalletsCount,
-  setUniqueWalletsCount,
 }: {
   onSelectTopHoldersSkip: () => void;
   onSelectTopHoldersFilter: (params: {
@@ -31,12 +29,11 @@ export default function SnapshotSelectTopHolders({
     from: number | null;
     to: number | null;
     tdhBlockNumber: number | null;
+    uniqueWalletsCount: number | null;
   }) => void;
   config: PhaseGroupSnapshotConfig;
   title: string;
   onClose: () => void;
-  uniqueWalletsCount: number | null;
-  setUniqueWalletsCount: (count: number | null) => void;
 }) {
   const { setToasts, operations } = useContext(DistributionPlanToolContext);
 
@@ -110,23 +107,23 @@ export default function SnapshotSelectTopHolders({
 
   const [localUniqueWalletsCount, setLocalUniqueWalletsCount] = useState<
     number | null
-  >(uniqueWalletsCount);
+  >(config.uniqueWalletsCount);
 
   useEffect(() => {
-    if (!uniqueWalletsCount) return;
+    if (!config.uniqueWalletsCount) return;
     const localFrom =
       typeof from === "number" ? (from > 0 ? from - 1 : from) : 0;
-    const localTo = typeof to === "number" ? to : uniqueWalletsCount;
+    const localTo = typeof to === "number" ? to : config.uniqueWalletsCount;
     setLocalUniqueWalletsCount(localTo - localFrom);
-  }, [uniqueWalletsCount, from, to]);
+  }, [config.uniqueWalletsCount, from, to]);
 
   useEffect(() => {
     const missingTopHolderTypeError = !topHolderType;
 
     const localUniqueWalletsHigherThanTotalError =
       !!localUniqueWalletsCount &&
-      !!uniqueWalletsCount &&
-      !!(localUniqueWalletsCount > uniqueWalletsCount);
+      !!config.uniqueWalletsCount &&
+      !!(localUniqueWalletsCount > config.uniqueWalletsCount);
 
     const fromAndToMissingError =
       typeof from !== "number" && typeof to !== "number";
@@ -136,13 +133,13 @@ export default function SnapshotSelectTopHolders({
     const fromLowerThanOneError = typeof from === "number" && from < 1;
     const fromHigherThanTotalError =
       typeof from === "number" &&
-      typeof uniqueWalletsCount === "number" &&
-      from > uniqueWalletsCount;
+      typeof config.uniqueWalletsCount === "number" &&
+      from > config.uniqueWalletsCount;
     const toLowerThanOneError = typeof to === "number" && to < 1;
     const toHigherThanTotalError =
       typeof to === "number" &&
-      typeof uniqueWalletsCount === "number" &&
-      to > uniqueWalletsCount;
+      typeof config.uniqueWalletsCount === "number" &&
+      to > config.uniqueWalletsCount;
 
     setErrors({
       missingTopHolderType: missingTopHolderTypeError,
@@ -154,7 +151,13 @@ export default function SnapshotSelectTopHolders({
       toLowerThanOne: toLowerThanOneError,
       toHigherThanTotal: toHigherThanTotalError,
     });
-  }, [topHolderType, from, to, localUniqueWalletsCount, uniqueWalletsCount]);
+  }, [
+    topHolderType,
+    from,
+    to,
+    localUniqueWalletsCount,
+    config.uniqueWalletsCount,
+  ]);
 
   useEffect(() => {
     setIsDisabled(Object.values(errors).some((error) => error));
@@ -182,12 +185,12 @@ export default function SnapshotSelectTopHolders({
 
   const onSelectTopHolders = () => {
     if (isDisabled || !topHolderType) return;
-    setUniqueWalletsCount(localUniqueWalletsCount);
     onSelectTopHoldersFilter({
       type: topHolderType,
       from: typeof from === "number" ? from : null,
       to: typeof to === "number" ? to : null,
       tdhBlockNumber,
+      uniqueWalletsCount: localUniqueWalletsCount,
     });
   };
 
@@ -242,7 +245,7 @@ export default function SnapshotSelectTopHolders({
           <div className="tw-mt-6 tw-flex tw-flex-col tw-gap-y-4">
             <div>
               <label className="tw-block tw-text-sm tw-font-medium tw-leading-6 tw-text-white">
-                From
+                From (included)
               </label>
               <div className="tw-mt-1.5">
                 <div
@@ -257,21 +260,23 @@ export default function SnapshotSelectTopHolders({
                     type="number"
                     value={from}
                     min={1}
-                    max={uniqueWalletsCount ?? Infinity}
+                    max={config.uniqueWalletsCount ?? Infinity}
                     onChange={(event) =>
                       event.target.value
                         ? setFrom(Number(event.target.value))
                         : setFrom("")
                     }
                     className="tw-flex-1 tw-border-0 tw-bg-transparent placeholder:tw-text-neutral-500 tw-py-3 tw-px-3 tw-text-white focus:tw-ring-0 sm:tw-text-sm sm:tw-leading-6"
-                    placeholder={`From (1 - ${uniqueWalletsCount ?? "∞"})`}
+                    placeholder={`From (1 - ${
+                      config.uniqueWalletsCount ?? "∞"
+                    })`}
                   />
                 </div>
               </div>
             </div>
             <div>
               <label className="tw-block tw-text-sm tw-font-medium tw-leading-6 tw-text-white">
-                To
+                To (included)
               </label>
               <div className="tw-mt-1.5">
                 <div
@@ -285,7 +290,7 @@ export default function SnapshotSelectTopHolders({
                   <input
                     type="number"
                     min={1}
-                    max={uniqueWalletsCount ?? Infinity}
+                    max={config.uniqueWalletsCount ?? Infinity}
                     value={to}
                     onChange={(event) =>
                       event.target.value
@@ -293,7 +298,7 @@ export default function SnapshotSelectTopHolders({
                         : setTo("")
                     }
                     className="tw-flex-1 tw-border-0 tw-bg-transparent placeholder:tw-text-neutral-500 tw-py-3 tw-px-3 tw-text-white focus:tw-ring-0 sm:tw-text-sm sm:tw-leading-6"
-                    placeholder={`To (1 - ${uniqueWalletsCount ?? "∞"})`}
+                    placeholder={`To (1 - ${config.uniqueWalletsCount ?? "∞"})`}
                   />
                 </div>
               </div>

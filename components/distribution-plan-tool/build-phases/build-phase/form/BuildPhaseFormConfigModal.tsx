@@ -232,9 +232,11 @@ export default function BuildPhaseFormConfigModal({
   const onSelectSnapshot = async ({
     snapshotId,
     snapshotType,
+    uniqueWalletsCount,
   }: {
     snapshotId: string;
     snapshotType: Pool.TOKEN_POOL | Pool.CUSTOM_TOKEN_POOL;
+    uniqueWalletsCount: number | null;
   }) => {
     const contractSchema =
       snapshotType === Pool.TOKEN_POOL
@@ -247,7 +249,7 @@ export default function BuildPhaseFormConfigModal({
       snapshotSchema: contractSchema,
       excludeComponentWinners: [],
       topHoldersFilter: null,
-      uniqueWalletsCount: null,
+      uniqueWalletsCount,
     });
 
     const haveComponents = targetPhases.some(
@@ -261,12 +263,17 @@ export default function BuildPhaseFormConfigModal({
     onNextStep(PhaseConfigStep.SNAPSHOT_EXCLUDE_COMPONENT_WINNERS);
   };
 
-  const onSelectExcludeComponentWinners = (
-    excludeComponentWinners: string[]
-  ) => {
+  const onSelectExcludeComponentWinners = ({
+    excludeComponentWinners,
+    uniqueWalletsCount,
+  }: {
+    excludeComponentWinners: string[];
+    uniqueWalletsCount: number | null;
+  }) => {
     setPhaseGroupSnapshotConfig((prev) => ({
       ...prev,
       excludeComponentWinners,
+      uniqueWalletsCount,
     }));
     onNextStep(PhaseConfigStep.SNAPSHOT_SELECT_TOP_HOLDERS);
   };
@@ -285,12 +292,17 @@ export default function BuildPhaseFormConfigModal({
     from: number | null;
     to: number | null;
     tdhBlockNumber: number | null;
+    uniqueWalletsCount: number | null;
   }) => {
     setPhaseGroupConfig((prev) => ({
       ...prev,
       snapshots: [
         ...prev.snapshots,
-        { ...phaseGroupSnapshotConfig, topHoldersFilter: params },
+        {
+          ...phaseGroupSnapshotConfig,
+          topHoldersFilter: params,
+          uniqueWalletsCount: params.uniqueWalletsCount,
+        },
       ],
     }));
     resetPhaseGroupSnapshotConfig();
@@ -815,10 +827,6 @@ export default function BuildPhaseFormConfigModal({
     setModalTitle(`Configure group "${name}"`);
   }, [name]);
 
-  const [uniqueWalletsCount, setUniqueWalletsCount] = useState<number | null>(
-    null
-  );
-
   return (
     <div className="tw-px-6 tw-gap-y-6 tw-flex tw-flex-col tw-divide-y tw-divide-solid tw-divide-neutral-700 tw-divide-x-0">
       {(() => {
@@ -831,15 +839,13 @@ export default function BuildPhaseFormConfigModal({
                 title={modalTitle}
                 onClose={onClose}
                 isLoading={isLoadingContractSchema}
-                uniqueWalletsCount={uniqueWalletsCount}
-                setUniqueWalletsCount={setUniqueWalletsCount}
               />
             );
           case PhaseConfigStep.SNAPSHOT_EXCLUDE_COMPONENT_WINNERS:
             return (
               phaseGroupSnapshotConfig.snapshotId && (
                 <SnapshotExcludeComponentWinners
-                  snapshotId={phaseGroupSnapshotConfig.snapshotId}
+                  config={phaseGroupSnapshotConfig}
                   phases={targetPhases}
                   onNextStep={onNextStep}
                   onSelectExcludeComponentWinners={
@@ -847,7 +853,6 @@ export default function BuildPhaseFormConfigModal({
                   }
                   title={modalTitle}
                   onClose={onClose}
-                  setUniqueWalletsCount={setUniqueWalletsCount}
                 />
               )
             );
@@ -859,8 +864,6 @@ export default function BuildPhaseFormConfigModal({
                 config={phaseGroupSnapshotConfig}
                 title={modalTitle}
                 onClose={onClose}
-                uniqueWalletsCount={uniqueWalletsCount}
-                setUniqueWalletsCount={setUniqueWalletsCount}
               />
             );
           case PhaseConfigStep.FINALIZE_SNAPSHOT:

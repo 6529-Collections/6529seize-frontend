@@ -14,6 +14,7 @@ export interface FinalizeSnapshotRow {
   readonly snapshot: DistributionPlanSnapshot | null;
   readonly excludeComponentWinners: string;
   readonly topHoldersFilter: string;
+  readonly uniqueWalletsCount: number | null;
 }
 
 export default function FinalizeSnapshotsTable({
@@ -100,6 +101,7 @@ export default function FinalizeSnapshotsTable({
           topHoldersFrom:
             groupSnapshot.topHoldersFilter?.from?.toString() ?? "",
           topHoldersTo: groupSnapshot.topHoldersFilter?.to?.toString() ?? "",
+          uniqueWalletsCount: groupSnapshot.uniqueWalletsCount,
         };
       })
     );
@@ -133,6 +135,12 @@ export default function FinalizeSnapshotsTable({
                 className="tw-px-3 tw-py-3 tw-whitespace-nowrap tw-text-left tw-text-[0.6875rem] tw-leading-[1.125rem] tw-font-medium tw-text-neutral-400 tw-uppercase tw-tracking-[0.25px]"
               >
                 Top holders
+              </th>
+              <th
+                scope="col"
+                className="tw-px-3 tw-py-3 tw-whitespace-nowrap tw-text-left tw-text-[0.6875rem] tw-leading-[1.125rem] tw-font-medium tw-text-neutral-400 tw-uppercase tw-tracking-[0.25px]"
+              >
+                Wallets
               </th>
               <th
                 scope="col"

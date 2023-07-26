@@ -1,6 +1,9 @@
 import { useEffect } from "react";
 import DistributionPlanSecondaryText from "../../../../common/DistributionPlanSecondaryText";
-import { DistributionPlanSnapshot, PhaseGroupSnapshotConfig } from "../BuildPhaseFormConfigModal";
+import {
+  DistributionPlanSnapshot,
+  PhaseGroupSnapshotConfig,
+} from "../BuildPhaseFormConfigModal";
 import FinalizeSnapshotsTable from "./snapshots-table/FinalizeSnapshotsTable";
 import BuildPhaseFormConfigModalTitle from "./BuildPhaseFormConfigModalTitle";
 
@@ -28,6 +31,10 @@ export default function FinalizeSnapshot({
       onStartAgain();
     }
   }, [groupSnapshots, onStartAgain]);
+
+  useEffect(() => {
+    console.log(JSON.stringify(groupSnapshots));
+  }, [groupSnapshots]);
 
   return (
     <div>
@@ -66,3 +73,5 @@ export default function FinalizeSnapshot({
     </div>
   );
 }
+
+

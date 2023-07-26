@@ -17,19 +17,16 @@ export default function SelectSnapshot({
   title,
   onClose,
   isLoading,
-  uniqueWalletsCount,
-  setUniqueWalletsCount,
 }: {
   snapshots: DistributionPlanSnapshot[];
   onSelectSnapshot: (param: {
     snapshotId: string;
     snapshotType: Pool.TOKEN_POOL | Pool.CUSTOM_TOKEN_POOL;
+    uniqueWalletsCount: number | null;
   }) => void;
   title: string;
   onClose: () => void;
   isLoading: boolean;
-  uniqueWalletsCount: number | null;
-  setUniqueWalletsCount: (count: number | null) => void;
 }) {
   const { setToasts } = useContext(DistributionPlanToolContext);
 
@@ -47,12 +44,9 @@ export default function SelectSnapshot({
     onSelectSnapshot({
       snapshotId: selectedSnapshot.id,
       snapshotType: selectedSnapshot.poolType,
+      uniqueWalletsCount: selectedSnapshot.walletsCount,
     });
   };
-
-  useEffect(() => {
-    setUniqueWalletsCount(selectedSnapshot?.walletsCount ?? null);
-  }, [selectedSnapshot, setUniqueWalletsCount]);
 
   const [tags, setTags] = useState<ComponentConfigMetaPropsTag[]>([]);
 
@@ -94,7 +88,10 @@ export default function SelectSnapshot({
         isDisabled={false}
         isLoading={isLoading}
       >
-        <ComponentConfigMeta tags={tags} walletsCount={uniqueWalletsCount} />
+        <ComponentConfigMeta
+          tags={tags}
+          walletsCount={selectedSnapshot?.walletsCount ?? null}
+        />
       </ComponentConfigNextBtn>
     </div>
   );

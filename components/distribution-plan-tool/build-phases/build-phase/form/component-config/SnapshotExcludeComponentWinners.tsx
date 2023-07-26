@@ -4,12 +4,20 @@ import AllowlistToolSelectMenuMultiple, {
 } from "../../../../../allowlist-tool/common/select-menu-multiple/AllowlistToolSelectMenuMultiple";
 import DistributionPlanSecondaryText from "../../../../common/DistributionPlanSecondaryText";
 import { BuildPhasesPhase } from "../../../BuildPhases";
-import { PhaseConfigStep } from "../BuildPhaseFormConfigModal";
+import {
+  PhaseConfigStep,
+  PhaseGroupSnapshotConfig,
+} from "../BuildPhaseFormConfigModal";
 import ComponentConfigNextBtn from "./ComponentConfigNextBtn";
 import { DistributionPlanToolContext } from "../../../../DistributionPlanToolContext";
 import BuildPhaseFormConfigModalTitle from "./BuildPhaseFormConfigModalTitle";
 import ComponentConfigMeta from "./ComponentConfigMeta";
-import { AllowlistToolResponse } from "../../../../../allowlist-tool/allowlist-tool.types";
+import {
+  AllowlistOperationCode,
+  AllowlistToolResponse,
+  Pool,
+} from "../../../../../allowlist-tool/allowlist-tool.types";
+import { assertUnreachable } from "../../../../../../helpers/AllowlistToolHelpers";
 
 const SELECT_ALL_OPTION: AllowlistToolSelectMenuMultipleOption = {
   title: "Exclude All Prior Groups",
@@ -18,23 +26,24 @@ const SELECT_ALL_OPTION: AllowlistToolSelectMenuMultipleOption = {
 };
 
 export default function SnapshotExcludeComponentWinners({
-  snapshotId,
+  config,
   phases,
   onNextStep,
   onSelectExcludeComponentWinners,
   title,
   onClose,
-  setUniqueWalletsCount,
 }: {
-  snapshotId: string;
+  config: PhaseGroupSnapshotConfig;
   phases: BuildPhasesPhase[];
   onNextStep: (step: PhaseConfigStep) => void;
-  onSelectExcludeComponentWinners: (componentIds: string[]) => void;
+  onSelectExcludeComponentWinners: (param: {
+    excludeComponentWinners: string[];
+    uniqueWalletsCount: number | null;
+  }) => void;
   title: string;
   onClose: () => void;
-  setUniqueWalletsCount: (count: number | null) => void;
 }) {
-  const { setToasts, distributionPlan } = useContext(
+  const { setToasts, distributionPlan, operations } = useContext(
     DistributionPlanToolContext
   );
   const [options, setOptions] = useState<
@@ -121,7 +130,10 @@ export default function SnapshotExcludeComponentWinners({
       });
       return;
     }
-    onSelectExcludeComponentWinners(excludeComponentWinners);
+    onSelectExcludeComponentWinners({
+      excludeComponentWinners,
+      uniqueWalletsCount: localUniqueWalletsCount,
+    });
   };
   const [loading, setLoading] = useState<boolean>(false);
 
@@ -130,22 +142,37 @@ export default function SnapshotExcludeComponentWinners({
   >(null);
 
   useEffect(() => {
+    const getCustomTokenPoolWallets = (): string[] => {
+      const operation = operations.find(
+        (o) =>
+          o.code === AllowlistOperationCode.CREATE_CUSTOM_TOKEN_POOL &&
+          o.params.id === config.snapshotId
+      );
+      if (!operation) {
+        return [];
+      }
+
+      return operation.params.tokens.map((t: any) => t.owner.toLowerCase());
+    };
+
     const fetchUniqueWalletsCount = async () => {
-      if (!distributionPlan) return;
+      if (!distributionPlan || !config.snapshotType) return;
+      const extraWallets =
+        config.snapshotType === Pool.CUSTOM_TOKEN_POOL
+          ? getCustomTokenPoolWallets()
+          : [];
       setLoading(true);
-      const url = `${process.env.ALLOWLIST_API_ENDPOINT}/allowlists/${
-        distributionPlan.id
-      }/token-pool-downloads/${snapshotId}/unique-wallets-count${
-        !!excludeComponentWinners.length
-          ? `?exclude-component-winners=${excludeComponentWinners.join(",")}`
-          : ""
-      }`;
+      const url = `${process.env.ALLOWLIST_API_ENDPOINT}/allowlists/${distributionPlan.id}/token-pool-downloads/token-pool/${config.snapshotId}/unique-wallets-count`;
       try {
         const response = await fetch(url, {
-          method: "GET",
+          method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
+          body: JSON.stringify({
+            excludeComponentWinners,
+            extraWallets,
+          }),
         });
         const data: AllowlistToolResponse<number> = await response.json();
         if (typeof data !== "number" && "error" in data) {
@@ -172,9 +199,9 @@ export default function SnapshotExcludeComponentWinners({
   }, [
     excludeComponentWinners,
     distributionPlan,
-    snapshotId,
+    config,
     setToasts,
-    setUniqueWalletsCount,
+    operations,
   ]);
 
   return (
@@ -200,10 +227,7 @@ export default function SnapshotExcludeComponentWinners({
         showNextBtn={!!selectedOptions.length}
         isDisabled={!selectedOptions.length}
         onSkip={() => onNextStep(PhaseConfigStep.SNAPSHOT_SELECT_TOP_HOLDERS)}
-        onNext={() => {
-          setUniqueWalletsCount(localUniqueWalletsCount);
-          onExcludePreviousWinners();
-        }}
+        onNext={() => onExcludePreviousWinners()}
       >
         <ComponentConfigMeta tags={[]} walletsCount={localUniqueWalletsCount} />
       </ComponentConfigNextBtn>
