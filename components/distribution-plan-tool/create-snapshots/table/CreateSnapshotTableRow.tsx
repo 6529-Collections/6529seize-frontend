@@ -160,7 +160,7 @@ export default function CreateSnapshotTableRow({
           <svg
             aria-hidden="true"
             role="status"
-            className="tw-inline tw-w-5 tw-h-5 tw-text-white tw-animate-spin tw-absolute"
+            className="tw-inline tw-w-5 tw-h-5 tw-text-white tw-animate-spin"
             viewBox="0 0 100 101"
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
