@@ -200,7 +200,7 @@ export default function RememePage(props: Props) {
               </Container>
             </Col>
           </Row>
-          {rememe.replicates.length > 1 && (
+          {rememe.replicas.length > 1 && (
             <>
               <Row className="pt-3">
                 <Col>
@@ -209,8 +209,8 @@ export default function RememePage(props: Props) {
               </Row>
               <Row className="pt-2 pb-4">
                 <Col className="d-flex align-items-center justify-content-start gap-3 flex-wrap">
-                  {rememe.replicates.map((rep) => (
-                    <span className={styles.replica}>
+                  {rememe.replicas.map((rep) => (
+                    <span className={styles.replica} key={`replica-rep`}>
                       <a href={`/rememes/${rememe.contract}/${rep}`}>#{rep}</a>
                     </span>
                   ))}

@@ -126,8 +126,8 @@ export default function Rememes(props: Props) {
                       &nbsp;
                       <span>#{rememe.id}</span>
                       &nbsp;
-                      {rememe.replicates.length > 1 && (
-                        <span>(x{rememe.replicates.length})</span>
+                      {rememe.replicas.length > 1 && (
+                        <span>(x{rememe.replicas.length})</span>
                       )}
                     </Col>
                   </Row>
