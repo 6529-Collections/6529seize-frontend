@@ -11,7 +11,7 @@ import {
 import { getRandomObjectId } from "../../../../helpers/AllowlistToolHelpers";
 import AllowlistToolPrimaryBtn from "../../common/AllowlistToolPrimaryBtn";
 import { AllowlistToolBuilderContext } from "../AllowlistToolBuilderContextWrapper";
-import Tippy from "@tippyjs/react";
+import Tippy from "@aslakson/tippyjs-react";
 
 export default function AllowlistToolBuilderTokenPoolsAdd() {
   const router = useRouter();

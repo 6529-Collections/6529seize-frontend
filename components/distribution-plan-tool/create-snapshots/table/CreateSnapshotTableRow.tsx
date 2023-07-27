@@ -2,7 +2,7 @@ import { useCopyToClipboard } from "react-use";
 import DistributionPlanTableRowWrapper from "../../common/DistributionPlanTableRowWrapper";
 import { truncateTextMiddle } from "../../../../helpers/AllowlistToolHelpers";
 import { useEffect, useState } from "react";
-import Tippy from "@tippyjs/react";
+import Tippy from "@aslakson/tippyjs-react";
 import { CreateSnapshotSnapshot } from "../CreateSnapshots";
 import { DistributionPlanTokenPoolDownloadStatus } from "../../../allowlist-tool/allowlist-tool.types";
 

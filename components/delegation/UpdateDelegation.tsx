@@ -15,7 +15,7 @@ import {
   SUB_DELEGATION_USE_CASE,
 } from "../../pages/delegation/[...section]";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import Tippy from "@tippyjs/react";
+import Tippy from "@aslakson/tippyjs-react";
 import { DELEGATION_CONTRACT, NEVER_DATE } from "../../constants";
 import { DELEGATION_ABI } from "../../abis";
 import { getTransactionLink, isValidEthAddress } from "../../helpers/Helpers";

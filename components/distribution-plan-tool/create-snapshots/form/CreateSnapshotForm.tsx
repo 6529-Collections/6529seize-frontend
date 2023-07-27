@@ -12,7 +12,7 @@ import {
 } from "../../../allowlist-tool/allowlist-tool.types";
 import styles from "../../DistributionPlan.module.scss";
 import DistributionPlanAddOperationBtn from "../../common/DistributionPlanAddOperationBtn";
-import Tippy from "@tippyjs/react";
+import Tippy from "@aslakson/tippyjs-react";
 import CreateSnapshotFormSearchCollection from "./CreateSnapshotFormSearchCollection";
 interface CreateSnapshotFormValues {
   name: string;

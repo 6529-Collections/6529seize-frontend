@@ -2,7 +2,7 @@ import styles from "./SearchModal.module.scss";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useState } from "react";
 import { Modal, InputGroup, Form, Button } from "react-bootstrap";
-import Tippy from "@tippyjs/react";
+import Tippy from "@aslakson/tippyjs-react";
 
 interface Props {
   show: boolean;

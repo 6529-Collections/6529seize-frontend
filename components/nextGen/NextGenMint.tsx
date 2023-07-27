@@ -33,7 +33,7 @@ import {
   isMintingUpcoming,
 } from "./NextGenCollection";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import Tippy from "@tippyjs/react";
+import Tippy from "@aslakson/tippyjs-react";
 import {
   createArray,
   fromGWEI,

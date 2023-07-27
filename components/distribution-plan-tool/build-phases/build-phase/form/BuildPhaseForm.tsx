@@ -6,7 +6,7 @@ import AllowlistToolCommonModalWrapper, {
   AllowlistToolModalSize,
 } from "../../../../allowlist-tool/common/modals/AllowlistToolCommonModalWrapper";
 import BuildPhaseFormConfigModal from "./BuildPhaseFormConfigModal";
-import Tippy from "@tippyjs/react";
+import Tippy from "@aslakson/tippyjs-react";
 
 export default function BuildPhaseForm({
   selectedPhase,
