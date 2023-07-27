@@ -96,7 +96,7 @@ export default function UserPage(props: Props) {
   );
   const [ownerENS, setOwnerENS] = useState("");
 
-  const ensAvatar = useEnsAvatar({ address: ownerAddress, chainId: 1 });
+  const ensAvatar = useEnsAvatar({ chainId: 1 });
   const [ownerLinkDisplay, setOwnerLinkDisplay] = useState("");
   const [owned, setOwned] = useState<Owner[]>([]);
   const [walletOwned, setWalletOwned] = useState<Owner[]>([]);
