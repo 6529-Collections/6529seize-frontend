@@ -4,19 +4,22 @@ import "tippy.js/dist/tippy.css";
 import "tippy.js/themes/light.css";
 
 import type { AppProps } from "next/app";
-import SSRProvider from "react-bootstrap/SSRProvider";
 
 import { CW_PROJECT_ID, DELEGATION_CONTRACT } from "../constants";
 
 import { alchemyProvider } from "wagmi/providers/alchemy";
 
-import { w3mConnectors, w3mProvider } from "@web3modal/ethereum";
-import { publicProvider } from "@wagmi/core/providers/public";
+import {
+  EthereumClient,
+  w3mConnectors,
+  w3mProvider,
+} from "@web3modal/ethereum";
 
-import { mainnet, sepolia } from "wagmi/chains";
-import { configureChains, createClient, WagmiConfig } from "wagmi";
+import { Chain, goerli, mainnet, sepolia } from "wagmi/chains";
+import { configureChains, createConfig, WagmiConfig } from "wagmi";
 
 import { library } from "@fortawesome/fontawesome-svg-core";
+
 import {
   faArrowUp,
   faArrowDown,
@@ -70,6 +73,7 @@ import {
   faRefresh,
 } from "@fortawesome/free-solid-svg-icons";
 import Head from "next/head";
+import { Web3Modal } from "@web3modal/react";
 
 library.add(
   faArrowUp,
@@ -125,34 +129,52 @@ library.add(
   faRefresh
 );
 
-const CONTRACT_CHAINS =
-  DELEGATION_CONTRACT.chain_id == mainnet.id ? [mainnet] : [mainnet, sepolia];
+const CONTRACT_CHAINS: Chain[] = [mainnet];
+if (DELEGATION_CONTRACT.chain_id === sepolia.id) {
+  CONTRACT_CHAINS.push(sepolia);
+}
+if (DELEGATION_CONTRACT.chain_id === goerli.id) {
+  CONTRACT_CHAINS.push(goerli);
+}
 
-const { chains, provider } = configureChains(CONTRACT_CHAINS, [
+DELEGATION_CONTRACT.chain_id === mainnet.id ? [mainnet] : [mainnet, sepolia];
+
+const { publicClient, chains } = configureChains(CONTRACT_CHAINS, [
   alchemyProvider({ apiKey: process.env.ALCHEMY_API_KEY! }),
   w3mProvider({ projectId: CW_PROJECT_ID }),
-  publicProvider(),
 ]);
 
-const client = createClient({
+const wagmiConfig = createConfig({
   autoConnect: true,
-  connectors: w3mConnectors({ projectId: CW_PROJECT_ID, version: 1, chains }),
-  provider,
+  connectors: w3mConnectors({ projectId: CW_PROJECT_ID, chains }),
+  publicClient,
 });
+const ethereumClient = new EthereumClient(wagmiConfig, chains);
 
 export default function App({ Component, pageProps }: AppProps) {
-  pageProps.provider = provider;
-
   return (
     <>
       <Head>
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       </Head>
-      <SSRProvider>
-        <WagmiConfig client={client}>
-          <Component {...pageProps} />
-        </WagmiConfig>
-      </SSRProvider>
+      <WagmiConfig config={wagmiConfig}>
+        <Component {...pageProps} />
+      </WagmiConfig>
+      <Web3Modal
+        defaultChain={mainnet}
+        projectId={CW_PROJECT_ID}
+        ethereumClient={ethereumClient}
+        themeMode={"dark"}
+        themeVariables={{
+          "--w3m-background-color": "#282828",
+          "--w3m-logo-image-url":
+            "https://d3lqz0a4bldqgf.cloudfront.net/seize_images/Seize_Logo_Glasses_3.png",
+          "--w3m-accent-color": "#fff",
+          "--w3m-accent-fill-color": "#000",
+          "--w3m-button-border-radius": "0",
+          "--w3m-font-family": "Arial",
+        }}
+      />
     </>
   );
 }
