@@ -29,3 +29,27 @@ export async function fetchAllPages(url: string, data?: any[]): Promise<any[]> {
   }
   return allData;
 }
+
+export async function postData(url: string, body: any) {
+  let headers = {};
+  const apiAuth = Cookies.get(API_AUTH_COOKIE);
+  if (apiAuth) {
+    headers = { "x-6529-auth": apiAuth };
+  }
+  const res = await fetch(url, {
+    method: "POST",
+    headers: headers,
+  });
+  if (res.ok) {
+    const json = await res.json();
+    return {
+      status: res.status,
+      response: json,
+    };
+  } else {
+    return {
+      status: res.status,
+      response: {},
+    };
+  }
+}
