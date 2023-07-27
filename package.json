@@ -15,11 +15,12 @@
     "@fortawesome/react-fontawesome": "^0.2.0",
     "@tailwindcss/forms": "^0.5.3",
     "@tippyjs/react": "^4.2.6",
-    "@web3modal/ethereum": "^2.6.2",
-    "@web3modal/react": "^2.6.2",
+    "framer-motion": "^10.12.16",
+    "@web3modal/ethereum": "^2.7.0",
+    "@web3modal/react": "^2.7.0",
+    "alchemy-sdk": "^2.9.2",
     "bootstrap": "^5.2.3",
     "csv-parser": "^3.0.0",
-    "framer-motion": "^10.12.16",
     "ethereum-cryptography": "^2.0.0",
     "fs": "^0.0.1-security",
     "js-cookie": "^3.0.1",
@@ -34,8 +35,8 @@
     "react-use-downloader": "^1.2.2",
     "sass": "^1.58.1",
     "viem": "^1.2.12",
-    "wagmi": "^1.3.8",
-    "web3": "^4.0.2"
+    "web3": "^4.0.2",
+    "wagmi": "^1.3.9"
   },
   "devDependencies": {
     "@next/bundle-analyzer": "^13.1.6",

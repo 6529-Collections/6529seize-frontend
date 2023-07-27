@@ -117,13 +117,18 @@ export default function Rememes(props: Props) {
               <Col>
                 <Container>
                   <Row>
-                    <Col className="font-smaller font-color-h d-flex justify-content-center gap-2">
+                    <Col className="font-smaller font-color-h d-flex justify-content-center align-items-center">
                       <span>
                         {rememe.contract_opensea_data.collectionName
                           ? rememe.contract_opensea_data.collectionName
                           : formatAddress(rememe.contract)}
                       </span>
+                      &nbsp;
                       <span>#{rememe.id}</span>
+                      &nbsp;
+                      {rememe.replicas.length > 1 && (
+                        <span>(x{rememe.replicas.length})</span>
+                      )}
                     </Col>
                   </Row>
                   <Row>
@@ -148,7 +153,7 @@ export default function Rememes(props: Props) {
         <Row>
           <Col>
             <Image
-              loading={"lazy"}
+              loading={"eager"}
               width="0"
               height="0"
               style={{ height: "auto", width: "100px" }}
@@ -173,14 +178,14 @@ export default function Rememes(props: Props) {
             <Row className="pt-2 pb-2">
               <Col sm={12} md={4} className="d-flex align-items-center gap-2">
                 <Image
-                  loading={"lazy"}
+                  loading={"eager"}
                   width="0"
                   height="0"
                   style={{ width: "250px", height: "auto" }}
                   src="/re-memes.png"
                   alt="re-memes"
                 />
-                {memesLoaded && rememesLoaded && totalResults > 0 ? (
+                {rememesLoaded && totalResults > 0 ? (
                   <span className="font-color-h font-larger">
                     &nbsp;(x{numberWithCommas(totalResults)})
                   </span>

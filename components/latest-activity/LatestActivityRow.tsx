@@ -80,7 +80,6 @@ export default function LatestActivityRow(props: Props) {
                 target="_blank"
                 rel="noreferrer">
                 <Image
-                  loading={"lazy"}
                   width={0}
                   height={0}
                   style={{ height: "40px", width: "auto" }}

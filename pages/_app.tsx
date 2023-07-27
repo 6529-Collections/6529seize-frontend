@@ -4,7 +4,6 @@ import "tippy.js/dist/tippy.css";
 import "tippy.js/themes/light.css";
 
 import type { AppProps } from "next/app";
-import SSRProvider from "react-bootstrap/SSRProvider";
 
 import {
   CW_PROJECT_ID,
@@ -24,6 +23,7 @@ import { Chain, goerli, mainnet, sepolia } from "wagmi/chains";
 import { configureChains, createConfig, WagmiConfig } from "wagmi";
 
 import { library } from "@fortawesome/fontawesome-svg-core";
+
 import {
   faArrowUp,
   faArrowDown,
@@ -167,11 +167,9 @@ export default function App({ Component, pageProps }: AppProps) {
       <Head>
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       </Head>
-      <SSRProvider>
-        <WagmiConfig config={wagmiConfig}>
-          <Component {...pageProps} />
-        </WagmiConfig>
-      </SSRProvider>
+      <WagmiConfig config={wagmiConfig}>
+        <Component {...pageProps} />
+      </WagmiConfig>
       <Web3Modal
         defaultChain={mainnet}
         projectId={CW_PROJECT_ID}

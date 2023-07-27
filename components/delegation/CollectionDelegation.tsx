@@ -163,7 +163,7 @@ export default function CollectionDelegationComponent(props: Props) {
   const accountResolution = useAccount();
   const networkResolution = useNetwork();
   const ensResolution = useEnsName({
-    address: accountResolution.address,
+    address: accountResolution.address as `0x${string}`,
     chainId: 1,
   });
 
@@ -232,10 +232,10 @@ export default function CollectionDelegationComponent(props: Props) {
     ),
     watch: true,
     enabled: accountResolution.isConnected,
-    onSettled(data: any, error: any) {
+    onSettled(data, error) {
       if (data) {
         const myDelegations: ContractDelegation[] = [];
-        data.map((d: any, index: number) => {
+        data.map((d, index: number) => {
           const walletDelegations: ContractWalletDelegation[] = [];
           const useCase =
             DELEGATION_USE_CASES.length > index
@@ -246,9 +246,9 @@ export default function CollectionDelegationComponent(props: Props) {
               ? CONSOLIDATION_USE_CASE
               : null;
           if (useCase) {
-            const delegationsArray = d as any[];
+            const delegationsArray = d.result as any[];
             delegationsArray[0].map((wallet: string, i: number) => {
-              const myDate = delegationsArray[1][i].toNumber();
+              const myDate = delegationsArray[1][i];
               const myDateDisplay =
                 new Date().getTime() / 1000 > myDate
                   ? `expired`
@@ -259,7 +259,7 @@ export default function CollectionDelegationComponent(props: Props) {
                 wallet: wallet,
                 expiry: myDateDisplay,
                 all: delegationsArray[2][i],
-                tokens: delegationsArray[3][i].toNumber(),
+                tokens: delegationsArray[3][i],
               });
             });
             myDelegations.push({
@@ -308,10 +308,10 @@ export default function CollectionDelegationComponent(props: Props) {
     ),
     watch: true,
     enabled: accountResolution.isConnected && incomingDelegations.length > 0,
-    onSettled(data: any, error: any) {
+    onSettled(data, error) {
       if (data) {
         const myDelegations: ContractDelegation[] = [];
-        data.map((d: any, index: number) => {
+        data.map((d, index: number) => {
           const walletDelegations: ContractWalletDelegation[] = [];
           const useCase =
             DELEGATION_USE_CASES.length > index
@@ -322,9 +322,9 @@ export default function CollectionDelegationComponent(props: Props) {
               ? CONSOLIDATION_USE_CASE
               : null;
           if (useCase) {
-            const delegationsArray = d as any[];
+            const delegationsArray = d.result as any[];
             delegationsArray[0].map((wallet: string, i: number) => {
-              const myDate = delegationsArray[1][i].toNumber();
+              const myDate = delegationsArray[1][i];
               const myDateDisplay =
                 new Date().getTime() / 1000 > myDate
                   ? `expired`
@@ -335,7 +335,7 @@ export default function CollectionDelegationComponent(props: Props) {
                 wallet: wallet,
                 expiry: myDateDisplay,
                 all: delegationsArray[2][i],
-                tokens: delegationsArray[3][i].toNumber(),
+                tokens: delegationsArray[3][i],
               });
             });
             myDelegations.push({

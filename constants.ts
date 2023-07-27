@@ -1,4 +1,5 @@
 import { goerli, mainnet, sepolia } from "wagmi/chains";
+import { Network } from "alchemy-sdk";
 
 export const PROJECT_NAME = "6529SEIZE";
 export const CW_PROJECT_ID = "0ba285cc179045bec37f7c9b9e7f9fbf";
@@ -14,6 +15,11 @@ export const SIX529_COLLECTIONS = "0x4B76837F8D8Ad0A28590d06E53dCD44b6B7D4554";
 export const SIX529_MUSEUM = "0xc6400A5584db71e41B0E5dFbdC769b54B91256CD";
 export const PIRAVLOS_TEST = "0x2ec4a2BCd4f33c7c9AaFaB7Cfa865ec15508bf62";
 export const MANIFOLD = "0x3A3548e060Be10c2614d0a4Cb0c03CC9093fD799";
+
+export const ALCHEMY_CONFIG = {
+  apiKey: process.env.ALCHEMY_API_KEY,
+  network: Network.ETH_MAINNET,
+};
 
 export const NEXT_GEN_CONTRACT: {
   chain_id: number;

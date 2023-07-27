@@ -553,7 +553,6 @@ export default function Distribution(props: Props) {
                 {loaded && phases.length === 0 && (
                   <Col>
                     <Image
-                      loading={"lazy"}
                       width="0"
                       height="0"
                       style={{ height: "auto", width: "100px" }}
