@@ -1,18 +1,21 @@
-import { on } from "events";
 import DistributionPlanSecondaryText from "../../../../common/DistributionPlanSecondaryText";
-import { PhaseConfigStep } from "../BuildPhaseFormConfigModal";
 import ComponentConfigNextBtn from "./ComponentConfigNextBtn";
 import { useContext, useEffect, useState } from "react";
 import { DistributionPlanToolContext } from "../../../../DistributionPlanToolContext";
 import BuildPhaseFormConfigModalTitle from "./BuildPhaseFormConfigModalTitle";
+import ComponentConfigMeta from "./ComponentConfigMeta";
 
 export default function ComponentAddSpots({
   onSelectMaxMintCount,
   title,
+  uniqueWalletsCount,
+  isLoadingUniqueWalletsCount,
   onClose,
 }: {
   onSelectMaxMintCount: (maxMints: number) => void;
   title: string;
+  uniqueWalletsCount: number | null;
+  isLoadingUniqueWalletsCount: boolean;
   onClose: () => void;
 }) {
   const { setToasts } = useContext(DistributionPlanToolContext);
@@ -92,7 +95,13 @@ export default function ComponentAddSpots({
         onSkip={() => undefined}
         onNext={onAddSpots}
         isDisabled={isDisabled}
-      />
+      >
+        <ComponentConfigMeta
+          tags={[]}
+          walletsCount={uniqueWalletsCount}
+          isLoading={isLoadingUniqueWalletsCount}
+        />
+      </ComponentConfigNextBtn>
     </div>
   );
 }

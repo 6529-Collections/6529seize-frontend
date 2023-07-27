@@ -1,9 +1,12 @@
 import { useEffect } from "react";
 import DistributionPlanSecondaryText from "../../../../common/DistributionPlanSecondaryText";
-import { PhaseGroupSnapshotConfig } from "../BuildPhaseFormConfigModal";
-import { AllowlistToolSelectMenuOption } from "../../../../../allowlist-tool/common/select-menu/AllowlistToolSelectMenu";
+import {
+  DistributionPlanSnapshot,
+  PhaseGroupSnapshotConfig,
+} from "../BuildPhaseFormConfigModal";
 import FinalizeSnapshotsTable from "./snapshots-table/FinalizeSnapshotsTable";
 import BuildPhaseFormConfigModalTitle from "./BuildPhaseFormConfigModalTitle";
+import ComponentConfigMeta from "./ComponentConfigMeta";
 
 export default function FinalizeSnapshot({
   onConfigureGroup,
@@ -13,6 +16,8 @@ export default function FinalizeSnapshot({
   groupSnapshots,
   snapshots,
   title,
+  uniqueWalletsCount,
+  isLoadingUniqueWalletsCount,
   onClose,
 }: {
   onConfigureGroup: () => void;
@@ -20,8 +25,10 @@ export default function FinalizeSnapshot({
   onRemoveGroupSnapshot: (groupSnapshotId: string) => void;
   onStartAgain: () => void;
   groupSnapshots: PhaseGroupSnapshotConfig[];
-  snapshots: AllowlistToolSelectMenuOption[];
+  snapshots: DistributionPlanSnapshot[];
   title: string;
+  uniqueWalletsCount: number | null;
+  isLoadingUniqueWalletsCount: boolean;
   onClose: () => void;
 }) {
   useEffect(() => {
@@ -48,21 +55,28 @@ export default function FinalizeSnapshot({
           />
         </div>
       )}
-      <div className="tw-mt-8 tw-gap-x-4 tw-flex tw-justify-end">
-        <button
-          onClick={onAddAnotherSnapshot}
-          type="button"
-          className="tw-inline-flex tw-items-center tw-justify-center tw-cursor-pointer tw-bg-transparent hover:tw-bg-neutral-800/80 tw-px-4 tw-py-3 tw-text-sm tw-font-medium tw-text-white tw-border-2 tw-border-solid tw-border-neutral-700 tw-rounded-lg tw-transition tw-duration-300 tw-ease-out"
-        >
-          Add another snapshot
-        </button>
-        <button
-          onClick={onConfigureGroup}
-          type="button"
-          className="tw-relative tw-inline-flex tw-items-center tw-justify-center tw-cursor-pointer tw-bg-primary-500 tw-px-4 tw-py-3 tw-text-sm tw-font-medium tw-text-white tw-border tw-border-solid tw-border-primary-500 tw-rounded-lg hover:tw-bg-primary-600 hover:tw-border-primary-600 tw-transition tw-duration-300 tw-ease-out"
-        >
-          Configure Group
-        </button>
+      <div className="tw-mt-8 tw-w-full tw-inline-flex tw-justify-between">
+        <ComponentConfigMeta
+          tags={[]}
+          walletsCount={uniqueWalletsCount}
+          isLoading={isLoadingUniqueWalletsCount}
+        />
+        <div className=" tw-gap-x-4 tw-flex tw-justify-end">
+          <button
+            onClick={onAddAnotherSnapshot}
+            type="button"
+            className="tw-inline-flex tw-items-center tw-justify-center tw-cursor-pointer tw-bg-transparent hover:tw-bg-neutral-800/80 tw-px-4 tw-py-3 tw-text-sm tw-font-medium tw-text-white tw-border-2 tw-border-solid tw-border-neutral-700 tw-rounded-lg tw-transition tw-duration-300 tw-ease-out"
+          >
+            Add another snapshot
+          </button>
+          <button
+            onClick={onConfigureGroup}
+            type="button"
+            className="tw-relative tw-inline-flex tw-items-center tw-justify-center tw-cursor-pointer tw-bg-primary-500 tw-px-4 tw-py-3 tw-text-sm tw-font-medium tw-text-white tw-border tw-border-solid tw-border-primary-500 tw-rounded-lg hover:tw-bg-primary-600 hover:tw-border-primary-600 tw-transition tw-duration-300 tw-ease-out"
+          >
+            Configure Group
+          </button>
+        </div>
       </div>
     </div>
   );

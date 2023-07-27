@@ -10,11 +10,15 @@ import BuildPhaseFormConfigModalTitle from "./BuildPhaseFormConfigModalTitle";
 import BuildPhaseFormConfigModalSidebar, {
   BuildPhaseFormConfigModalSidebarOption,
 } from "./BuildPhaseFormConfigModalSidebar";
+import ComponentConfigMeta from "./ComponentConfigMeta";
+import { assertUnreachable } from "../../../../../../helpers/AllowlistToolHelpers";
 
 export default function ComponentSelectRandomHolders({
   onNextStep,
   onSelectRandomHolders,
   title,
+  uniqueWalletsCount,
+  isLoadingUniqueWalletsCount,
   onClose,
 }: {
   onNextStep: (step: PhaseConfigStep) => void;
@@ -23,9 +27,13 @@ export default function ComponentSelectRandomHolders({
     randomHoldersType: RandomHoldersType;
   }) => void;
   title: string;
+  uniqueWalletsCount: number | null;
+  isLoadingUniqueWalletsCount: boolean;
   onClose: () => void;
 }) {
-  const { setToasts } = useContext(DistributionPlanToolContext);
+  const { setToasts } = useContext(
+    DistributionPlanToolContext
+  );
   const [value, setValue] = useState<number | string>("");
   const [randomHoldersType, setRandomHoldersType] = useState<RandomHoldersType>(
     RandomHoldersType.BY_COUNT
@@ -104,6 +112,34 @@ export default function ComponentSelectRandomHolders({
     setIsDisabled(false);
   }, [value, randomHoldersType]);
 
+  const [localUniqueWalletsCount, setLocalUniqueWalletsCount] = useState<
+    number | null
+  >(null);
+
+  useEffect(() => {
+    if (typeof uniqueWalletsCount !== "number") {
+      setLocalUniqueWalletsCount(null);
+      return;
+    }
+
+    if (typeof value !== "number") {
+      setLocalUniqueWalletsCount(uniqueWalletsCount);
+      return;
+    }
+
+    switch (randomHoldersType) {
+      case RandomHoldersType.BY_COUNT:
+        setLocalUniqueWalletsCount(value);
+        break;
+      case RandomHoldersType.BY_PERCENTAGE:
+        const count = Math.floor((uniqueWalletsCount * value) / 100);
+        setLocalUniqueWalletsCount(count);
+        break;
+      default:
+        assertUnreachable(randomHoldersType);
+    }
+  }, [uniqueWalletsCount, value, randomHoldersType]);
+
   return (
     <div>
       <div className="tw-w-full tw-inline-flex tw-gap-x-8">
@@ -150,7 +186,9 @@ export default function ComponentSelectRandomHolders({
         onSkip={() => onNextStep(PhaseConfigStep.COMPONENT_ADD_SPOTS)}
         onNext={onRandomHolders}
         isDisabled={isDisabled}
-      />
+      >
+        <ComponentConfigMeta tags={[]} walletsCount={localUniqueWalletsCount} isLoading={isLoadingUniqueWalletsCount}/>
+      </ComponentConfigNextBtn>
     </div>
   );
 }

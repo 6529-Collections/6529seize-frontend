@@ -4,7 +4,7 @@ export default function DistributionPlanSecondaryText({
   children: React.ReactNode;
 }) {
   return (
-    <p className="tw-mb-0 tw-block tw-font-light tw-text-sm tw-text-neutral-400">
+    <p className="tw-mb-0 tw-block tw-font-light tw-text-base tw-text-neutral-400">
       {children}
     </p>
   );

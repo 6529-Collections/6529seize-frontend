@@ -14,6 +14,7 @@ import BuildPhaseFormConfigModalTitle from "./BuildPhaseFormConfigModalTitle";
 import BuildPhaseFormConfigModalSidebar, {
   BuildPhaseFormConfigModalSidebarOption,
 } from "./BuildPhaseFormConfigModalSidebar";
+import ComponentConfigMeta from "./ComponentConfigMeta";
 
 export default function SnapshotSelectTopHolders({
   onSelectTopHoldersSkip,
@@ -28,12 +29,13 @@ export default function SnapshotSelectTopHolders({
     from: number | null;
     to: number | null;
     tdhBlockNumber: number | null;
+    uniqueWalletsCount: number | null;
   }) => void;
   config: PhaseGroupSnapshotConfig;
   title: string;
   onClose: () => void;
 }) {
-  const { setToasts, operations } = useContext(DistributionPlanToolContext);
+  const { operations } = useContext(DistributionPlanToolContext);
 
   const [isMemes, setIsMemes] = useState<boolean>(false);
   const [tdhBlockNumber, setTdhBlockNumber] = useState<number | null>(null);
@@ -81,85 +83,116 @@ export default function SnapshotSelectTopHolders({
   const [from, setFrom] = useState<number | string>("");
   const [to, setTo] = useState<number | string>("");
 
+  const [errors, setErrors] = useState<{
+    missingTopHolderType: boolean;
+    localUniqueWalletsHigherThanTotal: boolean;
+    fromAndToMissing: boolean;
+    fromHigherThanTo: boolean;
+    fromLowerThanOne: boolean;
+    fromHigherThanTotalError: boolean;
+    toLowerThanOne: boolean;
+    toHigherThanTotal: boolean;
+  }>({
+    missingTopHolderType: false,
+    localUniqueWalletsHigherThanTotal: false,
+    fromAndToMissing: false,
+    fromHigherThanTo: false,
+    fromLowerThanOne: false,
+    fromHigherThanTotalError: false,
+    toLowerThanOne: false,
+    toHigherThanTotal: false,
+  });
+
+  const [isDisabled, setIsDisabled] = useState<boolean>(false);
+
+  const [localUniqueWalletsCount, setLocalUniqueWalletsCount] = useState<
+    number | null
+  >(config.uniqueWalletsCount);
+
+  useEffect(() => {
+    if (!config.uniqueWalletsCount) return;
+    const localFrom =
+      typeof from === "number" ? (from > 0 ? from - 1 : from) : 0;
+    const localTo = typeof to === "number" ? to : config.uniqueWalletsCount;
+    setLocalUniqueWalletsCount(localTo - localFrom);
+  }, [config.uniqueWalletsCount, from, to]);
+
+  useEffect(() => {
+    const missingTopHolderTypeError = !topHolderType;
+
+    const localUniqueWalletsHigherThanTotalError =
+      !!localUniqueWalletsCount &&
+      !!config.uniqueWalletsCount &&
+      !!(localUniqueWalletsCount > config.uniqueWalletsCount);
+
+    const fromAndToMissingError =
+      typeof from !== "number" && typeof to !== "number";
+
+    const fromHigherThanToError =
+      typeof from === "number" && typeof to === "number" && from > to;
+    const fromLowerThanOneError = typeof from === "number" && from < 1;
+    const fromHigherThanTotalError =
+      typeof from === "number" &&
+      typeof config.uniqueWalletsCount === "number" &&
+      from > config.uniqueWalletsCount;
+    const toLowerThanOneError = typeof to === "number" && to < 1;
+    const toHigherThanTotalError =
+      typeof to === "number" &&
+      typeof config.uniqueWalletsCount === "number" &&
+      to > config.uniqueWalletsCount;
+
+    setErrors({
+      missingTopHolderType: missingTopHolderTypeError,
+      localUniqueWalletsHigherThanTotal: localUniqueWalletsHigherThanTotalError,
+      fromAndToMissing: fromAndToMissingError,
+      fromHigherThanTo: fromHigherThanToError,
+      fromLowerThanOne: fromLowerThanOneError,
+      fromHigherThanTotalError: fromHigherThanTotalError,
+      toLowerThanOne: toLowerThanOneError,
+      toHigherThanTotal: toHigherThanTotalError,
+    });
+  }, [
+    topHolderType,
+    from,
+    to,
+    localUniqueWalletsCount,
+    config.uniqueWalletsCount,
+  ]);
+
+  useEffect(() => {
+    setIsDisabled(Object.values(errors).some((error) => error));
+  }, [errors]);
+
+  const [isToError, setIsToError] = useState<boolean>(false);
+  const [isFromError, setIsFromError] = useState<boolean>(false);
+
+  useEffect(() => {
+    const toError = errors.toLowerThanOne || errors.toHigherThanTotal;
+    setIsToError(toError);
+  }, [errors.toLowerThanOne, errors.toHigherThanTotal]);
+
+  useEffect(() => {
+    const fromError =
+      errors.fromLowerThanOne ||
+      errors.fromHigherThanTo ||
+      errors.fromHigherThanTotalError;
+    setIsFromError(fromError);
+  }, [
+    errors.fromLowerThanOne,
+    errors.fromHigherThanTotalError,
+    errors.fromHigherThanTo,
+  ]);
+
   const onSelectTopHolders = () => {
-    if (!topHolderType) {
-      setToasts({
-        messages: ["Please select a top holder type."],
-        type: "error",
-      });
-      return;
-    }
-
-    if (typeof from !== "number" && typeof to !== "number") {
-      setToasts({
-        messages: ["Please insert a from or to value."],
-        type: "error",
-      });
-      return;
-    }
-
-    if (typeof from === "number" && typeof to === "number" && from > to) {
-      setToasts({
-        messages: ["From value must be less than to value."],
-        type: "error",
-      });
-      return;
-    }
-
-    if (typeof from === "number" && from < 1) {
-      setToasts({
-        messages: ["From value must be greater than 0."],
-        type: "error",
-      });
-      return;
-    }
-
-    if (typeof to === "number" && to < 1) {
-      setToasts({
-        messages: ["To value must be greater than 0."],
-        type: "error",
-      });
-      return;
-    }
-
+    if (isDisabled || !topHolderType) return;
     onSelectTopHoldersFilter({
       type: topHolderType,
       from: typeof from === "number" ? from : null,
       to: typeof to === "number" ? to : null,
       tdhBlockNumber,
+      uniqueWalletsCount: localUniqueWalletsCount,
     });
   };
-
-  const [isDisabled, setIsDisabled] = useState<boolean>(false);
-
-  useEffect(() => {
-    if (!topHolderType) {
-      setIsDisabled(true);
-      return;
-    }
-
-    if (typeof from !== "number" && typeof to !== "number") {
-      setIsDisabled(true);
-      return;
-    }
-
-    if (typeof from === "number" && typeof to === "number" && from > to) {
-      setIsDisabled(true);
-      return;
-    }
-
-    if (typeof from === "number" && from < 1) {
-      setIsDisabled(true);
-      return;
-    }
-
-    if (typeof to === "number" && to < 1) {
-      setIsDisabled(true);
-      return;
-    }
-
-    setIsDisabled(false);
-  }, [topHolderType, from, to]);
 
   const [sideBarOptions, setSideBarOptions] = useState<
     BuildPhaseFormConfigModalSidebarOption[]
@@ -212,32 +245,52 @@ export default function SnapshotSelectTopHolders({
           <div className="tw-mt-6 tw-flex tw-flex-col tw-gap-y-4">
             <div>
               <label className="tw-block tw-text-sm tw-font-medium tw-leading-6 tw-text-white">
-                From
+                From (included)
               </label>
               <div className="tw-mt-1.5">
-                <div className="tw-flex tw-rounded-md tw-bg-white/5 tw-ring-1 tw-ring-inset tw-ring-white/10 focus-within:tw-ring-1 focus-within:tw-ring-inset focus-within:tw-ring-primary-400">
+                <div
+                  className={`
+                tw-flex tw-rounded-md tw-bg-white/5 tw-ring-1 tw-ring-inset tw-ring-white/10 focus-within:tw-ring-1 focus-within:tw-ring-inset ${
+                  isFromError
+                    ? "focus-within:tw-ring-red-400"
+                    : "focus-within:tw-ring-primary-400"
+                }`}
+                >
                   <input
                     type="number"
                     value={from}
+                    min={1}
+                    max={config.uniqueWalletsCount ?? Infinity}
                     onChange={(event) =>
                       event.target.value
                         ? setFrom(Number(event.target.value))
                         : setFrom("")
                     }
                     className="tw-flex-1 tw-border-0 tw-bg-transparent placeholder:tw-text-neutral-500 tw-py-3 tw-px-3 tw-text-white focus:tw-ring-0 sm:tw-text-sm sm:tw-leading-6"
-                    placeholder="From"
+                    placeholder={`From (1 - ${
+                      config.uniqueWalletsCount ?? "∞"
+                    })`}
                   />
                 </div>
               </div>
             </div>
             <div>
               <label className="tw-block tw-text-sm tw-font-medium tw-leading-6 tw-text-white">
-                To
+                To (included)
               </label>
               <div className="tw-mt-1.5">
-                <div className="tw-flex tw-rounded-md tw-bg-white/5 tw-ring-1 tw-ring-inset tw-ring-white/10 focus-within:tw-ring-1 focus-within:tw-ring-inset focus-within:tw-ring-primary-400">
+                <div
+                  className={`
+                tw-flex tw-rounded-md tw-bg-white/5 tw-ring-1 tw-ring-inset tw-ring-white/10 focus-within:tw-ring-1 focus-within:tw-ring-inset ${
+                  isToError
+                    ? "focus-within:tw-ring-red-400"
+                    : "focus-within:tw-ring-primary-400"
+                }`}
+                >
                   <input
                     type="number"
+                    min={1}
+                    max={config.uniqueWalletsCount ?? Infinity}
                     value={to}
                     onChange={(event) =>
                       event.target.value
@@ -245,7 +298,7 @@ export default function SnapshotSelectTopHolders({
                         : setTo("")
                     }
                     className="tw-flex-1 tw-border-0 tw-bg-transparent placeholder:tw-text-neutral-500 tw-py-3 tw-px-3 tw-text-white focus:tw-ring-0 sm:tw-text-sm sm:tw-leading-6"
-                    placeholder="To"
+                    placeholder={`To (1 - ${config.uniqueWalletsCount ?? "∞"})`}
                   />
                 </div>
               </div>
@@ -260,7 +313,13 @@ export default function SnapshotSelectTopHolders({
         isDisabled={isDisabled}
         onSkip={onSelectTopHoldersSkip}
         onNext={onSelectTopHolders}
-      />
+      >
+        <ComponentConfigMeta
+          tags={[]}
+          walletsCount={localUniqueWalletsCount}
+          isLoading={false}
+        />
+      </ComponentConfigNextBtn>
     </div>
   );
 }

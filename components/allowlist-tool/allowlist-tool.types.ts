@@ -130,13 +130,16 @@ export enum AllowlistOperationCode {
   ITEM_SORT_WALLETS_BY_MEMES_TDH = "ITEM_SORT_WALLETS_BY_MEMES_TDH", // Not fully implemented to Allowlist-Tool
 }
 
-export interface AllowlistOperation {
+export interface AllowlistOperationBase {
+  readonly code: AllowlistOperationCode;
+  readonly params: Record<string, any>;
+}
+
+export interface AllowlistOperation extends AllowlistOperationBase {
   readonly id: string;
   readonly createdAt: number;
   readonly order: number;
   readonly allowlistId: string;
-  readonly code: AllowlistOperationCode;
-  readonly params: any;
   readonly hasRan: boolean;
 }
 
@@ -237,4 +240,20 @@ export interface DistributionPlanSearchContractMetadataResult {
   readonly description: string | null;
   readonly allTimeVolume: number | null;
   readonly openseaVerified: boolean;
+}
+
+export enum DistributionPlanTokenPoolDownloadStatus {
+  PENDING = "PENDING",
+  CLAIMED = "CLAIMED",
+  FAILED = "FAILED",
+  COMPLETED = "COMPLETED",
+}
+
+export interface DistributionPlanTokenPoolDownload {
+  readonly contract: string;
+  readonly tokenIds?: string;
+  readonly tokenPoolId: string;
+  readonly allowlistId: string;
+  readonly blockNo: number;
+  readonly status: DistributionPlanTokenPoolDownloadStatus;
 }
