@@ -117,13 +117,18 @@ export default function Rememes(props: Props) {
               <Col>
                 <Container>
                   <Row>
-                    <Col className="font-smaller font-color-h d-flex justify-content-center gap-2">
+                    <Col className="font-smaller font-color-h d-flex justify-content-center align-items-center">
                       <span>
                         {rememe.contract_opensea_data.collectionName
                           ? rememe.contract_opensea_data.collectionName
                           : formatAddress(rememe.contract)}
                       </span>
+                      &nbsp;
                       <span>#{rememe.id}</span>
+                      &nbsp;
+                      {rememe.replicates.length > 1 && (
+                        <span>(x{rememe.replicates.length})</span>
+                      )}
                     </Col>
                   </Row>
                   <Row>
@@ -189,13 +194,6 @@ export default function Rememes(props: Props) {
                 ) : (
                   ``
                 )}
-                {/* <FontAwesomeIcon
-                  icon="plus-circle"
-                  className={styles.refreshLink}
-                  onClick={() => {
-                    window.location.href = "/rememes/add";
-                  }}
-                /> */}
                 <FontAwesomeIcon
                   icon="refresh"
                   className={styles.refreshLink}
