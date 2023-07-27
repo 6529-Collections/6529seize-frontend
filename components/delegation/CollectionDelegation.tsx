@@ -160,11 +160,7 @@ function getConsolidationReadParams(
 
 export default function CollectionDelegationComponent(props: Props) {
   const toastRef = useRef<HTMLDivElement>(null);
-  // const accountResolution = useAccount();
-  const accountResolution = {
-    isConnected: true,
-    address: "0x0187C9a182736ba18b44eE8134eE438374cf87DC",
-  };
+  const accountResolution = useAccount();
   const networkResolution = useNetwork();
   const ensResolution = useEnsName({
     address: accountResolution.address as `0x${string}`,
