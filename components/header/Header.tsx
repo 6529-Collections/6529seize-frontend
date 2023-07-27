@@ -12,7 +12,7 @@ import {
   NavDropdown,
   Dropdown,
 } from "react-bootstrap";
-import { useAccount, useClient } from "wagmi";
+import { useAccount } from "wagmi";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import Image from "next/image";
@@ -36,8 +36,6 @@ enum VIEW {
 
 export default function Header(props: Props) {
   const router = useRouter();
-  const client = useClient();
-  const ethereumClient = new EthereumClient(client, [mainnet]);
   const [consolidations, setConsolidations] = useState<string[]>([]);
   const [isConsolidation, setIsConsolidation] = useState(false);
   const { address, connector, isConnected } = useAccount();
@@ -927,22 +925,6 @@ export default function Header(props: Props) {
           </Col>
         </Row>
       </Container>
-      {client && ethereumClient && (
-        <Web3Modal
-          defaultChain={mainnet}
-          projectId={CW_PROJECT_ID}
-          ethereumClient={ethereumClient}
-          themeMode={"dark"}
-          themeVariables={{
-            "--w3m-background-color": "#282828",
-            "--w3m-logo-image-url": "/Seize_Logo_Glasses_3.png",
-            "--w3m-accent-color": "#fff",
-            "--w3m-accent-fill-color": "#000",
-            "--w3m-button-border-radius": "0",
-            "--w3m-font-family": "Arial",
-          }}
-        />
-      )}
     </>
   );
 }
