@@ -1,5 +1,4 @@
-import { useContext, useEffect, useState } from "react";
-import { AllowlistToolSelectMenuOption } from "../../../../../allowlist-tool/common/select-menu/AllowlistToolSelectMenu";
+import { useEffect, useState } from "react";
 import DistributionPlanSecondaryText from "../../../../common/DistributionPlanSecondaryText";
 import {
   DistributionPlanSnapshot,
@@ -9,11 +8,6 @@ import {
 } from "../BuildPhaseFormConfigModal";
 import FinalizeSnapshotsTable from "./snapshots-table/FinalizeSnapshotsTable";
 import BuildPhaseFormConfigModalTitle from "./BuildPhaseFormConfigModalTitle";
-import {
-  AllowlistOperationBase,
-  AllowlistToolResponse,
-} from "../../../../../allowlist-tool/allowlist-tool.types";
-import { DistributionPlanToolContext } from "../../../../DistributionPlanToolContext";
 import ComponentConfigMeta from "./ComponentConfigMeta";
 
 export default function FinalizeComponent({
@@ -24,7 +18,8 @@ export default function FinalizeComponent({
   snapshots,
   loading,
   title,
-  uniqueWalletsCountRequestOperations,
+  uniqueWalletsCount,
+  isLoadingUniqueWalletsCount,
   onClose,
 }: {
   onSave: () => void;
@@ -34,13 +29,10 @@ export default function FinalizeComponent({
   snapshots: DistributionPlanSnapshot[];
   loading: boolean;
   title: string;
-  uniqueWalletsCountRequestOperations: AllowlistOperationBase[];
+  uniqueWalletsCount: number | null;
+  isLoadingUniqueWalletsCount: boolean;
   onClose: () => void;
 }) {
-  const { distributionPlan, setToasts } = useContext(
-    DistributionPlanToolContext
-  );
-
   const [groupSnapshots, setGroupSnapshots] = useState<
     PhaseGroupSnapshotConfig[]
   >(phaseGroupConfig.snapshots);
@@ -69,50 +61,6 @@ export default function FinalizeComponent({
       );
     }
   }, [phaseGroupConfig.randomHoldersFilter]);
-
-  const [uniqueWalletsCount, setUniqueWalletsCount] = useState<number | null>(
-    null
-  );
-
-  useEffect(() => {
-    const setUniqueWalletsCountByOperations = async (
-      distributionPlanId: string
-    ) => {
-      const url = `${process.env.ALLOWLIST_API_ENDPOINT}/allowlists/${distributionPlanId}/unique-wallets-count`;
-      try {
-        const response = await fetch(url, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(uniqueWalletsCountRequestOperations),
-        });
-        const data: AllowlistToolResponse<number> = await response.json();
-        if (typeof data !== "number" && "error" in data) {
-          setToasts({
-            messages:
-              typeof data.message === "string" ? [data.message] : data.message,
-            type: "error",
-          });
-          return { success: false };
-        }
-        setUniqueWalletsCount(data);
-        return { success: true };
-      } catch (error) {
-        setToasts({
-          messages: ["Something went wrong. Please try again."],
-          type: "error",
-        });
-        return { success: false };
-      }
-    };
-    if (!uniqueWalletsCountRequestOperations.length || !distributionPlan) {
-      setUniqueWalletsCount(null);
-      return;
-    }
-
-    setUniqueWalletsCountByOperations(distributionPlan.id);
-  }, [uniqueWalletsCountRequestOperations, distributionPlan, setToasts]);
   return (
     <div>
       <BuildPhaseFormConfigModalTitle title={title} onClose={onClose} />
@@ -147,7 +95,11 @@ export default function FinalizeComponent({
         </span>
       </div>
       <div className="tw-mt-8 tw-w-full tw-inline-flex tw-justify-between">
-      <ComponentConfigMeta tags={[]} walletsCount={uniqueWalletsCount} />
+        <ComponentConfigMeta
+          tags={[]}
+          walletsCount={uniqueWalletsCount}
+          isLoading={isLoadingUniqueWalletsCount}
+        />
         <div className="tw-flex tw-gap-x-4 tw-justify-end">
           <button
             disabled={loading}

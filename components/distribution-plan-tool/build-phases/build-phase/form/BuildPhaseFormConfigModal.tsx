@@ -631,8 +631,6 @@ export default function BuildPhaseFormConfigModal({
     ]);
   }, [newOperations, operations]);
 
-
-
   const onSave = async () => {
     if (
       !distributionPlan ||
@@ -660,6 +658,57 @@ export default function BuildPhaseFormConfigModal({
   useEffect(() => {
     setModalTitle(`Configure group "${name}"`);
   }, [name]);
+
+  const [uniqueWalletsCountByOperations, setUniqueWalletsCountByOperations] =
+    useState<number | null>(null);
+
+  const [isLoadingUniqueWalletsCount, setIsLoadingUniqueWalletsCount] =
+    useState<boolean>(false);
+
+  useEffect(() => {
+    const getUniqueWalletsCount = async (distributionPlanId: string) => {
+      setUniqueWalletsCountByOperations(null);
+      if (uniqueWalletsCountRequestOperations.length < 0) {
+        return;
+      }
+      const url = `${process.env.ALLOWLIST_API_ENDPOINT}/allowlists/${distributionPlanId}/unique-wallets-count`;
+      setIsLoadingUniqueWalletsCount(true);
+      try {
+        const response = await fetch(url, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(uniqueWalletsCountRequestOperations),
+        });
+        const data: AllowlistToolResponse<number> = await response.json();
+        if (typeof data !== "number" && "error" in data) {
+          setToasts({
+            messages:
+              typeof data.message === "string" ? [data.message] : data.message,
+            type: "error",
+          });
+          return { success: false };
+        }
+        setUniqueWalletsCountByOperations(data);
+        return { success: true };
+      } catch (error) {
+        setToasts({
+          messages: ["Something went wrong. Please try again."],
+          type: "error",
+        });
+        return { success: false };
+      } finally {
+        setIsLoadingUniqueWalletsCount(false);
+      }
+    };
+    if (!uniqueWalletsCountRequestOperations.length || !distributionPlan) {
+      setUniqueWalletsCountByOperations(null);
+      return;
+    }
+
+    getUniqueWalletsCount(distributionPlan.id);
+  }, [uniqueWalletsCountRequestOperations, distributionPlan, setToasts]);
 
   return (
     <div className="tw-px-6 tw-gap-y-6 tw-flex tw-flex-col tw-divide-y tw-divide-solid tw-divide-neutral-700 tw-divide-x-0">
@@ -715,9 +764,8 @@ export default function BuildPhaseFormConfigModal({
                 onAddAnotherSnapshot={onAddAnotherSnapshot}
                 onRemoveGroupSnapshot={onRemoveGroupSnapshot}
                 title={modalTitle}
-                uniqueWalletsCountRequestOperations={
-                  uniqueWalletsCountRequestOperations
-                }
+                uniqueWalletsCount={uniqueWalletsCountByOperations}
+                isLoadingUniqueWalletsCount={isLoadingUniqueWalletsCount}
                 onClose={onClose}
               />
             );
@@ -727,7 +775,8 @@ export default function BuildPhaseFormConfigModal({
                 onNextStep={onNextStep}
                 onSelectRandomHolders={onSelectRandomHolders}
                 title={modalTitle}
-                uniqueWalletsCountRequestOperations={uniqueWalletsCountRequestOperations}
+                uniqueWalletsCount={uniqueWalletsCountByOperations}
+                isLoadingUniqueWalletsCount={isLoadingUniqueWalletsCount}
                 onClose={onClose}
               />
             );
@@ -736,7 +785,8 @@ export default function BuildPhaseFormConfigModal({
               <ComponentAddSpots
                 onSelectMaxMintCount={onSelectMaxMintCount}
                 title={modalTitle}
-                uniqueWalletsCountRequestOperations={uniqueWalletsCountRequestOperations}
+                uniqueWalletsCount={uniqueWalletsCountByOperations}
+                isLoadingUniqueWalletsCount={isLoadingUniqueWalletsCount}
                 onClose={onClose}
               />
             );
@@ -750,7 +800,8 @@ export default function BuildPhaseFormConfigModal({
                 onRemoveGroupSnapshot={onRemoveGroupSnapshot}
                 loading={isLoading}
                 title={modalTitle}
-                uniqueWalletsCountRequestOperations={uniqueWalletsCountRequestOperations}
+                uniqueWalletsCount={uniqueWalletsCountByOperations}
+                isLoadingUniqueWalletsCount={isLoadingUniqueWalletsCount}
                 onClose={onClose}
               />
             );

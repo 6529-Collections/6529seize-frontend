@@ -1,30 +1,24 @@
-import { on } from "events";
 import DistributionPlanSecondaryText from "../../../../common/DistributionPlanSecondaryText";
-import { PhaseConfigStep } from "../BuildPhaseFormConfigModal";
 import ComponentConfigNextBtn from "./ComponentConfigNextBtn";
 import { useContext, useEffect, useState } from "react";
 import { DistributionPlanToolContext } from "../../../../DistributionPlanToolContext";
 import BuildPhaseFormConfigModalTitle from "./BuildPhaseFormConfigModalTitle";
-import {
-  AllowlistOperationBase,
-  AllowlistToolResponse,
-} from "../../../../../allowlist-tool/allowlist-tool.types";
 import ComponentConfigMeta from "./ComponentConfigMeta";
 
 export default function ComponentAddSpots({
   onSelectMaxMintCount,
   title,
-  uniqueWalletsCountRequestOperations,
+  uniqueWalletsCount,
+  isLoadingUniqueWalletsCount,
   onClose,
 }: {
   onSelectMaxMintCount: (maxMints: number) => void;
   title: string;
-  uniqueWalletsCountRequestOperations: AllowlistOperationBase[];
+  uniqueWalletsCount: number | null;
+  isLoadingUniqueWalletsCount: boolean;
   onClose: () => void;
 }) {
-  const { setToasts, distributionPlan } = useContext(
-    DistributionPlanToolContext
-  );
+  const { setToasts } = useContext(DistributionPlanToolContext);
 
   const [maxMints, setMaxMints] = useState<number | string>("");
 
@@ -68,50 +62,6 @@ export default function ComponentAddSpots({
     setIsDisabled(false);
   }, [maxMints]);
 
-  const [uniqueWalletsCount, setUniqueWalletsCount] = useState<number | null>(
-    null
-  );
-
-  useEffect(() => {
-    const setUniqueWalletsCountByOperations = async (
-      distributionPlanId: string
-    ) => {
-      const url = `${process.env.ALLOWLIST_API_ENDPOINT}/allowlists/${distributionPlanId}/unique-wallets-count`;
-      try {
-        const response = await fetch(url, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(uniqueWalletsCountRequestOperations),
-        });
-        const data: AllowlistToolResponse<number> = await response.json();
-        if (typeof data !== "number" && "error" in data) {
-          setToasts({
-            messages:
-              typeof data.message === "string" ? [data.message] : data.message,
-            type: "error",
-          });
-          return { success: false };
-        }
-        setUniqueWalletsCount(data);
-        return { success: true };
-      } catch (error) {
-        setToasts({
-          messages: ["Something went wrong. Please try again."],
-          type: "error",
-        });
-        return { success: false };
-      }
-    };
-    if (!uniqueWalletsCountRequestOperations.length || !distributionPlan) {
-      setUniqueWalletsCount(null);
-      return;
-    }
-
-    setUniqueWalletsCountByOperations(distributionPlan.id);
-  }, [uniqueWalletsCountRequestOperations, distributionPlan, setToasts]);
-
   return (
     <div>
       <BuildPhaseFormConfigModalTitle title={title} onClose={onClose} />
@@ -146,7 +96,11 @@ export default function ComponentAddSpots({
         onNext={onAddSpots}
         isDisabled={isDisabled}
       >
-        <ComponentConfigMeta tags={[]} walletsCount={uniqueWalletsCount} />
+        <ComponentConfigMeta
+          tags={[]}
+          walletsCount={uniqueWalletsCount}
+          isLoading={isLoadingUniqueWalletsCount}
+        />
       </ComponentConfigNextBtn>
     </div>
   );

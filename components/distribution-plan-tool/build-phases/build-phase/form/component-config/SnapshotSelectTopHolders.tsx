@@ -35,7 +35,7 @@ export default function SnapshotSelectTopHolders({
   title: string;
   onClose: () => void;
 }) {
-  const { setToasts, operations } = useContext(DistributionPlanToolContext);
+  const { operations } = useContext(DistributionPlanToolContext);
 
   const [isMemes, setIsMemes] = useState<boolean>(false);
   const [tdhBlockNumber, setTdhBlockNumber] = useState<number | null>(null);
@@ -314,7 +314,11 @@ export default function SnapshotSelectTopHolders({
         onSkip={onSelectTopHoldersSkip}
         onNext={onSelectTopHolders}
       >
-        <ComponentConfigMeta tags={[]} walletsCount={localUniqueWalletsCount} />
+        <ComponentConfigMeta
+          tags={[]}
+          walletsCount={localUniqueWalletsCount}
+          isLoading={false}
+        />
       </ComponentConfigNextBtn>
     </div>
   );

@@ -48,21 +48,6 @@ export default function SelectSnapshot({
     });
   };
 
-  const [tags, setTags] = useState<ComponentConfigMetaPropsTag[]>([]);
-
-  useEffect(() => {
-    if (!selectedSnapshot) {
-      setTags([]);
-      return;
-    }
-
-    setTags([
-      {
-        id: getRandomObjectId(),
-        name: selectedSnapshot.name,
-      },
-    ]);
-  }, [selectedSnapshot]);
 
   return (
     <div>
@@ -89,8 +74,9 @@ export default function SelectSnapshot({
         isLoading={isLoading}
       >
         <ComponentConfigMeta
-          tags={tags}
+          tags={[]}
           walletsCount={selectedSnapshot?.walletsCount ?? null}
+          isLoading={false}
         />
       </ComponentConfigNextBtn>
     </div>

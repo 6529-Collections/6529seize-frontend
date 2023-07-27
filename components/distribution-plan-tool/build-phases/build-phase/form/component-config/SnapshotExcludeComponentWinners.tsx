@@ -156,6 +156,10 @@ export default function SnapshotExcludeComponentWinners({
     };
 
     const fetchUniqueWalletsCount = async () => {
+      if (!excludeComponentWinners.length) {
+        setLocalUniqueWalletsCount(config.uniqueWalletsCount);
+        return;
+      }
       if (!distributionPlan || !config.snapshotType) return;
       const extraWallets =
         config.snapshotType === Pool.CUSTOM_TOKEN_POOL
@@ -229,7 +233,7 @@ export default function SnapshotExcludeComponentWinners({
         onSkip={() => onNextStep(PhaseConfigStep.SNAPSHOT_SELECT_TOP_HOLDERS)}
         onNext={() => onExcludePreviousWinners()}
       >
-        <ComponentConfigMeta tags={[]} walletsCount={localUniqueWalletsCount} />
+        <ComponentConfigMeta tags={[]} walletsCount={localUniqueWalletsCount} isLoading={loading}/>
       </ComponentConfigNextBtn>
     </div>
   );

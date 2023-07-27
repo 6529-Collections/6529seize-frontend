@@ -92,12 +92,14 @@ export default function CreateSnapshotForm() {
         contract: string;
         blockNo: number;
         tokenIds?: string;
+        consolidateWallets: boolean;
       } = {
         id: tokenPoolId,
         name: formValues.name,
         description: formValues.name,
         contract: formValues.contract,
         blockNo: parseInt(formValues.blockNo),
+        consolidateWallets: true,
       };
 
       if (!!formValues.tokenIds.length) {
@@ -139,69 +141,9 @@ export default function CreateSnapshotForm() {
     }
   };
 
-  const addTokenPoolConsolidation = async ({
-    tokenPoolId,
-    consolidationBlockNumber,
-  }: {
-    tokenPoolId: string;
-    consolidationBlockNumber: number;
-  }): Promise<void> => {
-    if (!distributionPlan) return;
-    setIsLoading(true);
-    try {
-      const url = `${process.env.ALLOWLIST_API_ENDPOINT}/allowlists/${distributionPlan.id}/operations`;
-      const params: {
-        tokenPoolId: string;
-        consolidationBlockNumber: number;
-      } = {
-        tokenPoolId,
-        consolidationBlockNumber,
-      };
-
-      const response = await fetch(url, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          code: AllowlistOperationCode.TOKEN_POOL_CONSOLIDATE_WALLETS,
-          params,
-        }),
-      });
-
-      const data: AllowlistToolResponse<AllowlistOperation> =
-        await response.json();
-
-      if ("error" in data) {
-        setToasts({
-          messages:
-            typeof data.message === "string" ? [data.message] : data.message,
-          type: "error",
-        });
-        return;
-      }
-      addOperations([structuredClone(data)]);
-      return;
-    } catch (error) {
-      setToasts({
-        messages: ["Something went wrong"],
-        type: "error",
-      });
-      return;
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   const addSnapshot = async () => {
     const tokenPoolResponse = await addTokenPool();
     if (!tokenPoolResponse) return;
-    const { tokenPoolId, consolidationBlockNumber } = tokenPoolResponse;
-    await addTokenPoolConsolidation({
-      tokenPoolId,
-      consolidationBlockNumber,
-    });
-
     setFormValues((prev) => ({
       ...prev,
       name: "",
