@@ -68,7 +68,6 @@ export default function CommunityDownloadsTeam() {
             {downloads != undefined && downloads.length == 0 && (
               <>
                 <Image
-                  loading={"lazy"}
                   width="0"
                   height="0"
                   style={{ height: "auto", width: "100px" }}

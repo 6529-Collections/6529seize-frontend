@@ -150,7 +150,7 @@ export default function Rememes(props: Props) {
         <Row>
           <Col>
             <Image
-              loading={"lazy"}
+              loading={"eager"}
               width="0"
               height="0"
               style={{ height: "auto", width: "100px" }}
@@ -175,20 +175,27 @@ export default function Rememes(props: Props) {
             <Row className="pt-2 pb-2">
               <Col sm={12} md={4} className="d-flex align-items-center gap-2">
                 <Image
-                  loading={"lazy"}
+                  loading={"eager"}
                   width="0"
                   height="0"
                   style={{ width: "250px", height: "auto" }}
                   src="/re-memes.png"
                   alt="re-memes"
                 />
-                {memesLoaded && rememesLoaded && totalResults > 0 ? (
+                {rememesLoaded && totalResults > 0 ? (
                   <span className="font-color-h font-larger">
                     &nbsp;(x{numberWithCommas(totalResults)})
                   </span>
                 ) : (
                   ``
                 )}
+                {/* <FontAwesomeIcon
+                  icon="plus-circle"
+                  className={styles.refreshLink}
+                  onClick={() => {
+                    window.location.href = "/rememes/add";
+                  }}
+                /> */}
                 <FontAwesomeIcon
                   icon="refresh"
                   className={styles.refreshLink}

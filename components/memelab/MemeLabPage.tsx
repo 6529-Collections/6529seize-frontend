@@ -401,7 +401,6 @@ export default function LabPage(props: Props) {
             ) : (
               <Col>
                 <Image
-                  loading={"lazy"}
                   width="0"
                   height="0"
                   style={{ height: "auto", width: "100px" }}
