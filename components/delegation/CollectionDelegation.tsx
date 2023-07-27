@@ -233,7 +233,7 @@ export default function CollectionDelegationComponent(props: Props) {
     onSettled(data, error) {
       if (data) {
         const myDelegations: ContractDelegation[] = [];
-        data.map((d, index) => {
+        data.map((d, index: number) => {
           const walletDelegations: ContractWalletDelegation[] = [];
           const useCase =
             DELEGATION_USE_CASES.length > index
@@ -244,9 +244,9 @@ export default function CollectionDelegationComponent(props: Props) {
               ? CONSOLIDATION_USE_CASE
               : null;
           if (useCase) {
-            const delegationsArray = d as any[];
+            const delegationsArray = d.result as any[];
             delegationsArray[0].map((wallet: string, i: number) => {
-              const myDate = delegationsArray[1][i].toNumber();
+              const myDate = delegationsArray[1][i];
               const myDateDisplay =
                 new Date().getTime() / 1000 > myDate
                   ? `expired`
@@ -257,7 +257,7 @@ export default function CollectionDelegationComponent(props: Props) {
                 wallet: wallet,
                 expiry: myDateDisplay,
                 all: delegationsArray[2][i],
-                tokens: delegationsArray[3][i].toNumber(),
+                tokens: delegationsArray[3][i],
               });
             });
             myDelegations.push({
@@ -309,7 +309,7 @@ export default function CollectionDelegationComponent(props: Props) {
     onSettled(data, error) {
       if (data) {
         const myDelegations: ContractDelegation[] = [];
-        data.map((d, index) => {
+        data.map((d, index: number) => {
           const walletDelegations: ContractWalletDelegation[] = [];
           const useCase =
             DELEGATION_USE_CASES.length > index
@@ -320,9 +320,9 @@ export default function CollectionDelegationComponent(props: Props) {
               ? CONSOLIDATION_USE_CASE
               : null;
           if (useCase) {
-            const delegationsArray = d as any[];
+            const delegationsArray = d.result as any[];
             delegationsArray[0].map((wallet: string, i: number) => {
-              const myDate = delegationsArray[1][i].toNumber();
+              const myDate = delegationsArray[1][i];
               const myDateDisplay =
                 new Date().getTime() / 1000 > myDate
                   ? `expired`
@@ -333,7 +333,7 @@ export default function CollectionDelegationComponent(props: Props) {
                 wallet: wallet,
                 expiry: myDateDisplay,
                 all: delegationsArray[2][i],
-                tokens: delegationsArray[3][i].toNumber(),
+                tokens: delegationsArray[3][i],
               });
             });
             myDelegations.push({
@@ -1456,13 +1456,18 @@ export default function CollectionDelegationComponent(props: Props) {
                         value={uc.use_case}>
                         #{uc.use_case} - {uc.display}
                         {(useCaseLockStatuses.data &&
-                          useCaseLockStatuses.data[index] == true) ||
+                          (useCaseLockStatuses.data[index] as any as boolean) ==
+                            true) ||
                         (useCaseLockStatusesGlobal?.data &&
-                          useCaseLockStatusesGlobal?.data[index] == true) ||
+                          (useCaseLockStatusesGlobal?.data[
+                            index
+                          ] as any as boolean) == true) ||
                         collectionLockRead.data
                           ? ` - LOCKED${
                               useCaseLockStatusesGlobal?.data &&
-                              useCaseLockStatusesGlobal?.data[index] == true
+                              (useCaseLockStatusesGlobal?.data[
+                                index
+                              ] as any as boolean) == true
                                 ? ` *`
                                 : ``
                             }`
@@ -1482,8 +1487,9 @@ export default function CollectionDelegationComponent(props: Props) {
                 className="pt-2 pb-2 d-flex align-items-center">
                 {!useCaseLockStatusesGlobal ||
                 (useCaseLockStatusesGlobal?.data &&
-                  useCaseLockStatusesGlobal?.data[lockUseCaseIndex] ==
-                    false) ? (
+                  (useCaseLockStatusesGlobal?.data[
+                    lockUseCaseIndex
+                  ] as any as boolean) == false) ? (
                   <button
                     className={`${styles.lockUseCaseBtn}`}
                     onClick={() => {
