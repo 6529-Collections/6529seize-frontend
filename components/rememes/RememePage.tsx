@@ -85,120 +85,140 @@ export default function RememePage(props: Props) {
   function printLive() {
     if (rememe) {
       return (
-        <Row className="pt-4">
-          <Col sm={12} md={6}>
-            <RememeImage nft={rememe} animation={true} height={650} />
-          </Col>
-          <Col sm={12} md={6}>
-            <Container>
-              <Row>
-                <Col className="font-color-h d-flex justify-content-start gap-2">
-                  <span>
-                    {rememe.contract_opensea_data.collectionName
-                      ? rememe.contract_opensea_data.collectionName
-                      : formatAddress(rememe.contract)}
-                  </span>
-                  <span>#{rememe.id}</span>
-                </Col>
-              </Row>
-              <Row className="pt-3">
-                <Col>
-                  by{" "}
-                  <Address
-                    wallets={[rememe.deployer as `0x${string}`]}
-                    display={
-                      ensResolution.data ? ensResolution.data : undefined
-                    }
-                  />
-                </Col>
-              </Row>
-              <Row className="pt-4">
-                <Col>
-                  <a
-                    className={styles.userLink}
-                    href={`https://etherscan.io/token/${rememe.contract}/?a=${rememe.id}`}
-                    target="_blank"
-                    rel="noreferrer">
-                    <Image
-                      width="0"
-                      height="0"
-                      style={{ width: "30px", height: "auto" }}
-                      src="/etherscan_w.png"
-                      alt={`etherscan`}
-                    />
-                    {rememe.contract_opensea_data.collectionName
-                      ? rememe.contract_opensea_data.collectionName
-                      : formatAddress(rememe.contract)}
-                  </a>
-                </Col>
-              </Row>
-              {rememe.contract_opensea_data.externalUrl && (
-                <Row className="pt-4">
-                  <Col>
-                    <a
-                      className={styles.userLink}
-                      href={rememe.contract_opensea_data.externalUrl}>
-                      <FontAwesomeIcon
-                        icon="globe"
-                        className={styles.globeIcon}
-                      />
-                      {rememe.contract_opensea_data.externalUrl}
-                    </a>
+        <>
+          <Row className="pt-4">
+            <Col sm={12} md={6}>
+              <RememeImage nft={rememe} animation={true} height={650} />
+            </Col>
+            <Col sm={12} md={6}>
+              <Container>
+                <Row>
+                  <Col className="font-color-h d-flex justify-content-start gap-2">
+                    <span>
+                      {rememe.contract_opensea_data.collectionName
+                        ? rememe.contract_opensea_data.collectionName
+                        : formatAddress(rememe.contract)}
+                    </span>
+                    <span>#{rememe.id}</span>
                   </Col>
                 </Row>
-              )}
-              {rememe.contract_opensea_data.twitterUsername && (
+                <Row className="pt-3">
+                  <Col>
+                    by{" "}
+                    <Address
+                      wallets={[rememe.deployer as `0x${string}`]}
+                      display={
+                        ensResolution.data ? ensResolution.data : undefined
+                      }
+                    />
+                  </Col>
+                </Row>
                 <Row className="pt-4">
                   <Col>
                     <a
                       className={styles.userLink}
-                      href={`https://twitter.com/${rememe.contract_opensea_data.twitterUsername}`}
+                      href={`https://etherscan.io/token/${rememe.contract}/?a=${rememe.id}`}
                       target="_blank"
                       rel="noreferrer">
                       <Image
                         width="0"
                         height="0"
                         style={{ width: "30px", height: "auto" }}
-                        src="/twitter.png"
-                        alt={`${rememe.contract_opensea_data.twitterUsername} Twitter`}
+                        src="/etherscan_w.png"
+                        alt={`etherscan`}
                       />
-                      &#64;
-                      {rememe.contract_opensea_data.twitterUsername}
+                      {rememe.contract_opensea_data.collectionName
+                        ? rememe.contract_opensea_data.collectionName
+                        : formatAddress(rememe.contract)}
                     </a>
                   </Col>
                 </Row>
-              )}
-              <Row className="pt-5">
+                {rememe.contract_opensea_data.externalUrl && (
+                  <Row className="pt-4">
+                    <Col>
+                      <a
+                        className={styles.userLink}
+                        href={rememe.contract_opensea_data.externalUrl}>
+                        <FontAwesomeIcon
+                          icon="globe"
+                          className={styles.globeIcon}
+                        />
+                        {rememe.contract_opensea_data.externalUrl}
+                      </a>
+                    </Col>
+                  </Row>
+                )}
+                {rememe.contract_opensea_data.twitterUsername && (
+                  <Row className="pt-4">
+                    <Col>
+                      <a
+                        className={styles.userLink}
+                        href={`https://twitter.com/${rememe.contract_opensea_data.twitterUsername}`}
+                        target="_blank"
+                        rel="noreferrer">
+                        <Image
+                          width="0"
+                          height="0"
+                          style={{ width: "30px", height: "auto" }}
+                          src="/twitter.png"
+                          alt={`${rememe.contract_opensea_data.twitterUsername} Twitter`}
+                        />
+                        &#64;
+                        {rememe.contract_opensea_data.twitterUsername}
+                      </a>
+                    </Col>
+                  </Row>
+                )}
+                <Row className="pt-5">
+                  <Col>
+                    <a
+                      href={`https://opensea.io/assets/ethereum/${props.contract}/${props.id}`}
+                      target="_blank"
+                      rel="noreferrer">
+                      <Image
+                        className={styles.marketplaceRememe}
+                        src="/opensea.png"
+                        alt="opensea"
+                        width={40}
+                        height={40}
+                      />
+                    </a>
+                    <a
+                      href={`https://x2y2.io/eth/${props.contract}/${props.id}`}
+                      target="_blank"
+                      rel="noreferrer">
+                      <Image
+                        className={styles.marketplaceRememe}
+                        src="/x2y2.png"
+                        alt="x2y2"
+                        width={40}
+                        height={40}
+                      />
+                    </a>
+                  </Col>
+                </Row>
+              </Container>
+            </Col>
+          </Row>
+          {rememe.replicates.length > 1 && (
+            <>
+              <Row className="pt-3">
                 <Col>
-                  <a
-                    href={`https://opensea.io/assets/ethereum/${props.contract}/${props.id}`}
-                    target="_blank"
-                    rel="noreferrer">
-                    <Image
-                      className={styles.marketplaceRememe}
-                      src="/opensea.png"
-                      alt="opensea"
-                      width={40}
-                      height={40}
-                    />
-                  </a>
-                  <a
-                    href={`https://x2y2.io/eth/${props.contract}/${props.id}`}
-                    target="_blank"
-                    rel="noreferrer">
-                    <Image
-                      className={styles.marketplaceRememe}
-                      src="/x2y2.png"
-                      alt="x2y2"
-                      width={40}
-                      height={40}
-                    />
-                  </a>
+                  <h1>REPLICAS</h1>
                 </Col>
               </Row>
-            </Container>
-          </Col>
-        </Row>
+              <Row className="pt-2 pb-4">
+                <Col className="d-flex align-items-center justify-content-start gap-3 flex-wrap">
+                  {rememe.replicates.map((rep) => (
+                    <span className={styles.replica}>
+                      <a href={`/rememes/${rememe.contract}/${rep}`}>#{rep}</a>
+                    </span>
+                  ))}
+                </Col>
+              </Row>
+            </>
+          )}
+        </>
       );
     }
   }
