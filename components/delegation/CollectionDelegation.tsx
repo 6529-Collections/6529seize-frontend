@@ -230,7 +230,7 @@ export default function CollectionDelegationComponent(props: Props) {
     ),
     watch: true,
     enabled: accountResolution.isConnected,
-    onSettled(data, error: any) {
+    onSettled(data, error) {
       if (data) {
         const myDelegations: ContractDelegation[] = [];
         data.map((d, index: number) => {
