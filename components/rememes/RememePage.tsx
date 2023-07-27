@@ -60,7 +60,6 @@ export default function RememePage(props: Props) {
         )}`
       ).then((responseNfts: NFT[]) => {
         setMemes(responseNfts.sort((a, b) => a.id - b.id));
-        console.log(responseNfts.length);
         setMemesLoaded(true);
       });
     }
@@ -384,7 +383,7 @@ export default function RememePage(props: Props) {
             <Row className="pt-2 pb-2">
               <Col>
                 <Image
-                  loading={"lazy"}
+                  loading={"eager"}
                   width="0"
                   height="0"
                   style={{ width: "250px", height: "auto" }}
