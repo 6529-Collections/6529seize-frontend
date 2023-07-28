@@ -38,7 +38,7 @@
   }
   div {
     max-height: 65vh;
-    overflow: scroll;
+    overflow-y: auto;
   }
 }
 
@@ -136,4 +136,22 @@
 
 .metadataTable > :not(caption) > * > * {
   padding: 0.5rem 0.1rem;
+}
+
+.replica {
+  border: 1px solid white;
+  padding: 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+
+  a {
+    text-decoration: none;
+  }
+
+  &:hover {
+    background-color: $almost-very-dark-grey;
+    border: 1px solid $off-white;
+  }
 }
