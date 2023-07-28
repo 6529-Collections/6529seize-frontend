@@ -207,7 +207,6 @@ export function getTransactionLink(chain_id: number, hash: string) {
 export async function getContentTypeFromURL(url: string) {
   try {
     const response = await fetch(url, { method: "HEAD" });
-    console.log("response", response);
     const contentType = response.headers.get("Content-Type");
     return contentType;
   } catch (error) {
