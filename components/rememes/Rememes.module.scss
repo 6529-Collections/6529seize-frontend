@@ -38,7 +38,7 @@
   }
   div {
     max-height: 65vh;
-    overflow-y: scroll;
+    overflow-y: auto;
   }
 }
 
@@ -221,4 +221,22 @@
   color: green;
   width: 30px;
   height: 30px;
+}
+
+.replica {
+  border: 1px solid white;
+  padding: 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+
+  a {
+    text-decoration: none;
+  }
+
+  &:hover {
+    background-color: $almost-very-dark-grey;
+    border: 1px solid $off-white;
+  }
 }
