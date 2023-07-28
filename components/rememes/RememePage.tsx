@@ -205,7 +205,7 @@ export default function RememePage(props: Props) {
             <>
               <Row className="pt-3">
                 <Col sm={12} md={4} className="d-flex align-items-center gap-2">
-                  <h1 className="mb-0">VARIANTS</h1>
+                  <h1 className="mb-0">REPLICAS</h1>
                   <span className="font-color-h font-larger">
                     &nbsp;(x{numberWithCommas(rememe.replicas.length)})
                   </span>

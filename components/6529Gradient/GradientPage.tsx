@@ -19,7 +19,6 @@ import LatestActivityRow from "../latest-activity/LatestActivityRow";
 import { Transaction } from "../../entities/ITransaction";
 import { useRouter } from "next/router";
 import { Owner } from "../../entities/IOwner";
-import { TwitterIcon, TwitterShareButton } from "react-share";
 import { fetchUrl } from "../../services/6529api";
 import NFTImage from "../nft-image/NFTImage";
 import Address from "../address/Address";
