@@ -204,7 +204,7 @@ export default function RememePage(props: Props) {
             <>
               <Row className="pt-3">
                 <Col>
-                  <h1>REPLICAS</h1>
+                  <h1>VARIANTS</h1>
                 </Col>
               </Row>
               <Row className="pt-2 pb-4">
