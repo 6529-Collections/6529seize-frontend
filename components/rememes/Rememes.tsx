@@ -9,7 +9,6 @@ import { useRouter } from "next/router";
 import RememeImage from "../nft-image/RememeImage";
 import Image from "next/image";
 import Pagination from "../pagination/Pagination";
-import { url } from "inspector";
 import { formatAddress, numberWithCommas } from "../../helpers/Helpers";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
