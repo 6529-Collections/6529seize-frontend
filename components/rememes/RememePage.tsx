@@ -16,6 +16,7 @@ import {
   formatAddress,
   isIPFS,
   isUrl,
+  numberWithCommas,
   parseIpfsUrl,
 } from "../../helpers/Helpers";
 
@@ -203,11 +204,14 @@ export default function RememePage(props: Props) {
           {rememe.replicas.length > 1 && (
             <>
               <Row className="pt-3">
-                <Col>
-                  <h1>VARIANTS</h1>
+                <Col sm={12} md={4} className="d-flex align-items-center gap-2">
+                  <h1 className="mb-0">VARIANTS</h1>
+                  <span className="font-color-h font-larger">
+                    &nbsp;(x{numberWithCommas(rememe.replicas.length)})
+                  </span>
                 </Col>
               </Row>
-              <Row className="pt-2 pb-4">
+              <Row className="pt-3 pb-4">
                 <Col className="d-flex align-items-center justify-content-start gap-3 flex-wrap">
                   {rememe.replicas
                     .filter((rep) => rep != rememe.id)
