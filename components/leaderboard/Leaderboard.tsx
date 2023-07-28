@@ -15,7 +15,7 @@ import { useRouter } from "next/router";
 import { fetchAllPages, fetchUrl } from "../../services/6529api";
 import { MEMES_CONTRACT } from "../../constants";
 import { MemesExtendedData } from "../../entities/INFT";
-import Tippy from "@aslakson/tippyjs-react";
+import Tippy from "@tippyjs/react";
 import ConsolidationSwitch from "../consolidation-switch/ConsolidationSwitch";
 import Address from "../address/Address";
 import SearchModal from "../searchModal/SearchModal";

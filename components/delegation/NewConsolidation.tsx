@@ -15,7 +15,7 @@ import {
   SUPPORTED_COLLECTIONS,
 } from "../../pages/delegation/[...section]";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import Tippy from "@aslakson/tippyjs-react";
+import Tippy from "@tippyjs/react";
 import {
   DELEGATION_ALL_ADDRESS,
   DELEGATION_CONTRACT,

@@ -23,7 +23,7 @@ import { useEnsAvatar } from "wagmi";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { fetchAllPages, fetchUrl } from "../../services/6529api";
 import { ReservedUser } from "../../pages/[user]";
-import Tippy from "@aslakson/tippyjs-react";
+import Tippy from "@tippyjs/react";
 import Tag, { TagType } from "../address/Tag";
 import ConsolidationSwitch, {
   VIEW,

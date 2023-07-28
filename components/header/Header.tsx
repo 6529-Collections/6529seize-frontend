@@ -1,17 +1,7 @@
-import { Web3Modal } from "@web3modal/react";
 import { Web3Button } from "@web3modal/react";
-import { mainnet } from "wagmi/chains";
 
 import styles from "./Header.module.scss";
-import {
-  Container,
-  Row,
-  Col,
-  Nav,
-  Navbar,
-  NavDropdown,
-  Dropdown,
-} from "react-bootstrap";
+import { Container, Row, Col, Nav, Navbar, NavDropdown } from "react-bootstrap";
 import { useAccount } from "wagmi";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
@@ -21,8 +11,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { DBResponse } from "../../entities/IDBResponse";
 import { fetchUrl } from "../../services/6529api";
 import Cookies from "js-cookie";
-import { CW_PROJECT_ID, VIEW_MODE_COOKIE } from "../../constants";
-import { EthereumClient } from "@web3modal/ethereum";
+import { VIEW_MODE_COOKIE } from "../../constants";
 
 interface Props {
   onLoad?: () => void;
@@ -733,7 +722,7 @@ export default function Header(props: Props) {
                                 Delegation Center
                               </NavDropdown.Item>
                               <NavDropdown.Divider />
-      
+
                               <NavDropdown.Item
                                 className={styles.dropdownItem}
                                 onClick={() =>

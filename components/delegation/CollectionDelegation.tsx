@@ -40,7 +40,7 @@ import {
   NULL_ADDRESS,
 } from "../../constants";
 import { DELEGATION_ABI } from "../../abis";
-import Tippy from "@aslakson/tippyjs-react";
+import Tippy from "@tippyjs/react";
 import { DelegationCenterSection } from "./DelegationCenterMenu";
 import DelegationWallet from "./DelegationWallet";
 import NewConsolidationComponent from "./NewConsolidation";

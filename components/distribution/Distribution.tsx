@@ -17,7 +17,7 @@ import { formatAddress, numberWithCommas } from "../../helpers/Helpers";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Pagination from "../pagination/Pagination";
 import { SortDirection } from "../../entities/ISort";
-import Tippy from "@aslakson/tippyjs-react";
+import Tippy from "@tippyjs/react";
 import SearchModal from "../searchModal/SearchModal";
 
 enum Sort {
