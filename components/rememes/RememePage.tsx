@@ -2,7 +2,7 @@ import styles from "./Rememes.module.scss";
 
 import { useEffect, useState } from "react";
 import Image from "next/image";
-import { Container, Row, Col, Tab, Table } from "react-bootstrap";
+import { Container, Row, Col, Table } from "react-bootstrap";
 import { DBResponse } from "../../entities/IDBResponse";
 import { NFT, Rememe } from "../../entities/INFT";
 import { fetchAllPages, fetchUrl } from "../../services/6529api";
