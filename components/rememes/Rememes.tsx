@@ -127,7 +127,9 @@ export default function Rememes(props: Props) {
                       <span>#{rememe.id}</span>
                       &nbsp;
                       {rememe.replicas.length > 1 && (
-                        <span>(x{rememe.replicas.length})</span>
+                        <span>
+                          (x{numberWithCommas(rememe.replicas.length)})
+                        </span>
                       )}
                     </Col>
                   </Row>
