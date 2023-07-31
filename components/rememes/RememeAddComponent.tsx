@@ -1,15 +1,23 @@
 import { NFT } from "../../entities/INFT";
-import MultiSelectDropdown from "../multiSelectDropdown/MultiSelectDropdown";
 import styles from "./Rememes.module.scss";
 import { Row, Col, Form, Container, Button, Dropdown } from "react-bootstrap";
-import { Alchemy, BigNumberish, Nft, NftContract } from "alchemy-sdk";
-import { ALCHEMY_CONFIG, MEMES_CONTRACT } from "../../constants";
+import { Alchemy, Nft, NftContract } from "alchemy-sdk";
+import {
+  ALCHEMY_CONFIG,
+  OPENSEA_STORE_FRONT_CONTRACT,
+  OPENSEA_STORE_FRONT_CONTRACT_DEPLOYER,
+} from "../../constants";
 import { useEffect, useState } from "react";
-import { formatAddress, isValidEthAddress } from "../../helpers/Helpers";
-import { useEnsName } from "wagmi";
+import {
+  areEqualAddresses,
+  formatAddress,
+  isValidEthAddress,
+} from "../../helpers/Helpers";
+import { useAccount, useEnsName } from "wagmi";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Tippy from "@tippyjs/react";
 import { AddRememe } from "./RememeAddPage";
+import Image from "next/image";
 
 interface Props {
   memes: NFT[];
@@ -19,12 +27,20 @@ interface Props {
 export default function RememeAddComponent(props: Props) {
   const alchemy = new Alchemy(ALCHEMY_CONFIG);
 
+  // const accountResolution = useAccount();
+  const accountResolution = {
+    isConnected: true,
+    address: "0x44f301b1de6c3fec0f8a8aea53311f5cca499904",
+  };
+
   const [contract, setContract] = useState("");
-  const [nftId, setNftId] = useState("");
+  const [tokenIdDisplay, setTokenIdDisplay] = useState("");
+  const [tokenIds, setTokenIds] = useState<string[]>([]);
+
   const [verifying, setVerifying] = useState(false);
 
   const [contractResponse, setContractResponse] = useState<NftContract>();
-  const [nftResponse, setNftResponse] = useState<Nft>();
+  const [nftResponses, setNftResponses] = useState<Nft[]>([]);
 
   const [references, setReferences] = useState<NFT[]>([]);
 
@@ -36,7 +52,7 @@ export default function RememeAddComponent(props: Props) {
     if (verified) {
       props.verifiedRememe({
         contract: contract,
-        nftId: nftId,
+        token_ids: tokenIds,
         references: references.map((r) => r.id),
       });
     } else {
@@ -53,21 +69,86 @@ export default function RememeAddComponent(props: Props) {
     chainId: 1,
   });
 
+  function parseTokenIds(tokenIds: string): string[] | undefined {
+    const ids: string[] = [];
+
+    try {
+      const split = tokenIds.split(",");
+      split.map((s) => {
+        if (s.includes("-")) {
+          const range = s.split("-");
+          if (range.length === 2) {
+            const start = parseInt(range[0]);
+            const end = parseInt(range[1]);
+            if (start < end) {
+              const rangeArray = [];
+              for (let i = start; i <= end; i++) {
+                rangeArray.push(i);
+              }
+              rangeArray.map((i) => {
+                ids.push(i.toString());
+              });
+            }
+          }
+        } else {
+          ids.push(s);
+        }
+      });
+      return ids;
+    } catch (e) {
+      return undefined;
+    }
+  }
+
   async function verify() {
     setVerifying(true);
     setContractResponse(undefined);
-    setNftResponse(undefined);
+    setNftResponses([]);
     setVerificationErrors([]);
-    try {
-      const contractR = await alchemy.nft.getContractMetadata(contract);
-      const nftR = await alchemy.nft.getNftMetadata(contract, nftId, {});
-      console.log("contract", contractR);
-      console.log("nft", nftR);
-      setContractResponse(contractR);
-      setNftResponse(nftR);
-      setVerified(true);
-    } catch (e: any) {
-      setVerificationErrors([e.message]);
+
+    const myTokenIds = parseTokenIds(tokenIdDisplay);
+    if (myTokenIds && myTokenIds.length > 0 && !myTokenIds.some((id) => !id)) {
+      try {
+        const contractR = await alchemy.nft.getContractMetadata(contract);
+        const nftResponses = await Promise.all(
+          myTokenIds.map((id) => alchemy.nft.getNftMetadata(contract, id, {}))
+        );
+        console.log("contract", contractR);
+        console.log("nft", nftResponses);
+        setContractResponse(contractR);
+        setNftResponses(nftResponses);
+        setTokenIds(myTokenIds);
+        if (nftResponses.some((n) => n.metadataError != undefined)) {
+          setVerificationErrors(["Some Token IDs are invalid or do not exist"]);
+        } else if (!accountResolution.isConnected) {
+          setVerificationErrors(["Please connect your wallet to continue."]);
+        } else {
+          if (
+            areEqualAddresses(
+              contractR.contractDeployer,
+              accountResolution.address
+            )
+          ) {
+            setVerified(true);
+          } else if (
+            areEqualAddresses(
+              contractR.contractDeployer,
+              OPENSEA_STORE_FRONT_CONTRACT_DEPLOYER
+            ) &&
+            areEqualAddresses(contract, OPENSEA_STORE_FRONT_CONTRACT)
+          ) {
+            setVerified(true);
+          } else {
+            setVerificationErrors([
+              "Your connected wallet is not the ReMeme contract deployer",
+            ]);
+          }
+        }
+      } catch (e: any) {
+        setVerificationErrors([e.message]);
+      }
+    } else {
+      setVerificationErrors(["Invalid token ID(s)"]);
     }
     setVerifying(false);
   }
@@ -91,7 +172,7 @@ export default function RememeAddComponent(props: Props) {
                   type="text"
                   placeholder="0x..."
                   value={contract}
-                  disabled={verifying}
+                  disabled={verifying || verified}
                   onChange={(e) => setContract(e.target.value)}
                 />
               </Col>
@@ -107,9 +188,11 @@ export default function RememeAddComponent(props: Props) {
                   className={`${styles.formInput}`}
                   type="text"
                   placeholder="1,2,3 or 1-3 or 1,2-5 or 1-3,5"
-                  value={nftId}
-                  disabled={verifying}
-                  onChange={(e) => setNftId(e.target.value)}
+                  value={tokenIdDisplay}
+                  disabled={verifying || verified}
+                  onChange={(e) => {
+                    setTokenIdDisplay(e.target.value);
+                  }}
                 />
               </Col>
             </Form.Group>
@@ -130,7 +213,11 @@ export default function RememeAddComponent(props: Props) {
                   placement={"top"}
                   theme={"dark"}>
                   <span
-                    className={styles.addMemeReferenceDisplayBtn}
+                    className={`${styles.addMemeReferenceDisplayBtn} ${
+                      verifying || verified
+                        ? styles.addMemeReferenceDisplayBtnDisabled
+                        : ""
+                    }`}
                     onClick={() =>
                       setReferences((r) => r.filter((s) => s.id != m.id))
                     }>
@@ -143,7 +230,7 @@ export default function RememeAddComponent(props: Props) {
               </span>
             ))}
             <Dropdown className={styles.addMemeReferencesDropdown}>
-              <Dropdown.Toggle>
+              <Dropdown.Toggle disabled={verifying || verified}>
                 <FontAwesomeIcon icon="plus-circle" />
               </Dropdown.Toggle>
               <Dropdown.Menu>
@@ -160,94 +247,138 @@ export default function RememeAddComponent(props: Props) {
             </Dropdown>
           </Col>
         </Row>
-        {(verificationErrors.length > 0 || contractResponse || nftResponse) &&
-          !verifying && (
-            <Row className="pt-4">
-              {verificationErrors.length > 0 &&
-                verificationErrors.map((ve) => <Col key={ve}>- {ve}</Col>)}
-              {contractResponse && !verifying && (
-                <Col>
-                  <Container className="no-padding">
-                    <Row>
+        {(contractResponse || nftResponses.length > 0) && !verifying && (
+          <Row>
+            {contractResponse && !verifying && (
+              <Col className="pt-4">
+                <Container className="no-padding">
+                  <Row>
+                    <Col>
+                      <b>
+                        <u>Contract</u>
+                      </b>
+                    </Col>
+                  </Row>
+                  {contractResponse.name && (
+                    <Row className="pt-1 pb-1">
+                      <Col>Name: {contractResponse.name}</Col>
+                    </Row>
+                  )}
+                  {contractResponse.contractDeployer && (
+                    <Row className="pt-1 pb-1">
                       <Col>
-                        <b>
-                          <u>Contract</u>
-                        </b>
+                        Deployer:{" "}
+                        {ensResolution.isSuccess &&
+                          ensResolution.data &&
+                          `${ensResolution.data} - `}
+                        {formatAddress(contractResponse.contractDeployer)}
                       </Col>
                     </Row>
-                    {contractResponse.name && (
-                      <Row className="pt-1 pb-1">
-                        <Col>Name: {contractResponse.name}</Col>
-                      </Row>
-                    )}
-                    {contractResponse.contractDeployer && (
-                      <Row className="pt-1 pb-1">
-                        <Col>
-                          Deployer:{" "}
-                          {ensResolution.isSuccess &&
-                            ensResolution.data &&
-                            `${ensResolution.data} - `}
-                          {formatAddress(contractResponse.contractDeployer)}
-                        </Col>
-                      </Row>
-                    )}
-                    {contractResponse.openSea?.collectionName && (
-                      <Row className="pt-1 pb-1">
-                        <Col>
-                          Collection Name:{" "}
-                          {contractResponse.openSea.collectionName}
-                        </Col>
-                      </Row>
-                    )}
-                  </Container>
-                </Col>
-              )}
-              {nftResponse && !verifying && (
-                <Col>
-                  <Container className="no-padding">
-                    <Row>
+                  )}
+                  {contractResponse.openSea?.collectionName && (
+                    <Row className="pt-1 pb-1">
                       <Col>
-                        <b>
-                          <u>Tokens</u>
-                        </b>
+                        Collection Name:{" "}
+                        {contractResponse.openSea.collectionName}
                       </Col>
                     </Row>
-                    <ul>
+                  )}
+                </Container>
+              </Col>
+            )}
+            {nftResponses.length > 0 && !verifying && (
+              <Col className="pt-4">
+                <Container className="no-padding">
+                  <Row>
+                    <Col>
+                      <b>
+                        <u>Tokens</u>
+                      </b>
+                    </Col>
+                  </Row>
+                  <ul className={styles.addRememeTokenList}>
+                    {nftResponses.map((nftR) => (
                       <li>
-                        {nftResponse.tokenId}
-                        {nftResponse.title && ` - ${nftResponse.title}`}
+                        {nftR.metadataError ? (
+                          <>
+                            {nftR.tokenId} - {nftR.metadataError}
+                          </>
+                        ) : (
+                          <a
+                            className="decoration-hover-underline"
+                            href={`https://opensea.io/assets/ethereum/${nftR.contract.address}/${nftR.tokenId}`}
+                            target="_blank"
+                            rel="noreferrer">
+                            {nftR.tokenId}
+                            {nftR.title && ` - ${nftR.title}`}
+                            &nbsp;&nbsp;
+                            <Image
+                              src="/opensea.png"
+                              alt="opensea"
+                              width={22}
+                              height={22}
+                            />
+                          </a>
+                        )}
                       </li>
-                    </ul>
-                  </Container>
-                </Col>
-              )}
+                    ))}
+                  </ul>
+                </Container>
+              </Col>
+            )}
+          </Row>
+        )}
+        {verificationErrors.length > 0 && (
+          <>
+            <Row className="pt-4">
+              <Col xs={12}>
+                <span className="d-flex align-items-center justify-content-start gap-2">
+                  <FontAwesomeIcon
+                    icon="times-circle"
+                    className={styles.unverifiedIcon}
+                  />
+                  Verification Failed
+                </span>
+              </Col>
             </Row>
-          )}
+            <Row className="pt-2">
+              {verificationErrors.map((ve) => (
+                <Col key={ve} xs={12}>
+                  - {ve}
+                </Col>
+              ))}
+            </Row>
+          </>
+        )}
         <Row className="pt-4">
           <Col>
             {!verified ? (
               <Button
                 onClick={() => verify()}
                 className="seize-btn"
-                disabled={!contract || !nftId || references.length == 0}>
+                disabled={
+                  !contract || !tokenIdDisplay || references.length == 0
+                }>
                 Verify
               </Button>
             ) : (
               <div className="d-flex align-items-center justify-content-start gap-2">
-                <span className="d-flex align-items-center justify-content-start gap-1">
+                <span className="d-flex align-items-center justify-content-start gap-2">
                   <FontAwesomeIcon
                     icon="check-circle"
                     className={styles.verifiedIcon}
                   />
                   Verified
+                  {areEqualAddresses(contract, OPENSEA_STORE_FRONT_CONTRACT) &&
+                    " (OpenSea Shared Storefront Contract)"}
                 </span>
                 <Button
                   onClick={() => {
                     setVerified(false);
-                    setNftResponse(undefined);
+                    setNftResponses([]);
                     setContractResponse(undefined);
                   }}
-                  className="seize-btn btn-link">
+                  className="seize-btn-link">
                   Edit
                 </Button>
               </div>

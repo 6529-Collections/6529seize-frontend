@@ -490,7 +490,7 @@ export default function TheMemesComponent(props: Props) {
           lg={{ span: 3 }}>
           <a
             href={`/the-memes/${nft.id}`}
-            className="decoration-none decoration-hover-underline scale-hover">
+            className="decoration-none scale-hover">
             <Container fluid>
               <Row
                 className={
