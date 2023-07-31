@@ -31,13 +31,16 @@ export async function fetchAllPages(url: string, data?: any[]): Promise<any[]> {
 }
 
 export async function postData(url: string, body: any) {
-  let headers = {};
+  let headers: any = {
+    "Content-Type": "application/json",
+  };
   const apiAuth = Cookies.get(API_AUTH_COOKIE);
   if (apiAuth) {
-    headers = { "x-6529-auth": apiAuth };
+    headers = { "x-6529-auth": apiAuth, "Content-Type": "application/json" };
   }
   const res = await fetch(url, {
     method: "POST",
+    body: JSON.stringify(body),
     headers: headers,
   });
   if (res.ok) {
