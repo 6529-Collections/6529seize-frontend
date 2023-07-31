@@ -270,6 +270,7 @@ h5 {
 
 .seize-btn {
   border-radius: 0 !important;
+  border: 0 !important;
   padding-left: 20px;
   padding-right: 20px;
 }
@@ -285,5 +286,14 @@ h5 {
 
   &:hover {
     color: $font-color-h !important;
+  }
+}
+
+.btn-white {
+  background-color: white !important;
+  color: black !important;
+
+  &:hover {
+    background-color: $off-white !important;
   }
 }

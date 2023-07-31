@@ -43,16 +43,9 @@ export async function postData(url: string, body: any) {
     body: JSON.stringify(body),
     headers: headers,
   });
-  if (res.ok) {
-    const json = await res.json();
-    return {
-      status: res.status,
-      response: json,
-    };
-  } else {
-    return {
-      status: res.status,
-      response: {},
-    };
-  }
+  const json = await res.json();
+  return {
+    status: res.status,
+    response: json,
+  };
 }
