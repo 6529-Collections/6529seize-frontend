@@ -7,7 +7,7 @@ export default function DistributionPlanTableBodyWrapper({
 }) {
   return (
     <tbody className="tw-bg-neutral-900 tw-divide-y tw-divide-neutral-700/40">
-      <AllowlistToolAnimationWrapper mode="wait" initial={false}>
+      <AllowlistToolAnimationWrapper mode="sync"  initial={false}>
         {children}
       </AllowlistToolAnimationWrapper>
     </tbody>

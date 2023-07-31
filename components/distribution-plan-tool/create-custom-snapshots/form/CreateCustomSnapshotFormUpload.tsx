@@ -80,7 +80,7 @@ export default function CreateCustomSnapshotFormUpload({
           id="fileInput"
           type="file"
           accept="text/csv"
-          className="tw-hidden"
+          className="tw-form-input tw-hidden"
           onChange={onFileUpload}
         />
       </div>

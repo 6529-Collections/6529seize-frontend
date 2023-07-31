@@ -32,5 +32,5 @@ module.exports = {
       fontSize: ["placeholder"],
     },
   },
-  plugins: [require("@tailwindcss/forms")],
+  plugins: [require("@tailwindcss/forms")({ strategy: "class" })],
 };
