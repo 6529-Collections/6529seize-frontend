@@ -48,3 +48,6 @@ export const DELEGATION_ALL_ADDRESS =
 export const API_AUTH_COOKIE = "x-6529-auth";
 export const VIEW_MODE_COOKIE = "view-mode";
 export const NEVER_DATE = 64060588800;
+
+export const OPENSEA_STORE_FRONT_CONTRACT =
+  "0x495f947276749ce646f68ac8c248420045cb7b5e";

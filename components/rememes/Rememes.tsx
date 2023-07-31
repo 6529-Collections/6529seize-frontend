@@ -1,7 +1,7 @@
 import { Container, Row, Col, Dropdown } from "react-bootstrap";
 import styles from "./Rememes.module.scss";
 import { fetchAllPages, fetchUrl } from "../../services/6529api";
-import { MEMES_CONTRACT } from "../../constants";
+import { MEMES_CONTRACT, OPENSEA_STORE_FRONT_CONTRACT } from "../../constants";
 import { useEffect, useState } from "react";
 import { NFT, Rememe } from "../../entities/INFT";
 import { DBResponse } from "../../entities/IDBResponse";
@@ -9,8 +9,11 @@ import { useRouter } from "next/router";
 import RememeImage from "../nft-image/RememeImage";
 import Image from "next/image";
 import Pagination from "../pagination/Pagination";
-import { url } from "inspector";
-import { formatAddress, numberWithCommas } from "../../helpers/Helpers";
+import {
+  areEqualAddresses,
+  formatAddress,
+  numberWithCommas,
+} from "../../helpers/Helpers";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 const PAGE_SIZE = 20;
@@ -118,16 +121,21 @@ export default function Rememes(props: Props) {
                 <Container>
                   <Row>
                     <Col className="font-smaller font-color-h d-flex justify-content-center align-items-center">
-                      <span>
-                        {rememe.contract_opensea_data.collectionName
-                          ? rememe.contract_opensea_data.collectionName
-                          : formatAddress(rememe.contract)}
-                      </span>
-                      &nbsp;
-                      <span>#{rememe.id}</span>
-                      &nbsp;
+                      {areEqualAddresses(
+                        rememe.contract,
+                        OPENSEA_STORE_FRONT_CONTRACT
+                      ) ? (
+                        <>{rememe.contract_opensea_data.collectionName}</>
+                      ) : (
+                        <>
+                          {rememe.contract_opensea_data.collectionName
+                            ? rememe.contract_opensea_data.collectionName
+                            : formatAddress(rememe.contract)}{" "}
+                          #{rememe.id}
+                        </>
+                      )}
                       {rememe.replicas.length > 1 && (
-                        <span>(x{rememe.replicas.length})</span>
+                        <>&nbsp;(x{numberWithCommas(rememe.replicas.length)})</>
                       )}
                     </Col>
                   </Row>

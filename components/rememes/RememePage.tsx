@@ -2,20 +2,22 @@ import styles from "./Rememes.module.scss";
 
 import { useEffect, useState } from "react";
 import Image from "next/image";
-import { Container, Row, Col, Tab, Table } from "react-bootstrap";
+import { Container, Row, Col, Table } from "react-bootstrap";
 import { DBResponse } from "../../entities/IDBResponse";
 import { NFT, Rememe } from "../../entities/INFT";
 import { fetchAllPages, fetchUrl } from "../../services/6529api";
 import RememeImage from "../nft-image/RememeImage";
 import { useEnsName } from "wagmi";
 import Address from "../address/Address";
-import { MEMES_CONTRACT } from "../../constants";
+import { MEMES_CONTRACT, OPENSEA_STORE_FRONT_CONTRACT } from "../../constants";
 import NFTImage from "../nft-image/NFTImage";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
+  areEqualAddresses,
   formatAddress,
   isIPFS,
   isUrl,
+  numberWithCommas,
   parseIpfsUrl,
 } from "../../helpers/Helpers";
 
@@ -94,25 +96,39 @@ export default function RememePage(props: Props) {
               <Container>
                 <Row>
                   <Col className="font-color-h d-flex justify-content-start gap-2">
-                    <span>
-                      {rememe.contract_opensea_data.collectionName
-                        ? rememe.contract_opensea_data.collectionName
-                        : formatAddress(rememe.contract)}
-                    </span>
-                    <span>#{rememe.id}</span>
+                    {areEqualAddresses(
+                      rememe.contract,
+                      OPENSEA_STORE_FRONT_CONTRACT
+                    ) ? (
+                      <span>{rememe.contract_opensea_data.collectionName}</span>
+                    ) : (
+                      <>
+                        <span>
+                          {rememe.contract_opensea_data.collectionName
+                            ? rememe.contract_opensea_data.collectionName
+                            : formatAddress(rememe.contract)}{" "}
+                          #{rememe.id}
+                        </span>
+                      </>
+                    )}
                   </Col>
                 </Row>
-                <Row className="pt-3">
-                  <Col>
-                    by{" "}
-                    <Address
-                      wallets={[rememe.deployer as `0x${string}`]}
-                      display={
-                        ensResolution.data ? ensResolution.data : undefined
-                      }
-                    />
-                  </Col>
-                </Row>
+                {!areEqualAddresses(
+                  rememe.contract,
+                  OPENSEA_STORE_FRONT_CONTRACT
+                ) && (
+                  <Row className="pt-3">
+                    <Col>
+                      by{" "}
+                      <Address
+                        wallets={[rememe.deployer as `0x${string}`]}
+                        display={
+                          ensResolution.data ? ensResolution.data : undefined
+                        }
+                      />
+                    </Col>
+                  </Row>
+                )}
                 <Row className="pt-4">
                   <Col>
                     <a
@@ -203,14 +219,22 @@ export default function RememePage(props: Props) {
           {rememe.replicas.length > 1 && (
             <>
               <Row className="pt-3">
-                <Col>
-                  <h1>REPLICAS</h1>
+                <Col sm={12} md={4} className="d-flex align-items-center gap-2">
+                  <h1 className="mb-0">REPLICAS</h1>
+                  <span className="font-color-h font-larger">
+                    &nbsp;(x{numberWithCommas(rememe.replicas.length)})
+                  </span>
                 </Col>
               </Row>
-              <Row className="pt-2 pb-4">
+              <Row>
+                <Col className="font-color-h font-smaller">
+                  * Replicas are tokens with identical images
+                </Col>
+              </Row>
+              <Row className="pt-4 pb-4">
                 <Col className="d-flex align-items-center justify-content-start gap-3 flex-wrap">
                   {rememe.replicas
-                    .filter((rep) => rep != rememe.id)
+                    .filter((rep) => rep != parseInt(rememe.id))
                     .map((rep) => (
                       <span className={styles.replica} key={`replica-rep`}>
                         <a href={`/rememes/${rememe.contract}/${rep}`}>
