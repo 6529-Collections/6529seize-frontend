@@ -6,15 +6,17 @@ import { MEMES_CONTRACT } from "../../constants";
 import { NFT } from "../../entities/INFT";
 import { fetchAllPages, postData } from "../../services/6529api";
 import RememeAddComponent from "./RememeAddComponent";
-import { useSignMessage } from "wagmi";
+import { useAccount, useSignMessage } from "wagmi";
 
 export interface AddRememe {
   contract: string;
-  nftId: string;
+  token_ids: string[];
   references: number[];
 }
 
 export default function RememeAddPage() {
+  const accountResolution = useAccount();
+
   const signMessage = useSignMessage();
   const [memes, setMemes] = useState<NFT[]>([]);
   const [memesLoaded, setMemesLoaded] = useState(false);
@@ -32,13 +34,13 @@ export default function RememeAddPage() {
 
   useEffect(() => {
     if (signMessage.isSuccess && signMessage.data) {
-      alert(signMessage.data);
-      console.log(signMessage.data);
-      postData(`${process.env.API_ENDPOINT}/api/rememes/add`, addRememe).then(
-        (response) => {
-          console.log(response);
-        }
-      );
+      postData(`${process.env.API_ENDPOINT}/api/rememes/add`, {
+        address: accountResolution.address,
+        signature: signMessage.data,
+        rememe: addRememe,
+      }).then((response) => {
+        console.log(response);
+      });
     }
   }, [signMessage.data]);
 
@@ -90,6 +92,7 @@ export default function RememeAddPage() {
                     if (addRememe) {
                       signMessage.signMessage({
                         message: JSON.stringify(addRememe),
+                        // message: `Adding ReMeme...\n\nContract: ${addRememe.contract}\n\nToken IDs: ${addRememe.tokenIds}\n\nMeme References: ${addRememe.references}`,
                       });
                     }
                   }}>

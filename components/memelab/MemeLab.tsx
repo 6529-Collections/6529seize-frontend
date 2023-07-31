@@ -411,9 +411,7 @@ export default function MemeLabComponent(props: Props) {
         sm={{ span: 4 }}
         md={{ span: 3 }}
         lg={{ span: 3 }}>
-        <a
-          href={`/meme-lab/${nft.id}`}
-          className="decoration-none decoration-hover-underline scale-hover">
+        <a href={`/meme-lab/${nft.id}`} className="decoration-none scale-hover">
           <Container fluid>
             <Row
               className={

@@ -182,7 +182,7 @@
 
   div {
     max-height: 50vh;
-    overflow-y: scroll;
+    overflow-y: auto;
   }
 }
 
@@ -202,7 +202,10 @@
 }
 
 .addMemeReferenceDisplayBtn {
+  border: none;
+  border-radius: 0;
   color: $bg-color-1;
+  border-color: $bg-color-1 !important;
   width: 30px;
   background-color: $off-white;
   padding: 5px 10px;
@@ -214,11 +217,24 @@
 
   &:hover {
     background-color: white;
+    color: black !important;
   }
 }
 
+.addMemeReferenceDisplayBtnDisabled {
+  pointer-events: none !important;
+  background-color: darken($color: white, $amount: 20);
+  color: $lighter-grey-2;
+}
+
 .verifiedIcon {
-  color: green;
+  color: #00ba00;
+  width: 30px;
+  height: 30px;
+}
+
+.unverifiedIcon {
+  color: #fb3535;
   width: 30px;
   height: 30px;
 }
@@ -238,5 +254,15 @@
   &:hover {
     background-color: $almost-very-dark-grey;
     border: 1px solid $off-white;
+  }
+}
+
+.addRememeTokenList {
+  position: relative;
+  max-height: 40vh;
+  overflow-y: scroll;
+
+  li {
+    word-wrap: break-word;
   }
 }
