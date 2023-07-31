@@ -1,38 +1,32 @@
 import { NFT } from "../../entities/INFT";
 import styles from "./Rememes.module.scss";
 import { Row, Col, Form, Container, Button, Dropdown } from "react-bootstrap";
-import { Alchemy, Nft, NftContract } from "alchemy-sdk";
-import {
-  ALCHEMY_CONFIG,
-  OPENSEA_STORE_FRONT_CONTRACT,
-  OPENSEA_STORE_FRONT_CONTRACT_DEPLOYER,
-} from "../../constants";
+import { Nft, NftContract } from "alchemy-sdk";
+import { OPENSEA_STORE_FRONT_CONTRACT } from "../../constants";
 import { useEffect, useState } from "react";
 import {
   areEqualAddresses,
   formatAddress,
   isValidEthAddress,
 } from "../../helpers/Helpers";
-import { useAccount, useEnsName } from "wagmi";
+import { useEnsName } from "wagmi";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Tippy from "@tippyjs/react";
-import { AddRememe } from "./RememeAddPage";
 import Image from "next/image";
+import { postData } from "../../services/6529api";
+
+interface AddRememe {
+  contract: string;
+  token_ids: string[];
+  references: number[];
+}
 
 interface Props {
   memes: NFT[];
-  verifiedRememe(r: AddRememe | undefined): void;
+  verifiedRememe(r: any | undefined): void;
 }
 
 export default function RememeAddComponent(props: Props) {
-  const alchemy = new Alchemy(ALCHEMY_CONFIG);
-
-  // const accountResolution = useAccount();
-  const accountResolution = {
-    isConnected: true,
-    address: "0x44f301b1de6c3fec0f8a8aea53311f5cca499904",
-  };
-
   const [contract, setContract] = useState("");
   const [tokenIdDisplay, setTokenIdDisplay] = useState("");
   const [tokenIds, setTokenIds] = useState<string[]>([]);
@@ -48,17 +42,13 @@ export default function RememeAddComponent(props: Props) {
 
   const [verified, setVerified] = useState(false);
 
-  useEffect(() => {
-    if (verified) {
-      props.verifiedRememe({
-        contract: contract,
-        token_ids: tokenIds,
-        references: references.map((r) => r.id),
-      });
-    } else {
-      props.verifiedRememe(undefined);
-    }
-  }, [verified]);
+  function getRememe(tokens?: string[]) {
+    return {
+      contract: contract,
+      token_ids: tokens ? tokens : tokenIds,
+      references: references.map((r) => r.id),
+    };
+  }
 
   const ensResolution = useEnsName({
     enabled:
@@ -100,7 +90,7 @@ export default function RememeAddComponent(props: Props) {
     }
   }
 
-  async function verify() {
+  async function validate() {
     setVerifying(true);
     setContractResponse(undefined);
     setNftResponses([]);
@@ -109,40 +99,33 @@ export default function RememeAddComponent(props: Props) {
     const myTokenIds = parseTokenIds(tokenIdDisplay);
     if (myTokenIds && myTokenIds.length > 0 && !myTokenIds.some((id) => !id)) {
       try {
-        const contractR = await alchemy.nft.getContractMetadata(contract);
-        const nftResponses = await Promise.all(
-          myTokenIds.map((id) => alchemy.nft.getNftMetadata(contract, id, {}))
-        );
-        console.log("contract", contractR);
-        console.log("nft", nftResponses);
-        setContractResponse(contractR);
-        setNftResponses(nftResponses);
         setTokenIds(myTokenIds);
-        if (nftResponses.some((n) => n.metadataError != undefined)) {
-          setVerificationErrors(["Some Token IDs are invalid or do not exist"]);
-        } else if (!accountResolution.isConnected) {
-          setVerificationErrors(["Please connect your wallet to continue."]);
-        } else {
-          if (
-            areEqualAddresses(
-              contractR.contractDeployer,
-              accountResolution.address
-            )
-          ) {
-            setVerified(true);
-          } else if (
-            areEqualAddresses(
-              contractR.contractDeployer,
-              OPENSEA_STORE_FRONT_CONTRACT_DEPLOYER
-            ) &&
-            areEqualAddresses(contract, OPENSEA_STORE_FRONT_CONTRACT)
-          ) {
-            setVerified(true);
-          } else {
-            setVerificationErrors([
-              "Your connected wallet is not the ReMeme contract deployer",
-            ]);
-          }
+        const validation = await postData(
+          `${process.env.API_ENDPOINT}/api/rememes/validate`,
+          getRememe(myTokenIds)
+        );
+        console.log("validation", validation);
+        const contractR = validation.response.contract;
+        const nftResponses: Nft[] = validation.response.nfts;
+        console.log("nftResponses", nftResponses);
+        if (contractR) {
+          setContractResponse(contractR);
+        }
+        if (nftResponses) {
+          setNftResponses(nftResponses);
+        }
+        if (validation.response.errror) {
+          setVerificationErrors([validation.response.errror]);
+        }
+        if (
+          nftResponses &&
+          nftResponses.some((n) => n.metadataError != undefined)
+        ) {
+          setVerificationErrors(["Some Token IDs are invalid"]);
+        }
+        setVerified(validation.response.valid);
+        if (validation.response.valid) {
+          props.verifiedRememe(validation.response);
         }
       } catch (e: any) {
         setVerificationErrors([e.message]);
@@ -152,6 +135,8 @@ export default function RememeAddComponent(props: Props) {
     }
     setVerifying(false);
   }
+
+  useEffect(() => {}, []);
 
   function addReference(meme: NFT) {
     setReferences([...references, meme].sort((a, b) => a.id - b.id));
@@ -168,6 +153,7 @@ export default function RememeAddComponent(props: Props) {
               </Form.Label>
               <Col>
                 <Form.Control
+                  autoFocus
                   className={`${styles.formInput}`}
                   type="text"
                   placeholder="0x..."
@@ -298,7 +284,7 @@ export default function RememeAddComponent(props: Props) {
                   </Row>
                   <ul className={styles.addRememeTokenList}>
                     {nftResponses.map((nftR) => (
-                      <li>
+                      <li key={`nftr-${nftR.tokenId}`}>
                         {nftR.metadataError ? (
                           <>
                             {nftR.tokenId} - {nftR.metadataError}
@@ -306,7 +292,7 @@ export default function RememeAddComponent(props: Props) {
                         ) : (
                           <a
                             className="decoration-hover-underline"
-                            href={`https://opensea.io/assets/ethereum/${nftR.contract.address}/${nftR.tokenId}`}
+                            href={`https://opensea.io/assets/ethereum/${contract}/${nftR.tokenId}`}
                             target="_blank"
                             rel="noreferrer">
                             {nftR.tokenId}
@@ -354,12 +340,12 @@ export default function RememeAddComponent(props: Props) {
           <Col>
             {!verified ? (
               <Button
-                onClick={() => verify()}
+                onClick={() => validate()}
                 className="seize-btn"
                 disabled={
                   !contract || !tokenIdDisplay || references.length == 0
                 }>
-                Verify
+                Validate
               </Button>
             ) : (
               <div className="d-flex align-items-center justify-content-start gap-2">
@@ -377,6 +363,7 @@ export default function RememeAddComponent(props: Props) {
                     setVerified(false);
                     setNftResponses([]);
                     setContractResponse(undefined);
+                    props.verifiedRememe(undefined);
                   }}
                   className="seize-btn-link">
                   Edit
