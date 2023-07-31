@@ -151,7 +151,7 @@ export default function ReviewDistributionPlanTableRow({
       <td className={commonClasses}>{item.description}</td>
       <td className={commonClasses}>{item.walletsCount}</td>
       <td className={commonClasses}>{item.spotsCount}</td>
-      <td className={`${commonClasses} tw-inline-flex`}>
+      <td className={`${commonClasses} tw-inline-flex tw-gap-x-2`}>
         <button
           onClick={() => fetchResults(FetchResultsType.JSON)}
           type="button"
