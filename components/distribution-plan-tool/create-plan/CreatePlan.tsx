@@ -15,7 +15,7 @@ export default function CreatePlan() {
   // const { setState } = useContext(DistributionPlanToolContext);
   // useEffect(() => {
   //   const fetchAllowlist = async () => {
-  //     const url = `${process.env.ALLOWLIST_API_ENDPOINT}/allowlists/735e7484-420f-4894-b2f9-8358cea2974c`;
+  //     const url = `${process.env.ALLOWLIST_API_ENDPOINT}/allowlists/13310c25-3779-489b-ac6c-717bd970a42e`;
   //     const response = await fetch(url, {
   //       headers: {
   //         "Content-Type": "application/json",

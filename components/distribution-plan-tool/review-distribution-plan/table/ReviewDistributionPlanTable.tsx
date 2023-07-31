@@ -9,6 +9,11 @@ export enum ReviewDistributionPlanTableItemType {
   COMPONENT = "COMPONENT",
 }
 
+export enum FetchResultsType {
+  JSON = "JSON",
+  CSV = "CSV",
+}
+
 export interface ReviewDistributionPlanTableItem {
   id: string;
   type: ReviewDistributionPlanTableItemType;

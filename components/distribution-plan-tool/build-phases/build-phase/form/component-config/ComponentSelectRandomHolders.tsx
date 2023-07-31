@@ -171,7 +171,7 @@ export default function ComponentSelectRandomHolders({
                         ? setValue(Number(event.target.value))
                         : setValue("")
                     }
-                    className="tw-flex-1 tw-border-0 tw-bg-transparent placeholder:tw-text-neutral-500 tw-py-3 tw-px-3 tw-text-white focus:tw-ring-0 sm:tw-text-sm sm:tw-leading-6"
+                    className="tw-form-input tw-flex-1 tw-border-0 tw-bg-transparent placeholder:tw-text-neutral-500 tw-py-3 tw-px-3 tw-text-white focus:tw-ring-0 sm:tw-text-sm sm:tw-leading-6"
                     placeholder={inputPlaceholders[randomHoldersType]}
                   />
                 </div>

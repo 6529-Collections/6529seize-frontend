@@ -2,6 +2,7 @@ import { useContext, useEffect, useState } from "react";
 import AllowlistToolJsonIcon from "../../../allowlist-tool/icons/AllowlistToolJsonIcon";
 import DistributionPlanTableRowWrapper from "../../common/DistributionPlanTableRowWrapper";
 import {
+  FetchResultsType,
   FullResultWallet,
   ReviewDistributionPlanTableItem,
   ReviewDistributionPlanTableItemType,
@@ -13,6 +14,7 @@ import {
   AllowlistResult,
   AllowlistToolResponse,
 } from "../../../allowlist-tool/allowlist-tool.types";
+import AllowlistToolCsvIcon from "../../../allowlist-tool/icons/AllowlistToolCsvIcon";
 
 export default function ReviewDistributionPlanTableRow({
   item,
@@ -39,21 +41,21 @@ export default function ReviewDistributionPlanTableRow({
     }
   };
 
-  const downloadResults = (results: AllowlistResult[]) => {
-    const fullResult: FullResultWallet[] = results.map<FullResultWallet>(
-      (result) => {
-        const phase = rows.find((row) => row.phase.id === result.phaseId);
-        const component = phase?.components.find(
-          (component) => component.id === result.phaseComponentId
-        );
-        return {
-          ...result,
-          phaseName: phase?.phase.name ?? "",
-          componentName: component?.name ?? "",
-        };
-      }
-    );
-    const data = JSON.stringify(fullResult);
+  const getFullResults = (results: AllowlistResult[]): FullResultWallet[] =>
+    results.map<FullResultWallet>((result) => {
+      const phase = rows.find((row) => row.phase.id === result.phaseId);
+      const component = phase?.components.find(
+        (component) => component.id === result.phaseComponentId
+      );
+      return {
+        ...result,
+        phaseName: phase?.phase.name ?? "",
+        componentName: component?.name ?? "",
+      };
+    });
+
+  const downloadJson = (results: AllowlistResult[]) => {
+    const data = JSON.stringify(getFullResults(results));
     const blob = new Blob([data], { type: "application/json" });
     const url = window.URL.createObjectURL(blob);
     const link = document.createElement("a");
@@ -62,7 +64,22 @@ export default function ReviewDistributionPlanTableRow({
     link.click();
   };
 
-  const fetchResults = async () => {
+  const downloadCsv = (results: AllowlistResult[]) => {
+    const fullResult = getFullResults(results);
+    const csv = [
+      Object.keys(fullResult[0]).join(","),
+      ...fullResult.map((item) => Object.values(item).join(",")),
+    ].join("\n");
+
+    const link = document.createElement("a");
+    link.href = "data:text/csv;charset=utf-8," + encodeURIComponent(csv);
+    link.download = "data.csv";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const fetchResults = async (fetchType: FetchResultsType) => {
     if (!distributionPlan) return;
     const url = getUrl(distributionPlan.id);
     setIsLoading(true);
@@ -84,7 +101,16 @@ export default function ReviewDistributionPlanTableRow({
         return;
       }
 
-      downloadResults(data);
+      switch (fetchType) {
+        case FetchResultsType.JSON:
+          downloadJson(data);
+          break;
+        case FetchResultsType.CSV:
+          downloadCsv(data);
+          break;
+        default:
+          assertUnreachable(fetchType);
+      }
     } catch (error) {
       setToasts({
         messages: ["Something went wrong"],
@@ -125,14 +151,23 @@ export default function ReviewDistributionPlanTableRow({
       <td className={commonClasses}>{item.description}</td>
       <td className={commonClasses}>{item.walletsCount}</td>
       <td className={commonClasses}>{item.spotsCount}</td>
-      <td className={commonClasses}>
+      <td className={`${commonClasses} tw-inline-flex tw-gap-x-2`}>
         <button
-          onClick={fetchResults}
+          onClick={() => fetchResults(FetchResultsType.JSON)}
           type="button"
           className="tw-group tw-flex tw-justify-center tw-items-center tw-rounded-full tw-bg-transparent tw-h-8 tw-w-8 tw-text-white tw-border-none hover:tw-bg-neutral-700 tw-transition-all tw-duration-300 tw-ease-out"
         >
           <div className="tw-h-4 tw-w-4 tw-flex tw-items-center tw-justify-center">
             <AllowlistToolJsonIcon />
+          </div>
+        </button>
+        <button
+          onClick={() => fetchResults(FetchResultsType.CSV)}
+          type="button"
+          className="tw-group tw-flex tw-justify-center tw-items-center tw-rounded-full tw-bg-transparent tw-h-8 tw-w-8 tw-text-white tw-border-none hover:tw-bg-neutral-700 tw-transition-all tw-duration-300 tw-ease-out"
+        >
+          <div className="tw-h-4 tw-w-4 tw-flex tw-items-center tw-justify-center">
+            <AllowlistToolCsvIcon />
           </div>
         </button>
       </td>
