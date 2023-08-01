@@ -11,13 +11,19 @@ import { useWeb3Modal } from "@web3modal/react";
 import { DBResponse } from "../../entities/IDBResponse";
 import { ConsolidatedTDHMetrics } from "../../entities/ITDH";
 import { areEqualAddresses, numberWithCommas } from "../../helpers/Helpers";
+import { SeizeSettings } from "../../entities/ISeizeSettings";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
-export const TDH_THRESHOLD = 1;
-export const MOD_TDH_THRESHOLD = 100000;
+interface CheckList {
+  status: boolean;
+  note: string;
+}
 
 export default function RememeAddPage() {
   const accountResolution = useAccount();
   const web3modal = useWeb3Modal();
+
+  const [seizeSettings, setSeizeSettings] = useState<SeizeSettings>();
 
   const signMessage = useSignMessage();
   const [memes, setMemes] = useState<NFT[]>([]);
@@ -25,38 +31,64 @@ export default function RememeAddPage() {
   const [userTDH, setUserTDH] = useState<ConsolidatedTDHMetrics>();
 
   const [addRememe, setAddRememe] = useState<any>();
-  const [verificationErrors, setVerificationErrors] = useState<string[]>([]);
+  const [references, setReferences] = useState<number[]>();
+  const [checkList, setCheckList] = useState<CheckList[]>([]);
   const [signErrors, setSignErrors] = useState<string[]>([]);
 
   useEffect(() => {
-    if (addRememe && userTDH) {
-      const errors: string[] = [];
-      if (TDH_THRESHOLD > userTDH.boosted_tdh) {
-        errors.push(
-          `Error: You need at least ${numberWithCommas(
-            TDH_THRESHOLD
-          )} TDH before you can add Rememes`
-        );
-      }
+    const mychecklist: CheckList[] = [];
+    if (addRememe) {
       if (
-        !areEqualAddresses(
-          addRememe.contract.address,
-          OPENSEA_STORE_FRONT_CONTRACT
-        ) &&
-        !areEqualAddresses(
+        !seizeSettings ||
+        !seizeSettings.rememes_submission_tdh_threshold ||
+        !seizeSettings.rememes_submission_tdh_threshold_moderator
+      ) {
+        mychecklist.push({
+          status: false,
+          note: "Something went wrong fetching global settings",
+        });
+      } else if (!userTDH) {
+        mychecklist.push({
+          status: false,
+          note: "Something went wrong fetching user details",
+        });
+      } else {
+        const isDeployer = areEqualAddresses(
           addRememe.contract.contractDeployer,
           accountResolution.address
-        ) &&
-        MOD_TDH_THRESHOLD > userTDH.boosted_tdh
-      ) {
-        errors.push(
-          `Error: You need at least ${numberWithCommas(
-            MOD_TDH_THRESHOLD
-          )} TDH before you can add Rememes for which you are not deployer`
         );
+        const isOpensea = areEqualAddresses(
+          addRememe.contract.address,
+          OPENSEA_STORE_FRONT_CONTRACT
+        );
+
+        if (isDeployer) {
+          mychecklist.push({
+            status: true,
+            note: "Rememe can be added (Rememe Contract Deployer)",
+          });
+        } else if (isOpensea) {
+          mychecklist.push({
+            status:
+              userTDH.boosted_tdh >=
+              seizeSettings.rememes_submission_tdh_threshold,
+            note: `You need ${numberWithCommas(
+              seizeSettings.rememes_submission_tdh_threshold
+            )} TDH to add this Rememe`,
+          });
+        } else {
+          mychecklist.push({
+            status:
+              userTDH.boosted_tdh >=
+              seizeSettings.rememes_submission_tdh_threshold_moderator,
+            note: `You need ${numberWithCommas(
+              seizeSettings.rememes_submission_tdh_threshold_moderator
+            )} TDH to add this Rememe`,
+          });
+        }
       }
-      setVerificationErrors(errors);
     }
+    setCheckList(mychecklist);
   }, [addRememe, userTDH]);
 
   useEffect(() => {
@@ -72,6 +104,14 @@ export default function RememeAddPage() {
       setMemes(responseNfts.sort((a, b) => a.id - b.id));
       setMemesLoaded(true);
     });
+  }, []);
+
+  useEffect(() => {
+    fetchUrl(`${process.env.API_ENDPOINT}/api/settings`).then(
+      (settings: SeizeSettings) => {
+        setSeizeSettings(settings);
+      }
+    );
   }, []);
 
   useEffect(() => {
@@ -94,12 +134,21 @@ export default function RememeAddPage() {
       postData(`${process.env.API_ENDPOINT}/api/rememes/add`, {
         address: accountResolution.address,
         signature: signMessage.data,
-        rememe: addRememe,
+        rememe: buildRememeObject(),
       }).then((response) => {
-        console.log(response);
+        alert(JSON.stringify(response.response));
+        console.log("response", response);
       });
     }
   }, [signMessage.data]);
+
+  function buildRememeObject() {
+    return {
+      contract: addRememe.contract.address,
+      token_ids: addRememe.nfts.map((n: any) => n.tokenId),
+      references: references,
+    };
+  }
 
   return (
     <Container fluid className={styles.mainContainer}>
@@ -125,9 +174,10 @@ export default function RememeAddPage() {
                     <Col className="no-padding">
                       <RememeAddComponent
                         memes={memes}
-                        verifiedRememe={(r) => {
+                        verifiedRememe={(r, references) => {
                           setAddRememe(r);
-                          setVerificationErrors([]);
+                          setReferences(references);
+                          setCheckList([]);
                           setSignErrors([]);
                           signMessage.reset();
                         }}
@@ -139,18 +189,41 @@ export default function RememeAddPage() {
             </Row>
             <Row className="pt-2">
               <Col className="d-flex justify-content-between align-items-center">
-                <span>
-                  {verificationErrors.length > 0 && (
-                    <ul>
-                      {verificationErrors.map((ve, index) => (
-                        <li key={`ve-${index}`}>{ve}</li>
+                <span className="d-flex flex-column gap-2">
+                  {checkList.length > 0 && (
+                    <ul className={styles.addRememeChecklist}>
+                      {checkList.map((note, index) => (
+                        <li
+                          key={`ve-${index}`}
+                          className={`d-flex align-items-center gap-2`}>
+                          {note.status ? (
+                            <FontAwesomeIcon
+                              icon="check-circle"
+                              className={styles.verifiedIcon}
+                            />
+                          ) : (
+                            <FontAwesomeIcon
+                              icon="times-circle"
+                              className={styles.unverifiedIcon}
+                            />
+                          )}
+                          {note.note}
+                        </li>
                       ))}
                     </ul>
                   )}
                   {signErrors.length > 0 && (
-                    <ul>
+                    <ul className={styles.addRememeChecklist}>
                       {signErrors.map((se, index) => (
-                        <li key={`se-${index}`}>{se}</li>
+                        <li
+                          key={`se-${index}`}
+                          className={`d-flex align-items-center gap-2`}>
+                          <FontAwesomeIcon
+                            icon="times-circle"
+                            className={styles.unverifiedIcon}
+                          />
+                          {se}
+                        </li>
                       ))}
                     </ul>
                   )}
@@ -162,12 +235,13 @@ export default function RememeAddPage() {
                       !addRememe ||
                       !addRememe.valid ||
                       !userTDH ||
-                      verificationErrors.length > 0
+                      checkList.some((c) => !c.status)
                     }
                     onClick={() => {
+                      setSignErrors([]);
                       if (addRememe) {
                         signMessage.signMessage({
-                          message: JSON.stringify(addRememe),
+                          message: JSON.stringify(buildRememeObject()),
                         });
                       }
                     }}>

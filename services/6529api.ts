@@ -2,7 +2,7 @@ import { DBResponse } from "../entities/IDBResponse";
 import Cookies from "js-cookie";
 import { API_AUTH_COOKIE } from "../constants";
 
-export async function fetchUrl(url: string): Promise<DBResponse> {
+export async function fetchUrl(url: string): Promise<DBResponse | any> {
   let headers = {};
   const apiAuth = Cookies.get(API_AUTH_COOKIE);
   if (apiAuth) {
