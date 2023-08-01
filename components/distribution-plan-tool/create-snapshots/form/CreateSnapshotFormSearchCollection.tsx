@@ -7,6 +7,11 @@ import {
   AllowlistToolResponse,
   DistributionPlanSearchContractMetadataResult,
 } from "../../../allowlist-tool/allowlist-tool.types";
+import { MEMES_CONTRACT } from "../../../../constants";
+import AllowlistToolCommonModalWrapper, {
+  AllowlistToolModalSize,
+} from "../../../allowlist-tool/common/modals/AllowlistToolCommonModalWrapper";
+import CreateSnapshotFormSearchCollectionMemesModal from "./CreateSnapshotFormSearchCollectionMemesModal";
 
 export default function CreateSnapshotFormSearchCollection({
   setCollection,
@@ -24,11 +29,18 @@ export default function CreateSnapshotFormSearchCollection({
   useClickAway(searchCollectionRef, () => closeDropdown());
   useKeyPressEvent("Escape", () => closeDropdown());
 
+  const [isOnMemesCollection, setIsOnMemesCollection] = useState(false);
+
   const onCollection = (param: {
     address: string;
     name: string;
     tokenIds: string | null;
   }) => {
+    if (param.address === MEMES_CONTRACT.toLowerCase()) {
+      closeDropdown();
+      setIsOnMemesCollection(true);
+      return;
+    }
     setCollection(param);
     closeDropdown();
   };
@@ -140,6 +152,15 @@ export default function CreateSnapshotFormSearchCollection({
     fetchCollections();
   }, [debouncedKeyword, setToasts]);
 
+  const onMemesCollection = (param: {
+    address: string;
+    name: string;
+    tokenIds: string | null;
+  }): void => {
+    setCollection(param);
+    setIsOnMemesCollection(false);
+  };
+
   return (
     <div className="tw-relative tw-max-w-lg" ref={searchCollectionRef}>
       <CreateSnapshotFormSearchCollectionInput
@@ -155,6 +176,18 @@ export default function CreateSnapshotFormSearchCollection({
           onCollection={onCollection}
         />
       )}
+      <AllowlistToolCommonModalWrapper
+        showModal={isOnMemesCollection}
+        onClose={() => setIsOnMemesCollection(false)}
+        title={`Select "The Memes by 6529" Seasons`}
+        modalSize={AllowlistToolModalSize.X_LARGE}
+        showTitle={true}
+      >
+        <CreateSnapshotFormSearchCollectionMemesModal
+          onMemesCollection={onMemesCollection}
+          collectionName="The Memes by 6529"
+        />
+      </AllowlistToolCommonModalWrapper>
     </div>
   );
 }
