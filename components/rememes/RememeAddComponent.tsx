@@ -15,7 +15,7 @@ import Tippy from "@tippyjs/react";
 import Image from "next/image";
 import { postData } from "../../services/6529api";
 
-interface AddRememe {
+export interface AddRememe {
   contract: string;
   token_ids: string[];
   references: number[];
@@ -23,7 +23,7 @@ interface AddRememe {
 
 interface Props {
   memes: NFT[];
-  verifiedRememe(r: any | undefined): void;
+  verifiedRememe(r: any | undefined, references: number[]): void;
 }
 
 export default function RememeAddComponent(props: Props) {
@@ -104,18 +104,17 @@ export default function RememeAddComponent(props: Props) {
           `${process.env.API_ENDPOINT}/api/rememes/validate`,
           getRememe(myTokenIds)
         );
-        console.log("validation", validation);
-        const contractR = validation.response.contract;
-        const nftResponses: Nft[] = validation.response.nfts;
-        console.log("nftResponses", nftResponses);
+        const response = validation.response;
+        const contractR = response.contract;
+        const nftResponses: Nft[] = response.nfts;
         if (contractR) {
           setContractResponse(contractR);
         }
         if (nftResponses) {
           setNftResponses(nftResponses);
         }
-        if (validation.response.errror) {
-          setVerificationErrors([validation.response.errror]);
+        if (response.error) {
+          setVerificationErrors([response.error]);
         }
         if (
           nftResponses &&
@@ -123,9 +122,12 @@ export default function RememeAddComponent(props: Props) {
         ) {
           setVerificationErrors(["Some Token IDs are invalid"]);
         }
-        setVerified(validation.response.valid);
-        if (validation.response.valid) {
-          props.verifiedRememe(validation.response);
+        setVerified(response.valid);
+        if (response.valid) {
+          props.verifiedRememe(
+            response,
+            references.map((r) => r.id)
+          );
         }
       } catch (e: any) {
         setVerificationErrors([e.message]);
@@ -167,7 +169,7 @@ export default function RememeAddComponent(props: Props) {
           <Col sm={12} md={6}>
             <Form.Group as={Row} className="pb-4">
               <Form.Label className="d-flex align-items-center">
-                Token ID
+                Token IDs
               </Form.Label>
               <Col>
                 <Form.Control
@@ -323,7 +325,7 @@ export default function RememeAddComponent(props: Props) {
                     icon="times-circle"
                     className={styles.unverifiedIcon}
                   />
-                  Verification Failed
+                  Verification Failed - Fix errors and revalidate
                 </span>
               </Col>
             </Row>
@@ -346,6 +348,15 @@ export default function RememeAddComponent(props: Props) {
                   !contract || !tokenIdDisplay || references.length == 0
                 }>
                 Validate
+                {verifying && (
+                  <div className="d-inline">
+                    <div
+                      className={`spinner-border ${styles.loader}`}
+                      role="status">
+                      <span className="sr-only"></span>
+                    </div>
+                  </div>
+                )}
               </Button>
             ) : (
               <div className="d-flex align-items-center justify-content-start gap-2">
