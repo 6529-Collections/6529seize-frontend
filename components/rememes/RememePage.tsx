@@ -251,6 +251,23 @@ export default function RememePage(props: Props) {
     }
   }
 
+  function getAttributes(): any[] {
+    if (rememe) {
+      if (Array.isArray(rememe.metadata.attributes)) {
+        return rememe.metadata.attributes;
+      } else if (typeof rememe.metadata.attributes === "object") {
+        const outputArray = Object.entries(rememe.metadata.attributes).map(
+          ([key, value]) => ({
+            trait_type: key,
+            value,
+          })
+        );
+        return outputArray;
+      }
+    }
+    return [];
+  }
+
   function printValue(s: string) {
     if (isUrl(s) || isIPFS(s)) {
       return (
@@ -349,7 +366,7 @@ export default function RememePage(props: Props) {
               <Col xs={12}>
                 <h1>ATTRIBUTES</h1>
               </Col>
-              {rememe.metadata.attributes.map((a: any) => (
+              {getAttributes().map((a: any) => (
                 <Col
                   key={a.trait_type}
                   xs={{ span: 6 }}
