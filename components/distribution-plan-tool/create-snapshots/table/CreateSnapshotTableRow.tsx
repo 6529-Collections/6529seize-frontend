@@ -176,14 +176,17 @@ export default function CreateSnapshotTableRow({
             ></path>
           </svg>
         ) : (
-          <span>{snapshot.downloaderStatus}</span>
+          <span
+            className={`tw-text-xs tw-font-medium tw-mr-2 tw-px-2.5 tw-py-0.5 tw-rounded-full ${
+              snapshot.downloaderStatus ===
+              DistributionPlanTokenPoolDownloadStatus.COMPLETED
+                ? "tw-bg-green-600/10 tw-text-success"
+                : "tw-bg-red-600/10 tw-text-error"
+            }`}
+          >
+            {snapshot.downloaderStatus}
+          </span>
         )}
-        <span className="tw-hidden tw-bg-green-600/10 tw-text-success tw-text-xs tw-font-medium tw-mr-2 tw-px-2.5 tw-py-0.5 tw-rounded-full">
-          Completed
-        </span>
-        <span className="tw-hidden tw-bg-red-600/10 tw-text-error tw-text-xs tw-font-medium tw-mr-2 tw-px-2.5 tw-py-0.5 tw-rounded-full">
-          Failed
-        </span>
       </td>
     </DistributionPlanTableRowWrapper>
   );

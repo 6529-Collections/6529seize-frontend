@@ -87,16 +87,12 @@ export default function CreateSnapshotFormSearchCollectionMemesModal({
           <div className="tw-mt-4 tw-divide-y tw-divide-solid tw-divide-neutral-800 tw-divide-x-0 tw-border-solid tw-border-x-0 tw-border-b tw-border-t tw-border-neutral-800">
             {options.map((option) => (
               <div
+                onClick={() => handleSelect(option.value)}
                 key={option.value}
-                className="tw-relative tw-flex tw-items-start tw-py-4"
+                className="tw-cursor-pointer tw-relative tw-flex tw-items-start tw-py-4"
               >
-                <div className="tw-min-w-0 tw-flex-1 tw-text-sm tw-leading-6">
-                  <label
-                    htmlFor={`option-${option.value}`}
-                    className="tw-select-none tw-font-medium tw-text-white"
-                  >
-                    {option.value} ({option.tokenIds})
-                  </label>
+                <div className="tw-min-w-0 tw-flex-1 tw-text-sm tw-leading-6 tw-font-medium tw-text-white">
+                  {option.value} ({option.tokenIds})
                 </div>
                 <div className="tw-ml-3 tw-flex tw-h-6 tw-w-auto tw-items-center">
                   <input
@@ -104,8 +100,11 @@ export default function CreateSnapshotFormSearchCollectionMemesModal({
                     name={`person-${option.value}`}
                     type="checkbox"
                     checked={selected.includes(option.value)}
-                    onChange={() => handleSelect(option.value)}
-                    className="tw-form-checkbox tw-h-4 tw-w-4 tw-bg-neutral-800 tw-rounded tw-border-solid tw-border-gray-600 tw-text-primary-500 focus:tw-ring-primary-500"
+                    onChange={(e) => {
+                      e.stopPropagation();
+                      handleSelect(option.value);
+                    }}
+                    className="tw-cursor-pointer tw-form-checkbox tw-h-4 tw-w-4 tw-bg-neutral-800 tw-rounded tw-border-solid tw-border-gray-600 tw-text-primary-500 focus:tw-ring-primary-500"
                   />
                 </div>
               </div>
