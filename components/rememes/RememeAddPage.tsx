@@ -35,6 +35,13 @@ export default function RememeAddPage() {
   const [checkList, setCheckList] = useState<CheckList[]>([]);
   const [signErrors, setSignErrors] = useState<string[]>([]);
 
+  const [submissionResult, setSubmissionResult] = useState<{
+    success: boolean;
+    message: string;
+    contract?: string;
+    tokens?: string[];
+  }>();
+
   useEffect(() => {
     const mychecklist: CheckList[] = [];
     if (addRememe) {
@@ -138,6 +145,16 @@ export default function RememeAddPage() {
       }).then((response) => {
         alert(JSON.stringify(response.response));
         console.log("response", response);
+        const success = response.status == 201;
+        const contract = response.response?.contract?.address;
+        const tokens = response.response?.nfts?.map((n: any) => n.tokenId);
+
+        setSubmissionResult({
+          success,
+          message: "",
+          contract,
+          tokens,
+        });
       });
     }
   }, [signMessage.data]);
@@ -229,24 +246,29 @@ export default function RememeAddPage() {
                   )}
                 </span>
                 {accountResolution.isConnected ? (
-                  <Button
-                    className="seize-btn"
-                    disabled={
-                      !addRememe ||
-                      !addRememe.valid ||
-                      !userTDH ||
-                      checkList.some((c) => !c.status)
-                    }
-                    onClick={() => {
-                      setSignErrors([]);
-                      if (addRememe) {
-                        signMessage.signMessage({
-                          message: JSON.stringify(buildRememeObject()),
-                        });
+                  <span className="d-flex flex-column gap-2">
+                    <Button
+                      className="seize-btn"
+                      disabled={
+                        !addRememe ||
+                        !addRememe.valid ||
+                        !userTDH ||
+                        checkList.some((c) => !c.status)
                       }
-                    }}>
-                    Add Rememe
-                  </Button>
+                      onClick={() => {
+                        setSignErrors([]);
+                        if (addRememe) {
+                          signMessage.signMessage({
+                            message: JSON.stringify(buildRememeObject()),
+                          });
+                        }
+                      }}>
+                      Add Rememe
+                    </Button>
+                    {submissionResult && (
+                      <>Status: {submissionResult.success}</>
+                    )}
+                  </span>
                 ) : (
                   <Button
                     className="seize-btn btn-white"
