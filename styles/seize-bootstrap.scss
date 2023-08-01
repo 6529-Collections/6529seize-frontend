@@ -152,15 +152,16 @@
   color: $lightest-grey;
 }
 
-table:not(#allowlist-tool table),
-thead:not(#allowlist-tool thead),
-tbody:not(#allowlist-tool tbody),
-tfoot:not(#allowlist-tool tfoot),
-tr:not(#allowlist-tool tr),
-td:not(#allowlist-tool td),
-th:not(#allowlist-tool th) {
-  color: $font-color !important;
-  border: none !important;
+.table {
+  thead,
+  tbody,
+  tfoot,
+  tr,
+  td,
+  th {
+    color: $font-color !important;
+    border: none !important;
+  }
 }
 
 .table > :not(caption) > * > * {
@@ -233,6 +234,10 @@ th:not(#allowlist-tool th) {
 
 .carousel-control-next {
   right: -40px;
+}
+
+.accordion-button {
+  color: $font-color !important;
 }
 
 .accordion-button::after {

@@ -17,16 +17,21 @@ body {
   overflow: auto;
 }
 
+textarea,
+select,
+input,
+button {
+  color: $font-color;
+}
+
 textarea:not(#allowlist-tool textarea),
 select:not(#allowlist-tool select),
 input:not(#allowlist-tool input),
 button:not(#allowlist-tool button),
-video,
-select:not(#allowlist-tool select) {
+video:not(#allowlist-tool video) {
   font-size: $font-size !important;
   outline: 0 !important;
   box-shadow: none !important;
-  color: $font-color !important;
 }
 
 a {
