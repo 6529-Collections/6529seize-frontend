@@ -148,7 +148,7 @@ export default function FinalizeSnapshotsTable({
               ></th>
             </tr>
           </thead>
-          <tbody className="tw-bg-neutral-900 tw-divide-y tw-divide-neutral-700/40">
+          <tbody className="tw-bg-neutral-800/60 tw-divide-y tw-divide-neutral-700/40">
             <AllowlistToolAnimationWrapper mode="wait" initial={false}>
               {rows.map((row) => (
                 <FinalizeSnapshotsTableRow

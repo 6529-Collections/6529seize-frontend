@@ -1,7 +1,7 @@
 export default function AllowlistToolCsvIcon() {
   return (
     <svg
-      className="tw-h-auto tw-w-auto tw-text-[#76bc99] tw-transition tw-duration-300 tw-ease-out"
+      className="tw-h-auto tw-w-auto tw-text-[#76bc99]"
       viewBox="0 0 71 80"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"

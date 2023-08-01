@@ -133,14 +133,14 @@ export default function ReviewDistributionPlanTableRow({
         "tw-whitespace-nowrap tw-py-4 tw-pr-3 tw-text-sm  tw-text-white tw-pl-8 sm:tw-pl-12 tw-font-light"
       );
       setCommonClasses(
-        "tw-whitespace-nowrap tw-px-3 tw-py-4 tw-text-sm tw-text-neutral-300 tw-font-light"
+        "tw-whitespace-nowrap tw-pl-3 tw-pr-4 tw-py-4 tw-text-sm tw-text-neutral-300 tw-font-light"
       );
     } else {
       setNameClasses(
         "tw-whitespace-nowrap tw-py-4 tw-pr-3 tw-text-sm  tw-text-white tw-pl-4 sm:tw-pl-6 tw-font-bold"
       );
       setCommonClasses(
-        "tw-whitespace-nowrap tw-px-3 tw-py-4 tw-text-sm tw-text-neutral-300 tw-font-bold"
+        "tw-whitespace-nowrap tw-pl-3 tw-pr-4 tw-py-4 tw-text-sm tw-text-neutral-300 tw-font-bold"
       );
     }
   }, [item.type]);
@@ -151,7 +151,7 @@ export default function ReviewDistributionPlanTableRow({
       <td className={commonClasses}>{item.description}</td>
       <td className={commonClasses}>{item.walletsCount}</td>
       <td className={commonClasses}>{item.spotsCount}</td>
-      <td className={`${commonClasses} tw-inline-flex tw-gap-x-2`}>
+      <td className={`${commonClasses} tw-flex tw-justify-end tw-gap-x-2`}>
         <button
           onClick={() => fetchResults(FetchResultsType.JSON)}
           type="button"

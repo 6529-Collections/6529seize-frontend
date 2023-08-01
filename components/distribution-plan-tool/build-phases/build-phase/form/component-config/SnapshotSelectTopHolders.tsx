@@ -250,9 +250,9 @@ export default function SnapshotSelectTopHolders({
               <div className="tw-mt-1.5">
                 <div
                   className={`
-                tw-flex tw-rounded-md tw-bg-white/5 tw-ring-1 tw-ring-inset tw-ring-white/10 focus-within:tw-ring-1 focus-within:tw-ring-inset ${
+                tw-flex tw-rounded-md tw-bg-white/5 tw-ring-1 tw-ring-inset tw-ring-white/10 focus-within:tw-ring-1 focus-within:tw-ring-inset tw-transition tw-duration-300 tw-ease-out ${
                   isFromError
-                    ? "focus-within:tw-ring-red-400"
+                    ? "focus-within:tw-ring-error"
                     : "focus-within:tw-ring-primary-400"
                 }`}
                 >
@@ -281,9 +281,9 @@ export default function SnapshotSelectTopHolders({
               <div className="tw-mt-1.5">
                 <div
                   className={`
-                tw-flex tw-rounded-md tw-bg-white/5 tw-ring-1 tw-ring-inset tw-ring-white/10 focus-within:tw-ring-1 focus-within:tw-ring-inset ${
+                tw-flex tw-rounded-md tw-bg-white/5 tw-ring-1 tw-ring-inset tw-ring-white/10 focus-within:tw-ring-1 focus-within:tw-ring-inset tw-transition tw-duration-300 tw-ease-out ${
                   isToError
-                    ? "focus-within:tw-ring-red-400"
+                    ? "focus-within:tw-ring-error"
                     : "focus-within:tw-ring-primary-400"
                 }`}
                 >
