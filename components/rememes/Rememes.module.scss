@@ -276,3 +276,17 @@
   padding: 6px 20px;
   margin-left: 20px;
 }
+
+.loader {
+  width: 20px;
+  height: 20px;
+  margin-left: 5px;
+}
+
+.addRememeChecklist {
+  padding: 0 !important;
+  margin: 0 !important;
+  li {
+    list-style-type: none;
+  }
+}
