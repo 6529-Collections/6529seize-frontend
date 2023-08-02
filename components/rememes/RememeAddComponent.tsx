@@ -21,9 +21,16 @@ export interface AddRememe {
   references: number[];
 }
 
+export interface ProcessedRememe {
+  valid: boolean;
+  contract: NftContract;
+  nfts: Nft[];
+  error?: string;
+}
+
 interface Props {
   memes: NFT[];
-  verifiedRememe(r: any | undefined, references: number[]): void;
+  verifiedRememe(r: ProcessedRememe | undefined, references: number[]): void;
 }
 
 export default function RememeAddComponent(props: Props) {
@@ -289,24 +296,25 @@ export default function RememeAddComponent(props: Props) {
                       <li key={`nftr-${nftR.tokenId}`}>
                         {nftR.metadataError ? (
                           <>
-                            {nftR.tokenId} - {nftR.metadataError}
+                            #{nftR.tokenId} - {nftR.metadataError}
                           </>
                         ) : (
-                          <a
-                            className="decoration-hover-underline"
-                            href={`https://opensea.io/assets/ethereum/${contract}/${nftR.tokenId}`}
-                            target="_blank"
-                            rel="noreferrer">
-                            {nftR.tokenId}
-                            {nftR.title && ` - ${nftR.title}`}
-                            &nbsp;&nbsp;
-                            <Image
-                              src="/opensea.png"
-                              alt="opensea"
-                              width={22}
-                              height={22}
-                            />
-                          </a>
+                          <>
+                            #{nftR.tokenId}
+                            {nftR.title && ` - ${nftR.title}`}&nbsp;&nbsp;
+                            <a
+                              className="decoration-hover-underline"
+                              href={`https://opensea.io/assets/ethereum/${contract}/${nftR.tokenId}`}
+                              target="_blank"
+                              rel="noreferrer">
+                              <Image
+                                src="/opensea.png"
+                                alt="opensea"
+                                width={22}
+                                height={22}
+                              />
+                            </a>
+                          </>
                         )}
                       </li>
                     ))}
@@ -374,7 +382,7 @@ export default function RememeAddComponent(props: Props) {
                     setVerified(false);
                     setNftResponses([]);
                     setContractResponse(undefined);
-                    props.verifiedRememe(undefined);
+                    props.verifiedRememe(undefined, []);
                   }}
                   className="seize-btn-link">
                   Edit
