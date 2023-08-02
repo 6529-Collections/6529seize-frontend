@@ -1,4 +1,4 @@
-import { Container, Row, Col, Dropdown } from "react-bootstrap";
+import { Container, Row, Col, Dropdown, Button } from "react-bootstrap";
 import styles from "./Rememes.module.scss";
 import { fetchAllPages, fetchUrl } from "../../services/6529api";
 import { MEMES_CONTRACT, OPENSEA_STORE_FRONT_CONTRACT } from "../../constants";
@@ -15,6 +15,7 @@ import {
   numberWithCommas,
 } from "../../helpers/Helpers";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import Tippy from "@tippyjs/react";
 
 const PAGE_SIZE = 20;
 
@@ -178,7 +179,7 @@ export default function Rememes(props: Props) {
     return (
       <>
         <Row>
-          <Col>
+          <Col className="d-flex align-items-center gap-2">
             <span className="font-color-h font-larger">
               (x{numberWithCommas(totalResults)})
             </span>
@@ -196,8 +197,11 @@ export default function Rememes(props: Props) {
       <Row>
         <Col>
           <Container className="pt-4">
-            <Row className="pt-2 pb-2">
-              <Col sm={12} md={4} className="d-flex align-items-center gap-2">
+            <Row>
+              <Col
+                sm={12}
+                md={4}
+                className="pt-2 pb-2 d-flex align-items-center gap-2">
                 <Image
                   loading={"eager"}
                   width="0"
@@ -206,25 +210,29 @@ export default function Rememes(props: Props) {
                   src="/re-memes.png"
                   alt="re-memes"
                 />
-                <FontAwesomeIcon
-                  icon="plus-circle"
-                  className={styles.refreshLink}
-                  onClick={() => {
-                    window.location.href = "/rememes/add";
-                  }}
-                />
-                <FontAwesomeIcon
-                  icon="refresh"
-                  className={styles.refreshLink}
-                  onClick={() => {
-                    fetchResults(page);
-                  }}
-                />
+                <Tippy content="Add ReMeme" placement="top" theme="light">
+                  <FontAwesomeIcon
+                    icon="plus-circle"
+                    className={styles.refreshLink}
+                    onClick={() => {
+                      window.location.href = "/rememes/add";
+                    }}
+                  />
+                </Tippy>
+                <Tippy content="Refresh results" placement="top" theme="light">
+                  <FontAwesomeIcon
+                    icon="refresh"
+                    className={styles.refreshLink}
+                    onClick={() => {
+                      fetchResults(page);
+                    }}
+                  />
+                </Tippy>
               </Col>
               <Col
                 sm={12}
                 md={8}
-                className="d-flex align-items-center justify-content-end flex-wrap gap-4">
+                className="pt-2 pb-2 d-flex align-items-center justify-content-end flex-wrap gap-3">
                 <Dropdown
                   className={styles.memeRefDropdown}
                   drop={"down-centered"}>

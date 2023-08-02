@@ -16,13 +16,19 @@ body {
 textarea,
 select,
 input,
-button,
-video,
-select {
+button {
+  color: $font-color;
+}
+
+textarea:not(#allowlist-tool textarea),
+select:not(#allowlist-tool select),
+input:not(#allowlist-tool input),
+button:not(#allowlist-tool button),
+video:not(#allowlist-tool video),
+svg:not(#allowlist-tool svg) {
   font-size: $font-size !important;
   outline: 0 !important;
   box-shadow: none !important;
-  color: $font-color !important;
 }
 
 a {
