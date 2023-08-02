@@ -5,7 +5,10 @@ import { useState, useEffect } from "react";
 import { MEMES_CONTRACT, OPENSEA_STORE_FRONT_CONTRACT } from "../../constants";
 import { NFT } from "../../entities/INFT";
 import { fetchAllPages, fetchUrl, postData } from "../../services/6529api";
-import RememeAddComponent from "./RememeAddComponent";
+import RememeAddComponent, {
+  AddRememe,
+  ProcessedRememe,
+} from "./RememeAddComponent";
 import { useAccount, useSignMessage } from "wagmi";
 import { useWeb3Modal } from "@web3modal/react";
 import { DBResponse } from "../../entities/IDBResponse";
@@ -30,14 +33,15 @@ export default function RememeAddPage() {
   const [memesLoaded, setMemesLoaded] = useState(false);
   const [userTDH, setUserTDH] = useState<ConsolidatedTDHMetrics>();
 
-  const [addRememe, setAddRememe] = useState<any>();
+  const [addRememe, setAddRememe] = useState<ProcessedRememe>();
   const [references, setReferences] = useState<number[]>();
   const [checkList, setCheckList] = useState<CheckList[]>([]);
   const [signErrors, setSignErrors] = useState<string[]>([]);
 
+  const [submitting, setSubmitting] = useState(false);
   const [submissionResult, setSubmissionResult] = useState<{
     success: boolean;
-    message: string;
+    errors?: string[];
     contract?: string;
     tokens?: string[];
   }>();
@@ -81,7 +85,7 @@ export default function RememeAddPage() {
               seizeSettings.rememes_submission_tdh_threshold,
             note: `You need ${numberWithCommas(
               seizeSettings.rememes_submission_tdh_threshold
-            )} TDH to add this Rememe`,
+            )} TDH to add this Rememe${addRememe.nfts.length > 0 ? `s` : ``}`,
           });
         } else {
           mychecklist.push({
@@ -90,7 +94,9 @@ export default function RememeAddPage() {
               seizeSettings.rememes_submission_tdh_threshold_moderator,
             note: `You need ${numberWithCommas(
               seizeSettings.rememes_submission_tdh_threshold_moderator
-            )} TDH to add this Rememe`,
+            )} TDH to add ${
+              addRememe.nfts.length > 0 ? `these Rememes` : `this Rememe`
+            }`,
           });
         }
       }
@@ -138,20 +144,31 @@ export default function RememeAddPage() {
 
   useEffect(() => {
     if (signMessage.isSuccess && signMessage.data) {
+      setSubmitting(true);
       postData(`${process.env.API_ENDPOINT}/api/rememes/add`, {
         address: accountResolution.address,
         signature: signMessage.data,
         rememe: buildRememeObject(),
       }).then((response) => {
-        alert(JSON.stringify(response.response));
-        console.log("response", response);
         const success = response.status == 201;
-        const contract = response.response?.contract?.address;
-        const tokens = response.response?.nfts?.map((n: any) => n.tokenId);
+        const processedRememe: ProcessedRememe = response.response;
+        const contract = processedRememe.contract?.address;
+        const tokens = processedRememe.nfts?.map((n) => n.tokenId);
 
+        const nftError: string[] = processedRememe.nfts
+          ? processedRememe.nfts
+              .filter((n) => n.metadataError)
+              .map((n) => `#${n.tokenId} - ${n.metadataError}`)
+          : [];
+
+        const message = processedRememe.error
+          ? [`Error: ${processedRememe.error}`]
+          : nftError;
+
+        setSubmitting(false);
         setSubmissionResult({
           success,
-          message: "",
+          errors: message,
           contract,
           tokens,
         });
@@ -161,8 +178,8 @@ export default function RememeAddPage() {
 
   function buildRememeObject() {
     return {
-      contract: addRememe.contract.address,
-      token_ids: addRememe.nfts.map((n: any) => n.tokenId),
+      contract: addRememe?.contract.address,
+      token_ids: addRememe?.nfts.map((n) => n.tokenId),
       references: references,
     };
   }
@@ -253,10 +270,12 @@ export default function RememeAddPage() {
                         !addRememe ||
                         !addRememe.valid ||
                         !userTDH ||
-                        checkList.some((c) => !c.status)
+                        checkList.some((c) => !c.status) ||
+                        submissionResult?.success
                       }
                       onClick={() => {
                         setSignErrors([]);
+                        setSubmissionResult(undefined);
                         if (addRememe) {
                           signMessage.signMessage({
                             message: JSON.stringify(buildRememeObject()),
@@ -265,9 +284,6 @@ export default function RememeAddPage() {
                       }}>
                       Add Rememe
                     </Button>
-                    {submissionResult && (
-                      <>Status: {submissionResult.success}</>
-                    )}
                   </span>
                 ) : (
                   <Button
@@ -279,6 +295,82 @@ export default function RememeAddPage() {
                 )}
               </Col>
             </Row>
+            {(submitting || signMessage.isLoading) && (
+              <Row className="pt-3">
+                <Col xs={12}>
+                  {signMessage.isLoading && "Signing Message"}
+                  {submitting && "Adding Rememe"}
+                  <div className="d-inline">
+                    <div
+                      className={`spinner-border ${styles.loader}`}
+                      role="status">
+                      <span className="sr-only"></span>
+                    </div>
+                  </div>
+                </Col>
+              </Row>
+            )}
+            {addRememe && submissionResult && (
+              <Row className="pt-3">
+                <Col xs={12}>
+                  <>
+                    {submissionResult.success ? (
+                      <span className="d-flex align-items-center gap-2">
+                        Status: Success
+                        <FontAwesomeIcon
+                          icon="check-circle"
+                          className={styles.verifiedIcon}
+                        />
+                      </span>
+                    ) : (
+                      <span className="d-flex align-items-center gap-2">
+                        Status: Fail
+                        <FontAwesomeIcon
+                          icon="times-circle"
+                          className={styles.unverifiedIcon}
+                        />
+                      </span>
+                    )}
+                  </>
+                </Col>
+                {submissionResult.errors &&
+                  submissionResult.errors.map((e, index) => (
+                    <Col
+                      xs={12}
+                      className="pt-2"
+                      key={`submission-result-error-${index}`}>
+                      {e}
+                    </Col>
+                  ))}
+                {submissionResult.success && submissionResult.tokens && (
+                  <Row className="pt-3">
+                    <Col xs={12}>
+                      <u>Rememes Added:</u>
+                    </Col>
+                    {submissionResult.tokens.map((t) => (
+                      <Col
+                        xs={12}
+                        className="pt-1 pb-1"
+                        key={`submission-result-token-${t}`}>
+                        #{t}
+                        &nbsp;&nbsp;
+                        <a
+                          className="font-color"
+                          href={`${
+                            process.env.BASE_ENDPOINT
+                              ? process.env.BASE_ENDPOINT
+                              : "https://seize.io"
+                          }/rememes/${submissionResult.contract}/${t}`}
+                          target="_blank"
+                          rel="noreferrer">
+                          view
+                        </a>
+                      </Col>
+                    ))}
+                  </Row>
+                )}
+              </Row>
+            )}
           </Container>
         </Col>
       </Row>
