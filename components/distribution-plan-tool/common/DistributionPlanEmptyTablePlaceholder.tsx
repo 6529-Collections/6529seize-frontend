@@ -26,7 +26,7 @@ export default function DistributionPlanEmptyTablePlaceholder({
       <div className="tw-mt-4 tw-text-sm tw-font-medium tw-text-neutral-100">
         {title}
       </div>
-      <p className="tw-mb-0 tw-mt-1 tw-text-sm tw-text-neutral-500">
+      <p className="tw-max-w-2xl tw-mb-0 tw-mt-1 tw-text-sm tw-text-neutral-500">
         {description}
       </p>
     </div>
