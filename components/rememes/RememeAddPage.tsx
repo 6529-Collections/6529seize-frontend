@@ -95,7 +95,7 @@ export default function RememeAddPage() {
             note: `You need ${numberWithCommas(
               seizeSettings.rememes_submission_tdh_threshold_moderator
             )} TDH to add ${
-              addRememe.nfts.length > 0 ? `these Rememes` : `this Rememe`
+              addRememe.nfts.length > 1 ? `these Rememes` : `this Rememe`
             }`,
           });
         }
