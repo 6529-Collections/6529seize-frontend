@@ -8,7 +8,7 @@ export default function BuildPhaseFormConfigModalSidebar({
   selectedOption,
   setSelectedOption,
 }: {
-  label,
+  label: string,
   options: BuildPhaseFormConfigModalSidebarOption[];
   selectedOption: string | null;
   setSelectedOption: (option: string) => void;
