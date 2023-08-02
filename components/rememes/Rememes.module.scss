@@ -135,8 +135,15 @@
 }
 
 .metadataTable > :not(caption) > * > * {
-  padding: 0.5rem 0.1rem;
-  word-wrap: break-word;
+  padding: 0.5rem;
+}
+
+.metadataTableNoBreak {
+  white-space: nowrap;
+}
+
+.metadataTableBreak {
+  word-break: break-all;
 }
 
 .addRememeContainer {
@@ -237,6 +244,7 @@
   color: #fb3535;
   width: 30px;
   height: 30px;
+  padding: 0.5rem;
 }
 
 .replica {
