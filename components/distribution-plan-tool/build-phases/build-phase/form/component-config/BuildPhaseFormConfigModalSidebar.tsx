@@ -3,10 +3,12 @@ export interface BuildPhaseFormConfigModalSidebarOption {
   readonly value: string;
 }
 export default function BuildPhaseFormConfigModalSidebar({
+  label,
   options,
   selectedOption,
   setSelectedOption,
 }: {
+  label,
   options: BuildPhaseFormConfigModalSidebarOption[];
   selectedOption: string | null;
   setSelectedOption: (option: string) => void;
@@ -19,7 +21,7 @@ export default function BuildPhaseFormConfigModalSidebar({
   return (
     <nav className="tw-w-auto tw-mt-2" aria-label="Sidebar">
       <div className="tw-text-base tw-font-medium tw-leading-6 tw-text-white">
-        Ranked by
+        {label}
       </div>
       <ul role="list" className="tw-list-none tw-mx-0 tw-mt-4 tw-mb-0 tw-p-0 tw-space-y-1">
         {options.map((option) => (

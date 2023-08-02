@@ -231,6 +231,7 @@ export default function SnapshotSelectTopHolders({
     <div>
       <div className="tw-flex tw-gap-x-8">
         <BuildPhaseFormConfigModalSidebar
+          label="Ranked by"
           options={sideBarOptions}
           selectedOption={topHolderType}
           setSelectedOption={(type) => setTopHolderType(type as TopHolderType)}

@@ -31,9 +31,7 @@ export default function ComponentSelectRandomHolders({
   isLoadingUniqueWalletsCount: boolean;
   onClose: () => void;
 }) {
-  const { setToasts } = useContext(
-    DistributionPlanToolContext
-  );
+  const { setToasts } = useContext(DistributionPlanToolContext);
   const [value, setValue] = useState<number | string>("");
   const [randomHoldersType, setRandomHoldersType] = useState<RandomHoldersType>(
     RandomHoldersType.BY_COUNT
@@ -144,6 +142,7 @@ export default function ComponentSelectRandomHolders({
     <div>
       <div className="tw-w-full tw-inline-flex tw-gap-x-8">
         <BuildPhaseFormConfigModalSidebar
+          label="Random type"
           options={sideBarOptions}
           selectedOption={randomHoldersType}
           setSelectedOption={(type) =>
@@ -187,7 +186,11 @@ export default function ComponentSelectRandomHolders({
         onNext={onRandomHolders}
         isDisabled={isDisabled}
       >
-        <ComponentConfigMeta tags={[]} walletsCount={localUniqueWalletsCount} isLoading={isLoadingUniqueWalletsCount}/>
+        <ComponentConfigMeta
+          tags={[]}
+          walletsCount={localUniqueWalletsCount}
+          isLoading={isLoadingUniqueWalletsCount}
+        />
       </ComponentConfigNextBtn>
     </div>
   );
