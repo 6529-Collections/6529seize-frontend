@@ -40,6 +40,15 @@ export default function RememePage(props: Props) {
   const [memes, setMemes] = useState<NFT[]>([]);
   const [memesLoaded, setMemesLoaded] = useState(false);
 
+  function parseDescription(description: string) {
+    let d = description.replaceAll("\n", "<br />");
+    d = d.replace(
+      /(https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9]{1,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*))/gi,
+      '<a href=\'$1\' target="blank" rel="noreferrer">$1</a>'
+    );
+    return d;
+  }
+
   useEffect(() => {
     if (props.contract && props.id) {
       fetchUrl(
@@ -251,6 +260,23 @@ export default function RememePage(props: Props) {
     }
   }
 
+  function getAttributes(): any[] {
+    if (rememe) {
+      if (Array.isArray(rememe.metadata.attributes)) {
+        return rememe.metadata.attributes;
+      } else if (typeof rememe.metadata.attributes === "object") {
+        const outputArray = Object.entries(rememe.metadata.attributes).map(
+          ([key, value]) => ({
+            trait_type: key,
+            value,
+          })
+        );
+        return outputArray;
+      }
+    }
+    return [];
+  }
+
   function printValue(s: string) {
     if (isUrl(s) || isIPFS(s)) {
       return (
@@ -276,8 +302,8 @@ export default function RememePage(props: Props) {
               <Table className={styles.metadataTable}>
                 <tbody>
                   <tr>
-                    <td>Token URI</td>
-                    <td>
+                    <td className={styles.metadataTableNoBreak}>Token URI</td>
+                    <td className={styles.metadataTableBreak}>
                       <a
                         href={rememe.token_uri}
                         target="_blank"
@@ -292,8 +318,10 @@ export default function RememePage(props: Props) {
                     </td>
                   </tr>
                   <tr>
-                    <td>Token Type</td>
-                    <td>{rememe.token_type}</td>
+                    <td className={styles.metadataTableNoBreak}>Token Type</td>
+                    <td className={styles.metadataTableBreak}>
+                      {rememe.token_type}
+                    </td>
                   </tr>
                 </tbody>
               </Table>
@@ -303,7 +331,11 @@ export default function RememePage(props: Props) {
             <Col xs={12}>
               <h1>DESCRIPTION</h1>
             </Col>
-            <Col xs={12}>{rememe.metadata.description}</Col>
+            <Col
+              xs={12}
+              dangerouslySetInnerHTML={{
+                __html: parseDescription(rememe.metadata.description),
+              }}></Col>
           </Row>
           <Row className="pt-4">
             <Col xs={12}>
@@ -349,7 +381,7 @@ export default function RememePage(props: Props) {
               <Col xs={12}>
                 <h1>ATTRIBUTES</h1>
               </Col>
-              {rememe.metadata.attributes.map((a: any) => (
+              {getAttributes().map((a: any) => (
                 <Col
                   key={a.trait_type}
                   xs={{ span: 6 }}
