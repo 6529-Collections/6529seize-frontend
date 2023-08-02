@@ -135,7 +135,115 @@
 }
 
 .metadataTable > :not(caption) > * > * {
-  padding: 0.5rem 0.1rem;
+  padding: 0.5rem;
+}
+
+.metadataTableNoBreak {
+  white-space: nowrap;
+}
+
+.metadataTableBreak {
+  word-break: break-all;
+}
+
+.addRememeContainer {
+  border: 1px solid white;
+  padding: 30px;
+}
+
+.formInput {
+  color: $dark-grey !important;
+  border-radius: 0 !important;
+  border-color: $lightest-grey;
+
+  &:focus {
+    border-color: $blue !important;
+  }
+}
+
+.addMemeReferencesDropdown {
+  line-height: 48px;
+  background-color: transparent;
+  border: none;
+  a {
+    line-height: 30px;
+  }
+  svg {
+    color: $off-white;
+    width: 30px;
+    height: 30px;
+
+    &:hover {
+      color: white;
+    }
+  }
+  button {
+    border: none !important;
+    background-color: transparent !important;
+    padding: 0 !important;
+
+    &::after {
+      border: none !important;
+    }
+  }
+
+  div {
+    max-height: 50vh;
+    overflow-y: auto;
+  }
+}
+
+.addMemeReferenceWrapper {
+  white-space: nowrap;
+  float: none;
+  line-height: 250%;
+}
+
+.addMemeReferenceDisplay {
+  color: $bg-color-1;
+  background-color: $off-white;
+  padding: 5px 10px;
+  margin-right: 10px;
+  border-top-right-radius: 5px;
+  border-bottom-right-radius: 5px;
+}
+
+.addMemeReferenceDisplayBtn {
+  border: none;
+  border-radius: 0;
+  color: $bg-color-1;
+  border-color: $bg-color-1 !important;
+  width: 30px;
+  background-color: $off-white;
+  padding: 5px 10px;
+  border-right: 1px solid $bg-color-1;
+  border-top-left-radius: 5px;
+  border-bottom-left-radius: 5px;
+  cursor: pointer;
+  outline: 0 !important;
+
+  &:hover {
+    background-color: white;
+    color: black !important;
+  }
+}
+
+.addMemeReferenceDisplayBtnDisabled {
+  pointer-events: none !important;
+  background-color: darken($color: white, $amount: 20);
+  color: $lighter-grey-2;
+}
+
+.verifiedIcon {
+  color: #00ba00;
+  width: 30px;
+  height: 30px;
+}
+
+.unverifiedIcon {
+  color: #fb3535;
+  width: 30px;
+  height: 30px;
 }
 
 .replica {
@@ -153,5 +261,39 @@
   &:hover {
     background-color: $almost-very-dark-grey;
     border: 1px solid $off-white;
+  }
+}
+
+.addRememeTokenList {
+  position: relative;
+  max-height: 40vh;
+  overflow-y: scroll;
+
+  li {
+    word-wrap: break-word;
+  }
+}
+
+.connectWalletButton {
+  background-color: white !important;
+  color: black !important;
+  font-size: larger !important;
+  font-weight: bolder !important;
+  border: none !important;
+  padding: 6px 20px;
+  margin-left: 20px;
+}
+
+.loader {
+  width: 20px;
+  height: 20px;
+  margin-left: 5px;
+}
+
+.addRememeChecklist {
+  padding: 0 !important;
+  margin: 0 !important;
+  li {
+    list-style-type: none;
   }
 }

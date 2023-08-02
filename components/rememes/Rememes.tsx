@@ -201,6 +201,13 @@ export default function Rememes(props: Props) {
                   ``
                 )}
                 <FontAwesomeIcon
+                  icon="plus-circle"
+                  className={styles.refreshLink}
+                  onClick={() => {
+                    window.location.href = "/rememes/add";
+                  }}
+                />
+                <FontAwesomeIcon
                   icon="refresh"
                   className={styles.refreshLink}
                   onClick={() => {

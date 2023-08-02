@@ -2,7 +2,7 @@ import { DBResponse } from "../entities/IDBResponse";
 import Cookies from "js-cookie";
 import { API_AUTH_COOKIE } from "../constants";
 
-export async function fetchUrl(url: string): Promise<any> {
+export async function fetchUrl(url: string): Promise<DBResponse | any> {
   let headers = {};
   const apiAuth = Cookies.get(API_AUTH_COOKIE);
   if (apiAuth) {
@@ -28,4 +28,24 @@ export async function fetchAllPages(url: string, data?: any[]): Promise<any[]> {
     return fetchAllPages(response.next, allData);
   }
   return allData;
+}
+
+export async function postData(url: string, body: any) {
+  let headers: any = {
+    "Content-Type": "application/json",
+  };
+  const apiAuth = Cookies.get(API_AUTH_COOKIE);
+  if (apiAuth) {
+    headers = { "x-6529-auth": apiAuth, "Content-Type": "application/json" };
+  }
+  const res = await fetch(url, {
+    method: "POST",
+    body: JSON.stringify(body),
+    headers: headers,
+  });
+  const json = await res.json();
+  return {
+    status: res.status,
+    response: json,
+  };
 }

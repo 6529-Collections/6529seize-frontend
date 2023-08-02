@@ -152,4 +152,6 @@ export interface Rememe {
   s3_image_thumbnail: string;
   s3_image_icon: string;
   replicas: number[];
+  source: string;
+  added_by: string;
 }
