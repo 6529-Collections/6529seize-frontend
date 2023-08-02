@@ -174,7 +174,18 @@ export default function Rememes(props: Props) {
       );
     }
     return (
-      <Row className="pt-2">{rememes.map((rememe) => printRememe(rememe))}</Row>
+      <>
+        <Row>
+          <Col>
+            <span className="font-color-h font-larger">
+              (x{numberWithCommas(totalResults)})
+            </span>
+          </Col>
+        </Row>
+        <Row className="pt-2">
+          {rememes.map((rememe) => printRememe(rememe))}
+        </Row>
+      </>
     );
   }
 
@@ -193,13 +204,6 @@ export default function Rememes(props: Props) {
                   src="/re-memes.png"
                   alt="re-memes"
                 />
-                {rememesLoaded && totalResults > 0 ? (
-                  <span className="font-color-h font-larger">
-                    &nbsp;(x{numberWithCommas(totalResults)})
-                  </span>
-                ) : (
-                  ``
-                )}
                 <FontAwesomeIcon
                   icon="plus-circle"
                   className={styles.refreshLink}
@@ -284,7 +288,7 @@ export default function Rememes(props: Props) {
           </Container>
         </Col>
       </Row>
-      {totalResults > PAGE_SIZE && (
+      {totalResults > PAGE_SIZE && rememesLoaded && (
         <Row className="text-center pt-4 pb-4">
           <Pagination
             page={page}
