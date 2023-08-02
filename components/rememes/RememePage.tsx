@@ -46,7 +46,6 @@ export default function RememePage(props: Props) {
       /(https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9]{1,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*))/gi,
       '<a href=\'$1\' target="blank" rel="noreferrer">$1</a>'
     );
-    alert(d);
     return d;
   }
 
