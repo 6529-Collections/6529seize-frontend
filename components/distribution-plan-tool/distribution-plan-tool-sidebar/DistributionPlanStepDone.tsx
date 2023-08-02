@@ -1,15 +1,35 @@
+import { useContext, useEffect, useState } from "react";
 import {
   DISTRIBUTION_PLAN_STEPS,
   DistributionPlanStepDescription,
 } from "./DistributionPlanToolSidebar";
+import {
+  DistributionPlanToolContext,
+  DistributionPlanToolStep,
+} from "../DistributionPlanToolContext";
 
 export default function DistributionPlanStepDone({
   step,
 }: {
   step: DistributionPlanStepDescription;
 }) {
+  const { setStep } = useContext(DistributionPlanToolContext);
   const isLastStep =
     step.order === Object.values(DISTRIBUTION_PLAN_STEPS).at(-1)!.order;
+
+  const [isNotCreatePlanStep, setIsNotCreatePlanStep] = useState(false);
+  useEffect(
+    () =>
+      setIsNotCreatePlanStep(step.key !== DistributionPlanToolStep.CREATE_PLAN),
+    [step.key]
+  );
+
+  const onStep = () => {
+    if (isNotCreatePlanStep) {
+      setStep(step.key);
+    }
+  };
+
   return (
     <li className="tw-relative tw-pb-10">
       {!isLastStep && (
@@ -19,7 +39,12 @@ export default function DistributionPlanStepDone({
         ></div>
       )}
 
-      <div className="tw-group tw-relative tw-flex tw-items-start">
+      <div
+        onClick={onStep}
+        className={`tw-group tw-relative tw-flex tw-items-start ${
+          isNotCreatePlanStep ? "tw-cursor-pointer" : ""
+        }`}
+      >
         <span className="tw-flex tw-h-8 tw-items-center">
           <span className="tw-relative tw-z-0 tw-flex tw-h-7 tw-w-7 tw-items-center tw-justify-center tw-rounded-full tw-bg-neutral-100">
             <svg
