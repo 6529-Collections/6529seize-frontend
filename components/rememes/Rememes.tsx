@@ -178,11 +178,25 @@ export default function Rememes(props: Props) {
     }
     return (
       <>
-        <Row>
-          <Col className="d-flex align-items-center gap-2">
+        <Row className="pt-2 pb-2">
+          <Col className="d-flex align-items-center gap-3">
             <span className="font-color-h font-larger">
               (x{numberWithCommas(totalResults)})
             </span>
+            <Button
+              className="seize-btn btn-white d-flex align-items-center"
+              onClick={() => {
+                window.location.href = "/rememes/add";
+              }}>
+              Add ReMeme{" "}
+              <FontAwesomeIcon
+                icon="plus-circle"
+                className={styles.refreshLink}
+                onClick={() => {
+                  window.location.href = "/rememes/add";
+                }}
+              />
+            </Button>
           </Col>
         </Row>
         <Row className="pt-2">
@@ -210,16 +224,11 @@ export default function Rememes(props: Props) {
                   src="/re-memes.png"
                   alt="re-memes"
                 />
-                <Tippy content="Add ReMeme" placement="top" theme="light">
-                  <FontAwesomeIcon
-                    icon="plus-circle"
-                    className={styles.refreshLink}
-                    onClick={() => {
-                      window.location.href = "/rememes/add";
-                    }}
-                  />
-                </Tippy>
-                <Tippy content="Refresh results" placement="top" theme="light">
+                <Tippy
+                  content="Refresh results"
+                  placement="top"
+                  theme="light"
+                  delay={250}>
                   <FontAwesomeIcon
                     icon="refresh"
                     className={styles.refreshLink}

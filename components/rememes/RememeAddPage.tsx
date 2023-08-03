@@ -201,6 +201,12 @@ export default function RememeAddPage() {
                 />
               </Col>
             </Row>
+            <Row className="pt-2">
+              <Col>
+                Please use this page to only add ReMemes{" "}
+                <a href="#requirements">view requirements</a>
+              </Col>
+            </Row>
             <Row className="pt-4">
               <Col>
                 <Container>
@@ -371,6 +377,27 @@ export default function RememeAddPage() {
                 )}
               </Row>
             )}
+            <Row className="pt-5" id="requirements">
+              <Col className="pt-5">
+                Submission Requirements:
+                <ol className="pt-2">
+                  <li className="pt-2">
+                    This form will allow you to submit ReMemes if you are the
+                    contract deployer or if you are not the contract deployer,
+                    but have a TDH &gt; 6,942
+                  </li>
+                  <li className="pt-2">
+                    You must connect with your Ethereum wallet (from any of your
+                    consolidated addresses)
+                  </li>
+                  <li className="pt-2">
+                    The contracts and tokens added must be a ReMeme of one or
+                    more Meme Cards. Please do not submit other contracts or
+                    there may be implications (for you!)
+                  </li>
+                </ol>
+              </Col>
+            </Row>
           </Container>
         </Col>
       </Row>
