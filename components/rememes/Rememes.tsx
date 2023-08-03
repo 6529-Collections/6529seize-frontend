@@ -179,7 +179,8 @@ export default function Rememes(props: Props) {
     return (
       <>
         <Row className="pt-2 pb-2">
-          <Col className="d-flex align-items-center gap-3">
+          <Col
+            className={`d-flex align-items-center gap-3 ${styles.rememesCountRow}`}>
             <span className="font-color-h font-larger">
               (x{numberWithCommas(totalResults)})
             </span>
@@ -211,11 +212,11 @@ export default function Rememes(props: Props) {
       <Row>
         <Col>
           <Container className="pt-4">
-            <Row>
+            <Row className="d-flex justify-content-between">
               <Col
                 sm={12}
                 md={4}
-                className="pt-2 pb-2 d-flex align-items-center gap-2">
+                className={`pt-2 pb-2 d-flex align-items-center gap-2 ${styles.rememesHeaderRow}`}>
                 <Image
                   loading={"eager"}
                   width="0"
@@ -241,7 +242,7 @@ export default function Rememes(props: Props) {
               <Col
                 sm={12}
                 md={8}
-                className="pt-2 pb-2 d-flex align-items-center justify-content-end flex-wrap gap-3">
+                className={`pt-2 pb-2 d-flex align-items-center flex-wrap gap-3 ${styles.rememesFiltersRow}`}>
                 <Dropdown
                   className={styles.memeRefDropdown}
                   drop={"down-centered"}>
