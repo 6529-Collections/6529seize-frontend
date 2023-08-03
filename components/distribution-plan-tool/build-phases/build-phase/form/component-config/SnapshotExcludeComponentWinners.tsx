@@ -17,7 +17,6 @@ import {
   AllowlistToolResponse,
   Pool,
 } from "../../../../../allowlist-tool/allowlist-tool.types";
-import { assertUnreachable } from "../../../../../../helpers/AllowlistToolHelpers";
 
 const SELECT_ALL_OPTION: AllowlistToolSelectMenuMultipleOption = {
   title: "Exclude All Prior Groups",
@@ -175,6 +174,7 @@ export default function SnapshotExcludeComponentWinners({
           },
           body: JSON.stringify({
             excludeComponentWinners,
+            excludeSnapshots: config.excludeSnapshots,
             extraWallets,
           }),
         });

@@ -20,7 +20,7 @@ module.exports = {
         "primary-500": "#406AFE",
         "primary-600": "#395FE4",
         error: "#F97066",
-        success: "#12B76A",
+        success: "#83BF6E",
       },
       gridTemplateColumns: {
         13: "repeat(13, minmax(0, 1fr))",

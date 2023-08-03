@@ -177,11 +177,11 @@ export default function CreateSnapshotTableRow({
           </svg>
         ) : (
           <span
-            className={`tw-text-xs tw-font-medium tw-mr-2 tw-px-2.5 tw-py-0.5 tw-rounded-full ${
+            className={`tw-text-xs tw-font-medium tw-mr-2 tw-px-2.5 tw-py-0.5 tw-rounded-md ${
               snapshot.downloaderStatus ===
               DistributionPlanTokenPoolDownloadStatus.COMPLETED
-                ? "tw-bg-green-600/10 tw-text-success"
-                : "tw-bg-red-600/10 tw-text-error"
+                ? "tw-bg-[#EAFAE4]/10 tw-text-success"
+                : "tw-bg-[#312524] tw-text-[#FF6A55]"
             }`}
           >
             {snapshot.downloaderStatus}

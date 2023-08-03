@@ -12,9 +12,10 @@ import FinalizeSnapshotsTableRow from "./FinalizeSnapshotsTableRow";
 export interface FinalizeSnapshotRow {
   readonly groupSnapshotId: string;
   readonly snapshot: DistributionPlanSnapshot | null;
+  readonly excludeSnapshots: string;
   readonly excludeComponentWinners: string;
   readonly topHoldersFilter: string;
-  readonly uniqueWalletsCount: number | null;
+  readonly uniqueWalletsCount: number | null;
 }
 
 export default function FinalizeSnapshotsTable({
@@ -90,6 +91,9 @@ export default function FinalizeSnapshotsTable({
         return {
           groupSnapshotId: groupSnapshot.groupSnapshotId ?? "",
           snapshot: snapshot ?? null,
+          excludeSnapshots: groupSnapshot.excludeSnapshots.length
+            ? `${groupSnapshot.excludeSnapshots.length.toString()} snapshots`
+            : "",
           excludeComponentWinners: groupSnapshot.excludeComponentWinners.length
             ? `${groupSnapshot.excludeComponentWinners.length.toString()} groups`
             : "",
@@ -128,6 +132,18 @@ export default function FinalizeSnapshotsTable({
                 scope="col"
                 className="tw-px-3 tw-py-3 tw-whitespace-nowrap tw-text-left tw-text-[0.6875rem] tw-leading-[1.125rem] tw-font-medium tw-text-neutral-400 tw-uppercase tw-tracking-[0.25px]"
               >
+                Wallets
+              </th>
+              <th
+                scope="col"
+                className="tw-px-3 tw-py-3 tw-whitespace-nowrap tw-text-left tw-text-[0.6875rem] tw-leading-[1.125rem] tw-font-medium tw-text-neutral-400 tw-uppercase tw-tracking-[0.25px]"
+              >
+                Exclude snapshots
+              </th>
+              <th
+                scope="col"
+                className="tw-px-3 tw-py-3 tw-whitespace-nowrap tw-text-left tw-text-[0.6875rem] tw-leading-[1.125rem] tw-font-medium tw-text-neutral-400 tw-uppercase tw-tracking-[0.25px]"
+              >
                 Exclude components
               </th>
               <th
@@ -136,12 +152,7 @@ export default function FinalizeSnapshotsTable({
               >
                 Top holders
               </th>
-              <th
-                scope="col"
-                className="tw-px-3 tw-py-3 tw-whitespace-nowrap tw-text-left tw-text-[0.6875rem] tw-leading-[1.125rem] tw-font-medium tw-text-neutral-400 tw-uppercase tw-tracking-[0.25px]"
-              >
-                Wallets
-              </th>
+
               <th
                 scope="col"
                 className="tw-px-3 tw-py-3 tw-whitespace-nowrap tw-text-left tw-text-[0.6875rem] tw-leading-[1.125rem] tw-font-medium tw-text-neutral-400 tw-uppercase tw-tracking-[0.25px]"

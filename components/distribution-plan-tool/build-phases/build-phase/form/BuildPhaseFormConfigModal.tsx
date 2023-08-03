@@ -20,9 +20,12 @@ import FinalizeSnapshot from "./component-config/FinalizeSnapshot";
 import ComponentSelectRandomHolders from "./component-config/ComponentSelectRandomHolders";
 import ComponentAddSpots from "./component-config/ComponentAddSpots";
 import FinalizeComponent from "./component-config/FinalizeComponent";
+import SnapshotExcludeOtherSnapshots from "./component-config/SnapshotExcludeOtherSnapshots";
+import { useDebounce } from "react-use";
 
 export enum PhaseConfigStep {
   SELECT_SNAPSHOT = "SELECT_SNAPSHOT",
+  SNAPSHOT_EXCLUDE_OTHER_SNAPSHOTS = "SNAPSHOT_EXCLUDE_OTHER_SNAPSHOTS",
   SNAPSHOT_EXCLUDE_COMPONENT_WINNERS = "SNAPSHOT_EXCLUDE_COMPONENT_WINNERS",
   SNAPSHOT_SELECT_TOP_HOLDERS = "SNAPSHOT_SELECT_TOP_HOLDERS",
   FINALIZE_SNAPSHOT = "FINALIZE_SNAPSHOT",
@@ -49,12 +52,19 @@ export interface DistributionPlanSnapshot {
   readonly walletsCount: number | null;
 }
 
+export interface PhaseGroupSnapshotConfigExcludeSnapshot {
+  readonly snapshotId: string;
+  readonly snapshotType: Pool;
+  readonly extraWallets: string[];
+}
+
 export interface PhaseGroupSnapshotConfig {
   groupSnapshotId: string | null;
   snapshotId: string | null;
   snapshotType: Pool.TOKEN_POOL | Pool.CUSTOM_TOKEN_POOL | null;
   snapshotSchema: string | null;
   excludeComponentWinners: string[];
+  excludeSnapshots: PhaseGroupSnapshotConfigExcludeSnapshot[];
   topHoldersFilter: {
     type: TopHolderType;
     from: number | null;
@@ -178,6 +188,7 @@ export default function BuildPhaseFormConfigModal({
       snapshotType: null,
       snapshotSchema: null,
       excludeComponentWinners: [],
+      excludeSnapshots: [],
       topHoldersFilter: null,
       uniqueWalletsCount: null,
     });
@@ -189,6 +200,7 @@ export default function BuildPhaseFormConfigModal({
       snapshotType: null,
       snapshotSchema: null,
       excludeComponentWinners: [],
+      excludeSnapshots: [],
       topHoldersFilter: null,
       uniqueWalletsCount: null,
     });
@@ -251,10 +263,23 @@ export default function BuildPhaseFormConfigModal({
       snapshotType,
       snapshotSchema: contractSchema,
       excludeComponentWinners: [],
+      excludeSnapshots: [],
       topHoldersFilter: null,
       uniqueWalletsCount,
     });
 
+    const haveMoreSnapshots = !!operations.filter(
+      (operation) =>
+        [
+          AllowlistOperationCode.CREATE_TOKEN_POOL,
+          AllowlistOperationCode.CREATE_CUSTOM_TOKEN_POOL,
+        ].includes(operation.code) && operation.params.id !== snapshotId
+    ).length;
+
+    if (haveMoreSnapshots) {
+      onNextStep(PhaseConfigStep.SNAPSHOT_EXCLUDE_OTHER_SNAPSHOTS);
+      return;
+    }
     const haveComponents = targetPhases.some(
       (phase) => phase.components.length > 0
     );
@@ -264,6 +289,34 @@ export default function BuildPhaseFormConfigModal({
       return;
     }
     onNextStep(PhaseConfigStep.SNAPSHOT_EXCLUDE_COMPONENT_WINNERS);
+  };
+
+  const onExcludeOtherSnapshotsNextStep = () => {
+    const haveComponents = targetPhases.some(
+      (phase) => phase.components.length > 0
+    );
+
+    if (!haveComponents) {
+      onNextStep(PhaseConfigStep.SNAPSHOT_SELECT_TOP_HOLDERS);
+      return;
+    }
+    onNextStep(PhaseConfigStep.SNAPSHOT_EXCLUDE_COMPONENT_WINNERS);
+  };
+
+  const onSelectExcludeOtherSnapshots = (param: {
+    snapshotsToExclude: {
+      snapshotId: string;
+      snapshotType: Pool;
+      extraWallets: string[];
+    }[];
+    uniqueWalletsCount: number | null;
+  }) => {
+    setPhaseGroupSnapshotConfig((prev) => ({
+      ...prev,
+      excludeSnapshots: param.snapshotsToExclude,
+      uniqueWalletsCount: param.uniqueWalletsCount,
+    }));
+    onExcludeOtherSnapshotsNextStep();
   };
 
   const onSelectExcludeComponentWinners = ({
@@ -364,29 +417,27 @@ export default function BuildPhaseFormConfigModal({
     setConfigStep(PhaseConfigStep.SELECT_SNAPSHOT);
   };
 
-  const [isLoading, setIsLoading] = useState(false);
-  const addOperation = async ({
-    code,
-    params,
+  const [isAddingOperations, setIsAddingOperations] = useState(false);
+  const createOperations = async ({
+    ops,
     distributionPlanId,
   }: {
-    code: AllowlistOperationCode;
-    params: any;
+    ops: {
+      code: AllowlistOperationCode;
+      params: any;
+    }[];
     distributionPlanId: string;
   }): Promise<{ success: boolean }> => {
-    const url = `${process.env.ALLOWLIST_API_ENDPOINT}/allowlists/${distributionPlanId}/operations`;
+    const url = `${process.env.ALLOWLIST_API_ENDPOINT}/allowlists/${distributionPlanId}/operations/batch`;
     try {
       const response = await fetch(url, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          code,
-          params,
-        }),
+        body: JSON.stringify(ops),
       });
-      const data: AllowlistToolResponse<AllowlistOperation> =
+      const data: AllowlistToolResponse<AllowlistOperation[]> =
         await response.json();
       if ("error" in data) {
         setToasts({
@@ -396,7 +447,7 @@ export default function BuildPhaseFormConfigModal({
         });
         return { success: false };
       }
-      addOperations([data]);
+      addOperations(data);
       return { success: true };
     } catch (error) {
       setToasts({
@@ -474,6 +525,7 @@ export default function BuildPhaseFormConfigModal({
           snapshotType,
           snapshotId,
           excludeComponentWinners,
+          excludeSnapshots,
           topHoldersFilter,
         } = groupSnapshot;
         if (!snapshotType || !snapshotId) continue;
@@ -493,6 +545,19 @@ export default function BuildPhaseFormConfigModal({
             poolType: snapshotType,
           },
         });
+
+        if (excludeSnapshots.length > 0) {
+          result.push({
+            code: AllowlistOperationCode.ITEM_REMOVE_WALLETS_FROM_CERTAIN_TOKEN_POOLS,
+            params: {
+              itemId,
+              pools: excludeSnapshots.map((s) => ({
+                poolType: s.snapshotType,
+                poolId: s.snapshotId,
+              })),
+            },
+          });
+        }
 
         if (excludeComponentWinners.length > 0) {
           result.push({
@@ -599,38 +664,6 @@ export default function BuildPhaseFormConfigModal({
     description,
   ]);
 
-  const [
-    uniqueWalletsCountRequestOperations,
-    setUniqueWalletsCountRequestOperations,
-  ] = useState<AllowlistOperationBase[]>([]);
-
-  useEffect(() => {
-    const customTokenPoolIds = new Set(
-      newOperations
-        .filter(
-          (o) =>
-            o.code === AllowlistOperationCode.ADD_ITEM &&
-            o.params.poolType === Pool.CUSTOM_TOKEN_POOL
-        )
-        .map((o) => o.params.poolId)
-    );
-
-    const customTokenPoolOperations = operations
-      .filter(
-        (o) =>
-          o.code === AllowlistOperationCode.CREATE_CUSTOM_TOKEN_POOL &&
-          customTokenPoolIds.has(o.params.id)
-      )
-      .map((o) => ({
-        code: o.code,
-        params: o.params,
-      }));
-    setUniqueWalletsCountRequestOperations([
-      ...customTokenPoolOperations,
-      ...newOperations,
-    ]);
-  }, [newOperations, operations]);
-
   const onSave = async () => {
     if (
       !distributionPlan ||
@@ -640,16 +673,11 @@ export default function BuildPhaseFormConfigModal({
       return;
     }
 
-    setIsLoading(true);
-
-    for (const operation of newOperations) {
-      await addOperation({
-        code: operation.code,
-        params: operation.params,
-        distributionPlanId: distributionPlan.id,
-      });
-    }
-    setIsLoading(false);
+    setIsAddingOperations(true);
+    await createOperations({
+      distributionPlanId: distributionPlan.id,
+      ops: newOperations,
+    });
     runOperations();
     onClose();
   };
@@ -665,12 +693,63 @@ export default function BuildPhaseFormConfigModal({
   const [isLoadingUniqueWalletsCount, setIsLoadingUniqueWalletsCount] =
     useState<boolean>(false);
 
+  const [uniqueCountOps, setUniqueCountOps] = useState<
+    AllowlistOperationBase[]
+  >([]);
+
+  useEffect(() => {
+    const customTokenPoolIds = new Set(
+      newOperations
+        .filter(
+          (o) =>
+            o.code === AllowlistOperationCode.ADD_ITEM &&
+            o.params.poolType === Pool.CUSTOM_TOKEN_POOL
+        )
+        .map((o) => o.params.poolId)
+    );
+
+    const excludeCustomTokenPoolIds = new Set(
+      newOperations.flatMap((o) => {
+        if (
+          o.code ===
+          AllowlistOperationCode.ITEM_REMOVE_WALLETS_FROM_CERTAIN_TOKEN_POOLS
+        ) {
+          return o.params.pools
+            .filter((p: any) => p.poolType === Pool.CUSTOM_TOKEN_POOL)
+            .map((p: any) => p.poolId);
+        }
+        return [];
+      })
+    );
+
+    const customTokenPoolOperations = operations
+      .filter(
+        (o) =>
+          o.code === AllowlistOperationCode.CREATE_CUSTOM_TOKEN_POOL &&
+          (customTokenPoolIds.has(o.params.id) ||
+            excludeCustomTokenPoolIds.has(o.params.id))
+      )
+      .map((o) => ({
+        code: o.code,
+        params: o.params,
+      }));
+    const ops = [...customTokenPoolOperations, ...newOperations];
+    setUniqueCountOps(ops);
+  }, [newOperations, operations]);
+
+  const [debouncedUniqueCountOps, setDebouncedUniqueCountOps] = useState<
+    AllowlistOperationBase[]
+  >([]);
+  useDebounce(
+    () => {
+      setDebouncedUniqueCountOps(uniqueCountOps);
+    },
+    1000,
+    [uniqueCountOps]
+  );
+
   useEffect(() => {
     const getUniqueWalletsCount = async (distributionPlanId: string) => {
-      setUniqueWalletsCountByOperations(null);
-      if (uniqueWalletsCountRequestOperations.length < 0) {
-        return;
-      }
       const url = `${process.env.ALLOWLIST_API_ENDPOINT}/allowlists/${distributionPlanId}/unique-wallets-count`;
       setIsLoadingUniqueWalletsCount(true);
       try {
@@ -679,7 +758,7 @@ export default function BuildPhaseFormConfigModal({
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify(uniqueWalletsCountRequestOperations),
+          body: JSON.stringify(debouncedUniqueCountOps),
         });
         const data: AllowlistToolResponse<number> = await response.json();
         if (typeof data !== "number" && "error" in data) {
@@ -702,13 +781,39 @@ export default function BuildPhaseFormConfigModal({
         setIsLoadingUniqueWalletsCount(false);
       }
     };
-    if (!uniqueWalletsCountRequestOperations.length || !distributionPlan) {
+
+    if (!distributionPlan) {
+      setUniqueWalletsCountByOperations(null);
+      return;
+    }
+
+    if (isAddingOperations) {
+      return;
+    }
+
+    if (
+      ![
+        PhaseConfigStep.FINALIZE_SNAPSHOT,
+        PhaseConfigStep.COMPONENT_ADD_SPOTS,
+        PhaseConfigStep.FINALIZE_COMPONENTS,
+      ].includes(configStep)
+    ) {
+      return;
+    }
+
+    if (debouncedUniqueCountOps.length < 0) {
       setUniqueWalletsCountByOperations(null);
       return;
     }
 
     getUniqueWalletsCount(distributionPlan.id);
-  }, [uniqueWalletsCountRequestOperations, distributionPlan, setToasts]);
+  }, [
+    distributionPlan,
+    setToasts,
+    configStep,
+    debouncedUniqueCountOps,
+    isAddingOperations,
+  ]);
 
   return (
     <div className="tw-px-6 tw-gap-y-6 tw-flex tw-flex-col tw-divide-y tw-divide-solid tw-divide-neutral-700 tw-divide-x-0">
@@ -723,6 +828,19 @@ export default function BuildPhaseFormConfigModal({
                 onClose={onClose}
                 isLoading={isLoadingContractSchema}
               />
+            );
+          case PhaseConfigStep.SNAPSHOT_EXCLUDE_OTHER_SNAPSHOTS:
+            return (
+              phaseGroupSnapshotConfig.snapshotId && (
+                <SnapshotExcludeOtherSnapshots
+                  config={phaseGroupSnapshotConfig}
+                  snapshots={snapshots}
+                  onSkip={onExcludeOtherSnapshotsNextStep}
+                  onSelectExcludeOtherSnapshots={onSelectExcludeOtherSnapshots}
+                  title={modalTitle}
+                  onClose={onClose}
+                />
+              )
             );
           case PhaseConfigStep.SNAPSHOT_EXCLUDE_COMPONENT_WINNERS:
             return (
@@ -798,7 +916,7 @@ export default function BuildPhaseFormConfigModal({
                 phaseGroupConfig={phaseGroupConfig}
                 snapshots={snapshots}
                 onRemoveGroupSnapshot={onRemoveGroupSnapshot}
-                loading={isLoading}
+                loading={isAddingOperations}
                 title={modalTitle}
                 uniqueWalletsCount={uniqueWalletsCountByOperations}
                 isLoadingUniqueWalletsCount={isLoadingUniqueWalletsCount}

@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from "react";
+import { useContext, useState } from "react";
 import DistributionPlanSecondaryText from "../../../../../common/DistributionPlanSecondaryText";
 import ComponentConfigNextBtn from "../ComponentConfigNextBtn";
 import { DistributionPlanToolContext } from "../../../../../DistributionPlanToolContext";
@@ -6,10 +6,7 @@ import { Pool } from "../../../../../../allowlist-tool/allowlist-tool.types";
 import BuildPhaseFormConfigModalTitle from "../BuildPhaseFormConfigModalTitle";
 import SelectSnapshotDropdown from "./SelectSnapshotDropdown";
 import { DistributionPlanSnapshot } from "../../BuildPhaseFormConfigModal";
-import ComponentConfigMeta, {
-  ComponentConfigMetaPropsTag,
-} from "../ComponentConfigMeta";
-import { getRandomObjectId } from "../../../../../../../helpers/AllowlistToolHelpers";
+import ComponentConfigMeta from "../ComponentConfigMeta";
 
 export default function SelectSnapshot({
   snapshots,
@@ -47,7 +44,6 @@ export default function SelectSnapshot({
       uniqueWalletsCount: selectedSnapshot.walletsCount,
     });
   };
-
 
   return (
     <div>
