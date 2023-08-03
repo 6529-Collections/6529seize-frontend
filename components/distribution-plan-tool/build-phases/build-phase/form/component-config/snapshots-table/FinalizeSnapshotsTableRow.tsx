@@ -36,14 +36,18 @@ export default function FinalizeSnapshotsTableRow({
         {poolType}
       </td>
       <td className="tw-whitespace-nowrap tw-px-3 tw-py-4 tw-text-xs tw-font-normal tw-text-neutral-300">
+        {row.uniqueWalletsCount}
+      </td>
+      <td className="tw-whitespace-nowrap tw-px-3 tw-py-4 tw-text-xs tw-font-normal tw-text-neutral-300">
+        {row.excludeSnapshots}
+      </td>
+      <td className="tw-whitespace-nowrap tw-px-3 tw-py-4 tw-text-xs tw-font-normal tw-text-neutral-300">
         {row.excludeComponentWinners}
       </td>
       <td className="tw-whitespace-nowrap tw-px-3 tw-py-4 tw-text-xs tw-font-normal tw-text-neutral-300">
         {row.topHoldersFilter}
       </td>
-      <td className="tw-whitespace-nowrap tw-px-3 tw-py-4 tw-text-xs tw-font-normal tw-text-neutral-300">
-        {row.uniqueWalletsCount}
-      </td>
+
       <td className="tw-whitespace-nowrap tw-px-3 tw-py-4 tw-text-xs tw-font-normal tw-text-neutral-300">
         <button
           type="button"

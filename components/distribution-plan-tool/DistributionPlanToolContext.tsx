@@ -136,6 +136,7 @@ export default function DistributionPlanToolContextWrapper({
     if (!distributionPlan) return;
     const url = `${process.env.ALLOWLIST_API_ENDPOINT}/allowlists/${distributionPlan.id}/runs`;
     try {
+      setFetching(true);
       const response = await fetch(url, {
         method: "POST",
         headers: {
@@ -165,7 +166,7 @@ export default function DistributionPlanToolContextWrapper({
         messages: ["Something went wrong"],
         type: "error",
       });
-    }
+    } 
   };
 
   const fetchTransferPools = async (distributionPlanId: string) => {
