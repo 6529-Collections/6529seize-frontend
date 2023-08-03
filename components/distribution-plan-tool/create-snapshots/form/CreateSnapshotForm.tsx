@@ -193,7 +193,29 @@ export default function CreateSnapshotForm() {
       <CreateSnapshotFormSearchCollection setCollection={setCollection} />
       <form
         className="tw-flex tw-flex-wrap tw-gap-y-5 tw-mt-8"
-        onSubmit={handleSubmit}>
+        onSubmit={handleSubmit}
+      >
+        <div className="tw-flex tw-items-center">
+          {/* Enabled: "tw-bg-primary-500", Not Enabled: "tw-bg-neutral-700"  */}
+          <button
+            type="button"
+            className="tw-p-0 tw-bg-neutral-700 tw-relative tw-inline-flex tw-h-6 tw-w-11 tw-flex-shrink-0 tw-cursor-pointer tw-rounded-full tw-border-2 tw-border-transparent tw-transition-colors tw-duration-200 tw-ease-in-out focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-500"
+            role="switch"
+            aria-checked="false"
+            aria-labelledby="annual-billing-label"
+          >
+            {/*  Enabled: "tw-translate-x-5", Not Enabled: "tw-translate-x-0"  */}
+            <span
+              aria-hidden="true"
+              className="tw-translate-x-0 tw-pointer-events-none tw-inline-block tw-h-5 tw-w-5 tw-transform tw-rounded-full tw-bg-white tw-shadow tw-ring-0 tw-transition tw-duration-200 tw-ease-in-out"
+            ></span>
+          </button>
+          <span className="tw-ml-3 tw-text-sm" id="annual-billing-label">
+            <span className="tw-font-medium tw-text-gray-100">
+              Consolidated
+            </span>
+          </span>
+        </div>
         <div className="tw-flex tw-w-full tw-gap-x-4">
           <div className="tw-flex-1">
             <label className="tw-block tw-text-sm tw-font-normal tw-leading-5 tw-text-neutral-100">
@@ -229,19 +251,20 @@ export default function CreateSnapshotForm() {
               />
             </div>
           </div>
-
           <div className="tw-flex-1">
             <label className="tw-flex tw-items-center tw-gap-x-2 tw-text-sm tw-font-normal tw-leading-5 tw-text-neutral-100">
               <span>Block number</span>
               <Tippy
                 content="Use etherscan.io to find previous block numbers"
                 placement="top"
-                theme="dark">
+                theme="dark"
+              >
                 <svg
                   className="tw-h-5 tw-w-5 tw-text-neutral-500 tw-cursor-pointer"
                   viewBox="0 0 24 24"
                   fill="none"
-                  xmlns="http://www.w3.org/2000/svg">
+                  xmlns="http://www.w3.org/2000/svg"
+                >
                   <path
                     d="M12 16V12M12 8H12.01M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12Z"
                     stroke="currentColor"
@@ -272,12 +295,14 @@ export default function CreateSnapshotForm() {
                 <Tippy
                   content="Example: 1,3,54-78"
                   placement="top"
-                  theme="dark">
+                  theme="dark"
+                >
                   <svg
                     className="tw-h-5 tw-w-5 tw-text-neutral-500 tw-cursor-pointer"
                     viewBox="0 0 24 24"
                     fill="none"
-                    xmlns="http://www.w3.org/2000/svg">
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
                     <path
                       d="M12 16V12M12 8H12.01M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12Z"
                       stroke="currentColor"
