@@ -294,6 +294,7 @@ export default function AllowlistToolAddOperationModal({
                   );
                 case AllowlistOperationCode.TOKEN_POOL_CONSOLIDATE_WALLETS:
                 case AllowlistOperationCode.ITEM_REMOVE_WALLETS_FROM_CERTAIN_COMPONENTS:
+                case AllowlistOperationCode.ITEM_REMOVE_WALLETS_FROM_CERTAIN_TOKEN_POOLS:
                 case AllowlistOperationCode.ITEM_SORT_WALLETS_BY_TOTAL_TOKENS_COUNT:
                 case AllowlistOperationCode.ITEM_SORT_WALLETS_BY_UNIQUE_TOKENS_COUNT:
                 case AllowlistOperationCode.ITEM_REMOVE_FIRST_N_WALLETS:

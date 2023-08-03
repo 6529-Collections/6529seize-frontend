@@ -382,6 +382,7 @@ export default function AllowlistToolBuilderContextWrapper({
             case AllowlistOperationCode.ITEM_SELECT_FIRST_N_TOKENS:
             case AllowlistOperationCode.ITEM_SELECT_LAST_N_TOKENS:
             case AllowlistOperationCode.ITEM_REMOVE_WALLETS_FROM_CERTAIN_COMPONENTS:
+            case AllowlistOperationCode.ITEM_REMOVE_WALLETS_FROM_CERTAIN_TOKEN_POOLS:
             case AllowlistOperationCode.ITEM_SORT_WALLETS_BY_TOTAL_TOKENS_COUNT:
             case AllowlistOperationCode.ITEM_SORT_WALLETS_BY_UNIQUE_TOKENS_COUNT:
             case AllowlistOperationCode.ITEM_REMOVE_FIRST_N_WALLETS:
@@ -483,11 +484,10 @@ export default function AllowlistToolBuilderContextWrapper({
 
     const addOperationToTokenPool = (operation: AllowlistOperation) => {
       if (!state.tokenPools.pools[operation.params.tokenPoolId]) {
-        state.tokenPools.pools[operation.params.tokenPoolId] = []
+        state.tokenPools.pools[operation.params.tokenPoolId] = [];
       }
       state.tokenPools.pools[operation.params.tokenPoolId].push(operation);
     };
-        
 
     const addOperationToComponent = (operation: AllowlistOperation) => {
       const phaseId = getPhaseIdForComponent({
@@ -632,6 +632,9 @@ export default function AllowlistToolBuilderContextWrapper({
           addOperationToItem(operation);
           break;
         case AllowlistOperationCode.ITEM_REMOVE_WALLETS_FROM_CERTAIN_COMPONENTS:
+          addOperationToItem(operation);
+          break;
+        case AllowlistOperationCode.ITEM_REMOVE_WALLETS_FROM_CERTAIN_TOKEN_POOLS:
           addOperationToItem(operation);
           break;
         case AllowlistOperationCode.ITEM_SORT_WALLETS_BY_TOTAL_TOKENS_COUNT:
