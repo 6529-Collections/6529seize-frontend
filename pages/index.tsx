@@ -43,13 +43,13 @@ export default function Home() {
 
   useEffect(() => {
     fetchUrl(
-      `${process.env.API_ENDPOINT}/api/nfts?contract=${MEMES_CONTRACT}&page_size=1`
+      `${process.env.API_ENDPOINT}/api/memes_extended_data?page_size=1`
     ).then((response: DBResponse) => {
-      const nft = response.data[0];
+      const nftExtended = response.data[0];
       fetchUrl(
-        `${process.env.API_ENDPOINT}/api/memes_extended_data?id=${nft.id}`
+        `${process.env.API_ENDPOINT}/api/nfts?id=${nftExtended.id}&contract=${MEMES_CONTRACT}`
       ).then((response: DBResponse) => {
-        const nftExtended = response.data[0];
+        const nft = response.data[0];
         setNFT(nft);
         setnftExtended(nftExtended);
       });
