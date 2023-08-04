@@ -12,6 +12,9 @@ import BuildPhaseFormConfigModalSidebar, {
 } from "./BuildPhaseFormConfigModalSidebar";
 import ComponentConfigMeta from "./ComponentConfigMeta";
 import { assertUnreachable } from "../../../../../../helpers/AllowlistToolHelpers";
+import ComponentRandomHoldersWeight, {
+  ComponentRandomHoldersWeightType,
+} from "./utils/ComponentRandomHoldersWeight";
 
 export default function ComponentSelectRandomHolders({
   onNextStep,
@@ -25,6 +28,7 @@ export default function ComponentSelectRandomHolders({
   onSelectRandomHolders: (param: {
     value: number;
     randomHoldersType: RandomHoldersType;
+    weightType: ComponentRandomHoldersWeightType;
   }) => void;
   title: string;
   uniqueWalletsCount: number | null;
@@ -47,6 +51,11 @@ export default function ComponentSelectRandomHolders({
       value: RandomHoldersType.BY_PERCENTAGE,
     },
   ];
+
+  const [weightType, setWeightType] =
+    useState<ComponentRandomHoldersWeightType>(
+      ComponentRandomHoldersWeightType.OFF
+    );
 
   const onRandomHolders = () => {
     if (typeof value !== "number") {
@@ -76,6 +85,7 @@ export default function ComponentSelectRandomHolders({
     onSelectRandomHolders({
       value,
       randomHoldersType,
+      weightType,
     });
   };
 
@@ -156,41 +166,10 @@ export default function ComponentSelectRandomHolders({
           </DistributionPlanSecondaryText>
 
           <div className="tw-mt-6 tw-flex tw-flex-col tw-gap-y-4">
-            <fieldset>
-              <legend className="tw-text-sm tw-font-medium tw-text-neutral-100">
-                Weighted by
-              </legend>
-              <div className="tw-space-y-4 sm:tw-flex sm:tw-items-center sm:tw-space-x-10 sm:tw-space-y-0">
-                <div className="tw-cursor-pointer tw-flex tw-items-center ">
-                  <input
-                    type="radio"
-                    checked
-                    className="tw-form-radio tw-h-4 tw-w-4 tw-border-neutral-600 tw-bg-neutral-700 tw-text-primary-500 focus:tw-ring-primary-500"
-                  />
-                  <label className="tw-cursor-pointer tw-ml-3 tw-block tw-text-sm tw-font-medium tw-leading-6 tw-text-neutral-100">
-                    Off
-                  </label>
-                </div>
-                <div className="tw-cursor-pointer tw-flex tw-items-center">
-                  <input
-                    type="radio"
-                    className="tw-form-radio tw-h-4 tw-w-4 tw-border-neutral-600 tw-bg-neutral-700 tw-text-primary-500 focus:tw-ring-primary-500"
-                  />
-                  <label className="tw-cursor-pointer tw-ml-3 tw-block tw-text-sm tw-font-medium tw-leading-6 tw-text-neutral-100">
-                    Total cards
-                  </label>
-                </div>
-                <div className="tw-cursor-pointer tw-flex tw-items-center">
-                  <input
-                    type="radio"
-                    className="tw-form-radio tw-h-4 tw-w-4 tw-border-neutral-600 tw-bg-neutral-700 tw-text-primary-500 focus:tw-ring-primary-500"
-                  />
-                  <label className="tw-cursor-pointer tw-ml-3 tw-block tw-text-sm tw-font-medium tw-leading-6 tw-text-neutral-100">
-                    Unique cards
-                  </label>
-                </div>
-              </div>
-            </fieldset>
+            <ComponentRandomHoldersWeight
+              selected={weightType}
+              onChange={setWeightType}
+            />
             <div>
               <label className="tw-block tw-text-sm tw-font-medium tw-leading-6 tw-text-white">
                 {inputLabels[randomHoldersType]}
