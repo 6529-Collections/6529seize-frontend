@@ -156,29 +156,43 @@ export default function ComponentSelectRandomHolders({
           </DistributionPlanSecondaryText>
 
           <div className="tw-mt-6 tw-flex tw-flex-col tw-gap-y-4">
-            <div className="tw-flex tw-items-center">
-              {/* Enabled: "tw-bg-primary-500", Not Enabled: "tw-bg-neutral-700"  */}
-              <button
-                type="button"
-                className="tw-p-0 tw-bg-neutral-700 tw-relative tw-inline-flex tw-h-6 tw-w-11 tw-flex-shrink-0 tw-cursor-pointer tw-rounded-full tw-border-2 tw-border-transparent tw-transition-colors tw-duration-200 tw-ease-in-out focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-500"
-                role="switch"
-                aria-checked="false"
-                aria-labelledby="annual-billing-label"
-              >
-                {/*  Enabled: "tw-translate-x-5", Not Enabled: "tw-translate-x-0"  */}
-                <span
-                  aria-hidden="true"
-                  className="tw-translate-x-0 tw-pointer-events-none tw-inline-block tw-h-5 tw-w-5 tw-transform tw-rounded-full tw-bg-white tw-shadow tw-ring-0 tw-transition tw-duration-200 tw-ease-in-out"
-                ></span>
-              </button>
-              <span className="tw-ml-3 tw-text-sm" id="annual-billing-label">
-                <span className="tw-font-medium tw-text-gray-100">
-                  Weighted
-                </span>
-              </span>
-            </div>
+            <fieldset>
+              <legend className="tw-text-sm tw-font-medium tw-text-neutral-100">
+                Weighted by
+              </legend>
+              <div className="tw-space-y-4 sm:tw-flex sm:tw-items-center sm:tw-space-x-10 sm:tw-space-y-0">
+                <div className="tw-cursor-pointer tw-flex tw-items-center ">
+                  <input
+                    type="radio"
+                    checked
+                    className="tw-form-radio tw-h-4 tw-w-4 tw-border-neutral-600 tw-bg-neutral-700 tw-text-primary-500 focus:tw-ring-primary-500"
+                  />
+                  <label className="tw-cursor-pointer tw-ml-3 tw-block tw-text-sm tw-font-medium tw-leading-6 tw-text-neutral-100">
+                    Off
+                  </label>
+                </div>
+                <div className="tw-cursor-pointer tw-flex tw-items-center">
+                  <input
+                    type="radio"
+                    className="tw-form-radio tw-h-4 tw-w-4 tw-border-neutral-600 tw-bg-neutral-700 tw-text-primary-500 focus:tw-ring-primary-500"
+                  />
+                  <label className="tw-cursor-pointer tw-ml-3 tw-block tw-text-sm tw-font-medium tw-leading-6 tw-text-neutral-100">
+                    Total cards
+                  </label>
+                </div>
+                <div className="tw-cursor-pointer tw-flex tw-items-center">
+                  <input
+                    type="radio"
+                    className="tw-form-radio tw-h-4 tw-w-4 tw-border-neutral-600 tw-bg-neutral-700 tw-text-primary-500 focus:tw-ring-primary-500"
+                  />
+                  <label className="tw-cursor-pointer tw-ml-3 tw-block tw-text-sm tw-font-medium tw-leading-6 tw-text-neutral-100">
+                    Unique cards
+                  </label>
+                </div>
+              </div>
+            </fieldset>
             <div>
-              <label className="tw-block tw-text-sm tw-font-medium tw-leading-6 tw-text-white ">
+              <label className="tw-block tw-text-sm tw-font-medium tw-leading-6 tw-text-white">
                 {inputLabels[randomHoldersType]}
               </label>
               <div className="tw-mt-1.5">
