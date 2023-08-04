@@ -195,27 +195,6 @@ export default function CreateSnapshotForm() {
         className="tw-flex tw-flex-wrap tw-gap-y-5 tw-mt-8"
         onSubmit={handleSubmit}
       >
-        <div className="tw-flex tw-items-center">
-          {/* Enabled: "tw-bg-primary-500", Not Enabled: "tw-bg-neutral-700"  */}
-          <button
-            type="button"
-            className="tw-p-0 tw-bg-neutral-700 tw-relative tw-inline-flex tw-h-6 tw-w-11 tw-flex-shrink-0 tw-cursor-pointer tw-rounded-full tw-border-2 tw-border-transparent tw-transition-colors tw-duration-200 tw-ease-in-out focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-500"
-            role="switch"
-            aria-checked="false"
-            aria-labelledby="annual-billing-label"
-          >
-            {/*  Enabled: "tw-translate-x-5", Not Enabled: "tw-translate-x-0"  */}
-            <span
-              aria-hidden="true"
-              className="tw-translate-x-0 tw-pointer-events-none tw-inline-block tw-h-5 tw-w-5 tw-transform tw-rounded-full tw-bg-white tw-shadow tw-ring-0 tw-transition tw-duration-200 tw-ease-in-out"
-            ></span>
-          </button>
-          <span className="tw-ml-3 tw-text-sm" id="annual-billing-label">
-            <span className="tw-font-medium tw-text-gray-100">
-              Consolidated
-            </span>
-          </span>
-        </div>
         <div className="tw-flex tw-w-full tw-gap-x-4">
           <div className="tw-flex-1">
             <label className="tw-block tw-text-sm tw-font-normal tw-leading-5 tw-text-neutral-100">
@@ -230,7 +209,7 @@ export default function CreateSnapshotForm() {
                 required
                 autoComplete="off"
                 placeholder="Snapshot name"
-                className="tw-form-input tw-block tw-w-full tw-rounded-lg tw-border-0 tw-py-3 tw-px-3 tw-bg-neutral-700/40 tw-text-white tw-font-light tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-neutral-700/40 placeholder:tw-text-neutral-500 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 tw-text-base sm:tw-leading-6 tw-transition tw-duration-300 tw-ease-out"
+                className="tw-form-input tw-block tw-w-full tw-rounded-lg tw-border-0 tw-py-3 tw-px-3 tw-bg-neutral-700/40 tw-text-white tw-font-light tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-neutral-700/40 placeholder:tw-text-neutral-500 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 hover:tw-ring-neutral-700 tw-text-base sm:tw-leading-6 tw-transition tw-duration-300 tw-ease-out"
               />
             </div>
           </div>
@@ -247,7 +226,7 @@ export default function CreateSnapshotForm() {
                 required
                 autoComplete="off"
                 placeholder="Contract number"
-                className="tw-form-input tw-block tw-w-full tw-rounded-lg tw-border-0 tw-py-3 tw-px-3 tw-bg-neutral-700/40 tw-text-white tw-font-light tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-neutral-700/40 placeholder:tw-text-neutral-500 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 tw-text-base sm:tw-leading-6 tw-transition tw-duration-300 tw-ease-out"
+                className="tw-form-input tw-block tw-w-full tw-rounded-lg tw-border-0 tw-py-3 tw-px-3 tw-bg-neutral-700/40 tw-text-white tw-font-light tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-neutral-700/40 placeholder:tw-text-neutral-500 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 hover:tw-ring-neutral-700 tw-text-base sm:tw-leading-6 tw-transition tw-duration-300 tw-ease-out"
               />
             </div>
           </div>
@@ -284,10 +263,12 @@ export default function CreateSnapshotForm() {
                 required
                 autoComplete="off"
                 placeholder="Block number"
-                className={`tw-form-input tw-block tw-w-full tw-rounded-lg tw-border-0 tw-py-3 tw-px-3 tw-bg-neutral-700/40 tw-text-white tw-font-light tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-neutral-700/40 placeholder:tw-text-neutral-500 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 tw-text-base sm:tw-leading-6 tw-transition tw-duration-300 tw-ease-out ${styles.numberInput}`}
+                className={`tw-form-input tw-block tw-w-full tw-rounded-lg tw-border-0 tw-py-3 tw-px-3 tw-bg-neutral-700/40 tw-text-white tw-font-light tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-neutral-700/40 placeholder:tw-text-neutral-500 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 hover:tw-ring-neutral-700 tw-text-base sm:tw-leading-6 tw-transition tw-duration-300 tw-ease-out ${styles.numberInput}`}
               />
             </div>
           </div>
+        </div>
+        <div className="tw-flex tw-items-center tw-w-full tw-gap-x-4">
           <div className="tw-flex-1">
             <label className="tw-block tw-text-sm tw-font-normal tw-leading-5 tw-text-neutral-100">
               <label className="tw-flex tw-items-center tw-gap-x-2 tw-text-sm tw-font-normal tw-leading-5 tw-text-neutral-100">
@@ -322,14 +303,55 @@ export default function CreateSnapshotForm() {
                 onChange={handleChange}
                 autoComplete="off"
                 placeholder="Empty for All tokens"
-                className="tw-form-input tw-block tw-w-full tw-rounded-lg tw-border-0 tw-py-3 tw-px-3 tw-bg-neutral-700/40 tw-text-white tw-font-light tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-neutral-700/40 placeholder:tw-text-neutral-500 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 tw-text-base sm:tw-leading-6 tw-transition tw-duration-300 tw-ease-out"
+                className="tw-form-input tw-block tw-w-full tw-rounded-lg tw-border-0 tw-py-3 tw-px-3 tw-bg-neutral-700/40 tw-text-white tw-font-light tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-neutral-700/40 placeholder:tw-text-neutral-500 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 hover:tw-ring-neutral-700 tw-text-base sm:tw-leading-6 tw-transition tw-duration-300 tw-ease-out"
               />
             </div>
           </div>
-          <div className="tw-self-end">
-            <DistributionPlanAddOperationBtn loading={isLoading}>
-              Add snapshot
-            </DistributionPlanAddOperationBtn>
+          <div className="tw-flex-1">
+            <div className="tw-flex tw-gap-x-4">
+              <div className="tw-w-full">
+                <label className="tw-block tw-text-sm tw-font-normal tw-leading-5 tw-text-neutral-100">
+                  <label className="tw-flex tw-items-center tw-gap-x-2 tw-text-sm tw-font-normal tw-leading-5 tw-text-neutral-100">
+                    <div className="tw-flex tw-items-center">
+                      {/* Enabled: "tw-bg-primary-500", Not Enabled: "tw-bg-neutral-700"  */}
+                      <button
+                        type="button"
+                        className="tw-p-0 tw-bg-neutral-700 tw-relative tw-inline-flex tw-h-6 tw-w-11 tw-flex-shrink-0 tw-cursor-pointer tw-rounded-full tw-border-2 tw-border-transparent tw-transition-colors tw-duration-200 tw-ease-in-out focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-500"
+                        role="switch"
+                        aria-checked="false"
+                        aria-labelledby="annual-billing-label"
+                      >
+                        {/*  Enabled: "tw-translate-x-5", Not Enabled: "tw-translate-x-0"  */}
+                        <span
+                          aria-hidden="true"
+                          className="tw-translate-x-0 tw-pointer-events-none tw-inline-block tw-h-5 tw-w-5 tw-transform tw-rounded-full tw-bg-white tw-shadow tw-ring-0 tw-transition tw-duration-200 tw-ease-in-out"
+                        ></span>
+                      </button>
+                      <span className="tw-ml-3 tw-text-sm">
+                        <span className="tw-font-medium tw-text-gray-100">
+                          Consolidated
+                        </span>
+                      </span>
+                    </div>
+                  </label>
+                </label>
+                <div className="tw-mt-2">
+                  <input
+                    type="text"
+                    autoComplete="off"
+                    placeholder="Consolidate block number"
+                    className="tw-form-input tw-block tw-w-full tw-rounded-lg tw-border-0 tw-py-3 tw-px-3 tw-bg-neutral-700/40 tw-text-white tw-font-light tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-neutral-700/40 placeholder:tw-text-neutral-500 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 hover:tw-ring-neutral-700 tw-text-base sm:tw-leading-6 tw-transition tw-duration-300 tw-ease-out"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="tw-flex-1 tw-self-end">
+            <div className="tw-max-w-[8.375rem]">
+              <DistributionPlanAddOperationBtn loading={isLoading}>
+                Add snapshot
+              </DistributionPlanAddOperationBtn>
+            </div>
           </div>
         </div>
       </form>
