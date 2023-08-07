@@ -12,6 +12,9 @@ import BuildPhaseFormConfigModalSidebar, {
 } from "./BuildPhaseFormConfigModalSidebar";
 import ComponentConfigMeta from "./ComponentConfigMeta";
 import { assertUnreachable } from "../../../../../../helpers/AllowlistToolHelpers";
+import ComponentRandomHoldersWeight, {
+  ComponentRandomHoldersWeightType,
+} from "./utils/ComponentRandomHoldersWeight";
 
 export default function ComponentSelectRandomHolders({
   onNextStep,
@@ -25,6 +28,7 @@ export default function ComponentSelectRandomHolders({
   onSelectRandomHolders: (param: {
     value: number;
     randomHoldersType: RandomHoldersType;
+    weightType: ComponentRandomHoldersWeightType;
   }) => void;
   title: string;
   uniqueWalletsCount: number | null;
@@ -47,6 +51,41 @@ export default function ComponentSelectRandomHolders({
       value: RandomHoldersType.BY_PERCENTAGE,
     },
   ];
+
+  const [weightType, setWeightType] =
+    useState<ComponentRandomHoldersWeightType>(
+      ComponentRandomHoldersWeightType.OFF
+    );
+
+  const [isError, setIsError] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (typeof value !== "number") {
+      setIsError(false);
+      return;
+    }
+
+    if (value < 1) {
+      setIsError(true);
+      return;
+    }
+
+    if (randomHoldersType === RandomHoldersType.BY_PERCENTAGE && value > 100) {
+      setIsError(true);
+      return;
+    }
+
+    if (
+      randomHoldersType === RandomHoldersType.BY_COUNT &&
+      typeof uniqueWalletsCount === "number" &&
+      value > uniqueWalletsCount
+    ) {
+      setIsError(true);
+      return;
+    }
+
+    setIsError(false);
+  }, [value, randomHoldersType, uniqueWalletsCount]);
 
   const onRandomHolders = () => {
     if (typeof value !== "number") {
@@ -76,17 +115,18 @@ export default function ComponentSelectRandomHolders({
     onSelectRandomHolders({
       value,
       randomHoldersType,
+      weightType,
     });
   };
 
   const inputLabels: Record<RandomHoldersType, string> = {
-    [RandomHoldersType.BY_COUNT]: "Random holders count",
-    [RandomHoldersType.BY_PERCENTAGE]: "Random holders percentage",
+    [RandomHoldersType.BY_COUNT]: "Random holders count (#)",
+    [RandomHoldersType.BY_PERCENTAGE]: "Random holders percentage (%)",
   };
 
   const inputPlaceholders: Record<RandomHoldersType, string> = {
-    [RandomHoldersType.BY_COUNT]: "Enter random holders count",
-    [RandomHoldersType.BY_PERCENTAGE]: "Enter random holders percentage",
+    [RandomHoldersType.BY_COUNT]: "Example: 100",
+    [RandomHoldersType.BY_PERCENTAGE]: "Example: 10",
   };
 
   const [isDisabled, setIsDisabled] = useState<boolean>(false);
@@ -156,12 +196,23 @@ export default function ComponentSelectRandomHolders({
           </DistributionPlanSecondaryText>
 
           <div className="tw-mt-6 tw-flex tw-flex-col tw-gap-y-4">
+            <ComponentRandomHoldersWeight
+              selected={weightType}
+              onChange={setWeightType}
+            />
             <div>
-              <label className="tw-block tw-text-sm tw-font-medium tw-leading-6 tw-text-white ">
+              <label className="tw-block tw-text-sm tw-font-medium tw-leading-6 tw-text-white">
                 {inputLabels[randomHoldersType]}
               </label>
               <div className="tw-mt-1.5">
-                <div className="tw-flex tw-rounded-md tw-bg-white/5 tw-ring-1 tw-ring-inset tw-ring-white/10 focus-within:tw-ring-1 focus-within:tw-ring-inset focus-within:tw-ring-primary-400">
+                <div
+                  className={`
+                tw-flex tw-rounded-md tw-bg-white/5 tw-ring-1 tw-ring-inset tw-ring-white/10 focus-within:tw-ring-1 focus-within:tw-ring-inset tw-transition tw-duration-300 tw-ease-out ${
+                  isError
+                    ? "tw-ring-error focus-within:tw-ring-error"
+                    : "focus-within:tw-ring-primary-400"
+                }`}
+                >
                   <input
                     type="number"
                     value={value}

@@ -1,11 +1,13 @@
-import { useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { MEMES_CONTRACT } from "../../../../constants";
+import { DistributionPlanToolContext } from "../../DistributionPlanToolContext";
+import { AllowlistToolResponse } from "../../../allowlist-tool/allowlist-tool.types";
 
-enum MemesSeason {
-  SZN1 = "SZN1",
-  SZN2 = "SZN2",
-  SZN3 = "SZN3",
-  SZN4 = "SZN4",
+type MemesSeason = `SZN${number}`;
+
+export interface MemesSeasonApiResponse {
+  readonly season: number;
+  readonly tokenIds: string;
 }
 
 export default function CreateSnapshotFormSearchCollectionMemesModal({
@@ -19,24 +21,38 @@ export default function CreateSnapshotFormSearchCollectionMemesModal({
     tokenIds: string | null;
   }) => void;
 }) {
-  const options = [
-    {
-      value: MemesSeason.SZN1,
-      tokenIds: "1-47",
-    },
-    {
-      value: MemesSeason.SZN2,
-      tokenIds: "48-86",
-    },
-    {
-      value: MemesSeason.SZN3,
-      tokenIds: "87-118",
-    },
-    {
-      value: MemesSeason.SZN4,
-      tokenIds: "119-125",
-    },
-  ];
+  const { setToasts } = useContext(DistributionPlanToolContext);
+  const [options, setOptions] = useState<
+    { value: MemesSeason; tokenIds: string }[]
+  >([]);
+
+  useEffect(() => {
+    const getSeasons = async () => {
+      const url = `${process.env.ALLOWLIST_API_ENDPOINT}/other/memes-seasons`;
+      try {
+        const response = await fetch(url);
+        const data: AllowlistToolResponse<MemesSeasonApiResponse[]> =
+          await response.json();
+        if ("error" in data) {
+          setToasts({
+            messages:
+              typeof data.message === "string" ? [data.message] : data.message,
+            type: "error",
+          });
+        } else {
+          setOptions(
+            data.map((d) => ({
+              value: `SZN${d.season}` as MemesSeason,
+              tokenIds: d.tokenIds,
+            }))
+          );
+        }
+      } catch (error: any) {
+        setToasts({ messages: [error.message], type: "error" });
+      }
+    };
+    getSeasons();
+  }, []);
 
   const [selected, setSelected] = useState<MemesSeason[]>(
     options.map((o) => o.value)
@@ -80,37 +96,60 @@ export default function CreateSnapshotFormSearchCollectionMemesModal({
   return (
     <div className="tw-px-8">
       <div className="tw-mt-6">
-        <fieldset>
-          <legend className="tw-text-base tw-font-semibold tw-leading-6 tw-text-white">
-            Seasons
-          </legend>
-          <div className="tw-mt-4 tw-divide-y tw-divide-solid tw-divide-neutral-800 tw-divide-x-0 tw-border-solid tw-border-x-0 tw-border-b tw-border-t tw-border-neutral-800">
-            {options.map((option) => (
-              <div
-                onClick={() => handleSelect(option.value)}
-                key={option.value}
-                className="tw-cursor-pointer tw-relative tw-flex tw-items-start tw-py-4"
-              >
-                <div className="tw-min-w-0 tw-flex-1 tw-text-sm tw-leading-6 tw-font-medium tw-text-white">
-                  {option.value} ({option.tokenIds})
+        {options.length && (
+          <fieldset>
+            <legend className="tw-text-base tw-font-semibold tw-leading-6 tw-text-white">
+              Seasons
+            </legend>
+            <div className="tw-mt-4 tw-divide-y tw-divide-solid tw-divide-neutral-800 tw-divide-x-0 tw-border-solid tw-border-x-0 tw-border-b tw-border-t tw-border-neutral-800">
+              {options.map((option) => (
+                <div
+                  onClick={() => handleSelect(option.value)}
+                  key={option.value}
+                  className="tw-cursor-pointer tw-relative tw-flex tw-items-start tw-py-4"
+                >
+                  <div className="tw-min-w-0 tw-flex-1 tw-text-sm tw-leading-6 tw-font-medium tw-text-white">
+                    {option.value} ({option.tokenIds})
+                  </div>
+                  <div className="tw-ml-3 tw-flex tw-h-6 tw-w-auto tw-items-center">
+                    <input
+                      id={`option-${option.value}`}
+                      name={`person-${option.value}`}
+                      type="checkbox"
+                      checked={selected.includes(option.value)}
+                      onChange={(e) => {
+                        e.stopPropagation();
+                        handleSelect(option.value);
+                      }}
+                      className="tw-cursor-pointer tw-form-checkbox tw-h-4 tw-w-4 tw-bg-neutral-800 tw-rounded tw-border-solid tw-border-gray-600 tw-text-primary-500 focus:tw-ring-primary-500"
+                    />
+                  </div>
                 </div>
-                <div className="tw-ml-3 tw-flex tw-h-6 tw-w-auto tw-items-center">
-                  <input
-                    id={`option-${option.value}`}
-                    name={`person-${option.value}`}
-                    type="checkbox"
-                    checked={selected.includes(option.value)}
-                    onChange={(e) => {
-                      e.stopPropagation();
-                      handleSelect(option.value);
-                    }}
-                    className="tw-cursor-pointer tw-form-checkbox tw-h-4 tw-w-4 tw-bg-neutral-800 tw-rounded tw-border-solid tw-border-gray-600 tw-text-primary-500 focus:tw-ring-primary-500"
-                  />
-                </div>
-              </div>
-            ))}
+              ))}
+            </div>
+          </fieldset>
+        )}
+        {!options.length && (
+          <div className="tw-mt-16 tw-flex tw-min-h-full tw-items-end tw-justify-center tw-p-4 tw-text-center sm:tw-items-center sm:tw-p-0">
+            <svg
+              aria-hidden="true"
+              role="status"
+              className="tw-inline tw-w-24 tw-h-24 tw-text-white tw-animate-spin tw-absolute"
+              viewBox="0 0 100 101"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z"
+                fill="#E5E7EB"
+              ></path>
+              <path
+                d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z"
+                fill="currentColor"
+              ></path>
+            </svg>
           </div>
-        </fieldset>
+        )}
       </div>
       <div className="tw-mt-8 tw-flex tw-justify-end">
         <button

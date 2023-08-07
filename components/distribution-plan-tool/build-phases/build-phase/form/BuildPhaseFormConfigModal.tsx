@@ -22,6 +22,7 @@ import ComponentAddSpots from "./component-config/ComponentAddSpots";
 import FinalizeComponent from "./component-config/FinalizeComponent";
 import SnapshotExcludeOtherSnapshots from "./component-config/SnapshotExcludeOtherSnapshots";
 import { useDebounce } from "react-use";
+import { ComponentRandomHoldersWeightType } from "./component-config/utils/ComponentRandomHoldersWeight";
 
 export enum PhaseConfigStep {
   SELECT_SNAPSHOT = "SELECT_SNAPSHOT",
@@ -79,6 +80,7 @@ export interface PhaseGroupConfig {
   randomHoldersFilter: {
     type: RandomHoldersType;
     value: number;
+    weightType: ComponentRandomHoldersWeightType;
   } | null;
   maxMintCount: number | null;
   uniqueWalletsCount: number | null;
@@ -387,12 +389,14 @@ export default function BuildPhaseFormConfigModal({
   const onSelectRandomHolders = (param: {
     value: number;
     randomHoldersType: RandomHoldersType;
+    weightType: ComponentRandomHoldersWeightType;
   }) => {
     setPhaseGroupConfig((prev) => ({
       ...prev,
       randomHoldersFilter: {
         type: param.randomHoldersType,
         value: param.value,
+        weightType: param.weightType,
       },
     }));
     onNextStep(PhaseConfigStep.COMPONENT_ADD_SPOTS);
@@ -613,16 +617,31 @@ export default function BuildPhaseFormConfigModal({
       }
 
       if (randomHoldersFilter && distributionPlan?.id) {
-        const { type: randomHoldersType, value } = randomHoldersFilter;
+        const {
+          type: randomHoldersType,
+          value,
+          weightType,
+        } = randomHoldersFilter;
         const seed = distributionPlan.id;
+        const coreParams: {
+          componentId: string;
+          seed: string;
+          weightType?: ComponentRandomHoldersWeightType;
+        } = {
+          componentId,
+          seed,
+        };
+
+        if (weightType !== ComponentRandomHoldersWeightType.OFF) {
+          coreParams.weightType = weightType;
+        }
         switch (randomHoldersType) {
           case RandomHoldersType.BY_COUNT:
             result.push({
               code: AllowlistOperationCode.COMPONENT_SELECT_RANDOM_WALLETS,
               params: {
-                componentId,
+                ...coreParams,
                 count: value,
-                seed,
               },
             });
             break;
@@ -630,9 +649,8 @@ export default function BuildPhaseFormConfigModal({
             result.push({
               code: AllowlistOperationCode.COMPONENT_SELECT_RANDOM_PERCENTAGE_WALLETS,
               params: {
-                componentId,
+                ...coreParams,
                 percentage: value,
-                seed,
               },
             });
             break;
@@ -693,6 +711,17 @@ export default function BuildPhaseFormConfigModal({
   const [isLoadingUniqueWalletsCount, setIsLoadingUniqueWalletsCount] =
     useState<boolean>(false);
 
+  const [loadingUniqueWalletsCountIds, setLoadingUniqueWalletsCountIds] =
+    useState<string[]>([]);
+
+  useEffect(() => {
+    if (!!loadingUniqueWalletsCountIds.length) {
+      setIsLoadingUniqueWalletsCount(true);
+      return;
+    }
+    setIsLoadingUniqueWalletsCount(false);
+  }, [loadingUniqueWalletsCountIds]);
+
   const [uniqueCountOps, setUniqueCountOps] = useState<
     AllowlistOperationBase[]
   >([]);
@@ -751,7 +780,8 @@ export default function BuildPhaseFormConfigModal({
   useEffect(() => {
     const getUniqueWalletsCount = async (distributionPlanId: string) => {
       const url = `${process.env.ALLOWLIST_API_ENDPOINT}/allowlists/${distributionPlanId}/unique-wallets-count`;
-      setIsLoadingUniqueWalletsCount(true);
+      const uniqueId = getRandomObjectId();
+      setLoadingUniqueWalletsCountIds((ids) => [...ids, uniqueId]);
       try {
         const response = await fetch(url, {
           method: "POST",
@@ -778,7 +808,9 @@ export default function BuildPhaseFormConfigModal({
         });
         return { success: false };
       } finally {
-        setIsLoadingUniqueWalletsCount(false);
+        setLoadingUniqueWalletsCountIds((ids) =>
+          ids.filter((id) => id !== uniqueId)
+        );
       }
     };
 

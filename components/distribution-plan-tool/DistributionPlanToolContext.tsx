@@ -166,7 +166,7 @@ export default function DistributionPlanToolContextWrapper({
         messages: ["Something went wrong"],
         type: "error",
       });
-    } 
+    }
   };
 
   const fetchTransferPools = async (distributionPlanId: string) => {

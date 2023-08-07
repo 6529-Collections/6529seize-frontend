@@ -37,6 +37,13 @@ export default function FinalizeSnapshot({
     }
   }, [groupSnapshots, onStartAgain]);
 
+  const configure = () => {
+    if (!uniqueWalletsCount) {
+      return;
+    }
+    onConfigureGroup();
+  };
+
   return (
     <div>
       <BuildPhaseFormConfigModalTitle title={title} onClose={onClose} />
@@ -70,7 +77,7 @@ export default function FinalizeSnapshot({
             Add another snapshot
           </button>
           <button
-            onClick={onConfigureGroup}
+            onClick={configure}
             type="button"
             className="tw-relative tw-inline-flex tw-items-center tw-justify-center tw-cursor-pointer tw-bg-primary-500 tw-px-4 tw-py-3 tw-text-sm tw-font-medium tw-text-white tw-border tw-border-solid tw-border-primary-500 tw-rounded-lg hover:tw-bg-primary-600 hover:tw-border-primary-600 tw-transition tw-duration-300 tw-ease-out"
           >

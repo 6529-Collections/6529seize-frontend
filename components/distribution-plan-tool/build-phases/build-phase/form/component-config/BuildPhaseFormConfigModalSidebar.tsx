@@ -20,10 +20,10 @@ export default function BuildPhaseFormConfigModalSidebar({
 
   return (
     <nav className="tw-w-auto tw-mt-2" aria-label="Sidebar">
-      <div className="tw-text-base tw-font-medium tw-leading-6 tw-text-white">
+      <div className="tw-text-sm tw-font-medium tw-leading-6 tw-text-white">
         {label}
       </div>
-      <ul role="list" className="tw-list-none tw-mx-0 tw-mt-4 tw-mb-0 tw-p-0 tw-space-y-1">
+      <ul role="list" className="tw-list-none tw-mx-0 tw-mt-2 tw-mb-0 tw-p-0 tw-space-y-1">
         {options.map((option) => (
           <li
             key={option.value}

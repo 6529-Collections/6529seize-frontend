@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import Tippy from "@tippyjs/react";
 import { CreateSnapshotSnapshot } from "../CreateSnapshots";
 import { DistributionPlanTokenPoolDownloadStatus } from "../../../allowlist-tool/allowlist-tool.types";
+import CreateSnapshotTableRowDownload from "./CreateSnapshotTableRowDownload";
 
 export default function CreateSnapshotTableRow({
   snapshot,
@@ -77,6 +78,19 @@ export default function CreateSnapshotTableRow({
       return;
     }
     setIsGeneratingSnapshot(false);
+  }, [snapshot.downloaderStatus]);
+
+  const [isCompleted, setIsCompleted] = useState<boolean>(false);
+  useEffect(() => {
+    if (
+      !snapshot.downloaderStatus ||
+      snapshot.downloaderStatus !==
+        DistributionPlanTokenPoolDownloadStatus.COMPLETED
+    ) {
+      setIsCompleted(false);
+      return;
+    }
+    setIsCompleted(true);
   }, [snapshot.downloaderStatus]);
 
   return (
@@ -186,6 +200,11 @@ export default function CreateSnapshotTableRow({
           >
             {snapshot.downloaderStatus}
           </span>
+        )}
+      </td>
+      <td className="tw-whitespace-nowrap tw-px-3 tw-py-4 tw-text-sm tw-font-normal tw-text-neutral-300">
+        {isCompleted && (
+          <CreateSnapshotTableRowDownload tokenPoolId={snapshot.id} />
         )}
       </td>
     </DistributionPlanTableRowWrapper>
