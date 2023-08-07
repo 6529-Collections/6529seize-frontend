@@ -21,12 +21,12 @@ export interface CreateSnapshotSnapshot {
   id: string;
   name: string;
   description: string;
-  transferPoolId: string;
   tokenIds: string | null;
   walletsCount: number | null;
   tokensCount: number | null;
   contract: string | null;
   blockNo: number | null;
+  consolidateBlockNo: number | null;
   downloaderStatus: DistributionPlanTokenPoolDownloadStatus | null;
 }
 
@@ -57,12 +57,12 @@ export default function CreateSnapshots() {
   >([]);
 
   useEffect(() => {
-    const createTokenPoolOperations = operations.filter(
-      (operation) => operation.code === AllowlistOperationCode.CREATE_TOKEN_POOL
-    );
-
-    setSnapshots(
-      createTokenPoolOperations.map((createTokenPoolOperation) => {
+    const generateSnapshots = () => {
+      const createTokenPoolOperations = operations.filter(
+        (operation) =>
+          operation.code === AllowlistOperationCode.CREATE_TOKEN_POOL
+      );
+      return createTokenPoolOperations.map((createTokenPoolOperation) => {
         const tokenPool =
           tokenPools.find(
             (tokenPool) => tokenPool.id === createTokenPoolOperation.params.id
@@ -72,21 +72,22 @@ export default function CreateSnapshots() {
           (tokenPoolDownload) =>
             tokenPoolDownload.tokenPoolId === createTokenPoolOperation.params.id
         );
-
         return {
           id: createTokenPoolOperation.params.id,
           name: createTokenPoolOperation.params.name,
           description: createTokenPoolOperation.params.description,
-          transferPoolId: createTokenPoolOperation.params.transferPoolId,
           tokenIds: createTokenPoolOperation.params.tokenIds,
           walletsCount: tokenPool?.walletsCount ?? null,
           tokensCount: tokenPool?.tokensCount ?? null,
           contract: createTokenPoolOperation?.params.contract ?? null,
           blockNo: createTokenPoolOperation?.params.blockNo ?? null,
+          consolidateBlockNo:
+            createTokenPoolOperation?.params.consolidateBlockNo ?? null,
           downloaderStatus: tokenPoolDownload?.status ?? null,
         };
-      })
-    );
+      });
+    };
+    setSnapshots(generateSnapshots());
   }, [operations, tokenPools, tokenPoolDownloads]);
 
   const [haveSnapshots, setHaveSnapshots] = useState(false);

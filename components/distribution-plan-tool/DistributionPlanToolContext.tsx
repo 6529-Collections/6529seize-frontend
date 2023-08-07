@@ -166,7 +166,7 @@ export default function DistributionPlanToolContextWrapper({
         messages: ["Something went wrong"],
         type: "error",
       });
-    } 
+    }
   };
 
   const fetchTransferPools = async (distributionPlanId: string) => {
@@ -301,7 +301,7 @@ export default function DistributionPlanToolContextWrapper({
     setDistributionPlan(distributionPlan);
     await initState(distributionPlan.id);
     if (step === DistributionPlanToolStep.CREATE_PLAN) {
-      setStep(DistributionPlanToolStep.BUILD_PHASES);
+      setStep(DistributionPlanToolStep.CREATE_SNAPSHOTS);
     }
   };
 

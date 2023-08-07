@@ -711,6 +711,17 @@ export default function BuildPhaseFormConfigModal({
   const [isLoadingUniqueWalletsCount, setIsLoadingUniqueWalletsCount] =
     useState<boolean>(false);
 
+  const [loadingUniqueWalletsCountIds, setLoadingUniqueWalletsCountIds] =
+    useState<string[]>([]);
+
+  useEffect(() => {
+    if (!!loadingUniqueWalletsCountIds.length) {
+      setIsLoadingUniqueWalletsCount(true);
+      return;
+    }
+    setIsLoadingUniqueWalletsCount(false);
+  }, [loadingUniqueWalletsCountIds]);
+
   const [uniqueCountOps, setUniqueCountOps] = useState<
     AllowlistOperationBase[]
   >([]);
@@ -769,7 +780,8 @@ export default function BuildPhaseFormConfigModal({
   useEffect(() => {
     const getUniqueWalletsCount = async (distributionPlanId: string) => {
       const url = `${process.env.ALLOWLIST_API_ENDPOINT}/allowlists/${distributionPlanId}/unique-wallets-count`;
-      setIsLoadingUniqueWalletsCount(true);
+      const uniqueId = getRandomObjectId();
+      setLoadingUniqueWalletsCountIds((ids) => [...ids, uniqueId]);
       try {
         const response = await fetch(url, {
           method: "POST",
@@ -796,7 +808,9 @@ export default function BuildPhaseFormConfigModal({
         });
         return { success: false };
       } finally {
-        setIsLoadingUniqueWalletsCount(false);
+        setLoadingUniqueWalletsCountIds((ids) =>
+          ids.filter((id) => id !== uniqueId)
+        );
       }
     };
 

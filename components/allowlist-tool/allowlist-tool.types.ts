@@ -258,3 +258,11 @@ export interface DistributionPlanTokenPoolDownload {
   readonly blockNo: number;
   readonly status: DistributionPlanTokenPoolDownloadStatus;
 }
+
+
+export interface DistributionPlanSnapshotToken {
+  readonly contract: string;
+  readonly tokenId: string;
+  readonly amount: number;
+  readonly wallet: string;
+}

@@ -7,12 +7,12 @@ const STEP_META: Record<
   [DistributionPlanToolStep.CREATE_PLAN]: {
     title: "Distribution Plan Tool",
     description:
-      "The Seize distribution plan tool allows you to build a distribution plan for your mint that includes airdrops, allowlists and public minting in one more phases.",
+      "The Seize distribution plan tool allows you to build a distribution plan for your mint that includes airdrops, allowlists and public minting in one or more phases.",
   },
   [DistributionPlanToolStep.CREATE_SNAPSHOTS]: {
     title: "Collection snapshots",
     description:
-      "By taking a snapshot at certain block, we can determine the eligible token holders and allowlist wallets accordingly.",
+      "By taking a snapshot at a certain block, we can determine the eligible token holders and allowlist wallets accordingly. Snapshot gives us a list of wallets and their balances at a certain block. We will use this list to create airdrops and allowlists.",
   },
   [DistributionPlanToolStep.CREATE_CUSTOM_SNAPSHOT]: {
     title: "Custom snapshots",
