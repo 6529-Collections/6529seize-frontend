@@ -96,7 +96,7 @@ export default function CreateSnapshotFormSearchCollectionMemesModal({
   return (
     <div className="tw-px-8">
       <div className="tw-mt-6">
-        {options.length && (
+        {!!options.length && (
           <fieldset>
             <legend className="tw-text-base tw-font-semibold tw-leading-6 tw-text-white">
               Seasons
