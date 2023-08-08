@@ -762,7 +762,15 @@ export default function BuildPhaseFormConfigModal({
         code: o.code,
         params: o.params,
       }));
-    const ops = [...customTokenPoolOperations, ...newOperations];
+
+    const tokenPoolOperations = operations.filter(
+      (o) => o.code === AllowlistOperationCode.CREATE_TOKEN_POOL
+    );
+    const ops = [
+      ...tokenPoolOperations,
+      ...customTokenPoolOperations,
+      ...newOperations,
+    ];
     setUniqueCountOps(ops);
   }, [newOperations, operations]);
 
