@@ -282,22 +282,10 @@ export default function Header(props: Props) {
                     </a>
                   </Col>
                 </Row>
-                <Row>
-                  <Col xs={{ span: 6, offset: 3 }}>
-                    <hr />
-                  </Col>
-                </Row>
                 <Row className="pt-3">
                   <Col>
                     <a href="/community-metrics">
                       <h3>Community Metrics</h3>
-                    </a>
-                  </Col>
-                </Row>
-                <Row className="pt-3">
-                  <Col>
-                    <a href="/consolidation-use-cases">
-                      <h3>Consolidation Use Cases</h3>
                     </a>
                   </Col>
                 </Row>
@@ -368,6 +356,13 @@ export default function Header(props: Props) {
                   <Col>
                     <a href="/consolidation-mapping-tool">
                       <h3>Consolidation Mapping</h3>
+                    </a>
+                  </Col>
+                </Row>
+                <Row className="pt-3">
+                  <Col>
+                    <a href="/consolidation-use-cases">
+                      <h3>Consolidation Use Cases</h3>
                     </a>
                   </Col>
                 </Row>
@@ -683,21 +678,12 @@ export default function Header(props: Props) {
                                 }>
                                 Latest Activity
                               </NavDropdown.Item>
-                              <NavDropdown.Divider />
                               <NavDropdown.Item
                                 className={styles.dropdownItem}
                                 onClick={() =>
                                   (window.location.href = "/community-metrics")
                                 }>
                                 Community Metrics
-                              </NavDropdown.Item>
-                              <NavDropdown.Item
-                                className={styles.dropdownItem}
-                                onClick={() =>
-                                  (window.location.href =
-                                    "/consolidation-use-cases")
-                                }>
-                                Consolidation Use Cases
                               </NavDropdown.Item>
                             </NavDropdown>
                             <NavDropdown
@@ -737,6 +723,14 @@ export default function Header(props: Props) {
                                     "/consolidation-mapping-tool")
                                 }>
                                 Consolidation Mapping
+                              </NavDropdown.Item>
+                              <NavDropdown.Item
+                                className={styles.dropdownItem}
+                                onClick={() =>
+                                  (window.location.href =
+                                    "/consolidation-use-cases")
+                                }>
+                                Consolidation Use Cases
                               </NavDropdown.Item>
                               <NavDropdown.Divider />
                               <NavDropdown.Item
