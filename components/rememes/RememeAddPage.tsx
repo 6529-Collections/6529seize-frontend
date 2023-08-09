@@ -5,10 +5,7 @@ import { useState, useEffect } from "react";
 import { MEMES_CONTRACT, OPENSEA_STORE_FRONT_CONTRACT } from "../../constants";
 import { NFT } from "../../entities/INFT";
 import { fetchAllPages, fetchUrl, postData } from "../../services/6529api";
-import RememeAddComponent, {
-  AddRememe,
-  ProcessedRememe,
-} from "./RememeAddComponent";
+import RememeAddComponent, { ProcessedRememe } from "./RememeAddComponent";
 import { useAccount, useSignMessage } from "wagmi";
 import { useWeb3Modal } from "@web3modal/react";
 import { DBResponse } from "../../entities/IDBResponse";
@@ -61,7 +58,7 @@ export default function RememeAddPage() {
       } else if (!userTDH) {
         mychecklist.push({
           status: false,
-          note: "Something went wrong fetching user details",
+          note: "You need to have some TDH before you can add Rememes",
         });
       } else {
         const isDeployer = areEqualAddresses(
@@ -85,7 +82,13 @@ export default function RememeAddPage() {
               seizeSettings.rememes_submission_tdh_threshold,
             note: `You need ${numberWithCommas(
               seizeSettings.rememes_submission_tdh_threshold
-            )} TDH to add this Rememe${addRememe.nfts.length > 0 ? `s` : ``}`,
+            )} TDH to add ${
+              addRememe.nfts.length > 1 ? `these Rememes` : `this Rememe`
+            }${
+              userTDH
+                ? ` (you have ${numberWithCommas(userTDH.boosted_tdh)} TDH)`
+                : ``
+            }`,
           });
         } else {
           mychecklist.push({
@@ -96,6 +99,10 @@ export default function RememeAddPage() {
               seizeSettings.rememes_submission_tdh_threshold_moderator
             )} TDH to add ${
               addRememe.nfts.length > 1 ? `these Rememes` : `this Rememe`
+            }${
+              userTDH
+                ? ` (you have ${numberWithCommas(userTDH.boosted_tdh)} TDH)`
+                : ``
             }`,
           });
         }
@@ -139,6 +146,8 @@ export default function RememeAddPage() {
 
     if (accountResolution.isConnected) {
       fetchTdh();
+    } else {
+      setCheckList([]);
     }
   }, [accountResolution.isConnected]);
 
