@@ -55,7 +55,7 @@ export default function CreateCustomSnapshotFormUpload({
   };
   return (
     <div>
-      <div className="tw-mb-2.5">
+      <div className="tw-hidden">
         <AllowlistToolAnimationWrapper mode="sync" initial={true}>
           <AllowlistToolAnimationHeightOpacity key="allowlist-tool-builder-custom-token-pool-pool-add-file-title">
             {fileName && (
@@ -85,35 +85,34 @@ export default function CreateCustomSnapshotFormUpload({
           </AllowlistToolAnimationHeightOpacity>
         </AllowlistToolAnimationWrapper>
       </div>
-      <div>
-        <label
-          htmlFor="fileInput"
-          className="tw-inline-flex tw-items-center tw-justify-center tw-cursor-pointer tw-bg-transparent hover:tw-bg-neutral-800/80 tw-border tw-border-solid tw-border-transparent hover:tw-border-neutral-800/80 tw-px-4 tw-py-3 tw-text-sm tw-font-medium tw-text-white tw-w-full tw-underline tw-rounded-lg tw-transition tw-duration-300 tw-ease-out"
+
+      <label
+        htmlFor="fileInput"
+        className="tw-flex tw-items-center tw-justify-center tw-cursor-pointer tw-text-sm tw-font-medium tw-text-primary-300 hover:tw-text-primary-400 tw-w-full tw-underline tw-rounded-lg tw-transition tw-duration-300 tw-ease-out"
+      >
+        <svg
+          className="tw-h-5 tw-w-5 tw-mr-2 -tw-ml-1"
+          viewBox="0 0 24 24"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
         >
-          <svg
-            className="tw-h-5 tw-w-5 tw-mr-2 -tw-ml-1"
-            viewBox="0 0 24 24"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="M21 15V16.2C21 17.8802 21 18.7202 20.673 19.362C20.3854 19.9265 19.9265 20.3854 19.362 20.673C18.7202 21 17.8802 21 16.2 21H7.8C6.11984 21 5.27976 21 4.63803 20.673C4.07354 20.3854 3.6146 19.9265 3.32698 19.362C3 18.7202 3 17.8802 3 16.2V15M17 8L12 3M12 3L7 8M12 3V15"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-          <span>Upload a CSV</span>
-        </label>
-        <input
-          id="fileInput"
-          type="file"
-          accept="text/csv"
-          className="tw-form-input tw-hidden"
-          onChange={onFileUpload}
-        />
-      </div>
+          <path
+            d="M21 15V16.2C21 17.8802 21 18.7202 20.673 19.362C20.3854 19.9265 19.9265 20.3854 19.362 20.673C18.7202 21 17.8802 21 16.2 21H7.8C6.11984 21 5.27976 21 4.63803 20.673C4.07354 20.3854 3.6146 19.9265 3.32698 19.362C3 18.7202 3 17.8802 3 16.2V15M17 8L12 3M12 3L7 8M12 3V15"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
+        <span>Upload a CSV</span>
+      </label>
+      <input
+        id="fileInput"
+        type="file"
+        accept="text/csv"
+        className="tw-form-input tw-hidden"
+        onChange={onFileUpload}
+      />
     </div>
   );
 }

@@ -107,18 +107,51 @@ export default function CreateCustomSnapshotForm() {
               autoComplete="off"
               value={formValues.name}
               onChange={handleChange}
-              className="tw-form-input tw-block tw-w-full tw-rounded-lg tw-border-0 tw-py-3 tw-px-3 tw-bg-neutral-700/40 tw-text-white tw-font-light tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-neutral-700/40 placeholder:tw-text-neutral-500 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 tw-text-base sm:tw-leading-6 tw-transition tw-duration-300 tw-ease-out"
+              className="tw-form-input tw-block tw-w-full tw-rounded-lg tw-border-0 tw-py-3 tw-px-3 tw-bg-neutral-700/40 tw-text-white tw-font-light tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-neutral-700/40 hover:tw-ring-neutral-700 placeholder:tw-text-neutral-500 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 tw-text-base sm:tw-leading-6 tw-transition tw-duration-300 tw-ease-out"
             />
           </div>
         </div>
 
-        <CreateCustomSnapshotFormUpload
-          fileName={fileName}
-          setFileName={setFileName}
-          setTokens={setTokens}
-        />
+        <div className="tw-w-80">
+          <div className="tw-flex tw-justify-between tw-items-center">
+            <label className="tw-block tw-text-sm tw-font-normal tw-leading-5 tw-text-neutral-100">
+              Wallet no
+            </label>
+            <CreateCustomSnapshotFormUpload
+              fileName={fileName}
+              setFileName={setFileName}
+              setTokens={setTokens}
+            />
+          </div>
+          <div className="tw-relative tw-mt-2">
+            <input
+              type="number"
+              name="name"
+              required
+              autoComplete="off"
+              className="tw-form-input tw-block tw-w-full tw-rounded-lg tw-border-0 tw-py-3 tw-px-3 tw-bg-neutral-700/40 tw-text-white tw-font-light tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-neutral-700/40
+              hover:tw-ring-neutral-700 placeholder:tw-text-neutral-500 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 tw-text-base sm:tw-leading-6 tw-transition tw-duration-300 tw-ease-out"
+            />
+            <div className="tw-absolute tw-inset-y-0 tw-top-1 tw-right-0 tw-pr-2">
+              <button
+                type="button"
+                className="tw-cursor-pointer tw-bg-neutral-800 hover:tw-bg-neutral-800/80 tw-px-4 tw-py-2 tw-text-sm tw-font-medium tw-text-white tw-border-2 tw-border-solid tw-border-neutral-700 tw-rounded-lg tw-transition tw-duration-300 tw-ease-out"
+              >
+                Add
+              </button>
+            </div>
+          </div>
+        </div>
 
-        <div>
+        <div className="tw-hidden">
+          <CreateCustomSnapshotFormUpload
+            fileName={fileName}
+            setFileName={setFileName}
+            setTokens={setTokens}
+          />
+        </div>
+
+        <div className="tw-ml-auto">
           <DistributionPlanAddOperationBtn loading={isLoading}>
             Add custom snapshot
           </DistributionPlanAddOperationBtn>
