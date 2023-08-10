@@ -40,9 +40,6 @@ export default function CreateCustomSnapshotFormUpload({
           const result: Mutable<CustomTokenPoolParamsToken, "id"> = {
             owner: row.at(0)?.toLowerCase() || "",
           };
-          if (!!row.at(1)?.length) {
-            result.id = row.at(1);
-          }
           return result;
         })
         .filter((token) => {

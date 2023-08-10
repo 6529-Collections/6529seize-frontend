@@ -110,46 +110,9 @@ export default function CreateCustomSnapshots() {
           </div>
         </button>
       </div>
-      <p className="tw-mt-2 tw-block tw-font-semibold tw-text-sm tw-text-neutral-100">
-        * Please note: ENS addresses are not supported at this time.
-      </p>
+
       <DistributionPlanStepWrapper>
         <CreateCustomSnapshotForm />
-
-        <div className="tw-mt-6 tw-flow-root">
-          <div className="-tw-mx-4 -tw-my-2 tw-overflow-x-auto sm:-tw-mx-6 lg:-tw-mx-8">
-            <div className="tw-inline-block tw-min-w-full tw-py-2 tw-align-middle sm:tw-px-6 lg:tw-px-8">
-              <div className="tw-overflow-hidden tw-shadow tw-ring-1 tw-ring-black tw-ring-opacity-5 sm:tw-rounded-lg">
-                <table className="tw-min-w-full tw-divide-y tw-divide-solid tw-divide-neutral-700">
-                  <tbody className="tw-divide-y tw-divide-solid tw-divide-neutral-700/40 tw-bg-neutral-800">
-                    <tr>
-                      <td className="tw-w-8 tw-whitespace-nowrap tw-py-4 tw-pl-4 tw-pr-3 tw-text-sm tw-font-medium tw-text-neutral-400 sm:pl-6">
-                        1
-                      </td>
-                      <td className="tw-whitespace-nowrap tw-py-4 tw-pl-3 tw-pr-3 tw-text-sm tw-font-medium tw-text-neutral-50 sm:pl-6">
-                        Wallet no
-                      </td>
-                      <td className="tw-whitespace-nowrap tw-py-4 tw-pl-3 tw-pr-4 tw-text-right tw-text-sm tw-font-medium sm:tw-pr-6">
-                        delete icon
-                      </td>
-                    </tr>
-                    <tr>
-                      <td className="tw-w-8 tw-whitespace-nowrap tw-py-4 tw-pl-4 tw-pr-3 tw-text-sm tw-font-medium tw-text-neutral-400 sm:pl-6">
-                        1
-                      </td>
-                      <td className="tw-whitespace-nowrap tw-py-4 tw-pl-3 tw-pr-3 tw-text-sm tw-font-medium tw-text-neutral-50 sm:pl-6">
-                        Wallet no
-                      </td>
-                      <td className="tw-whitespace-nowrap tw-py-4 tw-pl-3 tw-pr-4 tw-text-right tw-text-sm tw-font-medium sm:tw-pr-6">
-                        delete icon
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-        </div>
 
         <div className="tw-mt-6">
           {haveCustomSnapshots ? (
