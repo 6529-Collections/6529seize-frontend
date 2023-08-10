@@ -96,23 +96,24 @@ export default function CreateCustomSnapshots() {
   return (
     <div>
       <StepHeader step={DistributionPlanToolStep.CREATE_CUSTOM_SNAPSHOT} />
-      <div className="tw-mt-4 tw-items-center tw-font-light tw-text-base tw-text-neutral-400 tw-inline-flex">
+      <div
+        onClick={downloadExampleCsv}
+        className="tw-group tw-mt-4 tw-cursor-pointer tw-items-center tw-font-light tw-text-sm tw-text-neutral-400 hover:tw-text-neutral-50 tw-inline-flex tw-gap-x-1.5 tw-transition-all tw-duration-300 tw-ease-out"
+      >
         Download example CSV file
         <button
-          onClick={downloadExampleCsv}
           type="button"
-          className="tw-group tw-flex tw-justify-center tw-items-center tw-rounded-full tw-bg-transparent tw-h-8 tw-w-8 tw-text-white tw-border-none hover:tw-bg-neutral-700 tw-transition-all tw-duration-300 tw-ease-out"
+          className="-tw-mt-0.5 tw-group tw-flex tw-justify-center tw-items-center tw-rounded-full tw-bg-transparent tw-h-8 tw-w-8 tw-text-white tw-border-none group-hover:tw-bg-neutral-700 tw-transition-all tw-duration-300 tw-ease-out"
         >
           <div className="tw-h-4 tw-w-4 tw-flex tw-items-center tw-justify-center">
             <AllowlistToolCsvIcon />
           </div>
         </button>
       </div>
-      <p className="tw-mt-2 tw-block tw-font-semibold tw-text-sm tw-text-neutral-100">
-        * Please note: ENS addresses are not support at this time.
-      </p>
+
       <DistributionPlanStepWrapper>
         <CreateCustomSnapshotForm />
+
         <div className="tw-mt-6">
           {haveCustomSnapshots ? (
             <CreateCustomSnapshotTable customSnapshots={customSnapshots} />
