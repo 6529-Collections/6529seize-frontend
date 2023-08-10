@@ -220,8 +220,32 @@ export default function CreateCustomSnapshotForm() {
               />
             </div>
           </div>
+          <div>
+            <div>
+              <button
+                type="button"
+                className="tw-inline-flex tw-items-center tw-justify-center tw-cursor-pointer tw-bg-transparent tw-px-4 tw-py-3 tw-underline hover:tw-bg-neutral-800/80 tw-rounded-lg tw-text-sm tw-font-medium tw-text-white tw-w-full tw-border-transparent tw-border-solid tw-border-neutral-700 tw-border-2 tw-transition tw-duration-300 tw-ease-out"
+              >
+                <svg
+                  className="tw-h-5 tw-w-5 tw-mr-2 -tw-ml-1"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M12 5V19M5 12H19"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                </svg>
+                <span>Add wallet</span>
+              </button>
+            </div>
+          </div>
 
-          <div className="tw-w-80">
+          <div className="tw-w-80 tw-hidden">
             <div className="tw-flex tw-justify-between tw-items-center">
               <label className="tw-block tw-text-sm tw-font-normal tw-leading-5 tw-text-neutral-100">
                 Wallet no
@@ -244,14 +268,14 @@ export default function CreateCustomSnapshotForm() {
                     e.preventDefault();
                   }
                 }}
-                className="tw-form-input tw-block tw-w-full tw-rounded-lg tw-border-0 tw-py-3 tw-px-3 tw-bg-neutral-700/40 tw-text-white tw-font-light tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-neutral-700/40
+                className="tw-form-input tw-block tw-w-full tw-rounded-lg tw-border-0 tw-py-3 tw-pl-3 tw-pr-20 tw-bg-neutral-700/40 tw-text-white tw-font-light tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-neutral-700/40
               hover:tw-ring-neutral-700 placeholder:tw-text-neutral-500 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 tw-text-base sm:tw-leading-6 tw-transition tw-duration-300 tw-ease-out"
               />
               <div className="tw-absolute tw-inset-y-0 tw-top-1 tw-right-0 tw-pr-2">
                 <button
                   onClick={addManualWallet}
                   type="button"
-                  className="tw-cursor-pointer tw-bg-neutral-800 hover:tw-bg-neutral-800/80 tw-px-4 tw-py-2 tw-text-sm tw-font-medium tw-text-white tw-border-2 tw-border-solid tw-border-neutral-700 tw-rounded-lg tw-transition tw-duration-300 tw-ease-out"
+                  className="tw-cursor-pointer tw-bg-neutral-800 hover:tw-bg-neutral-700/20 tw-px-4 tw-py-2 tw-text-sm tw-font-medium tw-text-white tw-border-2 tw-border-solid tw-border-neutral-700 tw-rounded-lg tw-transition tw-duration-300 tw-ease-out"
                 >
                   Add
                 </button>
