@@ -15,6 +15,7 @@ import {
   numberWithCommas,
 } from "../../helpers/Helpers";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import DotLoader from "../dotLoader/DotLoader";
 
 const PAGE_SIZE = 20;
 
@@ -272,14 +273,14 @@ export default function Rememes(props: Props) {
             {rememesLoaded ? (
               printRememes()
             ) : (
-              <Row>
-                <Col>Fetching...</Col>
-              </Row>
+              <Col className="pt-3">
+                Fetching <DotLoader />
+              </Col>
             )}
           </Container>
         </Col>
       </Row>
-      {totalResults > PAGE_SIZE && (
+      {totalResults > PAGE_SIZE && rememesLoaded && (
         <Row className="text-center pt-4 pb-4">
           <Pagination
             page={page}

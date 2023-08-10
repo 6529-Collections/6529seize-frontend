@@ -15,6 +15,7 @@ import {
 import { useRouter } from "next/router";
 import { fetchAllPages } from "../../services/6529api";
 import NFTImage from "../nft-image/NFTImage";
+import DotLoader from "../dotLoader/DotLoader";
 
 enum Sort {
   AGE = "age",
@@ -666,9 +667,8 @@ export default function MemeLabComponent(props: Props) {
                   </span>
                 </Col>
               </Row>
-
-              {nftsLoaded &&
-                (nfts.length > 0 ? (
+              {nftsLoaded ? (
+                nfts.length > 0 ? (
                   sort == Sort.ARTISTS ? (
                     printArtists()
                   ) : sort == Sort.COLLECTIONS ? (
@@ -687,7 +687,14 @@ export default function MemeLabComponent(props: Props) {
                     />{" "}
                     Nothing here yet
                   </Col>
-                ))}
+                )
+              ) : (
+                <Row>
+                  <Col className="pt-3">
+                    Fetching <DotLoader />
+                  </Col>
+                </Row>
+              )}
             </>
           </Container>
         </Col>
