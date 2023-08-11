@@ -172,9 +172,9 @@ export default function UserPage(props: Props) {
           setOwnerAddress(oAddress);
           setOwnerENS(response.display ? response.display : oAddress);
           let reservedDisplay;
-          if (props.user.toUpperCase() == SIX529_MUSEUM.toUpperCase()) {
+          if (areEqualAddresses(props.user, SIX529_MUSEUM)) {
             reservedDisplay = ReservedUser.MUSEUM;
-          } else if (props.user.toUpperCase() == MANIFOLD.toUpperCase()) {
+          } else if (areEqualAddresses(props.user, MANIFOLD)) {
             reservedDisplay = ReservedUser.MANIFOLD;
           }
           setOwnerLinkDisplay(
@@ -413,6 +413,12 @@ export default function UserPage(props: Props) {
           break;
         case TypeFilter.AIRDROPS:
           url += `&filter=airdrops`;
+          break;
+        case TypeFilter.MINTS:
+          url += `&filter=mints`;
+          break;
+        case TypeFilter.BURNS:
+          url += `&filter=burns`;
           break;
       }
       fetchUrl(url).then((response: DBResponse) => {
