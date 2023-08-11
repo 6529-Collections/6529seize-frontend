@@ -297,7 +297,6 @@ export function containsEmojis(s: string) {
 export function parseEmojis(s: string) {
   const regex = /U\+([\dA-Fa-f]{1,6})/g;
   return s.replace(regex, (_, hexValue) => {
-    const codePoint = parseInt(hexValue, 16);
     return `&#x${hexValue};`;
   });
 }

@@ -57,6 +57,12 @@ export default function UserPageActivity(props: Props) {
         case TypeFilter.AIRDROPS:
           url += `&filter=airdrops`;
           break;
+        case TypeFilter.MINTS:
+          url += `&filter=mints`;
+          break;
+        case TypeFilter.BURNS:
+          url += `&filter=burns`;
+          break;
       }
       fetchUrl(url).then((response: DBResponse) => {
         setActivityTotalResults(response.count);

@@ -30,7 +30,7 @@ input:not(#allowlist-tool input),
 button:not(#allowlist-tool button),
 video:not(#allowlist-tool video),
 svg:not(#allowlist-tool svg) {
-  font-size: $font-size !important;
+  font-size: $font-size;
   outline: 0 !important;
   box-shadow: none !important;
 }

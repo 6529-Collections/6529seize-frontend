@@ -3,7 +3,7 @@ import styles from "./Distribution.module.scss";
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import { Container, Row, Col, Carousel, Table } from "react-bootstrap";
-import { SIX529_MUSEUM } from "../../constants";
+import { MANIFOLD, SIX529_MUSEUM } from "../../constants";
 import { DBResponse } from "../../entities/IDBResponse";
 import Breadcrumb, { Crumb } from "../breadcrumb/Breadcrumb";
 import { useRouter } from "next/router";
@@ -13,12 +13,19 @@ import {
   IDistributionPhoto,
 } from "../../entities/IDistribution";
 import ScrollToButton from "../scrollTo/ScrollToButton";
-import { formatAddress, numberWithCommas } from "../../helpers/Helpers";
+import {
+  areEqualAddresses,
+  formatAddress,
+  numberWithCommas,
+  parseEmojis,
+} from "../../helpers/Helpers";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Pagination from "../pagination/Pagination";
 import { SortDirection } from "../../entities/ISort";
 import Tippy from "@tippyjs/react";
 import SearchModal from "../searchModal/SearchModal";
+import { ReservedUser } from "../../pages/[user]";
+import DotLoader from "../dotLoader/DotLoader";
 
 enum Sort {
   phase = "phase",
@@ -57,13 +64,16 @@ export default function Distribution(props: Props) {
   const [showSearchModal, setShowSearchModal] = useState(false);
   const [searchWallets, setSearchWallets] = useState<string[]>([]);
 
+  const [fetching, setFetching] = useState(false);
+
   const [sort, setSort] = useState<{
     sort: Sort;
     sort_direction: SortDirection;
   }>({ sort: Sort.phase, sort_direction: SortDirection.DESC });
 
   function fetchDistribution() {
-    const phasefilter = activePhase === "All" ? "" : `&phase=${activePhase}`;
+    setFetching(true);
+    const phasefilter = activePhase == "All" ? "" : `&phase=${activePhase}`;
     const walletFilter =
       searchWallets.length === 0 ? "" : `&wallet=${searchWallets.join(",")}`;
     const distributionUrl = `${process.env.API_ENDPOINT}/api/distribution/${props.contract}/${nftId}?&page=${pageProps.page}&sort=${sort.sort}&sort_direction=${sort.sort_direction}${phasefilter}${walletFilter}`;
@@ -71,6 +81,7 @@ export default function Distribution(props: Props) {
     fetchUrl(distributionUrl).then((r: DBResponse) => {
       setTotalResults(r.count);
       setDistributions(r.data);
+      setFetching(false);
     });
   }
 
@@ -247,11 +258,15 @@ export default function Distribution(props: Props) {
                   <tr>
                     <th colSpan={2}>
                       Wallet{" "}
-                      <span className={styles.totalResults}>
-                        x{totalResults}
-                      </span>
+                      {!fetching ? (
+                        <span className={styles.totalResults}>
+                          x{totalResults}
+                        </span>
+                      ) : (
+                        <DotLoader />
+                      )}
                     </th>
-                    <th className="text-center">
+                    {/* <th className="text-center">
                       Cards&nbsp;
                       <span
                         className={`${styles.distributionsCaretWrapper} d-flex flex-column`}>
@@ -358,7 +373,7 @@ export default function Distribution(props: Props) {
                           }`}
                         />
                       </span>
-                    </th>
+                    </th> */}
                     <th className="text-center">
                       Phase&nbsp;
                       <span
@@ -480,15 +495,18 @@ export default function Distribution(props: Props) {
                         <a
                           href={`/${d.wallet}`}
                           target="_blank"
-                          rel="noreferrer">
-                          {d.wallet === SIX529_MUSEUM
-                            ? "6529Museum"
-                            : d.display
-                            ? d.display
-                            : formatAddress(d.wallet)}
-                        </a>
+                          rel="noreferrer"
+                          dangerouslySetInnerHTML={{
+                            __html: areEqualAddresses(d.wallet, SIX529_MUSEUM)
+                              ? ReservedUser.MUSEUM
+                              : areEqualAddresses(d.wallet, MANIFOLD)
+                              ? ReservedUser.MANIFOLD
+                              : d.display
+                              ? parseEmojis(d.display)
+                              : formatAddress(d.wallet),
+                          }}></a>
                       </td>
-                      <td className="text-center">
+                      {/* <td className="text-center">
                         {d.wallet_balance
                           ? numberWithCommas(d.wallet_balance)
                           : "-"}
@@ -500,7 +518,7 @@ export default function Distribution(props: Props) {
                       </td>
                       <td className="text-center">
                         {d.wallet_tdh ? numberWithCommas(d.wallet_tdh) : "-"}
-                      </td>
+                      </td> */}
                       <td className="text-center">{d.phase}</td>
                       <td className="text-center">
                         {numberWithCommas(d.count)}

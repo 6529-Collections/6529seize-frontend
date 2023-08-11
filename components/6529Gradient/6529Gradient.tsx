@@ -12,6 +12,7 @@ import { useRouter } from "next/router";
 import { fetchAllPages } from "../../services/6529api";
 import NFTImage from "../nft-image/NFTImage";
 import Address from "../address/Address";
+import DotLoader from "../dotLoader/DotLoader";
 
 enum Sort {
   ID = "id",
@@ -147,10 +148,12 @@ export default function GradientsComponent(props: Props) {
         sm={{ span: 4 }}
         md={{ span: 3 }}
         lg={{ span: 3 }}>
-        <Container fluid className="no-padding">
-          <Row>
-            <Col>
-              <a href={`/6529-gradient/${nft.id}`}>
+        <a
+          href={`/6529-gradient/${nft.id}`}
+          className="decoration-none decoration-hover-underline scale-hover">
+          <Container fluid className="no-padding">
+            <Row>
+              <Col>
                 <NFTImage
                   nft={nft}
                   animation={false}
@@ -165,45 +168,43 @@ export default function GradientsComponent(props: Props) {
                   showUnseized={false}
                   showThumbnail={true}
                 />
-              </a>
-            </Col>
-          </Row>
-          <Row>
-            <Col className="text-center pt-2">
-              <a href={`/6529-gradient/${nft.id}`}>{nft.name}</a>
-            </Col>
-          </Row>
-          <Row>
-            <Col className="text-center">
-              {owner &&
-              props.wallets.some((w) => areEqualAddresses(w, owner.wallet))
-                ? "*"
-                : ""}
-              {owner && (
-                <Address
-                  wallets={[owner.wallet]}
-                  display={owner.wallet_display}
-                  hideCopy={true}
-                />
-              )}
-            </Col>
-          </Row>
-          {owner && (
-            <Row>
-              <Col className="text-center pt-2">
-                TDH: <b>{numberWithCommas(Math.round(nft.tdh))}</b> | Rank:{" "}
-                <b>
-                  {nft.tdh_rank}/{nfts.length}
-                </b>
               </Col>
             </Row>
-          )}
-        </Container>
+            <Row>
+              <Col className="text-center pt-2">{nft.name}</Col>
+            </Row>
+            <Row>
+              <Col className="text-center">
+                {owner &&
+                props.wallets.some((w) => areEqualAddresses(w, owner.wallet))
+                  ? "*"
+                  : ""}
+                {owner && (
+                  <Address
+                    wallets={[owner.wallet]}
+                    display={owner.wallet_display}
+                    hideCopy={true}
+                  />
+                )}
+              </Col>
+            </Row>
+            {owner && (
+              <Row>
+                <Col className="text-center pt-2">
+                  TDH: <b>{numberWithCommas(Math.round(nft.tdh))}</b> | Rank:{" "}
+                  <b>
+                    {nft.tdh_rank}/{nfts.length}
+                  </b>
+                </Col>
+              </Row>
+            )}
+          </Container>
+        </a>
       </Col>
     );
   }
 
-  function printNfts(rowIndex?: number) {
+  function printNfts() {
     return <Row className="pt-2">{nfts.map((nft) => printNft(nft))}</Row>;
   }
 
@@ -255,8 +256,8 @@ export default function GradientsComponent(props: Props) {
                   </span>
                 </Col>
               </Row>
-              {nftsSorted &&
-                (nfts.length > 0 ? (
+              {nftsSorted ? (
+                nfts.length > 0 ? (
                   printNfts()
                 ) : (
                   <Col>
@@ -269,7 +270,14 @@ export default function GradientsComponent(props: Props) {
                     />{" "}
                     Nothing here yet
                   </Col>
-                ))}
+                )
+              ) : (
+                <Row>
+                  <Col className="pt-3">
+                    Fetching <DotLoader />
+                  </Col>
+                </Row>
+              )}
             </>
           </Container>
         </Col>

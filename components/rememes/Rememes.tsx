@@ -16,6 +16,7 @@ import {
 } from "../../helpers/Helpers";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Tippy from "@tippyjs/react";
+import DotLoader from "../dotLoader/DotLoader";
 
 const PAGE_SIZE = 20;
 
@@ -299,9 +300,9 @@ export default function Rememes(props: Props) {
             {rememesLoaded ? (
               printRememes()
             ) : (
-              <Row>
-                <Col>Fetching...</Col>
-              </Row>
+              <Col className="pt-3">
+                Fetching <DotLoader />
+              </Col>
             )}
           </Container>
         </Col>
