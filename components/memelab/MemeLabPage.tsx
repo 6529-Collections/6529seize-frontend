@@ -254,6 +254,12 @@ export default function LabPage(props: Props) {
         case TypeFilter.AIRDROPS:
           url += `&filter=airdrops`;
           break;
+        case TypeFilter.MINTS:
+          url += `&filter=mints`;
+          break;
+        case TypeFilter.BURNS:
+          url += `&filter=burns`;
+          break;
       }
       fetchUrl(url).then((response: DBResponse) => {
         setActivityTotalResults(response.count);
@@ -1281,21 +1287,36 @@ export default function LabPage(props: Props) {
             </Dropdown>
           </Col>
         </Row>
-        <Row className={`pt-2 ${styles.transactionsScrollContainer}`}>
-          <Col>
-            <Table bordered={false} className={styles.transactionsTable}>
-              <tbody>
-                {activity.map((tr) => (
-                  <LatestActivityRow
-                    tr={tr}
-                    nft={nft}
-                    key={`${tr.from_address}-${tr.to_address}-${tr.transaction}-${tr.token_id}`}
-                  />
-                ))}
-              </tbody>
-            </Table>
-          </Col>
-        </Row>
+        {activity.length > 0 ? (
+          <Row className={`pt-2 ${styles.transactionsScrollContainer}`}>
+            <Col>
+              <Table bordered={false} className={styles.transactionsTable}>
+                <tbody>
+                  {activity.map((tr) => (
+                    <LatestActivityRow
+                      tr={tr}
+                      nft={nft}
+                      key={`${tr.from_address}-${tr.to_address}-${tr.transaction}-${tr.token_id}`}
+                    />
+                  ))}
+                </tbody>
+              </Table>
+            </Col>
+          </Row>
+        ) : (
+          <Row>
+            <Col>
+              <Image
+                width="0"
+                height="0"
+                style={{ height: "auto", width: "100px" }}
+                src="/SummerGlasses.svg"
+                alt="SummerGlasses"
+              />{" "}
+              Nothing here yet
+            </Col>
+          </Row>
+        )}
         {activity.length > 0 && (
           <Row className="text-center pt-2 pb-3">
             <Pagination

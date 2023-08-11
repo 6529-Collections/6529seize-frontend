@@ -20,6 +20,7 @@ import ConsolidationSwitch from "../consolidation-switch/ConsolidationSwitch";
 import Address from "../address/Address";
 import SearchModal from "../searchModal/SearchModal";
 import DownloadUrlWidget from "../downloadUrlWidget/DownloadUrlWidget";
+import DotLoader from "../dotLoader/DotLoader";
 
 interface Props {
   page: number;
@@ -1100,12 +1101,6 @@ export default function Leaderboard(props: Props) {
     );
   }
 
-  function printLoader() {
-    if (showLoader) {
-      return <span className={styles.loader}></span>;
-    }
-  }
-
   return (
     <Container className={`no-padding pt-4`} id={`leaderboard-page`}>
       <Row>
@@ -1316,7 +1311,9 @@ export default function Leaderboard(props: Props) {
           {!leaderboard && (
             <Container>
               <Row>
-                <Col>Fetching...</Col>
+                <Col className="pt-3">
+                  Fetching <DotLoader />
+                </Col>
               </Row>
             </Container>
           )}
@@ -1334,10 +1331,13 @@ export default function Leaderboard(props: Props) {
                   <th className={styles.rank}>Rank</th>
                   <th className={`${styles.hodler}`}>
                     Collector&nbsp;&nbsp;
-                    <span className={styles.totalResults}>
-                      x{totalResults}
-                    </span>{" "}
-                    {printLoader()}
+                    <span className={styles.totalResults}>x{totalResults}</span>
+                    {showLoader && (
+                      <>
+                        {" "}
+                        <DotLoader />
+                      </>
+                    )}
                   </th>
                   {focus == Focus.TDH && (
                     <th className={styles.tdhSub}>
