@@ -17,6 +17,7 @@ import { Owner } from "../../entities/IOwner";
 import { ConsolidatedTDHMetrics, TDHMetrics } from "../../entities/ITDH";
 import Image from "next/image";
 import SeasonsDropdown from "../seasons-dropdown/SeasonsDropdown";
+import DotLoader from "../dotLoader/DotLoader";
 
 interface Props {
   show: boolean;
@@ -513,20 +514,27 @@ export default function UserPageCollection(props: Props) {
           </Col>
         </Row>
         {printUserControls()}
-        {props.owned.length > 0 ? (
-          printNfts()
+        {nftsLoaded ? (
+          props.owned.length > 0 ? (
+            printNfts()
+          ) : (
+            <Col>
+              <Image
+                width="0"
+                height="0"
+                style={{ height: "auto", width: "100px" }}
+                src="/SummerGlasses.svg"
+                alt="SummerGlasses"
+              />{" "}
+              Nothing here yet
+            </Col>
+          )
         ) : (
-          <Col>
-            <Image
-              loading={"lazy"}
-              width="0"
-              height="0"
-              style={{ height: "auto", width: "100px" }}
-              src="/SummerGlasses.svg"
-              alt="SummerGlasses"
-            />{" "}
-            Nothing here yet
-          </Col>
+          <Row>
+            <Col className="pt-3 pb-5">
+              Fetching <DotLoader />
+            </Col>
+          </Row>
         )}
       </>
     );
