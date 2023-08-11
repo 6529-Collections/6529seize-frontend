@@ -17,6 +17,7 @@ import {
 import { useRouter } from "next/router";
 import { fetchAllPages } from "../../services/6529api";
 import NFTImage from "../nft-image/NFTImage";
+import DotLoader from "../dotLoader/DotLoader";
 
 enum Sort {
   AGE = "age",
@@ -750,26 +751,34 @@ export default function TheMemesComponent(props: Props) {
                   </span>
                 </Col>
               </Row>
-
-              {nftsLoaded &&
-                (nfts.length > 0 ? (
+              {nftsLoaded ? (
+                nfts.length > 0 ? (
                   sort == Sort.MEME ? (
                     printMemes()
                   ) : (
                     printNfts()
                   )
                 ) : (
-                  <Col>
-                    <Image
-                      width="0"
-                      height="0"
-                      style={{ height: "auto", width: "100px" }}
-                      src="/SummerGlasses.svg"
-                      alt="SummerGlasses"
-                    />{" "}
-                    Nothing here yet
+                  <Row>
+                    <Col>
+                      <Image
+                        width="0"
+                        height="0"
+                        style={{ height: "auto", width: "100px" }}
+                        src="/SummerGlasses.svg"
+                        alt="SummerGlasses"
+                      />{" "}
+                      Nothing here yet
+                    </Col>
+                  </Row>
+                )
+              ) : (
+                <Row>
+                  <Col className="pt-3">
+                    Fetching <DotLoader />
                   </Col>
-                ))}
+                </Row>
+              )}
             </>
           </Container>
         </Col>

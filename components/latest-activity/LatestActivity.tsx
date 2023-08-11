@@ -18,9 +18,11 @@ interface Props {
 
 export enum TypeFilter {
   ALL = "All",
+  AIRDROPS = "Airdrops",
+  MINTS = "Mints",
   SALES = "Sales",
   TRANSFERS = "Transfers",
-  AIRDROPS = "Airdrops",
+  BURNS = "Burns",
 }
 
 export default function LatestActivity(props: Props) {
@@ -49,6 +51,12 @@ export default function LatestActivity(props: Props) {
         break;
       case TypeFilter.AIRDROPS:
         url += `&filter=airdrops`;
+        break;
+      case TypeFilter.MINTS:
+        url += `&filter=mints`;
+        break;
+      case TypeFilter.BURNS:
+        url += `&filter=burns`;
         break;
     }
     fetchUrl(url).then((response: DBResponse) => {
