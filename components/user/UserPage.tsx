@@ -53,6 +53,7 @@ import ConsolidationSwitch, {
 import Address from "../address/Address";
 import NFTImage from "../nft-image/NFTImage";
 import NotFound from "../notFound/NotFound";
+import DotLoader from "../dotLoader/DotLoader";
 
 interface Props {
   user: string;
@@ -2025,8 +2026,8 @@ export default function UserPage(props: Props) {
                     </Row>
                   )}
                   {printUserControls()}
-                  {ownedLoaded &&
-                    (owned.length > 0 ? (
+                  {ownedLoaded && nftsLoaded ? (
+                    owned.length > 0 ? (
                       printNfts()
                     ) : (
                       <Col>
@@ -2039,7 +2040,16 @@ export default function UserPage(props: Props) {
                         />{" "}
                         Nothing here yet
                       </Col>
-                    ))}
+                    )
+                  ) : (
+                    tdh?.balance && (
+                      <Row>
+                        <Col className="pt-3 pb-5">
+                          Fetching <DotLoader />
+                        </Col>
+                      </Row>
+                    )
+                  )}
                 </>
               )}
               {focus == Focus.ACTIVITY && (
