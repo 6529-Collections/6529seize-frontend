@@ -217,7 +217,7 @@ export default function SnapshotExcludeOtherSnapshots({
 
       <div className="tw-mt-6">
         <AllowlistToolSelectMenuMultiple
-          label="Select Snapshot To Exclude"
+          label="Select Snapshots To Exclude"
           placeholder="No snapshots excluded"
           allSelectedTitle="All Snapshots Excluded"
           someSelectedTitleSuffix="Snapshots Excluded"

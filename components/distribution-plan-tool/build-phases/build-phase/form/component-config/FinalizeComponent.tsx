@@ -9,6 +9,7 @@ import {
 import FinalizeSnapshotsTable from "./snapshots-table/FinalizeSnapshotsTable";
 import BuildPhaseFormConfigModalTitle from "./BuildPhaseFormConfigModalTitle";
 import ComponentConfigMeta from "./ComponentConfigMeta";
+import { BuildPhasesPhase } from "../../../BuildPhases";
 
 export default function FinalizeComponent({
   onSave,
@@ -21,6 +22,7 @@ export default function FinalizeComponent({
   uniqueWalletsCount,
   isLoadingUniqueWalletsCount,
   onClose,
+  phases
 }: {
   onSave: () => void;
   onStartAgain: () => void;
@@ -32,6 +34,7 @@ export default function FinalizeComponent({
   uniqueWalletsCount: number | null;
   isLoadingUniqueWalletsCount: boolean;
   onClose: () => void;
+  phases: BuildPhasesPhase[]
 }) {
   const [groupSnapshots, setGroupSnapshots] = useState<
     PhaseGroupSnapshotConfig[]
@@ -75,6 +78,7 @@ export default function FinalizeComponent({
           onRemoveGroupSnapshot={onRemoveGroupSnapshot}
           groupSnapshots={groupSnapshots}
           snapshots={snapshots}
+          phases={phases}
         />
       )}
       <div className="tw-mt-2 tw-inline-flex tw-gap-x-6">

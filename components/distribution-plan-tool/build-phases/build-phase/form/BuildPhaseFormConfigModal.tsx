@@ -925,6 +925,7 @@ export default function BuildPhaseFormConfigModal({
                 uniqueWalletsCount={uniqueWalletsCountByOperations}
                 isLoadingUniqueWalletsCount={isLoadingUniqueWalletsCount}
                 onClose={onClose}
+                phases={targetPhases}
               />
             );
           case PhaseConfigStep.COMPONENT_SELECT_RANDOM_HOLDERS:
@@ -961,6 +962,7 @@ export default function BuildPhaseFormConfigModal({
                 uniqueWalletsCount={uniqueWalletsCountByOperations}
                 isLoadingUniqueWalletsCount={isLoadingUniqueWalletsCount}
                 onClose={onClose}
+                phases={targetPhases}
               />
             );
           default:

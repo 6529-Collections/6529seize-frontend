@@ -7,6 +7,7 @@ import {
 import FinalizeSnapshotsTable from "./snapshots-table/FinalizeSnapshotsTable";
 import BuildPhaseFormConfigModalTitle from "./BuildPhaseFormConfigModalTitle";
 import ComponentConfigMeta from "./ComponentConfigMeta";
+import { BuildPhasesPhase } from "../../../BuildPhases";
 
 export default function FinalizeSnapshot({
   onConfigureGroup,
@@ -19,6 +20,7 @@ export default function FinalizeSnapshot({
   uniqueWalletsCount,
   isLoadingUniqueWalletsCount,
   onClose,
+  phases,
 }: {
   onConfigureGroup: () => void;
   onAddAnotherSnapshot: () => void;
@@ -30,6 +32,7 @@ export default function FinalizeSnapshot({
   uniqueWalletsCount: number | null;
   isLoadingUniqueWalletsCount: boolean;
   onClose: () => void;
+  phases: BuildPhasesPhase[]
 }) {
   useEffect(() => {
     if (!groupSnapshots.length) {
@@ -59,6 +62,7 @@ export default function FinalizeSnapshot({
             onRemoveGroupSnapshot={onRemoveGroupSnapshot}
             groupSnapshots={groupSnapshots}
             snapshots={snapshots}
+            phases={phases}
           />
         </div>
       )}
