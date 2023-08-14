@@ -301,7 +301,7 @@ export default function DistributionPlanToolContextWrapper({
     setDistributionPlan(distributionPlan);
     await initState(distributionPlan.id);
     if (step === DistributionPlanToolStep.CREATE_PLAN) {
-      setStep(DistributionPlanToolStep.CREATE_CUSTOM_SNAPSHOT);
+      setStep(DistributionPlanToolStep.BUILD_PHASES);
     }
   };
 

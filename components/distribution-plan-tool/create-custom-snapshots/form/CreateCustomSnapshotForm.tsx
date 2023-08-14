@@ -220,7 +220,7 @@ export default function CreateCustomSnapshotForm() {
               />
             </div>
           </div>
-          <div>
+          {/* <div>
             <div>
               <button
                 type="button"
@@ -243,9 +243,9 @@ export default function CreateCustomSnapshotForm() {
                 <span>Add wallet</span>
               </button>
             </div>
-          </div>
+          </div> */}
 
-          <div className="tw-w-80 tw-hidden">
+          <div className="tw-w-80">
             <div className="tw-flex tw-justify-between tw-items-center">
               <label className="tw-block tw-text-sm tw-font-normal tw-leading-5 tw-text-neutral-100">
                 Wallet no
