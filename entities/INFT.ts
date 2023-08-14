@@ -124,6 +124,7 @@ export interface NFTHistory {
 
 export interface Rememe {
   created_at: Date;
+  updated_at: Date;
   contract: string;
   id: string;
   deployer: string;

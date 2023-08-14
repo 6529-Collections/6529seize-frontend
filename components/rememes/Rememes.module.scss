@@ -52,8 +52,7 @@
   }
 }
 
-.refreshLink {
-  margin-left: 8px;
+.buttonIcon {
   width: 30px;
   cursor: pointer;
 
@@ -300,15 +299,6 @@
 
 .rememesFiltersRow {
   justify-content: flex-end;
-
-  @media only screen and (max-width: 1200px) {
-    justify-content: center;
-  }
-}
-
-.rememesCountRow,
-.rememesHeaderRow {
-  justify-content: flex-start;
 
   @media only screen and (max-width: 1200px) {
     justify-content: center;
