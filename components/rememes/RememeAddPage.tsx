@@ -46,11 +46,7 @@ export default function RememeAddPage() {
   useEffect(() => {
     const mychecklist: CheckList[] = [];
     if (addRememe) {
-      if (
-        !seizeSettings ||
-        !seizeSettings.rememes_submission_tdh_threshold ||
-        !seizeSettings.rememes_submission_tdh_threshold_moderator
-      ) {
+      if (!seizeSettings || !seizeSettings.rememes_submission_tdh_threshold) {
         mychecklist.push({
           status: false,
           note: "Something went wrong fetching global settings",
@@ -75,28 +71,13 @@ export default function RememeAddPage() {
             status: true,
             note: "Rememe can be added (Rememe Contract Deployer)",
           });
-        } else if (isOpensea) {
+        } else {
           mychecklist.push({
             status:
               userTDH.boosted_tdh >=
               seizeSettings.rememes_submission_tdh_threshold,
             note: `You need ${numberWithCommas(
               seizeSettings.rememes_submission_tdh_threshold
-            )} TDH to add ${
-              addRememe.nfts.length > 1 ? `these Rememes` : `this Rememe`
-            }${
-              userTDH
-                ? ` (you have ${numberWithCommas(userTDH.boosted_tdh)} TDH)`
-                : ``
-            }`,
-          });
-        } else {
-          mychecklist.push({
-            status:
-              userTDH.boosted_tdh >=
-              seizeSettings.rememes_submission_tdh_threshold_moderator,
-            note: `You need ${numberWithCommas(
-              seizeSettings.rememes_submission_tdh_threshold_moderator
             )} TDH to add ${
               addRememe.nfts.length > 1 ? `these Rememes` : `this Rememe`
             }${
