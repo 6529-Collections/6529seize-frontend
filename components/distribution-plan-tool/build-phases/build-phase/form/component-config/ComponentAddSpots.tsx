@@ -63,7 +63,7 @@ export default function ComponentAddSpots({
   }, [maxMints]);
 
   return (
-    <div>
+    <div className="tw-p-6">
       <BuildPhaseFormConfigModalTitle title={title} onClose={onClose} />
       <DistributionPlanSecondaryText>
         What is the maximum number of mints allowed per address?

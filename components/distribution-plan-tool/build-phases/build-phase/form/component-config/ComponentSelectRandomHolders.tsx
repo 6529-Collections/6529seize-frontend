@@ -189,7 +189,7 @@ export default function ComponentSelectRandomHolders({
             setRandomHoldersType(type as RandomHoldersType)
           }
         />
-        <div className="tw-w-full">
+        <div className="tw-w-full tw-pt-6 tw-pr-6">
           <BuildPhaseFormConfigModalTitle title={title} onClose={onClose} />
           <DistributionPlanSecondaryText>
             Do you want to select random holders?
@@ -207,7 +207,7 @@ export default function ComponentSelectRandomHolders({
               <div className="tw-mt-1.5">
                 <div
                   className={`
-                tw-flex tw-rounded-md tw-bg-white/5 tw-ring-1 tw-ring-inset tw-ring-white/10 focus-within:tw-ring-1 focus-within:tw-ring-inset tw-transition tw-duration-300 tw-ease-out ${
+                tw-flex tw-rounded-md tw-bg-white/5 tw-ring-1 tw-ring-inset tw-ring-neutral-700/40 focus-within:tw-ring-1 hover:tw-ring-neutral-700 focus-within:tw-ring-inset tw-transition tw-duration-300 tw-ease-out ${
                   isError
                     ? "tw-ring-error focus-within:tw-ring-error"
                     : "focus-within:tw-ring-primary-400"
@@ -227,22 +227,45 @@ export default function ComponentSelectRandomHolders({
                 </div>
               </div>
             </div>
+            <div>
+              <label className="tw-block tw-text-sm tw-font-medium tw-leading-6 tw-text-white">
+                Random seed
+              </label>
+              <div className="tw-mt-1.5">
+                <div
+                  className={`
+                tw-flex tw-rounded-md tw-bg-white/5 tw-ring-1 tw-ring-inset tw-ring-neutral-700/40 focus-within:tw-ring-1 hover:tw-ring-neutral-700 focus-within:tw-ring-inset tw-transition tw-duration-300 tw-ease-out ${
+                  isError
+                    ? "tw-ring-error focus-within:tw-ring-error"
+                    : "focus-within:tw-ring-primary-400"
+                }`}
+                >
+                  <input
+                    type="number"
+                    className="tw-form-input tw-flex-1 tw-border-0 tw-bg-transparent placeholder:tw-text-neutral-500 tw-py-3 tw-px-3 tw-text-white focus:tw-ring-0 sm:tw-text-sm sm:tw-leading-6"
+                    
+                  />
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
-      <ComponentConfigNextBtn
-        showSkipBtn={true}
-        showNextBtn={!isDisabled}
-        onSkip={() => onNextStep(PhaseConfigStep.COMPONENT_ADD_SPOTS)}
-        onNext={onRandomHolders}
-        isDisabled={isDisabled}
-      >
-        <ComponentConfigMeta
-          tags={[]}
-          walletsCount={localUniqueWalletsCount}
-          isLoading={isLoadingUniqueWalletsCount}
-        />
-      </ComponentConfigNextBtn>
+      <div className="tw-pb-6 tw-px-6">
+        <ComponentConfigNextBtn
+          showSkipBtn={true}
+          showNextBtn={!isDisabled}
+          onSkip={() => onNextStep(PhaseConfigStep.COMPONENT_ADD_SPOTS)}
+          onNext={onRandomHolders}
+          isDisabled={isDisabled}
+        >
+          <ComponentConfigMeta
+            tags={[]}
+            walletsCount={localUniqueWalletsCount}
+            isLoading={isLoadingUniqueWalletsCount}
+          />
+        </ComponentConfigNextBtn>
+      </div>
     </div>
   );
 }

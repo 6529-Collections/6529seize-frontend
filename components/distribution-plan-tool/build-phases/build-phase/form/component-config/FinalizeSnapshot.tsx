@@ -48,7 +48,7 @@ export default function FinalizeSnapshot({
   };
 
   return (
-    <div>
+    <div className="tw-p-6">
       <BuildPhaseFormConfigModalTitle title={title} onClose={onClose} />
       <DistributionPlanSecondaryText>
         Here you can see your snapshot configurations.
@@ -66,7 +66,7 @@ export default function FinalizeSnapshot({
           />
         </div>
       )}
-      <div className="tw-mt-8 tw-w-full tw-inline-flex tw-justify-between">
+      <div className="tw-mt-8 tw-w-full tw-flex tw-justify-end">
         <ComponentConfigMeta
           tags={[]}
           walletsCount={uniqueWalletsCount}

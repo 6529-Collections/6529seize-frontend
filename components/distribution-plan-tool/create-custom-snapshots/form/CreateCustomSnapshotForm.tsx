@@ -282,7 +282,7 @@ export default function CreateCustomSnapshotForm() {
               </div>
             </div>
           </div>
-          <div className="tw-ml-auto">
+          <div>
             <DistributionPlanAddOperationBtn loading={isLoading}>
               Add custom snapshot
             </DistributionPlanAddOperationBtn>

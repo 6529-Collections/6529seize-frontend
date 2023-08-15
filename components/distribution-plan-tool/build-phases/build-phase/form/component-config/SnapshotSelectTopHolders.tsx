@@ -229,7 +229,7 @@ export default function SnapshotSelectTopHolders({
 
   return (
     <div>
-      <div className="tw-flex tw-gap-x-8">
+      <div className="tw-flex">
         <BuildPhaseFormConfigModalSidebar
           label="Ranked by"
           options={sideBarOptions}
@@ -237,7 +237,7 @@ export default function SnapshotSelectTopHolders({
           setSelectedOption={(type) => setTopHolderType(type as TopHolderType)}
         />
 
-        <div className="tw-w-full">
+        <div className="tw-w-full tw-p-6">
           <BuildPhaseFormConfigModalTitle title={title} onClose={onClose} />
           <DistributionPlanSecondaryText>
             Do you want to include only some members of this group?
@@ -308,19 +308,21 @@ export default function SnapshotSelectTopHolders({
         </div>
       </div>
 
-      <ComponentConfigNextBtn
-        showSkipBtn={true}
-        showNextBtn={!isDisabled}
-        isDisabled={isDisabled}
-        onSkip={onSelectTopHoldersSkip}
-        onNext={onSelectTopHolders}
-      >
-        <ComponentConfigMeta
-          tags={[]}
-          walletsCount={localUniqueWalletsCount}
-          isLoading={false}
-        />
-      </ComponentConfigNextBtn>
+      <div className="tw-px-6 tw-pb-6">
+        <ComponentConfigNextBtn
+          showSkipBtn={true}
+          showNextBtn={!isDisabled}
+          isDisabled={isDisabled}
+          onSkip={onSelectTopHoldersSkip}
+          onNext={onSelectTopHolders}
+        >
+          <ComponentConfigMeta
+            tags={[]}
+            walletsCount={localUniqueWalletsCount}
+            isLoading={false}
+          />
+        </ComponentConfigNextBtn>
+      </div>
     </div>
   );
 }
