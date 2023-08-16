@@ -216,7 +216,7 @@ export default function UserPage(props: Props) {
       });
     }
 
-    if (walletTDH && walletTDH.balance > 0) {
+    if (walletTDH) {
       if (walletTDH.balance > 0) {
         const ownedUrl = `${process.env.API_ENDPOINT}/api/owners?wallet=${walletTDH.wallet}`;
         fetchOwned(ownedUrl, []);

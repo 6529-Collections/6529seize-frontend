@@ -293,26 +293,16 @@ export default function UserPageCollection(props: Props) {
     return 0;
   }
 
-  function printNft(nft: NFT) {
-    let nfttdh;
-    let nftrank;
+  function filterNft(nft: NFT) {
     const nftbalance = getBalance(nft);
 
     const isMemes = isMemesContract(nft.contract);
     const isGradients = isGradientsContract(nft.contract);
 
-    if (isMemes && props.tdh?.memes) {
-      nfttdh = props.tdh?.memes.find((m) => m.id === nft.id)?.tdh;
-      nftrank = props.tdh?.memes_ranks.find((g) => g.id === nft.id)?.rank;
-    } else if (isGradients && props.tdh?.gradients) {
-      nfttdh = props.tdh?.gradients.find((m) => m.id === nft.id)?.tdh;
-      nftrank = props.tdh?.gradients_ranks.find((g) => g.id === nft.id)?.rank;
-    }
-
     if (nftbalance > 0 && hideSeized) {
       return;
     }
-    if (nftbalance === 0 && (hideNonSeized || isGradients)) {
+    if (nftbalance == 0 && (hideNonSeized || isGradients)) {
       return;
     }
     if (nftbalance > 0 && isGradients && hideGradients) {
@@ -322,9 +312,28 @@ export default function UserPageCollection(props: Props) {
       return;
     }
 
-    const season = nftMetas.find((a) => a.id === nft.id)?.season;
+    const season = nftMetas.find((a) => a.id == nft.id)?.season;
     if (selectedSeason != 0 && selectedSeason != season) {
       return;
+    }
+
+    return nft;
+  }
+
+  function printNft(nft: NFT) {
+    let nfttdh;
+    let nftrank;
+    const nftbalance = getBalance(nft);
+
+    const isMemes = isMemesContract(nft.contract);
+    const isGradients = isGradientsContract(nft.contract);
+
+    if (isMemes && props.tdh?.memes) {
+      nfttdh = props.tdh?.memes.find((m) => m.id == nft.id)?.tdh;
+      nftrank = props.tdh?.memes_ranks.find((g) => g.id == nft.id)?.rank;
+    } else if (isGradients && props.tdh?.gradients) {
+      nfttdh = props.tdh?.gradients.find((m) => m.id == nft.id)?.tdh;
+      nftrank = props.tdh?.gradients_ranks.find((g) => g.id == nft.id)?.rank;
     }
 
     return (
@@ -368,7 +377,9 @@ export default function UserPageCollection(props: Props) {
                     ? "the-memes"
                     : "6529-gradient"
                 }/${nft.id}`}>
-                {nft.name}
+                {areEqualAddresses(nft.contract, MEMES_CONTRACT)
+                  ? `#${nft.id} - ${nft.name}`
+                  : nft.name}
               </a>
             </Col>
           </Row>
@@ -390,7 +401,24 @@ export default function UserPageCollection(props: Props) {
   }
 
   function printNfts() {
-    return <Row className="pt-2">{nfts.map((nft) => printNft(nft))}</Row>;
+    const mynfts = [...nfts].filter((n) => filterNft(n));
+    if (mynfts.length == 0) {
+      return (
+        <Row className="pt-2">
+          <Col>
+            <Image
+              width="0"
+              height="0"
+              style={{ height: "auto", width: "100px" }}
+              src="/SummerGlasses.svg"
+              alt="SummerGlasses"
+            />{" "}
+            Nothing here yet
+          </Col>
+        </Row>
+      );
+    }
+    return <Row className="pt-2">{mynfts.map((nft) => printNft(nft))}</Row>;
   }
 
   function printUserControls() {
@@ -515,20 +543,7 @@ export default function UserPageCollection(props: Props) {
         </Row>
         {printUserControls()}
         {nftsLoaded ? (
-          props.owned.length > 0 ? (
-            printNfts()
-          ) : (
-            <Col>
-              <Image
-                width="0"
-                height="0"
-                style={{ height: "auto", width: "100px" }}
-                src="/SummerGlasses.svg"
-                alt="SummerGlasses"
-              />{" "}
-              Nothing here yet
-            </Col>
-          )
+          printNfts()
         ) : (
           <Row>
             <Col className="pt-3 pb-5">

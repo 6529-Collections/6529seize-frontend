@@ -2,7 +2,7 @@ import styles from "./Rememes.module.scss";
 import { Container, Row, Col, Button } from "react-bootstrap";
 import Image from "next/image";
 import { useState, useEffect } from "react";
-import { MEMES_CONTRACT, OPENSEA_STORE_FRONT_CONTRACT } from "../../constants";
+import { MEMES_CONTRACT } from "../../constants";
 import { NFT } from "../../entities/INFT";
 import { fetchAllPages, fetchUrl, postData } from "../../services/6529api";
 import RememeAddComponent, { ProcessedRememe } from "./RememeAddComponent";
@@ -51,19 +51,10 @@ export default function RememeAddPage() {
           status: false,
           note: "Something went wrong fetching global settings",
         });
-      } else if (!userTDH) {
-        mychecklist.push({
-          status: false,
-          note: "You need to have some TDH before you can add Rememes",
-        });
       } else {
         const isDeployer = areEqualAddresses(
           addRememe.contract.contractDeployer,
           accountResolution.address
-        );
-        const isOpensea = areEqualAddresses(
-          addRememe.contract.address,
-          OPENSEA_STORE_FRONT_CONTRACT
         );
 
         if (isDeployer) {
@@ -72,20 +63,27 @@ export default function RememeAddPage() {
             note: "Rememe can be added (Rememe Contract Deployer)",
           });
         } else {
-          mychecklist.push({
-            status:
-              userTDH.boosted_tdh >=
-              seizeSettings.rememes_submission_tdh_threshold,
-            note: `You need ${numberWithCommas(
-              seizeSettings.rememes_submission_tdh_threshold
-            )} TDH to add ${
-              addRememe.nfts.length > 1 ? `these Rememes` : `this Rememe`
-            }${
-              userTDH
-                ? ` (you have ${numberWithCommas(userTDH.boosted_tdh)} TDH)`
-                : ``
-            }`,
-          });
+          if (!userTDH) {
+            mychecklist.push({
+              status: false,
+              note: "You need to have some TDH before you can add Rememes",
+            });
+          } else {
+            mychecklist.push({
+              status:
+                userTDH.boosted_tdh >=
+                seizeSettings.rememes_submission_tdh_threshold,
+              note: `You need ${numberWithCommas(
+                seizeSettings.rememes_submission_tdh_threshold
+              )} TDH to add ${
+                addRememe.nfts.length > 1 ? `these Rememes` : `this Rememe`
+              }${
+                userTDH
+                  ? ` (you have ${numberWithCommas(userTDH.boosted_tdh)} TDH)`
+                  : ``
+              }`,
+            });
+          }
         }
       }
     }
@@ -339,31 +337,44 @@ export default function RememeAddPage() {
                     </Col>
                   ))}
                 {submissionResult.success && submissionResult.tokens && (
-                  <Row className="pt-3">
-                    <Col xs={12}>
-                      <u>Rememes Added:</u>
-                    </Col>
-                    {submissionResult.tokens.map((t) => (
-                      <Col
-                        xs={12}
-                        className="pt-1 pb-1"
-                        key={`submission-result-token-${t}`}>
-                        #{t}
-                        &nbsp;&nbsp;
-                        <a
-                          className="font-color"
-                          href={`${
-                            process.env.BASE_ENDPOINT
-                              ? process.env.BASE_ENDPOINT
-                              : "https://seize.io"
-                          }/rememes/${submissionResult.contract}/${t}`}
-                          target="_blank"
-                          rel="noreferrer">
-                          view
-                        </a>
+                  <>
+                    <Row className="pt-3">
+                      <Col xs={12}>
+                        <u>Rememes Added:</u>
                       </Col>
-                    ))}
-                  </Row>
+                      {submissionResult.tokens.map((t) => (
+                        <Col
+                          xs={12}
+                          className="pt-1 pb-1"
+                          key={`submission-result-token-${t}`}>
+                          #{t}
+                          &nbsp;&nbsp;
+                          <a
+                            className="font-color"
+                            href={`${
+                              process.env.BASE_ENDPOINT
+                                ? process.env.BASE_ENDPOINT
+                                : "https://seize.io"
+                            }/rememes/${submissionResult.contract}/${t}`}
+                            target="_blank"
+                            rel="noreferrer">
+                            view
+                          </a>
+                        </Col>
+                      ))}
+                    </Row>
+                    <Row className="pt-4">
+                      <Col>
+                        <Button
+                          className="seize-btn btn-white"
+                          onClick={() => {
+                            location.reload();
+                          }}>
+                          Add Another
+                        </Button>
+                      </Col>
+                    </Row>
+                  </>
                 )}
               </Row>
             )}
