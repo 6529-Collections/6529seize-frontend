@@ -301,7 +301,7 @@ export default function UserPage(props: Props) {
       });
     }
 
-    if (walletTDH && walletTDH.balance > 0) {
+    if (walletTDH) {
       if (walletTDH.balance > 0) {
         const ownedUrl = `${process.env.API_ENDPOINT}/api/owners?wallet=${walletTDH.wallet}`;
         fetchOwned(ownedUrl, []);
@@ -650,21 +650,11 @@ export default function UserPage(props: Props) {
     nftsLoaded,
   ]);
 
-  function printNft(nft: NFT) {
-    let nfttdh;
-    let nftrank;
+  function filterNft(nft: NFT) {
     const nftbalance = getBalance(nft);
 
     const isMemes = isMemesContract(nft.contract);
     const isGradients = isGradientsContract(nft.contract);
-
-    if (isMemes && tdh?.memes) {
-      nfttdh = tdh?.memes.find((m) => m.id == nft.id)?.tdh;
-      nftrank = tdh?.memes_ranks.find((g) => g.id == nft.id)?.rank;
-    } else if (isGradients && tdh?.gradients) {
-      nfttdh = tdh?.gradients.find((m) => m.id == nft.id)?.tdh;
-      nftrank = tdh?.gradients_ranks.find((g) => g.id == nft.id)?.rank;
-    }
 
     if (nftbalance > 0 && hideSeized) {
       return;
@@ -682,6 +672,25 @@ export default function UserPage(props: Props) {
     const season = nftMetas.find((a) => a.id == nft.id)?.season;
     if (selectedSeason != 0 && selectedSeason != season) {
       return;
+    }
+
+    return nft;
+  }
+
+  function printNft(nft: NFT) {
+    let nfttdh;
+    let nftrank;
+    const nftbalance = getBalance(nft);
+
+    const isMemes = isMemesContract(nft.contract);
+    const isGradients = isGradientsContract(nft.contract);
+
+    if (isMemes && tdh?.memes) {
+      nfttdh = tdh?.memes.find((m) => m.id == nft.id)?.tdh;
+      nftrank = tdh?.memes_ranks.find((g) => g.id == nft.id)?.rank;
+    } else if (isGradients && tdh?.gradients) {
+      nfttdh = tdh?.gradients.find((m) => m.id == nft.id)?.tdh;
+      nftrank = tdh?.gradients_ranks.find((g) => g.id == nft.id)?.rank;
     }
 
     return (
@@ -749,73 +758,88 @@ export default function UserPage(props: Props) {
   }
 
   function printNfts() {
-    return <Row className="pt-2">{nfts.map((nft) => printNft(nft))}</Row>;
-  }
-
-  function printUserControls() {
-    if (tdh?.balance) {
+    const mynfts = [...nfts].filter((n) => filterNft(n));
+    if (mynfts.length == 0) {
       return (
-        <Row className="pt-3">
+        <Row className="pt-2">
           <Col>
-            <Form.Check
-              type="radio"
-              name="hide"
-              checked={!hideSeized && !hideNonSeized}
-              className={`${styles.seizedToggle}`}
-              label={`All`}
-              onChange={() => {
-                setHideSeized(false);
-                setHideNonSeized(false);
-              }}
-            />
-            <Form.Check
-              type="radio"
-              checked={!hideSeized && hideNonSeized}
-              className={`${styles.seizedToggle}`}
-              name="hide"
-              label={`Seized`}
-              onChange={() => {
-                setHideSeized(false);
-                setHideNonSeized(true);
-              }}
-            />
-            <Form.Check
-              type="radio"
-              checked={hideSeized && !hideNonSeized}
-              className={`${styles.seizedToggle}`}
-              name="hide"
-              label={`Unseized`}
-              onChange={() => {
-                setHideSeized(true);
-                setHideNonSeized(false);
-              }}
-            />
-            {tdh && tdh?.memes_balance > 0 && tdh?.gradients_balance > 0 && (
-              <>
-                <Form.Check
-                  type="switch"
-                  className={`${styles.seizedToggle}`}
-                  label={`Hide Gradients`}
-                  checked={hideGradients}
-                  onChange={() => {
-                    setHideGradients(!hideGradients);
-                  }}
-                />
-                <Form.Check
-                  type="switch"
-                  className={`${styles.seizedToggle}`}
-                  label={`Hide Memes`}
-                  checked={hideMemes}
-                  onChange={() => {
-                    setHideMemes(!hideMemes);
-                  }}
-                />
-              </>
-            )}
+            <Image
+              width="0"
+              height="0"
+              style={{ height: "auto", width: "100px" }}
+              src="/SummerGlasses.svg"
+              alt="SummerGlasses"
+            />{" "}
+            Nothing here yet
           </Col>
         </Row>
       );
     }
+    return <Row className="pt-2">{mynfts.map((nft) => printNft(nft))}</Row>;
+  }
+
+  function printUserControls() {
+    return (
+      <Row className="pt-3">
+        <Col>
+          <Form.Check
+            type="radio"
+            name="hide"
+            checked={!hideSeized && !hideNonSeized}
+            className={`${styles.seizedToggle}`}
+            label={`All`}
+            onChange={() => {
+              setHideSeized(false);
+              setHideNonSeized(false);
+            }}
+          />
+          <Form.Check
+            type="radio"
+            checked={!hideSeized && hideNonSeized}
+            className={`${styles.seizedToggle}`}
+            name="hide"
+            label={`Seized`}
+            onChange={() => {
+              setHideSeized(false);
+              setHideNonSeized(true);
+            }}
+          />
+          <Form.Check
+            type="radio"
+            checked={hideSeized && !hideNonSeized}
+            className={`${styles.seizedToggle}`}
+            name="hide"
+            label={`Unseized`}
+            onChange={() => {
+              setHideSeized(true);
+              setHideNonSeized(false);
+            }}
+          />
+          {tdh && tdh?.memes_balance > 0 && tdh?.gradients_balance > 0 && (
+            <>
+              <Form.Check
+                type="switch"
+                className={`${styles.seizedToggle}`}
+                label={`Hide Gradients`}
+                checked={hideGradients}
+                onChange={() => {
+                  setHideGradients(!hideGradients);
+                }}
+              />
+              <Form.Check
+                type="switch"
+                className={`${styles.seizedToggle}`}
+                label={`Hide Memes`}
+                checked={hideMemes}
+                onChange={() => {
+                  setHideMemes(!hideMemes);
+                }}
+              />
+            </>
+          )}
+        </Col>
+      </Row>
+    );
   }
 
   if (fetchingUser) {
@@ -2027,28 +2051,13 @@ export default function UserPage(props: Props) {
                   )}
                   {printUserControls()}
                   {ownedLoaded && nftsLoaded ? (
-                    owned.length > 0 ? (
-                      printNfts()
-                    ) : (
-                      <Col>
-                        <Image
-                          width="0"
-                          height="0"
-                          style={{ height: "auto", width: "100px" }}
-                          src="/SummerGlasses.svg"
-                          alt="SummerGlasses"
-                        />{" "}
-                        Nothing here yet
-                      </Col>
-                    )
+                    printNfts()
                   ) : (
-                    tdh?.balance && (
-                      <Row>
-                        <Col className="pt-3 pb-5">
-                          Fetching <DotLoader />
-                        </Col>
-                      </Row>
-                    )
+                    <Row>
+                      <Col className="pt-3 pb-5">
+                        Fetching <DotLoader />
+                      </Col>
+                    </Row>
                   )}
                 </>
               )}
