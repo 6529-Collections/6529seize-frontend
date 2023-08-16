@@ -228,7 +228,7 @@ export default function ComponentSelectRandomHolders({
                 tw-flex tw-rounded-md tw-bg-white/5 tw-ring-1 tw-ring-inset focus-within:tw-ring-1 focus-within:tw-ring-inset tw-transition tw-duration-300 tw-ease-out ${
                   isError
                     ? "tw-ring-error focus-within:tw-ring-error"
-                    : "tw-ring-neutral-700/40 focus-within:tw-ring-primary-400 "
+                    : "tw-ring-neutral-700/40 focus-within:tw-ring-primary-400 hover:tw-ring-neutral-700"
                 }`}
                 >
                   <input
@@ -255,7 +255,7 @@ export default function ComponentSelectRandomHolders({
                 tw-flex tw-rounded-md tw-bg-white/5 tw-ring-1 tw-ring-inset focus-within:tw-ring-1 focus-within:tw-ring-inset tw-transition tw-duration-300 tw-ease-out ${
                   !seed.length
                     ? "tw-ring-error focus-within:tw-ring-error"
-                    : "tw-ring-neutral-700/40 focus-within:tw-ring-primary-400 "
+                    : "tw-ring-neutral-700/40 focus-within:tw-ring-primary-400 hover:tw-ring-neutral-700"
                 }`}
                 >
                   <input

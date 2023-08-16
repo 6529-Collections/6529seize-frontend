@@ -66,7 +66,7 @@ export default function FinalizeSnapshot({
           />
         </div>
       )}
-      <div className="tw-mt-8 tw-w-full tw-flex tw-gap-x-4 tw-justify-end">
+      <div className="tw-mt-8 tw-w-full tw-flex tw-items-center tw-justify-between">
         <ComponentConfigMeta
           tags={[]}
           walletsCount={uniqueWalletsCount}

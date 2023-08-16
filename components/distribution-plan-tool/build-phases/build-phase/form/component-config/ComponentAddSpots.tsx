@@ -73,7 +73,7 @@ export default function ComponentAddSpots({
           Count
         </label>
         <div className="tw-mt-1.5">
-          <div className="tw-flex tw-rounded-md tw-bg-white/5 tw-ring-1 tw-ring-inset tw-ring-white/10 focus-within:tw-ring-1 focus-within:tw-ring-inset focus-within:tw-ring-primary-400">
+          <div className="tw-flex tw-rounded-md tw-bg-white/5 tw-ring-1 tw-ring-inset tw-ring-neutral-700/40 hover:tw-ring-neutral-700 focus-within:tw-ring-1 focus-within:tw-ring-inset focus-within:tw-ring-primary-400 tw-transition tw-duration-300 tw-ease-out">
             <input
               type="number"
               value={maxMints}

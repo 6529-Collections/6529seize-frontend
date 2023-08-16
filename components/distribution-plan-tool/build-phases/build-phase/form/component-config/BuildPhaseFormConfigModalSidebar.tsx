@@ -19,7 +19,7 @@ export default function BuildPhaseFormConfigModalSidebar({
     "tw-whitespace-nowrap tw-text-neutral-500 tw-cursor-pointer tw-no-underline hover:tw-text-neutral-100 tw-group tw-flex tw-gap-x-3 tw-rounded-md tw-py-2 tw-px-3 tw-text-sm tw-leading-6 tw-font-medium tw-transition tw-duration-300 tw-ease-out";
 
   return (
-    <nav className="tw-w-auto tw-py-6 tw-px-6 tw-bg-[#212121] tw-rounded-tl-lg" aria-label="Sidebar">
+    <nav className="tw-w-auto tw-py-6 tw-px-6 tw-bg-[#212121] tw-rounded-l-lg" aria-label="Sidebar">
       <div className="tw-text-sm tw-font-medium tw-leading-6 tw-text-neutral-100">
         {label}
       </div>
