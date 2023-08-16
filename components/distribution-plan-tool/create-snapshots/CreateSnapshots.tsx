@@ -147,7 +147,9 @@ export default function CreateSnapshots() {
 
   return (
     <div>
-      <StepHeader step={DistributionPlanToolStep.CREATE_SNAPSHOTS} />
+      <StepHeader
+        step={DistributionPlanToolStep.CREATE_SNAPSHOTS}
+      />
       <p className="tw-mt-2 tw-block tw-font-semibold tw-text-sm tw-text-neutral-100">
         * Please note: During this stage, some processes may take a moment to
         load.

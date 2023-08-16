@@ -81,6 +81,7 @@ export interface PhaseGroupConfig {
     type: RandomHoldersType;
     value: number;
     weightType: ComponentRandomHoldersWeightType;
+    seed: string;
   } | null;
   maxMintCount: number | null;
   uniqueWalletsCount: number | null;
@@ -390,6 +391,7 @@ export default function BuildPhaseFormConfigModal({
     value: number;
     randomHoldersType: RandomHoldersType;
     weightType: ComponentRandomHoldersWeightType;
+    seed: string;
   }) => {
     setPhaseGroupConfig((prev) => ({
       ...prev,
@@ -397,6 +399,7 @@ export default function BuildPhaseFormConfigModal({
         type: param.randomHoldersType,
         value: param.value,
         weightType: param.weightType,
+        seed: param.seed,
       },
     }));
     onNextStep(PhaseConfigStep.COMPONENT_ADD_SPOTS);
@@ -621,8 +624,8 @@ export default function BuildPhaseFormConfigModal({
           type: randomHoldersType,
           value,
           weightType,
+          seed,
         } = randomHoldersFilter;
-        const seed = distributionPlan.id;
         const coreParams: {
           componentId: string;
           seed: string;

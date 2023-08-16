@@ -41,7 +41,9 @@ export default function CreatePhases() {
   }, [phases]);
   return (
     <div>
-      <StepHeader step={DistributionPlanToolStep.CREATE_PHASES} />
+      <StepHeader
+        step={DistributionPlanToolStep.CREATE_PHASES}
+      />
       <DistributionPlanStepWrapper>
         <CreatePhasesForm />
         <div className="tw-mt-6">

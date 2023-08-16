@@ -1,6 +1,9 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { BuildPhasesPhase } from "../BuildPhases";
-import { DistributionPlanToolStep } from "../../DistributionPlanToolContext";
+import {
+  DistributionPlanToolContext,
+  DistributionPlanToolStep,
+} from "../../DistributionPlanToolContext";
 import StepHeader from "../../common/StepHeader";
 import BuildPhaseForm from "./form/BuildPhaseForm";
 import DistributionPlanStepWrapper from "../../common/DistributionPlanStepWrapper";
@@ -17,6 +20,7 @@ export default function BuildPhase({
   phases: BuildPhasesPhase[];
   onNextStep: () => void;
 }) {
+  const { operations } = useContext(DistributionPlanToolContext);
   const [haveRan, setHaveRan] = useState(false);
   useEffect(() => {
     setHaveRan(

@@ -66,13 +66,13 @@ export default function FinalizeSnapshot({
           />
         </div>
       )}
-      <div className="tw-mt-8 tw-w-full tw-flex tw-justify-end">
+      <div className="tw-mt-8 tw-w-full tw-flex tw-gap-x-4 tw-justify-end">
         <ComponentConfigMeta
           tags={[]}
           walletsCount={uniqueWalletsCount}
           isLoading={isLoadingUniqueWalletsCount}
         />
-        <div className=" tw-gap-x-4 tw-flex tw-justify-end">
+        <div className="tw-gap-x-4 tw-flex tw-justify-end">
           <button
             onClick={onAddAnotherSnapshot}
             type="button"

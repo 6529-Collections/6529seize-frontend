@@ -305,23 +305,20 @@ export default function SnapshotSelectTopHolders({
               </div>
             </div>
           </div>
+          <ComponentConfigNextBtn
+              showSkipBtn={true}
+              showNextBtn={!isDisabled}
+              isDisabled={isDisabled}
+              onSkip={onSelectTopHoldersSkip}
+              onNext={onSelectTopHolders}
+            >
+              <ComponentConfigMeta
+                tags={[]}
+                walletsCount={localUniqueWalletsCount}
+                isLoading={false}
+              />
+            </ComponentConfigNextBtn>
         </div>
-      </div>
-
-      <div className="tw-px-6 tw-pb-6">
-        <ComponentConfigNextBtn
-          showSkipBtn={true}
-          showNextBtn={!isDisabled}
-          isDisabled={isDisabled}
-          onSkip={onSelectTopHoldersSkip}
-          onNext={onSelectTopHolders}
-        >
-          <ComponentConfigMeta
-            tags={[]}
-            walletsCount={localUniqueWalletsCount}
-            isLoading={false}
-          />
-        </ComponentConfigNextBtn>
       </div>
     </div>
   );

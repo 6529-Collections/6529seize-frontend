@@ -79,6 +79,27 @@ export default function ReviewDistributionPlanTableRow({
     document.body.removeChild(link);
   };
 
+  const downloadManifold = (results: AllowlistResult[]) => {
+    const fullResult = getFullResults(results).map<{
+      address: string;
+      value: number;
+    }>((row) => ({
+      address: row.wallet,
+      value: row.amount,
+    }));
+    const csv = [
+      Object.keys(fullResult[0]).join(","),
+      ...fullResult.map((item) => Object.values(item).join(",")),
+    ].join("\n");
+
+    const link = document.createElement("a");
+    link.href = "data:text/csv;charset=utf-8," + encodeURIComponent(csv);
+    link.download = "data.csv";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   const fetchResults = async (fetchType: FetchResultsType) => {
     if (!distributionPlan) return;
     const url = getUrl(distributionPlan.id);
@@ -107,6 +128,9 @@ export default function ReviewDistributionPlanTableRow({
           break;
         case FetchResultsType.CSV:
           downloadCsv(data);
+          break;
+        case FetchResultsType.MANIFOLD:
+          downloadManifold(data);
           break;
         default:
           assertUnreachable(fetchType);
@@ -172,6 +196,7 @@ export default function ReviewDistributionPlanTableRow({
         </button>
         <button
           type="button"
+          onClick={() => fetchResults(FetchResultsType.MANIFOLD)}
           className="tw-group tw-rounded-full tw-group tw-flex tw-items-center tw-justify-center tw-h-8 tw-w-8 tw-text-xs tw-font-medium tw-border-none tw-ring-1 tw-ring-inset tw-text-neutral-400 tw-bg-neutral-400/10 tw-ring-neutral-400/20 hover:tw-bg-neutral-400/20 tw-ease-out tw-transition tw-duration-300"
         >
           <div className="tw-flex tw-items-center tw-justify-center">

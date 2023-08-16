@@ -29,14 +29,18 @@ export default function ComponentSelectRandomHolders({
     value: number;
     randomHoldersType: RandomHoldersType;
     weightType: ComponentRandomHoldersWeightType;
+    seed: string;
   }) => void;
   title: string;
   uniqueWalletsCount: number | null;
   isLoadingUniqueWalletsCount: boolean;
   onClose: () => void;
 }) {
-  const { setToasts } = useContext(DistributionPlanToolContext);
+  const { setToasts, distributionPlan } = useContext(
+    DistributionPlanToolContext
+  );
   const [value, setValue] = useState<number | string>("");
+  const [seed, setSeed] = useState<string>(distributionPlan?.id ?? "");
   const [randomHoldersType, setRandomHoldersType] = useState<RandomHoldersType>(
     RandomHoldersType.BY_COUNT
   );
@@ -112,10 +116,19 @@ export default function ComponentSelectRandomHolders({
       return;
     }
 
+    if (!seed.length) {
+      setToasts({
+        messages: ["Please insert seed."],
+        type: "error",
+      });
+      return;
+    }
+
     onSelectRandomHolders({
       value,
       randomHoldersType,
       weightType,
+      seed,
     });
   };
 
@@ -147,8 +160,13 @@ export default function ComponentSelectRandomHolders({
       return;
     }
 
+    if (!seed.length) {
+      setIsDisabled(true);
+      return;
+    }
+
     setIsDisabled(false);
-  }, [value, randomHoldersType]);
+  }, [value, randomHoldersType, seed]);
 
   const [localUniqueWalletsCount, setLocalUniqueWalletsCount] = useState<
     number | null
@@ -180,7 +198,7 @@ export default function ComponentSelectRandomHolders({
 
   return (
     <div>
-      <div className="tw-w-full tw-inline-flex tw-gap-x-8">
+      <div className="tw-flex">
         <BuildPhaseFormConfigModalSidebar
           label="Random type"
           options={sideBarOptions}
@@ -189,7 +207,7 @@ export default function ComponentSelectRandomHolders({
             setRandomHoldersType(type as RandomHoldersType)
           }
         />
-        <div className="tw-w-full tw-pt-6 tw-pr-6">
+        <div className="tw-w-full tw-p-6">
           <BuildPhaseFormConfigModalTitle title={title} onClose={onClose} />
           <DistributionPlanSecondaryText>
             Do you want to select random holders?
@@ -207,10 +225,10 @@ export default function ComponentSelectRandomHolders({
               <div className="tw-mt-1.5">
                 <div
                   className={`
-                tw-flex tw-rounded-md tw-bg-white/5 tw-ring-1 tw-ring-inset tw-ring-neutral-700/40 focus-within:tw-ring-1 hover:tw-ring-neutral-700 focus-within:tw-ring-inset tw-transition tw-duration-300 tw-ease-out ${
+                tw-flex tw-rounded-md tw-bg-white/5 tw-ring-1 tw-ring-inset focus-within:tw-ring-1 focus-within:tw-ring-inset tw-transition tw-duration-300 tw-ease-out ${
                   isError
                     ? "tw-ring-error focus-within:tw-ring-error"
-                    : "focus-within:tw-ring-primary-400"
+                    : "tw-ring-neutral-700/40 focus-within:tw-ring-primary-400 "
                 }`}
                 >
                   <input
@@ -234,25 +252,24 @@ export default function ComponentSelectRandomHolders({
               <div className="tw-mt-1.5">
                 <div
                   className={`
-                tw-flex tw-rounded-md tw-bg-white/5 tw-ring-1 tw-ring-inset tw-ring-neutral-700/40 focus-within:tw-ring-1 hover:tw-ring-neutral-700 focus-within:tw-ring-inset tw-transition tw-duration-300 tw-ease-out ${
-                  isError
+                tw-flex tw-rounded-md tw-bg-white/5 tw-ring-1 tw-ring-inset focus-within:tw-ring-1 focus-within:tw-ring-inset tw-transition tw-duration-300 tw-ease-out ${
+                  !seed.length
                     ? "tw-ring-error focus-within:tw-ring-error"
-                    : "focus-within:tw-ring-primary-400"
+                    : "tw-ring-neutral-700/40 focus-within:tw-ring-primary-400 "
                 }`}
                 >
                   <input
-                    type="number"
+                    type="text"
+                    value={seed}
+                    onChange={(event) => setSeed(event.target.value)}
+                    placeholder="Random seed"
                     className="tw-form-input tw-flex-1 tw-border-0 tw-bg-transparent placeholder:tw-text-neutral-500 tw-py-3 tw-px-3 tw-text-white focus:tw-ring-0 sm:tw-text-sm sm:tw-leading-6"
-                    
                   />
                 </div>
               </div>
             </div>
           </div>
-        </div>
-      </div>
-      <div className="tw-pb-6 tw-px-6">
-        <ComponentConfigNextBtn
+          <ComponentConfigNextBtn
           showSkipBtn={true}
           showNextBtn={!isDisabled}
           onSkip={() => onNextStep(PhaseConfigStep.COMPONENT_ADD_SPOTS)}
@@ -265,6 +282,7 @@ export default function ComponentSelectRandomHolders({
             isLoading={isLoadingUniqueWalletsCount}
           />
         </ComponentConfigNextBtn>
+        </div>
       </div>
     </div>
   );

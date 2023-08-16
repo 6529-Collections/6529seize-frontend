@@ -17,7 +17,7 @@ export default function ComponentConfigMeta({
   isLoading,
 }: ComponentConfigMetaProps) {
   return (
-    <div className="tw-hidden tw-space-y-1 tw-self-center">
+    <div className="tw-space-y-1 tw-self-center">
       <div className="tw-flex tw-space-x-2">
         {tags.map((tag) => (
           <span

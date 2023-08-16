@@ -1,4 +1,12 @@
-import { DistributionPlanToolStep } from "../DistributionPlanToolContext";
+import { useContext } from "react";
+import {
+  AllowlistOperation,
+  AllowlistOperationCode,
+} from "../../allowlist-tool/allowlist-tool.types";
+import {
+  DistributionPlanToolContext,
+  DistributionPlanToolStep,
+} from "../DistributionPlanToolContext";
 
 const STEP_META: Record<
   DistributionPlanToolStep,
@@ -43,6 +51,34 @@ export default function StepHeader({
   title?: string;
   description?: string;
 }) {
+  const { distributionPlan, operations } = useContext(
+    DistributionPlanToolContext
+  );
+  const downloadOperations = () => {
+    if (!distributionPlan) {
+      return;
+    }
+    const data = JSON.stringify([
+      {
+        code: AllowlistOperationCode.CREATE_ALLOWLIST,
+        params: {
+          id: distributionPlan.id,
+          name: distributionPlan.name,
+          description: distributionPlan.description,
+        },
+      },
+      operations.map((operation) => ({
+        code: operation.code,
+        params: operation.params,
+      })),
+    ]);
+    const blob = new Blob([data], { type: "application/json" });
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "operations.json";
+    link.click();
+  };
   return (
     <div
       className={` ${
@@ -57,6 +93,9 @@ export default function StepHeader({
       <p className="tw-mb-0 tw-block tw-font-light tw-text-base tw-text-neutral-400">
         {STEP_META[step].description} {description}
       </p>
+      {step !== DistributionPlanToolStep.CREATE_PLAN && (
+        <button onClick={downloadOperations}>Download operations</button>
+      )}
     </div>
   );
 }

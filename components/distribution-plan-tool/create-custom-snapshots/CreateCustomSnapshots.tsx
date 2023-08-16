@@ -95,7 +95,9 @@ export default function CreateCustomSnapshots() {
 
   return (
     <div>
-      <StepHeader step={DistributionPlanToolStep.CREATE_CUSTOM_SNAPSHOT} />
+      <StepHeader
+        step={DistributionPlanToolStep.CREATE_CUSTOM_SNAPSHOT}
+      />
       <div
         onClick={downloadExampleCsv}
         className="tw-group tw-mt-4 tw-cursor-pointer tw-items-center tw-font-light tw-text-sm tw-text-neutral-400 hover:tw-text-neutral-50 tw-inline-flex tw-gap-x-1.5 tw-transition-all tw-duration-300 tw-ease-out"
