@@ -428,6 +428,7 @@ export default function AllowlistToolBuilderOperationsList({
         case AllowlistOperationCode.COMPONENT_SELECT_RANDOM_WALLETS:
         case AllowlistOperationCode.COMPONENT_SELECT_RANDOM_PERCENTAGE_WALLETS:
         case AllowlistOperationCode.ITEM_SORT_WALLETS_BY_MEMES_TDH:
+        case AllowlistOperationCode.MAP_RESULTS_TO_DELEGATED_WALLETS:
           return [];
         default:
           assertUnreachable(operation.code);

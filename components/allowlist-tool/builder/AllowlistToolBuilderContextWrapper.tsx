@@ -371,6 +371,7 @@ export default function AllowlistToolBuilderContextWrapper({
               break;
             case AllowlistOperationCode.CREATE_ALLOWLIST:
             case AllowlistOperationCode.TOKEN_POOL_CONSOLIDATE_WALLETS:
+            case AllowlistOperationCode.MAP_RESULTS_TO_DELEGATED_WALLETS:
             case AllowlistOperationCode.COMPONENT_ADD_SPOTS_TO_ALL_ITEM_WALLETS:
             case AllowlistOperationCode.COMPONENT_ADD_SPOTS_TO_WALLETS_EXCLUDING_CERTAIN_COMPONENTS:
             case AllowlistOperationCode.COMPONENT_SELECT_RANDOM_WALLETS:
@@ -592,6 +593,9 @@ export default function AllowlistToolBuilderContextWrapper({
           state.phases.phases[operation.params.phaseId].operations.push(
             operation
           );
+          break;
+        case AllowlistOperationCode.MAP_RESULTS_TO_DELEGATED_WALLETS:
+          state.phases.operations.push(operation);
           break;
 
         case AllowlistOperationCode.TOKEN_POOL_CONSOLIDATE_WALLETS:

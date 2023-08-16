@@ -73,6 +73,8 @@ export default function CreateSnapshotTableRowDownload({
         case FetchResultsType.CSV:
           downloadCsv(data);
           break;
+        case FetchResultsType.MANIFOLD:
+          break;
         default:
           assertUnreachable(fetchType);
       }
