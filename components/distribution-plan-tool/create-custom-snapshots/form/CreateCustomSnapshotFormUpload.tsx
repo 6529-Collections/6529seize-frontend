@@ -85,10 +85,10 @@ export default function CreateCustomSnapshotFormUpload({
 
       <label
         htmlFor="fileInput"
-        className="tw-flex tw-items-center tw-justify-center tw-cursor-pointer tw-text-sm tw-font-medium tw-text-primary-300 hover:tw-text-primary-400 tw-w-full tw-underline tw-rounded-lg tw-transition tw-duration-300 tw-ease-out"
+        className="tw-group tw-flex tw-items-center tw-justify-center tw-cursor-pointer tw-text-sm tw-font-medium tw-text-primary-300 tw-w-full tw-underline tw-rounded-lg tw-transition tw-duration-300 tw-ease-out"
       >
         <svg
-          className="tw-h-5 tw-w-5 tw-mr-2 -tw-ml-1"
+          className="tw-h-5 tw-w-5 tw-mr-2 -tw-ml-1 group-hover:-tw-translate-y-0.5 tw-transform tw-transition tw-duration-300 tw-ease-out"
           viewBox="0 0 24 24"
           fill="none"
           xmlns="http://www.w3.org/2000/svg"

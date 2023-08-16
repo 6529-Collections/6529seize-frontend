@@ -1,4 +1,4 @@
-import { useContext } from "react";
+import { useContext, useEffect } from "react";
 import {
   DistributionPlanToolContext,
   DistributionPlanToolStep,
@@ -12,9 +12,11 @@ import CreateCustomSnapshots from "./create-custom-snapshots/CreateCustomSnapsho
 import ReviewDistributionPlan from "./review-distribution-plan/ReviewDistributionPlan";
 import AllowlistToolAnimationWrapper from "../allowlist-tool/common/animation/AllowlistToolAnimationWrapper";
 import AllowlistToolAnimationOpacity from "../allowlist-tool/common/animation/AllowlistToolAnimationOpacity";
+import MapDelegations from "./map-delegations/MapDelegations";
 
 export default function DistributionPlanToolPage() {
   const { step } = useContext(DistributionPlanToolContext);
+  useEffect(() => console.log(step), [step]);
   return (
     <AllowlistToolAnimationWrapper mode="wait" initial={true}>
       {(() => {
@@ -47,6 +49,12 @@ export default function DistributionPlanToolPage() {
             return (
               <AllowlistToolAnimationOpacity key="BuildPhases">
                 <BuildPhases />
+              </AllowlistToolAnimationOpacity>
+            );
+          case DistributionPlanToolStep.MAP_DELEGATIONS:
+            return (
+              <AllowlistToolAnimationOpacity key="MapDelegations">
+                <MapDelegations />
               </AllowlistToolAnimationOpacity>
             );
           case DistributionPlanToolStep.REVIEW:

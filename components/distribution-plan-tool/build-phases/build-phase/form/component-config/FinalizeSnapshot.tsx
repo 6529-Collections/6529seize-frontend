@@ -7,6 +7,7 @@ import {
 import FinalizeSnapshotsTable from "./snapshots-table/FinalizeSnapshotsTable";
 import BuildPhaseFormConfigModalTitle from "./BuildPhaseFormConfigModalTitle";
 import ComponentConfigMeta from "./ComponentConfigMeta";
+import { BuildPhasesPhase } from "../../../BuildPhases";
 
 export default function FinalizeSnapshot({
   onConfigureGroup,
@@ -19,6 +20,7 @@ export default function FinalizeSnapshot({
   uniqueWalletsCount,
   isLoadingUniqueWalletsCount,
   onClose,
+  phases,
 }: {
   onConfigureGroup: () => void;
   onAddAnotherSnapshot: () => void;
@@ -30,6 +32,7 @@ export default function FinalizeSnapshot({
   uniqueWalletsCount: number | null;
   isLoadingUniqueWalletsCount: boolean;
   onClose: () => void;
+  phases: BuildPhasesPhase[]
 }) {
   useEffect(() => {
     if (!groupSnapshots.length) {
@@ -45,7 +48,7 @@ export default function FinalizeSnapshot({
   };
 
   return (
-    <div>
+    <div className="tw-p-6">
       <BuildPhaseFormConfigModalTitle title={title} onClose={onClose} />
       <DistributionPlanSecondaryText>
         Here you can see your snapshot configurations.
@@ -59,16 +62,17 @@ export default function FinalizeSnapshot({
             onRemoveGroupSnapshot={onRemoveGroupSnapshot}
             groupSnapshots={groupSnapshots}
             snapshots={snapshots}
+            phases={phases}
           />
         </div>
       )}
-      <div className="tw-mt-8 tw-w-full tw-inline-flex tw-justify-between">
+      <div className="tw-mt-8 tw-w-full tw-flex tw-items-center tw-justify-between">
         <ComponentConfigMeta
           tags={[]}
           walletsCount={uniqueWalletsCount}
           isLoading={isLoadingUniqueWalletsCount}
         />
-        <div className=" tw-gap-x-4 tw-flex tw-justify-end">
+        <div className="tw-gap-x-4 tw-flex tw-justify-end">
           <button
             onClick={onAddAnotherSnapshot}
             type="button"

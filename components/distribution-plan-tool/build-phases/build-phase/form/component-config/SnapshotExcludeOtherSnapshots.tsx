@@ -209,7 +209,7 @@ export default function SnapshotExcludeOtherSnapshots({
     });
   };
   return (
-    <div className="tw-relative">
+    <div className="tw-relative tw-p-6">
       <BuildPhaseFormConfigModalTitle title={title} onClose={onClose} />
       <DistributionPlanSecondaryText>
         Exclude Other Snapshots Members.
@@ -217,7 +217,7 @@ export default function SnapshotExcludeOtherSnapshots({
 
       <div className="tw-mt-6">
         <AllowlistToolSelectMenuMultiple
-          label="Select Snapshot To Exclude"
+          label="Select Snapshots To Exclude"
           placeholder="No snapshots excluded"
           allSelectedTitle="All Snapshots Excluded"
           someSelectedTitleSuffix="Snapshots Excluded"

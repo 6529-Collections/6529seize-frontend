@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import DistributionPlanTableRowWrapper from "../../../../../common/DistributionPlanTableRowWrapper";
 import {
   DistributionPlanSnapshot,
   PhaseGroupSnapshotConfig,
@@ -8,12 +7,18 @@ import {
 import AllowlistToolAnimationWrapper from "../../../../../../allowlist-tool/common/animation/AllowlistToolAnimationWrapper";
 import { Pool } from "../../../../../../allowlist-tool/allowlist-tool.types";
 import FinalizeSnapshotsTableRow from "./FinalizeSnapshotsTableRow";
+import { BuildPhasesPhase } from "../../../../BuildPhases";
 
 export interface FinalizeSnapshotRow {
   readonly groupSnapshotId: string;
   readonly snapshot: DistributionPlanSnapshot | null;
-  readonly excludeSnapshots: string;
-  readonly excludeComponentWinners: string;
+  readonly excludeSnapshots: {
+    readonly snapshotId: string;
+    readonly snapshotType: Pool
+  }[]
+  readonly excludeSnapshotsText: string;
+  readonly excludeComponentWinners: string[];
+  readonly excludeComponentWinnersText: string;
   readonly topHoldersFilter: string;
   readonly uniqueWalletsCount: number | null;
 }
@@ -22,10 +27,12 @@ export default function FinalizeSnapshotsTable({
   onRemoveGroupSnapshot,
   groupSnapshots,
   snapshots,
+  phases
 }: {
   onRemoveGroupSnapshot: (groupSnapshotId: string) => void;
   groupSnapshots: PhaseGroupSnapshotConfig[];
   snapshots: DistributionPlanSnapshot[];
+  phases: BuildPhasesPhase[]
 }) {
   const [rows, setRows] = useState<FinalizeSnapshotRow[]>([]);
 
@@ -91,12 +98,13 @@ export default function FinalizeSnapshotsTable({
         return {
           groupSnapshotId: groupSnapshot.groupSnapshotId ?? "",
           snapshot: snapshot ?? null,
-          excludeSnapshots: groupSnapshot.excludeSnapshots.length
-            ? `${groupSnapshot.excludeSnapshots.length.toString()} snapshots`
-            : "",
-          excludeComponentWinners: groupSnapshot.excludeComponentWinners.length
-            ? `${groupSnapshot.excludeComponentWinners.length.toString()} groups`
-            : "",
+          excludeSnapshots: groupSnapshot.excludeSnapshots.map(ss => ({
+            snapshotId: ss.snapshotId,
+            snapshotType: ss.snapshotType
+          })),
+          excludeSnapshotsText: groupSnapshot.excludeSnapshots.length > 1 ? `${groupSnapshot.excludeSnapshots.length} snapshots` : groupSnapshot.excludeSnapshots.length === 1 ? `1 snapshot` : "",
+          excludeComponentWinners: groupSnapshot.excludeComponentWinners,
+          excludeComponentWinnersText: groupSnapshot.excludeComponentWinners.length > 1 ? `${groupSnapshot.excludeComponentWinners.length} components` : groupSnapshot.excludeComponentWinners.length === 1 ? `1 component` : "",
           topHoldersFilter: getTopHoldersFilter({
             type: groupSnapshot.topHoldersFilter?.type ?? null,
             from: groupSnapshot.topHoldersFilter?.from ?? null,
@@ -121,12 +129,6 @@ export default function FinalizeSnapshotsTable({
                 className="tw-py-3 tw-pl-4 tw-pr-3 tw-whitespace-nowrap tw-text-left tw-text-[0.6875rem] tw-leading-[1.125rem] tw-font-medium tw-text-neutral-400 tw-uppercase tw-tracking-[0.25px] sm:tw-pl-6"
               >
                 Name
-              </th>
-              <th
-                scope="col"
-                className="tw-px-3 tw-py-3 tw-whitespace-nowrap tw-text-left tw-text-[0.6875rem] tw-leading-[1.125rem] tw-font-medium tw-text-neutral-400 tw-uppercase tw-tracking-[0.25px]"
-              >
-                Type
               </th>
               <th
                 scope="col"
@@ -166,6 +168,7 @@ export default function FinalizeSnapshotsTable({
                   key={row.groupSnapshotId}
                   row={row}
                   onRemoveGroupSnapshot={onRemoveGroupSnapshot}
+                  phases={phases}
                 />
               ))}
             </AllowlistToolAnimationWrapper>

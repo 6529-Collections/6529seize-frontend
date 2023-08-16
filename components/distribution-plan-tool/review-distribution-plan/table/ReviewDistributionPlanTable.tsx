@@ -12,6 +12,7 @@ export enum ReviewDistributionPlanTableItemType {
 export enum FetchResultsType {
   JSON = "JSON",
   CSV = "CSV",
+  MANIFOLD = "MANIFOLD",
 }
 
 export interface ReviewDistributionPlanTableItem {

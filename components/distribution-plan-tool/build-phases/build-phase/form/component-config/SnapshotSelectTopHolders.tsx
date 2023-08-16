@@ -229,7 +229,7 @@ export default function SnapshotSelectTopHolders({
 
   return (
     <div>
-      <div className="tw-flex tw-gap-x-8">
+      <div className="tw-flex">
         <BuildPhaseFormConfigModalSidebar
           label="Ranked by"
           options={sideBarOptions}
@@ -237,7 +237,7 @@ export default function SnapshotSelectTopHolders({
           setSelectedOption={(type) => setTopHolderType(type as TopHolderType)}
         />
 
-        <div className="tw-w-full">
+        <div className="tw-w-full tw-p-6">
           <BuildPhaseFormConfigModalTitle title={title} onClose={onClose} />
           <DistributionPlanSecondaryText>
             Do you want to include only some members of this group?
@@ -251,7 +251,7 @@ export default function SnapshotSelectTopHolders({
               <div className="tw-mt-1.5">
                 <div
                   className={`
-                tw-flex tw-rounded-md tw-bg-white/5 tw-ring-1 tw-ring-inset tw-ring-white/10 focus-within:tw-ring-1 focus-within:tw-ring-inset tw-transition tw-duration-300 tw-ease-out ${
+                tw-flex tw-rounded-md tw-bg-white/5 tw-ring-1 tw-ring-inset tw-ring-neutral-700/40 hover:tw-ring-neutral-700 focus-within:tw-ring-1 focus-within:tw-ring-inset tw-transition tw-duration-300 tw-ease-out ${
                   isFromError
                     ? "focus-within:tw-ring-error"
                     : "focus-within:tw-ring-primary-400"
@@ -282,7 +282,7 @@ export default function SnapshotSelectTopHolders({
               <div className="tw-mt-1.5">
                 <div
                   className={`
-                tw-flex tw-rounded-md tw-bg-white/5 tw-ring-1 tw-ring-inset tw-ring-white/10 focus-within:tw-ring-1 focus-within:tw-ring-inset tw-transition tw-duration-300 tw-ease-out ${
+                tw-flex tw-rounded-md tw-bg-white/5 tw-ring-1 tw-ring-inset tw-ring-neutral-700/40 hover:tw-ring-neutral-700 focus-within:tw-ring-1 focus-within:tw-ring-inset tw-transition tw-duration-300 tw-ease-out ${
                   isToError
                     ? "tw-ring-error focus-within:tw-ring-error"
                     : "focus-within:tw-ring-primary-400"
@@ -305,22 +305,21 @@ export default function SnapshotSelectTopHolders({
               </div>
             </div>
           </div>
+          <ComponentConfigNextBtn
+            showSkipBtn={true}
+            showNextBtn={!isDisabled}
+            isDisabled={isDisabled}
+            onSkip={onSelectTopHoldersSkip}
+            onNext={onSelectTopHolders}
+          >
+            <ComponentConfigMeta
+              tags={[]}
+              walletsCount={localUniqueWalletsCount}
+              isLoading={false}
+            />
+          </ComponentConfigNextBtn>
         </div>
       </div>
-
-      <ComponentConfigNextBtn
-        showSkipBtn={true}
-        showNextBtn={!isDisabled}
-        isDisabled={isDisabled}
-        onSkip={onSelectTopHoldersSkip}
-        onNext={onSelectTopHolders}
-      >
-        <ComponentConfigMeta
-          tags={[]}
-          walletsCount={localUniqueWalletsCount}
-          isLoading={false}
-        />
-      </ComponentConfigNextBtn>
     </div>
   );
 }

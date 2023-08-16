@@ -81,6 +81,7 @@ export interface PhaseGroupConfig {
     type: RandomHoldersType;
     value: number;
     weightType: ComponentRandomHoldersWeightType;
+    seed: string;
   } | null;
   maxMintCount: number | null;
   uniqueWalletsCount: number | null;
@@ -390,6 +391,7 @@ export default function BuildPhaseFormConfigModal({
     value: number;
     randomHoldersType: RandomHoldersType;
     weightType: ComponentRandomHoldersWeightType;
+    seed: string;
   }) => {
     setPhaseGroupConfig((prev) => ({
       ...prev,
@@ -397,6 +399,7 @@ export default function BuildPhaseFormConfigModal({
         type: param.randomHoldersType,
         value: param.value,
         weightType: param.weightType,
+        seed: param.seed,
       },
     }));
     onNextStep(PhaseConfigStep.COMPONENT_ADD_SPOTS);
@@ -621,8 +624,8 @@ export default function BuildPhaseFormConfigModal({
           type: randomHoldersType,
           value,
           weightType,
+          seed,
         } = randomHoldersFilter;
-        const seed = distributionPlan.id;
         const coreParams: {
           componentId: string;
           seed: string;
@@ -856,7 +859,7 @@ export default function BuildPhaseFormConfigModal({
   ]);
 
   return (
-    <div className="tw-px-6 tw-gap-y-6 tw-flex tw-flex-col tw-divide-y tw-divide-solid tw-divide-neutral-700 tw-divide-x-0">
+    <div className="tw-gap-y-6 tw-flex tw-flex-col tw-divide-y tw-divide-solid tw-divide-neutral-700 tw-divide-x-0">
       {(() => {
         switch (configStep) {
           case PhaseConfigStep.SELECT_SNAPSHOT:
@@ -925,6 +928,7 @@ export default function BuildPhaseFormConfigModal({
                 uniqueWalletsCount={uniqueWalletsCountByOperations}
                 isLoadingUniqueWalletsCount={isLoadingUniqueWalletsCount}
                 onClose={onClose}
+                phases={targetPhases}
               />
             );
           case PhaseConfigStep.COMPONENT_SELECT_RANDOM_HOLDERS:
@@ -961,6 +965,7 @@ export default function BuildPhaseFormConfigModal({
                 uniqueWalletsCount={uniqueWalletsCountByOperations}
                 isLoadingUniqueWalletsCount={isLoadingUniqueWalletsCount}
                 onClose={onClose}
+                phases={targetPhases}
               />
             );
           default:

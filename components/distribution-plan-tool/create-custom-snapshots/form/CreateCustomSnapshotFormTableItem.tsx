@@ -11,13 +11,13 @@ export default function CreateCustomSnapshotFormTableItem({
 }) {
   return (
     <tr>
-      <td className="tw-w-8 tw-whitespace-nowrap tw-py-4 tw-pl-4 tw-pr-3 tw-text-sm tw-font-medium tw-text-neutral-400 sm:pl-6">
+      <td className="tw-w-8 tw-whitespace-nowrap tw-py-3.5 tw-pl-4 tw-pr-3 tw-text-sm tw-font-light tw-text-neutral-400 sm:pl-6">
         {index + 1}
       </td>
-      <td className="tw-whitespace-nowrap tw-py-4 tw-pl-3 tw-pr-3 tw-text-sm tw-font-medium tw-text-neutral-50 sm:pl-6">
+      <td className="tw-whitespace-nowrap tw-py-3.5 tw-pl-3 tw-pr-3 tw-text-sm tw-font-medium tw-text-neutral-50 sm:pl-6">
         {token.owner}
       </td>
-      <td className="tw-whitespace-nowrap tw-py-4 tw-pl-3 tw-pr-4 tw-text-right tw-text-sm tw-font-medium sm:tw-pr-6">
+      <td className="tw-whitespace-nowrap tw-py-3.5 tw-pl-3 tw-pr-4 tw-text-right tw-text-sm tw-font-medium sm:tw-pr-6">
         <button
           type="button"
           title="Delete"

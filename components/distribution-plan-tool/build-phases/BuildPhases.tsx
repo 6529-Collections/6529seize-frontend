@@ -86,7 +86,7 @@ export default function BuildPhases() {
       if (haveNotRan) {
         await runOperations();
       }
-      setStep(DistributionPlanToolStep.REVIEW);
+      setStep(DistributionPlanToolStep.MAP_DELEGATIONS);
       return;
     }
     setSelectedPhase(phasesByOp.at(index + 1));

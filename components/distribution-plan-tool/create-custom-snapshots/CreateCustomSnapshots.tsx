@@ -95,17 +95,19 @@ export default function CreateCustomSnapshots() {
 
   return (
     <div>
-      <StepHeader step={DistributionPlanToolStep.CREATE_CUSTOM_SNAPSHOT} />
+      <StepHeader
+        step={DistributionPlanToolStep.CREATE_CUSTOM_SNAPSHOT}
+      />
       <div
         onClick={downloadExampleCsv}
-        className="tw-group tw-mt-4 tw-cursor-pointer tw-items-center tw-font-light tw-text-sm tw-text-neutral-400 hover:tw-text-neutral-50 tw-inline-flex tw-gap-x-1.5 tw-transition-all tw-duration-300 tw-ease-out"
+        className="tw-group tw-mt-4 tw-cursor-pointer tw-items-center tw-font-light tw-text-sm tw-text-neutral-400 hover:tw-text-neutral-50 tw-inline-flex tw-gap-x-2 tw-transition-all tw-duration-300 tw-ease-out"
       >
         Download example CSV file
         <button
           type="button"
-          className="-tw-mt-0.5 tw-group tw-flex tw-justify-center tw-items-center tw-rounded-full tw-bg-transparent tw-h-8 tw-w-8 tw-text-white tw-border-none group-hover:tw-bg-neutral-700 tw-transition-all tw-duration-300 tw-ease-out"
+          className="-tw-mt-0.5 tw-group tw-rounded-full tw-group tw-flex tw-items-center tw-justify-center tw-h-8 tw-w-8 tw-text-xs tw-font-medium tw-border-none tw-ring-1 tw-ring-inset tw-text-neutral-400 tw-bg-neutral-400/10 tw-ring-neutral-400/20 group-hover:tw-bg-neutral-400/20 tw-ease-out tw-transition tw-duration-300"
         >
-          <div className="tw-h-4 tw-w-4 tw-flex tw-items-center tw-justify-center">
+          <div className="tw-h-3.5 tw-w-3.5 tw-flex tw-items-center tw-justify-center">
             <AllowlistToolCsvIcon />
           </div>
         </button>

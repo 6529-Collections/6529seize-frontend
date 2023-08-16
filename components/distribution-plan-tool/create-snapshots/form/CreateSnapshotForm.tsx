@@ -331,14 +331,14 @@ export default function CreateSnapshotForm() {
             <div className="tw-flex tw-gap-x-4">
               <div className="tw-w-full">
                 <div className="tw-block tw-text-sm tw-font-normal tw-leading-5 tw-text-neutral-100">
-                  <span className="tw-font-medium tw-text-gray-100">
+                  <span className="tw-font-medium tw-text-neutral-100">
                     Consolidation block number
                   </span>
-                  <div className="tw-text-xs tw-leading-6 tw-text-gray-400">
+                  <div className="tw-mt-0.5 tw-text-xs tw-text-neutral-400">
                     Leave empty if you don&apos;t want to consolidate.
                   </div>
                 </div>
-                <div>
+                <div className="tw-mt-2">
                   <input
                     type="text"
                     autoComplete="off"
