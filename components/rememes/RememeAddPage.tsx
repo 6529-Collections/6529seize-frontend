@@ -40,7 +40,10 @@ export default function RememeAddPage() {
     success: boolean;
     errors?: string[];
     contract?: string;
-    tokens?: string[];
+    tokens?: {
+      id: string;
+      title: string;
+    }[];
   }>();
 
   useEffect(() => {
@@ -141,7 +144,12 @@ export default function RememeAddPage() {
         const success = response.status == 201;
         const processedRememe: ProcessedRememe = response.response;
         const contract = processedRememe.contract?.address;
-        const tokens = processedRememe.nfts?.map((n) => n.tokenId);
+        const tokens = processedRememe.nfts?.map((n) => {
+          return {
+            id: n.tokenId,
+            title: n.title,
+          };
+        });
 
         const nftError: string[] = processedRememe.nfts
           ? processedRememe.nfts
@@ -263,7 +271,11 @@ export default function RememeAddPage() {
                       disabled={
                         !addRememe ||
                         !addRememe.valid ||
-                        !userTDH ||
+                        (!userTDH &&
+                          !areEqualAddresses(
+                            accountResolution.address,
+                            addRememe.contract.contractDeployer
+                          )) ||
                         checkList.some((c) => !c.status) ||
                         submissionResult?.success
                       }
@@ -346,8 +358,8 @@ export default function RememeAddPage() {
                         <Col
                           xs={12}
                           className="pt-1 pb-1"
-                          key={`submission-result-token-${t}`}>
-                          #{t}
+                          key={`submission-result-token-${t.id}`}>
+                          #{t.id} - {t.title}
                           &nbsp;&nbsp;
                           <a
                             className="font-color"
@@ -355,7 +367,7 @@ export default function RememeAddPage() {
                               process.env.BASE_ENDPOINT
                                 ? process.env.BASE_ENDPOINT
                                 : "https://seize.io"
-                            }/rememes/${submissionResult.contract}/${t}`}
+                            }/rememes/${submissionResult.contract}/${t.id}`}
                             target="_blank"
                             rel="noreferrer">
                             view
