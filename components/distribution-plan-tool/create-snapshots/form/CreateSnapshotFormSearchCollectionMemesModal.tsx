@@ -152,7 +152,7 @@ export default function CreateSnapshotFormSearchCollectionMemesModal({
           </div>
         )}
       </div>
-      <div className="tw-mt-8 tw-flex tw-justify-end">
+      <div className="tw-my-8 tw-flex tw-justify-end">
         <button
           type="button"
           onClick={onDone}

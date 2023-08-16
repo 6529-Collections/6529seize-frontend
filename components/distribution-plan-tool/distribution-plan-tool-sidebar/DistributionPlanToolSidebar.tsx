@@ -46,11 +46,17 @@ export const DISTRIBUTION_PLAN_STEPS: Record<
     key: DistributionPlanToolStep.BUILD_PHASES,
     order: 4,
   },
+  [DistributionPlanToolStep.MAP_DELEGATIONS]: {
+    label: "Map Delegations",
+    description: "Map delegations to the distribution plan",
+    key: DistributionPlanToolStep.MAP_DELEGATIONS,
+    order: 5,
+  },
   [DistributionPlanToolStep.REVIEW]: {
     label: "Review",
     description: "Review the distribution plan",
     key: DistributionPlanToolStep.REVIEW,
-    order: 5,
+    order: 6,
   },
 };
 
