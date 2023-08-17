@@ -448,7 +448,7 @@ export default function MemePage(props: Props) {
                   lg={{ span: 3 }}>
                   <a
                     href={`/meme-lab/${nft.id}`}
-                    className="decoration-none decoration-hover-underline scale-hover">
+                    className="decoration-none scale-hover">
                     <Container fluid className="no-padding">
                       <Row>
                         <Col>
@@ -526,7 +526,7 @@ export default function MemePage(props: Props) {
                   lg={{ span: 3 }}>
                   <a
                     href={`/rememes/${rememe.contract}/${rememe.id}`}
-                    className="decoration-none decoration-hover-underline scale-hover">
+                    className="decoration-none scale-hover">
                     <Container fluid className="no-padding">
                       <Row>
                         <Col>

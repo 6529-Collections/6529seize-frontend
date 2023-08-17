@@ -11,9 +11,10 @@ interface Props {
 }
 
 export default function RememeImage(props: Props) {
-  const fallbackUrls = getFallbackUrls();
+  const imageFallbackUrls = getImageFallbackUrls();
+  const videoFallbackUrls = getVideoFallbackUrls();
 
-  function getFallbackUrls() {
+  function getImageFallbackUrls() {
     const urls = [];
     if (props.height === 300 && props.nft.s3_image_thumbnail) {
       urls.push(props.nft.s3_image_thumbnail);
@@ -34,6 +35,22 @@ export default function RememeImage(props: Props) {
     return urls;
   }
 
+  function getVideoFallbackUrls() {
+    const urls = [];
+
+    if (props.nft.image.endsWith(".mp4")) {
+      urls.push(parseIpfsUrl(props.nft.image));
+      urls.push(parseIpfsUrlToGateway(props.nft.image));
+    }
+
+    if (props.nft.metadata.animation) {
+      urls.push(parseIpfsUrl(props.nft.metadata.animation));
+      urls.push(parseIpfsUrlToGateway(props.nft.metadata.animation));
+    }
+
+    return urls;
+  }
+
   function isMp4() {
     return (
       props.nft.metadata.animation_details &&
@@ -42,7 +59,10 @@ export default function RememeImage(props: Props) {
     );
   }
 
-  if (props.animation && props.nft.animation && isMp4()) {
+  if (
+    (props.animation && props.nft.animation && isMp4()) ||
+    props.nft.image.endsWith(".mp4")
+  ) {
     return (
       <Col
         className={`${styles.nftAnimation} ${
@@ -50,21 +70,16 @@ export default function RememeImage(props: Props) {
         } d-flex justify-content-center align-items-center`}>
         <video
           id={`${props.nft.contract}-${props.nft.id}`}
-          autoPlay
+          autoPlay={props.animation}
           muted
           controls
           loop
           playsInline
-          src={parseIpfsUrl(props.nft.animation)}
+          src={videoFallbackUrls[0]}
           onError={({ currentTarget }) => {
-            if (currentTarget.src == props.nft.animation) {
-              currentTarget.src = parseIpfsUrl(props.nft.metadata.animation);
-            } else if (
-              currentTarget.src == parseIpfsUrl(props.nft.metadata.animation)
-            ) {
-              currentTarget.src = parseIpfsUrlToGateway(
-                props.nft.metadata.animation
-              );
+            const nextFallback = videoFallbackUrls.shift();
+            if (nextFallback) {
+              currentTarget.src = nextFallback;
             }
           }}></video>
       </Col>
@@ -89,9 +104,9 @@ export default function RememeImage(props: Props) {
           maxHeight: "100%",
         }}
         id={`${props.nft.contract}-${props.nft.id}`}
-        src={fallbackUrls[0]}
+        src={imageFallbackUrls[0]}
         onError={({ currentTarget }) => {
-          const nextFallback = fallbackUrls.shift();
+          const nextFallback = imageFallbackUrls.shift();
           if (nextFallback) {
             currentTarget.src = nextFallback;
           }
