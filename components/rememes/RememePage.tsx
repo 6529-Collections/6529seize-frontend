@@ -76,8 +76,14 @@ export default function RememePage(props: Props) {
     }
   }, [rememe]);
 
-  const ensResolution = useEnsName({
+  const ensResolutionDeployer = useEnsName({
     address: rememe ? (rememe.deployer as `0x${string}`) : undefined,
+    enabled: rememe != undefined,
+    chainId: 1,
+  });
+
+  const ensResolutionAddedBy = useEnsName({
+    address: rememe ? (rememe.added_by as `0x${string}`) : undefined,
     enabled: rememe != undefined,
     chainId: 1,
   });
@@ -128,16 +134,34 @@ export default function RememePage(props: Props) {
                 ) && (
                   <Row className="pt-3">
                     <Col>
-                      by{" "}
+                      created by{" "}
                       <Address
                         wallets={[rememe.deployer as `0x${string}`]}
                         display={
-                          ensResolution.data ? ensResolution.data : undefined
+                          ensResolutionDeployer.data
+                            ? ensResolutionDeployer.data
+                            : undefined
                         }
                       />
                     </Col>
                   </Row>
                 )}
+                {rememe.added_by &&
+                  !areEqualAddresses(rememe.deployer, rememe.added_by) && (
+                    <Row className="pt-3">
+                      <Col>
+                        added by{" "}
+                        <Address
+                          wallets={[rememe.added_by as `0x${string}`]}
+                          display={
+                            ensResolutionAddedBy.data
+                              ? ensResolutionAddedBy.data
+                              : undefined
+                          }
+                        />
+                      </Col>
+                    </Row>
+                  )}
                 <Row className="pt-4">
                   <Col>
                     <a
@@ -423,7 +447,7 @@ export default function RememePage(props: Props) {
             lg={{ span: 3 }}>
             <a
               href={`/the-memes/${nft.id}`}
-              className="decoration-none decoration-hover-underline scale-hover">
+              className="decoration-none scale-hover">
               <Container fluid className="no-padding">
                 <Row>
                   <Col>
