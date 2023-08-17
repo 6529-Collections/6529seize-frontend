@@ -18,7 +18,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Tippy from "@tippyjs/react";
 import DotLoader from "../dotLoader/DotLoader";
 
-const PAGE_SIZE = 20;
+const PAGE_SIZE = 40;
 
 enum TokenType {
   ALL = "All",
