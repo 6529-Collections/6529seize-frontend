@@ -11,6 +11,7 @@ import {
   getDateDisplay,
   getValuesForVolumeType,
   numberWithCommas,
+  printMintDate,
 } from "../../helpers/Helpers";
 import { useRouter } from "next/router";
 import { fetchAllPages } from "../../services/6529api";
@@ -389,20 +390,6 @@ export default function MemeLabComponent(props: Props) {
     }
   }, [sort, sortDir, nftsLoaded, volumeType]);
 
-  function printMintDate(nft: LabNFT) {
-    const mintDate = new Date(nft.mint_date);
-    return (
-      <>
-        {mintDate.toLocaleString("default", {
-          day: "numeric",
-          month: "short",
-          year: "numeric",
-        })}{" "}
-        ({getDateDisplay(mintDate)})
-      </>
-    );
-  }
-
   function printNft(nft: LabNFT) {
     return (
       <Col
@@ -436,7 +423,7 @@ export default function MemeLabComponent(props: Props) {
               <Col className="text-center pt-1">
                 {sort &&
                   (sort == Sort.AGE || sort == Sort.ARTISTS) &&
-                  printMintDate(nft)}
+                  printMintDate(nft.mint_date)}
                 {sort == Sort.COLLECTIONS && `Artists: ${nft.artist}`}
                 {sort == Sort.EDITION_SIZE && `Edition Size: ${nft.supply}`}
                 {sort == Sort.HODLERS &&

@@ -26,7 +26,7 @@ enum TokenType {
   ERC1155 = "ERC-1155",
 }
 
-enum Sort {
+export enum RememeSort {
   RANDOM = "Random",
   CREATED_ASC = "Recently Added",
 }
@@ -54,8 +54,10 @@ export default function Rememes(props: Props) {
   );
   const [selectedMeme, setSelectedMeme] = useState<NFT>();
 
-  const sorting = [Sort.RANDOM, Sort.CREATED_ASC];
-  const [selectedSorting, setSelectedSorting] = useState<Sort>(Sort.RANDOM);
+  const sorting = [RememeSort.RANDOM, RememeSort.CREATED_ASC];
+  const [selectedSorting, setSelectedSorting] = useState<RememeSort>(
+    RememeSort.RANDOM
+  );
 
   useEffect(() => {
     fetchAllPages(
@@ -77,7 +79,7 @@ export default function Rememes(props: Props) {
       tokenTypeFilter = `&token_type=${selectedTokenType.replaceAll("-", "")}`;
     }
     let sort = "";
-    if (selectedSorting == Sort.CREATED_ASC) {
+    if (selectedSorting == RememeSort.CREATED_ASC) {
       sort = "&sort=created_at&sort_direction=desc";
     }
     let url = `${process.env.API_ENDPOINT}/api/rememes?page_size=${PAGE_SIZE}&page=${mypage}${memeFilter}${tokenTypeFilter}${sort}`;
@@ -155,7 +157,7 @@ export default function Rememes(props: Props) {
                   </Row>
                   <Row>
                     <Col className="d-flex justify-content-center align-items-center">
-                      <span>
+                      <span className="text-center">
                         {rememe.metadata.name
                           ? rememe.metadata.name
                           : `${formatAddress(rememe.contract)} #${rememe.id}`}
@@ -261,7 +263,7 @@ export default function Rememes(props: Props) {
                         ))}
                       </Dropdown.Menu>
                     </Dropdown>
-                    {selectedSorting == Sort.RANDOM && (
+                    {selectedSorting == RememeSort.RANDOM && (
                       <Tippy
                         content="Refresh results"
                         placement="top"
