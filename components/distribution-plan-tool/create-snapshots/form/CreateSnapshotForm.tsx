@@ -89,6 +89,7 @@ export default function CreateSnapshotForm() {
     success: boolean;
   }> => {
     if (!distributionPlan) return { success: false };
+    if (isLoading) return { success: false };
     setIsLoading(true);
     try {
       const url = `${process.env.ALLOWLIST_API_ENDPOINT}/allowlists/${distributionPlan.id}/operations`;

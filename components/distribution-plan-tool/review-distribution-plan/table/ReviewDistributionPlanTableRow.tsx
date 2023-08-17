@@ -15,6 +15,9 @@ import {
   AllowlistToolResponse,
 } from "../../../allowlist-tool/allowlist-tool.types";
 import AllowlistToolCsvIcon from "../../../allowlist-tool/icons/AllowlistToolCsvIcon";
+import RoundedJsonIconButton from "../../common/RoundedJsonIconButton";
+import RoundedCsvIconButton from "../../common/RoundedCsvIconButton";
+import RoundedManifoldIconButton from "../../common/RoundedManifoldIconButton";
 
 export default function ReviewDistributionPlanTableRow({
   item,
@@ -27,7 +30,16 @@ export default function ReviewDistributionPlanTableRow({
     DistributionPlanToolContext
   );
 
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [loadingType, setLoadingType] = useState<FetchResultsType | null>(null);
+  const [isLoadingJson, setIsLoadingJson] = useState(false);
+  const [isLoadingCsv, setIsLoadingCsv] = useState(false);
+  const [isLoadingManifold, setIsLoadingManifold] = useState(false);
+
+  useEffect(() => {
+    setIsLoadingJson(loadingType === FetchResultsType.JSON);
+    setIsLoadingCsv(loadingType === FetchResultsType.CSV);
+    setIsLoadingManifold(loadingType === FetchResultsType.MANIFOLD);
+  }, [loadingType]);
 
   const getUrl = (distributionPlanId: string): string => {
     switch (item.type) {
@@ -102,8 +114,9 @@ export default function ReviewDistributionPlanTableRow({
 
   const fetchResults = async (fetchType: FetchResultsType) => {
     if (!distributionPlan) return;
+    if (loadingType) return;
     const url = getUrl(distributionPlan.id);
-    setIsLoading(true);
+    setLoadingType(fetchType);
     try {
       const response = await fetch(url, {
         method: "GET",
@@ -141,7 +154,7 @@ export default function ReviewDistributionPlanTableRow({
         type: "error",
       });
     } finally {
-      setIsLoading(false);
+      setLoadingType(null);
     }
   };
 
@@ -176,43 +189,18 @@ export default function ReviewDistributionPlanTableRow({
       <td className={commonClasses}>{item.walletsCount}</td>
       <td className={commonClasses}>{item.spotsCount}</td>
       <td className={`${commonClasses} tw-flex tw-justify-end tw-gap-x-3`}>
-        <button
+        <RoundedJsonIconButton
           onClick={() => fetchResults(FetchResultsType.JSON)}
-          type="button"
-          className="tw-group tw-rounded-full tw-group tw-flex tw-items-center tw-justify-center tw-h-8 tw-w-8 tw-text-xs tw-font-medium tw-border-none tw-ring-1 tw-ring-inset tw-text-neutral-400 tw-bg-neutral-400/10 tw-ring-neutral-400/20 hover:tw-bg-neutral-400/20 tw-ease-out tw-transition tw-duration-300"
-        >
-          <div className="tw-h-3.5 tw-w-3.5 tw-flex tw-items-center tw-justify-center">
-            <AllowlistToolJsonIcon />
-          </div>
-        </button>
-        <button
+          loading={isLoadingJson}
+        />
+        <RoundedCsvIconButton
           onClick={() => fetchResults(FetchResultsType.CSV)}
-          type="button"
-          className="tw-group tw-rounded-full tw-group tw-flex tw-items-center tw-justify-center tw-h-8 tw-w-8 tw-text-xs tw-font-medium tw-border-none tw-ring-1 tw-ring-inset tw-text-neutral-400 tw-bg-neutral-400/10 tw-ring-neutral-400/20 hover:tw-bg-neutral-400/20 tw-ease-out tw-transition tw-duration-300"
-        >
-          <div className="tw-h-3.5 tw-w-3.5 tw-flex tw-items-center tw-justify-center">
-            <AllowlistToolCsvIcon />
-          </div>
-        </button>
-        <button
-          type="button"
+          loading={isLoadingCsv}
+        />
+        <RoundedManifoldIconButton
           onClick={() => fetchResults(FetchResultsType.MANIFOLD)}
-          className="tw-group tw-rounded-full tw-group tw-flex tw-items-center tw-justify-center tw-h-8 tw-w-8 tw-text-xs tw-font-medium tw-border-none tw-ring-1 tw-ring-inset tw-text-neutral-400 tw-bg-neutral-400/10 tw-ring-neutral-400/20 hover:tw-bg-neutral-400/20 tw-ease-out tw-transition tw-duration-300"
-        >
-          <div className="tw-flex tw-items-center tw-justify-center">
-            <svg
-              className="tw-h-4 tw-w-4"
-              viewBox="0 0 400 192"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="M0 0.0170752L65.3367 65.3537L297.894 65.3419L233.67 129.566L202.395 98.2916H100.296L193.519 191.515H295.618L262.661 158.558H306.777L399.998 65.3367H400L399.999 65.3356L400 65.3346H399.998L334.663 0L0 0.0170752Z"
-                fill="white"
-              />
-            </svg>
-          </div>
-        </button>
+          loading={isLoadingManifold}
+        />
       </td>
     </DistributionPlanTableRowWrapper>
   );

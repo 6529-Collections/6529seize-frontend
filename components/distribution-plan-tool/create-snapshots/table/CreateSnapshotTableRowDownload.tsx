@@ -1,6 +1,4 @@
-import { useContext, useState } from "react";
-import AllowlistToolCsvIcon from "../../../allowlist-tool/icons/AllowlistToolCsvIcon";
-import AllowlistToolJsonIcon from "../../../allowlist-tool/icons/AllowlistToolJsonIcon";
+import { useContext, useEffect, useState } from "react";
 import { DistributionPlanToolContext } from "../../DistributionPlanToolContext";
 import { FetchResultsType } from "../../review-distribution-plan/table/ReviewDistributionPlanTable";
 import {
@@ -8,6 +6,8 @@ import {
   DistributionPlanSnapshotToken,
 } from "../../../allowlist-tool/allowlist-tool.types";
 import { assertUnreachable } from "../../../../helpers/AllowlistToolHelpers";
+import RoundedJsonIconButton from "../../common/RoundedJsonIconButton";
+import RoundedCsvIconButton from "../../common/RoundedCsvIconButton";
 
 export default function CreateSnapshotTableRowDownload({
   tokenPoolId,
@@ -18,7 +18,14 @@ export default function CreateSnapshotTableRowDownload({
     DistributionPlanToolContext
   );
 
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [loadingType, setLoadingType] = useState<FetchResultsType | null>(null);
+  const [isLoadingJson, setIsLoadingJson] = useState(false);
+  const [isLoadingCsv, setIsLoadingCsv] = useState(false);
+
+  useEffect(() => {
+    setIsLoadingJson(loadingType === FetchResultsType.JSON);
+    setIsLoadingCsv(loadingType === FetchResultsType.CSV);
+  }, [loadingType]);
 
   const downloadJson = (results: DistributionPlanSnapshotToken[]) => {
     const data = JSON.stringify(results);
@@ -46,8 +53,9 @@ export default function CreateSnapshotTableRowDownload({
 
   const fetchResults = async (fetchType: FetchResultsType) => {
     if (!distributionPlan) return;
+    if (loadingType) return;
     const url = `${process.env.ALLOWLIST_API_ENDPOINT}/allowlists/${distributionPlan.id}/token-pool-downloads/token-pool/${tokenPoolId}/tokens`;
-    setIsLoading(true);
+    setLoadingType(fetchType);
     try {
       const response = await fetch(url, {
         method: "GET",
@@ -84,29 +92,20 @@ export default function CreateSnapshotTableRowDownload({
         type: "error",
       });
     } finally {
-      setIsLoading(false);
+      setLoadingType(null);
     }
   };
   return (
     <div className="tw-flex tw-justify-end tw-gap-x-3">
-      <button
+      <RoundedJsonIconButton
         onClick={() => fetchResults(FetchResultsType.JSON)}
-        type="button"
-        className="tw-group tw-rounded-full tw-group tw-flex tw-items-center tw-justify-center tw-h-8 tw-w-8 tw-text-xs tw-font-medium tw-border-none tw-ring-1 tw-ring-inset tw-text-neutral-400 tw-bg-neutral-400/10 tw-ring-neutral-400/20 hover:tw-bg-neutral-400/20 tw-ease-out tw-transition tw-duration-300"
-      >
-        <div className="tw-h-3.5 tw-w-3.5 tw-flex tw-items-center tw-justify-center">
-          <AllowlistToolJsonIcon />
-        </div>
-      </button>
-      <button
+        loading={isLoadingJson}
+      />
+
+      <RoundedCsvIconButton
         onClick={() => fetchResults(FetchResultsType.CSV)}
-        type="button"
-        className="tw-group tw-rounded-full tw-group tw-flex tw-items-center tw-justify-center tw-h-8 tw-w-8 tw-text-xs tw-font-medium tw-border-none tw-ring-1 tw-ring-inset tw-text-neutral-400 tw-bg-neutral-400/10 tw-ring-neutral-400/20 hover:tw-bg-neutral-400/20 tw-ease-out tw-transition tw-duration-300"
-      >
-        <div className="tw-h-3.5 tw-w-3.5 tw-flex tw-items-center tw-justify-center">
-          <AllowlistToolCsvIcon />
-        </div>
-      </button>
+        loading={isLoadingCsv}
+      />
     </div>
   );
 }
