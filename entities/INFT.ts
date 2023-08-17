@@ -124,6 +124,7 @@ export interface NFTHistory {
 
 export interface Rememe {
   created_at: Date;
+  updated_at: Date;
   contract: string;
   id: string;
   deployer: string;
@@ -152,4 +153,6 @@ export interface Rememe {
   s3_image_thumbnail: string;
   s3_image_icon: string;
   replicas: number[];
+  source: string;
+  added_by: string;
 }

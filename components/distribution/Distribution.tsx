@@ -2,7 +2,7 @@ import styles from "./Distribution.module.scss";
 
 import { useEffect, useState } from "react";
 import Image from "next/image";
-import { Container, Row, Col, Carousel, Table } from "react-bootstrap";
+import { Container, Row, Col, Carousel, Table, Button } from "react-bootstrap";
 import { MANIFOLD, SIX529_MUSEUM } from "../../constants";
 import { DBResponse } from "../../entities/IDBResponse";
 import Breadcrumb, { Crumb } from "../breadcrumb/Breadcrumb";
@@ -547,14 +547,21 @@ export default function Distribution(props: Props) {
           <Col>
             <Container className="pt-4 pb-4">
               <Row>
-                <Col>
-                  <h1>
+                <Col className={`${styles.distributionHeader} pb-1`}>
+                  <h1 className="text-center mb-0">
                     {props.header.toUpperCase()} CARD #{nftId} DISTRIBUTION
                   </h1>
+                  <Button
+                    className="seize-btn btn-white"
+                    onClick={() =>
+                      window.open("https://thememes.seize.io", "_blank")
+                    }>
+                    Minting Page
+                  </Button>
                 </Col>
               </Row>
               {distributionPhotos.length > 0 && (
-                <Row className="pt-2 pb-5">
+                <Row className="pt-4 pb-5">
                   <Col>{printDistributionPhotos()}</Col>
                 </Row>
               )}
