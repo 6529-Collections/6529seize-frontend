@@ -231,7 +231,7 @@ export default function Leaderboard(props: Props) {
       walletFilter = `&wallet=${searchWallets.join(",")}`;
     }
     let url = `${process.env.API_ENDPOINT}/api/${
-      view == VIEW.WALLET ? "owner_metrics" : "consolidated_owner_metrics"
+      view === VIEW.WALLET ? "owner_metrics" : "consolidated_owner_metrics"
     }`;
     url = `${url}?page_size=${props.pageSize}&page=${pageProps.page}&sort=${sort.sort}&sort_direction=${sort.sort_direction}${tagFilter}${museumFilter}${teamFilter}${walletFilter}`;
     setMyFetchUrl(url);
@@ -244,7 +244,7 @@ export default function Leaderboard(props: Props) {
 
   useEffect(() => {
     if (sort && ownerTagFilter && router.isReady && content) {
-      if (pageProps.page == 1) {
+      if (pageProps.page === 1) {
         fetchResults();
       } else {
         setPageProps({ ...pageProps, page: 1 });
@@ -277,10 +277,10 @@ export default function Leaderboard(props: Props) {
       `${process.env.API_ENDPOINT}/api/memes_extended_data?contract=${MEMES_CONTRACT}`
     ).then((newNfts: MemesExtendedData[]) => {
       setMemesCount(newNfts.length);
-      setMemesCountS1([...newNfts].filter((n) => n.season == 1).length);
-      setMemesCountS2([...newNfts].filter((n) => n.season == 2).length);
-      setMemesCountS3([...newNfts].filter((n) => n.season == 3).length);
-      setMemesCountS4([...newNfts].filter((n) => n.season == 4).length);
+      setMemesCountS1([...newNfts].filter((n) => n.season === 1).length);
+      setMemesCountS2([...newNfts].filter((n) => n.season === 2).length);
+      setMemesCountS3([...newNfts].filter((n) => n.season === 3).length);
+      setMemesCountS4([...newNfts].filter((n) => n.season === 4).length);
     });
   }, []);
 
@@ -480,7 +480,7 @@ export default function Leaderboard(props: Props) {
   }, [content]);
 
   useEffect(() => {
-    if (focus == Focus.TDH) {
+    if (focus === Focus.TDH) {
       if (sort.sort != getBalanceSort()) {
         setSort({
           sort: getBalanceSort(),
@@ -488,7 +488,7 @@ export default function Leaderboard(props: Props) {
         });
       }
     }
-    if (focus == Focus.INTERACTIONS) {
+    if (focus === Focus.INTERACTIONS) {
       if (sort.sort != getPurchasesCountSort()) {
         setSort({
           sort: getPurchasesCountSort(),
@@ -496,7 +496,7 @@ export default function Leaderboard(props: Props) {
         });
       }
     }
-    if (focus == Focus.SETS) {
+    if (focus === Focus.SETS) {
       if (sort.sort != Sort.memes_cards_sets) {
         setSort({
           sort: Sort.memes_cards_sets,
@@ -1317,7 +1317,7 @@ export default function Leaderboard(props: Props) {
               </Row>
             </Container>
           )}
-          {leaderboard && leaderboard.length == 0 && (
+          {leaderboard && leaderboard.length === 0 && (
             <Container>
               <Row>
                 <Col>No results found. Change filters and try again.</Col>
@@ -1339,7 +1339,7 @@ export default function Leaderboard(props: Props) {
                       </>
                     )}
                   </th>
-                  {focus == Focus.TDH && (
+                  {focus === Focus.TDH && (
                     <th className={styles.tdhSub}>
                       <span className="d-flex align-items-center justify-content-center">
                         Cards Collected&nbsp;
@@ -1378,7 +1378,7 @@ export default function Leaderboard(props: Props) {
                       </span>
                     </th>
                   )}
-                  {focus == Focus.INTERACTIONS && (
+                  {focus === Focus.INTERACTIONS && (
                     <>
                       <th className={styles.tdhSub}>
                         <span className="d-flex align-items-center justify-content-center">
@@ -1604,7 +1604,7 @@ export default function Leaderboard(props: Props) {
                       </th>
                     </>
                   )}
-                  {focus == Focus.TDH && (
+                  {focus === Focus.TDH && (
                     <>
                       <th className={styles.tdhSub}>
                         <span className="d-flex align-items-center justify-content-center">
@@ -1645,13 +1645,13 @@ export default function Leaderboard(props: Props) {
                       </th>
                       <th className={styles.tdhSub}>
                         <span className="d-flex align-items-center justify-content-center">
-                          {content == Content.MEMES1
+                          {content === Content.MEMES1
                             ? "SZN1"
-                            : content == Content.MEMES2
+                            : content === Content.MEMES2
                             ? "SZN2"
-                            : content == Content.MEMES3
+                            : content === Content.MEMES3
                             ? "SZN3"
-                            : content == Content.MEMES4
+                            : content === Content.MEMES4
                             ? "SZN4"
                             : "Meme"}{" "}
                           Sets&nbsp;
@@ -1808,7 +1808,7 @@ export default function Leaderboard(props: Props) {
                       </th>
                     </>
                   )}
-                  {focus == Focus.SETS && (
+                  {focus === Focus.SETS && (
                     <>
                       <th className={styles.tdhSub}>
                         <span className="d-flex align-items-center justify-content-center">
@@ -2140,12 +2140,12 @@ export default function Leaderboard(props: Props) {
                               }}
                             />
                           </td>
-                          {focus == Focus.TDH && (
+                          {focus === Focus.TDH && (
                             <td className={styles.tdhSub}>
                               {numberWithCommas(getCardsHodled(lead))}
                             </td>
                           )}
-                          {focus == Focus.INTERACTIONS && (
+                          {focus === Focus.INTERACTIONS && (
                             <>
                               <td className={styles.tdhSub}>
                                 {getPurchasesCount(lead)}
@@ -2167,7 +2167,7 @@ export default function Leaderboard(props: Props) {
                               </td>
                             </>
                           )}
-                          {focus == Focus.TDH && (
+                          {focus === Focus.TDH && (
                             <>
                               <td className={styles.tdhSub}>
                                 {getUniqueMemes(lead)}
@@ -2195,7 +2195,7 @@ export default function Leaderboard(props: Props) {
                               </td>
                             </>
                           )}
-                          {focus == Focus.SETS && (
+                          {focus === Focus.SETS && (
                             <>
                               <td className={styles.tdhSub}>
                                 {lead.memes_cards_sets > 0
@@ -2258,19 +2258,23 @@ export default function Leaderboard(props: Props) {
             <DownloadUrlWidget
               preview="Page"
               name={`${
-                view == VIEW.CONSOLIDATION ? `consolidated-` : ""
+                view === VIEW.CONSOLIDATION ? `consolidated-` : ""
               }community-download${lastTDH ? `-${lastTDH.block}` : ""}`}
               url={`${myFetchUrl}${
-                view == VIEW.CONSOLIDATION ? `&include_primary_wallet=true` : ""
+                view === VIEW.CONSOLIDATION
+                  ? `&include_primary_wallet=true`
+                  : ""
               }&download_page=true`}
             />
             <DownloadUrlWidget
               preview="All Pages"
               name={`${
-                view == VIEW.CONSOLIDATION ? `consolidated-` : ""
+                view === VIEW.CONSOLIDATION ? `consolidated-` : ""
               }community-download${lastTDH ? `-${lastTDH.block}` : ""}`}
               url={`${myFetchUrl}${
-                view == VIEW.CONSOLIDATION ? `&include_primary_wallet=true` : ""
+                view === VIEW.CONSOLIDATION
+                  ? `&include_primary_wallet=true`
+                  : ""
               }&download_all=true`}
             />
           </Col>

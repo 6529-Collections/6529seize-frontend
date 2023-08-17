@@ -15,7 +15,7 @@ export default function SwitchNetworkButton() {
 
   const currentNetwork = networkResolution.chain;
   const targetNetwork = networkResolution.chains.find(
-    (c) => c.id == DELEGATION_CONTRACT.chain_id
+    (c) => c.id === DELEGATION_CONTRACT.chain_id
   );
 
   return (

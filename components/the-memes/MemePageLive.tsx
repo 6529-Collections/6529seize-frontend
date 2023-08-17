@@ -264,7 +264,7 @@ export function MemePageLiveSubMenu(props: {
 
   function fetchRememes(meme_id: number) {
     let sort = "";
-    if (selectedRememeSorting == RememeSort.CREATED_ASC) {
+    if (selectedRememeSorting === RememeSort.CREATED_ASC) {
       sort = "&sort=created_at&sort_direction=desc";
     }
     fetchUrl(
@@ -381,7 +381,7 @@ export function MemePageLiveSubMenu(props: {
                     ))}
                   </Dropdown.Menu>
                 </Dropdown>
-                {selectedRememeSorting == RememeSort.RANDOM && (
+                {selectedRememeSorting === RememeSort.RANDOM && (
                   <Tippy
                     content="Refresh results"
                     placement="top"

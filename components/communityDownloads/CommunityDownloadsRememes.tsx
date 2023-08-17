@@ -72,7 +72,7 @@ export default function CommunityDownloadsRememes() {
                 </Col>
               </Row>
             )}
-            {downloads != undefined && downloads.length == 0 && (
+            {downloads != undefined && downloads.length === 0 && (
               <>
                 <Image
                   width="0"

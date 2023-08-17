@@ -54,7 +54,7 @@ export default function RememePage(props: Props) {
       fetchUrl(
         `${process.env.API_ENDPOINT}/api/rememes?contract=${props.contract}&id=${props.id}`
       ).then((response: DBResponse) => {
-        if (response.data.length == 1) {
+        if (response.data.length === 1) {
           setRememe(response.data[0]);
         }
       });
@@ -512,7 +512,7 @@ export default function RememePage(props: Props) {
                     {Object.values(Tabs).map((k) => (
                       <span
                         className={`${styles.tabFocus} ${
-                          activeTab == k ? styles.tabActive : ""
+                          activeTab === k ? styles.tabActive : ""
                         }`}
                         key={`${k}-tab`}
                         onClick={() => setActiveTab(k)}>

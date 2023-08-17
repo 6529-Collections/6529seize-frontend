@@ -394,7 +394,7 @@ export default function GradientPage(props: Props) {
                             <a
                               href={`/6529-gradient/${parseInt(nftId) - 1}`}
                               className={`${styles.nextPreviousNft} ${
-                                parseInt(nftId) == 0
+                                parseInt(nftId) === 0
                                   ? styles.nftPreviousdisabled
                                   : ""
                               }`}>
@@ -406,7 +406,7 @@ export default function GradientPage(props: Props) {
                             <a
                               href={`/6529-gradient/${parseInt(nftId) + 1}`}
                               className={`${styles.nextPreviousNft} ${
-                                parseInt(nftId) == 100
+                                parseInt(nftId) === 100
                                   ? styles.nftPreviousdisabled
                                   : ""
                               }`}>

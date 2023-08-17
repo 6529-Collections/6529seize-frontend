@@ -42,7 +42,7 @@ export default function NFTLeaderboard(props: Props) {
 
   async function fetchResults() {
     const url = `${process.env.API_ENDPOINT}/api/${
-      view == VIEW.WALLET ? "tdh" : "consolidated_tdh"
+      view === VIEW.WALLET ? "tdh" : "consolidated_tdh"
     }`;
     fetchUrl(
       `${url}/${props.contract}/${props.nftId}?page_size=${props.pageSize}&page=${pageProps.page}&sort=${sort.sort}&sort_direction=${sort.sort_direction}`
@@ -54,7 +54,7 @@ export default function NFTLeaderboard(props: Props) {
   }
 
   useEffect(() => {
-    if (pageProps.page == 1) {
+    if (pageProps.page === 1) {
       fetchResults();
     } else {
       setPageProps({ ...pageProps, page: 1 });
@@ -350,7 +350,7 @@ export default function NFTLeaderboard(props: Props) {
                 {leaderboard &&
                   leaderboard.map((lead, index) => {
                     const thisCard = lead.memes.find(
-                      (m) => m.id == props.nftId
+                      (m) => m.id === props.nftId
                     );
                     if (thisCard)
                       return (
@@ -417,7 +417,7 @@ export default function NFTLeaderboard(props: Props) {
           />
         </Row>
       )}
-      {leaderboardLoaded && leaderboard?.length == 0 && (
+      {leaderboardLoaded && leaderboard?.length === 0 && (
         <Row>
           <Col>No TDH accrued</Col>
         </Row>

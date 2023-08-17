@@ -79,7 +79,7 @@ export default function Rememes(props: Props) {
       tokenTypeFilter = `&token_type=${selectedTokenType.replaceAll("-", "")}`;
     }
     let sort = "";
-    if (selectedSorting == RememeSort.CREATED_ASC) {
+    if (selectedSorting === RememeSort.CREATED_ASC) {
       sort = "&sort=created_at&sort_direction=desc";
     }
     let url = `${process.env.API_ENDPOINT}/api/rememes?page_size=${PAGE_SIZE}&page=${mypage}${memeFilter}${tokenTypeFilter}${sort}`;
@@ -174,7 +174,7 @@ export default function Rememes(props: Props) {
   }
 
   function printRememes() {
-    if (rememes.length == 0) {
+    if (rememes.length === 0) {
       return (
         <Row>
           <Col>
@@ -263,7 +263,7 @@ export default function Rememes(props: Props) {
                         ))}
                       </Dropdown.Menu>
                     </Dropdown>
-                    {selectedSorting == RememeSort.RANDOM && (
+                    {selectedSorting === RememeSort.RANDOM && (
                       <Tippy
                         content="Refresh results"
                         placement="top"
@@ -305,9 +305,9 @@ export default function Rememes(props: Props) {
                       <Dropdown.Toggle>
                         Meme Reference:{" "}
                         {urlMemeId
-                          ? memes.find((m) => m.id == urlMemeId)
+                          ? memes.find((m) => m.id === urlMemeId)
                             ? `${urlMemeId} - ${
-                                memes.find((m) => m.id == urlMemeId)?.name
+                                memes.find((m) => m.id === urlMemeId)?.name
                               }`
                             : `${urlMemeId}`
                           : `All`}
