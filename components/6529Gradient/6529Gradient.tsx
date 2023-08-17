@@ -59,15 +59,15 @@ export default function GradientsComponent(props: Props) {
         { shallow: true }
       );
 
-      if (sort == Sort.ID) {
-        if (sortDir == SortDirection.ASC) {
+      if (sort === Sort.ID) {
+        if (sortDir === SortDirection.ASC) {
           setNfts([...nfts].sort((a, b) => (a.id > b.id ? 1 : -1)));
         } else {
           setNfts([...nfts].sort((a, b) => (a.id > b.id ? -1 : 1)));
         }
       }
-      if (sort == Sort.TDH) {
-        if (sortDir == SortDirection.ASC) {
+      if (sort === Sort.TDH) {
+        if (sortDir === SortDirection.ASC) {
           setNfts([...nfts].sort((a, b) => (a.tdh > b.tdh ? -1 : 1)));
         } else {
           setNfts([...nfts].sort((a, b) => (a.tdh > b.tdh ? 1 : -1)));

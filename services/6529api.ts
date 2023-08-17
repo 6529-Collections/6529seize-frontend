@@ -11,7 +11,7 @@ export async function fetchUrl(url: string): Promise<DBResponse | any> {
   const res = await fetch(url, {
     headers: headers,
   });
-  if (res.status == 401) {
+  if (res.status === 401) {
     Cookies.remove(API_AUTH_COOKIE);
   }
   return await res.json();

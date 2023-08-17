@@ -209,7 +209,7 @@ export default function CollectionDelegationComponent(props: Props) {
     useState(false);
 
   function chainsMatch() {
-    return networkResolution.chain?.id == DELEGATION_CONTRACT.chain_id;
+    return networkResolution.chain?.id === DELEGATION_CONTRACT.chain_id;
   }
 
   useEffect(() => {
@@ -218,7 +218,9 @@ export default function CollectionDelegationComponent(props: Props) {
 
   function getSwitchToHtml() {
     return `<span style="color: red !important;">Switch to ${
-      DELEGATION_CONTRACT.chain_id == 1 ? "Ethereum Mainnet" : "Sepolia Network"
+      DELEGATION_CONTRACT.chain_id === 1
+        ? "Ethereum Mainnet"
+        : "Sepolia Network"
     }</span>`;
   }
 
@@ -238,9 +240,9 @@ export default function CollectionDelegationComponent(props: Props) {
           const useCase =
             DELEGATION_USE_CASES.length > index
               ? DELEGATION_USE_CASES[index]
-              : index == SUB_DELEGATION_USE_CASE.index
+              : index === SUB_DELEGATION_USE_CASE.index
               ? SUB_DELEGATION_USE_CASE
-              : index == CONSOLIDATION_USE_CASE.index
+              : index === CONSOLIDATION_USE_CASE.index
               ? CONSOLIDATION_USE_CASE
               : null;
           if (useCase) {
@@ -314,9 +316,9 @@ export default function CollectionDelegationComponent(props: Props) {
           const useCase =
             DELEGATION_USE_CASES.length > index
               ? DELEGATION_USE_CASES[index]
-              : index == SUB_DELEGATION_USE_CASE.index
+              : index === SUB_DELEGATION_USE_CASE.index
               ? SUB_DELEGATION_USE_CASE
-              : index == CONSOLIDATION_USE_CASE.index
+              : index === CONSOLIDATION_USE_CASE.index
               ? CONSOLIDATION_USE_CASE
               : null;
           if (useCase) {
@@ -837,7 +839,7 @@ export default function CollectionDelegationComponent(props: Props) {
               {printOutgoingDelegations(
                 "Delegation Managers",
                 [...outgoingDelegations].filter(
-                  (d) => d.useCase.use_case == SUB_DELEGATION_USE_CASE.use_case
+                  (d) => d.useCase.use_case === SUB_DELEGATION_USE_CASE.use_case
                 )
               )}
             </Accordion.Body>
@@ -850,7 +852,7 @@ export default function CollectionDelegationComponent(props: Props) {
               {printIncomingDelegations(
                 "Delegation Managers",
                 [...incomingDelegations].filter(
-                  (d) => d.useCase.use_case == SUB_DELEGATION_USE_CASE.use_case
+                  (d) => d.useCase.use_case === SUB_DELEGATION_USE_CASE.use_case
                 ),
                 true
               )}
@@ -876,7 +878,7 @@ export default function CollectionDelegationComponent(props: Props) {
               {printOutgoingDelegations(
                 "consolidations",
                 [...outgoingDelegations].filter(
-                  (d) => d.useCase.use_case == CONSOLIDATION_USE_CASE.use_case
+                  (d) => d.useCase.use_case === CONSOLIDATION_USE_CASE.use_case
                 )
               )}
             </Accordion.Body>
@@ -889,7 +891,7 @@ export default function CollectionDelegationComponent(props: Props) {
               {printIncomingDelegations(
                 "consolidations",
                 [...incomingDelegations].filter(
-                  (d) => d.useCase.use_case == CONSOLIDATION_USE_CASE.use_case
+                  (d) => d.useCase.use_case === CONSOLIDATION_USE_CASE.use_case
                 )
               )}
             </Accordion.Body>
@@ -920,7 +922,8 @@ export default function CollectionDelegationComponent(props: Props) {
                   myDelegations.map((del, index: number) => {
                     if (del.wallets.length > 0) {
                       const isConsolidation =
-                        del.useCase.use_case == CONSOLIDATION_USE_CASE.use_case;
+                        del.useCase.use_case ===
+                        CONSOLIDATION_USE_CASE.use_case;
                       return (
                         <Fragment
                           key={`outgoing-${del.useCase.use_case}-${index}`}>
@@ -937,7 +940,8 @@ export default function CollectionDelegationComponent(props: Props) {
                                 areEqualAddresses(w.wallet, i.wallet)
                               )?.status;
                             const pending =
-                              consolidationStatus == "consolidation incomplete";
+                              consolidationStatus ===
+                              "consolidation incomplete";
                             return (
                               <tr
                                 key={`outgoing-${del.useCase.use_case}-${index}-${w.wallet}-${addressIndex}`}>
@@ -1094,7 +1098,7 @@ export default function CollectionDelegationComponent(props: Props) {
                     <tr>
                       <td colSpan={4} className="pt-5">
                         selected:{" "}
-                        {bulkRevocations.length == MAX_BULK_ACTIONS
+                        {bulkRevocations.length === MAX_BULK_ACTIONS
                           ? `${MAX_BULK_ACTIONS} (max)`
                           : bulkRevocations.length}
                         &nbsp;&nbsp;
@@ -1176,7 +1180,8 @@ export default function CollectionDelegationComponent(props: Props) {
                   myDelegations.map((del, index: number) => {
                     if (del.wallets.length > 0) {
                       const isConsolidation =
-                        del.useCase.use_case == CONSOLIDATION_USE_CASE.use_case;
+                        del.useCase.use_case ===
+                        CONSOLIDATION_USE_CASE.use_case;
                       return (
                         <Fragment
                           key={`incoming-${del.useCase.use_case}-${index}`}>
@@ -1193,7 +1198,8 @@ export default function CollectionDelegationComponent(props: Props) {
                                 areEqualAddresses(w.wallet, i.wallet)
                               )?.status;
                             const pending =
-                              consolidationStatus == "consolidation incomplete";
+                              consolidationStatus ===
+                              "consolidation incomplete";
                             return (
                               <tr
                                 key={`incoming-${del.useCase}-${index}-${w.wallet}`}>
@@ -1276,7 +1282,7 @@ export default function CollectionDelegationComponent(props: Props) {
                       <td colSpan={2} className="pt-5">
                         <span
                           className={`${styles.useCaseWalletUpdate} ${
-                            subDelegationOriginalDelegator == undefined
+                            subDelegationOriginalDelegator === undefined
                               ? styles.useCaseWalletUpdateDisabled
                               : ""
                           }`}
@@ -1292,7 +1298,7 @@ export default function CollectionDelegationComponent(props: Props) {
                         </span>
                         <span
                           className={`${styles.useCaseWalletUpdate} ${
-                            subDelegationOriginalDelegator == undefined
+                            subDelegationOriginalDelegator === undefined
                               ? styles.useCaseWalletUpdateDisabled
                               : ""
                           }`}
@@ -1308,7 +1314,7 @@ export default function CollectionDelegationComponent(props: Props) {
                         </span>
                         <span
                           className={`${styles.useCaseWalletUpdate} ${
-                            subDelegationOriginalDelegator == undefined
+                            subDelegationOriginalDelegator === undefined
                               ? styles.useCaseWalletUpdateDisabled
                               : ""
                           }`}
@@ -1324,7 +1330,7 @@ export default function CollectionDelegationComponent(props: Props) {
                         </span>
                         <span
                           className={`${styles.useCaseWalletRevoke} ${
-                            subDelegationOriginalDelegator == undefined
+                            subDelegationOriginalDelegator === undefined
                               ? styles.useCaseWalletRevokeDisabled
                               : ""
                           }`}
@@ -1433,7 +1439,7 @@ export default function CollectionDelegationComponent(props: Props) {
                 onChange={(e) => {
                   const value = parseInt(e.target.value);
                   setLockUseCaseValue(value);
-                  if (value == CONSOLIDATION_USE_CASE.use_case) {
+                  if (value === CONSOLIDATION_USE_CASE.use_case) {
                     setLockUseCaseIndex(16);
                   } else {
                     setLockUseCaseIndex(value - 1);
@@ -1461,13 +1467,13 @@ export default function CollectionDelegationComponent(props: Props) {
                         (useCaseLockStatusesGlobal?.data &&
                           (useCaseLockStatusesGlobal?.data[
                             index
-                          ] as any as boolean) == true) ||
+                          ] as any as boolean) === true) ||
                         collectionLockRead.data
                           ? ` - LOCKED${
                               useCaseLockStatusesGlobal?.data &&
                               (useCaseLockStatusesGlobal?.data[
                                 index
-                              ] as any as boolean) == true
+                              ] as any as boolean) === true
                                 ? ` *`
                                 : ``
                             }`
@@ -1489,7 +1495,7 @@ export default function CollectionDelegationComponent(props: Props) {
                 (useCaseLockStatusesGlobal?.data &&
                   (useCaseLockStatusesGlobal?.data[
                     lockUseCaseIndex
-                  ] as any as boolean) == false) ? (
+                  ] as any as boolean) === false) ? (
                   <button
                     className={`${styles.lockUseCaseBtn}`}
                     onClick={() => {

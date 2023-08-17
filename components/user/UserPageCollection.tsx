@@ -302,7 +302,7 @@ export default function UserPageCollection(props: Props) {
     if (nftbalance > 0 && hideSeized) {
       return;
     }
-    if (nftbalance == 0 && (hideNonSeized || isGradients)) {
+    if (nftbalance === 0 && (hideNonSeized || isGradients)) {
       return;
     }
     if (nftbalance > 0 && isGradients && hideGradients) {
@@ -312,7 +312,7 @@ export default function UserPageCollection(props: Props) {
       return;
     }
 
-    const season = nftMetas.find((a) => a.id == nft.id)?.season;
+    const season = nftMetas.find((a) => a.id === nft.id)?.season;
     if (selectedSeason != 0 && selectedSeason != season) {
       return;
     }
@@ -329,11 +329,11 @@ export default function UserPageCollection(props: Props) {
     const isGradients = isGradientsContract(nft.contract);
 
     if (isMemes && props.tdh?.memes) {
-      nfttdh = props.tdh?.memes.find((m) => m.id == nft.id)?.tdh;
-      nftrank = props.tdh?.memes_ranks.find((g) => g.id == nft.id)?.rank;
+      nfttdh = props.tdh?.memes.find((m) => m.id === nft.id)?.tdh;
+      nftrank = props.tdh?.memes_ranks.find((g) => g.id === nft.id)?.rank;
     } else if (isGradients && props.tdh?.gradients) {
-      nfttdh = props.tdh?.gradients.find((m) => m.id == nft.id)?.tdh;
-      nftrank = props.tdh?.gradients_ranks.find((g) => g.id == nft.id)?.rank;
+      nfttdh = props.tdh?.gradients.find((m) => m.id === nft.id)?.tdh;
+      nftrank = props.tdh?.gradients_ranks.find((g) => g.id === nft.id)?.rank;
     }
 
     return (
@@ -402,7 +402,7 @@ export default function UserPageCollection(props: Props) {
 
   function printNfts() {
     const mynfts = [...nfts].filter((n) => filterNft(n));
-    if (mynfts.length == 0) {
+    if (mynfts.length === 0) {
       return (
         <Row className="pt-2">
           <Col>
