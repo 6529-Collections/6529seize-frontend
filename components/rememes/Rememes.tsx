@@ -1,4 +1,4 @@
-import { Container, Row, Col, Dropdown } from "react-bootstrap";
+import { Container, Row, Col, Dropdown, Button } from "react-bootstrap";
 import styles from "./Rememes.module.scss";
 import { fetchAllPages, fetchUrl } from "../../services/6529api";
 import { MEMES_CONTRACT, OPENSEA_STORE_FRONT_CONTRACT } from "../../constants";
@@ -15,6 +15,7 @@ import {
   numberWithCommas,
 } from "../../helpers/Helpers";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import Tippy from "@tippyjs/react";
 import DotLoader from "../dotLoader/DotLoader";
 
 const PAGE_SIZE = 20;
@@ -23,6 +24,11 @@ enum TokenType {
   ALL = "All",
   ERC721 = "ERC-721",
   ERC1155 = "ERC-1155",
+}
+
+enum Sort {
+  RANDOM = "Random",
+  CREATED_ASC = "Recently Added",
 }
 
 interface Props {
@@ -48,6 +54,9 @@ export default function Rememes(props: Props) {
   );
   const [selectedMeme, setSelectedMeme] = useState<NFT>();
 
+  const sorting = [Sort.RANDOM, Sort.CREATED_ASC];
+  const [selectedSorting, setSelectedSorting] = useState<Sort>(Sort.RANDOM);
+
   useEffect(() => {
     fetchAllPages(
       `${process.env.API_ENDPOINT}/api/nfts?contract=${MEMES_CONTRACT}`
@@ -67,7 +76,11 @@ export default function Rememes(props: Props) {
     if (selectedTokenType !== TokenType.ALL) {
       tokenTypeFilter = `&token_type=${selectedTokenType.replaceAll("-", "")}`;
     }
-    let url = `${process.env.API_ENDPOINT}/api/rememes?page_size=${PAGE_SIZE}&page=${mypage}${memeFilter}${tokenTypeFilter}`;
+    let sort = "";
+    if (selectedSorting == Sort.CREATED_ASC) {
+      sort = "&sort=created_at&sort_direction=desc";
+    }
+    let url = `${process.env.API_ENDPOINT}/api/rememes?page_size=${PAGE_SIZE}&page=${mypage}${memeFilter}${tokenTypeFilter}${sort}`;
     fetchUrl(url).then((response: DBResponse) => {
       setTotalResults(response.count);
       setRememes(response.data);
@@ -99,7 +112,7 @@ export default function Rememes(props: Props) {
 
   useEffect(() => {
     fetchResults(page);
-  }, [page, router.isReady, urlMemeId, selectedTokenType]);
+  }, [page, router.isReady, urlMemeId, selectedTokenType, selectedSorting]);
 
   function printRememe(rememe: Rememe) {
     return (
@@ -112,7 +125,7 @@ export default function Rememes(props: Props) {
         lg={{ span: 3 }}>
         <a
           href={`/rememes/${rememe.contract}/${rememe.id}`}
-          className="decoration-none decoration-hover-underline scale-hover">
+          className="decoration-none scale-hover">
           <Container fluid>
             <Row>
               <RememeImage nft={rememe} animation={false} height={300} />
@@ -177,7 +190,11 @@ export default function Rememes(props: Props) {
       );
     }
     return (
-      <Row className="pt-2">{rememes.map((rememe) => printRememe(rememe))}</Row>
+      <>
+        <Row className="pt-2">
+          {rememes.map((rememe) => printRememe(rememe))}
+        </Row>
+      </>
     );
   }
 
@@ -186,90 +203,139 @@ export default function Rememes(props: Props) {
       <Row>
         <Col>
           <Container className="pt-4">
-            <Row className="pt-2 pb-2">
-              <Col sm={12} md={4} className="d-flex align-items-center gap-2">
-                <Image
-                  loading={"eager"}
-                  width="0"
-                  height="0"
-                  style={{ width: "250px", height: "auto" }}
-                  src="/re-memes.png"
-                  alt="re-memes"
-                />
-                {rememesLoaded && totalResults > 0 ? (
-                  <span className="font-color-h font-larger">
-                    &nbsp;(x{numberWithCommas(totalResults)})
-                  </span>
-                ) : (
-                  ``
-                )}
-                <FontAwesomeIcon
-                  icon="refresh"
-                  className={styles.refreshLink}
-                  onClick={() => {
-                    fetchResults(page);
-                  }}
-                />
-              </Col>
+            <Row className="d-flex justify-content-between">
               <Col
-                sm={12}
-                md={8}
-                className="d-flex align-items-center justify-content-end flex-wrap gap-4">
-                <Dropdown
-                  className={styles.memeRefDropdown}
-                  drop={"down-centered"}>
-                  <Dropdown.Toggle>
-                    Token Type: {selectedTokenType}
-                  </Dropdown.Toggle>
-                  <Dropdown.Menu>
-                    {tokenTypes.map((t) => (
-                      <Dropdown.Item
-                        key={`token-type-${t}`}
-                        onClick={() => {
-                          setTotalResults(0);
-                          setSelectedTokenType(t);
-                        }}>
-                        {t}
-                      </Dropdown.Item>
-                    ))}
-                  </Dropdown.Menu>
-                </Dropdown>
-                <Dropdown
-                  className={styles.memeRefDropdown}
-                  drop={"down-centered"}>
-                  <Dropdown.Toggle>
-                    Meme Reference:{" "}
-                    {urlMemeId
-                      ? memes.find((m) => m.id == urlMemeId)
-                        ? `${urlMemeId} - ${
-                            memes.find((m) => m.id == urlMemeId)?.name
-                          }`
-                        : `${urlMemeId}`
-                      : `All`}
-                  </Dropdown.Toggle>
-                  <Dropdown.Menu>
-                    <Dropdown.Item
+                className={`d-flex flex-wrap align-items-center gap-2 justify-content-between`}>
+                <span className="d-flex align-items-center gap-2 pt-2 pb-2">
+                  <Image
+                    loading={"eager"}
+                    width="0"
+                    height="0"
+                    style={{ width: "250px", height: "auto" }}
+                    src="/re-memes.png"
+                    alt="re-memes"
+                  />
+                  {totalResults > 0 && (
+                    <span className="font-color-h font-larger">
+                      (x{numberWithCommas(totalResults)})
+                    </span>
+                  )}
+                </span>
+                <span className="pt-2 pb-2">
+                  <Button
+                    className="seize-btn btn-white d-flex align-items-center gap-2"
+                    onClick={() => {
+                      window.location.href = "/rememes/add";
+                    }}>
+                    Add ReMeme{" "}
+                    <FontAwesomeIcon
+                      icon="plus-circle"
+                      className={styles.buttonIcon}
                       onClick={() => {
-                        setUrlMemeId(undefined);
-                        setTotalResults(0);
-                        setSelectedMeme(undefined);
-                      }}>
-                      All
-                    </Dropdown.Item>
-                    {memes.map((m) => (
-                      <Dropdown.Item
-                        key={`meme-${m.id}`}
-                        onClick={() => {
-                          setTotalResults(0);
-                          setSelectedMeme(m);
-                        }}>
-                        #{m.id} - {m.name}
-                      </Dropdown.Item>
-                    ))}
-                  </Dropdown.Menu>
-                </Dropdown>
+                        window.location.href = "/rememes/add";
+                      }}
+                    />
+                  </Button>
+                </span>
               </Col>
             </Row>
+            {rememesLoaded && (
+              <Row className="pt-2">
+                <Col
+                  className={`pt-2 pb-2 d-flex align-items-center flex-wrap gap-2 justify-content-between`}>
+                  <span className="d-flex align-items-center gap-1">
+                    <Dropdown
+                      className={styles.memeRefDropdown}
+                      drop={"down-centered"}>
+                      <Dropdown.Toggle>Sort: {selectedSorting}</Dropdown.Toggle>
+                      <Dropdown.Menu>
+                        {sorting.map((s) => (
+                          <Dropdown.Item
+                            key={`sorting-${s}`}
+                            onClick={() => {
+                              setTotalResults(0);
+                              setSelectedSorting(s);
+                            }}>
+                            {s}
+                          </Dropdown.Item>
+                        ))}
+                      </Dropdown.Menu>
+                    </Dropdown>
+                    {selectedSorting == Sort.RANDOM && (
+                      <Tippy
+                        content="Refresh results"
+                        placement="top"
+                        theme="light"
+                        delay={250}>
+                        <FontAwesomeIcon
+                          icon="refresh"
+                          className={styles.buttonIcon}
+                          onClick={() => {
+                            fetchResults(page);
+                          }}
+                        />
+                      </Tippy>
+                    )}
+                  </span>
+                  <span className="d-flex flex-wrap align-items-center justify-content-between gap-2">
+                    <Dropdown
+                      className={styles.memeRefDropdown}
+                      drop={"down-centered"}>
+                      <Dropdown.Toggle>
+                        Token Type: {selectedTokenType}
+                      </Dropdown.Toggle>
+                      <Dropdown.Menu>
+                        {tokenTypes.map((t) => (
+                          <Dropdown.Item
+                            key={`token-type-${t}`}
+                            onClick={() => {
+                              setTotalResults(0);
+                              setSelectedTokenType(t);
+                            }}>
+                            {t}
+                          </Dropdown.Item>
+                        ))}
+                      </Dropdown.Menu>
+                    </Dropdown>
+                    <Dropdown
+                      className={styles.memeRefDropdown}
+                      drop={"down-centered"}>
+                      <Dropdown.Toggle>
+                        Meme Reference:{" "}
+                        {urlMemeId
+                          ? memes.find((m) => m.id == urlMemeId)
+                            ? `${urlMemeId} - ${
+                                memes.find((m) => m.id == urlMemeId)?.name
+                              }`
+                            : `${urlMemeId}`
+                          : `All`}
+                      </Dropdown.Toggle>
+                      <Dropdown.Menu>
+                        <Dropdown.Item
+                          onClick={() => {
+                            setUrlMemeId(undefined);
+                            setTotalResults(0);
+                            setSelectedMeme(undefined);
+                          }}>
+                          All
+                        </Dropdown.Item>
+                        {memes.map((m) => (
+                          <Dropdown.Item
+                            key={`meme-${m.id}`}
+                            onClick={() => {
+                              setTotalResults(0);
+                              setSelectedMeme(m);
+                            }}>
+                            #{m.id} - {m.name}
+                          </Dropdown.Item>
+                        ))}
+                      </Dropdown.Menu>
+                    </Dropdown>
+                  </span>
+                </Col>
+              </Row>
+            )}
+
             {rememesLoaded ? (
               printRememes()
             ) : (
