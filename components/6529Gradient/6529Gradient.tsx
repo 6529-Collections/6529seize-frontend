@@ -88,7 +88,7 @@ export default function GradientsComponent(props: Props) {
         lg={{ span: 3 }}>
         <a
           href={`/6529-gradient/${nft.id}`}
-          className="decoration-none decoration-hover-underline scale-hover">
+          className="decoration-none scale-hover">
           <Container fluid className="no-padding">
             <Row>
               <Col>
