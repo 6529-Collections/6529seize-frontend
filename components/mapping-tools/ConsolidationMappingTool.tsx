@@ -154,7 +154,7 @@ export default function ConsolidationMappingTool() {
               consolidationData.address,
               addressConsolidations.primary
             ) ||
-            sum == consolidationData.balance
+            sum === consolidationData.balance
           ) {
             out.push({
               ...consolidationData,

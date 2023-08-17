@@ -15,7 +15,7 @@ export default function DelegationHTML(props: Props) {
     if (props.path) {
       const url = `https://6529bucket.s3.eu-west-1.amazonaws.com/seize_html/delegations-center-getting-started/html/${props.path}.html`;
       fetch(url).then((response) => {
-        if (response.status == 200) {
+        if (response.status === 200) {
           response.text().then((htmlText) => {
             setHtml(htmlText);
             setError(false);

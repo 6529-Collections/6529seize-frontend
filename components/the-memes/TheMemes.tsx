@@ -504,53 +504,53 @@ export default function TheMemesComponent(props: Props) {
               <Row>
                 <Col className="text-center pt-1">
                   {sort &&
-                    (sort == Sort.AGE || sort == Sort.MEME) &&
+                    (sort === Sort.AGE || sort === Sort.MEME) &&
                     printMintDate(nft.mint_date)}
-                  {sort == Sort.EDITION_SIZE && `Edition Size: ${nft.supply}`}
-                  {sort == Sort.TDH &&
+                  {sort === Sort.EDITION_SIZE && `Edition Size: ${nft.supply}`}
+                  {sort === Sort.TDH &&
                     `TDH: ${numberWithCommas(Math.round(nft.tdh))}`}
-                  {sort == Sort.HODLERS &&
+                  {sort === Sort.HODLERS &&
                     `Collectors: ${
-                      nftMetas.find((nftm) => nftm.id == nft.id)?.hodlers
+                      nftMetas.find((nftm) => nftm.id === nft.id)?.hodlers
                     }`}
-                  {sort == Sort.UNIQUE_PERCENT &&
+                  {sort === Sort.UNIQUE_PERCENT &&
                     `Unique: ${
                       Math.round(
-                        nftMetas.find((nftm) => nftm.id == nft.id)
+                        nftMetas.find((nftm) => nftm.id === nft.id)
                           ?.percent_unique! *
                           100 *
                           10
                       ) / 10
                     }%`}
-                  {sort == Sort.UNIQUE_PERCENT_EX_MUSEUM &&
+                  {sort === Sort.UNIQUE_PERCENT_EX_MUSEUM &&
                     `Unique Ex-Museum: ${
                       Math.round(
-                        nftMetas.find((nftm) => nftm.id == nft.id)
+                        nftMetas.find((nftm) => nftm.id === nft.id)
                           ?.percent_unique_cleaned! *
                           100 *
                           10
                       ) / 10
                     }%`}
-                  {sort == Sort.FLOOR_PRICE &&
+                  {sort === Sort.FLOOR_PRICE &&
                     (nft.floor_price > 0
                       ? `Floor Price: ${numberWithCommas(
                           Math.round(nft.floor_price * 100) / 100
                         )} ETH`
                       : `Floor Price: N/A`)}
-                  {sort == Sort.MARKET_CAP &&
+                  {sort === Sort.MARKET_CAP &&
                     (nft.market_cap > 0
                       ? `Market Cap: ${numberWithCommas(
                           Math.round(nft.market_cap * 100) / 100
                         )} ETH`
                       : `Market Cap: N/A`)}
-                  {sort == Sort.VOLUME &&
+                  {sort === Sort.VOLUME &&
                     `Volume (${volumeType}): ${numberWithCommas(
                       Math.round(
-                        (volumeType == VolumeType.HOURS_24
+                        (volumeType === VolumeType.HOURS_24
                           ? nft.total_volume_last_24_hours
-                          : volumeType == VolumeType.DAYS_7
+                          : volumeType === VolumeType.DAYS_7
                           ? nft.total_volume_last_7_days
-                          : volumeType == VolumeType.DAYS_30
+                          : volumeType === VolumeType.DAYS_30
                           ? nft.total_volume_last_1_month
                           : nft.total_volume) * 100
                       ) / 100
@@ -721,7 +721,7 @@ export default function TheMemesComponent(props: Props) {
               </Row>
               {nftsLoaded && nftMetassLoaded ? (
                 nfts.length > 0 ? (
-                  sort == Sort.MEME ? (
+                  sort === Sort.MEME ? (
                     printMemes()
                   ) : (
                     printNfts()

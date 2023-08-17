@@ -273,7 +273,7 @@ export default function UserPage(props: Props) {
 
   useEffect(() => {
     if (walletOwnedLoaded && consolidationOwnedLoaded) {
-      if (view == VIEW.CONSOLIDATION || !isConsolidation) {
+      if (view === VIEW.CONSOLIDATION || !isConsolidation) {
         setOwned(consolidationOwned);
       } else {
         setOwned(walletOwned);

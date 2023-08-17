@@ -98,7 +98,7 @@ export default function RevokeDelegationWithSubComponent(props: Props) {
       newDelegationUseCase,
     ],
     functionName:
-      validate().length == 0
+      validate().length === 0
         ? "revokeDelegationAddressUsingSubdelegation"
         : undefined,
     onSettled(data, error) {
@@ -109,7 +109,7 @@ export default function RevokeDelegationWithSubComponent(props: Props) {
         if (error.message.includes("Chain mismatch")) {
           setGasError(
             `Switch to ${
-              DELEGATION_CONTRACT.chain_id == 1
+              DELEGATION_CONTRACT.chain_id === 1
                 ? "Ethereum Mainnet"
                 : "Sepolia Network"
             }`
@@ -138,10 +138,10 @@ export default function RevokeDelegationWithSubComponent(props: Props) {
 
   function validate() {
     const newErrors: string[] = [];
-    if (!props.originalDelegator || props.originalDelegator == "") {
+    if (!props.originalDelegator || props.originalDelegator === "") {
       newErrors.push("Missing or invalid Original Delegator");
     }
-    if (!newDelegationCollection || newDelegationCollection == "0") {
+    if (!newDelegationCollection || newDelegationCollection === "0") {
       newErrors.push("Missing or invalid Collection");
     }
     if (!newDelegationUseCase) {
@@ -381,7 +381,7 @@ export default function RevokeDelegationWithSubComponent(props: Props) {
                   value={newDelegationUseCase}
                   onChange={(e) => {
                     const i = parseInt(e.target.value);
-                    const display = ALL_USE_CASES.find((u) => u.use_case == i);
+                    const display = ALL_USE_CASES.find((u) => u.use_case === i);
                     setNewDelegationUseCase(i);
                     setNewDelegationUseCaseDisplay(
                       display ? display.display : ""
