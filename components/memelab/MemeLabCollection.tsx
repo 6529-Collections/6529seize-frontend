@@ -10,6 +10,7 @@ import {
   getDateDisplay,
   getValuesForVolumeType,
   numberWithCommas,
+  printMintDate,
   removeProtocol,
 } from "../../helpers/Helpers";
 import { useRouter } from "next/router";
@@ -378,20 +379,6 @@ export default function LabCollection(props: Props) {
     return 0;
   }
 
-  function printMintDate(nft: LabNFT) {
-    const mintDate = new Date(nft.mint_date);
-    return (
-      <>
-        {mintDate.toLocaleString("default", {
-          day: "numeric",
-          month: "short",
-          year: "numeric",
-        })}{" "}
-        ({getDateDisplay(mintDate)})
-      </>
-    );
-  }
-
   function printNft(nft: LabNFT) {
     return (
       <Col
@@ -428,7 +415,7 @@ export default function LabCollection(props: Props) {
           </Row>
           <Row>
             <Col className="text-center pt-1">
-              {sort && sort == Sort.AGE && printMintDate(nft)}
+              {sort && sort == Sort.AGE && printMintDate(nft.mint_date)}
               {sort == Sort.EDITION_SIZE && `Edition Size: ${nft.supply}`}
               {sort == Sort.HODLERS &&
                 `Collectors: ${
