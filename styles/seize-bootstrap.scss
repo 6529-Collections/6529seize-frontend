@@ -168,28 +168,6 @@ th {
   background-color: transparent;
 }
 
-// .nav-tabs {
-//   border: none !important;
-// }
-
-// .nav-tabs .nav-link {
-//   color: darken($color: $font-color, $amount: $darken-percentage) !important;
-// }
-
-// .nav-tabs .nav-link.active,
-// .nav-tabs .nav-item.show .nav-link {
-//   background-color: transparent !important;
-//   color: $font-color !important;
-//   border: none !important;
-//   border-color: $very-dark-grey !important;
-//   pointer-events: none !important;
-// }
-
-// .nav-tabs .nav-link:hover {
-//   border-color: $very-dark-grey !important;
-//   color: $font-color !important;
-// }
-
 .nav-link:hover,
 .nav-link:focus {
   color: $lightest-grey;
@@ -228,6 +206,10 @@ th {
 
 .carousel-control-next {
   right: -40px;
+}
+
+.accordion-button {
+  color: $font-color !important;
 }
 
 .accordion-button::after {
