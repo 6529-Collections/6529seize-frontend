@@ -350,3 +350,53 @@
     font-size: 12px !important;
   }
 }
+
+.buttonIcon {
+  width: 30px;
+  cursor: pointer;
+
+  &:hover {
+    opacity: 0.75;
+  }
+
+  @media only screen and (max-width: 1200px) {
+    width: 26px;
+  }
+
+  @media only screen and (max-width: 800px) {
+    width: 22px;
+  }
+}
+
+.rememesSortDropdown {
+  line-height: 48px;
+  text-align: center;
+  background-color: transparent;
+  border: none;
+  padding-right: 25px;
+  a {
+    line-height: 30px;
+  }
+  button {
+    font-size: larger !important;
+    font-weight: bolder !important;
+    cursor: copy;
+    padding: 0;
+    background-color: transparent !important;
+    border-color: transparent !important;
+    &::after {
+      margin-top: 0.8rem;
+    }
+  }
+  div {
+    max-height: 65vh;
+    overflow-y: auto;
+  }
+  @media only screen and (max-width: 800px) {
+    button {
+      &::after {
+        margin-top: 0.5rem;
+      }
+    }
+  }
+}

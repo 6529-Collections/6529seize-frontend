@@ -13,6 +13,7 @@ import {
   enterArtFullScreen,
   fullScreenSupported,
   numberWithCommas,
+  printMintDate,
 } from "../../helpers/Helpers";
 import Breadcrumb, { Crumb } from "../breadcrumb/Breadcrumb";
 import LatestActivityRow from "../latest-activity/LatestActivityRow";
@@ -132,20 +133,6 @@ export default function GradientPage(props: Props) {
       });
     }
   }, [nftId]);
-
-  function printMintDate(date: Date) {
-    const mintDate = new Date(date);
-    return (
-      <>
-        {mintDate.toLocaleString("default", {
-          day: "numeric",
-          month: "short",
-          year: "numeric",
-        })}{" "}
-        ({getDateDisplay(mintDate)})
-      </>
-    );
-  }
 
   function printLive() {
     return (

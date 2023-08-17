@@ -25,6 +25,7 @@ import {
   fullScreenSupported,
   numberWithCommas,
   addProtocol,
+  printMintDate,
 } from "../../helpers/Helpers";
 import Breadcrumb, { Crumb } from "../breadcrumb/Breadcrumb";
 import Download from "../download/Download";
@@ -279,20 +280,6 @@ export default function LabPage(props: Props) {
       fetchHistory(initialUrlHistory);
     }
   }, [router.isReady, nftId]);
-
-  function printMintDate(date: Date) {
-    const mintDate = new Date(date);
-    return (
-      <>
-        {mintDate.toLocaleString("default", {
-          day: "numeric",
-          month: "short",
-          year: "numeric",
-        })}{" "}
-        ({getDateDisplay(mintDate)})
-      </>
-    );
-  }
 
   function printContent() {
     if (activeTab == MEME_FOCUS.ACTIVITY) {
