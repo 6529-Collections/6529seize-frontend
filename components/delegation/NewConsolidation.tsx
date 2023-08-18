@@ -104,7 +104,7 @@ export default function NewConsolidationComponent(props: Props) {
           0,
         ],
         functionName:
-          validate().length == 0
+          validate().length === 0
             ? "registerDelegationAddressUsingSubDelegation"
             : undefined,
         onSettled(data, error) {
@@ -115,7 +115,7 @@ export default function NewConsolidationComponent(props: Props) {
             if (error.message.includes("Chain mismatch")) {
               setGasError(
                 `Switch to ${
-                  DELEGATION_CONTRACT.chain_id == 1
+                  DELEGATION_CONTRACT.chain_id === 1
                     ? "Ethereum Mainnet"
                     : "Sepolia Network"
                 }`
@@ -141,7 +141,7 @@ export default function NewConsolidationComponent(props: Props) {
           0,
         ],
         functionName:
-          validate().length == 0 ? "registerDelegationAddress" : undefined,
+          validate().length === 0 ? "registerDelegationAddress" : undefined,
         onSettled(data, error) {
           if (data) {
             setGasError(undefined);
@@ -150,7 +150,7 @@ export default function NewConsolidationComponent(props: Props) {
             if (error.message.includes("Chain mismatch")) {
               setGasError(
                 `Switch to ${
-                  DELEGATION_CONTRACT.chain_id == 1
+                  DELEGATION_CONTRACT.chain_id === 1
                     ? "Ethereum Mainnet"
                     : "Sepolia Network"
                 }`
@@ -179,7 +179,7 @@ export default function NewConsolidationComponent(props: Props) {
 
   function validate() {
     const newErrors: string[] = [];
-    if (!newDelegationCollection || newDelegationCollection == "0") {
+    if (!newDelegationCollection || newDelegationCollection === "0") {
       newErrors.push("Missing or invalid Collection");
     }
     if (!newDelegationToAddress || !isValidEthAddress(newDelegationToAddress)) {
@@ -189,7 +189,7 @@ export default function NewConsolidationComponent(props: Props) {
         newDelegationToAddress.toUpperCase() ==
           props.subdelegation.originalDelegator.toUpperCase()) ||
       (!props.subdelegation &&
-        newDelegationToAddress.toUpperCase() == props.address.toUpperCase())
+        newDelegationToAddress.toUpperCase() === props.address.toUpperCase())
     ) {
       newErrors.push("Invalid Address - cannot delegate to your own wallet");
     }

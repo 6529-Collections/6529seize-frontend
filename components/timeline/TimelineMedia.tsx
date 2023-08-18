@@ -14,7 +14,7 @@ export enum MediaType {
 }
 
 export default function TimelineMediaComponent(props: Props) {
-  if (props.type == MediaType.VIDEO) {
+  if (props.type === MediaType.VIDEO) {
     return (
       <video
         autoPlay
@@ -26,7 +26,7 @@ export default function TimelineMediaComponent(props: Props) {
         src={props.url}></video>
     );
   }
-  if (props.type == MediaType.HTML) {
+  if (props.type === MediaType.HTML) {
     return (
       <iframe className={styles.timelineMediaImage} src={props.url}></iframe>
     );

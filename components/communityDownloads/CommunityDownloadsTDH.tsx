@@ -23,7 +23,7 @@ export default function CommunityDownloadsTDH(props: Props) {
 
   function fetchResults(mypage: number) {
     let url = `${process.env.API_ENDPOINT}/api/${
-      props.view == VIEW.WALLET ? "uploads" : "consolidated_uploads"
+      props.view === VIEW.WALLET ? "uploads" : "consolidated_uploads"
     }?page_size=${PAGE_SIZE}&page=${mypage}`;
     fetchUrl(url).then((response: DBResponse) => {
       setTotalResults(response.count);
@@ -53,7 +53,7 @@ export default function CommunityDownloadsTDH(props: Props) {
             <Row>
               <Col>
                 <h1>
-                  {props.view == VIEW.CONSOLIDATION ? `CONSOLIDATED ` : ``}
+                  {props.view === VIEW.CONSOLIDATION ? `CONSOLIDATED ` : ``}
                   COMMUNITY METRICS DOWNLOADS
                 </h1>
               </Col>
@@ -87,7 +87,7 @@ export default function CommunityDownloadsTDH(props: Props) {
                 </Col>
               </Row>
             )}
-            {downloads != undefined && downloads.length == 0 && (
+            {downloads != undefined && downloads.length === 0 && (
               <>
                 <Image
                   width="0"

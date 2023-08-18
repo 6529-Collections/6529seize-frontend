@@ -108,7 +108,7 @@ export default function UpdateDelegationComponent(props: Props) {
       !isDelegation && showTokensInput ? delegationToken : 0,
     ],
     functionName:
-      validate().length == 0 ? "updateDelegationAddress" : undefined,
+      validate().length === 0 ? "updateDelegationAddress" : undefined,
     onSettled(data, error) {
       if (data) {
         setGasError(undefined);
@@ -117,7 +117,7 @@ export default function UpdateDelegationComponent(props: Props) {
         if (error.message.includes("Chain mismatch")) {
           setGasError(
             `Switch to ${
-              DELEGATION_CONTRACT.chain_id == 1
+              DELEGATION_CONTRACT.chain_id === 1
                 ? "Ethereum Mainnet"
                 : "Sepolia Network"
             }`
@@ -230,9 +230,9 @@ export default function UpdateDelegationComponent(props: Props) {
         <Col xs={10} className="pt-3 pb-4">
           <h4>
             Update{" "}
-            {props.delegation.use_case == CONSOLIDATION_USE_CASE.use_case
+            {props.delegation.use_case === CONSOLIDATION_USE_CASE.use_case
               ? "Consolidation"
-              : props.delegation.use_case == SUB_DELEGATION_USE_CASE.use_case
+              : props.delegation.use_case === SUB_DELEGATION_USE_CASE.use_case
               ? "Delegation Manager"
               : "Delegation"}
           </h4>
@@ -404,8 +404,8 @@ export default function UpdateDelegationComponent(props: Props) {
                     type="radio"
                     label="Select Date"
                     disabled={
-                      props.delegation.use_case == 16 ||
-                      props.delegation.use_case == 99
+                      props.delegation.use_case === 16 ||
+                      props.delegation.use_case === 99
                     }
                     name="expiryRadio"
                     onChange={() => setShowExpiryCalendar(true)}
@@ -463,8 +463,8 @@ export default function UpdateDelegationComponent(props: Props) {
                     className={styles.newDelegationFormToggle}
                     type="radio"
                     disabled={
-                      props.delegation.use_case == 16 ||
-                      props.delegation.use_case == 99
+                      props.delegation.use_case === 16 ||
+                      props.delegation.use_case === 99
                     }
                     label="Select Token ID"
                     name="tokenIdRadio"

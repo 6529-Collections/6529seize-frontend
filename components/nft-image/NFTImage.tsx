@@ -29,7 +29,7 @@ export default function NFTImage(props: Props) {
   if (
     props.animation &&
     props.nft.animation &&
-    props.nft.metadata.animation_details?.format == "HTML"
+    props.nft.metadata.animation_details?.format === "HTML"
   ) {
     return (
       <Col
@@ -39,12 +39,12 @@ export default function NFTImage(props: Props) {
         {props.balance > 0 && showBalance && (
           <span
             className={`${styles.balance}  ${
-              props.height == 650 ? styles.balanceBigger : ""
+              props.height === 650 ? styles.balanceBigger : ""
             }`}>
             <span>SEIZED{!props.showOwned ? ` x${props.balance}` : ""}</span>
           </span>
         )}
-        {props.showUnseized && props.balance == 0 && (
+        {props.showUnseized && props.balance === 0 && (
           <span className={`${styles.balance}`}>UNSEIZED</span>
         )}
         <iframe
@@ -63,24 +63,24 @@ export default function NFTImage(props: Props) {
   if (
     props.animation &&
     props.nft.animation &&
-    props.nft.metadata.animation_details?.format == "MP4"
+    props.nft.metadata.animation_details?.format === "MP4"
   ) {
     return (
       <Col
         className={`${styles.nftAnimation} ${
-          props.height == 650 ? styles.height650 : styles.height300
+          props.height === 650 ? styles.height650 : styles.height300
         } ${
           props.transparentBG ? styles.transparentBG : ""
         } d-flex justify-content-center align-items-center`}>
         {props.balance > 0 && showBalance && (
           <span
             className={`${styles.balance}  ${
-              props.height == 650 ? styles.balanceBigger : ""
+              props.height === 650 ? styles.balanceBigger : ""
             }`}>
             <span>SEIZED{!props.showOwned ? ` x${props.balance}` : ""}</span>
           </span>
         )}
-        {props.showUnseized && props.balance == 0 && (
+        {props.showUnseized && props.balance === 0 && (
           <span className={`${styles.balance}`}>UNSEIZED</span>
         )}
         <video
@@ -98,7 +98,7 @@ export default function NFTImage(props: Props) {
           poster={props.nft.scaled ? props.nft.scaled : props.nft.image}
           // onLoadStart={() => setShowBalance(true)}
           onError={({ currentTarget }) => {
-            if (currentTarget.src == props.nft.compressed_animation) {
+            if (currentTarget.src === props.nft.compressed_animation) {
               currentTarget.src = props.nft.animation;
             } else {
               currentTarget.src = props.nft.metadata.animation;
@@ -113,7 +113,7 @@ export default function NFTImage(props: Props) {
       xs={12}
       className={`mb-2 text-center d-flex align-items-center justify-content-center ${
         styles.imageWrapper
-      } ${props.height == 300 ? styles.height300 : ""} ${
+      } ${props.height === 300 ? styles.height300 : ""} ${
         props.transparentBG && styles.transparentBG
       }`}>
       <Image
@@ -137,31 +137,31 @@ export default function NFTImage(props: Props) {
         }
         // onLoad={() => setShowBalance(true)}
         onError={({ currentTarget }) => {
-          if (currentTarget.src == props.nft.thumbnail) {
+          if (currentTarget.src === props.nft.thumbnail) {
             currentTarget.src = props.nft.scaled
               ? props.nft.scaled
               : props.nft.image;
-          } else if (currentTarget.src == props.nft.scaled) {
+          } else if (currentTarget.src === props.nft.scaled) {
             currentTarget.src = props.nft.image;
           } else {
             currentTarget.src = props.nft.metadata.image;
           }
         }}
         alt={props.nft.name}
-        className={props.height == 650 ? styles.height650 : ""}
+        className={props.height === 650 ? styles.height650 : ""}
       />
       {props.balance > 0 && showBalance && (
         <span
           className={`${styles.balance}  ${
-            props.height == 650 ? styles.balanceBigger : ""
+            props.height === 650 ? styles.balanceBigger : ""
           }`}>
           <span>SEIZED{!props.showOwned ? ` x${props.balance}` : ""}</span>
         </span>
       )}
-      {props.showUnseized && props.balance == 0 && (
+      {props.showUnseized && props.balance === 0 && (
         <span className={`${styles.balance}`}>UNSEIZED</span>
       )}
-      {props.showUnseized && props.balance == 0 && (
+      {props.showUnseized && props.balance === 0 && (
         <span className={`${styles.balance}`}>UNSEIZED</span>
       )}
     </Col>
