@@ -353,7 +353,7 @@ export default function RememeAddComponent(props: Props) {
                 onClick={() => validate()}
                 className="seize-btn"
                 disabled={
-                  !contract || !tokenIdDisplay || references.length == 0
+                  !contract || !tokenIdDisplay || references.length === 0
                 }>
                 Validate
                 {verifying && (

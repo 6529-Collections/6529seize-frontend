@@ -38,7 +38,6 @@ export default function Document() {
             target="_blank"
             rel="noreferrer">
             <Image
-              loading={"lazy"}
               width="0"
               height="0"
               style={{ height: "18px", width: "auto" }}
@@ -53,7 +52,6 @@ export default function Document() {
             target="_blank"
             rel="noreferrer">
             <Image
-              loading={"lazy"}
               width="0"
               height="0"
               style={{ height: "18px", width: "auto" }}
@@ -65,7 +63,6 @@ export default function Document() {
           &nbsp;&nbsp;|&nbsp;&nbsp;
           <a href="https://discord.gg/join-om" target="_blank" rel="noreferrer">
             <Image
-              loading={"lazy"}
               width="0"
               height="0"
               style={{ height: "18px", width: "auto" }}
@@ -77,7 +74,6 @@ export default function Document() {
           &nbsp;&nbsp;|&nbsp;&nbsp;
           <a href="https://6529.io" target="_blank" rel="noreferrer">
             <Image
-              loading={"lazy"}
               width="0"
               height="0"
               style={{ height: "18px", width: "auto" }}
