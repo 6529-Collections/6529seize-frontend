@@ -120,7 +120,7 @@ export default function RememeAddPage() {
     async function fetchTdh() {
       const url = `${process.env.API_ENDPOINT}/api/consolidated_owner_metrics/?wallet=${accountResolution.address}`;
       return fetchUrl(url).then((response: DBResponse) => {
-        if (response && response.data.length == 1) {
+        if (response && response.data.length === 1) {
           setUserTDH(response.data[0]);
         }
       });
@@ -141,7 +141,7 @@ export default function RememeAddPage() {
         signature: signMessage.data,
         rememe: buildRememeObject(),
       }).then((response) => {
-        const success = response.status == 201;
+        const success = response.status === 201;
         const processedRememe: ProcessedRememe = response.response;
         const contract = processedRememe.contract?.address;
         const tokens = processedRememe.nfts?.map((n) => {

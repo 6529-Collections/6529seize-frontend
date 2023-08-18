@@ -86,7 +86,7 @@ export default function WalletCheckerComponent(props: Props) {
       );
       setSubDelegations(
         [...response.data].filter(
-          (d) => d.use_case == SUB_DELEGATION_USE_CASE.use_case
+          (d) => d.use_case === SUB_DELEGATION_USE_CASE.use_case
         )
       );
       setDelegationsLoaded(true);
@@ -198,7 +198,7 @@ export default function WalletCheckerComponent(props: Props) {
   }
 
   function getUseCaseDisplay(useCase: number) {
-    const resolved = ALL_USE_CASES.find((u) => u.use_case == useCase);
+    const resolved = ALL_USE_CASES.find((u) => u.use_case === useCase);
     return resolved ? `#${useCase} - ${resolved.display}` : `#${useCase}`;
   }
 
@@ -218,7 +218,7 @@ export default function WalletCheckerComponent(props: Props) {
   }
 
   function getDateDisplay(myDate: number) {
-    if (myDate == NEVER_DATE) {
+    if (myDate === NEVER_DATE) {
       return `Never`;
     }
     return formatExpiry(myDate);

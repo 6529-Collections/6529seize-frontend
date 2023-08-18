@@ -13,6 +13,7 @@ import {
   enterArtFullScreen,
   fullScreenSupported,
   numberWithCommas,
+  printMintDate,
 } from "../../helpers/Helpers";
 import Breadcrumb, { Crumb } from "../breadcrumb/Breadcrumb";
 import LatestActivityRow from "../latest-activity/LatestActivityRow";
@@ -132,20 +133,6 @@ export default function GradientPage(props: Props) {
       });
     }
   }, [nftId]);
-
-  function printMintDate(date: Date) {
-    const mintDate = new Date(date);
-    return (
-      <>
-        {mintDate.toLocaleString("default", {
-          day: "numeric",
-          month: "short",
-          year: "numeric",
-        })}{" "}
-        ({getDateDisplay(mintDate)})
-      </>
-    );
-  }
 
   function printLive() {
     return (
@@ -407,7 +394,7 @@ export default function GradientPage(props: Props) {
                             <a
                               href={`/6529-gradient/${parseInt(nftId) - 1}`}
                               className={`${styles.nextPreviousNft} ${
-                                parseInt(nftId) == 0
+                                parseInt(nftId) === 0
                                   ? styles.nftPreviousdisabled
                                   : ""
                               }`}>
@@ -419,7 +406,7 @@ export default function GradientPage(props: Props) {
                             <a
                               href={`/6529-gradient/${parseInt(nftId) + 1}`}
                               className={`${styles.nextPreviousNft} ${
-                                parseInt(nftId) == 100
+                                parseInt(nftId) === 100
                                   ? styles.nftPreviousdisabled
                                   : ""
                               }`}>

@@ -24,15 +24,15 @@ export function formatAddress(address: string) {
 }
 
 export function isMemesContract(contract: string) {
-  return contract.toUpperCase() == MEMES_CONTRACT.toUpperCase();
+  return contract.toUpperCase() === MEMES_CONTRACT.toUpperCase();
 }
 
 export function isGradientsContract(contract: string) {
-  return contract.toUpperCase() == GRADIENT_CONTRACT.toUpperCase();
+  return contract.toUpperCase() === GRADIENT_CONTRACT.toUpperCase();
 }
 
 export function isMemeLabContract(contract: string) {
-  return contract.toUpperCase() == MEMELAB_CONTRACT.toUpperCase();
+  return contract.toUpperCase() === MEMELAB_CONTRACT.toUpperCase();
 }
 
 export const fetchMeta = async (uri: string) => {
@@ -69,7 +69,7 @@ export function numberWithCommasFromString(x: string) {
 }
 
 export function numberWithCommas(x: number) {
-  if (x == null || x == 0 || isNaN(x)) return "-";
+  if (x === null || x === 0 || isNaN(x)) return "-";
   const parts = x.toString().split(".");
   parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
   return parts.join(".");
@@ -199,7 +199,7 @@ export const isValidEthAddress = (address: string) =>
   /^0x[0-9a-fA-F]{40}$/.test(address);
 
 export function getTransactionLink(chain_id: number, hash: string) {
-  return chain_id == sepolia.id
+  return chain_id === sepolia.id
     ? `https://sepolia.etherscan.io/tx/${hash}`
     : `https://etherscan.io/tx/${hash}`;
 }
@@ -259,4 +259,16 @@ export function parseEmojis(s: string) {
   return s.replace(regex, (_, hexValue) => {
     return `&#x${hexValue};`;
   });
+}
+
+export function printMintDate(date: Date) {
+  const mintDate = new Date(date);
+  return `
+      ${mintDate.toLocaleString("default", {
+        day: "numeric",
+        month: "short",
+        year: "numeric",
+      })} 
+      (${getDateDisplay(mintDate)})
+    `;
 }

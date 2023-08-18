@@ -55,7 +55,7 @@ export default function RememeImage(props: Props) {
     return (
       props.nft.metadata.animation_details &&
       props.nft.metadata.animation_details.format &&
-      props.nft.metadata.animation_details.format.toLowerCase() == "mp4"
+      props.nft.metadata.animation_details.format.toLowerCase() === "mp4"
     );
   }
 
@@ -66,7 +66,7 @@ export default function RememeImage(props: Props) {
     return (
       <Col
         className={`${styles.nftAnimation} ${
-          props.height == 650 ? styles.height650 : styles.height300
+          props.height === 650 ? styles.height650 : styles.height300
         } d-flex justify-content-center align-items-center`}>
         <video
           id={`${props.nft.contract}-${props.nft.id}`}
@@ -91,7 +91,7 @@ export default function RememeImage(props: Props) {
       xs={12}
       className={`mb-2 text-center d-flex align-items-center justify-content-center ${
         styles.imageWrapper
-      } ${props.height == 300 ? styles.height300 : ""}`}>
+      } ${props.height === 300 ? styles.height300 : ""}`}>
       <Image
         loading="eager"
         priority
@@ -112,7 +112,7 @@ export default function RememeImage(props: Props) {
           }
         }}
         alt={props.nft.metadata.name}
-        className={props.height == 650 ? styles.height650 : ""}
+        className={props.height === 650 ? styles.height650 : ""}
       />
     </Col>
   );
