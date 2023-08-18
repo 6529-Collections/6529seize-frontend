@@ -19,7 +19,7 @@ export default function ConsolidationSwitch(props: Props) {
       {/* <Button
         onClick={() => props.onSetView(VIEW.WALLET)}
         className={`${styles.consolidationSwitchLeft} ${
-          props.view == VIEW.WALLET
+          props.view === VIEW.WALLET
             ? styles.consolidationSwitchActive
             : styles.consolidationSwitch
         }`}>
@@ -28,7 +28,7 @@ export default function ConsolidationSwitch(props: Props) {
       <Button
         onClick={() => props.onSetView(VIEW.CONSOLIDATION)}
         className={`${styles.consolidationSwitchRight} ${
-          props.view == VIEW.CONSOLIDATION
+          props.view === VIEW.CONSOLIDATION
             ? styles.consolidationSwitchActive
             : styles.consolidationSwitch
         }`}>
@@ -41,7 +41,7 @@ export default function ConsolidationSwitch(props: Props) {
         type="switch"
         className={`mb-0 ${styles.consolidationSwitch}`}
         label={``}
-        checked={props.view == VIEW.CONSOLIDATION}
+        checked={props.view === VIEW.CONSOLIDATION}
         onChange={(e: any) => {
           if (e.target.checked) {
             props.onSetView(VIEW.CONSOLIDATION);

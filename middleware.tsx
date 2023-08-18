@@ -19,7 +19,7 @@ export async function middleware(req: NextRequest) {
       headers: apiAuth ? { "x-6529-auth": apiAuth.value } : {},
     });
 
-    if (r.status == 401) {
+    if (r.status === 401) {
       req.nextUrl.pathname = "/access";
       req.nextUrl.search = "";
       return NextResponse.redirect(req.nextUrl);
