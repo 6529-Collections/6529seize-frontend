@@ -68,7 +68,7 @@ export default function MemeLabLeaderboard(props: Props) {
   }, [router.isReady, leaderboard]);
 
   useEffect(() => {
-    if (pageProps.page == 1) {
+    if (pageProps.page === 1) {
       fetchResults();
     } else {
       setPageProps({ ...pageProps, page: 1 });
@@ -210,7 +210,7 @@ export default function MemeLabLeaderboard(props: Props) {
           />
         </Row>
       )}
-      {leaderboardLoaded && leaderboard?.length == 0 && (
+      {leaderboardLoaded && leaderboard?.length === 0 && (
         <Row>
           <Col>No TDH accrued</Col>
         </Row>

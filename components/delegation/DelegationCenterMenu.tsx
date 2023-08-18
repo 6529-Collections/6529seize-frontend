@@ -175,7 +175,7 @@ export default function DelegationCenterMenu(props: Props) {
                   props.setActiveSection(DelegationCenterSection.CENTER)
                 }
                 className={`${styles.menuLeftItem} ${
-                  props.section == DelegationCenterSection.CENTER
+                  props.section === DelegationCenterSection.CENTER
                     ? styles.menuLeftItemActive
                     : ""
                 }`}>
@@ -190,7 +190,7 @@ export default function DelegationCenterMenu(props: Props) {
                   )
                 }
                 className={`${styles.menuLeftItem} ${
-                  props.section == DelegationCenterSection.WALLET_ARCHITECTURE
+                  props.section === DelegationCenterSection.WALLET_ARCHITECTURE
                     ? styles.menuLeftItemActive
                     : ""
                 }`}>
@@ -203,7 +203,7 @@ export default function DelegationCenterMenu(props: Props) {
                   props.setActiveSection(DelegationCenterSection.FAQ)
                 }
                 className={`${styles.menuLeftItem} ${
-                  props.section == DelegationCenterSection.FAQ
+                  props.section === DelegationCenterSection.FAQ
                     ? styles.menuLeftItemActive
                     : ""
                 }`}>
@@ -216,7 +216,7 @@ export default function DelegationCenterMenu(props: Props) {
                   props.setActiveSection(DelegationCenterSection.CHECKER)
                 }
                 className={`${styles.menuLeftItem} ${
-                  props.section == DelegationCenterSection.CHECKER
+                  props.section === DelegationCenterSection.CHECKER
                     ? styles.menuLeftItemActive
                     : ""
                 }`}>
@@ -244,7 +244,7 @@ export default function DelegationCenterMenu(props: Props) {
               <Col>
                 <a
                   href={
-                    DELEGATION_CONTRACT.chain_id == sepolia.id
+                    DELEGATION_CONTRACT.chain_id === sepolia.id
                       ? `https://sepolia.etherscan.io/address/${DELEGATION_CONTRACT.contract}`
                       : `https://etherscan.io/address/${DELEGATION_CONTRACT.contract}`
                   }
@@ -294,7 +294,7 @@ export default function DelegationCenterMenu(props: Props) {
                         props.setActiveSection(DelegationCenterSection.CENTER)
                       }
                       className={`${styles.menuLeftItem} ${
-                        props.section == DelegationCenterSection.CENTER
+                        props.section === DelegationCenterSection.CENTER
                           ? styles.menuLeftItemActive
                           : ""
                       }`}>
@@ -323,7 +323,7 @@ export default function DelegationCenterMenu(props: Props) {
                         props.setActiveSection(DelegationCenterSection.FAQ)
                       }
                       className={`${styles.menuLeftItem} ${
-                        props.section == DelegationCenterSection.FAQ
+                        props.section === DelegationCenterSection.FAQ
                           ? styles.menuLeftItemActive
                           : ""
                       }`}>
@@ -355,7 +355,7 @@ export default function DelegationCenterMenu(props: Props) {
                     <Col>
                       <a
                         href={
-                          DELEGATION_CONTRACT.chain_id == sepolia.id
+                          DELEGATION_CONTRACT.chain_id === sepolia.id
                             ? `https://sepolia.etherscan.io/address/${DELEGATION_CONTRACT.contract}`
                             : `https://etherscan.io/address/${DELEGATION_CONTRACT.contract}`
                         }
