@@ -9,7 +9,7 @@ import {
 import DistributionPlanAddOperationBtn from "../../common/DistributionPlanAddOperationBtn";
 
 export default function CreatePhasesForm() {
-  const { setToasts, distributionPlan, addOperations } = useContext(
+  const { setToasts, distributionPlan, fetchOperations } = useContext(
     DistributionPlanToolContext
   );
 
@@ -56,7 +56,7 @@ export default function CreatePhasesForm() {
         });
         return null;
       }
-      addOperations([data]);
+      await fetchOperations(distributionPlan.id);
       setFormValues({
         name: "",
       });

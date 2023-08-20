@@ -1,4 +1,4 @@
-import { useContext } from "react";
+import { useContext, useState } from "react";
 import {
   AllowlistOperation,
   AllowlistOperationCode,
@@ -56,20 +56,28 @@ export default function StepHeader({
   title?: string;
   description?: string;
 }) {
-  const { distributionPlan, operations } = useContext(
+  const { distributionPlan, operations, fetchOperations } = useContext(
     DistributionPlanToolContext
   );
-  const downloadOperations = () => {
-    if (!distributionPlan) {
-      return;
-    }
+
+  const [loading, setLoading] = useState(false);
+
+  const getJson = ({
+    id,
+    name,
+    description,
+  }: {
+    id: string;
+    name: string;
+    description: string;
+  }) => {
     const data = JSON.stringify([
       {
         code: AllowlistOperationCode.CREATE_ALLOWLIST,
         params: {
-          id: distributionPlan.id,
-          name: distributionPlan.name,
-          description: distributionPlan.description,
+          id,
+          name,
+          description,
         },
       },
       operations.map((operation) => ({
@@ -83,6 +91,19 @@ export default function StepHeader({
     link.href = url;
     link.download = "operations.json";
     link.click();
+  };
+  const downloadOperations = async () => {
+    if (loading) {
+      return;
+    }
+    if (!distributionPlan) {
+      return;
+    }
+    setLoading(true);
+    await fetchOperations(distributionPlan.id);
+    const { id, name, description } = distributionPlan;
+    getJson({ id, name, description });
+    setLoading(false);
   };
   return (
     <div

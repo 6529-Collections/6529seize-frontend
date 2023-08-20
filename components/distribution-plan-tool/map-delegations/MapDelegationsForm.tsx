@@ -8,7 +8,7 @@ import {
 } from "../../allowlist-tool/allowlist-tool.types";
 
 export default function MapDelegationsForm() {
-  const { setToasts, distributionPlan, addOperations } = useContext(
+  const { setToasts, distributionPlan, fetchOperations } = useContext(
     DistributionPlanToolContext
   );
 
@@ -53,7 +53,7 @@ export default function MapDelegationsForm() {
         });
         return { success: false };
       }
-      addOperations([data]);
+      fetchOperations(distributionPlan.id);
       setFormValues({
         delegationContract: "",
       });
@@ -79,7 +79,7 @@ export default function MapDelegationsForm() {
       <div className="tw-flex tw-gap-x-4 tw-items-end">
         <div className="tw-w-80">
           <label className="tw-block tw-text-sm tw-font-normal tw-leading-5 tw-text-neutral-100">
-            Distribution plan contract address
+            Contract to return registered Delegations
           </label>
           <div className="tw-mt-2">
             <input
@@ -89,7 +89,7 @@ export default function MapDelegationsForm() {
               onChange={handleChange}
               required
               autoComplete="off"
-              placeholder="Distribution plan contract address"
+              placeholder="Contract to return registered Delegations"
               className="tw-form-input tw-block tw-w-full tw-rounded-lg tw-border-0 tw-py-3 tw-px-3 tw-bg-neutral-700/40 tw-text-white tw-font-light tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-neutral-700/40 placeholder:tw-text-neutral-500 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 hover:tw-ring-neutral-700 tw-text-base sm:tw-leading-6 tw-transition tw-duration-300 tw-ease-out"
             />
           </div>
@@ -97,7 +97,7 @@ export default function MapDelegationsForm() {
 
         <div>
           <DistributionPlanAddOperationBtn loading={isLoading}>
-            Add delegation
+            Add contract
           </DistributionPlanAddOperationBtn>
         </div>
       </div>

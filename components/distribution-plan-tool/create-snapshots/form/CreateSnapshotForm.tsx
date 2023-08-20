@@ -22,7 +22,7 @@ interface CreateSnapshotFormValues {
 }
 
 export default function CreateSnapshotForm() {
-  const { setToasts, distributionPlan, addOperations } = useContext(
+  const { setToasts, distributionPlan, fetchOperations } = useContext(
     DistributionPlanToolContext
   );
 
@@ -141,7 +141,7 @@ export default function CreateSnapshotForm() {
         });
         return { success: false };
       }
-      addOperations([structuredClone(data)]);
+      fetchOperations(distributionPlan.id);
       return { success: true };
     } catch (error) {
       setToasts({

@@ -16,7 +16,7 @@ import CreateCustomSnapshotFormUpload from "./CreateCustomSnapshotFormUpload";
 import CreateCustomSnapshotFormTable from "./CreateCustomSnapshotFormTable";
 
 export default function CreateCustomSnapshotForm() {
-  const { distributionPlan, setToasts, addOperations } = useContext(
+  const { distributionPlan, setToasts, fetchOperations } = useContext(
     DistributionPlanToolContext
   );
   const [formValues, setFormValues] = useState<{
@@ -140,7 +140,7 @@ export default function CreateCustomSnapshotForm() {
         });
         return null;
       }
-      addOperations([structuredClone(data)]);
+      fetchOperations(distributionPlan.id);
       setFormValues({
         name: "",
       });

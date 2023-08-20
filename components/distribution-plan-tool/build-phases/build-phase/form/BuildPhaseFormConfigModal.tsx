@@ -109,7 +109,7 @@ export default function BuildPhaseFormConfigModal({
     tokenPools,
     customTokenPools,
     setToasts,
-    addOperations,
+    fetchOperations,
     runOperations,
   } = useContext(DistributionPlanToolContext);
   const [targetPhases, setTargetPhases] = useState<BuildPhasesPhase[]>([]);
@@ -454,7 +454,7 @@ export default function BuildPhaseFormConfigModal({
         });
         return { success: false };
       }
-      addOperations(data);
+      await fetchOperations(distributionPlanId);
       return { success: true };
     } catch (error) {
       setToasts({

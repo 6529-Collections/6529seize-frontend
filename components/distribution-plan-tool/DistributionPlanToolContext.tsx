@@ -39,7 +39,7 @@ type DistributionPlanToolContextType = {
   runOperations: () => void;
   setState: (distributionPlan: AllowlistDescription | null) => void;
   operations: AllowlistOperation[];
-  addOperations: (operations: AllowlistOperation[]) => void;
+  fetchOperations: (distributionPlanId: string) => void;
   transferPools: AllowlistTransferPool[];
   setTransferPools: (transferPools: AllowlistTransferPool[]) => void;
   tokenPools: AllowlistTokenPool[];
@@ -93,7 +93,7 @@ export const DistributionPlanToolContext =
     fetching: false,
     runOperations: () => {},
     operations: [],
-    addOperations: () => {},
+    fetchOperations: () => {},
     distributionPlan: null,
     setState: () => {},
     transferPools: [],
@@ -339,7 +339,7 @@ export default function DistributionPlanToolContextWrapper({
               fetching,
               runOperations,
               operations,
-              addOperations,
+              fetchOperations,
               setState,
               distributionPlan,
               transferPools,
