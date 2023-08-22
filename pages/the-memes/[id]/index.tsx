@@ -2,7 +2,6 @@ import Head from "next/head";
 import styles from "../../../styles/Home.module.scss";
 
 import dynamic from "next/dynamic";
-import { useRouter } from "next/router";
 import { MEMES_CONTRACT } from "../../../constants";
 import { fetchUrl } from "../../../services/6529api";
 import HeaderPlaceholder from "../../../components/header/HeaderPlaceholder";

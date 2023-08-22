@@ -1,18 +1,25 @@
 import styles from "./TheMemes.module.scss";
-import { Col, Container, Row, Table } from "react-bootstrap";
-import { MEMES_CONTRACT } from "../../constants";
+import { Col, Container, Dropdown, Row, Table } from "react-bootstrap";
+import { MEMES_CONTRACT, OPENSEA_STORE_FRONT_CONTRACT } from "../../constants";
 import { NFT, MemesExtendedData, Rememe } from "../../entities/INFT";
 import {
+  areEqualAddresses,
   formatAddress,
   numberWithCommas,
   printMintDate,
 } from "../../helpers/Helpers";
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { DBResponse } from "../../entities/IDBResponse";
 import { fetchUrl } from "../../services/6529api";
 import NFTImage from "../nft-image/NFTImage";
 import RememeImage from "../nft-image/RememeImage";
+import Pagination from "../pagination/Pagination";
+import { RememeSort } from "../rememes/Rememes";
+import Tippy from "@tippyjs/react";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+
+const REMEMES_PAGE_SIZE = 20;
 
 export function MemePageLiveRightMenu(props: {
   show: boolean;
@@ -226,8 +233,17 @@ export function MemePageLiveSubMenu(props: {
   const [memeLabNftsLoaded, setMemeLabNftsLoaded] = useState(false);
   const [memeLabNfts, setMemeLabNfts] = useState<NFT[]>([]);
 
+  const [rememesTotalResults, setRememesTotalResults] = useState(0);
+  const [rememesPage, setRememesPage] = useState(1);
   const [rememes, setRememes] = useState<Rememe[]>([]);
+  const [showRememesSort, setShowRememesSort] = useState(false);
   const [rememesLoaded, setRememesLoaded] = useState(false);
+
+  const rememesTarget = useRef<HTMLImageElement>(null);
+
+  const rememeSorting = [RememeSort.RANDOM, RememeSort.CREATED_ASC];
+  const [selectedRememeSorting, setSelectedRememeSorting] =
+    useState<RememeSort>(RememeSort.RANDOM);
 
   useEffect(() => {
     if (props.nft) {
@@ -237,15 +253,29 @@ export function MemePageLiveSubMenu(props: {
         setMemeLabNfts(response.data);
         setMemeLabNftsLoaded(true);
       });
-
-      fetchUrl(
-        `${process.env.API_ENDPOINT}/api/rememes?meme_id=${props.nft.id}&page_size=4`
-      ).then((response: DBResponse) => {
-        setRememes(response.data);
-        setRememesLoaded(true);
-      });
     }
   }, [props.nft]);
+
+  useEffect(() => {
+    if (props.nft) {
+      fetchRememes(props.nft.id);
+    }
+  }, [props.nft, rememesPage, selectedRememeSorting]);
+
+  function fetchRememes(meme_id: number) {
+    let sort = "";
+    if (selectedRememeSorting === RememeSort.CREATED_ASC) {
+      sort = "&sort=created_at&sort_direction=desc";
+    }
+    fetchUrl(
+      `${process.env.API_ENDPOINT}/api/rememes?meme_id=${meme_id}&page_size=${REMEMES_PAGE_SIZE}&page=${rememesPage}${sort}`
+    ).then((response: DBResponse) => {
+      setRememesTotalResults(response.count);
+      setRememes(response.data);
+      setShowRememesSort(response.count > REMEMES_PAGE_SIZE);
+      setRememesLoaded(true);
+    });
+  }
 
   if (props.show) {
     return (
@@ -253,7 +283,6 @@ export function MemePageLiveSubMenu(props: {
         <Row className="pt-3">
           <Col>
             <Image
-              loading={"lazy"}
               width="0"
               height="0"
               style={{ width: "250px", height: "auto" }}
@@ -262,19 +291,17 @@ export function MemePageLiveSubMenu(props: {
             />
           </Col>
         </Row>
-        <Row className="pt-4 pb-4">
+        <Row className="pt-4 pb-2">
           <Col>
             The Meme Lab is the lab for Meme Artists to release work that is
             related to The Meme Cards.
-            {memeLabNftsLoaded && memeLabNfts.length === 0 && (
-              <>
-                <br />
-                Meme Lab NFTs that reference this NFT will appear here once the
-                Meme Lab is launched.
-              </>
-            )}
           </Col>
         </Row>
+        {memeLabNftsLoaded && memeLabNfts.length === 0 && (
+          <Row className="pt-2 pb-4">
+            <Col>Meme Lab NFTs that reference this NFT will appear here.</Col>
+          </Row>
+        )}
         {memeLabNfts.length > 0 && (
           <Row className="pt-2 pb-2">
             {memeLabNfts.map((nft) => {
@@ -321,71 +348,169 @@ export function MemePageLiveSubMenu(props: {
             })}
           </Row>
         )}
-        <Row className="pt-5">
-          <Col>
-            <h1 className="d-flex align-items-center mb-0">
+        <Row className="pt-3" ref={rememesTarget}>
+          <Col className="d-flex flex-wrap align-items-center justify-content-between">
+            <h1 className="mb-0 pt-2">
               <Image
-                loading={"lazy"}
                 width="0"
                 height="0"
                 style={{ width: "250px", height: "auto", float: "left" }}
                 src="/re-memes.png"
                 alt="re-memes"
               />
-              {rememes.length > 0 && (
-                <a href={`/rememes?meme_id=${props.nft?.id}`}>
-                  <span className={styles.viewAllLink}>VIEW ALL</span>
-                </a>
-              )}
             </h1>
+            {showRememesSort && (
+              <span className="d-flex align-items-center gap-2 pt-2">
+                <Dropdown
+                  className={styles.rememesSortDropdown}
+                  drop={"down-centered"}>
+                  <Dropdown.Toggle>
+                    Sort: {selectedRememeSorting}
+                  </Dropdown.Toggle>
+                  <Dropdown.Menu>
+                    {rememeSorting.map((s) => (
+                      <Dropdown.Item
+                        key={`sorting-${s}`}
+                        onClick={() => {
+                          setRememesPage(1);
+                          setRememesTotalResults(0);
+                          setSelectedRememeSorting(s);
+                        }}>
+                        {s}
+                      </Dropdown.Item>
+                    ))}
+                  </Dropdown.Menu>
+                </Dropdown>
+                {selectedRememeSorting === RememeSort.RANDOM && (
+                  <Tippy
+                    content="Refresh results"
+                    placement="top"
+                    theme="light"
+                    delay={250}>
+                    <FontAwesomeIcon
+                      icon="refresh"
+                      className={styles.buttonIcon}
+                      onClick={() => {
+                        if (props.nft) {
+                          fetchRememes(props.nft.id);
+                        }
+                      }}
+                    />
+                  </Tippy>
+                )}
+              </span>
+            )}
           </Col>
         </Row>
-        {rememesLoaded && rememes.length == 0 && (
-          <Row className="pt-4 pb-4">
+        <Row className="pt-4 pb-2">
+          <Col>
+            ReMemes are community-created and community-submitted NFTs inspired
+            by the Meme Cards. They are not created or &quot;authorized&quot; by
+            6529 Collections.
+          </Col>
+        </Row>
+        {rememesLoaded && rememes.length === 0 && (
+          <Row className="pt-2 pb-4">
             <Col>ReMemes that reference this NFT will appear here.</Col>
           </Row>
         )}
         {rememes.length > 0 && (
-          <Row className="pt-2 pb-2">
-            {rememes.map((rememe) => {
-              return (
-                <Col
-                  key={`${rememe.contract}-${rememe.id}`}
-                  className="pt-3 pb-3"
-                  xs={{ span: 6 }}
-                  sm={{ span: 4 }}
-                  md={{ span: 3 }}
-                  lg={{ span: 3 }}>
-                  <a
-                    href={`/rememes/${rememe.contract}/${rememe.id}`}
-                    className="decoration-none scale-hover">
-                    <Container fluid className="no-padding">
-                      <Row>
-                        <Col>
-                          <RememeImage
-                            nft={rememe}
-                            animation={false}
-                            height={300}
-                          />
-                        </Col>
-                      </Row>
-                      <Row>
-                        <Col className="text-center pt-2">
-                          <b>
-                            {rememe.metadata.name
-                              ? rememe.metadata.name
-                              : `${formatAddress(rememe.contract)} #${
-                                  rememe.id
-                                }`}
-                          </b>
-                        </Col>
-                      </Row>
-                    </Container>
-                  </a>
-                </Col>
-              );
-            })}
-          </Row>
+          <>
+            <Row className="pt-2 pb-2">
+              {rememes.map((rememe) => {
+                return (
+                  <Col
+                    key={`${rememe.contract}-${rememe.id}`}
+                    className="pt-3 pb-3"
+                    xs={{ span: 6 }}
+                    sm={{ span: 4 }}
+                    md={{ span: 3 }}
+                    lg={{ span: 3 }}>
+                    <a
+                      href={`/rememes/${rememe.contract}/${rememe.id}`}
+                      className="decoration-none scale-hover">
+                      <Container fluid className="no-padding">
+                        <Row>
+                          <Col>
+                            <RememeImage
+                              nft={rememe}
+                              animation={false}
+                              height={300}
+                            />
+                          </Col>
+                        </Row>
+                        <Row>
+                          <Col>
+                            <Container>
+                              <Row>
+                                <Col className="font-smaller font-color-h d-flex justify-content-center align-items-center">
+                                  {areEqualAddresses(
+                                    rememe.contract,
+                                    OPENSEA_STORE_FRONT_CONTRACT
+                                  ) ? (
+                                    <>
+                                      {
+                                        rememe.contract_opensea_data
+                                          .collectionName
+                                      }
+                                    </>
+                                  ) : (
+                                    <>
+                                      {rememe.contract_opensea_data
+                                        .collectionName
+                                        ? rememe.contract_opensea_data
+                                            .collectionName
+                                        : formatAddress(rememe.contract)}{" "}
+                                      #{rememe.id}
+                                    </>
+                                  )}
+                                  {rememe.replicas.length > 1 && (
+                                    <>
+                                      &nbsp;(x
+                                      {numberWithCommas(rememe.replicas.length)}
+                                      )
+                                    </>
+                                  )}
+                                </Col>
+                              </Row>
+                              <Row>
+                                <Col className="d-flex justify-content-center align-items-center">
+                                  <span className="text-center">
+                                    {rememe.metadata.name
+                                      ? rememe.metadata.name
+                                      : `${formatAddress(rememe.contract)} #${
+                                          rememe.id
+                                        }`}
+                                  </span>
+                                </Col>
+                              </Row>
+                            </Container>
+                          </Col>
+                        </Row>
+                      </Container>
+                    </a>
+                  </Col>
+                );
+              })}
+            </Row>
+            {rememesTotalResults > REMEMES_PAGE_SIZE && (
+              <Row className="text-center pt-2 pb-3">
+                <Pagination
+                  page={rememesPage}
+                  pageSize={REMEMES_PAGE_SIZE}
+                  totalResults={rememesTotalResults}
+                  setPage={function (newPage: number) {
+                    setRememesPage(newPage);
+                    if (rememesTarget.current) {
+                      rememesTarget.current.scrollIntoView({
+                        behavior: "smooth",
+                      });
+                    }
+                  }}
+                />
+              </Row>
+            )}
+          </>
         )}
       </>
     );

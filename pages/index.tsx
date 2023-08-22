@@ -8,7 +8,11 @@ import { DBResponse } from "../entities/IDBResponse";
 import { NFT, MemesExtendedData, LabNFT, BaseNFT } from "../entities/INFT";
 
 import dynamic from "next/dynamic";
-import { getDateDisplay, numberWithCommas } from "../helpers/Helpers";
+import {
+  getDateDisplay,
+  numberWithCommas,
+  printMintDate,
+} from "../helpers/Helpers";
 import { fetchUrl } from "../services/6529api";
 import HeaderPlaceholder from "../components/header/HeaderPlaceholder";
 
@@ -82,20 +86,6 @@ export default function Home() {
       setNftBalance(0);
     }
   }, [connectedWallets, nft]);
-
-  function printMintDate(nft: BaseNFT) {
-    const mintDate = new Date(nft.mint_date);
-    return (
-      <>
-        {mintDate.toLocaleString("default", {
-          day: "numeric",
-          month: "short",
-          year: "numeric",
-        })}{" "}
-        ({getDateDisplay(mintDate)})
-      </>
-    );
-  }
 
   return (
     <>
@@ -218,7 +208,7 @@ export default function Home() {
                               </tr>
                               <tr>
                                 <td>Mint Date</td>
-                                <td>{printMintDate(nft)}</td>
+                                <td>{printMintDate(nft.mint_date)}</td>
                               </tr>
                               <tr>
                                 <td>File Type</td>

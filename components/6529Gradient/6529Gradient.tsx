@@ -1,10 +1,7 @@
 import styles from "./6529Gradient.module.scss";
-import Image from "next/image";
 import { useEffect, useState } from "react";
 import { Container, Row, Col } from "react-bootstrap";
-import { GRADIENT_CONTRACT } from "../../constants";
 import { NFT } from "../../entities/INFT";
-import { Owner } from "../../entities/IOwner";
 import { SortDirection } from "../../entities/ISort";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { areEqualAddresses, numberWithCommas } from "../../helpers/Helpers";
@@ -16,99 +13,41 @@ import DotLoader from "../dotLoader/DotLoader";
 
 enum Sort {
   ID = "id",
-  TDH = "tdh_rank",
+  TDH = "tdh",
 }
 
 interface Props {
   wallets: string[];
 }
 
+interface GradientNFT extends NFT {
+  owner: `0x${string}`;
+  owner_display: string;
+  tdh_rank: number;
+}
+
 export default function GradientsComponent(props: Props) {
   const router = useRouter();
 
-  const [nfts, setNfts] = useState<NFT[]>([]);
-  const [nftOwners, setNftOwners] = useState<Owner[]>([]);
+  const [nfts, setNfts] = useState<GradientNFT[]>([]);
   const [nftsLoaded, setNftsLoaded] = useState(false);
   const [nftsSorted, setNftsSorted] = useState(false);
-  const [sortDir, setSortDir] = useState<SortDirection>();
-  const [sort, setSort] = useState<Sort>();
+  const [sortDir, setSortDir] = useState<SortDirection>(SortDirection.ASC);
+  const [sort, setSort] = useState<Sort>(Sort.ID);
 
-  const [ownersLoaded, setOwnersLoaded] = useState(false);
-
-  useEffect(() => {
-    if (router.isReady && ownersLoaded && nftsLoaded) {
-      let initialSortDir = SortDirection.ASC;
-      let initialSort = Sort.ID;
-
-      const routerSortDir = router.query.sort_dir;
-      if (routerSortDir) {
-        const resolvedRouterSortDir = Object.values(SortDirection).find(
-          (sd) => sd === routerSortDir
-        );
-        if (resolvedRouterSortDir) {
-          initialSortDir = resolvedRouterSortDir;
-        }
-      }
-
-      const routerSort = router.query.sort;
-      if (routerSort) {
-        const resolvedRouterSort = Object.values(Sort).find(
-          (sd) => sd === routerSort
-        );
-        if (resolvedRouterSort) {
-          initialSort = resolvedRouterSort;
-        }
-      }
-
-      setSort(initialSort);
-      setSortDir(initialSortDir);
-    }
-  }, [router.isReady, ownersLoaded, nftsLoaded]);
+  function fetchResults() {
+    const url = `${process.env.API_ENDPOINT}/api/nfts/gradients?&page_size=101&sort=${sort}&sort_direction=${sortDir}`;
+    fetchAllPages(url).then((newNfts: GradientNFT[]) => {
+      setNfts(newNfts);
+      setNftsLoaded(true);
+    });
+  }
 
   useEffect(() => {
-    async function fetchNfts(url: string) {
-      fetchAllPages(url).then((newNfts: NFT[]) => {
-        setNfts(
-          [...newNfts]
-            .sort((a, b) => (a.tdh > b.tdh ? -1 : 1))
-            .map((n, index) => {
-              n.tdh_rank = index + 1;
-              return n;
-            })
-        );
-        setNftsLoaded(true);
-      });
-    }
-    if (router.isReady) {
-      const initialUrlNfts = `${process.env.API_ENDPOINT}/api/nfts?contract=${GRADIENT_CONTRACT}`;
-      fetchNfts(initialUrlNfts);
+    if (sort && sortDir) {
+      fetchResults();
     }
   }, [router.isReady]);
-
-  useEffect(() => {
-    async function fetchOwners(url: string) {
-      fetchAllPages(url).then((newOwners: Owner[]) => {
-        if (!ownersLoaded) {
-          const allOwners: Owner[] = [];
-          [...nfts]
-            .sort((a, b) => (a.tdh > b.tdh ? -1 : 1))
-            .map((nft) => {
-              const owner = newOwners.find((o) => o.token_id === nft.id);
-              if (owner) {
-                allOwners.push(owner);
-              }
-            });
-          setNftOwners(allOwners);
-          setOwnersLoaded(true);
-        }
-      });
-    }
-
-    if (router.isReady && nftsLoaded) {
-      const initialUrlOwners = `${process.env.API_ENDPOINT}/api/owners?contract=${GRADIENT_CONTRACT}`;
-      fetchOwners(initialUrlOwners);
-    }
-  }, [router.isReady, nftsLoaded]);
 
   useEffect(() => {
     if (sort && sortDir) {
@@ -138,8 +77,7 @@ export default function GradientsComponent(props: Props) {
     }
   }, [sortDir, sort]);
 
-  function printNft(nft: NFT) {
-    const owner = nftOwners.find((o) => o.token_id === nft.id);
+  function printNft(nft: GradientNFT) {
     return (
       <Col
         key={`${nft.contract}-${nft.id}`}
@@ -150,7 +88,7 @@ export default function GradientsComponent(props: Props) {
         lg={{ span: 3 }}>
         <a
           href={`/6529-gradient/${nft.id}`}
-          className="decoration-none decoration-hover-underline scale-hover">
+          className="decoration-none scale-hover">
           <Container fluid className="no-padding">
             <Row>
               <Col>
@@ -159,12 +97,7 @@ export default function GradientsComponent(props: Props) {
                   animation={false}
                   height={300}
                   balance={0}
-                  showOwned={
-                    owner &&
-                    props.wallets.some((w) =>
-                      areEqualAddresses(w, owner.wallet)
-                    )
-                  }
+                  showOwned={false}
                   showUnseized={false}
                   showThumbnail={true}
                 />
@@ -175,29 +108,26 @@ export default function GradientsComponent(props: Props) {
             </Row>
             <Row>
               <Col className="text-center">
-                {owner &&
-                props.wallets.some((w) => areEqualAddresses(w, owner.wallet))
+                {props.wallets.some((w) => areEqualAddresses(w, nft.owner))
                   ? "*"
                   : ""}
-                {owner && (
+                {nft.owner && (
                   <Address
-                    wallets={[owner.wallet]}
-                    display={owner.wallet_display}
+                    wallets={[nft.owner]}
+                    display={nft.owner_display}
                     hideCopy={true}
                   />
                 )}
               </Col>
             </Row>
-            {owner && (
-              <Row>
-                <Col className="text-center pt-2">
-                  TDH: <b>{numberWithCommas(Math.round(nft.tdh))}</b> | Rank:{" "}
-                  <b>
-                    {nft.tdh_rank}/{nfts.length}
-                  </b>
-                </Col>
-              </Row>
-            )}
+            <Row>
+              <Col className="text-center pt-2">
+                TDH: <b>{numberWithCommas(Math.round(nft.tdh))}</b> | Rank:{" "}
+                <b>
+                  {nft.tdh_rank}/{nfts.length}
+                </b>
+              </Col>
+            </Row>
           </Container>
         </a>
       </Col>
@@ -256,21 +186,8 @@ export default function GradientsComponent(props: Props) {
                   </span>
                 </Col>
               </Row>
-              {nftsSorted ? (
-                nfts.length > 0 ? (
-                  printNfts()
-                ) : (
-                  <Col>
-                    <Image
-                      width="0"
-                      height="0"
-                      style={{ height: "auto", width: "100px" }}
-                      src="/SummerGlasses.svg"
-                      alt="SummerGlasses"
-                    />{" "}
-                    Nothing here yet
-                  </Col>
-                )
+              {nftsLoaded ? (
+                printNfts()
               ) : (
                 <Row>
                   <Col className="pt-3">

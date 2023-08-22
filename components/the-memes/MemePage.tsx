@@ -225,8 +225,8 @@ export default function MemePage(props: Props) {
         if (response.data.length > 0) {
           const mine: TDHMetrics = response.data[0];
           setMyOwner(mine);
-          setMyTDH(mine.memes.find((m) => m.id == parseInt(nftId)));
-          setMyRank(mine.memes_ranks.find((m) => m.id == parseInt(nftId)));
+          setMyTDH(mine.memes.find((m) => m.id === parseInt(nftId)));
+          setMyRank(mine.memes_ranks.find((m) => m.id === parseInt(nftId)));
         }
       });
     }

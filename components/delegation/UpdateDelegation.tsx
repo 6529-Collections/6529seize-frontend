@@ -109,7 +109,7 @@ export default function UpdateDelegationComponent(props: Props) {
     ],
     functionName:
       validate().length === 0 ? "updateDelegationAddress" : undefined,
-    onSettled(data: any, error: any) {
+    onSettled(data, error) {
       if (data) {
         setGasError(undefined);
       }

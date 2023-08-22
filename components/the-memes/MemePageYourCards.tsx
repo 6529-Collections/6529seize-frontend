@@ -266,7 +266,6 @@ export function MemePageLiveSubMenu(props: {
         <Row className="pt-3">
           <Col>
             <Image
-              loading={"lazy"}
               width="0"
               height="0"
               style={{ width: "250px", height: "auto" }}
@@ -335,7 +334,6 @@ export function MemePageLiveSubMenu(props: {
         <Row className="pt-5">
           <Col>
             <Image
-              loading={"lazy"}
               width="0"
               height="0"
               style={{ width: "250px", height: "auto" }}

@@ -11,6 +11,7 @@ import {
   getDateDisplay,
   getValuesForVolumeType,
   numberWithCommas,
+  printMintDate,
 } from "../../helpers/Helpers";
 import { useRouter } from "next/router";
 import { fetchAllPages } from "../../services/6529api";
@@ -389,20 +390,6 @@ export default function MemeLabComponent(props: Props) {
     }
   }, [sort, sortDir, nftsLoaded, volumeType]);
 
-  function printMintDate(nft: LabNFT) {
-    const mintDate = new Date(nft.mint_date);
-    return (
-      <>
-        {mintDate.toLocaleString("default", {
-          day: "numeric",
-          month: "short",
-          year: "numeric",
-        })}{" "}
-        ({getDateDisplay(mintDate)})
-      </>
-    );
-  }
-
   function printNft(nft: LabNFT) {
     return (
       <Col
@@ -435,52 +422,52 @@ export default function MemeLabComponent(props: Props) {
             <Row>
               <Col className="text-center pt-1">
                 {sort &&
-                  (sort == Sort.AGE || sort == Sort.ARTISTS) &&
-                  printMintDate(nft)}
-                {sort == Sort.COLLECTIONS && `Artists: ${nft.artist}`}
-                {sort == Sort.EDITION_SIZE && `Edition Size: ${nft.supply}`}
-                {sort == Sort.HODLERS &&
+                  (sort === Sort.AGE || sort === Sort.ARTISTS) &&
+                  printMintDate(nft.mint_date)}
+                {sort === Sort.COLLECTIONS && `Artists: ${nft.artist}`}
+                {sort === Sort.EDITION_SIZE && `Edition Size: ${nft.supply}`}
+                {sort === Sort.HODLERS &&
                   `Collectors: ${
-                    nftMetas.find((nftm) => nftm.id == nft.id)?.hodlers
+                    nftMetas.find((nftm) => nftm.id === nft.id)?.hodlers
                   }`}
-                {sort == Sort.UNIQUE_PERCENT &&
+                {sort === Sort.UNIQUE_PERCENT &&
                   `Unique: ${
                     Math.round(
-                      nftMetas.find((nftm) => nftm.id == nft.id)
+                      nftMetas.find((nftm) => nftm.id === nft.id)
                         ?.percent_unique! *
                         100 *
                         10
                     ) / 10
                   }%`}
-                {sort == Sort.UNIQUE_PERCENT_EX_MUSEUM &&
+                {sort === Sort.UNIQUE_PERCENT_EX_MUSEUM &&
                   `Unique Ex-Museum: ${
                     Math.round(
-                      nftMetas.find((nftm) => nftm.id == nft.id)
+                      nftMetas.find((nftm) => nftm.id === nft.id)
                         ?.percent_unique_cleaned! *
                         100 *
                         10
                     ) / 10
                   }%`}
-                {sort == Sort.FLOOR_PRICE &&
+                {sort === Sort.FLOOR_PRICE &&
                   (nft.floor_price > 0
                     ? `Floor Price: ${numberWithCommas(
                         Math.round(nft.floor_price * 100) / 100
                       )} ETH`
                     : `Floor Price: N/A`)}
-                {sort == Sort.MARKET_CAP &&
+                {sort === Sort.MARKET_CAP &&
                   (nft.market_cap > 0
                     ? `Market Cap: ${numberWithCommas(
                         Math.round(nft.market_cap * 100) / 100
                       )} ETH`
                     : `Market Cap: N/A`)}
-                {sort == Sort.VOLUME &&
+                {sort === Sort.VOLUME &&
                   `Volume (${volumeType}): ${numberWithCommas(
                     Math.round(
-                      (volumeType == VolumeType.HOURS_24
+                      (volumeType === VolumeType.HOURS_24
                         ? nft.total_volume_last_24_hours
-                        : volumeType == VolumeType.DAYS_7
+                        : volumeType === VolumeType.DAYS_7
                         ? nft.total_volume_last_7_days
-                        : volumeType == VolumeType.DAYS_30
+                        : volumeType === VolumeType.DAYS_30
                         ? nft.total_volume_last_1_month
                         : nft.total_volume) * 100
                     ) / 100
@@ -667,7 +654,7 @@ export default function MemeLabComponent(props: Props) {
               </Row>
               {nftsLoaded ? (
                 nfts.length > 0 ? (
-                  sort == Sort.ARTISTS ? (
+                  sort === Sort.ARTISTS ? (
                     printArtists()
                   ) : sort === Sort.COLLECTIONS ? (
                     printCollections()
