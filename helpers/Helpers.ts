@@ -300,15 +300,3 @@ export function parseEmojis(s: string) {
     return `&#x${hexValue};`;
   });
 }
-
-export function printMintDate(date: Date) {
-  const mintDate = new Date(date);
-  return `
-      ${mintDate.toLocaleString("default", {
-        day: "numeric",
-        month: "short",
-        year: "numeric",
-      })} 
-      (${getDateDisplay(mintDate)})
-    `;
-}
