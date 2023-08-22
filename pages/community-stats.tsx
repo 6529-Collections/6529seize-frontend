@@ -14,10 +14,7 @@ const Header = dynamic(() => import("../components/header/Header"), {
 
 const CommunityStatsComponent = dynamic(
   () => import("../components/communityStats/CommunityStats"),
-  {
-    ssr: false,
-    loading: () => <HeaderPlaceholder />,
-  }
+  { ssr: false }
 );
 
 export default function CommunityStats() {
