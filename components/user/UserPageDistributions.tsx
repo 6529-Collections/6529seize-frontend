@@ -1,15 +1,11 @@
 import styles from "./UserPage.module.scss";
 import Image from "next/image";
-import { Col, Container, Dropdown, Form, Row, Table } from "react-bootstrap";
+import { Col, Row, Table } from "react-bootstrap";
 import { useEffect, useState } from "react";
 import { DBResponse } from "../../entities/IDBResponse";
-import { Owner } from "../../entities/IOwner";
-import { MemesExtendedData, NFT } from "../../entities/INFT";
 import {
   areEqualAddresses,
   formatAddress,
-  isGradientsContract,
-  isMemesContract,
   numberWithCommas,
 } from "../../helpers/Helpers";
 import {
@@ -17,20 +13,11 @@ import {
   MEMELAB_CONTRACT,
   MEMES_CONTRACT,
 } from "../../constants";
-import { ConsolidatedTDHMetrics, TDHMetrics } from "../../entities/ITDH";
-import { SortDirection } from "../../entities/ISort";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { fetchAllPages, fetchUrl } from "../../services/6529api";
+import { ConsolidatedTDHMetrics } from "../../entities/ITDH";
+import { fetchUrl } from "../../services/6529api";
 import Pagination from "../pagination/Pagination";
-import { TypeFilter } from "../latest-activity/LatestActivity";
-import LatestActivityRow from "../latest-activity/LatestActivityRow";
-import { Transaction } from "../../entities/ITransaction";
 import { IDistribution } from "../../entities/IDistribution";
 import { VIEW } from "../consolidation-switch/ConsolidationSwitch";
-import NFTImage from "../nft-image/NFTImage";
-import UserPageCollection from "./UserPageCollection";
-import UserPageActivity from "./UserPageActivity";
-import UserPage from "./UserPage";
 
 interface Props {
   show: boolean;
