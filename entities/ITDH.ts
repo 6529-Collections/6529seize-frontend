@@ -55,6 +55,7 @@ export interface BaseTDH {
   memes_cards_sets_szn2: number;
   memes_cards_sets_szn3: number;
   memes_cards_sets_szn4: number;
+  day_change: number;
 }
 
 export interface TDH extends BaseTDH {
@@ -175,4 +176,46 @@ export interface ConsolidatedTDHMetrics
 export interface TDHCalc {
   date: Date;
   block: number;
+}
+
+export interface GlobalTDHHistory extends TDHCalc {
+  created_tdh: number;
+  destroyed_tdh: number;
+  net_tdh: number;
+  created_boosted_tdh: number;
+  destroyed_boosted_tdh: number;
+  net_boosted_tdh: number;
+  created_tdh__raw: number;
+  destroyed_tdh__raw: number;
+  net_tdh__raw: number;
+  memes_balance: number;
+  gradients_balance: number;
+  total_boosted_tdh: number;
+  total_tdh: number;
+  total_tdh__raw: number;
+  gradients_boosted_tdh: number;
+  gradients_tdh: number;
+  gradients_tdh__raw: number;
+  memes_boosted_tdh: number;
+  memes_tdh: number;
+  memes_tdh__raw: number;
+  total_consolidated_wallets: number;
+  total_wallets: number;
+}
+
+export interface TDHHistory extends TDHCalc {
+  consolidation_display: string;
+  wallets: `0x${string}`[];
+  created_tdh: number;
+  destroyed_tdh: number;
+  net_tdh: number;
+  created_boosted_tdh: number;
+  destroyed_boosted_tdh: number;
+  net_boosted_tdh: number;
+  created_tdh__raw: number;
+  destroyed_tdh__raw: number;
+  net_tdh__raw: number;
+  created_balance: number;
+  destroyed_balance: number;
+  net_balance: number;
 }
