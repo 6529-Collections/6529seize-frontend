@@ -1,6 +1,6 @@
 import styles from "./UserPage.module.scss";
 import Image from "next/image";
-import { Col, Container, Row } from "react-bootstrap";
+import { Button, Col, Container, Row } from "react-bootstrap";
 import { useEffect, useState } from "react";
 import { DBResponse } from "../../entities/IDBResponse";
 import { Owner } from "../../entities/IOwner";
@@ -35,6 +35,7 @@ import NotFound from "../notFound/NotFound";
 
 interface Props {
   user: string;
+  wallets: string[];
 }
 
 export default function UserPage(props: Props) {
@@ -55,8 +56,6 @@ export default function UserPage(props: Props) {
   );
   const [ownerENS, setOwnerENS] = useState("");
 
-  const ensAvatar = useEnsAvatar({ chainId: 1 });
-
   const [ownerLinkDisplay, setOwnerLinkDisplay] = useState("");
   const [owned, setOwned] = useState<Owner[]>([]);
   const [walletOwned, setWalletOwned] = useState<Owner[]>([]);
@@ -69,6 +68,9 @@ export default function UserPage(props: Props) {
   const [isConsolidation, setIsConsolidation] = useState(false);
   const [userError, setUserError] = useState(false);
   const [fetchingUser, setFetchingUser] = useState(true);
+
+  const [pfp, setPfp] = useState<string>();
+  // "https://d3lqz0a4bldqgf.cloudfront.net/images/scaled_x450/0x33FD426905F149f8376e227d0C9D3340AaD17aF1/134.WEBP"
 
   useEffect(() => {
     async function fetchENS() {
@@ -360,50 +362,117 @@ export default function UserPage(props: Props) {
                     className={isConsolidation ? "pt-2" : "pt-3"}>
                     <Container className="no-padding">
                       <Row className="pb-1">
-                        <Col
-                          className={
-                            view === VIEW.WALLET
-                              ? "d-flex align-items-center"
-                              : ""
-                          }>
-                          {ensAvatar.data && view === VIEW.WALLET && (
-                            <Image
-                              className={styles.avatar}
-                              src={ensAvatar.data}
-                              alt="opensea"
-                              width={0}
-                              height={0}
-                            />
+                        <Col className="d-flex gap-4">
+                          {pfp && (
+                            <span className={`mt-3 ${styles.avatar}`}>
+                              <Image
+                                src={pfp}
+                                alt="add-image"
+                                width={0}
+                                height={0}
+                              />
+                            </span>
                           )}
-                          {tdh && consolidatedTDH ? (
-                            <Address
-                              wallets={
-                                view === VIEW.CONSOLIDATION
-                                  ? consolidatedTDH.wallets
-                                  : [ownerAddress]
-                              }
-                              display={
-                                view === VIEW.CONSOLIDATION &&
-                                consolidatedTDH.consolidation_display
-                                  ? consolidatedTDH.consolidation_display
-                                  : ownerENS
-                              }
-                              isUserPage={true}
-                              disableLink={true}
-                              viewingWallet={ownerAddress}
-                            />
-                          ) : (
-                            <Address
-                              wallets={[ownerAddress]}
-                              display={ownerENS}
-                              disableLink={true}
-                              isUserPage={true}
-                              viewingWallet={ownerAddress}
-                            />
-                          )}
+                          {!pfp &&
+                            ownerAddress &&
+                            props.wallets &&
+                            props.wallets.some((w) =>
+                              areEqualAddresses(w, ownerAddress)
+                            ) && (
+                              <span
+                                className={`mt-3 ${styles.avatarPlaceholder}`}>
+                                <Image
+                                  src="/add-image.png"
+                                  alt={ownerENS}
+                                  width={0}
+                                  height={0}
+                                />
+                              </span>
+                            )}
+                          <span className="d-flex flex-column">
+                            <span>
+                              {tdh && consolidatedTDH ? (
+                                <Address
+                                  wallets={
+                                    view === VIEW.CONSOLIDATION
+                                      ? consolidatedTDH.wallets
+                                      : [ownerAddress]
+                                  }
+                                  display={
+                                    view === VIEW.CONSOLIDATION &&
+                                    consolidatedTDH.consolidation_display
+                                      ? consolidatedTDH.consolidation_display
+                                      : ownerENS
+                                  }
+                                  isUserPage={true}
+                                  disableLink={true}
+                                  viewingWallet={ownerAddress}
+                                />
+                              ) : (
+                                <Address
+                                  wallets={[ownerAddress]}
+                                  display={ownerENS}
+                                  disableLink={true}
+                                  isUserPage={true}
+                                  viewingWallet={ownerAddress}
+                                />
+                              )}
+                            </span>
+                            <Tippy
+                              content={ownerLinkCopied ? "Copied" : "Copy"}
+                              placement={"right"}
+                              theme={"light"}
+                              hideOnClick={false}>
+                              <span
+                                className={styles.ownerLink}
+                                onClick={() => {
+                                  if (navigator.clipboard) {
+                                    navigator.clipboard.writeText(
+                                      window.location.href
+                                    );
+                                  }
+                                  setIsOwnerLinkCopied(true);
+                                  setTimeout(() => {
+                                    setIsOwnerLinkCopied(false);
+                                  }, 1000);
+                                }}>
+                                {removeProtocol(ownerLinkDisplay)}{" "}
+                                <FontAwesomeIcon
+                                  icon="link"
+                                  className={styles.ownerLinkIcon}
+                                />
+                              </span>
+                            </Tippy>
+                            <span className="pt-3">
+                              <a
+                                href={`https://opensea.io/${ownerAddress}`}
+                                target="_blank"
+                                rel="noreferrer">
+                                <Image
+                                  className={styles.marketplace}
+                                  src="/opensea.png"
+                                  alt="opensea"
+                                  width={40}
+                                  height={40}
+                                />
+                              </a>
+                              <a
+                                href={`https://x2y2.io/user/${ownerAddress}`}
+                                target="_blank"
+                                rel="noreferrer">
+                                <Image
+                                  className={styles.marketplace}
+                                  src="/x2y2.png"
+                                  alt="x2y2"
+                                  width={40}
+                                  height={40}
+                                />
+                              </a>
+                            </span>
+                          </span>
                         </Col>
                       </Row>
-                      <Row className="pt-1">
+                      {/* <Row className="pt-1">
                         <Tippy
                           content={ownerLinkCopied ? "Copied" : "Copy"}
                           placement={"right"}
@@ -457,7 +526,7 @@ export default function UserPage(props: Props) {
                             />
                           </a>
                         </Col>
-                      </Row>
+                      </Row> */}
                     </Container>
                   </Col>
                   {tdh && tdh.balance > 0 && (
