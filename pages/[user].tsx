@@ -33,6 +33,8 @@ export default function UserPageIndex(props: any) {
     Array.isArray(router.query.user) ? router.query.user[0] : router.query.user
   );
 
+  const [connectedWallets, setConnectedWallets] = useState<string[]>([]);
+
   useEffect(() => {
     if (user) {
       if (
@@ -64,9 +66,10 @@ export default function UserPageIndex(props: any) {
       </Head>
 
       <main className={styles.main}>
-        <Header />
+        <Header onSetWallets={(wallets) => setConnectedWallets(wallets)} />
         {router.isReady && router.query.user && (
           <UserPage
+            wallets={connectedWallets}
             user={
               Array.isArray(router.query.user)
                 ? router.query.user[0]
