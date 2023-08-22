@@ -25,8 +25,6 @@ export default function CommunityStats() {
     { display: "Home", href: "/" },
     { display: "Community Stats" },
   ]);
-  const [html, setHtml] = useState("");
-  const [error, setError] = useState(false);
 
   return (
     <>
