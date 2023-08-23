@@ -16,7 +16,6 @@ import MapDelegations from "./map-delegations/MapDelegations";
 
 export default function DistributionPlanToolPage() {
   const { step } = useContext(DistributionPlanToolContext);
-  useEffect(() => console.log(step), [step]);
   return (
     <AllowlistToolAnimationWrapper mode="wait" initial={true}>
       {(() => {
