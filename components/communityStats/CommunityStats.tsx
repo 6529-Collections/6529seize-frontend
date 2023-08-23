@@ -120,42 +120,46 @@ export default function CommunityStats() {
           </span>
         </Col>
       </Row>
-      <Row className="pt-4 pb-4">
-        <Col sm={12} md={{ span: 10, offset: 1 }}>
-          <Container className="no-padding">
-            <Row>
-              <h2 className="mb-0 font-color">Net TDH</h2>
-            </Row>
-            <Row className="pt-4">
-              <Col>{tdhHistory.length > 0 && <>{printNetTDH()}</>}</Col>
-            </Row>
-          </Container>
-        </Col>
-      </Row>
-      <Row className="pt-4 pb-4">
-        <Col sm={12} md={{ span: 10, offset: 1 }}>
-          <Container className="no-padding">
-            <Row>
-              <h2 className="mb-0 font-color">Created TDH</h2>
-            </Row>
-            <Row className="pt-4">
-              <Col>{tdhHistory.length > 0 && <>{printCreatedTDH()}</>}</Col>
-            </Row>
-          </Container>
-        </Col>
-      </Row>
-      <Row className="pt-4 pb-4">
-        <Col sm={12} md={{ span: 10, offset: 1 }}>
-          <Container className="no-padding">
-            <Row>
-              <h2 className="mb-0 font-color">Destroyed TDH</h2>
-            </Row>
-            <Row className="pt-4">
-              <Col>{tdhHistory.length > 0 && <>{printDestroyedTDH()}</>}</Col>
-            </Row>
-          </Container>
-        </Col>
-      </Row>
+      {tdhHistory.length > 0 && (
+        <>
+          <Row className="pt-4 pb-4">
+            <Col sm={12} md={{ span: 10, offset: 1 }}>
+              <Container className="no-padding">
+                <Row>
+                  <h2 className="mb-0 font-color">Net TDH</h2>
+                </Row>
+                <Row className="pt-4">
+                  <Col>{printNetTDH()}</Col>
+                </Row>
+              </Container>
+            </Col>
+          </Row>
+          <Row className="pt-4 pb-4">
+            <Col sm={12} md={{ span: 10, offset: 1 }}>
+              <Container className="no-padding">
+                <Row>
+                  <h2 className="mb-0 font-color">Created TDH</h2>
+                </Row>
+                <Row className="pt-4">
+                  <Col>{printCreatedTDH()}</Col>
+                </Row>
+              </Container>
+            </Col>
+          </Row>
+          <Row className="pt-4 pb-4">
+            <Col sm={12} md={{ span: 10, offset: 1 }}>
+              <Container className="no-padding">
+                <Row>
+                  <h2 className="mb-0 font-color">Destroyed TDH</h2>
+                </Row>
+                <Row className="pt-4">
+                  <Col>{printDestroyedTDH()}</Col>
+                </Row>
+              </Container>
+            </Col>
+          </Row>
+        </>
+      )}
     </Container>
   );
 }
