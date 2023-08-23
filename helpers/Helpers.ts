@@ -217,6 +217,19 @@ export async function getContentTypeFromURL(url: string) {
   }
 }
 
+export function printMintDate(date: Date) {
+  const mintDate = new Date(date);
+  return `
+      ${mintDate.toLocaleString("default", {
+        day: "numeric",
+        month: "short",
+        year: "numeric",
+      })} 
+      (${getDateDisplay(mintDate)})
+    `;
+}
+
+
 export function getNetworkName(chainId: number) {
   if (chainId === mainnet.id) {
     return "Etherium Mainnet";
@@ -287,16 +300,4 @@ export function parseEmojis(s: string) {
   return s.replace(regex, (_, hexValue) => {
     return `&#x${hexValue};`;
   });
-}
-
-export function printMintDate(date: Date) {
-  const mintDate = new Date(date);
-  return `
-      ${mintDate.toLocaleString("default", {
-        day: "numeric",
-        month: "short",
-        year: "numeric",
-      })} 
-      (${getDateDisplay(mintDate)})
-    `;
 }
