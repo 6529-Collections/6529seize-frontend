@@ -18,7 +18,11 @@ import {
   removeProtocol,
 } from "../../helpers/Helpers";
 import { MANIFOLD, SIX529_MUSEUM } from "../../constants";
-import { ConsolidatedTDHMetrics, TDHMetrics } from "../../entities/ITDH";
+import {
+  ConsolidatedTDHMetrics,
+  TDHHistory,
+  TDHMetrics,
+} from "../../entities/ITDH";
 import { useEnsAvatar } from "wagmi";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { fetchAllPages, fetchUrl } from "../../services/6529api";
@@ -39,7 +43,7 @@ interface Props {
 
 export default function UserPage(props: Props) {
   const router = useRouter();
-  const [view, setView] = useState<VIEW>(VIEW.WALLET);
+  const [view, setView] = useState<VIEW>(VIEW.CONSOLIDATION);
 
   const [ownerLinkCopied, setIsOwnerLinkCopied] = useState(false);
 
@@ -69,6 +73,8 @@ export default function UserPage(props: Props) {
   const [isConsolidation, setIsConsolidation] = useState(false);
   const [userError, setUserError] = useState(false);
   const [fetchingUser, setFetchingUser] = useState(true);
+
+  const [tdhHistory, setTdhHistory] = useState<TDHHistory>();
 
   useEffect(() => {
     async function fetchENS() {
@@ -272,6 +278,19 @@ export default function UserPage(props: Props) {
   }, [view, walletTDH, consolidatedTDH]);
 
   useEffect(() => {
+    if (consolidatedTDH) {
+      if (consolidatedTDH.balance > 0) {
+        const url = `${process.env.API_ENDPOINT}/api/tdh_history?wallet=${consolidatedTDH.wallets[0]}&page_size=1`;
+        fetchUrl(url).then((response: DBResponse) => {
+          if (response.data) {
+            setTdhHistory(response.data[0]);
+          }
+        });
+      }
+    }
+  }, [consolidatedTDH]);
+
+  useEffect(() => {
     if (walletOwnedLoaded && consolidationOwnedLoaded) {
       if (view === VIEW.CONSOLIDATION || !isConsolidation) {
         setOwned(consolidationOwned);
@@ -468,12 +487,42 @@ export default function UserPage(props: Props) {
                         md={3}
                         className={isConsolidation ? "pt-2" : "pt-3"}>
                         <Container className="no-padding text-right">
+                          {tdh.tdh_rank && (
+                            <Row className="pt-1 pb-1">
+                              <Col>
+                                <Tag
+                                  type={TagType.RANK}
+                                  text={`TDH ${numberWithCommas(
+                                    tdh.boosted_tdh
+                                  )} ${
+                                    view == VIEW.CONSOLIDATION
+                                      ? `(${
+                                          tdhHistory
+                                            ? tdhHistory.net_boosted_tdh > 0
+                                              ? "+"
+                                              : ""
+                                            : "..."
+                                        }${
+                                          tdhHistory
+                                            ? numberWithCommas(
+                                                tdhHistory.net_boosted_tdh
+                                              )
+                                            : ""
+                                        })`
+                                      : ""
+                                  } | Rank #${tdh.tdh_rank}`}
+                                />
+                              </Col>
+                            </Row>
+                          )}
+
                           <Row className="pt-2 pb-1">
                             <Col>
                               <Tag
                                 type={TagType.RANK}
-                                text={"All Cards Rank #"}
-                                value={tdh.dense_rank_balance}
+                                text={`Total Balance x${numberWithCommas(
+                                  tdh.balance
+                                )} | Rank #${tdh.dense_rank_balance}`}
                               />
                             </Col>
                           </Row>
@@ -481,22 +530,12 @@ export default function UserPage(props: Props) {
                             <Col>
                               <Tag
                                 type={TagType.RANK}
-                                text={"Unique Cards Rank #"}
-                                value={tdh.dense_rank_unique}
+                                text={`Unique Cards x${numberWithCommas(
+                                  tdh.unique_memes + tdh.gradients_balance
+                                )} | Rank #${tdh.dense_rank_balance}`}
                               />
                             </Col>
                           </Row>
-                          {tdh.tdh_rank && (
-                            <Row className="pt-1 pb-1">
-                              <Col>
-                                <Tag
-                                  type={TagType.RANK}
-                                  text={"TDH Rank #"}
-                                  value={tdh.tdh_rank}
-                                />
-                              </Col>
-                            </Row>
-                          )}
                           {tdh.boost && (
                             <Row className="pt-1 pb-1">
                               <Col>
@@ -598,7 +637,6 @@ export default function UserPage(props: Props) {
                 </Row>
               )}
             </Container>
-            <UserPageOverview tdh={tdh} />
             {walletOwnedLoaded && consolidationOwnedLoaded && (
               <UserPageDetails
                 ownerAddress={ownerAddress}
