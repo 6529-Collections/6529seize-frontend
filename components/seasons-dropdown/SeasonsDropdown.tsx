@@ -26,7 +26,7 @@ export default function SeasonsDropdown(props: Props) {
             onClick={() => {
               props.setSelectedSeason(s);
             }}>
-            SNZ{s}
+            SZN{s}
           </Dropdown.Item>
         ))}
       </Dropdown.Menu>
