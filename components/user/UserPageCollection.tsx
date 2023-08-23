@@ -12,12 +12,13 @@ import {
   numberWithCommas,
 } from "../../helpers/Helpers";
 import NFTImage from "../nft-image/NFTImage";
-import { fetchAllPages } from "../../services/6529api";
+import { fetchAllPages, fetchUrl } from "../../services/6529api";
 import { Owner } from "../../entities/IOwner";
 import { ConsolidatedTDHMetrics, TDHMetrics } from "../../entities/ITDH";
 import Image from "next/image";
 import SeasonsDropdown from "../seasons-dropdown/SeasonsDropdown";
 import DotLoader from "../dotLoader/DotLoader";
+import { DBResponse } from "../../entities/IDBResponse";
 
 interface Props {
   show: boolean;
@@ -40,12 +41,14 @@ export default function UserPageCollection(props: Props) {
   const [hideMemes, setHideMemes] = useState(false);
   const [hideGradients, setHideGradients] = useState(false);
 
+  const [memes, setMemes] = useState<NFT[]>([]);
+  const [gradients, setGradients] = useState<NFT[]>([]);
   const [nfts, setNfts] = useState<NFT[]>([]);
-  const [nftsLoaded, setNftsLoaded] = useState(false);
-
+  const [nftsNextPage, setNftsNextPage] = useState<string>(
+    `${process.env.API_ENDPOINT}/api/nfts?contract=${MEMES_CONTRACT}&page_size=40&sort_direction=asc`
+  );
   const [seasons, setSeasons] = useState<number[]>([]);
   const [selectedSeason, setSelectedSeason] = useState(0);
-  const [nftMetas, setNftMetas] = useState<MemesExtendedData[]>([]);
 
   useEffect(() => {
     if (sort && sortDir) {
@@ -249,38 +252,44 @@ export default function UserPageCollection(props: Props) {
         }
       }
     }
-  }, [
-    sortDir,
-    sort,
-    hideMemes,
-    hideGradients,
-    hideSeized,
-    hideNonSeized,
-    nftsLoaded,
-  ]);
+  }, [sortDir, sort, hideMemes, hideGradients, hideSeized, hideNonSeized]);
+
+  function fetchNfts(url: string) {
+    fetchUrl(url).then((responseNfts: DBResponse) => {
+      setMemes([...memes, ...responseNfts.data]);
+      setNftsNextPage(responseNfts.next);
+    });
+  }
 
   useEffect(() => {
-    const nftsUrl = `${process.env.API_ENDPOINT}/api/memes_extended_data`;
-    fetchAllPages(nftsUrl).then((responseNftMetas: any[]) => {
-      setNftMetas(responseNftMetas);
-      setSeasons(
-        Array.from(new Set(responseNftMetas.map((meme) => meme.season))).sort(
-          (a, b) => a - b
-        )
-      );
-      if (responseNftMetas.length > 0) {
-        fetchAllPages(`${process.env.API_ENDPOINT}/api/nfts`).then(
-          (responseNfts: any[]) => {
-            setNfts(responseNfts);
-            setNftsLoaded(true);
-          }
-        );
-      } else {
-        setNfts([]);
-        setNftsLoaded(true);
-      }
+    if (nftsNextPage) {
+      fetchNfts(nftsNextPage);
+    }
+  }, [nftsNextPage]);
+
+  useEffect(() => {
+    const url = `${process.env.API_ENDPOINT}/api/nfts/gradients?&page_size=101&sort=${sort}&sort_direction=${sortDir}`;
+    fetchAllPages(url).then((gradients: NFT[]) => {
+      setGradients(gradients);
     });
   }, []);
+
+  useEffect(() => {
+    setNfts(() => [...gradients, ...memes]);
+  }, [memes, gradients]);
+
+  useEffect(() => {
+    const seasons = new Set<number>();
+    nfts.map((meme) => {
+      const season = meme.metadata.attributes.find(
+        (a: any) => a.trait_type == "Type - Season"
+      )?.value;
+      if (season) {
+        seasons.add(season);
+      }
+    });
+    setSeasons(Array.from(seasons).sort((a, b) => a - b));
+  }, [nfts]);
 
   function getBalance(nft: NFT) {
     const balance = props.owned.find(
@@ -312,7 +321,10 @@ export default function UserPageCollection(props: Props) {
       return;
     }
 
-    const season = nftMetas.find((a) => a.id === nft.id)?.season;
+    const season = nft.metadata.attributes.find(
+      (a: any) => a.trait_type == "Type - Season"
+    )?.value;
+
     if (selectedSeason != 0 && selectedSeason != season) {
       return;
     }
@@ -402,7 +414,7 @@ export default function UserPageCollection(props: Props) {
 
   function printNfts() {
     const mynfts = [...nfts].filter((n) => filterNft(n));
-    if (mynfts.length === 0) {
+    if (mynfts.length === 0 && !nftsNextPage) {
       return (
         <Row className="pt-2">
           <Col>
@@ -542,9 +554,8 @@ export default function UserPageCollection(props: Props) {
           </Col>
         </Row>
         {printUserControls()}
-        {nftsLoaded ? (
-          printNfts()
-        ) : (
+        {nfts.length > 0 && printNfts()}
+        {nftsNextPage && (
           <Row>
             <Col className="pt-3 pb-5">
               Fetching <DotLoader />

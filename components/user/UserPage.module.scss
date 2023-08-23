@@ -344,3 +344,16 @@
     justify-content: center;
   }
 }
+
+.statsTimeSelectionSpan {
+  font-size: larger;
+  padding: 5px 10px;
+  cursor: pointer;
+  color: $font-color;
+}
+
+.statsTimeSelectionSpanSelected {
+  background-color: $off-white;
+  color: $very-dark-grey;
+  font-size: larger;
+}

@@ -1,23 +1,9 @@
 import styles from "./UserPage.module.scss";
-import Image from "next/image";
-import { Col, Row, Table } from "react-bootstrap";
+import { Col, Container, Row } from "react-bootstrap";
 import { useEffect, useState } from "react";
 import { DBResponse } from "../../entities/IDBResponse";
-import {
-  areEqualAddresses,
-  formatAddress,
-  numberWithCommas,
-} from "../../helpers/Helpers";
-import {
-  GRADIENT_CONTRACT,
-  MEMELAB_CONTRACT,
-  MEMES_CONTRACT,
-} from "../../constants";
-import { ConsolidatedTDHMetrics, TDHHistory } from "../../entities/ITDH";
+import { TDHHistory } from "../../entities/ITDH";
 import { fetchUrl } from "../../services/6529api";
-import Pagination from "../pagination/Pagination";
-import { IDistribution } from "../../entities/IDistribution";
-import { VIEW } from "../consolidation-switch/ConsolidationSwitch";
 import { Line } from "react-chartjs-2";
 import {
   Chart as ChartJS,
@@ -25,11 +11,7 @@ import {
   LinearScale,
   PointElement,
   LineElement,
-  Title,
   Tooltip,
-  Legend,
-  ArcElement,
-  BarElement,
 } from "chart.js";
 
 ChartJS.register(
@@ -37,9 +19,7 @@ ChartJS.register(
   LinearScale,
   PointElement,
   LineElement,
-  Title,
-  Tooltip,
-  Legend
+  Tooltip
 );
 
 interface Props {
@@ -49,50 +29,61 @@ interface Props {
 
 export default function UserPageStats(props: Props) {
   const [tdhHistory, setTdhHistory] = useState<TDHHistory[]>([]);
+  const [tdhLabels, setTdhLabels] = useState<Date[]>([]);
+  const [pageSize, setPageSize] = useState(7);
 
   useEffect(() => {
-    let url = `${process.env.API_ENDPOINT}/api/tdh_history?wallet=${props.ownerAddress}`;
+    let url = `${process.env.API_ENDPOINT}/api/tdh_history?wallet=${props.ownerAddress}&page_size=${pageSize}`;
     fetchUrl(url).then((response: DBResponse) => {
-      setTdhHistory(response.data);
+      const tdhH = response.data.reverse();
+      setTdhHistory(tdhH);
+      setTdhLabels(tdhH.map((t) => t.date));
     });
-  }, [props.ownerAddress]);
+  }, [props.ownerAddress, pageSize]);
 
-  function printTDHLines() {
-    const options = {
-      responsive: true,
-      plugins: {
-        legend: {
-          position: "top" as const,
-        },
-        title: {
-          display: false,
-        },
-      },
-    };
-
-    const labels = tdhHistory.map((t) => t.date);
+  function printNetTDH() {
     const data = {
-      labels,
+      labels: tdhLabels,
       datasets: [
         {
           label: "Net TDH",
-          data: labels.map(
+          data: tdhLabels.map(
             (l) => tdhHistory.find((t) => t.date === l)?.net_boosted_tdh
           ),
           borderColor: "#48E85F",
           backgroundColor: "#48E85F",
         },
+      ],
+    };
+
+    return <Line data={data} />;
+  }
+
+  function printCreatedTDH() {
+    const data = {
+      labels: tdhLabels,
+      datasets: [
         {
           label: "Created TDH",
-          data: labels.map(
+          data: tdhLabels.map(
             (l) => tdhHistory.find((t) => t.date === l)?.created_boosted_tdh
           ),
           borderColor: "#3773F2",
           backgroundColor: "#3773F2",
         },
+      ],
+    };
+
+    return <Line data={data} />;
+  }
+
+  function printDestroyedTDH() {
+    const data = {
+      labels: tdhLabels,
+      datasets: [
         {
           label: "Destroyed TDH",
-          data: labels.map(
+          data: tdhLabels.map(
             (l) => tdhHistory.find((t) => t.date === l)?.destroyed_boosted_tdh
           ),
           borderColor: "#DB4748",
@@ -101,51 +92,64 @@ export default function UserPageStats(props: Props) {
       ],
     };
 
-    return (
-      <>
-        <Row className="pt-2 pb-4">
-          <Col>
-            <h2 className="mb-0 font-color">TDH Day Change</h2>
-          </Col>
-        </Row>
-        <Row>
-          <Col>
-            <Line options={options} data={data} />
-          </Col>
-        </Row>
-      </>
-    );
+    return <Line data={data} />;
   }
 
-  if (props.show) {
+  if (props.show && tdhHistory.length > 0) {
     return (
       <>
-        <Row>
-          <Col
-            className="d-flex align-items-center"
-            xs={{ span: 7 }}
-            sm={{ span: 7 }}
-            md={{ span: 9 }}
-            lg={{ span: 10 }}>
-            <h3>Distributions</h3>
+        <Row className="pt-3">
+          <Col className="d-flex align-items-center justify-content-end gap-2 pt-4">
+            <span
+              className={`${styles.statsTimeSelectionSpan} ${
+                pageSize == 7 ? styles.statsTimeSelectionSpanSelected : ""
+              }`}
+              onClick={() => setPageSize(7)}>
+              7D
+            </span>
+            <span
+              className={`${styles.statsTimeSelectionSpan} ${
+                pageSize == 30 ? styles.statsTimeSelectionSpanSelected : ""
+              }`}
+              onClick={() => setPageSize(30)}>
+              1M
+            </span>
           </Col>
         </Row>
-        <Row className={`pt-2`}>
-          <Col>
-            {tdhHistory.length > 0 ? (
-              printTDHLines()
-            ) : (
-              <>
-                <Image
-                  width="0"
-                  height="0"
-                  style={{ height: "auto", width: "100px" }}
-                  src="/SummerGlasses.svg"
-                  alt="SummerGlasses"
-                />{" "}
-                Nothing here yet
-              </>
-            )}
+        <Row className="pt-4 pb-4">
+          <Col sm={12} md={{ span: 10, offset: 1 }}>
+            <Container className="no-padding">
+              <Row>
+                <h2 className="mb-0 font-color">Net TDH</h2>
+              </Row>
+              <Row className="pt-4">
+                <Col>{tdhHistory.length > 0 && <>{printNetTDH()}</>}</Col>
+              </Row>
+            </Container>
+          </Col>
+        </Row>
+        <Row className="pt-4 pb-4">
+          <Col sm={12} md={{ span: 10, offset: 1 }}>
+            <Container className="no-padding">
+              <Row>
+                <h2 className="mb-0 font-color">Created TDH</h2>
+              </Row>
+              <Row className="pt-4">
+                <Col>{tdhHistory.length > 0 && <>{printCreatedTDH()}</>}</Col>
+              </Row>
+            </Container>
+          </Col>
+        </Row>
+        <Row className="pt-4 pb-4">
+          <Col sm={12} md={{ span: 10, offset: 1 }}>
+            <Container className="no-padding">
+              <Row>
+                <h2 className="mb-0 font-color">Destroyed TDH</h2>
+              </Row>
+              <Row className="pt-4">
+                <Col>{tdhHistory.length > 0 && <>{printDestroyedTDH()}</>}</Col>
+              </Row>
+            </Container>
           </Col>
         </Row>
       </>

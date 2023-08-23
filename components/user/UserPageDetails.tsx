@@ -8,6 +8,7 @@ import UserPageCollection from "./UserPageCollection";
 import UserPageActivity from "./UserPageActivity";
 import UserPageDistributions from "./UserPageDistributions";
 import UserPageStats from "./UserPageStats";
+import UserPageOverview from "./UserPageOverview";
 
 interface Props {
   ownerAddress: `0x${string}` | undefined;
@@ -85,6 +86,7 @@ export default function UserPageDetails(props: Props) {
         consolidatedTDH={props.consolidatedTDH}
         isConsolidation={props.isConsolidation}
       />
+      <UserPageOverview show={focus === Focus.STATS} tdh={props.tdh} />
       <UserPageStats
         show={focus === Focus.STATS}
         ownerAddress={props.ownerAddress}

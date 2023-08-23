@@ -1,10 +1,9 @@
 import Head from "next/head";
 import styles from "../styles/Home.module.scss";
 import dynamic from "next/dynamic";
-import { Container, Row, Col, Table } from "react-bootstrap";
+import { Container, Row, Col } from "react-bootstrap";
 import Breadcrumb, { Crumb } from "../components/breadcrumb/Breadcrumb";
-import { useEffect, useState } from "react";
-import Image from "next/image";
+import { useState } from "react";
 import HeaderPlaceholder from "../components/header/HeaderPlaceholder";
 
 const Header = dynamic(() => import("../components/header/Header"), {
@@ -47,13 +46,8 @@ export default function CommunityStats() {
         <Container fluid className={styles.mainContainer}>
           <Row>
             <Col>
-              <Container className="pt-4">
+              <Container className="no-padding">
                 <Row>
-                  <Col>
-                    <h1>COMMUNITY STATS</h1>
-                  </Col>
-                </Row>
-                <Row className="pt-3 pb-3">
                   <Col>
                     <CommunityStatsComponent />
                   </Col>
