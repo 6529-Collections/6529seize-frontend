@@ -1,7 +1,13 @@
 import { useState, useEffect } from "react";
 import { Container, Row, Col, Table, Dropdown, Form } from "react-bootstrap";
 import { DBResponse } from "../../entities/IDBResponse";
-import { TDHCalc, TDHMetrics, BaseTDHMetrics } from "../../entities/ITDH";
+import {
+  TDHCalc,
+  TDHMetrics,
+  BaseTDHMetrics,
+  GlobalTDHHistory,
+  ConsolidatedTDH,
+} from "../../entities/ITDH";
 import styles from "./Leaderboard.module.scss";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -191,6 +197,8 @@ export default function Leaderboard(props: Props) {
   const [searchWallets, setSearchWallets] = useState<string[]>([]);
 
   const [myFetchUrl, setMyFetchUrl] = useState<string>();
+  const [globalTdhHistory, setGlobalTdhHistory] = useState<GlobalTDHHistory>();
+  const [globalTdhRateChange, setGlobalTdhRateChange] = useState<number>();
 
   if (props.showLastTdh) {
     printNextTdhCountdown();
@@ -511,6 +519,26 @@ export default function Leaderboard(props: Props) {
       }
     }
   }, [focus]);
+
+  useEffect(() => {
+    let url = `${
+      process.env.API_ENDPOINT
+    }/api/tdh_global_history?page_size=${1}`;
+    fetchUrl(url).then((response: DBResponse) => {
+      const tdhH = response.data[0];
+      setGlobalTdhHistory(tdhH);
+      const change = (tdhH.net_boosted_tdh / tdhH.total_boosted_tdh) * 100;
+      setGlobalTdhRateChange(change);
+    });
+  }, []);
+
+  function calculateTdhVsCommunity(lead: BaseTDHMetrics) {
+    if (!globalTdhRateChange || lead.day_change == 0) {
+      return "-";
+    }
+    const tdhChange = (lead.day_change / lead.boosted_tdh) * 100;
+    return `${(tdhChange / globalTdhRateChange).toFixed(2)}x`;
+  }
 
   function getWallets(lead: any) {
     if (lead.wallets) {
@@ -1314,6 +1342,26 @@ export default function Leaderboard(props: Props) {
       )}
       <Row className={`${styles.scrollContainer} pt-2`}>
         <Col>
+          {globalTdhHistory && (
+            <Container className="pb-3">
+              <Row>
+                <Col className="text-center">
+                  <b>
+                    Community TDH:{" "}
+                    {numberWithCommas(globalTdhHistory.total_boosted_tdh)}
+                    &nbsp;|&nbsp;Daily Change:{" "}
+                    {numberWithCommas(globalTdhHistory.net_boosted_tdh)} (
+                    {(
+                      (globalTdhHistory.net_boosted_tdh /
+                        globalTdhHistory.total_boosted_tdh) *
+                      100
+                    ).toFixed(2)}
+                    %)
+                  </b>
+                </Col>
+              </Row>
+            </Container>
+          )}
           {!leaderboard && (
             <Container>
               <Row>
@@ -1733,43 +1781,50 @@ export default function Leaderboard(props: Props) {
                         </span>
                       </th>
                       {view == VIEW.CONSOLIDATION ? (
-                        <th className={styles.tdhSub}>
-                          <span className="d-flex align-items-center justify-content-center">
-                            Day Change&nbsp; &nbsp;
-                            <span className="d-flex flex-column">
-                              <FontAwesomeIcon
-                                icon="square-caret-up"
-                                onClick={() =>
-                                  setSort({
-                                    sort: Sort.day_change,
-                                    sort_direction: SortDirection.ASC,
-                                  })
-                                }
-                                className={`${styles.caret} ${
-                                  sort.sort_direction != SortDirection.ASC ||
-                                  sort.sort != Sort.day_change
-                                    ? styles.disabled
-                                    : ""
-                                }`}
-                              />
-                              <FontAwesomeIcon
-                                icon="square-caret-down"
-                                onClick={() =>
-                                  setSort({
-                                    sort: Sort.day_change,
-                                    sort_direction: SortDirection.DESC,
-                                  })
-                                }
-                                className={`${styles.caret} ${
-                                  sort.sort_direction != SortDirection.DESC ||
-                                  sort.sort != Sort.day_change
-                                    ? styles.disabled
-                                    : ""
-                                }`}
-                              />
+                        <>
+                          <th className={styles.tdhSub}>
+                            <span className="d-flex align-items-center justify-content-center">
+                              Daily Change&nbsp; &nbsp;
+                              <span className="d-flex flex-column">
+                                <FontAwesomeIcon
+                                  icon="square-caret-up"
+                                  onClick={() =>
+                                    setSort({
+                                      sort: Sort.day_change,
+                                      sort_direction: SortDirection.ASC,
+                                    })
+                                  }
+                                  className={`${styles.caret} ${
+                                    sort.sort_direction != SortDirection.ASC ||
+                                    sort.sort != Sort.day_change
+                                      ? styles.disabled
+                                      : ""
+                                  }`}
+                                />
+                                <FontAwesomeIcon
+                                  icon="square-caret-down"
+                                  onClick={() =>
+                                    setSort({
+                                      sort: Sort.day_change,
+                                      sort_direction: SortDirection.DESC,
+                                    })
+                                  }
+                                  className={`${styles.caret} ${
+                                    sort.sort_direction != SortDirection.DESC ||
+                                    sort.sort != Sort.day_change
+                                      ? styles.disabled
+                                      : ""
+                                  }`}
+                                />
+                              </span>
                             </span>
-                          </span>
-                        </th>
+                          </th>
+                          <th className={styles.tdhSub}>
+                            <span className="d-flex align-items-center justify-content-center">
+                              vs Community&nbsp; &nbsp;
+                            </span>
+                          </th>
+                        </>
                       ) : (
                         <>
                           <th className={styles.tdhSub}>
@@ -1897,80 +1952,6 @@ export default function Leaderboard(props: Props) {
                           </span>
                         </span>
                       </th>
-                      {/* <th className={styles.tdhSub}>
-                        <span className="d-flex align-items-center justify-content-center">
-                          Meme Sets -1&nbsp;
-                          <span className="d-flex flex-column">
-                            <FontAwesomeIcon
-                              icon="square-caret-up"
-                              onClick={() =>
-                                setSort({
-                                  sort: Sort.memes_cards_sets_minus1,
-                                  sort_direction: SortDirection.ASC,
-                                })
-                              }
-                              className={`${styles.caret} ${
-                                sort.sort_direction != SortDirection.ASC ||
-                                sort.sort != Sort.memes_cards_sets_minus1
-                                  ? styles.disabled
-                                  : ""
-                              }`}
-                            />
-                            <FontAwesomeIcon
-                              icon="square-caret-down"
-                              onClick={() =>
-                                setSort({
-                                  sort: Sort.memes_cards_sets_minus1,
-                                  sort_direction: SortDirection.DESC,
-                                })
-                              }
-                              className={`${styles.caret} ${
-                                sort.sort_direction != SortDirection.DESC ||
-                                sort.sort != Sort.memes_cards_sets_minus1
-                                  ? styles.disabled
-                                  : ""
-                              }`}
-                            />
-                          </span>
-                        </span>
-                      </th> */}
-                      {/* <th className={styles.tdhSub}>
-                        <span className="d-flex align-items-center justify-content-center">
-                          Meme Sets -2&nbsp;
-                          <span className="d-flex flex-column">
-                            <FontAwesomeIcon
-                              icon="square-caret-up"
-                              onClick={() =>
-                                setSort({
-                                  sort: Sort.memes_cards_sets_minus2,
-                                  sort_direction: SortDirection.ASC,
-                                })
-                              }
-                              className={`${styles.caret} ${
-                                sort.sort_direction != SortDirection.ASC ||
-                                sort.sort != Sort.memes_cards_sets_minus2
-                                  ? styles.disabled
-                                  : ""
-                              }`}
-                            />
-                            <FontAwesomeIcon
-                              icon="square-caret-down"
-                              onClick={() =>
-                                setSort({
-                                  sort: Sort.memes_cards_sets_minus2,
-                                  sort_direction: SortDirection.DESC,
-                                })
-                              }
-                              className={`${styles.caret} ${
-                                sort.sort_direction != SortDirection.DESC ||
-                                sort.sort != Sort.memes_cards_sets_minus2
-                                  ? styles.disabled
-                                  : ""
-                              }`}
-                            />
-                          </span>
-                        </span>
-                      </th> */}
                       <th className={styles.tdhSub}>
                         <span className="d-flex align-items-center justify-content-center">
                           SZN1 Sets&nbsp;
@@ -2229,13 +2210,34 @@ export default function Leaderboard(props: Props) {
                                 )}
                               </td>
                               {view == VIEW.CONSOLIDATION ? (
-                                <td className={styles.tdhSub}>
-                                  {showLoader && !lead.day_change
-                                    ? "..."
-                                    : `${
-                                        lead.day_change > 0 ? `+` : ``
-                                      }${numberWithCommas(lead.day_change)}`}
-                                </td>
+                                <>
+                                  <td className={styles.tdhSub}>
+                                    {showLoader && !lead.day_change ? (
+                                      "..."
+                                    ) : (
+                                      <>
+                                        {lead.day_change > 0 ? `+` : ``}
+                                        {numberWithCommas(lead.day_change)}
+                                        {lead.day_change != 0 && (
+                                          <span className={styles.tdhBoost}>
+                                            &nbsp;(
+                                            {(
+                                              (lead.day_change /
+                                                lead.boosted_tdh) *
+                                              100
+                                            ).toFixed(2)}
+                                            %)
+                                          </span>
+                                        )}
+                                      </>
+                                    )}
+                                  </td>
+                                  <td className={styles.tdhSub}>
+                                    {showLoader && !lead.day_change
+                                      ? "..."
+                                      : `${calculateTdhVsCommunity(lead)}`}
+                                  </td>
+                                </>
                               ) : (
                                 <>
                                   <td className={styles.tdhSub}>
