@@ -28,7 +28,9 @@ export default function UserPageOverview(props: Props) {
       <Container className="no-padding">
         {props.tdh && props.tdh.balance > 0 && (
           <Row>
-            <Accordion alwaysOpen className={styles.userPageAccordion}>
+            <Accordion
+              defaultActiveKey="0"
+              className={styles.userPageAccordion}>
               <Accordion.Item
                 className={styles.userPageAccordionItem}
                 eventKey={"0"}>
@@ -419,7 +421,7 @@ export default function UserPageOverview(props: Props) {
         )}
         {showActivity && props.tdh && (
           <Row>
-            <Accordion alwaysOpen className={styles.userPageAccordion}>
+            <Accordion className={styles.userPageAccordion}>
               <Accordion.Item
                 className={`${styles.userPageAccordionItem} mt-4`}
                 eventKey={"1"}>
