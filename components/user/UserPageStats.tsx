@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { DBResponse } from "../../entities/IDBResponse";
 import { TDHHistory } from "../../entities/ITDH";
 import { fetchUrl } from "../../services/6529api";
-import { Bar, Line } from "react-chartjs-2";
+import { Bar } from "react-chartjs-2";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -62,7 +62,7 @@ const GRAPH_OPTIONS = {
 export default function UserPageStats(props: Props) {
   const [tdhHistory, setTdhHistory] = useState<TDHHistory[]>([]);
   const [tdhLabels, setTdhLabels] = useState<Date[]>([]);
-  const [pageSize, setPageSize] = useState(7);
+  const [pageSize, setPageSize] = useState(10);
 
   useEffect(() => {
     let url = `${process.env.API_ENDPOINT}/api/tdh_history?wallet=${props.ownerAddress}&page_size=${pageSize}`;
@@ -230,7 +230,7 @@ export default function UserPageStats(props: Props) {
   if (props.show && tdhHistory.length > 0) {
     return (
       <>
-        <Row className="pt-3">
+        {/* <Row className="pt-3">
           <Col className="d-flex align-items-center justify-content-end gap-2 pt-4">
             <span
               className={`${styles.statsTimeSelectionSpan} ${
@@ -247,7 +247,7 @@ export default function UserPageStats(props: Props) {
               1M
             </span>
           </Col>
-        </Row>
+        </Row> */}
         <Row className="pt-4 pb-4">
           <Col sm={12} md={{ span: 10, offset: 1 }}>
             <Container className="no-padding">
@@ -284,18 +284,24 @@ export default function UserPageStats(props: Props) {
             </Container>
           </Col>
         </Row>
-        <Row className="pt-4 pb-4">
-          <Col sm={12} md={{ span: 10, offset: 1 }}>
-            <Container className="no-padding">
-              <Row>
-                <h2 className="mb-0 font-color">Destroyed TDH Daily Change</h2>
-              </Row>
-              <Row className="pt-4">
-                <Col>{tdhHistory.length > 0 && <>{printDestroyedTDH()}</>}</Col>
-              </Row>
-            </Container>
-          </Col>
-        </Row>
+        {tdhHistory.some((t) => t.destroyed_boosted_tdh > 0) && (
+          <Row className="pt-4 pb-4">
+            <Col sm={12} md={{ span: 10, offset: 1 }}>
+              <Container className="no-padding">
+                <Row>
+                  <h2 className="mb-0 font-color">
+                    Destroyed TDH Daily Change
+                  </h2>
+                </Row>
+                <Row className="pt-4">
+                  <Col>
+                    {tdhHistory.length > 0 && <>{printDestroyedTDH()}</>}
+                  </Col>
+                </Row>
+              </Container>
+            </Col>
+          </Row>
+        )}
       </>
     );
   } else {
