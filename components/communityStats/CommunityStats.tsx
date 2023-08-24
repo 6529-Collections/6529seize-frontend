@@ -27,6 +27,34 @@ ChartJS.register(
   BarElement
 );
 
+const GRAPH_OPTIONS = {
+  scales: {
+    x: {
+      grid: {
+        color: "rgb(45, 45, 45)",
+      },
+      ticks: {
+        color: "rgb(154, 154, 154)",
+      },
+    },
+    y: {
+      grid: {
+        color: "rgb(45, 45, 45)",
+      },
+      ticks: {
+        color: "rgb(154, 154, 154)",
+      },
+    },
+  },
+  plugins: {
+    legend: {
+      labels: {
+        color: "rgb(200, 200, 200)",
+      },
+    },
+  },
+};
+
 export default function CommunityStats() {
   const [page, setPage] = useState(1);
 
@@ -85,7 +113,7 @@ export default function CommunityStats() {
 
     return (
       <>
-        <Bar data={data} />
+        <Bar data={data} options={GRAPH_OPTIONS} />
         {/* <Line data={data} /> */}
       </>
     );
@@ -124,7 +152,7 @@ export default function CommunityStats() {
 
     return (
       <>
-        <Bar data={data} />
+        <Bar data={data} options={GRAPH_OPTIONS} />
         {/* <Line data={data} /> */}
       </>
     );
@@ -163,7 +191,7 @@ export default function CommunityStats() {
 
     return (
       <>
-        <Bar data={data} />
+        <Bar data={data} options={GRAPH_OPTIONS} />
         {/* <Line data={data} /> */}
       </>
     );
@@ -202,7 +230,7 @@ export default function CommunityStats() {
 
     return (
       <>
-        <Bar data={data} />
+        <Bar data={data} options={GRAPH_OPTIONS} />
         {/* <Line data={data} /> */}
       </>
     );
