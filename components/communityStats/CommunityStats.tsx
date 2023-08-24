@@ -4,7 +4,7 @@ import { Container, Row, Col } from "react-bootstrap";
 import { DBResponse } from "../../entities/IDBResponse";
 import { fetchUrl } from "../../services/6529api";
 import { GlobalTDHHistory } from "../../entities/ITDH";
-import { Line } from "react-chartjs-2";
+import { Bar, Line } from "react-chartjs-2";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -12,6 +12,8 @@ import {
   PointElement,
   LineElement,
   Tooltip,
+  Legend,
+  BarElement,
 } from "chart.js";
 
 ChartJS.register(
@@ -19,7 +21,9 @@ ChartJS.register(
   LinearScale,
   PointElement,
   LineElement,
-  Tooltip
+  Tooltip,
+  Legend,
+  BarElement
 );
 
 export default function CommunityStats() {
@@ -44,46 +48,25 @@ export default function CommunityStats() {
       labels: tdhLabels,
       datasets: [
         {
-          label: "Net TDH",
+          label: "Net Boosted TDH",
           data: tdhLabels.map(
             (l) => tdhHistory.find((t) => t.date === l)?.net_boosted_tdh
           ),
-
           borderColor: "#48E85F",
           backgroundColor: "#48E85F",
         },
-      ],
-    };
-
-    return <Line data={data} />;
-  }
-
-  function printCreatedTDH() {
-    const data = {
-      labels: tdhLabels,
-      datasets: [
         {
-          label: "Total Created TDH",
+          label: "Net Unboosted TDH",
           data: tdhLabels.map(
-            (l) => tdhHistory.find((t) => t.date === l)?.created_boosted_tdh
+            (l) => tdhHistory.find((t) => t.date === l)?.net_tdh
           ),
           borderColor: "#3773F2",
           backgroundColor: "#3773F2",
         },
-      ],
-    };
-
-    return <Line data={data} />;
-  }
-
-  function printDestroyedTDH() {
-    const data = {
-      labels: tdhLabels,
-      datasets: [
         {
-          label: "Total Destroyed TDH",
+          label: "Net Unweighted TDH",
           data: tdhLabels.map(
-            (l) => tdhHistory.find((t) => t.date === l)?.destroyed_boosted_tdh
+            (l) => tdhHistory.find((t) => t.date === l)?.net_tdh__raw
           ),
           borderColor: "#DB4748",
           backgroundColor: "#DB4748",
@@ -91,7 +74,90 @@ export default function CommunityStats() {
       ],
     };
 
-    return <Line data={data} />;
+    return (
+      <>
+        <Bar data={data} />
+        <Line data={data} />
+      </>
+    );
+  }
+
+  function printCreatedTDH() {
+    const data = {
+      labels: tdhLabels,
+      datasets: [
+        {
+          label: "Created Boosted TDH",
+          data: tdhLabels.map(
+            (l) => tdhHistory.find((t) => t.date === l)?.created_boosted_tdh
+          ),
+          borderColor: "#48E85F",
+          backgroundColor: "#48E85F",
+        },
+        {
+          label: "Created Unboosted TDH",
+          data: tdhLabels.map(
+            (l) => tdhHistory.find((t) => t.date === l)?.created_tdh
+          ),
+          borderColor: "#3773F2",
+          backgroundColor: "#3773F2",
+        },
+        {
+          label: "Created Unweighted TDH",
+          data: tdhLabels.map(
+            (l) => tdhHistory.find((t) => t.date === l)?.created_tdh__raw
+          ),
+          borderColor: "#DB4748",
+          backgroundColor: "#DB4748",
+        },
+      ],
+    };
+
+    return (
+      <>
+        <Bar data={data} />
+        <Line data={data} />
+      </>
+    );
+  }
+
+  function printDestroyedTDH() {
+    const data = {
+      labels: tdhLabels,
+      datasets: [
+        {
+          label: "Destroyed Boosted TDH",
+          data: tdhLabels.map(
+            (l) => tdhHistory.find((t) => t.date === l)?.destroyed_boosted_tdh
+          ),
+          borderColor: "#48E85F",
+          backgroundColor: "#48E85F",
+        },
+        {
+          label: "Destroyed Unboosted TDH",
+          data: tdhLabels.map(
+            (l) => tdhHistory.find((t) => t.date === l)?.destroyed_tdh
+          ),
+          borderColor: "#3773F2",
+          backgroundColor: "#3773F2",
+        },
+        {
+          label: "Destroyed Unweighted TDH",
+          data: tdhLabels.map(
+            (l) => tdhHistory.find((t) => t.date === l)?.destroyed_tdh__raw
+          ),
+          borderColor: "#DB4748",
+          backgroundColor: "#DB4748",
+        },
+      ],
+    };
+
+    return (
+      <>
+        <Bar data={data} />
+        <Line data={data} />
+      </>
+    );
   }
 
   return (
