@@ -1,6 +1,6 @@
 import styles from "./CommunityStats.module.scss";
 import { useEffect, useState } from "react";
-import { Container, Row, Col } from "react-bootstrap";
+import { Container, Row, Col, Table } from "react-bootstrap";
 import { DBResponse } from "../../entities/IDBResponse";
 import { fetchUrl } from "../../services/6529api";
 import { GlobalTDHHistory } from "../../entities/ITDH";
@@ -15,6 +15,7 @@ import {
   Legend,
   BarElement,
 } from "chart.js";
+import { numberWithCommas } from "../../helpers/Helpers";
 
 ChartJS.register(
   CategoryScale,
@@ -32,7 +33,14 @@ export default function CommunityStats() {
   const [pageSize, setPageSize] = useState(7);
 
   const [tdhHistory, setTdhHistory] = useState<GlobalTDHHistory[]>([]);
+  const [latestHistory, setLatestHistory] = useState<GlobalTDHHistory>();
   const [tdhLabels, setTdhLabels] = useState<Date[]>([]);
+
+  function getEstimatedDaysUntil(x: number) {
+    const diff = x - latestHistory!.total_boosted_tdh;
+    const days = diff / latestHistory!.net_boosted_tdh;
+    return Math.round(days);
+  }
 
   useEffect(() => {
     let url = `${process.env.API_ENDPOINT}/api/tdh_global_history?page_size=${pageSize}&page=${page}`;
@@ -40,6 +48,7 @@ export default function CommunityStats() {
       const tdhH = response.data.reverse();
       setTdhHistory(tdhH);
       setTdhLabels(tdhH.map((t) => t.date));
+      setLatestHistory(tdhH[tdhH.length - 1]);
     });
   }, [pageSize]);
 
@@ -188,6 +197,71 @@ export default function CommunityStats() {
       </Row>
       {tdhHistory.length > 0 && (
         <>
+          <Row className="pt-4 pb-4 font-bolder">
+            <Col sm={12} md={{ span: 10, offset: 1 }}>
+              <Container className="no-padding">
+                <Row>
+                  <Col
+                    sm={12}
+                    md={6}
+                    lg={4}
+                    className="d-flex flex-column gap-2">
+                    <Table>
+                      <tbody>
+                        <tr>
+                          <td>Community TDH</td>
+                          <td className="text-right">
+                            {numberWithCommas(latestHistory!.total_boosted_tdh)}
+                          </td>
+                        </tr>
+                        <tr>
+                          <td>Daily Change</td>
+                          <td className="text-right">
+                            {numberWithCommas(latestHistory!.net_boosted_tdh)}
+                          </td>
+                        </tr>
+                        <tr>
+                          <td>Daily % Change</td>
+                          <td className="text-right">
+                            {(
+                              (latestHistory!.net_boosted_tdh /
+                                latestHistory!.total_boosted_tdh) *
+                              100
+                            ).toFixed(2)}
+                            %
+                          </td>
+                        </tr>
+                      </tbody>
+                    </Table>
+                  </Col>
+                  <Col sm={12} md={6} lg={{ span: 4, offset: 4 }}>
+                    <Table>
+                      <tbody>
+                        <tr>
+                          <td>Estimated days until 100M</td>
+                          <td className="text-right">
+                            {getEstimatedDaysUntil(100000000)}
+                          </td>
+                        </tr>
+                        <tr>
+                          <td>Estimated days until 150M</td>
+                          <td className="text-right">
+                            {getEstimatedDaysUntil(150000000)}
+                          </td>
+                        </tr>
+                        <tr>
+                          <td>Estimated days until 200M</td>
+                          <td className="text-right">
+                            {getEstimatedDaysUntil(200000000)}
+                          </td>
+                        </tr>
+                      </tbody>
+                    </Table>
+                  </Col>
+                </Row>
+              </Container>
+            </Col>
+          </Row>
           <Row className="pt-4 pb-4">
             <Col sm={12} md={{ span: 10, offset: 1 }}>
               <Container className="no-padding">
