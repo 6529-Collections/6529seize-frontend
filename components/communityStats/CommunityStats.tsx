@@ -4,7 +4,7 @@ import { Container, Row, Col, Table } from "react-bootstrap";
 import { DBResponse } from "../../entities/IDBResponse";
 import { fetchUrl } from "../../services/6529api";
 import { GlobalTDHHistory } from "../../entities/ITDH";
-import { Bar, Line } from "react-chartjs-2";
+import { Bar } from "react-chartjs-2";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -58,7 +58,7 @@ const GRAPH_OPTIONS = {
 export default function CommunityStats() {
   const [page, setPage] = useState(1);
 
-  const [pageSize, setPageSize] = useState(7);
+  const [pageSize, setPageSize] = useState(10);
 
   const [tdhHistory, setTdhHistory] = useState<GlobalTDHHistory[]>([]);
   const [latestHistory, setLatestHistory] = useState<GlobalTDHHistory>();
@@ -242,7 +242,7 @@ export default function CommunityStats() {
         <Col sm={12} md={8} className="pt-4">
           <h1 className="mb-0">COMMUNITY STATS</h1>
         </Col>
-        <Col
+        {/* <Col
           sm={12}
           md={4}
           className="d-flex align-items-center justify-content-end gap-2 pt-4">
@@ -260,7 +260,7 @@ export default function CommunityStats() {
             onClick={() => setPageSize(30)}>
             1M
           </span>
-        </Col>
+        </Col> */}
       </Row>
       {tdhHistory.length > 0 && (
         <>
