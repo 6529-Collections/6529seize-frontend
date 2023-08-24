@@ -317,9 +317,9 @@ export default function CommunityStats() {
                           </td>
                         </tr>
                         <tr>
-                          <td>Estimated days until 1B</td>
+                          <td>Estimated days until 500M</td>
                           <td className="text-right">
-                            {getEstimatedDaysUntil(1000000000)}
+                            {getEstimatedDaysUntil(500000000)}
                           </td>
                         </tr>
                       </tbody>
