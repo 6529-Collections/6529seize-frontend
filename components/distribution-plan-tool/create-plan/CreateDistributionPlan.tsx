@@ -4,9 +4,9 @@ import { distributionPlanApiPost } from "../../../services/distribution-plan-api
 import { AllowlistDescription } from "../../allowlist-tool/allowlist-tool.types";
 
 export default function CreateDistributionPlan({
-  onClose,
+  onSuccess,
 }: {
-  onClose: () => void;
+  onSuccess: (distributionPlanId: string) => void;
 }) {
   const [formValues, setFormValues] = useState({
     name: "",
@@ -24,16 +24,17 @@ export default function CreateDistributionPlan({
   const createPlan = async () => {
     if (!formValues.name || !formValues.description) return;
     setIsLoading(true);
-    const { success } = await distributionPlanApiPost<AllowlistDescription>({
-      endpoint: "/allowlists",
-      body: {
-        name: formValues.name,
-        description: formValues.description,
-      },
-    });
+    const { success, data } =
+      await distributionPlanApiPost<AllowlistDescription>({
+        endpoint: "/allowlists",
+        body: {
+          name: formValues.name,
+          description: formValues.description,
+        },
+      });
     setIsLoading(false);
-    if (success) {
-      onClose();
+    if (success && data?.id) {
+      onSuccess(data.id);
     }
   };
 
