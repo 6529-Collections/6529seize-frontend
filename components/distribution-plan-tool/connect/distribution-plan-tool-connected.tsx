@@ -1,4 +1,3 @@
-import { AllowlistDescription } from "../../allowlist-tool/allowlist-tool.types";
 import { useSignMessage } from "wagmi";
 import {
   distributionPlanApiFetch,
@@ -6,8 +5,7 @@ import {
   removeDistributionPlanCookie,
   setDistributionPlanCookie,
 } from "../../../services/distribution-plan-api";
-import "react-toastify/dist/ReactToastify.css";
-import { ToastContainer } from "react-toastify";
+
 import { makeErrorToast } from "../../../services/distribution-plan.utils";
 import { useEffect } from "react";
 import { useRouter } from "next/router";
@@ -225,7 +223,7 @@ l9.8-33.1l0,0h0l-10.6-32.4 M70.7,152.1L70.7,152.1L70.7,152.1"
           Continue with Metamask
         </button>
       </div>
-      <ToastContainer />
+
     </div>
   );
 }

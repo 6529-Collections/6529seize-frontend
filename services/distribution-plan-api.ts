@@ -42,7 +42,11 @@ export async function distributionPlanApiFetch<T>(endpoint: string): Promise<{
     }
 
     if (typeof data === "object" && "error" in data) {
-      makeErrorToast(data.error);
+      makeErrorToast(
+        typeof data.message === "string"
+          ? data.message
+          : data.message.join(", ")
+      );
       return {
         success: false,
         data: null,
@@ -99,9 +103,12 @@ export const distributionPlanApiPost = async <T>({
     }
 
     const data: AllowlistToolResponse<T> = await res.json();
-
     if (data && typeof data === "object" && "error" in data) {
-      makeErrorToast(data.error);
+      makeErrorToast(
+        typeof data.message === "string"
+          ? data.message
+          : data.message.join(", ")
+      );
       return {
         success: false,
         data: null,

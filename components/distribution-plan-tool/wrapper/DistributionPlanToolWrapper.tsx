@@ -5,7 +5,9 @@ import { Poppins } from "next/font/google";
 import { useEffect, useState } from "react";
 import { useAccount } from "wagmi";
 import { useRouter } from "next/router";
-import { removeDistributionPlanCookie } from "../../../services/distribution-plan-api";
+import "react-toastify/dist/ReactToastify.css";
+import { ToastContainer } from "react-toastify";
+
 const Header = dynamic(() => import("../../header/Header"), {
   ssr: false,
   loading: () => <HeaderPlaceholder />,
@@ -50,6 +52,7 @@ export default function DistributionPlanToolWrapper({
           {children}
         </div>
       </div>
+            <ToastContainer />
     </>
   );
 }
