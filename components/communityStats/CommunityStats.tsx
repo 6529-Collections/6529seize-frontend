@@ -52,6 +52,45 @@ export default function CommunityStats() {
     });
   }, [pageSize]);
 
+  function printTotalTDH() {
+    const data = {
+      labels: tdhLabels,
+      datasets: [
+        {
+          label: "Total Boosted TDH",
+          data: tdhLabels.map(
+            (l) => tdhHistory.find((t) => t.date === l)?.total_boosted_tdh
+          ),
+          borderColor: "#00DC21",
+          backgroundColor: "#00DC21",
+        },
+        {
+          label: "Total Unboosted TDH",
+          data: tdhLabels.map(
+            (l) => tdhHistory.find((t) => t.date === l)?.total_tdh
+          ),
+          borderColor: "#1861FF",
+          backgroundColor: "#1861FF",
+        },
+        {
+          label: "Total Unweighted TDH",
+          data: tdhLabels.map(
+            (l) => tdhHistory.find((t) => t.date === l)?.total_tdh__raw
+          ),
+          borderColor: "#e55137",
+          backgroundColor: "#e55137",
+        },
+      ],
+    };
+
+    return (
+      <>
+        <Bar data={data} />
+        {/* <Line data={data} /> */}
+      </>
+    );
+  }
+
   function printNetTDH() {
     const data = {
       labels: tdhLabels,
@@ -61,24 +100,24 @@ export default function CommunityStats() {
           data: tdhLabels.map(
             (l) => tdhHistory.find((t) => t.date === l)?.net_boosted_tdh
           ),
-          borderColor: "#48E85F",
-          backgroundColor: "#48E85F",
+          borderColor: "#00DC21",
+          backgroundColor: "#00DC21",
         },
         {
           label: "Net Unboosted TDH",
           data: tdhLabels.map(
             (l) => tdhHistory.find((t) => t.date === l)?.net_tdh
           ),
-          borderColor: "#3773F2",
-          backgroundColor: "#3773F2",
+          borderColor: "#1861FF",
+          backgroundColor: "#1861FF",
         },
         {
           label: "Net Unweighted TDH",
           data: tdhLabels.map(
             (l) => tdhHistory.find((t) => t.date === l)?.net_tdh__raw
           ),
-          borderColor: "#DB4748",
-          backgroundColor: "#DB4748",
+          borderColor: "#e55137",
+          backgroundColor: "#e55137",
         },
       ],
     };
@@ -86,7 +125,7 @@ export default function CommunityStats() {
     return (
       <>
         <Bar data={data} />
-        <Line data={data} />
+        {/* <Line data={data} /> */}
       </>
     );
   }
@@ -100,24 +139,24 @@ export default function CommunityStats() {
           data: tdhLabels.map(
             (l) => tdhHistory.find((t) => t.date === l)?.created_boosted_tdh
           ),
-          borderColor: "#48E85F",
-          backgroundColor: "#48E85F",
+          borderColor: "#00DC21",
+          backgroundColor: "#00DC21",
         },
         {
           label: "Created Unboosted TDH",
           data: tdhLabels.map(
             (l) => tdhHistory.find((t) => t.date === l)?.created_tdh
           ),
-          borderColor: "#3773F2",
-          backgroundColor: "#3773F2",
+          borderColor: "#1861FF",
+          backgroundColor: "#1861FF",
         },
         {
           label: "Created Unweighted TDH",
           data: tdhLabels.map(
             (l) => tdhHistory.find((t) => t.date === l)?.created_tdh__raw
           ),
-          borderColor: "#DB4748",
-          backgroundColor: "#DB4748",
+          borderColor: "#e55137",
+          backgroundColor: "#e55137",
         },
       ],
     };
@@ -125,7 +164,7 @@ export default function CommunityStats() {
     return (
       <>
         <Bar data={data} />
-        <Line data={data} />
+        {/* <Line data={data} /> */}
       </>
     );
   }
@@ -139,24 +178,24 @@ export default function CommunityStats() {
           data: tdhLabels.map(
             (l) => tdhHistory.find((t) => t.date === l)?.destroyed_boosted_tdh
           ),
-          borderColor: "#48E85F",
-          backgroundColor: "#48E85F",
+          borderColor: "#00DC21",
+          backgroundColor: "#00DC21",
         },
         {
           label: "Destroyed Unboosted TDH",
           data: tdhLabels.map(
             (l) => tdhHistory.find((t) => t.date === l)?.destroyed_tdh
           ),
-          borderColor: "#3773F2",
-          backgroundColor: "#3773F2",
+          borderColor: "#1861FF",
+          backgroundColor: "#1861FF",
         },
         {
           label: "Destroyed Unweighted TDH",
           data: tdhLabels.map(
             (l) => tdhHistory.find((t) => t.date === l)?.destroyed_tdh__raw
           ),
-          borderColor: "#DB4748",
-          backgroundColor: "#DB4748",
+          borderColor: "#e55137",
+          backgroundColor: "#e55137",
         },
       ],
     };
@@ -164,7 +203,7 @@ export default function CommunityStats() {
     return (
       <>
         <Bar data={data} />
-        <Line data={data} />
+        {/* <Line data={data} /> */}
       </>
     );
   }
@@ -238,12 +277,6 @@ export default function CommunityStats() {
                     <Table>
                       <tbody>
                         <tr>
-                          <td>Estimated days until 100M</td>
-                          <td className="text-right">
-                            {getEstimatedDaysUntil(100000000)}
-                          </td>
-                        </tr>
-                        <tr>
                           <td>Estimated days until 150M</td>
                           <td className="text-right">
                             {getEstimatedDaysUntil(150000000)}
@@ -253,6 +286,12 @@ export default function CommunityStats() {
                           <td>Estimated days until 200M</td>
                           <td className="text-right">
                             {getEstimatedDaysUntil(200000000)}
+                          </td>
+                        </tr>
+                        <tr>
+                          <td>Estimated days until 1B</td>
+                          <td className="text-right">
+                            {getEstimatedDaysUntil(1000000000)}
                           </td>
                         </tr>
                       </tbody>
@@ -266,7 +305,19 @@ export default function CommunityStats() {
             <Col sm={12} md={{ span: 10, offset: 1 }}>
               <Container className="no-padding">
                 <Row>
-                  <h2 className="mb-0 font-color">Net TDH</h2>
+                  <h2 className="mb-0 font-color">Total TDH</h2>
+                </Row>
+                <Row className="pt-4">
+                  <Col>{printTotalTDH()}</Col>
+                </Row>
+              </Container>
+            </Col>
+          </Row>
+          <Row className="pt-4 pb-4">
+            <Col sm={12} md={{ span: 10, offset: 1 }}>
+              <Container className="no-padding">
+                <Row>
+                  <h2 className="mb-0 font-color">Net TDH Daily Change</h2>
                 </Row>
                 <Row className="pt-4">
                   <Col>{printNetTDH()}</Col>
@@ -278,7 +329,7 @@ export default function CommunityStats() {
             <Col sm={12} md={{ span: 10, offset: 1 }}>
               <Container className="no-padding">
                 <Row>
-                  <h2 className="mb-0 font-color">Created TDH</h2>
+                  <h2 className="mb-0 font-color">Created TDH Daily Change</h2>
                 </Row>
                 <Row className="pt-4">
                   <Col>{printCreatedTDH()}</Col>
@@ -290,7 +341,7 @@ export default function CommunityStats() {
             <Col sm={12} md={{ span: 10, offset: 1 }}>
               <Container className="no-padding">
                 <Row>
-                  <h2 className="mb-0 font-color">Destroyed TDH</h2>
+                  <h2 className="mb-0 font-color">Destroyed TDH Change</h2>
                 </Row>
                 <Row className="pt-4">
                   <Col>{printDestroyedTDH()}</Col>

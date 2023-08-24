@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { DBResponse } from "../../entities/IDBResponse";
 import { TDHHistory } from "../../entities/ITDH";
 import { fetchUrl } from "../../services/6529api";
-import { Line } from "react-chartjs-2";
+import { Bar, Line } from "react-chartjs-2";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -12,6 +12,7 @@ import {
   PointElement,
   LineElement,
   Tooltip,
+  BarElement,
 } from "chart.js";
 
 ChartJS.register(
@@ -19,7 +20,8 @@ ChartJS.register(
   LinearScale,
   PointElement,
   LineElement,
-  Tooltip
+  Tooltip,
+  BarElement
 );
 
 interface Props {
@@ -41,22 +43,80 @@ export default function UserPageStats(props: Props) {
     });
   }, [props.ownerAddress, pageSize]);
 
+  function printTotalTDH() {
+    const data = {
+      labels: tdhLabels,
+      datasets: [
+        {
+          label: "Total Boosted TDH",
+          data: tdhLabels.map(
+            (l) => tdhHistory.find((t) => t.date === l)?.boosted_tdh
+          ),
+          borderColor: "#00DC21",
+          backgroundColor: "#00DC21",
+        },
+        {
+          label: "Total Unboosted TDH",
+          data: tdhLabels.map((l) => tdhHistory.find((t) => t.date === l)?.tdh),
+          borderColor: "#1861FF",
+          backgroundColor: "#1861FF",
+        },
+        {
+          label: "Total Unweighted TDH",
+          data: tdhLabels.map(
+            (l) => tdhHistory.find((t) => t.date === l)?.tdh__raw
+          ),
+          borderColor: "#e55137",
+          backgroundColor: "#e55137",
+        },
+      ],
+    };
+
+    return (
+      <>
+        <Bar data={data} />
+        {/* <Line data={data} /> */}
+      </>
+    );
+  }
+
   function printNetTDH() {
     const data = {
       labels: tdhLabels,
       datasets: [
         {
-          label: "Net TDH",
+          label: "Net Boosted TDH",
           data: tdhLabels.map(
             (l) => tdhHistory.find((t) => t.date === l)?.net_boosted_tdh
           ),
-          borderColor: "#48E85F",
-          backgroundColor: "#48E85F",
+          borderColor: "#00DC21",
+          backgroundColor: "#00DC21",
+        },
+        {
+          label: "Net Unboosted TDH",
+          data: tdhLabels.map(
+            (l) => tdhHistory.find((t) => t.date === l)?.net_tdh
+          ),
+          borderColor: "#1861FF",
+          backgroundColor: "#1861FF",
+        },
+        {
+          label: "Net Unweighted TDH",
+          data: tdhLabels.map(
+            (l) => tdhHistory.find((t) => t.date === l)?.net_tdh__raw
+          ),
+          borderColor: "#e55137",
+          backgroundColor: "#e55137",
         },
       ],
     };
 
-    return <Line data={data} />;
+    return (
+      <>
+        <Bar data={data} />
+        {/* <Line data={data} /> */}
+      </>
+    );
   }
 
   function printCreatedTDH() {
@@ -64,17 +124,38 @@ export default function UserPageStats(props: Props) {
       labels: tdhLabels,
       datasets: [
         {
-          label: "Created TDH",
+          label: "Created Boosted TDH",
           data: tdhLabels.map(
             (l) => tdhHistory.find((t) => t.date === l)?.created_boosted_tdh
           ),
-          borderColor: "#3773F2",
-          backgroundColor: "#3773F2",
+          borderColor: "#00DC21",
+          backgroundColor: "#00DC21",
+        },
+        {
+          label: "Created Unboosted TDH",
+          data: tdhLabels.map(
+            (l) => tdhHistory.find((t) => t.date === l)?.created_tdh
+          ),
+          borderColor: "#1861FF",
+          backgroundColor: "#1861FF",
+        },
+        {
+          label: "Created Unweighted TDH",
+          data: tdhLabels.map(
+            (l) => tdhHistory.find((t) => t.date === l)?.created_tdh__raw
+          ),
+          borderColor: "#e55137",
+          backgroundColor: "#e55137",
         },
       ],
     };
 
-    return <Line data={data} />;
+    return (
+      <>
+        <Bar data={data} />
+        {/* <Line data={data} /> */}
+      </>
+    );
   }
 
   function printDestroyedTDH() {
@@ -82,17 +163,38 @@ export default function UserPageStats(props: Props) {
       labels: tdhLabels,
       datasets: [
         {
-          label: "Destroyed TDH",
+          label: "Destroyed Boosted TDH",
           data: tdhLabels.map(
             (l) => tdhHistory.find((t) => t.date === l)?.destroyed_boosted_tdh
           ),
-          borderColor: "#DB4748",
-          backgroundColor: "#DB4748",
+          borderColor: "#00DC21",
+          backgroundColor: "#00DC21",
+        },
+        {
+          label: "Destroyed Unboosted TDH",
+          data: tdhLabels.map(
+            (l) => tdhHistory.find((t) => t.date === l)?.destroyed_tdh
+          ),
+          borderColor: "#1861FF",
+          backgroundColor: "#1861FF",
+        },
+        {
+          label: "Destroyed Unweighted TDH",
+          data: tdhLabels.map(
+            (l) => tdhHistory.find((t) => t.date === l)?.destroyed_tdh__raw
+          ),
+          borderColor: "#e55137",
+          backgroundColor: "#e55137",
         },
       ],
     };
 
-    return <Line data={data} />;
+    return (
+      <>
+        <Bar data={data} />
+        {/* <Line data={data} /> */}
+      </>
+    );
   }
 
   if (props.show && tdhHistory.length > 0) {
@@ -120,7 +222,19 @@ export default function UserPageStats(props: Props) {
           <Col sm={12} md={{ span: 10, offset: 1 }}>
             <Container className="no-padding">
               <Row>
-                <h2 className="mb-0 font-color">Net TDH</h2>
+                <h2 className="mb-0 font-color">Total TDH</h2>
+              </Row>
+              <Row className="pt-4">
+                <Col>{tdhHistory.length > 0 && <>{printTotalTDH()}</>}</Col>
+              </Row>
+            </Container>
+          </Col>
+        </Row>
+        <Row className="pt-4 pb-4">
+          <Col sm={12} md={{ span: 10, offset: 1 }}>
+            <Container className="no-padding">
+              <Row>
+                <h2 className="mb-0 font-color">Net TDH Daily Change</h2>
               </Row>
               <Row className="pt-4">
                 <Col>{tdhHistory.length > 0 && <>{printNetTDH()}</>}</Col>
@@ -132,7 +246,7 @@ export default function UserPageStats(props: Props) {
           <Col sm={12} md={{ span: 10, offset: 1 }}>
             <Container className="no-padding">
               <Row>
-                <h2 className="mb-0 font-color">Created TDH</h2>
+                <h2 className="mb-0 font-color">Created TDH Daily Change</h2>
               </Row>
               <Row className="pt-4">
                 <Col>{tdhHistory.length > 0 && <>{printCreatedTDH()}</>}</Col>
@@ -144,7 +258,7 @@ export default function UserPageStats(props: Props) {
           <Col sm={12} md={{ span: 10, offset: 1 }}>
             <Container className="no-padding">
               <Row>
-                <h2 className="mb-0 font-color">Destroyed TDH</h2>
+                <h2 className="mb-0 font-color">Destroyed TDH Daily Change</h2>
               </Row>
               <Row className="pt-4">
                 <Col>{tdhHistory.length > 0 && <>{printDestroyedTDH()}</>}</Col>
