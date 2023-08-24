@@ -206,6 +206,9 @@ export interface GlobalTDHHistory extends TDHCalc {
 export interface TDHHistory extends TDHCalc {
   consolidation_display: string;
   wallets: `0x${string}`[];
+  boosted_tdh: number;
+  tdh: number;
+  tdh__raw: number;
   created_tdh: number;
   destroyed_tdh: number;
   net_tdh: number;
