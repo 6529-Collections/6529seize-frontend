@@ -1345,7 +1345,7 @@ export default function Leaderboard(props: Props) {
           {globalTdhHistory && (
             <Container className="pb-3">
               <Row>
-                <Col className="text-center">
+                <Col className="d-flex flex-wrap justify-content-center">
                   <b>
                     Community TDH:{" "}
                     {numberWithCommas(globalTdhHistory.total_boosted_tdh)}

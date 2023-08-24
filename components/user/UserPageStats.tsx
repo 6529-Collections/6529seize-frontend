@@ -12,6 +12,7 @@ import {
   PointElement,
   LineElement,
   Tooltip,
+  Legend,
   BarElement,
 } from "chart.js";
 
@@ -21,6 +22,7 @@ ChartJS.register(
   PointElement,
   LineElement,
   Tooltip,
+  Legend,
   BarElement
 );
 
@@ -28,6 +30,34 @@ interface Props {
   show: boolean;
   ownerAddress: `0x${string}` | undefined;
 }
+
+const GRAPH_OPTIONS = {
+  scales: {
+    x: {
+      grid: {
+        color: "rgb(45, 45, 45)",
+      },
+      ticks: {
+        color: "rgb(154, 154, 154)",
+      },
+    },
+    y: {
+      grid: {
+        color: "rgb(45, 45, 45)",
+      },
+      ticks: {
+        color: "rgb(154, 154, 154)",
+      },
+    },
+  },
+  plugins: {
+    legend: {
+      labels: {
+        color: "rgb(200, 200, 200)",
+      },
+    },
+  },
+};
 
 export default function UserPageStats(props: Props) {
   const [tdhHistory, setTdhHistory] = useState<TDHHistory[]>([]);
@@ -74,7 +104,7 @@ export default function UserPageStats(props: Props) {
 
     return (
       <>
-        <Bar data={data} />
+        <Bar data={data} options={GRAPH_OPTIONS} />
         {/* <Line data={data} /> */}
       </>
     );
@@ -113,7 +143,7 @@ export default function UserPageStats(props: Props) {
 
     return (
       <>
-        <Bar data={data} />
+        <Bar data={data} options={GRAPH_OPTIONS} />
         {/* <Line data={data} /> */}
       </>
     );
@@ -152,7 +182,7 @@ export default function UserPageStats(props: Props) {
 
     return (
       <>
-        <Bar data={data} />
+        <Bar data={data} options={GRAPH_OPTIONS} />
         {/* <Line data={data} /> */}
       </>
     );
@@ -191,7 +221,7 @@ export default function UserPageStats(props: Props) {
 
     return (
       <>
-        <Bar data={data} />
+        <Bar data={data} options={GRAPH_OPTIONS} />
         {/* <Line data={data} /> */}
       </>
     );
