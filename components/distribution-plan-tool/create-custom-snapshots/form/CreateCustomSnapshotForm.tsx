@@ -14,6 +14,7 @@ import {
 import DistributionPlanAddOperationBtn from "../../common/DistributionPlanAddOperationBtn";
 import CreateCustomSnapshotFormUpload from "./CreateCustomSnapshotFormUpload";
 import CreateCustomSnapshotFormTable from "./CreateCustomSnapshotFormTable";
+import { distributionPlanApiPost } from "../../../../services/distribution-plan-api";
 
 export default function CreateCustomSnapshotForm() {
   const { distributionPlan, setToasts, fetchOperations } = useContext(
@@ -43,34 +44,13 @@ export default function CreateCustomSnapshotForm() {
   const resolveEns = async (ens: string[]): Promise<ResolvedEns[]> => {
     if (!ens.length) return [];
     setIsLoading(true);
-    const url = `${process.env.ALLOWLIST_API_ENDPOINT}/other/resolve-ens-to-address`;
-    try {
-      const response = await fetch(url, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(ens),
-      });
-      const data: AllowlistToolResponse<ResolvedEns[]> = await response.json();
-      if ("error" in data) {
-        setToasts({
-          messages:
-            typeof data.message === "string" ? [data.message] : data.message,
-          type: "error",
-        });
-        return [];
-      }
-      return data;
-    } catch (error) {
-      setToasts({
-        messages: ["Something went wrong"],
-        type: "error",
-      });
-      return [];
-    } finally {
-      setIsLoading(false);
-    }
+    const endpoint = `/other/resolve-ens-to-address`;
+    const { data } = await distributionPlanApiPost<ResolvedEns[]>({
+      endpoint,
+      body: ens,
+    });
+    setIsLoading(false);
+    return data ?? [];
   };
 
   const addCustomTokenPool = async (): Promise<string | null> => {
@@ -107,20 +87,17 @@ export default function CreateCustomSnapshotForm() {
     });
     if (!distributionPlan) return null;
     setIsLoading(true);
-    try {
-      if (tokens.length === 0) {
-        setToasts({ messages: ["No tokens provided"], type: "error" });
-        setIsLoading(false);
-        return null;
-      }
-      const url = `${process.env.ALLOWLIST_API_ENDPOINT}/allowlists/${distributionPlan.id}/operations`;
-      const customTokenPoolId = getRandomObjectId();
-      const response = await fetch(url, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
+    if (tokens.length === 0) {
+      setToasts({ messages: ["No tokens provided"], type: "error" });
+      return null;
+    }
+    setIsLoading(true);
+    const endpoint = `/allowlists/${distributionPlan.id}/operations`;
+    const customTokenPoolId = getRandomObjectId();
+    const { success } = await distributionPlanApiPost<AllowlistOperation>(
+      {
+        endpoint,
+        body: {
           code: AllowlistOperationCode.CREATE_CUSTOM_TOKEN_POOL,
           params: {
             id: customTokenPoolId,
@@ -128,34 +105,21 @@ export default function CreateCustomSnapshotForm() {
             description: formValues.name,
             tokens: tokensWithResolvedEns,
           },
-        }),
-      });
-      const data: AllowlistToolResponse<AllowlistOperation> =
-        await response.json();
-      if ("error" in data) {
-        setToasts({
-          messages:
-            typeof data.message === "string" ? [data.message] : data.message,
-          type: "error",
-        });
-        return null;
+        },
       }
-      fetchOperations(distributionPlan.id);
-      setFormValues({
-        name: "",
-      });
-      setTokens([]);
-      setFileName(null);
-      return customTokenPoolId;
-    } catch (error) {
-      setToasts({
-        messages: ["Something went wrong"],
-        type: "error",
-      });
+    );
+    setIsLoading(false);
+    if (!success) {
       return null;
-    } finally {
-      setIsLoading(false);
     }
+
+    fetchOperations(distributionPlan.id);
+    setFormValues({
+      name: "",
+    });
+    setTokens([]);
+    setFileName(null);
+    return customTokenPoolId;
   };
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {

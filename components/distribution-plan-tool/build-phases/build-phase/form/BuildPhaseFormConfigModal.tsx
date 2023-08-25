@@ -23,6 +23,10 @@ import FinalizeComponent from "./component-config/FinalizeComponent";
 import SnapshotExcludeOtherSnapshots from "./component-config/SnapshotExcludeOtherSnapshots";
 import { useDebounce } from "react-use";
 import { ComponentRandomHoldersWeightType } from "./component-config/utils/ComponentRandomHoldersWeight";
+import {
+  distributionPlanApiFetch,
+  distributionPlanApiPost,
+} from "../../../../../services/distribution-plan-api";
 
 export enum PhaseConfigStep {
   SELECT_SNAPSHOT = "SELECT_SNAPSHOT",
@@ -223,28 +227,15 @@ export default function BuildPhaseFormConfigModal({
       return null;
     }
     const contract = tokenPool.params.contract;
-    const url = `${process.env.ALLOWLIST_API_ENDPOINT}/other/contract-metadata/${contract}`;
+    const endpoint = `/other/contract-metadata/${contract}`;
     setIsLoadingContractSchema(true);
-    try {
-      const response = await fetch(url, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
+    const { data } =
+      await distributionPlanApiFetch<DistributionPlanSearchContractMetadataResult | null>(
+        endpoint
+      );
 
-      const data: AllowlistToolResponse<DistributionPlanSearchContractMetadataResult | null> =
-        await response.json();
-
-      if (data && "error" in data) {
-        return null;
-      }
-      return data?.tokenType ?? null;
-    } catch (error) {
-      return null;
-    } finally {
-      setIsLoadingContractSchema(false);
-    }
+    setIsLoadingContractSchema(false);
+    return data?.tokenType ?? null;
   };
 
   const onSelectSnapshot = async ({
@@ -435,34 +426,16 @@ export default function BuildPhaseFormConfigModal({
     }[];
     distributionPlanId: string;
   }): Promise<{ success: boolean }> => {
-    const url = `${process.env.ALLOWLIST_API_ENDPOINT}/allowlists/${distributionPlanId}/operations/batch`;
-    try {
-      const response = await fetch(url, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(ops),
-      });
-      const data: AllowlistToolResponse<AllowlistOperation[]> =
-        await response.json();
-      if ("error" in data) {
-        setToasts({
-          messages:
-            typeof data.message === "string" ? [data.message] : data.message,
-          type: "error",
-        });
-        return { success: false };
-      }
-      await fetchOperations(distributionPlanId);
-      return { success: true };
-    } catch (error) {
-      setToasts({
-        messages: ["Something went wrong. Please try again."],
-        type: "error",
-      });
+    const endpoint = `/allowlists/${distributionPlanId}/operations/batch`;
+    const { success } = await distributionPlanApiPost<AllowlistOperation[]>({
+      endpoint,
+      body: ops,
+    });
+    if (!success) {
       return { success: false };
     }
+    await fetchOperations(distributionPlanId);
+    return { success: true };
   };
 
   const [newOperations, setNewOperations] = useState<AllowlistOperationBase[]>(
@@ -790,39 +763,24 @@ export default function BuildPhaseFormConfigModal({
 
   useEffect(() => {
     const getUniqueWalletsCount = async (distributionPlanId: string) => {
-      const url = `${process.env.ALLOWLIST_API_ENDPOINT}/allowlists/${distributionPlanId}/unique-wallets-count`;
+      const endpoint = `/allowlists/${distributionPlanId}/unique-wallets-count`;
       const uniqueId = getRandomObjectId();
       setLoadingUniqueWalletsCountIds((ids) => [...ids, uniqueId]);
-      try {
-        const response = await fetch(url, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(debouncedUniqueCountOps),
-        });
-        const data: AllowlistToolResponse<number> = await response.json();
-        if (typeof data !== "number" && "error" in data) {
-          setToasts({
-            messages:
-              typeof data.message === "string" ? [data.message] : data.message,
-            type: "error",
-          });
-          return { success: false };
-        }
-        setUniqueWalletsCountByOperations(data);
-        return { success: true };
-      } catch (error) {
-        setToasts({
-          messages: ["Something went wrong. Please try again."],
-          type: "error",
-        });
-        return { success: false };
-      } finally {
+      const { success, data } = await distributionPlanApiPost<number>({
+        endpoint,
+        body: debouncedUniqueCountOps,
+      });
+      if (!success) {
         setLoadingUniqueWalletsCountIds((ids) =>
           ids.filter((id) => id !== uniqueId)
         );
+        return { success: false };
       }
+      setUniqueWalletsCountByOperations(data);
+      setLoadingUniqueWalletsCountIds((ids) =>
+        ids.filter((id) => id !== uniqueId)
+      );
+      return { success: true };
     };
 
     if (!distributionPlan) {

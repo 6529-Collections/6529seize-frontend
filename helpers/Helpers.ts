@@ -229,6 +229,7 @@ export function printMintDate(date: Date) {
     `;
 }
 
+
 export function getNetworkName(chainId: number) {
   if (chainId === mainnet.id) {
     return "Etherium Mainnet";

@@ -1,9 +1,24 @@
-export default function AllowlistToolLoader() {
+export enum AllowlistToolLoaderSize {
+  SMALL = "SMALL",
+  MEDIUM = "MEDIUM",
+  LARGE = "LARGE",
+}
+
+export default function AllowlistToolLoader({
+  size = AllowlistToolLoaderSize.SMALL,
+}: {
+  size?: AllowlistToolLoaderSize;
+}) {
+  const sizes: Record<AllowlistToolLoaderSize, string> = {
+    [AllowlistToolLoaderSize.SMALL]: "tw-w-5 tw-h-5",
+    [AllowlistToolLoaderSize.MEDIUM]: "tw-w-10 tw-h-10",
+    [AllowlistToolLoaderSize.LARGE]: "tw-w-20 tw-h-20",
+  };
   return (
     <svg
       aria-hidden="true"
       role="status"
-      className="tw-inline tw-w-5 tw-h-5 tw-text-primary-400 tw-animate-spin "
+      className={`tw-inline tw-text-primary-400 tw-animate-spin ${sizes[size]}`}
       viewBox="0 0 100 101"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"

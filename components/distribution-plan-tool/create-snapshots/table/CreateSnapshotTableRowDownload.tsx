@@ -8,6 +8,7 @@ import {
 import { assertUnreachable } from "../../../../helpers/AllowlistToolHelpers";
 import RoundedJsonIconButton from "../../common/RoundedJsonIconButton";
 import RoundedCsvIconButton from "../../common/RoundedCsvIconButton";
+import { distributionPlanApiFetch } from "../../../../services/distribution-plan-api";
 
 export default function CreateSnapshotTableRowDownload({
   tokenPoolId,
@@ -54,46 +55,27 @@ export default function CreateSnapshotTableRowDownload({
   const fetchResults = async (fetchType: FetchResultsType) => {
     if (!distributionPlan) return;
     if (loadingType) return;
-    const url = `${process.env.ALLOWLIST_API_ENDPOINT}/allowlists/${distributionPlan.id}/token-pool-downloads/token-pool/${tokenPoolId}/tokens`;
     setLoadingType(fetchType);
-    try {
-      const response = await fetch(url, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-      const data: AllowlistToolResponse<DistributionPlanSnapshotToken[]> =
-        await response.json();
-      if ("error" in data) {
-        setToasts({
-          messages:
-            typeof data.message === "string" ? [data.message] : data.message,
-          type: "error",
-        });
-        return;
-      }
-
-      switch (fetchType) {
-        case FetchResultsType.JSON:
-          downloadJson(data);
-          break;
-        case FetchResultsType.CSV:
-          downloadCsv(data);
-          break;
-        case FetchResultsType.MANIFOLD:
-          break;
-        default:
-          assertUnreachable(fetchType);
-      }
-    } catch (error) {
-      setToasts({
-        messages: ["Something went wrong"],
-        type: "error",
-      });
-    } finally {
-      setLoadingType(null);
+    const endpoint = `/allowlists/${distributionPlan.id}/token-pool-downloads/token-pool/${tokenPoolId}/tokens`;
+    const { success, data } = await distributionPlanApiFetch<
+      DistributionPlanSnapshotToken[]
+    >(endpoint);
+    if (!success || !data) {
+      return;
     }
+    switch (fetchType) {
+      case FetchResultsType.JSON:
+        downloadJson(data);
+        break;
+      case FetchResultsType.CSV:
+        downloadCsv(data);
+        break;
+      case FetchResultsType.MANIFOLD:
+        break;
+      default:
+        assertUnreachable(fetchType);
+    }
+    setLoadingType(null);
   };
   return (
     <div className="tw-flex tw-justify-end tw-gap-x-3">

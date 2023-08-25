@@ -18,6 +18,7 @@ import AllowlistToolCsvIcon from "../../../allowlist-tool/icons/AllowlistToolCsv
 import RoundedJsonIconButton from "../../common/RoundedJsonIconButton";
 import RoundedCsvIconButton from "../../common/RoundedCsvIconButton";
 import RoundedManifoldIconButton from "../../common/RoundedManifoldIconButton";
+import { distributionPlanApiFetch } from "../../../../services/distribution-plan-api";
 
 export default function ReviewDistributionPlanTableRow({
   item,
@@ -41,12 +42,12 @@ export default function ReviewDistributionPlanTableRow({
     setIsLoadingManifold(loadingType === FetchResultsType.MANIFOLD);
   }, [loadingType]);
 
-  const getUrl = (distributionPlanId: string): string => {
+  const getEndpoint = (distributionPlanId: string): string => {
     switch (item.type) {
       case ReviewDistributionPlanTableItemType.PHASE:
-        return `${process.env.ALLOWLIST_API_ENDPOINT}/allowlists/${distributionPlanId}/results/phases/${item.phaseId}`;
+        return `/allowlists/${distributionPlanId}/results/phases/${item.phaseId}`;
       case ReviewDistributionPlanTableItemType.COMPONENT:
-        return `${process.env.ALLOWLIST_API_ENDPOINT}/allowlists/${distributionPlanId}/results/phases/${item.phaseId}/components/${item.componentId}`;
+        return `/allowlists/${distributionPlanId}/results/phases/${item.phaseId}/components/${item.componentId}`;
       default:
         assertUnreachable(item.type);
         return "";
@@ -115,46 +116,27 @@ export default function ReviewDistributionPlanTableRow({
   const fetchResults = async (fetchType: FetchResultsType) => {
     if (!distributionPlan) return;
     if (loadingType) return;
-    const url = getUrl(distributionPlan.id);
     setLoadingType(fetchType);
-    try {
-      const response = await fetch(url, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-      const data: AllowlistToolResponse<AllowlistResult[]> =
-        await response.json();
-      if ("error" in data) {
-        setToasts({
-          messages:
-            typeof data.message === "string" ? [data.message] : data.message,
-          type: "error",
-        });
-        return;
-      }
-
-      switch (fetchType) {
-        case FetchResultsType.JSON:
-          downloadJson(data);
-          break;
-        case FetchResultsType.CSV:
-          downloadCsv(data);
-          break;
-        case FetchResultsType.MANIFOLD:
-          downloadManifold(data);
-          break;
-        default:
-          assertUnreachable(fetchType);
-      }
-    } catch (error) {
-      setToasts({
-        messages: ["Something went wrong"],
-        type: "error",
-      });
-    } finally {
-      setLoadingType(null);
+    const endpoint = getEndpoint(distributionPlan.id);
+    const { success, data } = await distributionPlanApiFetch<AllowlistResult[]>(
+      endpoint
+    );
+    setLoadingType(null);
+    if (!success || !data) {
+      return;
+    }
+    switch (fetchType) {
+      case FetchResultsType.JSON:
+        downloadJson(data);
+        break;
+      case FetchResultsType.CSV:
+        downloadCsv(data);
+        break;
+      case FetchResultsType.MANIFOLD:
+        downloadManifold(data);
+        break;
+      default:
+        assertUnreachable(fetchType);
     }
   };
 

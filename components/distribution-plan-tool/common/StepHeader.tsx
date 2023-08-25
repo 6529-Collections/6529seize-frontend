@@ -15,7 +15,7 @@ const STEP_META: Record<
   [DistributionPlanToolStep.CREATE_PLAN]: {
     title: "Distribution Plan Tool",
     description:
-      "The Seize distribution plan tool allows you to build a distribution plan for your mint that includes airdrops, allowlists and public minting in one or more phases.",
+      "Loading your distribution plan. This may take a few seconds. Please do not refresh the page.",
   },
   [DistributionPlanToolStep.CREATE_SNAPSHOTS]: {
     title: "Collection snapshots",

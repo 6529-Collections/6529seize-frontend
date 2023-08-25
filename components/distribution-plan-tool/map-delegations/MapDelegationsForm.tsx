@@ -6,6 +6,7 @@ import {
   AllowlistOperationCode,
   AllowlistToolResponse,
 } from "../../allowlist-tool/allowlist-tool.types";
+import { distributionPlanApiPost } from "../../../services/distribution-plan-api";
 
 export default function MapDelegationsForm() {
   const { setToasts, distributionPlan, fetchOperations } = useContext(
@@ -29,44 +30,27 @@ export default function MapDelegationsForm() {
   const addDelegation = async (): Promise<{ success: boolean }> => {
     if (!distributionPlan) return { success: false };
     setIsLoading(true);
-    const url = `${process.env.ALLOWLIST_API_ENDPOINT}/allowlists/${distributionPlan.id}/operations`;
-    try {
-      const response = await fetch(url, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
+    const endpoint = `/allowlists/${distributionPlan.id}/operations`;
+    const { success, data } = await distributionPlanApiPost<AllowlistOperation>(
+      {
+        endpoint,
+        body: {
           code: AllowlistOperationCode.MAP_RESULTS_TO_DELEGATED_WALLETS,
           params: {
             delegationContract: formValues.delegationContract.toLowerCase(),
           },
-        }),
-      });
-      const data: AllowlistToolResponse<AllowlistOperation> =
-        await response.json();
-      if ("error" in data) {
-        setToasts({
-          messages:
-            typeof data.message === "string" ? [data.message] : data.message,
-          type: "error",
-        });
-        return { success: false };
+        },
       }
-      fetchOperations(distributionPlan.id);
-      setFormValues({
-        delegationContract: "",
-      });
-      return { success: true };
-    } catch (error) {
-      setToasts({
-        messages: ["Something went wrong. Please try again later."],
-        type: "error",
-      });
+    );
+    setIsLoading(false);
+    if (!success || !data) {
       return { success: false };
-    } finally {
-      setIsLoading(false);
     }
+    fetchOperations(distributionPlan.id);
+    setFormValues({
+      delegationContract: "",
+    });
+    return { success: true };
   };
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {

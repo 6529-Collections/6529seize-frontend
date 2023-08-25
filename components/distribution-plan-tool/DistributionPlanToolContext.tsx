@@ -8,11 +8,14 @@ import {
   AllowlistOperation,
   AllowlistPhaseWithComponentAndItems,
   AllowlistTokenPool,
-  AllowlistToolResponse,
   AllowlistTransferPool,
 } from "../allowlist-tool/allowlist-tool.types";
 import RunOperations from "./run-operations/RunOperations";
 import Breadcrumb, { Crumb } from "../../components/breadcrumb/Breadcrumb";
+import {
+  distributionPlanApiFetch,
+  distributionPlanApiPost,
+} from "../../services/distribution-plan-api";
 
 const poppins = Poppins({
   weight: ["300", "400", "500", "600", "700"],
@@ -117,9 +120,6 @@ export default function DistributionPlanToolContextWrapper({
   );
   const [fetching, setFetching] = useState(false);
   const [operations, setOperations] = useState<AllowlistOperation[]>([]);
-  const addOperations = (newOperations: AllowlistOperation[]) => {
-    setOperations((prev) => structuredClone([...prev, ...newOperations]));
-  };
   const [distributionPlan, setDistributionPlan] =
     useState<AllowlistDescription | null>(null);
   const [transferPools, setTransferPools] = useState<AllowlistTransferPool[]>(
@@ -135,146 +135,68 @@ export default function DistributionPlanToolContextWrapper({
 
   const runOperations = async () => {
     if (!distributionPlan) return;
-    const url = `${process.env.ALLOWLIST_API_ENDPOINT}/allowlists/${distributionPlan.id}/runs`;
-    try {
-      setFetching(true);
-      const response = await fetch(url, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
+    const endpoint = `/allowlists/${distributionPlan.id}/runs`;
+    setFetching(true);
+    const { success, data } =
+      await distributionPlanApiPost<AllowlistDescription>({
+        endpoint,
+        body: {
           allowlistId: distributionPlan.id,
-        }),
+        },
       });
-      const data: AllowlistToolResponse<AllowlistDescription> =
-        await response.json();
-      if ("error" in data) {
-        setToasts({
-          messages:
-            typeof data.message === "string" ? [data.message] : data.message,
-          type: "error",
-        });
-        return;
-      }
+    if (success && data) {
       setState(data);
-      setToasts({
-        messages: ["Started running operations"],
-        type: "success",
-      });
-    } catch (error) {
-      setToasts({
-        messages: ["Something went wrong"],
-        type: "error",
-      });
     }
+    setFetching(false);
   };
 
   const fetchTransferPools = async (distributionPlanId: string) => {
-    try {
-      const response = await fetch(
-        `${process.env.ALLOWLIST_API_ENDPOINT}/allowlists/${distributionPlanId}/transfer-pools`
-      );
-      const data: AllowlistToolResponse<AllowlistTransferPool[]> =
-        await response.json();
-      if ("error" in data) {
-        setToasts({
-          messages:
-            typeof data.message === "string" ? [data.message] : data.message,
-          type: "error",
-        });
-      } else {
-        setTransferPools(data);
-      }
-    } catch (error: any) {
-      setToasts({ messages: [error.message], type: "error" });
+    const endpoint = `/allowlists/${distributionPlanId}/transfer-pools`;
+    const { success, data } = await distributionPlanApiFetch<
+      AllowlistTransferPool[]
+    >(endpoint);
+    if (success && data) {
+      setTransferPools(data);
     }
   };
 
   const fetchTokenPools = async (distributionPlanId: string) => {
-    try {
-      const response = await fetch(
-        `${process.env.ALLOWLIST_API_ENDPOINT}/allowlists/${distributionPlanId}/token-pools`
-      );
-      const data: AllowlistToolResponse<AllowlistTokenPool[]> =
-        await response.json();
-      if ("error" in data) {
-        setToasts({
-          messages:
-            typeof data.message === "string" ? [data.message] : data.message,
-          type: "error",
-        });
-      } else {
-        setTokenPools(structuredClone(data));
-      }
-    } catch (error: any) {
-      setToasts({ messages: [error.message], type: "error" });
+    const endpoint = `/allowlists/${distributionPlanId}/token-pools`;
+    const { success, data } = await distributionPlanApiFetch<
+      AllowlistTokenPool[]
+    >(endpoint);
+    if (success && data) {
+      setTokenPools(data);
     }
   };
 
   const fetchCustomTokenPools = async (distributionPlanId: string) => {
-    try {
-      const response = await fetch(
-        `${process.env.ALLOWLIST_API_ENDPOINT}/allowlists/${distributionPlanId}/custom-token-pools`
-      );
-      const data: AllowlistToolResponse<AllowlistCustomTokenPool[]> =
-        await response.json();
-      if ("error" in data) {
-        setToasts({
-          messages:
-            typeof data.message === "string" ? [data.message] : data.message,
-          type: "error",
-        });
-      } else {
-        setCustomTokenPools(data);
-      }
-    } catch (error: any) {
-      setToasts({
-        messages: ["Something went wrong. Please try again."],
-        type: "error",
-      });
+    const endpoint = `/allowlists/${distributionPlanId}/custom-token-pools`;
+    const { success, data } = await distributionPlanApiFetch<
+      AllowlistCustomTokenPool[]
+    >(endpoint);
+    if (success && data) {
+      setCustomTokenPools(data);
     }
   };
 
   const fetchOperations = async (distributionPlanId: string) => {
-    try {
-      const response = await fetch(
-        `${process.env.ALLOWLIST_API_ENDPOINT}/allowlists/${distributionPlanId}/operations`
-      );
-      const data: AllowlistToolResponse<AllowlistOperation[]> =
-        await response.json();
-      if ("error" in data) {
-        setToasts({
-          messages:
-            typeof data.message === "string" ? [data.message] : data.message,
-          type: "error",
-        });
-        return;
-      }
-      setOperations(structuredClone(data));
-    } catch (error: any) {
-      setToasts({ messages: [error.message], type: "error" });
+    const endpoint = `/allowlists/${distributionPlanId}/operations`;
+    const { success, data } = await distributionPlanApiFetch<
+      AllowlistOperation[]
+    >(endpoint);
+    if (success && data) {
+      setOperations(data);
     }
   };
 
   const fetchPhases = async (distributionPlanId: string) => {
-    try {
-      const response = await fetch(
-        `${process.env.ALLOWLIST_API_ENDPOINT}/allowlists/${distributionPlanId}/phases?withComponentsAndItems=true`
-      );
-      const data: AllowlistToolResponse<AllowlistPhaseWithComponentAndItems[]> =
-        await response.json();
-      if ("error" in data) {
-        setToasts({
-          messages:
-            typeof data.message === "string" ? [data.message] : data.message,
-          type: "error",
-        });
-      } else {
-        setPhases(data);
-      }
-    } catch (error: any) {
-      setToasts({ messages: [error.message], type: "error" });
+    const endpoint = `/allowlists/${distributionPlanId}/phases?withComponentsAndItems=true`;
+    const { success, data } = await distributionPlanApiFetch<
+      AllowlistPhaseWithComponentAndItems[]
+    >(endpoint);
+    if (success && data) {
+      setPhases(data);
     }
   };
 

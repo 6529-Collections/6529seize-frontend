@@ -7,6 +7,7 @@ import {
   AllowlistOperation,
 } from "../../../allowlist-tool/allowlist-tool.types";
 import DistributionPlanAddOperationBtn from "../../common/DistributionPlanAddOperationBtn";
+import { distributionPlanApiPost } from "../../../../services/distribution-plan-api";
 
 export default function CreatePhasesForm() {
   const { setToasts, distributionPlan, fetchOperations } = useContext(
@@ -29,47 +30,31 @@ export default function CreatePhasesForm() {
   const addPhase = async (): Promise<string | null> => {
     if (!distributionPlan) return null;
     setIsLoading(true);
-    const url = `${process.env.ALLOWLIST_API_ENDPOINT}/allowlists/${distributionPlan.id}/operations`;
-    try {
-      const phaseId = getRandomObjectId();
-      const response = await fetch(url, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
+    const endpoint = `/allowlists/${distributionPlan.id}/operations`;
+    const phaseId = getRandomObjectId();
+    const { success, data } = await distributionPlanApiPost({
+      endpoint,
+      body: {
+        code: AllowlistOperationCode.ADD_PHASE,
+        params: {
+          id: phaseId,
+          name: formValues.name,
+          description: formValues.name,
         },
-        body: JSON.stringify({
-          code: AllowlistOperationCode.ADD_PHASE,
-          params: {
-            id: phaseId,
-            name: formValues.name,
-            description: formValues.name,
-          },
-        }),
-      });
-      const data: AllowlistToolResponse<AllowlistOperation> =
-        await response.json();
-      if ("error" in data) {
-        setToasts({
-          messages:
-            typeof data.message === "string" ? [data.message] : data.message,
-          type: "error",
-        });
-        return null;
-      }
-      await fetchOperations(distributionPlan.id);
-      setFormValues({
-        name: "",
-      });
-      return phaseId;
-    } catch (error) {
-      setToasts({
-        messages: ["Something went wrong. Please try again later."],
-        type: "error",
-      });
-      return null;
-    } finally {
+      },
+    });
+
+    if (!success) {
       setIsLoading(false);
+      return null;
     }
+
+    await fetchOperations(distributionPlan.id);
+    setFormValues({
+      name: "",
+    });
+    setIsLoading(false);
+    return phaseId;
   };
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {

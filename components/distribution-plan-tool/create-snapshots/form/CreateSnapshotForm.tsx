@@ -14,6 +14,10 @@ import styles from "../../DistributionPlan.module.scss";
 import DistributionPlanAddOperationBtn from "../../common/DistributionPlanAddOperationBtn";
 import Tippy from "@tippyjs/react";
 import CreateSnapshotFormSearchCollection from "./CreateSnapshotFormSearchCollection";
+import {
+  distributionPlanApiFetch,
+  distributionPlanApiPost,
+} from "../../../../services/distribution-plan-api";
 interface CreateSnapshotFormValues {
   name: string;
   contract: string;
@@ -36,35 +40,16 @@ export default function CreateSnapshotForm() {
   const [consolidateBlockNo, setConsolidateBlockNo] = useState<string>("");
 
   const getContractMetadata = async (contract: string) => {
-    const url = `${process.env.ALLOWLIST_API_ENDPOINT}/other/contract-metadata/${contract}`;
-    try {
-      const response = await fetch(url, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-
-      const data: AllowlistToolResponse<DistributionPlanSearchContractMetadataResult | null> =
-        await response.json();
-
-      if (data && "error" in data) {
-        setToasts({
-          messages:
-            typeof data.message === "string" ? [data.message] : data.message,
-          type: "error",
-        });
-        return null;
-      }
-      if (data?.name && !formValues.name) {
-        setFormValues((prev) => ({ ...prev, name: data.name }));
-      }
-    } catch (error) {
-      setToasts({
-        messages: ["Something went wrong"],
-        type: "error",
-      });
+    const endpoint = `/other/contract-metadata/${contract}`;
+    const { success, data } =
+      await distributionPlanApiFetch<DistributionPlanSearchContractMetadataResult | null>(
+        endpoint
+      );
+    if (!success) {
       return null;
+    }
+    if (data?.name && !formValues.name) {
+      setFormValues((prev) => ({ ...prev, name: data.name }));
     }
   };
 
@@ -91,67 +76,48 @@ export default function CreateSnapshotForm() {
     if (!distributionPlan) return { success: false };
     if (isLoading) return { success: false };
     setIsLoading(true);
-    try {
-      const url = `${process.env.ALLOWLIST_API_ENDPOINT}/allowlists/${distributionPlan.id}/operations`;
-      const tokenPoolId = getRandomObjectId();
-      const consolidateBlockNoInt = parseInt(consolidateBlockNo);
+    const endpoint = `/allowlists/${distributionPlan.id}/operations`;
+    const tokenPoolId = getRandomObjectId();
+    const consolidateBlockNoInt = parseInt(consolidateBlockNo);
 
-      const params: {
-        id: string;
-        name: string;
-        description: string;
-        contract: string;
-        blockNo: number;
-        tokenIds?: string;
-        consolidateBlockNo: number | null;
-      } = {
-        id: tokenPoolId,
-        name: formValues.name,
-        description: formValues.name,
-        contract: formValues.contract,
-        blockNo: parseInt(formValues.blockNo),
-        consolidateBlockNo: !isNaN(consolidateBlockNoInt)
-          ? consolidateBlockNoInt
-          : null,
-      };
+    const params: {
+      id: string;
+      name: string;
+      description: string;
+      contract: string;
+      blockNo: number;
+      tokenIds?: string;
+      consolidateBlockNo: number | null;
+    } = {
+      id: tokenPoolId,
+      name: formValues.name,
+      description: formValues.name,
+      contract: formValues.contract,
+      blockNo: parseInt(formValues.blockNo),
+      consolidateBlockNo: !isNaN(consolidateBlockNoInt)
+        ? consolidateBlockNoInt
+        : null,
+    };
 
-      if (!!formValues.tokenIds.length) {
-        params.tokenIds = formValues.tokenIds;
-      }
-
-      const response = await fetch(url, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          code: AllowlistOperationCode.CREATE_TOKEN_POOL,
-          params,
-        }),
-      });
-
-      const data: AllowlistToolResponse<AllowlistOperation> =
-        await response.json();
-
-      if ("error" in data) {
-        setToasts({
-          messages:
-            typeof data.message === "string" ? [data.message] : data.message,
-          type: "error",
-        });
-        return { success: false };
-      }
-      fetchOperations(distributionPlan.id);
-      return { success: true };
-    } catch (error) {
-      setToasts({
-        messages: ["Something went wrong"],
-        type: "error",
-      });
-      return { success: false };
-    } finally {
-      setIsLoading(false);
+    if (!!formValues.tokenIds.length) {
+      params.tokenIds = formValues.tokenIds;
     }
+
+    const { success, data } = await distributionPlanApiPost({
+      endpoint,
+      body: {
+        code: AllowlistOperationCode.CREATE_TOKEN_POOL,
+        params,
+      },
+    });
+    setIsLoading(false);
+
+    if (!success) {
+      return { success: false };
+    }
+
+    fetchOperations(distributionPlan.id);
+    return { success: true };
   };
 
   const addSnapshot = async () => {
@@ -172,21 +138,15 @@ export default function CreateSnapshotForm() {
 
   useEffect(() => {
     const fetchLatestBlock = async () => {
-      try {
-        const response = await fetch(
-          `${process.env.ALLOWLIST_API_ENDPOINT}/other/latest-block-number`
-        );
-        const data: AllowlistToolResponse<number> = await response.json();
-        if (typeof data === "number") {
-          const blockNo = data.toString();
-          setFormValues((prev) => ({ ...prev, blockNo }));
-          setConsolidateBlockNo(blockNo);
-        }
-      } catch (error: any) {
-        return;
-      }
+      const endpoint = `/other/latest-block-number`;
+      const { success, data } = await distributionPlanApiFetch<number>(
+        endpoint
+      );
+      if (!success || typeof data !== "number") return;
+      const blockNo = data.toString();
+      setFormValues((prev) => ({ ...prev, blockNo }));
+      setConsolidateBlockNo(blockNo);
     };
-
     fetchLatestBlock();
   }, []);
 
