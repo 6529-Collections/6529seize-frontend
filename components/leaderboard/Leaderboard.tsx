@@ -532,8 +532,17 @@ export default function Leaderboard(props: Props) {
     });
   }, []);
 
+  function getTDHChange(lead: BaseTDHMetrics) {
+    if (!lead.boosted_tdh) {
+      return "";
+    }
+
+    const tdhChange = (lead.day_change / lead.boosted_tdh) * 100;
+    return `(${tdhChange.toFixed(2)}%)`;
+  }
+
   function calculateTdhVsCommunity(lead: BaseTDHMetrics) {
-    if (!globalTdhRateChange || lead.day_change == 0) {
+    if (!globalTdhRateChange || !lead.day_change || !lead.boosted_tdh) {
       return "-";
     }
     const tdhChange = (lead.day_change / lead.boosted_tdh) * 100;
@@ -2220,13 +2229,7 @@ export default function Leaderboard(props: Props) {
                                         {numberWithCommas(lead.day_change)}
                                         {lead.day_change != 0 && (
                                           <span className={styles.tdhBoost}>
-                                            &nbsp;(
-                                            {(
-                                              (lead.day_change /
-                                                lead.boosted_tdh) *
-                                              100
-                                            ).toFixed(2)}
-                                            %)
+                                            {getTDHChange(lead)}
                                           </span>
                                         )}
                                       </>
