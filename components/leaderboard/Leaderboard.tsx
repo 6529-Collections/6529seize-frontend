@@ -1359,13 +1359,16 @@ export default function Leaderboard(props: Props) {
                     Community TDH:{" "}
                     {numberWithCommas(globalTdhHistory.total_boosted_tdh)}
                     &nbsp;|&nbsp;Daily Change:{" "}
-                    {numberWithCommas(globalTdhHistory.net_boosted_tdh)} (
-                    {(
-                      (globalTdhHistory.net_boosted_tdh /
-                        globalTdhHistory.total_boosted_tdh) *
-                      100
-                    ).toFixed(2)}
-                    %)
+                    {numberWithCommas(globalTdhHistory.net_boosted_tdh)}{" "}
+                    <span className="font-smaller">
+                      (
+                      {(
+                        (globalTdhHistory.net_boosted_tdh /
+                          globalTdhHistory.total_boosted_tdh) *
+                        100
+                      ).toFixed(2)}
+                      %)
+                    </span>
                   </b>
                 </Col>
               </Row>
