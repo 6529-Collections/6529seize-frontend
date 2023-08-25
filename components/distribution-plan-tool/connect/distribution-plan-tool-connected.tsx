@@ -68,9 +68,9 @@ export default function DistributionPlanToolConnected() {
 
   return (
     <div className="tw-text-center tw-flex tw-flex-col tw-items-center">
-      <h1 className="tw-uppercase tw-text-white">Connect wallet</h1>
+      <h1 className="tw-uppercase tw-text-white">Sign in</h1>
       <p className="tw-m-0 tw-text-base tw-font-light tw-text-neutral-300">
-        Lorem ipsum dolor sit amet.
+      To verify your identity, please sign the message using your wallet. Always ensure you review what you're signing.
       </p>
       <div className="tw-mt-8">
         <button
@@ -78,7 +78,7 @@ export default function DistributionPlanToolConnected() {
           type="submit"
           className="tw-group tw-flex tw-gap-x-3 tw-items-center tw-justify-center tw-bg-primary-500 tw-px-6 tw-py-3 tw-font-medium tw-text-sm tw-text-white tw-border tw-border-primary-500 tw-rounded-lg hover:tw-bg-primary-600 hover:tw-border-primary-600 tw-transition tw-duration-300 tw-ease-out"
         >
-          <div className="-tw-ml-1 tw-rounded-full tw-h-7 tw-w-7 tw-bg-white/10 tw-flex tw-items-center tw-justify-center">
+          {/* <div className="-tw-ml-1 tw-rounded-full tw-h-7 tw-w-7 tw-bg-white/10 tw-flex tw-items-center tw-justify-center">
             <svg
               className="tw-flex-shrink-0 tw-h-6 tw-w-6 group-hover:tw-scale-105 tw-transition tw-duration-300 tw-ease-out"
               version="1.1"
@@ -223,8 +223,8 @@ l9.8-33.1l0,0h0l-10.6-32.4 M70.7,152.1L70.7,152.1L70.7,152.1"
                 </g>
               </g>
             </svg>
-          </div>
-          Continue with Metamask
+          </div> */}
+          Sign in
         </button>
       </div>
     </div>

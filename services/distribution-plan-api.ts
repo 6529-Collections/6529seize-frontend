@@ -69,7 +69,7 @@ export const distributionPlanApiPost = async <T>({
   body,
 }: {
   endpoint: string;
-  body: Record<string, unknown>;
+  body: any;
 }): Promise<{
   readonly success: boolean;
   readonly data: T | null;

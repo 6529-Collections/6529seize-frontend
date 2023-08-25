@@ -17,6 +17,7 @@ import {
   AllowlistToolResponse,
   Pool,
 } from "../../../../../allowlist-tool/allowlist-tool.types";
+import { distributionPlanApiPost } from "../../../../../../services/distribution-plan-api";
 
 const SELECT_ALL_OPTION: AllowlistToolSelectMenuMultipleOption = {
   title: "Exclude All Prior Groups",
@@ -165,39 +166,22 @@ export default function SnapshotExcludeComponentWinners({
           ? getCustomTokenPoolWallets()
           : [];
       setLoading(true);
-      const url = `${process.env.ALLOWLIST_API_ENDPOINT}/allowlists/${distributionPlan.id}/token-pool-downloads/token-pool/${config.snapshotId}/unique-wallets-count`;
-      try {
-        const response = await fetch(url, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            excludeComponentWinners,
-            excludeSnapshots: config.excludeSnapshots,
-            extraWallets,
-          }),
-        });
-        const data: AllowlistToolResponse<number> = await response.json();
-        if (typeof data !== "number" && "error" in data) {
-          setToasts({
-            messages:
-              typeof data.message === "string" ? [data.message] : data.message,
-            type: "error",
-          });
-          return { success: false };
-        }
-        setLocalUniqueWalletsCount(data);
-        return { success: true };
-      } catch (error) {
-        setToasts({
-          messages: ["Something went wrong. Please try again."],
-          type: "error",
-        });
-        return;
-      } finally {
+      const endpoint = `/allowlists/${distributionPlan.id}/token-pool-downloads/token-pool/${config.snapshotId}/unique-wallets-count`;
+      const { success, data } = await distributionPlanApiPost<number>({
+        endpoint,
+        body: {
+          excludeComponentWinners,
+          excludeSnapshots: config.excludeSnapshots,
+          extraWallets,
+        },
+      });
+      if (!success) {
         setLoading(false);
+        return { success: false };
       }
+      setLocalUniqueWalletsCount(data);
+      setLoading(false);
+      return { success: true };
     };
     fetchUniqueWalletsCount();
   }, [
@@ -233,7 +217,11 @@ export default function SnapshotExcludeComponentWinners({
         onSkip={() => onNextStep(PhaseConfigStep.SNAPSHOT_SELECT_TOP_HOLDERS)}
         onNext={() => onExcludePreviousWinners()}
       >
-        <ComponentConfigMeta tags={[]} walletsCount={localUniqueWalletsCount} isLoading={loading}/>
+        <ComponentConfigMeta
+          tags={[]}
+          walletsCount={localUniqueWalletsCount}
+          isLoading={loading}
+        />
       </ComponentConfigNextBtn>
     </div>
   );

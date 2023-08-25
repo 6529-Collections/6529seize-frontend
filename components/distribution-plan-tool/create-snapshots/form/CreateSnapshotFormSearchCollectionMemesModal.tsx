@@ -1,7 +1,6 @@
-import { useContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { MEMES_CONTRACT } from "../../../../constants";
-import { DistributionPlanToolContext } from "../../DistributionPlanToolContext";
-import { AllowlistToolResponse } from "../../../allowlist-tool/allowlist-tool.types";
+import { distributionPlanApiFetch } from "../../../../services/distribution-plan-api";
 
 type MemesSeason = `SZN${number}`;
 
@@ -21,35 +20,25 @@ export default function CreateSnapshotFormSearchCollectionMemesModal({
     tokenIds: string | null;
   }) => void;
 }) {
-  const { setToasts } = useContext(DistributionPlanToolContext);
   const [options, setOptions] = useState<
     { value: MemesSeason; tokenIds: string }[]
   >([]);
 
   useEffect(() => {
     const getSeasons = async () => {
-      const url = `${process.env.ALLOWLIST_API_ENDPOINT}/other/memes-seasons`;
-      try {
-        const response = await fetch(url);
-        const data: AllowlistToolResponse<MemesSeasonApiResponse[]> =
-          await response.json();
-        if ("error" in data) {
-          setToasts({
-            messages:
-              typeof data.message === "string" ? [data.message] : data.message,
-            type: "error",
-          });
-        } else {
-          setOptions(
-            data.map((d) => ({
-              value: `SZN${d.season}` as MemesSeason,
-              tokenIds: d.tokenIds,
-            }))
-          );
-        }
-      } catch (error: any) {
-        setToasts({ messages: [error.message], type: "error" });
+      const endpoint = `/other/memes-seasons`;
+      const { success, data } = await distributionPlanApiFetch<
+        MemesSeasonApiResponse[]
+      >(endpoint);
+      if (!success || !data) {
+        return;
       }
+      setOptions(
+        data.map((d) => ({
+          value: `SZN${d.season}` as MemesSeason,
+          tokenIds: d.tokenIds,
+        }))
+      );
     };
     getSeasons();
   }, []);

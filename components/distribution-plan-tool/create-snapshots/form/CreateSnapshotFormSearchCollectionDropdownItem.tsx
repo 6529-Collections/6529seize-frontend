@@ -10,6 +10,7 @@ import {
 } from "../../../../helpers/AllowlistToolHelpers";
 import { useContext, useState } from "react";
 import { DistributionPlanToolContext } from "../../DistributionPlanToolContext";
+import { distributionPlanApiFetch } from "../../../../services/distribution-plan-api";
 
 interface CollectionMeta {
   readonly imgUrl: string;
@@ -52,37 +53,13 @@ export default function CreateSnapshotFormSearchCollectionDropdownItem({
   const getTokenIdsString = async (
     collectionId: string
   ): Promise<string | null> => {
-    const url = `${process.env.ALLOWLIST_API_ENDPOINT}/other/contract-token-ids-as-string/${collectionId}`;
     setIsLoading(true);
-    try {
-      const response = await fetch(url, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-
-      const data: AllowlistToolResponse<{ tokenIds: string }> =
-        await response.json();
-
-      if ("error" in data) {
-        setToasts({
-          messages:
-            typeof data.message === "string" ? [data.message] : data.message,
-          type: "error",
-        });
-        return null;
-      }
-      return data.tokenIds;
-    } catch (error) {
-      setToasts({
-        messages: ["Something went wrong"],
-        type: "error",
-      });
-      return null;
-    } finally {
-      setIsLoading(false);
-    }
+    const endpoint = `/other/contract-token-ids-as-string/${collectionId}`;
+    const { data } = await distributionPlanApiFetch<{
+      tokenIds: string;
+    }>(endpoint);
+    setIsLoading(false);
+    return data?.tokenIds ?? null;
   };
 
   const onCollectionClick = async () => {

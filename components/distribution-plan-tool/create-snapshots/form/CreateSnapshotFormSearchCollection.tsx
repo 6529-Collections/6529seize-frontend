@@ -12,6 +12,10 @@ import AllowlistToolCommonModalWrapper, {
   AllowlistToolModalSize,
 } from "../../../allowlist-tool/common/modals/AllowlistToolCommonModalWrapper";
 import CreateSnapshotFormSearchCollectionMemesModal from "./CreateSnapshotFormSearchCollectionMemesModal";
+import {
+  distributionPlanApiFetch,
+  distributionPlanApiPost,
+} from "../../../../services/distribution-plan-api";
 
 export default function CreateSnapshotFormSearchCollection({
   setCollection,
@@ -72,37 +76,12 @@ export default function CreateSnapshotFormSearchCollection({
   useEffect(() => {
     const fetchDefaultCollections = async () => {
       setIsLoadingDefaultCollections(true);
-      try {
-        const url = `${process.env.ALLOWLIST_API_ENDPOINT}/other/memes-collections`;
-        const response = await fetch(url, {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        });
-
-        const data: AllowlistToolResponse<
-          DistributionPlanSearchContractMetadataResult[]
-        > = await response.json();
-
-        if ("error" in data) {
-          setToasts({
-            messages:
-              typeof data.message === "string" ? [data.message] : data.message,
-            type: "error",
-          });
-          return null;
-        }
-        setDefaultCollections(data);
-      } catch (error) {
-        setToasts({
-          messages: ["Something went wrong"],
-          type: "error",
-        });
-        return null;
-      } finally {
-        setIsLoadingDefaultCollections(false);
-      }
+      const endpoint = `/other/memes-collections`;
+      const { data } = await distributionPlanApiFetch<
+        DistributionPlanSearchContractMetadataResult[]
+      >(endpoint);
+      setIsLoadingDefaultCollections(false);
+      setDefaultCollections(data ?? []);
     };
     fetchDefaultCollections();
   }, []);
@@ -114,40 +93,20 @@ export default function CreateSnapshotFormSearchCollection({
         return;
       }
       setIsLoadingCollections(true);
-      try {
-        const url = `${process.env.ALLOWLIST_API_ENDPOINT}/other/search-contract-metadata`;
-        const response = await fetch(url, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            keyword: debouncedKeyword,
-          }),
-        });
-
-        const data: AllowlistToolResponse<
-          DistributionPlanSearchContractMetadataResult[]
-        > = await response.json();
-
-        if ("error" in data) {
-          setToasts({
-            messages:
-              typeof data.message === "string" ? [data.message] : data.message,
-            type: "error",
-          });
-          return null;
-        }
-        setCollections(data);
-      } catch (error) {
-        setToasts({
-          messages: ["Something went wrong"],
-          type: "error",
-        });
+      const endpoint = `/other/search-contract-metadata`;
+      const { success, data } = await distributionPlanApiPost<
+        DistributionPlanSearchContractMetadataResult[]
+      >({
+        endpoint,
+        body: {
+          keyword: debouncedKeyword,
+        },
+      });
+      setIsLoadingCollections(false);
+      if (!success) {
         return null;
-      } finally {
-        setIsLoadingCollections(false);
       }
+      setCollections(data ?? []);
     };
     fetchCollections();
   }, [debouncedKeyword, setToasts]);

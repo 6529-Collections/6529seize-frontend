@@ -6,6 +6,7 @@ import {
   AllowlistToolResponse,
 } from "../../allowlist-tool/allowlist-tool.types";
 import { useInterval } from "react-use";
+import { distributionPlanApiFetch } from "../../../services/distribution-plan-api";
 
 const LOADING_STATES = [AllowlistRunStatus.CLAIMED, AllowlistRunStatus.PENDING];
 
@@ -36,26 +37,17 @@ export default function RunOperations() {
     async () => {
       const fetchActiveRun = async () => {
         if (!distributionPlan) return;
-        const url = `${process.env.ALLOWLIST_API_ENDPOINT}/allowlists/${distributionPlan.id}`;
-        try {
-          const response = await fetch(url, {
-            headers: {
-              "Content-Type": "application/json",
-            },
-          });
-          const data: AllowlistToolResponse<AllowlistDescription> =
-            await response.json();
-          if ("error" in data) {
-            return;
-          }
-          if (
-            data.activeRun?.status &&
-            !LOADING_STATES.includes(data.activeRun?.status)
-          ) {
-            setState(data);
-          }
-        } catch (error) {
-          console.log(error);
+        const endpoint = `/allowlists/${distributionPlan.id}`;
+        const { success, data } =
+          await distributionPlanApiFetch<AllowlistDescription>(endpoint);
+        if (!success || !data) {
+          return;
+        }
+        if (
+          data.activeRun?.status &&
+          !LOADING_STATES.includes(data.activeRun?.status)
+        ) {
+          setState(data);
         }
       };
       await fetchActiveRun();
