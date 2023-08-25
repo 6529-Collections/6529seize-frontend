@@ -40,7 +40,7 @@ export default function DistributionPlanToolCreatePlan() {
         onClose={() => setIsNewPlanModalOpen(false)}
         title={`Create new Distribution plan`}
         modalSize={AllowlistToolModalSize.X_LARGE}
-        showTitle={true}
+        showTitle={false}
       >
         <CreateDistributionPlan onSuccess={onSuccess} />
       </AllowlistToolCommonModalWrapper>

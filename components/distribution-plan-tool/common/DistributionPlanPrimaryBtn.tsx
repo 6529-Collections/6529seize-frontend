@@ -28,7 +28,7 @@ export default function DistributionPlanPrimaryBtn({
   useEffect(() => {
     if (isDisabled) {
       setButtonClasses(
-        "tw-flex tw-items-center tw-justify-center tw-relative tw-bg-neutral-500 tw-px-4 tw-py-3 tw-font-medium tw-text-sm tw-text-white tw-border tw-border-neutral-500 tw-rounded-lg tw-transition tw-duration-300 tw-ease-out"
+        "tw-flex tw-items-center tw-justify-center tw-relative tw-bg-neutral-700 tw-px-4 tw-py-3 tw-font-medium tw-text-sm tw-text-white tw-border tw-border-neutral-700 tw-rounded-lg tw-transition tw-duration-300 tw-ease-out"
       );
     } else {
       setButtonClasses(
