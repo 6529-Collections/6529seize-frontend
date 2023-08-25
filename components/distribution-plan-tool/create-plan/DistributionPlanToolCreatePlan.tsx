@@ -9,7 +9,6 @@ export default function DistributionPlanToolCreatePlan() {
   const [isNewPlanModalOpen, setIsNewPlanModalOpen] = useState(false);
   const router = useRouter();
   const onSuccess = (distributionPlanId: string) => {
-    setIsNewPlanModalOpen(false);
     router.push(`/distribution-plan-tool/plans/${distributionPlanId}`);
   };
   return (

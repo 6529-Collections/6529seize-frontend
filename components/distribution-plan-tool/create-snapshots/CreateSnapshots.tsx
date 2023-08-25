@@ -16,6 +16,7 @@ import DistributionPlanNextStepBtn from "../common/DistributionPlanNextStepBtn";
 import DistributionPlanStepWrapper from "../common/DistributionPlanStepWrapper";
 import DistributionPlanEmptyTablePlaceholder from "../common/DistributionPlanEmptyTablePlaceholder";
 import { useInterval } from "react-use";
+import { distributionPlanApiFetch } from "../../../services/distribution-plan-api";
 
 export interface CreateSnapshotSnapshot {
   id: string;
@@ -115,22 +116,12 @@ export default function CreateSnapshots() {
 
   const fetchTokenPoolStatuses = async () => {
     if (!distributionPlan) return;
-    const url = `${process.env.ALLOWLIST_API_ENDPOINT}/allowlists/${distributionPlan.id}/token-pool-downloads`;
-    try {
-      const response = await fetch(url, {
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-      const data: AllowlistToolResponse<DistributionPlanTokenPoolDownload[]> =
-        await response.json();
-      if ("error" in data) {
-        setTokenPoolDownloads([]);
-        return;
-      }
+    const endpoint = `/allowlists/${distributionPlan.id}/token-pool-downloads`;
+    const { success, data } = await distributionPlanApiFetch<
+      DistributionPlanTokenPoolDownload[]
+    >(endpoint);
+    if (success && data) {
       setTokenPoolDownloads(data);
-    } catch (error) {
-      console.log(error);
     }
   };
 
@@ -147,9 +138,7 @@ export default function CreateSnapshots() {
 
   return (
     <div>
-      <StepHeader
-        step={DistributionPlanToolStep.CREATE_SNAPSHOTS}
-      />
+      <StepHeader step={DistributionPlanToolStep.CREATE_SNAPSHOTS} />
       <p className="tw-mt-2 tw-block tw-font-semibold tw-text-sm tw-text-neutral-100">
         * Please note: During this stage, some processes may take a moment to
         load.

@@ -32,9 +32,11 @@ export default function CreateDistributionPlan({
           description: formValues.description,
         },
       });
-    setIsLoading(false);
+
     if (success && data?.id) {
       onSuccess(data.id);
+    } else {
+      setIsLoading(false);
     }
   };
 
