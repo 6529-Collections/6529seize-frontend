@@ -538,7 +538,7 @@ export default function Leaderboard(props: Props) {
     }
 
     const tdhChange = (lead.day_change / lead.boosted_tdh) * 100;
-    return `(${tdhChange.toFixed(2)}%)`;
+    return ` (${tdhChange.toFixed(2)}%)`;
   }
 
   function calculateTdhVsCommunity(lead: BaseTDHMetrics) {
@@ -1352,9 +1352,9 @@ export default function Leaderboard(props: Props) {
       <Row className={`${styles.scrollContainer} pt-2`}>
         <Col>
           {globalTdhHistory && (
-            <Container className="pb-3">
+            <Container className="pt-1 pb-3">
               <Row>
-                <Col className="d-flex flex-wrap justify-content-center">
+                <Col className="d-flex flex-wrap justify-content-end font-larger">
                   <b>
                     Community TDH:{" "}
                     {numberWithCommas(globalTdhHistory.total_boosted_tdh)}
