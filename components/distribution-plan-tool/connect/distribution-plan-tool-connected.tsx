@@ -70,7 +70,7 @@ export default function DistributionPlanToolConnected() {
     <div className="tw-text-center tw-flex tw-flex-col tw-items-center">
       <h1 className="tw-uppercase tw-text-white">Sign in</h1>
       <p className="tw-m-0 tw-text-base tw-font-light tw-text-neutral-300">
-      To verify your identity, please sign the message using your wallet. Always ensure you review what you're signing.
+      To verify your identity, please sign the message using your wallet. Always ensure you review what you&apos;re signing.
       </p>
       <div className="tw-mt-8">
         <button
