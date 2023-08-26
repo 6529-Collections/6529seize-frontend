@@ -1,6 +1,6 @@
 export default function DistributionPlanToolPlansNoPlans() {
   return (
-    <div className="tw-text-center">
+    <div className="tw-mt-24 tw-text-center">
       <svg
         className="tw-h-12 tw-w-12 tw-text-neutral-500"
         viewBox="0 0 24 24"

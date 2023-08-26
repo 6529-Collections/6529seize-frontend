@@ -138,9 +138,9 @@ export default function CreateSnapshotFormSearchCollection({
       <AllowlistToolCommonModalWrapper
         showModal={isOnMemesCollection}
         onClose={() => setIsOnMemesCollection(false)}
-        title={`Select "The Memes by 6529" Seasons`}
+       /*  title={`Select "The Memes by 6529" Seasons`} */
         modalSize={AllowlistToolModalSize.X_LARGE}
-        showTitle={true}
+        /* showTitle={true} */
       >
         <CreateSnapshotFormSearchCollectionMemesModal
           onMemesCollection={onMemesCollection}

@@ -83,7 +83,8 @@ export default function CreateSnapshotFormSearchCollectionMemesModal({
   };
 
   return (
-    <div className="tw-px-8">
+    <div className="tw-p-8">
+      <p className="tw-m-0">Select "The Memes by 6529" Seasons</p>
       <div className="tw-mt-6">
         {!!options.length && (
           <fieldset>
@@ -141,7 +142,7 @@ export default function CreateSnapshotFormSearchCollectionMemesModal({
           </div>
         )}
       </div>
-      <div className="tw-my-8 tw-flex tw-justify-end">
+      <div className="tw-mt-8 tw-flex tw-justify-end">
         <button
           type="button"
           onClick={onDone}

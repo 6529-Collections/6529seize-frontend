@@ -56,7 +56,7 @@ export default function AllowlistToolCommonModalWrapper({
                   className={`tw-relative tw-w-full tw-transform tw-rounded-lg tw-bg-neutral-900  tw-text-left tw-shadow-xl tw-transition-all sm:tw-my-8 sm:tw-w-full  ${modalSizeClass}`}
                 >
                   {showTitle && (
-                    <div className="tw-px-4 sm:tw-pl-6 sm:tw-pr-4 tw-flex tw-justify-between tw-items-center">
+                    <div className="tw-absolute tw-right-4 tw-top-6 tw-flex tw-justify-between tw-items-center">
                       <p className="tw-max-w-sm tw-text-lg tw-text-white tw-font-medium tw-mb-0">
                         {title}
                       </p>

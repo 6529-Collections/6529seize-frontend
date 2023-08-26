@@ -41,7 +41,7 @@ export default function DistributionPlanToolPlansTableItem({
   return (
     <tr
       onClick={() => goToDistributionPlan(plan.id)}
-      className="tw-cursor-pointer hover:tw-bg-neutral-800/60"
+      className="tw-cursor-pointer hover:tw-bg-neutral-800/60 tw-transition tw-duration-300 tw-ease-out"
     >
       <td className="tw-whitespace-nowrap tw-px-3 tw-py-4 tw-text-xs tw-font-normal tw-text-neutral-300 sm:tw-pl-6">
         {plan.name}
@@ -67,7 +67,7 @@ export default function DistributionPlanToolPlansTableItem({
             <AllowlistToolLoader />
           ) : (
             <svg
-              className="tw-h-5 tw-w-5 group-hover:tw-text-error tw-transition tw-duration-300 tw-ease-out"
+              className="tw-h-4 tw-w-4 group-hover:tw-text-error tw-transition tw-duration-300 tw-ease-out"
               viewBox="0 0 24 24"
               fill="none"
               xmlns="http://www.w3.org/2000/svg"
