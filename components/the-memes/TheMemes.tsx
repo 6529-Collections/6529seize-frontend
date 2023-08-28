@@ -325,16 +325,16 @@ export default function TheMemesComponent(props: Props) {
         if (sortDir === SortDirection.ASC) {
           setNfts(
             [...nfts].sort((a, b) => {
-              if (a.tdh > b.tdh) return 1;
-              if (a.tdh < b.tdh) return -1;
+              if (a.boosted_tdh > b.boosted_tdh) return 1;
+              if (a.boosted_tdh < b.boosted_tdh) return -1;
               return a.mint_date > b.mint_date ? 1 : -1;
             })
           );
         } else {
           setNfts(
             [...nfts].sort((a, b) => {
-              if (a.tdh > b.tdh) return -1;
-              if (a.tdh < b.tdh) return 1;
+              if (a.boosted_tdh > b.boosted_tdh) return -1;
+              if (a.boosted_tdh < b.boosted_tdh) return 1;
               return a.mint_date > b.mint_date ? 1 : -1;
             })
           );
@@ -518,7 +518,7 @@ export default function TheMemesComponent(props: Props) {
                     printMintDate(nft.mint_date)}
                   {sort === Sort.EDITION_SIZE && `Edition Size: ${nft.supply}`}
                   {sort === Sort.TDH &&
-                    `TDH: ${numberWithCommas(Math.round(nft.tdh))}`}
+                    `TDH: ${numberWithCommas(Math.round(nft.boosted_tdh))}`}
                   {sort === Sort.HODLERS &&
                     `Collectors: ${
                       nftMetas.find((nftm) => nftm.id === nft.id)?.hodlers

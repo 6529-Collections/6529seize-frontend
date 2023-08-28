@@ -247,7 +247,9 @@ export default function GradientPage(props: Props) {
                         <tr>
                           <td>TDH</td>
                           <td>
-                            {numberWithCommas(Math.round(nft.tdh * 100) / 100)}
+                            {numberWithCommas(
+                              Math.round(nft.boosted_tdh * 100) / 100
+                            )}
                           </td>
                         </tr>
                         <tr>
