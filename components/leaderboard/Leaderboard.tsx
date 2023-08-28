@@ -1389,7 +1389,9 @@ export default function Leaderboard(props: Props) {
                     </span>
                   </b>
                 </Col>
-                <Col xs={12} className="d-flex flex-wrap justify-content-end">
+                <Col
+                  xs={12}
+                  className="d-flex flex-wrap justify-content-end font-smaller">
                   <b>
                     Unboosted Community TDH:{" "}
                     {numberWithCommas(globalTdhHistory.total_tdh)}
