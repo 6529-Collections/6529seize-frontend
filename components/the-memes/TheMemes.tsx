@@ -458,8 +458,8 @@ export default function TheMemesComponent(props: Props) {
               const aVolume = getValuesForVolumeType(volumeType, a);
               const bVolume = getValuesForVolumeType(volumeType, b);
 
-              if (aVolume > bVolume) return -1;
-              if (aVolume < bVolume) return 1;
+              if (aVolume > bVolume) return 1;
+              if (aVolume < bVolume) return -1;
               return a.mint_date > b.mint_date ? 1 : -1;
             })
           );
@@ -468,8 +468,8 @@ export default function TheMemesComponent(props: Props) {
             [...nfts].sort((a, b) => {
               const aVolume = getValuesForVolumeType(volumeType, a);
               const bVolume = getValuesForVolumeType(volumeType, b);
-              if (aVolume > bVolume) return 1;
-              if (aVolume < bVolume) return -1;
+              if (aVolume > bVolume) return -1;
+              if (aVolume < bVolume) return 1;
               return a.mint_date > b.mint_date ? 1 : -1;
             })
           );
