@@ -82,7 +82,9 @@ export function MemePageCollectorsRightMenu(props: {
                   <tr>
                     <td>TDH</td>
                     <td>
-                      {numberWithCommas(Math.round(props.nft.tdh * 100) / 100)}
+                      {numberWithCommas(
+                        Math.round(props.nft.boosted_tdh * 100) / 100
+                      )}
                     </td>
                   </tr>
                   <tr>
