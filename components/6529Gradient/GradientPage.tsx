@@ -45,7 +45,6 @@ export default function GradientPage(props: Props) {
 
   const [collectionCount, setCollectionCount] = useState(-1);
   const [collectionRank, setCollectionRank] = useState(-1);
-  const [totalNftCount, setTotalNftCount] = useState(-1);
 
   useEffect(() => {
     if (router.isReady) {
@@ -87,14 +86,6 @@ export default function GradientPage(props: Props) {
   }, [nftId]);
 
   useEffect(() => {
-    fetchUrl(`${process.env.API_ENDPOINT}/api/nfts`).then(
-      (response: DBResponse) => {
-        setTotalNftCount(response.count);
-      }
-    );
-  }, []);
-
-  useEffect(() => {
     async function fetchNfts(url: string, mynfts: NFT[]) {
       return fetchUrl(url).then((response: DBResponse) => {
         if (response.next) {
@@ -119,7 +110,7 @@ export default function GradientPage(props: Props) {
       });
     }
     if (router.isReady && nftId) {
-      const initialUrlNfts = `${process.env.API_ENDPOINT}/api/nfts?contract=${GRADIENT_CONTRACT}`;
+      const initialUrlNfts = `${process.env.API_ENDPOINT}/api/nfts/gradients`;
       fetchNfts(initialUrlNfts, []);
     }
   }, [router.isReady, nftId]);
@@ -263,7 +254,9 @@ export default function GradientPage(props: Props) {
                         <tr>
                           <td>Gradient Rank</td>
                           <td>
-                            {collectionRank}/{collectionCount}
+                            {collectionRank > -1 && collectionCount > -1
+                              ? `${collectionRank}/${collectionCount}`
+                              : "..."}
                           </td>
                         </tr>
                       </tbody>

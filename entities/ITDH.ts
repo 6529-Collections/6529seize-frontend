@@ -56,6 +56,7 @@ export interface BaseTDH {
   memes_cards_sets_szn3: number;
   memes_cards_sets_szn4: number;
   day_change: number;
+  day_change_unboosted: number;
 }
 
 export interface TDH extends BaseTDH {

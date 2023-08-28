@@ -80,6 +80,10 @@
 .tdhSub {
   width: calc(55% / 6);
   text-align: center;
+
+  span {
+    line-height: 20px;
+  }
 }
 
 .viewAllLink {
@@ -149,14 +153,6 @@
     white-space: nowrap;
     align-items: center;
     vertical-align: middle;
-    span {
-      float: left;
-      margin-top: 4px;
-      margin-bottom: 4px;
-      a {
-        line-height: 40px;
-      }
-    }
   }
 
   th {
@@ -190,14 +186,6 @@
     white-space: nowrap;
     align-items: center;
     vertical-align: middle;
-    span {
-      float: left;
-      margin-top: 4px;
-      margin-bottom: 4px;
-      a {
-        line-height: 40px;
-      }
-    }
   }
 
   th {
