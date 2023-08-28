@@ -15,10 +15,11 @@ import {
   printMintDate,
 } from "../../helpers/Helpers";
 import { useRouter } from "next/router";
-import { fetchAllPages } from "../../services/6529api";
+import { fetchAllPages, fetchUrl } from "../../services/6529api";
 import NFTImage from "../nft-image/NFTImage";
 import SeasonsDropdown from "../seasons-dropdown/SeasonsDropdown";
 import DotLoader from "../dotLoader/DotLoader";
+import { DBResponse } from "../../entities/IDBResponse";
 
 enum Sort {
   AGE = "age",
@@ -92,11 +93,14 @@ export default function TheMemesComponent(props: Props) {
 
   const [selectedSeason, setSelectedSeason] = useState(0);
   const [nfts, setNfts] = useState<NFT[]>([]);
+  const [nftsNextPage, setNftsNextPage] = useState<string>(
+    `${process.env.API_ENDPOINT}/api/nfts?contract=${MEMES_CONTRACT}&page_size=40&sort_direction=desc`
+  );
   const [seasons, setSeasons] = useState<number[]>([]);
   const [nftMetas, setNftMetas] = useState<MemesExtendedData[]>([]);
   const [nftBalances, setNftBalances] = useState<Owner[]>([]);
   const [balancesLoaded, setBalancesLoaded] = useState(false);
-  const [nftMetassLoaded, setNftMetasLoaded] = useState(false);
+  const [nftMetasLoaded, setNftMetasLoaded] = useState(false);
   const [nftsLoaded, setNftsLoaded] = useState(false);
   const [nftMemes, setNftMemes] = useState<Meme[]>([]);
 
@@ -173,14 +177,20 @@ export default function TheMemesComponent(props: Props) {
     });
   }, []);
 
-  useEffect(() => {
-    fetchAllPages(
-      `${process.env.API_ENDPOINT}/api/nfts?contract=${MEMES_CONTRACT}&page_size=100`
-    ).then((responseNfts: any[]) => {
-      setNfts(responseNfts);
-      setNftsLoaded(true);
+  function fetchNfts(url: string) {
+    fetchUrl(url).then((responseNfts: DBResponse) => {
+      setNfts([...nfts, ...responseNfts.data]);
+      setNftsNextPage(responseNfts.next);
     });
-  }, []);
+  }
+
+  useEffect(() => {
+    if (nftsNextPage) {
+      fetchNfts(nftsNextPage);
+    } else {
+      setNftsLoaded(true);
+    }
+  }, [nftsNextPage]);
 
   useEffect(() => {
     if (props.wallets.length > 0 && nftMetas.length > 0) {
@@ -218,7 +228,7 @@ export default function TheMemesComponent(props: Props) {
   }, [nftMetas, props.wallets]);
 
   useEffect(() => {
-    if (sort && sortDir && nftsLoaded && nftMetassLoaded) {
+    if (sort && sortDir && nftsLoaded && nftMetasLoaded) {
       if (selectedSeason > 0) {
         router.replace(
           {
@@ -315,16 +325,16 @@ export default function TheMemesComponent(props: Props) {
         if (sortDir === SortDirection.ASC) {
           setNfts(
             [...nfts].sort((a, b) => {
-              if (a.tdh > b.tdh) return 1;
-              if (a.tdh < b.tdh) return -1;
+              if (a.boosted_tdh > b.boosted_tdh) return 1;
+              if (a.boosted_tdh < b.boosted_tdh) return -1;
               return a.mint_date > b.mint_date ? 1 : -1;
             })
           );
         } else {
           setNfts(
             [...nfts].sort((a, b) => {
-              if (a.tdh > b.tdh) return -1;
-              if (a.tdh < b.tdh) return 1;
+              if (a.boosted_tdh > b.boosted_tdh) return -1;
+              if (a.boosted_tdh < b.boosted_tdh) return 1;
               return a.mint_date > b.mint_date ? 1 : -1;
             })
           );
@@ -448,8 +458,8 @@ export default function TheMemesComponent(props: Props) {
               const aVolume = getValuesForVolumeType(volumeType, a);
               const bVolume = getValuesForVolumeType(volumeType, b);
 
-              if (aVolume > bVolume) return -1;
-              if (aVolume < bVolume) return 1;
+              if (aVolume > bVolume) return 1;
+              if (aVolume < bVolume) return -1;
               return a.mint_date > b.mint_date ? 1 : -1;
             })
           );
@@ -458,15 +468,15 @@ export default function TheMemesComponent(props: Props) {
             [...nfts].sort((a, b) => {
               const aVolume = getValuesForVolumeType(volumeType, a);
               const bVolume = getValuesForVolumeType(volumeType, b);
-              if (aVolume > bVolume) return 1;
-              if (aVolume < bVolume) return -1;
+              if (aVolume > bVolume) return -1;
+              if (aVolume < bVolume) return 1;
               return a.mint_date > b.mint_date ? 1 : -1;
             })
           );
         }
       }
     }
-  }, [sort, sortDir, nftsLoaded, nftMetassLoaded, volumeType]);
+  }, [sort, sortDir, nftsLoaded, nftMetasLoaded, volumeType]);
 
   function printNft(nft: NFT) {
     const meta = nftMetas.find((a) => a.id === nft.id);
@@ -508,7 +518,7 @@ export default function TheMemesComponent(props: Props) {
                     printMintDate(nft.mint_date)}
                   {sort === Sort.EDITION_SIZE && `Edition Size: ${nft.supply}`}
                   {sort === Sort.TDH &&
-                    `TDH: ${numberWithCommas(Math.round(nft.tdh))}`}
+                    `TDH: ${numberWithCommas(Math.round(nft.boosted_tdh))}`}
                   {sort === Sort.HODLERS &&
                     `Collectors: ${
                       nftMetas.find((nftm) => nftm.id === nft.id)?.hodlers
@@ -577,7 +587,7 @@ export default function TheMemesComponent(props: Props) {
         <Row key={`${meme.meme}-${meme.meme_name}`}>
           <Col xs={12} className="pt-3">
             <Col>
-              <h4>
+              <h4 className="font-color">
                 {meme.meme} - {meme.meme_name}
               </h4>
             </Col>
@@ -719,30 +729,12 @@ export default function TheMemesComponent(props: Props) {
                   </span>
                 </Col>
               </Row>
-              {nftsLoaded && nftMetassLoaded ? (
-                nfts.length > 0 ? (
-                  sort === Sort.MEME ? (
-                    printMemes()
-                  ) : (
-                    printNfts()
-                  )
-                ) : (
-                  <Row>
-                    <Col>
-                      <Image
-                        width="0"
-                        height="0"
-                        style={{ height: "auto", width: "100px" }}
-                        src="/SummerGlasses.svg"
-                        alt="SummerGlasses"
-                      />{" "}
-                      Nothing here yet
-                    </Col>
-                  </Row>
-                )
-              ) : (
+              {nfts.length > 0 && sort === Sort.MEME
+                ? printMemes()
+                : printNfts()}
+              {nftsNextPage && (
                 <Row>
-                  <Col className="pt-3">
+                  <Col className="pt-3 pb-5">
                     Fetching <DotLoader />
                   </Col>
                 </Row>
