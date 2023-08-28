@@ -532,7 +532,7 @@ export default function UserPage(props: Props) {
                                 type={TagType.RANK}
                                 text={`Unique Cards x${numberWithCommas(
                                   tdh.unique_memes + tdh.gradients_balance
-                                )} | Rank #${tdh.dense_rank_balance}`}
+                                )} | Rank #${tdh.dense_rank_unique}`}
                               />
                             </Col>
                           </Row>
