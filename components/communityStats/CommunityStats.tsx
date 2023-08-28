@@ -271,20 +271,39 @@ export default function CommunityStats() {
                   <Col
                     sm={12}
                     md={6}
-                    lg={4}
+                    lg={5}
                     className="d-flex flex-column gap-2">
                     <Table>
                       <tbody>
                         <tr>
+                          <td></td>
+                          <td></td>&nbsp;&nbsp;
+                          <td className="text-right font-smaller">
+                            (unboosted)
+                          </td>
+                        </tr>
+                        <tr>
                           <td>Community TDH</td>
                           <td className="text-right">
                             {numberWithCommas(latestHistory!.total_boosted_tdh)}
+                          </td>
+                          &nbsp;&nbsp;
+                          <td className="text-right">
+                            <span className="font-smaller">
+                              {numberWithCommas(latestHistory!.total_tdh)}
+                            </span>
                           </td>
                         </tr>
                         <tr>
                           <td>Daily Change</td>
                           <td className="text-right">
                             {numberWithCommas(latestHistory!.net_boosted_tdh)}
+                          </td>
+                          &nbsp;&nbsp;
+                          <td className="text-right">
+                            <span className="font-smaller">
+                              {numberWithCommas(latestHistory!.net_tdh)}
+                            </span>
                           </td>
                         </tr>
                         <tr>
@@ -297,11 +316,22 @@ export default function CommunityStats() {
                             ).toFixed(2)}
                             %
                           </td>
+                          &nbsp;&nbsp;
+                          <td className="text-right">
+                            <span className="font-smaller">
+                              {(
+                                (latestHistory!.net_tdh /
+                                  latestHistory!.total_tdh) *
+                                100
+                              ).toFixed(2)}
+                              %
+                            </span>
+                          </td>
                         </tr>
                       </tbody>
                     </Table>
                   </Col>
-                  <Col sm={12} md={6} lg={{ span: 4, offset: 4 }}>
+                  <Col sm={12} md={6} lg={{ span: 5, offset: 2 }}>
                     <Table>
                       <tbody>
                         <tr>
