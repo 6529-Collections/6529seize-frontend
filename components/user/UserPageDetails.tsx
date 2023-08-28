@@ -1,37 +1,14 @@
 import styles from "./UserPage.module.scss";
-import Image from "next/image";
-import { Col, Container, Dropdown, Form, Row, Table } from "react-bootstrap";
-import { useEffect, useState } from "react";
-import { DBResponse } from "../../entities/IDBResponse";
+import { Col, Container, Row } from "react-bootstrap";
+import { useState } from "react";
 import { Owner } from "../../entities/IOwner";
-import { MemesExtendedData, NFT } from "../../entities/INFT";
-import {
-  areEqualAddresses,
-  formatAddress,
-  isGradientsContract,
-  isMemesContract,
-  numberWithCommas,
-} from "../../helpers/Helpers";
-import {
-  GRADIENT_CONTRACT,
-  MEMELAB_CONTRACT,
-  MEMES_CONTRACT,
-} from "../../constants";
 import { ConsolidatedTDHMetrics, TDHMetrics } from "../../entities/ITDH";
-import { SortDirection } from "../../entities/ISort";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { fetchAllPages, fetchUrl } from "../../services/6529api";
-import Pagination from "../pagination/Pagination";
-import { TypeFilter } from "../latest-activity/LatestActivity";
-import LatestActivityRow from "../latest-activity/LatestActivityRow";
-import { Transaction } from "../../entities/ITransaction";
-import { IDistribution } from "../../entities/IDistribution";
 import { VIEW } from "../consolidation-switch/ConsolidationSwitch";
-import NFTImage from "../nft-image/NFTImage";
 import UserPageCollection from "./UserPageCollection";
 import UserPageActivity from "./UserPageActivity";
-import UserPage from "./UserPage";
 import UserPageDistributions from "./UserPageDistributions";
+import UserPageStats from "./UserPageStats";
+import UserPageOverview from "./UserPageOverview";
 
 interface Props {
   ownerAddress: `0x${string}` | undefined;
@@ -46,6 +23,7 @@ export enum Focus {
   COLLECTION,
   ACTIVITY,
   DISTRIBUTIONS,
+  STATS,
 }
 
 const DISTRIBUTIONS_PAGE_SIZE = 25;
@@ -80,6 +58,14 @@ export default function UserPageDetails(props: Props) {
             onClick={() => setFocus(Focus.DISTRIBUTIONS)}>
             Distributions
           </h3>
+          <h3>&nbsp;|&nbsp;</h3>
+          <h3
+            className={
+              focus === Focus.STATS ? styles.focusActive : styles.focus
+            }
+            onClick={() => setFocus(Focus.STATS)}>
+            Stats
+          </h3>
         </Col>
       </Row>
       <UserPageCollection
@@ -99,6 +85,11 @@ export default function UserPageDetails(props: Props) {
         view={props.view}
         consolidatedTDH={props.consolidatedTDH}
         isConsolidation={props.isConsolidation}
+      />
+      <UserPageOverview show={focus === Focus.STATS} tdh={props.tdh} />
+      <UserPageStats
+        show={focus === Focus.STATS}
+        ownerAddress={props.ownerAddress}
       />
     </Container>
   );

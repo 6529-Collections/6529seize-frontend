@@ -1,0 +1,14 @@
+@import "../../styles/variables.scss";
+
+.timeSelectionSpan {
+  font-size: larger;
+  padding: 5px 10px;
+  cursor: pointer;
+  color: $font-color;
+}
+
+.timeSelectionSpanSelected {
+  background-color: $off-white;
+  color: $very-dark-grey;
+  font-size: larger;
+}
