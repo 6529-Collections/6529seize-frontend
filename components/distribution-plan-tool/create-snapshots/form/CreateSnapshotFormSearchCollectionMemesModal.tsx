@@ -84,7 +84,7 @@ export default function CreateSnapshotFormSearchCollectionMemesModal({
 
   return (
     <div className="tw-p-8">
-      <p className="tw-m-0">Select "The Memes by 6529" Seasons</p>
+      <p className="tw-m-0">Select &quot;The Memes by 6529&quot; Seasons</p>
       <div className="tw-mt-6">
         {!!options.length && (
           <fieldset>
