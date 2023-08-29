@@ -398,7 +398,11 @@ export default function UserPageCollection(props: Props) {
           {nfttdh && nftrank && (
             <Row>
               <Col className="text-center pt-2">
-                TDH: {numberWithCommas(Math.round(nfttdh))} | Rank #{nftrank}
+                TDH:{" "}
+                {numberWithCommas(
+                  Math.round(nfttdh * (props.tdh?.boost ? props.tdh.boost : 1))
+                )}{" "}
+                | Rank #{nftrank}
               </Col>
             </Row>
           )}

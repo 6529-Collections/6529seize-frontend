@@ -382,7 +382,9 @@ export default function NFTLeaderboard(props: Props) {
                             {numberWithCommas(thisCard.balance)}
                           </td>
                           <td className={styles.tdhSub}>
-                            {numberWithCommas(Math.round(thisCard.tdh))}
+                            {numberWithCommas(
+                              Math.round(thisCard.tdh * lead.boost)
+                            )}
                           </td>
                           <td className={styles.tdhSub}>
                             {numberWithCommas(Math.round(thisCard.tdh__raw))}

@@ -131,6 +131,7 @@ enum Sort {
   unique_memes_szn3 = "unique_memes_szn3",
   unique_memes_szn4 = "unique_memes_szn4",
   day_change = "day_change",
+  day_change_unboosted = "day_change_unboosted",
 }
 
 enum Content {
@@ -532,20 +533,35 @@ export default function Leaderboard(props: Props) {
     });
   }, []);
 
-  function getTDHChange(lead: BaseTDHMetrics) {
-    if (!lead.boosted_tdh) {
+  function getTDHChange(lead: BaseTDHMetrics, boosted: boolean) {
+    if (!lead.boosted_tdh || !lead.tdh) {
       return "";
     }
 
-    const tdhChange = (lead.day_change / lead.boosted_tdh) * 100;
-    return ` (${tdhChange.toFixed(2)}%)`;
+    let tdhChange;
+    if (boosted) {
+      tdhChange = (lead.day_change / lead.boosted_tdh) * 100;
+    } else {
+      tdhChange = (lead.day_change_unboosted / lead.tdh) * 100;
+    }
+    return `${tdhChange.toFixed(2)}%`;
   }
 
-  function calculateTdhVsCommunity(lead: BaseTDHMetrics) {
-    if (!globalTdhRateChange || !lead.day_change || !lead.boosted_tdh) {
+  function calculateTdhVsCommunity(lead: BaseTDHMetrics, boosted: boolean) {
+    if (
+      !globalTdhRateChange ||
+      !lead.day_change ||
+      !lead.boosted_tdh ||
+      !lead.tdh
+    ) {
       return "-";
     }
-    const tdhChange = (lead.day_change / lead.boosted_tdh) * 100;
+    let tdhChange;
+    if (boosted) {
+      tdhChange = (lead.day_change / lead.boosted_tdh) * 100;
+    } else {
+      tdhChange = (lead.day_change_unboosted / lead.tdh) * 100;
+    }
     return `${(tdhChange / globalTdhRateChange).toFixed(2)}x`;
   }
 
@@ -1354,7 +1370,9 @@ export default function Leaderboard(props: Props) {
           {globalTdhHistory && (
             <Container className="pt-1 pb-3">
               <Row>
-                <Col className="d-flex flex-wrap justify-content-end font-larger">
+                <Col
+                  xs={12}
+                  className="d-flex flex-wrap justify-content-end font-larger">
                   <b>
                     Community TDH:{" "}
                     {numberWithCommas(globalTdhHistory.total_boosted_tdh)}
@@ -1365,6 +1383,25 @@ export default function Leaderboard(props: Props) {
                       {(
                         (globalTdhHistory.net_boosted_tdh /
                           globalTdhHistory.total_boosted_tdh) *
+                        100
+                      ).toFixed(2)}
+                      %)
+                    </span>
+                  </b>
+                </Col>
+                <Col
+                  xs={12}
+                  className="d-flex flex-wrap justify-content-end font-smaller">
+                  <b>
+                    Unboosted Community TDH:{" "}
+                    {numberWithCommas(globalTdhHistory.total_tdh)}
+                    &nbsp;|&nbsp;Daily Change:{" "}
+                    {numberWithCommas(globalTdhHistory.net_tdh)}{" "}
+                    <span className="font-smaller">
+                      (
+                      {(
+                        (globalTdhHistory.net_tdh /
+                          globalTdhHistory.total_tdh) *
                         100
                       ).toFixed(2)}
                       %)
@@ -1831,9 +1868,50 @@ export default function Leaderboard(props: Props) {
                               </span>
                             </span>
                           </th>
-                          <th className={styles.tdhSub}>
+                          {/* <th className={styles.tdhSub}>
                             <span className="d-flex align-items-center justify-content-center">
                               vs Community&nbsp; &nbsp;
+                            </span>
+                          </th> */}
+                          <th className={styles.tdhSub}>
+                            <span className="d-flex align-items-center justify-content-center">
+                              Daily Change
+                              <span className="font-smaller">
+                                &nbsp;(unboosted)
+                              </span>
+                              &nbsp; &nbsp;
+                              <span className="d-flex flex-column">
+                                <FontAwesomeIcon
+                                  icon="square-caret-up"
+                                  onClick={() =>
+                                    setSort({
+                                      sort: Sort.day_change_unboosted,
+                                      sort_direction: SortDirection.ASC,
+                                    })
+                                  }
+                                  className={`${styles.caret} ${
+                                    sort.sort_direction != SortDirection.ASC ||
+                                    sort.sort != Sort.day_change_unboosted
+                                      ? styles.disabled
+                                      : ""
+                                  }`}
+                                />
+                                <FontAwesomeIcon
+                                  icon="square-caret-down"
+                                  onClick={() =>
+                                    setSort({
+                                      sort: Sort.day_change_unboosted,
+                                      sort_direction: SortDirection.DESC,
+                                    })
+                                  }
+                                  className={`${styles.caret} ${
+                                    sort.sort_direction != SortDirection.DESC ||
+                                    sort.sort != Sort.day_change_unboosted
+                                      ? styles.disabled
+                                      : ""
+                                  }`}
+                                />
+                              </span>
                             </span>
                           </th>
                         </>
@@ -2227,21 +2305,53 @@ export default function Leaderboard(props: Props) {
                                     {showLoader && !lead.day_change ? (
                                       "..."
                                     ) : (
-                                      <>
-                                        {lead.day_change > 0 ? `+` : ``}
-                                        {numberWithCommas(lead.day_change)}
-                                        {lead.day_change != 0 && (
-                                          <span className={styles.tdhBoost}>
-                                            {getTDHChange(lead)}
-                                          </span>
-                                        )}
-                                      </>
+                                      <span className="d-flex flex-column align-items-center justify-content-center gap-1">
+                                        <span>
+                                          {lead.day_change > 0 ? `+` : ``}
+                                          {numberWithCommas(lead.day_change)}
+                                        </span>
+                                        <span>
+                                          {lead.day_change != 0 && (
+                                            <span className={styles.tdhBoost}>
+                                              {getTDHChange(lead, true)}
+                                              &nbsp;&nbsp;|&nbsp;&nbsp;
+                                              {calculateTdhVsCommunity(
+                                                lead,
+                                                true
+                                              )}
+                                            </span>
+                                          )}
+                                        </span>
+                                      </span>
                                     )}
                                   </td>
                                   <td className={styles.tdhSub}>
-                                    {showLoader && !lead.day_change
-                                      ? "..."
-                                      : `${calculateTdhVsCommunity(lead)}`}
+                                    {showLoader && !lead.day_change ? (
+                                      "..."
+                                    ) : (
+                                      <span className="d-flex flex-column align-items-center justify-content-center gap-1">
+                                        <span>
+                                          {lead.day_change_unboosted > 0
+                                            ? `+`
+                                            : ``}
+                                          {numberWithCommas(
+                                            lead.day_change_unboosted
+                                          )}
+                                        </span>
+                                        <span>
+                                          {lead.day_change_unboosted != 0 && (
+                                            <span className={styles.tdhBoost}>
+                                              {getTDHChange(lead, false)}
+                                              &nbsp;&nbsp;|&nbsp;&nbsp;
+                                              {calculateTdhVsCommunity(
+                                                lead,
+                                                false
+                                              )}
+                                            </span>
+                                          )}
+                                        </span>
+                                      </span>
+                                    )}
                                   </td>
                                 </>
                               ) : (

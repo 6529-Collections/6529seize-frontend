@@ -32,6 +32,7 @@ export interface LabNFT extends BaseNFT {
 }
 
 export interface NFT extends BaseNFT {
+  boosted_tdh: number;
   tdh: number;
   tdh__raw: number;
   tdh_rank: number;

@@ -157,6 +157,12 @@ h5 {
   text-align: right;
 }
 
+.text-xs-center {
+  @media screen and (max-width: 800px) {
+    text-align: center;
+  }
+}
+
 .btn-block {
   width: 100%;
 }
