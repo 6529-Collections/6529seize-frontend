@@ -540,9 +540,9 @@ export default function Leaderboard(props: Props) {
 
     let tdhChange;
     if (boosted) {
-      tdhChange = (lead.day_change / lead.tdh) * 100;
+      tdhChange = (lead.day_change / lead.boosted_tdh) * 100;
     } else {
-      tdhChange = (lead.day_change_unboosted / lead.boosted_tdh) * 100;
+      tdhChange = (lead.day_change_unboosted / lead.tdh) * 100;
     }
     return `${tdhChange.toFixed(2)}%`;
   }
@@ -558,9 +558,9 @@ export default function Leaderboard(props: Props) {
     }
     let tdhChange;
     if (boosted) {
-      tdhChange = (lead.day_change / lead.tdh) * 100;
+      tdhChange = (lead.day_change / lead.boosted_tdh) * 100;
     } else {
-      tdhChange = (lead.day_change_unboosted / lead.boosted_tdh) * 100;
+      tdhChange = (lead.day_change_unboosted / lead.tdh) * 100;
     }
     return `${(tdhChange / globalTdhRateChange).toFixed(2)}x`;
   }
