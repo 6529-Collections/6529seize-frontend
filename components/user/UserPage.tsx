@@ -20,6 +20,7 @@ import {
 import { MANIFOLD, SIX529_MUSEUM } from "../../constants";
 import {
   ConsolidatedTDHMetrics,
+  GlobalTDHHistory,
   TDHHistory,
   TDHMetrics,
 } from "../../entities/ITDH";
@@ -75,6 +76,8 @@ export default function UserPage(props: Props) {
   const [fetchingUser, setFetchingUser] = useState(true);
 
   const [tdhHistory, setTdhHistory] = useState<TDHHistory>();
+  const [globalTdhHistory, setGlobalTdhHistory] = useState<GlobalTDHHistory>();
+  const [globalTdhRateChange, setGlobalTdhRateChange] = useState<number>();
 
   useEffect(() => {
     async function fetchENS() {
@@ -301,6 +304,18 @@ export default function UserPage(props: Props) {
     }
   }, [view, walletOwnedLoaded, consolidationOwnedLoaded]);
 
+  useEffect(() => {
+    let url = `${
+      process.env.API_ENDPOINT
+    }/api/tdh_global_history?page_size=${1}`;
+    fetchUrl(url).then((response: DBResponse) => {
+      const tdhH = response.data[0];
+      setGlobalTdhHistory(tdhH);
+      const change = (tdhH.net_boosted_tdh / tdhH.total_boosted_tdh) * 100;
+      setGlobalTdhRateChange(change);
+    });
+  }, []);
+
   if (fetchingUser) {
     return (
       <Container className="pt-5 text-center">
@@ -376,6 +391,7 @@ export default function UserPage(props: Props) {
                   <Col
                     xs={12}
                     sm={6}
+                    md={5}
                     className={isConsolidation ? "pt-2" : "pt-3"}>
                     <Container className="no-padding">
                       <Row className="pb-1">
@@ -482,11 +498,11 @@ export default function UserPage(props: Props) {
                   {tdh && tdh.balance > 0 && (
                     <>
                       <Col
-                        xs={6}
+                        xs={12}
                         sm={6}
-                        md={3}
+                        md={4}
                         className={isConsolidation ? "pt-2" : "pt-3"}>
-                        <Container className="no-padding text-right">
+                        <Container className="no-padding text-right  text-xs-center">
                           {tdh.tdh_rank && (
                             <Row className="pt-1 pb-1">
                               <Col>
@@ -494,28 +510,46 @@ export default function UserPage(props: Props) {
                                   type={TagType.RANK}
                                   text={`TDH ${numberWithCommas(
                                     tdh.boosted_tdh
-                                  )} ${
+                                  )} | Rank #${tdh.tdh_rank}`}
+                                />
+                              </Col>
+                            </Row>
+                          )}
+                          {tdhHistory && tdh.day_change && (
+                            <Row className="pt-1 pb-1">
+                              <Col>
+                                <Tag
+                                  type={TagType.RANK}
+                                  text={`Daily Change ${
                                     view == VIEW.CONSOLIDATION
-                                      ? `(${
-                                          tdhHistory
-                                            ? tdhHistory.net_boosted_tdh > 0
-                                              ? "+"
-                                              : ""
-                                            : "..."
+                                      ? `${
+                                          tdhHistory.net_boosted_tdh > 0
+                                            ? "+"
+                                            : ""
                                         }${
                                           tdhHistory
                                             ? numberWithCommas(
                                                 tdhHistory.net_boosted_tdh
                                               )
                                             : ""
-                                        })`
+                                        } | ${(
+                                          (tdh.day_change / tdh.boosted_tdh) *
+                                          100
+                                        ).toFixed(2)}% | ${
+                                          globalTdhRateChange &&
+                                          (
+                                            ((tdh.day_change /
+                                              tdh.boosted_tdh) *
+                                              100) /
+                                            globalTdhRateChange
+                                          ).toFixed(2)
+                                        }x`
                                       : ""
-                                  } | Rank #${tdh.tdh_rank}`}
+                                  }`}
                                 />
                               </Col>
                             </Row>
                           )}
-
                           <Row className="pt-2 pb-1">
                             <Col>
                               <Tag
@@ -550,11 +584,11 @@ export default function UserPage(props: Props) {
                         </Container>
                       </Col>
                       <Col
-                        xs={6}
+                        xs={12}
                         sm={6}
                         md={3}
                         className={isConsolidation ? "pt-2" : "pt-3"}>
-                        <Container className="no-padding text-right">
+                        <Container className="no-padding text-right text-xs-center">
                           <Row className="pt-2 pb-1">
                             <Col>
                               {tdh.memes_cards_sets > 0 ? (
