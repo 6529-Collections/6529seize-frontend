@@ -197,7 +197,7 @@ export default function BlockPicker() {
       <div className={`tw-bg-neutral-900 ${poppins.className}`}>
         <div
           id="allowlist-tool"
-          className="tw-overflow-y-auto tw-min-h-screen tw-relative tw-pt-8 tw-pb-12 tw-px-14"
+          className="tw-overflow-y-auto tw-min-h-screen tw-relative tw-pt-8 tw-pb-12 tw-px-4 min-[992px]:tw-max-w-[960px] min-[1200px]:tw-max-w-[1150px] min-[1300px]:tw-max-w-[1250px] min-[1400px]:tw-max-w-[1350px] min-[1500px]:tw-max-w-[1450px] min-[1600px]:tw-max-w-[1550px] tw-mx-auto"
         >
           <div className="tw-w-full tw-flex tw-gap-x-4 tw-gap-y-5">
             <div className="tw-w-1/2">
@@ -221,54 +221,112 @@ export default function BlockPicker() {
                 />
               </div>
             </div>
-            <div className="tw-self-end">
+            <div className="tw-mt-6">
               <button
                 type="button"
-                className="tw-w-36 tw-relative tw-inline-flex tw-items-center tw-justify-center tw-cursor-pointer tw-bg-primary-500 tw-px-4 tw-py-3 tw-text-sm tw-font-medium tw-text-white tw-border tw-border-solid tw-border-primary-500 tw-rounded-lg hover:tw-bg-primary-600 hover:tw-border-primary-600 tw-transition tw-duration-300 tw-ease-ou"
+                className="tw-w-[5.25rem] tw-relative tw-inline-flex tw-items-center tw-justify-center tw-cursor-pointer tw-bg-primary-500 tw-px-4 tw-py-3 tw-text-sm tw-font-medium tw-text-white tw-border tw-border-solid tw-border-primary-500 tw-rounded-lg hover:tw-bg-primary-600 hover:tw-border-primary-600 tw-transition tw-duration-300 tw-ease-ou"
                 onClick={onSubmit}
               >
-                {!loading ? 'Submit' : <AllowlistToolLoader/>}
+                {!loading ? "Submit" : <AllowlistToolLoader />}
               </button>
             </div>
           </div>
-          <div className="tw-w-full tw-flex">
-            <div className="tw-w-1/3">
-              {predictedBlock && (
-                <div>
-                  <p>Block number: {predictedBlock.blockNumber}</p>
-                  <p>
-                    Date:
-                    {new Date(predictedBlock.timestamp).toLocaleString(
-                      "en-GB",
-                      {
-                        day: "2-digit",
-                        month: "2-digit",
-                        year: "numeric",
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      }
-                    )}
+
+          <div>
+            <div className="tw-mt-8 tw-pt-6 tw-border-t tw-border-solid tw-border-x-0 tw-border-b-0 tw-border-neutral-700/60">
+              <div className="sm:tw-flex sm:tw-items-baseline sm:tw-justify-between">
+                <div className="sm:tw-w-0 sm:tw-flex-1">
+                  <p className="tw-mb-0 tw-text-base tw-font-semibold tw-text-neutral-100 tw-space-x-1">
+                    <span>Block number:</span>
+                    <span>13274288</span>
                   </p>
-                  <div className="tw-inline-flex tw-space-x-2">
-                    <div>In:</div>{" "}
-                    <Countdown timestamp={predictedBlock.timestamp} />
-                  </div>
+                  <p className="tw-mt-1 tw-mb-0 tw-truncate tw-text-sm tw-text-neutral-400 tw-space-x-1">
+                    <span>Date:</span>
+                    <span>30/08/2023, 20:00</span>
+                  </p>
                 </div>
-              )}
+                <p className="tw-mb-0 tw-text-sm tw-text-neutral-100">
+                  In 5 minutes, 11 seconds
+                </p>
+              </div>
             </div>
-            <div className="tw-w-1/3">
-              {!!predictedBlocks.length && (
-                <div className="tw-space-y-2">
-                  {predictedBlocks.map((block) => (
-                    <BlockPickerAdvancedItem
-                      key={block.blockNumberIncludes}
-                      item={block}
-                    />
-                  ))}
-                </div>
-              )}
+            <div className="tw-mt-6 tw-flow-root">
+              <div className="tw-overflow-x-auto tw-ring-1 tw-ring-white/10 tw-rounded-lg">
+                <table className="tw-min-w-full tw-divide-y tw-divide-neutral-700/60">
+                  <thead className="tw-bg-neutral-800/60">
+                    <tr>
+                      <th
+                        scope="col"
+                        className="tw-py-3 tw-pl-4 tw-pr-3 tw-whitespace-nowrap tw-text-left tw-text-[0.6875rem] tw-leading-[1.125rem] tw-font-medium tw-text-neutral-400 tw-uppercase tw-tracking-[0.25px] sm:tw-pl-6"
+                      >
+                        Block no inlcudes
+                      </th>
+                      <th
+                        scope="col"
+                        className="tw-py-3 tw-pr-4 tw-pl-3 tw-whitespace-nowrap tw-text-left tw-text-[0.6875rem] tw-leading-[1.125rem] tw-font-medium tw-text-neutral-400 tw-uppercase tw-tracking-[0.25px] sm:tw-pr-6"
+                      >
+                        Count
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="tw-divide-y tw-divide-neutral-700/40">
+                    <tr className="tw-cursor-pointer hover:tw-bg-neutral-800/60 tw-transition tw-duration-300 tw-ease-out">
+                      <td className="tw-whitespace-nowrap tw-py-4 tw-pl-4 tw-pr-3 tw-text-xs tw-font-medium tw-text-white sm:tw-pl-6">
+                        info
+                      </td>
+                      <td className="tw-whitespace-nowrap tw-py-4 tw-pl-3 tw-pr-4 tw-text-xs tw-font-medium tw-text-white sm:tw-pr-6">
+                        info
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
+
+          {
+            <div className="tw-mt-8">
+              <div>
+                {predictedBlock && (
+                  <div>
+                    <p className="tw-mb-0 tw-font-semibold tw-text-base tw-text-neutral-100">
+                      <span>Block number:</span> {predictedBlock.blockNumber}
+                    </p>
+                    <p className="tw-mb-0 tw-font-normal tw-text-base tw-text-neutral-400">
+                      <span>Date:</span>
+                      {new Date(predictedBlock.timestamp).toLocaleString(
+                        "en-GB",
+                        {
+                          day: "2-digit",
+                          month: "2-digit",
+                          year: "numeric",
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        }
+                      )}
+                    </p>
+                    <div className="tw-inline-flex tw-space-x-2">
+                      <div>In:</div>{" "}
+                      <Countdown timestamp={predictedBlock.timestamp} />
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <div className="tw-w-1/3">
+                {!!predictedBlocks.length && (
+                  <div className="tw-space-y-2">
+                    {predictedBlocks.map((block) => (
+                      <BlockPickerAdvancedItem
+                        key={block.blockNumberIncludes}
+                        item={block}
+                      />
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          }
         </div>
       </div>
       <ToastContainer />
