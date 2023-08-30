@@ -14,6 +14,7 @@ import { distributionPlanApiPost } from "../../services/distribution-plan-api";
 
 import Countdown from "../../components/distribution-plan-tool/common/Countdown";
 import BlockPickerAdvancedItem from "../../components/block-picker/advanced/BlockPickerAdvancedItem";
+import AllowlistToolLoader from "../../components/allowlist-tool/common/AllowlistToolLoader";
 
 export interface PredictBlockNumbersResponseApiModel {
   readonly blockNumberIncludes: number;
@@ -223,10 +224,10 @@ export default function BlockPicker() {
             <div className="tw-self-end">
               <button
                 type="button"
-                className="tw-relative tw-inline-flex tw-items-center tw-justify-center tw-cursor-pointer tw-bg-primary-500 tw-px-4 tw-py-3 tw-text-sm tw-font-medium tw-text-white tw-border tw-border-solid tw-border-primary-500 tw-rounded-lg hover:tw-bg-primary-600 hover:tw-border-primary-600 tw-transition tw-duration-300 tw-ease-ou"
+                className="tw-w-36 tw-relative tw-inline-flex tw-items-center tw-justify-center tw-cursor-pointer tw-bg-primary-500 tw-px-4 tw-py-3 tw-text-sm tw-font-medium tw-text-white tw-border tw-border-solid tw-border-primary-500 tw-rounded-lg hover:tw-bg-primary-600 hover:tw-border-primary-600 tw-transition tw-duration-300 tw-ease-ou"
                 onClick={onSubmit}
               >
-                Submit
+                {!loading ? 'Submit' : <AllowlistToolLoader/>}
               </button>
             </div>
           </div>
