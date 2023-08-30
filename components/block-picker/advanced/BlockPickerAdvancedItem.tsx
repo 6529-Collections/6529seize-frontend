@@ -2,8 +2,9 @@ import { useState } from "react";
 import AllowlistToolCommonModalWrapper, {
   AllowlistToolModalSize,
 } from "../../allowlist-tool/common/modals/AllowlistToolCommonModalWrapper";
-import { PredictBlockNumbersResponseApiModel } from "./BlockPickerAdvanced";
+
 import BlockPickerAdvancedItemBlock from "./BlockPickerAdvancedItemBlock";
+import { PredictBlockNumbersResponseApiModel } from "../../../pages/block-picker";
 
 export default function BlockPickerAdvanced({
   item,
@@ -21,7 +22,7 @@ export default function BlockPickerAdvanced({
       <AllowlistToolCommonModalWrapper
         showModal={showModal}
         onClose={() => setShowModal(false)}
-        title={`Select "The Memes by 6529" Seasons`}
+        title={`Block includes: ${item.blockNumberIncludes}`}
         modalSize={AllowlistToolModalSize.X_LARGE}
         showTitle={false}
       >
