@@ -196,10 +196,10 @@ export default function BlockPicker() {
       <div className={`tw-bg-neutral-900 ${poppins.className}`}>
         <div
           id="allowlist-tool"
-          className="tw-overflow-y-auto tw-min-h-screen tw-relative"
+          className="tw-overflow-y-auto tw-min-h-screen tw-relative tw-pt-8 tw-pb-12 tw-px-14"
         >
-          <div className="tw-w-full tw-inline-flex">
-            <div className="tw-w-1/3">
+          <div className="tw-w-full tw-flex tw-gap-x-4 tw-gap-y-5">
+            <div className="tw-w-1/2">
               <BlockPickerDateSelect
                 date={date}
                 setDate={setDate}
@@ -207,58 +207,66 @@ export default function BlockPicker() {
                 setTime={setTime}
               />
             </div>
-            <div className="tw-w-1/3">
-              <BlockPickerTimeWindowSelect
-                timeWindow={timeWindow}
-                setTimeWindow={setTimeWindow}
-              />
-              <BlockPickerBlockNumberIncludes
-                blockNumberIncludes={blockNumberIncludes}
-                setBlockNumberIncludes={setBlockNumberIncludes}
-              />
+
+            <div className="tw-w-1/2">
+              <div className="tw-flex tw-w-full tw-gap-x-4">
+                <BlockPickerTimeWindowSelect
+                  timeWindow={timeWindow}
+                  setTimeWindow={setTimeWindow}
+                />
+                <BlockPickerBlockNumberIncludes
+                  blockNumberIncludes={blockNumberIncludes}
+                  setBlockNumberIncludes={setBlockNumberIncludes}
+                />
+              </div>
             </div>
-            <div className="tw-w-1/3">
-              <button type="button" onClick={onSubmit}>
+            <div className="tw-self-end">
+              <button
+                type="button"
+                className="tw-relative tw-inline-flex tw-items-center tw-justify-center tw-cursor-pointer tw-bg-primary-500 tw-px-4 tw-py-3 tw-text-sm tw-font-medium tw-text-white tw-border tw-border-solid tw-border-primary-500 tw-rounded-lg hover:tw-bg-primary-600 hover:tw-border-primary-600 tw-transition tw-duration-300 tw-ease-ou"
+                onClick={onSubmit}
+              >
                 Submit
               </button>
             </div>
           </div>
-          <div className="tw-w-full tw-inline-flex">
-          <div className="tw-w-1/3">
- 
-            {predictedBlock && (
-              <div>
-                <p>Block number: {predictedBlock.blockNumber}</p>
-                <p>
-                  Date:
-                  {new Date(predictedBlock.timestamp).toLocaleString("en-GB", {
-                    day: "2-digit",
-                    month: "2-digit",
-                    year: "numeric",
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })}
-                </p>
-                <div className="tw-inline-flex tw-space-x-2">
-                  <div>In:</div>{" "}
-                  <Countdown timestamp={predictedBlock.timestamp} />
+          <div className="tw-w-full tw-flex">
+            <div className="tw-w-1/3">
+              {predictedBlock && (
+                <div>
+                  <p>Block number: {predictedBlock.blockNumber}</p>
+                  <p>
+                    Date:
+                    {new Date(predictedBlock.timestamp).toLocaleString(
+                      "en-GB",
+                      {
+                        day: "2-digit",
+                        month: "2-digit",
+                        year: "numeric",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      }
+                    )}
+                  </p>
+                  <div className="tw-inline-flex tw-space-x-2">
+                    <div>In:</div>{" "}
+                    <Countdown timestamp={predictedBlock.timestamp} />
+                  </div>
                 </div>
-              </div>
-            )}
-          </div>
-          <div className="tw-w-1/3">
-
-            {!!predictedBlocks.length && (
-              <div className="tw-space-y-2">
-                {predictedBlocks.map((block) => (
-                  <BlockPickerAdvancedItem
-                    key={block.blockNumberIncludes}
-                    item={block}
-                  />
-                ))}
-              </div>
-            )}
-          </div>
+              )}
+            </div>
+            <div className="tw-w-1/3">
+              {!!predictedBlocks.length && (
+                <div className="tw-space-y-2">
+                  {predictedBlocks.map((block) => (
+                    <BlockPickerAdvancedItem
+                      key={block.blockNumberIncludes}
+                      item={block}
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>
