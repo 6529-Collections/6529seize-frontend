@@ -11,7 +11,7 @@ export default function BlockPickerResultTableRowModal({
       <div className="tw-p-6 tw-max-h-[calc(100vh_+_-100px)] tw-overflow-y-auto">
         <div>
           <p className="tw-mb-0 tw-text-lg tw-font-semibold tw-text-neutral-100">
-            Blocks what includes {predictedBlock.blockNumberIncludes}
+            Blocks that includes {predictedBlock.blockNumberIncludes}
           </p>
           <p className="tw-mb-0 tw-text-sm tw-font-normal tw-text-neutral-400">
             Total: {predictedBlock.count}

@@ -69,12 +69,15 @@ export default function BlockPicker() {
     { display: "Block picker" },
   ]);
   const [breadcrumbs] = useState<Crumb[]>(defaultBreadCrumbs);
+  const targetDate =
+    new Date().getTime() +
+    BlockPickerTimeWindowToMilliseconds[BlockPickerTimeWindow.ONE_HOUR];
 
   const [date, setDate] = useState<string>(
-    new Date().toLocaleDateString("en-GB").split("/").reverse().join("-")
+    new Date(targetDate).toLocaleDateString("en-GB").split("/").reverse().join("-")
   );
   const [time, setTime] = useState<string>(
-    new Date().toLocaleTimeString([], {
+    new Date(targetDate).toLocaleTimeString([], {
       hour: "2-digit",
       minute: "2-digit",
       hour12: false,

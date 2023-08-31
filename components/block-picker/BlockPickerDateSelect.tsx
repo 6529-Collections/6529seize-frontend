@@ -36,6 +36,7 @@ export default function BlockPickerDateSelect({
         <div className="tw-mt-1.5">
           <input
             type="time"
+            step="1"
             name="block-picker-time"
             id="block-picker-time"
             value={time}
