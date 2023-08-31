@@ -42,12 +42,10 @@ export default function BlockPickerAdvancedItemBlock({
   };
 
   return (
-    <div
-      onClick={copy}
-      className="tw-cursor-pointer tw-text-neutral-300 hover:tw-text-white tw-transition tw-duration-300 tw-ease-out"
-    >
-            <svg
-        className="tw-h-4 tw-w-4 tw-mr-2.5 group-hover:tw-text-white tw-transition tw-duration-300 tw-ease-out"
+    <div className=" tw-text-neutral-300 hover:tw-text-white tw-transition tw-duration-300 tw-ease-out">
+      <svg
+        onClick={copy}
+        className="tw-h-4 tw-cursor-pointer tw-w-4 tw-mr-2.5 group-hover:tw-text-white tw-transition tw-duration-300 tw-ease-out"
         viewBox="0 0 24 24"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
@@ -60,8 +58,7 @@ export default function BlockPickerAdvancedItemBlock({
           strokeLinejoin="round"
         />
       </svg>
-      {coping ? "Copied" : parts}
-
+      {coping ? "Copied" : <a href={`https://etherscan.io/block/countdown/${block}`} target="_blank">{parts}</a>}
     </div>
   );
 }
