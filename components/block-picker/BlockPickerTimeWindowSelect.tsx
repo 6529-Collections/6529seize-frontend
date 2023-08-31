@@ -100,11 +100,13 @@ export default function BlockPickerTimeWindowSelect({
               exit={{ opacity: 0, y: -20 }}
               transition={{ duration: 0.2 }}
             >
-              <BlockPickerTimeWindowSelectList
-                setTimeWindow={onTimeWindowSelect}
-                timeWindow={timeWindow}
-                options={options}
-              />
+              <div className="tw-rounded-lg tw-overflow-hidden">
+                <BlockPickerTimeWindowSelectList
+                  setTimeWindow={onTimeWindowSelect}
+                  timeWindow={timeWindow}
+                  options={options}
+                />
+              </div>
             </motion.div>
           )}
         </AllowlistToolAnimationWrapper>

@@ -19,7 +19,7 @@ export default function BlockPickerAdvancedItemBlock({
       parts.push(number.substring(lastIndex, matchStart));
     }
     parts.push(
-      <span key={matchStart} className="tw-text-red-500">
+      <span key={matchStart} className="tw-text-error">
         {number.substring(matchStart, matchEnd)}
       </span>
     );

@@ -11,7 +11,7 @@ export default function BlockPickerAdvanced({
 }: {
   item: PredictBlockNumbersResponseApiModel;
 }) {
-  const [showModal, setShowModal] = useState(false);
+  const [showModal, setShowModal] = useState(true);
 
   return (
     <>
@@ -26,16 +26,28 @@ export default function BlockPickerAdvanced({
         modalSize={AllowlistToolModalSize.X_LARGE}
         showTitle={false}
       >
-        <div>
-          {item.blockNumbers.map((block) => (
-            <div key={block}>
-              <BlockPickerAdvancedItemBlock
-                key={block}
-                block={block}
-                blockParts={item.blockNumberIncludes}
-              />
+        <div className="tw-rounded-lg tw-overflow-hidden">
+          <div className="tw-p-6 tw-max-h-[calc(100vh_+_-100px)] tw-overflow-y-auto">
+            <div>
+              <p className="tw-mb-0 tw-text-lg tw-font-semibold tw-text-neutral-100">
+                Title
+              </p>
+              <p className="tw-mb-0 tw-text-sm tw-font-normal tw-text-neutral-400">
+                Lorem ipsum dolor sit amet consectetur.
+              </p>
             </div>
-          ))}
+            <div className="tw-mt-4">
+              {item.blockNumbers.map((block) => (
+                <div key={block} className="tw-text-base tw-font-normal">
+                  <BlockPickerAdvancedItemBlock
+                    key={block}
+                    block={block}
+                    blockParts={item.blockNumberIncludes}
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
       </AllowlistToolCommonModalWrapper>
     </>

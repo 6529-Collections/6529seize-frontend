@@ -14,7 +14,7 @@ export default function BlockPickerTimeWindowSelectList({
 }) {
   return (
     <ul
-      className="tw-absolute tw-z-10 tw-pl-1.5 tw-pr-1.5 tw-list-none tw-mt-1 tw-max-h-60 tw-w-full tw-overflow-auto tw-rounded-lg tw-bg-[#282828] tw-py-2 tw-text-base tw-shadow-xl  tw-ring-1 tw-ring-inset tw-ring-white/10 focus:tw-outline-none sm:tw-text-sm"
+      className="tw-absolute tw-z-10 tw-pl-1.5 tw-pr-1.5 tw-list-none tw-mt-1 tw-max-h-60 tw-w-full tw-overflow-auto tw-rounded-lg tw-bg-[#282828] tw-py-2 tw-text-base tw-shadow-xl tw-ring-1 tw-ring-inset tw-ring-white/10 focus:tw-outline-none sm:tw-text-sm"
       role="listbox"
       aria-labelledby="listbox-label"
       aria-activedescendant="listbox-option-3"
@@ -39,9 +39,9 @@ export default function BlockPickerTimeWindowSelectList({
           </div>
 
           {timeWindow === option.value && (
-            <span className="tw-text-white tw-absolute tw-inset-y-0 tw-right-0 tw-flex tw-items-center tw-pr-4">
+            <span className="tw-absolute tw-inset-y-0 tw-right-0 tw-flex tw-items-center tw-pr-4">
               <svg
-                className="tw-h-5 tw-w-5 tw-text-white"
+                className="tw-h-5 tw-w-5 tw-text-primary-300"
                 viewBox="0 0 20 20"
                 fill="currentColor"
                 aria-hidden="true"

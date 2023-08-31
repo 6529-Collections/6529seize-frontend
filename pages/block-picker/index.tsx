@@ -96,7 +96,13 @@ export default function BlockPicker() {
 
   const [predictedBlocks, setPredictedBlocks] = useState<
     PredictBlockNumbersResponseApiModel[]
-  >([]);
+  >([
+    {
+      blockNumberIncludes: 42,
+      count: 69,
+      blockNumbers: [42069],
+    },
+  ]);
 
   const getPredictedBlock = async (
     timestamp: number
@@ -233,24 +239,51 @@ export default function BlockPicker() {
           </div>
 
           <div>
-            <div className="tw-mt-8 tw-pt-6 tw-border-t tw-border-solid tw-border-x-0 tw-border-b-0 tw-border-neutral-700/60">
+            <div className="tw-mt-8 tw-pt-6 tw-border-t tw-border-solid tw-border-x-0 tw-border-b-0 tw-border-neutral-700">
               <div className="sm:tw-flex sm:tw-items-baseline sm:tw-justify-between">
                 <div className="sm:tw-w-0 sm:tw-flex-1">
                   <p className="tw-mb-0 tw-text-base tw-font-semibold tw-text-neutral-100 tw-space-x-1">
                     <span>Block number:</span>
                     <span>13274288</span>
                   </p>
-                  <p className="tw-mt-1 tw-mb-0 tw-truncate tw-text-sm tw-text-neutral-400 tw-space-x-1">
-                    <span>Date:</span>
+                  <div className="tw-mt-2 tw-inline-flex tw-items-center tw-text-sm tw-text-neutral-400">
+                    <svg
+                      className="tw-flex-shrink-0 tw-mr-2 tw-h-4 tw-w-4 tw-text-neutral-400"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="M21 10H3M16 2V6M8 2V6M7.8 22H16.2C17.8802 22 18.7202 22 19.362 21.673C19.9265 21.3854 20.3854 20.9265 20.673 20.362C21 19.7202 21 18.8802 21 17.2V8.8C21 7.11984 21 6.27976 20.673 5.63803C20.3854 5.07354 19.9265 4.6146 19.362 4.32698C18.7202 4 17.8802 4 16.2 4H7.8C6.11984 4 5.27976 4 4.63803 4.32698C4.07354 4.6146 3.6146 5.07354 3.32698 5.63803C3 6.27976 3 7.11984 3 8.8V17.2C3 18.8802 3 19.7202 3.32698 20.362C3.6146 20.9265 4.07354 21.3854 4.63803 21.673C5.27976 22 6.11984 22 7.8 22Z"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                      />
+                    </svg>
                     <span>30/08/2023, 20:00</span>
-                  </p>
+                  </div>
                 </div>
-                <p className="tw-mb-0 tw-text-sm tw-text-neutral-100">
-                  In 5 minutes, 11 seconds
-                </p>
+                <div className="tw-inline-flex tw-items-center tw-text-sm tw-text-neutral-100">
+                  <svg
+                    className="tw-flex-shrink-0 tw-mr-2 tw-h-4 tw-w-4 tw-text-neutral-400"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M12 6V12L16 14M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12Z"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    />
+                  </svg>
+                  <span> 5 minutes, 11 seconds</span>
+                </div>
               </div>
             </div>
-            <div className="tw-mt-6 tw-flow-root">
+            <div className="tw-mt-4 tw-flow-root">
               <div className="tw-overflow-x-auto tw-ring-1 tw-ring-white/10 tw-rounded-lg">
                 <table className="tw-min-w-full tw-divide-y tw-divide-neutral-700/60">
                   <thead className="tw-bg-neutral-800/60">
@@ -259,7 +292,7 @@ export default function BlockPicker() {
                         scope="col"
                         className="tw-py-3 tw-pl-4 tw-pr-3 tw-whitespace-nowrap tw-text-left tw-text-[0.6875rem] tw-leading-[1.125rem] tw-font-medium tw-text-neutral-400 tw-uppercase tw-tracking-[0.25px] sm:tw-pl-6"
                       >
-                        Block no inlcudes
+                        Block inlcudes
                       </th>
                       <th
                         scope="col"
