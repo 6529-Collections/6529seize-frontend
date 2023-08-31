@@ -3,7 +3,7 @@ import Breadcrumb, { Crumb } from "../../components/breadcrumb/Breadcrumb";
 import HeaderPlaceholder from "../../components/header/HeaderPlaceholder";
 import { Poppins } from "next/font/google";
 import { useState } from "react";
-
+import Head from "next/head";
 import "react-toastify/dist/ReactToastify.css";
 import { ToastContainer } from "react-toastify";
 
@@ -12,9 +12,8 @@ import BlockPickerDateSelect from "../../components/block-picker/BlockPickerDate
 import BlockPickerBlockNumberIncludes from "../../components/block-picker/BlockPickerBlockNumberIncludes";
 import { distributionPlanApiPost } from "../../services/distribution-plan-api";
 
-import Countdown from "../../components/distribution-plan-tool/common/Countdown";
-import BlockPickerAdvancedItem from "../../components/block-picker/advanced/BlockPickerAdvancedItem";
 import AllowlistToolLoader from "../../components/allowlist-tool/common/AllowlistToolLoader";
+import BlockPickerResult from "../../components/block-picker/result/BlockPickerResult";
 
 export interface PredictBlockNumbersResponseApiModel {
   readonly blockNumberIncludes: number;
@@ -96,13 +95,7 @@ export default function BlockPicker() {
 
   const [predictedBlocks, setPredictedBlocks] = useState<
     PredictBlockNumbersResponseApiModel[]
-  >([
-    {
-      blockNumberIncludes: 42,
-      count: 69,
-      blockNumbers: [42069],
-    },
-  ]);
+  >([]);
 
   const getPredictedBlock = async (
     timestamp: number
@@ -151,7 +144,11 @@ export default function BlockPicker() {
         .map((blockNo) => parseInt(blockNo.trim()));
 
       const haveInvalidBlockNos = blockNos.some((blockNo) => isNaN(blockNo));
-      if (haveInvalidBlockNos) {
+      if (
+        haveInvalidBlockNos ||
+        !blockNos.length ||
+        blockNumberIncludes.includes(".")
+      ) {
         alert(
           "Invalid block numbers, please use comma separated numbers. Example: 42, 69, 42069"
         );
@@ -198,6 +195,21 @@ export default function BlockPicker() {
 
   return (
     <>
+      <Head>
+        <title>Meme Lab | 6529 SEIZE</title>
+        <link rel="icon" href="/favicon.ico" />
+        <meta name="description" content="Block Picker | 6529 SEIZE" />
+        <meta
+          property="og:url"
+          content={`${process.env.BASE_ENDPOINT}/block-picker`}
+        />
+        <meta property="og:title" content="Block Picker" />
+        <meta property="og:description" content="6529 SEIZE" />
+        <meta
+          property="og:image"
+          content={`${process.env.BASE_ENDPOINT}/Seize_Logo_Glasses_2.png`}
+        />
+      </Head>
       <Header />
       <Breadcrumb breadcrumbs={breadcrumbs} />
       <div className={`tw-bg-neutral-900 ${poppins.className}`}>
@@ -238,128 +250,13 @@ export default function BlockPicker() {
             </div>
           </div>
 
-          <div>
-            <div className="tw-mt-8 tw-pt-6 tw-border-t tw-border-solid tw-border-x-0 tw-border-b-0 tw-border-neutral-700">
-              <div className="sm:tw-flex sm:tw-items-baseline sm:tw-justify-between">
-                <div className="sm:tw-w-0 sm:tw-flex-1">
-                  <p className="tw-mb-0 tw-text-base tw-font-semibold tw-text-neutral-100 tw-space-x-1">
-                    <span>Block number:</span>
-                    <span>13274288</span>
-                  </p>
-                  <div className="tw-mt-2 tw-inline-flex tw-items-center tw-text-sm tw-text-neutral-400">
-                    <svg
-                      className="tw-flex-shrink-0 tw-mr-2 tw-h-4 tw-w-4 tw-text-neutral-400"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        d="M21 10H3M16 2V6M8 2V6M7.8 22H16.2C17.8802 22 18.7202 22 19.362 21.673C19.9265 21.3854 20.3854 20.9265 20.673 20.362C21 19.7202 21 18.8802 21 17.2V8.8C21 7.11984 21 6.27976 20.673 5.63803C20.3854 5.07354 19.9265 4.6146 19.362 4.32698C18.7202 4 17.8802 4 16.2 4H7.8C6.11984 4 5.27976 4 4.63803 4.32698C4.07354 4.6146 3.6146 5.07354 3.32698 5.63803C3 6.27976 3 7.11984 3 8.8V17.2C3 18.8802 3 19.7202 3.32698 20.362C3.6146 20.9265 4.07354 21.3854 4.63803 21.673C5.27976 22 6.11984 22 7.8 22Z"
-                        stroke="currentColor"
-                        stroke-width="2"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                      />
-                    </svg>
-                    <span>30/08/2023, 20:00</span>
-                  </div>
-                </div>
-                <div className="tw-inline-flex tw-items-center tw-text-sm tw-text-neutral-100">
-                  <svg
-                    className="tw-flex-shrink-0 tw-mr-2 tw-h-4 tw-w-4 tw-text-neutral-400"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      d="M12 6V12L16 14M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12Z"
-                      stroke="currentColor"
-                      stroke-width="2"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                    />
-                  </svg>
-                  <span> 5 minutes, 11 seconds</span>
-                </div>
-              </div>
-            </div>
-            <div className="tw-mt-4 tw-flow-root">
-              <div className="tw-overflow-x-auto tw-ring-1 tw-ring-white/10 tw-rounded-lg">
-                <table className="tw-min-w-full tw-divide-y tw-divide-neutral-700/60">
-                  <thead className="tw-bg-neutral-800/60">
-                    <tr>
-                      <th
-                        scope="col"
-                        className="tw-py-3 tw-pl-4 tw-pr-3 tw-whitespace-nowrap tw-text-left tw-text-[0.6875rem] tw-leading-[1.125rem] tw-font-medium tw-text-neutral-400 tw-uppercase tw-tracking-[0.25px] sm:tw-pl-6"
-                      >
-                        Block inlcudes
-                      </th>
-                      <th
-                        scope="col"
-                        className="tw-py-3 tw-pr-4 tw-pl-3 tw-whitespace-nowrap tw-text-left tw-text-[0.6875rem] tw-leading-[1.125rem] tw-font-medium tw-text-neutral-400 tw-uppercase tw-tracking-[0.25px] sm:tw-pr-6"
-                      >
-                        Count
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="tw-divide-y tw-divide-neutral-700/40">
-                    <tr className="tw-cursor-pointer hover:tw-bg-neutral-800/60 tw-transition tw-duration-300 tw-ease-out">
-                      <td className="tw-whitespace-nowrap tw-py-4 tw-pl-4 tw-pr-3 tw-text-xs tw-font-medium tw-text-white sm:tw-pl-6">
-                        info
-                      </td>
-                      <td className="tw-whitespace-nowrap tw-py-4 tw-pl-3 tw-pr-4 tw-text-xs tw-font-medium tw-text-white sm:tw-pr-6">
-                        info
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-
-          {
-            <div className="tw-mt-8">
-              <div>
-                {predictedBlock && (
-                  <div>
-                    <p className="tw-mb-0 tw-font-semibold tw-text-base tw-text-neutral-100">
-                      <span>Block number:</span> {predictedBlock.blockNumber}
-                    </p>
-                    <p className="tw-mb-0 tw-font-normal tw-text-base tw-text-neutral-400">
-                      <span>Date:</span>
-                      {new Date(predictedBlock.timestamp).toLocaleString(
-                        "en-GB",
-                        {
-                          day: "2-digit",
-                          month: "2-digit",
-                          year: "numeric",
-                          hour: "2-digit",
-                          minute: "2-digit",
-                        }
-                      )}
-                    </p>
-                    <div className="tw-inline-flex tw-space-x-2">
-                      <div>In:</div>{" "}
-                      <Countdown timestamp={predictedBlock.timestamp} />
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              <div className="tw-w-1/3">
-                {!!predictedBlocks.length && (
-                  <div className="tw-space-y-2">
-                    {predictedBlocks.map((block) => (
-                      <BlockPickerAdvancedItem
-                        key={block.blockNumberIncludes}
-                        item={block}
-                      />
-                    ))}
-                  </div>
-                )}
-              </div>
-            </div>
-          }
+          {!loading && !!predictedBlock && (
+            <BlockPickerResult
+              blocknumber={predictedBlock.blockNumber}
+              timestamp={predictedBlock.timestamp}
+              predictedBlocks={predictedBlocks}
+            />
+          )}
         </div>
       </div>
       <ToastContainer />

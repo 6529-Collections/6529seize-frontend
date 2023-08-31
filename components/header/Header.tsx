@@ -347,6 +347,13 @@ export default function Header(props: Props) {
                     </a>
                   </Col>
                 </Row>
+                <Row className="pt-3">
+                  <Col>
+                    <a href="/block-picker">
+                      <h3>Block Picker</h3>
+                    </a>
+                  </Col>
+                </Row>
                 <Row>
                   <Col xs={{ span: 6, offset: 3 }}>
                     <hr />
@@ -720,6 +727,14 @@ export default function Header(props: Props) {
                                     "/distribution-plan-tool")
                                 }>
                                 Distribution Plan
+                              </NavDropdown.Item>
+                              <NavDropdown.Item
+                                className={styles.dropdownItem}
+                                onClick={() =>
+                                  (window.location.href =
+                                    "/block-picker")
+                                }>
+                                Block Picker
                               </NavDropdown.Item>
                               <NavDropdown.Divider />
                               <NavDropdown.Item
