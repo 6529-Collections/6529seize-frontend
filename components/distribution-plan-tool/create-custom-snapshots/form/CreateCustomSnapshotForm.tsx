@@ -269,12 +269,12 @@ export default function CreateCustomSnapshotForm() {
           <CreateCustomSnapshotFormAddWalletsModal />
         </AllowlistToolCommonModalWrapper>
       )}
-      <div className="tw-hidden">
+     {/*  <div>
         <CreateCustomSnapshotFormTable
           tokens={tokens}
           onRemoveToken={onRemoveToken}
         />
-      </div>
+      </div> */}
     </div>
   );
 }
