@@ -193,7 +193,7 @@ export default function CreateCustomSnapshotForm() {
               <button
                 onClick={() => setIsAddWalletsOpen(true)}
                 type="button"
-                className="tw-inline-flex tw-items-center tw-justify-center tw-cursor-pointer tw-bg-transparent tw-px-4 tw-py-3 tw-underline hover:tw-bg-neutral-800/80 tw-rounded-lg tw-text-sm tw-font-medium tw-text-white tw-w-full tw-border-transparent tw-border-solid tw-border-neutral-700 tw-border-2 tw-transition tw-duration-300 tw-ease-out"
+                className="tw-inline-flex tw-items-center tw-justify-center tw-cursor-pointer tw-bg-transparent tw-px-4 tw-py-3 tw-underline hover:tw-bg-[#232323] tw-rounded-lg tw-text-sm tw-font-medium tw-text-white tw-w-full tw-border-transparent tw-border-solid tw-border-neutral-700 tw-border-2 hover:tw-border-[#232323] tw-transition tw-duration-300 tw-ease-out"
               >
                 <svg
                   className="tw-h-5 tw-w-5 tw-mr-2 -tw-ml-1"
@@ -214,7 +214,7 @@ export default function CreateCustomSnapshotForm() {
             </div>
           </div>
 
-          {/* <div className="tw-w-80">
+          {/*  <div className="tw-w-80">
             <div className="tw-flex tw-justify-between tw-items-center">
               <label className="tw-block tw-text-sm tw-font-normal tw-leading-5 tw-text-neutral-100">
                 Wallet no
@@ -250,7 +250,7 @@ export default function CreateCustomSnapshotForm() {
                 </button>
               </div>
             </div>
-          </div> */}
+          </div>  */}
           <div>
             <DistributionPlanAddOperationBtn loading={isLoading}>
               Add custom snapshot
@@ -269,10 +269,12 @@ export default function CreateCustomSnapshotForm() {
           <CreateCustomSnapshotFormAddWalletsModal />
         </AllowlistToolCommonModalWrapper>
       )}
-      <CreateCustomSnapshotFormTable
-        tokens={tokens}
-        onRemoveToken={onRemoveToken}
-      />
+      <div className="tw-hidden">
+        <CreateCustomSnapshotFormTable
+          tokens={tokens}
+          onRemoveToken={onRemoveToken}
+        />
+      </div>
     </div>
   );
 }

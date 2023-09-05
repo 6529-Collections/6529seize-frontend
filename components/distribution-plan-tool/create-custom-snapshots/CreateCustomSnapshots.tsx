@@ -116,7 +116,7 @@ export default function CreateCustomSnapshots() {
       <DistributionPlanStepWrapper>
         <CreateCustomSnapshotForm />
 
-        <div className="tw-mt-6">
+        <div className="tw-mt-8">
           {haveCustomSnapshots ? (
             <CreateCustomSnapshotTable customSnapshots={customSnapshots} />
           ) : (
