@@ -213,17 +213,6 @@ export default function CreateCustomSnapshotForm() {
               </button>
             </div>
           </div>
-          {isAddWalletsOpen && (
-            <AllowlistToolCommonModalWrapper
-              showModal={isAddWalletsOpen}
-              onClose={() => setIsAddWalletsOpen(false)}
-              title={`Add wallets`}
-              modalSize={AllowlistToolModalSize.X_LARGE}
-              showTitle={false}
-            >
-              <CreateCustomSnapshotFormAddWalletsModal />
-            </AllowlistToolCommonModalWrapper>
-          )}
 
           {/* <div className="tw-w-80">
             <div className="tw-flex tw-justify-between tw-items-center">
@@ -269,6 +258,17 @@ export default function CreateCustomSnapshotForm() {
           </div>
         </div>
       </form>
+      {isAddWalletsOpen && (
+        <AllowlistToolCommonModalWrapper
+          showModal={isAddWalletsOpen}
+          onClose={() => setIsAddWalletsOpen(false)}
+          title={`Add wallets`}
+          modalSize={AllowlistToolModalSize.X_LARGE}
+          showTitle={false}
+        >
+          <CreateCustomSnapshotFormAddWalletsModal />
+        </AllowlistToolCommonModalWrapper>
+      )}
       <CreateCustomSnapshotFormTable
         tokens={tokens}
         onRemoveToken={onRemoveToken}
