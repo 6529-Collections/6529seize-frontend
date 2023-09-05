@@ -15,6 +15,10 @@ import DistributionPlanAddOperationBtn from "../../common/DistributionPlanAddOpe
 import CreateCustomSnapshotFormUpload from "./CreateCustomSnapshotFormUpload";
 import CreateCustomSnapshotFormTable from "./CreateCustomSnapshotFormTable";
 import { distributionPlanApiPost } from "../../../../services/distribution-plan-api";
+import AllowlistToolCommonModalWrapper, {
+  AllowlistToolModalSize,
+} from "../../../allowlist-tool/common/modals/AllowlistToolCommonModalWrapper";
+import CreateCustomSnapshotFormAddWalletsModal from "./CreateCustomSnapshotFormAddWalletsModal";
 
 export default function CreateCustomSnapshotForm() {
   const { distributionPlan, setToasts, fetchOperations } = useContext(
@@ -94,20 +98,18 @@ export default function CreateCustomSnapshotForm() {
     setIsLoading(true);
     const endpoint = `/allowlists/${distributionPlan.id}/operations`;
     const customTokenPoolId = getRandomObjectId();
-    const { success } = await distributionPlanApiPost<AllowlistOperation>(
-      {
-        endpoint,
-        body: {
-          code: AllowlistOperationCode.CREATE_CUSTOM_TOKEN_POOL,
-          params: {
-            id: customTokenPoolId,
-            name: formValues.name,
-            description: formValues.name,
-            tokens: tokensWithResolvedEns,
-          },
+    const { success } = await distributionPlanApiPost<AllowlistOperation>({
+      endpoint,
+      body: {
+        code: AllowlistOperationCode.CREATE_CUSTOM_TOKEN_POOL,
+        params: {
+          id: customTokenPoolId,
+          name: formValues.name,
+          description: formValues.name,
+          tokens: tokensWithResolvedEns,
         },
-      }
-    );
+      },
+    });
     setIsLoading(false);
     if (!success) {
       return null;
@@ -164,6 +166,8 @@ export default function CreateCustomSnapshotForm() {
     setTokens((prev) => [...tokens, ...prev]);
   };
 
+  const [isAddWalletsOpen, setIsAddWalletsOpen] = useState<boolean>(false);
+
   return (
     <div>
       <form onSubmit={handleSubmit}>
@@ -184,9 +188,10 @@ export default function CreateCustomSnapshotForm() {
               />
             </div>
           </div>
-          {/* <div>
+          <div>
             <div>
               <button
+                onClick={() => setIsAddWalletsOpen(true)}
                 type="button"
                 className="tw-inline-flex tw-items-center tw-justify-center tw-cursor-pointer tw-bg-transparent tw-px-4 tw-py-3 tw-underline hover:tw-bg-neutral-800/80 tw-rounded-lg tw-text-sm tw-font-medium tw-text-white tw-w-full tw-border-transparent tw-border-solid tw-border-neutral-700 tw-border-2 tw-transition tw-duration-300 tw-ease-out"
               >
@@ -204,12 +209,23 @@ export default function CreateCustomSnapshotForm() {
                     stroke-linejoin="round"
                   />
                 </svg>
-                <span>Add wallet</span>
+                <span>Add wallets</span>
               </button>
             </div>
-          </div> */}
+          </div>
+          {isAddWalletsOpen && (
+            <AllowlistToolCommonModalWrapper
+              showModal={isAddWalletsOpen}
+              onClose={() => setIsAddWalletsOpen(false)}
+              title={`Add wallets`}
+              modalSize={AllowlistToolModalSize.X_LARGE}
+              showTitle={false}
+            >
+              <CreateCustomSnapshotFormAddWalletsModal />
+            </AllowlistToolCommonModalWrapper>
+          )}
 
-          <div className="tw-w-80">
+          {/* <div className="tw-w-80">
             <div className="tw-flex tw-justify-between tw-items-center">
               <label className="tw-block tw-text-sm tw-font-normal tw-leading-5 tw-text-neutral-100">
                 Wallet no
@@ -245,7 +261,7 @@ export default function CreateCustomSnapshotForm() {
                 </button>
               </div>
             </div>
-          </div>
+          </div> */}
           <div>
             <DistributionPlanAddOperationBtn loading={isLoading}>
               Add custom snapshot
