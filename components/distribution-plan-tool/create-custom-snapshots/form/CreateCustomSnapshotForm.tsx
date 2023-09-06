@@ -213,44 +213,6 @@ export default function CreateCustomSnapshotForm() {
               </button>
             </div>
           </div>
-
-          {/*  <div className="tw-w-80">
-            <div className="tw-flex tw-justify-between tw-items-center">
-              <label className="tw-block tw-text-sm tw-font-normal tw-leading-5 tw-text-neutral-100">
-                Wallet no
-              </label>
-              <CreateCustomSnapshotFormUpload
-                fileName={fileName}
-                setFileName={setFileName}
-                setTokens={addUploadedTokens}
-              />
-            </div>
-            <div className="tw-relative tw-mt-2">
-              <input
-                type="text"
-                name="owner"
-                autoComplete="off"
-                value={manualWallet || ""}
-                onChange={(e) => setManualWallet(e.target.value ?? "")}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    e.preventDefault();
-                  }
-                }}
-                className="tw-form-input tw-block tw-w-full tw-rounded-lg tw-border-0 tw-py-3 tw-pl-3 tw-pr-20 tw-bg-neutral-700/40 tw-text-white tw-font-light tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-neutral-700/40
-              hover:tw-ring-neutral-700 placeholder:tw-text-neutral-500 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 tw-text-base sm:tw-leading-6 tw-transition tw-duration-300 tw-ease-out"
-              />
-              <div className="tw-absolute tw-inset-y-0 tw-top-1 tw-right-0 tw-pr-2">
-                <button
-                  onClick={addManualWallet}
-                  type="button"
-                  className="tw-cursor-pointer tw-bg-neutral-800 hover:tw-bg-neutral-700/20 tw-px-4 tw-py-2 tw-text-sm tw-font-medium tw-text-white tw-border-2 tw-border-solid tw-border-neutral-700 tw-rounded-lg tw-transition tw-duration-300 tw-ease-out"
-                >
-                  Add
-                </button>
-              </div>
-            </div>
-          </div>  */}
           <div>
             <DistributionPlanAddOperationBtn loading={isLoading}>
               Add custom snapshot
@@ -266,15 +228,24 @@ export default function CreateCustomSnapshotForm() {
           modalSize={AllowlistToolModalSize.X_LARGE}
           showTitle={false}
         >
-          <CreateCustomSnapshotFormAddWalletsModal />
+          <CreateCustomSnapshotFormAddWalletsModal
+            fileName={fileName}
+            setFileName={setFileName}
+            tokens={tokens}
+            addUploadedTokens={addUploadedTokens}
+            setManualWallet={setManualWallet}
+            addManualWallet={addManualWallet}
+            onRemoveToken={onRemoveToken}
+            onClose={() => setIsAddWalletsOpen(false)}
+          />
         </AllowlistToolCommonModalWrapper>
       )}
-     {/*  <div>
+      <div className="tw-hidden">
         <CreateCustomSnapshotFormTable
           tokens={tokens}
           onRemoveToken={onRemoveToken}
         />
-      </div> */}
+      </div>
     </div>
   );
 }
