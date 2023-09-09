@@ -20,7 +20,6 @@ export default function BuildPhase({
   phases: BuildPhasesPhase[];
   onNextStep: () => void;
 }) {
-  const { operations } = useContext(DistributionPlanToolContext);
   const [haveRan, setHaveRan] = useState(false);
   useEffect(() => {
     setHaveRan(

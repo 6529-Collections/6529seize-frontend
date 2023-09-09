@@ -15,6 +15,8 @@ export interface CreatePhasesPhase {
   readonly name: string;
   readonly description: string;
   readonly hasRan: boolean;
+  readonly order: number;
+  readonly allowlistId: string;
 }
 export default function CreatePhases() {
   const { setStep, operations } = useContext(DistributionPlanToolContext);
@@ -30,6 +32,8 @@ export default function CreatePhases() {
         name: operation.params.name,
         description: operation.params.description,
         hasRan: operation.hasRan,
+        order: operation.order,
+        allowlistId: operation.allowlistId,
       }))
     );
   }, [operations]);
@@ -41,9 +45,7 @@ export default function CreatePhases() {
   }, [phases]);
   return (
     <div>
-      <StepHeader
-        step={DistributionPlanToolStep.CREATE_PHASES}
-      />
+      <StepHeader step={DistributionPlanToolStep.CREATE_PHASES} />
       <DistributionPlanStepWrapper>
         <CreatePhasesForm />
         <div className="tw-mt-6">
