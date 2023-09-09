@@ -1,5 +1,4 @@
 import { useContext, useEffect, useState } from "react";
-import AllowlistToolJsonIcon from "../../../allowlist-tool/icons/AllowlistToolJsonIcon";
 import DistributionPlanTableRowWrapper from "../../common/DistributionPlanTableRowWrapper";
 import {
   FetchResultsType,
@@ -10,11 +9,7 @@ import {
 } from "./ReviewDistributionPlanTable";
 import { DistributionPlanToolContext } from "../../DistributionPlanToolContext";
 import { assertUnreachable } from "../../../../helpers/AllowlistToolHelpers";
-import {
-  AllowlistResult,
-  AllowlistToolResponse,
-} from "../../../allowlist-tool/allowlist-tool.types";
-import AllowlistToolCsvIcon from "../../../allowlist-tool/icons/AllowlistToolCsvIcon";
+import { AllowlistResult } from "../../../allowlist-tool/allowlist-tool.types";
 import RoundedJsonIconButton from "../../common/RoundedJsonIconButton";
 import RoundedCsvIconButton from "../../common/RoundedCsvIconButton";
 import RoundedManifoldIconButton from "../../common/RoundedManifoldIconButton";
@@ -27,9 +22,7 @@ export default function ReviewDistributionPlanTableRow({
   item: ReviewDistributionPlanTableItem;
   rows: ReviewDistributionPlanTablePhase[];
 }) {
-  const { distributionPlan, setToasts } = useContext(
-    DistributionPlanToolContext
-  );
+  const { distributionPlan } = useContext(DistributionPlanToolContext);
 
   const [loadingType, setLoadingType] = useState<FetchResultsType | null>(null);
   const [isLoadingJson, setIsLoadingJson] = useState(false);
@@ -54,6 +47,12 @@ export default function ReviewDistributionPlanTableRow({
     }
   };
 
+  const getFileName = (extension: string) =>
+    `${item.name
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/(^-|-$)+/g, "")}.${extension}`;
+
   const getFullResults = (results: AllowlistResult[]): FullResultWallet[] =>
     results.map<FullResultWallet>((result) => {
       const phase = rows.find((row) => row.phase.id === result.phaseId);
@@ -73,7 +72,7 @@ export default function ReviewDistributionPlanTableRow({
     const url = window.URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
-    link.download = "results.json";
+    link.download = getFileName("json");
     link.click();
   };
 
@@ -86,7 +85,7 @@ export default function ReviewDistributionPlanTableRow({
 
     const link = document.createElement("a");
     link.href = "data:text/csv;charset=utf-8," + encodeURIComponent(csv);
-    link.download = "data.csv";
+    link.download = getFileName("csv");
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -107,7 +106,7 @@ export default function ReviewDistributionPlanTableRow({
 
     const link = document.createElement("a");
     link.href = "data:text/csv;charset=utf-8," + encodeURIComponent(csv);
-    link.download = "data.csv";
+    link.download = getFileName("csv");
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
