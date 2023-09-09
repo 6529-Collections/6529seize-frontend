@@ -10,18 +10,22 @@ import AllowlistToolAnimationOpacity from "../../allowlist-tool/common/animation
 
 export interface BuildPhasesPhase {
   readonly id: string;
+  readonly allowlistId: string;
   readonly name: string;
   readonly description: string;
   readonly hasRan: boolean;
+  readonly order: number;
   readonly components: BuildPhasesPhaseComponent[];
 }
 
 export interface BuildPhasesPhaseComponent {
   id: string;
+  allowlistId: string;
   name: string;
   description: string;
   spotsNotRan: boolean;
   spots: number | null;
+  order: number;
 }
 
 export default function BuildPhases() {
@@ -37,9 +41,11 @@ export default function BuildPhases() {
     setPhasesByOp(
       createPhasesOperations.map((phaseOp) => ({
         id: phaseOp.params.id,
+        allowlistId: phaseOp.allowlistId,
         name: phaseOp.params.name,
         description: phaseOp.params.description,
         hasRan: phaseOp.hasRan,
+        order: phaseOp.order,
         components: operations
           .filter(
             (operation) =>
@@ -48,8 +54,10 @@ export default function BuildPhases() {
           )
           .map((operation) => ({
             id: operation.params.id,
+            allowlistId: operation.allowlistId,
             name: operation.params.name,
             description: operation.params.description,
+            order: operation.order,
             spotsNotRan: operations.some(
               (operation2) =>
                 [

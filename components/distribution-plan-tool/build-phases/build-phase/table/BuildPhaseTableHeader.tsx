@@ -21,6 +21,10 @@ export default function BuildPhaseTableHeader() {
       >
         Spots
       </th>
+      <th
+        scope="col"
+        className="tw-px-3 tw-py-3 tw-whitespace-nowrap tw-text-left tw-text-[0.6875rem] tw-leading-[1.125rem] tw-font-medium tw-text-neutral-400 tw-uppercase tw-tracking-[0.25px]"
+      ></th>
     </DistributionPlanTableHeaderWrapper>
   );
 }
