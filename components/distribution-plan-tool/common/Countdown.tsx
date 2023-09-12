@@ -21,7 +21,6 @@ export default function Countdown({ timestamp }: CountdownProps) {
         const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
         const seconds = Math.floor((difference % (1000 * 60)) / 1000);
         let countdown = ''
-        console.log({ days, hours, minutes, seconds })
         if (days === 0) {
           if (hours === 0) {
             if (minutes === 0) {

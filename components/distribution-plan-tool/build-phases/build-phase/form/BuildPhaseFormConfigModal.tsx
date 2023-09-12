@@ -9,7 +9,6 @@ import {
   AllowlistOperation,
   AllowlistOperationBase,
   AllowlistOperationCode,
-  AllowlistToolResponse,
   DistributionPlanSearchContractMetadataResult,
   Pool,
 } from "../../../../allowlist-tool/allowlist-tool.types";
@@ -427,7 +426,9 @@ export default function BuildPhaseFormConfigModal({
     distributionPlanId: string;
   }): Promise<{ success: boolean }> => {
     const endpoint = `/allowlists/${distributionPlanId}/operations/batch`;
-    const { success } = await distributionPlanApiPost<AllowlistOperation[]>({
+    const { success, data } = await distributionPlanApiPost<
+      AllowlistOperation[]
+    >({
       endpoint,
       body: ops,
     });
@@ -668,11 +669,13 @@ export default function BuildPhaseFormConfigModal({
     }
 
     setIsAddingOperations(true);
-    await createOperations({
+    const { success } = await createOperations({
       distributionPlanId: distributionPlan.id,
       ops: newOperations,
     });
-    runOperations();
+    if (success) {
+      runOperations();
+    }
     onClose();
   };
 
