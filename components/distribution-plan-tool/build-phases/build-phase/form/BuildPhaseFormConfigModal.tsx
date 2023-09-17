@@ -764,60 +764,60 @@ export default function BuildPhaseFormConfigModal({
     [uniqueCountOps]
   );
 
-  useEffect(() => {
-    const getUniqueWalletsCount = async (distributionPlanId: string) => {
-      const endpoint = `/allowlists/${distributionPlanId}/unique-wallets-count`;
-      const uniqueId = getRandomObjectId();
-      setLoadingUniqueWalletsCountIds((ids) => [...ids, uniqueId]);
-      const { success, data } = await distributionPlanApiPost<number>({
-        endpoint,
-        body: debouncedUniqueCountOps,
-      });
-      if (!success) {
-        setLoadingUniqueWalletsCountIds((ids) =>
-          ids.filter((id) => id !== uniqueId)
-        );
-        return { success: false };
-      }
-      setUniqueWalletsCountByOperations(data);
-      setLoadingUniqueWalletsCountIds((ids) =>
-        ids.filter((id) => id !== uniqueId)
-      );
-      return { success: true };
-    };
+  // useEffect(() => {
+  //   const getUniqueWalletsCount = async (distributionPlanId: string) => {
+  //     const endpoint = `/allowlists/${distributionPlanId}/unique-wallets-count`;
+  //     const uniqueId = getRandomObjectId();
+  //     setLoadingUniqueWalletsCountIds((ids) => [...ids, uniqueId]);
+  //     const { success, data } = await distributionPlanApiPost<number>({
+  //       endpoint,
+  //       body: debouncedUniqueCountOps,
+  //     });
+  //     if (!success) {
+  //       setLoadingUniqueWalletsCountIds((ids) =>
+  //         ids.filter((id) => id !== uniqueId)
+  //       );
+  //       return { success: false };
+  //     }
+  //     setUniqueWalletsCountByOperations(data);
+  //     setLoadingUniqueWalletsCountIds((ids) =>
+  //       ids.filter((id) => id !== uniqueId)
+  //     );
+  //     return { success: true };
+  //   };
 
-    if (!distributionPlan) {
-      setUniqueWalletsCountByOperations(null);
-      return;
-    }
+  //   if (!distributionPlan) {
+  //     setUniqueWalletsCountByOperations(null);
+  //     return;
+  //   }
 
-    if (isAddingOperations) {
-      return;
-    }
+  //   if (isAddingOperations) {
+  //     return;
+  //   }
 
-    if (
-      ![
-        PhaseConfigStep.FINALIZE_SNAPSHOT,
-        PhaseConfigStep.COMPONENT_ADD_SPOTS,
-        PhaseConfigStep.FINALIZE_COMPONENTS,
-      ].includes(configStep)
-    ) {
-      return;
-    }
+  //   if (
+  //     ![
+  //       PhaseConfigStep.FINALIZE_SNAPSHOT,
+  //       PhaseConfigStep.COMPONENT_ADD_SPOTS,
+  //       PhaseConfigStep.FINALIZE_COMPONENTS,
+  //     ].includes(configStep)
+  //   ) {
+  //     return;
+  //   }
 
-    if (debouncedUniqueCountOps.length < 0) {
-      setUniqueWalletsCountByOperations(null);
-      return;
-    }
+  //   if (debouncedUniqueCountOps.length < 0) {
+  //     setUniqueWalletsCountByOperations(null);
+  //     return;
+  //   }
 
-    getUniqueWalletsCount(distributionPlan.id);
-  }, [
-    distributionPlan,
-    setToasts,
-    configStep,
-    debouncedUniqueCountOps,
-    isAddingOperations,
-  ]);
+  //   getUniqueWalletsCount(distributionPlan.id);
+  // }, [
+  //   distributionPlan,
+  //   setToasts,
+  //   configStep,
+  //   debouncedUniqueCountOps,
+  //   isAddingOperations,
+  // ]);
 
   return (
     <div className="tw-gap-y-6 tw-flex tw-flex-col tw-divide-y tw-divide-solid tw-divide-neutral-700 tw-divide-x-0">

@@ -135,49 +135,49 @@ export default function SnapshotExcludeOtherSnapshots({
 
   const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    const getCustomTokenPoolWallets = (): string[] => {
-      const operation = operations.find(
-        (o) =>
-          o.code === AllowlistOperationCode.CREATE_CUSTOM_TOKEN_POOL &&
-          o.params.id === config.snapshotId
-      );
-      if (!operation) {
-        return [];
-      }
+  // useEffect(() => {
+  //   const getCustomTokenPoolWallets = (): string[] => {
+  //     const operation = operations.find(
+  //       (o) =>
+  //         o.code === AllowlistOperationCode.CREATE_CUSTOM_TOKEN_POOL &&
+  //         o.params.id === config.snapshotId
+  //     );
+  //     if (!operation) {
+  //       return [];
+  //     }
 
-      return operation.params.tokens.map((t: any) => t.owner.toLowerCase());
-    };
+  //     return operation.params.tokens.map((t: any) => t.owner.toLowerCase());
+  //   };
 
-    const fetchUniqueWalletsCount = async () => {
-      if (!snapshotsToExclude.length) {
-        setLocalUniqueWalletsCount(config.uniqueWalletsCount);
-        return;
-      }
-      if (!distributionPlan || !config.snapshotType) return;
-      const extraWallets =
-        config.snapshotType === Pool.CUSTOM_TOKEN_POOL
-          ? getCustomTokenPoolWallets()
-          : [];
-      setLoading(true);
-      const endpoint = `/allowlists/${distributionPlan.id}/token-pool-downloads/token-pool/${config.snapshotId}/unique-wallets-count`;
-      const { success, data } = await distributionPlanApiPost<number>({
-        endpoint,
-        body: {
-          excludeComponentWinners: [],
-          excludeSnapshots: snapshotsToExclude,
-          extraWallets,
-        },
-      });
-      setLoading(false);
-      if (!success) {
-        return { success: false };
-      }
-      setLocalUniqueWalletsCount(data);
-      return { success: true };
-    };
-    fetchUniqueWalletsCount();
-  }, [config, distributionPlan, snapshotsToExclude, setToasts, operations]);
+  //   const fetchUniqueWalletsCount = async () => {
+  //     if (!snapshotsToExclude.length) {
+  //       setLocalUniqueWalletsCount(config.uniqueWalletsCount);
+  //       return;
+  //     }
+  //     if (!distributionPlan || !config.snapshotType) return;
+  //     const extraWallets =
+  //       config.snapshotType === Pool.CUSTOM_TOKEN_POOL
+  //         ? getCustomTokenPoolWallets()
+  //         : [];
+  //     setLoading(true);
+  //     const endpoint = `/allowlists/${distributionPlan.id}/token-pool-downloads/token-pool/${config.snapshotId}/unique-wallets-count`;
+  //     const { success, data } = await distributionPlanApiPost<number>({
+  //       endpoint,
+  //       body: {
+  //         excludeComponentWinners: [],
+  //         excludeSnapshots: snapshotsToExclude,
+  //         extraWallets,
+  //       },
+  //     });
+  //     setLoading(false);
+  //     if (!success) {
+  //       return { success: false };
+  //     }
+  //     setLocalUniqueWalletsCount(data);
+  //     return { success: true };
+  //   };
+  //   fetchUniqueWalletsCount();
+  // }, [config, distributionPlan, snapshotsToExclude, setToasts, operations]);
 
   const onNext = () => {
     onSelectExcludeOtherSnapshots({

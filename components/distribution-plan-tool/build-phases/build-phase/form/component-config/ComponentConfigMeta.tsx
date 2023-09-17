@@ -18,7 +18,7 @@ export default function ComponentConfigMeta({
 }: ComponentConfigMetaProps) {
   return (
     <div className="tw-space-y-1 tw-self-center">
-      <div className="tw-flex tw-space-x-2">
+      {/* <div className="tw-flex tw-space-x-2">
         {tags.map((tag) => (
           <span
             key={tag.id}
@@ -54,7 +54,7 @@ export default function ComponentConfigMeta({
             ></path>
           </svg>
         )}
-      </div>
+      </div> */}
     </div>
   );
 }
