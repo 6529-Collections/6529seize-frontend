@@ -232,6 +232,10 @@ h5 {
   font-size: larger;
 }
 
+.font-bolder {
+  font-weight: bolder;
+}
+
 .icon-black {
   background-color: $very-dark-grey;
   color: white;
@@ -302,4 +306,8 @@ h5 {
   &:hover {
     background-color: $off-white !important;
   }
+}
+
+.cursor-pointer {
+  cursor: pointer;
 }

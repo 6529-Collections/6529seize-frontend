@@ -1,6 +1,6 @@
 import styles from "./UserPage.module.scss";
 import Image from "next/image";
-import { Button, Col, Container, Row } from "react-bootstrap";
+import { Col, Container, Row } from "react-bootstrap";
 import { useEffect, useState } from "react";
 import { DBResponse } from "../../entities/IDBResponse";
 import { Owner } from "../../entities/IOwner";
@@ -10,37 +10,46 @@ import {
   areEqualAddresses,
   containsEmojis,
   formatAddress,
+  getRandomColor,
   isEmptyObject,
-  isGradientsContract,
-  isMemesContract,
   numberWithCommas,
   parseEmojis,
   removeProtocol,
 } from "../../helpers/Helpers";
 import { MANIFOLD, SIX529_MUSEUM } from "../../constants";
-import { ConsolidatedTDHMetrics, TDHMetrics } from "../../entities/ITDH";
-import { useEnsAvatar } from "wagmi";
+import {
+  ConsolidatedTDHMetrics,
+  TDHHistory,
+  TDHMetrics,
+} from "../../entities/ITDH";
+import { useAccount } from "wagmi";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { fetchAllPages, fetchUrl } from "../../services/6529api";
 import { ReservedUser } from "../../pages/[user]";
 import Tippy from "@tippyjs/react";
 import Tag, { TagType } from "../address/Tag";
-import ConsolidationSwitch, {
-  VIEW,
-} from "../consolidation-switch/ConsolidationSwitch";
+import { VIEW } from "../consolidation-switch/ConsolidationSwitch";
 import Address from "../address/Address";
 import UserPageDetails from "./UserPageDetails";
-import UserPageOverview from "./UserPageOverview";
 import NotFound from "../notFound/NotFound";
+import { ENS } from "../../entities/IENS";
+import DotLoader from "../dotLoader/DotLoader";
 
 interface Props {
   user: string;
   wallets: string[];
 }
 
+const DEFAULT_BANNER_1 = getRandomColor();
+const DEFAULT_BANNER_2 = getRandomColor();
+
+const DEFAULT_PFP_1 = DEFAULT_BANNER_1;
+const DEFAULT_PFP_2 = DEFAULT_BANNER_2;
+
 export default function UserPage(props: Props) {
   const router = useRouter();
-  const [view, setView] = useState<VIEW>(VIEW.WALLET);
+  const account = useAccount();
+  const [view, setView] = useState<VIEW>(VIEW.CONSOLIDATION);
 
   const [ownerLinkCopied, setIsOwnerLinkCopied] = useState(false);
 
@@ -69,8 +78,9 @@ export default function UserPage(props: Props) {
   const [userError, setUserError] = useState(false);
   const [fetchingUser, setFetchingUser] = useState(true);
 
-  const [pfp, setPfp] = useState<string>();
-  // "https://d3lqz0a4bldqgf.cloudfront.net/images/scaled_x450/0x33FD426905F149f8376e227d0C9D3340AaD17aF1/134.WEBP"
+  const [ens, setEns] = useState<ENS>();
+
+  const [tdhHistory, setTdhHistory] = useState<TDHHistory>();
 
   useEffect(() => {
     async function fetchENS() {
@@ -78,14 +88,15 @@ export default function UserPage(props: Props) {
         ? process.env.BASE_ENDPOINT
         : "https://seize.io";
       if (props.user.startsWith("0x") || props.user.endsWith(".eth")) {
-        const url = `${process.env.API_ENDPOINT}/api/ens/${props.user}`;
-        return fetchUrl(url).then((response: any) => {
+        const url = `${process.env.API_ENDPOINT}/api/user/${props.user}`;
+        return fetchUrl(url).then((response: ENS) => {
           if (isEmptyObject(response)) {
             setUserError(true);
           }
+          setEns(response);
           setFetchingUser(false);
           const oAddress = response.wallet ? response.wallet : props.user;
-          setOwnerAddress(oAddress);
+          setOwnerAddress(oAddress as `0x${string}`);
           setOwnerENS(response.display ? response.display : oAddress);
           let reservedDisplay;
           if (areEqualAddresses(props.user, SIX529_MUSEUM)) {
@@ -134,6 +145,13 @@ export default function UserPage(props: Props) {
             { display: "Home", href: "/" },
             { display: ReservedUser.MUSEUM },
           ]);
+          setEns({
+            wallet: SIX529_MUSEUM,
+            display: ReservedUser.MUSEUM,
+            banner_1: "#111111",
+            banner_2: "#000000",
+            pfp: "./museum.png",
+          });
           setFetchingUser(false);
           router.push(ReservedUser.MUSEUM, undefined, {
             shallow: true,
@@ -149,6 +167,13 @@ export default function UserPage(props: Props) {
             { display: "Home", href: "/" },
             { display: ReservedUser.MANIFOLD },
           ]);
+          setEns({
+            wallet: MANIFOLD,
+            display: ReservedUser.MANIFOLD,
+            banner_1: "#111111",
+            banner_2: "#000000",
+            pfp: "./manifold.png",
+          });
           setFetchingUser(false);
           router.push(ReservedUser.MANIFOLD, undefined, {
             shallow: true,
@@ -274,6 +299,19 @@ export default function UserPage(props: Props) {
   }, [view, walletTDH, consolidatedTDH]);
 
   useEffect(() => {
+    if (consolidatedTDH) {
+      if (consolidatedTDH.balance > 0) {
+        const url = `${process.env.API_ENDPOINT}/api/tdh_history?wallet=${consolidatedTDH.wallets[0]}&page_size=1`;
+        fetchUrl(url).then((response: DBResponse) => {
+          if (response.data) {
+            setTdhHistory(response.data[0]);
+          }
+        });
+      }
+    }
+  }, [consolidatedTDH]);
+
+  useEffect(() => {
     if (walletOwnedLoaded && consolidationOwnedLoaded) {
       if (view === VIEW.CONSOLIDATION || !isConsolidation) {
         setOwned(consolidationOwned);
@@ -307,377 +345,315 @@ export default function UserPage(props: Props) {
 
   return (
     <>
-      <Breadcrumb breadcrumbs={breadcrumbs} />
-      <Container fluid className={styles.mainContainer}>
-        <Row>
-          <Col>
-            <Container className="mt-2 pt-2 pb-2">
-              {/* <Row>
-                <Col className="text-right">
-                  {ownerAddress && (
-                    <TwitterShareButton
-                      className="twitter-share-button"
-                      url={window.location.href.split("?")[0]}
-                      title={`${
-                        ownerENS
-                          ? ownerENS
-                          : formatAddress(ownerAddress as string)
-                      }'s SEIZE Collection${
-                        tdh
-                          ? `\n\nCards\nx${numberWithCommas(
-                              tdh.balance
-                            )} - \Rank #${
-                              tdh.dense_rank_balance
-                            }\n\nTDH\n${numberWithCommas(
-                              tdh.boosted_tdh
-                            )} - \Rank #${tdh.tdh_rank}`
-                          : ""
-                      }\n\n#6529SEIZE\n\n`}>
-                      <TwitterIcon
-                        size={30}
-                        round
-                        iconFillColor="white"
-                        bgStyle={{ fill: "transparent" }}
+      {/* <Breadcrumb breadcrumbs={breadcrumbs} /> */}
+      <div
+        style={{
+          background: `linear-gradient(45deg, ${
+            ens && ens.banner_1 ? ens.banner_1 : DEFAULT_BANNER_1
+          } 0%, ${ens && ens.banner_2 ? ens.banner_2 : DEFAULT_BANNER_2} 100%)`,
+        }}>
+        <Container>
+          <Row>
+            <Col className={`${styles.banner}`}>
+              <div>
+                {tdh && (
+                  <>
+                    {tdh.memes_cards_sets > 0 ? (
+                      <Tag
+                        type={TagType.MEME_SETS}
+                        text={"Memes Sets x"}
+                        value={tdh.memes_cards_sets}
                       />
-                      Tweet
-                    </TwitterShareButton>
+                    ) : (
+                      <Tag
+                        type={TagType.MEMES}
+                        text={"Memes x"}
+                        value={tdh.unique_memes}
+                        text_after={tdh.genesis > 0 ? ` (+Genesis) ` : ""}
+                      />
+                    )}
+                    {tdh.memes_cards_sets_szn1 > 0 && (
+                      <Tag
+                        type={TagType.SZN1}
+                        text={"SZN1 Sets x"}
+                        value={tdh.memes_cards_sets_szn1}
+                      />
+                    )}
+                    {tdh.memes_cards_sets_szn2 > 0 && (
+                      <Tag
+                        type={TagType.SZN2}
+                        text={"SZN2 Sets x"}
+                        value={tdh.memes_cards_sets_szn2}
+                      />
+                    )}
+                    {tdh.memes_cards_sets_szn3 > 0 && (
+                      <Tag
+                        type={TagType.SZN3}
+                        text={"SZN3 Sets x"}
+                        value={tdh.memes_cards_sets_szn3}
+                      />
+                    )}
+                    {tdh.memes_cards_sets_szn4 > 0 && (
+                      <Tag
+                        type={TagType.SZN4}
+                        text={"SZN4 Sets x"}
+                        value={tdh.memes_cards_sets_szn4}
+                      />
+                    )}
+                    {tdh.gradients_balance > 0 && (
+                      <Tag
+                        type={TagType.GRADIENT}
+                        text={"Gradients x"}
+                        value={tdh.gradients_balance}
+                      />
+                    )}
+                  </>
+                )}
+              </div>
+            </Col>
+          </Row>
+        </Container>
+      </div>
+      <Container>
+        {ownerAddress && (
+          <>
+            <Container className="no-padding">
+              <Row>
+                <Col className="d-flex align-items-start justify-content-between">
+                  <span
+                    className={`${styles.imagePlaceholder} d-flex flex-wrap gap-2 align-items-center`}>
+                    {ens && ens.pfp ? (
+                      <Image
+                        src={ens.pfp}
+                        alt="pfp"
+                        width={0}
+                        height={0}
+                        className={styles.pfp}
+                      />
+                    ) : (
+                      <span
+                        className={styles.pfpPlaceholder}
+                        style={{
+                          background: `linear-gradient(45deg, ${DEFAULT_PFP_1} 0%, ${DEFAULT_PFP_2} 100%)`,
+                        }}></span>
+                    )}
+                    {tdh && consolidatedTDH ? (
+                      <span className="flex-wrap">
+                        <Address
+                          wallets={
+                            view === VIEW.CONSOLIDATION
+                              ? consolidatedTDH.wallets
+                              : [ownerAddress]
+                          }
+                          display={
+                            view === VIEW.CONSOLIDATION &&
+                            consolidatedTDH.consolidation_display
+                              ? consolidatedTDH.consolidation_display
+                              : ownerENS
+                          }
+                          isUserPage={true}
+                          disableLink={true}
+                          viewingWallet={ownerAddress}
+                        />
+                      </span>
+                    ) : (
+                      <span className="d-flex flex-wrap">
+                        <Address
+                          wallets={[ownerAddress]}
+                          display={ownerENS}
+                          disableLink={true}
+                          isUserPage={true}
+                          viewingWallet={ownerAddress}
+                        />
+                      </span>
+                    )}
+                  </span>
+                  {account.address &&
+                    areEqualAddresses(account.address, ownerAddress) && (
+                      <Tippy
+                        content={"Settings"}
+                        delay={250}
+                        placement={"left"}
+                        theme={"light"}>
+                        <FontAwesomeIcon
+                          icon="gear"
+                          className={styles.settingsIcon}
+                          onClick={() =>
+                            (window.location.href = `/${props.user}/settings`)
+                          }
+                        />
+                      </Tippy>
+                    )}
+                </Col>
+              </Row>
+            </Container>
+            <Container className="no-padding">
+              <Row>
+                <Col
+                  xs={12}
+                  sm={6}
+                  className={`pt-2 pb-2 ${styles.tagsContainer}`}>
+                  {tdh ? (
+                    <Container>
+                      {tdh.tdh_rank && (
+                        <Row className="pt-2 pb-2">
+                          <Col>
+                            <Tag
+                              type={TagType.RANK}
+                              text={`TDH ${numberWithCommas(tdh.boosted_tdh)} ${
+                                view == VIEW.CONSOLIDATION
+                                  ? `(${
+                                      tdhHistory
+                                        ? tdhHistory.net_boosted_tdh > 0
+                                          ? "+"
+                                          : ""
+                                        : "..."
+                                    }${
+                                      tdhHistory
+                                        ? numberWithCommas(
+                                            tdhHistory.net_boosted_tdh
+                                          )
+                                        : ""
+                                    })`
+                                  : ""
+                              } | Rank #${tdh.tdh_rank}`}
+                            />
+                          </Col>
+                        </Row>
+                      )}
+                      <Row className="pt-2 pb-2">
+                        <Col>
+                          <Tag
+                            type={TagType.RANK}
+                            text={`Total Balance x${numberWithCommas(
+                              tdh.balance
+                            )} | Rank #${tdh.dense_rank_balance}`}
+                          />
+                        </Col>
+                      </Row>
+                      <Row className="pt-2 pb-2">
+                        <Col>
+                          <Tag
+                            type={TagType.RANK}
+                            text={`Unique Cards x${numberWithCommas(
+                              tdh.unique_memes + tdh.gradients_balance
+                            )} | Rank #${tdh.dense_rank_unique}`}
+                          />
+                        </Col>
+                      </Row>
+                      {tdh.boost && (
+                        <Row className="pt-2 pb-2">
+                          <Col>
+                            <Tag
+                              type={TagType.RANK}
+                              text={"Boost x"}
+                              value={tdh.boost}
+                            />
+                          </Col>
+                        </Row>
+                      )}
+                    </Container>
+                  ) : (
+                    <Container>
+                      <Row>
+                        <Col>
+                          <DotLoader />
+                        </Col>
+                      </Row>
+                    </Container>
                   )}
                 </Col>
-              </Row> */}
-              {isConsolidation && (
-                <Row>
-                  <Col className={styles.consolidationSwitch}>
-                    <ConsolidationSwitch
-                      view={view}
-                      onSetView={(v) => setView(v)}
-                    />
-                  </Col>
-                </Row>
-              )}
-              {ownerAddress && (
-                <Row>
-                  <Col
-                    xs={12}
-                    sm={6}
-                    className={isConsolidation ? "pt-2" : "pt-3"}>
-                    <Container className="no-padding">
-                      <Row className="pb-1">
-                        <Col className="d-flex gap-4">
-                          {pfp && (
-                            <span className={`mt-3 ${styles.avatar}`}>
-                              <Image
-                                src={pfp}
-                                alt="add-image"
-                                width={0}
-                                height={0}
-                              />
-                            </span>
-                          )}
-                          {!pfp &&
-                            ownerAddress &&
-                            props.wallets &&
-                            props.wallets.some((w) =>
-                              areEqualAddresses(w, ownerAddress)
-                            ) && (
-                              <span
-                                className={`mt-3 ${styles.avatarPlaceholder}`}>
-                                <Image
-                                  src="/add-image.png"
-                                  alt={ownerENS}
-                                  width={0}
-                                  height={0}
-                                />
-                              </span>
-                            )}
-                          <span className="d-flex flex-column">
-                            <span>
-                              {tdh && consolidatedTDH ? (
-                                <Address
-                                  wallets={
-                                    view === VIEW.CONSOLIDATION
-                                      ? consolidatedTDH.wallets
-                                      : [ownerAddress]
-                                  }
-                                  display={
-                                    view === VIEW.CONSOLIDATION &&
-                                    consolidatedTDH.consolidation_display
-                                      ? consolidatedTDH.consolidation_display
-                                      : ownerENS
-                                  }
-                                  isUserPage={true}
-                                  disableLink={true}
-                                  viewingWallet={ownerAddress}
-                                />
-                              ) : (
-                                <Address
-                                  wallets={[ownerAddress]}
-                                  display={ownerENS}
-                                  disableLink={true}
-                                  isUserPage={true}
-                                  viewingWallet={ownerAddress}
-                                />
-                              )}
-                            </span>
-                            <Tippy
-                              content={ownerLinkCopied ? "Copied" : "Copy"}
-                              placement={"right"}
-                              theme={"light"}
-                              hideOnClick={false}>
-                              <span
-                                className={styles.ownerLink}
-                                onClick={() => {
-                                  if (navigator.clipboard) {
-                                    navigator.clipboard.writeText(
-                                      window.location.href
-                                    );
-                                  }
-                                  setIsOwnerLinkCopied(true);
-                                  setTimeout(() => {
-                                    setIsOwnerLinkCopied(false);
-                                  }, 1000);
-                                }}>
-                                {removeProtocol(ownerLinkDisplay)}{" "}
-                                <FontAwesomeIcon
-                                  icon="link"
-                                  className={styles.ownerLinkIcon}
-                                />
-                              </span>
-                            </Tippy>
-                            <span className="pt-3">
-                              <a
-                                href={`https://opensea.io/${ownerAddress}`}
-                                target="_blank"
-                                rel="noreferrer">
-                                <Image
-                                  className={styles.marketplace}
-                                  src="/opensea.png"
-                                  alt="opensea"
-                                  width={40}
-                                  height={40}
-                                />
-                              </a>
-                              <a
-                                href={`https://x2y2.io/user/${ownerAddress}`}
-                                target="_blank"
-                                rel="noreferrer">
-                                <Image
-                                  className={styles.marketplace}
-                                  src="/x2y2.png"
-                                  alt="x2y2"
-                                  width={40}
-                                  height={40}
-                                />
-                              </a>
-                            </span>
-                          </span>
-                        </Col>
-                      </Row>
-                      {/* <Row className="pt-1">
-                        <Tippy
-                          content={ownerLinkCopied ? "Copied" : "Copy"}
-                          placement={"right"}
-                          theme={"light"}
-                          hideOnClick={false}>
-                          <span
-                            className={styles.ownerLink}
-                            onClick={() => {
-                              if (navigator.clipboard) {
-                                navigator.clipboard.writeText(
-                                  window.location.href
-                                );
-                              }
-                              setIsOwnerLinkCopied(true);
-                              setTimeout(() => {
-                                setIsOwnerLinkCopied(false);
-                              }, 1000);
-                            }}>
-                            {removeProtocol(ownerLinkDisplay)}{" "}
+                <Col
+                  xs={12}
+                  sm={6}
+                  className={`pt-2 pb-2 ${styles.linksContainer}`}>
+                  <Row className="pb-2">
+                    <Col>
+                      <Tippy
+                        content={ownerLinkCopied ? "Copied" : "Copy"}
+                        placement={"right"}
+                        theme={"light"}
+                        hideOnClick={false}>
+                        <span
+                          className={styles.ownerLink}
+                          onClick={() => {
+                            if (navigator.clipboard) {
+                              navigator.clipboard.writeText(
+                                window.location.href
+                              );
+                            }
+                            setIsOwnerLinkCopied(true);
+                            setTimeout(() => {
+                              setIsOwnerLinkCopied(false);
+                            }, 1000);
+                          }}>
+                          {removeProtocol(ownerLinkDisplay)}{" "}
+                          <FontAwesomeIcon
+                            icon="link"
+                            className={styles.ownerLinkIcon}
+                          />
+                        </span>
+                      </Tippy>
+                    </Col>
+                  </Row>
+                  <Row className="pt-2 pb-2">
+                    <Col>
+                      <span className="pt-3">
+                        <a
+                          href={`https://opensea.io/${ownerAddress}`}
+                          target="_blank"
+                          rel="noreferrer">
+                          <Image
+                            className={styles.marketplace}
+                            src="/opensea.png"
+                            alt="opensea"
+                            width={40}
+                            height={40}
+                          />
+                        </a>
+                        <a
+                          href={`https://x2y2.io/user/${ownerAddress}`}
+                          target="_blank"
+                          rel="noreferrer">
+                          <Image
+                            className={styles.marketplace}
+                            src="/x2y2.png"
+                            alt="x2y2"
+                            width={40}
+                            height={40}
+                          />
+                        </a>
+                        {ens && ens.website && (
+                          <a
+                            href={ens.website}
+                            target="_blank"
+                            rel="noreferrer">
                             <FontAwesomeIcon
-                              icon="link"
-                              className={styles.ownerLinkIcon}
-                            />
-                          </span>
-                        </Tippy>
-                      </Row>
-                      <Row className="pt-3">
-                        <Col>
-                          <a
-                            href={`https://opensea.io/${ownerAddress}`}
-                            target="_blank"
-                            rel="noreferrer">
-                            <Image
+                              icon="globe"
                               className={styles.marketplace}
-                              src="/opensea.png"
-                              alt="opensea"
-                              width={40}
-                              height={40}
                             />
                           </a>
-                          <a
-                            href={`https://x2y2.io/user/${ownerAddress}`}
-                            target="_blank"
-                            rel="noreferrer">
-                            <Image
-                              className={styles.marketplace}
-                              src="/x2y2.png"
-                              alt="x2y2"
-                              width={40}
-                              height={40}
-                            />
-                          </a>
-                        </Col>
-                      </Row> */}
-                    </Container>
-                  </Col>
-                  {tdh && tdh.balance > 0 && (
-                    <>
-                      <Col
-                        xs={6}
-                        sm={6}
-                        md={3}
-                        className={isConsolidation ? "pt-2" : "pt-3"}>
-                        <Container className="no-padding text-right">
-                          <Row className="pt-2 pb-1">
-                            <Col>
-                              <Tag
-                                type={TagType.RANK}
-                                text={"All Cards Rank #"}
-                                value={tdh.dense_rank_balance}
-                              />
-                            </Col>
-                          </Row>
-                          <Row className="pt-1 pb-1">
-                            <Col>
-                              <Tag
-                                type={TagType.RANK}
-                                text={"Unique Cards Rank #"}
-                                value={tdh.dense_rank_unique}
-                              />
-                            </Col>
-                          </Row>
-                          {tdh.tdh_rank && (
-                            <Row className="pt-1 pb-1">
-                              <Col>
-                                <Tag
-                                  type={TagType.RANK}
-                                  text={"TDH Rank #"}
-                                  value={tdh.tdh_rank}
-                                />
-                              </Col>
-                            </Row>
-                          )}
-                          {tdh.boost && (
-                            <Row className="pt-1 pb-1">
-                              <Col>
-                                <Tag
-                                  type={TagType.RANK}
-                                  text={"Boost x"}
-                                  value={tdh.boost}
-                                />
-                              </Col>
-                            </Row>
-                          )}
-                        </Container>
-                      </Col>
-                      <Col
-                        xs={6}
-                        sm={6}
-                        md={3}
-                        className={isConsolidation ? "pt-2" : "pt-3"}>
-                        <Container className="no-padding text-right">
-                          <Row className="pt-2 pb-1">
-                            <Col>
-                              {tdh.memes_cards_sets > 0 ? (
-                                <Tag
-                                  type={TagType.MEME_SETS}
-                                  text={"Memes Sets x"}
-                                  value={tdh.memes_cards_sets}
-                                />
-                              ) : (
-                                <Tag
-                                  type={TagType.MEMES}
-                                  text={"Memes x"}
-                                  value={tdh.unique_memes}
-                                  text_after={
-                                    tdh.genesis > 0 ? ` (+Genesis) ` : ""
-                                  }
-                                />
-                              )}
-                            </Col>
-                          </Row>
-                          {tdh.memes_cards_sets_szn1 > 0 && (
-                            <Row className="pt-1 pb-1">
-                              <Col>
-                                <Tag
-                                  type={TagType.SZN1}
-                                  text={"SZN1 Sets x"}
-                                  value={tdh.memes_cards_sets_szn1}
-                                />
-                              </Col>
-                            </Row>
-                          )}
-                          {tdh.memes_cards_sets_szn2 > 0 && (
-                            <Row className="pt-1 pb-1">
-                              <Col>
-                                <Tag
-                                  type={TagType.SZN2}
-                                  text={"SZN2 Sets x"}
-                                  value={tdh.memes_cards_sets_szn2}
-                                />
-                              </Col>
-                            </Row>
-                          )}
-                          {tdh.memes_cards_sets_szn3 > 0 && (
-                            <Row className="pt-1 pb-1">
-                              <Col>
-                                <Tag
-                                  type={TagType.SZN3}
-                                  text={"SZN3 Sets x"}
-                                  value={tdh.memes_cards_sets_szn3}
-                                />
-                              </Col>
-                            </Row>
-                          )}
-                          {tdh.memes_cards_sets_szn4 > 0 && (
-                            <Row className="pt-1 pb-1">
-                              <Col>
-                                <Tag
-                                  type={TagType.SZN4}
-                                  text={"SZN4 Sets x"}
-                                  value={tdh.memes_cards_sets_szn4}
-                                />
-                              </Col>
-                            </Row>
-                          )}
-                          {tdh.gradients_balance > 0 && (
-                            <Row className="pt-1 pb-1">
-                              <Col>
-                                <Tag
-                                  type={TagType.GRADIENT}
-                                  text={"Gradients x"}
-                                  value={tdh.gradients_balance}
-                                />
-                              </Col>
-                            </Row>
-                          )}
-                        </Container>
-                      </Col>
-                    </>
-                  )}
-                </Row>
-              )}
+                        )}
+                      </span>
+                    </Col>
+                  </Row>
+                </Col>
+              </Row>
             </Container>
-            <UserPageOverview tdh={tdh} />
-            {walletOwnedLoaded && consolidationOwnedLoaded && (
-              <UserPageDetails
-                ownerAddress={ownerAddress}
-                owned={owned}
-                view={view}
-                consolidatedTDH={consolidatedTDH}
-                tdh={tdh}
-                isConsolidation={isConsolidation}
-              />
-            )}
+          </>
+        )}
+      </Container>
+      <Container>
+        <Row>
+          <Col>
+            <UserPageDetails
+              ownerAddress={ownerAddress}
+              owned={owned}
+              view={view}
+              consolidatedTDH={consolidatedTDH}
+              tdh={tdh}
+              isConsolidation={isConsolidation}
+            />
           </Col>
         </Row>
       </Container>

@@ -68,9 +68,13 @@ export default function GradientsComponent(props: Props) {
       }
       if (sort === Sort.TDH) {
         if (sortDir === SortDirection.ASC) {
-          setNfts([...nfts].sort((a, b) => (a.tdh > b.tdh ? -1 : 1)));
+          setNfts(
+            [...nfts].sort((a, b) => (a.boosted_tdh > b.boosted_tdh ? -1 : 1))
+          );
         } else {
-          setNfts([...nfts].sort((a, b) => (a.tdh > b.tdh ? 1 : -1)));
+          setNfts(
+            [...nfts].sort((a, b) => (a.boosted_tdh > b.boosted_tdh ? 1 : -1))
+          );
         }
       }
       setNftsSorted(true);
@@ -122,7 +126,8 @@ export default function GradientsComponent(props: Props) {
             </Row>
             <Row>
               <Col className="text-center pt-2">
-                TDH: <b>{numberWithCommas(Math.round(nft.tdh))}</b> | Rank:{" "}
+                TDH: <b>{numberWithCommas(Math.round(nft.boosted_tdh))}</b> |
+                Rank:{" "}
                 <b>
                   {nft.tdh_rank}/{nfts.length}
                 </b>
