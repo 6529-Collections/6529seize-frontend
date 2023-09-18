@@ -230,16 +230,34 @@
 
 .marketplace {
   margin-right: 15px;
+  width: 40px;
+
+  &:hover {
+    opacity: 0.75;
+  }
 }
 
 .ownerLink {
   font-size: larger;
+  font-weight: bolder;
   cursor: pointer;
   width: fit-content;
 }
 
 .ownerLinkIcon {
   height: 20px;
+}
+
+.settingsIcon {
+  margin-top: 20px;
+  height: 25px;
+  font-size: larger;
+  font-weight: bolder;
+  cursor: pointer;
+  width: fit-content;
+  :hover {
+    opacity: 0.75;
+  }
 }
 
 .nftImagePadding {
@@ -272,12 +290,6 @@
 
 .distributionsTable > :not(caption) > * > * {
   padding: 0.5rem !important;
-}
-
-.avatar {
-  height: 35px;
-  padding-right: 10px;
-  width: auto;
 }
 
 .userPageAccordion {
@@ -356,4 +368,100 @@
   background-color: $off-white;
   color: $very-dark-grey;
   font-size: larger;
+}
+
+.userSection {
+  padding: 0;
+  min-height: calc(100vh - $header-height - 30px);
+  position: relative;
+}
+
+.banner {
+  height: 120px;
+  display: flex;
+  justify-content: flex-end;
+  padding-top: 10px;
+  padding-bottom: 10px;
+
+  div {
+    height: 120px;
+    max-width: calc(100vw - 200px);
+    height: 100%;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap !important;
+  }
+
+  @media only screen and (max-width: 800px) {
+    height: auto;
+
+    div {
+      justify-content: center;
+      max-width: 100%;
+      padding-bottom: 110px;
+    }
+  }
+}
+
+.imagePlaceholder {
+  justify-content: start;
+  @media only screen and (max-width: 800px) {
+    justify-content: center;
+  }
+}
+
+.tagsContainer {
+  text-align: left;
+  @media only screen and (max-width: 575px) {
+    text-align: center;
+  }
+}
+
+.linksContainer {
+  text-align: right;
+  @media only screen and (max-width: 575px) {
+    text-align: center;
+  }
+}
+
+.pfp {
+  height: 175px;
+  margin-top: -100px;
+  width: auto;
+  border: 8px solid $bg-color-2;
+}
+
+.pfpPlaceholder {
+  display: block;
+  width: 175px;
+  height: 175px;
+  margin-top: -100px;
+  border: 10px solid $bg-color-2;
+}
+
+.avatarPlaceholder {
+  width: 60px;
+  height: 60px;
+  background-color: $off-white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  img {
+    width: auto;
+    height: auto;
+    max-width: 30px;
+    max-height: 30px;
+  }
+
+  &:hover {
+    cursor: pointer;
+    background-color: white;
+  }
+}
+
+.detailsRow {
+  height: calc(100vh - $header-height - 105px);
 }

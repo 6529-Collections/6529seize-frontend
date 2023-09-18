@@ -34,9 +34,8 @@
 }
 
 .hodler {
-  position: relative;
-  width: 40%;
-  margin-left: 10%;
+  display: flex;
+  flex-wrap: wrap;
   span {
     overflow-wrap: break-word;
   }

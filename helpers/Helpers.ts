@@ -229,7 +229,6 @@ export function printMintDate(date: Date) {
     `;
 }
 
-
 export function getNetworkName(chainId: number) {
   if (chainId === mainnet.id) {
     return "Etherium Mainnet";
@@ -300,4 +299,18 @@ export function parseEmojis(s: string) {
   return s.replace(regex, (_, hexValue) => {
     return `&#x${hexValue};`;
   });
+}
+
+export function getRandomColor() {
+  const r = Math.floor(Math.random() * 256)
+    .toString(16)
+    .padStart(2, "0");
+  const g = Math.floor(Math.random() * 256)
+    .toString(16)
+    .padStart(2, "0");
+  const b = Math.floor(Math.random() * 256)
+    .toString(16)
+    .padStart(2, "0");
+
+  return `#${r}${g}${b}`;
 }
