@@ -15,7 +15,7 @@ export enum TagType {
 interface TagProps {
   type: TagType;
   text: string;
-  value?: number;
+  value: number;
   text_after?: string;
 }
 
@@ -42,9 +42,9 @@ export default function Tag(props: TagProps) {
   }
 
   return (
-    <span className={`${styles.tag} ${getStyle()}`}>
+    <span className={`mt-2 mb-2 ${styles.tag} ${getStyle()}`}>
       {props.text}
-      {props.value && numberWithCommas(props.value)}
+      {numberWithCommas(props.value)}
       {props.text_after}
     </span>
   );
