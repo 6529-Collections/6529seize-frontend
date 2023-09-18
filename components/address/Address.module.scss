@@ -97,6 +97,8 @@
 .rankTag {
   background-color: $off-white;
   color: $dark-grey !important;
+  font-size: larger;
+  padding: 5px 10px;
 }
 
 @media only screen and (max-width: 1200px) {
@@ -137,43 +139,36 @@
 .memesSetTag {
   background-color: $pink;
   line-height: 24px;
-  margin-top: 8px !important;
 }
 
 .memesTag {
   background-color: $raspberry;
   line-height: 24px;
-  margin-top: 8px !important;
 }
 
 .memeSzn1Tag {
   background-color: $green;
   line-height: 24px;
-  margin-top: 8px !important;
 }
 
 .memeSzn2Tag {
   background-color: $blue;
   line-height: 24px;
-  margin-top: 8px !important;
 }
 
 .memeSzn3Tag {
   background-color: #d7710d;
   line-height: 24px;
-  margin-top: 8px !important;
 }
 
 .memeSzn4Tag {
   background-color: #a8a800;
   line-height: 24px;
-  margin-top: 8px !important;
 }
 
 .gradientTag {
   background-color: $lighter-grey;
   line-height: 24px;
-  margin-top: 8px !important;
 }
 
 .arrowTurnRight {
