@@ -41,9 +41,6 @@ export default function FinalizeSnapshot({
   }, [groupSnapshots, onStartAgain]);
 
   const configure = () => {
-    if (!uniqueWalletsCount) {
-      return;
-    }
     onConfigureGroup();
   };
 
