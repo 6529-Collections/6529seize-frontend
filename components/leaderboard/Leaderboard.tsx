@@ -1395,7 +1395,7 @@ export default function Leaderboard(props: Props) {
               <thead>
                 <tr>
                   <th className={styles.rank}>Rank</th>
-                  <th className={`${styles.hodler}`}>
+                  <th className={`${styles.hodlerContainer}`}>
                     Collector&nbsp;&nbsp;
                     <span className={styles.totalResults}>x{totalResults}</span>
                     {showLoader && (
@@ -2167,21 +2167,23 @@ export default function Leaderboard(props: Props) {
                                 1 +
                                 (pageProps.page - 1) * pageProps.pageSize}
                           </td>
-                          <td className={styles.hodler}>
-                            <Address
-                              wallets={getWallets(lead)}
-                              display={getDisplay(lead)}
-                              tags={{
-                                memesCardsSets: lead.memes_cards_sets,
-                                memesCardsSetS1: lead.memes_cards_sets_szn1,
-                                memesCardsSetS2: lead.memes_cards_sets_szn2,
-                                memesCardsSetS3: lead.memes_cards_sets_szn3,
-                                memesCardsSetS4: lead.memes_cards_sets_szn4,
-                                memesBalance: lead.unique_memes,
-                                gradientsBalance: lead.gradients_balance,
-                                genesis: lead.genesis,
-                              }}
-                            />
+                          <td className={styles.hodlerContainer}>
+                            <div className={styles.hodler}>
+                              <Address
+                                wallets={getWallets(lead)}
+                                display={getDisplay(lead)}
+                                tags={{
+                                  memesCardsSets: lead.memes_cards_sets,
+                                  memesCardsSetS1: lead.memes_cards_sets_szn1,
+                                  memesCardsSetS2: lead.memes_cards_sets_szn2,
+                                  memesCardsSetS3: lead.memes_cards_sets_szn3,
+                                  memesCardsSetS4: lead.memes_cards_sets_szn4,
+                                  memesBalance: lead.unique_memes,
+                                  gradientsBalance: lead.gradients_balance,
+                                  genesis: lead.genesis,
+                                }}
+                              />
+                            </div>
                           </td>
                           {focus === Focus.TDH && (
                             <td className={styles.tdhSub}>
