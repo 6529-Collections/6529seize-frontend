@@ -46,14 +46,28 @@ const DEFAULT_BANNER_2 = getRandomColor();
 const DEFAULT_PFP_1 = DEFAULT_BANNER_1;
 const DEFAULT_PFP_2 = DEFAULT_BANNER_2;
 
+const MUSEUM_ENS = {
+  wallet: SIX529_MUSEUM,
+  display: ReservedUser.MUSEUM,
+  banner_1: "#111111",
+  banner_2: "#000000",
+  pfp: "./museum.png",
+};
+
+const MANIFOLD_ENS = {
+  wallet: MANIFOLD,
+  display: ReservedUser.MANIFOLD,
+  banner_1: "#111111",
+  banner_2: "#000000",
+  pfp: "./manifold.png",
+};
+
 export default function UserPage(props: Props) {
   const router = useRouter();
   const account = useAccount();
   const [view, setView] = useState<VIEW>(VIEW.CONSOLIDATION);
 
   const [ownerLinkCopied, setIsOwnerLinkCopied] = useState(false);
-
-  const [breadcrumbs, setBreadcrumbs] = useState<Crumb[]>([]);
 
   const [walletOwnedLoaded, setWalletOwnedLoaded] = useState(false);
   const [consolidationOwnedLoaded, setConsolidationOwnedLoaded] =
@@ -93,7 +107,13 @@ export default function UserPage(props: Props) {
           if (isEmptyObject(response)) {
             setUserError(true);
           }
-          setEns(response);
+          if (areEqualAddresses(response.wallet, SIX529_MUSEUM)) {
+            setEns(MUSEUM_ENS);
+          } else if (areEqualAddresses(response.wallet, MANIFOLD)) {
+            setEns(MANIFOLD_ENS);
+          } else {
+            setEns(response);
+          }
           setFetchingUser(false);
           const oAddress = response.wallet ? response.wallet : props.user;
           setOwnerAddress(oAddress as `0x${string}`);
@@ -113,16 +133,7 @@ export default function UserPage(props: Props) {
                 : formatAddress(oAddress)
             }`
           );
-          setBreadcrumbs([
-            { display: "Home", href: "/" },
-            {
-              display: reservedDisplay
-                ? reservedDisplay
-                : response.display
-                ? parseEmojis(response.display)
-                : oAddress,
-            },
-          ]);
+
           router.push(
             reservedDisplay
               ? reservedDisplay
@@ -140,18 +151,7 @@ export default function UserPage(props: Props) {
           setOwnerAddress(SIX529_MUSEUM);
           setOwnerENS(ReservedUser.MUSEUM);
           setOwnerLinkDisplay(`${oLink}/${ReservedUser.MUSEUM}`);
-          setFetchingUser(false);
-          setBreadcrumbs([
-            { display: "Home", href: "/" },
-            { display: ReservedUser.MUSEUM },
-          ]);
-          setEns({
-            wallet: SIX529_MUSEUM,
-            display: ReservedUser.MUSEUM,
-            banner_1: "#111111",
-            banner_2: "#000000",
-            pfp: "./museum.png",
-          });
+          setEns(MUSEUM_ENS);
           setFetchingUser(false);
           router.push(ReservedUser.MUSEUM, undefined, {
             shallow: true,
@@ -162,18 +162,7 @@ export default function UserPage(props: Props) {
           setOwnerAddress(MANIFOLD);
           setOwnerENS(ReservedUser.MANIFOLD);
           setOwnerLinkDisplay(`${oLink}/${ReservedUser.MANIFOLD}`);
-          setFetchingUser(false);
-          setBreadcrumbs([
-            { display: "Home", href: "/" },
-            { display: ReservedUser.MANIFOLD },
-          ]);
-          setEns({
-            wallet: MANIFOLD,
-            display: ReservedUser.MANIFOLD,
-            banner_1: "#111111",
-            banner_2: "#000000",
-            pfp: "./manifold.png",
-          });
+          setEns(MANIFOLD_ENS);
           setFetchingUser(false);
           router.push(ReservedUser.MANIFOLD, undefined, {
             shallow: true,
