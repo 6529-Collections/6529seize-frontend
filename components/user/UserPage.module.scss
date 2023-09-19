@@ -249,7 +249,6 @@
 }
 
 .settingsIcon {
-  margin-top: 20px;
   height: 25px;
   font-size: larger;
   font-weight: bolder;
@@ -412,6 +411,14 @@
   }
 }
 
+.addressContainer {
+  display: flex;
+  flex-direction: column;
+  @media only screen and (max-width: 800px) {
+    align-items: center;
+  }
+}
+
 .tagsContainer {
   text-align: left;
   @media only screen and (max-width: 575px) {
@@ -427,17 +434,18 @@
 }
 
 .pfp {
-  height: 175px;
-  margin-top: -100px;
+  height: 200px;
+  margin-top: -75px;
+  min-width: 125px;
   width: auto;
   border: 8px solid $bg-color-2;
 }
 
 .pfpPlaceholder {
   display: block;
-  width: 175px;
-  height: 175px;
-  margin-top: -100px;
+  width: 200px;
+  height: 200px;
+  margin-top: -75px;
   border: 10px solid $bg-color-2;
 }
 
