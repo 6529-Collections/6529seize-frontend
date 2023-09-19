@@ -1,10 +1,14 @@
 import { useEffect, useRef, useState } from "react";
 import styles from "./UserSettings.module.scss";
-import { fetchUrl } from "../../../services/6529api";
+import { fetchUrl, postData } from "../../../services/6529api";
 import { ENS } from "../../../entities/IENS";
 import { Button, Col, Container, Form, Row } from "react-bootstrap";
-import { useAccount } from "wagmi";
-import { areEqualAddresses, getRandomColor } from "../../../helpers/Helpers";
+import { useAccount, useSignMessage } from "wagmi";
+import {
+  areEqualAddresses,
+  formatAddress,
+  getRandomColor,
+} from "../../../helpers/Helpers";
 import Image from "next/image";
 import Address from "../../address/Address";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -32,6 +36,8 @@ const FILE_SIZE_LIMIT = 10485760;
 
 export default function UserSettingsComponent(props: Props) {
   const account = useAccount();
+  const signMessage = useSignMessage();
+
   const [ens, setEns] = useState<ENS>();
 
   const inputRef = useRef(null);
@@ -45,9 +51,50 @@ export default function UserSettingsComponent(props: Props) {
   const [processing, setProcessing] = useState(false);
   const [fetching, setFetching] = useState(true);
 
+  const [success, setSuccess] = useState(false);
+  const [signErrors, setSignErrors] = useState<string[]>([]);
+
   function submit() {
-    alert("submit");
     setProcessing(true);
+    setSuccess(false);
+    setSignErrors([]);
+    signMessage.signMessage({
+      message: JSON.stringify(buildUserObject()),
+    });
+  }
+
+  useEffect(() => {
+    if (signMessage.isError) {
+      setProcessing(false);
+      setSignErrors([`Error: ${signMessage.error?.message.split(".")[0]}`]);
+    }
+  }, [signMessage.isError]);
+
+  useEffect(() => {
+    if (signMessage.isSuccess && signMessage.data) {
+      postData(`${process.env.API_ENDPOINT}/api/user`, {
+        wallet: ens?.wallet,
+        signature: signMessage.data,
+        user: buildUserObject(),
+      }).then((response) => {
+        const success = response.status === 200;
+        setProcessing(false);
+        if (success) {
+          setSuccess(true);
+        } else {
+          setSignErrors([`Error: ${response.response.error}`]);
+        }
+      });
+    }
+  }, [signMessage.data]);
+
+  function buildUserObject() {
+    return {
+      pfp: file ? file.name : null,
+      banner_1: bgColor1,
+      banner_2: bgColor2,
+      website: website,
+    };
   }
 
   const handleUpload = () => {
@@ -317,6 +364,39 @@ export default function UserSettingsComponent(props: Props) {
                     </Button>
                   </Col>
                 </Row>
+                {success && (
+                  <Row className="pt-4">
+                    <Col
+                      className={`${styles.success} d-flex align-items-center gap-2`}>
+                      <FontAwesomeIcon
+                        icon="check-circle"
+                        className={styles.statusIcon}
+                      />
+                      <span>Profile Updated Successfully!</span>
+                      <a href={`/${props.user}`}>
+                        BACK TO{" "}
+                        {props.user.endsWith(".eth")
+                          ? props.user.toUpperCase()
+                          : formatAddress(props.user)}
+                      </a>
+                    </Col>
+                  </Row>
+                )}
+                {signErrors.length > 0 && (
+                  <Row className="pt-4">
+                    {signErrors.map((e) => (
+                      <Col
+                        xs={12}
+                        className={`${styles.error} d-flex align-items-center gap-2`}>
+                        <FontAwesomeIcon
+                          icon="times-circle"
+                          className={styles.statusIcon}
+                        />
+                        {e}
+                      </Col>
+                    ))}
+                  </Row>
+                )}
                 <Form.Control
                   ref={inputRef}
                   className={`${styles.formInputHidden}`}
@@ -349,9 +429,12 @@ export default function UserSettingsComponent(props: Props) {
             src="/SummerGlasses.svg"
             alt="SummerGlasses"
           />
-          <h2>SOMETHING IS NOT RIGHT</h2>
+          <h2>YOU HAVE NO POWER HERE</h2>
           <a href={`/${props.user}`} className="pt-3">
-            BACK TO USER PAGE
+            BACK TO{" "}
+            {props.user.endsWith(".eth")
+              ? props.user.toUpperCase()
+              : formatAddress(props.user)}
           </a>
           <a href="/" className="pt-3">
             TAKE ME HOME
