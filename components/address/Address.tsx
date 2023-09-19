@@ -275,32 +275,39 @@ export default function Address(props: Props) {
           </Dropdown.Toggle>
         </Dropdown>
       )}
-      {(consolidationExpanded || props.isUserPage) &&
-        props.wallets.length > 1 &&
-        props.wallets.map((w, index) => (
-          <div
-            key={w}
-            className={`d-flex align-items-center justify-content-start ${
-              props.isUserPage ? styles.consolidationDiv : ""
-            }`}>
-            <FontAwesomeIcon
-              icon="arrow-turn-right"
-              name={`arrow-turn-right`}
-              aria-label={`arrow-turn-right`}
-              className={`${styles.arrowTurnRight}`}
-            />
-            <WalletAddress
-              wallet={w}
-              display={
-                props.display?.split(" - ")[index].endsWith(".eth")
-                  ? props.display?.split(" - ")[index]
-                  : undefined
-              }
-              hideCopy={props.hideCopy}
-              disableLink={areEqualAddresses(w, props.viewingWallet)}
-            />
-          </div>
-        ))}
+      <span
+        className={
+          props.isUserPage
+            ? `d-flex flex-wrap align-items-center gap-2`
+            : `d-flex flex-column`
+        }>
+        {(consolidationExpanded || props.isUserPage) &&
+          props.wallets.length > 1 &&
+          props.wallets.map((w, index) => (
+            <div
+              key={w}
+              className={`d-flex align-items-center justify-content-start ${
+                props.isUserPage ? styles.consolidationDiv : ""
+              }`}>
+              <FontAwesomeIcon
+                icon="arrow-turn-right"
+                name={`arrow-turn-right`}
+                aria-label={`arrow-turn-right`}
+                className={`${styles.arrowTurnRight}`}
+              />
+              <WalletAddress
+                wallet={w}
+                display={
+                  props.display?.split(" - ")[index].endsWith(".eth")
+                    ? props.display?.split(" - ")[index]
+                    : undefined
+                }
+                hideCopy={props.hideCopy}
+                disableLink={areEqualAddresses(w, props.viewingWallet)}
+              />
+            </div>
+          ))}
+      </span>
       {props.tags && (
         <span className={styles.noWrap}>
           {(props.tags.tdh_rank || props.tags.balance_rank) && (
