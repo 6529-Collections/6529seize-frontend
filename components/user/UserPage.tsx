@@ -5,7 +5,6 @@ import { useEffect, useState } from "react";
 import { DBResponse } from "../../entities/IDBResponse";
 import { Owner } from "../../entities/IOwner";
 import { useRouter } from "next/router";
-import Breadcrumb, { Crumb } from "../breadcrumb/Breadcrumb";
 import {
   areEqualAddresses,
   containsEmojis,
@@ -28,7 +27,9 @@ import { fetchAllPages, fetchUrl } from "../../services/6529api";
 import { ReservedUser } from "../../pages/[user]";
 import Tippy from "@tippyjs/react";
 import Tag, { TagType } from "../address/Tag";
-import { VIEW } from "../consolidation-switch/ConsolidationSwitch";
+import ConsolidationSwitch, {
+  VIEW,
+} from "../consolidation-switch/ConsolidationSwitch";
 import Address from "../address/Address";
 import UserPageDetails from "./UserPageDetails";
 import NotFound from "../notFound/NotFound";
@@ -334,7 +335,6 @@ export default function UserPage(props: Props) {
 
   return (
     <>
-      {/* <Breadcrumb breadcrumbs={breadcrumbs} /> */}
       <div
         style={{
           background: `linear-gradient(45deg, ${
@@ -347,19 +347,24 @@ export default function UserPage(props: Props) {
               <div>
                 {tdh && (
                   <>
-                    {tdh.memes_cards_sets > 0 ? (
-                      <Tag
-                        type={TagType.MEME_SETS}
-                        text={"Memes Sets x"}
-                        value={tdh.memes_cards_sets}
-                      />
-                    ) : (
-                      <Tag
-                        type={TagType.MEMES}
-                        text={"Memes x"}
-                        value={tdh.unique_memes}
-                        text_after={tdh.genesis > 0 ? ` (+Genesis) ` : ""}
-                      />
+                    {(tdh.memes_cards_sets_szn1 > 0 ||
+                      tdh.unique_memes > 0) && (
+                      <>
+                        {tdh.memes_cards_sets > 0 ? (
+                          <Tag
+                            type={TagType.MEME_SETS}
+                            text={"Memes Sets x"}
+                            value={tdh.memes_cards_sets}
+                          />
+                        ) : (
+                          <Tag
+                            type={TagType.MEMES}
+                            text={"Memes x"}
+                            value={tdh.unique_memes}
+                            text_after={tdh.genesis > 0 ? ` (+Genesis) ` : ""}
+                          />
+                        )}
+                      </>
                     )}
                     {tdh.memes_cards_sets_szn1 > 0 && (
                       <Tag
@@ -413,8 +418,10 @@ export default function UserPage(props: Props) {
                     className={`${styles.imagePlaceholder} d-flex flex-wrap gap-2 align-items-center`}>
                     {ens && ens.pfp ? (
                       <Image
+                        priority
+                        loading={"eager"}
                         src={ens.pfp}
-                        alt="pfp"
+                        alt={props.user}
                         width={0}
                         height={0}
                         className={styles.pfp}
@@ -423,27 +430,41 @@ export default function UserPage(props: Props) {
                       <span
                         className={styles.pfpPlaceholder}
                         style={{
-                          background: `linear-gradient(45deg, ${DEFAULT_PFP_1} 0%, ${DEFAULT_PFP_2} 100%)`,
+                          background: `linear-gradient(45deg, ${
+                            ens?.banner_1 ? ens.banner_1 : DEFAULT_PFP_1
+                          } 0%, ${
+                            ens?.banner_2 ? ens.banner_2 : DEFAULT_PFP_2
+                          } 100%)`,
                         }}></span>
                     )}
                     {tdh && consolidatedTDH ? (
-                      <span className="flex-wrap">
-                        <Address
-                          wallets={
-                            view === VIEW.CONSOLIDATION
-                              ? consolidatedTDH.wallets
-                              : [ownerAddress]
-                          }
-                          display={
-                            view === VIEW.CONSOLIDATION &&
-                            consolidatedTDH.consolidation_display
-                              ? consolidatedTDH.consolidation_display
-                              : ownerENS
-                          }
-                          isUserPage={true}
-                          disableLink={true}
-                          viewingWallet={ownerAddress}
-                        />
+                      <span className={styles.addressContainer}>
+                        {isConsolidation && (
+                          <span className="mt-1">
+                            <ConsolidationSwitch
+                              view={view}
+                              onSetView={(v) => setView(v)}
+                            />
+                          </span>
+                        )}
+                        <span>
+                          <Address
+                            wallets={
+                              view === VIEW.CONSOLIDATION
+                                ? consolidatedTDH.wallets
+                                : [ownerAddress]
+                            }
+                            display={
+                              view === VIEW.CONSOLIDATION &&
+                              consolidatedTDH.consolidation_display
+                                ? consolidatedTDH.consolidation_display
+                                : ownerENS
+                            }
+                            isUserPage={true}
+                            disableLink={true}
+                            viewingWallet={ownerAddress}
+                          />
+                        </span>
                       </span>
                     ) : (
                       <span className="d-flex flex-wrap">
@@ -457,27 +478,29 @@ export default function UserPage(props: Props) {
                       </span>
                     )}
                   </span>
-                  {account.address &&
-                    areEqualAddresses(account.address, ownerAddress) && (
-                      <Tippy
-                        content={"Settings"}
-                        delay={250}
-                        placement={"left"}
-                        theme={"light"}>
-                        <FontAwesomeIcon
-                          icon="gear"
-                          className={styles.settingsIcon}
-                          onClick={() =>
-                            (window.location.href = `/${props.user}/settings`)
-                          }
-                        />
-                      </Tippy>
-                    )}
+                  <span className="mt-3 d-flex align-items-start gap-2">
+                    {account.address &&
+                      areEqualAddresses(account.address, ownerAddress) && (
+                        <Tippy
+                          content={"Profile Settings"}
+                          delay={250}
+                          placement={"left"}
+                          theme={"light"}>
+                          <FontAwesomeIcon
+                            icon="gear"
+                            className={styles.settingsIcon}
+                            onClick={() =>
+                              (window.location.href = `/${props.user}/settings`)
+                            }
+                          />
+                        </Tippy>
+                      )}
+                  </span>
                 </Col>
               </Row>
             </Container>
             <Container className="no-padding">
-              <Row>
+              <Row className="pt-3">
                 <Col
                   xs={12}
                   sm={6}
@@ -510,26 +533,46 @@ export default function UserPage(props: Props) {
                           </Col>
                         </Row>
                       )}
-                      <Row className="pt-2 pb-2">
-                        <Col>
-                          <Tag
-                            type={TagType.RANK}
-                            text={`Total Balance x${numberWithCommas(
-                              tdh.balance
-                            )} | Rank #${tdh.dense_rank_balance}`}
-                          />
-                        </Col>
-                      </Row>
-                      <Row className="pt-2 pb-2">
-                        <Col>
-                          <Tag
-                            type={TagType.RANK}
-                            text={`Unique Cards x${numberWithCommas(
-                              tdh.unique_memes + tdh.gradients_balance
-                            )} | Rank #${tdh.dense_rank_unique}`}
-                          />
-                        </Col>
-                      </Row>
+                      {tdh.balance > 0 ? (
+                        <>
+                          <Row className="pt-2 pb-2">
+                            <Col>
+                              <Tag
+                                type={TagType.RANK}
+                                text={`Total Balance x${numberWithCommas(
+                                  tdh.balance
+                                )} | Rank #${tdh.dense_rank_balance}`}
+                              />
+                            </Col>
+                          </Row>
+                          <Row className="pt-2 pb-2">
+                            <Col>
+                              <Tag
+                                type={TagType.RANK}
+                                text={`Unique Cards x${numberWithCommas(
+                                  tdh.unique_memes + tdh.gradients_balance
+                                )} | Rank #${tdh.dense_rank_unique}`}
+                              />
+                            </Col>
+                          </Row>
+                        </>
+                      ) : (
+                        <>
+                          <Row className="pt-2 pb-2">
+                            <Col>
+                              <Tag type={TagType.RANK} text={`TDH -`} />
+                            </Col>
+                          </Row>
+                          <Row className="pt-2 pb-2">
+                            <Col>
+                              <Tag
+                                type={TagType.RANK}
+                                text={`Total Balance -`}
+                              />
+                            </Col>
+                          </Row>
+                        </>
+                      )}
                       {tdh.boost && (
                         <Row className="pt-2 pb-2">
                           <Col>

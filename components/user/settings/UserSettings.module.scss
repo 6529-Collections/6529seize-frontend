@@ -108,3 +108,15 @@
     outline: none !important;
   }
 }
+
+.error {
+  color: lighten($raspberry, 15%);
+}
+
+.success {
+  color: lighten($green, 15%);
+}
+
+.statusIcon {
+  height: 25px;
+}
