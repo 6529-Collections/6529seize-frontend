@@ -384,8 +384,9 @@ export default function UserSettingsComponent(props: Props) {
                 )}
                 {signErrors.length > 0 && (
                   <Row className="pt-4">
-                    {signErrors.map((e) => (
+                    {signErrors.map((e, index) => (
                       <Col
+                        key={`${index}-${e}`}
                         xs={12}
                         className={`${styles.error} d-flex align-items-center gap-2`}>
                         <FontAwesomeIcon
