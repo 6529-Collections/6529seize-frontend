@@ -4,7 +4,7 @@ import { Row, Col, Dropdown, Container, Form } from "react-bootstrap";
 import { SortDirection } from "../../entities/ISort";
 import { useState, useEffect } from "react";
 import { MEMES_CONTRACT, GRADIENT_CONTRACT } from "../../constants";
-import { MemesExtendedData, NFT } from "../../entities/INFT";
+import { MemesExtendedData, NFT, NFTLite } from "../../entities/INFT";
 import {
   areEqualAddresses,
   isMemesContract,
@@ -19,6 +19,7 @@ import Image from "next/image";
 import SeasonsDropdown from "../seasons-dropdown/SeasonsDropdown";
 import DotLoader from "../dotLoader/DotLoader";
 import { DBResponse } from "../../entities/IDBResponse";
+import { Season } from "../../entities/ISeason";
 
 interface Props {
   show: boolean;
@@ -41,14 +42,16 @@ export default function UserPageCollection(props: Props) {
   const [hideMemes, setHideMemes] = useState(false);
   const [hideGradients, setHideGradients] = useState(false);
 
-  const [memes, setMemes] = useState<NFT[]>([]);
-  const [gradients, setGradients] = useState<NFT[]>([]);
-  const [nfts, setNfts] = useState<NFT[]>([]);
-  const [nftsNextPage, setNftsNextPage] = useState<string>(
-    `${process.env.API_ENDPOINT}/api/nfts?contract=${MEMES_CONTRACT}&page_size=40&sort_direction=asc`
-  );
-  const [seasons, setSeasons] = useState<number[]>([]);
+  const [memes, setMemes] = useState<NFTLite[]>([]);
+  const [gradients, setGradients] = useState<NFTLite[]>([]);
+  const [nfts, setNfts] = useState<NFTLite[]>([]);
+
+  const [seasons, setSeasons] = useState<Season[]>([]);
   const [selectedSeason, setSelectedSeason] = useState(0);
+
+  const [memesFetched, setMemesFetched] = useState(false);
+  const [gradientsFetched, setGradientsFetched] = useState(false);
+  const [nftsFetched, setNftsFetched] = useState(false);
 
   useEffect(() => {
     if (sort && sortDir) {
@@ -254,44 +257,38 @@ export default function UserPageCollection(props: Props) {
     }
   }, [sortDir, sort, hideMemes, hideGradients, hideSeized, hideNonSeized]);
 
-  function fetchNfts(url: string) {
-    fetchUrl(url).then((responseNfts: DBResponse) => {
-      setMemes([...memes, ...responseNfts.data]);
-      setNftsNextPage(responseNfts.next);
-    });
-  }
-
   useEffect(() => {
-    if (nftsNextPage) {
-      fetchNfts(nftsNextPage);
-    }
-  }, [nftsNextPage]);
+    fetchUrl(`${process.env.API_ENDPOINT}/api/memes_lite`).then(
+      (response: DBResponse) => {
+        setMemes(response.data);
+        setMemesFetched(true);
+      }
+    );
+  }, []);
 
   useEffect(() => {
     const url = `${process.env.API_ENDPOINT}/api/nfts/gradients?&page_size=101&sort=${sort}&sort_direction=${sortDir}`;
     fetchAllPages(url).then((gradients: NFT[]) => {
       setGradients(gradients);
+      setGradientsFetched(true);
     });
   }, []);
 
   useEffect(() => {
-    setNfts(() => [...gradients, ...memes]);
-  }, [memes, gradients]);
+    if (memesFetched && gradientsFetched) {
+      setNfts(() => [...gradients, ...memes]);
+      setNftsFetched(true);
+    }
+  }, [memesFetched, gradientsFetched]);
 
   useEffect(() => {
-    const seasons = new Set<number>();
-    nfts.map((meme) => {
-      const season = meme.metadata.attributes.find(
-        (a: any) => a.trait_type == "Type - Season"
-      )?.value;
-      if (season) {
-        seasons.add(season);
-      }
+    const url = `${process.env.API_ENDPOINT}/api/memes_seasons`;
+    fetchUrl(url).then((seasons: any[]) => {
+      setSeasons(seasons);
     });
-    setSeasons(Array.from(seasons).sort((a, b) => a - b));
-  }, [nfts]);
+  }, []);
 
-  function getBalance(nft: NFT) {
+  function getBalance(nft: NFTLite) {
     const balance = props.owned.find(
       (b) =>
         b.token_id === nft.id && areEqualAddresses(b.contract, nft.contract)
@@ -302,7 +299,7 @@ export default function UserPageCollection(props: Props) {
     return 0;
   }
 
-  function filterNft(nft: NFT) {
+  function filterNft(nft: NFTLite) {
     const nftbalance = getBalance(nft);
 
     const isMemes = isMemesContract(nft.contract);
@@ -321,9 +318,7 @@ export default function UserPageCollection(props: Props) {
       return;
     }
 
-    const season = nft.metadata.attributes.find(
-      (a: any) => a.trait_type == "Type - Season"
-    )?.value;
+    const season = seasons.find((s) => s.token_ids.includes(nft.id))?.season;
 
     if (selectedSeason != 0 && selectedSeason != season) {
       return;
@@ -332,7 +327,7 @@ export default function UserPageCollection(props: Props) {
     return nft;
   }
 
-  function printNft(nft: NFT) {
+  function printNft(nft: NFTLite) {
     let nfttdh;
     let nftrank;
     const nftbalance = getBalance(nft);
@@ -418,7 +413,7 @@ export default function UserPageCollection(props: Props) {
 
   function printNfts() {
     const mynfts = [...nfts].filter((n) => filterNft(n));
-    if (mynfts.length === 0 && !nftsNextPage) {
+    if (mynfts.length === 0 && nftsFetched) {
       return (
         <Row className="pt-2">
           <Col>
@@ -551,7 +546,7 @@ export default function UserPageCollection(props: Props) {
           </Col>
           <Col className="d-flex align-items-center justify-content-end" xs={7}>
             <SeasonsDropdown
-              seasons={seasons}
+              seasons={seasons.map((s) => s.season)}
               selectedSeason={selectedSeason}
               setSelectedSeason={setSelectedSeason}
             />
@@ -559,13 +554,13 @@ export default function UserPageCollection(props: Props) {
         </Row>
         {printUserControls()}
         {nfts.length > 0 && printNfts()}
-        {nftsNextPage && (
+        {/* {nftsNextPage && (
           <Row>
             <Col className="pt-3 pb-5">
               Fetching <DotLoader />
             </Col>
           </Row>
-        )}
+        )} */}
       </>
     );
   } else {

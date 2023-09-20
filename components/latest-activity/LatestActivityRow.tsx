@@ -10,11 +10,11 @@ import {
 } from "../../helpers/Helpers";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { NULL_ADDRESS } from "../../constants";
-import { BaseNFT } from "../../entities/INFT";
+import { BaseNFT, NFTLite } from "../../entities/INFT";
 import Address from "../address/Address";
 
 interface Props {
-  nft?: BaseNFT;
+  nft?: NFTLite;
   tr: Transaction;
   mykey?: string;
 }
