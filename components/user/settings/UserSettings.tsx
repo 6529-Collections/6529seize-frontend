@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import styles from "./UserSettings.module.scss";
-import { fetchUrl, postData } from "../../../services/6529api";
+import { fetchUrl } from "../../../services/6529api";
 import { ENS } from "../../../entities/IENS";
 import { Button, Col, Container, Dropdown, Form, Row } from "react-bootstrap";
 import { useAccount, useSignMessage } from "wagmi";
