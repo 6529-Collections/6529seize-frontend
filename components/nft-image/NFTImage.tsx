@@ -1,11 +1,11 @@
 import styles from "./NFTImage.module.scss";
 import { Col } from "react-bootstrap";
-import { BaseNFT } from "../../entities/INFT";
+import { BaseNFT, NFTLite } from "../../entities/INFT";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 
 interface Props {
-  nft: BaseNFT;
+  nft: BaseNFT | NFTLite;
   animation: boolean;
   showThumbnail?: boolean;
   showOriginal?: boolean;
@@ -29,6 +29,7 @@ export default function NFTImage(props: Props) {
   if (
     props.animation &&
     props.nft.animation &&
+    "metadata" in props.nft &&
     props.nft.metadata.animation_details?.format === "HTML"
   ) {
     return (
@@ -63,6 +64,7 @@ export default function NFTImage(props: Props) {
   if (
     props.animation &&
     props.nft.animation &&
+    "metadata" in props.nft &&
     props.nft.metadata.animation_details?.format === "MP4"
   ) {
     return (
@@ -98,9 +100,12 @@ export default function NFTImage(props: Props) {
           poster={props.nft.scaled ? props.nft.scaled : props.nft.image}
           // onLoadStart={() => setShowBalance(true)}
           onError={({ currentTarget }) => {
-            if (currentTarget.src === props.nft.compressed_animation) {
+            if (
+              "metadata" in props.nft &&
+              currentTarget.src === props.nft.compressed_animation
+            ) {
               currentTarget.src = props.nft.animation;
-            } else {
+            } else if ("metadata" in props.nft) {
               currentTarget.src = props.nft.metadata.animation;
             }
           }}></video>
@@ -143,7 +148,7 @@ export default function NFTImage(props: Props) {
               : props.nft.image;
           } else if (currentTarget.src === props.nft.scaled) {
             currentTarget.src = props.nft.image;
-          } else {
+          } else if ("metadata" in props.nft) {
             currentTarget.src = props.nft.metadata.image;
           }
         }}
