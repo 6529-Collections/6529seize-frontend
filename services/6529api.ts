@@ -49,3 +49,21 @@ export async function postData(url: string, body: any) {
     response: json,
   };
 }
+
+export async function postFormData(url: string, formData: FormData) {
+  let headers: any = {};
+  const apiAuth = Cookies.get(API_AUTH_COOKIE);
+  if (apiAuth) {
+    headers = { "x-6529-auth": apiAuth };
+  }
+  const res = await fetch(url, {
+    method: "POST",
+    body: formData,
+    headers: headers,
+  });
+  const json = await res.json();
+  return {
+    status: res.status,
+    response: json,
+  };
+}
