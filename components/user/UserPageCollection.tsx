@@ -1,10 +1,10 @@
 import styles from "./UserPage.module.scss";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { Row, Col, Dropdown, Container, Form } from "react-bootstrap";
+import { Row, Col, Container, Form } from "react-bootstrap";
 import { SortDirection } from "../../entities/ISort";
 import { useState, useEffect } from "react";
 import { MEMES_CONTRACT, GRADIENT_CONTRACT } from "../../constants";
-import { MemesExtendedData, NFT, NFTLite } from "../../entities/INFT";
+import { NFT, NFTLite } from "../../entities/INFT";
 import {
   areEqualAddresses,
   isMemesContract,
@@ -17,7 +17,6 @@ import { Owner } from "../../entities/IOwner";
 import { ConsolidatedTDHMetrics, TDHMetrics } from "../../entities/ITDH";
 import Image from "next/image";
 import SeasonsDropdown from "../seasons-dropdown/SeasonsDropdown";
-import DotLoader from "../dotLoader/DotLoader";
 import { DBResponse } from "../../entities/IDBResponse";
 import { Season } from "../../entities/ISeason";
 
