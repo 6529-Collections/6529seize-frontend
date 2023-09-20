@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import styles from "./UserSettings.module.scss";
-import { fetchUrl } from "../../../services/6529api";
+import { fetchUrl, getHeaders, postFormData } from "../../../services/6529api";
 import { ENS } from "../../../entities/IENS";
 import { Button, Col, Container, Dropdown, Form, Row } from "react-bootstrap";
 import { useAccount, useSignMessage } from "wagmi";
@@ -93,20 +93,17 @@ export default function UserSettingsComponent(props: Props) {
       formData.append("signature", signMessage.data);
       formData.append("user", JSON.stringify(buildUserObject()));
 
-      fetch(`${process.env.API_ENDPOINT}/api/user`, {
-        method: "POST",
-        body: formData,
-      }).then((response) => {
-        const success = response.status === 200;
-        setProcessing(false);
-        if (success) {
-          setSuccess(true);
-        } else {
-          response.json().then((r) => {
-            setSignErrors([`Error: ${r.error}`]);
-          });
+      postFormData(`${process.env.API_ENDPOINT}/api/user`, formData).then(
+        (response) => {
+          const success = response.status === 200;
+          setProcessing(false);
+          if (success) {
+            setSuccess(true);
+          } else {
+            setSignErrors([`Error: ${response.response.error}`]);
+          }
         }
-      });
+      );
     }
   }, [signMessage.data]);
 
