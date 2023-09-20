@@ -120,3 +120,54 @@
 .statusIcon {
   height: 25px;
 }
+
+.orBlock {
+  border-bottom: 1px solid #fff;
+  line-height: 0.1em;
+
+  span {
+    background: $almost-very-dark-grey;
+    padding: 0 10px;
+  }
+}
+
+.memesDropdown {
+  background-color: white !important;
+  line-height: 48px;
+  background-color: transparent;
+  border: none;
+  padding-right: 25px;
+  a {
+    line-height: 30px;
+  }
+  button {
+    color: black !important;
+    padding-left: 10px;
+    padding-right: 10px;
+    width: 100%;
+    text-align: left;
+    font-size: larger !important;
+    font-weight: bolder !important;
+    cursor: copy;
+    background-color: transparent !important;
+    border-color: transparent !important;
+    &::after {
+      right: 10px;
+      margin-top: 0.8rem;
+    }
+  }
+  div {
+    max-height: 65vh;
+    overflow-y: auto;
+    width: 100%;
+    transform: translate3d(0px, 42px, 0px) !important;
+  }
+
+  @media only screen and (max-width: 800px) {
+    button {
+      &::after {
+        margin-top: 0.5rem;
+      }
+    }
+  }
+}

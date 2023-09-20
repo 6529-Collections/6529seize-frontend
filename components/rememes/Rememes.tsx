@@ -1,9 +1,9 @@
 import { Container, Row, Col, Dropdown, Button } from "react-bootstrap";
 import styles from "./Rememes.module.scss";
-import { fetchAllPages, fetchUrl } from "../../services/6529api";
+import { fetchUrl } from "../../services/6529api";
 import { MEMES_CONTRACT, OPENSEA_STORE_FRONT_CONTRACT } from "../../constants";
 import { useEffect, useState } from "react";
-import { NFT, Rememe } from "../../entities/INFT";
+import { NFT, NFTLite, Rememe } from "../../entities/INFT";
 import { DBResponse } from "../../entities/IDBResponse";
 import { useRouter } from "next/router";
 import RememeImage from "../nft-image/RememeImage";
@@ -38,7 +38,7 @@ interface Props {
 export default function Rememes(props: Props) {
   const router = useRouter();
 
-  const [memes, setMemes] = useState<NFT[]>([]);
+  const [memes, setMemes] = useState<NFTLite[]>([]);
   const [memesLoaded, setMemesLoaded] = useState(false);
 
   const [rememes, setRememes] = useState<Rememe[]>([]);
@@ -52,7 +52,7 @@ export default function Rememes(props: Props) {
   const [selectedTokenType, setSelectedTokenType] = useState<TokenType>(
     TokenType.ALL
   );
-  const [selectedMeme, setSelectedMeme] = useState<NFT>();
+  const [selectedMeme, setSelectedMeme] = useState<NFTLite>();
 
   const sorting = [RememeSort.RANDOM, RememeSort.CREATED_ASC];
   const [selectedSorting, setSelectedSorting] = useState<RememeSort>(
@@ -60,10 +60,10 @@ export default function Rememes(props: Props) {
   );
 
   useEffect(() => {
-    fetchAllPages(
-      `${process.env.API_ENDPOINT}/api/nfts?contract=${MEMES_CONTRACT}`
-    ).then((responseNfts: NFT[]) => {
-      setMemes(responseNfts.sort((a, b) => a.id - b.id));
+    fetchUrl(
+      `${process.env.API_ENDPOINT}/api/memes_lite?contract=${MEMES_CONTRACT}`
+    ).then((response: DBResponse) => {
+      setMemes(response.data);
       setMemesLoaded(true);
     });
   }, []);

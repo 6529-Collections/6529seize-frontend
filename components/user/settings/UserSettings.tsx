@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import styles from "./UserSettings.module.scss";
 import { fetchUrl, postData } from "../../../services/6529api";
 import { ENS } from "../../../entities/IENS";
-import { Button, Col, Container, Form, Row } from "react-bootstrap";
+import { Button, Col, Container, Dropdown, Form, Row } from "react-bootstrap";
 import { useAccount, useSignMessage } from "wagmi";
 import {
   areEqualAddresses,
@@ -14,6 +14,8 @@ import Address from "../../address/Address";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Tippy from "@tippyjs/react";
 import DotLoader from "../../dotLoader/DotLoader";
+import { DBResponse } from "../../../entities/IDBResponse";
+import { NFTLite } from "../../../entities/INFT";
 
 interface Props {
   user: string;
@@ -44,6 +46,7 @@ export default function UserSettingsComponent(props: Props) {
   const [dragActive, setDragActive] = useState(false);
 
   const [file, setFile] = useState<any>();
+  const [selectedMeme, setSelectedMeme] = useState<NFTLite>();
   const [bgColor1, setBgColor1] = useState<string>();
   const [bgColor2, setBgColor2] = useState<string>();
   const [website, setWebsite] = useState<string>();
@@ -53,6 +56,8 @@ export default function UserSettingsComponent(props: Props) {
 
   const [success, setSuccess] = useState(false);
   const [signErrors, setSignErrors] = useState<string[]>([]);
+
+  const [nfts, setNfts] = useState<NFTLite[]>([]);
 
   function submit() {
     setProcessing(true);
@@ -64,6 +69,14 @@ export default function UserSettingsComponent(props: Props) {
   }
 
   useEffect(() => {
+    fetchUrl(`${process.env.API_ENDPOINT}/api/memes_lite`).then(
+      (response: DBResponse) => {
+        setNfts(response.data);
+      }
+    );
+  }, []);
+
+  useEffect(() => {
     if (signMessage.isError) {
       setProcessing(false);
       setSignErrors([`Error: ${signMessage.error?.message.split(".")[0]}`]);
@@ -71,18 +84,27 @@ export default function UserSettingsComponent(props: Props) {
   }, [signMessage.isError]);
 
   useEffect(() => {
-    if (signMessage.isSuccess && signMessage.data) {
-      postData(`${process.env.API_ENDPOINT}/api/user`, {
-        wallet: ens?.wallet,
-        signature: signMessage.data,
-        user: buildUserObject(),
+    if (signMessage.isSuccess && signMessage.data && ens) {
+      const formData = new FormData();
+      if (file) {
+        formData.append("pfp", file);
+      }
+      formData.append("wallet", ens.wallet);
+      formData.append("signature", signMessage.data);
+      formData.append("user", JSON.stringify(buildUserObject()));
+
+      fetch(`${process.env.API_ENDPOINT}/api/user`, {
+        method: "POST",
+        body: formData,
       }).then((response) => {
         const success = response.status === 200;
         setProcessing(false);
         if (success) {
           setSuccess(true);
         } else {
-          setSignErrors([`Error: ${response.response.error}`]);
+          response.json().then((r) => {
+            setSignErrors([`Error: ${r.error}`]);
+          });
         }
       });
     }
@@ -91,6 +113,7 @@ export default function UserSettingsComponent(props: Props) {
   function buildUserObject() {
     return {
       pfp: file ? file.name : null,
+      meme: selectedMeme ? selectedMeme.id : null,
       banner_1: bgColor1,
       banner_2: bgColor2,
       website: website,
@@ -163,6 +186,18 @@ export default function UserSettingsComponent(props: Props) {
     fetch();
   }, [account.address]);
 
+  useEffect(() => {
+    if (selectedMeme) {
+      setFile(undefined);
+    }
+  }, [selectedMeme]);
+
+  useEffect(() => {
+    if (file) {
+      setSelectedMeme(undefined);
+    }
+  }, [file]);
+
   if (fetching) {
     return (
       <Container>
@@ -197,7 +232,9 @@ export default function UserSettingsComponent(props: Props) {
                         icon="arrow-circle-left"
                         className={styles.backIcon}
                         onClick={() =>
-                          (window.location.href = `/${props.user}`)
+                          (window.location.href = `/${
+                            ens.display ? ens.display : ens.wallet
+                          }`)
                         }
                       />
                     </Tippy>
@@ -221,6 +258,52 @@ export default function UserSettingsComponent(props: Props) {
               md={{ span: 10, offset: 1 }}
               lg={{ span: 8, offset: 2 }}>
               <Container className={styles.toolArea}>
+                <Row>
+                  <Col
+                    xs={12}
+                    className="d-flex align-items-center justify-content-between">
+                    <span>Select Meme</span>
+                    {selectedMeme && (
+                      <span
+                        className="font-color-h cursor-pointer decoration-hover-underline"
+                        onClick={() => setSelectedMeme(undefined)}>
+                        clear
+                      </span>
+                    )}
+                  </Col>
+                  <Col xs={12}>
+                    <Dropdown
+                      className={styles.memesDropdown}
+                      drop={"down-centered"}>
+                      <Dropdown.Toggle>
+                        {selectedMeme
+                          ? `#${selectedMeme.id} - ${selectedMeme.name}`
+                          : "-"}
+                      </Dropdown.Toggle>
+                      <Dropdown.Menu>
+                        <Dropdown.Item disabled>-</Dropdown.Item>
+                        {nfts.map((m) => (
+                          <Dropdown.Item
+                            key={`meme-${m.id}`}
+                            onClick={() => {
+                              setSelectedMeme(m);
+                            }}>
+                            #{m.id} - {m.name}
+                          </Dropdown.Item>
+                        ))}
+                      </Dropdown.Menu>
+                    </Dropdown>
+                  </Col>
+                </Row>
+                <Row className="pt-4 pb-4 text-center">
+                  <Col>
+                    <div className={styles.orBlock}>
+                      <span>
+                        <b>OR</b>
+                      </span>
+                    </div>
+                  </Col>
+                </Row>
                 <Row>
                   <Col
                     xs={12}
@@ -256,7 +339,22 @@ export default function UserSettingsComponent(props: Props) {
                       onDragEnter={handleDrag}
                       onDragLeave={handleDrag}
                       onDragOver={handleDrag}>
-                      {file ? (
+                      {selectedMeme ? (
+                        <Image
+                          priority
+                          loading="eager"
+                          width="0"
+                          height="0"
+                          style={{
+                            width: "auto",
+                            height: "auto",
+                            maxWidth: "100%",
+                            maxHeight: "100%",
+                          }}
+                          src={selectedMeme.thumbnail}
+                          alt={selectedMeme.name}
+                        />
+                      ) : file ? (
                         <Image
                           width="0"
                           height="0"
@@ -271,6 +369,8 @@ export default function UserSettingsComponent(props: Props) {
                         />
                       ) : ens.pfp ? (
                         <Image
+                          priority
+                          loading="eager"
                           width="0"
                           height="0"
                           style={{
@@ -373,11 +473,9 @@ export default function UserSettingsComponent(props: Props) {
                         className={styles.statusIcon}
                       />
                       <span>Profile Updated Successfully!</span>
-                      <a href={`/${props.user}`}>
+                      <a href={`/${ens.display ? ens.display : ens.wallet}`}>
                         BACK TO{" "}
-                        {props.user.endsWith(".eth")
-                          ? props.user.toUpperCase()
-                          : formatAddress(props.user)}
+                        {ens.display ? ens.display : formatAddress(ens.wallet)}
                       </a>
                     </Col>
                   </Row>
