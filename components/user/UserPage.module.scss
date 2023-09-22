@@ -395,11 +395,12 @@
 
   @media only screen and (max-width: 800px) {
     height: auto;
+    justify-content: center;
 
     div {
       justify-content: center;
       max-width: 100%;
-      padding-bottom: 110px;
+      padding-bottom: 90px;
     }
   }
 }
