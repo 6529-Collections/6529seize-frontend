@@ -18,7 +18,6 @@ import {
 import { MANIFOLD, SIX529_MUSEUM } from "../../constants";
 import {
   ConsolidatedTDHMetrics,
-  GlobalTDHHistory,
   TDHHistory,
   TDHMetrics,
 } from "../../entities/ITDH";
@@ -96,10 +95,6 @@ export default function UserPage(props: Props) {
 
   const [ens, setEns] = useState<ENS>();
 
-  const [tdhHistory, setTdhHistory] = useState<TDHHistory>();
-  const [globalTdhHistory, setGlobalTdhHistory] = useState<GlobalTDHHistory>();
-  const [globalTdhRateChange, setGlobalTdhRateChange] = useState<number>();
-
   useEffect(() => {
     async function fetchENS() {
       let oLink = process.env.BASE_ENDPOINT
@@ -112,9 +107,15 @@ export default function UserPage(props: Props) {
             setUserError(true);
           }
           if (areEqualAddresses(response.wallet, SIX529_MUSEUM)) {
-            setEns(MUSEUM_ENS);
+            setEns({
+              ...MUSEUM_ENS,
+              consolidation_key: response.consolidation_key,
+            });
           } else if (areEqualAddresses(response.wallet, MANIFOLD)) {
-            setEns(MANIFOLD_ENS);
+            setEns({
+              ...MANIFOLD_ENS,
+              consolidation_key: response.consolidation_key,
+            });
           } else {
             setEns(response);
           }
@@ -155,7 +156,10 @@ export default function UserPage(props: Props) {
           setOwnerAddress(SIX529_MUSEUM);
           setOwnerENS(ReservedUser.MUSEUM);
           setOwnerLinkDisplay(`${oLink}/${ReservedUser.MUSEUM}`);
-          setEns(MUSEUM_ENS);
+          setEns({
+            ...MUSEUM_ENS,
+            consolidation_key: MUSEUM_ENS.wallet,
+          });
           setFetchingUser(false);
           router.push(ReservedUser.MUSEUM, undefined, {
             shallow: true,
@@ -166,7 +170,10 @@ export default function UserPage(props: Props) {
           setOwnerAddress(MANIFOLD);
           setOwnerENS(ReservedUser.MANIFOLD);
           setOwnerLinkDisplay(`${oLink}/${ReservedUser.MANIFOLD}`);
-          setEns(MANIFOLD_ENS);
+          setEns({
+            ...MANIFOLD_ENS,
+            consolidation_key: MANIFOLD_ENS.wallet,
+          });
           setFetchingUser(false);
           router.push(ReservedUser.MANIFOLD, undefined, {
             shallow: true,
@@ -248,21 +255,21 @@ export default function UserPage(props: Props) {
 
   useEffect(() => {
     async function fetchConsolidatedTDH() {
-      const url = `${process.env.API_ENDPOINT}/api/consolidated_owner_metrics/?wallet=${ownerAddress}&profile_page=true`;
-      return fetchUrl(url).then((response: DBResponse) => {
-        if (response && response.data.length === 1) {
-          setConsolidatedTDH(response.data[0]);
-          if (response.data[0].wallets && response.data[0].wallets.length > 1) {
+      const url = `${process.env.API_ENDPOINT}/api/consolidated_owner_metrics/${ens?.consolidation_key}`;
+      return fetchUrl(url).then((response: ConsolidatedTDHMetrics) => {
+        if (response) {
+          setConsolidatedTDH(response);
+          if (response.wallets && response.wallets.length > 1) {
             setIsConsolidation(true);
           }
         }
       });
     }
 
-    if (ownerAddress && router.isReady) {
+    if (ens && ens.consolidation_key) {
       fetchConsolidatedTDH();
     }
-  }, [ownerAddress, router.isReady]);
+  }, [ens]);
 
   useEffect(() => {
     async function fetchTDH() {
@@ -292,19 +299,6 @@ export default function UserPage(props: Props) {
   }, [view, walletTDH, consolidatedTDH]);
 
   useEffect(() => {
-    if (consolidatedTDH) {
-      if (consolidatedTDH.balance > 0) {
-        const url = `${process.env.API_ENDPOINT}/api/tdh_history?wallet=${consolidatedTDH.wallets[0]}&page_size=1`;
-        fetchUrl(url).then((response: DBResponse) => {
-          if (response.data) {
-            setTdhHistory(response.data[0]);
-          }
-        });
-      }
-    }
-  }, [consolidatedTDH]);
-
-  useEffect(() => {
     if (walletOwnedLoaded && consolidationOwnedLoaded) {
       if (view === VIEW.CONSOLIDATION || !isConsolidation) {
         setOwned(consolidationOwned);
@@ -314,18 +308,6 @@ export default function UserPage(props: Props) {
       setOwnedLoaded(true);
     }
   }, [view, walletOwnedLoaded, consolidationOwnedLoaded]);
-
-  useEffect(() => {
-    let url = `${
-      process.env.API_ENDPOINT
-    }/api/tdh_global_history?page_size=${1}`;
-    fetchUrl(url).then((response: DBResponse) => {
-      const tdhH = response.data[0];
-      setGlobalTdhHistory(tdhH);
-      const change = (tdhH.net_boosted_tdh / tdhH.total_boosted_tdh) * 100;
-      setGlobalTdhRateChange(change);
-    });
-  }, []);
 
   if (fetchingUser) {
     return (
@@ -528,20 +510,10 @@ export default function UserPage(props: Props) {
                             <Tag
                               type={TagType.RANK}
                               text={`TDH ${numberWithCommas(tdh.boosted_tdh)} ${
-                                view == VIEW.CONSOLIDATION
+                                tdh.day_change
                                   ? `(${
-                                      tdhHistory
-                                        ? tdhHistory.net_boosted_tdh > 0
-                                          ? "+"
-                                          : ""
-                                        : "..."
-                                    }${
-                                      tdhHistory
-                                        ? numberWithCommas(
-                                            tdhHistory.net_boosted_tdh
-                                          )
-                                        : ""
-                                    })`
+                                      tdh.day_change > 0 ? "+" : ""
+                                    }${numberWithCommas(tdh.day_change)})`
                                   : ""
                               } | Rank #${tdh.tdh_rank}`}
                             />
