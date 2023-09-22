@@ -36,7 +36,28 @@ const ACCEPTED_FORMATS_DISPLAY = ACCEPTED_FORMATS.map(
 
 const FILE_SIZE_LIMIT = 10485760;
 
+const isDivInViewport = (divRef: any) => {
+  if (divRef.current) {
+    const rect = divRef.current.getBoundingClientRect();
+    return (
+      rect.top >= 0 &&
+      rect.left >= 0 &&
+      rect.bottom <= window.innerHeight &&
+      rect.right <= window.innerWidth
+    );
+  }
+  return false;
+};
+
+const scrollToDiv = (divRef: any) => {
+  if (divRef.current) {
+    divRef.current.scrollIntoView({ behavior: "smooth", block: "end" });
+  }
+};
+
 export default function UserSettingsComponent(props: Props) {
+  const statusDivRef = useRef(null);
+
   const account = useAccount();
   const signMessage = useSignMessage();
 
@@ -56,8 +77,15 @@ export default function UserSettingsComponent(props: Props) {
 
   const [success, setSuccess] = useState(false);
   const [signErrors, setSignErrors] = useState<string[]>([]);
+  const [fileError, setFileError] = useState<string>();
 
   const [nfts, setNfts] = useState<NFTLite[]>([]);
+
+  useEffect(() => {
+    if (!isDivInViewport(statusDivRef)) {
+      scrollToDiv(statusDivRef);
+    }
+  }, [processing]);
 
   function submit() {
     setProcessing(true);
@@ -107,13 +135,19 @@ export default function UserSettingsComponent(props: Props) {
     }
   }, [signMessage.data]);
 
+  useEffect(() => {
+    if (success && ens) {
+      window.location.href = `/${ens.display ? ens.display : ens.wallet}`;
+    }
+  }, [success]);
+
   function buildUserObject() {
     return {
       pfp: file ? file.name : null,
       meme: selectedMeme ? selectedMeme.id : null,
       banner_1: bgColor1,
       banner_2: bgColor2,
-      website: website,
+      website: website ? website : null,
     };
   }
 
@@ -131,14 +165,14 @@ export default function UserSettingsComponent(props: Props) {
     }
   };
 
-  function isValidImage(file: any) {
+  function validateImage(file: File) {
     if (ACCEPTED_FORMATS.indexOf(file.type) === -1) {
-      return false;
+      setFileError("Invalid file type");
+    } else if (file.size > FILE_SIZE_LIMIT) {
+      setFileError("File size must be less than 10MB");
+    } else {
+      setFile(file);
     }
-    if (file.size > FILE_SIZE_LIMIT) {
-      return false;
-    }
-    return true;
   }
 
   function getFileSize() {
@@ -155,12 +189,8 @@ export default function UserSettingsComponent(props: Props) {
     e.preventDefault();
     e.stopPropagation();
     setDragActive(false);
-    if (
-      e.dataTransfer.files &&
-      e.dataTransfer.files[0] &&
-      isValidImage(e.dataTransfer.files[0])
-    ) {
-      setFile(e.dataTransfer.files[0]);
+    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+      validateImage(e.dataTransfer.files[0]);
     }
   };
 
@@ -321,8 +351,10 @@ export default function UserSettingsComponent(props: Props) {
                             clear
                           </span>
                         </span>
+                      ) : fileError ? (
+                        <span className={styles.error}>{fileError}</span>
                       ) : (
-                        ""
+                        <></>
                       )}
                     </span>
                   </Col>
@@ -462,7 +494,7 @@ export default function UserSettingsComponent(props: Props) {
                   </Col>
                 </Row>
                 {success && (
-                  <Row className="pt-4">
+                  <Row className="pt-4 pb-2">
                     <Col
                       className={`${styles.success} d-flex align-items-center gap-2`}>
                       <FontAwesomeIcon
@@ -470,15 +502,18 @@ export default function UserSettingsComponent(props: Props) {
                         className={styles.statusIcon}
                       />
                       <span>Profile Updated Successfully!</span>
-                      <a href={`/${ens.display ? ens.display : ens.wallet}`}>
-                        BACK TO{" "}
-                        {ens.display ? ens.display : formatAddress(ens.wallet)}
-                      </a>
+                    </Col>
+                  </Row>
+                )}
+                {signMessage.isLoading && (
+                  <Row className="pt-4 pb-2" ref={statusDivRef}>
+                    <Col>
+                      Confirm in your wallet <DotLoader />
                     </Col>
                   </Row>
                 )}
                 {signErrors.length > 0 && (
-                  <Row className="pt-4">
+                  <Row className="pt-4 pb-2">
                     {signErrors.map((e, index) => (
                       <Col
                         key={`${index}-${e}`}
@@ -502,7 +537,7 @@ export default function UserSettingsComponent(props: Props) {
                   onChange={(e: any) => {
                     if (e.target.files) {
                       const f = e.target.files[0];
-                      setFile(f);
+                      validateImage(f);
                     }
                   }}
                 />
