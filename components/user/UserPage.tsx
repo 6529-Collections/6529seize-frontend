@@ -657,7 +657,11 @@ export default function UserPage(props: Props) {
                         </a>
                         {ens && ens.website && (
                           <a
-                            href={ens.website}
+                            href={
+                              ens.website.startsWith("http")
+                                ? ens.website
+                                : `https://${ens.website}`
+                            }
                             target="_blank"
                             rel="noreferrer">
                             <FontAwesomeIcon
