@@ -7,6 +7,7 @@ import {
   areEqualAddresses,
   containsEmojis,
   formatAddress,
+  numberWithCommas,
 } from "../../helpers/Helpers";
 import { MANIFOLD, SIX529_MUSEUM } from "../../constants";
 import HeaderPlaceholder from "../../components/header/HeaderPlaceholder";
@@ -16,6 +17,23 @@ export enum ReservedUser {
   MUSEUM = "6529Museum",
   MANIFOLD = "Manifold-Minting-Wallet",
 }
+
+export const MUSEUM_ENS = {
+  wallet: SIX529_MUSEUM,
+  display: ReservedUser.MUSEUM,
+  banner_1: "#111111",
+  banner_2: "#000000",
+  pfp: "./museum.png",
+};
+
+export const MANIFOLD_ENS = {
+  wallet: MANIFOLD,
+  display: ReservedUser.MANIFOLD,
+  banner_1: "#111111",
+  banner_2: "#000000",
+  pfp: "./manifold.png",
+};
+
 const Header = dynamic(() => import("../../components/header/Header"), {
   ssr: false,
   loading: () => <HeaderPlaceholder />,
@@ -25,9 +43,21 @@ const UserPage = dynamic(() => import("../../components/user/UserPage"), {
   ssr: false,
 });
 
+const DEFAULT_IMAGE =
+  "https://d3lqz0a4bldqgf.cloudfront.net/seize_images/Seize_Logo_Glasses_2.png";
+
 export default function UserPageIndex(props: any) {
   const router = useRouter();
   const pagenameFull = `${props.title} | 6529 SEIZE`;
+
+  const descriptionArray = [];
+  if (props.tdh && props.tdh > 0) {
+    descriptionArray.push(`TDH: ${numberWithCommas(props.tdh)}`);
+  }
+  if (props.balance && props.balance > 0) {
+    descriptionArray.push(`Balance: ${numberWithCommas(props.balance)}`);
+  }
+  descriptionArray.push("6529 SEIZE");
 
   const [user, setUser] = useState(
     Array.isArray(router.query.user) ? router.query.user[0] : router.query.user
@@ -58,11 +88,11 @@ export default function UserPageIndex(props: any) {
           content={`${process.env.BASE_ENDPOINT}/${props.url}`}
         />
         <meta property="og:title" content={props.title} />
+        <meta property="og:image" content={props.image} />
         <meta
-          property="og:image"
-          content={`https://d3lqz0a4bldqgf.cloudfront.net/seize_images/Seize_Logo_Glasses_2.png`}
+          property="og:description"
+          content={descriptionArray.join(" | ")}
         />
-        <meta property="og:description" content="6529 SEIZE" />
       </Head>
 
       <main className={styles.main}>
@@ -76,19 +106,34 @@ export default function UserPageIndex(props: any) {
 }
 
 export async function getServerSideProps(req: any, res: any, resolvedUrl: any) {
-  const user = req.query.user;
-  if (user.includes(".eth") || !user.startsWith("0x")) {
-    return {
-      props: { title: user, url: user },
-    };
+  let user = req.query.user;
+  if (areEqualAddresses(user, MUSEUM_ENS.display)) {
+    user = MUSEUM_ENS.wallet;
+  }
+  if (areEqualAddresses(user, MANIFOLD_ENS.display)) {
+    user = MANIFOLD_ENS.wallet;
   }
   const ensRequest = await fetch(
     `${process.env.API_ENDPOINT}/api/user/${user}`
   );
   let userDisplay = formatAddress(user);
+  let pfp;
+  let tdh;
+  let balance;
   const responseText = await ensRequest.text();
   if (responseText) {
     const response = await JSON.parse(responseText);
+    pfp = response.pfp;
+    if (!pfp) {
+      if (areEqualAddresses(user, SIX529_MUSEUM)) {
+        pfp = MUSEUM_ENS.pfp;
+      }
+      if (areEqualAddresses(user, MANIFOLD)) {
+        pfp = MANIFOLD_ENS.pfp;
+      }
+    }
+    tdh = response.boosted_tdh;
+    balance = response.balance;
     userDisplay =
       response.display && !containsEmojis(response.display)
         ? response.display
@@ -103,6 +148,9 @@ export async function getServerSideProps(req: any, res: any, resolvedUrl: any) {
     props: {
       title: userDisplay,
       url: userDisplay.includes(".eth") ? userDisplay : user,
+      image: pfp ? pfp : DEFAULT_IMAGE,
+      tdh,
+      balance,
     },
   };
 }

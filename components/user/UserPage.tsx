@@ -12,19 +12,14 @@ import {
   getRandomColor,
   isEmptyObject,
   numberWithCommas,
-  parseEmojis,
   removeProtocol,
 } from "../../helpers/Helpers";
 import { MANIFOLD, SIX529_MUSEUM } from "../../constants";
-import {
-  ConsolidatedTDHMetrics,
-  TDHHistory,
-  TDHMetrics,
-} from "../../entities/ITDH";
+import { ConsolidatedTDHMetrics, TDHMetrics } from "../../entities/ITDH";
 import { useAccount } from "wagmi";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { fetchAllPages, fetchUrl } from "../../services/6529api";
-import { ReservedUser } from "../../pages/[user]";
+import { MANIFOLD_ENS, MUSEUM_ENS, ReservedUser } from "../../pages/[user]";
 import Tippy from "@tippyjs/react";
 import Tag, { TagType } from "../address/Tag";
 import ConsolidationSwitch, {
@@ -46,22 +41,6 @@ const DEFAULT_BANNER_2 = getRandomColor();
 
 const DEFAULT_PFP_1 = DEFAULT_BANNER_1;
 const DEFAULT_PFP_2 = DEFAULT_BANNER_2;
-
-const MUSEUM_ENS = {
-  wallet: SIX529_MUSEUM,
-  display: ReservedUser.MUSEUM,
-  banner_1: "#111111",
-  banner_2: "#000000",
-  pfp: "./museum.png",
-};
-
-const MANIFOLD_ENS = {
-  wallet: MANIFOLD,
-  display: ReservedUser.MANIFOLD,
-  banner_1: "#111111",
-  banner_2: "#000000",
-  pfp: "./manifold.png",
-};
 
 export default function UserPage(props: Props) {
   const router = useRouter();
@@ -255,7 +234,9 @@ export default function UserPage(props: Props) {
 
   useEffect(() => {
     async function fetchConsolidatedTDH() {
-      const url = `${process.env.API_ENDPOINT}/api/consolidated_owner_metrics/${ens?.consolidation_key}`;
+      const url = `${process.env.API_ENDPOINT}/api/consolidated_owner_metrics/${
+        ens?.consolidation_key ? ens?.consolidation_key : props.user
+      }`;
       return fetchUrl(url).then((response: ConsolidatedTDHMetrics) => {
         if (response) {
           setConsolidatedTDH(response);
@@ -266,7 +247,7 @@ export default function UserPage(props: Props) {
       });
     }
 
-    if (ens && ens.consolidation_key) {
+    if (ens) {
       fetchConsolidatedTDH();
     }
   }, [ens]);
