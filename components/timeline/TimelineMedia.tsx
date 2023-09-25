@@ -1,6 +1,4 @@
-import { useEffect, useState } from "react";
 import styles from "./Timeline.module.scss";
-import { getContentTypeFromURL } from "../../helpers/Helpers";
 
 interface Props {
   type: MediaType;

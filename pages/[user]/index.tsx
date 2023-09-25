@@ -1,5 +1,5 @@
 import Head from "next/head";
-import styles from "../styles/Home.module.scss";
+import styles from "../../styles/Home.module.scss";
 
 import dynamic from "next/dynamic";
 import { useRouter } from "next/router";
@@ -7,21 +7,21 @@ import {
   areEqualAddresses,
   containsEmojis,
   formatAddress,
-} from "../helpers/Helpers";
-import { MANIFOLD, SIX529_MUSEUM } from "../constants";
-import HeaderPlaceholder from "../components/header/HeaderPlaceholder";
+} from "../../helpers/Helpers";
+import { MANIFOLD, SIX529_MUSEUM } from "../../constants";
+import HeaderPlaceholder from "../../components/header/HeaderPlaceholder";
 import { useEffect, useState } from "react";
 
 export enum ReservedUser {
   MUSEUM = "6529Museum",
   MANIFOLD = "Manifold-Minting-Wallet",
 }
-const Header = dynamic(() => import("../components/header/Header"), {
+const Header = dynamic(() => import("../../components/header/Header"), {
   ssr: false,
   loading: () => <HeaderPlaceholder />,
 });
 
-const UserPage = dynamic(() => import("../components/user/UserPage"), {
+const UserPage = dynamic(() => import("../../components/user/UserPage"), {
   ssr: false,
 });
 
@@ -32,6 +32,8 @@ export default function UserPageIndex(props: any) {
   const [user, setUser] = useState(
     Array.isArray(router.query.user) ? router.query.user[0] : router.query.user
   );
+
+  const [connectedWallets, setConnectedWallets] = useState<string[]>([]);
 
   useEffect(() => {
     if (user) {
@@ -64,15 +66,9 @@ export default function UserPageIndex(props: any) {
       </Head>
 
       <main className={styles.main}>
-        <Header />
-        {router.isReady && router.query.user && (
-          <UserPage
-            user={
-              Array.isArray(router.query.user)
-                ? router.query.user[0]
-                : router.query.user
-            }
-          />
+        <Header onSetWallets={(wallets) => setConnectedWallets(wallets)} />
+        {router.isReady && user && (
+          <UserPage wallets={connectedWallets} user={user} />
         )}
       </main>
     </>
@@ -86,7 +82,9 @@ export async function getServerSideProps(req: any, res: any, resolvedUrl: any) {
       props: { title: user, url: user },
     };
   }
-  const ensRequest = await fetch(`${process.env.API_ENDPOINT}/api/ens/${user}`);
+  const ensRequest = await fetch(
+    `${process.env.API_ENDPOINT}/api/user/${user}`
+  );
   let userDisplay = formatAddress(user);
   const responseText = await ensRequest.text();
   if (responseText) {
