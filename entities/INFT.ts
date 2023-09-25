@@ -27,6 +27,17 @@ export interface BaseNFT {
   has_distribution?: boolean;
 }
 
+export interface NFTLite {
+  id: number;
+  contract: string;
+  name: string;
+  icon: string;
+  thumbnail: string;
+  scaled: string;
+  image: string;
+  animation: string;
+}
+
 export interface LabNFT extends BaseNFT {
   meme_references: number[];
 }

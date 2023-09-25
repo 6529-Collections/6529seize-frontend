@@ -1,0 +1,173 @@
+@import "../../../styles/variables.scss";
+
+.placeholder {
+  height: 300px;
+}
+
+.formInput {
+  width: 100%;
+  color: $dark-grey !important;
+  border-radius: 0 !important;
+  border-color: $lightest-grey;
+
+  &:focus {
+    border-color: $blue !important;
+  }
+}
+
+.formInputHidden {
+  display: none;
+}
+
+.submitBtn {
+  width: 100%;
+  border-radius: 0;
+  background-color: $green;
+  padding-left: 15px;
+  padding-right: 25px;
+  border: none;
+  padding: 12px 20px;
+  cursor: pointer;
+  margin-right: 20px;
+  margin-top: 15px;
+  color: white;
+
+  &:active {
+    background-color: $green !important;
+  }
+
+  &:hover {
+    background-color: darken($color: $green, $amount: 5);
+  }
+}
+
+.submitBtnDisabled {
+  pointer-events: none !important;
+  background-color: darken($color: $green, $amount: 10);
+  color: $font-color-h;
+}
+
+.loader {
+  width: 20px;
+  height: 20px;
+  margin-left: 5px;
+}
+
+.toolArea {
+  padding: 25px 30px;
+  background-color: $almost-very-dark-grey;
+}
+
+.uploadArea {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 10px;
+  background-color: $very-dark-grey;
+  align-items: center;
+  gap: 2rem;
+  border: 2px dashed $lighter-grey;
+  cursor: pointer;
+
+  &:hover {
+    border: 2px dashed $lightest-grey;
+  }
+}
+
+.uploadAreaActive {
+  border: 2px dashed $lightest-grey;
+}
+
+.uploadIcon {
+  height: 4rem;
+}
+
+.addressContainer {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.backIcon {
+  align-self: flex-start;
+  height: 2rem;
+  margin-right: 1rem;
+  cursor: pointer;
+
+  &:hover {
+    opacity: 0.75;
+  }
+}
+
+.clearBtn {
+  height: 25px;
+  cursor: pointer;
+
+  &:focus {
+    outline: none !important;
+  }
+}
+
+.error {
+  color: lighten($raspberry, 15%);
+}
+
+.success {
+  color: lighten($green, 15%);
+}
+
+.statusIcon {
+  height: 25px;
+}
+
+.orBlock {
+  border-bottom: 1px solid #fff;
+  line-height: 0.1em;
+
+  span {
+    background: $almost-very-dark-grey;
+    padding: 0 10px;
+  }
+}
+
+.memesDropdown {
+  background-color: white !important;
+  line-height: 48px;
+  background-color: transparent;
+  border: none;
+  padding-right: 25px;
+  a {
+    line-height: 30px;
+  }
+  button {
+    color: black !important;
+    padding-left: 10px;
+    padding-right: 10px;
+    width: 100%;
+    text-align: left;
+    font-size: larger !important;
+    font-weight: bolder !important;
+    cursor: copy;
+    background-color: transparent !important;
+    border-color: transparent !important;
+    &::after {
+      right: 10px;
+      margin-top: 0.8rem;
+    }
+  }
+  div {
+    max-height: 65vh;
+    overflow-y: auto;
+    width: 100%;
+    transform: translate3d(0px, 42px, 0px) !important;
+  }
+
+  @media only screen and (max-width: 800px) {
+    button {
+      &::after {
+        margin-top: 0.5rem;
+      }
+    }
+  }
+}
