@@ -9,6 +9,7 @@ import { useRouter } from "next/router";
 import { NFT } from "../../entities/INFT";
 import { areEqualAddresses } from "../../helpers/Helpers";
 import { fetchAllPages, fetchUrl } from "../../services/6529api";
+import DotLoader from "../dotLoader/DotLoader";
 
 interface Props {
   page: number;
@@ -36,11 +37,12 @@ export default function LatestActivity(props: Props) {
   const [totalResults, setTotalResults] = useState(0);
 
   const [nfts, setNfts] = useState<NFT[]>([]);
-  const [nftsLoaded, setNftsLoaded] = useState(false);
 
   const [typeFilter, setTypeFilter] = useState<TypeFilter>(TypeFilter.ALL);
+  const [fetching, setFetching] = useState(false);
 
   useEffect(() => {
+    setFetching(true);
     let url = `${process.env.API_ENDPOINT}/api/transactions?page_size=${props.pageSize}&page=${page}`;
     switch (typeFilter) {
       case TypeFilter.SALES:
@@ -63,6 +65,7 @@ export default function LatestActivity(props: Props) {
       setTotalResults(response.count);
       setNext(response.next);
       setActivity(response.data);
+      setFetching(false);
     });
   }, [page, typeFilter]);
 
@@ -74,7 +77,6 @@ export default function LatestActivity(props: Props) {
             return n;
           })
         );
-        setNftsLoaded(true);
       });
     }
     if (router.isReady) {
@@ -92,7 +94,7 @@ export default function LatestActivity(props: Props) {
           md={{ span: 9 }}
           lg={{ span: 9 }}>
           <h1>
-            LATEST ACTIVITY{" "}
+            LATEST ACTIVITY {fetching && <DotLoader />}
             {showViewAll && (
               <a href="/latest-activity">
                 <span className={styles.viewAllLink}>VIEW ALL</span>

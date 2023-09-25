@@ -12,19 +12,14 @@ import {
   getRandomColor,
   isEmptyObject,
   numberWithCommas,
-  parseEmojis,
   removeProtocol,
 } from "../../helpers/Helpers";
 import { MANIFOLD, SIX529_MUSEUM } from "../../constants";
-import {
-  ConsolidatedTDHMetrics,
-  TDHHistory,
-  TDHMetrics,
-} from "../../entities/ITDH";
+import { ConsolidatedTDHMetrics, TDHMetrics } from "../../entities/ITDH";
 import { useAccount } from "wagmi";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { fetchAllPages, fetchUrl } from "../../services/6529api";
-import { ReservedUser } from "../../pages/[user]";
+import { MANIFOLD_ENS, MUSEUM_ENS, ReservedUser } from "../../pages/[user]";
 import Tippy from "@tippyjs/react";
 import Tag, { TagType } from "../address/Tag";
 import ConsolidationSwitch, {
@@ -46,22 +41,6 @@ const DEFAULT_BANNER_2 = getRandomColor();
 
 const DEFAULT_PFP_1 = DEFAULT_BANNER_1;
 const DEFAULT_PFP_2 = DEFAULT_BANNER_2;
-
-const MUSEUM_ENS = {
-  wallet: SIX529_MUSEUM,
-  display: ReservedUser.MUSEUM,
-  banner_1: "#111111",
-  banner_2: "#000000",
-  pfp: "./museum.png",
-};
-
-const MANIFOLD_ENS = {
-  wallet: MANIFOLD,
-  display: ReservedUser.MANIFOLD,
-  banner_1: "#111111",
-  banner_2: "#000000",
-  pfp: "./manifold.png",
-};
 
 export default function UserPage(props: Props) {
   const router = useRouter();
@@ -95,8 +74,6 @@ export default function UserPage(props: Props) {
 
   const [ens, setEns] = useState<ENS>();
 
-  const [tdhHistory, setTdhHistory] = useState<TDHHistory>();
-
   useEffect(() => {
     async function fetchENS() {
       let oLink = process.env.BASE_ENDPOINT
@@ -109,9 +86,15 @@ export default function UserPage(props: Props) {
             setUserError(true);
           }
           if (areEqualAddresses(response.wallet, SIX529_MUSEUM)) {
-            setEns(MUSEUM_ENS);
+            setEns({
+              ...MUSEUM_ENS,
+              consolidation_key: response.consolidation_key,
+            });
           } else if (areEqualAddresses(response.wallet, MANIFOLD)) {
-            setEns(MANIFOLD_ENS);
+            setEns({
+              ...MANIFOLD_ENS,
+              consolidation_key: response.consolidation_key,
+            });
           } else {
             setEns(response);
           }
@@ -152,7 +135,10 @@ export default function UserPage(props: Props) {
           setOwnerAddress(SIX529_MUSEUM);
           setOwnerENS(ReservedUser.MUSEUM);
           setOwnerLinkDisplay(`${oLink}/${ReservedUser.MUSEUM}`);
-          setEns(MUSEUM_ENS);
+          setEns({
+            ...MUSEUM_ENS,
+            consolidation_key: MUSEUM_ENS.wallet,
+          });
           setFetchingUser(false);
           router.push(ReservedUser.MUSEUM, undefined, {
             shallow: true,
@@ -163,7 +149,10 @@ export default function UserPage(props: Props) {
           setOwnerAddress(MANIFOLD);
           setOwnerENS(ReservedUser.MANIFOLD);
           setOwnerLinkDisplay(`${oLink}/${ReservedUser.MANIFOLD}`);
-          setEns(MANIFOLD_ENS);
+          setEns({
+            ...MANIFOLD_ENS,
+            consolidation_key: MANIFOLD_ENS.wallet,
+          });
           setFetchingUser(false);
           router.push(ReservedUser.MANIFOLD, undefined, {
             shallow: true,
@@ -245,21 +234,23 @@ export default function UserPage(props: Props) {
 
   useEffect(() => {
     async function fetchConsolidatedTDH() {
-      const url = `${process.env.API_ENDPOINT}/api/consolidated_owner_metrics/?wallet=${ownerAddress}&profile_page=true`;
-      return fetchUrl(url).then((response: DBResponse) => {
-        if (response && response.data.length === 1) {
-          setConsolidatedTDH(response.data[0]);
-          if (response.data[0].wallets && response.data[0].wallets.length > 1) {
+      const url = `${process.env.API_ENDPOINT}/api/consolidated_owner_metrics/${
+        ens?.consolidation_key ? ens?.consolidation_key : props.user
+      }`;
+      return fetchUrl(url).then((response: ConsolidatedTDHMetrics) => {
+        if (response) {
+          setConsolidatedTDH(response);
+          if (response.wallets && response.wallets.length > 1) {
             setIsConsolidation(true);
           }
         }
       });
     }
 
-    if (ownerAddress && router.isReady) {
+    if (ens) {
       fetchConsolidatedTDH();
     }
-  }, [ownerAddress, router.isReady]);
+  }, [ens]);
 
   useEffect(() => {
     async function fetchTDH() {
@@ -287,19 +278,6 @@ export default function UserPage(props: Props) {
       setTDH(walletTDH);
     }
   }, [view, walletTDH, consolidatedTDH]);
-
-  useEffect(() => {
-    if (consolidatedTDH) {
-      if (consolidatedTDH.balance > 0) {
-        const url = `${process.env.API_ENDPOINT}/api/tdh_history?wallet=${consolidatedTDH.wallets[0]}&page_size=1`;
-        fetchUrl(url).then((response: DBResponse) => {
-          if (response.data) {
-            setTdhHistory(response.data[0]);
-          }
-        });
-      }
-    }
-  }, [consolidatedTDH]);
 
   useEffect(() => {
     if (walletOwnedLoaded && consolidationOwnedLoaded) {
@@ -513,20 +491,10 @@ export default function UserPage(props: Props) {
                             <Tag
                               type={TagType.RANK}
                               text={`TDH ${numberWithCommas(tdh.boosted_tdh)} ${
-                                view == VIEW.CONSOLIDATION
+                                tdh.day_change
                                   ? `(${
-                                      tdhHistory
-                                        ? tdhHistory.net_boosted_tdh > 0
-                                          ? "+"
-                                          : ""
-                                        : "..."
-                                    }${
-                                      tdhHistory
-                                        ? numberWithCommas(
-                                            tdhHistory.net_boosted_tdh
-                                          )
-                                        : ""
-                                    })`
+                                      tdh.day_change > 0 ? "+" : ""
+                                    }${numberWithCommas(tdh.day_change)})`
                                   : ""
                               } | Rank #${tdh.tdh_rank}`}
                             />

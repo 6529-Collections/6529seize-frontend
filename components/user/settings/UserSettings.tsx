@@ -166,6 +166,8 @@ export default function UserSettingsComponent(props: Props) {
   };
 
   function validateImage(file: File) {
+    setSelectedMeme(undefined);
+    setFile(undefined);
     if (ACCEPTED_FORMATS.indexOf(file.type) === -1) {
       setFileError("Invalid file type");
     } else if (file.size > FILE_SIZE_LIMIT) {
@@ -218,12 +220,6 @@ export default function UserSettingsComponent(props: Props) {
       setFile(undefined);
     }
   }, [selectedMeme]);
-
-  useEffect(() => {
-    if (file) {
-      setSelectedMeme(undefined);
-    }
-  }, [file]);
 
   if (fetching) {
     return (
@@ -313,6 +309,8 @@ export default function UserSettingsComponent(props: Props) {
                           <Dropdown.Item
                             key={`meme-${m.id}`}
                             onClick={() => {
+                              setFileError(undefined);
+                              setFile(undefined);
                               setSelectedMeme(m);
                             }}>
                             #{m.id} - {m.name}
