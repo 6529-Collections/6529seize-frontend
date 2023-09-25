@@ -126,10 +126,10 @@ export async function getServerSideProps(req: any, res: any, resolvedUrl: any) {
     pfp = response.pfp;
     if (!pfp) {
       if (areEqualAddresses(user, SIX529_MUSEUM)) {
-        pfp = MUSEUM_ENS.pfp;
+        pfp = `${process.env.BASE_ENDPOINT}/${MUSEUM_ENS.pfp}`;
       }
       if (areEqualAddresses(user, MANIFOLD)) {
-        pfp = MANIFOLD_ENS.pfp;
+        pfp = `${process.env.BASE_ENDPOINT}/${MANIFOLD_ENS.pfp}`;
       }
     }
     tdh = response.boosted_tdh;
