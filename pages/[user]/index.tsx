@@ -55,7 +55,7 @@ export default function UserPageIndex(props: any) {
     descriptionArray.push(`TDH: ${numberWithCommas(props.tdh)}`);
   }
   if (props.balance && props.balance > 0) {
-    descriptionArray.push(`Balance: ${numberWithCommas(props.balance)}`);
+    descriptionArray.push(`Cards: ${numberWithCommas(props.balance)}`);
   }
   descriptionArray.push("6529 SEIZE");
 
@@ -132,8 +132,8 @@ export async function getServerSideProps(req: any, res: any, resolvedUrl: any) {
         pfp = `${process.env.BASE_ENDPOINT}/${MANIFOLD_ENS.pfp}`;
       }
     }
-    tdh = response.boosted_tdh;
-    balance = response.balance;
+    tdh = response.boosted_tdh ? response.booested_tdh : null;
+    balance = response.balance ? response.balance : null;
     userDisplay =
       response.display && !containsEmojis(response.display)
         ? response.display
@@ -149,8 +149,8 @@ export async function getServerSideProps(req: any, res: any, resolvedUrl: any) {
       title: userDisplay,
       url: userDisplay.includes(".eth") ? userDisplay : user,
       image: pfp ? pfp : DEFAULT_IMAGE,
-      tdh,
-      balance,
+      tdh: tdh ? tdh : null,
+      balance: balance ? balance : null,
     },
   };
 }
