@@ -33,10 +33,14 @@
   text-align: center;
 }
 
-.hodler {
-  position: relative;
+.hodlerContainer {
   width: 40%;
-  margin-left: 10%;
+}
+
+.hodler {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
   span {
     overflow-wrap: break-word;
   }
