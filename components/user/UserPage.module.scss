@@ -250,10 +250,10 @@
 
 .settingsIcon {
   height: 25px;
+  width: 25px;
   font-size: larger;
   font-weight: bolder;
   cursor: pointer;
-  width: fit-content;
   :hover {
     opacity: 0.75;
   }
@@ -435,7 +435,9 @@
 }
 
 .pfp {
-  height: 200px;
+  height: auto;
+  max-height: 200px;
+  max-width: 85vw;
   margin-top: -75px;
   min-width: 125px;
   width: auto;

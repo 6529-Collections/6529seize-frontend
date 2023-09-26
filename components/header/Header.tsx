@@ -1,8 +1,7 @@
-import { Web3Button } from "@web3modal/react";
-
+import { Web3Button, useWeb3Modal } from "@web3modal/react";
 import styles from "./Header.module.scss";
 import { Container, Row, Col, Nav, Navbar, NavDropdown } from "react-bootstrap";
-import { useAccount } from "wagmi";
+import { useAccount, useEnsName } from "wagmi";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import Image from "next/image";
@@ -12,6 +11,8 @@ import { DBResponse } from "../../entities/IDBResponse";
 import { fetchUrl } from "../../services/6529api";
 import Cookies from "js-cookie";
 import { VIEW_MODE_COOKIE } from "../../constants";
+import { formatAddress } from "../../helpers/Helpers";
+import WalletModal from "./walletModal/WalletModal";
 
 interface Props {
   onLoad?: () => void;
@@ -25,9 +26,18 @@ enum VIEW {
 
 export default function Header(props: Props) {
   const router = useRouter();
+  const web3modal = useWeb3Modal();
+
+  const account = useAccount();
+  const ens = useEnsName({
+    address: account.address as `0x${string}`,
+    chainId: 1,
+  });
+
+  const [showWalletModal, setShowWalletModal] = useState(false);
+
   const [consolidations, setConsolidations] = useState<string[]>([]);
   const [isConsolidation, setIsConsolidation] = useState(false);
-  const { address, connector, isConnected } = useAccount();
   const [burgerMenuOpen, setBurgerMenuOpen] = useState(false);
   const [view, setView] = useState<VIEW>();
 
@@ -51,14 +61,14 @@ export default function Header(props: Props) {
       if (props.onSetWallets) {
         if (isConsolidation && view === VIEW.CONSOLIDATION) {
           props.onSetWallets(consolidations);
-        } else if (address) {
-          props.onSetWallets([address]);
+        } else if (account.address) {
+          props.onSetWallets([account.address]);
         } else {
           props.onSetWallets([]);
         }
       }
     }
-  }, [view, isConsolidation, isConnected]);
+  }, [view, isConsolidation, account.isConnected]);
 
   useEffect(() => {
     function handleResize() {
@@ -79,16 +89,16 @@ export default function Header(props: Props) {
   }, []);
 
   useEffect(() => {
-    if (isConnected && address) {
+    if (account.isConnected && account.address) {
       fetchUrl(
-        `${process.env.API_ENDPOINT}/api/consolidations/${address}`
+        `${process.env.API_ENDPOINT}/api/consolidations/${account.address}`
       ).then((response: DBResponse) => {
         if (
           response.data.length === 1 &&
           consolidations.length === 1 &&
           props.onSetWallets
         ) {
-          props.onSetWallets([address]);
+          props.onSetWallets([account.address as string]);
         } else {
           setConsolidations(Array.from(response.data));
         }
@@ -96,7 +106,7 @@ export default function Header(props: Props) {
     } else {
       setConsolidations([]);
     }
-  }, [isConnected, address]);
+  }, [account.isConnected, account.address]);
 
   useEffect(() => {
     if (consolidations.length > 1) {
@@ -139,18 +149,23 @@ export default function Header(props: Props) {
             <Col>
               <h3
                 className={`d-flex justify-content-center ${styles.burgerMenuHeader}`}>
-                <Web3Button
-                  label="Connect"
-                  icon="hide"
-                  avatar="hide"
-                  balance="hide"
-                />
-                {isConnected && (
+                {account.isConnected ? (
                   <>
                     <button
                       className={`${styles.userProfileBtn}`}
+                      onClick={() => setShowWalletModal(true)}>
+                      <b>
+                        &nbsp;
+                        {ens.data
+                          ? ens.data
+                          : formatAddress(account.address as string)}
+                        &nbsp;
+                      </b>
+                    </button>
+                    <button
+                      className={`${styles.userProfileBtn}`}
                       onClick={() =>
-                        (window.location.href = `/${address as string}`)
+                        (window.location.href = `/${account.address as string}`)
                       }>
                       <FontAwesomeIcon icon="user"></FontAwesomeIcon>
                     </button>
@@ -198,6 +213,13 @@ export default function Header(props: Props) {
                       </NavDropdown>
                     )}
                   </>
+                ) : (
+                  <Web3Button
+                    label="Connect"
+                    icon="hide"
+                    avatar="hide"
+                    balance="hide"
+                  />
                 )}
               </h3>
             </Col>
@@ -890,19 +912,26 @@ export default function Header(props: Props) {
                                 Cookie Policy
                               </NavDropdown.Item>
                             </NavDropdown>
-                            <Web3Button
-                              label="Connect"
-                              icon="hide"
-                              avatar="hide"
-                              balance="hide"
-                            />
-                            {isConnected && (
+                            {account.isConnected ? (
                               <>
+                                <button
+                                  className={`${styles.userProfileBtn}`}
+                                  onClick={() => setShowWalletModal(true)}>
+                                  <b>
+                                    &nbsp;
+                                    {ens.data
+                                      ? ens.data
+                                      : formatAddress(
+                                          account.address as string
+                                        )}
+                                    &nbsp;
+                                  </b>
+                                </button>
                                 <button
                                   className={`${styles.userProfileBtn}`}
                                   onClick={() =>
                                     (window.location.href = `/${
-                                      address as string
+                                      account.address as string
                                     }`)
                                   }>
                                   <FontAwesomeIcon icon="user"></FontAwesomeIcon>
@@ -956,6 +985,13 @@ export default function Header(props: Props) {
                                   </NavDropdown>
                                 )}
                               </>
+                            ) : (
+                              <Web3Button
+                                label="Connect"
+                                icon="hide"
+                                avatar="hide"
+                                balance="hide"
+                              />
                             )}
                           </Nav>
                         </Navbar>
@@ -983,6 +1019,13 @@ export default function Header(props: Props) {
           </Col>
         </Row>
       </Container>
+      {account.address && (
+        <WalletModal
+          wallet={account.address}
+          show={showWalletModal}
+          onHide={() => setShowWalletModal(false)}
+        />
+      )}
     </>
   );
 }
