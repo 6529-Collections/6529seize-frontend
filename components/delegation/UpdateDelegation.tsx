@@ -100,12 +100,12 @@ export default function UpdateDelegationComponent(props: Props) {
       props.collection.contract,
       props.delegation.wallet,
       delegationToAddress,
-      !isDelegation && showExpiryCalendar && delegationDate
+      isDelegation && showExpiryCalendar && delegationDate
         ? delegationDate.getTime() / 1000
         : NEVER_DATE,
       props.delegation.use_case,
-      !isDelegation && showTokensInput ? false : true,
-      !isDelegation && showTokensInput ? delegationToken : 0,
+      isDelegation && showTokensInput ? false : true,
+      isDelegation && showTokensInput ? delegationToken : 0,
     ],
     functionName:
       validate().length === 0 ? "updateDelegationAddress" : undefined,

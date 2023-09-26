@@ -101,7 +101,7 @@ export default function NFTLeaderboard(props: Props) {
               <thead>
                 <tr>
                   <th className={styles.rank}></th>
-                  <th className={styles.hodler}></th>
+                  <th className={styles.hodlerContainer}></th>
                   <th className={styles.gap}></th>
                   <th
                     colSpan={3}
@@ -118,7 +118,7 @@ export default function NFTLeaderboard(props: Props) {
                 <tr className={styles.gap}></tr>
                 <tr>
                   <th className={styles.rank}>Rank</th>
-                  <th className={styles.hodler}>Collector</th>
+                  <th className={styles.hodlerContainer}>Collector</th>
                   <th className={styles.gap}></th>
                   <th className={styles.tdhSub}>
                     <span className="d-flex align-items-center justify-content-center">
@@ -361,21 +361,23 @@ export default function NFTLeaderboard(props: Props) {
                               1 +
                               (pageProps.page - 1) * pageProps.pageSize}
                           </td>
-                          <td className={styles.hodler}>
-                            <Address
-                              wallets={getWallets(lead)}
-                              display={getDisplay(lead)}
-                              tags={{
-                                memesCardsSets: lead.memes_cards_sets,
-                                memesCardsSetS1: lead.memes_cards_sets_szn1,
-                                memesCardsSetS2: lead.memes_cards_sets_szn2,
-                                memesCardsSetS3: lead.memes_cards_sets_szn3,
-                                memesCardsSetS4: lead.memes_cards_sets_szn4,
-                                memesBalance: lead.unique_memes,
-                                gradientsBalance: lead.gradients_balance,
-                                genesis: lead.genesis,
-                              }}
-                            />
+                          <td className={styles.hodlerContainer}>
+                            <div className={styles.hodler}>
+                              <Address
+                                wallets={getWallets(lead)}
+                                display={getDisplay(lead)}
+                                tags={{
+                                  memesCardsSets: lead.memes_cards_sets,
+                                  memesCardsSetS1: lead.memes_cards_sets_szn1,
+                                  memesCardsSetS2: lead.memes_cards_sets_szn2,
+                                  memesCardsSetS3: lead.memes_cards_sets_szn3,
+                                  memesCardsSetS4: lead.memes_cards_sets_szn4,
+                                  memesBalance: lead.unique_memes,
+                                  gradientsBalance: lead.gradients_balance,
+                                  genesis: lead.genesis,
+                                }}
+                              />
+                            </div>
                           </td>
                           <td className={styles.gap}></td>
                           <td className={styles.tdhSub}>

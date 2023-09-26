@@ -10,11 +10,11 @@ import {
 } from "../../helpers/Helpers";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { NULL_ADDRESS } from "../../constants";
-import { BaseNFT } from "../../entities/INFT";
+import { BaseNFT, NFTLite } from "../../entities/INFT";
 import Address from "../address/Address";
 
 interface Props {
-  nft?: BaseNFT;
+  nft?: NFTLite;
   tr: Transaction;
   mykey?: string;
 }
@@ -51,7 +51,7 @@ export default function LatestActivityRow(props: Props) {
           }
         />
       </td>
-      <td>
+      <td className="d-flex">
         {areEqualAddresses(NULL_ADDRESS, props.tr.from_address) && (
           <>
             {props.tr.value > 0 ? (
@@ -64,8 +64,9 @@ export default function LatestActivityRow(props: Props) {
               </>
             ) : (
               "airdrop"
-            )}{" "}
-            {props.tr.token_count}x{" "}
+            )}
+            &nbsp;
+            {props.tr.token_count}x&nbsp;
             {props.nft ? (
               <a
                 href={
@@ -104,8 +105,7 @@ export default function LatestActivityRow(props: Props) {
             )}
             {props.tr.value === 0 && (
               <>
-                {" "}
-                to{" "}
+                &nbsp; to&nbsp;
                 <Address
                   wallets={[props.tr.to_address]}
                   display={props.tr.to_display}
@@ -132,7 +132,7 @@ export default function LatestActivityRow(props: Props) {
               display={props.tr.from_display}
             />
             {" burnt "}
-            {props.tr.token_count}x{" "}
+            {props.tr.token_count}x&nbsp;
             {props.nft ? (
               <a
                 href={
@@ -181,7 +181,8 @@ export default function LatestActivityRow(props: Props) {
               `MemeLab #${props.tr.token_id}`
             ) : (
               `#${props.tr.token_id}`
-            )}{" "}
+            )}
+            &nbsp;
           </>
         )}
         {!areEqualAddresses(NULL_ADDRESS, props.tr.from_address) &&
@@ -190,9 +191,10 @@ export default function LatestActivityRow(props: Props) {
               <Address
                 wallets={[props.tr.to_address]}
                 display={props.tr.to_display}
-              />{" "}
-              {props.tr.value > 0 ? "bought" : "received"}{" "}
-              {props.tr.token_count}x{" "}
+              />
+              &nbsp;
+              {props.tr.value > 0 ? "bought" : "received"}&nbsp;
+              {props.tr.token_count}x&nbsp;
               {props.nft ? (
                 <a
                   href={
@@ -241,8 +243,8 @@ export default function LatestActivityRow(props: Props) {
                 `MemeLab #${props.tr.token_id}`
               ) : (
                 `#${props.tr.token_id}`
-              )}{" "}
-              from{" "}
+              )}
+              &nbsp; from&nbsp;
               <Address
                 wallets={[props.tr.from_address]}
                 display={props.tr.from_display}

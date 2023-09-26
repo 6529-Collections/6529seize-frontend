@@ -161,31 +161,35 @@ export default function MemeLabLeaderboard(props: Props) {
                             1 +
                             (pageProps.page - 1) * pageProps.pageSize}
                         </td>
-                        <td className={styles.hodler}>
-                          <Address
-                            wallets={[lead.wallet]}
-                            display={lead.wallet_display}
-                            tags={{
-                              memesCardsSets: tags ? tags.memes_cards_sets : 0,
-                              memesCardsSetS1: tags
-                                ? tags.memes_cards_sets_szn1
-                                : 0,
-                              memesCardsSetS2: tags
-                                ? tags.memes_cards_sets_szn2
-                                : 0,
-                              memesCardsSetS3: tags
-                                ? tags.memes_cards_sets_szn3
-                                : 0,
-                              memesCardsSetS4: tags
-                                ? tags.memes_cards_sets_szn4
-                                : 0,
-                              memesBalance: tags ? tags.unique_memes : 0,
-                              gradientsBalance: tags
-                                ? tags.gradients_balance
-                                : 0,
-                              genesis: tags ? tags.genesis : 0,
-                            }}
-                          />
+                        <td className={styles.hodlerContainer}>
+                          <div className={styles.hodler}>
+                            <Address
+                              wallets={[lead.wallet]}
+                              display={lead.wallet_display}
+                              tags={{
+                                memesCardsSets: tags
+                                  ? tags.memes_cards_sets
+                                  : 0,
+                                memesCardsSetS1: tags
+                                  ? tags.memes_cards_sets_szn1
+                                  : 0,
+                                memesCardsSetS2: tags
+                                  ? tags.memes_cards_sets_szn2
+                                  : 0,
+                                memesCardsSetS3: tags
+                                  ? tags.memes_cards_sets_szn3
+                                  : 0,
+                                memesCardsSetS4: tags
+                                  ? tags.memes_cards_sets_szn4
+                                  : 0,
+                                memesBalance: tags ? tags.unique_memes : 0,
+                                gradientsBalance: tags
+                                  ? tags.gradients_balance
+                                  : 0,
+                                genesis: tags ? tags.genesis : 0,
+                              }}
+                            />
+                          </div>
                         </td>
                         <td className={styles.tdhSub}>
                           {numberWithCommas(lead.balance)}

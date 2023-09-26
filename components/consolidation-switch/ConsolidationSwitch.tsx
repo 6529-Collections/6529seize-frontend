@@ -16,24 +16,6 @@ interface Props {
 export default function ConsolidationSwitch(props: Props) {
   return (
     <>
-      {/* <Button
-        onClick={() => props.onSetView(VIEW.WALLET)}
-        className={`${styles.consolidationSwitchLeft} ${
-          props.view === VIEW.WALLET
-            ? styles.consolidationSwitchActive
-            : styles.consolidationSwitch
-        }`}>
-        Wallet{props.plural && "s"}
-      </Button>
-      <Button
-        onClick={() => props.onSetView(VIEW.CONSOLIDATION)}
-        className={`${styles.consolidationSwitchRight} ${
-          props.view === VIEW.CONSOLIDATION
-            ? styles.consolidationSwitchActive
-            : styles.consolidationSwitch
-        }`}>
-        Consolidation{props.plural && "s"}
-      </Button> */}
       <span className={styles.consolidationSwitchLabel}>
         Wallet{props.plural && "s"}
       </span>

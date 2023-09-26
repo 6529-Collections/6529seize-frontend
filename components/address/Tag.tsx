@@ -42,7 +42,7 @@ export default function Tag(props: TagProps) {
   }
 
   return (
-    <span className={`mt-2 mb-2 ${styles.tag} ${getStyle()}`}>
+    <span className={`${styles.tag} ${getStyle()}`}>
       {props.text}
       {props.value && numberWithCommas(props.value)}
       {props.text_after}

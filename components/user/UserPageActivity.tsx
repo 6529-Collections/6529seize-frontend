@@ -12,7 +12,7 @@ import { MEMES_CONTRACT } from "../../constants";
 import { DBResponse } from "../../entities/IDBResponse";
 import { fetchAllPages, fetchUrl } from "../../services/6529api";
 import { areEqualAddresses } from "../../helpers/Helpers";
-import { NFT } from "../../entities/INFT";
+import { NFT, NFTLite } from "../../entities/INFT";
 
 interface Props {
   show: boolean;
@@ -31,7 +31,7 @@ export default function UserPageActivity(props: Props) {
   const [activityPage, setActivityPage] = useState(1);
   const [activityTotalResults, setActivityTotalResults] = useState(0);
 
-  const [nfts, setNfts] = useState<NFT[]>([]);
+  const [nfts, setNfts] = useState<NFTLite[]>([]);
 
   useEffect(() => {
     setActivityPage(1);
@@ -72,9 +72,9 @@ export default function UserPageActivity(props: Props) {
   }, [activityPage, props.ownerAddress, activityTypeFilter, props.view]);
 
   useEffect(() => {
-    fetchAllPages(`${process.env.API_ENDPOINT}/api/nfts`).then(
-      (responseNfts: any[]) => {
-        setNfts(responseNfts);
+    fetchUrl(`${process.env.API_ENDPOINT}/api/memes_lite`).then(
+      (response: DBResponse) => {
+        setNfts(response.data);
       }
     );
   }, []);
