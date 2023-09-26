@@ -507,7 +507,7 @@ export default function UserPage(props: Props) {
                             <Col>
                               <Tag
                                 type={TagType.RANK}
-                                text={`Total Balance x${numberWithCommas(
+                                text={`Total Cards x${numberWithCommas(
                                   tdh.balance
                                 )} | Rank #${tdh.dense_rank_balance}`}
                               />
@@ -533,10 +533,7 @@ export default function UserPage(props: Props) {
                           </Row>
                           <Row className="pt-2 pb-2">
                             <Col>
-                              <Tag
-                                type={TagType.RANK}
-                                text={`Total Balance -`}
-                              />
+                              <Tag type={TagType.RANK} text={`Total Cards -`} />
                             </Col>
                           </Row>
                         </>

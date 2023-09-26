@@ -7,4 +7,6 @@ export interface ENS {
   banner_1: string;
   banner_2: string;
   website?: string;
+  balance?: number;
+  boosted_tdh?: number;
 }
