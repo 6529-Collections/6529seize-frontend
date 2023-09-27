@@ -127,7 +127,6 @@ export const distributionPlanApiDelete = async <T>({
     try {
       return await handleResponse<T>(res);
     } catch (e) {
-      console.log("first", e);
       if (res.status === 200 && res.statusText === "OK") {
         return {
           success: true,
@@ -142,7 +141,6 @@ export const distributionPlanApiDelete = async <T>({
       }
     }
   } catch (error) {
-    console.log("second", error);
     makeErrorToast("Something went wrong, try again");
     return {
       success: false,
