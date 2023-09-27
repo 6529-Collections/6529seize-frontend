@@ -58,7 +58,17 @@ export default function BlockPickerAdvancedItemBlock({
           strokeLinejoin="round"
         />
       </svg>
-      {coping ? "Copied" : <a href={`https://etherscan.io/block/countdown/${block}`} target="_blank">{parts}</a>}
+      {coping ? (
+        "Copied"
+      ) : (
+        <a
+          href={`https://etherscan.io/block/countdown/${block}`}
+          target="_blank"
+          rel="noreferrer"
+        >
+          {parts}
+        </a>
+      )}
     </div>
   );
 }
