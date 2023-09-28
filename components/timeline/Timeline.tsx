@@ -1,11 +1,8 @@
-import { Col, Container, Row, Table } from "react-bootstrap";
-import { BaseNFT, NFT, NFTHistory } from "../../entities/INFT";
+import { Col, Container, Row } from "react-bootstrap";
+import { BaseNFT, NFTHistory } from "../../entities/INFT";
 import styles from "./Timeline.module.scss";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  getContentTypeFromURL,
-  numberWithCommasFromString,
-} from "../../helpers/Helpers";
+import { numberWithCommasFromString } from "../../helpers/Helpers";
 import TimelineMediaComponent, { MediaType } from "./TimelineMedia";
 
 interface Props {
@@ -165,17 +162,45 @@ export default function Timeline(props: Props) {
                                   </a>
                                 </Col>
                               </>
+                            ) : change.key.endsWith("(Added)") ? (
+                              <Col xs={12}>
+                                <b>Value:</b>{" "}
+                                <span
+                                  dangerouslySetInnerHTML={{
+                                    __html: numberWithCommasFromString(
+                                      change.to
+                                    ).replaceAll("\n", "<br>"),
+                                  }}></span>
+                              </Col>
+                            ) : change.key.endsWith("(Removed)") ? (
+                              <Col xs={12}>
+                                <b>Value:</b>{" "}
+                                <span
+                                  dangerouslySetInnerHTML={{
+                                    __html: numberWithCommasFromString(
+                                      change.from
+                                    ).replaceAll("\n", "<br>"),
+                                  }}></span>
+                              </Col>
                             ) : (
                               <>
                                 <Col xs={12}>
                                   <b>From:</b>{" "}
-                                  <span>
-                                    {numberWithCommasFromString(change.from)}
-                                  </span>
+                                  <span
+                                    dangerouslySetInnerHTML={{
+                                      __html: numberWithCommasFromString(
+                                        change.from
+                                      ).replaceAll("\n", "<br>"),
+                                    }}></span>
                                 </Col>
                                 <Col xs={12} className="pt-2">
                                   <b>To:</b>{" "}
-                                  {numberWithCommasFromString(change.to)}
+                                  <span
+                                    dangerouslySetInnerHTML={{
+                                      __html: numberWithCommasFromString(
+                                        change.to
+                                      ).replaceAll("\n", "<br>"),
+                                    }}></span>
                                 </Col>
                               </>
                             )}
