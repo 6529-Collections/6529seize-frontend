@@ -755,8 +755,8 @@ export default function CollectionDelegationComponent(props: Props) {
     }
   }, [batchRevokeDelegationParams, contractWriteBatchRevoke.write]);
 
-  function formatExpiry(myDate: number) {
-    const date = new Date(myDate * 1000);
+  function formatExpiry(myDate: any) {
+    const date = new Date(parseInt(myDate) * 1000);
     const year = date.getUTCFullYear();
     const month = String(date.getUTCMonth() + 1).padStart(2, "0");
     const day = String(date.getUTCDate()).padStart(2, "0");
