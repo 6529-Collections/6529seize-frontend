@@ -448,14 +448,39 @@ export default function WalletCheckerComponent(props: Props) {
                     <h5 className="pt-2 pb-2 float-none">
                       Active Minting Delegation for The Memes
                     </h5>
-                    <div className="d-flex align-items-center">
-                      <Address
-                        wallets={[activeDelegation.to_address as `0x${string}`]}
-                        display={activeDelegation.to_display}
-                      />
+                    <div className="d-flex align-items-center gap-4">
+                      <span>
+                        To:{" "}
+                        <Address
+                          wallets={[
+                            activeDelegation.to_address as `0x${string}`,
+                          ]}
+                          display={activeDelegation.to_display}
+                        />
+                      </span>
+                      <span>
+                        Collection:{" "}
+                        <b>
+                          {getCollectionDisplay(activeDelegation.collection)}
+                        </b>
+                      </span>
+                      <span>
+                        Use Case:{" "}
+                        <b>{getUseCaseDisplay(activeDelegation.use_case)}</b>
+                      </span>
+                      {activeDelegation.expiry && (
+                        <span>
+                          &nbsp;&nbsp;Expiry:{" "}
+                          <b>
+                            {activeDelegation.expiry == NEVER_DATE
+                              ? `Never`
+                              : formatExpiry(activeDelegation.expiry)}
+                          </b>
+                        </span>
+                      )}
                       <FontAwesomeIcon
                         icon="check"
-                        className={styles.consolidationActiveIcon}
+                        className={styles.activeDelegationIcon}
                       />
                     </div>
                   </div>
