@@ -1,5 +1,9 @@
 @import "./variables.scss";
 
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 #seize-web3-network-switch {
   display: none;
 }
