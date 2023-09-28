@@ -4,13 +4,18 @@ import { Container, Row, Col, Form, Button, Table } from "react-bootstrap";
 import { useEnsName, useEnsAddress } from "wagmi";
 import { areEqualAddresses, isValidEthAddress } from "../../../helpers/Helpers";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { NEVER_DATE } from "../../../constants";
+import {
+  DELEGATION_ALL_ADDRESS,
+  MEMES_CONTRACT,
+  NEVER_DATE,
+} from "../../../constants";
 import { DBResponse } from "../../../entities/IDBResponse";
 import { Delegation, WalletConsolidation } from "../../../entities/IDelegation";
 import {
   SUB_DELEGATION_USE_CASE,
   ALL_USE_CASES,
   SUPPORTED_COLLECTIONS,
+  MINTING_USE_CASE,
 } from "../../../pages/delegation/[...section]";
 import { fetchUrl } from "../../../services/6529api";
 import Address from "../../address/Address";
@@ -48,6 +53,7 @@ export default function WalletCheckerComponent(props: Props) {
     { address: string; display: string | undefined }[]
   >([]);
   const [consolidationsLoaded, setConsolidationsLoaded] = useState(false);
+  const [activeDelegation, setActiveDelegation] = useState<Delegation>();
 
   const walletAddressEns = useEnsName({
     address:
@@ -132,6 +138,52 @@ export default function WalletCheckerComponent(props: Props) {
     setConsolidations(myConsolidations);
     setConsolidationsLoaded(true);
   }
+
+  function getForAddress(address: string, collection: string, useCase: number) {
+    const myDelegations = delegations.find(
+      (d) =>
+        areEqualAddresses(address, d.from_address) &&
+        areEqualAddresses(collection, d.collection) &&
+        useCase === d.use_case
+    );
+    return myDelegations;
+  }
+
+  useEffect(() => {
+    if (delegationsLoaded) {
+      const memesUseCase = getForAddress(
+        walletAddress,
+        MEMES_CONTRACT,
+        MINTING_USE_CASE.use_case
+      );
+      if (memesUseCase) {
+        setActiveDelegation(memesUseCase);
+      } else {
+        const memesAll = getForAddress(walletAddress, MEMES_CONTRACT, 1);
+        if (memesAll) {
+          setActiveDelegation(memesAll);
+        } else {
+          const anyUseCase = getForAddress(
+            walletAddress,
+            DELEGATION_ALL_ADDRESS,
+            MINTING_USE_CASE.use_case
+          );
+          if (anyUseCase) {
+            setActiveDelegation(anyUseCase);
+          } else {
+            const anyAll = getForAddress(
+              walletAddress,
+              DELEGATION_ALL_ADDRESS,
+              1
+            );
+            if (anyAll) {
+              setActiveDelegation(anyAll);
+            }
+          }
+        }
+      }
+    }
+  }, [delegationsLoaded]);
 
   useEffect(() => {
     if (consolidationsLoaded) {
@@ -232,6 +284,7 @@ export default function WalletCheckerComponent(props: Props) {
         return;
       } else {
         setAddressError(false);
+        setActiveDelegation(undefined);
         setFetchedAddress(walletAddress);
         setDelegationsLoaded(false);
         setDelegations([]);
@@ -390,6 +443,23 @@ export default function WalletCheckerComponent(props: Props) {
                     )}
                   </Col>
                 </Form.Group>
+                {activeDelegation && (
+                  <div className="pt-2">
+                    <h5 className="pt-2 pb-2 float-none">
+                      Active Minting Delegation for The Memes
+                    </h5>
+                    <div className="d-flex align-items-center">
+                      <Address
+                        wallets={[activeDelegation.to_address as `0x${string}`]}
+                        display={activeDelegation.to_display}
+                      />
+                      <FontAwesomeIcon
+                        icon="check"
+                        className={styles.consolidationActiveIcon}
+                      />
+                    </div>
+                  </div>
+                )}
                 <Form.Group as={Row} className="pt-4">
                   <Col sm={12}>
                     <h5 className="pt-2 pb-2 float-none">
