@@ -1,4 +1,4 @@
-import { useSignMessage } from "wagmi";
+import { useAccount, useSignMessage } from "wagmi";
 import {
   distributionPlanApiFetch,
   distributionPlanApiPost,
@@ -16,6 +16,7 @@ interface DistributionPlanNonce {
 
 export default function DistributionPlanToolConnected() {
   const signMessage = useSignMessage();
+  const { address } = useAccount();
   const router = useRouter();
 
   const getSignature = async ({
@@ -37,7 +38,7 @@ export default function DistributionPlanToolConnected() {
   const trySignIn = async () => {
     removeDistributionPlanCookie();
     const nonceResponse = await distributionPlanApiFetch<DistributionPlanNonce>(
-      "/auth/nonce"
+      `/auth/nonce/${address}`
     );
     if (!nonceResponse) return;
     const { data: nonceData } = nonceResponse;
