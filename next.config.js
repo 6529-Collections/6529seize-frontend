@@ -54,6 +54,7 @@ const nextConfig = {
     ALCHEMY_API_KEY: process.env.ALCHEMY_API_KEY,
     API_ENDPOINT: process.env.REACT_APP_API_ENDPOINT,
     BASE_ENDPOINT: process.env.REACT_APP_BASE_ENDPOINT,
+    ALLOWLIST_API_ENDPOINT: process.env.REACT_APP_ALLOWLIST_API_ENDPOINT,
     VERSION: VERSION,
   },
   async generateBuildId() {
