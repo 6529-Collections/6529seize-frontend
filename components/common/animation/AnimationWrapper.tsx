@@ -1,7 +1,6 @@
 import { AnimatePresence, AnimatePresenceProps } from "framer-motion";
-import React from "react";
 
-export default function AllowlistToolAnimationWrapper({
+export default function AnimationWrapper({
   children,
   mode = "wait",
   initial = false,
@@ -11,7 +10,7 @@ export default function AllowlistToolAnimationWrapper({
   initial?: AnimatePresenceProps["initial"];
 }) {
   return (
-    <AnimatePresence mode={mode} initial={initial} >
+    <AnimatePresence mode={mode} initial={initial}>
       {children}
     </AnimatePresence>
   );

@@ -30,6 +30,7 @@ import UserPageDetails from "./UserPageDetails";
 import NotFound from "../notFound/NotFound";
 import { ENS } from "../../entities/IENS";
 import DotLoader from "../dotLoader/DotLoader";
+import RepGiveBtn from "../rep/common/give-rep/RepGiveBtn";
 
 interface Props {
   user: string;
@@ -318,7 +319,8 @@ export default function UserPage(props: Props) {
           background: `linear-gradient(45deg, ${
             ens && ens.banner_1 ? ens.banner_1 : DEFAULT_BANNER_1
           } 0%, ${ens && ens.banner_2 ? ens.banner_2 : DEFAULT_BANNER_2} 100%)`,
-        }}>
+        }}
+      >
         <Container>
           <Row>
             <Col className={`${styles.banner}`}>
@@ -393,7 +395,8 @@ export default function UserPage(props: Props) {
               <Row>
                 <Col className="d-flex align-items-start justify-content-between">
                   <span
-                    className={`${styles.imagePlaceholder} d-flex flex-wrap gap-2 align-items-center`}>
+                    className={`${styles.imagePlaceholder} d-flex flex-wrap gap-2 align-items-center`}
+                  >
                     {ens && ens.pfp ? (
                       <Image
                         priority
@@ -413,7 +416,8 @@ export default function UserPage(props: Props) {
                           } 0%, ${
                             ens?.banner_2 ? ens.banner_2 : DEFAULT_PFP_2
                           } 100%)`,
-                        }}></span>
+                        }}
+                      ></span>
                     )}
                     {tdh && consolidatedTDH ? (
                       <span className={styles.addressContainer}>
@@ -463,7 +467,8 @@ export default function UserPage(props: Props) {
                           content={"Profile Settings"}
                           delay={250}
                           placement={"left"}
-                          theme={"light"}>
+                          theme={"light"}
+                        >
                           <FontAwesomeIcon
                             icon="gear"
                             className={styles.settingsIcon}
@@ -474,6 +479,9 @@ export default function UserPage(props: Props) {
                         </Tippy>
                       )}
                   </span>
+                  {account.address && (
+                    <RepGiveBtn activeAddress={account.address} />
+                  )}
                 </Col>
               </Row>
             </Container>
@@ -482,7 +490,8 @@ export default function UserPage(props: Props) {
                 <Col
                   xs={12}
                   sm={6}
-                  className={`pt-2 pb-2 ${styles.tagsContainer}`}>
+                  className={`pt-2 pb-2 ${styles.tagsContainer}`}
+                >
                   {tdh ? (
                     <Container>
                       {tdh.tdh_rank && (
@@ -566,14 +575,16 @@ export default function UserPage(props: Props) {
                 <Col
                   xs={12}
                   sm={6}
-                  className={`pt-2 pb-2 ${styles.linksContainer}`}>
+                  className={`pt-2 pb-2 ${styles.linksContainer}`}
+                >
                   <Row className="pb-2">
                     <Col>
                       <Tippy
                         content={ownerLinkCopied ? "Copied" : "Copy"}
                         placement={"right"}
                         theme={"light"}
-                        hideOnClick={false}>
+                        hideOnClick={false}
+                      >
                         <span
                           className={styles.ownerLink}
                           onClick={() => {
@@ -586,7 +597,8 @@ export default function UserPage(props: Props) {
                             setTimeout(() => {
                               setIsOwnerLinkCopied(false);
                             }, 1000);
-                          }}>
+                          }}
+                        >
                           {removeProtocol(ownerLinkDisplay)}{" "}
                           <FontAwesomeIcon
                             icon="link"
@@ -602,7 +614,8 @@ export default function UserPage(props: Props) {
                         <a
                           href={`https://opensea.io/${ownerAddress}`}
                           target="_blank"
-                          rel="noreferrer">
+                          rel="noreferrer"
+                        >
                           <Image
                             className={styles.marketplace}
                             src="/opensea.png"
@@ -614,7 +627,8 @@ export default function UserPage(props: Props) {
                         <a
                           href={`https://x2y2.io/user/${ownerAddress}`}
                           target="_blank"
-                          rel="noreferrer">
+                          rel="noreferrer"
+                        >
                           <Image
                             className={styles.marketplace}
                             src="/x2y2.png"
@@ -631,7 +645,8 @@ export default function UserPage(props: Props) {
                                 : `https://${ens.website}`
                             }
                             target="_blank"
-                            rel="noreferrer">
+                            rel="noreferrer"
+                          >
                             <FontAwesomeIcon
                               icon="globe"
                               className={styles.marketplace}
