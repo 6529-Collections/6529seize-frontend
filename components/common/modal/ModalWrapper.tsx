@@ -13,7 +13,7 @@ interface ModalWrapperProps {
   children: React.ReactNode;
   showModal: boolean;
   onClose: () => void;
-  title: string;
+  title?: string;
   modalSize?: ModalSize;
   showTitle?: boolean;
 }
@@ -83,7 +83,9 @@ export default function ModalWrapper({
                       </button>
                     </div>
                   )}
+                  <div className="tw-mt-12">
                   {children}
+                  </div>
                 </div>
               </div>
             </div>

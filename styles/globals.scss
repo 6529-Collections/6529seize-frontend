@@ -24,12 +24,12 @@ button {
   color: $font-color;
 }
 
-textarea:not(#allowlist-tool textarea),
-select:not(#allowlist-tool select),
-input:not(#allowlist-tool input),
-button:not(#allowlist-tool button),
-video:not(#allowlist-tool video),
-svg:not(#allowlist-tool svg) {
+textarea:not(.tailwind-scope textarea),
+select:not(.tailwind-scope select),
+input:not(.tailwind-scope input),
+button:not(.tailwind-scope button),
+video:not(.tailwind-scope video),
+svg:not(.tailwind-scope svg) {
   font-size: $font-size;
   outline: 0 !important;
   box-shadow: none !important;

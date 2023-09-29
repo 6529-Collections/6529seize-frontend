@@ -74,7 +74,11 @@ export default function BlockPicker() {
     BlockPickerTimeWindowToMilliseconds[BlockPickerTimeWindow.ONE_HOUR];
 
   const [date, setDate] = useState<string>(
-    new Date(targetDate).toLocaleDateString("en-GB").split("/").reverse().join("-")
+    new Date(targetDate)
+      .toLocaleDateString("en-GB")
+      .split("/")
+      .reverse()
+      .join("-")
   );
   const [time, setTime] = useState<string>(
     new Date(targetDate).toLocaleTimeString([], {
@@ -216,10 +220,7 @@ export default function BlockPicker() {
       <Header />
       <Breadcrumb breadcrumbs={breadcrumbs} />
       <div className={`tw-bg-neutral-900 ${poppins.className}`}>
-        <div
-          id="allowlist-tool"
-          className="tw-overflow-y-auto tw-min-h-screen tw-relative tw-pt-8 tw-pb-12 tw-px-4 min-[992px]:tw-max-w-[960px] min-[1200px]:tw-max-w-[1150px] min-[1300px]:tw-max-w-[1250px] min-[1400px]:tw-max-w-[1350px] min-[1500px]:tw-max-w-[1450px] min-[1600px]:tw-max-w-[1550px] tw-mx-auto"
-        >
+        <div className="tailwind-scope tw-overflow-y-auto tw-min-h-screen tw-relative tw-pt-8 tw-pb-12 tw-px-4 min-[992px]:tw-max-w-[960px] min-[1200px]:tw-max-w-[1150px] min-[1300px]:tw-max-w-[1250px] min-[1400px]:tw-max-w-[1350px] min-[1500px]:tw-max-w-[1450px] min-[1600px]:tw-max-w-[1550px] tw-mx-auto">
           <div className="tw-w-full tw-flex tw-gap-x-4 tw-gap-y-5">
             <div className="tw-w-1/2">
               <BlockPickerDateSelect

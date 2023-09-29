@@ -1,31 +1,35 @@
 import { useState } from "react";
-import ModalWrapper from "../../../common/modal/ModalWrapper";
+import ModalWrapper, { ModalSize } from "../../../common/modal/ModalWrapper";
+import RepGiveModal from "./RepGiveModal";
+import { Poppins } from "next/font/google";
+
+const poppins = Poppins({
+  weight: ["300", "400", "500", "600", "700"],
+  style: ["normal", "italic"],
+  subsets: ["latin"],
+  display: "swap",
+});
 
 export default function RepGiveBtn({
-  activeAddress,
+  giverAddress,
+  receiverAddress,
 }: {
-  activeAddress: string;
+  giverAddress: string;
+  receiverAddress: string;
 }) {
   const [isGiving, setIsGiving] = useState(false);
   return (
-    <div id="allowlist-tool">
+    <div className={`tailwind-scope ${poppins.className}`}>
       <button onClick={() => setIsGiving((prev) => !prev)}>Give rep</button>
-      <ModalWrapper showModal={isGiving} onClose={() => setIsGiving(false)} title="Awesome stuff">
-      <div className="tw-rounded-lg tw-overflow-hidden">
-      <div className="tw-p-6 tw-max-h-[calc(100vh_+_-100px)] tw-overflow-y-auto">
-        <div>
-          <p className="tw-mb-0 tw-text-lg tw-font-semibold tw-text-neutral-100">
-            Blocks that includes 
-          </p>
-          <p className="tw-mb-0 tw-text-sm tw-font-normal tw-text-neutral-400">
-            Total: 
-          </p>
-        </div>
-        <div className="tw-mt-4 tw-space-y-0.5">
-     
-        </div>
-      </div>
-    </div>
+      <ModalWrapper
+        showModal={isGiving}
+        onClose={() => setIsGiving(false)}
+        modalSize={ModalSize.LARGE}
+      >
+        <RepGiveModal
+          giverAddress={giverAddress}
+          receiverAddress={receiverAddress}
+        />
       </ModalWrapper>
     </div>
   );

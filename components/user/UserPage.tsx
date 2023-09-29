@@ -479,8 +479,11 @@ export default function UserPage(props: Props) {
                         </Tippy>
                       )}
                   </span>
-                  {account.address && (
-                    <RepGiveBtn activeAddress={account.address} />
+                  {account.address && ownerAddress?.length && (
+                    <RepGiveBtn
+                      giverAddress={account.address.toLowerCase()}
+                      receiverAddress={ownerAddress.toLowerCase()}
+                    />
                   )}
                 </Col>
               </Row>

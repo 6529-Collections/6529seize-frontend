@@ -5,9 +5,7 @@ import {
   isEthereumAddress,
 } from "../../../../helpers/AllowlistToolHelpers";
 import {
-  AllowlistOperation,
   AllowlistOperationCode,
-  AllowlistToolResponse,
   DistributionPlanSearchContractMetadataResult,
 } from "../../../allowlist-tool/allowlist-tool.types";
 import styles from "../../DistributionPlan.module.scss";
