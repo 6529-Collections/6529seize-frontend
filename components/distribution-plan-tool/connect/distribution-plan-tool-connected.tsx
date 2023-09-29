@@ -38,7 +38,7 @@ export default function DistributionPlanToolConnected() {
   const trySignIn = async () => {
     removeDistributionPlanCookie();
     const nonceResponse = await distributionPlanApiFetch<DistributionPlanNonce>(
-      `/auth/nonce/${address}`
+      `/auth/nonce`
     );
     if (!nonceResponse) return;
     const { data: nonceData } = nonceResponse;
