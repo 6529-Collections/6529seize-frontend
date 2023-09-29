@@ -35,7 +35,7 @@ export default function CreateCustomSnapshotFormAddWalletsModal({
                 <div className="tw-w-80 tw-relative">
                   <div className="tw-flex tw-justify-between tw-items-center">
                     <label className="tw-block tw-text-sm tw-font-normal tw-leading-5 tw-text-neutral-100">
-                      Wallet no.
+                      Wallet address.
                     </label>
                   </div>
                   <div className="tw-mt-1.5">
