@@ -13,7 +13,7 @@ export default function FinalizeSnapshotsTableRow({
 }: {
   row: FinalizeSnapshotRow;
   onRemoveGroupSnapshot: (groupSnapshotId: string) => void;
-  phases: BuildPhasesPhase[]
+  phases: BuildPhasesPhase[];
 }) {
   return (
     <DistributionPlanTableRowWrapper>
@@ -106,6 +106,9 @@ export default function FinalizeSnapshotsTableRow({
             </svg>
           </Tippy>
         )}
+      </td>
+      <td className="tw-whitespace-nowrap tw-px-3 tw-py-4 tw-text-xs tw-font-normal tw-text-neutral-300">
+        {row.requiredTokens}
       </td>
       <td className="tw-whitespace-nowrap tw-px-3 tw-py-4 tw-text-xs tw-font-normal tw-text-neutral-300">
         {row.topHoldersFilter}
