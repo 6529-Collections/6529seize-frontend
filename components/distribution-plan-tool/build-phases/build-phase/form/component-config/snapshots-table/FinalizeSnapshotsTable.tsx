@@ -14,11 +14,12 @@ export interface FinalizeSnapshotRow {
   readonly snapshot: DistributionPlanSnapshot | null;
   readonly excludeSnapshots: {
     readonly snapshotId: string;
-    readonly snapshotType: Pool
-  }[]
+    readonly snapshotType: Pool;
+  }[];
   readonly excludeSnapshotsText: string;
   readonly excludeComponentWinners: string[];
   readonly excludeComponentWinnersText: string;
+  readonly requiredTokens: string | null;
   readonly topHoldersFilter: string;
   readonly uniqueWalletsCount: number | null;
 }
@@ -27,12 +28,12 @@ export default function FinalizeSnapshotsTable({
   onRemoveGroupSnapshot,
   groupSnapshots,
   snapshots,
-  phases
+  phases,
 }: {
   onRemoveGroupSnapshot: (groupSnapshotId: string) => void;
   groupSnapshots: PhaseGroupSnapshotConfig[];
   snapshots: DistributionPlanSnapshot[];
-  phases: BuildPhasesPhase[]
+  phases: BuildPhasesPhase[];
 }) {
   const [rows, setRows] = useState<FinalizeSnapshotRow[]>([]);
 
@@ -98,13 +99,24 @@ export default function FinalizeSnapshotsTable({
         return {
           groupSnapshotId: groupSnapshot.groupSnapshotId ?? "",
           snapshot: snapshot ?? null,
-          excludeSnapshots: groupSnapshot.excludeSnapshots.map(ss => ({
+          excludeSnapshots: groupSnapshot.excludeSnapshots.map((ss) => ({
             snapshotId: ss.snapshotId,
-            snapshotType: ss.snapshotType
+            snapshotType: ss.snapshotType,
           })),
-          excludeSnapshotsText: groupSnapshot.excludeSnapshots.length > 1 ? `${groupSnapshot.excludeSnapshots.length} snapshots` : groupSnapshot.excludeSnapshots.length === 1 ? `1 snapshot` : "",
+          excludeSnapshotsText:
+            groupSnapshot.excludeSnapshots.length > 1
+              ? `${groupSnapshot.excludeSnapshots.length} snapshots`
+              : groupSnapshot.excludeSnapshots.length === 1
+              ? `1 snapshot`
+              : "",
           excludeComponentWinners: groupSnapshot.excludeComponentWinners,
-          excludeComponentWinnersText: groupSnapshot.excludeComponentWinners.length > 1 ? `${groupSnapshot.excludeComponentWinners.length} components` : groupSnapshot.excludeComponentWinners.length === 1 ? `1 component` : "",
+          excludeComponentWinnersText:
+            groupSnapshot.excludeComponentWinners.length > 1
+              ? `${groupSnapshot.excludeComponentWinners.length} components`
+              : groupSnapshot.excludeComponentWinners.length === 1
+              ? `1 component`
+              : "",
+          requiredTokens: groupSnapshot.tokenIds ?? null,
           topHoldersFilter: getTopHoldersFilter({
             type: groupSnapshot.topHoldersFilter?.type ?? null,
             from: groupSnapshot.topHoldersFilter?.from ?? null,
@@ -147,6 +159,12 @@ export default function FinalizeSnapshotsTable({
                 className="tw-px-3 tw-py-3 tw-whitespace-nowrap tw-text-left tw-text-[0.6875rem] tw-leading-[1.125rem] tw-font-medium tw-text-neutral-400 tw-uppercase tw-tracking-[0.25px]"
               >
                 Exclude components
+              </th>
+              <th
+                scope="col"
+                className="tw-px-3 tw-py-3 tw-whitespace-nowrap tw-text-left tw-text-[0.6875rem] tw-leading-[1.125rem] tw-font-medium tw-text-neutral-400 tw-uppercase tw-tracking-[0.25px]"
+              >
+                Required Tokens
               </th>
               <th
                 scope="col"
