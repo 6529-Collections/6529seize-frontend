@@ -78,6 +78,7 @@ export default function WalletModal(props: Props) {
           wallets={[props.wallet]}
           display={ens?.display}
           disableLink={true}
+          hideCopy={true}
         />
         <span className="d-flex flex-column align-items-end font-smaller">
           {ens && ens.boosted_tdh && ens.boosted_tdh > 0 && (
@@ -107,11 +108,16 @@ export default function WalletModal(props: Props) {
                 <Col
                   xs={3}
                   className={`${styles.footerBtnContainer} d-flex flex-column align-items-center gap-2`}
-                  onClick={() =>
-                    (window.location.href = ens?.display
+                  onClick={() => {
+                    const newPath = ens?.display
                       ? `/${ens.display}`
-                      : `/${props.wallet as string}`)
-                  }>
+                      : `/${props.wallet as string}`;
+                    if (window.location.pathname !== newPath) {
+                      window.location.href = newPath;
+                    } else {
+                      props.onHide();
+                    }
+                  }}>
                   <span className={styles.footerBtn}>
                     <FontAwesomeIcon
                       className={styles.footerIcon}
