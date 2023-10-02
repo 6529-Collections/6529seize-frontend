@@ -32,6 +32,13 @@ export default function DistributionPlanTool() {
                   anti-spam measures currently in place to protect system performance. We
                   will reevaulate them over time.
                 </p>
+                <p className="tw-text-justify tw-mb-0 tw-mt-2 md:tw-mt-4 tw-block tw-font-light tw-text-base tw-leading-[1.6] tw-text-neutral-400">
+                  Users with tdh &lt; 25000 will be limited to 3 allowlist per
+                  day.
+                  <br /> Users with tdh &gt; 25000 can create unlimited
+                  allowlists per day. day.
+                </p>
+                <p className="tw-text-justify tw-mb-0 tw-mt-2 md:tw-mt-4 tw-block tw-font-light tw-text-base tw-leading-[1.6] tw-text-neutral-400"></p>
               </div>
             </div>
           </div>
