@@ -33,7 +33,7 @@ export default function RepGiveModal({
               />
             </div>
           </div>
-          <div>
+          <div className="tw-mt-4">
             <CommonInputLabel>Receiver Address</CommonInputLabel>
             <div className="tw-mt-2">
               <CommonInput
@@ -45,10 +45,10 @@ export default function RepGiveModal({
               />
             </div>
           </div>
-          <div>tag</div>
-          <div>
+          <div className="tw-mt-4">tag</div>
+          <div className="tw-mt-4">
+            <CommonInputLabel>Rep to Give</CommonInputLabel>
             <div className="tw-mt-2">
-              <CommonInputLabel>Rep to Give</CommonInputLabel>
               <CommonInput
                 type="number"
                 name="repScoreToGive"
@@ -58,9 +58,11 @@ export default function RepGiveModal({
               />
             </div>
           </div>
-          <PrimaryButton disabled={false} loading={false} buttonType="submit">
-            Give Rep Points
-          </PrimaryButton>
+          <div className="tw-mt-8 tw-flex tw-justify-end">
+            <PrimaryButton disabled={false} loading={false} buttonType="submit">
+              Give Rep Points
+            </PrimaryButton>
+          </div>
         </form>
       </div>
     </div>

@@ -54,7 +54,7 @@ export default function ModalWrapper({
                   className={`tw-relative tw-w-full tw-transform tw-rounded-lg tw-bg-neutral-900  tw-text-left tw-shadow-xl tw-transition-all sm:tw-my-8 sm:tw-w-full  ${modalSizeClass}`}
                 >
                   {showTitle && (
-                    <div className="tw-absolute tw-right-4 tw-top-6 tw-flex tw-justify-between tw-items-center">
+                    <div className="tw-absolute tw-right-4 tw-top-3 tw-flex tw-justify-between tw-items-center">
                       <p className="tw-max-w-sm tw-text-lg tw-text-white tw-font-medium tw-mb-0">
                         {title}
                       </p>
@@ -83,7 +83,7 @@ export default function ModalWrapper({
                       </button>
                     </div>
                   )}
-                  <div className="tw-mt-12">
+                  <div className="">
                   {children}
                   </div>
                 </div>
