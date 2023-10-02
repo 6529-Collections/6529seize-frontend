@@ -127,10 +127,7 @@ export function WalletAddress(props: {
             </span>
           )}
           {props.display && props.display.endsWith(".eth") ? (
-            <Dropdown
-              drop={"down-centered"}
-              className={`${styles.copyDropdown}`}
-              autoClose="outside">
+            <Dropdown className={`${styles.copyDropdown}`} autoClose="outside">
               <Tippy
                 content={isCopied ? "Copied" : "Copy"}
                 placement={"right"}
@@ -190,7 +187,6 @@ export function WalletAddress(props: {
           ) : (
             <>
               <Dropdown
-                drop={"down-centered"}
                 className={`${styles.copyDropdown}`}
                 autoClose="outside">
                 <Tippy
@@ -245,7 +241,6 @@ export default function Address(props: Props) {
         />
       ) : (
         <Dropdown
-          drop={"down-centered"}
           className={`${styles.consolidationDropdown}`}
           autoClose="outside">
           <Dropdown.Toggle
