@@ -24,7 +24,7 @@ interface Props {
 export enum Focus {
   COLLECTION = "collection",
   ACTIVITY = "activity",
-  DISTRIBUTIONS = "distribution",
+  DISTRIBUTIONS = "distributions",
   STATS = "stats",
 }
 
