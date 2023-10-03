@@ -31,6 +31,7 @@ import NotFound from "../notFound/NotFound";
 import { ENS } from "../../entities/IENS";
 import DotLoader from "../dotLoader/DotLoader";
 import RepGiveBtn from "../rep/common/give-rep/RepGiveBtn";
+import RepState from "../rep/common/RepState";
 
 interface Props {
   user: string;
@@ -480,10 +481,13 @@ export default function UserPage(props: Props) {
                       )}
                   </span>
                   {account.address && ownerAddress?.length && (
-                    <RepGiveBtn
-                      giverAddress={account.address.toLowerCase()}
-                      receiverAddress={ownerAddress.toLowerCase()}
-                    />
+                    <div>
+                      <RepGiveBtn
+                        giverAddress={account.address.toLowerCase()}
+                        receiverAddress={ownerAddress.toLowerCase()}
+                      />
+                      <RepState wallet={ownerAddress} />
+                    </div>
                   )}
                 </Col>
               </Row>
