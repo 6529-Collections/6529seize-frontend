@@ -81,15 +81,20 @@ export default function DistributionPlanToolConnected() {
       </div>
       <div className="tw-mb-6 tw-max-w-2xl">
         <ul className="tw-text-justify tw-mb-0 tw-mt-2 tw-text-base tw-leading-[1.6] tw-font-normal tw-text-neutral-300">
-          <li>Sign in with an address that's a part of your consolidated account to proceed,
-            so that we can verify your TDH to grant you access.</li>
+          <li>
+            Sign in with an address that&apos;s a part of your consolidated
+            account to proceed, so that we can verify your TDH to grant you
+            access.
+          </li>
           <li>No special delegation is required.</li>
           <li>Review the message carefully.</li>
-          <li>Please don't connect your vault.</li>
-          <li>No gas is needed to sign in, and there is currently no cost or fee to use the tool.</li>
+          <li>Please don&apos;t connect your vault.</li>
+          <li>
+            No gas is needed to sign in, and there is currently no cost or fee
+            to use the tool.
+          </li>
         </ul>
-      </p>
-    </div>
+      </div>
     </div>
   );
 }

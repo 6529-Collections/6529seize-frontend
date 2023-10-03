@@ -10,27 +10,36 @@ export default function DistributionPlanTool() {
             <div className="2xl:tw-max-w-xl tw-mx-auto xl:tw-pr-16 2xl:tw-pr-0">
               <div className="tw-flex tw-flex-col">
                 <p className="tw-text-white tw-font-semibold tw-mb-0 tw-text-base md:tw-text-lg">
-                  Meet EMMA - The Editor for Managing Multiphase Allowlists: 
-                  The allowlist building tool to bring your community together.
+                  Meet EMMA - The Editor for Managing Multiphase Allowlists: The
+                  allowlist building tool to bring your community together.
                 </p>
                 <p className="tw-text-justify tw-mb-0 tw-mt-2 md:tw-mt-4 tw-block tw-font-light tw-text-base tw-leading-[1.6] tw-text-neutral-400">
-                  The Memes and the Allowlist Research Institute have built
-                  what may be the worlds deepest expertise in multi-faceted allowlist management
-                  across 150+ NFT drops (and counting). 
-                  In fact, the 6529 team built <a href="https://github.com/6529-Collections/Janus" target="_blank">Janus</a>,
-                  a domain-specific language for deeply customized allowlist management.
+                  The Memes and the Allowlist Research Institute have built what
+                  may be the worlds deepest expertise in multi-faceted allowlist
+                  management across 150+ NFT drops (and counting). In fact, the
+                  6529 team built{" "}
+                  <a
+                    href="https://github.com/6529-Collections/Janus"
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    Janus
+                  </a>
+                  , a domain-specific language for deeply customized allowlist
+                  management.
                 </p>
                 <p className="tw-text-justify tw-mb-0 tw-mt-2 md:tw-mt-4 tw-block tw-font-light tw-text-base tw-leading-[1.6] tw-text-neutral-400">
-                  Leveraging the power of Janus, EMMA was created as a part of seize.io,
-                  so that The Memes team could smoothly manage multiple weekly NFT
-                  drops. Now, we are making This tool available for any member of
-                  the memes community who wants to use it. 
-                  Ready to bring your community together? 
+                  Leveraging the power of Janus, EMMA was created as a part of
+                  seize.io, so that The Memes team could smoothly manage
+                  multiple weekly NFT drops. Now, we are making This tool
+                  available for any member of the memes community who wants to
+                  use it. Ready to bring your community together?
                 </p>
                 <p className="tw-text-justify tw-mb-0 tw-mt-2 md:tw-mt-4 tw-block tw-font-light tw-text-base tw-leading-[1.6] tw-text-neutral-400">
-                  Please note: Since the tool can use significant computational resources, we have some mild
-                  anti-spam measures currently in place to protect system performance. We
-                  will reevaulate them over time.
+                  Please note: Since the tool can use significant computational
+                  resources, we have some mild anti-spam measures currently in
+                  place to protect system performance. We will reevaulate them
+                  over time.
                 </p>
                 <p className="tw-text-justify tw-mb-0 tw-mt-2 md:tw-mt-4 tw-block tw-font-light tw-text-base tw-leading-[1.6] tw-text-neutral-400">
                   Users with tdh &lt; 25000 will be limited to 3 allowlist per
