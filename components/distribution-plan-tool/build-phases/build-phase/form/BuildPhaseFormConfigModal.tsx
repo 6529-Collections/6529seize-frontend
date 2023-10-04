@@ -26,11 +26,13 @@ import {
   distributionPlanApiFetch,
   distributionPlanApiPost,
 } from "../../../../../services/distribution-plan-api";
+import SnapshotSelectTokenIds from "./component-config/SnapshotSelectTokenIds";
 
 export enum PhaseConfigStep {
   SELECT_SNAPSHOT = "SELECT_SNAPSHOT",
   SNAPSHOT_EXCLUDE_OTHER_SNAPSHOTS = "SNAPSHOT_EXCLUDE_OTHER_SNAPSHOTS",
   SNAPSHOT_EXCLUDE_COMPONENT_WINNERS = "SNAPSHOT_EXCLUDE_COMPONENT_WINNERS",
+  SNAPSHOT_SELECT_TOKEN_IDS = "SNAPSHOT_SELECT_TOKEN_IDS",
   SNAPSHOT_SELECT_TOP_HOLDERS = "SNAPSHOT_SELECT_TOP_HOLDERS",
   FINALIZE_SNAPSHOT = "FINALIZE_SNAPSHOT",
   COMPONENT_SELECT_RANDOM_HOLDERS = "COMPONENT_SELECT_RANDOM_HOLDERS",
@@ -75,6 +77,7 @@ export interface PhaseGroupSnapshotConfig {
     to: number | null;
     tdhBlockNumber: number | null;
   } | null;
+  tokenIds: string | null;
   uniqueWalletsCount: number | null;
 }
 
@@ -111,7 +114,6 @@ export default function BuildPhaseFormConfigModal({
     distributionPlan,
     tokenPools,
     customTokenPools,
-    setToasts,
     fetchOperations,
     runOperations,
   } = useContext(DistributionPlanToolContext);
@@ -195,6 +197,7 @@ export default function BuildPhaseFormConfigModal({
       snapshotSchema: null,
       excludeComponentWinners: [],
       excludeSnapshots: [],
+      tokenIds: null,
       topHoldersFilter: null,
       uniqueWalletsCount: null,
     });
@@ -208,6 +211,7 @@ export default function BuildPhaseFormConfigModal({
       excludeComponentWinners: [],
       excludeSnapshots: [],
       topHoldersFilter: null,
+      tokenIds: null,
       uniqueWalletsCount: null,
     });
   };
@@ -258,6 +262,7 @@ export default function BuildPhaseFormConfigModal({
       excludeComponentWinners: [],
       excludeSnapshots: [],
       topHoldersFilter: null,
+      tokenIds: null,
       uniqueWalletsCount,
     });
 
@@ -278,7 +283,7 @@ export default function BuildPhaseFormConfigModal({
     );
 
     if (!haveComponents) {
-      onNextStep(PhaseConfigStep.SNAPSHOT_SELECT_TOP_HOLDERS);
+      onNextStep(PhaseConfigStep.SNAPSHOT_SELECT_TOKEN_IDS);
       return;
     }
     onNextStep(PhaseConfigStep.SNAPSHOT_EXCLUDE_COMPONENT_WINNERS);
@@ -290,7 +295,7 @@ export default function BuildPhaseFormConfigModal({
     );
 
     if (!haveComponents) {
-      onNextStep(PhaseConfigStep.SNAPSHOT_SELECT_TOP_HOLDERS);
+      onNextStep(PhaseConfigStep.SNAPSHOT_SELECT_TOKEN_IDS);
       return;
     }
     onNextStep(PhaseConfigStep.SNAPSHOT_EXCLUDE_COMPONENT_WINNERS);
@@ -324,7 +329,7 @@ export default function BuildPhaseFormConfigModal({
       excludeComponentWinners,
       uniqueWalletsCount,
     }));
-    onNextStep(PhaseConfigStep.SNAPSHOT_SELECT_TOP_HOLDERS);
+    onNextStep(PhaseConfigStep.SNAPSHOT_SELECT_TOKEN_IDS);
   };
 
   const onSelectTopHoldersSkip = () => {
@@ -334,6 +339,14 @@ export default function BuildPhaseFormConfigModal({
     }));
     resetPhaseGroupSnapshotConfig();
     onNextStep(PhaseConfigStep.FINALIZE_SNAPSHOT);
+  };
+
+  const onSelectTokenIds = (tokenIds: string) => {
+    setPhaseGroupSnapshotConfig((prev) => ({
+      ...prev,
+      tokenIds: tokenIds.length ? tokenIds : null,
+    }));
+    onNextStep(PhaseConfigStep.SNAPSHOT_SELECT_TOP_HOLDERS);
   };
 
   const onSelectTopHoldersFilter = (params: {
@@ -507,6 +520,7 @@ export default function BuildPhaseFormConfigModal({
           snapshotId,
           excludeComponentWinners,
           excludeSnapshots,
+          tokenIds,
           topHoldersFilter,
         } = groupSnapshot;
         if (!snapshotType || !snapshotId) continue;
@@ -546,6 +560,16 @@ export default function BuildPhaseFormConfigModal({
             params: {
               itemId,
               componentIds: excludeComponentWinners,
+            },
+          });
+        }
+
+        if (tokenIds?.length) {
+          result.push({
+            code: AllowlistOperationCode.ITEM_SELECT_WALLETS_OWNING_TOKEN_IDS,
+            params: {
+              itemId,
+              tokenIds,
             },
           });
         }
@@ -860,6 +884,15 @@ export default function BuildPhaseFormConfigModal({
                   onClose={onClose}
                 />
               )
+            );
+          case PhaseConfigStep.SNAPSHOT_SELECT_TOKEN_IDS:
+            return (
+              <SnapshotSelectTokenIds
+                title={modalTitle}
+                onNextStep={onNextStep}
+                onSelectTokenIds={onSelectTokenIds}
+                onClose={onClose}
+              />
             );
           case PhaseConfigStep.SNAPSHOT_SELECT_TOP_HOLDERS:
             return (
