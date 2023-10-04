@@ -23,6 +23,7 @@ interface Props {
     memesCardsSetS2: number;
     memesCardsSetS3: number;
     memesCardsSetS4: number;
+    memesCardsSetS5: number;
     memesBalance: number;
     genesis: number;
     gradientsBalance: number;
@@ -47,6 +48,8 @@ export const SZN_2_ICON = "";
 export const SZN_3_ICON = "";
 
 export const SZN_4_ICON = "";
+
+export const SZN_5_ICON = "";
 
 export const GRADIENT_ICON = "";
 
@@ -447,6 +450,23 @@ export default function Address(props: Props) {
                         src={SZN_4_ICON}
                         className={styles.addressTagIcon}
                         alt="Memes SZN4"
+                      />
+                    )}
+                  </span>
+                )}
+              {props.tags.memesCardsSetS5 > 0 &&
+                (props.tags.memesCardsSets === 0 || props.expandedTags) && (
+                  <span
+                    className={`${styles.addressTag} ${
+                      !SZN_4_ICON ? styles.memeSzn5Tag : ""
+                    }`}>
+                    {(props.isUserPage || !SZN_4_ICON) && `SZN5 Sets x`}
+                    {props.tags.memesCardsSetS5}
+                    {SZN_5_ICON && (
+                      <img
+                        src={SZN_5_ICON}
+                        className={styles.addressTagIcon}
+                        alt="Memes SZN5"
                       />
                     )}
                   </span>
