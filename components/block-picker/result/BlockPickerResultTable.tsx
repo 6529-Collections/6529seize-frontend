@@ -12,7 +12,7 @@ export default function BlockPickerResultTable({
       <div className="tw-overflow-x-auto tw-ring-1 tw-ring-white/10 tw-rounded-lg">
         <table className="tw-min-w-full tw-divide-y tw-divide-neutral-700/60">
           <BlockPickerResultTableHeader />
-          <tbody className="tw-divide-y tw-divide-neutral-700/40">
+          <tbody className="tw-divide-y tw-divide-solid tw-divide-neutral-700/60">
             {predictedBlocks.map((block) => (
               <BlockPickerResultTableRow
                 key={block.blockNumberIncludes}
