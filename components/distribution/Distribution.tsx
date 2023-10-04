@@ -3,18 +3,19 @@ import styles from "./Distribution.module.scss";
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import { Container, Row, Col, Carousel, Table, Button } from "react-bootstrap";
-import { MANIFOLD, SIX529_MUSEUM } from "../../constants";
 import { DBResponse } from "../../entities/IDBResponse";
 import Breadcrumb, { Crumb } from "../breadcrumb/Breadcrumb";
 import { useRouter } from "next/router";
 import { fetchAllPages, fetchUrl } from "../../services/6529api";
 import {
+  DistributionPhase,
   IDistribution,
   IDistributionPhoto,
 } from "../../entities/IDistribution";
 import ScrollToButton from "../scrollTo/ScrollToButton";
 import {
   areEqualAddresses,
+  capitalizeEveryWord,
   formatAddress,
   numberWithCommas,
   parseEmojis,
@@ -26,6 +27,14 @@ import Tippy from "@tippyjs/react";
 import SearchModal from "../searchModal/SearchModal";
 import { ReservedUser } from "../../pages/[user]";
 import DotLoader from "../dotLoader/DotLoader";
+import {
+  MEMES_CONTRACT,
+  GRADIENT_CONTRACT,
+  MEMELAB_CONTRACT,
+  SIX529_MUSEUM,
+  MANIFOLD,
+} from "../../constants";
+import { VIEW } from "../consolidation-switch/ConsolidationSwitch";
 
 enum Sort {
   phase = "phase",
@@ -55,6 +64,9 @@ export default function Distribution(props: Props) {
   const [activePhase, setActivePhase] = useState("All");
   const [phases, setPhases] = useState<string[]>([]);
   const [distributions, setDistributions] = useState<IDistribution[]>([]);
+  const [distributionsPhases, setDistributionsPhases] = useState<
+    DistributionPhase[]
+  >([]);
   const [distributionPhotos, setDistributionPhotos] = useState<
     IDistributionPhoto[]
   >([]);
@@ -76,11 +88,29 @@ export default function Distribution(props: Props) {
     const phasefilter = activePhase === "All" ? "" : `&phase=${activePhase}`;
     const walletFilter =
       searchWallets.length === 0 ? "" : `&wallet=${searchWallets.join(",")}`;
-    const distributionUrl = `${process.env.API_ENDPOINT}/api/distribution/${props.contract}/${nftId}?&page=${pageProps.page}&sort=${sort.sort}&sort_direction=${sort.sort_direction}${phasefilter}${walletFilter}`;
-
+    // const distributionUrl = `${process.env.API_ENDPOINT}/api/distribution/${props.contract}/${nftId}?&page=${pageProps.page}&sort=${sort.sort}&sort_direction=${sort.sort_direction}${phasefilter}${walletFilter}`;
+    const distributionUrl = `${process.env.API_ENDPOINT}/api/distributions?card_id=${nftId}&contract=${props.contract}&page=${pageProps.page}&sort=${sort.sort}&sort_direction=${sort.sort_direction}${walletFilter}`;
     fetchUrl(distributionUrl).then((r: DBResponse) => {
       setTotalResults(r.count);
-      setDistributions(r.data);
+      const mydistributions = r.data;
+      setDistributions(mydistributions);
+      const phases = [];
+      if (mydistributions.some((d) => d.airdrop > 0)) {
+        phases.push(DistributionPhase.AIRDROP);
+      }
+      if (mydistributions.some((d) => d.allowlist > 0)) {
+        phases.push(DistributionPhase.ALLOWLIST);
+      }
+      if (mydistributions.some((d) => d.phase_1 > 0)) {
+        phases.push(DistributionPhase.PHASE_1);
+      }
+      if (mydistributions.some((d) => d.phase_2 > 0)) {
+        phases.push(DistributionPhase.PHASE_2);
+      }
+      if (mydistributions.some((d) => d.phase_3 > 0)) {
+        phases.push(DistributionPhase.PHASE_3);
+      }
+      setDistributionsPhases(phases);
       setFetching(false);
     });
   }
@@ -159,43 +189,7 @@ export default function Distribution(props: Props) {
         <ScrollToButton threshhold={500} to="distribution-table" offset={0} />
         <Container className="pt-5 pb-3" id={`distribution-table`}>
           <Row>
-            <Col
-              xs={{ span: 12 }}
-              sm={{ span: 12 }}
-              md={{ span: 6 }}
-              lg={{ span: 6 }}>
-              <span
-                onClick={() => {
-                  setActivePhase("All");
-                }}
-                className={`${styles.distributionPhaseLink} ${
-                  "All" === activePhase
-                    ? styles.distributionPhaseLinkActive
-                    : ""
-                }`}>
-                All
-              </span>
-              {phases.map((phase) => (
-                <span
-                  key={phase}
-                  onClick={() => {
-                    setActivePhase(phase);
-                  }}
-                  className={`${styles.distributionPhaseLink} ${
-                    phase === activePhase
-                      ? styles.distributionPhaseLinkActive
-                      : ""
-                  }`}>
-                  {phase}
-                </span>
-              ))}
-            </Col>
-            <Col
-              className={`d-flex justify-content-end align-items-center`}
-              xs={{ span: 12 }}
-              sm={{ span: 12 }}
-              md={{ span: 6 }}
-              lg={{ span: 6 }}>
+            <Col className={`d-flex justify-content-end align-items-center`}>
               <>
                 <span>
                   {searchWallets.length > 0 &&
@@ -256,279 +250,65 @@ export default function Distribution(props: Props) {
               <Table className={styles.distributionsTable}>
                 <thead>
                   <tr>
+                    <th colSpan={2}></th>
+                    <th
+                      colSpan={distributionsPhases.length}
+                      className="text-center">
+                      ALLOWLIST SPOTS
+                    </th>
+                    <th colSpan={2} className="text-center">
+                      ACTUAL
+                    </th>
+                  </tr>
+                  <tr>
                     <th colSpan={2}>
                       Wallet{" "}
-                      {!fetching ? (
-                        <span className={styles.totalResults}>
-                          x{totalResults}
-                        </span>
-                      ) : (
+                      {fetching ? (
                         <DotLoader />
+                      ) : (
+                        <span className="font-larger">x{totalResults}</span>
                       )}
                     </th>
-                    {/* <th className="text-center">
-                      Cards&nbsp;
-                      <span
-                        className={`${styles.distributionsCaretWrapper} d-flex flex-column`}>
-                        <FontAwesomeIcon
-                          icon="square-caret-up"
-                          onClick={() =>
-                            setSort({
-                              sort: Sort.wallet_balance,
-                              sort_direction: SortDirection.ASC,
-                            })
-                          }
-                          className={`${styles.distributionsCaret} ${
-                            sort.sort_direction != SortDirection.ASC ||
-                            sort.sort != Sort.wallet_balance
-                              ? styles.distributionsCaretDisabled
-                              : ""
-                          }`}
-                        />
-                        <FontAwesomeIcon
-                          icon="square-caret-down"
-                          onClick={() =>
-                            setSort({
-                              sort: Sort.wallet_balance,
-                              sort_direction: SortDirection.DESC,
-                            })
-                          }
-                          className={`${styles.distributionsCaret} ${
-                            sort.sort_direction != SortDirection.DESC ||
-                            sort.sort != Sort.wallet_balance
-                              ? styles.distributionsCaretDisabled
-                              : ""
-                          }`}
-                        />
-                      </span>
-                    </th>
-                    <th className="text-center">
-                      Unique&nbsp;
-                      <span
-                        className={`${styles.distributionsCaretWrapper} d-flex flex-column`}>
-                        <FontAwesomeIcon
-                          icon="square-caret-up"
-                          onClick={() =>
-                            setSort({
-                              sort: Sort.wallet_unique_balance,
-                              sort_direction: SortDirection.ASC,
-                            })
-                          }
-                          className={`${styles.distributionsCaret} ${
-                            sort.sort_direction != SortDirection.ASC ||
-                            sort.sort != Sort.wallet_unique_balance
-                              ? styles.distributionsCaretDisabled
-                              : ""
-                          }`}
-                        />
-                        <FontAwesomeIcon
-                          icon="square-caret-down"
-                          onClick={() =>
-                            setSort({
-                              sort: Sort.wallet_unique_balance,
-                              sort_direction: SortDirection.DESC,
-                            })
-                          }
-                          className={`${styles.distributionsCaret} ${
-                            sort.sort_direction != SortDirection.DESC ||
-                            sort.sort != Sort.wallet_unique_balance
-                              ? styles.distributionsCaretDisabled
-                              : ""
-                          }`}
-                        />
-                      </span>
-                    </th>
-                    <th className="text-center">
-                      TDH&nbsp;
-                      <span
-                        className={`${styles.distributionsCaretWrapper} d-flex flex-column`}>
-                        <FontAwesomeIcon
-                          icon="square-caret-up"
-                          onClick={() =>
-                            setSort({
-                              sort: Sort.wallet_tdh,
-                              sort_direction: SortDirection.ASC,
-                            })
-                          }
-                          className={`${styles.distributionsCaret} ${
-                            sort.sort_direction != SortDirection.ASC ||
-                            sort.sort != Sort.wallet_tdh
-                              ? styles.distributionsCaretDisabled
-                              : ""
-                          }`}
-                        />
-                        <FontAwesomeIcon
-                          icon="square-caret-down"
-                          onClick={() =>
-                            setSort({
-                              sort: Sort.wallet_tdh,
-                              sort_direction: SortDirection.DESC,
-                            })
-                          }
-                          className={`${styles.distributionsCaret} ${
-                            sort.sort_direction != SortDirection.DESC ||
-                            sort.sort != Sort.wallet_tdh
-                              ? styles.distributionsCaretDisabled
-                              : ""
-                          }`}
-                        />
-                      </span>
-                    </th> */}
-                    <th className="text-center">
-                      Phase&nbsp;
-                      <span
-                        className={`${styles.distributionsCaretWrapper} d-flex flex-column`}>
-                        <FontAwesomeIcon
-                          icon="square-caret-up"
-                          onClick={() =>
-                            setSort({
-                              sort: Sort.phase,
-                              sort_direction: SortDirection.ASC,
-                            })
-                          }
-                          className={`${styles.distributionsCaret} ${
-                            sort.sort_direction != SortDirection.ASC ||
-                            sort.sort != Sort.phase
-                              ? styles.distributionsCaretDisabled
-                              : ""
-                          }`}
-                        />
-                        <FontAwesomeIcon
-                          icon="square-caret-down"
-                          onClick={() =>
-                            setSort({
-                              sort: Sort.phase,
-                              sort_direction: SortDirection.DESC,
-                            })
-                          }
-                          className={`${styles.distributionsCaret} ${
-                            sort.sort_direction != SortDirection.DESC ||
-                            sort.sort != Sort.phase
-                              ? styles.distributionsCaretDisabled
-                              : ""
-                          }`}
-                        />
-                      </span>
-                    </th>
-                    <th className="text-center">
-                      Count&nbsp;
-                      <span
-                        className={`${styles.distributionsCaretWrapper} d-flex flex-column`}>
-                        <FontAwesomeIcon
-                          icon="square-caret-up"
-                          onClick={() =>
-                            setSort({
-                              sort: Sort.count,
-                              sort_direction: SortDirection.ASC,
-                            })
-                          }
-                          className={`${styles.distributionsCaret} ${
-                            sort.sort_direction != SortDirection.ASC ||
-                            sort.sort != Sort.count
-                              ? styles.distributionsCaretDisabled
-                              : ""
-                          }`}
-                        />
-                        <FontAwesomeIcon
-                          icon="square-caret-down"
-                          onClick={() =>
-                            setSort({
-                              sort: Sort.count,
-                              sort_direction: SortDirection.DESC,
-                            })
-                          }
-                          className={`${styles.distributionsCaret} ${
-                            sort.sort_direction != SortDirection.DESC ||
-                            sort.sort != Sort.count
-                              ? styles.distributionsCaretDisabled
-                              : ""
-                          }`}
-                        />
-                      </span>
-                    </th>
-                    <th className="text-center">
-                      Minted&nbsp;
-                      <span
-                        className={`${styles.distributionsCaretWrapper} d-flex flex-column`}>
-                        <FontAwesomeIcon
-                          icon="square-caret-up"
-                          onClick={() =>
-                            setSort({
-                              sort: Sort.card_mint_count,
-                              sort_direction: SortDirection.ASC,
-                            })
-                          }
-                          className={`${styles.distributionsCaret} ${
-                            sort.sort_direction != SortDirection.ASC ||
-                            sort.sort != Sort.card_mint_count
-                              ? styles.distributionsCaretDisabled
-                              : ""
-                          }`}
-                        />
-                        <FontAwesomeIcon
-                          icon="square-caret-down"
-                          onClick={() =>
-                            setSort({
-                              sort: Sort.card_mint_count,
-                              sort_direction: SortDirection.DESC,
-                            })
-                          }
-                          className={`${styles.distributionsCaret} ${
-                            sort.sort_direction != SortDirection.DESC ||
-                            sort.sort != Sort.card_mint_count
-                              ? styles.distributionsCaretDisabled
-                              : ""
-                          }`}
-                        />
-                      </span>
-                    </th>
+                    {distributionsPhases.map((p) => (
+                      <th key={`${p}-header`} className="text-center">
+                        {capitalizeEveryWord(p.replaceAll("_", " "))}
+                      </th>
+                    ))}
+                    <th className="text-center">Minted</th>
+                    <th className="text-center">Total</th>
                   </tr>
                 </thead>
                 <tbody>
                   {distributions.map((d) => (
-                    <tr
-                      key={`${d.contract}-${d.card_id}-${d.phase}-${d.wallet}}`}>
-                      <td className={styles.distributionsTableWallet}>
-                        {d.wallet}
+                    <tr key={`${d.wallet}`}>
+                      <td className="font-smaller">{d.wallet}</td>
+                      <td>
+                        <a href={`/${d.display ? d.display : d.wallet}`}>
+                          {d.display
+                            ? d.display
+                            : areEqualAddresses(d.wallet, SIX529_MUSEUM)
+                            ? ReservedUser.MUSEUM
+                            : areEqualAddresses(d.wallet, MANIFOLD)
+                            ? ReservedUser.MANIFOLD
+                            : formatAddress(d.wallet)}
+                        </a>
                       </td>
+                      {distributionsPhases.map((p) => (
+                        <th
+                          key={`${p}-${d.contract}-${d.card_id}`}
+                          className="text-center">
+                          {d[p] === 0 ? "-" : numberWithCommas(d[p])}
+                        </th>
+                      ))}
                       <td className="text-center">
-                        <a
-                          href={`/${d.wallet}`}
-                          target="_blank"
-                          rel="noreferrer"
-                          dangerouslySetInnerHTML={{
-                            __html: areEqualAddresses(d.wallet, SIX529_MUSEUM)
-                              ? ReservedUser.MUSEUM
-                              : areEqualAddresses(d.wallet, MANIFOLD)
-                              ? ReservedUser.MANIFOLD
-                              : d.display
-                              ? parseEmojis(d.display)
-                              : formatAddress(d.wallet),
-                          }}></a>
-                      </td>
-                      {/* <td className="text-center">
-                        {d.wallet_balance
-                          ? numberWithCommas(d.wallet_balance)
-                          : "-"}
-                      </td>
-                      <td className="text-center">
-                        {d.wallet_unique_balance
-                          ? numberWithCommas(d.wallet_unique_balance)
-                          : "-"}
-                      </td>
-                      <td className="text-center">
-                        {d.wallet_tdh ? numberWithCommas(d.wallet_tdh) : "-"}
-                      </td> */}
-                      <td className="text-center">{d.phase}</td>
-                      <td className="text-center">
-                        {numberWithCommas(d.count)}
-                      </td>
-                      <td className="text-center">
-                        {d.phase === "Airdrop" || !d.card_mint_count
+                        {d.total_minted === 0
                           ? "-"
-                          : d.card_mint_count === 0
-                          ? d.card_mint_count
-                          : numberWithCommas(d.card_mint_count)}
+                          : numberWithCommas(d.total_minted)}
+                      </td>
+                      <td className="text-center">
+                        {!d.total_minted && !d.airdrop
+                          ? "-"
+                          : numberWithCommas(d.total_minted + d.airdrop)}
                       </td>
                     </tr>
                   ))}
