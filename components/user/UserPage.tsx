@@ -26,7 +26,7 @@ import ConsolidationSwitch, {
   VIEW,
 } from "../consolidation-switch/ConsolidationSwitch";
 import Address from "../address/Address";
-import UserPageDetails from "./UserPageDetails";
+import UserPageDetails, { Focus } from "./UserPageDetails";
 import NotFound from "../notFound/NotFound";
 import { ENS } from "../../entities/IENS";
 import DotLoader from "../dotLoader/DotLoader";
@@ -74,6 +74,35 @@ export default function UserPage(props: Props) {
 
   const [ens, setEns] = useState<ENS>();
 
+  const [focus, setFocus] = useState<Focus>(
+    (router.query.focus as Focus) || Focus.COLLECTION
+  );
+
+  useEffect(() => {
+    const currFocus = router.query.focus;
+    if (currFocus != focus) {
+      setFocus(currFocus as Focus);
+    }
+  }, [router.query.focus]);
+
+  useEffect(() => {
+    if (focus) {
+      const currFocus = router.query.focus;
+      if (!currFocus || currFocus[0] != focus) {
+        const currentQuery = { ...router.query };
+        currentQuery.focus = focus;
+        router.push(
+          {
+            pathname: router.pathname,
+            query: currentQuery,
+          },
+          undefined,
+          { shallow: true }
+        );
+      }
+    }
+  }, [focus]);
+
   useEffect(() => {
     async function fetchENS() {
       let oLink = process.env.BASE_ENDPOINT
@@ -117,17 +146,20 @@ export default function UserPage(props: Props) {
                 : formatAddress(oAddress)
             }`
           );
-
+          const currentQuery = {
+            focus: focus,
+          };
           router.push(
-            reservedDisplay
-              ? reservedDisplay
-              : response.display && !containsEmojis(response.display)
-              ? response.display.replaceAll(" ", "-")
-              : oAddress,
-            undefined,
             {
-              shallow: true,
-            }
+              pathname: reservedDisplay
+                ? reservedDisplay
+                : response.display && !containsEmojis(response.display)
+                ? response.display.replaceAll(" ", "-")
+                : oAddress,
+              query: currentQuery,
+            },
+            undefined,
+            { shallow: true }
           );
         });
       } else {
@@ -140,9 +172,6 @@ export default function UserPage(props: Props) {
             consolidation_key: MUSEUM_ENS.wallet,
           });
           setFetchingUser(false);
-          router.push(ReservedUser.MUSEUM, undefined, {
-            shallow: true,
-          });
         } else if (
           props.user.toUpperCase() === ReservedUser.MANIFOLD.toUpperCase()
         ) {
@@ -154,9 +183,6 @@ export default function UserPage(props: Props) {
             consolidation_key: MANIFOLD_ENS.wallet,
           });
           setFetchingUser(false);
-          router.push(ReservedUser.MANIFOLD, undefined, {
-            shallow: true,
-          });
         } else {
           window.location.href = "/404";
         }
@@ -507,7 +533,7 @@ export default function UserPage(props: Props) {
                             <Col>
                               <Tag
                                 type={TagType.RANK}
-                                text={`Total Balance x${numberWithCommas(
+                                text={`Total Cards x${numberWithCommas(
                                   tdh.balance
                                 )} | Rank #${tdh.dense_rank_balance}`}
                               />
@@ -533,10 +559,7 @@ export default function UserPage(props: Props) {
                           </Row>
                           <Row className="pt-2 pb-2">
                             <Col>
-                              <Tag
-                                type={TagType.RANK}
-                                text={`Total Balance -`}
-                              />
+                              <Tag type={TagType.RANK} text={`Total Cards -`} />
                             </Col>
                           </Row>
                         </>
@@ -650,14 +673,18 @@ export default function UserPage(props: Props) {
       <Container>
         <Row>
           <Col>
-            <UserPageDetails
-              ownerAddress={ownerAddress}
-              owned={owned}
-              view={view}
-              consolidatedTDH={consolidatedTDH}
-              tdh={tdh}
-              isConsolidation={isConsolidation}
-            />
+            {focus && (
+              <UserPageDetails
+                ownerAddress={ownerAddress}
+                owned={owned}
+                view={view}
+                consolidatedTDH={consolidatedTDH}
+                tdh={tdh}
+                isConsolidation={isConsolidation}
+                focus={focus}
+                setFocus={setFocus}
+              />
+            )}
           </Col>
         </Row>
       </Container>
