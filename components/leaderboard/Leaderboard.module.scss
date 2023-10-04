@@ -39,8 +39,10 @@
 
 .hodler {
   display: flex;
+  flex-direction: column;
   flex-wrap: wrap;
-  align-items: center;
+  justify-content: center;
+  gap: 0.2rem;
   span {
     overflow-wrap: break-word;
   }
