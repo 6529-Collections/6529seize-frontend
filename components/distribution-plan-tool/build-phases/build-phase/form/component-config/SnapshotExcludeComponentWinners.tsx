@@ -12,12 +12,6 @@ import ComponentConfigNextBtn from "./ComponentConfigNextBtn";
 import { DistributionPlanToolContext } from "../../../../DistributionPlanToolContext";
 import BuildPhaseFormConfigModalTitle from "./BuildPhaseFormConfigModalTitle";
 import ComponentConfigMeta from "./ComponentConfigMeta";
-import {
-  AllowlistOperationCode,
-  AllowlistToolResponse,
-  Pool,
-} from "../../../../../allowlist-tool/allowlist-tool.types";
-import { distributionPlanApiPost } from "../../../../../../services/distribution-plan-api";
 
 const SELECT_ALL_OPTION: AllowlistToolSelectMenuMultipleOption = {
   title: "Exclude All Prior Groups",
@@ -26,7 +20,6 @@ const SELECT_ALL_OPTION: AllowlistToolSelectMenuMultipleOption = {
 };
 
 export default function SnapshotExcludeComponentWinners({
-  config,
   phases,
   onNextStep,
   onSelectExcludeComponentWinners,
@@ -43,7 +36,7 @@ export default function SnapshotExcludeComponentWinners({
   title: string;
   onClose: () => void;
 }) {
-  const { setToasts, distributionPlan, operations } = useContext(
+  const { setToasts } = useContext(
     DistributionPlanToolContext
   );
   const [options, setOptions] = useState<
@@ -135,7 +128,7 @@ export default function SnapshotExcludeComponentWinners({
       uniqueWalletsCount: localUniqueWalletsCount,
     });
   };
-  const [loading, setLoading] = useState<boolean>(false);
+  const [loading] = useState<boolean>(false);
 
   const [localUniqueWalletsCount, setLocalUniqueWalletsCount] = useState<
     number | null
@@ -214,7 +207,7 @@ export default function SnapshotExcludeComponentWinners({
         showSkipBtn={true}
         showNextBtn={!!selectedOptions.length}
         isDisabled={!selectedOptions.length}
-        onSkip={() => onNextStep(PhaseConfigStep.SNAPSHOT_SELECT_TOP_HOLDERS)}
+        onSkip={() => onNextStep(PhaseConfigStep.SNAPSHOT_SELECT_TOKEN_IDS)}
         onNext={() => onExcludePreviousWinners()}
       >
         <ComponentConfigMeta

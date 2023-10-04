@@ -7,6 +7,7 @@ import { useAccount } from "wagmi";
 import { useRouter } from "next/router";
 import "react-toastify/dist/ReactToastify.css";
 import { ToastContainer } from "react-toastify";
+import Head from "next/head";
 
 const Header = dynamic(() => import("../../header/Header"), {
   ssr: false,
@@ -42,6 +43,24 @@ export default function DistributionPlanToolWrapper({
   }, [address]);
   return (
     <>
+      <Head>
+        <title>Distribution Plan Tool | 6529 SEIZE</title>
+        <link rel="icon" href="/favicon.ico" />
+        <meta
+          name="description"
+          content="Distribution Plan Tool | 6529 SEIZE"
+        />
+        <meta
+          property="og:url"
+          content={`${process.env.BASE_ENDPOINT}/distribution-plan-tool`}
+        />
+        <meta property="og:title" content="Distribution Plan Tool" />
+        <meta property="og:description" content="6529 SEIZE" />
+        <meta
+          property="og:image"
+          content={`${process.env.BASE_ENDPOINT}/Seize_Logo_Glasses_2.png`}
+        />
+      </Head>
       <Header />
       <Breadcrumb breadcrumbs={breadcrumbs} />
       <div className={`tw-bg-neutral-900 ${poppins.className}`}>
