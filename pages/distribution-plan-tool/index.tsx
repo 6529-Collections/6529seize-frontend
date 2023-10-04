@@ -15,7 +15,7 @@ export default function DistributionPlanTool() {
                 </p>
                 <p className="tw-text-justify tw-mb-0 tw-mt-2 md:tw-mt-4 tw-block tw-font-light tw-text-base tw-leading-[1.6] tw-text-neutral-400">
                   The Memes and the Allowlist Research Institute have built what
-                  may be the world's deepest expertise in complex allowlist
+                  may be the world&apos;s deepest expertise in complex allowlist
                   management across 150+ NFT drops (and counting). These efforts
                   lead to the creation of {""}
                   <a
@@ -39,16 +39,16 @@ export default function DistributionPlanTool() {
                   Please note: Since the tool can use significant computational
                   resources for complex allowlists, we have some mild anti-spam
                   measures currently in place to protect system performance.
-                  Specifically, we use our community's "proof of humanity" or
-                  anti-Sybil measure (TDH) as a lightweight rate-limiter on
-                  allowlist creation. We will reevaluate and increase or
-                  decrease the limits over time. As always, we reserve the right
-                  to change access to this free tool, including sunsetting it
-                  altogether.
+                  Specifically, we use our community&apos;s &quot;proof of
+                  humanity&quot; or anti-Sybil measure (TDH) as a lightweight
+                  rate-limiter on allowlist creation. We will reevaluate and
+                  increase or decrease the limits over time. As always, we
+                  reserve the right to change access to this free tool,
+                  including sunsetting it altogether.
                 </p>
                 <p className="tw-text-justify tw-mb-0 tw-mt-2 md:tw-mt-4 tw-block tw-font-light tw-text-base tw-leading-[1.6] tw-text-neutral-400">
-                  Users with TDH &lt; 25,000 (but at least 1) will be limited to 3 allowlists per
-                  day.
+                  Users with TDH &lt; 25,000 (but at least 1) will be limited to
+                  3 allowlists per day.
                   <br /> Users with TDH &gt; 25,000 can create unlimited
                   allowlists per day.
                 </p>
