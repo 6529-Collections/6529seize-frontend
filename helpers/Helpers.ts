@@ -286,3 +286,28 @@ export function getRandomColor() {
 
   return `#${r}${g}${b}`;
 }
+
+export const scrollToDiv = (divRef: any, block: "start" | "end") => {
+  if (divRef.current) {
+    divRef.current.scrollIntoView({ behavior: "smooth", block });
+  }
+};
+
+export const isDivInViewport = (divRef: any) => {
+  if (divRef.current) {
+    const rect = divRef.current.getBoundingClientRect();
+    return (
+      rect.top >= 0 &&
+      rect.left >= 0 &&
+      rect.bottom <= window.innerHeight &&
+      rect.right <= window.innerWidth
+    );
+  }
+  return false;
+};
+
+export function capitalizeEveryWord(input: string): string {
+  return input
+    .toLocaleLowerCase()
+    .replace(/^(.)|\s+(.)/g, (match: string) => match.toUpperCase());
+}
