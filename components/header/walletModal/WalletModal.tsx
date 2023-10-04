@@ -131,11 +131,16 @@ export default function WalletModal(props: Props) {
                 <Col
                   xs={3}
                   className={`${styles.footerBtnContainer} d-flex flex-column align-items-center gap-2`}
-                  onClick={() =>
-                    (window.location.href = ens?.display
+                  onClick={() => {
+                    const newPath = ens?.display
                       ? `/${ens.display}/settings`
-                      : `/${props.wallet as string}/settings`)
-                  }>
+                      : `/${props.wallet as string}/settings`;
+                    if (window.location.pathname !== newPath) {
+                      window.location.href = newPath;
+                    } else {
+                      props.onHide();
+                    }
+                  }}>
                   <span className={styles.footerBtn}>
                     <FontAwesomeIcon
                       className={styles.footerIcon}
