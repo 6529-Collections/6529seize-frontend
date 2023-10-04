@@ -1,6 +1,5 @@
 import styles from "./UserPage.module.scss";
 import { Col, Container, Row } from "react-bootstrap";
-import { useState } from "react";
 import { Owner } from "../../entities/IOwner";
 import { ConsolidatedTDHMetrics, TDHMetrics } from "../../entities/ITDH";
 import { VIEW } from "../consolidation-switch/ConsolidationSwitch";
@@ -9,6 +8,7 @@ import UserPageActivity from "./UserPageActivity";
 import UserPageDistributions from "./UserPageDistributions";
 import UserPageStats from "./UserPageStats";
 import UserPageOverview from "./UserPageOverview";
+import { useRouter } from "next/router";
 
 interface Props {
   ownerAddress: `0x${string}` | undefined;
@@ -17,19 +17,19 @@ interface Props {
   consolidatedTDH?: ConsolidatedTDHMetrics;
   tdh?: ConsolidatedTDHMetrics | TDHMetrics;
   isConsolidation: boolean;
+  focus: Focus;
+  setFocus: (focus: Focus) => void;
 }
 
 export enum Focus {
-  COLLECTION,
-  ACTIVITY,
-  DISTRIBUTIONS,
-  STATS,
+  COLLECTION = "collection",
+  ACTIVITY = "activity",
+  DISTRIBUTIONS = "distributions",
+  STATS = "stats",
 }
 
-const DISTRIBUTIONS_PAGE_SIZE = 25;
-
 export default function UserPageDetails(props: Props) {
-  const [focus, setFocus] = useState<Focus>(Focus.COLLECTION);
+  const router = useRouter();
 
   return (
     <Container>
@@ -37,58 +37,62 @@ export default function UserPageDetails(props: Props) {
         <Col className="d-flex align-items-center justify-content-center">
           <h3
             className={
-              focus === Focus.COLLECTION ? styles.focusActive : styles.focus
+              props.focus === Focus.COLLECTION
+                ? styles.focusActive
+                : styles.focus
             }
-            onClick={() => setFocus(Focus.COLLECTION)}>
+            onClick={() => props.setFocus(Focus.COLLECTION)}>
             Collection
           </h3>
           <h3>&nbsp;|&nbsp;</h3>
           <h3
             className={
-              focus === Focus.ACTIVITY ? styles.focusActive : styles.focus
+              props.focus === Focus.ACTIVITY ? styles.focusActive : styles.focus
             }
-            onClick={() => setFocus(Focus.ACTIVITY)}>
+            onClick={() => props.setFocus(Focus.ACTIVITY)}>
             Activity
           </h3>
           <h3>&nbsp;|&nbsp;</h3>
           <h3
             className={
-              focus === Focus.DISTRIBUTIONS ? styles.focusActive : styles.focus
+              props.focus === Focus.DISTRIBUTIONS
+                ? styles.focusActive
+                : styles.focus
             }
-            onClick={() => setFocus(Focus.DISTRIBUTIONS)}>
+            onClick={() => props.setFocus(Focus.DISTRIBUTIONS)}>
             Distributions
           </h3>
           <h3>&nbsp;|&nbsp;</h3>
           <h3
             className={
-              focus === Focus.STATS ? styles.focusActive : styles.focus
+              props.focus === Focus.STATS ? styles.focusActive : styles.focus
             }
-            onClick={() => setFocus(Focus.STATS)}>
+            onClick={() => props.setFocus(Focus.STATS)}>
             Stats
           </h3>
         </Col>
       </Row>
       <UserPageCollection
-        show={focus === Focus.COLLECTION}
+        show={props.focus === Focus.COLLECTION}
         owned={props.owned}
         tdh={props.tdh}
       />
       <UserPageActivity
-        show={focus === Focus.ACTIVITY}
+        show={props.focus === Focus.ACTIVITY}
         ownerAddress={props.ownerAddress}
         view={props.view}
         consolidatedTDH={props.consolidatedTDH}
       />
       <UserPageDistributions
-        show={focus === Focus.DISTRIBUTIONS}
+        show={props.focus === Focus.DISTRIBUTIONS}
         ownerAddress={props.ownerAddress}
         view={props.view}
         consolidatedTDH={props.consolidatedTDH}
         isConsolidation={props.isConsolidation}
       />
-      <UserPageOverview show={focus === Focus.STATS} tdh={props.tdh} />
+      <UserPageOverview show={props.focus === Focus.STATS} tdh={props.tdh} />
       <UserPageStats
-        show={focus === Focus.STATS}
+        show={props.focus === Focus.STATS}
         ownerAddress={props.ownerAddress}
       />
     </Container>

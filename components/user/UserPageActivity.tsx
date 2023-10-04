@@ -69,7 +69,7 @@ export default function UserPageActivity(props: Props) {
         setActivity(response.data);
       });
     }
-  }, [activityPage, props.ownerAddress, activityTypeFilter, props.view]);
+  }, [activityPage, props.consolidatedTDH, activityTypeFilter, props.view]);
 
   useEffect(() => {
     fetchUrl(`${process.env.API_ENDPOINT}/api/memes_lite`).then(
