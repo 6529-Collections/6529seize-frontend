@@ -12,13 +12,11 @@ import DistributionPlanSecondaryText from "../../../../common/DistributionPlanSe
 import { DistributionPlanToolContext } from "../../../../DistributionPlanToolContext";
 import {
   AllowlistOperationCode,
-  AllowlistToolResponse,
   Pool,
 } from "../../../../../allowlist-tool/allowlist-tool.types";
 import { assertUnreachable } from "../../../../../../helpers/AllowlistToolHelpers";
 import ComponentConfigNextBtn from "./ComponentConfigNextBtn";
 import ComponentConfigMeta from "./ComponentConfigMeta";
-import { distributionPlanApiPost } from "../../../../../../services/distribution-plan-api";
 
 export default function SnapshotExcludeOtherSnapshots({
   snapshots,
