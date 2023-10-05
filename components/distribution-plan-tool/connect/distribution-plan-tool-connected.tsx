@@ -1,4 +1,4 @@
-import { useSignMessage } from "wagmi";
+import { useAccount, useSignMessage } from "wagmi";
 import {
   distributionPlanApiFetch,
   distributionPlanApiPost,
@@ -16,6 +16,7 @@ interface DistributionPlanNonce {
 
 export default function DistributionPlanToolConnected() {
   const signMessage = useSignMessage();
+  const { address } = useAccount();
   const router = useRouter();
 
   const getSignature = async ({
@@ -37,7 +38,7 @@ export default function DistributionPlanToolConnected() {
   const trySignIn = async () => {
     removeDistributionPlanCookie();
     const nonceResponse = await distributionPlanApiFetch<DistributionPlanNonce>(
-      "/auth/nonce"
+      `/auth/nonce`
     );
     if (!nonceResponse) return;
     const { data: nonceData } = nonceResponse;
@@ -67,19 +68,31 @@ export default function DistributionPlanToolConnected() {
   }, []);
 
   return (
-    <div className="tw-text-center tw-flex tw-flex-col tw-items-center">
+    <div className="tw-flex tw-flex-col">
       <h1 className="tw-uppercase tw-text-white">Sign in</h1>
-      <p className="tw-m-0 tw-text-base tw-font-light tw-text-neutral-300">
-        To verify your identity, please sign the message using your wallet.
-        Always ensure you review what you&apos;re signing.
-      </p>
-      <div className="tw-mt-8">
+      <div className="tw-mb-6 tw-max-w-2xl">
+        <ul className="tw-text-justify tw-space-y-1 tw-mb-0 tw-mt-2 tw-text-base tw-leading-[1.6] tw-font-normal tw-text-neutral-300">
+          <li>
+            Sign in with an address that&apos;s a part of your consolidated
+            account to proceed, so that we can verify your TDH to grant you
+            access.
+          </li>
+          <li>No special delegation is required.</li>
+          <li>Review the message carefully.</li>
+          <li>Please don&apos;t connect your vault.</li>
+          <li>
+            No gas is needed to sign in, and there is currently no cost or fee
+            to use the tool.
+          </li>
+        </ul>
+      </div>
+      <div>
         <button
           onClick={trySignIn}
           type="submit"
-          className="tw-group tw-flex tw-gap-x-3 tw-items-center tw-justify-center tw-bg-primary-500 tw-px-6 tw-py-3 tw-font-medium tw-text-sm tw-text-white tw-border tw-border-primary-500 tw-rounded-lg hover:tw-bg-primary-600 hover:tw-border-primary-600 tw-transition tw-duration-300 tw-ease-out"
+          className="tw-group tw-flex tw-gap-x-3 tw-items-center tw-justify-center tw-bg-primary-500 tw-px-6 tw-py-3.5 tw-font-medium tw-text-sm tw-text-white tw-border tw-border-primary-500 tw-rounded-lg hover:tw-bg-primary-600 hover:tw-border-primary-600 tw-transition tw-duration-300 tw-ease-out"
         >
-          Sign in
+          Sign In with Web3
         </button>
       </div>
     </div>

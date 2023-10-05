@@ -203,7 +203,7 @@ export default function BlockPicker() {
   return (
     <>
       <Head>
-        <title>Meme Lab | 6529 SEIZE</title>
+        <title>Block Picker | 6529 SEIZE</title>
         <link rel="icon" href="/favicon.ico" />
         <meta name="description" content="Block Picker | 6529 SEIZE" />
         <meta

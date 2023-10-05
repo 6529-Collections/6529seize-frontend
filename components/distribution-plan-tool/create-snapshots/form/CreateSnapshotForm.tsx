@@ -24,7 +24,7 @@ interface CreateSnapshotFormValues {
 }
 
 export default function CreateSnapshotForm() {
-  const { setToasts, distributionPlan, fetchOperations } = useContext(
+  const { distributionPlan, fetchOperations } = useContext(
     DistributionPlanToolContext
   );
 
@@ -101,7 +101,7 @@ export default function CreateSnapshotForm() {
       params.tokenIds = formValues.tokenIds;
     }
 
-    const { success, data } = await distributionPlanApiPost({
+    const { success } = await distributionPlanApiPost({
       endpoint,
       body: {
         code: AllowlistOperationCode.CREATE_TOKEN_POOL,
