@@ -8,6 +8,7 @@ export default function CommonInput({
   autoComplete = "off",
   value,
   placeholder = "",
+  onChange,
 }: {
   name: InputHTMLAttributes<HTMLInputElement>["name"];
   type?: InputHTMLAttributes<HTMLInputElement>["type"];
@@ -16,6 +17,7 @@ export default function CommonInput({
   autoComplete?: InputHTMLAttributes<HTMLInputElement>["autoComplete"];
   value: InputHTMLAttributes<HTMLInputElement>["value"];
   placeholder?: InputHTMLAttributes<HTMLInputElement>["placeholder"];
+  onChange: InputHTMLAttributes<HTMLInputElement>["onChange"];
 }) {
   return (
     <input
@@ -26,8 +28,11 @@ export default function CommonInput({
       value={value}
       autoComplete={autoComplete}
       placeholder={placeholder}
+      onChange={onChange}
       className={` ${
-        disabled ? "tw-text-white/50 tw-bg-neutral-700/80" : "tw-text-white tw-bg-neutral-700/40"
+        disabled
+          ? "tw-text-white/50 tw-bg-neutral-700/80"
+          : "tw-text-white tw-bg-neutral-700/40"
       } tw-form-input tw-block tw-w-full tw-rounded-lg tw-border-0 tw-py-3 tw-px-3 tw-font-light tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-neutral-700/40 placeholder:tw-text-neutral-500 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 hover:tw-ring-neutral-700 tw-text-base sm:tw-leading-6 tw-transition tw-duration-300 tw-ease-out`}
     />
   );
