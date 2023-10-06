@@ -1,4 +1,4 @@
-import { PredictBlockNumbersResponseApiModel } from "../../../pages/block-picker";
+import { PredictBlockNumbersResponseApiModel } from "../../../pages/meme-blocks";
 import BlockPickerAdvancedItemBlock from "../advanced/BlockPickerAdvancedItemBlock";
 
 export default function BlockPickerResultTableRowModal({
