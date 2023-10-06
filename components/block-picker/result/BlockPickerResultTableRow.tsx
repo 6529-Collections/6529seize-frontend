@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { PredictBlockNumbersResponseApiModel } from "../../../pages/block-picker";
+import { PredictBlockNumbersResponseApiModel } from "../../../pages/meme-blocks";
 import AllowlistToolCommonModalWrapper, {
   AllowlistToolModalSize,
 } from "../../allowlist-tool/common/modals/AllowlistToolCommonModalWrapper";
