@@ -5,7 +5,11 @@ import "tippy.js/themes/light.css";
 
 import type { AppProps } from "next/app";
 
-import { CW_PROJECT_ID, DELEGATION_CONTRACT } from "../constants";
+import {
+  CW_PROJECT_ID,
+  DELEGATION_CONTRACT,
+  NEXT_GEN_CONTRACT,
+} from "../constants";
 
 import { alchemyProvider } from "wagmi/providers/alchemy";
 
@@ -140,10 +144,16 @@ library.add(
 );
 
 const CONTRACT_CHAINS: Chain[] = [mainnet];
-if (DELEGATION_CONTRACT.chain_id === sepolia.id) {
+if (
+  DELEGATION_CONTRACT.chain_id === sepolia.id ||
+  NEXT_GEN_CONTRACT.chain_id === sepolia.id
+) {
   CONTRACT_CHAINS.push(sepolia);
 }
-if (DELEGATION_CONTRACT.chain_id === goerli.id) {
+if (
+  DELEGATION_CONTRACT.chain_id === goerli.id ||
+  NEXT_GEN_CONTRACT.chain_id === goerli.id
+) {
   CONTRACT_CHAINS.push(goerli);
 }
 

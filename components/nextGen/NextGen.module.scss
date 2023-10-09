@@ -1,0 +1,163 @@
+@import "../../styles/variables.scss";
+
+.collectionPreview {
+  padding: 10px;
+  box-shadow: rgba(0, 0, 0, 0.2) 0px 4px 8px;
+}
+
+.mintBtn {
+  border-radius: 0;
+  border: none;
+  background-color: $green !important;
+  padding: 10px 50px;
+  // width: 100%;
+
+  &:hover {
+    background-color: lighten($color: $green, $amount: 10) !important;
+  }
+}
+
+.globeIcon {
+  height: 28px;
+  cursor: pointer;
+}
+
+.collectionIcon {
+  &:hover {
+    opacity: 0.75;
+  }
+}
+
+.caret {
+  height: 18px;
+}
+
+.infoIcon {
+  height: 18px;
+  margin-left: 6px;
+  cursor: help;
+  &:focus {
+    outline: none !important;
+  }
+}
+
+@media only screen and (max-width: 800px) {
+  .infoIcon {
+    height: 15px;
+  }
+}
+
+.formInput {
+  color: $dark-grey !important;
+  border-radius: 0 !important;
+  border-color: $lightest-grey;
+
+  &:focus {
+    border-color: $blue !important;
+  }
+}
+
+.renderedHtmlContainer {
+  width: 100%;
+  height: calc(90vh - $header-height);
+}
+
+.renderedHtmlContainerPreview {
+  height: 300px;
+  width: 300px;
+  max-width: 100%;
+}
+
+@media only screen and (max-width: 800px) {
+  .renderedHtmlContainerPreview {
+    height: 175px;
+  }
+
+  .renderedHtmlContainer {
+    width: 100%;
+    height: 300px;
+  }
+}
+
+.overview {
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  user-select: none;
+}
+
+.expandedOverview {
+  display: inline-block;
+}
+
+.copyData {
+  text-decoration: underline;
+  cursor: pointer;
+
+  &:hover {
+    color: $lightest-grey;
+  }
+}
+
+.previewBanner {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  opacity: 0.25;
+}
+
+.collectionHeaderRow {
+  margin-top: -120px;
+}
+
+.collectionHeaderCol {
+  background-color: $very-dark-grey;
+}
+
+.mintArea {
+  padding: 15px 25px;
+  background-color: $almost-very-dark-grey;
+}
+
+.mintSelect {
+  color: $dark-grey !important;
+}
+
+.mintingForRadio {
+  margin-bottom: 0;
+  min-height: unset;
+  input {
+    border-color: transparent !important;
+    background-color: white !important;
+    cursor: pointer;
+  }
+
+  input:checked {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='2.3' fill='%23000'/%3e%3c/svg%3e") !important;
+  }
+}
+
+.tokenImageOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.loader {
+  width: 20px;
+  height: 20px;
+  margin-left: 5px;
+}
+
+.marketplace {
+  margin-right: 15px;
+  &:hover {
+    opacity: 0.75;
+  }
+}
