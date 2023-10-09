@@ -31,6 +31,7 @@ import NotFound from "../notFound/NotFound";
 import { ENS } from "../../entities/IENS";
 import DotLoader from "../dotLoader/DotLoader";
 import RepGiveBtn from "../rep/common/give-rep/RepGiveBtn";
+import UserPageRep from "./UserPageRep";
 
 interface Props {
   user: string;
@@ -505,20 +506,14 @@ export default function UserPage(props: Props) {
                         </Tippy>
                       )}
                   </span>
-                  {account.address && ownerAddress?.length && (
-                    <RepGiveBtn
-                      giverAddress={"0x38d9e6aae5da479e1b7dec64ea2a5edf64aa60c8".toLowerCase()}
-                      receiverAddress={ownerAddress.toLowerCase()}
-                    />
-                  )}
                 </Col>
               </Row>
             </Container>
             <Container className="no-padding">
               <Row className="pt-3">
                 <Col
-                  xs={12}
-                  sm={6}
+                  xs="12"
+                  md="4"
                   className={`pt-2 pb-2 ${styles.tagsContainer}`}
                 >
                   {tdh ? (
@@ -599,8 +594,24 @@ export default function UserPage(props: Props) {
                   )}
                 </Col>
                 <Col
-                  xs={12}
-                  sm={6}
+                  xs="12"
+                  md="4"
+                  className={`pt-2 pb-2 ${styles.repContainer}`}
+                >
+                  {ownerAddress?.length && (
+                    <UserPageRep
+                      userWallet={ownerAddress.toLowerCase()}
+                      connectedWallet={
+                        "0x38d9e6aae5da479e1b7dec64ea2a5edf64aa60c8" ??
+                        account?.address?.toLowerCase() ??
+                        null
+                      }
+                    />
+                  )}
+                </Col>
+                <Col
+                  xs="12"
+                  md="4"
                   className={`pt-2 pb-2 ${styles.linksContainer}`}
                 >
                   <Row className="pb-2">

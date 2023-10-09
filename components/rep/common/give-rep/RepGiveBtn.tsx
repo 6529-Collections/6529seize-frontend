@@ -1,28 +1,31 @@
 import { useState } from "react";
 import ModalWrapper, { ModalSize } from "../../../common/modal/ModalWrapper";
 import RepGiveModal from "./RepGiveModal";
-import { Poppins } from "next/font/google";
-import RepGiven from "../RepGiven";
-
-const poppins = Poppins({
-  weight: ["300", "400", "500", "600", "700"],
-  style: ["normal", "italic"],
-  subsets: ["latin"],
-  display: "swap",
-});
 
 export default function RepGiveBtn({
   giverAddress,
   receiverAddress,
+  maxVotes,
+  onNewVote,
 }: {
   giverAddress: string;
   receiverAddress: string;
+  maxVotes: number;
+  onNewVote: () => void;
 }) {
   const [isGiving, setIsGiving] = useState(false);
+  const onRepGiven = () => {
+    setIsGiving(false);
+    onNewVote();
+  };
   return (
-    <div className={`tailwind-scope ${poppins.className}`}>
-      <button onClick={() => setIsGiving((prev) => !prev)}>Give rep</button>
-      <RepGiven wallet={receiverAddress} />
+    <div>
+      <button
+        className="tw-rounded tw-w-16 tw-bg-white/10 tw-px-2 tw-py-1 tw-text-xs tw-font-semibold tw-text-white tw-shadow-sm tw-hover:bg-white/20"
+        onClick={() => setIsGiving((prev) => !prev)}
+      >
+        Vote
+      </button>
       <ModalWrapper
         showModal={isGiving}
         onClose={() => setIsGiving(false)}
@@ -31,6 +34,8 @@ export default function RepGiveBtn({
         <RepGiveModal
           giverAddress={giverAddress}
           receiverAddress={receiverAddress}
+          maxVotes={maxVotes}
+          onRepGiven={onRepGiven}
         />
       </ModalWrapper>
     </div>

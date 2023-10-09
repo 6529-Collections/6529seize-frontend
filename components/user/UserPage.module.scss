@@ -422,14 +422,21 @@
 
 .tagsContainer {
   text-align: left;
-  @media only screen and (max-width: 575px) {
+  @media only screen and (max-width: 767px) {
     text-align: center;
   }
 }
 
+.repContainer {
+  text-align: left;
+  @media only screen and (max-width: 767px) {
+      text-align: center;
+    }
+}
+
 .linksContainer {
   text-align: right;
-  @media only screen and (max-width: 575px) {
+  @media only screen and (max-width: 767px) {
     text-align: center;
   }
 }

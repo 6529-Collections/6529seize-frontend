@@ -7,9 +7,13 @@ import { commonApiPost } from "../../../../services/api/common-api";
 export default function RepGiveModal({
   giverAddress,
   receiverAddress,
+  maxVotes,
+  onRepGiven,
 }: {
   giverAddress: string;
   receiverAddress: string;
+  maxVotes: number;
+  onRepGiven: () => void;
 }) {
   const [amount, setAmount] = useState<number | null>(null);
   const giveRep = async () => {
@@ -34,20 +38,21 @@ export default function RepGiveModal({
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     await giveRep();
+    onRepGiven();
   };
   return (
     <div className="tw-rounded-lg tw-overflow-hidden">
       <div className="tw-p-6 tw-max-h-[calc(100vh_+_-100px)] tw-overflow-y-auto">
-        <div>
+        {/* <div>
           <p className="tw-mb-0 tw-text-lg tw-font-semibold tw-text-neutral-100">
             Give Reputation
           </p>
           <p className="tw-mb-0 tw-text-sm tw-font-normal tw-text-neutral-400">
             Use this form to give reputation to another Ethereum address.
           </p>
-        </div>
+        </div> */}
         <form className="tw-mt-8" onSubmit={handleSubmit}>
-          <div>
+          {/* <div>
             <CommonInputLabel>Giver Address</CommonInputLabel>
             <div className="tw-mt-2">
               <CommonInput
@@ -72,9 +77,9 @@ export default function RepGiveModal({
                 onChange={() => {}}
               />
             </div>
-          </div>
+          </div> */}
           <div className="tw-mt-4">
-            <CommonInputLabel>Rep to Give</CommonInputLabel>
+            <CommonInputLabel>Rep to Give (max: {maxVotes})</CommonInputLabel>
             <div className="tw-mt-2">
               <CommonInput
                 type="number"
