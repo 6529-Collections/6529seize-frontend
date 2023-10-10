@@ -14,6 +14,13 @@ import { VIEW_MODE_COOKIE } from "../../constants";
 import { formatAddress } from "../../helpers/Helpers";
 import WalletModal from "./walletModal/WalletModal";
 
+import { useDispatch, useSelector } from "react-redux";
+import {
+  selectCounter,
+  incrementCounter,
+  decrementCounter,
+} from "../../store/counterSlice";
+
 interface Props {
   onLoad?: () => void;
   onSetWallets?(wallets: string[]): any;
@@ -44,6 +51,21 @@ export default function Header(props: Props) {
   const [showBurgerMenuAbout, setShowBurgerMenuAbout] = useState(false);
   const [showBurgerMenuCommunity, setShowBurgerMenuCommunity] = useState(false);
   const [showBurgerMenuTools, setShowBurgerMenuTools] = useState(false);
+
+  const counter = useSelector(selectCounter);
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    if (account.isConnected) {
+      dispatch(incrementCounter(1));
+    } else {
+      dispatch(decrementCounter(1));
+    }
+  }, [account.isConnected]);
+
+  useEffect(() => {
+    console.log("counter", counter);
+  }, [counter]);
 
   useEffect(() => {
     const viewMode = Cookies.get(VIEW_MODE_COOKIE);
