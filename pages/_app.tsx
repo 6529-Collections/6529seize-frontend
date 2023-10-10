@@ -5,11 +5,7 @@ import "tippy.js/themes/light.css";
 
 import type { AppProps } from "next/app";
 
-import {
-  CW_PROJECT_ID,
-  DELEGATION_CONTRACT,
-  NEXT_GEN_CONTRACT,
-} from "../constants";
+import { CW_PROJECT_ID, DELEGATION_CONTRACT } from "../constants";
 
 import { alchemyProvider } from "wagmi/providers/alchemy";
 
@@ -83,6 +79,7 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import Head from "next/head";
 import { Web3Modal } from "@web3modal/react";
+import { NEXTGEN_CORE, NEXTGEN_MINTER } from "../components/nextGen/contracts";
 
 library.add(
   faArrowUp,
@@ -146,13 +143,15 @@ library.add(
 const CONTRACT_CHAINS: Chain[] = [mainnet];
 if (
   DELEGATION_CONTRACT.chain_id === sepolia.id ||
-  NEXT_GEN_CONTRACT.chain_id === sepolia.id
+  (NEXTGEN_CORE.chain_id as number) === sepolia.id ||
+  (NEXTGEN_MINTER.chain_id as number) === sepolia.id
 ) {
   CONTRACT_CHAINS.push(sepolia);
 }
 if (
   DELEGATION_CONTRACT.chain_id === goerli.id ||
-  NEXT_GEN_CONTRACT.chain_id === goerli.id
+  (NEXTGEN_CORE.chain_id as number) === goerli.id ||
+  (NEXTGEN_MINTER.chain_id as number) === goerli.id
 ) {
   CONTRACT_CHAINS.push(goerli);
 }

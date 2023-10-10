@@ -4,8 +4,7 @@ import { Col, Container, Row } from "react-bootstrap";
 import { TokenURI } from "./entities";
 import { useState } from "react";
 import { useContractRead, useEnsName } from "wagmi";
-import { NEXT_GEN_ABI } from "../../abis";
-import { NEXT_GEN_CONTRACT } from "../../constants";
+import { NEXTGEN_CORE } from "./contracts";
 
 interface Props {
   token: TokenURI;
@@ -17,9 +16,9 @@ export default function NextGenTokenPreview(props: Props) {
   const [name, setName] = useState<string>();
 
   useContractRead({
-    address: NEXT_GEN_CONTRACT.contract,
-    abi: NEXT_GEN_ABI,
-    chainId: NEXT_GEN_CONTRACT.chain_id,
+    address: NEXTGEN_CORE.contract as `0x${string}`,
+    abi: NEXTGEN_CORE.abi,
+    chainId: NEXTGEN_CORE.chain_id,
     functionName: "ownerOf",
     watch: true,
     args: [props.token.id],

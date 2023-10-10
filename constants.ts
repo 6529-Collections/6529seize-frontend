@@ -37,15 +37,3 @@ export const OPENSEA_STORE_FRONT_CONTRACT =
   "0x495f947276749ce646f68ac8c248420045cb7b5e";
 
 export const OPENSEA_STORE_FRONT_CONTRACT_DEPLOYER = `0x5b3256965e7c3cf26e11fcaf296dfc8807c01073`;
-
-export const NEXT_GEN_CONTRACT: {
-  chain_id: number;
-  contract: `0x${string}`;
-} = {
-  // chain_id: sepolia.id,
-  // contract: "0x5f2f33b4aabc56ed7731b772d849a2c6276ac340",
-  // chain_id: sepolia.id,
-  // contract: "0x3148c619708821d3a6554bdbcb7593c61659b183",
-  chain_id: goerli.id,
-  contract: "0x56A80F508c77cE23bb9A9EF7E26c505c9c6C4A3f",
-};

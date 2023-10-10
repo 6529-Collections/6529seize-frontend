@@ -1,13 +1,11 @@
 import styles from "./NextGen.module.scss";
 import { Container, Row, Col, Button } from "react-bootstrap";
 import { useContractRead, useContractReads } from "wagmi";
-import { NEVER_DATE, NEXT_GEN_CONTRACT } from "../../constants";
-import { NEXT_GEN_ABI } from "../../abis";
+import { NEVER_DATE } from "../../constants";
 import { Fragment, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import NextGenTokenList from "./NextGenTokenList";
 import {
-  TokenIndexes,
   Info,
   AdditionalData,
   TokenURI,
@@ -18,6 +16,7 @@ import { fromGWEI } from "../../helpers/Helpers";
 import { COLLECTION_BANNERS } from "./NextGen";
 import Image from "next/image";
 import { goerli } from "wagmi/chains";
+import { NEXTGEN_CORE, NEXTGEN_MINTER } from "./contracts";
 
 interface Props {
   collection: number;
@@ -83,7 +82,8 @@ export function extractField(field: string, s: string) {
 }
 
 export default function NextGenCollection(props: Props) {
-  const [tokenIndexes, setTokenIndexes] = useState<TokenIndexes>();
+  const [tokenStartIndex, setTokenStartIndex] = useState<number>(0);
+  const [tokenEndIndex, setTokenEndIndex] = useState<number>(0);
 
   const [info, setInfo] = useState<Info>();
   const [libraryScript, setLibraryScript] = useState<LibraryScript>();
@@ -98,12 +98,12 @@ export default function NextGenCollection(props: Props) {
 
   function getTokenUriReadParams() {
     const params: any[] = [];
-    if (tokenIndexes) {
-      for (let i = tokenIndexes.start; i <= tokenIndexes.end; i++) {
+    if (tokenStartIndex && tokenEndIndex) {
+      for (let i = tokenStartIndex; i <= tokenEndIndex; i++) {
         params.push({
-          address: NEXT_GEN_CONTRACT.contract,
-          abi: NEXT_GEN_ABI,
-          chainId: NEXT_GEN_CONTRACT.chain_id,
+          address: NEXTGEN_CORE.contract,
+          abi: NEXTGEN_CORE.abi,
+          chainId: NEXTGEN_CORE.chain_id,
           functionName: "tokenURI",
           args: [i],
         });
@@ -112,23 +112,30 @@ export default function NextGenCollection(props: Props) {
     return params;
   }
 
-  useContractRead({
-    address: NEXT_GEN_CONTRACT.contract,
-    abi: NEXT_GEN_ABI,
-    chainId: NEXT_GEN_CONTRACT.chain_id,
-    functionName: "viewTokensIndexForCollection",
+  const startIndexRead = useContractRead({
+    address: NEXTGEN_CORE.contract as `0x${string}`,
+    abi: NEXTGEN_CORE.abi,
+    chainId: NEXTGEN_CORE.chain_id,
+    functionName: "viewTokensIndexMin",
     watch: true,
     args: [props.collection],
     onSettled(data: any, error: any) {
       if (data) {
-        const d = data as any[];
-        const startIndex = parseInt(d[0]);
-        const endIndex = parseInt(d[1]);
-        const tokenIndexes: TokenIndexes = {
-          start: startIndex,
-          end: endIndex,
-        };
-        setTokenIndexes(tokenIndexes);
+        setTokenStartIndex(parseInt(data));
+      }
+    },
+  });
+
+  const endIndexRead = useContractRead({
+    address: NEXTGEN_CORE.contract as `0x${string}`,
+    abi: NEXTGEN_CORE.abi,
+    chainId: NEXTGEN_CORE.chain_id,
+    functionName: "viewTokensIndexMax",
+    watch: true,
+    args: [props.collection],
+    onSettled(data: any, error: any) {
+      if (data) {
+        setTokenEndIndex(parseInt(data));
       }
     },
   });
@@ -136,19 +143,19 @@ export default function NextGenCollection(props: Props) {
   useContractReads({
     contracts: getTokenUriReadParams(),
     watch: true,
-    enabled: tokenIndexes != undefined,
+    enabled: tokenStartIndex > 0 && tokenEndIndex > 0,
     onSettled(data, error) {
       const tokens: TokenURI[] = [];
       if (data) {
         data.map((d, index: number) => {
-          if (d.result && tokenIndexes) {
+          if (d.result && tokenStartIndex && tokenEndIndex) {
             const r: string = d.result as string;
             if (r.startsWith("data")) {
               const uri = extractURI(r);
               const name = extractField("name", r);
               const description = extractField("description", r);
               tokens.push({
-                id: index + tokenIndexes.start,
+                id: index + tokenStartIndex,
                 collection: props.collection,
                 uri: uri.uri,
                 data: uri.data,
@@ -157,7 +164,7 @@ export default function NextGenCollection(props: Props) {
               });
             } else {
               tokens.push({
-                id: index + tokenIndexes.start,
+                id: index + tokenStartIndex,
                 collection: props.collection,
                 uri: r,
                 name: "",
@@ -172,9 +179,9 @@ export default function NextGenCollection(props: Props) {
   });
 
   useContractRead({
-    address: NEXT_GEN_CONTRACT.contract,
-    abi: NEXT_GEN_ABI,
-    chainId: NEXT_GEN_CONTRACT.chain_id,
+    address: NEXTGEN_CORE.contract as `0x${string}`,
+    abi: NEXTGEN_CORE.abi,
+    chainId: NEXTGEN_CORE.chain_id,
     functionName: "retrieveCollectionInfo",
     watch: true,
     args: [props.collection],
@@ -195,9 +202,9 @@ export default function NextGenCollection(props: Props) {
   });
 
   useContractRead({
-    address: NEXT_GEN_CONTRACT.contract,
-    abi: NEXT_GEN_ABI,
-    chainId: NEXT_GEN_CONTRACT.chain_id,
+    address: NEXTGEN_CORE.contract as `0x${string}`,
+    abi: NEXTGEN_CORE.abi,
+    chainId: NEXTGEN_CORE.chain_id,
     functionName: "retrieveCollectionLibraryAndScript",
     watch: true,
     args: [props.collection],
@@ -214,9 +221,9 @@ export default function NextGenCollection(props: Props) {
   });
 
   useContractRead({
-    address: NEXT_GEN_CONTRACT.contract,
-    abi: NEXT_GEN_ABI,
-    chainId: NEXT_GEN_CONTRACT.chain_id,
+    address: NEXTGEN_CORE.contract as `0x${string}`,
+    abi: NEXTGEN_CORE.abi,
+    chainId: NEXTGEN_CORE.chain_id,
     functionName: "retrieveCollectionAdditionalData",
     watch: true,
     args: [props.collection],
@@ -238,9 +245,9 @@ export default function NextGenCollection(props: Props) {
   });
 
   useContractRead({
-    address: NEXT_GEN_CONTRACT.contract,
-    abi: NEXT_GEN_ABI,
-    chainId: NEXT_GEN_CONTRACT.chain_id,
+    address: NEXTGEN_MINTER.contract as `0x${string}`,
+    abi: NEXTGEN_MINTER.abi,
+    chainId: NEXTGEN_MINTER.chain_id,
     functionName: "retrieveCollectionPhases",
     watch: true,
     args: [props.collection],
@@ -260,9 +267,9 @@ export default function NextGenCollection(props: Props) {
   });
 
   useContractRead({
-    address: NEXT_GEN_CONTRACT.contract,
-    abi: NEXT_GEN_ABI,
-    chainId: NEXT_GEN_CONTRACT.chain_id,
+    address: NEXTGEN_CORE.contract as `0x${string}`,
+    abi: NEXTGEN_CORE.abi,
+    chainId: NEXTGEN_CORE.chain_id,
     functionName: "burnAmount",
     watch: true,
     args: [props.collection],
@@ -273,8 +280,8 @@ export default function NextGenCollection(props: Props) {
     },
   });
 
-  if (tokenIndexes) {
-    if (tokenIndexes.start === 0 || tokenIndexes.end === 0) {
+  if (!startIndexRead.isLoading && !endIndexRead.isLoading) {
+    if (!tokenStartIndex || !tokenEndIndex) {
       return (
         <Container className="pt-5 text-center">
           <Row>
@@ -319,236 +326,246 @@ export default function NextGenCollection(props: Props) {
             alt={`${props.collection}-banner`}
           />
           <Container className="pt-2 pb-2">
-            {tokenIndexes && additionalData && info && phaseTimes && (
-              <Fragment>
-                <Row className="pt-2">
-                  <Col className="d-flex justify-content-between align-items-center flex-wrap">
-                    <span>
-                      <h1 className="mb-0">{info.name.toUpperCase()}</h1>
-                    </span>
-                    <span className="d-flex align-items-center gap-4">
-                      <FontAwesomeIcon
-                        className={`${styles.globeIcon} ${styles.collectionIcon}`}
-                        icon="globe"
-                        onClick={() => {
-                          let url = info.website;
-                          if (!url.startsWith("http")) {
-                            url = `http://${url}`;
-                          }
-                          window.open(url, "_blank");
-                        }}></FontAwesomeIcon>
-                      <a
-                        href={`https://${
-                          NEXT_GEN_CONTRACT.chain_id === goerli.id
-                            ? `testnets.opensea`
-                            : `opensea`
-                        }.io/assets/${
-                          NEXT_GEN_CONTRACT.chain_id === goerli.id
-                            ? `goerli`
-                            : `ethereum`
-                        }/${NEXT_GEN_CONTRACT.contract}`}
-                        target="_blank"
-                        rel="noreferrer">
-                        <Image
-                          className={styles.collectionIcon}
-                          src="/opensea.png"
-                          alt="opensea"
-                          width={32}
-                          height={32}
-                        />
-                      </a>
-                      <a
-                        href={`https://${
-                          NEXT_GEN_CONTRACT.chain_id === goerli.id
-                            ? `goerli.x2y2`
-                            : `x2y2`
-                        }.io/eth/${NEXT_GEN_CONTRACT.contract}`}
-                        target="_blank"
-                        rel="noreferrer">
-                        <Image
-                          className={styles.collectionIcon}
-                          src="/x2y2.png"
-                          alt="x2y2"
-                          width={32}
-                          height={32}
-                        />
-                      </a>
-                      <Button
-                        onClick={() => {
-                          window.location.href = `/nextgen/collection/${props.collection}/mint`;
-                        }}
-                        className={styles.mintBtn}
-                        disabled={
-                          !additionalData ||
-                          !additionalData.is_collection_active ||
-                          !phaseTimes ||
-                          (!isMintingOpen(
-                            phaseTimes.allowlist_start_time,
-                            phaseTimes.allowlist_end_time
-                          ) &&
-                            !isMintingOpen(
+            {tokenStartIndex &&
+              tokenEndIndex &&
+              additionalData &&
+              info &&
+              phaseTimes && (
+                <Fragment>
+                  <Row className="pt-2">
+                    <Col className="d-flex justify-content-between align-items-center flex-wrap">
+                      <span>
+                        <h1 className="mb-0">{info.name.toUpperCase()}</h1>
+                      </span>
+                      <span className="d-flex align-items-center gap-4">
+                        <FontAwesomeIcon
+                          className={`${styles.globeIcon} ${styles.collectionIcon}`}
+                          icon="globe"
+                          onClick={() => {
+                            let url = info.website;
+                            if (!url.startsWith("http")) {
+                              url = `http://${url}`;
+                            }
+                            window.open(url, "_blank");
+                          }}></FontAwesomeIcon>
+                        <a
+                          href={`https://${
+                            NEXTGEN_CORE.chain_id === goerli.id
+                              ? `testnets.opensea`
+                              : `opensea`
+                          }.io/assets/${
+                            NEXTGEN_CORE.chain_id === goerli.id
+                              ? `goerli`
+                              : `ethereum`
+                          }/${NEXTGEN_CORE.contract}`}
+                          target="_blank"
+                          rel="noreferrer">
+                          <Image
+                            className={styles.collectionIcon}
+                            src="/opensea.png"
+                            alt="opensea"
+                            width={32}
+                            height={32}
+                          />
+                        </a>
+                        <a
+                          href={`https://${
+                            NEXTGEN_CORE.chain_id === goerli.id
+                              ? `goerli.x2y2`
+                              : `x2y2`
+                          }.io/eth/${NEXTGEN_CORE.contract}`}
+                          target="_blank"
+                          rel="noreferrer">
+                          <Image
+                            className={styles.collectionIcon}
+                            src="/x2y2.png"
+                            alt="x2y2"
+                            width={32}
+                            height={32}
+                          />
+                        </a>
+                        <Button
+                          onClick={() => {
+                            window.location.href = `/nextgen/collection/${props.collection}/mint`;
+                          }}
+                          className={styles.mintBtn}
+                          disabled={
+                            !additionalData ||
+                            !additionalData.is_collection_active ||
+                            !phaseTimes ||
+                            (!isMintingOpen(
+                              phaseTimes.allowlist_start_time,
+                              phaseTimes.allowlist_end_time
+                            ) &&
+                              !isMintingOpen(
+                                phaseTimes.public_start_time,
+                                phaseTimes.public_end_time
+                              ))
+                          }>
+                          Go to Minting
+                        </Button>
+                      </span>
+                    </Col>
+                    <Col className="pt-2" xs={12}>
+                      by {info.artist.toUpperCase()}
+                    </Col>
+                  </Row>
+                  <Row className="pt-4">
+                    <Col className="d-flex  align-items-center flex-wrap gap-4">
+                      <span className="d-inline-flex align-items-center gap-2">
+                        <span
+                          className={`traffic-light ${
+                            additionalData.is_collection_active
+                              ? `green`
+                              : `red`
+                          }`}></span>
+                        Active
+                      </span>
+                      <span className="d-inline-flex align-items-center gap-2">
+                        <span
+                          className={`traffic-light ${
+                            isMintingOpen(
+                              phaseTimes.allowlist_start_time,
+                              phaseTimes.allowlist_end_time
+                            )
+                              ? `green`
+                              : isMintingUpcoming(
+                                  phaseTimes.allowlist_start_time
+                                )
+                              ? `orange`
+                              : `red`
+                          }`}></span>
+                        Allowlist Minting{" "}
+                        {getMintingTimesDisplay(
+                          phaseTimes.allowlist_start_time,
+                          phaseTimes.allowlist_end_time
+                        )}
+                      </span>
+                      <span className="d-inline-flex align-items-center gap-2">
+                        <span
+                          className={`traffic-light ${
+                            isMintingOpen(
                               phaseTimes.public_start_time,
                               phaseTimes.public_end_time
-                            ))
-                        }>
-                        Go to Minting
-                      </Button>
-                    </span>
-                  </Col>
-                  <Col className="pt-2" xs={12}>
-                    by {info.artist.toUpperCase()}
-                  </Col>
-                </Row>
-                <Row className="pt-4">
-                  <Col className="d-flex  align-items-center flex-wrap gap-4">
-                    <span className="d-inline-flex align-items-center gap-2">
-                      <span
-                        className={`traffic-light ${
-                          additionalData.is_collection_active ? `green` : `red`
-                        }`}></span>
-                      Active
-                    </span>
-                    <span className="d-inline-flex align-items-center gap-2">
-                      <span
-                        className={`traffic-light ${
-                          isMintingOpen(
-                            phaseTimes.allowlist_start_time,
-                            phaseTimes.allowlist_end_time
-                          )
-                            ? `green`
-                            : isMintingUpcoming(phaseTimes.allowlist_start_time)
-                            ? `orange`
-                            : `red`
-                        }`}></span>
-                      Allowlist Minting{" "}
-                      {getMintingTimesDisplay(
-                        phaseTimes.allowlist_start_time,
-                        phaseTimes.allowlist_end_time
+                            )
+                              ? `green`
+                              : isMintingUpcoming(phaseTimes.public_start_time)
+                              ? `orange`
+                              : `red`
+                          }`}></span>
+                        Public Minting{" "}
+                        {getMintingTimesDisplay(
+                          phaseTimes.public_start_time,
+                          phaseTimes.public_end_time
+                        )}
+                      </span>
+                    </Col>
+                  </Row>
+                  <Row className="pt-4">
+                    <Col className="d-flex align-tems-center justify-content-start gap-3 flex-wrap">
+                      <span>
+                        Token Indexes{" "}
+                        <b>
+                          {tokenStartIndex} - {tokenEndIndex}
+                        </b>
+                      </span>
+                      &bull;
+                      <span>
+                        Total Supply <b>x{additionalData.total_supply}</b>
+                      </span>
+                      &bull;
+                      <span>
+                        Minted <b>x{additionalData.circulation_supply}</b>
+                      </span>
+                      {burnAmount > 0 && (
+                        <>
+                          &bull;
+                          <span>
+                            Burnt <b>x{burnAmount}</b>
+                          </span>
+                        </>
                       )}
-                    </span>
-                    <span className="d-inline-flex align-items-center gap-2">
-                      <span
-                        className={`traffic-light ${
-                          isMintingOpen(
-                            phaseTimes.public_start_time,
-                            phaseTimes.public_end_time
-                          )
-                            ? `green`
-                            : isMintingUpcoming(phaseTimes.public_start_time)
-                            ? `orange`
-                            : `red`
-                        }`}></span>
-                      Public Minting{" "}
-                      {getMintingTimesDisplay(
-                        phaseTimes.public_start_time,
-                        phaseTimes.public_end_time
+                      &bull;
+                      <span>
+                        Available{" "}
+                        <b>
+                          {additionalData.total_supply -
+                            additionalData.circulation_supply -
+                            burnAmount >
+                          0
+                            ? `x${
+                                additionalData.total_supply -
+                                additionalData.circulation_supply -
+                                burnAmount
+                              }`
+                            : `-`}
+                        </b>
+                      </span>
+                      &bull;
+                      <span>
+                        Mint Cost{" "}
+                        <b>
+                          {additionalData.mint_cost > 0
+                            ? fromGWEI(additionalData.mint_cost)
+                            : `Free`}{" "}
+                          {additionalData.mint_cost > 0 ? `ETH` : ``}
+                        </b>
+                      </span>
+                    </Col>
+                  </Row>
+                  <Row className="pt-4">
+                    <Col xs={6}>
+                      <h4>Overview</h4>
+                    </Col>
+                    <Col
+                      xs={6}
+                      onClick={() => setIsOverviewExpanded(!isOverviewExpanded)}
+                      className="d-flex align-items-center justify-content-end gap-2 cursor-pointer unselectable">
+                      Show {isOverviewExpanded ? `Less` : `More`}{" "}
+                      <FontAwesomeIcon
+                        icon={
+                          isOverviewExpanded ? `chevron-up` : `chevron-down`
+                        }
+                        className={styles.caret}></FontAwesomeIcon>
+                    </Col>
+                  </Row>
+                  <Row
+                    className={`pt-1 ${styles.overview} ${
+                      isOverviewExpanded ? styles.expandedOverview : ``
+                    }`}>
+                    <Col xs={12}>{info.description}</Col>
+                    <Col xs={12} className="pt-2">
+                      Licence <b>{info.licence}</b>
+                    </Col>
+                    <Col xs={12} className="pt-1">
+                      Base URI <b>{info.base_uri}</b>
+                    </Col>
+                    <Col xs={12} className="pt-1">
+                      Sales Percentage <b>{additionalData.sales_percentage}%</b>
+                    </Col>
+                    <Col xs={12} className="pt-1">
+                      Merkle Root <b>{phaseTimes.merkle_root}</b>
+                    </Col>
+                  </Row>
+                  <Row className="pt-4">
+                    <Col>
+                      <h4>
+                        Tokens x{additionalData.circulation_supply - burnAmount}
+                      </h4>
+                    </Col>
+                  </Row>
+                  <Row>
+                    <Col>
+                      {tokenURIs && (
+                        <NextGenTokenList
+                          collection={props.collection}
+                          tokens={tokenURIs}
+                        />
                       )}
-                    </span>
-                  </Col>
-                </Row>
-                <Row className="pt-4">
-                  <Col className="d-flex align-tems-center justify-content-start gap-3 flex-wrap">
-                    <span>
-                      Token Indexes{" "}
-                      <b>
-                        {tokenIndexes.start} - {tokenIndexes.end}
-                      </b>
-                    </span>
-                    &bull;
-                    <span>
-                      Total Supply <b>x{additionalData.total_supply}</b>
-                    </span>
-                    &bull;
-                    <span>
-                      Minted <b>x{additionalData.circulation_supply}</b>
-                    </span>
-                    {burnAmount > 0 && (
-                      <>
-                        &bull;
-                        <span>
-                          Burnt <b>x{burnAmount}</b>
-                        </span>
-                      </>
-                    )}
-                    &bull;
-                    <span>
-                      Available{" "}
-                      <b>
-                        {additionalData.total_supply -
-                          additionalData.circulation_supply -
-                          burnAmount >
-                        0
-                          ? `x${
-                              additionalData.total_supply -
-                              additionalData.circulation_supply -
-                              burnAmount
-                            }`
-                          : `-`}
-                      </b>
-                    </span>
-                    &bull;
-                    <span>
-                      Mint Cost{" "}
-                      <b>
-                        {additionalData.mint_cost > 0
-                          ? fromGWEI(additionalData.mint_cost)
-                          : `Free`}{" "}
-                        {additionalData.mint_cost > 0 ? `ETH` : ``}
-                      </b>
-                    </span>
-                  </Col>
-                </Row>
-                <Row className="pt-4">
-                  <Col xs={6}>
-                    <h4>Overview</h4>
-                  </Col>
-                  <Col
-                    xs={6}
-                    onClick={() => setIsOverviewExpanded(!isOverviewExpanded)}
-                    className="d-flex align-items-center justify-content-end gap-2 cursor-pointer unselectable">
-                    Show {isOverviewExpanded ? `Less` : `More`}{" "}
-                    <FontAwesomeIcon
-                      icon={isOverviewExpanded ? `chevron-up` : `chevron-down`}
-                      className={styles.caret}></FontAwesomeIcon>
-                  </Col>
-                </Row>
-                <Row
-                  className={`pt-1 ${styles.overview} ${
-                    isOverviewExpanded ? styles.expandedOverview : ``
-                  }`}>
-                  <Col xs={12}>{info.description}</Col>
-                  <Col xs={12} className="pt-2">
-                    Licence <b>{info.licence}</b>
-                  </Col>
-                  <Col xs={12} className="pt-1">
-                    Base URI <b>{info.base_uri}</b>
-                  </Col>
-                  <Col xs={12} className="pt-1">
-                    Sales Percentage <b>{additionalData.sales_percentage}%</b>
-                  </Col>
-                  <Col xs={12} className="pt-1">
-                    Merkle Root <b>{phaseTimes.merkle_root}</b>
-                  </Col>
-                </Row>
-                <Row className="pt-4">
-                  <Col>
-                    <h4>
-                      Tokens x{additionalData.circulation_supply - burnAmount}
-                    </h4>
-                  </Col>
-                </Row>
-                <Row>
-                  <Col>
-                    {tokenURIs && (
-                      <NextGenTokenList
-                        collection={props.collection}
-                        tokens={tokenURIs}
-                      />
-                    )}
-                  </Col>
-                </Row>
-              </Fragment>
-            )}
+                    </Col>
+                  </Row>
+                </Fragment>
+              )}
           </Container>
         </>
       );

@@ -7,11 +7,6 @@ export interface Info {
   base_uri: string;
 }
 
-export interface TokenIndexes {
-  start: number;
-  end: number;
-}
-
 export interface LibraryScript {
   library: string;
   script: string[];

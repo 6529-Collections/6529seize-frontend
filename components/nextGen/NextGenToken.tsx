@@ -1,8 +1,6 @@
 import styles from "./NextGen.module.scss";
 import { mainnet, useContractRead, useEnsName } from "wagmi";
 import { Col, Container, Row, Table } from "react-bootstrap";
-import { NEXT_GEN_CONTRACT } from "../../constants";
-import { NEXT_GEN_ABI } from "../../abis";
 import { useState } from "react";
 import { Info, TokenURI } from "./entities";
 import NextGenTokenImage from "./NextGenTokenImage";
@@ -10,6 +8,7 @@ import Address from "../address/Address";
 import { extractField, extractURI } from "./NextGenCollection";
 import Image from "next/image";
 import { goerli } from "wagmi/chains";
+import { NEXTGEN_CORE, NEXTGEN_MINTER } from "./contracts";
 
 interface Props {
   collection: number;
@@ -30,9 +29,9 @@ export default function NextGenToken(props: Props) {
   const [codeCopied, setCodeCopied] = useState(false);
 
   useContractRead({
-    address: NEXT_GEN_CONTRACT.contract,
-    abi: NEXT_GEN_ABI,
-    chainId: NEXT_GEN_CONTRACT.chain_id,
+    address: NEXTGEN_CORE.contract as `0x${string}`,
+    abi: NEXTGEN_CORE.abi,
+    chainId: NEXTGEN_CORE.chain_id,
     functionName: "tokenURI",
     watch: true,
     args: [props.token],
@@ -65,9 +64,9 @@ export default function NextGenToken(props: Props) {
   });
 
   useContractRead({
-    address: NEXT_GEN_CONTRACT.contract,
-    abi: NEXT_GEN_ABI,
-    chainId: NEXT_GEN_CONTRACT.chain_id,
+    address: NEXTGEN_CORE.contract as `0x${string}`,
+    abi: NEXTGEN_CORE.abi,
+    chainId: NEXTGEN_CORE.chain_id,
     functionName: "retrieveCollectionInfo",
     watch: true,
     args: [props.collection],
@@ -88,9 +87,9 @@ export default function NextGenToken(props: Props) {
   });
 
   useContractRead({
-    address: NEXT_GEN_CONTRACT.contract,
-    abi: NEXT_GEN_ABI,
-    chainId: NEXT_GEN_CONTRACT.chain_id,
+    address: NEXTGEN_CORE.contract as `0x${string}`,
+    abi: NEXTGEN_CORE.abi,
+    chainId: NEXTGEN_CORE.chain_id,
     functionName: "ownerOf",
     watch: true,
     args: [props.token],
@@ -258,14 +257,14 @@ export default function NextGenToken(props: Props) {
                     <Col>
                       <a
                         href={`https://${
-                          NEXT_GEN_CONTRACT.chain_id === goerli.id
+                          NEXTGEN_CORE.chain_id === goerli.id
                             ? `testnets.opensea`
                             : `opensea`
                         }.io/assets/${
-                          NEXT_GEN_CONTRACT.chain_id === goerli.id
+                          NEXTGEN_MINTER.chain_id === goerli.id
                             ? `goerli`
                             : `ethereum`
-                        }/${NEXT_GEN_CONTRACT.contract}/${props.token}`}
+                        }/${NEXTGEN_MINTER.contract}/${props.token}`}
                         target="_blank"
                         rel="noreferrer">
                         <Image
@@ -278,10 +277,10 @@ export default function NextGenToken(props: Props) {
                       </a>
                       <a
                         href={`https://${
-                          NEXT_GEN_CONTRACT.chain_id === goerli.id
+                          NEXTGEN_MINTER.chain_id === goerli.id
                             ? `goerli.x2y2`
                             : `x2y2`
-                        }.io/eth/${NEXT_GEN_CONTRACT.contract}/${props.token}`}
+                        }.io/eth/${NEXTGEN_MINTER.contract}/${props.token}`}
                         target="_blank"
                         rel="noreferrer">
                         <Image

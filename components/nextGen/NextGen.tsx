@@ -1,9 +1,8 @@
 import { Container, Row, Col } from "react-bootstrap";
 import { useContractRead } from "wagmi";
-import { NEXT_GEN_CONTRACT } from "../../constants";
-import { NEXT_GEN_ABI } from "../../abis";
 import { useState } from "react";
 import NextGenCollectionPreview from "./NextGenCollectionPreview";
+import { NEXTGEN_CORE } from "./contracts";
 
 export const COLLECTION_BANNERS = `https://6529bucket.s3.eu-west-1.amazonaws.com/nextgen_collections/banners`;
 export const COLLECTION_PREVIEWS = `https://6529bucket.s3.eu-west-1.amazonaws.com/nextgen_collections/previews`;
@@ -12,9 +11,9 @@ export default function NextGen() {
   const [collectionIndex, setCollectionIndex] = useState<number>();
 
   useContractRead({
-    address: NEXT_GEN_CONTRACT.contract,
-    abi: NEXT_GEN_ABI,
-    chainId: NEXT_GEN_CONTRACT.chain_id,
+    address: NEXTGEN_CORE.contract as `0x${string}`,
+    abi: NEXTGEN_CORE.abi,
+    chainId: NEXTGEN_CORE.chain_id,
     functionName: "newCollectionIndex",
     watch: true,
     onSettled(data: any, error: any) {

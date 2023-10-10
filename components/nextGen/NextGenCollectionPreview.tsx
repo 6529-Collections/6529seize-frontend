@@ -1,12 +1,11 @@
 import styles from "./NextGen.module.scss";
 import { Container, Row, Col } from "react-bootstrap";
 import { useContractRead } from "wagmi";
-import { NEXT_GEN_CONTRACT } from "../../constants";
-import { NEXT_GEN_ABI } from "../../abis";
 import { useState } from "react";
 import { COLLECTION_PREVIEWS } from "./NextGen";
 import Image from "next/image";
 import { Info } from "./entities";
+import { NEXTGEN_CORE } from "./contracts";
 
 interface Props {
   collection: number;
@@ -16,9 +15,9 @@ export default function NextGenCollectionPreview(props: Props) {
   const [info, setInfo] = useState<Info>();
 
   useContractRead({
-    address: NEXT_GEN_CONTRACT.contract,
-    abi: NEXT_GEN_ABI,
-    chainId: NEXT_GEN_CONTRACT.chain_id,
+    address: NEXTGEN_CORE.contract as `0x${string}`,
+    abi: NEXTGEN_CORE.abi,
+    chainId: NEXTGEN_CORE.chain_id,
     functionName: "retrieveCollectionInfo",
     watch: true,
     args: [props.collection],

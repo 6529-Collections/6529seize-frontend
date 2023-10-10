@@ -1,4 +1,4 @@
-import { sepolia } from "wagmi/chains";
+import { mainnet, sepolia, goerli } from "wagmi/chains";
 import {
   GRADIENT_CONTRACT,
   MEMELAB_CONTRACT,
@@ -310,4 +310,30 @@ export function capitalizeEveryWord(input: string): string {
   return input
     .toLocaleLowerCase()
     .replace(/^(.)|\s+(.)/g, (match: string) => match.toUpperCase());
+}
+
+export function getNetworkName(chainId: number) {
+  if (chainId === mainnet.id) {
+    return "Etherium Mainnet";
+  } else if (chainId === sepolia.id) {
+    return "Sepolia Testnet";
+  } else if (chainId === goerli.id) {
+    return "Goerli Testnet";
+  } else {
+    return `Network ID ${chainId}`;
+  }
+}
+
+export function createArray(startNum: number, endNum: number) {
+  let result = [];
+
+  if (startNum <= endNum) {
+    for (let i = startNum; i <= endNum; i++) {
+      result.push(i);
+    }
+  } else {
+    result.push(0);
+  }
+
+  return result;
 }
