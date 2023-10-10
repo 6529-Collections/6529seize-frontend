@@ -29,7 +29,7 @@ export default function DistributionPlanToolWrapper({
   const router = useRouter();
   const [defaultBreadCrumbs] = useState<Crumb[]>([
     { display: "Home", href: "/" },
-    { display: "Distribution plan tool" },
+    { display: "EMMA" },
   ]);
   const [breadcrumbs, setBreadCrumbs] = useState<Crumb[]>(defaultBreadCrumbs);
   const [initialized, setInitialized] = useState(false);
@@ -44,17 +44,14 @@ export default function DistributionPlanToolWrapper({
   return (
     <>
       <Head>
-        <title>Distribution Plan Tool | 6529 SEIZE</title>
+        <title>EMMA | 6529 SEIZE</title>
         <link rel="icon" href="/favicon.ico" />
-        <meta
-          name="description"
-          content="Distribution Plan Tool | 6529 SEIZE"
-        />
+        <meta name="description" content="EMMA | 6529 SEIZE" />
         <meta
           property="og:url"
           content={`${process.env.BASE_ENDPOINT}/distribution-plan-tool`}
         />
-        <meta property="og:title" content="Distribution Plan Tool" />
+        <meta property="og:title" content="EMMA" />
         <meta property="og:description" content="6529 SEIZE" />
         <meta
           property="og:image"
