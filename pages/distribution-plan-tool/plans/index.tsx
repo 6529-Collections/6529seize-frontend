@@ -12,7 +12,7 @@ export default function DistributionPlanToolPlansPage() {
               <div className="tw-max-w-2xl">
                 <div className="tw-flex tw-flex-col">
                   <h1 className="tw-uppercase tw-text-white">
-                    Distribution Plan Tool
+                    EMMA
                   </h1>
                   <p className="tw-mb-0 tw-block tw-font-light tw-text-base tw-text-neutral-400">
                     The Seize distribution plan tool allows you to build a
