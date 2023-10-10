@@ -1,14 +1,13 @@
-import { useAccount, useSignMessage } from "wagmi";
+import { useSignMessage } from "wagmi";
 import {
   distributionPlanApiFetch,
   distributionPlanApiPost,
-  removeDistributionPlanCookie,
-  setDistributionPlanCookie,
 } from "../../../services/distribution-plan-api";
 
 import { makeErrorToast } from "../../../services/distribution-plan.utils";
 import { useEffect } from "react";
 import { useRouter } from "next/router";
+import { setAuthJwt, removeAuthJwt } from "../../../services/auth/auth";
 interface DistributionPlanNonce {
   readonly nonce: string;
   readonly serverSignature: string;
@@ -16,7 +15,6 @@ interface DistributionPlanNonce {
 
 export default function DistributionPlanToolConnected() {
   const signMessage = useSignMessage();
-  const { address } = useAccount();
   const router = useRouter();
 
   const getSignature = async ({
@@ -36,7 +34,7 @@ export default function DistributionPlanToolConnected() {
   };
 
   const trySignIn = async () => {
-    removeDistributionPlanCookie();
+    removeAuthJwt();
     const nonceResponse = await distributionPlanApiFetch<DistributionPlanNonce>(
       `/auth/nonce`
     );
@@ -59,12 +57,12 @@ export default function DistributionPlanToolConnected() {
     if (!tokenData) return;
     const { token } = tokenData;
     if (!token) return;
-    setDistributionPlanCookie(token);
+    setAuthJwt(token);
     router.push("/distribution-plan-tool/plans");
   };
 
   useEffect(() => {
-    removeDistributionPlanCookie();
+    removeAuthJwt();
   }, []);
 
   return (

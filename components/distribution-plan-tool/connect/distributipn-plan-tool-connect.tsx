@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
 import { useAccount } from "wagmi";
-import { removeDistributionPlanCookie } from "../../../services/distribution-plan-api";
 import {
   assertUnreachable,
   isEthereumAddress,
 } from "../../../helpers/AllowlistToolHelpers";
 import DistributionPlanToolNotConnected from "./distribution-plan-tool-not-connected";
 import DistributionPlanToolConnected from "./distribution-plan-tool-connected";
+import { removeAuthJwt } from "../../../services/auth/auth";
 
 enum DistributionPlanAuth {
   NOT_CONNECTED = "NOT_CONNECTED",
@@ -19,7 +19,7 @@ export default function DistributionPlanToolConnect() {
   );
 
   useEffect(() => {
-    removeDistributionPlanCookie();
+    removeAuthJwt();
     if (address && isEthereumAddress(address)) {
       setAuthStatus(DistributionPlanAuth.CONNECTED);
       return;

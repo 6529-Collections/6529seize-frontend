@@ -598,7 +598,7 @@ export default function UserPage(props: Props) {
                   md="4"
                   className={`pt-2 pb-2 ${styles.repContainer}`}
                 >
-                  {ownerAddress?.length && (
+                  {/* {ownerAddress?.length && (
                     <UserPageRep
                       userWallet={ownerAddress.toLowerCase()}
                       connectedWallet={
@@ -607,7 +607,7 @@ export default function UserPage(props: Props) {
                         null
                       }
                     />
-                  )}
+                  )} */}
                 </Col>
                 <Col
                   xs="12"

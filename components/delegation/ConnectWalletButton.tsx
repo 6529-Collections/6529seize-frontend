@@ -12,12 +12,14 @@ export default function ConnectWalletButton() {
           <button
             disabled={isOpen}
             className={styles.connectWalletButton}
-            onClick={() => open()}>
+            onClick={() => open()}
+          >
             {isOpen && (
               <div className="d-inline">
                 <div
                   className={`spinner-border ${styles.loader}`}
-                  role="status">
+                  role="status"
+                >
                   <span className="sr-only"></span>
                 </div>
               </div>
