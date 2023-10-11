@@ -14,12 +14,9 @@ export interface LibraryScript {
 
 export interface AdditionalData {
   artist_address: string;
-  mint_cost: number;
   max_purchases: number;
   circulation_supply: number;
   total_supply: number;
-  sales_percentage: number;
-  is_collection_active: boolean;
 }
 
 export interface PhaseTimes {

@@ -1,14 +1,13 @@
 import { goerli } from "wagmi/chains";
 
 export const NEXTGEN_CORE = {
-  contract: "0x832C2ec862BF83c013b756735a41a32Cc6b26D6a",
+  contract: "0xED2F5300A458F638cBD21b1A7217b54B99bb2Fc4",
   chain_id: goerli.id,
   abi: [
     {
       inputs: [
         { internalType: "string", name: "name", type: "string" },
         { internalType: "string", name: "symbol", type: "string" },
-        { internalType: "address", name: "_randomizer", type: "address" },
         { internalType: "address", name: "_adminsContract", type: "address" },
       ],
       stateMutability: "nonpayable",
@@ -110,15 +109,6 @@ export const NEXTGEN_CORE = {
       name: "addMinterContract",
       outputs: [],
       stateMutability: "nonpayable",
-      type: "function",
-    },
-    {
-      inputs: [],
-      name: "adminsContract",
-      outputs: [
-        { internalType: "contract INextGenAdmins", name: "", type: "address" },
-      ],
-      stateMutability: "view",
       type: "function",
     },
     {
@@ -351,10 +341,8 @@ export const NEXTGEN_CORE = {
     },
     {
       inputs: [],
-      name: "randomizer",
-      outputs: [
-        { internalType: "contract IRandomizer", name: "", type: "address" },
-      ],
+      name: "randomizerContract",
+      outputs: [{ internalType: "address", name: "", type: "address" }],
       stateMutability: "view",
       type: "function",
     },
@@ -544,6 +532,16 @@ export const NEXTGEN_CORE = {
         { internalType: "uint256", name: "_collectionID", type: "uint256" },
       ],
       name: "setFinalSupply",
+      outputs: [],
+      stateMutability: "nonpayable",
+      type: "function",
+    },
+    {
+      inputs: [
+        { internalType: "uint256", name: "_mintIndex", type: "uint256" },
+        { internalType: "bytes32", name: "_hash", type: "bytes32" },
+      ],
+      name: "setTokenHash",
       outputs: [],
       stateMutability: "nonpayable",
       type: "function",

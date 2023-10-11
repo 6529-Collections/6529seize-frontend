@@ -96,6 +96,7 @@ export default function NextGenCollection(props: Props) {
   const [isOverviewExpanded, setIsOverviewExpanded] = useState(false);
 
   const [burnAmount, setBurnAmount] = useState<number>(0);
+  const [mintPrice, setMintPrice] = useState<number>(0);
 
   function getTokenUriReadParams() {
     const params: any[] = [];
@@ -179,7 +180,7 @@ export default function NextGenCollection(props: Props) {
     },
   });
 
-  const collectionInfo = useContractRead({
+  useContractRead({
     address: NEXTGEN_CORE.contract as `0x${string}`,
     abi: NEXTGEN_CORE.abi,
     chainId: NEXTGEN_CORE.chain_id,
@@ -236,12 +237,9 @@ export default function NextGenCollection(props: Props) {
         const d = data as any[];
         const ad1: AdditionalData = {
           artist_address: d[0],
-          mint_cost: Math.round(parseInt(d[1]) * 100000) / 100000,
-          max_purchases: parseInt(d[2]),
-          circulation_supply: parseInt(d[3]),
-          total_supply: parseInt(d[4]),
-          sales_percentage: parseInt(d[5]),
-          is_collection_active: d[6] as boolean,
+          max_purchases: parseInt(d[1]),
+          circulation_supply: parseInt(d[2]),
+          total_supply: parseInt(d[3]),
         };
         setAdditionalData(ad1);
       }
@@ -280,6 +278,20 @@ export default function NextGenCollection(props: Props) {
     onSettled(data: any, error: any) {
       if (data) {
         setBurnAmount(parseInt(data));
+      }
+    },
+  });
+
+  useContractRead({
+    address: NEXTGEN_MINTER.contract as `0x${string}`,
+    abi: NEXTGEN_MINTER.abi,
+    chainId: NEXTGEN_MINTER.chain_id,
+    functionName: "getPrice",
+    watch: true,
+    args: [props.collection],
+    onSettled(data: any, error: any) {
+      if (!isNaN(parseInt(data))) {
+        setMintPrice(parseInt(data));
       }
     },
   });
@@ -391,7 +403,6 @@ export default function NextGenCollection(props: Props) {
                         className={styles.mintBtn}
                         disabled={
                           !additionalData ||
-                          !additionalData.is_collection_active ||
                           !phaseTimes ||
                           (!isMintingOpen(
                             phaseTimes.allowlist_start_time,
@@ -412,15 +423,6 @@ export default function NextGenCollection(props: Props) {
                 </Row>
                 <Row className="pt-4">
                   <Col className="d-flex  align-items-center flex-wrap gap-4">
-                    <span className="d-inline-flex align-items-center gap-2">
-                      <span
-                        className={`${styles.trafficLight} ${
-                          additionalData.is_collection_active
-                            ? styles.trafficLightGreen
-                            : styles.trafficLightRed
-                        }`}></span>
-                      Active
-                    </span>
                     <span className="d-inline-flex align-items-center gap-2">
                       <span
                         className={`${styles.trafficLight} ${
@@ -507,10 +509,8 @@ export default function NextGenCollection(props: Props) {
                     <span>
                       Mint Cost{" "}
                       <b>
-                        {additionalData.mint_cost > 0
-                          ? fromGWEI(additionalData.mint_cost)
-                          : `Free`}{" "}
-                        {additionalData.mint_cost > 0 ? `ETH` : ``}
+                        {mintPrice > 0 ? fromGWEI(mintPrice) : `Free`}{" "}
+                        {mintPrice > 0 ? `ETH` : ``}
                       </b>
                     </span>
                   </Col>
@@ -539,9 +539,6 @@ export default function NextGenCollection(props: Props) {
                   </Col>
                   <Col xs={12} className="pt-1">
                     Base URI <b>{info.base_uri}</b>
-                  </Col>
-                  <Col xs={12} className="pt-1">
-                    Sales Percentage <b>{additionalData.sales_percentage}%</b>
                   </Col>
                   <Col xs={12} className="pt-1">
                     Merkle Root <b>{phaseTimes.merkle_root}</b>
