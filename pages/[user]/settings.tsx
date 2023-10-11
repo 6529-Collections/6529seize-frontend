@@ -22,13 +22,10 @@ const Header = dynamic(() => import("../../components/header/Header"), {
   loading: () => <HeaderPlaceholder />,
 });
 
-const UserPage = dynamic(() => import("../../components/user/UserPage"), {
-  ssr: false,
-});
-
 export default function UserPageSettings(props: any) {
   const router = useRouter();
-  const pagenameFull = `${props.title} | 6529 SEIZE`;
+  const pageProps = props.pageProps;
+  const pagenameFull = `${pageProps.title} | 6529 SEIZE`;
 
   const [user, setUser] = useState(
     Array.isArray(router.query.user) ? router.query.user[0] : router.query.user
@@ -53,12 +50,12 @@ export default function UserPageSettings(props: any) {
       <Head>
         <title>{pagenameFull}</title>
         <link rel="icon" href="/favicon.ico" />
-        <meta name="description" content={props.title} />
+        <meta name="description" content={pageProps.title} />
         <meta
           property="og:url"
-          content={`${process.env.BASE_ENDPOINT}/${props.url}`}
+          content={`${process.env.BASE_ENDPOINT}/${pageProps.url}`}
         />
-        <meta property="og:title" content={props.title} />
+        <meta property="og:title" content={pageProps.title} />
         <meta
           property="og:image"
           content={`${process.env.BASE_ENDPOINT}/Seize_Logo_Glasses_2.png`}
