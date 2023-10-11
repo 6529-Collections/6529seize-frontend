@@ -14,6 +14,8 @@ import { VIEW_MODE_COOKIE } from "../../constants";
 import { formatAddress } from "../../helpers/Helpers";
 import WalletModal from "./walletModal/WalletModal";
 
+
+
 interface Props {
   onLoad?: () => void;
   onSetWallets?(wallets: string[]): any;
