@@ -19,7 +19,8 @@ const GradientPageComponent = dynamic(
 );
 
 export default function GradientPageIndex(props: any) {
-  const pagenameFull = `${props.name} | 6529 SEIZE`;
+  const pageProps = props.pageProps;
+  const pagenameFull = `${pageProps.name} | 6529 SEIZE`;
   const [connectedWallets, setConnectedWallets] = useState<string[]>([]);
 
   return (
@@ -30,10 +31,10 @@ export default function GradientPageIndex(props: any) {
         <meta name="description" content={pagenameFull} />
         <meta
           property="og:url"
-          content={`${process.env.BASE_ENDPOINT}/the-memes/${props.id}`}
+          content={`${process.env.BASE_ENDPOINT}/the-memes/${pageProps.id}`}
         />
-        <meta property="og:title" content={props.name} />
-        <meta property="og:image" content={props.image} />
+        <meta property="og:title" content={pageProps.name} />
+        <meta property="og:image" content={pageProps.image} />
         <meta property="og:description" content="6529 SEIZE" />
       </Head>
 

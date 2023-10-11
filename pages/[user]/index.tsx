@@ -48,14 +48,15 @@ const DEFAULT_IMAGE =
 
 export default function UserPageIndex(props: any) {
   const router = useRouter();
-  const pagenameFull = `${props.title} | 6529 SEIZE`;
+  const pageProps = props.pageProps;
+  const pagenameFull = `${pageProps.title} | 6529 SEIZE`;
 
   const descriptionArray = [];
-  if (props.tdh && props.tdh > 0) {
-    descriptionArray.push(`TDH: ${numberWithCommas(props.tdh)}`);
+  if (pageProps.tdh && pageProps.tdh > 0) {
+    descriptionArray.push(`TDH: ${numberWithCommas(pageProps.tdh)}`);
   }
-  if (props.balance && props.balance > 0) {
-    descriptionArray.push(`Cards: ${numberWithCommas(props.balance)}`);
+  if (pageProps.balance && pageProps.balance > 0) {
+    descriptionArray.push(`Cards: ${numberWithCommas(pageProps.balance)}`);
   }
   descriptionArray.push("6529 SEIZE");
 
@@ -82,13 +83,13 @@ export default function UserPageIndex(props: any) {
       <Head>
         <title>{pagenameFull}</title>
         <link rel="icon" href="/favicon.ico" />
-        <meta name="description" content={props.title} />
+        <meta name="description" content={pageProps.title} />
         <meta
           property="og:url"
-          content={`${process.env.BASE_ENDPOINT}/${props.url}`}
+          content={`${process.env.BASE_ENDPOINT}/${pageProps.url}`}
         />
-        <meta property="og:title" content={props.title} />
-        <meta property="og:image" content={props.image} />
+        <meta property="og:title" content={pageProps.title} />
+        <meta property="og:image" content={pageProps.image} />
         <meta
           property="og:description"
           content={descriptionArray.join(" | ")}
