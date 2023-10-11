@@ -2,9 +2,9 @@ import "../styles/seize-bootstrap.scss";
 import "../styles/globals.scss";
 import "tippy.js/dist/tippy.css";
 import "tippy.js/themes/light.css";
-
+import { Provider } from "react-redux";
 import type { AppProps } from "next/app";
-
+import { wrapper } from "../store/store";
 import { CW_PROJECT_ID, DELEGATION_CONTRACT } from "../constants";
 
 import { alchemyProvider } from "wagmi/providers/alchemy";
@@ -170,30 +170,36 @@ const wagmiConfig = createConfig({
 });
 const ethereumClient = new EthereumClient(wagmiConfig, chains);
 
-export default function App({ Component, pageProps }: AppProps) {
+export default function App({ Component, ...rest }: AppProps) {
+  const { store, props } = wrapper.useWrappedStore(rest);
   return (
     <>
-      <Head>
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-      </Head>
-      <WagmiConfig config={wagmiConfig}>
-        <Component {...pageProps} />
-      </WagmiConfig>
-      <Web3Modal
-        defaultChain={mainnet}
-        projectId={CW_PROJECT_ID}
-        ethereumClient={ethereumClient}
-        themeMode={"dark"}
-        themeVariables={{
-          "--w3m-background-color": "#282828",
-          "--w3m-logo-image-url":
-            "https://d3lqz0a4bldqgf.cloudfront.net/seize_images/Seize_Logo_Glasses_3.png",
-          "--w3m-accent-color": "#fff",
-          "--w3m-accent-fill-color": "#000",
-          "--w3m-button-border-radius": "0",
-          "--w3m-font-family": "Arial",
-        }}
-      />
+      <Provider store={store}>
+        <Head>
+          <meta
+            name="viewport"
+            content="width=device-width, initial-scale=1.0"
+          />
+        </Head>
+        <WagmiConfig config={wagmiConfig}>
+          <Component {...props} />
+        </WagmiConfig>
+        <Web3Modal
+          defaultChain={mainnet}
+          projectId={CW_PROJECT_ID}
+          ethereumClient={ethereumClient}
+          themeMode={"dark"}
+          themeVariables={{
+            "--w3m-background-color": "#282828",
+            "--w3m-logo-image-url":
+              "https://d3lqz0a4bldqgf.cloudfront.net/seize_images/Seize_Logo_Glasses_3.png",
+            "--w3m-accent-color": "#fff",
+            "--w3m-accent-fill-color": "#000",
+            "--w3m-button-border-radius": "0",
+            "--w3m-font-family": "Arial",
+          }}
+        />
+      </Provider>
     </>
   );
 }
