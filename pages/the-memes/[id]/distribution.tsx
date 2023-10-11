@@ -20,7 +20,8 @@ const DistributionComponent = dynamic(
 );
 
 export default function MemeDistributionPage(props: any) {
-  const pagenameFull = `${props.name} | 6529 SEIZE`;
+  const pageProps = props.pageProps;
+  const pagenameFull = `${pageProps.name} | 6529 SEIZE`;
 
   return (
     <>
@@ -30,16 +31,16 @@ export default function MemeDistributionPage(props: any) {
         <meta name="description" content={pagenameFull} />
         <meta
           property="og:url"
-          content={`${process.env.BASE_ENDPOINT}/the-memes/${props.id}/distribution`}
+          content={`${process.env.BASE_ENDPOINT}/the-memes/${pageProps.id}/distribution`}
         />
-        <meta property="og:title" content={props.name} />
-        <meta property="og:image" content={props.image} />
+        <meta property="og:title" content={pageProps.name} />
+        <meta property="og:image" content={pageProps.image} />
         <meta property="og:description" content="6529 SEIZE" />
         <meta name="twitter:card" content={pagenameFull} />
-        <meta name="twitter:image:alt" content={props.name} />
-        <meta name="twitter:title" content={props.name} />
+        <meta name="twitter:image:alt" content={pageProps.name} />
+        <meta name="twitter:title" content={pageProps.name} />
         <meta name="twitter:description" content="6529 SEIZE" />
-        <meta name="twitter:image" content={props.image} />
+        <meta name="twitter:image" content={pageProps.image} />
       </Head>
 
       <main className={styles.main}>
