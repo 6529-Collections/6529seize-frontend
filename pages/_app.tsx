@@ -6,7 +6,6 @@ import { Provider } from "react-redux";
 import type { AppProps } from "next/app";
 import { wrapper } from "../store/store";
 import { CW_PROJECT_ID, DELEGATION_CONTRACT } from "../constants";
-
 import { alchemyProvider } from "wagmi/providers/alchemy";
 
 import {
@@ -79,6 +78,7 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import Head from "next/head";
 import { Web3Modal } from "@web3modal/react";
+import Auth from "../components/auth/Auth";
 
 library.add(
   faArrowUp,
@@ -163,6 +163,7 @@ const ethereumClient = new EthereumClient(wagmiConfig, chains);
 
 export default function App({ Component, ...rest }: AppProps) {
   const { store, props } = wrapper.useWrappedStore(rest);
+
   return (
     <>
       <Provider store={store}>
@@ -172,8 +173,11 @@ export default function App({ Component, ...rest }: AppProps) {
             content="width=device-width, initial-scale=1.0"
           />
         </Head>
+
         <WagmiConfig config={wagmiConfig}>
-          <Component {...props} />
+          <Auth>
+            <Component {...props} />
+          </Auth>
         </WagmiConfig>
         <Web3Modal
           defaultChain={mainnet}
