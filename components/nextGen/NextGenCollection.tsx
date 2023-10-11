@@ -451,7 +451,7 @@ export default function NextGenCollection(props: Props) {
                             ? styles.trafficLightGreen
                             : isMintingUpcoming(phaseTimes.public_start_time)
                             ? styles.trafficLightOrange
-                            : styles.trafficLightGreen
+                            : styles.trafficLightRed
                         }`}></span>
                       Public Minting{" "}
                       {getMintingTimesDisplay(
