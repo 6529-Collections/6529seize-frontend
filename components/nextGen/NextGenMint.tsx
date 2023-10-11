@@ -89,6 +89,7 @@ export default function NextGenMint(props: Props) {
 
   const [isMinting, setIsMinting] = useState(false);
   const [burnAmount, setBurnAmount] = useState<number>(-1);
+  const [mintPrice, setMintPrice] = useState<number>(0);
 
   const [availableSupply, setAvailableSupply] = useState<number>(0);
   const [errors, setErrors] = useState<string[]>([]);
@@ -130,12 +131,9 @@ export default function NextGenMint(props: Props) {
         const d = data as any[];
         const ad: AdditionalData = {
           artist_address: d[0],
-          mint_cost: Math.round(parseInt(d[1]) * 100000) / 100000,
-          max_purchases: parseInt(d[2]),
-          circulation_supply: parseInt(d[3]),
-          total_supply: parseInt(d[4]),
-          sales_percentage: parseInt(d[5]),
-          is_collection_active: d[6] as boolean,
+          max_purchases: parseInt(d[1]),
+          circulation_supply: parseInt(d[2]),
+          total_supply: parseInt(d[3]),
         };
         setAdditionalData(ad);
       }
@@ -147,7 +145,7 @@ export default function NextGenMint(props: Props) {
     abi: NEXTGEN_MINTER.abi,
     chainId: NEXTGEN_MINTER.chain_id,
     value: mintCount
-      ? BigInt(additionalData ? additionalData.mint_cost * mintCount : 0)
+      ? BigInt(mintPrice ? mintPrice * mintCount : 0)
       : BigInt(0),
     functionName: "mint",
     args: [
@@ -436,7 +434,6 @@ export default function NextGenMint(props: Props) {
         phaseTimes.allowlist_end_time
       ) &&
         !proofResponse) ||
-      !additionalData.is_collection_active ||
       (!isMintingOpen(
         phaseTimes.allowlist_start_time,
         phaseTimes.allowlist_end_time
@@ -473,6 +470,20 @@ export default function NextGenMint(props: Props) {
     },
   });
 
+  useContractRead({
+    address: NEXTGEN_MINTER.contract as `0x${string}`,
+    abi: NEXTGEN_MINTER.abi,
+    chainId: NEXTGEN_MINTER.chain_id,
+    functionName: "getPrice",
+    watch: true,
+    args: [props.collection],
+    onSettled(data: any, error: any) {
+      if (!isNaN(parseInt(data))) {
+        setMintPrice(parseInt(data));
+      }
+    },
+  });
+
   useEffect(() => {
     setAddressMintCounts({
       airdrop: 0,
@@ -500,29 +511,18 @@ export default function NextGenMint(props: Props) {
       </Row>
       <Row className="pt-4">
         <Col className="d-flex gap-4 flex-wrap">
-          <span className="d-inline-flex align-items-center gap-2">
-            <span
-              className={`traffic-light ${
-                additionalData
-                  ? additionalData.is_collection_active
-                    ? `green`
-                    : `red`
-                  : ``
-              }`}></span>
-            Active
-          </span>
           {phaseTimes && (
             <span className="d-inline-flex align-items-center gap-2">
               <span
-                className={`traffic-light ${
+                className={`${styles.trafficLight} ${
                   isMintingOpen(
                     phaseTimes.allowlist_start_time,
                     phaseTimes.allowlist_end_time
                   )
-                    ? `green`
+                    ? styles.trafficLightGreen
                     : isMintingUpcoming(phaseTimes.allowlist_start_time)
-                    ? `orange`
-                    : `red`
+                    ? styles.trafficLightOrange
+                    : styles.trafficLightRed
                 }`}></span>
               Allowlist Minting{" "}
               {getMintingTimesDisplay(
@@ -534,15 +534,15 @@ export default function NextGenMint(props: Props) {
           {phaseTimes && (
             <span className="d-inline-flex align-items-center gap-2">
               <span
-                className={`traffic-light ${
+                className={`${styles.trafficLight} ${
                   isMintingOpen(
                     phaseTimes.public_start_time,
                     phaseTimes.public_end_time
                   )
-                    ? `green`
+                    ? styles.trafficLightGreen
                     : isMintingUpcoming(phaseTimes.public_start_time)
-                    ? `orange`
-                    : `red`
+                    ? styles.trafficLightOrange
+                    : styles.trafficLightRed
                 }`}></span>
               Public Minting{" "}
               {getMintingTimesDisplay(
@@ -593,10 +593,8 @@ export default function NextGenMint(props: Props) {
                   <td>Mint Cost</td>
                   <td className="text-right">
                     <b>
-                      {additionalData.mint_cost > 0
-                        ? fromGWEI(additionalData.mint_cost)
-                        : `Free`}{" "}
-                      {additionalData.mint_cost > 0 ? `ETH` : ``}
+                      {mintPrice > 0 ? fromGWEI(mintPrice) : `Free`}{" "}
+                      {mintPrice > 0 ? `ETH` : ``}
                     </b>
                   </td>
                 </tr>
