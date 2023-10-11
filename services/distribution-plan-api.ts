@@ -1,5 +1,5 @@
 import Cookies from "js-cookie";
-import { DISTRIBUTION_PLAN_COOKIE } from "../constants";
+import { WALLET_AUTH_COOKIE } from "../constants";
 import { AllowlistToolResponse } from "../components/allowlist-tool/allowlist-tool.types";
 import { makeErrorToast } from "./distribution-plan.utils";
 
@@ -10,7 +10,7 @@ const handleResponse = async <T>(
   readonly data: T | null;
 }> => {
   if (res.status === 401) {
-    Cookies.remove(DISTRIBUTION_PLAN_COOKIE);
+    Cookies.remove(WALLET_AUTH_COOKIE);
     makeErrorToast("Unauthorized");
     return {
       success: false,
@@ -42,7 +42,7 @@ export async function distributionPlanApiFetch<T>(endpoint: string): Promise<{
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
   };
-  const auth = Cookies.get(DISTRIBUTION_PLAN_COOKIE);
+  const auth = Cookies.get(WALLET_AUTH_COOKIE);
   if (auth) {
     headers["Authorization"] = `Bearer ${auth}`;
   }
@@ -77,7 +77,7 @@ export const distributionPlanApiPost = async <T>({
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
   };
-  const auth = Cookies.get(DISTRIBUTION_PLAN_COOKIE);
+  const auth = Cookies.get(WALLET_AUTH_COOKIE);
   if (auth) {
     headers["Authorization"] = `Bearer ${auth}`;
   }
@@ -112,7 +112,7 @@ export const distributionPlanApiDelete = async <T>({
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
   };
-  const auth = Cookies.get(DISTRIBUTION_PLAN_COOKIE);
+  const auth = Cookies.get(WALLET_AUTH_COOKIE);
   if (auth) {
     headers["Authorization"] = `Bearer ${auth}`;
   }
@@ -150,9 +150,9 @@ export const distributionPlanApiDelete = async <T>({
 };
 
 export const setDistributionPlanCookie = (token: string) => {
-  Cookies.set(DISTRIBUTION_PLAN_COOKIE, token);
+  Cookies.set(WALLET_AUTH_COOKIE, token);
 };
 
 export const removeDistributionPlanCookie = () => {
-  Cookies.remove(DISTRIBUTION_PLAN_COOKIE);
+  Cookies.remove(WALLET_AUTH_COOKIE);
 };
