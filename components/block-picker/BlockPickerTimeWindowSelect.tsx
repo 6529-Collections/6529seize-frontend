@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { useClickAway, useKeyPressEvent } from "react-use";
 import AllowlistToolAnimationWrapper from "../allowlist-tool/common/animation/AllowlistToolAnimationWrapper";
 import BlockPickerTimeWindowSelectList from "./BlockPickerTimeWindowSelectList";
-import { BlockPickerTimeWindow } from "../../pages/block-picker";
+import { BlockPickerTimeWindow } from "../../pages/meme-blocks";
 
 export default function BlockPickerTimeWindowSelect({
   timeWindow,
