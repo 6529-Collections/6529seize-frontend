@@ -66,7 +66,7 @@ const BlockPickerTimeWindowToMilliseconds = {
 export default function BlockPicker() {
   const [defaultBreadCrumbs] = useState<Crumb[]>([
     { display: "Home", href: "/" },
-    { display: "Block picker" },
+    { display: "Meme Blocks" },
   ]);
   const [breadcrumbs] = useState<Crumb[]>(defaultBreadCrumbs);
   const targetDate =
@@ -199,14 +199,14 @@ export default function BlockPicker() {
   return (
     <>
       <Head>
-        <title>Block Picker | 6529 SEIZE</title>
+        <title>Meme Blocks | 6529 SEIZE</title>
         <link rel="icon" href="/favicon.ico" />
-        <meta name="description" content="Block Picker | 6529 SEIZE" />
+        <meta name="description" content="Meme Blocks | 6529 SEIZE" />
         <meta
           property="og:url"
-          content={`${process.env.BASE_ENDPOINT}/block-picker`}
+          content={`${process.env.BASE_ENDPOINT}/meme-blocks`}
         />
-        <meta property="og:title" content="Block Picker" />
+        <meta property="og:title" content="Meme Blocks" />
         <meta property="og:description" content="6529 SEIZE" />
         <meta
           property="og:image"

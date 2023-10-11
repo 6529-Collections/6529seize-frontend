@@ -14,6 +14,8 @@ import { VIEW_MODE_COOKIE } from "../../constants";
 import { formatAddress } from "../../helpers/Helpers";
 import WalletModal from "./walletModal/WalletModal";
 
+
+
 interface Props {
   onLoad?: () => void;
   onSetWallets?(wallets: string[]): any;
@@ -384,8 +386,8 @@ export default function Header(props: Props) {
                 </Row>
                 <Row className="pt-3">
                   <Col>
-                    <a href="/block-picker">
-                      <h3>Block Picker</h3>
+                    <a href="/meme-blocks">
+                      <h3>Meme Blocks</h3>
                     </a>
                   </Col>
                 </Row>
@@ -784,10 +786,10 @@ export default function Header(props: Props) {
                               <NavDropdown.Item
                                 className={styles.dropdownItem}
                                 onClick={() =>
-                                  (window.location.href = "/block-picker")
+                                  (window.location.href = "/meme-blocks")
                                 }
                               >
-                                Block Picker
+                                Meme Blocks
                               </NavDropdown.Item>
                               <NavDropdown.Divider />
                               <NavDropdown.Item
