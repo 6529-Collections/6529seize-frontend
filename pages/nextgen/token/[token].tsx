@@ -18,26 +18,21 @@ const NextGenTokenComponent = dynamic(
   }
 );
 
-interface Props {
-  collection: number;
-  token: number;
-  name: string;
-}
-
 export default function NextGenCollectionToken(props: any) {
-  const pagenameFull = `${props.name} | 6529 SEIZE`;
+  const pageProps = props.pageProps;
+  const pagenameFull = `${pageProps.name} | 6529 SEIZE`;
   const [connectedWallets, setConnectedWallets] = useState<string[]>([]);
 
   const [breadcrumbs, setBreadcrumbs] = useState<Crumb[]>(
-    props.collection > 0
+    pageProps.collection > 0
       ? [
           { display: "Home", href: "/" },
           { display: "NextGen", href: "/nextgen" },
           {
-            display: `Collection #${props.collection}`,
-            href: `/nextgen/collection/${props.collection}`,
+            display: `Collection #${pageProps.collection}`,
+            href: `/nextgen/collection/${pageProps.collection}`,
           },
-          { display: `Token #${props.token}` },
+          { display: `Token #${pageProps.token}` },
         ]
       : [
           { display: "Home", href: "/" },
@@ -53,24 +48,24 @@ export default function NextGenCollectionToken(props: any) {
         <meta name="description" content={pagenameFull} />
         <meta
           property="og:url"
-          content={`${process.env.BASE_ENDPOINT}/nextgen/token/${props.token}`}
+          content={`${process.env.BASE_ENDPOINT}/nextgen/token/${pageProps.token}`}
         />
-        <meta property="og:title" content={props.name} />
-        <meta property="og:image" content={props.image} />
+        <meta property="og:title" content={pageProps.name} />
+        <meta property="og:image" content={pageProps.image} />
         <meta property="og:description" content="6529 SEIZE" />
         <meta name="twitter:card" content={pagenameFull} />
-        <meta name="twitter:image:alt" content={props.name} />
-        <meta name="twitter:title" content={props.name} />
+        <meta name="twitter:image:alt" content={pageProps.name} />
+        <meta name="twitter:title" content={pageProps.name} />
         <meta name="twitter:description" content="6529 SEIZE" />
-        <meta name="twitter:image" content={props.image} />
+        <meta name="twitter:image" content={pageProps.image} />
       </Head>
 
       <main className={styles.main}>
         <Header onSetWallets={(wallets) => setConnectedWallets(wallets)} />
         <Breadcrumb breadcrumbs={breadcrumbs} />
         <NextGenTokenComponent
-          collection={props.collection}
-          token={props.token}
+          collection={pageProps.collection}
+          token={pageProps.token}
         />
       </main>
     </>
@@ -88,7 +83,7 @@ export async function getServerSideProps(req: any, res: any, resolvedUrl: any) {
   let name = `NextGen ${
     collection > 0 ? `Collection #${collection}` : ``
   } Token #${token}`;
-  const props: Props = {
+  const props = {
     collection,
     token,
     name,

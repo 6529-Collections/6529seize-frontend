@@ -161,3 +161,24 @@
     opacity: 0.75;
   }
 }
+
+.trafficLight {
+  height: $font-size;
+  width: $font-size;
+  border-radius: 50%;
+  display: inline-block;
+  animation: flashing 1s infinite;
+  background-color: $lightest-grey;
+}
+
+.trafficLightGreen {
+  background-color: green;
+}
+
+.trafficLightOrange {
+  background-color: orange;
+}
+
+.trafficLightRed {
+  background-color: red;
+}

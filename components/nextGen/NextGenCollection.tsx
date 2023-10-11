@@ -86,6 +86,7 @@ export default function NextGenCollection(props: Props) {
   const [tokenEndIndex, setTokenEndIndex] = useState<number>(0);
 
   const [info, setInfo] = useState<Info>();
+  const [infoSettled, setInfoSettled] = useState<boolean>(false);
   const [libraryScript, setLibraryScript] = useState<LibraryScript>();
   const [phaseTimes, setPhaseTimes] = useState<PhaseTimes>();
   const [additionalData, setAdditionalData] = useState<AdditionalData>();
@@ -178,7 +179,7 @@ export default function NextGenCollection(props: Props) {
     },
   });
 
-  useContractRead({
+  const collectionInfo = useContractRead({
     address: NEXTGEN_CORE.contract as `0x${string}`,
     abi: NEXTGEN_CORE.abi,
     chainId: NEXTGEN_CORE.chain_id,
@@ -188,16 +189,19 @@ export default function NextGenCollection(props: Props) {
     onSettled(data: any, error: any) {
       if (data) {
         const d = data as any[];
-        const i1: Info = {
-          name: d[0],
-          artist: d[1],
-          description: d[2],
-          website: d[3],
-          licence: d[4],
-          base_uri: d[5],
-        };
-        setInfo(i1);
+        if (d.some((e) => e)) {
+          const i1: Info = {
+            name: d[0],
+            artist: d[1],
+            description: d[2],
+            website: d[3],
+            licence: d[4],
+            base_uri: d[5],
+          };
+          setInfo(i1);
+        }
       }
+      setInfoSettled(true);
     },
   });
 
@@ -280,8 +284,8 @@ export default function NextGenCollection(props: Props) {
     },
   });
 
-  if (!startIndexRead.isLoading && !endIndexRead.isLoading) {
-    if (!tokenStartIndex || !tokenEndIndex) {
+  if (!startIndexRead.isLoading && !endIndexRead.isLoading && infoSettled) {
+    if (!info) {
       return (
         <Container className="pt-5 text-center">
           <Row>
@@ -326,246 +330,242 @@ export default function NextGenCollection(props: Props) {
             alt={`${props.collection}-banner`}
           />
           <Container className="pt-2 pb-2">
-            {tokenStartIndex &&
-              tokenEndIndex &&
-              additionalData &&
-              info &&
-              phaseTimes && (
-                <Fragment>
-                  <Row className="pt-2">
-                    <Col className="d-flex justify-content-between align-items-center flex-wrap">
-                      <span>
-                        <h1 className="mb-0">{info.name.toUpperCase()}</h1>
-                      </span>
-                      <span className="d-flex align-items-center gap-4">
-                        <FontAwesomeIcon
-                          className={`${styles.globeIcon} ${styles.collectionIcon}`}
-                          icon="globe"
-                          onClick={() => {
-                            let url = info.website;
-                            if (!url.startsWith("http")) {
-                              url = `http://${url}`;
-                            }
-                            window.open(url, "_blank");
-                          }}></FontAwesomeIcon>
-                        <a
-                          href={`https://${
-                            NEXTGEN_CORE.chain_id === goerli.id
-                              ? `testnets.opensea`
-                              : `opensea`
-                          }.io/assets/${
-                            NEXTGEN_CORE.chain_id === goerli.id
-                              ? `goerli`
-                              : `ethereum`
-                          }/${NEXTGEN_CORE.contract}`}
-                          target="_blank"
-                          rel="noreferrer">
-                          <Image
-                            className={styles.collectionIcon}
-                            src="/opensea.png"
-                            alt="opensea"
-                            width={32}
-                            height={32}
-                          />
-                        </a>
-                        <a
-                          href={`https://${
-                            NEXTGEN_CORE.chain_id === goerli.id
-                              ? `goerli.x2y2`
-                              : `x2y2`
-                          }.io/eth/${NEXTGEN_CORE.contract}`}
-                          target="_blank"
-                          rel="noreferrer">
-                          <Image
-                            className={styles.collectionIcon}
-                            src="/x2y2.png"
-                            alt="x2y2"
-                            width={32}
-                            height={32}
-                          />
-                        </a>
-                        <Button
-                          onClick={() => {
-                            window.location.href = `/nextgen/collection/${props.collection}/mint`;
-                          }}
-                          className={styles.mintBtn}
-                          disabled={
-                            !additionalData ||
-                            !additionalData.is_collection_active ||
-                            !phaseTimes ||
-                            (!isMintingOpen(
-                              phaseTimes.allowlist_start_time,
-                              phaseTimes.allowlist_end_time
-                            ) &&
-                              !isMintingOpen(
-                                phaseTimes.public_start_time,
-                                phaseTimes.public_end_time
-                              ))
-                          }>
-                          Go to Minting
-                        </Button>
-                      </span>
-                    </Col>
-                    <Col className="pt-2" xs={12}>
-                      by {info.artist.toUpperCase()}
-                    </Col>
-                  </Row>
-                  <Row className="pt-4">
-                    <Col className="d-flex  align-items-center flex-wrap gap-4">
-                      <span className="d-inline-flex align-items-center gap-2">
-                        <span
-                          className={`traffic-light ${
-                            additionalData.is_collection_active
-                              ? `green`
-                              : `red`
-                          }`}></span>
-                        Active
-                      </span>
-                      <span className="d-inline-flex align-items-center gap-2">
-                        <span
-                          className={`traffic-light ${
-                            isMintingOpen(
-                              phaseTimes.allowlist_start_time,
-                              phaseTimes.allowlist_end_time
-                            )
-                              ? `green`
-                              : isMintingUpcoming(
-                                  phaseTimes.allowlist_start_time
-                                )
-                              ? `orange`
-                              : `red`
-                          }`}></span>
-                        Allowlist Minting{" "}
-                        {getMintingTimesDisplay(
-                          phaseTimes.allowlist_start_time,
-                          phaseTimes.allowlist_end_time
-                        )}
-                      </span>
-                      <span className="d-inline-flex align-items-center gap-2">
-                        <span
-                          className={`traffic-light ${
-                            isMintingOpen(
+            {additionalData && info && phaseTimes && (
+              <Fragment>
+                <Row className="pt-2">
+                  <Col className="d-flex justify-content-between align-items-center flex-wrap">
+                    <span>
+                      <h1 className="mb-0">{info.name.toUpperCase()}</h1>
+                    </span>
+                    <span className="d-flex align-items-center gap-4">
+                      <FontAwesomeIcon
+                        className={`${styles.globeIcon} ${styles.collectionIcon}`}
+                        icon="globe"
+                        onClick={() => {
+                          let url = info.website;
+                          if (!url.startsWith("http")) {
+                            url = `http://${url}`;
+                          }
+                          window.open(url, "_blank");
+                        }}></FontAwesomeIcon>
+                      <a
+                        href={`https://${
+                          NEXTGEN_CORE.chain_id === goerli.id
+                            ? `testnets.opensea`
+                            : `opensea`
+                        }.io/assets/${
+                          NEXTGEN_CORE.chain_id === goerli.id
+                            ? `goerli`
+                            : `ethereum`
+                        }/${NEXTGEN_CORE.contract}`}
+                        target="_blank"
+                        rel="noreferrer">
+                        <Image
+                          className={styles.collectionIcon}
+                          src="/opensea.png"
+                          alt="opensea"
+                          width={32}
+                          height={32}
+                        />
+                      </a>
+                      <a
+                        href={`https://${
+                          NEXTGEN_CORE.chain_id === goerli.id
+                            ? `goerli.x2y2`
+                            : `x2y2`
+                        }.io/eth/${NEXTGEN_CORE.contract}`}
+                        target="_blank"
+                        rel="noreferrer">
+                        <Image
+                          className={styles.collectionIcon}
+                          src="/x2y2.png"
+                          alt="x2y2"
+                          width={32}
+                          height={32}
+                        />
+                      </a>
+                      <Button
+                        onClick={() => {
+                          window.location.href = `/nextgen/collection/${props.collection}/mint`;
+                        }}
+                        className={styles.mintBtn}
+                        disabled={
+                          !additionalData ||
+                          !additionalData.is_collection_active ||
+                          !phaseTimes ||
+                          (!isMintingOpen(
+                            phaseTimes.allowlist_start_time,
+                            phaseTimes.allowlist_end_time
+                          ) &&
+                            !isMintingOpen(
                               phaseTimes.public_start_time,
                               phaseTimes.public_end_time
-                            )
-                              ? `green`
-                              : isMintingUpcoming(phaseTimes.public_start_time)
-                              ? `orange`
-                              : `red`
-                          }`}></span>
-                        Public Minting{" "}
-                        {getMintingTimesDisplay(
-                          phaseTimes.public_start_time,
-                          phaseTimes.public_end_time
-                        )}
-                      </span>
-                    </Col>
-                  </Row>
-                  <Row className="pt-4">
-                    <Col className="d-flex align-tems-center justify-content-start gap-3 flex-wrap">
-                      <span>
-                        Token Indexes{" "}
-                        <b>
-                          {tokenStartIndex} - {tokenEndIndex}
-                        </b>
-                      </span>
-                      &bull;
-                      <span>
-                        Total Supply <b>x{additionalData.total_supply}</b>
-                      </span>
-                      &bull;
-                      <span>
-                        Minted <b>x{additionalData.circulation_supply}</b>
-                      </span>
-                      {burnAmount > 0 && (
-                        <>
-                          &bull;
-                          <span>
-                            Burnt <b>x{burnAmount}</b>
-                          </span>
-                        </>
+                            ))
+                        }>
+                        Go to Minting
+                      </Button>
+                    </span>
+                  </Col>
+                  <Col className="pt-2" xs={12}>
+                    by {info.artist.toUpperCase()}
+                  </Col>
+                </Row>
+                <Row className="pt-4">
+                  <Col className="d-flex  align-items-center flex-wrap gap-4">
+                    <span className="d-inline-flex align-items-center gap-2">
+                      <span
+                        className={`${styles.trafficLight} ${
+                          additionalData.is_collection_active
+                            ? styles.trafficLightGreen
+                            : styles.trafficLightRed
+                        }`}></span>
+                      Active
+                    </span>
+                    <span className="d-inline-flex align-items-center gap-2">
+                      <span
+                        className={`${styles.trafficLight} ${
+                          isMintingOpen(
+                            phaseTimes.allowlist_start_time,
+                            phaseTimes.allowlist_end_time
+                          )
+                            ? styles.trafficLightGreen
+                            : isMintingUpcoming(phaseTimes.allowlist_start_time)
+                            ? styles.trafficLightOrange
+                            : styles.trafficLightRed
+                        }`}></span>
+                      Allowlist Minting{" "}
+                      {getMintingTimesDisplay(
+                        phaseTimes.allowlist_start_time,
+                        phaseTimes.allowlist_end_time
                       )}
-                      &bull;
-                      <span>
-                        Available{" "}
-                        <b>
-                          {additionalData.total_supply -
-                            additionalData.circulation_supply -
-                            burnAmount >
-                          0
-                            ? `x${
-                                additionalData.total_supply -
-                                additionalData.circulation_supply -
-                                burnAmount
-                              }`
-                            : `-`}
-                        </b>
-                      </span>
-                      &bull;
-                      <span>
-                        Mint Cost{" "}
-                        <b>
-                          {additionalData.mint_cost > 0
-                            ? fromGWEI(additionalData.mint_cost)
-                            : `Free`}{" "}
-                          {additionalData.mint_cost > 0 ? `ETH` : ``}
-                        </b>
-                      </span>
-                    </Col>
-                  </Row>
-                  <Row className="pt-4">
-                    <Col xs={6}>
-                      <h4>Overview</h4>
-                    </Col>
-                    <Col
-                      xs={6}
-                      onClick={() => setIsOverviewExpanded(!isOverviewExpanded)}
-                      className="d-flex align-items-center justify-content-end gap-2 cursor-pointer unselectable">
-                      Show {isOverviewExpanded ? `Less` : `More`}{" "}
-                      <FontAwesomeIcon
-                        icon={
-                          isOverviewExpanded ? `chevron-up` : `chevron-down`
-                        }
-                        className={styles.caret}></FontAwesomeIcon>
-                    </Col>
-                  </Row>
-                  <Row
-                    className={`pt-1 ${styles.overview} ${
-                      isOverviewExpanded ? styles.expandedOverview : ``
-                    }`}>
-                    <Col xs={12}>{info.description}</Col>
-                    <Col xs={12} className="pt-2">
-                      Licence <b>{info.licence}</b>
-                    </Col>
-                    <Col xs={12} className="pt-1">
-                      Base URI <b>{info.base_uri}</b>
-                    </Col>
-                    <Col xs={12} className="pt-1">
-                      Sales Percentage <b>{additionalData.sales_percentage}%</b>
-                    </Col>
-                    <Col xs={12} className="pt-1">
-                      Merkle Root <b>{phaseTimes.merkle_root}</b>
-                    </Col>
-                  </Row>
-                  <Row className="pt-4">
-                    <Col>
-                      <h4>
-                        Tokens x{additionalData.circulation_supply - burnAmount}
-                      </h4>
-                    </Col>
-                  </Row>
-                  <Row>
-                    <Col>
-                      {tokenURIs && (
-                        <NextGenTokenList
-                          collection={props.collection}
-                          tokens={tokenURIs}
-                        />
+                    </span>
+                    <span className="d-inline-flex align-items-center gap-2">
+                      <span
+                        className={`${styles.trafficLight} ${
+                          isMintingOpen(
+                            phaseTimes.public_start_time,
+                            phaseTimes.public_end_time
+                          )
+                            ? styles.trafficLightGreen
+                            : isMintingUpcoming(phaseTimes.public_start_time)
+                            ? styles.trafficLightOrange
+                            : styles.trafficLightGreen
+                        }`}></span>
+                      Public Minting{" "}
+                      {getMintingTimesDisplay(
+                        phaseTimes.public_start_time,
+                        phaseTimes.public_end_time
                       )}
-                    </Col>
-                  </Row>
-                </Fragment>
-              )}
+                    </span>
+                  </Col>
+                </Row>
+                <Row className="pt-4">
+                  <Col className="d-flex align-tems-center justify-content-start gap-3 flex-wrap">
+                    {tokenStartIndex > 0 && tokenEndIndex > 0 && (
+                      <>
+                        <span>
+                          Token Indexes{" "}
+                          <b>
+                            {tokenStartIndex} - {tokenEndIndex}
+                          </b>
+                        </span>
+                        &bull;
+                      </>
+                    )}
+                    <span>
+                      Total Supply <b>x{additionalData.total_supply}</b>
+                    </span>
+                    &bull;
+                    <span>
+                      Minted <b>x{additionalData.circulation_supply}</b>
+                    </span>
+                    {burnAmount > 0 && (
+                      <>
+                        &bull;
+                        <span>
+                          Burnt <b>x{burnAmount}</b>
+                        </span>
+                      </>
+                    )}
+                    &bull;
+                    <span>
+                      Available{" "}
+                      <b>
+                        {additionalData.total_supply -
+                          additionalData.circulation_supply -
+                          burnAmount >
+                        0
+                          ? `x${
+                              additionalData.total_supply -
+                              additionalData.circulation_supply -
+                              burnAmount
+                            }`
+                          : `-`}
+                      </b>
+                    </span>
+                    &bull;
+                    <span>
+                      Mint Cost{" "}
+                      <b>
+                        {additionalData.mint_cost > 0
+                          ? fromGWEI(additionalData.mint_cost)
+                          : `Free`}{" "}
+                        {additionalData.mint_cost > 0 ? `ETH` : ``}
+                      </b>
+                    </span>
+                  </Col>
+                </Row>
+                <Row className="pt-4">
+                  <Col xs={6}>
+                    <h4>Overview</h4>
+                  </Col>
+                  <Col
+                    xs={6}
+                    onClick={() => setIsOverviewExpanded(!isOverviewExpanded)}
+                    className="d-flex align-items-center justify-content-end gap-2 cursor-pointer unselectable">
+                    Show {isOverviewExpanded ? `Less` : `More`}{" "}
+                    <FontAwesomeIcon
+                      icon={isOverviewExpanded ? `chevron-up` : `chevron-down`}
+                      className={styles.caret}></FontAwesomeIcon>
+                  </Col>
+                </Row>
+                <Row
+                  className={`pt-1 ${styles.overview} ${
+                    isOverviewExpanded ? styles.expandedOverview : ``
+                  }`}>
+                  <Col xs={12}>{info.description}</Col>
+                  <Col xs={12} className="pt-2">
+                    Licence <b>{info.licence}</b>
+                  </Col>
+                  <Col xs={12} className="pt-1">
+                    Base URI <b>{info.base_uri}</b>
+                  </Col>
+                  <Col xs={12} className="pt-1">
+                    Sales Percentage <b>{additionalData.sales_percentage}%</b>
+                  </Col>
+                  <Col xs={12} className="pt-1">
+                    Merkle Root <b>{phaseTimes.merkle_root}</b>
+                  </Col>
+                </Row>
+                <Row className="pt-4">
+                  <Col>
+                    <h4>
+                      Tokens x{additionalData.circulation_supply - burnAmount}
+                    </h4>
+                  </Col>
+                </Row>
+                <Row>
+                  <Col>
+                    {tokenURIs && (
+                      <NextGenTokenList
+                        collection={props.collection}
+                        tokens={tokenURIs}
+                      />
+                    )}
+                  </Col>
+                </Row>
+              </Fragment>
+            )}
           </Container>
         </>
       );
