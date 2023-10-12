@@ -61,15 +61,18 @@ interface Props {
   ensText: string;
 }
 
-export default function About(props: Props) {
+export default function About(props: any) {
+  const pageProps: Props = props.pageProps;
   const router = useRouter();
   const [breadcrumbs, setBreadcrumbs] = useState<Crumb[]>([
     { display: "Home", href: "/" },
     { display: "About" },
   ]);
 
-  const [section, setSection] = useState<AboutSection>(props.section);
-  const [sectionTitle, setSectionTitle] = useState<string>(props.sectionTitle);
+  const [section, setSection] = useState<AboutSection>(pageProps.section);
+  const [sectionTitle, setSectionTitle] = useState<string>(
+    pageProps.sectionTitle
+  );
 
   function setNewSection(section: AboutSection) {
     setSection(section);
@@ -99,13 +102,13 @@ export default function About(props: Props) {
       case AboutSection.MEMES:
         return <AboutMemes />;
       case AboutSection.MEMES_CALENDAR:
-        return <AboutMemesCalendar html={props.memesCalendarText} />;
+        return <AboutMemesCalendar html={pageProps.memesCalendarText} />;
       case AboutSection.MEME_LAB:
         return <AboutMemeLab />;
       case AboutSection.GRADIENTS:
         return <AboutGradients />;
       case AboutSection.FAQ:
-        return <AboutHTML html={props.faqText} />;
+        return <AboutHTML html={pageProps.faqText} />;
       case AboutSection.MINTING:
         return <AboutMinting />;
       case AboutSection.LICENSE:
@@ -115,7 +118,7 @@ export default function About(props: Props) {
       case AboutSection.CONTACT_US:
         return <AboutContactUs />;
       case AboutSection.RELEASE_NOTES:
-        return <AboutReleaseNotes html={props.releaseNotesText} />;
+        return <AboutReleaseNotes html={pageProps.releaseNotesText} />;
       case AboutSection.TERMS_OF_SERVICE:
         return <AboutTermsOfService />;
       case AboutSection.PRIVACY_POLICY:
@@ -125,11 +128,11 @@ export default function About(props: Props) {
       case AboutSection.DATA_DECENTR:
         return <AboutDataDecentral />;
       case AboutSection.GDRC1:
-        return <AboutGDRC1 html={props.gdrc1Text} />;
+        return <AboutGDRC1 html={pageProps.gdrc1Text} />;
       case AboutSection.NFT_DELEGATION:
         return <AboutNFTDelegation />;
       case AboutSection.ENS:
-        return <AboutHTML html={props.ensText} />;
+        return <AboutHTML html={pageProps.ensText} />;
     }
   }
 
