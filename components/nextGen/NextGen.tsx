@@ -44,10 +44,10 @@ export default function NextGen() {
             .fill(null)
             .map((_, index) => (
               <Col
-                xs={6}
-                sm={6}
-                md={4}
-                lg={3}
+                xs={12}
+                sm={12}
+                md={6}
+                lg={4}
                 key={`collection-preview-${index}`}>
                 <NextGenCollectionPreview
                   collection={index + 1}

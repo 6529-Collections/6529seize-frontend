@@ -1,5 +1,5 @@
 import styles from "./NextGen.module.scss";
-import { Container, Row, Col, Button } from "react-bootstrap";
+import { Container, Row, Col, Button, Tab, Tabs } from "react-bootstrap";
 import { useContractRead, useContractReads } from "wagmi";
 import { NEVER_DATE } from "../../constants";
 import { Fragment, useState } from "react";
@@ -13,13 +13,18 @@ import {
   PhaseTimes,
 } from "./entities";
 import { fromGWEI } from "../../helpers/Helpers";
-import { COLLECTION_BANNERS } from "./NextGen";
+import { COLLECTION_BANNERS, COLLECTION_PREVIEWS } from "./NextGen";
 import Image from "next/image";
 import { goerli } from "wagmi/chains";
 import { NEXTGEN_CORE, NEXTGEN_MINTER } from "./contracts";
 
 interface Props {
   collection: number;
+}
+
+enum View {
+  ART,
+  COLLECTION,
 }
 
 const getDateDisplay = (numberDate: number) => {
@@ -97,6 +102,8 @@ export default function NextGenCollection(props: Props) {
 
   const [burnAmount, setBurnAmount] = useState<number>(0);
   const [mintPrice, setMintPrice] = useState<number>(0);
+
+  const [view, setView] = useState<View>(View.ART);
 
   function getTokenUriReadParams() {
     const params: any[] = [];
@@ -333,21 +340,23 @@ export default function NextGenCollection(props: Props) {
     } else {
       return (
         <>
-          <Image
+          {/* <Image
             loading={"lazy"}
             width="0"
             height="0"
             style={{ width: "100%", height: "auto" }}
             src={`${COLLECTION_BANNERS}/${props.collection}.png`}
             alt={`${props.collection}-banner`}
-          />
+          /> */}
           <Container className="pt-2 pb-2">
             {additionalData && info && phaseTimes && (
               <Fragment>
                 <Row className="pt-2">
                   <Col className="d-flex justify-content-between align-items-center flex-wrap">
                     <span>
-                      <h1 className="mb-0">{info.name.toUpperCase()}</h1>
+                      <h1 className="mb-0">
+                        #{props.collection} - {info.name.toUpperCase()}
+                      </h1>
                     </span>
                     <span className="d-flex align-items-center gap-4">
                       <FontAwesomeIcon
@@ -422,6 +431,143 @@ export default function NextGenCollection(props: Props) {
                   </Col>
                 </Row>
                 <Row className="pt-4">
+                  <Col>
+                    <div className={styles.collectionTabs}>
+                      <span
+                        onClick={() => setView(View.ART)}
+                        className={`${styles.collectionTab} ${
+                          view == View.ART ? styles.collectionTabActive : ""
+                        }`}>
+                        The Art
+                      </span>
+                      <span
+                        onClick={() => setView(View.COLLECTION)}
+                        className={`${styles.collectionTab} ${
+                          view == View.COLLECTION
+                            ? styles.collectionTabActive
+                            : ""
+                        }`}>
+                        The Collection
+                      </span>
+                    </div>
+                  </Col>
+                </Row>
+                {view == View.ART && (
+                  <>
+                    <Row className="pt-2">
+                      <Col>
+                        <h4>
+                          Tokens x
+                          {additionalData.circulation_supply - burnAmount}
+                        </h4>
+                      </Col>
+                    </Row>
+                    <Row>
+                      <Col>
+                        {tokenURIs && (
+                          <NextGenTokenList
+                            collection={props.collection}
+                            tokens={tokenURIs}
+                          />
+                        )}
+                      </Col>
+                    </Row>
+                  </>
+                )}
+                {view == View.COLLECTION && (
+                  <Row className="pt-2">
+                    <Col sm={12} md={4}>
+                      <Container>
+                        <Row>
+                          <Col>
+                            <Image
+                              loading={"lazy"}
+                              width="0"
+                              height="0"
+                              style={{
+                                height: "auto",
+                                width: "auto",
+                                maxWidth: "100%",
+                                maxHeight: "100%",
+                              }}
+                              src={`${COLLECTION_PREVIEWS}/${props.collection}.png`}
+                              alt={`${props.collection}-preview`}
+                            />
+                          </Col>
+                        </Row>
+                        <Row className="pt-4">
+                          {tokenStartIndex > 0 && tokenEndIndex > 0 && (
+                            <Col xs={12} className="pt-2">
+                              Token Indexes{" "}
+                              <b>
+                                {tokenStartIndex} - {tokenEndIndex}
+                              </b>
+                            </Col>
+                          )}
+                          <Col xs={12} className="pt-2">
+                            Total Supply <b>x{additionalData.total_supply}</b>
+                          </Col>
+                          <Col xs={12} className="pt-2">
+                            Minted <b>x{additionalData.circulation_supply}</b>
+                          </Col>
+                          {burnAmount > 0 && (
+                            <Col xs={12} className="pt-2">
+                              <span>
+                                Burnt <b>x{burnAmount}</b>
+                              </span>
+                            </Col>
+                          )}
+                          <Col xs={12} className="pt-2">
+                            Available{" "}
+                            <b>
+                              {additionalData.total_supply -
+                                additionalData.circulation_supply -
+                                burnAmount >
+                              0
+                                ? `x${
+                                    additionalData.total_supply -
+                                    additionalData.circulation_supply -
+                                    burnAmount
+                                  }`
+                                : `-`}
+                            </b>
+                          </Col>
+                          <Col xs={12} className="pt-2">
+                            Mint Cost{" "}
+                            <b>
+                              {mintPrice > 0 ? fromGWEI(mintPrice) : `Free`}{" "}
+                              {mintPrice > 0 ? `ETH` : ``}
+                            </b>
+                          </Col>
+                        </Row>
+                      </Container>
+                    </Col>
+                    <Col sm={12} md={8}>
+                      <Container>
+                        <Row>
+                          <Col>
+                            <b>Collection Overview</b>
+                          </Col>
+                        </Row>
+                        <Row>
+                          <Col xs={12} className="pt-2">
+                            {info.description}
+                          </Col>
+                          <Col xs={12} className="pt-2">
+                            Licence <b>{info.licence}</b>
+                          </Col>
+                          <Col xs={12} className="pt-1">
+                            Base URI <b>{info.base_uri}</b>
+                          </Col>
+                          <Col xs={12} className="pt-1">
+                            Merkle Root <b>{phaseTimes.merkle_root}</b>
+                          </Col>
+                        </Row>
+                      </Container>
+                    </Col>
+                  </Row>
+                )}
+                {/* <Row className="pt-4">
                   <Col className="d-flex  align-items-center flex-wrap gap-4">
                     <span className="d-inline-flex align-items-center gap-2">
                       <span
@@ -560,7 +706,7 @@ export default function NextGenCollection(props: Props) {
                       />
                     )}
                   </Col>
-                </Row>
+                </Row> */}
               </Fragment>
             )}
           </Container>

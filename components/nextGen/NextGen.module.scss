@@ -2,7 +2,7 @@
 
 .collectionPreview {
   padding: 10px;
-  box-shadow: rgba(0, 0, 0, 0.2) 0px 4px 8px;
+  border: 1px solid $dark-grey;
 }
 
 .mintBtn {
@@ -181,4 +181,18 @@
 
 .trafficLightRed {
   background-color: red;
+}
+
+.collectionTabs {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 20px;
+}
+
+.collectionTab {
+  cursor: pointer;
+}
+
+.collectionTabActive {
+  border-bottom: 3px solid;
 }

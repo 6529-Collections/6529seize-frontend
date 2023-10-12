@@ -1,10 +1,10 @@
 import styles from "./NextGen.module.scss";
-import { Container, Row, Col } from "react-bootstrap";
+import { Container, Row, Col, Table } from "react-bootstrap";
 import { useContractRead } from "wagmi";
 import { useState } from "react";
 import { COLLECTION_PREVIEWS } from "./NextGen";
 import Image from "next/image";
-import { Info } from "./entities";
+import { AdditionalData, Info } from "./entities";
 import { NEXTGEN_CORE } from "./contracts";
 
 interface Props {
@@ -13,6 +13,7 @@ interface Props {
 
 export default function NextGenCollectionPreview(props: Props) {
   const [info, setInfo] = useState<Info>();
+  const [additionalData, setAdditionalData] = useState<AdditionalData>();
 
   useContractRead({
     address: NEXTGEN_CORE.contract as `0x${string}`,
@@ -37,26 +38,57 @@ export default function NextGenCollectionPreview(props: Props) {
     },
   });
 
+  useContractRead({
+    address: NEXTGEN_CORE.contract as `0x${string}`,
+    abi: NEXTGEN_CORE.abi,
+    chainId: NEXTGEN_CORE.chain_id,
+    functionName: "retrieveCollectionAdditionalData",
+    watch: true,
+    args: [props.collection],
+    onSettled(data: any, error: any) {
+      if (data) {
+        const d = data as any[];
+        const ad1: AdditionalData = {
+          artist_address: d[0],
+          max_purchases: parseInt(d[1]),
+          circulation_supply: parseInt(d[2]),
+          total_supply: parseInt(d[3]),
+        };
+        setAdditionalData(ad1);
+      }
+    },
+  });
+
   return (
     <a
       href={`/nextgen/collection/${props.collection}`}
       className="decoration-none">
-      <Container className="no-padding">
-        <Image
-          loading={"lazy"}
-          width="0"
-          height="0"
-          style={{ width: "100%", height: "auto" }}
-          src={`${COLLECTION_PREVIEWS}/${props.collection}.png`}
-          alt={`${props.collection}-preview`}
-        />
+      <Container className={styles.collectionPreview}>
+        <Row>
+          <Col>
+            <Image
+              loading={"lazy"}
+              width="0"
+              height="0"
+              style={{
+                height: "auto",
+                width: "auto",
+                maxWidth: "100%",
+                maxHeight: "100%",
+                padding: "30px",
+              }}
+              src={`${COLLECTION_PREVIEWS}/${props.collection}.png`}
+              alt={`${props.collection}-preview`}
+            />
+          </Col>
+        </Row>
         <Row>
           <Col>
             <Container className={styles.collectionPreview}>
               {info && (
                 <>
                   <Row>
-                    <Col>
+                    <Col className="font-larger">
                       <b>
                         #{props.collection} - {info.name}
                       </b>
@@ -69,32 +101,13 @@ export default function NextGenCollectionPreview(props: Props) {
                   </Row>
                 </>
               )}
-              {/* {additionalData1 && (
-                <Row>
-                  <Col>
-                    <Table className="mb-0">
-                      <tbody>
-                        <tr>
-                          <td>Total Supply</td>
-                          <td>x{additionalData1.total_supply}</td>
-                        </tr>
-                        <tr>
-                          <td>Circulating Supply</td>
-                          <td>x{additionalData1.circulation_supply}</td>
-                        </tr>
-                        <tr>
-                          <td>Available</td>
-                          <td>
-                            {additionalData1.available > 0
-                              ? `x${additionalData1.available}`
-                              : `-`}
-                          </td>
-                        </tr>
-                      </tbody>
-                    </Table>
-                  </Col>
-                </Row>
-              )} */}
+              <Row>
+                <Col className="font-color-h d-flex">
+                  {additionalData && additionalData.circulation_supply > 0 && (
+                    <>{additionalData.circulation_supply} Minted</>
+                  )}
+                </Col>
+              </Row>
             </Container>
           </Col>
         </Row>
