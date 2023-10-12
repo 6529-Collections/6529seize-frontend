@@ -167,15 +167,11 @@ export const ALL_USE_CASES = [
   CONSOLIDATION_USE_CASE,
 ];
 
-interface Props {
-  section: DelegationCenterSection;
-  path?: string[];
-}
-
-export default function DelegationsDocumentation(props: Props) {
+export default function DelegationsDocumentation(props: any) {
+  const pageProps = props.pageProps;
   const router = useRouter();
   const [activeSection, setActiveSection] = useState<DelegationCenterSection>(
-    props.section
+    pageProps.section
   );
 
   const [breadcrumbs, setBreadcrumbs] = useState<Crumb[]>([
@@ -203,10 +199,10 @@ export default function DelegationsDocumentation(props: Props) {
 
   useEffect(() => {
     if (activeSection) {
-      if (activeSection === DelegationCenterSection.HTML && props.path) {
+      if (activeSection === DelegationCenterSection.HTML && pageProps.path) {
         router.push(
           {
-            pathname: `${props.path.join("/")}`,
+            pathname: `${pageProps.path.join("/")}`,
           },
           undefined,
           { shallow: true }
@@ -214,10 +210,12 @@ export default function DelegationsDocumentation(props: Props) {
 
         const sectionTitle: any[] = [];
 
-        props.path.map((p) => {
+        pageProps.path.map((p: any) => {
           const title = p
             .replaceAll("-", " ")
-            .replace(/(^\w{1})|(\s+\w{1})/g, (letter) => letter.toUpperCase())
+            .replace(/(^\w{1})|(\s+\w{1})/g, (letter: any) =>
+              letter.toUpperCase()
+            )
             .replace("Faq", "FAQ")
             .replace("Sub Delegation", "Sub-Delegation");
 
@@ -277,7 +275,7 @@ export default function DelegationsDocumentation(props: Props) {
         <Breadcrumb breadcrumbs={breadcrumbs} />
         <DelegationCenterMenu
           section={activeSection}
-          path={props.path}
+          path={pageProps.path}
           setActiveSection={(section: DelegationCenterSection) => {
             setActiveSection(section);
           }}
