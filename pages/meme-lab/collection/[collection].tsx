@@ -18,19 +18,17 @@ const LabCollectionComponent = dynamic(
   }
 );
 
-export default function MemeLabIndex(props: {
-  collection: string;
-  name: string;
-}) {
+export default function MemeLabIndex(props: any) {
+  const pageProps = props.pageProps;
   const [connectedWallets, setConnectedWallets] = useState<string[]>([]);
 
   const [breadcrumbs, setBreadcrumbs] = useState<Crumb[]>([
     { display: "Home", href: "/" },
     { display: "Meme Lab", href: "/meme-lab" },
     { display: "Collections", href: "/meme-lab?sort=collections" },
-    { display: props.collection.replaceAll("-", " ") },
+    { display: pageProps.collection.replaceAll("-", " ") },
   ]);
-  const pagenameFull = `${props.name} | 6529 SEIZE`;
+  const pagenameFull = `${pageProps.name} | 6529 SEIZE`;
 
   return (
     <>
@@ -40,17 +38,17 @@ export default function MemeLabIndex(props: {
         <meta name="description" content={pagenameFull} />
         <meta
           property="og:url"
-          content={`${process.env.BASE_ENDPOINT}/the-memes/collection/${props.collection}`}
+          content={`${process.env.BASE_ENDPOINT}/the-memes/collection/${pageProps.collection}`}
         />
-        <meta property="og:title" content={props.name} />
+        <meta property="og:title" content={pageProps.name} />
         <meta
           property="og:image"
           content={`${process.env.BASE_ENDPOINT}/Seize_Logo_Glasses_2.png`}
         />
         <meta property="og:description" content="6529 SEIZE" />
         <meta name="twitter:card" content={pagenameFull} />
-        <meta name="twitter:image:alt" content={props.name} />
-        <meta name="twitter:title" content={props.name} />
+        <meta name="twitter:image:alt" content={pageProps.name} />
+        <meta name="twitter:title" content={pageProps.name} />
         <meta name="twitter:description" content="6529 SEIZE" />
         <meta
           name="twitter:image"

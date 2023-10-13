@@ -9,6 +9,7 @@ export enum TagType {
   SZN2,
   SZN3,
   SZN4,
+  SZN5,
   GRADIENT,
 }
 
@@ -36,6 +37,8 @@ export default function Tag(props: TagProps) {
         return styles.memeSzn3Tag;
       case TagType.SZN4:
         return styles.memeSzn4Tag;
+      case TagType.SZN5:
+        return styles.memeSzn5Tag;
       case TagType.GRADIENT:
         return styles.gradientTag;
     }

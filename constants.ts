@@ -30,7 +30,7 @@ export const DELEGATION_ALL_ADDRESS =
 
 export const API_AUTH_COOKIE = "x-6529-auth";
 export const VIEW_MODE_COOKIE = "view-mode";
-export const DISTRIBUTION_PLAN_COOKIE = "distribution-plan";
+export const WALLET_AUTH_COOKIE = "wallet-auth";
 export const NEVER_DATE = 64060588800;
 
 export const OPENSEA_STORE_FRONT_CONTRACT =
