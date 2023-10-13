@@ -62,7 +62,7 @@ export default function NextGenCollectionPreview(props: Props) {
   return (
     <a
       href={`/nextgen/collection/${props.collection}`}
-      className="decoration-none">
+      className="decoration-none scale-hover">
       <Container className={styles.collectionPreview}>
         <Row>
           <Col>

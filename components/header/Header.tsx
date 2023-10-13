@@ -14,8 +14,6 @@ import { VIEW_MODE_COOKIE } from "../../constants";
 import { formatAddress } from "../../helpers/Helpers";
 import WalletModal from "./walletModal/WalletModal";
 
-
-
 interface Props {
   onLoad?: () => void;
   onSetWallets?(wallets: string[]): any;
@@ -43,6 +41,7 @@ export default function Header(props: Props) {
   const [burgerMenuOpen, setBurgerMenuOpen] = useState(false);
   const [view, setView] = useState<VIEW>();
 
+  const [showBurgerMenuNextgen, setShowBurgerMenuNextgen] = useState(false);
   const [showBurgerMenuAbout, setShowBurgerMenuAbout] = useState(false);
   const [showBurgerMenuCommunity, setShowBurgerMenuCommunity] = useState(false);
   const [showBurgerMenuTools, setShowBurgerMenuTools] = useState(false);
@@ -123,8 +122,7 @@ export default function Header(props: Props) {
       <div
         className={`${styles.burgerMenu} ${
           burgerMenuOpen ? styles.burgerMenuOpen : ""
-        }`}
-      >
+        }`}>
         <FontAwesomeIcon
           className={styles.burgerMenuClose}
           icon="times-circle"
@@ -133,8 +131,7 @@ export default function Header(props: Props) {
             setShowBurgerMenuAbout(false);
             setShowBurgerMenuCommunity(false);
             setShowBurgerMenuTools(false);
-          }}
-        ></FontAwesomeIcon>
+          }}></FontAwesomeIcon>
         <Container className="text-center">
           <Row className="pt-5 pb-4">
             <Col>
@@ -152,14 +149,12 @@ export default function Header(props: Props) {
           <Row className="pt-3 pb-3">
             <Col>
               <h3
-                className={`d-flex justify-content-center ${styles.burgerMenuHeader}`}
-              >
+                className={`d-flex justify-content-center ${styles.burgerMenuHeader}`}>
                 {account.isConnected ? (
                   <>
                     <button
                       className={`${styles.userProfileBtn}`}
-                      onClick={() => setShowWalletModal(true)}
-                    >
+                      onClick={() => setShowWalletModal(true)}>
                       <b>
                         &nbsp;
                         {ens.data
@@ -172,8 +167,7 @@ export default function Header(props: Props) {
                       className={`${styles.userProfileBtn}`}
                       onClick={() =>
                         (window.location.href = `/${account.address as string}`)
-                      }
-                    >
+                      }>
                       <FontAwesomeIcon icon="user"></FontAwesomeIcon>
                     </button>
                     {isConsolidation && (
@@ -185,8 +179,7 @@ export default function Header(props: Props) {
                               isConsolidation && view === VIEW.CONSOLIDATION
                                 ? styles.consolidationBtnActive
                                 : ""
-                            }`}
-                          >
+                            }`}>
                             <Image
                               loading="eager"
                               priority
@@ -197,29 +190,24 @@ export default function Header(props: Props) {
                             />
                           </button>
                         }
-                        align={"end"}
-                      >
+                        align={"end"}>
                         <NavDropdown.Item
                           className={styles.dropdownItemViewMode}
-                          onClick={() => setView(VIEW.WALLET)}
-                        >
+                          onClick={() => setView(VIEW.WALLET)}>
                           {view === VIEW.WALLET && (
                             <FontAwesomeIcon
                               className={styles.viewModeIcon}
-                              icon="check-circle"
-                            ></FontAwesomeIcon>
+                              icon="check-circle"></FontAwesomeIcon>
                           )}
                           Wallet
                         </NavDropdown.Item>
                         <NavDropdown.Item
                           onClick={() => setView(VIEW.CONSOLIDATION)}
-                          className={styles.dropdownItemViewMode}
-                        >
+                          className={styles.dropdownItemViewMode}>
                           {view === VIEW.CONSOLIDATION && (
                             <FontAwesomeIcon
                               className={`${styles.viewModeIcon} ${styles.viewModeIconConsolidation}`}
-                              icon="check-circle"
-                            ></FontAwesomeIcon>
+                              icon="check-circle"></FontAwesomeIcon>
                           )}
                           Consolidation
                         </NavDropdown.Item>
@@ -292,8 +280,7 @@ export default function Header(props: Props) {
                     showBurgerMenuCommunity
                       ? styles.burgerMenuCaretClose
                       : styles.burgerMenuCaretOpen
-                  }`}
-              >
+                  }`}>
                 Community
               </h3>
             </Col>
@@ -353,8 +340,7 @@ export default function Header(props: Props) {
                     showBurgerMenuTools
                       ? styles.burgerMenuCaretClose
                       : styles.burgerMenuCaretOpen
-                  }`}
-              >
+                  }`}>
                 Tools
               </h3>
             </Col>
@@ -450,8 +436,7 @@ export default function Header(props: Props) {
                     showBurgerMenuAbout
                       ? styles.burgerMenuCaretClose
                       : styles.burgerMenuCaretOpen
-                  }`}
-              >
+                  }`}>
                 About
               </h3>
             </Col>
@@ -632,8 +617,7 @@ export default function Header(props: Props) {
                   sm={{ span: 8 }}
                   md={{ span: 8 }}
                   lg={{ span: 3 }}
-                  className={`d-flex align-items-center justify-content-start ${styles.headerLeft}`}
-                >
+                  className={`d-flex align-items-center justify-content-start ${styles.headerLeft}`}>
                   <a href="/">
                     <Image
                       loading="eager"
@@ -651,13 +635,11 @@ export default function Header(props: Props) {
                   sm={{ span: 4 }}
                   md={{ span: 4 }}
                   lg={{ span: 9 }}
-                  className={`d-flex align-items-center justify-content-end ${styles.headerRight}`}
-                >
+                  className={`d-flex align-items-center justify-content-end ${styles.headerRight}`}>
                   <Container>
                     <Navbar expand="lg" variant="dark">
                       <Container
-                        className={`d-flex align-items-center justify-content-end no-padding`}
-                      >
+                        className={`d-flex align-items-center justify-content-end no-padding`}>
                         <Image
                           loading="eager"
                           priority
@@ -676,15 +658,13 @@ export default function Header(props: Props) {
                         />
                         <Navbar
                           id="seize-navbar-nav"
-                          className={`justify-content-end d-none ${styles.dMdBlock}`}
-                        >
+                          className={`justify-content-end d-none ${styles.dMdBlock}`}>
                           <Nav className="justify-content-end ml-auto">
                             <Nav.Link
                               className={`${styles.mainNavLink} ${
                                 router.pathname === "/the-memes" ? "active" : ""
                               }`}
-                              href="/the-memes?sort=age&sort_dir=ASC"
-                            >
+                              href="/the-memes?sort=age&sort_dir=ASC">
                               The Memes
                             </Nav.Link>
                             <Nav.Link
@@ -693,84 +673,73 @@ export default function Header(props: Props) {
                                   ? "active"
                                   : ""
                               }`}
-                              href="/6529-gradient?sort=id&sort_dir=ASC"
-                            >
+                              href="/6529-gradient?sort=id&sort_dir=ASC">
                               Gradient
                             </Nav.Link>
                             <Nav.Link
                               className={`${styles.mainNavLink} ${
                                 router.pathname === "/meme-lab" ? "active" : ""
                               }`}
-                              href="/meme-lab"
-                            >
+                              href="/meme-lab">
                               Meme Lab
                             </Nav.Link>
                             <Nav.Link
                               className={`${styles.mainNavLink} ${
                                 router.pathname === "/rememes" ? "active" : ""
                               }`}
-                              href="/rememes"
-                            >
+                              href="/rememes">
                               ReMemes
                             </Nav.Link>
                             <Nav.Link
                               className={`${styles.mainNavLink} ${
                                 router.pathname === "/nextgen" ? "active" : ""
                               }`}
-                              href="/nextgen"
-                            >
+                              href="/nextgen">
                               NextGen
                             </Nav.Link>
                             <NavDropdown
                               title="Community"
                               align={"start"}
-                              className={`${styles.mainNavLink} ${styles.mainNavLinkPadding}`}
-                            >
+                              className={`${styles.mainNavLink} ${styles.mainNavLinkPadding}`}>
                               <NavDropdown.Item
                                 className={styles.dropdownItem}
                                 onClick={() =>
                                   (window.location.href = "/community")
-                                }
-                              >
+                                }>
                                 Community
                               </NavDropdown.Item>
                               <NavDropdown.Item
                                 className={styles.dropdownItem}
                                 onClick={() =>
                                   (window.location.href = "/latest-activity")
-                                }
-                              >
+                                }>
                                 Latest Activity
                               </NavDropdown.Item>
                               <NavDropdown.Item
                                 className={styles.dropdownItem}
                                 onClick={() =>
                                   (window.location.href = "/community-metrics")
-                                }
-                              >
+                                }>
                                 Community Metrics
                               </NavDropdown.Item>
                               <NavDropdown.Item
                                 className={styles.dropdownItem}
                                 onClick={() =>
                                   (window.location.href = "/community-stats")
-                                }
-                              >
+                                }>
                                 Community Stats
                               </NavDropdown.Item>
                             </NavDropdown>
                             <NavDropdown
                               title="Tools"
                               align={"start"}
-                              className={`${styles.mainNavLink} ${styles.mainNavLinkPadding}`}
-                            >
+                              className={`${styles.mainNavLink} ${styles.mainNavLinkPadding}`}>
                               <NavDropdown.Item
                                 className={styles.dropdownItem}
                                 onClick={() =>
                                   (window.location.href =
                                     "/delegation/delegation-center")
-                                }
-                              >
+                                }>
                                 Delegation Center
                               </NavDropdown.Item>
                               <NavDropdown.Divider />
@@ -779,16 +748,14 @@ export default function Header(props: Props) {
                                 onClick={() =>
                                   (window.location.href =
                                     "/distribution-plan-tool")
-                                }
-                              >
+                                }>
                                 EMMA
                               </NavDropdown.Item>
                               <NavDropdown.Item
                                 className={styles.dropdownItem}
                                 onClick={() =>
                                   (window.location.href = "/meme-blocks")
-                                }
-                              >
+                                }>
                                 Meme Blocks
                               </NavDropdown.Item>
                               <NavDropdown.Divider />
@@ -797,8 +764,7 @@ export default function Header(props: Props) {
                                 onClick={() =>
                                   (window.location.href =
                                     "/delegation-mapping-tool")
-                                }
-                              >
+                                }>
                                 Delegation Mapping
                               </NavDropdown.Item>
                               <NavDropdown.Item
@@ -806,8 +772,7 @@ export default function Header(props: Props) {
                                 onClick={() =>
                                   (window.location.href =
                                     "/consolidation-mapping-tool")
-                                }
-                              >
+                                }>
                                 Consolidation Mapping
                               </NavDropdown.Item>
                               <NavDropdown.Item
@@ -815,8 +780,7 @@ export default function Header(props: Props) {
                                 onClick={() =>
                                   (window.location.href =
                                     "/consolidation-use-cases")
-                                }
-                              >
+                                }>
                                 Consolidation Use Cases
                               </NavDropdown.Item>
                               <NavDropdown.Divider />
@@ -824,8 +788,7 @@ export default function Header(props: Props) {
                                 className={styles.dropdownItem}
                                 onClick={() =>
                                   (window.location.href = "/downloads")
-                                }
-                              >
+                                }>
                                 Downloads
                               </NavDropdown.Item>
                             </NavDropdown>
@@ -838,38 +801,33 @@ export default function Header(props: Props) {
                                   ? "active"
                                   : ""
                               }`}
-                              align={"start"}
-                            >
+                              align={"start"}>
                               <NavDropdown.Item
                                 className={styles.dropdownItem}
                                 onClick={() =>
                                   (window.location.href = `/about/${AboutSection.MEMES}`)
-                                }
-                              >
+                                }>
                                 The Memes
                               </NavDropdown.Item>
                               <NavDropdown.Item
                                 className={styles.dropdownItem}
                                 onClick={() =>
                                   (window.location.href = `/about/${AboutSection.MEMES_CALENDAR}`)
-                                }
-                              >
+                                }>
                                 Memes Calendar
                               </NavDropdown.Item>
                               <NavDropdown.Item
                                 className={styles.dropdownItem}
                                 onClick={() =>
                                   (window.location.href = `/about/${AboutSection.MEME_LAB}`)
-                                }
-                              >
+                                }>
                                 Meme Lab
                               </NavDropdown.Item>
                               <NavDropdown.Item
                                 className={styles.dropdownItem}
                                 onClick={() =>
                                   (window.location.href = `/about/${AboutSection.GRADIENTS}`)
-                                }
-                              >
+                                }>
                                 Gradient
                               </NavDropdown.Item>
                               <NavDropdown.Divider />
@@ -877,8 +835,7 @@ export default function Header(props: Props) {
                                 className={styles.dropdownItem}
                                 onClick={() =>
                                   (window.location.href = `/about/${AboutSection.GDRC1}`)
-                                }
-                              >
+                                }>
                                 GDRC1
                               </NavDropdown.Item>
                               <NavDropdown.Divider />
@@ -886,8 +843,7 @@ export default function Header(props: Props) {
                                 className={styles.dropdownItem}
                                 onClick={() =>
                                   (window.location.href = `/about/${AboutSection.NFT_DELEGATION}`)
-                                }
-                              >
+                                }>
                                 NFT Delegation
                               </NavDropdown.Item>
                               <NavDropdown.Divider />
@@ -895,32 +851,28 @@ export default function Header(props: Props) {
                                 className={styles.dropdownItem}
                                 onClick={() =>
                                   (window.location.href = `/about/${AboutSection.FAQ}`)
-                                }
-                              >
+                                }>
                                 FAQ
                               </NavDropdown.Item>
                               <NavDropdown.Item
                                 className={styles.dropdownItem}
                                 onClick={() =>
                                   (window.location.href = `/about/${AboutSection.ENS}`)
-                                }
-                              >
+                                }>
                                 ENS
                               </NavDropdown.Item>
                               <NavDropdown.Item
                                 className={styles.dropdownItem}
                                 onClick={() =>
                                   (window.location.href = `/about/${AboutSection.MINTING}`)
-                                }
-                              >
+                                }>
                                 Minting
                               </NavDropdown.Item>
                               <NavDropdown.Item
                                 className={styles.dropdownItem}
                                 onClick={() =>
                                   (window.location.href = `/about/${AboutSection.LICENSE}`)
-                                }
-                              >
+                                }>
                                 License
                               </NavDropdown.Item>
                               <NavDropdown.Divider />
@@ -928,32 +880,28 @@ export default function Header(props: Props) {
                                 className={styles.dropdownItem}
                                 onClick={() =>
                                   (window.location.href = `/about/${AboutSection.APPLY}`)
-                                }
-                              >
+                                }>
                                 Apply
                               </NavDropdown.Item>
                               <NavDropdown.Item
                                 className={styles.dropdownItem}
                                 onClick={() =>
                                   (window.location.href = `/about/${AboutSection.CONTACT_US}`)
-                                }
-                              >
+                                }>
                                 Contact Us
                               </NavDropdown.Item>
                               <NavDropdown.Item
                                 className={styles.dropdownItem}
                                 onClick={() =>
                                   (window.location.href = `/about/${AboutSection.RELEASE_NOTES}`)
-                                }
-                              >
+                                }>
                                 Release Notes
                               </NavDropdown.Item>
                               <NavDropdown.Item
                                 className={styles.dropdownItem}
                                 onClick={() =>
                                   (window.location.href = `/about/${AboutSection.DATA_DECENTR}`)
-                                }
-                              >
+                                }>
                                 Data Decentralization
                               </NavDropdown.Item>
                               <NavDropdown.Divider />
@@ -961,24 +909,21 @@ export default function Header(props: Props) {
                                 className={styles.dropdownItem}
                                 onClick={() =>
                                   (window.location.href = `/about/${AboutSection.TERMS_OF_SERVICE}`)
-                                }
-                              >
+                                }>
                                 Terms of Service
                               </NavDropdown.Item>
                               <NavDropdown.Item
                                 className={styles.dropdownItem}
                                 onClick={() =>
                                   (window.location.href = `/about/${AboutSection.PRIVACY_POLICY}`)
-                                }
-                              >
+                                }>
                                 Privacy Policy
                               </NavDropdown.Item>
                               <NavDropdown.Item
                                 className={styles.dropdownItem}
                                 onClick={() =>
                                   (window.location.href = `/about/${AboutSection.COOKIE_POLICY}`)
-                                }
-                              >
+                                }>
                                 Cookie Policy
                               </NavDropdown.Item>
                             </NavDropdown>
@@ -986,8 +931,7 @@ export default function Header(props: Props) {
                               <>
                                 <button
                                   className={`${styles.userProfileBtn}`}
-                                  onClick={() => setShowWalletModal(true)}
-                                >
+                                  onClick={() => setShowWalletModal(true)}>
                                   <b>
                                     &nbsp;
                                     {ens.data
@@ -1004,8 +948,7 @@ export default function Header(props: Props) {
                                     (window.location.href = `/${
                                       account.address as string
                                     }`)
-                                  }
-                                >
+                                  }>
                                   <FontAwesomeIcon icon="user"></FontAwesomeIcon>
                                 </button>
                                 {isConsolidation && (
@@ -1020,8 +963,7 @@ export default function Header(props: Props) {
                                           view === VIEW.CONSOLIDATION
                                             ? styles.consolidationBtnActive
                                             : ""
-                                        }`}
-                                      >
+                                        }`}>
                                         <Image
                                           loading="eager"
                                           priority
@@ -1032,17 +974,14 @@ export default function Header(props: Props) {
                                         />
                                       </button>
                                     }
-                                    align={"end"}
-                                  >
+                                    align={"end"}>
                                     <NavDropdown.Item
                                       className={styles.dropdownItemViewMode}
-                                      onClick={() => setView(VIEW.WALLET)}
-                                    >
+                                      onClick={() => setView(VIEW.WALLET)}>
                                       {view === VIEW.WALLET && (
                                         <FontAwesomeIcon
                                           className={styles.viewModeIcon}
-                                          icon="check-circle"
-                                        ></FontAwesomeIcon>
+                                          icon="check-circle"></FontAwesomeIcon>
                                       )}
                                       Wallet
                                     </NavDropdown.Item>
@@ -1050,13 +989,11 @@ export default function Header(props: Props) {
                                       onClick={() =>
                                         setView(VIEW.CONSOLIDATION)
                                       }
-                                      className={styles.dropdownItemViewMode}
-                                    >
+                                      className={styles.dropdownItemViewMode}>
                                       {view === VIEW.CONSOLIDATION && (
                                         <FontAwesomeIcon
                                           className={`${styles.viewModeIcon} ${styles.viewModeIconConsolidation}`}
-                                          icon="check-circle"
-                                        ></FontAwesomeIcon>
+                                          icon="check-circle"></FontAwesomeIcon>
                                       )}
                                       Consolidation
                                     </NavDropdown.Item>

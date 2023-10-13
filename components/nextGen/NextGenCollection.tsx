@@ -358,76 +358,114 @@ export default function NextGenCollection(props: Props) {
                         #{props.collection} - {info.name.toUpperCase()}
                       </h1>
                     </span>
-                    <span className="d-flex align-items-center gap-4">
-                      <FontAwesomeIcon
-                        className={`${styles.globeIcon} ${styles.collectionIcon}`}
-                        icon="globe"
-                        onClick={() => {
-                          let url = info.website;
-                          if (!url.startsWith("http")) {
-                            url = `http://${url}`;
-                          }
-                          window.open(url, "_blank");
-                        }}></FontAwesomeIcon>
-                      <a
-                        href={`https://${
-                          NEXTGEN_CORE.chain_id === goerli.id
-                            ? `testnets.opensea`
-                            : `opensea`
-                        }.io/assets/${
-                          NEXTGEN_CORE.chain_id === goerli.id
-                            ? `goerli`
-                            : `ethereum`
-                        }/${NEXTGEN_CORE.contract}`}
-                        target="_blank"
-                        rel="noreferrer">
-                        <Image
-                          className={styles.collectionIcon}
-                          src="/opensea.png"
-                          alt="opensea"
-                          width={32}
-                          height={32}
-                        />
-                      </a>
-                      <a
-                        href={`https://${
-                          NEXTGEN_CORE.chain_id === goerli.id
-                            ? `goerli.x2y2`
-                            : `x2y2`
-                        }.io/eth/${NEXTGEN_CORE.contract}`}
-                        target="_blank"
-                        rel="noreferrer">
-                        <Image
-                          className={styles.collectionIcon}
-                          src="/x2y2.png"
-                          alt="x2y2"
-                          width={32}
-                          height={32}
-                        />
-                      </a>
-                      <Button
-                        onClick={() => {
-                          window.location.href = `/nextgen/collection/${props.collection}/mint`;
-                        }}
-                        className={styles.mintBtn}
-                        disabled={
-                          !additionalData ||
-                          !phaseTimes ||
-                          (!isMintingOpen(
+                    <span className="d-flex flex-column gap-4">
+                      <span className="d-flex align-items-center justify-content-end gap-2">
+                        <span className={styles.phaseTimeTag}>
+                          {isMintingOpen(
                             phaseTimes.allowlist_start_time,
                             phaseTimes.allowlist_end_time
-                          ) &&
-                            !isMintingOpen(
-                              phaseTimes.public_start_time,
-                              phaseTimes.public_end_time
-                            ))
-                        }>
-                        Go to Minting
-                      </Button>
+                          )
+                            ? `Allowlist Available`
+                            : isMintingUpcoming(phaseTimes.allowlist_start_time)
+                            ? `Allowlist Upcoming`
+                            : `Allowlist Complete`}
+                        </span>
+                        <span className={styles.phaseTimeTag}>
+                          {isMintingOpen(
+                            phaseTimes.public_start_time,
+                            phaseTimes.public_end_time
+                          )
+                            ? `Public Phase Available`
+                            : isMintingUpcoming(phaseTimes.public_start_time)
+                            ? `Public Phase Upcoming`
+                            : `Public Phase Complete`}
+                        </span>
+                      </span>
+                      <span className="d-flex align-items-center justify-content-end gap-4">
+                        <FontAwesomeIcon
+                          className={`${styles.globeIcon} ${styles.collectionIcon}`}
+                          icon="globe"
+                          onClick={() => {
+                            let url = info.website;
+                            if (!url.startsWith("http")) {
+                              url = `http://${url}`;
+                            }
+                            window.open(url, "_blank");
+                          }}></FontAwesomeIcon>
+                        <a
+                          href={`https://${
+                            NEXTGEN_CORE.chain_id === goerli.id
+                              ? `testnets.opensea`
+                              : `opensea`
+                          }.io/assets/${
+                            NEXTGEN_CORE.chain_id === goerli.id
+                              ? `goerli`
+                              : `ethereum`
+                          }/${NEXTGEN_CORE.contract}`}
+                          target="_blank"
+                          rel="noreferrer">
+                          <Image
+                            className={styles.collectionIcon}
+                            src="/opensea.png"
+                            alt="opensea"
+                            width={32}
+                            height={32}
+                          />
+                        </a>
+                        <a
+                          href={`https://${
+                            NEXTGEN_CORE.chain_id === goerli.id
+                              ? `goerli.x2y2`
+                              : `x2y2`
+                          }.io/eth/${NEXTGEN_CORE.contract}`}
+                          target="_blank"
+                          rel="noreferrer">
+                          <Image
+                            className={styles.collectionIcon}
+                            src="/x2y2.png"
+                            alt="x2y2"
+                            width={32}
+                            height={32}
+                          />
+                        </a>
+                        <Button
+                          onClick={() => {
+                            window.location.href = `/nextgen/collection/${props.collection}/mint`;
+                          }}
+                          className={styles.mintBtn}
+                          disabled={
+                            !additionalData ||
+                            !phaseTimes ||
+                            (!isMintingOpen(
+                              phaseTimes.allowlist_start_time,
+                              phaseTimes.allowlist_end_time
+                            ) &&
+                              !isMintingOpen(
+                                phaseTimes.public_start_time,
+                                phaseTimes.public_end_time
+                              ))
+                          }>
+                          Go to Minting
+                        </Button>
+                      </span>
                     </span>
                   </Col>
                   <Col className="pt-2" xs={12}>
                     by {info.artist.toUpperCase()}
+                  </Col>
+                </Row>
+                <Row>
+                  <Col className="d-flex  align-items-center flex-wrap gap-4">
+                    <span className="d-inline-flex align-items-center gap-2">
+                      {isMintingOpen(
+                        phaseTimes.allowlist_start_time,
+                        phaseTimes.allowlist_end_time
+                      )
+                        ? `Allowlist Available`
+                        : isMintingUpcoming(phaseTimes.allowlist_start_time)
+                        ? `Allowlist Upcoming`
+                        : `Allowlist Complete`}
+                    </span>
                   </Col>
                 </Row>
                 <Row className="pt-4">
