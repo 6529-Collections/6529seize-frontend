@@ -17,48 +17,42 @@ const RememePageComponent = dynamic(
   { ssr: false }
 );
 
-interface Props {
-  contract: string;
-  id: string;
-  name: string;
-  image: string;
-}
-
-export default function ReMeme(props: Props) {
+export default function ReMeme(props: any) {
+  const pageProps = props.pageProps;
   const [breadcrumbs, setBreadcrumbs] = useState<Crumb[]>([
     { display: "Home", href: "/" },
     { display: "ReMemes", href: "/rememes" },
-    { display: props.name },
+    { display: pageProps.name },
   ]);
 
   return (
     <>
       <Head>
-        <title>{`${props.name} | ReMemes | 6529 SEIZE`}</title>
+        <title>{`${pageProps.name} | ReMemes | 6529 SEIZE`}</title>
         <link rel="icon" href="/favicon.ico" />
         <meta
           name="description"
-          content={`${props.name} | ReMemes | 6529 SEIZE`}
+          content={`${pageProps.name} | ReMemes | 6529 SEIZE`}
         />
         <meta
           property="og:url"
-          content={`${process.env.BASE_ENDPOINT}/rememes/${props.contract}/${props.id}`}
+          content={`${process.env.BASE_ENDPOINT}/rememes/${pageProps.contract}/${pageProps.id}`}
         />
         <meta
           property="og:title"
-          content={`${props.name} | ReMemes | 6529 SEIZE`}
+          content={`${pageProps.name} | ReMemes | 6529 SEIZE`}
         />
         <meta
           property="og:description"
-          content={`${props.name} | ReMemes | 6529 SEIZE`}
+          content={`${pageProps.name} | ReMemes | 6529 SEIZE`}
         />
-        <meta property="og:image" content={parseIpfsUrl(props.image)} />
+        <meta property="og:image" content={parseIpfsUrl(pageProps.image)} />
       </Head>
 
       <main className={styles.main}>
         <Header />
         <Breadcrumb breadcrumbs={breadcrumbs} />
-        <RememePageComponent contract={props.contract} id={props.id} />
+        <RememePageComponent contract={pageProps.contract} id={pageProps.id} />
       </main>
     </>
   );
