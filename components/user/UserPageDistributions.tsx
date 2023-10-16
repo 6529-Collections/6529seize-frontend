@@ -89,6 +89,9 @@ export default function UserPageDistributions(props: Props) {
         if (mydistributions.some((d) => d.allowlist > 0)) {
           phases.push(DistributionPhase.ALLOWLIST);
         }
+        if (mydistributions.some((d) => d.phase_0 > 0)) {
+          phases.push(DistributionPhase.PHASE_0);
+        }
         if (mydistributions.some((d) => d.phase_1 > 0)) {
           phases.push(DistributionPhase.PHASE_1);
         }
