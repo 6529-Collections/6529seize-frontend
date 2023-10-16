@@ -6,16 +6,18 @@ import {
   numberWithCommas,
   parseEmojis,
 } from "../../helpers/Helpers";
-import { MANIFOLD, SIX529_MUSEUM } from "../../constants";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useState } from "react";
 import { Dropdown } from "react-bootstrap";
 import Tippy from "@tippyjs/react";
 import Image from "next/image";
+import { IProfileConsolidation } from "../../entities/IProfile";
 
 interface Props {
   wallets: `0x${string}`[];
+  consolidatedWallets?: IProfileConsolidation[];
   display: string | undefined;
+  displayEns?: string | undefined;
   hideCopy?: boolean;
   tags?: {
     memesCardsSets: number;
@@ -56,20 +58,14 @@ export const GRADIENT_ICON = "";
 export function WalletAddress(props: {
   wallet: string;
   display: string | undefined;
+  displayEns?: string | undefined;
   isUserPage?: boolean;
   disableLink?: boolean;
   hideCopy?: boolean;
 }) {
   const [isCopied, setIsCopied] = useState(false);
 
-  function resolveAddress() {
-    if (props.wallet.toUpperCase() === SIX529_MUSEUM.toUpperCase()) {
-      return "6529Museum";
-    }
-    if (props.wallet.toUpperCase() === MANIFOLD.toUpperCase()) {
-      return "Manifold Minting Wallet";
-    }
-
+  function resolveDisplay() {
     if (props.display) {
       if (containsEmojis(props.display)) {
         return parseEmojis(props.display);
@@ -78,6 +74,17 @@ export function WalletAddress(props: {
     }
 
     return formatAddress(props.wallet);
+  }
+
+  function resolveAddress() {
+    if (props.displayEns) {
+      if (containsEmojis(props.displayEns)) {
+        return parseEmojis(props.displayEns);
+      }
+      return formatAddress(props.displayEns);
+    }
+
+    return resolveDisplay();
   }
 
   function getLink() {
@@ -100,11 +107,19 @@ export function WalletAddress(props: {
 
   function getInnerHTML() {
     if (props.disableLink) {
-      return resolveAddress();
+      return resolveDisplay();
     }
 
-    return `<a href="${getLink()}">${resolveAddress()}</a>`;
+    return `<a href="${getLink()}">${resolveDisplay()}</a>`;
   }
+
+  const [walletEns] = useState(
+    props.display?.endsWith(".eth")
+      ? props.display
+      : props.displayEns?.endsWith(".eth")
+      ? props.displayEns
+      : null
+  );
 
   return (
     <span>
@@ -113,7 +128,8 @@ export function WalletAddress(props: {
           className={styles.address}
           dangerouslySetInnerHTML={{
             __html: getInnerHTML(),
-          }}></span>
+          }}
+        ></span>
       )}
       {!props.hideCopy && navigator.clipboard && (
         <>
@@ -121,32 +137,36 @@ export function WalletAddress(props: {
             <span
               className={`${styles.address} ${
                 props.isUserPage ? styles.addressUserPage : ""
-              }`}>
+              }`}
+            >
               <span
                 className={styles.address}
                 dangerouslySetInnerHTML={{
                   __html: getInnerHTML(),
-                }}></span>
+                }}
+              ></span>
             </span>
           )}
-          {props.display && props.display.endsWith(".eth") ? (
+          {walletEns ? (
             <Dropdown className={`${styles.copyDropdown}`} autoClose="outside">
               <Tippy
                 content={isCopied ? "Copied" : "Copy"}
                 placement={"right"}
                 theme={"light"}
-                hideOnClick={false}>
+                hideOnClick={false}
+              >
                 <Dropdown.Toggle
                   name={`copy-toggle`}
-                  aria-label={`copy-toggle`}>
-                  {props.isUserPage && (
+                  aria-label={`copy-toggle`}
+                >
+                  {props.isUserPage && props.display && (
                     <span
                       className={`${styles.address} ${
                         props.isUserPage ? styles.addressUserPage : ""
                       }`}
-                      dangerouslySetInnerHTML={{
-                        __html: resolveAddress(),
-                      }}></span>
+                    >
+                      {formatAddress(props.display)}
+                    </span>
                   )}
                   <FontAwesomeIcon
                     icon="copy"
@@ -162,26 +182,30 @@ export function WalletAddress(props: {
                     content={isCopied ? "Copied" : "Copy"}
                     placement={"right"}
                     theme={"light"}
-                    hideOnClick={false}>
+                    hideOnClick={false}
+                  >
                     <Dropdown.Item
                       name={`copy-ens-btn`}
                       aria-label={`copy-ens-btn`}
-                      onClick={() => copy(props.display)}
+                      onClick={() => copy(props.displayEns ?? props.display)}
                       dangerouslySetInnerHTML={{
                         __html: resolveAddress(),
-                      }}></Dropdown.Item>
+                      }}
+                    ></Dropdown.Item>
                   </Tippy>
                 )}
                 <Tippy
                   content={isCopied ? "Copied" : "Copy"}
                   placement={"right"}
                   theme={"light"}
-                  hideOnClick={false}>
+                  hideOnClick={false}
+                >
                   <Dropdown.Item
                     className={styles.copyDropdownItem}
                     name={`copy-address-btn`}
                     aria-label={`copy-address-btn`}
-                    onClick={() => copy(props.wallet)}>
+                    onClick={() => copy(props.wallet)}
+                  >
                     {formatAddress(props.wallet as string)}
                   </Dropdown.Item>
                 </Tippy>
@@ -191,16 +215,19 @@ export function WalletAddress(props: {
             <>
               <Dropdown
                 className={`${styles.copyDropdown}`}
-                autoClose="outside">
+                autoClose="outside"
+              >
                 <Tippy
                   content={isCopied ? "Copied" : "Copy"}
                   placement={"right"}
                   theme={"light"}
-                  hideOnClick={false}>
+                  hideOnClick={false}
+                >
                   <Dropdown.Toggle
                     name={`copy-toggle`}
                     aria-label={`copy-toggle`}
-                    onClick={() => copy(props.wallet)}>
+                    onClick={() => copy(props.wallet)}
+                  >
                     {props.isUserPage && (
                       <span
                         className={`${styles.address} ${
@@ -208,7 +235,8 @@ export function WalletAddress(props: {
                         }`}
                         dangerouslySetInnerHTML={{
                           __html: resolveAddress(),
-                        }}></span>
+                        }}
+                      ></span>
                     )}
                     <FontAwesomeIcon
                       icon="copy"
@@ -238,6 +266,7 @@ export default function Address(props: Props) {
         <WalletAddress
           wallet={props.wallets[0]}
           display={props.display}
+          displayEns={props.displayEns}
           hideCopy={props.hideCopy}
           disableLink={props.disableLink}
           isUserPage={props.isUserPage}
@@ -245,7 +274,8 @@ export default function Address(props: Props) {
       ) : (
         <Dropdown
           className={`${styles.consolidationDropdown}`}
-          autoClose="outside">
+          autoClose="outside"
+        >
           <Dropdown.Toggle
             onClick={() => {
               if (!props.isUserPage) {
@@ -253,7 +283,8 @@ export default function Address(props: Props) {
               }
             }}
             name={`consolidation-toggle`}
-            aria-label={`consolidation-toggle`}>
+            aria-label={`consolidation-toggle`}
+          >
             <Image
               loading="eager"
               priority
@@ -269,7 +300,8 @@ export default function Address(props: Props) {
               }`}
               dangerouslySetInnerHTML={{
                 __html: props.display ? parseEmojis(props.display) : ``,
-              }}></span>
+              }}
+            ></span>
           </Dropdown.Toggle>
         </Dropdown>
       )}
@@ -278,7 +310,8 @@ export default function Address(props: Props) {
           props.isUserPage
             ? `d-flex flex-wrap align-items-center gap-2`
             : `d-flex flex-column`
-        }>
+        }
+      >
         {(consolidationExpanded || props.isUserPage) &&
           props.wallets.length > 1 &&
           props.wallets.map((w, index) => (
@@ -286,7 +319,8 @@ export default function Address(props: Props) {
               key={w}
               className={`d-flex align-items-center justify-content-start ${
                 props.isUserPage ? styles.consolidationDiv : ""
-              }`}>
+              }`}
+            >
               <FontAwesomeIcon
                 icon="arrow-turn-right"
                 name={`arrow-turn-right`}
@@ -296,9 +330,12 @@ export default function Address(props: Props) {
               <WalletAddress
                 wallet={w}
                 display={
+                  props.consolidatedWallets?.find(
+                    (c) => c.wallet.address.toLowerCase() === w.toLowerCase()
+                  )?.wallet.ens ??
                   props.display?.split(" - ")[index].endsWith(".eth")
                     ? props.display?.split(" - ")[index]
-                    : undefined
+                    : w
                 }
                 hideCopy={props.hideCopy}
                 disableLink={areEqualAddresses(w, props.viewingWallet)}
@@ -339,7 +376,8 @@ export default function Address(props: Props) {
             <span
               className={`${styles.addressTag} ${
                 !MEMES_SETS_ICON ? styles.memesSetTag : ""
-              }`}>
+              }`}
+            >
               {(props.isUserPage || !MEMES_SETS_ICON) && `Memes Sets x`}
               {props.tags.memesCardsSets}
               {MEMES_SETS_ICON && (
@@ -354,7 +392,8 @@ export default function Address(props: Props) {
             <span
               className={`${styles.addressTag} ${
                 !UNIQUE_MEMES_ICON ? styles.memesTag : ""
-              }`}>
+              }`}
+            >
               {(props.isUserPage || !UNIQUE_MEMES_ICON) && `Memes x`}
               {props.tags.memesBalance}
               {props.tags.genesis > 0 ? ` (+Genesis) ` : ""}
@@ -373,7 +412,8 @@ export default function Address(props: Props) {
             <span
               className={`${styles.addressTag} ${
                 !GRADIENT_ICON ? styles.gradientTag : ""
-              }`}>
+              }`}
+            >
               {(props.isUserPage || !GRADIENT_ICON) && `Gradients x`}
               {props.tags.gradientsBalance}
               {GRADIENT_ICON && (
@@ -391,7 +431,8 @@ export default function Address(props: Props) {
                   <span
                     className={`${styles.addressTag} ${
                       !SZN_1_ICON ? styles.memeSzn1Tag : ""
-                    }`}>
+                    }`}
+                  >
                     {(props.isUserPage || !SZN_1_ICON) && `SZN1 Sets x`}
                     {props.tags.memesCardsSetS1}
                     {SZN_1_ICON && (
@@ -408,7 +449,8 @@ export default function Address(props: Props) {
                   <span
                     className={`${styles.addressTag} ${
                       !SZN_2_ICON ? styles.memeSzn2Tag : ""
-                    }`}>
+                    }`}
+                  >
                     {(props.isUserPage || !SZN_2_ICON) && `SZN2 Sets x`}
                     {props.tags.memesCardsSetS2}
                     {SZN_2_ICON && (
@@ -425,7 +467,8 @@ export default function Address(props: Props) {
                   <span
                     className={`${styles.addressTag} ${
                       !SZN_3_ICON ? styles.memeSzn3Tag : ""
-                    }`}>
+                    }`}
+                  >
                     {(props.isUserPage || !SZN_3_ICON) && `SZN3 Sets x`}
                     {props.tags.memesCardsSetS3}
                     {SZN_3_ICON && (
@@ -442,7 +485,8 @@ export default function Address(props: Props) {
                   <span
                     className={`${styles.addressTag} ${
                       !SZN_4_ICON ? styles.memeSzn4Tag : ""
-                    }`}>
+                    }`}
+                  >
                     {(props.isUserPage || !SZN_4_ICON) && `SZN4 Sets x`}
                     {props.tags.memesCardsSetS4}
                     {SZN_4_ICON && (
@@ -459,7 +503,8 @@ export default function Address(props: Props) {
                   <span
                     className={`${styles.addressTag} ${
                       !SZN_4_ICON ? styles.memeSzn5Tag : ""
-                    }`}>
+                    }`}
+                  >
                     {(props.isUserPage || !SZN_4_ICON) && `SZN5 Sets x`}
                     {props.tags.memesCardsSetS5}
                     {SZN_5_ICON && (
@@ -475,7 +520,8 @@ export default function Address(props: Props) {
                 <span
                   className={`${styles.addressTag} ${
                     !GRADIENT_ICON ? styles.gradientTag : ""
-                  }`}>
+                  }`}
+                >
                   {(props.isUserPage || !GRADIENT_ICON) && `Gradients x`}
                   {props.tags.gradientsBalance}
                   {GRADIENT_ICON && (
