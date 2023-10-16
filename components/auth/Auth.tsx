@@ -1,5 +1,6 @@
-import { createContext, useEffect } from "react";
+import { createContext, useEffect, useState } from "react";
 import { Slide, ToastContainer, TypeOptions, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import { useAccount, useSignMessage } from "wagmi";
 import {
   getAuthJwt,
@@ -8,9 +9,31 @@ import {
 } from "../../services/auth/auth.utils";
 import { commonApiFetch, commonApiPost } from "../../services/api/common-api";
 import jwtDecode from "jwt-decode";
+import { UserRejectedRequestError } from "viem";
+import { IProfile, IProfileAndConsolidations } from "../../entities/IProfile";
+
+export interface IProfileMetaWallet {
+  readonly wallet: {
+    readonly address: string;
+    readonly ens: string | null;
+  };
+  readonly displayName: string;
+  readonly tdh: number;
+}
+
+export interface IProfileWithMeta {
+  readonly profile: IProfile | null;
+  readonly consolidation: {
+    readonly wallets: IProfileMetaWallet[];
+    readonly tdh: number;
+  };
+}
 
 type AuthContextType = {
-  requestAuth: () => void;
+  profile: IProfileWithMeta | null;
+  loadingProfile: boolean;
+  requestAuth: () => Promise<{ success: boolean }>;
+  setToast: ({ message, type }: { message: string; type: TypeOptions }) => void;
 };
 
 interface NonceResponse {
@@ -19,18 +42,66 @@ interface NonceResponse {
 }
 
 export const AuthContext = createContext<AuthContextType>({
-  requestAuth: () => {},
+  profile: null,
+  loadingProfile: false,
+  requestAuth: async () => ({ success: false }),
+  setToast: () => {},
 });
 
 export default function Auth({ children }: { children: React.ReactNode }) {
   const { address } = useAccount();
   const signMessage = useSignMessage();
+
+  const [profile, setProfile] = useState<IProfileWithMeta | null>(null);
+  const [loadingProfile, setLoadingProfile] = useState(false);
+
   useEffect(() => {
     if (!address) removeAuthJwt();
     else {
       const isAuth = validateJwt({ jwt: getAuthJwt(), wallet: address });
       if (!isAuth) removeAuthJwt();
     }
+  }, [address]);
+
+  const mapApiResponseToUser = (
+    response: IProfileAndConsolidations
+  ): IProfileWithMeta => {
+    return {
+      ...response,
+      consolidation: {
+        ...response.consolidation,
+        wallets: response.consolidation.wallets.map((w) => ({
+          ...w,
+          wallet: {
+            ...w.wallet,
+            address: w.wallet.address.toLowerCase(),
+            ens: w.wallet.ens ?? null,
+          },
+          displayName: w.wallet.ens ?? w.wallet.address.toLowerCase(),
+        })),
+      },
+    };
+  };
+
+  useEffect(() => {
+    const getProfile = async () => {
+      if (!address) {
+        setProfile(null);
+        return;
+      }
+      setLoadingProfile(true);
+      try {
+        const response = await commonApiFetch<IProfileAndConsolidations>({
+          endpoint: `profiles/${address}`,
+        });
+        setProfile(mapApiResponseToUser(response));
+      } catch {
+        setProfile(null);
+      } finally {
+        setLoadingProfile(false);
+      }
+    };
+    getProfile();
   }, [address]);
 
   const getNonce = async (): Promise<NonceResponse | null> => {
@@ -66,15 +137,48 @@ export default function Auth({ children }: { children: React.ReactNode }) {
     message,
   }: {
     message: string;
-  }): Promise<string | null> => {
+  }): Promise<{
+    signature: string | null;
+    userRejected: boolean;
+  }> => {
     try {
       const signedMessage = await signMessage.signMessageAsync({
         message,
       });
-      return signedMessage;
-    } catch {
-      return null;
+      return {
+        signature: signedMessage,
+        userRejected: false,
+      };
+    } catch (e) {
+      return {
+        signature: null,
+        userRejected: e instanceof UserRejectedRequestError,
+      };
     }
+  };
+
+  const getSignatureWithRetry = async ({
+    message,
+  }: {
+    message: string;
+  }): Promise<{
+    signature: string | null;
+    userRejected: boolean;
+  }> => {
+    const maxRetries = 3;
+    let retryCount = 0;
+    const delayMS = 1000;
+
+    while (retryCount < maxRetries) {
+      const signature = await getSignature({ message });
+      if (signature.signature || signature.userRejected) return signature;
+      retryCount++;
+      await new Promise((r) => setTimeout(r, delayMS));
+    }
+    return {
+      signature: null,
+      userRejected: false,
+    };
   };
 
   const requestSignIn = async () => {
@@ -94,8 +198,16 @@ export default function Auth({ children }: { children: React.ReactNode }) {
       });
       return;
     }
-    const clientSignature = await getSignature({ message: nonce });
-    if (!clientSignature) {
+    const clientSignature = await getSignatureWithRetry({ message: nonce });
+    if (clientSignature.userRejected) {
+      setToast({
+        message: "Authentication rejected",
+        type: "error",
+      });
+      return;
+    }
+
+    if (!clientSignature.signature) {
       setToast({
         message: "Error requesting authentication, please try again",
         type: "error",
@@ -113,7 +225,7 @@ export default function Auth({ children }: { children: React.ReactNode }) {
         endpoint: "auth/login",
         body: {
           serverSignature,
-          clientSignature,
+          clientSignature: clientSignature.signature,
         },
       });
       setAuthJwt(tokenResponse.token);
@@ -162,7 +274,9 @@ export default function Auth({ children }: { children: React.ReactNode }) {
   };
   return (
     <>
-      <AuthContext.Provider value={{ requestAuth }}>
+      <AuthContext.Provider
+        value={{ requestAuth, setToast, profile, loadingProfile }}
+      >
         {children}
         <ToastContainer />
       </AuthContext.Provider>

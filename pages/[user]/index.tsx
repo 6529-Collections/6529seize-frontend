@@ -12,6 +12,9 @@ import {
 import { MANIFOLD, SIX529_MUSEUM } from "../../constants";
 import HeaderPlaceholder from "../../components/header/HeaderPlaceholder";
 import { useEffect, useState } from "react";
+import { commonApiFetch } from "../../services/api/common-api";
+import { IProfileAndConsolidations } from "../../entities/IProfile";
+import { get } from "http";
 
 export enum ReservedUser {
   MUSEUM = "6529Museum",
@@ -34,6 +37,14 @@ export const MANIFOLD_ENS = {
   pfp: "./manifold.png",
 };
 
+interface PageProps {
+  title: string;
+  url: string;
+  image: string;
+  tdh: number | null;
+  balance: number | null;
+}
+
 const Header = dynamic(() => import("../../components/header/Header"), {
   ssr: false,
   loading: () => <HeaderPlaceholder />,
@@ -46,9 +57,10 @@ const UserPage = dynamic(() => import("../../components/user/UserPage"), {
 const DEFAULT_IMAGE =
   "https://d3lqz0a4bldqgf.cloudfront.net/seize_images/Seize_Logo_Glasses_2.png";
 
-export default function UserPageIndex(props: any) {
+export default function UserPageIndex(props: { pageProps: PageProps }) {
   const router = useRouter();
   const pageProps = props.pageProps;
+
   const pagenameFull = `${pageProps.title} | 6529 SEIZE`;
 
   const descriptionArray = [];
@@ -60,22 +72,40 @@ export default function UserPageIndex(props: any) {
   }
   descriptionArray.push("6529 SEIZE");
 
+  const [connectedWallets, setConnectedWallets] = useState<string[]>([]);
+
   const [user, setUser] = useState(
     Array.isArray(router.query.user) ? router.query.user[0] : router.query.user
   );
 
-  const [connectedWallets, setConnectedWallets] = useState<string[]>([]);
+  const [userProfile, setUserProfile] =
+    useState<IProfileAndConsolidations | null>(null);
 
   useEffect(() => {
-    if (user) {
-      if (
-        !user.startsWith("0x") &&
-        !user.endsWith(".eth") &&
-        !Object.values(ReservedUser).includes(user as ReservedUser)
-      ) {
-        window.location.href = "404";
+    const getUserProfile = async () => {
+      if (!user) {
+        return;
       }
-    }
+      const userProfile = await commonApiFetch<IProfileAndConsolidations>({
+        endpoint: `profiles/${user}`,
+      }).catch(() => null);
+
+      if (!userProfile) {
+        router.push("/404");
+        return;
+      }
+
+      if (
+        userProfile?.profile?.normalised_handle &&
+        userProfile.profile?.normalised_handle !== user.toLowerCase()
+      ) {
+        router.push(`${userProfile.profile.normalised_handle}`);
+      }
+
+      setUserProfile(userProfile);
+    };
+
+    getUserProfile();
   }, [user]);
 
   return (
@@ -98,22 +128,34 @@ export default function UserPageIndex(props: any) {
 
       <main className={styles.main}>
         <Header onSetWallets={(wallets) => setConnectedWallets(wallets)} />
-        {router.isReady && user && (
-          <UserPage wallets={connectedWallets} user={user} />
+        {router.isReady && pageProps.url && userProfile && (
+          <UserPage
+            wallets={connectedWallets}
+            user={pageProps.url}
+            profile={userProfile}
+          />
         )}
       </main>
     </>
   );
 }
 
-export async function getServerSideProps(req: any, res: any, resolvedUrl: any) {
+export async function getServerSideProps(
+  req: any,
+  res: any,
+  resolvedUrl: any
+): Promise<{
+  props: PageProps;
+}> {
   let user = req.query.user;
+
   if (areEqualAddresses(user, MUSEUM_ENS.display)) {
     user = MUSEUM_ENS.wallet;
   }
   if (areEqualAddresses(user, MANIFOLD_ENS.display)) {
     user = MANIFOLD_ENS.wallet;
   }
+
   const ensRequest = await fetch(
     `${process.env.API_ENDPOINT}/api/user/${user}`
   );
@@ -144,7 +186,6 @@ export async function getServerSideProps(req: any, res: any, resolvedUrl: any) {
         ? ReservedUser.MANIFOLD
         : userDisplay;
   }
-
   return {
     props: {
       title: userDisplay,
@@ -152,6 +193,7 @@ export async function getServerSideProps(req: any, res: any, resolvedUrl: any) {
       image: pfp ? pfp : DEFAULT_IMAGE,
       tdh: tdh ? tdh : null,
       balance: balance ? balance : null,
+      //userProfile,
     },
   };
 }

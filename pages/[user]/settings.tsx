@@ -3,59 +3,58 @@ import styles from "../../styles/Home.module.scss";
 
 import dynamic from "next/dynamic";
 import { useRouter } from "next/router";
-import {
-  areEqualAddresses,
-  containsEmojis,
-  formatAddress,
-} from "../../helpers/Helpers";
-import { MANIFOLD, SIX529_MUSEUM } from "../../constants";
 import HeaderPlaceholder from "../../components/header/HeaderPlaceholder";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import UserSettingsComponent from "../../components/user/settings/UserSettings";
+import { AuthContext } from "../../components/auth/Auth";
 
-export enum ReservedUser {
-  MUSEUM = "6529Museum",
-  MANIFOLD = "Manifold-Minting-Wallet",
-}
 const Header = dynamic(() => import("../../components/header/Header"), {
   ssr: false,
   loading: () => <HeaderPlaceholder />,
 });
 
-export default function UserPageSettings(props: any) {
+export default function UserPageSettings() {
+  const { profile } = useContext(AuthContext);
   const router = useRouter();
-  const pageProps = props.pageProps;
-  const pagenameFull = `${pageProps.title} | 6529 SEIZE`;
-
-  const [user, setUser] = useState(
+  const [user] = useState(
     Array.isArray(router.query.user) ? router.query.user[0] : router.query.user
   );
-
   const [connectedWallets, setConnectedWallets] = useState<string[]>([]);
+  const [pagenameFull, setPagenameFull] = useState<string | null>(null);
+  const [title, setTitle] = useState<string | null>(null);
+  const [url, setUrl] = useState<string | null>(null);
 
   useEffect(() => {
-    if (user) {
-      if (
-        !user.startsWith("0x") &&
-        !user.endsWith(".eth") &&
-        !Object.values(ReservedUser).includes(user as ReservedUser)
-      ) {
-        window.location.href = "404";
-      }
+    if (!profile?.profile) {
+      setPagenameFull(null);
+      setTitle(null);
+      setUrl(null);
+      return;
     }
-  }, [user]);
+    const consolidatedWalletsSortedByHighest =
+      profile.consolidation.wallets.sort((a, d) => d.tdh - a.tdh);
+
+    const profileTitle =
+      profile.profile?.handle ??
+      consolidatedWalletsSortedByHighest.at(0)?.displayName ??
+      null;
+
+    setPagenameFull(`${profileTitle} | 6529 SEIZE`);
+    setTitle(profileTitle);
+    setUrl(profileTitle);
+  }, [profile]);
 
   return (
     <>
       <Head>
         <title>{pagenameFull}</title>
         <link rel="icon" href="/favicon.ico" />
-        <meta name="description" content={pageProps.title} />
+        <meta name="description" content={title ?? undefined} />
         <meta
           property="og:url"
-          content={`${process.env.BASE_ENDPOINT}/${pageProps.url}`}
+          content={`${process.env.BASE_ENDPOINT}/${url}`}
         />
-        <meta property="og:title" content={pageProps.title} />
+        <meta property="og:title" content={title ?? undefined} />
         <meta
           property="og:image"
           content={`${process.env.BASE_ENDPOINT}/Seize_Logo_Glasses_2.png`}
@@ -74,33 +73,7 @@ export default function UserPageSettings(props: any) {
 }
 
 export async function getServerSideProps(req: any, res: any, resolvedUrl: any) {
-  const user = req.query.user;
-  if (user.includes(".eth") || !user.startsWith("0x")) {
-    return {
-      props: { title: user, url: user },
-    };
-  }
-  const ensRequest = await fetch(
-    `${process.env.API_ENDPOINT}/api/user/${user}`
-  );
-  let userDisplay = formatAddress(user);
-  const responseText = await ensRequest.text();
-  if (responseText) {
-    const response = await JSON.parse(responseText);
-    userDisplay =
-      response.display && !containsEmojis(response.display)
-        ? response.display
-        : areEqualAddresses(user, SIX529_MUSEUM)
-        ? ReservedUser.MUSEUM
-        : areEqualAddresses(user, MANIFOLD)
-        ? ReservedUser.MANIFOLD
-        : userDisplay;
-  }
-
   return {
-    props: {
-      title: userDisplay,
-      url: userDisplay.includes(".eth") ? userDisplay : user,
-    },
+    props: {},
   };
 }
