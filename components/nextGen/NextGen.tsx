@@ -1,27 +1,18 @@
 import { Container, Row, Col } from "react-bootstrap";
-import { useContractRead } from "wagmi";
 import { useState } from "react";
 import NextGenCollectionPreview from "./NextGenCollectionPreview";
-import { NEXTGEN_CORE } from "./contracts";
+import { useCollectionIndex } from "./NextGenAdmin/admin_helpers";
 
 export const COLLECTION_BANNERS = `https://6529bucket.s3.eu-west-1.amazonaws.com/nextgen_collections/banners`;
 export const COLLECTION_PREVIEWS = `https://6529bucket.s3.eu-west-1.amazonaws.com/nextgen_collections/previews`;
 
 export default function NextGen() {
-  const [collectionIndex, setCollectionIndex] = useState<number>();
-
-  useContractRead({
-    address: NEXTGEN_CORE.contract as `0x${string}`,
-    abi: NEXTGEN_CORE.abi,
-    chainId: NEXTGEN_CORE.chain_id,
-    functionName: "newCollectionIndex",
-    watch: true,
-    onSettled(data: any, error: any) {
-      if (data) {
-        setCollectionIndex(parseInt(data) - 1);
-      }
-    },
-  });
+  const collectionIndexRead = useCollectionIndex();
+  const [collectionIndex, setCollectionIndex] = useState<number>(
+    collectionIndexRead.data
+      ? parseInt(collectionIndexRead.data as string) - 1
+      : 0
+  );
 
   return (
     <Container>

@@ -16,7 +16,7 @@ import { fromGWEI } from "../../helpers/Helpers";
 import { COLLECTION_BANNERS, COLLECTION_PREVIEWS } from "./NextGen";
 import Image from "next/image";
 import { goerli } from "wagmi/chains";
-import { NEXTGEN_CORE, NEXTGEN_MINTER } from "./contracts";
+import { NEXTGEN_CHAIN_ID, NEXTGEN_CORE, NEXTGEN_MINTER } from "./contracts";
 
 interface Props {
   collection: number;
@@ -112,7 +112,7 @@ export default function NextGenCollection(props: Props) {
         params.push({
           address: NEXTGEN_CORE.contract,
           abi: NEXTGEN_CORE.abi,
-          chainId: NEXTGEN_CORE.chain_id,
+          chainId: NEXTGEN_CHAIN_ID,
           functionName: "tokenURI",
           args: [i],
         });
@@ -124,7 +124,7 @@ export default function NextGenCollection(props: Props) {
   const startIndexRead = useContractRead({
     address: NEXTGEN_CORE.contract as `0x${string}`,
     abi: NEXTGEN_CORE.abi,
-    chainId: NEXTGEN_CORE.chain_id,
+    chainId: NEXTGEN_CHAIN_ID,
     functionName: "viewTokensIndexMin",
     watch: true,
     args: [props.collection],
@@ -138,7 +138,7 @@ export default function NextGenCollection(props: Props) {
   const endIndexRead = useContractRead({
     address: NEXTGEN_CORE.contract as `0x${string}`,
     abi: NEXTGEN_CORE.abi,
-    chainId: NEXTGEN_CORE.chain_id,
+    chainId: NEXTGEN_CHAIN_ID,
     functionName: "viewTokensIndexMax",
     watch: true,
     args: [props.collection],
@@ -190,7 +190,7 @@ export default function NextGenCollection(props: Props) {
   useContractRead({
     address: NEXTGEN_CORE.contract as `0x${string}`,
     abi: NEXTGEN_CORE.abi,
-    chainId: NEXTGEN_CORE.chain_id,
+    chainId: NEXTGEN_CHAIN_ID,
     functionName: "retrieveCollectionInfo",
     watch: true,
     args: [props.collection],
@@ -216,7 +216,7 @@ export default function NextGenCollection(props: Props) {
   useContractRead({
     address: NEXTGEN_CORE.contract as `0x${string}`,
     abi: NEXTGEN_CORE.abi,
-    chainId: NEXTGEN_CORE.chain_id,
+    chainId: NEXTGEN_CHAIN_ID,
     functionName: "retrieveCollectionLibraryAndScript",
     watch: true,
     args: [props.collection],
@@ -235,7 +235,7 @@ export default function NextGenCollection(props: Props) {
   useContractRead({
     address: NEXTGEN_CORE.contract as `0x${string}`,
     abi: NEXTGEN_CORE.abi,
-    chainId: NEXTGEN_CORE.chain_id,
+    chainId: NEXTGEN_CHAIN_ID,
     functionName: "retrieveCollectionAdditionalData",
     watch: true,
     args: [props.collection],
@@ -256,7 +256,7 @@ export default function NextGenCollection(props: Props) {
   useContractRead({
     address: NEXTGEN_MINTER.contract as `0x${string}`,
     abi: NEXTGEN_MINTER.abi,
-    chainId: NEXTGEN_MINTER.chain_id,
+    chainId: NEXTGEN_CHAIN_ID,
     functionName: "retrieveCollectionPhases",
     watch: true,
     args: [props.collection],
@@ -278,7 +278,7 @@ export default function NextGenCollection(props: Props) {
   useContractRead({
     address: NEXTGEN_CORE.contract as `0x${string}`,
     abi: NEXTGEN_CORE.abi,
-    chainId: NEXTGEN_CORE.chain_id,
+    chainId: NEXTGEN_CHAIN_ID,
     functionName: "burnAmount",
     watch: true,
     args: [props.collection],
@@ -292,7 +292,7 @@ export default function NextGenCollection(props: Props) {
   useContractRead({
     address: NEXTGEN_MINTER.contract as `0x${string}`,
     abi: NEXTGEN_MINTER.abi,
-    chainId: NEXTGEN_MINTER.chain_id,
+    chainId: NEXTGEN_CHAIN_ID,
     functionName: "getPrice",
     watch: true,
     args: [props.collection],
@@ -394,11 +394,11 @@ export default function NextGenCollection(props: Props) {
                           }}></FontAwesomeIcon>
                         <a
                           href={`https://${
-                            NEXTGEN_CORE.chain_id === goerli.id
+                            NEXTGEN_CHAIN_ID === goerli.id
                               ? `testnets.opensea`
                               : `opensea`
                           }.io/assets/${
-                            NEXTGEN_CORE.chain_id === goerli.id
+                            NEXTGEN_CHAIN_ID === goerli.id
                               ? `goerli`
                               : `ethereum`
                           }/${NEXTGEN_CORE.contract}`}
@@ -414,7 +414,7 @@ export default function NextGenCollection(props: Props) {
                         </a>
                         <a
                           href={`https://${
-                            NEXTGEN_CORE.chain_id === goerli.id
+                            NEXTGEN_CHAIN_ID === goerli.id
                               ? `goerli.x2y2`
                               : `x2y2`
                           }.io/eth/${NEXTGEN_CORE.contract}`}

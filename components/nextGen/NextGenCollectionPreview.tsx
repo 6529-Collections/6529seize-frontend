@@ -5,7 +5,7 @@ import { useState } from "react";
 import { COLLECTION_PREVIEWS } from "./NextGen";
 import Image from "next/image";
 import { AdditionalData, Info } from "./entities";
-import { NEXTGEN_CORE } from "./contracts";
+import { NEXTGEN_CHAIN_ID, NEXTGEN_CORE } from "./contracts";
 
 interface Props {
   collection: number;
@@ -18,7 +18,7 @@ export default function NextGenCollectionPreview(props: Props) {
   useContractRead({
     address: NEXTGEN_CORE.contract as `0x${string}`,
     abi: NEXTGEN_CORE.abi,
-    chainId: NEXTGEN_CORE.chain_id,
+    chainId: NEXTGEN_CHAIN_ID,
     functionName: "retrieveCollectionInfo",
     watch: true,
     args: [props.collection],
@@ -41,7 +41,7 @@ export default function NextGenCollectionPreview(props: Props) {
   useContractRead({
     address: NEXTGEN_CORE.contract as `0x${string}`,
     abi: NEXTGEN_CORE.abi,
-    chainId: NEXTGEN_CORE.chain_id,
+    chainId: NEXTGEN_CHAIN_ID,
     functionName: "retrieveCollectionAdditionalData",
     watch: true,
     args: [props.collection],

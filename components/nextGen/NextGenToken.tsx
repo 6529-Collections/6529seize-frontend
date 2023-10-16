@@ -8,7 +8,7 @@ import Address from "../address/Address";
 import { extractField, extractURI } from "./NextGenCollection";
 import Image from "next/image";
 import { goerli } from "wagmi/chains";
-import { NEXTGEN_CORE, NEXTGEN_MINTER } from "./contracts";
+import { NEXTGEN_CHAIN_ID, NEXTGEN_CORE, NEXTGEN_MINTER } from "./contracts";
 
 interface Props {
   collection: number;
@@ -31,7 +31,7 @@ export default function NextGenToken(props: Props) {
   useContractRead({
     address: NEXTGEN_CORE.contract as `0x${string}`,
     abi: NEXTGEN_CORE.abi,
-    chainId: NEXTGEN_CORE.chain_id,
+    chainId: NEXTGEN_CHAIN_ID,
     functionName: "tokenURI",
     watch: true,
     args: [props.token],
@@ -66,7 +66,7 @@ export default function NextGenToken(props: Props) {
   useContractRead({
     address: NEXTGEN_CORE.contract as `0x${string}`,
     abi: NEXTGEN_CORE.abi,
-    chainId: NEXTGEN_CORE.chain_id,
+    chainId: NEXTGEN_CHAIN_ID,
     functionName: "retrieveCollectionInfo",
     watch: true,
     args: [props.collection],
@@ -89,7 +89,7 @@ export default function NextGenToken(props: Props) {
   useContractRead({
     address: NEXTGEN_CORE.contract as `0x${string}`,
     abi: NEXTGEN_CORE.abi,
-    chainId: NEXTGEN_CORE.chain_id,
+    chainId: NEXTGEN_CHAIN_ID,
     functionName: "ownerOf",
     watch: true,
     args: [props.token],
@@ -257,13 +257,11 @@ export default function NextGenToken(props: Props) {
                     <Col>
                       <a
                         href={`https://${
-                          NEXTGEN_CORE.chain_id === goerli.id
+                          NEXTGEN_CHAIN_ID === goerli.id
                             ? `testnets.opensea`
                             : `opensea`
                         }.io/assets/${
-                          NEXTGEN_MINTER.chain_id === goerli.id
-                            ? `goerli`
-                            : `ethereum`
+                          NEXTGEN_CHAIN_ID === goerli.id ? `goerli` : `ethereum`
                         }/${NEXTGEN_MINTER.contract}/${props.token}`}
                         target="_blank"
                         rel="noreferrer">
@@ -277,7 +275,7 @@ export default function NextGenToken(props: Props) {
                       </a>
                       <a
                         href={`https://${
-                          NEXTGEN_MINTER.chain_id === goerli.id
+                          NEXTGEN_CHAIN_ID === goerli.id
                             ? `goerli.x2y2`
                             : `x2y2`
                         }.io/eth/${NEXTGEN_MINTER.contract}/${props.token}`}

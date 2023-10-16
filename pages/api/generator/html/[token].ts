@@ -1,6 +1,9 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import Web3 from "web3";
-import { NEXTGEN_CORE } from "../../../../components/nextGen/contracts";
+import {
+  NEXTGEN_CHAIN_ID,
+  NEXTGEN_CORE,
+} from "../../../../components/nextGen/contracts";
 import { mainnet, goerli } from "wagmi/chains";
 
 export default async function handler(
@@ -10,9 +13,9 @@ export default async function handler(
   const { token } = req.query;
 
   let providerUrl;
-  if ((NEXTGEN_CORE.chain_id as number) === mainnet.id) {
+  if ((NEXTGEN_CHAIN_ID as number) === mainnet.id) {
     providerUrl = `https://eth-mainnet.alchemyapi.io/v2/${process.env.ALCHEMY_API_KEY}`;
-  } else if ((NEXTGEN_CORE.chain_id as number) === goerli.id) {
+  } else if ((NEXTGEN_CHAIN_ID as number) === goerli.id) {
     providerUrl = `https://eth-goerli.alchemyapi.io/v2/${process.env.ALCHEMY_API_KEY}`;
   }
 

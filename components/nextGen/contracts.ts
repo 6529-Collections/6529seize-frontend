@@ -1,8 +1,10 @@
 import { goerli } from "wagmi/chains";
 
+export const NEXTGEN_FUNCTION_SELECTOR = "0xb85f97a0";
+export const NEXTGEN_CHAIN_ID = goerli.id;
+
 export const NEXTGEN_CORE = {
-  contract: "0xED2F5300A458F638cBD21b1A7217b54B99bb2Fc4",
-  chain_id: goerli.id,
+  contract: "0xde7a7ed4d4f947bc7ad7d04ec901c32acecfc730",
   abi: [
     {
       inputs: [
@@ -116,7 +118,7 @@ export const NEXTGEN_CORE = {
         { internalType: "uint256", name: "mintIndex", type: "uint256" },
         { internalType: "address", name: "_recipient", type: "address" },
         { internalType: "string", name: "_tokenData", type: "string" },
-        { internalType: "uint256", name: "_varg0", type: "uint256" },
+        { internalType: "uint256", name: "_saltfun_o", type: "uint256" },
         { internalType: "uint256", name: "_collectionID", type: "uint256" },
       ],
       name: "airDropTokens",
@@ -188,7 +190,7 @@ export const NEXTGEN_CORE = {
         { internalType: "uint256", name: "_burnCollectionID", type: "uint256" },
         { internalType: "uint256", name: "_tokenId", type: "uint256" },
         { internalType: "uint256", name: "_mintCollectionID", type: "uint256" },
-        { internalType: "uint256", name: "_varg0", type: "uint256" },
+        { internalType: "uint256", name: "_saltfun_o", type: "uint256" },
         { internalType: "address", name: "burner", type: "address" },
       ],
       name: "burnToMint",
@@ -276,19 +278,12 @@ export const NEXTGEN_CORE = {
       type: "function",
     },
     {
-      inputs: [{ internalType: "uint256", name: "", type: "uint256" }],
-      name: "isCollectionCreated",
-      outputs: [{ internalType: "bool", name: "", type: "bool" }],
-      stateMutability: "view",
-      type: "function",
-    },
-    {
       inputs: [
         { internalType: "uint256", name: "mintIndex", type: "uint256" },
         { internalType: "address", name: "_mintingAddress", type: "address" },
         { internalType: "address", name: "_mintTo", type: "address" },
         { internalType: "string", name: "_tokenData", type: "string" },
-        { internalType: "uint256", name: "_varg0", type: "uint256" },
+        { internalType: "uint256", name: "_saltfun_o", type: "uint256" },
         { internalType: "uint256", name: "_collectionID", type: "uint256" },
         { internalType: "uint256", name: "phase", type: "uint256" },
       ],
@@ -409,6 +404,13 @@ export const NEXTGEN_CORE = {
       inputs: [{ internalType: "uint256", name: "tokenId", type: "uint256" }],
       name: "retrieveGenerativeScript",
       outputs: [{ internalType: "string", name: "", type: "string" }],
+      stateMutability: "view",
+      type: "function",
+    },
+    {
+      inputs: [{ internalType: "uint256", name: "_tokenid", type: "uint256" }],
+      name: "retrieveTokenHash",
+      outputs: [{ internalType: "bytes32", name: "", type: "bytes32" }],
       stateMutability: "view",
       type: "function",
     },
@@ -791,8 +793,7 @@ export const NEXTGEN_CORE = {
 };
 
 export const NEXTGEN_MINTER = {
-  contract: "0x33086373a0d118ec22b1ca67ca47d0de9b8ce425",
-  chain_id: goerli.id,
+  contract: "0xd16C94C10e3C42F9a673907c0c2C1b126d7e87B7",
   abi: [
     {
       inputs: [
@@ -906,7 +907,7 @@ export const NEXTGEN_MINTER = {
       inputs: [
         { internalType: "address[]", name: "_recipients", type: "address[]" },
         { internalType: "string[]", name: "_tokenData", type: "string[]" },
-        { internalType: "uint256[]", name: "_varg0", type: "uint256[]" },
+        { internalType: "uint256[]", name: "_saltfun_o", type: "uint256[]" },
         { internalType: "uint256", name: "_collectionID", type: "uint256" },
         {
           internalType: "uint256[]",
@@ -944,7 +945,7 @@ export const NEXTGEN_MINTER = {
         { internalType: "uint256", name: "_mintCollectionID", type: "uint256" },
         { internalType: "string", name: "_tokenData", type: "string" },
         { internalType: "bytes32[]", name: "merkleProof", type: "bytes32[]" },
-        { internalType: "uint256", name: "_varg0", type: "uint256" },
+        { internalType: "uint256", name: "_saltfun_o", type: "uint256" },
       ],
       name: "burnOrSwapExternalToMint",
       outputs: [],
@@ -956,7 +957,7 @@ export const NEXTGEN_MINTER = {
         { internalType: "uint256", name: "_burnCollectionID", type: "uint256" },
         { internalType: "uint256", name: "_tokenId", type: "uint256" },
         { internalType: "uint256", name: "_mintCollectionID", type: "uint256" },
-        { internalType: "uint256", name: "_varg0", type: "uint256" },
+        { internalType: "uint256", name: "_saltfun_o", type: "uint256" },
       ],
       name: "burnToMint",
       outputs: [],
@@ -1094,7 +1095,7 @@ export const NEXTGEN_MINTER = {
         { internalType: "address", name: "_mintTo", type: "address" },
         { internalType: "bytes32[]", name: "merkleProof", type: "bytes32[]" },
         { internalType: "address", name: "_delegator", type: "address" },
-        { internalType: "uint256", name: "_varg0", type: "uint256" },
+        { internalType: "uint256", name: "_saltfun_o", type: "uint256" },
       ],
       name: "mint",
       outputs: [],
@@ -1105,7 +1106,7 @@ export const NEXTGEN_MINTER = {
       inputs: [
         { internalType: "address", name: "_recipient", type: "address" },
         { internalType: "string", name: "_tokenData", type: "string" },
-        { internalType: "uint256", name: "_varg0", type: "uint256" },
+        { internalType: "uint256", name: "_saltfun_o", type: "uint256" },
         { internalType: "uint256", name: "_collectionID", type: "uint256" },
         { internalType: "uint256", name: "_auctionEndTime", type: "uint256" },
       ],
@@ -1357,7 +1358,6 @@ export const NEXTGEN_MINTER = {
 
 export const NEXTGEN_ADMIN = {
   contract: "0x1bAe1D145Dd61fBBB62C85f8A6d7B6eDe0D150f5",
-  chain_id: goerli.id,
   abi: [
     { inputs: [], stateMutability: "nonpayable", type: "constructor" },
     {

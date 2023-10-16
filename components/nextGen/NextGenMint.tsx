@@ -44,7 +44,7 @@ import {
   ALL_USE_CASE,
   MINTING_USE_CASE,
 } from "../../pages/delegation/[...section]";
-import { NEXTGEN_CORE, NEXTGEN_MINTER } from "./contracts";
+import { NEXTGEN_CHAIN_ID, NEXTGEN_CORE, NEXTGEN_MINTER } from "./contracts";
 
 function NextGenDelegatorOption(props: { address: string }) {
   const ens = useEnsName({
@@ -99,7 +99,7 @@ export default function NextGenMint(props: Props) {
   useContractRead({
     address: NEXTGEN_CORE.contract as `0x${string}`,
     abi: NEXTGEN_CORE.abi,
-    chainId: NEXTGEN_CORE.chain_id,
+    chainId: NEXTGEN_CHAIN_ID,
     functionName: "retrieveCollectionInfo",
     watch: true,
     args: [props.collection],
@@ -122,7 +122,7 @@ export default function NextGenMint(props: Props) {
   useContractRead({
     address: NEXTGEN_CORE.contract as `0x${string}`,
     abi: NEXTGEN_CORE.abi,
-    chainId: NEXTGEN_CORE.chain_id,
+    chainId: NEXTGEN_CHAIN_ID,
     functionName: "retrieveCollectionAdditionalData",
     watch: true,
     args: [props.collection],
@@ -143,7 +143,7 @@ export default function NextGenMint(props: Props) {
   const mintWriteConfig = usePrepareContractWrite({
     address: NEXTGEN_MINTER.contract as `0x${string}`,
     abi: NEXTGEN_MINTER.abi,
-    chainId: NEXTGEN_MINTER.chain_id,
+    chainId: NEXTGEN_CHAIN_ID,
     value: mintCount
       ? BigInt(mintPrice ? mintPrice * mintCount : 0)
       : BigInt(0),
@@ -206,7 +206,7 @@ export default function NextGenMint(props: Props) {
 
   const handleMintClick = () => {
     if (account.isConnected) {
-      if (chainId === NEXTGEN_CORE.chain_id) {
+      if (chainId === NEXTGEN_CHAIN_ID) {
         const e = validate();
         if (e.length > 0) {
           setErrors(e);
@@ -312,7 +312,7 @@ export default function NextGenMint(props: Props) {
   const addressMintCountRead = useContractRead({
     address: NEXTGEN_CORE.contract as `0x${string}`,
     abi: NEXTGEN_CORE.abi,
-    chainId: NEXTGEN_CORE.chain_id,
+    chainId: NEXTGEN_CHAIN_ID,
     functionName: "retrieveTokensPerAddress",
     watch: true,
     enabled: mintingForDelegator
@@ -401,7 +401,7 @@ export default function NextGenMint(props: Props) {
   useContractRead({
     address: NEXTGEN_MINTER.contract as `0x${string}`,
     abi: NEXTGEN_MINTER.abi,
-    chainId: NEXTGEN_MINTER.chain_id,
+    chainId: NEXTGEN_CHAIN_ID,
     functionName: "retrieveCollectionPhases",
     watch: true,
     args: [props.collection],
@@ -421,7 +421,7 @@ export default function NextGenMint(props: Props) {
   });
 
   function disableMint() {
-    if (!account.isConnected || chainId !== NEXTGEN_MINTER.chain_id) {
+    if (!account.isConnected || chainId !== NEXTGEN_CHAIN_ID) {
       return false;
     }
     return (
@@ -461,7 +461,7 @@ export default function NextGenMint(props: Props) {
   useContractRead({
     address: NEXTGEN_CORE.contract as `0x${string}`,
     abi: NEXTGEN_CORE.abi,
-    chainId: NEXTGEN_CORE.chain_id,
+    chainId: NEXTGEN_CHAIN_ID,
     functionName: "burnAmount",
     watch: true,
     args: [props.collection],
@@ -473,7 +473,7 @@ export default function NextGenMint(props: Props) {
   useContractRead({
     address: NEXTGEN_MINTER.contract as `0x${string}`,
     abi: NEXTGEN_MINTER.abi,
-    chainId: NEXTGEN_MINTER.chain_id,
+    chainId: NEXTGEN_CHAIN_ID,
     functionName: "getPrice",
     watch: true,
     args: [props.collection],
@@ -871,13 +871,11 @@ export default function NextGenMint(props: Props) {
                           disabled={disableMint()}
                           onClick={handleMintClick}>
                           {account.isConnected
-                            ? chainId === NEXTGEN_MINTER.chain_id
+                            ? chainId === NEXTGEN_CHAIN_ID
                               ? isMinting
                                 ? `Processing...`
                                 : `Mint Now`
-                              : `Switch to ${getNetworkName(
-                                  NEXTGEN_MINTER.chain_id
-                                )}`
+                              : `Switch to ${getNetworkName(NEXTGEN_CHAIN_ID)}`
                             : `Connect Wallet`}
                           {isMinting && (
                             <div className="d-inline">
@@ -931,7 +929,7 @@ export default function NextGenMint(props: Props) {
                           &nbsp;&nbsp;
                           <a
                             href={getTransactionLink(
-                              NEXTGEN_MINTER.chain_id,
+                              NEXTGEN_CHAIN_ID,
                               mintWrite.data.hash
                             )}
                             target="_blank"

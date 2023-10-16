@@ -78,7 +78,11 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import Head from "next/head";
 import { Web3Modal } from "@web3modal/react";
-import { NEXTGEN_CORE, NEXTGEN_MINTER } from "../components/nextGen/contracts";
+import {
+  NEXTGEN_CHAIN_ID,
+  NEXTGEN_CORE,
+  NEXTGEN_MINTER,
+} from "../components/nextGen/contracts";
 import Auth from "../components/auth/Auth";
 
 library.add(
@@ -143,15 +147,13 @@ library.add(
 const CONTRACT_CHAINS: Chain[] = [mainnet];
 if (
   DELEGATION_CONTRACT.chain_id === sepolia.id ||
-  (NEXTGEN_CORE.chain_id as number) === sepolia.id ||
-  (NEXTGEN_MINTER.chain_id as number) === sepolia.id
+  (NEXTGEN_CHAIN_ID as number) === sepolia.id
 ) {
   CONTRACT_CHAINS.push(sepolia);
 }
 if (
   DELEGATION_CONTRACT.chain_id === goerli.id ||
-  (NEXTGEN_CORE.chain_id as number) === goerli.id ||
-  (NEXTGEN_MINTER.chain_id as number) === goerli.id
+  (NEXTGEN_CHAIN_ID as number) === goerli.id
 ) {
   CONTRACT_CHAINS.push(goerli);
 }
