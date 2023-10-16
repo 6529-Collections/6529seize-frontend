@@ -1,6 +1,7 @@
 export enum DistributionPhase {
   AIRDROP = "airdrop",
   ALLOWLIST = "allowlist",
+  PHASE_0 = "phase_0",
   PHASE_1 = "phase_1",
   PHASE_2 = "phase_2",
   PHASE_3 = "phase_3",
@@ -16,6 +17,7 @@ export interface IDistribution {
   card_mint_date: string;
   airdrop: number;
   allowlist: number;
+  phase_0: number;
   phase_1: number;
   phase_2: number;
   phase_3: number;
