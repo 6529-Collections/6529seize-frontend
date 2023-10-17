@@ -14,27 +14,17 @@ import {
 } from "../../entities/IDistribution";
 import ScrollToButton from "../scrollTo/ScrollToButton";
 import {
-  areEqualAddresses,
   capitalizeEveryWord,
   formatAddress,
   numberWithCommas,
-  parseEmojis,
 } from "../../helpers/Helpers";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Pagination from "../pagination/Pagination";
 import { SortDirection } from "../../entities/ISort";
 import Tippy from "@tippyjs/react";
 import SearchModal from "../searchModal/SearchModal";
-import { ReservedUser } from "../../pages/[user]";
 import DotLoader from "../dotLoader/DotLoader";
-import {
-  MEMES_CONTRACT,
-  GRADIENT_CONTRACT,
-  MEMELAB_CONTRACT,
-  SIX529_MUSEUM,
-  MANIFOLD,
-} from "../../constants";
-import { VIEW } from "../consolidation-switch/ConsolidationSwitch";
+import Address from "../address/Address";
 
 enum Sort {
   phase = "phase",
@@ -100,6 +90,9 @@ export default function Distribution(props: Props) {
       }
       if (mydistributions.some((d) => d.allowlist > 0)) {
         phases.push(DistributionPhase.ALLOWLIST);
+      }
+      if (mydistributions.some((d) => d.phase_0 > 0)) {
+        phases.push(DistributionPhase.PHASE_0);
       }
       if (mydistributions.some((d) => d.phase_1 > 0)) {
         phases.push(DistributionPhase.PHASE_1);
@@ -283,15 +276,11 @@ export default function Distribution(props: Props) {
                     <tr key={`${d.wallet}`}>
                       <td className="font-smaller">{d.wallet}</td>
                       <td>
-                        <a href={`/${d.display ? d.display : d.wallet}`}>
-                          {d.display
-                            ? d.display
-                            : areEqualAddresses(d.wallet, SIX529_MUSEUM)
-                            ? ReservedUser.MUSEUM
-                            : areEqualAddresses(d.wallet, MANIFOLD)
-                            ? ReservedUser.MANIFOLD
-                            : formatAddress(d.wallet)}
-                        </a>
+                        <Address
+                          wallets={[d.wallet as `0x${string}`]}
+                          display={d.display}
+                          hideCopy={true}
+                        />
                       </td>
                       {distributionsPhases.map((p) => (
                         <th
