@@ -9,7 +9,11 @@ import {
   useCollectionAdmin,
   getCollectionIdsForAddress,
 } from "./admin_helpers";
-import { NEXTGEN_CORE, NEXTGEN_CHAIN_ID } from "../contracts";
+import {
+  NEXTGEN_CORE,
+  NEXTGEN_CHAIN_ID,
+  FunctionSelectors,
+} from "../contracts";
 import NextGenContractWriteStatus from "../NextGenContractWriteStatus";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
@@ -21,7 +25,10 @@ export default function NextGenAdminSetCollectionData(props: Props) {
   const account = useAccount();
 
   const globalAdmin = useGlobalAdmin(account.address as string);
-  const functionAdmin = useFunctionAdmin(account.address as string);
+  const functionAdmin = useFunctionAdmin(
+    account.address as string,
+    FunctionSelectors.SET_COLLECTION_DATA
+  );
   const collectionIndex = useCollectionIndex();
   const collectionAdmin = useCollectionAdmin(
     account.address as string,
