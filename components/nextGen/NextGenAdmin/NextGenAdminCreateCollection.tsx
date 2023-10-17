@@ -64,9 +64,8 @@ export default function NextGenAdminCreateCollection(props: Props) {
     abi: NEXTGEN_CORE.abi,
     chainId: NEXTGEN_CHAIN_ID,
     functionName: "retrieveCollectionInfo",
-    enabled: props.update,
+    enabled: props.update && !!collectionID,
     args: [collectionID],
-    enabled: !!collectionID,
     onSettled(data: any, error: any) {
       if (data) {
         const d = data as any[];
