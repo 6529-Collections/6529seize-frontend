@@ -201,6 +201,8 @@ export const isValidEthAddress = (address: string) =>
 export function getTransactionLink(chain_id: number, hash: string) {
   return chain_id === sepolia.id
     ? `https://sepolia.etherscan.io/tx/${hash}`
+    : chain_id === goerli.id
+    ? `https://goerli.etherscan.io/tx/${hash}`
     : `https://etherscan.io/tx/${hash}`;
 }
 

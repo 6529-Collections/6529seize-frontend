@@ -3,53 +3,81 @@ import styles from "./NextGenAdmin.module.scss";
 import { useAccount, useContractWrite } from "wagmi";
 import { useEffect, useState } from "react";
 import {
+  FunctionSelectors,
+  NEXTGEN_CHAIN_ID,
+  NEXTGEN_MINTER,
+} from "../contracts";
+import {
   useGlobalAdmin,
   useFunctionAdmin,
   useCollectionIndex,
-  useCollectionAdmin,
   getCollectionIdsForAddress,
 } from "./admin_helpers";
-import { NEXTGEN_CORE, NEXTGEN_CHAIN_ID } from "../contracts";
 import NextGenContractWriteStatus from "../NextGenContractWriteStatus";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
+export enum ProposalType {
+  PRIMARY = "Primary",
+  SECONDARY = "Secondary",
+}
+
 interface Props {
+  type: ProposalType;
   close: () => void;
 }
 
-export default function NextGenAdminSetCollectionData(props: Props) {
+export default function NextGenAdminProposeAddressesAndPercentages(
+  props: Props
+) {
   const account = useAccount();
 
   const globalAdmin = useGlobalAdmin(account.address as string);
-  const functionAdmin = useFunctionAdmin(account.address as string);
-  const collectionIndex = useCollectionIndex();
-  const collectionAdmin = useCollectionAdmin(
+  const functionAdmin = useFunctionAdmin(
     account.address as string,
-    parseInt(collectionIndex.data as string)
+    props.type === ProposalType.PRIMARY
+      ? FunctionSelectors.PROPOSE_PRIMARY_ADDRESSES_AND_PERCENTAGES
+      : props.type === ProposalType.SECONDARY
+      ? FunctionSelectors.PROPOSE_SECONDARY_ADDRESSES_AND_PERCENTAGES
+      : ""
   );
+
+  const collectionIndex = useCollectionIndex();
 
   const collectionIds = getCollectionIdsForAddress(
     globalAdmin.data === true,
     functionAdmin.data === true,
-    collectionAdmin.data,
+    undefined,
     parseInt(collectionIndex.data as string)
   );
 
   const [collectionID, setCollectionID] = useState("");
-  const [artistAddress, setArtistAddress] = useState("");
-  const [maxPurchases, setMaxPurchases] = useState<number>();
-  const [totalSupply, setTotalSupply] = useState<number>();
-  const [finalSupplyTime, setFinalSupplyTime] = useState<number>();
+  const [address1, setAddress1] = useState("");
+  const [address2, setAddress2] = useState("");
+  const [address3, setAddress3] = useState("");
+  const [percentage1, setPercentage1] = useState<number>();
+  const [percentage2, setPercentage2] = useState<number>();
+  const [percentage3, setPercentage3] = useState<number>();
 
   const [errors, setErrors] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
+  function getFunctionName() {
+    switch (props.type) {
+      case ProposalType.PRIMARY:
+        return "proposePrimaryAddressesAndPercentages";
+      case ProposalType.SECONDARY:
+        return "proposeSecondaryAddressesAndPercentages";
+      default:
+        return "";
+    }
+  }
+
   const contractWrite = useContractWrite({
-    address: NEXTGEN_CORE.contract as `0x${string}`,
-    abi: NEXTGEN_CORE.abi,
+    address: NEXTGEN_MINTER.contract as `0x${string}`,
+    abi: NEXTGEN_MINTER.abi,
     chainId: NEXTGEN_CHAIN_ID,
-    functionName: "setCollectionData",
+    functionName: getFunctionName(),
     onError() {
       setSubmitting(false);
       setLoading(false);
@@ -60,23 +88,26 @@ export default function NextGenAdminSetCollectionData(props: Props) {
     setLoading(true);
     contractWrite.reset();
     const errors = [];
-
     if (!collectionID) {
       errors.push("Collection id is required");
     }
-    if (!artistAddress) {
-      errors.push("Artist ETH Address is required");
+    if (!address1) {
+      errors.push("Primary address 1 is required");
     }
-    if (!maxPurchases) {
-      errors.push("Max # of purchases during public mint is required");
+    if (!address2) {
+      errors.push("Primary address 2 is required");
     }
-    if (!totalSupply) {
-      errors.push("Total Supply of collection is required");
+    if (!address3) {
+      errors.push("Primary address 3 is required");
     }
-    if (!finalSupplyTime) {
-      errors.push(
-        "The time to reduce the supply, after minting is completed, is required"
-      );
+    if (!percentage1) {
+      errors.push("Percentage 1 is required");
+    }
+    if (!percentage2) {
+      errors.push("Percentage 2 is required");
+    }
+    if (!percentage3) {
+      errors.push("Percentage 3 is required");
     }
     if (errors.length > 0) {
       setErrors(errors);
@@ -92,10 +123,12 @@ export default function NextGenAdminSetCollectionData(props: Props) {
       contractWrite.write({
         args: [
           collectionID,
-          artistAddress,
-          maxPurchases,
-          totalSupply,
-          finalSupplyTime,
+          address1,
+          address2,
+          address3,
+          percentage1,
+          percentage2,
+          percentage3,
         ],
       });
     }
@@ -111,7 +144,7 @@ export default function NextGenAdminSetCollectionData(props: Props) {
       <Row className="pt-3">
         <Col className="d-flex align-items-center justify-content-between">
           <h3>
-            <b>SET COLLECTION DATA</b>
+            <b>PROPOSE {props.type.toUpperCase()} ADDRESSES AND PERCENTAGES</b>
           </h3>
           <FontAwesomeIcon
             className={styles.closeIcon}
@@ -143,41 +176,57 @@ export default function NextGenAdminSetCollectionData(props: Props) {
               </Form.Select>
             </Form.Group>
             <Form.Group className="mb-3">
-              <Form.Label>Artist Address</Form.Label>
+              <Form.Label>{props.type} Address 1</Form.Label>
               <Form.Control
                 type="text"
-                placeholder="0x33FD426905F149f8376e227d0C9D3340AaD17aF1"
-                value={artistAddress}
-                onChange={(e: any) => setArtistAddress(e.target.value)}
+                placeholder="0x..."
+                value={address1}
+                onChange={(e: any) => setAddress1(e.target.value)}
               />
             </Form.Group>
             <Form.Group className="mb-3">
-              <Form.Label>Max # of purchases (public phase)</Form.Label>
+              <Form.Label>{props.type} Address 2</Form.Label>
+              <Form.Control
+                type="text"
+                placeholder="0x..."
+                value={address2}
+                onChange={(e: any) => setAddress2(e.target.value)}
+              />
+            </Form.Group>
+            <Form.Group className="mb-3">
+              <Form.Label>{props.type} Address 3</Form.Label>
+              <Form.Control
+                type="text"
+                placeholder="0x..."
+                value={address3}
+                onChange={(e: any) => setAddress3(e.target.value)}
+              />
+            </Form.Group>
+            <Form.Group className="mb-3">
+              <Form.Label>{props.type} Percentage 1</Form.Label>
               <Form.Control
                 type="number"
-                placeholder="...max #"
-                value={maxPurchases}
-                onChange={(e: any) => setMaxPurchases(e.target.value)}
+                placeholder="...percentage"
+                value={percentage1}
+                onChange={(e: any) => setPercentage1(parseInt(e.target.value))}
               />
             </Form.Group>
             <Form.Group className="mb-3">
-              <Form.Label>Total Supply of Collection</Form.Label>
+              <Form.Label>{props.type} Percentage 2</Form.Label>
               <Form.Control
-                type="text"
-                placeholder="1000, 1500, ..."
-                value={totalSupply}
-                onChange={(e: any) => setTotalSupply(e.target.value)}
+                type="number"
+                placeholder="...percentage"
+                value={percentage2}
+                onChange={(e: any) => setPercentage2(parseInt(e.target.value))}
               />
             </Form.Group>
             <Form.Group className="mb-3">
-              <Form.Label>
-                Time, after minting is completed, to reduce supply
-              </Form.Label>
+              <Form.Label>{props.type} Percentage 3</Form.Label>
               <Form.Control
-                type="text"
-                placeholder="unix epoch time eg. 86400 (seconds in a day)"
-                value={finalSupplyTime}
-                onChange={(e: any) => setFinalSupplyTime(e.target.value)}
+                type="number"
+                placeholder="...percentage"
+                value={percentage3}
+                onChange={(e: any) => setPercentage3(parseInt(e.target.value))}
               />
             </Form.Group>
             {!loading && errors.length > 0 && (
@@ -194,10 +243,7 @@ export default function NextGenAdminSetCollectionData(props: Props) {
             <Button
               className={`mt-3 mb-3 seize-btn`}
               disabled={submitting || loading}
-              onClick={() => {
-                setLoading(true);
-                submit();
-              }}>
+              onClick={() => submit()}>
               Submit
             </Button>
           </Form>

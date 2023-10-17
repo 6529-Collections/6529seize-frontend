@@ -1,13 +1,12 @@
 import { Container, Row, Col, Button, Form } from "react-bootstrap";
 import styles from "./NextGenAdmin.module.scss";
-import {
-  useAccount,
-  useContractRead,
-  useContractWrite,
-  usePrepareContractWrite,
-} from "wagmi";
+import { useAccount, useContractRead, useContractWrite } from "wagmi";
 import { useEffect, useState } from "react";
-import { NEXTGEN_CORE, NEXTGEN_CHAIN_ID } from "../contracts";
+import {
+  NEXTGEN_CORE,
+  NEXTGEN_CHAIN_ID,
+  FunctionSelectors,
+} from "../contracts";
 import NextGenContractWriteStatus from "../NextGenContractWriteStatus";
 import {
   getCollectionIdsForAddress,
@@ -16,16 +15,23 @@ import {
   useFunctionAdmin,
   useGlobalAdmin,
 } from "./admin_helpers";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 interface Props {
   update?: boolean;
+  close: () => void;
 }
 
 export default function NextGenAdminCreateCollection(props: Props) {
   const account = useAccount();
 
   const globalAdmin = useGlobalAdmin(account.address as string);
-  const functionAdmin = useFunctionAdmin(account.address as string);
+  const functionAdmin = useFunctionAdmin(
+    account.address as string,
+    props.update
+      ? FunctionSelectors.UPDATE_COLLECTION_INFO
+      : FunctionSelectors.CREATE_COLLECTION
+  );
   const collectionIndex = useCollectionIndex();
   const collectionAdmin = useCollectionAdmin(
     account.address as string,
@@ -58,8 +64,9 @@ export default function NextGenAdminCreateCollection(props: Props) {
     abi: NEXTGEN_CORE.abi,
     chainId: NEXTGEN_CHAIN_ID,
     functionName: "retrieveCollectionInfo",
-    watch: true,
+    enabled: props.update,
     args: [collectionID],
+    enabled: !!collectionID,
     onSettled(data: any, error: any) {
       if (data) {
         const d = data as any[];
@@ -80,6 +87,7 @@ export default function NextGenAdminCreateCollection(props: Props) {
     functionName: "retrieveCollectionLibraryAndScript",
     watch: true,
     args: [collectionID],
+    enabled: !!collectionID,
     onSettled(data: any, error: any) {
       if (data) {
         const d = data as any[];
@@ -90,14 +98,9 @@ export default function NextGenAdminCreateCollection(props: Props) {
   });
 
   function getFunctionName() {
-    if (!submitting) {
-      return "";
-    }
-
     if (props.update) {
       return "updateCollectionInfo";
     }
-
     return "createCollection";
   }
 
@@ -120,19 +123,16 @@ export default function NextGenAdminCreateCollection(props: Props) {
     return params;
   }
 
-  const contractWriteConfig = usePrepareContractWrite({
+  const contractWrite = useContractWrite({
     address: NEXTGEN_CORE.contract as `0x${string}`,
     abi: NEXTGEN_CORE.abi,
     chainId: NEXTGEN_CHAIN_ID,
-    args: getParams(),
     functionName: getFunctionName(),
-    onError(err) {
-      alert(err);
+    onError() {
       setSubmitting(false);
       setLoading(false);
     },
   });
-  const contractWrite = useContractWrite(contractWriteConfig.config);
 
   function submit() {
     setLoading(true);
@@ -170,13 +170,16 @@ export default function NextGenAdminCreateCollection(props: Props) {
       setErrors(errors);
       setLoading(false);
     } else {
+      setErrors([]);
       setSubmitting(true);
     }
   }
 
   useEffect(() => {
     if (submitting) {
-      contractWrite.write?.();
+      contractWrite.write({
+        args: getParams(),
+      });
     }
   }, [submitting]);
 
@@ -188,36 +191,44 @@ export default function NextGenAdminCreateCollection(props: Props) {
   return (
     <Container className="no-padding">
       <Row className="pt-3">
-        <Col className="text-center">
+        <Col className="d-flex align-items-center justify-content-between">
           <h3>
             <b>
               {props.update ? `UPDATE` : `CREATE`} COLLECTION{" "}
               {props.update ? `INFO` : ``}
             </b>
           </h3>
+          <FontAwesomeIcon
+            className={styles.closeIcon}
+            icon="times-circle"
+            onClick={() => {
+              props.close();
+            }}></FontAwesomeIcon>
         </Col>
       </Row>
       <Row className="pt-3">
         <Col>
           <Form>
-            <Form.Group className="mb-3">
-              <Form.Label>Collection ID</Form.Label>
-              <Form.Select
-                className={`${styles.formInput}`}
-                value={collectionID}
-                onChange={(e) => {
-                  setCollectionID(e.target.value);
-                }}>
-                <option value="" disabled>
-                  Select Collection
-                </option>
-                {collectionIds.map((id) => (
-                  <option key={`collection-id-${id}`} value={id}>
-                    {id}
+            {props.update && (
+              <Form.Group className="mb-3">
+                <Form.Label>Collection ID</Form.Label>
+                <Form.Select
+                  className={`${styles.formInput}`}
+                  value={collectionID}
+                  onChange={(e) => {
+                    setCollectionID(e.target.value);
+                  }}>
+                  <option value="" disabled>
+                    Select Collection
                   </option>
-                ))}
-              </Form.Select>
-            </Form.Group>
+                  {collectionIds.map((id) => (
+                    <option key={`collection-id-${id}`} value={id}>
+                      {id}
+                    </option>
+                  ))}
+                </Form.Select>
+              </Form.Group>
+            )}
             <Form.Group className="mb-3">
               <Form.Label>Collection Name</Form.Label>
               <Form.Control

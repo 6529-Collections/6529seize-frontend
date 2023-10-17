@@ -9,7 +9,11 @@ import {
   useCollectionAdmin,
   getCollectionIdsForAddress,
 } from "./admin_helpers";
-import { NEXTGEN_CORE, NEXTGEN_CHAIN_ID } from "../contracts";
+import {
+  FunctionSelectors,
+  NEXTGEN_CHAIN_ID,
+  NEXTGEN_MINTER,
+} from "../contracts";
 import NextGenContractWriteStatus from "../NextGenContractWriteStatus";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
@@ -17,11 +21,14 @@ interface Props {
   close: () => void;
 }
 
-export default function NextGenAdminSetCollectionData(props: Props) {
+export default function NextGenAdminAirdropTokens(props: Props) {
   const account = useAccount();
 
   const globalAdmin = useGlobalAdmin(account.address as string);
-  const functionAdmin = useFunctionAdmin(account.address as string);
+  const functionAdmin = useFunctionAdmin(
+    account.address as string,
+    FunctionSelectors.AIRDROP_TOKENS
+  );
   const collectionIndex = useCollectionIndex();
   const collectionAdmin = useCollectionAdmin(
     account.address as string,
@@ -35,21 +42,21 @@ export default function NextGenAdminSetCollectionData(props: Props) {
     parseInt(collectionIndex.data as string)
   );
 
+  const [recipients, setRecipients] = useState<string[]>([]);
+  const [tokenData, setTokenData] = useState<string[]>([]);
+  const [salts, setSalts] = useState<string[]>([]);
   const [collectionID, setCollectionID] = useState("");
-  const [artistAddress, setArtistAddress] = useState("");
-  const [maxPurchases, setMaxPurchases] = useState<number>();
-  const [totalSupply, setTotalSupply] = useState<number>();
-  const [finalSupplyTime, setFinalSupplyTime] = useState<number>();
+  const [tokenCounts, setTokenCounts] = useState<string[]>([]);
 
   const [errors, setErrors] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
   const contractWrite = useContractWrite({
-    address: NEXTGEN_CORE.contract as `0x${string}`,
-    abi: NEXTGEN_CORE.abi,
+    address: NEXTGEN_MINTER.contract as `0x${string}`,
+    abi: NEXTGEN_MINTER.abi,
     chainId: NEXTGEN_CHAIN_ID,
-    functionName: "setCollectionData",
+    functionName: "airDropTokens",
     onError() {
       setSubmitting(false);
       setLoading(false);
@@ -60,24 +67,34 @@ export default function NextGenAdminSetCollectionData(props: Props) {
     setLoading(true);
     contractWrite.reset();
     const errors = [];
-
+    if (recipients.length === 0) {
+      errors.push("At least one recipient is required");
+    }
+    if (tokenData.length === 0) {
+      errors.push("At least one token data is required");
+    }
+    if (salts.length === 0) {
+      errors.push("At least one salt is required");
+    }
     if (!collectionID) {
       errors.push("Collection id is required");
     }
-    if (!artistAddress) {
-      errors.push("Artist ETH Address is required");
+    if (tokenCounts.length === 0) {
+      errors.push("At least one token count is required");
     }
-    if (!maxPurchases) {
-      errors.push("Max # of purchases during public mint is required");
-    }
-    if (!totalSupply) {
-      errors.push("Total Supply of collection is required");
-    }
-    if (!finalSupplyTime) {
+    if (
+      recipients.length !== tokenData.length ||
+      recipients.length !== salts.length ||
+      recipients.length !== tokenCounts.length ||
+      tokenData.length !== salts.length ||
+      tokenData.length !== tokenCounts.length ||
+      salts.length !== tokenCounts.length
+    ) {
       errors.push(
-        "The time to reduce the supply, after minting is completed, is required"
+        "Number of entries for recipients, token data, salts and token counts must all be the same"
       );
     }
+
     if (errors.length > 0) {
       setErrors(errors);
       setLoading(false);
@@ -91,11 +108,11 @@ export default function NextGenAdminSetCollectionData(props: Props) {
     if (submitting) {
       contractWrite.write({
         args: [
+          recipients,
+          tokenData,
+          salts,
           collectionID,
-          artistAddress,
-          maxPurchases,
-          totalSupply,
-          finalSupplyTime,
+          tokenCounts.map((count) => parseInt(count)),
         ],
       });
     }
@@ -111,7 +128,7 @@ export default function NextGenAdminSetCollectionData(props: Props) {
       <Row className="pt-3">
         <Col className="d-flex align-items-center justify-content-between">
           <h3>
-            <b>SET COLLECTION DATA</b>
+            <b>AIRDROP TOKENS</b>
           </h3>
           <FontAwesomeIcon
             className={styles.closeIcon}
@@ -143,41 +160,51 @@ export default function NextGenAdminSetCollectionData(props: Props) {
               </Form.Select>
             </Form.Group>
             <Form.Group className="mb-3">
-              <Form.Label>Artist Address</Form.Label>
+              <Form.Label>Recipients</Form.Label>
               <Form.Control
-                type="text"
-                placeholder="0x33FD426905F149f8376e227d0C9D3340AaD17aF1"
-                value={artistAddress}
-                onChange={(e: any) => setArtistAddress(e.target.value)}
+                as="textarea"
+                rows={3}
+                placeholder="One line per entry"
+                value={recipients.join("\n")}
+                onChange={(e) => {
+                  setRecipients(e.target.value.split("\n"));
+                }}
               />
             </Form.Group>
             <Form.Group className="mb-3">
-              <Form.Label>Max # of purchases (public phase)</Form.Label>
+              <Form.Label>Token Data</Form.Label>
               <Form.Control
-                type="number"
-                placeholder="...max #"
-                value={maxPurchases}
-                onChange={(e: any) => setMaxPurchases(e.target.value)}
+                as="textarea"
+                rows={3}
+                placeholder="One line per entry"
+                value={tokenData.join("\n")}
+                onChange={(e) => {
+                  setTokenData(e.target.value.split("\n"));
+                }}
               />
             </Form.Group>
             <Form.Group className="mb-3">
-              <Form.Label>Total Supply of Collection</Form.Label>
+              <Form.Label>Salts</Form.Label>
               <Form.Control
-                type="text"
-                placeholder="1000, 1500, ..."
-                value={totalSupply}
-                onChange={(e: any) => setTotalSupply(e.target.value)}
+                as="textarea"
+                rows={3}
+                placeholder="One line per entry"
+                value={salts.join("\n")}
+                onChange={(e) => {
+                  setSalts(e.target.value.split("\n"));
+                }}
               />
             </Form.Group>
             <Form.Group className="mb-3">
-              <Form.Label>
-                Time, after minting is completed, to reduce supply
-              </Form.Label>
+              <Form.Label>Token Counts</Form.Label>
               <Form.Control
-                type="text"
-                placeholder="unix epoch time eg. 86400 (seconds in a day)"
-                value={finalSupplyTime}
-                onChange={(e: any) => setFinalSupplyTime(e.target.value)}
+                as="textarea"
+                rows={3}
+                placeholder="One line per entry"
+                value={tokenCounts.join("\n")}
+                onChange={(e) => {
+                  setTokenCounts(e.target.value.split("\n"));
+                }}
               />
             </Form.Group>
             {!loading && errors.length > 0 && (

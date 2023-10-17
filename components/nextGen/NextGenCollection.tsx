@@ -98,10 +98,10 @@ export default function NextGenCollection(props: Props) {
 
   const [tokenURIs, setTokenURIs] = useState<TokenURI[]>();
 
-  const [isOverviewExpanded, setIsOverviewExpanded] = useState(false);
-
   const [burnAmount, setBurnAmount] = useState<number>(0);
   const [mintPrice, setMintPrice] = useState<number>(0);
+
+  const [artistSignature, setArtistSignature] = useState<string>("");
 
   const [view, setView] = useState<View>(View.ART);
 
@@ -228,6 +228,20 @@ export default function NextGenCollection(props: Props) {
           script: d[1],
         };
         setLibraryScript(ls);
+      }
+    },
+  });
+
+  useContractRead({
+    address: NEXTGEN_CORE.contract as `0x${string}`,
+    abi: NEXTGEN_CORE.abi,
+    chainId: NEXTGEN_CHAIN_ID,
+    functionName: "artistsSignatures",
+    watch: true,
+    args: [props.collection],
+    onSettled(data: any, error: any) {
+      if (data) {
+        setArtistSignature(data.replaceAll("\n", "<br>"));
       }
     },
   });
@@ -454,20 +468,6 @@ export default function NextGenCollection(props: Props) {
                     by {info.artist.toUpperCase()}
                   </Col>
                 </Row>
-                <Row>
-                  <Col className="d-flex  align-items-center flex-wrap gap-4">
-                    <span className="d-inline-flex align-items-center gap-2">
-                      {isMintingOpen(
-                        phaseTimes.allowlist_start_time,
-                        phaseTimes.allowlist_end_time
-                      )
-                        ? `Allowlist Available`
-                        : isMintingUpcoming(phaseTimes.allowlist_start_time)
-                        ? `Allowlist Upcoming`
-                        : `Allowlist Complete`}
-                    </span>
-                  </Col>
-                </Row>
                 <Row className="pt-4">
                   <Col>
                     <div className={styles.collectionTabs}>
@@ -582,6 +582,24 @@ export default function NextGenCollection(props: Props) {
                     </Col>
                     <Col sm={12} md={8}>
                       <Container>
+                        {artistSignature && (
+                          <>
+                            <Row>
+                              <Col>
+                                <b>Artist Signature</b>
+                              </Col>
+                            </Row>
+                            <Row className="pb-4">
+                              <Col xs={12} className="pt-2">
+                                <div
+                                  className={styles.artistSignature}
+                                  dangerouslySetInnerHTML={{
+                                    __html: artistSignature,
+                                  }}></div>
+                              </Col>
+                            </Row>
+                          </>
+                        )}
                         <Row>
                           <Col>
                             <b>Collection Overview</b>

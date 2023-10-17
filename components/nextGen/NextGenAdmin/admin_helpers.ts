@@ -5,6 +5,7 @@ import {
   NEXTGEN_CORE,
   NEXTGEN_FUNCTION_SELECTOR,
 } from "../contracts";
+import { areEqualAddresses } from "../../../helpers/Helpers";
 
 export function useGlobalAdmin(address: string) {
   return useContractRead({
@@ -16,13 +17,13 @@ export function useGlobalAdmin(address: string) {
   });
 }
 
-export function useFunctionAdmin(address: string) {
+export function useFunctionAdmin(address: string, functionSelector: string) {
   return useContractRead({
     address: NEXTGEN_ADMIN.contract as `0x${string}`,
     abi: NEXTGEN_ADMIN.abi,
     chainId: NEXTGEN_CHAIN_ID,
     functionName: "retrieveFunctionAdmin",
-    args: [address, NEXTGEN_FUNCTION_SELECTOR],
+    args: [address, functionSelector],
   });
 }
 
@@ -63,6 +64,36 @@ export function isCollectionAdmin(collectionAdmin: any) {
     collectionAdmin &&
     collectionAdmin.data &&
     collectionAdmin.data.some((d: any) => d.result === true)
+  );
+}
+
+function getCollectionArtistReadParams(collectionIndex: number) {
+  const params: any = [];
+  for (let i = 1; i <= collectionIndex - 1; i++) {
+    params.push({
+      address: NEXTGEN_CORE.contract as `0x${string}`,
+      abi: NEXTGEN_CORE.abi,
+      chainId: NEXTGEN_CHAIN_ID,
+      functionName: "retrieveArtistAddress",
+      args: [i],
+    });
+  }
+  return params;
+}
+
+export function useCollectionArtist(collectionIndex: number) {
+  return useContractReads({
+    contracts: getCollectionArtistReadParams(collectionIndex),
+  });
+}
+
+export function isCollectionArtist(address: string, collectionArtists: any) {
+  return (
+    collectionArtists &&
+    collectionArtists.data &&
+    collectionArtists.data.some((d: any) =>
+      areEqualAddresses(address, d.result)
+    )
   );
 }
 

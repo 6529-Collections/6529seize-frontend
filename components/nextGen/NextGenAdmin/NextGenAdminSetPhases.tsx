@@ -1,33 +1,39 @@
 import { Container, Row, Col, Button, Form } from "react-bootstrap";
 import { v4 as uuidv4 } from "uuid";
 import styles from "./NextGenAdmin.module.scss";
-import {
-  useAccount,
-  useContractWrite,
-  usePrepareContractWrite,
-  useSignMessage,
-} from "wagmi";
+import { useAccount, useContractWrite, useSignMessage } from "wagmi";
 import { useEffect, useState } from "react";
 import { postFormData } from "../../../services/6529api";
-import { NEXTGEN_MINTER, NEXTGEN_CHAIN_ID } from "../contracts";
+import {
+  NEXTGEN_MINTER,
+  NEXTGEN_CHAIN_ID,
+  FunctionSelectors,
+} from "../contracts";
 import {
   useGlobalAdmin,
   useFunctionAdmin,
   useCollectionIndex,
   useCollectionAdmin,
   getCollectionIdsForAddress,
-  isCollectionAdmin,
 } from "./admin_helpers";
 import NextGenContractWriteStatus from "../NextGenContractWriteStatus";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
-export default function NextGenAdminSetPhases() {
+interface Props {
+  close: () => void;
+}
+
+export default function NextGenAdminSetPhases(props: Props) {
   const account = useAccount();
   const signMessage = useSignMessage();
 
   const [uuid, setuuid] = useState(uuidv4());
 
   const globalAdmin = useGlobalAdmin(account.address as string);
-  const functionAdmin = useFunctionAdmin(account.address as string);
+  const functionAdmin = useFunctionAdmin(
+    account.address as string,
+    FunctionSelectors.SET_COLLECTION_PHASES
+  );
   const collectionIndex = useCollectionIndex();
   const collectionAdmin = useCollectionAdmin(
     account.address as string,
@@ -59,30 +65,22 @@ export default function NextGenAdminSetPhases() {
 
   const [uploadError, setUploadError] = useState<string>();
 
-  const contractWriteConfig = usePrepareContractWrite({
+  const contractWrite = useContractWrite({
     address: NEXTGEN_MINTER.contract as `0x${string}`,
     abi: NEXTGEN_MINTER.abi,
     chainId: NEXTGEN_CHAIN_ID,
-    args: [
-      collectionID,
-      collectionAllowlistStartTime,
-      collectionAllowlistEndTime,
-      collectionPublicStartTime,
-      collectionPublicEndTime,
-      merkleRoot,
-    ],
-    functionName: submitting ? "setCollectionPhases" : "",
-    onError(err) {
-      alert(err);
+    functionName: "setCollectionPhases",
+    onError() {
       setSubmitting(false);
       setLoading(false);
     },
   });
-  const contractWrite = useContractWrite(contractWriteConfig.config);
 
   function submit() {
     setLoading(true);
+    contractWrite.reset();
     const errors = [];
+
     if (!collectionID) {
       errors.push("Collection id is required");
     }
@@ -105,13 +103,23 @@ export default function NextGenAdminSetPhases() {
       setErrors(errors);
       setLoading(false);
     } else {
+      setErrors([]);
       setSubmitting(true);
     }
   }
 
   useEffect(() => {
     if (submitting) {
-      contractWrite.write?.();
+      contractWrite.write({
+        args: [
+          collectionID,
+          collectionAllowlistStartTime,
+          collectionAllowlistEndTime,
+          collectionPublicStartTime,
+          collectionPublicEndTime,
+          merkleRoot,
+        ],
+      });
     }
   }, [submitting]);
 
@@ -173,10 +181,16 @@ export default function NextGenAdminSetPhases() {
   return (
     <Container className="no-padding">
       <Row className="pt-3">
-        <Col className="text-center">
+        <Col className="d-flex align-items-center justify-content-between">
           <h3>
             <b>SET COLLECTION MINTING PHASES</b>
           </h3>
+          <FontAwesomeIcon
+            className={styles.closeIcon}
+            icon="times-circle"
+            onClick={() => {
+              props.close();
+            }}></FontAwesomeIcon>
         </Col>
       </Row>
       <Row className="pt-3">

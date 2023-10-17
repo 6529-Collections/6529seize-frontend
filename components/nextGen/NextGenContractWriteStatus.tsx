@@ -1,6 +1,7 @@
 import { useWaitForTransaction } from "wagmi";
 import { getTransactionLink } from "../../helpers/Helpers";
 import { NEXTGEN_CHAIN_ID } from "./contracts";
+import { useEffect } from "react";
 
 interface Props {
   hash?: `0x${string}`;
@@ -14,6 +15,20 @@ export default function NextGenContractWriteStatus(props: Props) {
     hash: props.hash,
   });
 
+  function getError() {
+    const error = props.error as any;
+    if (error.shortMessage) {
+      return error.shortMessage;
+    }
+    if (error.details) {
+      return error.details;
+    }
+    if (error.message) {
+      return error.message;
+    }
+    return JSON.stringify(props.error);
+  }
+
   return (
     <>
       {props.isLoading && (
@@ -23,9 +38,7 @@ export default function NextGenContractWriteStatus(props: Props) {
           Confirm in your wallet
         </span>
       )}
-      {props.error && (
-        <span className="text-danger">{(props.error as any).details}</span>
-      )}
+      {props.error && <span className="text-danger">{getError()}</span>}
       {!props.isLoading && props.hash && (
         <span>
           Transaction{" "}

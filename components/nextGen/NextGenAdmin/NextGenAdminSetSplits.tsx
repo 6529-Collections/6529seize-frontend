@@ -1,15 +1,18 @@
 import { Container, Row, Col, Button, Form } from "react-bootstrap";
 import styles from "./NextGenAdmin.module.scss";
-import { useAccount, useContractWrite } from "wagmi";
+import { useAccount, useContractRead, useContractWrite } from "wagmi";
 import { useEffect, useState } from "react";
+import {
+  FunctionSelectors,
+  NEXTGEN_CHAIN_ID,
+  NEXTGEN_MINTER,
+} from "../contracts";
 import {
   useGlobalAdmin,
   useFunctionAdmin,
   useCollectionIndex,
-  useCollectionAdmin,
   getCollectionIdsForAddress,
 } from "./admin_helpers";
-import { NEXTGEN_CORE, NEXTGEN_CHAIN_ID } from "../contracts";
 import NextGenContractWriteStatus from "../NextGenContractWriteStatus";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
@@ -17,39 +20,71 @@ interface Props {
   close: () => void;
 }
 
-export default function NextGenAdminSetCollectionData(props: Props) {
+export default function NextGenAdminSetSplits(props: Props) {
   const account = useAccount();
 
   const globalAdmin = useGlobalAdmin(account.address as string);
-  const functionAdmin = useFunctionAdmin(account.address as string);
-  const collectionIndex = useCollectionIndex();
-  const collectionAdmin = useCollectionAdmin(
+  const functionAdmin = useFunctionAdmin(
     account.address as string,
-    parseInt(collectionIndex.data as string)
+    FunctionSelectors.SET_PRIMARY_AND_SECONDARY_SPLITS
   );
+
+  const collectionIndex = useCollectionIndex();
 
   const collectionIds = getCollectionIdsForAddress(
     globalAdmin.data === true,
     functionAdmin.data === true,
-    collectionAdmin.data,
+    undefined,
     parseInt(collectionIndex.data as string)
   );
 
   const [collectionID, setCollectionID] = useState("");
-  const [artistAddress, setArtistAddress] = useState("");
-  const [maxPurchases, setMaxPurchases] = useState<number>();
-  const [totalSupply, setTotalSupply] = useState<number>();
-  const [finalSupplyTime, setFinalSupplyTime] = useState<number>();
+  const [artistPrimary, setArtistPrimary] = useState<number>();
+  const [teamPrimary, setTeamPrimary] = useState<number>();
+  const [artistSecondary, setArtistSecondary] = useState<number>();
+  const [teamSecondary, setTeamSecondary] = useState<number>();
+
+  useContractRead({
+    address: NEXTGEN_MINTER.contract as `0x${string}`,
+    abi: NEXTGEN_MINTER.abi,
+    chainId: NEXTGEN_CHAIN_ID,
+    functionName: "retrievePrimarySplits",
+    args: [collectionID],
+    enabled: !!collectionID,
+    onSettled(data: any, error: any) {
+      if (data) {
+        const d = data as string[];
+        setArtistPrimary(parseInt(d[0]));
+        setTeamPrimary(parseInt(d[1]));
+      }
+    },
+  });
+
+  useContractRead({
+    address: NEXTGEN_MINTER.contract as `0x${string}`,
+    abi: NEXTGEN_MINTER.abi,
+    chainId: NEXTGEN_CHAIN_ID,
+    functionName: "retrieveSecondarySplits",
+    args: [collectionID],
+    enabled: !!collectionID,
+    onSettled(data: any, error: any) {
+      if (data) {
+        const d = data as string[];
+        setArtistSecondary(parseInt(d[0]));
+        setTeamSecondary(parseInt(d[1]));
+      }
+    },
+  });
 
   const [errors, setErrors] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
   const contractWrite = useContractWrite({
-    address: NEXTGEN_CORE.contract as `0x${string}`,
-    abi: NEXTGEN_CORE.abi,
+    address: NEXTGEN_MINTER.contract as `0x${string}`,
+    abi: NEXTGEN_MINTER.abi,
     chainId: NEXTGEN_CHAIN_ID,
-    functionName: "setCollectionData",
+    functionName: "setPrimaryAndSecondarySplits",
     onError() {
       setSubmitting(false);
       setLoading(false);
@@ -64,20 +99,19 @@ export default function NextGenAdminSetCollectionData(props: Props) {
     if (!collectionID) {
       errors.push("Collection id is required");
     }
-    if (!artistAddress) {
-      errors.push("Artist ETH Address is required");
+    if (!artistPrimary) {
+      errors.push("Artist primary split is required");
     }
-    if (!maxPurchases) {
-      errors.push("Max # of purchases during public mint is required");
+    if (!teamPrimary) {
+      errors.push("Team primary split is required");
     }
-    if (!totalSupply) {
-      errors.push("Total Supply of collection is required");
+    if (!artistSecondary) {
+      errors.push("Artist secondary split is required");
     }
-    if (!finalSupplyTime) {
-      errors.push(
-        "The time to reduce the supply, after minting is completed, is required"
-      );
+    if (!teamSecondary) {
+      errors.push("Team secondary split is required");
     }
+
     if (errors.length > 0) {
       setErrors(errors);
       setLoading(false);
@@ -92,10 +126,10 @@ export default function NextGenAdminSetCollectionData(props: Props) {
       contractWrite.write({
         args: [
           collectionID,
-          artistAddress,
-          maxPurchases,
-          totalSupply,
-          finalSupplyTime,
+          artistPrimary,
+          teamPrimary,
+          artistSecondary,
+          teamSecondary,
         ],
       });
     }
@@ -111,7 +145,7 @@ export default function NextGenAdminSetCollectionData(props: Props) {
       <Row className="pt-3">
         <Col className="d-flex align-items-center justify-content-between">
           <h3>
-            <b>SET COLLECTION DATA</b>
+            <b>SET PRIMARY AND SECONDARY SPLITS</b>
           </h3>
           <FontAwesomeIcon
             className={styles.closeIcon}
@@ -143,41 +177,45 @@ export default function NextGenAdminSetCollectionData(props: Props) {
               </Form.Select>
             </Form.Group>
             <Form.Group className="mb-3">
-              <Form.Label>Artist Address</Form.Label>
-              <Form.Control
-                type="text"
-                placeholder="0x33FD426905F149f8376e227d0C9D3340AaD17aF1"
-                value={artistAddress}
-                onChange={(e: any) => setArtistAddress(e.target.value)}
-              />
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>Max # of purchases (public phase)</Form.Label>
+              <Form.Label>Artist Primary Split</Form.Label>
               <Form.Control
                 type="number"
-                placeholder="...max #"
-                value={maxPurchases}
-                onChange={(e: any) => setMaxPurchases(e.target.value)}
+                placeholder="%"
+                value={artistPrimary}
+                onChange={(e: any) =>
+                  setArtistPrimary(parseInt(e.target.value))
+                }
               />
             </Form.Group>
             <Form.Group className="mb-3">
-              <Form.Label>Total Supply of Collection</Form.Label>
+              <Form.Label>Team Primary Split</Form.Label>
               <Form.Control
-                type="text"
-                placeholder="1000, 1500, ..."
-                value={totalSupply}
-                onChange={(e: any) => setTotalSupply(e.target.value)}
+                type="number"
+                placeholder="%"
+                value={teamPrimary}
+                onChange={(e: any) => setTeamPrimary(parseInt(e.target.value))}
               />
             </Form.Group>
             <Form.Group className="mb-3">
-              <Form.Label>
-                Time, after minting is completed, to reduce supply
-              </Form.Label>
+              <Form.Label>Artist Secondary Split</Form.Label>
               <Form.Control
-                type="text"
-                placeholder="unix epoch time eg. 86400 (seconds in a day)"
-                value={finalSupplyTime}
-                onChange={(e: any) => setFinalSupplyTime(e.target.value)}
+                type="number"
+                placeholder="%"
+                value={artistSecondary}
+                onChange={(e: any) =>
+                  setArtistSecondary(parseInt(e.target.value))
+                }
+              />
+            </Form.Group>
+            <Form.Group className="mb-3">
+              <Form.Label>Team Secondary Split</Form.Label>
+              <Form.Control
+                type="number"
+                placeholder="%"
+                value={teamSecondary}
+                onChange={(e: any) =>
+                  setTeamSecondary(parseInt(e.target.value))
+                }
               />
             </Form.Group>
             {!loading && errors.length > 0 && (
@@ -194,10 +232,7 @@ export default function NextGenAdminSetCollectionData(props: Props) {
             <Button
               className={`mt-3 mb-3 seize-btn`}
               disabled={submitting || loading}
-              onClick={() => {
-                setLoading(true);
-                submit();
-              }}>
+              onClick={() => submit()}>
               Submit
             </Button>
           </Form>

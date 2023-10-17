@@ -1,8 +1,12 @@
 import { Container, Row, Col, Button, Form } from "react-bootstrap";
 import styles from "./NextGenAdmin.module.scss";
-import { useAccount, useContractWrite, usePrepareContractWrite } from "wagmi";
+import { useAccount, useContractWrite } from "wagmi";
 import { useEffect, useState } from "react";
-import { NEXTGEN_CHAIN_ID, NEXTGEN_ADMIN } from "../contracts";
+import {
+  NEXTGEN_CHAIN_ID,
+  NEXTGEN_ADMIN,
+  FunctionSelectors,
+} from "../contracts";
 import NextGenContractWriteStatus from "../NextGenContractWriteStatus";
 
 import {
@@ -12,6 +16,7 @@ import {
   useCollectionAdmin,
   getCollectionIdsForAddress,
 } from "./admin_helpers";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 export enum ADMIN_TYPE {
   GLOBAL = "GLOBAL",
@@ -20,6 +25,7 @@ export enum ADMIN_TYPE {
 }
 
 interface Props {
+  close: () => void;
   type: ADMIN_TYPE;
 }
 
@@ -28,23 +34,19 @@ export default function NextGenAdminRegisterAdmin(props: Props) {
 
   const [collectionID, setCollectionID] = useState("");
   const [address, setAddress] = useState("");
-  const [selector, setSelector] = useState("");
-  const [status, setStatus] = useState(true);
+  const [selectors, setSelectors] = useState<string[]>([]);
+  const [status, setStatus] = useState<boolean>();
 
   const [errors, setErrors] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
   function getFunctionName() {
-    if (!submitting) {
-      return "";
-    }
-
     switch (props.type) {
       case ADMIN_TYPE.GLOBAL:
         return "registerAdmin";
       case ADMIN_TYPE.FUNCTION:
-        return "registerFunctionAdmin";
+        return "registerBatchFunctionAdmin";
       case ADMIN_TYPE.COLLECTION:
         return "registerCollectionAdmin";
       default:
@@ -57,7 +59,7 @@ export default function NextGenAdminRegisterAdmin(props: Props) {
       case ADMIN_TYPE.GLOBAL:
         return [address, status];
       case ADMIN_TYPE.FUNCTION:
-        return [address, selector, status];
+        return [address, selectors, status];
       case ADMIN_TYPE.COLLECTION:
         return [collectionID, address, status];
       default:
@@ -66,33 +68,25 @@ export default function NextGenAdminRegisterAdmin(props: Props) {
   }
 
   const globalAdmin = useGlobalAdmin(account.address as string);
-  const functionAdmin = useFunctionAdmin(account.address as string);
   const collectionIndex = useCollectionIndex();
-  const collectionAdmin = useCollectionAdmin(
-    account.address as string,
-    parseInt(collectionIndex.data as string)
-  );
 
   const collectionIds = getCollectionIdsForAddress(
     globalAdmin.data === true,
-    functionAdmin.data === true,
-    collectionAdmin.data,
+    false,
+    undefined,
     parseInt(collectionIndex.data as string)
   );
 
-  const contractWriteConfig = usePrepareContractWrite({
+  const contractWrite = useContractWrite({
     address: NEXTGEN_ADMIN.contract as `0x${string}`,
     abi: NEXTGEN_ADMIN.abi,
     chainId: NEXTGEN_CHAIN_ID,
-    args: getParams(),
     functionName: getFunctionName(),
-    onError(err) {
-      alert(err);
+    onError() {
       setSubmitting(false);
       setLoading(false);
     },
   });
-  const contractWrite = useContractWrite(contractWriteConfig.config);
 
   function submit() {
     setLoading(true);
@@ -105,21 +99,27 @@ export default function NextGenAdminRegisterAdmin(props: Props) {
     if (!address) {
       errors.push("Address is required");
     }
-    if (props.type === ADMIN_TYPE.FUNCTION && !selector) {
-      errors.push("Function Selector is required");
+    if (props.type === ADMIN_TYPE.FUNCTION && selectors.length === 0) {
+      errors.push("At least one Function Selector is required");
+    }
+    if (status === undefined) {
+      errors.push("Select Register or Revoke");
     }
 
     if (errors.length > 0) {
       setErrors(errors);
       setLoading(false);
     } else {
+      setErrors([]);
       setSubmitting(true);
     }
   }
 
   useEffect(() => {
     if (submitting) {
-      contractWrite.write?.();
+      contractWrite.write({
+        args: getParams(),
+      });
     }
   }, [submitting]);
 
@@ -131,10 +131,16 @@ export default function NextGenAdminRegisterAdmin(props: Props) {
   return (
     <Container className="no-padding">
       <Row className="pt-3">
-        <Col className="text-center">
+        <Col className="d-flex align-items-center justify-content-between">
           <h3>
             <b>REGISTER / REVOKE {props.type} ADMIN</b>
           </h3>
+          <FontAwesomeIcon
+            className={styles.closeIcon}
+            icon="times-circle"
+            onClick={() => {
+              props.close();
+            }}></FontAwesomeIcon>
         </Col>
       </Row>
       <Row className="pt-3">
@@ -173,11 +179,29 @@ export default function NextGenAdminRegisterAdmin(props: Props) {
               <Form.Group className="mb-3">
                 <Form.Label>Function Selector</Form.Label>
                 <Form.Control
-                  type="text"
-                  placeholder="function selector..."
-                  value={selector}
-                  onChange={(e: any) => setSelector(e.target.value)}
-                />
+                  as="select"
+                  multiple
+                  value={selectors}
+                  onChange={(e: any) => {
+                    if (selectors.includes(e.target.value)) {
+                      setSelectors((selectors) =>
+                        selectors.filter(
+                          (selector) => selector !== e.target.value
+                        )
+                      );
+                    } else {
+                      setSelectors((selectors) => [
+                        ...selectors,
+                        e.target.value,
+                      ]);
+                    }
+                  }}>
+                  {Object.entries(FunctionSelectors).map(([key, value]) => (
+                    <option key={key} value={value}>
+                      {key} - {value}
+                    </option>
+                  ))}
+                </Form.Control>
               </Form.Group>
             )}
             <Form.Group className="mb-3">
@@ -193,7 +217,7 @@ export default function NextGenAdminRegisterAdmin(props: Props) {
                   }}
                 />
                 <Form.Check
-                  checked={!status}
+                  checked={status === false}
                   type="radio"
                   label="Revoke"
                   name="statusRadio"

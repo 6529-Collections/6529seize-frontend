@@ -1,8 +1,12 @@
 import { Container, Row, Col, Button, Form } from "react-bootstrap";
 import styles from "./NextGenAdmin.module.scss";
-import { useAccount, useContractWrite, usePrepareContractWrite } from "wagmi";
+import { useAccount, useContractWrite } from "wagmi";
 import { useEffect, useState } from "react";
-import { NEXTGEN_MINTER, NEXTGEN_CHAIN_ID } from "../contracts";
+import {
+  NEXTGEN_MINTER,
+  NEXTGEN_CHAIN_ID,
+  FunctionSelectors,
+} from "../contracts";
 import {
   useGlobalAdmin,
   useFunctionAdmin,
@@ -11,12 +15,20 @@ import {
   getCollectionIdsForAddress,
 } from "./admin_helpers";
 import NextGenContractWriteStatus from "../NextGenContractWriteStatus";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
-export default function NextGenAdminSetMintingCosts() {
+interface Props {
+  close: () => void;
+}
+
+export default function NextGenAdminSetMintingCosts(props: Props) {
   const account = useAccount();
 
   const globalAdmin = useGlobalAdmin(account.address as string);
-  const functionAdmin = useFunctionAdmin(account.address as string);
+  const functionAdmin = useFunctionAdmin(
+    account.address as string,
+    FunctionSelectors.SET_COLLECTION_COSTS
+  );
   const collectionIndex = useCollectionIndex();
   const collectionAdmin = useCollectionAdmin(
     account.address as string,
@@ -41,30 +53,22 @@ export default function NextGenAdminSetMintingCosts() {
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
-  const contractWriteConfig = usePrepareContractWrite({
+  const contractWrite = useContractWrite({
     address: NEXTGEN_MINTER.contract as `0x${string}`,
     abi: NEXTGEN_MINTER.abi,
     chainId: NEXTGEN_CHAIN_ID,
-    args: [
-      collectionID,
-      collectionStartCost,
-      collectionEndCost,
-      rate,
-      timeperiod,
-      salesOption,
-    ],
-    functionName: submitting ? "setCollectionCosts" : "",
-    onError(err) {
-      alert(err);
+    functionName: "setCollectionCosts",
+    onError() {
       setSubmitting(false);
       setLoading(false);
     },
   });
-  const contractWrite = useContractWrite(contractWriteConfig.config);
 
   function submit() {
     setLoading(true);
+    contractWrite.reset();
     const errors = [];
+
     if (!collectionID) {
       errors.push("Collection id is required");
     }
@@ -87,13 +91,23 @@ export default function NextGenAdminSetMintingCosts() {
       setErrors(errors);
       setLoading(false);
     } else {
+      setErrors([]);
       setSubmitting(true);
     }
   }
 
   useEffect(() => {
     if (submitting) {
-      contractWrite.write?.();
+      contractWrite.write({
+        args: [
+          collectionID,
+          collectionStartCost,
+          collectionEndCost,
+          rate,
+          timeperiod,
+          salesOption,
+        ],
+      });
     }
   }, [submitting]);
 
@@ -105,10 +119,16 @@ export default function NextGenAdminSetMintingCosts() {
   return (
     <Container className="no-padding">
       <Row className="pt-3">
-        <Col className="text-center">
+        <Col className="d-flex align-items-center justify-content-between">
           <h3>
             <b>SET COLLECTION MINTING COSTS</b>
           </h3>
+          <FontAwesomeIcon
+            className={styles.closeIcon}
+            icon="times-circle"
+            onClick={() => {
+              props.close();
+            }}></FontAwesomeIcon>
         </Col>
       </Row>
       <Row className="pt-3">
