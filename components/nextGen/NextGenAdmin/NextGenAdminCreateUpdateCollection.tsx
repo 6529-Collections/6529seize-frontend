@@ -22,7 +22,7 @@ interface Props {
   close: () => void;
 }
 
-export default function NextGenAdminCreateCollection(props: Props) {
+export default function NextGenAdminCreateUpdateCollection(props: Props) {
   const account = useAccount();
 
   const globalAdmin = useGlobalAdmin(account.address as string);

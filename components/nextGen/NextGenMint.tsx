@@ -134,6 +134,8 @@ export default function NextGenMint(props: Props) {
           max_purchases: parseInt(d[1]),
           circulation_supply: parseInt(d[2]),
           total_supply: parseInt(d[3]),
+          final_supply_after_mint: parseInt(d[4]),
+          randomizer: d[5],
         };
         setAdditionalData(ad);
       }

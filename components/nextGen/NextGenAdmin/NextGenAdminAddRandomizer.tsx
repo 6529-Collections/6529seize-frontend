@@ -7,6 +7,8 @@ import {
   NEXTGEN_CHAIN_ID,
   NEXTGEN_CORE,
 } from "../contracts";
+import NextGenContractWriteStatus from "../NextGenContractWriteStatus";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   useGlobalAdmin,
   useFunctionAdmin,
@@ -14,14 +16,34 @@ import {
   useCollectionAdmin,
   getCollectionIdsForAddress,
 } from "./admin_helpers";
-import NextGenContractWriteStatus from "../NextGenContractWriteStatus";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { AdditionalData } from "../entities";
 
 interface Props {
   close: () => void;
 }
 
 export default function NextGenAdminUpdateRandomizer(props: Props) {
+  const account = useAccount();
+
+  const globalAdmin = useGlobalAdmin(account.address as string);
+  const functionAdmin = useFunctionAdmin(
+    account.address as string,
+    FunctionSelectors.ADD_RANDOMIZER
+  );
+  const collectionIndex = useCollectionIndex();
+  const collectionAdmin = useCollectionAdmin(
+    account.address as string,
+    parseInt(collectionIndex.data as string)
+  );
+
+  const collectionIds = getCollectionIdsForAddress(
+    globalAdmin.data === true,
+    functionAdmin.data === true,
+    collectionAdmin.data,
+    parseInt(collectionIndex.data as string)
+  );
+
+  const [collectionID, setCollectionID] = useState("");
   const [randomizerContract, setRandomizerContract] = useState("");
 
   const [errors, setErrors] = useState<string[]>([]);
@@ -32,9 +54,22 @@ export default function NextGenAdminUpdateRandomizer(props: Props) {
     address: NEXTGEN_CORE.contract as `0x${string}`,
     abi: NEXTGEN_CORE.abi,
     chainId: NEXTGEN_CHAIN_ID,
-    functionName: "randomizerContract",
+    functionName: "retrieveCollectionAdditionalData",
+    args: [collectionID],
+    enabled: !!collectionID,
     onSettled(data: any, error: any) {
-      setRandomizerContract(data as string);
+      if (data) {
+        const d = data as any[];
+        const ad: AdditionalData = {
+          artist_address: d[0],
+          max_purchases: parseInt(d[1]),
+          circulation_supply: parseInt(d[2]),
+          total_supply: parseInt(d[3]),
+          final_supply_after_mint: parseInt(d[4]),
+          randomizer: d[5],
+        };
+        setRandomizerContract(ad.randomizer);
+      }
     },
   });
 
@@ -42,7 +77,7 @@ export default function NextGenAdminUpdateRandomizer(props: Props) {
     address: NEXTGEN_CORE.contract as `0x${string}`,
     abi: NEXTGEN_CORE.abi,
     chainId: NEXTGEN_CHAIN_ID,
-    functionName: "updateRandomizerContract",
+    functionName: "addRandomizer",
     onError() {
       setSubmitting(false);
       setLoading(false);
@@ -53,6 +88,9 @@ export default function NextGenAdminUpdateRandomizer(props: Props) {
     setLoading(true);
     contractWrite.reset();
     const errors = [];
+    if (!collectionID) {
+      errors.push("Collection ID is required");
+    }
     if (!randomizerContract) {
       errors.push("Randomizer Contract is required");
     }
@@ -68,7 +106,7 @@ export default function NextGenAdminUpdateRandomizer(props: Props) {
   useEffect(() => {
     if (submitting) {
       contractWrite.write({
-        args: [randomizerContract],
+        args: [collectionID, randomizerContract],
       });
     }
   }, [submitting]);
@@ -83,7 +121,7 @@ export default function NextGenAdminUpdateRandomizer(props: Props) {
       <Row className="pt-3">
         <Col className="d-flex align-items-center justify-content-between">
           <h3>
-            <b>UPDATE BASE URI</b>
+            <b>ADD RANDOMIZER</b>
           </h3>
           <FontAwesomeIcon
             className={styles.closeIcon}
@@ -97,7 +135,25 @@ export default function NextGenAdminUpdateRandomizer(props: Props) {
         <Col>
           <Form>
             <Form.Group className="mb-3">
-              <Form.Label>Base URI</Form.Label>
+              <Form.Label>Collection ID</Form.Label>
+              <Form.Select
+                className={`${styles.formInput}`}
+                value={collectionID}
+                onChange={(e) => {
+                  setCollectionID(e.target.value);
+                }}>
+                <option value="" disabled>
+                  Select Collection
+                </option>
+                {collectionIds.map((id) => (
+                  <option key={`collection-id-${id}`} value={id}>
+                    {id}
+                  </option>
+                ))}
+              </Form.Select>
+            </Form.Group>
+            <Form.Group className="mb-3">
+              <Form.Label>Randomizer</Form.Label>
               <Form.Control
                 type="text"
                 placeholder="0x..."

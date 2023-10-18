@@ -48,13 +48,15 @@ export default function NextGenCollectionPreview(props: Props) {
     onSettled(data: any, error: any) {
       if (data) {
         const d = data as any[];
-        const ad1: AdditionalData = {
+        const ad: AdditionalData = {
           artist_address: d[0],
           max_purchases: parseInt(d[1]),
           circulation_supply: parseInt(d[2]),
           total_supply: parseInt(d[3]),
+          final_supply_after_mint: parseInt(d[4]),
+          randomizer: d[5],
         };
-        setAdditionalData(ad1);
+        setAdditionalData(ad);
       }
     },
   });

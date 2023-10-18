@@ -8,12 +8,12 @@ export enum FunctionSelectors {
   UPDATE_COLLECTION_INFO = "0x5138a2cd",
   UPDATE_COLLECTION_SCRIPT_BY_INDEX = "0x10ee80f9",
   CHANGE_METADATA_VIEW = "0xf6a85dd0",
-  CHANGE_TOKEN_DATA = "0x9a8490f3",
+  CHANGE_TOKEN_DATA = "0x9a8490f3", // not implemented
   UPDATE_BASE_URI = "0x817234fa",
   UPDATE_IMAGES_AND_ATTRIBUTES = "0xad241020",
-  UPDATE_RANDOMIZER_CONTRACT = "0xb5425195",
-  FREEZE_COLLECTION = "0xbcc405d0",
-  SET_COLLECTION_COSTS = "0x2a91a4b1",
+  ADD_RANDOMIZER = "0x1aab8d69",
+  FREEZE_COLLECTION = "0xbcc405d0", // not implemented
+  SET_COLLECTION_COSTS = "0xd2f4302f",
   SET_COLLECTION_PHASES = "0xb85f97a0",
   AIRDROP_TOKENS = "0x5ac57d8b",
   INITIALIZE_BURN = "0x1253e16d",
@@ -21,10 +21,15 @@ export enum FunctionSelectors {
   SET_PRIMARY_AND_SECONDARY_SPLITS = "0xd418baec",
   PROPOSE_PRIMARY_ADDRESSES_AND_PERCENTAGES = "0x7e04bcb7",
   PROPOSE_SECONDARY_ADDRESSES_AND_PERCENTAGES = "0x1c7a8b22",
+  ACCEPT_ADDRESSES_AND_PERCENTAGES = "0xd6516f47",
+  PAY_ARTIST = "0x2ebc24b3",
+  MINT_AND_AUCTION = "0x46372ba6",
+  INITIALIZE_EXTERNAL_BURN_SWAP = "0x4c29c6f2",
+  UPDATE_DELEGATION_COLLECTION = "0x81c1a52b",
 }
 
 export const NEXTGEN_CORE = {
-  contract: "0xde7a7ed4d4f947bc7ad7d04ec901c32acecfc730",
+  contract: "0x3f7579358221162E038013660c28a771c099E779",
   abi: [
     {
       inputs: [
@@ -129,6 +134,20 @@ export const NEXTGEN_CORE = {
         { internalType: "address", name: "_minterContract", type: "address" },
       ],
       name: "addMinterContract",
+      outputs: [],
+      stateMutability: "nonpayable",
+      type: "function",
+    },
+    {
+      inputs: [
+        { internalType: "uint256", name: "_collectionID", type: "uint256" },
+        {
+          internalType: "address",
+          name: "_randomizerContract",
+          type: "address",
+        },
+      ],
+      name: "addRandomizer",
       outputs: [],
       stateMutability: "nonpayable",
       type: "function",
@@ -356,13 +375,6 @@ export const NEXTGEN_CORE = {
     },
     {
       inputs: [],
-      name: "randomizerContract",
-      outputs: [{ internalType: "address", name: "", type: "address" }],
-      stateMutability: "view",
-      type: "function",
-    },
-    {
-      inputs: [],
       name: "renounceOwnership",
       outputs: [],
       stateMutability: "nonpayable",
@@ -388,6 +400,7 @@ export const NEXTGEN_CORE = {
         { internalType: "uint256", name: "", type: "uint256" },
         { internalType: "uint256", name: "", type: "uint256" },
         { internalType: "uint256", name: "", type: "uint256" },
+        { internalType: "address", name: "", type: "address" },
       ],
       stateMutability: "view",
       type: "function",
@@ -439,6 +452,16 @@ export const NEXTGEN_CORE = {
         { internalType: "uint256", name: "_collectionID", type: "uint256" },
         { internalType: "address", name: "_address", type: "address" },
       ],
+      name: "retrieveTokensAirdroppedPerAddress",
+      outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
+      stateMutability: "view",
+      type: "function",
+    },
+    {
+      inputs: [
+        { internalType: "uint256", name: "_collectionID", type: "uint256" },
+        { internalType: "address", name: "_address", type: "address" },
+      ],
       name: "retrieveTokensMintedALPerAddress",
       outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
       stateMutability: "view",
@@ -451,20 +474,6 @@ export const NEXTGEN_CORE = {
       ],
       name: "retrieveTokensMintedPublicPerAddress",
       outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
-      stateMutability: "view",
-      type: "function",
-    },
-    {
-      inputs: [
-        { internalType: "uint256", name: "_collectionID", type: "uint256" },
-        { internalType: "address", name: "_address", type: "address" },
-      ],
-      name: "retrieveTokensPerAddress",
-      outputs: [
-        { internalType: "uint256", name: "", type: "uint256" },
-        { internalType: "uint256", name: "", type: "uint256" },
-        { internalType: "uint256", name: "", type: "uint256" },
-      ],
       stateMutability: "view",
       type: "function",
     },
@@ -560,6 +569,7 @@ export const NEXTGEN_CORE = {
     },
     {
       inputs: [
+        { internalType: "uint256", name: "_collectionID", type: "uint256" },
         { internalType: "uint256", name: "_mintIndex", type: "uint256" },
         { internalType: "bytes32", name: "_hash", type: "bytes32" },
       ],
@@ -759,15 +769,6 @@ export const NEXTGEN_CORE = {
     },
     {
       inputs: [
-        { internalType: "address", name: "_newRandomizer", type: "address" },
-      ],
-      name: "updateRandomizerContract",
-      outputs: [],
-      stateMutability: "nonpayable",
-      type: "function",
-    },
-    {
-      inputs: [
         { internalType: "uint256", name: "_collectionID", type: "uint256" },
       ],
       name: "viewCirSupply",
@@ -813,7 +814,7 @@ export const NEXTGEN_CORE = {
 };
 
 export const NEXTGEN_MINTER = {
-  contract: "0xd16C94C10e3C42F9a673907c0c2C1b126d7e87B7",
+  contract: "0x0DC656875269F58EBd1d663168aB298a338f3FCe",
   abi: [
     {
       inputs: [
@@ -915,15 +916,6 @@ export const NEXTGEN_MINTER = {
       type: "function",
     },
     {
-      inputs: [],
-      name: "adminsContract",
-      outputs: [
-        { internalType: "contract INextGenAdmins", name: "", type: "address" },
-      ],
-      stateMutability: "view",
-      type: "function",
-    },
-    {
       inputs: [
         { internalType: "address[]", name: "_recipients", type: "address[]" },
         { internalType: "string[]", name: "_tokenData", type: "string[]" },
@@ -998,19 +990,6 @@ export const NEXTGEN_MINTER = {
       inputs: [{ internalType: "uint256", name: "", type: "uint256" }],
       name: "collectionTotalAmount",
       outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
-      stateMutability: "view",
-      type: "function",
-    },
-    {
-      inputs: [],
-      name: "dmc",
-      outputs: [
-        {
-          internalType: "contract IDelegationManagementContract",
-          name: "",
-          type: "address",
-        },
-      ],
       stateMutability: "view",
       type: "function",
     },
@@ -1203,6 +1182,7 @@ export const NEXTGEN_MINTER = {
         { internalType: "uint256", name: "", type: "uint256" },
         { internalType: "uint256", name: "", type: "uint256" },
         { internalType: "uint8", name: "", type: "uint8" },
+        { internalType: "address", name: "", type: "address" },
       ],
       stateMutability: "view",
       type: "function",
@@ -1296,6 +1276,7 @@ export const NEXTGEN_MINTER = {
         { internalType: "uint256", name: "_rate", type: "uint256" },
         { internalType: "uint256", name: "_timePeriod", type: "uint256" },
         { internalType: "uint8", name: "_salesOption", type: "uint8" },
+        { internalType: "address", name: "_delAddress", type: "address" },
       ],
       name: "setCollectionCosts",
       outputs: [],
@@ -1344,19 +1325,6 @@ export const NEXTGEN_MINTER = {
       inputs: [
         {
           internalType: "address",
-          name: "_collectionAddress",
-          type: "address",
-        },
-      ],
-      name: "updateALCol",
-      outputs: [],
-      stateMutability: "nonpayable",
-      type: "function",
-    },
-    {
-      inputs: [
-        {
-          internalType: "address",
           name: "_newadminsContract",
           type: "address",
         },
@@ -1369,6 +1337,20 @@ export const NEXTGEN_MINTER = {
     {
       inputs: [{ internalType: "address", name: "_gencore", type: "address" }],
       name: "updateCoreContract",
+      outputs: [],
+      stateMutability: "nonpayable",
+      type: "function",
+    },
+    {
+      inputs: [
+        { internalType: "uint256", name: "_collectionID", type: "uint256" },
+        {
+          internalType: "address",
+          name: "_collectionAddress",
+          type: "address",
+        },
+      ],
+      name: "updateDelegationCollection",
       outputs: [],
       stateMutability: "nonpayable",
       type: "function",

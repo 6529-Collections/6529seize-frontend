@@ -1,11 +1,11 @@
 import { Container, Row, Col, Button, Form } from "react-bootstrap";
 import styles from "./NextGenAdmin.module.scss";
-import { useAccount, useContractWrite } from "wagmi";
+import { useAccount, useContractRead, useContractWrite } from "wagmi";
 import { useEffect, useState } from "react";
 import {
-  NEXTGEN_MINTER,
-  NEXTGEN_CHAIN_ID,
   FunctionSelectors,
+  NEXTGEN_CHAIN_ID,
+  NEXTGEN_MINTER,
 } from "../contracts";
 import {
   useGlobalAdmin,
@@ -21,13 +21,13 @@ interface Props {
   close: () => void;
 }
 
-export default function NextGenAdminSetMintingCosts(props: Props) {
+export default function NextGenAdminMintAndAuction(props: Props) {
   const account = useAccount();
 
   const globalAdmin = useGlobalAdmin(account.address as string);
   const functionAdmin = useFunctionAdmin(
     account.address as string,
-    FunctionSelectors.SET_COLLECTION_COSTS
+    FunctionSelectors.MINT_AND_AUCTION
   );
   const collectionIndex = useCollectionIndex();
   const collectionAdmin = useCollectionAdmin(
@@ -42,12 +42,11 @@ export default function NextGenAdminSetMintingCosts(props: Props) {
     parseInt(collectionIndex.data as string)
   );
 
+  const [recipient, setRecipient] = useState("");
+  const [tokenData, setTokenData] = useState("");
+  const [salt, setSalt] = useState<number>();
   const [collectionID, setCollectionID] = useState("");
-  const [collectionStartCost, setCollectionStartCost] = useState("");
-  const [collectionEndCost, setCollectionEndCost] = useState("");
-  const [rate, setRate] = useState("");
-  const [timeperiod, setTimePeriod] = useState("");
-  const [salesOption, setSaleOption] = useState("");
+  const [endTime, setEndTime] = useState<number>();
 
   const [errors, setErrors] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
@@ -57,7 +56,7 @@ export default function NextGenAdminSetMintingCosts(props: Props) {
     address: NEXTGEN_MINTER.contract as `0x${string}`,
     abi: NEXTGEN_MINTER.abi,
     chainId: NEXTGEN_CHAIN_ID,
-    functionName: "setCollectionCosts",
+    functionName: "mintAndAuction",
     onError() {
       setSubmitting(false);
       setLoading(false);
@@ -69,24 +68,22 @@ export default function NextGenAdminSetMintingCosts(props: Props) {
     contractWrite.reset();
     const errors = [];
 
+    if (!recipient) {
+      errors.push("Recipient is required");
+    }
+    if (!tokenData) {
+      errors.push("Token data is required");
+    }
+    if (!salt) {
+      errors.push("Salt is required");
+    }
     if (!collectionID) {
       errors.push("Collection id is required");
     }
-    if (!collectionStartCost) {
-      errors.push("Starting price is required");
+    if (!endTime) {
+      errors.push("End time is required");
     }
-    if (!collectionEndCost) {
-      errors.push("Ending price is required");
-    }
-    if (!rate) {
-      errors.push("Rate is required");
-    }
-    if (!timeperiod) {
-      errors.push("Time period is required");
-    }
-    if (!salesOption) {
-      errors.push("Sales Model is required");
-    }
+
     if (errors.length > 0) {
       setErrors(errors);
       setLoading(false);
@@ -99,14 +96,7 @@ export default function NextGenAdminSetMintingCosts(props: Props) {
   useEffect(() => {
     if (submitting) {
       contractWrite.write({
-        args: [
-          collectionID,
-          collectionStartCost,
-          collectionEndCost,
-          rate,
-          timeperiod,
-          salesOption,
-        ],
+        args: [recipient, tokenData, salt, collectionID, endTime],
       });
     }
   }, [submitting]);
@@ -121,7 +111,7 @@ export default function NextGenAdminSetMintingCosts(props: Props) {
       <Row className="pt-3">
         <Col className="d-flex align-items-center justify-content-between">
           <h3>
-            <b>SET COLLECTION MINTING COSTS</b>
+            <b>MINT AND AUCTION</b>
           </h3>
           <FontAwesomeIcon
             className={styles.closeIcon}
@@ -134,6 +124,33 @@ export default function NextGenAdminSetMintingCosts(props: Props) {
       <Row className="pt-3">
         <Col>
           <Form>
+            <Form.Group className="mb-3">
+              <Form.Label>Recipient</Form.Label>
+              <Form.Control
+                type="text"
+                placeholder="0x..."
+                value={recipient}
+                onChange={(e: any) => setRecipient(e.target.value)}
+              />
+            </Form.Group>
+            <Form.Group className="mb-3">
+              <Form.Label>Token Data</Form.Label>
+              <Form.Control
+                type="text"
+                placeholder="...token data"
+                value={tokenData}
+                onChange={(e: any) => setTokenData(e.target.value)}
+              />
+            </Form.Group>
+            <Form.Group className="mb-3">
+              <Form.Label>Salt</Form.Label>
+              <Form.Control
+                type="number"
+                placeholder="...salt"
+                value={salt}
+                onChange={(e: any) => setSalt(e.target.value)}
+              />
+            </Form.Group>
             <Form.Group className="mb-3">
               <Form.Label>Collection ID</Form.Label>
               <Form.Select
@@ -153,52 +170,12 @@ export default function NextGenAdminSetMintingCosts(props: Props) {
               </Form.Select>
             </Form.Group>
             <Form.Group className="mb-3">
-              <Form.Label>Starting Minting Price</Form.Label>
+              <Form.Label>Auction End Time</Form.Label>
               <Form.Control
-                type="integer"
-                placeholder="Cost in wei"
-                value={collectionStartCost}
-                onChange={(e: any) => setCollectionStartCost(e.target.value)}
-              />
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>Ending Minting Price</Form.Label>
-              <Form.Control
-                type="integer"
-                placeholder="Cost in wei"
-                value={collectionEndCost}
-                onChange={(e: any) => setCollectionEndCost(e.target.value)}
-              />
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>
-                Rate (Applies only for sales models 2 and 3)
-              </Form.Label>
-              <Form.Control
-                type="integer"
-                placeholder="either % or in wei"
-                value={rate}
-                onChange={(e: any) => setRate(e.target.value)}
-              />
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>
-                Time Period (Applies only for sales models 2 and 3)
-              </Form.Label>
-              <Form.Control
-                type="integer"
-                placeholder="unix epoch time eg. 86400 (seconds in a day)"
-                value={timeperiod}
-                onChange={(e: any) => setTimePeriod(e.target.value)}
-              />
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>Sales Model</Form.Label>
-              <Form.Control
-                type="integer"
-                placeholder="1. Fixed Price, 2. Exponential/Linear decrease, 3. Periodic Sale"
-                value={salesOption}
-                onChange={(e: any) => setSaleOption(e.target.value)}
+                type="number"
+                placeholder="unix epoch time"
+                value={endTime}
+                onChange={(e: any) => setEndTime(e.target.value)}
               />
             </Form.Group>
             {!loading && errors.length > 0 && (

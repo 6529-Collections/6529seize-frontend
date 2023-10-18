@@ -16,14 +16,6 @@ interface Props {
 }
 
 export default function NextGenAdminUpdateImagesAttributes(props: Props) {
-  const account = useAccount();
-
-  const globalAdmin = useGlobalAdmin(account.address as string);
-  const functionAdmin = useFunctionAdmin(
-    account.address as string,
-    FunctionSelectors.AIRDROP_TOKENS
-  );
-
   const [tokenIds, setTokenIds] = useState<string[]>([]);
   const [images, setImages] = useState<string[]>([]);
   const [attributes, setAttributes] = useState<string[]>([]);

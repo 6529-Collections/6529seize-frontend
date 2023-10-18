@@ -17,6 +17,17 @@ export interface AdditionalData {
   max_purchases: number;
   circulation_supply: number;
   total_supply: number;
+  final_supply_after_mint: number;
+  randomizer: string;
+}
+
+export interface MintingDetails {
+  mint_cost: number;
+  end_mint_cost: number;
+  rate: number;
+  timePeriod: number;
+  salesOption: number;
+  delAddress: string;
 }
 
 export interface PhaseTimes {
