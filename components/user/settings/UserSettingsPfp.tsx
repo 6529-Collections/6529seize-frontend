@@ -18,6 +18,7 @@ import Tippy from "@tippyjs/react";
 import DotLoader from "../../dotLoader/DotLoader";
 import { DBResponse } from "../../../entities/IDBResponse";
 import { NFTLite } from "../../../entities/INFT";
+import { commonApiPost } from "../../../services/api/common-api";
 
 interface Props {
   user: string;
@@ -100,21 +101,29 @@ export default function UserSettingsPfp(props: Props) {
       if (file) {
         formData.append("pfp", file);
       }
-      formData.append("wallet", ens.wallet);
-      formData.append("signature", signMessage.data);
-      formData.append("user", JSON.stringify(buildUserObject()));
+      if (selectedMeme) {
+        const memeID = selectedMeme.id;
+        formData.append("meme", memeID.toString());
+      }
+      // formData.append("wallet", ens.wallet);
+      // // formData.append("signature", signMessage.data);
+      // formData.append("user", JSON.stringify(buildUserObject()));
+      commonApiPost({
+        endpoint: `profiles/pfp`,
+        body: formData,
+      });
 
-      postFormData(`${process.env.API_ENDPOINT}/api/user`, formData).then(
-        (response) => {
-          const success = response.status === 200;
-          setProcessing(false);
-          if (success) {
-            setSuccess(true);
-          } else {
-            setSignErrors([`Error: ${response.response.error}`]);
-          }
-        }
-      );
+      // postFormData(`${process.env.API_ENDPOINT}/api/profiles/simo/pfp`, formData).then(
+      //   (response) => {
+      //     const success = response.status === 200;
+      //     setProcessing(false);
+      //     if (success) {
+      //       setSuccess(true);
+      //     } else {
+      //       setSignErrors([`Error: ${response.response.error}`]);
+      //     }
+      //   }
+      // );
     }
   }, [signMessage.data]);
 
@@ -128,9 +137,9 @@ export default function UserSettingsPfp(props: Props) {
     return {
       pfp: file ? file.name : null,
       meme: selectedMeme ? selectedMeme.id : null,
-      banner_1: bgColor1,
-      banner_2: bgColor2,
-      website: website ? website : null,
+      // banner_1: bgColor1,
+      // banner_2: bgColor2,
+      // website: website ? website : null,
     };
   }
 

@@ -8,6 +8,7 @@ import { commonApiFetch } from "../../../services/api/common-api";
 import { IProfileAndConsolidations } from "../../../entities/IProfile";
 
 import UserSettingsPage from "./UserSettingsPage";
+import UserSettingsPfp from "./UserSettingsPfp";
 interface Props {
   user: string;
   wallets: string[];
@@ -98,6 +99,10 @@ export default function UserSettingsComponent(props: Props) {
       <div className="tw-max-w-lg tw-mx-auto tw-pt-8 tw-pb-12">
         <UserSettingsGoToUser user={user.profile?.handle ?? userOrWallet} />
         <UserSettingsPage user={user} onUser={setUser} />
+        {/* <UserSettingsPfp
+          user={"0x23a867C9b39c940E9467f5b3B43FA0e5a2bD1e6E"}
+          wallets={["0x23a867C9b39c940E9467f5b3B43FA0e5a2bD1e6E"]}
+        /> */}
       </div>
     </div>
   );

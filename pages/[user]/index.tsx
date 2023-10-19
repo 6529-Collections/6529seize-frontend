@@ -36,6 +36,15 @@ export const MANIFOLD_ENS = {
   pfp: "./manifold.png",
 };
 
+interface PageProps {
+  title: string;
+  url: string;
+  image: string;
+  tdh: number | null;
+  balance: number | null;
+  userProfile: IProfileAndConsolidations;
+}
+
 const Header = dynamic(() => import("../../components/header/Header"), {
   ssr: false,
   loading: () => <HeaderPlaceholder />,
@@ -48,7 +57,7 @@ const UserPage = dynamic(() => import("../../components/user/UserPage"), {
 const DEFAULT_IMAGE =
   "https://d3lqz0a4bldqgf.cloudfront.net/seize_images/Seize_Logo_Glasses_2.png";
 
-export default function UserPageIndex(props: any) {
+export default function UserPageIndex(props: { pageProps: PageProps }) {
   const router = useRouter();
   const pageProps = props.pageProps;
 
@@ -74,7 +83,8 @@ export default function UserPageIndex(props: any) {
       if (
         !user.startsWith("0x") &&
         !user.endsWith(".eth") &&
-        !Object.values(ReservedUser).includes(user as ReservedUser)
+        !Object.values(ReservedUser).includes(user as ReservedUser) &&
+        !pageProps.userProfile
       ) {
         window.location.href = "404";
       }
@@ -102,32 +112,50 @@ export default function UserPageIndex(props: any) {
       <main className={styles.main}>
         <Header onSetWallets={(wallets) => setConnectedWallets(wallets)} />
         {router.isReady && pageProps.url && (
-          <UserPage wallets={connectedWallets} user={pageProps.url} />
+          <UserPage
+            wallets={connectedWallets}
+            user={pageProps.url}
+            profile={pageProps.userProfile}
+          />
         )}
       </main>
     </>
   );
 }
 
-export async function getServerSideProps(req: any, res: any, resolvedUrl: any) {
+export async function getServerSideProps(
+  req: any,
+  res: any,
+  resolvedUrl: any
+): Promise<{
+  props: PageProps;
+}> {
   let user = req.query.user;
+  const userProfile = await commonApiFetch<IProfileAndConsolidations>({
+    endpoint: `profiles/${user}`,
+  }).catch(() => null);
 
-  try {
-    const userProfile = await commonApiFetch<IProfileAndConsolidations>({
-      endpoint: `profiles/${user}`,
-    });
+  if (!userProfile) {
+    return {
+      redirect: {
+        permanent: false,
+        destination: `/404`,
+      },
+      props: {},
+    } as any;
+  }
 
-    if (userProfile?.profile?.normalised_handle === user.toLowerCase()) {
-      return {
-        redirect: {
-          permanent: false,
-          destination: `/${userProfile.profile?.primary_wallet}`,
-        },
-        props: {},
-      };
-    }
-  } catch {
-    undefined;
+  if (
+    userProfile?.profile?.normalised_handle &&
+    userProfile.profile?.normalised_handle !== user.toLowerCase()
+  ) {
+    return {
+      redirect: {
+        permanent: false,
+        destination: `/${userProfile.profile.normalised_handle}`,
+      },
+      props: {},
+    } as any;
   }
 
   if (areEqualAddresses(user, MUSEUM_ENS.display)) {
@@ -174,6 +202,7 @@ export async function getServerSideProps(req: any, res: any, resolvedUrl: any) {
       image: pfp ? pfp : DEFAULT_IMAGE,
       tdh: tdh ? tdh : null,
       balance: balance ? balance : null,
+      userProfile,
     },
   };
 }

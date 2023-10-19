@@ -15,8 +15,8 @@ interface ApiCreateOrUpdateProfileRequest {
   readonly handle: string;
   readonly primary_wallet: string;
   pfp_url?: string | undefined;
-  banner_1_url?: string | undefined;
-  banner_2_url?: string | undefined;
+  banner_1?: string | undefined;
+  banner_2?: string | undefined;
   website?: string | undefined;
 }
 
@@ -44,10 +44,10 @@ export default function UserSettingsPage({
   );
 
   const [bgColor1, setBgColor1] = useState<string>(
-    user.profile?.banner_1_url ?? getRandomColor()
+    user.profile?.banner_1 ?? getRandomColor()
   );
   const [bgColor2, setBgColor2] = useState<string>(
-    user.profile?.banner_2_url ?? getRandomColor()
+    user.profile?.banner_2 ?? getRandomColor()
   );
 
   const [website, setWebsite] = useState<string>(user.profile?.website ?? "");
@@ -68,9 +68,15 @@ export default function UserSettingsPage({
     const body: ApiCreateOrUpdateProfileRequest = {
       handle: userName,
       primary_wallet: primaryWallet,
-      // banner_1_url: bgColor1,
-      // banner_2_url: bgColor2,
     };
+
+    if (bgColor1) {
+      body.banner_1 = bgColor1;
+    }
+
+    if (bgColor2) {
+      body.banner_2 = bgColor2;
+    }
 
     if (website) {
       body.website = website;
@@ -109,12 +115,12 @@ export default function UserSettingsPage({
           selected={primaryWallet}
           onSelect={setPrimaryWallet}
         />
-        {/* <UserSettingsBackground
+        <UserSettingsBackground
           bgColor1={bgColor1}
           bgColor2={bgColor2}
           setBgColor1={setBgColor1}
           setBgColor2={setBgColor2}
-        /> */}
+        />
         <UserSettingsWebsite website={website} setWebsite={setWebsite} />
         {/* <UserSettingsImg /> */}
       </div>
