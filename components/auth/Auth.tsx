@@ -10,7 +10,7 @@ import { commonApiFetch, commonApiPost } from "../../services/api/common-api";
 import jwtDecode from "jwt-decode";
 
 type AuthContextType = {
-  requestAuth: () => void;
+  requestAuth: () => Promise<{ success: boolean }>;
 };
 
 interface NonceResponse {
@@ -19,7 +19,7 @@ interface NonceResponse {
 }
 
 export const AuthContext = createContext<AuthContextType>({
-  requestAuth: () => {},
+  requestAuth: async () => ({ success: false }),
 });
 
 export default function Auth({ children }: { children: React.ReactNode }) {
