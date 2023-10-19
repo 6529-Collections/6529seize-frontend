@@ -109,12 +109,12 @@ export default function UserSettingsPage({
           selected={primaryWallet}
           onSelect={setPrimaryWallet}
         />
-        <UserSettingsBackground
+        {/* <UserSettingsBackground
           bgColor1={bgColor1}
           bgColor2={bgColor2}
           setBgColor1={setBgColor1}
           setBgColor2={setBgColor2}
-        />
+        /> */}
         <UserSettingsWebsite website={website} setWebsite={setWebsite} />
         {/* <UserSettingsImg /> */}
       </div>
