@@ -20,6 +20,10 @@ export const commonApiFetch = async <T>(param: {
   const res = await fetch(`${process.env.API_ENDPOINT}/api/${param.endpoint}`, {
     headers: getHeaders(param.headers),
   });
+  if (!res.ok) {
+    const body: any = await res.json();
+    throw new Error(body?.error ?? res.statusText ?? "Something went wrong");
+  }
   return res.json();
 };
 
@@ -33,5 +37,9 @@ export const commonApiPost = async <T, U>(param: {
     headers: getHeaders(param.headers),
     body: JSON.stringify(param.body),
   });
+  if (!res.ok) {
+    const body: any = await res.json();
+    throw new Error(body?.error ?? res.statusText ?? "Something went wrong");
+  }
   return res.json();
 };

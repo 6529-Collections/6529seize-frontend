@@ -12,6 +12,8 @@ import {
 import { MANIFOLD, SIX529_MUSEUM } from "../../constants";
 import HeaderPlaceholder from "../../components/header/HeaderPlaceholder";
 import { useEffect, useState } from "react";
+import { commonApiFetch } from "../../services/api/common-api";
+import { IProfileAndConsolidations } from "../../entities/IProfile";
 
 export enum ReservedUser {
   MUSEUM = "6529Museum",
@@ -49,6 +51,7 @@ const DEFAULT_IMAGE =
 export default function UserPageIndex(props: any) {
   const router = useRouter();
   const pageProps = props.pageProps;
+
   const pagenameFull = `${pageProps.title} | 6529 SEIZE`;
 
   const descriptionArray = [];
@@ -60,11 +63,11 @@ export default function UserPageIndex(props: any) {
   }
   descriptionArray.push("6529 SEIZE");
 
+  const [connectedWallets, setConnectedWallets] = useState<string[]>([]);
+
   const [user, setUser] = useState(
     Array.isArray(router.query.user) ? router.query.user[0] : router.query.user
   );
-
-  const [connectedWallets, setConnectedWallets] = useState<string[]>([]);
 
   useEffect(() => {
     if (user) {
@@ -98,8 +101,8 @@ export default function UserPageIndex(props: any) {
 
       <main className={styles.main}>
         <Header onSetWallets={(wallets) => setConnectedWallets(wallets)} />
-        {router.isReady && user && (
-          <UserPage wallets={connectedWallets} user={user} />
+        {router.isReady && pageProps.url && (
+          <UserPage wallets={connectedWallets} user={pageProps.url} />
         )}
       </main>
     </>
@@ -108,12 +111,32 @@ export default function UserPageIndex(props: any) {
 
 export async function getServerSideProps(req: any, res: any, resolvedUrl: any) {
   let user = req.query.user;
+
+  try {
+    const userProfile = await commonApiFetch<IProfileAndConsolidations>({
+      endpoint: `profiles/${user}`,
+    });
+
+    if (userProfile?.profile?.normalised_handle === user.toLowerCase()) {
+      return {
+        redirect: {
+          permanent: false,
+          destination: `/${userProfile.profile?.primary_wallet}`,
+        },
+        props: {},
+      };
+    }
+  } catch {
+    undefined;
+  }
+
   if (areEqualAddresses(user, MUSEUM_ENS.display)) {
     user = MUSEUM_ENS.wallet;
   }
   if (areEqualAddresses(user, MANIFOLD_ENS.display)) {
     user = MANIFOLD_ENS.wallet;
   }
+
   const ensRequest = await fetch(
     `${process.env.API_ENDPOINT}/api/user/${user}`
   );
@@ -144,7 +167,6 @@ export async function getServerSideProps(req: any, res: any, resolvedUrl: any) {
         ? ReservedUser.MANIFOLD
         : userDisplay;
   }
-
   return {
     props: {
       title: userDisplay,

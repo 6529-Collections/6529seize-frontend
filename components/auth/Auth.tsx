@@ -1,5 +1,6 @@
 import { createContext, useEffect } from "react";
 import { Slide, ToastContainer, TypeOptions, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import { useAccount, useSignMessage } from "wagmi";
 import {
   getAuthJwt,
@@ -11,6 +12,7 @@ import jwtDecode from "jwt-decode";
 
 type AuthContextType = {
   requestAuth: () => Promise<{ success: boolean }>;
+  setToast: ({ message, type }: { message: string; type: TypeOptions }) => void;
 };
 
 interface NonceResponse {
@@ -20,6 +22,7 @@ interface NonceResponse {
 
 export const AuthContext = createContext<AuthContextType>({
   requestAuth: async () => ({ success: false }),
+  setToast: () => {},
 });
 
 export default function Auth({ children }: { children: React.ReactNode }) {
@@ -162,7 +165,7 @@ export default function Auth({ children }: { children: React.ReactNode }) {
   };
   return (
     <>
-      <AuthContext.Provider value={{ requestAuth }}>
+      <AuthContext.Provider value={{ requestAuth, setToast }}>
         {children}
         <ToastContainer />
       </AuthContext.Provider>
