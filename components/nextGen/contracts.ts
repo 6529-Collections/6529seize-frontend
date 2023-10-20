@@ -5,11 +5,9 @@ export const NEXTGEN_CHAIN_ID = goerli.id;
 export enum FunctionSelectors {
   CREATE_COLLECTION = "0x02de55d0",
   SET_COLLECTION_DATA = "0xfb171694",
-  UPDATE_COLLECTION_INFO = "0x5138a2cd",
-  UPDATE_COLLECTION_SCRIPT_BY_INDEX = "0x10ee80f9",
+  UPDATE_COLLECTION_INFO = "0x16e7c899",
   CHANGE_METADATA_VIEW = "0xf6a85dd0",
   CHANGE_TOKEN_DATA = "0x9a8490f3", // not implemented
-  UPDATE_BASE_URI = "0x817234fa",
   UPDATE_IMAGES_AND_ATTRIBUTES = "0xad241020",
   ADD_RANDOMIZER = "0x1aab8d69",
   FREEZE_COLLECTION = "0xbcc405d0", // not implemented
@@ -29,7 +27,7 @@ export enum FunctionSelectors {
 }
 
 export const NEXTGEN_CORE = {
-  contract: "0x3f7579358221162E038013660c28a771c099E779",
+  contract: "0xF3ff54B93844B1512C7bDafd2c41B5D228D03f98",
   abi: [
     {
       inputs: [
@@ -39,6 +37,36 @@ export const NEXTGEN_CORE = {
       ],
       stateMutability: "nonpayable",
       type: "constructor",
+    },
+    {
+      inputs: [
+        { internalType: "uint256", name: "numerator", type: "uint256" },
+        { internalType: "uint256", name: "denominator", type: "uint256" },
+      ],
+      name: "ERC2981InvalidDefaultRoyalty",
+      type: "error",
+    },
+    {
+      inputs: [{ internalType: "address", name: "receiver", type: "address" }],
+      name: "ERC2981InvalidDefaultRoyaltyReceiver",
+      type: "error",
+    },
+    {
+      inputs: [
+        { internalType: "uint256", name: "tokenId", type: "uint256" },
+        { internalType: "uint256", name: "numerator", type: "uint256" },
+        { internalType: "uint256", name: "denominator", type: "uint256" },
+      ],
+      name: "ERC2981InvalidTokenRoyalty",
+      type: "error",
+    },
+    {
+      inputs: [
+        { internalType: "uint256", name: "tokenId", type: "uint256" },
+        { internalType: "address", name: "receiver", type: "address" },
+      ],
+      name: "ERC2981InvalidTokenRoyaltyReceiver",
+      type: "error",
     },
     {
       anonymous: false,
@@ -498,6 +526,19 @@ export const NEXTGEN_CORE = {
     },
     {
       inputs: [
+        { internalType: "uint256", name: "tokenId", type: "uint256" },
+        { internalType: "uint256", name: "salePrice", type: "uint256" },
+      ],
+      name: "royaltyInfo",
+      outputs: [
+        { internalType: "address", name: "", type: "address" },
+        { internalType: "uint256", name: "", type: "uint256" },
+      ],
+      stateMutability: "view",
+      type: "function",
+    },
+    {
+      inputs: [
         { internalType: "address", name: "from", type: "address" },
         { internalType: "address", name: "to", type: "address" },
         { internalType: "uint256", name: "tokenId", type: "uint256" },
@@ -560,6 +601,16 @@ export const NEXTGEN_CORE = {
     },
     {
       inputs: [
+        { internalType: "address", name: "_royaltyAddress", type: "address" },
+        { internalType: "uint96", name: "_bps", type: "uint96" },
+      ],
+      name: "setDefaultRoyalties",
+      outputs: [],
+      stateMutability: "nonpayable",
+      type: "function",
+    },
+    {
+      inputs: [
         { internalType: "uint256", name: "_collectionID", type: "uint256" },
       ],
       name: "setFinalSupply",
@@ -608,28 +659,11 @@ export const NEXTGEN_CORE = {
     },
     {
       inputs: [
-        { internalType: "uint256", name: "", type: "uint256" },
-        { internalType: "uint256", name: "", type: "uint256" },
-      ],
-      name: "tokenImageAndAttributes",
-      outputs: [{ internalType: "string", name: "", type: "string" }],
-      stateMutability: "view",
-      type: "function",
-    },
-    {
-      inputs: [
         { internalType: "address", name: "owner", type: "address" },
         { internalType: "uint256", name: "index", type: "uint256" },
       ],
       name: "tokenOfOwnerByIndex",
       outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
-      stateMutability: "view",
-      type: "function",
-    },
-    {
-      inputs: [{ internalType: "uint256", name: "", type: "uint256" }],
-      name: "tokenToHash",
-      outputs: [{ internalType: "bytes32", name: "", type: "bytes32" }],
       stateMutability: "view",
       type: "function",
     },
@@ -690,20 +724,6 @@ export const NEXTGEN_CORE = {
     {
       inputs: [
         { internalType: "uint256", name: "_collectionID", type: "uint256" },
-        {
-          internalType: "string",
-          name: "_newCollectionBaseURI",
-          type: "string",
-        },
-      ],
-      name: "updateBaseURI",
-      outputs: [],
-      stateMutability: "nonpayable",
-      type: "function",
-    },
-    {
-      inputs: [
-        { internalType: "uint256", name: "_collectionID", type: "uint256" },
         { internalType: "string", name: "_newCollectionName", type: "string" },
         {
           internalType: "string",
@@ -727,9 +747,15 @@ export const NEXTGEN_CORE = {
         },
         {
           internalType: "string",
+          name: "_newCollectionBaseURI",
+          type: "string",
+        },
+        {
+          internalType: "string",
           name: "_newCollectionLibrary",
           type: "string",
         },
+        { internalType: "uint256", name: "_index", type: "uint256" },
         {
           internalType: "string[]",
           name: "_newCollectionScript",
@@ -737,21 +763,6 @@ export const NEXTGEN_CORE = {
         },
       ],
       name: "updateCollectionInfo",
-      outputs: [],
-      stateMutability: "nonpayable",
-      type: "function",
-    },
-    {
-      inputs: [
-        { internalType: "uint256", name: "_collectionID", type: "uint256" },
-        { internalType: "uint256", name: "_index", type: "uint256" },
-        {
-          internalType: "string",
-          name: "_newCollectionIndexScript",
-          type: "string",
-        },
-      ],
-      name: "updateCollectionScriptByIndex",
       outputs: [],
       stateMutability: "nonpayable",
       type: "function",

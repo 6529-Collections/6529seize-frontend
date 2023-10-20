@@ -14,7 +14,6 @@ import {
 } from "./admin_helpers";
 import ConnectWalletButton from "../../delegation/ConnectWalletButton";
 import { FunctionSelectors, NEXTGEN_CHAIN_ID } from "../contracts";
-import NextGenAdminCreateCollection from "./NextGenAdminCreateUpdateCollection";
 import NextGenAdminSetData from "./NextGenAdminSetData";
 import NextGenAdminSetCosts from "./NextGenAdminSetCosts";
 import NextGenAdminSetPhases from "./NextGenAdminSetPhases";
@@ -23,12 +22,10 @@ import NextGenAdminRegisterAdmin, {
 } from "./NextGenAdminRegisterAdmin";
 import NextGenAdminSignCollection from "./NextGenAdminSignCollection";
 import NextGenAdminAirdropTokens from "./NextGenAdminAirdropTokens";
-import NextGenAdminUpdateBaseUri from "./NextGenAdminUpdateBaseUri";
 import NextGenAdminProposeAddressesAndPercentages, {
   ProposalType,
 } from "./NextGenAdminProposeAddressesAndPercentages";
 import NextGenAdminSetSplits from "./NextGenAdminSetSplits";
-import NextGenAdminUpdateScriptByIndex from "./NextGenAdminUpdateScriptByIndex";
 import NextGenAdminChangeMetadataView from "./NextGenAdminChangeMetadataView";
 import NextGenAdminUpdateImagesAttributes from "./NextGenAdminUpdateImagesAttributes";
 import NextGenAdminAddRandomizer from "./NextGenAdminAddRandomizer";
@@ -39,7 +36,10 @@ import NextGenAdminPayArtist from "./NextGenAdminPayArtist";
 import NextGenAdminMintAndAuction from "./NextGenAdminMintAndAuction";
 import NextGenAdminInitializeExternalBurnSwap from "./NextGenAdminInitializeExternalBurnSwap";
 import NextGenAdminUpdateDelegationCollection from "./NextGenAdminUpdateDelegationCollection";
-import NextGenAdminCreateUpdateCollection from "./NextGenAdminCreateUpdateCollection";
+import NextGenAdminCreateCollection from "./NextGenAdminCreateCollection";
+import NextGenAdminUpdateCollection, {
+  UpdateType,
+} from "./NextGenAdminUpdateCollection";
 
 enum Focus {
   GLOBAL = "global",
@@ -112,17 +112,9 @@ export default function NextGenAdmin() {
     account.address as string,
     FunctionSelectors.UPDATE_COLLECTION_INFO
   );
-  const updateCollectionScriptFunctionAdmin = useFunctionAdmin(
-    account.address as string,
-    FunctionSelectors.UPDATE_COLLECTION_SCRIPT_BY_INDEX
-  );
   const changeMetadataViewFunctionAdmin = useFunctionAdmin(
     account.address as string,
     FunctionSelectors.CHANGE_METADATA_VIEW
-  );
-  const updateBaseUriFunctionAdmin = useFunctionAdmin(
-    account.address as string,
-    FunctionSelectors.UPDATE_BASE_URI
   );
   const setFinalSupplyFunctionAdmin = useFunctionAdmin(
     account.address as string,
@@ -182,6 +174,7 @@ export default function NextGenAdmin() {
   const collectionArtists = useCollectionArtist(
     parseInt(collectionIndex.data as string)
   );
+
   const isArtist = isCollectionArtist(
     account.address as string,
     collectionArtists
@@ -619,8 +612,6 @@ export default function NextGenAdmin() {
       setCostsFunctionAdmin.data === false &&
       setPhasesFunctionAdmin.data === false &&
       updateInfoFunctionAdmin.data === false &&
-      updateBaseUriFunctionAdmin.data === false &&
-      updateCollectionScriptFunctionAdmin.data === false &&
       changeMetadataViewFunctionAdmin.data === false
     ) {
       return (
@@ -707,8 +698,6 @@ export default function NextGenAdmin() {
         {(isGlobalAdmin() ||
           isWalletCollectionAdmin ||
           updateInfoFunctionAdmin.data === true ||
-          updateBaseUriFunctionAdmin.data === true ||
-          updateCollectionScriptFunctionAdmin.data === true ||
           changeMetadataViewFunctionAdmin.data === true) && (
           <>
             <Row className="pt-4">
@@ -731,7 +720,7 @@ export default function NextGenAdmin() {
                 )}
                 {(isGlobalAdmin() ||
                   isWalletCollectionAdmin ||
-                  updateBaseUriFunctionAdmin.data === true) && (
+                  updateInfoFunctionAdmin.data === true) && (
                   <Button
                     className="seize-btn btn-white"
                     onClick={() =>
@@ -742,7 +731,7 @@ export default function NextGenAdmin() {
                 )}
                 {(isGlobalAdmin() ||
                   isWalletCollectionAdmin ||
-                  updateCollectionScriptFunctionAdmin.data === true) && (
+                  updateInfoFunctionAdmin.data === true) && (
                   <Button
                     className="seize-btn btn-white"
                     onClick={() =>
@@ -767,16 +756,22 @@ export default function NextGenAdmin() {
             <Row className="pt-3">
               <Col>
                 {collectionFocus === CollectionFocus.UPDATE_INFO && (
-                  <NextGenAdminCreateUpdateCollection
-                    update={true}
+                  <NextGenAdminUpdateCollection
+                    type={UpdateType.UPDATE_INFO}
                     close={() => close()}
                   />
                 )}
                 {collectionFocus === CollectionFocus.UPDATE_BASE_URI && (
-                  <NextGenAdminUpdateBaseUri close={() => close()} />
+                  <NextGenAdminUpdateCollection
+                    type={UpdateType.UPDATE_BASE_URI}
+                    close={() => close()}
+                  />
                 )}
                 {collectionFocus === CollectionFocus.UPDATE_SCRIPT_BY_INDEX && (
-                  <NextGenAdminUpdateScriptByIndex close={() => close()} />
+                  <NextGenAdminUpdateCollection
+                    type={UpdateType.UPDATE_SCRIPT}
+                    close={() => close()}
+                  />
                 )}
                 {collectionFocus === CollectionFocus.CHANGE_METADATA_VIEW && (
                   <NextGenAdminChangeMetadataView close={() => close()} />

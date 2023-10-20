@@ -18,19 +18,16 @@ import {
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 interface Props {
-  update?: boolean;
   close: () => void;
 }
 
-export default function NextGenAdminCreateUpdateCollection(props: Props) {
+export default function NextGenAdminCreateCollection(props: Props) {
   const account = useAccount();
 
   const globalAdmin = useGlobalAdmin(account.address as string);
   const functionAdmin = useFunctionAdmin(
     account.address as string,
-    props.update
-      ? FunctionSelectors.UPDATE_COLLECTION_INFO
-      : FunctionSelectors.CREATE_COLLECTION
+    FunctionSelectors.CREATE_COLLECTION
   );
   const collectionIndex = useCollectionIndex();
   const collectionAdmin = useCollectionAdmin(
@@ -45,7 +42,6 @@ export default function NextGenAdminCreateUpdateCollection(props: Props) {
     parseInt(collectionIndex.data as string)
   );
 
-  const [collectionID, setCollectionID] = useState("");
   const [collectionName, setCollectionName] = useState("");
   const [artist, setArtist] = useState("");
   const [description, setDescription] = useState("");
@@ -59,63 +55,16 @@ export default function NextGenAdminCreateUpdateCollection(props: Props) {
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
-  useContractRead({
-    address: NEXTGEN_CORE.contract as `0x${string}`,
-    abi: NEXTGEN_CORE.abi,
-    chainId: NEXTGEN_CHAIN_ID,
-    functionName: "retrieveCollectionInfo",
-    enabled: props.update && !!collectionID,
-    args: [collectionID],
-    onSettled(data: any, error: any) {
-      if (data) {
-        const d = data as any[];
-        setCollectionName(d[0]);
-        setArtist(d[1]);
-        setDescription(d[2]);
-        setWebsite(d[3]);
-        setLicense(d[4]);
-        setBaseURI(d[5]);
-      }
-    },
-  });
-
-  useContractRead({
-    address: NEXTGEN_CORE.contract as `0x${string}`,
-    abi: NEXTGEN_CORE.abi,
-    chainId: NEXTGEN_CHAIN_ID,
-    functionName: "retrieveCollectionLibraryAndScript",
-    watch: true,
-    args: [collectionID],
-    enabled: !!collectionID,
-    onSettled(data: any, error: any) {
-      if (data) {
-        const d = data as any[];
-        setLibrary(d[0]);
-        setScript(d[1]);
-      }
-    },
-  });
-
-  function getFunctionName() {
-    if (props.update) {
-      return "updateCollectionInfo";
-    }
-    return "createCollection";
-  }
-
   function getParams() {
     const params: any[] = [];
-    if (props.update) {
-      params.push(collectionID);
-    }
+
     params.push(collectionName);
     params.push(artist);
     params.push(description);
     params.push(website);
     params.push(license);
-    if (!props.update) {
-      params.push(baseURI);
-    }
+    params.push(baseURI);
+
     params.push(library);
     params.push([script]);
 
@@ -126,7 +75,7 @@ export default function NextGenAdminCreateUpdateCollection(props: Props) {
     address: NEXTGEN_CORE.contract as `0x${string}`,
     abi: NEXTGEN_CORE.abi,
     chainId: NEXTGEN_CHAIN_ID,
-    functionName: getFunctionName(),
+    functionName: "createCollection",
     onError() {
       setSubmitting(false);
       setLoading(false);
@@ -137,9 +86,6 @@ export default function NextGenAdminCreateUpdateCollection(props: Props) {
     setLoading(true);
     contractWrite.reset();
     const errors = [];
-    if (props.update && !collectionID) {
-      errors.push("Collection id is required");
-    }
     if (!collectionName) {
       errors.push("Collection name is required");
     }
@@ -155,7 +101,7 @@ export default function NextGenAdminCreateUpdateCollection(props: Props) {
     if (!license) {
       errors.push("License is required");
     }
-    if (!props.update && !baseURI) {
+    if (!baseURI) {
       errors.push("Base URI is required");
     }
     if (!library) {
@@ -177,7 +123,16 @@ export default function NextGenAdminCreateUpdateCollection(props: Props) {
   useEffect(() => {
     if (submitting) {
       contractWrite.write({
-        args: getParams(),
+        args: [
+          collectionName,
+          artist,
+          description,
+          website,
+          license,
+          baseURI,
+          library,
+          [script],
+        ],
       });
     }
   }, [submitting]);
@@ -192,10 +147,7 @@ export default function NextGenAdminCreateUpdateCollection(props: Props) {
       <Row className="pt-3">
         <Col className="d-flex align-items-center justify-content-between">
           <h3>
-            <b>
-              {props.update ? `UPDATE` : `CREATE`} COLLECTION{" "}
-              {props.update ? `INFO` : ``}
-            </b>
+            <b>CREATE COLLECTION</b>
           </h3>
           <FontAwesomeIcon
             className={styles.closeIcon}
@@ -208,26 +160,6 @@ export default function NextGenAdminCreateUpdateCollection(props: Props) {
       <Row className="pt-3">
         <Col>
           <Form>
-            {props.update && (
-              <Form.Group className="mb-3">
-                <Form.Label>Collection ID</Form.Label>
-                <Form.Select
-                  className={`${styles.formInput}`}
-                  value={collectionID}
-                  onChange={(e) => {
-                    setCollectionID(e.target.value);
-                  }}>
-                  <option value="" disabled>
-                    Select Collection
-                  </option>
-                  {collectionIds.map((id) => (
-                    <option key={`collection-id-${id}`} value={id}>
-                      {id}
-                    </option>
-                  ))}
-                </Form.Select>
-              </Form.Group>
-            )}
             <Form.Group className="mb-3">
               <Form.Label>Collection Name</Form.Label>
               <Form.Control
@@ -273,17 +205,15 @@ export default function NextGenAdminCreateUpdateCollection(props: Props) {
                 onChange={(e: any) => setLicense(e.target.value)}
               />
             </Form.Group>
-            {!props.update && (
-              <Form.Group className="mb-3">
-                <Form.Label>Base URI</Form.Label>
-                <Form.Control
-                  type="text"
-                  placeholder="https://"
-                  value={baseURI}
-                  onChange={(e: any) => setBaseURI(e.target.value)}
-                />
-              </Form.Group>
-            )}
+            <Form.Group className="mb-3">
+              <Form.Label>Base URI</Form.Label>
+              <Form.Control
+                type="text"
+                placeholder="https://"
+                value={baseURI}
+                onChange={(e: any) => setBaseURI(e.target.value)}
+              />
+            </Form.Group>
             <Form.Group className="mb-3">
               <Form.Label>Library</Form.Label>
               <Form.Control
