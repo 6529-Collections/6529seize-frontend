@@ -24,7 +24,7 @@ const securityHeaders = [
   },
   {
     key: "X-Frame-Options",
-    value: "SAMEORIGIN",
+    value: "*",
   },
   {
     key: "X-Content-Type-Options",
