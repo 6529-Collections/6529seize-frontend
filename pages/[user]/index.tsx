@@ -138,6 +138,7 @@ export async function getServerSideProps(
 
   const userProfile: IProfileAndConsolidations | null =
     await userProfileResponse?.json();
+  console.log(userProfile);
   if (!userProfile || !userProfile.consolidation) {
     return {
       redirect: {
