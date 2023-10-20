@@ -1,6 +1,7 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { MemeLite } from "./UserSettingsImg";
 import { AnimatePresence, motion } from "framer-motion";
+import { useClickAway } from "react-use";
 
 export default function UserSettingsImgSelectMeme({
   memes,
@@ -26,8 +27,15 @@ export default function UserSettingsImgSelectMeme({
   }, [input, memes]);
 
   const [isOpen, setIsOpen] = useState(false);
+  const listRef = useRef<HTMLDivElement>(null);
+  useClickAway(listRef, () => setIsOpen(false));
+
+  const setMemeAndCloseDropdown = (meme: MemeLite) => {
+    onMeme(meme);
+    setIsOpen(false);
+  };
   return (
-    <div className="tw-max-w-lg tw-relative">
+    <div ref={listRef} className="tw-max-w-lg tw-relative">
       <label className="tw-block tw-text-sm tw-font-normal tw-leading-5 tw-text-neutral-350">
         Select Memes
       </label>
@@ -37,7 +45,6 @@ export default function UserSettingsImgSelectMeme({
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onFocus={() => setIsOpen(true)}
-          onBlur={() => setIsOpen(false)}
           placeholder="Search"
           className="tw-text-left tw-block tw-w-full tw-rounded-lg tw-border-0 tw-py-3 tw-px-3 tw-bg-neutral-900 focus:tw-bg-transparent tw-text-white tw-font-light tw-caret-primary-300 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-neutral-600 placeholder:tw-text-neutral-500 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-300 hover:tw-ring-neutral-500 tw-text-base sm:tw-leading-6 tw-transition tw-duration-300 tw-ease-out"
         />
@@ -72,7 +79,7 @@ export default function UserSettingsImgSelectMeme({
                 <ul className="tw-flex tw-flex-col tw-px-2 tw-mx-0 tw-mb-0 tw-list-none">
                   {filteredMemes.map((meme) => (
                     <li
-                      onClick={() => onMeme(meme)}
+                      onClick={() => setMemeAndCloseDropdown(meme)}
                       key={meme.id}
                       className="tw-group tw-text-white tw-rounded-lg tw-relative tw-cursor-pointer tw-select-none tw-p-2 hover:tw-bg-neutral-700 tw-transition tw-duration-300 tw-ease-out"
                     >

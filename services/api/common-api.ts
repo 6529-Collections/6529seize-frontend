@@ -4,12 +4,12 @@ import { getAuthJwt } from "../auth/auth.utils";
 
 const getHeaders = (
   headers?: Record<string, string>,
-  contentType: string = "application/json"
+  contentType: boolean = true
 ) => {
   const apiAuth = Cookies.get(API_AUTH_COOKIE);
   const walletAuth = getAuthJwt();
   return {
-    "Content-Type": contentType,
+    ...(contentType ? { "Content-Type": "application/json" } : {}),
     ...(apiAuth ? { "x-6529-auth": apiAuth } : {}),
     ...(walletAuth ? { Authorization: `Bearer ${walletAuth}` } : {}),
     ...(headers || {}),
@@ -54,8 +54,8 @@ export const commonApiPostForm = async <U>(param: {
 }): Promise<U> => {
   const res = await fetch(`${process.env.API_ENDPOINT}/api/${param.endpoint}`, {
     method: "POST",
-    headers: getHeaders(param.headers, "multipart/form-data"),
-    body: JSON.stringify(param.body),
+    headers: getHeaders(param.headers, false),
+    body: param.body,
   });
   if (!res.ok) {
     const body: any = await res.json();

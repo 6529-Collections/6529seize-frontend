@@ -8,6 +8,7 @@ import UserSettingsImgSelectMeme from "./UserSettingsImgSelectMeme";
 import { AuthContext } from "../../auth/Auth";
 import UserSettingsImgSelectFile from "./UserSettingsImgSelectFile";
 import UserSettingsSave from "./UserSettingsSave";
+import { useRouter } from "next/router";
 
 export interface MemeLite {
   animation: any;
@@ -21,6 +22,7 @@ export interface MemeLite {
 }
 
 export default function UserSettingsImg({ profile }: { profile: IProfile }) {
+  const router = useRouter();
   const { setToast } = useContext(AuthContext);
   const [memes, setMemes] = useState<MemeLite[]>([]);
 
@@ -67,6 +69,22 @@ export default function UserSettingsImg({ profile }: { profile: IProfile }) {
   const [saving, setSaving] = useState<boolean>(false);
 
   const onSave = async () => {
+    const { success } = await requestAuth();
+    if (!success) {
+      setToast({
+        message: "You must be logged in to save settings",
+        type: "error",
+      });
+      router.push("/404");
+      return;
+    }
+    if (!file && !selectedMeme) {
+      setToast({
+        message: "You must select an image",
+        type: "error",
+      });
+      return;
+    }
     setSaving(true);
     try {
       const formData = new FormData();
@@ -76,9 +94,13 @@ export default function UserSettingsImg({ profile }: { profile: IProfile }) {
       if (selectedMeme) {
         formData.append("meme", selectedMeme.id.toString());
       }
-      const response = await commonApiPostForm<IProfile>({
+      await commonApiPostForm<{ pfp_url: string }>({
         endpoint: `profiles/${profile.handle}/pfp`,
         body: formData,
+      });
+      setToast({
+        message: "Profile updated",
+        type: "success",
       });
     } catch (e: any) {
       setToast({
@@ -113,4 +135,7 @@ export default function UserSettingsImg({ profile }: { profile: IProfile }) {
       </div>
     </>
   );
+}
+function requestAuth(): { success: any } | PromiseLike<{ success: any }> {
+  throw new Error("Function not implemented.");
 }
