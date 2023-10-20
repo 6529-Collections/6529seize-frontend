@@ -136,6 +136,8 @@ export async function getServerSideProps(
     `${process.env.API_ENDPOINT}/api/profiles/${user}`
   ).catch(() => null);
 
+  console.log(`${process.env.API_ENDPOINT}/api/profiles/${user}`);
+
   const userProfile: IProfileAndConsolidations | null =
     await userProfileResponse?.json();
   console.log(userProfile);
