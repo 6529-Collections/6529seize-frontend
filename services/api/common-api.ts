@@ -20,6 +20,8 @@ export const commonApiFetch = async <T>(param: {
   endpoint: string;
   headers?: Record<string, string>;
 }): Promise<T> => {
+  console.log("headers", getHeaders(param.headers));
+  console.log("endpoint", `${process.env.API_ENDPOINT}/api/${param.endpoint}`)
   const res = await fetch(`${process.env.API_ENDPOINT}/api/${param.endpoint}`, {
     headers: getHeaders(param.headers),
   });
