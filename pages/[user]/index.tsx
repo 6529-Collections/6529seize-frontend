@@ -135,15 +135,15 @@ export async function getServerSideProps(
     endpoint: `profiles/${user}`,
   }).catch(() => null);
 
-  if (!userProfile) {
-    return {
-      redirect: {
-        permanent: false,
-        destination: `/404`,
-      },
-      props: {},
-    } as any;
-  }
+  // if (!userProfile) {
+  //   return {
+  //     redirect: {
+  //       permanent: false,
+  //       destination: `/404`,
+  //     },
+  //     props: {},
+  //   } as any;
+  // }
 
   if (
     userProfile?.profile?.normalised_handle &&
