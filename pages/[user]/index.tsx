@@ -136,10 +136,9 @@ export async function getServerSideProps(
     `${process.env.API_ENDPOINT}/api/profiles/${user}`
   ).catch(() => null);
 
-  const userProfile: IProfileAndConsolidations | { error: string } | null =
+  const userProfile: IProfileAndConsolidations | null =
     await userProfileResponse?.json();
-  console.log(userProfile);
-  if (!userProfile || Object.keys(userProfile).includes("error")) {
+  if (!userProfile || !userProfile.consolidation) {
     return {
       redirect: {
         permanent: false,
