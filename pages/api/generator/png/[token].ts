@@ -29,6 +29,7 @@ export default async function handler(
         .send({ error: "An error occurred while capturing the canvas." });
     }
   } catch (error) {
+    console.log("i am error", error);
     res
       .status(500)
       .send({ error: "An error occurred while processing the page." });
