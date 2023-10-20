@@ -22,10 +22,10 @@ const securityHeaders = [
     key: "Content-Security-Policy",
     value: `default-src 'none'; script-src 'self' 'unsafe-inline' https://www.google-analytics.com https://www.googletagmanager.com/ 'unsafe-eval'; connect-src * 'self' ${process.env.REACT_APP_API_ENDPOINT} https://eth-sepolia.g.alchemy.com/v2/${process.env.ALCHEMY_API_KEY} https://registry.walletconnect.com/api/v2/wallets wss://*.bridge.walletconnect.org wss://*.walletconnect.com wss://www.walletlink.org/rpc https://explorer-api.walletconnect.com/v3/wallets https://www.googletagmanager.com https://*.google-analytics.com https://cloudflare-eth.com/ https://arweave.net/* https://eth-mainnet.alchemyapi.io/v2/${process.env.ALCHEMY_API_KEY} https://rpc.walletconnect.com/v1/; font-src 'self'; img-src 'self' data: blob: *; media-src 'self' https://*.cloudfront.net https://arweave.net https://*.arweave.net https://ipfs.io/ipfs/* https://cf-ipfs.com/ipfs/*; frame-src 'self' https://arweave.net https://*.arweave.net https://ipfs.io/ipfs/* https://cf-ipfs.com/ipfs/*; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; object-src data:;`,
   },
-  // {
-  //   key: "X-Frame-Options",
-  //   value: "SAMEORIGIN",
-  // },
+  {
+    key: "X-Frame-Options",
+    value: "SAMEORIGIN",
+  },
   {
     key: "X-Content-Type-Options",
     value: "nosniff",
