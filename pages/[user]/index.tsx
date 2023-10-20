@@ -131,13 +131,15 @@ export async function getServerSideProps(
   props: PageProps;
 }> {
   let user = req.query.user;
-  const userProfile = await commonApiFetch<IProfileAndConsolidations>({
-    endpoint: `profiles/${user}`,
-  }).catch(() => null);
 
-  console.log(userProfile)
+  const userProfileResponse = await fetch(
+    `${process.env.API_ENDPOINT}/api/profiles/${user}`
+  ).catch(() => null);
 
-  if (!userProfile) {
+  const userProfile: IProfileAndConsolidations | { error: string } | null =
+    await userProfileResponse?.json();
+  console.log(userProfile);
+  if (!userProfile || Object.keys(userProfile).includes("error")) {
     return {
       redirect: {
         permanent: false,
