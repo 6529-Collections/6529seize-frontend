@@ -122,9 +122,9 @@ export default function UserSettingsPage({
           setBgColor2={setBgColor2}
         />
         <UserSettingsWebsite website={website} setWebsite={setWebsite} />
-        {/* <UserSettingsImg /> */}
+        <UserSettingsSave onSave={onSave} loading={saving} />
+        {user.profile && <UserSettingsImg profile={user.profile} />}
       </div>
-      <UserSettingsSave onSave={onSave} loading={saving} />
     </div>
   );
 }

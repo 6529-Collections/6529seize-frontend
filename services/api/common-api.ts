@@ -2,11 +2,14 @@ import Cookies from "js-cookie";
 import { API_AUTH_COOKIE } from "../../constants";
 import { getAuthJwt } from "../auth/auth.utils";
 
-const getHeaders = (headers?: Record<string, string>) => {
+const getHeaders = (
+  headers?: Record<string, string>,
+  contentType: string = "application/json"
+) => {
   const apiAuth = Cookies.get(API_AUTH_COOKIE);
   const walletAuth = getAuthJwt();
   return {
-    "Content-Type": "application/json",
+    "Content-Type": contentType,
     ...(apiAuth ? { "x-6529-auth": apiAuth } : {}),
     ...(walletAuth ? { Authorization: `Bearer ${walletAuth}` } : {}),
     ...(headers || {}),
@@ -35,6 +38,23 @@ export const commonApiPost = async <T, U>(param: {
   const res = await fetch(`${process.env.API_ENDPOINT}/api/${param.endpoint}`, {
     method: "POST",
     headers: getHeaders(param.headers),
+    body: JSON.stringify(param.body),
+  });
+  if (!res.ok) {
+    const body: any = await res.json();
+    throw new Error(body?.error ?? res.statusText ?? "Something went wrong");
+  }
+  return res.json();
+};
+
+export const commonApiPostForm = async <U>(param: {
+  endpoint: string;
+  body: FormData;
+  headers?: Record<string, string>;
+}): Promise<U> => {
+  const res = await fetch(`${process.env.API_ENDPOINT}/api/${param.endpoint}`, {
+    method: "POST",
+    headers: getHeaders(param.headers, "multipart/form-data"),
     body: JSON.stringify(param.body),
   });
   if (!res.ok) {
