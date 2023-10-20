@@ -425,6 +425,13 @@ export default function UserPage(props: Props) {
                         value={tdh.memes_cards_sets_szn4}
                       />
                     )}
+                    {tdh.memes_cards_sets_szn5 > 0 && (
+                      <Tag
+                        type={TagType.SZN5}
+                        text={"SZN5 Sets x"}
+                        value={tdh.memes_cards_sets_szn5}
+                      />
+                    )}
                     {tdh.gradients_balance > 0 && (
                       <Tag
                         type={TagType.GRADIENT}
