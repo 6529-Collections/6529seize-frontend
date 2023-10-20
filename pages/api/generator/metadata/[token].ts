@@ -37,12 +37,28 @@ export default async function handler(
       // @ts-ignore
       .retrieveCollectionInfo(collection)
       .call();
+
+    const minIndex: any = await contract.methods
+      // @ts-ignore
+      .viewTokensIndexMin(collection)
+      .call();
+
+    const collectionName = data[0];
+    const tokenName = `${collectionName} #${
+      parseInt(token as string) - parseInt(minIndex)
+    }`;
     const description = data[2];
     const external_url = data[3];
     const image = `${process.env.REACT_APP_BASE_ENDPOINT}/api/generator/png/${token}`;
     const animation_url = `${process.env.REACT_APP_BASE_ENDPOINT}/api/generator/html/${token}`;
     res.setHeader("Content-Type", "application/json");
-    res.send({ name: token, description, external_url, image, animation_url });
+    res.send({
+      name: tokenName,
+      description,
+      external_url,
+      image,
+      animation_url,
+    });
   } catch (error) {
     console.log("error", error);
     res.setHeader("Content-Type", "text/html");
