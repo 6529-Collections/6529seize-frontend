@@ -14,6 +14,7 @@ import HeaderPlaceholder from "../../components/header/HeaderPlaceholder";
 import { useEffect, useState } from "react";
 import { commonApiFetch } from "../../services/api/common-api";
 import { IProfileAndConsolidations } from "../../entities/IProfile";
+import { get } from "http";
 
 export enum ReservedUser {
   MUSEUM = "6529Museum",
@@ -42,7 +43,6 @@ interface PageProps {
   image: string;
   tdh: number | null;
   balance: number | null;
-  userProfile: IProfileAndConsolidations;
 }
 
 const Header = dynamic(() => import("../../components/header/Header"), {
@@ -78,17 +78,34 @@ export default function UserPageIndex(props: { pageProps: PageProps }) {
     Array.isArray(router.query.user) ? router.query.user[0] : router.query.user
   );
 
+  const [userProfile, setUserProfile] =
+    useState<IProfileAndConsolidations | null>(null);
+
   useEffect(() => {
-    if (user) {
-      if (
-        !user.startsWith("0x") &&
-        !user.endsWith(".eth") &&
-        !Object.values(ReservedUser).includes(user as ReservedUser) &&
-        !pageProps.userProfile
-      ) {
-        window.location.href = "404";
+    const getUserProfile = async () => {
+      if (!user) {
+        return;
       }
-    }
+      const userProfile = await commonApiFetch<IProfileAndConsolidations>({
+        endpoint: `profiles/${user}`,
+      }).catch(() => null);
+
+      if (!userProfile) {
+        router.push("/404");
+        return;
+      }
+
+      if (
+        userProfile?.profile?.normalised_handle &&
+        userProfile.profile?.normalised_handle !== user.toLowerCase()
+      ) {
+        router.push(`${userProfile.profile.normalised_handle}`);
+      }
+
+      setUserProfile(userProfile);
+    };
+
+    getUserProfile();
   }, [user]);
 
   return (
@@ -111,11 +128,11 @@ export default function UserPageIndex(props: { pageProps: PageProps }) {
 
       <main className={styles.main}>
         <Header onSetWallets={(wallets) => setConnectedWallets(wallets)} />
-        {router.isReady && pageProps.url && (
+        {router.isReady && pageProps.url && userProfile && (
           <UserPage
             wallets={connectedWallets}
             user={pageProps.url}
-            profile={pageProps.userProfile}
+            profile={userProfile}
           />
         )}
       </main>
@@ -131,32 +148,6 @@ export async function getServerSideProps(
   props: PageProps;
 }> {
   let user = req.query.user;
-  const userProfile = await commonApiFetch<IProfileAndConsolidations>({
-    endpoint: `profiles/${user}`,
-  }).catch(() => null);
-
-  if (!userProfile) {
-    return {
-      redirect: {
-        permanent: false,
-        destination: `/404`,
-      },
-      props: {},
-    } as any;
-  }
-
-  if (
-    userProfile?.profile?.normalised_handle &&
-    userProfile.profile?.normalised_handle !== user.toLowerCase()
-  ) {
-    return {
-      redirect: {
-        permanent: false,
-        destination: `/${userProfile.profile.normalised_handle}`,
-      },
-      props: {},
-    } as any;
-  }
 
   if (areEqualAddresses(user, MUSEUM_ENS.display)) {
     user = MUSEUM_ENS.wallet;
@@ -202,7 +193,7 @@ export async function getServerSideProps(
       image: pfp ? pfp : DEFAULT_IMAGE,
       tdh: tdh ? tdh : null,
       balance: balance ? balance : null,
-      userProfile,
+      //userProfile,
     },
   };
 }
