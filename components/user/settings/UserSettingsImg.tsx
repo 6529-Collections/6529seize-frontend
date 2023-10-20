@@ -23,7 +23,7 @@ export interface MemeLite {
 
 export default function UserSettingsImg({ profile }: { profile: IProfile }) {
   const router = useRouter();
-  const { setToast } = useContext(AuthContext);
+  const { setToast, requestAuth } = useContext(AuthContext);
   const [memes, setMemes] = useState<MemeLite[]>([]);
 
   useEffect(() => {
@@ -135,7 +135,4 @@ export default function UserSettingsImg({ profile }: { profile: IProfile }) {
       </div>
     </>
   );
-}
-function requestAuth(): { success: any } | PromiseLike<{ success: any }> {
-  throw new Error("Function not implemented.");
 }
