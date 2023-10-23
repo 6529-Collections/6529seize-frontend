@@ -1,6 +1,5 @@
-import { useContext, useState } from "react";
+import { FormEvent, useContext, useState } from "react";
 import { IProfileAndConsolidations } from "../../../entities/IProfile";
-import UserSettingsGoToUser from "./UserSettingsGoToUser";
 import UserSettingsPrimaryWallet from "./UserSettingsPrimaryWallet";
 import UserSettingsSave from "./UserSettingsSave";
 import UserSettingsUsername from "./UserSettingsUsername";
@@ -105,24 +104,31 @@ export default function UserSettingsPage({
     }
   };
 
+  const onSubmit = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    await onSave();
+  };
+
   return (
     <div className="tw-pt-10 tw-space-y-6 tw-divide-y tw-divide-x-0 tw-divide-solid tw-divide-neutral-700">
       <div className="tw-flex tw-flex-col tw-gap-y-6">
-        <UserSettingsUsername userName={userName} setUserName={setUserName} />
+        <form onSubmit={onSubmit} className="tw-flex tw-flex-col tw-gap-y-6">
+          <UserSettingsUsername userName={userName} setUserName={setUserName} />
 
-        <UserSettingsPrimaryWallet
-          consolidations={user.consolidation.wallets}
-          selected={primaryWallet}
-          onSelect={setPrimaryWallet}
-        />
-        <UserSettingsBackground
-          bgColor1={bgColor1}
-          bgColor2={bgColor2}
-          setBgColor1={setBgColor1}
-          setBgColor2={setBgColor2}
-        />
-        <UserSettingsWebsite website={website} setWebsite={setWebsite} />
-        <UserSettingsSave onSave={onSave} loading={saving} />
+          <UserSettingsPrimaryWallet
+            consolidations={user.consolidation.wallets}
+            selected={primaryWallet}
+            onSelect={setPrimaryWallet}
+          />
+          <UserSettingsBackground
+            bgColor1={bgColor1}
+            bgColor2={bgColor2}
+            setBgColor1={setBgColor1}
+            setBgColor2={setBgColor2}
+          />
+          <UserSettingsWebsite website={website} setWebsite={setWebsite} />
+          <UserSettingsSave loading={saving} />
+        </form>
         {user.profile && <UserSettingsImg profile={user.profile} />}
       </div>
     </div>

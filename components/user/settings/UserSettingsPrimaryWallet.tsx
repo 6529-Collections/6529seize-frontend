@@ -2,6 +2,7 @@ import { AnimatePresence, motion, useAnimate } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
 import { useClickAway, useKeyPressEvent } from "react-use";
 import { IProfileConsolidation } from "../../../entities/IProfile";
+import { numberWithCommas } from "../../../helpers/Helpers";
 
 export default function UserSettingsPrimaryWallet({
   consolidations,
@@ -33,6 +34,7 @@ export default function UserSettingsPrimaryWallet({
       </label>
       <div className="tw-mt-2 tw-relative">
         <button
+          type="button"
           onClick={toggleOpen}
           className="tw-text-left tw-block tw-w-full tw-rounded-lg tw-border-0 tw-py-3 tw-px-3 tw-bg-neutral-900 focus:tw-bg-transparent tw-text-white tw-font-medium tw-caret-primary-300 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-neutral-600 placeholder:tw-text-neutral-500 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-300 hover:tw-ring-neutral-500 tw-text-base sm:tw-leading-6 tw-transition tw-duration-300 tw-ease-out"
         >
@@ -78,7 +80,9 @@ export default function UserSettingsPrimaryWallet({
                       className="tw-group tw-text-white tw-rounded-lg tw-relative tw-cursor-pointer tw-select-none tw-p-2 hover:tw-bg-neutral-700 tw-transition tw-duration-300 tw-ease-out"
                     >
                       <span className="tw-inline-block tw-text-sm tw-font-medium tw-text-white">
-                        {`${wallet.wallet} - ${wallet.tdh}TDH`}
+                        {`${wallet.wallet} - ${numberWithCommas(
+                          wallet.tdh
+                        )}TDH`}
                       </span>
                     </li>
                   ))}

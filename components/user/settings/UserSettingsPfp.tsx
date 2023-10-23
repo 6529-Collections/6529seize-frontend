@@ -205,7 +205,7 @@ export default function UserSettingsPfp(props: Props) {
     }
 
     fetch();
-  }, [account.address]);
+  }, [props.user]);
 
   useEffect(() => {
     if (selectedMeme) {

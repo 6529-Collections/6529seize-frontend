@@ -97,12 +97,10 @@ export default function UserSettingsComponent(props: Props) {
       className={`tw-bg-neutral-900 tw-overflow-y-auto tw-min-h-screen tw-relative ${inter.className}`}
     >
       <div className="tw-max-w-lg tw-mx-auto tw-pt-8 tw-pb-12">
-        <UserSettingsGoToUser user={user.profile?.handle ?? userOrWallet} />
+        <UserSettingsGoToUser
+          user={user.profile?.handle ?? userOrWallet.toLowerCase()}
+        />
         <UserSettingsPage user={user} onUser={setUser} />
-        {/* <UserSettingsPfp
-          user={"0x23a867C9b39c940E9467f5b3B43FA0e5a2bD1e6E"}
-          wallets={["0x23a867C9b39c940E9467f5b3B43FA0e5a2bD1e6E"]}
-        /> */}
       </div>
     </div>
   );

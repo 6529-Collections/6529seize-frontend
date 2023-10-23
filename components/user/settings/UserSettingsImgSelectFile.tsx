@@ -1,4 +1,4 @@
-import { useContext, useRef } from "react";
+import { useContext, useRef, useState } from "react";
 import { AuthContext } from "../../auth/Auth";
 
 const ACCEPTED_FORMATS = [
@@ -24,11 +24,6 @@ export default function UserSettingsImgSelectFile({
 }) {
   const { setToast } = useContext(AuthContext);
   const inputRef = useRef<HTMLInputElement>(null);
-
-  const handleUpload = () => {
-    inputRef?.current?.click();
-  };
-
   const onFileChange = (file: File) => {
     if (ACCEPTED_FORMATS.indexOf(file.type) === -1) {
       setToast({
@@ -53,22 +48,39 @@ export default function UserSettingsImgSelectFile({
     }
   };
 
+  const [dragging, setDragging] = useState(false);
+
   const handleDrag = (e: any) => {
     e.preventDefault();
     e.stopPropagation();
+    if (e.type === "dragenter" || e.type === "dragover") {
+      setDragging(true);
+    } else if (e.type === "dragleave") {
+      setDragging(false);
+    } else if (e.type === "drop") {
+      setDragging(false);
+    }
   };
 
   return (
-    <div className="tw-flex tw-items-center tw-justify-center tw-w-full">
-      <label className="tw-flex tw-flex-col tw-items-center tw-justify-center tw-w-full tw-h-64 tw-border-2 tw-border-dashed tw-rounded-lg tw-cursor-pointer tw-bg-neutral-800 tw-border-neutral-600 hover:tw-border-neutral-500 hover:tw-bg-neutral-700 tw-transition tw-duration-300 tw-ease-out">
-        <div
-          className="tw-flex tw-flex-col tw-items-center tw-justify-center tw-pt-5 tw-pb-6"
-          onClick={handleUpload}
-          onDrop={handleDrop}
-          onDragEnter={handleDrag}
-          onDragLeave={handleDrag}
-          onDragOver={handleDrag}
-        >
+    <div
+      onDrop={handleDrop}
+      onDragEnter={handleDrag}
+      onDragLeave={handleDrag}
+      onDragOver={handleDrag}
+      className="tw-flex tw-items-center tw-justify-center tw-w-full"
+    >
+      <label
+        className={`
+        ${
+          dragging
+            ? "tw-border-neutral-500 tw-bg-neutral-700"
+            : "tw-bg-neutral-800 tw-border-neutral-600"
+        }
+      tw-flex tw-flex-col tw-items-center tw-justify-center tw-w-full tw-h-64 tw-border-2 tw-border-dashed tw-rounded-lg tw-cursor-pointer  hover:tw-border-neutral-500 hover:tw-bg-neutral-700 tw-transition tw-duration-300 tw-ease-out
+      `}
+      >
+        <div className="tw-flex tw-flex-col tw-items-center tw-justify-center tw-pt-5 tw-pb-6">
           <div className="tw-h-32 tw-w-32">
             {imageToShow && (
               <img
