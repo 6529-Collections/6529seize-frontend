@@ -296,7 +296,7 @@ export default function Address(props: Props) {
               <WalletAddress
                 wallet={w}
                 display={
-                  props.display?.split(" - ")[index].endsWith(".eth")
+                  props.display?.split(" - ")[index]?.endsWith(".eth")
                     ? props.display?.split(" - ")[index]
                     : undefined
                 }

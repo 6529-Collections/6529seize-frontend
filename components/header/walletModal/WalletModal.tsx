@@ -8,6 +8,8 @@ import { ENS } from "../../../entities/IENS";
 import { fetchUrl } from "../../../services/6529api";
 import { isEmptyObject, numberWithCommas } from "../../../helpers/Helpers";
 import Address from "../../address/Address";
+import { commonApiFetch } from "../../../services/api/common-api";
+import { IProfileAndConsolidations } from "../../../entities/IProfile";
 
 interface Props {
   wallet: `0x${string}`;
@@ -20,14 +22,32 @@ export default function WalletModal(props: Props) {
   const [copied, setIsCopied] = useState<boolean>(false);
 
   useEffect(() => {
-    const url = `${process.env.API_ENDPOINT}/api/user/${props.wallet}`;
-    fetchUrl(url).then((response: ENS) => {
-      if (!isEmptyObject(response)) {
-        setEns(response);
-      } else {
+    const getUser = async () => {
+      const profile = await commonApiFetch<IProfileAndConsolidations>({
+        endpoint: `profiles/${props.wallet}`,
+      }).catch(() => null);
+      if (!profile) {
         setEns(undefined);
+      } else {
+        const user = await fetchUrl(
+          `${process.env.API_ENDPOINT}/api/user/${props.wallet}`
+        ).catch(() => null);
+        if (isEmptyObject(user)) {
+          setEns(undefined);
+        } else {
+          setEns({
+            ...user,
+            display: profile.profile?.handle ?? user.display,
+            pfp: profile.profile?.pfp_url ?? user.pfp,
+            banner_1: profile.profile?.banner_1 ?? user.banner_1,
+            banner_2: profile.profile?.banner_2 ?? user.banner_2,
+            website: profile.profile?.website ?? user.website,
+          });
+        }
       }
-    });
+    };
+
+    getUser();
   }, [props.wallet]);
 
   function copy() {
@@ -62,7 +82,8 @@ export default function WalletModal(props: Props) {
           className={styles.banner}
           style={{
             background: `linear-gradient(45deg, ${ens.banner_1} 0%, ${ens.banner_2} 100%)`,
-          }}>
+          }}
+        >
           <Image
             src={ens.pfp}
             alt="Profile Picture"
@@ -73,7 +94,8 @@ export default function WalletModal(props: Props) {
         </div>
       )}
       <Modal.Body
-        className={`${styles.body} d-flex align-items-center justify-content-between font-larger`}>
+        className={`${styles.body} d-flex align-items-center justify-content-between font-larger`}
+      >
         <Address
           wallets={[props.wallet]}
           display={ens?.display}
@@ -95,7 +117,8 @@ export default function WalletModal(props: Props) {
             <Col
               xs={3}
               className={`${styles.footerBtnContainer} d-flex flex-column align-items-center gap-2`}
-              onClick={() => copy()}>
+              onClick={() => copy()}
+            >
               <span className={styles.footerBtn}>
                 <FontAwesomeIcon className={styles.footerIcon} icon="copy" />
               </span>
@@ -117,7 +140,8 @@ export default function WalletModal(props: Props) {
                     } else {
                       props.onHide();
                     }
-                  }}>
+                  }}
+                >
                   <span className={styles.footerBtn}>
                     <FontAwesomeIcon
                       className={styles.footerIcon}
@@ -140,7 +164,8 @@ export default function WalletModal(props: Props) {
                     } else {
                       props.onHide();
                     }
-                  }}>
+                  }}
+                >
                   <span className={styles.footerBtn}>
                     <FontAwesomeIcon
                       className={styles.footerIcon}
@@ -159,7 +184,8 @@ export default function WalletModal(props: Props) {
               onClick={() => {
                 disconnect();
                 props.onHide();
-              }}>
+              }}
+            >
               <span className={styles.footerBtn}>
                 <FontAwesomeIcon
                   className={styles.footerIcon}

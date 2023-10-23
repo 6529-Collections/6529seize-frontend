@@ -1,3 +1,5 @@
+import { useRef, useState } from "react";
+
 export default function UserSettingsBackground({
   bgColor1,
   bgColor2,
@@ -9,6 +11,21 @@ export default function UserSettingsBackground({
   setBgColor1: (color: string) => void;
   setBgColor2: (color: string) => void;
 }) {
+  const bgColor1Ref = useRef<HTMLInputElement>(null);
+  const bgColor2Ref = useRef<HTMLInputElement>(null);
+
+  const onBgColor1Click = () => {
+    if (bgColor1Ref.current) {
+      bgColor1Ref.current.click();
+    }
+  };
+
+  const onBgColor2Click = () => {
+    if (bgColor2Ref.current) {
+      bgColor2Ref.current.click();
+    }
+  };
+
   return (
     <div className="tw-flex tw-gap-x-5">
       <div className="tw-flex-1 tw-cursor-pointer">
@@ -17,13 +34,18 @@ export default function UserSettingsBackground({
         </label>
         <div className="tw-mt-2 tw-relative">
           <input
+            ref={bgColor1Ref}
             type="color"
-            name="name"
+            id="bgColor1"
+            name="bgColor1"
             value={bgColor1}
             onChange={(e) => setBgColor1(e.target.value)}
             className="tw-cursor-pointer tw-block tw-w-full tw-rounded-lg tw-border-0 tw-py-3 tw-h-12 tw-px-3 tw-pr-10 tw-bg-neutral-900 tw-text-white tw-font-medium tw-caret-primary-300 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-neutral-600 placeholder:tw-text-neutral-500 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-300 hover:tw-ring-neutral-500 tw-text-base sm:tw-leading-6 tw-transition tw-duration-300 tw-ease-out"
           />
-          <div className="tw-absolute tw-inset-y-0 tw-right-0 tw-flex tw-items-center tw-pr-3">
+          <div
+            onClick={onBgColor1Click}
+            className="tw-absolute tw-inset-y-0 tw-right-0 tw-flex tw-items-center tw-pr-3"
+          >
             <svg
               className="tw-h-4 tw-w-4 tw-text-white"
               viewBox="0 0 24 24"
@@ -48,13 +70,18 @@ export default function UserSettingsBackground({
         </label>
         <div className="tw-mt-2 tw-relative">
           <input
+            ref={bgColor2Ref}
             type="color"
-            name="color"
+            id="bgColor2"
+            name="bgColor2"
             value={bgColor2}
             onChange={(e) => setBgColor2(e.target.value)}
             className="tw-cursor-pointer tw-block tw-w-full tw-rounded-lg tw-border-0 tw-py-3 tw-h-12 tw-px-3 tw-pr-10 tw-bg-neutral-900 tw-text-white tw-font-medium tw-caret-primary-300 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-neutral-600 placeholder:tw-text-neutral-500 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-300 hover:tw-ring-neutral-500 tw-text-base sm:tw-leading-6 tw-transition tw-duration-300 tw-ease-out"
           />
-          <div className="tw-pointer-events-none tw-absolute tw-inset-y-0 tw-right-0 tw-flex tw-items-center tw-pr-3">
+          <div
+            onClick={onBgColor2Click}
+            className="tw-absolute tw-inset-y-0 tw-right-0 tw-flex tw-items-center tw-pr-3"
+          >
             <svg
               className="tw-h-4 tw-w-4 tw-text-white"
               viewBox="0 0 24 24"
