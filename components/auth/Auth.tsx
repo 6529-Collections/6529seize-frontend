@@ -1,4 +1,4 @@
-import { createContext, useEffect } from "react";
+import { createContext, useEffect, useState } from "react";
 import { Slide, ToastContainer, TypeOptions, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useAccount, useSignMessage } from "wagmi";
@@ -10,8 +10,27 @@ import {
 import { commonApiFetch, commonApiPost } from "../../services/api/common-api";
 import jwtDecode from "jwt-decode";
 import { UserRejectedRequestError } from "viem";
+import { IProfile, IProfileAndConsolidations } from "../../entities/IProfile";
+
+export interface IProfileMetaWallet {
+  readonly wallet: {
+    readonly address: string;
+    readonly ens: string | null;
+  };
+  readonly displayName: string;
+  readonly tdh: number;
+}
+
+export interface IProfileWithMeta {
+  readonly profile: IProfile | null;
+  readonly consolidation: {
+    readonly wallets: IProfileMetaWallet[];
+    readonly tdh: number;
+  };
+}
 
 type AuthContextType = {
+  profile: IProfileWithMeta | null;
   requestAuth: () => Promise<{ success: boolean }>;
   setToast: ({ message, type }: { message: string; type: TypeOptions }) => void;
 };
@@ -22,6 +41,7 @@ interface NonceResponse {
 }
 
 export const AuthContext = createContext<AuthContextType>({
+  profile: null,
   requestAuth: async () => ({ success: false }),
   setToast: () => {},
 });
@@ -29,12 +49,53 @@ export const AuthContext = createContext<AuthContextType>({
 export default function Auth({ children }: { children: React.ReactNode }) {
   const { address } = useAccount();
   const signMessage = useSignMessage();
+
+  const [profile, setProfile] = useState<IProfileWithMeta | null>(null);
+
   useEffect(() => {
     if (!address) removeAuthJwt();
     else {
       const isAuth = validateJwt({ jwt: getAuthJwt(), wallet: address });
       if (!isAuth) removeAuthJwt();
     }
+  }, [address]);
+
+  const mapApiResponseToUser = (
+    response: IProfileAndConsolidations
+  ): IProfileWithMeta => {
+    return {
+      ...response,
+      consolidation: {
+        ...response.consolidation,
+        wallets: response.consolidation.wallets.map((w) => ({
+          ...w,
+          wallet: {
+            ...w.wallet,
+            address: w.wallet.address.toLowerCase(),
+            ens: w.wallet.ens ?? null,
+          },
+          displayName: w.wallet.ens ?? w.wallet.address.toLowerCase(),
+        })),
+      },
+    };
+  };
+
+  useEffect(() => {
+    const getProfile = async () => {
+      const response = await commonApiFetch<IProfileAndConsolidations>({
+        endpoint: `profiles/${address}`,
+      });
+      if (response.profile) {
+        setProfile(mapApiResponseToUser(response));
+      } else {
+        setProfile(null);
+      }
+    };
+    if (!address) {
+      setProfile(null);
+      return;
+    }
+    getProfile();
   }, [address]);
 
   const getNonce = async (): Promise<NonceResponse | null> => {
@@ -207,7 +268,7 @@ export default function Auth({ children }: { children: React.ReactNode }) {
   };
   return (
     <>
-      <AuthContext.Provider value={{ requestAuth, setToast }}>
+      <AuthContext.Provider value={{ requestAuth, setToast, profile }}>
         {children}
         <ToastContainer />
       </AuthContext.Provider>
