@@ -3,14 +3,14 @@ import { IProfileAndConsolidations } from "../../../entities/IProfile";
 import UserSettingsPrimaryWallet from "./UserSettingsPrimaryWallet";
 import UserSettingsSave from "./UserSettingsSave";
 import UserSettingsUsername from "./UserSettingsUsername";
-import { AuthContext } from "../../auth/Auth";
+import { AuthContext, IProfileWithMeta } from "../../auth/Auth";
 import { useRouter } from "next/router";
 import { commonApiPost } from "../../../services/api/common-api";
 import UserSettingsImg from "./UserSettingsImg";
 import UserSettingsBackground from "./UserSettingsBackground";
 import { getRandomColor } from "../../../helpers/Helpers";
 import UserSettingsWebsite from "./UserSettingsWebsite";
-import { IProfileWithMeta } from "./UserSettings";
+
 interface ApiCreateOrUpdateProfileRequest {
   readonly handle: string;
   readonly primary_wallet: string;
