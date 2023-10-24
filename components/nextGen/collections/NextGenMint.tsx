@@ -582,19 +582,21 @@ export default function NextGenMint(props: Props) {
                   className="d-flex align-items-center">
                   Wallet Mints:&nbsp;
                   <b>
-                    {props.phase_times.al_status == Status.LIVE &&
-                      (proofResponse
-                        ? `${addressMintCounts.allowlist} / ${
-                            proofResponse.spots
-                          }${
-                            proofResponse.spots > addressMintCounts.allowlist
-                              ? ` (${
-                                  proofResponse.spots -
-                                  addressMintCounts.allowlist
-                                } remaining)`
-                              : ""
-                          }`
-                        : `-`)}
+                    {proofResponse?.spots > 0
+                      ? props.phase_times.al_status == Status.LIVE &&
+                        (proofResponse
+                          ? `${addressMintCounts.allowlist} / ${
+                              proofResponse.spots
+                            }${
+                              proofResponse.spots > addressMintCounts.allowlist
+                                ? ` (${
+                                    proofResponse.spots -
+                                    addressMintCounts.allowlist
+                                  } remaining)`
+                                : ""
+                            }`
+                          : `-`)
+                      : `You don't have any spots in the allowlist`}
                     {props.phase_times.public_status == Status.LIVE &&
                       (proofResponse
                         ? `${addressMintCounts.public} / ${
