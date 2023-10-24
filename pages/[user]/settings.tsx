@@ -33,18 +33,6 @@ export default function UserPageSettings(props: any) {
 
   const [connectedWallets, setConnectedWallets] = useState<string[]>([]);
 
-  // useEffect(() => {
-  //   if (user) {
-  //     if (
-  //       !user.startsWith("0x") &&
-  //       !user.endsWith(".eth") &&
-  //       !Object.values(ReservedUser).includes(user as ReservedUser)
-  //     ) {
-  //       window.location.href = "404";
-  //     }
-  //   }
-  // }, [user]);
-
   return (
     <>
       <Head>

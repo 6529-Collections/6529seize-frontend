@@ -10,6 +10,7 @@ import UserSettingsImg from "./UserSettingsImg";
 import UserSettingsBackground from "./UserSettingsBackground";
 import { getRandomColor } from "../../../helpers/Helpers";
 import UserSettingsWebsite from "./UserSettingsWebsite";
+import { IProfileWithMeta } from "./UserSettings";
 interface ApiCreateOrUpdateProfileRequest {
   readonly handle: string;
   readonly primary_wallet: string;
@@ -23,7 +24,7 @@ export default function UserSettingsPage({
   user,
   onUser,
 }: {
-  user: IProfileAndConsolidations;
+  user: IProfileWithMeta;
   onUser: (user: IProfileAndConsolidations) => void;
 }) {
   const { requestAuth, setToast } = useContext(AuthContext);
@@ -35,7 +36,7 @@ export default function UserSettingsPage({
     const tdhWallets = user.consolidation.wallets
       .filter((w) => w.tdh > 0)
       .sort((a, b) => b.tdh - a.tdh);
-    return tdhWallets.length > 0 ? tdhWallets[0].wallet : "";
+    return tdhWallets.length > 0 ? tdhWallets[0].wallet.address : "";
   };
 
   const [primaryWallet, setPrimaryWallet] = useState<string>(

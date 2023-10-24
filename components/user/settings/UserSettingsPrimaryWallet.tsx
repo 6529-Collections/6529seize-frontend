@@ -1,15 +1,15 @@
 import { AnimatePresence, motion, useAnimate } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
 import { useClickAway, useKeyPressEvent } from "react-use";
-import { IProfileConsolidation } from "../../../entities/IProfile";
 import { numberWithCommas } from "../../../helpers/Helpers";
+import { IProfileMetaWallet } from "./UserSettings";
 
 export default function UserSettingsPrimaryWallet({
   consolidations,
   selected,
   onSelect,
 }: {
-  consolidations: IProfileConsolidation[];
+  consolidations: IProfileMetaWallet[];
   selected: string;
   onSelect: (wallet: string) => void;
 }) {
@@ -27,6 +27,14 @@ export default function UserSettingsPrimaryWallet({
   useClickAway(listRef, () => setIsOpen(false));
   useKeyPressEvent("Escape", () => setIsOpen(false));
 
+  const [title, setTitle] = useState<string>("Select wallet");
+  useEffect(() => {
+    setTitle(
+      consolidations.find((w) => w.wallet.address === selected)?.displayName ??
+        "Select wallet"
+    );
+  }, [selected]);
+
   return (
     <div className="tw-max-w-lg tw-relative" ref={listRef}>
       <label className="tw-block tw-text-sm tw-font-normal tw-leading-5 tw-text-neutral-350">
@@ -38,9 +46,7 @@ export default function UserSettingsPrimaryWallet({
           onClick={toggleOpen}
           className="tw-text-left tw-block tw-w-full tw-rounded-lg tw-border-0 tw-py-3 tw-px-3 tw-bg-neutral-900 focus:tw-bg-transparent tw-text-white tw-font-medium tw-caret-primary-300 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-neutral-600 placeholder:tw-text-neutral-500 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-300 hover:tw-ring-neutral-500 tw-text-base sm:tw-leading-6 tw-transition tw-duration-300 tw-ease-out"
         >
-          <span className="tw-text-neutral-350 tw-font-light">
-            {selected ?? "Select wallet"}
-          </span>
+          <span className="tw-text-neutral-350 tw-font-light">{title}</span>
         </button>
         <div className="tw-pointer-events-none tw-absolute tw-inset-y-0 tw-right-0 tw-flex tw-items-center tw-pr-3">
           <svg
@@ -75,12 +81,12 @@ export default function UserSettingsPrimaryWallet({
                 <ul className="tw-flex tw-flex-col tw-px-2 tw-mx-0 tw-mb-0 tw-list-none">
                   {consolidations.map((wallet) => (
                     <li
-                      onClick={() => onSelect(wallet.wallet)}
-                      key={wallet.wallet}
+                      onClick={() => onSelect(wallet.wallet.address)}
+                      key={wallet.wallet.address}
                       className="tw-group tw-text-white tw-rounded-lg tw-relative tw-cursor-pointer tw-select-none tw-p-2 hover:tw-bg-neutral-700 tw-transition tw-duration-300 tw-ease-out"
                     >
                       <span className="tw-inline-block tw-text-sm tw-font-medium tw-text-white">
-                        {`${wallet.wallet} - ${numberWithCommas(
+                        {`${wallet.displayName} - ${numberWithCommas(
                           wallet.tdh
                         )}TDH`}
                       </span>
