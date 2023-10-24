@@ -5,10 +5,12 @@ import { useRouter } from "next/router";
 import { AuthContext } from "../../auth/Auth";
 import UserSettingsGoToUser from "./UserSettingsGoToUser";
 import { commonApiFetch } from "../../../services/api/common-api";
-import { IProfileAndConsolidations } from "../../../entities/IProfile";
-
+import {
+  IProfile,
+  IProfileAndConsolidations,
+} from "../../../entities/IProfile";
 import UserSettingsPage from "./UserSettingsPage";
-import UserSettingsPfp from "./UserSettingsPfp";
+
 interface Props {
   user: string;
   wallets: string[];
@@ -21,6 +23,23 @@ const inter = Inter({
   display: "swap",
 });
 
+export interface IProfileMetaWallet {
+  readonly wallet: {
+    readonly address: string;
+    readonly ens: string | null;
+  };
+  readonly displayName: string;
+  readonly tdh: number;
+}
+
+export interface IProfileWithMeta {
+  readonly profile: IProfile | null;
+  readonly consolidation: {
+    readonly wallets: IProfileMetaWallet[];
+    readonly tdh: number;
+  };
+}
+
 export default function UserSettingsComponent(props: Props) {
   const account = useAccount();
   const router = useRouter();
@@ -32,7 +51,34 @@ export default function UserSettingsComponent(props: Props) {
       : router.query.user
   );
 
-  const [user, setUser] = useState<IProfileAndConsolidations | null>(null);
+  const [user, setUser] = useState<IProfileWithMeta | null>(null);
+
+  const goToUser = () => {
+    router.push(`/${user}`);
+  };
+
+  const mapApiResponseToUser = (
+    response: IProfileAndConsolidations
+  ): IProfileWithMeta => {
+    return {
+      ...response,
+      consolidation: {
+        ...response.consolidation,
+        wallets: response.consolidation.wallets.map((w) => ({
+          ...w,
+          wallet: {
+            ...w.wallet,
+            address: w.wallet.address.toLowerCase(),
+            ens: w.wallet.ens ?? null,
+          },
+          displayName: w.wallet.ens ?? w.wallet.address.toLowerCase(),
+        })),
+      },
+    };
+  };
+
+  const onUser = (user: IProfileAndConsolidations) =>
+    setUser(mapApiResponseToUser(user));
 
   useEffect(() => {
     if (!init || !userOrWallet) {
@@ -40,12 +86,12 @@ export default function UserSettingsComponent(props: Props) {
     }
     const getUser = async () => {
       if (!account.address) {
-        router.push("/404");
+        goToUser();
         return;
       }
 
       if (!userOrWallet) {
-        router.push("/404");
+        goToUser();
         return;
       }
 
@@ -53,25 +99,21 @@ export default function UserSettingsComponent(props: Props) {
         const response = await commonApiFetch<IProfileAndConsolidations>({
           endpoint: `profiles/${userOrWallet}`,
         });
-
-        const consolidations = response.consolidation.wallets.map((w) => ({
-          ...w,
-          wallet: w.wallet.toLowerCase(),
-        }));
-
-        const wallets = consolidations.map((w) => w.wallet);
-
-        if (!wallets.includes(account.address.toLowerCase())) {
-          router.push("/404");
+        const lowerCaseWallets = response.consolidation.wallets.map((w) =>
+          w.wallet.address.toLowerCase()
+        );
+        const lowerCaseAccount = account.address.toLowerCase();
+        if (!lowerCaseWallets.includes(lowerCaseAccount)) {
+          goToUser();
           return;
         }
-        setUser(response);
+        onUser(response);
       } catch (e: any) {
         setToast({
           message: e?.message ?? "Something went wrong",
           type: "error",
         });
-        router.push("/404");
+        goToUser();
       }
     };
     getUser();
@@ -100,7 +142,7 @@ export default function UserSettingsComponent(props: Props) {
         <UserSettingsGoToUser
           user={user.profile?.handle ?? userOrWallet.toLowerCase()}
         />
-        <UserSettingsPage user={user} onUser={setUser} />
+        <UserSettingsPage user={user} onUser={onUser} />
       </div>
     </div>
   );

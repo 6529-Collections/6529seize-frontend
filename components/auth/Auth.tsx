@@ -9,6 +9,7 @@ import {
 } from "../../services/auth/auth.utils";
 import { commonApiFetch, commonApiPost } from "../../services/api/common-api";
 import jwtDecode from "jwt-decode";
+import { UserRejectedRequestError } from "viem";
 
 type AuthContextType = {
   requestAuth: () => Promise<{ success: boolean }>;
@@ -69,15 +70,48 @@ export default function Auth({ children }: { children: React.ReactNode }) {
     message,
   }: {
     message: string;
-  }): Promise<string | null> => {
+  }): Promise<{
+    signature: string | null;
+    userRejected: boolean;
+  }> => {
     try {
       const signedMessage = await signMessage.signMessageAsync({
         message,
       });
-      return signedMessage;
-    } catch {
-      return null;
+      return {
+        signature: signedMessage,
+        userRejected: false,
+      };
+    } catch (e) {
+      return {
+        signature: null,
+        userRejected: e instanceof UserRejectedRequestError,
+      };
     }
+  };
+
+  const getSignatureWithRetry = async ({
+    message,
+  }: {
+    message: string;
+  }): Promise<{
+    signature: string | null;
+    userRejected: boolean;
+  }> => {
+    const maxRetries = 3;
+    let retryCount = 0;
+    const delayMS = 1000;
+
+    while (retryCount < maxRetries) {
+      const signature = await getSignature({ message });
+      if (signature.signature || signature.userRejected) return signature;
+      retryCount++;
+      await new Promise((r) => setTimeout(r, delayMS));
+    }
+    return {
+      signature: null,
+      userRejected: false,
+    };
   };
 
   const requestSignIn = async () => {
@@ -97,8 +131,16 @@ export default function Auth({ children }: { children: React.ReactNode }) {
       });
       return;
     }
-    const clientSignature = await getSignature({ message: nonce });
-    if (!clientSignature) {
+    const clientSignature = await getSignatureWithRetry({ message: nonce });
+    if (clientSignature.userRejected) {
+      setToast({
+        message: "Authentication rejected",
+        type: "error",
+      });
+      return;
+    }
+
+    if (!clientSignature.signature) {
       setToast({
         message: "Error requesting authentication, please try again",
         type: "error",
@@ -116,7 +158,7 @@ export default function Auth({ children }: { children: React.ReactNode }) {
         endpoint: "auth/login",
         body: {
           serverSignature,
-          clientSignature,
+          clientSignature: clientSignature.signature,
         },
       });
       setAuthJwt(tokenResponse.token);
