@@ -582,7 +582,7 @@ export default function NextGenMint(props: Props) {
                   className="d-flex align-items-center">
                   Wallet Mints:&nbsp;
                   <b>
-                    {proofResponse?.spots > 0
+                    {proofResponse && proofResponse.spots > 0
                       ? props.phase_times.al_status == Status.LIVE &&
                         (proofResponse
                           ? `${addressMintCounts.allowlist} / ${
@@ -638,7 +638,10 @@ export default function NextGenMint(props: Props) {
                   <Form.Select
                     className={styles.mintSelect}
                     value={mintCount}
-                    disabled={!account.isConnected}
+                    disabled={
+                      !account.isConnected ||
+                      (proofResponse && proofResponse.spots <= 0)
+                    }
                     onChange={(e: any) =>
                       setMintCount(parseInt(e.currentTarget.value))
                     }>
