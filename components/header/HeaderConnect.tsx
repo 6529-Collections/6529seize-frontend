@@ -3,11 +3,7 @@ import styles from "./Header.module.scss";
 import { useContext, useEffect, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Web3Button } from "@web3modal/react";
-import { NavDropdown } from "react-bootstrap";
-import Image from "next/image";
-import { IProfileAndConsolidations } from "../../entities/IProfile";
 import { AuthContext } from "../auth/Auth";
-import { useRouter } from "next/router";
 import WalletModal from "./walletModal/WalletModal";
 
 export default function HeaderConnect() {
@@ -16,7 +12,16 @@ export default function HeaderConnect() {
   const [showWalletModal, setShowWalletModal] = useState(false);
   const [display, setDisplay] = useState("");
   useEffect(() => {
-    setDisplay(profile?.profile?.handle ?? account.address?.slice(0, 6) ?? "");
+    const wallet = profile?.consolidation.wallets.find(
+      (w) =>
+        w.wallet.address.toLowerCase() === account.address?.toLocaleLowerCase()
+    );
+    setDisplay(
+      profile?.profile?.handle ??
+        wallet?.wallet?.ens ??
+        account.address?.slice(0, 6) ??
+        ""
+    );
   }, [profile?.profile?.handle, account.address]);
 
   return (
