@@ -12,7 +12,7 @@ const Header = dynamic(() => import("../../components/header/Header"), {
 });
 
 const NextGenComponent = dynamic(
-  () => import("../../components/nextGen/NextGen"),
+  () => import("../../components/nextGen/collections/NextGen"),
   {
     ssr: false,
   }

@@ -3,10 +3,6 @@ import styles from "../../../../styles/Home.module.scss";
 
 import dynamic from "next/dynamic";
 import HeaderPlaceholder from "../../../../components/header/HeaderPlaceholder";
-import { useState } from "react";
-import Breadcrumb, {
-  Crumb,
-} from "../../../../components/breadcrumb/Breadcrumb";
 
 const Header = dynamic(() => import("../../../../components/header/Header"), {
   ssr: false,
@@ -14,7 +10,7 @@ const Header = dynamic(() => import("../../../../components/header/Header"), {
 });
 
 const NextGenCollectionComponent = dynamic(
-  () => import("../../../../components/nextGen/NextGenCollection"),
+  () => import("../../../../components/nextGen/collections/NextGenCollection"),
   {
     ssr: false,
   }
@@ -23,13 +19,6 @@ const NextGenCollectionComponent = dynamic(
 export default function NextGenCollection(props: any) {
   const pageProps = props.pageProps;
   const pagenameFull = `${pageProps.name} | 6529 SEIZE`;
-  const [connectedWallets, setConnectedWallets] = useState<string[]>([]);
-
-  const [breadcrumbs, setBreadcrumbs] = useState<Crumb[]>([
-    { display: "Home", href: "/" },
-    { display: "NextGen", href: "/nextgen" },
-    { display: `Collection #${pageProps.collection}` },
-  ]);
 
   return (
     <>
@@ -52,8 +41,7 @@ export default function NextGenCollection(props: any) {
       </Head>
 
       <main className={styles.main}>
-        <Header onSetWallets={(wallets) => setConnectedWallets(wallets)} />
-        <Breadcrumb breadcrumbs={breadcrumbs} />
+        <Header />
         <NextGenCollectionComponent collection={pageProps.collection} />
       </main>
     </>
