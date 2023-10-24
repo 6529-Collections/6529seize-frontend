@@ -78,11 +78,7 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import Head from "next/head";
 import { Web3Modal } from "@web3modal/react";
-import {
-  NEXTGEN_CHAIN_ID,
-  NEXTGEN_CORE,
-  NEXTGEN_MINTER,
-} from "../components/nextGen/contracts";
+import { NEXTGEN_CHAIN_ID } from "../components/nextGen/nextgen_contracts";
 import Auth from "../components/auth/Auth";
 
 library.add(
