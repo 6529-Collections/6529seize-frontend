@@ -10,7 +10,7 @@ import {
 } from "../../helpers/Helpers";
 import { MANIFOLD, SIX529_MUSEUM } from "../../constants";
 import HeaderPlaceholder from "../../components/header/HeaderPlaceholder";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import UserSettingsComponent from "../../components/user/settings/UserSettings";
 
 export enum ReservedUser {
@@ -27,7 +27,7 @@ export default function UserPageSettings(props: any) {
   const pageProps = props.pageProps;
   const pagenameFull = `${pageProps.title} | 6529 SEIZE`;
 
-  const [user, setUser] = useState(
+  const [user] = useState(
     Array.isArray(router.query.user) ? router.query.user[0] : router.query.user
   );
 

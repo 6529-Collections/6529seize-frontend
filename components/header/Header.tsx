@@ -1,7 +1,7 @@
-import { Web3Button, useWeb3Modal } from "@web3modal/react";
+
 import styles from "./Header.module.scss";
 import { Container, Row, Col, Nav, Navbar, NavDropdown } from "react-bootstrap";
-import { useAccount, useEnsName } from "wagmi";
+import { useAccount } from "wagmi";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import Image from "next/image";
@@ -9,68 +9,23 @@ import { AboutSection } from "../../pages/about/[section]";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { DBResponse } from "../../entities/IDBResponse";
 import { fetchUrl } from "../../services/6529api";
-import Cookies from "js-cookie";
-import { VIEW_MODE_COOKIE } from "../../constants";
-import { formatAddress } from "../../helpers/Helpers";
-import WalletModal from "./walletModal/WalletModal";
-
-
+import HeaderConnect from "./HeaderConnect";
 
 interface Props {
   onLoad?: () => void;
   onSetWallets?(wallets: string[]): any;
 }
 
-enum VIEW {
-  CONSOLIDATION = "Consolidation",
-  WALLET = "Wallet",
-}
-
 export default function Header(props: Props) {
   const router = useRouter();
-  const web3modal = useWeb3Modal();
-
   const account = useAccount();
-  const ens = useEnsName({
-    address: account.address as `0x${string}`,
-    chainId: 1,
-  });
-
-  const [showWalletModal, setShowWalletModal] = useState(false);
 
   const [consolidations, setConsolidations] = useState<string[]>([]);
-  const [isConsolidation, setIsConsolidation] = useState(false);
   const [burgerMenuOpen, setBurgerMenuOpen] = useState(false);
-  const [view, setView] = useState<VIEW>();
 
   const [showBurgerMenuAbout, setShowBurgerMenuAbout] = useState(false);
   const [showBurgerMenuCommunity, setShowBurgerMenuCommunity] = useState(false);
   const [showBurgerMenuTools, setShowBurgerMenuTools] = useState(false);
-
-  useEffect(() => {
-    const viewMode = Cookies.get(VIEW_MODE_COOKIE);
-    console.log(VIEW_MODE_COOKIE, viewMode);
-    if (viewMode === VIEW.CONSOLIDATION) {
-      setView(VIEW.CONSOLIDATION);
-    } else {
-      setView(VIEW.WALLET);
-    }
-  }, []);
-
-  useEffect(() => {
-    if (view) {
-      Cookies.set(VIEW_MODE_COOKIE, view);
-      if (props.onSetWallets) {
-        if (isConsolidation && view === VIEW.CONSOLIDATION) {
-          props.onSetWallets(consolidations);
-        } else if (account.address) {
-          props.onSetWallets([account.address]);
-        } else {
-          props.onSetWallets([]);
-        }
-      }
-    }
-  }, [view, isConsolidation, account.isConnected]);
 
   useEffect(() => {
     function handleResize() {
@@ -110,14 +65,6 @@ export default function Header(props: Props) {
     }
   }, [account.isConnected, account.address]);
 
-  useEffect(() => {
-    if (consolidations.length > 1) {
-      setIsConsolidation(true);
-    } else {
-      setIsConsolidation(false);
-    }
-  }, [consolidations]);
-
   function printBurgerMenu() {
     return (
       <div
@@ -154,86 +101,7 @@ export default function Header(props: Props) {
               <h3
                 className={`d-flex justify-content-center ${styles.burgerMenuHeader}`}
               >
-                {account.isConnected ? (
-                  <>
-                    <button
-                      className={`${styles.userProfileBtn}`}
-                      onClick={() => setShowWalletModal(true)}
-                    >
-                      <b>
-                        &nbsp;
-                        {ens.data
-                          ? ens.data
-                          : formatAddress(account.address as string)}
-                        &nbsp;
-                      </b>
-                    </button>
-                    <button
-                      className={`${styles.userProfileBtn}`}
-                      onClick={() =>
-                        (window.location.href = `/${account.address as string}`)
-                      }
-                    >
-                      <FontAwesomeIcon icon="user"></FontAwesomeIcon>
-                    </button>
-                    {isConsolidation && (
-                      <NavDropdown
-                        className={`${styles.consolidationDropDown}`}
-                        title={
-                          <button
-                            className={`${styles.consolidationDropdownBtn} ${
-                              isConsolidation && view === VIEW.CONSOLIDATION
-                                ? styles.consolidationBtnActive
-                                : ""
-                            }`}
-                          >
-                            <Image
-                              loading="eager"
-                              priority
-                              src="/consolidation-icon_b.png"
-                              alt="consolidation"
-                              width={20}
-                              height={20}
-                            />
-                          </button>
-                        }
-                        align={"end"}
-                      >
-                        <NavDropdown.Item
-                          className={styles.dropdownItemViewMode}
-                          onClick={() => setView(VIEW.WALLET)}
-                        >
-                          {view === VIEW.WALLET && (
-                            <FontAwesomeIcon
-                              className={styles.viewModeIcon}
-                              icon="check-circle"
-                            ></FontAwesomeIcon>
-                          )}
-                          Wallet
-                        </NavDropdown.Item>
-                        <NavDropdown.Item
-                          onClick={() => setView(VIEW.CONSOLIDATION)}
-                          className={styles.dropdownItemViewMode}
-                        >
-                          {view === VIEW.CONSOLIDATION && (
-                            <FontAwesomeIcon
-                              className={`${styles.viewModeIcon} ${styles.viewModeIconConsolidation}`}
-                              icon="check-circle"
-                            ></FontAwesomeIcon>
-                          )}
-                          Consolidation
-                        </NavDropdown.Item>
-                      </NavDropdown>
-                    )}
-                  </>
-                ) : (
-                  <Web3Button
-                    label="Connect"
-                    icon="hide"
-                    avatar="hide"
-                    balance="hide"
-                  />
-                )}
+                <HeaderConnect />
               </h3>
             </Col>
           </Row>
@@ -982,95 +850,8 @@ export default function Header(props: Props) {
                                 Cookie Policy
                               </NavDropdown.Item>
                             </NavDropdown>
-                            {account.isConnected ? (
-                              <>
-                                <button
-                                  className={`${styles.userProfileBtn}`}
-                                  onClick={() => setShowWalletModal(true)}
-                                >
-                                  <b>
-                                    &nbsp;
-                                    {ens.data
-                                      ? ens.data
-                                      : formatAddress(
-                                          account.address as string
-                                        )}
-                                    &nbsp;
-                                  </b>
-                                </button>
-                                <button
-                                  className={`${styles.userProfileBtn}`}
-                                  onClick={() =>
-                                    (window.location.href = `/${
-                                      account.address as string
-                                    }`)
-                                  }
-                                >
-                                  <FontAwesomeIcon icon="user"></FontAwesomeIcon>
-                                </button>
-                                {isConsolidation && (
-                                  <NavDropdown
-                                    className={`${styles.consolidationDropDown}`}
-                                    title={
-                                      <button
-                                        className={`${
-                                          styles.consolidationDropdownBtn
-                                        } ${
-                                          isConsolidation &&
-                                          view === VIEW.CONSOLIDATION
-                                            ? styles.consolidationBtnActive
-                                            : ""
-                                        }`}
-                                      >
-                                        <Image
-                                          loading="eager"
-                                          priority
-                                          src="/consolidation-icon_b.png"
-                                          alt="consolidation"
-                                          width={20}
-                                          height={20}
-                                        />
-                                      </button>
-                                    }
-                                    align={"end"}
-                                  >
-                                    <NavDropdown.Item
-                                      className={styles.dropdownItemViewMode}
-                                      onClick={() => setView(VIEW.WALLET)}
-                                    >
-                                      {view === VIEW.WALLET && (
-                                        <FontAwesomeIcon
-                                          className={styles.viewModeIcon}
-                                          icon="check-circle"
-                                        ></FontAwesomeIcon>
-                                      )}
-                                      Wallet
-                                    </NavDropdown.Item>
-                                    <NavDropdown.Item
-                                      onClick={() =>
-                                        setView(VIEW.CONSOLIDATION)
-                                      }
-                                      className={styles.dropdownItemViewMode}
-                                    >
-                                      {view === VIEW.CONSOLIDATION && (
-                                        <FontAwesomeIcon
-                                          className={`${styles.viewModeIcon} ${styles.viewModeIconConsolidation}`}
-                                          icon="check-circle"
-                                        ></FontAwesomeIcon>
-                                      )}
-                                      Consolidation
-                                    </NavDropdown.Item>
-                                  </NavDropdown>
-                                )}
-                              </>
-                            ) : (
-                              <Web3Button
-                                label="Connect"
-                                icon="hide"
-                                avatar="hide"
-                                balance="hide"
-                              />
-                            )}
+  
+                            <HeaderConnect />
                           </Nav>
                         </Navbar>
                         <Image
@@ -1097,13 +878,6 @@ export default function Header(props: Props) {
           </Col>
         </Row>
       </Container>
-      {account.address && (
-        <WalletModal
-          wallet={account.address}
-          show={showWalletModal}
-          onHide={() => setShowWalletModal(false)}
-        />
-      )}
     </>
   );
 }

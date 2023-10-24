@@ -2,7 +2,7 @@ import { useAccount } from "wagmi";
 import { Inter } from "next/font/google";
 import { useContext, useEffect, useState } from "react";
 import { useRouter } from "next/router";
-import { AuthContext } from "../../auth/Auth";
+import { AuthContext, IProfileWithMeta } from "../../auth/Auth";
 import UserSettingsGoToUser from "./UserSettingsGoToUser";
 import { commonApiFetch } from "../../../services/api/common-api";
 import {
@@ -23,22 +23,7 @@ const inter = Inter({
   display: "swap",
 });
 
-export interface IProfileMetaWallet {
-  readonly wallet: {
-    readonly address: string;
-    readonly ens: string | null;
-  };
-  readonly displayName: string;
-  readonly tdh: number;
-}
 
-export interface IProfileWithMeta {
-  readonly profile: IProfile | null;
-  readonly consolidation: {
-    readonly wallets: IProfileMetaWallet[];
-    readonly tdh: number;
-  };
-}
 
 export default function UserSettingsComponent(props: Props) {
   const account = useAccount();
