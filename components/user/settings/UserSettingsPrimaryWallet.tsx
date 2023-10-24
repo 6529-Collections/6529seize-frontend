@@ -2,7 +2,7 @@ import { AnimatePresence, motion, useAnimate } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
 import { useClickAway, useKeyPressEvent } from "react-use";
 import { numberWithCommas } from "../../../helpers/Helpers";
-import { IProfileMetaWallet } from "./UserSettings";
+import { IProfileMetaWallet } from "../../auth/Auth";
 
 export default function UserSettingsPrimaryWallet({
   consolidations,
