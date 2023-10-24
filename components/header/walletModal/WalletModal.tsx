@@ -36,12 +36,14 @@ export default function WalletModal(props: Props) {
           setEns(undefined);
         } else {
           setEns({
-            ...user,
-            display: profile.profile?.handle ?? user.display,
-            pfp: profile.profile?.pfp_url ?? user.pfp,
-            banner_1: profile.profile?.banner_1 ?? user.banner_1,
-            banner_2: profile.profile?.banner_2 ?? user.banner_2,
-            website: profile.profile?.website ?? user.website,
+            created_at: profile.profile?.created_at ?? undefined,
+            wallet: props.wallet.toLowerCase(),
+            display: profile.profile?.handle ?? props.wallet.toLowerCase(),
+            consolidation_key: user.consolidation_key,
+            pfp: profile.profile?.pfp_url ?? undefined,
+            banner_1: profile.profile?.banner_1 ?? undefined,
+            banner_2: profile.profile?.banner_2 ?? undefined,
+            website: profile.profile?.website ?? undefined,
           });
         }
       }
