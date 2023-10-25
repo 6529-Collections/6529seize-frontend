@@ -7,26 +7,35 @@ import { AuthContext } from "../auth/Auth";
 import WalletModal from "./walletModal/WalletModal";
 
 export default function HeaderConnect() {
-  const { profile } = useContext(AuthContext);
+  const { profile, loadingProfile } = useContext(AuthContext);
   const account = useAccount();
   const [showWalletModal, setShowWalletModal] = useState(false);
   const [display, setDisplay] = useState("");
   useEffect(() => {
+    if (profile?.profile?.handle) {
+      setDisplay(profile?.profile?.handle);
+      return;
+    }
     const wallet = profile?.consolidation.wallets.find(
       (w) =>
         w.wallet.address.toLowerCase() === account.address?.toLocaleLowerCase()
     );
-    setDisplay(
-      profile?.profile?.handle ??
-        wallet?.wallet?.ens ??
-        account.address?.slice(0, 6) ??
-        ""
-    );
+    if (wallet?.wallet?.ens) {
+      setDisplay(wallet.wallet.ens);
+      return;
+    }
+    if (account.address) {
+      setDisplay(account.address.slice(0, 6));
+      return;
+    }
+    setDisplay("Connect");
   }, [profile?.profile?.handle, account.address]);
 
   return (
     <>
-      {account.isConnected && account.address ? (
+      {loadingProfile ? (
+        <div></div>
+      ) : account.isConnected && account.address ? (
         <>
           <button
             className={`${styles.userProfileBtn}`}
@@ -51,6 +60,13 @@ export default function HeaderConnect() {
         </>
       ) : (
         <Web3Button label="Connect" icon="hide" avatar="hide" balance="hide" />
+      )}
+      {account.address && (
+        <WalletModal
+          wallet={account.address}
+          show={showWalletModal}
+          onHide={() => setShowWalletModal(false)}
+        />
       )}
       {account.address && (
         <WalletModal
