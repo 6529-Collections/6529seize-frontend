@@ -10,7 +10,10 @@ const Header = dynamic(() => import("../../../../components/header/Header"), {
 });
 
 const NextGenCollectionComponent = dynamic(
-  () => import("../../../../components/nextGen/collections/NextGenCollection"),
+  () =>
+    import(
+      "../../../../components/nextGen/collections/collection/NextGenCollection"
+    ),
   {
     ssr: false,
   }

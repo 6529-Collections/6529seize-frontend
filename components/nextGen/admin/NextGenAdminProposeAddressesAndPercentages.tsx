@@ -13,7 +13,7 @@ import {
   useCollectionIndex,
   getCollectionIdsForAddress,
 } from "../nextgen_helpers";
-import NextGenContractWriteStatus from "../collections/NextGenContractWriteStatus";
+import NextGenContractWriteStatus from "../NextGenContractWriteStatus";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 export enum ProposalType {
@@ -135,8 +135,10 @@ export default function NextGenAdminProposeAddressesAndPercentages(
   }, [submitting]);
 
   useEffect(() => {
-    setLoading(false);
-    setSubmitting(false);
+    if (contractWrite.isSuccess || contractWrite.isError) {
+      setLoading(false);
+      setSubmitting(false);
+    }
   }, [contractWrite.isSuccess || contractWrite.isError]);
 
   return (

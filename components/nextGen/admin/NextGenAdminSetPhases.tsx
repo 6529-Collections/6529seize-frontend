@@ -17,7 +17,7 @@ import {
   getCollectionIdsForAddress,
   retrieveCollectionPhases,
 } from "../nextgen_helpers";
-import NextGenContractWriteStatus from "../collections/NextGenContractWriteStatus";
+import NextGenContractWriteStatus from "../NextGenContractWriteStatus";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { PhaseTimes } from "../nextgen_entities";
 
@@ -152,8 +152,10 @@ export default function NextGenAdminSetPhases(props: Props) {
   }, [submitting]);
 
   useEffect(() => {
-    setLoading(false);
-    setSubmitting(false);
+    if (contractWrite.isSuccess || contractWrite.isError) {
+      setLoading(false);
+      setSubmitting(false);
+    }
   }, [contractWrite.isSuccess || contractWrite.isError]);
 
   function uploadFile() {

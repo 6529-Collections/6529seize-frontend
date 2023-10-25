@@ -2,7 +2,12 @@ import styles from "./NextGen.module.scss";
 import { Container, Row, Col } from "react-bootstrap";
 import { useContractRead } from "wagmi";
 import { useState } from "react";
-import { AdditionalData, Info, TokenURI } from "../nextgen_entities";
+import {
+  AdditionalData,
+  EMPTY_TOKEN_URI,
+  Info,
+  TokenURI,
+} from "../nextgen_entities";
 import { NEXTGEN_CHAIN_ID, NEXTGEN_CORE } from "../nextgen_contracts";
 import NextGenTokenPreview from "./NextGenTokenPreview";
 import {
@@ -19,14 +24,8 @@ interface Props {
 
 export default function NextGenCollectionPreview(props: Props) {
   const [sampleToken, setSampleToken] = useState<number>();
-  const [sampleTokenUri, setSampleTokenUri] = useState<TokenURI>({
-    id: 0,
-    collection: 0,
-    uri: "",
-    name: "",
-    description: "",
-    attributes: [],
-  });
+  const [sampleTokenUri, setSampleTokenUri] =
+    useState<TokenURI>(EMPTY_TOKEN_URI);
   const [info, setInfo] = useState<Info>();
   const [additionalData, setAdditionalData] = useState<AdditionalData>();
 

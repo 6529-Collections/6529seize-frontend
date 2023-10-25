@@ -65,6 +65,15 @@ export interface TokenURI {
   attributes: Attributes[];
 }
 
+export const EMPTY_TOKEN_URI: TokenURI = {
+  id: 0,
+  collection: 0,
+  uri: "",
+  name: "",
+  description: "",
+  attributes: [],
+};
+
 export interface Attributes {
   trait_type: string;
   value: string;

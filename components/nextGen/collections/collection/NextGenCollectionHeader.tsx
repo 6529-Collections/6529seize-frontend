@@ -1,11 +1,16 @@
-import styles from "./NextGen.module.scss";
+import styles from "../NextGen.module.scss";
 import { Container, Row, Col } from "react-bootstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { AdditionalData, Info, PhaseTimes, Status } from "../nextgen_entities";
+import {
+  AdditionalData,
+  Info,
+  PhaseTimes,
+  Status,
+} from "../../nextgen_entities";
 import Image from "next/image";
 import { goerli } from "wagmi/chains";
-import { NEXTGEN_CHAIN_ID, NEXTGEN_CORE } from "../nextgen_contracts";
-import { getPhaseDateDisplay } from "../nextgen_helpers";
+import { NEXTGEN_CHAIN_ID, NEXTGEN_CORE } from "../../nextgen_contracts";
+import { getPhaseDateDisplay } from "../../nextgen_helpers";
 import { useEffect, useState } from "react";
 
 interface Props {
@@ -16,7 +21,7 @@ interface Props {
   collectionLink?: boolean;
 }
 
-export default function NextGenCollectionDetails(props: Props) {
+export default function NextGenCollectionHeader(props: Props) {
   const [available, setAvailable] = useState<number>(0);
 
   useEffect(() => {

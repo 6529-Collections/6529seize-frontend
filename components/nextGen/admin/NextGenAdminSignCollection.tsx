@@ -8,7 +8,7 @@ import {
   useCollectionArtist,
   isCollectionArtist,
 } from "../nextgen_helpers";
-import NextGenContractWriteStatus from "../collections/NextGenContractWriteStatus";
+import NextGenContractWriteStatus from "../NextGenContractWriteStatus";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { areEqualAddresses } from "../../../helpers/Helpers";
 
@@ -91,8 +91,10 @@ export default function NextGenAdminSignCollection(props: Props) {
   }, [submitting]);
 
   useEffect(() => {
-    setLoading(false);
-    setSubmitting(false);
+    if (contractWrite.isSuccess || contractWrite.isError) {
+      setLoading(false);
+      setSubmitting(false);
+    }
   }, [contractWrite.isSuccess || contractWrite.isError]);
 
   return (

@@ -14,7 +14,7 @@ import {
   useCollectionAdmin,
   getCollectionIdsForAddress,
 } from "../nextgen_helpers";
-import NextGenContractWriteStatus from "../collections/NextGenContractWriteStatus";
+import NextGenContractWriteStatus from "../NextGenContractWriteStatus";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 interface Props {
@@ -162,8 +162,10 @@ export default function NextGenAdminAcceptAddressesAndPercentages(
   }, [submitting]);
 
   useEffect(() => {
-    setLoading(false);
-    setSubmitting(false);
+    if (contractWrite.isSuccess || contractWrite.isError) {
+      setLoading(false);
+      setSubmitting(false);
+    }
   }, [contractWrite.isSuccess || contractWrite.isError]);
 
   return (

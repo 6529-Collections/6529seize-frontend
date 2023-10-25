@@ -7,7 +7,7 @@ import {
   NEXTGEN_CHAIN_ID,
   FunctionSelectors,
 } from "../nextgen_contracts";
-import NextGenContractWriteStatus from "../collections/NextGenContractWriteStatus";
+import NextGenContractWriteStatus from "../NextGenContractWriteStatus";
 import {
   getCollectionIdsForAddress,
   retrieveCollectionInfo,
@@ -64,7 +64,7 @@ export default function NextGenAdminUpdateCollection(props: Props) {
   const [baseURI, setBaseURI] = useState("");
   const [library, setLibrary] = useState("");
   const [scriptIndex, setScriptIndex] = useState<number>();
-  const [script, setScript] = useState("");
+  const [scripts, setScripts] = useState<string[]>([]);
 
   const [existingScripts, setExistingScripts] = useState<string[]>([]);
 
@@ -86,35 +86,30 @@ export default function NextGenAdminUpdateCollection(props: Props) {
     if (props.type === UpdateType.UPDATE_SCRIPT) {
       setExistingScripts(data.script);
     } else {
-      setScript(data.script[0]);
+      setScripts(data.script);
     }
   });
 
   function getParams() {
     const params: any[] = [];
     params.push(collectionID);
+    params.push(collectionName);
+    params.push(artist);
+    params.push(description);
+    params.push(website);
+    params.push(license);
+    params.push(baseURI);
+    params.push(library);
+
     if (props.type === UpdateType.UPDATE_INFO) {
-      params.push(collectionName);
-      params.push(artist);
-      params.push(description);
-      params.push(website);
-      params.push(license);
-      params.push("");
-      params.push(library);
       params.push(UPDATE_INFO_INDEX);
-      params.push([script]);
+      params.push(scripts);
     } else if (props.type === UpdateType.UPDATE_BASE_URI) {
-      params.push("");
-      params.push("");
-      params.push("");
-      params.push("");
-      params.push("");
-      params.push(baseURI);
       params.push(UPDATE_BASE_URI_INDEX);
-      params.push([]);
+      params.push(scripts);
     } else if (props.type === UpdateType.UPDATE_SCRIPT) {
       params.push(scriptIndex);
-      params.push([script]);
+      params.push(scripts);
     }
 
     return params;
@@ -157,8 +152,8 @@ export default function NextGenAdminUpdateCollection(props: Props) {
       if (!library) {
         errors.push("Library is required");
       }
-      if (!script) {
-        errors.push("Script is required");
+      if (scripts.length === 0) {
+        errors.push("At least one script is required");
       }
     }
 
@@ -169,8 +164,8 @@ export default function NextGenAdminUpdateCollection(props: Props) {
     }
 
     if (props.type === UpdateType.UPDATE_SCRIPT) {
-      if (!script) {
-        errors.push("Script is required");
+      if (scripts.length !== 1) {
+        errors.push("You need exactly one script");
       }
       if (scriptIndex === undefined) {
         errors.push("Script index is required");
@@ -197,8 +192,10 @@ export default function NextGenAdminUpdateCollection(props: Props) {
   }, [submitting]);
 
   useEffect(() => {
-    setLoading(false);
-    setSubmitting(false);
+    if (contractWrite.isSuccess || contractWrite.isError) {
+      setLoading(false);
+      setSubmitting(false);
+    }
   }, [contractWrite.isSuccess || contractWrite.isError]);
 
   return (
@@ -325,9 +322,9 @@ export default function NextGenAdminUpdateCollection(props: Props) {
                     const i = parseInt(e.target.value);
                     setScriptIndex(i);
                     if (existingScripts.length > i) {
-                      setScript(existingScripts[i]);
+                      setScripts([existingScripts[i]]);
                     } else {
-                      setScript("");
+                      setScripts([]);
                     }
                   }}
                 />
@@ -336,12 +333,19 @@ export default function NextGenAdminUpdateCollection(props: Props) {
             {(props.type === UpdateType.UPDATE_INFO ||
               props.type === UpdateType.UPDATE_SCRIPT) && (
               <Form.Group className="mb-3">
-                <Form.Label>Script</Form.Label>
+                <Form.Label>Script x{scripts.length}</Form.Label>
                 <Form.Control
-                  type="text"
-                  placeholder="...script"
-                  value={script}
-                  onChange={(e: any) => setScript(e.target.value)}
+                  as="textarea"
+                  rows={3}
+                  placeholder="...script - one line per entry"
+                  value={scripts.join("\n")}
+                  onChange={(e) => {
+                    if (e.target.value) {
+                      setScripts(e.target.value.split("\n"));
+                    } else {
+                      setScripts([]);
+                    }
+                  }}
                 />
               </Form.Group>
             )}
