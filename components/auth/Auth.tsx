@@ -31,6 +31,7 @@ export interface IProfileWithMeta {
 
 type AuthContextType = {
   profile: IProfileWithMeta | null;
+  loadingProfile: boolean;
   requestAuth: () => Promise<{ success: boolean }>;
   setToast: ({ message, type }: { message: string; type: TypeOptions }) => void;
 };
@@ -42,6 +43,7 @@ interface NonceResponse {
 
 export const AuthContext = createContext<AuthContextType>({
   profile: null,
+  loadingProfile: false,
   requestAuth: async () => ({ success: false }),
   setToast: () => {},
 });
@@ -51,6 +53,7 @@ export default function Auth({ children }: { children: React.ReactNode }) {
   const signMessage = useSignMessage();
 
   const [profile, setProfile] = useState<IProfileWithMeta | null>(null);
+  const [loadingProfile, setLoadingProfile] = useState(false);
 
   useEffect(() => {
     if (!address) removeAuthJwt();
@@ -82,19 +85,26 @@ export default function Auth({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     const getProfile = async () => {
-      const response = await commonApiFetch<IProfileAndConsolidations>({
-        endpoint: `profiles/${address}`,
-      });
-      if (response.profile) {
-        setProfile(mapApiResponseToUser(response));
-      } else {
+      if (!address) {
         setProfile(null);
+        return;
+      }
+      setLoadingProfile(true);
+      try {
+        const response = await commonApiFetch<IProfileAndConsolidations>({
+          endpoint: `profiles/${address}`,
+        });
+        if (response.profile) {
+          setProfile(mapApiResponseToUser(response));
+        } else {
+          setProfile(null);
+        }
+      } catch {
+        setProfile(null);
+      } finally {
+        setLoadingProfile(false);
       }
     };
-    if (!address) {
-      setProfile(null);
-      return;
-    }
     getProfile();
   }, [address]);
 
@@ -268,7 +278,9 @@ export default function Auth({ children }: { children: React.ReactNode }) {
   };
   return (
     <>
-      <AuthContext.Provider value={{ requestAuth, setToast, profile }}>
+      <AuthContext.Provider
+        value={{ requestAuth, setToast, profile, loadingProfile }}
+      >
         {children}
         <ToastContainer />
       </AuthContext.Provider>
