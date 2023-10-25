@@ -175,7 +175,7 @@ export default function WalletModal(props: Props) {
                     />
                   </span>
                   <span className="font-smaller no-wrap">
-                    <b>Profile Settings</b>
+                    <b>Edit Profile</b>
                   </span>
                 </Col>
               </>

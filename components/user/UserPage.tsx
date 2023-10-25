@@ -481,25 +481,10 @@ export default function UserPage(props: Props) {
                   </span>
 
                   <span className="mt-3 d-flex align-items-start gap-2">
-                    {/* account.address &&
-                      areEqualAddresses(account.address, ownerAddress) */}
-                    {true && (
-                      <UserEditProfileButton />
-                      /*   <Tippy
-                        content={"Profile Settings"}
-                        delay={250}
-                        placement={"left"}
-                        theme={"light"}
-                      >
-                        <FontAwesomeIcon
-                          icon="gear"
-                          className={styles.settingsIcon}
-                          onClick={() =>
-                            (window.location.href = `/${props.user}/settings`)
-                          }
-                        />
-                      </Tippy> */
-                    )}
+                    {account.address &&
+                      areEqualAddresses(account.address, ownerAddress) && (
+                        <UserEditProfileButton user={props.user} />
+                      )}
                   </span>
                 </Col>
               </Row>
