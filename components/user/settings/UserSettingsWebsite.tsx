@@ -14,7 +14,6 @@ export default function UserSettingsWebsite({
         <input
           type="text"
           name="name"
-          required
           autoComplete="off"
           value={website}
           onChange={(e) => setWebsite(e.target.value)}

@@ -25,7 +25,7 @@ export default function UserPageSettings() {
   const [url, setUrl] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!profile) {
+    if (!profile?.profile) {
       setPagenameFull(null);
       setTitle(null);
       setUrl(null);
