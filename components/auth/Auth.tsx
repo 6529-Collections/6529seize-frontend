@@ -94,11 +94,7 @@ export default function Auth({ children }: { children: React.ReactNode }) {
         const response = await commonApiFetch<IProfileAndConsolidations>({
           endpoint: `profiles/${address}`,
         });
-        if (response.profile) {
-          setProfile(mapApiResponseToUser(response));
-        } else {
-          setProfile(null);
-        }
+        setProfile(mapApiResponseToUser(response));
       } catch {
         setProfile(null);
       } finally {

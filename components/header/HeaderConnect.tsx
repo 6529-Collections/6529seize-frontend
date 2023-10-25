@@ -29,7 +29,7 @@ export default function HeaderConnect() {
       return;
     }
     setDisplay("Connect");
-  }, [profile?.profile?.handle, account.address]);
+  }, [profile, account.address]);
 
   return (
     <>
