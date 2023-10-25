@@ -1,8 +1,7 @@
-import styles from "./NextGen.module.scss";
+import styles from "../NextGen.module.scss";
 import { Container, Row, Col } from "react-bootstrap";
 import { useContractRead, useContractReads } from "wagmi";
 import { useEffect, useState } from "react";
-import NextGenTokenList from "./NextGenTokenList";
 import {
   Info,
   AdditionalData,
@@ -10,17 +9,19 @@ import {
   LibraryScript,
   PhaseTimes,
   Status,
-} from "../nextgen_entities";
-import { fromGWEI } from "../../../helpers/Helpers";
+  EMPTY_TOKEN_URI,
+} from "../../nextgen_entities";
+import { fromGWEI } from "../../../../helpers/Helpers";
 import Image from "next/image";
 import {
   NEXTGEN_CHAIN_ID,
   NEXTGEN_CORE,
   NEXTGEN_MINTER,
-} from "../nextgen_contracts";
-import Breadcrumb, { Crumb } from "../../breadcrumb/Breadcrumb";
-import NextGenCollectionDetails from "./NextGenCollectionDetails";
-import NextGenMint from "./NextGenMint";
+} from "../../nextgen_contracts";
+import Breadcrumb, { Crumb } from "../../../breadcrumb/Breadcrumb";
+import NextGenCollectionHeader from "./NextGenCollectionHeader";
+import NextGenCollectionArt from "./NextGenCollectionArt";
+import NextGenCollectionMint from "./NextGenCollectionMint";
 import router from "next/router";
 import {
   extractField,
@@ -29,8 +30,9 @@ import {
   retrieveCollectionInfo,
   retrieveCollectionLibraryAndScript,
   retrieveCollectionPhases,
-} from "../nextgen_helpers";
-import { NextGenTokenImageContent } from "./NextGenTokenImage";
+} from "../../nextgen_helpers";
+import { NextGenTokenImageContent } from "../NextGenTokenImage";
+import NextGenCollectionDetails from "./NextGenCollectionDetails";
 
 interface Props {
   collection: number;
@@ -58,7 +60,7 @@ export default function NextGenCollection(props: Props) {
   const [phaseTimes, setPhaseTimes] = useState<PhaseTimes>();
   const [additionalData, setAdditionalData] = useState<AdditionalData>();
 
-  const [tokenURIs, setTokenURIs] = useState<TokenURI[]>();
+  const [tokenURIs, setTokenURIs] = useState<TokenURI[]>([]);
 
   const [burnAmount, setBurnAmount] = useState<number>(0);
   const [mintPrice, setMintPrice] = useState<number>(0);
@@ -313,7 +315,7 @@ export default function NextGenCollection(props: Props) {
           <Container className="pt-3 pb-2">
             {additionalData && info && phaseTimes && (
               <>
-                <NextGenCollectionDetails
+                <NextGenCollectionHeader
                   collection={props.collection}
                   info={info}
                   phase_times={phaseTimes}
@@ -356,132 +358,32 @@ export default function NextGenCollection(props: Props) {
                   <>
                     <Row className="pt-3">
                       <Col>
-                        <h4>
-                          Tokens x
-                          {additionalData.circulation_supply - burnAmount}
-                        </h4>
-                      </Col>
-                    </Row>
-                    <Row>
-                      <Col>
-                        {tokenURIs && (
-                          <NextGenTokenList
-                            collection={props.collection}
-                            tokens={tokenURIs}
-                          />
-                        )}
+                        <NextGenCollectionArt
+                          collection={props.collection}
+                          additional_data={additionalData}
+                          burn_amount={burnAmount}
+                          token_uris={tokenURIs}
+                        />
                       </Col>
                     </Row>
                   </>
                 )}
                 {focus == Focus.COLLECTION && (
                   <>
-                    <Row>
-                      <Col sm={12} md={6} className="pt-3">
-                        <Container className="no-padding">
-                          <Row className="pb-4">
-                            <Col className={styles.tokenFrameContainerHalf}>
-                              {tokenURIs && tokenURIs.length > 0 && (
-                                <NextGenTokenImageContent
-                                  preview={true}
-                                  token={tokenURIs[0]}
-                                />
-                              )}
-                            </Col>
-                          </Row>
-                          <Row>
-                            {tokenStartIndex > 0 && tokenEndIndex > 0 && (
-                              <Col xs={12} className="pb-2">
-                                Token Indexes{" "}
-                                <b>
-                                  {tokenStartIndex} - {tokenEndIndex}
-                                </b>
-                              </Col>
-                            )}
-                            <Col xs={12} className="pb-2">
-                              Total Supply <b>x{additionalData.total_supply}</b>
-                            </Col>
-                            <Col xs={12} className="pb-2">
-                              Minted <b>x{additionalData.circulation_supply}</b>
-                            </Col>
-                            {burnAmount > 0 && (
-                              <Col xs={12} className="pb-2">
-                                <span>
-                                  Burnt <b>x{burnAmount}</b>
-                                </span>
-                              </Col>
-                            )}
-                            <Col xs={12} className="pb-2">
-                              Available{" "}
-                              <b>
-                                {additionalData.total_supply -
-                                  additionalData.circulation_supply -
-                                  burnAmount >
-                                0
-                                  ? `x${
-                                      additionalData.total_supply -
-                                      additionalData.circulation_supply -
-                                      burnAmount
-                                    }`
-                                  : `-`}
-                              </b>
-                            </Col>
-                            <Col xs={12} className="pb-2">
-                              Mint Cost{" "}
-                              <b>
-                                {mintPrice > 0 ? fromGWEI(mintPrice) : `Free`}{" "}
-                                {mintPrice > 0 ? `ETH` : ``}
-                              </b>
-                            </Col>
-                            <Col xs={12} className="pb-2">
-                              <span>
-                                Max Purchases (Public Phase){" "}
-                                <b>x{additionalData.max_purchases}</b>
-                              </span>
-                            </Col>
-                          </Row>
-                        </Container>
-                      </Col>
-                      <Col sm={12} md={6} className="pt-3">
-                        <Container className="no-padding">
-                          {artistSignature && (
-                            <>
-                              <Row>
-                                <Col>
-                                  <b>Artist Signature</b>
-                                </Col>
-                              </Row>
-                              <Row className="pb-4">
-                                <Col xs={12} className="pt-2">
-                                  <div
-                                    className={styles.artistSignature}
-                                    dangerouslySetInnerHTML={{
-                                      __html: artistSignature,
-                                    }}></div>
-                                </Col>
-                              </Row>
-                            </>
-                          )}
-                          <Row>
-                            <Col>
-                              <b>Collection Overview</b>
-                            </Col>
-                          </Row>
-                          <Row>
-                            <Col xs={12} className="pt-2">
-                              {info.description}
-                            </Col>
-                            <Col xs={12} className="pt-2">
-                              Licence <b>{info.licence}</b>
-                            </Col>
-                            <Col xs={12} className="pt-1">
-                              Base URI <b>{info.base_uri}</b>
-                            </Col>
-                            <Col xs={12} className="pt-1">
-                              Merkle Root <b>{phaseTimes.merkle_root}</b>
-                            </Col>
-                          </Row>
-                        </Container>
+                    <Row className="pt-3">
+                      <Col>
+                        <NextGenCollectionDetails
+                          collection={props.collection}
+                          additional_data={additionalData}
+                          info={info}
+                          phase_times={phaseTimes}
+                          token_uris={tokenURIs}
+                          burn_amount={burnAmount}
+                          token_start_index={tokenStartIndex}
+                          token_end_index={tokenEndIndex}
+                          mint_price={mintPrice}
+                          artist_signature={artistSignature}
+                        />
                       </Col>
                     </Row>
                   </>
@@ -489,12 +391,10 @@ export default function NextGenCollection(props: Props) {
                 {focus == Focus.MINT && (
                   <Row className="pt-3">
                     <Col>
-                      <NextGenMint
+                      <NextGenCollectionMint
                         collection={props.collection}
                         collection_preview={
-                          tokenURIs && tokenURIs.length > 0
-                            ? tokenURIs[0]
-                            : undefined
+                          tokenURIs.length > 0 ? tokenURIs[0] : undefined
                         }
                         phase_times={phaseTimes}
                         mint_price={mintPrice}

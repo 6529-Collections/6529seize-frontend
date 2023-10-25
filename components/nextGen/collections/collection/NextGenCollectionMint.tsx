@@ -7,13 +7,13 @@ import {
   useEnsAddress,
   useEnsName,
 } from "wagmi";
-import { DELEGATION_ABI } from "../../../abis";
+import { DELEGATION_ABI } from "../../../../abis";
 import {
   DELEGATION_CONTRACT,
   MEMES_CONTRACT,
   NULL_ADDRESS,
-} from "../../../constants";
-import styles from "./NextGen.module.scss";
+} from "../../../../constants";
+import styles from "../NextGen.module.scss";
 import { Button, Col, Container, Form, Row, Table } from "react-bootstrap";
 import { useEffect, useState } from "react";
 import {
@@ -24,28 +24,28 @@ import {
   MintingDetails,
   Status,
   TokenURI,
-} from "../nextgen_entities";
+} from "../../nextgen_entities";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Tippy from "@tippyjs/react";
 import {
   createArray,
   fromGWEI,
   getNetworkName,
-} from "../../../helpers/Helpers";
+} from "../../../../helpers/Helpers";
 import { useWeb3Modal } from "@web3modal/react";
 import {
   ALL_USE_CASE,
   MINTING_USE_CASE,
-} from "../../../pages/delegation/[...section]";
+} from "../../../../pages/delegation/[...section]";
 import {
   NEXTGEN_CHAIN_ID,
   NEXTGEN_CORE,
   NEXTGEN_MINTER,
-} from "../nextgen_contracts";
-import DateCountdown from "../../date-countdown/DateCountdown";
-import { fetchUrl } from "../../../services/6529api";
-import NextGenContractWriteStatus from "./NextGenContractWriteStatus";
-import { NextGenTokenImageContent } from "./NextGenTokenImage";
+} from "../../nextgen_contracts";
+import DateCountdown from "../../../date-countdown/DateCountdown";
+import { fetchUrl } from "../../../../services/6529api";
+import NextGenContractWriteStatus from "../../NextGenContractWriteStatus";
+import { NextGenTokenImageContent } from "../NextGenTokenImage";
 
 function NextGenDelegatorOption(props: { address: string }) {
   const ens = useEnsName({
@@ -69,7 +69,7 @@ interface Props {
   burn_amount: number;
 }
 
-export default function NextGenMint(props: Props) {
+export default function NextGenCollectionMint(props: Props) {
   const account = useAccount();
   const chainId = useChainId();
   const web3Modal = useWeb3Modal();
@@ -784,30 +784,36 @@ export default function NextGenMint(props: Props) {
               </span>
             )}
             {props.phase_times.al_status == Status.LIVE && (
-              <DateCountdown
-                title={"Allowlist Ending in"}
-                date={props.phase_times.allowlist_end_time}
-              />
+              <span className={styles.mintDetailsSpan}>
+                <DateCountdown
+                  title={"Allowlist Ending in"}
+                  date={props.phase_times.allowlist_end_time}
+                />
+              </span>
             )}
             {props.phase_times.al_status != Status.LIVE &&
               props.phase_times.al_status != Status.UPCOMING &&
               props.phase_times.public_status == Status.UPCOMING && (
-                <DateCountdown
-                  title={"Public Phase Starting in"}
-                  date={props.phase_times.public_start_time}
-                />
+                <span className={styles.mintDetailsSpan}>
+                  <DateCountdown
+                    title={"Public Phase Starting in"}
+                    date={props.phase_times.public_start_time}
+                  />
+                </span>
               )}
             {props.phase_times.public_status == Status.LIVE && (
-              <DateCountdown
-                title={"Public Phase Ending in"}
-                date={props.phase_times.public_end_time}
-              />
+              <span className={styles.mintDetailsSpan}>
+                <DateCountdown
+                  title={"Public Phase Ending in"}
+                  date={props.phase_times.public_end_time}
+                />
+              </span>
             )}
           </div>
         </Col>
       </Row>
       <Row className="pt-4">
-        <Col sm={12} md={6}>
+        <Col sm={12} md={5}>
           <Container className="no-padding">
             <Row className="pb-4">
               <Col className={styles.tokenFrameContainerHalf}>
@@ -821,7 +827,7 @@ export default function NextGenMint(props: Props) {
             </Row>
           </Container>
         </Col>
-        <Col sm={12} md={6}>
+        <Col sm={12} md={7}>
           <Container>
             <Row>
               <Col>{printMintWidget()}</Col>

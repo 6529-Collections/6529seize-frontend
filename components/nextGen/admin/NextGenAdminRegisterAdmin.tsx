@@ -7,7 +7,7 @@ import {
   NEXTGEN_ADMIN,
   FunctionSelectors,
 } from "../nextgen_contracts";
-import NextGenContractWriteStatus from "../collections/NextGenContractWriteStatus";
+import NextGenContractWriteStatus from "../NextGenContractWriteStatus";
 
 import {
   useGlobalAdmin,
@@ -123,8 +123,10 @@ export default function NextGenAdminRegisterAdmin(props: Props) {
   }, [submitting]);
 
   useEffect(() => {
-    setLoading(false);
-    setSubmitting(false);
+    if (contractWrite.isSuccess || contractWrite.isError) {
+      setLoading(false);
+      setSubmitting(false);
+    }
   }, [contractWrite.isSuccess || contractWrite.isError]);
 
   return (

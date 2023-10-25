@@ -17,7 +17,7 @@ import {
   NEXTGEN_CORE,
   NEXTGEN_MINTER,
 } from "../nextgen_contracts";
-import NextGenCollectionDetails from "./NextGenCollectionDetails";
+import NextGenCollectionHeader from "./collection/NextGenCollectionHeader";
 import { areEqualAddresses } from "../../../helpers/Helpers";
 import {
   retrieveCollectionAdditionalData,
@@ -366,7 +366,7 @@ export default function NextGenToken(props: Props) {
         <>
           <Container className="pt-4 pb-4">
             {info && phaseTimes && additionalData && (
-              <NextGenCollectionDetails
+              <NextGenCollectionHeader
                 collection={props.collection}
                 info={info}
                 phase_times={phaseTimes}

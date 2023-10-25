@@ -1,6 +1,6 @@
 import { useWaitForTransaction } from "wagmi";
-import { getTransactionLink } from "../../../helpers/Helpers";
-import { NEXTGEN_CHAIN_ID } from "../nextgen_contracts";
+import { getTransactionLink } from "../../helpers/Helpers";
+import { NEXTGEN_CHAIN_ID } from "./nextgen_contracts";
 
 interface Props {
   hash?: `0x${string}`;
