@@ -31,6 +31,7 @@ import NotFound from "../notFound/NotFound";
 import { ENS } from "../../entities/IENS";
 import DotLoader from "../dotLoader/DotLoader";
 import { IProfileAndConsolidations } from "../../entities/IProfile";
+import UserEditProfileButton from "./settings/UserEditProfileButton";
 
 interface Props {
   user: string;
@@ -477,73 +478,34 @@ export default function UserPage(props: Props) {
                         }}
                       ></span>
                     )}
-                    {tdh && consolidatedTDH ? (
-                      <span className={styles.addressContainer}>
-                        {isConsolidation && (
-                          <span className="mt-1">
-                            <ConsolidationSwitch
-                              view={view}
-                              onSetView={(v) => setView(v)}
-                            />
-                          </span>
-                        )}
-                        <span>
-                          <Address
-                            wallets={
-                              view === VIEW.CONSOLIDATION
-                                ? consolidatedTDH.wallets
-                                : [ownerAddress]
-                            }
-                            display={
-                              props.profile.profile?.handle
-                                ? props.profile.profile.handle
-                                : view === VIEW.CONSOLIDATION &&
-                                  consolidatedTDH.consolidation_display
-                                ? consolidatedTDH.consolidation_display
-                                : ownerENS
-                            }
-                            isUserPage={true}
-                            disableLink={true}
-                            viewingWallet={ownerAddress}
-                          />
-                        </span>
-                      </span>
-                    ) : (
-                      <span className="d-flex flex-wrap">
-                        <Address
-                          wallets={[ownerAddress]}
-                          display={ownerENS}
-                          disableLink={true}
-                          isUserPage={true}
-                          viewingWallet={ownerAddress}
-                        />
-                      </span>
-                    )}
                   </span>
+
                   <span className="mt-3 d-flex align-items-start gap-2">
-                    {account.address &&
-                      areEqualAddresses(account.address, ownerAddress) && (
-                        <Tippy
-                          content={"Profile Settings"}
-                          delay={250}
-                          placement={"left"}
-                          theme={"light"}
-                        >
-                          <FontAwesomeIcon
-                            icon="gear"
-                            className={styles.settingsIcon}
-                            onClick={() =>
-                              (window.location.href = `/${props.user}/settings`)
-                            }
-                          />
-                        </Tippy>
-                      )}
+                    {/* account.address &&
+                      areEqualAddresses(account.address, ownerAddress) */}
+                    {true && (
+                      <UserEditProfileButton />
+                      /*   <Tippy
+                        content={"Profile Settings"}
+                        delay={250}
+                        placement={"left"}
+                        theme={"light"}
+                      >
+                        <FontAwesomeIcon
+                          icon="gear"
+                          className={styles.settingsIcon}
+                          onClick={() =>
+                            (window.location.href = `/${props.user}/settings`)
+                          }
+                        />
+                      </Tippy> */
+                    )}
                   </span>
                 </Col>
               </Row>
             </Container>
             <Container className="no-padding">
-              <Row className="pt-3">
+              <Row>
                 <Col
                   xs={12}
                   sm={6}
@@ -551,6 +513,48 @@ export default function UserPage(props: Props) {
                 >
                   {tdh ? (
                     <Container>
+                      {tdh && consolidatedTDH ? (
+                        <span className={styles.addressContainer}>
+                          {isConsolidation && (
+                            <span>
+                              <ConsolidationSwitch
+                                view={view}
+                                onSetView={(v) => setView(v)}
+                              />
+                            </span>
+                          )}
+                          <span>
+                            <Address
+                              wallets={
+                                view === VIEW.CONSOLIDATION
+                                  ? consolidatedTDH.wallets
+                                  : [ownerAddress]
+                              }
+                              display={
+                                props.profile.profile?.handle
+                                  ? props.profile.profile.handle
+                                  : view === VIEW.CONSOLIDATION &&
+                                    consolidatedTDH.consolidation_display
+                                  ? consolidatedTDH.consolidation_display
+                                  : ownerENS
+                              }
+                              isUserPage={true}
+                              disableLink={true}
+                              viewingWallet={ownerAddress}
+                            />
+                          </span>
+                        </span>
+                      ) : (
+                        <span className="d-flex flex-wrap">
+                          <Address
+                            wallets={[ownerAddress]}
+                            display={ownerENS}
+                            disableLink={true}
+                            isUserPage={true}
+                            viewingWallet={ownerAddress}
+                          />
+                        </span>
+                      )}
                       {tdh.tdh_rank && (
                         <Row className="pt-2 pb-2">
                           <Col>
