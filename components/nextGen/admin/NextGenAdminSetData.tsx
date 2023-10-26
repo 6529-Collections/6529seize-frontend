@@ -8,6 +8,7 @@ import {
   useCollectionIndex,
   useCollectionAdmin,
   getCollectionIdsForAddress,
+  retrieveCollectionAdditionalData,
 } from "../nextgen_helpers";
 import {
   NEXTGEN_CORE,
@@ -16,6 +17,7 @@ import {
 } from "../nextgen_contracts";
 import NextGenContractWriteStatus from "../NextGenContractWriteStatus";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { AdditionalData } from "../nextgen_entities";
 
 interface Props {
   close: () => void;
@@ -51,6 +53,15 @@ export default function NextGenAdminSetData(props: Props) {
   const [errors, setErrors] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+
+  retrieveCollectionAdditionalData(collectionID, (data: AdditionalData) => {
+    if (collectionID) {
+      setArtistAddress(data.artist_address);
+      setMaxPurchases(data.max_purchases);
+      setTotalSupply(data.total_supply);
+      setFinalSupplyTime(data.final_supply_after_mint);
+    }
+  });
 
   const contractWrite = useContractWrite({
     address: NEXTGEN_CORE.contract as `0x${string}`,
