@@ -27,7 +27,7 @@ export default function UserSettingsBackground({
   };
 
   return (
-    <div className="tw-flex tw-gap-x-5">
+    <div className="tw-flex tw-gap-x-5 tw-mt-6">
       <div className="tw-flex-1 tw-cursor-pointer">
         <label className="tw-block tw-text-sm tw-font-normal tw-leading-5 tw-text-neutral-350">
           Background Color 1
