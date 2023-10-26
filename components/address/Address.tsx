@@ -159,15 +159,14 @@ export function WalletAddress(props: {
                   name={`copy-toggle`}
                   aria-label={`copy-toggle`}
                 >
-                  {props.isUserPage && (
+                  {props.isUserPage && props.display && (
                     <span
                       className={`${styles.address} ${
                         props.isUserPage ? styles.addressUserPage : ""
                       }`}
-                      dangerouslySetInnerHTML={{
-                        __html: resolveAddress(),
-                      }}
-                    ></span>
+                    >
+                      {formatAddress(props.display)}
+                    </span>
                   )}
                   <FontAwesomeIcon
                     icon="copy"
