@@ -3,13 +3,14 @@ import styles from "./WalletModal.module.scss";
 import { disconnect } from "@wagmi/core";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { ENS } from "../../../entities/IENS";
 import { fetchUrl } from "../../../services/6529api";
 import { isEmptyObject, numberWithCommas } from "../../../helpers/Helpers";
 import Address from "../../address/Address";
 import { commonApiFetch } from "../../../services/api/common-api";
 import { IProfileAndConsolidations } from "../../../entities/IProfile";
+import { AuthContext } from "../../auth/Auth";
 
 interface Props {
   wallet: `0x${string}`;
@@ -18,14 +19,12 @@ interface Props {
 }
 
 export default function WalletModal(props: Props) {
+  const { profile } = useContext(AuthContext);
   const [ens, setEns] = useState<ENS>();
   const [copied, setIsCopied] = useState<boolean>(false);
 
   useEffect(() => {
     const getUser = async () => {
-      const profile = await commonApiFetch<IProfileAndConsolidations>({
-        endpoint: `profiles/${props.wallet}`,
-      }).catch(() => null);
       if (!profile) {
         setEns(undefined);
       } else {
@@ -57,7 +56,7 @@ export default function WalletModal(props: Props) {
     };
 
     getUser();
-  }, [props.wallet]);
+  }, [props.wallet, profile]);
 
   function copy() {
     navigator.clipboard.writeText(props.wallet);
