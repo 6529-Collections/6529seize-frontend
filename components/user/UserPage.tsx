@@ -14,12 +14,10 @@ import {
   numberWithCommas,
   removeProtocol,
 } from "../../helpers/Helpers";
-import { MANIFOLD, SIX529_MUSEUM } from "../../constants";
 import { ConsolidatedTDHMetrics, TDHMetrics } from "../../entities/ITDH";
 import { useAccount } from "wagmi";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { fetchAllPages, fetchUrl } from "../../services/6529api";
-import { MANIFOLD_ENS, MUSEUM_ENS, ReservedUser } from "../../pages/[user]";
 import Tippy from "@tippyjs/react";
 import Tag, { TagType } from "../address/Tag";
 import ConsolidationSwitch, {
@@ -111,25 +109,7 @@ export default function UserPage(props: Props) {
       let oLink = process.env.BASE_ENDPOINT
         ? process.env.BASE_ENDPOINT
         : "https://seize.io";
-      if (props.user.toUpperCase() === ReservedUser.MUSEUM.toUpperCase()) {
-        setOwnerAddress(SIX529_MUSEUM);
-        setOwnerENS(ReservedUser.MUSEUM);
-        setOwnerLinkDisplay(`${oLink}/${ReservedUser.MUSEUM}`);
-        setEns({
-          ...MUSEUM_ENS,
-          consolidation_key: MUSEUM_ENS.wallet,
-        });
-      } else if (
-        props.user.toUpperCase() === ReservedUser.MANIFOLD.toUpperCase()
-      ) {
-        setOwnerAddress(MANIFOLD);
-        setOwnerENS(ReservedUser.MANIFOLD);
-        setOwnerLinkDisplay(`${oLink}/${ReservedUser.MANIFOLD}`);
-        setEns({
-          ...MANIFOLD_ENS,
-          consolidation_key: MANIFOLD_ENS.wallet,
-        });
-      } else if (
+      if (
         props.user.startsWith("0x") ||
         props.user.endsWith(".eth") ||
         props.profile?.profile?.primary_wallet
@@ -143,26 +123,14 @@ export default function UserPage(props: Props) {
           if (isEmptyObject(response)) {
             setUserError(true);
           }
-          if (areEqualAddresses(response.wallet, SIX529_MUSEUM)) {
-            setEns({
-              ...MUSEUM_ENS,
-              consolidation_key: response.consolidation_key,
-            });
-          } else if (areEqualAddresses(response.wallet, MANIFOLD)) {
-            setEns({
-              ...MANIFOLD_ENS,
-              consolidation_key: response.consolidation_key,
-            });
-          } else {
-            setEns({
-              ...response,
-              display: props.profile.profile?.handle ?? response.display,
-              pfp: props.profile.profile?.pfp_url ?? response.pfp,
-              banner_1: props.profile.profile?.banner_1 ?? response.banner_1,
-              banner_2: props.profile.profile?.banner_2 ?? response.banner_2,
-              website: props.profile.profile?.website ?? response.website,
-            });
-          }
+          setEns({
+            ...response,
+            display: props.profile.profile?.handle ?? response.display,
+            pfp: props.profile.profile?.pfp_url ?? response.pfp,
+            banner_1: props.profile.profile?.banner_1 ?? response.banner_1,
+            banner_2: props.profile.profile?.banner_2 ?? response.banner_2,
+            website: props.profile.profile?.website ?? response.website,
+          });
 
           const oAddress =
             props.profile.profile?.primary_wallet ??
@@ -176,17 +144,9 @@ export default function UserPage(props: Props) {
               response.display ??
               oAddress
           );
-          let reservedDisplay;
-          if (areEqualAddresses(props.user, SIX529_MUSEUM)) {
-            reservedDisplay = ReservedUser.MUSEUM;
-          } else if (areEqualAddresses(props.user, MANIFOLD)) {
-            reservedDisplay = ReservedUser.MANIFOLD;
-          }
           setOwnerLinkDisplay(
             `${oLink}/${
-              reservedDisplay
-                ? reservedDisplay
-                : props.profile.profile?.handle
+              props.profile.profile?.handle
                 ? props.profile.profile.handle
                 : response.display && !containsEmojis(response.display)
                 ? response.display.replaceAll(" ", "-")
@@ -198,9 +158,7 @@ export default function UserPage(props: Props) {
           };
           router.push(
             {
-              pathname: reservedDisplay
-                ? reservedDisplay
-                : props.profile.profile?.handle
+              pathname: props.profile.profile?.handle
                 ? props.profile.profile.handle
                 : response.display && !containsEmojis(response.display)
                 ? response.display.replaceAll(" ", "-")
