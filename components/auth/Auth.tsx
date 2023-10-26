@@ -32,6 +32,7 @@ export interface IProfileWithMeta {
 type AuthContextType = {
   profile: IProfileWithMeta | null;
   loadingProfile: boolean;
+  updateProfile: () => Promise<void>;
   requestAuth: () => Promise<{ success: boolean }>;
   setToast: ({ message, type }: { message: string; type: TypeOptions }) => void;
 };
@@ -44,6 +45,7 @@ interface NonceResponse {
 export const AuthContext = createContext<AuthContextType>({
   profile: null,
   loadingProfile: false,
+  updateProfile: async () => {},
   requestAuth: async () => ({ success: false }),
   setToast: () => {},
 });
@@ -83,26 +85,29 @@ export default function Auth({ children }: { children: React.ReactNode }) {
     };
   };
 
+  const getProfile = async () => {
+    if (!address) {
+      setProfile(null);
+      return;
+    }
+    setLoadingProfile(true);
+    try {
+      const response = await commonApiFetch<IProfileAndConsolidations>({
+        endpoint: `profiles/${address}`,
+      });
+      setProfile(mapApiResponseToUser(response));
+    } catch {
+      setProfile(null);
+    } finally {
+      setLoadingProfile(false);
+    }
+  };
+
   useEffect(() => {
-    const getProfile = async () => {
-      if (!address) {
-        setProfile(null);
-        return;
-      }
-      setLoadingProfile(true);
-      try {
-        const response = await commonApiFetch<IProfileAndConsolidations>({
-          endpoint: `profiles/${address}`,
-        });
-        setProfile(mapApiResponseToUser(response));
-      } catch {
-        setProfile(null);
-      } finally {
-        setLoadingProfile(false);
-      }
-    };
     getProfile();
   }, [address]);
+
+  const updateProfile = async () => await getProfile();
 
   const getNonce = async (): Promise<NonceResponse | null> => {
     try {
@@ -275,7 +280,7 @@ export default function Auth({ children }: { children: React.ReactNode }) {
   return (
     <>
       <AuthContext.Provider
-        value={{ requestAuth, setToast, profile, loadingProfile }}
+        value={{ requestAuth, setToast, profile, loadingProfile, updateProfile }}
       >
         {children}
         <ToastContainer />
