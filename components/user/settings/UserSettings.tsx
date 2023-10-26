@@ -23,12 +23,10 @@ const inter = Inter({
   display: "swap",
 });
 
-
-
 export default function UserSettingsComponent(props: Props) {
   const account = useAccount();
   const router = useRouter();
-  const { requestAuth, setToast, updateProfile } = useContext(AuthContext);
+  const { requestAuth, setToast } = useContext(AuthContext);
   const [init, setInit] = useState(false);
   const [userOrWallet] = useState(
     Array.isArray(router.query.user)

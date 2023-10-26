@@ -23,7 +23,7 @@ export interface MemeLite {
 
 export default function UserSettingsImg({ profile }: { profile: IProfile }) {
   const router = useRouter();
-  const { setToast, requestAuth, updateProfile } = useContext(AuthContext);
+  const { setToast, requestAuth, updateMyProfile } = useContext(AuthContext);
   const [memes, setMemes] = useState<MemeLite[]>([]);
 
   useEffect(() => {
@@ -98,7 +98,7 @@ export default function UserSettingsImg({ profile }: { profile: IProfile }) {
         endpoint: `profiles/${profile.handle}/pfp`,
         body: formData,
       });
-      await updateProfile();
+      await updateMyProfile();
       setToast({
         message: "Profile updated",
         type: "success",

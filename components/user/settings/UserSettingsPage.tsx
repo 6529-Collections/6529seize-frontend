@@ -27,7 +27,7 @@ export default function UserSettingsPage({
   user: IProfileWithMeta;
   onUser: (user: IProfileAndConsolidations) => void;
 }) {
-  const { requestAuth, setToast, updateProfile } = useContext(AuthContext);
+  const { requestAuth, setToast, updateMyProfile } = useContext(AuthContext);
   const router = useRouter();
 
   const [userName, setUserName] = useState<string>(user.profile?.handle ?? "");
@@ -91,7 +91,7 @@ export default function UserSettingsPage({
         body,
       });
       onUser(response);
-      await updateProfile();
+      await updateMyProfile();
       setToast({
         message: "Profile updated",
         type: "success",
