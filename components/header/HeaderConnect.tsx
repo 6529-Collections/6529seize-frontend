@@ -68,13 +68,6 @@ export default function HeaderConnect() {
           onHide={() => setShowWalletModal(false)}
         />
       )}
-      {account.address && (
-        <WalletModal
-          wallet={account.address}
-          show={showWalletModal}
-          onHide={() => setShowWalletModal(false)}
-        />
-      )}
     </>
   );
 }
