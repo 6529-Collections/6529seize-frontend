@@ -90,6 +90,9 @@ export default function UserSettingsPage({
         endpoint: "profiles",
         body,
       });
+      if (response.profile?.handle !== user.profile?.handle) {
+        router.push(`/${response.profile?.handle}/settings`);
+      }
       onUser(response);
       await updateMyProfile();
       setToast({
