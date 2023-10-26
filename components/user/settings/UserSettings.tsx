@@ -121,7 +121,7 @@ export default function UserSettingsComponent(props: Props) {
       id="allowlist-tool"
       className={`tw-bg-neutral-900 tw-overflow-y-auto tw-min-h-screen tw-relative ${inter.className}`}
     >
-      <div className="tw-max-w-lg tw-mx-auto tw-pt-8 tw-pb-12">
+      <div className="tw-max-w-2xl tw-mx-auto tw-pt-8 tw-pb-12">
         <UserSettingsGoToUser
           user={user.profile?.handle ?? userOrWallet.toLowerCase()}
         />
