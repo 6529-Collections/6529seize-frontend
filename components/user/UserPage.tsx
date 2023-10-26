@@ -515,6 +515,9 @@ export default function UserPage(props: Props) {
                                   ? consolidatedTDH.wallets
                                   : [ownerAddress]
                               }
+                              consolidatedWallets={
+                                props.profile.consolidation.wallets
+                              }
                               display={
                                 props.profile.profile?.handle
                                   ? props.profile.profile.handle
@@ -522,6 +525,14 @@ export default function UserPage(props: Props) {
                                     consolidatedTDH.consolidation_display
                                   ? consolidatedTDH.consolidation_display
                                   : ownerENS
+                              }
+                              displayEns={
+                                props.profile.profile?.handle
+                                  ? props.profile.consolidation.wallets.reduce(
+                                      (prev, curr) =>
+                                        prev.tdh > curr.tdh ? prev : curr
+                                    ).wallet.ens
+                                  : undefined
                               }
                               isUserPage={true}
                               disableLink={true}
