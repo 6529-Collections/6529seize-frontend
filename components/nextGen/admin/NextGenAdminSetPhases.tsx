@@ -20,6 +20,7 @@ import {
 import NextGenContractWriteStatus from "../NextGenContractWriteStatus";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { PhaseTimes } from "../nextgen_entities";
+import { NULL_ADDRESS } from "../../../constants";
 
 interface Props {
   close: () => void;
@@ -58,6 +59,9 @@ export default function NextGenAdminSetPhases(props: Props) {
   const [publicStartTime, setPublicStartTime] = useState("");
   const [publicEndTime, setPublicEndTime] = useState("");
   const [merkleRoot, setMerkleRoot] = useState("");
+  const [onChainMerkleRoot, setOnChainMerkleRoot] = useState("");
+
+  const [hasAllowlist, setHasAllowlist] = useState(true);
 
   const [errors, setErrors] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
@@ -68,13 +72,16 @@ export default function NextGenAdminSetPhases(props: Props) {
   const [uploadError, setUploadError] = useState<string>();
 
   retrieveCollectionPhases(collectionID, (data: PhaseTimes) => {
-    if (
-      collectionID &&
-      !uploadSuccess &&
-      data &&
-      !MARKLE_ZERO_PATTERN.test(data.merkle_root)
-    ) {
-      setMerkleRoot(data.merkle_root);
+    if (collectionID) {
+      if (MARKLE_ZERO_PATTERN.test(data.merkle_root)) {
+        setOnChainMerkleRoot("");
+        setMerkleRoot("");
+        setHasAllowlist(false);
+      } else {
+        setOnChainMerkleRoot(data.merkle_root);
+        setMerkleRoot(data.merkle_root);
+        setHasAllowlist(true);
+      }
       setAllowlistStartTime(data.allowlist_start_time.toString());
       setAllowlistEndTime(data.allowlist_end_time.toString());
       setPublicStartTime(data.public_start_time.toString());
@@ -112,14 +119,16 @@ export default function NextGenAdminSetPhases(props: Props) {
     if (!collectionID) {
       errors.push("Collection id is required");
     }
-    if (!merkleRoot) {
-      errors.push("Merkle Root is required");
-    }
-    if (!allowlistStartTime) {
-      errors.push("Allowlist start time is required");
-    }
-    if (!allowlistEndTime) {
-      errors.push("Allowlist ending time is required");
+    if (hasAllowlist) {
+      if (!merkleRoot) {
+        errors.push("Merkle Root is required");
+      }
+      if (!allowlistStartTime) {
+        errors.push("Allowlist start time is required");
+      }
+      if (!allowlistEndTime) {
+        errors.push("Allowlist ending time is required");
+      }
     }
     if (!publicStartTime) {
       errors.push("Public minting time is required");
@@ -141,11 +150,11 @@ export default function NextGenAdminSetPhases(props: Props) {
       contractWrite.write({
         args: [
           collectionID,
-          allowlistStartTime,
-          allowlistEndTime,
+          hasAllowlist ? allowlistStartTime : 0,
+          hasAllowlist ? allowlistEndTime : 0,
           publicStartTime,
           publicEndTime,
-          merkleRoot,
+          hasAllowlist ? merkleRoot : NULL_ADDRESS,
         ],
       });
     }
@@ -247,68 +256,94 @@ export default function NextGenAdminSetPhases(props: Props) {
               </Form.Select>
             </Form.Group>
             <Form.Group className="mb-3">
-              <Form.Label>Allowlist</Form.Label>
-              <Form.Control
-                type="file"
-                accept={".csv"}
-                value={allowlistFile ? allowlistFile.fileName : ""}
-                onChange={(e: any) => {
-                  if (e.target.files) {
-                    const f = e.target.files[0];
-                    setAllowlistFile(f);
-                  }
-                }}
-              />
-              <div className="d-flex align-items-center mt-3 gap-3">
-                <Button
-                  className="seize-btn"
-                  disabled={
-                    !collectionID ||
-                    !allowlistFile ||
-                    uploading ||
-                    uploadSuccess
-                  }
-                  onClick={() => uploadFile()}>
-                  Upload
-                </Button>
-                {uploading && <span>Uploading...</span>}
-                {uploadSuccess && (
-                  <span className="text-success">Uploaded</span>
-                )}
-                {!uploading && uploadError && (
-                  <span className="text-danger">{uploadError}</span>
-                )}
-              </div>
+              <span className="d-flex align-items-center gap-3">
+                <Form.Check
+                  checked={hasAllowlist}
+                  type="radio"
+                  label="Allowlist"
+                  name="hasAllowlistRadio"
+                  onChange={() => {
+                    setHasAllowlist(true);
+                    setMerkleRoot(onChainMerkleRoot);
+                  }}
+                />
+                <Form.Check
+                  checked={!hasAllowlist}
+                  type="radio"
+                  label="No Allowlist"
+                  name="hasAllowlistRadio"
+                  onChange={() => {
+                    setHasAllowlist(false);
+                  }}
+                />
+              </span>
             </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>Merkle Root</Form.Label>
-              <Form.Control
-                type="text"
-                placeholder={
-                  merkleRoot ? merkleRoot : "Upload file to generate"
-                }
-                value={merkleRoot}
-                disabled
-              />
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>Allowlist Start Time</Form.Label>
-              <Form.Control
-                type="integer"
-                placeholder="Unix epoch time"
-                value={allowlistStartTime}
-                onChange={(e: any) => setAllowlistStartTime(e.target.value)}
-              />
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>Allowlist Ending Time</Form.Label>
-              <Form.Control
-                type="integer"
-                placeholder="Unix epoch time"
-                value={allowlistEndTime}
-                onChange={(e: any) => setAllowlistEndTime(e.target.value)}
-              />
-            </Form.Group>
+            {hasAllowlist && (
+              <>
+                <Form.Group className="mb-3">
+                  <Form.Control
+                    type="file"
+                    accept={".csv"}
+                    value={allowlistFile ? allowlistFile.fileName : ""}
+                    onChange={(e: any) => {
+                      if (e.target.files) {
+                        const f = e.target.files[0];
+                        setAllowlistFile(f);
+                      }
+                    }}
+                  />
+                  <div className="d-flex align-items-center mt-3 gap-3">
+                    <Button
+                      className="seize-btn"
+                      disabled={
+                        !collectionID ||
+                        !allowlistFile ||
+                        uploading ||
+                        uploadSuccess
+                      }
+                      onClick={() => uploadFile()}>
+                      Upload
+                    </Button>
+                    {uploading && <span>Uploading...</span>}
+                    {uploadSuccess && (
+                      <span className="text-success">Uploaded</span>
+                    )}
+                    {!uploading && uploadError && (
+                      <span className="text-danger">{uploadError}</span>
+                    )}
+                  </div>
+                </Form.Group>
+                <Form.Group className="mb-3">
+                  <Form.Label>Merkle Root</Form.Label>
+                  <Form.Control
+                    type="text"
+                    placeholder={
+                      merkleRoot ? merkleRoot : "Upload file to generate"
+                    }
+                    value={merkleRoot}
+                    disabled
+                  />
+                </Form.Group>
+                <Form.Group className="mb-3">
+                  <Form.Label>Allowlist Start Time</Form.Label>
+                  <Form.Control
+                    type="integer"
+                    placeholder="Unix epoch time"
+                    value={allowlistStartTime}
+                    onChange={(e: any) => setAllowlistStartTime(e.target.value)}
+                  />
+                </Form.Group>
+                <Form.Group className="mb-3">
+                  <Form.Label>Allowlist Ending Time</Form.Label>
+                  <Form.Control
+                    type="integer"
+                    placeholder="Unix epoch time"
+                    value={allowlistEndTime}
+                    onChange={(e: any) => setAllowlistEndTime(e.target.value)}
+                  />
+                </Form.Group>
+              </>
+            )}
             <Form.Group className="mb-3">
               <Form.Label>Public Minting Start Time</Form.Label>
               <Form.Control

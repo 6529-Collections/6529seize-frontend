@@ -52,7 +52,9 @@ export default function NextGenAdminUpdateRandomizer(props: Props) {
   const [submitting, setSubmitting] = useState(false);
 
   retrieveCollectionAdditionalData(collectionID, (data: AdditionalData) => {
-    setRandomizerContract(data.randomizer);
+    if (collectionID) {
+      setRandomizerContract(data.randomizer);
+    }
   });
 
   const contractWrite = useContractWrite({

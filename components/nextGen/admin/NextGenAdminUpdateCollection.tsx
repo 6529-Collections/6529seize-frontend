@@ -106,7 +106,7 @@ export default function NextGenAdminUpdateCollection(props: Props) {
       params.push(scripts);
     } else if (props.type === UpdateType.UPDATE_BASE_URI) {
       params.push(UPDATE_BASE_URI_INDEX);
-      params.push(scripts);
+      params.push([]);
     } else if (props.type === UpdateType.UPDATE_SCRIPT) {
       params.push(scriptIndex);
       params.push(scripts);

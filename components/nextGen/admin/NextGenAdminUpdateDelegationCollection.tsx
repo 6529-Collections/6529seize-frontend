@@ -15,6 +15,7 @@ import {
   useCollectionIndex,
   useCollectionAdmin,
   getCollectionIdsForAddress,
+  retrieveCollectionCosts,
 } from "../nextgen_helpers";
 import { MintingDetails } from "../nextgen_entities";
 
@@ -50,27 +51,10 @@ export default function NextGenAdminUpdateDelegationCollection(props: Props) {
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
-  useContractRead({
-    address: NEXTGEN_MINTER.contract as `0x${string}`,
-    abi: NEXTGEN_MINTER.abi,
-    chainId: NEXTGEN_CHAIN_ID,
-    functionName: "retrieveCollectionMintingDetails",
-    args: [collectionID],
-    enabled: !!collectionID,
-    onSettled(data: any, error: any) {
-      if (data) {
-        const d = data as any[];
-        const md: MintingDetails = {
-          mint_cost: parseInt(d[1]),
-          end_mint_cost: parseInt(d[1]),
-          rate: parseInt(d[2]),
-          timePeriod: parseInt(d[3]),
-          salesOption: parseInt(d[4]),
-          delAddress: d[5],
-        };
-        setDelegationCollection(md.delAddress);
-      }
-    },
+  retrieveCollectionCosts(collectionID, (data: MintingDetails) => {
+    if (collectionID) {
+      setDelegationCollection(data.del_address);
+    }
   });
 
   const contractWrite = useContractWrite({

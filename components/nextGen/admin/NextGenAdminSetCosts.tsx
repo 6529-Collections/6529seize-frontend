@@ -13,10 +13,12 @@ import {
   useCollectionIndex,
   useCollectionAdmin,
   getCollectionIdsForAddress,
+  retrieveCollectionCosts,
 } from "../nextgen_helpers";
 import NextGenContractWriteStatus from "../NextGenContractWriteStatus";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { ANY_COLLECTION } from "../../../pages/delegation/[...section]";
+import { MintingDetails } from "../nextgen_entities";
 
 interface Props {
   close: () => void;
@@ -56,6 +58,17 @@ export default function NextGenAdminSetCosts(props: Props) {
   const [errors, setErrors] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+
+  retrieveCollectionCosts(collectionID, (data: MintingDetails) => {
+    if (collectionID) {
+      setCollectionStartCost(data.mint_cost.toString());
+      setCollectionEndCost(data.end_mint_cost.toString());
+      setRate(data.rate.toString());
+      setTimePeriod(data.time_period.toString());
+      setSaleOption(data.sales_option.toString());
+      setDelegationAddress(data.del_address);
+    }
+  });
 
   const contractWrite = useContractWrite({
     address: NEXTGEN_MINTER.contract as `0x${string}`,

@@ -25,9 +25,9 @@ export interface MintingDetails {
   mint_cost: number;
   end_mint_cost: number;
   rate: number;
-  timePeriod: number;
-  salesOption: number;
-  delAddress: string;
+  time_period: number;
+  sales_option: number;
+  del_address: string;
 }
 
 export interface PhaseTimes {

@@ -10,6 +10,7 @@ import {
   AdditionalData,
   Info,
   LibraryScript,
+  MintingDetails,
   PhaseTimes,
   Status,
 } from "./nextgen_entities";
@@ -228,6 +229,36 @@ export function retrieveCollectionLibraryAndScript(
           script: d[1],
         };
         callback(ls);
+      }
+    },
+  });
+}
+
+export function retrieveCollectionCosts(
+  collection: number | string,
+  callback: (data: any) => void,
+  watch: boolean = false
+) {
+  useContractRead({
+    address: NEXTGEN_MINTER.contract as `0x${string}`,
+    abi: NEXTGEN_MINTER.abi,
+    chainId: NEXTGEN_CHAIN_ID,
+    functionName: "retrieveCollectionMintingDetails",
+    args: [collection],
+    watch: watch,
+    enabled: !!collection,
+    onSettled(data: any, error: any) {
+      if (data) {
+        const d = data as any[];
+        const md: MintingDetails = {
+          mint_cost: parseInt(d[1]),
+          end_mint_cost: parseInt(d[1]),
+          rate: parseInt(d[2]),
+          time_period: parseInt(d[3]),
+          sales_option: parseInt(d[4]),
+          del_address: d[5],
+        };
+        callback(md);
       }
     },
   });

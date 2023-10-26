@@ -46,6 +46,7 @@ import DateCountdown from "../../../date-countdown/DateCountdown";
 import { fetchUrl } from "../../../../services/6529api";
 import NextGenContractWriteStatus from "../../NextGenContractWriteStatus";
 import { NextGenTokenImageContent } from "../NextGenTokenImage";
+import { retrieveCollectionCosts } from "../../nextgen_helpers";
 
 function NextGenDelegatorOption(props: { address: string }) {
   const ens = useEnsName({
@@ -215,7 +216,7 @@ export default function NextGenCollectionMint(props: Props) {
         functionName: "retrieveDelegators",
         args: [
           account.address ? account.address : "",
-          mintingDetails ? mintingDetails.delAddress : "",
+          mintingDetails ? mintingDetails.del_address : "",
           ALL_USE_CASE.use_case,
         ],
       },
@@ -226,7 +227,7 @@ export default function NextGenCollectionMint(props: Props) {
         functionName: "retrieveDelegators",
         args: [
           account.address ? account.address : "",
-          mintingDetails ? mintingDetails.delAddress : "",
+          mintingDetails ? mintingDetails.del_address : "",
           MINTING_USE_CASE.use_case,
         ],
       },
@@ -246,27 +247,8 @@ export default function NextGenCollectionMint(props: Props) {
     },
   });
 
-  useContractRead({
-    functionName: "retrieveCollectionMintingDetails",
-    address: NEXTGEN_MINTER.contract as `0x${string}`,
-    abi: NEXTGEN_MINTER.abi,
-    chainId: NEXTGEN_CHAIN_ID,
-    watch: true,
-    args: [props.collection],
-    onSettled(data: any, error: any) {
-      if (data) {
-        const d = data as any[];
-        const md: MintingDetails = {
-          mint_cost: parseInt(d[1]),
-          end_mint_cost: parseInt(d[1]),
-          rate: parseInt(d[2]),
-          timePeriod: parseInt(d[3]),
-          salesOption: parseInt(d[4]),
-          delAddress: d[5],
-        };
-        setMintingDetails(md);
-      }
-    },
+  retrieveCollectionCosts(props.collection, (data: MintingDetails) => {
+    setMintingDetails(data);
   });
 
   function retrievePerAddressParams() {
@@ -419,7 +401,7 @@ export default function NextGenCollectionMint(props: Props) {
       return "-";
     }
 
-    switch (mintingDetails.salesOption) {
+    switch (mintingDetails.sales_option) {
       case 1:
         return "Fixed Price";
       case 2:
@@ -427,7 +409,7 @@ export default function NextGenCollectionMint(props: Props) {
       case 3:
         return "Periodic Sale";
       default:
-        return `${mintingDetails.salesOption}`;
+        return `${mintingDetails.sales_option}`;
     }
   }
 
