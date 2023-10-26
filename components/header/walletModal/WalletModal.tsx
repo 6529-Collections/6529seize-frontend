@@ -35,10 +35,17 @@ export default function WalletModal(props: Props) {
         if (isEmptyObject(user)) {
           setEns(undefined);
         } else {
+          const highestTdhWallet = profile?.consolidation?.wallets?.reduce(
+            (prev, current) => (prev.tdh > current.tdh ? prev : current)
+          );
+
           setEns({
             created_at: profile.profile?.created_at ?? undefined,
             wallet: props.wallet.toLowerCase(),
-            display: profile.profile?.handle ?? props.wallet.toLowerCase(),
+            display:
+              profile.profile?.handle ??
+              highestTdhWallet?.wallet?.ens ??
+              props.wallet.toLowerCase(),
             consolidation_key: user.consolidation_key,
             pfp: profile.profile?.pfp_url ?? undefined,
             banner_1: profile.profile?.banner_1 ?? undefined,
