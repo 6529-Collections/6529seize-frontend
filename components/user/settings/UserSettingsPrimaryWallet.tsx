@@ -86,9 +86,9 @@ export default function UserSettingsPrimaryWallet({
                       className="tw-group tw-text-white tw-rounded-lg tw-relative tw-cursor-pointer tw-select-none tw-p-2 hover:tw-bg-neutral-600 tw-transition tw-duration-300 tw-ease-out"
                     >
                       <span className="tw-inline-block tw-text-sm tw-font-medium tw-text-white">
-                        {`${wallet.displayName} - ${numberWithCommas(
-                          wallet.tdh
-                        )}TDH`}
+                        {`${wallet.displayName} - ${
+                          wallet.tdh > 0 ? numberWithCommas(wallet.tdh) : 0
+                        }TDH`}
                       </span>
                     </li>
                   ))}
