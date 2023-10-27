@@ -37,7 +37,7 @@ export default function UserSettingsImgSelectMeme({
   return (
     <div ref={listRef} className="tw-max-w-full tw-relative">
       <label className="tw-block tw-text-sm tw-font-normal tw-leading-5 tw-text-neutral-350">
-        Select Memes
+        Select Meme
       </label>
       <div className="tw-mt-2 tw-relative">
         <input
