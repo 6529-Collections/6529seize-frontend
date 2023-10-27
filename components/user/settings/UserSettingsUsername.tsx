@@ -55,7 +55,7 @@ export default function UserSettingsUsername({
       }
     };
     getUsernameAvailability();
-  }, [debouncedUsername]);
+  }, [debouncedUsername, originalUsername]);
 
   return (
     <div>
