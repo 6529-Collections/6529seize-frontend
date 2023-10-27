@@ -39,7 +39,7 @@ export default function NextGenAdmin() {
         <meta property="og:description" content="6529 SEIZE" />
         <meta
           property="og:image"
-          content={`${process.env.BASE_ENDPOINT}/re-memes-b.jpeg`}
+          content={`${process.env.BASE_ENDPOINT}/nextgen.png`}
         />
       </Head>
 

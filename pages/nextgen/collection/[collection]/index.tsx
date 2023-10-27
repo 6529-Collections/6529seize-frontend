@@ -34,7 +34,10 @@ export default function NextGenCollection(props: any) {
           content={`${process.env.BASE_ENDPOINT}/nextgen/collection/${pageProps.collection}`}
         />
         <meta property="og:title" content={pageProps.name} />
-        {/* <meta property="og:image" content={pageProps.image} /> */}
+        <meta
+          property="og:image"
+          content={`${process.env.BASE_ENDPOINT}/nextgen.png`}
+        />
         <meta property="og:description" content="6529 SEIZE" />
         <meta name="twitter:card" content={pagenameFull} />
         <meta name="twitter:image:alt" content={pageProps.name} />
