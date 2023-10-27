@@ -1,6 +1,6 @@
 export default function UserSettingsSave({ loading }: { loading: boolean }) {
   return (
-    <div className="tw-pt-6 tw-flex tw-justify-end">
+    <div className="tw-pt-6 tw-flex tw-justify-end tw-mt-6">
       <button
         disabled={loading}
         type="submit"

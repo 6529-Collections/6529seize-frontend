@@ -1,15 +1,19 @@
-import { FormEvent, useContext, useState } from "react";
+import { FormEvent, useContext, useEffect, useState } from "react";
 import { IProfileAndConsolidations } from "../../../entities/IProfile";
 import UserSettingsPrimaryWallet from "./UserSettingsPrimaryWallet";
 import UserSettingsSave from "./UserSettingsSave";
 import UserSettingsUsername from "./UserSettingsUsername";
 import { AuthContext, IProfileWithMeta } from "../../auth/Auth";
 import { useRouter } from "next/router";
-import { commonApiPost } from "../../../services/api/common-api";
+import {
+  commonApiFetch,
+  commonApiPost,
+} from "../../../services/api/common-api";
 import UserSettingsImg from "./UserSettingsImg";
 import UserSettingsBackground from "./UserSettingsBackground";
 import { getRandomColor } from "../../../helpers/Helpers";
 import UserSettingsWebsite from "./UserSettingsWebsite";
+import { useDebounce } from "react-use";
 
 interface ApiCreateOrUpdateProfileRequest {
   readonly handle: string;
@@ -117,8 +121,12 @@ export default function UserSettingsPage({
   return (
     <div className="tw-pt-10 tw-space-y-6 tw-divide-y tw-divide-x-0 tw-divide-solid tw-divide-neutral-700">
       <div className="tw-flex tw-flex-col tw-gap-y-6">
-        <form onSubmit={onSubmit} className="tw-flex tw-flex-col tw-gap-y-6">
-          <UserSettingsUsername userName={userName} setUserName={setUserName} />
+        <form onSubmit={onSubmit} className="tw-flex tw-flex-col">
+          <UserSettingsUsername
+            userName={userName}
+            originalUsername={user.profile?.handle ?? ""}
+            setUserName={setUserName}
+          />
 
           <UserSettingsPrimaryWallet
             consolidations={user.consolidation.wallets}
