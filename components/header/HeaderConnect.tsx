@@ -7,16 +7,16 @@ import { AuthContext } from "../auth/Auth";
 import WalletModal from "./walletModal/WalletModal";
 
 export default function HeaderConnect() {
-  const { profile, loadingProfile } = useContext(AuthContext);
+  const { myProfile, loadingMyProfile } = useContext(AuthContext);
   const account = useAccount();
   const [showWalletModal, setShowWalletModal] = useState(false);
   const [display, setDisplay] = useState("");
   useEffect(() => {
-    if (profile?.profile?.handle) {
-      setDisplay(profile?.profile?.handle);
+    if (myProfile?.profile?.handle) {
+      setDisplay(myProfile?.profile?.handle);
       return;
     }
-    const wallet = profile?.consolidation.wallets.find(
+    const wallet = myProfile?.consolidation.wallets.find(
       (w) =>
         w.wallet.address.toLowerCase() === account.address?.toLocaleLowerCase()
     );
@@ -29,11 +29,11 @@ export default function HeaderConnect() {
       return;
     }
     setDisplay("Connect");
-  }, [profile, account.address]);
+  }, [myProfile, account.address]);
 
   return (
     <>
-      {loadingProfile ? (
+      {loadingMyProfile ? (
         <div></div>
       ) : account.isConnected && account.address ? (
         <>
@@ -51,7 +51,7 @@ export default function HeaderConnect() {
             className={`${styles.userProfileBtn}`}
             onClick={() =>
               (window.location.href = `/${
-                profile?.profile?.handle ?? account.address
+                myProfile?.profile?.handle ?? account.address
               }`)
             }
           >

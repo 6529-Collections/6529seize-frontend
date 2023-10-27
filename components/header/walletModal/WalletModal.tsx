@@ -19,13 +19,13 @@ interface Props {
 }
 
 export default function WalletModal(props: Props) {
-  const { profile } = useContext(AuthContext);
+  const { myProfile } = useContext(AuthContext);
   const [ens, setEns] = useState<ENS>();
   const [copied, setIsCopied] = useState<boolean>(false);
 
   useEffect(() => {
     const getUser = async () => {
-      if (!profile) {
+      if (!myProfile) {
         setEns(undefined);
       } else {
         const user = await fetchUrl(
@@ -34,29 +34,29 @@ export default function WalletModal(props: Props) {
         if (isEmptyObject(user)) {
           setEns(undefined);
         } else {
-          const highestTdhWallet = profile?.consolidation?.wallets?.reduce(
+          const highestTdhWallet = myProfile?.consolidation?.wallets?.reduce(
             (prev, current) => (prev.tdh > current.tdh ? prev : current)
           );
 
           setEns({
-            created_at: profile.profile?.created_at ?? undefined,
+            created_at: myProfile.profile?.created_at ?? undefined,
             wallet: props.wallet.toLowerCase(),
             display:
-              profile.profile?.handle ??
+              myProfile.profile?.handle ??
               highestTdhWallet?.wallet?.ens ??
               props.wallet.toLowerCase(),
             consolidation_key: user.consolidation_key,
-            pfp: profile.profile?.pfp_url ?? undefined,
-            banner_1: profile.profile?.banner_1 ?? undefined,
-            banner_2: profile.profile?.banner_2 ?? undefined,
-            website: profile.profile?.website ?? undefined,
+            pfp: myProfile.profile?.pfp_url ?? undefined,
+            banner_1: myProfile.profile?.banner_1 ?? undefined,
+            banner_2: myProfile.profile?.banner_2 ?? undefined,
+            website: myProfile.profile?.website ?? undefined,
           });
         }
       }
     };
 
     getUser();
-  }, [props.wallet, profile]);
+  }, [props.wallet, myProfile]);
 
   function copy() {
     navigator.clipboard.writeText(props.wallet);

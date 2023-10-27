@@ -4,38 +4,14 @@ import styles from "../../styles/Home.module.scss";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/router";
 import {
-  areEqualAddresses,
   containsEmojis,
   formatAddress,
   numberWithCommas,
 } from "../../helpers/Helpers";
-import { MANIFOLD, SIX529_MUSEUM } from "../../constants";
 import HeaderPlaceholder from "../../components/header/HeaderPlaceholder";
 import { useEffect, useState } from "react";
 import { commonApiFetch } from "../../services/api/common-api";
 import { IProfileAndConsolidations } from "../../entities/IProfile";
-import { get } from "http";
-
-export enum ReservedUser {
-  MUSEUM = "6529Museum",
-  MANIFOLD = "Manifold-Minting-Wallet",
-}
-
-export const MUSEUM_ENS = {
-  wallet: SIX529_MUSEUM,
-  display: ReservedUser.MUSEUM,
-  banner_1: "#111111",
-  banner_2: "#000000",
-  pfp: "./museum.png",
-};
-
-export const MANIFOLD_ENS = {
-  wallet: MANIFOLD,
-  display: ReservedUser.MANIFOLD,
-  banner_1: "#111111",
-  banner_2: "#000000",
-  pfp: "./manifold.png",
-};
 
 interface PageProps {
   title: string;
@@ -149,13 +125,6 @@ export async function getServerSideProps(
 }> {
   let user = req.query.user;
 
-  if (areEqualAddresses(user, MUSEUM_ENS.display)) {
-    user = MUSEUM_ENS.wallet;
-  }
-  if (areEqualAddresses(user, MANIFOLD_ENS.display)) {
-    user = MANIFOLD_ENS.wallet;
-  }
-
   const ensRequest = await fetch(
     `${process.env.API_ENDPOINT}/api/user/${user}`
   );
@@ -167,23 +136,11 @@ export async function getServerSideProps(
   if (responseText) {
     const response = await JSON.parse(responseText);
     pfp = response.pfp;
-    if (!pfp) {
-      if (areEqualAddresses(user, SIX529_MUSEUM)) {
-        pfp = `${process.env.BASE_ENDPOINT}/${MUSEUM_ENS.pfp}`;
-      }
-      if (areEqualAddresses(user, MANIFOLD)) {
-        pfp = `${process.env.BASE_ENDPOINT}/${MANIFOLD_ENS.pfp}`;
-      }
-    }
     tdh = response.boosted_tdh ? response.booested_tdh : null;
     balance = response.balance ? response.balance : null;
     userDisplay =
       response.display && !containsEmojis(response.display)
         ? response.display
-        : areEqualAddresses(user, SIX529_MUSEUM)
-        ? ReservedUser.MUSEUM
-        : areEqualAddresses(user, MANIFOLD)
-        ? ReservedUser.MANIFOLD
         : userDisplay;
   }
   return {
@@ -193,7 +150,6 @@ export async function getServerSideProps(
       image: pfp ? pfp : DEFAULT_IMAGE,
       tdh: tdh ? tdh : null,
       balance: balance ? balance : null,
-      //userProfile,
     },
   };
 }

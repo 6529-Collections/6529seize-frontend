@@ -1,12 +1,20 @@
-export default function UserSettingsSave({ loading }: { loading: boolean }) {
+export default function UserSettingsSave({
+  loading,
+  title = "Save",
+}: {
+  loading: boolean;
+  title?: string | undefined;
+}) {
   return (
-    <div className="tw-pt-6 tw-flex tw-justify-end">
+    <div className="tw-flex tw-justify-end tw-mt-6">
       <button
         disabled={loading}
         type="submit"
         className="tw-cursor-pointer tw-flex tw-items-center tw-justify-center tw-relative tw-bg-primary-500 tw-px-4 tw-py-3 tw-text-sm tw-font-medium tw-text-white tw-border tw-border-solid tw-border-primary-500 tw-rounded-lg hover:tw-bg-primary-600 hover:tw-border-primary-600 tw-transition tw-duration-300 tw-ease-out"
       >
-        <div style={{ visibility: loading ? "hidden" : "visible" }}>Save</div>
+        <div style={{ visibility: loading ? "hidden" : "visible" }}>
+          {title}
+        </div>
         {loading && (
           <svg
             aria-hidden="true"

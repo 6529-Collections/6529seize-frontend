@@ -6,7 +6,6 @@ import {
   numberWithCommas,
   parseEmojis,
 } from "../../helpers/Helpers";
-import { MANIFOLD, SIX529_MUSEUM } from "../../constants";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useState } from "react";
 import { Dropdown } from "react-bootstrap";
@@ -67,13 +66,6 @@ export function WalletAddress(props: {
   const [isCopied, setIsCopied] = useState(false);
 
   function resolveAddress() {
-    if (props.wallet.toUpperCase() === SIX529_MUSEUM.toUpperCase()) {
-      return "6529Museum";
-    }
-    if (props.wallet.toUpperCase() === MANIFOLD.toUpperCase()) {
-      return "Manifold Minting Wallet";
-    }
-
     if (props.displayEns) {
       if (containsEmojis(props.displayEns)) {
         return parseEmojis(props.displayEns);

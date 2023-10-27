@@ -14,7 +14,7 @@ const Header = dynamic(() => import("../../components/header/Header"), {
 });
 
 export default function UserPageSettings() {
-  const { profile } = useContext(AuthContext);
+  const { myProfile } = useContext(AuthContext);
   const router = useRouter();
   const [user] = useState(
     Array.isArray(router.query.user) ? router.query.user[0] : router.query.user
@@ -25,24 +25,24 @@ export default function UserPageSettings() {
   const [url, setUrl] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!profile?.profile) {
+    if (!myProfile?.profile) {
       setPagenameFull(null);
       setTitle(null);
       setUrl(null);
       return;
     }
     const consolidatedWalletsSortedByHighest =
-      profile.consolidation.wallets.sort((a, d) => d.tdh - a.tdh);
+      myProfile.consolidation.wallets.sort((a, d) => d.tdh - a.tdh);
 
     const profileTitle =
-      profile.profile?.handle ??
+      myProfile.profile?.handle ??
       consolidatedWalletsSortedByHighest.at(0)?.displayName ??
       null;
 
     setPagenameFull(`${profileTitle} | 6529 SEIZE`);
     setTitle(profileTitle);
     setUrl(profileTitle);
-  }, [profile]);
+  }, [myProfile]);
 
   return (
     <>

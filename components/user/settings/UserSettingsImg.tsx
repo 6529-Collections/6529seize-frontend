@@ -23,7 +23,7 @@ export interface MemeLite {
 
 export default function UserSettingsImg({ profile }: { profile: IProfile }) {
   const router = useRouter();
-  const { setToast, requestAuth, updateProfile } = useContext(AuthContext);
+  const { setToast, requestAuth, updateMyProfile } = useContext(AuthContext);
   const [memes, setMemes] = useState<MemeLite[]>([]);
 
   useEffect(() => {
@@ -98,7 +98,7 @@ export default function UserSettingsImg({ profile }: { profile: IProfile }) {
         endpoint: `profiles/${profile.handle}/pfp`,
         body: formData,
       });
-      await updateProfile();
+      await updateMyProfile();
       setToast({
         message: "Profile updated",
         type: "success",
@@ -119,24 +119,28 @@ export default function UserSettingsImg({ profile }: { profile: IProfile }) {
   };
 
   return (
-    <form onSubmit={onSubmit} className="tw-pt-6">
-      <UserSettingsImgSelectMeme
-        memes={memes}
-        onMeme={setSelectedMemeAndRemoveFile}
-      />
+    <div className="tw-bg-neutral-800 tw-p-8 tw-rounded-lg">
+      <form onSubmit={onSubmit} className="tw-pt-6">
+        <UserSettingsImgSelectMeme
+          memes={memes}
+          onMeme={setSelectedMemeAndRemoveFile}
+        />
 
-      <div className="tw-inline-flex tw-items-center tw-my-2 tw-justify-center tw-w-full">
-        <hr className="tw-w-full tw-h-px tw-border tw-bg-neutral-600" />
-        <span className="tw-absolute tw-px-3 tw-font-medium tw-text-sm tw-uppercase tw-text-white">
-          or
-        </span>
-      </div>
+        <div className="tw-inline-flex tw-items-center tw-my-2 tw-justify-center tw-w-full">
+          <hr className="tw-w-full tw-h-px tw-border tw-bg-neutral-600" />
+          <span className="tw-absolute tw-px-3 tw-font-medium tw-text-sm tw-uppercase tw-text-white">
+            or
+          </span>
+        </div>
 
-      <UserSettingsImgSelectFile
-        imageToShow={imageToShow}
-        setFile={setFileAndRemoveMeme}
-      />
-      <UserSettingsSave loading={saving} />
-    </form>
+        <UserSettingsImgSelectFile
+          imageToShow={imageToShow}
+          setFile={setFileAndRemoveMeme}
+        />
+        <div className="tw-pt-6">
+          <UserSettingsSave loading={saving} title="Save PFP" />
+        </div>
+      </form>
+    </div>
   );
 }
