@@ -37,9 +37,9 @@ export default function UserSettingsPage({
   const [userName, setUserName] = useState<string>(user.profile?.handle ?? "");
 
   const getHighestTdhWalletOrNone = () => {
-    const tdhWallets = user.consolidation.wallets
-      .filter((w) => w.tdh > 0)
-      .sort((a, b) => b.tdh - a.tdh);
+    const tdhWallets = user.consolidation.wallets.sort(
+      (a, b) => (b.tdh ?? 0) - (a.tdh ?? 0)
+    );
     return tdhWallets.length > 0 ? tdhWallets[0].wallet.address : "";
   };
 

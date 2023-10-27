@@ -6,10 +6,8 @@ import Image from "next/image";
 import { useContext, useEffect, useState } from "react";
 import { ENS } from "../../../entities/IENS";
 import { fetchUrl } from "../../../services/6529api";
-import { isEmptyObject, numberWithCommas } from "../../../helpers/Helpers";
+import {  numberWithCommas } from "../../../helpers/Helpers";
 import Address from "../../address/Address";
-import { commonApiFetch } from "../../../services/api/common-api";
-import { IProfileAndConsolidations } from "../../../entities/IProfile";
 import { AuthContext } from "../../auth/Auth";
 
 interface Props {
@@ -31,9 +29,7 @@ export default function WalletModal(props: Props) {
         const user = await fetchUrl(
           `${process.env.API_ENDPOINT}/api/user/${props.wallet}`
         ).catch(() => null);
-        if (isEmptyObject(user)) {
-          setEns(undefined);
-        } else {
+        {
           const highestTdhWallet = myProfile?.consolidation?.wallets?.reduce(
             (prev, current) => (prev.tdh > current.tdh ? prev : current)
           );

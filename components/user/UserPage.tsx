@@ -10,7 +10,6 @@ import {
   containsEmojis,
   formatAddress,
   getRandomColor,
-  isEmptyObject,
   numberWithCommas,
   removeProtocol,
 } from "../../helpers/Helpers";
@@ -70,7 +69,6 @@ export default function UserPage(props: Props) {
     useState<ConsolidatedTDHMetrics>();
   const [tdh, setTDH] = useState<ConsolidatedTDHMetrics | TDHMetrics>();
   const [isConsolidation, setIsConsolidation] = useState(false);
-  const [userError, setUserError] = useState(false);
   const [fetchingUser, setFetchingUser] = useState(true);
 
   const [ens, setEns] = useState<ENS>();
@@ -120,9 +118,6 @@ export default function UserPage(props: Props) {
             : props.profile?.profile?.primary_wallet;
         const url = `${process.env.API_ENDPOINT}/api/user/${userUrl}`;
         return fetchUrl(url).then((response: ENS) => {
-          if (isEmptyObject(response)) {
-            setUserError(true);
-          }
           setEns({
             ...response,
             display: props.profile.profile?.handle ?? response.display,
@@ -310,15 +305,6 @@ export default function UserPage(props: Props) {
           </Col>
         </Row>
       </Container>
-    );
-  }
-
-  if (userError) {
-    return (
-      <NotFound
-        title="User Not found"
-        links={[{ href: "/", display: "BACK TO HOME" }]}
-      />
     );
   }
 
