@@ -136,7 +136,7 @@ export async function getServerSideProps(
   if (responseText) {
     const response = await JSON.parse(responseText);
     pfp = response.pfp;
-    tdh = response.boosted_tdh ? response.booested_tdh : null;
+    tdh = response.boosted_tdh ? response.boosted_tdh : null;
     balance = response.balance ? response.balance : null;
     userDisplay =
       response.display && !containsEmojis(response.display)
