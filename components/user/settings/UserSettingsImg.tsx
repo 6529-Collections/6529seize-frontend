@@ -99,6 +99,8 @@ export default function UserSettingsImg({ profile }: { profile: IProfile }) {
         body: formData,
       });
       await updateMyProfile();
+      setFile(null);
+      setSelectedMeme(null);
       setToast({
         message: "Profile updated",
         type: "success",
@@ -138,7 +140,11 @@ export default function UserSettingsImg({ profile }: { profile: IProfile }) {
           setFile={setFileAndRemoveMeme}
         />
         <div className="tw-pt-6">
-          <UserSettingsSave loading={saving} title="Save PFP" />
+          <UserSettingsSave
+            loading={saving}
+            disabled={!file && !selectedMeme}
+            title="Save PFP"
+          />
         </div>
       </form>
     </div>
