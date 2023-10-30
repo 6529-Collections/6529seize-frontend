@@ -46,9 +46,9 @@ export default function NextGenAdminSetData(props: Props) {
 
   const [collectionID, setCollectionID] = useState("");
   const [artistAddress, setArtistAddress] = useState("");
-  const [maxPurchases, setMaxPurchases] = useState<number>();
-  const [totalSupply, setTotalSupply] = useState<number>();
-  const [finalSupplyTime, setFinalSupplyTime] = useState<number>();
+  const [maxPurchases, setMaxPurchases] = useState("");
+  const [totalSupply, setTotalSupply] = useState("");
+  const [finalSupplyTime, setFinalSupplyTime] = useState("");
 
   const [errors, setErrors] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
@@ -57,9 +57,9 @@ export default function NextGenAdminSetData(props: Props) {
   retrieveCollectionAdditionalData(collectionID, (data: AdditionalData) => {
     if (collectionID) {
       setArtistAddress(data.artist_address);
-      setMaxPurchases(data.max_purchases);
-      setTotalSupply(data.total_supply);
-      setFinalSupplyTime(data.final_supply_after_mint);
+      setMaxPurchases(data.max_purchases.toString());
+      setTotalSupply(data.total_supply.toString());
+      setFinalSupplyTime(data.final_supply_after_mint.toString());
     }
   });
 
@@ -88,8 +88,8 @@ export default function NextGenAdminSetData(props: Props) {
     if (!maxPurchases) {
       errors.push("Max # of purchases during public mint is required");
     }
-    if (!totalSupply) {
-      errors.push("Total Supply of collection is required");
+    if (!totalSupply || parseInt(totalSupply) < 1) {
+      errors.push("Total Supply of collection must be greater than 0");
     }
     if (!finalSupplyTime) {
       errors.push(
@@ -174,7 +174,7 @@ export default function NextGenAdminSetData(props: Props) {
             <Form.Group className="mb-3">
               <Form.Label>Max # of purchases (public phase)</Form.Label>
               <Form.Control
-                type="number"
+                type="text"
                 placeholder="...max #"
                 value={maxPurchases}
                 onChange={(e: any) => setMaxPurchases(e.target.value)}

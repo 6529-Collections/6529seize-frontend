@@ -46,8 +46,8 @@ export default function NextGenAdminInitializeExternalBurnSwap(props: Props) {
   const [erc721Collection, setErc721Collection] = useState("");
   const [burnCollectionID, setBurnCollectionID] = useState("");
   const [mintCollectionID, setMintCollectionID] = useState("");
-  const [tokenMin, setTokenMin] = useState<number>();
-  const [tokenMax, setTokenMax] = useState<number>();
+  const [tokenMin, setTokenMin] = useState("");
+  const [tokenMax, setTokenMax] = useState("");
   const [burnSwapAddress, setBurnSwapAddress] = useState("");
   const [status, setStatus] = useState<boolean>();
 
@@ -154,22 +154,12 @@ export default function NextGenAdminInitializeExternalBurnSwap(props: Props) {
             </Form.Group>
             <Form.Group className="mb-3">
               <Form.Label>Burn Collection ID</Form.Label>
-              <Form.Select
-                className={`${styles.formInput}`}
-                value={burnCollectionID}
-                onChange={(e) => {
-                  setStatus(undefined);
-                  setBurnCollectionID(e.target.value);
-                }}>
-                <option value="" disabled>
-                  Select Collection
-                </option>
-                {collectionIds.map((id) => (
-                  <option key={`burn-collection-id-${id}`} value={id}>
-                    {id}
-                  </option>
-                ))}
-              </Form.Select>
+              <Form.Control
+                type="text"
+                placeholder="0x..."
+                value={erc721Collection}
+                onChange={(e: any) => setBurnCollectionID(e.target.value)}
+              />
             </Form.Group>
             <Form.Group className="mb-3">
               <Form.Label>Mint Collection ID</Form.Label>
@@ -193,7 +183,7 @@ export default function NextGenAdminInitializeExternalBurnSwap(props: Props) {
             <Form.Group className="mb-3">
               <Form.Label>Min Token Index</Form.Label>
               <Form.Control
-                type="number"
+                type="text"
                 placeholder="...min"
                 value={tokenMin}
                 onChange={(e: any) => setTokenMin(e.target.value)}
@@ -202,7 +192,7 @@ export default function NextGenAdminInitializeExternalBurnSwap(props: Props) {
             <Form.Group className="mb-3">
               <Form.Label>Max Token Index</Form.Label>
               <Form.Control
-                type="number"
+                type="text"
                 placeholder="...max"
                 value={tokenMax}
                 onChange={(e: any) => setTokenMax(e.target.value)}

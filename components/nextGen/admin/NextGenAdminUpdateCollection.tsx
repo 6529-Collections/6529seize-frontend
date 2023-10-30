@@ -63,7 +63,7 @@ export default function NextGenAdminUpdateCollection(props: Props) {
   const [license, setLicense] = useState("");
   const [baseURI, setBaseURI] = useState("");
   const [library, setLibrary] = useState("");
-  const [scriptIndex, setScriptIndex] = useState<number>();
+  const [scriptIndex, setScriptIndex] = useState("");
   const [scripts, setScripts] = useState<string[]>([]);
 
   const [existingScripts, setExistingScripts] = useState<string[]>([]);
@@ -315,11 +315,11 @@ export default function NextGenAdminUpdateCollection(props: Props) {
               <Form.Group className="mb-3">
                 <Form.Label>Script Index</Form.Label>
                 <Form.Control
-                  type="number"
+                  type="text"
                   placeholder="...index"
                   value={scriptIndex}
                   onChange={(e: any) => {
-                    const i = parseInt(e.target.value);
+                    const i = e.target.value;
                     setScriptIndex(i);
                     if (existingScripts.length > i) {
                       setScripts([existingScripts[i]]);
