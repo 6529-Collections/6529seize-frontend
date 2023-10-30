@@ -1,4 +1,3 @@
-
 import styles from "./Header.module.scss";
 import { Container, Row, Col, Nav, Navbar, NavDropdown } from "react-bootstrap";
 import { useAccount } from "wagmi";
@@ -100,8 +99,7 @@ export default function Header(props: Props) {
           <Row className="pt-3 pb-3">
             <Col>
               <h3
-                className={`d-flex justify-content-center ${styles.burgerMenuHeader}`}
-              >
+                className={`d-flex justify-content-center ${styles.burgerMenuHeader}`}>
                 <HeaderConnect />
               </h3>
             </Col>
@@ -856,7 +854,6 @@ export default function Header(props: Props) {
                                 Cookie Policy
                               </NavDropdown.Item>
                             </NavDropdown>
-  
                             <HeaderConnect />
                           </Nav>
                         </Navbar>
