@@ -333,7 +333,7 @@ export default function NextGenAdminUpdateCollection(props: Props) {
             {(props.type === UpdateType.UPDATE_INFO ||
               props.type === UpdateType.UPDATE_SCRIPT) && (
               <Form.Group className="mb-3">
-                <Form.Label>Script x{scripts.length}</Form.Label>
+                <Form.Label>Scripts x{scripts.length}</Form.Label>
                 <Form.Control
                   as="textarea"
                   rows={3}
