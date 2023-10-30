@@ -1,16 +1,32 @@
+import { useEffect, useState } from "react";
+
 export default function UserSettingsSave({
   loading,
+  disabled,
   title = "Save",
 }: {
   loading: boolean;
+  disabled?: boolean | undefined;
   title?: string | undefined;
 }) {
+  const [isDisabled, setIsDisabled] = useState<boolean>(
+    (loading || disabled) ?? false
+  );
+
+  useEffect(() => {
+    setIsDisabled((loading || disabled) ?? false);
+  }, [loading, disabled]);
+
   return (
     <div className="tw-flex tw-justify-end tw-mt-6">
       <button
-        disabled={loading}
+        disabled={isDisabled}
         type="submit"
-        className="tw-cursor-pointer tw-flex tw-items-center tw-justify-center tw-relative tw-bg-primary-500 tw-px-4 tw-py-3 tw-text-sm tw-font-medium tw-text-white tw-border tw-border-solid tw-border-primary-500 tw-rounded-lg hover:tw-bg-primary-600 hover:tw-border-primary-600 tw-transition tw-duration-300 tw-ease-out"
+        className={`tw-flex tw-items-center tw-justify-center tw-relative tw-px-4 tw-py-3 tw-text-sm tw-font-medium tw-text-white tw-border tw-border-solid tw-rounded-lg tw-transition tw-duration-300 tw-ease-out ${
+          isDisabled
+            ? "tw-cursor-not-allowed tw-bg-gray-400 tw-border-gray-400"
+            : "tw-cursor-pointer tw-bg-primary-500 tw-border-primary-500 hover:tw-bg-primary-600 hover:tw-border-primary-600"
+        }`}
       >
         <div style={{ visibility: loading ? "hidden" : "visible" }}>
           {title}

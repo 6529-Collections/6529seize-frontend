@@ -55,7 +55,6 @@ export default function UserSettingsPage({
   );
 
   const [website, setWebsite] = useState<string>(user.profile?.website ?? "");
-
   const [saving, setSaving] = useState<boolean>(false);
 
   const onSave = async () => {
@@ -118,6 +117,17 @@ export default function UserSettingsPage({
     await onSave();
   };
 
+  const [haveChanges, setHaveChanges] = useState<boolean>(false);
+  useEffect(() => {
+    setHaveChanges(
+      userName?.toLowerCase() !== user.profile?.handle.toLowerCase() ||
+        primaryWallet !== user.profile?.primary_wallet ||
+        bgColor1 !== user.profile?.banner_1 ||
+        bgColor2 !== user.profile?.banner_2 ||
+        website !== (user.profile?.website ?? "")
+    );
+  }, [user, userName, primaryWallet, bgColor1, bgColor2, website]);
+
   return (
     <div className="tw-pt-10 tw-space-y-6 tw-divide-y tw-divide-x-0 tw-divide-solid tw-divide-neutral-700">
       <div className="tw-flex tw-flex-col tw-gap-y-6">
@@ -141,7 +151,7 @@ export default function UserSettingsPage({
               setBgColor2={setBgColor2}
             />
             <UserSettingsWebsite website={website} setWebsite={setWebsite} />
-            <UserSettingsSave loading={saving} />
+            <UserSettingsSave loading={saving} disabled={!haveChanges} />
           </form>
         </div>
         {user.profile && <UserSettingsImg profile={user.profile} />}

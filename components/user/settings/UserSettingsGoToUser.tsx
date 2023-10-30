@@ -1,10 +1,22 @@
 import { useRouter } from "next/router";
+import { formatAddress } from "../../../helpers/Helpers";
+import { useEffect, useState } from "react";
+import { isEthereumAddress } from "../../../helpers/AllowlistToolHelpers";
 
 export default function UserSettingsGoToUser({ user }: { user: string }) {
   const router = useRouter();
   const goBackToUser = () => {
     router.push(`/${user}`);
   };
+
+  const formatTitle = (input: string) =>
+    isEthereumAddress(input) ? formatAddress(input) : input;
+  const [title, setTile] = useState<string>(formatTitle(user));
+
+  useEffect(() => {
+    setTile(formatTitle(user));
+  }, [user]);
+
   return (
     <div className="tw-flex tw-items-center tw-gap-x-3">
       <button
@@ -28,7 +40,7 @@ export default function UserSettingsGoToUser({ user }: { user: string }) {
         </svg>
       </button>
       <div className="tw-inline-flex tw-items-center tw-gap-x-2">
-        <span className="tw-text-2xl tw-font-bold tw-text-white">{user}</span>
+        <span className="tw-text-2xl tw-font-bold tw-text-white">{title}</span>
       </div>
     </div>
   );

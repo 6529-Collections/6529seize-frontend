@@ -34,7 +34,7 @@ export default function UserSettingsUsername({
         setAvailabilityState(AVAILABILITY.NEUTRAL);
         return;
       }
-      if (debouncedUsername === originalUsername) {
+      if (debouncedUsername.toLowerCase() === originalUsername.toLowerCase()) {
         setUsernameAvailability("");
         setAvailabilityState(AVAILABILITY.NEUTRAL);
         return;

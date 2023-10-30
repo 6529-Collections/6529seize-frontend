@@ -65,14 +65,7 @@ export function WalletAddress(props: {
 }) {
   const [isCopied, setIsCopied] = useState(false);
 
-  function resolveAddress() {
-    if (props.displayEns) {
-      if (containsEmojis(props.displayEns)) {
-        return parseEmojis(props.displayEns);
-      }
-      return formatAddress(props.displayEns);
-    }
-
+  function resolveDisplay() {
     if (props.display) {
       if (containsEmojis(props.display)) {
         return parseEmojis(props.display);
@@ -81,6 +74,17 @@ export function WalletAddress(props: {
     }
 
     return formatAddress(props.wallet);
+  }
+
+  function resolveAddress() {
+    if (props.displayEns) {
+      if (containsEmojis(props.displayEns)) {
+        return parseEmojis(props.displayEns);
+      }
+      return formatAddress(props.displayEns);
+    }
+
+    return resolveDisplay();
   }
 
   function getLink() {
@@ -103,14 +107,18 @@ export function WalletAddress(props: {
 
   function getInnerHTML() {
     if (props.disableLink) {
-      return resolveAddress();
+      return resolveDisplay();
     }
 
-    return `<a href="${getLink()}">${resolveAddress()}</a>`;
+    return `<a href="${getLink()}">${resolveDisplay()}</a>`;
   }
 
   const [walletEns] = useState(
-    props.display?.endsWith(".eth") ? props.display : props.displayEns
+    props.display?.endsWith(".eth")
+      ? props.display
+      : props.displayEns?.endsWith(".eth")
+      ? props.displayEns
+      : null
   );
 
   return (
@@ -172,7 +180,7 @@ export function WalletAddress(props: {
                     <Dropdown.Item
                       name={`copy-ens-btn`}
                       aria-label={`copy-ens-btn`}
-                      onClick={() => copy(props.display)}
+                      onClick={() => copy(props.displayEns ?? props.display)}
                       dangerouslySetInnerHTML={{
                         __html: resolveAddress(),
                       }}></Dropdown.Item>
@@ -305,7 +313,10 @@ export default function Address(props: Props) {
                 display={
                   props.consolidatedWallets?.find(
                     (c) => c.wallet.address.toLowerCase() === w.toLowerCase()
-                  )?.wallet.ens ?? w
+                  )?.wallet.ens ??
+                  props.display?.split(" - ")[index].endsWith(".eth")
+                    ? props.display?.split(" - ")[index]
+                    : w
                 }
                 hideCopy={props.hideCopy}
                 disableLink={areEqualAddresses(w, props.viewingWallet)}
