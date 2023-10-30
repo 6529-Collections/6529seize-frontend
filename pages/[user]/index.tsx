@@ -133,7 +133,7 @@ export async function getServerSideProps(req: any, res: any, resolvedUrl: any) {
         pfp = `${process.env.BASE_ENDPOINT}/${MANIFOLD_ENS.pfp}`;
       }
     }
-    tdh = response.boosted_tdh ? response.booested_tdh : null;
+    tdh = response.boosted_tdh ? response.boosted_tdh : null;
     balance = response.balance ? response.balance : null;
     userDisplay =
       response.display && !containsEmojis(response.display)
