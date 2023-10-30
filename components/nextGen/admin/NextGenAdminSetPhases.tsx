@@ -20,7 +20,7 @@ import {
 import NextGenContractWriteStatus from "../NextGenContractWriteStatus";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { PhaseTimes } from "../nextgen_entities";
-import { NULL_ADDRESS } from "../../../constants";
+import { NULL_MERKLE } from "../../../constants";
 
 interface Props {
   close: () => void;
@@ -98,6 +98,8 @@ export default function NextGenAdminSetPhases(props: Props) {
     setAllowlistEndTime("");
     setPublicStartTime("");
     setPublicEndTime("");
+    setErrors([]);
+    contractWrite.reset();
   }
 
   const contractWrite = useContractWrite({
@@ -154,7 +156,7 @@ export default function NextGenAdminSetPhases(props: Props) {
           hasAllowlist ? allowlistEndTime : 0,
           publicStartTime,
           publicEndTime,
-          hasAllowlist ? merkleRoot : NULL_ADDRESS,
+          hasAllowlist ? merkleRoot : NULL_MERKLE,
         ],
       });
     }

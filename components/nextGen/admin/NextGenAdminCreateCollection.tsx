@@ -49,27 +49,11 @@ export default function NextGenAdminCreateCollection(props: Props) {
   const [license, setLicense] = useState("");
   const [baseURI, setBaseURI] = useState("");
   const [library, setLibrary] = useState("");
-  const [script, setScript] = useState("");
+  const [scripts, setScripts] = useState<string[]>([]);
 
   const [errors, setErrors] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-
-  function getParams() {
-    const params: any[] = [];
-
-    params.push(collectionName);
-    params.push(artist);
-    params.push(description);
-    params.push(website);
-    params.push(license);
-    params.push(baseURI);
-
-    params.push(library);
-    params.push([script]);
-
-    return params;
-  }
 
   const contractWrite = useContractWrite({
     address: NEXTGEN_CORE.contract as `0x${string}`,
@@ -107,7 +91,7 @@ export default function NextGenAdminCreateCollection(props: Props) {
     if (!library) {
       errors.push("Library is required");
     }
-    if (!script) {
+    if (scripts.length === 0) {
       errors.push("Script is required");
     }
 
@@ -131,7 +115,7 @@ export default function NextGenAdminCreateCollection(props: Props) {
           license,
           baseURI,
           library,
-          [script],
+          scripts,
         ],
       });
     }
@@ -226,12 +210,19 @@ export default function NextGenAdminCreateCollection(props: Props) {
               />
             </Form.Group>
             <Form.Group className="mb-3">
-              <Form.Label>Script</Form.Label>
+              <Form.Label>Scripts x{scripts.length}</Form.Label>
               <Form.Control
-                type="text"
-                placeholder="...script"
-                value={script}
-                onChange={(e: any) => setScript(e.target.value)}
+                as="textarea"
+                rows={3}
+                placeholder="...script - one line per entry"
+                value={scripts.join("\n")}
+                onChange={(e) => {
+                  if (e.target.value) {
+                    setScripts(e.target.value.split("\n"));
+                  } else {
+                    setScripts([]);
+                  }
+                }}
               />
             </Form.Group>
             {!loading && errors.length > 0 && (
