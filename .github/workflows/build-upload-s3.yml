@@ -3,7 +3,7 @@ name: Build and Upload to S3
 on: workflow_dispatch
 
 jobs:
-  build:
+  build-deploy:
     runs-on: ubuntu-latest
 
     steps:
@@ -27,12 +27,12 @@ jobs:
       - name: Get latest commit hash
         run: echo "GIT_COMMIT_HASH=$(git rev-parse HEAD)" >> $GITHUB_ENV
 
-      - name: Upload assets to S3
-        uses: shallwefootball/s3-upload-action@master
-        id: S3
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
         with:
-          aws_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws_bucket: "6529bucket"
-          source_dir: "_next"
-          destination_dir: "web_build/$GIT_COMMIT_HASH"
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      - name: Upload assets to S3
+        run: aws s3 sync _next s3://6529bucket/web_build/$GIT_COMMIT_HASH
