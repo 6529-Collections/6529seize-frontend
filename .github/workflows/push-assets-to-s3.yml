@@ -24,17 +24,16 @@ jobs:
 
       - name: Rename directory
         run: mv .next _next
-      
+
       - name: Get latest commit hash
         run: echo "GIT_COMMIT_HASH=$(git rev-parse HEAD)" >> $GITHUB_ENV
 
       - name: Upload assets to S3
-         - uses: shallwefootball/s3-upload-action@master
-        name: Upload S3
+        uses: shallwefootball/s3-upload-action@master
         id: S3
         with:
           aws_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws_bucket: '6529bucket'
-          source_dir: '_next'
-          destination_dir: 'web_build/$GIT_COMMIT_HASH'
+          aws_bucket: "6529bucket"
+          source_dir: "_next"
+          destination_dir: "web_build/$GIT_COMMIT_HASH"
