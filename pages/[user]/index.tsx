@@ -123,33 +123,38 @@ export async function getServerSideProps(
 ): Promise<{
   props: PageProps;
 }> {
-  let user = req.query.user;
+  const profile = await commonApiFetch<IProfileAndConsolidations>({
+    endpoint: `profiles/${req.query.user}`,
+  });
+
+  const wallet =
+    profile?.profile?.primary_wallet?.toLowerCase() ?? req.query.user;
 
   const ensRequest = await fetch(
-    `${process.env.API_ENDPOINT}/api/user/${user}`
+    `${process.env.API_ENDPOINT}/api/user/${wallet}`
   );
-  let userDisplay = formatAddress(user);
-  let pfp;
+  let userDisplay = profile?.profile?.handle ?? formatAddress(wallet);
+  let pfp = profile?.profile?.pfp_url;
   let tdh;
   let balance;
   const responseText = await ensRequest.text();
   if (responseText) {
     const response = await JSON.parse(responseText);
-    pfp = response.pfp;
     tdh = response.boosted_tdh ? response.boosted_tdh : null;
     balance = response.balance ? response.balance : null;
     userDisplay =
-      response.display && !containsEmojis(response.display)
+      profile?.profile?.handle ??
+      (response.display && !containsEmojis(response.display))
         ? response.display
         : userDisplay;
   }
   return {
     props: {
       title: userDisplay,
-      url: userDisplay.includes(".eth") ? userDisplay : user,
-      image: pfp ? pfp : DEFAULT_IMAGE,
-      tdh: tdh ? tdh : null,
-      balance: balance ? balance : null,
+      url: userDisplay ?? wallet,
+      image: pfp ?? DEFAULT_IMAGE,
+      tdh: tdh ?? null,
+      balance: balance ?? null,
     },
   };
 }
