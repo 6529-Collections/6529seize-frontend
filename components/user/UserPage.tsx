@@ -123,7 +123,7 @@ export default function UserPage(props: Props) {
             display: props.profile.profile?.handle ?? response.display,
             pfp: props.profile.profile?.pfp_url,
             banner_1: props.profile.profile?.banner_1,
-            banner_2: props.profile.profile?.banner_2 ,
+            banner_2: props.profile.profile?.banner_2,
             website: props.profile.profile?.website,
           });
 
@@ -453,6 +453,7 @@ export default function UserPage(props: Props) {
                             </span>
                           )}
                           <span>
+
                             <Address
                               wallets={
                                 view === VIEW.CONSOLIDATION
