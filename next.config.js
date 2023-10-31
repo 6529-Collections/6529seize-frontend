@@ -40,7 +40,11 @@ const securityHeaders = [
   },
 ];
 
+const LOAD_S3 = process.env.LOAD_S3 === "true";
 const nextConfig = {
+  assetPrefix: LOAD_S3
+    ? `https://d3lqz0a4bldqgf.cloudfront.net/web_build/${VERSION}`
+    : "",
   reactStrictMode: false,
   swcMinify: true,
   compress: true,
