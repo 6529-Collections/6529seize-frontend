@@ -121,10 +121,10 @@ export default function UserPage(props: Props) {
           setEns({
             ...response,
             display: props.profile.profile?.handle ?? response.display,
-            pfp: props.profile.profile?.pfp_url ?? response.pfp,
-            banner_1: props.profile.profile?.banner_1 ?? response.banner_1,
-            banner_2: props.profile.profile?.banner_2 ?? response.banner_2,
-            website: props.profile.profile?.website ?? response.website,
+            pfp: props.profile.profile?.pfp_url ?? null,
+            banner_1: props.profile.profile?.banner_1 ?? null,
+            banner_2: props.profile.profile?.banner_2 ?? null,
+            website: props.profile.profile?.website ?? null,
           });
 
           const oAddress =
