@@ -19,6 +19,13 @@ jobs:
         run: npm install
 
       - name: Build
+        env:
+          NODE_ENV: production
+          API_ENDPOINT: "https://api.seize.io"
+          ALLOWLIST_API_ENDPOINT: "https://allowlist-api.seize.io"
+          BASE_ENDPOINT: "https://seize.io"
+          ALCHEMY_API_KEY: ${{ secrets.ALCHEMY_API_KEY }}
+          LOAD_S3: "true"
         run: npm run build
 
       - name: Get latest commit hash
