@@ -73,10 +73,34 @@ export default function NFTLeaderboard(props: Props) {
   }
 
   function getDisplay(lead: any) {
+    if (lead.handle) {
+      return lead.handle;
+    }
     if (lead.consolidation_display) {
       return lead.consolidation_display;
     }
     return lead.wallet_display;
+  }
+
+  function getDisplayEns(lead: any) {
+    if (!lead.handle) {
+      return;
+    }
+    if (lead.wallet_display?.includes(" ")) {
+      return;
+    }
+
+    if (lead.wallet_display?.endsWith(".eth")) {
+      return lead.wallet_display;
+    }
+
+    if (lead.consolidation_display?.includes(" ")) {
+      return;
+    }
+    if (lead.consolidation_display?.endsWith(".eth")) {
+      return lead.consolidation_display;
+    }
+    return;
   }
 
   return (
@@ -105,13 +129,15 @@ export default function NFTLeaderboard(props: Props) {
                   <th className={styles.gap}></th>
                   <th
                     colSpan={3}
-                    className={`${styles.tdh} ${styles.borderBottom}`}>
+                    className={`${styles.tdh} ${styles.borderBottom}`}
+                  >
                     <b>This Card</b>
                   </th>
                   <th className={styles.gap}></th>
                   <th
                     colSpan={3}
-                    className={`${styles.tdh} ${styles.borderBottom}`}>
+                    className={`${styles.tdh} ${styles.borderBottom}`}
+                  >
                     <b>Total</b>
                   </th>
                 </tr>
@@ -366,6 +392,7 @@ export default function NFTLeaderboard(props: Props) {
                               <Address
                                 wallets={getWallets(lead)}
                                 display={getDisplay(lead)}
+                                displayEns={getDisplayEns(lead)}
                                 tags={{
                                   memesCardsSets: lead.memes_cards_sets,
                                   memesCardsSetS1: lead.memes_cards_sets_szn1,
