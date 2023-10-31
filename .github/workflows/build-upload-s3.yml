@@ -21,9 +21,6 @@ jobs:
       - name: Build
         run: npm run build
 
-      - name: Rename directory
-        run: mv .next _next
-
       - name: Get latest commit hash
         run: echo "GIT_COMMIT_HASH=$(git rev-parse HEAD)" >> $GITHUB_ENV
 
@@ -35,4 +32,4 @@ jobs:
           aws-region: us-east-1
 
       - name: Upload assets to S3
-        run: aws s3 sync _next s3://6529bucket/web_build/$GIT_COMMIT_HASH
+        run: aws s3 sync .next s3://6529bucket/web_build/$GIT_COMMIT_HASH/_next
