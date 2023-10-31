@@ -260,6 +260,31 @@ export default function Address(props: Props) {
     props.isUserPage ? true : false
   );
 
+  const getWalletDisplayAndEns = (
+    wallet: string,
+    index: number
+  ): { display: string | undefined; displayEns: string | undefined } => {
+    const walletObj = props.consolidatedWallets?.find(
+      (c) => c.wallet.address.toLowerCase() === wallet.toLowerCase()
+    );
+
+    if (walletObj) {
+      return {
+        display: walletObj.wallet.ens,
+        displayEns: walletObj.wallet.ens,
+      };
+    }
+
+    const ens = props.display?.split(" - ")[index].endsWith(".eth")
+      ? props.display?.split(" - ")[index]
+      : undefined;
+
+    return {
+      display: ens ?? wallet,
+      displayEns: ens,
+    };
+  };
+
   return (
     <>
       {props.wallets.length === 1 ? (
@@ -329,14 +354,8 @@ export default function Address(props: Props) {
               />
               <WalletAddress
                 wallet={w}
-                display={
-                  props.consolidatedWallets?.find(
-                    (c) => c.wallet.address.toLowerCase() === w.toLowerCase()
-                  )?.wallet.ens ??
-                  props.display?.split(" - ")[index].endsWith(".eth")
-                    ? props.display?.split(" - ")[index]
-                    : w
-                }
+                display={getWalletDisplayAndEns(w, index).display}
+                displayEns={getWalletDisplayAndEns(w, index).displayEns}
                 hideCopy={props.hideCopy}
                 disableLink={areEqualAddresses(w, props.viewingWallet)}
               />
