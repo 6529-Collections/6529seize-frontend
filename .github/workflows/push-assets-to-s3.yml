@@ -1,7 +1,6 @@
 name: Build and Upload to S3
 
-on:
-  workflow_dispatch:
+on: workflow_dispatch
 
 jobs:
   build:
