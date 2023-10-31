@@ -137,21 +137,23 @@ export async function getServerSideProps(
   let pfp = profile?.profile?.pfp_url;
   let tdh;
   let balance;
+
   const responseText = await ensRequest.text();
   if (responseText) {
     const response = await JSON.parse(responseText);
     tdh = response.boosted_tdh ? response.boosted_tdh : null;
     balance = response.balance ? response.balance : null;
-    userDisplay =
-      profile?.profile?.handle ??
-      (response.display && !containsEmojis(response.display))
-        ? response.display
-        : userDisplay;
+    userDisplay = profile?.profile?.handle
+      ? profile.profile.handle
+      : response.display && !containsEmojis(response.display)
+      ? response.display
+      : wallet;
   }
+
   return {
     props: {
       title: userDisplay,
-      url: userDisplay ?? wallet,
+      url: req.query.user,
       image: pfp ?? DEFAULT_IMAGE,
       tdh: tdh ?? null,
       balance: balance ?? null,
