@@ -53,6 +53,10 @@ const nextConfig = {
     minimumCacheTTL: 86400,
   },
   env: {
+    API_ENDPOINT: process.env.API_ENDPOINT,
+    ALLOWLIST_API_ENDPOINT: process.env.ALLOWLIST_API_ENDPOINT,
+    BASE_ENDPOINT: process.env.BASE_ENDPOINT,
+    ALCHEMY_API_KEY: process.env.ALCHEMY_API_KEY,
     VERSION: VERSION,
   },
   async generateBuildId() {
