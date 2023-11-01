@@ -404,6 +404,7 @@ export default function NFTLeaderboard(props: Props) {
                                   gradientsBalance: lead.gradients_balance,
                                   genesis: lead.genesis,
                                 }}
+                                setLinkQueryAddress={view === VIEW.WALLET}
                               />
                             </div>
                           </td>
