@@ -25,6 +25,7 @@ jobs:
           ALLOWLIST_API_ENDPOINT: "https://allowlist-api.seize.io"
           BASE_ENDPOINT: "https://seize.io"
           LOAD_S3: "true"
+          ALCHEMY_API_KEY: ${{ secrets.ALCHEMY_API_KEY }}
         run: npm run build
 
       - name: Get latest commit hash
