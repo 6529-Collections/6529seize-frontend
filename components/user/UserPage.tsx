@@ -45,11 +45,34 @@ export default function UserPage(props: Props) {
     router.query.address ? VIEW.WALLET : VIEW.CONSOLIDATION
   );
 
+  const [activeAddress, setActiveAddress] = useState<string | null>(
+    router.query.address ? (router.query.address as string) : null
+  );
+
+  const [latestActiveAddress, setLatestActiveAddress] = useState<string | null>(
+    null
+  );
+
   const onView = (newView: VIEW) => {
     if (newView === VIEW.CONSOLIDATION) {
       const currentQuery = { ...router.query };
       delete currentQuery.address;
+      setLatestActiveAddress(activeAddress);
       setActiveAddress(null);
+      setView(newView);
+      router.push(
+        {
+          pathname: router.pathname,
+          query: currentQuery,
+        },
+        undefined,
+        { shallow: true }
+      );
+    } else if (newView === VIEW.WALLET && latestActiveAddress) {
+      const currentQuery = { ...router.query };
+      currentQuery.address = latestActiveAddress;
+      setActiveAddress(latestActiveAddress);
+      setLatestActiveAddress(null);
       setView(newView);
       router.push(
         {
@@ -61,10 +84,6 @@ export default function UserPage(props: Props) {
       );
     }
   };
-
-  const [activeAddress, setActiveAddress] = useState<string | null>(
-    router.query.address ? (router.query.address as string) : null
-  );
 
   const [walletOwnedLoaded, setWalletOwnedLoaded] = useState(false);
   const [consolidationOwnedLoaded, setConsolidationOwnedLoaded] =
@@ -100,8 +119,10 @@ export default function UserPage(props: Props) {
     }
     const currAddress = router.query.address;
     if (!currAddress && activeAddress) {
+      setLatestActiveAddress(activeAddress);
       setActiveAddress(null);
     } else if (currAddress && currAddress !== activeAddress) {
+      setLatestActiveAddress(null);
       setActiveAddress(currAddress as string);
     }
   }, [router.query]);
@@ -461,14 +482,15 @@ export default function UserPage(props: Props) {
                     <Container>
                       {tdh && consolidatedTDH ? (
                         <span className={styles.addressContainer}>
-                          {isConsolidation && activeAddress && (
-                            <span>
-                              <ConsolidationSwitch
-                                view={view}
-                                onSetView={onView}
-                              />
-                            </span>
-                          )}
+                          {isConsolidation &&
+                            (activeAddress || latestActiveAddress) && (
+                              <span>
+                                <ConsolidationSwitch
+                                  view={view}
+                                  onSetView={onView}
+                                />
+                              </span>
+                            )}
                           <span>
                             <Address
                               wallets={
