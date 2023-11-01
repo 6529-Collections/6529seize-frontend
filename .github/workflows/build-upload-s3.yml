@@ -3,7 +3,7 @@ name: Build and Upload to S3
 on: workflow_dispatch
 
 jobs:
-  build-deploy:
+  build-upload:
     runs-on: ubuntu-latest
 
     steps:
