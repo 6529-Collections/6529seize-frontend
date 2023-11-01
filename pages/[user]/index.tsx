@@ -78,6 +78,22 @@ export default function UserPageIndex(props: { pageProps: PageProps }) {
         router.push(`${userProfile.profile.normalised_handle}`);
       }
 
+      if (
+        router.query.address &&
+        userProfile.consolidation.wallets.length === 1
+      ) {
+        const currentQuery = { ...router.query };
+        delete currentQuery.address;
+        router.push(
+          {
+            pathname: router.pathname,
+            query: currentQuery,
+          },
+          undefined,
+          { shallow: true }
+        );
+      }
+
       setUserProfile(userProfile);
     };
 
