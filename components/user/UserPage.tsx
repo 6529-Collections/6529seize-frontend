@@ -8,27 +8,23 @@ import { useRouter } from "next/router";
 import {
   areEqualAddresses,
   containsEmojis,
-  formatAddress,
   getRandomColor,
   numberWithCommas,
-  removeProtocol,
 } from "../../helpers/Helpers";
 import { ConsolidatedTDHMetrics, TDHMetrics } from "../../entities/ITDH";
 import { useAccount } from "wagmi";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { fetchAllPages, fetchUrl } from "../../services/6529api";
-import Tippy from "@tippyjs/react";
 import Tag, { TagType } from "../address/Tag";
 import ConsolidationSwitch, {
   VIEW,
 } from "../consolidation-switch/ConsolidationSwitch";
 import Address from "../address/Address";
 import UserPageDetails, { Focus } from "./UserPageDetails";
-import NotFound from "../notFound/NotFound";
 import { ENS } from "../../entities/IENS";
 import DotLoader from "../dotLoader/DotLoader";
 import { IProfileAndConsolidations } from "../../entities/IProfile";
 import UserEditProfileButton from "./settings/UserEditProfileButton";
+import UserPageLinks from "./UserPageLinks";
 
 interface Props {
   user: string;
@@ -45,9 +41,30 @@ const DEFAULT_PFP_2 = DEFAULT_BANNER_2;
 export default function UserPage(props: Props) {
   const router = useRouter();
   const account = useAccount();
-  const [view, setView] = useState<VIEW>(VIEW.CONSOLIDATION);
+  const [view, setView] = useState<VIEW>(
+    router.query.address ? VIEW.WALLET : VIEW.CONSOLIDATION
+  );
 
-  const [ownerLinkCopied, setIsOwnerLinkCopied] = useState(false);
+  const onView = (newView: VIEW) => {
+    if (newView === VIEW.CONSOLIDATION) {
+      const currentQuery = { ...router.query };
+      delete currentQuery.address;
+      setActiveAddress(null);
+      setView(newView);
+      router.push(
+        {
+          pathname: router.pathname,
+          query: currentQuery,
+        },
+        undefined,
+        { shallow: true }
+      );
+    }
+  };
+
+  const [activeAddress, setActiveAddress] = useState<string | null>(
+    router.query.address ? (router.query.address as string) : null
+  );
 
   const [walletOwnedLoaded, setWalletOwnedLoaded] = useState(false);
   const [consolidationOwnedLoaded, setConsolidationOwnedLoaded] =
@@ -59,7 +76,6 @@ export default function UserPage(props: Props) {
   );
   const [ownerENS, setOwnerENS] = useState("");
 
-  const [ownerLinkDisplay, setOwnerLinkDisplay] = useState("");
   const [owned, setOwned] = useState<Owner[]>([]);
   const [walletOwned, setWalletOwned] = useState<Owner[]>([]);
   const [consolidationOwned, setConsolidationOwned] = useState<Owner[]>([]);
@@ -79,10 +95,16 @@ export default function UserPage(props: Props) {
 
   useEffect(() => {
     const currFocus = router.query.focus;
-    if (currFocus != focus) {
+    if (currFocus !== focus) {
       setFocus(currFocus as Focus);
     }
-  }, [router.query.focus]);
+    const currAddress = router.query.address;
+    if (!currAddress && activeAddress) {
+      setActiveAddress(null);
+    } else if (currAddress && currAddress !== activeAddress) {
+      setActiveAddress(currAddress as string);
+    }
+  }, [router.query]);
 
   useEffect(() => {
     if (focus) {
@@ -104,17 +126,17 @@ export default function UserPage(props: Props) {
 
   useEffect(() => {
     async function fetchENS() {
-      let oLink = process.env.BASE_ENDPOINT
-        ? process.env.BASE_ENDPOINT
-        : "https://seize.io";
       if (
         props.user.startsWith("0x") ||
         props.user.endsWith(".eth") ||
-        props.profile?.profile?.primary_wallet
+        props.profile?.profile?.primary_wallet ||
+        activeAddress
       ) {
         const userUrl =
           props.user.startsWith("0x") || props.user.endsWith(".eth")
             ? props.user
+            : activeAddress
+            ? activeAddress
             : props.profile?.profile?.primary_wallet;
         const url = `${process.env.API_ENDPOINT}/api/user/${userUrl}`;
         return fetchUrl(url).then((response: ENS) => {
@@ -128,29 +150,24 @@ export default function UserPage(props: Props) {
           });
 
           const oAddress =
+            activeAddress ??
             props.profile.profile?.primary_wallet ??
-            response.wallet ??
             response.wallet ??
             props.user;
           setOwnerAddress(oAddress as `0x${string}`);
           setOwnerENS(
-            props.profile?.profile?.primary_wallet ??
-              response.display ??
+            activeAddress ??
+              props.profile?.profile?.primary_wallet ??
               response.display ??
               oAddress
           );
-          setOwnerLinkDisplay(
-            `${oLink}/${
-              props.profile.profile?.handle
-                ? props.profile.profile.handle
-                : response.display && !containsEmojis(response.display)
-                ? response.display.replaceAll(" ", "-")
-                : formatAddress(oAddress)
-            }`
-          );
-          const currentQuery = {
+          const currentQuery: { focus: Focus; address?: string | undefined } = {
             focus: focus,
           };
+
+          if (activeAddress) {
+            currentQuery.address = activeAddress;
+          }
           router.push(
             {
               pathname: props.profile.profile?.handle
@@ -444,16 +461,15 @@ export default function UserPage(props: Props) {
                     <Container>
                       {tdh && consolidatedTDH ? (
                         <span className={styles.addressContainer}>
-                          {isConsolidation && (
+                          {isConsolidation && activeAddress && (
                             <span>
                               <ConsolidationSwitch
                                 view={view}
-                                onSetView={(v) => setView(v)}
+                                onSetView={onView}
                               />
                             </span>
                           )}
                           <span>
-
                             <Address
                               wallets={
                                 view === VIEW.CONSOLIDATION
@@ -464,7 +480,13 @@ export default function UserPage(props: Props) {
                                 props.profile.consolidation.wallets
                               }
                               display={
-                                props.profile.profile?.handle
+                                activeAddress
+                                  ? props.profile.consolidation.wallets.find(
+                                      (w) =>
+                                        w.wallet.address.toLowerCase() ===
+                                        activeAddress.toLowerCase()
+                                    )?.wallet.ens
+                                  : props.profile.profile?.handle
                                   ? props.profile.profile.handle
                                   : view === VIEW.CONSOLIDATION &&
                                     consolidatedTDH.consolidation_display
@@ -472,7 +494,13 @@ export default function UserPage(props: Props) {
                                   : ownerENS
                               }
                               displayEns={
-                                props.profile.profile?.handle
+                                activeAddress
+                                  ? props.profile.consolidation.wallets.find(
+                                      (w) =>
+                                        w.wallet.address.toLowerCase() ===
+                                        activeAddress.toLowerCase()
+                                    )?.wallet.ens
+                                  : props.profile.profile?.handle
                                   ? props.profile.consolidation.wallets.reduce(
                                       (prev, curr) =>
                                         prev.tdh > curr.tdh ? prev : curr
@@ -482,6 +510,7 @@ export default function UserPage(props: Props) {
                               isUserPage={true}
                               disableLink={true}
                               viewingWallet={ownerAddress}
+                              setLinkQueryAddress={true}
                             />
                           </span>
                         </span>
@@ -493,6 +522,7 @@ export default function UserPage(props: Props) {
                             disableLink={true}
                             isUserPage={true}
                             viewingWallet={ownerAddress}
+                            setLinkQueryAddress={true}
                           />
                         </span>
                       )}
@@ -571,91 +601,12 @@ export default function UserPage(props: Props) {
                     </Container>
                   )}
                 </Col>
-                <Col
-                  xs={12}
-                  sm={6}
-                  className={`pt-2 pb-2 ${styles.linksContainer}`}
-                >
-                  <Row className="pb-2">
-                    <Col>
-                      <Tippy
-                        content={ownerLinkCopied ? "Copied" : "Copy"}
-                        placement={"right"}
-                        theme={"light"}
-                        hideOnClick={false}
-                      >
-                        <span
-                          className={styles.ownerLink}
-                          onClick={() => {
-                            if (navigator.clipboard) {
-                              navigator.clipboard.writeText(
-                                window.location.href
-                              );
-                            }
-                            setIsOwnerLinkCopied(true);
-                            setTimeout(() => {
-                              setIsOwnerLinkCopied(false);
-                            }, 1000);
-                          }}
-                        >
-                          {removeProtocol(ownerLinkDisplay)}{" "}
-                          <FontAwesomeIcon
-                            icon="link"
-                            className={styles.ownerLinkIcon}
-                          />
-                        </span>
-                      </Tippy>
-                    </Col>
-                  </Row>
-                  <Row className="pt-2 pb-2">
-                    <Col>
-                      <span className="pt-3">
-                        <a
-                          href={`https://opensea.io/${ownerAddress}`}
-                          target="_blank"
-                          rel="noreferrer"
-                        >
-                          <Image
-                            className={styles.marketplace}
-                            src="/opensea.png"
-                            alt="opensea"
-                            width={40}
-                            height={40}
-                          />
-                        </a>
-                        <a
-                          href={`https://x2y2.io/user/${ownerAddress}`}
-                          target="_blank"
-                          rel="noreferrer"
-                        >
-                          <Image
-                            className={styles.marketplace}
-                            src="/x2y2.png"
-                            alt="x2y2"
-                            width={40}
-                            height={40}
-                          />
-                        </a>
-                        {ens && ens.website && (
-                          <a
-                            href={
-                              ens.website.startsWith("http")
-                                ? ens.website
-                                : `https://${ens.website}`
-                            }
-                            target="_blank"
-                            rel="noreferrer"
-                          >
-                            <FontAwesomeIcon
-                              icon="globe"
-                              className={styles.marketplace}
-                            />
-                          </a>
-                        )}
-                      </span>
-                    </Col>
-                  </Row>
-                </Col>
+                <UserPageLinks
+                  user={props.user}
+                  userAddress={ownerAddress}
+                  activeAddress={activeAddress}
+                  profile={props.profile}
+                />
               </Row>
             </Container>
           </>

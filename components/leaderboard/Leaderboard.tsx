@@ -2406,6 +2406,7 @@ export default function Leaderboard(props: Props) {
                                   gradientsBalance: lead.gradients_balance,
                                   genesis: lead.genesis,
                                 }}
+                                setLinkQueryAddress={view === VIEW.WALLET}
                               />
                             </div>
                           </td>
