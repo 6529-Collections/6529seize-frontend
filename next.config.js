@@ -1,9 +1,16 @@
 /** @type {import('next').NextConfig} */
 
-const VERSION = require("child_process")
-  .execSync("git rev-parse HEAD")
-  .toString()
-  .trim();
+const LOAD_S3 = process.env.LOAD_S3 === "true";
+
+let VERSION = "6529seize";
+if (LOAD_S3) {
+  VERSION = process.env.VERSION;
+} else {
+  VERSION = require("child_process")
+    .execSync("git rev-parse HEAD")
+    .toString()
+    .trim();
+}
 
 const withBundleAnalyzer = require("@next/bundle-analyzer")({
   enabled: process.env.NODE_ENV === "development" ? false : true,
@@ -36,9 +43,6 @@ const securityHeaders = [
     value: "geolocation=()",
   },
 ];
-
-const LOAD_S3 = process.env.LOAD_S3 === "true";
-
 const nextConfig = {
   assetPrefix: LOAD_S3
     ? `https://d3lqz0a4bldqgf.cloudfront.net/web_build/${VERSION}`
