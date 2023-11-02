@@ -2,14 +2,18 @@
 
 const LOAD_S3 = process.env.LOAD_S3 === "true";
 
-let VERSION = "6529seize";
+let VERSION;
 if (LOAD_S3) {
   VERSION = process.env.VERSION;
 } else {
-  VERSION = require("child_process")
-    .execSync("git rev-parse HEAD")
-    .toString()
-    .trim();
+  try {
+    VERSION = require("child_process")
+      .execSync("git rev-parse HEAD")
+      .toString()
+      .trim();
+  } catch {
+    VERSION = "6529seize";
+  }
 }
 
 const withBundleAnalyzer = require("@next/bundle-analyzer")({
