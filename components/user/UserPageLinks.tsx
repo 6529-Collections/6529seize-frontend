@@ -1,11 +1,9 @@
-import { Col, Row } from "react-bootstrap";
+import { Col } from "react-bootstrap";
 import styles from "./UserPage.module.scss";
 import Tippy from "@tippyjs/react";
-import { truncateTextMiddle } from "../../helpers/AllowlistToolHelpers";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { removeProtocol } from "../../helpers/Helpers";
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { IProfileAndConsolidations } from "../../entities/IProfile";
 
 export default function UserPageLinks({
@@ -20,9 +18,13 @@ export default function UserPageLinks({
   profile: IProfileAndConsolidations;
 }) {
   const [ownerLinkCopied, setIsOwnerLinkCopied] = useState(false);
-  const [ownerLink, setOwnerLink] = useState("");
-
-  useEffect(() => {
+  const copyOwnerLink = () => {
+    if (!navigator.clipboard) {
+      return;
+    }
+    if (ownerLinkCopied) {
+      return;
+    }
     let oLink = process.env.BASE_ENDPOINT
       ? process.env.BASE_ENDPOINT
       : "https://seize.io";
@@ -39,79 +41,81 @@ export default function UserPageLinks({
       )?.wallet.ens;
       oLink += `?address=${activeAddressEns ?? activeAddress}`;
     }
-
-    setOwnerLink(oLink);
-  }, [user, profile, activeAddress]);
+    navigator.clipboard.writeText(oLink);
+    setIsOwnerLinkCopied(true);
+    setTimeout(() => {
+      setIsOwnerLinkCopied(false);
+    }, 1000);
+  };
 
   return (
     <Col xs={12} sm={6} className={`pt-2 pb-2 ${styles.linksContainer}`}>
-      <Row className="pb-2">
-        <Col>
-          <Tippy
-            content={ownerLinkCopied ? "Copied" : "Copy"}
-            placement={"right"}
-            theme={"light"}
-            hideOnClick={false}
-          >
-            <span
-              className={styles.ownerLink}
-              onClick={() => {
-                if (navigator.clipboard) {
-                  navigator.clipboard.writeText(ownerLink);
-                }
-                setIsOwnerLinkCopied(true);
-                setTimeout(() => {
-                  setIsOwnerLinkCopied(false);
-                }, 1000);
-              }}
-            >
-              {truncateTextMiddle(removeProtocol(ownerLink), 50)}{" "}
-              <FontAwesomeIcon icon="link" className={styles.ownerLinkIcon} />
-            </span>
-          </Tippy>
-        </Col>
-      </Row>
-      <Row className="pt-2 pb-2">
-        <Col>
-          <span className="pt-3">
-            <a
-              href={`https://opensea.io/${userAddress}`}
-              target="_blank"
-              rel="noreferrer"
-            >
-              <Image
-                className={styles.marketplace}
-                src="/opensea.png"
-                alt="opensea"
-                width={40}
-                height={40}
-              />
-            </a>
-            <a
-              href={`https://x2y2.io/user/${userAddress}`}
-              target="_blank"
-              rel="noreferrer"
-            >
-              <Image
-                className={styles.marketplace}
-                src="/x2y2.png"
-                alt="x2y2"
-                width={40}
-                height={40}
-              />
-            </a>
-            {profile.profile?.website && (
-              <a
-                href={profile.profile.website}
-                target="_blank"
-                rel="noreferrer"
-              >
-                <FontAwesomeIcon icon="globe" className={styles.marketplace} />
-              </a>
-            )}
-          </span>
-        </Col>
-      </Row>
+      <Tippy
+        content={ownerLinkCopied ? "Copied" : "Copy"}
+        placement={"top"}
+        theme={"light"}
+        hideOnClick={false}
+      >
+        <span className="cursor-pointer" onClick={copyOwnerLink}>
+          <FontAwesomeIcon
+            icon="link"
+            height={40}
+            className={styles.marketplace}
+          />
+        </span>
+      </Tippy>
+      <Tippy
+        content="Open"
+        placement={"top"}
+        theme={"light"}
+        hideOnClick={false}
+      >
+        <a
+          href={`https://opensea.io/${userAddress}`}
+          target="_blank"
+          rel="noreferrer"
+        >
+          <Image
+            className={styles.marketplace}
+            src="/opensea.png"
+            alt="opensea"
+            width={40}
+            height={40}
+          />
+        </a>
+      </Tippy>
+      <Tippy
+        content="Open"
+        placement={"top"}
+        theme={"light"}
+        hideOnClick={false}
+      >
+        <a
+          href={`https://x2y2.io/user/${userAddress}`}
+          target="_blank"
+          rel="noreferrer"
+        >
+          <Image
+            className={styles.marketplace}
+            src="/x2y2.png"
+            alt="x2y2"
+            width={40}
+            height={40}
+          />
+        </a>
+      </Tippy>
+      {profile.profile?.website && (
+        <Tippy
+          content="Open"
+          placement={"top"}
+          theme={"light"}
+          hideOnClick={false}
+        >
+          <a href={profile.profile.website} target="_blank" rel="noreferrer">
+            <FontAwesomeIcon icon="globe" className={styles.marketplace} />
+          </a>
+        </Tippy>
+      )}
     </Col>
   );
 }
