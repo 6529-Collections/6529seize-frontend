@@ -1,7 +1,6 @@
 import styles from "./UserPage.module.scss";
 import Image from "next/image";
 import { Col, Dropdown, Row, Table } from "react-bootstrap";
-import { ConsolidatedTDHMetrics } from "../../entities/ITDH";
 import Pagination from "../pagination/Pagination";
 import { TypeFilter } from "../latest-activity/LatestActivity";
 import LatestActivityRow from "../latest-activity/LatestActivityRow";
@@ -10,15 +9,17 @@ import { useEffect, useState } from "react";
 import { Transaction } from "../../entities/ITransaction";
 import { MEMES_CONTRACT } from "../../constants";
 import { DBResponse } from "../../entities/IDBResponse";
-import { fetchAllPages, fetchUrl } from "../../services/6529api";
+import { fetchUrl } from "../../services/6529api";
 import { areEqualAddresses } from "../../helpers/Helpers";
-import { NFT, NFTLite } from "../../entities/INFT";
+import { NFTLite } from "../../entities/INFT";
+import { IProfileAndConsolidations } from "../../entities/IProfile";
 
 interface Props {
   show: boolean;
   ownerAddress: `0x${string}` | undefined;
   view: VIEW;
-  consolidatedTDH?: ConsolidatedTDHMetrics;
+  memesLite: NFTLite[];
+  profile: IProfileAndConsolidations;
 }
 
 const ACTIVITY_PAGE_SIZE = 25;
@@ -28,21 +29,57 @@ export default function UserPageActivity(props: Props) {
   const [activityTypeFilter, setActivityTypeFilter] = useState<TypeFilter>(
     TypeFilter.ALL
   );
+
   const [activityPage, setActivityPage] = useState(1);
+  const [activityLoaded, setActivityLoaded] = useState(false);
   const [activityTotalResults, setActivityTotalResults] = useState(0);
 
-  const [nfts, setNfts] = useState<NFTLite[]>([]);
+  const changeActivityPage = ({
+    page,
+    filter,
+  }: {
+    page: number;
+    filter: TypeFilter | null;
+  }) => {
+    setActivityPage(page);
+    if (filter) {
+      setActivityTypeFilter(filter);
+    }
+    setActivityLoaded(false);
+  };
 
   useEffect(() => {
-    setActivityPage(1);
+    changeActivityPage({
+      page: 1,
+      filter: null,
+    });
   }, [props.view]);
 
   useEffect(() => {
+    if (activityPage === 1 && activityTypeFilter === TypeFilter.ALL) {
+      return;
+    }
+    changeActivityPage({ page: 1, filter: TypeFilter.ALL });
+  }, [props.show]);
+
+  useEffect(() => {
+    if (!props.show) {
+      return;
+    }
+
+    if (activityLoaded) {
+      return;
+    }
+
     let url = `${process.env.API_ENDPOINT}/api/transactions?contract=${MEMES_CONTRACT}&wallet=${props.ownerAddress}&page_size=${ACTIVITY_PAGE_SIZE}&page=${activityPage}`;
-    if (props.view === VIEW.CONSOLIDATION && props.consolidatedTDH) {
+    if (props.view === VIEW.CONSOLIDATION) {
+      const wallets = props.profile.consolidation.wallets.map(
+        (w) => w.wallet.address
+      );
+
       url = `${
         process.env.API_ENDPOINT
-      }/api/transactions?contract=${MEMES_CONTRACT}&wallet=${props.consolidatedTDH.wallets.join(
+      }/api/transactions?contract=${MEMES_CONTRACT}&wallet=${wallets.join(
         ","
       )}&page_size=${ACTIVITY_PAGE_SIZE}&page=${activityPage}`;
     }
@@ -67,20 +104,20 @@ export default function UserPageActivity(props: Props) {
       fetchUrl(url).then((response: DBResponse) => {
         setActivityTotalResults(response.count);
         setActivity(response.data);
+        setActivityLoaded(true);
       });
     }
-  }, [activityPage, props.consolidatedTDH, activityTypeFilter, props.view]);
-
-  useEffect(() => {
-    fetchUrl(`${process.env.API_ENDPOINT}/api/memes_lite`).then(
-      (response: DBResponse) => {
-        setNfts(response.data);
-      }
-    );
-  }, []);
+  }, [
+    activityPage,
+    props.profile,
+    activityTypeFilter,
+    props.view,
+    activityLoaded,
+    props.show,
+  ]);
 
   function findNftOrNull(tr: Transaction) {
-    const nft = [...nfts].find(
+    const nft = [...props.memesLite].find(
       (n) => areEqualAddresses(tr.contract, n.contract) && tr.token_id === n.id
     );
 
@@ -96,26 +133,32 @@ export default function UserPageActivity(props: Props) {
             xs={{ span: 7 }}
             sm={{ span: 7 }}
             md={{ span: 9 }}
-            lg={{ span: 10 }}>
+            lg={{ span: 10 }}
+          >
             <h3>Wallet Activity</h3>
           </Col>
           <Col
             xs={{ span: 5 }}
             sm={{ span: 5 }}
             md={{ span: 3 }}
-            lg={{ span: 2 }}>
+            lg={{ span: 2 }}
+          >
             <Dropdown
               className={styles.activityFilterDropdown}
-              drop={"down-centered"}>
+              drop={"down-centered"}
+            >
               <Dropdown.Toggle>Filter: {activityTypeFilter}</Dropdown.Toggle>
               <Dropdown.Menu>
                 {Object.values(TypeFilter).map((filter) => (
                   <Dropdown.Item
                     key={`nft-activity-${filter}`}
-                    onClick={() => {
-                      setActivityPage(1);
-                      setActivityTypeFilter(filter);
-                    }}>
+                    onClick={() =>
+                      changeActivityPage({
+                        page: 1,
+                        filter,
+                      })
+                    }
+                  >
                     {filter}
                   </Dropdown.Item>
                 ))}
@@ -158,7 +201,11 @@ export default function UserPageActivity(props: Props) {
               pageSize={ACTIVITY_PAGE_SIZE}
               totalResults={activityTotalResults}
               setPage={function (newPage: number) {
-                setActivityPage(newPage);
+                changeActivityPage({
+                  page: newPage,
+                  filter: null,
+                });
+
                 window.scrollTo(0, 0);
               }}
             />

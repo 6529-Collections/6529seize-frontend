@@ -16,18 +16,17 @@ import {
   MEMELAB_CONTRACT,
   MEMES_CONTRACT,
 } from "../../constants";
-import { ConsolidatedTDHMetrics } from "../../entities/ITDH";
 import { fetchUrl } from "../../services/6529api";
 import Pagination from "../pagination/Pagination";
 import { DistributionPhase, IDistribution } from "../../entities/IDistribution";
 import { VIEW } from "../consolidation-switch/ConsolidationSwitch";
+import { IProfileAndConsolidations } from "../../entities/IProfile";
 
 interface Props {
   show: boolean;
   ownerAddress: `0x${string}` | undefined;
   view: VIEW;
-  consolidatedTDH?: ConsolidatedTDHMetrics;
-  isConsolidation: boolean;
+  profile: IProfileAndConsolidations;
 }
 
 const DISTRIBUTIONS_PAGE_SIZE = 50;
@@ -41,6 +40,7 @@ export default function UserPageDistributions(props: Props) {
   >([]);
   const [distributionsPage, setDistributionsPage] = useState(1);
   const [distributionsTotalResults, setDistributionsTotalResults] = useState(0);
+  const [distributionsLoaded, setDistributionsLoaded] = useState(false);
 
   function printDistributionDate(dateString: any) {
     const d = new Date(
@@ -51,16 +51,38 @@ export default function UserPageDistributions(props: Props) {
     return d.toDateString();
   }
 
+  const changeDistributionPage = (page: number) => {
+    setDistributionsPage(page);
+    setDistributionsLoaded(false);
+  };
+
   useEffect(() => {
-    setDistributionsPage(1);
+    changeDistributionPage(1);
   }, [props.view]);
 
   useEffect(() => {
+    if (distributionsPage === 1) {
+      return;
+    }
+    changeDistributionPage(1);
+  }, [props.show]);
+
+  useEffect(() => {
+    if (!props.show) {
+      return;
+    }
+
+    if (distributionsLoaded) {
+      return;
+    }
     const walletFilter: string[] = [];
-    if (props.isConsolidation && props.view === VIEW.CONSOLIDATION) {
-      props.consolidatedTDH?.wallets.forEach((w) => {
-        walletFilter.push(w);
-      });
+    if (
+      !!props.profile.consolidation.wallets.length &&
+      props.view === VIEW.CONSOLIDATION
+    ) {
+      props.profile.consolidation.wallets.forEach((w) =>
+        walletFilter.push(w.wallet.address)
+      );
     } else {
       walletFilter.push(props.ownerAddress as string);
     }
@@ -70,10 +92,13 @@ export default function UserPageDistributions(props: Props) {
     }/api/distributions?wallet=${walletFilter.join(
       ","
     )}&page_size=${DISTRIBUTIONS_PAGE_SIZE}&page=${distributionsPage}`;
-    if (props.view === VIEW.CONSOLIDATION && props.consolidatedTDH) {
+    if (props.view === VIEW.CONSOLIDATION) {
+      const consolidatedWallets = props.profile.consolidation.wallets.map(
+        (w) => w.wallet.address
+      );
       url = `${
         process.env.API_ENDPOINT
-      }/api/distributions?wallet=${props.consolidatedTDH.wallets.join(
+      }/api/distributions?wallet=${consolidatedWallets.join(
         ","
       )}&page_size=${DISTRIBUTIONS_PAGE_SIZE}&page=${distributionsPage}`;
     }
@@ -102,14 +127,15 @@ export default function UserPageDistributions(props: Props) {
           phases.push(DistributionPhase.PHASE_3);
         }
         setDistributionsPhases(phases);
+        setDistributionsLoaded(true);
       });
     }
   }, [
     distributionsPage,
     props.ownerAddress,
     props.view,
-    props.consolidatedTDH,
-    props.isConsolidation,
+    props.profile,
+    props.show,
   ]);
 
   if (props.show) {
@@ -121,7 +147,8 @@ export default function UserPageDistributions(props: Props) {
             xs={{ span: 7 }}
             sm={{ span: 7 }}
             md={{ span: 9 }}
-            lg={{ span: 10 }}>
+            lg={{ span: 10 }}
+          >
             <h3 ref={distributionsDivRef}>Distributions</h3>
           </Col>
         </Row>
@@ -133,14 +160,16 @@ export default function UserPageDistributions(props: Props) {
                   <tr>
                     <th
                       colSpan={
-                        props.isConsolidation &&
+                        !!props.profile.consolidation.wallets.length &&
                         props.view === VIEW.CONSOLIDATION
                           ? 3
                           : 2
-                      }></th>
+                      }
+                    ></th>
                     <th
                       colSpan={distributionsPhases.length}
-                      className="text-center">
+                      className="text-center"
+                    >
                       ALLOWLIST SPOTS
                     </th>
                     <th colSpan={2} className="text-center">
@@ -150,7 +179,7 @@ export default function UserPageDistributions(props: Props) {
                   <tr>
                     <th>Date</th>
                     <th>Card</th>
-                    {props.isConsolidation &&
+                    {!!props.profile.consolidation.wallets.length &&
                       props.view === VIEW.CONSOLIDATION && <th>Wallet</th>}
                     {distributionsPhases.map((p) => (
                       <th key={`${p}-header`} className="text-center">
@@ -183,7 +212,8 @@ export default function UserPageDistributions(props: Props) {
                                   )
                                 ? `/meme-lab/${d.card_id}`
                                 : d.contract
-                            }>
+                            }
+                          >
                             Card #{d.card_id}
                           </a>
                         ) : (
@@ -199,7 +229,7 @@ export default function UserPageDistributions(props: Props) {
                             : d.contract
                         }${d.card_name ? ` - ${d.card_name}` : ""}`}
                       </td>
-                      {props.isConsolidation &&
+                      {!!props.profile.consolidation.wallets.length &&
                         props.view === VIEW.CONSOLIDATION && (
                           <td>
                             {d.display ? d.display : formatAddress(d.wallet)}
@@ -208,7 +238,8 @@ export default function UserPageDistributions(props: Props) {
                       {distributionsPhases.map((p) => (
                         <th
                           key={`${p}-${d.contract}-${d.card_id}`}
-                          className="text-center">
+                          className="text-center"
+                        >
                           {d[p] === 0 ? "-" : numberWithCommas(d[p])}
                         </th>
                       ))}
@@ -247,7 +278,7 @@ export default function UserPageDistributions(props: Props) {
               pageSize={DISTRIBUTIONS_PAGE_SIZE}
               totalResults={distributionsTotalResults}
               setPage={function (newPage: number) {
-                setDistributionsPage(newPage);
+                changeDistributionPage(newPage);
                 if (!isDivInViewport(distributionsDivRef)) {
                   scrollToDiv(distributionsDivRef, "start");
                 }

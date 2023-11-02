@@ -17,13 +17,13 @@ import { Owner } from "../../entities/IOwner";
 import { ConsolidatedTDHMetrics, TDHMetrics } from "../../entities/ITDH";
 import Image from "next/image";
 import SeasonsDropdown from "../seasons-dropdown/SeasonsDropdown";
-import { DBResponse } from "../../entities/IDBResponse";
 import { Season } from "../../entities/ISeason";
 
 interface Props {
   show: boolean;
   owned: Owner[];
   tdh?: ConsolidatedTDHMetrics | TDHMetrics;
+  memesLite: NFTLite[];
 }
 
 enum Sort {
@@ -41,14 +41,12 @@ export default function UserPageCollection(props: Props) {
   const [hideMemes, setHideMemes] = useState(false);
   const [hideGradients, setHideGradients] = useState(false);
 
-  const [memes, setMemes] = useState<NFTLite[]>([]);
   const [gradients, setGradients] = useState<NFTLite[]>([]);
   const [nfts, setNfts] = useState<NFTLite[]>([]);
 
   const [seasons, setSeasons] = useState<Season[]>([]);
   const [selectedSeason, setSelectedSeason] = useState(0);
 
-  const [memesFetched, setMemesFetched] = useState(false);
   const [gradientsFetched, setGradientsFetched] = useState(false);
   const [nftsFetched, setNftsFetched] = useState(false);
 
@@ -256,14 +254,6 @@ export default function UserPageCollection(props: Props) {
     }
   }, [sortDir, sort, hideMemes, hideGradients, hideSeized, hideNonSeized]);
 
-  useEffect(() => {
-    fetchUrl(`${process.env.API_ENDPOINT}/api/memes_lite`).then(
-      (response: DBResponse) => {
-        setMemes(response.data);
-        setMemesFetched(true);
-      }
-    );
-  }, []);
 
   useEffect(() => {
     const url = `${process.env.API_ENDPOINT}/api/nfts/gradients?&page_size=101&sort=${sort}&sort_direction=${sortDir}`;
@@ -274,11 +264,11 @@ export default function UserPageCollection(props: Props) {
   }, []);
 
   useEffect(() => {
-    if (memesFetched && gradientsFetched) {
-      setNfts(() => [...gradients, ...memes]);
+    if (!!props.memesLite.length && gradientsFetched) {
+      setNfts(() => [...gradients, ...props.memesLite]);
       setNftsFetched(true);
     }
-  }, [memesFetched, gradientsFetched]);
+  }, [props.memesLite, gradientsFetched]);
 
   useEffect(() => {
     const url = `${process.env.API_ENDPOINT}/api/memes_seasons`;
@@ -349,7 +339,8 @@ export default function UserPageCollection(props: Props) {
         xs={{ span: 6 }}
         sm={{ span: 4 }}
         md={{ span: 3 }}
-        lg={{ span: 3 }}>
+        lg={{ span: 3 }}
+      >
         <Container fluid className="no-padding">
           <Row>
             <a
@@ -358,7 +349,8 @@ export default function UserPageCollection(props: Props) {
                 areEqualAddresses(nft.contract, MEMES_CONTRACT)
                   ? "the-memes"
                   : "6529-gradient"
-              }/${nft.id}`}>
+              }/${nft.id}`}
+            >
               <NFTImage
                 nft={nft}
                 animation={false}
@@ -382,7 +374,8 @@ export default function UserPageCollection(props: Props) {
                   areEqualAddresses(nft.contract, MEMES_CONTRACT)
                     ? "the-memes"
                     : "6529-gradient"
-                }/${nft.id}`}>
+                }/${nft.id}`}
+              >
                 {areEqualAddresses(nft.contract, MEMES_CONTRACT)
                   ? `#${nft.id} - ${nft.name}`
                   : nft.name}
@@ -524,21 +517,24 @@ export default function UserPageCollection(props: Props) {
                 onClick={() => setSort(Sort.ID)}
                 className={`${styles.sort} ${
                   sort != Sort.ID ? styles.disabled : ""
-                }`}>
+                }`}
+              >
                 ID
               </span>
               <span
                 onClick={() => setSort(Sort.TDH)}
                 className={`${styles.sort} ${
                   sort != Sort.TDH ? styles.disabled : ""
-                }`}>
+                }`}
+              >
                 TDH
               </span>
               <span
                 onClick={() => setSort(Sort.RANK)}
                 className={`${styles.sort} ${
                   sort != Sort.RANK ? styles.disabled : ""
-                }`}>
+                }`}
+              >
                 RANK
               </span>
             </Col>

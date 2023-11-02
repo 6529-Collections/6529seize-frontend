@@ -63,15 +63,29 @@ export default function UserPageStats(props: Props) {
   const [tdhHistory, setTdhHistory] = useState<TDHHistory[]>([]);
   const [tdhLabels, setTdhLabels] = useState<Date[]>([]);
   const [pageSize, setPageSize] = useState(10);
+  const [tdhHistoryLoaded, setTdhHistoryLoaded] = useState(false);
 
   useEffect(() => {
+    setTdhHistoryLoaded(false);
+  }, [props.ownerAddress, pageSize]);
+
+  useEffect(() => {
+    if (!props.show) {
+      return;
+    }
+
+    if (tdhHistoryLoaded) {
+      return;
+    }
+
     let url = `${process.env.API_ENDPOINT}/api/tdh_history?wallet=${props.ownerAddress}&page_size=${pageSize}`;
     fetchUrl(url).then((response: DBResponse) => {
       const tdhH = response.data.reverse();
       setTdhHistory(tdhH);
       setTdhLabels(tdhH.map((t) => t.date));
+      setTdhHistoryLoaded(true);
     });
-  }, [props.ownerAddress, pageSize]);
+  }, [props.show, props.ownerAddress, pageSize, tdhHistoryLoaded]);
 
   function printTotalTDH() {
     const data = {
