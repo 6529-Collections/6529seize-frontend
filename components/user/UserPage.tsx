@@ -7,7 +7,7 @@ import { areEqualAddresses, containsEmojis } from "../../helpers/Helpers";
 import { ConsolidatedTDHMetrics, TDHMetrics } from "../../entities/ITDH";
 import { fetchAllPages, fetchUrl } from "../../services/6529api";
 import { VIEW } from "../consolidation-switch/ConsolidationSwitch";
-import UserPageDetails from "./user-page-details/UserPageDetails";
+import UserPageDetails from "./details/UserPageDetails";
 import { ENS } from "../../entities/IENS";
 import { IProfileAndConsolidations } from "../../entities/IProfile";
 import UserPageHeader from "./user-page-header/UserPageHeader";

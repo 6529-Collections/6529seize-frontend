@@ -1,23 +1,24 @@
-import styles from "./UserPage.module.scss";
+import styles from "../../UserPage.module.scss";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Row, Col, Container, Form } from "react-bootstrap";
-import { SortDirection } from "../../entities/ISort";
+import { SortDirection } from "../../../../entities/ISort";
 import { useState, useEffect } from "react";
-import { MEMES_CONTRACT, GRADIENT_CONTRACT } from "../../constants";
-import { NFT, NFTLite } from "../../entities/INFT";
+import { MEMES_CONTRACT, GRADIENT_CONTRACT } from "../../../../constants";
+import { NFT, NFTLite } from "../../../../entities/INFT";
 import {
   areEqualAddresses,
   isMemesContract,
   isGradientsContract,
   numberWithCommas,
-} from "../../helpers/Helpers";
-import NFTImage from "../nft-image/NFTImage";
-import { fetchAllPages, fetchUrl } from "../../services/6529api";
-import { Owner } from "../../entities/IOwner";
-import { ConsolidatedTDHMetrics, TDHMetrics } from "../../entities/ITDH";
+} from "../../../../helpers/Helpers";
+import NFTImage from "../../../nft-image/NFTImage";
+import { fetchAllPages, fetchUrl } from "../../../../services/6529api";
+import { Owner } from "../../../../entities/IOwner";
+import { ConsolidatedTDHMetrics, TDHMetrics } from "../../../../entities/ITDH";
 import Image from "next/image";
-import SeasonsDropdown from "../seasons-dropdown/SeasonsDropdown";
-import { Season } from "../../entities/ISeason";
+import SeasonsDropdown from "../../../seasons-dropdown/SeasonsDropdown";
+import { Season } from "../../../../entities/ISeason";
+import UserPageCollectionNfts from "./UserPageCollectionNfts";
 
 interface Props {
   show: boolean;
@@ -253,7 +254,6 @@ export default function UserPageCollection(props: Props) {
       }
     }
   }, [sortDir, sort, hideMemes, hideGradients, hideSeized, hideNonSeized]);
-
 
   useEffect(() => {
     const url = `${process.env.API_ENDPOINT}/api/nfts/gradients?&page_size=101&sort=${sort}&sort_direction=${sortDir}`;
@@ -548,7 +548,20 @@ export default function UserPageCollection(props: Props) {
           </Col>
         </Row>
         {printUserControls()}
-        {nfts.length > 0 && printNfts()}
+        {/* {nfts.length > 0 && printNfts()} */}
+        {!!nfts.length && (
+          <UserPageCollectionNfts
+            owned={props.owned}
+            nfts={nfts}
+            tdh={props.tdh}
+            seasons={seasons}
+            selectedSeason={selectedSeason}
+            hideSeized={hideSeized}
+            hideNonSeized={hideNonSeized}
+            hideMemes={hideMemes}
+            hideGradients={hideGradients}
+          />
+        )}
         {/* {nftsNextPage && (
           <Row>
             <Col className="pt-3 pb-5">

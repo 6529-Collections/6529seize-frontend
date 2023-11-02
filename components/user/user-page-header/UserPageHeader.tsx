@@ -19,7 +19,7 @@ import { useAccount } from "wagmi";
 import { ConsolidatedTDHMetrics, TDHMetrics } from "../../../entities/ITDH";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
-import { Focus } from "../user-page-details/UserPageDetails";
+import { Focus } from "../details/UserPageDetails";
 
 const DEFAULT_BANNER_1 = getRandomColor();
 const DEFAULT_BANNER_2 = getRandomColor();

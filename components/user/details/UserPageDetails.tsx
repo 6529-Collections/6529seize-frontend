@@ -2,7 +2,7 @@ import { Container } from "react-bootstrap";
 import { Owner } from "../../../entities/IOwner";
 import { ConsolidatedTDHMetrics, TDHMetrics } from "../../../entities/ITDH";
 import { VIEW } from "../../consolidation-switch/ConsolidationSwitch";
-import UserPageCollection from "../UserPageCollection";
+import UserPageCollection from "./collection/UserPageCollection";
 import UserPageActivity from "../UserPageActivity";
 import UserPageDistributions from "../UserPageDistributions";
 import UserPageStats from "../UserPageStats";

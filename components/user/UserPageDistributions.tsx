@@ -192,7 +192,7 @@ export default function UserPageDistributions(props: Props) {
                 </thead>
                 <tbody>
                   {distributions.map((d) => (
-                    <tr key={`${d.contract}-${d.card_id}`}>
+                    <tr key={`${d.contract}-${d.card_id}-${d.wallet}`}>
                       <td>{printDistributionDate(d.card_mint_date)}</td>
                       <td className={styles.distributionsTableWallet}>
                         {d.card_name ? (
