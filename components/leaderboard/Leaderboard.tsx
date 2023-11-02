@@ -598,10 +598,34 @@ export default function Leaderboard(props: Props) {
   }
 
   function getDisplay(lead: any) {
+    if (lead.handle) {
+      return lead.handle;
+    }
     if (lead.consolidation_display) {
       return lead.consolidation_display;
     }
     return lead.wallet_display;
+  }
+
+  function getDisplayEns(lead: any) {
+    if (!lead.handle) {
+      return;
+    }
+    if (lead.wallet_display?.includes(" ")) {
+      return;
+    }
+
+    if (lead.wallet_display?.endsWith(".eth")) {
+      return lead.wallet_display;
+    }
+
+    if (lead.consolidation_display?.includes(" ")) {
+      return;
+    }
+    if (lead.consolidation_display?.endsWith(".eth")) {
+      return lead.consolidation_display;
+    }
+    return;
   }
 
   function getCardsHodled(lead: TDHMetrics) {
@@ -1226,7 +1250,8 @@ export default function Leaderboard(props: Props) {
           {Object.values(OwnerTagFilter).map((tagFilter) => (
             <Dropdown.Item
               key={tagFilter}
-              onClick={() => setOwnerTagFilter(tagFilter)}>
+              onClick={() => setOwnerTagFilter(tagFilter)}
+            >
               {[
                 OwnerTagFilter.MEMES_SETS,
                 OwnerTagFilter.MEMES_SETS_SZN1,
@@ -1289,7 +1314,8 @@ export default function Leaderboard(props: Props) {
           xs={{ span: showViewAll ? 12 : 6 }}
           sm={{ span: 6 }}
           md={{ span: 4 }}
-          lg={{ span: 4 }}>
+          lg={{ span: 4 }}
+        >
           <h1>
             COMMUNITY{" "}
             {showViewAll && (
@@ -1301,7 +1327,8 @@ export default function Leaderboard(props: Props) {
         </Col>
         <Col
           className={`d-flex justify-content-center align-items-center d-none ${styles.dMdFlex}`}
-          xs={4}>
+          xs={4}
+        >
           <ConsolidationSwitch
             view={view}
             onSetView={(v) => setView(v)}
@@ -1314,12 +1341,14 @@ export default function Leaderboard(props: Props) {
             xs={{ span: 6 }}
             sm={{ span: 6 }}
             md={{ span: 4 }}
-            lg={{ span: 4 }}>
+            lg={{ span: 4 }}
+          >
             * TDH Block&nbsp;
             <a
               href={`https://etherscan.io/block/${lastTDH.block}`}
               rel="noreferrer"
-              target="_blank">
+              target="_blank"
+            >
               {lastTDH.block}
             </a>
             {/* &nbsp;|&nbsp;Next Calculation&nbsp;
@@ -1328,7 +1357,8 @@ export default function Leaderboard(props: Props) {
         )}
         <Col
           className={`pt-2 d-flex justify-content-center align-items-center d-block ${styles.dMdNone}`}
-          xs={12}>
+          xs={12}
+        >
           <ConsolidationSwitch
             view={view}
             onSetView={(v) => setView(v)}
@@ -1344,7 +1374,8 @@ export default function Leaderboard(props: Props) {
               xs={{ span: 6 }}
               sm={{ span: 6 }}
               md={{ span: 3 }}
-              lg={{ span: 3 }}>
+              lg={{ span: 3 }}
+            >
               {printHodlersDropdown()}
             </Col>
             <Col
@@ -1352,7 +1383,8 @@ export default function Leaderboard(props: Props) {
               xs={{ span: 6 }}
               sm={{ span: 6 }}
               md={{ span: 3 }}
-              lg={{ span: 3 }}>
+              lg={{ span: 3 }}
+            >
               {printCollectionsDropdown()}
             </Col>
             <Col
@@ -1360,15 +1392,18 @@ export default function Leaderboard(props: Props) {
               xs={{ span: 12 }}
               sm={{ span: 12 }}
               md={{ span: 6 }}
-              lg={{ span: 6 }}>
+              lg={{ span: 6 }}
+            >
               <div
-                className={`${styles.headerMenuFocus} d-flex justify-content-center align-items-center`}>
+                className={`${styles.headerMenuFocus} d-flex justify-content-center align-items-center`}
+              >
                 <span>
                   <span
                     onClick={() => setFocus(Focus.TDH)}
                     className={`${styles.focus} ${
                       focus != Focus.TDH ? styles.disabled : ""
-                    }`}>
+                    }`}
+                  >
                     {Focus.TDH}
                   </span>
                 </span>
@@ -1378,7 +1413,8 @@ export default function Leaderboard(props: Props) {
                     onClick={() => setFocus(Focus.INTERACTIONS)}
                     className={`${styles.focus} ${
                       focus != Focus.INTERACTIONS ? styles.disabled : ""
-                    }`}>
+                    }`}
+                  >
                     {Focus.INTERACTIONS}
                   </span>
                 </span>
@@ -1388,7 +1424,8 @@ export default function Leaderboard(props: Props) {
                     onClick={() => setFocus(Focus.SETS)}
                     className={`${styles.focus} ${
                       focus != Focus.SETS ? styles.disabled : ""
-                    }`}>
+                    }`}
+                  >
                     {Focus.SETS}
                   </span>
                 </span>
@@ -1401,7 +1438,8 @@ export default function Leaderboard(props: Props) {
               sm={{ span: 12 }}
               md={{ span: 6 }}
               lg={{ span: 4 }}
-              className={`${styles.pageHeader} d-flex justify-content-center align-items-center`}>
+              className={`${styles.pageHeader} d-flex justify-content-center align-items-center`}
+            >
               <Container className="no-padding">
                 <Row>
                   <Col className="d-flex align-items-center justify-content-center">
@@ -1428,26 +1466,30 @@ export default function Leaderboard(props: Props) {
               xs={{ span: 12 }}
               sm={{ span: 12 }}
               md={{ span: 6 }}
-              lg={{ span: 8 }}>
+              lg={{ span: 8 }}
+            >
               <>
                 <span>
                   {searchWallets.length > 0 &&
                     searchWallets.map((sw) => (
                       <span
                         className={styles.searchWalletDisplayWrapper}
-                        key={sw}>
+                        key={sw}
+                      >
                         <Tippy
                           delay={250}
                           content={"Clear"}
                           placement={"top"}
-                          theme={"dark"}>
+                          theme={"dark"}
+                        >
                           <span
                             className={styles.searchWalletDisplayBtn}
                             onClick={() =>
                               setSearchWallets((sr) =>
                                 sr.filter((s) => s != sw)
                               )
-                            }>
+                            }
+                          >
                             x
                           </span>
                         </Tippy>
@@ -1462,12 +1504,14 @@ export default function Leaderboard(props: Props) {
                     delay={250}
                     content={"Clear All"}
                     placement={"top"}
-                    theme={"dark"}>
+                    theme={"dark"}
+                  >
                     <span>
                       <FontAwesomeIcon
                         onClick={() => setSearchWallets([])}
                         className={styles.clearSearchBtnIcon}
-                        icon="times-circle"></FontAwesomeIcon>
+                        icon="times-circle"
+                      ></FontAwesomeIcon>
                     </span>
                   </Tippy>
                 )}
@@ -1475,11 +1519,13 @@ export default function Leaderboard(props: Props) {
                   onClick={() => setShowSearchModal(true)}
                   className={`${styles.searchBtn} ${
                     searchWallets.length > 0 ? styles.searchBtnActive : ""
-                  } d-inline-flex align-items-center justify-content-center`}>
+                  } d-inline-flex align-items-center justify-content-center`}
+                >
                   {" "}
                   <FontAwesomeIcon
                     className={styles.searchBtnIcon}
-                    icon="search"></FontAwesomeIcon>
+                    icon="search"
+                  ></FontAwesomeIcon>
                 </span>
               </>
             </Col>
@@ -2348,6 +2394,7 @@ export default function Leaderboard(props: Props) {
                               <Address
                                 wallets={getWallets(lead)}
                                 display={getDisplay(lead)}
+                                displayEns={getDisplayEns(lead)}
                                 tags={{
                                   memesCardsSets: lead.memes_cards_sets,
                                   memesCardsSetS1: lead.memes_cards_sets_szn1,
@@ -2359,6 +2406,7 @@ export default function Leaderboard(props: Props) {
                                   gradientsBalance: lead.gradients_balance,
                                   genesis: lead.genesis,
                                 }}
+                                setLinkQueryAddress={view === VIEW.WALLET}
                               />
                             </div>
                           </td>
@@ -2510,7 +2558,8 @@ export default function Leaderboard(props: Props) {
             xs={12}
             sm={12}
             md={6}
-            className="pt-4 pb-3 d-flex justify-content-center">
+            className="pt-4 pb-3 d-flex justify-content-center"
+          >
             <DownloadUrlWidget
               preview="Page"
               name={`${
@@ -2539,7 +2588,8 @@ export default function Leaderboard(props: Props) {
               xs={12}
               sm={12}
               md={6}
-              className="pt-4 pb-3 d-flex justify-content-center">
+              className="pt-4 pb-3 d-flex justify-content-center"
+            >
               <Pagination
                 page={pageProps.page}
                 pageSize={pageProps.pageSize}
