@@ -140,40 +140,50 @@ export async function getServerSideProps(
 ): Promise<{
   props: PageProps;
 }> {
-  const profile = await commonApiFetch<IProfileAndConsolidations>({
-    endpoint: `profiles/${req.query.user}`,
-  });
+  try {
+    const profile = await commonApiFetch<IProfileAndConsolidations>({
+      endpoint: `profiles/${req.query.user}`,
+    });
 
-  const wallet =
-    profile?.profile?.primary_wallet?.toLowerCase() ?? req.query.user;
+    const wallet =
+      profile?.profile?.primary_wallet?.toLowerCase() ?? req.query.user;
 
-  const ensRequest = await fetch(
-    `${process.env.API_ENDPOINT}/api/user/${wallet}`
-  );
-  let userDisplay = profile?.profile?.handle ?? formatAddress(wallet);
-  let pfp = profile?.profile?.pfp_url;
-  let tdh;
-  let balance;
+    const ensRequest = await fetch(
+      `${process.env.API_ENDPOINT}/api/user/${wallet}`
+    );
+    let userDisplay = profile?.profile?.handle ?? formatAddress(wallet);
+    let pfp = profile?.profile?.pfp_url;
+    let tdh;
+    let balance;
 
-  const responseText = await ensRequest.text();
-  if (responseText) {
-    const response = await JSON.parse(responseText);
-    tdh = response.boosted_tdh ? response.boosted_tdh : null;
-    balance = response.balance ? response.balance : null;
-    userDisplay = profile?.profile?.handle
-      ? profile.profile.handle
-      : response.display && !containsEmojis(response.display)
-      ? response.display
-      : wallet;
+    const responseText = await ensRequest.text();
+    if (responseText) {
+      const response = await JSON.parse(responseText);
+      tdh = response.boosted_tdh ? response.boosted_tdh : null;
+      balance = response.balance ? response.balance : null;
+      userDisplay = profile?.profile?.handle
+        ? profile.profile.handle
+        : response.display && !containsEmojis(response.display)
+        ? response.display
+        : wallet;
+    }
+
+    return {
+      props: {
+        title: userDisplay,
+        url: req.query.user,
+        image: pfp ?? DEFAULT_IMAGE,
+        tdh: tdh ?? null,
+        balance: balance ?? null,
+      },
+    };
+  } catch {
+    return {
+      redirect: {
+        permanent: false,
+        destination: "/404",
+      },
+      props: {},
+    } as any;
   }
-
-  return {
-    props: {
-      title: userDisplay,
-      url: req.query.user,
-      image: pfp ?? DEFAULT_IMAGE,
-      tdh: tdh ?? null,
-      balance: balance ?? null,
-    },
-  };
 }
