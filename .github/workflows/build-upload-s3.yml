@@ -25,11 +25,9 @@ jobs:
           ALLOWLIST_API_ENDPOINT: "https://allowlist-api.seize.io"
           BASE_ENDPOINT: "https://seize.io"
           LOAD_S3: "true"
+          VERSION: ${{ github.sha }}
           ALCHEMY_API_KEY: ${{ secrets.ALCHEMY_API_KEY }}
         run: npm run build
-
-      - name: Get latest commit hash
-        run: echo "GIT_COMMIT_HASH=$(git rev-parse HEAD)" >> $GITHUB_ENV
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -39,4 +37,4 @@ jobs:
           aws-region: us-east-1
 
       - name: Upload assets to S3
-        run: aws s3 sync .next s3://6529bucket/web_build/$GIT_COMMIT_HASH/_next
+        run: aws s3 sync .next s3://6529bucket/web_build/${{ github.sha }}/_next
