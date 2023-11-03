@@ -71,24 +71,26 @@ jobs:
           --environment-name "${{ env.BEANSTALK_ENV_NAME }}" \
           --version-label "${{ env.COMMIT_SHA }}"
 
-      - name: Check Elastic Beanstalk status (60s warmup then 30 retries with 10s delay)
+      - name: Check Elastic Beanstalk health and readiness (30s warmup then 30 retries with 10s delay)
         run: |
           echo "Warmup..."
           MAX_RETRIES=30
           COUNTER=0
-          sleep 60 # Initial sleep for the new ec2 to initialize
+          sleep 30 # Initial sleep for the new EC2 to initialize
           while : ; do
-            ENV_STATUS=$(aws elasticbeanstalk describe-environments --environment-names ${{ env.BEANSTALK_ENV_NAME }} --query 'Environments[0].Health' --output text)
-            echo "Environment health status: $ENV_STATUS"
-            if [[ $ENV_STATUS == "Green" ]]; then
-              echo "Environment is healthy!"
+            ENV_HEALTH=$(aws elasticbeanstalk describe-environments --environment-names ${{ env.BEANSTALK_ENV_NAME }} --region us-east-1 --query 'Environments[0].Health' --output text)
+            ENV_STATUS=$(aws elasticbeanstalk describe-environments --environment-names ${{ env.BEANSTALK_ENV_NAME }} --region us-east-1 --query 'Environments[0].Status' --output text)
+            echo "Environment health status: $ENV_HEALTH"
+            echo "Environment status: $ENV_STATUS"
+            if [[ $ENV_HEALTH == "Green" && $ENV_STATUS == "Ready" ]]; then
+              echo "Environment is healthy and ready!"
               break
             elif [[ $COUNTER -eq $MAX_RETRIES ]]; then
-              echo "Environment is not healthy within the expected time."
+              echo "Environment did not become healthy and ready within the expected time."
               exit 1
             fi
             COUNTER=$((COUNTER+1))
-            echo "Waiting for environment to become healthy... Attempt: $COUNTER"
+            echo "Waiting for environment to become healthy and ready... Attempt: $COUNTER"
             sleep 10
           done
 
