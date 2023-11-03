@@ -17,6 +17,7 @@ import UserPageHeader from "./user-page-header/UserPageHeader";
 import UserPageFetching from "./UserPageFetching";
 import DotLoader from "../dotLoader/DotLoader";
 import { Row } from "react-bootstrap";
+import UserPageHeaderClean from "./user-page-header/UserPageHeaderClean";
 
 interface Props {
   user: string;
@@ -249,7 +250,7 @@ export default function UserPage(props: Props) {
 
   return (
     <>
-      <UserPageHeader
+      {/* <UserPageHeader
         dataLoaded={dataLoaded}
         tdh={tdh}
         consolidatedTDH={consolidatedTDH}
@@ -262,7 +263,8 @@ export default function UserPage(props: Props) {
         setView={setView}
         ownerENS={ownerENS}
         profile={props.profile}
-      />
+      /> */}
+      <UserPageHeaderClean />
       {dataLoaded ? (
         <UserPageDetails
           tdh={tdh}
