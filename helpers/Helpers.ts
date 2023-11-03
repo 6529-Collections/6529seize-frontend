@@ -9,7 +9,7 @@ import { BaseNFT, VolumeType } from "../entities/INFT";
 export function formatAddress(address: string) {
   if (
     !address ||
-    !address.startsWith("0x") ||
+    !isValidEthAddress(address) ||
     address.endsWith(".eth") ||
     address.includes(" ")
   ) {
