@@ -8,32 +8,28 @@ import { useRouter } from "next/router";
 import {
   areEqualAddresses,
   containsEmojis,
-  formatAddress,
   getRandomColor,
-  isEmptyObject,
   numberWithCommas,
-  removeProtocol,
 } from "../../helpers/Helpers";
-import { MANIFOLD, SIX529_MUSEUM } from "../../constants";
 import { ConsolidatedTDHMetrics, TDHMetrics } from "../../entities/ITDH";
 import { useAccount } from "wagmi";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { fetchAllPages, fetchUrl } from "../../services/6529api";
-import { MANIFOLD_ENS, MUSEUM_ENS, ReservedUser } from "../../pages/[user]";
-import Tippy from "@tippyjs/react";
 import Tag, { TagType } from "../address/Tag";
 import ConsolidationSwitch, {
   VIEW,
 } from "../consolidation-switch/ConsolidationSwitch";
 import Address from "../address/Address";
 import UserPageDetails, { Focus } from "./UserPageDetails";
-import NotFound from "../notFound/NotFound";
 import { ENS } from "../../entities/IENS";
 import DotLoader from "../dotLoader/DotLoader";
+import { IProfileAndConsolidations } from "../../entities/IProfile";
+import UserEditProfileButton from "./settings/UserEditProfileButton";
+import UserPageLinks from "./UserPageLinks";
 
 interface Props {
   user: string;
   wallets: string[];
+  profile: IProfileAndConsolidations;
 }
 
 const DEFAULT_BANNER_1 = getRandomColor();
@@ -45,9 +41,49 @@ const DEFAULT_PFP_2 = DEFAULT_BANNER_2;
 export default function UserPage(props: Props) {
   const router = useRouter();
   const account = useAccount();
-  const [view, setView] = useState<VIEW>(VIEW.CONSOLIDATION);
+  const [view, setView] = useState<VIEW>(
+    router.query.address ? VIEW.WALLET : VIEW.CONSOLIDATION
+  );
 
-  const [ownerLinkCopied, setIsOwnerLinkCopied] = useState(false);
+  const [activeAddress, setActiveAddress] = useState<string | null>(
+    router.query.address ? (router.query.address as string) : null
+  );
+
+  const [latestActiveAddress, setLatestActiveAddress] = useState<string | null>(
+    null
+  );
+
+  const onView = (newView: VIEW) => {
+    if (newView === VIEW.CONSOLIDATION) {
+      const currentQuery = { ...router.query };
+      delete currentQuery.address;
+      setLatestActiveAddress(activeAddress);
+      setActiveAddress(null);
+      setView(newView);
+      router.push(
+        {
+          pathname: router.pathname,
+          query: currentQuery,
+        },
+        undefined,
+        { shallow: true }
+      );
+    } else if (newView === VIEW.WALLET && latestActiveAddress) {
+      const currentQuery = { ...router.query };
+      currentQuery.address = latestActiveAddress;
+      setActiveAddress(latestActiveAddress);
+      setLatestActiveAddress(null);
+      setView(newView);
+      router.push(
+        {
+          pathname: router.pathname,
+          query: currentQuery,
+        },
+        undefined,
+        { shallow: true }
+      );
+    }
+  };
 
   const [walletOwnedLoaded, setWalletOwnedLoaded] = useState(false);
   const [consolidationOwnedLoaded, setConsolidationOwnedLoaded] =
@@ -59,7 +95,6 @@ export default function UserPage(props: Props) {
   );
   const [ownerENS, setOwnerENS] = useState("");
 
-  const [ownerLinkDisplay, setOwnerLinkDisplay] = useState("");
   const [owned, setOwned] = useState<Owner[]>([]);
   const [walletOwned, setWalletOwned] = useState<Owner[]>([]);
   const [consolidationOwned, setConsolidationOwned] = useState<Owner[]>([]);
@@ -69,7 +104,6 @@ export default function UserPage(props: Props) {
     useState<ConsolidatedTDHMetrics>();
   const [tdh, setTDH] = useState<ConsolidatedTDHMetrics | TDHMetrics>();
   const [isConsolidation, setIsConsolidation] = useState(false);
-  const [userError, setUserError] = useState(false);
   const [fetchingUser, setFetchingUser] = useState(true);
 
   const [ens, setEns] = useState<ENS>();
@@ -80,10 +114,18 @@ export default function UserPage(props: Props) {
 
   useEffect(() => {
     const currFocus = router.query.focus;
-    if (currFocus != focus) {
+    if (currFocus !== focus) {
       setFocus(currFocus as Focus);
     }
-  }, [router.query.focus]);
+    const currAddress = router.query.address;
+    if (!currAddress && activeAddress) {
+      setLatestActiveAddress(activeAddress);
+      setActiveAddress(null);
+    } else if (currAddress && currAddress !== activeAddress) {
+      setLatestActiveAddress(null);
+      setActiveAddress(currAddress as string);
+    }
+  }, [router.query]);
 
   useEffect(() => {
     if (focus) {
@@ -105,54 +147,52 @@ export default function UserPage(props: Props) {
 
   useEffect(() => {
     async function fetchENS() {
-      let oLink = process.env.BASE_ENDPOINT
-        ? process.env.BASE_ENDPOINT
-        : "https://seize.io";
-      if (props.user.startsWith("0x") || props.user.endsWith(".eth")) {
-        const url = `${process.env.API_ENDPOINT}/api/user/${props.user}`;
+      if (
+        props.user.startsWith("0x") ||
+        props.user.endsWith(".eth") ||
+        props.profile?.profile?.primary_wallet ||
+        activeAddress
+      ) {
+        const userUrl =
+          props.user.startsWith("0x") || props.user.endsWith(".eth")
+            ? props.user
+            : activeAddress
+            ? activeAddress
+            : props.profile?.profile?.primary_wallet;
+        const url = `${process.env.API_ENDPOINT}/api/user/${userUrl}`;
         return fetchUrl(url).then((response: ENS) => {
-          if (isEmptyObject(response)) {
-            setUserError(true);
-          }
-          if (areEqualAddresses(response.wallet, SIX529_MUSEUM)) {
-            setEns({
-              ...MUSEUM_ENS,
-              consolidation_key: response.consolidation_key,
-            });
-          } else if (areEqualAddresses(response.wallet, MANIFOLD)) {
-            setEns({
-              ...MANIFOLD_ENS,
-              consolidation_key: response.consolidation_key,
-            });
-          } else {
-            setEns(response);
-          }
-          setFetchingUser(false);
-          const oAddress = response.wallet ? response.wallet : props.user;
+          setEns({
+            ...response,
+            display: props.profile.profile?.handle ?? response.display,
+            pfp: props.profile.profile?.pfp_url,
+            banner_1: props.profile.profile?.banner_1,
+            banner_2: props.profile.profile?.banner_2,
+            website: props.profile.profile?.website,
+          });
+
+          const oAddress =
+            activeAddress ??
+            props.profile.profile?.primary_wallet ??
+            response.wallet ??
+            props.user;
           setOwnerAddress(oAddress as `0x${string}`);
-          setOwnerENS(response.display ? response.display : oAddress);
-          let reservedDisplay;
-          if (areEqualAddresses(props.user, SIX529_MUSEUM)) {
-            reservedDisplay = ReservedUser.MUSEUM;
-          } else if (areEqualAddresses(props.user, MANIFOLD)) {
-            reservedDisplay = ReservedUser.MANIFOLD;
-          }
-          setOwnerLinkDisplay(
-            `${oLink}/${
-              reservedDisplay
-                ? reservedDisplay
-                : response.display && !containsEmojis(response.display)
-                ? response.display.replaceAll(" ", "-")
-                : formatAddress(oAddress)
-            }`
+          setOwnerENS(
+            activeAddress ??
+              props.profile?.profile?.primary_wallet ??
+              response.display ??
+              oAddress
           );
-          const currentQuery = {
+          const currentQuery: { focus: Focus; address?: string | undefined } = {
             focus: focus,
           };
+
+          if (activeAddress) {
+            currentQuery.address = activeAddress;
+          }
           router.push(
             {
-              pathname: reservedDisplay
-                ? reservedDisplay
+              pathname: props.profile.profile?.handle
+                ? props.profile.profile.handle
                 : response.display && !containsEmojis(response.display)
                 ? response.display.replaceAll(" ", "-")
                 : oAddress,
@@ -161,32 +201,10 @@ export default function UserPage(props: Props) {
             undefined,
             { shallow: true }
           );
+          setFetchingUser(false);
         });
-      } else {
-        if (props.user.toUpperCase() === ReservedUser.MUSEUM.toUpperCase()) {
-          setOwnerAddress(SIX529_MUSEUM);
-          setOwnerENS(ReservedUser.MUSEUM);
-          setOwnerLinkDisplay(`${oLink}/${ReservedUser.MUSEUM}`);
-          setEns({
-            ...MUSEUM_ENS,
-            consolidation_key: MUSEUM_ENS.wallet,
-          });
-          setFetchingUser(false);
-        } else if (
-          props.user.toUpperCase() === ReservedUser.MANIFOLD.toUpperCase()
-        ) {
-          setOwnerAddress(MANIFOLD);
-          setOwnerENS(ReservedUser.MANIFOLD);
-          setOwnerLinkDisplay(`${oLink}/${ReservedUser.MANIFOLD}`);
-          setEns({
-            ...MANIFOLD_ENS,
-            consolidation_key: MANIFOLD_ENS.wallet,
-          });
-          setFetchingUser(false);
-        } else {
-          window.location.href = "/404";
-        }
       }
+      setFetchingUser(false);
     }
 
     if (router.isReady) {
@@ -328,15 +346,6 @@ export default function UserPage(props: Props) {
     );
   }
 
-  if (userError) {
-    return (
-      <NotFound
-        title="User Not found"
-        links={[{ href: "/", display: "BACK TO HOME" }]}
-      />
-    );
-  }
-
   return (
     <>
       <div
@@ -344,7 +353,8 @@ export default function UserPage(props: Props) {
           background: `linear-gradient(45deg, ${
             ens && ens.banner_1 ? ens.banner_1 : DEFAULT_BANNER_1
           } 0%, ${ens && ens.banner_2 ? ens.banner_2 : DEFAULT_BANNER_2} 100%)`,
-        }}>
+        }}
+      >
         <Container>
           <Row>
             <Col className={`${styles.banner}`}>
@@ -426,7 +436,8 @@ export default function UserPage(props: Props) {
               <Row>
                 <Col className="d-flex align-items-start justify-content-between">
                   <span
-                    className={`${styles.imagePlaceholder} d-flex flex-wrap gap-2 align-items-center`}>
+                    className={`${styles.imagePlaceholder} d-flex flex-wrap gap-2 align-items-center`}
+                  >
                     {ens && ens.pfp ? (
                       <Image
                         priority
@@ -446,78 +457,97 @@ export default function UserPage(props: Props) {
                           } 0%, ${
                             ens?.banner_2 ? ens.banner_2 : DEFAULT_PFP_2
                           } 100%)`,
-                        }}></span>
-                    )}
-                    {tdh && consolidatedTDH ? (
-                      <span className={styles.addressContainer}>
-                        {isConsolidation && (
-                          <span className="mt-1">
-                            <ConsolidationSwitch
-                              view={view}
-                              onSetView={(v) => setView(v)}
-                            />
-                          </span>
-                        )}
-                        <span>
-                          <Address
-                            wallets={
-                              view === VIEW.CONSOLIDATION
-                                ? consolidatedTDH.wallets
-                                : [ownerAddress]
-                            }
-                            display={
-                              view === VIEW.CONSOLIDATION &&
-                              consolidatedTDH.consolidation_display
-                                ? consolidatedTDH.consolidation_display
-                                : ownerENS
-                            }
-                            isUserPage={true}
-                            disableLink={true}
-                            viewingWallet={ownerAddress}
-                          />
-                        </span>
-                      </span>
-                    ) : (
-                      <span className="d-flex flex-wrap">
-                        <Address
-                          wallets={[ownerAddress]}
-                          display={ownerENS}
-                          disableLink={true}
-                          isUserPage={true}
-                          viewingWallet={ownerAddress}
-                        />
-                      </span>
+                        }}
+                      ></span>
                     )}
                   </span>
+
                   <span className="mt-3 d-flex align-items-start gap-2">
                     {account.address &&
                       areEqualAddresses(account.address, ownerAddress) && (
-                        <Tippy
-                          content={"Profile Settings"}
-                          delay={250}
-                          placement={"left"}
-                          theme={"light"}>
-                          <FontAwesomeIcon
-                            icon="gear"
-                            className={styles.settingsIcon}
-                            onClick={() =>
-                              (window.location.href = `/${props.user}/settings`)
-                            }
-                          />
-                        </Tippy>
+                        <UserEditProfileButton user={props.user} />
                       )}
                   </span>
                 </Col>
               </Row>
             </Container>
             <Container className="no-padding">
-              <Row className="pt-3">
+              <Row>
                 <Col
                   xs={12}
                   sm={6}
-                  className={`pt-2 pb-2 ${styles.tagsContainer}`}>
+                  className={`pt-2 pb-2 ${styles.tagsContainer}`}
+                >
                   {tdh ? (
                     <Container>
+                      {tdh && consolidatedTDH ? (
+                        <span className={styles.addressContainer}>
+                          {isConsolidation &&
+                            (activeAddress || latestActiveAddress) && (
+                              <span>
+                                <ConsolidationSwitch
+                                  view={view}
+                                  onSetView={onView}
+                                />
+                              </span>
+                            )}
+                          <span>
+                            <Address
+                              wallets={
+                                view === VIEW.CONSOLIDATION
+                                  ? consolidatedTDH.wallets
+                                  : [ownerAddress]
+                              }
+                              consolidatedWallets={
+                                props.profile.consolidation.wallets
+                              }
+                              display={
+                                activeAddress
+                                  ? props.profile.consolidation.wallets.find(
+                                      (w) =>
+                                        w.wallet.address.toLowerCase() ===
+                                        activeAddress.toLowerCase()
+                                    )?.wallet.ens
+                                  : props.profile.profile?.handle
+                                  ? props.profile.profile.handle
+                                  : view === VIEW.CONSOLIDATION &&
+                                    consolidatedTDH.consolidation_display
+                                  ? consolidatedTDH.consolidation_display
+                                  : ownerENS
+                              }
+                              displayEns={
+                                activeAddress
+                                  ? props.profile.consolidation.wallets.find(
+                                      (w) =>
+                                        w.wallet.address.toLowerCase() ===
+                                        activeAddress.toLowerCase()
+                                    )?.wallet.ens
+                                  : props.profile.profile?.handle
+                                  ? props.profile.consolidation.wallets.reduce(
+                                      (prev, curr) =>
+                                        prev.tdh > curr.tdh ? prev : curr
+                                    ).wallet.ens
+                                  : undefined
+                              }
+                              isUserPage={true}
+                              disableLink={true}
+                              viewingWallet={ownerAddress}
+                              setLinkQueryAddress={true}
+                            />
+                          </span>
+                        </span>
+                      ) : (
+                        <span className="d-flex flex-wrap">
+                          <Address
+                            wallets={[ownerAddress]}
+                            display={ownerENS}
+                            disableLink={true}
+                            isUserPage={true}
+                            viewingWallet={ownerAddress}
+                            setLinkQueryAddress={true}
+                          />
+                        </span>
+                      )}
                       {tdh.tdh_rank && (
                         <Row className="pt-2 pb-2">
                           <Col>
@@ -593,85 +623,12 @@ export default function UserPage(props: Props) {
                     </Container>
                   )}
                 </Col>
-                <Col
-                  xs={12}
-                  sm={6}
-                  className={`pt-2 pb-2 ${styles.linksContainer}`}>
-                  <Row className="pb-2">
-                    <Col>
-                      <Tippy
-                        content={ownerLinkCopied ? "Copied" : "Copy"}
-                        placement={"right"}
-                        theme={"light"}
-                        hideOnClick={false}>
-                        <span
-                          className={styles.ownerLink}
-                          onClick={() => {
-                            if (navigator.clipboard) {
-                              navigator.clipboard.writeText(
-                                window.location.href
-                              );
-                            }
-                            setIsOwnerLinkCopied(true);
-                            setTimeout(() => {
-                              setIsOwnerLinkCopied(false);
-                            }, 1000);
-                          }}>
-                          {removeProtocol(ownerLinkDisplay)}{" "}
-                          <FontAwesomeIcon
-                            icon="link"
-                            className={styles.ownerLinkIcon}
-                          />
-                        </span>
-                      </Tippy>
-                    </Col>
-                  </Row>
-                  <Row className="pt-2 pb-2">
-                    <Col>
-                      <span className="pt-3">
-                        <a
-                          href={`https://opensea.io/${ownerAddress}`}
-                          target="_blank"
-                          rel="noreferrer">
-                          <Image
-                            className={styles.marketplace}
-                            src="/opensea.png"
-                            alt="opensea"
-                            width={40}
-                            height={40}
-                          />
-                        </a>
-                        <a
-                          href={`https://x2y2.io/user/${ownerAddress}`}
-                          target="_blank"
-                          rel="noreferrer">
-                          <Image
-                            className={styles.marketplace}
-                            src="/x2y2.png"
-                            alt="x2y2"
-                            width={40}
-                            height={40}
-                          />
-                        </a>
-                        {ens && ens.website && (
-                          <a
-                            href={
-                              ens.website.startsWith("http")
-                                ? ens.website
-                                : `https://${ens.website}`
-                            }
-                            target="_blank"
-                            rel="noreferrer">
-                            <FontAwesomeIcon
-                              icon="globe"
-                              className={styles.marketplace}
-                            />
-                          </a>
-                        )}
-                      </span>
-                    </Col>
-                  </Row>
-                </Col>
+                <UserPageLinks
+                  user={props.user}
+                  userAddress={ownerAddress}
+                  activeAddress={activeAddress}
+                  profile={props.profile}
+                />
               </Row>
             </Container>
           </>
