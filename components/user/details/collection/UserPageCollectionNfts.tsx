@@ -12,6 +12,7 @@ import UserPageCollectionNft from "./UserPageCollectionNft";
 import { Row } from "react-bootstrap";
 import { UserCollectionSort } from "./UserPageCollection";
 import { SortDirection } from "../../../../entities/ISort";
+import { assertUnreachable } from "../../../../helpers/AllowlistToolHelpers";
 
 export interface IUserNFT extends NFTLite {
   readonly nftTDH: number | null;
@@ -153,12 +154,52 @@ export default function UserPageCollectionNfts({
   ]);
 
   useEffect(() => {
-    
-  }, [sort, sortDir]);
+    switch (sort) {
+      case UserCollectionSort.ID:
+        setFinalNfts(
+          [...filteredNfts].sort((a, b) => {
+            if (a.contract !== b.contract) {
+              return a.contract > b.contract ? 1 : -1;
+            }
+            if (sortDir === SortDirection.ASC) {
+              return a.id > b.id ? 1 : -1;
+            }
+            return a.id > b.id ? -1 : 1;
+          })
+        );
+        break;
+      case UserCollectionSort.TDH:
+        setFinalNfts(
+          [...filteredNfts].sort((a, b) => {
+            const aTDH = a.nftTDH ?? 0;
+            const bTDH = b.nftTDH ?? 0;
+            if (sortDir === SortDirection.ASC) {
+              return aTDH > bTDH ? 1 : -1;
+            }
+            return aTDH > bTDH ? -1 : 1;
+          })
+        );
+        break;
+      case UserCollectionSort.RANK:
+        setFinalNfts(
+          [...filteredNfts].sort((a, b) => {
+            const aRank = a.nftRank ?? 0;
+            const bRank = b.nftRank ?? 0;
+            if (sortDir === SortDirection.ASC) {
+              return aRank > bRank ? 1 : -1;
+            }
+            return aRank > bRank ? -1 : 1;
+          })
+        );
+        break;
+      default:
+        assertUnreachable(sort);
+    }
+  }, [sort, sortDir, filteredNfts]);
 
   return (
     <Row className="pt-2">
-      {filteredNfts.map((nft) => (
+      {finalNfts.map((nft) => (
         <UserPageCollectionNft
           key={`user-page-collection-nft-${nft.contract}-${nft.id}`}
           nft={nft}
