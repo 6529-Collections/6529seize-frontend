@@ -6,6 +6,7 @@ env:
   AWS_BUCKET: "6529bucket"
   COMMIT_SHA: "${{ github.sha }}"
   AWS_REGION: "us-east-1"
+  APP_NAME: "seize app"
 
 jobs:
   build-upload-deploy:
