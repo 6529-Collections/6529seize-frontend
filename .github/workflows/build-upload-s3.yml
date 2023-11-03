@@ -69,14 +69,15 @@ jobs:
           --environment-name "${{ env.BEANSTACK_ENV_NAME }}" \
           --version-label "${{ env.COMMIT_SHA }}"
 
-      - name: Check Elastic Beanstalk status (30 retries with 5 seconds delay)
+      - name: Check Elastic Beanstalk status (30\'\' warmup then 15 retries with 5\'\' delay)
         run: |
-          MAX_RETRIES=30
+          MAX_RETRIES=15
           COUNTER=0
+          sleep 30
           while [[ "$(aws elasticbeanstalk describe-environments --environment-names ${{ env.BEANSTACK_ENV_NAME }} --query 'Environments[].Status' --output text)" != "Ready" && ${COUNTER} -lt ${MAX_RETRIES} ]]; do 
             COUNTER=$[$COUNTER +1]
             echo "Environment update still in progress... Attempt: $COUNTER" 
-            sleep 5 
+            sleep 5
           done
           if [[ ${COUNTER} -eq ${MAX_RETRIES} ]]; then
             echo "Failed to update the environment within the expected time." 
