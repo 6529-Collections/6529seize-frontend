@@ -74,9 +74,9 @@ jobs:
       - name: Check Elastic Beanstalk health and readiness (60s warmup then 30 retries with 15s delay)
         run: |
           echo "Warmup..."
-          MAX_RETRIES=60
+          MAX_RETRIES=30
           COUNTER=0
-          sleep 30 # Initial sleep for the new EC2 to initialize
+          sleep 60
           while : ; do
             ENV_HEALTH=$(aws elasticbeanstalk describe-environments --environment-names ${{ env.BEANSTALK_ENV_NAME }} --query 'Environments[0].Health' --output text)
             ENV_STATUS=$(aws elasticbeanstalk describe-environments --environment-names ${{ env.BEANSTALK_ENV_NAME }} --query 'Environments[0].Status' --output text)
@@ -93,6 +93,21 @@ jobs:
             echo "Waiting for environment to become healthy and ready... Attempt: $COUNTER"
             sleep 15
           done
+
+      - name: Validate Deployment
+        run: |
+          DEPLOYED_BEANSTALK_VERSION=$(aws elasticbeanstalk describe-environments \
+            --environment-names ${{ env.BEANSTALK_ENV_NAME }} \
+            --query 'Environments[0].VersionLabel' \
+            --output text \
+            --region us-east-1)
+          echo "Current deployed version is $DEPLOYED_BEANSTALK_VERSION"
+          if [ "$DEPLOYED_BEANSTALK_VERSION" != "${{ env.COMMIT_SHA }}" ]; then
+            echo "Deployed version does not match the commit SHA."
+            exit 1
+          else
+            echo "Deployed version valid!"
+          fi
 
       - name: Notify about failure
         uses: sarisia/actions-status-discord@v1
