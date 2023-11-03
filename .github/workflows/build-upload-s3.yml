@@ -71,16 +71,16 @@ jobs:
           --environment-name "${{ env.BEANSTALK_ENV_NAME }}" \
           --version-label "${{ env.COMMIT_SHA }}"
 
-      - name: Check Elastic Beanstalk health and readiness (30s warmup then 30 retries with 10s delay)
+      - name: Check Elastic Beanstalk health and readiness (60s warmup then 30 retries with 15s delay)
         run: |
           echo "Warmup..."
-          MAX_RETRIES=30
+          MAX_RETRIES=60
           COUNTER=0
           sleep 30 # Initial sleep for the new EC2 to initialize
           while : ; do
-            ENV_HEALTH=$(aws elasticbeanstalk describe-environments --environment-names ${{ env.BEANSTALK_ENV_NAME }} --region us-east-1 --query 'Environments[0].Health' --output text)
-            ENV_STATUS=$(aws elasticbeanstalk describe-environments --environment-names ${{ env.BEANSTALK_ENV_NAME }} --region us-east-1 --query 'Environments[0].Status' --output text)
-            echo "Environment health status: $ENV_HEALTH"
+            ENV_HEALTH=$(aws elasticbeanstalk describe-environments --environment-names ${{ env.BEANSTALK_ENV_NAME }} --query 'Environments[0].Health' --output text)
+            ENV_STATUS=$(aws elasticbeanstalk describe-environments --environment-names ${{ env.BEANSTALK_ENV_NAME }} --query 'Environments[0].Status' --output text)
+            echo "Environment health: $ENV_HEALTH"
             echo "Environment status: $ENV_STATUS"
             if [[ $ENV_HEALTH == "Green" && $ENV_STATUS == "Ready" ]]; then
               echo "Environment is healthy and ready!"
@@ -91,26 +91,26 @@ jobs:
             fi
             COUNTER=$((COUNTER+1))
             echo "Waiting for environment to become healthy and ready... Attempt: $COUNTER"
-            sleep 10
+            sleep 15
           done
 
-      # - name: Notify about failure
-      #   uses: sarisia/actions-status-discord@v1
-      #   if: failure()
-      #   env:
-      #     DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
-      #   with:
-      #     title: "Seize PROD WEB DEPLOY: CI pipeline is broken!!!"
-      #     description: ${{ env.COMMIT_SHA }} - ${{ env.COMMIT_MESSAGE }}
-      #     content: "@developers"
-      #     color: 0xff0000
+      - name: Notify about failure
+        uses: sarisia/actions-status-discord@v1
+        if: failure()
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+        with:
+          title: "Seize PROD WEB DEPLOY: CI pipeline is broken!!!"
+          description: ${{ env.COMMIT_SHA }} - ${{ env.COMMIT_MESSAGE }}
+          content: "@developers"
+          color: 0xff0000
 
-      # - name: Notify about success
-      #   uses: sarisia/actions-status-discord@v1
-      #   if: success()
-      #   env:
-      #     DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
-      #   with:
-      #     title: "Seize PROD WEB DEPLOY: CI pipeline complete"
-      #     description: ${{ env.COMMIT_SHA }} - ${{ env.COMMIT_MESSAGE }}
-      #     color: 0x00ff00
+      - name: Notify about success
+        uses: sarisia/actions-status-discord@v1
+        if: success()
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+        with:
+          title: "Seize PROD WEB DEPLOY: CI pipeline complete"
+          description: ${{ env.COMMIT_SHA }} - ${{ env.COMMIT_MESSAGE }}
+          color: 0x00ff00

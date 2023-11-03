@@ -49,7 +49,7 @@ const securityHeaders = [
 ];
 const nextConfig = {
   assetPrefix: LOAD_S3
-    ? `https://seize-web.s3.amazonaws.com/web_build/${VERSION}`
+    ? `https://dnclu2fna0b2b.cloudfront.net/web_build/${VERSION}`
     : "",
   reactStrictMode: false,
   swcMinify: true,
