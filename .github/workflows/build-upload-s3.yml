@@ -29,6 +29,13 @@ jobs:
           ALCHEMY_API_KEY: ${{ secrets.ALCHEMY_API_KEY }}
         run: npm run build
 
+      - name: Build Target
+        run: |
+          mkdir -p target/_next
+          cp -r .next/static target/_next/
+          zip -r package.zip . -x '*.git*' 'node_modules/*' 'target/*'
+          mv package.zip target/
+
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -37,4 +44,4 @@ jobs:
           aws-region: us-east-1
 
       - name: Upload assets to S3
-        run: aws s3 sync .next s3://6529bucket/web_build/${{ github.sha }}/_next
+        run: aws s3 sync target s3://6529bucket/web_build/${{ github.sha }}/
