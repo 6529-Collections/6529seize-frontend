@@ -7,12 +7,18 @@ import UserPageActivity from "./UserPageActivity";
 import UserPageDistributions from "./UserPageDistributions";
 import UserPageStats from "./UserPageStats";
 import UserPageOverview from "../UserPageOverview";
-import { useEffect, useState } from "react";
+import { use, useEffect, useState } from "react";
 import UserPageDetailsHeader from "./UserPageDetailsHeader";
 import { NFTLite } from "../../../entities/INFT";
 import { commonApiFetch } from "../../../services/api/common-api";
 import { IProfileAndConsolidations } from "../../../entities/IProfile";
 import DotLoader from "../../dotLoader/DotLoader";
+import { useRouter } from "next/router";
+
+// ?focus=collection
+// ?focus=activity
+// ?focus=distributions
+// ?focus=stats
 
 interface Props {
   ownerAddress: `0x${string}` | undefined;
@@ -30,8 +36,22 @@ export enum Focus {
 }
 
 export default function UserPageDetails(props: Props) {
-  const [focus, setFocus] = useState<Focus>(Focus.COLLECTION);
+  const router = useRouter();
+  const [focus, setFocus] = useState<Focus>(
+    (router.query.focus as Focus) ?? Focus.COLLECTION
+  );
   const [memesLite, setMemesLite] = useState<NFTLite[]>([]);
+
+  useEffect(() => {
+    router.push(
+      {
+        pathname: router.pathname,
+        query: { ...router.query, focus },
+      },
+      undefined,
+      { shallow: true }
+    );
+  }, [focus]);
 
   useEffect(() => {
     const getMemesLite = async () => {
@@ -77,7 +97,6 @@ export default function UserPageDetails(props: Props) {
       <UserPageStats
         show={focus === Focus.STATS}
         ownerAddress={props.ownerAddress}
-        
       />
     </Container>
   );

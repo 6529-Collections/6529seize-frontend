@@ -15,8 +15,6 @@ import { ENS } from "../../entities/IENS";
 import { IProfileAndConsolidations } from "../../entities/IProfile";
 import UserPageHeader from "./user-page-header/UserPageHeader";
 import UserPageFetching from "./UserPageFetching";
-import DotLoader from "../dotLoader/DotLoader";
-import { Row } from "react-bootstrap";
 
 interface Props {
   user: string;
@@ -96,9 +94,16 @@ export default function UserPage(props: Props) {
               response.display ??
               oAddress
           );
-          const currentQuery: { address?: string | undefined } = {};
+          const currentQuery: {
+            focus?: string | undefined;
+            address?: string | undefined;
+          } = {};
           if (activeAddress) {
             currentQuery.address = activeAddress;
+          }
+
+          if (router.query.focus) {
+            currentQuery.focus = router.query.focus as string;
           }
           router.push(
             {
@@ -263,7 +268,7 @@ export default function UserPage(props: Props) {
         ownerENS={ownerENS}
         profile={props.profile}
       />
-      {dataLoaded ? (
+      {dataLoaded && (
         <UserPageDetails
           tdh={tdh}
           ownerAddress={ownerAddress}
@@ -271,10 +276,6 @@ export default function UserPage(props: Props) {
           owned={owned}
           profile={props.profile}
         />
-      ) : (
-        <Row>
-          <DotLoader />
-        </Row>
       )}
     </>
   );

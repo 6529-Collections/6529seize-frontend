@@ -9,7 +9,7 @@ import UserPageCollectionNfts from "./UserPageCollectionNfts";
 import UserPageCollectionControls from "./UserPageCollectionControls";
 import DotLoader from "../../../dotLoader/DotLoader";
 import { Row } from "react-bootstrap";
-import UserPageDetailsNothingHere from "../UserPageDetailsNothingHere";
+
 
 interface Props {
   show: boolean;
@@ -27,7 +27,6 @@ export enum UserCollectionSort {
 export default function UserPageCollection(props: Props) {
   const [sortDir, setSortDir] = useState<SortDirection>(SortDirection.ASC);
   const [sort, setSort] = useState<UserCollectionSort>(UserCollectionSort.ID);
-
   const [hideSeized, setHideSeized] = useState(false);
   const [hideNonSeized, setHideNonSeized] = useState(true);
   const [hideMemes, setHideMemes] = useState(false);
@@ -40,25 +39,22 @@ export default function UserPageCollection(props: Props) {
   const [selectedSeason, setSelectedSeason] = useState(0);
   const [dataLoaded, setDataLoaded] = useState(false);
 
-  const [haveCards, setHaveCards] = useState(false);
-  useEffect(() => {
-    setHaveCards(!!props.owned.length);
-  }, [props.owned]);
+
+
 
   useEffect(() => {
-    if (!haveCards) {
-      setDataLoaded(true);
-      return;
-    }
     if (seasonsLoaded && gradientsLoaded) {
       setDataLoaded(true);
       return;
     }
     setDataLoaded(false);
-  }, [seasonsLoaded, gradientsLoaded, props.owned]);
+  }, [seasonsLoaded, gradientsLoaded]);
 
   useEffect(() => {
-    if (!haveCards) {
+    if (!props.show) {
+      return;
+    }
+    if (gradientsLoaded) {
       return;
     }
     const url = `${process.env.API_ENDPOINT}/api/nfts/gradients?&page_size=101&sort=${sort}&sort_direction=${sortDir}`;
@@ -66,7 +62,7 @@ export default function UserPageCollection(props: Props) {
       setGradients(gradients);
       setGradientsLoaded(true);
     });
-  }, [haveCards]);
+  }, [props.show, gradientsLoaded]);
 
   useEffect(() => {
     if (!!props.memesLite.length && !!gradients.length) {
@@ -75,15 +71,20 @@ export default function UserPageCollection(props: Props) {
   }, [props.memesLite, gradients]);
 
   useEffect(() => {
-    if (!haveCards) {
+    if (seasonsLoaded) {
       return;
     }
+
+    if (!props.show) {
+      return;
+    }
+
     const url = `${process.env.API_ENDPOINT}/api/memes_seasons`;
     fetchUrl(url).then((seasons: any[]) => {
       setSeasons(seasons);
       setSeasonsLoaded(true);
     });
-  }, [haveCards]);
+  }, [props.show, seasonsLoaded]);
 
   if (!props.show) {
     return <></>;
@@ -117,24 +118,19 @@ export default function UserPageCollection(props: Props) {
         selectedSeason={selectedSeason}
         setSelectedSeason={setSelectedSeason}
       />
-
-      {haveCards ? (
-        <UserPageCollectionNfts
-          owned={props.owned}
-          nfts={nfts}
-          tdh={props.tdh}
-          seasons={seasons}
-          selectedSeason={selectedSeason}
-          hideSeized={hideSeized}
-          hideNonSeized={hideNonSeized}
-          hideMemes={hideMemes}
-          hideGradients={hideGradients}
-          sort={sort}
-          sortDir={sortDir}
-        />
-      ) : (
-        <UserPageDetailsNothingHere />
-      )}
+      <UserPageCollectionNfts
+        owned={props.owned}
+        nfts={nfts}
+        tdh={props.tdh}
+        seasons={seasons}
+        selectedSeason={selectedSeason}
+        hideSeized={hideSeized}
+        hideNonSeized={hideNonSeized}
+        hideMemes={hideMemes}
+        hideGradients={hideGradients}
+        sort={sort}
+        sortDir={sortDir}
+      />
     </>
   );
 }
