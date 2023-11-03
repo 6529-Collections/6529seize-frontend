@@ -7,6 +7,7 @@ env:
   COMMIT_SHA: "${{ github.sha }}"
   AWS_REGION: "us-east-1"
   BEANSTALK_APP_NAME: "seize app"
+  BEANSTACK_ENV_NAME: "Seizeapp-env"
 
 jobs:
   build-upload-deploy:
@@ -60,3 +61,25 @@ jobs:
           --source-bundle S3Bucket="${{ env.AWS_BUCKET }}",S3Key="web_build/${{ env.COMMIT_SHA }}/package.zip" \
           --version-label "${{ env.COMMIT_SHA }}" \
           --description "${DESCRIPTION:0:100}"
+
+      - name: Deploy new Version to ElasticBeanstalk
+        run: |
+          aws elasticbeanstalk update-environment \
+          --application-name "${{ env.BEANSTALK_APP_NAME }}" \
+          --environment-name "${{ env.BEANSTACK_ENV_NAME }}" \
+          --version-label "${{ env.COMMIT_SHA }}"
+
+      - name: Check Elastic Beanstalk status
+        run: |
+          MAX_RETRIES=40
+          COUNTER=0
+          while [[ "$(aws elasticbeanstalk describe-environments --environment-names ${{ env.BEANSTACK_ENV_NAME }} --query 'Environments[].Status' --output text)" != "Ready" && $COUNTER -lt $MAX_RETRIES ]]; do 
+            ((COUNTER++))
+            echo "Environment update still in progress... Attempt: $COUNTER" 
+            sleep 15 
+          done
+          if [[ $COUNTER -eq $MAX_RETRIES ]]; then
+            echo "Failed to update the environment within the expected time." 
+            exit 1
+          fi
+          echo "Environment update complete!"
