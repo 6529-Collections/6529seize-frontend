@@ -69,8 +69,9 @@ jobs:
           --environment-name "${{ env.BEANSTACK_ENV_NAME }}" \
           --version-label "${{ env.COMMIT_SHA }}"
 
-      - name: Check Elastic Beanstalk status (30\'\' warmup then 15 retries with 5\'\' delay)
+      - name: Check Elastic Beanstalk status (30s warmup then 15 retries with 5s delay)
         run: |
+          echo "Warmup..." 
           MAX_RETRIES=15
           COUNTER=0
           sleep 30
