@@ -40,5 +40,3 @@ next-env.d.ts
 
 /analyze
 /.idea/
-
-.launch_script
