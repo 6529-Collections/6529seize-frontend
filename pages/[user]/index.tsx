@@ -6,6 +6,7 @@ import { useRouter } from "next/router";
 import {
   containsEmojis,
   formatAddress,
+  getRandomColor,
   numberWithCommas,
 } from "../../helpers/Helpers";
 import HeaderPlaceholder from "../../components/header/HeaderPlaceholder";
