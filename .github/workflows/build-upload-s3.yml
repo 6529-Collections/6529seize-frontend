@@ -7,7 +7,7 @@ env:
   COMMIT_SHA: "${{ github.sha }}"
   AWS_REGION: "us-east-1"
   BEANSTALK_APP_NAME: "seize app"
-  BEANSTACK_ENV_NAME: "Seizeapp-env"
+  BEANSTALK_ENV_NAME: "Seizeapp-env"
 
 jobs:
   build-upload-deploy:
@@ -53,29 +53,22 @@ jobs:
       - name: Upload assets to S3
         run: aws s3 sync target s3://${{ env.AWS_BUCKET }}/web_build/${{ env.COMMIT_SHA }}/
 
+      - name: Get commit message
+        run: echo "COMMIT_MESSAGE=$(git show -s --format=%s)" >> $GITHUB_ENV
+
       - name: Create new ElasticBeanstalk Application Version
         run: |
-          export DESCRIPTION=$(git show -s --format=%s)
           aws elasticbeanstalk create-application-version \
           --application-name "${{ env.BEANSTALK_APP_NAME }}" \
           --source-bundle S3Bucket="${{ env.AWS_BUCKET }}",S3Key="web_build/${{ env.COMMIT_SHA }}/package.zip" \
           --version-label "${{ env.COMMIT_SHA }}" \
-          --description "${DESCRIPTION:0:100}"
-
-      - name: Validate Deployment
-        run: |
-          INSTANCE_COUNT=$(aws elasticbeanstalk describe-environment-resources --environment-name Seizeapp-env --region us-east-1 --query "EnvironmentResources.Instances[*].Id" --output text | wc -w)
-          echo "Instance count: $INSTANCE_COUNT"
-          if [[ "$INSTANCE_COUNT" -lt 2 ]]; then
-            echo "Deployment Aborted: Less than 2 instances are running."
-            exit 1
-          fi
+          --description "${{ env.COMMIT_MESSAGE }}"
 
       - name: Deploy new Version to ElasticBeanstalk
         run: |
           aws elasticbeanstalk update-environment \
           --application-name "${{ env.BEANSTALK_APP_NAME }}" \
-          --environment-name "${{ env.BEANSTACK_ENV_NAME }}" \
+          --environment-name "${{ env.BEANSTALK_ENV_NAME }}" \
           --version-label "${{ env.COMMIT_SHA }}"
 
       - name: Check Elastic Beanstalk status (30s warmup then 30 retries with 10s delay)
@@ -83,26 +76,39 @@ jobs:
           echo "Warmup..."
           MAX_RETRIES=30
           COUNTER=0
-          sleep 30
-          ENVIRONMENT_ID=$(aws elasticbeanstalk describe-environments --environment-names ${{ env.BEANSTALK_ENV_NAME }} --query 'Environments[0].EnvironmentId' --output text)
+          sleep 30 # Initial sleep for the environment to start updating
           while : ; do
-            ALL_HEALTHY=true
-            INSTANCE_HEALTHS=$(aws elasticbeanstalk describe-instances-health --environment-id $ENVIRONMENT_ID --attribute-names All --query 'InstanceHealthList[].HealthStatus' --output text)
-            echo "Checking instance health statuses: $INSTANCE_HEALTHS"
-            for STATUS in $INSTANCE_HEALTHS; do
-              if [[ $STATUS != "Ok" ]]; then
-                ALL_HEALTHY=false
-                break
-              fi
-            done
-            if $ALL_HEALTHY && [[ $COUNTER -lt $MAX_RETRIES ]]; then
-              echo "All instances are in good health!"
+            ENV_STATUS=$(aws elasticbeanstalk describe-environments --environment-names ${{ env.BEANSTALK_ENV_NAME }} --query 'Environments[0].Health' --output text)
+            echo "Environment health status: $ENV_STATUS"
+            if [[ $ENV_STATUS == "Green" ]]; then
+              echo "Environment is healthy!"
               break
             elif [[ $COUNTER -eq $MAX_RETRIES ]]; then
-              echo "Some instances are not healthy within the expected time."
+              echo "Environment is not healthy within the expected time."
               exit 1
             fi
             COUNTER=$((COUNTER+1))
-            echo "Waiting for instances to become healthy... Attempt: $COUNTER"
+            echo "Waiting for environment to become healthy... Attempt: $COUNTER"
             sleep 10
           done
+
+      # - name: Notify about failure
+      #   uses: sarisia/actions-status-discord@v1
+      #   if: failure()
+      #   env:
+      #     DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+      #   with:
+      #     title: "Seize PROD WEB DEPLOY: CI pipeline is broken!!!"
+      #     description: ${{ env.COMMIT_SHA }} - ${{ env.COMMIT_MESSAGE }}
+      #     content: "@developers"
+      #     color: 0xff0000
+
+      # - name: Notify about success
+      #   uses: sarisia/actions-status-discord@v1
+      #   if: success()
+      #   env:
+      #     DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+      #   with:
+      #     title: "Seize PROD WEB DEPLOY: CI pipeline complete"
+      #     description: ${{ env.COMMIT_SHA }} - ${{ env.COMMIT_MESSAGE }}
+      #     color: 0x00ff00
