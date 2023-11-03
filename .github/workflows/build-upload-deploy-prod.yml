@@ -99,8 +99,7 @@ jobs:
           DEPLOYED_BEANSTALK_VERSION=$(aws elasticbeanstalk describe-environments \
             --environment-names ${{ env.BEANSTALK_ENV_NAME }} \
             --query 'Environments[0].VersionLabel' \
-            --output text \
-            --region us-east-1)
+            --output text)
           echo "Current deployed version is $DEPLOYED_BEANSTALK_VERSION"
           if [ "$DEPLOYED_BEANSTALK_VERSION" != "${{ env.COMMIT_SHA }}" ]; then
             echo "Deployed version does not match the commit SHA."
