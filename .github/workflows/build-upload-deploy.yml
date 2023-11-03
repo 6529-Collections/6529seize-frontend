@@ -2,8 +2,13 @@ name: Build and Upload to S3
 
 on: workflow_dispatch
 
+env:
+  AWS_BUCKET: "6529bucket"
+  COMMIT_SHA: "${{ github.sha }}"
+  AWS_REGION: "us-east-1"
+
 jobs:
-  build-upload:
+  build-upload-deploy:
     runs-on: ubuntu-latest
 
     steps:
@@ -25,7 +30,7 @@ jobs:
           ALLOWLIST_API_ENDPOINT: "https://allowlist-api.seize.io"
           BASE_ENDPOINT: "https://seize.io"
           LOAD_S3: "true"
-          VERSION: ${{ github.sha }}
+          VERSION: ${{ env.COMMIT_SHA }}
           ALCHEMY_API_KEY: ${{ secrets.ALCHEMY_API_KEY }}
         run: npm run build
 
@@ -41,7 +46,15 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: us-east-1
+          aws-region: ${{ env.AWS_REGION }}
 
       - name: Upload assets to S3
-        run: aws s3 sync target s3://6529bucket/web_build/${{ github.sha }}/
+        run: aws s3 sync target s3://${{ env.AWS_BUCKET }}/web_build/${{ env.COMMIT_SHA }}/
+
+      - name: Create new ElasticBeanstalk Application Version
+        run: |
+          aws elasticbeanstalk create-application-version \
+          --application-name "${{ env.APP_NAME }}" \
+          --source-bundle S3Bucket="${{ env.AWS_BUCKET }}",S3Key="web_build/${{ env.COMMIT_SHA }}/package.zip" \
+          --version-label "${{ env.COMMIT_SHA }}" \
+          --description "${{ env.COMMIT_SHA }}"
