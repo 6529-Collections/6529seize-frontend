@@ -4,35 +4,22 @@ import styles from "../../styles/Home.module.scss";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/router";
 import {
-  areEqualAddresses,
   containsEmojis,
   formatAddress,
   numberWithCommas,
 } from "../../helpers/Helpers";
-import { MANIFOLD, SIX529_MUSEUM } from "../../constants";
 import HeaderPlaceholder from "../../components/header/HeaderPlaceholder";
 import { useEffect, useState } from "react";
+import { commonApiFetch } from "../../services/api/common-api";
+import { IProfileAndConsolidations } from "../../entities/IProfile";
 
-export enum ReservedUser {
-  MUSEUM = "6529Museum",
-  MANIFOLD = "Manifold-Minting-Wallet",
+interface PageProps {
+  title: string;
+  url: string;
+  image: string;
+  tdh: number | null;
+  balance: number | null;
 }
-
-export const MUSEUM_ENS = {
-  wallet: SIX529_MUSEUM,
-  display: ReservedUser.MUSEUM,
-  banner_1: "#111111",
-  banner_2: "#000000",
-  pfp: "./museum.png",
-};
-
-export const MANIFOLD_ENS = {
-  wallet: MANIFOLD,
-  display: ReservedUser.MANIFOLD,
-  banner_1: "#111111",
-  banner_2: "#000000",
-  pfp: "./manifold.png",
-};
 
 const Header = dynamic(() => import("../../components/header/Header"), {
   ssr: false,
@@ -46,9 +33,10 @@ const UserPage = dynamic(() => import("../../components/user/UserPage"), {
 const DEFAULT_IMAGE =
   "https://d3lqz0a4bldqgf.cloudfront.net/seize_images/Seize_Logo_Glasses_2.png";
 
-export default function UserPageIndex(props: any) {
+export default function UserPageIndex(props: { pageProps: PageProps }) {
   const router = useRouter();
   const pageProps = props.pageProps;
+
   const pagenameFull = `${pageProps.title} | 6529 SEIZE`;
 
   const descriptionArray = [];
@@ -60,22 +48,56 @@ export default function UserPageIndex(props: any) {
   }
   descriptionArray.push("6529 SEIZE");
 
+  const [connectedWallets, setConnectedWallets] = useState<string[]>([]);
+
   const [user, setUser] = useState(
     Array.isArray(router.query.user) ? router.query.user[0] : router.query.user
   );
 
-  const [connectedWallets, setConnectedWallets] = useState<string[]>([]);
+  const [userProfile, setUserProfile] =
+    useState<IProfileAndConsolidations | null>(null);
 
   useEffect(() => {
-    if (user) {
-      if (
-        !user.startsWith("0x") &&
-        !user.endsWith(".eth") &&
-        !Object.values(ReservedUser).includes(user as ReservedUser)
-      ) {
-        window.location.href = "404";
+    const getUserProfile = async () => {
+      if (!user) {
+        return;
       }
-    }
+      const userProfile = await commonApiFetch<IProfileAndConsolidations>({
+        endpoint: `profiles/${user}`,
+      }).catch(() => null);
+
+      if (!userProfile) {
+        router.push("/404");
+        return;
+      }
+
+      if (
+        userProfile?.profile?.normalised_handle &&
+        userProfile.profile?.normalised_handle !== user.toLowerCase()
+      ) {
+        router.push(`${userProfile.profile.normalised_handle}`);
+      }
+
+      if (
+        router.query.address &&
+        userProfile.consolidation.wallets.length === 1
+      ) {
+        const currentQuery = { ...router.query };
+        delete currentQuery.address;
+        router.push(
+          {
+            pathname: router.pathname,
+            query: currentQuery,
+          },
+          undefined,
+          { shallow: true }
+        );
+      }
+
+      setUserProfile(userProfile);
+    };
+
+    getUserProfile();
   }, [user]);
 
   return (
@@ -98,60 +120,69 @@ export default function UserPageIndex(props: any) {
 
       <main className={styles.main}>
         <Header onSetWallets={(wallets) => setConnectedWallets(wallets)} />
-        {router.isReady && user && (
-          <UserPage wallets={connectedWallets} user={user} />
+        {router.isReady && pageProps.url && userProfile && (
+          <UserPage
+            wallets={connectedWallets}
+            user={pageProps.url}
+            profile={userProfile}
+          />
         )}
       </main>
     </>
   );
 }
 
-export async function getServerSideProps(req: any, res: any, resolvedUrl: any) {
-  let user = req.query.user;
-  if (areEqualAddresses(user, MUSEUM_ENS.display)) {
-    user = MUSEUM_ENS.wallet;
-  }
-  if (areEqualAddresses(user, MANIFOLD_ENS.display)) {
-    user = MANIFOLD_ENS.wallet;
-  }
-  const ensRequest = await fetch(
-    `${process.env.API_ENDPOINT}/api/user/${user}`
-  );
-  let userDisplay = formatAddress(user);
-  let pfp;
-  let tdh;
-  let balance;
-  const responseText = await ensRequest.text();
-  if (responseText) {
-    const response = await JSON.parse(responseText);
-    pfp = response.pfp;
-    if (!pfp) {
-      if (areEqualAddresses(user, SIX529_MUSEUM)) {
-        pfp = `${process.env.BASE_ENDPOINT}/${MUSEUM_ENS.pfp}`;
-      }
-      if (areEqualAddresses(user, MANIFOLD)) {
-        pfp = `${process.env.BASE_ENDPOINT}/${MANIFOLD_ENS.pfp}`;
-      }
-    }
-    tdh = response.boosted_tdh ? response.boosted_tdh : null;
-    balance = response.balance ? response.balance : null;
-    userDisplay =
-      response.display && !containsEmojis(response.display)
-        ? response.display
-        : areEqualAddresses(user, SIX529_MUSEUM)
-        ? ReservedUser.MUSEUM
-        : areEqualAddresses(user, MANIFOLD)
-        ? ReservedUser.MANIFOLD
-        : userDisplay;
-  }
+export async function getServerSideProps(
+  req: any,
+  res: any,
+  resolvedUrl: any
+): Promise<{
+  props: PageProps;
+}> {
+  try {
+    const profile = await commonApiFetch<IProfileAndConsolidations>({
+      endpoint: `profiles/${req.query.user}`,
+    });
 
-  return {
-    props: {
-      title: userDisplay,
-      url: userDisplay.includes(".eth") ? userDisplay : user,
-      image: pfp ? pfp : DEFAULT_IMAGE,
-      tdh: tdh ? tdh : null,
-      balance: balance ? balance : null,
-    },
-  };
+    const wallet =
+      profile?.profile?.primary_wallet?.toLowerCase() ?? req.query.user;
+
+    const ensRequest = await fetch(
+      `${process.env.API_ENDPOINT}/api/user/${wallet}`
+    );
+    let userDisplay = profile?.profile?.handle ?? formatAddress(wallet);
+    let pfp = profile?.profile?.pfp_url;
+    let tdh;
+    let balance;
+
+    const responseText = await ensRequest.text();
+    if (responseText) {
+      const response = await JSON.parse(responseText);
+      tdh = response.boosted_tdh ? response.boosted_tdh : null;
+      balance = response.balance ? response.balance : null;
+      userDisplay = profile?.profile?.handle
+        ? profile.profile.handle
+        : response.display && !containsEmojis(response.display)
+        ? response.display
+        : wallet;
+    }
+
+    return {
+      props: {
+        title: userDisplay,
+        url: req.query.user,
+        image: pfp ?? DEFAULT_IMAGE,
+        tdh: tdh ?? null,
+        balance: balance ?? null,
+      },
+    };
+  } catch {
+    return {
+      redirect: {
+        permanent: false,
+        destination: "/404",
+      },
+      props: {},
+    } as any;
+  }
 }

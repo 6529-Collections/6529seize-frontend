@@ -1,21 +1,17 @@
 import styles from "./Address.module.scss";
-import {
-  areEqualAddresses,
-  containsEmojis,
-  formatAddress,
-  numberWithCommas,
-  parseEmojis,
-} from "../../helpers/Helpers";
-import { MANIFOLD, SIX529_MUSEUM } from "../../constants";
+import { numberWithCommas, parseEmojis } from "../../helpers/Helpers";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useState } from "react";
 import { Dropdown } from "react-bootstrap";
-import Tippy from "@tippyjs/react";
 import Image from "next/image";
+import { IProfileConsolidation } from "../../entities/IProfile";
+import { WalletAddress } from "./WalletAddress";
 
 interface Props {
   wallets: `0x${string}`[];
+  consolidatedWallets?: IProfileConsolidation[];
   display: string | undefined;
+  displayEns?: string | undefined;
   hideCopy?: boolean;
   tags?: {
     memesCardsSets: number;
@@ -35,6 +31,7 @@ interface Props {
   disableLink?: boolean;
   viewingWallet?: `0x${string}`;
   expandedTags?: boolean;
+  setLinkQueryAddress?: boolean;
 }
 
 export const MEMES_SETS_ICON = "";
@@ -53,184 +50,35 @@ export const SZN_5_ICON = "";
 
 export const GRADIENT_ICON = "";
 
-export function WalletAddress(props: {
-  wallet: string;
-  display: string | undefined;
-  isUserPage?: boolean;
-  disableLink?: boolean;
-  hideCopy?: boolean;
-}) {
-  const [isCopied, setIsCopied] = useState(false);
-
-  function resolveAddress() {
-    if (props.wallet.toUpperCase() === SIX529_MUSEUM.toUpperCase()) {
-      return "6529Museum";
-    }
-    if (props.wallet.toUpperCase() === MANIFOLD.toUpperCase()) {
-      return "Manifold Minting Wallet";
-    }
-
-    if (props.display) {
-      if (containsEmojis(props.display)) {
-        return parseEmojis(props.display);
-      }
-      return formatAddress(props.display);
-    }
-
-    return formatAddress(props.wallet);
-  }
-
-  function getLink() {
-    let path = "";
-    if (props.display && !containsEmojis(props.display)) {
-      path = props.display;
-    } else {
-      path = props.wallet;
-    }
-    return `/${encodeURIComponent(path)}`;
-  }
-
-  function copy(text: any) {
-    navigator.clipboard.writeText(text);
-    setIsCopied(true);
-    setTimeout(() => {
-      setIsCopied(false);
-    }, 1000);
-  }
-
-  function getInnerHTML() {
-    if (props.disableLink) {
-      return resolveAddress();
-    }
-
-    return `<a href="${getLink()}">${resolveAddress()}</a>`;
-  }
-
-  return (
-    <span>
-      {(props.hideCopy || !navigator.clipboard) && (
-        <span
-          className={styles.address}
-          dangerouslySetInnerHTML={{
-            __html: getInnerHTML(),
-          }}></span>
-      )}
-      {!props.hideCopy && navigator.clipboard && (
-        <>
-          {!props.isUserPage && (
-            <span
-              className={`${styles.address} ${
-                props.isUserPage ? styles.addressUserPage : ""
-              }`}>
-              <span
-                className={styles.address}
-                dangerouslySetInnerHTML={{
-                  __html: getInnerHTML(),
-                }}></span>
-            </span>
-          )}
-          {props.display && props.display.endsWith(".eth") ? (
-            <Dropdown className={`${styles.copyDropdown}`} autoClose="outside">
-              <Tippy
-                content={isCopied ? "Copied" : "Copy"}
-                placement={"right"}
-                theme={"light"}
-                hideOnClick={false}>
-                <Dropdown.Toggle
-                  name={`copy-toggle`}
-                  aria-label={`copy-toggle`}>
-                  {props.isUserPage && (
-                    <span
-                      className={`${styles.address} ${
-                        props.isUserPage ? styles.addressUserPage : ""
-                      }`}
-                      dangerouslySetInnerHTML={{
-                        __html: resolveAddress(),
-                      }}></span>
-                  )}
-                  <FontAwesomeIcon
-                    icon="copy"
-                    name={`copy-btn`}
-                    aria-label={`copy-btn`}
-                    className={`${styles.copy}`}
-                  />
-                </Dropdown.Toggle>
-              </Tippy>
-              <Dropdown.Menu>
-                {props.display && (
-                  <Tippy
-                    content={isCopied ? "Copied" : "Copy"}
-                    placement={"right"}
-                    theme={"light"}
-                    hideOnClick={false}>
-                    <Dropdown.Item
-                      name={`copy-ens-btn`}
-                      aria-label={`copy-ens-btn`}
-                      onClick={() => copy(props.display)}
-                      dangerouslySetInnerHTML={{
-                        __html: resolveAddress(),
-                      }}></Dropdown.Item>
-                  </Tippy>
-                )}
-                <Tippy
-                  content={isCopied ? "Copied" : "Copy"}
-                  placement={"right"}
-                  theme={"light"}
-                  hideOnClick={false}>
-                  <Dropdown.Item
-                    className={styles.copyDropdownItem}
-                    name={`copy-address-btn`}
-                    aria-label={`copy-address-btn`}
-                    onClick={() => copy(props.wallet)}>
-                    {formatAddress(props.wallet as string)}
-                  </Dropdown.Item>
-                </Tippy>
-              </Dropdown.Menu>
-            </Dropdown>
-          ) : (
-            <>
-              <Dropdown
-                className={`${styles.copyDropdown}`}
-                autoClose="outside">
-                <Tippy
-                  content={isCopied ? "Copied" : "Copy"}
-                  placement={"right"}
-                  theme={"light"}
-                  hideOnClick={false}>
-                  <Dropdown.Toggle
-                    name={`copy-toggle`}
-                    aria-label={`copy-toggle`}
-                    onClick={() => copy(props.wallet)}>
-                    {props.isUserPage && (
-                      <span
-                        className={`${styles.address} ${
-                          props.isUserPage ? styles.addressUserPage : ""
-                        }`}
-                        dangerouslySetInnerHTML={{
-                          __html: resolveAddress(),
-                        }}></span>
-                    )}
-                    <FontAwesomeIcon
-                      icon="copy"
-                      name={`copy-btn`}
-                      aria-label={`copy-btn`}
-                      className={`${styles.copy}`}
-                    />
-                  </Dropdown.Toggle>
-                </Tippy>
-              </Dropdown>
-            </>
-          )}
-        </>
-      )}
-    </span>
-  );
-}
-
 export default function Address(props: Props) {
   const [consolidationExpanded, setConsolidationExpanded] = useState(
     props.isUserPage ? true : false
   );
+
+  const getWalletDisplayAndEns = (
+    wallet: string,
+    index: number
+  ): { display: string | undefined; displayEns: string | undefined } => {
+    const walletObj = props.consolidatedWallets?.find(
+      (c) => c.wallet.address.toLowerCase() === wallet.toLowerCase()
+    );
+
+    if (walletObj) {
+      return {
+        display: walletObj.wallet.ens,
+        displayEns: walletObj.wallet.ens,
+      };
+    }
+
+    const ens = props.display?.split(" - ")[index]?.endsWith(".eth")
+      ? props.display?.split(" - ")[index]
+      : undefined;
+
+    return {
+      display: ens ?? wallet,
+      displayEns: ens,
+    };
+  };
 
   return (
     <>
@@ -238,9 +86,11 @@ export default function Address(props: Props) {
         <WalletAddress
           wallet={props.wallets[0]}
           display={props.display}
+          displayEns={props.displayEns}
           hideCopy={props.hideCopy}
           disableLink={props.disableLink}
           isUserPage={props.isUserPage}
+          setLinkQueryAddress={props.setLinkQueryAddress}
         />
       ) : (
         <Dropdown
@@ -295,13 +145,11 @@ export default function Address(props: Props) {
               />
               <WalletAddress
                 wallet={w}
-                display={
-                  props.display?.split(" - ")[index].endsWith(".eth")
-                    ? props.display?.split(" - ")[index]
-                    : undefined
-                }
+                display={getWalletDisplayAndEns(w, index).display}
+                displayEns={getWalletDisplayAndEns(w, index).displayEns}
                 hideCopy={props.hideCopy}
-                disableLink={areEqualAddresses(w, props.viewingWallet)}
+                disableLink={false}
+                setLinkQueryAddress={props.setLinkQueryAddress}
               />
             </div>
           ))}
