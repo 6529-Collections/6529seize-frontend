@@ -73,7 +73,7 @@ jobs:
         run: |
           MAX_RETRIES=30
           COUNTER=0
-          while [[ "$(aws elasticbeanstalk describe-environments --environment-names $ENV_NAME --query 'Environments[].Status' --output text)" != "Ready" && ${COUNTER} -lt ${MAX_RETRIES} ]]; do 
+          while [[ "$(aws elasticbeanstalk describe-environments --environment-names ${{ env.BEANSTACK_ENV_NAME }} --query 'Environments[].Status' --output text)" != "Ready" && ${COUNTER} -lt ${MAX_RETRIES} ]]; do 
             COUNTER=$[$COUNTER +1]
             echo "Environment update still in progress... Attempt: $COUNTER" 
             sleep 30 
