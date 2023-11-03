@@ -3,7 +3,7 @@ name: Build and Upload to S3
 on: workflow_dispatch
 
 env:
-  AWS_BUCKET: "6529bucket"
+  AWS_BUCKET: "seize-web"
   COMMIT_SHA: "${{ github.sha }}"
   AWS_REGION: "us-east-1"
   BEANSTALK_APP_NAME: "seize app"
