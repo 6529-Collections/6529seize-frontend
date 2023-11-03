@@ -9,6 +9,7 @@ import {
   areEqualAddresses,
   containsEmojis,
   getRandomColor,
+  isValidEthAddress,
   numberWithCommas,
 } from "../../helpers/Helpers";
 import { ConsolidatedTDHMetrics, TDHMetrics } from "../../entities/ITDH";
@@ -148,13 +149,13 @@ export default function UserPage(props: Props) {
   useEffect(() => {
     async function fetchENS() {
       if (
-        props.user.startsWith("0x") ||
+        isValidEthAddress(props.user) ||
         props.user.endsWith(".eth") ||
         props.profile?.profile?.primary_wallet ||
         activeAddress
       ) {
         const userUrl =
-          props.user.startsWith("0x") || props.user.endsWith(".eth")
+          isValidEthAddress(props.user) || props.user.endsWith(".eth")
             ? props.user
             : activeAddress
             ? activeAddress
