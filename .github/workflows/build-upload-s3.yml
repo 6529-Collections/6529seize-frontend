@@ -54,8 +54,9 @@ jobs:
 
       - name: Create new ElasticBeanstalk Application Version
         run: |
+          export DESCRIPTION=$(git show -s --format=%s)
           aws elasticbeanstalk create-application-version \
           --application-name "${{ env.BEANSTALK_APP_NAME }}" \
           --source-bundle S3Bucket="${{ env.AWS_BUCKET }}",S3Key="web_build/${{ env.COMMIT_SHA }}/package.zip" \
           --version-label "${{ env.COMMIT_SHA }}" \
-          --description "${{ env.COMMIT_SHA }}"
+          --description "${DESCRIPTION:0:100}"
