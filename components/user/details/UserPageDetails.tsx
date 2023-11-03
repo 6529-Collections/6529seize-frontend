@@ -1,17 +1,18 @@
-import { Container } from "react-bootstrap";
+import { Container, Row } from "react-bootstrap";
 import { Owner } from "../../../entities/IOwner";
 import { ConsolidatedTDHMetrics, TDHMetrics } from "../../../entities/ITDH";
 import { VIEW } from "../../consolidation-switch/ConsolidationSwitch";
 import UserPageCollection from "./collection/UserPageCollection";
-import UserPageActivity from "../UserPageActivity";
-import UserPageDistributions from "../UserPageDistributions";
-import UserPageStats from "../UserPageStats";
+import UserPageActivity from "./UserPageActivity";
+import UserPageDistributions from "./UserPageDistributions";
+import UserPageStats from "./UserPageStats";
 import UserPageOverview from "../UserPageOverview";
 import { useEffect, useState } from "react";
 import UserPageDetailsHeader from "./UserPageDetailsHeader";
 import { NFTLite } from "../../../entities/INFT";
 import { commonApiFetch } from "../../../services/api/common-api";
 import { IProfileAndConsolidations } from "../../../entities/IProfile";
+import DotLoader from "../../dotLoader/DotLoader";
 
 interface Props {
   ownerAddress: `0x${string}` | undefined;
@@ -42,6 +43,14 @@ export default function UserPageDetails(props: Props) {
     getMemesLite();
   }, []);
 
+  if (!memesLite.length) {
+    return (
+      <Row>
+        <DotLoader />
+      </Row>
+    );
+  }
+
   return (
     <Container>
       <UserPageDetailsHeader focus={focus} setFocus={setFocus} />
@@ -68,6 +77,7 @@ export default function UserPageDetails(props: Props) {
       <UserPageStats
         show={focus === Focus.STATS}
         ownerAddress={props.ownerAddress}
+        
       />
     </Container>
   );

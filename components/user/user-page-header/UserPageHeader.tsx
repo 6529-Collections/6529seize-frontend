@@ -19,12 +19,12 @@ import { useAccount } from "wagmi";
 import { ConsolidatedTDHMetrics, TDHMetrics } from "../../../entities/ITDH";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
-import { Focus } from "../details/UserPageDetails";
 
 const DEFAULT_BANNER_1 = getRandomColor();
 const DEFAULT_BANNER_2 = getRandomColor();
 
 export default function UserPageHeader({
+  dataLoaded,
   profile,
   tdh,
   ownerAddress,
@@ -37,6 +37,7 @@ export default function UserPageHeader({
   view,
   setView,
 }: {
+  dataLoaded: boolean;
   profile: IProfileAndConsolidations;
   tdh: ConsolidatedTDHMetrics | TDHMetrics | undefined;
   consolidatedTDH: ConsolidatedTDHMetrics | undefined;
@@ -227,7 +228,7 @@ export default function UserPageHeader({
                   sm={6}
                   className={`pt-2 pb-2 ${styles.tagsContainer}`}
                 >
-                  {tdh ? (
+                  {dataLoaded ? (
                     <Container>
                       {tdh && consolidatedTDH ? (
                         <span className={styles.addressContainer}>
@@ -297,7 +298,7 @@ export default function UserPageHeader({
                           />
                         </span>
                       )}
-                      {tdh.tdh_rank && (
+                      {tdh?.tdh_rank && (
                         <Row className="pt-2 pb-2">
                           <Col>
                             <Tag
@@ -313,7 +314,7 @@ export default function UserPageHeader({
                           </Col>
                         </Row>
                       )}
-                      {tdh.balance > 0 ? (
+                      {tdh?.balance && tdh?.balance > 0 ? (
                         <>
                           <Row className="pt-2 pb-2">
                             <Col>
@@ -350,7 +351,7 @@ export default function UserPageHeader({
                           </Row>
                         </>
                       )}
-                      {tdh.boost && (
+                      {tdh?.boost && (
                         <Row className="pt-2 pb-2">
                           <Col>
                             <Tag

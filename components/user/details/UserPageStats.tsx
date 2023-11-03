@@ -1,9 +1,8 @@
-import styles from "./UserPage.module.scss";
 import { Col, Container, Row } from "react-bootstrap";
 import { useEffect, useState } from "react";
-import { DBResponse } from "../../entities/IDBResponse";
-import { TDHHistory } from "../../entities/ITDH";
-import { fetchUrl } from "../../services/6529api";
+import { DBResponse } from "../../../entities/IDBResponse";
+import { TDHHistory } from "../../../entities/ITDH";
+import { fetchUrl } from "../../../services/6529api";
 import { Bar } from "react-chartjs-2";
 import {
   Chart as ChartJS,
@@ -15,6 +14,8 @@ import {
   Legend,
   BarElement,
 } from "chart.js";
+import DotLoader from "../../dotLoader/DotLoader";
+import UserPageDetailsNothingHere from "./UserPageDetailsNothingHere";
 
 ChartJS.register(
   CategoryScale,
@@ -241,10 +242,25 @@ export default function UserPageStats(props: Props) {
     );
   }
 
-  if (props.show && tdhHistory.length > 0) {
+  if (!props.show) {
+    return <></>;
+  }
+
+  if (!tdhHistoryLoaded) {
     return (
-      <>
-        {/* <Row className="pt-3">
+      <Row>
+        <DotLoader />
+      </Row>
+    );
+  }
+
+  if (!tdhHistory.length) {
+    return <UserPageDetailsNothingHere />;
+  }
+
+  return (
+    <>
+      {/* <Row className="pt-3">
           <Col className="d-flex align-items-center justify-content-end gap-2 pt-4">
             <span
               className={`${styles.statsTimeSelectionSpan} ${
@@ -262,63 +278,56 @@ export default function UserPageStats(props: Props) {
             </span>
           </Col>
         </Row> */}
+      <Row className="pt-4 pb-4">
+        <Col sm={12} md={{ span: 10, offset: 1 }}>
+          <Container className="no-padding">
+            <Row>
+              <h2 className="mb-0 font-color">Total TDH</h2>
+            </Row>
+            <Row className="pt-4">
+              <Col>{tdhHistory.length > 0 && <>{printTotalTDH()}</>}</Col>
+            </Row>
+          </Container>
+        </Col>
+      </Row>
+      <Row className="pt-4 pb-4">
+        <Col sm={12} md={{ span: 10, offset: 1 }}>
+          <Container className="no-padding">
+            <Row>
+              <h2 className="mb-0 font-color">Net TDH Daily Change</h2>
+            </Row>
+            <Row className="pt-4">
+              <Col>{tdhHistory.length > 0 && <>{printNetTDH()}</>}</Col>
+            </Row>
+          </Container>
+        </Col>
+      </Row>
+      <Row className="pt-4 pb-4">
+        <Col sm={12} md={{ span: 10, offset: 1 }}>
+          <Container className="no-padding">
+            <Row>
+              <h2 className="mb-0 font-color">Created TDH Daily Change</h2>
+            </Row>
+            <Row className="pt-4">
+              <Col>{tdhHistory.length > 0 && <>{printCreatedTDH()}</>}</Col>
+            </Row>
+          </Container>
+        </Col>
+      </Row>
+      {tdhHistory.some((t) => t.destroyed_boosted_tdh > 0) && (
         <Row className="pt-4 pb-4">
           <Col sm={12} md={{ span: 10, offset: 1 }}>
             <Container className="no-padding">
               <Row>
-                <h2 className="mb-0 font-color">Total TDH</h2>
+                <h2 className="mb-0 font-color">Destroyed TDH Daily Change</h2>
               </Row>
               <Row className="pt-4">
-                <Col>{tdhHistory.length > 0 && <>{printTotalTDH()}</>}</Col>
+                <Col>{tdhHistory.length > 0 && <>{printDestroyedTDH()}</>}</Col>
               </Row>
             </Container>
           </Col>
         </Row>
-        <Row className="pt-4 pb-4">
-          <Col sm={12} md={{ span: 10, offset: 1 }}>
-            <Container className="no-padding">
-              <Row>
-                <h2 className="mb-0 font-color">Net TDH Daily Change</h2>
-              </Row>
-              <Row className="pt-4">
-                <Col>{tdhHistory.length > 0 && <>{printNetTDH()}</>}</Col>
-              </Row>
-            </Container>
-          </Col>
-        </Row>
-        <Row className="pt-4 pb-4">
-          <Col sm={12} md={{ span: 10, offset: 1 }}>
-            <Container className="no-padding">
-              <Row>
-                <h2 className="mb-0 font-color">Created TDH Daily Change</h2>
-              </Row>
-              <Row className="pt-4">
-                <Col>{tdhHistory.length > 0 && <>{printCreatedTDH()}</>}</Col>
-              </Row>
-            </Container>
-          </Col>
-        </Row>
-        {tdhHistory.some((t) => t.destroyed_boosted_tdh > 0) && (
-          <Row className="pt-4 pb-4">
-            <Col sm={12} md={{ span: 10, offset: 1 }}>
-              <Container className="no-padding">
-                <Row>
-                  <h2 className="mb-0 font-color">
-                    Destroyed TDH Daily Change
-                  </h2>
-                </Row>
-                <Row className="pt-4">
-                  <Col>
-                    {tdhHistory.length > 0 && <>{printDestroyedTDH()}</>}
-                  </Col>
-                </Row>
-              </Container>
-            </Col>
-          </Row>
-        )}
-      </>
-    );
-  } else {
-    return <></>;
-  }
+      )}
+    </>
+  );
 }
