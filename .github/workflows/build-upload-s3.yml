@@ -25,7 +25,7 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Build
+      - name: Build App
         env:
           NODE_ENV: "production"
           API_ENDPOINT: "https://api.seize.io"
@@ -71,14 +71,14 @@ jobs:
 
       - name: Check Elastic Beanstalk status
         run: |
-          MAX_RETRIES=40
+          MAX_RETRIES=30
           COUNTER=0
-          while [[ "$(aws elasticbeanstalk describe-environments --environment-names ${{ env.BEANSTACK_ENV_NAME }} --query 'Environments[].Status' --output text)" != "Ready" && $COUNTER -lt $MAX_RETRIES ]]; do 
-            ((COUNTER++))
+          while [[ "$(aws elasticbeanstalk describe-environments --environment-names $ENV_NAME --query 'Environments[].Status' --output text)" != "Ready" && ${COUNTER} -lt ${MAX_RETRIES} ]]; do 
+            COUNTER=$[$COUNTER +1]
             echo "Environment update still in progress... Attempt: $COUNTER" 
-            sleep 15 
+            sleep 30 
           done
-          if [[ $COUNTER -eq $MAX_RETRIES ]]; then
+          if [[ ${COUNTER} -eq ${MAX_RETRIES} ]]; then
             echo "Failed to update the environment within the expected time." 
             exit 1
           fi
