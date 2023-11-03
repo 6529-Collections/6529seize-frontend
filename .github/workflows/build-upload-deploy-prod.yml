@@ -1,4 +1,4 @@
-name: Build and Upload to S3
+name: Build - Upload to S3 - Deploy to Elastic Beanstalk
 
 on: workflow_dispatch
 
