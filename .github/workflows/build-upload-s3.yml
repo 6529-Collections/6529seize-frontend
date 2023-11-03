@@ -62,6 +62,15 @@ jobs:
           --version-label "${{ env.COMMIT_SHA }}" \
           --description "${DESCRIPTION:0:100}"
 
+      - name: Validate Deployment
+        run: |
+          INSTANCE_COUNT=$(aws elasticbeanstalk describe-environment-resources --environment-name Seizeapp-env --region us-east-1 --query "EnvironmentResources.Instances[*].Id" --output text | wc -w)
+          echo "Instance count: $INSTANCE_COUNT"
+          if [[ "$INSTANCE_COUNT" -lt 2 ]]; then
+            echo "Deployment Aborted: Less than 2 instances are running."
+            exit 1
+          fi
+
       - name: Deploy new Version to ElasticBeanstalk
         run: |
           aws elasticbeanstalk update-environment \
