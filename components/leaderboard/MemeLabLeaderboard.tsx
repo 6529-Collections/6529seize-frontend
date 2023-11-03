@@ -79,6 +79,37 @@ export default function MemeLabLeaderboard(props: Props) {
     fetchResults();
   }, [pageProps.page]);
 
+  function getDisplay(lead: any) {
+    if (lead.handle) {
+      return lead.handle;
+    }
+    if (lead.consolidation_display) {
+      return lead.consolidation_display;
+    }
+    return lead.wallet_display;
+  }
+
+  function getDisplayEns(lead: any) {
+    if (!lead.handle) {
+      return;
+    }
+    if (lead.wallet_display?.includes(" ")) {
+      return;
+    }
+
+    if (lead.wallet_display?.endsWith(".eth")) {
+      return lead.wallet_display;
+    }
+
+    if (lead.consolidation_display?.includes(" ")) {
+      return;
+    }
+    if (lead.consolidation_display?.endsWith(".eth")) {
+      return lead.consolidation_display;
+    }
+    return;
+  }
+
   return (
     <Container className={`no-padding`} id={`leaderboard-${props.nftId}`}>
       <Row>
@@ -165,7 +196,8 @@ export default function MemeLabLeaderboard(props: Props) {
                           <div className={styles.hodler}>
                             <Address
                               wallets={[lead.wallet]}
-                              display={lead.wallet_display}
+                              display={getDisplay(lead)}
+                              displayEns={getDisplayEns(lead)}
                               tags={{
                                 memesCardsSets: tags
                                   ? tags.memes_cards_sets
