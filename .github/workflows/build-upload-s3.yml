@@ -6,7 +6,7 @@ env:
   AWS_BUCKET: "6529bucket"
   COMMIT_SHA: "${{ github.sha }}"
   AWS_REGION: "us-east-1"
-  APP_NAME: "seize app"
+  BEANSTALK_APP_NAME: "seize app"
 
 jobs:
   build-upload-deploy:
@@ -55,7 +55,7 @@ jobs:
       - name: Create new ElasticBeanstalk Application Version
         run: |
           aws elasticbeanstalk create-application-version \
-          --application-name "${{ env.APP_NAME }}" \
+          --application-name "${{ env.BEANSTALK_APP_NAME }}" \
           --source-bundle S3Bucket="${{ env.AWS_BUCKET }}",S3Key="web_build/${{ env.COMMIT_SHA }}/package.zip" \
           --version-label "${{ env.COMMIT_SHA }}" \
           --description "${{ env.COMMIT_SHA }}"
