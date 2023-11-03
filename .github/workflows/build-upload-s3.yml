@@ -71,12 +71,12 @@ jobs:
           --environment-name "${{ env.BEANSTALK_ENV_NAME }}" \
           --version-label "${{ env.COMMIT_SHA }}"
 
-      - name: Check Elastic Beanstalk status (30s warmup then 30 retries with 10s delay)
+      - name: Check Elastic Beanstalk status (60s warmup then 30 retries with 10s delay)
         run: |
           echo "Warmup..."
           MAX_RETRIES=30
           COUNTER=0
-          sleep 30 # Initial sleep for the environment to start updating
+          sleep 60 # Initial sleep for the new ec2 to initialize
           while : ; do
             ENV_STATUS=$(aws elasticbeanstalk describe-environments --environment-names ${{ env.BEANSTALK_ENV_NAME }} --query 'Environments[0].Health' --output text)
             echo "Environment health status: $ENV_STATUS"
