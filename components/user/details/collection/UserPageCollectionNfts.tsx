@@ -10,6 +10,8 @@ import { ConsolidatedTDHMetrics, TDHMetrics } from "../../../../entities/ITDH";
 import { Season } from "../../../../entities/ISeason";
 import UserPageCollectionNft from "./UserPageCollectionNft";
 import { Row } from "react-bootstrap";
+import { UserCollectionSort } from "./UserPageCollection";
+import { SortDirection } from "../../../../entities/ISort";
 
 export interface IUserNFT extends NFTLite {
   readonly nftTDH: number | null;
@@ -30,6 +32,8 @@ export default function UserPageCollectionNfts({
   hideMemes,
   selectedSeason,
   seasons,
+  sort,
+  sortDir,
 }: {
   owned: Owner[];
   nfts: NFTLite[];
@@ -40,9 +44,12 @@ export default function UserPageCollectionNfts({
   hideMemes: boolean;
   selectedSeason: number;
   seasons: Season[];
+  sort: UserCollectionSort;
+  sortDir: SortDirection;
 }) {
   const [allNfts, setAllNfts] = useState<IUserNFT[]>([]);
   const [filteredNfts, setFilteredNfts] = useState<IUserNFT[]>([]);
+  const [finalNfts, setFinalNfts] = useState<IUserNFT[]>([]);
 
   const getNftTdhAndRank = ({
     nft,
@@ -144,6 +151,11 @@ export default function UserPageCollectionNfts({
     selectedSeason,
     seasons,
   ]);
+
+  useEffect(() => {
+    
+  }, [sort, sortDir]);
+
   return (
     <Row className="pt-2">
       {filteredNfts.map((nft) => (
