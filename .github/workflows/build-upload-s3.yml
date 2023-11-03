@@ -78,19 +78,31 @@ jobs:
           --environment-name "${{ env.BEANSTACK_ENV_NAME }}" \
           --version-label "${{ env.COMMIT_SHA }}"
 
-      - name: Check Elastic Beanstalk status (30s warmup then 15 retries with 5s delay)
+      - name: Check Elastic Beanstalk status (30s warmup then 30 retries with 10s delay)
         run: |
-          echo "Warmup..." 
-          MAX_RETRIES=15
+          echo "Warmup..."
+          MAX_RETRIES=30
           COUNTER=0
           sleep 30
-          while [[ "$(aws elasticbeanstalk describe-environments --environment-names ${{ env.BEANSTACK_ENV_NAME }} --query 'Environments[].Status' --output text)" != "Ready" && ${COUNTER} -lt ${MAX_RETRIES} ]]; do 
-            COUNTER=$[$COUNTER +1]
-            echo "Environment update still in progress... Attempt: $COUNTER" 
-            sleep 5
+          ENVIRONMENT_ID=$(aws elasticbeanstalk describe-environments --environment-names ${{ env.BEANSTALK_ENV_NAME }} --query 'Environments[0].EnvironmentId' --output text)
+          while : ; do
+            ALL_HEALTHY=true
+            INSTANCE_HEALTHS=$(aws elasticbeanstalk describe-instances-health --environment-id $ENVIRONMENT_ID --attribute-names All --query 'InstanceHealthList[].HealthStatus' --output text)
+            echo "Checking instance health statuses: $INSTANCE_HEALTHS"
+            for STATUS in $INSTANCE_HEALTHS; do
+              if [[ $STATUS != "Ok" ]]; then
+                ALL_HEALTHY=false
+                break
+              fi
+            done
+            if $ALL_HEALTHY && [[ $COUNTER -lt $MAX_RETRIES ]]; then
+              echo "All instances are in good health!"
+              break
+            elif [[ $COUNTER -eq $MAX_RETRIES ]]; then
+              echo "Some instances are not healthy within the expected time."
+              exit 1
+            fi
+            COUNTER=$((COUNTER+1))
+            echo "Waiting for instances to become healthy... Attempt: $COUNTER"
+            sleep 10
           done
-          if [[ ${COUNTER} -eq ${MAX_RETRIES} ]]; then
-            echo "Failed to update the environment within the expected time." 
-            exit 1
-          fi
-          echo "Environment update complete!"
