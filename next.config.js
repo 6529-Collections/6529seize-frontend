@@ -1,11 +1,12 @@
 /** @type {import('next').NextConfig} */
 
-const LOAD_S3 = process.env.LOAD_S3 === "true";
+let VERSION = process.env.VERSION;
+let LOAD_S3;
 
-let VERSION;
-if (LOAD_S3) {
-  VERSION = process.env.VERSION;
+if (VERSION) {
+  LOAD_S3 = true;
 } else {
+  LOAD_S3 = false;
   try {
     VERSION = require("child_process")
       .execSync("git rev-parse HEAD")
