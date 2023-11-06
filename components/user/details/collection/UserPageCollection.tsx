@@ -10,11 +10,10 @@ import UserPageCollectionControls from "./UserPageCollectionControls";
 import DotLoader from "../../../dotLoader/DotLoader";
 import { Row } from "react-bootstrap";
 
-
 interface Props {
   show: boolean;
   owned: Owner[];
-  tdh?: ConsolidatedTDHMetrics | TDHMetrics;
+  tdh: ConsolidatedTDHMetrics | TDHMetrics | null;
   memesLite: NFTLite[];
 }
 
@@ -38,9 +37,6 @@ export default function UserPageCollection(props: Props) {
   const [seasonsLoaded, setSeasonsLoaded] = useState(false);
   const [selectedSeason, setSelectedSeason] = useState(0);
   const [dataLoaded, setDataLoaded] = useState(false);
-
-
-
 
   useEffect(() => {
     if (seasonsLoaded && gradientsLoaded) {

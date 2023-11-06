@@ -38,7 +38,7 @@ export default function UserPageCollectionNfts({
 }: {
   owned: Owner[];
   nfts: NFTLite[];
-  tdh?: ConsolidatedTDHMetrics | TDHMetrics;
+  tdh: ConsolidatedTDHMetrics | TDHMetrics | null;
   hideSeized: boolean;
   hideNonSeized: boolean;
   hideGradients: boolean;
@@ -72,15 +72,15 @@ export default function UserPageCollectionNfts({
 
     if (isMemes) {
       return {
-        tdh: tdhs.memes.find((m) => m.id === nft.id)?.tdh ?? null,
-        rank: tdhs.memes_ranks.find((g) => g.id === nft.id)?.rank ?? null,
+        tdh: tdhs.memes?.find((m) => m.id === nft.id)?.tdh ?? null,
+        rank: tdhs.memes_ranks?.find((g) => g.id === nft.id)?.rank ?? null,
       };
     }
 
     if (isGradients) {
       return {
-        tdh: tdhs.gradients.find((m) => m.id === nft.id)?.tdh ?? null,
-        rank: tdhs.gradients_ranks.find((g) => g.id === nft.id)?.rank ?? null,
+        tdh: tdhs.gradients?.find((m) => m.id === nft.id)?.tdh ?? null,
+        rank: tdhs.gradients_ranks?.find((g) => g.id === nft.id)?.rank ?? null,
       };
     }
 

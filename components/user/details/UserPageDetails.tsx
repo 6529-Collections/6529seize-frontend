@@ -1,13 +1,12 @@
 import { Container, Row } from "react-bootstrap";
 import { Owner } from "../../../entities/IOwner";
 import { ConsolidatedTDHMetrics, TDHMetrics } from "../../../entities/ITDH";
-import { VIEW } from "../../consolidation-switch/ConsolidationSwitch";
 import UserPageCollection from "./collection/UserPageCollection";
 import UserPageActivity from "./UserPageActivity";
 import UserPageDistributions from "./UserPageDistributions";
 import UserPageStats from "./UserPageStats";
 import UserPageOverview from "../UserPageOverview";
-import { use, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import UserPageDetailsHeader from "./UserPageDetailsHeader";
 import { NFTLite } from "../../../entities/INFT";
 import { commonApiFetch } from "../../../services/api/common-api";
@@ -15,16 +14,11 @@ import { IProfileAndConsolidations } from "../../../entities/IProfile";
 import DotLoader from "../../dotLoader/DotLoader";
 import { useRouter } from "next/router";
 
-// ?focus=collection
-// ?focus=activity
-// ?focus=distributions
-// ?focus=stats
-
 interface Props {
-  ownerAddress: `0x${string}` | undefined;
+  activeAddress: string | null;
+  mainAddress: string;
   owned: Owner[];
-  view: VIEW;
-  tdh?: ConsolidatedTDHMetrics | TDHMetrics;
+  tdh: ConsolidatedTDHMetrics | TDHMetrics | null;
   profile: IProfileAndConsolidations;
 }
 
@@ -82,21 +76,19 @@ export default function UserPageDetails(props: Props) {
       />
       <UserPageActivity
         show={focus === Focus.ACTIVITY}
-        ownerAddress={props.ownerAddress}
-        view={props.view}
+        activeAddress={props.activeAddress}
         memesLite={memesLite}
         profile={props.profile}
       />
       <UserPageDistributions
         show={focus === Focus.DISTRIBUTIONS}
-        ownerAddress={props.ownerAddress}
-        view={props.view}
+        activeAddress={props.activeAddress}
         profile={props.profile}
       />
       <UserPageOverview show={focus === Focus.STATS} tdh={props.tdh} />
       <UserPageStats
         show={focus === Focus.STATS}
-        ownerAddress={props.ownerAddress}
+        mainAddress={props.mainAddress}
       />
     </Container>
   );

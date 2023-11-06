@@ -123,7 +123,7 @@ export default function UserPageIndex(props: { pageProps: PageProps }) {
         <Header onSetWallets={(wallets) => setConnectedWallets(wallets)} />
         {router.isReady && pageProps.url && userProfile && (
           <UserPage
-            wallets={connectedWallets}
+            connectedWallets={connectedWallets}
             user={pageProps.url}
             profile={userProfile}
           />

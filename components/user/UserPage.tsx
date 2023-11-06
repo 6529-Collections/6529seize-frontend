@@ -2,28 +2,24 @@ import { useEffect, useState } from "react";
 import { DBResponse } from "../../entities/IDBResponse";
 import { Owner } from "../../entities/IOwner";
 import { useRouter } from "next/router";
-import {
-  areEqualAddresses,
-  containsEmojis,
-  isValidEthAddress,
-} from "../../helpers/Helpers";
+import { areEqualAddresses } from "../../helpers/Helpers";
 import { ConsolidatedTDHMetrics, TDHMetrics } from "../../entities/ITDH";
 import { fetchAllPages, fetchUrl } from "../../services/6529api";
-import { VIEW } from "../consolidation-switch/ConsolidationSwitch";
 import UserPageDetails from "./details/UserPageDetails";
-import { ENS } from "../../entities/IENS";
 import { IProfileAndConsolidations } from "../../entities/IProfile";
 import UserPageHeader from "./user-page-header/UserPageHeader";
 import UserPageFetching from "./UserPageFetching";
+import { commonApiFetch } from "../../services/api/common-api";
 
 interface Props {
   user: string;
-  wallets: string[];
+  connectedWallets: string[];
   profile: IProfileAndConsolidations;
 }
 
 export default function UserPage(props: Props) {
   const router = useRouter();
+  const isConsolidation = props.profile.consolidation.wallets.length > 1;
 
   const getAddressFromQuery = (): string | null => {
     if (!router.query.address) {
@@ -39,18 +35,49 @@ export default function UserPage(props: Props) {
     return null;
   };
 
-  const [view, setView] = useState<VIEW>(
-    getAddressFromQuery() ? VIEW.WALLET : VIEW.CONSOLIDATION
-  );
+  const getMainAddress = (): string => {
+    if (props.profile.profile?.primary_wallet) {
+      return props.profile.profile.primary_wallet.toLowerCase();
+    }
+
+    return props.user.toLowerCase();
+  };
 
   const [activeAddress, setActiveAddress] = useState<string | null>(
     getAddressFromQuery()
   );
 
+  const [mainAddress, setMainAddress] = useState<string>(getMainAddress());
+  const [queryAddress, setQueryAddress] = useState<string>(
+    getAddressFromQuery() ?? getMainAddress()
+  );
+
+  const [walletsOwned, setWalletsOwned] = useState<Record<string, Owner[]>>({});
+  const [consolidationOwned, setConsolidationOwned] = useState<Owner[]>([]);
+  const [owned, setOwned] = useState<Owner[]>([]);
+
+  const [walletsTDH, setWalletsTDH] = useState<Record<string, TDHMetrics>>({});
+  const [consolidatedTDH, setConsolidatedTDH] =
+    useState<ConsolidatedTDHMetrics | null>(null);
+  const [tdh, setTDH] = useState<ConsolidatedTDHMetrics | TDHMetrics | null>(
+    null
+  );
+
+  const [fetchingUser, setFetchingUser] = useState(true);
+  const [userNotFound, setUserNotFound] = useState(false);
+  const [dataLoaded, setDataLoaded] = useState(false);
+
+  const [loadingWalletTdh, setLoadingWalletTdh] = useState<string[]>([]);
+  const [loadingWalletOwned, setLoadingWalletOwned] = useState<string[]>([]);
+  const [loadingMetrics, setLoadingMetrics] = useState<boolean>(false);
+
+  useEffect(() => {
+    setLoadingMetrics(!!loadingWalletTdh.length || !!loadingWalletOwned.length);
+  }, [loadingWalletTdh, loadingWalletOwned]);
+
   const onActiveAddress = (address: string) => {
     if (address === activeAddress) {
       setActiveAddress(null);
-      setView(VIEW.CONSOLIDATION);
       const currentQuery = { ...router.query };
       delete currentQuery.address;
       router.push(
@@ -64,7 +91,6 @@ export default function UserPage(props: Props) {
       return;
     }
     setActiveAddress(address);
-    setView(VIEW.WALLET);
     const currentQuery = { ...router.query };
     currentQuery.address = address;
     router.push(
@@ -77,119 +103,39 @@ export default function UserPage(props: Props) {
     );
   };
 
-  const [walletOwnedLoaded, setWalletOwnedLoaded] = useState(false);
-  const [consolidationOwnedLoaded, setConsolidationOwnedLoaded] =
-    useState(false);
-
-  const [ownerAddress, setOwnerAddress] = useState<`0x${string}` | undefined>(
-    undefined
-  );
-  const [ownerENS, setOwnerENS] = useState("");
-
-  const [owned, setOwned] = useState<Owner[]>([]);
-  const [walletOwned, setWalletOwned] = useState<Owner[]>([]);
-  const [consolidationOwned, setConsolidationOwned] = useState<Owner[]>([]);
-
-  const [walletTDH, setWalletTDH] = useState<TDHMetrics>();
-  const [consolidatedTDH, setConsolidatedTDH] =
-    useState<ConsolidatedTDHMetrics>();
-  const [tdh, setTDH] = useState<ConsolidatedTDHMetrics | TDHMetrics>();
-  const [isConsolidation, setIsConsolidation] = useState(false);
-  const [fetchingUser, setFetchingUser] = useState(true);
-  const [consolidationKey, setConsolidationKey] = useState<string | null>();
-  const [userNotFound, setUserNotFound] = useState(false);
-  const [dataLoaded, setDataLoaded] = useState(false);
+  useEffect(() => {
+    setQueryAddress(activeAddress ?? mainAddress);
+  }, [activeAddress, mainAddress]);
 
   useEffect(() => {
-    setDataLoaded(
-      userNotFound || (consolidationOwned && consolidationOwnedLoaded)
-    );
-  }, [userNotFound, consolidationOwned, consolidationOwnedLoaded]);
+    setDataLoaded(userNotFound || !!consolidationOwned.length);
+  }, [userNotFound, consolidationOwned]);
 
   useEffect(() => {
-    async function fetchENS() {
-      if (
-        isValidEthAddress(props.user) ||
-        props.user.endsWith(".eth") ||
-        props.profile?.profile?.primary_wallet ||
-        activeAddress
-      ) {
-        const userUrl =
-          isValidEthAddress(props.user) || props.user.endsWith(".eth")
-            ? props.user
-            : activeAddress
-            ? activeAddress
-            : props.profile?.profile?.primary_wallet;
-        const url = `${process.env.API_ENDPOINT}/api/user/${userUrl}`;
-        return fetchUrl(url).then((response: ENS) => {
-          setConsolidationKey(response.consolidation_key ?? null);
-          if (!response.consolidation_key) {
-            setUserNotFound(true);
-          }
-          const oAddress =
-            activeAddress ??
-            props.profile.profile?.primary_wallet ??
-            response.wallet ??
-            props.user;
-          setOwnerAddress(oAddress as `0x${string}`);
-          setOwnerENS(
-            activeAddress ??
-              props.profile?.profile?.primary_wallet ??
-              response.display ??
-              oAddress
-          );
-          const currentQuery: {
-            focus?: string | undefined;
-            address?: string | undefined;
-          } = {};
-          if (activeAddress) {
-            currentQuery.address = activeAddress;
-          }
-
-          if (router.query.focus) {
-            currentQuery.focus = router.query.focus as string;
-          }
-          router.push(
-            {
-              pathname: props.profile.profile?.handle
-                ? props.profile.profile.handle
-                : response.display && !containsEmojis(response.display)
-                ? response.display.replaceAll(" ", "-")
-                : oAddress,
-              query: currentQuery,
-            },
-            undefined,
-            { shallow: true }
-          );
-          setFetchingUser(false);
-        });
-      } else {
-        setUserNotFound(true);
-      }
-      setFetchingUser(false);
-    }
-
-    if (router.isReady) {
-      fetchENS();
-    }
-  }, [router.isReady]);
-
-  useEffect(() => {
-    async function fetchConsolidatedTDH() {
-      const url = `${process.env.API_ENDPOINT}/api/consolidated_owner_metrics/${consolidationKey}`;
-      return fetchUrl(url).then((response: ConsolidatedTDHMetrics) => {
-        if (response) {
-          setConsolidatedTDH(response);
-          if (response.wallets && response.wallets.length > 1) {
-            setIsConsolidation(true);
-          }
-        }
+    const fetchConsolidatedTDH = async () => {
+      const userResponse = await commonApiFetch<{
+        consolidation_key: string | undefined;
+      }>({
+        endpoint: `user/${mainAddress}`,
       });
-    }
-    if (consolidationKey) {
-      fetchConsolidatedTDH();
-    }
-  }, [consolidationKey]);
+
+      if (!userResponse.consolidation_key) {
+        setUserNotFound(true);
+        setFetchingUser(false);
+        return;
+      }
+
+      const consolidatedTDHResponse =
+        await commonApiFetch<ConsolidatedTDHMetrics>({
+          endpoint: `consolidated_owner_metrics/${userResponse.consolidation_key}`,
+        });
+
+      setConsolidatedTDH(consolidatedTDHResponse);
+      setFetchingUser(false);
+    };
+
+    fetchConsolidatedTDH();
+  }, [mainAddress]);
 
   useEffect(() => {
     async function fetchOwned(url: string, myowned: Owner[]) {
@@ -219,78 +165,108 @@ export default function UserPage(props: Props) {
             );
             setConsolidationOwned(mergedOwners);
           }
-          setConsolidationOwnedLoaded(true);
         }
       });
     }
 
-    if (consolidatedTDH) {
-      if (consolidatedTDH.balance > 0) {
-        const ownedUrl = `${
-          process.env.API_ENDPOINT
-        }/api/owners?wallet=${consolidatedTDH.wallets.join(",")}`;
-        fetchOwned(ownedUrl, []);
-      } else {
-        setConsolidationOwnedLoaded(true);
-        setWalletOwnedLoaded(true);
-      }
+    if (!consolidatedTDH) {
+      return;
     }
+
+    if (consolidatedTDH.balance <= 0) {
+      return;
+    }
+    const ownedUrl = `${
+      process.env.API_ENDPOINT
+    }/api/owners?wallet=${consolidatedTDH.wallets.join(",")}`;
+    fetchOwned(ownedUrl, []);
   }, [consolidatedTDH]);
 
   useEffect(() => {
-    async function fetchOwned(url: string, myowned: Owner[]) {
-      fetchAllPages(url).then((response: Owner[]) => {
-        setWalletOwned(response);
-        setWalletOwnedLoaded(true);
-      });
-    }
-
-    if (walletTDH) {
-      if (walletTDH.balance > 0) {
-        const ownedUrl = `${process.env.API_ENDPOINT}/api/owners?wallet=${walletTDH.wallet}`;
-        fetchOwned(ownedUrl, []);
-      } else {
-        setWalletOwnedLoaded(true);
-      }
-    }
-  }, [walletTDH]);
-
-  useEffect(() => {
-    async function fetchTDH() {
-      const url = `${process.env.API_ENDPOINT}/api/owner_metrics/?wallet=${ownerAddress}&profile_page=true`;
-      return fetchUrl(url).then((response: DBResponse) => {
+    async function fetchTDH(wallet: string) {
+      const url = `${process.env.API_ENDPOINT}/api/owner_metrics/?wallet=${wallet}&profile_page=true`;
+      setLoadingWalletTdh((prev) => [...prev, wallet]);
+      fetchUrl(url).then((response: DBResponse) => {
         if (response && response.data.length === 1) {
-          setWalletTDH(response.data[0]);
+          setWalletsTDH((prev) => ({
+            ...prev,
+            [wallet]: response.data[0],
+          }));
         }
+        setLoadingWalletTdh((prev) => prev.filter((w) => w !== wallet));
       });
     }
 
-    if (consolidatedTDH) {
-      if (isConsolidation) {
-        fetchTDH();
-      } else {
-        setWalletOwnedLoaded(true);
-      }
+    if (!activeAddress) {
+      return;
     }
-  }, [isConsolidation, consolidatedTDH]);
+    if (walletsTDH[activeAddress]) {
+      return;
+    }
+
+    if (!consolidatedTDH) {
+      return;
+    }
+
+    if (!isConsolidation) {
+      return;
+    }
+
+    fetchTDH(activeAddress);
+  }, [consolidatedTDH, activeAddress, walletsTDH]);
 
   useEffect(() => {
-    if (view === VIEW.CONSOLIDATION || !isConsolidation) {
+    async function fetchOwned(url: string, wallet: string) {
+      setLoadingWalletOwned((prev) => [...prev, wallet]);
+      fetchAllPages(url).then((response: Owner[]) => {
+        setWalletsOwned((prev) => ({
+          ...prev,
+          [wallet]: response,
+        }));
+        setLoadingWalletOwned((prev) => prev.filter((w) => w !== wallet));
+      });
+    }
+
+    if (!activeAddress) {
+      return;
+    }
+    if (!!walletsOwned[activeAddress]) {
+      return;
+    }
+
+    if (!walletsTDH[activeAddress]) {
+      return;
+    }
+
+    if (!consolidatedTDH) {
+      return;
+    }
+
+    if (!isConsolidation) {
+      return;
+    }
+
+    if (walletsTDH[activeAddress].balance > 0) {
+      const ownedUrl = `${process.env.API_ENDPOINT}/api/owners?wallet=${activeAddress}`;
+      fetchOwned(ownedUrl, activeAddress);
+    }
+  }, [consolidatedTDH, activeAddress, walletsOwned, walletsTDH]);
+
+  useEffect(() => {
+    if (!activeAddress || !isConsolidation) {
       setTDH(consolidatedTDH);
     } else {
-      setTDH(walletTDH);
+      setTDH(walletsTDH[queryAddress]);
     }
-  }, [view, walletTDH, consolidatedTDH]);
+  }, [activeAddress, walletsTDH, queryAddress, consolidatedTDH]);
 
   useEffect(() => {
-    if (walletOwnedLoaded && consolidationOwnedLoaded) {
-      if (view === VIEW.CONSOLIDATION || !isConsolidation) {
-        setOwned(consolidationOwned);
-      } else {
-        setOwned(walletOwned);
-      }
+    if (!activeAddress || !isConsolidation) {
+      setOwned(consolidationOwned);
+    } else {
+      setOwned(walletsOwned[queryAddress]);
     }
-  }, [view, walletOwnedLoaded, consolidationOwnedLoaded]);
+  }, [activeAddress, walletsOwned, consolidationOwned, queryAddress]);
 
   if (fetchingUser) {
     return <UserPageFetching />;
@@ -320,9 +296,9 @@ export default function UserPage(props: Props) {
       {dataLoaded && (
         <UserPageDetails
           tdh={tdh}
-          ownerAddress={ownerAddress}
-          view={view}
-          owned={owned}
+          activeAddress={activeAddress}
+          mainAddress={mainAddress}
+          owned={owned ?? []}
           profile={props.profile}
         />
       )}

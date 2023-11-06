@@ -25,7 +25,7 @@ export default function UserPageCollectionControls({
   selectedSeason,
   setSelectedSeason,
 }: {
-  tdh?: ConsolidatedTDHMetrics | TDHMetrics;
+  tdh: ConsolidatedTDHMetrics | TDHMetrics | null;
   hideSeized: boolean;
   hideNonSeized: boolean;
   setHideSeized: (hide: boolean) => void;
