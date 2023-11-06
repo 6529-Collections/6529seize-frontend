@@ -16,6 +16,29 @@ export interface IProfileAndConsolidations {
   };
 }
 
+export enum PROFILE_CLASSIFICATION {
+  NOT_SET = "NOT_SET",
+  GOVERNMENT_NAME = "GOVERNMENT_NAME",
+  PSEUDONYM = "PSEUDONYM",
+  ORGANIZATION = "ORGANIZATION",
+  AI = "AI",
+  BOT = "BOT",
+  PARODY = "PARODY",
+}
+
+export const CLASSIFICATIONS: Record<
+  PROFILE_CLASSIFICATION,
+  { title: string }
+> = {
+  [PROFILE_CLASSIFICATION.NOT_SET]: { title: "Not Set" },
+  [PROFILE_CLASSIFICATION.GOVERNMENT_NAME]: { title: "Government Name" },
+  [PROFILE_CLASSIFICATION.PSEUDONYM]: { title: "Pseudonym" },
+  [PROFILE_CLASSIFICATION.ORGANIZATION]: { title: "Organization" },
+  [PROFILE_CLASSIFICATION.AI]: { title: "AI" },
+  [PROFILE_CLASSIFICATION.BOT]: { title: "Bot" },
+  [PROFILE_CLASSIFICATION.PARODY]: { title: "Parody" },
+};
+
 export interface IProfile {
   readonly normalised_handle: string;
   readonly handle: string;

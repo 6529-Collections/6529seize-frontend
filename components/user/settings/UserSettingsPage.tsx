@@ -1,19 +1,19 @@
 import { FormEvent, useContext, useEffect, useState } from "react";
-import { IProfileAndConsolidations } from "../../../entities/IProfile";
+import {
+  IProfileAndConsolidations,
+  PROFILE_CLASSIFICATION,
+} from "../../../entities/IProfile";
 import UserSettingsPrimaryWallet from "./UserSettingsPrimaryWallet";
 import UserSettingsSave from "./UserSettingsSave";
 import UserSettingsUsername from "./UserSettingsUsername";
 import { AuthContext, IProfileWithMeta } from "../../auth/Auth";
 import { useRouter } from "next/router";
-import {
-  commonApiFetch,
-  commonApiPost,
-} from "../../../services/api/common-api";
+import { commonApiPost } from "../../../services/api/common-api";
 import UserSettingsImg from "./UserSettingsImg";
 import UserSettingsBackground from "./UserSettingsBackground";
 import { getRandomColor } from "../../../helpers/Helpers";
 import UserSettingsWebsite from "./UserSettingsWebsite";
-import { useDebounce } from "react-use";
+import UserSettingsClassification from "./UserSettingsClassification";
 
 interface ApiCreateOrUpdateProfileRequest {
   readonly handle: string;
@@ -42,6 +42,10 @@ export default function UserSettingsPage({
     );
     return tdhWallets.length > 0 ? tdhWallets[0].wallet.address : "";
   };
+
+  const [classification, setClassification] = useState<PROFILE_CLASSIFICATION>(
+    PROFILE_CLASSIFICATION.PSEUDONYM
+  );
 
   const [primaryWallet, setPrimaryWallet] = useState<string>(
     user.profile?.primary_wallet ?? getHighestTdhWalletOrNone()
@@ -137,6 +141,11 @@ export default function UserSettingsPage({
               userName={userName}
               originalUsername={user.profile?.handle ?? ""}
               setUserName={setUserName}
+            />
+
+            <UserSettingsClassification
+              selected={classification}
+              onSelect={setClassification}
             />
 
             <UserSettingsPrimaryWallet

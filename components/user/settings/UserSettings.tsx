@@ -118,8 +118,7 @@ export default function UserSettingsComponent(props: Props) {
   if (!init || !account.address || !userOrWallet || !user) return <></>;
   return (
     <div
-      id="allowlist-tool"
-      className={`tw-bg-neutral-900 tw-overflow-y-auto tw-min-h-screen tw-relative ${inter.className}`}
+      className={`tailwind-scope tw-bg-neutral-900 tw-overflow-y-auto tw-min-h-screen tw-relative ${inter.className}`}
     >
       <div className="tw-max-w-2xl tw-mx-auto tw-pt-8 tw-pb-12">
         <UserSettingsGoToUser

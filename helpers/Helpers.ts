@@ -311,3 +311,23 @@ export function capitalizeEveryWord(input: string): string {
     .toLocaleLowerCase()
     .replace(/^(.)|\s+(.)/g, (match: string) => match.toUpperCase());
 }
+
+export const formatNumber = (num: number): string => {
+  // For numbers less than 1000, return the number as is
+  if (num < 1000) {
+    return num.toString();
+  }
+
+  // For numbers between 1000 and 100,000, format with commas
+  if (num < 100000) {
+    return num.toLocaleString();
+  }
+
+  // For numbers 100,000 and above, format as 'K' for thousands
+  if (num < 1000000) {
+    return (num / 1000).toFixed(1) + "K";
+  }
+
+  // For numbers 1 million and above, format as 'M' for millions
+  return (num / 1000000).toFixed(2) + "M";
+};

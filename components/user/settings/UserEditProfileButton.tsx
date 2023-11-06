@@ -6,11 +6,11 @@ export default function UserEditProfileButton({ user }: { user: string }) {
     router.push(`/${user}/settings`);
   }
   return (
-    <div id="allowlist-tool">
+    <div>
       <button
         onClick={goToSettings}
         type="button"
-        className="tw-bg-neutral-100 tw-px-4 tw-py-1.5 tw-text-sm tw-font-semibold tw-text-neutral-900 tw-border tw-border-solid tw-border-neutral-600 tw-rounded-sm hover:tw-bg-neutral-200 hover:tw-border-neutral-600 
+        className="tailwind-scope tw-bg-neutral-100 tw-px-4 tw-py-1.5 tw-text-sm tw-font-semibold tw-text-neutral-900 tw-border tw-border-solid tw-border-neutral-600 tw-rounded-sm hover:tw-bg-neutral-200 hover:tw-border-neutral-600 
         tw-transition tw-duration-300 tw-ease-out"
       >
         Edit profile

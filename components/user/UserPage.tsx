@@ -25,13 +25,57 @@ interface Props {
 export default function UserPage(props: Props) {
   const router = useRouter();
 
+  const getAddressFromQuery = (): string | null => {
+    if (!router.query.address) {
+      return null;
+    }
+    if (typeof router.query.address === "string") {
+      return router.query.address.toLowerCase();
+    }
+
+    if (router.query.address.length > 0) {
+      return router.query.address[0].toLowerCase();
+    }
+    return null;
+  };
+
   const [view, setView] = useState<VIEW>(
-    router.query.address ? VIEW.WALLET : VIEW.CONSOLIDATION
+    getAddressFromQuery() ? VIEW.WALLET : VIEW.CONSOLIDATION
   );
 
   const [activeAddress, setActiveAddress] = useState<string | null>(
-    router.query.address ? (router.query.address as string) : null
+    getAddressFromQuery()
   );
+
+  const onActiveAddress = (address: string) => {
+    if (address === activeAddress) {
+      setActiveAddress(null);
+      setView(VIEW.CONSOLIDATION);
+      const currentQuery = { ...router.query };
+      delete currentQuery.address;
+      router.push(
+        {
+          pathname: router.pathname,
+          query: currentQuery,
+        },
+        undefined,
+        { shallow: true }
+      );
+      return;
+    }
+    setActiveAddress(address);
+    setView(VIEW.WALLET);
+    const currentQuery = { ...router.query };
+    currentQuery.address = address;
+    router.push(
+      {
+        pathname: router.pathname,
+        query: currentQuery,
+      },
+      undefined,
+      { shallow: true }
+    );
+  };
 
   const [walletOwnedLoaded, setWalletOwnedLoaded] = useState(false);
   const [consolidationOwnedLoaded, setConsolidationOwnedLoaded] =
@@ -254,7 +298,7 @@ export default function UserPage(props: Props) {
 
   return (
     <>
-      <UserPageHeader
+      {/* <UserPageHeader
         dataLoaded={dataLoaded}
         tdh={tdh}
         consolidatedTDH={consolidatedTDH}
@@ -267,6 +311,11 @@ export default function UserPage(props: Props) {
         setView={setView}
         ownerENS={ownerENS}
         profile={props.profile}
+      /> */}
+      <UserPageHeader
+        profile={props.profile}
+        activeAddress={activeAddress}
+        onActiveAddress={onActiveAddress}
       />
       {dataLoaded && (
         <UserPageDetails
