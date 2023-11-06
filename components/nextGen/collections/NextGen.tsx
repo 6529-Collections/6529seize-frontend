@@ -39,6 +39,7 @@ export default function NextGen() {
             .fill(null)
             .map((_, index) => (
               <Col
+                className="pb-3"
                 xs={12}
                 sm={12}
                 md={6}

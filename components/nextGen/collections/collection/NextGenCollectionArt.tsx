@@ -1,6 +1,5 @@
 import { Container, Row, Col } from "react-bootstrap";
 import { AdditionalData, TokenURI } from "../../nextgen_entities";
-import { useEffect, useState } from "react";
 import NextGenTokenList from "../NextGenTokenList";
 import DotLoader from "../../../dotLoader/DotLoader";
 

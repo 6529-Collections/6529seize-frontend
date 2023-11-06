@@ -90,6 +90,10 @@ export default function NextGenCollectionPreview(props: Props) {
     setAdditionalData(data);
   });
 
+  if (!additionalData || additionalData.total_supply == 0) {
+    return <></>;
+  }
+
   return (
     <a
       href={`/nextgen/collection/${props.collection}`}
