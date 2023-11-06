@@ -22,14 +22,12 @@ import {
   DistributionPhase,
   IDistribution,
 } from "../../../entities/IDistribution";
-import { VIEW } from "../../consolidation-switch/ConsolidationSwitch";
 import { IProfileAndConsolidations } from "../../../entities/IProfile";
 import DotLoader from "../../dotLoader/DotLoader";
 
 interface Props {
   show: boolean;
-  ownerAddress: `0x${string}` | undefined;
-  view: VIEW;
+  activeAddress: string | null;
   profile: IProfileAndConsolidations;
 }
 
@@ -62,7 +60,7 @@ export default function UserPageDistributions(props: Props) {
 
   useEffect(() => {
     changeDistributionPage(1);
-  }, [props.view]);
+  }, [props.activeAddress]);
 
   useEffect(() => {
     if (distributionsPage === 1) {
@@ -80,15 +78,12 @@ export default function UserPageDistributions(props: Props) {
       return;
     }
     const walletFilter: string[] = [];
-    if (
-      !!props.profile.consolidation.wallets.length &&
-      props.view === VIEW.CONSOLIDATION
-    ) {
+    if (!props.activeAddress) {
       props.profile.consolidation.wallets.forEach((w) =>
         walletFilter.push(w.wallet.address)
       );
     } else {
-      walletFilter.push(props.ownerAddress as string);
+      walletFilter.push(props.activeAddress);
     }
 
     let url = `${
@@ -96,7 +91,7 @@ export default function UserPageDistributions(props: Props) {
     }/api/distributions?wallet=${walletFilter.join(
       ","
     )}&page_size=${DISTRIBUTIONS_PAGE_SIZE}&page=${distributionsPage}`;
-    if (props.view === VIEW.CONSOLIDATION) {
+    if (!props.activeAddress) {
       const consolidatedWallets = props.profile.consolidation.wallets.map(
         (w) => w.wallet.address
       );
@@ -106,40 +101,38 @@ export default function UserPageDistributions(props: Props) {
         ","
       )}&page_size=${DISTRIBUTIONS_PAGE_SIZE}&page=${distributionsPage}`;
     }
-    if (props.ownerAddress) {
-      fetchUrl(url).then((response: DBResponse) => {
-        setDistributionsTotalResults(response.count);
-        const mydistributions: IDistribution[] = response.data;
-        setDistributions(mydistributions);
-        const phases = [];
-        if (mydistributions.some((d) => d.airdrop > 0)) {
-          phases.push(DistributionPhase.AIRDROP);
-        }
-        if (mydistributions.some((d) => d.allowlist > 0)) {
-          phases.push(DistributionPhase.ALLOWLIST);
-        }
-        if (mydistributions.some((d) => d.phase_0 > 0)) {
-          phases.push(DistributionPhase.PHASE_0);
-        }
-        if (mydistributions.some((d) => d.phase_1 > 0)) {
-          phases.push(DistributionPhase.PHASE_1);
-        }
-        if (mydistributions.some((d) => d.phase_2 > 0)) {
-          phases.push(DistributionPhase.PHASE_2);
-        }
-        if (mydistributions.some((d) => d.phase_3 > 0)) {
-          phases.push(DistributionPhase.PHASE_3);
-        }
-        setDistributionsPhases(phases);
-        setDistributionsLoaded(true);
-      });
-    }
+    fetchUrl(url).then((response: DBResponse) => {
+      setDistributionsTotalResults(response.count);
+      const mydistributions: IDistribution[] = response.data;
+      setDistributions(mydistributions);
+      const phases = [];
+      if (mydistributions.some((d) => d.airdrop > 0)) {
+        phases.push(DistributionPhase.AIRDROP);
+      }
+      if (mydistributions.some((d) => d.allowlist > 0)) {
+        phases.push(DistributionPhase.ALLOWLIST);
+      }
+      if (mydistributions.some((d) => d.phase_0 > 0)) {
+        phases.push(DistributionPhase.PHASE_0);
+      }
+      if (mydistributions.some((d) => d.phase_1 > 0)) {
+        phases.push(DistributionPhase.PHASE_1);
+      }
+      if (mydistributions.some((d) => d.phase_2 > 0)) {
+        phases.push(DistributionPhase.PHASE_2);
+      }
+      if (mydistributions.some((d) => d.phase_3 > 0)) {
+        phases.push(DistributionPhase.PHASE_3);
+      }
+      setDistributionsPhases(phases);
+      setDistributionsLoaded(true);
+    });
   }, [
     distributionsPage,
-    props.ownerAddress,
-    props.view,
+    props.activeAddress,
     props.profile,
     props.show,
+    distributionsLoaded,
   ]);
 
   if (!props.show) {
@@ -176,7 +169,7 @@ export default function UserPageDistributions(props: Props) {
                   <th
                     colSpan={
                       !!props.profile.consolidation.wallets.length &&
-                      props.view === VIEW.CONSOLIDATION
+                      !props.activeAddress
                         ? 3
                         : 2
                     }
@@ -195,7 +188,7 @@ export default function UserPageDistributions(props: Props) {
                   <th>Date</th>
                   <th>Card</th>
                   {!!props.profile.consolidation.wallets.length &&
-                    props.view === VIEW.CONSOLIDATION && <th>Wallet</th>}
+                    !props.activeAddress && <th>Wallet</th>}
                   {distributionsPhases.map((p) => (
                     <th key={`${p}-header`} className="text-center">
                       {capitalizeEveryWord(p.replaceAll("_", " "))}
@@ -239,7 +232,7 @@ export default function UserPageDistributions(props: Props) {
                       }${d.card_name ? ` - ${d.card_name}` : ""}`}
                     </td>
                     {!!props.profile.consolidation.wallets.length &&
-                      props.view === VIEW.CONSOLIDATION && (
+                      !props.activeAddress && (
                         <td>
                           {d.display ? d.display : formatAddress(d.wallet)}
                         </td>

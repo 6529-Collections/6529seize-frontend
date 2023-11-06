@@ -1,10 +1,8 @@
 import styles from "../UserPage.module.scss";
-import Image from "next/image";
 import { Col, Dropdown, Row, Table } from "react-bootstrap";
 import Pagination from "../../pagination/Pagination";
 import { TypeFilter } from "../../latest-activity/LatestActivity";
 import LatestActivityRow from "../../latest-activity/LatestActivityRow";
-import { VIEW } from "../../consolidation-switch/ConsolidationSwitch";
 import { useEffect, useState } from "react";
 import { Transaction } from "../../../entities/ITransaction";
 import { MEMES_CONTRACT } from "../../../constants";
@@ -18,8 +16,7 @@ import DotLoader from "../../dotLoader/DotLoader";
 
 interface Props {
   show: boolean;
-  ownerAddress: `0x${string}` | undefined;
-  view: VIEW;
+  activeAddress: string | null;
   memesLite: NFTLite[];
   profile: IProfileAndConsolidations;
 }
@@ -55,7 +52,7 @@ export default function UserPageActivity(props: Props) {
       page: 1,
       filter: null,
     });
-  }, [props.view]);
+  }, [props.activeAddress]);
 
   useEffect(() => {
     if (activityPage === 1 && activityTypeFilter === TypeFilter.ALL) {
@@ -73,8 +70,8 @@ export default function UserPageActivity(props: Props) {
       return;
     }
 
-    let url = `${process.env.API_ENDPOINT}/api/transactions?contract=${MEMES_CONTRACT}&wallet=${props.ownerAddress}&page_size=${ACTIVITY_PAGE_SIZE}&page=${activityPage}`;
-    if (props.view === VIEW.CONSOLIDATION) {
+    let url = `${process.env.API_ENDPOINT}/api/transactions?contract=${MEMES_CONTRACT}&wallet=${props.activeAddress}&page_size=${ACTIVITY_PAGE_SIZE}&page=${activityPage}`;
+    if (!props.activeAddress) {
       const wallets = props.profile.consolidation.wallets.map(
         (w) => w.wallet.address
       );
@@ -85,35 +82,33 @@ export default function UserPageActivity(props: Props) {
         ","
       )}&page_size=${ACTIVITY_PAGE_SIZE}&page=${activityPage}`;
     }
-    if (props.ownerAddress) {
-      switch (activityTypeFilter) {
-        case TypeFilter.SALES:
-          url += `&filter=sales`;
-          break;
-        case TypeFilter.TRANSFERS:
-          url += `&filter=transfers`;
-          break;
-        case TypeFilter.AIRDROPS:
-          url += `&filter=airdrops`;
-          break;
-        case TypeFilter.MINTS:
-          url += `&filter=mints`;
-          break;
-        case TypeFilter.BURNS:
-          url += `&filter=burns`;
-          break;
-      }
-      fetchUrl(url).then((response: DBResponse) => {
-        setActivityTotalResults(response.count);
-        setActivity(response.data);
-        setActivityLoaded(true);
-      });
+    switch (activityTypeFilter) {
+      case TypeFilter.SALES:
+        url += `&filter=sales`;
+        break;
+      case TypeFilter.TRANSFERS:
+        url += `&filter=transfers`;
+        break;
+      case TypeFilter.AIRDROPS:
+        url += `&filter=airdrops`;
+        break;
+      case TypeFilter.MINTS:
+        url += `&filter=mints`;
+        break;
+      case TypeFilter.BURNS:
+        url += `&filter=burns`;
+        break;
     }
+    fetchUrl(url).then((response: DBResponse) => {
+      setActivityTotalResults(response.count);
+      setActivity(response.data);
+      setActivityLoaded(true);
+    });
   }, [
     activityPage,
     props.profile,
     activityTypeFilter,
-    props.view,
+    props.activeAddress,
     activityLoaded,
     props.show,
   ]);

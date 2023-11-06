@@ -3,6 +3,7 @@ import { IProfileConsolidation } from "../../../../entities/IProfile";
 import { AnimatePresence, motion, useAnimate } from "framer-motion";
 import { useClickAway, useKeyPressEvent } from "react-use";
 import UserPageHeaderAddressesItem from "./UserPageHeaderAddressesItem";
+import { areEqualAddresses } from "../../../../helpers/Helpers";
 
 export default function UserPageHeaderAddresses({
   addresses,
@@ -29,11 +30,30 @@ export default function UserPageHeaderAddresses({
 
   const [title, setTitle] = useState<string>("Addresses");
 
+  useEffect(() => {
+    if (!activeAddress) {
+      setTitle("Addresses");
+      return;
+    }
+    const address = addresses.find((item) =>
+      areEqualAddresses(item.wallet.address, activeAddress)
+    );
+
+    if (!address) {
+      setTitle("Addresses");
+      return;
+    }
+
+    setTitle(address.wallet.ens ?? address.wallet.address);
+  }, [activeAddress, addresses]);
+
+  const setActiveAddress = (address: string) => {
+    onActiveAddress(address);
+    setIsOpen(false);
+  };
+
   return (
-    <div className="tw-max-w-full tw-relative tw-mt-2" ref={listRef}>
-      <label className="tw-block tw-text-sm tw-font-normal tw-leading-5 tw-text-neutral-350">
-        Primary wallet
-      </label>
+    <div className="tw-w-96 tw-relative tw-mt-2" ref={listRef}>
       <div className="tw-mt-2 tw-relative">
         <button
           type="button"
@@ -78,7 +98,7 @@ export default function UserPageHeaderAddresses({
                       key={item.wallet.address}
                       item={item}
                       activeAddress={activeAddress}
-                      onActiveAddress={onActiveAddress}
+                      onActiveAddress={setActiveAddress}
                     />
                   ))}
                 </ul>

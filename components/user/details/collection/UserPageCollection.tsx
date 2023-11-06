@@ -10,12 +10,12 @@ import UserPageCollectionControls from "./UserPageCollectionControls";
 import DotLoader from "../../../dotLoader/DotLoader";
 import { Row } from "react-bootstrap";
 
-
 interface Props {
   show: boolean;
   owned: Owner[];
-  tdh?: ConsolidatedTDHMetrics | TDHMetrics;
+  tdh: ConsolidatedTDHMetrics | TDHMetrics | null;
   memesLite: NFTLite[];
+  loading: boolean;
 }
 
 export enum UserCollectionSort {
@@ -38,9 +38,6 @@ export default function UserPageCollection(props: Props) {
   const [seasonsLoaded, setSeasonsLoaded] = useState(false);
   const [selectedSeason, setSelectedSeason] = useState(0);
   const [dataLoaded, setDataLoaded] = useState(false);
-
-
-
 
   useEffect(() => {
     if (seasonsLoaded && gradientsLoaded) {
@@ -118,19 +115,23 @@ export default function UserPageCollection(props: Props) {
         selectedSeason={selectedSeason}
         setSelectedSeason={setSelectedSeason}
       />
-      <UserPageCollectionNfts
-        owned={props.owned}
-        nfts={nfts}
-        tdh={props.tdh}
-        seasons={seasons}
-        selectedSeason={selectedSeason}
-        hideSeized={hideSeized}
-        hideNonSeized={hideNonSeized}
-        hideMemes={hideMemes}
-        hideGradients={hideGradients}
-        sort={sort}
-        sortDir={sortDir}
-      />
+      {props.loading ? (
+        <DotLoader />
+      ) : (
+        <UserPageCollectionNfts
+          owned={props.owned}
+          nfts={nfts}
+          tdh={props.tdh}
+          seasons={seasons}
+          selectedSeason={selectedSeason}
+          hideSeized={hideSeized}
+          hideNonSeized={hideNonSeized}
+          hideMemes={hideMemes}
+          hideGradients={hideGradients}
+          sort={sort}
+          sortDir={sortDir}
+        />
+      )}
     </>
   );
 }

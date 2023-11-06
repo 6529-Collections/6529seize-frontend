@@ -29,7 +29,7 @@ ChartJS.register(
 
 interface Props {
   show: boolean;
-  ownerAddress: `0x${string}` | undefined;
+  mainAddress: string;
 }
 
 const GRAPH_OPTIONS = {
@@ -68,7 +68,7 @@ export default function UserPageStats(props: Props) {
 
   useEffect(() => {
     setTdhHistoryLoaded(false);
-  }, [props.ownerAddress, pageSize]);
+  }, [props.mainAddress, pageSize]);
 
   useEffect(() => {
     if (!props.show) {
@@ -79,14 +79,14 @@ export default function UserPageStats(props: Props) {
       return;
     }
 
-    let url = `${process.env.API_ENDPOINT}/api/tdh_history?wallet=${props.ownerAddress}&page_size=${pageSize}`;
+    let url = `${process.env.API_ENDPOINT}/api/tdh_history?wallet=${props.mainAddress}&page_size=${pageSize}`;
     fetchUrl(url).then((response: DBResponse) => {
       const tdhH = response.data.reverse();
       setTdhHistory(tdhH);
       setTdhLabels(tdhH.map((t) => t.date));
       setTdhHistoryLoaded(true);
     });
-  }, [props.show, props.ownerAddress, pageSize, tdhHistoryLoaded]);
+  }, [props.show, props.mainAddress, pageSize, tdhHistoryLoaded]);
 
   function printTotalTDH() {
     const data = {

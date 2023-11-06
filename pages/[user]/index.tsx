@@ -124,7 +124,7 @@ export default function UserPageIndex(props: { pageProps: PageProps }) {
         {router.isReady && pageProps.url && userProfile && (
          <div className="tw-bg-neutral-950">
            <UserPage
-            wallets={connectedWallets}
+            connectedWallets={connectedWallets}
             user={pageProps.url}
             profile={userProfile}
           />
