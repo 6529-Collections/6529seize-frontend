@@ -31,7 +31,6 @@ jobs:
           API_ENDPOINT: "https://api.seize.io"
           ALLOWLIST_API_ENDPOINT: "https://allowlist-api.seize.io"
           BASE_ENDPOINT: "https://seize.io"
-          LOAD_S3: "true"
           VERSION: ${{ env.COMMIT_SHA }}
           ALCHEMY_API_KEY: ${{ secrets.ALCHEMY_API_KEY }}
         run: npm run build
