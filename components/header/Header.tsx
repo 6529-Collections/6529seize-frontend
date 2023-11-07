@@ -7,10 +7,11 @@ import { AboutSection } from "../../pages/about/[section]";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { DBResponse } from "../../entities/IDBResponse";
 import { fetchUrl } from "../../services/6529api";
-import HeaderConnect, { WalletView } from "./HeaderConnect";
+import HeaderConnect from "./HeaderConnect";
 import Cookies from "js-cookie";
 import { VIEW_MODE_COOKIE } from "../../constants";
 import { useAccount } from "wagmi";
+import { WalletView } from "../../enums";
 
 interface Props {
   onLoad?: () => void;
