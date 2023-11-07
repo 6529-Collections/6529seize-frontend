@@ -3,7 +3,7 @@ import { IProfileConsolidation } from "../../../../entities/IProfile";
 import { AnimatePresence, motion, useAnimate } from "framer-motion";
 import { useClickAway, useKeyPressEvent } from "react-use";
 import UserPageHeaderAddressesItem from "./UserPageHeaderAddressesItem";
-import { areEqualAddresses } from "../../../../helpers/Helpers";
+import { areEqualAddresses, formatAddress } from "../../../../helpers/Helpers";
 
 export default function UserPageHeaderAddresses({
   addresses,
@@ -44,7 +44,7 @@ export default function UserPageHeaderAddresses({
       return;
     }
 
-    setTitle(address.wallet.ens ?? address.wallet.address);
+    setTitle(address.wallet.ens ?? formatAddress(address.wallet.address));
   }, [activeAddress, addresses]);
 
   const setActiveAddress = (address: string) => {

@@ -1,5 +1,8 @@
+import { useEffect, useState } from "react";
 import { IProfileConsolidation } from "../../../../entities/IProfile";
-import { formatAddress } from "../../../../helpers/Helpers";
+import { areEqualAddresses, formatAddress } from "../../../../helpers/Helpers";
+import { useCopyToClipboard } from "react-use";
+import { it } from "node:test";
 
 export default function UserPageHeaderAddressesItem({
   item,
@@ -10,32 +13,62 @@ export default function UserPageHeaderAddressesItem({
   activeAddress: string | null;
   onActiveAddress: (address: string) => void;
 }) {
-  const title = item.wallet.ens ?? formatAddress(item.wallet.address);
+  const getEnsOrWallet = () => item.wallet.ens ?? item.wallet.address;
+  const getTitle = () => item.wallet.ens ?? formatAddress(item.wallet.address);
+
+  const [title, setTitle] = useState(getTitle());
+  const [isActive, setIsActive] = useState<boolean>(
+    areEqualAddresses(item.wallet.address, activeAddress)
+  );
+
+  useEffect(() => {
+    setIsActive(areEqualAddresses(item.wallet.address, activeAddress));
+  }, [activeAddress, item.wallet.address]);
+
+  const [copyState, copyToClipboard] = useCopyToClipboard();
+
+  const copyAddress = (event: React.MouseEvent<HTMLButtonElement>) => {
+    event.stopPropagation();
+    copyToClipboard(getEnsOrWallet());
+    setTitle("Copied!");
+    setTimeout(() => {
+      setTitle(getTitle());
+    }, 1000);
+  };
+
+  const openOpensea = (event: React.MouseEvent<HTMLDivElement>) => {
+    event.stopPropagation();
+    window.open(`https://opensea.io/${getEnsOrWallet()}`, "_blank");
+  };
+
   return (
     <li
       className="tw-h-full tw-flex tw-items-center tw-justify-between tw-text-white tw-rounded-lg tw-relative tw-cursor-pointer tw-select-none tw-p-2 hover:tw-bg-neutral-700 tw-transition tw-duration-300 tw-ease-out"
       onClick={() => onActiveAddress(item.wallet.address.toLowerCase())}
     >
-      <svg
-        className="tw-h-5 tw-w-5 tw-mr-2 tw-text-primary-300 tw-transition tw-duration-300 tw-ease-out"
-        viewBox="0 0 24 24"
-        fill="none"
-        xmlns="http://www.w3.org/2000/svg"
-      >
-        <path
-          d="M20 6L9 17L4 12"
-          stroke="currentColor"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        />
-      </svg>
       <div className="tw-w-44 tw-truncate">
         <span className="tw-text-sm tw-font-medium tw-text-white">{title}</span>
+        {isActive && (
+          <svg
+            className="tw-h-5 tw-w-5 tw-ml-2 tw-text-primary-300 tw-transition tw-duration-300 tw-ease-out"
+            viewBox="0 0 24 24"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M20 6L9 17L4 12"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+          </svg>
+        )}
       </div>
 
       <div className="tw-h-full tw-flex tw-items-center tw-gap-x-3 -tw-mr-2">
         <button
+          onClick={copyAddress}
           type="button"
           title="Copy"
           className="tw-inline-flex tw-items-center tw-w-7 tw-h-7 tw-border-0 tw-outline-0 tw-bg-transparent focus:tw-outline-none tw-group tw-cursor-pointer"
@@ -55,7 +88,10 @@ export default function UserPageHeaderAddressesItem({
             />
           </svg>
         </button>
-        <div className="tw-group tw-inline-flex tw-items-center tw-w-7 tw-h-7 tw-border-0 tw-outline-0 tw-bg-transparent focus:tw-outline-none tw-group tw-cursor-pointer">
+        <div
+          onClick={openOpensea}
+          className="tw-group tw-inline-flex tw-items-center tw-w-7 tw-h-7 tw-border-0 tw-outline-0 tw-bg-transparent focus:tw-outline-none tw-group tw-cursor-pointer"
+        >
           <svg
             className="tw-h-5 tw-w-5 group-hover:tw-scale-110 tw-transition tw-duration-300 tw-ease-out"
             viewBox="0 0 90 90"
