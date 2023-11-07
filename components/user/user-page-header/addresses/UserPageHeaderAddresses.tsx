@@ -58,7 +58,7 @@ export default function UserPageHeaderAddresses({
         <button
           type="button"
           onClick={toggleOpen}
-          className="tw-text-left tw-block tw-w-full tw-rounded-lg tw-border-0 tw-py-2 tw-pl-3 tw-pr-10 tw-bg-neutral-900 focus:tw-bg-transparent tw-text-white tw-font-medium tw-caret-primary-300 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-neutral-600 placeholder:tw-text-neutral-500 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-300 hover:tw-ring-neutral-500 tw-text-base sm:tw-text-sm sm:tw-leading-6 tw-transition tw-duration-300 tw-ease-out"
+          className="tw-text-left tw-block tw-min-w-[12rem] tw-w-full tw-rounded-lg tw-border-0 tw-py-2 tw-pl-3 tw-pr-10 tw-bg-neutral-900 focus:tw-bg-transparent tw-text-white tw-font-medium tw-caret-primary-300 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-neutral-600 placeholder:tw-text-neutral-500 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-300 hover:tw-ring-neutral-500 tw-text-base sm:tw-text-sm sm:tw-leading-6 tw-transition tw-duration-300 tw-ease-out"
         >
           <span className="tw-text-neutral-350 tw-font-light">{title}</span>
         </button>
@@ -80,7 +80,6 @@ export default function UserPageHeaderAddresses({
           </svg>
         </div>
       </div>
-
       <AnimatePresence mode="wait" initial={false}>
         {isOpen && (
           <motion.div
