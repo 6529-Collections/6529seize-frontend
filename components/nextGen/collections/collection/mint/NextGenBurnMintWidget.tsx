@@ -337,7 +337,9 @@ export default function NextGenBurnMintWidget(props: Props) {
                       : "fetching..."}
                   </option>
                   {tokensOwnedForBurnAddress.map((token) => (
-                    <option value={token.tokenId}>
+                    <option
+                      value={token.tokenId}
+                      key={`token-${token.tokenId}`}>
                       #{token.tokenId}
                       {token.name ? ` - ${token.name}` : ""}
                     </option>
