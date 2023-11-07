@@ -1,7 +1,5 @@
-
 import styles from "./Header.module.scss";
 import { Container, Row, Col, Nav, Navbar, NavDropdown } from "react-bootstrap";
-import { useAccount } from "wagmi";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import Image from "next/image";
@@ -9,7 +7,10 @@ import { AboutSection } from "../../pages/about/[section]";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { DBResponse } from "../../entities/IDBResponse";
 import { fetchUrl } from "../../services/6529api";
-import HeaderConnect from "./HeaderConnect";
+import HeaderConnect, { WalletView } from "./HeaderConnect";
+import Cookies from "js-cookie";
+import { VIEW_MODE_COOKIE } from "../../constants";
+import { useAccount } from "wagmi";
 
 interface Props {
   onLoad?: () => void;
@@ -22,6 +23,8 @@ export default function Header(props: Props) {
 
   const [consolidations, setConsolidations] = useState<string[]>([]);
   const [burgerMenuOpen, setBurgerMenuOpen] = useState(false);
+
+  const [view, setView] = useState<WalletView>();
 
   const [showBurgerMenuAbout, setShowBurgerMenuAbout] = useState(false);
   const [showBurgerMenuCommunity, setShowBurgerMenuCommunity] = useState(false);
@@ -46,24 +49,52 @@ export default function Header(props: Props) {
   }, []);
 
   useEffect(() => {
-    if (account.isConnected && account.address) {
+    const viewMode = Cookies.get(VIEW_MODE_COOKIE);
+    console.log(VIEW_MODE_COOKIE, viewMode);
+    if (viewMode === WalletView.CONSOLIDATION) {
+      setView(WalletView.CONSOLIDATION);
+    } else {
+      setView(WalletView.WALLET);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (view) {
+      Cookies.set(VIEW_MODE_COOKIE, view);
+      if (props.onSetWallets) {
+        const isConsolidation = consolidations.length > 1;
+        if (isConsolidation && view === WalletView.CONSOLIDATION) {
+          props.onSetWallets(consolidations);
+        } else if (account.address) {
+          props.onSetWallets([account.address]);
+        } else {
+          props.onSetWallets([]);
+        }
+      }
+    }
+  }, [view, consolidations, account.address]);
+
+  useEffect(() => {
+    if (account.address) {
       fetchUrl(
         `${process.env.API_ENDPOINT}/api/consolidations/${account.address}`
       ).then((response: DBResponse) => {
-        if (
-          response.data.length === 1 &&
-          consolidations.length === 1 &&
-          props.onSetWallets
-        ) {
-          props.onSetWallets([account.address as string]);
-        } else {
-          setConsolidations(Array.from(response.data));
-        }
+        setConsolidations(Array.from(response.data));
       });
     } else {
       setConsolidations([]);
     }
-  }, [account.isConnected, account.address]);
+  }, [account.address]);
+
+  function printHeaderConnect() {
+    return (
+      <HeaderConnect
+        consolidations={consolidations}
+        view={view}
+        setView={setView}
+      />
+    );
+  }
 
   function printBurgerMenu() {
     return (
@@ -97,9 +128,8 @@ export default function Header(props: Props) {
           <Row className="pt-3 pb-3">
             <Col>
               <h3
-                className={`d-flex justify-content-center ${styles.burgerMenuHeader}`}
-              >
-                <HeaderConnect />
+                className={`d-flex justify-content-center ${styles.burgerMenuHeader}`}>
+                {printHeaderConnect()}
               </h3>
             </Col>
           </Row>
@@ -798,8 +828,7 @@ export default function Header(props: Props) {
                                 Cookie Policy
                               </NavDropdown.Item>
                             </NavDropdown>
-  
-                            <HeaderConnect />
+                            {printHeaderConnect()}
                           </Nav>
                         </Navbar>
                         <Image
