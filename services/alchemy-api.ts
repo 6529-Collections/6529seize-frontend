@@ -40,13 +40,15 @@ export async function getNftsForContractAndOwner(
   }
 
   const allNfts = nfts.map((nft) => {
-    return {
-      tokenId: nft.tokenId,
-      tokenType: nft.tokenType,
-      name: nft.name,
-      tokenUri: nft.tokenUri,
-      image: nft.image,
-    };
+    if (nft) {
+      return {
+        tokenId: nft.tokenId,
+        tokenType: nft.tokenType,
+        name: nft.name,
+        tokenUri: nft.tokenUri,
+        image: nft.image,
+      };
+    }
   });
   return allNfts;
 }

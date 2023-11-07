@@ -17,7 +17,7 @@ import {
 } from "../nextgen_helpers";
 import NextGenContractWriteStatus from "../NextGenContractWriteStatus";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { postData, postFormData } from "../../../services/6529api";
+import { postData } from "../../../services/6529api";
 
 interface Props {
   close: () => void;
@@ -95,33 +95,22 @@ export default function NextGenAdminInitializeExternalBurnSwap(props: Props) {
 
   useEffect(() => {
     if (signMessage.isSuccess && signMessage.data) {
-      const formData = new FormData();
-      formData.append(
-        "nextgen_burn",
-        JSON.stringify({
-          wallet: account.address as string,
-          signature: signMessage.data,
-          uuid: uuid,
-          collection_id: mintCollectionID,
-          burn_collection: erc721Collection,
-          burn_collection_id: burnCollectionID,
-          burn_address: burnSwapAddress,
-          status: status,
-        })
-      );
+      const data = {
+        wallet: account.address as string,
+        signature: signMessage.data,
+        uuid: uuid,
+        collection_id: mintCollectionID,
+        burn_collection: erc721Collection,
+        burn_collection_id: burnCollectionID,
+        min_token_index: tokenMin,
+        max_token_index: tokenMax,
+        burn_address: burnSwapAddress,
+        status: status,
+      };
 
       postData(
         `${process.env.API_ENDPOINT}/api/nextgen/register_burn_collection`,
-        {
-          wallet: account.address as string,
-          signature: signMessage.data,
-          uuid: uuid,
-          collection_id: mintCollectionID,
-          burn_collection: erc721Collection,
-          burn_collection_id: burnCollectionID,
-          burn_address: burnSwapAddress,
-          status: status,
-        }
+        data
       ).then((response) => {
         if (response.status === 200 && response.response) {
           setSubmitting(true);

@@ -51,7 +51,7 @@ export default function NextGenCollectionHeader(props: Props) {
                   ? `ALLOWLIST LIVE`
                   : props.phase_times.al_status == Status.UPCOMING &&
                     available > 0
-                  ? `ALLOWLIST STARTING ${getPhaseDateDisplay(
+                  ? `ALLOWLIST ${getPhaseDateDisplay(
                       props.phase_times.allowlist_start_time
                     )}`
                   : `ALLOWLIST COMPLETE`}
@@ -78,7 +78,7 @@ export default function NextGenCollectionHeader(props: Props) {
                   ? `PUBLIC PHASE LIVE`
                   : props.phase_times.public_status == Status.UPCOMING &&
                     available > 0
-                  ? `PUBLIC PHASE STARTING ${getPhaseDateDisplay(
+                  ? `PUBLIC PHASE ${getPhaseDateDisplay(
                       props.phase_times.public_start_time
                     )}`
                   : `PUBLIC PHASE COMPLETE`}

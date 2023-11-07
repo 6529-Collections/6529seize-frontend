@@ -57,9 +57,15 @@ export default function NextGenMintWidget(props: Props) {
   const [mintToAddress, setMintToAddress] = useState("");
 
   const [mintingForDelegator, setMintingForDelegator] = useState(false);
-  const [mintForAddress, setMintForAddress] = useState<string>(
-    props.delegators[0]
-  );
+  const [mintForAddress, setMintForAddress] = useState<string>();
+  useEffect(() => {
+    if (props.delegators.length > 0) {
+      setMintForAddress(props.delegators[0]);
+    } else {
+      setMintForAddress(undefined);
+    }
+  }, [props.delegators]);
+
   const [mintCount, setMintCount] = useState<number>(1);
   const [salt, setSalt] = useState<number>(0);
   const [isMinting, setIsMinting] = useState(false);
@@ -71,10 +77,6 @@ export default function NextGenMintWidget(props: Props) {
   }, [mintingForDelegator]);
 
   useEffect(() => {
-    props.mintForAddress(mintForAddress);
-  }, [mintForAddress]);
-
-  useEffect(() => {
     if (
       props.phase_times &&
       account.address &&
@@ -82,7 +84,7 @@ export default function NextGenMintWidget(props: Props) {
     ) {
       const wallet = mintingForDelegator ? mintForAddress : account.address;
       if (wallet) {
-        const url = `${process.env.API_ENDPOINT}/api/nextgen/${props.phase_times.merkle_root}/${wallet}`;
+        const url = `${process.env.API_ENDPOINT}/api/nextgen/proofs/${props.phase_times.merkle_root}/${wallet}`;
         fetchUrl(url).then((response: ProofResponse) => {
           setProofResponse(response);
         });
@@ -325,6 +327,9 @@ export default function NextGenMintWidget(props: Props) {
                     onChange={(e: any) =>
                       setMintForAddress(e.currentTarget.value)
                     }>
+                    <option value="" disabled>
+                      Select Delegator
+                    </option>
                     {props.delegators.map((delegator) => (
                       <NextGenMintDelegatorOption
                         address={delegator}

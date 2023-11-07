@@ -2,7 +2,10 @@ import styles from "../../NextGen.module.scss";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Tippy from "@tippyjs/react";
 import { Container, Row, Col, Form, Button } from "react-bootstrap";
-import { createArray, getNetworkName } from "../../../../../helpers/Helpers";
+import {
+  areEqualAddresses,
+  getNetworkName,
+} from "../../../../../helpers/Helpers";
 import NextGenContractWriteStatus from "../../../NextGenContractWriteStatus";
 import {
   NEXTGEN_CHAIN_ID,
@@ -11,27 +14,22 @@ import {
 } from "../../../nextgen_contracts";
 import {
   AdditionalData,
+  CollectionWithMerkle,
   PhaseTimes,
   ProofResponse,
+  ProofResponseBurn,
   Status,
   TokensPerAddress,
 } from "../../../nextgen_entities";
-import {
-  useAccount,
-  useChainId,
-  useContractWrite,
-  useEnsAddress,
-  useEnsName,
-} from "wagmi";
+import { useAccount, useChainId, useContractWrite } from "wagmi";
 import { useState, useEffect } from "react";
-import { NULL_ADDRESS } from "../../../../../constants";
 import { fetchUrl } from "../../../../../services/6529api";
 import { useWeb3Modal } from "@web3modal/react";
 import { NextGenMintDelegatorOption } from "./NextGenMintDelegatorOption";
 import { getNftsForContractAndOwner } from "../../../../../services/alchemy-api";
 
 interface Props {
-  collection: number;
+  collection: CollectionWithMerkle;
   phase_times: PhaseTimes;
   additional_data: AdditionalData;
   available_supply: number;
@@ -42,7 +40,7 @@ interface Props {
   mintForAddress: (mintForAddress: string) => void;
 }
 
-export default function NextGenBurnMintWidget(props: Props) {
+export default function NextGenMintBurnWidget(props: Props) {
   const account = useAccount();
   const chainId = useChainId();
   const web3Modal = useWeb3Modal();
@@ -56,7 +54,7 @@ export default function NextGenBurnMintWidget(props: Props) {
     setAvailable(a);
   }, [props.additional_data]);
 
-  const [proofResponse, setProofResponse] = useState<ProofResponse>();
+  const [proofResponse, setProofResponse] = useState<ProofResponseBurn>();
 
   const [mintForAddress, setMintForAddress] = useState<string>();
   useEffect(() => {
@@ -80,7 +78,28 @@ export default function NextGenBurnMintWidget(props: Props) {
   const [salt, setSalt] = useState<number>(0);
   const [isMinting, setIsMinting] = useState(false);
 
+  const [fetchingProofs, setFetchingProofs] = useState(false);
+
   const [errors, setErrors] = useState<string[]>([]);
+
+  function filterTokensOwnedForBurnAddress(r: any[]) {
+    if (props.collection.max_token_index > 0) {
+      r = r.filter((t) => {
+        return (
+          t.tokenId >= props.collection.min_token_index &&
+          t.tokenId <= props.collection.max_token_index
+        );
+      });
+    }
+    if (
+      areEqualAddresses(props.collection.burn_collection, NEXTGEN_CORE.contract)
+    ) {
+      r = r.filter((t) =>
+        t.tokenId.toString().startsWith(props.collection.burn_collection_id)
+      );
+    }
+    return r;
+  }
 
   useEffect(() => {
     const burnAddress = mintingForDelegator ? mintForAddress : account.address;
@@ -91,7 +110,8 @@ export default function NextGenBurnMintWidget(props: Props) {
         burnAddress
       ).then((r) => {
         setTokensOwnedForBurnAddressLoaded(true);
-        setTokensOwnedForBurnAddress(r);
+        const filteredTokens = filterTokensOwnedForBurnAddress(r);
+        setTokensOwnedForBurnAddress(filteredTokens);
       });
     }
   }, [account.address, mintingForDelegator, mintForAddress]);
@@ -107,20 +127,21 @@ export default function NextGenBurnMintWidget(props: Props) {
   }, [mintingForDelegator]);
 
   useEffect(() => {
-    if (
-      props.phase_times &&
-      account.address &&
-      props.phase_times.allowlist_end_time > 0
-    ) {
-      // const wallet = mintingForDelegator ? mintForAddress : account.address;
-      // if (wallet) {
-      //   const url = `${process.env.API_ENDPOINT}/api/nextgen/${props.phase_times.merkle_root}/${wallet}`;
-      //   fetchUrl(url).then((response: ProofResponse) => {
-      //     setProofResponse(response);
-      //   });
-      // }
+    if (mintForAddress) {
+      props.mintForAddress(mintForAddress);
     }
-  }, [props.phase_times, account.address, mintingForDelegator]);
+  }, [mintForAddress]);
+
+  useEffect(() => {
+    if (tokenId) {
+      setFetchingProofs(true);
+      const url = `${process.env.API_ENDPOINT}/api/nextgen/burn_proofs/${props.phase_times.merkle_root}/${tokenId}`;
+      fetchUrl(url).then((response: ProofResponse) => {
+        setProofResponse(response);
+        setFetchingProofs(false);
+      });
+    }
+  }, [tokenId]);
 
   const mintWrite = useContractWrite({
     address: NEXTGEN_MINTER.contract as `0x${string}`,
@@ -142,8 +163,8 @@ export default function NextGenBurnMintWidget(props: Props) {
     if (
       props.phase_times &&
       proofResponse &&
-      props.phase_times.al_status == Status.LIVE &&
-      0 >= proofResponse.spots
+      proofResponse.proof.length > 0 &&
+      props.phase_times.al_status == Status.LIVE
     ) {
       e.push("Not in Allowlist");
     }
@@ -174,14 +195,13 @@ export default function NextGenBurnMintWidget(props: Props) {
     return (
       !props.phase_times ||
       !props.additional_data ||
-      !props.phase_times ||
       !props.mint_counts ||
       (props.phase_times.al_status == Status.LIVE && !proofResponse) ||
       (props.phase_times.al_status != Status.LIVE &&
         props.phase_times.public_status != Status.LIVE) ||
       (props.phase_times.al_status == Status.LIVE &&
         proofResponse &&
-        0 >= proofResponse.spots - props.mint_counts.allowlist) ||
+        proofResponse.proof.length === 0) ||
       (props.phase_times.public_status == Status.LIVE &&
         0 >= props.additional_data.max_purchases - props.mint_counts.public) ||
       0 >= props.available_supply ||
@@ -196,7 +216,7 @@ export default function NextGenBurnMintWidget(props: Props) {
           burnCollection,
           burnCollectionId,
           tokenId,
-          props.collection,
+          props.collection.collection_id,
           proofResponse ? proofResponse.info : "",
           props.phase_times &&
           proofResponse &&
@@ -306,10 +326,11 @@ export default function NextGenBurnMintWidget(props: Props) {
                     value={mintForAddress}
                     onChange={(e: any) => {
                       setMintForAddress(e.currentTarget.value);
-                    }}>
-                    {/* <option value="" selected disabled>
+                    }}
+                    defaultValue={""}>
+                    <option value="" disabled>
                       Select Delegator
-                    </option> */}
+                    </option>
                     {props.delegators.map((delegator) => (
                       <NextGenMintDelegatorOption
                         address={delegator}
@@ -322,15 +343,21 @@ export default function NextGenBurnMintWidget(props: Props) {
             )}
             <Form.Group as={Row} className="pb-2">
               <Form.Label column sm={12} className="d-flex align-items-center">
-                Select token from BURN collection
+                Select token from Burn collection <br />
+                {props.collection.burn_collection}
+                {props.collection.burn_collection_id &&
+                  ` | Collection ${props.collection.burn_collection_id} `}
+                {props.collection.max_token_index > 0 &&
+                  ` | #${props.collection.min_token_index} - #${props.collection.max_token_index}`}
               </Form.Label>
               <Col sm={12}>
                 <Form.Select
                   disabled={!tokensOwnedForBurnAddressLoaded}
                   className={styles.mintSelect}
                   value={tokenId}
-                  onChange={(e: any) => setTokenId(e.currentTarget.value)}>
-                  <option value="" selected disabled>
+                  onChange={(e: any) => setTokenId(e.currentTarget.value)}
+                  defaultValue={""}>
+                  <option value="" disabled>
                     Select Token to burn -{" "}
                     {tokensOwnedForBurnAddressLoaded
                       ? `${tokensOwnedForBurnAddress.length} available`
@@ -357,7 +384,14 @@ export default function NextGenBurnMintWidget(props: Props) {
                     ? chainId === NEXTGEN_CHAIN_ID
                       ? isMinting
                         ? `Processing...`
-                        : `Mint Now`
+                        : `Mint Now${
+                            !fetchingProofs &&
+                            tokenId &&
+                            proofResponse &&
+                            proofResponse.proof.length === 0
+                              ? ` - no proofs found`
+                              : ""
+                          }`
                       : `Switch to ${getNetworkName(NEXTGEN_CHAIN_ID)}`
                     : `Connect Wallet`}
                   {isMinting && (
@@ -394,18 +428,6 @@ export default function NextGenBurnMintWidget(props: Props) {
               hash={mintWrite.data?.hash}
               error={mintWrite.error}
             />
-            {props.phase_times &&
-              proofResponse &&
-              props.mint_counts &&
-              proofResponse.spots > 0 &&
-              0 >= proofResponse.spots - props.mint_counts.allowlist && (
-                <Form.Group as={Row} className={`pt-3`}>
-                  <Col sm={12} className="d-flex align-items-center">
-                    Max allowlist spots reached (x
-                    {props.mint_counts.allowlist})
-                  </Col>
-                </Form.Group>
-              )}
             {props.phase_times &&
               proofResponse &&
               props.mint_counts &&

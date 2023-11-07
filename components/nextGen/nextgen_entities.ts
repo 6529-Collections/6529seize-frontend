@@ -58,13 +58,22 @@ export interface CollectionWithMerkle {
   merkle_tree: any;
   al_type: AllowlistType;
   phase: string;
+  burn_collection: string;
+  burn_collection_id: number;
+  min_token_index: number;
+  max_token_index: number;
+  burn_address: string;
+  status: boolean;
 }
 
-export interface ProofResponse {
+export interface ProofResponseBurn {
   keccak: string;
-  spots: number;
   info: any;
   proof: string[];
+}
+
+export interface ProofResponse extends ProofResponseBurn {
+  spots: number;
 }
 
 export interface TokenURI {

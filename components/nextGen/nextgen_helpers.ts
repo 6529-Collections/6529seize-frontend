@@ -269,6 +269,9 @@ export const getPhaseDateDisplay = (numberDate: number) => {
   //   return "Never";
   // }
   const date = new Date(numberDate);
+  if (isNaN(date.getTime())) {
+    return "UNAVAILABLE";
+  }
   const formattedDate = date.toLocaleString("default", {
     day: "numeric",
     month: "short",
@@ -276,7 +279,7 @@ export const getPhaseDateDisplay = (numberDate: number) => {
     hour: "2-digit",
     minute: "2-digit",
   });
-  return formattedDate.toUpperCase();
+  return `STARTING ${formattedDate.toUpperCase()}`;
 };
 
 export function isMintingOpen(startTime: number, endTime: number) {

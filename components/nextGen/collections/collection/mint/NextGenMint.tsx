@@ -29,7 +29,7 @@ import { fetchUrl } from "../../../../../services/6529api";
 import { NextGenTokenImageContent } from "../../NextGenTokenImage";
 import { retrieveCollectionCosts } from "../../../nextgen_helpers";
 import NextGenMintWidget from "./NextGenMintWidget";
-import NextGenBurnMintWidget from "./NextGenBurnMintWidget";
+import NextGenMintBurnWidget from "./NextGenMintBurnWidget";
 
 interface Props {
   collection: number;
@@ -260,8 +260,8 @@ export default function NextGenMint(props: Props) {
       );
     } else if (type == AllowlistType.EXTERNAL_BURN) {
       return (
-        <NextGenBurnMintWidget
-          collection={props.collection}
+        <NextGenMintBurnWidget
+          collection={collection!}
           phase_times={props.phase_times}
           additional_data={props.additional_data}
           available_supply={availableSupply}
