@@ -6,8 +6,8 @@ import { AuthContext, IProfileWithMeta } from "../../auth/Auth";
 import UserSettingsGoToUser from "./UserSettingsGoToUser";
 import { commonApiFetch } from "../../../services/api/common-api";
 import {
-  IProfile,
   IProfileAndConsolidations,
+  PROFILE_CLASSIFICATION,
 } from "../../../entities/IProfile";
 import UserSettingsPage from "./UserSettingsPage";
 

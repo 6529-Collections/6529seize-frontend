@@ -17,7 +17,6 @@ export interface IProfileAndConsolidations {
 }
 
 export enum PROFILE_CLASSIFICATION {
-  NOT_SET = "NOT_SET",
   GOVERNMENT_NAME = "GOVERNMENT_NAME",
   PSEUDONYM = "PSEUDONYM",
   ORGANIZATION = "ORGANIZATION",
@@ -30,7 +29,6 @@ export const CLASSIFICATIONS: Record<
   PROFILE_CLASSIFICATION,
   { title: string }
 > = {
-  [PROFILE_CLASSIFICATION.NOT_SET]: { title: "Not Set" },
   [PROFILE_CLASSIFICATION.GOVERNMENT_NAME]: { title: "Government Name" },
   [PROFILE_CLASSIFICATION.PSEUDONYM]: { title: "Pseudonym" },
   [PROFILE_CLASSIFICATION.ORGANIZATION]: { title: "Organization" },
@@ -45,6 +43,7 @@ export interface IProfile {
   readonly primary_wallet: string;
   readonly created_at: Date;
   readonly created_by_wallet: string;
+  readonly classification: PROFILE_CLASSIFICATION | null;
   readonly updated_at?: Date | undefined;
   readonly updated_by_wallet?: string | undefined;
   readonly pfp_url?: string | undefined;

@@ -18,6 +18,7 @@ import UserSettingsClassification from "./UserSettingsClassification";
 interface ApiCreateOrUpdateProfileRequest {
   readonly handle: string;
   readonly primary_wallet: string;
+  readonly classification: PROFILE_CLASSIFICATION;
   pfp_url?: string | undefined;
   banner_1?: string | undefined;
   banner_2?: string | undefined;
@@ -44,7 +45,7 @@ export default function UserSettingsPage({
   };
 
   const [classification, setClassification] = useState<PROFILE_CLASSIFICATION>(
-    PROFILE_CLASSIFICATION.PSEUDONYM
+    user.profile?.classification ?? PROFILE_CLASSIFICATION.GOVERNMENT_NAME
   );
 
   const [primaryWallet, setPrimaryWallet] = useState<string>(
@@ -75,6 +76,7 @@ export default function UserSettingsPage({
     const body: ApiCreateOrUpdateProfileRequest = {
       handle: userName,
       primary_wallet: primaryWallet,
+      classification,
     };
 
     if (bgColor1) {
@@ -126,11 +128,20 @@ export default function UserSettingsPage({
     setHaveChanges(
       userName?.toLowerCase() !== user.profile?.handle.toLowerCase() ||
         primaryWallet !== user.profile?.primary_wallet ||
+        classification !== user.profile?.classification ||
         bgColor1 !== user.profile?.banner_1 ||
         bgColor2 !== user.profile?.banner_2 ||
         website !== (user.profile?.website ?? "")
     );
-  }, [user, userName, primaryWallet, bgColor1, bgColor2, website]);
+  }, [
+    user,
+    userName,
+    primaryWallet,
+    bgColor1,
+    bgColor2,
+    website,
+    classification,
+  ]);
 
   return (
     <div className="tw-pt-10 tw-space-y-6 tw-divide-y tw-divide-x-0 tw-divide-solid tw-divide-neutral-700">

@@ -52,13 +52,10 @@ export default function UserPageHeader({
     );
   }, [account, profile]);
 
-  const defaultBackground = "#1F2126";
   return (
     <div className="tailwind-scope">
       <section className="tw-pb-16">
-        <div
-          className="tw-h-36 tw-bg-neutral-800"
-        ></div>
+        <div className="tw-h-36 tw-bg-neutral-800"></div>
         <div className="tw-relative tw-px-6 min-[1100px]:tw-max-w-[960px] min-[1200px]:tw-max-w-[1150px] min-[1300px]:tw-max-w-[1250px] min-[1400px]:tw-max-w-[1350px] min-[1500px]:tw-max-w-[1450px] min-[1600px]:tw-max-w-[1550px] min-[1800px]:tw-max-w-[1750px] min-[2000px]:tw-max-w-[1950px] tw-mx-auto">
           <div className="tw-w-full tw-flex tw-justify-between">
             <div className="-tw-mt-24">

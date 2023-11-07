@@ -1,4 +1,7 @@
-import { IProfileAndConsolidations } from "../../../entities/IProfile";
+import {
+  CLASSIFICATIONS,
+  IProfileAndConsolidations,
+} from "../../../entities/IProfile";
 import { ConsolidatedTDHMetrics } from "../../../entities/ITDH";
 
 export default function UserPageHeaderName({
@@ -49,9 +52,11 @@ export default function UserPageHeaderName({
           </svg>
         )}
       </div>
-      <div className="tw-block tw-text-neutral-400 tw-font-normal tw-text-[13px] tw-leading-3">
-        Pseudonym
-      </div>
+      {profile.profile?.classification && (
+        <div className="tw-block tw-text-neutral-400 tw-font-normal tw-text-[13px] tw-leading-3">
+          {CLASSIFICATIONS[profile.profile.classification].title}
+        </div>
+      )}
     </div>
   );
 }
