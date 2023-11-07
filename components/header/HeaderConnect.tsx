@@ -9,11 +9,7 @@ import { NavDropdown } from "react-bootstrap";
 import Cookies from "js-cookie";
 import { VIEW_MODE_COOKIE } from "../../constants";
 import Image from "next/image";
-
-export enum WalletView {
-  CONSOLIDATION = "Consolidation",
-  WALLET = "Wallet",
-}
+import { WalletView } from "../../enums";
 
 interface Props {
   consolidations: string[];
