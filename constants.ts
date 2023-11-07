@@ -32,7 +32,7 @@ export const DELEGATION_ALL_ADDRESS =
   "0x8888888888888888888888888888888888888888";
 
 export const API_AUTH_COOKIE = "x-6529-auth";
-export const VIEW_MODE_COOKIE = "view-mode";
+export const VIEW_MODE_COOKIE = "seize-view-mode";
 export const WALLET_AUTH_COOKIE = "wallet-auth";
 export const NEVER_DATE = 64060588800;
 
