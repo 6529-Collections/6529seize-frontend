@@ -1,17 +1,18 @@
-import { AnimatePresence, motion, useAnimate } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
+import {
+  CLASSIFICATIONS,
+  PROFILE_CLASSIFICATION,
+} from "../../../entities/IProfile";
+import { AnimatePresence, motion, useAnimate } from "framer-motion";
 import { useClickAway, useKeyPressEvent } from "react-use";
-import { IProfileMetaWallet } from "../../auth/Auth";
-import UserSettingsPrimaryWalletItem from "./UserSettingsPrimaryWalletItem";
+import UserSettingsClassificationItem from "./UserSettingsClassificationItem";
 
-export default function UserSettingsPrimaryWallet({
-  consolidations,
+export default function UserSettingsClassification({
   selected,
   onSelect,
 }: {
-  consolidations: IProfileMetaWallet[];
-  selected: string;
-  onSelect: (wallet: string) => void;
+  selected: PROFILE_CLASSIFICATION;
+  onSelect: (selected: PROFILE_CLASSIFICATION) => void;
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const [iconScope, animateIcon] = useAnimate();
@@ -27,23 +28,22 @@ export default function UserSettingsPrimaryWallet({
   useClickAway(listRef, () => setIsOpen(false));
   useKeyPressEvent("Escape", () => setIsOpen(false));
 
-  const [title, setTitle] = useState<string>("Select wallet");
+  const [title, setTitle] = useState<string>(CLASSIFICATIONS[selected].title);
   useEffect(() => {
-    setTitle(
-      consolidations.find((w) => w.wallet.address === selected)?.displayName ??
-        "Select wallet"
-    );
+    setTitle(CLASSIFICATIONS[selected].title);
   }, [selected]);
 
-  const selectWallet = (wallet: string) => {
-    onSelect(wallet);
+  const onClassification = (value: PROFILE_CLASSIFICATION) => {
+    onSelect(value);
     setIsOpen(false);
   };
+
+  const classifications = Object.values(PROFILE_CLASSIFICATION);
 
   return (
     <div className="tw-max-w-full tw-relative tw-mt-2" ref={listRef}>
       <label className="tw-block tw-text-sm tw-font-normal tw-leading-5 tw-text-neutral-350">
-        Primary wallet
+        Profile classification
       </label>
       <div className="tw-mt-2 tw-relative">
         <button
@@ -75,21 +75,21 @@ export default function UserSettingsPrimaryWallet({
       <AnimatePresence mode="wait" initial={false}>
         {isOpen && (
           <motion.div
-            className="tw-origin-top-right tw-absolute tw-z-10 tw-right-0 tw-mt-1 tw-w-full tw-rounded-lg tw-shadow-xl tw-bg-neutral-800 tw-ring-1 tw-ring-black tw-ring-opacity-5"
+            className="tw-origin-top-right tw-z-10 tw-absolute tw-right-0 tw-mt-1 tw-w-full tw-rounded-lg tw-shadow-xl tw-bg-neutral-800 tw-ring-1 tw-ring-black tw-ring-opacity-5"
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
             transition={{ duration: 0.2 }}
           >
             <div className="tw-absolute tw-z-10 tw-mt-1 tw-overflow-hidden tw-max-w-full tw-w-full tw-rounded-md tw-bg-neutral-700 tw-shadow-2xl tw-ring-1 tw-ring-white/10">
-              <div className="tw-py-1 tw-flow-root tw-max-h-[calc(240px+_-5vh)] tw-overflow-x-hidden tw-overflow-y-auto">
+              <div className="tw-py-1 tw-flow-root tw-max-h-[calc(280px+_-5vh)] tw-overflow-x-hidden tw-overflow-y-auto">
                 <ul className="tw-flex tw-flex-col tw-px-2 tw-mx-0 tw-mb-0 tw-list-none">
-                  {consolidations.map((wallet) => (
-                    <UserSettingsPrimaryWalletItem
-                      key={wallet.wallet.address}
-                      wallet={wallet}
+                  {classifications.map((classification) => (
+                    <UserSettingsClassificationItem
+                      key={classification}
+                      classification={classification}
                       selected={selected}
-                      onSelect={selectWallet}
+                      onClassification={onClassification}
                     />
                   ))}
                 </ul>

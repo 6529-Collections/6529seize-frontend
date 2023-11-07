@@ -63,7 +63,7 @@ export default function DistributionPlanToolWrapper({
       <div className={`tw-bg-neutral-900 ${poppins.className}`}>
         <div
           id="allowlist-tool"
-          className="tw-overflow-y-auto tw-min-h-screen tw-relative"
+          className="tailwind-scope tw-overflow-y-auto tw-min-h-screen tw-relative"
         >
           {children}
         </div>

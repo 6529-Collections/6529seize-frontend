@@ -13,6 +13,7 @@ import { Row } from "react-bootstrap";
 import { UserCollectionSort } from "./UserPageCollection";
 import { SortDirection } from "../../../../entities/ISort";
 import { assertUnreachable } from "../../../../helpers/AllowlistToolHelpers";
+import UserPageDetailsNothingHere from "../UserPageDetailsNothingHere";
 
 export interface IUserNFT extends NFTLite {
   readonly nftTDH: number | null;
@@ -38,7 +39,7 @@ export default function UserPageCollectionNfts({
 }: {
   owned: Owner[];
   nfts: NFTLite[];
-  tdh?: ConsolidatedTDHMetrics | TDHMetrics;
+  tdh: ConsolidatedTDHMetrics | TDHMetrics | null;
   hideSeized: boolean;
   hideNonSeized: boolean;
   hideGradients: boolean;
@@ -59,7 +60,7 @@ export default function UserPageCollectionNfts({
     isGradients,
   }: {
     nft: NFTLite;
-    tdhs?: ConsolidatedTDHMetrics | TDHMetrics;
+    tdhs: ConsolidatedTDHMetrics | TDHMetrics | null;
     isMemes: boolean;
     isGradients: boolean;
   }): { tdh: number | null; rank: number | null } => {
@@ -72,15 +73,15 @@ export default function UserPageCollectionNfts({
 
     if (isMemes) {
       return {
-        tdh: tdhs.memes.find((m) => m.id === nft.id)?.tdh ?? null,
-        rank: tdhs.memes_ranks.find((g) => g.id === nft.id)?.rank ?? null,
+        tdh: tdhs.memes?.find((m) => m.id === nft.id)?.tdh ?? null,
+        rank: tdhs.memes_ranks?.find((g) => g.id === nft.id)?.rank ?? null,
       };
     }
 
     if (isGradients) {
       return {
-        tdh: tdhs.gradients.find((m) => m.id === nft.id)?.tdh ?? null,
-        rank: tdhs.gradients_ranks.find((g) => g.id === nft.id)?.rank ?? null,
+        tdh: tdhs.gradients?.find((m) => m.id === nft.id)?.tdh ?? null,
+        rank: tdhs.gradients_ranks?.find((g) => g.id === nft.id)?.rank ?? null,
       };
     }
 
@@ -199,12 +200,16 @@ export default function UserPageCollectionNfts({
 
   return (
     <Row className="pt-2">
-      {finalNfts.map((nft) => (
-        <UserPageCollectionNft
-          key={`user-page-collection-nft-${nft.contract}-${nft.id}`}
-          nft={nft}
-        />
-      ))}
+      {finalNfts.length ? (
+        finalNfts.map((nft) => (
+          <UserPageCollectionNft
+            key={`user-page-collection-nft-${nft.contract}-${nft.id}`}
+            nft={nft}
+          />
+        ))
+      ) : (
+        <UserPageDetailsNothingHere />
+      )}
     </Row>
   );
 }
