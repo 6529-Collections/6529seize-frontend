@@ -47,6 +47,19 @@ export interface TokensPerAddress {
   total: number;
 }
 
+export enum AllowlistType {
+  ALLOWLIST = "allowlist",
+  EXTERNAL_BURN = "external_burn",
+}
+
+export interface CollectionWithMerkle {
+  collection_id: number;
+  merkle_root: string;
+  merkle_tree: any;
+  al_type: AllowlistType;
+  phase: string;
+}
+
 export interface ProofResponse {
   keccak: string;
   spots: number;

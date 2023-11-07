@@ -265,9 +265,9 @@ export function retrieveCollectionCosts(
 }
 
 export const getPhaseDateDisplay = (numberDate: number) => {
-  if (numberDate >= NEVER_DATE * 1000) {
-    return "Never";
-  }
+  // if (numberDate >= NEVER_DATE * 1000) {
+  //   return "Never";
+  // }
   const date = new Date(numberDate);
   const formattedDate = date.toLocaleString("default", {
     day: "numeric",

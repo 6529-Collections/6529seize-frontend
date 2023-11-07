@@ -21,7 +21,7 @@ import {
 import Breadcrumb, { Crumb } from "../../../breadcrumb/Breadcrumb";
 import NextGenCollectionHeader from "./NextGenCollectionHeader";
 import NextGenCollectionArt from "./NextGenCollectionArt";
-import NextGenCollectionMint from "./NextGenCollectionMint";
+import NextGenMint from "./mint/NextGenMint";
 import router from "next/router";
 import {
   extractField,
@@ -391,7 +391,7 @@ export default function NextGenCollection(props: Props) {
                 {focus == Focus.MINT && (
                   <Row className="pt-3">
                     <Col>
-                      <NextGenCollectionMint
+                      <NextGenMint
                         collection={props.collection}
                         collection_preview={
                           tokenURIs.length > 0 ? tokenURIs[0] : undefined

@@ -24,13 +24,13 @@ export default function NextGen() {
             alt="nextgen"
           />
         </Col>
-        <Col xs={12}>
+        {/* <Col xs={12}>
           {collectionIndex
             ? ` [${collectionIndex} COLLECTION${
                 collectionIndex > 1 ? `S` : ``
               }]`
             : ``}
-        </Col>
+        </Col> */}
       </Row>
       <Row className="pt-4 pb-4">
         {collectionIndex &&

@@ -1,0 +1,539 @@
+import styles from "../../NextGen.module.scss";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import Tippy from "@tippyjs/react";
+import { Container, Row, Col, Form, Button } from "react-bootstrap";
+import { createArray, getNetworkName } from "../../../../../helpers/Helpers";
+import NextGenContractWriteStatus from "../../../NextGenContractWriteStatus";
+import { NEXTGEN_CHAIN_ID, NEXTGEN_MINTER } from "../../../nextgen_contracts";
+import {
+  AdditionalData,
+  PhaseTimes,
+  ProofResponse,
+  Status,
+  TokensPerAddress,
+} from "../../../nextgen_entities";
+import {
+  useAccount,
+  useChainId,
+  useContractWrite,
+  useEnsAddress,
+  useEnsName,
+} from "wagmi";
+import { useState, useEffect } from "react";
+import { NULL_ADDRESS } from "../../../../../constants";
+import { fetchUrl } from "../../../../../services/6529api";
+import { useWeb3Modal } from "@web3modal/react";
+import { NextGenMintDelegatorOption } from "./NextGenMintDelegatorOption";
+
+interface Props {
+  collection: number;
+  phase_times: PhaseTimes;
+  additional_data: AdditionalData;
+  available_supply: number;
+  mint_price: number;
+  mint_counts: TokensPerAddress;
+  delegators: string[];
+  mintingForDelegator: (mintingForDelegator: boolean) => void;
+  mintForAddress: (mintForAddress: string) => void;
+}
+
+export default function NextGenMintWidget(props: Props) {
+  const account = useAccount();
+  const chainId = useChainId();
+  const web3Modal = useWeb3Modal();
+
+  const [available, setAvailable] = useState<number>(0);
+
+  useEffect(() => {
+    const a =
+      props.additional_data.total_supply -
+      props.additional_data.circulation_supply;
+    setAvailable(a);
+  }, [props.additional_data]);
+
+  const [proofResponse, setProofResponse] = useState<ProofResponse>();
+
+  const [mintToInput, setMintToInput] = useState("");
+  const [mintToAddress, setMintToAddress] = useState("");
+
+  const [mintingForDelegator, setMintingForDelegator] = useState(false);
+  const [mintForAddress, setMintForAddress] = useState<string>(
+    props.delegators[0]
+  );
+  const [mintCount, setMintCount] = useState<number>(1);
+  const [salt, setSalt] = useState<number>(0);
+  const [isMinting, setIsMinting] = useState(false);
+
+  const [errors, setErrors] = useState<string[]>([]);
+
+  useEffect(() => {
+    props.mintingForDelegator(mintingForDelegator);
+  }, [mintingForDelegator]);
+
+  useEffect(() => {
+    props.mintForAddress(mintForAddress);
+  }, [mintForAddress]);
+
+  useEffect(() => {
+    if (
+      props.phase_times &&
+      account.address &&
+      props.phase_times.allowlist_end_time > 0
+    ) {
+      const wallet = mintingForDelegator ? mintForAddress : account.address;
+      if (wallet) {
+        const url = `${process.env.API_ENDPOINT}/api/nextgen/${props.phase_times.merkle_root}/${wallet}`;
+        fetchUrl(url).then((response: ProofResponse) => {
+          setProofResponse(response);
+        });
+      }
+    }
+  }, [props.phase_times, account.address, mintingForDelegator]);
+
+  const mintWrite = useContractWrite({
+    address: NEXTGEN_MINTER.contract as `0x${string}`,
+    abi: NEXTGEN_MINTER.abi,
+    chainId: NEXTGEN_CHAIN_ID,
+    value: mintCount
+      ? BigInt(props.mint_price ? props.mint_price * mintCount : 0)
+      : BigInt(0),
+    functionName: "mint",
+    onError() {
+      setIsMinting(false);
+    },
+  });
+
+  useEffect(() => {
+    setIsMinting(false);
+  }, [mintWrite.isSuccess || mintWrite.isError]);
+
+  function validate() {
+    let e: string[] = [];
+    if (
+      props.phase_times &&
+      proofResponse &&
+      props.phase_times.al_status == Status.LIVE &&
+      0 >= proofResponse.spots
+    ) {
+      e.push("Not in Allowlist");
+    }
+    return e;
+  }
+
+  const handleMintClick = () => {
+    if (account.isConnected) {
+      if (chainId === NEXTGEN_CHAIN_ID) {
+        const e = validate();
+        if (e.length > 0) {
+          setErrors(e);
+        } else {
+          setIsMinting(true);
+        }
+      } else {
+        web3Modal.open({ route: "SelectNetwork" });
+      }
+    } else {
+      web3Modal.open();
+    }
+  };
+
+  function disableMint() {
+    if (!account.isConnected || chainId !== NEXTGEN_CHAIN_ID) {
+      return false;
+    }
+    return (
+      !props.phase_times ||
+      !props.additional_data ||
+      !props.phase_times ||
+      !props.mint_counts ||
+      (props.phase_times.al_status == Status.LIVE && !proofResponse) ||
+      (props.phase_times.al_status != Status.LIVE &&
+        props.phase_times.public_status != Status.LIVE) ||
+      (props.phase_times.al_status == Status.LIVE &&
+        proofResponse &&
+        0 >= proofResponse.spots - props.mint_counts.allowlist) ||
+      (props.phase_times.public_status == Status.LIVE &&
+        0 >= props.additional_data.max_purchases - props.mint_counts.public) ||
+      0 >= props.available_supply ||
+      isMinting
+    );
+  }
+
+  useEffect(() => {
+    if (isMinting) {
+      mintWrite.write({
+        args: [
+          props.collection,
+          mintCount,
+          props.phase_times &&
+          proofResponse &&
+          proofResponse.spots > 0 &&
+          props.phase_times.al_status == Status.LIVE
+            ? proofResponse.spots
+            : 0,
+          proofResponse ? proofResponse.info : "",
+          mintToAddress,
+          props.phase_times &&
+          proofResponse &&
+          props.phase_times.al_status == Status.LIVE
+            ? proofResponse.proof
+            : [],
+          mintingForDelegator ? mintForAddress : NULL_ADDRESS,
+          salt,
+        ],
+      });
+    }
+  }, [isMinting]);
+
+  useEffect(() => {
+    setProofResponse(undefined);
+    if (account.address) {
+      setMintToAddress(account.address);
+      setMintToInput(account.address);
+    } else {
+      setMintToInput("");
+      setMintToAddress("");
+    }
+  }, [account.address]);
+
+  const mintToAddressEns = useEnsName({
+    address:
+      mintToInput && mintToInput.startsWith("0x")
+        ? (mintToInput as `0x${string}`)
+        : undefined,
+    chainId: 1,
+  });
+
+  const delegatorsEns = useEnsName({
+    address:
+      mintToInput && mintToInput.startsWith("0x")
+        ? (mintToInput as `0x${string}`)
+        : undefined,
+    chainId: 1,
+  });
+
+  useEffect(() => {
+    if (mintToAddressEns.data) {
+      setMintToAddress(mintToInput);
+      setMintToInput(`${mintToAddressEns.data} - ${mintToInput}`);
+    }
+  }, [mintToAddressEns.data]);
+
+  const mintToAddressFromEns = useEnsAddress({
+    name: mintToInput && mintToInput.endsWith(".eth") ? mintToInput : undefined,
+    chainId: 1,
+  });
+
+  useEffect(() => {
+    if (mintToAddressFromEns.data) {
+      setMintToAddress(mintToAddressFromEns.data);
+      setMintToInput(`${mintToInput} - ${mintToAddressFromEns.data}`);
+    }
+  }, [mintToAddressFromEns.data]);
+
+  return (
+    <Container className="no-padding">
+      <Row>
+        <Col>
+          <span className="d-inline-flex align-items-center">
+            <b>
+              {props.additional_data.circulation_supply} /{" "}
+              {props.additional_data.total_supply} minted
+              {available > 0 && ` | ${available} remaining`}
+            </b>
+          </span>
+          <Form
+            onChange={() => {
+              setErrors([]);
+              setIsMinting(false);
+            }}>
+            <Form.Group as={Row} className="pb-2">
+              <Form.Label column sm={12} className="d-flex align-items-center">
+                Minting For
+              </Form.Label>
+              <Col
+                sm={12}
+                className="d-flex align-items-center gap-3 flex-wrap">
+                <span className="d-flex align-items-center">
+                  <Form.Check
+                    checked={!mintingForDelegator}
+                    className={styles.mintingForRadio}
+                    type="radio"
+                    label="Connected Wallet"
+                    name="expiryRadio"
+                    disabled={!account.isConnected}
+                    onChange={() => {
+                      setMintingForDelegator(false);
+                    }}
+                  />
+                  <Tippy
+                    content={`Mint for your connected wallet ${account.address}`}
+                    placement={"top"}
+                    theme={"light"}>
+                    <FontAwesomeIcon
+                      className={styles.infoIcon}
+                      icon="info-circle"></FontAwesomeIcon>
+                  </Tippy>
+                </span>
+                <span className="d-flex align-items-center">
+                  <Form.Check
+                    checked={mintingForDelegator}
+                    className={styles.mintingForRadio}
+                    type="radio"
+                    label="Delegator"
+                    name="expiryRadio"
+                    disabled={props.delegators.length === 0}
+                    onChange={() => {
+                      setMintingForDelegator(true);
+                    }}
+                  />
+                  <Tippy
+                    content={`Mint for an address that has delegated to you${
+                      props.delegators.length === 0
+                        ? ` - you currently have no props.delegators`
+                        : ``
+                    }`}
+                    placement={"top"}
+                    theme={"light"}>
+                    <FontAwesomeIcon
+                      className={styles.infoIcon}
+                      icon="info-circle"></FontAwesomeIcon>
+                  </Tippy>
+                </span>
+              </Col>
+            </Form.Group>
+            {mintingForDelegator && (
+              <Form.Group as={Row} className="pb-2">
+                <Form.Label
+                  column
+                  sm={12}
+                  className="d-flex align-items-center">
+                  Delegator
+                  <Tippy
+                    content={`The address you are minting for`}
+                    placement={"top"}
+                    theme={"light"}>
+                    <FontAwesomeIcon
+                      className={styles.infoIcon}
+                      icon="info-circle"></FontAwesomeIcon>
+                  </Tippy>
+                </Form.Label>
+                <Col sm={12}>
+                  <Form.Select
+                    className={styles.mintSelect}
+                    value={mintForAddress}
+                    onChange={(e: any) =>
+                      setMintForAddress(e.currentTarget.value)
+                    }>
+                    {props.delegators.map((delegator) => (
+                      <NextGenMintDelegatorOption
+                        address={delegator}
+                        key={`delegator-${delegator}`}
+                      />
+                    ))}
+                  </Form.Select>
+                </Col>
+              </Form.Group>
+            )}
+            <Form.Group as={Row} className="pb-2">
+              <Form.Label column sm={12} className="d-flex align-items-center">
+                Mint To
+                <Tippy
+                  content={`Address to receive the minted tokens`}
+                  placement={"top"}
+                  theme={"light"}>
+                  <FontAwesomeIcon
+                    className={styles.infoIcon}
+                    icon="info-circle"></FontAwesomeIcon>
+                </Tippy>
+              </Form.Label>
+              <Col sm={12}>
+                <Form.Control
+                  className={`${styles.formInput} ${styles.formInputDisabled}`}
+                  type="text"
+                  placeholder="0x..."
+                  disabled={!account.isConnected}
+                  value={mintToInput}
+                  onChange={(e) => {
+                    setMintToInput(e.target.value);
+                    setMintToAddress(e.target.value);
+                  }}
+                />
+              </Col>
+            </Form.Group>
+            <Form.Group as={Row} className="pt-2">
+              <Form.Label column sm={12} className="d-flex align-items-center">
+                Wallet Mints:&nbsp;
+                <b>
+                  {proofResponse && proofResponse.spots > 0
+                    ? props.phase_times.al_status == Status.LIVE &&
+                      (proofResponse
+                        ? `${props.mint_counts.allowlist} / ${
+                            proofResponse.spots
+                          }${
+                            proofResponse.spots > props.mint_counts.allowlist
+                              ? ` (${
+                                  proofResponse.spots -
+                                  props.mint_counts.allowlist
+                                } remaining)`
+                              : ""
+                          }`
+                        : `-`)
+                    : `You don't have any spots in the allowlist`}
+                  {props.phase_times.public_status == Status.LIVE &&
+                    (proofResponse
+                      ? `${props.mint_counts.public} / ${
+                          props.additional_data.max_purchases
+                        }${
+                          props.additional_data.max_purchases >
+                          props.mint_counts.public
+                            ? ` (${
+                                props.additional_data.max_purchases -
+                                props.mint_counts.public
+                              } remaining)`
+                            : ""
+                        }`
+                      : `-`)}
+                  {props.phase_times.public_status == Status.LIVE &&
+                    `${
+                      props.additional_data.max_purchases -
+                      props.mint_counts.public
+                    }`}
+                </b>
+              </Form.Label>
+            </Form.Group>
+            <Form.Group as={Row} className="pb-2">
+              <Form.Label column sm={12} className="d-flex align-items-center">
+                Mint Count
+                <Tippy
+                  content={`How many tokens to mint`}
+                  placement={"top"}
+                  theme={"light"}>
+                  <FontAwesomeIcon
+                    className={styles.infoIcon}
+                    icon="info-circle"></FontAwesomeIcon>
+                </Tippy>
+              </Form.Label>
+              <Col sm={12}>
+                <Form.Select
+                  className={styles.mintSelect}
+                  value={mintCount}
+                  disabled={
+                    !account.isConnected ||
+                    (proofResponse && proofResponse.spots <= 0)
+                  }
+                  onChange={(e: any) =>
+                    setMintCount(parseInt(e.currentTarget.value))
+                  }>
+                  {props.phase_times && props.mint_counts ? (
+                    props.phase_times.al_status == Status.LIVE &&
+                    proofResponse &&
+                    proofResponse.spots > 0 ? (
+                      createArray(
+                        1,
+                        proofResponse.spots - props.mint_counts.allowlist
+                      ).map((i) => (
+                        <option
+                          selected
+                          key={`allowlist-mint-count-${i}`}
+                          value={i}>
+                          {i > 0 ? i : `n/a`}
+                        </option>
+                      ))
+                    ) : props.phase_times.public_status == Status.LIVE ? (
+                      createArray(
+                        1,
+                        props.additional_data.max_purchases -
+                          props.mint_counts.public
+                      ).map((i) => (
+                        <option key={`public-mint-count-${i}`} value={i}>
+                          {i > 0 ? i : `n/a`}
+                        </option>
+                      ))
+                    ) : (
+                      <option value={0}>n/a</option>
+                    )
+                  ) : (
+                    <option value={0}>n/a</option>
+                  )}
+                </Form.Select>
+              </Col>
+            </Form.Group>
+            <Form.Group as={Row} className="pt-4 mb-3">
+              <Col sm={12}>
+                <Button
+                  className={styles.mintBtn}
+                  disabled={disableMint()}
+                  onClick={handleMintClick}>
+                  {account.isConnected
+                    ? chainId === NEXTGEN_CHAIN_ID
+                      ? isMinting
+                        ? `Processing...`
+                        : `Mint Now`
+                      : `Switch to ${getNetworkName(NEXTGEN_CHAIN_ID)}`
+                    : `Connect Wallet`}
+                  {isMinting && (
+                    <div className="d-inline">
+                      <div
+                        className={`spinner-border ${styles.loader}`}
+                        role="status">
+                        <span className="sr-only"></span>
+                      </div>
+                    </div>
+                  )}
+                </Button>
+              </Col>
+            </Form.Group>
+            {errors.length > 0 && (
+              <Form.Group as={Row} className={`pt-2 pb-2`}>
+                <Form.Label
+                  column
+                  sm={12}
+                  className="d-flex align-items-center">
+                  Errors
+                </Form.Label>
+                <Col sm={12} className="d-flex align-items-center">
+                  <ul className="mb-0">
+                    {errors.map((e, index) => (
+                      <li key={`mint-error-${index}`}>{e}</li>
+                    ))}
+                  </ul>
+                </Col>
+              </Form.Group>
+            )}
+            <NextGenContractWriteStatus
+              isLoading={mintWrite.isLoading}
+              hash={mintWrite.data?.hash}
+              error={mintWrite.error}
+            />
+            {props.phase_times &&
+              proofResponse &&
+              props.mint_counts &&
+              proofResponse.spots > 0 &&
+              0 >= proofResponse.spots - props.mint_counts.allowlist && (
+                <Form.Group as={Row} className={`pt-3`}>
+                  <Col sm={12} className="d-flex align-items-center">
+                    Max allowlist spots reached (x
+                    {props.mint_counts.allowlist})
+                  </Col>
+                </Form.Group>
+              )}
+            {props.phase_times &&
+              proofResponse &&
+              props.mint_counts &&
+              0 >=
+                props.additional_data.max_purchases -
+                  props.mint_counts.public && (
+                <Form.Group as={Row} className={`pt-3`}>
+                  <Col sm={12} className="d-flex align-items-center">
+                    Max public spots reached (x
+                    {props.mint_counts.public})
+                  </Col>
+                </Form.Group>
+              )}
+          </Form>
+        </Col>
+      </Row>
+    </Container>
+  );
+}

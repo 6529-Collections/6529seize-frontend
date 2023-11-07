@@ -65,6 +65,7 @@ export default function NextGenAdminSetPhases(props: Props) {
   const [publicStartTime, setPublicStartTime] = useState("");
   const [publicEndTime, setPublicEndTime] = useState("");
   const [merkleRoot, setMerkleRoot] = useState("");
+  const [phaseName, setPhaseName] = useState("");
   const [onChainMerkleRoot, setOnChainMerkleRoot] = useState("");
 
   const [type, setType] = useState(Type.ALLOWLIST);
@@ -203,6 +204,7 @@ export default function NextGenAdminSetPhases(props: Props) {
           signature: signMessage.data,
           uuid: uuid,
           al_type: type,
+          phase: phaseName,
         })
       );
 
@@ -299,6 +301,15 @@ export default function NextGenAdminSetPhases(props: Props) {
             </Form.Group>
             {type !== Type.NO_ALLOWLIST && (
               <>
+                <Form.Group className="mb-3">
+                  <Form.Label>Phase</Form.Label>
+                  <Form.Control
+                    type="string"
+                    placeholder="Phase 1"
+                    value={phaseName}
+                    onChange={(e: any) => setPhaseName(e.target.value)}
+                  />
+                </Form.Group>
                 <Form.Group className="mb-3">
                   <Form.Control
                     type="file"
