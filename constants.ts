@@ -13,7 +13,6 @@ export const SIX529_ER = "0xE359aB04cEC41AC8C62bc5016C10C749c7De5480";
 export const SIX529_COLLECTIONS = "0x4B76837F8D8Ad0A28590d06E53dCD44b6B7D4554";
 export const PIRAVLOS_TEST = "0x2ec4a2BCd4f33c7c9AaFaB7Cfa865ec15508bf62";
 
-
 export const DELEGATION_CONTRACT: {
   chain_id: number;
   contract: `0x${string}`;
@@ -32,7 +31,7 @@ export const DELEGATION_ALL_ADDRESS =
   "0x8888888888888888888888888888888888888888";
 
 export const API_AUTH_COOKIE = "x-6529-auth";
-export const VIEW_MODE_COOKIE = "view-mode";
+export const VIEW_MODE_COOKIE = "seize-view-mode";
 export const WALLET_AUTH_COOKIE = "wallet-auth";
 export const NEVER_DATE = 64060588800;
 
