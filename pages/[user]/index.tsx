@@ -122,7 +122,7 @@ export default function UserPageIndex(props: { pageProps: PageProps }) {
       <main className={styles.main}>
         <Header onSetWallets={(wallets) => setConnectedWallets(wallets)} />
         {router.isReady && pageProps.url && userProfile && (
-         <div className="tw-bg-neutral-950">
+         <div className="tw-bg-neutral-950 tw-min-h-screen">
            <UserPage
             connectedWallets={connectedWallets}
             user={pageProps.url}

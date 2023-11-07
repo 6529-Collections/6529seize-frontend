@@ -28,7 +28,7 @@ export default function UserPageHeaderName({
 
   const displayName = getDisplayName();
   return (
-    <div className="tw-mt-2">
+    <div className="tw-mt-4">
       <div className="tw-inline-flex tw-items-center tw-space-x-2">
         <p className="tw-mb-0 tw-text-3xl tw-font-semibold">{displayName}</p>
         {profile.profile && (

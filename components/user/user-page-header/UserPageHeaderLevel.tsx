@@ -439,7 +439,7 @@ export default function UserPageHeaderLevel({
   const classes = getClasses();
 
   return (
-    <div className="tw-mt-4">
+    <div className="tw-mt-3">
       <span
         className={`tw-inline-flex tw-items-center tw-rounded-xl tw-bg-transparent tw-px-2 tw-py-1 tw-text-base tw-font-semibold tw-ring-2 tw-ring-inset ${classes}`}
       >
