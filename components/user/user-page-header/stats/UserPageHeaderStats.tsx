@@ -18,7 +18,7 @@ export default function UserPageHeaderStats({
       <div className="tw-flex tw-gap-x-8">
         <div className="tw-flex tw-flex-col">
           <span className="tw-block tw-text-sm tw-font-medium tw-text-neutral-400">
-            Total days held
+            TDH
           </span>
           <div className="tw-mt-2 tw-inline-flex tw-items-center tw-gap-x-2">
             <span className="tw-text-base tw-font-semibold tw-text-white">
@@ -33,7 +33,7 @@ export default function UserPageHeaderStats({
         </div>
         <div className="tw-flex tw-flex-col">
           <span className="tw-block tw-text-sm tw-font-medium tw-text-neutral-400">
-            Reputation
+            Rep
           </span>
           <div className="tw-mt-2 tw-inline-flex tw-items-center tw-gap-x-2">
             <span className="tw-text-base tw-font-semibold tw-text-white">
