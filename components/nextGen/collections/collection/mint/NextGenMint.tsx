@@ -2,6 +2,7 @@ import styles from "../../NextGen.module.scss";
 import { useContractRead, useAccount, useContractReads } from "wagmi";
 import { DELEGATION_ABI } from "../../../../../abis";
 import {
+  DELEGATION_ALL_ADDRESS,
   DELEGATION_CONTRACT,
   MEMES_CONTRACT,
   NULL_ADDRESS,
@@ -79,7 +80,7 @@ export default function NextGenMint(props: Props) {
         functionName: "retrieveDelegators",
         args: [
           account.address ? account.address : "",
-          NULL_ADDRESS,
+          DELEGATION_ALL_ADDRESS,
           ALL_USE_CASE.use_case,
         ],
       },
@@ -90,7 +91,7 @@ export default function NextGenMint(props: Props) {
         functionName: "retrieveDelegators",
         args: [
           account.address ? account.address : "",
-          NULL_ADDRESS,
+          DELEGATION_ALL_ADDRESS,
           MINTING_USE_CASE.use_case,
         ],
       },
@@ -126,7 +127,6 @@ export default function NextGenMint(props: Props) {
         d.map((r) => {
           r.result.map((a: string) => del.push(a));
         });
-        // setMintForAddress(del[0]);
         setDelegators(del);
       }
     },
@@ -304,7 +304,7 @@ export default function NextGenMint(props: Props) {
               <span className={styles.mintDetailsSpan}>
                 <DateCountdown
                   title={"Allowlist Ending in"}
-                  date={props.phase_times.allowlist_end_time}
+                  date={props.phase_times.allowlist_end_time * 1000}
                 />
               </span>
             )}

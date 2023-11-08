@@ -65,8 +65,6 @@ export default function NextGenMintBurnWidget(props: Props) {
     }
   }, [props.delegators]);
 
-  const [burnCollection, setBurnCollection] = useState<string>("");
-  const [burnCollectionId, setBurnCollectionId] = useState<number>(0);
   const [tokensOwnedForBurnAddressLoaded, setTokensOwnedForBurnAddressLoaded] =
     useState(false);
   const [tokensOwnedForBurnAddress, setTokensOwnedForBurnAddress] = useState<
@@ -192,6 +190,9 @@ export default function NextGenMintBurnWidget(props: Props) {
     if (!account.isConnected || chainId !== NEXTGEN_CHAIN_ID) {
       return false;
     }
+    if (!props.collection.status) {
+      return true;
+    }
     return (
       !props.phase_times ||
       !props.additional_data ||
@@ -213,8 +214,8 @@ export default function NextGenMintBurnWidget(props: Props) {
     if (isMinting) {
       mintWrite.write({
         args: [
-          burnCollection,
-          burnCollectionId,
+          props.collection.burn_collection,
+          props.collection.burn_collection_id,
           tokenId,
           props.collection.collection_id,
           proofResponse ? proofResponse.info : "",
@@ -237,7 +238,7 @@ export default function NextGenMintBurnWidget(props: Props) {
     <Container className="no-padding">
       <Row>
         <Col>
-          <span className="d-inline-flex align-items-center">
+          <span className="d-inline-flex align-items-center pb-2">
             <b>
               {props.additional_data.circulation_supply} /{" "}
               {props.additional_data.total_supply} minted
@@ -249,7 +250,14 @@ export default function NextGenMintBurnWidget(props: Props) {
               setErrors([]);
               setIsMinting(false);
             }}>
-            <Form.Group as={Row} className="pb-2">
+            {props.collection.phase && (
+              <Row className="pt-2">
+                <Col>
+                  <h4 className="mb-0">{props.collection.phase}</h4>
+                </Col>
+              </Row>
+            )}
+            <Form.Group as={Row} className="pt-2 pb-2">
               <Form.Label column sm={12} className="d-flex align-items-center">
                 Burn to Mint For
               </Form.Label>
@@ -341,14 +349,16 @@ export default function NextGenMintBurnWidget(props: Props) {
                 </Col>
               </Form.Group>
             )}
-            <Form.Group as={Row} className="pb-2">
-              <Form.Label column sm={12} className="d-flex align-items-center">
-                Select token from Burn collection <br />
-                {props.collection.burn_collection}
-                {props.collection.burn_collection_id &&
-                  ` | Collection ${props.collection.burn_collection_id} `}
-                {props.collection.max_token_index > 0 &&
-                  ` | #${props.collection.min_token_index} - #${props.collection.max_token_index}`}
+            <Form.Group as={Row} className="pt-2 pb-2">
+              <Form.Label column sm={12} className="d-flex flex-column">
+                <span>Select token from Burn collection</span>
+                <span>
+                  {props.collection.burn_collection}
+                  {props.collection.burn_collection_id &&
+                    ` | Collection ${props.collection.burn_collection_id} `}
+                  {props.collection.max_token_index > 0 &&
+                    ` | #${props.collection.min_token_index} - #${props.collection.max_token_index}`}
+                </span>
               </Form.Label>
               <Col sm={12}>
                 <Form.Select
@@ -384,7 +394,8 @@ export default function NextGenMintBurnWidget(props: Props) {
                     ? chainId === NEXTGEN_CHAIN_ID
                       ? isMinting
                         ? `Processing...`
-                        : `Mint Now${
+                        : props.collection.status
+                        ? `Mint Now${
                             !fetchingProofs &&
                             tokenId &&
                             proofResponse &&
@@ -392,6 +403,7 @@ export default function NextGenMintBurnWidget(props: Props) {
                               ? ` - no proofs found`
                               : ""
                           }`
+                        : `Burn Not Active`
                       : `Switch to ${getNetworkName(NEXTGEN_CHAIN_ID)}`
                     : `Connect Wallet`}
                   {isMinting && (

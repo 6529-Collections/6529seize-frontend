@@ -327,3 +327,14 @@ h5 {
 .cursor-pointer {
   cursor: pointer;
 }
+
+.area-clamped {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  overflow: hidden;
+}
+
+.area-expanded {
+  -webkit-line-clamp: none;
+}

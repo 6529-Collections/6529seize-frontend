@@ -102,8 +102,7 @@ export interface Attributes {
 }
 
 export enum Status {
-  UPCOMING,
-  LIVE,
-  COMPLETE,
-  UNAVAILABLE,
+  UPCOMING = "UPCOMING",
+  LIVE = "LIVE",
+  COMPLETE = "COMPLETE",
 }

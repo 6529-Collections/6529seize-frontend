@@ -1,7 +1,7 @@
 import { Container, Row, Col, Button, Form } from "react-bootstrap";
 import styles from "./NextGenAdmin.module.scss";
 import { useAccount, useContractWrite, useSignMessage } from "wagmi";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 import {
   FunctionSelectors,
@@ -311,7 +311,12 @@ export default function NextGenAdminInitializeExternalBurnSwap(props: Props) {
             </Form.Group>
           </Form>
           {uploadError && <div className="text-danger">{uploadError}</div>}
-          {loading && !contractWrite.isLoading && <div>Syncing with DB...</div>}
+          {loading && !contractWrite.isLoading && (
+            <div>
+              Syncing with DB... Sign Message <code>{uuid}</code> in your
+              wallet...
+            </div>
+          )}
           {loading && contractWrite.isLoading && <div>Synced with DB.</div>}
           <NextGenContractWriteStatus
             isLoading={contractWrite.isLoading}

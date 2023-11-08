@@ -28,6 +28,9 @@ export async function getNftsForContractAndOwner(
     url += `&pageKey=${pageKey}`;
   }
   const response = await fetchUrl(url);
+  if (response.error) {
+    return getNftsForContractAndOwner(chainId, contract, owner, nfts, pageKey);
+  }
   nfts = [...nfts].concat(response.ownedNfts);
   if (response.pageKey) {
     return getNftsForContractAndOwner(
@@ -40,15 +43,13 @@ export async function getNftsForContractAndOwner(
   }
 
   const allNfts = nfts.map((nft) => {
-    if (nft) {
-      return {
-        tokenId: nft.tokenId,
-        tokenType: nft.tokenType,
-        name: nft.name,
-        tokenUri: nft.tokenUri,
-        image: nft.image,
-      };
-    }
+    return {
+      tokenId: nft.tokenId,
+      tokenType: nft.tokenType,
+      name: nft.name,
+      tokenUri: nft.tokenUri,
+      image: nft.image,
+    };
   });
   return allNfts;
 }
