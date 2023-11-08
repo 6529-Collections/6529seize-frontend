@@ -9,6 +9,10 @@ import DotLoader from "../../dotLoader/DotLoader";
 import { useAccount } from "wagmi";
 import { useEffect, useState } from "react";
 import UserEditProfileButton from "../settings/UserEditProfileButton";
+import { getRandomColor } from "../../../helpers/Helpers";
+
+const DEFAULT_BANNER_1 = getRandomColor();
+const DEFAULT_BANNER_2 = getRandomColor();
 
 export default function UserPageHeader({
   profile,
@@ -48,15 +52,19 @@ export default function UserPageHeader({
         <div
           className="tw-h-36"
           style={{
-            background: profile.profile
-              ? `linear-gradient(45deg, ${profile.profile.banner_1} 0%, ${profile.profile.banner_2} 100%)`
-              : "#262626",
+            background: `linear-gradient(45deg, ${
+              profile.profile?.banner_1 ?? DEFAULT_BANNER_1
+            } 0%, ${profile.profile?.banner_2 ?? DEFAULT_BANNER_2} 100%)`,
           }}
         ></div>
         <div className="tw-relative tw-px-6 min-[1100px]:tw-max-w-[960px] min-[1200px]:tw-max-w-[1150px] min-[1300px]:tw-max-w-[1250px] min-[1400px]:tw-max-w-[1350px] min-[1500px]:tw-max-w-[1450px] min-[1600px]:tw-max-w-[1550px] min-[1800px]:tw-max-w-[1750px] min-[2000px]:tw-max-w-[1950px] tw-mx-auto">
           <div className="tw-w-full tw-flex tw-justify-between">
             <div className="-tw-mt-24">
-              <UserPageHeaderPfp profile={profile} />
+              <UserPageHeaderPfp
+                profile={profile}
+                defaultBanner1={DEFAULT_BANNER_1}
+                defaultBanner2={DEFAULT_BANNER_2}
+              />
             </div>
             <div className="tw-flex tw-items-center tw-gap-x-6">
               {isLoggedInUser && <UserEditProfileButton user={user} />}
