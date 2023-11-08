@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
 
 interface Props {
   show: boolean;
-  tdh: ConsolidatedTDHMetrics | TDHMetrics | undefined;
+  tdh: ConsolidatedTDHMetrics | TDHMetrics | null;
 }
 
 export default function UserPageOverview(props: Props) {
