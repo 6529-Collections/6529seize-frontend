@@ -95,7 +95,7 @@ export default function UserPageHeader({
                 consolidatedTDH={consolidatedTDH}
               />
 
-              <UserPageHeaderLevel consolidatedTDH={consolidatedTDH} />
+              <UserPageHeaderLevel level={profile.level} />
               <UserPageHeaderStats consolidatedTDH={consolidatedTDH} />
             </>
           ) : (

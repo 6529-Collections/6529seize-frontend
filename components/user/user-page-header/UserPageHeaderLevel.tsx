@@ -412,34 +412,22 @@ const LEVEL_CLASSES: { minLevel: number; classes: string }[] = [
   { minLevel: 80, classes: "tw-text-[#55B075] tw-ring-[#55B075]" },
 ].reverse();
 
-export default function UserPageHeaderLevel({
-  consolidatedTDH,
-}: {
-  consolidatedTDH: ConsolidatedTDHMetrics | null;
-}) {
-  const getLevel = (): number => {
-    if (!consolidatedTDH) {
-      return 0;
-    }
-
-    const tdh = consolidatedTDH.boosted_memes_tdh;
-    const targetLevel = LEVELS.find((level) => level.minTdh <= tdh);
-    return targetLevel?.level ?? 0;
-  };
-
+export default function UserPageHeaderLevel({ level }: { level: number }) {
   const getClasses = (): string => {
-    const targetLevel = getLevel();
     const targetClasses = LEVEL_CLASSES.find(
-      (level) => level.minLevel <= targetLevel
+      (levelClass) => levelClass.minLevel <= level
     )?.classes;
     return targetClasses ?? LEVEL_CLASSES[0].classes;
   };
 
-  const level = getLevel();
   const classes = getClasses();
 
+  const openLevelsPage = () => {
+    window.open("https://seize.io/levels", "_blank");
+  };
+
   return (
-    <div className="tw-mt-3">
+    <div className="tw-mt-3 tw-cursor-pointer" onClick={openLevelsPage}>
       <span
         className={`tw-inline-flex tw-items-center tw-rounded-xl tw-bg-transparent tw-px-2 tw-py-1 tw-text-base tw-font-semibold tw-ring-2 tw-ring-inset ${classes}`}
       >

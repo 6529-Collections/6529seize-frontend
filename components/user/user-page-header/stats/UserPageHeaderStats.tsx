@@ -6,8 +6,8 @@ export default function UserPageHeaderStats({
 }: {
   consolidatedTDH: ConsolidatedTDHMetrics | null;
 }) {
-  const TDHFormatted = consolidatedTDH?.tdh
-    ? formatNumber(consolidatedTDH.tdh)
+  const TDHFormatted = consolidatedTDH?.boosted_memes_tdh
+    ? formatNumber(consolidatedTDH.boosted_memes_tdh)
     : null;
   const tdhRank = consolidatedTDH?.tdh_rank
     ? `#${consolidatedTDH.tdh_rank}`

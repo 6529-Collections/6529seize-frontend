@@ -14,6 +14,7 @@ export interface IProfileAndConsolidations {
     wallets: IProfileConsolidation[];
     tdh: number;
   };
+  readonly level: number;
 }
 
 export enum PROFILE_CLASSIFICATION {
