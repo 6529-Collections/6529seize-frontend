@@ -1,23 +1,24 @@
 import { FormEvent, useContext, useEffect, useState } from "react";
-import { IProfileAndConsolidations } from "../../../entities/IProfile";
+import {
+  IProfileAndConsolidations,
+  PROFILE_CLASSIFICATION,
+} from "../../../entities/IProfile";
 import UserSettingsPrimaryWallet from "./UserSettingsPrimaryWallet";
 import UserSettingsSave from "./UserSettingsSave";
 import UserSettingsUsername from "./UserSettingsUsername";
 import { AuthContext, IProfileWithMeta } from "../../auth/Auth";
 import { useRouter } from "next/router";
-import {
-  commonApiFetch,
-  commonApiPost,
-} from "../../../services/api/common-api";
+import { commonApiPost } from "../../../services/api/common-api";
 import UserSettingsImg from "./UserSettingsImg";
 import UserSettingsBackground from "./UserSettingsBackground";
 import { getRandomColor } from "../../../helpers/Helpers";
 import UserSettingsWebsite from "./UserSettingsWebsite";
-import { useDebounce } from "react-use";
+import UserSettingsClassification from "./UserSettingsClassification";
 
 interface ApiCreateOrUpdateProfileRequest {
   readonly handle: string;
   readonly primary_wallet: string;
+  readonly classification: PROFILE_CLASSIFICATION;
   pfp_url?: string | undefined;
   banner_1?: string | undefined;
   banner_2?: string | undefined;
@@ -42,6 +43,10 @@ export default function UserSettingsPage({
     );
     return tdhWallets.length > 0 ? tdhWallets[0].wallet.address : "";
   };
+
+  const [classification, setClassification] = useState<PROFILE_CLASSIFICATION>(
+    user.profile?.classification ?? PROFILE_CLASSIFICATION.GOVERNMENT_NAME
+  );
 
   const [primaryWallet, setPrimaryWallet] = useState<string>(
     user.profile?.primary_wallet ?? getHighestTdhWalletOrNone()
@@ -71,6 +76,7 @@ export default function UserSettingsPage({
     const body: ApiCreateOrUpdateProfileRequest = {
       handle: userName,
       primary_wallet: primaryWallet,
+      classification,
     };
 
     if (bgColor1) {
@@ -122,11 +128,20 @@ export default function UserSettingsPage({
     setHaveChanges(
       userName?.toLowerCase() !== user.profile?.handle.toLowerCase() ||
         primaryWallet !== user.profile?.primary_wallet ||
+        classification !== user.profile?.classification ||
         bgColor1 !== user.profile?.banner_1 ||
         bgColor2 !== user.profile?.banner_2 ||
         website !== (user.profile?.website ?? "")
     );
-  }, [user, userName, primaryWallet, bgColor1, bgColor2, website]);
+  }, [
+    user,
+    userName,
+    primaryWallet,
+    bgColor1,
+    bgColor2,
+    website,
+    classification,
+  ]);
 
   return (
     <div className="tw-pt-10 tw-space-y-6 tw-divide-y tw-divide-x-0 tw-divide-solid tw-divide-neutral-700">
@@ -137,6 +152,11 @@ export default function UserSettingsPage({
               userName={userName}
               originalUsername={user.profile?.handle ?? ""}
               setUserName={setUserName}
+            />
+
+            <UserSettingsClassification
+              selected={classification}
+              onSelect={setClassification}
             />
 
             <UserSettingsPrimaryWallet
