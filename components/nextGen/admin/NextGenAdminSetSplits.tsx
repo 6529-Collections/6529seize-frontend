@@ -39,10 +39,10 @@ export default function NextGenAdminSetSplits(props: Props) {
   );
 
   const [collectionID, setCollectionID] = useState("");
-  const [artistPrimary, setArtistPrimary] = useState<number>();
-  const [teamPrimary, setTeamPrimary] = useState<number>();
-  const [artistSecondary, setArtistSecondary] = useState<number>();
-  const [teamSecondary, setTeamSecondary] = useState<number>();
+  const [artistPrimary, setArtistPrimary] = useState("");
+  const [teamPrimary, setTeamPrimary] = useState("");
+  const [artistSecondary, setArtistSecondary] = useState("");
+  const [teamSecondary, setTeamSecondary] = useState("");
 
   useContractRead({
     address: NEXTGEN_MINTER.contract as `0x${string}`,
@@ -54,8 +54,8 @@ export default function NextGenAdminSetSplits(props: Props) {
     onSettled(data: any, error: any) {
       if (data) {
         const d = data as string[];
-        setArtistPrimary(parseInt(d[0]));
-        setTeamPrimary(parseInt(d[1]));
+        setArtistPrimary(d[0]);
+        setTeamPrimary(d[1]);
       }
     },
   });
@@ -70,8 +70,8 @@ export default function NextGenAdminSetSplits(props: Props) {
     onSettled(data: any, error: any) {
       if (data) {
         const d = data as string[];
-        setArtistSecondary(parseInt(d[0]));
-        setTeamSecondary(parseInt(d[1]));
+        setArtistSecondary(d[0]);
+        setTeamSecondary(d[1]);
       }
     },
   });
@@ -181,43 +181,37 @@ export default function NextGenAdminSetSplits(props: Props) {
             <Form.Group className="mb-3">
               <Form.Label>Artist Primary Split</Form.Label>
               <Form.Control
-                type="number"
+                type="text"
                 placeholder="%"
                 value={artistPrimary}
-                onChange={(e: any) =>
-                  setArtistPrimary(parseInt(e.target.value))
-                }
+                onChange={(e: any) => setArtistPrimary(e.target.value)}
               />
             </Form.Group>
             <Form.Group className="mb-3">
               <Form.Label>Team Primary Split</Form.Label>
               <Form.Control
-                type="number"
+                type="text"
                 placeholder="%"
                 value={teamPrimary}
-                onChange={(e: any) => setTeamPrimary(parseInt(e.target.value))}
+                onChange={(e: any) => setTeamPrimary(e.target.value)}
               />
             </Form.Group>
             <Form.Group className="mb-3">
               <Form.Label>Artist Secondary Split</Form.Label>
               <Form.Control
-                type="number"
+                type="text"
                 placeholder="%"
                 value={artistSecondary}
-                onChange={(e: any) =>
-                  setArtistSecondary(parseInt(e.target.value))
-                }
+                onChange={(e: any) => setArtistSecondary(e.target.value)}
               />
             </Form.Group>
             <Form.Group className="mb-3">
               <Form.Label>Team Secondary Split</Form.Label>
               <Form.Control
-                type="number"
+                type="text"
                 placeholder="%"
                 value={teamSecondary}
-                onChange={(e: any) =>
-                  setTeamSecondary(parseInt(e.target.value))
-                }
+                onChange={(e: any) => setTeamSecondary(e.target.value)}
               />
             </Form.Group>
             {!loading && errors.length > 0 && (

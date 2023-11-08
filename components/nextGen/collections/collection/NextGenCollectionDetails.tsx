@@ -3,11 +3,20 @@ import { Container, Row, Col } from "react-bootstrap";
 import {
   AdditionalData,
   Info,
+  LibraryScript,
+  MintingDetails,
   PhaseTimes,
   TokenURI,
 } from "../../nextgen_entities";
 import { fromGWEI } from "../../../../helpers/Helpers";
 import { NextGenTokenImageContent } from "../NextGenTokenImage";
+import { useState } from "react";
+import {
+  retrieveCollectionCosts,
+  retrieveCollectionLibraryAndScript,
+} from "../../nextgen_helpers";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import Tippy from "@tippyjs/react";
 
 interface Props {
   collection: number;
@@ -23,6 +32,32 @@ interface Props {
 }
 
 export default function NextGenCollectionDetails(props: Props) {
+  const [mintingDetails, setMintingDetails] = useState<MintingDetails>();
+  const [libraryScript, setLibraryScript] = useState<LibraryScript>();
+
+  const [scriptClamped, setScriptClamped] = useState<boolean>(true);
+
+  const [isCopied, setIsCopied] = useState<boolean>(false);
+
+  function copy(text: any) {
+    navigator.clipboard.writeText(text);
+    setIsCopied(true);
+    setTimeout(() => {
+      setIsCopied(false);
+    }, 1000);
+  }
+
+  retrieveCollectionCosts(props.collection, (data: MintingDetails) => {
+    setMintingDetails(data);
+  });
+
+  retrieveCollectionLibraryAndScript(
+    props.collection,
+    (data: LibraryScript) => {
+      setLibraryScript(data);
+    }
+  );
+
   return (
     <Container className="no-padding">
       <Row>
@@ -135,6 +170,71 @@ export default function NextGenCollectionDetails(props: Props) {
               </Col>
               <Col xs={12}>{props.phase_times.merkle_root}</Col>
             </Row>
+            {mintingDetails && (
+              <Row className="pt-3">
+                <Col xs={12}>
+                  <b>Delegation Address</b>
+                </Col>
+                <Col xs={12}>
+                  {mintingDetails.del_address
+                    ? mintingDetails.del_address
+                    : "-"}
+                </Col>
+              </Row>
+            )}
+            {libraryScript && (
+              <>
+                <Row className="pt-3">
+                  <Col xs={12}>
+                    <b>Library</b>
+                  </Col>
+                  <Col xs={12}>
+                    {libraryScript.library ? libraryScript.library : "-"}
+                  </Col>
+                </Row>
+                <Row className="pt-3">
+                  <Col
+                    xs={12}
+                    className="d-flex align-items-center justify-content-between">
+                    <span>
+                      <b>Script</b>
+                    </span>
+                    <Tippy
+                      content={isCopied ? "Copied" : "Copy"}
+                      placement={"top"}
+                      theme={"light"}
+                      hideOnClick={false}>
+                      <FontAwesomeIcon
+                        icon="copy"
+                        name={`copy-btn`}
+                        aria-label={`copy-btn`}
+                        className={styles.copyIcon}
+                        onClick={() => copy(libraryScript.script)}
+                      />
+                    </Tippy>
+                  </Col>
+                  <Col xs={12} className="d-flex flex-column pt-1">
+                    {libraryScript.script ? (
+                      <>
+                        <code
+                          className={`${styles.codeBlock} ${
+                            scriptClamped ? "area-clamped" : "area-expanded"
+                          }`}>
+                          {libraryScript.script}
+                        </code>
+                        <span
+                          className="font-smaller font-color-h cursor-pointer decoration-hover-underline"
+                          onClick={() => setScriptClamped(!scriptClamped)}>
+                          {scriptClamped ? `Show More` : `Show Less`}
+                        </span>
+                      </>
+                    ) : (
+                      "-"
+                    )}
+                  </Col>
+                </Row>
+              </>
+            )}
           </Container>
         </Col>
       </Row>

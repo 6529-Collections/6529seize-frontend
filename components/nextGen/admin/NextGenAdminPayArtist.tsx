@@ -44,9 +44,9 @@ export default function NextGenAdminPayArtist(props: Props) {
 
   const [collectionID, setCollectionID] = useState("");
   const [address1, setAddress1] = useState("");
-  const [percentage1, setPercentage1] = useState<number>();
+  const [percentage1, setPercentage1] = useState("");
   const [address2, setAddress2] = useState("");
-  const [percentage2, setPercentage2] = useState<number>();
+  const [percentage2, setPercentage2] = useState("");
 
   const [errors, setErrors] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
@@ -155,10 +155,10 @@ export default function NextGenAdminPayArtist(props: Props) {
             <Form.Group className="mb-3">
               <Form.Label>Percentage for Address 1</Form.Label>
               <Form.Control
-                type="number"
+                type="text"
                 placeholder="%"
                 value={percentage1}
-                onChange={(e: any) => setPercentage1(parseInt(e.target.value))}
+                onChange={(e: any) => setPercentage1(e.target.value)}
               />
             </Form.Group>
             <Form.Group className="mb-3">
@@ -173,10 +173,10 @@ export default function NextGenAdminPayArtist(props: Props) {
             <Form.Group className="mb-3">
               <Form.Label>Percentage for Address 2</Form.Label>
               <Form.Control
-                type="number"
+                type="text"
                 placeholder="%"
                 value={percentage2}
-                onChange={(e: any) => setPercentage2(parseInt(e.target.value))}
+                onChange={(e: any) => setPercentage2(e.target.value)}
               />
             </Form.Group>
             {!loading && errors.length > 0 && (

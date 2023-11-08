@@ -6,6 +6,7 @@ import {
   AdditionalData,
   EMPTY_TOKEN_URI,
   Info,
+  PhaseTimes,
   TokenURI,
 } from "../nextgen_entities";
 import { NEXTGEN_CHAIN_ID, NEXTGEN_CORE } from "../nextgen_contracts";
@@ -16,10 +17,12 @@ import {
   extractURI,
   retrieveCollectionAdditionalData,
   retrieveCollectionInfo,
+  retrieveCollectionPhases,
 } from "../nextgen_helpers";
 
 interface Props {
   collection: number;
+  setPhaseTimes: (phaseTimes: PhaseTimes) => void;
 }
 
 export default function NextGenCollectionPreview(props: Props) {
@@ -28,6 +31,7 @@ export default function NextGenCollectionPreview(props: Props) {
     useState<TokenURI>(EMPTY_TOKEN_URI);
   const [info, setInfo] = useState<Info>();
   const [additionalData, setAdditionalData] = useState<AdditionalData>();
+  const [phaseTimes, setPhaseTimes] = useState<PhaseTimes>();
 
   useContractRead({
     address: NEXTGEN_CORE.contract as `0x${string}`,
@@ -89,6 +93,15 @@ export default function NextGenCollectionPreview(props: Props) {
   retrieveCollectionAdditionalData(props.collection, (data: AdditionalData) => {
     setAdditionalData(data);
   });
+
+  retrieveCollectionPhases(props.collection, (data: PhaseTimes) => {
+    setPhaseTimes(data);
+    props.setPhaseTimes(data);
+  });
+
+  if (!additionalData || additionalData.total_supply == 0) {
+    return <></>;
+  }
 
   return (
     <a

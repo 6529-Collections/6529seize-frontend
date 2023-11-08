@@ -1,6 +1,4 @@
-import { Col, Container, Row } from "react-bootstrap";
-import styles from "./DateCountdown.module.scss";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 
 interface Props {
   title: string;
@@ -8,44 +6,51 @@ interface Props {
 }
 
 export default function DateCountdown(props: Props) {
-  const targetDate = new Date(props.date);
-
+  const targetDate = useMemo(() => new Date(props.date), [props.date]);
   const [timeLeft, setTimeLeft] = useState(calculateTimeLeft());
 
   function calculateTimeLeft() {
-    const now = new Date().getTime();
+    const now = Date.now();
     const difference = targetDate.getTime() - now;
 
     if (difference <= 0) {
-      return {
-        days: 0,
-        hours: 0,
-        minutes: 0,
-        seconds: 0,
-      };
+      return { days: 0, hours: 0, minutes: 0, seconds: 0 };
     }
 
-    const days = Math.floor(difference / (1000 * 60 * 60 * 24));
-    const hours = Math.floor(
-      (difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)
-    );
-    const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
-    const seconds = Math.floor((difference % (1000 * 60)) / 1000);
+    let remaining = difference;
 
-    return {
-      days,
-      hours,
-      minutes,
-      seconds,
-    };
+    const days = Math.floor(remaining / (1000 * 60 * 60 * 24));
+    remaining -= days * (1000 * 60 * 60 * 24);
+
+    const hours = Math.floor(remaining / (1000 * 60 * 60));
+    remaining -= hours * (1000 * 60 * 60);
+
+    const minutes = Math.floor(remaining / (1000 * 60));
+    remaining -= minutes * (1000 * 60);
+
+    const seconds = Math.floor(remaining / 1000);
+
+    return { days, hours, minutes, seconds };
   }
 
   useEffect(() => {
-    const interval = setInterval(() => {
+    let timeoutId: any;
+    function tick() {
       setTimeLeft(calculateTimeLeft());
-    }, 1000);
+      scheduleNextTick();
+    }
 
-    return () => clearInterval(interval);
+    function scheduleNextTick() {
+      const now = Date.now();
+      const msUntilNextSecond = 1000 - (now % 1000);
+      timeoutId = setTimeout(tick, msUntilNextSecond); // Assign the identifier to the variable
+    }
+
+    scheduleNextTick();
+
+    return () => {
+      clearTimeout(timeoutId);
+    };
   }, [targetDate]);
 
   return (

@@ -36,59 +36,28 @@ export default function NextGenCollectionHeader(props: Props) {
       <Row>
         <Col className="d-flex justify-content-between align-items-center flex-wrap">
           <span className="pt-2 pb-2 d-flex align-items-center gap-2 align-items-center">
-            {props.phase_times.allowlist_start_time > 0 &&
-            props.phase_times.allowlist_end_time > 0 ? (
-              <span
-                className={`${styles.phaseTimeTag} ${
-                  props.phase_times.al_status == Status.LIVE && available > 0
-                    ? styles.phaseTimeTagActive
-                    : props.phase_times.al_status == Status.UPCOMING &&
-                      available > 0
-                    ? styles.phaseTimeTagUpcoming
-                    : styles.phaseTimeTagComplete
-                }`}>
-                {props.phase_times.al_status == Status.LIVE && available > 0
-                  ? `ALLOWLIST LIVE`
+            <span
+              className={`${styles.phaseTimeTag} ${
+                props.phase_times.al_status == Status.LIVE && available > 0
+                  ? styles.phaseTimeTagActive
                   : props.phase_times.al_status == Status.UPCOMING &&
                     available > 0
-                  ? `ALLOWLIST STARTING ${getPhaseDateDisplay(
-                      props.phase_times.allowlist_start_time
-                    )}`
-                  : `ALLOWLIST COMPLETE`}
-              </span>
-            ) : (
-              <span
-                className={`${styles.phaseTimeTag} ${styles.phaseTimeTagComplete}`}>
-                ALLOWLIST NOT AVAILABLE
-              </span>
-            )}
-            {props.phase_times.public_start_time > 0 &&
-            props.phase_times.public_end_time > 0 ? (
-              <span
-                className={`${styles.phaseTimeTag} ${
-                  props.phase_times.public_status == Status.LIVE &&
-                  available > 0
-                    ? styles.phaseTimeTagActive
-                    : props.phase_times.public_status == Status.UPCOMING &&
-                      available > 0
-                    ? styles.phaseTimeTagUpcoming
-                    : styles.phaseTimeTagComplete
-                }`}>
-                {props.phase_times.public_status == Status.LIVE && available > 0
-                  ? `PUBLIC PHASE LIVE`
+                  ? styles.phaseTimeTagUpcoming
+                  : styles.phaseTimeTagComplete
+              }`}>
+              ALLOWLIST {props.phase_times.al_status.toUpperCase()}
+            </span>
+            <span
+              className={`${styles.phaseTimeTag} ${
+                props.phase_times.public_status == Status.LIVE && available > 0
+                  ? styles.phaseTimeTagActive
                   : props.phase_times.public_status == Status.UPCOMING &&
                     available > 0
-                  ? `PUBLIC PHASE STARTING ${getPhaseDateDisplay(
-                      props.phase_times.public_start_time
-                    )}`
-                  : `PUBLIC PHASE COMPLETE`}
-              </span>
-            ) : (
-              <span
-                className={`${styles.phaseTimeTag} ${styles.phaseTimeTagComplete}`}>
-                PUBLIC PHASE NOT AVAILABLE
-              </span>
-            )}
+                  ? styles.phaseTimeTagUpcoming
+                  : styles.phaseTimeTagComplete
+              }`}>
+              PUBLIC PHASE {props.phase_times.public_status}
+            </span>
           </span>
           <span className="pt-2 pb-2 d-flex align-items-center justify-content-end gap-4">
             <FontAwesomeIcon

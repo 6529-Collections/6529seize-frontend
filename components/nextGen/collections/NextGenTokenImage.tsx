@@ -59,7 +59,10 @@ export function NextGenTokenImageContent(props: Props) {
             maxHeight: "100%",
             maxWidth: "100%",
           }}
-          src={image}
+          src={`https://d3lqz0a4bldqgf.cloudfront.net/nextgen/tokens/images/${props.token.id}.png`}
+          onError={({ currentTarget }) => {
+            currentTarget.src = image;
+          }}
           alt={props.token.name}
         />
       ) : (

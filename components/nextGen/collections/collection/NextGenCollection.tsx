@@ -9,9 +9,7 @@ import {
   LibraryScript,
   PhaseTimes,
   Status,
-  EMPTY_TOKEN_URI,
 } from "../../nextgen_entities";
-import { fromGWEI } from "../../../../helpers/Helpers";
 import Image from "next/image";
 import {
   NEXTGEN_CHAIN_ID,
@@ -21,7 +19,7 @@ import {
 import Breadcrumb, { Crumb } from "../../../breadcrumb/Breadcrumb";
 import NextGenCollectionHeader from "./NextGenCollectionHeader";
 import NextGenCollectionArt from "./NextGenCollectionArt";
-import NextGenCollectionMint from "./NextGenCollectionMint";
+import NextGenMint from "./mint/NextGenMint";
 import router from "next/router";
 import {
   extractField,
@@ -31,7 +29,6 @@ import {
   retrieveCollectionLibraryAndScript,
   retrieveCollectionPhases,
 } from "../../nextgen_helpers";
-import { NextGenTokenImageContent } from "../NextGenTokenImage";
 import NextGenCollectionDetails from "./NextGenCollectionDetails";
 
 interface Props {
@@ -164,13 +161,6 @@ export default function NextGenCollection(props: Props) {
     setInfoSettled(true);
   });
 
-  retrieveCollectionLibraryAndScript(
-    props.collection,
-    (data: LibraryScript) => {
-      setLibraryScript(data);
-    }
-  );
-
   useContractRead({
     address: NEXTGEN_CORE.contract as `0x${string}`,
     abi: NEXTGEN_CORE.abi,
@@ -229,12 +219,17 @@ export default function NextGenCollection(props: Props) {
     const currFocus = router.query.focus;
     if (currFocus != focus) {
       let f = currFocus as Focus;
-      if (f == Focus.MINT && !showMint()) {
-        f = Focus.ART;
-      }
       setFocus(f);
     }
   }, [router.query.focus]);
+
+  useEffect(() => {
+    if (phaseTimes && additionalData && !showMint()) {
+      if (focus === Focus.MINT) {
+        setFocus(Focus.ART);
+      }
+    }
+  }, [phaseTimes, additionalData]);
 
   useEffect(() => {
     if (focus) {
@@ -391,7 +386,7 @@ export default function NextGenCollection(props: Props) {
                 {focus == Focus.MINT && (
                   <Row className="pt-3">
                     <Col>
-                      <NextGenCollectionMint
+                      <NextGenMint
                         collection={props.collection}
                         collection_preview={
                           tokenURIs.length > 0 ? tokenURIs[0] : undefined

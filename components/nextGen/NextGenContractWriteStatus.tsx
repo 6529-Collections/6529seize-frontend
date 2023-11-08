@@ -1,6 +1,7 @@
 import { useWaitForTransaction } from "wagmi";
 import { getTransactionLink } from "../../helpers/Helpers";
 import { NEXTGEN_CHAIN_ID } from "./nextgen_contracts";
+import DotLoader from "../dotLoader/DotLoader";
 
 interface Props {
   hash?: `0x${string}`;
@@ -32,7 +33,7 @@ export default function NextGenContractWriteStatus(props: Props) {
     <>
       {props.isLoading && (
         <span>
-          Submitting...
+          Submitting <DotLoader />
           <br />
           Confirm in your wallet
         </span>
@@ -55,7 +56,7 @@ export default function NextGenContractWriteStatus(props: Props) {
           {waitContractWrite.isLoading && (
             <>
               <br />
-              Waiting for confirmation...
+              Waiting for confirmation <DotLoader />
             </>
           )}
         </span>

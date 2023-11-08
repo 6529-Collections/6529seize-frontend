@@ -28,6 +28,12 @@ interface Props {
 
 const MARKLE_ZERO_PATTERN = /^0x0+$/;
 
+enum Type {
+  ALLOWLIST = "allowlist",
+  NO_ALLOWLIST = "no_allowlist",
+  EXTERNAL_BURN = "external_burn",
+}
+
 export default function NextGenAdminSetPhases(props: Props) {
   const account = useAccount();
   const signMessage = useSignMessage();
@@ -59,9 +65,10 @@ export default function NextGenAdminSetPhases(props: Props) {
   const [publicStartTime, setPublicStartTime] = useState("");
   const [publicEndTime, setPublicEndTime] = useState("");
   const [merkleRoot, setMerkleRoot] = useState("");
+  const [phaseName, setPhaseName] = useState("");
   const [onChainMerkleRoot, setOnChainMerkleRoot] = useState("");
 
-  const [hasAllowlist, setHasAllowlist] = useState(true);
+  const [type, setType] = useState(Type.ALLOWLIST);
 
   const [errors, setErrors] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
@@ -76,11 +83,11 @@ export default function NextGenAdminSetPhases(props: Props) {
       if (MARKLE_ZERO_PATTERN.test(data.merkle_root)) {
         setOnChainMerkleRoot("");
         setMerkleRoot("");
-        setHasAllowlist(false);
+        setType(Type.NO_ALLOWLIST);
       } else {
         setOnChainMerkleRoot(data.merkle_root);
         setMerkleRoot(data.merkle_root);
-        setHasAllowlist(true);
+        setType(Type.ALLOWLIST);
       }
       setAllowlistStartTime(data.allowlist_start_time.toString());
       setAllowlistEndTime(data.allowlist_end_time.toString());
@@ -121,7 +128,7 @@ export default function NextGenAdminSetPhases(props: Props) {
     if (!collectionID) {
       errors.push("Collection id is required");
     }
-    if (hasAllowlist) {
+    if (type != Type.NO_ALLOWLIST) {
       if (!merkleRoot) {
         errors.push("Merkle Root is required");
       }
@@ -152,11 +159,11 @@ export default function NextGenAdminSetPhases(props: Props) {
       contractWrite.write({
         args: [
           collectionID,
-          hasAllowlist ? allowlistStartTime : 0,
-          hasAllowlist ? allowlistEndTime : 0,
+          type !== Type.NO_ALLOWLIST ? allowlistStartTime : 0,
+          type !== Type.NO_ALLOWLIST ? allowlistEndTime : 0,
           publicStartTime,
           publicEndTime,
-          hasAllowlist ? merkleRoot : NULL_MERKLE,
+          type !== Type.NO_ALLOWLIST ? merkleRoot : NULL_MERKLE,
         ],
       });
     }
@@ -196,6 +203,8 @@ export default function NextGenAdminSetPhases(props: Props) {
           wallet: account.address as string,
           signature: signMessage.data,
           uuid: uuid,
+          al_type: type,
+          phase: phaseName,
         })
       );
 
@@ -260,28 +269,47 @@ export default function NextGenAdminSetPhases(props: Props) {
             <Form.Group className="mb-3">
               <span className="d-flex align-items-center gap-3">
                 <Form.Check
-                  checked={hasAllowlist}
+                  checked={type == Type.ALLOWLIST}
                   type="radio"
                   label="Allowlist"
                   name="hasAllowlistRadio"
                   onChange={() => {
-                    setHasAllowlist(true);
+                    setType(Type.ALLOWLIST);
                     setMerkleRoot(onChainMerkleRoot);
                   }}
                 />
                 <Form.Check
-                  checked={!hasAllowlist}
+                  checked={type == Type.NO_ALLOWLIST}
                   type="radio"
                   label="No Allowlist"
                   name="hasAllowlistRadio"
                   onChange={() => {
-                    setHasAllowlist(false);
+                    setType(Type.NO_ALLOWLIST);
+                  }}
+                />
+                <Form.Check
+                  checked={type === Type.EXTERNAL_BURN}
+                  type="radio"
+                  label="Burn Allowlist"
+                  name="hasAllowlistRadio"
+                  onChange={() => {
+                    setType(Type.EXTERNAL_BURN);
+                    setMerkleRoot(onChainMerkleRoot);
                   }}
                 />
               </span>
             </Form.Group>
-            {hasAllowlist && (
+            {type !== Type.NO_ALLOWLIST && (
               <>
+                <Form.Group className="mb-3">
+                  <Form.Label>Phase</Form.Label>
+                  <Form.Control
+                    type="string"
+                    placeholder="Phase 1"
+                    value={phaseName}
+                    onChange={(e: any) => setPhaseName(e.target.value)}
+                  />
+                </Form.Group>
                 <Form.Group className="mb-3">
                   <Form.Control
                     type="file"

@@ -1,6 +1,11 @@
 import { Container, Row, Col, Button, Form } from "react-bootstrap";
 import styles from "./NextGenAdmin.module.scss";
-import { useAccount, useContractRead, useContractWrite } from "wagmi";
+import {
+  useAccount,
+  useContractRead,
+  useContractWrite,
+  useSignMessage,
+} from "wagmi";
 import { useEffect, useState } from "react";
 import {
   FunctionSelectors,
@@ -17,6 +22,9 @@ import {
 } from "../nextgen_helpers";
 import NextGenContractWriteStatus from "../NextGenContractWriteStatus";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { v4 as uuidv4 } from "uuid";
+import { NULL_ADDRESS } from "../../../constants";
+import { postData } from "../../../services/6529api";
 
 interface Props {
   close: () => void;
@@ -24,6 +32,8 @@ interface Props {
 
 export default function NextGenAdminInitializeBurn(props: Props) {
   const account = useAccount();
+  const signMessage = useSignMessage();
+  const [uuid, setuuid] = useState(uuidv4());
 
   const globalAdmin = useGlobalAdmin(account.address as string);
   const functionAdmin = useFunctionAdmin(
@@ -51,6 +61,8 @@ export default function NextGenAdminInitializeBurn(props: Props) {
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
+  const [uploadError, setUploadError] = useState<string>();
+
   useContractRead({
     address: NEXTGEN_MINTER.contract as `0x${string}`,
     abi: NEXTGEN_MINTER.abi,
@@ -63,9 +75,51 @@ export default function NextGenAdminInitializeBurn(props: Props) {
     },
   });
 
+  useEffect(() => {
+    if (signMessage.isError) {
+      setLoading(false);
+      setUploadError(`Error: ${signMessage.error?.message.split(".")[0]}`);
+    }
+  }, [signMessage.isError]);
+
+  useEffect(() => {
+    if (signMessage.isSuccess && signMessage.data) {
+      const data = {
+        wallet: account.address as string,
+        signature: signMessage.data,
+        uuid: uuid,
+        collection_id: mintCollectionID,
+        burn_collection: NEXTGEN_CORE.contract,
+        burn_collection_id: burnCollectionID,
+        min_token_index: 0,
+        max_token_index: 0,
+        burn_address: NULL_ADDRESS,
+        status: status,
+      };
+
+      postData(
+        `${process.env.API_ENDPOINT}/api/nextgen/register_burn_collection`,
+        data
+      ).then((response) => {
+        if (response.status === 200 && response.response) {
+          setSubmitting(true);
+        } else {
+          setUploadError(
+            `Error: ${
+              response.response.error
+                ? response.response.error
+                : "Unknown error"
+            }`
+          );
+          setLoading(false);
+        }
+      });
+    }
+  }, [signMessage.data]);
+
   const contractWrite = useContractWrite({
-    address: NEXTGEN_CORE.contract as `0x${string}`,
-    abi: NEXTGEN_CORE.abi,
+    address: NEXTGEN_MINTER.contract as `0x${string}`,
+    abi: NEXTGEN_MINTER.abi,
     chainId: NEXTGEN_CHAIN_ID,
     functionName: "initializeBurn",
     onError() {
@@ -74,10 +128,9 @@ export default function NextGenAdminInitializeBurn(props: Props) {
     },
   });
 
-  function submit() {
-    setLoading(true);
-    contractWrite.reset();
+  function validate() {
     const errors = [];
+
     if (!burnCollectionID) {
       errors.push("Burn Collection id is required");
     }
@@ -90,10 +143,25 @@ export default function NextGenAdminInitializeBurn(props: Props) {
 
     if (errors.length > 0) {
       setErrors(errors);
-      setLoading(false);
+      return false;
     } else {
       setErrors([]);
-      setSubmitting(true);
+      return true;
+    }
+  }
+
+  function syncDB() {
+    setLoading(true);
+    setUploadError(undefined);
+    signMessage.reset();
+    contractWrite.reset();
+    const valid = validate();
+    if (valid) {
+      signMessage.signMessage({
+        message: uuid,
+      });
+    } else {
+      setLoading(false);
     }
   }
 
@@ -205,10 +273,18 @@ export default function NextGenAdminInitializeBurn(props: Props) {
             <Button
               className={`mt-3 mb-3 seize-btn`}
               disabled={submitting || loading}
-              onClick={() => submit()}>
+              onClick={() => syncDB()}>
               Submit
             </Button>
           </Form>
+          {uploadError && <div className="text-danger">{uploadError}</div>}
+          {loading && !contractWrite.isLoading && (
+            <div>
+              Syncing with DB... Sign Message <code>{uuid}</code> in your
+              wallet...
+            </div>
+          )}
+          {loading && contractWrite.isLoading && <div>Synced with DB.</div>}
           <NextGenContractWriteStatus
             isLoading={contractWrite.isLoading}
             hash={contractWrite.data?.hash}

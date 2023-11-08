@@ -1,7 +1,8 @@
 import { Container, Row, Col, Button, Form } from "react-bootstrap";
 import styles from "./NextGenAdmin.module.scss";
-import { useAccount, useContractWrite } from "wagmi";
-import { useEffect, useRef, useState } from "react";
+import { useAccount, useContractWrite, useSignMessage } from "wagmi";
+import { useEffect, useState } from "react";
+import { v4 as uuidv4 } from "uuid";
 import {
   FunctionSelectors,
   NEXTGEN_CHAIN_ID,
@@ -16,7 +17,7 @@ import {
 } from "../nextgen_helpers";
 import NextGenContractWriteStatus from "../NextGenContractWriteStatus";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { isDivInViewport, scrollToDiv } from "../../../helpers/Helpers";
+import { postData } from "../../../services/6529api";
 
 interface Props {
   close: () => void;
@@ -24,6 +25,8 @@ interface Props {
 
 export default function NextGenAdminInitializeExternalBurnSwap(props: Props) {
   const account = useAccount();
+  const signMessage = useSignMessage();
+  const [uuid, setuuid] = useState(uuidv4());
 
   const globalAdmin = useGlobalAdmin(account.address as string);
   const functionAdmin = useFunctionAdmin(
@@ -46,14 +49,16 @@ export default function NextGenAdminInitializeExternalBurnSwap(props: Props) {
   const [erc721Collection, setErc721Collection] = useState("");
   const [burnCollectionID, setBurnCollectionID] = useState("");
   const [mintCollectionID, setMintCollectionID] = useState("");
-  const [tokenMin, setTokenMin] = useState<number>();
-  const [tokenMax, setTokenMax] = useState<number>();
+  const [tokenMin, setTokenMin] = useState("");
+  const [tokenMax, setTokenMax] = useState("");
   const [burnSwapAddress, setBurnSwapAddress] = useState("");
   const [status, setStatus] = useState<boolean>();
 
   const [errors, setErrors] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+
+  const [uploadError, setUploadError] = useState<string>();
 
   const contractWrite = useContractWrite({
     address: NEXTGEN_MINTER.contract as `0x${string}`,
@@ -66,9 +71,64 @@ export default function NextGenAdminInitializeExternalBurnSwap(props: Props) {
     },
   });
 
-  function submit() {
+  function syncDB() {
     setLoading(true);
+    setUploadError(undefined);
+    signMessage.reset();
     contractWrite.reset();
+    const valid = validate();
+    if (valid) {
+      signMessage.signMessage({
+        message: uuid,
+      });
+    } else {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    if (signMessage.isError) {
+      setLoading(false);
+      setUploadError(`Error: ${signMessage.error?.message.split(".")[0]}`);
+    }
+  }, [signMessage.isError]);
+
+  useEffect(() => {
+    if (signMessage.isSuccess && signMessage.data) {
+      const data = {
+        wallet: account.address as string,
+        signature: signMessage.data,
+        uuid: uuid,
+        collection_id: mintCollectionID,
+        burn_collection: erc721Collection,
+        burn_collection_id: burnCollectionID,
+        min_token_index: tokenMin,
+        max_token_index: tokenMax,
+        burn_address: burnSwapAddress,
+        status: status,
+      };
+
+      postData(
+        `${process.env.API_ENDPOINT}/api/nextgen/register_burn_collection`,
+        data
+      ).then((response) => {
+        if (response.status === 200 && response.response) {
+          setSubmitting(true);
+        } else {
+          setUploadError(
+            `Error: ${
+              response.response.error
+                ? response.response.error
+                : "Unknown error"
+            }`
+          );
+          setLoading(false);
+        }
+      });
+    }
+  }, [signMessage.data]);
+
+  function validate() {
     const errors = [];
 
     if (!erc721Collection) {
@@ -95,10 +155,10 @@ export default function NextGenAdminInitializeExternalBurnSwap(props: Props) {
 
     if (errors.length > 0) {
       setErrors(errors);
-      setLoading(false);
+      return false;
     } else {
       setErrors([]);
-      setSubmitting(true);
+      return true;
     }
   }
 
@@ -154,22 +214,12 @@ export default function NextGenAdminInitializeExternalBurnSwap(props: Props) {
             </Form.Group>
             <Form.Group className="mb-3">
               <Form.Label>Burn Collection ID</Form.Label>
-              <Form.Select
-                className={`${styles.formInput}`}
+              <Form.Control
+                type="text"
+                placeholder="0x..."
                 value={burnCollectionID}
-                onChange={(e) => {
-                  setStatus(undefined);
-                  setBurnCollectionID(e.target.value);
-                }}>
-                <option value="" disabled>
-                  Select Collection
-                </option>
-                {collectionIds.map((id) => (
-                  <option key={`burn-collection-id-${id}`} value={id}>
-                    {id}
-                  </option>
-                ))}
-              </Form.Select>
+                onChange={(e: any) => setBurnCollectionID(e.target.value)}
+              />
             </Form.Group>
             <Form.Group className="mb-3">
               <Form.Label>Mint Collection ID</Form.Label>
@@ -193,7 +243,7 @@ export default function NextGenAdminInitializeExternalBurnSwap(props: Props) {
             <Form.Group className="mb-3">
               <Form.Label>Min Token Index</Form.Label>
               <Form.Control
-                type="number"
+                type="text"
                 placeholder="...min"
                 value={tokenMin}
                 onChange={(e: any) => setTokenMin(e.target.value)}
@@ -202,7 +252,7 @@ export default function NextGenAdminInitializeExternalBurnSwap(props: Props) {
             <Form.Group className="mb-3">
               <Form.Label>Max Token Index</Form.Label>
               <Form.Control
-                type="number"
+                type="text"
                 placeholder="...max"
                 value={tokenMax}
                 onChange={(e: any) => setTokenMax(e.target.value)}
@@ -251,13 +301,23 @@ export default function NextGenAdminInitializeExternalBurnSwap(props: Props) {
                 </ul>
               </div>
             )}
-            <Button
-              className={`mt-3 mb-3 seize-btn`}
-              disabled={submitting || loading}
-              onClick={() => submit()}>
-              Submit
-            </Button>
+            <Form.Group className="mb-3 d-flex gap-3">
+              <Button
+                className="seize-btn"
+                disabled={submitting || loading}
+                onClick={() => syncDB()}>
+                Submit
+              </Button>
+            </Form.Group>
           </Form>
+          {uploadError && <div className="text-danger">{uploadError}</div>}
+          {loading && !contractWrite.isLoading && (
+            <div>
+              Syncing with DB... Sign Message <code>{uuid}</code> in your
+              wallet...
+            </div>
+          )}
+          {loading && contractWrite.isLoading && <div>Synced with DB.</div>}
           <NextGenContractWriteStatus
             isLoading={contractWrite.isLoading}
             hash={contractWrite.data?.hash}

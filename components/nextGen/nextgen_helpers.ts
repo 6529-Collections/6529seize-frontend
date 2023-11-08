@@ -265,10 +265,14 @@ export function retrieveCollectionCosts(
 }
 
 export const getPhaseDateDisplay = (numberDate: number) => {
-  if (numberDate >= NEVER_DATE * 1000) {
-    return "Never";
+  const date = new Date(numberDate * 1000);
+  if (
+    isNaN(date.getTime()) ||
+    numberDate >= NEVER_DATE * 1000 ||
+    numberDate === 0
+  ) {
+    return "UNAVAILABLE";
   }
-  const date = new Date(numberDate);
   const formattedDate = date.toLocaleString("default", {
     day: "numeric",
     month: "short",
@@ -276,17 +280,17 @@ export const getPhaseDateDisplay = (numberDate: number) => {
     hour: "2-digit",
     minute: "2-digit",
   });
-  return formattedDate.toUpperCase();
+  return `STARTING ${formattedDate.toUpperCase()}`;
 };
 
 export function isMintingOpen(startTime: number, endTime: number) {
   const now = new Date().getTime();
-  return now > startTime && now < endTime;
+  return now > startTime * 1000 && now < endTime * 1000;
 }
 
 export function isMintingUpcoming(startTime: number) {
   const now = new Date().getTime();
-  return startTime > now;
+  return startTime * 1000 > now;
 }
 
 export function extractURI(s: string) {
@@ -328,10 +332,10 @@ export function extractAttributes(s: string) {
 }
 
 export function extractPhases(d: any[]) {
-  let alStatus = Status.UNAVAILABLE;
-  let publicStatus = Status.UNAVAILABLE;
-  const al_start = parseInt(d[0]) * 1000;
-  const al_end = parseInt(d[1]) * 1000;
+  let alStatus = Status.COMPLETE;
+  let publicStatus = Status.COMPLETE;
+  const al_start = parseInt(d[0]);
+  const al_end = parseInt(d[1]);
   if (isMintingOpen(al_start, al_end)) {
     alStatus = Status.LIVE;
   }
@@ -339,8 +343,8 @@ export function extractPhases(d: any[]) {
     alStatus = Status.UPCOMING;
   }
 
-  const public_start = parseInt(d[3]) * 1000;
-  const public_end = parseInt(d[4]) * 1000;
+  const public_start = parseInt(d[3]);
+  const public_end = parseInt(d[4]);
   if (isMintingOpen(public_start, public_end)) {
     publicStatus = Status.LIVE;
   }

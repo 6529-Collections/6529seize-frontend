@@ -54,9 +54,9 @@ export default function NextGenAdminProposeAddressesAndPercentages(
   const [address1, setAddress1] = useState("");
   const [address2, setAddress2] = useState("");
   const [address3, setAddress3] = useState("");
-  const [percentage1, setPercentage1] = useState<number>();
-  const [percentage2, setPercentage2] = useState<number>();
-  const [percentage3, setPercentage3] = useState<number>();
+  const [percentage1, setPercentage1] = useState("");
+  const [percentage2, setPercentage2] = useState("");
+  const [percentage3, setPercentage3] = useState("");
 
   const [errors, setErrors] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
@@ -207,28 +207,28 @@ export default function NextGenAdminProposeAddressesAndPercentages(
             <Form.Group className="mb-3">
               <Form.Label>{props.type} Percentage 1</Form.Label>
               <Form.Control
-                type="number"
+                type="text"
                 placeholder="...percentage"
                 value={percentage1}
-                onChange={(e: any) => setPercentage1(parseInt(e.target.value))}
+                onChange={(e: any) => setPercentage1(e.target.value)}
               />
             </Form.Group>
             <Form.Group className="mb-3">
               <Form.Label>{props.type} Percentage 2</Form.Label>
               <Form.Control
-                type="number"
+                type="text"
                 placeholder="...percentage"
                 value={percentage2}
-                onChange={(e: any) => setPercentage2(parseInt(e.target.value))}
+                onChange={(e: any) => setPercentage2(e.target.value)}
               />
             </Form.Group>
             <Form.Group className="mb-3">
               <Form.Label>{props.type} Percentage 3</Form.Label>
               <Form.Control
-                type="number"
+                type="text"
                 placeholder="...percentage"
                 value={percentage3}
-                onChange={(e: any) => setPercentage3(parseInt(e.target.value))}
+                onChange={(e: any) => setPercentage3(e.target.value)}
               />
             </Form.Group>
             {!loading && errors.length > 0 && (

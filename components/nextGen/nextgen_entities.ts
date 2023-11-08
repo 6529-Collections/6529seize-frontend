@@ -47,11 +47,33 @@ export interface TokensPerAddress {
   total: number;
 }
 
-export interface ProofResponse {
+export enum AllowlistType {
+  ALLOWLIST = "allowlist",
+  EXTERNAL_BURN = "external_burn",
+}
+
+export interface CollectionWithMerkle {
+  collection_id: number;
+  merkle_root: string;
+  merkle_tree: any;
+  al_type: AllowlistType;
+  phase: string;
+  burn_collection: string;
+  burn_collection_id: number;
+  min_token_index: number;
+  max_token_index: number;
+  burn_address: string;
+  status: boolean;
+}
+
+export interface ProofResponseBurn {
   keccak: string;
-  spots: number;
   info: any;
   proof: string[];
+}
+
+export interface ProofResponse extends ProofResponseBurn {
+  spots: number;
 }
 
 export interface TokenURI {
@@ -80,8 +102,7 @@ export interface Attributes {
 }
 
 export enum Status {
-  UPCOMING,
-  LIVE,
-  COMPLETE,
-  UNAVAILABLE,
+  UPCOMING = "UPCOMING",
+  LIVE = "LIVE",
+  COMPLETE = "COMPLETE",
 }

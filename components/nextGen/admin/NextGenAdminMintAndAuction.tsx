@@ -44,9 +44,9 @@ export default function NextGenAdminMintAndAuction(props: Props) {
 
   const [recipient, setRecipient] = useState("");
   const [tokenData, setTokenData] = useState("");
-  const [salt, setSalt] = useState<number>();
+  const [salt, setSalt] = useState("");
   const [collectionID, setCollectionID] = useState("");
-  const [endTime, setEndTime] = useState<number>();
+  const [endTime, setEndTime] = useState("");
 
   const [errors, setErrors] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
@@ -147,7 +147,7 @@ export default function NextGenAdminMintAndAuction(props: Props) {
             <Form.Group className="mb-3">
               <Form.Label>Salt</Form.Label>
               <Form.Control
-                type="number"
+                type="text"
                 placeholder="...salt"
                 value={salt}
                 onChange={(e: any) => setSalt(e.target.value)}
@@ -174,7 +174,7 @@ export default function NextGenAdminMintAndAuction(props: Props) {
             <Form.Group className="mb-3">
               <Form.Label>Auction End Time</Form.Label>
               <Form.Control
-                type="number"
+                type="text"
                 placeholder="unix epoch time"
                 value={endTime}
                 onChange={(e: any) => setEndTime(e.target.value)}

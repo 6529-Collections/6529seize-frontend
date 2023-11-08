@@ -265,11 +265,49 @@
 }
 
 .mintDetails {
-  background-color: $off-white;
+  background-color: white;
   color: black;
 }
 
 .mintDetailsSpan {
   margin-left: 1.2rem;
   margin-right: 1.2rem;
+}
+
+.filterDropdown {
+  line-height: 48px;
+  text-align: center;
+  background-color: transparent;
+  border: none;
+  padding-right: 10px;
+  a {
+    line-height: 30px;
+  }
+  button {
+    font-size: larger !important;
+    font-weight: bolder !important;
+    cursor: copy;
+    padding: 0;
+    background-color: transparent !important;
+    border-color: transparent !important;
+    &::after {
+      margin-top: 0.8rem;
+    }
+  }
+}
+
+.codeBlock {
+  background-color: black;
+  padding: 5px 10px;
+}
+
+.copyIcon {
+  height: 18px;
+  cursor: pointer;
+  &:hover {
+    color: $lightest-grey;
+  }
+  &:focus {
+    outline: none !important;
+  }
 }
