@@ -10,9 +10,17 @@ import { useAccount } from "wagmi";
 import { useEffect, useState } from "react";
 import UserEditProfileButton from "../settings/UserEditProfileButton";
 import { getRandomColor } from "../../../helpers/Helpers";
+import { Inter } from "next/font/google";
 
 const DEFAULT_BANNER_1 = getRandomColor();
 const DEFAULT_BANNER_2 = getRandomColor();
+
+const inter = Inter({
+  weight: ["300", "400", "500", "600", "700"],
+  style: ["normal"],
+  subsets: ["latin"],
+  display: "swap",
+});
 
 export default function UserPageHeader({
   profile,
@@ -47,7 +55,7 @@ export default function UserPageHeader({
   }, [account, profile]);
 
   return (
-    <div className="tailwind-scope">
+    <div className={`tailwind-scope ${inter.className}`}>
       <section className="tw-pb-16">
         <div
           className="tw-h-36"
@@ -87,7 +95,7 @@ export default function UserPageHeader({
                 consolidatedTDH={consolidatedTDH}
               />
 
-              <UserPageHeaderLevel consolidatedTDH={consolidatedTDH} />
+              <UserPageHeaderLevel level={profile.level} />
               <UserPageHeaderStats consolidatedTDH={consolidatedTDH} />
             </>
           ) : (

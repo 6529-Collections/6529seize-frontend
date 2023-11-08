@@ -66,6 +66,8 @@ export default function UserPageIndex(props: { pageProps: PageProps }) {
         endpoint: `profiles/${user}`,
       }).catch(() => null);
 
+      console.log(userProfile)
+
       if (!userProfile) {
         router.push("/404");
         return;
