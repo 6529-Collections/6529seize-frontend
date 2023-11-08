@@ -3,8 +3,12 @@ import Image from "next/image";
 
 export default function UserPageHeaderPfp({
   profile,
+  defaultBanner1,
+  defaultBanner2,
 }: {
   profile: IProfileAndConsolidations;
+  defaultBanner1: string;
+  defaultBanner2: string;
 }) {
   if (profile.profile?.pfp_url) {
     return (
@@ -18,6 +22,11 @@ export default function UserPageHeaderPfp({
     );
   }
   return (
-    <div className="tw-flex-shrink-0 tw-h-44 tw-w-44 tw-rounded-lg tw-ring-[3px] tw-ring-white/30 tw-bg-neutral-800"></div>
+    <div
+      className="tw-flex-shrink-0 tw-h-44 tw-w-44 tw-rounded-lg tw-ring-[3px] tw-ring-white/30 "
+      style={{
+        background: `linear-gradient(45deg, ${defaultBanner1} 0%, ${defaultBanner2} 100%)`,
+      }}
+    ></div>
   );
 }
