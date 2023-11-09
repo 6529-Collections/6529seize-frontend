@@ -27,9 +27,11 @@ import {
   getTransactionLink,
   isValidEthAddress,
 } from "../../helpers/Helpers";
+import { ConnectedWalletType } from "../../enums";
 
 interface Props {
   address: string;
+  walletType: ConnectedWalletType;
   subdelegation?: {
     originalDelegator: string;
     collection: DelegationCollection;
@@ -233,6 +235,20 @@ export default function NewDelegationComponent(props: Props) {
   }
 
   function submitDelegation() {
+    props.onSetToast({
+      title: `Registering Delegation`,
+      message: `Transaction Successful!
+                    <a
+                    href=${getTransactionLink(
+                      DELEGATION_CONTRACT.chain_id,
+                      "lalala"
+                    )}
+                    target="_blank"
+                    rel="noreferrer"
+                    className=${styles.etherscanLink}>
+                    view
+                  </a>`,
+    });
     const newErrors = validate();
     if (newErrors.length > 0 || gasError) {
       setErrors(newErrors);

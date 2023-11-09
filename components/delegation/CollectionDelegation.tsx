@@ -18,6 +18,7 @@ import {
   useEnsName,
   useNetwork,
   usePrepareContractWrite,
+  usePublicClient,
   useWaitForTransaction,
 } from "wagmi";
 import { Fragment, useEffect, useRef, useState } from "react";
@@ -48,6 +49,8 @@ import NewDelegationComponent from "./NewDelegation";
 import NewSubDelegationComponent from "./NewSubDelegation";
 import UpdateDelegationComponent from "./UpdateDelegation";
 import RevokeDelegationWithSubComponent from "./RevokeDelegationWithSub";
+import { ConnectedWalletType } from "../../enums";
+import { connected } from "process";
 
 interface Props {
   setSection(section: DelegationCenterSection): any;
@@ -166,6 +169,11 @@ export default function CollectionDelegationComponent(props: Props) {
     address: accountResolution.address as `0x${string}`,
     chainId: 1,
   });
+  const publicClient = usePublicClient();
+
+  const [walletType, setWalletType] = useState<ConnectedWalletType>(
+    ConnectedWalletType.ADDRESS
+  );
 
   const [outgoingDelegations, setOutgoingDelegations] = useState<
     ContractDelegation[]
@@ -214,6 +222,17 @@ export default function CollectionDelegationComponent(props: Props) {
 
   useEffect(() => {
     reset();
+    if (publicClient && accountResolution.address) {
+      publicClient
+        .getBytecode({ address: accountResolution.address })
+        .then((code) => {
+          if (code) {
+            setWalletType(ConnectedWalletType.CONTRACT);
+          } else {
+            setWalletType(ConnectedWalletType.ADDRESS);
+          }
+        });
+    }
   }, [accountResolution.address]);
 
   function getSwitchToHtml() {
@@ -1637,13 +1656,15 @@ export default function CollectionDelegationComponent(props: Props) {
                   />
                 )}
               {showCreateNewDelegationWithSub &&
-                subDelegationOriginalDelegator && (
+                subDelegationOriginalDelegator &&
+                accountResolution.address && (
                   <NewDelegationComponent
                     subdelegation={{
                       originalDelegator: subDelegationOriginalDelegator,
                       collection: props.collection,
                     }}
-                    address={accountResolution.address as string}
+                    address={accountResolution.address}
+                    walletType={walletType}
                     ens={ensResolution.data}
                     onHide={() => {
                       setShowCreateNewDelegationWithSub(false);
