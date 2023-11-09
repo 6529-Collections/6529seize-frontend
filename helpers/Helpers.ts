@@ -331,3 +331,12 @@ export const formatNumber = (num: number): string => {
   // For numbers 1 million and above, format as 'M' for millions
   return parseFloat((num / 1000000).toFixed(2)).toString() + "M";
 };
+
+export function displayDecimal(value: number, places: number) {
+  if (0 >= value) {
+    return "-";
+  }
+
+  const fixedValue = value.toFixed(places);
+  return numberWithCommas(parseFloat(fixedValue)).toString();
+}
