@@ -367,3 +367,13 @@ export function displayDecimal(value: number, places: number) {
   const fixedValue = value.toFixed(places);
   return numberWithCommas(parseFloat(fixedValue)).toString();
 }
+
+export function areEqualURLS(s1: string, s2: string) {
+  try {
+    const url1 = new URL(s1);
+    const url2 = new URL(s2);
+    return url1.href === url2.href;
+  } catch {
+    return false;
+  }
+}

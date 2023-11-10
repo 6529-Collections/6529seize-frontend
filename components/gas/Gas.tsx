@@ -14,6 +14,8 @@ export default function Gas() {
   const [fetching, setFetching] = useState(true);
 
   const [gas, setGas] = useState<Gas[]>([]);
+  const [sumPrimary, setSumPrimary] = useState(0);
+  const [sumSecondary, setSumSecondary] = useState(0);
 
   const [fromDate, setFromDate] = useState<Date>();
   const [toDate, setToDate] = useState<Date>();
@@ -101,6 +103,10 @@ export default function Gas() {
     setFetching(true);
     fetchUrl(getUrl()).then((res: Gas[]) => {
       setGas(res);
+      setSumPrimary(res.map((r) => r.primary_gas).reduce((a, b) => a + b, 0));
+      setSumSecondary(
+        res.map((r) => r.secondary_gas).reduce((a, b) => a + b, 0)
+      );
       setFetching(false);
     });
   }
@@ -192,6 +198,17 @@ export default function Gas() {
                     </td>
                   </tr>
                 ))}
+                <tr key={`gas-total`}>
+                  <td colSpan={2} className="text-right">
+                    <b>TOTAL</b>
+                  </td>
+                  <td className="text-center">
+                    {displayDecimal(sumPrimary, 3)}
+                  </td>
+                  <td className="text-center">
+                    {displayDecimal(sumSecondary, 3)}
+                  </td>
+                </tr>
               </tbody>
             </Table>
           )}

@@ -3,6 +3,7 @@ import styles from "./LatestActivity.module.scss";
 import { Transaction } from "../../entities/ITransaction";
 import {
   areEqualAddresses,
+  areEqualURLS,
   displayDecimal,
   getDateDisplay,
   isGradientsContract,
@@ -27,6 +28,25 @@ interface Props {
 const ROYALTIES_PERCENTAGE = 0.069;
 
 export default function LatestActivityRow(props: Props) {
+  function getNftImageSrc(nft?: NFTLite, src?: string) {
+    if (!nft) {
+      return "";
+    }
+    if (!src) {
+      return nft.icon;
+    }
+    if (areEqualURLS(src, nft.icon)) {
+      return nft.thumbnail;
+    }
+    if (areEqualURLS(src, nft.thumbnail)) {
+      return nft.scaled;
+    }
+    if (areEqualURLS(src, nft.scaled)) {
+      return nft.image;
+    }
+    return "";
+  }
+
   function printRoyalties() {
     if (
       props.tr.value == 0 ||
@@ -35,28 +55,66 @@ export default function LatestActivityRow(props: Props) {
     ) {
       return <></>;
     }
-    let emoji: IconProp;
     const royaltiesPercentage = props.tr.royalties / props.tr.value;
     if (props.tr.royalties > 0) {
+      let imgSrc: string = "pepe-smile.png";
       if (royaltiesPercentage >= ROYALTIES_PERCENTAGE) {
-        emoji = "face-grin-wide";
-      } else {
-        emoji = "face-smile";
+        imgSrc = "pepe-xglasses.png";
       }
-    } else {
-      emoji = "face-frown";
+      return (
+        <Tippy
+          content={
+            <Container>
+              <Row>
+                <Col className="no-wrap">Royalties</Col>
+                <Col className="text-right no-wrap">
+                  {props.tr.royalties > 0
+                    ? `${displayDecimal(
+                        props.tr.royalties,
+                        5
+                      )} (${displayDecimal(royaltiesPercentage * 100, 2)}%)`
+                    : "-"}
+                </Col>
+              </Row>
+            </Container>
+          }
+          placement={"top-end"}
+          theme={"light"}
+          hideOnClick={false}>
+          <Image
+            width={0}
+            height={0}
+            style={{ height: "25px", width: "auto" }}
+            src={imgSrc}
+            alt={imgSrc}
+            className="cursor-pointer"
+          />
+        </Tippy>
+      );
     }
+  }
+
+  function printGas() {
     return (
       <Tippy
         content={
           <Container>
             <Row>
-              <Col className="no-wrap">Royalties</Col>
-              <Col className="text-right no-wrap">
-                {props.tr.royalties > 0
-                  ? `${displayDecimal(props.tr.royalties, 5)} (
-                ${displayDecimal(royaltiesPercentage * 100, 2)}%)`
-                  : "Not paid"}
+              <Col className="no-wrap">Gas</Col>
+              <Col className="text-right">
+                {displayDecimal(props.tr.gas, 5)}
+              </Col>
+            </Row>
+            <Row>
+              <Col className="no-wrap">GWEI</Col>
+              <Col className="text-right">
+                {numberWithCommas(props.tr.gas_gwei)}
+              </Col>
+            </Row>
+            <Row>
+              <Col className="no-wrap">Gas Price</Col>
+              <Col className="text-right">
+                {displayDecimal(props.tr.gas_price_gwei, 2)}
               </Col>
             </Row>
           </Container>
@@ -66,7 +124,7 @@ export default function LatestActivityRow(props: Props) {
         hideOnClick={false}>
         <FontAwesomeIcon
           className={styles.gasIcon}
-          icon={emoji}></FontAwesomeIcon>
+          icon="gas-pump"></FontAwesomeIcon>
       </Tippy>
     );
   }
@@ -74,36 +132,7 @@ export default function LatestActivityRow(props: Props) {
     return (
       <span className="d-flex align-items-center gap-3">
         {printRoyalties()}
-        <Tippy
-          content={
-            <Container>
-              <Row>
-                <Col className="no-wrap">Gas</Col>
-                <Col className="text-right">
-                  {displayDecimal(props.tr.gas, 5)}
-                </Col>
-              </Row>
-              <Row>
-                <Col className="no-wrap">GWEI</Col>
-                <Col className="text-right">
-                  {numberWithCommas(props.tr.gas_gwei)}
-                </Col>
-              </Row>
-              <Row>
-                <Col className="no-wrap">Gas Price</Col>
-                <Col className="text-right">
-                  {displayDecimal(props.tr.gas_price_gwei, 2)}
-                </Col>
-              </Row>
-            </Container>
-          }
-          placement={"top-end"}
-          theme={"light"}
-          hideOnClick={false}>
-          <FontAwesomeIcon
-            className={styles.gasIcon}
-            icon="gas-pump"></FontAwesomeIcon>
-        </Tippy>
+        {printGas()}
         <a
           href={`https://etherscan.io/tx/${props.tr.transaction}`}
           className={styles.transactionLink}
@@ -184,14 +213,13 @@ export default function LatestActivityRow(props: Props) {
                     width={0}
                     height={0}
                     style={{ height: "40px", width: "auto" }}
-                    src={
-                      props.nft.thumbnail
-                        ? props.nft.thumbnail
-                        : props.nft.scaled
-                    }
+                    src={getNftImageSrc(props.nft)}
                     alt={props.nft.name}
                     onError={({ currentTarget }) => {
-                      currentTarget.src = props.nft!.image;
+                      currentTarget.src = getNftImageSrc(
+                        props.nft,
+                        currentTarget.src
+                      );
                     }}
                     className={styles.nftImage}
                   />
@@ -253,16 +281,13 @@ export default function LatestActivityRow(props: Props) {
                     width={0}
                     height={0}
                     style={{ height: "40px", width: "auto" }}
-                    src={
-                      props.nft.icon
-                        ? props.nft.icon
-                        : props.nft.thumbnail
-                        ? props.nft.thumbnail
-                        : props.nft.image
-                    }
+                    src={getNftImageSrc(props.nft)}
                     alt={props.nft.name}
                     onError={({ currentTarget }) => {
-                      currentTarget.src = props.nft!.image;
+                      currentTarget.src = getNftImageSrc(
+                        props.nft,
+                        currentTarget.src
+                      );
                     }}
                     className={styles.nftImage}
                   />
@@ -316,16 +341,13 @@ export default function LatestActivityRow(props: Props) {
                       width={0}
                       height={0}
                       style={{ height: "40px", width: "auto" }}
-                      src={
-                        props.nft.icon
-                          ? props.nft.icon
-                          : props.nft.thumbnail
-                          ? props.nft.thumbnail
-                          : props.nft.image
-                      }
+                      src={getNftImageSrc(props.nft)}
                       alt={props.nft.name}
                       onError={({ currentTarget }) => {
-                        currentTarget.src = props.nft!.image;
+                        currentTarget.src = getNftImageSrc(
+                          props.nft,
+                          currentTarget.src
+                        );
                       }}
                       className={styles.nftImage}
                     />
