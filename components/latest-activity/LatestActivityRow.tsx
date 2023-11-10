@@ -38,7 +38,7 @@ export default function LatestActivityRow(props: Props) {
     const royaltiesPercentage = props.tr.royalties / props.tr.value;
     if (props.tr.royalties > 0) {
       if (royaltiesPercentage >= ROYALTIES_PERCENTAGE) {
-        emoji = "&#129395;";
+        emoji = "&#128512;";
       } else {
         emoji = "&#128578;";
       }
