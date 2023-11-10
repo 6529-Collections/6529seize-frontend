@@ -16,6 +16,7 @@ import { NFTLite } from "../../entities/INFT";
 import Address from "../address/Address";
 import Tippy from "@tippyjs/react";
 import { Container, Row, Col } from "react-bootstrap";
+import { IconProp } from "@fortawesome/fontawesome-svg-core";
 
 interface Props {
   nft?: NFTLite;
@@ -34,16 +35,16 @@ export default function LatestActivityRow(props: Props) {
     ) {
       return <></>;
     }
-    let emoji;
+    let emoji: IconProp;
     const royaltiesPercentage = props.tr.royalties / props.tr.value;
     if (props.tr.royalties > 0) {
       if (royaltiesPercentage >= ROYALTIES_PERCENTAGE) {
-        emoji = "&#128512;";
+        emoji = "face-grin-wide";
       } else {
-        emoji = "&#128578;";
+        emoji = "face-smile";
       }
     } else {
-      emoji = "&#128577;";
+      emoji = "face-frown";
     }
     return (
       <Tippy
@@ -63,11 +64,9 @@ export default function LatestActivityRow(props: Props) {
         placement={"top-end"}
         theme={"light"}
         hideOnClick={false}>
-        <span
-          className={styles.royalties}
-          dangerouslySetInnerHTML={{
-            __html: emoji,
-          }}></span>
+        <FontAwesomeIcon
+          className={styles.gasIcon}
+          icon={emoji}></FontAwesomeIcon>
       </Tippy>
     );
   }

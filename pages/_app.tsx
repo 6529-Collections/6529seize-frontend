@@ -76,6 +76,9 @@ import {
   faArrowCircleLeft,
   faArrowRightFromBracket,
   faGasPump,
+  faFaceGrinWide,
+  faFaceSmile,
+  faFrown,
 } from "@fortawesome/free-solid-svg-icons";
 import Head from "next/head";
 import { Web3Modal } from "@web3modal/react";
@@ -139,7 +142,10 @@ library.add(
   faGear,
   faArrowCircleLeft,
   faArrowRightFromBracket,
-  faGasPump
+  faGasPump,
+  faFaceGrinWide,
+  faFaceSmile,
+  faFrown
 );
 
 const CONTRACT_CHAINS: Chain[] = [mainnet];
