@@ -55,40 +55,38 @@ export default function LatestActivityRow(props: Props) {
     ) {
       return <></>;
     }
-    let emoji: IconProp;
     const royaltiesPercentage = props.tr.royalties / props.tr.value;
     if (props.tr.royalties > 0) {
+      let emoji: IconProp = "face-smile";
       if (royaltiesPercentage >= ROYALTIES_PERCENTAGE) {
         emoji = "face-grin-wide";
-      } else {
-        emoji = "face-smile";
       }
-    } else {
-      emoji = "face-frown";
+      return (
+        <Tippy
+          content={
+            <Container>
+              <Row>
+                <Col className="no-wrap">Royalties</Col>
+                <Col className="text-right no-wrap">
+                  {props.tr.royalties > 0
+                    ? `${displayDecimal(
+                        props.tr.royalties,
+                        5
+                      )} (${displayDecimal(royaltiesPercentage * 100, 2)}%)`
+                    : "-"}
+                </Col>
+              </Row>
+            </Container>
+          }
+          placement={"top-end"}
+          theme={"light"}
+          hideOnClick={false}>
+          <FontAwesomeIcon
+            className={styles.gasIcon}
+            icon={emoji}></FontAwesomeIcon>
+        </Tippy>
+      );
     }
-    return (
-      <Tippy
-        content={
-          <Container>
-            <Row>
-              <Col className="no-wrap">Royalties</Col>
-              <Col className="text-right no-wrap">
-                {props.tr.royalties > 0
-                  ? `${displayDecimal(props.tr.royalties, 5)} (
-                ${displayDecimal(royaltiesPercentage * 100, 2)}%)`
-                  : "Not paid"}
-              </Col>
-            </Row>
-          </Container>
-        }
-        placement={"top-end"}
-        theme={"light"}
-        hideOnClick={false}>
-        <FontAwesomeIcon
-          className={styles.gasIcon}
-          icon={emoji}></FontAwesomeIcon>
-      </Tippy>
-    );
   }
   function printInfo() {
     return (
