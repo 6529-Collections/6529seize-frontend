@@ -57,9 +57,9 @@ export default function LatestActivityRow(props: Props) {
     }
     const royaltiesPercentage = props.tr.royalties / props.tr.value;
     if (props.tr.royalties > 0) {
-      let emoji: IconProp = "face-smile";
+      let imgSrc: string = "pepe-smile.png";
       if (royaltiesPercentage >= ROYALTIES_PERCENTAGE) {
-        emoji = "face-grin-wide";
+        imgSrc = "pepe-xglasses.png";
       }
       return (
         <Tippy
@@ -81,47 +81,58 @@ export default function LatestActivityRow(props: Props) {
           placement={"top-end"}
           theme={"light"}
           hideOnClick={false}>
-          <FontAwesomeIcon
-            className={styles.gasIcon}
-            icon={emoji}></FontAwesomeIcon>
+          <Image
+            width={0}
+            height={0}
+            style={{ height: "25px", width: "auto" }}
+            src={imgSrc}
+            alt={imgSrc}
+            className="cursor-pointer"
+          />
         </Tippy>
       );
     }
+  }
+
+  function printGas() {
+    return (
+      <Tippy
+        content={
+          <Container>
+            <Row>
+              <Col className="no-wrap">Gas</Col>
+              <Col className="text-right">
+                {displayDecimal(props.tr.gas, 5)}
+              </Col>
+            </Row>
+            <Row>
+              <Col className="no-wrap">GWEI</Col>
+              <Col className="text-right">
+                {numberWithCommas(props.tr.gas_gwei)}
+              </Col>
+            </Row>
+            <Row>
+              <Col className="no-wrap">Gas Price</Col>
+              <Col className="text-right">
+                {displayDecimal(props.tr.gas_price_gwei, 2)}
+              </Col>
+            </Row>
+          </Container>
+        }
+        placement={"top-end"}
+        theme={"light"}
+        hideOnClick={false}>
+        <FontAwesomeIcon
+          className={styles.gasIcon}
+          icon="gas-pump"></FontAwesomeIcon>
+      </Tippy>
+    );
   }
   function printInfo() {
     return (
       <span className="d-flex align-items-center gap-3">
         {printRoyalties()}
-        <Tippy
-          content={
-            <Container>
-              <Row>
-                <Col className="no-wrap">Gas</Col>
-                <Col className="text-right">
-                  {displayDecimal(props.tr.gas, 5)}
-                </Col>
-              </Row>
-              <Row>
-                <Col className="no-wrap">GWEI</Col>
-                <Col className="text-right">
-                  {numberWithCommas(props.tr.gas_gwei)}
-                </Col>
-              </Row>
-              <Row>
-                <Col className="no-wrap">Gas Price</Col>
-                <Col className="text-right">
-                  {displayDecimal(props.tr.gas_price_gwei, 2)}
-                </Col>
-              </Row>
-            </Container>
-          }
-          placement={"top-end"}
-          theme={"light"}
-          hideOnClick={false}>
-          <FontAwesomeIcon
-            className={styles.gasIcon}
-            icon="gas-pump"></FontAwesomeIcon>
-        </Tippy>
+        {printGas()}
         <a
           href={`https://etherscan.io/tx/${props.tr.transaction}`}
           className={styles.transactionLink}
