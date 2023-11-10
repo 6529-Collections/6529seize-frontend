@@ -3,6 +3,7 @@ import styles from "./LatestActivity.module.scss";
 import { Transaction } from "../../entities/ITransaction";
 import {
   areEqualAddresses,
+  areEqualURLS,
   displayDecimal,
   getDateDisplay,
   isGradientsContract,
@@ -27,6 +28,25 @@ interface Props {
 const ROYALTIES_PERCENTAGE = 0.069;
 
 export default function LatestActivityRow(props: Props) {
+  function getNftImageSrc(nft?: NFTLite, src?: string) {
+    if (!nft) {
+      return "";
+    }
+    if (!src) {
+      return nft.icon;
+    }
+    if (areEqualURLS(src, nft.icon)) {
+      return nft.thumbnail;
+    }
+    if (areEqualURLS(src, nft.thumbnail)) {
+      return nft.scaled;
+    }
+    if (areEqualURLS(src, nft.scaled)) {
+      return nft.image;
+    }
+    return "";
+  }
+
   function printRoyalties() {
     if (
       props.tr.value == 0 ||
@@ -184,14 +204,13 @@ export default function LatestActivityRow(props: Props) {
                     width={0}
                     height={0}
                     style={{ height: "40px", width: "auto" }}
-                    src={
-                      props.nft.thumbnail
-                        ? props.nft.thumbnail
-                        : props.nft.scaled
-                    }
+                    src={getNftImageSrc(props.nft)}
                     alt={props.nft.name}
                     onError={({ currentTarget }) => {
-                      currentTarget.src = props.nft!.image;
+                      currentTarget.src = getNftImageSrc(
+                        props.nft,
+                        currentTarget.src
+                      );
                     }}
                     className={styles.nftImage}
                   />
@@ -253,16 +272,13 @@ export default function LatestActivityRow(props: Props) {
                     width={0}
                     height={0}
                     style={{ height: "40px", width: "auto" }}
-                    src={
-                      props.nft.icon
-                        ? props.nft.icon
-                        : props.nft.thumbnail
-                        ? props.nft.thumbnail
-                        : props.nft.image
-                    }
+                    src={getNftImageSrc(props.nft)}
                     alt={props.nft.name}
                     onError={({ currentTarget }) => {
-                      currentTarget.src = props.nft!.image;
+                      currentTarget.src = getNftImageSrc(
+                        props.nft,
+                        currentTarget.src
+                      );
                     }}
                     className={styles.nftImage}
                   />
@@ -316,16 +332,13 @@ export default function LatestActivityRow(props: Props) {
                       width={0}
                       height={0}
                       style={{ height: "40px", width: "auto" }}
-                      src={
-                        props.nft.icon
-                          ? props.nft.icon
-                          : props.nft.thumbnail
-                          ? props.nft.thumbnail
-                          : props.nft.image
-                      }
+                      src={getNftImageSrc(props.nft)}
                       alt={props.nft.name}
                       onError={({ currentTarget }) => {
-                        currentTarget.src = props.nft!.image;
+                        currentTarget.src = getNftImageSrc(
+                          props.nft,
+                          currentTarget.src
+                        );
                       }}
                       className={styles.nftImage}
                     />
