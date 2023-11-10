@@ -1,13 +1,5 @@
 import { useEffect, useState } from "react";
-import {
-  Container,
-  Row,
-  Col,
-  Table,
-  Dropdown,
-  Form,
-  Badge,
-} from "react-bootstrap";
+import { Container, Row, Col, Table, Dropdown } from "react-bootstrap";
 import styles from "./Gas.module.scss";
 import DotLoader from "../dotLoader/DotLoader";
 import { Gas } from "../../entities/IGas";
@@ -16,17 +8,7 @@ import { displayDecimal } from "../../helpers/Helpers";
 import Image from "next/image";
 import DatePickerModal from "../datePickerModal/DatePickerModal";
 import DownloadUrlWidget from "../downloadUrlWidget/DownloadUrlWidget";
-
-enum DateSelection {
-  TODAY = "Today",
-  WEEK = "Week",
-  MONTH = "Month",
-  YEAR = "Year",
-  ALL = "All",
-  CUSTOM = "Custom",
-}
-
-const MEMES_ARTIST_SPLIT = 0.5;
+import { DateIntervalsSelection } from "../../enums";
 
 export default function Gas() {
   const [fetching, setFetching] = useState(true);
@@ -38,8 +20,8 @@ export default function Gas() {
 
   const [showDatePicker, setShowDatePicker] = useState(false);
 
-  const [dateSelection, setDateSelection] = useState<DateSelection>(
-    DateSelection.TODAY
+  const [dateSelection, setDateSelection] = useState<DateIntervalsSelection>(
+    DateIntervalsSelection.TODAY
   );
 
   function formatDate(d: Date) {
@@ -52,25 +34,58 @@ export default function Gas() {
   function getUrl() {
     let filters = "";
     switch (dateSelection) {
-      case DateSelection.TODAY:
+      case DateIntervalsSelection.ALL:
+        break;
+      case DateIntervalsSelection.TODAY:
         filters += `&from_date=${formatDate(new Date())}`;
         break;
-      case DateSelection.WEEK:
+      case DateIntervalsSelection.YESTERDAY:
+        const yesterday = new Date();
+        yesterday.setUTCDate(yesterday.getUTCDate() - 1);
+        filters += `&from_date=${formatDate(yesterday)}`;
+        filters += `&to_date=${formatDate(new Date())}`;
+        break;
+      case DateIntervalsSelection.LAST_7:
         const weekAgo = new Date();
         weekAgo.setUTCDate(weekAgo.getUTCDate() - 7);
         filters += `&from_date=${formatDate(weekAgo)}`;
         break;
-      case DateSelection.MONTH:
-        const monthAgo = new Date();
-        monthAgo.setUTCDate(monthAgo.getUTCDate() - 30);
-        filters += `&from_date=${formatDate(monthAgo)}`;
+      case DateIntervalsSelection.THIS_MONTH:
+        const firstDayOfMonth = new Date();
+        firstDayOfMonth.setUTCDate(1);
+        filters += `&from_date=${formatDate(firstDayOfMonth)}`;
         break;
-      case DateSelection.YEAR:
-        const yearAgo = new Date();
-        yearAgo.setUTCDate(yearAgo.getUTCDate() - 365);
-        filters += `&from_date=${formatDate(yearAgo)}`;
+      case DateIntervalsSelection.PREVIOUS_MONTH:
+        const firstDayOfPreviousMonth = new Date();
+        firstDayOfPreviousMonth.setUTCDate(1);
+        firstDayOfPreviousMonth.setUTCMonth(
+          firstDayOfPreviousMonth.getUTCMonth() - 1
+        );
+        const lastDayOfPreviousMonth = new Date();
+        lastDayOfPreviousMonth.setUTCDate(0);
+        filters += `&from_date=${formatDate(firstDayOfPreviousMonth)}`;
+        filters += `&to_date=${formatDate(lastDayOfPreviousMonth)}`;
         break;
-      case DateSelection.CUSTOM:
+      case DateIntervalsSelection.YEAR_TO_DATE:
+        const firstDayOfYear = new Date();
+        firstDayOfYear.setUTCDate(1);
+        firstDayOfYear.setUTCMonth(0);
+        filters += `&from_date=${formatDate(firstDayOfYear)}`;
+        break;
+      case DateIntervalsSelection.LAST_YEAR:
+        const firstDayOfLastYear = new Date();
+        firstDayOfLastYear.setUTCDate(1);
+        firstDayOfLastYear.setUTCMonth(0);
+        firstDayOfLastYear.setUTCFullYear(
+          firstDayOfLastYear.getUTCFullYear() - 1
+        );
+        const lastDayOfLastYear = new Date();
+        lastDayOfLastYear.setUTCDate(0);
+        lastDayOfLastYear.setUTCMonth(0);
+        filters += `&from_date=${formatDate(firstDayOfLastYear)}`;
+        filters += `&to_date=${formatDate(lastDayOfLastYear)}`;
+        break;
+      case DateIntervalsSelection.CUSTOM:
         if (fromDate) {
           filters += `&from_date=${formatDate(fromDate)}`;
         }
@@ -82,7 +97,7 @@ export default function Gas() {
     return `${process.env.API_ENDPOINT}/api/gas_memes?${filters}`;
   }
 
-  function fetchRoyalties() {
+  function fetchGas() {
     setFetching(true);
     fetchUrl(getUrl()).then((res: Gas[]) => {
       setGas(res);
@@ -91,17 +106,26 @@ export default function Gas() {
   }
 
   useEffect(() => {
-    fetchRoyalties();
+    fetchGas();
   }, [dateSelection, fromDate, toDate]);
 
   return (
     <Container className={`no-padding pt-4`}>
       <Row className="d-flex align-items-center">
         <Col className="d-flex align-items-center justify-content-between">
-          <h1>GAS {fetching && <DotLoader />}</h1>
+          <span className="d-flex align-items-center gap-2">
+            <h1>GAS {fetching && <DotLoader />}</h1>
+            {!fetching && gas.length > 0 && (
+              <DownloadUrlWidget
+                preview=""
+                name={`gas-memes-${dateSelection.toLowerCase()}`}
+                url={`${getUrl()}&download=true`}
+              />
+            )}
+          </span>
           <Dropdown className={styles.filterDropdown} drop={"down"}>
             <Dropdown.Toggle>
-              {dateSelection == DateSelection.CUSTOM ? (
+              {dateSelection == DateIntervalsSelection.CUSTOM ? (
                 <span>
                   {fromDate && `from: ${fromDate.toISOString().slice(0, 10)}`}{" "}
                   {toDate && `to: ${toDate.toISOString().slice(0, 10)}`}
@@ -111,11 +135,11 @@ export default function Gas() {
               )}
             </Dropdown.Toggle>
             <Dropdown.Menu>
-              {Object.values(DateSelection).map((dateSelection) => (
+              {Object.values(DateIntervalsSelection).map((dateSelection) => (
                 <Dropdown.Item
                   key={dateSelection}
                   onClick={() => {
-                    if (dateSelection !== DateSelection.CUSTOM) {
+                    if (dateSelection !== DateIntervalsSelection.CUSTOM) {
                       setDateSelection(dateSelection);
                     } else {
                       setShowDatePicker(true);
@@ -131,7 +155,7 @@ export default function Gas() {
       <Row className={`pt-3 ${styles.scrollContainer}`}>
         <Col>
           {gas.length > 0 && (
-            <Table bordered={false} className={styles.royaltiesTable}>
+            <Table bordered={false} className={styles.gasTable}>
               <thead>
                 <tr>
                   <th>Meme Card (x{gas.length})</th>
@@ -180,17 +204,6 @@ export default function Gas() {
           </Col>
         </Row>
       )}
-      {gas.length > 0 && (
-        <Row className="pt-3 pb-3">
-          <Col className="d-flex justify-content-end">
-            <DownloadUrlWidget
-              preview=""
-              name={`royalties-memes-${dateSelection.toLowerCase()}`}
-              url={`${getUrl()}&download=true`}
-            />
-          </Col>
-        </Row>
-      )}
       <DatePickerModal
         show={showDatePicker}
         initial_from={fromDate}
@@ -199,7 +212,7 @@ export default function Gas() {
         onApply={(fromDate, toDate) => {
           setFromDate(fromDate);
           setToDate(toDate);
-          setDateSelection(DateSelection.CUSTOM);
+          setDateSelection(DateIntervalsSelection.CUSTOM);
         }}
         onHide={() => setShowDatePicker(false)}
       />
