@@ -84,6 +84,7 @@
   background-color: transparent;
   border: none;
   width: 100%;
+  padding-right: 15px;
   a {
     line-height: 30px;
   }
@@ -119,7 +120,12 @@
   }
 }
 
-.infoIcon {
+.gasIcon {
   height: 20px;
+  cursor: pointer;
+}
+
+.royalties {
+  font-size: larger;
   cursor: pointer;
 }

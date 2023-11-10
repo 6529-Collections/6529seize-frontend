@@ -16,15 +16,7 @@ import { displayDecimal } from "../../helpers/Helpers";
 import Image from "next/image";
 import DatePickerModal from "../datePickerModal/DatePickerModal";
 import DownloadUrlWidget from "../downloadUrlWidget/DownloadUrlWidget";
-
-enum DateSelection {
-  TODAY = "Today",
-  WEEK = "Week",
-  MONTH = "Month",
-  YEAR = "Year",
-  ALL = "All",
-  CUSTOM = "Custom",
-}
+import { DateIntervalsSelection } from "../../enums";
 
 const MEMES_ARTIST_SPLIT = 0.5;
 
@@ -38,8 +30,8 @@ export default function Royalties() {
 
   const [showDatePicker, setShowDatePicker] = useState(false);
 
-  const [dateSelection, setDateSelection] = useState<DateSelection>(
-    DateSelection.TODAY
+  const [dateSelection, setDateSelection] = useState<DateIntervalsSelection>(
+    DateIntervalsSelection.TODAY
   );
 
   function formatDate(d: Date) {
@@ -52,25 +44,58 @@ export default function Royalties() {
   function getUrl() {
     let filters = "";
     switch (dateSelection) {
-      case DateSelection.TODAY:
+      case DateIntervalsSelection.ALL:
+        break;
+      case DateIntervalsSelection.TODAY:
         filters += `&from_date=${formatDate(new Date())}`;
         break;
-      case DateSelection.WEEK:
+      case DateIntervalsSelection.YESTERDAY:
+        const yesterday = new Date();
+        yesterday.setUTCDate(yesterday.getUTCDate() - 1);
+        filters += `&from_date=${formatDate(yesterday)}`;
+        filters += `&to_date=${formatDate(new Date())}`;
+        break;
+      case DateIntervalsSelection.LAST_7:
         const weekAgo = new Date();
         weekAgo.setUTCDate(weekAgo.getUTCDate() - 7);
         filters += `&from_date=${formatDate(weekAgo)}`;
         break;
-      case DateSelection.MONTH:
-        const monthAgo = new Date();
-        monthAgo.setUTCDate(monthAgo.getUTCDate() - 30);
-        filters += `&from_date=${formatDate(monthAgo)}`;
+      case DateIntervalsSelection.THIS_MONTH:
+        const firstDayOfMonth = new Date();
+        firstDayOfMonth.setUTCDate(1);
+        filters += `&from_date=${formatDate(firstDayOfMonth)}`;
         break;
-      case DateSelection.YEAR:
-        const yearAgo = new Date();
-        yearAgo.setUTCDate(yearAgo.getUTCDate() - 365);
-        filters += `&from_date=${formatDate(yearAgo)}`;
+      case DateIntervalsSelection.PREVIOUS_MONTH:
+        const firstDayOfPreviousMonth = new Date();
+        firstDayOfPreviousMonth.setUTCDate(1);
+        firstDayOfPreviousMonth.setUTCMonth(
+          firstDayOfPreviousMonth.getUTCMonth() - 1
+        );
+        const lastDayOfPreviousMonth = new Date();
+        lastDayOfPreviousMonth.setUTCDate(0);
+        filters += `&from_date=${formatDate(firstDayOfPreviousMonth)}`;
+        filters += `&to_date=${formatDate(lastDayOfPreviousMonth)}`;
         break;
-      case DateSelection.CUSTOM:
+      case DateIntervalsSelection.YEAR_TO_DATE:
+        const firstDayOfYear = new Date();
+        firstDayOfYear.setUTCDate(1);
+        firstDayOfYear.setUTCMonth(0);
+        filters += `&from_date=${formatDate(firstDayOfYear)}`;
+        break;
+      case DateIntervalsSelection.LAST_YEAR:
+        const firstDayOfLastYear = new Date();
+        firstDayOfLastYear.setUTCDate(1);
+        firstDayOfLastYear.setUTCMonth(0);
+        firstDayOfLastYear.setUTCFullYear(
+          firstDayOfLastYear.getUTCFullYear() - 1
+        );
+        const lastDayOfLastYear = new Date();
+        lastDayOfLastYear.setUTCDate(0);
+        lastDayOfLastYear.setUTCMonth(0);
+        filters += `&from_date=${formatDate(firstDayOfLastYear)}`;
+        filters += `&to_date=${formatDate(lastDayOfLastYear)}`;
+        break;
+      case DateIntervalsSelection.CUSTOM:
         if (fromDate) {
           filters += `&from_date=${formatDate(fromDate)}`;
         }
@@ -98,10 +123,19 @@ export default function Royalties() {
     <Container className={`no-padding pt-4`}>
       <Row className="d-flex align-items-center">
         <Col className="d-flex align-items-center justify-content-between">
-          <h1>ROYALTIES {fetching && <DotLoader />}</h1>
+          <span className="d-flex align-items-center gap-2">
+            <h1>ROYALTIES {fetching && <DotLoader />}</h1>
+            {!fetching && royalties.length > 0 && (
+              <DownloadUrlWidget
+                preview=""
+                name={`royalties-memes-${dateSelection.toLowerCase()}`}
+                url={`${getUrl()}&download=true`}
+              />
+            )}
+          </span>
           <Dropdown className={styles.filterDropdown} drop={"down"}>
             <Dropdown.Toggle>
-              {dateSelection == DateSelection.CUSTOM ? (
+              {dateSelection == DateIntervalsSelection.CUSTOM ? (
                 <span>
                   {fromDate && `from: ${fromDate.toISOString().slice(0, 10)}`}{" "}
                   {toDate && `to: ${toDate.toISOString().slice(0, 10)}`}
@@ -111,11 +145,11 @@ export default function Royalties() {
               )}
             </Dropdown.Toggle>
             <Dropdown.Menu>
-              {Object.values(DateSelection).map((dateSelection) => (
+              {Object.values(DateIntervalsSelection).map((dateSelection) => (
                 <Dropdown.Item
                   key={dateSelection}
                   onClick={() => {
-                    if (dateSelection !== DateSelection.CUSTOM) {
+                    if (dateSelection !== DateIntervalsSelection.CUSTOM) {
                       setDateSelection(dateSelection);
                     } else {
                       setShowDatePicker(true);
@@ -163,21 +197,21 @@ export default function Royalties() {
                     </td>
                     <td>{r.artist}</td>
                     <td className="text-center">
-                      {displayDecimal(r.total_volume, 3)}
+                      {displayDecimal(r.total_volume, 4)}
                     </td>
                     <td className="text-center">
-                      {displayDecimal(r.total_royalties, 4)}
+                      {displayDecimal(r.total_royalties, 6)}
                     </td>
                     <td className="text-center">
                       {displayDecimal(
                         (r.total_royalties * 100) / r.total_volume,
-                        2
+                        5
                       )}
                     </td>
                     <td className="text-center">
                       {displayDecimal(
                         r.total_royalties * MEMES_ARTIST_SPLIT,
-                        4
+                        6
                       )}
                     </td>
                   </tr>
@@ -194,17 +228,6 @@ export default function Royalties() {
           </Col>
         </Row>
       )}
-      {royalties.length > 0 && (
-        <Row className="pt-3 pb-3">
-          <Col className="d-flex justify-content-end">
-            <DownloadUrlWidget
-              preview=""
-              name={`royalties-memes-${dateSelection.toLowerCase()}`}
-              url={`${getUrl()}&download=true`}
-            />
-          </Col>
-        </Row>
-      )}
       <DatePickerModal
         show={showDatePicker}
         initial_from={fromDate}
@@ -213,7 +236,7 @@ export default function Royalties() {
         onApply={(fromDate, toDate) => {
           setFromDate(fromDate);
           setToDate(toDate);
-          setDateSelection(DateSelection.CUSTOM);
+          setDateSelection(DateIntervalsSelection.CUSTOM);
         }}
         onHide={() => setShowDatePicker(false)}
       />

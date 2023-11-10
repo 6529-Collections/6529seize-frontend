@@ -10,7 +10,7 @@
   display: none;
 }
 
-.royaltiesTable {
+.gasTable {
   tr td {
     white-space: nowrap;
     align-items: center;
@@ -47,7 +47,7 @@
   }
 }
 
-.royaltiesTable > :not(caption) > * > * {
+.gasTable > :not(caption) > * > * {
   padding: 0.5rem;
 }
 
