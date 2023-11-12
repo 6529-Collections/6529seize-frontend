@@ -45,7 +45,7 @@ export default function Gas() {
         const yesterday = new Date();
         yesterday.setUTCDate(yesterday.getUTCDate() - 1);
         filters += `&from_date=${formatDate(yesterday)}`;
-        filters += `&to_date=${formatDate(new Date())}`;
+        filters += `&to_date=${formatDate(yesterday)}`;
         break;
       case DateIntervalsSelection.LAST_7:
         const weekAgo = new Date();
@@ -59,10 +59,10 @@ export default function Gas() {
         break;
       case DateIntervalsSelection.PREVIOUS_MONTH:
         const firstDayOfPreviousMonth = new Date();
-        firstDayOfPreviousMonth.setUTCDate(1);
         firstDayOfPreviousMonth.setUTCMonth(
           firstDayOfPreviousMonth.getUTCMonth() - 1
         );
+        firstDayOfPreviousMonth.setUTCDate(1);
         const lastDayOfPreviousMonth = new Date();
         lastDayOfPreviousMonth.setUTCDate(0);
         filters += `&from_date=${formatDate(firstDayOfPreviousMonth)}`;
@@ -70,20 +70,20 @@ export default function Gas() {
         break;
       case DateIntervalsSelection.YEAR_TO_DATE:
         const firstDayOfYear = new Date();
-        firstDayOfYear.setUTCDate(1);
         firstDayOfYear.setUTCMonth(0);
+        firstDayOfYear.setUTCDate(1);
         filters += `&from_date=${formatDate(firstDayOfYear)}`;
         break;
       case DateIntervalsSelection.LAST_YEAR:
         const firstDayOfLastYear = new Date();
-        firstDayOfLastYear.setUTCDate(1);
-        firstDayOfLastYear.setUTCMonth(0);
         firstDayOfLastYear.setUTCFullYear(
           firstDayOfLastYear.getUTCFullYear() - 1
         );
+        firstDayOfLastYear.setUTCMonth(0);
+        firstDayOfLastYear.setUTCDate(1);
         const lastDayOfLastYear = new Date();
-        lastDayOfLastYear.setUTCDate(0);
         lastDayOfLastYear.setUTCMonth(0);
+        lastDayOfLastYear.setUTCDate(0);
         filters += `&from_date=${formatDate(firstDayOfLastYear)}`;
         filters += `&to_date=${formatDate(lastDayOfLastYear)}`;
         break;
