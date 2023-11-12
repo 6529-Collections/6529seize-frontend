@@ -7,7 +7,6 @@ interface Props {
   show: boolean;
   initial_from: Date | undefined;
   initial_to: Date | undefined;
-  min: Date | undefined;
   onApply: (fromDate: Date | undefined, toDate: Date | undefined) => void;
   onHide: () => void;
 }
@@ -57,7 +56,6 @@ export default function DatePickerModal(props: Props) {
                   <Form.Label>Start Date</Form.Label>
                   <Form.Control
                     value={fromDate && fromDate.toISOString().slice(0, 10)}
-                    min={props.min && props.min.toISOString().slice(0, 10)}
                     max={new Date().toISOString().slice(0, 10)}
                     className={`${styles.formInput}`}
                     type="date"
@@ -76,7 +74,6 @@ export default function DatePickerModal(props: Props) {
                   <Form.Label>End Date</Form.Label>
                   <Form.Control
                     value={toDate && toDate.toISOString().slice(0, 10)}
-                    min={new Date("2023-03-20").toISOString().slice(0, 10)}
                     max={new Date().toISOString().slice(0, 10)}
                     className={`${styles.formInput}`}
                     type="date"

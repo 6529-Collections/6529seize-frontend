@@ -232,7 +232,6 @@ export default function Royalties() {
         show={showDatePicker}
         initial_from={fromDate}
         initial_to={toDate}
-        min={new Date("2023-03-20")}
         onApply={(fromDate, toDate) => {
           setFromDate(fromDate);
           setToDate(toDate);
