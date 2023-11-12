@@ -22,7 +22,7 @@ export default function DatePickerModal(props: Props) {
   }, [props.initial_from]);
 
   useEffect(() => {
-    if (props.initial_to) setFromDate(props.initial_to);
+    if (props.initial_to) setToDate(props.initial_to);
   }, [props.initial_to]);
 
   function apply() {
