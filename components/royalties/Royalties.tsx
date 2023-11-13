@@ -24,6 +24,8 @@ export default function Royalties() {
   const [fetching, setFetching] = useState(true);
 
   const [royalties, setRoyalties] = useState<Royalty[]>([]);
+  const [sumTotalVolume, setSumTotalVolume] = useState(0);
+  const [sumTotalRoyalties, setSumTotalRoyalties] = useState(0);
 
   const [fromDate, setFromDate] = useState<Date>();
   const [toDate, setToDate] = useState<Date>();
@@ -111,6 +113,12 @@ export default function Royalties() {
     setFetching(true);
     fetchUrl(getUrl()).then((res: Royalty[]) => {
       setRoyalties(res);
+      setSumTotalVolume(
+        res.reduce((prev, current) => prev + current.total_volume, 0)
+      );
+      setSumTotalRoyalties(
+        res.reduce((prev, current) => prev + current.total_royalties, 0)
+      );
       setFetching(false);
     });
   }
@@ -180,20 +188,25 @@ export default function Royalties() {
                 {royalties.map((r) => (
                   <tr key={`token-${r.token_id}`}>
                     <td>
-                      <span className="d-flex aling-items-center gap-2">
-                        <span>
-                          {r.token_id} - {r.name}
+                      <a
+                        href={`/the-memes/${r.token_id}`}
+                        target="_blank"
+                        rel="noreferrer">
+                        <span className="d-flex aling-items-center gap-2">
+                          <span>
+                            {r.token_id} - {r.name}
+                          </span>
+                          <Image
+                            loading={"lazy"}
+                            width={0}
+                            height={0}
+                            style={{ width: "auto", height: "40px" }}
+                            src={r.thumbnail}
+                            alt={r.name}
+                            className={styles.nftImage}
+                          />
                         </span>
-                        <Image
-                          loading={"lazy"}
-                          width={0}
-                          height={0}
-                          style={{ width: "auto", height: "40px" }}
-                          src={r.thumbnail}
-                          alt={r.name}
-                          className={styles.nftImage}
-                        />
-                      </span>
+                      </a>
                     </td>
                     <td>{r.artist}</td>
                     <td className="text-center">
@@ -216,6 +229,26 @@ export default function Royalties() {
                     </td>
                   </tr>
                 ))}
+                <tr key={`royalties-total`}>
+                  <td colSpan={2} className="text-right">
+                    <b>TOTAL</b>
+                  </td>
+                  <td className="text-center">
+                    {displayDecimal(sumTotalVolume, 4)}
+                  </td>
+                  <td className="text-center">
+                    {displayDecimal(sumTotalRoyalties, 6)}
+                  </td>
+                  <td className="text-center">
+                    {displayDecimal(
+                      (sumTotalRoyalties * 100) / sumTotalVolume,
+                      5
+                    )}
+                  </td>
+                  <td className="text-center">
+                    {displayDecimal(sumTotalRoyalties * MEMES_ARTIST_SPLIT, 6)}
+                  </td>
+                </tr>
               </tbody>
             </Table>
           )}

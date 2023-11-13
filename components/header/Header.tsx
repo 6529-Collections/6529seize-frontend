@@ -52,11 +52,6 @@ export default function Header(props: Props) {
   useEffect(() => {
     const viewMode = Cookies.get(VIEW_MODE_COOKIE);
     console.log(VIEW_MODE_COOKIE, viewMode);
-    if (viewMode === WalletView.CONSOLIDATION) {
-      setView(WalletView.CONSOLIDATION);
-    } else {
-      setView(WalletView.WALLET);
-    }
   }, []);
 
   useEffect(() => {

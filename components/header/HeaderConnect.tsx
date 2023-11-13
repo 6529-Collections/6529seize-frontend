@@ -25,7 +25,6 @@ export default function HeaderConnect(props: Props) {
 
   useEffect(() => {
     const viewMode = Cookies.get(VIEW_MODE_COOKIE);
-    console.log(VIEW_MODE_COOKIE, viewMode);
     if (viewMode === WalletView.CONSOLIDATION) {
       props.setView(WalletView.CONSOLIDATION);
     } else {
