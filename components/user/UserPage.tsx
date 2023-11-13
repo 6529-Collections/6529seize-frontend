@@ -31,20 +31,24 @@ export default function UserPage(props: Props) {
       return [];
     }
     const cards: OwnerLite[] = [];
-    for (const meme of props.consolidatedTDH.memes) {
-      cards.push({
-        token_id: meme.id,
-        balance: meme.balance,
-        contract: MEMES_CONTRACT,
-      });
+    if (Array.isArray(props.consolidatedTDH.memes)) {
+      for (const meme of props.consolidatedTDH.memes) {
+        cards.push({
+          token_id: meme.id,
+          balance: meme.balance,
+          contract: MEMES_CONTRACT,
+        });
+      }
     }
 
-    for (const gradient of props.consolidatedTDH.gradients) {
-      cards.push({
-        token_id: gradient.id,
-        balance: gradient.balance,
-        contract: GRADIENT_CONTRACT,
-      });
+    if (Array.isArray(props.consolidatedTDH.gradients)) {
+      for (const gradient of props.consolidatedTDH.gradients) {
+        cards.push({
+          token_id: gradient.id,
+          balance: gradient.balance,
+          contract: GRADIENT_CONTRACT,
+        });
+      }
     }
 
     return cards;
@@ -177,13 +181,7 @@ export default function UserPage(props: Props) {
 
     setTDH(walletsTDH[queryAddress]);
     setOwned(walletsOwned[queryAddress] ?? []);
-  }, [
-    activeAddress,
-    walletsOwned,
-    queryAddress,
-    walletsTDH,
-  ]);
-
+  }, [activeAddress, walletsOwned, queryAddress, walletsTDH]);
 
   return (
     <>
