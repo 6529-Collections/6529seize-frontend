@@ -176,7 +176,7 @@ export default function UserPage(props: Props) {
     }
 
     setTDH(walletsTDH[queryAddress]);
-    setOwned(walletsOwned[queryAddress]);
+    setOwned(walletsOwned[queryAddress] ?? []);
   }, [
     activeAddress,
     walletsOwned,
@@ -195,7 +195,7 @@ export default function UserPage(props: Props) {
         onActiveAddress={onActiveAddress}
         user={props.user}
       />
-      {/* <UserPageDetails
+      <UserPageDetails
         tdh={tdh}
         activeAddress={activeAddress}
         mainAddress={props.mainAddress}
@@ -205,7 +205,7 @@ export default function UserPage(props: Props) {
         memesLite={props.memesLite}
         gradients={props.gradients}
         seasons={props.seasons}
-      /> */}
+      />
     </>
   );
 }
