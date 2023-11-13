@@ -5,7 +5,6 @@ import UserPageHeaderPfp from "./userPageHeaderPfp";
 import UserPageHeaderName from "./UserPageHeaderName";
 import UserPageHeaderLevel from "./UserPageHeaderLevel";
 import UserPageHeaderStats from "./stats/UserPageHeaderStats";
-import DotLoader from "../../dotLoader/DotLoader";
 import { useAccount } from "wagmi";
 import { useEffect, useState } from "react";
 import UserEditProfileButton from "../settings/UserEditProfileButton";
@@ -28,7 +27,6 @@ export default function UserPageHeader({
   activeAddress,
   onActiveAddress,
   consolidatedTDH,
-  dataLoaded,
   user,
 }: {
   profile: IProfileAndConsolidations;
@@ -36,7 +34,6 @@ export default function UserPageHeader({
   activeAddress: string | null;
   onActiveAddress: (address: string) => void;
   consolidatedTDH: ConsolidatedTDHMetrics | null;
-  dataLoaded: boolean;
   user: string;
 }) {
   const account = useAccount();
@@ -75,20 +72,14 @@ export default function UserPageHeader({
                   defaultBanner2={DEFAULT_BANNER_2}
                 />
               </div>
-              {dataLoaded ? (
-                <>
-                  <UserPageHeaderName
-                    profile={profile}
-                    mainAddress={mainAddress}
-                    consolidatedTDH={consolidatedTDH}
-                  />
+              <UserPageHeaderName
+                profile={profile}
+                mainAddress={mainAddress}
+                consolidatedTDH={consolidatedTDH}
+              />
 
-                  <UserPageHeaderLevel level={profile.level} />
-                  <UserPageHeaderStats consolidatedTDH={consolidatedTDH} />
-                </>
-              ) : (
-                <DotLoader />
-              )}
+              <UserPageHeaderLevel level={profile.level} />
+              <UserPageHeaderStats consolidatedTDH={consolidatedTDH} />
             </div>
             <div className="tw-mt-6 md:tw-hidden">
               {isLoggedInUser && <UserEditProfileButton user={user} />}
