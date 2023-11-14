@@ -7,9 +7,9 @@ import UserPageDetails from "./details/UserPageDetails";
 import { IProfileAndConsolidations } from "../../entities/IProfile";
 import UserPageHeader from "./user-page-header/UserPageHeader";
 import { commonApiFetch } from "../../services/api/common-api";
-import { GRADIENT_CONTRACT, MEMES_CONTRACT } from "../../constants";
 import { NFT, NFTLite } from "../../entities/INFT";
 import { Season } from "../../entities/ISeason";
+
 
 interface Props {
   user: string;
@@ -20,41 +20,13 @@ interface Props {
   memesLite: NFTLite[];
   gradients: NFT[];
   seasons: Season[];
+  owned: OwnerLite[];
 }
 
 export default function UserPage(props: Props) {
   const router = useRouter();
   const isConsolidation = props.profile.consolidation.wallets.length > 1;
 
-  const getConsolidatedOwned = (): OwnerLite[] => {
-    if (!props.consolidatedTDH) {
-      return [];
-    }
-    const cards: OwnerLite[] = [];
-    if (Array.isArray(props.consolidatedTDH.memes)) {
-      for (const meme of props.consolidatedTDH.memes) {
-        cards.push({
-          token_id: meme.id,
-          balance: meme.balance,
-          contract: MEMES_CONTRACT,
-        });
-      }
-    }
-
-    if (Array.isArray(props.consolidatedTDH.gradients)) {
-      for (const gradient of props.consolidatedTDH.gradients) {
-        cards.push({
-          token_id: gradient.id,
-          balance: gradient.balance,
-          contract: GRADIENT_CONTRACT,
-        });
-      }
-    }
-
-    return cards;
-  };
-
-  const consolidatedOwned = getConsolidatedOwned();
 
   const getAddressFromQuery = (): string | null => {
     if (!router.query.address) {
@@ -175,7 +147,7 @@ export default function UserPage(props: Props) {
   useEffect(() => {
     if (!activeAddress || !isConsolidation) {
       setTDH(props.consolidatedTDH);
-      setOwned(consolidatedOwned);
+      setOwned(props.owned);
       return;
     }
 

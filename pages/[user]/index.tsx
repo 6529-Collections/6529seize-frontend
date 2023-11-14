@@ -2,6 +2,7 @@ import Head from "next/head";
 import styles from "../../styles/Home.module.scss";
 import dynamic from "next/dynamic";
 import {
+  areEqualAddresses,
   containsEmojis,
   formatAddress,
   numberWithCommas,
@@ -14,6 +15,7 @@ import { ENS } from "../../entities/IENS";
 import { ConsolidatedTDHMetrics } from "../../entities/ITDH";
 import { NFT, NFTLite } from "../../entities/INFT";
 import { Season } from "../../entities/ISeason";
+import { OwnerLite } from "../../entities/IOwner";
 
 interface PageProps {
   profile: IProfileAndConsolidations;
@@ -23,6 +25,7 @@ interface PageProps {
   memesLite: NFTLite[];
   gradients: NFT[];
   seasons: Season[];
+  owned: OwnerLite[];
 }
 
 const Header = dynamic(() => import("../../components/header/Header"), {
@@ -99,6 +102,7 @@ export default function UserPageIndex(props: { pageProps: PageProps }) {
             memesLite={pageProps.memesLite}
             gradients={pageProps.gradients}
             seasons={pageProps.seasons}
+            owned={pageProps.owned}
           />
         </div>
       </main>
@@ -149,6 +153,53 @@ export async function getServerSideProps(
     return gradients.data;
   };
 
+  const getOwned = async (
+    wallets: string[],
+    headers: Record<string, string>
+  ): Promise<OwnerLite[]> => {
+    if (!wallets.length) {
+      return [];
+    }
+    const baseURL = `owners?wallet=${wallets.join(",")}`;
+    let page: number | null = null;
+    const allOwned: OwnerLite[] = [];
+    do {
+      const ownedResponse: {
+        data: OwnerLite[];
+        page: number;
+        next: string | null;
+      } = await commonApiFetch<{
+        data: OwnerLite[];
+        page: number;
+        next: string | null;
+      }>({
+        endpoint: page ? `${baseURL}&page=${page}` : baseURL,
+        headers,
+      });
+      ownedResponse.data.forEach((o) =>
+        allOwned.push({
+          token_id: o.token_id,
+          contract: o.contract,
+          balance: o.balance,
+        })
+      );
+
+      page = ownedResponse.next ? ownedResponse.page + 1 : null;
+    } while (page);
+
+    return allOwned.reduce<OwnerLite[]>((acc, curr) => {
+      const existing = acc.find(
+        (a) => a.token_id === curr.token_id && areEqualAddresses(a.contract, curr.contract)
+      );
+      if (existing) {
+        existing.balance += curr.balance;
+      } else {
+        acc.push(curr);
+      }
+      return acc;
+    }, []);
+  };
+
   const authCookie = req?.req?.cookies["x-6529-auth"];
   try {
     const headers: Record<string, string> = authCookie
@@ -178,7 +229,7 @@ export async function getServerSideProps(
     const wallet =
       profile?.profile?.primary_wallet?.toLowerCase() ?? req.query.user;
 
-    const [ensAndConsolidatedTDH, memesLite, gradients, seasons] =
+    const [ensAndConsolidatedTDH, memesLite, gradients, seasons, owned] =
       await Promise.all([
         getEnsAndConsolidatedTDH(wallet, headers),
         commonApiFetch<{ data: NFTLite[] }>({
@@ -190,6 +241,10 @@ export async function getServerSideProps(
           endpoint: "memes_seasons",
           headers,
         }),
+        getOwned(
+          profile.consolidation.wallets.map((w) => w.wallet.address),
+          headers
+        ),
       ]);
 
     const { ens, consolidatedTDH } = ensAndConsolidatedTDH;
@@ -208,6 +263,7 @@ export async function getServerSideProps(
         memesLite: memesLite.data,
         gradients,
         seasons,
+        owned,
       },
     };
   } catch (e: any) {
