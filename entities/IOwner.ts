@@ -1,7 +1,7 @@
 export interface OwnerLite {
   readonly token_id: number;
   readonly contract: string;
-  readonly balance: number;
+  balance: number;
 }
 
 
