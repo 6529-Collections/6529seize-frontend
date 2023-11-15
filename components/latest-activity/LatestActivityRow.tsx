@@ -87,7 +87,7 @@ export default function LatestActivityRow(props: Props) {
             width={0}
             height={0}
             style={{ height: "25px", width: "auto" }}
-            src={imgSrc}
+            src={`/${imgSrc}`}
             alt={imgSrc}
             className="cursor-pointer"
           />
