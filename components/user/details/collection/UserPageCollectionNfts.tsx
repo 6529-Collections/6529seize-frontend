@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { NFTLite } from "../../../../entities/INFT";
-import { Owner } from "../../../../entities/IOwner";
+import { Owner, OwnerLite } from "../../../../entities/IOwner";
 import {
   areEqualAddresses,
   isGradientsContract,
@@ -37,7 +37,7 @@ export default function UserPageCollectionNfts({
   sort,
   sortDir,
 }: {
-  owned: Owner[];
+  owned: OwnerLite[];
   nfts: NFTLite[];
   tdh: ConsolidatedTDHMetrics | TDHMetrics | null;
   hideSeized: boolean;
