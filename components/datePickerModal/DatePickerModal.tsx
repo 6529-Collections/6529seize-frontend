@@ -41,7 +41,7 @@ export default function DatePickerModal(props: Props) {
       <Modal.Header className={styles.header}>
         <Modal.Title>Select Dates</Modal.Title>
         <FontAwesomeIcon
-          className={styles.walletModalClose}
+          className={styles.modalClose}
           icon="times-circle"
           onClick={() => props.onHide()}
         />

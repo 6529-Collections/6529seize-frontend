@@ -247,6 +247,11 @@ export default function Header(props: Props) {
                     </a>
                   </Col>
                 </Row>
+                <Row>
+                  <Col xs={{ span: 6, offset: 3 }}>
+                    <hr />
+                  </Col>
+                </Row>
               </Container>
             )}
           </Row>
