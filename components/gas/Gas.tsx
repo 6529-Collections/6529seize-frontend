@@ -174,20 +174,25 @@ export default function Gas() {
                 {gas.map((r) => (
                   <tr key={`token-${r.token_id}`}>
                     <td>
-                      <span className="d-flex aling-items-center gap-2">
-                        <span>
-                          {r.token_id} - {r.name}
+                      <a
+                        href={`/the-memes/${r.token_id}`}
+                        target="_blank"
+                        rel="noreferrer">
+                        <span className="d-flex aling-items-center gap-2">
+                          <span>
+                            {r.token_id} - {r.name}
+                          </span>
+                          <Image
+                            loading={"lazy"}
+                            width={0}
+                            height={0}
+                            style={{ width: "auto", height: "40px" }}
+                            src={r.thumbnail}
+                            alt={r.name}
+                            className={styles.nftImage}
+                          />
                         </span>
-                        <Image
-                          loading={"lazy"}
-                          width={0}
-                          height={0}
-                          style={{ width: "auto", height: "40px" }}
-                          src={r.thumbnail}
-                          alt={r.name}
-                          className={styles.nftImage}
-                        />
-                      </span>
+                      </a>
                     </td>
                     <td>{r.artist}</td>
                     <td className="text-center">
