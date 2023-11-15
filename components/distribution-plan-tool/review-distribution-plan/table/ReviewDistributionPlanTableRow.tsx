@@ -91,6 +91,26 @@ export default function ReviewDistributionPlanTableRow({
     document.body.removeChild(link);
   };
 
+  const mergeAddressValues = (
+    results: { address: string; value: number }[]
+  ): { address: string; value: number }[] => {
+    const merged = results.reduce<{ [address: string]: number }>(
+      (acc, result) => {
+        const address = result.address.toLowerCase();
+        if (acc[address]) {
+          acc[address] += result.value;
+        } else {
+          acc[address] = result.value;
+        }
+        return acc;
+      },
+      {}
+    );
+    return Object.keys(merged).map<{ address: string; value: number }>(
+      (address) => ({ address, value: merged[address] })
+    );
+  };
+
   const downloadManifold = (results: AllowlistResult[]) => {
     const fullResult = getFullResults(results).map<{
       address: string;
@@ -101,7 +121,9 @@ export default function ReviewDistributionPlanTableRow({
     }));
     const csv = [
       Object.keys(fullResult[0]).join(","),
-      ...fullResult.map((item) => Object.values(item).join(",")),
+      ...mergeAddressValues(fullResult).map((item) =>
+        Object.values(item).join(",")
+      ),
     ].join("\n");
 
     const link = document.createElement("a");
