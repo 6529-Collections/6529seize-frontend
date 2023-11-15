@@ -14,7 +14,6 @@ import {
   formatAddress,
   nextTdh,
   numberWithCommas,
-  tdh2Level,
 } from "../../helpers/Helpers";
 import Pagination from "../pagination/Pagination";
 import { SortDirection } from "../../entities/ISort";
@@ -29,6 +28,7 @@ import SearchModal from "../searchModal/SearchModal";
 import DownloadUrlWidget from "../downloadUrlWidget/DownloadUrlWidget";
 import DotLoader from "../dotLoader/DotLoader";
 import { assertUnreachable } from "../../helpers/AllowlistToolHelpers";
+import { tdh2Level } from "../../helpers/LevelHelpers";
 
 interface Props {
   page: number;
