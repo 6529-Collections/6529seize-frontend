@@ -142,7 +142,7 @@ export default function Royalties() {
             )}
           </span>
           <Dropdown className={styles.filterDropdown} drop={"down"}>
-            <Dropdown.Toggle>
+            <Dropdown.Toggle disabled={fetching}>
               {dateSelection == DateIntervalsSelection.CUSTOM ? (
                 <span>
                   {fromDate && `from: ${fromDate.toISOString().slice(0, 10)}`}{" "}
