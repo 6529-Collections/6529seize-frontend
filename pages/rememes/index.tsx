@@ -46,23 +46,8 @@ export default function ReMemes(props: Props) {
       <main className={styles.main}>
         <Header />
         <Breadcrumb breadcrumbs={breadcrumbs} />
-        <RememesComponent meme_id={props.meme_id} />
+        <RememesComponent />
       </main>
     </>
   );
-}
-
-export async function getServerSideProps(req: any, res: any, resolvedUrl: any) {
-  const meme_id = req.query.meme_id;
-
-  if (meme_id) {
-    return {
-      props: {
-        meme_id,
-      },
-    };
-  }
-  return {
-    props: {},
-  };
 }
