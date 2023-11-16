@@ -278,12 +278,7 @@ export default function Leaderboard(props: Props) {
     setMyFetchUrl(url);
     fetchUrl(url).then((response: DBResponse) => {
       setTotalResults(response.count);
-      setLeaderboard(
-        response.data.map((i) => ({
-          ...i,
-          level: tdh2Level(i.boosted_tdh ?? 0),
-        }))
-      );
+      setLeaderboard(response.data);
       setShowLoader(false);
     });
   }
@@ -519,7 +514,8 @@ export default function Leaderboard(props: Props) {
           Sort.memes_cards_sets_szn3,
           Sort.memes_cards_sets_szn4,
           Sort.memes_cards_sets_szn5,
-        ].includes(sort.sort) || (focus === Focus.SETS)
+        ].includes(sort.sort) ||
+        focus === Focus.SETS
       ) {
         setSort({
           sort: getSetsSort(),
@@ -552,7 +548,7 @@ export default function Leaderboard(props: Props) {
             sort: Sort.level,
             sort_direction: sort.sort_direction,
           });
-          break
+          break;
         }
         if (sort.sort !== getBalanceSort()) {
           setSort({
