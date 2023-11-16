@@ -30,7 +30,7 @@ export default function Royalties() {
 
   function getUrl() {
     const dateFilters = getDateFilters(dateSelection, fromDate, toDate);
-    return `${process.env.API_ENDPOINT}/api/royalties/memes?${filters}`;
+    return `${process.env.API_ENDPOINT}/api/royalties/memes?${dateFilters}`;
   }
 
   function fetchRoyalties() {
