@@ -46,7 +46,20 @@ export default function Rememes() {
   const [selectedTokenType, setSelectedTokenType] = useState<TokenType>(
     TokenType.ALL
   );
-  const [selectedMeme, setSelectedMeme] = useState<NFTLite>();
+  const [selectedMeme, setSelectedMeme] = useState<NFTLite | undefined>(
+    router.query.meme_id
+      ? {
+          id: parseInt(router.query.meme_id.toString()),
+          name: "",
+          contract: "",
+          icon: "",
+          thumbnail: "",
+          scaled: "",
+          image: "",
+          animation: "",
+        }
+      : undefined
+  );
 
   const sorting = [RememeSort.RANDOM, RememeSort.CREATED_ASC];
   const [selectedSorting, setSelectedSorting] = useState<RememeSort>(
@@ -89,6 +102,14 @@ export default function Rememes() {
       router.replace(
         {
           query: { meme_id: selectedMeme.id },
+        },
+        undefined,
+        { shallow: true }
+      );
+    } else {
+      router.replace(
+        {
+          query: {},
         },
         undefined,
         { shallow: true }
