@@ -35,6 +35,11 @@ export default function CommunityDownloads() {
                   <span className={styles.downloadLink}>Team</span>
                 </a>
               </Col>
+              <Col xs={12} sm={6} md={4} className="pt-2 pb-3">
+                <a href="/downloads/royalties">
+                  <span className={styles.downloadLink}>Royalties</span>
+                </a>
+              </Col>
             </Row>
           </Container>
         </Col>

@@ -31,71 +31,91 @@ export default function Document() {
         <Main />
         <NextScript />
         <footer
-          className="d-flex align-items-center justify-content-center flex-wrap"
+          className="d-flex flex-column align-items-center justify-content-center gap-2"
           id="footer">
-          <a
-            href="https://twitter.com/punk6529"
-            target="_blank"
-            rel="noreferrer">
-            <Image
-              width="0"
-              height="0"
-              style={{ height: "18px", width: "auto" }}
-              src="/twitter.png"
-              alt="punk6529 Twitter"
-            />{" "}
-            &#64;punk6529
-          </a>
-          &nbsp;&nbsp;|&nbsp;&nbsp;
-          <a
-            href="https://twitter.com/6529Collections"
-            target="_blank"
-            rel="noreferrer">
-            <Image
-              width="0"
-              height="0"
-              style={{ height: "18px", width: "auto" }}
-              src="/twitter.png"
-              alt="6529Collections Twitter"
-            />{" "}
-            &#64;6529Collections
-          </a>
-          &nbsp;&nbsp;|&nbsp;&nbsp;
-          <a href="https://discord.gg/join-om" target="_blank" rel="noreferrer">
-            <Image
-              width="0"
-              height="0"
-              style={{ height: "18px", width: "auto" }}
-              src="/discord.png"
-              alt="OM Discrod"
-            />{" "}
-            OM Discord
-          </a>
-          &nbsp;&nbsp;|&nbsp;&nbsp;
-          <a href="https://6529.io" target="_blank" rel="noreferrer">
-            <Image
-              width="0"
-              height="0"
-              style={{ height: "18px", width: "auto" }}
-              src="/Seize_Logo_2.png"
-              alt="6529.io"
-            />{" "}
-            6529.io
-          </a>
-          &nbsp;&nbsp;|&nbsp;&nbsp;
-          <a href={`/about/${AboutSection.TERMS_OF_SERVICE}`}>
-            Terms of Service
-          </a>
-          &nbsp;&nbsp;|&nbsp;&nbsp;
-          <a href={`/about/${AboutSection.PRIVACY_POLICY}`}>Privacy Policy</a>
-          &nbsp;&nbsp;|&nbsp;&nbsp;
-          <a href={`/about/${AboutSection.COOKIE_POLICY}`}>Cookie Policy</a>
-          &nbsp;&nbsp;|&nbsp;&nbsp;
-          <a href={`/about/${AboutSection.LICENSE}`}>License</a>
-          &nbsp;&nbsp;|&nbsp;&nbsp;
-          <a href={`https://status.seize.io/`} target="_blank" rel="noreferrer">
-            Status
-          </a>
+          <span className="d-flex align-items-center justify-content-center flex-wrap gap-2">
+            <a
+              href="https://twitter.com/punk6529"
+              target="_blank"
+              rel="noreferrer">
+              <Image
+                width="0"
+                height="0"
+                style={{ height: "18px", width: "auto" }}
+                src="/twitter.png"
+                alt="punk6529 Twitter"
+              />{" "}
+              &#64;punk6529
+            </a>
+            |
+            <a
+              href="https://twitter.com/6529Collections"
+              target="_blank"
+              rel="noreferrer">
+              <Image
+                width="0"
+                height="0"
+                style={{ height: "18px", width: "auto" }}
+                src="/twitter.png"
+                alt="6529Collections Twitter"
+              />{" "}
+              &#64;6529Collections
+            </a>
+            |
+            <a
+              href="https://discord.gg/join-om"
+              target="_blank"
+              rel="noreferrer">
+              <Image
+                width="0"
+                height="0"
+                style={{ height: "18px", width: "auto" }}
+                src="/discord.png"
+                alt="OM Discord"
+              />{" "}
+              OM Discord
+            </a>
+            |
+            <a href="https://6529.io" target="_blank" rel="noreferrer">
+              <Image
+                width="0"
+                height="0"
+                style={{ height: "18px", width: "auto" }}
+                src="/Seize_Logo_2.png"
+                alt="6529.io"
+              />{" "}
+              6529.io
+            </a>
+            |
+            <a
+              href="https://github.com/6529-Collections"
+              target="_blank"
+              rel="noreferrer">
+              <Image
+                width="0"
+                height="0"
+                style={{ height: "18px", width: "auto" }}
+                src="/github_w.png"
+                alt="6529-Collections"
+              />{" "}
+              6529-Collections
+            </a>
+          </span>
+          <span className="d-flex align-items-center justify-content-center flex-wrap gap-2">
+            <a href={`/about/${AboutSection.TERMS_OF_SERVICE}`}>
+              Terms of Service
+            </a>
+            |
+            <a href={`/about/${AboutSection.PRIVACY_POLICY}`}>Privacy Policy</a>
+            |<a href={`/about/${AboutSection.COOKIE_POLICY}`}>Cookie Policy</a>|
+            <a href={`/about/${AboutSection.LICENSE}`}>License</a>|
+            <a
+              href={`https://status.seize.io/`}
+              target="_blank"
+              rel="noreferrer">
+              Status
+            </a>
+          </span>
         </footer>
       </body>
     </Html>
