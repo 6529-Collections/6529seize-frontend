@@ -46,19 +46,8 @@ export default function Rememes() {
   const [selectedTokenType, setSelectedTokenType] = useState<TokenType>(
     TokenType.ALL
   );
-  const [selectedMeme, setSelectedMeme] = useState<NFTLite | undefined>(
-    router.query.meme_id
-      ? {
-          id: parseInt(router.query.meme_id.toString()),
-          name: "",
-          contract: "",
-          icon: "",
-          thumbnail: "",
-          scaled: "",
-          image: "",
-          animation: "",
-        }
-      : undefined
+  const [selectedMeme, setSelectedMeme] = useState<number>(
+    router.query.meme_id ? parseInt(router.query.meme_id.toString()) : 0
   );
 
   const sorting = [RememeSort.RANDOM, RememeSort.CREATED_ASC];
@@ -78,8 +67,8 @@ export default function Rememes() {
   function fetchResults(mypage: number) {
     setRememesLoaded(false);
     let memeFilter = "";
-    if (router.query.meme_id) {
-      memeFilter = `&meme_id=${router.query.meme_id}`;
+    if (selectedMeme) {
+      memeFilter = `&meme_id=${selectedMeme}`;
     }
     let tokenTypeFilter = "";
     if (selectedTokenType !== TokenType.ALL) {
@@ -98,18 +87,20 @@ export default function Rememes() {
   }
 
   useEffect(() => {
-    if (selectedMeme) {
-      router.replace(
+    const currentId = router.query.meme_id
+      ? parseInt(router.query.meme_id.toString())
+      : 0;
+    if (!currentId || currentId != selectedMeme) {
+      const currentQuery = { ...router.query };
+      if (selectedMeme) {
+        currentQuery.meme_id = selectedMeme.toString();
+      } else {
+        delete currentQuery.meme_id;
+      }
+      router.push(
         {
-          query: { meme_id: selectedMeme.id },
-        },
-        undefined,
-        { shallow: true }
-      );
-    } else {
-      router.replace(
-        {
-          query: {},
+          pathname: router.pathname,
+          query: currentQuery,
         },
         undefined,
         { shallow: true }
@@ -123,7 +114,7 @@ export default function Rememes() {
     } else {
       setPage(1);
     }
-  }, [selectedTokenType, selectedSorting, router.query.meme_id]);
+  }, [selectedTokenType, selectedSorting, selectedMeme]);
 
   useEffect(() => {
     fetchResults(page);
@@ -331,7 +322,7 @@ export default function Rememes() {
                       <Dropdown.Menu>
                         <Dropdown.Item
                           onClick={() => {
-                            setSelectedMeme(undefined);
+                            setSelectedMeme(0);
                           }}>
                           All
                         </Dropdown.Item>
@@ -339,7 +330,7 @@ export default function Rememes() {
                           <Dropdown.Item
                             key={`meme-${m.id}`}
                             onClick={() => {
-                              setSelectedMeme(m);
+                              setSelectedMeme(m.id);
                             }}>
                             #{m.id} - {m.name}
                           </Dropdown.Item>
