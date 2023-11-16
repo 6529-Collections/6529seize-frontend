@@ -55,8 +55,7 @@ export default function LatestActivityRow(props: Props) {
       return <></>;
     }
     const royaltiesPercentage =
-      Math.round((props.tr.royalties / props.tr.value) * 1000) / 1000;
-
+      Math.round((props.tr.royalties / props.tr.value) * 10000) / 10000;
     if (props.tr.royalties > 0) {
       let imgSrc: string = "pepe-smile.png";
       if (royaltiesPercentage >= ROYALTIES_PERCENTAGE) {
