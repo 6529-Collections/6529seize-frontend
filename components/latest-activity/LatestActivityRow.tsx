@@ -149,7 +149,7 @@ export default function LatestActivityRow(props: Props) {
   }
 
   function isBurn() {
-    return areEqualAddresses(NULL_ADDRESS);
+    return areEqualAddresses(NULL_ADDRESS, props.tr.to_address);
   }
 
   function isMint() {
