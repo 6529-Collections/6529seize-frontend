@@ -1,12 +1,7 @@
-import { useRouter } from "next/router";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Container, Row, Col, Table } from "react-bootstrap";
-import { DBResponse } from "../../entities/IDBResponse";
-import { fetchUrl } from "../../services/6529api";
-import { Crumb } from "../breadcrumb/Breadcrumb";
 import styles from "./CommunityDownloads.module.scss";
 import Image from "next/image";
-import Pagination from "../pagination/Pagination";
 
 export default function CommunityDownloadsTeam() {
   const [downloads, setDownloads] = useState<any[]>([
@@ -24,12 +19,7 @@ export default function CommunityDownloadsTeam() {
 
   function printDate(dateString: any) {
     const d = new Date(dateString);
-    const hours = d.getUTCHours();
-    const mins = d.getUTCMinutes();
-    const timeString = `${hours < 10 ? "0" + hours : hours}:${
-      mins < 10 ? "0" + mins : mins
-    }`;
-    return `${d.toDateString()} - ${timeString}`;
+    return `${d.toDateString()}`;
   }
 
   return (
