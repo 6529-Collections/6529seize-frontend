@@ -18,7 +18,7 @@ export default function CommunityDownloadsRoyalties() {
   const [page, setPage] = useState(1);
 
   function fetchResults(mypage: number) {
-    let url = `${process.env.API_ENDPOINT}/api/royalties_uploads?page_size=${PAGE_SIZE}&page=${mypage}`;
+    let url = `${process.env.API_ENDPOINT}/api/royalties/uploads?page_size=${PAGE_SIZE}&page=${mypage}`;
     fetchUrl(url).then((response: DBResponse) => {
       setTotalResults(response.count);
       setDownloads(response.data);
