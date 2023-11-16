@@ -426,4 +426,5 @@ export function getDateFilters(
       }
       break;
   }
+  return filters;
 }

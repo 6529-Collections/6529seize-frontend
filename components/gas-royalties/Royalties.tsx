@@ -1,14 +1,12 @@
 import { useEffect, useState } from "react";
-import { Container, Row, Col, Table, Dropdown } from "react-bootstrap";
-import styles from "./Royalties.module.scss";
-import DotLoader from "../dotLoader/DotLoader";
+import { Container, Row, Col, Table } from "react-bootstrap";
+import styles from "./GasRoyalties.module.scss";
 import { Royalty } from "../../entities/IRoyalty";
 import { fetchUrl } from "../../services/6529api";
 import { displayDecimal, getDateFilters } from "../../helpers/Helpers";
-import Image from "next/image";
 import DatePickerModal from "../datePickerModal/DatePickerModal";
-import DownloadUrlWidget from "../downloadUrlWidget/DownloadUrlWidget";
 import { DateIntervalsSelection } from "../../enums";
+import { GasRoyaltiesHeader, GasRoyaltiesTokenImage } from "./GasRoyalties";
 
 const MEMES_ARTIST_SPLIT = 0.5;
 
@@ -53,47 +51,17 @@ export default function Royalties() {
 
   return (
     <Container className={`no-padding pt-4`}>
-      <Row className="d-flex align-items-center">
-        <Col className="d-flex align-items-center justify-content-between">
-          <span className="d-flex align-items-center gap-2">
-            <h1>ROYALTIES {fetching && <DotLoader />}</h1>
-            {!fetching && royalties.length > 0 && (
-              <DownloadUrlWidget
-                preview=""
-                name={`royalties-memes-${dateSelection.toLowerCase()}`}
-                url={`${getUrl()}&download=true`}
-              />
-            )}
-          </span>
-          <Dropdown className={styles.filterDropdown} drop={"down"}>
-            <Dropdown.Toggle disabled={fetching}>
-              {dateSelection == DateIntervalsSelection.CUSTOM ? (
-                <span>
-                  {fromDate && `from: ${fromDate.toISOString().slice(0, 10)}`}{" "}
-                  {toDate && `to: ${toDate.toISOString().slice(0, 10)}`}
-                </span>
-              ) : (
-                dateSelection
-              )}
-            </Dropdown.Toggle>
-            <Dropdown.Menu>
-              {Object.values(DateIntervalsSelection).map((dateSelection) => (
-                <Dropdown.Item
-                  key={dateSelection}
-                  onClick={() => {
-                    if (dateSelection !== DateIntervalsSelection.CUSTOM) {
-                      setDateSelection(dateSelection);
-                    } else {
-                      setShowDatePicker(true);
-                    }
-                  }}>
-                  {dateSelection}
-                </Dropdown.Item>
-              ))}
-            </Dropdown.Menu>
-          </Dropdown>
-        </Col>
-      </Row>
+      <GasRoyaltiesHeader
+        title={"ROYALTIES"}
+        fetching={fetching}
+        results_count={royalties.length}
+        date_selection={dateSelection}
+        from_date={fromDate}
+        to_date={toDate}
+        getUrl={getUrl}
+        setDateSelection={setDateSelection}
+        setShowDatePicker={setShowDatePicker}
+      />
       <Row className={`pt-3 ${styles.scrollContainer}`}>
         <Col>
           {royalties.length > 0 && (
@@ -112,25 +80,11 @@ export default function Royalties() {
                 {royalties.map((r) => (
                   <tr key={`token-${r.token_id}`}>
                     <td>
-                      <a
-                        href={`/the-memes/${r.token_id}`}
-                        target="_blank"
-                        rel="noreferrer">
-                        <span className="d-flex aling-items-center gap-2">
-                          <span>
-                            {r.token_id} - {r.name}
-                          </span>
-                          <Image
-                            loading={"lazy"}
-                            width={0}
-                            height={0}
-                            style={{ width: "auto", height: "40px" }}
-                            src={r.thumbnail}
-                            alt={r.name}
-                            className={styles.nftImage}
-                          />
-                        </span>
-                      </a>
+                      <GasRoyaltiesTokenImage
+                        token_id={r.token_id}
+                        name={r.name}
+                        thumbnail={r.thumbnail}
+                      />
                     </td>
                     <td>{r.artist}</td>
                     <td className="text-center">
