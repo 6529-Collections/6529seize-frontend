@@ -6,7 +6,6 @@ import {
   TDHMetrics,
   BaseTDHMetrics,
   GlobalTDHHistory,
-  ConsolidatedTDH,
 } from "../../entities/ITDH";
 import styles from "./Leaderboard.module.scss";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";

@@ -11,7 +11,7 @@ interface Props {
   onHide: () => void;
 }
 
-export default function DatePickerModal(props: Props) {
+export default function DatePickerModal(props: Readonly<Props>) {
   const [fromDate, setFromDate] = useState<Date>();
   const [toDate, setToDate] = useState<Date>();
 
@@ -55,7 +55,7 @@ export default function DatePickerModal(props: Props) {
                 <Form.Group className="mb-3">
                   <Form.Label>Start Date</Form.Label>
                   <Form.Control
-                    value={fromDate && fromDate.toISOString().slice(0, 10)}
+                    value={fromDate?.toISOString().slice(0, 10)}
                     max={new Date().toISOString().slice(0, 10)}
                     className={`${styles.formInput}`}
                     type="date"
@@ -73,7 +73,7 @@ export default function DatePickerModal(props: Props) {
                 <Form.Group className="mb-3">
                   <Form.Label>End Date</Form.Label>
                   <Form.Control
-                    value={toDate && toDate.toISOString().slice(0, 10)}
+                    value={toDate?.toISOString().slice(0, 10)}
                     max={new Date().toISOString().slice(0, 10)}
                     className={`${styles.formInput}`}
                     type="date"

@@ -7,7 +7,7 @@ import { Container, Row, Col } from "react-bootstrap";
 import dynamic from "next/dynamic";
 import HeaderPlaceholder from "../components/header/HeaderPlaceholder";
 
-const Gas = dynamic(() => import("../components/gas/Gas"), {
+const Gas = dynamic(() => import("../components/gas-royalties/Gas"), {
   ssr: false,
 });
 
@@ -17,10 +17,7 @@ const Header = dynamic(() => import("../components/header/Header"), {
 });
 
 export default function TheMemesPage() {
-  const [breadcrumbs, setBreadcrumbs] = useState<Crumb[]>([
-    { display: "Home", href: "/" },
-    { display: "Gas" },
-  ]);
+  const breadcrumbs = [{ display: "Home", href: "/" }, { display: "Gas" }];
 
   return (
     <>

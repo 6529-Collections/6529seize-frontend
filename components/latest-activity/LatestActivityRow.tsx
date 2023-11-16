@@ -17,7 +17,6 @@ import { NFTLite } from "../../entities/INFT";
 import Address from "../address/Address";
 import Tippy from "@tippyjs/react";
 import { Container, Row, Col } from "react-bootstrap";
-import { IconProp } from "@fortawesome/fontawesome-svg-core";
 
 interface Props {
   nft?: NFTLite;
@@ -130,6 +129,7 @@ export default function LatestActivityRow(props: Props) {
       </Tippy>
     );
   }
+
   function printInfo() {
     return (
       <span className="d-flex align-items-center gap-3">
@@ -147,6 +147,22 @@ export default function LatestActivityRow(props: Props) {
       </span>
     );
   }
+
+  function isBurn() {
+    return areEqualAddresses(NULL_ADDRESS);
+  }
+
+  function isMint() {
+    return (
+      areEqualAddresses(MANIFOLD, props.tr.from_address) ||
+      areEqualAddresses(NULL_ADDRESS, props.tr.from_address)
+    );
+  }
+
+  function isAirdrop() {
+    return areEqualAddresses(NULL_ADDRESS, props.tr.from_address);
+  }
+
   return (
     <tr
       key={`${props.tr.from_address}-${props.tr.to_address}-${props.tr.transaction}-${props.tr.token_id}-latestactivity-row`}
@@ -157,24 +173,22 @@ export default function LatestActivityRow(props: Props) {
       <td className="align-middle text-center">
         <FontAwesomeIcon
           className={
-            props.tr.to_address === NULL_ADDRESS
+            isBurn()
               ? styles.iconRed
-              : areEqualAddresses(MANIFOLD, props.tr.from_address) ||
-                areEqualAddresses(NULL_ADDRESS, props.tr.from_address)
+              : isMint() || isAirdrop()
               ? styles.iconWhite
               : props.tr.value > 0
               ? styles.iconBlue
               : styles.iconGreen
           }
           icon={
-            props.tr.to_address === NULL_ADDRESS
+            isBurn()
               ? `fire`
               : props.tr.value > 0
-              ? areEqualAddresses(NULL_ADDRESS, props.tr.from_address) ||
-                areEqualAddresses(MANIFOLD, props.tr.from_address)
+              ? isMint()
                 ? "cart-plus"
                 : "shopping-cart"
-              : areEqualAddresses(NULL_ADDRESS, props.tr.from_address)
+              : isAirdrop()
               ? "parachute-box"
               : "exchange"
           }
