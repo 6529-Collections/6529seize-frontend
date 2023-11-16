@@ -9,30 +9,12 @@ import Pagination from "../pagination/Pagination";
 
 const PAGE_SIZE = 25;
 
-interface Props {
-  title: string;
+interface RowProps {
+  date: string;
   url: string;
 }
 
-export default function CommunityDownloadsComponent(props: Props) {
-  const router = useRouter();
-
-  const [downloads, setDownloads] = useState<any[]>();
-  const [totalResults, setTotalResults] = useState(0);
-  const [page, setPage] = useState(1);
-
-  function fetchResults(mypage: number) {
-    let url = `${props.url}?page_size=${PAGE_SIZE}&page=${mypage}`;
-    fetchUrl(url).then((response: DBResponse) => {
-      setTotalResults(response.count);
-      setDownloads(response.data);
-    });
-  }
-
-  useEffect(() => {
-    fetchResults(page);
-  }, [page, router.isReady]);
-
+export function CommunityDownloadsComponentRow(props: Readonly<RowProps>) {
   function isYYYYMMDDFormat(str: string): boolean {
     return /^\d{8}$/.test(str);
   }
@@ -53,6 +35,42 @@ export default function CommunityDownloadsComponent(props: Props) {
   }
 
   return (
+    <tr>
+      <td>{printDate(props.date)}</td>
+      <td>
+        <a href={props.url} target="_blank" rel="noreferrer">
+          {props.url}
+        </a>
+      </td>
+    </tr>
+  );
+}
+
+interface Props {
+  title: string;
+  url: string;
+}
+
+export default function CommunityDownloadsComponent(props: Readonly<Props>) {
+  const router = useRouter();
+
+  const [downloads, setDownloads] = useState<any[]>();
+  const [totalResults, setTotalResults] = useState(0);
+  const [page, setPage] = useState(1);
+
+  function fetchResults(mypage: number) {
+    let url = `${props.url}?page_size=${PAGE_SIZE}&page=${mypage}`;
+    fetchUrl(url).then((response: DBResponse) => {
+      setTotalResults(response.count);
+      setDownloads(response.data);
+    });
+  }
+
+  useEffect(() => {
+    fetchResults(page);
+  }, [page, router.isReady]);
+
+  return (
     <Container fluid>
       <Row>
         <Col>
@@ -68,17 +86,11 @@ export default function CommunityDownloadsComponent(props: Props) {
                   <Table bordered={false} className={styles.downloadsTable}>
                     <tbody>
                       {downloads.map((download) => (
-                        <tr key={download.created_at}>
-                          <td>{printDate(download.date)}</td>
-                          <td>
-                            <a
-                              href={download.url}
-                              target="_blank"
-                              rel="noreferrer">
-                              {download.url}
-                            </a>
-                          </td>
-                        </tr>
+                        <CommunityDownloadsComponentRow
+                          key={download.date}
+                          date={download.date}
+                          url={download.url}
+                        />
                       ))}
                     </tbody>
                   </Table>
