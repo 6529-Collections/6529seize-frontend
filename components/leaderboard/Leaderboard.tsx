@@ -6,7 +6,6 @@ import {
   TDHMetrics,
   BaseTDHMetrics,
   GlobalTDHHistory,
-  ConsolidatedTDH,
 } from "../../entities/ITDH";
 import styles from "./Leaderboard.module.scss";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -28,7 +27,6 @@ import SearchModal from "../searchModal/SearchModal";
 import DownloadUrlWidget from "../downloadUrlWidget/DownloadUrlWidget";
 import DotLoader from "../dotLoader/DotLoader";
 import { assertUnreachable } from "../../helpers/AllowlistToolHelpers";
-import { tdh2Level } from "../../helpers/LevelHelpers";
 
 interface Props {
   page: number;
