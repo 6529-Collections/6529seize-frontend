@@ -96,7 +96,7 @@ export default function Gas() {
         }
         break;
     }
-    return `${process.env.API_ENDPOINT}/api/gas_memes?${filters}`;
+    return `${process.env.API_ENDPOINT}/api/gas/memes?${filters}`;
   }
 
   function fetchGas() {

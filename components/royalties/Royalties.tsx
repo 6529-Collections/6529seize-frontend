@@ -106,7 +106,7 @@ export default function Royalties() {
         }
         break;
     }
-    return `${process.env.API_ENDPOINT}/api/royalties_memes?${filters}`;
+    return `${process.env.API_ENDPOINT}/api/royalties/memes?${filters}`;
   }
 
   function fetchRoyalties() {
