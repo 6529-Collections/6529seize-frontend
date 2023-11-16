@@ -1,18 +1,10 @@
 import { useEffect, useState } from "react";
-import {
-  Container,
-  Row,
-  Col,
-  Table,
-  Dropdown,
-  Form,
-  Badge,
-} from "react-bootstrap";
+import { Container, Row, Col, Table, Dropdown } from "react-bootstrap";
 import styles from "./Royalties.module.scss";
 import DotLoader from "../dotLoader/DotLoader";
 import { Royalty } from "../../entities/IRoyalty";
 import { fetchUrl } from "../../services/6529api";
-import { displayDecimal } from "../../helpers/Helpers";
+import { displayDecimal, getDateFilters } from "../../helpers/Helpers";
 import Image from "next/image";
 import DatePickerModal from "../datePickerModal/DatePickerModal";
 import DownloadUrlWidget from "../downloadUrlWidget/DownloadUrlWidget";
@@ -36,76 +28,8 @@ export default function Royalties() {
     DateIntervalsSelection.TODAY
   );
 
-  function formatDate(d: Date) {
-    const year = d.getUTCFullYear();
-    const month = String(d.getUTCMonth() + 1).padStart(2, "0");
-    const day = String(d.getUTCDate()).padStart(2, "0");
-    return `${year}-${month}-${day}`;
-  }
-
   function getUrl() {
-    let filters = "";
-    switch (dateSelection) {
-      case DateIntervalsSelection.ALL:
-        break;
-      case DateIntervalsSelection.TODAY:
-        filters += `&from_date=${formatDate(new Date())}`;
-        break;
-      case DateIntervalsSelection.YESTERDAY:
-        const yesterday = new Date();
-        yesterday.setUTCDate(yesterday.getUTCDate() - 1);
-        filters += `&from_date=${formatDate(yesterday)}`;
-        filters += `&to_date=${formatDate(yesterday)}`;
-        break;
-      case DateIntervalsSelection.LAST_7:
-        const weekAgo = new Date();
-        weekAgo.setUTCDate(weekAgo.getUTCDate() - 7);
-        filters += `&from_date=${formatDate(weekAgo)}`;
-        break;
-      case DateIntervalsSelection.THIS_MONTH:
-        const firstDayOfMonth = new Date();
-        firstDayOfMonth.setUTCDate(1);
-        filters += `&from_date=${formatDate(firstDayOfMonth)}`;
-        break;
-      case DateIntervalsSelection.PREVIOUS_MONTH:
-        const firstDayOfPreviousMonth = new Date();
-        firstDayOfPreviousMonth.setUTCMonth(
-          firstDayOfPreviousMonth.getUTCMonth() - 1
-        );
-        firstDayOfPreviousMonth.setUTCDate(1);
-        const lastDayOfPreviousMonth = new Date();
-        lastDayOfPreviousMonth.setUTCDate(0);
-        filters += `&from_date=${formatDate(firstDayOfPreviousMonth)}`;
-        filters += `&to_date=${formatDate(lastDayOfPreviousMonth)}`;
-        break;
-      case DateIntervalsSelection.YEAR_TO_DATE:
-        const firstDayOfYear = new Date();
-        firstDayOfYear.setUTCMonth(0);
-        firstDayOfYear.setUTCDate(1);
-        filters += `&from_date=${formatDate(firstDayOfYear)}`;
-        break;
-      case DateIntervalsSelection.LAST_YEAR:
-        const firstDayOfLastYear = new Date();
-        firstDayOfLastYear.setUTCFullYear(
-          firstDayOfLastYear.getUTCFullYear() - 1
-        );
-        firstDayOfLastYear.setUTCMonth(0);
-        firstDayOfLastYear.setUTCDate(1);
-        const lastDayOfLastYear = new Date();
-        lastDayOfLastYear.setUTCMonth(0);
-        lastDayOfLastYear.setUTCDate(0);
-        filters += `&from_date=${formatDate(firstDayOfLastYear)}`;
-        filters += `&to_date=${formatDate(lastDayOfLastYear)}`;
-        break;
-      case DateIntervalsSelection.CUSTOM:
-        if (fromDate) {
-          filters += `&from_date=${formatDate(fromDate)}`;
-        }
-        if (toDate) {
-          filters += `&to_date=${formatDate(toDate)}`;
-        }
-        break;
-    }
+    const dateFilters = getDateFilters(dateSelection, fromDate, toDate);
     return `${process.env.API_ENDPOINT}/api/royalties/memes?${filters}`;
   }
 
