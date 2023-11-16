@@ -1,5 +1,4 @@
 export interface Transaction {
-  id: number;
   created_at: Date;
   transaction: string;
   block: number;
@@ -12,4 +11,9 @@ export interface Transaction {
   token_id: number;
   token_count: number;
   value: number;
+  royalties: number;
+  gas_gwei: number;
+  gas_price: number;
+  gas_price_gwei: number;
+  gas: number;
 }
