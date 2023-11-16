@@ -70,45 +70,35 @@ export default function LatestActivity(props: Props) {
   }, [page, typeFilter]);
 
   useEffect(() => {
-    async function fetchNfts(url: string) {
-      fetchAllPages(url).then((newnfts: NFT[]) => {
-        setNfts(
-          [...newnfts].map((n) => {
-            return n;
-          })
-        );
-      });
-    }
-    if (router.isReady) {
-      const initialUrlNfts = `${process.env.API_ENDPOINT}/api/nfts`;
-      fetchNfts(initialUrlNfts);
-    }
-  }, [router.isReady]);
+    fetchUrl(`${process.env.API_ENDPOINT}/api/memes_lite`).then(
+      (memeResponse: DBResponse) => {
+        setNfts(memeResponse.data);
+        fetchAllPages(
+          `${process.env.API_ENDPOINT}/api/nfts/gradients?&page_size=101`
+        ).then((gradients: NFT[]) => {
+          setNfts([...memeResponse.data, ...gradients]);
+        });
+      }
+    );
+  }, []);
 
   return (
     <Container className={`no-padding pt-4`}>
       <Row className="d-flex align-items-center">
-        <Col
-          xs={{ span: 12 }}
-          sm={{ span: 7 }}
-          md={{ span: 9 }}
-          lg={{ span: 9 }}>
-          <h1>
-            LATEST ACTIVITY {fetching && <DotLoader />}
-            {showViewAll && (
-              <a href="/latest-activity">
-                <span className={styles.viewAllLink}>VIEW ALL</span>
-              </a>
-            )}
-          </h1>
-        </Col>
-        {!showViewAll && (
-          <Col
-            xs={{ span: 12 }}
-            sm={{ span: 5 }}
-            md={{ span: 3 }}
-            lg={{ span: 3 }}
-            className={`d-flex justify-content-center align-items-center`}>
+        <Col className="d-flex align-items-center justify-content-between">
+          <span className="d-flex align-items-center gap-2">
+            <h1>
+              LATEST ACTIVITY{" "}
+              {showViewAll ? (
+                <a href="/latest-activity">
+                  <span className={styles.viewAllLink}>VIEW ALL</span>
+                </a>
+              ) : (
+                fetching && <DotLoader />
+              )}
+            </h1>
+          </span>
+          <span>
             <Dropdown className={styles.filterDropdown} drop={"down-centered"}>
               <Dropdown.Toggle>Filter: {typeFilter}</Dropdown.Toggle>
               <Dropdown.Menu>
@@ -124,10 +114,11 @@ export default function LatestActivity(props: Props) {
                 ))}
               </Dropdown.Menu>
             </Dropdown>
-          </Col>
-        )}
+          </span>
+        </Col>
       </Row>
-      <Row className={styles.scrollContainer}>
+      {fetching && showViewAll && <DotLoader />}
+      <Row className={`pt-3 ${styles.scrollContainer}`}>
         <Col>
           <Table bordered={false} className={styles.activityTable}>
             <tbody>
