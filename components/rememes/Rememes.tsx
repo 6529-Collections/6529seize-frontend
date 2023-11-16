@@ -31,11 +31,7 @@ export enum RememeSort {
   CREATED_ASC = "Recently Added",
 }
 
-interface Props {
-  meme_id?: number;
-}
-
-export default function Rememes(props: Props) {
+export default function Rememes() {
   const router = useRouter();
 
   const [memes, setMemes] = useState<NFTLite[]>([]);
@@ -45,8 +41,6 @@ export default function Rememes(props: Props) {
   const [totalResults, setTotalResults] = useState(0);
   const [page, setPage] = useState(1);
   const [rememesLoaded, setRememesLoaded] = useState(false);
-
-  const [urlMemeId, setUrlMemeId] = useState<number | undefined>(props.meme_id);
 
   const tokenTypes = [TokenType.ALL, TokenType.ERC721, TokenType.ERC1155];
   const [selectedTokenType, setSelectedTokenType] = useState<TokenType>(
@@ -71,8 +65,8 @@ export default function Rememes(props: Props) {
   function fetchResults(mypage: number) {
     setRememesLoaded(false);
     let memeFilter = "";
-    if (urlMemeId) {
-      memeFilter = `&meme_id=${urlMemeId}`;
+    if (router.query.meme_id) {
+      memeFilter = `&meme_id=${router.query.meme_id}`;
     }
     let tokenTypeFilter = "";
     if (selectedTokenType !== TokenType.ALL) {
@@ -91,30 +85,28 @@ export default function Rememes(props: Props) {
   }
 
   useEffect(() => {
-    if (selectedMeme || urlMemeId) {
-      setUrlMemeId(selectedMeme ? selectedMeme.id : urlMemeId);
+    if (selectedMeme) {
       router.replace(
         {
-          query: { meme_id: selectedMeme ? selectedMeme.id : urlMemeId },
-        },
-        undefined,
-        { shallow: true }
-      );
-    } else {
-      setUrlMemeId(undefined);
-      router.replace(
-        {
-          query: {},
+          query: { meme_id: selectedMeme.id },
         },
         undefined,
         { shallow: true }
       );
     }
-  }, [selectedMeme || urlMemeId]);
+  }, [selectedMeme]);
+
+  useEffect(() => {
+    if (page === 1) {
+      fetchResults(page);
+    } else {
+      setPage(1);
+    }
+  }, [selectedTokenType, selectedSorting, router.query.meme_id]);
 
   useEffect(() => {
     fetchResults(page);
-  }, [page, router.isReady, urlMemeId, selectedTokenType, selectedSorting]);
+  }, [page]);
 
   function printRememe(rememe: Rememe) {
     return (
@@ -255,7 +247,6 @@ export default function Rememes(props: Props) {
                           <Dropdown.Item
                             key={`sorting-${s}`}
                             onClick={() => {
-                              setTotalResults(0);
                               setSelectedSorting(s);
                             }}>
                             {s}
@@ -291,7 +282,6 @@ export default function Rememes(props: Props) {
                           <Dropdown.Item
                             key={`token-type-${t}`}
                             onClick={() => {
-                              setTotalResults(0);
                               setSelectedTokenType(t);
                             }}>
                             {t}
@@ -304,19 +294,22 @@ export default function Rememes(props: Props) {
                       drop={"down-centered"}>
                       <Dropdown.Toggle>
                         Meme Reference:{" "}
-                        {urlMemeId
-                          ? memes.find((m) => m.id === urlMemeId)
-                            ? `${urlMemeId} - ${
-                                memes.find((m) => m.id === urlMemeId)?.name
+                        {router.query.meme_id
+                          ? memes.find(
+                              (m) => m.id.toString() === router.query.meme_id
+                            )
+                            ? `${router.query.meme_id} - ${
+                                memes.find(
+                                  (m) =>
+                                    m.id.toString() === router.query.meme_id
+                                )?.name
                               }`
-                            : `${urlMemeId}`
+                            : `${router.query.meme_id}`
                           : `All`}
                       </Dropdown.Toggle>
                       <Dropdown.Menu>
                         <Dropdown.Item
                           onClick={() => {
-                            setUrlMemeId(undefined);
-                            setTotalResults(0);
                             setSelectedMeme(undefined);
                           }}>
                           All
@@ -325,7 +318,6 @@ export default function Rememes(props: Props) {
                           <Dropdown.Item
                             key={`meme-${m.id}`}
                             onClick={() => {
-                              setTotalResults(0);
                               setSelectedMeme(m);
                             }}>
                             #{m.id} - {m.name}
