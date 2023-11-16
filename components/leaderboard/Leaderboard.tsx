@@ -6,7 +6,6 @@ import {
   TDHMetrics,
   BaseTDHMetrics,
   GlobalTDHHistory,
-  ConsolidatedTDH,
 } from "../../entities/ITDH";
 import styles from "./Leaderboard.module.scss";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -27,6 +26,7 @@ import Address from "../address/Address";
 import SearchModal from "../searchModal/SearchModal";
 import DownloadUrlWidget from "../downloadUrlWidget/DownloadUrlWidget";
 import DotLoader from "../dotLoader/DotLoader";
+import { assertUnreachable } from "../../helpers/AllowlistToolHelpers";
 
 interface Props {
   page: number;
@@ -144,6 +144,7 @@ enum Sort {
   unique_memes_szn4 = "unique_memes_szn4",
   unique_memes_szn5 = "unique_memes_szn5",
   day_change = "day_change",
+  level = "level",
 }
 
 enum Content {
@@ -176,6 +177,11 @@ enum Focus {
   SETS = "Sets",
 }
 
+export interface LeaderboardTDH extends BaseTDHMetrics {
+  handle?: string | undefined;
+  level: number;
+}
+
 export default function Leaderboard(props: Props) {
   const router = useRouter();
 
@@ -197,12 +203,12 @@ export default function Leaderboard(props: Props) {
 
   const [pageProps, setPageProps] = useState<Props>(props);
   const [totalResults, setTotalResults] = useState(0);
-  const [leaderboard, setLeaderboard] = useState<BaseTDHMetrics[]>();
+  const [leaderboard, setLeaderboard] = useState<LeaderboardTDH[]>();
   const [lastTDH, setLastTDH] = useState<TDHCalc>();
   const [sort, setSort] = useState<{
     sort: Sort;
     sort_direction: SortDirection;
-  }>({ sort: Sort.total_balance, sort_direction: SortDirection.DESC });
+  }>({ sort: Sort.level, sort_direction: SortDirection.DESC });
   const [showViewAll, setShowViewAll] = useState(
     !window.location.pathname.includes("community")
   );
@@ -261,7 +267,7 @@ export default function Leaderboard(props: Props) {
     let url = `${process.env.API_ENDPOINT}/api/${
       view === VIEW.WALLET ? "owner_metrics" : "consolidated_owner_metrics"
     }`;
-    let mysort = sort.sort;
+    let mysort = sort.sort === Sort.level ? Sort.boosted_tdh : sort.sort;
     if (mysort == Sort.day_change && view == VIEW.WALLET) {
       mysort = Sort.total_balance;
       setSort({ sort: mysort, sort_direction: sort.sort_direction });
@@ -506,7 +512,8 @@ export default function Leaderboard(props: Props) {
           Sort.memes_cards_sets_szn3,
           Sort.memes_cards_sets_szn4,
           Sort.memes_cards_sets_szn5,
-        ].includes(sort.sort)
+        ].includes(sort.sort) ||
+        focus === Focus.SETS
       ) {
         setSort({
           sort: getSetsSort(),
@@ -531,32 +538,45 @@ export default function Leaderboard(props: Props) {
     }
   }, [content]);
 
-  useEffect(() => {
-    if (focus === Focus.TDH) {
-      if (sort.sort != getBalanceSort()) {
-        setSort({
-          sort: getBalanceSort(),
-          sort_direction: sort.sort_direction,
-        });
-      }
+  const changeFocus = (newFocus: Focus) => {
+    switch (newFocus) {
+      case Focus.TDH:
+        if (content === Content.ALL) {
+          setSort({
+            sort: Sort.level,
+            sort_direction: sort.sort_direction,
+          });
+          break;
+        }
+        if (sort.sort !== getBalanceSort()) {
+          setSort({
+            sort: getBalanceSort(),
+            sort_direction: sort.sort_direction,
+          });
+        }
+        break;
+      case Focus.INTERACTIONS:
+        if (sort.sort !== getPurchasesCountSort()) {
+          setSort({
+            sort: getPurchasesCountSort(),
+            sort_direction: sort.sort_direction,
+          });
+        }
+        break;
+      case Focus.SETS:
+        if (sort.sort !== getSetsSort()) {
+          setSort({
+            sort: getSetsSort(),
+            sort_direction: sort.sort_direction,
+          });
+        }
+        break;
+      default:
+        assertUnreachable(newFocus);
     }
-    if (focus === Focus.INTERACTIONS) {
-      if (sort.sort != getPurchasesCountSort()) {
-        setSort({
-          sort: getPurchasesCountSort(),
-          sort_direction: sort.sort_direction,
-        });
-      }
-    }
-    if (focus === Focus.SETS) {
-      if (sort.sort != Sort.memes_cards_sets) {
-        setSort({
-          sort: Sort.memes_cards_sets,
-          sort_direction: sort.sort_direction,
-        });
-      }
-    }
-  }, [focus]);
+
+    setFocus(newFocus);
+  };
 
   useEffect(() => {
     let url = `${
@@ -1399,7 +1419,7 @@ export default function Leaderboard(props: Props) {
               >
                 <span>
                   <span
-                    onClick={() => setFocus(Focus.TDH)}
+                    onClick={() => changeFocus(Focus.TDH)}
                     className={`${styles.focus} ${
                       focus != Focus.TDH ? styles.disabled : ""
                     }`}
@@ -1410,7 +1430,7 @@ export default function Leaderboard(props: Props) {
                 &nbsp;&nbsp;|&nbsp;&nbsp;
                 <span>
                   <span
-                    onClick={() => setFocus(Focus.INTERACTIONS)}
+                    onClick={() => changeFocus(Focus.INTERACTIONS)}
                     className={`${styles.focus} ${
                       focus != Focus.INTERACTIONS ? styles.disabled : ""
                     }`}
@@ -1421,7 +1441,7 @@ export default function Leaderboard(props: Props) {
                 &nbsp;&nbsp;|&nbsp;&nbsp;
                 <span>
                   <span
-                    onClick={() => setFocus(Focus.SETS)}
+                    onClick={() => changeFocus(Focus.SETS)}
                     className={`${styles.focus} ${
                       focus != Focus.SETS ? styles.disabled : ""
                     }`}
@@ -1587,6 +1607,43 @@ export default function Leaderboard(props: Props) {
                         <DotLoader />
                       </>
                     )}
+                  </th>
+                  <th className={styles.tdhSub}>
+                    <span className="d-flex align-items-center justify-content-center">
+                      Level&nbsp;
+                      <span className="d-flex flex-column">
+                        <FontAwesomeIcon
+                          icon="square-caret-up"
+                          onClick={() =>
+                            setSort({
+                              sort: Sort.level,
+                              sort_direction: SortDirection.ASC,
+                            })
+                          }
+                          className={`${styles.caret} ${
+                            sort.sort_direction != SortDirection.ASC ||
+                            sort.sort != Sort.level
+                              ? styles.disabled
+                              : ""
+                          }`}
+                        />
+                        <FontAwesomeIcon
+                          icon="square-caret-down"
+                          onClick={() =>
+                            setSort({
+                              sort: Sort.level,
+                              sort_direction: SortDirection.DESC,
+                            })
+                          }
+                          className={`${styles.caret} ${
+                            sort.sort_direction != SortDirection.DESC ||
+                            sort.sort != Sort.level
+                              ? styles.disabled
+                              : ""
+                          }`}
+                        />
+                      </span>
+                    </span>
                   </th>
                   {focus === Focus.TDH && (
                     <th className={styles.tdhSub}>
@@ -2410,6 +2467,7 @@ export default function Leaderboard(props: Props) {
                               />
                             </div>
                           </td>
+                          <td className={styles.tdhSub}>{lead.level}</td>
                           {focus === Focus.TDH && (
                             <td className={styles.tdhSub}>
                               {numberWithCommas(getCardsHodled(lead))}
