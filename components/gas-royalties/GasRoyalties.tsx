@@ -54,7 +54,15 @@ export function GasRoyaltiesHeader(props: Readonly<HeaderProps>) {
                   ? styles.collectionFocusActive
                   : styles.collectionFocus
               }`}
-              onClick={() => props.setFocus(GasRoyaltiesCollectionFocus.MEMES)}>
+              onClick={() => props.setFocus(GasRoyaltiesCollectionFocus.MEMES)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  props.setFocus(GasRoyaltiesCollectionFocus.MEMES);
+                }
+              }}
+              tabIndex={0}
+              role="button"
+              aria-label="The Memes">
               The Memes
             </span>
             <span
@@ -65,7 +73,15 @@ export function GasRoyaltiesHeader(props: Readonly<HeaderProps>) {
               }`}
               onClick={() =>
                 props.setFocus(GasRoyaltiesCollectionFocus.MEMELAB)
-              }>
+              }
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  props.setFocus(GasRoyaltiesCollectionFocus.MEMELAB);
+                }
+              }}
+              tabIndex={0}
+              role="button"
+              aria-label="Meme Lab">
               Meme Lab
             </span>
           </span>
