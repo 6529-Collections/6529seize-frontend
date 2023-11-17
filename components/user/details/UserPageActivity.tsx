@@ -1,7 +1,6 @@
 import styles from "../UserPage.module.scss";
 import { Col, Dropdown, Row, Table } from "react-bootstrap";
 import Pagination from "../../pagination/Pagination";
-import { TypeFilter } from "../../latest-activity/LatestActivity";
 import LatestActivityRow from "../../latest-activity/LatestActivityRow";
 import { useEffect, useState } from "react";
 import { Transaction } from "../../../entities/ITransaction";
@@ -23,11 +22,20 @@ interface Props {
 
 const ACTIVITY_PAGE_SIZE = 25;
 
+export enum UserActivityTypeFilter {
+  ALL = "All",
+  AIRDROPS = "Airdrops",
+  MINTS = "Mints",
+  SALES = "Sales",
+  PURCHASES = "Purchases",
+  TRANSFERS = "Transfers",
+  BURNS = "Burns",
+}
+
 export default function UserPageActivity(props: Props) {
   const [activity, setActivity] = useState<Transaction[]>([]);
-  const [activityTypeFilter, setActivityTypeFilter] = useState<TypeFilter>(
-    TypeFilter.ALL
-  );
+  const [activityTypeFilter, setActivityTypeFilter] =
+    useState<UserActivityTypeFilter>(UserActivityTypeFilter.ALL);
 
   const [activityPage, setActivityPage] = useState(1);
   const [activityLoaded, setActivityLoaded] = useState(false);
@@ -38,7 +46,7 @@ export default function UserPageActivity(props: Props) {
     filter,
   }: {
     page: number;
-    filter: TypeFilter | null;
+    filter: UserActivityTypeFilter | null;
   }) => {
     setActivityPage(page);
     if (filter) {
@@ -55,10 +63,13 @@ export default function UserPageActivity(props: Props) {
   }, [props.activeAddress]);
 
   useEffect(() => {
-    if (activityPage === 1 && activityTypeFilter === TypeFilter.ALL) {
+    if (
+      activityPage === 1 &&
+      activityTypeFilter === UserActivityTypeFilter.ALL
+    ) {
       return;
     }
-    changeActivityPage({ page: 1, filter: TypeFilter.ALL });
+    changeActivityPage({ page: 1, filter: UserActivityTypeFilter.ALL });
   }, [props.show]);
 
   useEffect(() => {
@@ -83,19 +94,22 @@ export default function UserPageActivity(props: Props) {
       )}&page_size=${ACTIVITY_PAGE_SIZE}&page=${activityPage}`;
     }
     switch (activityTypeFilter) {
-      case TypeFilter.SALES:
+      case UserActivityTypeFilter.SALES:
         url += `&filter=sales`;
         break;
-      case TypeFilter.TRANSFERS:
+      case UserActivityTypeFilter.PURCHASES:
+        url += `&filter=purchases`;
+        break;
+      case UserActivityTypeFilter.TRANSFERS:
         url += `&filter=transfers`;
         break;
-      case TypeFilter.AIRDROPS:
+      case UserActivityTypeFilter.AIRDROPS:
         url += `&filter=airdrops`;
         break;
-      case TypeFilter.MINTS:
+      case UserActivityTypeFilter.MINTS:
         url += `&filter=mints`;
         break;
-      case TypeFilter.BURNS:
+      case UserActivityTypeFilter.BURNS:
         url += `&filter=burns`;
         break;
     }
@@ -141,23 +155,20 @@ export default function UserPageActivity(props: Props) {
           xs={{ span: 7 }}
           sm={{ span: 7 }}
           md={{ span: 9 }}
-          lg={{ span: 10 }}
-        >
+          lg={{ span: 10 }}>
           <h3>Wallet Activity</h3>
         </Col>
         <Col
           xs={{ span: 5 }}
           sm={{ span: 5 }}
           md={{ span: 3 }}
-          lg={{ span: 2 }}
-        >
+          lg={{ span: 2 }}>
           <Dropdown
             className={styles.activityFilterDropdown}
-            drop={"down-centered"}
-          >
+            drop={"down-centered"}>
             <Dropdown.Toggle>Filter: {activityTypeFilter}</Dropdown.Toggle>
             <Dropdown.Menu>
-              {Object.values(TypeFilter).map((filter) => (
+              {Object.values(UserActivityTypeFilter).map((filter) => (
                 <Dropdown.Item
                   key={`nft-activity-${filter}`}
                   onClick={() =>
@@ -165,8 +176,7 @@ export default function UserPageActivity(props: Props) {
                       page: 1,
                       filter,
                     })
-                  }
-                >
+                  }>
                   {filter}
                 </Dropdown.Item>
               ))}
