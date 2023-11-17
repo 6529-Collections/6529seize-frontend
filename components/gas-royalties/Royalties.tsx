@@ -180,6 +180,14 @@ export default function Royalties() {
         }}
         onHide={() => setShowDatePicker(false)}
       />
+      {!fetching && royalties.length > 0 && (
+        <Row className="pt-3 pb-3">
+          <Col className="text-left font-color-h">
+            * 6529 and 6529er have a different arrangement on royalties not
+            reflected here.
+          </Col>
+        </Row>
+      )}
     </Container>
   );
 }
