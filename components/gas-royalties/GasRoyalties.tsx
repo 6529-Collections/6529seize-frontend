@@ -85,7 +85,7 @@ export function GasRoyaltiesHeader(props: Readonly<HeaderProps>) {
               Meme Lab
             </span>
           </span>
-          <Dropdown className={styles.filterDropdown} drop={"down"}>
+          <Dropdown className={styles.filterDropdown} drop={"down-centered"}>
             <Dropdown.Toggle disabled={props.fetching}>
               {props.date_selection == DateIntervalsSelection.CUSTOM ? (
                 <span>
