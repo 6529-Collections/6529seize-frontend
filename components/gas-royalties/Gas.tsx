@@ -6,10 +6,17 @@ import { fetchUrl } from "../../services/6529api";
 import { displayDecimal, getDateFilters } from "../../helpers/Helpers";
 import DatePickerModal from "../datePickerModal/DatePickerModal";
 import { DateIntervalsSelection } from "../../enums";
-import { GasRoyaltiesHeader, GasRoyaltiesTokenImage } from "./GasRoyalties";
+import {
+  GasRoyaltiesCollectionFocus,
+  GasRoyaltiesHeader,
+  GasRoyaltiesTokenImage,
+} from "./GasRoyalties";
 
 export default function Gas() {
   const [fetching, setFetching] = useState(true);
+
+  const [collectionFocus, setCollectionFocus] =
+    useState<GasRoyaltiesCollectionFocus>(GasRoyaltiesCollectionFocus.MEMES);
 
   const [gas, setGas] = useState<Gas[]>([]);
   const [sumPrimary, setSumPrimary] = useState(0);
@@ -26,7 +33,11 @@ export default function Gas() {
 
   function getUrl() {
     const dateFilters = getDateFilters(dateSelection, fromDate, toDate);
-    return `${process.env.API_ENDPOINT}/api/gas/memes?${dateFilters}`;
+    const collection =
+      collectionFocus === GasRoyaltiesCollectionFocus.MEMELAB
+        ? "memelab"
+        : "memes";
+    return `${process.env.API_ENDPOINT}/api/gas/collection/${collection}?${dateFilters}`;
   }
 
   function fetchGas() {
@@ -43,7 +54,7 @@ export default function Gas() {
 
   useEffect(() => {
     fetchGas();
-  }, [dateSelection, fromDate, toDate]);
+  }, [dateSelection, fromDate, toDate, collectionFocus]);
 
   return (
     <Container className={`no-padding pt-4`}>
@@ -54,6 +65,8 @@ export default function Gas() {
         date_selection={dateSelection}
         from_date={fromDate}
         to_date={toDate}
+        focus={collectionFocus}
+        setFocus={setCollectionFocus}
         getUrl={getUrl}
         setDateSelection={setDateSelection}
         setShowDatePicker={setShowDatePicker}
@@ -75,6 +88,12 @@ export default function Gas() {
                   <tr key={`token-${g.token_id}`}>
                     <td>
                       <GasRoyaltiesTokenImage
+                        path={
+                          collectionFocus ===
+                          GasRoyaltiesCollectionFocus.MEMELAB
+                            ? "meme-lab"
+                            : "the-memes"
+                        }
                         token_id={g.token_id}
                         name={g.name}
                         thumbnail={g.thumbnail}
@@ -82,7 +101,7 @@ export default function Gas() {
                     </td>
                     <td>{g.artist}</td>
                     <td className="text-center">
-                      {displayDecimal(g.primary_gas, 3)}
+                      {displayDecimal(g.primary_gas, 4)}
                     </td>
                     <td className="text-center">
                       {displayDecimal(g.secondary_gas, 4)}
@@ -94,10 +113,10 @@ export default function Gas() {
                     <b>TOTAL</b>
                   </td>
                   <td className="text-center">
-                    {displayDecimal(sumPrimary, 3)}
+                    {displayDecimal(sumPrimary, 4)}
                   </td>
                   <td className="text-center">
-                    {displayDecimal(sumSecondary, 3)}
+                    {displayDecimal(sumSecondary, 4)}
                   </td>
                 </tr>
               </tbody>

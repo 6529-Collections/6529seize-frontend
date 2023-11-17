@@ -71,9 +71,21 @@
     border-color: transparent !important;
     &::after {
       margin-top: 0.8rem;
+      @media only screen and (max-width: 800px) {
+        margin-top: 0.5rem;
+      }
     }
   }
-  // div {
-  //   width: 60%;
-  // }
+}
+
+.collectionFocus {
+  &:hover {
+    color: $font-color;
+    cursor: pointer;
+  }
+}
+
+.collectionFocusActive {
+  color: $font-color;
+  transform: scale(1.02);
 }
