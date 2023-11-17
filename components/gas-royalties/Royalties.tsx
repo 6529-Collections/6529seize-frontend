@@ -44,6 +44,12 @@ export default function Royalties() {
   function fetchRoyalties() {
     setFetching(true);
     fetchUrl(getUrl()).then((res: Royalty[]) => {
+      res.forEach((r) => {
+        r.total_volume = Math.round(r.total_volume * 100000) / 100000;
+        r.royalty_split = Math.round(r.royalty_split * 100000) / 100000;
+        r.total_royalties = Math.round(r.total_royalties * 100000) / 100000;
+        r.artist_take = Math.round(r.artist_take * 100000) / 100000;
+      });
       setRoyalties(res);
       setSumTotalVolume(
         res.reduce((prev, current) => prev + current.total_volume, 0)
@@ -114,25 +120,23 @@ export default function Royalties() {
                     </td>
                     <td>{r.artist}</td>
                     <td className="text-center">
-                      {displayDecimal(r.total_volume, 4)}
+                      {displayDecimal(r.total_volume, 5)}
                     </td>
                     <td className="text-center">
-                      {displayDecimal(r.total_royalties, 4)}
+                      {displayDecimal(r.total_royalties, 5)}
                     </td>
                     <td className="text-center">
                       {displayDecimal(
                         (r.total_royalties * 100) / r.total_volume,
-                        4
+                        5
                       )}
                     </td>
                     <td className="d-flex justify-content-center">
                       <span className="d-flex align-items-center gap-1">
-                        {displayDecimal(r.artist_take, 4)}
-                        {r.total_royalties > 0 && r.royalty_split > 0 && (
-                          <span className="font-smaller font-color-h">
-                            ({r.royalty_split * 100}%)
-                          </span>
-                        )}
+                        {displayDecimal(r.artist_take, 5)}
+                        <span className="font-smaller font-color-h">
+                          ({r.royalty_split * 100}%)
+                        </span>
                       </span>
                     </td>
                   </tr>
@@ -142,19 +146,19 @@ export default function Royalties() {
                     <b>TOTAL</b>
                   </td>
                   <td className="text-center">
-                    {displayDecimal(sumTotalVolume, 4)}
+                    {displayDecimal(sumTotalVolume, 5)}
                   </td>
                   <td className="text-center">
-                    {displayDecimal(sumTotalRoyalties, 4)}
+                    {displayDecimal(sumTotalRoyalties, 5)}
                   </td>
                   <td className="text-center">
                     {displayDecimal(
                       (sumTotalRoyalties * 100) / sumTotalVolume,
-                      4
+                      5
                     )}
                   </td>
                   <td className="text-center">
-                    {displayDecimal(sumTotalArtistTake, 4)}
+                    {displayDecimal(sumTotalArtistTake, 5)}
                   </td>
                 </tr>
               </tbody>

@@ -43,6 +43,10 @@ export default function Gas() {
   function fetchGas() {
     setFetching(true);
     fetchUrl(getUrl()).then((res: Gas[]) => {
+      res.forEach((r) => {
+        r.primary_gas = Math.round(r.primary_gas * 100000) / 100000;
+        r.secondary_gas = Math.round(r.secondary_gas * 100000) / 100000;
+      });
       setGas(res);
       setSumPrimary(res.map((g) => g.primary_gas).reduce((a, b) => a + b, 0));
       setSumSecondary(
@@ -101,10 +105,10 @@ export default function Gas() {
                     </td>
                     <td>{g.artist}</td>
                     <td className="text-center">
-                      {displayDecimal(g.primary_gas, 4)}
+                      {displayDecimal(g.primary_gas, 5)}
                     </td>
                     <td className="text-center">
-                      {displayDecimal(g.secondary_gas, 4)}
+                      {displayDecimal(g.secondary_gas, 5)}
                     </td>
                   </tr>
                 ))}
@@ -113,10 +117,10 @@ export default function Gas() {
                     <b>TOTAL</b>
                   </td>
                   <td className="text-center">
-                    {displayDecimal(sumPrimary, 4)}
+                    {displayDecimal(sumPrimary, 5)}
                   </td>
                   <td className="text-center">
-                    {displayDecimal(sumSecondary, 4)}
+                    {displayDecimal(sumSecondary, 5)}
                   </td>
                 </tr>
               </tbody>
