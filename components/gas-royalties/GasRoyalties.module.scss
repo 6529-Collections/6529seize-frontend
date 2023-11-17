@@ -73,7 +73,16 @@
       margin-top: 0.8rem;
     }
   }
-  // div {
-  //   width: 60%;
-  // }
+}
+
+.collectionFocus {
+  &:hover {
+    color: $font-color;
+    cursor: pointer;
+  }
+}
+
+.collectionFocusActive {
+  color: $font-color;
+  transform: scale(1.02);
 }
