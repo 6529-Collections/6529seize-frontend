@@ -12,18 +12,18 @@ import UserPageLayout from "../../components/user/layout/UserPageLayout";
 import { getCommonUserServerSideProps, userPageNeedsRedirect } from "./server.helpers";
 
 
-export interface UserPageProps {
+export interface UserPageCollectedProps {
   profile: IProfileAndConsolidations;
   title: string;
   consolidatedTDH: ConsolidatedTDHMetrics | null;
-  gradients: NFT[];
+  memesLite: NFTLite[];
 }
 
-const Page: NextPageWithLayout<{ pageProps: UserPageProps }> = ({ pageProps }) => {
-  return <div>index</div>
+const Page: NextPageWithLayout<{ pageProps: UserPageCollectedProps }> = ({ pageProps }) => {
+  return <div>collected</div>
 }
 
-Page.getLayout = function getLayout(page: ReactElement<{ pageProps: UserPageProps }>) {
+Page.getLayout = function getLayout(page: ReactElement<{ pageProps: UserPageCollectedProps }>) {
   return (
     <UserPageLayout props={page.props.pageProps}>
       {page}
@@ -38,19 +38,8 @@ export async function getServerSideProps(
   res: any,
   resolvedUrl: any
 ): Promise<{
-  props: UserPageProps;
+  props: UserPageCollectedProps;
 }> {
-
-  const getGradients = async (
-    headers: Record<string, string>
-  ): Promise<NFT[]> => {
-    const gradients = await commonApiFetch<{ data: NFT[] }>({
-      endpoint: "nfts/gradients?&page_size=101&sort=ASC&sort_direction=id",
-      headers,
-    });
-    return gradients.data;
-  };
-
   const authCookie = req?.req?.cookies["x-6529-auth"];
   try {
     const headers: Record<string, string> = authCookie
@@ -58,24 +47,27 @@ export async function getServerSideProps(
       : {};
 
     const { profile, title, consolidatedTDH } = await getCommonUserServerSideProps({ user: req.query.user, headers })
-
     const needsRedirect = userPageNeedsRedirect({
       profile,
       req,
-      subroute: null
+      subroute: 'collected'
     })
 
     if (needsRedirect) {
       return needsRedirect as any
     }
 
-    const gradients = await getGradients(headers)
+    const memesLite = await commonApiFetch<{ data: NFTLite[] }>({
+      endpoint: "memes_lite",
+      headers,
+    })
+
     return {
       props: {
         profile,
         title,
         consolidatedTDH,
-        gradients,
+        memesLite: memesLite.data,
       },
     };
   } catch (e: any) {

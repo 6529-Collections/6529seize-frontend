@@ -83,6 +83,8 @@ import {
 import Head from "next/head";
 import { Web3Modal } from "@web3modal/react";
 import Auth from "../components/auth/Auth";
+import { NextPage, NextPageContext } from "next";
+import { ReactElement, ReactNode } from "react";
 
 library.add(
   faArrowUp,
@@ -169,9 +171,17 @@ const wagmiConfig = createConfig({
 });
 const ethereumClient = new EthereumClient(wagmiConfig, chains);
 
-export default function App({ Component, ...rest }: AppProps) {
-  const { store, props } = wrapper.useWrappedStore(rest);
+export type NextPageWithLayout<Props> = NextPage<Props> & {
+  getLayout?: (page: ReactElement) => ReactNode;
+};
 
+type AppPropsWithLayout = AppProps & {
+  Component: NextPageWithLayout<NextPageContext>
+}
+
+export default function App({ Component, ...rest }: AppPropsWithLayout) {
+  const { store, props } = wrapper.useWrappedStore(rest);
+  const getLayout = Component.getLayout ?? ((page) => page)
   return (
     <>
       <Provider store={store}>
@@ -184,7 +194,7 @@ export default function App({ Component, ...rest }: AppProps) {
 
         <WagmiConfig config={wagmiConfig}>
           <Auth>
-            <Component {...props} />
+            {getLayout(<Component {...props} />)}
           </Auth>
         </WagmiConfig>
         <Web3Modal

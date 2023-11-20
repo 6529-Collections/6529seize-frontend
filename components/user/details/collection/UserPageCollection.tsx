@@ -5,8 +5,13 @@ import { OwnerLite } from "../../../../entities/IOwner";
 import { ConsolidatedTDHMetrics, TDHMetrics } from "../../../../entities/ITDH";
 import { Season } from "../../../../entities/ISeason";
 import UserPageCollectionNfts from "./UserPageCollectionNfts";
-import UserPageCollectionControls from "./UserPageCollectionControls";
+
 import DotLoader from "../../../dotLoader/DotLoader";
+import dynamic from "next/dynamic";
+
+const UserPageCollectionControls = dynamic(() => import("./UserPageCollectionControls"), {
+  ssr: false,
+});
 
 interface Props {
   show: boolean;

@@ -13,7 +13,6 @@ import { Season } from "../../entities/ISeason";
 
 interface Props {
   user: string;
-  connectedWallets: string[];
   profile: IProfileAndConsolidations;
   mainAddress: string;
   consolidatedTDH: ConsolidatedTDHMetrics | null;
