@@ -47,11 +47,11 @@ a:hover {
 
 @media only screen and (max-width: 1200px) {
   body,
-  button,
+  button:not(.tailwind-scope button),
   textarea,
   select,
   input,
-  button,
+  button:not(.tailwind-scope button),
   video,
   select {
     font-size: $font-smaller !important;
@@ -64,7 +64,7 @@ a:hover {
   textarea,
   select,
   input,
-  button,
+  button:not(.tailwind-scope button),
   video,
   select {
     font-size: $font-smallest !important;
@@ -174,7 +174,7 @@ h5 {
 
 #footer {
   background-color: $bg-color-1;
-  padding: 1.5rem;
+  padding: 1rem;
   line-height: 18px;
 
   img {

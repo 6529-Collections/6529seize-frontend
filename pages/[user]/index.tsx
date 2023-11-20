@@ -1,24 +1,31 @@
 import Head from "next/head";
 import styles from "../../styles/Home.module.scss";
-
 import dynamic from "next/dynamic";
-import { useRouter } from "next/router";
 import {
+  areEqualAddresses,
   containsEmojis,
   formatAddress,
   numberWithCommas,
 } from "../../helpers/Helpers";
 import HeaderPlaceholder from "../../components/header/HeaderPlaceholder";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { commonApiFetch } from "../../services/api/common-api";
 import { IProfileAndConsolidations } from "../../entities/IProfile";
+import { ENS } from "../../entities/IENS";
+import { ConsolidatedTDHMetrics } from "../../entities/ITDH";
+import { NFT, NFTLite } from "../../entities/INFT";
+import { Season } from "../../entities/ISeason";
+import { OwnerLite } from "../../entities/IOwner";
 
 interface PageProps {
+  profile: IProfileAndConsolidations;
   title: string;
   url: string;
-  image: string;
-  tdh: number | null;
-  balance: number | null;
+  consolidatedTDH: ConsolidatedTDHMetrics | null;
+  memesLite: NFTLite[];
+  gradients: NFT[];
+  seasons: Season[];
+  owned: OwnerLite[];
 }
 
 const Header = dynamic(() => import("../../components/header/Header"), {
@@ -34,73 +41,30 @@ const DEFAULT_IMAGE =
   "https://d3lqz0a4bldqgf.cloudfront.net/seize_images/Seize_Logo_Glasses_2.png";
 
 export default function UserPageIndex(props: { pageProps: PageProps }) {
-  const router = useRouter();
   const pageProps = props.pageProps;
 
   const pagenameFull = `${pageProps.title} | 6529 SEIZE`;
 
   const descriptionArray = [];
-  if (pageProps.tdh && pageProps.tdh > 0) {
-    descriptionArray.push(`TDH: ${numberWithCommas(pageProps.tdh)}`);
+  if (
+    pageProps.profile.consolidation.tdh &&
+    pageProps.profile.consolidation.tdh > 0
+  ) {
+    descriptionArray.push(
+      `TDH: ${numberWithCommas(pageProps.profile.consolidation.tdh)}`
+    );
   }
-  if (pageProps.balance && pageProps.balance > 0) {
-    descriptionArray.push(`Cards: ${numberWithCommas(pageProps.balance)}`);
+  if (
+    pageProps.consolidatedTDH?.balance &&
+    pageProps.consolidatedTDH?.balance > 0
+  ) {
+    descriptionArray.push(
+      `Cards: ${numberWithCommas(pageProps.consolidatedTDH?.balance)}`
+    );
   }
   descriptionArray.push("6529 SEIZE");
 
   const [connectedWallets, setConnectedWallets] = useState<string[]>([]);
-
-  const [user, setUser] = useState(
-    Array.isArray(router.query.user) ? router.query.user[0] : router.query.user
-  );
-
-  const [userProfile, setUserProfile] =
-    useState<IProfileAndConsolidations | null>(null);
-
-  useEffect(() => {
-    const getUserProfile = async () => {
-      if (!user) {
-        return;
-      }
-      const userProfile = await commonApiFetch<IProfileAndConsolidations>({
-        endpoint: `profiles/${user}`,
-      }).catch(() => null);
-
-      console.log(userProfile)
-
-      if (!userProfile) {
-        router.push("/404");
-        return;
-      }
-
-      if (
-        userProfile?.profile?.normalised_handle &&
-        userProfile.profile?.normalised_handle !== user.toLowerCase()
-      ) {
-        router.push(`${userProfile.profile.normalised_handle}`);
-      }
-
-      if (
-        router.query.address &&
-        userProfile.consolidation.wallets.length === 1
-      ) {
-        const currentQuery = { ...router.query };
-        delete currentQuery.address;
-        router.push(
-          {
-            pathname: router.pathname,
-            query: currentQuery,
-          },
-          undefined,
-          { shallow: true }
-        );
-      }
-
-      setUserProfile(userProfile);
-    };
-
-    getUserProfile();
-  }, [user]);
 
   return (
     <>
@@ -113,7 +77,10 @@ export default function UserPageIndex(props: { pageProps: PageProps }) {
           content={`${process.env.BASE_ENDPOINT}/${pageProps.url}`}
         />
         <meta property="og:title" content={pageProps.title} />
-        <meta property="og:image" content={pageProps.image} />
+        <meta
+          property="og:image"
+          content={pageProps.profile.profile?.pfp_url ?? DEFAULT_IMAGE}
+        />
         <meta
           property="og:description"
           content={descriptionArray.join(" | ")}
@@ -122,15 +89,22 @@ export default function UserPageIndex(props: { pageProps: PageProps }) {
 
       <main className={styles.main}>
         <Header onSetWallets={(wallets) => setConnectedWallets(wallets)} />
-        {router.isReady && pageProps.url && userProfile && (
-         <div className="tw-bg-neutral-950 tw-min-h-screen">
-           <UserPage
+        <div className="tw-bg-neutral-950 tw-min-h-screen">
+          <UserPage
             connectedWallets={connectedWallets}
             user={pageProps.url}
-            profile={userProfile}
+            profile={pageProps.profile}
+            mainAddress={
+              pageProps.profile.profile?.primary_wallet ??
+              pageProps.url.toLowerCase()
+            }
+            consolidatedTDH={pageProps.consolidatedTDH}
+            memesLite={pageProps.memesLite}
+            gradients={pageProps.gradients}
+            seasons={pageProps.seasons}
+            owned={pageProps.owned}
           />
-         </div>
-        )}
+        </div>
       </main>
     </>
   );
@@ -143,44 +117,156 @@ export async function getServerSideProps(
 ): Promise<{
   props: PageProps;
 }> {
+  const getEnsAndConsolidatedTDH = async (
+    address: string,
+    headers: Record<string, string>
+  ): Promise<{
+    ens: ENS | null;
+    consolidatedTDH: ConsolidatedTDHMetrics | null;
+  }> => {
+    const ens = await commonApiFetch<ENS>({
+      endpoint: `user/${address}`,
+      headers,
+    });
+
+    const consolidationKey = ens?.consolidation_key ?? null;
+    const consolidatedTDH = consolidationKey
+      ? await commonApiFetch<ConsolidatedTDHMetrics>({
+          endpoint: `consolidated_owner_metrics/${consolidationKey}`,
+          headers: authCookie ? { "x-6529-auth": authCookie } : {},
+        })
+      : null;
+
+    return {
+      ens,
+      consolidatedTDH,
+    };
+  };
+
+  const getGradients = async (
+    headers: Record<string, string>
+  ): Promise<NFT[]> => {
+    const gradients = await commonApiFetch<{ data: NFT[] }>({
+      endpoint: "nfts/gradients?&page_size=101&sort=ASC&sort_direction=id",
+      headers,
+    });
+    return gradients.data;
+  };
+
+  const getOwned = async (
+    wallets: string[],
+    headers: Record<string, string>
+  ): Promise<OwnerLite[]> => {
+    if (!wallets.length) {
+      return [];
+    }
+    const baseURL = `owners?wallet=${wallets.join(",")}`;
+    let page: number | null = null;
+    const allOwned: OwnerLite[] = [];
+    do {
+      const ownedResponse: {
+        data: OwnerLite[];
+        page: number;
+        next: string | null;
+      } = await commonApiFetch<{
+        data: OwnerLite[];
+        page: number;
+        next: string | null;
+      }>({
+        endpoint: page ? `${baseURL}&page=${page}` : baseURL,
+        headers,
+      });
+      ownedResponse.data.forEach((o) =>
+        allOwned.push({
+          token_id: o.token_id,
+          contract: o.contract,
+          balance: o.balance,
+        })
+      );
+
+      page = ownedResponse.next ? ownedResponse.page + 1 : null;
+    } while (page);
+
+    return allOwned.reduce<OwnerLite[]>((acc, curr) => {
+      const existing = acc.find(
+        (a) => a.token_id === curr.token_id && areEqualAddresses(a.contract, curr.contract)
+      );
+      if (existing) {
+        existing.balance += curr.balance;
+      } else {
+        acc.push(curr);
+      }
+      return acc;
+    }, []);
+  };
+
+  const authCookie = req?.req?.cookies["x-6529-auth"];
   try {
+    const headers: Record<string, string> = authCookie
+      ? { "x-6529-auth": authCookie }
+      : {};
     const profile = await commonApiFetch<IProfileAndConsolidations>({
       endpoint: `profiles/${req.query.user}`,
+      headers: headers,
     });
+
+    if (
+      profile?.profile?.normalised_handle &&
+      profile.profile?.normalised_handle !== req.query.user.toLowerCase()
+    ) {
+      const currentQuery = { ...req.query };
+      delete currentQuery.user;
+      const queryParamsString = new URLSearchParams(currentQuery).toString();
+      return {
+        redirect: {
+          permanent: false,
+          destination: `/${profile.profile.normalised_handle}?${queryParamsString}`,
+        },
+        props: {},
+      } as any;
+    }
 
     const wallet =
       profile?.profile?.primary_wallet?.toLowerCase() ?? req.query.user;
 
-    const ensRequest = await fetch(
-      `${process.env.API_ENDPOINT}/api/user/${wallet}`
-    );
-    let userDisplay = profile?.profile?.handle ?? formatAddress(wallet);
-    let pfp = profile?.profile?.pfp_url;
-    let tdh;
-    let balance;
+    const [ensAndConsolidatedTDH, memesLite, gradients, seasons, owned] =
+      await Promise.all([
+        getEnsAndConsolidatedTDH(wallet, headers),
+        commonApiFetch<{ data: NFTLite[] }>({
+          endpoint: "memes_lite",
+          headers,
+        }),
+        getGradients(headers),
+        commonApiFetch<Season[]>({
+          endpoint: "memes_seasons",
+          headers,
+        }),
+        getOwned(
+          profile.consolidation.wallets.map((w) => w.wallet.address),
+          headers
+        ),
+      ]);
 
-    const responseText = await ensRequest.text();
-    if (responseText) {
-      const response = await JSON.parse(responseText);
-      tdh = response.boosted_tdh ? response.boosted_tdh : null;
-      balance = response.balance ? response.balance : null;
-      userDisplay = profile?.profile?.handle
-        ? profile.profile.handle
-        : response.display && !containsEmojis(response.display)
-        ? response.display
-        : wallet;
-    }
+    const { ens, consolidatedTDH } = ensAndConsolidatedTDH;
+    const title = profile?.profile?.handle
+      ? profile.profile.handle
+      : ens?.display && !containsEmojis(ens.display)
+      ? ens.display
+      : formatAddress(wallet);
 
     return {
       props: {
-        title: userDisplay,
+        profile,
+        title,
         url: req.query.user,
-        image: pfp ?? DEFAULT_IMAGE,
-        tdh: tdh ?? null,
-        balance: balance ?? null,
+        consolidatedTDH,
+        memesLite: memesLite.data,
+        gradients,
+        seasons,
+        owned,
       },
     };
-  } catch {
+  } catch (e: any) {
     return {
       redirect: {
         permanent: false,

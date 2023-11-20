@@ -36,7 +36,7 @@ export default function UserPageHeaderName({
         <p className="tw-mb-0 tw-text-3xl tw-font-semibold">{displayName}</p>
       </div>
       {profile.profile?.classification && (
-        <div className="tw-block tw-text-neutral-400 tw-font-normal tw-text-[13px] tw-leading-3">
+        <div className="tw-block tw-mt-1 tw-text-neutral-400 tw-font-normal tw-text-[13px] tw-leading-3">
           {CLASSIFICATIONS[profile.profile.classification].title}
         </div>
       )}

@@ -54,11 +54,6 @@ export default function Header(props: Props) {
   useEffect(() => {
     const viewMode = Cookies.get(VIEW_MODE_COOKIE);
     console.log(VIEW_MODE_COOKIE, viewMode);
-    if (viewMode === WalletView.CONSOLIDATION) {
-      setView(WalletView.CONSOLIDATION);
-    } else {
-      setView(WalletView.WALLET);
-    }
   }, []);
 
   useEffect(() => {
@@ -251,6 +246,11 @@ export default function Header(props: Props) {
                     </a>
                   </Col>
                 </Row>
+                <Row>
+                  <Col xs={{ span: 6, offset: 3 }}>
+                    <hr />
+                  </Col>
+                </Row>
                 <Row className="pt-3">
                   <Col>
                     <a href="/community-metrics">
@@ -269,6 +269,25 @@ export default function Header(props: Props) {
                   <Col>
                     <a href="/levels">
                       <h3>Levels</h3>
+                    </a>
+                  </Col>
+                </Row>
+                <Row>
+                  <Col xs={{ span: 6, offset: 3 }}>
+                    <hr />
+                  </Col>
+                </Row>
+                <Row className="pt-3">
+                  <Col>
+                    <a href="/royalties">
+                      <h3>Royalties</h3>
+                    </a>
+                  </Col>
+                </Row>
+                <Row className="pt-3">
+                  <Col>
+                    <a href="/gas">
+                      <h3>Gas</h3>
                     </a>
                   </Col>
                 </Row>
@@ -682,6 +701,7 @@ export default function Header(props: Props) {
                                 }>
                                 Latest Activity
                               </NavDropdown.Item>
+                              <NavDropdown.Divider />
                               <NavDropdown.Item
                                 className={styles.dropdownItem}
                                 onClick={() =>
@@ -702,6 +722,19 @@ export default function Header(props: Props) {
                                   (window.location.href = "/levels")
                                 }>
                                 Levels
+                              </NavDropdown.Item>
+                              <NavDropdown.Divider />
+                              <NavDropdown.Item
+                                className={styles.dropdownItem}
+                                onClick={() =>
+                                  (window.location.href = "/royalties")
+                                }>
+                                Royalties
+                              </NavDropdown.Item>
+                              <NavDropdown.Item
+                                className={styles.dropdownItem}
+                                onClick={() => (window.location.href = "/gas")}>
+                                Gas
                               </NavDropdown.Item>
                             </NavDropdown>
                             <NavDropdown

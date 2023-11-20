@@ -21,9 +21,10 @@ export default function UserPageHeaderLevel({ level }: { level: number }) {
   };
 
   return (
-    <div className="tw-mt-3 tw-cursor-pointer" onClick={openLevelsPage}>
+    <div className="tw-mt-3">
       <span
-        className={`tw-inline-flex tw-items-center tw-rounded-xl tw-bg-transparent tw-px-2 tw-py-1 tw-text-base tw-font-semibold tw-ring-2 tw-ring-inset ${classes}`}
+        onClick={openLevelsPage}
+        className={`tw-cursor-pointer tw-inline-flex tw-items-center tw-rounded-xl tw-bg-transparent tw-px-2 tw-py-1 tw-text-base tw-font-semibold tw-ring-2 tw-ring-inset ${classes}`}
       >
         Level {level}
       </span>
