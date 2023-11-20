@@ -38,6 +38,9 @@ export function NextGenTokenImageContent(props: Props) {
           if (data.name && props.setName) props.setName(data.name);
           if (data.description && props.setDescription)
             props.setDescription(data.description);
+        })
+        .catch((err) => {
+          // ignore err
         });
     }
   }, [props.token]);
@@ -50,6 +53,7 @@ export function NextGenTokenImageContent(props: Props) {
         <iframe src={animation} />
       ) : image ? (
         <Image
+          priority
           loading={"eager"}
           width="0"
           height="0"

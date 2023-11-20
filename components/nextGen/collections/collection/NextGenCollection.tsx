@@ -1,11 +1,10 @@
 import styles from "../NextGen.module.scss";
 import { Container, Row, Col } from "react-bootstrap";
-import { useContractRead, useContractReads } from "wagmi";
+import { useContractRead } from "wagmi";
 import { useEffect, useState } from "react";
 import {
   Info,
   AdditionalData,
-  TokenURI,
   LibraryScript,
   PhaseTimes,
   Status,
@@ -22,14 +21,14 @@ import NextGenCollectionArt from "./NextGenCollectionArt";
 import NextGenMint from "./mint/NextGenMint";
 import router from "next/router";
 import {
-  extractField,
-  extractURI,
   retrieveCollectionAdditionalData,
   retrieveCollectionInfo,
-  retrieveCollectionLibraryAndScript,
   retrieveCollectionPhases,
 } from "../../nextgen_helpers";
 import NextGenCollectionDetails from "./NextGenCollectionDetails";
+import NextGenCollectionSlideshow from "./NextGenCollectionSlideshow";
+
+const ART_TOKEN_COUNT = 8;
 
 interface Props {
   collection: number;
@@ -57,7 +56,7 @@ export default function NextGenCollection(props: Props) {
   const [phaseTimes, setPhaseTimes] = useState<PhaseTimes>();
   const [additionalData, setAdditionalData] = useState<AdditionalData>();
 
-  const [tokenURIs, setTokenURIs] = useState<TokenURI[]>([]);
+  const [tokens, setTokens] = useState<number[]>([]);
 
   const [burnAmount, setBurnAmount] = useState<number>(0);
   const [mintPrice, setMintPrice] = useState<number>(0);
@@ -96,6 +95,18 @@ export default function NextGenCollection(props: Props) {
     },
   });
 
+  useEffect(() => {
+    if (tokenStartIndex > 0 && tokenEndIndex > 0) {
+      const rangeLength = Math.min(
+        ART_TOKEN_COUNT,
+        tokenEndIndex - tokenStartIndex + 1
+      );
+      setTokens(
+        Array.from({ length: rangeLength }, (_, i) => tokenStartIndex + i)
+      );
+    }
+  }, [tokenStartIndex, tokenEndIndex]);
+
   const endIndexRead = useContractRead({
     address: NEXTGEN_CORE.contract as `0x${string}`,
     abi: NEXTGEN_CORE.abi,
@@ -107,48 +118,6 @@ export default function NextGenCollection(props: Props) {
       if (data) {
         setTokenEndIndex(parseInt(data));
       }
-    },
-  });
-
-  useContractReads({
-    contracts: getTokenUriReadParams(),
-    watch: true,
-    enabled: tokenStartIndex > 0 && tokenEndIndex > 0,
-    onSettled(data, error) {
-      const tokens: TokenURI[] = [];
-      if (data) {
-        data.map((d, index: number) => {
-          if (d.result && tokenStartIndex && tokenEndIndex) {
-            const r: string = d.result as string;
-            if (r.startsWith("data")) {
-              const uri = extractURI(r);
-              const name = extractField("name", r);
-              const description = extractField("description", r);
-              const image = extractField("image", r);
-              tokens.push({
-                id: index + tokenStartIndex,
-                collection: props.collection,
-                uri: uri.uri,
-                data: uri.data,
-                name: name,
-                description: description,
-                image: image,
-                attributes: [],
-              });
-            } else {
-              tokens.push({
-                id: index + tokenStartIndex,
-                collection: props.collection,
-                uri: r,
-                name: "",
-                description: "",
-                attributes: [],
-              });
-            }
-          }
-        });
-      }
-      setTokenURIs(tokens);
     },
   });
 
@@ -307,6 +276,11 @@ export default function NextGenCollection(props: Props) {
       return (
         <>
           <Breadcrumb breadcrumbs={breadcrumbs} />
+          <NextGenCollectionSlideshow
+            collection={props.collection}
+            start_index={tokenStartIndex}
+            end_index={tokenEndIndex}
+          />
           <Container className="pt-3 pb-2">
             {additionalData && info && phaseTimes && (
               <>
@@ -357,7 +331,7 @@ export default function NextGenCollection(props: Props) {
                           collection={props.collection}
                           additional_data={additionalData}
                           burn_amount={burnAmount}
-                          token_uris={tokenURIs}
+                          tokens={tokens}
                         />
                       </Col>
                     </Row>
@@ -372,7 +346,6 @@ export default function NextGenCollection(props: Props) {
                           additional_data={additionalData}
                           info={info}
                           phase_times={phaseTimes}
-                          token_uris={tokenURIs}
                           burn_amount={burnAmount}
                           token_start_index={tokenStartIndex}
                           token_end_index={tokenEndIndex}
@@ -388,9 +361,7 @@ export default function NextGenCollection(props: Props) {
                     <Col>
                       <NextGenMint
                         collection={props.collection}
-                        collection_preview={
-                          tokenURIs.length > 0 ? tokenURIs[0] : undefined
-                        }
+                        collection_preview={tokens.length > 0 ? tokens[0] : 0}
                         phase_times={phaseTimes}
                         mint_price={mintPrice}
                         additional_data={additionalData}

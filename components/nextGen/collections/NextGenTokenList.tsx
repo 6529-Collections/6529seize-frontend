@@ -1,10 +1,9 @@
 import { Col, Container, Row } from "react-bootstrap";
-import { TokenURI } from "../nextgen_entities";
 import NextGenTokenPreview from "./NextGenTokenPreview";
 
 interface Props {
   collection: number;
-  tokens: TokenURI[];
+  tokens: number[];
 }
 
 export default function NextGenTokenList(props: Props) {
@@ -16,8 +15,8 @@ export default function NextGenTokenList(props: Props) {
             xs={6}
             sm={4}
             md={3}
-            key={`collection-${props.collection}-token-list-${t.id}`}>
-            <NextGenTokenPreview token={t} />
+            key={`collection-${props.collection}-token-list-${t}`}>
+            <NextGenTokenPreview token_id={t} collection={props.collection} />
           </Col>
         ))}
       </Row>

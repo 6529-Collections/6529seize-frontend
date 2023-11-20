@@ -311,3 +311,43 @@
     outline: none !important;
   }
 }
+
+.nextgenCarousel {
+  overflow-x: scroll;
+  position: relative;
+  scroll-behavior: smooth;
+  width: calc(100% - 60px);
+
+  &::-webkit-scrollbar {
+    height: 8px;
+    cursor: pointer;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background-color: $nextgen-grey;
+    border-radius: 10px;
+    border: 1px solid $off-white;
+  }
+
+  &::-webkit-scrollbar-track {
+    width: 50%;
+    background: $off-white;
+    border-radius: 10px;
+  }
+
+  // Firefox
+  @supports (scrollbar-color: auto) {
+    scrollbar-color: darkgrey $off-white;
+    scrollbar-width: thin;
+  }
+}
+
+.nextgenCarouselLeft,
+.nextgenCarouselRight {
+  cursor: pointer;
+  padding-left: 15px;
+  padding-right: 15px;
+  svg {
+    height: 30px;
+  }
+}

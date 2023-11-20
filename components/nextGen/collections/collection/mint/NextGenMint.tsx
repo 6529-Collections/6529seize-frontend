@@ -4,8 +4,6 @@ import { DELEGATION_ABI } from "../../../../../abis";
 import {
   DELEGATION_ALL_ADDRESS,
   DELEGATION_CONTRACT,
-  MEMES_CONTRACT,
-  NULL_ADDRESS,
 } from "../../../../../constants";
 import { Col, Container, Row } from "react-bootstrap";
 import { useEffect, useState } from "react";
@@ -15,7 +13,6 @@ import {
   TokensPerAddress,
   MintingDetails,
   Status,
-  TokenURI,
   CollectionWithMerkle,
   AllowlistType,
 } from "../../../nextgen_entities";
@@ -27,14 +24,14 @@ import {
 import { NEXTGEN_CHAIN_ID, NEXTGEN_CORE } from "../../../nextgen_contracts";
 import DateCountdown from "../../../../date-countdown/DateCountdown";
 import { fetchUrl } from "../../../../../services/6529api";
-import { NextGenTokenImageContent } from "../../NextGenTokenImage";
 import { retrieveCollectionCosts } from "../../../nextgen_helpers";
 import NextGenMintWidget from "./NextGenMintWidget";
 import NextGenMintBurnWidget from "./NextGenMintBurnWidget";
+import NextGenTokenPreview from "../../NextGenTokenPreview";
 
 interface Props {
   collection: number;
-  collection_preview?: TokenURI;
+  collection_preview?: number;
   phase_times: PhaseTimes;
   mint_price: number;
   additional_data: AdditionalData;
@@ -335,9 +332,10 @@ export default function NextGenMint(props: Props) {
             <Row className="pb-4">
               <Col className={styles.tokenFrameContainerHalf}>
                 {props.collection_preview && (
-                  <NextGenTokenImageContent
-                    preview={true}
-                    token={props.collection_preview}
+                  <NextGenTokenPreview
+                    token_id={props.collection_preview}
+                    collection={props.collection}
+                    hide_info={true}
                   />
                 )}
               </Col>

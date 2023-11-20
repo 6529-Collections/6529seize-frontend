@@ -26,6 +26,8 @@ export default function NextGen() {
     { id: number; phaseTimes?: PhaseTimes }[]
   >([]);
 
+  const [collectionsLoaded, setCollectionsLoaded] = useState(false);
+
   const [filteredCollections, setFilteredCollections] = useState<
     { id: number; phaseTimes?: PhaseTimes }[]
   >([]);
@@ -36,6 +38,7 @@ export default function NextGen() {
       newCollections.push({ id: i + 1 });
     }
     setCollections(newCollections);
+    setCollectionsLoaded(true);
   }, [collectionIndex]);
 
   useEffect(() => {
@@ -87,6 +90,7 @@ export default function NextGen() {
           xs={12}
           className="pt-3 pb-3 d-flex align-items-center justify-content-between">
           <Image
+            priority
             width="0"
             height="0"
             style={{ width: "400px", maxWidth: "85vw", height: "auto" }}
@@ -133,7 +137,7 @@ export default function NextGen() {
             />
           </Col>
         ))}
-        {filteredCollections.length === 0 && (
+        {collectionsLoaded && filteredCollections.length === 0 && (
           <Col className="text-center">
             <h4>No collections found</h4>
           </Col>

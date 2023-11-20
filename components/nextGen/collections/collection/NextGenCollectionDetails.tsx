@@ -23,7 +23,6 @@ interface Props {
   additional_data: AdditionalData;
   info: Info;
   phase_times: PhaseTimes;
-  token_uris: TokenURI[];
   burn_amount: number;
   token_start_index: number;
   token_end_index: number;
@@ -63,16 +62,6 @@ export default function NextGenCollectionDetails(props: Props) {
       <Row>
         <Col sm={12} md={5} className="pt-3">
           <Container className="no-padding">
-            <Row className="pb-3">
-              <Col className={styles.tokenFrameContainerHalf}>
-                {props.token_uris.length > 0 && (
-                  <NextGenTokenImageContent
-                    preview={true}
-                    token={props.token_uris[0]}
-                  />
-                )}
-              </Col>
-            </Row>
             <Row>
               {props.token_start_index > 0 && props.token_end_index > 0 && (
                 <Col xs={12} className="pb-2">

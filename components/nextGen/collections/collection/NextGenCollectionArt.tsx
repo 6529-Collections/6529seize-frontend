@@ -7,7 +7,7 @@ interface Props {
   collection: number;
   additional_data: AdditionalData;
   burn_amount: number;
-  token_uris: TokenURI[];
+  tokens: number[];
 }
 
 export default function NextGenCollectionArt(props: Props) {
@@ -21,19 +21,19 @@ export default function NextGenCollectionArt(props: Props) {
           </h4>
         </Col>
       </Row>
-      {props.token_uris.length > 0 && (
+      {props.tokens.length > 0 && (
         <Row>
           <Col>
-            {props.token_uris && (
+            {props.tokens && (
               <NextGenTokenList
                 collection={props.collection}
-                tokens={props.token_uris}
+                tokens={props.tokens}
               />
             )}
           </Col>
         </Row>
       )}
-      {props.token_uris.length === 0 &&
+      {props.tokens.length === 0 &&
         props.additional_data.circulation_supply > 0 && (
           <Row>
             <Col>
