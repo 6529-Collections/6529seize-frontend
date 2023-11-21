@@ -3,6 +3,8 @@ export interface Royalty {
   name: string;
   artist: string;
   thumbnail: string;
-  total_royalties: number;
   total_volume: number;
+  total_royalties: number;
+  royalty_split: number;
+  artist_take: number;
 }
