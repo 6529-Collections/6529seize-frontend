@@ -225,7 +225,6 @@ export default function Header(props: Props) {
                   }
                 }}
                 tabIndex={0}
-                role="button"
                 className={`${styles.burgerMenuHeader}
                   ${
                     showBurgerMenuCommunity

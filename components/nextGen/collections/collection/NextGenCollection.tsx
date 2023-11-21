@@ -303,8 +303,7 @@ export default function NextGenCollection(props: Props) {
                             setFocus(Focus.ART);
                           }
                         }}
-                        tabIndex={0}
-                        role="button">
+                        tabIndex={0}>
                         The Art
                       </span>
                       <span
@@ -319,8 +318,7 @@ export default function NextGenCollection(props: Props) {
                             setFocus(Focus.COLLECTION);
                           }
                         }}
-                        tabIndex={0}
-                        role="button">
+                        tabIndex={0}>
                         The Collection
                       </span>
                       {showMint() && (
@@ -336,8 +334,7 @@ export default function NextGenCollection(props: Props) {
                               setFocus(Focus.MINT);
                             }
                           }}
-                          tabIndex={0}
-                          role="button">
+                          tabIndex={0}>
                           Mint
                         </span>
                       )}
