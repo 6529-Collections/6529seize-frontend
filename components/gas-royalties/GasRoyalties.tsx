@@ -4,6 +4,7 @@ import { DateIntervalsSelection } from "../../enums";
 import DotLoader from "../dotLoader/DotLoader";
 import DownloadUrlWidget from "../downloadUrlWidget/DownloadUrlWidget";
 import Image from "next/image";
+import Tippy from "@tippyjs/react";
 
 export enum GasRoyaltiesCollectionFocus {
   MEMES = "memes",
@@ -37,9 +38,9 @@ export function GasRoyaltiesHeader(props: Readonly<HeaderProps>) {
           {!props.fetching && props.results_count > 0 && (
             <DownloadUrlWidget
               preview=""
-              name={`${props.title.toLowerCase()}-${
+              name={`${props.title.toLowerCase().replaceAll(" ", "-")}_${
                 props.focus
-              }-${props.date_selection.toLowerCase()}`}
+              }_${props.date_selection.toLowerCase().replaceAll(" ", "-")}`}
               url={`${props.getUrl()}&download=true`}
             />
           )}
@@ -133,19 +134,23 @@ export function GasRoyaltiesTokenImage(props: Readonly<TokenImageProps>) {
       href={`/${props.path}/${props.token_id}`}
       target="_blank"
       rel="noreferrer">
-      <span className="d-flex aling-items-center gap-2">
-        <span>
-          {props.token_id} - {props.name}
-        </span>
-        <Image
-          loading={"lazy"}
-          width={0}
-          height={0}
-          style={{ width: "auto", height: "40px" }}
-          src={props.thumbnail}
-          alt={props.name}
-          className={styles.nftImage}
-        />
+      <span className="d-flex justify-content-center aling-items-center gap-2">
+        <span>{props.token_id} -</span>
+        <Tippy
+          content={`${props.name}`}
+          delay={0}
+          placement={"auto"}
+          theme={"light"}>
+          <Image
+            loading={"lazy"}
+            width={0}
+            height={0}
+            style={{ width: "auto", height: "40px" }}
+            src={props.thumbnail}
+            alt={props.name}
+            className={styles.nftImage}
+          />
+        </Tippy>
       </span>
     </a>
   );

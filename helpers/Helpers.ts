@@ -339,7 +339,7 @@ export function displayDecimal(value: number, places: number) {
   }
 
   const fixedValue = value.toFixed(places);
-  return numberWithCommas(parseFloat(fixedValue)).toString();
+  return numberWithCommasFromString(fixedValue);
 }
 
 export function areEqualURLS(s1: string, s2: string) {

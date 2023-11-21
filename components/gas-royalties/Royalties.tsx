@@ -19,9 +19,11 @@ export default function Royalties() {
     useState<GasRoyaltiesCollectionFocus>(GasRoyaltiesCollectionFocus.MEMES);
 
   const [royalties, setRoyalties] = useState<Royalty[]>([]);
-  const [sumTotalVolume, setSumTotalVolume] = useState(0);
-  const [sumTotalRoyalties, setSumTotalRoyalties] = useState(0);
-  const [sumTotalArtistTake, setSumTotalArtistTake] = useState(0);
+  const [sumPrimaryVolume, setSumPrimaryVolume] = useState(0);
+  const [sumSecondaryVolume, setSumSecondaryVolume] = useState(0);
+  const [sumRoyalties, setSumRoyalties] = useState(0);
+  const [sumPrimaryArtistTake, setSumPrimaryArtistTake] = useState(0);
+  const [sumSecondaryArtistTake, setSumSecondaryArtistTake] = useState(0);
 
   const [fromDate, setFromDate] = useState<Date>();
   const [toDate, setToDate] = useState<Date>();
@@ -45,20 +47,33 @@ export default function Royalties() {
     setFetching(true);
     fetchUrl(getUrl()).then((res: Royalty[]) => {
       res.forEach((r) => {
-        r.total_volume = Math.round(r.total_volume * 100000) / 100000;
-        r.royalty_split = Math.round(r.royalty_split * 100000) / 100000;
-        r.total_royalties = Math.round(r.total_royalties * 100000) / 100000;
-        r.artist_take = Math.round(r.artist_take * 100000) / 100000;
+        r.primary_volume = Math.round(r.primary_volume * 100000) / 100000;
+        r.secondary_volume = Math.round(r.secondary_volume * 100000) / 100000;
+        r.primary_royalty_split =
+          Math.round(r.primary_royalty_split * 100000) / 100000;
+        r.secondary_royalty_split =
+          Math.round(r.secondary_royalty_split * 100000) / 100000;
+        r.royalties = Math.round(r.royalties * 100000) / 100000;
+        r.primary_artist_take =
+          Math.round(r.primary_artist_take * 100000) / 100000;
+        r.secondary_artist_take =
+          Math.round(r.secondary_artist_take * 100000) / 100000;
       });
       setRoyalties(res);
-      setSumTotalVolume(
-        res.reduce((prev, current) => prev + current.total_volume, 0)
+      setSumPrimaryVolume(
+        res.reduce((prev, current) => prev + current.primary_volume, 0)
       );
-      setSumTotalRoyalties(
-        res.reduce((prev, current) => prev + current.total_royalties, 0)
+      setSumSecondaryVolume(
+        res.reduce((prev, current) => prev + current.secondary_volume, 0)
       );
-      setSumTotalArtistTake(
-        res.reduce((prev, current) => prev + current.artist_take, 0)
+      setSumRoyalties(
+        res.reduce((prev, current) => prev + current.royalties, 0)
+      );
+      setSumPrimaryArtistTake(
+        res.reduce((prev, current) => prev + current.primary_artist_take, 0)
+      );
+      setSumSecondaryArtistTake(
+        res.reduce((prev, current) => prev + current.secondary_artist_take, 0)
       );
       setFetching(false);
     });
@@ -96,10 +111,11 @@ export default function Royalties() {
                     (x{royalties.length})
                   </th>
                   <th>Artist</th>
-                  <th className="text-center">Volume (ETH)</th>
-                  <th className="text-center">Royalties (ETH)</th>
-                  <th className="text-center">Rate (%)</th>
-                  <th className="text-center">Artist Split (ETH)</th>
+                  <th className="text-center">Primary Volume</th>
+                  <th className="text-center">Secondary Volume</th>
+                  <th className="text-center">Royalties</th>
+                  <th className="text-center">Primary Artist Split</th>
+                  <th className="text-center">Secondary Artist Split</th>
                 </tr>
               </thead>
               <tbody>
@@ -120,24 +136,39 @@ export default function Royalties() {
                     </td>
                     <td>{r.artist}</td>
                     <td className="text-center">
-                      {displayDecimal(r.total_volume, 5)}
+                      {displayDecimal(r.primary_volume, 5)}
                     </td>
                     <td className="text-center">
-                      {displayDecimal(r.total_royalties, 5)}
+                      {displayDecimal(r.secondary_volume, 5)}
                     </td>
                     <td className="text-center">
-                      {displayDecimal(
-                        (r.total_royalties * 100) / r.total_volume,
-                        5
-                      )}
+                      {displayDecimal(r.royalties, 5)}
+                      {r.royalties > 0 &&
+                        ` (${displayDecimal(
+                          (r.royalties * 100) / r.secondary_volume,
+                          2
+                        )}
+                      %)`}
                     </td>
-                    <td className="d-flex justify-content-center">
-                      <span className="d-flex align-items-center gap-1">
-                        {displayDecimal(r.artist_take, 5)}
-                        <span className="font-smaller font-color-h">
-                          ({r.royalty_split * 100}%)
+                    <td>
+                      <div className="d-flex justify-content-center">
+                        <span className="d-flex align-items-center gap-1">
+                          {displayDecimal(r.primary_artist_take, 5)}
+                          <span className="font-smaller font-color-h">
+                            ({r.primary_royalty_split * 100}%)
+                          </span>
                         </span>
-                      </span>
+                      </div>
+                    </td>
+                    <td>
+                      <div className="d-flex justify-content-center">
+                        <span className="d-flex align-items-center gap-1">
+                          {displayDecimal(r.secondary_artist_take, 5)}
+                          <span className="font-smaller font-color-h">
+                            ({r.secondary_royalty_split * 100}%)
+                          </span>
+                        </span>
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -146,19 +177,25 @@ export default function Royalties() {
                     <b>TOTAL</b>
                   </td>
                   <td className="text-center">
-                    {displayDecimal(sumTotalVolume, 5)}
+                    {displayDecimal(sumPrimaryVolume, 5)}
                   </td>
                   <td className="text-center">
-                    {displayDecimal(sumTotalRoyalties, 5)}
+                    {displayDecimal(sumSecondaryVolume, 5)}
                   </td>
                   <td className="text-center">
-                    {displayDecimal(
-                      (sumTotalRoyalties * 100) / sumTotalVolume,
-                      5
-                    )}
+                    {displayDecimal(sumRoyalties, 5)}
+                    {sumRoyalties > 0 &&
+                      ` (${displayDecimal(
+                        (sumRoyalties * 100) / sumSecondaryVolume,
+                        2
+                      )}
+                      %)`}
                   </td>
                   <td className="text-center">
-                    {displayDecimal(sumTotalArtistTake, 5)}
+                    {displayDecimal(sumPrimaryArtistTake, 5)}
+                  </td>
+                  <td className="text-center">
+                    {displayDecimal(sumSecondaryArtistTake, 5)}
                   </td>
                 </tr>
               </tbody>
