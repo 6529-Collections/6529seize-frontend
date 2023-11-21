@@ -14,7 +14,7 @@ interface Props {
   setDescription?: (description: string) => void;
 }
 
-export function NextGenTokenImageContent(props: Props) {
+export function NextGenTokenImageContent(props: Readonly<Props>) {
   const [image, setImage] = useState<string>();
   const [animation, setAnimation] = useState<string>();
 
@@ -76,7 +76,7 @@ export function NextGenTokenImageContent(props: Props) {
   );
 }
 
-export default function NextGenTokenImage(props: Props) {
+export default function NextGenTokenImage(props: Readonly<Props>) {
   return (
     <Container className="no-padding">
       <Row>
@@ -102,7 +102,13 @@ export default function NextGenTokenImage(props: Props) {
               if (props.show_link) {
                 window.location.href = `/nextgen/token/${props.token.id}`;
               }
-            }}></div>
+            }}
+            onKeyDown={(e) => {
+              if (props.show_link && (e.key === "Enter" || e.key === " ")) {
+                window.location.href = `/nextgen/token/${props.token.id}`;
+              }
+            }}
+            tabIndex={0}></div>
         </Col>
       </Row>
     </Container>

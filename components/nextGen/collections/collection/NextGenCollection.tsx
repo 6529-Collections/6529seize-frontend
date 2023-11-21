@@ -294,29 +294,50 @@ export default function NextGenCollection(props: Props) {
                   <Col>
                     <div className={styles.collectionTabs}>
                       <span
-                        onClick={() => setFocus(Focus.ART)}
                         className={`${styles.collectionTab} ${
                           focus == Focus.ART ? styles.collectionTabActive : ""
-                        }`}>
+                        }`}
+                        onClick={() => setFocus(Focus.ART)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter" || e.key === " ") {
+                            setFocus(Focus.ART);
+                          }
+                        }}
+                        tabIndex={0}
+                        role="button">
                         The Art
                       </span>
                       <span
-                        onClick={() => setFocus(Focus.COLLECTION)}
                         className={`${styles.collectionTab} ${
                           focus == Focus.COLLECTION
                             ? styles.collectionTabActive
                             : ""
-                        }`}>
+                        }`}
+                        onClick={() => setFocus(Focus.COLLECTION)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter" || e.key === " ") {
+                            setFocus(Focus.COLLECTION);
+                          }
+                        }}
+                        tabIndex={0}
+                        role="button">
                         The Collection
                       </span>
                       {showMint() && (
                         <span
-                          onClick={() => setFocus(Focus.MINT)}
                           className={`${styles.collectionTab} ${
                             focus == Focus.MINT
                               ? styles.collectionTabActive
                               : ""
-                          }`}>
+                          }`}
+                          onClick={() => setFocus(Focus.MINT)}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter" || e.key === " ") {
+                              setFocus(Focus.MINT);
+                            }
+                          }}
+                          tabIndex={0}
+                          role="button">
                           Mint
                         </span>
                       )}
@@ -324,37 +345,33 @@ export default function NextGenCollection(props: Props) {
                   </Col>
                 </Row>
                 {focus == Focus.ART && (
-                  <>
-                    <Row className="pt-3">
-                      <Col>
-                        <NextGenCollectionArt
-                          collection={props.collection}
-                          additional_data={additionalData}
-                          burn_amount={burnAmount}
-                          tokens={tokens}
-                        />
-                      </Col>
-                    </Row>
-                  </>
+                  <Row className="pt-3">
+                    <Col>
+                      <NextGenCollectionArt
+                        collection={props.collection}
+                        additional_data={additionalData}
+                        burn_amount={burnAmount}
+                        tokens={tokens}
+                      />
+                    </Col>
+                  </Row>
                 )}
                 {focus == Focus.COLLECTION && (
-                  <>
-                    <Row className="pt-3">
-                      <Col>
-                        <NextGenCollectionDetails
-                          collection={props.collection}
-                          additional_data={additionalData}
-                          info={info}
-                          phase_times={phaseTimes}
-                          burn_amount={burnAmount}
-                          token_start_index={tokenStartIndex}
-                          token_end_index={tokenEndIndex}
-                          mint_price={mintPrice}
-                          artist_signature={artistSignature}
-                        />
-                      </Col>
-                    </Row>
-                  </>
+                  <Row className="pt-3">
+                    <Col>
+                      <NextGenCollectionDetails
+                        collection={props.collection}
+                        additional_data={additionalData}
+                        info={info}
+                        phase_times={phaseTimes}
+                        burn_amount={burnAmount}
+                        token_start_index={tokenStartIndex}
+                        token_end_index={tokenEndIndex}
+                        mint_price={mintPrice}
+                        artist_signature={artistSignature}
+                      />
+                    </Col>
+                  </Row>
                 )}
                 {focus == Focus.MINT && (
                   <Row className="pt-3">
