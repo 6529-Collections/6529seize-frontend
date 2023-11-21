@@ -71,7 +71,7 @@ export default function Royalties() {
   return (
     <Container className={`no-padding pt-4`}>
       <GasRoyaltiesHeader
-        title={"ROYALTIES"}
+        title={"Artist Economics"}
         fetching={fetching}
         results_count={royalties.length}
         date_selection={dateSelection}
