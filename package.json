@@ -15,7 +15,7 @@
     "@fortawesome/free-solid-svg-icons": "^6.4.0",
     "@fortawesome/react-fontawesome": "^0.2.0",
     "@reduxjs/toolkit": "^1.9.7",
-    "@tailwindcss/forms": "^0.5.3",
+    "@tailwindcss/forms": "^0.5.7",
     "@tippyjs/react": "^4.2.6",
     "@web3modal/ethereum": "^2.7.1",
     "@web3modal/react": "^2.7.1",
