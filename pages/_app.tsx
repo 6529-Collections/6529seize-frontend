@@ -2,6 +2,8 @@ import "../styles/seize-bootstrap.scss";
 import "../styles/globals.scss";
 import "tippy.js/dist/tippy.css";
 import "tippy.js/themes/light.css";
+import "slick-carousel/slick/slick.css";
+import "slick-carousel/slick/slick-theme.css";
 import { Provider } from "react-redux";
 import type { AppProps } from "next/app";
 import { wrapper } from "../store/store";
@@ -82,6 +84,7 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import Head from "next/head";
 import { Web3Modal } from "@web3modal/react";
+import { NEXTGEN_CHAIN_ID } from "../components/nextGen/nextgen_contracts";
 import Auth from "../components/auth/Auth";
 
 library.add(
@@ -148,10 +151,16 @@ library.add(
 );
 
 const CONTRACT_CHAINS: Chain[] = [mainnet];
-if (DELEGATION_CONTRACT.chain_id === sepolia.id) {
+if (
+  DELEGATION_CONTRACT.chain_id === sepolia.id ||
+  (NEXTGEN_CHAIN_ID as number) === sepolia.id
+) {
   CONTRACT_CHAINS.push(sepolia);
 }
-if (DELEGATION_CONTRACT.chain_id === goerli.id) {
+if (
+  DELEGATION_CONTRACT.chain_id === goerli.id ||
+  (NEXTGEN_CHAIN_ID as number) === goerli.id
+) {
   CONTRACT_CHAINS.push(goerli);
 }
 

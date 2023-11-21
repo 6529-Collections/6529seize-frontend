@@ -1,4 +1,4 @@
-import { sepolia } from "wagmi/chains";
+import { mainnet, sepolia, goerli } from "wagmi/chains";
 import {
   GRADIENT_CONTRACT,
   MEMELAB_CONTRACT,
@@ -202,6 +202,8 @@ export const isValidEthAddress = (address: string) =>
 export function getTransactionLink(chain_id: number, hash: string) {
   return chain_id === sepolia.id
     ? `https://sepolia.etherscan.io/tx/${hash}`
+    : chain_id === goerli.id
+    ? `https://goerli.etherscan.io/tx/${hash}`
     : `https://etherscan.io/tx/${hash}`;
 }
 
@@ -313,6 +315,31 @@ export function capitalizeEveryWord(input: string): string {
     .replace(/^(.)|\s+(.)/g, (match: string) => match.toUpperCase());
 }
 
+export function getNetworkName(chainId: number) {
+  if (chainId === mainnet.id) {
+    return "Etherium Mainnet";
+  } else if (chainId === sepolia.id) {
+    return "Sepolia Testnet";
+  } else if (chainId === goerli.id) {
+    return "Goerli Testnet";
+  } else {
+    return `Network ID ${chainId}`;
+  }
+}
+
+export function createArray(startNum: number, endNum: number) {
+  let result = [];
+
+  if (startNum <= endNum) {
+    for (let i = startNum; i <= endNum; i++) {
+      result.push(i);
+    }
+  } else {
+    result.push(0);
+  }
+
+  return result;
+}
 export const formatNumber = (num: number): string => {
   // For numbers less than 1000, return the number as is
   if (num < 1000) {

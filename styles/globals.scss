@@ -1,4 +1,6 @@
 @import "./variables.scss";
+@import "~slick-carousel/slick/slick.css";
+@import "~slick-carousel/slick/slick-theme.css";
 
 @tailwind base;
 @tailwind components;
@@ -81,7 +83,6 @@ a:hover {
 
 h1 {
   font-family: $square-font !important;
-  font-display: swap;
   font-size: 48px;
   float: left;
   color: $font-color-h;
@@ -118,7 +119,6 @@ h5 {
 @media only screen and (max-width: 800px) {
   h1 {
     font-family: $square-font !important;
-    font-display: swap;
     font-size: 26px;
     float: left;
   }
@@ -291,6 +291,7 @@ h5 {
   border: 0 !important;
   padding-left: 20px;
   padding-right: 20px;
+  font-weight: bolder;
 }
 
 .seize-btn-link {
@@ -316,6 +317,26 @@ h5 {
   }
 }
 
+.btn-green {
+  background-color: $green;
+  color: white !important;
+
+  &:hover {
+    background-color: lighten($color: $green, $amount: 5);
+  }
+}
+
 .cursor-pointer {
   cursor: pointer;
+}
+
+.area-clamped {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  overflow: hidden;
+}
+
+.area-expanded {
+  -webkit-line-clamp: none;
 }

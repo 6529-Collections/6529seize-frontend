@@ -95,8 +95,7 @@ export default function Address(props: Props) {
       ) : (
         <Dropdown
           className={`${styles.consolidationDropdown}`}
-          autoClose="outside"
-        >
+          autoClose="outside">
           <Dropdown.Toggle
             onClick={() => {
               if (!props.isUserPage) {
@@ -104,8 +103,7 @@ export default function Address(props: Props) {
               }
             }}
             name={`consolidation-toggle`}
-            aria-label={`consolidation-toggle`}
-          >
+            aria-label={`consolidation-toggle`}>
             <Image
               loading="eager"
               priority
@@ -121,8 +119,7 @@ export default function Address(props: Props) {
               }`}
               dangerouslySetInnerHTML={{
                 __html: props.display ? parseEmojis(props.display) : ``,
-              }}
-            ></span>
+              }}></span>
           </Dropdown.Toggle>
         </Dropdown>
       )}
@@ -131,8 +128,7 @@ export default function Address(props: Props) {
           props.isUserPage
             ? `d-flex flex-wrap align-items-center gap-2`
             : `d-flex flex-column`
-        }
-      >
+        }>
         {(consolidationExpanded || props.isUserPage) &&
           props.wallets.length > 1 &&
           props.wallets.map((w, index) => (
@@ -140,8 +136,7 @@ export default function Address(props: Props) {
               key={w}
               className={`d-flex align-items-center justify-content-start ${
                 props.isUserPage ? styles.consolidationDiv : ""
-              }`}
-            >
+              }`}>
               <FontAwesomeIcon
                 icon="arrow-turn-right"
                 name={`arrow-turn-right`}
@@ -192,8 +187,7 @@ export default function Address(props: Props) {
             <span
               className={`${styles.addressTag} ${
                 !MEMES_SETS_ICON ? styles.memesSetTag : ""
-              }`}
-            >
+              }`}>
               {(props.isUserPage || !MEMES_SETS_ICON) && `Memes Sets x`}
               {props.tags.memesCardsSets}
               {MEMES_SETS_ICON && (
@@ -208,8 +202,7 @@ export default function Address(props: Props) {
             <span
               className={`${styles.addressTag} ${
                 !UNIQUE_MEMES_ICON ? styles.memesTag : ""
-              }`}
-            >
+              }`}>
               {(props.isUserPage || !UNIQUE_MEMES_ICON) && `Memes x`}
               {props.tags.memesBalance}
               {props.tags.genesis > 0 ? ` (+Genesis) ` : ""}
@@ -228,8 +221,7 @@ export default function Address(props: Props) {
             <span
               className={`${styles.addressTag} ${
                 !GRADIENT_ICON ? styles.gradientTag : ""
-              }`}
-            >
+              }`}>
               {(props.isUserPage || !GRADIENT_ICON) && `Gradients x`}
               {props.tags.gradientsBalance}
               {GRADIENT_ICON && (
@@ -247,8 +239,7 @@ export default function Address(props: Props) {
                   <span
                     className={`${styles.addressTag} ${
                       !SZN_1_ICON ? styles.memeSzn1Tag : ""
-                    }`}
-                  >
+                    }`}>
                     {(props.isUserPage || !SZN_1_ICON) && `SZN1 Sets x`}
                     {props.tags.memesCardsSetS1}
                     {SZN_1_ICON && (
@@ -265,8 +256,7 @@ export default function Address(props: Props) {
                   <span
                     className={`${styles.addressTag} ${
                       !SZN_2_ICON ? styles.memeSzn2Tag : ""
-                    }`}
-                  >
+                    }`}>
                     {(props.isUserPage || !SZN_2_ICON) && `SZN2 Sets x`}
                     {props.tags.memesCardsSetS2}
                     {SZN_2_ICON && (
@@ -283,8 +273,7 @@ export default function Address(props: Props) {
                   <span
                     className={`${styles.addressTag} ${
                       !SZN_3_ICON ? styles.memeSzn3Tag : ""
-                    }`}
-                  >
+                    }`}>
                     {(props.isUserPage || !SZN_3_ICON) && `SZN3 Sets x`}
                     {props.tags.memesCardsSetS3}
                     {SZN_3_ICON && (
@@ -301,8 +290,7 @@ export default function Address(props: Props) {
                   <span
                     className={`${styles.addressTag} ${
                       !SZN_4_ICON ? styles.memeSzn4Tag : ""
-                    }`}
-                  >
+                    }`}>
                     {(props.isUserPage || !SZN_4_ICON) && `SZN4 Sets x`}
                     {props.tags.memesCardsSetS4}
                     {SZN_4_ICON && (
@@ -318,10 +306,9 @@ export default function Address(props: Props) {
                 (props.tags.memesCardsSets === 0 || props.expandedTags) && (
                   <span
                     className={`${styles.addressTag} ${
-                      !SZN_4_ICON ? styles.memeSzn5Tag : ""
-                    }`}
-                  >
-                    {(props.isUserPage || !SZN_4_ICON) && `SZN5 Sets x`}
+                      !SZN_5_ICON ? styles.memeSzn5Tag : ""
+                    }`}>
+                    {(props.isUserPage || !SZN_5_ICON) && `SZN5 Sets x`}
                     {props.tags.memesCardsSetS5}
                     {SZN_5_ICON && (
                       <img
@@ -336,8 +323,7 @@ export default function Address(props: Props) {
                 <span
                   className={`${styles.addressTag} ${
                     !GRADIENT_ICON ? styles.gradientTag : ""
-                  }`}
-                >
+                  }`}>
                   {(props.isUserPage || !GRADIENT_ICON) && `Gradients x`}
                   {props.tags.gradientsBalance}
                   {GRADIENT_ICON && (

@@ -2,8 +2,13 @@ import styles from "./Delegation.module.scss";
 import { useWeb3Modal } from "@web3modal/react";
 import { Container, Row, Col } from "react-bootstrap";
 
-export default function ConnectWalletButton() {
+interface Props {
+  chain_id: number;
+}
+
+export default function ConnectWalletButton(props: Props) {
   const { isOpen, open, close, setDefaultChain } = useWeb3Modal();
+  setDefaultChain(props.chain_id);
 
   return (
     <Container>
