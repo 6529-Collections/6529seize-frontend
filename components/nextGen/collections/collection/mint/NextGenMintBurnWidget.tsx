@@ -354,7 +354,7 @@ export default function NextGenMintBurnWidget(props: Props) {
                 <span>Select token from Burn collection</span>
                 <span>
                   {props.collection.burn_collection}
-                  {props.collection.burn_collection_id &&
+                  {!!props.collection.burn_collection_id &&
                     ` | Collection ${props.collection.burn_collection_id} `}
                   {props.collection.max_token_index > 0 &&
                     ` | #${props.collection.min_token_index} - #${props.collection.max_token_index}`}

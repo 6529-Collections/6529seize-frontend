@@ -199,6 +199,13 @@ export default function NextGenCollectionDetails(props: Props) {
                         aria-label={`copy-btn`}
                         className={styles.copyIcon}
                         onClick={() => copy(libraryScript.script)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter" || e.key === " ") {
+                            copy(libraryScript.script);
+                          }
+                        }}
+                        tabIndex={0}
+                        role="button"
                       />
                     </Tippy>
                   </Col>
@@ -213,7 +220,14 @@ export default function NextGenCollectionDetails(props: Props) {
                         </code>
                         <span
                           className="font-smaller font-color-h cursor-pointer decoration-hover-underline"
-                          onClick={() => setScriptClamped(!scriptClamped)}>
+                          onClick={() => setScriptClamped(!scriptClamped)}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter" || e.key === " ") {
+                              setScriptClamped(!scriptClamped);
+                            }
+                          }}
+                          tabIndex={0}
+                          role="button">
                           {scriptClamped ? `Show More` : `Show Less`}
                         </span>
                       </>

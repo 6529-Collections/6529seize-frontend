@@ -121,7 +121,7 @@ export default function NextGenMint(props: Props) {
       if (data) {
         const del: string[] = [];
         const d = data as any[];
-        d.map((r) => {
+        d.forEach((r) => {
           r.result.map((a: string) => del.push(a));
         });
         setDelegators(del);
