@@ -114,17 +114,21 @@ export default function Royalties() {
   }
 
   useEffect(() => {
-    fetchRoyalties();
+    if (collectionFocus) {
+      fetchRoyalties();
+    }
   }, [dateSelection, fromDate, toDate, selectedArtist]);
 
   useEffect(() => {
-    setRoyalties([]);
-    setDescription(
-      collectionFocus === GasRoyaltiesCollectionFocus.MEMELAB
-        ? MEMELAB_DESCRIPTION
-        : MEMES_DESCRIPTION
-    );
-    fetchRoyalties();
+    if (collectionFocus) {
+      setRoyalties([]);
+      setDescription(
+        collectionFocus === GasRoyaltiesCollectionFocus.MEMELAB
+          ? MEMELAB_DESCRIPTION
+          : MEMES_DESCRIPTION
+      );
+      fetchRoyalties();
+    }
   }, [collectionFocus]);
 
   useEffect(() => {

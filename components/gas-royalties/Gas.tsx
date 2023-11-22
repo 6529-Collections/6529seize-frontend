@@ -84,12 +84,16 @@ export default function Gas() {
   }
 
   useEffect(() => {
-    fetchGas();
+    if (collectionFocus) {
+      fetchGas();
+    }
   }, [dateSelection, fromDate, toDate, selectedArtist]);
 
   useEffect(() => {
-    setGas([]);
-    fetchGas();
+    if (collectionFocus) {
+      setGas([]);
+      fetchGas();
+    }
   }, [collectionFocus]);
 
   useEffect(() => {
