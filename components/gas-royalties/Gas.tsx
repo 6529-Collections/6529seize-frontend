@@ -54,7 +54,7 @@ export default function Gas() {
   const [showDatePicker, setShowDatePicker] = useState(false);
 
   const [dateSelection, setDateSelection] = useState<DateIntervalsSelection>(
-    DateIntervalsSelection.TODAY
+    DateIntervalsSelection.THIS_MONTH
   );
 
   function getUrl() {
