@@ -1,7 +1,10 @@
 import { ENS } from "../../entities/IENS";
+import { NFT, NFTLite } from "../../entities/INFT";
+import { OwnerLite } from "../../entities/IOwner";
 import { IProfileAndConsolidations } from "../../entities/IProfile";
+import { Season } from "../../entities/ISeason";
 import { ConsolidatedTDHMetrics } from "../../entities/ITDH";
-import { containsEmojis, formatAddress } from "../../helpers/Helpers";
+import { areEqualAddresses, containsEmojis, formatAddress } from "../../helpers/Helpers";
 import { commonApiFetch } from "../../services/api/common-api";
 
 export interface CommonUserServerSideProps {
@@ -89,3 +92,83 @@ export const userPageNeedsRedirect = ({ profile, req, subroute }: { profile: IPr
   }
   return null
 }
+
+export const getGradients = async (
+  headers: Record<string, string>
+): Promise<NFT[]> => {
+  const gradients = await commonApiFetch<{ data: NFT[] }>({
+    endpoint: "nfts/gradients?&page_size=101&sort=ASC&sort_direction=id",
+    headers,
+  });
+  return gradients.data;
+};
+
+
+export const getMemesLite = async (
+  headers: Record<string, string>
+): Promise<NFTLite[]> => {
+  const memes = await commonApiFetch<{ data: NFTLite[] }>({
+    endpoint: "memes_lite",
+    headers,
+  });
+  return memes.data;
+}
+
+export const getSeasons = async (
+  headers: Record<string, string>
+): Promise<Season[]> => {
+  const seasons = await commonApiFetch<Season[]>({
+    endpoint: "memes_seasons",
+    headers,
+  });
+  return seasons;
+}
+
+export const getOwned = async (
+  { wallets, headers }: {
+    wallets: string[],
+    headers: Record<string, string>
+  }
+): Promise<OwnerLite[]> => {
+  if (!wallets.length) {
+    return [];
+  }
+  const baseURL = `owners?wallet=${wallets.join(",")}`;
+  let page: number | null = null;
+  const allOwned: OwnerLite[] = [];
+  do {
+    const ownedResponse: {
+      data: OwnerLite[];
+      page: number;
+      next: string | null;
+    } = await commonApiFetch<{
+      data: OwnerLite[];
+      page: number;
+      next: string | null;
+    }>({
+      endpoint: page ? `${baseURL}&page=${page}` : baseURL,
+      headers,
+    });
+    ownedResponse.data.forEach((o) =>
+      allOwned.push({
+        token_id: o.token_id,
+        contract: o.contract,
+        balance: o.balance,
+      })
+    );
+
+    page = ownedResponse.next ? ownedResponse.page + 1 : null;
+  } while (page);
+
+  return allOwned.reduce<OwnerLite[]>((acc, curr) => {
+    const existing = acc.find(
+      (a) => a.token_id === curr.token_id && areEqualAddresses(a.contract, curr.contract)
+    );
+    if (existing) {
+      existing.balance += curr.balance;
+    } else {
+      acc.push(curr);
+    }
+    return acc;
+  }, []);
+};

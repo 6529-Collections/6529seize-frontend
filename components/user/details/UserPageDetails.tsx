@@ -1,7 +1,7 @@
 import { Container } from "react-bootstrap";
 import { OwnerLite } from "../../../entities/IOwner";
 import { ConsolidatedTDHMetrics, TDHMetrics } from "../../../entities/ITDH";
-import UserPageCollection from "./collection/UserPageCollection";
+import UserPageCollection from "./collected/UserPageCollection";
 import UserPageActivity from "./UserPageActivity";
 import UserPageDistributions from "./UserPageDistributions";
 import UserPageStats from "./UserPageStats";

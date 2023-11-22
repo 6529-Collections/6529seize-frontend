@@ -1,6 +1,5 @@
 import Head from "next/head";
 import { ReactNode, useEffect, useState } from "react";
-import { UserPageProps } from "../../../pages/[user]";
 import dynamic from "next/dynamic";
 import HeaderPlaceholder from "../../header/HeaderPlaceholder";
 import { numberWithCommas } from "../../../helpers/Helpers";
@@ -9,6 +8,7 @@ import UserPageHeader from "../user-page-header/UserPageHeader";
 import { useRouter } from "next/router";
 import { IProfileAndConsolidations } from "../../../entities/IProfile";
 import { ConsolidatedTDHMetrics } from "../../../entities/ITDH";
+import UserPageTabs from "./UserPageTabs";
 
 
 const Header = dynamic(() => import("../../header/Header"), {
@@ -18,19 +18,6 @@ const Header = dynamic(() => import("../../header/Header"), {
 
 const DEFAULT_IMAGE =
 	"https://d3lqz0a4bldqgf.cloudfront.net/seize_images/Seize_Logo_Glasses_2.png";
-
-
-enum Tab {
-	COLLECTED = "COLLECTED",
-	STATS = "STATS",
-	IDENTITY = "IDENTITY",
-}
-
-const TabRoutes: Record<Tab, string> = {
-	[Tab.COLLECTED]: "collected",
-	[Tab.STATS]: "",
-	[Tab.IDENTITY]: "identity",
-};
 
 interface UserPageLayoutProps {
 	profile: IProfileAndConsolidations;
@@ -110,38 +97,27 @@ export default function UserPageLayout({ props, children }: { props: UserPageLay
 		);
 	};
 
-	const pathnameToTab = (pathname: string): Tab => {
-		const regex = /\/\[user\]\/([^/?]+)/;
-		const match = pathname.match(regex);
-		const name = match ? match[1] : '';
-		if (name === "") {
-			return Tab.STATS;
-		}
-		else if (name === "collected") {
-			return Tab.COLLECTED;
-		}
-
-		else if (name === "identity") {
-			return Tab.IDENTITY;
-		}
-
-		return Tab.STATS;
-	}
-
-	const [tab, setTab] = useState<Tab>(pathnameToTab(router.pathname));
+	const [isLoading, setIsLoading] = useState(false);
 
 	useEffect(() => {
-		setTab(pathnameToTab(router.pathname));
-	}, [router.pathname])
+		const handleStart = () => {
+			setIsLoading(true);
+		};
 
-	const goToTab = (tab: Tab) => {
-		router.push(
-			{
-				pathname: `/${user}/${TabRoutes[tab]}`,
-				query: router.query.address ? { address: router.query.address } : {},
-			}
-		);
-	}
+		const handleComplete = () => {
+			setIsLoading(false);
+		};
+
+		router.events.on('routeChangeStart', handleStart);
+		router.events.on('routeChangeComplete', handleComplete);
+		router.events.on('routeChangeError', handleComplete);
+
+		return () => {
+			router.events.off('routeChangeStart', handleStart);
+			router.events.off('routeChangeComplete', handleComplete);
+			router.events.off('routeChangeError', handleComplete);
+		};
+	}, []);
 
 	return (
 		<>
@@ -175,11 +151,9 @@ export default function UserPageLayout({ props, children }: { props: UserPageLay
 						onActiveAddress={onActiveAddress}
 						user={user}
 					/>
-					<div className="tw-inline-flex tw-w-full tw-space-x-4">
-						<button onClick={() => goToTab(Tab.STATS)} className={tab === Tab.STATS ? 'tw-bg-blue-500' : ''}>index</button>
-						<button onClick={() => goToTab(Tab.COLLECTED)} className={tab === Tab.COLLECTED ? 'tw-bg-blue-500' : ''}>collected</button>
-					</div>
-					{children}
+					<UserPageTabs />
+					{isLoading ? <div>Loading...</div> : children}
+
 				</div>
 			</main>
 		</>
