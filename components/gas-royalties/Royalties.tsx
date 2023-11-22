@@ -221,7 +221,12 @@ export default function Royalties() {
                               GasRoyaltiesCollectionFocus.MEMELAB &&
                               r.primary_royalty_split > 0 && (
                                 <span className="font-smaller font-color-h">
-                                  ({r.primary_royalty_split * 100}%)
+                                  (
+                                  {displayDecimal(
+                                    r.primary_royalty_split * 100,
+                                    2
+                                  )}
+                                  %)
                                 </span>
                               )}
                           </span>
@@ -246,7 +251,12 @@ export default function Royalties() {
                               GasRoyaltiesCollectionFocus.MEMELAB &&
                               r.secondary_royalty_split > 0 && (
                                 <span className="font-smaller font-color-h">
-                                  ({r.secondary_royalty_split * 100}%)
+                                  (
+                                  {displayDecimal(
+                                    r.secondary_royalty_split * 100,
+                                    2
+                                  )}
+                                  %)
                                 </span>
                               )}
                           </span>
