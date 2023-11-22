@@ -96,16 +96,16 @@ export default function NextGenCollection(props: Props) {
   });
 
   useEffect(() => {
-    if (tokenStartIndex > 0 && tokenEndIndex > 0) {
+    if (tokenStartIndex > 0 && additionalData) {
       const rangeLength = Math.min(
         ART_TOKEN_COUNT,
-        tokenEndIndex - tokenStartIndex + 1
+        additionalData.circulation_supply
       );
       setTokens(
         Array.from({ length: rangeLength }, (_, i) => tokenStartIndex + i)
       );
     }
-  }, [tokenStartIndex, tokenEndIndex]);
+  }, [tokenStartIndex, additionalData]);
 
   const endIndexRead = useContractRead({
     address: NEXTGEN_CORE.contract as `0x${string}`,
@@ -276,11 +276,13 @@ export default function NextGenCollection(props: Props) {
       return (
         <>
           <Breadcrumb breadcrumbs={breadcrumbs} />
-          <NextGenCollectionSlideshow
-            collection={props.collection}
-            start_index={tokenStartIndex}
-            end_index={tokenEndIndex}
-          />
+          {additionalData && (
+            <NextGenCollectionSlideshow
+              collection={props.collection}
+              start_index={tokenStartIndex}
+              length={additionalData.circulation_supply}
+            />
+          )}
           <Container className="pt-3 pb-2">
             {additionalData && info && phaseTimes && (
               <>

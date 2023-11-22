@@ -7,12 +7,12 @@ import { useState } from "react";
 interface Props {
   collection: number;
   start_index: number;
-  end_index: number;
+  length: number;
 }
 
 export default function NextGenCollectionSlideshow(props: Props) {
   const tokens = Array.from(
-    { length: props.end_index - props.start_index + 1 },
+    { length: props.length },
     (_, i) => props.start_index + i
   );
 
@@ -23,11 +23,12 @@ export default function NextGenCollectionSlideshow(props: Props) {
     centerMode: true,
     infinite: true,
     centerPadding: "50px",
-    slidesToShow: 3,
+    slidesToShow: Math.min(3, props.length),
     slidesToScroll: 1,
-    speed: 500,
-    afterChange: (current: number) =>
-      setCurrentSlide(current + props.start_index),
+    speed: 300,
+    afterChange: (current: number) => {
+      setCurrentSlide(current + props.start_index);
+    },
   };
 
   return (
