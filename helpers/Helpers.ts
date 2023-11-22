@@ -64,13 +64,15 @@ export function fromGWEI(from: number) {
 }
 
 export function numberWithCommasFromString(x: string) {
-  if (!/^\d+$/.test(x)) return x;
-  if (isNaN(parseInt(x))) return x;
-  return numberWithCommas(parseInt(x));
+  if (!/^[-]?\d*\.?\d+$/.test(x)) return x;
+  const num = parseFloat(x);
+  if (isNaN(num)) return x;
+  return numberWithCommas(num);
 }
 
 export function numberWithCommas(x: number) {
-  if (x === null || x === 0 || isNaN(x)) return "-";
+  if (x === null || isNaN(x)) return "-";
+  if (x === 0) return "-";
   const parts = x.toString().split(".");
   parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
   return parts.join(".");
