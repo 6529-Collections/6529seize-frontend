@@ -51,15 +51,10 @@
     "@next/bundle-analyzer": "^13.1.6",
     "@types/js-cookie": "^3.0.2",
     "@types/node": "^18.13.0",
-<<<<<<< HEAD
-    "@types/react": "18.0.28",
-    "@types/react-scroll": "^1.8.6",
     "@types/react-slick": "^0.23.12",
     "@types/uuid": "^9.0.5",
-=======
     "@types/react": "^18.2.38",
     "@types/react-scroll": "^1.8.10",
->>>>>>> sonarcloud-memelab-royalties
     "autoprefixer": "^10.4.14",
     "eslint": "8.34.0",
     "eslint-config-next": "13.1.6",
