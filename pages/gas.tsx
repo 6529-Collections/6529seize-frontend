@@ -35,14 +35,7 @@ export default function GasPage() {
 
       <main className={styles.main}>
         <Header />
-        <Breadcrumb breadcrumbs={breadcrumbs} />
-        <Container fluid className={styles.mainContainer}>
-          <Row>
-            <Col>
-              <Gas />
-            </Col>
-          </Row>
-        </Container>
+        <Gas />
       </main>
     </>
   );
