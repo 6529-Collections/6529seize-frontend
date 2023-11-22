@@ -1,8 +1,8 @@
-import styles from "../../UserPage.module.scss";
+import styles from "../UserPage.module.scss";
 import { Container, Row, Accordion, Table } from "react-bootstrap";
 import { useEffect, useState } from "react";
-import { ConsolidatedTDHMetrics, TDHMetrics } from "../../../../entities/ITDH";
-import { numberWithCommas } from "../../../../helpers/Helpers";
+import { ConsolidatedTDHMetrics, TDHMetrics } from "../../../entities/ITDH";
+import { numberWithCommas } from "../../../helpers/Helpers";
 
 export default function UserPageStatsOverview({ tdh, loading }: { tdh: ConsolidatedTDHMetrics | TDHMetrics | null, loading: boolean }) {
   const [showActivity, setShowActivity] = useState<boolean>(false);

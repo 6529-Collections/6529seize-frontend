@@ -1,11 +1,11 @@
-import { ConsolidatedTDHMetrics, TDHMetrics } from "../../../../entities/ITDH";
-import styles from "../../UserPage.module.scss";
+import { ConsolidatedTDHMetrics, TDHMetrics } from "../../../entities/ITDH";
+import styles from "../UserPage.module.scss";
 import { Row, Col, Form } from "react-bootstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { SortDirection } from "../../../../entities/ISort";
-import SeasonsDropdown from "../../../seasons-dropdown/SeasonsDropdown";
+import { SortDirection } from "../../../entities/ISort";
+import SeasonsDropdown from "../../seasons-dropdown/SeasonsDropdown";
 import { UserCollectionSort } from "./UserPageCollection";
-import { Season } from "../../../../entities/ISeason";
+import { Season } from "../../../entities/ISeason";
 
 export default function UserPageCollectionControls({
   tdh,
@@ -51,40 +51,35 @@ export default function UserPageCollectionControls({
             <FontAwesomeIcon
               icon="chevron-circle-up"
               onClick={() => setSortDir(SortDirection.ASC)}
-              className={`${styles.sortDirection} ${
-                sortDir !== SortDirection.ASC ? styles.disabled : ""
-              }`}
+              className={`${styles.sortDirection} ${sortDir !== SortDirection.ASC ? styles.disabled : ""
+                }`}
             />{" "}
             <FontAwesomeIcon
               icon="chevron-circle-down"
               onClick={() => setSortDir(SortDirection.DESC)}
-              className={`${styles.sortDirection} ${
-                sortDir !== SortDirection.DESC ? styles.disabled : ""
-              }`}
+              className={`${styles.sortDirection} ${sortDir !== SortDirection.DESC ? styles.disabled : ""
+                }`}
             />
           </Col>
           <Col xs={12} className="pt-2">
             <span
               onClick={() => setSort(UserCollectionSort.ID)}
-              className={`${styles.sort} ${
-                sort !== UserCollectionSort.ID ? styles.disabled : ""
-              }`}
+              className={`${styles.sort} ${sort !== UserCollectionSort.ID ? styles.disabled : ""
+                }`}
             >
               ID
             </span>
             <span
               onClick={() => setSort(UserCollectionSort.TDH)}
-              className={`${styles.sort} ${
-                sort !== UserCollectionSort.TDH ? styles.disabled : ""
-              }`}
+              className={`${styles.sort} ${sort !== UserCollectionSort.TDH ? styles.disabled : ""
+                }`}
             >
               TDH
             </span>
             <span
               onClick={() => setSort(UserCollectionSort.RANK)}
-              className={`${styles.sort} ${
-                sort !== UserCollectionSort.RANK ? styles.disabled : ""
-              }`}
+              className={`${styles.sort} ${sort !== UserCollectionSort.RANK ? styles.disabled : ""
+                }`}
             >
               RANK
             </span>

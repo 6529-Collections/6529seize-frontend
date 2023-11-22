@@ -10,7 +10,7 @@ import { fetchUrl } from "../../../services/6529api";
 import { areEqualAddresses } from "../../../helpers/Helpers";
 import { NFTLite } from "../../../entities/INFT";
 import { IProfileAndConsolidations } from "../../../entities/IProfile";
-import UserPageDetailsNothingHere from "./UserPageDetailsNothingHere";
+import UserPageDetailsNothingHere from "../UserPageDetailsNothingHere";
 import DotLoader from "../../dotLoader/DotLoader";
 
 interface Props {
@@ -87,11 +87,10 @@ export default function UserPageActivity(props: Props) {
         (w) => w.wallet.address
       );
 
-      url = `${
-        process.env.API_ENDPOINT
-      }/api/transactions?contract=${MEMES_CONTRACT}&wallet=${wallets.join(
-        ","
-      )}&page_size=${ACTIVITY_PAGE_SIZE}&page=${activityPage}`;
+      url = `${process.env.API_ENDPOINT
+        }/api/transactions?contract=${MEMES_CONTRACT}&wallet=${wallets.join(
+          ","
+        )}&page_size=${ACTIVITY_PAGE_SIZE}&page=${activityPage}`;
     }
     switch (activityTypeFilter) {
       case UserActivityTypeFilter.SALES:

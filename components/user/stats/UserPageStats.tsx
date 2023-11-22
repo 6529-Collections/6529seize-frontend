@@ -1,9 +1,9 @@
 import { useRouter } from "next/router";
-import { IProfileAndConsolidations } from "../../../../entities/IProfile";
-import { ConsolidatedTDHMetrics, TDHMetrics } from "../../../../entities/ITDH";
+import { IProfileAndConsolidations } from "../../../entities/IProfile";
+import { ConsolidatedTDHMetrics, TDHMetrics } from "../../../entities/ITDH";
 import { useEffect, useState } from "react";
-import { commonApiFetch } from "../../../../services/api/common-api";
-import { fetchAllPages } from "../../../../services/6529api";
+import { commonApiFetch } from "../../../services/api/common-api";
+import { fetchAllPages } from "../../../services/6529api";
 import UserPageStatsOverview from "./UserPageStatsOverview";
 import UserPageStatsTDHcharts from "./UserPageStatsTDHcharts";
 

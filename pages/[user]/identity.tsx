@@ -6,7 +6,7 @@ import { NFTLite } from "../../entities/INFT";
 import { commonApiFetch } from "../../services/api/common-api";
 import UserPageLayout from "../../components/user/layout/UserPageLayout";
 import { getCommonUserServerSideProps, userPageNeedsRedirect } from "./server.helpers";
-import UserPageIdentity from "../../components/user/details/identity/UserPageIdentity";
+import UserPageIdentity from "../../components/user/identity/UserPageIdentity";
 
 
 export interface UserPageIdentityProps {

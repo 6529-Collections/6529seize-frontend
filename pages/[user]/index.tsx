@@ -5,7 +5,7 @@ import { ConsolidatedTDHMetrics } from "../../entities/ITDH";
 import { NFT, NFTLite } from "../../entities/INFT";
 import UserPageLayout from "../../components/user/layout/UserPageLayout";
 import { getCommonUserServerSideProps, getGradients, getMemesLite, getOwned, getSeasons, userPageNeedsRedirect } from "./server.helpers";
-import UserPageCollection from "../../components/user/details/collected/UserPageCollection";
+import UserPageCollection from "../../components/user/collected/UserPageCollection";
 import { Season } from "../../entities/ISeason";
 import { OwnerLite } from "../../entities/IOwner";
 

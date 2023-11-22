@@ -1,11 +1,11 @@
-import styles from "../../UserPage.module.scss";
+import styles from "../UserPage.module.scss";
 import { Col, Container, Row } from "react-bootstrap";
 import {
   areEqualAddresses,
   numberWithCommas,
-} from "../../../../helpers/Helpers";
-import { GRADIENT_CONTRACT, MEMES_CONTRACT } from "../../../../constants";
-import NFTImage from "../../../nft-image/NFTImage";
+} from "../../../helpers/Helpers";
+import { GRADIENT_CONTRACT, MEMES_CONTRACT } from "../../../constants";
+import NFTImage from "../../nft-image/NFTImage";
 import { IUserNFT } from "./UserPageCollectionNfts";
 
 export default function UserPageCollectionNft({ nft }: { nft: IUserNFT }) {
@@ -22,11 +22,10 @@ export default function UserPageCollectionNft({ nft }: { nft: IUserNFT }) {
         <Row>
           <a
             className={styles.nftImagePadding}
-            href={`/${
-              areEqualAddresses(nft.contract, MEMES_CONTRACT)
+            href={`/${areEqualAddresses(nft.contract, MEMES_CONTRACT)
                 ? "the-memes"
                 : "6529-gradient"
-            }/${nft.id}`}
+              }/${nft.id}`}
           >
             <NFTImage
               nft={nft}
@@ -35,7 +34,7 @@ export default function UserPageCollectionNft({ nft }: { nft: IUserNFT }) {
               balance={nft.userBalance}
               showOwned={
                 areEqualAddresses(nft.contract, GRADIENT_CONTRACT) &&
-                nft.userBalance > 0
+                  nft.userBalance > 0
                   ? true
                   : false
               }
@@ -47,11 +46,10 @@ export default function UserPageCollectionNft({ nft }: { nft: IUserNFT }) {
         <Row>
           <Col className="text-center pt-2">
             <a
-              href={`/${
-                areEqualAddresses(nft.contract, MEMES_CONTRACT)
+              href={`/${areEqualAddresses(nft.contract, MEMES_CONTRACT)
                   ? "the-memes"
                   : "6529-gradient"
-              }/${nft.id}`}
+                }/${nft.id}`}
             >
               {areEqualAddresses(nft.contract, MEMES_CONTRACT)
                 ? `#${nft.id} - ${nft.name}`

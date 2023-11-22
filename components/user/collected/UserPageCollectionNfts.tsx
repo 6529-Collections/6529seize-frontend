@@ -1,18 +1,18 @@
 import { useEffect, useState } from "react";
-import { NFTLite } from "../../../../entities/INFT";
-import { Owner, OwnerLite } from "../../../../entities/IOwner";
+import { NFTLite } from "../../../entities/INFT";
+import { Owner, OwnerLite } from "../../../entities/IOwner";
 import {
   areEqualAddresses,
   isGradientsContract,
   isMemesContract,
-} from "../../../../helpers/Helpers";
-import { ConsolidatedTDHMetrics, TDHMetrics } from "../../../../entities/ITDH";
-import { Season } from "../../../../entities/ISeason";
+} from "../../../helpers/Helpers";
+import { ConsolidatedTDHMetrics, TDHMetrics } from "../../../entities/ITDH";
+import { Season } from "../../../entities/ISeason";
 import UserPageCollectionNft from "./UserPageCollectionNft";
 import { Row } from "react-bootstrap";
 import { UserCollectionSort } from "./UserPageCollection";
-import { SortDirection } from "../../../../entities/ISort";
-import { assertUnreachable } from "../../../../helpers/AllowlistToolHelpers";
+import { SortDirection } from "../../../entities/ISort";
+import { assertUnreachable } from "../../../helpers/AllowlistToolHelpers";
 import UserPageDetailsNothingHere from "../UserPageDetailsNothingHere";
 
 export interface IUserNFT extends NFTLite {

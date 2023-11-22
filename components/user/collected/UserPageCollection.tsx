@@ -1,17 +1,17 @@
-import { SortDirection } from "../../../../entities/ISort";
+import { SortDirection } from "../../../entities/ISort";
 import { useEffect, useState } from "react";
-import { NFT, NFTLite } from "../../../../entities/INFT";
-import { Owner, OwnerLite } from "../../../../entities/IOwner";
-import { ConsolidatedTDHMetrics, TDHMetrics } from "../../../../entities/ITDH";
-import { Season } from "../../../../entities/ISeason";
+import { NFT, NFTLite } from "../../../entities/INFT";
+import { Owner, OwnerLite } from "../../../entities/IOwner";
+import { ConsolidatedTDHMetrics, TDHMetrics } from "../../../entities/ITDH";
+import { Season } from "../../../entities/ISeason";
 import UserPageCollectionNfts from "./UserPageCollectionNfts";
 
-import DotLoader from "../../../dotLoader/DotLoader";
+import DotLoader from "../../dotLoader/DotLoader";
 import dynamic from "next/dynamic";
-import { IProfileAndConsolidations } from "../../../../entities/IProfile";
+import { IProfileAndConsolidations } from "../../../entities/IProfile";
 import { useRouter } from "next/router";
-import { commonApiFetch } from "../../../../services/api/common-api";
-import { fetchAllPages } from "../../../../services/6529api";
+import { commonApiFetch } from "../../../services/api/common-api";
+import { fetchAllPages } from "../../../services/6529api";
 
 const UserPageCollectionControls = dynamic(() => import("./UserPageCollectionControls"), {
   ssr: false,

@@ -4,7 +4,7 @@ import { IProfileAndConsolidations } from "../../entities/IProfile";
 import { ConsolidatedTDHMetrics } from "../../entities/ITDH";
 import UserPageLayout from "../../components/user/layout/UserPageLayout";
 import { getCommonUserServerSideProps, userPageNeedsRedirect } from "./server.helpers";
-import UserPageStats from "../../components/user/details/stats/UserPageStats";
+import UserPageStats from "../../components/user/stats/UserPageStats";
 
 
 export interface UserPageStatsProps {

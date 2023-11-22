@@ -1,9 +1,5 @@
-import { Col, Container, Row } from "react-bootstrap";
-import { useEffect, useState } from "react";
-import { DBResponse } from "../../../entities/IDBResponse";
-import { TDHHistory } from "../../../entities/ITDH";
-import { fetchUrl } from "../../../services/6529api";
 import { Bar } from "react-chartjs-2";
+import { Col, Container, Row } from "react-bootstrap";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -14,8 +10,12 @@ import {
   Legend,
   BarElement,
 } from "chart.js";
+import { useEffect, useState } from "react";
+import { TDHHistory } from "../../../entities/ITDH";
+import { fetchUrl } from "../../../services/6529api";
+import { DBResponse } from "../../../entities/IDBResponse";
 import DotLoader from "../../dotLoader/DotLoader";
-import UserPageDetailsNothingHere from "./UserPageDetailsNothingHere";
+import UserPageDetailsNothingHere from "../UserPageDetailsNothingHere";
 
 ChartJS.register(
   CategoryScale,
@@ -26,11 +26,6 @@ ChartJS.register(
   Legend,
   BarElement
 );
-
-interface Props {
-  show: boolean;
-  mainAddress: string;
-}
 
 const GRAPH_OPTIONS = {
   scales: {
@@ -59,8 +54,11 @@ const GRAPH_OPTIONS = {
     },
   },
 };
-
-export default function UserPageStats(props: Props) {
+export default function UserPageStatsTDHcharts({
+  mainAddress
+}: {
+  mainAddress: string;
+}) {
   const [tdhHistory, setTdhHistory] = useState<TDHHistory[]>([]);
   const [tdhLabels, setTdhLabels] = useState<Date[]>([]);
   const [pageSize, setPageSize] = useState(10);
@@ -68,25 +66,21 @@ export default function UserPageStats(props: Props) {
 
   useEffect(() => {
     setTdhHistoryLoaded(false);
-  }, [props.mainAddress, pageSize]);
+  }, [mainAddress, pageSize]);
 
   useEffect(() => {
-    if (!props.show) {
-      return;
-    }
-
     if (tdhHistoryLoaded) {
       return;
     }
 
-    let url = `${process.env.API_ENDPOINT}/api/tdh_history?wallet=${props.mainAddress}&page_size=${pageSize}`;
+    let url = `${process.env.API_ENDPOINT}/api/tdh_history?wallet=${mainAddress}&page_size=${pageSize}`;
     fetchUrl(url).then((response: DBResponse) => {
       const tdhH = response.data.reverse();
       setTdhHistory(tdhH);
       setTdhLabels(tdhH.map((t) => t.date));
       setTdhHistoryLoaded(true);
     });
-  }, [props.show, props.mainAddress, pageSize, tdhHistoryLoaded]);
+  }, [mainAddress, pageSize, tdhHistoryLoaded]);
 
   function printTotalTDH() {
     const data = {
@@ -242,9 +236,6 @@ export default function UserPageStats(props: Props) {
     );
   }
 
-  if (!props.show) {
-    return <></>;
-  }
 
   if (!tdhHistoryLoaded) {
     return (
