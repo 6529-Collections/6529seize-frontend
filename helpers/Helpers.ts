@@ -64,8 +64,9 @@ export function fromGWEI(from: number) {
 }
 
 export function numberWithCommasFromString(x: string) {
-  if (!/^[-]?\d*\.?\d+$/.test(x)) return x;
-  const num = parseFloat(x);
+  const cleanedInput = x.replace(/[^\d.-]/g, "");
+  if (!/^-?\d+(\.\d+)?$/.test(cleanedInput)) return x;
+  const num = parseFloat(cleanedInput);
   if (isNaN(num)) return x;
   return numberWithCommas(num);
 }

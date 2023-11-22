@@ -73,7 +73,6 @@ export function GasRoyaltiesHeader(props: Readonly<HeaderProps>) {
                 }
               }}
               tabIndex={0}
-              role="button"
               aria-label="The Memes">
               The Memes
             </span>
@@ -92,7 +91,6 @@ export function GasRoyaltiesHeader(props: Readonly<HeaderProps>) {
                 }
               }}
               tabIndex={0}
-              role="button"
               aria-label="Meme Lab">
               Meme Lab
             </span>
