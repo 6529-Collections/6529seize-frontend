@@ -4,6 +4,7 @@ import NextGenTokenPreview from "./NextGenTokenPreview";
 interface Props {
   collection: number;
   tokens: number[];
+  hide_info: boolean;
 }
 
 export default function NextGenTokenList(props: Props) {
@@ -16,7 +17,11 @@ export default function NextGenTokenList(props: Props) {
             sm={4}
             md={3}
             key={`collection-${props.collection}-token-list-${t}`}>
-            <NextGenTokenPreview token_id={t} collection={props.collection} />
+            <NextGenTokenPreview
+              token_id={t}
+              collection={props.collection}
+              hide_info={props.hide_info}
+            />
           </Col>
         ))}
       </Row>

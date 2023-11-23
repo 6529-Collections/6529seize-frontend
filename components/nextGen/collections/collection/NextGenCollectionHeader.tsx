@@ -1,5 +1,5 @@
 import styles from "../NextGen.module.scss";
-import { Container, Row, Col } from "react-bootstrap";
+import { Container, Row, Col, Button } from "react-bootstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   AdditionalData,
@@ -12,17 +12,48 @@ import { goerli } from "wagmi/chains";
 import { NEXTGEN_CHAIN_ID, NEXTGEN_CORE } from "../../nextgen_contracts";
 import { getPhaseDateDisplay } from "../../nextgen_helpers";
 import { useEffect, useState } from "react";
+import { useRouter } from "next/router";
 
 interface Props {
   collection: number;
   info: Info;
   phase_times: PhaseTimes;
   additional_data: AdditionalData;
-  collectionLink?: boolean;
+  collection_link?: boolean;
 }
 
 export default function NextGenCollectionHeader(props: Props) {
+  const router = useRouter();
   const [available, setAvailable] = useState<number>(0);
+
+  const collectionPath = `/nextgen/collection/${props.collection}`;
+
+  function showMint() {
+    if (router.pathname.includes("mint")) {
+      return false;
+    }
+
+    if (!props.phase_times || !props.additional_data) {
+      return false;
+    }
+
+    if (
+      props.additional_data.circulation_supply ==
+      props.additional_data.total_supply
+    ) {
+      return false;
+    }
+
+    const now = new Date().getTime();
+    const allowlistStartsIn = props.phase_times.allowlist_start_time - now;
+    if (allowlistStartsIn > 0 && allowlistStartsIn < 1000 * 60 * 60 * 24) {
+      return true;
+    }
+    return (
+      props.phase_times.al_status == Status.LIVE ||
+      props.phase_times.public_status == Status.LIVE
+    );
+  }
 
   useEffect(() => {
     const a =
@@ -104,30 +135,44 @@ export default function NextGenCollectionHeader(props: Props) {
         </Col>
       </Row>
       <Row className="pt-2">
-        <Col className="d-flex justify-content-between align-items-center flex-wrap">
-          {props.collectionLink ? (
-            <a href={`/nextgen/collection/${props.collection}`}>
-              <h1 className="mb-0 font-color decoration-none decoration-hover-underline">
+        <Col className="d-flex justify-content-between flex-wrap">
+          <span className="d-flex flex-column align-items-start gap-3">
+            <span className="d-flex flex-column align-items-start">
+              <h1 className="mb-0 font-color">
                 #{props.collection} - <b>{props.info.name.toUpperCase()}</b>
               </h1>
-            </a>
-          ) : (
-            <h1 className="mb-0 font-color">
-              #{props.collection} - <b>{props.info.name.toUpperCase()}</b>
-            </h1>
-          )}
-        </Col>
-        <Col className="pt-2" xs={12}>
-          by <b>{props.info.artist}</b>
-        </Col>
-        <Col className="pt-2" xs={12}>
-          <span className="d-inline-flex align-items-center">
-            <b>
-              {props.additional_data.circulation_supply} /{" "}
-              {props.additional_data.total_supply} minted
-              {available > 0 && ` | ${available} remaining`}
-            </b>
+              {props.collection_link && (
+                <a
+                  href={collectionPath}
+                  className="decoration-none d-flex align-items-center gap-2">
+                  <FontAwesomeIcon
+                    icon="arrow-circle-left"
+                    className={styles.backIcon}
+                  />
+                  Back to collection Page
+                </a>
+              )}
+            </span>
+            <span>
+              by <b>{props.info.artist}</b>
+            </span>
+            <span className="d-inline-flex align-items-center">
+              <b>
+                {props.additional_data.circulation_supply} /{" "}
+                {props.additional_data.total_supply} minted
+                {available > 0 && ` | ${available} remaining`}
+              </b>
+            </span>
           </span>
+          {showMint() && (
+            <span className="d-flex align-items-start pt-2">
+              <a href={`${collectionPath}/mint`}>
+                <Button className="seize-btn btn-white font-larger font-bolder">
+                  Mint Now!
+                </Button>
+              </a>
+            </span>
+          )}
         </Col>
       </Row>
     </Container>

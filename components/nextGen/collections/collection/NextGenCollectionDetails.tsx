@@ -60,6 +60,12 @@ export default function NextGenCollectionDetails(props: Props) {
   return (
     <Container className="no-padding">
       <Row>
+        <Col>
+          <h3 className="mb-0">About</h3>
+        </Col>
+      </Row>
+      <hr />
+      <Row>
         <Col sm={12} md={5} className="pt-3">
           <Container className="no-padding">
             <Row>

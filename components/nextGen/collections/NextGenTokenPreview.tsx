@@ -15,6 +15,7 @@ interface Props {
   collection: number;
   hide_info?: boolean;
   hide_link?: boolean;
+  hide_background?: boolean;
 }
 
 export default function NextGenTokenPreview(props: Props) {
@@ -96,6 +97,7 @@ export default function NextGenTokenPreview(props: Props) {
             <NextGenTokenImage
               token={tokenUri}
               preview={true}
+              hide_background={props.hide_background}
               show_link={!props.hide_info || !props.hide_link}
               setName={(name) => setName(name)}
             />

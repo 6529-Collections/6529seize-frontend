@@ -6,10 +6,12 @@
 
 .swiper {
   position: relative;
+  .swiper-slide-active {
+    scale: 1.05;
+  }
   .swiper-pagination {
     position: static;
     text-align: center;
-    margin-bottom: 15px;
 
     .swiper-pagination-bullet-active {
       background: $off-white;

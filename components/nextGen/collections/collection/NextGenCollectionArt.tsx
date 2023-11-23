@@ -1,13 +1,15 @@
+import styles from "../NextGen.module.scss";
 import { Container, Row, Col } from "react-bootstrap";
 import { AdditionalData, TokenURI } from "../../nextgen_entities";
 import NextGenTokenList from "../NextGenTokenList";
 import DotLoader from "../../../dotLoader/DotLoader";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 interface Props {
   collection: number;
   additional_data: AdditionalData;
-  burn_amount: number;
-  tokens: number[];
+  token_ids: number[];
+  show_view_all?: boolean;
 }
 
 export default function NextGenCollectionArt(props: Props) {
@@ -15,25 +17,38 @@ export default function NextGenCollectionArt(props: Props) {
     <Container className="no-padding">
       <Row>
         <Col>
-          <h4>
-            Tokens x
-            {props.additional_data.circulation_supply - props.burn_amount}
-          </h4>
+          <h3 className="mb-0">The Art</h3>
         </Col>
       </Row>
-      {props.tokens.length > 0 && (
+      <hr />
+      {props.token_ids.length > 0 && (
         <Row>
           <Col>
-            {props.tokens && (
+            {props.token_ids && (
               <NextGenTokenList
                 collection={props.collection}
-                tokens={props.tokens}
+                tokens={props.token_ids}
+                hide_info={true}
               />
             )}
           </Col>
         </Row>
       )}
-      {props.tokens.length === 0 &&
+      {props.show_view_all && (
+        <Row>
+          <Col className="d-flex align-items-center justify-content-end">
+            <a
+              href={`/nextgen/collection/${props.collection}/art`}
+              className={`d-flex align-items-center gap-2 ${styles.viewAllTokens}`}>
+              <h5 className="mb-0 font-color">
+                <b>View All</b>
+              </h5>
+              <FontAwesomeIcon icon="arrow-circle-right" />
+            </a>
+          </Col>
+        </Row>
+      )}
+      {props.token_ids.length === 0 &&
         props.additional_data.circulation_supply > 0 && (
           <Row>
             <Col>

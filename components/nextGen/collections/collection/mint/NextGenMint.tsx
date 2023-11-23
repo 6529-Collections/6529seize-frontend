@@ -336,6 +336,7 @@ export default function NextGenMint(props: Props) {
                     token_id={props.collection_preview}
                     collection={props.collection}
                     hide_info={true}
+                    hide_link={true}
                   />
                 )}
               </Col>
@@ -343,7 +344,7 @@ export default function NextGenMint(props: Props) {
           </Container>
         </Col>
         <Col sm={12} md={7}>
-          <Container>
+          <Container className="pt-3 pb-3">
             <Row>
               <Col>
                 {collection

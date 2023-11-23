@@ -371,7 +371,7 @@ export default function NextGenToken(props: Props) {
                 info={info}
                 phase_times={phaseTimes}
                 additional_data={additionalData}
-                collectionLink={true}
+                collection_link={true}
               />
             )}
           </Container>
