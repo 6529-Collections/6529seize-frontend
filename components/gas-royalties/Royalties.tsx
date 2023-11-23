@@ -50,7 +50,7 @@ export default function Royalties() {
   }, [router.isReady]);
 
   const [royalties, setRoyalties] = useState<Royalty[]>([]);
-  const [sumPrimaryVolume, setSumPrimaryVolume] = useState(0);
+  const [sumPrimaryProceeds, setSumPrimaryProceeds] = useState(0);
   const [sumSecondaryVolume, setSumSecondaryVolume] = useState(0);
   const [sumRoyalties, setSumRoyalties] = useState(0);
   const [sumPrimaryArtistTake, setSumPrimaryArtistTake] = useState(0);
@@ -82,6 +82,7 @@ export default function Royalties() {
     fetchUrl(getUrl()).then((res: Royalty[]) => {
       res.forEach((r) => {
         r.primary_volume = Math.round(r.primary_volume * 100000) / 100000;
+        r.primary_proceeds = Math.round(r.primary_proceeds * 100000) / 100000;
         r.secondary_volume = Math.round(r.secondary_volume * 100000) / 100000;
         r.primary_royalty_split =
           Math.round(r.primary_royalty_split * 100000) / 100000;
@@ -94,8 +95,8 @@ export default function Royalties() {
           Math.round(r.secondary_artist_take * 100000) / 100000;
       });
       setRoyalties(res);
-      setSumPrimaryVolume(
-        res.reduce((prev, current) => prev + current.primary_volume, 0)
+      setSumPrimaryProceeds(
+        res.reduce((prev, current) => prev + current.primary_proceeds, 0)
       );
       setSumSecondaryVolume(
         res.reduce((prev, current) => prev + current.secondary_volume, 0)
@@ -215,7 +216,7 @@ export default function Royalties() {
                       </td>
                       <td>{r.artist}</td>
                       <td className="text-center">
-                        {displayDecimal(r.primary_volume, 5)}
+                        {displayDecimal(r.primary_proceeds, 5)}
                       </td>
                       <td>
                         <div className="d-flex justify-content-center">
@@ -273,7 +274,7 @@ export default function Royalties() {
                       <b>TOTAL</b>
                     </td>
                     <td className="text-center">
-                      {displayDecimal(sumPrimaryVolume, 5)}
+                      {displayDecimal(sumPrimaryProceeds, 5)}
                     </td>
                     <td className="text-center">
                       {displayDecimal(sumPrimaryArtistTake, 5)}
