@@ -305,21 +305,21 @@ export default function CommunityStats() {
                     <Table>
                       <tbody>
                         <tr>
-                          <td>Estimated days until 150M</td>
+                          <td>Estimated days until 250M</td>
                           <td className="text-right">
-                            {getEstimatedDaysUntil(150000000)}
-                          </td>
-                        </tr>
-                        <tr>
-                          <td>Estimated days until 200M</td>
-                          <td className="text-right">
-                            {getEstimatedDaysUntil(200000000)}
+                            {getEstimatedDaysUntil(250000000)}
                           </td>
                         </tr>
                         <tr>
                           <td>Estimated days until 500M</td>
                           <td className="text-right">
                             {getEstimatedDaysUntil(500000000)}
+                          </td>
+                        </tr>
+                        <tr>
+                          <td>Estimated days until 1B</td>
+                          <td className="text-right">
+                            {getEstimatedDaysUntil(1000000000)}
                           </td>
                         </tr>
                       </tbody>
