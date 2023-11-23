@@ -307,19 +307,21 @@ export default function CommunityStats() {
                         <tr>
                           <td>Estimated days until 250M</td>
                           <td className="text-right">
-                            {getEstimatedDaysUntil(250000000)}
+                            {numberWithCommas(getEstimatedDaysUntil(250000000))}
                           </td>
                         </tr>
                         <tr>
                           <td>Estimated days until 500M</td>
                           <td className="text-right">
-                            {getEstimatedDaysUntil(500000000)}
+                            {numberWithCommas(getEstimatedDaysUntil(500000000))}
                           </td>
                         </tr>
                         <tr>
                           <td>Estimated days until 1B</td>
                           <td className="text-right">
-                            {getEstimatedDaysUntil(1000000000)}
+                            {numberWithCommas(
+                              getEstimatedDaysUntil(1000000000)
+                            )}
                           </td>
                         </tr>
                       </tbody>
