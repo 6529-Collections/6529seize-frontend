@@ -23,7 +23,7 @@ export function NextGenTokenImageContent(props: Readonly<Props>) {
   }, [props.token.image]);
 
   useEffect(() => {
-    if (!props.token.data) {
+    if (!props.token.data && props.token.uri) {
       let url = parseIpfsUrl(props.token.uri);
       if (props.setMetadata) {
         props.setMetadata(url);
