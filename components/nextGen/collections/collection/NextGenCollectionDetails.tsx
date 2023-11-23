@@ -60,6 +60,12 @@ export default function NextGenCollectionDetails(props: Props) {
   return (
     <Container className="no-padding">
       <Row>
+        <Col>
+          <h3 className="mb-0">About</h3>
+        </Col>
+      </Row>
+      <hr />
+      <Row>
         <Col sm={12} md={5} className="pt-3">
           <Container className="no-padding">
             <Row>
@@ -205,7 +211,6 @@ export default function NextGenCollectionDetails(props: Props) {
                           }
                         }}
                         tabIndex={0}
-                        role="button"
                       />
                     </Tippy>
                   </Col>
@@ -226,8 +231,7 @@ export default function NextGenCollectionDetails(props: Props) {
                               setScriptClamped(!scriptClamped);
                             }
                           }}
-                          tabIndex={0}
-                          role="button">
+                          tabIndex={0}>
                           {scriptClamped ? `Show More` : `Show Less`}
                         </span>
                       </>

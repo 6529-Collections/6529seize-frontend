@@ -1,4 +1,3 @@
-import styles from "../NextGen.module.scss";
 import { Container, Row, Col } from "react-bootstrap";
 import { useContractRead } from "wagmi";
 import { useEffect, useState } from "react";
@@ -7,7 +6,6 @@ import {
   AdditionalData,
   LibraryScript,
   PhaseTimes,
-  Status,
 } from "../../nextgen_entities";
 import Image from "next/image";
 import {
@@ -18,8 +16,6 @@ import {
 import Breadcrumb, { Crumb } from "../../../breadcrumb/Breadcrumb";
 import NextGenCollectionHeader from "./NextGenCollectionHeader";
 import NextGenCollectionArt from "./NextGenCollectionArt";
-import NextGenMint from "./mint/NextGenMint";
-import router from "next/router";
 import {
   retrieveCollectionAdditionalData,
   retrieveCollectionInfo,
@@ -34,12 +30,6 @@ interface Props {
   collection: number;
 }
 
-enum Focus {
-  ART = "art",
-  COLLECTION = "collection",
-  MINT = "mint",
-}
-
 export default function NextGenCollection(props: Props) {
   const crumbs: Crumb[] = [
     { display: "Home", href: "/" },
@@ -52,18 +42,15 @@ export default function NextGenCollection(props: Props) {
 
   const [info, setInfo] = useState<Info>();
   const [infoSettled, setInfoSettled] = useState<boolean>(false);
-  const [libraryScript, setLibraryScript] = useState<LibraryScript>();
   const [phaseTimes, setPhaseTimes] = useState<PhaseTimes>();
   const [additionalData, setAdditionalData] = useState<AdditionalData>();
 
-  const [tokens, setTokens] = useState<number[]>([]);
+  const [tokenIds, setTokenIds] = useState<number[]>([]);
 
   const [burnAmount, setBurnAmount] = useState<number>(0);
   const [mintPrice, setMintPrice] = useState<number>(0);
 
   const [artistSignature, setArtistSignature] = useState<string>("");
-
-  const [focus, setFocus] = useState<Focus>(Focus.ART);
 
   function getTokenUriReadParams() {
     const params: any[] = [];
@@ -96,16 +83,16 @@ export default function NextGenCollection(props: Props) {
   });
 
   useEffect(() => {
-    if (tokenStartIndex > 0 && tokenEndIndex > 0) {
+    if (tokenStartIndex > 0 && additionalData) {
       const rangeLength = Math.min(
         ART_TOKEN_COUNT,
-        tokenEndIndex - tokenStartIndex + 1
+        additionalData.circulation_supply
       );
-      setTokens(
+      setTokenIds(
         Array.from({ length: rangeLength }, (_, i) => tokenStartIndex + i)
       );
     }
-  }, [tokenStartIndex, tokenEndIndex]);
+  }, [tokenStartIndex, additionalData]);
 
   const endIndexRead = useContractRead({
     address: NEXTGEN_CORE.contract as `0x${string}`,
@@ -184,60 +171,6 @@ export default function NextGenCollection(props: Props) {
     },
   });
 
-  useEffect(() => {
-    const currFocus = router.query.focus;
-    if (currFocus != focus) {
-      let f = currFocus as Focus;
-      setFocus(f);
-    }
-  }, [router.query.focus]);
-
-  useEffect(() => {
-    if (phaseTimes && additionalData && !showMint()) {
-      if (focus === Focus.MINT) {
-        setFocus(Focus.ART);
-      }
-    }
-  }, [phaseTimes, additionalData]);
-
-  useEffect(() => {
-    if (focus) {
-      const currFocus = router.query.focus;
-      if (!currFocus || currFocus[0] != focus) {
-        const currentQuery = { ...router.query };
-        currentQuery.focus = focus;
-        router.push(
-          {
-            pathname: router.pathname,
-            query: currentQuery,
-          },
-          undefined,
-          { shallow: true }
-        );
-      }
-    }
-  }, [focus]);
-
-  function showMint() {
-    if (!phaseTimes || !additionalData) {
-      return false;
-    }
-
-    if (additionalData.circulation_supply == additionalData.total_supply) {
-      return false;
-    }
-
-    const now = new Date().getTime();
-    const allowlistStartsIn = phaseTimes.allowlist_start_time - now;
-    if (allowlistStartsIn > 0 && allowlistStartsIn < 1000 * 60 * 60 * 24) {
-      return true;
-    }
-    return (
-      phaseTimes.al_status == Status.LIVE ||
-      phaseTimes.public_status == Status.LIVE
-    );
-  }
-
   if (!startIndexRead.isLoading && !endIndexRead.isLoading && infoSettled) {
     if (!info) {
       return (
@@ -276,11 +209,14 @@ export default function NextGenCollection(props: Props) {
       return (
         <>
           <Breadcrumb breadcrumbs={breadcrumbs} />
-          <NextGenCollectionSlideshow
-            collection={props.collection}
-            start_index={tokenStartIndex}
-            end_index={tokenEndIndex}
-          />
+          {additionalData && (
+            <NextGenCollectionSlideshow
+              collection_name={info.name}
+              collection={props.collection}
+              start_index={tokenStartIndex}
+              length={additionalData.circulation_supply}
+            />
+          )}
           <Container className="pt-3 pb-2">
             {additionalData && info && phaseTimes && (
               <>
@@ -292,101 +228,29 @@ export default function NextGenCollection(props: Props) {
                 />
                 <Row className="pt-5">
                   <Col>
-                    <div className={styles.collectionTabs}>
-                      <span
-                        className={`${styles.collectionTab} ${
-                          focus == Focus.ART ? styles.collectionTabActive : ""
-                        }`}
-                        onClick={() => setFocus(Focus.ART)}
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter" || e.key === " ") {
-                            setFocus(Focus.ART);
-                          }
-                        }}
-                        tabIndex={0}
-                        role="button">
-                        The Art
-                      </span>
-                      <span
-                        className={`${styles.collectionTab} ${
-                          focus == Focus.COLLECTION
-                            ? styles.collectionTabActive
-                            : ""
-                        }`}
-                        onClick={() => setFocus(Focus.COLLECTION)}
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter" || e.key === " ") {
-                            setFocus(Focus.COLLECTION);
-                          }
-                        }}
-                        tabIndex={0}
-                        role="button">
-                        The Collection
-                      </span>
-                      {showMint() && (
-                        <span
-                          className={`${styles.collectionTab} ${
-                            focus == Focus.MINT
-                              ? styles.collectionTabActive
-                              : ""
-                          }`}
-                          onClick={() => setFocus(Focus.MINT)}
-                          onKeyDown={(e) => {
-                            if (e.key === "Enter" || e.key === " ") {
-                              setFocus(Focus.MINT);
-                            }
-                          }}
-                          tabIndex={0}
-                          role="button">
-                          Mint
-                        </span>
-                      )}
-                    </div>
+                    <NextGenCollectionArt
+                      collection={props.collection}
+                      additional_data={additionalData}
+                      token_ids={tokenIds}
+                      show_view_all={true}
+                    />
                   </Col>
                 </Row>
-                {focus == Focus.ART && (
-                  <Row className="pt-3">
-                    <Col>
-                      <NextGenCollectionArt
-                        collection={props.collection}
-                        additional_data={additionalData}
-                        burn_amount={burnAmount}
-                        tokens={tokens}
-                      />
-                    </Col>
-                  </Row>
-                )}
-                {focus == Focus.COLLECTION && (
-                  <Row className="pt-3">
-                    <Col>
-                      <NextGenCollectionDetails
-                        collection={props.collection}
-                        additional_data={additionalData}
-                        info={info}
-                        phase_times={phaseTimes}
-                        burn_amount={burnAmount}
-                        token_start_index={tokenStartIndex}
-                        token_end_index={tokenEndIndex}
-                        mint_price={mintPrice}
-                        artist_signature={artistSignature}
-                      />
-                    </Col>
-                  </Row>
-                )}
-                {focus == Focus.MINT && (
-                  <Row className="pt-3">
-                    <Col>
-                      <NextGenMint
-                        collection={props.collection}
-                        collection_preview={tokens.length > 0 ? tokens[0] : 0}
-                        phase_times={phaseTimes}
-                        mint_price={mintPrice}
-                        additional_data={additionalData}
-                        burn_amount={burnAmount}
-                      />
-                    </Col>
-                  </Row>
-                )}
+                <Row className="pt-5">
+                  <Col>
+                    <NextGenCollectionDetails
+                      collection={props.collection}
+                      additional_data={additionalData}
+                      info={info}
+                      phase_times={phaseTimes}
+                      burn_amount={burnAmount}
+                      token_start_index={tokenStartIndex}
+                      token_end_index={tokenEndIndex}
+                      mint_price={mintPrice}
+                      artist_signature={artistSignature}
+                    />
+                  </Col>
+                </Row>
               </>
             )}
           </Container>

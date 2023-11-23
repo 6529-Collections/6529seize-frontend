@@ -2,8 +2,7 @@ import "../styles/seize-bootstrap.scss";
 import "../styles/globals.scss";
 import "tippy.js/dist/tippy.css";
 import "tippy.js/themes/light.css";
-import "slick-carousel/slick/slick.css";
-import "slick-carousel/slick/slick-theme.css";
+import "../styles/swiper.scss";
 import { Provider } from "react-redux";
 import type { AppProps } from "next/app";
 import { wrapper } from "../store/store";
@@ -81,6 +80,7 @@ import {
   faFaceGrinWide,
   faFaceSmile,
   faFrown,
+  faArrowCircleRight,
 } from "@fortawesome/free-solid-svg-icons";
 import Head from "next/head";
 import { Web3Modal } from "@web3modal/react";
@@ -143,6 +143,7 @@ library.add(
   faWallet,
   faGear,
   faArrowCircleLeft,
+  faArrowCircleRight,
   faArrowRightFromBracket,
   faGasPump,
   faFaceGrinWide,

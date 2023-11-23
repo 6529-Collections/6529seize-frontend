@@ -9,6 +9,7 @@ interface Props {
   token: TokenURI;
   show_link?: boolean;
   preview?: boolean;
+  hide_background?: boolean;
   setMetadata?: (url: string) => void;
   setName?: (name: string) => void;
   setDescription?: (description: string) => void;
@@ -23,7 +24,7 @@ export function NextGenTokenImageContent(props: Readonly<Props>) {
   }, [props.token.image]);
 
   useEffect(() => {
-    if (!props.token.data) {
+    if (!props.token.data && props.token.uri) {
       let url = parseIpfsUrl(props.token.uri);
       if (props.setMetadata) {
         props.setMetadata(url);
@@ -51,7 +52,7 @@ export function NextGenTokenImageContent(props: Readonly<Props>) {
         <iframe srcDoc={props.token.uri} />
       ) : animation ? (
         <iframe src={animation} />
-      ) : image ? (
+      ) : (
         <Image
           priority
           loading={"eager"}
@@ -59,18 +60,18 @@ export function NextGenTokenImageContent(props: Readonly<Props>) {
           height="0"
           style={{
             height: "auto",
-            width: image.startsWith("data") ? "100%" : "auto",
+            width: image && image.startsWith("data") ? "100%" : "auto",
             maxHeight: "100%",
             maxWidth: "100%",
           }}
           src={`https://d3lqz0a4bldqgf.cloudfront.net/nextgen/tokens/images/${props.token.id}.png`}
           onError={({ currentTarget }) => {
-            currentTarget.src = image;
+            if (image) {
+              currentTarget.src = image;
+            }
           }}
           alt={props.token.name}
         />
-      ) : (
-        ``
       )}
     </>
   );
@@ -82,11 +83,12 @@ export default function NextGenTokenImage(props: Readonly<Props>) {
       <Row>
         <Col
           style={{ position: "relative" }}
-          className={
-            props.preview
-              ? styles.tokenFrameContainer
-              : styles.tokenFrameContainerFull
-          }>
+          className={`
+            ${
+              props.preview
+                ? styles.tokenFrameContainer
+                : styles.tokenFrameContainerFull
+            } ${!props.hide_background ? styles.tokenFrameBackground : ""}`}>
           <NextGenTokenImageContent
             token={props.token}
             preview={props.preview}
