@@ -161,38 +161,34 @@ export function WalletAddress(props: {
               </Dropdown.Menu>
             </Dropdown>
           ) : (
-            <>
-              <Dropdown
-                className={`${styles.copyDropdown}`}
-                autoClose="outside">
-                <Tippy
-                  content={isCopied ? "Copied" : "Copy"}
-                  placement={"right"}
-                  theme={"light"}
-                  hideOnClick={false}>
-                  <Dropdown.Toggle
-                    name={`copy-toggle`}
-                    aria-label={`copy-toggle`}
-                    onClick={() => copy(props.wallet)}>
-                    {props.isUserPage && (
-                      <span
-                        className={`${styles.address} ${
-                          props.isUserPage ? styles.addressUserPage : ""
-                        }`}
-                        dangerouslySetInnerHTML={{
-                          __html: resolveAddress(),
-                        }}></span>
-                    )}
-                    <FontAwesomeIcon
-                      icon="copy"
-                      name={`copy-btn`}
-                      aria-label={`copy-btn`}
-                      className={`${styles.copy}`}
-                    />
-                  </Dropdown.Toggle>
-                </Tippy>
-              </Dropdown>
-            </>
+            <Dropdown className={`${styles.copyDropdown}`} autoClose="outside">
+              <Tippy
+                content={isCopied ? "Copied" : "Copy"}
+                placement={"right"}
+                theme={"light"}
+                hideOnClick={false}>
+                <Dropdown.Toggle
+                  name={`copy-toggle`}
+                  aria-label={`copy-toggle`}
+                  onClick={() => copy(props.wallet)}>
+                  {props.isUserPage && (
+                    <span
+                      className={`${styles.address} ${
+                        props.isUserPage ? styles.addressUserPage : ""
+                      }`}
+                      dangerouslySetInnerHTML={{
+                        __html: resolveAddress(),
+                      }}></span>
+                  )}
+                  <FontAwesomeIcon
+                    icon="copy"
+                    name={`copy-btn`}
+                    aria-label={`copy-btn`}
+                    className={`${styles.copy}`}
+                  />
+                </Dropdown.Toggle>
+              </Tippy>
+            </Dropdown>
           )}
         </>
       )}
