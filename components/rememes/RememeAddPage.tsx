@@ -100,12 +100,12 @@ export default function RememeAddPage() {
   }, [signMessage.isError]);
 
   useEffect(() => {
-    fetchAllPages(
-      `${process.env.API_ENDPOINT}/api/nfts?contract=${MEMES_CONTRACT}`
-    ).then((responseNfts: NFT[]) => {
-      setMemes(responseNfts.sort((a, b) => a.id - b.id));
-      setMemesLoaded(true);
-    });
+    fetchUrl(`${process.env.API_ENDPOINT}/api/memes_lite`).then(
+      (response: DBResponse) => {
+        setMemes(response.data);
+        setMemesLoaded(true);
+      }
+    );
   }, []);
 
   useEffect(() => {
