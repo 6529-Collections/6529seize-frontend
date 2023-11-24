@@ -13,8 +13,6 @@ const Header = dynamic(() => import("../components/header/Header"), {
 });
 
 export default function GasPage() {
-  const breadcrumbs = [{ display: "Home", href: "/" }, { display: "Gas" }];
-
   return (
     <>
       <Head>

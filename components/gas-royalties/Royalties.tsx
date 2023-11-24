@@ -13,7 +13,6 @@ import {
   getUrlParams,
 } from "./GasRoyalties";
 import { useRouter } from "next/router";
-import Breadcrumb, { Crumb } from "../breadcrumb/Breadcrumb";
 
 const MEMES_DESCRIPTION =
   "Primary mint revenues and secondary royalties in The Memes are split 50:50 between the artist and the collection. Cards #1 to #4 were sold manually. 6529 and 6529er have custom arrangements not reflected here for simplicity. All values are in ETH.";
