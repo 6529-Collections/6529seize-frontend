@@ -1,5 +1,5 @@
 import { ConsolidatedTDHMetrics } from "../../../../entities/ITDH";
-import { formatNumber } from "../../../../helpers/Helpers";
+import { formatNumber, numberWithCommas } from "../../../../helpers/Helpers";
 
 export default function UserPageHeaderStats({
   consolidatedTDH,
@@ -10,7 +10,7 @@ export default function UserPageHeaderStats({
     ? formatNumber(consolidatedTDH.boosted_tdh)
     : null;
   const tdhRank = consolidatedTDH?.tdh_rank
-    ? `#${consolidatedTDH.tdh_rank}`
+    ? `#${numberWithCommas(consolidatedTDH.tdh_rank)}`
     : "-";
 
   return (
