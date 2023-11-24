@@ -8,7 +8,7 @@ export default function UserPageIdentity({
 }) {
   return (
     <div className="tailwind-scope">
-      <UserPageIdentityHeader />
+      <UserPageIdentityHeader profile={profile} />
     </div>
   );
 }

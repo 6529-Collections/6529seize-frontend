@@ -4,7 +4,11 @@ import { useAccount } from "wagmi";
 import { AuthContext } from "../../auth/Auth";
 import UserPageIdentityRateModal from "./UserPageIdentityRateModal";
 
-export default function UserPageIdentityRateButton() {
+export default function UserPageIdentityRateButton({
+  targetHandle,
+}: {
+  targetHandle: string;
+}) {
   const { open } = useWeb3Modal();
   const { address } = useAccount();
   const { requestAuth } = useContext(AuthContext);
@@ -28,6 +32,7 @@ export default function UserPageIdentityRateButton() {
       <UserPageIdentityRateModal
         isModalOpen={isModalOpen}
         setIsModalOpen={setIsModalOpen}
+        targetHandle={targetHandle}
       />
     </>
   );
