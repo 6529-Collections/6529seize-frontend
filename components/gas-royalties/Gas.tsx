@@ -14,6 +14,7 @@ import {
   GasRoyaltiesCollectionFocus,
   GasRoyaltiesHeader,
   GasRoyaltiesTokenImage,
+  getUrlParams,
 } from "./GasRoyalties";
 import { useRouter } from "next/router";
 import Breadcrumb, { Crumb } from "../breadcrumb/Breadcrumb";
@@ -58,13 +59,14 @@ export default function Gas() {
   );
 
   function getUrl() {
-    const dateFilters = getDateFilters(dateSelection, fromDate, toDate);
-    const collection =
-      collectionFocus === GasRoyaltiesCollectionFocus.MEMELAB
-        ? "memelab"
-        : "memes";
-    const artistFilter = selectedArtist ? `&artist=${selectedArtist}` : "";
-    return `${process.env.API_ENDPOINT}/api/gas/collection/${collection}?${dateFilters}${artistFilter}`;
+    return getUrlParams(
+      "gas",
+      dateSelection,
+      collectionFocus,
+      fromDate,
+      toDate,
+      selectedArtist
+    );
   }
 
   function fetchGas() {

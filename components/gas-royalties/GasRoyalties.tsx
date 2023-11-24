@@ -7,6 +7,7 @@ import Image from "next/image";
 import Tippy from "@tippyjs/react";
 import { useState, useEffect } from "react";
 import { fetchUrl } from "../../services/6529api";
+import { getDateFilters } from "../../helpers/Helpers";
 
 export enum GasRoyaltiesCollectionFocus {
   MEMES = "the-memes",
@@ -28,6 +29,26 @@ interface HeaderProps {
   setSelectedArtist: (artist: string) => void;
   setDateSelection: (dateSelection: DateIntervalsSelection) => void;
   setShowDatePicker: (showDatePicker: boolean) => void;
+}
+
+export function getUrlParams(
+  apiPath: string,
+  dateSelection: DateIntervalsSelection,
+  collectionFocus?: GasRoyaltiesCollectionFocus,
+  fromDate?: Date,
+  toDate?: Date,
+  selectedArtist?: string
+): string {
+  if (!collectionFocus) {
+    return "";
+  }
+  const dateFilters = getDateFilters(dateSelection, fromDate, toDate);
+  const collection =
+    collectionFocus === GasRoyaltiesCollectionFocus.MEMELAB
+      ? "memelab"
+      : "memes";
+  const artistFilter = selectedArtist ? `&artist=${selectedArtist}` : "";
+  return `${process.env.API_ENDPOINT}/api/${apiPath}/collection/${collection}?${dateFilters}${artistFilter}`;
 }
 
 export function GasRoyaltiesHeader(props: Readonly<HeaderProps>) {

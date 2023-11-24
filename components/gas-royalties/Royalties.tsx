@@ -3,17 +3,14 @@ import { Container, Row, Col, Table } from "react-bootstrap";
 import styles from "./GasRoyalties.module.scss";
 import { Royalty } from "../../entities/IRoyalty";
 import { fetchUrl } from "../../services/6529api";
-import {
-  capitalizeEveryWord,
-  displayDecimal,
-  getDateFilters,
-} from "../../helpers/Helpers";
+import { capitalizeEveryWord, displayDecimal } from "../../helpers/Helpers";
 import DatePickerModal from "../datePickerModal/DatePickerModal";
 import { DateIntervalsSelection } from "../../enums";
 import {
   GasRoyaltiesCollectionFocus,
   GasRoyaltiesHeader,
   GasRoyaltiesTokenImage,
+  getUrlParams,
 } from "./GasRoyalties";
 import { useRouter } from "next/router";
 import Breadcrumb, { Crumb } from "../breadcrumb/Breadcrumb";
@@ -68,13 +65,14 @@ export default function Royalties() {
   );
 
   function getUrl() {
-    const dateFilters = getDateFilters(dateSelection, fromDate, toDate);
-    const collection =
-      collectionFocus === GasRoyaltiesCollectionFocus.MEMELAB
-        ? "memelab"
-        : "memes";
-    const artistFilter = selectedArtist ? `&artist=${selectedArtist}` : "";
-    return `${process.env.API_ENDPOINT}/api/royalties/collection/${collection}?${dateFilters}${artistFilter}`;
+    return getUrlParams(
+      "royalties",
+      dateSelection,
+      collectionFocus,
+      fromDate,
+      toDate,
+      selectedArtist
+    );
   }
 
   function fetchRoyalties() {
