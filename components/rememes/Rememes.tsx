@@ -56,12 +56,12 @@ export default function Rememes() {
   );
 
   useEffect(() => {
-    fetchUrl(
-      `${process.env.API_ENDPOINT}/api/memes_lite?contract=${MEMES_CONTRACT}`
-    ).then((response: DBResponse) => {
-      setMemes(response.data);
-      setMemesLoaded(true);
-    });
+    fetchUrl(`${process.env.API_ENDPOINT}/api/memes_lite`).then(
+      (response: DBResponse) => {
+        setMemes(response.data);
+        setMemesLoaded(true);
+      }
+    );
   }, []);
 
   function fetchResults(mypage: number) {
