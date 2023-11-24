@@ -3,7 +3,7 @@ import { Container, Row, Col, Table } from "react-bootstrap";
 import styles from "./GasRoyalties.module.scss";
 import { Royalty } from "../../entities/IRoyalty";
 import { fetchUrl } from "../../services/6529api";
-import { capitalizeEveryWord, displayDecimal } from "../../helpers/Helpers";
+import { displayDecimal } from "../../helpers/Helpers";
 import DatePickerModal from "../datePickerModal/DatePickerModal";
 import { DateIntervalsSelection } from "../../enums";
 import {
@@ -22,8 +22,6 @@ const MEMELAB_DESCRIPTION =
 
 export default function Royalties() {
   const router = useRouter();
-
-  const [breadcrumbs, setBreadcrumbs] = useState<Crumb[]>([]);
 
   const [description, setDescription] = useState<string>(MEMES_DESCRIPTION);
 
@@ -130,52 +128,29 @@ export default function Royalties() {
     }
   }, [collectionFocus]);
 
-  useEffect(() => {
-    if (collectionFocus) {
-      setBreadcrumbs([
-        { display: "Home", href: "/" },
-        { display: "Meme Accounting" },
-        {
-          display: capitalizeEveryWord(collectionFocus.replaceAll("-", " ")),
-        },
-      ]);
-      router.push(
-        {
-          pathname: router.pathname,
-          query: {
-            focus: collectionFocus,
-          },
-        },
-        undefined,
-        { shallow: true }
-      );
-    }
-  }, [collectionFocus]);
-
   if (!collectionFocus) {
     return <></>;
   }
 
   return (
     <>
-      <Breadcrumb breadcrumbs={breadcrumbs} />
+      <GasRoyaltiesHeader
+        title={"Meme Accounting"}
+        description={description}
+        fetching={fetching}
+        results_count={royalties.length}
+        date_selection={dateSelection}
+        selected_artist={selectedArtist}
+        from_date={fromDate}
+        to_date={toDate}
+        focus={collectionFocus}
+        setFocus={setCollectionFocus}
+        getUrl={getUrl}
+        setSelectedArtist={setSelectedArtist}
+        setDateSelection={setDateSelection}
+        setShowDatePicker={setShowDatePicker}
+      />
       <Container className={`no-padding pt-4`}>
-        <GasRoyaltiesHeader
-          title={"Meme Accounting"}
-          description={description}
-          fetching={fetching}
-          results_count={royalties.length}
-          date_selection={dateSelection}
-          selected_artist={selectedArtist}
-          from_date={fromDate}
-          to_date={toDate}
-          focus={collectionFocus}
-          setFocus={setCollectionFocus}
-          getUrl={getUrl}
-          setSelectedArtist={setSelectedArtist}
-          setDateSelection={setDateSelection}
-          setShowDatePicker={setShowDatePicker}
-        />
         <Row className={`pt-4 ${styles.scrollContainer}`}>
           <Col>
             {royalties.length > 0 && (

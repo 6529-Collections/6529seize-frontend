@@ -3,11 +3,7 @@ import { Container, Row, Col, Table } from "react-bootstrap";
 import styles from "./GasRoyalties.module.scss";
 import { Gas } from "../../entities/IGas";
 import { fetchUrl } from "../../services/6529api";
-import {
-  capitalizeEveryWord,
-  displayDecimal,
-  getDateFilters,
-} from "../../helpers/Helpers";
+import { displayDecimal } from "../../helpers/Helpers";
 import DatePickerModal from "../datePickerModal/DatePickerModal";
 import { DateIntervalsSelection } from "../../enums";
 import {
@@ -17,12 +13,9 @@ import {
   getUrlParams,
 } from "./GasRoyalties";
 import { useRouter } from "next/router";
-import Breadcrumb, { Crumb } from "../breadcrumb/Breadcrumb";
 
 export default function Gas() {
   const router = useRouter();
-
-  const [breadcrumbs, setBreadcrumbs] = useState<Crumb[]>([]);
 
   const [fetching, setFetching] = useState(true);
 
@@ -98,51 +91,28 @@ export default function Gas() {
     }
   }, [collectionFocus]);
 
-  useEffect(() => {
-    if (collectionFocus) {
-      setBreadcrumbs([
-        { display: "Home", href: "/" },
-        { display: "Gas" },
-        {
-          display: capitalizeEveryWord(collectionFocus.replaceAll("-", " ")),
-        },
-      ]);
-      router.push(
-        {
-          pathname: router.pathname,
-          query: {
-            focus: collectionFocus,
-          },
-        },
-        undefined,
-        { shallow: true }
-      );
-    }
-  }, [collectionFocus]);
-
   if (!collectionFocus) {
     return <></>;
   }
 
   return (
     <>
-      <Breadcrumb breadcrumbs={breadcrumbs} />
+      <GasRoyaltiesHeader
+        title={"Gas"}
+        fetching={fetching}
+        results_count={gas.length}
+        date_selection={dateSelection}
+        selected_artist={selectedArtist}
+        from_date={fromDate}
+        to_date={toDate}
+        focus={collectionFocus}
+        setFocus={setCollectionFocus}
+        getUrl={getUrl}
+        setSelectedArtist={setSelectedArtist}
+        setDateSelection={setDateSelection}
+        setShowDatePicker={setShowDatePicker}
+      />
       <Container className={`no-padding pt-4`}>
-        <GasRoyaltiesHeader
-          title={"GAS"}
-          fetching={fetching}
-          results_count={gas.length}
-          date_selection={dateSelection}
-          selected_artist={selectedArtist}
-          from_date={fromDate}
-          to_date={toDate}
-          focus={collectionFocus}
-          setFocus={setCollectionFocus}
-          getUrl={getUrl}
-          setSelectedArtist={setSelectedArtist}
-          setDateSelection={setDateSelection}
-          setShowDatePicker={setShowDatePicker}
-        />
         <Row className={`pt-3 ${styles.scrollContainer}`}>
           <Col>
             {gas.length > 0 && (

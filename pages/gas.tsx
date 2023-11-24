@@ -1,8 +1,5 @@
 import Head from "next/head";
 import styles from "../styles/Home.module.scss";
-
-import Breadcrumb from "../components/breadcrumb/Breadcrumb";
-import { Container, Row, Col } from "react-bootstrap";
 import dynamic from "next/dynamic";
 import HeaderPlaceholder from "../components/header/HeaderPlaceholder";
 
