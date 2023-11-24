@@ -83,6 +83,8 @@ import {
 import Head from "next/head";
 import { Web3Modal } from "@web3modal/react";
 import Auth from "../components/auth/Auth";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 
 library.add(
   faArrowUp,
@@ -168,41 +170,45 @@ const wagmiConfig = createConfig({
   publicClient,
 });
 const ethereumClient = new EthereumClient(wagmiConfig, chains);
+const queryClient = new QueryClient();
 
 export default function App({ Component, ...rest }: AppProps) {
   const { store, props } = wrapper.useWrappedStore(rest);
 
   return (
     <>
-      <Provider store={store}>
-        <Head>
-          <meta
-            name="viewport"
-            content="width=device-width, initial-scale=1.0"
-          />
-        </Head>
+      <QueryClientProvider client={queryClient}>
+        <Provider store={store}>
+          <Head>
+            <meta
+              name="viewport"
+              content="width=device-width, initial-scale=1.0"
+            />
+          </Head>
 
-        <WagmiConfig config={wagmiConfig}>
-          <Auth>
-            <Component {...props} />
-          </Auth>
-        </WagmiConfig>
-        <Web3Modal
-          defaultChain={mainnet}
-          projectId={CW_PROJECT_ID}
-          ethereumClient={ethereumClient}
-          themeMode={"dark"}
-          themeVariables={{
-            "--w3m-background-color": "#282828",
-            "--w3m-logo-image-url":
-              "https://d3lqz0a4bldqgf.cloudfront.net/seize_images/Seize_Logo_Glasses_3.png",
-            "--w3m-accent-color": "#fff",
-            "--w3m-accent-fill-color": "#000",
-            "--w3m-button-border-radius": "0",
-            "--w3m-font-family": "Arial",
-          }}
-        />
-      </Provider>
+          <WagmiConfig config={wagmiConfig}>
+            <Auth>
+              <Component {...props} />
+            </Auth>
+          </WagmiConfig>
+          <Web3Modal
+            defaultChain={mainnet}
+            projectId={CW_PROJECT_ID}
+            ethereumClient={ethereumClient}
+            themeMode={"dark"}
+            themeVariables={{
+              "--w3m-background-color": "#282828",
+              "--w3m-logo-image-url":
+                "https://d3lqz0a4bldqgf.cloudfront.net/seize_images/Seize_Logo_Glasses_3.png",
+              "--w3m-accent-color": "#fff",
+              "--w3m-accent-fill-color": "#000",
+              "--w3m-button-border-radius": "0",
+              "--w3m-font-family": "Arial",
+            }}
+          />
+        </Provider>
+        <ReactQueryDevtools initialIsOpen={false} />
+      </QueryClientProvider>
     </>
   );
 }
