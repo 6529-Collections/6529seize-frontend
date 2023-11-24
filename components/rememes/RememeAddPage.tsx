@@ -42,7 +42,7 @@ export default function RememeAddPage() {
     contract?: string;
     tokens?: {
       id: string;
-      title: string;
+      name: string;
     }[];
   }>();
 
@@ -147,14 +147,14 @@ export default function RememeAddPage() {
         const tokens = processedRememe.nfts?.map((n) => {
           return {
             id: n.tokenId,
-            title: n.title,
+            name: n.name ? n.name : `#${n.tokenId}`,
           };
         });
 
         const nftError: string[] = processedRememe.nfts
           ? processedRememe.nfts
-              .filter((n) => n.metadataError)
-              .map((n) => `#${n.tokenId} - ${n.metadataError}`)
+              .filter((n) => n.raw.error)
+              .map((n) => `#${n.tokenId} - ${n.raw.error}`)
           : [];
 
         const message = processedRememe.error
@@ -359,7 +359,7 @@ export default function RememeAddPage() {
                           xs={12}
                           className="pt-1 pb-1"
                           key={`submission-result-token-${t.id}`}>
-                          #{t.id} - {t.title}
+                          #{t.id} - {t.name}
                           &nbsp;&nbsp;
                           <a
                             className="font-color"

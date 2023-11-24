@@ -89,8 +89,7 @@ export function WalletAddress(props: {
           className={styles.address}
           dangerouslySetInnerHTML={{
             __html: getInnerHTML(),
-          }}
-        ></span>
+          }}></span>
       )}
       {!props.hideCopy && navigator.clipboard && (
         <>
@@ -98,14 +97,12 @@ export function WalletAddress(props: {
             <span
               className={`${styles.address} ${
                 props.isUserPage ? styles.addressUserPage : ""
-              }`}
-            >
+              }`}>
               <span
                 className={styles.address}
                 dangerouslySetInnerHTML={{
                   __html: getInnerHTML(),
-                }}
-              ></span>
+                }}></span>
             </span>
           )}
           {walletEns ? (
@@ -114,18 +111,15 @@ export function WalletAddress(props: {
                 content={isCopied ? "Copied" : "Copy"}
                 placement={"right"}
                 theme={"light"}
-                hideOnClick={false}
-              >
+                hideOnClick={false}>
                 <Dropdown.Toggle
                   name={`copy-toggle`}
-                  aria-label={`copy-toggle`}
-                >
+                  aria-label={`copy-toggle`}>
                   {props.isUserPage && props.display && (
                     <span
                       className={`${styles.address} ${
                         props.isUserPage ? styles.addressUserPage : ""
-                      }`}
-                    >
+                      }`}>
                       {formatAddress(props.display)}
                     </span>
                   )}
@@ -143,72 +137,58 @@ export function WalletAddress(props: {
                     content={isCopied ? "Copied" : "Copy"}
                     placement={"right"}
                     theme={"light"}
-                    hideOnClick={false}
-                  >
+                    hideOnClick={false}>
                     <Dropdown.Item
-                      name={`copy-ens-btn`}
                       aria-label={`copy-ens-btn`}
                       onClick={() => copy(props.displayEns ?? props.display)}
                       dangerouslySetInnerHTML={{
                         __html: resolveAddress(),
-                      }}
-                    ></Dropdown.Item>
+                      }}></Dropdown.Item>
                   </Tippy>
                 )}
                 <Tippy
                   content={isCopied ? "Copied" : "Copy"}
                   placement={"right"}
                   theme={"light"}
-                  hideOnClick={false}
-                >
+                  hideOnClick={false}>
                   <Dropdown.Item
                     className={styles.copyDropdownItem}
-                    name={`copy-address-btn`}
                     aria-label={`copy-address-btn`}
-                    onClick={() => copy(props.wallet)}
-                  >
+                    onClick={() => copy(props.wallet)}>
                     {formatAddress(props.wallet as string)}
                   </Dropdown.Item>
                 </Tippy>
               </Dropdown.Menu>
             </Dropdown>
           ) : (
-            <>
-              <Dropdown
-                className={`${styles.copyDropdown}`}
-                autoClose="outside"
-              >
-                <Tippy
-                  content={isCopied ? "Copied" : "Copy"}
-                  placement={"right"}
-                  theme={"light"}
-                  hideOnClick={false}
-                >
-                  <Dropdown.Toggle
-                    name={`copy-toggle`}
-                    aria-label={`copy-toggle`}
-                    onClick={() => copy(props.wallet)}
-                  >
-                    {props.isUserPage && (
-                      <span
-                        className={`${styles.address} ${
-                          props.isUserPage ? styles.addressUserPage : ""
-                        }`}
-                        dangerouslySetInnerHTML={{
-                          __html: resolveAddress(),
-                        }}
-                      ></span>
-                    )}
-                    <FontAwesomeIcon
-                      icon="copy"
-                      name={`copy-btn`}
-                      aria-label={`copy-btn`}
-                      className={`${styles.copy}`}
-                    />
-                  </Dropdown.Toggle>
-                </Tippy>
-              </Dropdown>
-            </>
+            <Dropdown className={`${styles.copyDropdown}`} autoClose="outside">
+              <Tippy
+                content={isCopied ? "Copied" : "Copy"}
+                placement={"right"}
+                theme={"light"}
+                hideOnClick={false}>
+                <Dropdown.Toggle
+                  name={`copy-toggle`}
+                  aria-label={`copy-toggle`}
+                  onClick={() => copy(props.wallet)}>
+                  {props.isUserPage && (
+                    <span
+                      className={`${styles.address} ${
+                        props.isUserPage ? styles.addressUserPage : ""
+                      }`}
+                      dangerouslySetInnerHTML={{
+                        __html: resolveAddress(),
+                      }}></span>
+                  )}
+                  <FontAwesomeIcon
+                    icon="copy"
+                    name={`copy-btn`}
+                    aria-label={`copy-btn`}
+                    className={`${styles.copy}`}
+                  />
+                </Dropdown.Toggle>
+              </Tippy>
+            </Dropdown>
           )}
         </>
       )}
