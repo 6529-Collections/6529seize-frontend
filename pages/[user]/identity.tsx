@@ -2,11 +2,11 @@ import { ReactElement } from "react"
 import { NextPageWithLayout } from "../_app"
 import { IProfileAndConsolidations } from "../../entities/IProfile";
 import { ConsolidatedTDHMetrics } from "../../entities/ITDH";
-import { NFTLite } from "../../entities/INFT";
-import { commonApiFetch } from "../../services/api/common-api";
 import UserPageLayout from "../../components/user/layout/UserPageLayout";
 import { getCommonUserServerSideProps, userPageNeedsRedirect } from "./server.helpers";
 import UserPageIdentity from "../../components/user/identity/UserPageIdentity";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { commonApiFetch } from "../../services/api/common-api";
 
 
 export interface UserPageIdentityProps {
@@ -16,6 +16,27 @@ export interface UserPageIdentityProps {
 }
 
 const Page: NextPageWithLayout<{ pageProps: UserPageIdentityProps }> = ({ pageProps }) => {
+  const queryClient = useQueryClient();
+  if (pageProps.profile.profile?.handle) {
+    queryClient.setQueryData<IProfileAndConsolidations>(
+      ["profile", pageProps.profile.profile?.handle.toLowerCase()],
+      pageProps.profile
+    );
+  }
+
+  for (const wallet of pageProps.profile.consolidation.wallets) {
+    queryClient.setQueryData<IProfileAndConsolidations>(
+      ["profile", wallet.wallet.address.toLowerCase()],
+      pageProps.profile
+    );
+
+    if (wallet.wallet.ens) {
+      queryClient.setQueryData<IProfileAndConsolidations>(
+        ["profile", wallet.wallet.ens.toLowerCase()],
+        pageProps.profile
+      );
+    }
+  }
   return <UserPageIdentity profile={pageProps.profile} />
 }
 
@@ -52,11 +73,6 @@ export async function getServerSideProps(
     if (needsRedirect) {
       return needsRedirect as any
     }
-
-    const memesLite = await commonApiFetch<{ data: NFTLite[] }>({
-      endpoint: "memes_lite",
-      headers,
-    })
 
     return {
       props: {

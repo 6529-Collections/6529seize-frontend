@@ -22,14 +22,14 @@ const inter = Inter({
 });
 
 export default function UserPageHeader({
-  profile,
+ // profile,
   mainAddress,
   activeAddress,
   onActiveAddress,
   consolidatedTDH,
   user,
 }: {
-  profile: IProfileAndConsolidations;
+ // profile: IProfileAndConsolidations;
   mainAddress: string;
   activeAddress: string | null;
   onActiveAddress: (address: string) => void;

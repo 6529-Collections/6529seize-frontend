@@ -4,7 +4,11 @@ import { OwnerLite } from "../../entities/IOwner";
 import { IProfileAndConsolidations } from "../../entities/IProfile";
 import { Season } from "../../entities/ISeason";
 import { ConsolidatedTDHMetrics } from "../../entities/ITDH";
-import { areEqualAddresses, containsEmojis, formatAddress } from "../../helpers/Helpers";
+import {
+  areEqualAddresses,
+  containsEmojis,
+  formatAddress,
+} from "../../helpers/Helpers";
 import { commonApiFetch } from "../../services/api/common-api";
 
 export interface CommonUserServerSideProps {
@@ -28,9 +32,9 @@ const getEnsAndConsolidatedTDH = async (
   const consolidationKey = ens?.consolidation_key ?? null;
   const consolidatedTDH = consolidationKey
     ? await commonApiFetch<ConsolidatedTDHMetrics>({
-      endpoint: `consolidated_owner_metrics/${consolidationKey}`,
-      headers,
-    })
+        endpoint: `consolidated_owner_metrics/${consolidationKey}`,
+        headers,
+      })
     : null;
 
   return {
@@ -39,40 +43,49 @@ const getEnsAndConsolidatedTDH = async (
   };
 };
 
-
-export const getCommonUserServerSideProps = async ({ user, headers }: { user: string, headers: Record<string, string> }): Promise<CommonUserServerSideProps> => {
+export const getCommonUserServerSideProps = async ({
+  user,
+  headers,
+}: {
+  user: string;
+  headers: Record<string, string>;
+}): Promise<CommonUserServerSideProps> => {
   const profile = await commonApiFetch<IProfileAndConsolidations>({
     endpoint: `profiles/${user}`,
     headers: headers,
   });
 
-  const wallet =
-    profile?.profile?.primary_wallet?.toLowerCase() ?? user;
-  const ensAndConsolidatedTDH = await getEnsAndConsolidatedTDH(
-    wallet,
-    headers
-  );
+  const wallet = profile?.profile?.primary_wallet?.toLowerCase() ?? user;
+  const ensAndConsolidatedTDH = await getEnsAndConsolidatedTDH(wallet, headers);
 
   const { ens, consolidatedTDH } = ensAndConsolidatedTDH;
   const title = profile?.profile?.handle
     ? profile.profile.handle
     : ens?.display && !containsEmojis(ens.display)
-      ? ens.display
-      : formatAddress(wallet);
+    ? ens.display
+    : formatAddress(wallet);
 
   return {
     profile,
     title,
     consolidatedTDH,
   };
-}
+};
 
-export const userPageNeedsRedirect = ({ profile, req, subroute }: { profile: IProfileAndConsolidations | null, req: any, subroute: string | null }): {
+export const userPageNeedsRedirect = ({
+  profile,
+  req,
+  subroute,
+}: {
+  profile: IProfileAndConsolidations | null;
+  req: any;
+  subroute: string | null;
+}): {
   redirect: {
-    permanent: false,
-    destination: string
-  },
-  props: {}
+    permanent: false;
+    destination: string;
+  };
+  props: {};
 } | null => {
   if (
     profile?.profile?.normalised_handle &&
@@ -81,7 +94,9 @@ export const userPageNeedsRedirect = ({ profile, req, subroute }: { profile: IPr
     const currentQuery = { ...req.query };
     delete currentQuery.user;
     const queryParamsString = new URLSearchParams(currentQuery).toString();
-    const destination = subroute ? `/${profile.profile.normalised_handle}/${subroute}?${queryParamsString}` : `/${profile.profile.normalised_handle}?${queryParamsString}`
+    const destination = subroute
+      ? `/${profile.profile.normalised_handle}/${subroute}?${queryParamsString}`
+      : `/${profile.profile.normalised_handle}?${queryParamsString}`;
     return {
       redirect: {
         permanent: false,
@@ -90,8 +105,8 @@ export const userPageNeedsRedirect = ({ profile, req, subroute }: { profile: IPr
       props: {},
     };
   }
-  return null
-}
+  return null;
+};
 
 export const getGradients = async (
   headers: Record<string, string>
@@ -103,7 +118,6 @@ export const getGradients = async (
   return gradients.data;
 };
 
-
 export const getMemesLite = async (
   headers: Record<string, string>
 ): Promise<NFTLite[]> => {
@@ -112,7 +126,7 @@ export const getMemesLite = async (
     headers,
   });
   return memes.data;
-}
+};
 
 export const getSeasons = async (
   headers: Record<string, string>
@@ -122,14 +136,15 @@ export const getSeasons = async (
     headers,
   });
   return seasons;
-}
+};
 
-export const getOwned = async (
-  { wallets, headers }: {
-    wallets: string[],
-    headers: Record<string, string>
-  }
-): Promise<OwnerLite[]> => {
+export const getOwned = async ({
+  wallets,
+  headers,
+}: {
+  wallets: string[];
+  headers: Record<string, string>;
+}): Promise<OwnerLite[]> => {
   if (!wallets.length) {
     return [];
   }
@@ -162,7 +177,9 @@ export const getOwned = async (
 
   return allOwned.reduce<OwnerLite[]>((acc, curr) => {
     const existing = acc.find(
-      (a) => a.token_id === curr.token_id && areEqualAddresses(a.contract, curr.contract)
+      (a) =>
+        a.token_id === curr.token_id &&
+        areEqualAddresses(a.contract, curr.contract)
     );
     if (existing) {
       existing.balance += curr.balance;

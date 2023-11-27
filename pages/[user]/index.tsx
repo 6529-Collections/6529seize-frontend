@@ -1,14 +1,21 @@
-import { ReactElement } from "react"
-import { NextPageWithLayout } from "../_app"
+import { ReactElement } from "react";
+import { NextPageWithLayout } from "../_app";
 import { IProfileAndConsolidations } from "../../entities/IProfile";
 import { ConsolidatedTDHMetrics } from "../../entities/ITDH";
 import { NFT, NFTLite } from "../../entities/INFT";
 import UserPageLayout from "../../components/user/layout/UserPageLayout";
-import { getCommonUserServerSideProps, getGradients, getMemesLite, getOwned, getSeasons, userPageNeedsRedirect } from "./server.helpers";
+import {
+  getCommonUserServerSideProps,
+  getGradients,
+  getMemesLite,
+  getOwned,
+  getSeasons,
+  userPageNeedsRedirect,
+} from "./server.helpers";
 import UserPageCollection from "../../components/user/collected/UserPageCollection";
 import { Season } from "../../entities/ISeason";
 import { OwnerLite } from "../../entities/IOwner";
-
+import {  useQueryClient } from "@tanstack/react-query";
 
 export interface UserPageProps {
   profile: IProfileAndConsolidations;
@@ -20,26 +27,50 @@ export interface UserPageProps {
   consolidatedOwned: OwnerLite[];
 }
 
-const Page: NextPageWithLayout<{ pageProps: UserPageProps }> = ({ pageProps }) => {
-  return <UserPageCollection
-    profile={pageProps.profile}
-    consolidatedOwned={pageProps.consolidatedOwned}
-    consolidatedTDH={pageProps.consolidatedTDH}
-    memesLite={pageProps.memesLite}
-    gradients={pageProps.gradients}
-    seasons={pageProps.seasons}
-  />
-}
+const Page: NextPageWithLayout<{ pageProps: UserPageProps }> = ({
+  pageProps,
+}) => {
+  const queryClient = useQueryClient();
+  if (pageProps.profile.profile?.handle) {
+    queryClient.setQueryData<IProfileAndConsolidations>(
+      ["profile", pageProps.profile.profile?.handle.toLowerCase()],
+      pageProps.profile
+    );
+  }
 
-Page.getLayout = function getLayout(page: ReactElement<{ pageProps: UserPageProps }>) {
+  for (const wallet of pageProps.profile.consolidation.wallets) {
+    queryClient.setQueryData<IProfileAndConsolidations>(
+      ["profile", wallet.wallet.address.toLowerCase()],
+      pageProps.profile
+    );
+
+    if (wallet.wallet.ens) {
+      queryClient.setQueryData<IProfileAndConsolidations>(
+        ["profile", wallet.wallet.ens.toLowerCase()],
+        pageProps.profile
+      );
+    }
+  }
+
   return (
-    <UserPageLayout props={page.props.pageProps}>
-      {page}
-    </UserPageLayout>
-  )
-}
+    <UserPageCollection
+      profile={pageProps.profile}
+      consolidatedOwned={pageProps.consolidatedOwned}
+      consolidatedTDH={pageProps.consolidatedTDH}
+      memesLite={pageProps.memesLite}
+      gradients={pageProps.gradients}
+      seasons={pageProps.seasons}
+    />
+  );
+};
 
-export default Page
+Page.getLayout = function getLayout(
+  page: ReactElement<{ pageProps: UserPageProps }>
+) {
+  return <UserPageLayout props={page.props.pageProps}>{page}</UserPageLayout>;
+};
+
+export default Page;
 
 export async function getServerSideProps(
   req: any,
@@ -48,31 +79,35 @@ export async function getServerSideProps(
 ): Promise<{
   props: UserPageProps;
 }> {
-
   const authCookie = req?.req?.cookies["x-6529-auth"];
   try {
     const headers: Record<string, string> = authCookie
       ? { "x-6529-auth": authCookie }
       : {};
 
-    const { profile, title, consolidatedTDH } = await getCommonUserServerSideProps({ user: req.query.user, headers })
+    const { profile, title, consolidatedTDH } =
+      await getCommonUserServerSideProps({ user: req.query.user, headers });
 
     const needsRedirect = userPageNeedsRedirect({
       profile,
       req,
-      subroute: null
-    })
+      subroute: null,
+    });
 
     if (needsRedirect) {
-      return needsRedirect as any
+      return needsRedirect as any;
     }
 
-    const [gradients, memesLite, seasons, consolidatedOwned] = await Promise.all([
-      getGradients(headers),
-      getMemesLite(headers),
-      getSeasons(headers),
-      getOwned({ wallets: profile.consolidation.wallets.map(w => w.wallet.address), headers })
-    ])
+    const [gradients, memesLite, seasons, consolidatedOwned] =
+      await Promise.all([
+        getGradients(headers),
+        getMemesLite(headers),
+        getSeasons(headers),
+        getOwned({
+          wallets: profile.consolidation.wallets.map((w) => w.wallet.address),
+          headers,
+        }),
+      ]);
 
     return {
       props: {
