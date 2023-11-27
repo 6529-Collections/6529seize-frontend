@@ -250,7 +250,7 @@
   align-items: center;
   justify-content: center;
   width: 100%;
-  height: 300px;
+  min-height: 300px;
   background-clip: content-box;
 
   iframe {
@@ -264,7 +264,7 @@
   align-items: flex-start;
   justify-content: center;
   width: 100%;
-  height: 400px;
+  min-height: 400px;
   background-clip: content-box;
 
   iframe {
@@ -374,4 +374,12 @@
 
 .slideshowContainer {
   background-color: $nextgen-grey;
+}
+
+.countdownContainer {
+  padding: 20px;
+  background-color: $nextgen-grey;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
 }

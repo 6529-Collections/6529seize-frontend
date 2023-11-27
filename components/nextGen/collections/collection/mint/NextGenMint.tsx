@@ -272,6 +272,14 @@ export default function NextGenMint(props: Props) {
     }
   }
 
+  function printCountdown(title: string, date: number) {
+    return (
+      <div className={styles.countdownContainer}>
+        <DateCountdown title={title} date={new Date(date * 1000)} />
+      </div>
+    );
+  }
+
   return (
     <Container className="no-padding pb-4">
       <Row className="pb-2">
@@ -289,40 +297,28 @@ export default function NextGenMint(props: Props) {
               <span>Sales Model</span>
               <span className="font-larger font-bolder">{getSalesModel()}</span>
             </span>
-            {props.phase_times.al_status == Status.UPCOMING && (
-              <span className={styles.mintDetailsSpan}>
-                <DateCountdown
-                  title={"Allowlist Starting in"}
-                  date={props.phase_times.allowlist_start_time}
-                />
-              </span>
-            )}
-            {props.phase_times.al_status == Status.LIVE && (
-              <span className={styles.mintDetailsSpan}>
-                <DateCountdown
-                  title={"Allowlist Ending in"}
-                  date={props.phase_times.allowlist_end_time * 1000}
-                />
-              </span>
-            )}
+            {props.phase_times.al_status == Status.UPCOMING &&
+              printCountdown(
+                "Allowlist Starting in",
+                props.phase_times.allowlist_start_time
+              )}
+            {props.phase_times.al_status == Status.LIVE &&
+              printCountdown(
+                "Allowlist Ending in",
+                props.phase_times.allowlist_end_time
+              )}
             {props.phase_times.al_status != Status.LIVE &&
               props.phase_times.al_status != Status.UPCOMING &&
-              props.phase_times.public_status == Status.UPCOMING && (
-                <span className={styles.mintDetailsSpan}>
-                  <DateCountdown
-                    title={"Public Phase Starting in"}
-                    date={props.phase_times.public_start_time}
-                  />
-                </span>
+              props.phase_times.public_status == Status.UPCOMING &&
+              printCountdown(
+                "Public Phase Starting in",
+                props.phase_times.public_start_time
               )}
-            {props.phase_times.public_status == Status.LIVE && (
-              <span className={styles.mintDetailsSpan}>
-                <DateCountdown
-                  title={"Public Phase Ending in"}
-                  date={props.phase_times.public_end_time}
-                />
-              </span>
-            )}
+            {props.phase_times.public_status == Status.LIVE &&
+              printCountdown(
+                "Public Phase Ending in",
+                props.phase_times.public_end_time
+              )}
           </div>
         </Col>
       </Row>

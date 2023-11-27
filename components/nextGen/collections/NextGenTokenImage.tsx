@@ -19,6 +19,9 @@ export function NextGenTokenImageContent(props: Readonly<Props>) {
   const [image, setImage] = useState<string>();
   const [animation, setAnimation] = useState<string>();
 
+  const generatorUrl = `https://nextgen-generator.seize.io/png/${props.token.id}`;
+  const cloudfrontUrl = `https://d3lqz0a4bldqgf.cloudfront.net/nextgen/tokens/images/${props.token.id}.png`;
+
   useEffect(() => {
     setImage(props.token.image);
   }, [props.token.image]);
@@ -32,7 +35,11 @@ export function NextGenTokenImageContent(props: Readonly<Props>) {
       fetch(url)
         .then((res) => res.json())
         .then((data) => {
-          if (data.image) setImage(parseIpfsUrl(data.image));
+          if (data.image) {
+            setImage(parseIpfsUrl(data.image));
+          } else {
+            alert("hi");
+          }
           if (!props.preview && data.animation_url) {
             setAnimation(parseIpfsUrl(data.animation_url));
           }
@@ -64,8 +71,11 @@ export function NextGenTokenImageContent(props: Readonly<Props>) {
             maxHeight: "100%",
             maxWidth: "100%",
           }}
-          src={`https://d3lqz0a4bldqgf.cloudfront.net/nextgen/tokens/images/${props.token.id}.png`}
+          src={cloudfrontUrl}
           onError={({ currentTarget }) => {
+            if (currentTarget.src === cloudfrontUrl) {
+              currentTarget.src = generatorUrl;
+            }
             if (image) {
               currentTarget.src = image;
             }

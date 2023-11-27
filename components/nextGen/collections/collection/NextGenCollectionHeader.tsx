@@ -13,6 +13,7 @@ import { NEXTGEN_CHAIN_ID, NEXTGEN_CORE } from "../../nextgen_contracts";
 import { getPhaseDateDisplay } from "../../nextgen_helpers";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
+import DateCountdown from "../../../date-countdown/DateCountdown";
 
 interface Props {
   collection: number;
@@ -61,6 +62,19 @@ export default function NextGenCollectionHeader(props: Props) {
       props.additional_data.circulation_supply;
     setAvailable(a);
   }, [props.additional_data]);
+
+  function printCountdown(title: string, date: number) {
+    return (
+      <div className={styles.countdownContainer}>
+        <DateCountdown title={title} date={new Date(date * 1000)} />
+        <a href={`${collectionPath}/mint`}>
+          <Button className="seize-btn btn-block pt-2 btn-white font-larger font-bolder">
+            Mint Now!
+          </Button>
+        </a>
+      </div>
+    );
+  }
 
   return (
     <Container className="no-padding">
@@ -153,10 +167,10 @@ export default function NextGenCollectionHeader(props: Props) {
                 </a>
               )}
             </span>
-            <span>
+            <span className="font-larger">
               by <b>{props.info.artist}</b>
             </span>
-            <span className="d-inline-flex align-items-center">
+            <span className="font-larger d-inline-flex align-items-center">
               <b>
                 {props.additional_data.circulation_supply} /{" "}
                 {props.additional_data.total_supply} minted
@@ -165,12 +179,36 @@ export default function NextGenCollectionHeader(props: Props) {
             </span>
           </span>
           {showMint() && (
-            <span className="d-flex align-items-start pt-2">
-              <a href={`${collectionPath}/mint`}>
-                <Button className="seize-btn btn-white font-larger font-bolder">
-                  Mint Now!
-                </Button>
-              </a>
+            // <span className="d-flex align-items-start pt-2">
+            //   <a href={`${collectionPath}/mint`}>
+            //     <Button className="seize-btn btn-white font-larger font-bolder">
+            //       Mint Now!
+            //     </Button>
+            //   </a>
+            // </span>
+            <span>
+              {props.phase_times.al_status == Status.UPCOMING &&
+                printCountdown(
+                  "Allowlist Starting in",
+                  props.phase_times.allowlist_start_time
+                )}
+              {props.phase_times.al_status == Status.LIVE &&
+                printCountdown(
+                  "Allowlist Ending in",
+                  props.phase_times.allowlist_end_time
+                )}
+              {props.phase_times.al_status != Status.LIVE &&
+                props.phase_times.al_status != Status.UPCOMING &&
+                props.phase_times.public_status == Status.UPCOMING &&
+                printCountdown(
+                  "Public Phase Starting in",
+                  props.phase_times.public_start_time
+                )}
+              {props.phase_times.public_status == Status.LIVE &&
+                printCountdown(
+                  "Public Phase Ending in",
+                  props.phase_times.public_end_time
+                )}
             </span>
           )}
         </Col>
