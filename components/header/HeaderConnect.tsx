@@ -10,9 +10,6 @@ import Cookies from "js-cookie";
 import { VIEW_MODE_COOKIE } from "../../constants";
 import Image from "next/image";
 import { WalletView } from "../../enums";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { commonApiFetch } from "../../services/api/common-api";
-import { IProfileAndConsolidations } from "../../entities/IProfile";
 
 interface Props {
   consolidations: string[];
@@ -25,19 +22,6 @@ export default function HeaderConnect(props: Props) {
   const account = useAccount();
   const [showWalletModal, setShowWalletModal] = useState(false);
   const [display, setDisplay] = useState("");
-
-  const { data } = useQuery({
-    queryKey: ["profile", account.address],
-    queryFn: async () =>
-      await commonApiFetch<IProfileAndConsolidations>({
-        endpoint: `profiles/${account.address}`,
-      }),
-    enabled: !!account.address,
-  });
-
-  useEffect(() => {
-    console.log(data);
-  }, [data]);
 
   useEffect(() => {
     const viewMode = Cookies.get(VIEW_MODE_COOKIE);

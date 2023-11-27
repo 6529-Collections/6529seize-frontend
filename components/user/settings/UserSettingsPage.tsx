@@ -14,8 +14,6 @@ import UserSettingsBackground from "./UserSettingsBackground";
 import { getRandomColor } from "../../../helpers/Helpers";
 import UserSettingsWebsite from "./UserSettingsWebsite";
 import UserSettingsClassification from "./UserSettingsClassification";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useAccount } from "wagmi";
 
 interface ApiCreateOrUpdateProfileRequest {
   readonly handle: string;
@@ -37,23 +35,6 @@ export default function UserSettingsPage({
   const { requestAuth, setToast, updateMyProfile } = useContext(AuthContext);
   const router = useRouter();
   const [userName, setUserName] = useState<string>(user.profile?.handle ?? "");
-  const account = useAccount();
-  const queryClient = useQueryClient();
-  const { mutateAsync } = useMutation({
-    mutationFn: async (body: ApiCreateOrUpdateProfileRequest) =>
-      await commonApiPost<
-        ApiCreateOrUpdateProfileRequest,
-        IProfileAndConsolidations
-      >({
-        endpoint: "profiles",
-        body,
-      }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ["profile", account.address],
-      });
-    },
-  });
 
   const getHighestTdhWalletOrNone = () => {
     const tdhWallets = user.consolidation.wallets.sort(
@@ -110,14 +91,14 @@ export default function UserSettingsPage({
     }
     setSaving(true);
     try {
-      // const response = await commonApiPost<
-      //   ApiCreateOrUpdateProfileRequest,
-      //   IProfileAndConsolidations
-      // >({
-      //   endpoint: "profiles",
-      //   body,
-      // });
-      const response = await mutateAsync(body);
+      const response = await commonApiPost<
+        ApiCreateOrUpdateProfileRequest,
+        IProfileAndConsolidations
+      >({
+        endpoint: "profiles",
+        body,
+      });
+
       if (response.profile?.handle !== user.profile?.handle) {
         router.push(`/${response.profile?.handle}/settings`);
       }
