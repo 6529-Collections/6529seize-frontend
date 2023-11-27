@@ -300,7 +300,7 @@ export default function NextGenMintBurnWidget(props: Props) {
                   <Tippy
                     content={`Mint for an address that has delegated to you${
                       props.delegators.length === 0
-                        ? ` - you currently have no props.delegators`
+                        ? ` - you currently have no delegators`
                         : ``
                     }`}
                     placement={"top"}
@@ -396,7 +396,7 @@ export default function NextGenMintBurnWidget(props: Props) {
                       ? isMinting
                         ? `Processing...`
                         : props.collection.status
-                        ? `Mint Now${
+                        ? `Mint${
                             !fetchingProofs &&
                             tokenId &&
                             proofResponse &&

@@ -7,11 +7,7 @@ import {
   retrieveCollectionInfo,
 } from "../../../nextgen_helpers";
 import { useContractRead } from "wagmi";
-import {
-  NEXTGEN_CORE,
-  NEXTGEN_CHAIN_ID,
-  NEXTGEN_MINTER,
-} from "../../../nextgen_contracts";
+import { NEXTGEN_CORE, NEXTGEN_CHAIN_ID } from "../../../nextgen_contracts";
 import NextGenCollectionHeader from "../NextGenCollectionHeader";
 import Breadcrumb, { Crumb } from "../../../../breadcrumb/Breadcrumb";
 import NextGenCollectionArt from "../NextGenCollectionArt";

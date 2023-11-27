@@ -10,7 +10,6 @@ import {
 import Image from "next/image";
 import { goerli } from "wagmi/chains";
 import { NEXTGEN_CHAIN_ID, NEXTGEN_CORE } from "../../nextgen_contracts";
-import { getPhaseDateDisplay } from "../../nextgen_helpers";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import DateCountdown from "../../../date-countdown/DateCountdown";
@@ -30,10 +29,6 @@ export default function NextGenCollectionHeader(props: Props) {
   const collectionPath = `/nextgen/collection/${props.collection}`;
 
   function showMint() {
-    if (router.pathname.includes("mint")) {
-      return false;
-    }
-
     if (!props.phase_times || !props.additional_data) {
       return false;
     }
@@ -65,14 +60,16 @@ export default function NextGenCollectionHeader(props: Props) {
 
   function printCountdown(title: string, date: number) {
     return (
-      <div className={styles.countdownContainer}>
+      <span className={styles.countdownContainer}>
         <DateCountdown title={title} date={new Date(date * 1000)} />
-        <a href={`${collectionPath}/mint`}>
-          <Button className="seize-btn btn-block pt-2 btn-white font-larger font-bolder">
-            Mint Now!
-          </Button>
-        </a>
-      </div>
+        {!router.pathname.includes("mint") && (
+          <a href={`${collectionPath}/mint`}>
+            <Button className="seize-btn btn-block mt-2 pt-2 pb-2 btn-black font-larger font-bolder">
+              MINT
+            </Button>
+          </a>
+        )}
+      </span>
     );
   }
 
@@ -82,7 +79,7 @@ export default function NextGenCollectionHeader(props: Props) {
         <Col className="d-flex justify-content-between align-items-center flex-wrap">
           <span className="pt-2 pb-2 d-flex align-items-center gap-2 align-items-center">
             <span
-              className={`${styles.phaseTimeTag} ${
+              className={`font-bolder font-smaller ${styles.nextgenTag} ${
                 props.phase_times.al_status == Status.LIVE && available > 0
                   ? styles.phaseTimeTagActive
                   : props.phase_times.al_status == Status.UPCOMING &&
@@ -93,7 +90,7 @@ export default function NextGenCollectionHeader(props: Props) {
               ALLOWLIST {props.phase_times.al_status.toUpperCase()}
             </span>
             <span
-              className={`${styles.phaseTimeTag} ${
+              className={`font-bolder font-smaller ${styles.nextgenTag} ${
                 props.phase_times.public_status == Status.LIVE && available > 0
                   ? styles.phaseTimeTagActive
                   : props.phase_times.public_status == Status.UPCOMING &&
@@ -148,45 +145,38 @@ export default function NextGenCollectionHeader(props: Props) {
           </span>
         </Col>
       </Row>
-      <Row className="pt-2">
-        <Col className="d-flex justify-content-between flex-wrap">
-          <span className="d-flex flex-column align-items-start gap-3">
-            <span className="d-flex flex-column align-items-start">
-              <h1 className="mb-0 font-color">
-                #{props.collection} - <b>{props.info.name.toUpperCase()}</b>
-              </h1>
-              {props.collection_link && (
-                <a
-                  href={collectionPath}
-                  className="decoration-none d-flex align-items-center gap-2">
-                  <FontAwesomeIcon
-                    icon="arrow-circle-left"
-                    className={styles.backIcon}
-                  />
-                  Back to collection Page
-                </a>
-              )}
-            </span>
-            <span className="font-larger">
-              by <b>{props.info.artist}</b>
-            </span>
-            <span className="font-larger d-inline-flex align-items-center">
-              <b>
-                {props.additional_data.circulation_supply} /{" "}
-                {props.additional_data.total_supply} minted
-                {available > 0 && ` | ${available} remaining`}
-              </b>
-            </span>
+      <Row className="pt-3">
+        <Col className="d-flex flex-column align-items-start gap-3">
+          <span className="d-flex flex-column align-items-start">
+            <h1 className="mb-0 font-color">
+              #{props.collection} - <b>{props.info.name.toUpperCase()}</b>
+            </h1>
+            {props.collection_link && (
+              <a
+                href={collectionPath}
+                className="decoration-none d-flex align-items-center gap-2">
+                <FontAwesomeIcon
+                  icon="arrow-circle-left"
+                  className={styles.backIcon}
+                />
+                Back to collection Page
+              </a>
+            )}
           </span>
+          <span className="font-larger">
+            by <b>{props.info.artist}</b>
+          </span>
+          <span className="font-larger d-inline-flex align-items-center">
+            <b>
+              {props.additional_data.circulation_supply} /{" "}
+              {props.additional_data.total_supply} minted
+              {available > 0 && ` | ${available} remaining`}
+            </b>
+          </span>
+        </Col>
+        <Col className="d-flex flex-column align-items-center">
           {showMint() && (
-            // <span className="d-flex align-items-start pt-2">
-            //   <a href={`${collectionPath}/mint`}>
-            //     <Button className="seize-btn btn-white font-larger font-bolder">
-            //       Mint Now!
-            //     </Button>
-            //   </a>
-            // </span>
-            <span>
+            <>
               {props.phase_times.al_status == Status.UPCOMING &&
                 printCountdown(
                   "Allowlist Starting in",
@@ -209,7 +199,7 @@ export default function NextGenCollectionHeader(props: Props) {
                   "Public Phase Ending in",
                   props.phase_times.public_end_time
                 )}
-            </span>
+            </>
           )}
         </Col>
       </Row>

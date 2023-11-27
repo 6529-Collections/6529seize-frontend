@@ -1,6 +1,6 @@
 import { Col, Container, Row } from "react-bootstrap";
 import NextGenMint from "./NextGenMint";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { PhaseTimes, AdditionalData, Info } from "../../../nextgen_entities";
 import {
   retrieveCollectionPhases,
@@ -108,7 +108,7 @@ export default function NextGenCollectionMint(props: Readonly<Props>) {
                 />
               </Col>
             </Row>
-            <Row className="pt-4">
+            <Row className="pt-2">
               <Col>
                 <NextGenMint
                   collection={props.collection}

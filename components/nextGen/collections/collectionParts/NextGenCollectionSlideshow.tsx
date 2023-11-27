@@ -35,7 +35,7 @@ export default function NextGenCollectionSlideshow(props: Props) {
                   slidesPerView={Math.min(4, props.length)}
                   navigation
                   centeredSlides
-                  loop
+                  // loop
                   pagination={{ clickable: true }}
                   onSlideChange={(swiper) => {
                     setCurrentSlide(props.start_index + swiper.realIndex);
@@ -72,7 +72,7 @@ export default function NextGenCollectionSlideshow(props: Props) {
                 </Swiper>
               </Col>
             </Row>
-            <Row>
+            <Row className="pt-1">
               <Col>
                 <a
                   className="font-color-h font-smaller decoration-nonem decoration-hover-underline"

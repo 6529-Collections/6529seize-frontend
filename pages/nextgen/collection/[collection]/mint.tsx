@@ -12,7 +12,7 @@ const Header = dynamic(() => import("../../../../components/header/Header"), {
 const NextGenCollectionMintComponent = dynamic(
   () =>
     import(
-      "../../../../components/nextGen/collections/collection/mint/NextGenCollectionMint"
+      "../../../../components/nextGen/collections/collectionParts/mint/NextGenCollectionMint"
     ),
   {
     ssr: false,

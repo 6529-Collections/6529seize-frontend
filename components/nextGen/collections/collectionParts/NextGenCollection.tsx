@@ -1,12 +1,7 @@
 import { Container, Row, Col } from "react-bootstrap";
 import { useContractRead } from "wagmi";
 import { useEffect, useState } from "react";
-import {
-  Info,
-  AdditionalData,
-  LibraryScript,
-  PhaseTimes,
-} from "../../nextgen_entities";
+import { Info, AdditionalData, PhaseTimes } from "../../nextgen_entities";
 import Image from "next/image";
 import {
   NEXTGEN_CHAIN_ID,

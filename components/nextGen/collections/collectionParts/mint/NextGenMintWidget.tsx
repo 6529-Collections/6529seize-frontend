@@ -2,7 +2,11 @@ import styles from "../../NextGen.module.scss";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Tippy from "@tippyjs/react";
 import { Container, Row, Col, Form, Button } from "react-bootstrap";
-import { createArray, getNetworkName } from "../../../../../helpers/Helpers";
+import {
+  createArray,
+  getNetworkName,
+  isValidEthAddress,
+} from "../../../../../helpers/Helpers";
 import NextGenContractWriteStatus from "../../../NextGenContractWriteStatus";
 import { NEXTGEN_CHAIN_ID, NEXTGEN_MINTER } from "../../../nextgen_contracts";
 import {
@@ -200,15 +204,15 @@ export default function NextGenMintWidget(props: Props) {
 
   const mintToAddressEns = useEnsName({
     address:
-      mintToInput && mintToInput.startsWith("0x")
+      mintToInput && isValidEthAddress(mintToInput)
         ? (mintToInput as `0x${string}`)
         : undefined,
     chainId: 1,
   });
 
-  const delegatorsEns = useEnsName({
+  useEnsName({
     address:
-      mintToInput && mintToInput.startsWith("0x")
+      mintToInput && isValidEthAddress(mintToInput)
         ? (mintToInput as `0x${string}`)
         : undefined,
     chainId: 1,
@@ -237,13 +241,6 @@ export default function NextGenMintWidget(props: Props) {
     <Container className="no-padding">
       <Row>
         <Col>
-          <span className="d-inline-flex align-items-center">
-            <b>
-              {props.additional_data.circulation_supply} /{" "}
-              {props.additional_data.total_supply} minted
-              {available > 0 && ` | ${available} remaining`}
-            </b>
-          </span>
           <Form
             onChange={() => {
               setErrors([]);
@@ -292,7 +289,7 @@ export default function NextGenMintWidget(props: Props) {
                   <Tippy
                     content={`Mint for an address that has delegated to you${
                       props.delegators.length === 0
-                        ? ` - you currently have no props.delegators`
+                        ? ` - you currently have no delegators`
                         : ``
                     }`}
                     placement={"top"}
@@ -370,39 +367,31 @@ export default function NextGenMintWidget(props: Props) {
               <Form.Label column sm={12} className="d-flex align-items-center">
                 Wallet Mints:&nbsp;
                 <b>
-                  {proofResponse && proofResponse.spots > 0
-                    ? props.phase_times.al_status == Status.LIVE &&
-                      (proofResponse
-                        ? `${props.mint_counts.allowlist} / ${
-                            proofResponse.spots
-                          }${
-                            proofResponse.spots > props.mint_counts.allowlist
-                              ? ` (${
-                                  proofResponse.spots -
-                                  props.mint_counts.allowlist
-                                } remaining)`
-                              : ""
-                          }`
-                        : `-`)
-                    : `You don't have any spots in the allowlist`}
-                  {props.phase_times.public_status == Status.LIVE &&
-                    (proofResponse
-                      ? `${props.mint_counts.public} / ${
-                          props.additional_data.max_purchases
+                  {proofResponse &&
+                    props.phase_times.al_status === Status.LIVE &&
+                    (proofResponse.spots > 0
+                      ? `${props.mint_counts.allowlist} / ${
+                          proofResponse.spots
                         }${
-                          props.additional_data.max_purchases >
-                          props.mint_counts.public
+                          proofResponse.spots > props.mint_counts.allowlist
                             ? ` (${
-                                props.additional_data.max_purchases -
-                                props.mint_counts.public
+                                proofResponse.spots -
+                                props.mint_counts.allowlist
                               } remaining)`
                             : ""
                         }`
-                      : `-`)}
+                      : `You don't have any spots in the allowlist`)}
                   {props.phase_times.public_status == Status.LIVE &&
-                    `${
-                      props.additional_data.max_purchases -
+                    `${props.mint_counts.public} / ${
+                      props.additional_data.max_purchases
+                    }${
+                      props.additional_data.max_purchases >
                       props.mint_counts.public
+                        ? ` (${
+                            props.additional_data.max_purchases -
+                            props.mint_counts.public
+                          } remaining)`
+                        : ""
                     }`}
                 </b>
               </Form.Label>
@@ -474,7 +463,7 @@ export default function NextGenMintWidget(props: Props) {
                     ? chainId === NEXTGEN_CHAIN_ID
                       ? isMinting
                         ? `Processing...`
-                        : `Mint Now`
+                        : `Mint`
                       : `Switch to ${getNetworkName(NEXTGEN_CHAIN_ID)}`
                     : `Connect Wallet`}
                   {isMinting && (

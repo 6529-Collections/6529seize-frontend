@@ -315,6 +315,15 @@ h5 {
   }
 }
 
+.btn-black {
+  background-color: black !important;
+  color: white !important;
+
+  &:hover {
+    background-color: $dark-grey !important;
+  }
+}
+
 .btn-green {
   background-color: $green;
   color: white !important;

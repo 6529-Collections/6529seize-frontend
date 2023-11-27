@@ -37,8 +37,6 @@ export function NextGenTokenImageContent(props: Readonly<Props>) {
         .then((data) => {
           if (data.image) {
             setImage(parseIpfsUrl(data.image));
-          } else {
-            alert("hi");
           }
           if (!props.preview && data.animation_url) {
             setAnimation(parseIpfsUrl(data.animation_url));

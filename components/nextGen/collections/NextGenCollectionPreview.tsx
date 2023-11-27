@@ -6,9 +6,6 @@ import { AdditionalData, Info, PhaseTimes } from "../nextgen_entities";
 import { NEXTGEN_CHAIN_ID, NEXTGEN_CORE } from "../nextgen_contracts";
 import NextGenTokenPreview from "./NextGenTokenPreview";
 import {
-  extractAttributes,
-  extractField,
-  extractURI,
   retrieveCollectionAdditionalData,
   retrieveCollectionInfo,
   retrieveCollectionPhases,

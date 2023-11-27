@@ -12,7 +12,6 @@ import {
   PhaseTimes,
   TokensPerAddress,
   MintingDetails,
-  Status,
   CollectionWithMerkle,
   AllowlistType,
 } from "../../../nextgen_entities";
@@ -22,12 +21,12 @@ import {
   MINTING_USE_CASE,
 } from "../../../../../pages/delegation/[...section]";
 import { NEXTGEN_CHAIN_ID, NEXTGEN_CORE } from "../../../nextgen_contracts";
-import DateCountdown from "../../../../date-countdown/DateCountdown";
 import { fetchUrl } from "../../../../../services/6529api";
 import { retrieveCollectionCosts } from "../../../nextgen_helpers";
 import NextGenMintWidget from "./NextGenMintWidget";
 import NextGenMintBurnWidget from "./NextGenMintBurnWidget";
 import NextGenTokenPreview from "../../NextGenTokenPreview";
+import Image from "next/image";
 
 interface Props {
   collection: number;
@@ -52,6 +51,7 @@ export default function NextGenMint(props: Props) {
   });
 
   const [collection, setCollection] = useState<CollectionWithMerkle>();
+  const [collectionLoaded, setCollectionLoaded] = useState<boolean>(false);
 
   const [availableSupply, setAvailableSupply] = useState<number>(0);
 
@@ -205,6 +205,7 @@ export default function NextGenMint(props: Props) {
         if (response) {
           setCollection(response);
         }
+        setCollectionLoaded(true);
       });
     }
   }, [props.phase_times]);
@@ -272,57 +273,9 @@ export default function NextGenMint(props: Props) {
     }
   }
 
-  function printCountdown(title: string, date: number) {
-    return (
-      <div className={styles.countdownContainer}>
-        <DateCountdown title={title} date={new Date(date * 1000)} />
-      </div>
-    );
-  }
-
   return (
     <Container className="no-padding pb-4">
-      <Row className="pb-2">
-        <Col>
-          <div
-            className={`pt-2 pb-2 d-flex flex-wrap align-items-center gap-2 justify-content-center ${styles.mintDetails}`}>
-            <span className={`d-flex flex-column ${styles.mintDetailsSpan}`}>
-              <span>Mint Cost</span>
-              <span className="font-larger font-bolder">
-                {props.mint_price > 0 ? fromGWEI(props.mint_price) : `Free`}{" "}
-                {props.mint_price > 0 ? `ETH` : ``}
-              </span>
-            </span>
-            <span className={`d-flex flex-column ${styles.mintDetailsSpan}`}>
-              <span>Sales Model</span>
-              <span className="font-larger font-bolder">{getSalesModel()}</span>
-            </span>
-            {props.phase_times.al_status == Status.UPCOMING &&
-              printCountdown(
-                "Allowlist Starting in",
-                props.phase_times.allowlist_start_time
-              )}
-            {props.phase_times.al_status == Status.LIVE &&
-              printCountdown(
-                "Allowlist Ending in",
-                props.phase_times.allowlist_end_time
-              )}
-            {props.phase_times.al_status != Status.LIVE &&
-              props.phase_times.al_status != Status.UPCOMING &&
-              props.phase_times.public_status == Status.UPCOMING &&
-              printCountdown(
-                "Public Phase Starting in",
-                props.phase_times.public_start_time
-              )}
-            {props.phase_times.public_status == Status.LIVE &&
-              printCountdown(
-                "Public Phase Ending in",
-                props.phase_times.public_end_time
-              )}
-          </div>
-        </Col>
-      </Row>
-      <Row className="pt-4">
+      <Row>
         <Col sm={12} md={5}>
           <Container className="no-padding">
             <Row className="pb-4">
@@ -342,10 +295,42 @@ export default function NextGenMint(props: Props) {
         <Col sm={12} md={7}>
           <Container className="pt-3 pb-3">
             <Row>
+              <Col className="d-flex gap-2">
+                <span
+                  className={`mb-0 d-flex align-items-center gap-2 ${styles.nextgenTag}`}>
+                  <span>Mint Cost</span>
+                  <span>|</span>
+                  <span className="font-bolder">
+                    {props.mint_price > 0 ? fromGWEI(props.mint_price) : `Free`}{" "}
+                    {props.mint_price > 0 ? `ETH` : ``}
+                  </span>
+                </span>
+                <span
+                  className={`mb-0 d-flex align-items-center gap-2 ${styles.nextgenTag}`}>
+                  <span>Sales Model</span>
+                  <span>|</span>
+                  <span className="font-bolder">{getSalesModel()}</span>
+                </span>
+              </Col>
+            </Row>
+            <Row className="pt-3">
               <Col>
-                {collection
-                  ? printMintWidget(collection.al_type)
-                  : "Allowlist Not Found"}
+                {collectionLoaded &&
+                  (collection ? (
+                    printMintWidget(collection.al_type)
+                  ) : (
+                    <span className="d-flex gap-1 align-items-center">
+                      <Image
+                        loading="eager"
+                        width="0"
+                        height="0"
+                        style={{ height: "50px", width: "auto" }}
+                        src="/SummerGlasses.svg"
+                        alt="SummerGlasses"
+                      />
+                      <b>Allowlist Not Found</b>
+                    </span>
+                  ))}
               </Col>
             </Row>
           </Container>

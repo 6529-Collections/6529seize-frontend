@@ -54,7 +54,7 @@ export default function DateCountdown(props: Props) {
 
   return (
     <span className="d-flex flex-column">
-      <span>{props.title}:</span>
+      <span>{props.title}</span>
       <span className="font-larger font-bolder">
         {timeLeft.days > 0 && (
           <>

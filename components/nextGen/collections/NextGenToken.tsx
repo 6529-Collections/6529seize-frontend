@@ -17,7 +17,7 @@ import {
   NEXTGEN_CORE,
   NEXTGEN_MINTER,
 } from "../nextgen_contracts";
-import NextGenCollectionHeader from "./collection/NextGenCollectionHeader";
+import NextGenCollectionHeader from "./collectionParts/NextGenCollectionHeader";
 import { areEqualAddresses } from "../../../helpers/Helpers";
 import {
   retrieveCollectionAdditionalData,

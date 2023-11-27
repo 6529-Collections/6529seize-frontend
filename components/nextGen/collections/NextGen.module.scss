@@ -188,13 +188,13 @@
   border-bottom: 3px solid;
 }
 
-.phaseTimeTag {
+.nextgenTag {
   background-color: rgb(25, 25, 25);
   border-radius: 20px;
   padding: 5px 12px;
-  font-size: smaller;
-  font-weight: bolder;
   letter-spacing: 0.5px;
+  border: 1px solid white;
+  color: white;
 }
 
 .phaseTimeTagComplete {
@@ -251,6 +251,7 @@
   justify-content: center;
   width: 100%;
   min-height: 300px;
+  max-height: 450px;
   background-clip: content-box;
 
   iframe {
@@ -378,7 +379,8 @@
 
 .countdownContainer {
   padding: 20px;
-  background-color: $nextgen-grey;
+  color: $dark-grey;
+  background-color: white;
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
