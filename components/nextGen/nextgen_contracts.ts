@@ -1,5 +1,9 @@
 import { goerli } from "wagmi/chains";
-import { NEXTGEN_ADMIN_ABI, NEXTGEN_MINTER_ABI } from "../../abis";
+import {
+  NEXTGEN_ADMIN_ABI,
+  NEXTGEN_CORE_ABI,
+  NEXTGEN_MINTER_ABI,
+} from "../../abis";
 
 export const NEXTGEN_CHAIN_ID = goerli.id;
 

@@ -22,7 +22,7 @@ export default function NextGenAdminSignCollection(props: Readonly<Props>) {
 
   const collectionIndex = useCollectionIndex();
   const collectionArtists = useCollectionArtist(
-    parseInt(collectionIndex.data as string)
+    parseInt(collectionIndex?.data as string)
   );
 
   function getCollectionIds() {
