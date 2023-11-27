@@ -60,7 +60,8 @@ export default function HeaderConnect(props: Props) {
         <>
           <button
             className={`${styles.userProfileBtn}`}
-            onClick={() => setShowWalletModal(true)}>
+            onClick={() => setShowWalletModal(true)}
+          >
             <b>
               &nbsp;
               {display}
@@ -73,7 +74,8 @@ export default function HeaderConnect(props: Props) {
               (window.location.href = `/${
                 myProfile?.profile?.handle ?? account.address
               }`)
-            }>
+            }
+          >
             <FontAwesomeIcon icon="user"></FontAwesomeIcon>
           </button>
           {props.consolidations.length > 1 && (
@@ -85,7 +87,8 @@ export default function HeaderConnect(props: Props) {
                     props.view === WalletView.CONSOLIDATION
                       ? styles.consolidationBtnActive
                       : ""
-                  }`}>
+                  }`}
+                >
                   <Image
                     loading="eager"
                     priority
@@ -96,24 +99,29 @@ export default function HeaderConnect(props: Props) {
                   />
                 </button>
               }
-              align={"end"}>
+              align={"end"}
+            >
               <NavDropdown.Item
                 className={styles.dropdownItemViewMode}
-                onClick={() => props.setView(WalletView.WALLET)}>
+                onClick={() => props.setView(WalletView.WALLET)}
+              >
                 {props.view === WalletView.WALLET && (
                   <FontAwesomeIcon
                     className={styles.viewModeIcon}
-                    icon="check-circle"></FontAwesomeIcon>
+                    icon="check-circle"
+                  ></FontAwesomeIcon>
                 )}
                 Wallet
               </NavDropdown.Item>
               <NavDropdown.Item
                 onClick={() => props.setView(WalletView.CONSOLIDATION)}
-                className={styles.dropdownItemViewMode}>
+                className={styles.dropdownItemViewMode}
+              >
                 {props.view === WalletView.CONSOLIDATION && (
                   <FontAwesomeIcon
                     className={`${styles.viewModeIcon} ${styles.viewModeIconConsolidation}`}
-                    icon="check-circle"></FontAwesomeIcon>
+                    icon="check-circle"
+                  ></FontAwesomeIcon>
                 )}
                 Consolidation
               </NavDropdown.Item>

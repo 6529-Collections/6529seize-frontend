@@ -34,7 +34,6 @@ export default function UserSettingsPage({
 }) {
   const { requestAuth, setToast, updateMyProfile } = useContext(AuthContext);
   const router = useRouter();
-
   const [userName, setUserName] = useState<string>(user.profile?.handle ?? "");
 
   const getHighestTdhWalletOrNone = () => {
@@ -99,6 +98,7 @@ export default function UserSettingsPage({
         endpoint: "profiles",
         body,
       });
+
       if (response.profile?.handle !== user.profile?.handle) {
         router.push(`/${response.profile?.handle}/settings`);
       }
