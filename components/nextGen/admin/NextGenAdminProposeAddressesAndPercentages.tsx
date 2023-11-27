@@ -27,6 +27,17 @@ interface Props {
   close: () => void;
 }
 
+function getFunctionSelector(type: ProposalType) {
+  switch (type) {
+    case ProposalType.PRIMARY:
+      return FunctionSelectors.PROPOSE_PRIMARY_ADDRESSES_AND_PERCENTAGES;
+    case ProposalType.SECONDARY:
+      return FunctionSelectors.PROPOSE_SECONDARY_ADDRESSES_AND_PERCENTAGES;
+    default:
+      return "";
+  }
+}
+
 export default function NextGenAdminProposeAddressesAndPercentages(
   props: Readonly<Props>
 ) {
@@ -35,11 +46,7 @@ export default function NextGenAdminProposeAddressesAndPercentages(
   const globalAdmin = useGlobalAdmin(account.address as string);
   const functionAdmin = useFunctionAdmin(
     account.address as string,
-    props.type === ProposalType.PRIMARY
-      ? FunctionSelectors.PROPOSE_PRIMARY_ADDRESSES_AND_PERCENTAGES
-      : props.type === ProposalType.SECONDARY
-      ? FunctionSelectors.PROPOSE_SECONDARY_ADDRESSES_AND_PERCENTAGES
-      : ""
+    getFunctionSelector(props.type)
   );
 
   const collectionIndex = useCollectionIndex();

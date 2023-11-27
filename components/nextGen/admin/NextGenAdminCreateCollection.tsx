@@ -36,13 +36,6 @@ export default function NextGenAdminCreateCollection(props: Readonly<Props>) {
     parseInt(collectionIndex.data as string)
   );
 
-  const collectionIds = getCollectionIdsForAddress(
-    globalAdmin.data === true,
-    functionAdmin.data === true,
-    collectionAdmin.data,
-    parseInt(collectionIndex.data as string)
-  );
-
   const [collectionName, setCollectionName] = useState("");
   const [artist, setArtist] = useState("");
   const [description, setDescription] = useState("");

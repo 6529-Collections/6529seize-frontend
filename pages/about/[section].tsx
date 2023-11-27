@@ -62,7 +62,7 @@ interface Props {
 }
 
 export default function About(props: any) {
-  const pageprops: Readonly<Props> = props.pageProps;
+  const pageProps: Props = props.pageProps;
   const router = useRouter();
   const [breadcrumbs, setBreadcrumbs] = useState<Crumb[]>([
     { display: "Home", href: "/" },

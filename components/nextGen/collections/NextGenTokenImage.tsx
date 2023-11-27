@@ -51,38 +51,40 @@ export function NextGenTokenImageContent(props: Readonly<Props>) {
     }
   }, [props.token]);
 
-  return (
-    <>
-      {props.token.data && !props.token.image && !props.preview ? (
-        <iframe srcDoc={props.token.uri} />
-      ) : animation ? (
-        <iframe src={animation} />
-      ) : (
-        <Image
-          priority
-          loading={"eager"}
-          width="0"
-          height="0"
-          style={{
-            height: "auto",
-            width: image && image.startsWith("data") ? "100%" : "auto",
-            maxHeight: "100%",
-            maxWidth: "100%",
-          }}
-          src={cloudfrontUrl}
-          onError={({ currentTarget }) => {
-            if (currentTarget.src === cloudfrontUrl) {
-              currentTarget.src = generatorUrl;
-            }
-            if (image) {
-              currentTarget.src = image;
-            }
-          }}
-          alt={props.token.name}
-        />
-      )}
-    </>
-  );
+  let content;
+
+  if (props.token.data && !props.token.image && !props.preview) {
+    content = <iframe srcDoc={props.token.uri} />;
+  } else if (animation) {
+    content = <iframe src={animation} />;
+  } else {
+    content = (
+      <Image
+        priority
+        loading={"eager"}
+        width="0"
+        height="0"
+        style={{
+          height: "auto",
+          width: image?.startsWith("data") ? "100%" : "auto",
+          maxHeight: "100%",
+          maxWidth: "100%",
+        }}
+        src={cloudfrontUrl}
+        onError={({ currentTarget }) => {
+          if (currentTarget.src === cloudfrontUrl) {
+            currentTarget.src = generatorUrl;
+          }
+          if (image) {
+            currentTarget.src = image;
+          }
+        }}
+        alt={props.token.name}
+      />
+    );
+  }
+
+  return <>{content}</>;
 }
 
 export default function NextGenTokenImage(props: Readonly<Props>) {

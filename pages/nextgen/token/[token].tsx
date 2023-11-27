@@ -3,8 +3,7 @@ import styles from "../../../styles/Home.module.scss";
 
 import dynamic from "next/dynamic";
 import HeaderPlaceholder from "../../../components/header/HeaderPlaceholder";
-import { useState } from "react";
-import Breadcrumb, { Crumb } from "../../../components/breadcrumb/Breadcrumb";
+import Breadcrumb from "../../../components/breadcrumb/Breadcrumb";
 
 const Header = dynamic(() => import("../../../components/header/Header"), {
   ssr: false,
@@ -21,9 +20,8 @@ const NextGenTokenComponent = dynamic(
 export default function NextGenCollectionToken(props: any) {
   const pageProps = props.pageProps;
   const pagenameFull = `${pageProps.name} | 6529 SEIZE`;
-  const [connectedWallets, setConnectedWallets] = useState<string[]>([]);
 
-  const [breadcrumbs, setBreadcrumbs] = useState<Crumb[]>(
+  const breadcrumbs =
     pageProps.collection > 0
       ? [
           { display: "Home", href: "/" },
@@ -37,8 +35,7 @@ export default function NextGenCollectionToken(props: any) {
       : [
           { display: "Home", href: "/" },
           { display: "NextGen", href: "/nextgen" },
-        ]
-  );
+        ];
 
   return (
     <>
@@ -64,7 +61,7 @@ export default function NextGenCollectionToken(props: any) {
       </Head>
 
       <main className={styles.main}>
-        <Header onSetWallets={(wallets) => setConnectedWallets(wallets)} />
+        <Header />
         <Breadcrumb breadcrumbs={breadcrumbs} />
         <NextGenTokenComponent
           collection={pageProps.collection}
@@ -86,6 +83,7 @@ export async function getServerSideProps(req: any, res: any, resolvedUrl: any) {
   let name = `NextGen ${
     collection > 0 ? `Collection #${collection}` : ``
   } Token #${token}`;
+
   const props = {
     collection,
     token,
@@ -93,6 +91,6 @@ export async function getServerSideProps(req: any, res: any, resolvedUrl: any) {
   };
 
   return {
-    props: Readonly<Props>,
+    props,
   };
 }

@@ -38,6 +38,20 @@ export default function NextGenCollectionMint(props: Readonly<Props>) {
   const [burnAmount, setBurnAmount] = useState<number>(0);
   const [mintPrice, setMintPrice] = useState<number>(0);
 
+  useContractRead({
+    address: NEXTGEN_CORE.contract as `0x${string}`,
+    abi: NEXTGEN_CORE.abi,
+    chainId: NEXTGEN_CHAIN_ID,
+    functionName: "burnAmount",
+    watch: true,
+    args: [props.collection],
+    onSettled(data: any, error: any) {
+      if (data) {
+        setBurnAmount(parseInt(data));
+      }
+    },
+  });
+
   retrieveCollectionInfo(props.collection, (data: Info) => {
     setInfo(data);
     const nameCrumb = data.name

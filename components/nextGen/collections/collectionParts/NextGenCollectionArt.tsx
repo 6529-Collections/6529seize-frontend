@@ -1,6 +1,6 @@
 import styles from "../NextGen.module.scss";
 import { Container, Row, Col } from "react-bootstrap";
-import { AdditionalData, TokenURI } from "../../nextgen_entities";
+import { AdditionalData } from "../../nextgen_entities";
 import NextGenTokenList from "../NextGenTokenList";
 import DotLoader from "../../../dotLoader/DotLoader";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";

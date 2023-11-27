@@ -12,7 +12,6 @@ import NextGenContractWriteStatus from "../NextGenContractWriteStatus";
 import {
   useGlobalAdmin,
   useCollectionIndex,
-  useCollectionAdmin,
   getCollectionIdsForAddress,
 } from "../nextgen_helpers";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";

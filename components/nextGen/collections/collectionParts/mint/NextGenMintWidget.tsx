@@ -28,6 +28,7 @@ import { NULL_ADDRESS } from "../../../../../constants";
 import { fetchUrl } from "../../../../../services/6529api";
 import { useWeb3Modal } from "@web3modal/react";
 import { NextGenMintDelegatorOption } from "./NextGenMintDelegatorOption";
+import { Spinner } from "../../NextGen";
 
 interface Props {
   collection: number;
@@ -41,11 +42,17 @@ interface Props {
   mintForAddress: (mintForAddress: string) => void;
 }
 
+function getMintValue(mintCount: number, mintPrice: number) {
+  if (!mintCount || !mintPrice) {
+    return BigInt(0);
+  }
+  return BigInt(mintPrice * mintCount);
+}
+
 export default function NextGenMintWidget(props: Readonly<Props>) {
   const account = useAccount();
   const chainId = useChainId();
   const web3Modal = useWeb3Modal();
-
   const [available, setAvailable] = useState<number>(0);
 
   useEffect(() => {
@@ -71,7 +78,7 @@ export default function NextGenMintWidget(props: Readonly<Props>) {
   }, [props.delegators]);
 
   const [mintCount, setMintCount] = useState<number>(1);
-  const [salt, setSalt] = useState<number>(0);
+  const salt = 0;
   const [isMinting, setIsMinting] = useState(false);
 
   const [errors, setErrors] = useState<string[]>([]);
@@ -100,9 +107,7 @@ export default function NextGenMintWidget(props: Readonly<Props>) {
     address: NEXTGEN_MINTER.contract as `0x${string}`,
     abi: NEXTGEN_MINTER.abi,
     chainId: NEXTGEN_CHAIN_ID,
-    value: mintCount
-      ? BigInt(props.mint_price ? props.mint_price * mintCount : 0)
-      : BigInt(0),
+    value: getMintValue(mintCount, props.mint_price),
     functionName: "mint",
     onError() {
       setIsMinting(false);
@@ -146,6 +151,9 @@ export default function NextGenMintWidget(props: Readonly<Props>) {
   function disableMint() {
     if (!account.isConnected || chainId !== NEXTGEN_CHAIN_ID) {
       return false;
+    }
+    if (available <= 0) {
+      return true;
     }
     return (
       !props.phase_times ||
@@ -226,7 +234,7 @@ export default function NextGenMintWidget(props: Readonly<Props>) {
   }, [mintToAddressEns.data]);
 
   const mintToAddressFromEns = useEnsAddress({
-    name: mintToInput && mintToInput.endsWith(".eth") ? mintToInput : undefined,
+    name: mintToInput?.endsWith(".eth") ? mintToInput : undefined,
     chainId: 1,
   });
 
@@ -236,6 +244,81 @@ export default function NextGenMintWidget(props: Readonly<Props>) {
       setMintToInput(`${mintToInput} - ${mintToAddressFromEns.data}`);
     }
   }, [mintToAddressFromEns.data]);
+
+  function renderAllowlistStatus() {
+    if (proofResponse && props.phase_times.al_status === Status.LIVE) {
+      if (proofResponse.spots > 0) {
+        const spotsRemaining =
+          proofResponse.spots > props.mint_counts.allowlist
+            ? ` (${
+                proofResponse.spots - props.mint_counts.allowlist
+              } remaining)`
+            : "";
+        return `${props.mint_counts.allowlist} / ${proofResponse.spots}${spotsRemaining}`;
+      } else {
+        return "You don't have any spots in the allowlist";
+      }
+    }
+    return null;
+  }
+
+  function renderPublicStatus() {
+    if (props.phase_times.public_status == Status.LIVE) {
+      const publicRemaining =
+        props.additional_data.max_purchases > props.mint_counts.public
+          ? ` (${
+              props.additional_data.max_purchases - props.mint_counts.public
+            } remaining)`
+          : "";
+      return `${props.mint_counts.public} / ${props.additional_data.max_purchases}${publicRemaining}`;
+    }
+    return null;
+  }
+
+  function renderAllowlistOptions() {
+    if (
+      props.phase_times.al_status == Status.LIVE &&
+      proofResponse &&
+      proofResponse.spots > 0
+    ) {
+      return createArray(
+        1,
+        proofResponse.spots - props.mint_counts.allowlist
+      ).map((i) => (
+        <option selected key={`allowlist-mint-count-${i}`} value={i}>
+          {i > 0 ? i : `n/a`}
+        </option>
+      ));
+    }
+    return null;
+  }
+
+  function renderPublicOptions() {
+    if (props.phase_times.public_status == Status.LIVE) {
+      return createArray(
+        1,
+        props.additional_data.max_purchases - props.mint_counts.public
+      ).map((i) => (
+        <option key={`public-mint-count-${i}`} value={i}>
+          {i > 0 ? i : `n/a`}
+        </option>
+      ));
+    }
+    return <option value={0}>n/a</option>;
+  }
+
+  function renderButtonText() {
+    if (!account.isConnected) {
+      return "Connect Wallet";
+    }
+    if (chainId !== NEXTGEN_CHAIN_ID) {
+      return `Switch to ${getNetworkName(NEXTGEN_CHAIN_ID)}`;
+    }
+    if (isMinting) {
+      return "Processing...";
+    }
+    return "Mint";
+  }
 
   return (
     <Container className="no-padding">
@@ -366,34 +449,8 @@ export default function NextGenMintWidget(props: Readonly<Props>) {
             <Form.Group as={Row} className="pt-2">
               <Form.Label column sm={12} className="d-flex align-items-center">
                 Wallet Mints:&nbsp;
-                <b>
-                  {proofResponse &&
-                    props.phase_times.al_status === Status.LIVE &&
-                    (proofResponse.spots > 0
-                      ? `${props.mint_counts.allowlist} / ${
-                          proofResponse.spots
-                        }${
-                          proofResponse.spots > props.mint_counts.allowlist
-                            ? ` (${
-                                proofResponse.spots -
-                                props.mint_counts.allowlist
-                              } remaining)`
-                            : ""
-                        }`
-                      : `You don't have any spots in the allowlist`)}
-                  {props.phase_times.public_status == Status.LIVE &&
-                    `${props.mint_counts.public} / ${
-                      props.additional_data.max_purchases
-                    }${
-                      props.additional_data.max_purchases >
-                      props.mint_counts.public
-                        ? ` (${
-                            props.additional_data.max_purchases -
-                            props.mint_counts.public
-                          } remaining)`
-                        : ""
-                    }`}
-                </b>
+                <b>{renderAllowlistStatus()}</b>
+                <b>{renderPublicStatus()}</b>
               </Form.Label>
             </Form.Group>
             <Form.Group as={Row} className="pb-2">
@@ -420,33 +477,7 @@ export default function NextGenMintWidget(props: Readonly<Props>) {
                     setMintCount(parseInt(e.currentTarget.value))
                   }>
                   {props.phase_times && props.mint_counts ? (
-                    props.phase_times.al_status == Status.LIVE &&
-                    proofResponse &&
-                    proofResponse.spots > 0 ? (
-                      createArray(
-                        1,
-                        proofResponse.spots - props.mint_counts.allowlist
-                      ).map((i) => (
-                        <option
-                          selected
-                          key={`allowlist-mint-count-${i}`}
-                          value={i}>
-                          {i > 0 ? i : `n/a`}
-                        </option>
-                      ))
-                    ) : props.phase_times.public_status == Status.LIVE ? (
-                      createArray(
-                        1,
-                        props.additional_data.max_purchases -
-                          props.mint_counts.public
-                      ).map((i) => (
-                        <option key={`public-mint-count-${i}`} value={i}>
-                          {i > 0 ? i : `n/a`}
-                        </option>
-                      ))
-                    ) : (
-                      <option value={0}>n/a</option>
-                    )
+                    renderAllowlistOptions() ?? renderPublicOptions()
                   ) : (
                     <option value={0}>n/a</option>
                   )}
@@ -459,22 +490,8 @@ export default function NextGenMintWidget(props: Readonly<Props>) {
                   className={styles.mintBtn}
                   disabled={disableMint()}
                   onClick={handleMintClick}>
-                  {account.isConnected
-                    ? chainId === NEXTGEN_CHAIN_ID
-                      ? isMinting
-                        ? `Processing...`
-                        : `Mint`
-                      : `Switch to ${getNetworkName(NEXTGEN_CHAIN_ID)}`
-                    : `Connect Wallet`}
-                  {isMinting && (
-                    <div className="d-inline">
-                      <div
-                        className={`spinner-border ${styles.loader}`}
-                        role="status">
-                        <span className="sr-only"></span>
-                      </div>
-                    </div>
-                  )}
+                  {renderButtonText()}
+                  {isMinting && <Spinner />}
                 </Button>
               </Col>
             </Form.Group>
@@ -488,8 +505,8 @@ export default function NextGenMintWidget(props: Readonly<Props>) {
                 </Form.Label>
                 <Col sm={12} className="d-flex align-items-center">
                   <ul className="mb-0">
-                    {errors.map((e, index) => (
-                      <li key={`mint-error-${index}`}>{e}</li>
+                    {errors.map((e) => (
+                      <li key={`mint-error-${e.replaceAll(" ", "-")}`}>{e}</li>
                     ))}
                   </ul>
                 </Col>

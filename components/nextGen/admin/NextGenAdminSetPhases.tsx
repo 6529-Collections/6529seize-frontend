@@ -39,7 +39,7 @@ export default function NextGenAdminSetPhases(props: Readonly<Props>) {
   const account = useAccount();
   const signMessage = useSignMessage();
 
-  const [uuid, setuuid] = useState(uuidv4());
+  const [uuid, setUuid] = useState(uuidv4());
 
   const globalAdmin = useGlobalAdmin(account.address as string);
   const functionAdmin = useFunctionAdmin(
@@ -348,9 +348,7 @@ export default function NextGenAdminSetPhases(props: Readonly<Props>) {
                   <Form.Label>Merkle Root</Form.Label>
                   <Form.Control
                     type="text"
-                    placeholder={
-                      merkleRoot ? merkleRoot : "Upload file to generate"
-                    }
+                    placeholder={merkleRoot || "Upload file to generate"}
                     value={merkleRoot}
                     disabled
                   />

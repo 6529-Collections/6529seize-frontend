@@ -1,6 +1,6 @@
 import { Container, Row, Col, Button, Form } from "react-bootstrap";
 import styles from "./NextGenAdmin.module.scss";
-import { useAccount, useContractRead, useContractWrite } from "wagmi";
+import { useAccount, useContractWrite } from "wagmi";
 import { useEffect, useState } from "react";
 import {
   FunctionSelectors,

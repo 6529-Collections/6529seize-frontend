@@ -29,7 +29,7 @@ export default function NextGenAdminInitializeExternalBurnSwap(
 ) {
   const account = useAccount();
   const signMessage = useSignMessage();
-  const [uuid, setuuid] = useState(uuidv4());
+  const [uuid, setUuid] = useState(uuidv4());
 
   const globalAdmin = useGlobalAdmin(account.address as string);
   const functionAdmin = useFunctionAdmin(

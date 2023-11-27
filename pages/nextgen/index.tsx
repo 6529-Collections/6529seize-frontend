@@ -19,10 +19,7 @@ const NextGenComponent = dynamic(
 );
 
 export default function NextGen() {
-  const [breadcrumbs, setBreadcrumbs] = useState<Crumb[]>([
-    { display: "Home", href: "/" },
-    { display: "NextGen" },
-  ]);
+  const breadcrumbs = [{ display: "Home", href: "/" }, { display: "NextGen" }];
 
   return (
     <>

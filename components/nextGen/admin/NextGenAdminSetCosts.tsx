@@ -50,8 +50,8 @@ export default function NextGenAdminSetCosts(props: Readonly<Props>) {
   const [collectionStartCost, setCollectionStartCost] = useState("");
   const [collectionEndCost, setCollectionEndCost] = useState("");
   const [rate, setRate] = useState("");
-  const [timeperiod, setTimePeriod] = useState("");
-  const [salesOption, setSaleOption] = useState("");
+  const [timePeriod, setTimePeriod] = useState("");
+  const [salesOption, setSalesOption] = useState("");
   const [delegationAddress, setDelegationAddress] = useState(
     ANY_COLLECTION.contract
   );
@@ -66,7 +66,7 @@ export default function NextGenAdminSetCosts(props: Readonly<Props>) {
       setCollectionEndCost(data.end_mint_cost.toString());
       setRate(data.rate.toString());
       setTimePeriod(data.time_period.toString());
-      setSaleOption(data.sales_option.toString());
+      setSalesOption(data.sales_option.toString());
       setDelegationAddress(data.del_address);
     }
   });
@@ -99,7 +99,7 @@ export default function NextGenAdminSetCosts(props: Readonly<Props>) {
     if (!rate) {
       errors.push("Rate is required");
     }
-    if (!timeperiod) {
+    if (!timePeriod) {
       errors.push("Time period is required");
     }
     if (!salesOption) {
@@ -126,7 +126,7 @@ export default function NextGenAdminSetCosts(props: Readonly<Props>) {
           collectionStartCost,
           collectionEndCost,
           rate,
-          timeperiod,
+          timePeriod,
           salesOption,
           delegationAddress,
         ],
@@ -213,7 +213,7 @@ export default function NextGenAdminSetCosts(props: Readonly<Props>) {
               <Form.Control
                 type="integer"
                 placeholder="unix epoch time eg. 86400 (seconds in a day)"
-                value={timeperiod}
+                value={timePeriod}
                 onChange={(e: any) => setTimePeriod(e.target.value)}
               />
             </Form.Group>
@@ -223,7 +223,7 @@ export default function NextGenAdminSetCosts(props: Readonly<Props>) {
                 type="integer"
                 placeholder="1. Fixed Price, 2. Exponential/Linear decrease, 3. Periodic Sale"
                 value={salesOption}
-                onChange={(e: any) => setSaleOption(e.target.value)}
+                onChange={(e: any) => setSalesOption(e.target.value)}
               />
             </Form.Group>
             <Form.Group className="mb-3">

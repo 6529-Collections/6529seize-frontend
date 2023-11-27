@@ -140,13 +140,13 @@ export function nextTdh() {
   const now = new Date();
   const utcMidnight = new Date(now).setUTCHours(24, 0, 0, 0);
 
-  var diffMS = utcMidnight / 1000 - now.getTime() / 1000;
-  var diffHr = Math.floor(diffMS / 3600);
+  let diffMS = utcMidnight / 1000 - now.getTime() / 1000;
+  let diffHr = Math.floor(diffMS / 3600);
   diffMS = diffMS - diffHr * 3600;
-  var diffMi = Math.floor(diffMS / 60);
+  let diffMi = Math.floor(diffMS / 60);
   diffMS = diffMS - diffMi * 60;
-  var diffS = Math.floor(diffMS);
-  var result = diffHr < 10 ? "0" + diffHr : diffHr;
+  let diffS = Math.floor(diffMS);
+  let result = diffHr < 10 ? "0" + diffHr : diffHr;
   result += ":" + (diffMi < 10 ? "0" + diffMi : diffMi);
   result += ":" + (diffS < 10 ? "0" + diffS : diffS);
   return result.toString();
@@ -200,11 +200,14 @@ export const isValidEthAddress = (address: string) =>
   /^0x[0-9a-fA-F]{40}$/.test(address);
 
 export function getTransactionLink(chain_id: number, hash: string) {
-  return chain_id === sepolia.id
-    ? `https://sepolia.etherscan.io/tx/${hash}`
-    : chain_id === goerli.id
-    ? `https://goerli.etherscan.io/tx/${hash}`
-    : `https://etherscan.io/tx/${hash}`;
+  switch (chain_id) {
+    case sepolia.id:
+      return `https://sepolia.etherscan.io/tx/${hash}`;
+    case goerli.id:
+      return `https://goerli.etherscan.io/tx/${hash}`;
+    default:
+      return `https://etherscan.io/tx/${hash}`;
+  }
 }
 
 export async function getContentTypeFromURL(url: string) {
@@ -312,7 +315,7 @@ export const isDivInViewport = (divRef: any) => {
 export function capitalizeEveryWord(input: string): string {
   return input
     .toLocaleLowerCase()
-    .replace(/^(.)|\s+(.)/g, (match: string) => match.toUpperCase());
+    .replace(/(?:^|\s+)(.)/g, (match) => match.toUpperCase());
 }
 
 export function getNetworkName(chainId: number) {
@@ -395,26 +398,30 @@ export function getDateFilters(
   switch (dateSelection) {
     case DateIntervalsSelection.ALL:
       break;
-    case DateIntervalsSelection.TODAY:
+    case DateIntervalsSelection.TODAY: {
       filters += `&from_date=${formatDateFilterDate(new Date())}`;
       break;
-    case DateIntervalsSelection.YESTERDAY:
+    }
+    case DateIntervalsSelection.YESTERDAY: {
       const yesterday = new Date();
       yesterday.setUTCDate(yesterday.getUTCDate() - 1);
       filters += `&from_date=${formatDateFilterDate(yesterday)}`;
       filters += `&to_date=${formatDateFilterDate(yesterday)}`;
       break;
-    case DateIntervalsSelection.LAST_7:
+    }
+    case DateIntervalsSelection.LAST_7: {
       const weekAgo = new Date();
       weekAgo.setUTCDate(weekAgo.getUTCDate() - 7);
       filters += `&from_date=${formatDateFilterDate(weekAgo)}`;
       break;
-    case DateIntervalsSelection.THIS_MONTH:
+    }
+    case DateIntervalsSelection.THIS_MONTH: {
       const firstDayOfMonth = new Date();
       firstDayOfMonth.setUTCDate(1);
       filters += `&from_date=${formatDateFilterDate(firstDayOfMonth)}`;
       break;
-    case DateIntervalsSelection.PREVIOUS_MONTH:
+    }
+    case DateIntervalsSelection.PREVIOUS_MONTH: {
       const firstDayOfPreviousMonth = new Date();
       firstDayOfPreviousMonth.setUTCMonth(
         firstDayOfPreviousMonth.getUTCMonth() - 1
@@ -425,13 +432,15 @@ export function getDateFilters(
       filters += `&from_date=${formatDateFilterDate(firstDayOfPreviousMonth)}`;
       filters += `&to_date=${formatDateFilterDate(lastDayOfPreviousMonth)}`;
       break;
-    case DateIntervalsSelection.YEAR_TO_DATE:
+    }
+    case DateIntervalsSelection.YEAR_TO_DATE: {
       const firstDayOfYear = new Date();
       firstDayOfYear.setUTCMonth(0);
       firstDayOfYear.setUTCDate(1);
       filters += `&from_date=${formatDateFilterDate(firstDayOfYear)}`;
       break;
-    case DateIntervalsSelection.LAST_YEAR:
+    }
+    case DateIntervalsSelection.LAST_YEAR: {
       const firstDayOfLastYear = new Date();
       firstDayOfLastYear.setUTCFullYear(
         firstDayOfLastYear.getUTCFullYear() - 1
@@ -444,7 +453,8 @@ export function getDateFilters(
       filters += `&from_date=${formatDateFilterDate(firstDayOfLastYear)}`;
       filters += `&to_date=${formatDateFilterDate(lastDayOfLastYear)}`;
       break;
-    case DateIntervalsSelection.CUSTOM:
+    }
+    case DateIntervalsSelection.CUSTOM: {
       if (fromDate) {
         filters += `&from_date=${formatDateFilterDate(fromDate)}`;
       }
@@ -452,6 +462,7 @@ export function getDateFilters(
         filters += `&to_date=${formatDateFilterDate(toDate)}`;
       }
       break;
+    }
   }
   return filters;
 }

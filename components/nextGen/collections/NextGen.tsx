@@ -14,6 +14,16 @@ enum TypeFilter {
   COMPLETE = "COMPLETE",
 }
 
+export function Spinner() {
+  return (
+    <div className="d-inline">
+      <output className={`spinner-border ${styles.loader}`}>
+        <span className="sr-only">Loading...</span>
+      </output>
+    </div>
+  );
+}
+
 export default function NextGen() {
   const collectionIndexRead = useCollectionIndex();
   const collectionIndex = collectionIndexRead.data
@@ -98,9 +108,7 @@ export default function NextGen() {
             alt="nextgen"
           />
           <Dropdown className={styles.filterDropdown} drop={"down-centered"}>
-            <Dropdown.Toggle>
-              Status: {typeFilter ? typeFilter : "ALL"}
-            </Dropdown.Toggle>
+            <Dropdown.Toggle>Status: {typeFilter ?? "ALL"}</Dropdown.Toggle>
             <Dropdown.Menu>
               {Object.values(TypeFilter).map((filter) => (
                 <Dropdown.Item
