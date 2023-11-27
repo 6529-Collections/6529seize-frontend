@@ -12,7 +12,7 @@ interface Props {
   show_view_all?: boolean;
 }
 
-export default function NextGenCollectionArt(props: Props) {
+export default function NextGenCollectionArt(props: Readonly<Props>) {
   return (
     <Container className="no-padding">
       <Row>

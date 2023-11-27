@@ -12,7 +12,7 @@ interface Props {
   }[];
 }
 
-export default function NotFound(props: Props) {
+export default function NotFound(props: Readonly<Props>) {
   return (
     <Container className="pt-5 text-center">
       <Row>

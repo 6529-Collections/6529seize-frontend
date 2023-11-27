@@ -37,7 +37,7 @@ interface Props {
   burn_amount: number;
 }
 
-export default function NextGenMint(props: Props) {
+export default function NextGenMint(props: Readonly<Props>) {
   const account = useAccount();
 
   const [mintForAddress, setMintForAddress] = useState<string>("");

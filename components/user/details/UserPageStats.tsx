@@ -60,7 +60,7 @@ const GRAPH_OPTIONS = {
   },
 };
 
-export default function UserPageStats(props: Props) {
+export default function UserPageStats(props: Readonly<Props>) {
   const [tdhHistory, setTdhHistory] = useState<TDHHistory[]>([]);
   const [tdhLabels, setTdhLabels] = useState<Date[]>([]);
   const [pageSize, setPageSize] = useState(10);

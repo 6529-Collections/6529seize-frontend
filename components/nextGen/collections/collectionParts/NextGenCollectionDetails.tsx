@@ -28,7 +28,7 @@ interface Props {
   artist_signature: string;
 }
 
-export default function NextGenCollectionDetails(props: Props) {
+export default function NextGenCollectionDetails(props: Readonly<Props>) {
   const [mintingDetails, setMintingDetails] = useState<MintingDetails>();
   const [libraryScript, setLibraryScript] = useState<LibraryScript>();
 

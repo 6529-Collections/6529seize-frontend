@@ -1,11 +1,11 @@
-import { useState, useEffect, useRef, useMemo } from "react";
+import { useState, useEffect } from "react";
 
 interface Props {
   title: string;
   date: Date;
 }
 
-export default function DateCountdown(props: Props) {
+export default function DateCountdown(props: Readonly<Props>) {
   const [timeLeft, setTimeLeft] = useState(calculateTimeLeft());
 
   function calculateTimeLeft() {

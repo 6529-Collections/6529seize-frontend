@@ -7,7 +7,7 @@ interface Props {
   hide_info: boolean;
 }
 
-export default function NextGenTokenList(props: Props) {
+export default function NextGenTokenList(props: Readonly<Props>) {
   return (
     <Container className="no-padding">
       <Row>

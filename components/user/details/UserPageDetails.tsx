@@ -32,7 +32,7 @@ export enum Focus {
   STATS = "stats",
 }
 
-export default function UserPageDetails(props: Props) {
+export default function UserPageDetails(props: Readonly<Props>) {
   const router = useRouter();
   const [focus, setFocus] = useState<Focus>(
     (router.query.focus as Focus) ?? Focus.COLLECTION

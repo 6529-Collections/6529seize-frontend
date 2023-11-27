@@ -29,7 +29,7 @@ enum Sort {
   total_balance = "total_balance",
 }
 
-export default function NFTLeaderboard(props: Props) {
+export default function NFTLeaderboard(props: Readonly<Props>) {
   const [view, setView] = useState<VIEW>(VIEW.CONSOLIDATION);
   const [pageProps, setPageProps] = useState<Props>(props);
   const [totalResults, setTotalResults] = useState(0);
@@ -129,15 +129,13 @@ export default function NFTLeaderboard(props: Props) {
                   <th className={styles.gap}></th>
                   <th
                     colSpan={3}
-                    className={`${styles.tdh} ${styles.borderBottom}`}
-                  >
+                    className={`${styles.tdh} ${styles.borderBottom}`}>
                     <b>This Card</b>
                   </th>
                   <th className={styles.gap}></th>
                   <th
                     colSpan={3}
-                    className={`${styles.tdh} ${styles.borderBottom}`}
-                  >
+                    className={`${styles.tdh} ${styles.borderBottom}`}>
                     <b>Total</b>
                   </th>
                 </tr>

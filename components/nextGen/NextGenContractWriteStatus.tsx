@@ -9,14 +9,14 @@ interface Props {
   error: any;
 }
 
-export default function NextGenContractWriteStatus(props: Props) {
+export default function NextGenContractWriteStatus(props: Readonly<Props>) {
   const waitContractWrite = useWaitForTransaction({
     confirmations: 1,
     hash: props.hash,
   });
 
   function getError() {
-    const error = props.error as any;
+    const error = props.error;
     if (error.shortMessage) {
       return error.shortMessage;
     }
@@ -27,6 +27,16 @@ export default function NextGenContractWriteStatus(props: Props) {
       return error.message;
     }
     return JSON.stringify(props.error);
+  }
+
+  function getStatusMessage() {
+    if (waitContractWrite.isLoading) {
+      return "Submitted";
+    } else if (waitContractWrite.isSuccess) {
+      return "Successful";
+    } else {
+      return "Failed";
+    }
   }
 
   return (
@@ -41,12 +51,7 @@ export default function NextGenContractWriteStatus(props: Props) {
       {props.error && <span className="text-danger">{getError()}</span>}
       {!props.isLoading && props.hash && (
         <span>
-          Transaction{" "}
-          {waitContractWrite.isLoading
-            ? `Submitted`
-            : waitContractWrite.isSuccess
-            ? `Successful`
-            : `Failed`}{" "}
+          Transaction {getStatusMessage()}{" "}
           <a
             href={getTransactionLink(NEXTGEN_CHAIN_ID, props.hash)}
             target="_blank"

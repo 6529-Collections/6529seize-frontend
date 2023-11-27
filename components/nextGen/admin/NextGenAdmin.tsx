@@ -1,6 +1,6 @@
 import { Container, Row, Col, Button } from "react-bootstrap";
 import { useAccount } from "wagmi";
-import { use, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import styles from "./NextGenAdmin.module.scss";
 import { useRouter } from "next/router";
 import {
@@ -83,6 +83,21 @@ enum ArtistFocus {
   PROPOSE_SECONDARY_ADDRESSES_AND_PERCENTAGES = "propose_secondary_addresses_and_percentages",
 }
 
+export function printAdminErrors(errors: string[]) {
+  return (
+    <div className="mb-3">
+      <ul>
+        {errors.map((error) => (
+          <li
+            key={`error-${error.replaceAll("", " ")}`}
+            className="text-danger">
+            {error}
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
 export default function NextGenAdmin() {
   const router = useRouter();
   const account = useAccount();

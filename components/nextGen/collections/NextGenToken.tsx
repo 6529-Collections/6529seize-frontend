@@ -33,7 +33,7 @@ interface Props {
   token: number;
 }
 
-export default function NextGenToken(props: Props) {
+export default function NextGenToken(props: Readonly<Props>) {
   const account = useAccount();
 
   const [tokenFetched, setTokenFetched] = useState(false);

@@ -93,6 +93,6 @@ export async function getServerSideProps(req: any, res: any, resolvedUrl: any) {
   };
 
   return {
-    props: props,
+    props: Readonly<Props>,
   };
 }

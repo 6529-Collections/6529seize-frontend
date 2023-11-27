@@ -9,7 +9,7 @@ interface Props {
   tdh: ConsolidatedTDHMetrics | TDHMetrics | null;
 }
 
-export default function UserPageOverview(props: Props) {
+export default function UserPageOverview(props: Readonly<Props>) {
   const [showActivity, setShowActivity] = useState<boolean>(false);
 
   useEffect(() => {

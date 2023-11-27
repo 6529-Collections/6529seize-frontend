@@ -26,7 +26,7 @@ export enum TypeFilter {
   BURNS = "Burns",
 }
 
-export default function LatestActivity(props: Props) {
+export default function LatestActivity(props: Readonly<Props>) {
   const router = useRouter();
   const [activity, setActivity] = useState<Transaction[]>([]);
   const [page, setPage] = useState(props.page);

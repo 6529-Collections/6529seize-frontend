@@ -18,7 +18,7 @@ interface Props {
   hide_background?: boolean;
 }
 
-export default function NextGenTokenPreview(props: Props) {
+export default function NextGenTokenPreview(props: Readonly<Props>) {
   const [owner, setOwner] = useState<`0x${string}`>();
   const [ownerENS, setOwnerENS] = useState<string>();
   const [name, setName] = useState<string>();

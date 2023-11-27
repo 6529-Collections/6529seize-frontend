@@ -27,7 +27,7 @@ interface AddressPercentage {
 }
 
 export default function NextGenAdminAcceptAddressesAndPercentages(
-  props: Props
+  props: Readonly<Props>
 ) {
   const account = useAccount();
 
@@ -60,11 +60,6 @@ export default function NextGenAdminAcceptAddressesAndPercentages(
   const [secondary1, setSecondary1] = useState<AddressPercentage>();
   const [secondary2, setSecondary2] = useState<AddressPercentage>();
   const [secondary3, setSecondary3] = useState<AddressPercentage>();
-
-  const [
-    secondaryAddressesAndPercentages,
-    setSecondaryAddressesAndPercentages,
-  ] = useState<AddressPercentage[]>([]);
 
   const [errors, setErrors] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
@@ -387,8 +382,10 @@ export default function NextGenAdminAcceptAddressesAndPercentages(
             {!loading && errors.length > 0 && (
               <div className="mb-3">
                 <ul>
-                  {errors.map((error, index) => (
-                    <li key={`error-${index}`} className="text-danger">
+                  {errors.map((error) => (
+                    <li
+                      key={`error-${error.replaceAll("", " ")}`}
+                      className="text-danger">
                       {error}
                     </li>
                   ))}

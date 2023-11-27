@@ -21,6 +21,7 @@ import NextGenContractWriteStatus from "../NextGenContractWriteStatus";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { PhaseTimes } from "../nextgen_entities";
 import { NULL_MERKLE } from "../../../constants";
+import { printAdminErrors } from "./NextGenAdmin";
 
 interface Props {
   close: () => void;
@@ -34,7 +35,7 @@ enum Type {
   EXTERNAL_BURN = "external_burn",
 }
 
-export default function NextGenAdminSetPhases(props: Props) {
+export default function NextGenAdminSetPhases(props: Readonly<Props>) {
   const account = useAccount();
   const signMessage = useSignMessage();
 
@@ -392,17 +393,7 @@ export default function NextGenAdminSetPhases(props: Props) {
                 onChange={(e: any) => setPublicEndTime(e.target.value)}
               />
             </Form.Group>
-            {!loading && errors.length > 0 && (
-              <div className="mb-3">
-                <ul>
-                  {errors.map((error, index) => (
-                    <li key={`error-${index}`} className="text-danger">
-                      {error}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
+            {!loading && errors.length > 0 && printAdminErrors(errors)}
             <Button
               className={`mt-3 mb-3 seize-btn`}
               disabled={submitting || loading}

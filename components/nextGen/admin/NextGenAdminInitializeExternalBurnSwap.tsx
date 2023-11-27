@@ -18,12 +18,15 @@ import {
 import NextGenContractWriteStatus from "../NextGenContractWriteStatus";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { postData } from "../../../services/6529api";
+import { printAdminErrors } from "./NextGenAdmin";
 
 interface Props {
   close: () => void;
 }
 
-export default function NextGenAdminInitializeExternalBurnSwap(props: Props) {
+export default function NextGenAdminInitializeExternalBurnSwap(
+  props: Readonly<Props>
+) {
   const account = useAccount();
   const signMessage = useSignMessage();
   const [uuid, setuuid] = useState(uuidv4());
@@ -290,17 +293,7 @@ export default function NextGenAdminInitializeExternalBurnSwap(props: Props) {
                 />
               </span>
             </Form.Group>
-            {!loading && errors.length > 0 && (
-              <div className="mb-3">
-                <ul>
-                  {errors.map((error, index) => (
-                    <li key={`error-${index}`} className="text-danger">
-                      {error}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
+            {!loading && errors.length > 0 && printAdminErrors(errors)}
             <Form.Group className="mb-3 d-flex gap-3">
               <Button
                 className="seize-btn"

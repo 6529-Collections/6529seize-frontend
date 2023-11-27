@@ -18,7 +18,7 @@ interface Props {
   onSetWallets?(wallets: string[]): any;
 }
 
-export default function Header(props: Props) {
+export default function Header(props: Readonly<Props>) {
   const router = useRouter();
   const account = useAccount();
 

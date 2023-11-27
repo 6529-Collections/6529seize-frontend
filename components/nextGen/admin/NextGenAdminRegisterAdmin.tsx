@@ -16,6 +16,7 @@ import {
   getCollectionIdsForAddress,
 } from "../nextgen_helpers";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { printAdminErrors } from "./NextGenAdmin";
 
 export enum ADMIN_TYPE {
   GLOBAL = "GLOBAL",
@@ -28,7 +29,7 @@ interface Props {
   type: ADMIN_TYPE;
 }
 
-export default function NextGenAdminRegisterAdmin(props: Props) {
+export default function NextGenAdminRegisterAdmin(props: Readonly<Props>) {
   const account = useAccount();
 
   const [collectionID, setCollectionID] = useState("");
@@ -228,17 +229,7 @@ export default function NextGenAdminRegisterAdmin(props: Props) {
                 />
               </span>
             </Form.Group>
-            {!loading && errors.length > 0 && (
-              <div className="mb-3">
-                <ul>
-                  {errors.map((error, index) => (
-                    <li key={`error-${index}`} className="text-danger">
-                      {error}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
+            {!loading && errors.length > 0 && printAdminErrors(errors)}
             <Button
               className={`mt-3 mb-3 seize-btn`}
               disabled={submitting || loading}

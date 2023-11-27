@@ -1,6 +1,6 @@
 import { Container, Row, Col, Button, Form } from "react-bootstrap";
 import styles from "./NextGenAdmin.module.scss";
-import { useAccount, useContractRead, useContractWrite } from "wagmi";
+import { useAccount, useContractWrite } from "wagmi";
 import { useEffect, useState } from "react";
 import {
   FunctionSelectors,
@@ -18,12 +18,13 @@ import {
   retrieveCollectionAdditionalData,
 } from "../nextgen_helpers";
 import { AdditionalData } from "../nextgen_entities";
+import { printAdminErrors } from "./NextGenAdmin";
 
 interface Props {
   close: () => void;
 }
 
-export default function NextGenAdminUpdateRandomizer(props: Props) {
+export default function NextGenAdminUpdateRandomizer(props: Readonly<Props>) {
   const account = useAccount();
 
   const globalAdmin = useGlobalAdmin(account.address as string);
@@ -147,17 +148,7 @@ export default function NextGenAdminUpdateRandomizer(props: Props) {
                 onChange={(e: any) => setRandomizerContract(e.target.value)}
               />
             </Form.Group>
-            {!loading && errors.length > 0 && (
-              <div className="mb-3">
-                <ul>
-                  {errors.map((error, index) => (
-                    <li key={`error-${index}`} className="text-danger">
-                      {error}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
+            {!loading && errors.length > 0 && printAdminErrors(errors)}
             <Button
               className={`mt-3 mb-3 seize-btn`}
               disabled={submitting || loading}

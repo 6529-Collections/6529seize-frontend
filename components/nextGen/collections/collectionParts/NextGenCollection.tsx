@@ -25,7 +25,7 @@ interface Props {
   collection: number;
 }
 
-export default function NextGenCollection(props: Props) {
+export default function NextGenCollection(props: Readonly<Props>) {
   const crumbs: Crumb[] = [
     { display: "Home", href: "/" },
     { display: "NextGen", href: "/nextgen" },

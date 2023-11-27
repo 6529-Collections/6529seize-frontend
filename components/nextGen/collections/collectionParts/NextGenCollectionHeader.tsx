@@ -22,7 +22,7 @@ interface Props {
   collection_link?: boolean;
 }
 
-export default function NextGenCollectionHeader(props: Props) {
+export default function NextGenCollectionHeader(props: Readonly<Props>) {
   const router = useRouter();
   const [available, setAvailable] = useState<number>(0);
 

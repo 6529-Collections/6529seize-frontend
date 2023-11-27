@@ -5,12 +5,15 @@ import { useEffect, useState } from "react";
 import { NEXTGEN_CHAIN_ID, NEXTGEN_CORE } from "../nextgen_contracts";
 import NextGenContractWriteStatus from "../NextGenContractWriteStatus";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { printAdminErrors } from "./NextGenAdmin";
 
 interface Props {
   close: () => void;
 }
 
-export default function NextGenAdminUpdateImagesAttributes(props: Props) {
+export default function NextGenAdminUpdateImagesAttributes(
+  props: Readonly<Props>
+) {
   const [tokenIds, setTokenIds] = useState<string[]>([]);
   const [images, setImages] = useState<string[]>([]);
   const [attributes, setAttributes] = useState<string[]>([]);
@@ -131,17 +134,7 @@ export default function NextGenAdminUpdateImagesAttributes(props: Props) {
                 }}
               />
             </Form.Group>
-            {!loading && errors.length > 0 && (
-              <div className="mb-3">
-                <ul>
-                  {errors.map((error, index) => (
-                    <li key={`error-${index}`} className="text-danger">
-                      {error}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
+            {!loading && errors.length > 0 && printAdminErrors(errors)}
             <Button
               className={`mt-3 mb-3 seize-btn`}
               disabled={submitting || loading}

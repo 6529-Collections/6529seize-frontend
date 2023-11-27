@@ -25,12 +25,13 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { v4 as uuidv4 } from "uuid";
 import { NULL_ADDRESS } from "../../../constants";
 import { postData } from "../../../services/6529api";
+import { printAdminErrors } from "./NextGenAdmin";
 
 interface Props {
   close: () => void;
 }
 
-export default function NextGenAdminInitializeBurn(props: Props) {
+export default function NextGenAdminInitializeBurn(props: Readonly<Props>) {
   const account = useAccount();
   const signMessage = useSignMessage();
   const [uuid, setuuid] = useState(uuidv4());
@@ -259,17 +260,7 @@ export default function NextGenAdminInitializeBurn(props: Props) {
                 />
               </span>
             </Form.Group>
-            {!loading && errors.length > 0 && (
-              <div className="mb-3">
-                <ul>
-                  {errors.map((error, index) => (
-                    <li key={`error-${index}`} className="text-danger">
-                      {error}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
+            {!loading && errors.length > 0 && printAdminErrors(errors)}
             <Button
               className={`mt-3 mb-3 seize-btn`}
               disabled={submitting || loading}

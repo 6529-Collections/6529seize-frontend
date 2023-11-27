@@ -26,7 +26,7 @@ interface GradientNFT extends NFT {
   tdh_rank: number;
 }
 
-export default function GradientsComponent(props: Props) {
+export default function GradientsComponent(props: Readonly<Props>) {
   const router = useRouter();
 
   const [nfts, setNfts] = useState<GradientNFT[]>([]);

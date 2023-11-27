@@ -14,7 +14,7 @@ interface Props {
 
 const SLIDESHOW_LIMIT = 10;
 
-export default function NextGenCollectionSlideshow(props: Props) {
+export default function NextGenCollectionSlideshow(props: Readonly<Props>) {
   const tokens = Array.from(
     { length: Math.min(SLIDESHOW_LIMIT, props.length) },
     (_, i) => props.start_index + i

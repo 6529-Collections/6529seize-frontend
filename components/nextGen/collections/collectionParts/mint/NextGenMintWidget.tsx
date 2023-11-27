@@ -41,7 +41,7 @@ interface Props {
   mintForAddress: (mintForAddress: string) => void;
 }
 
-export default function NextGenMintWidget(props: Props) {
+export default function NextGenMintWidget(props: Readonly<Props>) {
   const account = useAccount();
   const chainId = useChainId();
   const web3Modal = useWeb3Modal();
