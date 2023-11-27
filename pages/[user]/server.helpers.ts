@@ -95,8 +95,8 @@ export const userPageNeedsRedirect = ({
     delete currentQuery.user;
     const queryParamsString = new URLSearchParams(currentQuery).toString();
     const destination = subroute
-      ? `/${profile.profile.normalised_handle}/${subroute}?${queryParamsString}`
-      : `/${profile.profile.normalised_handle}?${queryParamsString}`;
+      ? `/${profile.profile.handle}/${subroute}?${queryParamsString}`
+      : `/${profile.profile.handle}?${queryParamsString}`;
     return {
       redirect: {
         permanent: false,
