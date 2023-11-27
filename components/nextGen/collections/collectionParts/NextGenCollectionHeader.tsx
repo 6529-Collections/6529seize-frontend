@@ -73,31 +73,47 @@ export default function NextGenCollectionHeader(props: Readonly<Props>) {
     );
   }
 
+  function getAllowlistClassName() {
+    if (props.phase_times.al_status === Status.LIVE && available > 0) {
+      return styles.phaseTimeTagActive;
+    } else if (
+      props.phase_times.al_status === Status.UPCOMING &&
+      available > 0
+    ) {
+      return styles.phaseTimeTagUpcoming;
+    } else {
+      return styles.phaseTimeTagComplete;
+    }
+  }
+
+  function getPublicStatusClassName() {
+    if (props.phase_times.public_status === Status.LIVE && available > 0) {
+      return styles.phaseTimeTagActive;
+    } else if (
+      props.phase_times.public_status === Status.UPCOMING &&
+      available > 0
+    ) {
+      return styles.phaseTimeTagUpcoming;
+    } else {
+      return styles.phaseTimeTagComplete;
+    }
+  }
+
   return (
     <Container className="no-padding">
       <Row>
         <Col className="d-flex justify-content-between align-items-center flex-wrap">
           <span className="pt-2 pb-2 d-flex align-items-center gap-2 align-items-center">
             <span
-              className={`font-bolder font-smaller ${styles.nextgenTag} ${
-                props.phase_times.al_status == Status.LIVE && available > 0
-                  ? styles.phaseTimeTagActive
-                  : props.phase_times.al_status == Status.UPCOMING &&
-                    available > 0
-                  ? styles.phaseTimeTagUpcoming
-                  : styles.phaseTimeTagComplete
-              }`}>
+              className={`font-bolder font-smaller ${
+                styles.nextgenTag
+              } ${getAllowlistClassName()}`}>
               ALLOWLIST {props.phase_times.al_status.toUpperCase()}
             </span>
             <span
-              className={`font-bolder font-smaller ${styles.nextgenTag} ${
-                props.phase_times.public_status == Status.LIVE && available > 0
-                  ? styles.phaseTimeTagActive
-                  : props.phase_times.public_status == Status.UPCOMING &&
-                    available > 0
-                  ? styles.phaseTimeTagUpcoming
-                  : styles.phaseTimeTagComplete
-              }`}>
+              className={`font-bolder font-smaller ${
+                styles.nextgenTag
+              } ${getPublicStatusClassName()}`}>
               PUBLIC PHASE {props.phase_times.public_status}
             </span>
           </span>

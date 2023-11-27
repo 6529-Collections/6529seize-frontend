@@ -1,7 +1,7 @@
 import NextGenTokenImage from "./NextGenTokenImage";
 import { Col, Container, Row } from "react-bootstrap";
 import { useState } from "react";
-import { useContractRead, useEnsName } from "wagmi";
+import { useContractRead } from "wagmi";
 import { NEXTGEN_CHAIN_ID, NEXTGEN_CORE } from "../nextgen_contracts";
 import {
   extractURI,

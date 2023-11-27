@@ -1,6 +1,6 @@
 import { Container, Row, Col, Button, Form } from "react-bootstrap";
 import styles from "./NextGenAdmin.module.scss";
-import { useAccount, useContractWrite } from "wagmi";
+import { useAccount } from "wagmi";
 import { useEffect, useState } from "react";
 import {
   useGlobalAdmin,
@@ -11,11 +11,7 @@ import {
   retrieveCollectionAdditionalData,
   getCoreUseContractWrite,
 } from "../nextgen_helpers";
-import {
-  NEXTGEN_CORE,
-  NEXTGEN_CHAIN_ID,
-  FunctionSelectors,
-} from "../nextgen_contracts";
+import { FunctionSelectors } from "../nextgen_contracts";
 import NextGenContractWriteStatus from "../NextGenContractWriteStatus";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { AdditionalData } from "../nextgen_entities";
