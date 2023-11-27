@@ -315,7 +315,7 @@ export const isDivInViewport = (divRef: any) => {
 export function capitalizeEveryWord(input: string): string {
   return input
     .toLocaleLowerCase()
-    .replace(/(?:^|\s+)(.)/g, (match) => match.toUpperCase());
+    .replace(/^(.)|\s+(.)/g, (match: string) => match.toUpperCase());
 }
 
 export function getNetworkName(chainId: number) {

@@ -20,7 +20,6 @@ interface Props {
 
 export default function NextGenTokenPreview(props: Readonly<Props>) {
   const [owner, setOwner] = useState<`0x${string}`>();
-  const [ownerENS, setOwnerENS] = useState<string>();
   const [name, setName] = useState<string>();
 
   const [tokenUri, setTokenUri] = useState<TokenURI>(EMPTY_TOKEN_URI);
@@ -75,16 +74,6 @@ export default function NextGenTokenPreview(props: Readonly<Props>) {
     onSettled(data: any, error: any) {
       if (data) {
         setOwner(data);
-      }
-    },
-  });
-
-  useEnsName({
-    address: owner,
-    chainId: 1,
-    onSettled(data: any, error: any) {
-      if (data) {
-        setOwnerENS(data);
       }
     },
   });

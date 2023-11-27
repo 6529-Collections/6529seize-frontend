@@ -43,8 +43,7 @@
     "swiper": "^11.0.5",
     "uuid": "^9.0.1",
     "viem": "^1.19.5",
-    "wagmi": "^1.4.7",
-    "web3": "^4.2.2"
+    "wagmi": "^1.4.7"
   },
   "devDependencies": {
     "@next/bundle-analyzer": "^13.1.6",

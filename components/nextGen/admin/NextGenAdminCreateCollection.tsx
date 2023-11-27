@@ -1,20 +1,9 @@
 import { Container, Row, Col, Button, Form } from "react-bootstrap";
 import styles from "./NextGenAdmin.module.scss";
-import { useAccount, useContractWrite } from "wagmi";
+import { useContractWrite } from "wagmi";
 import { useEffect, useState } from "react";
-import {
-  NEXTGEN_CORE,
-  NEXTGEN_CHAIN_ID,
-  FunctionSelectors,
-} from "../nextgen_contracts";
+import { NEXTGEN_CORE, NEXTGEN_CHAIN_ID } from "../nextgen_contracts";
 import NextGenContractWriteStatus from "../NextGenContractWriteStatus";
-import {
-  getCollectionIdsForAddress,
-  useCollectionAdmin,
-  useCollectionIndex,
-  useFunctionAdmin,
-  useGlobalAdmin,
-} from "../nextgen_helpers";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { printAdminErrors } from "./NextGenAdmin";
 
@@ -23,19 +12,6 @@ interface Props {
 }
 
 export default function NextGenAdminCreateCollection(props: Readonly<Props>) {
-  const account = useAccount();
-
-  const globalAdmin = useGlobalAdmin(account.address as string);
-  const functionAdmin = useFunctionAdmin(
-    account.address as string,
-    FunctionSelectors.CREATE_COLLECTION
-  );
-  const collectionIndex = useCollectionIndex();
-  const collectionAdmin = useCollectionAdmin(
-    account.address as string,
-    parseInt(collectionIndex.data as string)
-  );
-
   const [collectionName, setCollectionName] = useState("");
   const [artist, setArtist] = useState("");
   const [description, setDescription] = useState("");

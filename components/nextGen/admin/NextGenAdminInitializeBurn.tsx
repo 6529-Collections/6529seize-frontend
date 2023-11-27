@@ -34,7 +34,7 @@ interface Props {
 export default function NextGenAdminInitializeBurn(props: Readonly<Props>) {
   const account = useAccount();
   const signMessage = useSignMessage();
-  const [uuid, setUuid] = useState(uuidv4());
+  const uuid = uuidv4();
 
   const globalAdmin = useGlobalAdmin(account.address as string);
   const functionAdmin = useFunctionAdmin(

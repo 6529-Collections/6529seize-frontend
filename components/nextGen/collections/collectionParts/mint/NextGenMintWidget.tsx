@@ -448,9 +448,11 @@ export default function NextGenMintWidget(props: Readonly<Props>) {
             </Form.Group>
             <Form.Group as={Row} className="pt-2">
               <Form.Label column sm={12} className="d-flex align-items-center">
-                Wallet Mints:&nbsp;
-                <b>{renderAllowlistStatus()}</b>
-                <b>{renderPublicStatus()}</b>
+                Wallet Mints:{" "}
+                <b>
+                  {renderAllowlistStatus()}
+                  {renderPublicStatus()}
+                </b>
               </Form.Label>
             </Form.Group>
             <Form.Group as={Row} className="pb-2">
