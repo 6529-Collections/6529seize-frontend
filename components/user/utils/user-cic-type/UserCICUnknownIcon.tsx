@@ -6,7 +6,7 @@ export default function UserCICUnknownIcon() {
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
     >
-      <g clip-path="url(#clip0_357_3933)">
+      <g clipPath="url(#clip0_357_3933)">
         <path
           d="M91.36 182.72C141.817 182.72 182.72 141.817 182.72 91.36C182.72 40.9033 141.817 0 91.36 0C40.9033 0 0 40.9033 0 91.36C0 141.817 40.9033 182.72 91.36 182.72Z"
           fill="#FEDF89"

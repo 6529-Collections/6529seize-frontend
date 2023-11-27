@@ -5,6 +5,7 @@ import { ConsolidatedTDHMetrics } from "../../entities/ITDH";
 import { NFT, NFTLite } from "../../entities/INFT";
 import UserPageLayout from "../../components/user/layout/UserPageLayout";
 import {
+  getCommonHeaders,
   getCommonUserServerSideProps,
   getGradients,
   getMemesLite,
@@ -15,7 +16,7 @@ import {
 import UserPageCollection from "../../components/user/collected/UserPageCollection";
 import { Season } from "../../entities/ISeason";
 import { OwnerLite } from "../../entities/IOwner";
-import {  useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 
 export interface UserPageProps {
   profile: IProfileAndConsolidations;
@@ -80,10 +81,12 @@ export async function getServerSideProps(
   props: UserPageProps;
 }> {
   const authCookie = req?.req?.cookies["x-6529-auth"];
+  const walletAuthCookie = req?.req?.cookies["wallet-auth"] ?? null;
   try {
-    const headers: Record<string, string> = authCookie
-      ? { "x-6529-auth": authCookie }
-      : {};
+    const headers: Record<string, string> = getCommonHeaders({
+      authCookie,
+      walletAuthCookie,
+    });
 
     const { profile, title, consolidatedTDH } =
       await getCommonUserServerSideProps({ user: req.query.user, headers });

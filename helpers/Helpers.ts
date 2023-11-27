@@ -6,6 +6,7 @@ import {
 } from "../constants";
 import { BaseNFT, VolumeType } from "../entities/INFT";
 import { DateIntervalsSelection } from "../enums";
+import { CICType } from "../entities/IProfile";
 
 export function formatAddress(address: string) {
   if (
@@ -71,6 +72,13 @@ export function numberWithCommasFromString(x: string) {
 
 export function numberWithCommas(x: number) {
   if (x === null || x === 0 || isNaN(x)) return "-";
+  const parts = x.toString().split(".");
+  parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  return parts.join(".");
+}
+
+export function formatNumberWithCommas(x: number) {
+  if (x === null || isNaN(x)) return "-";
   const parts = x.toString().split(".");
   parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
   return parts.join(".");
@@ -428,3 +436,23 @@ export function getDateFilters(
   }
   return filters;
 }
+
+export const cicToType = (cic: number): CICType => {
+  if (cic < 0) {
+    return CICType.INACCURATE;
+  }
+
+  if (cic < 1000) {
+    return CICType.UNKNOWN;
+  }
+
+  if (cic < 10000) {
+    return CICType.PROBABLY_ACCURATE;
+  }
+
+  if (cic < 25000) {
+    return CICType.ACCURATE;
+  }
+
+  return CICType.HIGHLY_ACCURATE;
+};

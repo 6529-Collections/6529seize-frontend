@@ -1,13 +1,15 @@
-import { ReactElement } from "react"
-import { NextPageWithLayout } from "../_app"
+import { ReactElement } from "react";
+import { NextPageWithLayout } from "../_app";
 import { IProfileAndConsolidations } from "../../entities/IProfile";
 import { ConsolidatedTDHMetrics } from "../../entities/ITDH";
 import UserPageLayout from "../../components/user/layout/UserPageLayout";
-import { getCommonUserServerSideProps, userPageNeedsRedirect } from "./server.helpers";
+import {
+  getCommonHeaders,
+  getCommonUserServerSideProps,
+  userPageNeedsRedirect,
+} from "./server.helpers";
 import UserPageIdentity from "../../components/user/identity/UserPageIdentity";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { commonApiFetch } from "../../services/api/common-api";
-
+import { useQueryClient } from "@tanstack/react-query";
 
 export interface UserPageIdentityProps {
   profile: IProfileAndConsolidations;
@@ -15,7 +17,9 @@ export interface UserPageIdentityProps {
   consolidatedTDH: ConsolidatedTDHMetrics | null;
 }
 
-const Page: NextPageWithLayout<{ pageProps: UserPageIdentityProps }> = ({ pageProps }) => {
+const Page: NextPageWithLayout<{ pageProps: UserPageIdentityProps }> = ({
+  pageProps,
+}) => {
   const queryClient = useQueryClient();
   if (pageProps.profile.profile?.handle) {
     queryClient.setQueryData<IProfileAndConsolidations>(
@@ -37,18 +41,16 @@ const Page: NextPageWithLayout<{ pageProps: UserPageIdentityProps }> = ({ pagePr
       );
     }
   }
-  return <UserPageIdentity profile={pageProps.profile} />
-}
+  return <UserPageIdentity />;
+};
 
-Page.getLayout = function getLayout(page: ReactElement<{ pageProps: UserPageIdentityProps }>) {
-  return (
-    <UserPageLayout props={page.props.pageProps}>
-      {page}
-    </UserPageLayout>
-  )
-}
+Page.getLayout = function getLayout(
+  page: ReactElement<{ pageProps: UserPageIdentityProps }>
+) {
+  return <UserPageLayout props={page.props.pageProps}>{page}</UserPageLayout>;
+};
 
-export default Page
+export default Page;
 
 export async function getServerSideProps(
   req: any,
@@ -57,21 +59,35 @@ export async function getServerSideProps(
 ): Promise<{
   props: UserPageIdentityProps;
 }> {
-  const authCookie = req?.req?.cookies["x-6529-auth"];
+  const authCookie = req?.req?.cookies["x-6529-auth"] ?? null;
+  const walletAuthCookie = req?.req?.cookies["wallet-auth"] ?? null;
   try {
-    const headers: Record<string, string> = authCookie
-      ? { "x-6529-auth": authCookie }
-      : {};
+    const headers: Record<string, string> = getCommonHeaders({
+      authCookie,
+      walletAuthCookie,
+    });
 
-    const { profile, title, consolidatedTDH } = await getCommonUserServerSideProps({ user: req.query.user, headers })
+    const { profile, title, consolidatedTDH } =
+      await getCommonUserServerSideProps({ user: req.query.user, headers });
+
+    if (!profile.profile) {
+      return {
+        redirect: {
+          permanent: false,
+          destination: "/404",
+        },
+        props: {},
+      } as any;
+    }
+
     const needsRedirect = userPageNeedsRedirect({
       profile,
       req,
-      subroute: 'collected'
-    })
+      subroute: "collected",
+    });
 
     if (needsRedirect) {
-      return needsRedirect as any
+      return needsRedirect as any;
     }
 
     return {

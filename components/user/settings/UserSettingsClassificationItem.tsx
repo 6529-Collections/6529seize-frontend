@@ -37,7 +37,7 @@ export default function UserSettingsClassificationItem({
           <path
             d="M20 6L9 17L4 12"
             stroke="currentColor"
-            stroke-width="2"
+            strokeWidth="2"
             strokeLinecap="round"
             strokeLinejoin="round"
           />

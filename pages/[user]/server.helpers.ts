@@ -189,3 +189,19 @@ export const getOwned = async ({
     return acc;
   }, []);
 };
+
+export const getCommonHeaders = ({
+  authCookie,
+  walletAuthCookie,
+}: {
+  authCookie: string | null;
+  walletAuthCookie: string | null;
+}) => {
+
+  return {
+    ...(authCookie ? { "x-6529-auth": authCookie } : {}),
+    ...(walletAuthCookie
+      ? { Authorization: `Bearer ${walletAuthCookie}` }
+      : {}),
+  };
+};

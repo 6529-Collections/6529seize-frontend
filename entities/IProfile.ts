@@ -8,6 +8,11 @@ export interface IProfileConsolidation {
   readonly tdh: number;
 }
 
+export interface AggregatedCicRating {
+  cic_rating: number;
+  contributor_count: number;
+}
+
 export interface IProfileAndConsolidations {
   readonly profile: IProfile | null;
   readonly consolidation: {
@@ -15,6 +20,10 @@ export interface IProfileAndConsolidations {
     tdh: number;
   };
   readonly level: number;
+  readonly cic: AggregatedCicRating & {
+    readonly authenticated_profile_contribution: number;
+    readonly cic_left_for_authenticated_profile: number;
+  };
 }
 
 export enum PROFILE_CLASSIFICATION {
@@ -51,4 +60,13 @@ export interface IProfile {
   readonly banner_1?: string | undefined;
   readonly banner_2?: string | undefined;
   readonly website?: string | undefined;
+}
+
+
+export enum CICType {
+  INACCURATE = "INACCURATE",
+  UNKNOWN = "UNKNOWN",
+  PROBABLY_ACCURATE = "PROBABLY_ACCURATE",
+  ACCURATE = "ACCURATE",
+  HIGHLY_ACCURATE = "HIGHLY_ACCURATE",
 }

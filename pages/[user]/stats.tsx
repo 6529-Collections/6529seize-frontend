@@ -4,6 +4,7 @@ import { IProfileAndConsolidations } from "../../entities/IProfile";
 import { ConsolidatedTDHMetrics } from "../../entities/ITDH";
 import UserPageLayout from "../../components/user/layout/UserPageLayout";
 import {
+  getCommonHeaders,
   getCommonUserServerSideProps,
   userPageNeedsRedirect,
 } from "./server.helpers";
@@ -63,11 +64,13 @@ export async function getServerSideProps(
 ): Promise<{
   props: UserPageStatsProps;
 }> {
-  const authCookie = req?.req?.cookies["x-6529-auth"];
+  const authCookie = req?.req?.cookies["x-6529-auth"] ?? null;
+  const walletAuthCookie = req?.req?.cookies["wallet-auth"] ?? null;
   try {
-    const headers: Record<string, string> = authCookie
-      ? { "x-6529-auth": authCookie }
-      : {};
+    const headers: Record<string, string> = getCommonHeaders({
+      authCookie,
+      walletAuthCookie,
+    });
 
     const { profile, title, consolidatedTDH } =
       await getCommonUserServerSideProps({ user: req.query.user, headers });
