@@ -1,14 +1,10 @@
 import { Container, Row, Col, Button, Form } from "react-bootstrap";
 import { v4 as uuidv4 } from "uuid";
 import styles from "./NextGenAdmin.module.scss";
-import { useAccount, useContractWrite, useSignMessage } from "wagmi";
+import { useAccount, useSignMessage } from "wagmi";
 import { useEffect, useState } from "react";
 import { postFormData } from "../../../services/6529api";
-import {
-  NEXTGEN_MINTER,
-  NEXTGEN_CHAIN_ID,
-  FunctionSelectors,
-} from "../nextgen_contracts";
+import { FunctionSelectors } from "../nextgen_contracts";
 import {
   useGlobalAdmin,
   useFunctionAdmin,
@@ -16,6 +12,7 @@ import {
   useCollectionAdmin,
   getCollectionIdsForAddress,
   retrieveCollectionPhases,
+  getMinterUseContractWrite,
 } from "../nextgen_helpers";
 import NextGenContractWriteStatus from "../NextGenContractWriteStatus";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -109,15 +106,9 @@ export default function NextGenAdminSetPhases(props: Readonly<Props>) {
     contractWrite.reset();
   }
 
-  const contractWrite = useContractWrite({
-    address: NEXTGEN_MINTER.contract as `0x${string}`,
-    abi: NEXTGEN_MINTER.abi,
-    chainId: NEXTGEN_CHAIN_ID,
-    functionName: "setCollectionPhases",
-    onError() {
-      setSubmitting(false);
-      setLoading(false);
-    },
+  const contractWrite = getMinterUseContractWrite("setCollectionPhases", () => {
+    setSubmitting(false);
+    setLoading(false);
   });
 
   function submit() {

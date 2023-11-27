@@ -1,6 +1,6 @@
 import { Container, Row, Col, Button, Form } from "react-bootstrap";
 import styles from "./NextGenAdmin.module.scss";
-import { useAccount, useContractWrite } from "wagmi";
+import { useAccount } from "wagmi";
 import { useEffect, useState } from "react";
 import {
   useGlobalAdmin,
@@ -8,12 +8,9 @@ import {
   useCollectionIndex,
   useCollectionAdmin,
   getCollectionIdsForAddress,
+  getMinterUseContractWrite,
 } from "../nextgen_helpers";
-import {
-  FunctionSelectors,
-  NEXTGEN_CHAIN_ID,
-  NEXTGEN_MINTER,
-} from "../nextgen_contracts";
+import { FunctionSelectors } from "../nextgen_contracts";
 import NextGenContractWriteStatus from "../NextGenContractWriteStatus";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { printAdminErrors } from "./NextGenAdmin";
@@ -53,15 +50,9 @@ export default function NextGenAdminAirdropTokens(props: Readonly<Props>) {
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
-  const contractWrite = useContractWrite({
-    address: NEXTGEN_MINTER.contract as `0x${string}`,
-    abi: NEXTGEN_MINTER.abi,
-    chainId: NEXTGEN_CHAIN_ID,
-    functionName: "airDropTokens",
-    onError() {
-      setSubmitting(false);
-      setLoading(false);
-    },
+  const contractWrite = getMinterUseContractWrite("airDropTokens", () => {
+    setSubmitting(false);
+    setLoading(false);
   });
 
   function submit() {

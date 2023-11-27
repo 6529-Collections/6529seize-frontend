@@ -1,11 +1,6 @@
 import { Container, Row, Col, Button, Form } from "react-bootstrap";
 import styles from "./NextGenAdmin.module.scss";
-import {
-  useAccount,
-  useContractRead,
-  useContractWrite,
-  useSignMessage,
-} from "wagmi";
+import { useAccount, useContractRead, useSignMessage } from "wagmi";
 import { useEffect, useState } from "react";
 import {
   FunctionSelectors,
@@ -19,6 +14,7 @@ import {
   useCollectionIndex,
   useCollectionAdmin,
   getCollectionIdsForAddress,
+  getMinterUseContractWrite,
 } from "../nextgen_helpers";
 import NextGenContractWriteStatus from "../NextGenContractWriteStatus";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -118,15 +114,9 @@ export default function NextGenAdminInitializeBurn(props: Readonly<Props>) {
     }
   }, [signMessage.data]);
 
-  const contractWrite = useContractWrite({
-    address: NEXTGEN_MINTER.contract as `0x${string}`,
-    abi: NEXTGEN_MINTER.abi,
-    chainId: NEXTGEN_CHAIN_ID,
-    functionName: "initializeBurn",
-    onError() {
-      setSubmitting(false);
-      setLoading(false);
-    },
+  const contractWrite = getMinterUseContractWrite("initializeBurn", () => {
+    setSubmitting(false);
+    setLoading(false);
   });
 
   function validate() {

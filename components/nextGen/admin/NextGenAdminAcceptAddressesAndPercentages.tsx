@@ -1,6 +1,6 @@
 import { Container, Row, Col, Button, Form } from "react-bootstrap";
 import styles from "./NextGenAdmin.module.scss";
-import { useAccount, useContractRead, useContractWrite } from "wagmi";
+import { useAccount, useContractRead } from "wagmi";
 import { useEffect, useState } from "react";
 import {
   FunctionSelectors,
@@ -13,6 +13,7 @@ import {
   useCollectionIndex,
   useCollectionAdmin,
   getCollectionIdsForAddress,
+  getMinterUseContractWrite,
 } from "../nextgen_helpers";
 import NextGenContractWriteStatus from "../NextGenContractWriteStatus";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -115,16 +116,13 @@ export default function NextGenAdminAcceptAddressesAndPercentages(
     },
   });
 
-  const contractWrite = useContractWrite({
-    address: NEXTGEN_MINTER.contract as `0x${string}`,
-    abi: NEXTGEN_MINTER.abi,
-    chainId: NEXTGEN_CHAIN_ID,
-    functionName: "acceptAddressesAndPercentages",
-    onError() {
+  const contractWrite = getMinterUseContractWrite(
+    "acceptAddressesAndPercentages",
+    () => {
       setSubmitting(false);
       setLoading(false);
-    },
-  });
+    }
+  );
 
   function submit() {
     setLoading(true);

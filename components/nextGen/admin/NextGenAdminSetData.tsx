@@ -9,6 +9,7 @@ import {
   useCollectionAdmin,
   getCollectionIdsForAddress,
   retrieveCollectionAdditionalData,
+  getCoreUseContractWrite,
 } from "../nextgen_helpers";
 import {
   NEXTGEN_CORE,
@@ -64,15 +65,9 @@ export default function NextGenAdminSetData(props: Readonly<Props>) {
     }
   });
 
-  const contractWrite = useContractWrite({
-    address: NEXTGEN_CORE.contract as `0x${string}`,
-    abi: NEXTGEN_CORE.abi,
-    chainId: NEXTGEN_CHAIN_ID,
-    functionName: "setCollectionData",
-    onError() {
-      setSubmitting(false);
-      setLoading(false);
-    },
+  const contractWrite = getCoreUseContractWrite("setCollectionData", () => {
+    setSubmitting(false);
+    setLoading(false);
   });
 
   function submit() {

@@ -1,4 +1,4 @@
-import { useContractRead, useContractReads } from "wagmi";
+import { useContractRead, useContractReads, useContractWrite } from "wagmi";
 import {
   NEXTGEN_ADMIN,
   NEXTGEN_CHAIN_ID,
@@ -354,4 +354,41 @@ export function extractPhases(d: any[]) {
     public_status: publicStatus,
   };
   return phases;
+}
+
+export function getCoreUseContractWrite(
+  functionName: string,
+  onError: () => void
+) {
+  return getUseContractWrite(NEXTGEN_CORE, functionName, onError);
+}
+
+export function getMinterUseContractWrite(
+  functionName: string,
+  onError: () => void
+) {
+  return getUseContractWrite(NEXTGEN_MINTER, functionName, onError);
+}
+
+export function getAdminUseContractWrite(
+  functionName: string,
+  onError: () => void
+) {
+  return getUseContractWrite(NEXTGEN_ADMIN, functionName, onError);
+}
+
+function getUseContractWrite(
+  contract: { contract: string; abi: any },
+  functionName: string,
+  onError: () => void
+) {
+  return useContractWrite({
+    address: contract.contract as `0x${string}`,
+    abi: contract.abi,
+    chainId: NEXTGEN_CHAIN_ID,
+    functionName: functionName,
+    onError() {
+      onError();
+    },
+  });
 }

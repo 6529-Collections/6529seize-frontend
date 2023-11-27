@@ -1,12 +1,8 @@
 import { Container, Row, Col, Button, Form } from "react-bootstrap";
 import styles from "./NextGenAdmin.module.scss";
-import { useAccount, useContractWrite } from "wagmi";
+import { useAccount } from "wagmi";
 import { useEffect, useState } from "react";
-import {
-  NEXTGEN_MINTER,
-  NEXTGEN_CHAIN_ID,
-  FunctionSelectors,
-} from "../nextgen_contracts";
+import { FunctionSelectors } from "../nextgen_contracts";
 import {
   useGlobalAdmin,
   useFunctionAdmin,
@@ -14,6 +10,7 @@ import {
   useCollectionAdmin,
   getCollectionIdsForAddress,
   retrieveCollectionCosts,
+  getMinterUseContractWrite,
 } from "../nextgen_helpers";
 import NextGenContractWriteStatus from "../NextGenContractWriteStatus";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -71,15 +68,9 @@ export default function NextGenAdminSetCosts(props: Readonly<Props>) {
     }
   });
 
-  const contractWrite = useContractWrite({
-    address: NEXTGEN_MINTER.contract as `0x${string}`,
-    abi: NEXTGEN_MINTER.abi,
-    chainId: NEXTGEN_CHAIN_ID,
-    functionName: "setCollectionCosts",
-    onError() {
-      setSubmitting(false);
-      setLoading(false);
-    },
+  const contractWrite = getMinterUseContractWrite("setCollectionCosts", () => {
+    setSubmitting(false);
+    setLoading(false);
   });
 
   function submit() {

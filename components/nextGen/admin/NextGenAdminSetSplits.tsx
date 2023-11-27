@@ -1,6 +1,6 @@
 import { Container, Row, Col, Button, Form } from "react-bootstrap";
 import styles from "./NextGenAdmin.module.scss";
-import { useAccount, useContractRead, useContractWrite } from "wagmi";
+import { useAccount, useContractRead } from "wagmi";
 import { useEffect, useState } from "react";
 import {
   FunctionSelectors,
@@ -12,6 +12,7 @@ import {
   useFunctionAdmin,
   useCollectionIndex,
   getCollectionIdsForAddress,
+  getMinterUseContractWrite,
 } from "../nextgen_helpers";
 import NextGenContractWriteStatus from "../NextGenContractWriteStatus";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -81,16 +82,13 @@ export default function NextGenAdminSetSplits(props: Readonly<Props>) {
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
-  const contractWrite = useContractWrite({
-    address: NEXTGEN_MINTER.contract as `0x${string}`,
-    abi: NEXTGEN_MINTER.abi,
-    chainId: NEXTGEN_CHAIN_ID,
-    functionName: "setPrimaryAndSecondarySplits",
-    onError() {
+  const contractWrite = getMinterUseContractWrite(
+    "setPrimaryAndSecondarySplits",
+    () => {
       setSubmitting(false);
       setLoading(false);
-    },
-  });
+    }
+  );
 
   function submit() {
     setLoading(true);

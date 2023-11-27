@@ -1,19 +1,16 @@
 import { Container, Row, Col, Button, Form } from "react-bootstrap";
 import styles from "./NextGenAdmin.module.scss";
-import { useAccount, useContractWrite, useSignMessage } from "wagmi";
+import { useAccount, useSignMessage } from "wagmi";
 import { useEffect, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
-import {
-  FunctionSelectors,
-  NEXTGEN_CHAIN_ID,
-  NEXTGEN_MINTER,
-} from "../nextgen_contracts";
+import { FunctionSelectors } from "../nextgen_contracts";
 import {
   useGlobalAdmin,
   useFunctionAdmin,
   useCollectionIndex,
   useCollectionAdmin,
   getCollectionIdsForAddress,
+  getMinterUseContractWrite,
 } from "../nextgen_helpers";
 import NextGenContractWriteStatus from "../NextGenContractWriteStatus";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -63,16 +60,13 @@ export default function NextGenAdminInitializeExternalBurnSwap(
 
   const [uploadError, setUploadError] = useState<string>();
 
-  const contractWrite = useContractWrite({
-    address: NEXTGEN_MINTER.contract as `0x${string}`,
-    abi: NEXTGEN_MINTER.abi,
-    chainId: NEXTGEN_CHAIN_ID,
-    functionName: "initializeExternalBurnOrSwap",
-    onError() {
+  const contractWrite = getMinterUseContractWrite(
+    "initializeExternalBurnOrSwap",
+    () => {
       setSubmitting(false);
       setLoading(false);
-    },
-  });
+    }
+  );
 
   function syncDB() {
     setLoading(true);

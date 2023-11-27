@@ -1,18 +1,15 @@
 import { Container, Row, Col, Button, Form } from "react-bootstrap";
 import styles from "./NextGenAdmin.module.scss";
-import { useAccount, useContractWrite } from "wagmi";
+import { useAccount } from "wagmi";
 import { useEffect, useState } from "react";
-import {
-  FunctionSelectors,
-  NEXTGEN_CHAIN_ID,
-  NEXTGEN_CORE,
-} from "../nextgen_contracts";
+import { FunctionSelectors } from "../nextgen_contracts";
 import {
   useGlobalAdmin,
   useFunctionAdmin,
   useCollectionIndex,
   useCollectionAdmin,
   getCollectionIdsForAddress,
+  getCoreUseContractWrite,
 } from "../nextgen_helpers";
 import NextGenContractWriteStatus from "../NextGenContractWriteStatus";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -49,15 +46,9 @@ export default function NextGenAdminSetFinalSupply(props: Readonly<Props>) {
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
-  const contractWrite = useContractWrite({
-    address: NEXTGEN_CORE.contract as `0x${string}`,
-    abi: NEXTGEN_CORE.abi,
-    chainId: NEXTGEN_CHAIN_ID,
-    functionName: "setFinalSupply",
-    onError() {
-      setSubmitting(false);
-      setLoading(false);
-    },
+  const contractWrite = getCoreUseContractWrite("setFinalSupply", () => {
+    setSubmitting(false);
+    setLoading(false);
   });
 
   function submit() {

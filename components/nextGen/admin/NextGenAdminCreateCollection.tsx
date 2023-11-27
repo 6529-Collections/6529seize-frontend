@@ -1,11 +1,10 @@
 import { Container, Row, Col, Button, Form } from "react-bootstrap";
 import styles from "./NextGenAdmin.module.scss";
-import { useContractWrite } from "wagmi";
 import { useEffect, useState } from "react";
-import { NEXTGEN_CORE, NEXTGEN_CHAIN_ID } from "../nextgen_contracts";
 import NextGenContractWriteStatus from "../NextGenContractWriteStatus";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { printAdminErrors } from "./NextGenAdmin";
+import { getCoreUseContractWrite } from "../nextgen_helpers";
 
 interface Props {
   close: () => void;
@@ -25,15 +24,9 @@ export default function NextGenAdminCreateCollection(props: Readonly<Props>) {
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
-  const contractWrite = useContractWrite({
-    address: NEXTGEN_CORE.contract as `0x${string}`,
-    abi: NEXTGEN_CORE.abi,
-    chainId: NEXTGEN_CHAIN_ID,
-    functionName: "createCollection",
-    onError() {
-      setSubmitting(false);
-      setLoading(false);
-    },
+  const contractWrite = getCoreUseContractWrite("createCollection", () => {
+    setSubmitting(false);
+    setLoading(false);
   });
 
   function submit() {

@@ -1,12 +1,8 @@
 import { Container, Row, Col, Button, Form } from "react-bootstrap";
 import styles from "./NextGenAdmin.module.scss";
-import { useAccount, useContractWrite } from "wagmi";
+import { useAccount } from "wagmi";
 import { useEffect, useState } from "react";
-import {
-  FunctionSelectors,
-  NEXTGEN_CHAIN_ID,
-  NEXTGEN_MINTER,
-} from "../nextgen_contracts";
+import { FunctionSelectors } from "../nextgen_contracts";
 import NextGenContractWriteStatus from "../NextGenContractWriteStatus";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -16,6 +12,7 @@ import {
   useCollectionAdmin,
   getCollectionIdsForAddress,
   retrieveCollectionCosts,
+  getMinterUseContractWrite,
 } from "../nextgen_helpers";
 import { MintingDetails } from "../nextgen_entities";
 import { printAdminErrors } from "./NextGenAdmin";
@@ -60,16 +57,13 @@ export default function NextGenAdminUpdateDelegationCollection(
     }
   });
 
-  const contractWrite = useContractWrite({
-    address: NEXTGEN_MINTER.contract as `0x${string}`,
-    abi: NEXTGEN_MINTER.abi,
-    chainId: NEXTGEN_CHAIN_ID,
-    functionName: "updateDelegationCollection",
-    onError() {
+  const contractWrite = getMinterUseContractWrite(
+    "updateDelegationCollection",
+    () => {
       setSubmitting(false);
       setLoading(false);
-    },
-  });
+    }
+  );
 
   function submit() {
     setLoading(true);

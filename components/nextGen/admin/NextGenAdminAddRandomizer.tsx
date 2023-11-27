@@ -1,12 +1,8 @@
 import { Container, Row, Col, Button, Form } from "react-bootstrap";
 import styles from "./NextGenAdmin.module.scss";
-import { useAccount, useContractWrite } from "wagmi";
+import { useAccount } from "wagmi";
 import { useEffect, useState } from "react";
-import {
-  FunctionSelectors,
-  NEXTGEN_CHAIN_ID,
-  NEXTGEN_CORE,
-} from "../nextgen_contracts";
+import { FunctionSelectors } from "../nextgen_contracts";
 import NextGenContractWriteStatus from "../NextGenContractWriteStatus";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -16,6 +12,7 @@ import {
   useCollectionAdmin,
   getCollectionIdsForAddress,
   retrieveCollectionAdditionalData,
+  getCoreUseContractWrite,
 } from "../nextgen_helpers";
 import { AdditionalData } from "../nextgen_entities";
 import { printAdminErrors } from "./NextGenAdmin";
@@ -58,15 +55,9 @@ export default function NextGenAdminUpdateRandomizer(props: Readonly<Props>) {
     }
   });
 
-  const contractWrite = useContractWrite({
-    address: NEXTGEN_CORE.contract as `0x${string}`,
-    abi: NEXTGEN_CORE.abi,
-    chainId: NEXTGEN_CHAIN_ID,
-    functionName: "addRandomizer",
-    onError() {
-      setSubmitting(false);
-      setLoading(false);
-    },
+  const contractWrite = getCoreUseContractWrite("addRandomizer", () => {
+    setSubmitting(false);
+    setLoading(false);
   });
 
   function submit() {
