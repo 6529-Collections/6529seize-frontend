@@ -21,7 +21,7 @@ const DEFAULT_IMAGE =
   "https://d3lqz0a4bldqgf.cloudfront.net/seize_images/Seize_Logo_Glasses_2.png";
 
 interface UserPageLayoutProps {
- profile: IProfileAndConsolidations;
+  profile: IProfileAndConsolidations;
   title: string;
   consolidatedTDH: ConsolidatedTDHMetrics | null;
 }
@@ -146,7 +146,7 @@ export default function UserPageLayout({
         <Header />
         <div className="tw-bg-neutral-950 tw-min-h-screen">
           <UserPageHeader
-         //  profile={props.profile}
+            profile={props.profile}
             mainAddress={mainAddress}
             consolidatedTDH={props.consolidatedTDH}
             activeAddress={activeAddress}
