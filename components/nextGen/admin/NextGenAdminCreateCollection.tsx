@@ -1,47 +1,16 @@
 import { Container, Row, Col, Button, Form } from "react-bootstrap";
 import styles from "./NextGenAdmin.module.scss";
-import { useAccount, useContractWrite } from "wagmi";
 import { useEffect, useState } from "react";
-import {
-  NEXTGEN_CORE,
-  NEXTGEN_CHAIN_ID,
-  FunctionSelectors,
-} from "../nextgen_contracts";
 import NextGenContractWriteStatus from "../NextGenContractWriteStatus";
-import {
-  getCollectionIdsForAddress,
-  useCollectionAdmin,
-  useCollectionIndex,
-  useFunctionAdmin,
-  useGlobalAdmin,
-} from "../nextgen_helpers";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { printAdminErrors } from "./NextGenAdmin";
+import { getCoreUseContractWrite } from "../nextgen_helpers";
 
 interface Props {
   close: () => void;
 }
 
-export default function NextGenAdminCreateCollection(props: Props) {
-  const account = useAccount();
-
-  const globalAdmin = useGlobalAdmin(account.address as string);
-  const functionAdmin = useFunctionAdmin(
-    account.address as string,
-    FunctionSelectors.CREATE_COLLECTION
-  );
-  const collectionIndex = useCollectionIndex();
-  const collectionAdmin = useCollectionAdmin(
-    account.address as string,
-    parseInt(collectionIndex.data as string)
-  );
-
-  const collectionIds = getCollectionIdsForAddress(
-    globalAdmin.data === true,
-    functionAdmin.data === true,
-    collectionAdmin.data,
-    parseInt(collectionIndex.data as string)
-  );
-
+export default function NextGenAdminCreateCollection(props: Readonly<Props>) {
   const [collectionName, setCollectionName] = useState("");
   const [artist, setArtist] = useState("");
   const [description, setDescription] = useState("");
@@ -55,15 +24,9 @@ export default function NextGenAdminCreateCollection(props: Props) {
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
-  const contractWrite = useContractWrite({
-    address: NEXTGEN_CORE.contract as `0x${string}`,
-    abi: NEXTGEN_CORE.abi,
-    chainId: NEXTGEN_CHAIN_ID,
-    functionName: "createCollection",
-    onError() {
-      setSubmitting(false);
-      setLoading(false);
-    },
+  const contractWrite = getCoreUseContractWrite("createCollection", () => {
+    setSubmitting(false);
+    setLoading(false);
   });
 
   function submit() {
@@ -225,17 +188,7 @@ export default function NextGenAdminCreateCollection(props: Props) {
                 }}
               />
             </Form.Group>
-            {!loading && errors.length > 0 && (
-              <div className="mb-3">
-                <ul>
-                  {errors.map((error, index) => (
-                    <li key={`error-${index}`} className="text-danger">
-                      {error}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
+            {!loading && errors.length > 0 && printAdminErrors(errors)}
             <Button
               className={`mt-3 mb-3 seize-btn`}
               disabled={submitting || loading}

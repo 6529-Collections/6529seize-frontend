@@ -12,7 +12,7 @@ const Header = dynamic(() => import("../../../../components/header/Header"), {
 const NextGenCollectionComponent = dynamic(
   () =>
     import(
-      "../../../../components/nextGen/collections/collection/NextGenCollection"
+      "../../../../components/nextGen/collections/collectionParts/NextGenCollection"
     ),
   {
     ssr: false,
@@ -65,6 +65,6 @@ export async function getServerSideProps(req: any, res: any, resolvedUrl: any) {
   };
 
   return {
-    props: props,
+    props,
   };
 }

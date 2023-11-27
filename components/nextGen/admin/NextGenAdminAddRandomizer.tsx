@@ -1,12 +1,8 @@
 import { Container, Row, Col, Button, Form } from "react-bootstrap";
 import styles from "./NextGenAdmin.module.scss";
-import { useAccount, useContractRead, useContractWrite } from "wagmi";
+import { useAccount } from "wagmi";
 import { useEffect, useState } from "react";
-import {
-  FunctionSelectors,
-  NEXTGEN_CHAIN_ID,
-  NEXTGEN_CORE,
-} from "../nextgen_contracts";
+import { FunctionSelectors } from "../nextgen_contracts";
 import NextGenContractWriteStatus from "../NextGenContractWriteStatus";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -16,14 +12,16 @@ import {
   useCollectionAdmin,
   getCollectionIdsForAddress,
   retrieveCollectionAdditionalData,
+  getCoreUseContractWrite,
 } from "../nextgen_helpers";
 import { AdditionalData } from "../nextgen_entities";
+import { printAdminErrors } from "./NextGenAdmin";
 
 interface Props {
   close: () => void;
 }
 
-export default function NextGenAdminUpdateRandomizer(props: Props) {
+export default function NextGenAdminUpdateRandomizer(props: Readonly<Props>) {
   const account = useAccount();
 
   const globalAdmin = useGlobalAdmin(account.address as string);
@@ -57,15 +55,9 @@ export default function NextGenAdminUpdateRandomizer(props: Props) {
     }
   });
 
-  const contractWrite = useContractWrite({
-    address: NEXTGEN_CORE.contract as `0x${string}`,
-    abi: NEXTGEN_CORE.abi,
-    chainId: NEXTGEN_CHAIN_ID,
-    functionName: "addRandomizer",
-    onError() {
-      setSubmitting(false);
-      setLoading(false);
-    },
+  const contractWrite = getCoreUseContractWrite("addRandomizer", () => {
+    setSubmitting(false);
+    setLoading(false);
   });
 
   function submit() {
@@ -147,17 +139,7 @@ export default function NextGenAdminUpdateRandomizer(props: Props) {
                 onChange={(e: any) => setRandomizerContract(e.target.value)}
               />
             </Form.Group>
-            {!loading && errors.length > 0 && (
-              <div className="mb-3">
-                <ul>
-                  {errors.map((error, index) => (
-                    <li key={`error-${index}`} className="text-danger">
-                      {error}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
+            {!loading && errors.length > 0 && printAdminErrors(errors)}
             <Button
               className={`mt-3 mb-3 seize-btn`}
               disabled={submitting || loading}

@@ -1,22 +1,23 @@
 import { Container, Row, Col, Button, Form } from "react-bootstrap";
 import styles from "./NextGenAdmin.module.scss";
-import { useAccount, useContractWrite } from "wagmi";
+import { useAccount } from "wagmi";
 import { useEffect, useState } from "react";
-import { NEXTGEN_CHAIN_ID, NEXTGEN_CORE } from "../nextgen_contracts";
 import {
   useCollectionIndex,
   useCollectionArtist,
   isCollectionArtist,
+  getCoreUseContractWrite,
 } from "../nextgen_helpers";
 import NextGenContractWriteStatus from "../NextGenContractWriteStatus";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { areEqualAddresses } from "../../../helpers/Helpers";
+import { printAdminErrors } from "./NextGenAdmin";
 
 interface Props {
   close: () => void;
 }
 
-export default function NextGenAdminSignCollection(props: Props) {
+export default function NextGenAdminSignCollection(props: Readonly<Props>) {
   const account = useAccount();
 
   const collectionIndex = useCollectionIndex();
@@ -51,15 +52,9 @@ export default function NextGenAdminSignCollection(props: Props) {
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
-  const contractWrite = useContractWrite({
-    address: NEXTGEN_CORE.contract as `0x${string}`,
-    abi: NEXTGEN_CORE.abi,
-    chainId: NEXTGEN_CHAIN_ID,
-    functionName: "artistSignature",
-    onError() {
-      setSubmitting(false);
-      setLoading(false);
-    },
+  const contractWrite = getCoreUseContractWrite("artistSignature", () => {
+    setSubmitting(false);
+    setLoading(false);
   });
 
   function submit() {
@@ -146,17 +141,7 @@ export default function NextGenAdminSignCollection(props: Props) {
                   }}
                 />
               </Form.Group>
-              {!loading && errors.length > 0 && (
-                <div className="mb-3">
-                  <ul>
-                    {errors.map((error, index) => (
-                      <li key={`error-${index}`} className="text-danger">
-                        {error}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
+              {!loading && errors.length > 0 && printAdminErrors(errors)}
               <Button
                 className={`mt-3 mb-3 seize-btn`}
                 disabled={submitting || loading}

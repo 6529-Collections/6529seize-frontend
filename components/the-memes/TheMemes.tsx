@@ -44,7 +44,7 @@ interface Props {
   wallets: string[];
 }
 
-export default function TheMemesComponent(props: Props) {
+export default function TheMemesComponent(props: Readonly<Props>) {
   const router = useRouter();
 
   useEffect(() => {

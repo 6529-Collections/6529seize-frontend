@@ -12,7 +12,7 @@ const Header = dynamic(() => import("../../../../components/header/Header"), {
 const NextGenCollectionTokensComponent = dynamic(
   () =>
     import(
-      "../../../../components/nextGen/collections/collection/art/NextGenCollectionArtPage"
+      "../../../../components/nextGen/collections/collectionParts/art/NextGenCollectionArtPage"
     ),
   {
     ssr: false,
@@ -31,7 +31,7 @@ export default function NextGenCollectionTokensPage(props: any) {
         <meta name="description" content={pagenameFull} />
         <meta
           property="og:url"
-          content={`${process.env.BASE_ENDPOINT}/nextgen/collection/${pageProps.collection}/mint`}
+          content={`${process.env.BASE_ENDPOINT}/nextgen/collection/${pageProps.collection}/art`}
         />
         <meta property="og:title" content={pageProps.name} />
         <meta
@@ -65,6 +65,6 @@ export async function getServerSideProps(req: any, res: any, resolvedUrl: any) {
   };
 
   return {
-    props: props,
+    props,
   };
 }

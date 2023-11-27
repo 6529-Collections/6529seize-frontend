@@ -1,12 +1,8 @@
 import { Container, Row, Col, Button, Form } from "react-bootstrap";
 import styles from "./NextGenAdmin.module.scss";
-import { useAccount, useContractWrite } from "wagmi";
+import { useAccount } from "wagmi";
 import { useEffect, useState } from "react";
-import {
-  NEXTGEN_MINTER,
-  NEXTGEN_CHAIN_ID,
-  FunctionSelectors,
-} from "../nextgen_contracts";
+import { FunctionSelectors } from "../nextgen_contracts";
 import {
   useGlobalAdmin,
   useFunctionAdmin,
@@ -14,17 +10,19 @@ import {
   useCollectionAdmin,
   getCollectionIdsForAddress,
   retrieveCollectionCosts,
+  getMinterUseContractWrite,
 } from "../nextgen_helpers";
 import NextGenContractWriteStatus from "../NextGenContractWriteStatus";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { ANY_COLLECTION } from "../../../pages/delegation/[...section]";
 import { MintingDetails } from "../nextgen_entities";
+import { printAdminErrors } from "./NextGenAdmin";
 
 interface Props {
   close: () => void;
 }
 
-export default function NextGenAdminSetCosts(props: Props) {
+export default function NextGenAdminSetCosts(props: Readonly<Props>) {
   const account = useAccount();
 
   const globalAdmin = useGlobalAdmin(account.address as string);
@@ -49,8 +47,8 @@ export default function NextGenAdminSetCosts(props: Props) {
   const [collectionStartCost, setCollectionStartCost] = useState("");
   const [collectionEndCost, setCollectionEndCost] = useState("");
   const [rate, setRate] = useState("");
-  const [timeperiod, setTimePeriod] = useState("");
-  const [salesOption, setSaleOption] = useState("");
+  const [timePeriod, setTimePeriod] = useState("");
+  const [salesOption, setSalesOption] = useState("");
   const [delegationAddress, setDelegationAddress] = useState(
     ANY_COLLECTION.contract
   );
@@ -65,20 +63,14 @@ export default function NextGenAdminSetCosts(props: Props) {
       setCollectionEndCost(data.end_mint_cost.toString());
       setRate(data.rate.toString());
       setTimePeriod(data.time_period.toString());
-      setSaleOption(data.sales_option.toString());
+      setSalesOption(data.sales_option.toString());
       setDelegationAddress(data.del_address);
     }
   });
 
-  const contractWrite = useContractWrite({
-    address: NEXTGEN_MINTER.contract as `0x${string}`,
-    abi: NEXTGEN_MINTER.abi,
-    chainId: NEXTGEN_CHAIN_ID,
-    functionName: "setCollectionCosts",
-    onError() {
-      setSubmitting(false);
-      setLoading(false);
-    },
+  const contractWrite = getMinterUseContractWrite("setCollectionCosts", () => {
+    setSubmitting(false);
+    setLoading(false);
   });
 
   function submit() {
@@ -98,7 +90,7 @@ export default function NextGenAdminSetCosts(props: Props) {
     if (!rate) {
       errors.push("Rate is required");
     }
-    if (!timeperiod) {
+    if (!timePeriod) {
       errors.push("Time period is required");
     }
     if (!salesOption) {
@@ -125,7 +117,7 @@ export default function NextGenAdminSetCosts(props: Props) {
           collectionStartCost,
           collectionEndCost,
           rate,
-          timeperiod,
+          timePeriod,
           salesOption,
           delegationAddress,
         ],
@@ -212,7 +204,7 @@ export default function NextGenAdminSetCosts(props: Props) {
               <Form.Control
                 type="integer"
                 placeholder="unix epoch time eg. 86400 (seconds in a day)"
-                value={timeperiod}
+                value={timePeriod}
                 onChange={(e: any) => setTimePeriod(e.target.value)}
               />
             </Form.Group>
@@ -222,7 +214,7 @@ export default function NextGenAdminSetCosts(props: Props) {
                 type="integer"
                 placeholder="1. Fixed Price, 2. Exponential/Linear decrease, 3. Periodic Sale"
                 value={salesOption}
-                onChange={(e: any) => setSaleOption(e.target.value)}
+                onChange={(e: any) => setSalesOption(e.target.value)}
               />
             </Form.Group>
             <Form.Group className="mb-3">
@@ -234,17 +226,7 @@ export default function NextGenAdminSetCosts(props: Props) {
                 onChange={(e: any) => setDelegationAddress(e.target.value)}
               />
             </Form.Group>
-            {!loading && errors.length > 0 && (
-              <div className="mb-3">
-                <ul>
-                  {errors.map((error, index) => (
-                    <li key={`error-${index}`} className="text-danger">
-                      {error}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
+            {!loading && errors.length > 0 && printAdminErrors(errors)}
             <Button
               className={`mt-3 mb-3 seize-btn`}
               disabled={submitting || loading}

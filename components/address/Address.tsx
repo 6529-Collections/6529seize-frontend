@@ -50,7 +50,7 @@ export const SZN_5_ICON = "";
 
 export const GRADIENT_ICON = "";
 
-export default function Address(props: Props) {
+export default function Address(props: Readonly<Props>) {
   const [consolidationExpanded, setConsolidationExpanded] = useState(
     props.isUserPage ? true : false
   );

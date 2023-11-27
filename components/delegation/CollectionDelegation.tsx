@@ -158,7 +158,7 @@ function getConsolidationReadParams(
   return null;
 }
 
-export default function CollectionDelegationComponent(props: Props) {
+export default function CollectionDelegationComponent(props: Readonly<Props>) {
   const toastRef = useRef<HTMLDivElement>(null);
   const accountResolution = useAccount();
   const networkResolution = useNetwork();

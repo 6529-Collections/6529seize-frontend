@@ -27,6 +27,7 @@ import { fetchUrl } from "../../../../../services/6529api";
 import { useWeb3Modal } from "@web3modal/react";
 import { NextGenMintDelegatorOption } from "./NextGenMintDelegatorOption";
 import { getNftsForContractAndOwner } from "../../../../../services/alchemy-api";
+import { Spinner } from "../../NextGen";
 
 interface Props {
   collection: CollectionWithMerkle;
@@ -40,7 +41,7 @@ interface Props {
   mintForAddress: (mintForAddress: string) => void;
 }
 
-export default function NextGenMintBurnWidget(props: Props) {
+export default function NextGenMintBurnWidget(props: Readonly<Props>) {
   const account = useAccount();
   const chainId = useChainId();
   const web3Modal = useWeb3Modal();
@@ -73,7 +74,7 @@ export default function NextGenMintBurnWidget(props: Props) {
   const [tokenId, setTokenId] = useState<string>("");
 
   const [mintingForDelegator, setMintingForDelegator] = useState(false);
-  const [salt, setSalt] = useState<number>(0);
+  const salt = 0;
   const [isMinting, setIsMinting] = useState(false);
 
   const [fetchingProofs, setFetchingProofs] = useState(false);
@@ -234,6 +235,32 @@ export default function NextGenMintBurnWidget(props: Props) {
     setProofResponse(undefined);
   }, [account.address]);
 
+  function getButtonText() {
+    if (!account.isConnected) {
+      return "Connect Wallet";
+    }
+    if (chainId !== NEXTGEN_CHAIN_ID) {
+      return `Switch to ${getNetworkName(NEXTGEN_CHAIN_ID)}`;
+    }
+    if (isMinting) {
+      return "Processing...";
+    }
+    if (!props.collection.status) {
+      return "Burn Not Active";
+    }
+
+    let text = "Mint";
+    if (
+      !fetchingProofs &&
+      tokenId &&
+      proofResponse &&
+      proofResponse.proof.length === 0
+    ) {
+      text += " - no proofs found";
+    }
+    return text;
+  }
+
   return (
     <Container className="no-padding">
       <Row>
@@ -300,7 +327,7 @@ export default function NextGenMintBurnWidget(props: Props) {
                   <Tippy
                     content={`Mint for an address that has delegated to you${
                       props.delegators.length === 0
-                        ? ` - you currently have no props.delegators`
+                        ? ` - you currently have no delegators`
                         : ``
                     }`}
                     placement={"top"}
@@ -391,31 +418,8 @@ export default function NextGenMintBurnWidget(props: Props) {
                   className={styles.mintBtn}
                   disabled={disableMint()}
                   onClick={handleMintClick}>
-                  {account.isConnected
-                    ? chainId === NEXTGEN_CHAIN_ID
-                      ? isMinting
-                        ? `Processing...`
-                        : props.collection.status
-                        ? `Mint Now${
-                            !fetchingProofs &&
-                            tokenId &&
-                            proofResponse &&
-                            proofResponse.proof.length === 0
-                              ? ` - no proofs found`
-                              : ""
-                          }`
-                        : `Burn Not Active`
-                      : `Switch to ${getNetworkName(NEXTGEN_CHAIN_ID)}`
-                    : `Connect Wallet`}
-                  {isMinting && (
-                    <div className="d-inline">
-                      <div
-                        className={`spinner-border ${styles.loader}`}
-                        role="status">
-                        <span className="sr-only"></span>
-                      </div>
-                    </div>
-                  )}
+                  {getButtonText()}
+                  {isMinting && <Spinner />}
                 </Button>
               </Col>
             </Form.Group>
@@ -429,8 +433,8 @@ export default function NextGenMintBurnWidget(props: Props) {
                 </Form.Label>
                 <Col sm={12} className="d-flex align-items-center">
                   <ul className="mb-0">
-                    {errors.map((e, index) => (
-                      <li key={`mint-error-${index}`}>{e}</li>
+                    {errors.map((e) => (
+                      <li key={`mint-error-${e.replaceAll(" ", "-")}`}>{e}</li>
                     ))}
                   </ul>
                 </Col>

@@ -12,12 +12,8 @@ import NextGenTokenImage from "./NextGenTokenImage";
 import Address from "../../address/Address";
 import Image from "next/image";
 import { goerli } from "wagmi/chains";
-import {
-  NEXTGEN_CHAIN_ID,
-  NEXTGEN_CORE,
-  NEXTGEN_MINTER,
-} from "../nextgen_contracts";
-import NextGenCollectionHeader from "./collection/NextGenCollectionHeader";
+import { NEXTGEN_CHAIN_ID, NEXTGEN_CORE } from "../nextgen_contracts";
+import NextGenCollectionHeader from "./collectionParts/NextGenCollectionHeader";
 import { areEqualAddresses } from "../../../helpers/Helpers";
 import {
   retrieveCollectionAdditionalData,
@@ -33,7 +29,7 @@ interface Props {
   token: number;
 }
 
-export default function NextGenToken(props: Props) {
+export default function NextGenToken(props: Readonly<Props>) {
   const account = useAccount();
 
   const [tokenFetched, setTokenFetched] = useState(false);
@@ -327,57 +323,53 @@ export default function NextGenToken(props: Props) {
         </Row>
       </Container>
     );
+  } else if (tokenNotFound) {
+    return (
+      <Container className="pt-5 text-center">
+        <Row>
+          <Col>
+            <h4 className="mb-0 float-none">Token #{props.token} not found</h4>
+          </Col>
+        </Row>
+        <Row>
+          <Col>
+            <Image
+              width="0"
+              height="0"
+              style={{ height: "auto", width: "120px" }}
+              src="/SummerGlasses.svg"
+              alt="SummerGlasses"
+            />
+          </Col>
+        </Row>
+        <Row>
+          <Col>
+            <a href={`/nextgen`}>BACK TO NEXTGEN</a>
+          </Col>
+        </Row>
+        <Row className="pt-3">
+          <Col>
+            <a href={`/`}>BACK TO HOME</a>
+          </Col>
+        </Row>
+      </Container>
+    );
   } else {
-    if (tokenNotFound) {
-      return (
-        <Container className="pt-5 text-center">
-          <Row>
-            <Col>
-              <h4 className="mb-0 float-none">
-                Token #{props.token} not found
-              </h4>
-            </Col>
-          </Row>
-          <Row>
-            <Col>
-              <Image
-                width="0"
-                height="0"
-                style={{ height: "auto", width: "120px" }}
-                src="/SummerGlasses.svg"
-                alt="SummerGlasses"
-              />
-            </Col>
-          </Row>
-          <Row>
-            <Col>
-              <a href={`/nextgen`}>BACK TO NEXTGEN</a>
-            </Col>
-          </Row>
-          <Row className="pt-3">
-            <Col>
-              <a href={`/`}>BACK TO HOME</a>
-            </Col>
-          </Row>
+    return (
+      <>
+        <Container className="pt-4 pb-4">
+          {info && phaseTimes && additionalData && (
+            <NextGenCollectionHeader
+              collection={props.collection}
+              info={info}
+              phase_times={phaseTimes}
+              additional_data={additionalData}
+              collection_link={true}
+            />
+          )}
         </Container>
-      );
-    } else {
-      return (
-        <>
-          <Container className="pt-4 pb-4">
-            {info && phaseTimes && additionalData && (
-              <NextGenCollectionHeader
-                collection={props.collection}
-                info={info}
-                phase_times={phaseTimes}
-                additional_data={additionalData}
-                collection_link={true}
-              />
-            )}
-          </Container>
-          {printToken()}
-        </>
-      );
-    }
+        {printToken()}
+      </>
+    );
   }
 }

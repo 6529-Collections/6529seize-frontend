@@ -10,7 +10,6 @@ import { commonApiFetch } from "../../services/api/common-api";
 import { NFT, NFTLite } from "../../entities/INFT";
 import { Season } from "../../entities/ISeason";
 
-
 interface Props {
   user: string;
   connectedWallets: string[];
@@ -23,10 +22,9 @@ interface Props {
   owned: OwnerLite[];
 }
 
-export default function UserPage(props: Props) {
+export default function UserPage(props: Readonly<Props>) {
   const router = useRouter();
   const isConsolidation = props.profile.consolidation.wallets.length > 1;
-
 
   const getAddressFromQuery = (): string | null => {
     if (!router.query.address) {

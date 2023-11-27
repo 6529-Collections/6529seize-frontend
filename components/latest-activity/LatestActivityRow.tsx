@@ -26,7 +26,7 @@ interface Props {
 
 const ROYALTIES_PERCENTAGE = 0.069;
 
-export default function LatestActivityRow(props: Props) {
+export default function LatestActivityRow(props: Readonly<Props>) {
   function getNftImageSrc(nft?: NFTLite, src?: string) {
     if (!nft) {
       return "";

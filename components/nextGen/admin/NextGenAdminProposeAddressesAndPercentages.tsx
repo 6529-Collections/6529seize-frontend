@@ -1,20 +1,18 @@
 import { Container, Row, Col, Button, Form } from "react-bootstrap";
 import styles from "./NextGenAdmin.module.scss";
-import { useAccount, useContractWrite } from "wagmi";
+import { useAccount } from "wagmi";
 import { useEffect, useState } from "react";
-import {
-  FunctionSelectors,
-  NEXTGEN_CHAIN_ID,
-  NEXTGEN_MINTER,
-} from "../nextgen_contracts";
+import { FunctionSelectors } from "../nextgen_contracts";
 import {
   useGlobalAdmin,
   useFunctionAdmin,
   useCollectionIndex,
   getCollectionIdsForAddress,
+  getMinterUseContractWrite,
 } from "../nextgen_helpers";
 import NextGenContractWriteStatus from "../NextGenContractWriteStatus";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { printAdminErrors } from "./NextGenAdmin";
 
 export enum ProposalType {
   PRIMARY = "Primary",
@@ -26,19 +24,26 @@ interface Props {
   close: () => void;
 }
 
+function getFunctionSelector(type: ProposalType) {
+  switch (type) {
+    case ProposalType.PRIMARY:
+      return FunctionSelectors.PROPOSE_PRIMARY_ADDRESSES_AND_PERCENTAGES;
+    case ProposalType.SECONDARY:
+      return FunctionSelectors.PROPOSE_SECONDARY_ADDRESSES_AND_PERCENTAGES;
+    default:
+      return "";
+  }
+}
+
 export default function NextGenAdminProposeAddressesAndPercentages(
-  props: Props
+  props: Readonly<Props>
 ) {
   const account = useAccount();
 
   const globalAdmin = useGlobalAdmin(account.address as string);
   const functionAdmin = useFunctionAdmin(
     account.address as string,
-    props.type === ProposalType.PRIMARY
-      ? FunctionSelectors.PROPOSE_PRIMARY_ADDRESSES_AND_PERCENTAGES
-      : props.type === ProposalType.SECONDARY
-      ? FunctionSelectors.PROPOSE_SECONDARY_ADDRESSES_AND_PERCENTAGES
-      : ""
+    getFunctionSelector(props.type)
   );
 
   const collectionIndex = useCollectionIndex();
@@ -73,15 +78,9 @@ export default function NextGenAdminProposeAddressesAndPercentages(
     }
   }
 
-  const contractWrite = useContractWrite({
-    address: NEXTGEN_MINTER.contract as `0x${string}`,
-    abi: NEXTGEN_MINTER.abi,
-    chainId: NEXTGEN_CHAIN_ID,
-    functionName: getFunctionName(),
-    onError() {
-      setSubmitting(false);
-      setLoading(false);
-    },
+  const contractWrite = getMinterUseContractWrite(getFunctionName(), () => {
+    setSubmitting(false);
+    setLoading(false);
   });
 
   function submit() {
@@ -231,17 +230,7 @@ export default function NextGenAdminProposeAddressesAndPercentages(
                 onChange={(e: any) => setPercentage3(e.target.value)}
               />
             </Form.Group>
-            {!loading && errors.length > 0 && (
-              <div className="mb-3">
-                <ul>
-                  {errors.map((error, index) => (
-                    <li key={`error-${index}`} className="text-danger">
-                      {error}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
+            {!loading && errors.length > 0 && printAdminErrors(errors)}
             <Button
               className={`mt-3 mb-3 seize-btn`}
               disabled={submitting || loading}

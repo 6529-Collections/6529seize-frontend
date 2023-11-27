@@ -1,14 +1,10 @@
 import { Container, Row, Col, Button, Form } from "react-bootstrap";
 import { v4 as uuidv4 } from "uuid";
 import styles from "./NextGenAdmin.module.scss";
-import { useAccount, useContractWrite, useSignMessage } from "wagmi";
+import { useAccount, useSignMessage } from "wagmi";
 import { useEffect, useState } from "react";
 import { postFormData } from "../../../services/6529api";
-import {
-  NEXTGEN_MINTER,
-  NEXTGEN_CHAIN_ID,
-  FunctionSelectors,
-} from "../nextgen_contracts";
+import { FunctionSelectors } from "../nextgen_contracts";
 import {
   useGlobalAdmin,
   useFunctionAdmin,
@@ -16,11 +12,13 @@ import {
   useCollectionAdmin,
   getCollectionIdsForAddress,
   retrieveCollectionPhases,
+  getMinterUseContractWrite,
 } from "../nextgen_helpers";
 import NextGenContractWriteStatus from "../NextGenContractWriteStatus";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { PhaseTimes } from "../nextgen_entities";
 import { NULL_MERKLE } from "../../../constants";
+import { printAdminErrors } from "./NextGenAdmin";
 
 interface Props {
   close: () => void;
@@ -34,11 +32,10 @@ enum Type {
   EXTERNAL_BURN = "external_burn",
 }
 
-export default function NextGenAdminSetPhases(props: Props) {
+export default function NextGenAdminSetPhases(props: Readonly<Props>) {
   const account = useAccount();
   const signMessage = useSignMessage();
-
-  const [uuid, setuuid] = useState(uuidv4());
+  const uuid = uuidv4();
 
   const globalAdmin = useGlobalAdmin(account.address as string);
   const functionAdmin = useFunctionAdmin(
@@ -109,15 +106,9 @@ export default function NextGenAdminSetPhases(props: Props) {
     contractWrite.reset();
   }
 
-  const contractWrite = useContractWrite({
-    address: NEXTGEN_MINTER.contract as `0x${string}`,
-    abi: NEXTGEN_MINTER.abi,
-    chainId: NEXTGEN_CHAIN_ID,
-    functionName: "setCollectionPhases",
-    onError() {
-      setSubmitting(false);
-      setLoading(false);
-    },
+  const contractWrite = getMinterUseContractWrite("setCollectionPhases", () => {
+    setSubmitting(false);
+    setLoading(false);
   });
 
   function submit() {
@@ -159,8 +150,8 @@ export default function NextGenAdminSetPhases(props: Props) {
       contractWrite.write({
         args: [
           collectionID,
-          type !== Type.NO_ALLOWLIST ? allowlistStartTime : 0,
-          type !== Type.NO_ALLOWLIST ? allowlistEndTime : 0,
+          type === Type.ALLOWLIST ? publicStartTime : allowlistStartTime,
+          type === Type.ALLOWLIST ? publicStartTime : allowlistEndTime,
           publicStartTime,
           publicEndTime,
           type !== Type.NO_ALLOWLIST ? merkleRoot : NULL_MERKLE,
@@ -347,9 +338,7 @@ export default function NextGenAdminSetPhases(props: Props) {
                   <Form.Label>Merkle Root</Form.Label>
                   <Form.Control
                     type="text"
-                    placeholder={
-                      merkleRoot ? merkleRoot : "Upload file to generate"
-                    }
+                    placeholder={merkleRoot || "Upload file to generate"}
                     value={merkleRoot}
                     disabled
                   />
@@ -392,17 +381,7 @@ export default function NextGenAdminSetPhases(props: Props) {
                 onChange={(e: any) => setPublicEndTime(e.target.value)}
               />
             </Form.Group>
-            {!loading && errors.length > 0 && (
-              <div className="mb-3">
-                <ul>
-                  {errors.map((error, index) => (
-                    <li key={`error-${index}`} className="text-danger">
-                      {error}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
+            {!loading && errors.length > 0 && printAdminErrors(errors)}
             <Button
               className={`mt-3 mb-3 seize-btn`}
               disabled={submitting || loading}

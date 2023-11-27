@@ -60,7 +60,7 @@ interface Props {
   wallets: string[];
 }
 
-export default function LabPage(props: Props) {
+export default function LabPage(props: Readonly<Props>) {
   const router = useRouter();
 
   const [isFullScreenSupported, setIsFullScreenSupported] = useState(false);

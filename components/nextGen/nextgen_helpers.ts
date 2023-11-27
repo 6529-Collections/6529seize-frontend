@@ -1,4 +1,4 @@
-import { useContractRead, useContractReads } from "wagmi";
+import { useContractRead, useContractReads, useContractWrite } from "wagmi";
 import {
   NEXTGEN_ADMIN,
   NEXTGEN_CHAIN_ID,
@@ -64,16 +64,12 @@ function getCollectionAdminReadParams(
 
 export function useCollectionAdmin(address: string, collectionIndex: number) {
   return useContractReads({
-    contracts: getCollectionAdminReadParams(collectionIndex, address as string),
+    contracts: getCollectionAdminReadParams(collectionIndex, address),
   });
 }
 
 export function isCollectionAdmin(collectionAdmin: any) {
-  return (
-    collectionAdmin &&
-    collectionAdmin.data &&
-    collectionAdmin.data.some((d: any) => d.result === true)
-  );
+  return collectionAdmin?.data?.some((d: any) => d.result === true);
 }
 
 function getCollectionArtistReadParams(collectionIndex: number) {
@@ -97,12 +93,8 @@ export function useCollectionArtist(collectionIndex: number) {
 }
 
 export function isCollectionArtist(address: string, collectionArtists: any) {
-  return (
-    collectionArtists &&
-    collectionArtists.data &&
-    collectionArtists.data.some((d: any) =>
-      areEqualAddresses(address, d.result)
-    )
+  return collectionArtists?.data?.some((a: any) =>
+    areEqualAddresses(address, a.result)
   );
 }
 
@@ -117,7 +109,7 @@ export function getCollectionIdsForAddress(
     for (let i = 1; i <= collectionIndex - 1; i++) {
       collectionIndexArray.push(i.toString());
     }
-  } else if (collectionAdmin && collectionAdmin.data) {
+  } else if (collectionAdmin?.data) {
     collectionAdmin.data.forEach((d: any, i: number) => {
       if (d.result === true) {
         collectionIndexArray.push((i + 1).toString());
@@ -295,7 +287,7 @@ export function isMintingUpcoming(startTime: number) {
 
 export function extractURI(s: string) {
   const regex = /"animation_url":"([^"]+)"/;
-  const match = s.match(regex);
+  const match = regex.exec(s);
   if (match && match.length >= 2) {
     const animationUrl = match[1];
     const base64Data = animationUrl.split(",")[1];
@@ -314,7 +306,7 @@ export function extractURI(s: string) {
 
 export function extractField(field: string, s: string) {
   const regex = new RegExp(`"${field}":"([^"]+)"`);
-  const match = s.match(regex);
+  const match = regex.exec(s);
   if (match && match.length >= 2) {
     return match[1];
   } else {
@@ -324,7 +316,7 @@ export function extractField(field: string, s: string) {
 
 export function extractAttributes(s: string) {
   const regex = /"attributes":\[(.*?)\]/;
-  const match = s.match(regex);
+  const match = regex.exec(s);
   if (match) {
     return JSON.parse(`[${match[1]}]`);
   }
@@ -362,4 +354,41 @@ export function extractPhases(d: any[]) {
     public_status: publicStatus,
   };
   return phases;
+}
+
+export function getCoreUseContractWrite(
+  functionName: string,
+  onError: () => void
+) {
+  return getUseContractWrite(NEXTGEN_CORE, functionName, onError);
+}
+
+export function getMinterUseContractWrite(
+  functionName: string,
+  onError: () => void
+) {
+  return getUseContractWrite(NEXTGEN_MINTER, functionName, onError);
+}
+
+export function getAdminUseContractWrite(
+  functionName: string,
+  onError: () => void
+) {
+  return getUseContractWrite(NEXTGEN_ADMIN, functionName, onError);
+}
+
+function getUseContractWrite(
+  contract: { contract: string; abi: any },
+  functionName: string,
+  onError: () => void
+) {
+  return useContractWrite({
+    address: contract.contract as `0x${string}`,
+    abi: contract.abi,
+    chainId: NEXTGEN_CHAIN_ID,
+    functionName: functionName,
+    onError() {
+      onError();
+    },
+  });
 }

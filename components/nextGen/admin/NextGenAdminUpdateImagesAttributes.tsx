@@ -1,16 +1,18 @@
 import { Container, Row, Col, Button, Form } from "react-bootstrap";
 import styles from "./NextGenAdmin.module.scss";
-import { useContractWrite } from "wagmi";
 import { useEffect, useState } from "react";
-import { NEXTGEN_CHAIN_ID, NEXTGEN_CORE } from "../nextgen_contracts";
 import NextGenContractWriteStatus from "../NextGenContractWriteStatus";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { printAdminErrors } from "./NextGenAdmin";
+import { getCoreUseContractWrite } from "../nextgen_helpers";
 
 interface Props {
   close: () => void;
 }
 
-export default function NextGenAdminUpdateImagesAttributes(props: Props) {
+export default function NextGenAdminUpdateImagesAttributes(
+  props: Readonly<Props>
+) {
   const [tokenIds, setTokenIds] = useState<string[]>([]);
   const [images, setImages] = useState<string[]>([]);
   const [attributes, setAttributes] = useState<string[]>([]);
@@ -19,16 +21,13 @@ export default function NextGenAdminUpdateImagesAttributes(props: Props) {
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
-  const contractWrite = useContractWrite({
-    address: NEXTGEN_CORE.contract as `0x${string}`,
-    abi: NEXTGEN_CORE.abi,
-    chainId: NEXTGEN_CHAIN_ID,
-    functionName: "updateImagesAndAttributes",
-    onError() {
+  const contractWrite = getCoreUseContractWrite(
+    "updateImagesAndAttributes",
+    () => {
       setSubmitting(false);
       setLoading(false);
-    },
-  });
+    }
+  );
 
   function submit() {
     setLoading(true);
@@ -131,17 +130,7 @@ export default function NextGenAdminUpdateImagesAttributes(props: Props) {
                 }}
               />
             </Form.Group>
-            {!loading && errors.length > 0 && (
-              <div className="mb-3">
-                <ul>
-                  {errors.map((error, index) => (
-                    <li key={`error-${index}`} className="text-danger">
-                      {error}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
+            {!loading && errors.length > 0 && printAdminErrors(errors)}
             <Button
               className={`mt-3 mb-3 seize-btn`}
               disabled={submitting || loading}

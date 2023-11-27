@@ -23,10 +23,25 @@
     color: $off-white;
     position: absolute;
     top: auto;
-    bottom: 8px;
+    bottom: -10px;
 
     &::after {
       font-size: 1.5rem;
+      font-weight: bolder;
+    }
+  }
+
+  .swiper-button-prev {
+    left: calc(50% - 120px);
+    &::after {
+      content: "\2190";
+    }
+  }
+
+  .swiper-button-next {
+    right: calc(50% - 120px);
+    &::after {
+      content: "\2192";
     }
   }
 }

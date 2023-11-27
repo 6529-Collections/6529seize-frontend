@@ -1,6 +1,6 @@
 import styles from "../NextGen.module.scss";
 import { Container, Row, Col } from "react-bootstrap";
-import { AdditionalData, TokenURI } from "../../nextgen_entities";
+import { AdditionalData } from "../../nextgen_entities";
 import NextGenTokenList from "../NextGenTokenList";
 import DotLoader from "../../../dotLoader/DotLoader";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -12,7 +12,7 @@ interface Props {
   show_view_all?: boolean;
 }
 
-export default function NextGenCollectionArt(props: Props) {
+export default function NextGenCollectionArt(props: Readonly<Props>) {
   return (
     <Container className="no-padding">
       <Row>

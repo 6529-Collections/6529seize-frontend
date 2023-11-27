@@ -1,7 +1,7 @@
 import NextGenTokenImage from "./NextGenTokenImage";
 import { Col, Container, Row } from "react-bootstrap";
 import { useState } from "react";
-import { useContractRead, useEnsName } from "wagmi";
+import { useContractRead } from "wagmi";
 import { NEXTGEN_CHAIN_ID, NEXTGEN_CORE } from "../nextgen_contracts";
 import {
   extractURI,
@@ -18,9 +18,8 @@ interface Props {
   hide_background?: boolean;
 }
 
-export default function NextGenTokenPreview(props: Props) {
+export default function NextGenTokenPreview(props: Readonly<Props>) {
   const [owner, setOwner] = useState<`0x${string}`>();
-  const [ownerENS, setOwnerENS] = useState<string>();
   const [name, setName] = useState<string>();
 
   const [tokenUri, setTokenUri] = useState<TokenURI>(EMPTY_TOKEN_URI);
@@ -75,16 +74,6 @@ export default function NextGenTokenPreview(props: Props) {
     onSettled(data: any, error: any) {
       if (data) {
         setOwner(data);
-      }
-    },
-  });
-
-  useEnsName({
-    address: owner,
-    chainId: 1,
-    onSettled(data: any, error: any) {
-      if (data) {
-        setOwnerENS(data);
       }
     },
   });

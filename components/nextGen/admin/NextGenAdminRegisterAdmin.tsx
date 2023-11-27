@@ -1,21 +1,18 @@
 import { Container, Row, Col, Button, Form } from "react-bootstrap";
 import styles from "./NextGenAdmin.module.scss";
-import { useAccount, useContractWrite } from "wagmi";
+import { useAccount } from "wagmi";
 import { useEffect, useState } from "react";
-import {
-  NEXTGEN_CHAIN_ID,
-  NEXTGEN_ADMIN,
-  FunctionSelectors,
-} from "../nextgen_contracts";
+import { FunctionSelectors } from "../nextgen_contracts";
 import NextGenContractWriteStatus from "../NextGenContractWriteStatus";
 
 import {
   useGlobalAdmin,
   useCollectionIndex,
-  useCollectionAdmin,
   getCollectionIdsForAddress,
+  getAdminUseContractWrite,
 } from "../nextgen_helpers";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { printAdminErrors } from "./NextGenAdmin";
 
 export enum ADMIN_TYPE {
   GLOBAL = "GLOBAL",
@@ -28,7 +25,7 @@ interface Props {
   type: ADMIN_TYPE;
 }
 
-export default function NextGenAdminRegisterAdmin(props: Props) {
+export default function NextGenAdminRegisterAdmin(props: Readonly<Props>) {
   const account = useAccount();
 
   const [collectionID, setCollectionID] = useState("");
@@ -76,15 +73,9 @@ export default function NextGenAdminRegisterAdmin(props: Props) {
     parseInt(collectionIndex.data as string)
   );
 
-  const contractWrite = useContractWrite({
-    address: NEXTGEN_ADMIN.contract as `0x${string}`,
-    abi: NEXTGEN_ADMIN.abi,
-    chainId: NEXTGEN_CHAIN_ID,
-    functionName: getFunctionName(),
-    onError() {
-      setSubmitting(false);
-      setLoading(false);
-    },
+  const contractWrite = getAdminUseContractWrite(getFunctionName(), () => {
+    setSubmitting(false);
+    setLoading(false);
   });
 
   function submit() {
@@ -228,17 +219,7 @@ export default function NextGenAdminRegisterAdmin(props: Props) {
                 />
               </span>
             </Form.Group>
-            {!loading && errors.length > 0 && (
-              <div className="mb-3">
-                <ul>
-                  {errors.map((error, index) => (
-                    <li key={`error-${index}`} className="text-danger">
-                      {error}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
+            {!loading && errors.length > 0 && printAdminErrors(errors)}
             <Button
               className={`mt-3 mb-3 seize-btn`}
               disabled={submitting || loading}

@@ -6,9 +6,6 @@ import { AdditionalData, Info, PhaseTimes } from "../nextgen_entities";
 import { NEXTGEN_CHAIN_ID, NEXTGEN_CORE } from "../nextgen_contracts";
 import NextGenTokenPreview from "./NextGenTokenPreview";
 import {
-  extractAttributes,
-  extractField,
-  extractURI,
   retrieveCollectionAdditionalData,
   retrieveCollectionInfo,
   retrieveCollectionPhases,
@@ -19,7 +16,7 @@ interface Props {
   setPhaseTimes: (phaseTimes: PhaseTimes) => void;
 }
 
-export default function NextGenCollectionPreview(props: Props) {
+export default function NextGenCollectionPreview(props: Readonly<Props>) {
   const [sampleToken, setSampleToken] = useState<number>(0);
 
   const [info, setInfo] = useState<Info>();

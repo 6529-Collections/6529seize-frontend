@@ -1,11 +1,6 @@
 import { Container, Row, Col, Button, Form } from "react-bootstrap";
 import styles from "./NextGenAdmin.module.scss";
-import {
-  useAccount,
-  useContractRead,
-  useContractWrite,
-  useSignMessage,
-} from "wagmi";
+import { useAccount, useContractRead, useSignMessage } from "wagmi";
 import { useEffect, useState } from "react";
 import {
   FunctionSelectors,
@@ -19,21 +14,23 @@ import {
   useCollectionIndex,
   useCollectionAdmin,
   getCollectionIdsForAddress,
+  getMinterUseContractWrite,
 } from "../nextgen_helpers";
 import NextGenContractWriteStatus from "../NextGenContractWriteStatus";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { v4 as uuidv4 } from "uuid";
 import { NULL_ADDRESS } from "../../../constants";
 import { postData } from "../../../services/6529api";
+import { printAdminErrors } from "./NextGenAdmin";
 
 interface Props {
   close: () => void;
 }
 
-export default function NextGenAdminInitializeBurn(props: Props) {
+export default function NextGenAdminInitializeBurn(props: Readonly<Props>) {
   const account = useAccount();
   const signMessage = useSignMessage();
-  const [uuid, setuuid] = useState(uuidv4());
+  const uuid = uuidv4();
 
   const globalAdmin = useGlobalAdmin(account.address as string);
   const functionAdmin = useFunctionAdmin(
@@ -117,15 +114,9 @@ export default function NextGenAdminInitializeBurn(props: Props) {
     }
   }, [signMessage.data]);
 
-  const contractWrite = useContractWrite({
-    address: NEXTGEN_MINTER.contract as `0x${string}`,
-    abi: NEXTGEN_MINTER.abi,
-    chainId: NEXTGEN_CHAIN_ID,
-    functionName: "initializeBurn",
-    onError() {
-      setSubmitting(false);
-      setLoading(false);
-    },
+  const contractWrite = getMinterUseContractWrite("initializeBurn", () => {
+    setSubmitting(false);
+    setLoading(false);
   });
 
   function validate() {
@@ -259,17 +250,7 @@ export default function NextGenAdminInitializeBurn(props: Props) {
                 />
               </span>
             </Form.Group>
-            {!loading && errors.length > 0 && (
-              <div className="mb-3">
-                <ul>
-                  {errors.map((error, index) => (
-                    <li key={`error-${index}`} className="text-danger">
-                      {error}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
+            {!loading && errors.length > 0 && printAdminErrors(errors)}
             <Button
               className={`mt-3 mb-3 seize-btn`}
               disabled={submitting || loading}

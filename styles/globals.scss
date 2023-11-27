@@ -315,6 +315,15 @@ h5 {
   }
 }
 
+.btn-black {
+  background-color: black !important;
+  color: white !important;
+
+  &:hover {
+    background-color: $dark-grey !important;
+  }
+}
+
 .btn-green {
   background-color: $green;
   color: white !important;
@@ -322,6 +331,10 @@ h5 {
   &:hover {
     background-color: lighten($color: $green, $amount: 5);
   }
+}
+
+.btn-block {
+  width: 100%;
 }
 
 .cursor-pointer {

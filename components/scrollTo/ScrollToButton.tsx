@@ -9,7 +9,7 @@ interface Props {
   offset: number;
 }
 
-export default function ScrollToButton(props: Props) {
+export default function ScrollToButton(props: Readonly<Props>) {
   const [showButton, setShowButton] = useState(false);
 
   useEffect(() => {

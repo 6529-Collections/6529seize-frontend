@@ -1,17 +1,16 @@
-import { useState, useEffect, useRef, useMemo } from "react";
+import { useState, useEffect } from "react";
 
 interface Props {
   title: string;
-  date: number;
+  date: Date;
 }
 
-export default function DateCountdown(props: Props) {
-  const targetDate = useMemo(() => new Date(props.date), [props.date]);
+export default function DateCountdown(props: Readonly<Props>) {
   const [timeLeft, setTimeLeft] = useState(calculateTimeLeft());
 
   function calculateTimeLeft() {
     const now = Date.now();
-    const difference = targetDate.getTime() - now;
+    const difference = props.date.getTime() - now;
 
     if (difference <= 0) {
       return { days: 0, hours: 0, minutes: 0, seconds: 0 };
@@ -51,11 +50,11 @@ export default function DateCountdown(props: Props) {
     return () => {
       clearTimeout(timeoutId);
     };
-  }, [targetDate]);
+  }, [props.date]);
 
   return (
     <span className="d-flex flex-column">
-      <span>{props.title}:</span>
+      <span>{props.title}</span>
       <span className="font-larger font-bolder">
         {timeLeft.days > 0 && (
           <>

@@ -1,32 +1,32 @@
 import { Container, Row, Col, Button, Form } from "react-bootstrap";
 import styles from "./NextGenAdmin.module.scss";
-import { useAccount, useContractWrite, useSignMessage } from "wagmi";
+import { useAccount, useSignMessage } from "wagmi";
 import { useEffect, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
-import {
-  FunctionSelectors,
-  NEXTGEN_CHAIN_ID,
-  NEXTGEN_MINTER,
-} from "../nextgen_contracts";
+import { FunctionSelectors } from "../nextgen_contracts";
 import {
   useGlobalAdmin,
   useFunctionAdmin,
   useCollectionIndex,
   useCollectionAdmin,
   getCollectionIdsForAddress,
+  getMinterUseContractWrite,
 } from "../nextgen_helpers";
 import NextGenContractWriteStatus from "../NextGenContractWriteStatus";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { postData } from "../../../services/6529api";
+import { printAdminErrors } from "./NextGenAdmin";
 
 interface Props {
   close: () => void;
 }
 
-export default function NextGenAdminInitializeExternalBurnSwap(props: Props) {
+export default function NextGenAdminInitializeExternalBurnSwap(
+  props: Readonly<Props>
+) {
   const account = useAccount();
   const signMessage = useSignMessage();
-  const [uuid, setuuid] = useState(uuidv4());
+  const uuid = uuidv4();
 
   const globalAdmin = useGlobalAdmin(account.address as string);
   const functionAdmin = useFunctionAdmin(
@@ -60,16 +60,13 @@ export default function NextGenAdminInitializeExternalBurnSwap(props: Props) {
 
   const [uploadError, setUploadError] = useState<string>();
 
-  const contractWrite = useContractWrite({
-    address: NEXTGEN_MINTER.contract as `0x${string}`,
-    abi: NEXTGEN_MINTER.abi,
-    chainId: NEXTGEN_CHAIN_ID,
-    functionName: "initializeExternalBurnOrSwap",
-    onError() {
+  const contractWrite = getMinterUseContractWrite(
+    "initializeExternalBurnOrSwap",
+    () => {
       setSubmitting(false);
       setLoading(false);
-    },
-  });
+    }
+  );
 
   function syncDB() {
     setLoading(true);
@@ -290,17 +287,7 @@ export default function NextGenAdminInitializeExternalBurnSwap(props: Props) {
                 />
               </span>
             </Form.Group>
-            {!loading && errors.length > 0 && (
-              <div className="mb-3">
-                <ul>
-                  {errors.map((error, index) => (
-                    <li key={`error-${index}`} className="text-danger">
-                      {error}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
+            {!loading && errors.length > 0 && printAdminErrors(errors)}
             <Form.Group className="mb-3 d-flex gap-3">
               <Button
                 className="seize-btn"

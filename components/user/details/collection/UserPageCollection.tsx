@@ -24,7 +24,7 @@ export enum UserCollectionSort {
   RANK = "tdh_rank",
 }
 
-export default function UserPageCollection(props: Props) {
+export default function UserPageCollection(props: Readonly<Props>) {
   const [sortDir, setSortDir] = useState<SortDirection>(SortDirection.ASC);
   const [sort, setSort] = useState<UserCollectionSort>(UserCollectionSort.ID);
   const [hideSeized, setHideSeized] = useState(false);

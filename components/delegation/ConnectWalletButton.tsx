@@ -6,7 +6,7 @@ interface Props {
   chain_id: number;
 }
 
-export default function ConnectWalletButton(props: Props) {
+export default function ConnectWalletButton(props: Readonly<Props>) {
   const { isOpen, open, close, setDefaultChain } = useWeb3Modal();
   setDefaultChain(props.chain_id);
 
