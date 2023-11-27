@@ -40,14 +40,14 @@ export default function NextGenAdminAcceptAddressesAndPercentages(
   const collectionIndex = useCollectionIndex();
   const collectionAdmin = useCollectionAdmin(
     account.address as string,
-    parseInt(collectionIndex.data as string)
+    parseInt(collectionIndex?.data as string)
   );
 
   const collectionIds = getCollectionIdsForAddress(
     globalAdmin.data === true,
     functionAdmin.data === true,
-    collectionAdmin.data,
-    parseInt(collectionIndex.data as string)
+    collectionAdmin?.data,
+    parseInt(collectionIndex?.data as string)
   );
 
   const [collectionID, setCollectionID] = useState("");
@@ -198,7 +198,7 @@ export default function NextGenAdminAcceptAddressesAndPercentages(
                 <option value="" disabled>
                   Select Collection
                 </option>
-                {collectionIds.map((id) => (
+                {collectionIds?.map((id) => (
                   <option key={`collection-id-${id}`} value={id}>
                     {id}
                   </option>

@@ -33,14 +33,14 @@ export default function NextGenAdminSetCosts(props: Readonly<Props>) {
   const collectionIndex = useCollectionIndex();
   const collectionAdmin = useCollectionAdmin(
     account.address as string,
-    parseInt(collectionIndex.data as string)
+    parseInt(collectionIndex?.data as string)
   );
 
   const collectionIds = getCollectionIdsForAddress(
     globalAdmin.data === true,
     functionAdmin.data === true,
     collectionAdmin.data,
-    parseInt(collectionIndex.data as string)
+    parseInt(collectionIndex?.data as string)
   );
 
   const [collectionID, setCollectionID] = useState("");

@@ -70,7 +70,7 @@ export default function NextGenAdminRegisterAdmin(props: Readonly<Props>) {
     globalAdmin.data === true,
     false,
     undefined,
-    parseInt(collectionIndex.data as string)
+    parseInt(collectionIndex?.data as string)
   );
 
   const contractWrite = getAdminUseContractWrite(getFunctionName(), () => {

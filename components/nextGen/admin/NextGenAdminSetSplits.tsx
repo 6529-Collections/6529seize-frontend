@@ -37,7 +37,7 @@ export default function NextGenAdminSetSplits(props: Readonly<Props>) {
     globalAdmin.data === true,
     functionAdmin.data === true,
     undefined,
-    parseInt(collectionIndex.data as string)
+    parseInt(collectionIndex?.data as string)
   );
 
   const [collectionID, setCollectionID] = useState("");

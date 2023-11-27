@@ -182,12 +182,12 @@ export default function NextGenAdmin() {
   const collectionIndex = useCollectionIndex();
   const collectionAdmin = useCollectionAdmin(
     account.address as string,
-    parseInt(collectionIndex.data as string)
+    parseInt(collectionIndex?.data as string)
   );
   const isWalletCollectionAdmin = isCollectionAdmin(collectionAdmin);
 
   const collectionArtists = useCollectionArtist(
-    parseInt(collectionIndex.data as string)
+    parseInt(collectionIndex?.data as string)
   );
 
   const isArtist = isCollectionArtist(
