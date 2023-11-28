@@ -6,6 +6,7 @@ import {
   retrieveCollectionPhases,
   retrieveCollectionAdditionalData,
   retrieveCollectionInfo,
+  retrieveTokensIndex,
 } from "../../../nextgen_helpers";
 import { useContractRead } from "wagmi";
 import {
@@ -76,18 +77,8 @@ export default function NextGenCollectionMint(props: Readonly<Props>) {
     true
   );
 
-  useContractRead({
-    address: NEXTGEN_CORE.contract as `0x${string}`,
-    abi: NEXTGEN_CORE.abi,
-    chainId: NEXTGEN_CHAIN_ID,
-    functionName: "viewTokensIndexMin",
-    watch: true,
-    args: [props.collection],
-    onSettled(data: any, error: any) {
-      if (data) {
-        setTokenStartIndex(parseInt(data));
-      }
-    },
+  retrieveTokensIndex("min", props.collection, (data: number) => {
+    setTokenStartIndex(data);
   });
 
   useContractRead({

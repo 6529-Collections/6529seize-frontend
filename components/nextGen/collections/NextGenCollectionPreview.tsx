@@ -1,14 +1,13 @@
 import styles from "./NextGen.module.scss";
 import { Container, Row, Col } from "react-bootstrap";
-import { useContractRead } from "wagmi";
 import { useState } from "react";
 import { AdditionalData, Info, PhaseTimes } from "../nextgen_entities";
-import { NEXTGEN_CHAIN_ID, NEXTGEN_CORE } from "../nextgen_contracts";
 import NextGenTokenPreview from "./NextGenTokenPreview";
 import {
   retrieveCollectionAdditionalData,
   retrieveCollectionInfo,
   retrieveCollectionPhases,
+  retrieveTokensIndex,
 } from "../nextgen_helpers";
 
 interface Props {
@@ -22,18 +21,8 @@ export default function NextGenCollectionPreview(props: Readonly<Props>) {
   const [info, setInfo] = useState<Info>();
   const [additionalData, setAdditionalData] = useState<AdditionalData>();
 
-  useContractRead({
-    address: NEXTGEN_CORE.contract as `0x${string}`,
-    abi: NEXTGEN_CORE.abi,
-    chainId: NEXTGEN_CHAIN_ID,
-    functionName: "viewTokensIndexMin",
-    watch: true,
-    args: [props.collection],
-    onSettled(data: any, error: any) {
-      if (data) {
-        setSampleToken(parseInt(data));
-      }
-    },
+  retrieveTokensIndex("min", props.collection, (data: number) => {
+    setSampleToken(data);
   });
 
   retrieveCollectionInfo(props.collection, (data: Info) => {

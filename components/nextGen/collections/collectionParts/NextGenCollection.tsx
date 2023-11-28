@@ -15,6 +15,7 @@ import {
   retrieveCollectionAdditionalData,
   retrieveCollectionInfo,
   retrieveCollectionPhases,
+  retrieveTokensIndex,
 } from "../../nextgen_helpers";
 import NextGenCollectionDetails from "./NextGenCollectionDetails";
 import NextGenCollectionSlideshow from "./NextGenCollectionSlideshow";
@@ -63,19 +64,13 @@ export default function NextGenCollection(props: Readonly<Props>) {
     return params;
   }
 
-  const startIndexRead = useContractRead({
-    address: NEXTGEN_CORE.contract as `0x${string}`,
-    abi: NEXTGEN_CORE.abi,
-    chainId: NEXTGEN_CHAIN_ID,
-    functionName: "viewTokensIndexMin",
-    watch: true,
-    args: [props.collection],
-    onSettled(data: any, error: any) {
-      if (data) {
-        setTokenStartIndex(parseInt(data));
-      }
-    },
-  });
+  const startIndexRead = retrieveTokensIndex(
+    "min",
+    props.collection,
+    (data: number) => {
+      setTokenStartIndex(data);
+    }
+  );
 
   useEffect(() => {
     if (tokenStartIndex > 0 && additionalData) {
@@ -89,19 +84,13 @@ export default function NextGenCollection(props: Readonly<Props>) {
     }
   }, [tokenStartIndex, additionalData]);
 
-  const endIndexRead = useContractRead({
-    address: NEXTGEN_CORE.contract as `0x${string}`,
-    abi: NEXTGEN_CORE.abi,
-    chainId: NEXTGEN_CHAIN_ID,
-    functionName: "viewTokensIndexMax",
-    watch: true,
-    args: [props.collection],
-    onSettled(data: any, error: any) {
-      if (data) {
-        setTokenEndIndex(parseInt(data));
-      }
-    },
-  });
+  const endIndexRead = retrieveTokensIndex(
+    "max",
+    props.collection,
+    (data: number) => {
+      setTokenEndIndex(data);
+    }
+  );
 
   retrieveCollectionInfo(props.collection, (data: Info) => {
     setInfo(data);

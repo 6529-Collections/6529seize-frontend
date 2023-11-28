@@ -5,9 +5,8 @@ import {
   retrieveCollectionPhases,
   retrieveCollectionAdditionalData,
   retrieveCollectionInfo,
+  retrieveTokensIndex,
 } from "../../../nextgen_helpers";
-import { useContractRead } from "wagmi";
-import { NEXTGEN_CORE, NEXTGEN_CHAIN_ID } from "../../../nextgen_contracts";
 import NextGenCollectionHeader from "../NextGenCollectionHeader";
 import Breadcrumb, { Crumb } from "../../../../breadcrumb/Breadcrumb";
 import NextGenCollectionArt from "../NextGenCollectionArt";
@@ -58,18 +57,8 @@ export default function NextGenCollectionArtPage(props: Readonly<Props>) {
     true
   );
 
-  useContractRead({
-    address: NEXTGEN_CORE.contract as `0x${string}`,
-    abi: NEXTGEN_CORE.abi,
-    chainId: NEXTGEN_CHAIN_ID,
-    functionName: "viewTokensIndexMin",
-    watch: true,
-    args: [props.collection],
-    onSettled(data: any, error: any) {
-      if (data) {
-        setTokenStartIndex(parseInt(data));
-      }
-    },
+  retrieveTokensIndex("min", props.collection, (data: number) => {
+    setTokenStartIndex(data);
   });
 
   useEffect(() => {

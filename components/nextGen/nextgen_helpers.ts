@@ -356,6 +356,26 @@ export function extractPhases(d: any[]) {
   return phases;
 }
 
+export function retrieveTokensIndex(
+  type: "min" | "max",
+  collection: number | string,
+  callback: (data: any) => void
+) {
+  return useContractRead({
+    address: NEXTGEN_CORE.contract as `0x${string}`,
+    abi: NEXTGEN_CORE.abi,
+    chainId: NEXTGEN_CHAIN_ID,
+    functionName: type === "min" ? "viewTokensIndexMin" : "viewTokensIndexMax",
+    args: [collection],
+    onSettled(data: any, error: any) {
+      if (data) {
+        const d = parseInt(data);
+        callback(d);
+      }
+    },
+  });
+}
+
 export function getCoreUseContractWrite(
   functionName: string,
   onError: () => void
