@@ -1,7 +1,10 @@
 import styles from "../../NextGen.module.scss";
 import { useContractRead, useAccount, useContractReads } from "wagmi";
 import { DELEGATION_ABI } from "../../../../../abis";
-import { DELEGATION_CONTRACT } from "../../../../../constants";
+import {
+  DELEGATION_ALL_ADDRESS,
+  DELEGATION_CONTRACT,
+} from "../../../../../constants";
 import { Col, Container, Row } from "react-bootstrap";
 import { useEffect, useState } from "react";
 import {
@@ -14,7 +17,10 @@ import {
   Info,
 } from "../../../nextgen_entities";
 import { fromGWEI } from "../../../../../helpers/Helpers";
-import { MINTING_USE_CASE } from "../../../../../pages/delegation/[...section]";
+import {
+  ALL_USE_CASE,
+  MINTING_USE_CASE,
+} from "../../../../../pages/delegation/[...section]";
 import { NEXTGEN_CHAIN_ID, NEXTGEN_CORE } from "../../../nextgen_contracts";
 import { fetchUrl } from "../../../../../services/6529api";
 import { retrieveCollectionCosts } from "../../../nextgen_helpers";
@@ -65,41 +71,19 @@ export default function NextGenMint(props: Readonly<Props>) {
     }
   }, [props.additional_data, props.burn_amount]);
 
+  function getDelegationAddress() {
+    if (collection && mintingDetails) {
+      if (collection.al_type === AllowlistType.ALLOWLIST) {
+        return mintingDetails.del_address;
+      } else if (collection.al_type === AllowlistType.EXTERNAL_BURN) {
+        return collection.burn_collection;
+      }
+    }
+    return "";
+  }
+
   useContractReads({
     contracts: [
-      // {
-      //   address: DELEGATION_CONTRACT.contract,
-      //   abi: DELEGATION_ABI as any,
-      //   chainId: DELEGATION_CONTRACT.chain_id,
-      //   functionName: "retrieveDelegators",
-      //   args: [
-      //     account.address ? account.address : "",
-      //     DELEGATION_ALL_ADDRESS,
-      //     ALL_USE_CASE.use_case,
-      //   ],
-      // },
-      // {
-      //   address: DELEGATION_CONTRACT.contract,
-      //   abi: DELEGATION_ABI as any,
-      //   chainId: DELEGATION_CONTRACT.chain_id,
-      //   functionName: "retrieveDelegators",
-      //   args: [
-      //     account.address ? account.address : "",
-      //     DELEGATION_ALL_ADDRESS,
-      //     MINTING_USE_CASE.use_case,
-      //   ],
-      // },
-      // {
-      //   address: DELEGATION_CONTRACT.contract,
-      //   abi: DELEGATION_ABI as any,
-      //   chainId: DELEGATION_CONTRACT.chain_id,
-      //   functionName: "retrieveDelegators",
-      //   args: [
-      //     account.address ? account.address : "",
-      //     mintingDetails ? mintingDetails.del_address : "",
-      //     ALL_USE_CASE.use_case,
-      //   ],
-      // },
       {
         address: DELEGATION_CONTRACT.contract,
         abi: DELEGATION_ABI as any,
@@ -107,13 +91,49 @@ export default function NextGenMint(props: Readonly<Props>) {
         functionName: "retrieveDelegators",
         args: [
           account.address ? account.address : "",
-          mintingDetails ? mintingDetails.del_address : "",
+          DELEGATION_ALL_ADDRESS,
+          ALL_USE_CASE.use_case,
+        ],
+      },
+      {
+        address: DELEGATION_CONTRACT.contract,
+        abi: DELEGATION_ABI as any,
+        chainId: DELEGATION_CONTRACT.chain_id,
+        functionName: "retrieveDelegators",
+        args: [
+          account.address ? account.address : "",
+          DELEGATION_ALL_ADDRESS,
+          MINTING_USE_CASE.use_case,
+        ],
+      },
+      {
+        address: DELEGATION_CONTRACT.contract,
+        abi: DELEGATION_ABI as any,
+        chainId: DELEGATION_CONTRACT.chain_id,
+        functionName: "retrieveDelegators",
+        args: [
+          account.address ? account.address : "",
+          getDelegationAddress(),
+          ALL_USE_CASE.use_case,
+        ],
+      },
+      {
+        address: DELEGATION_CONTRACT.contract,
+        abi: DELEGATION_ABI as any,
+        chainId: DELEGATION_CONTRACT.chain_id,
+        functionName: "retrieveDelegators",
+        args: [
+          account.address ? account.address : "",
+          getDelegationAddress(),
           MINTING_USE_CASE.use_case,
         ],
       },
     ],
     watch: true,
-    enabled: account.isConnected && mintingDetails != undefined,
+    enabled:
+      account.isConnected &&
+      mintingDetails !== undefined &&
+      collection !== undefined,
     onSettled(data: any, error: any) {
       if (data) {
         const del: string[] = [];
