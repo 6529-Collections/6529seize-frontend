@@ -20,10 +20,7 @@ export interface IProfileAndConsolidations {
     tdh: number;
   };
   readonly level: number;
-  readonly cic: AggregatedCicRating & {
-    readonly authenticated_profile_contribution: number;
-    readonly cic_left_for_authenticated_profile: number;
-  };
+  readonly cic: AggregatedCicRating
 }
 
 export enum PROFILE_CLASSIFICATION {
@@ -69,4 +66,9 @@ export enum CICType {
   PROBABLY_ACCURATE = "PROBABLY_ACCURATE",
   ACCURATE = "ACCURATE",
   HIGHLY_ACCURATE = "HIGHLY_ACCURATE",
+}
+
+export interface ApiProfileRaterCicState {
+  readonly cic_rating_by_rater: number | null;
+  readonly cic_ratings_left_to_give_by_rater: number | null;
 }

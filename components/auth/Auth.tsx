@@ -58,8 +58,9 @@ export default function Auth({ children }: { children: React.ReactNode }) {
   const [loadingMyProfile, setLoadingMyProfile] = useState(false);
 
   useEffect(() => {
-    if (!address) removeAuthJwt();
-    else {
+    if (!address) {
+      removeAuthJwt();
+    } else {
       const isAuth = validateJwt({ jwt: getAuthJwt(), wallet: address });
       if (!isAuth) removeAuthJwt();
     }

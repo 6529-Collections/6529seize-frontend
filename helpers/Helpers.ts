@@ -438,7 +438,7 @@ export function getDateFilters(
 }
 
 export const cicToType = (cic: number): CICType => {
-  if (cic < 0) {
+  if (cic < -20) {
     return CICType.INACCURATE;
   }
 

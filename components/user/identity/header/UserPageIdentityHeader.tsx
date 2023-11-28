@@ -1,24 +1,14 @@
 import { useRouter } from "next/router";
-import UserPageIdentityRateButton from "../../rate/UserPageIdentityRateButton";
-import UserCICAccurateIcon from "../../utils/user-cic-type/UserCICAccurateIcon";
-import UserCICInaccurateIcon from "../../utils/user-cic-type/UserCICInaccurateIcon";
-import UserCICUnknownIcon from "../../utils/user-cic-type/UserCICUnknownIcon";
-
-import {
-  CICType,
-  IProfileAndConsolidations,
-} from "../../../../entities/IProfile";
+import { IProfileAndConsolidations } from "../../../../entities/IProfile";
 import { useQuery } from "@tanstack/react-query";
 import { commonApiFetch } from "../../../../services/api/common-api";
-import { useEffect, useState } from "react";
-import { cicToType, formatNumberWithCommas } from "../../../../helpers/Helpers";
-import UserCICTypeIcon from "../../utils/user-cic-type/UserCICTypeIcon";
-import UserCICStatus from "../../utils/user-cic-status/UserCICStatus";
 import UserPageIdentityHeaderCIC from "./UserPageIdentityHeaderCIC";
 import UserPageIdentityHeaderCICRate from "./UserPageIdentityHeaderCICRate";
 
+
 export default function UserPageIdentityHeader() {
   const router = useRouter();
+
   const user = (router.query.user as string).toLowerCase();
 
   const {
@@ -30,7 +20,7 @@ export default function UserPageIdentityHeader() {
     queryKey: ["profile", user.toLowerCase()],
     queryFn: async () =>
       await commonApiFetch<IProfileAndConsolidations>({
-        endpoint: `/profiles/${user}`,
+        endpoint: `profiles/${user}`,
       }),
     enabled: !!user,
   });

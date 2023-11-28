@@ -7,7 +7,7 @@ export default function SubstackIcon() {
       xmlns="http://www.w3.org/2000/svg"
     >
       <circle cx="45" cy="45" r="45" fill="#FF6719" />
-      <g clip-path="url(#clip0_377_2269)">
+      <g clipPath="url(#clip0_377_2269)">
         <path d="M65.9982 31.8125H24V37.4855H65.9982V31.8125Z" fill="white" />
         <path
           d="M24 42.625V69.0008L44.9982 57.2214L66 69.0008V42.625H24Z"

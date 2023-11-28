@@ -2,6 +2,9 @@ import Cookies from "js-cookie";
 import { API_AUTH_COOKIE } from "../../constants";
 import { getAuthJwt } from "../auth/auth.utils";
 
+
+
+
 const getHeaders = (
   headers?: Record<string, string>,
   contentType: boolean = true

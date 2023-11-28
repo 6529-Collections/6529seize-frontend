@@ -1,4 +1,3 @@
-import { IProfileAndConsolidations } from "../../../entities/IProfile";
 import UserPageIdentityStatements from "./UserPageIdentityStatements";
 import UserPageIdentityHeader from "./header/UserPageIdentityHeader";
 

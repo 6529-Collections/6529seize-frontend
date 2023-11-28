@@ -9,8 +9,6 @@ import { useRouter } from "next/router";
 import { IProfileAndConsolidations } from "../../../entities/IProfile";
 import { ConsolidatedTDHMetrics } from "../../../entities/ITDH";
 import UserPageTabs from "./UserPageTabs";
-import { useQuery } from "@tanstack/react-query";
-import { commonApiFetch } from "../../../services/api/common-api";
 import { Inter } from "next/font/google";
 
 const Header = dynamic(() => import("../../header/Header"), {

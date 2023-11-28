@@ -59,17 +59,10 @@ export async function getServerSideProps(
 ): Promise<{
   props: UserPageIdentityProps;
 }> {
-  const authCookie = req?.req?.cookies["x-6529-auth"] ?? null;
-  const walletAuthCookie = req?.req?.cookies["wallet-auth"] ?? null;
   try {
-    const headers: Record<string, string> = getCommonHeaders({
-      authCookie,
-      walletAuthCookie,
-    });
-
+    const headers = getCommonHeaders(req);
     const { profile, title, consolidatedTDH } =
       await getCommonUserServerSideProps({ user: req.query.user, headers });
-
     if (!profile.profile) {
       return {
         redirect: {

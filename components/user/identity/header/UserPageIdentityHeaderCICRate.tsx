@@ -1,21 +1,96 @@
 import { FormEvent, useContext, useEffect, useState } from "react";
-import { IProfileAndConsolidations } from "../../../../entities/IProfile";
+import {
+  ApiProfileRaterCicState,
+  IProfileAndConsolidations,
+} from "../../../../entities/IProfile";
 import { formatNumberWithCommas } from "../../../../helpers/Helpers";
 import { AuthContext } from "../../../auth/Auth";
-import { commonApiPost } from "../../../../services/api/common-api";
+import {
+  commonApiFetch,
+  commonApiPost,
+} from "../../../../services/api/common-api";
+import { useAccount, useMutation } from "wagmi";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 export default function UserPageIdentityHeaderCICRate({
   profile,
 }: {
   profile: IProfileAndConsolidations;
 }) {
+  const queryClient = useQueryClient();
+  const { myProfile } = useContext(AuthContext);
+  const { address } = useAccount();
+  const {
+    isLoading,
+    isError,
+    data: myCICState,
+    error,
+  } = useQuery<ApiProfileRaterCicState>({
+    queryKey: [
+      "profileRaterCicState",
+      {
+        handle: profile.profile?.handle.toLowerCase(),
+        rater: address?.toLowerCase(),
+      },
+    ],
+    queryFn: async () =>
+      await commonApiFetch<ApiProfileRaterCicState>({
+        endpoint: `profiles/${profile.profile?.handle}/cic/rating/${address}`,
+      }),
+    enabled: !!profile.profile?.handle && !!address,
+    staleTime: 0,
+  });
+
+  const updateCICMutation = useMutation(
+    (amount: number) =>
+      commonApiPost({
+        endpoint: `profiles/${profile.profile?.handle}/cic/rating`,
+        body: {
+          amount,
+        },
+      }),
+    {
+      onSuccess: () => {
+        setToast({
+          message: "CIC rating updated.",
+          type: "success",
+        });
+        queryClient.invalidateQueries({
+          queryKey: ["profile", profile.profile?.handle.toLowerCase()],
+        });
+
+        for (const wallet of profile.consolidation.wallets) {
+          queryClient.invalidateQueries({
+            queryKey: ["profile", wallet.wallet.address.toLowerCase()],
+          });
+
+          if (wallet.wallet.ens) {
+            queryClient.invalidateQueries({
+              queryKey: ["profile", wallet.wallet.ens.toLowerCase()],
+            });
+          }
+        }
+
+        queryClient.invalidateQueries({
+          queryKey: [
+            "profileRaterCicState",
+            {
+              handle: profile.profile?.handle.toLowerCase(),
+              rater: address?.toLowerCase(),
+            },
+          ],
+        });
+      },
+    }
+  );
+
   const { requestAuth, setToast } = useContext(AuthContext);
   const [myAvailableCIC, setMyAvailableCIC] = useState<number>(
-    profile.cic.cic_left_for_authenticated_profile
+    myCICState?.cic_ratings_left_to_give_by_rater ?? 0
   );
 
   const [myCICRatings, setMyCICRatings] = useState<number>(
-    profile.cic.authenticated_profile_contribution
+    myCICState?.cic_rating_by_rater ?? 0
   );
 
   const [myCICRatingsStr, setMyCICRatingsStr] = useState<string>(
@@ -23,8 +98,8 @@ export default function UserPageIdentityHeaderCICRate({
   );
 
   const [myMaxCICRatings, setMyMaxCICRatings] = useState<number>(
-    profile.cic.cic_left_for_authenticated_profile +
-      Math.abs(profile.cic.authenticated_profile_contribution)
+    (myCICState?.cic_ratings_left_to_give_by_rater ?? 0) +
+      Math.abs(myCICState?.cic_rating_by_rater ?? 0)
   );
 
   const getMyCICRatingsAsNumber = (cic: string) => {
@@ -52,14 +127,14 @@ export default function UserPageIdentityHeaderCICRate({
   };
 
   useEffect(() => {
-    setMyAvailableCIC(profile.cic.cic_left_for_authenticated_profile);
-    setMyCICRatings(profile.cic.authenticated_profile_contribution);
-    setMyCICRatingsStr(`${profile.cic.authenticated_profile_contribution}`);
+    setMyAvailableCIC(myCICState?.cic_ratings_left_to_give_by_rater ?? 0);
+    setMyCICRatings(myCICState?.cic_rating_by_rater ?? 0);
+    setMyCICRatingsStr(`${myCICState?.cic_rating_by_rater ?? 0}`);
     setMyMaxCICRatings(
-      profile.cic.cic_left_for_authenticated_profile +
-        Math.abs(profile.cic.authenticated_profile_contribution)
+      (myCICState?.cic_ratings_left_to_give_by_rater ?? 0) +
+        Math.abs(myCICState?.cic_rating_by_rater ?? 0)
     );
-  }, [profile]);
+  }, [myCICState]);
 
   const handleChange = (e: FormEvent<HTMLInputElement>) => {
     const inputValue = e.currentTarget.value;
@@ -81,14 +156,9 @@ export default function UserPageIdentityHeaderCICRate({
       return;
     }
 
-    const updatedTargetProfile = await commonApiPost({
-      endpoint: `profiles/${profile.profile?.handle}/cic/rating`,
-      body: {
-        amount: getMyCICRatingsAsNumber(myCICRatingsStr),
-      },
-    });
-
-    console.log(updatedTargetProfile);
+    await updateCICMutation.mutateAsync(
+      getMyCICRatingsAsNumber(myCICRatingsStr)
+    );
   };
 
   const onSubmit = async (e: FormEvent<HTMLFormElement>) => {

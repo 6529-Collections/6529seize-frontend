@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import { CICType } from "../../../../entities/IProfile";
 import { cicToType } from "../../../../helpers/Helpers";
-import UserCICInaccurateIcon from "./UserCICAccurateIcon";
+import UserCICAccurateIcon from "./UserCICAccurateIcon";
 import UserCICUnknownIcon from "./UserCICUnknownIcon";
-import UserCICAccurateIcon from "./UserCICInaccurateIcon";
+import UserCICInaccurateIcon from "./UserCICInaccurateIcon";
 import { assertUnreachable } from "../../../../helpers/AllowlistToolHelpers";
 
 export default function UserCICTypeIcon({ cic }: { cic: number }) {
