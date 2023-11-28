@@ -7,8 +7,8 @@ import {
   useCollectionIndex,
   useCollectionAdmin,
   getCollectionIdsForAddress,
-  retrieveCollectionAdditionalData,
-  getCoreUseContractWrite,
+  useCollectionAdditionalData,
+  useCoreUseContractWrite,
 } from "../nextgen_helpers";
 import { FunctionSelectors } from "../nextgen_contracts";
 import NextGenContractWriteStatus from "../NextGenContractWriteStatus";
@@ -54,7 +54,7 @@ export default function NextGenAdminSetData(props: Readonly<Props>) {
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
-  retrieveCollectionAdditionalData(collectionID, (data: AdditionalData) => {
+  useCollectionAdditionalData(collectionID, (data: AdditionalData) => {
     if (collectionID) {
       setArtistAddress(data.artist_address);
       setMaxPurchases(data.max_purchases.toString());
@@ -63,7 +63,7 @@ export default function NextGenAdminSetData(props: Readonly<Props>) {
     }
   });
 
-  const contractWrite = getCoreUseContractWrite("setCollectionData", () => {
+  const contractWrite = useCoreUseContractWrite("setCollectionData", () => {
     setSubmitting(false);
     setLoading(false);
   });

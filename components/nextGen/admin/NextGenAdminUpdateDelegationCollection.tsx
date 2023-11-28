@@ -9,8 +9,8 @@ import {
   useCollectionIndex,
   useCollectionAdmin,
   getCollectionIdsForAddress,
-  retrieveCollectionCosts,
-  getMinterUseContractWrite,
+  useCollectionCosts,
+  useMinterUseContractWrite,
 } from "../nextgen_helpers";
 import { MintingDetails } from "../nextgen_entities";
 import { printAdminErrors } from "./NextGenAdmin";
@@ -53,13 +53,13 @@ export default function NextGenAdminUpdateDelegationCollection(
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
-  retrieveCollectionCosts(collectionID, (data: MintingDetails) => {
+  useCollectionCosts(collectionID, (data: MintingDetails) => {
     if (collectionID) {
       setDelegationCollection(data.del_address);
     }
   });
 
-  const contractWrite = getMinterUseContractWrite(
+  const contractWrite = useMinterUseContractWrite(
     "updateDelegationCollection",
     () => {
       setSubmitting(false);

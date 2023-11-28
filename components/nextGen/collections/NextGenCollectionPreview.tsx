@@ -3,10 +3,10 @@ import { Container, Row, Col } from "react-bootstrap";
 import { AdditionalData, Info, PhaseTimes } from "../nextgen_entities";
 import NextGenTokenPreview from "./NextGenTokenPreview";
 import {
-  retrieveCollectionAdditionalData,
-  retrieveCollectionInfo,
-  retrieveCollectionPhases,
-  retrieveTokensIndex,
+  useCollectionAdditionalData,
+  useCollectionInfo,
+  useCollectionPhases,
+  useTokensIndex,
   useSharedState,
 } from "../nextgen_helpers";
 
@@ -25,19 +25,19 @@ export default function NextGenCollectionPreview(props: Readonly<Props>) {
     setSampleToken,
   } = useSharedState();
 
-  retrieveTokensIndex("min", props.collection, (data: number) => {
+  useTokensIndex("min", props.collection, (data: number) => {
     setSampleToken(data);
   });
 
-  retrieveCollectionInfo(props.collection, (data: Info) => {
+  useCollectionInfo(props.collection, (data: Info) => {
     setInfo(data);
   });
 
-  retrieveCollectionAdditionalData(props.collection, (data: AdditionalData) => {
+  useCollectionAdditionalData(props.collection, (data: AdditionalData) => {
     setAdditionalData(data);
   });
 
-  retrieveCollectionPhases(props.collection, (data: PhaseTimes) => {
+  useCollectionPhases(props.collection, (data: PhaseTimes) => {
     props.setPhaseTimes(data);
   });
 

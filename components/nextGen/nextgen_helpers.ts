@@ -125,7 +125,7 @@ export function getCollectionIdsForAddress(
   return collectionIndexArray;
 }
 
-export function retrieveCollectionPhases(
+export function useCollectionPhases(
   collection: number | string,
   callback: (data: any) => void,
   watch: boolean = false
@@ -146,7 +146,7 @@ export function retrieveCollectionPhases(
   });
 }
 
-export function retrieveCollectionAdditionalData(
+export function useCollectionAdditionalData(
   collection: number | string,
   callback: (data: any) => void,
   watch: boolean = false
@@ -175,7 +175,7 @@ export function retrieveCollectionAdditionalData(
   });
 }
 
-export function retrieveCollectionInfo(
+export function useCollectionInfo(
   collection: number | string,
   callback: (data: any) => void,
   watch: boolean = false
@@ -206,7 +206,7 @@ export function retrieveCollectionInfo(
   });
 }
 
-export function retrieveCollectionLibraryAndScript(
+export function useCollectionLibraryAndScript(
   collection: number | string,
   callback: (data: any) => void,
   watch: boolean = false
@@ -231,7 +231,7 @@ export function retrieveCollectionLibraryAndScript(
   });
 }
 
-export function retrieveCollectionCosts(
+export function useCollectionCosts(
   collection: number | string,
   callback: (data: any) => void,
   watch: boolean = false
@@ -361,7 +361,7 @@ export function extractPhases(d: any[]) {
   return phases;
 }
 
-export function retrieveTokensIndex(
+export function useTokensIndex(
   type: "min" | "max",
   collection: number | string,
   callback: (data: any) => void
@@ -381,28 +381,28 @@ export function retrieveTokensIndex(
   });
 }
 
-export function getCoreUseContractWrite(
+export function useCoreUseContractWrite(
   functionName: string,
   onError: () => void
 ) {
-  return getUseContractWrite(NEXTGEN_CORE, functionName, onError);
+  return useContractWriteForFunction(NEXTGEN_CORE, functionName, onError);
 }
 
-export function getMinterUseContractWrite(
+export function useMinterUseContractWrite(
   functionName: string,
   onError: () => void
 ) {
-  return getUseContractWrite(NEXTGEN_MINTER, functionName, onError);
+  return useContractWriteForFunction(NEXTGEN_MINTER, functionName, onError);
 }
 
-export function getAdminUseContractWrite(
+export function useAdminUseContractWrite(
   functionName: string,
   onError: () => void
 ) {
-  return getUseContractWrite(NEXTGEN_ADMIN, functionName, onError);
+  return useContractWriteForFunction(NEXTGEN_ADMIN, functionName, onError);
 }
 
-function getUseContractWrite(
+function useContractWriteForFunction(
   contract: { contract: string; abi: any },
   functionName: string,
   onError: () => void

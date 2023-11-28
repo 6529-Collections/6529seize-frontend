@@ -2,7 +2,7 @@ import { Container, Row, Col, Button, Form } from "react-bootstrap";
 import { useEffect, useState } from "react";
 import NextGenContractWriteStatus from "../NextGenContractWriteStatus";
 import { printAdminErrors } from "./NextGenAdmin";
-import { getCoreUseContractWrite } from "../nextgen_helpers";
+import { useCoreUseContractWrite } from "../nextgen_helpers";
 import { NextGenAdminHeadingRow } from "./NextGenAdminShared";
 
 interface Props {
@@ -23,7 +23,7 @@ export default function NextGenAdminCreateCollection(props: Readonly<Props>) {
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
-  const contractWrite = getCoreUseContractWrite("createCollection", () => {
+  const contractWrite = useCoreUseContractWrite("createCollection", () => {
     setSubmitting(false);
     setLoading(false);
   });

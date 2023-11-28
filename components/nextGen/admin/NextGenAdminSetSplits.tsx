@@ -11,7 +11,7 @@ import {
   useFunctionAdmin,
   useCollectionIndex,
   getCollectionIdsForAddress,
-  getMinterUseContractWrite,
+  useMinterUseContractWrite,
 } from "../nextgen_helpers";
 import NextGenContractWriteStatus from "../NextGenContractWriteStatus";
 import { printAdminErrors } from "./NextGenAdmin";
@@ -84,7 +84,7 @@ export default function NextGenAdminSetSplits(props: Readonly<Props>) {
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
-  const contractWrite = getMinterUseContractWrite(
+  const contractWrite = useMinterUseContractWrite(
     "setPrimaryAndSecondarySplits",
     () => {
       setSubmitting(false);

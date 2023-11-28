@@ -10,7 +10,7 @@ import {
   useCollectionIndex,
   useCollectionAdmin,
   getCollectionIdsForAddress,
-  getMinterUseContractWrite,
+  useMinterUseContractWrite,
 } from "../nextgen_helpers";
 import NextGenContractWriteStatus from "../NextGenContractWriteStatus";
 import { postData } from "../../../services/6529api";
@@ -60,7 +60,7 @@ export default function NextGenAdminInitializeExternalBurnSwap(
 
   const [uploadError, setUploadError] = useState<string>();
 
-  const contractWrite = getMinterUseContractWrite(
+  const contractWrite = useMinterUseContractWrite(
     "initializeExternalBurnOrSwap",
     () => {
       setSubmitting(false);

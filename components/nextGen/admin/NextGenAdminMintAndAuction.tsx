@@ -8,7 +8,7 @@ import {
   useCollectionIndex,
   useCollectionAdmin,
   getCollectionIdsForAddress,
-  getMinterUseContractWrite,
+  useMinterUseContractWrite,
 } from "../nextgen_helpers";
 import NextGenContractWriteStatus from "../NextGenContractWriteStatus";
 import { printAdminErrors } from "./NextGenAdmin";
@@ -52,7 +52,7 @@ export default function NextGenAdminMintAndAuction(props: Readonly<Props>) {
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
-  const contractWrite = getMinterUseContractWrite("mintAndAuction", () => {
+  const contractWrite = useMinterUseContractWrite("mintAndAuction", () => {
     setSubmitting(false);
     setLoading(false);
   });

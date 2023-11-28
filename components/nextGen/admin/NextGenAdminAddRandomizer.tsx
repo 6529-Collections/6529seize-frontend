@@ -9,8 +9,8 @@ import {
   useCollectionIndex,
   useCollectionAdmin,
   getCollectionIdsForAddress,
-  retrieveCollectionAdditionalData,
-  getCoreUseContractWrite,
+  useCollectionAdditionalData,
+  useCoreUseContractWrite,
 } from "../nextgen_helpers";
 import { AdditionalData } from "../nextgen_entities";
 import { printAdminErrors } from "./NextGenAdmin";
@@ -51,13 +51,13 @@ export default function NextGenAdminUpdateRandomizer(props: Readonly<Props>) {
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
-  retrieveCollectionAdditionalData(collectionID, (data: AdditionalData) => {
+  useCollectionAdditionalData(collectionID, (data: AdditionalData) => {
     if (collectionID) {
       setRandomizerContract(data.randomizer);
     }
   });
 
-  const contractWrite = getCoreUseContractWrite("addRandomizer", () => {
+  const contractWrite = useCoreUseContractWrite("addRandomizer", () => {
     setSubmitting(false);
     setLoading(false);
   });

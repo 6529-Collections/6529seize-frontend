@@ -2,10 +2,10 @@ import { Col, Container, Row } from "react-bootstrap";
 import { useEffect } from "react";
 import { PhaseTimes, AdditionalData, Info } from "../../../nextgen_entities";
 import {
-  retrieveCollectionPhases,
-  retrieveCollectionAdditionalData,
-  retrieveCollectionInfo,
-  retrieveTokensIndex,
+  useCollectionPhases,
+  useCollectionAdditionalData,
+  useCollectionInfo,
+  useTokensIndex,
   useSharedState,
 } from "../../../nextgen_helpers";
 import NextGenCollectionHeader from "../NextGenCollectionHeader";
@@ -43,7 +43,7 @@ export default function NextGenCollectionArtPage(props: Readonly<Props>) {
     setBreadcrumbs(crumbs);
   }, []);
 
-  retrieveCollectionInfo(props.collection, (data: Info) => {
+  useCollectionInfo(props.collection, (data: Info) => {
     setInfo(data);
     const nameCrumb = data.name
       ? `#${props.collection} - ${data.name}`
@@ -56,11 +56,11 @@ export default function NextGenCollectionArtPage(props: Readonly<Props>) {
     setInfoSettled(true);
   });
 
-  retrieveCollectionPhases(props.collection, (data: PhaseTimes) => {
+  useCollectionPhases(props.collection, (data: PhaseTimes) => {
     setPhaseTimes(data);
   });
 
-  retrieveCollectionAdditionalData(
+  useCollectionAdditionalData(
     props.collection,
     (data: AdditionalData) => {
       setAdditionalData(data);
@@ -68,7 +68,7 @@ export default function NextGenCollectionArtPage(props: Readonly<Props>) {
     true
   );
 
-  retrieveTokensIndex("min", props.collection, (data: number) => {
+  useTokensIndex("min", props.collection, (data: number) => {
     setTokenStartIndex(data);
   });
 

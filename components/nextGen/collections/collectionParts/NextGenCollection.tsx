@@ -12,10 +12,10 @@ import Breadcrumb, { Crumb } from "../../../breadcrumb/Breadcrumb";
 import NextGenCollectionHeader from "./NextGenCollectionHeader";
 import NextGenCollectionArt from "./NextGenCollectionArt";
 import {
-  retrieveCollectionAdditionalData,
-  retrieveCollectionInfo,
-  retrieveCollectionPhases,
-  retrieveTokensIndex,
+  useCollectionAdditionalData,
+  useCollectionInfo,
+  useCollectionPhases,
+  useTokensIndex,
   useSharedState,
 } from "../../nextgen_helpers";
 import NextGenCollectionDetails from "./NextGenCollectionDetails";
@@ -78,7 +78,7 @@ export default function NextGenCollection(props: Readonly<Props>) {
     return params;
   }
 
-  const startIndexRead = retrieveTokensIndex(
+  const startIndexRead = useTokensIndex(
     "min",
     props.collection,
     (data: number) => {
@@ -98,7 +98,7 @@ export default function NextGenCollection(props: Readonly<Props>) {
     }
   }, [tokenStartIndex, additionalData]);
 
-  const endIndexRead = retrieveTokensIndex(
+  const endIndexRead = useTokensIndex(
     "max",
     props.collection,
     (data: number) => {
@@ -106,7 +106,7 @@ export default function NextGenCollection(props: Readonly<Props>) {
     }
   );
 
-  retrieveCollectionInfo(props.collection, (data: Info) => {
+  useCollectionInfo(props.collection, (data: Info) => {
     setInfo(data);
     const nameCrumb = data.name
       ? `#${props.collection} - ${data.name}`
@@ -129,11 +129,11 @@ export default function NextGenCollection(props: Readonly<Props>) {
     },
   });
 
-  retrieveCollectionPhases(props.collection, (data: PhaseTimes) => {
+  useCollectionPhases(props.collection, (data: PhaseTimes) => {
     setPhaseTimes(data);
   });
 
-  retrieveCollectionAdditionalData(
+  useCollectionAdditionalData(
     props.collection,
     (data: AdditionalData) => {
       setAdditionalData(data);

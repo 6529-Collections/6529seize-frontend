@@ -8,7 +8,7 @@ import {
   useCollectionIndex,
   useCollectionAdmin,
   getCollectionIdsForAddress,
-  getCoreUseContractWrite,
+  useCoreUseContractWrite,
 } from "../nextgen_helpers";
 import NextGenContractWriteStatus from "../NextGenContractWriteStatus";
 import { printAdminErrors } from "./NextGenAdmin";
@@ -48,7 +48,7 @@ export default function NextGenAdminSetFinalSupply(props: Readonly<Props>) {
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
-  const contractWrite = getCoreUseContractWrite("setFinalSupply", () => {
+  const contractWrite = useCoreUseContractWrite("setFinalSupply", () => {
     setSubmitting(false);
     setLoading(false);
   });

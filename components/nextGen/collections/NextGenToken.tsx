@@ -16,9 +16,9 @@ import { NEXTGEN_CHAIN_ID, NEXTGEN_CORE } from "../nextgen_contracts";
 import NextGenCollectionHeader from "./collectionParts/NextGenCollectionHeader";
 import { areEqualAddresses } from "../../../helpers/Helpers";
 import {
-  retrieveCollectionAdditionalData,
-  retrieveCollectionInfo,
-  retrieveCollectionPhases,
+  useCollectionAdditionalData,
+  useCollectionInfo,
+  useCollectionPhases,
   extractAttributes,
   extractField,
   extractURI,
@@ -92,15 +92,15 @@ export default function NextGenToken(props: Readonly<Props>) {
     },
   });
 
-  retrieveCollectionInfo(props.collection, (data: Info) => {
+  useCollectionInfo(props.collection, (data: Info) => {
     setInfo(data);
   });
 
-  retrieveCollectionPhases(props.collection, (data: PhaseTimes) => {
+  useCollectionPhases(props.collection, (data: PhaseTimes) => {
     setPhaseTimes(data);
   });
 
-  retrieveCollectionAdditionalData(props.collection, (data: AdditionalData) => {
+  useCollectionAdditionalData(props.collection, (data: AdditionalData) => {
     setAdditionalData(data);
   });
 

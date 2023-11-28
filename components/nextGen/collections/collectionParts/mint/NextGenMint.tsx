@@ -24,7 +24,7 @@ import {
 import { NEXTGEN_CHAIN_ID, NEXTGEN_CORE } from "../../../nextgen_contracts";
 import { fetchUrl } from "../../../../../services/6529api";
 import {
-  retrieveCollectionCosts,
+  useCollectionCosts,
   useMintSharedState,
   useSharedState,
 } from "../../../nextgen_helpers";
@@ -149,7 +149,7 @@ export default function NextGenMint(props: Readonly<Props>) {
     },
   });
 
-  retrieveCollectionCosts(props.collection, (data: MintingDetails) => {
+  useCollectionCosts(props.collection, (data: MintingDetails) => {
     setMintingDetails(data);
   });
 

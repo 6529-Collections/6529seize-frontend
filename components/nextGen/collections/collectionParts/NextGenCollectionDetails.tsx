@@ -10,8 +10,8 @@ import {
 import { addProtocol, fromGWEI } from "../../../../helpers/Helpers";
 import { useState } from "react";
 import {
-  retrieveCollectionCosts,
-  retrieveCollectionLibraryAndScript,
+  useCollectionCosts,
+  useCollectionLibraryAndScript,
   useSharedState,
 } from "../../nextgen_helpers";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -61,16 +61,13 @@ export default function NextGenCollectionDetails(props: Readonly<Props>) {
     );
   }
 
-  retrieveCollectionCosts(props.collection, (data: MintingDetails) => {
+  useCollectionCosts(props.collection, (data: MintingDetails) => {
     setMintingDetails(data);
   });
 
-  retrieveCollectionLibraryAndScript(
-    props.collection,
-    (data: LibraryScript) => {
-      setLibraryScript(data);
-    }
-  );
+  useCollectionLibraryAndScript(props.collection, (data: LibraryScript) => {
+    setLibraryScript(data);
+  });
 
   return (
     <Container className="no-padding">

@@ -5,9 +5,9 @@ import { FunctionSelectors } from "../nextgen_contracts";
 import NextGenContractWriteStatus from "../NextGenContractWriteStatus";
 import {
   getCollectionIdsForAddress,
-  getCoreUseContractWrite,
-  retrieveCollectionInfo,
-  retrieveCollectionLibraryAndScript,
+  useCoreUseContractWrite,
+  useCollectionInfo,
+  useCollectionLibraryAndScript,
   useCollectionAdmin,
   useCollectionIndex,
   useFunctionAdmin,
@@ -72,7 +72,7 @@ export default function NextGenAdminUpdateCollection(props: Readonly<Props>) {
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
-  retrieveCollectionInfo(collectionID, (data: Info) => {
+  useCollectionInfo(collectionID, (data: Info) => {
     setCollectionName(data.name);
     setArtist(data.artist);
     setDescription(data.description);
@@ -81,7 +81,7 @@ export default function NextGenAdminUpdateCollection(props: Readonly<Props>) {
     setBaseURI(data.base_uri);
   });
 
-  retrieveCollectionLibraryAndScript(collectionID, (data: LibraryScript) => {
+  useCollectionLibraryAndScript(collectionID, (data: LibraryScript) => {
     setLibrary(data.library);
     if (props.type === UpdateType.UPDATE_SCRIPT) {
       setExistingScripts(data.script);
@@ -115,7 +115,7 @@ export default function NextGenAdminUpdateCollection(props: Readonly<Props>) {
     return params;
   }
 
-  const contractWrite = getCoreUseContractWrite("updateCollectionInfo", () => {
+  const contractWrite = useCoreUseContractWrite("updateCollectionInfo", () => {
     setSubmitting(false);
     setLoading(false);
   });
