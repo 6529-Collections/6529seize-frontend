@@ -12,6 +12,7 @@ import { useState } from "react";
 import {
   retrieveCollectionCosts,
   retrieveCollectionLibraryAndScript,
+  useSharedState,
 } from "../../nextgen_helpers";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Tippy from "@tippyjs/react";
@@ -29,8 +30,8 @@ interface Props {
 }
 
 export default function NextGenCollectionDetails(props: Readonly<Props>) {
-  const [mintingDetails, setMintingDetails] = useState<MintingDetails>();
-  const [libraryScript, setLibraryScript] = useState<LibraryScript>();
+  const { mintingDetails, setMintingDetails, libraryScript, setLibraryScript } =
+    useSharedState();
 
   const [scriptClamped, setScriptClamped] = useState<boolean>(true);
 

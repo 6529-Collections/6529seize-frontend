@@ -20,7 +20,7 @@ import NextGenAdminSetPhases from "./NextGenAdminSetPhases";
 import NextGenAdminRegisterAdmin, {
   ADMIN_TYPE,
 } from "./NextGenAdminRegisterAdmin";
-import NextGenAdminSignCollection from "./NextGenAdminSignCollection";
+import NextGenAdminArtistSignCollection from "./NextGenAdminArtistSignCollection";
 import NextGenAdminAirdropTokens from "./NextGenAdminAirdropTokens";
 import NextGenAdminProposeAddressesAndPercentages, {
   ProposalType,
@@ -257,6 +257,324 @@ export default function NextGenAdmin() {
     );
   }
 
+  function printAdminRestrictionMessage() {
+    return (
+      <Container className="no-padding">
+        <Row className="pt-2">
+          <Col className="d-flex flex-column align-items-center gap-3">
+            <h4 className="font-color">
+              ONLY ADMIN WALLETS CAN USE THIS dAPP.
+            </h4>
+            <h4 className="font-color">
+              PLEASE USE AN ADMIN WALLET TO CONTINUE.
+            </h4>
+          </Col>
+        </Row>
+      </Container>
+    );
+  }
+
+  function printCreateCollection() {
+    return (
+      (isGlobalAdmin() || createCollectionFunctionAdmin.data === true) && (
+        <Button
+          className="seize-btn btn-white"
+          onClick={() => setGlobalFocus(GlobalFocus.CREATE_COLLECTION)}>
+          Create Collection
+        </Button>
+      )
+    );
+  }
+
+  function printAirdropTokens() {
+    return (
+      (isGlobalAdmin() || airdropTokensFunctionAdmin.data === true) && (
+        <Button
+          className="seize-btn btn-white"
+          onClick={() => setGlobalFocus(GlobalFocus.AIRDROP_TOKENS)}>
+          Airdrop Tokens
+        </Button>
+      )
+    );
+  }
+
+  function printUpdateImagesAttributes() {
+    return (
+      (isGlobalAdmin() ||
+        updateImagesAttributesFunctionAdmin.data === true) && (
+        <Button
+          className="seize-btn btn-white"
+          onClick={() => setGlobalFocus(GlobalFocus.UPDATE_IMAGES_ATTRIBUTES)}>
+          Update Images and Attributes
+        </Button>
+      )
+    );
+  }
+
+  function printSetFinalSupply() {
+    return (
+      (isGlobalAdmin() || setFinalSupplyFunctionAdmin.data === true) && (
+        <Button
+          className="seize-btn btn-white"
+          onClick={() => setGlobalFocus(GlobalFocus.SET_FINAL_SUPPLY)}>
+          Set Final Supply
+        </Button>
+      )
+    );
+  }
+
+  function printInitBurn() {
+    return (
+      (isGlobalAdmin() || initializeBurnFunctionAdmin.data === true) && (
+        <Button
+          className="seize-btn btn-white"
+          onClick={() => setGlobalFocus(GlobalFocus.INITIALIZE_BURN)}>
+          Initialize Burn
+        </Button>
+      )
+    );
+  }
+
+  function printInitExternalBurnSwap() {
+    return (
+      (isGlobalAdmin() ||
+        initializeExternalBurnSwapFunctionAdmin.data === true) && (
+        <Button
+          className="seize-btn btn-white"
+          onClick={() =>
+            setGlobalFocus(GlobalFocus.INITIALIZE_EXTERNAL_BURN_SWAP)
+          }>
+          Initialize External Burn/Swap
+        </Button>
+      )
+    );
+  }
+
+  function printMintAuction() {
+    return (
+      (isGlobalAdmin() || mintAndAuctionFunctionAdmin.data === true) && (
+        <Button
+          className="seize-btn btn-white"
+          onClick={() => setGlobalFocus(GlobalFocus.MINT_AND_AUCTION)}>
+          Mint & Auction
+        </Button>
+      )
+    );
+  }
+
+  function printUpdateDelegationCollection() {
+    return (
+      (isGlobalAdmin() ||
+        updateDelegationCollectionAdminFunction.data === true) && (
+        <Button
+          className="seize-btn btn-white"
+          onClick={() =>
+            setGlobalFocus(GlobalFocus.UPDATE_DELEGATION_COLLECTION)
+          }>
+          Update Delegation Collection
+        </Button>
+      )
+    );
+  }
+
+  function printAdminCollectionActions() {
+    return (
+      (isGlobalAdmin() ||
+        createCollectionFunctionAdmin.data === true ||
+        airdropTokensFunctionAdmin.data === true ||
+        updateImagesAttributesFunctionAdmin.data === true ||
+        setFinalSupplyFunctionAdmin.data === true ||
+        initializeBurnFunctionAdmin.data === true ||
+        mintAndAuctionFunctionAdmin.data === true ||
+        initializeExternalBurnSwapFunctionAdmin.data === true ||
+        updateDelegationCollectionAdminFunction.data === true) && (
+        <>
+          <Row className="pt-4">
+            <Col xs={12}>
+              <h4>COLLECTION ACTIONS</h4>
+            </Col>
+            <Col
+              xs={12}
+              className="pt-2 d-flex flex-wrap align-items-center gap-3">
+              {printCreateCollection()}
+              {printAirdropTokens()}
+              {printUpdateImagesAttributes()}
+              {printSetFinalSupply()}
+            </Col>
+            <Col
+              xs={12}
+              className="pt-3 d-flex flex-wrap align-items-center gap-3">
+              {printInitBurn()}
+              {printInitExternalBurnSwap()}
+              {printMintAuction()}
+              {printUpdateDelegationCollection()}
+            </Col>
+          </Row>
+          <Row className="pt-3">
+            <Col>
+              {globalFocus === GlobalFocus.CREATE_COLLECTION && (
+                <NextGenAdminCreateCollection close={() => close()} />
+              )}
+              {globalFocus === GlobalFocus.AIRDROP_TOKENS && (
+                <NextGenAdminAirdropTokens close={() => close()} />
+              )}
+              {globalFocus === GlobalFocus.UPDATE_IMAGES_ATTRIBUTES && (
+                <NextGenAdminUpdateImagesAttributes close={() => close()} />
+              )}
+              {globalFocus === GlobalFocus.SET_FINAL_SUPPLY && (
+                <NextGenAdminSetFinalSupply close={() => close()} />
+              )}
+              {globalFocus === GlobalFocus.INITIALIZE_BURN && (
+                <NextGenAdminInitializeBurn close={() => close()} />
+              )}
+              {globalFocus === GlobalFocus.MINT_AND_AUCTION && (
+                <NextGenAdminMintAndAuction close={() => close()} />
+              )}
+              {globalFocus === GlobalFocus.INITIALIZE_EXTERNAL_BURN_SWAP && (
+                <NextGenAdminInitializeExternalBurnSwap close={() => close()} />
+              )}
+              {globalFocus === GlobalFocus.UPDATE_DELEGATION_COLLECTION && (
+                <NextGenAdminUpdateDelegationCollection close={() => close()} />
+              )}
+            </Col>
+          </Row>
+        </>
+      )
+    );
+  }
+
+  function printSetSplits() {
+    return (
+      (isGlobalAdmin() || setSplitsFunctionAdmin.data === true) && (
+        <Button
+          className="seize-btn btn-white"
+          onClick={() =>
+            setGlobalFocus(GlobalFocus.SET_PRIMARY_AND_SECONDARY_SPLITS)
+          }>
+          Set Splits
+        </Button>
+      )
+    );
+  }
+
+  function printProposePrimary() {
+    return (
+      (isGlobalAdmin() ||
+        proposePrimaryAddressesAndPercentagesFunctionAdmin.data === true) && (
+        <Button
+          className="seize-btn btn-white"
+          onClick={() =>
+            setGlobalFocus(
+              GlobalFocus.PROPOSE_PRIMARY_ADDRESSES_AND_PERCENTAGES
+            )
+          }>
+          Propose Primary Addresses and Percentages
+        </Button>
+      )
+    );
+  }
+
+  function printProposeSecondary() {
+    return (
+      (isGlobalAdmin() ||
+        proposeSecondaryAddressesAndPercentagesFunctionAdmin.data === true) && (
+        <Button
+          className="seize-btn btn-white"
+          onClick={() =>
+            setGlobalFocus(
+              GlobalFocus.PROPOSE_SECONDARY_ADDRESSES_AND_PERCENTAGES
+            )
+          }>
+          Propose Secondary Addresses and Percentages
+        </Button>
+      )
+    );
+  }
+
+  function printAcceptAddressesAndPercentages() {
+    return (
+      (isGlobalAdmin() ||
+        acceptAddressesAndPercentagesFunctionAdmin.data === true) && (
+        <Button
+          className="seize-btn btn-white"
+          onClick={() =>
+            setGlobalFocus(GlobalFocus.ACCEPT_ADDRESSES_AND_PERCENTAGES)
+          }>
+          Accept Addresses and Percentages
+        </Button>
+      )
+    );
+  }
+
+  function printPayArtist() {
+    return (
+      (isGlobalAdmin() || payArtistFunctionAdmin.data === true) && (
+        <Button
+          className="seize-btn btn-white"
+          onClick={() => setGlobalFocus(GlobalFocus.PAY_ARTIST)}>
+          Pay Artist
+        </Button>
+      )
+    );
+  }
+
+  function printPayActions() {
+    return (
+      (isGlobalAdmin() ||
+        setSplitsFunctionAdmin.data === true ||
+        proposePrimaryAddressesAndPercentagesFunctionAdmin.data === true ||
+        proposeSecondaryAddressesAndPercentagesFunctionAdmin.data === true ||
+        acceptAddressesAndPercentagesFunctionAdmin.data === true ||
+        payArtistFunctionAdmin.data === true) && (
+        <>
+          <Row className="pt-4">
+            <Col xs={12}>
+              <h4>PAY</h4>
+            </Col>
+            <Col
+              xs={12}
+              className="pt-3 d-flex flex-wrap align-items-center gap-3">
+              {printSetSplits()}
+              {printProposePrimary()}
+              {printProposeSecondary()}
+              {printAcceptAddressesAndPercentages()}
+              {printPayArtist()}
+            </Col>
+          </Row>
+          <Row className="pt-3">
+            <Col>
+              {globalFocus === GlobalFocus.SET_PRIMARY_AND_SECONDARY_SPLITS && (
+                <NextGenAdminSetSplits close={() => close()} />
+              )}
+              {globalFocus ===
+                GlobalFocus.PROPOSE_PRIMARY_ADDRESSES_AND_PERCENTAGES && (
+                <NextGenAdminProposeAddressesAndPercentages
+                  type={ProposalType.PRIMARY}
+                  close={() => close()}
+                />
+              )}
+              {globalFocus ===
+                GlobalFocus.PROPOSE_SECONDARY_ADDRESSES_AND_PERCENTAGES && (
+                <NextGenAdminProposeAddressesAndPercentages
+                  type={ProposalType.SECONDARY}
+                  close={() => close()}
+                />
+              )}
+              {globalFocus === GlobalFocus.ACCEPT_ADDRESSES_AND_PERCENTAGES && (
+                <NextGenAdminAcceptAddressesAndPercentages
+                  close={() => close()}
+                />
+              )}
+              {globalFocus === GlobalFocus.PAY_ARTIST && (
+                <NextGenAdminPayArtist close={() => close()} />
+              )}
+            </Col>
+          </Row>
+        </>
+      )
+    );
+  }
+
   function printGlobal() {
     if (
       !isGlobalAdmin() &&
@@ -275,262 +593,13 @@ export default function NextGenAdmin() {
       mintAndAuctionFunctionAdmin.data === false &&
       initializeExternalBurnSwapFunctionAdmin.data === false
     ) {
-      return (
-        <Container className="no-padding">
-          <Row className="pt-2">
-            <Col className="d-flex flex-column align-items-center gap-3">
-              <h4 className="font-color">
-                ONLY ADMIN WALLETS CAN USE THIS dAPP.
-              </h4>
-              <h4 className="font-color">
-                PLEASE USE AN ADMIN WALLET TO CONTINUE.
-              </h4>
-            </Col>
-          </Row>
-        </Container>
-      );
+      return printAdminRestrictionMessage();
     }
 
     return (
       <Container>
-        {(isGlobalAdmin() ||
-          createCollectionFunctionAdmin.data === true ||
-          airdropTokensFunctionAdmin.data === true ||
-          updateImagesAttributesFunctionAdmin.data === true ||
-          setFinalSupplyFunctionAdmin.data === true ||
-          initializeBurnFunctionAdmin.data === true ||
-          mintAndAuctionFunctionAdmin.data === true ||
-          initializeExternalBurnSwapFunctionAdmin.data === true ||
-          updateDelegationCollectionAdminFunction.data === true) && (
-          <>
-            <Row className="pt-4">
-              <Col xs={12}>
-                <h4>COLLECTION ACTIONS</h4>
-              </Col>
-              <Col
-                xs={12}
-                className="pt-2 d-flex flex-wrap align-items-center gap-3">
-                {(isGlobalAdmin() ||
-                  createCollectionFunctionAdmin.data === true) && (
-                  <Button
-                    className="seize-btn btn-white"
-                    onClick={() =>
-                      setGlobalFocus(GlobalFocus.CREATE_COLLECTION)
-                    }>
-                    Create Collection
-                  </Button>
-                )}
-                {(isGlobalAdmin() ||
-                  airdropTokensFunctionAdmin.data === true) && (
-                  <Button
-                    className="seize-btn btn-white"
-                    onClick={() => setGlobalFocus(GlobalFocus.AIRDROP_TOKENS)}>
-                    Airdrop Tokens
-                  </Button>
-                )}
-                {(isGlobalAdmin() ||
-                  updateImagesAttributesFunctionAdmin.data === true) && (
-                  <Button
-                    className="seize-btn btn-white"
-                    onClick={() =>
-                      setGlobalFocus(GlobalFocus.UPDATE_IMAGES_ATTRIBUTES)
-                    }>
-                    Update Images and Attributes
-                  </Button>
-                )}
-                {(isGlobalAdmin() ||
-                  setFinalSupplyFunctionAdmin.data === true) && (
-                  <Button
-                    className="seize-btn btn-white"
-                    onClick={() =>
-                      setGlobalFocus(GlobalFocus.SET_FINAL_SUPPLY)
-                    }>
-                    Set Final Supply
-                  </Button>
-                )}
-              </Col>
-              <Col
-                xs={12}
-                className="pt-3 d-flex flex-wrap align-items-center gap-3">
-                {(isGlobalAdmin() ||
-                  initializeBurnFunctionAdmin.data === true) && (
-                  <Button
-                    className="seize-btn btn-white"
-                    onClick={() => setGlobalFocus(GlobalFocus.INITIALIZE_BURN)}>
-                    Initialize Burn
-                  </Button>
-                )}
-                {(isGlobalAdmin() ||
-                  initializeExternalBurnSwapFunctionAdmin.data === true) && (
-                  <Button
-                    className="seize-btn btn-white"
-                    onClick={() =>
-                      setGlobalFocus(GlobalFocus.INITIALIZE_EXTERNAL_BURN_SWAP)
-                    }>
-                    Initialize External Burn/Swap
-                  </Button>
-                )}
-                {(isGlobalAdmin() ||
-                  mintAndAuctionFunctionAdmin.data === true) && (
-                  <Button
-                    className="seize-btn btn-white"
-                    onClick={() =>
-                      setGlobalFocus(GlobalFocus.MINT_AND_AUCTION)
-                    }>
-                    Mint & Auction
-                  </Button>
-                )}
-                {(isGlobalAdmin() ||
-                  updateDelegationCollectionAdminFunction.data === true) && (
-                  <Button
-                    className="seize-btn btn-white"
-                    onClick={() =>
-                      setGlobalFocus(GlobalFocus.UPDATE_DELEGATION_COLLECTION)
-                    }>
-                    Update Delegation Collection
-                  </Button>
-                )}
-              </Col>
-            </Row>
-            <Row className="pt-3">
-              <Col>
-                {globalFocus === GlobalFocus.CREATE_COLLECTION && (
-                  <NextGenAdminCreateCollection close={() => close()} />
-                )}
-                {globalFocus === GlobalFocus.AIRDROP_TOKENS && (
-                  <NextGenAdminAirdropTokens close={() => close()} />
-                )}
-                {globalFocus === GlobalFocus.UPDATE_IMAGES_ATTRIBUTES && (
-                  <NextGenAdminUpdateImagesAttributes close={() => close()} />
-                )}
-                {globalFocus === GlobalFocus.SET_FINAL_SUPPLY && (
-                  <NextGenAdminSetFinalSupply close={() => close()} />
-                )}
-                {globalFocus === GlobalFocus.INITIALIZE_BURN && (
-                  <NextGenAdminInitializeBurn close={() => close()} />
-                )}
-                {globalFocus === GlobalFocus.MINT_AND_AUCTION && (
-                  <NextGenAdminMintAndAuction close={() => close()} />
-                )}
-                {globalFocus === GlobalFocus.INITIALIZE_EXTERNAL_BURN_SWAP && (
-                  <NextGenAdminInitializeExternalBurnSwap
-                    close={() => close()}
-                  />
-                )}
-                {globalFocus === GlobalFocus.UPDATE_DELEGATION_COLLECTION && (
-                  <NextGenAdminUpdateDelegationCollection
-                    close={() => close()}
-                  />
-                )}
-              </Col>
-            </Row>
-          </>
-        )}
-        {(isGlobalAdmin() ||
-          setSplitsFunctionAdmin.data === true ||
-          proposePrimaryAddressesAndPercentagesFunctionAdmin.data === true ||
-          proposeSecondaryAddressesAndPercentagesFunctionAdmin.data === true ||
-          acceptAddressesAndPercentagesFunctionAdmin.data === true ||
-          payArtistFunctionAdmin.data === true) && (
-          <>
-            <Row className="pt-4">
-              <Col xs={12}>
-                <h4>PAY</h4>
-              </Col>
-              <Col
-                xs={12}
-                className="pt-3 d-flex flex-wrap align-items-center gap-3">
-                {(isGlobalAdmin() || setSplitsFunctionAdmin.data === true) && (
-                  <Button
-                    className="seize-btn btn-white"
-                    onClick={() =>
-                      setGlobalFocus(
-                        GlobalFocus.SET_PRIMARY_AND_SECONDARY_SPLITS
-                      )
-                    }>
-                    Set Splits
-                  </Button>
-                )}
-                {(isGlobalAdmin() ||
-                  proposePrimaryAddressesAndPercentagesFunctionAdmin.data ===
-                    true) && (
-                  <Button
-                    className="seize-btn btn-white"
-                    onClick={() =>
-                      setGlobalFocus(
-                        GlobalFocus.PROPOSE_PRIMARY_ADDRESSES_AND_PERCENTAGES
-                      )
-                    }>
-                    Propose Primary Addresses and Percentages
-                  </Button>
-                )}
-                {(isGlobalAdmin() ||
-                  proposeSecondaryAddressesAndPercentagesFunctionAdmin.data ===
-                    true) && (
-                  <Button
-                    className="seize-btn btn-white"
-                    onClick={() =>
-                      setGlobalFocus(
-                        GlobalFocus.PROPOSE_SECONDARY_ADDRESSES_AND_PERCENTAGES
-                      )
-                    }>
-                    Propose Secondary Addresses and Percentages
-                  </Button>
-                )}
-                {(isGlobalAdmin() ||
-                  acceptAddressesAndPercentagesFunctionAdmin.data === true) && (
-                  <Button
-                    className="seize-btn btn-white"
-                    onClick={() =>
-                      setGlobalFocus(
-                        GlobalFocus.ACCEPT_ADDRESSES_AND_PERCENTAGES
-                      )
-                    }>
-                    Accept Addresses and Percentages
-                  </Button>
-                )}
-                {(isGlobalAdmin() || payArtistFunctionAdmin.data === true) && (
-                  <Button
-                    className="seize-btn btn-white"
-                    onClick={() => setGlobalFocus(GlobalFocus.PAY_ARTIST)}>
-                    Pay Artist
-                  </Button>
-                )}
-              </Col>
-            </Row>
-            <Row className="pt-3">
-              <Col>
-                {globalFocus ===
-                  GlobalFocus.SET_PRIMARY_AND_SECONDARY_SPLITS && (
-                  <NextGenAdminSetSplits close={() => close()} />
-                )}
-                {globalFocus ===
-                  GlobalFocus.PROPOSE_PRIMARY_ADDRESSES_AND_PERCENTAGES && (
-                  <NextGenAdminProposeAddressesAndPercentages
-                    type={ProposalType.PRIMARY}
-                    close={() => close()}
-                  />
-                )}
-                {globalFocus ===
-                  GlobalFocus.PROPOSE_SECONDARY_ADDRESSES_AND_PERCENTAGES && (
-                  <NextGenAdminProposeAddressesAndPercentages
-                    type={ProposalType.SECONDARY}
-                    close={() => close()}
-                  />
-                )}
-                {globalFocus ===
-                  GlobalFocus.ACCEPT_ADDRESSES_AND_PERCENTAGES && (
-                  <NextGenAdminAcceptAddressesAndPercentages
-                    close={() => close()}
-                  />
-                )}
-                {globalFocus === GlobalFocus.PAY_ARTIST && (
-                  <NextGenAdminPayArtist close={() => close()} />
-                )}
-              </Col>
-            </Row>
-          </>
-        )}
+        {printAdminCollectionActions()}
+        {printPayActions()}
         {isGlobalAdmin() && (
           <>
             <Row className="pt-4">
@@ -619,6 +688,160 @@ export default function NextGenAdmin() {
     );
   }
 
+  function printSetData() {
+    return (
+      (isGlobalAdmin() ||
+        isWalletCollectionAdmin ||
+        setDataFunctionAdmin.data === true ||
+        setCostsFunctionAdmin.data === true ||
+        setPhasesFunctionAdmin.data === true) && (
+        <>
+          <Row className="pt-4">
+            <Col xs={12}>
+              <h4>SET DATA</h4>
+            </Col>
+            <Col
+              xs={12}
+              className="pt-2 d-flex flex-wrap align-items-center gap-3">
+              {(isGlobalAdmin() ||
+                isWalletCollectionAdmin ||
+                setDataFunctionAdmin.data === true) && (
+                <Button
+                  className="seize-btn btn-white"
+                  onClick={() => setCollectionFocus(CollectionFocus.SET_DATA)}>
+                  Set Data
+                </Button>
+              )}
+              {(isGlobalAdmin() ||
+                isWalletCollectionAdmin ||
+                setCostsFunctionAdmin.data === true) && (
+                <Button
+                  className="seize-btn btn-white"
+                  onClick={() => setCollectionFocus(CollectionFocus.SET_COSTS)}>
+                  Set Costs
+                </Button>
+              )}
+              {(isGlobalAdmin() ||
+                isWalletCollectionAdmin ||
+                setPhasesFunctionAdmin.data === true) && (
+                <Button
+                  className="seize-btn btn-white"
+                  onClick={() =>
+                    setCollectionFocus(CollectionFocus.SET_PHASES)
+                  }>
+                  Set Phases
+                </Button>
+              )}
+            </Col>
+          </Row>
+          <Row className="pt-3">
+            <Col>
+              {collectionFocus === CollectionFocus.SET_DATA && (
+                <NextGenAdminSetData close={() => close()} />
+              )}
+              {collectionFocus === CollectionFocus.SET_COSTS && (
+                <NextGenAdminSetCosts close={() => close()} />
+              )}
+              {collectionFocus === CollectionFocus.SET_PHASES && (
+                <NextGenAdminSetPhases close={() => close()} />
+              )}
+            </Col>
+          </Row>
+        </>
+      )
+    );
+  }
+
+  function printUpdateCollection() {
+    return (
+      (isGlobalAdmin() ||
+        isWalletCollectionAdmin ||
+        updateInfoFunctionAdmin.data === true ||
+        changeMetadataViewFunctionAdmin.data === true) && (
+        <>
+          <Row className="pt-4">
+            <Col xs={12}>
+              <h4>UPDATE COLLECTION</h4>
+            </Col>
+            <Col
+              xs={12}
+              className="pt-2 d-flex flex-wrap align-items-center gap-3">
+              {(isGlobalAdmin() ||
+                isWalletCollectionAdmin ||
+                updateInfoFunctionAdmin.data === true) && (
+                <Button
+                  className="seize-btn btn-white"
+                  onClick={() =>
+                    setCollectionFocus(CollectionFocus.UPDATE_INFO)
+                  }>
+                  Update Info
+                </Button>
+              )}
+              {(isGlobalAdmin() ||
+                isWalletCollectionAdmin ||
+                updateInfoFunctionAdmin.data === true) && (
+                <Button
+                  className="seize-btn btn-white"
+                  onClick={() =>
+                    setCollectionFocus(CollectionFocus.UPDATE_BASE_URI)
+                  }>
+                  Update Base URI
+                </Button>
+              )}
+              {(isGlobalAdmin() ||
+                isWalletCollectionAdmin ||
+                updateInfoFunctionAdmin.data === true) && (
+                <Button
+                  className="seize-btn btn-white"
+                  onClick={() =>
+                    setCollectionFocus(CollectionFocus.UPDATE_SCRIPT_BY_INDEX)
+                  }>
+                  Update Script By Index
+                </Button>
+              )}
+              {(isGlobalAdmin() ||
+                isWalletCollectionAdmin ||
+                changeMetadataViewFunctionAdmin.data === true) && (
+                <Button
+                  className="seize-btn btn-white"
+                  onClick={() =>
+                    setCollectionFocus(CollectionFocus.CHANGE_METADATA_VIEW)
+                  }>
+                  Change Metadata View
+                </Button>
+              )}
+            </Col>
+          </Row>
+          <Row className="pt-3">
+            <Col>
+              {collectionFocus === CollectionFocus.UPDATE_INFO && (
+                <NextGenAdminUpdateCollection
+                  type={UpdateType.UPDATE_INFO}
+                  close={() => close()}
+                />
+              )}
+              {collectionFocus === CollectionFocus.UPDATE_BASE_URI && (
+                <NextGenAdminUpdateCollection
+                  type={UpdateType.UPDATE_BASE_URI}
+                  close={() => close()}
+                />
+              )}
+              {collectionFocus === CollectionFocus.UPDATE_SCRIPT_BY_INDEX && (
+                <NextGenAdminUpdateCollection
+                  type={UpdateType.UPDATE_SCRIPT}
+                  close={() => close()}
+                />
+              )}
+              {collectionFocus === CollectionFocus.CHANGE_METADATA_VIEW && (
+                <NextGenAdminChangeMetadataView close={() => close()} />
+              )}
+            </Col>
+          </Row>
+        </>
+      )
+    );
+  }
+
   function printCollection() {
     if (
       !isGlobalAdmin() &&
@@ -629,172 +852,13 @@ export default function NextGenAdmin() {
       updateInfoFunctionAdmin.data === false &&
       changeMetadataViewFunctionAdmin.data === false
     ) {
-      return (
-        <Container className="no-padding">
-          <Row className="pt-2">
-            <Col className="d-flex flex-column align-items-center gap-3">
-              <h4 className="font-color">
-                ONLY ADMIN WALLETS CAN USE THIS dAPP.
-              </h4>
-              <h4 className="font-color">
-                PLEASE USE AN ADMIN WALLET TO CONTINUE.
-              </h4>
-            </Col>
-          </Row>
-        </Container>
-      );
+      return printAdminRestrictionMessage();
     }
 
     return (
       <Container>
-        {(isGlobalAdmin() ||
-          isWalletCollectionAdmin ||
-          setDataFunctionAdmin.data === true ||
-          setCostsFunctionAdmin.data === true ||
-          setPhasesFunctionAdmin.data === true) && (
-          <>
-            <Row className="pt-4">
-              <Col xs={12}>
-                <h4>SET DATA</h4>
-              </Col>
-              <Col
-                xs={12}
-                className="pt-2 d-flex flex-wrap align-items-center gap-3">
-                {(isGlobalAdmin() ||
-                  isWalletCollectionAdmin ||
-                  setDataFunctionAdmin.data === true) && (
-                  <Button
-                    className="seize-btn btn-white"
-                    onClick={() =>
-                      setCollectionFocus(CollectionFocus.SET_DATA)
-                    }>
-                    Set Data
-                  </Button>
-                )}
-                {(isGlobalAdmin() ||
-                  isWalletCollectionAdmin ||
-                  setCostsFunctionAdmin.data === true) && (
-                  <Button
-                    className="seize-btn btn-white"
-                    onClick={() =>
-                      setCollectionFocus(CollectionFocus.SET_COSTS)
-                    }>
-                    Set Costs
-                  </Button>
-                )}
-                {(isGlobalAdmin() ||
-                  isWalletCollectionAdmin ||
-                  setPhasesFunctionAdmin.data === true) && (
-                  <Button
-                    className="seize-btn btn-white"
-                    onClick={() =>
-                      setCollectionFocus(CollectionFocus.SET_PHASES)
-                    }>
-                    Set Phases
-                  </Button>
-                )}
-              </Col>
-            </Row>
-            <Row className="pt-3">
-              <Col>
-                {collectionFocus === CollectionFocus.SET_DATA && (
-                  <NextGenAdminSetData close={() => close()} />
-                )}
-                {collectionFocus === CollectionFocus.SET_COSTS && (
-                  <NextGenAdminSetCosts close={() => close()} />
-                )}
-                {collectionFocus === CollectionFocus.SET_PHASES && (
-                  <NextGenAdminSetPhases close={() => close()} />
-                )}
-              </Col>
-            </Row>
-          </>
-        )}
-        {(isGlobalAdmin() ||
-          isWalletCollectionAdmin ||
-          updateInfoFunctionAdmin.data === true ||
-          changeMetadataViewFunctionAdmin.data === true) && (
-          <>
-            <Row className="pt-4">
-              <Col xs={12}>
-                <h4>UPDATE COLLECTION</h4>
-              </Col>
-              <Col
-                xs={12}
-                className="pt-2 d-flex flex-wrap align-items-center gap-3">
-                {(isGlobalAdmin() ||
-                  isWalletCollectionAdmin ||
-                  updateInfoFunctionAdmin.data === true) && (
-                  <Button
-                    className="seize-btn btn-white"
-                    onClick={() =>
-                      setCollectionFocus(CollectionFocus.UPDATE_INFO)
-                    }>
-                    Update Info
-                  </Button>
-                )}
-                {(isGlobalAdmin() ||
-                  isWalletCollectionAdmin ||
-                  updateInfoFunctionAdmin.data === true) && (
-                  <Button
-                    className="seize-btn btn-white"
-                    onClick={() =>
-                      setCollectionFocus(CollectionFocus.UPDATE_BASE_URI)
-                    }>
-                    Update Base URI
-                  </Button>
-                )}
-                {(isGlobalAdmin() ||
-                  isWalletCollectionAdmin ||
-                  updateInfoFunctionAdmin.data === true) && (
-                  <Button
-                    className="seize-btn btn-white"
-                    onClick={() =>
-                      setCollectionFocus(CollectionFocus.UPDATE_SCRIPT_BY_INDEX)
-                    }>
-                    Update Script By Index
-                  </Button>
-                )}
-                {(isGlobalAdmin() ||
-                  isWalletCollectionAdmin ||
-                  changeMetadataViewFunctionAdmin.data === true) && (
-                  <Button
-                    className="seize-btn btn-white"
-                    onClick={() =>
-                      setCollectionFocus(CollectionFocus.CHANGE_METADATA_VIEW)
-                    }>
-                    Change Metadata View
-                  </Button>
-                )}
-              </Col>
-            </Row>
-            <Row className="pt-3">
-              <Col>
-                {collectionFocus === CollectionFocus.UPDATE_INFO && (
-                  <NextGenAdminUpdateCollection
-                    type={UpdateType.UPDATE_INFO}
-                    close={() => close()}
-                  />
-                )}
-                {collectionFocus === CollectionFocus.UPDATE_BASE_URI && (
-                  <NextGenAdminUpdateCollection
-                    type={UpdateType.UPDATE_BASE_URI}
-                    close={() => close()}
-                  />
-                )}
-                {collectionFocus === CollectionFocus.UPDATE_SCRIPT_BY_INDEX && (
-                  <NextGenAdminUpdateCollection
-                    type={UpdateType.UPDATE_SCRIPT}
-                    close={() => close()}
-                  />
-                )}
-                {collectionFocus === CollectionFocus.CHANGE_METADATA_VIEW && (
-                  <NextGenAdminChangeMetadataView close={() => close()} />
-                )}
-              </Col>
-            </Row>
-          </>
-        )}
+        {printSetData()}
+        {printUpdateCollection()}
       </Container>
     );
   }
@@ -854,7 +918,7 @@ export default function NextGenAdmin() {
         <Row className="pt-3">
           <Col>
             {artistFocus === ArtistFocus.SIGN_COLLECTION && (
-              <NextGenAdminSignCollection close={() => close()} />
+              <NextGenAdminArtistSignCollection close={() => close()} />
             )}
             {artistFocus ===
               ArtistFocus.PROPOSE_PRIMARY_ADDRESSES_AND_PERCENTAGES && (

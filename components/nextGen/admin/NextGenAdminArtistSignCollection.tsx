@@ -1,5 +1,4 @@
 import { Container, Row, Col, Button, Form } from "react-bootstrap";
-import styles from "./NextGenAdmin.module.scss";
 import { useAccount } from "wagmi";
 import { useEffect, useState } from "react";
 import {
@@ -9,15 +8,20 @@ import {
   getCoreUseContractWrite,
 } from "../nextgen_helpers";
 import NextGenContractWriteStatus from "../NextGenContractWriteStatus";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { areEqualAddresses } from "../../../helpers/Helpers";
 import { printAdminErrors } from "./NextGenAdmin";
+import {
+  NextGenCollectionIdFormGroup,
+  NextGenAdminHeadingRow,
+} from "./NextGenAdminShared";
 
 interface Props {
   close: () => void;
 }
 
-export default function NextGenAdminSignCollection(props: Readonly<Props>) {
+export default function NextGenAdminArtistSignCollection(
+  props: Readonly<Props>
+) {
   const account = useAccount();
 
   const collectionIndex = useCollectionIndex();
@@ -26,12 +30,12 @@ export default function NextGenAdminSignCollection(props: Readonly<Props>) {
   );
 
   function getCollectionIds() {
-    const ids = [];
+    const ids: string[] = [];
     if (collectionArtists.data) {
       for (let i = 0; i < collectionArtists.data.length; i++) {
         const artist = collectionArtists.data[i].result;
         if (areEqualAddresses(artist, account.address)) {
-          ids.push(i + 1);
+          ids.push((i + 1).toString());
         }
       }
     }
@@ -94,41 +98,21 @@ export default function NextGenAdminSignCollection(props: Readonly<Props>) {
 
   return (
     <Container className="no-padding">
-      <Row className="pt-3">
-        <Col className="d-flex align-items-center justify-content-between">
-          <h3>
-            <b>SIGN COLLECTION AS ARTIST</b>
-          </h3>
-          <FontAwesomeIcon
-            className={styles.closeIcon}
-            icon="times-circle"
-            onClick={() => {
-              props.close();
-            }}></FontAwesomeIcon>
-        </Col>
-      </Row>
+      <NextGenAdminHeadingRow
+        close={props.close}
+        title="Sign Collection As Artist"
+      />
       {isArtist ? (
         <Row className="pt-3">
           <Col>
             <Form>
-              <Form.Group className="mb-3">
-                <Form.Label>Collection ID</Form.Label>
-                <Form.Select
-                  className={`${styles.formInput}`}
-                  value={collectionID}
-                  onChange={(e) => {
-                    setCollectionID(e.target.value);
-                  }}>
-                  <option value="" disabled>
-                    Select Collection
-                  </option>
-                  {collectionIds.map((id) => (
-                    <option key={`collection-id-${id}`} value={id}>
-                      {id}
-                    </option>
-                  ))}
-                </Form.Select>
-              </Form.Group>
+              <NextGenCollectionIdFormGroup
+                collection_id={collectionID}
+                collection_ids={collectionIds}
+                onChange={(id) => {
+                  setCollectionID(id);
+                }}
+              />
               <Form.Group className="mb-3">
                 <Form.Label>Signature</Form.Label>
                 <Form.Control

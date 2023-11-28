@@ -1,7 +1,7 @@
 import { Container, Row, Col, Button, Form } from "react-bootstrap";
 import styles from "./NextGenAdmin.module.scss";
 import { useAccount, useSignMessage } from "wagmi";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 import { FunctionSelectors } from "../nextgen_contracts";
 import {
@@ -13,9 +13,9 @@ import {
   getMinterUseContractWrite,
 } from "../nextgen_helpers";
 import NextGenContractWriteStatus from "../NextGenContractWriteStatus";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { postData } from "../../../services/6529api";
 import { printAdminErrors } from "./NextGenAdmin";
+import { NextGenAdminHeadingRow } from "./NextGenAdminShared";
 
 interface Props {
   close: () => void;
@@ -26,7 +26,7 @@ export default function NextGenAdminInitializeExternalBurnSwap(
 ) {
   const account = useAccount();
   const signMessage = useSignMessage();
-  const uuid = uuidv4();
+  const uuid = useRef(uuidv4()).current;
 
   const globalAdmin = useGlobalAdmin(account.address as string);
   const functionAdmin = useFunctionAdmin(
@@ -184,19 +184,10 @@ export default function NextGenAdminInitializeExternalBurnSwap(
 
   return (
     <Container className="no-padding">
-      <Row className="pt-3">
-        <Col className="d-flex align-items-center justify-content-between">
-          <h3>
-            <b>INITIALIZE EXTERNAL BURN/SWAP</b>
-          </h3>
-          <FontAwesomeIcon
-            className={styles.closeIcon}
-            icon="times-circle"
-            onClick={() => {
-              props.close();
-            }}></FontAwesomeIcon>
-        </Col>
-      </Row>
+      <NextGenAdminHeadingRow
+        title="Initialize External Burn/Swap"
+        close={props.close}
+      />
       <Row className="pt-3">
         <Col>
           <Form>

@@ -1,7 +1,7 @@
 import { Container, Row, Col, Button, Form } from "react-bootstrap";
 import styles from "./NextGenAdmin.module.scss";
 import { useAccount, useContractRead, useSignMessage } from "wagmi";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   FunctionSelectors,
   NEXTGEN_CHAIN_ID,
@@ -17,11 +17,11 @@ import {
   getMinterUseContractWrite,
 } from "../nextgen_helpers";
 import NextGenContractWriteStatus from "../NextGenContractWriteStatus";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { v4 as uuidv4 } from "uuid";
 import { NULL_ADDRESS } from "../../../constants";
 import { postData } from "../../../services/6529api";
 import { printAdminErrors } from "./NextGenAdmin";
+import { NextGenAdminHeadingRow } from "./NextGenAdminShared";
 
 interface Props {
   close: () => void;
@@ -30,7 +30,7 @@ interface Props {
 export default function NextGenAdminInitializeBurn(props: Readonly<Props>) {
   const account = useAccount();
   const signMessage = useSignMessage();
-  const uuid = uuidv4();
+  const uuid = useRef(uuidv4()).current;
 
   const globalAdmin = useGlobalAdmin(account.address as string);
   const functionAdmin = useFunctionAdmin(
@@ -173,19 +173,7 @@ export default function NextGenAdminInitializeBurn(props: Readonly<Props>) {
 
   return (
     <Container className="no-padding">
-      <Row className="pt-3">
-        <Col className="d-flex align-items-center justify-content-between">
-          <h3>
-            <b>INITIALIZE BURN</b>
-          </h3>
-          <FontAwesomeIcon
-            className={styles.closeIcon}
-            icon="times-circle"
-            onClick={() => {
-              props.close();
-            }}></FontAwesomeIcon>
-        </Col>
-      </Row>
+      <NextGenAdminHeadingRow title="Initialize Burn" close={props.close} />
       <Row className="pt-3">
         <Col>
           <Form>

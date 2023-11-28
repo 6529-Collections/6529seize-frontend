@@ -5,9 +5,9 @@ import {
   retrieveCollectionPhases,
   retrieveCollectionAdditionalData,
   retrieveCollectionInfo,
+  retrieveTokensIndex,
+  useSharedState,
 } from "../../../nextgen_helpers";
-import { useContractRead } from "wagmi";
-import { NEXTGEN_CORE, NEXTGEN_CHAIN_ID } from "../../../nextgen_contracts";
 import NextGenCollectionHeader from "../NextGenCollectionHeader";
 import Breadcrumb, { Crumb } from "../../../../breadcrumb/Breadcrumb";
 import NextGenCollectionArt from "../NextGenCollectionArt";
@@ -21,17 +21,25 @@ export default function NextGenCollectionArtPage(props: Readonly<Props>) {
     { display: "Home", href: "/" },
     { display: "NextGen", href: "/nextgen" },
   ];
-  const [breadcrumbs, setBreadcrumbs] = useState<Crumb[]>(crumbs);
 
-  const [info, setInfo] = useState<Info>();
-  const [infoSettled, setInfoSettled] = useState<boolean>(false);
+  const {
+    breadcrumbs,
+    setBreadcrumbs,
+    info,
+    setInfo,
+    infoSettled,
+    setInfoSettled,
+    tokenStartIndex,
+    setTokenStartIndex,
+    phaseTimes,
+    setPhaseTimes,
+    additionalData,
+    setAdditionalData,
+    tokenIds,
+    setTokenIds,
+  } = useSharedState();
 
-  const [tokenStartIndex, setTokenStartIndex] = useState<number>(0);
-
-  const [phaseTimes, setPhaseTimes] = useState<PhaseTimes>();
-  const [additionalData, setAdditionalData] = useState<AdditionalData>();
-
-  const [tokenIds, setTokenIds] = useState<number[]>([]);
+  setBreadcrumbs(crumbs);
 
   retrieveCollectionInfo(props.collection, (data: Info) => {
     setInfo(data);
@@ -41,7 +49,7 @@ export default function NextGenCollectionArtPage(props: Readonly<Props>) {
     setBreadcrumbs((b) => [
       ...crumbs,
       { display: nameCrumb, href: `/nextgen/collection/${props.collection}` },
-      { display: "Mint" },
+      { display: "Art" },
     ]);
     setInfoSettled(true);
   });
@@ -58,18 +66,8 @@ export default function NextGenCollectionArtPage(props: Readonly<Props>) {
     true
   );
 
-  useContractRead({
-    address: NEXTGEN_CORE.contract as `0x${string}`,
-    abi: NEXTGEN_CORE.abi,
-    chainId: NEXTGEN_CHAIN_ID,
-    functionName: "viewTokensIndexMin",
-    watch: true,
-    args: [props.collection],
-    onSettled(data: any, error: any) {
-      if (data) {
-        setTokenStartIndex(parseInt(data));
-      }
-    },
+  retrieveTokensIndex("min", props.collection, (data: number) => {
+    setTokenStartIndex(data);
   });
 
   useEffect(() => {

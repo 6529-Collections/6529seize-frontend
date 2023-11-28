@@ -29,6 +29,7 @@ import { fetchUrl } from "../../../../../services/6529api";
 import { useWeb3Modal } from "@web3modal/react";
 import { NextGenMintDelegatorOption } from "./NextGenMintDelegatorOption";
 import { Spinner } from "../../NextGen";
+import { useMintSharedState } from "../../../nextgen_helpers";
 
 interface Props {
   collection: number;
@@ -53,7 +54,28 @@ export default function NextGenMintWidget(props: Readonly<Props>) {
   const account = useAccount();
   const chainId = useChainId();
   const web3Modal = useWeb3Modal();
-  const [available, setAvailable] = useState<number>(0);
+
+  const {
+    available,
+    setAvailable,
+    proofResponse,
+    setProofResponse,
+    mintForAddress,
+    setMintForAddress,
+    mintingForDelegator,
+    setMintingForDelegator,
+    salt,
+    mintCount,
+    setMintCount,
+    mintToInput,
+    setMintToInput,
+    mintToAddress,
+    setMintToAddress,
+    isMinting,
+    setIsMinting,
+    errors,
+    setErrors,
+  } = useMintSharedState();
 
   useEffect(() => {
     const a =
@@ -62,13 +84,6 @@ export default function NextGenMintWidget(props: Readonly<Props>) {
     setAvailable(a);
   }, [props.additional_data]);
 
-  const [proofResponse, setProofResponse] = useState<ProofResponse>();
-
-  const [mintToInput, setMintToInput] = useState("");
-  const [mintToAddress, setMintToAddress] = useState("");
-
-  const [mintingForDelegator, setMintingForDelegator] = useState(false);
-  const [mintForAddress, setMintForAddress] = useState<string>();
   useEffect(() => {
     if (props.delegators.length > 0) {
       setMintForAddress(props.delegators[0]);
@@ -76,12 +91,6 @@ export default function NextGenMintWidget(props: Readonly<Props>) {
       setMintForAddress(undefined);
     }
   }, [props.delegators]);
-
-  const [mintCount, setMintCount] = useState<number>(1);
-  const salt = 0;
-  const [isMinting, setIsMinting] = useState(false);
-
-  const [errors, setErrors] = useState<string[]>([]);
 
   useEffect(() => {
     props.mintingForDelegator(mintingForDelegator);

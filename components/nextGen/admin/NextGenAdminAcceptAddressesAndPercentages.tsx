@@ -1,5 +1,4 @@
 import { Container, Row, Col, Button, Form } from "react-bootstrap";
-import styles from "./NextGenAdmin.module.scss";
 import { useAccount, useContractRead } from "wagmi";
 import { useEffect, useState } from "react";
 import {
@@ -16,7 +15,10 @@ import {
   getMinterUseContractWrite,
 } from "../nextgen_helpers";
 import NextGenContractWriteStatus from "../NextGenContractWriteStatus";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  NextGenCollectionIdFormGroup,
+  NextGenAdminHeadingRow,
+} from "./NextGenAdminShared";
 
 interface Props {
   close: () => void;
@@ -163,48 +165,28 @@ export default function NextGenAdminAcceptAddressesAndPercentages(
 
   return (
     <Container className="no-padding">
-      <Row className="pt-3">
-        <Col className="d-flex align-items-center justify-content-between">
-          <h3>
-            <b>ACCEPT ADDRESSES AND PERCENTAGES</b>
-          </h3>
-          <FontAwesomeIcon
-            className={styles.closeIcon}
-            icon="times-circle"
-            onClick={() => {
-              props.close();
-            }}></FontAwesomeIcon>
-        </Col>
-      </Row>
+      <NextGenAdminHeadingRow
+        title="Accept Addresses and Percentages"
+        close={props.close}
+      />
       <Row className="pt-3">
         <Col>
           <Form>
-            <Form.Group className="mb-3">
-              <Form.Label>Collection ID</Form.Label>
-              <Form.Select
-                className={`${styles.formInput}`}
-                value={collectionID}
-                onChange={(e) => {
-                  setPrimary1(undefined);
-                  setPrimary2(undefined);
-                  setPrimary3(undefined);
-                  setSecondary1(undefined);
-                  setSecondary2(undefined);
-                  setSecondary3(undefined);
-                  setPrimaryStatus(undefined);
-                  setSecondaryStatus(undefined);
-                  setCollectionID(e.target.value);
-                }}>
-                <option value="" disabled>
-                  Select Collection
-                </option>
-                {collectionIds?.map((id) => (
-                  <option key={`collection-id-${id}`} value={id}>
-                    {id}
-                  </option>
-                ))}
-              </Form.Select>
-            </Form.Group>
+            <NextGenCollectionIdFormGroup
+              collection_id={collectionID}
+              collection_ids={collectionIds}
+              onChange={(id) => {
+                setPrimary1(undefined);
+                setPrimary2(undefined);
+                setPrimary3(undefined);
+                setSecondary1(undefined);
+                setSecondary2(undefined);
+                setSecondary3(undefined);
+                setPrimaryStatus(undefined);
+                setSecondaryStatus(undefined);
+                setCollectionID(id);
+              }}
+            />
             <Form.Group className="mb-3">
               <Form.Label>Primary 1</Form.Label>
               <Row>

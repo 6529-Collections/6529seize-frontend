@@ -16,6 +16,7 @@ interface Props {
   hide_info?: boolean;
   hide_link?: boolean;
   hide_background?: boolean;
+  show_owner?: boolean;
 }
 
 export default function NextGenTokenPreview(props: Readonly<Props>) {
@@ -50,14 +51,18 @@ export default function NextGenTokenPreview(props: Readonly<Props>) {
             attributes: attrs,
           });
         } else {
-          setTokenUri({
-            id: props.token_id,
-            collection: props.collection,
-            uri: data,
-            name: "",
-            description: "",
-            attributes: [],
-          });
+          fetch(data)
+            .then((response) => response.json())
+            .then((response) => {
+              setTokenUri({
+                id: props.token_id,
+                collection: props.collection,
+                uri: response.image,
+                name: response.name,
+                description: response.description,
+                attributes: response.attributes,
+              });
+            });
         }
       }
     },
@@ -80,7 +85,7 @@ export default function NextGenTokenPreview(props: Readonly<Props>) {
 
   function printToken() {
     return (
-      <Container className="no-padding pt-3 pb-3">
+      <Container className="no-padding">
         <Row>
           <Col className="text-center">
             <NextGenTokenImage
@@ -95,13 +100,20 @@ export default function NextGenTokenPreview(props: Readonly<Props>) {
         {!props.hide_info && (
           <>
             <Row className="pt-1">
-              <Col className="text-center">#{props.token_id}</Col>
+              <Col className="text-center font-smaller font-color-h">
+                #{props.token_id}
+              </Col>
             </Row>
             <Row className="pt-1">
               <Col className="text-center">
                 {tokenUri ? tokenUri.name : name}
               </Col>
             </Row>
+            {props.show_owner && (
+              <Row className="pt-1">
+                <Col className="text-center">Owned by {owner}</Col>
+              </Row>
+            )}
           </>
         )}
       </Container>

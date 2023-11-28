@@ -1,8 +1,7 @@
 import { Container, Row, Col, Button, Form } from "react-bootstrap";
 import { v4 as uuidv4 } from "uuid";
-import styles from "./NextGenAdmin.module.scss";
 import { useAccount, useSignMessage } from "wagmi";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { postFormData } from "../../../services/6529api";
 import { FunctionSelectors } from "../nextgen_contracts";
 import {
@@ -15,11 +14,13 @@ import {
   getMinterUseContractWrite,
 } from "../nextgen_helpers";
 import NextGenContractWriteStatus from "../NextGenContractWriteStatus";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { PhaseTimes } from "../nextgen_entities";
 import { NULL_MERKLE } from "../../../constants";
 import { printAdminErrors } from "./NextGenAdmin";
-
+import {
+  NextGenCollectionIdFormGroup,
+  NextGenAdminHeadingRow,
+} from "./NextGenAdminShared";
 interface Props {
   close: () => void;
 }
@@ -35,7 +36,7 @@ enum Type {
 export default function NextGenAdminSetPhases(props: Readonly<Props>) {
   const account = useAccount();
   const signMessage = useSignMessage();
-  const uuid = uuidv4();
+  const uuid = useRef(uuidv4()).current;
 
   const globalAdmin = useGlobalAdmin(account.address as string);
   const functionAdmin = useFunctionAdmin(
@@ -222,41 +223,21 @@ export default function NextGenAdminSetPhases(props: Readonly<Props>) {
 
   return (
     <Container className="no-padding">
-      <Row className="pt-3">
-        <Col className="d-flex align-items-center justify-content-between">
-          <h3>
-            <b>SET COLLECTION MINTING PHASES</b>
-          </h3>
-          <FontAwesomeIcon
-            className={styles.closeIcon}
-            icon="times-circle"
-            onClick={() => {
-              props.close();
-            }}></FontAwesomeIcon>
-        </Col>
-      </Row>
+      <NextGenAdminHeadingRow
+        close={props.close}
+        title="Set Collection Minting Phases"
+      />
       <Row className="pt-3">
         <Col>
           <Form>
-            <Form.Group className="mb-3">
-              <Form.Label>Collection ID</Form.Label>
-              <Form.Select
-                className={`${styles.formInput}`}
-                value={collectionID}
-                onChange={(e) => {
-                  clear();
-                  setCollectionID(e.target.value);
-                }}>
-                <option value="" disabled>
-                  Select Collection
-                </option>
-                {collectionIds.map((id) => (
-                  <option key={`collection-id-${id}`} value={id}>
-                    {id}
-                  </option>
-                ))}
-              </Form.Select>
-            </Form.Group>
+            <NextGenCollectionIdFormGroup
+              collection_id={collectionID}
+              collection_ids={collectionIds}
+              onChange={(id) => {
+                clear();
+                setCollectionID(id);
+              }}
+            />
             <Form.Group className="mb-3">
               <span className="d-flex align-items-center gap-3">
                 <Form.Check
@@ -325,7 +306,12 @@ export default function NextGenAdminSetPhases(props: Readonly<Props>) {
                       onClick={() => uploadFile()}>
                       Upload
                     </Button>
-                    {uploading && <span>Uploading...</span>}
+                    {uploading && (
+                      <span>
+                        Uploading... Sign Message <code>{uuid}</code> in your
+                        wallet...
+                      </span>
+                    )}
                     {uploadSuccess && (
                       <span className="text-success">Uploaded</span>
                     )}

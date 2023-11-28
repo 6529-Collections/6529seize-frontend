@@ -133,14 +133,6 @@
   }
 }
 
-.tokenImageOverlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-}
-
 .loader {
   width: 20px;
   height: 20px;
@@ -250,7 +242,7 @@
   align-items: center;
   justify-content: center;
   width: 100%;
-  min-height: 300px;
+  min-height: 250px;
   max-height: 450px;
   background-clip: content-box;
 
@@ -378,7 +370,8 @@
 }
 
 .countdownContainer {
-  padding: 20px;
+  padding: 10px 20px;
+  width: 100%;
   color: $dark-grey;
   background-color: white;
   display: flex;

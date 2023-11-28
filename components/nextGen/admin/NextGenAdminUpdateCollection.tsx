@@ -1,5 +1,4 @@
 import { Container, Row, Col, Button, Form } from "react-bootstrap";
-import styles from "./NextGenAdmin.module.scss";
 import { useAccount } from "wagmi";
 import { useEffect, useState } from "react";
 import { FunctionSelectors } from "../nextgen_contracts";
@@ -14,9 +13,12 @@ import {
   useFunctionAdmin,
   useGlobalAdmin,
 } from "../nextgen_helpers";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Info, LibraryScript } from "../nextgen_entities";
 import { printAdminErrors } from "./NextGenAdmin";
+import {
+  NextGenCollectionIdFormGroup,
+  NextGenAdminHeadingRow,
+} from "./NextGenAdminShared";
 
 export enum UpdateType {
   UPDATE_INFO,
@@ -118,51 +120,10 @@ export default function NextGenAdminUpdateCollection(props: Readonly<Props>) {
     setLoading(false);
   });
 
-  function submit() {
+  function submit(): void {
     setLoading(true);
     contractWrite.reset();
-    const errors = [];
-    if (!collectionID) {
-      errors.push("Collection id is required");
-    }
-    if (props.type === UpdateType.UPDATE_INFO) {
-      if (!collectionName) {
-        errors.push("Collection name is required");
-      }
-      if (!artist) {
-        errors.push("Artist is required");
-      }
-      if (!description) {
-        errors.push("Description is required");
-      }
-      if (!website) {
-        errors.push("Website is required");
-      }
-      if (!license) {
-        errors.push("License is required");
-      }
-      if (!library) {
-        errors.push("Library is required");
-      }
-      if (scripts.length === 0) {
-        errors.push("At least one script is required");
-      }
-    }
-
-    if (props.type === UpdateType.UPDATE_BASE_URI) {
-      if (!baseURI) {
-        errors.push("Base URI is required");
-      }
-    }
-
-    if (props.type === UpdateType.UPDATE_SCRIPT) {
-      if (scripts.length !== 1) {
-        errors.push("You need exactly one script");
-      }
-      if (scriptIndex === undefined) {
-        errors.push("Script index is required");
-      }
-    }
+    const errors: string[] = validateInputs();
 
     if (errors.length > 0) {
       setErrors(errors);
@@ -170,6 +131,66 @@ export default function NextGenAdminUpdateCollection(props: Readonly<Props>) {
     } else {
       setErrors([]);
       setSubmitting(true);
+    }
+  }
+
+  function validateInputs(): string[] {
+    const errors: string[] = [];
+    validateCommonInputs(errors);
+
+    switch (props.type) {
+      case UpdateType.UPDATE_INFO:
+        validateUpdateInfoInputs(errors);
+        validateUpdateBaseURI(errors);
+        break;
+      case UpdateType.UPDATE_BASE_URI:
+        validateUpdateBaseURI(errors);
+        break;
+      case UpdateType.UPDATE_SCRIPT:
+        validateUpdateScript(errors);
+        break;
+    }
+
+    return errors;
+  }
+
+  function validateCommonInputs(errors: string[]): void {
+    if (!collectionID) {
+      errors.push("Collection id is required");
+    }
+  }
+
+  function validateUpdateInfoInputs(errors: string[]): void {
+    const requiredFields: { value: any; message: string }[] = [
+      { value: collectionName, message: "Collection name is required" },
+      { value: artist, message: "Artist is required" },
+      { value: description, message: "Description is required" },
+      { value: website, message: "Website is required" },
+      { value: license, message: "License is required" },
+      { value: library, message: "Library is required" },
+    ];
+
+    if (scripts.length === 0) {
+      errors.push("At least one script is required");
+    }
+
+    requiredFields.forEach((field) => {
+      if (!field.value) errors.push(field.message);
+    });
+  }
+
+  function validateUpdateBaseURI(errors: string[]): void {
+    if (!baseURI) {
+      errors.push("Base URI is required");
+    }
+  }
+
+  function validateUpdateScript(errors: string[]): void {
+    if (scripts.length !== 1) {
+      errors.push("You need exactly one script");
+    }
+    if (scriptIndex === undefined) {
+      errors.push("Script index is required");
     }
   }
 
@@ -190,47 +211,29 @@ export default function NextGenAdminUpdateCollection(props: Readonly<Props>) {
     }
   }, [contractWrite.isSuccess || contractWrite.isError]);
 
+  function getTitle() {
+    switch (props.type) {
+      case UpdateType.UPDATE_INFO:
+        return "UPDATE INFO";
+      case UpdateType.UPDATE_BASE_URI:
+        return "UPDATE BASE URI";
+      case UpdateType.UPDATE_SCRIPT:
+        return "UPDATE SCRIPT";
+    }
+  }
   return (
     <Container className="no-padding">
-      <Row className="pt-3">
-        <Col className="d-flex align-items-center justify-content-between">
-          <h3>
-            <b>
-              {props.type === UpdateType.UPDATE_INFO &&
-                "UPDATE COLLECTION INFO"}
-              {props.type === UpdateType.UPDATE_BASE_URI && "UPDATE BASE URI"}
-              {props.type === UpdateType.UPDATE_SCRIPT && "UPDATE SCRIPT"}
-            </b>
-          </h3>
-          <FontAwesomeIcon
-            className={styles.closeIcon}
-            icon="times-circle"
-            onClick={() => {
-              props.close();
-            }}></FontAwesomeIcon>
-        </Col>
-      </Row>
+      <NextGenAdminHeadingRow close={props.close} title={getTitle()} />
       <Row className="pt-3">
         <Col>
           <Form>
-            <Form.Group className="mb-3">
-              <Form.Label>Collection ID</Form.Label>
-              <Form.Select
-                className={`${styles.formInput}`}
-                value={collectionID}
-                onChange={(e) => {
-                  setCollectionID(e.target.value);
-                }}>
-                <option value="" disabled>
-                  Select Collection
-                </option>
-                {collectionIds.map((id) => (
-                  <option key={`collection-id-${id}`} value={id}>
-                    {id}
-                  </option>
-                ))}
-              </Form.Select>
-            </Form.Group>
+            <NextGenCollectionIdFormGroup
+              collection_id={collectionID}
+              collection_ids={collectionIds}
+              onChange={(id) => {
+                setCollectionID(id);
+              }}
+            />
             {props.type === UpdateType.UPDATE_INFO && (
               <>
                 <Form.Group className="mb-3">

@@ -1,14 +1,13 @@
 import styles from "./NextGen.module.scss";
 import { Container, Row, Col } from "react-bootstrap";
-import { useContractRead } from "wagmi";
-import { useState } from "react";
 import { AdditionalData, Info, PhaseTimes } from "../nextgen_entities";
-import { NEXTGEN_CHAIN_ID, NEXTGEN_CORE } from "../nextgen_contracts";
 import NextGenTokenPreview from "./NextGenTokenPreview";
 import {
   retrieveCollectionAdditionalData,
   retrieveCollectionInfo,
   retrieveCollectionPhases,
+  retrieveTokensIndex,
+  useSharedState,
 } from "../nextgen_helpers";
 
 interface Props {
@@ -17,23 +16,17 @@ interface Props {
 }
 
 export default function NextGenCollectionPreview(props: Readonly<Props>) {
-  const [sampleToken, setSampleToken] = useState<number>(0);
+  const {
+    info,
+    setInfo,
+    additionalData,
+    setAdditionalData,
+    sampleToken,
+    setSampleToken,
+  } = useSharedState();
 
-  const [info, setInfo] = useState<Info>();
-  const [additionalData, setAdditionalData] = useState<AdditionalData>();
-
-  useContractRead({
-    address: NEXTGEN_CORE.contract as `0x${string}`,
-    abi: NEXTGEN_CORE.abi,
-    chainId: NEXTGEN_CHAIN_ID,
-    functionName: "viewTokensIndexMin",
-    watch: true,
-    args: [props.collection],
-    onSettled(data: any, error: any) {
-      if (data) {
-        setSampleToken(parseInt(data));
-      }
-    },
+  retrieveTokensIndex("min", props.collection, (data: number) => {
+    setSampleToken(data);
   });
 
   retrieveCollectionInfo(props.collection, (data: Info) => {
@@ -58,7 +51,7 @@ export default function NextGenCollectionPreview(props: Readonly<Props>) {
       className="decoration-none scale-hover">
       <Container className={styles.collectionPreview}>
         <Row>
-          <Col>
+          <Col className="pt-2 pb-2">
             <NextGenTokenPreview
               token_id={sampleToken}
               collection={props.collection}

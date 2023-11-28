@@ -1,5 +1,4 @@
 import { Container, Row, Col, Button, Form } from "react-bootstrap";
-import styles from "./NextGenAdmin.module.scss";
 import { useAccount } from "wagmi";
 import { useEffect, useState } from "react";
 import { FunctionSelectors } from "../nextgen_contracts";
@@ -12,8 +11,11 @@ import {
   getMinterUseContractWrite,
 } from "../nextgen_helpers";
 import NextGenContractWriteStatus from "../NextGenContractWriteStatus";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { printAdminErrors } from "./NextGenAdmin";
+import {
+  NextGenCollectionIdFormGroup,
+  NextGenAdminHeadingRow,
+} from "./NextGenAdminShared";
 
 interface Props {
   close: () => void;
@@ -101,40 +103,17 @@ export default function NextGenAdminPayArtist(props: Readonly<Props>) {
 
   return (
     <Container className="no-padding">
-      <Row className="pt-3">
-        <Col className="d-flex align-items-center justify-content-between">
-          <h3>
-            <b>PAY ARTIST</b>
-          </h3>
-          <FontAwesomeIcon
-            className={styles.closeIcon}
-            icon="times-circle"
-            onClick={() => {
-              props.close();
-            }}></FontAwesomeIcon>
-        </Col>
-      </Row>
+      <NextGenAdminHeadingRow close={props.close} title="Pay Artist" />
       <Row className="pt-3">
         <Col>
           <Form>
-            <Form.Group className="mb-3">
-              <Form.Label>Collection ID</Form.Label>
-              <Form.Select
-                className={`${styles.formInput}`}
-                value={collectionID}
-                onChange={(e) => {
-                  setCollectionID(e.target.value);
-                }}>
-                <option value="" disabled>
-                  Select Collection
-                </option>
-                {collectionIds.map((id) => (
-                  <option key={`collection-id-${id}`} value={id}>
-                    {id}
-                  </option>
-                ))}
-              </Form.Select>
-            </Form.Group>
+            <NextGenCollectionIdFormGroup
+              collection_id={collectionID}
+              collection_ids={collectionIds}
+              onChange={(id) => {
+                setCollectionID(id);
+              }}
+            />
             <Form.Group className="mb-3">
               <Form.Label>Address 1</Form.Label>
               <Form.Control

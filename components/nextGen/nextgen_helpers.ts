@@ -12,9 +12,14 @@ import {
   LibraryScript,
   MintingDetails,
   PhaseTimes,
+  ProofResponse,
+  ProofResponseBurn,
   Status,
+  TokensPerAddress,
 } from "./nextgen_entities";
 import { NEVER_DATE } from "../../constants";
+import { useState } from "react";
+import { Crumb } from "../breadcrumb/Breadcrumb";
 
 export function useGlobalAdmin(address: string) {
   return useContractRead({
@@ -356,6 +361,26 @@ export function extractPhases(d: any[]) {
   return phases;
 }
 
+export function retrieveTokensIndex(
+  type: "min" | "max",
+  collection: number | string,
+  callback: (data: any) => void
+) {
+  return useContractRead({
+    address: NEXTGEN_CORE.contract as `0x${string}`,
+    abi: NEXTGEN_CORE.abi,
+    chainId: NEXTGEN_CHAIN_ID,
+    functionName: type === "min" ? "viewTokensIndexMin" : "viewTokensIndexMax",
+    args: [collection],
+    onSettled(data: any, error: any) {
+      if (data) {
+        const d = parseInt(data);
+        callback(d);
+      }
+    },
+  });
+}
+
 export function getCoreUseContractWrite(
   functionName: string,
   onError: () => void
@@ -391,4 +416,108 @@ function getUseContractWrite(
       onError();
     },
   });
+}
+
+export function useSharedState() {
+  const [breadcrumbs, setBreadcrumbs] = useState<Crumb[]>([]);
+  const [info, setInfo] = useState<Info>();
+  const [infoSettled, setInfoSettled] = useState<boolean>(false);
+  const [tokenStartIndex, setTokenStartIndex] = useState<number>(0);
+  const [tokenEndIndex, setTokenEndIndex] = useState<number>(0);
+  const [phaseTimes, setPhaseTimes] = useState<PhaseTimes>();
+  const [additionalData, setAdditionalData] = useState<AdditionalData>();
+  const [tokenIds, setTokenIds] = useState<number[]>([]);
+  const [burnAmount, setBurnAmount] = useState<number>(0);
+  const [mintPrice, setMintPrice] = useState<number>(0);
+  const [artistSignature, setArtistSignature] = useState<string>("");
+  const [mintingDetails, setMintingDetails] = useState<MintingDetails>();
+  const [libraryScript, setLibraryScript] = useState<LibraryScript>();
+  const [sampleToken, setSampleToken] = useState<number>(0);
+
+  return {
+    breadcrumbs,
+    setBreadcrumbs,
+    info,
+    setInfo,
+    infoSettled,
+    setInfoSettled,
+    tokenStartIndex,
+    setTokenStartIndex,
+    tokenEndIndex,
+    setTokenEndIndex,
+    phaseTimes,
+    setPhaseTimes,
+    additionalData,
+    setAdditionalData,
+    tokenIds,
+    setTokenIds,
+    burnAmount,
+    setBurnAmount,
+    mintPrice,
+    setMintPrice,
+    artistSignature,
+    setArtistSignature,
+    mintingDetails,
+    setMintingDetails,
+    libraryScript,
+    setLibraryScript,
+    sampleToken,
+    setSampleToken,
+  };
+}
+
+export function useMintSharedState() {
+  const [available, setAvailable] = useState<number>(0);
+  const [delegators, setDelegators] = useState<string[]>([]);
+  const [addressMintCounts, setAddressMintCounts] = useState<TokensPerAddress>({
+    airdrop: 0,
+    allowlist: 0,
+    public: 0,
+    total: 0,
+  });
+  const [proofResponse, setProofResponse] = useState<ProofResponse>();
+  const [burnProofResponse, setBurnProofResponse] =
+    useState<ProofResponseBurn>();
+  const [mintForAddress, setMintForAddress] = useState<string>();
+  const [tokenId, setTokenId] = useState<string>("");
+  const [mintingForDelegator, setMintingForDelegator] = useState(false);
+  const salt = 0;
+  const [mintCount, setMintCount] = useState<number>(0);
+  const [mintToInput, setMintToInput] = useState<string>("");
+  const [mintToAddress, setMintToAddress] = useState<string>("");
+  const [isMinting, setIsMinting] = useState(false);
+  const [fetchingProofs, setFetchingProofs] = useState(false);
+  const [errors, setErrors] = useState<string[]>([]);
+
+  return {
+    available,
+    setAvailable,
+    delegators,
+    setDelegators,
+    addressMintCounts,
+    setAddressMintCounts,
+    proofResponse,
+    setProofResponse,
+    burnProofResponse,
+    setBurnProofResponse,
+    mintForAddress,
+    setMintForAddress,
+    tokenId,
+    setTokenId,
+    mintingForDelegator,
+    setMintingForDelegator,
+    salt,
+    mintCount,
+    setMintCount,
+    mintToInput,
+    setMintToInput,
+    mintToAddress,
+    setMintToAddress,
+    isMinting,
+    setIsMinting,
+    fetchingProofs,
+    setFetchingProofs,
+    errors,
+    setErrors,
+  };
 }

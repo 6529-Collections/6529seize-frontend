@@ -14,6 +14,7 @@ import {
   MintingDetails,
   CollectionWithMerkle,
   AllowlistType,
+  Info,
 } from "../../../nextgen_entities";
 import { fromGWEI } from "../../../../../helpers/Helpers";
 import {
@@ -22,15 +23,21 @@ import {
 } from "../../../../../pages/delegation/[...section]";
 import { NEXTGEN_CHAIN_ID, NEXTGEN_CORE } from "../../../nextgen_contracts";
 import { fetchUrl } from "../../../../../services/6529api";
-import { retrieveCollectionCosts } from "../../../nextgen_helpers";
+import {
+  retrieveCollectionCosts,
+  useMintSharedState,
+  useSharedState,
+} from "../../../nextgen_helpers";
 import NextGenMintWidget from "./NextGenMintWidget";
 import NextGenMintBurnWidget from "./NextGenMintBurnWidget";
 import NextGenTokenPreview from "../../NextGenTokenPreview";
 import Image from "next/image";
+import { NextGenCountdown, NextGenPhases } from "../NextGenCollectionHeader";
 
 interface Props {
   collection: number;
   collection_preview?: number;
+  info: Info;
   phase_times: PhaseTimes;
   mint_price: number;
   additional_data: AdditionalData;
@@ -40,33 +47,43 @@ interface Props {
 export default function NextGenMint(props: Readonly<Props>) {
   const account = useAccount();
 
-  const [mintForAddress, setMintForAddress] = useState<string>("");
-  const [mintingForDelegator, setMintingForDelegator] = useState(false);
-
-  const [addressMintCounts, setAddressMintCounts] = useState<TokensPerAddress>({
-    airdrop: 0,
-    allowlist: 0,
-    public: 0,
-    total: 0,
-  });
-
   const [collection, setCollection] = useState<CollectionWithMerkle>();
   const [collectionLoaded, setCollectionLoaded] = useState<boolean>(false);
 
-  const [availableSupply, setAvailableSupply] = useState<number>(0);
-
-  const [delegators, setDelegators] = useState<string[]>([]);
-  const [mintingDetails, setMintingDetails] = useState<MintingDetails>();
+  const { mintingDetails, setMintingDetails } = useSharedState();
+  const {
+    available,
+    setAvailable,
+    delegators,
+    setDelegators,
+    mintingForDelegator,
+    setMintingForDelegator,
+    mintForAddress,
+    setMintForAddress,
+    addressMintCounts,
+    setAddressMintCounts,
+  } = useMintSharedState();
 
   useEffect(() => {
     if (props.additional_data && props.burn_amount > -1) {
-      setAvailableSupply(
+      setAvailable(
         props.additional_data.total_supply -
           props.burn_amount -
           props.additional_data.circulation_supply
       );
     }
   }, [props.additional_data, props.burn_amount]);
+
+  function getDelegationAddress() {
+    if (collection && mintingDetails) {
+      if (collection.al_type === AllowlistType.ALLOWLIST) {
+        return mintingDetails.del_address;
+      } else if (collection.al_type === AllowlistType.EXTERNAL_BURN) {
+        return collection.burn_collection;
+      }
+    }
+    return "";
+  }
 
   useContractReads({
     contracts: [
@@ -99,7 +116,7 @@ export default function NextGenMint(props: Readonly<Props>) {
         functionName: "retrieveDelegators",
         args: [
           account.address ? account.address : "",
-          mintingDetails ? mintingDetails.del_address : "",
+          getDelegationAddress(),
           ALL_USE_CASE.use_case,
         ],
       },
@@ -110,13 +127,16 @@ export default function NextGenMint(props: Readonly<Props>) {
         functionName: "retrieveDelegators",
         args: [
           account.address ? account.address : "",
-          mintingDetails ? mintingDetails.del_address : "",
+          getDelegationAddress(),
           MINTING_USE_CASE.use_case,
         ],
       },
     ],
     watch: true,
-    enabled: account.isConnected && mintingDetails != undefined,
+    enabled:
+      account.isConnected &&
+      mintingDetails !== undefined &&
+      collection !== undefined,
     onSettled(data: any, error: any) {
       if (data) {
         const del: string[] = [];
@@ -249,7 +269,7 @@ export default function NextGenMint(props: Readonly<Props>) {
             collection={props.collection}
             phase_times={props.phase_times}
             additional_data={props.additional_data}
-            available_supply={availableSupply}
+            available_supply={available}
             mint_price={props.mint_price}
             mint_counts={addressMintCounts}
             delegators={delegators}
@@ -263,7 +283,7 @@ export default function NextGenMint(props: Readonly<Props>) {
             collection={collection}
             phase_times={props.phase_times}
             additional_data={props.additional_data}
-            available_supply={availableSupply}
+            available_supply={available}
             mint_price={props.mint_price}
             mint_counts={addressMintCounts}
             delegators={delegators}
@@ -276,30 +296,61 @@ export default function NextGenMint(props: Readonly<Props>) {
   }
 
   return (
-    <Container className="no-padding pb-4">
-      <Row>
-        <Col sm={12} md={5}>
-          <Container className="no-padding">
-            <Row className="pb-4">
-              <Col className={styles.tokenFrameContainerHalf}>
-                {props.collection_preview && (
-                  <NextGenTokenPreview
-                    token_id={props.collection_preview}
-                    collection={props.collection}
-                    hide_info={true}
-                    hide_link={true}
-                  />
-                )}
-              </Col>
-            </Row>
-          </Container>
+    <Container className="no-padding">
+      <Row className="pt-2">
+        <Col
+          xs={12}
+          className="d-flex align-items-center justify-content-between">
+          <a
+            href={`/nextgen/collection/${props.collection}`}
+            className="decoration-hover-underline">
+            <h1 className="mb-0 font-color">
+              #{props.collection} - <b>{props.info.name.toUpperCase()}</b>
+            </h1>
+          </a>
+          <NextGenPhases
+            phase_times={props.phase_times}
+            available={available}
+          />
         </Col>
-        <Col sm={12} md={7}>
-          <Container className="pt-3 pb-3">
-            <Row>
+        <Col
+          xs={12}
+          className="d-flex align-items-center justify-content-between">
+          <span className="font-larger">
+            by <b>{props.info.artist}</b>
+          </span>
+          <span className="font-larger d-inline-flex align-items-center">
+            <b>
+              {props.additional_data.circulation_supply} /{" "}
+              {props.additional_data.total_supply} minted
+              {available > 0 && ` | ${available} remaining`}
+            </b>
+          </span>
+        </Col>
+        <Col xs={12} className="pt-3">
+          <NextGenCountdown
+            collection={props.collection}
+            phase_times={props.phase_times}
+            align="horizontal"
+          />
+        </Col>
+      </Row>
+      <Row className="pt-4 pb-4">
+        <Col className="d-flex align-items-start justify-content-start gap-3">
+          {props.collection_preview && (
+            <NextGenTokenPreview
+              token_id={props.collection_preview}
+              collection={props.collection}
+              hide_info={true}
+              hide_link={true}
+              hide_background={true}
+            />
+          )}
+          <Container className="no-padding">
+            <Row className="pt-2">
               <Col className="d-flex gap-2">
                 <span
-                  className={`mb-0 d-flex align-items-center gap-2 ${styles.nextgenTag}`}>
+                  className={`mb-0 d-flex align-items-center gap-2 no-wrap ${styles.nextgenTag}`}>
                   <span>Mint Cost</span>
                   <span>|</span>
                   <span className="font-bolder">
@@ -308,7 +359,7 @@ export default function NextGenMint(props: Readonly<Props>) {
                   </span>
                 </span>
                 <span
-                  className={`mb-0 d-flex align-items-center gap-2 ${styles.nextgenTag}`}>
+                  className={`mb-0 d-flex align-items-center gap-2 no-wrap ${styles.nextgenTag}`}>
                   <span>Sales Model</span>
                   <span>|</span>
                   <span className="font-bolder">{getSalesModel()}</span>

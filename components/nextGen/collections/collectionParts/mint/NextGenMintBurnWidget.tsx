@@ -17,7 +17,6 @@ import {
   CollectionWithMerkle,
   PhaseTimes,
   ProofResponse,
-  ProofResponseBurn,
   Status,
   TokensPerAddress,
 } from "../../../nextgen_entities";
@@ -28,6 +27,7 @@ import { useWeb3Modal } from "@web3modal/react";
 import { NextGenMintDelegatorOption } from "./NextGenMintDelegatorOption";
 import { getNftsForContractAndOwner } from "../../../../../services/alchemy-api";
 import { Spinner } from "../../NextGen";
+import { useMintSharedState } from "../../../nextgen_helpers";
 
 interface Props {
   collection: CollectionWithMerkle;
@@ -46,18 +46,24 @@ export default function NextGenMintBurnWidget(props: Readonly<Props>) {
   const chainId = useChainId();
   const web3Modal = useWeb3Modal();
 
-  const [available, setAvailable] = useState<number>(0);
+  const {
+    burnProofResponse,
+    setBurnProofResponse,
+    mintForAddress,
+    setMintForAddress,
+    tokenId,
+    setTokenId,
+    mintingForDelegator,
+    setMintingForDelegator,
+    salt,
+    isMinting,
+    setIsMinting,
+    fetchingProofs,
+    setFetchingProofs,
+    errors,
+    setErrors,
+  } = useMintSharedState();
 
-  useEffect(() => {
-    const a =
-      props.additional_data.total_supply -
-      props.additional_data.circulation_supply;
-    setAvailable(a);
-  }, [props.additional_data]);
-
-  const [proofResponse, setProofResponse] = useState<ProofResponseBurn>();
-
-  const [mintForAddress, setMintForAddress] = useState<string>();
   useEffect(() => {
     if (props.delegators.length > 0) {
       setMintForAddress(props.delegators[0]);
@@ -71,15 +77,6 @@ export default function NextGenMintBurnWidget(props: Readonly<Props>) {
   const [tokensOwnedForBurnAddress, setTokensOwnedForBurnAddress] = useState<
     any[]
   >([]);
-  const [tokenId, setTokenId] = useState<string>("");
-
-  const [mintingForDelegator, setMintingForDelegator] = useState(false);
-  const salt = 0;
-  const [isMinting, setIsMinting] = useState(false);
-
-  const [fetchingProofs, setFetchingProofs] = useState(false);
-
-  const [errors, setErrors] = useState<string[]>([]);
 
   function filterTokensOwnedForBurnAddress(r: any[]) {
     if (props.collection.max_token_index > 0) {
@@ -132,11 +129,12 @@ export default function NextGenMintBurnWidget(props: Readonly<Props>) {
   }, [mintForAddress]);
 
   useEffect(() => {
+    mintWrite.reset();
     if (tokenId) {
       setFetchingProofs(true);
       const url = `${process.env.API_ENDPOINT}/api/nextgen/burn_proofs/${props.phase_times.merkle_root}/${tokenId}`;
       fetchUrl(url).then((response: ProofResponse) => {
-        setProofResponse(response);
+        setBurnProofResponse(response);
         setFetchingProofs(false);
       });
     }
@@ -159,12 +157,7 @@ export default function NextGenMintBurnWidget(props: Readonly<Props>) {
 
   function validate() {
     let e: string[] = [];
-    if (
-      props.phase_times &&
-      proofResponse &&
-      proofResponse.proof.length > 0 &&
-      props.phase_times.al_status == Status.LIVE
-    ) {
+    if (!burnProofResponse?.proof) {
       e.push("Not in Allowlist");
     }
     return e;
@@ -198,12 +191,12 @@ export default function NextGenMintBurnWidget(props: Readonly<Props>) {
       !props.phase_times ||
       !props.additional_data ||
       !props.mint_counts ||
-      (props.phase_times.al_status == Status.LIVE && !proofResponse) ||
+      (props.phase_times.al_status == Status.LIVE && !burnProofResponse) ||
       (props.phase_times.al_status != Status.LIVE &&
         props.phase_times.public_status != Status.LIVE) ||
       (props.phase_times.al_status == Status.LIVE &&
-        proofResponse &&
-        proofResponse.proof.length === 0) ||
+        burnProofResponse &&
+        burnProofResponse.proof.length === 0) ||
       (props.phase_times.public_status == Status.LIVE &&
         0 >= props.additional_data.max_purchases - props.mint_counts.public) ||
       0 >= props.available_supply ||
@@ -219,11 +212,11 @@ export default function NextGenMintBurnWidget(props: Readonly<Props>) {
           props.collection.burn_collection_id,
           tokenId,
           props.collection.collection_id,
-          proofResponse ? proofResponse.info : "",
+          burnProofResponse ? burnProofResponse.info : "",
           props.phase_times &&
-          proofResponse &&
+          burnProofResponse &&
           props.phase_times.al_status == Status.LIVE
-            ? proofResponse.proof
+            ? burnProofResponse.proof
             : [],
           salt,
         ],
@@ -232,7 +225,7 @@ export default function NextGenMintBurnWidget(props: Readonly<Props>) {
   }, [isMinting]);
 
   useEffect(() => {
-    setProofResponse(undefined);
+    setBurnProofResponse(undefined);
   }, [account.address]);
 
   function getButtonText() {
@@ -249,12 +242,15 @@ export default function NextGenMintBurnWidget(props: Readonly<Props>) {
       return "Burn Not Active";
     }
 
-    let text = "Mint";
+    let text = "Burn to Mint";
+    if (fetchingProofs) {
+      text += " - fetching proofs";
+    }
     if (
       !fetchingProofs &&
       tokenId &&
-      proofResponse &&
-      proofResponse.proof.length === 0
+      burnProofResponse &&
+      burnProofResponse.proof.length === 0
     ) {
       text += " - no proofs found";
     }
@@ -265,26 +261,19 @@ export default function NextGenMintBurnWidget(props: Readonly<Props>) {
     <Container className="no-padding">
       <Row>
         <Col>
-          <span className="d-inline-flex align-items-center pb-2">
-            <b>
-              {props.additional_data.circulation_supply} /{" "}
-              {props.additional_data.total_supply} minted
-              {available > 0 && ` | ${available} remaining`}
-            </b>
-          </span>
           <Form
             onChange={() => {
               setErrors([]);
               setIsMinting(false);
             }}>
             {props.collection.phase && (
-              <Row className="pt-2">
+              <Row className="pt-1">
                 <Col>
                   <h4 className="mb-0">{props.collection.phase}</h4>
                 </Col>
               </Row>
             )}
-            <Form.Group as={Row} className="pt-2 pb-2">
+            <Form.Group as={Row} className="pt-1 pb-1">
               <Form.Label column sm={12} className="d-flex align-items-center">
                 Burn to Mint For
               </Form.Label>
@@ -361,8 +350,7 @@ export default function NextGenMintBurnWidget(props: Readonly<Props>) {
                     value={mintForAddress}
                     onChange={(e: any) => {
                       setMintForAddress(e.currentTarget.value);
-                    }}
-                    defaultValue={""}>
+                    }}>
                     <option value="" disabled>
                       Select Delegator
                     </option>
@@ -376,16 +364,37 @@ export default function NextGenMintBurnWidget(props: Readonly<Props>) {
                 </Col>
               </Form.Group>
             )}
-            <Form.Group as={Row} className="pt-2 pb-2">
+            <Form.Group as={Row} className="pt-1 pb-1">
+              <Form.Label column sm={12} className="d-flex align-items-center">
+                Mint To
+                <Tippy
+                  content={`In burns to mint, the token is minted to the address that burns the token.`}
+                  placement={"top"}
+                  theme={"light"}>
+                  <FontAwesomeIcon
+                    className={styles.infoIcon}
+                    icon="info-circle"></FontAwesomeIcon>
+                </Tippy>
+              </Form.Label>
+              <Col sm={12}>
+                {mintingForDelegator ? mintForAddress : account.address}
+              </Col>
+            </Form.Group>
+            <Form.Group as={Row} className="pt-1 pb-1">
               <Form.Label column sm={12} className="d-flex flex-column">
                 <span>Select token from Burn collection</span>
                 <span>
                   {props.collection.burn_collection}
-                  {props.collection.burn_collection_id
-                    ? ` | Collection ${props.collection.burn_collection_id} `
-                    : null}
-                  {props.collection.max_token_index > 0 &&
-                    ` | #${props.collection.min_token_index} - #${props.collection.max_token_index}`}
+                  {!!props.collection.burn_collection_id && (
+                    <> | Collection {props.collection.burn_collection_id}</>
+                  )}
+                  {props.collection.max_token_index > 0 && (
+                    <>
+                      {" "}
+                      | #{props.collection.min_token_index} - #
+                      {props.collection.max_token_index}
+                    </>
+                  )}
                 </span>
               </Form.Label>
               <Col sm={12}>
@@ -393,8 +402,7 @@ export default function NextGenMintBurnWidget(props: Readonly<Props>) {
                   disabled={!tokensOwnedForBurnAddressLoaded}
                   className={styles.mintSelect}
                   value={tokenId}
-                  onChange={(e: any) => setTokenId(e.currentTarget.value)}
-                  defaultValue={""}>
+                  onChange={(e: any) => setTokenId(e.currentTarget.value)}>
                   <option value="" disabled>
                     Select Token to burn -{" "}
                     {tokensOwnedForBurnAddressLoaded
@@ -424,7 +432,7 @@ export default function NextGenMintBurnWidget(props: Readonly<Props>) {
               </Col>
             </Form.Group>
             {errors.length > 0 && (
-              <Form.Group as={Row} className={`pt-2 pb-2`}>
+              <Form.Group as={Row} className={`pt-1 pb-1`}>
                 <Form.Label
                   column
                   sm={12}
@@ -446,7 +454,7 @@ export default function NextGenMintBurnWidget(props: Readonly<Props>) {
               error={mintWrite.error}
             />
             {props.phase_times &&
-              proofResponse &&
+              burnProofResponse &&
               props.mint_counts &&
               0 >=
                 props.additional_data.max_purchases -
