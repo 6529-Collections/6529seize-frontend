@@ -16,6 +16,7 @@ import {
   retrieveCollectionInfo,
   retrieveCollectionPhases,
   retrieveTokensIndex,
+  useSharedState,
 } from "../../nextgen_helpers";
 import NextGenCollectionDetails from "./NextGenCollectionDetails";
 import NextGenCollectionSlideshow from "./NextGenCollectionSlideshow";
@@ -31,22 +32,33 @@ export default function NextGenCollection(props: Readonly<Props>) {
     { display: "Home", href: "/" },
     { display: "NextGen", href: "/nextgen" },
   ];
-  const [breadcrumbs, setBreadcrumbs] = useState<Crumb[]>(crumbs);
 
-  const [tokenStartIndex, setTokenStartIndex] = useState<number>(0);
-  const [tokenEndIndex, setTokenEndIndex] = useState<number>(0);
+  const {
+    breadcrumbs,
+    setBreadcrumbs,
+    info,
+    setInfo,
+    infoSettled,
+    setInfoSettled,
+    tokenStartIndex,
+    setTokenStartIndex,
+    tokenEndIndex,
+    setTokenEndIndex,
+    phaseTimes,
+    setPhaseTimes,
+    additionalData,
+    setAdditionalData,
+    tokenIds,
+    setTokenIds,
+    burnAmount,
+    setBurnAmount,
+    mintPrice,
+    setMintPrice,
+    artistSignature,
+    setArtistSignature,
+  } = useSharedState();
 
-  const [info, setInfo] = useState<Info>();
-  const [infoSettled, setInfoSettled] = useState<boolean>(false);
-  const [phaseTimes, setPhaseTimes] = useState<PhaseTimes>();
-  const [additionalData, setAdditionalData] = useState<AdditionalData>();
-
-  const [tokenIds, setTokenIds] = useState<number[]>([]);
-
-  const [burnAmount, setBurnAmount] = useState<number>(0);
-  const [mintPrice, setMintPrice] = useState<number>(0);
-
-  const [artistSignature, setArtistSignature] = useState<string>("");
+  setBreadcrumbs(crumbs);
 
   function getTokenUriReadParams() {
     const params: any[] = [];

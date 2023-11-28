@@ -6,6 +6,7 @@ import {
   retrieveCollectionAdditionalData,
   retrieveCollectionInfo,
   retrieveTokensIndex,
+  useSharedState,
 } from "../../../nextgen_helpers";
 import NextGenCollectionHeader from "../NextGenCollectionHeader";
 import Breadcrumb, { Crumb } from "../../../../breadcrumb/Breadcrumb";
@@ -20,17 +21,25 @@ export default function NextGenCollectionArtPage(props: Readonly<Props>) {
     { display: "Home", href: "/" },
     { display: "NextGen", href: "/nextgen" },
   ];
-  const [breadcrumbs, setBreadcrumbs] = useState<Crumb[]>(crumbs);
 
-  const [info, setInfo] = useState<Info>();
-  const [infoSettled, setInfoSettled] = useState<boolean>(false);
+  const {
+    breadcrumbs,
+    setBreadcrumbs,
+    info,
+    setInfo,
+    infoSettled,
+    setInfoSettled,
+    tokenStartIndex,
+    setTokenStartIndex,
+    phaseTimes,
+    setPhaseTimes,
+    additionalData,
+    setAdditionalData,
+    tokenIds,
+    setTokenIds,
+  } = useSharedState();
 
-  const [tokenStartIndex, setTokenStartIndex] = useState<number>(0);
-
-  const [phaseTimes, setPhaseTimes] = useState<PhaseTimes>();
-  const [additionalData, setAdditionalData] = useState<AdditionalData>();
-
-  const [tokenIds, setTokenIds] = useState<number[]>([]);
+  setBreadcrumbs(crumbs);
 
   retrieveCollectionInfo(props.collection, (data: Info) => {
     setInfo(data);

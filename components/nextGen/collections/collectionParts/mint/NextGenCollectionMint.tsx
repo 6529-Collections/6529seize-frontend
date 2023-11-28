@@ -7,6 +7,7 @@ import {
   retrieveCollectionAdditionalData,
   retrieveCollectionInfo,
   retrieveTokensIndex,
+  useSharedState,
 } from "../../../nextgen_helpers";
 import { useContractRead } from "wagmi";
 import {
@@ -25,18 +26,27 @@ export default function NextGenCollectionMint(props: Readonly<Props>) {
     { display: "Home", href: "/" },
     { display: "NextGen", href: "/nextgen" },
   ];
-  const [breadcrumbs, setBreadcrumbs] = useState<Crumb[]>(crumbs);
 
-  const [info, setInfo] = useState<Info>();
-  const [infoSettled, setInfoSettled] = useState<boolean>(false);
+  const {
+    breadcrumbs,
+    setBreadcrumbs,
+    info,
+    setInfo,
+    infoSettled,
+    setInfoSettled,
+    tokenStartIndex,
+    setTokenStartIndex,
+    phaseTimes,
+    setPhaseTimes,
+    additionalData,
+    setAdditionalData,
+    burnAmount,
+    setBurnAmount,
+    mintPrice,
+    setMintPrice,
+  } = useSharedState();
 
-  const [tokenStartIndex, setTokenStartIndex] = useState<number>(0);
-
-  const [phaseTimes, setPhaseTimes] = useState<PhaseTimes>();
-  const [additionalData, setAdditionalData] = useState<AdditionalData>();
-
-  const [burnAmount, setBurnAmount] = useState<number>(0);
-  const [mintPrice, setMintPrice] = useState<number>(0);
+  setBreadcrumbs(crumbs);
 
   useContractRead({
     address: NEXTGEN_CORE.contract as `0x${string}`,

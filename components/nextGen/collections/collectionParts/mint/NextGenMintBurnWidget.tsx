@@ -17,7 +17,6 @@ import {
   CollectionWithMerkle,
   PhaseTimes,
   ProofResponse,
-  ProofResponseBurn,
   Status,
   TokensPerAddress,
 } from "../../../nextgen_entities";
@@ -28,6 +27,7 @@ import { useWeb3Modal } from "@web3modal/react";
 import { NextGenMintDelegatorOption } from "./NextGenMintDelegatorOption";
 import { getNftsForContractAndOwner } from "../../../../../services/alchemy-api";
 import { Spinner } from "../../NextGen";
+import { useMintSharedState } from "../../../nextgen_helpers";
 
 interface Props {
   collection: CollectionWithMerkle;
@@ -46,9 +46,24 @@ export default function NextGenMintBurnWidget(props: Readonly<Props>) {
   const chainId = useChainId();
   const web3Modal = useWeb3Modal();
 
-  const [proofResponse, setProofResponse] = useState<ProofResponseBurn>();
+  const {
+    burnProofResponse,
+    setBurnProofResponse,
+    mintForAddress,
+    setMintForAddress,
+    tokenId,
+    setTokenId,
+    mintingForDelegator,
+    setMintingForDelegator,
+    salt,
+    isMinting,
+    setIsMinting,
+    fetchingProofs,
+    setFetchingProofs,
+    errors,
+    setErrors,
+  } = useMintSharedState();
 
-  const [mintForAddress, setMintForAddress] = useState<string>();
   useEffect(() => {
     if (props.delegators.length > 0) {
       setMintForAddress(props.delegators[0]);
@@ -62,15 +77,6 @@ export default function NextGenMintBurnWidget(props: Readonly<Props>) {
   const [tokensOwnedForBurnAddress, setTokensOwnedForBurnAddress] = useState<
     any[]
   >([]);
-  const [tokenId, setTokenId] = useState<string>("");
-
-  const [mintingForDelegator, setMintingForDelegator] = useState(false);
-  const salt = 0;
-  const [isMinting, setIsMinting] = useState(false);
-
-  const [fetchingProofs, setFetchingProofs] = useState(false);
-
-  const [errors, setErrors] = useState<string[]>([]);
 
   function filterTokensOwnedForBurnAddress(r: any[]) {
     if (props.collection.max_token_index > 0) {
@@ -128,7 +134,7 @@ export default function NextGenMintBurnWidget(props: Readonly<Props>) {
       setFetchingProofs(true);
       const url = `${process.env.API_ENDPOINT}/api/nextgen/burn_proofs/${props.phase_times.merkle_root}/${tokenId}`;
       fetchUrl(url).then((response: ProofResponse) => {
-        setProofResponse(response);
+        setBurnProofResponse(response);
         setFetchingProofs(false);
       });
     }
@@ -151,7 +157,7 @@ export default function NextGenMintBurnWidget(props: Readonly<Props>) {
 
   function validate() {
     let e: string[] = [];
-    if (!proofResponse?.proof) {
+    if (!burnProofResponse?.proof) {
       e.push("Not in Allowlist");
     }
     return e;
@@ -185,12 +191,12 @@ export default function NextGenMintBurnWidget(props: Readonly<Props>) {
       !props.phase_times ||
       !props.additional_data ||
       !props.mint_counts ||
-      (props.phase_times.al_status == Status.LIVE && !proofResponse) ||
+      (props.phase_times.al_status == Status.LIVE && !burnProofResponse) ||
       (props.phase_times.al_status != Status.LIVE &&
         props.phase_times.public_status != Status.LIVE) ||
       (props.phase_times.al_status == Status.LIVE &&
-        proofResponse &&
-        proofResponse.proof.length === 0) ||
+        burnProofResponse &&
+        burnProofResponse.proof.length === 0) ||
       (props.phase_times.public_status == Status.LIVE &&
         0 >= props.additional_data.max_purchases - props.mint_counts.public) ||
       0 >= props.available_supply ||
@@ -206,11 +212,11 @@ export default function NextGenMintBurnWidget(props: Readonly<Props>) {
           props.collection.burn_collection_id,
           tokenId,
           props.collection.collection_id,
-          proofResponse ? proofResponse.info : "",
+          burnProofResponse ? burnProofResponse.info : "",
           props.phase_times &&
-          proofResponse &&
+          burnProofResponse &&
           props.phase_times.al_status == Status.LIVE
-            ? proofResponse.proof
+            ? burnProofResponse.proof
             : [],
           salt,
         ],
@@ -219,7 +225,7 @@ export default function NextGenMintBurnWidget(props: Readonly<Props>) {
   }, [isMinting]);
 
   useEffect(() => {
-    setProofResponse(undefined);
+    setBurnProofResponse(undefined);
   }, [account.address]);
 
   function getButtonText() {
@@ -243,8 +249,8 @@ export default function NextGenMintBurnWidget(props: Readonly<Props>) {
     if (
       !fetchingProofs &&
       tokenId &&
-      proofResponse &&
-      proofResponse.proof.length === 0
+      burnProofResponse &&
+      burnProofResponse.proof.length === 0
     ) {
       text += " - no proofs found";
     }
@@ -448,7 +454,7 @@ export default function NextGenMintBurnWidget(props: Readonly<Props>) {
               error={mintWrite.error}
             />
             {props.phase_times &&
-              proofResponse &&
+              burnProofResponse &&
               props.mint_counts &&
               0 >=
                 props.additional_data.max_purchases -

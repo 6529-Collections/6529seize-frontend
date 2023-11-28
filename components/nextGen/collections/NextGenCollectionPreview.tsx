@@ -1,6 +1,5 @@
 import styles from "./NextGen.module.scss";
 import { Container, Row, Col } from "react-bootstrap";
-import { useState } from "react";
 import { AdditionalData, Info, PhaseTimes } from "../nextgen_entities";
 import NextGenTokenPreview from "./NextGenTokenPreview";
 import {
@@ -8,6 +7,7 @@ import {
   retrieveCollectionInfo,
   retrieveCollectionPhases,
   retrieveTokensIndex,
+  useSharedState,
 } from "../nextgen_helpers";
 
 interface Props {
@@ -16,10 +16,14 @@ interface Props {
 }
 
 export default function NextGenCollectionPreview(props: Readonly<Props>) {
-  const [sampleToken, setSampleToken] = useState<number>(0);
-
-  const [info, setInfo] = useState<Info>();
-  const [additionalData, setAdditionalData] = useState<AdditionalData>();
+  const {
+    info,
+    setInfo,
+    additionalData,
+    setAdditionalData,
+    sampleToken,
+    setSampleToken,
+  } = useSharedState();
 
   retrieveTokensIndex("min", props.collection, (data: number) => {
     setSampleToken(data);

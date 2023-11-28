@@ -23,7 +23,11 @@ import {
 } from "../../../../../pages/delegation/[...section]";
 import { NEXTGEN_CHAIN_ID, NEXTGEN_CORE } from "../../../nextgen_contracts";
 import { fetchUrl } from "../../../../../services/6529api";
-import { retrieveCollectionCosts } from "../../../nextgen_helpers";
+import {
+  retrieveCollectionCosts,
+  useMintSharedState,
+  useSharedState,
+} from "../../../nextgen_helpers";
 import NextGenMintWidget from "./NextGenMintWidget";
 import NextGenMintBurnWidget from "./NextGenMintBurnWidget";
 import NextGenTokenPreview from "../../NextGenTokenPreview";
@@ -43,27 +47,26 @@ interface Props {
 export default function NextGenMint(props: Readonly<Props>) {
   const account = useAccount();
 
-  const [mintForAddress, setMintForAddress] = useState<string>("");
-  const [mintingForDelegator, setMintingForDelegator] = useState(false);
-
-  const [addressMintCounts, setAddressMintCounts] = useState<TokensPerAddress>({
-    airdrop: 0,
-    allowlist: 0,
-    public: 0,
-    total: 0,
-  });
-
   const [collection, setCollection] = useState<CollectionWithMerkle>();
   const [collectionLoaded, setCollectionLoaded] = useState<boolean>(false);
 
-  const [availableSupply, setAvailableSupply] = useState<number>(0);
-
-  const [delegators, setDelegators] = useState<string[]>([]);
-  const [mintingDetails, setMintingDetails] = useState<MintingDetails>();
+  const { mintingDetails, setMintingDetails } = useSharedState();
+  const {
+    available,
+    setAvailable,
+    delegators,
+    setDelegators,
+    mintingForDelegator,
+    setMintingForDelegator,
+    mintForAddress,
+    setMintForAddress,
+    addressMintCounts,
+    setAddressMintCounts,
+  } = useMintSharedState();
 
   useEffect(() => {
     if (props.additional_data && props.burn_amount > -1) {
-      setAvailableSupply(
+      setAvailable(
         props.additional_data.total_supply -
           props.burn_amount -
           props.additional_data.circulation_supply
@@ -266,7 +269,7 @@ export default function NextGenMint(props: Readonly<Props>) {
             collection={props.collection}
             phase_times={props.phase_times}
             additional_data={props.additional_data}
-            available_supply={availableSupply}
+            available_supply={available}
             mint_price={props.mint_price}
             mint_counts={addressMintCounts}
             delegators={delegators}
@@ -280,7 +283,7 @@ export default function NextGenMint(props: Readonly<Props>) {
             collection={collection}
             phase_times={props.phase_times}
             additional_data={props.additional_data}
-            available_supply={availableSupply}
+            available_supply={available}
             mint_price={props.mint_price}
             mint_counts={addressMintCounts}
             delegators={delegators}
@@ -307,7 +310,7 @@ export default function NextGenMint(props: Readonly<Props>) {
           </a>
           <NextGenPhases
             phase_times={props.phase_times}
-            available={availableSupply}
+            available={available}
           />
         </Col>
         <Col
@@ -320,7 +323,7 @@ export default function NextGenMint(props: Readonly<Props>) {
             <b>
               {props.additional_data.circulation_supply} /{" "}
               {props.additional_data.total_supply} minted
-              {availableSupply > 0 && ` | ${availableSupply} remaining`}
+              {available > 0 && ` | ${available} remaining`}
             </b>
           </span>
         </Col>

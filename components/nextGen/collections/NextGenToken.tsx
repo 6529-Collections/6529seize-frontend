@@ -22,6 +22,7 @@ import {
   extractAttributes,
   extractField,
   extractURI,
+  useSharedState,
 } from "../nextgen_helpers";
 
 interface Props {
@@ -36,9 +37,15 @@ export default function NextGenToken(props: Readonly<Props>) {
   const [tokenNotFound, setTokenNotFound] = useState(false);
 
   const [token, setToken] = useState<TokenURI>();
-  const [info, setInfo] = useState<Info>();
-  const [phaseTimes, setPhaseTimes] = useState<PhaseTimes>();
-  const [additionalData, setAdditionalData] = useState<AdditionalData>();
+
+  const {
+    info,
+    setInfo,
+    phaseTimes,
+    setPhaseTimes,
+    additionalData,
+    setAdditionalData,
+  } = useSharedState();
 
   const [owner, setOwner] = useState<`0x${string}`>();
   const [ownerENS, setOwnerENS] = useState<string>();
