@@ -118,51 +118,10 @@ export default function NextGenAdminUpdateCollection(props: Readonly<Props>) {
     setLoading(false);
   });
 
-  function submit() {
+  function submit(): void {
     setLoading(true);
     contractWrite.reset();
-    const errors = [];
-    if (!collectionID) {
-      errors.push("Collection id is required");
-    }
-    if (props.type === UpdateType.UPDATE_INFO) {
-      if (!collectionName) {
-        errors.push("Collection name is required");
-      }
-      if (!artist) {
-        errors.push("Artist is required");
-      }
-      if (!description) {
-        errors.push("Description is required");
-      }
-      if (!website) {
-        errors.push("Website is required");
-      }
-      if (!license) {
-        errors.push("License is required");
-      }
-      if (!library) {
-        errors.push("Library is required");
-      }
-      if (scripts.length === 0) {
-        errors.push("At least one script is required");
-      }
-    }
-
-    if (props.type === UpdateType.UPDATE_BASE_URI) {
-      if (!baseURI) {
-        errors.push("Base URI is required");
-      }
-    }
-
-    if (props.type === UpdateType.UPDATE_SCRIPT) {
-      if (scripts.length !== 1) {
-        errors.push("You need exactly one script");
-      }
-      if (scriptIndex === undefined) {
-        errors.push("Script index is required");
-      }
-    }
+    const errors: string[] = validateInputs();
 
     if (errors.length > 0) {
       setErrors(errors);
@@ -170,6 +129,66 @@ export default function NextGenAdminUpdateCollection(props: Readonly<Props>) {
     } else {
       setErrors([]);
       setSubmitting(true);
+    }
+  }
+
+  function validateInputs(): string[] {
+    const errors: string[] = [];
+    validateCommonInputs(errors);
+
+    switch (props.type) {
+      case UpdateType.UPDATE_INFO:
+        validateUpdateInfoInputs(errors);
+        validateUpdateBaseURI(errors);
+        break;
+      case UpdateType.UPDATE_BASE_URI:
+        validateUpdateBaseURI(errors);
+        break;
+      case UpdateType.UPDATE_SCRIPT:
+        validateUpdateScript(errors);
+        break;
+    }
+
+    return errors;
+  }
+
+  function validateCommonInputs(errors: string[]): void {
+    if (!collectionID) {
+      errors.push("Collection id is required");
+    }
+  }
+
+  function validateUpdateInfoInputs(errors: string[]): void {
+    const requiredFields: { value: any; message: string }[] = [
+      { value: collectionName, message: "Collection name is required" },
+      { value: artist, message: "Artist is required" },
+      { value: description, message: "Description is required" },
+      { value: website, message: "Website is required" },
+      { value: license, message: "License is required" },
+      { value: library, message: "Library is required" },
+    ];
+
+    if (scripts.length === 0) {
+      errors.push("At least one script is required");
+    }
+
+    requiredFields.forEach((field) => {
+      if (!field.value) errors.push(field.message);
+    });
+  }
+
+  function validateUpdateBaseURI(errors: string[]): void {
+    if (!baseURI) {
+      errors.push("Base URI is required");
+    }
+  }
+
+  function validateUpdateScript(errors: string[]): void {
+    if (scripts.length !== 1) {
+      errors.push("You need exactly one script");
+    }
+    if (scriptIndex === undefined) {
+      errors.push("Script index is required");
     }
   }
 

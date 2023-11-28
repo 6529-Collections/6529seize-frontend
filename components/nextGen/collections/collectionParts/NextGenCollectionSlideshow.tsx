@@ -4,7 +4,6 @@ import NextGenTokenPreview from "../NextGenTokenPreview";
 import { useState } from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation, Pagination, A11y } from "swiper/modules";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 interface Props {
   collection: number;

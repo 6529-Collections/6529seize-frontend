@@ -9,7 +9,6 @@ import {
   extractAttributes,
 } from "../nextgen_helpers";
 import { EMPTY_TOKEN_URI, TokenURI } from "../nextgen_entities";
-import { fetchUrl } from "../../../services/6529api";
 
 interface Props {
   token_id: number;
@@ -17,6 +16,7 @@ interface Props {
   hide_info?: boolean;
   hide_link?: boolean;
   hide_background?: boolean;
+  show_owner?: boolean;
 }
 
 export default function NextGenTokenPreview(props: Readonly<Props>) {
@@ -109,6 +109,11 @@ export default function NextGenTokenPreview(props: Readonly<Props>) {
                 {tokenUri ? tokenUri.name : name}
               </Col>
             </Row>
+            {props.show_owner && (
+              <Row className="pt-1">
+                <Col className="text-center">Owned by {owner}</Col>
+              </Row>
+            )}
           </>
         )}
       </Container>
