@@ -381,21 +381,21 @@ export function useTokensIndex(
   });
 }
 
-export function useCoreUseContractWrite(
+export function useCoreContractWrite(
   functionName: string,
   onError: () => void
 ) {
   return useContractWriteForFunction(NEXTGEN_CORE, functionName, onError);
 }
 
-export function useMinterUseContractWrite(
+export function useMinterContractWrite(
   functionName: string,
   onError: () => void
 ) {
   return useContractWriteForFunction(NEXTGEN_MINTER, functionName, onError);
 }
 
-export function useAdminUseContractWrite(
+export function useAdminContractWrite(
   functionName: string,
   onError: () => void
 ) {

@@ -5,7 +5,7 @@ import {
   useCollectionIndex,
   useCollectionArtist,
   isCollectionArtist,
-  useCoreUseContractWrite,
+  useCoreContractWrite,
 } from "../nextgen_helpers";
 import NextGenContractWriteStatus from "../NextGenContractWriteStatus";
 import { areEqualAddresses } from "../../../helpers/Helpers";
@@ -56,7 +56,7 @@ export default function NextGenAdminArtistSignCollection(
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
-  const contractWrite = useCoreUseContractWrite("artistSignature", () => {
+  const contractWrite = useCoreContractWrite("artistSignature", () => {
     setSubmitting(false);
     setLoading(false);
   });

@@ -9,7 +9,7 @@ import {
   useCollectionAdmin,
   getCollectionIdsForAddress,
   useCollectionCosts,
-  useMinterUseContractWrite,
+  useMinterContractWrite,
 } from "../nextgen_helpers";
 import NextGenContractWriteStatus from "../NextGenContractWriteStatus";
 import { ANY_COLLECTION } from "../../../pages/delegation/[...section]";
@@ -70,7 +70,7 @@ export default function NextGenAdminSetCosts(props: Readonly<Props>) {
     }
   });
 
-  const contractWrite = useMinterUseContractWrite("setCollectionCosts", () => {
+  const contractWrite = useMinterContractWrite("setCollectionCosts", () => {
     setSubmitting(false);
     setLoading(false);
   });

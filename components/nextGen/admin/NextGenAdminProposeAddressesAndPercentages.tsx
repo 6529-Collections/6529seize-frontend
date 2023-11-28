@@ -7,7 +7,7 @@ import {
   useFunctionAdmin,
   useCollectionIndex,
   getCollectionIdsForAddress,
-  useMinterUseContractWrite,
+  useMinterContractWrite,
 } from "../nextgen_helpers";
 import NextGenContractWriteStatus from "../NextGenContractWriteStatus";
 import { printAdminErrors } from "./NextGenAdmin";
@@ -80,7 +80,7 @@ export default function NextGenAdminProposeAddressesAndPercentages(
     }
   }
 
-  const contractWrite = useMinterUseContractWrite(getFunctionName(), () => {
+  const contractWrite = useMinterContractWrite(getFunctionName(), () => {
     setSubmitting(false);
     setLoading(false);
   });

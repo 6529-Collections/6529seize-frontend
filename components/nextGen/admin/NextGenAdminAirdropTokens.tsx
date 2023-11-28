@@ -7,7 +7,7 @@ import {
   useCollectionIndex,
   useCollectionAdmin,
   getCollectionIdsForAddress,
-  useMinterUseContractWrite,
+  useMinterContractWrite,
 } from "../nextgen_helpers";
 import { FunctionSelectors } from "../nextgen_contracts";
 import NextGenContractWriteStatus from "../NextGenContractWriteStatus";
@@ -51,7 +51,7 @@ export default function NextGenAdminAirdropTokens(props: Readonly<Props>) {
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
-  const contractWrite = useMinterUseContractWrite("airDropTokens", () => {
+  const contractWrite = useMinterContractWrite("airDropTokens", () => {
     setSubmitting(false);
     setLoading(false);
   });

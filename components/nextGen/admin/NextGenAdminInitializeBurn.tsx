@@ -14,7 +14,7 @@ import {
   useCollectionIndex,
   useCollectionAdmin,
   getCollectionIdsForAddress,
-  useMinterUseContractWrite,
+  useMinterContractWrite,
 } from "../nextgen_helpers";
 import NextGenContractWriteStatus from "../NextGenContractWriteStatus";
 import { v4 as uuidv4 } from "uuid";
@@ -114,7 +114,7 @@ export default function NextGenAdminInitializeBurn(props: Readonly<Props>) {
     }
   }, [signMessage.data]);
 
-  const contractWrite = useMinterUseContractWrite("initializeBurn", () => {
+  const contractWrite = useMinterContractWrite("initializeBurn", () => {
     setSubmitting(false);
     setLoading(false);
   });

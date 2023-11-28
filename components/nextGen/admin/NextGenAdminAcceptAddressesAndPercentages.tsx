@@ -12,7 +12,7 @@ import {
   useCollectionIndex,
   useCollectionAdmin,
   getCollectionIdsForAddress,
-  useMinterUseContractWrite,
+  useMinterContractWrite,
 } from "../nextgen_helpers";
 import NextGenContractWriteStatus from "../NextGenContractWriteStatus";
 import {
@@ -118,7 +118,7 @@ export default function NextGenAdminAcceptAddressesAndPercentages(
     },
   });
 
-  const contractWrite = useMinterUseContractWrite(
+  const contractWrite = useMinterContractWrite(
     "acceptAddressesAndPercentages",
     () => {
       setSubmitting(false);

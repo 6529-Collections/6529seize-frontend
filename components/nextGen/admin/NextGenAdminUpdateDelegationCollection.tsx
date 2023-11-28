@@ -10,7 +10,7 @@ import {
   useCollectionAdmin,
   getCollectionIdsForAddress,
   useCollectionCosts,
-  useMinterUseContractWrite,
+  useMinterContractWrite,
 } from "../nextgen_helpers";
 import { MintingDetails } from "../nextgen_entities";
 import { printAdminErrors } from "./NextGenAdmin";
@@ -59,7 +59,7 @@ export default function NextGenAdminUpdateDelegationCollection(
     }
   });
 
-  const contractWrite = useMinterUseContractWrite(
+  const contractWrite = useMinterContractWrite(
     "updateDelegationCollection",
     () => {
       setSubmitting(false);

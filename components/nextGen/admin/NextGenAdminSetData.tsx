@@ -8,7 +8,7 @@ import {
   useCollectionAdmin,
   getCollectionIdsForAddress,
   useCollectionAdditionalData,
-  useCoreUseContractWrite,
+  useCoreContractWrite,
 } from "../nextgen_helpers";
 import { FunctionSelectors } from "../nextgen_contracts";
 import NextGenContractWriteStatus from "../NextGenContractWriteStatus";
@@ -63,7 +63,7 @@ export default function NextGenAdminSetData(props: Readonly<Props>) {
     }
   });
 
-  const contractWrite = useCoreUseContractWrite("setCollectionData", () => {
+  const contractWrite = useCoreContractWrite("setCollectionData", () => {
     setSubmitting(false);
     setLoading(false);
   });

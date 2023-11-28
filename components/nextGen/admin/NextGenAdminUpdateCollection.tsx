@@ -5,7 +5,7 @@ import { FunctionSelectors } from "../nextgen_contracts";
 import NextGenContractWriteStatus from "../NextGenContractWriteStatus";
 import {
   getCollectionIdsForAddress,
-  useCoreUseContractWrite,
+  useCoreContractWrite,
   useCollectionInfo,
   useCollectionLibraryAndScript,
   useCollectionAdmin,
@@ -115,7 +115,7 @@ export default function NextGenAdminUpdateCollection(props: Readonly<Props>) {
     return params;
   }
 
-  const contractWrite = useCoreUseContractWrite("updateCollectionInfo", () => {
+  const contractWrite = useCoreContractWrite("updateCollectionInfo", () => {
     setSubmitting(false);
     setLoading(false);
   });

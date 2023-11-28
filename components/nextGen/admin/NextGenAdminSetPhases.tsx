@@ -11,7 +11,7 @@ import {
   useCollectionAdmin,
   getCollectionIdsForAddress,
   useCollectionPhases,
-  useMinterUseContractWrite,
+  useMinterContractWrite,
 } from "../nextgen_helpers";
 import NextGenContractWriteStatus from "../NextGenContractWriteStatus";
 import { PhaseTimes } from "../nextgen_entities";
@@ -107,7 +107,7 @@ export default function NextGenAdminSetPhases(props: Readonly<Props>) {
     contractWrite.reset();
   }
 
-  const contractWrite = useMinterUseContractWrite("setCollectionPhases", () => {
+  const contractWrite = useMinterContractWrite("setCollectionPhases", () => {
     setSubmitting(false);
     setLoading(false);
   });

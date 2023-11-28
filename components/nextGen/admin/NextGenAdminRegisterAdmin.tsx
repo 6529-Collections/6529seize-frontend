@@ -8,7 +8,7 @@ import {
   useGlobalAdmin,
   useCollectionIndex,
   getCollectionIdsForAddress,
-  useAdminUseContractWrite,
+  useAdminContractWrite,
 } from "../nextgen_helpers";
 import { printAdminErrors } from "./NextGenAdmin";
 import {
@@ -75,7 +75,7 @@ export default function NextGenAdminRegisterAdmin(props: Readonly<Props>) {
     parseInt(collectionIndex?.data as string)
   );
 
-  const contractWrite = useAdminUseContractWrite(getFunctionName(), () => {
+  const contractWrite = useAdminContractWrite(getFunctionName(), () => {
     setSubmitting(false);
     setLoading(false);
   });

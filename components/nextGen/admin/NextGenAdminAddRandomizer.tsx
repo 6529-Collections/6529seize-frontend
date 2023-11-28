@@ -10,7 +10,7 @@ import {
   useCollectionAdmin,
   getCollectionIdsForAddress,
   useCollectionAdditionalData,
-  useCoreUseContractWrite,
+  useCoreContractWrite,
 } from "../nextgen_helpers";
 import { AdditionalData } from "../nextgen_entities";
 import { printAdminErrors } from "./NextGenAdmin";
@@ -57,7 +57,7 @@ export default function NextGenAdminUpdateRandomizer(props: Readonly<Props>) {
     }
   });
 
-  const contractWrite = useCoreUseContractWrite("addRandomizer", () => {
+  const contractWrite = useCoreContractWrite("addRandomizer", () => {
     setSubmitting(false);
     setLoading(false);
   });

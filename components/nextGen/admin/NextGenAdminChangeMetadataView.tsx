@@ -12,7 +12,7 @@ import {
   useCollectionIndex,
   useCollectionAdmin,
   getCollectionIdsForAddress,
-  useCoreUseContractWrite,
+  useCoreContractWrite,
 } from "../nextgen_helpers";
 import NextGenContractWriteStatus from "../NextGenContractWriteStatus";
 import { printAdminErrors } from "./NextGenAdmin";
@@ -65,7 +65,7 @@ export default function NextGenAdminChangeMetadataView(props: Readonly<Props>) {
     },
   });
 
-  const contractWrite = useCoreUseContractWrite("updateBaseURI", () => {
+  const contractWrite = useCoreContractWrite("updateBaseURI", () => {
     setSubmitting(false);
     setLoading(false);
   });
