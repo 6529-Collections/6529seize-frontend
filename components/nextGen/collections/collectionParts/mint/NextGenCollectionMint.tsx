@@ -1,6 +1,6 @@
 import { Col, Container, Row } from "react-bootstrap";
 import NextGenMint from "./NextGenMint";
-import { useState } from "react";
+import { useEffect } from "react";
 import { PhaseTimes, AdditionalData, Info } from "../../../nextgen_entities";
 import {
   retrieveCollectionPhases,
