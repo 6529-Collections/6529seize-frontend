@@ -4,6 +4,7 @@ import NextGenTokenPreview from "../NextGenTokenPreview";
 import { useState } from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation, Pagination, A11y } from "swiper/modules";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 interface Props {
   collection: number;
@@ -26,7 +27,7 @@ export default function NextGenCollectionSlideshow(props: Readonly<Props>) {
     <Container fluid className={styles.slideshowContainer}>
       <Row>
         <Col>
-          <Container className="no-padding pb-2">
+          <Container className="pt-3 pb-3">
             <Row>
               <Col>
                 <Swiper
@@ -45,7 +46,7 @@ export default function NextGenCollectionSlideshow(props: Readonly<Props>) {
                       <NextGenTokenPreview
                         collection={props.collection}
                         token_id={token}
-                        hide_info={true}
+                        hide_info={currentSlide !== token}
                         hide_link={false}
                         hide_background={true}
                       />
@@ -70,15 +71,6 @@ export default function NextGenCollectionSlideshow(props: Readonly<Props>) {
                     </SwiperSlide>
                   )}
                 </Swiper>
-              </Col>
-            </Row>
-            <Row className="pt-1">
-              <Col>
-                <a
-                  className="font-color-h font-smaller decoration-nonem decoration-hover-underline"
-                  href={`/nextgen/token/${currentSlide}`}>
-                  {props.collection_name} #{currentSlide}
-                </a>
               </Col>
             </Row>
           </Container>

@@ -9,6 +9,7 @@ import {
   extractAttributes,
 } from "../nextgen_helpers";
 import { EMPTY_TOKEN_URI, TokenURI } from "../nextgen_entities";
+import { fetchUrl } from "../../../services/6529api";
 
 interface Props {
   token_id: number;
@@ -50,14 +51,18 @@ export default function NextGenTokenPreview(props: Readonly<Props>) {
             attributes: attrs,
           });
         } else {
-          setTokenUri({
-            id: props.token_id,
-            collection: props.collection,
-            uri: data,
-            name: "",
-            description: "",
-            attributes: [],
-          });
+          fetch(data)
+            .then((response) => response.json())
+            .then((response) => {
+              setTokenUri({
+                id: props.token_id,
+                collection: props.collection,
+                uri: response.image,
+                name: response.name,
+                description: response.description,
+                attributes: response.attributes,
+              });
+            });
         }
       }
     },
@@ -95,7 +100,9 @@ export default function NextGenTokenPreview(props: Readonly<Props>) {
         {!props.hide_info && (
           <>
             <Row className="pt-1">
-              <Col className="text-center">#{props.token_id}</Col>
+              <Col className="text-center font-smaller font-color-h">
+                #{props.token_id}
+              </Col>
             </Row>
             <Row className="pt-1">
               <Col className="text-center">

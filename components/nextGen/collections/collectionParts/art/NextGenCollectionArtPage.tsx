@@ -41,7 +41,7 @@ export default function NextGenCollectionArtPage(props: Readonly<Props>) {
     setBreadcrumbs((b) => [
       ...crumbs,
       { display: nameCrumb, href: `/nextgen/collection/${props.collection}` },
-      { display: "Mint" },
+      { display: "Art" },
     ]);
     setInfoSettled(true);
   });

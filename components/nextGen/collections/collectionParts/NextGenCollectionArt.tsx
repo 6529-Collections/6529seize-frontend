@@ -1,5 +1,5 @@
 import styles from "../NextGen.module.scss";
-import { Container, Row, Col } from "react-bootstrap";
+import { Container, Row, Col, Button } from "react-bootstrap";
 import { AdditionalData } from "../../nextgen_entities";
 import NextGenTokenList from "../NextGenTokenList";
 import DotLoader from "../../../dotLoader/DotLoader";
@@ -28,7 +28,7 @@ export default function NextGenCollectionArt(props: Readonly<Props>) {
               <NextGenTokenList
                 collection={props.collection}
                 tokens={props.token_ids}
-                hide_info={true}
+                hide_info={false}
               />
             )}
           </Col>
@@ -40,10 +40,9 @@ export default function NextGenCollectionArt(props: Readonly<Props>) {
             <a
               href={`/nextgen/collection/${props.collection}/art`}
               className={`d-flex align-items-center gap-2 ${styles.viewAllTokens}`}>
-              <h5 className="mb-0 font-color">
-                <b>View All</b>
-              </h5>
-              <FontAwesomeIcon icon="arrow-circle-right" />
+              <Button className="seize-btn btn-white">
+                View All <FontAwesomeIcon icon="arrow-circle-right" />
+              </Button>
             </a>
           </Col>
         </Row>
