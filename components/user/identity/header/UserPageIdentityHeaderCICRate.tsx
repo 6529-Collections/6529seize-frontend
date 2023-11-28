@@ -97,7 +97,7 @@ export default function UserPageIdentityHeaderCICRate({
   };
 
   return (
-    <div className="tw-mt-4">
+    <div className="tw-mt-6">
       <form onSubmit={onSubmit}>
         <div className="tw-flex tw-items-center tw-space-x-3.5">
           <div>
