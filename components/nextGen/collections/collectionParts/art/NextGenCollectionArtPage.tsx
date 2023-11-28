@@ -1,5 +1,5 @@
 import { Col, Container, Row } from "react-bootstrap";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { PhaseTimes, AdditionalData, Info } from "../../../nextgen_entities";
 import {
   retrieveCollectionPhases,
@@ -39,7 +39,9 @@ export default function NextGenCollectionArtPage(props: Readonly<Props>) {
     setTokenIds,
   } = useSharedState();
 
-  setBreadcrumbs(crumbs);
+  useEffect(() => {
+    setBreadcrumbs(crumbs);
+  }, []);
 
   retrieveCollectionInfo(props.collection, (data: Info) => {
     setInfo(data);

@@ -1,6 +1,6 @@
 import { Col, Container, Row } from "react-bootstrap";
 import NextGenMint from "./NextGenMint";
-import { useState } from "react";
+import { useEffect } from "react";
 import { PhaseTimes, AdditionalData, Info } from "../../../nextgen_entities";
 import {
   retrieveCollectionPhases,
@@ -46,7 +46,9 @@ export default function NextGenCollectionMint(props: Readonly<Props>) {
     setMintPrice,
   } = useSharedState();
 
-  setBreadcrumbs(crumbs);
+  useEffect(() => {
+    setBreadcrumbs(crumbs);
+  }, []);
 
   useContractRead({
     address: NEXTGEN_CORE.contract as `0x${string}`,
