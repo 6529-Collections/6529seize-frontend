@@ -1,5 +1,4 @@
 import { Container, Row, Col, Button, Form } from "react-bootstrap";
-import styles from "./NextGenAdmin.module.scss";
 import { useAccount } from "wagmi";
 import { useEffect, useState } from "react";
 import { FunctionSelectors } from "../nextgen_contracts";
@@ -14,9 +13,12 @@ import {
   useFunctionAdmin,
   useGlobalAdmin,
 } from "../nextgen_helpers";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Info, LibraryScript } from "../nextgen_entities";
 import { printAdminErrors } from "./NextGenAdmin";
+import {
+  NextGenCollectionIdFormGroup,
+  NextGenAdminHeadingRow,
+} from "./NextGenAdminShared";
 
 export enum UpdateType {
   UPDATE_INFO,
@@ -209,47 +211,29 @@ export default function NextGenAdminUpdateCollection(props: Readonly<Props>) {
     }
   }, [contractWrite.isSuccess || contractWrite.isError]);
 
+  function getTitle() {
+    switch (props.type) {
+      case UpdateType.UPDATE_INFO:
+        return "UPDATE INFO";
+      case UpdateType.UPDATE_BASE_URI:
+        return "UPDATE BASE URI";
+      case UpdateType.UPDATE_SCRIPT:
+        return "UPDATE SCRIPT";
+    }
+  }
   return (
     <Container className="no-padding">
-      <Row className="pt-3">
-        <Col className="d-flex align-items-center justify-content-between">
-          <h3>
-            <b>
-              {props.type === UpdateType.UPDATE_INFO &&
-                "UPDATE COLLECTION INFO"}
-              {props.type === UpdateType.UPDATE_BASE_URI && "UPDATE BASE URI"}
-              {props.type === UpdateType.UPDATE_SCRIPT && "UPDATE SCRIPT"}
-            </b>
-          </h3>
-          <FontAwesomeIcon
-            className={styles.closeIcon}
-            icon="times-circle"
-            onClick={() => {
-              props.close();
-            }}></FontAwesomeIcon>
-        </Col>
-      </Row>
+      <NextGenAdminHeadingRow close={props.close} title={getTitle()} />
       <Row className="pt-3">
         <Col>
           <Form>
-            <Form.Group className="mb-3">
-              <Form.Label>Collection ID</Form.Label>
-              <Form.Select
-                className={`${styles.formInput}`}
-                value={collectionID}
-                onChange={(e) => {
-                  setCollectionID(e.target.value);
-                }}>
-                <option value="" disabled>
-                  Select Collection
-                </option>
-                {collectionIds.map((id) => (
-                  <option key={`collection-id-${id}`} value={id}>
-                    {id}
-                  </option>
-                ))}
-              </Form.Select>
-            </Form.Group>
+            <NextGenCollectionIdFormGroup
+              collection_id={collectionID}
+              collection_ids={collectionIds}
+              onChange={(id) => {
+                setCollectionID(id);
+              }}
+            />
             {props.type === UpdateType.UPDATE_INFO && (
               <>
                 <Form.Group className="mb-3">

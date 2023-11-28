@@ -1,10 +1,9 @@
 import { Container, Row, Col, Button, Form } from "react-bootstrap";
-import styles from "./NextGenAdmin.module.scss";
 import { useEffect, useState } from "react";
 import NextGenContractWriteStatus from "../NextGenContractWriteStatus";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { printAdminErrors } from "./NextGenAdmin";
 import { getCoreUseContractWrite } from "../nextgen_helpers";
+import { NextGenAdminHeadingRow } from "./NextGenAdminShared";
 
 interface Props {
   close: () => void;
@@ -93,19 +92,7 @@ export default function NextGenAdminCreateCollection(props: Readonly<Props>) {
 
   return (
     <Container className="no-padding">
-      <Row className="pt-3">
-        <Col className="d-flex align-items-center justify-content-between">
-          <h3>
-            <b>CREATE COLLECTION</b>
-          </h3>
-          <FontAwesomeIcon
-            className={styles.closeIcon}
-            icon="times-circle"
-            onClick={() => {
-              props.close();
-            }}></FontAwesomeIcon>
-        </Col>
-      </Row>
+      <NextGenAdminHeadingRow title="Create Collection" close={props.close} />
       <Row className="pt-3">
         <Col>
           <Form>

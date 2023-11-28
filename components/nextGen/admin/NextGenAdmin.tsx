@@ -20,7 +20,7 @@ import NextGenAdminSetPhases from "./NextGenAdminSetPhases";
 import NextGenAdminRegisterAdmin, {
   ADMIN_TYPE,
 } from "./NextGenAdminRegisterAdmin";
-import NextGenAdminSignCollection from "./NextGenAdminSignCollection";
+import NextGenAdminArtistSignCollection from "./NextGenAdminArtistSignCollection";
 import NextGenAdminAirdropTokens from "./NextGenAdminAirdropTokens";
 import NextGenAdminProposeAddressesAndPercentages, {
   ProposalType,
@@ -918,7 +918,7 @@ export default function NextGenAdmin() {
         <Row className="pt-3">
           <Col>
             {artistFocus === ArtistFocus.SIGN_COLLECTION && (
-              <NextGenAdminSignCollection close={() => close()} />
+              <NextGenAdminArtistSignCollection close={() => close()} />
             )}
             {artistFocus ===
               ArtistFocus.PROPOSE_PRIMARY_ADDRESSES_AND_PERCENTAGES && (
