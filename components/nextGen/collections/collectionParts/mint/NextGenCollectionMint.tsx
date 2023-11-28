@@ -46,7 +46,9 @@ export default function NextGenCollectionMint(props: Readonly<Props>) {
     setMintPrice,
   } = useSharedState();
 
-  setBreadcrumbs(crumbs);
+  useEffect(() => {
+    setBreadcrumbs(crumbs);
+  }, []);
 
   useContractRead({
     address: NEXTGEN_CORE.contract as `0x${string}`,

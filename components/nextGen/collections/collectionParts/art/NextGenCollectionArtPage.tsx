@@ -39,7 +39,9 @@ export default function NextGenCollectionArtPage(props: Readonly<Props>) {
     setTokenIds,
   } = useSharedState();
 
-  setBreadcrumbs(crumbs);
+  useEffect(() => {
+    setBreadcrumbs(crumbs);
+  }, []);
 
   retrieveCollectionInfo(props.collection, (data: Info) => {
     setInfo(data);

@@ -58,7 +58,9 @@ export default function NextGenCollection(props: Readonly<Props>) {
     setArtistSignature,
   } = useSharedState();
 
-  setBreadcrumbs(crumbs);
+  useEffect(() => {
+    setBreadcrumbs(crumbs);
+  }, []);
 
   function getTokenUriReadParams() {
     const params: any[] = [];
