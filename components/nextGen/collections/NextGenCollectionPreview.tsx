@@ -58,7 +58,7 @@ export default function NextGenCollectionPreview(props: Readonly<Props>) {
       className="decoration-none scale-hover">
       <Container className={styles.collectionPreview}>
         <Row>
-          <Col>
+          <Col className="pt-2 pb-2">
             <NextGenTokenPreview
               token_id={sampleToken}
               collection={props.collection}

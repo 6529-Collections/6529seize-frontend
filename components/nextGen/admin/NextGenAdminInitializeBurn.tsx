@@ -1,7 +1,7 @@
 import { Container, Row, Col, Button, Form } from "react-bootstrap";
 import styles from "./NextGenAdmin.module.scss";
 import { useAccount, useContractRead, useSignMessage } from "wagmi";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   FunctionSelectors,
   NEXTGEN_CHAIN_ID,
@@ -30,7 +30,7 @@ interface Props {
 export default function NextGenAdminInitializeBurn(props: Readonly<Props>) {
   const account = useAccount();
   const signMessage = useSignMessage();
-  const uuid = uuidv4();
+  const uuid = useRef(uuidv4()).current;
 
   const globalAdmin = useGlobalAdmin(account.address as string);
   const functionAdmin = useFunctionAdmin(

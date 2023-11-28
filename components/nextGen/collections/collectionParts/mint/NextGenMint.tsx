@@ -1,10 +1,7 @@
 import styles from "../../NextGen.module.scss";
 import { useContractRead, useAccount, useContractReads } from "wagmi";
 import { DELEGATION_ABI } from "../../../../../abis";
-import {
-  DELEGATION_ALL_ADDRESS,
-  DELEGATION_CONTRACT,
-} from "../../../../../constants";
+import { DELEGATION_CONTRACT } from "../../../../../constants";
 import { Col, Container, Row } from "react-bootstrap";
 import { useEffect, useState } from "react";
 import {
@@ -14,12 +11,10 @@ import {
   MintingDetails,
   CollectionWithMerkle,
   AllowlistType,
+  Info,
 } from "../../../nextgen_entities";
 import { fromGWEI } from "../../../../../helpers/Helpers";
-import {
-  ALL_USE_CASE,
-  MINTING_USE_CASE,
-} from "../../../../../pages/delegation/[...section]";
+import { MINTING_USE_CASE } from "../../../../../pages/delegation/[...section]";
 import { NEXTGEN_CHAIN_ID, NEXTGEN_CORE } from "../../../nextgen_contracts";
 import { fetchUrl } from "../../../../../services/6529api";
 import { retrieveCollectionCosts } from "../../../nextgen_helpers";
@@ -27,10 +22,12 @@ import NextGenMintWidget from "./NextGenMintWidget";
 import NextGenMintBurnWidget from "./NextGenMintBurnWidget";
 import NextGenTokenPreview from "../../NextGenTokenPreview";
 import Image from "next/image";
+import { NextGenCountdown, NextGenPhases } from "../NextGenCollectionHeader";
 
 interface Props {
   collection: number;
   collection_preview?: number;
+  info: Info;
   phase_times: PhaseTimes;
   mint_price: number;
   additional_data: AdditionalData;
@@ -70,39 +67,39 @@ export default function NextGenMint(props: Readonly<Props>) {
 
   useContractReads({
     contracts: [
-      {
-        address: DELEGATION_CONTRACT.contract,
-        abi: DELEGATION_ABI as any,
-        chainId: DELEGATION_CONTRACT.chain_id,
-        functionName: "retrieveDelegators",
-        args: [
-          account.address ? account.address : "",
-          DELEGATION_ALL_ADDRESS,
-          ALL_USE_CASE.use_case,
-        ],
-      },
-      {
-        address: DELEGATION_CONTRACT.contract,
-        abi: DELEGATION_ABI as any,
-        chainId: DELEGATION_CONTRACT.chain_id,
-        functionName: "retrieveDelegators",
-        args: [
-          account.address ? account.address : "",
-          DELEGATION_ALL_ADDRESS,
-          MINTING_USE_CASE.use_case,
-        ],
-      },
-      {
-        address: DELEGATION_CONTRACT.contract,
-        abi: DELEGATION_ABI as any,
-        chainId: DELEGATION_CONTRACT.chain_id,
-        functionName: "retrieveDelegators",
-        args: [
-          account.address ? account.address : "",
-          mintingDetails ? mintingDetails.del_address : "",
-          ALL_USE_CASE.use_case,
-        ],
-      },
+      // {
+      //   address: DELEGATION_CONTRACT.contract,
+      //   abi: DELEGATION_ABI as any,
+      //   chainId: DELEGATION_CONTRACT.chain_id,
+      //   functionName: "retrieveDelegators",
+      //   args: [
+      //     account.address ? account.address : "",
+      //     DELEGATION_ALL_ADDRESS,
+      //     ALL_USE_CASE.use_case,
+      //   ],
+      // },
+      // {
+      //   address: DELEGATION_CONTRACT.contract,
+      //   abi: DELEGATION_ABI as any,
+      //   chainId: DELEGATION_CONTRACT.chain_id,
+      //   functionName: "retrieveDelegators",
+      //   args: [
+      //     account.address ? account.address : "",
+      //     DELEGATION_ALL_ADDRESS,
+      //     MINTING_USE_CASE.use_case,
+      //   ],
+      // },
+      // {
+      //   address: DELEGATION_CONTRACT.contract,
+      //   abi: DELEGATION_ABI as any,
+      //   chainId: DELEGATION_CONTRACT.chain_id,
+      //   functionName: "retrieveDelegators",
+      //   args: [
+      //     account.address ? account.address : "",
+      //     mintingDetails ? mintingDetails.del_address : "",
+      //     ALL_USE_CASE.use_case,
+      //   ],
+      // },
       {
         address: DELEGATION_CONTRACT.contract,
         abi: DELEGATION_ABI as any,
@@ -276,30 +273,61 @@ export default function NextGenMint(props: Readonly<Props>) {
   }
 
   return (
-    <Container className="no-padding pb-4">
-      <Row>
-        <Col sm={12} md={5}>
-          <Container className="no-padding">
-            <Row className="pb-4">
-              <Col className={styles.tokenFrameContainerHalf}>
-                {props.collection_preview && (
-                  <NextGenTokenPreview
-                    token_id={props.collection_preview}
-                    collection={props.collection}
-                    hide_info={true}
-                    hide_link={true}
-                  />
-                )}
-              </Col>
-            </Row>
-          </Container>
+    <Container className="no-padding">
+      <Row className="pt-2">
+        <Col
+          xs={12}
+          className="d-flex align-items-center justify-content-between">
+          <a
+            href={`/nextgen/collection/${props.collection}`}
+            className="decoration-hover-underline">
+            <h1 className="mb-0 font-color">
+              #{props.collection} - <b>{props.info.name.toUpperCase()}</b>
+            </h1>
+          </a>
+          <NextGenPhases
+            phase_times={props.phase_times}
+            available={availableSupply}
+          />
         </Col>
-        <Col sm={12} md={7}>
-          <Container className="pt-3 pb-3">
-            <Row>
+        <Col
+          xs={12}
+          className="d-flex align-items-center justify-content-between">
+          <span className="font-larger">
+            by <b>{props.info.artist}</b>
+          </span>
+          <span className="font-larger d-inline-flex align-items-center">
+            <b>
+              {props.additional_data.circulation_supply} /{" "}
+              {props.additional_data.total_supply} minted
+              {availableSupply > 0 && ` | ${availableSupply} remaining`}
+            </b>
+          </span>
+        </Col>
+        <Col xs={12} className="pt-3">
+          <NextGenCountdown
+            collection={props.collection}
+            phase_times={props.phase_times}
+            align="horizontal"
+          />
+        </Col>
+      </Row>
+      <Row className="pt-4 pb-4">
+        <Col className="d-flex align-items-start justify-content-start gap-3">
+          {props.collection_preview && (
+            <NextGenTokenPreview
+              token_id={props.collection_preview}
+              collection={props.collection}
+              hide_info={true}
+              hide_link={true}
+              hide_background={true}
+            />
+          )}
+          <Container className="no-padding">
+            <Row className="pt-2">
               <Col className="d-flex gap-2">
                 <span
-                  className={`mb-0 d-flex align-items-center gap-2 ${styles.nextgenTag}`}>
+                  className={`mb-0 d-flex align-items-center gap-2 no-wrap ${styles.nextgenTag}`}>
                   <span>Mint Cost</span>
                   <span>|</span>
                   <span className="font-bolder">
@@ -308,7 +336,7 @@ export default function NextGenMint(props: Readonly<Props>) {
                   </span>
                 </span>
                 <span
-                  className={`mb-0 d-flex align-items-center gap-2 ${styles.nextgenTag}`}>
+                  className={`mb-0 d-flex align-items-center gap-2 no-wrap ${styles.nextgenTag}`}>
                   <span>Sales Model</span>
                   <span>|</span>
                   <span className="font-bolder">{getSalesModel()}</span>

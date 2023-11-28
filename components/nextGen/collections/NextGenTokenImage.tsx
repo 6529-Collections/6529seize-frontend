@@ -26,28 +26,32 @@ export function NextGenTokenImageContent(props: Readonly<Props>) {
     setImage(props.token.image);
   }, [props.token.image]);
 
+  function getDataFromUrl(url: string) {
+    fetch(url)
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.image) {
+          setImage(parseIpfsUrl(data.image));
+        }
+        if (!props.preview && data.animation_url) {
+          setAnimation(parseIpfsUrl(data.animation_url));
+        }
+        if (data.name && props.setName) props.setName(data.name);
+        if (data.description && props.setDescription)
+          props.setDescription(data.description);
+      })
+      .catch((err) => {
+        // ignore err
+      });
+  }
+
   useEffect(() => {
     if (!props.token.data && props.token.uri) {
       let url = parseIpfsUrl(props.token.uri);
       if (props.setMetadata) {
         props.setMetadata(url);
       }
-      fetch(url)
-        .then((res) => res.json())
-        .then((data) => {
-          if (data.image) {
-            setImage(parseIpfsUrl(data.image));
-          }
-          if (!props.preview && data.animation_url) {
-            setAnimation(parseIpfsUrl(data.animation_url));
-          }
-          if (data.name && props.setName) props.setName(data.name);
-          if (data.description && props.setDescription)
-            props.setDescription(data.description);
-        })
-        .catch((err) => {
-          // ignore err
-        });
+      getDataFromUrl(url);
     }
   }, [props.token]);
 
@@ -106,21 +110,6 @@ export default function NextGenTokenImage(props: Readonly<Props>) {
             setName={props.setName}
             setDescription={props.setDescription}
           />
-          <div
-            className={`${styles.tokenImageOverlay} ${
-              props.show_link ? `cursor-pointer` : ``
-            }`}
-            onClick={() => {
-              if (props.show_link) {
-                window.location.href = `/nextgen/token/${props.token.id}`;
-              }
-            }}
-            onKeyDown={(e) => {
-              if (props.show_link && (e.key === "Enter" || e.key === " ")) {
-                window.location.href = `/nextgen/token/${props.token.id}`;
-              }
-            }}
-            tabIndex={0}></div>
         </Col>
       </Row>
     </Container>

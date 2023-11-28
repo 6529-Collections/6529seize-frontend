@@ -1,7 +1,7 @@
 import { Container, Row, Col, Button, Form } from "react-bootstrap";
 import styles from "./NextGenAdmin.module.scss";
 import { useAccount, useSignMessage } from "wagmi";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 import { FunctionSelectors } from "../nextgen_contracts";
 import {
@@ -26,7 +26,7 @@ export default function NextGenAdminInitializeExternalBurnSwap(
 ) {
   const account = useAccount();
   const signMessage = useSignMessage();
-  const uuid = uuidv4();
+  const uuid = useRef(uuidv4()).current;
 
   const globalAdmin = useGlobalAdmin(account.address as string);
   const functionAdmin = useFunctionAdmin(

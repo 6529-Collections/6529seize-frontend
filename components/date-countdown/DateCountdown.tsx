@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 interface Props {
   title: string;
   date: Date;
+  align: "vertical" | "horizontal";
 }
 
 export default function DateCountdown(props: Readonly<Props>) {
@@ -53,7 +54,12 @@ export default function DateCountdown(props: Readonly<Props>) {
   }, [props.date]);
 
   return (
-    <span className="d-flex flex-column">
+    <span
+      className={
+        props.align === "horizontal"
+          ? `d-flex align-items-center gap-2 justify-content-center`
+          : "d-flex flex-column"
+      }>
       <span>{props.title}</span>
       <span className="font-larger font-bolder">
         {timeLeft.days > 0 && (

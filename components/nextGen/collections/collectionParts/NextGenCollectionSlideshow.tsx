@@ -42,7 +42,9 @@ export default function NextGenCollectionSlideshow(props: Readonly<Props>) {
                     setCurrentSlide(props.start_index + swiper.realIndex);
                   }}>
                   {tokens.map((token) => (
-                    <SwiperSlide key={`nextgen-carousel-${token}`}>
+                    <SwiperSlide
+                      key={`nextgen-carousel-${token}`}
+                      className="pt-2 pb-2">
                       <NextGenTokenPreview
                         collection={props.collection}
                         token_id={token}

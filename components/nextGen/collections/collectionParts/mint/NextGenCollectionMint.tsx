@@ -13,7 +13,6 @@ import {
   NEXTGEN_CHAIN_ID,
   NEXTGEN_MINTER,
 } from "../../../nextgen_contracts";
-import NextGenCollectionHeader from "../NextGenCollectionHeader";
 import Breadcrumb, { Crumb } from "../../../../breadcrumb/Breadcrumb";
 
 interface Props {
@@ -108,25 +107,18 @@ export default function NextGenCollectionMint(props: Readonly<Props>) {
   return (
     <>
       <Breadcrumb breadcrumbs={breadcrumbs} />
-      <Container className="pt-4 pb-4">
-        {phaseTimes && additionalData && infoSettled && info && (
-          <>
+      <Container>
+        {phaseTimes &&
+          additionalData &&
+          infoSettled &&
+          info &&
+          !!tokenStartIndex && (
             <Row>
-              <Col>
-                <NextGenCollectionHeader
-                  collection={props.collection}
-                  info={info}
-                  phase_times={phaseTimes}
-                  additional_data={additionalData}
-                  collection_link={true}
-                />
-              </Col>
-            </Row>
-            <Row className="pt-2">
               <Col>
                 <NextGenMint
                   collection={props.collection}
                   collection_preview={tokenStartIndex}
+                  info={info}
                   phase_times={phaseTimes}
                   mint_price={mintPrice}
                   additional_data={additionalData}
@@ -134,8 +126,7 @@ export default function NextGenCollectionMint(props: Readonly<Props>) {
                 />
               </Col>
             </Row>
-          </>
-        )}
+          )}
       </Container>
     </>
   );

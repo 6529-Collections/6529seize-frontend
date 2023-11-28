@@ -17,9 +17,7 @@ enum TypeFilter {
 export function Spinner() {
   return (
     <div className="d-inline">
-      <output className={`spinner-border ${styles.loader}`}>
-        <span className="sr-only">Loading...</span>
-      </output>
+      <output className={`spinner-border ${styles.loader}`}></output>
     </div>
   );
 }

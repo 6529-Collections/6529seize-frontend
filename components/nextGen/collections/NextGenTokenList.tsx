@@ -16,7 +16,8 @@ export default function NextGenTokenList(props: Readonly<Props>) {
             xs={6}
             sm={4}
             md={3}
-            key={`collection-${props.collection}-token-list-${t}`}>
+            key={`collection-${props.collection}-token-list-${t}`}
+            className="pt-2 pb-2">
             <NextGenTokenPreview
               token_id={t}
               collection={props.collection}

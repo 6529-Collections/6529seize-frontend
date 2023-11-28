@@ -85,7 +85,7 @@ export default function NextGenTokenPreview(props: Readonly<Props>) {
 
   function printToken() {
     return (
-      <Container className="no-padding pt-3 pb-3">
+      <Container className="no-padding">
         <Row>
           <Col className="text-center">
             <NextGenTokenImage
