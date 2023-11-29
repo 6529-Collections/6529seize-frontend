@@ -5,6 +5,8 @@ import FacebookIcon from "../utils/FacebookIcon";
 import GithubIcon from "../utils/GithubIcon";
 import InstagramIcon from "../utils/InstagramIcon";
 import LinkedInIcon from "../utils/LinkedInIcon";
+import MediumIcon from "../utils/MediumIcon";
+import MirrorIcon from "../utils/MirrorIcon";
 import OpenseaIcon from "../utils/OpenseaIcon";
 import RedditIcon from "../utils/RedditIcon";
 import SubstackIcon from "../utils/SubstackIcon";
@@ -13,21 +15,44 @@ import TikTokIcon from "../utils/TikTokIcon";
 import WeChatIcon from "../utils/WeChatIcon";
 import WeiboIcon from "../utils/WeiboIcon";
 import XIcon from "../utils/XIcon";
+import YoutubeIcon from "../utils/YoutubeIcon";
 
 export default function UserPageIdentityStatements() {
   return (
     <div className="tw-mt-10">
       <div className="tw-bg-neutral-800 tw-border tw-border-white/5 tw-border-solid tw-rounded-xl">
-        <div className="tw-pt-5 tw-px-8 tw-flex">
-          <div className="tw-pb-2.5 tw-w-full tw-border-b tw-border-t-0 tw-border-x-0 tw-border-solid tw-border-neutral-700">
+        <div className="tw-h-16 tw-px-8">
+          <div className="tw-h-full tw-flex tw-items-center tw-justify-between tw-w-full tw-border-b tw-border-t-0 tw-border-x-0 tw-border-solid tw-border-neutral-700">
             <h3 className="tw-text-lg tw-font-semibold tw-text-neutral-50 tw-tracking-tight">
               <span>Simo&apos;s</span> ID Statements
             </h3>
+            <button
+              type="button"
+              className="tw-cursor-pointer tw-bg-transparent tw-px-4 tw-py-2 tw-text-sm tw-font-medium tw-text-white tw-border tw-border-solid tw-border-neutral-700 tw-rounded-lg hover:tw-bg-neutral-700 hover:tw-border-neutral-700 active:tw-scale-95 tw-transition tw-duration-300 tw-ease-out"
+            >
+              <svg
+                className="tw-h-5 tw-w-5 tw-text-white -tw-ml-1 tw-mr-2 tw-flex-shrink-0"
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M12 5V19M5 12H19"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+              Add
+            </button>
           </div>
         </div>
+
         <div className="tw-p-8 tw-mx-auto tw-grid tw-max-w-2xl tw-grid-cols-1 tw-gap-x-8 tw-gap-y-16 tw-sm:gap-y-20 tw-lg:mx-0 lg:tw-max-w-none lg:tw-grid-cols-3">
           <div className="tw-col-span-2 tw-space-y-5">
             <div className="tw-grid tw-grid-cols-1 tw-gap-x-8 tw-gap-y-5 sm:tw-grid-cols-2">
+              {/* Consolidated Addresses */}
               <div>
                 <div className="tw-flex tw-items-center tw-space-x-4">
                   <div className="tw-flex tw-h-9 tw-w-9 tw-items-center tw-justify-center tw-rounded-lg tw-bg-neutral-700 tw-border tw-border-solid tw-border-neutral-600">
@@ -40,73 +65,11 @@ export default function UserPageIdentityStatements() {
                   </span>
                 </div>
                 <ul className="tw-mt-6 tw-list-none tw-space-y-4 tw-pl-0 tw-text-base tw-leading-7 tw-text-gray-600">
-                  <li className="tw-flex itw-items-center tw-text-sm tw-font-medium tw-text-neutral-50 tw-space-x-3">
-                    <div className="tw-flex-shrink-0 tw-h-6 tw-w-6">
+                  <li className="tw-group tw-flex tw-items-center tw-group tw-cursor-pointer  tw-text-sm tw-font-medium tw-text-neutral-50 hover:tw-text-neutral-300 tw-transition tw-duration-300 tw-ease-out tw-space-x-3">
+                    <div className="tw-cursor-pointer tw-flex-shrink-0 tw-h-6 tw-w-6 hover:tw-scale-110 tw-transition tw-duration-300 tw-ease-out">
                       <OpenseaIcon />
                     </div>
-                    <div className="tw-flex-shrink-0 tw-h-6 tw-w-6">
-                      <EtherscanIcon />
-                    </div>
-                    <div className="tw-space-x-3 tw-inline-flex tw-items-center">
-                      <span>0xFD22</span>
-                      <span>6529.eth</span>
-                      <div className="tw-inline-flex tw-items-center">
-                        <svg
-                          className="tw-flex-shrink-0 tw-w-5 tw-h-5"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          xmlns="http://www.w3.org/2000/svg"
-                        >
-                          <path
-                            d="M20 6L9 17L4 12"
-                            stroke="#3CCB7F"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          />
-                        </svg>
-                        <span className="tw-ml-1 tw-text-xs tw-font-bold tw-text-neutral-500">
-                          Primary
-                        </span>
-                      </div>
-                    </div>
-                  </li>
-                  <li className="tw-flex itw-items-center tw-text-sm tw-font-medium tw-text-neutral-50 tw-space-x-3">
-                    <div className="tw-flex-shrink-0 tw-h-6 tw-w-6">
-                      <OpenseaIcon />
-                    </div>
-                    <div className="tw-flex-shrink-0 tw-h-6 tw-w-6">
-                      <EtherscanIcon />
-                    </div>
-                    <div className="tw-space-x-3 tw-inline-flex tw-items-center">
-                      <span>0xFD22</span>
-                      <span>6529.eth</span>
-                      <div className="tw-inline-flex tw-items-center">
-                        <svg
-                          className="tw-flex-shrink-0 tw-w-5 tw-h-5"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          xmlns="http://www.w3.org/2000/svg"
-                        >
-                          <path
-                            d="M20 6L9 17L4 12"
-                            stroke="#3CCB7F"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          />
-                        </svg>
-                        <span className="tw-ml-1 tw-text-xs tw-font-bold tw-text-neutral-500">
-                          Primary
-                        </span>
-                      </div>
-                    </div>
-                  </li>
-                  <li className="tw-flex itw-items-center tw-text-sm tw-font-medium tw-text-neutral-50 tw-space-x-3">
-                    <div className="tw-flex-shrink-0 tw-h-6 tw-w-6">
-                      <OpenseaIcon />
-                    </div>
-                    <div className="tw-flex-shrink-0 tw-h-6 tw-w-6">
+                    <div className="tw-cursor-pointer tw-flex-shrink-0 tw-h-6 tw-w-6  hover:tw-scale-110 tw-transition tw-duration-300 tw-ease-out">
                       <EtherscanIcon />
                     </div>
                     <div className="tw-space-x-3 tw-inline-flex tw-items-center">
@@ -135,6 +98,7 @@ export default function UserPageIdentityStatements() {
                   </li>
                 </ul>
               </div>
+              {/* Social Media Accounts */}
               <div>
                 <div className="tw-flex tw-items-center tw-space-x-4">
                   <div className="tw-flex tw-h-9 tw-w-9 tw-items-center tw-justify-center tw-rounded-lg tw-bg-neutral-700 tw-border tw-border-solid tw-border-neutral-600">
@@ -160,121 +124,90 @@ export default function UserPageIdentityStatements() {
                   </span>
                 </div>
                 <ul className="tw-mt-6 tw-list-none tw-space-y-4 tw-pl-0 tw-text-base tw-leading-7 tw-text-gray-600">
-                  <li className="tw-flex itw-items-center tw-text-sm tw-font-medium tw-text-neutral-50 tw-space-x-3">
-                    <div className="tw-flex-shrink-0 tw-h-6 tw-w-6">
+                  <li className="tw-group tw-cursor-pointer tw-flex tw-items-center tw-text-sm tw-font-medium tw-text-neutral-50 hover:tw-text-neutral-400 tw-transition tw-duration-300 tw-ease-out tw-space-x-3">
+                    <div className="tw-cursor-pointer tw-w-6 tw-h-6 group-hover:tw-scale-110 tw-transition tw-duration-300 tw-ease-out">
                       <FacebookIcon />
                     </div>
                     <span className="tw-flex tw-items-center">
                       facebook account
                     </span>
                   </li>
-                  <li className="tw-flex itw-items-center tw-text-sm tw-font-medium tw-text-neutral-50 tw-space-x-3">
-                    <div className="tw-flex-shrink-0 tw-h-6 tw-w-6">
+                  <li className="tw-group tw-cursor-pointer tw-flex tw-items-center tw-text-sm tw-font-medium tw-text-neutral-50 hover:tw-text-neutral-400 tw-transition tw-duration-300 tw-ease-out tw-space-x-3">
+                    <div className="tw-cursor-pointer tw-flex-shrink-0 tw-h-6 tw-w-6 group-hover:tw-scale-110 tw-transition tw-duration-300 tw-ease-out">
                       <XIcon />
                     </div>
                     <span className="tw-flex tw-items-center">x account</span>
                   </li>
-                  <li className="tw-flex itw-items-center tw-text-sm tw-font-medium tw-text-neutral-50 tw-space-x-3">
-                    <div className="tw-flex-shrink-0 tw-h-6 tw-w-6">
+                  <li className="tw-group tw-cursor-pointer tw-flex tw-items-center tw-text-sm tw-font-medium tw-text-neutral-50 hover:tw-text-neutral-400 tw-transition tw-duration-300 tw-ease-out tw-space-x-3">
+                    <div className="tw-cursor-pointer tw-flex-shrink-0 tw-h-6 tw-w-6 group-hover:tw-scale-110 tw-transition tw-duration-300 tw-ease-out">
                       <LinkedInIcon />
                     </div>
                     <span className="tw-flex tw-items-center">
                       linkedin account
                     </span>
                   </li>
-                  <li className="tw-flex itw-items-center tw-text-sm tw-font-medium tw-text-neutral-50 tw-space-x-3">
-                    <div className="tw-flex-shrink-0 tw-h-6 tw-w-6">
+                  <li className="tw-group tw-cursor-pointer tw-flex tw-items-center tw-text-sm tw-font-medium tw-text-neutral-50 hover:tw-text-neutral-400 tw-transition tw-duration-300 tw-ease-out tw-space-x-3">
+                    <div className="tw-cursor-pointer tw-flex-shrink-0 tw-h-6 tw-w-6 group-hover:tw-scale-110 tw-transition tw-duration-300 tw-ease-out">
                       <InstagramIcon />
                     </div>
                     <span className="tw-flex tw-items-center">
                       instagram account
                     </span>
                   </li>
-                  <li className="tw-flex itw-items-center tw-text-sm tw-font-medium tw-text-neutral-50 tw-space-x-3">
-                    <div className="tw-flex-shrink-0 tw-h-6 tw-w-6">
+                  <li className="tw-group tw-cursor-pointer tw-flex tw-items-center tw-text-sm tw-font-medium tw-text-neutral-50 hover:tw-text-neutral-400 tw-transition tw-duration-300 tw-ease-out tw-space-x-3">
+                    <div className="tw-cursor-pointer tw-flex-shrink-0 tw-h-6 tw-w-6 group-hover:tw-scale-110 tw-transition tw-duration-300 tw-ease-out">
                       <TikTokIcon />
                     </div>
                     <span className="tw-flex tw-items-center">tiktok</span>
                   </li>
-                  <li className="tw-flex itw-items-center tw-text-sm tw-font-medium tw-text-neutral-50 tw-space-x-3">
-                    <div className="tw-flex-shrink-0 tw-h-6 tw-w-6">
+                  <li className="tw-group tw-cursor-pointer tw-flex tw-items-center tw-text-sm tw-font-medium tw-text-neutral-50 hover:tw-text-neutral-400 tw-transition tw-duration-300 tw-ease-out tw-space-x-3">
+                    <div className="tw-cursor-pointer tw-flex-shrink-0 tw-h-6 tw-w-6 group-hover:tw-scale-110 tw-transition tw-duration-300 tw-ease-out">
                       <GithubIcon />
                     </div>
                     <span className="tw-flex tw-items-center">github</span>
                   </li>
-                  <li className="tw-flex itw-items-center tw-text-sm tw-font-medium tw-text-neutral-50 tw-space-x-3">
-                    <div className="tw-flex-shrink-0 tw-h-6 tw-w-6">
+                  <li className="tw-group tw-cursor-pointer tw-flex tw-items-center tw-text-sm tw-font-medium tw-text-neutral-50 hover:tw-text-neutral-400 tw-transition tw-duration-300 tw-ease-out tw-space-x-3">
+                    <div className="tw-cursor-pointer tw-flex-shrink-0 tw-h-6 tw-w-6 group-hover:tw-scale-110 tw-transition tw-duration-300 tw-ease-out">
                       <RedditIcon />
                     </div>
                     <span className="tw-flex tw-items-center">reddit</span>
                   </li>
-                  <li className="tw-flex itw-items-center tw-text-sm tw-font-medium tw-text-neutral-50 tw-space-x-3">
-                    <div className="tw-flex-shrink-0 tw-h-6 tw-w-6">
+                  <li className="tw-group tw-cursor-pointer tw-flex tw-items-center tw-text-sm tw-font-medium tw-text-neutral-50 hover:tw-text-neutral-400 tw-transition tw-duration-300 tw-ease-out tw-space-x-3">
+                    <div className="tw-cursor-pointer tw-flex-shrink-0 tw-h-6 tw-w-6 group-hover:tw-scale-110 tw-transition tw-duration-300 tw-ease-out">
                       <WeiboIcon />
                     </div>
                     <span className="tw-flex tw-items-center">weibo</span>
                   </li>
-                  <li className="tw-flex itw-items-center tw-text-sm tw-font-medium tw-text-neutral-50 tw-space-x-3">
-                    <div className="tw-flex-shrink-0 tw-h-6 tw-w-6">
+                  <li className="tw-group tw-cursor-pointer tw-flex tw-items-center tw-text-sm tw-font-medium tw-text-neutral-50 hover:tw-text-neutral-400 tw-transition tw-duration-300 tw-ease-out tw-space-x-3">
+                    <div className="tw-cursor-pointer tw-flex-shrink-0 tw-h-6 tw-w-6 group-hover:tw-scale-110 tw-transition tw-duration-300 tw-ease-out">
                       <SubstackIcon />
                     </div>
                     <span className="tw-flex tw-items-center">substack</span>
                   </li>
-                  <li className="tw-flex itw-items-center tw-text-sm tw-font-medium tw-text-neutral-50 tw-space-x-3">
-                    <svg
-                      className="tw-h-5 tw-w-6 tw-text-neutral-100"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        d="M12 2C14.5013 4.73835 15.9228 8.29203 16 12C15.9228 15.708 14.5013 19.2616 12 22M12 2C9.49872 4.73835 8.07725 8.29203 8 12C8.07725 15.708 9.49872 19.2616 12 22M12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22M12 2C17.5228 2 22 6.47715 22 12C22 17.5228 17.5228 22 12 22M2.50002 9H21.5M2.5 15H21.5"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                    </svg>
+                  <li className="tw-group tw-cursor-pointer tw-flex tw-items-center tw-text-sm tw-font-medium tw-text-neutral-50 hover:tw-text-neutral-400 tw-transition tw-duration-300 tw-ease-out tw-space-x-3">
+                    <div className="tw-cursor-pointer tw-flex-shrink-0 tw-h-6 tw-w-6 group-hover:tw-scale-110 tw-transition tw-duration-300 tw-ease-out">
+                      <MediumIcon />
+                    </div>
                     <span className="tw-flex tw-items-center">medium</span>
                   </li>
-                  <li className="tw-flex itw-items-center tw-text-sm tw-font-medium tw-text-neutral-50 tw-space-x-3">
-                    <svg
-                      className="tw-h-5 tw-w-6 tw-text-neutral-100"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        d="M12 2C14.5013 4.73835 15.9228 8.29203 16 12C15.9228 15.708 14.5013 19.2616 12 22M12 2C9.49872 4.73835 8.07725 8.29203 8 12C8.07725 15.708 9.49872 19.2616 12 22M12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22M12 2C17.5228 2 22 6.47715 22 12C22 17.5228 17.5228 22 12 22M2.50002 9H21.5M2.5 15H21.5"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                    </svg>
+                  <li className="tw-group tw-cursor-pointer tw-flex tw-items-center tw-text-sm tw-font-medium tw-text-neutral-50 hover:tw-text-neutral-400 tw-transition tw-duration-300 tw-ease-out tw-space-x-3">
+                    <div className="tw-cursor-pointer tw-flex-shrink-0 tw-h-6 tw-w-6 group-hover:tw-scale-110 tw-transition tw-duration-300 tw-ease-out">
+                      <MirrorIcon />
+                    </div>
                     <span className="tw-flex tw-items-center">mirror.xyz</span>
                   </li>
-                  <li className="tw-flex itw-items-center tw-text-sm tw-font-medium tw-text-neutral-50 tw-space-x-3">
-                    <svg
-                      className="tw-h-5 tw-w-6 tw-text-neutral-100"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        d="M12 2C14.5013 4.73835 15.9228 8.29203 16 12C15.9228 15.708 14.5013 19.2616 12 22M12 2C9.49872 4.73835 8.07725 8.29203 8 12C8.07725 15.708 9.49872 19.2616 12 22M12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22M12 2C17.5228 2 22 6.47715 22 12C22 17.5228 17.5228 22 12 22M2.50002 9H21.5M2.5 15H21.5"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                    </svg>
+                  <li className="tw-group tw-cursor-pointer tw-flex tw-items-center tw-text-sm tw-font-medium tw-text-neutral-50 hover:tw-text-neutral-400 tw-transition tw-duration-300 tw-ease-out tw-space-x-3">
+                    <div className="tw-cursor-pointer tw-flex-shrink-0 tw-h-6 tw-w-6 group-hover:tw-scale-110 tw-transition tw-duration-300 tw-ease-out">
+                      <YoutubeIcon />
+                    </div>
                     <span className="tw-flex tw-items-center">youtube</span>
                   </li>
                 </ul>
               </div>
             </div>
+
             <div className="tw-grid tw-grid-cols-1 tw-gap-x-8 tw-gap-y-5 sm:tw-grid-cols-2">
+              {/* Contact */}
               <div>
                 <div className="tw-flex tw-items-center tw-space-x-4">
                   <div className="tw-flex tw-h-9 tw-w-9 tw-items-center tw-justify-center tw-rounded-lg tw-bg-neutral-700 tw-border tw-border-solid tw-border-neutral-600">
@@ -300,33 +233,33 @@ export default function UserPageIdentityStatements() {
                   </span>
                 </div>
                 <ul className="tw-mt-6 tw-list-none tw-space-y-4 tw-pl-0 tw-text-base tw-leading-7 tw-text-gray-600">
-                  <li className="tw-flex itw-items-center tw-text-sm tw-font-medium tw-text-neutral-50 tw-space-x-3">
-                    <div className="tw-flex-shrink-0 tw-h-6 tw-w-6">
+                  <li className="tw-group tw-cursor-pointer tw-flex tw-items-center tw-text-sm tw-font-medium tw-text-neutral-50 hover:tw-text-neutral-400 tw-transition tw-duration-300 tw-ease-out tw-space-x-3">
+                    <div className="tw-cursor-pointer tw-flex-shrink-0 tw-h-6 tw-w-6 group-hover:tw-scale-110 tw-transition tw-duration-300 tw-ease-out">
                       <DiscordIcon />
                     </div>
                     <span className="tw-flex tw-items-center">
                       discord account
                     </span>
                   </li>
-                  <li className="tw-flex itw-items-center tw-text-sm tw-font-medium tw-text-neutral-50 tw-space-x-3">
-                    <div className="tw-flex-shrink-0 tw-h-6 tw-w-6">
+                  <li className="tw-group tw-cursor-pointer tw-flex tw-items-center tw-text-sm tw-font-medium tw-text-neutral-50 hover:tw-text-neutral-400 tw-transition tw-duration-300 tw-ease-out tw-space-x-3">
+                    <div className="tw-cursor-pointer tw-flex-shrink-0 tw-h-6 tw-w-6 group-hover:tw-scale-110 tw-transition tw-duration-300 tw-ease-out">
                       <TelegramIcon />
                     </div>
                     <span className="tw-flex tw-items-center">
                       telegram account
                     </span>
                   </li>
-                  <li className="tw-flex itw-items-center tw-text-sm tw-font-medium tw-text-neutral-50 tw-space-x-3">
-                    <div className="tw-flex-shrink-0 tw-h-6 tw-w-6">
+                  <li className="tw-group tw-cursor-pointer tw-flex tw-items-center tw-text-sm tw-font-medium tw-text-neutral-50 hover:tw-text-neutral-400 tw-transition tw-duration-300 tw-ease-out tw-space-x-3">
+                    <div className="tw-cursor-pointer tw-flex-shrink-0 tw-h-6 tw-w-6 group-hover:tw-scale-110 tw-transition tw-duration-300 tw-ease-out">
                       <WeChatIcon />
                     </div>
                     <span className="tw-flex tw-items-center">
                       wechat account
                     </span>
                   </li>
-                  <li className="tw-flex itw-items-center tw-text-sm tw-font-medium tw-text-neutral-50 tw-space-x-3">
+                  <li className="tw-group tw-cursor-pointer tw-flex tw-items-center tw-text-sm tw-font-medium tw-text-neutral-50 hover:tw-text-neutral-400 tw-transition tw-duration-300 tw-ease-out tw-space-x-3">
                     <svg
-                      className="tw-h-5 tw-w-6 tw-text-neutral-100"
+                      className="tw-h-5 tw-w-6 tw-text-neutral-100 group-hover:tw-scale-110 tw-transition tw-duration-300 tw-ease-out"
                       viewBox="0 0 24 24"
                       fill="none"
                       xmlns="http://www.w3.org/2000/svg"
@@ -343,9 +276,9 @@ export default function UserPageIdentityStatements() {
                       phone number
                     </span>
                   </li>
-                  <li className="tw-flex itw-items-center tw-text-sm tw-font-medium tw-text-neutral-50 tw-space-x-3">
+                  <li className="tw-group tw-cursor-pointer tw-flex tw-items-center tw-text-sm tw-font-medium tw-text-neutral-50 hover:tw-text-neutral-400 tw-transition tw-duration-300 tw-ease-out tw-space-x-3">
                     <svg
-                      className="tw-h-5 tw-w-6 tw-text-neutral-100"
+                      className="tw-h-5 tw-w-6 tw-text-neutral-100 group-hover:tw-scale-110 tw-transition tw-duration-300 tw-ease-out"
                       viewBox="0 0 24 24"
                       fill="none"
                       xmlns="http://www.w3.org/2000/svg"
@@ -361,9 +294,9 @@ export default function UserPageIdentityStatements() {
 
                     <span className="tw-flex tw-items-center">email</span>
                   </li>
-                  <li className="tw-flex itw-items-center tw-text-sm tw-font-medium tw-text-neutral-50 tw-space-x-3">
+                  <li className="tw-group tw-cursor-pointer tw-flex tw-items-center tw-text-sm tw-font-medium tw-text-neutral-50 hover:tw-text-neutral-400 tw-transition tw-duration-300 tw-ease-out tw-space-x-3">
                     <svg
-                      className="tw-h-5 tw-w-6 tw-text-neutral-100"
+                      className="tw-h-5 tw-w-6 tw-text-neutral-100 group-hover:tw-scale-110 tw-transition tw-duration-300 tw-ease-out"
                       viewBox="0 0 24 24"
                       fill="none"
                       xmlns="http://www.w3.org/2000/svg"
@@ -380,6 +313,7 @@ export default function UserPageIdentityStatements() {
                   </li>
                 </ul>
               </div>
+              {/* Social Media Verification Posts */}
               <div>
                 <div className="tw-flex tw-items-center tw-space-x-4">
                   <div className="tw-flex tw-h-9 tw-w-9 tw-items-center tw-justify-center tw-rounded-lg tw-bg-neutral-700 tw-border tw-border-solid tw-border-neutral-600">
@@ -403,9 +337,9 @@ export default function UserPageIdentityStatements() {
                   </span>
                 </div>
                 <ul className="tw-mt-6 tw-list-none tw-space-y-4 tw-pl-0 tw-text-base tw-leading-7 tw-text-gray-600">
-                  <li className="tw-flex itw-items-center tw-text-sm tw-font-medium tw-text-neutral-50 tw-space-x-3">
+                  <li className="tw-flex tw-items-center tw-text-sm tw-font-medium tw-text-neutral-50 tw-group tw-cursor-pointer  hover:tw-text-neutral-300 tw-transition tw-duration-300 tw-ease-out tw-space-x-3">
                     <svg
-                      className="tw-h-5 tw-w-6 tw-text-neutral-100"
+                      className="tw-h-5 tw-w-6 tw-text-neutral-100 group-hover:tw-scale-110 tw-transition tw-duration-300 tw-ease-out"
                       viewBox="0 0 24 24"
                       fill="none"
                       xmlns="http://www.w3.org/2000/svg"
@@ -426,8 +360,9 @@ export default function UserPageIdentityStatements() {
               </div>
             </div>
           </div>
-          <div className="tw-col-span-1">
-            <ul className="tw-list-disc tw-text-neutral-400 tw-text-sm tw-font-normal tw-space-y-1">
+
+          <div className="tw-col-span-1 tw-ml-auto">
+            <ul className="tw-list-disc tw-text-neutral-500 tw-text-sm tw-font-normal tw-space-y-1">
               <li>All statements are optional.</li>
               <li>All statements are fully and permanently public.</li>
               <li>
