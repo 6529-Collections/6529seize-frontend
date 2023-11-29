@@ -21,8 +21,10 @@ import { v4 as uuidv4 } from "uuid";
 import { NULL_ADDRESS } from "../../../constants";
 import { postData } from "../../../services/6529api";
 import { printAdminErrors } from "./NextGenAdmin";
-import { NextGenAdminHeadingRow } from "./NextGenAdminShared";
-import { NextGenAdminStatusFormGroup } from "./NextGenAdminForms";
+import {
+  NextGenAdminHeadingRow,
+  NextGenAdminStatusFormGroup,
+} from "./NextGenAdminShared";
 
 interface Props {
   close: () => void;

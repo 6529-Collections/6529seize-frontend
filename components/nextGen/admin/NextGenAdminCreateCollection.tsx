@@ -3,11 +3,11 @@ import { useEffect, useState } from "react";
 import NextGenContractWriteStatus from "../NextGenContractWriteStatus";
 import { printAdminErrors } from "./NextGenAdmin";
 import { useCoreContractWrite } from "../nextgen_helpers";
-import { NextGenAdminHeadingRow } from "./NextGenAdminShared";
 import {
   NextGenAdminScriptsFormGroup,
   NextGenAdminTextFormGroup,
-} from "./NextGenAdminForms";
+  NextGenAdminHeadingRow,
+} from "./NextGenAdminShared";
 
 interface Props {
   close: () => void;

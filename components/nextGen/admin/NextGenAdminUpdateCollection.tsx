@@ -18,11 +18,9 @@ import { printAdminErrors } from "./NextGenAdmin";
 import {
   NextGenCollectionIdFormGroup,
   NextGenAdminHeadingRow,
-} from "./NextGenAdminShared";
-import {
   NextGenAdminScriptsFormGroup,
   NextGenAdminTextFormGroup,
-} from "./NextGenAdminForms";
+} from "./NextGenAdminShared";
 
 export enum UpdateType {
   UPDATE_INFO,

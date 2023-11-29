@@ -15,8 +15,8 @@ import { printAdminErrors } from "./NextGenAdmin";
 import {
   NextGenCollectionIdFormGroup,
   NextGenAdminHeadingRow,
+  NextGenAdminTextFormGroup,
 } from "./NextGenAdminShared";
-import { NextGenAdminTextFormGroup } from "./NextGenAdminForms";
 
 interface Props {
   close: () => void;

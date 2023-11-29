@@ -15,13 +15,11 @@ import {
 import NextGenContractWriteStatus from "../NextGenContractWriteStatus";
 import { postData } from "../../../services/6529api";
 import { printAdminErrors } from "./NextGenAdmin";
-import { NextGenAdminHeadingRow } from "./NextGenAdminShared";
 import {
   NextGenAdminStatusFormGroup,
   NextGenAdminTextFormGroup,
-} from "./NextGenAdminForms";
-import { Next } from "react-bootstrap/esm/PageItem";
-import NextGen from "../collections/NextGen";
+  NextGenAdminHeadingRow,
+} from "./NextGenAdminShared";
 
 interface Props {
   close: () => void;

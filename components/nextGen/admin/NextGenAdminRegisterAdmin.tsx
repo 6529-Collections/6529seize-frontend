@@ -14,8 +14,8 @@ import { printAdminErrors } from "./NextGenAdmin";
 import {
   NextGenCollectionIdFormGroup,
   NextGenAdminHeadingRow,
+  NextGenAdminTextFormGroup,
 } from "./NextGenAdminShared";
-import { NextGenAdminTextFormGroup } from "./NextGenAdminForms";
 
 export enum ADMIN_TYPE {
   GLOBAL = "GLOBAL",
