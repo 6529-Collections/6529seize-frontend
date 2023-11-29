@@ -10,6 +10,7 @@ import { useEffect, useState } from "react";
 import UserEditProfileButton from "../settings/UserEditProfileButton";
 import { getRandomColor } from "../../../helpers/Helpers";
 import { Inter } from "next/font/google";
+import UserCICTypeIcon from "../utils/user-cic-type/UserCICTypeIcon";
 
 const DEFAULT_BANNER_1 = getRandomColor();
 const DEFAULT_BANNER_2 = getRandomColor();
@@ -77,6 +78,9 @@ export default function UserPageHeader({
                 mainAddress={mainAddress}
                 consolidatedTDH={consolidatedTDH}
               />
+              {/* <span className="tw-ml-2 -tw-mt-1.5 tw-h-5 tw-w-5">
+                <UserCICTypeIcon cic={profile.cic.cic_rating} />
+              </span> */}
 
               <UserPageHeaderLevel level={profile.level} />
               <UserPageHeaderStats consolidatedTDH={consolidatedTDH} />

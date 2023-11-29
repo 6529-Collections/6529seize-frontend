@@ -4,12 +4,18 @@ import { useQuery } from "@tanstack/react-query";
 import { commonApiFetch } from "../../../../services/api/common-api";
 import UserPageIdentityHeaderCIC from "./UserPageIdentityHeaderCIC";
 import UserPageIdentityHeaderCICRate from "./UserPageIdentityHeaderCICRate";
+import { useContext, useEffect, useState } from "react";
+import { AuthContext } from "../../../auth/Auth";
+import { useAccount } from "wagmi";
 
-
-export default function UserPageIdentityHeader() {
+export default function UserPageIdentityHeader({
+  profile: initialProfile,
+}: {
+  profile: IProfileAndConsolidations;
+}) {
   const router = useRouter();
-
   const user = (router.query.user as string).toLowerCase();
+  const { address } = useAccount();
 
   const {
     isLoading,
@@ -23,7 +29,28 @@ export default function UserPageIdentityHeader() {
         endpoint: `profiles/${user}`,
       }),
     enabled: !!user,
+    initialData: initialProfile,
   });
+
+  const amIUser = ({
+    profile,
+    address,
+  }: {
+    profile: IProfileAndConsolidations;
+    address: string | undefined;
+  }) =>
+    profile.consolidation.wallets.some(
+      (wallet) => wallet.wallet.address.toLowerCase() === address?.toLowerCase()
+    );
+
+  const [isMyProfile, setIsMyProfile] = useState<boolean>(
+    amIUser({ profile, address })
+  );
+
+  useEffect(
+    () => setIsMyProfile(amIUser({ profile, address })),
+    [profile, address]
+  );
 
   return (
     <div>
@@ -38,8 +65,8 @@ export default function UserPageIdentityHeader() {
               identity?
             </p>
           </div>
-          {profile && <UserPageIdentityHeaderCIC profile={profile} />}
-          {profile && <UserPageIdentityHeaderCICRate profile={profile} />}
+          <UserPageIdentityHeaderCIC profile={profile} />
+          {!isMyProfile && <UserPageIdentityHeaderCICRate profile={profile} />}
         </div>
       </div>
     </div>

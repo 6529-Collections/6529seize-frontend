@@ -18,8 +18,8 @@ export default function UserPageIdentityHeaderCICRate({
   profile: IProfileAndConsolidations;
 }) {
   const queryClient = useQueryClient();
-  const { myProfile } = useContext(AuthContext);
   const { address } = useAccount();
+  const { requestAuth, setToast } = useContext(AuthContext);
   const {
     isLoading,
     isError,
@@ -84,7 +84,6 @@ export default function UserPageIdentityHeaderCICRate({
     }
   );
 
-  const { requestAuth, setToast } = useContext(AuthContext);
   const [myAvailableCIC, setMyAvailableCIC] = useState<number>(
     myCICState?.cic_ratings_left_to_give_by_rater ?? 0
   );

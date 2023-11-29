@@ -41,7 +41,7 @@ const Page: NextPageWithLayout<{ pageProps: UserPageIdentityProps }> = ({
       );
     }
   }
-  return <UserPageIdentity />;
+  return <UserPageIdentity profile={pageProps.profile} />;
 };
 
 Page.getLayout = function getLayout(

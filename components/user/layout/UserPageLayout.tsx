@@ -10,6 +10,8 @@ import { IProfileAndConsolidations } from "../../../entities/IProfile";
 import { ConsolidatedTDHMetrics } from "../../../entities/ITDH";
 import UserPageTabs from "./UserPageTabs";
 import { Inter } from "next/font/google";
+import { useQuery } from "@tanstack/react-query";
+import { commonApiFetch } from "../../../services/api/common-api";
 
 const Header = dynamic(() => import("../../header/Header"), {
   ssr: false,
@@ -22,7 +24,6 @@ const inter = Inter({
   subsets: ["latin"],
   display: "swap",
 });
-
 
 const DEFAULT_IMAGE =
   "https://d3lqz0a4bldqgf.cloudfront.net/seize_images/Seize_Logo_Glasses_2.png";
@@ -42,12 +43,28 @@ export default function UserPageLayout({
 }) {
   const router = useRouter();
   const user = router.query.user as string;
+
+  const {
+    isLoading: isLoadingProfile,
+    isError,
+    data: profile,
+    error,
+  } = useQuery<IProfileAndConsolidations>({
+    queryKey: ["profile", user.toLowerCase()],
+    queryFn: async () =>
+      await commonApiFetch<IProfileAndConsolidations>({
+        endpoint: `profiles/${user}`,
+      }),
+    enabled: !!user,
+    initialData: props.profile,
+  });
+
   const pagenameFull = `${props.title} | 6529 SEIZE`;
 
   const descriptionArray = [];
-  if (props.profile.consolidation.tdh && props.profile.consolidation.tdh > 0) {
+  if (profile.consolidation.tdh && profile.consolidation.tdh > 0) {
     descriptionArray.push(
-      `TDH: ${numberWithCommas(props.profile.consolidation.tdh)}`
+      `TDH: ${numberWithCommas(profile.consolidation.tdh)}`
     );
   }
   if (props.consolidatedTDH?.balance && props.consolidatedTDH?.balance > 0) {
@@ -57,8 +74,7 @@ export default function UserPageLayout({
   }
   descriptionArray.push("6529 SEIZE");
 
-  const mainAddress =
-    props.profile.profile?.primary_wallet ?? user.toLowerCase();
+  const mainAddress = profile.profile?.primary_wallet ?? user.toLowerCase();
 
   const getAddressFromQuery = (): string | null => {
     if (!router.query.address) {
@@ -141,7 +157,7 @@ export default function UserPageLayout({
         <meta property="og:title" content={props.title} />
         <meta
           property="og:image"
-          content={props.profile.profile?.pfp_url ?? DEFAULT_IMAGE}
+          content={profile.profile?.pfp_url ?? DEFAULT_IMAGE}
         />
         <meta
           property="og:description"
@@ -151,9 +167,11 @@ export default function UserPageLayout({
 
       <main className={styles.main}>
         <Header />
-        <div className={`tw-bg-[#121212] tw-min-h-screen tw-pb-16 ${inter.className}` } >
+        <div
+          className={`tw-bg-[#121212] tw-min-h-screen tw-pb-16 ${inter.className}`}
+        >
           <UserPageHeader
-            profile={props.profile}
+            profile={profile}
             mainAddress={mainAddress}
             consolidatedTDH={props.consolidatedTDH}
             activeAddress={activeAddress}
