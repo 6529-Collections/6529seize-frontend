@@ -1,12 +1,12 @@
 import { Col, Container, Row } from "react-bootstrap";
 import { useEffect } from "react";
-import { PhaseTimes, AdditionalData, Info } from "../../../nextgen_entities";
+import { Info } from "../../../nextgen_entities";
 import {
-  useCollectionPhases,
-  useCollectionAdditionalData,
   useCollectionInfo,
   useTokensIndex,
   useSharedState,
+  useCollectionPhasesHook,
+  useCollectionAdditionalHook,
 } from "../../../nextgen_helpers";
 import NextGenCollectionHeader from "../NextGenCollectionHeader";
 import Breadcrumb, { Crumb } from "../../../../breadcrumb/Breadcrumb";
@@ -56,17 +56,8 @@ export default function NextGenCollectionArtPage(props: Readonly<Props>) {
     setInfoSettled(true);
   });
 
-  useCollectionPhases(props.collection, (data: PhaseTimes) => {
-    setPhaseTimes(data);
-  });
-
-  useCollectionAdditionalData(
-    props.collection,
-    (data: AdditionalData) => {
-      setAdditionalData(data);
-    },
-    true
-  );
+  useCollectionPhasesHook(props.collection, setPhaseTimes);
+  useCollectionAdditionalHook(props.collection, setAdditionalData, true);
 
   useTokensIndex("min", props.collection, (data: number) => {
     setTokenStartIndex(data);

@@ -4,13 +4,12 @@ import {
   AdditionalData,
   Info,
   LibraryScript,
-  MintingDetails,
   PhaseTimes,
 } from "../../nextgen_entities";
 import { addProtocol, fromGWEI } from "../../../../helpers/Helpers";
 import { useState } from "react";
 import {
-  useCollectionCosts,
+  useCollectionCostsHook,
   useCollectionLibraryAndScript,
   useSharedState,
 } from "../../nextgen_helpers";
@@ -34,8 +33,9 @@ export default function NextGenCollectionDetails(props: Readonly<Props>) {
     useSharedState();
 
   const [scriptClamped, setScriptClamped] = useState<boolean>(true);
-
   const [isCopied, setIsCopied] = useState<boolean>(false);
+
+  useCollectionCostsHook(props.collection, setMintingDetails);
 
   function copy(text: any) {
     navigator.clipboard.writeText(text);
@@ -60,10 +60,6 @@ export default function NextGenCollectionDetails(props: Readonly<Props>) {
       </span>
     );
   }
-
-  useCollectionCosts(props.collection, (data: MintingDetails) => {
-    setMintingDetails(data);
-  });
 
   useCollectionLibraryAndScript(props.collection, (data: LibraryScript) => {
     setLibraryScript(data);

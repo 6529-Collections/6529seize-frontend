@@ -2,12 +2,7 @@ import styles from "./NextGen.module.scss";
 import { mainnet, useAccount, useContractRead, useEnsName } from "wagmi";
 import { Col, Container, Row, Table } from "react-bootstrap";
 import { useState } from "react";
-import {
-  AdditionalData,
-  Info,
-  PhaseTimes,
-  TokenURI,
-} from "../nextgen_entities";
+import { TokenURI } from "../nextgen_entities";
 import NextGenTokenImage from "./NextGenTokenImage";
 import Address from "../../address/Address";
 import Image from "next/image";
@@ -16,13 +11,13 @@ import { NEXTGEN_CHAIN_ID, NEXTGEN_CORE } from "../nextgen_contracts";
 import NextGenCollectionHeader from "./collectionParts/NextGenCollectionHeader";
 import { areEqualAddresses } from "../../../helpers/Helpers";
 import {
-  useCollectionAdditionalData,
-  useCollectionInfo,
-  useCollectionPhases,
   extractAttributes,
   extractField,
   extractURI,
   useSharedState,
+  useCollectionPhasesHook,
+  useCollectionAdditionalHook,
+  useCollectionInfoHook,
 } from "../nextgen_helpers";
 
 interface Props {
@@ -92,17 +87,9 @@ export default function NextGenToken(props: Readonly<Props>) {
     },
   });
 
-  useCollectionInfo(props.collection, (data: Info) => {
-    setInfo(data);
-  });
-
-  useCollectionPhases(props.collection, (data: PhaseTimes) => {
-    setPhaseTimes(data);
-  });
-
-  useCollectionAdditionalData(props.collection, (data: AdditionalData) => {
-    setAdditionalData(data);
-  });
+  useCollectionPhasesHook(props.collection, setPhaseTimes);
+  useCollectionAdditionalHook(props.collection, setAdditionalData);
+  useCollectionInfoHook(props.collection, setInfo);
 
   useContractRead({
     address: NEXTGEN_CORE.contract as `0x${string}`,

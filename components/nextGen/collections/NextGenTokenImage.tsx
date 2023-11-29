@@ -58,9 +58,16 @@ export function NextGenTokenImageContent(props: Readonly<Props>) {
   let content;
 
   if (props.token.data && !props.token.image && !props.preview) {
-    content = <iframe srcDoc={props.token.uri} />;
+    content = (
+      <iframe
+        srcDoc={props.token.uri}
+        title={`NextGen Token ${props.token.id}`}
+      />
+    );
   } else if (animation) {
-    content = <iframe src={animation} />;
+    content = (
+      <iframe src={animation} title={`NextGen Token ${props.token.id}`} />
+    );
   } else {
     content = (
       <Image

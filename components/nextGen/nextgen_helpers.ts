@@ -146,6 +146,15 @@ export function useCollectionPhases(
   });
 }
 
+export function useCollectionPhasesHook(
+  collection: number,
+  setPhaseTimes: (data: PhaseTimes) => void
+) {
+  useCollectionPhases(collection, (data: PhaseTimes) => {
+    setPhaseTimes(data);
+  });
+}
+
 export function useCollectionAdditionalData(
   collection: number | string,
   callback: (data: any) => void,
@@ -173,6 +182,20 @@ export function useCollectionAdditionalData(
       }
     },
   });
+}
+
+export function useCollectionAdditionalHook(
+  collection: number,
+  setData: (data: AdditionalData) => void,
+  watch: boolean = false
+) {
+  useCollectionAdditionalData(
+    collection,
+    (data: AdditionalData) => {
+      setData(data);
+    },
+    watch
+  );
 }
 
 export function useCollectionInfo(
@@ -204,6 +227,20 @@ export function useCollectionInfo(
       }
     },
   });
+}
+
+export function useCollectionInfoHook(
+  collection: number,
+  setData: (data: Info) => void,
+  watch: boolean = false
+) {
+  useCollectionInfo(
+    collection,
+    (data: Info) => {
+      setData(data);
+    },
+    watch
+  );
 }
 
 export function useCollectionLibraryAndScript(
@@ -259,6 +296,20 @@ export function useCollectionCosts(
       }
     },
   });
+}
+
+export function useCollectionCostsHook(
+  collection: number,
+  setData: (data: MintingDetails) => void,
+  watch: boolean = false
+) {
+  useCollectionCosts(
+    collection,
+    (data: MintingDetails) => {
+      setData(data);
+    },
+    watch
+  );
 }
 
 export const getPhaseDateDisplay = (numberDate: number) => {
