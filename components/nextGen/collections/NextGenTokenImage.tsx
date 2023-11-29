@@ -56,8 +56,9 @@ export function NextGenTokenImageContent(props: Readonly<Props>) {
   }, [props.token]);
 
   let content;
-
-  if (props.token.data && !props.token.image && !props.preview) {
+  if (!props.token.id) {
+    content = <></>;
+  } else if (props.token.data && !props.token.image && !props.preview) {
     content = (
       <iframe
         srcDoc={props.token.uri}
@@ -99,9 +100,6 @@ export function NextGenTokenImageContent(props: Readonly<Props>) {
 }
 
 export default function NextGenTokenImage(props: Readonly<Props>) {
-  if (props.token.id == 0) {
-    return <></>;
-  }
   return (
     <Container className="no-padding">
       <Row>
