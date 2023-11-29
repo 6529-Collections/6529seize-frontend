@@ -19,6 +19,7 @@ import {
   NextGenCollectionIdFormGroup,
   NextGenAdminHeadingRow,
 } from "./NextGenAdminShared";
+import { NextGenAdminTextFormGroup } from "./NextGenAdminForms";
 
 interface Props {
   close: () => void;
@@ -159,42 +160,26 @@ export default function NextGenAdminSetSplits(props: Readonly<Props>) {
                 setCollectionID(id);
               }}
             />
-            <Form.Group className="mb-3">
-              <Form.Label>Artist Primary Split</Form.Label>
-              <Form.Control
-                type="text"
-                placeholder="%"
-                value={artistPrimary}
-                onChange={(e: any) => setArtistPrimary(e.target.value)}
-              />
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>Team Primary Split</Form.Label>
-              <Form.Control
-                type="text"
-                placeholder="%"
-                value={teamPrimary}
-                onChange={(e: any) => setTeamPrimary(e.target.value)}
-              />
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>Artist Secondary Split</Form.Label>
-              <Form.Control
-                type="text"
-                placeholder="%"
-                value={artistSecondary}
-                onChange={(e: any) => setArtistSecondary(e.target.value)}
-              />
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>Team Secondary Split</Form.Label>
-              <Form.Control
-                type="text"
-                placeholder="%"
-                value={teamSecondary}
-                onChange={(e: any) => setTeamSecondary(e.target.value)}
-              />
-            </Form.Group>
+            <NextGenAdminTextFormGroup
+              title="Artist Primary Split"
+              value={artistPrimary}
+              setValue={setArtistPrimary}
+            />
+            <NextGenAdminTextFormGroup
+              title="Team Primary Split"
+              value={teamPrimary}
+              setValue={setTeamPrimary}
+            />
+            <NextGenAdminTextFormGroup
+              title="Artist Secondary Split"
+              value={artistSecondary}
+              setValue={setArtistSecondary}
+            />
+            <NextGenAdminTextFormGroup
+              title="Team Secondary Split"
+              value={teamSecondary}
+              setValue={setTeamSecondary}
+            />
             {!loading && errors.length > 0 && printAdminErrors(errors)}
             <Button
               className={`mt-3 mb-3 seize-btn`}

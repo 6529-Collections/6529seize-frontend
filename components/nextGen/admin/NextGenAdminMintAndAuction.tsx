@@ -16,6 +16,7 @@ import {
   NextGenCollectionIdFormGroup,
   NextGenAdminHeadingRow,
 } from "./NextGenAdminShared";
+import { NextGenAdminTextFormGroup } from "./NextGenAdminForms";
 
 interface Props {
   close: () => void;
@@ -108,33 +109,21 @@ export default function NextGenAdminMintAndAuction(props: Readonly<Props>) {
       <Row className="pt-3">
         <Col>
           <Form>
-            <Form.Group className="mb-3">
-              <Form.Label>Recipient</Form.Label>
-              <Form.Control
-                type="text"
-                placeholder="0x..."
-                value={recipient}
-                onChange={(e: any) => setRecipient(e.target.value)}
-              />
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>Token Data</Form.Label>
-              <Form.Control
-                type="text"
-                placeholder="...token data"
-                value={tokenData}
-                onChange={(e: any) => setTokenData(e.target.value)}
-              />
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>Salt</Form.Label>
-              <Form.Control
-                type="text"
-                placeholder="...salt"
-                value={salt}
-                onChange={(e: any) => setSalt(e.target.value)}
-              />
-            </Form.Group>{" "}
+            <NextGenAdminTextFormGroup
+              title="Recipient"
+              value={recipient}
+              setValue={setRecipient}
+            />
+            <NextGenAdminTextFormGroup
+              title="Token Data"
+              value={tokenData}
+              setValue={setTokenData}
+            />
+            <NextGenAdminTextFormGroup
+              title="Salt"
+              value={salt}
+              setValue={setSalt}
+            />
             <NextGenCollectionIdFormGroup
               collection_id={collectionID}
               collection_ids={collectionIds}
@@ -142,15 +131,11 @@ export default function NextGenAdminMintAndAuction(props: Readonly<Props>) {
                 setCollectionID(id);
               }}
             />
-            <Form.Group className="mb-3">
-              <Form.Label>Auction End Time</Form.Label>
-              <Form.Control
-                type="text"
-                placeholder="unix epoch time"
-                value={endTime}
-                onChange={(e: any) => setEndTime(e.target.value)}
-              />
-            </Form.Group>
+            <NextGenAdminTextFormGroup
+              title="Auction End Time"
+              value={endTime}
+              setValue={setEndTime}
+            />
             {!loading && errors.length > 0 && printAdminErrors(errors)}
             <Button
               className={`mt-3 mb-3 seize-btn`}

@@ -18,6 +18,7 @@ import {
   NextGenCollectionIdFormGroup,
   NextGenAdminHeadingRow,
 } from "./NextGenAdminShared";
+import { NextGenAdminTextFormGroup } from "./NextGenAdminForms";
 
 interface Props {
   close: () => void;
@@ -117,15 +118,11 @@ export default function NextGenAdminUpdateDelegationCollection(
                 setCollectionID(id);
               }}
             />
-            <Form.Group className="mb-3">
-              <Form.Label>Delegation Collection</Form.Label>
-              <Form.Control
-                type="text"
-                placeholder="0x..."
-                value={delegationCollection}
-                onChange={(e: any) => setDelegationCollection(e.target.value)}
-              />
-            </Form.Group>
+            <NextGenAdminTextFormGroup
+              title="Delegation Collection"
+              value={delegationCollection}
+              setValue={setDelegationCollection}
+            />
             {!loading && errors.length > 0 && printAdminErrors(errors)}
             <Button
               className={`mt-3 mb-3 seize-btn`}

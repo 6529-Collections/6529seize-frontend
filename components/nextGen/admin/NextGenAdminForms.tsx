@@ -47,3 +47,37 @@ export function NextGenAdminTextFormGroup(
     </Form.Group>
   );
 }
+
+export function NextGenAdminStatusFormGroup(
+  props: Readonly<{
+    title: string;
+    status: boolean | undefined;
+    setStatus: (status: boolean) => void;
+  }>
+) {
+  return (
+    <Form.Group className="mb-3">
+      <Form.Label>{props.title}</Form.Label>
+      <span className="d-flex align-items-center gap-3">
+        <Form.Check
+          checked={props.status}
+          type="radio"
+          label="Active"
+          name="statusRadio"
+          onChange={() => {
+            props.setStatus(true);
+          }}
+        />
+        <Form.Check
+          checked={props.status === false}
+          type="radio"
+          label="Inactive"
+          name="statusRadio"
+          onChange={() => {
+            props.setStatus(false);
+          }}
+        />
+      </span>
+    </Form.Group>
+  );
+}

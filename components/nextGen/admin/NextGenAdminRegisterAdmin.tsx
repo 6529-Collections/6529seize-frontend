@@ -15,6 +15,7 @@ import {
   NextGenCollectionIdFormGroup,
   NextGenAdminHeadingRow,
 } from "./NextGenAdminShared";
+import { NextGenAdminTextFormGroup } from "./NextGenAdminForms";
 
 export enum ADMIN_TYPE {
   GLOBAL = "GLOBAL",
@@ -140,15 +141,11 @@ export default function NextGenAdminRegisterAdmin(props: Readonly<Props>) {
                 }}
               />
             )}
-            <Form.Group className="mb-3">
-              <Form.Label>Admin Address</Form.Label>
-              <Form.Control
-                type="text"
-                placeholder="0x..."
-                value={address}
-                onChange={(e: any) => setAddress(e.target.value)}
-              />
-            </Form.Group>
+            <NextGenAdminTextFormGroup
+              title="Admin Address"
+              value={address}
+              setValue={setAddress}
+            />
             {props.type === ADMIN_TYPE.FUNCTION && (
               <Form.Group className="mb-3">
                 <Form.Label>Function Selector</Form.Label>

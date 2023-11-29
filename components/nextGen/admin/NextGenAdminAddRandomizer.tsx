@@ -18,6 +18,7 @@ import {
   NextGenCollectionIdFormGroup,
   NextGenAdminHeadingRow,
 } from "./NextGenAdminShared";
+import { NextGenAdminTextFormGroup } from "./NextGenAdminForms";
 
 interface Props {
   close: () => void;
@@ -109,15 +110,11 @@ export default function NextGenAdminUpdateRandomizer(props: Readonly<Props>) {
                 setCollectionID(id);
               }}
             />
-            <Form.Group className="mb-3">
-              <Form.Label>Randomizer</Form.Label>
-              <Form.Control
-                type="text"
-                placeholder="0x..."
-                value={randomizerContract}
-                onChange={(e: any) => setRandomizerContract(e.target.value)}
-              />
-            </Form.Group>
+            <NextGenAdminTextFormGroup
+              title="Randomizer Contract"
+              value={randomizerContract}
+              setValue={setRandomizerContract}
+            />
             {!loading && errors.length > 0 && printAdminErrors(errors)}
             <Button
               className={`mt-3 mb-3 seize-btn`}

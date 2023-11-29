@@ -22,6 +22,7 @@ import { NULL_ADDRESS } from "../../../constants";
 import { postData } from "../../../services/6529api";
 import { printAdminErrors } from "./NextGenAdmin";
 import { NextGenAdminHeadingRow } from "./NextGenAdminShared";
+import { NextGenAdminStatusFormGroup } from "./NextGenAdminForms";
 
 interface Props {
   close: () => void;
@@ -215,29 +216,11 @@ export default function NextGenAdminInitializeBurn(props: Readonly<Props>) {
                 ))}
               </Form.Select>
             </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>Burn Status</Form.Label>
-              <span className="d-flex align-items-center gap-3">
-                <Form.Check
-                  checked={status}
-                  type="radio"
-                  label="Active"
-                  name="statusRadio"
-                  onChange={() => {
-                    setStatus(true);
-                  }}
-                />
-                <Form.Check
-                  checked={status === false}
-                  type="radio"
-                  label="Inactive"
-                  name="statusRadio"
-                  onChange={() => {
-                    setStatus(false);
-                  }}
-                />
-              </span>
-            </Form.Group>
+            <NextGenAdminStatusFormGroup
+              title="Burn Status"
+              status={status}
+              setStatus={setStatus}
+            />
             {!loading && errors.length > 0 && printAdminErrors(errors)}
             <Button
               className={`mt-3 mb-3 seize-btn`}
