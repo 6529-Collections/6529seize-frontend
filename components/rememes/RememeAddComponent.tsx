@@ -125,7 +125,7 @@ export default function RememeAddComponent(props: Props) {
         }
         if (
           nftResponses &&
-          nftResponses.some((n) => n.metadataError != undefined)
+          nftResponses.some((n) => n.raw.error != undefined)
         ) {
           setVerificationErrors(["Some Token IDs are invalid"]);
         }
@@ -270,11 +270,11 @@ export default function RememeAddComponent(props: Props) {
                       </Col>
                     </Row>
                   )}
-                  {contractResponse.openSea?.collectionName && (
+                  {contractResponse.openSeaMetadata?.collectionName && (
                     <Row className="pt-1 pb-1">
                       <Col>
                         Collection Name:{" "}
-                        {contractResponse.openSea.collectionName}
+                        {contractResponse.openSeaMetadata.collectionName}
                       </Col>
                     </Row>
                   )}
@@ -294,14 +294,14 @@ export default function RememeAddComponent(props: Props) {
                   <ul className={styles.addRememeTokenList}>
                     {nftResponses.map((nftR) => (
                       <li key={`nftr-${nftR.tokenId}`}>
-                        {nftR.metadataError ? (
+                        {nftR.raw.error ? (
                           <>
-                            #{nftR.tokenId} - {nftR.metadataError}
+                            #{nftR.tokenId} - {nftR.raw.error}
                           </>
                         ) : (
                           <>
                             #{nftR.tokenId}
-                            {nftR.title && ` - ${nftR.title}`}&nbsp;&nbsp;
+                            {nftR.name && ` - ${nftR.name}`}&nbsp;&nbsp;
                             <a
                               className="decoration-hover-underline"
                               href={`https://opensea.io/assets/ethereum/${contract}/${nftR.tokenId}`}
