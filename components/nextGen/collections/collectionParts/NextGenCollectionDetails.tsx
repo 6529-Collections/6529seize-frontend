@@ -54,8 +54,7 @@ export default function NextGenCollectionDetails(props: Readonly<Props>) {
           if (e.key === "Enter" || e.key === " ") {
             setScriptClamped(!scriptClamped);
           }
-        }}
-        tabIndex={0}>
+        }}>
         {scriptClamped ? `Show More` : `Show Less`}
       </span>
     );

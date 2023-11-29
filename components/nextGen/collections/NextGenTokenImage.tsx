@@ -99,6 +99,9 @@ export function NextGenTokenImageContent(props: Readonly<Props>) {
 }
 
 export default function NextGenTokenImage(props: Readonly<Props>) {
+  if (props.token.id == 0) {
+    return <></>;
+  }
   return (
     <Container className="no-padding">
       <Row>
