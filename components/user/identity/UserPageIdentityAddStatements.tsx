@@ -1,10 +1,23 @@
-export default function UserPageIdentityAddStatements() {
+import { useRef } from "react";
+import { useClickAway, useKeyPressEvent } from "react-use";
+
+export default function UserPageIdentityAddStatements({
+  onClose,
+}: {
+  onClose: () => void;
+}) {
+  const modalRef = useRef<HTMLDivElement>(null);
+  useClickAway(modalRef, onClose);
+  useKeyPressEvent("Escape", onClose);
   return (
     <div className="tw-relative tw-z-10" role="dialog">
       <div className="tw-fixed tw-inset-0 tw-bg-gray-500 tw-bg-opacity-75"></div>
       <div className="tw-fixed tw-inset-0 tw-z-10 tw-overflow-y-auto">
         <div className="tw-flex tw-min-h-full tw-items-end tw-justify-center tw-p-4 tw-text-center sm:tw-items-center sm:tw-p-0">
-          <div className="tw-relative tw-w-full tw-transform tw-rounded-xl tw-bg-neutral-900 tw-text-left tw-shadow-xl tw-transition-all sm:tw-w-full tw-p-6 sm:tw-max-w-4xl">
+          <div
+            ref={modalRef}
+            className="tw-relative tw-w-full tw-transform tw-rounded-xl tw-bg-neutral-900 tw-text-left tw-shadow-xl tw-transition-all sm:tw-w-full tw-p-6 sm:tw-max-w-4xl"
+          >
             <div className="tw-flex tw-justify-between">
               <div className="tw-max-w-xl tw-flex tw-flex-col">
                 <p className="tw-max-w-sm tw-text-lg tw-text-neutral-50 tw-font-medium tw-mb-0">
@@ -18,6 +31,7 @@ export default function UserPageIdentityAddStatements() {
               </div>
               <div className="tw-absolute tw-right-4 tw-top-4 tw-flex tw-justify-between tw-items-center">
                 <button
+                  onClick={onClose}
                   type="button"
                   className="tw-p-2.5 tw-flex tw-items-center tw-justify-center tw-rounded-full tw-bg-neutral-900 tw-border-0 tw-text-neutral-400 hover:tw-text-neutral-50 focus:tw-outline-none tw-transition tw-duration-300 tw-ease-out"
                 >
@@ -109,9 +123,9 @@ export default function UserPageIdentityAddStatements() {
                       <path
                         d="M11 4H7.8C6.11984 4 5.27976 4 4.63803 4.32698C4.07354 4.6146 3.6146 5.07354 3.32698 5.63803C3 6.27976 3 7.11984 3 8.8V16.2C3 17.8802 3 18.7202 3.32698 19.362C3.6146 19.9265 4.07354 20.3854 4.63803 20.673C5.27976 21 6.11984 21 7.8 21H15.2C16.8802 21 17.7202 21 18.362 20.673C18.9265 20.3854 19.3854 19.9265 19.673 19.362C20 18.7202 20 17.8802 20 16.2V13M13 17H7M15 13H7M20.1213 3.87868C21.2929 5.05025 21.2929 6.94975 20.1213 8.12132C18.9497 9.29289 17.0503 9.29289 15.8787 8.12132C14.7071 6.94975 14.7071 5.05025 15.8787 3.87868C17.0503 2.70711 18.9497 2.70711 20.1213 3.87868Z"
                         stroke="currentColor"
-                        stroke-width="2"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
                       />
                     </svg>
                   </span>
