@@ -4,6 +4,10 @@ import NextGenContractWriteStatus from "../NextGenContractWriteStatus";
 import { printAdminErrors } from "./NextGenAdmin";
 import { useCoreContractWrite } from "../nextgen_helpers";
 import { NextGenAdminHeadingRow } from "./NextGenAdminShared";
+import {
+  NextGenAdminScriptsFormGroup,
+  NextGenAdminTextFormGroup,
+} from "./NextGenAdminForms";
 
 interface Props {
   close: () => void;
@@ -96,85 +100,45 @@ export default function NextGenAdminCreateCollection(props: Readonly<Props>) {
       <Row className="pt-3">
         <Col>
           <Form>
-            <Form.Group className="mb-3">
-              <Form.Label>Collection Name</Form.Label>
-              <Form.Control
-                type="text"
-                placeholder="my collection"
-                value={collectionName}
-                onChange={(e: any) => setCollectionName(e.target.value)}
-              />
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>Artist</Form.Label>
-              <Form.Control
-                type="text"
-                placeholder="XCOPY"
-                value={artist}
-                onChange={(e: any) => setArtist(e.target.value)}
-              />
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>Description</Form.Label>
-              <Form.Control
-                type="text"
-                placeholder="...description"
-                value={description}
-                onChange={(e: any) => setDescription(e.target.value)}
-              />
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>Website</Form.Label>
-              <Form.Control
-                type="text"
-                placeholder="https://"
-                value={website}
-                onChange={(e: any) => setWebsite(e.target.value)}
-              />
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>License</Form.Label>
-              <Form.Control
-                type="text"
-                placeholder="...license"
-                value={license}
-                onChange={(e: any) => setLicense(e.target.value)}
-              />
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>Base URI</Form.Label>
-              <Form.Control
-                type="text"
-                placeholder="https://"
-                value={baseURI}
-                onChange={(e: any) => setBaseURI(e.target.value)}
-              />
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>Library</Form.Label>
-              <Form.Control
-                type="text"
-                placeholder="...library"
-                value={library}
-                onChange={(e: any) => setLibrary(e.target.value)}
-              />
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>Scripts x{scripts.length}</Form.Label>
-              <Form.Control
-                as="textarea"
-                rows={3}
-                placeholder="...script - one line per entry"
-                value={scripts.join("\n")}
-                onChange={(e) => {
-                  if (e.target.value) {
-                    setScripts(e.target.value.split("\n"));
-                  } else {
-                    setScripts([]);
-                  }
-                }}
-              />
-            </Form.Group>
+            <NextGenAdminTextFormGroup
+              title="Collection Name"
+              value={collectionName}
+              setValue={setCollectionName}
+            />
+            <NextGenAdminTextFormGroup
+              title="Artist"
+              value={artist}
+              setValue={setArtist}
+            />
+            <NextGenAdminTextFormGroup
+              title="Description"
+              value={description}
+              setValue={setDescription}
+            />
+            <NextGenAdminTextFormGroup
+              title="Website"
+              value={website}
+              setValue={setWebsite}
+            />
+            <NextGenAdminTextFormGroup
+              title="License"
+              value={license}
+              setValue={setLicense}
+            />
+            <NextGenAdminTextFormGroup
+              title="Base URI"
+              value={baseURI}
+              setValue={setBaseURI}
+            />
+            <NextGenAdminTextFormGroup
+              title="Library"
+              value={library}
+              setValue={setLibrary}
+            />
+            <NextGenAdminScriptsFormGroup
+              scripts={scripts}
+              setScripts={setScripts}
+            />
             {!loading && errors.length > 0 && printAdminErrors(errors)}
             <Button
               className={`mt-3 mb-3 seize-btn`}
