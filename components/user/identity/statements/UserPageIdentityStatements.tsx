@@ -1,35 +1,33 @@
-import DiscordIcon from "../../utils/DiscordIcon";
-import EthereumIcon from "../../utils/EthereumIcon";
-import EtherscanIcon from "../../utils/EtherscanIcon";
-import FacebookIcon from "../../utils/FacebookIcon";
-import GithubIcon from "../../utils/GithubIcon";
-import InstagramIcon from "../../utils/InstagramIcon";
-import LinkedInIcon from "../../utils/LinkedInIcon";
-import MediumIcon from "../../utils/MediumIcon";
-import MirrorIcon from "../../utils/MirrorIcon";
-import OpenseaIcon from "../../utils/OpenseaIcon";
-import RedditIcon from "../../utils/RedditIcon";
-import SubstackIcon from "../../utils/SubstackIcon";
-import TelegramIcon from "../../utils/TelegramIcon";
-import TikTokIcon from "../../utils/TikTokIcon";
-import WeChatIcon from "../../utils/WeChatIcon";
-import WeiboIcon from "../../utils/WeiboIcon";
-import XIcon from "../../utils/XIcon";
-import YoutubeIcon from "../../utils/YoutubeIcon";
-import UserPageIdentityStatementsAddButton from "./UserPageIdentityStatementsAddButton";
+import { IProfileAndConsolidations } from "../../../../entities/IProfile";
+import DiscordIcon from "../../utils/icons/DiscordIcon";
+import EthereumIcon from "../../utils/icons/EthereumIcon";
+import EtherscanIcon from "../../utils/icons/EtherscanIcon";
+import FacebookIcon from "../../utils/icons/FacebookIcon";
+import GithubIcon from "../../utils/icons/GithubIcon";
+import InstagramIcon from "../../utils/icons/InstagramIcon";
+import LinkedInIcon from "../../utils/icons/LinkedInIcon";
+import MediumIcon from "../../utils/icons/MediumIcon";
+import MirrorIcon from "../../utils/icons/MirrorIcon";
+import OpenseaIcon from "../../utils/icons/OpenseaIcon";
+import RedditIcon from "../../utils/icons/RedditIcon";
+import SubstackIcon from "../../utils/icons/SubstackIcon";
+import TelegramIcon from "../../utils/icons/TelegramIcon";
+import TikTokIcon from "../../utils/icons/TikTokIcon";
+import WeChatIcon from "../../utils/icons/WeChatIcon";
+import WeiboIcon from "../../utils/icons/WeiboIcon";
+import XIcon from "../../utils/icons/XIcon";
+import YoutubeIcon from "../../utils/icons/YoutubeIcon";
+import UserPageIdentityAddStatementsHeader from "./header/UserPageIdentityAddStatementsHeader";
 
-export default function UserPageIdentityStatements() {
+export default function UserPageIdentityStatements({
+  profile,
+}: {
+  profile: IProfileAndConsolidations;
+}) {
   return (
     <div className="tw-mt-10">
       <div className="tw-bg-neutral-800 tw-border tw-border-white/5 tw-border-solid tw-rounded-xl">
-        <div className="tw-h-16 tw-px-8">
-          <div className="tw-h-full tw-flex tw-items-center tw-justify-between tw-w-full tw-border-b tw-border-t-0 tw-border-x-0 tw-border-solid tw-border-neutral-700">
-            <h3 className="tw-text-lg tw-font-semibold tw-text-neutral-50 tw-tracking-tight">
-              <span>Simo&apos;s</span> ID Statements
-            </h3>
-            <UserPageIdentityStatementsAddButton />
-          </div>
-        </div>
+        <UserPageIdentityAddStatementsHeader profile={profile} />
 
         <div className="tw-p-8 tw-mx-auto tw-grid tw-max-w-2xl tw-grid-cols-1 tw-gap-x-8 tw-gap-y-16 tw-sm:gap-y-20 tw-lg:mx-0 lg:tw-max-w-none lg:tw-grid-cols-3">
           <div className="tw-col-span-2 tw-space-y-5">
