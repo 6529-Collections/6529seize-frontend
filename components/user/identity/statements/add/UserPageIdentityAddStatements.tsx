@@ -39,7 +39,7 @@ export default function UserPageIdentityAddStatements({
         <div className="tw-flex tw-min-h-full tw-items-end tw-justify-center tw-p-4 tw-text-center sm:tw-items-center sm:tw-p-0">
           <div
             ref={modalRef}
-            className={`${VIEW_W_CLASS[activeView]} tw-relative tw-w-full tw-transform tw-rounded-xl tw-bg-neutral-900 tw-text-left tw-shadow-xl tw-transition-all sm:tw-w-full tw-p-6`}
+            className={`${VIEW_W_CLASS[activeView]} tw-relative tw-w-full tw-transform tw-rounded-xl tw-bg-neutral-900 tw-text-left tw-shadow-xl tw-transition-all tw-duration-500 sm:tw-w-full tw-p-6`}
           >
             <UserPageIdentityAddStatementsViews
               profile={profile}
