@@ -17,12 +17,12 @@ export default function UserPageIdentity({
       <UserPageIdentityHeader profile={profile} />
       <UserPageIdentityStatements profile={profile} />
 
-      <div className="tw-hidden">
+      {/* <div className="tw-hidden">
         <UserPageIdentityAddStatementsSocialMediaAccount />
       </div>
       <div className="tw-hidden">
         <UserPageIdentityAddStatementsContact />
-      </div>
+      </div> */}
 
       <div className="tw-mt-10 tw-grid tw-grid-cols-2 tw-gap-x-10">
         <div>

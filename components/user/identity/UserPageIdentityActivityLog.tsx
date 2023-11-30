@@ -1,19 +1,6 @@
-import DiscordIcon from "../utils/DiscordIcon";
-import EthereumIcon from "../utils/EthereumIcon";
-import FacebookIcon from "../utils/FacebookIcon";
-import GithubIcon from "../utils/GithubIcon";
-import InstagramIcon from "../utils/InstagramIcon";
-import LinkedInIcon from "../utils/LinkedInIcon";
-import MediumIcon from "../utils/MediumIcon";
-import MirrorIcon from "../utils/MirrorIcon";
-import RedditIcon from "../utils/RedditIcon";
-import SubstackIcon from "../utils/SubstackIcon";
-import TelegramIcon from "../utils/TelegramIcon";
-import TikTokIcon from "../utils/TikTokIcon";
-import WeChatIcon from "../utils/WeChatIcon";
-import WeiboIcon from "../utils/WeiboIcon";
-import XIcon from "../utils/XIcon";
-import YoutubeIcon from "../utils/YoutubeIcon";
+import DiscordIcon from "../utils/icons/DiscordIcon";
+import EthereumIcon from "../utils/icons/EthereumIcon";
+import XIcon from "../utils/icons/XIcon";
 
 export default function UserPageIdentityActivityLog() {
   return (
@@ -68,9 +55,9 @@ export default function UserPageIdentityActivityLog() {
                       <path
                         d="M12 15.5H7.5C6.10444 15.5 5.40665 15.5 4.83886 15.6722C3.56045 16.06 2.56004 17.0605 2.17224 18.3389C2 18.9067 2 19.6044 2 21M16 18L18 20L22 16M14.5 7.5C14.5 9.98528 12.4853 12 10 12C7.51472 12 5.5 9.98528 5.5 7.5C5.5 5.01472 7.51472 3 10 3C12.4853 3 14.5 5.01472 14.5 7.5Z"
                         stroke="currentColor"
-                        stroke-width="2"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
                       />
                     </svg>
                     <span className="tw-font-normal tw-block tw-truncate">
@@ -107,9 +94,9 @@ export default function UserPageIdentityActivityLog() {
                       <path
                         d="M16 7.99999V13C16 13.7956 16.3161 14.5587 16.8787 15.1213C17.4413 15.6839 18.2043 16 19 16C19.7956 16 20.5587 15.6839 21.1213 15.1213C21.6839 14.5587 22 13.7956 22 13V12C21.9999 9.74302 21.2362 7.55247 19.8333 5.78452C18.4303 4.01658 16.4705 2.77521 14.2726 2.26229C12.0747 1.74936 9.76793 1.99503 7.72734 2.95936C5.68676 3.92368 4.03239 5.54995 3.03325 7.57371C2.03411 9.59748 1.74896 11.8997 2.22416 14.1061C2.69936 16.3125 3.90697 18.2932 5.65062 19.7263C7.39428 21.1593 9.57143 21.9603 11.8281 21.9991C14.0847 22.0379 16.2881 21.3122 18.08 19.94M16 12C16 14.2091 14.2091 16 12 16C9.79086 16 8 14.2091 8 12C8 9.79085 9.79086 7.99999 12 7.99999C14.2091 7.99999 16 9.79085 16 12Z"
                         stroke="currentColor"
-                        stroke-width="2"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
                       />
                     </svg>
                     <span className="tw-font-normal tw-block tw-truncate">
@@ -300,9 +287,9 @@ export default function UserPageIdentityActivityLog() {
                   <path
                     d="M16 7.99999V13C16 13.7956 16.3161 14.5587 16.8787 15.1213C17.4413 15.6839 18.2043 16 19 16C19.7956 16 20.5587 15.6839 21.1213 15.1213C21.6839 14.5587 22 13.7956 22 13V12C21.9999 9.74302 21.2362 7.55247 19.8333 5.78452C18.4303 4.01658 16.4705 2.77521 14.2726 2.26229C12.0747 1.74936 9.76793 1.99503 7.72734 2.95936C5.68676 3.92368 4.03239 5.54995 3.03325 7.57371C2.03411 9.59748 1.74896 11.8997 2.22416 14.1061C2.69936 16.3125 3.90697 18.2932 5.65062 19.7263C7.39428 21.1593 9.57143 21.9603 11.8281 21.9991C14.0847 22.0379 16.2881 21.3122 18.08 19.94M16 12C16 14.2091 14.2091 16 12 16C9.79086 16 8 14.2091 8 12C8 9.79085 9.79086 7.99999 12 7.99999C14.2091 7.99999 16 9.79085 16 12Z"
                     stroke="currentColor"
-                    stroke-width="2"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
                   />
                 </svg>
                 <div className="tw-inline-flex tw-space-x-1.5">
@@ -324,9 +311,9 @@ export default function UserPageIdentityActivityLog() {
                     <path
                       d="M4 12H20M20 12L14 6M20 12L14 18"
                       stroke="currentcOLOR"
-                      stroke-width="2"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
                     />
                   </svg>
 
@@ -368,9 +355,9 @@ export default function UserPageIdentityActivityLog() {
                     <path
                       d="M4 12H20M20 12L14 6M20 12L14 18"
                       stroke="currentcOLOR"
-                      stroke-width="2"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
                     />
                   </svg>
                   <span className="tw-truncate tw-max-w-[12rem] tw-text-sm tw-font-semibold tw-text-neutral-100">
@@ -490,9 +477,9 @@ export default function UserPageIdentityActivityLog() {
                   <path
                     d="M12 15.5H7.5C6.10444 15.5 5.40665 15.5 4.83886 15.6722C3.56045 16.06 2.56004 17.0605 2.17224 18.3389C2 18.9067 2 19.6044 2 21M16 18L18 20L22 16M14.5 7.5C14.5 9.98528 12.4853 12 10 12C7.51472 12 5.5 9.98528 5.5 7.5C5.5 5.01472 7.51472 3 10 3C12.4853 3 14.5 5.01472 14.5 7.5Z"
                     stroke="currentColor"
-                    stroke-width="2"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
                   />
                 </svg>
                 <div className="tw-inline-flex tw-space-x-1.5">
@@ -530,9 +517,9 @@ export default function UserPageIdentityActivityLog() {
                   <path
                     d="M12 15.5H7.5C6.10444 15.5 5.40665 15.5 4.83886 15.6722C3.56045 16.06 2.56004 17.0605 2.17224 18.3389C2 18.9067 2 19.6044 2 21M16 18L18 20L22 16M14.5 7.5C14.5 9.98528 12.4853 12 10 12C7.51472 12 5.5 9.98528 5.5 7.5C5.5 5.01472 7.51472 3 10 3C12.4853 3 14.5 5.01472 14.5 7.5Z"
                     stroke="currentColor"
-                    stroke-width="2"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
                   />
                 </svg>
                 <div className="tw-inline-flex tw-space-x-1.5">
