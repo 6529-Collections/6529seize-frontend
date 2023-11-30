@@ -1,4 +1,4 @@
-import { STATEMENT_ADD_VIEW } from "./UserPageIdentityAddStatementsViews";
+import { STATEMENT_ADD_VIEW } from "./UserPageIdentityAddStatements";
 
 export default function UserPageIdentityAddStatementsSelect({
   onClose,

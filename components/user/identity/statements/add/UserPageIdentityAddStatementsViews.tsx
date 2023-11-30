@@ -5,25 +5,19 @@ import UserPageIdentityAddStatementsContact from "./contact/UserPageIdentityAddS
 import UserPageIdentityAddStatementsSocialMediaAccount from "./social-media/UserPageIdentityAddStatementsSocialMediaAccount";
 import { IProfileAndConsolidations } from "../../../../../entities/IProfile";
 import UserPageIdentityAddStatementsSocialMediaPosts from "./social-media-verification-posts/UserPageIdentityAddStatementsSocialMediaPosts";
-
-export enum STATEMENT_ADD_VIEW {
-  SELECT = "SELECT",
-  CONTACT = "CONTACT",
-  SOCIAL_MEDIA_ACCOUNT = "SOCIAL_MEDIA_ACCOUNT",
-  SOCIAL_MEDIA_VERIFICATION_POST = "SOCIAL_MEDIA_VERIFICATION_POST",
-}
+import { STATEMENT_ADD_VIEW } from "./UserPageIdentityAddStatements";
 
 export default function UserPageIdentityAddStatementsViews({
   profile,
+  activeView,
+  setActiveView,
   onClose,
 }: {
   profile: IProfileAndConsolidations;
+  activeView: STATEMENT_ADD_VIEW;
+  setActiveView: (view: STATEMENT_ADD_VIEW) => void;
   onClose: () => void;
 }) {
-  const [activeView, setActiveView] = useState<STATEMENT_ADD_VIEW>(
-    STATEMENT_ADD_VIEW.SELECT
-  );
-
   switch (activeView) {
     case STATEMENT_ADD_VIEW.SELECT:
       return (

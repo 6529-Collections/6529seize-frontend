@@ -80,15 +80,12 @@ export default function UserPageIdentityStatements({
     <div className="tw-mt-10">
       <div className="tw-bg-neutral-900 tw-border tw-border-white/5 tw-border-solid tw-rounded-xl">
         <UserPageIdentityAddStatementsHeader profile={profile} />
-
         <div className="tw-p-8 tw-mx-auto tw-grid tw-max-w-2xl tw-grid-cols-1 tw-gap-x-8 tw-gap-y-16 tw-sm:gap-y-20 tw-lg:mx-0 lg:tw-max-w-none lg:tw-grid-cols-3">
           <div className="tw-col-span-2 tw-space-y-5">
             <div className="tw-grid tw-grid-cols-1 tw-gap-x-8 tw-gap-y-5 sm:tw-grid-cols-2">
-              {/* Consolidated Addresses */}
               <UserPageIdentityStatementsConsolidatedAddresses
                 profile={profile}
               />
-              {/* Social Media Accounts */}
               <UserPageIdentityStatementsSocialMediaAccounts
                 statements={socialMediaAccounts}
                 profile={profile}
@@ -96,12 +93,10 @@ export default function UserPageIdentityStatements({
             </div>
 
             <div className="tw-grid tw-grid-cols-1 tw-gap-x-8 tw-gap-y-5 sm:tw-grid-cols-2">
-              {/* Contact */}
               <UserPageIdentityStatementsContacts
                 statements={contacts}
                 profile={profile}
               />
-              {/* Social Media Verification Posts */}
               <UserPageIdentityStatementsSocialMediaVerificationPosts
                 statements={socialMediaVerificationPosts}
                 profile={profile}
