@@ -1,3 +1,5 @@
+import { STATEMENT_GROUP, STATEMENT_TYPE } from "../helpers/Types";
+
 export interface IProfileWallet {
   readonly address: string;
   readonly ens?: string;
@@ -76,8 +78,8 @@ export interface ApiProfileRaterCicState {
 export interface CicStatement {
   id: string;
   profile_id: string;
-  statement_group: string;
-  statement_type: string;
+  statement_group: STATEMENT_GROUP;
+  statement_type: STATEMENT_TYPE;
   statement_comment: string | null;
   statement_value: string;
   crated_at: Date;

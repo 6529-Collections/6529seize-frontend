@@ -4,10 +4,10 @@ import {
   SOCIAL_MEDIA_ACCOUNT_STATEMENT_TYPE,
   STATEMENT_GROUP,
   STATEMENT_TYPE,
-} from "../../../../../helpers/Types";
+} from "../../../../../../helpers/Types";
 import UserPageIdentityAddStatementsSocialMediaAccountItems from "./UserPageIdentityAddStatementsSocialMediaAccountItems";
-import UserPageIdentityAddStatementsForm from "../utils/UserPageIdentityAddStatementsForm";
-import { IProfileAndConsolidations } from "../../../../../entities/IProfile";
+import UserPageIdentityAddStatementsForm from "../../utils/UserPageIdentityAddStatementsForm";
+import { IProfileAndConsolidations } from "../../../../../../entities/IProfile";
 
 export default function UserPageIdentityAddStatementsSocialMediaAccount({
   onClose,

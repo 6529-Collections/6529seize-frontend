@@ -2,9 +2,6 @@ import Cookies from "js-cookie";
 import { API_AUTH_COOKIE } from "../../constants";
 import { getAuthJwt } from "../auth/auth.utils";
 
-
-
-
 const getHeaders = (
   headers?: Record<string, string>,
   contentType: boolean = true
@@ -48,6 +45,16 @@ export const commonApiPost = async <T, U>(param: {
     throw new Error(body?.error ?? res.statusText ?? "Something went wrong");
   }
   return res.json();
+};
+
+export const commonApiDelete = async (param: {
+  endpoint: string;
+  headers?: Record<string, string>;
+}): Promise<void> => {
+  await fetch(`${process.env.API_ENDPOINT}/api/${param.endpoint}`, {
+    method: "DELETE",
+    headers: getHeaders(param.headers),
+  });
 };
 
 export const commonApiPostForm = async <U>(param: {

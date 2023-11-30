@@ -1,4 +1,8 @@
-export default function UserPageIdentityaddStatementsSocialMediaPostsHeader() {
+export default function UserPageIdentityAddStatementsSocialMediaPostsHeader({
+  onClose,
+}: {
+  onClose: () => void;
+}) {
   return (
     <div className="tw-flex tw-justify-between">
       <div className="tw-max-w-xl tw-flex tw-items-center tw-space-x-4">
@@ -27,6 +31,7 @@ export default function UserPageIdentityaddStatementsSocialMediaPostsHeader() {
       </div>
       <div className="tw-absolute tw-right-4 tw-top-6 tw-flex tw-justify-between tw-items-center">
         <button
+          onClick={onClose}
           type="button"
           className="tw-p-2.5 tw-flex tw-items-center tw-justify-center tw-rounded-full tw-bg-neutral-900 tw-border-0 tw-text-neutral-400 hover:tw-text-neutral-50 focus:tw-outline-none tw-transition tw-duration-300 tw-ease-out"
         >

@@ -45,18 +45,34 @@ export default function UserPageIdentityAddStatementsForm({
         message: "CIC statement added.",
         type: "success",
       });
-      // queryClient.invalidateQueries({
-      //   queryKey: ["profile", profile.profile?.handle.toLowerCase()],
-      // });
+      queryClient.invalidateQueries({
+        queryKey: ["user-cic-statements", profile.profile?.handle],
+      });
+      for (const wallet of profile.consolidation.wallets) {
+        queryClient.invalidateQueries({
+          queryKey: [
+            "user-cic-statements",
+            wallet.wallet.address.toLowerCase(),
+          ],
+        });
+
+        if (wallet.wallet.ens) {
+          queryClient.invalidateQueries({
+            queryKey: ["user-cic-statements", wallet.wallet.ens.toLowerCase()],
+          });
+        }
+      }
     },
   });
 
   const onSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (!value) return;
-    await requestAuth();
+    const { success } = await requestAuth();
+    if (!success) return;
     await addStatementMutation.mutateAsync(value);
     setValue("");
+    onClose();
   };
   return (
     <div className="tw-mt-4">

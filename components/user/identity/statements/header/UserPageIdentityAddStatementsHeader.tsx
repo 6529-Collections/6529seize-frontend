@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { IProfileAndConsolidations } from "../../../../../entities/IProfile";
-import UserPageIdentityStatementsAddButton from "../UserPageIdentityStatementsAddButton";
+import UserPageIdentityStatementsAddButton from "../add/UserPageIdentityStatementsAddButton";
 import { useAccount } from "wagmi";
 
 export default function UserPageIdentityAddStatementsHeader({

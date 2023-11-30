@@ -1,7 +1,7 @@
 import { useRef } from "react";
 import { useClickAway, useKeyPressEvent } from "react-use";
 import UserPageIdentityAddStatementsViews from "./UserPageIdentityAddStatementsViews";
-import { IProfileAndConsolidations } from "../../../../entities/IProfile";
+import { IProfileAndConsolidations } from "../../../../../entities/IProfile";
 
 
 export default function UserPageIdentityAddStatements({

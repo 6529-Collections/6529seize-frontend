@@ -5,9 +5,9 @@ import {
   CONTACT_STATEMENT_TYPE,
   STATEMENT_GROUP,
   STATEMENT_TYPE,
-} from "../../../../../helpers/Types";
-import UserPageIdentityAddStatementsForm from "../utils/UserPageIdentityAddStatementsForm";
-import { IProfileAndConsolidations } from "../../../../../entities/IProfile";
+} from "../../../../../../helpers/Types";
+import UserPageIdentityAddStatementsForm from "../../utils/UserPageIdentityAddStatementsForm";
+import { IProfileAndConsolidations } from "../../../../../../entities/IProfile";
 
 export default function UserPageIdentityAddStatementsContact({
   profile,

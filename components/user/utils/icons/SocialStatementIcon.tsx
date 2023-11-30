@@ -18,6 +18,7 @@ import SubstackIcon from "./SubstackIcon";
 import MediumIcon from "./MediumIcon";
 import MirrorIcon from "./MirrorIcon";
 import YoutubeIcon from "./YoutubeIcon";
+import LinkIcon from "./LinkIcon";
 
 export default function SocialStatementIcon({
   statementType,
@@ -61,6 +62,8 @@ export default function SocialStatementIcon({
       return <EmailIcon aria-hidden="true" />;
     case STATEMENT_TYPE.WEBSITE:
       return <WebsiteIcon aria-hidden="true" />;
+    case STATEMENT_TYPE.LINK:
+      return <LinkIcon aria-hidden="true" />;
     default:
       assertUnreachable(statementType);
   }

@@ -108,7 +108,12 @@ export default function UserPageIdentityAddStatementsSelect({
             </p>
           </div>
         </div>
-        <div className="tw-cursor-pointer tw-rounded-lg tw-group tw-relative tw-bg-neutral-800/80 tw-border tw-border-solid tw-border-white/5 hover:tw-bg-neutral-800 tw-p-6 tw-transition tw-duration-300 tw-ease-out">
+        <div
+          onClick={() =>
+            onViewChange(STATEMENT_ADD_VIEW.SOCIAL_MEDIA_VERIFICATION_POST)
+          }
+          className="tw-cursor-pointer tw-rounded-lg tw-group tw-relative tw-bg-neutral-800/80 tw-border tw-border-solid tw-border-white/5 hover:tw-bg-neutral-800 tw-p-6 tw-transition tw-duration-300 tw-ease-out"
+        >
           <div>
             <span className="tw-inline-flex tw-items-center tw-justify-center tw-rounded-xl tw-h-11 tw-w-11 tw-bg-neutral-700/60 tw-border tw-border-solid tw-border-neutral-600/20">
               <svg
