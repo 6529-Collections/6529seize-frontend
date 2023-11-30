@@ -46,7 +46,9 @@ export default function UserPageIdentityAddStatementsHeader({
         <h3 className="tw-mb-0 tw-text-lg tw-font-semibold tw-text-neutral-50 tw-tracking-tight">
           <span>{possessionName}</span> ID Statements
         </h3>
-        {isMyProfile && <UserPageIdentityStatementsAddButton />}
+        {isMyProfile && (
+          <UserPageIdentityStatementsAddButton profile={profile} />
+        )}
       </div>
     </div>
   );

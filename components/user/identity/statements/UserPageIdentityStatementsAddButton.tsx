@@ -2,10 +2,14 @@ import { useRef, useState } from "react";
 import UserPageIdentityAddStatements from "./UserPageIdentityAddStatements";
 import CommonAnimationWrapper from "../../../utils/animation/CommonAnimationWrapper";
 import CommonAnimationOpacity from "../../../utils/animation/CommonAnimationOpacity";
+import { IProfileAndConsolidations } from "../../../../entities/IProfile";
 
-export default function UserPageIdentityStatementsAddButton() {
-  const [isAddStatementsOpen, setIsAddStatementsOpen] =
-    useState<boolean>(false);
+export default function UserPageIdentityStatementsAddButton({
+  profile,
+}: {
+  profile: IProfileAndConsolidations;
+}) {
+  const [isAddStatementsOpen, setIsAddStatementsOpen] = useState<boolean>(true);
 
   return (
     <>
@@ -40,6 +44,7 @@ export default function UserPageIdentityStatementsAddButton() {
               onClicked={(e) => e.stopPropagation()}
             >
               <UserPageIdentityAddStatements
+                profile={profile}
                 onClose={() => setIsAddStatementsOpen(false)}
               />
             </CommonAnimationOpacity>

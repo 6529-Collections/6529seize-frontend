@@ -1,11 +1,14 @@
-import { useRef, useState } from "react";
+import { useRef } from "react";
 import { useClickAway, useKeyPressEvent } from "react-use";
 import UserPageIdentityAddStatementsViews from "./UserPageIdentityAddStatementsViews";
+import { IProfileAndConsolidations } from "../../../../entities/IProfile";
 
 
 export default function UserPageIdentityAddStatements({
+  profile,
   onClose,
 }: {
+  profile: IProfileAndConsolidations;
   onClose: () => void;
 }) {
   const modalRef = useRef<HTMLDivElement>(null);
@@ -21,7 +24,10 @@ export default function UserPageIdentityAddStatements({
             ref={modalRef}
             className="tw-relative tw-w-full tw-transform tw-rounded-xl tw-bg-neutral-900 tw-text-left tw-shadow-xl tw-transition-all sm:tw-w-full tw-p-6 sm:tw-max-w-4xl"
           >
-            <UserPageIdentityAddStatementsViews onClose={onClose} />
+            <UserPageIdentityAddStatementsViews
+              profile={profile}
+              onClose={onClose}
+            />
           </div>
         </div>
       </div>
