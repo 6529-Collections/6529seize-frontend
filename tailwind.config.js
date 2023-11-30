@@ -16,13 +16,15 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        "primary-300":"#84ADFF",
+        "primary-300": "#84ADFF",
         "primary-400": "#528BFF",
         "primary-500": "#406AFE",
         "primary-600": "#395FE4",
         error: "#F97066",
         success: "#83BF6E",
         "neutral-350": "#B0B0B0",
+        "green": "#3CCB7F",
+        "red":"#F97066",
       },
       gridTemplateColumns: {
         13: "repeat(13, minmax(0, 1fr))",
