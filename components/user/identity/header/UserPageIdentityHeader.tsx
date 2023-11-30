@@ -43,7 +43,7 @@ export default function UserPageIdentityHeader({
       (wallet) => wallet.wallet.address.toLowerCase() === address?.toLowerCase()
     );
 
-  const [isMyProfile, setIsMyProfile] = useState<boolean>(false);
+  const [isMyProfile, setIsMyProfile] = useState<boolean>(true);
 
   useEffect(
     () => setIsMyProfile(amIUser({ profile, address })),
@@ -64,7 +64,7 @@ export default function UserPageIdentityHeader({
             </p>
           </div>
           <UserPageIdentityHeaderCIC profile={profile} />
-          {isMyProfile && <UserPageIdentityHeaderCICRate profile={profile} />}
+          {!isMyProfile && <UserPageIdentityHeaderCICRate profile={profile} />}
         </div>
       </div>
     </div>
