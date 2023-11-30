@@ -1,7 +1,7 @@
 import { IProfileAndConsolidations } from "../../../entities/IProfile";
-import UserPageIdentityAddStatements from "./UserPageIdentityAddStatements";
-import UserPageIdentityAddStatementsContact from "./UserPageIdentityAddStatementsContact";
-import UserPageIdentityAddStatementsSocialMediaAccount from "./UserPageIdentityAddStatementsSocialMediaAccount";
+import UserPageIdentityAddStatements from "./statements/UserPageIdentityAddStatements";
+import UserPageIdentityAddStatementsContact from "./statements/contact/UserPageIdentityAddStatementsContact";
+import UserPageIdentityAddStatementsSocialMediaAccount from "./statements/social-media/UserPageIdentityAddStatementsSocialMediaAccount";
 import UserPageIdentityStatements from "./statements/UserPageIdentityStatements";
 import UserPageIdentityHeader from "./header/UserPageIdentityHeader";
 
@@ -13,7 +13,7 @@ export default function UserPageIdentity({
   return (
     <div className="tailwind-scope">
       <UserPageIdentityHeader profile={profile} />
-      <UserPageIdentityStatements />
+      <UserPageIdentityStatements profile={profile} />
 
       <div className="tw-hidden">
         <UserPageIdentityAddStatementsSocialMediaAccount />

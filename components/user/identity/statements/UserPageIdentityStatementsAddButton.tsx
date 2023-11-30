@@ -1,5 +1,5 @@
 import { useRef, useState } from "react";
-import UserPageIdentityAddStatements from "../UserPageIdentityAddStatements";
+import UserPageIdentityAddStatements from "./UserPageIdentityAddStatements";
 import CommonAnimationWrapper from "../../../utils/animation/CommonAnimationWrapper";
 import CommonAnimationOpacity from "../../../utils/animation/CommonAnimationOpacity";
 
