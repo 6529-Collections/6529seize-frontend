@@ -72,3 +72,14 @@ export interface ApiProfileRaterCicState {
   readonly cic_rating_by_rater: number | null;
   readonly cic_ratings_left_to_give_by_rater: number | null;
 }
+
+export interface CicStatement {
+  id: string;
+  profile_id: string;
+  statement_group: string;
+  statement_type: string;
+  statement_comment: string | null;
+  statement_value: string;
+  crated_at: Date;
+  updated_at: Date | null;
+}

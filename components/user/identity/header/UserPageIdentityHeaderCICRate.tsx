@@ -9,8 +9,8 @@ import {
   commonApiFetch,
   commonApiPost,
 } from "../../../../services/api/common-api";
-import { useAccount, useMutation } from "wagmi";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useAccount } from "wagmi";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 export default function UserPageIdentityHeaderCICRate({
   profile,
@@ -41,48 +41,46 @@ export default function UserPageIdentityHeaderCICRate({
     staleTime: 0,
   });
 
-  const updateCICMutation = useMutation(
-    (amount: number) =>
-      commonApiPost({
+  const updateCICMutation = useMutation({
+    mutationFn: async (amount: number) =>
+      await commonApiPost({
         endpoint: `profiles/${profile.profile?.handle}/cic/rating`,
         body: {
           amount,
         },
       }),
-    {
-      onSuccess: () => {
-        setToast({
-          message: "CIC rating updated.",
-          type: "success",
-        });
+    onSuccess: () => {
+      setToast({
+        message: "CIC rating updated.",
+        type: "success",
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["profile", profile.profile?.handle.toLowerCase()],
+      });
+
+      for (const wallet of profile.consolidation.wallets) {
         queryClient.invalidateQueries({
-          queryKey: ["profile", profile.profile?.handle.toLowerCase()],
+          queryKey: ["profile", wallet.wallet.address.toLowerCase()],
         });
 
-        for (const wallet of profile.consolidation.wallets) {
+        if (wallet.wallet.ens) {
           queryClient.invalidateQueries({
-            queryKey: ["profile", wallet.wallet.address.toLowerCase()],
+            queryKey: ["profile", wallet.wallet.ens.toLowerCase()],
           });
-
-          if (wallet.wallet.ens) {
-            queryClient.invalidateQueries({
-              queryKey: ["profile", wallet.wallet.ens.toLowerCase()],
-            });
-          }
         }
+      }
 
-        queryClient.invalidateQueries({
-          queryKey: [
-            "profileRaterCicState",
-            {
-              handle: profile.profile?.handle.toLowerCase(),
-              rater: address?.toLowerCase(),
-            },
-          ],
-        });
-      },
-    }
-  );
+      queryClient.invalidateQueries({
+        queryKey: [
+          "profileRaterCicState",
+          {
+            handle: profile.profile?.handle.toLowerCase(),
+            rater: address?.toLowerCase(),
+          },
+        ],
+      });
+    },
+  });
 
   const [myAvailableCIC, setMyAvailableCIC] = useState<number>(
     myCICState?.cic_ratings_left_to_give_by_rater ?? 0

@@ -1,6 +1,6 @@
 import {
-  CONTACT_STATEMENT_TYPE,
   STATEMENT_TITLE,
+  STATEMENT_TYPE,
 } from "../../../../../helpers/Types";
 import SocialStatementIcon from "../../../utils/icons/SocialStatementIcon";
 
@@ -9,7 +9,7 @@ export default function UserPageIdentityAddStatementsContactInput({
   value,
   onChange,
 }: {
-  activeType: CONTACT_STATEMENT_TYPE;
+  activeType: STATEMENT_TYPE;
   value: string;
   onChange: (value: string) => void;
 }) {
