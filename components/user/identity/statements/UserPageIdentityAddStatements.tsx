@@ -1,7 +1,7 @@
 import { useRef, useState } from "react";
 import { useClickAway, useKeyPressEvent } from "react-use";
-import UserPageIdentityAddStatementsSelect from "./UserPageIdentityAddStatementsSelect";
 import UserPageIdentityAddStatementsViews from "./UserPageIdentityAddStatementsViews";
+
 
 export default function UserPageIdentityAddStatements({
   onClose,

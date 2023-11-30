@@ -26,7 +26,7 @@ export default function UserPageIdentityStatements({
 }) {
   return (
     <div className="tw-mt-10">
-      <div className="tw-bg-neutral-800 tw-border tw-border-white/5 tw-border-solid tw-rounded-xl">
+      <div className="tw-bg-neutral-900 tw-border tw-border-white/5 tw-border-solid tw-rounded-xl">
         <UserPageIdentityAddStatementsHeader profile={profile} />
 
         <div className="tw-p-8 tw-mx-auto tw-grid tw-max-w-2xl tw-grid-cols-1 tw-gap-x-8 tw-gap-y-16 tw-sm:gap-y-20 tw-lg:mx-0 lg:tw-max-w-none lg:tw-grid-cols-3">
@@ -35,7 +35,7 @@ export default function UserPageIdentityStatements({
               {/* Consolidated Addresses */}
               <div>
                 <div className="tw-flex tw-items-center tw-space-x-4">
-                  <div className="tw-flex tw-h-9 tw-w-9 tw-items-center tw-justify-center tw-rounded-lg tw-bg-neutral-700 tw-border tw-border-solid tw-border-neutral-600">
+                  <div className="tw-flex tw-h-9 tw-w-9 tw-items-center tw-justify-center tw-rounded-lg tw-bg-neutral-800 tw-border tw-border-solid tw-border-neutral-700">
                     <div className="tw-flex tw-items-center tw-justify-center tw-flex-shrink-0 tw-h-5 tw-w-5 tw-text-neutral-50">
                       <EthereumIcon />
                     </div>
@@ -81,7 +81,7 @@ export default function UserPageIdentityStatements({
               {/* Social Media Accounts */}
               <div>
                 <div className="tw-flex tw-items-center tw-space-x-4">
-                  <div className="tw-flex tw-h-9 tw-w-9 tw-items-center tw-justify-center tw-rounded-lg tw-bg-neutral-700 tw-border tw-border-solid tw-border-neutral-600">
+                  <div className="tw-flex tw-h-9 tw-w-9 tw-items-center tw-justify-center tw-rounded-lg tw-bg-neutral-800 tw-border tw-border-solid tw-border-neutral-700">
                     <div className="tw-flex tw-items-center tw-justify-center tw-flex-shrink-0 tw-h-5 tw-w-5 tw-text-neutral-50">
                       <svg
                         className="tw-flex-shrink-0 tw-h-5 tw-w-5 tw-text-neutral-50"
@@ -190,7 +190,7 @@ export default function UserPageIdentityStatements({
               {/* Contact */}
               <div>
                 <div className="tw-flex tw-items-center tw-space-x-4">
-                  <div className="tw-flex tw-h-9 tw-w-9 tw-items-center tw-justify-center tw-rounded-lg tw-bg-neutral-700 tw-border tw-border-solid tw-border-neutral-600">
+                  <div className="tw-flex tw-h-9 tw-w-9 tw-items-center tw-justify-center tw-rounded-lg tw-bg-neutral-800 tw-border tw-border-solid tw-border-neutral-700">
                     <div className="tw-flex tw-items-center tw-justify-center tw-flex-shrink-0 tw-h-5 tw-w-5 tw-text-neutral-50">
                       <svg
                         className="tw-flex-shrink-0 tw-h-5 tw-w-5 tw-text-neutral-50"
@@ -296,7 +296,7 @@ export default function UserPageIdentityStatements({
               {/* Social Media Verification Posts */}
               <div>
                 <div className="tw-flex tw-items-center tw-space-x-4">
-                  <div className="tw-flex tw-h-9 tw-w-9 tw-items-center tw-justify-center tw-rounded-lg tw-bg-neutral-700 tw-border tw-border-solid tw-border-neutral-600">
+                  <div className="tw-flex tw-h-9 tw-w-9 tw-items-center tw-justify-center tw-rounded-lg tw-bg-neutral-800 tw-border tw-border-solid tw-border-neutral-700">
                     <svg
                       className="tw-flex-shrink-0 tw-h-5 tw-w-5 tw-text-neutral-50"
                       viewBox="0 0 24 24"
