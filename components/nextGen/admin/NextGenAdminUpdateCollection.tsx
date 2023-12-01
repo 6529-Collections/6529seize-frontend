@@ -33,8 +33,8 @@ interface Props {
   close: () => void;
 }
 
-const UPDATE_INFO_INDEX = 1000;
-const UPDATE_BASE_URI_INDEX = 999;
+const UPDATE_INFO_INDEX = 1000000;
+const UPDATE_BASE_URI_INDEX = 999999;
 
 export default function NextGenAdminUpdateCollection(props: Readonly<Props>) {
   const account = useAccount();
