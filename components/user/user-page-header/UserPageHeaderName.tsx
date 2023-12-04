@@ -33,10 +33,10 @@ export default function UserPageHeaderName({
   const displayName = getDisplayName();
   return (
     <div className="tw-mt-4">
-      <div className="tw-inline-flex tw-items-center">
+      <div className="tw-flex tw-items-center">
         <p className="tw-mb-0 tw-text-3xl tw-font-semibold">{displayName}</p>
         {profile.profile?.handle && (
-          <div className="tw-ml-2 -tw-mt-1.5 tw-h-6 tw-w-6">
+          <div className="tw-ml-2 tw-flex tw-items-center tw-justify-center tw-self-center tw-h-6 tw-w-6">
             <UserCICTypeIcon profile={profile} />
           </div>
         )}

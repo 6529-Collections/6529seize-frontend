@@ -56,9 +56,8 @@ export default function UserPageIdentityStatementsStatement({
 
   return (
     <li
-      onClick={onDelete}
-      /* hover:tw-bg-neutral-800 - kui kasutaja on oma profiili vaates ja hoverdab statemendil */
-      className="hover:tw-bg-neutral-800 tw-group tw-cursor-pointer tw-inline-flex tw-py-1.5 tw-px-1.5 tw-rounded-lg tw-items-center tw-text-sm tw-font-medium tw-text-neutral-50 hover:tw-text-neutral-400 tw-transition tw-duration-300 tw-ease-out "
+      /* hover:tw-bg-neutral-800 - see klass tekib kasutaja oma profiili vaates kui hoverdab statemendil */
+      className="tw-group tw-cursor-pointer -tw-ml-1 tw-inline-flex tw-h-8 tw-px-1.5 tw-rounded-lg tw-items-center tw-text-sm tw-font-medium tw-text-neutral-50 hover:tw-text-neutral-400 tw-transition tw-duration-300 tw-ease-out"
     >
       <div className="tw-inline-flex tw-items-center tw-space-x-3">
         <div className="tw-cursor-pointer tw-w-6 tw-h-6 group-hover:tw-scale-110 tw-transition tw-duration-300 tw-ease-out">
@@ -68,21 +67,28 @@ export default function UserPageIdentityStatementsStatement({
           <span>{statement.statement_value}</span>
         </div>
       </div>
-      {/* Delete icon - kui kasutaja on oma profiili vaates ja hoverdab statemendil */}
-      <svg
-        className="tw-flex-shrink-0 tw-ml-4 tw-w-6 tw-h-6 tw-text-red tw-transition tw-duration-300 tw-ease-out hover:tw-scale-110"
-        viewBox="0 0 24 24"
-        fill="none"
-        xmlns="http://www.w3.org/2000/svg"
+      {/* Delete icon - see ikoon tekib kasutaja  oma profiili vaates kui hoverdab statemendil */}
+      <button
+        onClick={onDelete}
+        type="button"
+        className="tw-hidden group-hover:tw-block tw-bg-transparent tw-cursor-pointer tw-text-sm tw-font-semibold tw-text-white tw-border-0 focus:tw-outline-none tw-transition tw-duration-300 tw-ease-out"
       >
-        <path
-          d="M15 9L9 15M9 9L15 15M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12Z"
-          stroke="currentColor"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        />
-      </svg>
+        <svg
+          className="tw-flex-shrink-0 tw-ml-4 tw-w-6 tw-h-6 tw-text-red tw-transition tw-duration-300 tw-ease-out hover:tw-scale-110"
+          viewBox="0 0 24 24"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M15 9L9 15M9 9L15 15M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12Z"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
+          <span className="tw-sr-only">Delete statement</span>
+        </svg>
+      </button>
     </li>
   );
 }

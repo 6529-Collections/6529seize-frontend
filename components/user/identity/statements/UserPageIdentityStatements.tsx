@@ -18,6 +18,7 @@ import UserPageIdentityStatementsSocialMediaAccounts from "./social-media-accoun
 import UserPageIdentityStatementsContacts from "./contacts/UserPageIdentityStatementsContacts";
 import UserPageIdentityStatementsSocialMediaVerificationPosts from "./social-media-verification-posts/UserPageIdentityStatementsSocialMediaVerificationPosts";
 
+
 export default function UserPageIdentityStatements({
   profile,
 }: {

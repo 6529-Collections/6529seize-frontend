@@ -3,6 +3,7 @@ import UserPageIdentityStatements from "./statements/UserPageIdentityStatements"
 import UserPageIdentityHeader from "./header/UserPageIdentityHeader";
 import UserPageIdentityCICRatings from "./UserPageIdentityCICRatings";
 import UserPageIdentityActivityLog from "./UserPageIdentityActivityLog";
+import UserPageIdentityDeleteStatementModal from "./statements/utils/UserPageIdentityDeleteStatementModal";
 
 export default function UserPageIdentity({
   profile,
@@ -20,6 +21,7 @@ export default function UserPageIdentity({
         <div>
           <UserPageIdentityActivityLog />
         </div>
+       <UserPageIdentityDeleteStatementModal />
       </div>
     </div>
   );
