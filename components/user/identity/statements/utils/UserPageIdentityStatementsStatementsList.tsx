@@ -23,7 +23,7 @@ export default function UserPageIdentityStatementsStatementsList({
       [profile, address]
     );
   return (
-    <ul className="tw-mt-4 tw-list-none tw-space-y-4 tw-pl-0 tw-text-base tw-leading-7 tw-text-gray-600">
+    <ul className="tw-mt-6 tw-list-none tw-space-y-2 tw-inline-flex tw-flex-col tw-pl-0 tw-text-base tw-leading-7 tw-text-gray-600">
       {statements.map((statement) => (
         <UserPageIdentityStatementsStatement
           key={statement.id}
