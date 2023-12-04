@@ -9,9 +9,30 @@ export default function UserPageIdentityStatementsConsolidatedAddressesItem({
   address: IProfileConsolidation;
   primaryAddress: string;
 }) {
+  const goToOpensea = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+    e.stopPropagation();
+    window.open(
+      `https://opensea.io/accounts/${address.wallet.address}`,
+      "_blank"
+    );
+  };
+
+  const goToEtherscan = () => {
+    window.open(
+      `https://etherscan.io/address/${address.wallet.address}`,
+      "_blank"
+    );
+  };
+
   return (
-    <li className="tw-group tw-flex tw-items-center tw-group tw-cursor-pointer  tw-text-sm tw-font-medium tw-text-neutral-50 hover:tw-text-neutral-300 tw-transition tw-duration-300 tw-ease-out tw-space-x-3">
-      <div className="tw-cursor-pointer tw-flex-shrink-0 tw-h-6 tw-w-6 hover:tw-scale-110 tw-transition tw-duration-300 tw-ease-out">
+    <li
+      onClick={goToEtherscan}
+      className="tw-group tw-flex tw-items-center tw-group tw-cursor-pointer  tw-text-sm tw-font-medium tw-text-neutral-50 hover:tw-text-neutral-300 tw-transition tw-duration-300 tw-ease-out tw-space-x-3"
+    >
+      <div
+        onClick={goToOpensea}
+        className="tw-cursor-pointer tw-flex-shrink-0 tw-h-6 tw-w-6 hover:tw-scale-110 tw-transition tw-duration-300 tw-ease-out"
+      >
         <OpenseaIcon />
       </div>
       <div className="tw-cursor-pointer tw-flex-shrink-0 tw-h-6 tw-w-6  hover:tw-scale-110 tw-transition tw-duration-300 tw-ease-out">
