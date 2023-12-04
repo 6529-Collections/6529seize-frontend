@@ -467,3 +467,12 @@ export const amIUser = ({
   profile.consolidation.wallets.some(
     (wallet) => wallet.wallet.address.toLowerCase() === address?.toLowerCase()
   );
+
+
+    export const createPossessionStr = (name: string | null): string => {
+      if (name) {
+        const possession = name.endsWith("s") ? `${name}'` : `${name}'s`;
+        return possession;
+      }
+      return "";
+    };

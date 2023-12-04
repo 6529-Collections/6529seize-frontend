@@ -1,274 +1,38 @@
-import DiscordIcon from "../utils/icons/DiscordIcon";
-import EthereumIcon from "../utils/icons/EthereumIcon";
-import XIcon from "../utils/icons/XIcon";
+import {  useState } from "react";
+import { IProfileAndConsolidations, PROFILE_ACTIVITY_TYPE } from "../../../../entities/IProfile";
+import DiscordIcon from "../../utils/icons/DiscordIcon";
+import EthereumIcon from "../../utils/icons/EthereumIcon";
+import XIcon from "../../utils/icons/XIcon";
+import UserPageIdentityActivityLogHeader from "./UserPageIdentityActivityLogHeader";
+import UserPageIdentityActivityLogFilter from "./filter/UserPageIdentityActivityLogFilter";
 
-export default function UserPageIdentityActivityLog() {
+
+
+export default function UserPageIdentityActivityLog({
+  profile,
+}: {
+  profile: IProfileAndConsolidations;
+}) {
+  const [selectedFilters, setSelectedFilters] = useState<
+    PROFILE_ACTIVITY_TYPE[]
+  >([]);
+
+  const onFilter = (filter: PROFILE_ACTIVITY_TYPE) => {
+    if (selectedFilters.includes(filter)) {
+      setSelectedFilters(selectedFilters.filter((f) => f !== filter));
+    } else {
+      setSelectedFilters([...selectedFilters, filter]);
+    }
+  };
+
   return (
     <div className="tw-bg-neutral-900 tw-border tw-border-white/5 tw-border-solid tw-rounded-xl">
-      <div className="tw-h-16 tw-px-8">
-        <div className="tw-h-full tw-flex tw-items-center tw-justify-between tw-w-full tw-border-b tw-border-t-0 tw-border-x-0 tw-border-solid tw-border-[#333333]">
-          <h3 className="mb-0 tw-text-lg tw-font-semibold tw-text-neutral-50 tw-tracking-tight">
-            <span>Simo&apos;s</span> Activity Log
-          </h3>
-        </div>
-      </div>
+      <UserPageIdentityActivityLogHeader profile={profile} />
       <div className="tw-max-h-[28rem] tw-transform-gpu tw-scroll-py-3 tw-overflow-y-auto">
-        <div className="tw-px-8 tw-mt-4 tw-max-w-sm">
-          <div className="tw-relative">
-            <button
-              type="button"
-              className="tw-relative tw-flex tw-items-center tw-w-full tw-rounded-lg tw-border-0 tw-py-2.5 tw-px-3.5 tw-bg-neutral-800 tw-text-neutral-50 tw-font-light tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-white/5 placeholder:tw-text-neutral-500 focus:tw-outline-none focus:tw-bg-transparent focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 hover:tw-ring-neutral-700 tw-text-base sm:tw-leading-6 tw-transition tw-duration-300 tw-ease-out"
-            >
-              <span className="tw-block tw-truncate tw-text-neutral-400 tw-font-normal tw-text-base">
-                Select
-              </span>
-              <span className="tw-pointer-events-none tw-absolute tw-inset-y-0 tw-right-0 tw-flex tw-items-center tw-pr-3.5">
-                <svg
-                  className="tw-h-5 tw-w-5 tw-text-neutral-100"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M6 9L12 15L18 9"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-              </span>
-            </button>
-            <div className="tw-origin-top-right tw-absolute tw-right-0 tw-mt-1 tw-w-full tw-rounded-lg tw-shadow-xl tw-bg-neutral-800 tw-ring-1 tw-ring-black tw-ring-opacity-5">
-              <ul className="tw-absolute tw-z-10 tw-pl-1.5 tw-pr-1.5 tw-list-none tw-mt-1 tw-w-full tw-overflow-auto tw-rounded-lg tw-bg-neutral-800 tw-py-2 tw-text-base tw-shadow-xl tw-ring-1 tw-ring-inset tw-ring-white/10 focus:tw-outline-none sm:tw-text-sm">
-                <li
-                  className="tw-group tw-text-neutral-50 tw-rounded-lg tw-relative tw-cursor-pointer tw-select-none tw-py-2.5 tw-pl-3 tw-pr-9 hover:tw-bg-neutral-700 tw-transition tw-duration-300 tw-ease-out"
-                  role="option"
-                >
-                  <div className="tw-w-full tw-flex tw-items-center tw-space-x-3 tw-pr-4">
-                    <svg
-                      className="tw-flex-shrink-0 tw-h-4 tw-w-4 tw-text-neutral-100"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        d="M12 15.5H7.5C6.10444 15.5 5.40665 15.5 4.83886 15.6722C3.56045 16.06 2.56004 17.0605 2.17224 18.3389C2 18.9067 2 19.6044 2 21M16 18L18 20L22 16M14.5 7.5C14.5 9.98528 12.4853 12 10 12C7.51472 12 5.5 9.98528 5.5 7.5C5.5 5.01472 7.51472 3 10 3C12.4853 3 14.5 5.01472 14.5 7.5Z"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                    </svg>
-                    <span className="tw-font-normal tw-block tw-truncate">
-                      CIC Ratings
-                    </span>
-                  </div>
-                  {/* 
-                  <span className="tw-text-neutral-50 tw-absolute tw-inset-y-0 tw-right-0 tw-flex tw-items-center tw-pr-4">
-                    <svg
-                      className="tw-h-4 tw-w-4 tw-text-primary-400"
-                      viewBox="0 0 20 20"
-                      fill="currentColor"
-                      aria-hidden="true"
-                    >
-                      <path
-                        fillRule="evenodd"
-                        d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z"
-                        clipRule="evenodd"
-                      />
-                    </svg>
-                  </span> */}
-                </li>
-                <li
-                  className="tw-group tw-text-neutral-50 tw-rounded-lg tw-relative tw-cursor-pointer tw-select-none tw-py-2.5 tw-pl-3 tw-pr-9 hover:tw-bg-neutral-700 tw-transition tw-duration-300 tw-ease-out"
-                  role="option"
-                >
-                  <div className="tw-w-full tw-flex tw-items-center tw-space-x-3 tw-pr-4">
-                    <svg
-                      className="tw-flex-shrink-0 tw-h-4 tw-w-4 tw-text-neutral-100"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        d="M16 7.99999V13C16 13.7956 16.3161 14.5587 16.8787 15.1213C17.4413 15.6839 18.2043 16 19 16C19.7956 16 20.5587 15.6839 21.1213 15.1213C21.6839 14.5587 22 13.7956 22 13V12C21.9999 9.74302 21.2362 7.55247 19.8333 5.78452C18.4303 4.01658 16.4705 2.77521 14.2726 2.26229C12.0747 1.74936 9.76793 1.99503 7.72734 2.95936C5.68676 3.92368 4.03239 5.54995 3.03325 7.57371C2.03411 9.59748 1.74896 11.8997 2.22416 14.1061C2.69936 16.3125 3.90697 18.2932 5.65062 19.7263C7.39428 21.1593 9.57143 21.9603 11.8281 21.9991C14.0847 22.0379 16.2881 21.3122 18.08 19.94M16 12C16 14.2091 14.2091 16 12 16C9.79086 16 8 14.2091 8 12C8 9.79085 9.79086 7.99999 12 7.99999C14.2091 7.99999 16 9.79085 16 12Z"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                    </svg>
-                    <span className="tw-font-normal tw-block tw-truncate">
-                      Handle
-                    </span>
-                  </div>
-                  {/* 
-                  <span className="tw-text-neutral-50 tw-absolute tw-inset-y-0 tw-right-0 tw-flex tw-items-center tw-pr-4">
-                    <svg
-                      className="tw-h-4 tw-w-4 tw-text-primary-400"
-                      viewBox="0 0 20 20"
-                      fill="currentColor"
-                      aria-hidden="true"
-                    >
-                      <path
-                        fillRule="evenodd"
-                        d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z"
-                        clipRule="evenodd"
-                      />
-                    </svg>
-                  </span> */}
-                </li>
-                <li
-                  className="tw-group tw-text-neutral-50 tw-rounded-lg tw-relative tw-cursor-pointer tw-select-none tw-py-2.5 tw-pl-3 tw-pr-9 hover:tw-bg-neutral-700 tw-transition tw-duration-300 tw-ease-out"
-                  role="option"
-                >
-                  <div className="tw-w-full tw-flex tw-items-center tw-space-x-3 tw-pr-4">
-                    <div className="tw-flex tw-items-center tw-flex-shrink-0 tw-h-4 tw-w-4 tw-text-neutral-100">
-                      <EthereumIcon />
-                    </div>
-                    <span className="tw-font-normal tw-block tw-truncate">
-                      Primary Wallet
-                    </span>
-                  </div>
-
-                  {/*  <span className="tw-text-neutral-50 tw-absolute tw-inset-y-0 tw-right-0 tw-flex tw-items-center tw-pr-4">
-                    <svg
-                      className="tw-h-4 tw-w-4 tw-text-primary-400"
-                      viewBox="0 0 20 20"
-                      fill="currentColor"
-                      aria-hidden="true"
-                    >
-                      <path
-                        fillRule="evenodd"
-                        d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z"
-                        clipRule="evenodd"
-                      />
-                    </svg>
-                  </span> */}
-                </li>
-                <li
-                  className="tw-group tw-text-neutral-50 tw-rounded-lg tw-relative tw-cursor-pointer tw-select-none tw-py-2.5 tw-pl-3 tw-pr-9 hover:tw-bg-neutral-700 tw-transition tw-duration-300 tw-ease-out"
-                  role="option"
-                >
-                  <div className="tw-w-full tw-flex tw-items-center tw-space-x-3 tw-pr-4">
-                    <svg
-                      className="tw-flex-shrink-0 tw-h-4 tw-w-4 tw-text-neutral-100"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        d="M16 3.46776C17.4817 4.20411 18.5 5.73314 18.5 7.5C18.5 9.26686 17.4817 10.7959 16 11.5322M18 16.7664C19.5115 17.4503 20.8725 18.565 22 20M2 20C3.94649 17.5226 6.58918 16 9.5 16C12.4108 16 15.0535 17.5226 17 20M14 7.5C14 9.98528 11.9853 12 9.5 12C7.01472 12 5 9.98528 5 7.5C5 5.01472 7.01472 3 9.5 3C11.9853 3 14 5.01472 14 7.5Z"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                    </svg>
-                    <span className="tw-font-normal tw-block tw-truncate">
-                      Social Media Account
-                    </span>
-                  </div>
-
-                  {/*  <span className="tw-text-neutral-50 tw-absolute tw-inset-y-0 tw-right-0 tw-flex tw-items-center tw-pr-4">
-                    <svg
-                      className="tw-h-4 tw-w-4 tw-text-primary-400"
-                      viewBox="0 0 20 20"
-                      fill="currentColor"
-                      aria-hidden="true"
-                    >
-                      <path
-                        fillRule="evenodd"
-                        d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z"
-                        clipRule="evenodd"
-                      />
-                    </svg>
-                  </span> */}
-                </li>
-                <li
-                  className="tw-group tw-text-neutral-50 tw-rounded-lg tw-relative tw-cursor-pointer tw-select-none tw-py-2.5 tw-pl-3 tw-pr-9 hover:tw-bg-neutral-700 tw-transition tw-duration-300 tw-ease-out"
-                  role="option"
-                >
-                  <div className="tw-w-full tw-flex tw-items-center tw-space-x-3 tw-pr-4">
-                    <svg
-                      className="tw-flex-shrink-0 tw-h-4 tw-w-4 tw-text-neutral-100"
-                      aria-hidden="true"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        d="M7 8.5H12M7 12H15M9.68375 18H16.2C17.8802 18 18.7202 18 19.362 17.673C19.9265 17.3854 20.3854 16.9265 20.673 16.362C21 15.7202 21 14.8802 21 13.2V7.8C21 6.11984 21 5.27976 20.673 4.63803C20.3854 4.07354 19.9265 3.6146 19.362 3.32698C18.7202 3 17.8802 3 16.2 3H7.8C6.11984 3 5.27976 3 4.63803 3.32698C4.07354 3.6146 3.6146 4.07354 3.32698 4.63803C3 5.27976 3 6.11984 3 7.8V20.3355C3 20.8684 3 21.1348 3.10923 21.2716C3.20422 21.3906 3.34827 21.4599 3.50054 21.4597C3.67563 21.4595 3.88367 21.2931 4.29976 20.9602L6.68521 19.0518C7.17252 18.662 7.41617 18.4671 7.68749 18.3285C7.9282 18.2055 8.18443 18.1156 8.44921 18.0613C8.74767 18 9.0597 18 9.68375 18Z"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                    </svg>
-                    <span className="tw-font-normal tw-block tw-truncate">
-                      Contact
-                    </span>
-                  </div>
-
-                  {/*  <span className="tw-text-neutral-50 tw-absolute tw-inset-y-0 tw-right-0 tw-flex tw-items-center tw-pr-4">
-                    <svg
-                      className="tw-h-4 tw-w-4 tw-text-primary-400"
-                      viewBox="0 0 20 20"
-                      fill="currentColor"
-                      aria-hidden="true"
-                    >
-                      <path
-                        fillRule="evenodd"
-                        d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z"
-                        clipRule="evenodd"
-                      />
-                    </svg>
-                  </span> */}
-                </li>
-                <li
-                  className="tw-group tw-text-neutral-50 tw-rounded-lg tw-relative tw-cursor-pointer tw-select-none tw-py-2.5 tw-pl-3 tw-pr-9 hover:tw-bg-neutral-700 tw-transition tw-duration-300 tw-ease-out"
-                  role="option"
-                >
-                  <div className="tw-w-full tw-flex tw-items-center tw-space-x-3 tw-pr-4">
-                    <svg
-                      className="tw-flex-shrink-0 tw-h-4 tw-w-4 tw-text-neutral-100"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        d="M11 4H7.8C6.11984 4 5.27976 4 4.63803 4.32698C4.07354 4.6146 3.6146 5.07354 3.32698 5.63803C3 6.27976 3 7.11984 3 8.8V16.2C3 17.8802 3 18.7202 3.32698 19.362C3.6146 19.9265 4.07354 20.3854 4.63803 20.673C5.27976 21 6.11984 21 7.8 21H15.2C16.8802 21 17.7202 21 18.362 20.673C18.9265 20.3854 19.3854 19.9265 19.673 19.362C20 18.7202 20 17.8802 20 16.2V13M13 17H7M15 13H7M20.1213 3.87868C21.2929 5.05025 21.2929 6.94975 20.1213 8.12132C18.9497 9.29289 17.0503 9.29289 15.8787 8.12132C14.7071 6.94975 14.7071 5.05025 15.8787 3.87868C17.0503 2.70711 18.9497 2.70711 20.1213 3.87868Z"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                    </svg>
-                    <span className="tw-font-normal tw-block tw-truncate">
-                      Social Media Verification Posts
-                    </span>
-                  </div>
-                  {/* 
-                  <span className="tw-text-neutral-50 tw-absolute tw-inset-y-0 tw-right-0 tw-flex tw-items-center tw-pr-4">
-                    <svg
-                      className="tw-h-4 tw-w-4 tw-text-primary-400"
-                      viewBox="0 0 20 20"
-                      fill="currentColor"
-                      aria-hidden="true"
-                    >
-                      <path
-                        fillRule="evenodd"
-                        d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z"
-                        clipRule="evenodd"
-                      />
-                    </svg>
-                  </span> */}
-                </li>
-              </ul>
-            </div>
-          </div>
-        </div>
+        <UserPageIdentityActivityLogFilter
+          selected={selectedFilters}
+          setSelected={onFilter}
+        />
 
         <ul
           role="list"

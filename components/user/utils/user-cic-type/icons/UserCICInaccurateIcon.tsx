@@ -1,6 +1,3 @@
-import Tippy from "@tippyjs/react";
-import UserCICInnacurateTooltip from "../UserCICInnacurateTooltip";
-import { IProfileAndConsolidations } from "../../../../../entities/IProfile";
 
 export default function UserCICAccurateIcon() {
   return (
