@@ -11,6 +11,7 @@ import {
   GasRoyaltiesHeader,
   GasRoyaltiesTokenImage,
   getUrlParams,
+  useSharedState,
 } from "./GasRoyalties";
 import { useRouter } from "next/router";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -28,10 +29,30 @@ export default function Royalties() {
 
   const [description, setDescription] = useState<string>(MEMES_DESCRIPTION);
 
-  const [fetching, setFetching] = useState(true);
+  const [royalties, setRoyalties] = useState<Royalty[]>([]);
+  const [sumVolume, setSumVolume] = useState(0);
+  const [sumProceeds, setSumProceeds] = useState(0);
+  const [sumArtistTake, setSumArtistTake] = useState(0);
 
-  const [collectionFocus, setCollectionFocus] =
-    useState<GasRoyaltiesCollectionFocus>();
+  const {
+    dateSelection,
+    setDateSelection,
+    fromDate,
+    setFromDate,
+    toDate,
+    setToDate,
+    isPrimary,
+    setIsPrimary,
+    selectedArtist,
+    setSelectedArtist,
+    showDatePicker,
+    setShowDatePicker,
+    collectionFocus,
+    setCollectionFocus,
+    fetching,
+    setFetching,
+    getUrl,
+  } = useSharedState();
 
   useEffect(() => {
     if (router.isReady) {
@@ -47,39 +68,13 @@ export default function Royalties() {
     }
   }, [router.isReady]);
 
-  const [royalties, setRoyalties] = useState<Royalty[]>([]);
-  const [sumVolume, setSumVolume] = useState(0);
-  const [sumProceeds, setSumProceeds] = useState(0);
-  const [sumArtistTake, setSumArtistTake] = useState(0);
-
-  const [selectedArtist, setSelectedArtist] = useState<string>("");
-
-  const [fromDate, setFromDate] = useState<Date>();
-  const [toDate, setToDate] = useState<Date>();
-
-  const [showDatePicker, setShowDatePicker] = useState(false);
-
-  const [dateSelection, setDateSelection] = useState<DateIntervalsSelection>(
-    DateIntervalsSelection.THIS_MONTH
-  );
-
-  const [isPrimary, setIsPrimary] = useState<boolean>(false);
-
-  function getUrl() {
-    return getUrlParams(
-      "royalties",
-      isPrimary,
-      dateSelection,
-      collectionFocus,
-      fromDate,
-      toDate,
-      selectedArtist
-    );
+  function getUrlWithParams() {
+    return getUrl("royalties");
   }
 
   function fetchRoyalties() {
     setFetching(true);
-    fetchUrl(getUrl()).then((res: Royalty[]) => {
+    fetchUrl(getUrlWithParams()).then((res: Royalty[]) => {
       res.forEach((r) => {
         r.volume = Math.round(r.volume * 100000) / 100000;
         r.proceeds = Math.round(r.proceeds * 100000) / 100000;
@@ -155,7 +150,7 @@ export default function Royalties() {
         to_date={toDate}
         focus={collectionFocus}
         setFocus={setCollectionFocus}
-        getUrl={getUrl}
+        getUrl={getUrlWithParams}
         setSelectedArtist={setSelectedArtist}
         setIsPrimary={setIsPrimary}
         setDateSelection={(date_selection) => {

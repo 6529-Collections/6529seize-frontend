@@ -295,3 +295,49 @@ export function GasRoyaltiesTokenImage(props: Readonly<TokenImageProps>) {
     </a>
   );
 }
+
+export function useSharedState() {
+  const [selectedArtist, setSelectedArtist] = useState<string>("");
+  const [fromDate, setFromDate] = useState<Date>();
+  const [toDate, setToDate] = useState<Date>();
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [dateSelection, setDateSelection] = useState<DateIntervalsSelection>(
+    DateIntervalsSelection.THIS_MONTH
+  );
+  const [isPrimary, setIsPrimary] = useState<boolean>(false);
+  const [collectionFocus, setCollectionFocus] =
+    useState<GasRoyaltiesCollectionFocus>();
+  const [fetching, setFetching] = useState(true);
+
+  function getUrl(type: string) {
+    return getUrlParams(
+      type,
+      isPrimary,
+      dateSelection,
+      collectionFocus,
+      fromDate,
+      toDate,
+      selectedArtist
+    );
+  }
+
+  return {
+    selectedArtist,
+    setSelectedArtist,
+    fromDate,
+    setFromDate,
+    toDate,
+    setToDate,
+    showDatePicker,
+    setShowDatePicker,
+    dateSelection,
+    setDateSelection,
+    isPrimary,
+    setIsPrimary,
+    collectionFocus,
+    setCollectionFocus,
+    fetching,
+    setFetching,
+    getUrl,
+  };
+}
