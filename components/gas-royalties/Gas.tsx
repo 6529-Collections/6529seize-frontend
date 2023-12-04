@@ -10,7 +10,6 @@ import {
   GasRoyaltiesCollectionFocus,
   GasRoyaltiesHeader,
   GasRoyaltiesTokenImage,
-  getUrlParams,
   useSharedState,
 } from "./GasRoyalties";
 import { useRouter } from "next/router";

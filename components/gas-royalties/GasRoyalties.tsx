@@ -150,7 +150,6 @@ export function GasRoyaltiesHeader(props: Readonly<HeaderProps>) {
                     props.setFocus(GasRoyaltiesCollectionFocus.MEMES);
                   }
                 }}
-                tabIndex={0}
                 aria-label="The Memes">
                 The Memes
               </span>
@@ -168,7 +167,6 @@ export function GasRoyaltiesHeader(props: Readonly<HeaderProps>) {
                     props.setFocus(GasRoyaltiesCollectionFocus.MEMELAB);
                   }
                 }}
-                tabIndex={0}
                 aria-label="Meme Lab">
                 Meme Lab
               </span>

@@ -10,7 +10,6 @@ import {
   GasRoyaltiesCollectionFocus,
   GasRoyaltiesHeader,
   GasRoyaltiesTokenImage,
-  getUrlParams,
   useSharedState,
 } from "./GasRoyalties";
 import { useRouter } from "next/router";
@@ -26,8 +25,6 @@ const MEMES_SOLD_MANUALLY = [1, 2, 3, 4];
 
 export default function Royalties() {
   const router = useRouter();
-
-  const [description, setDescription] = useState<string>(MEMES_DESCRIPTION);
 
   const [royalties, setRoyalties] = useState<Royalty[]>([]);
   const [sumVolume, setSumVolume] = useState(0);
@@ -100,11 +97,6 @@ export default function Royalties() {
   useEffect(() => {
     if (collectionFocus) {
       setRoyalties([]);
-      setDescription(
-        collectionFocus === GasRoyaltiesCollectionFocus.MEMELAB
-          ? MEMELAB_DESCRIPTION
-          : MEMES_DESCRIPTION
-      );
       fetchRoyalties();
     }
   }, [collectionFocus]);
