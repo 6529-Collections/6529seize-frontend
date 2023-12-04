@@ -25,6 +25,7 @@ module.exports = {
         "neutral-350": "#B0B0B0",
         "green": "#3CCB7F",
         "red":"#F97066",
+        "yellow":"#FEDF89"
       },
       gridTemplateColumns: {
         13: "repeat(13, minmax(0, 1fr))",
