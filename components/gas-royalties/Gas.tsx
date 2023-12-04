@@ -3,25 +3,19 @@ import { Container, Row, Col, Table } from "react-bootstrap";
 import styles from "./GasRoyalties.module.scss";
 import { Gas } from "../../entities/IGas";
 import { fetchUrl } from "../../services/6529api";
-import {
-  capitalizeEveryWord,
-  displayDecimal,
-  getDateFilters,
-} from "../../helpers/Helpers";
+import { displayDecimal } from "../../helpers/Helpers";
 import DatePickerModal from "../datePickerModal/DatePickerModal";
 import { DateIntervalsSelection } from "../../enums";
 import {
   GasRoyaltiesCollectionFocus,
   GasRoyaltiesHeader,
   GasRoyaltiesTokenImage,
+  getUrlParams,
 } from "./GasRoyalties";
 import { useRouter } from "next/router";
-import Breadcrumb, { Crumb } from "../breadcrumb/Breadcrumb";
 
 export default function Gas() {
   const router = useRouter();
-
-  const [breadcrumbs, setBreadcrumbs] = useState<Crumb[]>([]);
 
   const [fetching, setFetching] = useState(true);
 
@@ -43,8 +37,7 @@ export default function Gas() {
   }, [router.isReady]);
 
   const [gas, setGas] = useState<Gas[]>([]);
-  const [sumPrimary, setSumPrimary] = useState(0);
-  const [sumSecondary, setSumSecondary] = useState(0);
+  const [sumGas, setSumGas] = useState(0);
 
   const [selectedArtist, setSelectedArtist] = useState<string>("");
 
@@ -57,28 +50,28 @@ export default function Gas() {
     DateIntervalsSelection.THIS_MONTH
   );
 
+  const [isPrimary, setIsPrimary] = useState<boolean>(false);
+
   function getUrl() {
-    const dateFilters = getDateFilters(dateSelection, fromDate, toDate);
-    const collection =
-      collectionFocus === GasRoyaltiesCollectionFocus.MEMELAB
-        ? "memelab"
-        : "memes";
-    const artistFilter = selectedArtist ? `&artist=${selectedArtist}` : "";
-    return `${process.env.API_ENDPOINT}/api/gas/collection/${collection}?${dateFilters}${artistFilter}`;
+    return getUrlParams(
+      "gas",
+      isPrimary,
+      dateSelection,
+      collectionFocus,
+      fromDate,
+      toDate,
+      selectedArtist
+    );
   }
 
   function fetchGas() {
     setFetching(true);
     fetchUrl(getUrl()).then((res: Gas[]) => {
       res.forEach((r) => {
-        r.primary_gas = Math.round(r.primary_gas * 100000) / 100000;
-        r.secondary_gas = Math.round(r.secondary_gas * 100000) / 100000;
+        r.gas = Math.round(r.gas * 100000) / 100000;
       });
       setGas(res);
-      setSumPrimary(res.map((g) => g.primary_gas).reduce((a, b) => a + b, 0));
-      setSumSecondary(
-        res.map((g) => g.secondary_gas).reduce((a, b) => a + b, 0)
-      );
+      setSumGas(res.map((g) => g.gas).reduce((a, b) => a + b, 0));
       setFetching(false);
     });
   }
@@ -87,34 +80,12 @@ export default function Gas() {
     if (collectionFocus) {
       fetchGas();
     }
-  }, [dateSelection, fromDate, toDate, selectedArtist]);
+  }, [dateSelection, fromDate, toDate, selectedArtist, isPrimary]);
 
   useEffect(() => {
     if (collectionFocus) {
       setGas([]);
       fetchGas();
-    }
-  }, [collectionFocus]);
-
-  useEffect(() => {
-    if (collectionFocus) {
-      setBreadcrumbs([
-        { display: "Home", href: "/" },
-        { display: "Gas" },
-        {
-          display: capitalizeEveryWord(collectionFocus.replaceAll("-", " ")),
-        },
-      ]);
-      router.push(
-        {
-          pathname: router.pathname,
-          query: {
-            focus: collectionFocus,
-          },
-        },
-        undefined,
-        { shallow: true }
-      );
     }
   }, [collectionFocus]);
 
@@ -124,23 +95,27 @@ export default function Gas() {
 
   return (
     <>
-      <Breadcrumb breadcrumbs={breadcrumbs} />
+      <GasRoyaltiesHeader
+        title={"Gas"}
+        fetching={fetching}
+        results_count={gas.length}
+        date_selection={dateSelection}
+        is_primary={isPrimary}
+        selected_artist={selectedArtist}
+        from_date={fromDate}
+        to_date={toDate}
+        focus={collectionFocus}
+        setFocus={setCollectionFocus}
+        getUrl={getUrl}
+        setSelectedArtist={setSelectedArtist}
+        setIsPrimary={setIsPrimary}
+        setDateSelection={(date_selection) => {
+          setIsPrimary(false);
+          setDateSelection(date_selection);
+        }}
+        setShowDatePicker={setShowDatePicker}
+      />
       <Container className={`no-padding pt-4`}>
-        <GasRoyaltiesHeader
-          title={"GAS"}
-          fetching={fetching}
-          results_count={gas.length}
-          date_selection={dateSelection}
-          selected_artist={selectedArtist}
-          from_date={fromDate}
-          to_date={toDate}
-          focus={collectionFocus}
-          setFocus={setCollectionFocus}
-          getUrl={getUrl}
-          setSelectedArtist={setSelectedArtist}
-          setDateSelection={setDateSelection}
-          setShowDatePicker={setShowDatePicker}
-        />
         <Row className={`pt-3 ${styles.scrollContainer}`}>
           <Col>
             {gas.length > 0 && (
@@ -149,8 +124,7 @@ export default function Gas() {
                   <tr>
                     <th>Meme Card (x{gas.length})</th>
                     <th>Artist</th>
-                    <th className="text-center">Gas Primary (ETH)</th>
-                    <th className="text-center">Gas Secondary (ETH)</th>
+                    <th className="text-center">Gas (ETH)</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -171,10 +145,7 @@ export default function Gas() {
                       </td>
                       <td>{g.artist}</td>
                       <td className="text-center">
-                        {displayDecimal(g.primary_gas, 5)}
-                      </td>
-                      <td className="text-center">
-                        {displayDecimal(g.secondary_gas, 5)}
+                        {displayDecimal(g.gas, 5)}
                       </td>
                     </tr>
                   ))}
@@ -182,12 +153,7 @@ export default function Gas() {
                     <td colSpan={2} className="text-right">
                       <b>TOTAL</b>
                     </td>
-                    <td className="text-center">
-                      {displayDecimal(sumPrimary, 5)}
-                    </td>
-                    <td className="text-center">
-                      {displayDecimal(sumSecondary, 5)}
-                    </td>
+                    <td className="text-center">{displayDecimal(sumGas, 5)}</td>
                   </tr>
                 </tbody>
               </Table>
