@@ -131,7 +131,7 @@ export default function Royalties() {
   return (
     <>
       <GasRoyaltiesHeader
-        title="Gas"
+        title="Meme Accounting"
         results_count={royalties.length}
         focus={collectionFocus}
         setDateSelection={(date_selection) => {
