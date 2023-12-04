@@ -35,9 +35,11 @@ export default function UserPageHeaderName({
     <div className="tw-mt-4">
       <div className="tw-inline-flex tw-items-center">
         <p className="tw-mb-0 tw-text-3xl tw-font-semibold">{displayName}</p>
-        <div className="tw-ml-2 -tw-mt-1.5 tw-h-6 tw-w-6">
-          <UserCICTypeIcon cic={profile.cic.cic_rating} />
-        </div>
+        {profile.profile?.handle && (
+          <div className="tw-ml-2 -tw-mt-1.5 tw-h-6 tw-w-6">
+            <UserCICTypeIcon profile={profile} />
+          </div>
+        )}
       </div>
       {profile.profile?.classification && (
         <div className="tw-block tw-mt-1 tw-text-neutral-400 tw-font-normal tw-text-[13px] tw-leading-3">

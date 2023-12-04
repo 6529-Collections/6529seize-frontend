@@ -20,11 +20,18 @@ export default function UserPageIdentityNoProfile({
     [profile, address]
   );
 
+  const goToSettings = () => {
+    router.push(`/${user}/settings`);
+  };
+
   if (isMyProfile) {
     return (
       <div className="tw-mt-6 tw-text-base tw-text-neutral-300 tw-font-normal">
         You have not set up your profile yet, to set up your profile click{" "}
-        <span className="tw-cursor-pointer tw-font-semibold tw-text-neutral-100 tw-underline hover:tw-text-primary-300 tw-transition tw-duration-300 tw-ease-out">
+        <span
+          onClick={goToSettings}
+          className="tw-cursor-pointer tw-font-semibold tw-text-neutral-100 tw-underline hover:tw-text-primary-300 tw-transition tw-duration-300 tw-ease-out"
+        >
           here.
         </span>
       </div>
@@ -33,8 +40,9 @@ export default function UserPageIdentityNoProfile({
 
   return (
     <div className="tw-mt-6 tw-text-base tw-text-neutral-300 tw-font-normal">
-      Address <span className="tw-font-semibold tw-text-neutral-100">{user}</span>{" "}
-      have not set up profile yet.
+      Address{" "}
+      <span className="tw-font-semibold tw-text-neutral-100">{user}</span> have
+      not set up profile yet.
     </div>
   );
 }
