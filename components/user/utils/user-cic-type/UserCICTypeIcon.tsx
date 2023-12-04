@@ -4,12 +4,13 @@ import {
   IProfileAndConsolidations,
 } from "../../../../entities/IProfile";
 import { cicToType } from "../../../../helpers/Helpers";
-import UserCICAccurateIcon from "./UserCICAccurateIcon";
-import UserCICUnknownIcon from "./UserCICUnknownIcon";
-import UserCICInaccurateIcon from "./UserCICInaccurateIcon";
-import { assertUnreachable } from "../../../../helpers/AllowlistToolHelpers";
-import UserCICProbablyAccurateIcon from "./UserCICProbablyAccurateIcon";
-import UserCICHighlyAccurateIcon from "./UserCICHighlyAccurateIcon";
+import UserCICAccurateIcon from "./icons/UserCICAccurateIcon";
+import UserCICUnknownIcon from "./icons/UserCICUnknownIcon";
+import UserCICInaccurateIcon from "./icons/UserCICInaccurateIcon";
+import UserCICProbablyAccurateIcon from "./icons/UserCICProbablyAccurateIcon";
+import UserCICHighlyAccurateIcon from "./icons/UserCICHighlyAccurateIcon";
+import Tippy from "@tippyjs/react";
+import UserCICTypeIconTooltip from "./tooltip/UserCICTypeIconTooltip";
 
 export default function UserCICTypeIcon({
   profile,
@@ -23,19 +24,21 @@ export default function UserCICTypeIcon({
     setCicType(cicToType(profile.cic.cic_rating));
   }, [profile]);
 
-  switch (cicType) {
-    case CICType.INACCURATE:
-      return <UserCICInaccurateIcon profile={profile}/>;
-    case CICType.UNKNOWN:
-      return <UserCICUnknownIcon profile={profile} />;
-    case CICType.PROBABLY_ACCURATE:
-      return <UserCICProbablyAccurateIcon profile={profile} />;
-    case CICType.ACCURATE:
-      return <UserCICAccurateIcon profile={profile} />;
-    case CICType.HIGHLY_ACCURATE:
-      return <UserCICHighlyAccurateIcon profile={profile} />;
-    default:
-      assertUnreachable(cicType);
-      return <UserCICUnknownIcon profile={profile} />;
-  }
+  const COMPONENTS: Record<CICType, JSX.Element> = {
+    [CICType.INACCURATE]: <UserCICInaccurateIcon />,
+    [CICType.UNKNOWN]: <UserCICUnknownIcon />,
+    [CICType.PROBABLY_ACCURATE]: <UserCICProbablyAccurateIcon />,
+    [CICType.ACCURATE]: <UserCICAccurateIcon />,
+    [CICType.HIGHLY_ACCURATE]: <UserCICHighlyAccurateIcon />,
+  };
+
+  return (
+    <Tippy
+      placement={"top-end"}
+      interactive={true}
+      content={<UserCICTypeIconTooltip profile={profile} />}
+    >
+      <div>{COMPONENTS[cicType]}</div>
+    </Tippy>
+  );
 }
