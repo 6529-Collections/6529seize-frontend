@@ -35,7 +35,6 @@ import NextGenAdminAcceptAddressesAndPercentages from "./NextGenAdminAcceptAddre
 import NextGenAdminPayArtist from "./NextGenAdminPayArtist";
 import NextGenAdminMintAndAuction from "./NextGenAdminMintAndAuction";
 import NextGenAdminInitializeExternalBurnSwap from "./NextGenAdminInitializeExternalBurnSwap";
-import NextGenAdminUpdateDelegationCollection from "./NextGenAdminUpdateDelegationCollection";
 import NextGenAdminCreateCollection from "./NextGenAdminCreateCollection";
 import NextGenAdminUpdateCollection, {
   UpdateType,
@@ -53,7 +52,6 @@ enum GlobalFocus {
   UPDATE_IMAGES_ATTRIBUTES = "update_images_attributes",
   SET_FINAL_SUPPLY = "set_final_supply",
   ADD_RANDOMIZER = "add_randomizer",
-  UPDATE_DELEGATION_COLLECTION = "update_delegation_collection",
   SET_PRIMARY_AND_SECONDARY_SPLITS = "set_primary_and_secondary_splits",
   INITIALIZE_BURN = "initialize_burn",
   PROPOSE_PRIMARY_ADDRESSES_AND_PERCENTAGES = "propose_primary_addresses_and_percentages",
@@ -146,10 +144,6 @@ export default function NextGenAdmin() {
   const addRandomizerFunctionAdmin = useFunctionAdmin(
     account.address as string,
     FunctionSelectors.ADD_RANDOMIZER
-  );
-  const updateDelegationCollectionAdminFunction = useFunctionAdmin(
-    account.address as string,
-    FunctionSelectors.UPDATE_DELEGATION_COLLECTION
   );
   const setSplitsFunctionAdmin = useFunctionAdmin(
     account.address as string,
@@ -362,21 +356,6 @@ export default function NextGenAdmin() {
     );
   }
 
-  function printUpdateDelegationCollection() {
-    return (
-      (isGlobalAdmin() ||
-        updateDelegationCollectionAdminFunction.data === true) && (
-        <Button
-          className="seize-btn btn-white"
-          onClick={() =>
-            setGlobalFocus(GlobalFocus.UPDATE_DELEGATION_COLLECTION)
-          }>
-          Update Delegation Collection
-        </Button>
-      )
-    );
-  }
-
   function printAdminCollectionActions() {
     return (
       (isGlobalAdmin() ||
@@ -386,8 +365,7 @@ export default function NextGenAdmin() {
         setFinalSupplyFunctionAdmin.data === true ||
         initializeBurnFunctionAdmin.data === true ||
         mintAndAuctionFunctionAdmin.data === true ||
-        initializeExternalBurnSwapFunctionAdmin.data === true ||
-        updateDelegationCollectionAdminFunction.data === true) && (
+        initializeExternalBurnSwapFunctionAdmin.data === true) && (
         <>
           <Row className="pt-4">
             <Col xs={12}>
@@ -407,7 +385,6 @@ export default function NextGenAdmin() {
               {printInitBurn()}
               {printInitExternalBurnSwap()}
               {printMintAuction()}
-              {printUpdateDelegationCollection()}
             </Col>
           </Row>
           <Row className="pt-3">
@@ -432,9 +409,6 @@ export default function NextGenAdmin() {
               )}
               {globalFocus === GlobalFocus.INITIALIZE_EXTERNAL_BURN_SWAP && (
                 <NextGenAdminInitializeExternalBurnSwap close={() => close()} />
-              )}
-              {globalFocus === GlobalFocus.UPDATE_DELEGATION_COLLECTION && (
-                <NextGenAdminUpdateDelegationCollection close={() => close()} />
               )}
             </Col>
           </Row>
@@ -584,8 +558,6 @@ export default function NextGenAdmin() {
       updateImagesAttributesFunctionAdmin.data === false &&
       setFinalSupplyFunctionAdmin.data === false &&
       initializeBurnFunctionAdmin.data === false &&
-      addRandomizerFunctionAdmin.data === false &&
-      updateDelegationCollectionAdminFunction.data === false &&
       proposePrimaryAddressesAndPercentagesFunctionAdmin.data === false &&
       proposeSecondaryAddressesAndPercentagesFunctionAdmin.data === false &&
       acceptAddressesAndPercentagesFunctionAdmin.data === false &&

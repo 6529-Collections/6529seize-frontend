@@ -797,12 +797,7 @@ export const NEXTGEN_CORE_ABI = [
         name: "operator",
         type: "address",
       },
-      {
-        indexed: false,
-        internalType: "bool",
-        name: "approved",
-        type: "bool",
-      },
+      { indexed: false, internalType: "bool", name: "approved", type: "bool" },
     ],
     name: "ApprovalForAll",
     type: "event",
@@ -810,31 +805,7 @@ export const NEXTGEN_CORE_ABI = [
   {
     anonymous: false,
     inputs: [
-      {
-        indexed: true,
-        internalType: "address",
-        name: "previousOwner",
-        type: "address",
-      },
-      {
-        indexed: true,
-        internalType: "address",
-        name: "newOwner",
-        type: "address",
-      },
-    ],
-    name: "OwnershipTransferred",
-    type: "event",
-  },
-  {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: true,
-        internalType: "address",
-        name: "from",
-        type: "address",
-      },
+      { indexed: true, internalType: "address", name: "from", type: "address" },
       { indexed: true, internalType: "address", name: "to", type: "address" },
       {
         indexed: true,
@@ -858,11 +829,7 @@ export const NEXTGEN_CORE_ABI = [
   {
     inputs: [
       { internalType: "uint256", name: "_collectionID", type: "uint256" },
-      {
-        internalType: "address",
-        name: "_randomizerContract",
-        type: "address",
-      },
+      { internalType: "address", name: "_randomizerContract", type: "address" },
     ],
     name: "addRandomizer",
     outputs: [],
@@ -996,11 +963,7 @@ export const NEXTGEN_CORE_ABI = [
       { internalType: "string", name: "_collectionLicense", type: "string" },
       { internalType: "string", name: "_collectionBaseURI", type: "string" },
       { internalType: "string", name: "_collectionLibrary", type: "string" },
-      {
-        internalType: "string[]",
-        name: "_collectionScript",
-        type: "string[]",
-      },
+      { internalType: "string[]", name: "_collectionScript", type: "string[]" },
     ],
     name: "createCollection",
     outputs: [],
@@ -1077,24 +1040,10 @@ export const NEXTGEN_CORE_ABI = [
     type: "function",
   },
   {
-    inputs: [],
-    name: "owner",
-    outputs: [{ internalType: "address", name: "", type: "address" }],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
     inputs: [{ internalType: "uint256", name: "tokenId", type: "uint256" }],
     name: "ownerOf",
     outputs: [{ internalType: "address", name: "", type: "address" }],
     stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [],
-    name: "renounceOwnership",
-    outputs: [],
-    stateMutability: "nonpayable",
     type: "function",
   },
   {
@@ -1391,19 +1340,8 @@ export const NEXTGEN_CORE_ABI = [
     type: "function",
   },
   {
-    inputs: [{ internalType: "address", name: "newOwner", type: "address" }],
-    name: "transferOwnership",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
     inputs: [
-      {
-        internalType: "address",
-        name: "_newadminsContract",
-        type: "address",
-      },
+      { internalType: "address", name: "_newadminsContract", type: "address" },
     ],
     name: "updateAdminContract",
     outputs: [],
@@ -1414,36 +1352,16 @@ export const NEXTGEN_CORE_ABI = [
     inputs: [
       { internalType: "uint256", name: "_collectionID", type: "uint256" },
       { internalType: "string", name: "_newCollectionName", type: "string" },
-      {
-        internalType: "string",
-        name: "_newCollectionArtist",
-        type: "string",
-      },
+      { internalType: "string", name: "_newCollectionArtist", type: "string" },
       {
         internalType: "string",
         name: "_newCollectionDescription",
         type: "string",
       },
-      {
-        internalType: "string",
-        name: "_newCollectionWebsite",
-        type: "string",
-      },
-      {
-        internalType: "string",
-        name: "_newCollectionLicense",
-        type: "string",
-      },
-      {
-        internalType: "string",
-        name: "_newCollectionBaseURI",
-        type: "string",
-      },
-      {
-        internalType: "string",
-        name: "_newCollectionLibrary",
-        type: "string",
-      },
+      { internalType: "string", name: "_newCollectionWebsite", type: "string" },
+      { internalType: "string", name: "_newCollectionLicense", type: "string" },
+      { internalType: "string", name: "_newCollectionBaseURI", type: "string" },
+      { internalType: "string", name: "_newCollectionLibrary", type: "string" },
       { internalType: "uint256", name: "_index", type: "uint256" },
       {
         internalType: "string[]",
@@ -1525,71 +1443,7 @@ export const NEXTGEN_MINTER_ABI = [
   {
     anonymous: false,
     inputs: [
-      {
-        indexed: true,
-        internalType: "address",
-        name: "previousOwner",
-        type: "address",
-      },
-      {
-        indexed: true,
-        internalType: "address",
-        name: "newOwner",
-        type: "address",
-      },
-    ],
-    name: "OwnershipTransferred",
-    type: "event",
-  },
-  {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: true,
-        internalType: "address",
-        name: "_add",
-        type: "address",
-      },
-      { indexed: false, internalType: "bool", name: "status", type: "bool" },
-      {
-        indexed: true,
-        internalType: "uint256",
-        name: "funds",
-        type: "uint256",
-      },
-    ],
-    name: "PayArtist",
-    type: "event",
-  },
-  {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: true,
-        internalType: "address",
-        name: "_add",
-        type: "address",
-      },
-      { indexed: false, internalType: "bool", name: "status", type: "bool" },
-      {
-        indexed: true,
-        internalType: "uint256",
-        name: "funds",
-        type: "uint256",
-      },
-    ],
-    name: "PayTeam",
-    type: "event",
-  },
-  {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: true,
-        internalType: "address",
-        name: "_add",
-        type: "address",
-      },
+      { indexed: true, internalType: "address", name: "_add", type: "address" },
       { indexed: false, internalType: "bool", name: "status", type: "bool" },
       {
         indexed: true,
@@ -1618,11 +1472,7 @@ export const NEXTGEN_MINTER_ABI = [
       { internalType: "string[]", name: "_tokenData", type: "string[]" },
       { internalType: "uint256[]", name: "_saltfun_o", type: "uint256[]" },
       { internalType: "uint256", name: "_collectionID", type: "uint256" },
-      {
-        internalType: "uint256[]",
-        name: "_numberOfTokens",
-        type: "uint256[]",
-      },
+      { internalType: "uint256[]", name: "_numberOfTokens", type: "uint256[]" },
     ],
     name: "airDropTokens",
     outputs: [],
@@ -1692,7 +1542,38 @@ export const NEXTGEN_MINTER_ABI = [
   },
   {
     inputs: [],
+    name: "dmc",
+    outputs: [
+      {
+        internalType: "contract IDelegationManagementContract",
+        name: "",
+        type: "address",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
     name: "emergencyWithdraw",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [{ internalType: "uint256", name: "", type: "uint256" }],
+    name: "excludeTokensCounter",
+    outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
+      { internalType: "uint256", name: "_option", type: "uint256" },
+      { internalType: "uint256", name: "_collectionID", type: "uint256" },
+      { internalType: "uint256", name: "_excludeCounter", type: "uint256" },
+    ],
+    name: "excludeTokensOrResetLD",
     outputs: [],
     stateMutability: "nonpayable",
     type: "function",
@@ -1756,11 +1637,7 @@ export const NEXTGEN_MINTER_ABI = [
       { internalType: "uint256", name: "_mintCollectionID", type: "uint256" },
       { internalType: "uint256", name: "_tokmin", type: "uint256" },
       { internalType: "uint256", name: "_tokmax", type: "uint256" },
-      {
-        internalType: "address",
-        name: "_burnOrSwapAddress",
-        type: "address",
-      },
+      { internalType: "address", name: "_burnOrSwapAddress", type: "address" },
       { internalType: "bool", name: "_status", type: "bool" },
     ],
     name: "initializeExternalBurnOrSwap",
@@ -1812,13 +1689,6 @@ export const NEXTGEN_MINTER_ABI = [
     type: "function",
   },
   {
-    inputs: [],
-    name: "owner",
-    outputs: [{ internalType: "address", name: "", type: "address" }],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
     inputs: [
       { internalType: "uint256", name: "_collectionID", type: "uint256" },
       { internalType: "address", name: "_team1", type: "address" },
@@ -1857,13 +1727,6 @@ export const NEXTGEN_MINTER_ABI = [
       { internalType: "uint256", name: "_add3Percentage", type: "uint256" },
     ],
     name: "proposeSecondaryAddressesAndPercentages",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [],
-    name: "renounceOwnership",
     outputs: [],
     stateMutability: "nonpayable",
     type: "function",
@@ -1960,11 +1823,7 @@ export const NEXTGEN_MINTER_ABI = [
   {
     inputs: [
       { internalType: "uint256", name: "_collectionID", type: "uint256" },
-      {
-        internalType: "uint256",
-        name: "_collectionMintCost",
-        type: "uint256",
-      },
+      { internalType: "uint256", name: "_collectionMintCost", type: "uint256" },
       {
         internalType: "uint256",
         name: "_collectionEndMintCost",
@@ -1983,11 +1842,7 @@ export const NEXTGEN_MINTER_ABI = [
   {
     inputs: [
       { internalType: "uint256", name: "_collectionID", type: "uint256" },
-      {
-        internalType: "uint256",
-        name: "_allowlistStartTime",
-        type: "uint256",
-      },
+      { internalType: "uint256", name: "_allowlistStartTime", type: "uint256" },
       { internalType: "uint256", name: "_allowlistEndTime", type: "uint256" },
       { internalType: "uint256", name: "_publicStartTime", type: "uint256" },
       { internalType: "uint256", name: "_publicEndTime", type: "uint256" },
@@ -2012,19 +1867,8 @@ export const NEXTGEN_MINTER_ABI = [
     type: "function",
   },
   {
-    inputs: [{ internalType: "address", name: "newOwner", type: "address" }],
-    name: "transferOwnership",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
     inputs: [
-      {
-        internalType: "address",
-        name: "_newadminsContract",
-        type: "address",
-      },
+      { internalType: "address", name: "_newadminsContract", type: "address" },
     ],
     name: "updateAdminContract",
     outputs: [],
@@ -2034,20 +1878,6 @@ export const NEXTGEN_MINTER_ABI = [
   {
     inputs: [{ internalType: "address", name: "_gencore", type: "address" }],
     name: "updateCoreContract",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [
-      { internalType: "uint256", name: "_collectionID", type: "uint256" },
-      {
-        internalType: "address",
-        name: "_collectionAddress",
-        type: "address",
-      },
-    ],
-    name: "updateDelegationCollection",
     outputs: [],
     stateMutability: "nonpayable",
     type: "function",
