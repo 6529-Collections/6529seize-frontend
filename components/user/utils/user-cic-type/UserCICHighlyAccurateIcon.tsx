@@ -1,7 +1,12 @@
 import Tippy from "@tippyjs/react";
 import UserCICHighlyAccurateTooltip from "./UserCICHighlyAccurateTooltip";
+import { IProfileAndConsolidations } from "../../../../entities/IProfile";
 
-export default function UserCICHighlyAccurateIcon() {
+export default function UserCICHighlyAccurateIcon({
+  profile,
+}: {
+  profile: IProfileAndConsolidations;
+}) {
   return (
     <Tippy
       placement={"top-end"}

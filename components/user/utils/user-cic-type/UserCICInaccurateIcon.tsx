@@ -1,12 +1,17 @@
 import Tippy from "@tippyjs/react";
 import UserCICInnacurateTooltip from "./UserCICInnacurateTooltip";
+import { IProfileAndConsolidations } from "../../../../entities/IProfile";
 
-export default function UserCICAccurateIcon() {
+export default function UserCICAccurateIcon({
+  profile,
+}: {
+  profile: IProfileAndConsolidations;
+}) {
   return (
     <Tippy
       placement={"top-end"}
       interactive={true}
-      content={<UserCICInnacurateTooltip />}
+      content={<UserCICInnacurateTooltip/> }
     >
       <svg
         className="tw-h-full tw-w-full"

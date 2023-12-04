@@ -3,7 +3,6 @@ import { IProfileAndConsolidations } from "../../../../entities/IProfile";
 import { useQuery } from "@tanstack/react-query";
 import { commonApiFetch } from "../../../../services/api/common-api";
 import UserPageIdentityHeaderCIC from "./UserPageIdentityHeaderCIC";
-import UserPageIdentityHeaderCICRate from "./UserPageIdentityHeaderCICRate";
 import UserPageIdentityHeaderCICRateWrapper from "./UserPageIdentityHeaderCICRateWrapper";
 
 export default function UserPageIdentityHeader({

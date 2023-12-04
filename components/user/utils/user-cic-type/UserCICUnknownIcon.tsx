@@ -1,7 +1,12 @@
 import Tippy from "@tippyjs/react";
 import UserCICUnknownTooltip from "./UserCICUnknownTooltip";
+import { IProfileAndConsolidations } from "../../../../entities/IProfile";
 
-export default function UserCICUnknownIcon() {
+export default function UserCICUnknownIcon({
+  profile,
+}: {
+  profile: IProfileAndConsolidations;
+}) {
   return (
     <Tippy
       placement={"top-end"}

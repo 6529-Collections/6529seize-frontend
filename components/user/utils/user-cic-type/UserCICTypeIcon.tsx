@@ -1,5 +1,8 @@
 import { useEffect, useState } from "react";
-import { CICType } from "../../../../entities/IProfile";
+import {
+  CICType,
+  IProfileAndConsolidations,
+} from "../../../../entities/IProfile";
 import { cicToType } from "../../../../helpers/Helpers";
 import UserCICAccurateIcon from "./UserCICAccurateIcon";
 import UserCICUnknownIcon from "./UserCICUnknownIcon";
@@ -8,25 +11,31 @@ import { assertUnreachable } from "../../../../helpers/AllowlistToolHelpers";
 import UserCICProbablyAccurateIcon from "./UserCICProbablyAccurateIcon";
 import UserCICHighlyAccurateIcon from "./UserCICHighlyAccurateIcon";
 
-export default function UserCICTypeIcon({ cic }: { cic: number }) {
-  const [cicType, setCicType] = useState<CICType>(cicToType(cic));
+export default function UserCICTypeIcon({
+  profile,
+}: {
+  profile: IProfileAndConsolidations;
+}) {
+  const [cicType, setCicType] = useState<CICType>(
+    cicToType(profile.cic.cic_rating)
+  );
   useEffect(() => {
-    setCicType(cicToType(cic));
-  }, [cic]);
+    setCicType(cicToType(profile.cic.cic_rating));
+  }, [profile]);
 
   switch (cicType) {
     case CICType.INACCURATE:
-      return <UserCICInaccurateIcon />;
+      return <UserCICInaccurateIcon profile={profile}/>;
     case CICType.UNKNOWN:
-      return <UserCICUnknownIcon />;
+      return <UserCICUnknownIcon profile={profile} />;
     case CICType.PROBABLY_ACCURATE:
-      return <UserCICProbablyAccurateIcon />;
+      return <UserCICProbablyAccurateIcon profile={profile} />;
     case CICType.ACCURATE:
-      return <UserCICAccurateIcon />;
+      return <UserCICAccurateIcon profile={profile} />;
     case CICType.HIGHLY_ACCURATE:
-      return <UserCICHighlyAccurateIcon />;
+      return <UserCICHighlyAccurateIcon profile={profile} />;
     default:
       assertUnreachable(cicType);
-      return <UserCICUnknownIcon />;
+      return <UserCICUnknownIcon profile={profile} />;
   }
 }
