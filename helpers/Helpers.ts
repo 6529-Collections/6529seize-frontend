@@ -6,7 +6,7 @@ import {
 } from "../constants";
 import { BaseNFT, VolumeType } from "../entities/INFT";
 import { DateIntervalsSelection } from "../enums";
-import { CICType } from "../entities/IProfile";
+import { CICType, IProfileAndConsolidations } from "../entities/IProfile";
 
 export function formatAddress(address: string) {
   if (
@@ -456,3 +456,14 @@ export const cicToType = (cic: number): CICType => {
 
   return CICType.HIGHLY_ACCURATE;
 };
+
+export const amIUser = ({
+  profile,
+  address,
+}: {
+  profile: IProfileAndConsolidations;
+  address: string | undefined;
+}): boolean =>
+  profile.consolidation.wallets.some(
+    (wallet) => wallet.wallet.address.toLowerCase() === address?.toLowerCase()
+  );

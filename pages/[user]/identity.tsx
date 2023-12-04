@@ -10,6 +10,7 @@ import {
 } from "./server.helpers";
 import UserPageIdentity from "../../components/user/identity/UserPageIdentity";
 import { useQueryClient } from "@tanstack/react-query";
+import UserPageIdentityNoProfile from "../../components/user/identity/UserPageIdentityNoProfile";
 
 export interface UserPageIdentityProps {
   profile: IProfileAndConsolidations;
@@ -41,6 +42,11 @@ const Page: NextPageWithLayout<{ pageProps: UserPageIdentityProps }> = ({
       );
     }
   }
+
+  if (!pageProps.profile.profile) {
+    return <UserPageIdentityNoProfile profile={pageProps.profile} />;
+  }
+
   return <UserPageIdentity profile={pageProps.profile} />;
 };
 
@@ -63,15 +69,6 @@ export async function getServerSideProps(
     const headers = getCommonHeaders(req);
     const { profile, title, consolidatedTDH } =
       await getCommonUserServerSideProps({ user: req.query.user, headers });
-    if (!profile.profile) {
-      return {
-        redirect: {
-          permanent: false,
-          destination: "/404",
-        },
-        props: {},
-      } as any;
-    }
 
     const needsRedirect = userPageNeedsRedirect({
       profile,
