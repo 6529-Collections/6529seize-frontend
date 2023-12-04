@@ -113,7 +113,7 @@ export default function Royalties() {
       content = `Secondary royalties`;
     }
     if (collectionFocus === GasRoyaltiesCollectionFocus.MEMELAB) {
-      content += ` in Meme Lab are split between artist the and the collection solely at the artist's discretion.`;
+      content += ` in Meme Lab are split between the artist and the collection solely at the artist's discretion.`;
     } else {
       content += ` in The Memes are split 50:50 between the artist and the collection.`;
     }
@@ -157,18 +157,35 @@ export default function Royalties() {
                     <th>Artist</th>
                     <th className="text-center">Volume</th>
                     <th className="text-center">
-                      {isPrimary ? "Primary Proceeds" : "Royalties"}
+                      <div className="d-flex align-items-center justify-content-center gap-2">
+                        {isPrimary ? "Primary Proceeds" : "Royalties"}
+                        {isPrimary && (
+                          <Tippy
+                            content="Total primary proceeds less the Manifold fee"
+                            placement={"auto"}
+                            theme={"light"}>
+                            <FontAwesomeIcon
+                              className={styles.infoIcon}
+                              icon="info-circle"></FontAwesomeIcon>
+                          </Tippy>
+                        )}
+                      </div>
                     </th>
-                    <th className="d-flex align-items-center justify-content-center gap-2">
-                      Artist Split{" "}
-                      <Tippy
-                        content={getTippyArtistsContent()}
-                        placement={"auto"}
-                        theme={"light"}>
-                        <FontAwesomeIcon
-                          className={styles.infoIcon}
-                          icon="info-circle"></FontAwesomeIcon>
-                      </Tippy>
+                    {!isPrimary && (
+                      <th className="text-center">Effective Royalty %</th>
+                    )}
+                    <th className="text-center">
+                      <div className="d-flex align-items-center justify-content-center gap-2">
+                        Artist Split{" "}
+                        <Tippy
+                          content={getTippyArtistsContent()}
+                          placement={"auto"}
+                          theme={"light"}>
+                          <FontAwesomeIcon
+                            className={styles.infoIcon}
+                            icon="info-circle"></FontAwesomeIcon>
+                        </Tippy>
+                      </div>
                     </th>
                   </tr>
                 </thead>
@@ -203,6 +220,13 @@ export default function Royalties() {
                       <td className="text-center">
                         {displayDecimal(r.proceeds, 5)}
                       </td>
+                      {!isPrimary && (
+                        <td className="text-center">
+                          {r.proceeds > 0
+                            ? displayDecimal((r.proceeds / r.volume) * 100, 5)
+                            : `-`}
+                        </td>
+                      )}
                       <td>
                         <div className="d-flex justify-content-center">
                           <span className="d-flex align-items-center gap-1">
@@ -252,7 +276,7 @@ export default function Royalties() {
           </Row>
         )}
         {!fetching && royalties.length > 0 && (
-          <Row className="font-color-h text-center pt-3 pb-3">
+          <Row className="font-color-h pt-3 pb-3">
             <Col>All values are in ETH</Col>
           </Row>
         )}

@@ -153,7 +153,7 @@ export default function Gas() {
           </Row>
         )}
         {!fetching && gas.length > 0 && (
-          <Row className="font-color-h text-center pt-3 pb-3">
+          <Row className="font-color-h pt-3 pb-3">
             <Col>All values are in ETH</Col>
           </Row>
         )}
