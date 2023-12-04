@@ -44,7 +44,6 @@ export default function Gas() {
     isPrimary,
     setIsPrimary,
     selectedArtist,
-    setSelectedArtist,
     showDatePicker,
     setShowDatePicker,
     collectionFocus,
@@ -52,6 +51,7 @@ export default function Gas() {
     fetching,
     setFetching,
     getUrl,
+    getSharedProps,
   } = useSharedState();
 
   function getUrlWithParams() {
@@ -90,24 +90,15 @@ export default function Gas() {
   return (
     <>
       <GasRoyaltiesHeader
-        title={"Gas"}
-        fetching={fetching}
+        title="Gas"
         results_count={gas.length}
-        date_selection={dateSelection}
-        is_primary={isPrimary}
-        selected_artist={selectedArtist}
-        from_date={fromDate}
-        to_date={toDate}
         focus={collectionFocus}
-        setFocus={setCollectionFocus}
-        getUrl={getUrlWithParams}
-        setSelectedArtist={setSelectedArtist}
-        setIsPrimary={setIsPrimary}
         setDateSelection={(date_selection) => {
           setIsPrimary(false);
           setDateSelection(date_selection);
         }}
-        setShowDatePicker={setShowDatePicker}
+        getUrl={getUrlWithParams}
+        {...getSharedProps()}
       />
       <Container className={`no-padding pt-4`}>
         <Row className={`pt-3 ${styles.scrollContainer}`}>
@@ -159,6 +150,11 @@ export default function Gas() {
             <Col>
               <h5>No gas info found for selected dates</h5>
             </Col>
+          </Row>
+        )}
+        {!fetching && gas.length > 0 && (
+          <Row className="font-color-h text-center pt-3 pb-3">
+            <Col>All values are in ETH</Col>
           </Row>
         )}
         <DatePickerModal

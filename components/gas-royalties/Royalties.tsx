@@ -41,7 +41,6 @@ export default function Royalties() {
     isPrimary,
     setIsPrimary,
     selectedArtist,
-    setSelectedArtist,
     showDatePicker,
     setShowDatePicker,
     collectionFocus,
@@ -49,6 +48,7 @@ export default function Royalties() {
     fetching,
     setFetching,
     getUrl,
+    getSharedProps,
   } = useSharedState();
 
   useEffect(() => {
@@ -131,25 +131,15 @@ export default function Royalties() {
   return (
     <>
       <GasRoyaltiesHeader
-        title={"Meme Accounting"}
-        // description={description}
-        fetching={fetching}
+        title="Gas"
         results_count={royalties.length}
-        date_selection={dateSelection}
-        is_primary={isPrimary}
-        selected_artist={selectedArtist}
-        from_date={fromDate}
-        to_date={toDate}
         focus={collectionFocus}
-        setFocus={setCollectionFocus}
-        getUrl={getUrlWithParams}
-        setSelectedArtist={setSelectedArtist}
-        setIsPrimary={setIsPrimary}
         setDateSelection={(date_selection) => {
           setIsPrimary(false);
           setDateSelection(date_selection);
         }}
-        setShowDatePicker={setShowDatePicker}
+        getUrl={getUrlWithParams}
+        {...getSharedProps()}
       />
       <Container className={`no-padding pt-4`}>
         <Row className={`pt-4 ${styles.scrollContainer}`}>
@@ -249,16 +239,6 @@ export default function Royalties() {
                         )}%)`}
                     </td>
                   </tr>
-                  <tr>
-                    <td colSpan={2}>
-                      <b></b>
-                    </td>
-                    <td className="text-center" colSpan={3}>
-                      <div className="font-color-h">
-                        <b>All values are in ETH</b>
-                      </div>
-                    </td>
-                  </tr>
                 </tbody>
               </Table>
             )}
@@ -269,6 +249,11 @@ export default function Royalties() {
             <Col>
               <h5>No royalties found for selected dates</h5>
             </Col>
+          </Row>
+        )}
+        {!fetching && royalties.length > 0 && (
+          <Row className="font-color-h text-center pt-3 pb-3">
+            <Col>All values are in ETH</Col>
           </Row>
         )}
         <DatePickerModal
@@ -285,4 +270,8 @@ export default function Royalties() {
       </Container>
     </>
   );
+}
+function getSharedProps(): import("react").JSX.IntrinsicAttributes &
+  Readonly<import("./GasRoyalties").HeaderProps> {
+  throw new Error("Function not implemented.");
 }

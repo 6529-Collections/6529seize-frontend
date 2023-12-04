@@ -17,7 +17,7 @@ export enum GasRoyaltiesCollectionFocus {
   MEMELAB = "meme-lab",
 }
 
-interface HeaderProps {
+export interface HeaderProps {
   title: string;
   description?: string;
   fetching: boolean;
@@ -319,6 +319,21 @@ export function useSharedState() {
     );
   }
 
+  function getSharedProps() {
+    return {
+      fetching,
+      date_selection: dateSelection,
+      selected_artist: selectedArtist,
+      is_primary: isPrimary,
+      from_date: fromDate,
+      to_date: toDate,
+      setFocus: setCollectionFocus,
+      setSelectedArtist,
+      setIsPrimary,
+      setShowDatePicker,
+    };
+  }
+
   return {
     selectedArtist,
     setSelectedArtist,
@@ -337,5 +352,6 @@ export function useSharedState() {
     fetching,
     setFetching,
     getUrl,
+    getSharedProps,
   };
 }
