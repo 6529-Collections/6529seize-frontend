@@ -10,6 +10,7 @@ import { fetchUrl } from "../../services/6529api";
 import { capitalizeEveryWord, getDateFilters } from "../../helpers/Helpers";
 import Breadcrumb, { Crumb } from "../breadcrumb/Breadcrumb";
 import router from "next/router";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 export enum GasRoyaltiesCollectionFocus {
   MEMES = "the-memes",
@@ -23,18 +24,21 @@ interface HeaderProps {
   results_count: number;
   date_selection: DateIntervalsSelection;
   selected_artist: string;
+  is_primary: boolean;
   from_date?: Date;
   to_date?: Date;
   focus: GasRoyaltiesCollectionFocus;
   setFocus: (focus: GasRoyaltiesCollectionFocus) => void;
   getUrl: () => string;
   setSelectedArtist: (artist: string) => void;
+  setIsPrimary: (isPrimary: boolean) => void;
   setDateSelection: (dateSelection: DateIntervalsSelection) => void;
   setShowDatePicker: (showDatePicker: boolean) => void;
 }
 
 export function getUrlParams(
   apiPath: string,
+  isPrimary: boolean,
   dateSelection: DateIntervalsSelection,
   collectionFocus?: GasRoyaltiesCollectionFocus,
   fromDate?: Date,
@@ -44,13 +48,19 @@ export function getUrlParams(
   if (!collectionFocus) {
     return "";
   }
-  const dateFilters = getDateFilters(dateSelection, fromDate, toDate);
+  let filters = "";
+  if (isPrimary) {
+    filters += "&primary=true";
+  } else {
+    filters += getDateFilters(dateSelection, fromDate, toDate);
+  }
+
   const collection =
     collectionFocus === GasRoyaltiesCollectionFocus.MEMELAB
       ? "memelab"
       : "memes";
   const artistFilter = selectedArtist ? `&artist=${selectedArtist}` : "";
-  return `${process.env.API_ENDPOINT}/api/${apiPath}/collection/${collection}?${dateFilters}${artistFilter}`;
+  return `${process.env.API_ENDPOINT}/api/${apiPath}/collection/${collection}?${filters}${artistFilter}`;
 }
 
 export function GasRoyaltiesHeader(props: Readonly<HeaderProps>) {
@@ -96,6 +106,23 @@ export function GasRoyaltiesHeader(props: Readonly<HeaderProps>) {
       }
     );
   }, [props.focus]);
+
+  function getDateSelectionLabel() {
+    let label = "";
+    if (props.date_selection == DateIntervalsSelection.CUSTOM) {
+      if (props.from_date) {
+        label += `from: ${props.from_date.toISOString().slice(0, 10)} `;
+      }
+      if (props.to_date) {
+        label += `to: ${props.to_date.toISOString().slice(0, 10)}`;
+      }
+    } else if (props.is_primary) {
+      label += `Primary Sales`;
+    } else {
+      label += `${props.date_selection}`;
+    }
+    return <span>{label}</span>;
+  }
 
   return (
     <>
@@ -191,20 +218,14 @@ export function GasRoyaltiesHeader(props: Readonly<HeaderProps>) {
               </Dropdown>
               <Dropdown className={styles.filterDropdown} drop={"down"}>
                 <Dropdown.Toggle disabled={props.fetching}>
-                  {props.date_selection == DateIntervalsSelection.CUSTOM ? (
-                    <span>
-                      {props.from_date &&
-                        `from: ${props.from_date
-                          .toISOString()
-                          .slice(0, 10)}`}{" "}
-                      {props.to_date &&
-                        `to: ${props.to_date.toISOString().slice(0, 10)}`}
-                    </span>
-                  ) : (
-                    props.date_selection
-                  )}
+                  {getDateSelectionLabel()}
                 </Dropdown.Toggle>
                 <Dropdown.Menu>
+                  <Dropdown.Item onClick={() => props.setIsPrimary(true)}>
+                    Primary Sales
+                  </Dropdown.Item>
+                  <Dropdown.Divider />
+                  <Dropdown.Header>Secondary Sales</Dropdown.Header>
                   {Object.values(DateIntervalsSelection).map(
                     (dateSelection) => (
                       <Dropdown.Item
@@ -235,6 +256,7 @@ interface TokenImageProps {
   token_id: number;
   name: string;
   thumbnail: string;
+  note?: string;
 }
 
 export function GasRoyaltiesTokenImage(props: Readonly<TokenImageProps>) {
@@ -243,7 +265,7 @@ export function GasRoyaltiesTokenImage(props: Readonly<TokenImageProps>) {
       href={`/${props.path}/${props.token_id}`}
       target="_blank"
       rel="noreferrer">
-      <span className="d-flex justify-content-center aling-items-center gap-2">
+      <span className="d-flex justify-content-center aling-items-center gap-3">
         <span>{props.token_id} -</span>
         <Tippy
           content={`${props.name}`}
@@ -260,6 +282,15 @@ export function GasRoyaltiesTokenImage(props: Readonly<TokenImageProps>) {
             className={styles.nftImage}
           />
         </Tippy>
+        {props.note && (
+          <Tippy content={props.note} placement={"auto"} theme={"light"}>
+            <span>
+              <FontAwesomeIcon
+                className={styles.infoIcon}
+                icon="info-circle"></FontAwesomeIcon>
+            </span>
+          </Tippy>
+        )}
       </span>
     </a>
   );

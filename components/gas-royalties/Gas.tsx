@@ -37,8 +37,7 @@ export default function Gas() {
   }, [router.isReady]);
 
   const [gas, setGas] = useState<Gas[]>([]);
-  const [sumPrimary, setSumPrimary] = useState(0);
-  const [sumSecondary, setSumSecondary] = useState(0);
+  const [sumGas, setSumGas] = useState(0);
 
   const [selectedArtist, setSelectedArtist] = useState<string>("");
 
@@ -51,9 +50,12 @@ export default function Gas() {
     DateIntervalsSelection.THIS_MONTH
   );
 
+  const [isPrimary, setIsPrimary] = useState<boolean>(false);
+
   function getUrl() {
     return getUrlParams(
       "gas",
+      isPrimary,
       dateSelection,
       collectionFocus,
       fromDate,
@@ -66,14 +68,10 @@ export default function Gas() {
     setFetching(true);
     fetchUrl(getUrl()).then((res: Gas[]) => {
       res.forEach((r) => {
-        r.primary_gas = Math.round(r.primary_gas * 100000) / 100000;
-        r.secondary_gas = Math.round(r.secondary_gas * 100000) / 100000;
+        r.gas = Math.round(r.gas * 100000) / 100000;
       });
       setGas(res);
-      setSumPrimary(res.map((g) => g.primary_gas).reduce((a, b) => a + b, 0));
-      setSumSecondary(
-        res.map((g) => g.secondary_gas).reduce((a, b) => a + b, 0)
-      );
+      setSumGas(res.map((g) => g.gas).reduce((a, b) => a + b, 0));
       setFetching(false);
     });
   }
@@ -82,7 +80,7 @@ export default function Gas() {
     if (collectionFocus) {
       fetchGas();
     }
-  }, [dateSelection, fromDate, toDate, selectedArtist]);
+  }, [dateSelection, fromDate, toDate, selectedArtist, isPrimary]);
 
   useEffect(() => {
     if (collectionFocus) {
@@ -102,6 +100,7 @@ export default function Gas() {
         fetching={fetching}
         results_count={gas.length}
         date_selection={dateSelection}
+        is_primary={isPrimary}
         selected_artist={selectedArtist}
         from_date={fromDate}
         to_date={toDate}
@@ -109,7 +108,11 @@ export default function Gas() {
         setFocus={setCollectionFocus}
         getUrl={getUrl}
         setSelectedArtist={setSelectedArtist}
-        setDateSelection={setDateSelection}
+        setIsPrimary={setIsPrimary}
+        setDateSelection={(date_selection) => {
+          setIsPrimary(false);
+          setDateSelection(date_selection);
+        }}
         setShowDatePicker={setShowDatePicker}
       />
       <Container className={`no-padding pt-4`}>
@@ -121,8 +124,7 @@ export default function Gas() {
                   <tr>
                     <th>Meme Card (x{gas.length})</th>
                     <th>Artist</th>
-                    <th className="text-center">Gas Primary (ETH)</th>
-                    <th className="text-center">Gas Secondary (ETH)</th>
+                    <th className="text-center">Gas (ETH)</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -143,10 +145,7 @@ export default function Gas() {
                       </td>
                       <td>{g.artist}</td>
                       <td className="text-center">
-                        {displayDecimal(g.primary_gas, 5)}
-                      </td>
-                      <td className="text-center">
-                        {displayDecimal(g.secondary_gas, 5)}
+                        {displayDecimal(g.gas, 5)}
                       </td>
                     </tr>
                   ))}
@@ -154,12 +153,7 @@ export default function Gas() {
                     <td colSpan={2} className="text-right">
                       <b>TOTAL</b>
                     </td>
-                    <td className="text-center">
-                      {displayDecimal(sumPrimary, 5)}
-                    </td>
-                    <td className="text-center">
-                      {displayDecimal(sumSecondary, 5)}
-                    </td>
+                    <td className="text-center">{displayDecimal(sumGas, 5)}</td>
                   </tr>
                 </tbody>
               </Table>

@@ -4,6 +4,5 @@ export interface Gas {
   name: string;
   artist: string;
   thumbnail: string;
-  primary_gas: number;
-  secondary_gas: number;
+  gas: number;
 }

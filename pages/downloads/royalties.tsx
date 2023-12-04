@@ -19,11 +19,11 @@ const CommunityDownloadsRoyalties = dynamic(
 );
 
 export default function Downloads() {
-  const [breadcrumbs, setBreadcrumbs] = useState<Crumb[]>([
+  const breadcrumbs = [
     { display: "Home", href: "/" },
     { display: "Downloads", href: "/downloads" },
     { display: "Royalties" },
-  ]);
+  ];
 
   return (
     <>
