@@ -10,17 +10,12 @@ import {
   GasRoyaltiesCollectionFocus,
   GasRoyaltiesHeader,
   GasRoyaltiesTokenImage,
-  getUrlParams,
+  useSharedState,
 } from "./GasRoyalties";
 import { useRouter } from "next/router";
 
 export default function Gas() {
   const router = useRouter();
-
-  const [fetching, setFetching] = useState(true);
-
-  const [collectionFocus, setCollectionFocus] =
-    useState<GasRoyaltiesCollectionFocus>(GasRoyaltiesCollectionFocus.MEMES);
 
   useEffect(() => {
     if (router.isReady) {
@@ -39,34 +34,33 @@ export default function Gas() {
   const [gas, setGas] = useState<Gas[]>([]);
   const [sumGas, setSumGas] = useState(0);
 
-  const [selectedArtist, setSelectedArtist] = useState<string>("");
+  const {
+    dateSelection,
+    setDateSelection,
+    fromDate,
+    setFromDate,
+    toDate,
+    setToDate,
+    isPrimary,
+    setIsPrimary,
+    selectedArtist,
+    showDatePicker,
+    setShowDatePicker,
+    collectionFocus,
+    setCollectionFocus,
+    fetching,
+    setFetching,
+    getUrl,
+    getSharedProps,
+  } = useSharedState();
 
-  const [fromDate, setFromDate] = useState<Date>();
-  const [toDate, setToDate] = useState<Date>();
-
-  const [showDatePicker, setShowDatePicker] = useState(false);
-
-  const [dateSelection, setDateSelection] = useState<DateIntervalsSelection>(
-    DateIntervalsSelection.THIS_MONTH
-  );
-
-  const [isPrimary, setIsPrimary] = useState<boolean>(false);
-
-  function getUrl() {
-    return getUrlParams(
-      "gas",
-      isPrimary,
-      dateSelection,
-      collectionFocus,
-      fromDate,
-      toDate,
-      selectedArtist
-    );
+  function getUrlWithParams() {
+    return getUrl("royalties");
   }
 
   function fetchGas() {
     setFetching(true);
-    fetchUrl(getUrl()).then((res: Gas[]) => {
+    fetchUrl(getUrlWithParams()).then((res: Gas[]) => {
       res.forEach((r) => {
         r.gas = Math.round(r.gas * 100000) / 100000;
       });
@@ -96,24 +90,15 @@ export default function Gas() {
   return (
     <>
       <GasRoyaltiesHeader
-        title={"Gas"}
-        fetching={fetching}
+        title="Gas"
         results_count={gas.length}
-        date_selection={dateSelection}
-        is_primary={isPrimary}
-        selected_artist={selectedArtist}
-        from_date={fromDate}
-        to_date={toDate}
         focus={collectionFocus}
-        setFocus={setCollectionFocus}
-        getUrl={getUrl}
-        setSelectedArtist={setSelectedArtist}
-        setIsPrimary={setIsPrimary}
         setDateSelection={(date_selection) => {
           setIsPrimary(false);
           setDateSelection(date_selection);
         }}
-        setShowDatePicker={setShowDatePicker}
+        getUrl={getUrlWithParams}
+        {...getSharedProps()}
       />
       <Container className={`no-padding pt-4`}>
         <Row className={`pt-3 ${styles.scrollContainer}`}>
@@ -165,6 +150,11 @@ export default function Gas() {
             <Col>
               <h5>No gas info found for selected dates</h5>
             </Col>
+          </Row>
+        )}
+        {!fetching && gas.length > 0 && (
+          <Row className="font-color-h pt-3 pb-3">
+            <Col>All values are in ETH</Col>
           </Row>
         )}
         <DatePickerModal

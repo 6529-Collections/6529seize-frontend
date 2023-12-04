@@ -10,7 +10,7 @@ import {
   GasRoyaltiesCollectionFocus,
   GasRoyaltiesHeader,
   GasRoyaltiesTokenImage,
-  getUrlParams,
+  useSharedState,
 } from "./GasRoyalties";
 import { useRouter } from "next/router";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -26,12 +26,30 @@ const MEMES_SOLD_MANUALLY = [1, 2, 3, 4];
 export default function Royalties() {
   const router = useRouter();
 
-  const [description, setDescription] = useState<string>(MEMES_DESCRIPTION);
+  const [royalties, setRoyalties] = useState<Royalty[]>([]);
+  const [sumVolume, setSumVolume] = useState(0);
+  const [sumProceeds, setSumProceeds] = useState(0);
+  const [sumArtistTake, setSumArtistTake] = useState(0);
 
-  const [fetching, setFetching] = useState(true);
-
-  const [collectionFocus, setCollectionFocus] =
-    useState<GasRoyaltiesCollectionFocus>();
+  const {
+    dateSelection,
+    setDateSelection,
+    fromDate,
+    setFromDate,
+    toDate,
+    setToDate,
+    isPrimary,
+    setIsPrimary,
+    selectedArtist,
+    showDatePicker,
+    setShowDatePicker,
+    collectionFocus,
+    setCollectionFocus,
+    fetching,
+    setFetching,
+    getUrl,
+    getSharedProps,
+  } = useSharedState();
 
   useEffect(() => {
     if (router.isReady) {
@@ -47,39 +65,13 @@ export default function Royalties() {
     }
   }, [router.isReady]);
 
-  const [royalties, setRoyalties] = useState<Royalty[]>([]);
-  const [sumVolume, setSumVolume] = useState(0);
-  const [sumProceeds, setSumProceeds] = useState(0);
-  const [sumArtistTake, setSumArtistTake] = useState(0);
-
-  const [selectedArtist, setSelectedArtist] = useState<string>("");
-
-  const [fromDate, setFromDate] = useState<Date>();
-  const [toDate, setToDate] = useState<Date>();
-
-  const [showDatePicker, setShowDatePicker] = useState(false);
-
-  const [dateSelection, setDateSelection] = useState<DateIntervalsSelection>(
-    DateIntervalsSelection.THIS_MONTH
-  );
-
-  const [isPrimary, setIsPrimary] = useState<boolean>(false);
-
-  function getUrl() {
-    return getUrlParams(
-      "royalties",
-      isPrimary,
-      dateSelection,
-      collectionFocus,
-      fromDate,
-      toDate,
-      selectedArtist
-    );
+  function getUrlWithParams() {
+    return getUrl("royalties");
   }
 
   function fetchRoyalties() {
     setFetching(true);
-    fetchUrl(getUrl()).then((res: Royalty[]) => {
+    fetchUrl(getUrlWithParams()).then((res: Royalty[]) => {
       res.forEach((r) => {
         r.volume = Math.round(r.volume * 100000) / 100000;
         r.proceeds = Math.round(r.proceeds * 100000) / 100000;
@@ -105,11 +97,6 @@ export default function Royalties() {
   useEffect(() => {
     if (collectionFocus) {
       setRoyalties([]);
-      setDescription(
-        collectionFocus === GasRoyaltiesCollectionFocus.MEMELAB
-          ? MEMELAB_DESCRIPTION
-          : MEMES_DESCRIPTION
-      );
       fetchRoyalties();
     }
   }, [collectionFocus]);
@@ -126,7 +113,7 @@ export default function Royalties() {
       content = `Secondary royalties`;
     }
     if (collectionFocus === GasRoyaltiesCollectionFocus.MEMELAB) {
-      content += ` in Meme Lab are split between artist the and the collection solely at the artist's discretion.`;
+      content += ` in Meme Lab are split between the artist and the collection solely at the artist's discretion.`;
     } else {
       content += ` in The Memes are split 50:50 between the artist and the collection.`;
     }
@@ -144,25 +131,15 @@ export default function Royalties() {
   return (
     <>
       <GasRoyaltiesHeader
-        title={"Meme Accounting"}
-        // description={description}
-        fetching={fetching}
+        title="Gas"
         results_count={royalties.length}
-        date_selection={dateSelection}
-        is_primary={isPrimary}
-        selected_artist={selectedArtist}
-        from_date={fromDate}
-        to_date={toDate}
         focus={collectionFocus}
-        setFocus={setCollectionFocus}
-        getUrl={getUrl}
-        setSelectedArtist={setSelectedArtist}
-        setIsPrimary={setIsPrimary}
         setDateSelection={(date_selection) => {
           setIsPrimary(false);
           setDateSelection(date_selection);
         }}
-        setShowDatePicker={setShowDatePicker}
+        getUrl={getUrlWithParams}
+        {...getSharedProps()}
       />
       <Container className={`no-padding pt-4`}>
         <Row className={`pt-4 ${styles.scrollContainer}`}>
@@ -180,18 +157,35 @@ export default function Royalties() {
                     <th>Artist</th>
                     <th className="text-center">Volume</th>
                     <th className="text-center">
-                      {isPrimary ? "Primary Proceeds" : "Royalties"}
+                      <div className="d-flex align-items-center justify-content-center gap-2">
+                        {isPrimary ? "Primary Proceeds" : "Royalties"}
+                        {isPrimary && (
+                          <Tippy
+                            content="Total primary proceeds less the Manifold fee"
+                            placement={"auto"}
+                            theme={"light"}>
+                            <FontAwesomeIcon
+                              className={styles.infoIcon}
+                              icon="info-circle"></FontAwesomeIcon>
+                          </Tippy>
+                        )}
+                      </div>
                     </th>
-                    <th className="d-flex align-items-center justify-content-center gap-2">
-                      Artist Split{" "}
-                      <Tippy
-                        content={getTippyArtistsContent()}
-                        placement={"auto"}
-                        theme={"light"}>
-                        <FontAwesomeIcon
-                          className={styles.infoIcon}
-                          icon="info-circle"></FontAwesomeIcon>
-                      </Tippy>
+                    {!isPrimary && (
+                      <th className="text-center">Effective Royalty %</th>
+                    )}
+                    <th className="text-center">
+                      <div className="d-flex align-items-center justify-content-center gap-2">
+                        Artist Split{" "}
+                        <Tippy
+                          content={getTippyArtistsContent()}
+                          placement={"auto"}
+                          theme={"light"}>
+                          <FontAwesomeIcon
+                            className={styles.infoIcon}
+                            icon="info-circle"></FontAwesomeIcon>
+                        </Tippy>
+                      </div>
                     </th>
                   </tr>
                 </thead>
@@ -226,6 +220,13 @@ export default function Royalties() {
                       <td className="text-center">
                         {displayDecimal(r.proceeds, 5)}
                       </td>
+                      {!isPrimary && (
+                        <td className="text-center">
+                          {r.proceeds > 0
+                            ? displayDecimal((r.proceeds / r.volume) * 100, 5)
+                            : `-`}
+                        </td>
+                      )}
                       <td>
                         <div className="d-flex justify-content-center">
                           <span className="d-flex align-items-center gap-1">
@@ -262,16 +263,6 @@ export default function Royalties() {
                         )}%)`}
                     </td>
                   </tr>
-                  <tr>
-                    <td colSpan={2}>
-                      <b></b>
-                    </td>
-                    <td className="text-center" colSpan={3}>
-                      <div className="font-color-h">
-                        <b>All values are in ETH</b>
-                      </div>
-                    </td>
-                  </tr>
                 </tbody>
               </Table>
             )}
@@ -282,6 +273,11 @@ export default function Royalties() {
             <Col>
               <h5>No royalties found for selected dates</h5>
             </Col>
+          </Row>
+        )}
+        {!fetching && royalties.length > 0 && (
+          <Row className="font-color-h pt-3 pb-3">
+            <Col>All values are in ETH</Col>
           </Row>
         )}
         <DatePickerModal
@@ -298,4 +294,8 @@ export default function Royalties() {
       </Container>
     </>
   );
+}
+function getSharedProps(): import("react").JSX.IntrinsicAttributes &
+  Readonly<import("./GasRoyalties").HeaderProps> {
+  throw new Error("Function not implemented.");
 }
