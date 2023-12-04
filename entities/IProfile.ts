@@ -70,6 +70,14 @@ export enum CICType {
   HIGHLY_ACCURATE = "HIGHLY_ACCURATE",
 }
 
+export const CIC_TO_TEXT: Record<CICType, string> = {
+  [CICType.INACCURATE]: "Inaccurate",
+  [CICType.UNKNOWN]: "Not Enough Ratings Yet",
+  [CICType.PROBABLY_ACCURATE]: "Probably Accurate",
+  [CICType.ACCURATE]: "Accurate",
+  [CICType.HIGHLY_ACCURATE]: "Highly Accurate",
+};
+
 export interface ApiProfileRaterCicState {
   readonly cic_rating_by_rater: number | null;
   readonly cic_ratings_left_to_give_by_rater: number | null;
