@@ -46,7 +46,7 @@ export default function GradientPage(props: Props) {
   const [collectionCount, setCollectionCount] = useState(-1);
   const [collectionRank, setCollectionRank] = useState(-1);
 
-  const [nfts, setNFTs] = useState<NFT[]>([]);
+  const [nfts, setNfts] = useState<NFT[]>([]);
 
   useEffect(() => {
     if (router.isReady) {
