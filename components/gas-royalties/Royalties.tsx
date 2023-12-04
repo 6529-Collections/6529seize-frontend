@@ -212,6 +212,7 @@ export default function Royalties() {
                           note={
                             collectionFocus ===
                               GasRoyaltiesCollectionFocus.MEMES &&
+                            isPrimary &&
                             MEMES_SOLD_MANUALLY.includes(r.token_id)
                               ? "Card sold manually"
                               : undefined
