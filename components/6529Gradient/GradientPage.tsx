@@ -102,7 +102,7 @@ export default function GradientPage(props: Props) {
           const rankedNFTs = newnfts.sort((a, b) =>
             a.tdh_rank > b.tdh_rank ? 1 : -1
           );
-          setNFTs(newnfts);
+          setNfts(newnfts);
           setCollectionCount(newnfts.length);
           if (nftId) {
             setCollectionRank(
