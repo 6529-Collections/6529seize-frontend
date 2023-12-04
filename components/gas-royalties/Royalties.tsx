@@ -161,7 +161,7 @@ export default function Royalties() {
                         {isPrimary ? "Primary Proceeds" : "Royalties"}
                         {isPrimary && (
                           <Tippy
-                            content="Total primary proceeds less the Manifold fee"
+                            content="Total Minter payments less the Manifold fee"
                             placement={"auto"}
                             theme={"light"}>
                             <FontAwesomeIcon
