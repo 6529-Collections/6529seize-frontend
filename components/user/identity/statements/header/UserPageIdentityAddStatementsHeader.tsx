@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { IProfileAndConsolidations } from "../../../../../entities/IProfile";
 import UserPageIdentityStatementsAddButton from "../add/UserPageIdentityStatementsAddButton";
 import { useAccount } from "wagmi";
+import { createPossessionStr } from "../../../../../helpers/Helpers";
 
 export default function UserPageIdentityAddStatementsHeader({
   profile,
@@ -23,21 +24,13 @@ export default function UserPageIdentityAddStatementsHeader({
     );
   }, [account, profile]);
 
-  const createPossession = (): string => {
-    const handle = profile.profile?.handle;
-    if (handle) {
-      const possession = handle.endsWith("s") ? `${handle}'` : `${handle}'s`;
-      return possession;
-    }
-    return "";
-  };
 
   const [possessionName, setPossessionName] = useState<string>(
-    createPossession()
+    createPossessionStr(profile.profile?.handle ?? null)
   );
 
   useEffect(() => {
-    setPossessionName(createPossession());
+    setPossessionName(createPossessionStr(profile.profile?.handle ?? null));
   }, [profile]);
 
   return (

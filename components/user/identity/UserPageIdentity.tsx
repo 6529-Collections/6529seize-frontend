@@ -2,7 +2,7 @@ import { IProfileAndConsolidations } from "../../../entities/IProfile";
 import UserPageIdentityStatements from "./statements/UserPageIdentityStatements";
 import UserPageIdentityHeader from "./header/UserPageIdentityHeader";
 import UserPageIdentityCICRatings from "./UserPageIdentityCICRatings";
-import UserPageIdentityActivityLog from "./UserPageIdentityActivityLog";
+import UserPageIdentityActivityLog from "./activity/UserPageIdentityActivityLog";
 
 export default function UserPageIdentity({
   profile,
@@ -18,7 +18,7 @@ export default function UserPageIdentity({
           <UserPageIdentityCICRatings />
         </div>
         <div>
-          <UserPageIdentityActivityLog />
+          <UserPageIdentityActivityLog profile={profile} />
         </div>
       </div>
     </div>

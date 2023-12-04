@@ -22,7 +22,7 @@ export interface IProfileAndConsolidations {
     tdh: number;
   };
   readonly level: number;
-  readonly cic: AggregatedCicRating
+  readonly cic: AggregatedCicRating;
 }
 
 export enum PROFILE_CLASSIFICATION {
@@ -61,7 +61,6 @@ export interface IProfile {
   readonly website?: string | undefined;
 }
 
-
 export enum CICType {
   INACCURATE = "INACCURATE",
   UNKNOWN = "UNKNOWN",
@@ -93,3 +92,25 @@ export interface CicStatement {
   crated_at: Date;
   updated_at: Date | null;
 }
+
+export enum PROFILE_ACTIVITY_TYPE {
+  CIC_RATING = "CIC_RATING",
+  HANDLE = "HANDLE",
+  PRIMARY_WALLET = "PRIMARY_WALLET",
+  SOCIAL_MEDIA_ACCOUNT = "SOCIAL_MEDIA_ACCOUNT",
+  CONTACT = "CONTACT",
+  SOCIAL_MEDIA_VERIFICATION_POST = "SOCIAL_MEDIA_VERIFICATION_POST",
+}
+
+export const PROFILE_ACTIVITY_TYPE_TO_TEXT: Record<
+  PROFILE_ACTIVITY_TYPE,
+  string
+> = {
+  [PROFILE_ACTIVITY_TYPE.CIC_RATING]: "CIC Rating",
+  [PROFILE_ACTIVITY_TYPE.HANDLE]: "Handle",
+  [PROFILE_ACTIVITY_TYPE.PRIMARY_WALLET]: "Primary Wallet",
+  [PROFILE_ACTIVITY_TYPE.SOCIAL_MEDIA_ACCOUNT]: "Social Media Account",
+  [PROFILE_ACTIVITY_TYPE.CONTACT]: "Contact",
+  [PROFILE_ACTIVITY_TYPE.SOCIAL_MEDIA_VERIFICATION_POST]:
+    "Social Media Verification Post",
+};
