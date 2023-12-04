@@ -1,5 +1,3 @@
-export default function UserCICInnacurateTooltip({ cic }: { cic: number }) {
-  return (
-    <div className="tw-bg-blue-500">i am custom tooltip with cic {cic}</div>
-  );
+export default function UserCICInnacurateTooltip() {
+  return <div className="tw-bg-blue-500">Inaccurate</div>;
 }

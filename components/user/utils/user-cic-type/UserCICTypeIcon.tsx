@@ -5,6 +5,8 @@ import UserCICAccurateIcon from "./UserCICAccurateIcon";
 import UserCICUnknownIcon from "./UserCICUnknownIcon";
 import UserCICInaccurateIcon from "./UserCICInaccurateIcon";
 import { assertUnreachable } from "../../../../helpers/AllowlistToolHelpers";
+import UserCICProbablyAccurateIcon from "./UserCICProbablyAccurateIcon";
+import UserCICHighlyAccurateIcon from "./UserCICHighlyAccurateIcon";
 
 export default function UserCICTypeIcon({ cic }: { cic: number }) {
   const [cicType, setCicType] = useState<CICType>(cicToType(cic));
@@ -18,11 +20,11 @@ export default function UserCICTypeIcon({ cic }: { cic: number }) {
     case CICType.UNKNOWN:
       return <UserCICUnknownIcon />;
     case CICType.PROBABLY_ACCURATE:
-      return <UserCICAccurateIcon />;
+      return <UserCICProbablyAccurateIcon />;
     case CICType.ACCURATE:
       return <UserCICAccurateIcon />;
     case CICType.HIGHLY_ACCURATE:
-      return <UserCICAccurateIcon />;
+      return <UserCICHighlyAccurateIcon />;
     default:
       assertUnreachable(cicType);
       return <UserCICUnknownIcon />;

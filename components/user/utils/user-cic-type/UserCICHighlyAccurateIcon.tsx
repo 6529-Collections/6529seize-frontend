@@ -1,12 +1,12 @@
 import Tippy from "@tippyjs/react";
-import UserCICAccurateTooltip from "./UserCICAccurateTooltip";
+import UserCICHighlyAccurateTooltip from "./UserCICHighlyAccurateTooltip";
 
-export default function UserCICAccurateIcon() {
+export default function UserCICHighlyAccurateIcon() {
   return (
     <Tippy
       placement={"top-end"}
       interactive={true}
-      content={<UserCICAccurateTooltip />}
+      content={<UserCICHighlyAccurateTooltip />}
     >
       <svg
         className="tw-w-full tw-h-full"

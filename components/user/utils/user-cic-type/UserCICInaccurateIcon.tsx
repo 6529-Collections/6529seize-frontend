@@ -6,7 +6,7 @@ export default function UserCICAccurateIcon() {
     <Tippy
       placement={"top-end"}
       interactive={true}
-      content={<UserCICInnacurateTooltip cic={123} />}
+      content={<UserCICInnacurateTooltip />}
     >
       <svg
         className="tw-h-full tw-w-full"
