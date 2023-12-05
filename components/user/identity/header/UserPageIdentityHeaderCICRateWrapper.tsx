@@ -26,11 +26,59 @@ export default function UserPageIdentityHeaderCICRateWrapper({
   useEffect(() => setIAmConnected(!!address), [address]);
 
   if (!iAmConnected) {
-    return <div>Please connect to rate</div>;
+    return (
+      <div className="tw-mt-6 tw-inline-flex tw-items-center tw-rounded-lg tw-bg-primary-400/5 tw-border tw-border-solid tw-border-primary-400/20 tw-px-4 tw-py-3">
+        <div className="tw-flex tw-items-center">
+          <svg
+            className="tw-flex-shrink- tw-self-center tw-w-5 tw-h-5 tw-text-primary-300"
+            viewBox="0 0 24 24"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M12 16V12M12 8H12.01M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12Z"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+          </svg>
+          <div className="tw-ml-3 tw-self-center">
+            <h3 className="tw-text-sm tw-mb-0 tw-font-semibold tw-text-primary-300">
+              Please connect to rate
+            </h3>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   if (!iHaveProfile) {
-    return <div>Please make profile for rate</div>;
+    return (
+      <div className="tw-mt-6 tw-inline-flex tw-items-center tw-rounded-lg tw-bg-primary-400/5 tw-border tw-border-solid tw-border-primary-400/20 tw-px-4 tw-py-3">
+        <div className="tw-flex tw-items-center">
+          <svg
+            className="tw-flex-shrink- tw-self-center tw-w-5 tw-h-5 tw-text-primary-300"
+            viewBox="0 0 24 24"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M12 16V12M12 8H12.01M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12Z"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+          </svg>
+          <div className="tw-ml-3 tw-self-center">
+            <h3 className="tw-text-sm tw-mb-0 tw-font-semibold tw-text-primary-300">
+              Please make profile to rate
+            </h3>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   if (isMyProfile) {
