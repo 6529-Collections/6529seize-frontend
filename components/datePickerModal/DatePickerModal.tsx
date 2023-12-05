@@ -10,11 +10,8 @@ interface Props {
   initial_to_date?: Date | undefined;
   initial_from_block?: number | undefined;
   initial_to_block?: number | undefined;
-  onApplyDate?: (fromDate: Date | undefined, toDate: Date | undefined) => void;
-  onApplyBlock?: (
-    fromBlock: number | undefined,
-    toBlock: number | undefined
-  ) => void;
+  onApplyDate?: (fromDate: Date, toDate: Date) => void;
+  onApplyBlock?: (fromBlock: number, toBlock: number) => void;
   onHide: () => void;
 }
 

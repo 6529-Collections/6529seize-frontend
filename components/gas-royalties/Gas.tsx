@@ -4,7 +4,6 @@ import styles from "./GasRoyalties.module.scss";
 import { Gas } from "../../entities/IGas";
 import { fetchUrl } from "../../services/6529api";
 import { displayDecimal } from "../../helpers/Helpers";
-import DatePickerModal from "../datePickerModal/DatePickerModal";
 import { DateIntervalsSelection } from "../../enums";
 import {
   GasRoyaltiesCollectionFocus,
@@ -46,16 +45,12 @@ export default function Gas() {
     isCustomBlocks,
     setIsCustomBlocks,
     selectedArtist,
-    showDatePicker,
-    setShowDatePicker,
     collectionFocus,
     setCollectionFocus,
     fetching,
     setFetching,
     getUrl,
     getSharedProps,
-    showBlockPicker,
-    setShowBlockPicker,
     fromBlock,
     setFromBlock,
     toBlock,
@@ -114,6 +109,19 @@ export default function Gas() {
           setIsPrimary(false);
           setIsCustomBlocks(false);
           setDateSelection(date_selection);
+        }}
+        setDates={(from_date, to_date) => {
+          setFromDate(from_date);
+          setToDate(to_date);
+          setIsPrimary(false);
+          setIsCustomBlocks(false);
+          setDateSelection(DateIntervalsSelection.CUSTOM_DATES);
+        }}
+        setblocks={(from_block, to_block) => {
+          setFromBlock(from_block);
+          setToBlock(to_block);
+          setIsPrimary(false);
+          setIsCustomBlocks(true);
         }}
         getUrl={getUrlWithParams}
         {...getSharedProps()}
@@ -175,33 +183,6 @@ export default function Gas() {
             <Col>All values are in ETH</Col>
           </Row>
         )}
-        <DatePickerModal
-          mode="date"
-          show={showDatePicker}
-          initial_from_date={fromDate}
-          initial_to_date={toDate}
-          onApplyDate={(fromDate, toDate) => {
-            setIsPrimary(false);
-            setIsCustomBlocks(false);
-            setFromDate(fromDate);
-            setToDate(toDate);
-            setDateSelection(DateIntervalsSelection.CUSTOM_DATES);
-          }}
-          onHide={() => setShowDatePicker(false)}
-        />
-        <DatePickerModal
-          mode="block"
-          show={showBlockPicker}
-          initial_from_block={fromBlock}
-          initial_to_block={toBlock}
-          onApplyBlock={(fromBlock, toBlock) => {
-            setIsPrimary(false);
-            setFromBlock(fromBlock);
-            setToBlock(toBlock);
-            setIsCustomBlocks(true);
-          }}
-          onHide={() => setShowBlockPicker(false)}
-        />
       </Container>
     </>
   );

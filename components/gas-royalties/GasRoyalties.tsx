@@ -11,6 +11,7 @@ import { capitalizeEveryWord, getDateFilters } from "../../helpers/Helpers";
 import Breadcrumb, { Crumb } from "../breadcrumb/Breadcrumb";
 import router from "next/router";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import DatePickerModal from "../datePickerModal/DatePickerModal";
 
 export enum GasRoyaltiesCollectionFocus {
   MEMES = "the-memes",
@@ -26,10 +27,6 @@ export interface HeaderProps {
   selected_artist: string;
   is_primary: boolean;
   is_custom_blocks: boolean;
-  from_date?: Date;
-  to_date?: Date;
-  from_block?: number;
-  to_block?: number;
   focus: GasRoyaltiesCollectionFocus;
   setFocus: (focus: GasRoyaltiesCollectionFocus) => void;
   getUrl: () => string;
@@ -37,8 +34,8 @@ export interface HeaderProps {
   setIsPrimary: (isPrimary: boolean) => void;
   setIsCustomBlocks: (iCustomBlocks: boolean) => void;
   setDateSelection: (dateSelection: DateIntervalsSelection) => void;
-  setShowDatePicker: (showDatePicker: boolean) => void;
-  setShowBlockPicker: (showBlockPicker: boolean) => void;
+  setDates: (fromDate: Date, toDate: Date) => void;
+  setblocks: (fromBlock: number, toBlock: number) => void;
 }
 
 export function getUrlParams(
@@ -88,6 +85,12 @@ export function GasRoyaltiesHeader(props: Readonly<HeaderProps>) {
   const [artists, setArtists] = useState<{ name: string; cards: number[] }[]>(
     []
   );
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [showBlockPicker, setShowBlockPicker] = useState(false);
+  const [fromDate, setFromDate] = useState<Date>();
+  const [toDate, setToDate] = useState<Date>();
+  const [fromBlock, setFromBlock] = useState<number>();
+  const [toBlock, setToBlock] = useState<number>();
 
   const [breadcrumbs, setBreadcrumbs] = useState<Crumb[]>([]);
 
@@ -133,18 +136,18 @@ export function GasRoyaltiesHeader(props: Readonly<HeaderProps>) {
     if (props.is_primary) {
       label += "Primary Sales";
     } else if (props.is_custom_blocks) {
-      if (props.from_block) {
-        label += `from block: ${props.from_block} `;
+      if (fromBlock) {
+        label += `from block: ${fromBlock} `;
       }
-      if (props.to_block) {
-        label += `to block: ${props.to_block} `;
+      if (toBlock) {
+        label += `to block: ${toBlock} `;
       }
     } else if (props.date_selection === DateIntervalsSelection.CUSTOM_DATES) {
-      if (props.from_date) {
-        label += `from: ${props.from_date.toISOString().slice(0, 10)} `;
+      if (fromDate) {
+        label += `from: ${fromDate.toISOString().slice(0, 10)} `;
       }
-      if (props.to_date) {
-        label += `to: ${props.to_date.toISOString().slice(0, 10)}`;
+      if (toDate) {
+        label += `to: ${toDate.toISOString().slice(0, 10)}`;
       }
     } else {
       label += `${props.date_selection}`;
@@ -261,7 +264,7 @@ export function GasRoyaltiesHeader(props: Readonly<HeaderProps>) {
                             dateSelection ===
                             DateIntervalsSelection.CUSTOM_DATES
                           ) {
-                            props.setShowDatePicker(true);
+                            setShowDatePicker(true);
                           } else {
                             props.setDateSelection(dateSelection);
                           }
@@ -272,7 +275,7 @@ export function GasRoyaltiesHeader(props: Readonly<HeaderProps>) {
                   )}
                   <Dropdown.Item
                     onClick={() => {
-                      props.setShowBlockPicker(true);
+                      setShowBlockPicker(true);
                     }}>
                     Custom Blocks
                   </Dropdown.Item>
@@ -282,6 +285,30 @@ export function GasRoyaltiesHeader(props: Readonly<HeaderProps>) {
           </Col>
         </Row>
       </Container>
+      <DatePickerModal
+        mode="date"
+        show={showDatePicker}
+        initial_from_date={fromDate}
+        initial_to_date={toDate}
+        onApplyDate={(fromDate, toDate) => {
+          setFromDate(fromDate);
+          setToDate(toDate);
+          props.setDates(fromDate, toDate);
+        }}
+        onHide={() => setShowDatePicker(false)}
+      />
+      <DatePickerModal
+        mode="block"
+        show={showBlockPicker}
+        initial_from_block={fromBlock}
+        initial_to_block={toBlock}
+        onApplyBlock={(fromBlock, toBlock) => {
+          setFromBlock(fromBlock);
+          setToBlock(toBlock);
+          props.setblocks(fromBlock, toBlock);
+        }}
+        onHide={() => setShowBlockPicker(false)}
+      />
     </>
   );
 }
@@ -370,16 +397,10 @@ export function useSharedState() {
       selected_artist: selectedArtist,
       is_primary: isPrimary,
       is_custom_blocks: isCustomBlocks,
-      from_date: fromDate,
-      to_date: toDate,
-      from_block: fromBlock,
-      to_block: toBlock,
       setFocus: setCollectionFocus,
       setSelectedArtist,
       setIsPrimary,
       setIsCustomBlocks,
-      setShowDatePicker,
-      setShowBlockPicker,
     };
   }
 
