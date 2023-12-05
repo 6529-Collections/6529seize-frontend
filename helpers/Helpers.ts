@@ -5,7 +5,7 @@ import {
   MEMES_CONTRACT,
 } from "../constants";
 import { BaseNFT, VolumeType } from "../entities/INFT";
-import { DateIntervalsSelection } from "../enums";
+import { DateIntervalsWithBlocksSelection } from "../enums";
 
 export function formatAddress(address: string) {
   if (
@@ -366,13 +366,30 @@ export const formatNumber = (num: number): string => {
   return parseFloat((num / 1000000).toFixed(2)).toString() + "M";
 };
 
-export function displayDecimal(value: number, places: number) {
+export function displayDecimal(value: number, places: number): string {
   if (0 >= value) {
     return "-";
   }
 
-  const fixedValue = value.toFixed(places);
-  return numberWithCommasFromString(fixedValue);
+  const valueAsString = value.toString();
+  const decimalPlaceIndex = valueAsString.indexOf(".");
+
+  if (decimalPlaceIndex !== -1 && value < 0.01) {
+    const exponent = Math.ceil(-Math.log10(value));
+    return Number(value.toFixed(exponent)).toString();
+  }
+
+  if (value >= 0.01) {
+    return Number(value.toFixed(2)).toLocaleString("en-US", {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    });
+  }
+
+  return value.toLocaleString("en-US", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
 }
 
 export function areEqualURLS(s1: string, s2: string) {
@@ -393,38 +410,36 @@ function formatDateFilterDate(d: Date) {
 }
 
 export function getDateFilters(
-  dateSelection: DateIntervalsSelection,
+  dateSelection: keyof typeof DateIntervalsWithBlocksSelection,
   fromDate: Date | undefined,
-  toDate: Date | undefined
+  toDate: Date | undefined,
+  fromBlock: number | undefined,
+  toBlock: number | undefined
 ) {
   let filters = "";
   switch (dateSelection) {
-    case DateIntervalsSelection.ALL:
+    case DateIntervalsWithBlocksSelection.ALL:
       break;
-    case DateIntervalsSelection.TODAY: {
+    case DateIntervalsWithBlocksSelection.TODAY:
       filters += `&from_date=${formatDateFilterDate(new Date())}`;
       break;
-    }
-    case DateIntervalsSelection.YESTERDAY: {
+    case DateIntervalsWithBlocksSelection.YESTERDAY:
       const yesterday = new Date();
       yesterday.setUTCDate(yesterday.getUTCDate() - 1);
       filters += `&from_date=${formatDateFilterDate(yesterday)}`;
       filters += `&to_date=${formatDateFilterDate(yesterday)}`;
       break;
-    }
-    case DateIntervalsSelection.LAST_7: {
+    case DateIntervalsWithBlocksSelection.LAST_7:
       const weekAgo = new Date();
       weekAgo.setUTCDate(weekAgo.getUTCDate() - 7);
       filters += `&from_date=${formatDateFilterDate(weekAgo)}`;
       break;
-    }
-    case DateIntervalsSelection.THIS_MONTH: {
+    case DateIntervalsWithBlocksSelection.THIS_MONTH:
       const firstDayOfMonth = new Date();
       firstDayOfMonth.setUTCDate(1);
       filters += `&from_date=${formatDateFilterDate(firstDayOfMonth)}`;
       break;
-    }
-    case DateIntervalsSelection.PREVIOUS_MONTH: {
+    case DateIntervalsWithBlocksSelection.PREVIOUS_MONTH:
       const firstDayOfPreviousMonth = new Date();
       firstDayOfPreviousMonth.setUTCMonth(
         firstDayOfPreviousMonth.getUTCMonth() - 1
@@ -435,15 +450,13 @@ export function getDateFilters(
       filters += `&from_date=${formatDateFilterDate(firstDayOfPreviousMonth)}`;
       filters += `&to_date=${formatDateFilterDate(lastDayOfPreviousMonth)}`;
       break;
-    }
-    case DateIntervalsSelection.YEAR_TO_DATE: {
+    case DateIntervalsWithBlocksSelection.YEAR_TO_DATE:
       const firstDayOfYear = new Date();
       firstDayOfYear.setUTCMonth(0);
       firstDayOfYear.setUTCDate(1);
       filters += `&from_date=${formatDateFilterDate(firstDayOfYear)}`;
       break;
-    }
-    case DateIntervalsSelection.LAST_YEAR: {
+    case DateIntervalsWithBlocksSelection.LAST_YEAR:
       const firstDayOfLastYear = new Date();
       firstDayOfLastYear.setUTCFullYear(
         firstDayOfLastYear.getUTCFullYear() - 1
@@ -456,8 +469,7 @@ export function getDateFilters(
       filters += `&from_date=${formatDateFilterDate(firstDayOfLastYear)}`;
       filters += `&to_date=${formatDateFilterDate(lastDayOfLastYear)}`;
       break;
-    }
-    case DateIntervalsSelection.CUSTOM: {
+    case DateIntervalsWithBlocksSelection.CUSTOM_DATES:
       if (fromDate) {
         filters += `&from_date=${formatDateFilterDate(fromDate)}`;
       }
@@ -465,7 +477,14 @@ export function getDateFilters(
         filters += `&to_date=${formatDateFilterDate(toDate)}`;
       }
       break;
-    }
+    case DateIntervalsWithBlocksSelection.CUSTOM_BLOCKS:
+      if (fromBlock) {
+        filters += `&from_block=${fromBlock}`;
+      }
+      if (toBlock) {
+        filters += `&to_block=${toBlock}`;
+      }
+      break;
   }
   return filters;
 }

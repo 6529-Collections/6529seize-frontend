@@ -1,6 +1,6 @@
 import styles from "./GasRoyalties.module.scss";
 import { Row, Col, Dropdown, Container } from "react-bootstrap";
-import { DateIntervalsSelection } from "../../enums";
+import { DateIntervalsWithBlocksSelection } from "../../enums";
 import DotLoader from "../dotLoader/DotLoader";
 import DownloadUrlWidget from "../downloadUrlWidget/DownloadUrlWidget";
 import Image from "next/image";
@@ -22,27 +22,34 @@ export interface HeaderProps {
   description?: string;
   fetching: boolean;
   results_count: number;
-  date_selection: DateIntervalsSelection;
+  date_selection: keyof typeof DateIntervalsWithBlocksSelection;
   selected_artist: string;
   is_primary: boolean;
   from_date?: Date;
   to_date?: Date;
+  from_block?: number;
+  to_block?: number;
   focus: GasRoyaltiesCollectionFocus;
   setFocus: (focus: GasRoyaltiesCollectionFocus) => void;
   getUrl: () => string;
   setSelectedArtist: (artist: string) => void;
   setIsPrimary: (isPrimary: boolean) => void;
-  setDateSelection: (dateSelection: DateIntervalsSelection) => void;
+  setDateSelection: (
+    dateSelection: keyof typeof DateIntervalsWithBlocksSelection
+  ) => void;
   setShowDatePicker: (showDatePicker: boolean) => void;
+  setShowBlockPicker: (showBlockPicker: boolean) => void;
 }
 
 export function getUrlParams(
   apiPath: string,
   isPrimary: boolean,
-  dateSelection: DateIntervalsSelection,
+  dateSelection: keyof typeof DateIntervalsWithBlocksSelection,
   collectionFocus?: GasRoyaltiesCollectionFocus,
   fromDate?: Date,
   toDate?: Date,
+  fromBlock?: number,
+  toBlock?: number,
   selectedArtist?: string
 ): string {
   if (!collectionFocus) {
@@ -52,7 +59,13 @@ export function getUrlParams(
   if (isPrimary) {
     filters += "&primary=true";
   } else {
-    filters += getDateFilters(dateSelection, fromDate, toDate);
+    filters += getDateFilters(
+      dateSelection,
+      fromDate,
+      toDate,
+      fromBlock,
+      toBlock
+    );
   }
 
   const collection =
@@ -109,15 +122,26 @@ export function GasRoyaltiesHeader(props: Readonly<HeaderProps>) {
 
   function getDateSelectionLabel() {
     let label = "";
-    if (props.date_selection == DateIntervalsSelection.CUSTOM) {
+    if (props.is_primary) {
+      label += "Primary Sales";
+    } else if (
+      props.date_selection === DateIntervalsWithBlocksSelection.CUSTOM_DATES
+    ) {
       if (props.from_date) {
         label += `from: ${props.from_date.toISOString().slice(0, 10)} `;
       }
       if (props.to_date) {
         label += `to: ${props.to_date.toISOString().slice(0, 10)}`;
       }
-    } else if (props.is_primary) {
-      label += `Primary Sales`;
+    } else if (
+      props.date_selection == DateIntervalsWithBlocksSelection.CUSTOM_BLOCKS
+    ) {
+      if (props.from_block) {
+        label += `from block: ${props.from_block} `;
+      }
+      if (props.to_block) {
+        label += `to block: ${props.to_block} `;
+      }
     } else {
       label += `${props.date_selection}`;
     }
@@ -224,18 +248,28 @@ export function GasRoyaltiesHeader(props: Readonly<HeaderProps>) {
                   </Dropdown.Item>
                   <Dropdown.Divider />
                   <Dropdown.Header>Secondary Sales</Dropdown.Header>
-                  {Object.values(DateIntervalsSelection).map(
-                    (dateSelection) => (
+                  {Object.entries(DateIntervalsWithBlocksSelection).map(
+                    ([key, value]) => (
                       <Dropdown.Item
-                        key={dateSelection}
+                        key={key}
                         onClick={() => {
-                          if (dateSelection !== DateIntervalsSelection.CUSTOM) {
-                            props.setDateSelection(dateSelection);
-                          } else {
+                          if (
+                            value ===
+                            DateIntervalsWithBlocksSelection.CUSTOM_DATES
+                          ) {
                             props.setShowDatePicker(true);
+                          } else if (
+                            value ===
+                            DateIntervalsWithBlocksSelection.CUSTOM_BLOCKS
+                          ) {
+                            props.setShowBlockPicker(true);
+                          } else {
+                            props.setDateSelection(
+                              key as keyof typeof DateIntervalsWithBlocksSelection
+                            );
                           }
                         }}>
-                        {dateSelection}
+                        {value}
                       </Dropdown.Item>
                     )
                   )}
@@ -299,8 +333,13 @@ export function useSharedState() {
   const [fromDate, setFromDate] = useState<Date>();
   const [toDate, setToDate] = useState<Date>();
   const [showDatePicker, setShowDatePicker] = useState(false);
-  const [dateSelection, setDateSelection] = useState<DateIntervalsSelection>(
-    DateIntervalsSelection.THIS_MONTH
+  const [fromBlock, setFromBlock] = useState<number>();
+  const [toBlock, setToBlock] = useState<number>();
+  const [showBlockPicker, setShowBlockPicker] = useState(false);
+  const [dateSelection, setDateSelection] = useState<
+    keyof typeof DateIntervalsWithBlocksSelection
+  >(
+    DateIntervalsWithBlocksSelection.THIS_MONTH as keyof typeof DateIntervalsWithBlocksSelection
   );
   const [isPrimary, setIsPrimary] = useState<boolean>(false);
   const [collectionFocus, setCollectionFocus] =
@@ -315,6 +354,8 @@ export function useSharedState() {
       collectionFocus,
       fromDate,
       toDate,
+      fromBlock,
+      toBlock,
       selectedArtist
     );
   }
@@ -327,10 +368,13 @@ export function useSharedState() {
       is_primary: isPrimary,
       from_date: fromDate,
       to_date: toDate,
+      from_block: fromBlock,
+      to_block: toBlock,
       setFocus: setCollectionFocus,
       setSelectedArtist,
       setIsPrimary,
       setShowDatePicker,
+      setShowBlockPicker,
     };
   }
 
@@ -353,5 +397,11 @@ export function useSharedState() {
     setFetching,
     getUrl,
     getSharedProps,
+    showBlockPicker,
+    setShowBlockPicker,
+    fromBlock,
+    setFromBlock,
+    toBlock,
+    setToBlock,
   };
 }

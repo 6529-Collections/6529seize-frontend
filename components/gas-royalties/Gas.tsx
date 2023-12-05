@@ -5,7 +5,7 @@ import { Gas } from "../../entities/IGas";
 import { fetchUrl } from "../../services/6529api";
 import { displayDecimal } from "../../helpers/Helpers";
 import DatePickerModal from "../datePickerModal/DatePickerModal";
-import { DateIntervalsSelection } from "../../enums";
+import { DateIntervalsWithBlocksSelection } from "../../enums";
 import {
   GasRoyaltiesCollectionFocus,
   GasRoyaltiesHeader,
@@ -13,6 +13,7 @@ import {
   useSharedState,
 } from "./GasRoyalties";
 import { useRouter } from "next/router";
+import BlockPickerModal from "../blockPickerModal/BlockPickerModal";
 
 export default function Gas() {
   const router = useRouter();
@@ -52,10 +53,16 @@ export default function Gas() {
     setFetching,
     getUrl,
     getSharedProps,
+    showBlockPicker,
+    setShowBlockPicker,
+    fromBlock,
+    setFromBlock,
+    toBlock,
+    setToBlock,
   } = useSharedState();
 
   function getUrlWithParams() {
-    return getUrl("royalties");
+    return getUrl("gas");
   }
 
   function fetchGas() {
@@ -74,7 +81,15 @@ export default function Gas() {
     if (collectionFocus) {
       fetchGas();
     }
-  }, [dateSelection, fromDate, toDate, selectedArtist, isPrimary]);
+  }, [
+    dateSelection,
+    fromDate,
+    toDate,
+    fromBlock,
+    toBlock,
+    selectedArtist,
+    isPrimary,
+  ]);
 
   useEffect(() => {
     if (collectionFocus) {
@@ -130,7 +145,7 @@ export default function Gas() {
                       </td>
                       <td>{g.artist}</td>
                       <td className="text-center">
-                        {displayDecimal(g.gas, 5)}
+                        {displayDecimal(g.gas, 2)}
                       </td>
                     </tr>
                   ))}
@@ -138,7 +153,7 @@ export default function Gas() {
                     <td colSpan={2} className="text-right">
                       <b>TOTAL</b>
                     </td>
-                    <td className="text-center">{displayDecimal(sumGas, 5)}</td>
+                    <td className="text-center">{displayDecimal(sumGas, 2)}</td>
                   </tr>
                 </tbody>
               </Table>
@@ -164,9 +179,25 @@ export default function Gas() {
           onApply={(fromDate, toDate) => {
             setFromDate(fromDate);
             setToDate(toDate);
-            setDateSelection(DateIntervalsSelection.CUSTOM);
+            setDateSelection(
+              DateIntervalsWithBlocksSelection.CUSTOM_DATES as keyof typeof DateIntervalsWithBlocksSelection
+            );
           }}
           onHide={() => setShowDatePicker(false)}
+        />
+        <BlockPickerModal
+          show={showBlockPicker}
+          initial_from={fromBlock}
+          initial_to={toBlock}
+          onApply={(fromBlock, toBlock) => {
+            setIsPrimary(false);
+            setFromBlock(fromBlock);
+            setToBlock(toBlock);
+            setDateSelection(
+              DateIntervalsWithBlocksSelection.CUSTOM_BLOCKS as keyof typeof DateIntervalsWithBlocksSelection
+            );
+          }}
+          onHide={() => setShowBlockPicker(false)}
         />
       </Container>
     </>
