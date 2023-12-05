@@ -7,8 +7,8 @@ import {
   useCollectionIndex,
   useCollectionAdmin,
   getCollectionIdsForAddress,
-  retrieveCollectionAdditionalData,
-  getCoreUseContractWrite,
+  useCollectionAdditionalData,
+  useCoreContractWrite,
 } from "../nextgen_helpers";
 import { FunctionSelectors } from "../nextgen_contracts";
 import NextGenContractWriteStatus from "../NextGenContractWriteStatus";
@@ -17,6 +17,7 @@ import { printAdminErrors } from "./NextGenAdmin";
 import {
   NextGenCollectionIdFormGroup,
   NextGenAdminHeadingRow,
+  NextGenAdminTextFormGroup,
 } from "./NextGenAdminShared";
 
 interface Props {
@@ -54,7 +55,7 @@ export default function NextGenAdminSetData(props: Readonly<Props>) {
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
-  retrieveCollectionAdditionalData(collectionID, (data: AdditionalData) => {
+  useCollectionAdditionalData(collectionID, (data: AdditionalData) => {
     if (collectionID) {
       setArtistAddress(data.artist_address);
       setMaxPurchases(data.max_purchases.toString());
@@ -63,7 +64,7 @@ export default function NextGenAdminSetData(props: Readonly<Props>) {
     }
   });
 
-  const contractWrite = getCoreUseContractWrite("setCollectionData", () => {
+  const contractWrite = useCoreContractWrite("setCollectionData", () => {
     setSubmitting(false);
     setLoading(false);
   });
@@ -133,44 +134,26 @@ export default function NextGenAdminSetData(props: Readonly<Props>) {
                 setCollectionID(id);
               }}
             />
-            <Form.Group className="mb-3">
-              <Form.Label>Artist Address</Form.Label>
-              <Form.Control
-                type="text"
-                placeholder="0x33FD426905F149f8376e227d0C9D3340AaD17aF1"
-                value={artistAddress}
-                onChange={(e: any) => setArtistAddress(e.target.value)}
-              />
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>Max # of purchases (public phase)</Form.Label>
-              <Form.Control
-                type="text"
-                placeholder="...max #"
-                value={maxPurchases}
-                onChange={(e: any) => setMaxPurchases(e.target.value)}
-              />
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>Total Supply of Collection</Form.Label>
-              <Form.Control
-                type="text"
-                placeholder="1000, 1500, ..."
-                value={totalSupply}
-                onChange={(e: any) => setTotalSupply(e.target.value)}
-              />
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>
-                Time, after minting is completed, to reduce supply
-              </Form.Label>
-              <Form.Control
-                type="text"
-                placeholder="unix epoch time eg. 86400 (seconds in a day)"
-                value={finalSupplyTime}
-                onChange={(e: any) => setFinalSupplyTime(e.target.value)}
-              />
-            </Form.Group>
+            <NextGenAdminTextFormGroup
+              title="Artist Address"
+              value={artistAddress}
+              setValue={setArtistAddress}
+            />
+            <NextGenAdminTextFormGroup
+              title="Max # of purchases (public phase)"
+              value={maxPurchases}
+              setValue={setMaxPurchases}
+            />
+            <NextGenAdminTextFormGroup
+              title="Total Supply of Collection"
+              value={totalSupply}
+              setValue={setTotalSupply}
+            />
+            <NextGenAdminTextFormGroup
+              title="Time, after minting is completed, to reduce supply - unix epoch time eg. 86400 (seconds in a day)"
+              value={finalSupplyTime}
+              setValue={setFinalSupplyTime}
+            />
             {!loading && errors.length > 0 && printAdminErrors(errors)}
             <Button
               className={`mt-3 mb-3 seize-btn`}

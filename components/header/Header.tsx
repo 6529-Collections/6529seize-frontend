@@ -224,7 +224,6 @@ export default function Header(props: Readonly<Props>) {
                     setShowBurgerMenuTools(false);
                   }
                 }}
-                tabIndex={0}
                 className={`${styles.burgerMenuHeader}
                   ${
                     showBurgerMenuCommunity

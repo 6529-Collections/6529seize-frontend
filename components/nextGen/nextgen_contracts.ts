@@ -32,12 +32,12 @@ export enum FunctionSelectors {
 }
 
 export const NEXTGEN_CORE = {
-  contract: "0xF3ff54B93844B1512C7bDafd2c41B5D228D03f98",
+  contract: "0xA25645414EEE330342b9382B73b1023a7dB99CC9",
   abi: NEXTGEN_CORE_ABI,
 };
 
 export const NEXTGEN_MINTER = {
-  contract: "0x0DC656875269F58EBd1d663168aB298a338f3FCe",
+  contract: "0xe73D086F3663c2969410b387898693A1E8fFCb93",
   abi: NEXTGEN_MINTER_ABI,
 };
 

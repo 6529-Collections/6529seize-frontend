@@ -10,8 +10,6 @@ import { useEffect, useState } from "react";
 import {
   AdditionalData,
   PhaseTimes,
-  TokensPerAddress,
-  MintingDetails,
   CollectionWithMerkle,
   AllowlistType,
   Info,
@@ -24,7 +22,7 @@ import {
 import { NEXTGEN_CHAIN_ID, NEXTGEN_CORE } from "../../../nextgen_contracts";
 import { fetchUrl } from "../../../../../services/6529api";
 import {
-  retrieveCollectionCosts,
+  useCollectionCostsHook,
   useMintSharedState,
   useSharedState,
 } from "../../../nextgen_helpers";
@@ -51,6 +49,8 @@ export default function NextGenMint(props: Readonly<Props>) {
   const [collectionLoaded, setCollectionLoaded] = useState<boolean>(false);
 
   const { mintingDetails, setMintingDetails } = useSharedState();
+  useCollectionCostsHook(props.collection, setMintingDetails);
+
   const {
     available,
     setAvailable,
@@ -147,10 +147,6 @@ export default function NextGenMint(props: Readonly<Props>) {
         setDelegators(del);
       }
     },
-  });
-
-  retrieveCollectionCosts(props.collection, (data: MintingDetails) => {
-    setMintingDetails(data);
   });
 
   function retrievePerAddressParams() {

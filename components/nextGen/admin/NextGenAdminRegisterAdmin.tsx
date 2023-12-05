@@ -8,12 +8,13 @@ import {
   useGlobalAdmin,
   useCollectionIndex,
   getCollectionIdsForAddress,
-  getAdminUseContractWrite,
+  useAdminContractWrite,
 } from "../nextgen_helpers";
 import { printAdminErrors } from "./NextGenAdmin";
 import {
   NextGenCollectionIdFormGroup,
   NextGenAdminHeadingRow,
+  NextGenAdminTextFormGroup,
 } from "./NextGenAdminShared";
 
 export enum ADMIN_TYPE {
@@ -75,7 +76,7 @@ export default function NextGenAdminRegisterAdmin(props: Readonly<Props>) {
     parseInt(collectionIndex?.data as string)
   );
 
-  const contractWrite = getAdminUseContractWrite(getFunctionName(), () => {
+  const contractWrite = useAdminContractWrite(getFunctionName(), () => {
     setSubmitting(false);
     setLoading(false);
   });
@@ -140,15 +141,11 @@ export default function NextGenAdminRegisterAdmin(props: Readonly<Props>) {
                 }}
               />
             )}
-            <Form.Group className="mb-3">
-              <Form.Label>Admin Address</Form.Label>
-              <Form.Control
-                type="text"
-                placeholder="0x..."
-                value={address}
-                onChange={(e: any) => setAddress(e.target.value)}
-              />
-            </Form.Group>
+            <NextGenAdminTextFormGroup
+              title="Admin Address"
+              value={address}
+              setValue={setAddress}
+            />
             {props.type === ADMIN_TYPE.FUNCTION && (
               <Form.Group className="mb-3">
                 <Form.Label>Function Selector</Form.Label>

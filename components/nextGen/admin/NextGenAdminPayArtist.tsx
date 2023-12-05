@@ -8,13 +8,14 @@ import {
   useCollectionIndex,
   useCollectionAdmin,
   getCollectionIdsForAddress,
-  getMinterUseContractWrite,
+  useMinterContractWrite,
 } from "../nextgen_helpers";
 import NextGenContractWriteStatus from "../NextGenContractWriteStatus";
 import { printAdminErrors } from "./NextGenAdmin";
 import {
   NextGenCollectionIdFormGroup,
   NextGenAdminHeadingRow,
+  NextGenAdminTextFormGroup,
 } from "./NextGenAdminShared";
 
 interface Props {
@@ -52,7 +53,7 @@ export default function NextGenAdminPayArtist(props: Readonly<Props>) {
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
-  const contractWrite = getMinterUseContractWrite("payArtist", () => {
+  const contractWrite = useMinterContractWrite("payArtist", () => {
     setSubmitting(false);
     setLoading(false);
   });
@@ -114,42 +115,26 @@ export default function NextGenAdminPayArtist(props: Readonly<Props>) {
                 setCollectionID(id);
               }}
             />
-            <Form.Group className="mb-3">
-              <Form.Label>Address 1</Form.Label>
-              <Form.Control
-                type="text"
-                placeholder="0x..."
-                value={address1}
-                onChange={(e: any) => setAddress1(e.target.value)}
-              />
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>Percentage for Address 1</Form.Label>
-              <Form.Control
-                type="text"
-                placeholder="%"
-                value={percentage1}
-                onChange={(e: any) => setPercentage1(e.target.value)}
-              />
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>Address 2</Form.Label>
-              <Form.Control
-                type="text"
-                placeholder="0x..."
-                value={address2}
-                onChange={(e: any) => setAddress2(e.target.value)}
-              />
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>Percentage for Address 2</Form.Label>
-              <Form.Control
-                type="text"
-                placeholder="%"
-                value={percentage2}
-                onChange={(e: any) => setPercentage2(e.target.value)}
-              />
-            </Form.Group>
+            <NextGenAdminTextFormGroup
+              title="Artist Address"
+              value={address1}
+              setValue={setAddress1}
+            />
+            <NextGenAdminTextFormGroup
+              title="Percentage for Address 1"
+              value={percentage1}
+              setValue={setPercentage1}
+            />
+            <NextGenAdminTextFormGroup
+              title="Artist Address"
+              value={address2}
+              setValue={setAddress2}
+            />
+            <NextGenAdminTextFormGroup
+              title="Percentage for Address 2"
+              value={percentage2}
+              setValue={setPercentage2}
+            />
             {!loading && errors.length > 0 && printAdminErrors(errors)}
             <Button
               className={`mt-3 mb-3 seize-btn`}

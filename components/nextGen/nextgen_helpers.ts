@@ -125,7 +125,7 @@ export function getCollectionIdsForAddress(
   return collectionIndexArray;
 }
 
-export function retrieveCollectionPhases(
+export function useCollectionPhases(
   collection: number | string,
   callback: (data: any) => void,
   watch: boolean = false
@@ -146,7 +146,16 @@ export function retrieveCollectionPhases(
   });
 }
 
-export function retrieveCollectionAdditionalData(
+export function useCollectionPhasesHook(
+  collection: number,
+  setPhaseTimes: (data: PhaseTimes) => void
+) {
+  useCollectionPhases(collection, (data: PhaseTimes) => {
+    setPhaseTimes(data);
+  });
+}
+
+export function useCollectionAdditionalData(
   collection: number | string,
   callback: (data: any) => void,
   watch: boolean = false
@@ -175,7 +184,21 @@ export function retrieveCollectionAdditionalData(
   });
 }
 
-export function retrieveCollectionInfo(
+export function useCollectionAdditionalHook(
+  collection: number,
+  setData: (data: AdditionalData) => void,
+  watch: boolean = false
+) {
+  useCollectionAdditionalData(
+    collection,
+    (data: AdditionalData) => {
+      setData(data);
+    },
+    watch
+  );
+}
+
+export function useCollectionInfo(
   collection: number | string,
   callback: (data: any) => void,
   watch: boolean = false
@@ -206,7 +229,21 @@ export function retrieveCollectionInfo(
   });
 }
 
-export function retrieveCollectionLibraryAndScript(
+export function useCollectionInfoHook(
+  collection: number,
+  setData: (data: Info) => void,
+  watch: boolean = false
+) {
+  useCollectionInfo(
+    collection,
+    (data: Info) => {
+      setData(data);
+    },
+    watch
+  );
+}
+
+export function useCollectionLibraryAndScript(
   collection: number | string,
   callback: (data: any) => void,
   watch: boolean = false
@@ -231,7 +268,7 @@ export function retrieveCollectionLibraryAndScript(
   });
 }
 
-export function retrieveCollectionCosts(
+export function useCollectionCosts(
   collection: number | string,
   callback: (data: any) => void,
   watch: boolean = false
@@ -259,6 +296,20 @@ export function retrieveCollectionCosts(
       }
     },
   });
+}
+
+export function useCollectionCostsHook(
+  collection: number,
+  setData: (data: MintingDetails) => void,
+  watch: boolean = false
+) {
+  useCollectionCosts(
+    collection,
+    (data: MintingDetails) => {
+      setData(data);
+    },
+    watch
+  );
 }
 
 export const getPhaseDateDisplay = (numberDate: number) => {
@@ -361,7 +412,7 @@ export function extractPhases(d: any[]) {
   return phases;
 }
 
-export function retrieveTokensIndex(
+export function useTokensIndex(
   type: "min" | "max",
   collection: number | string,
   callback: (data: any) => void
@@ -381,28 +432,28 @@ export function retrieveTokensIndex(
   });
 }
 
-export function getCoreUseContractWrite(
+export function useCoreContractWrite(
   functionName: string,
   onError: () => void
 ) {
-  return getUseContractWrite(NEXTGEN_CORE, functionName, onError);
+  return useContractWriteForFunction(NEXTGEN_CORE, functionName, onError);
 }
 
-export function getMinterUseContractWrite(
+export function useMinterContractWrite(
   functionName: string,
   onError: () => void
 ) {
-  return getUseContractWrite(NEXTGEN_MINTER, functionName, onError);
+  return useContractWriteForFunction(NEXTGEN_MINTER, functionName, onError);
 }
 
-export function getAdminUseContractWrite(
+export function useAdminContractWrite(
   functionName: string,
   onError: () => void
 ) {
-  return getUseContractWrite(NEXTGEN_ADMIN, functionName, onError);
+  return useContractWriteForFunction(NEXTGEN_ADMIN, functionName, onError);
 }
 
-function getUseContractWrite(
+function useContractWriteForFunction(
   contract: { contract: string; abi: any },
   functionName: string,
   onError: () => void

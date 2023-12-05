@@ -10,8 +10,8 @@ import {
   useCollectionIndex,
   useCollectionAdmin,
   getCollectionIdsForAddress,
-  retrieveCollectionPhases,
-  getMinterUseContractWrite,
+  useCollectionPhases,
+  useMinterContractWrite,
 } from "../nextgen_helpers";
 import NextGenContractWriteStatus from "../NextGenContractWriteStatus";
 import { PhaseTimes } from "../nextgen_entities";
@@ -76,7 +76,7 @@ export default function NextGenAdminSetPhases(props: Readonly<Props>) {
   const [uploadSuccess, setUploadSuccess] = useState(false);
   const [uploadError, setUploadError] = useState<string>();
 
-  retrieveCollectionPhases(collectionID, (data: PhaseTimes) => {
+  useCollectionPhases(collectionID, (data: PhaseTimes) => {
     if (collectionID) {
       if (MARKLE_ZERO_PATTERN.test(data.merkle_root)) {
         setOnChainMerkleRoot("");
@@ -107,7 +107,7 @@ export default function NextGenAdminSetPhases(props: Readonly<Props>) {
     contractWrite.reset();
   }
 
-  const contractWrite = getMinterUseContractWrite("setCollectionPhases", () => {
+  const contractWrite = useMinterContractWrite("setCollectionPhases", () => {
     setSubmitting(false);
     setLoading(false);
   });

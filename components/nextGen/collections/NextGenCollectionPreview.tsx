@@ -1,13 +1,13 @@
 import styles from "./NextGen.module.scss";
 import { Container, Row, Col } from "react-bootstrap";
-import { AdditionalData, Info, PhaseTimes } from "../nextgen_entities";
+import { PhaseTimes } from "../nextgen_entities";
 import NextGenTokenPreview from "./NextGenTokenPreview";
 import {
-  retrieveCollectionAdditionalData,
-  retrieveCollectionInfo,
-  retrieveCollectionPhases,
-  retrieveTokensIndex,
+  useTokensIndex,
   useSharedState,
+  useCollectionPhasesHook,
+  useCollectionAdditionalHook,
+  useCollectionInfoHook,
 } from "../nextgen_helpers";
 
 interface Props {
@@ -25,21 +25,13 @@ export default function NextGenCollectionPreview(props: Readonly<Props>) {
     setSampleToken,
   } = useSharedState();
 
-  retrieveTokensIndex("min", props.collection, (data: number) => {
+  useTokensIndex("min", props.collection, (data: number) => {
     setSampleToken(data);
   });
 
-  retrieveCollectionInfo(props.collection, (data: Info) => {
-    setInfo(data);
-  });
-
-  retrieveCollectionAdditionalData(props.collection, (data: AdditionalData) => {
-    setAdditionalData(data);
-  });
-
-  retrieveCollectionPhases(props.collection, (data: PhaseTimes) => {
-    props.setPhaseTimes(data);
-  });
+  useCollectionPhasesHook(props.collection, props.setPhaseTimes);
+  useCollectionAdditionalHook(props.collection, setAdditionalData);
+  useCollectionInfoHook(props.collection, setInfo);
 
   if (!additionalData || additionalData.total_supply == 0) {
     return <></>;

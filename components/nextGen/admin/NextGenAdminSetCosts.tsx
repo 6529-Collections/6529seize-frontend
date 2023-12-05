@@ -8,8 +8,8 @@ import {
   useCollectionIndex,
   useCollectionAdmin,
   getCollectionIdsForAddress,
-  retrieveCollectionCosts,
-  getMinterUseContractWrite,
+  useCollectionCosts,
+  useMinterContractWrite,
 } from "../nextgen_helpers";
 import NextGenContractWriteStatus from "../NextGenContractWriteStatus";
 import { ANY_COLLECTION } from "../../../pages/delegation/[...section]";
@@ -59,7 +59,7 @@ export default function NextGenAdminSetCosts(props: Readonly<Props>) {
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
-  retrieveCollectionCosts(collectionID, (data: MintingDetails) => {
+  useCollectionCosts(collectionID, (data: MintingDetails) => {
     if (collectionID) {
       setCollectionStartCost(data.mint_cost.toString());
       setCollectionEndCost(data.end_mint_cost.toString());
@@ -70,7 +70,7 @@ export default function NextGenAdminSetCosts(props: Readonly<Props>) {
     }
   });
 
-  const contractWrite = getMinterUseContractWrite("setCollectionCosts", () => {
+  const contractWrite = useMinterContractWrite("setCollectionCosts", () => {
     setSubmitting(false);
     setLoading(false);
   });

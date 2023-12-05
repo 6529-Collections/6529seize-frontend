@@ -4,14 +4,13 @@ import {
   AdditionalData,
   Info,
   LibraryScript,
-  MintingDetails,
   PhaseTimes,
 } from "../../nextgen_entities";
 import { addProtocol, fromGWEI } from "../../../../helpers/Helpers";
 import { useState } from "react";
 import {
-  retrieveCollectionCosts,
-  retrieveCollectionLibraryAndScript,
+  useCollectionCostsHook,
+  useCollectionLibraryAndScript,
   useSharedState,
 } from "../../nextgen_helpers";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -34,8 +33,9 @@ export default function NextGenCollectionDetails(props: Readonly<Props>) {
     useSharedState();
 
   const [scriptClamped, setScriptClamped] = useState<boolean>(true);
-
   const [isCopied, setIsCopied] = useState<boolean>(false);
+
+  useCollectionCostsHook(props.collection, setMintingDetails);
 
   function copy(text: any) {
     navigator.clipboard.writeText(text);
@@ -54,23 +54,15 @@ export default function NextGenCollectionDetails(props: Readonly<Props>) {
           if (e.key === "Enter" || e.key === " ") {
             setScriptClamped(!scriptClamped);
           }
-        }}
-        tabIndex={0}>
+        }}>
         {scriptClamped ? `Show More` : `Show Less`}
       </span>
     );
   }
 
-  retrieveCollectionCosts(props.collection, (data: MintingDetails) => {
-    setMintingDetails(data);
+  useCollectionLibraryAndScript(props.collection, (data: LibraryScript) => {
+    setLibraryScript(data);
   });
-
-  retrieveCollectionLibraryAndScript(
-    props.collection,
-    (data: LibraryScript) => {
-      setLibraryScript(data);
-    }
-  );
 
   return (
     <Container className="no-padding">

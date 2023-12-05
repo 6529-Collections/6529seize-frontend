@@ -10,12 +10,16 @@ import {
   useCollectionIndex,
   useCollectionAdmin,
   getCollectionIdsForAddress,
-  getMinterUseContractWrite,
+  useMinterContractWrite,
 } from "../nextgen_helpers";
 import NextGenContractWriteStatus from "../NextGenContractWriteStatus";
 import { postData } from "../../../services/6529api";
 import { printAdminErrors } from "./NextGenAdmin";
-import { NextGenAdminHeadingRow } from "./NextGenAdminShared";
+import {
+  NextGenAdminStatusFormGroup,
+  NextGenAdminTextFormGroup,
+  NextGenAdminHeadingRow,
+} from "./NextGenAdminShared";
 
 interface Props {
   close: () => void;
@@ -60,7 +64,7 @@ export default function NextGenAdminInitializeExternalBurnSwap(
 
   const [uploadError, setUploadError] = useState<string>();
 
-  const contractWrite = getMinterUseContractWrite(
+  const contractWrite = useMinterContractWrite(
     "initializeExternalBurnOrSwap",
     () => {
       setSubmitting(false);
@@ -191,24 +195,16 @@ export default function NextGenAdminInitializeExternalBurnSwap(
       <Row className="pt-3">
         <Col>
           <Form>
-            <Form.Group className="mb-3">
-              <Form.Label>ERC721 Collection</Form.Label>
-              <Form.Control
-                type="text"
-                placeholder="0x..."
-                value={erc721Collection}
-                onChange={(e: any) => setErc721Collection(e.target.value)}
-              />
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>Burn Collection ID</Form.Label>
-              <Form.Control
-                type="text"
-                placeholder="0x..."
-                value={burnCollectionID}
-                onChange={(e: any) => setBurnCollectionID(e.target.value)}
-              />
-            </Form.Group>
+            <NextGenAdminTextFormGroup
+              title="ERC721 Collection"
+              value={erc721Collection}
+              setValue={setErc721Collection}
+            />
+            <NextGenAdminTextFormGroup
+              title="Burn Collection ID"
+              value={burnCollectionID}
+              setValue={setBurnCollectionID}
+            />
             <Form.Group className="mb-3">
               <Form.Label>Mint Collection ID</Form.Label>
               <Form.Select
@@ -228,56 +224,26 @@ export default function NextGenAdminInitializeExternalBurnSwap(
                 ))}
               </Form.Select>
             </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>Min Token Index</Form.Label>
-              <Form.Control
-                type="text"
-                placeholder="...min"
-                value={tokenMin}
-                onChange={(e: any) => setTokenMin(e.target.value)}
-              />
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>Max Token Index</Form.Label>
-              <Form.Control
-                type="text"
-                placeholder="...max"
-                value={tokenMax}
-                onChange={(e: any) => setTokenMax(e.target.value)}
-              />
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>Burn/Swap Address</Form.Label>
-              <Form.Control
-                type="text"
-                placeholder="0x..."
-                value={burnSwapAddress}
-                onChange={(e: any) => setBurnSwapAddress(e.target.value)}
-              />
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>Burn Status</Form.Label>
-              <span className="d-flex align-items-center gap-3">
-                <Form.Check
-                  checked={status}
-                  type="radio"
-                  label="Active"
-                  name="statusRadio"
-                  onChange={() => {
-                    setStatus(true);
-                  }}
-                />
-                <Form.Check
-                  checked={status === false}
-                  type="radio"
-                  label="Inactive"
-                  name="statusRadio"
-                  onChange={() => {
-                    setStatus(false);
-                  }}
-                />
-              </span>
-            </Form.Group>
+            <NextGenAdminTextFormGroup
+              title="Min Token Index"
+              value={tokenMin}
+              setValue={setTokenMin}
+            />
+            <NextGenAdminTextFormGroup
+              title="Max Token Index"
+              value={tokenMax}
+              setValue={setTokenMax}
+            />
+            <NextGenAdminTextFormGroup
+              title="Burn/Swap Address"
+              value={burnSwapAddress}
+              setValue={setBurnSwapAddress}
+            />
+            <NextGenAdminStatusFormGroup
+              title="Burn Status"
+              status={status}
+              setStatus={setStatus}
+            />
             {!loading && errors.length > 0 && printAdminErrors(errors)}
             <Form.Group className="mb-3 d-flex gap-3">
               <Button

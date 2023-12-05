@@ -1,7 +1,7 @@
 import { Container, Row, Col } from "react-bootstrap";
 import { useContractRead } from "wagmi";
 import { useEffect } from "react";
-import { Info, AdditionalData, PhaseTimes } from "../../nextgen_entities";
+import { Info } from "../../nextgen_entities";
 import Image from "next/image";
 import {
   NEXTGEN_CHAIN_ID,
@@ -12,11 +12,11 @@ import Breadcrumb, { Crumb } from "../../../breadcrumb/Breadcrumb";
 import NextGenCollectionHeader from "./NextGenCollectionHeader";
 import NextGenCollectionArt from "./NextGenCollectionArt";
 import {
-  retrieveCollectionAdditionalData,
-  retrieveCollectionInfo,
-  retrieveCollectionPhases,
-  retrieveTokensIndex,
+  useCollectionInfo,
+  useTokensIndex,
   useSharedState,
+  useCollectionAdditionalHook,
+  useCollectionPhasesHook,
 } from "../../nextgen_helpers";
 import NextGenCollectionDetails from "./NextGenCollectionDetails";
 import NextGenCollectionSlideshow from "./NextGenCollectionSlideshow";
@@ -78,7 +78,7 @@ export default function NextGenCollection(props: Readonly<Props>) {
     return params;
   }
 
-  const startIndexRead = retrieveTokensIndex(
+  const startIndexRead = useTokensIndex(
     "min",
     props.collection,
     (data: number) => {
@@ -98,7 +98,7 @@ export default function NextGenCollection(props: Readonly<Props>) {
     }
   }, [tokenStartIndex, additionalData]);
 
-  const endIndexRead = retrieveTokensIndex(
+  const endIndexRead = useTokensIndex(
     "max",
     props.collection,
     (data: number) => {
@@ -106,7 +106,7 @@ export default function NextGenCollection(props: Readonly<Props>) {
     }
   );
 
-  retrieveCollectionInfo(props.collection, (data: Info) => {
+  useCollectionInfo(props.collection, (data: Info) => {
     setInfo(data);
     const nameCrumb = data.name
       ? `#${props.collection} - ${data.name}`
@@ -129,17 +129,8 @@ export default function NextGenCollection(props: Readonly<Props>) {
     },
   });
 
-  retrieveCollectionPhases(props.collection, (data: PhaseTimes) => {
-    setPhaseTimes(data);
-  });
-
-  retrieveCollectionAdditionalData(
-    props.collection,
-    (data: AdditionalData) => {
-      setAdditionalData(data);
-    },
-    true
-  );
+  useCollectionPhasesHook(props.collection, setPhaseTimes);
+  useCollectionAdditionalHook(props.collection, setAdditionalData, true);
 
   useContractRead({
     address: NEXTGEN_CORE.contract as `0x${string}`,

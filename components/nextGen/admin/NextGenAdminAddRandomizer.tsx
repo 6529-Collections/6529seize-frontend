@@ -9,14 +9,15 @@ import {
   useCollectionIndex,
   useCollectionAdmin,
   getCollectionIdsForAddress,
-  retrieveCollectionAdditionalData,
-  getCoreUseContractWrite,
+  useCollectionAdditionalData,
+  useCoreContractWrite,
 } from "../nextgen_helpers";
 import { AdditionalData } from "../nextgen_entities";
 import { printAdminErrors } from "./NextGenAdmin";
 import {
   NextGenCollectionIdFormGroup,
   NextGenAdminHeadingRow,
+  NextGenAdminTextFormGroup,
 } from "./NextGenAdminShared";
 
 interface Props {
@@ -51,13 +52,13 @@ export default function NextGenAdminUpdateRandomizer(props: Readonly<Props>) {
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
-  retrieveCollectionAdditionalData(collectionID, (data: AdditionalData) => {
+  useCollectionAdditionalData(collectionID, (data: AdditionalData) => {
     if (collectionID) {
       setRandomizerContract(data.randomizer);
     }
   });
 
-  const contractWrite = getCoreUseContractWrite("addRandomizer", () => {
+  const contractWrite = useCoreContractWrite("addRandomizer", () => {
     setSubmitting(false);
     setLoading(false);
   });
@@ -109,15 +110,11 @@ export default function NextGenAdminUpdateRandomizer(props: Readonly<Props>) {
                 setCollectionID(id);
               }}
             />
-            <Form.Group className="mb-3">
-              <Form.Label>Randomizer</Form.Label>
-              <Form.Control
-                type="text"
-                placeholder="0x..."
-                value={randomizerContract}
-                onChange={(e: any) => setRandomizerContract(e.target.value)}
-              />
-            </Form.Group>
+            <NextGenAdminTextFormGroup
+              title="Randomizer Contract"
+              value={randomizerContract}
+              setValue={setRandomizerContract}
+            />
             {!loading && errors.length > 0 && printAdminErrors(errors)}
             <Button
               className={`mt-3 mb-3 seize-btn`}

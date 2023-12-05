@@ -7,13 +7,14 @@ import {
   useFunctionAdmin,
   useCollectionIndex,
   getCollectionIdsForAddress,
-  getMinterUseContractWrite,
+  useMinterContractWrite,
 } from "../nextgen_helpers";
 import NextGenContractWriteStatus from "../NextGenContractWriteStatus";
 import { printAdminErrors } from "./NextGenAdmin";
 import {
   NextGenCollectionIdFormGroup,
   NextGenAdminHeadingRow,
+  NextGenAdminTextFormGroup,
 } from "./NextGenAdminShared";
 
 export enum ProposalType {
@@ -80,7 +81,7 @@ export default function NextGenAdminProposeAddressesAndPercentages(
     }
   }
 
-  const contractWrite = getMinterUseContractWrite(getFunctionName(), () => {
+  const contractWrite = useMinterContractWrite(getFunctionName(), () => {
     setSubmitting(false);
     setLoading(false);
   });
@@ -158,60 +159,36 @@ export default function NextGenAdminProposeAddressesAndPercentages(
                 setCollectionID(id);
               }}
             />
-            <Form.Group className="mb-3">
-              <Form.Label>{props.type} Address 1</Form.Label>
-              <Form.Control
-                type="text"
-                placeholder="0x..."
-                value={address1}
-                onChange={(e: any) => setAddress1(e.target.value)}
-              />
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>{props.type} Address 2</Form.Label>
-              <Form.Control
-                type="text"
-                placeholder="0x..."
-                value={address2}
-                onChange={(e: any) => setAddress2(e.target.value)}
-              />
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>{props.type} Address 3</Form.Label>
-              <Form.Control
-                type="text"
-                placeholder="0x..."
-                value={address3}
-                onChange={(e: any) => setAddress3(e.target.value)}
-              />
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>{props.type} Percentage 1</Form.Label>
-              <Form.Control
-                type="text"
-                placeholder="...percentage"
-                value={percentage1}
-                onChange={(e: any) => setPercentage1(e.target.value)}
-              />
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>{props.type} Percentage 2</Form.Label>
-              <Form.Control
-                type="text"
-                placeholder="...percentage"
-                value={percentage2}
-                onChange={(e: any) => setPercentage2(e.target.value)}
-              />
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>{props.type} Percentage 3</Form.Label>
-              <Form.Control
-                type="text"
-                placeholder="...percentage"
-                value={percentage3}
-                onChange={(e: any) => setPercentage3(e.target.value)}
-              />
-            </Form.Group>
+            <NextGenAdminTextFormGroup
+              title={`${props.type} Address 1`}
+              value={address1}
+              setValue={setAddress1}
+            />
+            <NextGenAdminTextFormGroup
+              title={`${props.type} Address 2`}
+              value={address2}
+              setValue={setAddress2}
+            />
+            <NextGenAdminTextFormGroup
+              title={`${props.type} Address 3`}
+              value={address3}
+              setValue={setAddress3}
+            />
+            <NextGenAdminTextFormGroup
+              title={`${props.type} Percentage 1`}
+              value={percentage1}
+              setValue={setPercentage1}
+            />
+            <NextGenAdminTextFormGroup
+              title={`${props.type} Percentage 2`}
+              value={percentage2}
+              setValue={setPercentage2}
+            />
+            <NextGenAdminTextFormGroup
+              title={`${props.type} Percentage 3`}
+              value={percentage3}
+              setValue={setPercentage3}
+            />
             {!loading && errors.length > 0 && printAdminErrors(errors)}
             <Button
               className={`mt-3 mb-3 seize-btn`}

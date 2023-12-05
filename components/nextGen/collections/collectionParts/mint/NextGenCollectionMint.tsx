@@ -1,13 +1,13 @@
 import { Col, Container, Row } from "react-bootstrap";
 import NextGenMint from "./NextGenMint";
 import { useEffect } from "react";
-import { PhaseTimes, AdditionalData, Info } from "../../../nextgen_entities";
+import { Info } from "../../../nextgen_entities";
 import {
-  retrieveCollectionPhases,
-  retrieveCollectionAdditionalData,
-  retrieveCollectionInfo,
-  retrieveTokensIndex,
+  useCollectionInfo,
+  useTokensIndex,
   useSharedState,
+  useCollectionPhasesHook,
+  useCollectionAdditionalHook,
 } from "../../../nextgen_helpers";
 import { useContractRead } from "wagmi";
 import {
@@ -64,7 +64,7 @@ export default function NextGenCollectionMint(props: Readonly<Props>) {
     },
   });
 
-  retrieveCollectionInfo(props.collection, (data: Info) => {
+  useCollectionInfo(props.collection, (data: Info) => {
     setInfo(data);
     const nameCrumb = data.name
       ? `#${props.collection} - ${data.name}`
@@ -77,19 +77,10 @@ export default function NextGenCollectionMint(props: Readonly<Props>) {
     setInfoSettled(true);
   });
 
-  retrieveCollectionPhases(props.collection, (data: PhaseTimes) => {
-    setPhaseTimes(data);
-  });
+  useCollectionPhasesHook(props.collection, setPhaseTimes);
+  useCollectionAdditionalHook(props.collection, setAdditionalData, true);
 
-  retrieveCollectionAdditionalData(
-    props.collection,
-    (data: AdditionalData) => {
-      setAdditionalData(data);
-    },
-    true
-  );
-
-  retrieveTokensIndex("min", props.collection, (data: number) => {
+  useTokensIndex("min", props.collection, (data: number) => {
     setTokenStartIndex(data);
   });
 
