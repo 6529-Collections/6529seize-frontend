@@ -223,7 +223,7 @@ export default function Royalties() {
                               GasRoyaltiesCollectionFocus.MEMES &&
                             isPrimary &&
                             MEMES_SOLD_MANUALLY.includes(r.token_id)
-                              ? "Card sold manually"
+                              ? "Figures not easily calculable as card was sold manually"
                               : undefined
                           }
                         />
@@ -238,7 +238,7 @@ export default function Royalties() {
                       {!isPrimary && (
                         <td className="text-center">
                           {r.proceeds > 0
-                            ? ((r.proceeds / r.volume) * 100).toFixed(2)
+                            ? `${((r.proceeds / r.volume) * 100).toFixed(2)}%`
                             : `-`}
                         </td>
                       )}
