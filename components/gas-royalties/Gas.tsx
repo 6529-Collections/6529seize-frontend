@@ -4,7 +4,6 @@ import styles from "./GasRoyalties.module.scss";
 import { Gas } from "../../entities/IGas";
 import { fetchUrl } from "../../services/6529api";
 import { displayDecimal } from "../../helpers/Helpers";
-import { DateIntervalsSelection } from "../../enums";
 import {
   GasRoyaltiesCollectionFocus,
   GasRoyaltiesHeader,
@@ -37,9 +36,7 @@ export default function Gas() {
     dateSelection,
     setDateSelection,
     fromDate,
-    setFromDate,
     toDate,
-    setToDate,
     isPrimary,
     setIsPrimary,
     isCustomBlocks,
@@ -52,9 +49,7 @@ export default function Gas() {
     getUrl,
     getSharedProps,
     fromBlock,
-    setFromBlock,
     toBlock,
-    setToBlock,
   } = useSharedState();
 
   function getUrlWithParams() {
