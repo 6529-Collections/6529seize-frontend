@@ -1,38 +1,42 @@
 import { Button, Col, Container, Form, Modal, Row } from "react-bootstrap";
-import styles from "./DatePickerModal.module.scss";
+import styles from "./BlockPickerModal.module.scss";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useEffect, useState } from "react";
 
 interface Props {
   show: boolean;
-  initial_from: Date | undefined;
-  initial_to: Date | undefined;
-  onApply: (fromDate: Date | undefined, toDate: Date | undefined) => void;
+  initial_from: number | undefined;
+  initial_to: number | undefined;
+  onApply: (fromBlock: number | undefined, toBlock: number | undefined) => void;
   onHide: () => void;
 }
 
-export default function DatePickerModal(props: Readonly<Props>) {
-  const [fromDate, setFromDate] = useState<Date>();
-  const [toDate, setToDate] = useState<Date>();
+export default function BlockPickerModal(props: Readonly<Props>) {
+  const [fromBlock, setFromBlock] = useState("");
+  const [toBlock, setToBlock] = useState("");
 
   const [error, setError] = useState<string>();
 
   useEffect(() => {
-    if (props.initial_from) setFromDate(props.initial_from);
+    if (props.initial_from) setFromBlock(props.initial_from.toString());
   }, [props.initial_from]);
 
   useEffect(() => {
-    if (props.initial_to) setToDate(props.initial_to);
+    if (props.initial_to) setToBlock(props.initial_to.toString());
   }, [props.initial_to]);
 
   function apply() {
-    if (fromDate && toDate) {
-      if (fromDate > toDate) {
-        setError("The start date must be before the end date.");
-        return;
-      }
+    const fromBlockInt = parseInt(fromBlock);
+    const toBlockInt = parseInt(toBlock);
+    if (isNaN(fromBlockInt) || isNaN(toBlockInt)) {
+      setError("Please enter a valid start and end block.");
+      return;
     }
-    props.onApply(fromDate, toDate);
+    if (fromBlockInt > toBlockInt) {
+      setError("The start block must be before the end block.");
+      return;
+    }
+    props.onApply(fromBlockInt, toBlockInt);
     props.onHide();
   }
 
@@ -53,37 +57,35 @@ export default function DatePickerModal(props: Readonly<Props>) {
             <Col>
               <Form>
                 <Form.Group className="mb-3">
-                  <Form.Label>Start Date</Form.Label>
+                  <Form.Label>Start Block</Form.Label>
                   <Form.Control
-                    value={fromDate?.toISOString().slice(0, 10)}
-                    max={new Date().toISOString().slice(0, 10)}
+                    value={fromBlock}
                     className={`${styles.formInput}`}
-                    type="date"
-                    placeholder="Start Date"
+                    type="number"
+                    placeholder="Start Block"
                     onChange={(e) => {
-                      const value = e.target.value;
-                      if (value) {
-                        setFromDate(new Date(value));
+                      const value = parseInt(e.target.value);
+                      if (isNaN(value)) {
+                        setFromBlock("");
                       } else {
-                        setFromDate(undefined);
+                        setFromBlock(value.toString());
                       }
                     }}
                   />
                 </Form.Group>
                 <Form.Group className="mb-3">
-                  <Form.Label>End Date</Form.Label>
+                  <Form.Label>End Blocks</Form.Label>
                   <Form.Control
-                    value={toDate?.toISOString().slice(0, 10)}
-                    max={new Date().toISOString().slice(0, 10)}
+                    value={toBlock}
                     className={`${styles.formInput}`}
-                    type="date"
-                    placeholder="End Date"
+                    type="number"
+                    placeholder="End Block"
                     onChange={(e) => {
-                      const value = e.target.value;
-                      if (value) {
-                        setToDate(new Date(value));
+                      const value = parseInt(e.target.value);
+                      if (isNaN(value)) {
+                        setToBlock("");
                       } else {
-                        setToDate(undefined);
+                        setToBlock(value.toString());
                       }
                     }}
                   />

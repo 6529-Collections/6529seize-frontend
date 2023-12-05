@@ -5,7 +5,7 @@ import { Royalty } from "../../entities/IRoyalty";
 import { fetchUrl } from "../../services/6529api";
 import { displayDecimal } from "../../helpers/Helpers";
 import DatePickerModal from "../datePickerModal/DatePickerModal";
-import { DateIntervalsSelection } from "../../enums";
+import { DateIntervalsWithBlocksSelection } from "../../enums";
 import {
   GasRoyaltiesCollectionFocus,
   GasRoyaltiesHeader,
@@ -15,6 +15,7 @@ import {
 import { useRouter } from "next/router";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Tippy from "@tippyjs/react";
+import BlockPickerModal from "../blockPickerModal/BlockPickerModal";
 
 const MEMES_DESCRIPTION =
   "Primary mint revenues and secondary royalties in The Memes are split 50:50 between the artist and the collection. Cards #1 to #4 were sold manually. 6529 and 6529er have custom arrangements not reflected here for simplicity. All values are in ETH.";
@@ -49,6 +50,12 @@ export default function Royalties() {
     setFetching,
     getUrl,
     getSharedProps,
+    showBlockPicker,
+    setShowBlockPicker,
+    fromBlock,
+    setFromBlock,
+    toBlock,
+    setToBlock,
   } = useSharedState();
 
   useEffect(() => {
@@ -92,7 +99,15 @@ export default function Royalties() {
     if (collectionFocus) {
       fetchRoyalties();
     }
-  }, [dateSelection, fromDate, toDate, selectedArtist, isPrimary]);
+  }, [
+    dateSelection,
+    fromDate,
+    toDate,
+    fromBlock,
+    toBlock,
+    selectedArtist,
+    isPrimary,
+  ]);
 
   useEffect(() => {
     if (collectionFocus) {
@@ -215,10 +230,10 @@ export default function Royalties() {
                       </td>
                       <td>{r.artist}</td>
                       <td className="text-center">
-                        {displayDecimal(r.volume, 5)}
+                        {displayDecimal(r.volume, 2)}
                       </td>
                       <td className="text-center">
-                        {displayDecimal(r.proceeds, 5)}
+                        {displayDecimal(r.proceeds, 2)}
                       </td>
                       {!isPrimary && (
                         <td className="text-center">
@@ -230,7 +245,7 @@ export default function Royalties() {
                       <td>
                         <div className="d-flex justify-content-center">
                           <span className="d-flex align-items-center gap-1">
-                            {displayDecimal(r.artist_take, 5)}
+                            {displayDecimal(r.artist_take, 2)}
                             {collectionFocus ===
                               GasRoyaltiesCollectionFocus.MEMELAB &&
                               r.artist_split > 0 && (
@@ -249,10 +264,10 @@ export default function Royalties() {
                       <b>TOTAL</b>
                     </td>
                     <td className="text-center">
-                      {displayDecimal(sumVolume, 5)}
+                      {displayDecimal(sumVolume, 2)}
                     </td>
                     <td className="text-center">
-                      {displayDecimal(sumProceeds, 5)}
+                      {displayDecimal(sumProceeds, 2)}
                     </td>
                     {!isPrimary && (
                       <td className="text-center">
@@ -262,7 +277,7 @@ export default function Royalties() {
                       </td>
                     )}
                     <td className="text-center">
-                      {displayDecimal(sumArtistTake, 5)}
+                      {displayDecimal(sumArtistTake, 2)}
                       {collectionFocus ===
                         GasRoyaltiesCollectionFocus.MEMELAB &&
                         sumArtistTake > 0 &&
@@ -294,11 +309,28 @@ export default function Royalties() {
           initial_from={fromDate}
           initial_to={toDate}
           onApply={(fromDate, toDate) => {
+            setIsPrimary(false);
             setFromDate(fromDate);
             setToDate(toDate);
-            setDateSelection(DateIntervalsSelection.CUSTOM);
+            setDateSelection(
+              DateIntervalsWithBlocksSelection.CUSTOM_DATES as keyof typeof DateIntervalsWithBlocksSelection
+            );
           }}
           onHide={() => setShowDatePicker(false)}
+        />
+        <BlockPickerModal
+          show={showBlockPicker}
+          initial_from={fromBlock}
+          initial_to={toBlock}
+          onApply={(fromBlock, toBlock) => {
+            setIsPrimary(false);
+            setFromBlock(fromBlock);
+            setToBlock(toBlock);
+            setDateSelection(
+              DateIntervalsWithBlocksSelection.CUSTOM_BLOCKS as keyof typeof DateIntervalsWithBlocksSelection
+            );
+          }}
+          onHide={() => setShowBlockPicker(false)}
         />
       </Container>
     </>

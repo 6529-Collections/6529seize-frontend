@@ -12,5 +12,15 @@ export enum DateIntervalsSelection {
   YEAR_TO_DATE = "Year to Date",
   LAST_YEAR = "Last Year",
   ALL = "All",
-  CUSTOM = "Custom",
+  CUSTOM_DATES = "Custom Dates",
 }
+
+export type DateIntervalsWithBlocksSelectionType = {
+  [key in keyof typeof DateIntervalsSelection | "CUSTOM_BLOCKS"]: string;
+};
+
+export const DateIntervalsWithBlocksSelection: DateIntervalsWithBlocksSelectionType =
+  {
+    ...DateIntervalsSelection,
+    CUSTOM_BLOCKS: "Custom Blocks",
+  };
