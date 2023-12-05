@@ -223,7 +223,7 @@ export default function Royalties() {
                       {!isPrimary && (
                         <td className="text-center">
                           {r.proceeds > 0
-                            ? displayDecimal((r.proceeds / r.volume) * 100, 5)
+                            ? ((r.proceeds / r.volume) * 100).toFixed(2)
                             : `-`}
                         </td>
                       )}
@@ -254,9 +254,18 @@ export default function Royalties() {
                     <td className="text-center">
                       {displayDecimal(sumProceeds, 5)}
                     </td>
+                    {!isPrimary && (
+                      <td className="text-center">
+                        {sumProceeds > 0
+                          ? ((sumProceeds / sumVolume) * 100).toFixed(2)
+                          : `-`}
+                      </td>
+                    )}
                     <td className="text-center">
                       {displayDecimal(sumArtistTake, 5)}
-                      {sumArtistTake > 0 &&
+                      {collectionFocus ===
+                        GasRoyaltiesCollectionFocus.MEMELAB &&
+                        sumArtistTake > 0 &&
                         ` (${displayDecimal(
                           (sumArtistTake * 100) / sumProceeds,
                           2
