@@ -15,7 +15,6 @@ import {
 import { useRouter } from "next/router";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Tippy from "@tippyjs/react";
-import BlockPickerModal from "../blockPickerModal/BlockPickerModal";
 
 const MEMES_DESCRIPTION =
   "Primary mint revenues and secondary royalties in The Memes are split 50:50 between the artist and the collection. Cards #1 to #4 were sold manually. 6529 and 6529er have custom arrangements not reflected here for simplicity. All values are in ETH.";
@@ -309,10 +308,11 @@ export default function Royalties() {
           </Row>
         )}
         <DatePickerModal
+          mode="date"
           show={showDatePicker}
-          initial_from={fromDate}
-          initial_to={toDate}
-          onApply={(fromDate, toDate) => {
+          initial_from_date={fromDate}
+          initial_to_date={toDate}
+          onApplyDate={(fromDate, toDate) => {
             setIsPrimary(false);
             setIsCustomBlocks(false);
             setFromDate(fromDate);
@@ -321,11 +321,12 @@ export default function Royalties() {
           }}
           onHide={() => setShowDatePicker(false)}
         />
-        <BlockPickerModal
+        <DatePickerModal
+          mode="block"
           show={showBlockPicker}
-          initial_from={fromBlock}
-          initial_to={toBlock}
-          onApply={(fromBlock, toBlock) => {
+          initial_from_block={fromBlock}
+          initial_to_block={toBlock}
+          onApplyBlock={(fromBlock, toBlock) => {
             setIsPrimary(false);
             setFromBlock(fromBlock);
             setToBlock(toBlock);

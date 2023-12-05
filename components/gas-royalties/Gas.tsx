@@ -13,7 +13,6 @@ import {
   useSharedState,
 } from "./GasRoyalties";
 import { useRouter } from "next/router";
-import BlockPickerModal from "../blockPickerModal/BlockPickerModal";
 
 export default function Gas() {
   const router = useRouter();
@@ -177,10 +176,11 @@ export default function Gas() {
           </Row>
         )}
         <DatePickerModal
+          mode="date"
           show={showDatePicker}
-          initial_from={fromDate}
-          initial_to={toDate}
-          onApply={(fromDate, toDate) => {
+          initial_from_date={fromDate}
+          initial_to_date={toDate}
+          onApplyDate={(fromDate, toDate) => {
             setIsPrimary(false);
             setIsCustomBlocks(false);
             setFromDate(fromDate);
@@ -189,11 +189,12 @@ export default function Gas() {
           }}
           onHide={() => setShowDatePicker(false)}
         />
-        <BlockPickerModal
+        <DatePickerModal
+          mode="block"
           show={showBlockPicker}
-          initial_from={fromBlock}
-          initial_to={toBlock}
-          onApply={(fromBlock, toBlock) => {
+          initial_from_block={fromBlock}
+          initial_to_block={toBlock}
+          onApplyBlock={(fromBlock, toBlock) => {
             setIsPrimary(false);
             setFromBlock(fromBlock);
             setToBlock(toBlock);

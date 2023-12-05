@@ -4,10 +4,17 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useEffect, useState } from "react";
 
 interface Props {
+  mode: "date" | "block";
   show: boolean;
-  initial_from: Date | undefined;
-  initial_to: Date | undefined;
-  onApply: (fromDate: Date | undefined, toDate: Date | undefined) => void;
+  initial_from_date?: Date | undefined;
+  initial_to_date?: Date | undefined;
+  initial_from_block?: number | undefined;
+  initial_to_block?: number | undefined;
+  onApplyDate?: (fromDate: Date | undefined, toDate: Date | undefined) => void;
+  onApplyBlock?: (
+    fromBlock: number | undefined,
+    toBlock: number | undefined
+  ) => void;
   onHide: () => void;
 }
 
@@ -15,31 +22,67 @@ export default function DatePickerModal(props: Readonly<Props>) {
   const [fromDate, setFromDate] = useState<string>("");
   const [toDate, setToDate] = useState<string>("");
 
+  const [fromBlock, setFromBlock] = useState("");
+  const [toBlock, setToBlock] = useState("");
+
   const [error, setError] = useState<string>();
 
   useEffect(() => {
-    if (props.initial_from) setFromDate(props.initial_from.toISOString());
-  }, [props.initial_from]);
+    if (props.initial_from_date)
+      setFromDate(props.initial_from_date.toISOString());
+  }, [props.initial_from_date]);
 
   useEffect(() => {
-    if (props.initial_to) setToDate(props.initial_to.toISOString());
-  }, [props.initial_to]);
+    if (props.initial_to_date) setToDate(props.initial_to_date.toISOString());
+  }, [props.initial_to_date]);
 
-  function apply() {
+  useEffect(() => {
+    if (props.initial_from_block)
+      setFromBlock(props.initial_from_block.toString());
+  }, [props.initial_from_block]);
+
+  useEffect(() => {
+    if (props.initial_to_block) setToBlock(props.initial_to_block.toString());
+  }, [props.initial_to_block]);
+
+  function applyDate() {
     if (fromDate && toDate) {
       if (fromDate > toDate) {
         setError("The start date must be before the end date.");
         return;
       }
     }
-    props.onApply(new Date(fromDate), new Date(toDate));
+    props.onApplyDate?.(new Date(fromDate), new Date(toDate));
     props.onHide();
+  }
+
+  function applyBlock() {
+    const fromBlockInt = parseInt(fromBlock);
+    const toBlockInt = parseInt(toBlock);
+    if (isNaN(fromBlockInt) || isNaN(toBlockInt)) {
+      setError("Please enter a valid start and end block.");
+      return;
+    }
+    if (fromBlockInt > toBlockInt) {
+      setError("The start block must be before the end block.");
+      return;
+    }
+    props.onApplyBlock?.(fromBlockInt, toBlockInt);
+    props.onHide();
+  }
+
+  function apply() {
+    if (props.mode === "date") {
+      applyDate();
+    } else {
+      applyBlock();
+    }
   }
 
   return (
     <Modal show={props.show} onHide={() => props.onHide()}>
       <Modal.Header className={styles.header}>
-        <Modal.Title>Select Dates</Modal.Title>
+        <Modal.Title>Select {props.mode}s</Modal.Title>
         <FontAwesomeIcon
           className={styles.modalClose}
           icon="times-circle"
@@ -53,50 +96,85 @@ export default function DatePickerModal(props: Readonly<Props>) {
             <Col>
               <Form>
                 <Form.Group className="mb-3">
-                  <Form.Label>Start Date</Form.Label>
-                  <Form.Control
-                    value={
-                      fromDate && new Date(fromDate)?.toISOString().slice(0, 10)
-                    }
-                    max={new Date().toISOString().slice(0, 10)}
-                    className={`${styles.formInput}`}
-                    type="date"
-                    placeholder="Start Date"
-                    onChange={(e) => {
-                      const value = e.target.value;
-                      if (value && value.length === 10) {
-                        const tempDate = new Date(value);
-                        if (!isNaN(tempDate.getTime())) {
-                          setFromDate(value);
-                        }
-                      } else {
-                        setFromDate("");
+                  <Form.Label>Start {props.mode}</Form.Label>
+                  {props.mode === "date" ? (
+                    <Form.Control
+                      value={
+                        fromDate &&
+                        new Date(fromDate)?.toISOString().slice(0, 10)
                       }
-                    }}
-                  />
+                      max={new Date().toISOString().slice(0, 10)}
+                      type="date"
+                      placeholder="Start Date"
+                      className={`${styles.formInput}`}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        if (value && value.length === 10) {
+                          const tempDate = new Date(value);
+                          if (!isNaN(tempDate.getTime())) {
+                            setFromDate(value);
+                          }
+                        } else {
+                          setFromDate("");
+                        }
+                      }}
+                    />
+                  ) : (
+                    <Form.Control
+                      value={fromBlock}
+                      className={`${styles.formInput}`}
+                      type="number"
+                      placeholder="Start Block"
+                      onChange={(e) => {
+                        const value = parseInt(e.target.value);
+                        if (isNaN(value)) {
+                          setFromBlock("");
+                        } else {
+                          setFromBlock(value.toString());
+                        }
+                      }}
+                    />
+                  )}
                 </Form.Group>
                 <Form.Group className="mb-3">
-                  <Form.Label>End Date</Form.Label>
-                  <Form.Control
-                    value={
-                      toDate && new Date(toDate)?.toISOString().slice(0, 10)
-                    }
-                    max={new Date().toISOString().slice(0, 10)}
-                    className={`${styles.formInput}`}
-                    type="date"
-                    placeholder="End Date"
-                    onChange={(e) => {
-                      const value = e.target.value;
-                      if (value && value.length === 10) {
-                        const tempDate = new Date(value);
-                        if (!isNaN(tempDate.getTime())) {
-                          setToDate(value);
-                        }
-                      } else {
-                        setToDate("");
+                  <Form.Label>End {props.mode}</Form.Label>
+                  {props.mode === "date" ? (
+                    <Form.Control
+                      value={
+                        toDate && new Date(toDate)?.toISOString().slice(0, 10)
                       }
-                    }}
-                  />
+                      max={new Date().toISOString().slice(0, 10)}
+                      className={`${styles.formInput}`}
+                      type="date"
+                      placeholder="End Date"
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        if (value && value.length === 10) {
+                          const tempDate = new Date(value);
+                          if (!isNaN(tempDate.getTime())) {
+                            setToDate(value);
+                          }
+                        } else {
+                          setToDate("");
+                        }
+                      }}
+                    />
+                  ) : (
+                    <Form.Control
+                      value={toBlock}
+                      className={`${styles.formInput}`}
+                      type="number"
+                      placeholder="End Block"
+                      onChange={(e) => {
+                        const value = parseInt(e.target.value);
+                        if (isNaN(value)) {
+                          setToBlock("");
+                        } else {
+                          setToBlock(value.toString());
+                        }
+                      }}
+                    />
+                  )}
                 </Form.Group>
               </Form>
             </Col>
