@@ -32,6 +32,7 @@ export default function UserPageIdentityStatementsStatementsList({
           isMyProfile={isMyProfile}
         />
       ))}
+      <span className="tw-text-sm tw-italic tw-text-neutral-500">No Social Media Account added</span>
     </ul>
   );
 }
