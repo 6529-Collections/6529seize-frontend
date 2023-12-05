@@ -20,7 +20,7 @@ interface Props {
   setSection(section: DelegationCenterSection): any;
 }
 
-export default function DelegationCenterComponent(props: Props) {
+export default function DelegationCenterComponent(props: Readonly<Props>) {
   const [redirect, setRedirect] = useState<DelegationCenterSection>();
   const accountResolution = useAccount();
   const web3Modal = useWeb3Modal();

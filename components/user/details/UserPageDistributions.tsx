@@ -33,7 +33,7 @@ interface Props {
 
 const DISTRIBUTIONS_PAGE_SIZE = 50;
 
-export default function UserPageDistributions(props: Props) {
+export default function UserPageDistributions(props: Readonly<Props>) {
   const distributionsDivRef = useRef(null);
 
   const [distributions, setDistributions] = useState<IDistribution[]>([]);
@@ -155,8 +155,7 @@ export default function UserPageDistributions(props: Props) {
           xs={{ span: 7 }}
           sm={{ span: 7 }}
           md={{ span: 9 }}
-          lg={{ span: 10 }}
-        >
+          lg={{ span: 10 }}>
           <h3 ref={distributionsDivRef}>Distributions</h3>
         </Col>
       </Row>
@@ -172,12 +171,10 @@ export default function UserPageDistributions(props: Props) {
                       !props.activeAddress
                         ? 3
                         : 2
-                    }
-                  ></th>
+                    }></th>
                   <th
                     colSpan={distributionsPhases.length}
-                    className="text-center"
-                  >
+                    className="text-center">
                     ALLOWLIST SPOTS
                   </th>
                   <th colSpan={2} className="text-center">
@@ -214,8 +211,7 @@ export default function UserPageDistributions(props: Props) {
                               : areEqualAddresses(d.contract, MEMELAB_CONTRACT)
                               ? `/meme-lab/${d.card_id}`
                               : d.contract
-                          }
-                        >
+                          }>
                           Card #{d.card_id}
                         </a>
                       ) : (
@@ -240,8 +236,7 @@ export default function UserPageDistributions(props: Props) {
                     {distributionsPhases.map((p) => (
                       <th
                         key={`${p}-${d.contract}-${d.card_id}`}
-                        className="text-center"
-                      >
+                        className="text-center">
                         {d[p] === 0 ? "-" : numberWithCommas(d[p])}
                       </th>
                     ))}

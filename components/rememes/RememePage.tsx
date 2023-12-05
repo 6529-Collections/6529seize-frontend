@@ -32,7 +32,7 @@ enum Tabs {
   REFERENCES = "References",
 }
 
-export default function RememePage(props: Props) {
+export default function RememePage(props: Readonly<Props>) {
   const [rememe, setRememe] = useState<Rememe>();
 
   const [activeTab, setActiveTab] = useState<Tabs>(Tabs.LIVE);

@@ -6,7 +6,7 @@ import Image from "next/image";
 import { useContext, useEffect, useState } from "react";
 import { ENS } from "../../../entities/IENS";
 import { fetchUrl } from "../../../services/6529api";
-import {  numberWithCommas } from "../../../helpers/Helpers";
+import { numberWithCommas } from "../../../helpers/Helpers";
 import Address from "../../address/Address";
 import { AuthContext } from "../../auth/Auth";
 
@@ -16,7 +16,7 @@ interface Props {
   onHide: () => void;
 }
 
-export default function WalletModal(props: Props) {
+export default function WalletModal(props: Readonly<Props>) {
   const { myProfile } = useContext(AuthContext);
   const [ens, setEns] = useState<ENS>();
   const [copied, setIsCopied] = useState<boolean>(false);
@@ -86,8 +86,7 @@ export default function WalletModal(props: Props) {
           className={styles.banner}
           style={{
             background: `linear-gradient(45deg, ${ens.banner_1} 0%, ${ens.banner_2} 100%)`,
-          }}
-        >
+          }}>
           <Image
             src={ens.pfp}
             alt="Profile Picture"
@@ -98,8 +97,7 @@ export default function WalletModal(props: Props) {
         </div>
       )}
       <Modal.Body
-        className={`${styles.body} d-flex align-items-center justify-content-between font-larger`}
-      >
+        className={`${styles.body} d-flex align-items-center justify-content-between font-larger`}>
         <Address
           wallets={[props.wallet]}
           display={ens?.display}
@@ -121,8 +119,7 @@ export default function WalletModal(props: Props) {
             <Col
               xs={3}
               className={`${styles.footerBtnContainer} d-flex flex-column align-items-center gap-2`}
-              onClick={() => copy()}
-            >
+              onClick={() => copy()}>
               <span className={styles.footerBtn}>
                 <FontAwesomeIcon className={styles.footerIcon} icon="copy" />
               </span>
@@ -144,8 +141,7 @@ export default function WalletModal(props: Props) {
                     } else {
                       props.onHide();
                     }
-                  }}
-                >
+                  }}>
                   <span className={styles.footerBtn}>
                     <FontAwesomeIcon
                       className={styles.footerIcon}
@@ -168,8 +164,7 @@ export default function WalletModal(props: Props) {
                     } else {
                       props.onHide();
                     }
-                  }}
-                >
+                  }}>
                   <span className={styles.footerBtn}>
                     <FontAwesomeIcon
                       className={styles.footerIcon}
@@ -188,8 +183,7 @@ export default function WalletModal(props: Props) {
               onClick={() => {
                 disconnect();
                 props.onHide();
-              }}
-            >
+              }}>
               <span className={styles.footerBtn}>
                 <FontAwesomeIcon
                   className={styles.footerIcon}

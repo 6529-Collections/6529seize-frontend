@@ -36,7 +36,9 @@ interface Props {
   onSetToast(toast: any): any;
 }
 
-export default function RevokeDelegationWithSubComponent(props: Props) {
+export default function RevokeDelegationWithSubComponent(
+  props: Readonly<Props>
+) {
   const [newDelegationCollection, setNewDelegationCollection] =
     useState<string>("0");
   const [newDelegationUseCase, setNewDelegationUseCase] = useState<number>(0);

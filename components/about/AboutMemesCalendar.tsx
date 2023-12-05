@@ -5,7 +5,7 @@ interface Props {
   html: string;
 }
 
-export default function AboutMemesCalendar(props: Props) {
+export default function AboutMemesCalendar(props: Readonly<Props>) {
   return (
     <>
       <Container>

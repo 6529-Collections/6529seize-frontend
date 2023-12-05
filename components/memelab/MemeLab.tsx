@@ -35,7 +35,7 @@ interface Props {
   wallets: string[];
 }
 
-export default function MemeLabComponent(props: Props) {
+export default function MemeLabComponent(props: Readonly<Props>) {
   const router = useRouter();
 
   useEffect(() => {

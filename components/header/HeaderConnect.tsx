@@ -17,7 +17,7 @@ interface Props {
   setView: (view: WalletView) => void;
 }
 
-export default function HeaderConnect(props: Props) {
+export default function HeaderConnect(props: Readonly<Props>) {
   const { myProfile, loadingMyProfile } = useContext(AuthContext);
   const account = useAccount();
   const [showWalletModal, setShowWalletModal] = useState(false);

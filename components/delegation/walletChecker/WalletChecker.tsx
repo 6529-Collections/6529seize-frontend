@@ -31,7 +31,7 @@ interface ConsolidationDisplay {
   to_display: string | undefined;
 }
 
-export default function WalletCheckerComponent(props: Props) {
+export default function WalletCheckerComponent(props: Readonly<Props>) {
   const [fetchedAddress, setFetchedAddress] = useState<string>("");
   const [walletInput, setWalletInput] = useState("");
   const [walletAddress, setWalletAddress] = useState("");

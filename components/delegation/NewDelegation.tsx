@@ -39,7 +39,7 @@ interface Props {
   onSetToast(toast: any): any;
 }
 
-export default function NewDelegationComponent(props: Props) {
+export default function NewDelegationComponent(props: Readonly<Props>) {
   const [showExpiryCalendar, setShowExpiryCalendar] = useState(false);
   const [showTokensInput, setShowTokensInput] = useState(false);
 

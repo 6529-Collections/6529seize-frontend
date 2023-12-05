@@ -1,4 +1,4 @@
-import { sepolia } from "wagmi/chains";
+import { mainnet, sepolia, goerli } from "wagmi/chains";
 import {
   GRADIENT_CONTRACT,
   MEMELAB_CONTRACT,
@@ -64,13 +64,16 @@ export function fromGWEI(from: number) {
 }
 
 export function numberWithCommasFromString(x: string) {
-  if (!/^\d+$/.test(x)) return x;
-  if (isNaN(parseInt(x))) return x;
-  return numberWithCommas(parseInt(x));
+  const cleanedInput = x.replace(/[^\d.-]/g, "");
+  if (!/^-?\d+(\.\d+)?$/.test(cleanedInput)) return x;
+  const num = parseFloat(cleanedInput);
+  if (isNaN(num)) return x;
+  return numberWithCommas(num);
 }
 
 export function numberWithCommas(x: number) {
-  if (x === null || x === 0 || isNaN(x)) return "-";
+  if (x === null || isNaN(x)) return "-";
+  if (x === 0) return "-";
   const parts = x.toString().split(".");
   parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
   return parts.join(".");
@@ -109,13 +112,13 @@ export const fullScreenSupported = () => {
   const doc: any = document;
   const el: any = doc.body;
   const check =
-    typeof el.requestFullscreen !== "undefined" ||
-    typeof el.mozRequestFullScreen !== "undefined" ||
-    typeof el.webkitRequestFullscreen !== "undefined" ||
-    typeof el.msRequestFullscreen !== "undefined" ||
-    typeof doc.exitFullscreen !== "undefined" ||
-    typeof doc.mozCancelFullScreen !== "undefined" ||
-    typeof doc.webkitExitFullscreen !== "undefined";
+    el.requestFullscreen !== "undefined" ||
+    el.mozRequestFullScreen !== "undefined" ||
+    el.webkitRequestFullscreen !== "undefined" ||
+    el.msRequestFullscreen !== "undefined" ||
+    doc.exitFullscreen !== "undefined" ||
+    doc.mozCancelFullScreen !== "undefined" ||
+    doc.webkitExitFullscreen !== "undefined";
 
   return check;
 };
@@ -140,13 +143,13 @@ export function nextTdh() {
   const now = new Date();
   const utcMidnight = new Date(now).setUTCHours(24, 0, 0, 0);
 
-  var diffMS = utcMidnight / 1000 - now.getTime() / 1000;
-  var diffHr = Math.floor(diffMS / 3600);
+  let diffMS = utcMidnight / 1000 - now.getTime() / 1000;
+  let diffHr = Math.floor(diffMS / 3600);
   diffMS = diffMS - diffHr * 3600;
-  var diffMi = Math.floor(diffMS / 60);
+  let diffMi = Math.floor(diffMS / 60);
   diffMS = diffMS - diffMi * 60;
-  var diffS = Math.floor(diffMS);
-  var result = diffHr < 10 ? "0" + diffHr : diffHr;
+  let diffS = Math.floor(diffMS);
+  let result = diffHr < 10 ? "0" + diffHr : diffHr;
   result += ":" + (diffMi < 10 ? "0" + diffMi : diffMi);
   result += ":" + (diffS < 10 ? "0" + diffS : diffS);
   return result.toString();
@@ -200,9 +203,14 @@ export const isValidEthAddress = (address: string) =>
   /^0x[0-9a-fA-F]{40}$/.test(address);
 
 export function getTransactionLink(chain_id: number, hash: string) {
-  return chain_id === sepolia.id
-    ? `https://sepolia.etherscan.io/tx/${hash}`
-    : `https://etherscan.io/tx/${hash}`;
+  switch (chain_id) {
+    case sepolia.id:
+      return `https://sepolia.etherscan.io/tx/${hash}`;
+    case goerli.id:
+      return `https://goerli.etherscan.io/tx/${hash}`;
+    default:
+      return `https://etherscan.io/tx/${hash}`;
+  }
 }
 
 export async function getContentTypeFromURL(url: string) {
@@ -313,6 +321,31 @@ export function capitalizeEveryWord(input: string): string {
     .replace(/^(.)|\s+(.)/g, (match: string) => match.toUpperCase());
 }
 
+export function getNetworkName(chainId: number) {
+  if (chainId === mainnet.id) {
+    return "Etherium Mainnet";
+  } else if (chainId === sepolia.id) {
+    return "Sepolia Testnet";
+  } else if (chainId === goerli.id) {
+    return "Goerli Testnet";
+  } else {
+    return `Network ID ${chainId}`;
+  }
+}
+
+export function createArray(startNum: number, endNum: number) {
+  let result = [];
+
+  if (startNum <= endNum) {
+    for (let i = startNum; i <= endNum; i++) {
+      result.push(i);
+    }
+  } else {
+    result.push(0);
+  }
+
+  return result;
+}
 export const formatNumber = (num: number): string => {
   // For numbers less than 1000, return the number as is
   if (num < 1000) {
@@ -333,13 +366,30 @@ export const formatNumber = (num: number): string => {
   return parseFloat((num / 1000000).toFixed(2)).toString() + "M";
 };
 
-export function displayDecimal(value: number, places: number) {
+export function displayDecimal(value: number, places: number): string {
   if (0 >= value) {
     return "-";
   }
 
-  const fixedValue = value.toFixed(places);
-  return numberWithCommas(parseFloat(fixedValue)).toString();
+  const valueAsString = value.toString();
+  const decimalPlaceIndex = valueAsString.indexOf(".");
+
+  if (decimalPlaceIndex !== -1 && value < 0.01) {
+    const exponent = Math.ceil(-Math.log10(value));
+    return Number(value.toFixed(exponent)).toString();
+  }
+
+  if (value >= 0.01) {
+    return Number(value.toFixed(2)).toLocaleString("en-US", {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    });
+  }
+
+  return value.toLocaleString("en-US", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
 }
 
 export function areEqualURLS(s1: string, s2: string) {
@@ -362,7 +412,9 @@ function formatDateFilterDate(d: Date) {
 export function getDateFilters(
   dateSelection: DateIntervalsSelection,
   fromDate: Date | undefined,
-  toDate: Date | undefined
+  toDate: Date | undefined,
+  fromBlock: number | undefined,
+  toBlock: number | undefined
 ) {
   let filters = "";
   switch (dateSelection) {
@@ -417,7 +469,7 @@ export function getDateFilters(
       filters += `&from_date=${formatDateFilterDate(firstDayOfLastYear)}`;
       filters += `&to_date=${formatDateFilterDate(lastDayOfLastYear)}`;
       break;
-    case DateIntervalsSelection.CUSTOM:
+    case DateIntervalsSelection.CUSTOM_DATES:
       if (fromDate) {
         filters += `&from_date=${formatDateFilterDate(fromDate)}`;
       }

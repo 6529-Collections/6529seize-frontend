@@ -32,7 +32,7 @@ export enum UserActivityTypeFilter {
   BURNS = "Burns",
 }
 
-export default function UserPageActivity(props: Props) {
+export default function UserPageActivity(props: Readonly<Props>) {
   const [activity, setActivity] = useState<Transaction[]>([]);
   const [activityTypeFilter, setActivityTypeFilter] =
     useState<UserActivityTypeFilter>(UserActivityTypeFilter.ALL);

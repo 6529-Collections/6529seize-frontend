@@ -54,7 +54,6 @@
 }
 
 .filterDropdown {
-  line-height: 48px;
   text-align: center;
   background-color: transparent;
   border: none;
@@ -71,9 +70,31 @@
     border-color: transparent !important;
     &::after {
       margin-top: 0.8rem;
+      @media only screen and (max-width: 800px) {
+        margin-top: 0.5rem;
+      }
     }
   }
-  // div {
-  //   width: 60%;
-  // }
+}
+
+.collectionFocus {
+  &:hover {
+    color: $font-color;
+    cursor: pointer;
+  }
+}
+
+.collectionFocusActive {
+  color: $font-color;
+  transform: scale(1.02);
+}
+
+.infoIcon {
+  color: $font-color-h;
+  height: 18px;
+  cursor: pointer;
+
+  &:hover {
+    color: $font-color;
+  }
 }

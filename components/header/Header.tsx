@@ -18,13 +18,14 @@ interface Props {
   onSetWallets?(wallets: string[]): any;
 }
 
-export default function Header(props: Props) {
+export default function Header(props: Readonly<Props>) {
   const router = useRouter();
   const account = useAccount();
 
   const [consolidations, setConsolidations] = useState<string[]>([]);
   const [burgerMenuOpen, setBurgerMenuOpen] = useState(false);
 
+  const [showBurgerMenuNextgen, setShowBurgerMenuNextgen] = useState(false);
   const [view, setView] = useState<WalletView>();
 
   const [showBurgerMenuAbout, setShowBurgerMenuAbout] = useState(false);
@@ -33,6 +34,7 @@ export default function Header(props: Props) {
 
   useEffect(() => {
     function handleResize() {
+      setShowBurgerMenuNextgen(false);
       setBurgerMenuOpen(false);
       setShowBurgerMenuAbout(false);
       setShowBurgerMenuCommunity(false);
@@ -102,6 +104,7 @@ export default function Header(props: Props) {
           className={styles.burgerMenuClose}
           icon="times-circle"
           onClick={() => {
+            setShowBurgerMenuNextgen(false);
             setBurgerMenuOpen(false);
             setShowBurgerMenuAbout(false);
             setShowBurgerMenuCommunity(false);
@@ -159,18 +162,67 @@ export default function Header(props: Props) {
           </Row>
           <Row className="pt-3 pb-3">
             <Col>
-              <a href="/nextgen">
-                <h3>NextGen</h3>
-              </a>
+              <h3
+                onClick={() => {
+                  setShowBurgerMenuNextgen(!showBurgerMenuNextgen);
+                  setShowBurgerMenuCommunity(false);
+                  setShowBurgerMenuAbout(false);
+                  setShowBurgerMenuTools(false);
+                }}
+                className={`${styles.burgerMenuHeader}
+                  ${
+                    showBurgerMenuNextgen
+                      ? styles.burgerMenuCaretClose
+                      : styles.burgerMenuCaretOpen
+                  }`}>
+                NextGen
+              </h3>
             </Col>
+            {showBurgerMenuNextgen && (
+              <Container>
+                <Row>
+                  <Col xs={{ span: 6, offset: 3 }}>
+                    <hr />
+                  </Col>
+                </Row>
+                <Row className="pt-3">
+                  <Col>
+                    <a href="/nextgen">
+                      <h3>Collections</h3>
+                    </a>
+                  </Col>
+                </Row>
+                <Row className="pt-3">
+                  <Col>
+                    <a href="/nextgen/admin">
+                      <h3>Admin</h3>
+                    </a>
+                  </Col>
+                </Row>
+                <Row>
+                  <Col xs={{ span: 6, offset: 3 }}>
+                    <hr />
+                  </Col>
+                </Row>
+              </Container>
+            )}
           </Row>
           <Row className="pt-3 pb-3">
             <Col>
               <h3
                 onClick={() => {
                   setShowBurgerMenuCommunity(!showBurgerMenuCommunity);
+                  setShowBurgerMenuNextgen(false);
                   setShowBurgerMenuAbout(false);
                   setShowBurgerMenuTools(false);
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    setShowBurgerMenuCommunity(!showBurgerMenuCommunity);
+                    setShowBurgerMenuNextgen(false);
+                    setShowBurgerMenuAbout(false);
+                    setShowBurgerMenuTools(false);
+                  }
                 }}
                 className={`${styles.burgerMenuHeader}
                   ${
@@ -235,8 +287,8 @@ export default function Header(props: Props) {
                 </Row>
                 <Row className="pt-3">
                   <Col>
-                    <a href="/royalties">
-                      <h3>Royalties</h3>
+                    <a href="/meme-accounting">
+                      <h3>Meme Accounting </h3>
                     </a>
                   </Col>
                 </Row>
@@ -260,6 +312,7 @@ export default function Header(props: Props) {
               <h3
                 onClick={() => {
                   setShowBurgerMenuTools(!showBurgerMenuTools);
+                  setShowBurgerMenuNextgen(false);
                   setShowBurgerMenuCommunity(false);
                   setShowBurgerMenuAbout(false);
                 }}
@@ -356,6 +409,7 @@ export default function Header(props: Props) {
               <h3
                 onClick={() => {
                   setShowBurgerMenuAbout(!showBurgerMenuAbout);
+                  setShowBurgerMenuNextgen(false);
                   setShowBurgerMenuCommunity(false);
                   setShowBurgerMenuTools(false);
                 }}
@@ -618,13 +672,25 @@ export default function Header(props: Props) {
                               href="/rememes">
                               ReMemes
                             </Nav.Link>
-                            <Nav.Link
-                              className={`${styles.mainNavLink} ${
-                                router.pathname === "/nextgen" ? "active" : ""
-                              }`}
-                              href="/nextgen">
-                              NextGen
-                            </Nav.Link>
+                            <NavDropdown
+                              title="NextGen"
+                              align={"start"}
+                              className={`${styles.mainNavLink} ${styles.mainNavLinkPadding}`}>
+                              <NavDropdown.Item
+                                className={styles.dropdownItem}
+                                onClick={() =>
+                                  (window.location.href = "/nextgen")
+                                }>
+                                Collections
+                              </NavDropdown.Item>
+                              <NavDropdown.Item
+                                className={styles.dropdownItem}
+                                onClick={() =>
+                                  (window.location.href = "/nextgen/admin")
+                                }>
+                                Admin
+                              </NavDropdown.Item>
+                            </NavDropdown>
                             <NavDropdown
                               title="Community"
                               align={"start"}
@@ -669,9 +735,9 @@ export default function Header(props: Props) {
                               <NavDropdown.Item
                                 className={styles.dropdownItem}
                                 onClick={() =>
-                                  (window.location.href = "/royalties")
+                                  (window.location.href = "/meme-accounting")
                                 }>
-                                Royalties
+                                Meme Accounting
                               </NavDropdown.Item>
                               <NavDropdown.Item
                                 className={styles.dropdownItem}

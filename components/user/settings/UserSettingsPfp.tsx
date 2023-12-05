@@ -39,7 +39,7 @@ const ACCEPTED_FORMATS_DISPLAY = ACCEPTED_FORMATS.map(
 
 const FILE_SIZE_LIMIT = 10485760;
 
-export default function UserSettingsPfp(props: Props) {
+export default function UserSettingsPfp(props: Readonly<Props>) {
   const statusDivRef = useRef(null);
 
   const account = useAccount();
@@ -234,8 +234,7 @@ export default function UserSettingsPfp(props: Props) {
               xs={{ span: 12 }}
               sm={{ span: 12 }}
               md={{ span: 10, offset: 1 }}
-              lg={{ span: 8, offset: 2 }}
-            >
+              lg={{ span: 8, offset: 2 }}>
               <Container className={styles.addressContainer}>
                 <Row>
                   <Col>
@@ -243,8 +242,7 @@ export default function UserSettingsPfp(props: Props) {
                       content={"Back to user page"}
                       delay={500}
                       placement={"right"}
-                      theme={"light"}
-                    >
+                      theme={"light"}>
                       <FontAwesomeIcon
                         icon="arrow-circle-left"
                         className={styles.backIcon}
@@ -273,20 +271,17 @@ export default function UserSettingsPfp(props: Props) {
               xs={{ span: 12 }}
               sm={{ span: 12 }}
               md={{ span: 10, offset: 1 }}
-              lg={{ span: 8, offset: 2 }}
-            >
+              lg={{ span: 8, offset: 2 }}>
               <Container className={styles.toolArea}>
                 <Row>
                   <Col
                     xs={12}
-                    className="d-flex align-items-center justify-content-between"
-                  >
+                    className="d-flex align-items-center justify-content-between">
                     <span>Select Meme</span>
                     {selectedMeme && (
                       <span
                         className="font-color-h cursor-pointer decoration-hover-underline"
-                        onClick={() => setSelectedMeme(undefined)}
-                      >
+                        onClick={() => setSelectedMeme(undefined)}>
                         clear
                       </span>
                     )}
@@ -294,8 +289,7 @@ export default function UserSettingsPfp(props: Props) {
                   <Col xs={12}>
                     <Dropdown
                       className={styles.memesDropdown}
-                      drop={"down-centered"}
-                    >
+                      drop={"down-centered"}>
                       <Dropdown.Toggle>
                         {selectedMeme
                           ? `#${selectedMeme.id} - ${selectedMeme.name}`
@@ -310,8 +304,7 @@ export default function UserSettingsPfp(props: Props) {
                               setFileError(undefined);
                               setFile(undefined);
                               setSelectedMeme(m);
-                            }}
-                          >
+                            }}>
                             #{m.id} - {m.name}
                           </Dropdown.Item>
                         ))}
@@ -331,8 +324,7 @@ export default function UserSettingsPfp(props: Props) {
                 <Row>
                   <Col
                     xs={12}
-                    className="d-flex justify-content-between flex-wrap gap-2"
-                  >
+                    className="d-flex justify-content-between flex-wrap gap-2">
                     <span>
                       Upload Image{" "}
                       <span className="font-color-h">
@@ -345,8 +337,7 @@ export default function UserSettingsPfp(props: Props) {
                           {file.name} ({getFileSize()})&nbsp;
                           <span
                             className="font-color-h cursor-pointer decoration-hover-underline"
-                            onClick={() => setFile(undefined)}
-                          >
+                            onClick={() => setFile(undefined)}>
                             clear
                           </span>
                         </span>
@@ -366,8 +357,7 @@ export default function UserSettingsPfp(props: Props) {
                       onDrop={handleDrop}
                       onDragEnter={handleDrag}
                       onDragLeave={handleDrag}
-                      onDragOver={handleDrag}
-                    >
+                      onDragOver={handleDrag}>
                       {selectedMeme ? (
                         <Image
                           priority
@@ -479,15 +469,13 @@ export default function UserSettingsPfp(props: Props) {
                   <Col>
                     <Button
                       className={`${styles.submitBtn}`}
-                      onClick={() => submit()}
-                    >
+                      onClick={() => submit()}>
                       {processing ? "Processing" : "Submit"}
                       {processing && (
                         <div className="d-inline">
                           <div
                             className={`spinner-border ${styles.loader}`}
-                            role="status"
-                          >
+                            role="status">
                             <span className="sr-only"></span>
                           </div>
                         </div>
@@ -498,8 +486,7 @@ export default function UserSettingsPfp(props: Props) {
                 {success && (
                   <Row className="pt-4 pb-2">
                     <Col
-                      className={`${styles.success} d-flex align-items-center gap-2`}
-                    >
+                      className={`${styles.success} d-flex align-items-center gap-2`}>
                       <FontAwesomeIcon
                         icon="check-circle"
                         className={styles.statusIcon}
@@ -521,8 +508,7 @@ export default function UserSettingsPfp(props: Props) {
                       <Col
                         key={`${index}-${e}`}
                         xs={12}
-                        className={`${styles.error} d-flex align-items-center gap-2`}
-                      >
+                        className={`${styles.error} d-flex align-items-center gap-2`}>
                         <FontAwesomeIcon
                           icon="times-circle"
                           className={styles.statusIcon}

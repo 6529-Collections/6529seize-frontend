@@ -35,7 +35,7 @@ interface Props {
   wallets: string[];
 }
 
-export default function LabCollection(props: Props) {
+export default function LabCollection(props: Readonly<Props>) {
   const router = useRouter();
   const [collectionName, setCollectionName] = useState<string>();
   const [website, setWebsite] = useState<string>();

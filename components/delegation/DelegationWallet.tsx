@@ -4,7 +4,7 @@ interface Props {
   address: string;
 }
 
-export default function DelegationWallet(props: Props) {
+export default function DelegationWallet(props: Readonly<Props>) {
   const ensResolution = useEnsName({
     address: props.address as `0x${string}`,
     chainId: 1,

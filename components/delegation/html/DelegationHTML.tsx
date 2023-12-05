@@ -7,7 +7,7 @@ interface Props {
   path?: string;
 }
 
-export default function DelegationHTML(props: Props) {
+export default function DelegationHTML(props: Readonly<Props>) {
   const [html, setHtml] = useState("");
   const [error, setError] = useState(false);
 

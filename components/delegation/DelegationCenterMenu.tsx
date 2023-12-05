@@ -40,7 +40,7 @@ interface Props {
   setActiveSection(section: DelegationCenterSection): any;
 }
 
-export default function DelegationCenterMenu(props: Props) {
+export default function DelegationCenterMenu(props: Readonly<Props>) {
   const accountResolution = useAccount();
   const ensResolution = useEnsName({
     address: accountResolution.address,

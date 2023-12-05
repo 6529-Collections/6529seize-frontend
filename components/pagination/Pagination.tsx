@@ -10,7 +10,7 @@ interface Props {
   setPage(page: number): any;
 }
 
-export default function Pagination(props: Props) {
+export default function Pagination(props: Readonly<Props>) {
   const [inputPage, setInputPage] = useState<string>(props.page.toString());
 
   useEffect(() => {

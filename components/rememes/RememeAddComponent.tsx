@@ -33,7 +33,7 @@ interface Props {
   verifiedRememe(r: ProcessedRememe | undefined, references: number[]): void;
 }
 
-export default function RememeAddComponent(props: Props) {
+export default function RememeAddComponent(props: Readonly<Props>) {
   const [contract, setContract] = useState("");
   const [tokenIdDisplay, setTokenIdDisplay] = useState("");
   const [tokenIds, setTokenIds] = useState<string[]>([]);

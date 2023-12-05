@@ -31,7 +31,7 @@ interface Props {
   onSetToast(toast: any): any;
 }
 
-export default function UpdateDelegationComponent(props: Props) {
+export default function UpdateDelegationComponent(props: Readonly<Props>) {
   const [isDelegation, setIsDelegation] = useState(
     ![
       CONSOLIDATION_USE_CASE.use_case,

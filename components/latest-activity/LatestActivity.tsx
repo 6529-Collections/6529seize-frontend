@@ -26,7 +26,7 @@ export enum TypeFilter {
   BURNS = "Burns",
 }
 
-export default function LatestActivity(props: Props) {
+export default function LatestActivity(props: Readonly<Props>) {
   const router = useRouter();
   const [activity, setActivity] = useState<Transaction[]>([]);
   const [page, setPage] = useState(props.page);
@@ -86,7 +86,7 @@ export default function LatestActivity(props: Props) {
     <Container className={`no-padding pt-4`}>
       <Row className="d-flex align-items-center">
         <Col className="d-flex align-items-center justify-content-between">
-          <span className="d-flex align-items-center gap-2">
+          <span className="d-flex flex-wrap align-items-center gap-2">
             <h1>
               LATEST ACTIVITY{" "}
               {showViewAll ? (

@@ -5,7 +5,7 @@ interface Props {
   html: string;
 }
 
-export default function AboutHTML(props: Props) {
+export default function AboutHTML(props: Readonly<Props>) {
   return (
     <>
       <Container>

@@ -10,7 +10,7 @@ interface Props {
   height: 300 | 650;
 }
 
-export default function RememeImage(props: Props) {
+export default function RememeImage(props: Readonly<Props>) {
   const imageFallbackUrls = getImageFallbackUrls();
   const videoFallbackUrls = getVideoFallbackUrls();
 

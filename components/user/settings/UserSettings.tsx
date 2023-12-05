@@ -23,7 +23,7 @@ const inter = Inter({
   display: "swap",
 });
 
-export default function UserSettingsComponent(props: Props) {
+export default function UserSettingsComponent(props: Readonly<Props>) {
   const account = useAccount();
   const router = useRouter();
   const { requestAuth, setToast } = useContext(AuthContext);
@@ -118,8 +118,7 @@ export default function UserSettingsComponent(props: Props) {
   if (!init || !account.address || !userOrWallet || !user) return <></>;
   return (
     <div
-      className={`tailwind-scope tw-bg-neutral-900 tw-overflow-y-auto tw-min-h-screen tw-relative ${inter.className}`}
-    >
+      className={`tailwind-scope tw-bg-neutral-900 tw-overflow-y-auto tw-min-h-screen tw-relative ${inter.className}`}>
       <div className="tw-max-w-2xl tw-mx-auto tw-pt-8 tw-pb-12">
         <UserSettingsGoToUser
           user={user.profile?.handle ?? userOrWallet.toLowerCase()}

@@ -8,7 +8,7 @@ interface Props {
   extension: string;
 }
 
-export default function Download(props: Props) {
+export default function Download(props: Readonly<Props>) {
   const { size, elapsed, percentage, download, cancel, error, isInProgress } =
     useDownloader();
 

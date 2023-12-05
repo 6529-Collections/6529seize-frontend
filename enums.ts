@@ -12,5 +12,5 @@ export enum DateIntervalsSelection {
   YEAR_TO_DATE = "Year to Date",
   LAST_YEAR = "Last Year",
   ALL = "All",
-  CUSTOM = "Custom",
+  CUSTOM_DATES = "Custom Dates",
 }

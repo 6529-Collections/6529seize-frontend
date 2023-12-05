@@ -1,9 +1,5 @@
 import Head from "next/head";
 import styles from "../styles/Home.module.scss";
-
-import { useState } from "react";
-import Breadcrumb, { Crumb } from "../components/breadcrumb/Breadcrumb";
-import { Container, Row, Col } from "react-bootstrap";
 import dynamic from "next/dynamic";
 import HeaderPlaceholder from "../components/header/HeaderPlaceholder";
 
@@ -16,9 +12,7 @@ const Header = dynamic(() => import("../components/header/Header"), {
   loading: () => <HeaderPlaceholder />,
 });
 
-export default function TheMemesPage() {
-  const breadcrumbs = [{ display: "Home", href: "/" }, { display: "Gas" }];
-
+export default function GasPage() {
   return (
     <>
       <Head>
@@ -36,14 +30,7 @@ export default function TheMemesPage() {
 
       <main className={styles.main}>
         <Header />
-        <Breadcrumb breadcrumbs={breadcrumbs} />
-        <Container fluid className={styles.mainContainer}>
-          <Row>
-            <Col>
-              <Gas />
-            </Col>
-          </Row>
-        </Container>
+        <Gas />
       </main>
     </>
   );

@@ -1,8 +1,7 @@
 import Head from "next/head";
 import styles from "../../styles/Home.module.scss";
-import { useState } from "react";
 import dynamic from "next/dynamic";
-import Breadcrumb, { Crumb } from "../../components/breadcrumb/Breadcrumb";
+import Breadcrumb from "../../components/breadcrumb/Breadcrumb";
 import HeaderPlaceholder from "../../components/header/HeaderPlaceholder";
 
 const Header = dynamic(() => import("../../components/header/Header"), {
@@ -19,11 +18,11 @@ const CommunityDownloadsRoyalties = dynamic(
 );
 
 export default function Downloads() {
-  const [breadcrumbs, setBreadcrumbs] = useState<Crumb[]>([
+  const breadcrumbs = [
     { display: "Home", href: "/" },
     { display: "Downloads", href: "/downloads" },
     { display: "Royalties" },
-  ]);
+  ];
 
   return (
     <>
