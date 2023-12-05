@@ -5,7 +5,7 @@ import { Royalty } from "../../entities/IRoyalty";
 import { fetchUrl } from "../../services/6529api";
 import { displayDecimal } from "../../helpers/Helpers";
 import DatePickerModal from "../datePickerModal/DatePickerModal";
-import { DateIntervalsWithBlocksSelection } from "../../enums";
+import { DateIntervalsSelection } from "../../enums";
 import {
   GasRoyaltiesCollectionFocus,
   GasRoyaltiesHeader,
@@ -41,6 +41,8 @@ export default function Royalties() {
     setToDate,
     isPrimary,
     setIsPrimary,
+    isCustomBlocks,
+    setIsCustomBlocks,
     selectedArtist,
     showDatePicker,
     setShowDatePicker,
@@ -107,6 +109,7 @@ export default function Royalties() {
     toBlock,
     selectedArtist,
     isPrimary,
+    isCustomBlocks,
   ]);
 
   useEffect(() => {
@@ -151,6 +154,7 @@ export default function Royalties() {
         focus={collectionFocus}
         setDateSelection={(date_selection) => {
           setIsPrimary(false);
+          setIsCustomBlocks(false);
           setDateSelection(date_selection);
         }}
         getUrl={getUrlWithParams}
@@ -272,7 +276,7 @@ export default function Royalties() {
                     {!isPrimary && (
                       <td className="text-center">
                         {sumProceeds > 0
-                          ? ((sumProceeds / sumVolume) * 100).toFixed(2)
+                          ? `${((sumProceeds / sumVolume) * 100).toFixed(2)}%`
                           : `-`}
                       </td>
                     )}
@@ -310,11 +314,10 @@ export default function Royalties() {
           initial_to={toDate}
           onApply={(fromDate, toDate) => {
             setIsPrimary(false);
+            setIsCustomBlocks(false);
             setFromDate(fromDate);
             setToDate(toDate);
-            setDateSelection(
-              DateIntervalsWithBlocksSelection.CUSTOM_DATES as keyof typeof DateIntervalsWithBlocksSelection
-            );
+            setDateSelection(DateIntervalsSelection.CUSTOM_DATES);
           }}
           onHide={() => setShowDatePicker(false)}
         />
@@ -326,9 +329,7 @@ export default function Royalties() {
             setIsPrimary(false);
             setFromBlock(fromBlock);
             setToBlock(toBlock);
-            setDateSelection(
-              DateIntervalsWithBlocksSelection.CUSTOM_BLOCKS as keyof typeof DateIntervalsWithBlocksSelection
-            );
+            setIsCustomBlocks(true);
           }}
           onHide={() => setShowBlockPicker(false)}
         />

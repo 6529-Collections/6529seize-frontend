@@ -5,7 +5,7 @@ import { Gas } from "../../entities/IGas";
 import { fetchUrl } from "../../services/6529api";
 import { displayDecimal } from "../../helpers/Helpers";
 import DatePickerModal from "../datePickerModal/DatePickerModal";
-import { DateIntervalsWithBlocksSelection } from "../../enums";
+import { DateIntervalsSelection } from "../../enums";
 import {
   GasRoyaltiesCollectionFocus,
   GasRoyaltiesHeader,
@@ -44,6 +44,8 @@ export default function Gas() {
     setToDate,
     isPrimary,
     setIsPrimary,
+    isCustomBlocks,
+    setIsCustomBlocks,
     selectedArtist,
     showDatePicker,
     setShowDatePicker,
@@ -89,6 +91,7 @@ export default function Gas() {
     toBlock,
     selectedArtist,
     isPrimary,
+    isCustomBlocks,
   ]);
 
   useEffect(() => {
@@ -110,6 +113,7 @@ export default function Gas() {
         focus={collectionFocus}
         setDateSelection={(date_selection) => {
           setIsPrimary(false);
+          setIsCustomBlocks(false);
           setDateSelection(date_selection);
         }}
         getUrl={getUrlWithParams}
@@ -177,11 +181,11 @@ export default function Gas() {
           initial_from={fromDate}
           initial_to={toDate}
           onApply={(fromDate, toDate) => {
+            setIsPrimary(false);
+            setIsCustomBlocks(false);
             setFromDate(fromDate);
             setToDate(toDate);
-            setDateSelection(
-              DateIntervalsWithBlocksSelection.CUSTOM_DATES as keyof typeof DateIntervalsWithBlocksSelection
-            );
+            setDateSelection(DateIntervalsSelection.CUSTOM_DATES);
           }}
           onHide={() => setShowDatePicker(false)}
         />
@@ -193,9 +197,7 @@ export default function Gas() {
             setIsPrimary(false);
             setFromBlock(fromBlock);
             setToBlock(toBlock);
-            setDateSelection(
-              DateIntervalsWithBlocksSelection.CUSTOM_BLOCKS as keyof typeof DateIntervalsWithBlocksSelection
-            );
+            setIsCustomBlocks(true);
           }}
           onHide={() => setShowBlockPicker(false)}
         />

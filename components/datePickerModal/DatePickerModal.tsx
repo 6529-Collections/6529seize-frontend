@@ -12,17 +12,17 @@ interface Props {
 }
 
 export default function DatePickerModal(props: Readonly<Props>) {
-  const [fromDate, setFromDate] = useState<Date>();
-  const [toDate, setToDate] = useState<Date>();
+  const [fromDate, setFromDate] = useState<string>("");
+  const [toDate, setToDate] = useState<string>("");
 
   const [error, setError] = useState<string>();
 
   useEffect(() => {
-    if (props.initial_from) setFromDate(props.initial_from);
+    if (props.initial_from) setFromDate(props.initial_from.toISOString());
   }, [props.initial_from]);
 
   useEffect(() => {
-    if (props.initial_to) setToDate(props.initial_to);
+    if (props.initial_to) setToDate(props.initial_to.toISOString());
   }, [props.initial_to]);
 
   function apply() {
@@ -32,7 +32,7 @@ export default function DatePickerModal(props: Readonly<Props>) {
         return;
       }
     }
-    props.onApply(fromDate, toDate);
+    props.onApply(new Date(fromDate), new Date(toDate));
     props.onHide();
   }
 
@@ -55,17 +55,22 @@ export default function DatePickerModal(props: Readonly<Props>) {
                 <Form.Group className="mb-3">
                   <Form.Label>Start Date</Form.Label>
                   <Form.Control
-                    value={fromDate?.toISOString().slice(0, 10)}
+                    value={
+                      fromDate && new Date(fromDate)?.toISOString().slice(0, 10)
+                    }
                     max={new Date().toISOString().slice(0, 10)}
                     className={`${styles.formInput}`}
                     type="date"
                     placeholder="Start Date"
                     onChange={(e) => {
                       const value = e.target.value;
-                      if (value) {
-                        setFromDate(new Date(value));
+                      if (value && value.length === 10) {
+                        const tempDate = new Date(value);
+                        if (!isNaN(tempDate.getTime())) {
+                          setFromDate(value);
+                        }
                       } else {
-                        setFromDate(undefined);
+                        setFromDate("");
                       }
                     }}
                   />
@@ -73,17 +78,22 @@ export default function DatePickerModal(props: Readonly<Props>) {
                 <Form.Group className="mb-3">
                   <Form.Label>End Date</Form.Label>
                   <Form.Control
-                    value={toDate?.toISOString().slice(0, 10)}
+                    value={
+                      toDate && new Date(toDate)?.toISOString().slice(0, 10)
+                    }
                     max={new Date().toISOString().slice(0, 10)}
                     className={`${styles.formInput}`}
                     type="date"
                     placeholder="End Date"
                     onChange={(e) => {
                       const value = e.target.value;
-                      if (value) {
-                        setToDate(new Date(value));
+                      if (value && value.length === 10) {
+                        const tempDate = new Date(value);
+                        if (!isNaN(tempDate.getTime())) {
+                          setToDate(value);
+                        }
                       } else {
-                        setToDate(undefined);
+                        setToDate("");
                       }
                     }}
                   />
