@@ -110,19 +110,6 @@ export default function Gas() {
           setIsCustomBlocks(false);
           setDateSelection(date_selection);
         }}
-        setDates={(from_date, to_date) => {
-          setFromDate(from_date);
-          setToDate(to_date);
-          setIsPrimary(false);
-          setIsCustomBlocks(false);
-          setDateSelection(DateIntervalsSelection.CUSTOM_DATES);
-        }}
-        setblocks={(from_block, to_block) => {
-          setFromBlock(from_block);
-          setToBlock(to_block);
-          setIsPrimary(false);
-          setIsCustomBlocks(true);
-        }}
         getUrl={getUrlWithParams}
         {...getSharedProps()}
       />

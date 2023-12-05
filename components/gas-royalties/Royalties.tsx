@@ -4,7 +4,6 @@ import styles from "./GasRoyalties.module.scss";
 import { Royalty } from "../../entities/IRoyalty";
 import { fetchUrl } from "../../services/6529api";
 import { displayDecimal } from "../../helpers/Helpers";
-import { DateIntervalsSelection } from "../../enums";
 import {
   GasRoyaltiesCollectionFocus,
   GasRoyaltiesHeader,
@@ -14,11 +13,6 @@ import {
 import { useRouter } from "next/router";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Tippy from "@tippyjs/react";
-
-const MEMES_DESCRIPTION =
-  "Primary mint revenues and secondary royalties in The Memes are split 50:50 between the artist and the collection. Cards #1 to #4 were sold manually. 6529 and 6529er have custom arrangements not reflected here for simplicity. All values are in ETH.";
-const MEMELAB_DESCRIPTION =
-  "Primary mint revenues and secondary royalties in Meme Lab are split between artist the and the collection solely at the artist's discretion. 6529 and 6529er have custom arrangements not reflected here for simplicity. All values are in ETH.";
 
 const MEMES_SOLD_MANUALLY = [1, 2, 3, 4];
 
@@ -34,9 +28,7 @@ export default function Royalties() {
     dateSelection,
     setDateSelection,
     fromDate,
-    setFromDate,
     toDate,
-    setToDate,
     isPrimary,
     setIsPrimary,
     isCustomBlocks,
@@ -49,9 +41,7 @@ export default function Royalties() {
     getUrl,
     getSharedProps,
     fromBlock,
-    setFromBlock,
     toBlock,
-    setToBlock,
   } = useSharedState();
 
   useEffect(() => {
@@ -150,19 +140,6 @@ export default function Royalties() {
           setIsPrimary(false);
           setIsCustomBlocks(false);
           setDateSelection(date_selection);
-        }}
-        setDates={(from_date, to_date) => {
-          setFromDate(from_date);
-          setToDate(to_date);
-          setIsPrimary(false);
-          setIsCustomBlocks(false);
-          setDateSelection(DateIntervalsSelection.CUSTOM_DATES);
-        }}
-        setblocks={(from_block, to_block) => {
-          setFromBlock(from_block);
-          setToBlock(to_block);
-          setIsPrimary(false);
-          setIsCustomBlocks(true);
         }}
         getUrl={getUrlWithParams}
         {...getSharedProps()}

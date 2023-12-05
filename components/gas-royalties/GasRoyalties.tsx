@@ -35,7 +35,7 @@ export interface HeaderProps {
   setIsCustomBlocks: (iCustomBlocks: boolean) => void;
   setDateSelection: (dateSelection: DateIntervalsSelection) => void;
   setDates: (fromDate: Date, toDate: Date) => void;
-  setblocks: (fromBlock: number, toBlock: number) => void;
+  setBlocks: (fromBlock: number, toBlock: number) => void;
 }
 
 export function getUrlParams(
@@ -305,7 +305,7 @@ export function GasRoyaltiesHeader(props: Readonly<HeaderProps>) {
         onApplyBlock={(fromBlock, toBlock) => {
           setFromBlock(fromBlock);
           setToBlock(toBlock);
-          props.setblocks(fromBlock, toBlock);
+          props.setBlocks(fromBlock, toBlock);
         }}
         onHide={() => setShowBlockPicker(false)}
       />
@@ -401,6 +401,19 @@ export function useSharedState() {
       setSelectedArtist,
       setIsPrimary,
       setIsCustomBlocks,
+      setDates: (fromDate: Date, toDate: Date) => {
+        setFromDate(fromDate);
+        setToDate(toDate);
+        setIsPrimary(false);
+        setIsCustomBlocks(false);
+        setDateSelection(DateIntervalsSelection.CUSTOM_DATES);
+      },
+      setBlocks: (fromBlock: number, toBlock: number) => {
+        setFromBlock(fromBlock);
+        setToBlock(toBlock);
+        setIsPrimary(false);
+        setIsCustomBlocks(true);
+      },
     };
   }
 
