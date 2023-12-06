@@ -20,7 +20,7 @@ export default function UserPageIdentityDeleteStatementModal({
   const modalRef = useRef<HTMLDivElement>(null);
   useClickAway(modalRef, onClose);
   useKeyPressEvent("Escape", onClose);
-  
+
   const queryClient = useQueryClient();
   const { requestAuth, setToast } = useContext(AuthContext);
 
@@ -37,6 +37,14 @@ export default function UserPageIdentityDeleteStatementModal({
       queryClient.invalidateQueries({
         queryKey: ["user-cic-statements", profile.profile?.handle],
       });
+      queryClient.invalidateQueries({
+        queryKey: [
+          "profile-logs",
+          {
+            profile: profile.profile?.handle.toLowerCase(),
+          },
+        ],
+      });
       for (const wallet of profile.consolidation.wallets) {
         queryClient.invalidateQueries({
           queryKey: [
@@ -44,10 +52,26 @@ export default function UserPageIdentityDeleteStatementModal({
             wallet.wallet.address.toLowerCase(),
           ],
         });
+        queryClient.invalidateQueries({
+          queryKey: [
+            "profile-logs",
+            {
+              profile: wallet.wallet.address.toLowerCase(),
+            },
+          ],
+        });
 
         if (wallet.wallet.ens) {
           queryClient.invalidateQueries({
             queryKey: ["user-cic-statements", wallet.wallet.ens.toLowerCase()],
+          });
+          queryClient.invalidateQueries({
+            queryKey: [
+              "profile-logs",
+              {
+                profile: wallet.wallet.ens.toLowerCase(),
+              },
+            ],
           });
         }
       }

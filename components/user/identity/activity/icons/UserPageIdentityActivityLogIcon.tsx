@@ -1,4 +1,5 @@
-import { PROFILE_ACTIVITY_TYPE } from "../../../../../entities/IProfile";
+
+import { ProfileActivityLogType } from "../../../../../entities/IProfile";
 import { assertUnreachable } from "../../../../../helpers/AllowlistToolHelpers";
 import UserPageIdentityActivityLogCICRatingIcon from "./UserPageIdentityActivityLogCICRatingIcon";
 import UserPageIdentityActivityLogContactIcon from "./UserPageIdentityActivityLogContactIcon";
@@ -10,20 +11,20 @@ import UserPageIdentityActivityLogSocialMediaVerificationPostIcon from "./UserPa
 export default function UserPageIdentityActivityLogIcon({
   logType,
 }: {
-  logType: PROFILE_ACTIVITY_TYPE;
+  logType: ProfileActivityLogType;
 }) {
   switch (logType) {
-    case PROFILE_ACTIVITY_TYPE.CIC_RATING:
+    case ProfileActivityLogType.RATING_EDIT:
       return <UserPageIdentityActivityLogCICRatingIcon />;
-    case PROFILE_ACTIVITY_TYPE.HANDLE:
+    case ProfileActivityLogType.HANDLE_EDIT:
       return <UserPageIdentityActivityLogHandleIcon />;
-    case PROFILE_ACTIVITY_TYPE.PRIMARY_WALLET:
+    case ProfileActivityLogType.PRIMARY_WALLET_EDIT:
       return <UserPageIdentityActivityLogPrimaryWalletIcon />;
-    case PROFILE_ACTIVITY_TYPE.SOCIAL_MEDIA_ACCOUNT:
+    case ProfileActivityLogType.SOCIALS_EDIT:
       return <UserPageIdentityActivityLogSocialMediaAccountIcon />;
-    case PROFILE_ACTIVITY_TYPE.CONTACT:
+    case ProfileActivityLogType.CONTACTS_EDIT:
       return <UserPageIdentityActivityLogContactIcon />;
-    case PROFILE_ACTIVITY_TYPE.SOCIAL_MEDIA_VERIFICATION_POST:
+    case ProfileActivityLogType.SOCIAL_VERIFICATION_POST_EDIT:
       return <UserPageIdentityActivityLogSocialMediaVerificationPostIcon />;
     default:
       assertUnreachable(logType);

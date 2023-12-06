@@ -1,3 +1,10 @@
+export interface Page<T> {
+  count: number;
+  page: number;
+  next: boolean;
+  data: T[];
+}
+
 export enum STATEMENT_GROUP {
   CONTACT = "CONTACT",
   SOCIAL_MEDIA_ACCOUNT = "SOCIAL_MEDIA_ACCOUNT",

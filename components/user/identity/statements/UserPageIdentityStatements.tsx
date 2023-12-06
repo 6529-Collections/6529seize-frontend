@@ -3,11 +3,6 @@ import {
   CicStatement,
   IProfileAndConsolidations,
 } from "../../../../entities/IProfile";
-import DiscordIcon from "../../utils/icons/DiscordIcon";
-
-import TelegramIcon from "../../utils/icons/TelegramIcon";
-
-import WeChatIcon from "../../utils/icons/WeChatIcon";
 import UserPageIdentityStatementsConsolidatedAddresses from "./consolidated-addresses/UserPageIdentityStatementsConsolidatedAddresses";
 import UserPageIdentityAddStatementsHeader from "./header/UserPageIdentityAddStatementsHeader";
 import { useRouter } from "next/router";
@@ -17,6 +12,7 @@ import { STATEMENT_GROUP } from "../../../../helpers/Types";
 import UserPageIdentityStatementsSocialMediaAccounts from "./social-media-accounts/UserPageIdentityStatementsSocialMediaAccounts";
 import UserPageIdentityStatementsContacts from "./contacts/UserPageIdentityStatementsContacts";
 import UserPageIdentityStatementsSocialMediaVerificationPosts from "./social-media-verification-posts/UserPageIdentityStatementsSocialMediaVerificationPosts";
+
 
 
 export default function UserPageIdentityStatements({

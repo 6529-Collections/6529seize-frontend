@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import {
-  PROFILE_ACTIVITY_TYPE,
-  PROFILE_ACTIVITY_TYPE_TO_TEXT,
+
+  PROFILE_ACTIVITY_TYPE_TO_TEXT, ProfileActivityLogType,
 } from "../../../../../entities/IProfile";
 import UserPageIdentityActivityLogIcon from "../icons/UserPageIdentityActivityLogIcon";
 
@@ -10,9 +10,9 @@ export default function UserPageIdentityActivityLogFilterListItem({
   selectedItems,
   setSelected,
 }: {
-  itemType: PROFILE_ACTIVITY_TYPE;
-  selectedItems: PROFILE_ACTIVITY_TYPE[];
-  setSelected: (selected: PROFILE_ACTIVITY_TYPE) => void;
+  itemType: ProfileActivityLogType;
+  selectedItems: ProfileActivityLogType[];
+  setSelected: (selected: ProfileActivityLogType) => void;
 }) {
   const [isSelected, setIsSelected] = useState(
     selectedItems.includes(itemType)
