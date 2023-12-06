@@ -1,8 +1,5 @@
 import Head from "next/head";
 import styles from "../styles/Home.module.scss";
-
-import Breadcrumb from "../components/breadcrumb/Breadcrumb";
-import { Container, Row, Col } from "react-bootstrap";
 import dynamic from "next/dynamic";
 import HeaderPlaceholder from "../components/header/HeaderPlaceholder";
 
@@ -18,23 +15,18 @@ const Header = dynamic(() => import("../components/header/Header"), {
   loading: () => <HeaderPlaceholder />,
 });
 
-export default function TheMemesPage() {
-  const breadcrumbs = [
-    { display: "Home", href: "/" },
-    { display: "Royalties" },
-  ];
-
+export default function MemeAccountingPage() {
   return (
     <>
       <Head>
-        <title>Royalties | 6529 SEIZE</title>
+        <title>Meme Accounting | 6529 SEIZE</title>
         <link rel="icon" href="/favicon.ico" />
-        <meta name="description" content="Royalties | 6529 SEIZE" />
+        <meta name="description" content="Meme Accounting | 6529 SEIZE" />
         <meta
           property="og:url"
-          content={`${process.env.BASE_ENDPOINT}/royalties`}
+          content={`${process.env.BASE_ENDPOINT}/meme-accounting`}
         />
-        <meta property="og:title" content="Royalties" />
+        <meta property="og:title" content="Meme Accounting" />
         <meta property="og:description" content="6529 SEIZE" />
         <meta
           property="og:image"
@@ -44,14 +36,7 @@ export default function TheMemesPage() {
 
       <main className={styles.main}>
         <Header />
-        <Breadcrumb breadcrumbs={breadcrumbs} />
-        <Container fluid className={styles.mainContainer}>
-          <Row>
-            <Col>
-              <Royalties />
-            </Col>
-          </Row>
-        </Container>
+        <Royalties />
       </main>
     </>
   );
