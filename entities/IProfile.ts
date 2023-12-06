@@ -93,24 +93,115 @@ export interface CicStatement {
   updated_at: Date | null;
 }
 
-export enum PROFILE_ACTIVITY_TYPE {
-  CIC_RATING = "CIC_RATING",
-  HANDLE = "HANDLE",
-  PRIMARY_WALLET = "PRIMARY_WALLET",
-  SOCIAL_MEDIA_ACCOUNT = "SOCIAL_MEDIA_ACCOUNT",
-  CONTACT = "CONTACT",
-  SOCIAL_MEDIA_VERIFICATION_POST = "SOCIAL_MEDIA_VERIFICATION_POST",
+export enum ProfileActivityLogTargetType {
+  PROFILE_ID = "PROFILE_ID",
+}
+
+export enum ProfileActivityLogType {
+  RATING_EDIT = "RATING_EDIT",
+  HANDLE_EDIT = "HANDLE_EDIT",
+  PRIMARY_WALLET_EDIT = "PRIMARY_WALLET_EDIT",
+  SOCIALS_EDIT = "SOCIALS_EDIT",
+  CONTACTS_EDIT = "CONTACTS_EDIT",
+  SOCIAL_VERIFICATION_POST_EDIT = "SOCIAL_VERIFICATION_POST_EDIT",
 }
 
 export const PROFILE_ACTIVITY_TYPE_TO_TEXT: Record<
-  PROFILE_ACTIVITY_TYPE,
+  ProfileActivityLogType,
   string
 > = {
-  [PROFILE_ACTIVITY_TYPE.CIC_RATING]: "CIC Rating",
-  [PROFILE_ACTIVITY_TYPE.HANDLE]: "Handle",
-  [PROFILE_ACTIVITY_TYPE.PRIMARY_WALLET]: "Primary Wallet",
-  [PROFILE_ACTIVITY_TYPE.SOCIAL_MEDIA_ACCOUNT]: "Social Media Account",
-  [PROFILE_ACTIVITY_TYPE.CONTACT]: "Contact",
-  [PROFILE_ACTIVITY_TYPE.SOCIAL_MEDIA_VERIFICATION_POST]:
+  [ProfileActivityLogType.RATING_EDIT]: "CIC Rating",
+  [ProfileActivityLogType.HANDLE_EDIT]: "Handle",
+  [ProfileActivityLogType.PRIMARY_WALLET_EDIT]: "Primary Wallet",
+  [ProfileActivityLogType.SOCIALS_EDIT]: "Social Media Account",
+  [ProfileActivityLogType.CONTACTS_EDIT]: "Contact",
+  [ProfileActivityLogType.SOCIAL_VERIFICATION_POST_EDIT]:
     "Social Media Verification Post",
 };
+
+export interface ProfileActivityLogBase {
+  readonly id: string;
+  readonly profile_id: string;
+  readonly target_id: string | null;
+  readonly target_type: ProfileActivityLogTargetType | null;
+  readonly created_at: Date;
+  readonly profile_handle: string;
+  readonly target_profile_handle: string | null;
+}
+
+export interface ProfileActivityLogRatingEdit extends ProfileActivityLogBase {
+  readonly type: ProfileActivityLogType.RATING_EDIT;
+  readonly contents: {
+    change_reason: string;
+    new_rating: number;
+    old_rating: {
+      rating: number;
+      total_tdh_spent_on_matter: number;
+    };
+    rating_category: string;
+    rating_matter: string;
+  };
+}
+
+export interface ProfileActivityLogHandleEdit extends ProfileActivityLogBase {
+  readonly type: ProfileActivityLogType.HANDLE_EDIT;
+  readonly contents: {
+    new_value: string;
+    old_value: string;
+  };
+}
+
+export interface ProfileActivityLogPrimaryWalletEdit
+  extends ProfileActivityLogBase {
+  readonly type: ProfileActivityLogType.PRIMARY_WALLET_EDIT;
+  readonly contents: {
+    new_value: string;
+    old_value: string;
+  };
+}
+
+export enum ProfileActivityLogSocialsEditContentAction {
+  ADD = "ADD",
+  DELETE = "DELETE",
+}
+
+export const PROFILE_ACTIVITY_LOG_ACTION_STR: Record<
+  ProfileActivityLogSocialsEditContentAction,
+  string
+> = {
+  [ProfileActivityLogSocialsEditContentAction.ADD]: "added",
+  [ProfileActivityLogSocialsEditContentAction.DELETE]: "removed",
+};
+
+export interface ProfileActivityLogSocialsEdit extends ProfileActivityLogBase {
+  readonly type: ProfileActivityLogType.SOCIALS_EDIT;
+  readonly contents: {
+    action: ProfileActivityLogSocialsEditContentAction;
+    statement: CicStatement;
+  };
+}
+
+export interface ProfileActivityLogContactsEdit extends ProfileActivityLogBase {
+  readonly type: ProfileActivityLogType.CONTACTS_EDIT;
+  readonly contents: {
+    action: ProfileActivityLogSocialsEditContentAction;
+    statement: CicStatement;
+  };
+}
+
+export interface ProfileActivityLogSocialVerificationPostEdit
+  extends ProfileActivityLogBase {
+  readonly type: ProfileActivityLogType.SOCIAL_VERIFICATION_POST_EDIT;
+  readonly contents: {
+    action: ProfileActivityLogSocialsEditContentAction;
+    statement: CicStatement;
+  };
+}
+
+export type ProfileActivityLog =
+  | ProfileActivityLogRatingEdit
+  | ProfileActivityLogHandleEdit
+  | ProfileActivityLogPrimaryWalletEdit
+  | ProfileActivityLogSocialsEdit
+  | ProfileActivityLogContactsEdit
+  | ProfileActivityLogSocialVerificationPostEdit;

@@ -19,8 +19,16 @@ const getHeaders = (
 export const commonApiFetch = async <T>(param: {
   endpoint: string;
   headers?: Record<string, string>;
+  params?: Record<string, string>;
 }): Promise<T> => {
-  const res = await fetch(`${process.env.API_ENDPOINT}/api/${param.endpoint}`, {
+  let url = `${process.env.API_ENDPOINT}/api/${param.endpoint}`;
+
+  if (param.params) {
+    const queryParams = new URLSearchParams(param.params);
+    url += `?${queryParams.toString()}`;
+  }
+
+  const res = await fetch(url, {
     headers: getHeaders(param.headers),
   });
   if (!res.ok) {
