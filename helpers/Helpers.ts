@@ -64,13 +64,16 @@ export function fromGWEI(from: number) {
 }
 
 export function numberWithCommasFromString(x: string) {
-  if (!/^\d+$/.test(x)) return x;
-  if (isNaN(parseInt(x))) return x;
-  return numberWithCommas(parseInt(x));
+  const cleanedInput = x.replace(/[^\d.-]/g, "");
+  if (!/^-?\d+(\.\d+)?$/.test(cleanedInput)) return x;
+  const num = parseFloat(cleanedInput);
+  if (isNaN(num)) return x;
+  return numberWithCommas(num);
 }
 
 export function numberWithCommas(x: number) {
-  if (x === null || x === 0 || isNaN(x)) return "-";
+  if (x === null || isNaN(x)) return "-";
+  if (x === 0) return "-";
   const parts = x.toString().split(".");
   parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
   return parts.join(".");
@@ -109,13 +112,13 @@ export const fullScreenSupported = () => {
   const doc: any = document;
   const el: any = doc.body;
   const check =
-    typeof el.requestFullscreen !== "undefined" ||
-    typeof el.mozRequestFullScreen !== "undefined" ||
-    typeof el.webkitRequestFullscreen !== "undefined" ||
-    typeof el.msRequestFullscreen !== "undefined" ||
-    typeof doc.exitFullscreen !== "undefined" ||
-    typeof doc.mozCancelFullScreen !== "undefined" ||
-    typeof doc.webkitExitFullscreen !== "undefined";
+    el.requestFullscreen !== "undefined" ||
+    el.mozRequestFullScreen !== "undefined" ||
+    el.webkitRequestFullscreen !== "undefined" ||
+    el.msRequestFullscreen !== "undefined" ||
+    doc.exitFullscreen !== "undefined" ||
+    doc.mozCancelFullScreen !== "undefined" ||
+    doc.webkitExitFullscreen !== "undefined";
 
   return check;
 };
@@ -333,13 +336,30 @@ export const formatNumber = (num: number): string => {
   return parseFloat((num / 1000000).toFixed(2)).toString() + "M";
 };
 
-export function displayDecimal(value: number, places: number) {
+export function displayDecimal(value: number, places: number): string {
   if (0 >= value) {
     return "-";
   }
 
-  const fixedValue = value.toFixed(places);
-  return numberWithCommas(parseFloat(fixedValue)).toString();
+  const valueAsString = value.toString();
+  const decimalPlaceIndex = valueAsString.indexOf(".");
+
+  if (decimalPlaceIndex !== -1 && value < 0.01) {
+    const exponent = Math.ceil(-Math.log10(value));
+    return Number(value.toFixed(exponent)).toString();
+  }
+
+  if (value >= 0.01) {
+    return Number(value.toFixed(2)).toLocaleString("en-US", {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    });
+  }
+
+  return value.toLocaleString("en-US", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
 }
 
 export function areEqualURLS(s1: string, s2: string) {
@@ -362,7 +382,9 @@ function formatDateFilterDate(d: Date) {
 export function getDateFilters(
   dateSelection: DateIntervalsSelection,
   fromDate: Date | undefined,
-  toDate: Date | undefined
+  toDate: Date | undefined,
+  fromBlock: number | undefined,
+  toBlock: number | undefined
 ) {
   let filters = "";
   switch (dateSelection) {
@@ -417,7 +439,7 @@ export function getDateFilters(
       filters += `&from_date=${formatDateFilterDate(firstDayOfLastYear)}`;
       filters += `&to_date=${formatDateFilterDate(lastDayOfLastYear)}`;
       break;
-    case DateIntervalsSelection.CUSTOM:
+    case DateIntervalsSelection.CUSTOM_DATES:
       if (fromDate) {
         filters += `&from_date=${formatDateFilterDate(fromDate)}`;
       }
