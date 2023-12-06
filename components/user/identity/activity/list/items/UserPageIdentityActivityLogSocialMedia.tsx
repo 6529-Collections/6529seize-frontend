@@ -3,13 +3,13 @@ import {
   ProfileActivityLogSocialsEdit,
 } from "../../../../../../entities/IProfile";
 import SocialStatementIcon from "../../../../utils/icons/SocialStatementIcon";
+import UserPageIdentityActivityLogItemTimeAgo from "./UserPageIdentityActivityLogItemTimeAgo";
 
 export default function UserPageIdentityActivityLogSocialMedia({
   log,
 }: {
   log: ProfileActivityLogSocialsEdit;
 }) {
-  console.log(log);
   return (
     <li className="tw-py-4">
       <div className="tw-flex tw-items-center tw-justify-between tw-gap-x-3">
@@ -45,10 +45,7 @@ export default function UserPageIdentityActivityLogSocialMedia({
             </span>
           </div>
         </div>
-        <span className="tw-flex-none tw-text-[0.8125rem] tw-leading-5 tw-text-neutral-500">
-          <span>1h</span>
-          <span className="tw-ml-1">ago</span>
-        </span>
+        <UserPageIdentityActivityLogItemTimeAgo log={log} />
       </div>
     </li>
   );

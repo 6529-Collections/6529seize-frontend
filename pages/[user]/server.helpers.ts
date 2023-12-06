@@ -28,7 +28,6 @@ const getEnsAndConsolidatedTDH = async (
     endpoint: `user/${address}`,
     headers,
   });
-
   const consolidationKey = ens?.consolidation_key ?? null;
   const consolidatedTDH = consolidationKey
     ? await commonApiFetch<ConsolidatedTDHMetrics>({
@@ -189,7 +188,6 @@ export const getOwned = async ({
     return acc;
   }, []);
 };
-
 
 export const getCommonHeaders = (req: any): Record<string, string> => {
   const authCookie = req?.req?.cookies["x-6529-auth"] ?? null;

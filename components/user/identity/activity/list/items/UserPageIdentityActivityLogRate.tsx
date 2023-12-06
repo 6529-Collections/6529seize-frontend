@@ -1,5 +1,6 @@
 import { ProfileActivityLogRatingEdit } from "../../../../../../entities/IProfile";
 import { formatNumberWithCommas } from "../../../../../../helpers/Helpers";
+import UserPageIdentityActivityLogItemTimeAgo from "./UserPageIdentityActivityLogItemTimeAgo";
 
 export default function UserPageIdentityActivityLogRate({
   log,
@@ -48,10 +49,7 @@ export default function UserPageIdentityActivityLogRate({
             </span>
           </div>
         </div>
-        <span className="tw-flex-none tw-text-[0.8125rem] tw-leading-5 tw-text-neutral-500">
-          <span>1h</span>
-          <span className="tw-ml-1">ago</span>
-        </span>
+        <UserPageIdentityActivityLogItemTimeAgo log={log} />
       </div>
     </li>
   );

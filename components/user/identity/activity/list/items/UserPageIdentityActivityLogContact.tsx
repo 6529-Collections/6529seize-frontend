@@ -4,6 +4,7 @@ import {
 } from "../../../../../../entities/IProfile";
 import DiscordIcon from "../../../../utils/icons/DiscordIcon";
 import SocialStatementIcon from "../../../../utils/icons/SocialStatementIcon";
+import UserPageIdentityActivityLogItemTimeAgo from "./UserPageIdentityActivityLogItemTimeAgo";
 
 export default function UserPageIdentityActivityLogContact({
   log,
@@ -46,10 +47,7 @@ export default function UserPageIdentityActivityLogContact({
             </span>
           </div>
         </div>
-        <span className="tw-flex-none tw-text-[0.8125rem] tw-leading-5 tw-text-neutral-500">
-          <span>1h</span>
-          <span className="tw-ml-1">ago</span>
-        </span>
+        <UserPageIdentityActivityLogItemTimeAgo log={log} />
       </div>
     </li>
   );

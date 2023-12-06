@@ -1,5 +1,7 @@
 import { ProfileActivityLogPrimaryWalletEdit } from "../../../../../../entities/IProfile";
+import { formatAddress } from "../../../../../../helpers/Helpers";
 import EthereumIcon from "../../../../utils/icons/EthereumIcon";
+import UserPageIdentityActivityLogItemTimeAgo from "./UserPageIdentityActivityLogItemTimeAgo";
 
 export default function UserPageIdentityActivityLogPrimaryWallet({
   log,
@@ -21,7 +23,7 @@ export default function UserPageIdentityActivityLogPrimaryWallet({
               primary wallet
             </span>
             <span className="tw-text-sm tw-font-semibold tw-text-neutral-100">
-              {log.contents.old_value}
+              {formatAddress(log.contents.old_value)}
             </span>
             <svg
               className="tw-h-5 tw-w-5 tw-text-neutral-400"
@@ -38,14 +40,11 @@ export default function UserPageIdentityActivityLogPrimaryWallet({
               />
             </svg>
             <span className="tw-truncate tw-max-w-[12rem] tw-text-sm tw-font-semibold tw-text-neutral-100">
-              {log.contents.new_value}
+              {formatAddress(log.contents.new_value)}
             </span>
           </div>
         </div>
-        <span className="tw-flex-none tw-text-[0.8125rem] tw-leading-5 tw-text-neutral-500">
-          <span>1h</span>
-          <span className="tw-ml-1">ago</span>
-        </span>
+        <UserPageIdentityActivityLogItemTimeAgo log={log} />
       </div>
     </li>
   );

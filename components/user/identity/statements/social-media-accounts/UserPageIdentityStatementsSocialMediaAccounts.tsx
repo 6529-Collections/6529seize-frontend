@@ -39,6 +39,7 @@ export default function UserPageIdentityStatementsSocialMediaAccounts({
       <UserPageIdentityStatementsStatementsList
         statements={statements}
         profile={profile}
+        noItemsMessage="No Social Media Account added yet."
       />
     </div>
   );

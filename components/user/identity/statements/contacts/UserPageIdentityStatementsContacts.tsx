@@ -39,6 +39,7 @@ export default function UserPageIdentityStatementsContacts({
       <UserPageIdentityStatementsStatementsList
         statements={statements}
         profile={profile}
+        noItemsMessage="No Contact added yet."
       />
     </div>
   );

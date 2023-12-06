@@ -11,17 +11,19 @@ import { amIUser } from "../../../../../helpers/Helpers";
 export default function UserPageIdentityStatementsStatementsList({
   statements,
   profile,
+  noItemsMessage,
 }: {
   statements: CicStatement[];
   profile: IProfileAndConsolidations;
-  }) {
-    const { address } = useAccount();
-    const [isMyProfile, setIsMyProfile] = useState<boolean>(false);
+  noItemsMessage: string;
+}) {
+  const { address } = useAccount();
+  const [isMyProfile, setIsMyProfile] = useState<boolean>(false);
 
-    useEffect(
-      () => setIsMyProfile(amIUser({ profile, address })),
-      [profile, address]
-    );
+  useEffect(
+    () => setIsMyProfile(amIUser({ profile, address })),
+    [profile, address]
+  );
   return (
     <ul className="tw-mt-6 tw-list-none tw-space-y-2 tw-inline-flex tw-flex-col tw-pl-0 tw-text-base tw-leading-7 tw-text-gray-600">
       {statements.map((statement) => (
@@ -32,7 +34,11 @@ export default function UserPageIdentityStatementsStatementsList({
           isMyProfile={isMyProfile}
         />
       ))}
-      <span className="tw-text-sm tw-italic tw-text-neutral-500">No Social Media Account added</span>
+      {!statements.length && (
+        <span className="tw-text-sm tw-italic tw-text-neutral-500">
+          {noItemsMessage}
+        </span>
+      )}
     </ul>
   );
 }

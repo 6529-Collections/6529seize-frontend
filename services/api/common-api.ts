@@ -22,7 +22,6 @@ export const commonApiFetch = async <T>(param: {
   params?: Record<string, string>;
 }): Promise<T> => {
   let url = `${process.env.API_ENDPOINT}/api/${param.endpoint}`;
-
   if (param.params) {
     const queryParams = new URLSearchParams(param.params);
     url += `?${queryParams.toString()}`;

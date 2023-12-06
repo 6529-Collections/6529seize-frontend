@@ -1,13 +1,9 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   IProfileAndConsolidations,
   ProfileActivityLog,
-  ProfileActivityLogContents,
   ProfileActivityLogType,
 } from "../../../../entities/IProfile";
-import DiscordIcon from "../../utils/icons/DiscordIcon";
-import EthereumIcon from "../../utils/icons/EthereumIcon";
-import XIcon from "../../utils/icons/XIcon";
 import UserPageIdentityActivityLogHeader from "./UserPageIdentityActivityLogHeader";
 import UserPageIdentityActivityLogFilter from "./filter/UserPageIdentityActivityLogFilter";
 import { Page } from "../../../../helpers/Types";
@@ -35,6 +31,15 @@ export default function UserPageIdentityActivityLog({
     }
   };
 
+  const [logTypeParams, setLogTypeParams] = useState<string>("");
+  useEffect(() => {
+    if (!selectedFilters.length) {
+      setLogTypeParams("");
+      return;
+    }
+    setLogTypeParams(selectedFilters.map((f) => f.toLowerCase()).join(","));
+  }, [selectedFilters]);
+
   const {
     isLoading,
     isError,
@@ -47,6 +52,7 @@ export default function UserPageIdentityActivityLog({
         profile: user,
         page: 1,
         page_size: 100,
+        log_type: logTypeParams,
       },
     ],
     queryFn: async () =>
@@ -56,12 +62,12 @@ export default function UserPageIdentityActivityLog({
           profile: user,
           page: "1",
           page_size: "100",
+          log_type: logTypeParams,
         },
       }),
     enabled: !!user,
     // initialData: initialProfile,
   });
-
   return (
     <div className="tw-bg-neutral-900 tw-border tw-border-white/5 tw-border-solid tw-rounded-xl">
       <UserPageIdentityActivityLogHeader profile={profile} />
@@ -70,7 +76,6 @@ export default function UserPageIdentityActivityLog({
           selected={selectedFilters}
           setSelected={onFilter}
         />
-
         <UserPageIdentityActivityLogList logs={logs?.data ?? []} />
       </div>
     </div>
