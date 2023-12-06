@@ -155,6 +155,24 @@ export function GasRoyaltiesHeader(props: Readonly<HeaderProps>) {
     return <span>{label}</span>;
   }
 
+  function getFileName() {
+    const title = props.title.toLowerCase().replaceAll(" ", "-");
+    const focus = props.focus.toLowerCase().replaceAll(" ", "-");
+    let filters = "all";
+    if (props.is_primary) {
+      filters = "primary-sales";
+    } else if (props.is_custom_blocks) {
+      filters = `blocks_${fromBlock}-${toBlock}`;
+    } else if (props.date_selection === DateIntervalsSelection.CUSTOM_DATES) {
+      filters = `dates_${fromDate?.toISOString().slice(0, 10)}-${toDate
+        ?.toISOString()
+        .slice(0, 10)}`;
+    } else {
+      filters = `${props.date_selection.toLowerCase().replaceAll(" ", "-")}`;
+    }
+    return `${title}_${focus}_${filters}.csv`;
+  }
+
   return (
     <>
       <Breadcrumb breadcrumbs={breadcrumbs} />
@@ -215,9 +233,7 @@ export function GasRoyaltiesHeader(props: Readonly<HeaderProps>) {
               {!props.fetching && props.results_count > 0 && (
                 <DownloadUrlWidget
                   preview=""
-                  name={`${props.title.toLowerCase().replaceAll(" ", "-")}_${
-                    props.focus
-                  }_${props.date_selection.toLowerCase().replaceAll(" ", "-")}`}
+                  name={getFileName()}
                   url={`${props.getUrl()}&download=true`}
                 />
               )}
