@@ -5,6 +5,7 @@ import {
   NEXTGEN_MINTER_ABI,
 } from "../../abis";
 
+export const NEXTGEN_CHAIN_NAME = "eth-goerli";
 export const NEXTGEN_CHAIN_ID = goerli.id;
 
 export enum FunctionSelectors {

@@ -131,7 +131,7 @@ export default function NextGenToken(props: Readonly<Props>) {
                   </Col>
                 </Row>
                 <Row className="pt-2">
-                  <Col>
+                  <Col className="text-center">
                     <NextGenTokenImage
                       token={token}
                       setMetadata={(url) => setMetadata(url)}

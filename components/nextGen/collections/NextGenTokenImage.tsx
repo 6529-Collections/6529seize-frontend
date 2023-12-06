@@ -4,6 +4,7 @@ import { TokenURI } from "../nextgen_entities";
 import Image from "next/image";
 import { parseIpfsUrl } from "../../../helpers/Helpers";
 import { useEffect, useState } from "react";
+import { NEXTGEN_CHAIN_NAME, NEXTGEN_CORE } from "../nextgen_contracts";
 
 interface Props {
   token: TokenURI;
@@ -20,7 +21,7 @@ export function NextGenTokenImageContent(props: Readonly<Props>) {
   const [animation, setAnimation] = useState<string>();
 
   const generatorUrl = `https://nextgen-generator.seize.io/png/${props.token.id}`;
-  const cloudfrontUrl = `https://d3lqz0a4bldqgf.cloudfront.net/nextgen/tokens/images/${props.token.id}.png`;
+  const cloudfrontUrl = `https://d3lqz0a4bldqgf.cloudfront.net/nextgen/tokens/images/${NEXTGEN_CHAIN_NAME}-${NEXTGEN_CORE.contract}/${props.token.id}.png`;
 
   useEffect(() => {
     setImage(props.token.image);
@@ -33,7 +34,7 @@ export function NextGenTokenImageContent(props: Readonly<Props>) {
         if (data.image) {
           setImage(parseIpfsUrl(data.image));
         }
-        if (!props.preview && data.animation_url) {
+        if (data.animation_url) {
           setAnimation(parseIpfsUrl(data.animation_url));
         }
         if (data.name && props.setName) props.setName(data.name);
@@ -65,7 +66,7 @@ export function NextGenTokenImageContent(props: Readonly<Props>) {
         title={`NextGen Token ${props.token.id}`}
       />
     );
-  } else if (animation) {
+  } else if (animation && !props.preview) {
     content = (
       <iframe src={animation} title={`NextGen Token ${props.token.id}`} />
     );

@@ -414,9 +414,7 @@ function formatDateFilterDate(d: Date) {
 export function getDateFilters(
   dateSelection: DateIntervalsSelection,
   fromDate: Date | undefined,
-  toDate: Date | undefined,
-  fromBlock: number | undefined,
-  toBlock: number | undefined
+  toDate: Date | undefined
 ) {
   let filters = "";
   switch (dateSelection) {
