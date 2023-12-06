@@ -46,6 +46,8 @@ export default function GradientPage(props: Readonly<Props>) {
   const [collectionCount, setCollectionCount] = useState(-1);
   const [collectionRank, setCollectionRank] = useState(-1);
 
+  const [nfts, setNfts] = useState<NFT[]>([]);
+
   useEffect(() => {
     if (router.isReady) {
       if (router.query.id) {
@@ -100,6 +102,7 @@ export default function GradientPage(props: Readonly<Props>) {
           const rankedNFTs = newnfts.sort((a, b) =>
             a.tdh_rank > b.tdh_rank ? 1 : -1
           );
+          setNfts(newnfts);
           setCollectionCount(newnfts.length);
           if (nftId) {
             setCollectionRank(
@@ -110,13 +113,13 @@ export default function GradientPage(props: Readonly<Props>) {
       });
     }
     if (router.isReady && nftId) {
-      const initialUrlNfts = `${process.env.API_ENDPOINT}/api/nfts/gradients`;
+      const initialUrlNfts = `${process.env.API_ENDPOINT}/api/nfts/gradients?&page_size=101`;
       fetchNfts(initialUrlNfts, []);
     }
   }, [router.isReady, nftId]);
 
   useEffect(() => {
-    if (props.wallets.length > 0 && nftId) {
+    if (nftId) {
       fetchUrl(
         `${process.env.API_ENDPOINT}/api/transactions?contract=${GRADIENT_CONTRACT}&id=${nftId}`
       ).then((response: DBResponse) => {
@@ -320,6 +323,7 @@ export default function GradientPage(props: Readonly<Props>) {
                   <tbody>
                     {transactions.map((tr) => (
                       <LatestActivityRow
+                        nft={nfts.find((n) => n.id === tr.token_id)}
                         tr={tr}
                         key={`${tr.from_address}-${tr.to_address}-${tr.transaction}-${tr.token_id}`}
                       />

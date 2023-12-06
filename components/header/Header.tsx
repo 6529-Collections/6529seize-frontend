@@ -287,8 +287,8 @@ export default function Header(props: Readonly<Props>) {
                 </Row>
                 <Row className="pt-3">
                   <Col>
-                    <a href="/royalties">
-                      <h3>Royalties</h3>
+                    <a href="/meme-accounting">
+                      <h3>Meme Accounting </h3>
                     </a>
                   </Col>
                 </Row>
@@ -735,9 +735,9 @@ export default function Header(props: Readonly<Props>) {
                               <NavDropdown.Item
                                 className={styles.dropdownItem}
                                 onClick={() =>
-                                  (window.location.href = "/royalties")
+                                  (window.location.href = "/meme-accounting")
                                 }>
-                                Royalties
+                                Meme Accounting
                               </NavDropdown.Item>
                               <NavDropdown.Item
                                 className={styles.dropdownItem}
