@@ -8,15 +8,15 @@ import { Owner } from "../../entities/IOwner";
 import { SortDirection } from "../../entities/ISort";
 import {
   areEqualAddresses,
-  getDateDisplay,
   getValuesForVolumeType,
   numberWithCommas,
   printMintDate,
 } from "../../helpers/Helpers";
 import { useRouter } from "next/router";
-import { fetchAllPages } from "../../services/6529api";
+import { fetchAllPages, fetchUrl } from "../../services/6529api";
 import NFTImage from "../nft-image/NFTImage";
 import DotLoader from "../dotLoader/DotLoader";
+import { DBResponse } from "../../entities/IDBResponse";
 
 enum Sort {
   AGE = "age",
@@ -72,10 +72,14 @@ export default function MemeLabComponent(props: Props) {
   const [sort, setSort] = useState<Sort>();
 
   const [nfts, setNfts] = useState<LabNFT[]>([]);
+  const [nftsNextPage, setNftsNextPage] = useState<string>(
+    `${process.env.API_ENDPOINT}/api/nfts_memelab?page_size=40&sort_direction=desc`
+  );
   const [nftMetas, setNftMetas] = useState<LabExtendedData[]>([]);
   const [nftBalances, setNftBalances] = useState<Owner[]>([]);
   const [balancesLoaded, setBalancesLoaded] = useState(false);
   const [nftsLoaded, setNftsLoaded] = useState(false);
+  const [nftMetasLoaded, setNftMetasLoaded] = useState(false);
   const [labArtists, setLabArtists] = useState<string[]>([]);
   const [labCollections, setLabCollections] = useState<string[]>([]);
 
@@ -100,21 +104,24 @@ export default function MemeLabComponent(props: Props) {
         }
       });
       setLabCollections(myCollections.sort());
-      if (responseNftMetas.length > 0) {
-        const tokenIds = responseNftMetas.map((n: LabExtendedData) => n.id);
-        fetchAllPages(
-          `${process.env.API_ENDPOINT}/api/nfts_memelab?id=${tokenIds.join(
-            ","
-          )}`
-        ).then((responseNfts: any[]) => {
-          setNfts(responseNfts);
-        });
-      } else {
-        setNfts([]);
-        setNftsLoaded(true);
-      }
+      setNftMetasLoaded(true);
     });
   }, []);
+
+  function fetchNfts(url: string) {
+    fetchUrl(url).then((responseNfts: DBResponse) => {
+      setNfts([...nfts, ...responseNfts.data]);
+      setNftsNextPage(responseNfts.next);
+    });
+  }
+
+  useEffect(() => {
+    if (nftsNextPage) {
+      fetchNfts(nftsNextPage);
+    } else {
+      setNftsLoaded(true);
+    }
+  }, [nftsNextPage]);
 
   useEffect(() => {
     if (props.wallets.length > 0 && nftMetas.length > 0) {
