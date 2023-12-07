@@ -17,7 +17,7 @@ export default function UserPageHeaderStats({
     <div className="tw-mt-6">
       <div className="tw-flex tw-gap-x-8">
         <div className="tw-flex tw-flex-col">
-          <span className="tw-block tw-text-sm tw-font-medium tw-text-neutral-400">
+          <span className="tw-block tw-text-sm tw-font-medium tw-text-iron-400">
             TDH
           </span>
           <div className="tw-mt-2 tw-inline-flex tw-items-center tw-gap-x-2">
@@ -25,14 +25,14 @@ export default function UserPageHeaderStats({
               {tdhRank}
             </span>
             {TDHFormatted && (
-              <span className="tw-inline-flex tw-items-center tw-rounded-lg tw-bg-neutral-800 tw-px-2 tw-py-1 tw-text-sm tw-font-medium tw-text-neutral-300 tw-ring-1 tw-ring-inset tw-ring-neutral-500/5">
+              <span className="tw-inline-flex tw-items-center tw-rounded-lg tw-bg-iron-800 tw-px-2 tw-py-1 tw-text-sm tw-font-medium tw-text-iron-300 tw-ring-1 tw-ring-inset tw-ring-iron-500/5">
                 {TDHFormatted}
               </span>
             )}
           </div>
         </div>
         <div className="tw-flex tw-flex-col">
-          <span className="tw-block tw-text-sm tw-font-medium tw-text-neutral-400">
+          <span className="tw-block tw-text-sm tw-font-medium tw-text-iron-400">
             Rep
           </span>
           <div className="tw-mt-2 tw-inline-flex tw-items-center tw-gap-x-2">

@@ -62,7 +62,7 @@ export default function UserPageIdentityNoProfile({
     <div className="tw-mt-6 tw-inline-flex tw-items-center tw-rounded-lg tw-bg-white/5 tw-border tw-border-solid tw-border-white/10 tw-px-4 tw-py-3">
       <div className="tw-flex tw-items-center">
         <svg
-          className="tw-flex-shrink- tw-self-center tw-w-5 tw-h-5 tw-text-neutral-400"
+          className="tw-flex-shrink- tw-self-center tw-w-5 tw-h-5 tw-text-iron-400"
           viewBox="0 0 24 24"
           fill="none"
           xmlns="http://www.w3.org/2000/svg"
@@ -76,9 +76,9 @@ export default function UserPageIdentityNoProfile({
           />
         </svg>
         <div className="tw-ml-3 tw-self-center">
-          <h3 className="tw-text-sm tw-mb-0 tw-font-semibold tw-text-neutral-400">
+          <h3 className="tw-text-sm tw-mb-0 tw-font-semibold tw-text-iron-400">
             Address
-            <span className="tw-px-1.5 tw-font-semibold tw-text-neutral-100">
+            <span className="tw-px-1.5 tw-font-semibold tw-text-iron-100">
               {user}
             </span>
             have not set up profile yet.

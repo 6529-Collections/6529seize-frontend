@@ -74,10 +74,10 @@ export default function UserSettingsImgSelectFile({
         className={`
         ${
           dragging
-            ? "tw-border-neutral-500 tw-bg-neutral-700"
-            : "tw-bg-neutral-800 tw-border-neutral-600"
+            ? "tw-border-iron-500 tw-bg-iron-700"
+            : "tw-bg-iron-800 tw-border-iron-600"
         }
-      tw-flex tw-flex-col tw-items-center tw-justify-center tw-w-full tw-h-64 tw-border-2 tw-border-dashed tw-rounded-lg tw-cursor-pointer  hover:tw-border-neutral-500 hover:tw-bg-neutral-700 tw-transition tw-duration-300 tw-ease-out
+      tw-flex tw-flex-col tw-items-center tw-justify-center tw-w-full tw-h-64 tw-border-2 tw-border-dashed tw-rounded-lg tw-cursor-pointer  hover:tw-border-iron-500 hover:tw-bg-iron-700 tw-transition tw-duration-300 tw-ease-out
       `}
       >
         <div className="tw-flex tw-flex-col tw-items-center tw-justify-center tw-pt-5 tw-pb-6">
@@ -86,13 +86,13 @@ export default function UserSettingsImgSelectFile({
               <img
                 src={imageToShow}
                 alt="Profile image"
-                className="tw-h-full tw-w-full tw-object-contain tw-bg-neutral-700 tw-rounded-sm"
+                className="tw-h-full tw-w-full tw-object-contain tw-bg-iron-700 tw-rounded-sm"
               />
             )}
           </div>
 
           <svg
-            className="tw-w-8 tw-h-8 tw-mb-4 tw-text-neutral-400"
+            className="tw-w-8 tw-h-8 tw-mb-4 tw-text-iron-400"
             viewBox="0 0 24 24"
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
@@ -105,13 +105,13 @@ export default function UserSettingsImgSelectFile({
               strokeLinejoin="round"
             />
           </svg>
-          <p className="tw-mb-2 tw-text-sm tw-font-normal tw-text-neutral-400">
+          <p className="tw-mb-2 tw-text-sm tw-font-normal tw-text-iron-400">
             <span className="tw-font-medium tw-text-white">
               Click to upload
             </span>{" "}
             or drag and drop
           </p>
-          <p className="tw-text-xs tw-font-normal tw-text-neutral-400">
+          <p className="tw-text-xs tw-font-normal tw-text-iron-400">
             JPEG, JPG, PNG, GIF, WEBP
           </p>
         </div>

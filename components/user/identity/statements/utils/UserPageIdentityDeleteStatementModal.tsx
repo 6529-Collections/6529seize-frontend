@@ -91,7 +91,7 @@ export default function UserPageIdentityDeleteStatementModal({
         <div className="tw-flex tw-min-h-full tw-items-end tw-justify-center tw-p-4 tw-text-center sm:tw-items-center sm:tw-p-0">
           <div
             ref={modalRef}
-            className="sm:tw-max-w-xl tw-relative tw-w-full tw-transform tw-rounded-xl tw-bg-neutral-900 tw-text-left tw-shadow-xl tw-transition-all tw-duration-500 sm:tw-w-full tw-p-6"
+            className="sm:tw-max-w-xl tw-relative tw-w-full tw-transform tw-rounded-xl tw-bg-iron-900 tw-text-left tw-shadow-xl tw-transition-all tw-duration-500 sm:tw-w-full tw-p-6"
           >
             <div className="tw-flex tw-justify-between">
               <div className="tw-max-w-xl tw-flex tw-space-x-4">
@@ -114,10 +114,10 @@ export default function UserPageIdentityDeleteStatementModal({
                   </span>
                 </div>
                 <div className="tw-max-w-sm tw-flex tw-flex-col">
-                  <p className=" tw-text-lg tw-text-neutral-50 tw-font-medium tw-mb-0">
+                  <p className=" tw-text-lg tw-text-iron-50 tw-font-medium tw-mb-0">
                     Delete Statement
                   </p>
-                  <p className="tw-mt-1 tw-mb-0 tw-text-sm tw-text-neutral-400">
+                  <p className="tw-mt-1 tw-mb-0 tw-text-sm tw-text-iron-400">
                     Are you sure you want to delete this statement? This action
                     cannot be undone.
                   </p>
@@ -127,7 +127,7 @@ export default function UserPageIdentityDeleteStatementModal({
                 <button
                   onClick={onClose}
                   type="button"
-                  className="tw-p-2.5 tw-flex tw-items-center tw-justify-center tw-rounded-full tw-bg-neutral-900 tw-border-0 tw-text-neutral-400 hover:tw-text-neutral-50 focus:tw-outline-none tw-transition tw-duration-300 tw-ease-out"
+                  className="tw-p-2.5 tw-flex tw-items-center tw-justify-center tw-rounded-full tw-bg-iron-900 tw-border-0 tw-text-iron-400 hover:tw-text-iron-50 focus:tw-outline-none tw-transition tw-duration-300 tw-ease-out"
                 >
                   <span className="tw-sr-only tw-text-sm">Close</span>
                   <svg
@@ -160,7 +160,7 @@ export default function UserPageIdentityDeleteStatementModal({
                   <button
                     onClick={onClose}
                     type="button"
-                    className="tw-mt-3 sm:tw-mt-0 tw-w-full sm:tw-w-auto tw-cursor-pointer tw-bg-neutral-900 tw-px-4 tw-py-3 tw-text-sm tw-font-semibold tw-text-white tw-border tw-border-solid tw-border-neutral-600 tw-rounded-lg hover:tw-bg-neutral-800 hover:tw-border-neutral-700 tw-transition tw-duration-300 tw-ease-out"
+                    className="tw-mt-3 sm:tw-mt-0 tw-w-full sm:tw-w-auto tw-cursor-pointer tw-bg-iron-900 tw-px-4 tw-py-3 tw-text-sm tw-font-semibold tw-text-white tw-border tw-border-solid tw-border-iron-600 tw-rounded-lg hover:tw-bg-iron-800 hover:tw-border-iron-700 tw-transition tw-duration-300 tw-ease-out"
                   >
                     Cancel
                   </button>

@@ -69,13 +69,18 @@ export default function UserPageIdentityActivityLog({
     // initialData: initialProfile,
   });
   return (
-    <div className="tw-bg-neutral-900 tw-border tw-border-white/5 tw-border-solid tw-rounded-xl">
+    <div className="tw-bg-iron-900 tw-border tw-border-white/5 tw-border-solid tw-rounded-xl">
       <UserPageIdentityActivityLogHeader profile={profile} />
-      <div className="tw-max-h-[28rem] tw-transform-gpu tw-scroll-py-3 tw-overflow-y-auto">
+      <div className="tw-min-h-[22rem] tw-max-h-[28rem] tw-transform-gpu tw-scroll-py-3 tw-overflow-auto">
         <UserPageIdentityActivityLogFilter
           selected={selectedFilters}
           setSelected={onFilter}
         />
+        <div className="tw-mt-4 tw-hidden">
+          <span className="tw-px-8 tw-text-sm tw-italic tw-text-iron-500">
+            No Activity Log
+          </span>
+        </div>
         <UserPageIdentityActivityLogList logs={logs?.data ?? []} />
       </div>
     </div>

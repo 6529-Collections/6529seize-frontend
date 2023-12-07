@@ -11,10 +11,10 @@ export default function UserPageIdentityAddStatementsSelect({
     <>
       <div className="tw-flex tw-justify-between">
         <div className="tw-max-w-xl tw-flex tw-flex-col">
-          <p className="tw-max-w-sm tw-text-lg tw-text-neutral-50 tw-font-medium tw-mb-0">
+          <p className="tw-max-w-sm tw-text-lg tw-text-iron-50 tw-font-medium tw-mb-0">
             Add Statements About Your Identity
           </p>
-          <p className="tw-mt-2 tw-text-sm tw-font-normal tw-text-neutral-400 tw-mb-0">
+          <p className="tw-mt-2 tw-text-sm tw-font-normal tw-text-iron-400 tw-mb-0">
             Seize users can make statements asserting their identity (eponymous,
             pseudonymous or organizational). It is up to the community to
             evaluate if they are accurate.
@@ -24,7 +24,7 @@ export default function UserPageIdentityAddStatementsSelect({
           <button
             onClick={onClose}
             type="button"
-            className="tw-p-2.5 tw-flex tw-items-center tw-justify-center tw-rounded-full tw-bg-neutral-900 tw-border-0 tw-text-neutral-400 hover:tw-text-neutral-50 focus:tw-outline-none tw-transition tw-duration-300 tw-ease-out"
+            className="tw-p-2.5 tw-flex tw-items-center tw-justify-center tw-rounded-full tw-bg-iron-900 tw-border-0 tw-text-iron-400 hover:tw-text-iron-50 focus:tw-outline-none tw-transition tw-duration-300 tw-ease-out"
           >
             <span className="tw-sr-only tw-text-sm">Close</span>
             <svg
@@ -48,12 +48,12 @@ export default function UserPageIdentityAddStatementsSelect({
       <div className="tw-mt-8 sm:tw-grid sm:tw-grid-cols-3 tw-gap-6">
         <div
           onClick={() => onViewChange(STATEMENT_ADD_VIEW.SOCIAL_MEDIA_ACCOUNT)}
-          className="tw-cursor-pointer tw-rounded-lg tw-group tw-relative tw-bg-neutral-800/80 tw-border tw-border-solid tw-border-white/5 hover:tw-bg-neutral-800 tw-p-6 tw-transition tw-duration-300 tw-ease-out"
+          className="tw-cursor-pointer tw-rounded-lg tw-group tw-relative tw-bg-iron-800/80 tw-border tw-border-solid tw-border-white/5 hover:tw-bg-iron-800 tw-p-6 tw-transition tw-duration-300 tw-ease-out"
         >
           <div>
-            <span className="tw-inline-flex tw-items-center tw-justify-center tw-rounded-xl tw-h-11 tw-w-11 tw-bg-neutral-700/60 tw-border tw-border-solid tw-border-neutral-600/20">
+            <span className="tw-inline-flex tw-items-center tw-justify-center tw-rounded-xl tw-h-11 tw-w-11 tw-bg-iron-700/60 tw-border tw-border-solid tw-border-iron-600/20">
               <svg
-                className="tw-flex-shrink-0 tw-h-6 tw-w-6 tw-text-neutral-50 group-hover:tw-scale-105 tw-transition tw-duration-300 tw-ease-out"
+                className="tw-flex-shrink-0 tw-h-6 tw-w-6 tw-text-iron-50 group-hover:tw-scale-105 tw-transition tw-duration-300 tw-ease-out"
                 viewBox="0 0 24 24"
                 fill="none"
                 xmlns="http://www.w3.org/2000/svg"
@@ -69,22 +69,22 @@ export default function UserPageIdentityAddStatementsSelect({
             </span>
           </div>
           <div className="tw-mt-8">
-            <p className="tw-mb-0 tw-text-sm tw-font-semibold tw-text-neutral-50">
+            <p className="tw-mb-0 tw-text-sm tw-font-semibold tw-text-iron-50">
               Social Media Accounts
             </p>
-            <p className="tw-mt-1 tw-mb-0 tw-text-sm tw-text-neutral-500">
+            <p className="tw-mt-1 tw-mb-0 tw-text-sm tw-text-iron-500">
               Your handle on social media platforms.
             </p>
           </div>
         </div>
         <div
           onClick={() => onViewChange(STATEMENT_ADD_VIEW.CONTACT)}
-          className="tw-group tw-cursor-pointer tw-rounded-lg tw-group tw-relative tw-bg-neutral-800/80 tw-border tw-border-solid tw-border-white/5 hover:tw-bg-neutral-800 tw-p-6 tw-transition tw-duration-300 tw-ease-out"
+          className="tw-group tw-cursor-pointer tw-rounded-lg tw-group tw-relative tw-bg-iron-800/80 tw-border tw-border-solid tw-border-white/5 hover:tw-bg-iron-800 tw-p-6 tw-transition tw-duration-300 tw-ease-out"
         >
           <div>
-            <span className="tw-inline-flex tw-items-center tw-justify-center tw-rounded-xl tw-h-11 tw-w-11 tw-bg-neutral-700/60 tw-border tw-border-solid tw-border-neutral-600/20">
+            <span className="tw-inline-flex tw-items-center tw-justify-center tw-rounded-xl tw-h-11 tw-w-11 tw-bg-iron-700/60 tw-border tw-border-solid tw-border-iron-600/20">
               <svg
-                className="tw-flex-shrink-0 tw-h-6 tw-w-6 tw-text-neutral-50 group-hover:tw-scale-105 tw-transition tw-duration-300 tw-ease-out"
+                className="tw-flex-shrink-0 tw-h-6 tw-w-6 tw-text-iron-50 group-hover:tw-scale-105 tw-transition tw-duration-300 tw-ease-out"
                 viewBox="0 0 24 24"
                 fill="none"
                 xmlns="http://www.w3.org/2000/svg"
@@ -100,10 +100,10 @@ export default function UserPageIdentityAddStatementsSelect({
             </span>
           </div>
           <div className="tw-mt-8">
-            <p className="tw-mb-0 tw-text-sm tw-font-semibold tw-text-neutral-50">
+            <p className="tw-mb-0 tw-text-sm tw-font-semibold tw-text-iron-50">
               Contact
             </p>
-            <p className="tw-mt-1 tw-mb-0 tw-text-sm tw-text-neutral-500">
+            <p className="tw-mt-1 tw-mb-0 tw-text-sm tw-text-iron-500">
               Your handle on messaging platforms.
             </p>
           </div>
@@ -112,12 +112,12 @@ export default function UserPageIdentityAddStatementsSelect({
           onClick={() =>
             onViewChange(STATEMENT_ADD_VIEW.SOCIAL_MEDIA_VERIFICATION_POST)
           }
-          className="tw-cursor-pointer tw-rounded-lg tw-group tw-relative tw-bg-neutral-800/80 tw-border tw-border-solid tw-border-white/5 hover:tw-bg-neutral-800 tw-p-6 tw-transition tw-duration-300 tw-ease-out"
+          className="tw-cursor-pointer tw-rounded-lg tw-group tw-relative tw-bg-iron-800/80 tw-border tw-border-solid tw-border-white/5 hover:tw-bg-iron-800 tw-p-6 tw-transition tw-duration-300 tw-ease-out"
         >
           <div>
-            <span className="tw-inline-flex tw-items-center tw-justify-center tw-rounded-xl tw-h-11 tw-w-11 tw-bg-neutral-700/60 tw-border tw-border-solid tw-border-neutral-600/20">
+            <span className="tw-inline-flex tw-items-center tw-justify-center tw-rounded-xl tw-h-11 tw-w-11 tw-bg-iron-700/60 tw-border tw-border-solid tw-border-iron-600/20">
               <svg
-                className="tw-flex-shrink-0 tw-h-6 tw-w-6 tw-text-neutral-50 group-hover:tw-scale-105 tw-transition tw-duration-300 tw-ease-out"
+                className="tw-flex-shrink-0 tw-h-6 tw-w-6 tw-text-iron-50 group-hover:tw-scale-105 tw-transition tw-duration-300 tw-ease-out"
                 viewBox="0 0 24 24"
                 fill="none"
                 xmlns="http://www.w3.org/2000/svg"
@@ -133,10 +133,10 @@ export default function UserPageIdentityAddStatementsSelect({
             </span>
           </div>
           <div className="tw-mt-8">
-            <p className="tw-mb-0 tw-text-sm tw-font-semibold tw-text-neutral-50">
+            <p className="tw-mb-0 tw-text-sm tw-font-semibold tw-text-iron-50">
               Social Media Verification Posts
             </p>
-            <p className="tw-mt-1 tw-mb-0 tw-text-sm tw-text-neutral-500">
+            <p className="tw-mt-1 tw-mb-0 tw-text-sm tw-text-iron-500">
               Your posts verifying your profile here.
             </p>
           </div>
@@ -144,7 +144,7 @@ export default function UserPageIdentityAddStatementsSelect({
       </div>
       {/* Bottom bullet points */}
       <div className="tw-px-4 tw-pt-6 tw-mt-6 tw-border-t tw-border-solid tw-border-[#333333] tw-border-x-0 tw-border-b-0">
-        <ul className="tw-pl-0 tw-list-disc tw-text-neutral-500 tw-text-xs tw-font-normal tw-space-y-1">
+        <ul className="tw-pl-0 tw-list-disc tw-text-iron-500 tw-text-xs tw-font-normal tw-space-y-1">
           <li>All statements are optional.</li>
           <li>All statements are fully and permanently public.</li>
           <li>

@@ -33,7 +33,7 @@ export default function UserPageIdentityActivityLogSocialMediaVerificationPost({
               {PROFILE_ACTIVITY_LOG_ACTION_STR[log.contents.action]}
             </span>
             <span className="tw-whitespace-nowrap tw-text-sm tw-text-neutral-400 tw-font-medium">
-              social media verification post
+              social media verification post 
             </span>
             <div className="tw-flex tw-items-center tw-flex-shrink-0 tw-h-5 tw-w-5 tw-text-neutral-100">
               <SocialStatementIcon

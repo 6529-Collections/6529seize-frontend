@@ -47,13 +47,13 @@ export default function UserCICTypeIconTooltip({
     <div className="tw-p-3">
       <UserCICTypeIconTooltipHeaders />
       <div className="tw-mt-4 tw-space-y-0.5">
-        <span className="tw-block tw-text-neutral-100 tw-font-semibold">
+        <span className="tw-block tw-text-iron-100 tw-font-semibold">
           <span>Rating:</span>
           <span className="tw-ml-1 tw-text-white tw-font-bold">
             {profile.cic.cic_rating}
           </span>
         </span>
-        <span className="tw-block tw-text-neutral-100 tw-font-semibold">
+        <span className="tw-block tw-text-iron-100 tw-font-semibold">
           <span>Status:</span>
           <span className={`${CIC_META[cicType].class} tw-ml-1 tw-font-bold`}>
             {CIC_META[cicType].title}
@@ -62,7 +62,7 @@ export default function UserCICTypeIconTooltip({
       </div>
       {cicType === CICType.INACCURATE && (
         <div className="mt-2">
-          <p className="tw-mb-0 tw-mt-1 tw-text-sm tw-text-neutral-400 tw-font-medium">
+          <p className="tw-mb-0 tw-mt-1 tw-text-sm tw-text-iron-400 tw-font-medium">
             This profile will lose its handle on Jan 4, 2024 at midnight UTC if
             its rating does not turn positive before then.
           </p>

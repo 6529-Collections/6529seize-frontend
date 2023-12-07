@@ -14,9 +14,9 @@ export default function UserPageIdentityStatementsSocialMediaVerificationPosts({
   return (
     <div>
       <div className="tw-flex tw-items-center tw-space-x-4">
-        <div className="tw-flex tw-h-9 tw-w-9 tw-items-center tw-justify-center tw-rounded-lg tw-bg-neutral-800 tw-border tw-border-solid tw-border-neutral-700">
+        <div className="tw-flex tw-h-9 tw-w-9 tw-items-center tw-justify-center tw-rounded-lg tw-bg-iron-800 tw-border tw-border-solid tw-border-iron-700">
           <svg
-            className="tw-flex-shrink-0 tw-h-5 tw-w-5 tw-text-neutral-50"
+            className="tw-flex-shrink-0 tw-h-5 tw-w-5 tw-text-iron-50"
             viewBox="0 0 24 24"
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
@@ -30,7 +30,7 @@ export default function UserPageIdentityStatementsSocialMediaVerificationPosts({
             />
           </svg>
         </div>
-        <span className="tw-text-base tw-font-semibold tw-text-neutral-50">
+        <span className="tw-text-base tw-font-semibold tw-text-iron-50">
           Social Media Verification Posts
         </span>
       </div>

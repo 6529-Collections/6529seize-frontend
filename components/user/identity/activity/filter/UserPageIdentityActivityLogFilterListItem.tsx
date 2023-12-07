@@ -25,7 +25,7 @@ export default function UserPageIdentityActivityLogFilterListItem({
   return (
     <li
       onClick={() => setSelected(itemType)}
-      className="tw-group tw-text-neutral-50 tw-rounded-lg tw-relative tw-cursor-pointer tw-select-none tw-py-2.5 tw-pl-3 tw-pr-9 hover:tw-bg-neutral-700 tw-transition tw-duration-300 tw-ease-out"
+      className="tw-group tw-text-iron-50 tw-rounded-lg tw-relative tw-cursor-pointer tw-select-none tw-py-2.5 tw-pl-3 tw-pr-9 hover:tw-bg-iron-700 tw-transition tw-duration-300 tw-ease-out"
       role="option"
     >
       <div className="tw-w-full tw-flex tw-items-center tw-space-x-3 tw-pr-4">
@@ -35,7 +35,7 @@ export default function UserPageIdentityActivityLogFilterListItem({
         </span>
       </div>
       {isSelected && (
-        <span className="tw-text-neutral-50 tw-absolute tw-inset-y-0 tw-right-0 tw-flex tw-items-center tw-pr-4">
+        <span className="tw-text-iron-50 tw-absolute tw-inset-y-0 tw-right-0 tw-flex tw-items-center tw-pr-4">
           <svg
             className="tw-h-4 tw-w-4 tw-text-primary-400"
             viewBox="0 0 20 20"

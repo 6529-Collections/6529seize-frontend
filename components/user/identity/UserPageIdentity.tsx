@@ -13,7 +13,7 @@ export default function UserPageIdentity({
     <div className="tailwind-scope">
       <UserPageIdentityHeader profile={profile} />
       <UserPageIdentityStatements profile={profile} />
-      <div className="tw-mt-10 tw-grid tw-grid-cols-2 tw-gap-x-10">
+      <div className="tw-mt-10 tw-grid tw-grid-cols-1 md:tw-grid-cols-2 tw-gap-y-10 tw-gap-x-10">
         <div>
           <UserPageIdentityCICRatings />
         </div>

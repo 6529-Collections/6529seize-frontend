@@ -7,8 +7,8 @@ export default function UserPageTab({ tab, activeTab, goToTab }: { tab: UserPage
     setIsActive(tab === activeTab)
   }, [activeTab])
 
-  const activeClasses = "tw-cursor-pointer tw-border-primary-400 tw-border-solid tw-border-x-0 tw-border-t-0 tw-text-neutral-100 tw-whitespace-nowrap tw-border-b-2 tw-py-4 tw-px-1 tw-text-base tw-font-semibold"
-  const inActiveClasses = 'tw-cursor-pointer tw-border-transparent tw-text-neutral-500 hover:tw-border-gray-300 hover:tw-text-neutral-100 tw-whitespace-nowrap tw-border-b-2 tw-py-4 tw-px-1 tw-text-base tw-font-semibold tw-transition tw-duration-300 tw-ease-out'
+  const activeClasses = "tw-cursor-pointer tw-border-primary-400 tw-border-solid tw-border-x-0 tw-border-t-0 tw-text-iron-100 tw-whitespace-nowrap tw-border-b-2 tw-py-4 tw-px-1 tw-text-base tw-font-semibold"
+  const inActiveClasses = 'tw-cursor-pointer tw-border-transparent tw-text-iron-500 hover:tw-border-gray-300 hover:tw-text-iron-100 tw-whitespace-nowrap tw-border-b-2 tw-py-4 tw-px-1 tw-text-base tw-font-semibold tw-transition tw-duration-300 tw-ease-out'
 
   const [classes, setClasses] = useState<string>(isActive ? activeClasses : inActiveClasses)
 

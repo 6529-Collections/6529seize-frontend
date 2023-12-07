@@ -36,7 +36,7 @@ export default function UserPageIdentityHeader({
             <h2 className="tw-mb-1 tw-text-xl tw-font-semibold tw-text-white tw-sm:truncate sm:tw-text-2xl sm:tw-tracking-tight">
               Community Identity Check (CIC)
             </h2>
-            <p className="tw-font-normal tw-text-neutral-400 tw-text-base tw-mb-0">
+            <p className="tw-font-normal tw-text-iron-400 tw-text-base tw-mb-0">
               Does the community believe this profile accurately represents its
               identity?
             </p>

@@ -17,8 +17,8 @@ export default function UserPageIdentityStatementsStatement({
   return (
     <li
       className={`${
-        isMyProfile ? "tw-cursor-pointer hover:tw-bg-neutral-800" : ""
-      } tw-group -tw-ml-1 tw-inline-flex tw-h-8 tw-px-1.5 tw-rounded-lg tw-items-center tw-text-sm tw-font-medium tw-text-neutral-50 hover:tw-text-neutral-400 tw-transition tw-duration-300 tw-ease-out`}
+        isMyProfile ? "tw-cursor-pointer hover:tw-bg-iron-800" : ""
+      } tw-group -tw-ml-1 tw-inline-flex tw-h-8 tw-px-1.5 tw-rounded-lg tw-items-center tw-text-sm tw-font-medium tw-text-iron-50 hover:tw-text-iron-400 tw-transition tw-duration-300 tw-ease-out`}
     >
       <div className="tw-inline-flex tw-items-center tw-space-x-3">
         <div className="tw-cursor-pointer tw-w-6 tw-h-6 group-hover:tw-scale-110 tw-transition tw-duration-300 tw-ease-out">

@@ -67,12 +67,12 @@ export default function UserPageIdentityStatementsConsolidatedAddresses({
   return (
     <div>
       <div className="tw-flex tw-items-center tw-space-x-4">
-        <div className="tw-flex tw-h-9 tw-w-9 tw-items-center tw-justify-center tw-rounded-lg tw-bg-neutral-800 tw-border tw-border-solid tw-border-neutral-700">
-          <div className="tw-flex tw-items-center tw-justify-center tw-flex-shrink-0 tw-h-5 tw-w-5 tw-text-neutral-50">
+        <div className="tw-flex tw-h-9 tw-w-9 tw-items-center tw-justify-center tw-rounded-lg tw-bg-iron-800 tw-border tw-border-solid tw-border-iron-700">
+          <div className="tw-flex tw-items-center tw-justify-center tw-flex-shrink-0 tw-h-5 tw-w-5 tw-text-iron-50">
             <EthereumIcon />
           </div>
         </div>
-        <span className="tw-text-base tw-font-semibold tw-text-neutral-50">
+        <span className="tw-text-base tw-font-semibold tw-text-iron-50">
           Consolidated Addresses
         </span>
       </div>

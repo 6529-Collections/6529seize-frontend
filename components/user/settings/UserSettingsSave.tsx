@@ -24,7 +24,7 @@ export default function UserSettingsSave({
         type="submit"
         className={`tw-flex tw-items-center tw-justify-center tw-relative tw-px-4 tw-py-3 tw-text-sm tw-font-medium tw-text-white tw-border tw-border-solid tw-rounded-lg tw-transition tw-duration-300 tw-ease-out ${
           isDisabled
-            ? "tw-cursor-not-allowed tw-bg-gray-400 tw-border-gray-400"
+            ? "tw-cursor-not-allowed tw-bg-iron-400 tw-border-iron-400"
             : "tw-cursor-pointer tw-bg-primary-500 tw-border-primary-500 hover:tw-bg-primary-600 hover:tw-border-primary-600"
         }`}
       >

@@ -7,9 +7,9 @@ export default function UserPageIdentityAddStatementsSocialMediaAccountHeader({
     <div className="tw-flex tw-justify-between">
       <div className="tw-max-w-xl tw-flex tw-items-center tw-space-x-4">
         <div>
-          <span className="tw-inline-flex tw-items-center tw-justify-center tw-rounded-xl tw-h-11 tw-w-11 tw-bg-neutral-700/60 tw-border tw-border-solid tw-border-neutral-600/20">
+          <span className="tw-inline-flex tw-items-center tw-justify-center tw-rounded-xl tw-h-11 tw-w-11 tw-bg-iron-700/60 tw-border tw-border-solid tw-border-iron-600/20">
             <svg
-              className="tw-flex-shrink-0 tw-h-6 tw-w-6 tw-text-neutral-50 group-hover:tw-scale-105 tw-transition tw-duration-300 tw-ease-out"
+              className="tw-flex-shrink-0 tw-h-6 tw-w-6 tw-text-iron-50 group-hover:tw-scale-105 tw-transition tw-duration-300 tw-ease-out"
               aria-hidden="true"
               viewBox="0 0 24 24"
               fill="none"
@@ -25,7 +25,7 @@ export default function UserPageIdentityAddStatementsSocialMediaAccountHeader({
             </svg>
           </span>
         </div>
-        <p className="tw-max-w-sm tw-text-lg tw-text-neutral-50 tw-font-medium tw-mb-0">
+        <p className="tw-max-w-sm tw-text-lg tw-text-iron-50 tw-font-medium tw-mb-0">
           Add Social Media Account
         </p>
       </div>
@@ -33,7 +33,7 @@ export default function UserPageIdentityAddStatementsSocialMediaAccountHeader({
         <button
           onClick={onClose}
           type="button"
-          className="tw-p-2.5 tw-flex tw-items-center tw-justify-center tw-rounded-full tw-bg-neutral-900 tw-border-0 tw-text-neutral-400 hover:tw-text-neutral-50 focus:tw-outline-none tw-transition tw-duration-300 tw-ease-out"
+          className="tw-p-2.5 tw-flex tw-items-center tw-justify-center tw-rounded-full tw-bg-iron-900 tw-border-0 tw-text-iron-400 hover:tw-text-iron-50 focus:tw-outline-none tw-transition tw-duration-300 tw-ease-out"
         >
           <span className="tw-sr-only tw-text-sm">Close</span>
           <svg

@@ -20,7 +20,7 @@ export default function UserPageIdentityHeaderCIC({
   }, [profile]);
   return (
     <div className="tw-mt-4 tw-flex tw-flex-col sm:tw-flex-row sm:tw-flex-wrap sm:tw-space-x-6">
-      <div className="tw-flex tw-items-center tw-text-base tw-font-semibold tw-text-neutral-200 ">
+      <div className="tw-flex tw-items-center tw-text-base tw-font-semibold tw-text-iron-200">
         <div className="tw-flex tw items-center tw-space-x-1">
           <span>CIC:</span>
           <span>{formatNumberWithCommas(cicRating)}</span>
@@ -29,11 +29,11 @@ export default function UserPageIdentityHeaderCIC({
           <UserCICTypeIcon profile={profile} />
         </span>
       </div>
-      <div className="tw-flex tw-items-center tw-text-base tw-font-semibold tw-text-neutral-200 tw-space-x-1">
+      <div className="tw-flex tw-items-center tw-text-base tw-font-semibold tw-text-iron-200 tw-space-x-1">
         <span>Status:</span>
         <UserCICStatus cic={cicRating} />
       </div>
-      <div className="tw-flex tw-items-center tw-text-base tw-font-semibold tw-text-neutral-200 tw-space-x-1">
+      <div className="tw-flex tw-items-center tw-text-base tw-font-semibold tw-text-iron-200 tw-space-x-1">
         <span>Raters:</span>
         <span>{formatNumberWithCommas(cicRaters)}</span>
       </div>
