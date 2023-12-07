@@ -205,3 +205,15 @@ export type ProfileActivityLog =
   | ProfileActivityLogSocialsEdit
   | ProfileActivityLogContactsEdit
   | ProfileActivityLogSocialVerificationPostEdit;
+
+export enum RateMatter {
+  CIC = "CIC",
+}
+
+export interface ProfilesMatterRating {
+  readonly rater_handle: string;
+  readonly matter: RateMatter;
+  readonly matter_category: string;
+  readonly rating: number;
+  readonly last_modified: Date;
+}

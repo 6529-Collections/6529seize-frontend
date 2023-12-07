@@ -27,7 +27,7 @@ export default function UserPageIdentityHeaderCICRate({
     error,
   } = useQuery<ApiProfileRaterCicState>({
     queryKey: [
-      "profileRaterCicState",
+      "profile-rater-cic-state",
       {
         handle: profile.profile?.handle.toLowerCase(),
         rater: address?.toLowerCase(),
@@ -72,19 +72,21 @@ export default function UserPageIdentityHeaderCICRate({
 
       queryClient.invalidateQueries({
         queryKey: [
-          "profileRaterCicState",
+          "profile-rater-cic-state",
           {
             handle: profile.profile?.handle.toLowerCase(),
             rater: address?.toLowerCase(),
           },
         ],
       });
+      queryClient.invalidateQueries({
+        queryKey: [
+          "cic-ratings",
+          { profile: profile.profile?.handle.toLowerCase() },
+        ],
+      });
     },
   });
-
-  const [myAvailableCIC, setMyAvailableCIC] = useState<number>(
-    myCICState?.cic_ratings_left_to_give_by_rater ?? 0
-  );
 
   const [myCICRatings, setMyCICRatings] = useState<number>(
     myCICState?.cic_rating_by_rater ?? 0
@@ -118,13 +120,7 @@ export default function UserPageIdentityHeaderCICRate({
     return strCIC;
   };
 
-  const getAvailableCIC = (newCicValue: string): number => {
-    const cicAsNumber = getMyCICRatingsAsNumber(newCicValue);
-    return myMaxCICRatings - Math.abs(cicAsNumber);
-  };
-
   useEffect(() => {
-    setMyAvailableCIC(myCICState?.cic_ratings_left_to_give_by_rater ?? 0);
     setMyCICRatings(myCICState?.cic_rating_by_rater ?? 0);
     setMyCICRatingsStr(`${myCICState?.cic_rating_by_rater ?? 0}`);
     setMyMaxCICRatings(
@@ -139,7 +135,6 @@ export default function UserPageIdentityHeaderCICRate({
       const strCIC = inputValue === "-0" ? "-" : inputValue;
       const newCicValue = getCICStrOrMaxStr(strCIC);
       setMyCICRatingsStr(newCicValue);
-      setMyAvailableCIC(getAvailableCIC(newCicValue));
     }
   };
 
@@ -231,10 +226,10 @@ export default function UserPageIdentityHeaderCICRate({
             </div>
             <div className="tw-mt-3.5 tw-space-x-1 tw-flex tw-items-center tw-justify-between tw-w-full">
               <span className="tw-text-sm tw-font-semibold tw-text-iron-200">
-                Your available CIC TDH:
+                Your min/max CIC Rating:
               </span>
               <span className="tw-text-sm tw-font-semibold tw-text-iron-200">
-                {formatNumberWithCommas(myAvailableCIC)}
+                (+/-){formatNumberWithCommas(myMaxCICRatings)}
               </span>
             </div>
           </div>
