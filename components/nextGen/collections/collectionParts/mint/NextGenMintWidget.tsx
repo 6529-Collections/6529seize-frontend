@@ -466,18 +466,6 @@ export default function NextGenMintWidget(props: Readonly<Props>) {
               hash={mintWrite.data?.hash}
               error={mintWrite.error}
             />
-            {props.phase_times &&
-              proofResponse &&
-              props.mint_counts &&
-              proofResponse.spots > 0 &&
-              0 >= proofResponse.spots - props.mint_counts.allowlist && (
-                <Form.Group as={Row} className={`pt-3`}>
-                  <Col sm={12} className="d-flex align-items-center">
-                    Max allowlist spots reached (x
-                    {props.mint_counts.allowlist})
-                  </Col>
-                </Form.Group>
-              )}
           </Form>
         </Col>
       </Row>
