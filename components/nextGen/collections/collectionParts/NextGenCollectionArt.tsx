@@ -1,5 +1,5 @@
 import styles from "../NextGen.module.scss";
-import { Container, Row, Col, Button } from "react-bootstrap";
+import { Container, Row, Col } from "react-bootstrap";
 import { AdditionalData } from "../../nextgen_entities";
 import NextGenTokenList from "../NextGenTokenList";
 import DotLoader from "../../../dotLoader/DotLoader";

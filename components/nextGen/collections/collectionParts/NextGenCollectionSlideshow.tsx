@@ -13,6 +13,7 @@ interface Props {
 }
 
 const SLIDESHOW_LIMIT = -1;
+const SLIDES_PER_VIEW = 4;
 
 export default function NextGenCollectionSlideshow(props: Readonly<Props>) {
   const tokens = Array.from(
@@ -32,10 +33,10 @@ export default function NextGenCollectionSlideshow(props: Readonly<Props>) {
                 <Swiper
                   modules={[Navigation, Pagination, A11y]}
                   spaceBetween={20}
-                  slidesPerView={Math.min(4, props.length)}
+                  slidesPerView={Math.min(SLIDES_PER_VIEW, props.length)}
                   navigation
                   centeredSlides
-                  loop={props.length > 4}
+                  loop={props.length > SLIDES_PER_VIEW}
                   pagination={{ clickable: true }}
                   onSlideChange={(swiper) => {
                     setCurrentSlide(props.start_index + swiper.realIndex);
