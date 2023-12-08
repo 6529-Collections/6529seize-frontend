@@ -46,7 +46,7 @@ export default function UserPageIdentityAddStatementsForm({
         type: "success",
       });
       queryClient.invalidateQueries({
-        queryKey: ["user-cic-statements", profile.profile?.handle],
+        queryKey: ["user-cic-statements", profile.profile?.handle.toLowerCase()],
       });
       queryClient.invalidateQueries({
         queryKey: [
