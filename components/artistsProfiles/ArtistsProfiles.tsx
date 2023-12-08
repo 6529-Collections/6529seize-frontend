@@ -1,6 +1,7 @@
 import styles from "./ArtistsProfiles.module.scss";
 import { useState, useEffect } from "react";
 import { parseArtistName } from "../../helpers/Helpers";
+import { fetchUrl } from "../../services/6529api";
 
 interface Props {
   artists: string[];
@@ -14,21 +15,7 @@ export default function ArtistsProfiles(props: Readonly<Props>) {
   >([]);
 
   function fetchArtistProfile(artist: string) {
-    return fetch(`${process.env.API_ENDPOINT}/api/profiles/${artist}`);
-  }
-
-  async function getHandle(response: Response) {
-    const json = await response.json();
-    return json.profile.handle;
-  }
-
-  function handleOkResponse(response: Response, artist: string) {
-    getHandle(response).then((handle) => {
-      setArtistsProfiles((artistsProfiles) => [
-        ...artistsProfiles,
-        { [artist]: handle },
-      ]);
-    });
+    return fetchUrl(`${process.env.API_ENDPOINT}/api/profiles/${artist}`);
   }
 
   useEffect(() => {
@@ -36,13 +23,21 @@ export default function ArtistsProfiles(props: Readonly<Props>) {
       props.artists.forEach((artist) => {
         const parsedArtist = parseArtistName(artist);
         fetchArtistProfile(parsedArtist).then((response) => {
-          if (response.ok) {
-            handleOkResponse(response, artist);
+          const profileHandle = response.profile?.handle;
+          if (profileHandle) {
+            setArtistsProfiles((artistsProfiles) => [
+              ...artistsProfiles,
+              { [artist]: profileHandle },
+            ]);
           } else if (parsedArtist.includes("-")) {
             const parsedArtist2 = parsedArtist.replaceAll("-", "");
             fetchArtistProfile(parsedArtist2).then((response) => {
-              if (response.ok) {
-                handleOkResponse(response, artist);
+              const profileHandle = response.profile?.handle;
+              if (profileHandle) {
+                setArtistsProfiles((artistsProfiles) => [
+                  ...artistsProfiles,
+                  { [artist]: profileHandle },
+                ]);
               }
             });
           }

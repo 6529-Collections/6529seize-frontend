@@ -32,6 +32,7 @@ import NextGenMintBurnWidget from "./NextGenMintBurnWidget";
 import Image from "next/image";
 import { NextGenCountdown, NextGenPhases } from "../NextGenCollectionHeader";
 import { NextGenTokenImage } from "../../NextGenTokenImage";
+import ArtistsLinks from "../../../../artistsProfiles/ArtistsProfiles";
 
 interface Props {
   collection: number;
@@ -312,7 +313,10 @@ export default function NextGenMint(props: Readonly<Props>) {
           xs={12}
           className="d-flex align-items-center justify-content-between">
           <span className="font-larger">
-            by <b>{props.info.artist}</b>
+            by{" "}
+            <b>
+              <ArtistsLinks artists={[props.info.artist]} />
+            </b>
           </span>
           <span className="font-larger d-inline-flex align-items-center">
             <b>
