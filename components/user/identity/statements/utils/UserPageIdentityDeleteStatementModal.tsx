@@ -35,7 +35,7 @@ export default function UserPageIdentityDeleteStatementModal({
         type: "warning",
       });
       queryClient.invalidateQueries({
-        queryKey: ["user-cic-statements", profile.profile?.handle],
+        queryKey: ["user-cic-statements", profile.profile?.handle.toLowerCase()],
       });
       queryClient.invalidateQueries({
         queryKey: [

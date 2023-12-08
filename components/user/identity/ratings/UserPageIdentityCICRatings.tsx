@@ -34,7 +34,7 @@ export default function CICRatings({
     queryKey: [
       "cic-ratings",
       {
-        profile: user,
+        profile: user.toLowerCase(),
         page: `${currentPage}`,
         page_size: `${PAGE_SIZE}`,
       },
