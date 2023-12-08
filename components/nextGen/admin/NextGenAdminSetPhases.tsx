@@ -151,8 +151,8 @@ export default function NextGenAdminSetPhases(props: Readonly<Props>) {
       contractWrite.write({
         args: [
           collectionID,
-          type === Type.ALLOWLIST ? publicStartTime : allowlistStartTime,
-          type === Type.ALLOWLIST ? publicStartTime : allowlistEndTime,
+          type === Type.NO_ALLOWLIST ? publicStartTime : allowlistStartTime,
+          type === Type.NO_ALLOWLIST ? publicStartTime : allowlistEndTime,
           publicStartTime,
           publicEndTime,
           type !== Type.NO_ALLOWLIST ? merkleRoot : NULL_MERKLE,
