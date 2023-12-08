@@ -379,19 +379,6 @@ export default function NextGenMintBurnWidget(props: Readonly<Props>) {
               hash={mintWrite.data?.hash}
               error={mintWrite.error}
             />
-            {props.phase_times &&
-              burnProofResponse &&
-              props.mint_counts &&
-              0 >=
-                props.additional_data.max_purchases -
-                  props.mint_counts.public && (
-                <Form.Group as={Row} className={`pt-3`}>
-                  <Col sm={12} className="d-flex align-items-center">
-                    Max public spots reached (x
-                    {props.mint_counts.public})
-                  </Col>
-                </Form.Group>
-              )}
           </Form>
         </Col>
       </Row>
