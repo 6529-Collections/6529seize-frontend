@@ -15,7 +15,7 @@ import {
   getUserProfileCICRatings,
   getUserProfileIdentityStatements,
   userPageNeedsRedirect,
-} from "./server.helpers";
+} from "../../helpers/server.helpers";
 import UserPageIdentity from "../../components/user/identity/UserPageIdentity";
 import { useQueryClient } from "@tanstack/react-query";
 import UserPageIdentityNoProfile from "../../components/user/identity/UserPageIdentityNoProfile";

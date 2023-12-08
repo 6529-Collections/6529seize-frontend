@@ -1,21 +1,21 @@
-import { ENS } from "../../entities/IENS";
-import { NFT, NFTLite } from "../../entities/INFT";
-import { OwnerLite } from "../../entities/IOwner";
+import { ENS } from "../entities/IENS";
+import { NFT, NFTLite } from "../entities/INFT";
+import { OwnerLite } from "../entities/IOwner";
 import {
   CicStatement,
   IProfileAndConsolidations,
   ProfileActivityLog,
   ProfilesMatterRatingWithRaterLevel,
-} from "../../entities/IProfile";
-import { Season } from "../../entities/ISeason";
-import { ConsolidatedTDHMetrics } from "../../entities/ITDH";
+} from "../entities/IProfile";
+import { Season } from "../entities/ISeason";
+import { ConsolidatedTDHMetrics } from "../entities/ITDH";
 import {
   areEqualAddresses,
   containsEmojis,
   formatAddress,
-} from "../../helpers/Helpers";
-import { Page } from "../../helpers/Types";
-import { commonApiFetch } from "../../services/api/common-api";
+} from "./Helpers";
+import { Page } from "./Types";
+import { commonApiFetch } from "../services/api/common-api";
 
 export interface CommonUserServerSideProps {
   profile: IProfileAndConsolidations;

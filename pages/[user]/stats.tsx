@@ -7,7 +7,7 @@ import {
   getCommonHeaders,
   getCommonUserServerSideProps,
   userPageNeedsRedirect,
-} from "./server.helpers";
+} from "../../helpers/server.helpers";
 import UserPageStats from "../../components/user/stats/UserPageStats";
 import { useQueryClient } from "@tanstack/react-query";
 

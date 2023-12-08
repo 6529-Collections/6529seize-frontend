@@ -12,7 +12,7 @@ import {
   getOwned,
   getSeasons,
   userPageNeedsRedirect,
-} from "./server.helpers";
+} from "../../helpers/server.helpers";
 import UserPageCollection from "../../components/user/collected/UserPageCollection";
 import { Season } from "../../entities/ISeason";
 import { OwnerLite } from "../../entities/IOwner";
