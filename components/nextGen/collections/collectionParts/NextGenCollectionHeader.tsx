@@ -13,6 +13,7 @@ import { NEXTGEN_CHAIN_ID, NEXTGEN_CORE } from "../../nextgen_contracts";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import DateCountdown from "../../../date-countdown/DateCountdown";
+import ArtistsLinks from "../../../artistsProfiles/ArtistsProfiles";
 
 interface Props {
   collection: number;
@@ -244,7 +245,10 @@ export default function NextGenCollectionHeader(props: Readonly<Props>) {
             )}
           </span>
           <span className="font-larger">
-            by <b>{props.info.artist}</b>
+            by{" "}
+            <b>
+              <ArtistsLinks artists={[props.info.artist]} />
+            </b>
           </span>
           <span className="font-larger d-inline-flex align-items-center">
             <b>

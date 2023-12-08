@@ -481,3 +481,22 @@ export function getDateFilters(
   }
   return filters;
 }
+
+export function parseArtistName(name: string) {
+  return name
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replaceAll(" ", "-")
+    .toLowerCase();
+}
+
+export function splitArtistName(name: string) {
+  return name
+    .split(" / ")
+    .join(",")
+    .split(", ")
+    .join(",")
+    .split(" and ")
+    .join(",")
+    .split(",");
+}

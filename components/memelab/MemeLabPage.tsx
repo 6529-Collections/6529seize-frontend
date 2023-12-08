@@ -26,6 +26,7 @@ import {
   numberWithCommas,
   addProtocol,
   printMintDate,
+  splitArtistName,
 } from "../../helpers/Helpers";
 import Breadcrumb, { Crumb } from "../breadcrumb/Breadcrumb";
 import Download from "../download/Download";
@@ -39,6 +40,7 @@ import { TypeFilter } from "../latest-activity/LatestActivity";
 import NFTImage from "../nft-image/NFTImage";
 import MemeLabLeaderboard from "../leaderboard/MemeLabLeaderboard";
 import Timeline from "../timeline/Timeline";
+import ArtistsLinks from "../artistsProfiles/ArtistsProfiles";
 
 interface MemeTab {
   focus: MEME_FOCUS;
@@ -90,6 +92,15 @@ export default function LabPage(props: Readonly<Props>) {
   const [activityTotalResults, setActivityTotalResults] = useState(0);
 
   const [nftHistory, setNftHistory] = useState<NFTHistory[]>([]);
+
+  const [artists, setArtists] = useState<string[]>([]);
+
+  useEffect(() => {
+    if (nft?.artist) {
+      const artists = splitArtistName(nft.artist);
+      setArtists(artists);
+    }
+  }, [nft]);
 
   const [activityTypeFilter, setActivityTypeFilter] = useState<TypeFilter>(
     TypeFilter.ALL
@@ -429,8 +440,10 @@ export default function LabPage(props: Readonly<Props>) {
                 <Table bordered={false}>
                   <tbody>
                     <tr>
-                      <td>Artist</td>
-                      <td>{nft.artist}</td>
+                      <td>Artist{artists.length > 0 ? "s" : ""}</td>
+                      <td>
+                        <ArtistsLinks artists={artists} />
+                      </td>
                     </tr>
                     <tr>
                       <td>Collection</td>
@@ -1011,8 +1024,10 @@ export default function LabPage(props: Readonly<Props>) {
                             <td>{nft.collection}</td>
                           </tr>
                           <tr>
-                            <td>Artist</td>
-                            <td>{nft.artist}</td>
+                            <td>Artist{artists.length > 0 ? "s" : ""}</td>
+                            <td>
+                              <ArtistsLinks artists={artists} />
+                            </td>
                           </tr>
                           <tr>
                             <td>Mint Date</td>

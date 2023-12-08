@@ -6,6 +6,7 @@ import {
   areEqualAddresses,
   formatAddress,
   numberWithCommas,
+  splitArtistName,
   printMintDate,
 } from "../../helpers/Helpers";
 import Image from "next/image";
@@ -18,6 +19,7 @@ import Pagination from "../pagination/Pagination";
 import { RememeSort } from "../rememes/Rememes";
 import Tippy from "@tippyjs/react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import ArtistsLinks from "../artistsProfiles/ArtistsProfiles";
 
 const REMEMES_PAGE_SIZE = 20;
 
@@ -27,6 +29,15 @@ export function MemePageLiveRightMenu(props: {
   nftMeta: MemesExtendedData | undefined;
   nftBalance: number;
 }) {
+  const [artists, setArtists] = useState<string[]>([]);
+
+  useEffect(() => {
+    if (props.nft?.artist) {
+      const artists = splitArtistName(props.nft.artist);
+      setArtists(artists);
+    }
+  }, [props.nft]);
+
   if (props.show && props.nft && props.nftMeta) {
     return (
       <Col
@@ -119,8 +130,10 @@ export function MemePageLiveRightMenu(props: {
               <Table bordered={false}>
                 <tbody>
                   <tr>
-                    <td>Artist</td>
-                    <td>{props.nft.artist}</td>
+                    <td>Artist{artists.length > 0 ? "s" : ""}</td>
+                    <td>
+                      <ArtistsLinks artists={artists} />
+                    </td>
                   </tr>
                   <tr>
                     <td>Mint Date</td>
