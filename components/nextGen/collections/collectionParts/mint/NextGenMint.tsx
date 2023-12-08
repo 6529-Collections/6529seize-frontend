@@ -13,6 +13,7 @@ import {
   CollectionWithMerkle,
   AllowlistType,
   Info,
+  Status,
 } from "../../../nextgen_entities";
 import { fromGWEI } from "../../../../../helpers/Helpers";
 import {
@@ -258,36 +259,34 @@ export default function NextGenMint(props: Readonly<Props>) {
   }, [mintingForDelegator]);
 
   function printMintWidget(type: AllowlistType) {
-    if (collection) {
-      if (type === AllowlistType.ALLOWLIST) {
-        return (
-          <NextGenMintWidget
-            collection={props.collection}
-            phase_times={props.phase_times}
-            additional_data={props.additional_data}
-            available_supply={available}
-            mint_price={props.mint_price}
-            mint_counts={addressMintCounts}
-            delegators={delegators}
-            mintingForDelegator={setMintingForDelegator}
-            mintForAddress={setMintForAddress}
-          />
-        );
-      } else if (type == AllowlistType.EXTERNAL_BURN) {
-        return (
-          <NextGenMintBurnWidget
-            collection={collection}
-            phase_times={props.phase_times}
-            additional_data={props.additional_data}
-            available_supply={available}
-            mint_price={props.mint_price}
-            mint_counts={addressMintCounts}
-            delegators={delegators}
-            mintingForDelegator={setMintingForDelegator}
-            mintForAddress={setMintForAddress}
-          />
-        );
-      }
+    if (type === AllowlistType.ALLOWLIST) {
+      return (
+        <NextGenMintWidget
+          collection={props.collection}
+          phase_times={props.phase_times}
+          additional_data={props.additional_data}
+          available_supply={available}
+          mint_price={props.mint_price}
+          mint_counts={addressMintCounts}
+          delegators={delegators}
+          mintingForDelegator={setMintingForDelegator}
+          mintForAddress={setMintForAddress}
+        />
+      );
+    } else if (type == AllowlistType.EXTERNAL_BURN) {
+      return (
+        <NextGenMintBurnWidget
+          collection={collection}
+          phase_times={props.phase_times}
+          additional_data={props.additional_data}
+          available_supply={available}
+          mint_price={props.mint_price}
+          mint_counts={addressMintCounts}
+          delegators={delegators}
+          mintingForDelegator={setMintingForDelegator}
+          mintForAddress={setMintForAddress}
+        />
+      );
     }
   }
 
@@ -364,22 +363,23 @@ export default function NextGenMint(props: Readonly<Props>) {
             </Row>
             <Row className="pt-3">
               <Col>
-                {collectionLoaded &&
-                  (collection ? (
-                    printMintWidget(collection.al_type)
-                  ) : (
-                    <span className="d-flex gap-1 align-items-center">
-                      <Image
-                        loading="eager"
-                        width="0"
-                        height="0"
-                        style={{ height: "50px", width: "auto" }}
-                        src="/SummerGlasses.svg"
-                        alt="SummerGlasses"
-                      />
-                      <b>Allowlist Not Found</b>
-                    </span>
-                  ))}
+                {collectionLoaded && collection ? (
+                  printMintWidget(collection.al_type)
+                ) : props.phase_times.public_status === Status.LIVE ? (
+                  printMintWidget(AllowlistType.ALLOWLIST)
+                ) : (
+                  <span className="d-flex gap-1 align-items-center">
+                    <Image
+                      loading="eager"
+                      width="0"
+                      height="0"
+                      style={{ height: "50px", width: "auto" }}
+                      src="/SummerGlasses.svg"
+                      alt="SummerGlasses"
+                    />
+                    <b>Allowlist Not Found</b>
+                  </span>
+                )}
               </Col>
             </Row>
           </Container>

@@ -257,6 +257,12 @@ export default function NextGenMintWidget(props: Readonly<Props>) {
     }
   }, [mintToAddressFromEns.data]);
 
+  useEffect(() => {
+    if (props.mint_counts) {
+      setMintCount(1);
+    }
+  }, [props.mint_counts]);
+
   function renderAllowlistStatus() {
     if (proofResponse && props.phase_times.al_status === Status.LIVE) {
       if (proofResponse.spots > 0) {
@@ -383,7 +389,13 @@ export default function NextGenMintWidget(props: Readonly<Props>) {
             </Form.Group>
             <Form.Group as={Row} className="pt-2">
               <Form.Label column sm={12} className="d-flex align-items-center">
-                Wallet Mints:{" "}
+                Wallet Mints
+                {props.phase_times.al_status === Status.LIVE
+                  ? " Allowlist"
+                  : props.phase_times.public_status === Status.LIVE
+                  ? " Public Phase"
+                  : ""}
+                :&nbsp;
                 <b>
                   {renderAllowlistStatus()}
                   {renderPublicStatus()}
@@ -410,9 +422,9 @@ export default function NextGenMintWidget(props: Readonly<Props>) {
                     !account.isConnected ||
                     (proofResponse && proofResponse.spots <= 0)
                   }
-                  onChange={(e: any) =>
-                    setMintCount(parseInt(e.currentTarget.value))
-                  }>
+                  onChange={(e: any) => {
+                    setMintCount(parseInt(e.currentTarget.value));
+                  }}>
                   {props.phase_times && props.mint_counts ? (
                     renderAllowlistOptions() ?? renderPublicOptions()
                   ) : (
@@ -463,19 +475,6 @@ export default function NextGenMintWidget(props: Readonly<Props>) {
                   <Col sm={12} className="d-flex align-items-center">
                     Max allowlist spots reached (x
                     {props.mint_counts.allowlist})
-                  </Col>
-                </Form.Group>
-              )}
-            {props.phase_times &&
-              proofResponse &&
-              props.mint_counts &&
-              0 >=
-                props.additional_data.max_purchases -
-                  props.mint_counts.public && (
-                <Form.Group as={Row} className={`pt-3`}>
-                  <Col sm={12} className="d-flex align-items-center">
-                    Max public spots reached (x
-                    {props.mint_counts.public})
                   </Col>
                 </Form.Group>
               )}
