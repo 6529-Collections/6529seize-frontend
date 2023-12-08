@@ -39,6 +39,7 @@ interface Props {
   header: string;
   contract: string;
   link: string;
+  minting_link: string;
 }
 
 export default function Distribution(props: Readonly<Props>) {
@@ -324,9 +325,7 @@ export default function Distribution(props: Readonly<Props>) {
                   </h1>
                   <Button
                     className="seize-btn btn-white"
-                    onClick={() =>
-                      window.open("https://thememes.seize.io", "_blank")
-                    }>
+                    onClick={() => window.open(props.minting_link, "_blank")}>
                     Minting Page
                   </Button>
                 </Col>
