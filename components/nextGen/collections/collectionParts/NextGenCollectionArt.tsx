@@ -3,6 +3,7 @@ import { Container, Row, Col, Button } from "react-bootstrap";
 import { AdditionalData } from "../../nextgen_entities";
 import NextGenTokenList from "../NextGenTokenList";
 import DotLoader from "../../../dotLoader/DotLoader";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 interface Props {
   collection: number;
@@ -15,8 +16,21 @@ export default function NextGenCollectionArt(props: Readonly<Props>) {
   return (
     <Container className="no-padding">
       <Row>
-        <Col>
+        <Col className="d-flex align-items-center justify-content-between">
           <h3 className="mb-0">The Art</h3>
+          {props.show_view_all && (
+            <a
+              href={`/nextgen/collection/${props.collection}/art`}
+              className={`d-flex align-items-center gap-2 decoration-none ${styles.viewAllTokens}`}>
+              <h5 className="mb-0 font-color d-flex align-items-center gap-2">
+                View All
+                <FontAwesomeIcon
+                  icon="arrow-circle-right"
+                  className={styles.viewAllIcon}
+                />
+              </h5>
+            </a>
+          )}
         </Col>
       </Row>
       <hr />
@@ -30,17 +44,6 @@ export default function NextGenCollectionArt(props: Readonly<Props>) {
                 hide_info={false}
               />
             )}
-          </Col>
-        </Row>
-      )}
-      {props.show_view_all && (
-        <Row>
-          <Col className="d-flex align-items-center justify-content-center pt-2">
-            <a
-              href={`/nextgen/collection/${props.collection}/art`}
-              className={`d-flex align-items-center gap-2 decoration-none ${styles.viewAllTokens}`}>
-              <Button className="seize-btn btn-white">View All</Button>
-            </a>
           </Col>
         </Row>
       )}

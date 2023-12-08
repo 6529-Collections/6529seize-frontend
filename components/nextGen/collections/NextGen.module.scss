@@ -1,17 +1,20 @@
 @import "../../../styles/variables.scss";
 
 .collectionPreview {
-  padding: 10px;
-  border: 1px solid $nextgen-grey;
+  padding: 20px;
+  border: 1px solid transparent;
+  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
+  transition: transform 0.3s ease;
 
   &:hover {
+    transform: scale(1.02);
     border: 1px solid $dark-grey;
   }
 }
 
 .collectionPreviewTitle {
-  padding: 10px;
-  border: 1px solid $nextgen-grey;
+  padding: 15px;
+  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
   color: white !important;
 }
 
@@ -33,13 +36,11 @@
 }
 
 .viewAllTokens {
-  width: fit-content;
-  cursor: pointer;
   :hover {
     color: $font-color-h;
   }
   svg {
-    height: 25px;
+    height: 22px;
   }
 }
 

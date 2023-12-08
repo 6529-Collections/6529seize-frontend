@@ -46,7 +46,6 @@ export default function NextGen() {
       newCollections.push({ id: i + 1 });
     }
     setCollections(newCollections);
-    setCollectionsLoaded(true);
   }, [collectionIndex]);
 
   useEffect(() => {
@@ -89,6 +88,7 @@ export default function NextGen() {
           break;
       }
     }
+    setCollectionsLoaded(true);
   }, [typeFilter, collections]);
 
   return (

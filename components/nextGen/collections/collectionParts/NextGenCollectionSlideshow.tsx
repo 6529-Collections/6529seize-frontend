@@ -1,9 +1,9 @@
 import styles from "../NextGen.module.scss";
 import { Button, Col, Container, Row } from "react-bootstrap";
-import NextGenTokenPreview from "../NextGenTokenPreview";
 import { useState } from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation, Pagination, A11y } from "swiper/modules";
+import { NextGenTokenImage } from "../NextGenTokenImage";
 
 interface Props {
   collection: number;
@@ -12,11 +12,11 @@ interface Props {
   length: number;
 }
 
-const SLIDESHOW_LIMIT = 10;
+const SLIDESHOW_LIMIT = -1;
 
 export default function NextGenCollectionSlideshow(props: Readonly<Props>) {
   const tokens = Array.from(
-    { length: Math.min(SLIDESHOW_LIMIT, props.length) },
+    { length: props.length },
     (_, i) => props.start_index + i
   );
 
@@ -35,7 +35,7 @@ export default function NextGenCollectionSlideshow(props: Readonly<Props>) {
                   slidesPerView={Math.min(4, props.length)}
                   navigation
                   centeredSlides
-                  // loop
+                  loop={props.length > 4}
                   pagination={{ clickable: true }}
                   onSlideChange={(swiper) => {
                     setCurrentSlide(props.start_index + swiper.realIndex);
@@ -44,22 +44,18 @@ export default function NextGenCollectionSlideshow(props: Readonly<Props>) {
                     <SwiperSlide
                       key={`nextgen-carousel-${token}`}
                       className="pt-2 pb-2">
-                      <NextGenTokenPreview
+                      <NextGenTokenImage
                         collection={props.collection}
                         token_id={token}
                         hide_info={currentSlide !== token}
-                        hide_link={false}
-                        hide_background={true}
                       />
                     </SwiperSlide>
                   ))}
-                  {props.length > SLIDESHOW_LIMIT && (
+                  {SLIDESHOW_LIMIT > 0 && props.length > SLIDESHOW_LIMIT && (
                     <SwiperSlide>
                       <Container className="no-padding pt-3 pb-3">
                         <Row>
-                          <Col
-                            style={{ position: "relative" }}
-                            className={styles.tokenFrameContainer}>
+                          <Col className="d-flex align-items-center justify-content-center">
                             <a
                               href={`/nextgen/collection/${props.collection}/art`}>
                               <Button className="seize-btn btn-white">

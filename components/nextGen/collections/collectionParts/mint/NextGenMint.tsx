@@ -28,9 +28,9 @@ import {
 } from "../../../nextgen_helpers";
 import NextGenMintWidget from "./NextGenMintWidget";
 import NextGenMintBurnWidget from "./NextGenMintBurnWidget";
-import NextGenTokenPreview from "../../NextGenTokenPreview";
 import Image from "next/image";
 import { NextGenCountdown, NextGenPhases } from "../NextGenCollectionHeader";
+import { NextGenTokenImage } from "../../NextGenTokenImage";
 
 interface Props {
   collection: number;
@@ -334,12 +334,12 @@ export default function NextGenMint(props: Readonly<Props>) {
       <Row className="pt-4 pb-4">
         <Col className="d-flex align-items-start justify-content-start gap-3">
           {props.collection_preview && (
-            <NextGenTokenPreview
+            <NextGenTokenImage
               token_id={props.collection_preview}
               collection={props.collection}
               hide_info={true}
               hide_link={true}
-              hide_background={true}
+              // hide_background={true}
             />
           )}
           <Container className="no-padding">

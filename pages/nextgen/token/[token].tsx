@@ -65,7 +65,7 @@ export default function NextGenCollectionToken(props: any) {
         <Breadcrumb breadcrumbs={breadcrumbs} />
         <NextGenTokenComponent
           collection={pageProps.collection}
-          token={pageProps.token}
+          token_id={pageProps.token}
         />
       </main>
     </>

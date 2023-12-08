@@ -1,7 +1,6 @@
 import styles from "./NextGen.module.scss";
 import { Container, Row, Col } from "react-bootstrap";
 import { PhaseTimes } from "../nextgen_entities";
-import NextGenTokenPreview from "./NextGenTokenPreview";
 import {
   useTokensIndex,
   useSharedState,
@@ -9,6 +8,7 @@ import {
   useCollectionAdditionalHook,
   useCollectionInfoHook,
 } from "../nextgen_helpers";
+import { NextGenTokenImage } from "./NextGenTokenImage";
 
 interface Props {
   collection: number;
@@ -40,13 +40,14 @@ export default function NextGenCollectionPreview(props: Readonly<Props>) {
   return (
     <a
       href={`/nextgen/collection/${props.collection}`}
-      className="decoration-none scale-hover">
+      className="decoration-none">
       <Container className={styles.collectionPreview}>
         <Row>
-          <Col className="pt-2 pb-2">
-            <NextGenTokenPreview
-              token_id={sampleToken}
+          <Col className="pb-4">
+            <NextGenTokenImage
               collection={props.collection}
+              token_id={sampleToken}
+              hide_link={true}
               hide_info={true}
             />
           </Col>

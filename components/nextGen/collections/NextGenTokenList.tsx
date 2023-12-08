@@ -1,5 +1,5 @@
 import { Col, Container, Row } from "react-bootstrap";
-import NextGenTokenPreview from "./NextGenTokenPreview";
+import { NextGenTokenImage } from "./NextGenTokenImage";
 
 interface Props {
   collection: number;
@@ -15,14 +15,10 @@ export default function NextGenTokenList(props: Readonly<Props>) {
           <Col
             xs={6}
             sm={4}
-            md={3}
+            md={4}
             key={`collection-${props.collection}-token-list-${t}`}
             className="pt-2 pb-2">
-            <NextGenTokenPreview
-              token_id={t}
-              collection={props.collection}
-              hide_info={props.hide_info}
-            />
+            <NextGenTokenImage collection={props.collection} token_id={t} />
           </Col>
         ))}
       </Row>

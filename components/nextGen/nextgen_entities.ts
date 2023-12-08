@@ -76,31 +76,6 @@ export interface ProofResponse extends ProofResponseBurn {
   spots: number;
 }
 
-export interface TokenURI {
-  id: number;
-  collection: number;
-  uri: string;
-  data?: any;
-  image?: string;
-  name: string;
-  description: string;
-  attributes: Attributes[];
-}
-
-export const EMPTY_TOKEN_URI: TokenURI = {
-  id: 0,
-  collection: 0,
-  uri: "",
-  name: "",
-  description: "",
-  attributes: [],
-};
-
-export interface Attributes {
-  trait_type: string;
-  value: string;
-}
-
 export enum Status {
   UPCOMING = "UPCOMING",
   LIVE = "LIVE",

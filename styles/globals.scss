@@ -351,3 +351,7 @@ h5 {
 .area-expanded {
   -webkit-line-clamp: none;
 }
+
+.unselectable {
+  user-select: none;
+}

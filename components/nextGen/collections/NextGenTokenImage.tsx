@@ -1,126 +1,190 @@
-import styles from "./NextGen.module.scss";
-import { Col, Container, Row } from "react-bootstrap";
-import { TokenURI } from "../nextgen_entities";
 import Image from "next/image";
-import { parseIpfsUrl } from "../../../helpers/Helpers";
+import { isUrl } from "../../../helpers/Helpers";
 import { useEffect, useState } from "react";
-import { NEXTGEN_CHAIN_NAME, NEXTGEN_CORE } from "../nextgen_contracts";
+import {
+  NEXTGEN_CHAIN_ID,
+  NEXTGEN_CHAIN_NAME,
+  NEXTGEN_CORE,
+} from "../nextgen_contracts";
+import { useContractRead } from "wagmi";
+import {
+  extractURI,
+  extractField,
+  extractAttributes,
+} from "../nextgen_helpers";
+import { IAttribute } from "../../../entities/INFT";
 
-interface Props {
-  token: TokenURI;
-  show_link?: boolean;
-  preview?: boolean;
-  hide_background?: boolean;
-  setMetadata?: (url: string) => void;
-  setName?: (name: string) => void;
-  setDescription?: (description: string) => void;
+export function getTokenName(
+  collection: number,
+  token_id: number,
+  name?: string
+) {
+  if (name) {
+    return name;
+  }
+  return `Collection ${collection} - #${token_id}`;
 }
 
-export function NextGenTokenImageContent(props: Readonly<Props>) {
+export function NextGenTokenImage(
+  props: Readonly<{
+    collection: number;
+    token_id: number;
+    hide_link?: boolean;
+    hide_info?: boolean;
+    show_animation?: boolean;
+    setName?: (name: string) => void;
+    setDescription?: (description: string) => void;
+    setMetadata?: (meta: any) => void;
+    setAttributes?: (attributes: IAttribute[]) => void;
+  }>
+) {
+  const cloudfrontUrl = `https://d3lqz0a4bldqgf.cloudfront.net/nextgen/tokens/images/${NEXTGEN_CHAIN_NAME}-${NEXTGEN_CORE.contract}/${props.token_id}.png`;
+  const generatorUrl = `https://nextgen-generator.seize.io/png/${props.token_id}`;
+
+  const [name, setName] = useState<string>();
+  const [description, setDescription] = useState<string>();
   const [image, setImage] = useState<string>();
-  const [animation, setAnimation] = useState<string>();
-
-  const generatorUrl = `https://nextgen-generator.seize.io/png/${props.token.id}`;
-  const cloudfrontUrl = `https://d3lqz0a4bldqgf.cloudfront.net/nextgen/tokens/images/${NEXTGEN_CHAIN_NAME}-${NEXTGEN_CORE.contract}/${props.token.id}.png`;
-
-  useEffect(() => {
-    setImage(props.token.image);
-  }, [props.token.image]);
-
-  function getDataFromUrl(url: string) {
-    fetch(url)
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.image) {
-          setImage(parseIpfsUrl(data.image));
-        }
-        if (data.animation_url) {
-          setAnimation(parseIpfsUrl(data.animation_url));
-        }
-        if (data.name && props.setName) props.setName(data.name);
-        if (data.description && props.setDescription)
-          props.setDescription(data.description);
-      })
-      .catch((err) => {
-        // ignore err
-      });
-  }
+  const [animationUrl, setAnimationUrl] = useState<string>();
+  const [attributes, setAttributes] = useState<IAttribute[]>();
+  const [onChainData, setOnChainData] = useState<any>();
+  const [animationLoaded, setAnimationLoaded] = useState(false);
 
   useEffect(() => {
-    if (!props.token.data && props.token.uri) {
-      let url = parseIpfsUrl(props.token.uri);
-      if (props.setMetadata) {
-        props.setMetadata(url);
-      }
-      getDataFromUrl(url);
+    if (props.setName && name) {
+      props.setName(name);
     }
-  }, [props.token]);
+  }, [name]);
 
-  let content;
-  if (!props.token.id) {
-    content = <></>;
-  } else if (props.token.data && !props.token.image && !props.preview) {
-    content = (
-      <iframe
-        srcDoc={props.token.uri}
-        title={`NextGen Token ${props.token.id}`}
-      />
-    );
-  } else if (animation && !props.preview) {
-    content = (
-      <iframe src={animation} title={`NextGen Token ${props.token.id}`} />
-    );
-  } else {
-    content = (
-      <Image
-        priority
-        loading={"eager"}
-        width="0"
-        height="0"
-        style={{
-          height: "auto",
-          width: image?.startsWith("data") ? "100%" : "auto",
-          maxHeight: "100%",
-          maxWidth: "100%",
-        }}
-        src={cloudfrontUrl}
-        onError={({ currentTarget }) => {
-          if (currentTarget.src === cloudfrontUrl) {
-            currentTarget.src = generatorUrl;
-          }
-          if (image) {
-            currentTarget.src = image;
-          }
-        }}
-        alt={props.token.name}
-      />
+  useEffect(() => {
+    if (props.setDescription && description) {
+      props.setDescription(description);
+    }
+  }, [description]);
+
+  useEffect(() => {
+    if (props.setAttributes && attributes) {
+      props.setAttributes(attributes);
+    }
+  }, [attributes]);
+
+  useContractRead({
+    address: NEXTGEN_CORE.contract as `0x${string}`,
+    abi: NEXTGEN_CORE.abi,
+    chainId: NEXTGEN_CHAIN_ID,
+    functionName: "tokenURI",
+    watch: true,
+    enabled: props.token_id > 0,
+    args: [props.token_id],
+    onSettled(data: any, error: any) {
+      if (data) {
+        if (data.startsWith("data")) {
+          const uri = extractURI(data);
+          setOnChainData(uri);
+          setName(extractField("name", data));
+          setDescription(extractField("description", data));
+          setImage(extractField("image", data));
+          setAnimationUrl(extractField("animation_url", data));
+          setAttributes(extractAttributes(data));
+        } else if (isUrl(data)) {
+          fetch(data)
+            .then((response) => response.json())
+            .then((response) => {
+              setName(response.name);
+              setDescription(response.description);
+              setImage(response.image);
+              setAnimationUrl(response.animation_url);
+              setAttributes(response.attributes);
+            });
+        }
+        if (props.setMetadata) {
+          props.setMetadata(data);
+        }
+      }
+    },
+  });
+
+  function getImage(hideOnLoad: boolean = false) {
+    return (
+      <span className="d-flex flex-column align-items-center">
+        <Image
+          priority
+          loading={"eager"}
+          width="0"
+          height="0"
+          style={{
+            height: "auto",
+            width: "auto",
+            maxHeight: "100%",
+            maxWidth: "100%",
+          }}
+          src={cloudfrontUrl}
+          onError={({ currentTarget }) => {
+            if (currentTarget.src === cloudfrontUrl) {
+              currentTarget.src = generatorUrl;
+            }
+            if (image) {
+              currentTarget.src = image;
+            }
+          }}
+          alt={`NextGen Token #${props.token_id}`}
+        />
+        {!props.hide_info && (
+          <>
+            <span className="pt-1 text-center font-smaller font-color-h">
+              #{props.token_id}
+            </span>
+            <span>{getTokenName(props.collection, props.token_id, name)}</span>
+          </>
+        )}
+      </span>
     );
   }
 
-  return <>{content}</>;
-}
-
-export default function NextGenTokenImage(props: Readonly<Props>) {
-  return (
-    <Container className="no-padding">
-      <Row>
-        <Col
-          style={{ position: "relative" }}
-          className={`
-            ${
-              props.preview
-                ? styles.tokenFrameContainer
-                : styles.tokenFrameContainerFull
-            } ${!props.hide_background ? styles.tokenFrameBackground : ""}`}>
-          <NextGenTokenImageContent
-            token={props.token}
-            preview={props.preview}
-            setMetadata={props.setMetadata}
-            setName={props.setName}
-            setDescription={props.setDescription}
+  function getContent() {
+    if (props.show_animation && onChainData) {
+      return (
+        <iframe
+          style={{
+            width: "100%",
+            height: "80vh",
+          }}
+          srcDoc={onChainData.uri}
+          title={`NextGen Token ${props.token_id}`}
+        />
+      );
+    } else if (props.show_animation && animationUrl) {
+      return (
+        <>
+          <iframe
+            style={{
+              width: "100%",
+              height: "80vh",
+              visibility: animationLoaded ? "visible" : "hidden",
+              position: animationLoaded ? "static" : "absolute",
+            }}
+            onLoad={() => {
+              setAnimationLoaded(true);
+            }}
+            src={animationUrl}
+            title={`NextGen Token ${props.token_id}`}
           />
-        </Col>
-      </Row>
-    </Container>
-  );
+          {!animationLoaded && getImage(true)}
+        </>
+      );
+    } else {
+      return getImage();
+    }
+  }
+
+  if (props.hide_link) {
+    return <span className="unselectable">{getContent()}</span>;
+  } else {
+    return (
+      <a
+        href={`/nextgen/token/${props.token_id}`}
+        className="decoration-none scale-hover unselectable">
+        {getContent()}
+      </a>
+    );
+  }
 }
