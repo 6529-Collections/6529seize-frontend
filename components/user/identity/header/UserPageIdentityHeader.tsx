@@ -19,10 +19,10 @@ export default function UserPageIdentityHeader({
     data: profile,
     error,
   } = useQuery<IProfileAndConsolidations>({
-    queryKey: ["profile", user],
+    queryKey: ["profile", user.toLowerCase()],
     queryFn: async () =>
       await commonApiFetch<IProfileAndConsolidations>({
-        endpoint: `profiles/${user}`,
+        endpoint: `profiles/${user.toLowerCase()}`,
       }),
     enabled: !!user,
     initialData: initialProfile,

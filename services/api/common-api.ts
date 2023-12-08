@@ -32,7 +32,10 @@ export const commonApiFetch = async <T>(param: {
   });
   if (!res.ok) {
     const body: any = await res.json();
-    throw new Error(body?.error ?? res.statusText ?? "Something went wrong");
+    // throw new Error(body?.error ?? res.statusText ?? "Something went wrong");
+    return new Promise((_, rej) =>
+      rej(body?.error ?? res.statusText ?? "Something went wrong")
+    );
   }
   return res.json();
 };
@@ -49,7 +52,10 @@ export const commonApiPost = async <T, U>(param: {
   });
   if (!res.ok) {
     const body: any = await res.json();
-    throw new Error(body?.error ?? res.statusText ?? "Something went wrong");
+    return new Promise((_, rej) =>
+      rej(body?.error ?? res.statusText ?? "Something went wrong")
+    );
+    // throw new Error(body?.error ?? res.statusText ?? "Something went wrong");
   }
   return res.json();
 };
@@ -76,7 +82,10 @@ export const commonApiPostForm = async <U>(param: {
   });
   if (!res.ok) {
     const body: any = await res.json();
-    throw new Error(body?.error ?? res.statusText ?? "Something went wrong");
+    // throw new Error(body?.error ?? res.statusText ?? "Something went wrong");
+    return new Promise((_, rej) =>
+      rej(body?.error ?? res.statusText ?? "Something went wrong")
+    );
   }
   return res.json();
 };

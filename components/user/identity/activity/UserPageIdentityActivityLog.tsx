@@ -55,7 +55,7 @@ export default function UserPageIdentityActivityLog({
     queryKey: [
       "profile-logs",
       {
-        profile: user,
+        profile: user.toLowerCase(),
         page: currentPage,
         page_size: PAGE_SIZE,
         log_type: logTypeParams,
@@ -65,7 +65,7 @@ export default function UserPageIdentityActivityLog({
       await commonApiFetch<Page<ProfileActivityLog>>({
         endpoint: `profile-logs`,
         params: {
-          profile: user,
+          profile: user.toLowerCase(),
           page: `${currentPage}`,
           page_size: `${PAGE_SIZE}`,
           log_type: logTypeParams,

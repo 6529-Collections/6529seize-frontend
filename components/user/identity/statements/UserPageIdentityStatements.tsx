@@ -36,7 +36,7 @@ export default function UserPageIdentityStatements({
     data: statements,
     error,
   } = useQuery<CicStatement[]>({
-    queryKey: ["user-cic-statements", user],
+    queryKey: ["user-cic-statements", user.toLowerCase()],
     queryFn: async () =>
       await commonApiFetch<CicStatement[]>({
         endpoint: `profiles/${user}/cic/statements`,

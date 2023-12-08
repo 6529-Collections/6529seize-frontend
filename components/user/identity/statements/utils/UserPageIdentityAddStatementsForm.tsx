@@ -46,7 +46,10 @@ export default function UserPageIdentityAddStatementsForm({
         type: "success",
       });
       queryClient.invalidateQueries({
-        queryKey: ["user-cic-statements", profile.profile?.handle.toLowerCase()],
+        queryKey: [
+          "user-cic-statements",
+          profile.profile?.handle.toLowerCase(),
+        ],
       });
       queryClient.invalidateQueries({
         queryKey: [
@@ -86,6 +89,12 @@ export default function UserPageIdentityAddStatementsForm({
           });
         }
       }
+    },
+    onError: (error) => {
+      setToast({
+        message: error as unknown as string,
+        type: "error",
+      });
     },
   });
 
