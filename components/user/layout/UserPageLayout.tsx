@@ -3,7 +3,6 @@ import { ReactNode, useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 import HeaderPlaceholder from "../../header/HeaderPlaceholder";
 import { numberWithCommas } from "../../../helpers/Helpers";
-import styles from "../../../styles/Home.module.scss";
 import UserPageHeader from "../user-page-header/UserPageHeader";
 import { useRouter } from "next/router";
 import { IProfileAndConsolidations } from "../../../entities/IProfile";
@@ -165,7 +164,7 @@ export default function UserPageLayout({
         />
       </Head>
 
-      <main className={styles.main}>
+      <main className="tw-min-h-screen">
         <Header />
         <div
           className={`tw-bg-iron-950 tw-min-h-screen tw-pb-16 ${inter.className}`}

@@ -37,7 +37,7 @@ export default function UserPageIdentityStatementsSocialMediaVerificationPosts({
       <UserPageIdentityStatementsStatementsList
         statements={statements}
         profile={profile}
-        noItemsMessage="No Social Media Verification Post added yet."
+        noItemsMessage="No Social Media Verification Post added yet"
       />
     </div>
   );
