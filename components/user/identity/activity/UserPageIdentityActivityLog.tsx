@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   IProfileAndConsolidations,
   ProfileActivityLog,
@@ -11,6 +11,9 @@ import { commonApiFetch } from "../../../../services/api/common-api";
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/router";
 import UserPageIdentityActivityLogList from "./list/UserPageIdentityActivityLogList";
+import UserPageIdentityPagination from "../utils/UserPageIdentityPagination";
+
+const PAGE_SIZE = 10;
 
 export default function UserPageIdentityActivityLog({
   profile,
@@ -40,6 +43,7 @@ export default function UserPageIdentityActivityLog({
     setLogTypeParams(selectedFilters.map((f) => f.toLowerCase()).join(","));
   }, [selectedFilters]);
 
+  const [currentPage, setCurrentPage] = useState<number>(1);
   const {
     isLoading,
     isError,
@@ -50,8 +54,8 @@ export default function UserPageIdentityActivityLog({
       "profile-logs",
       {
         profile: user,
-        page: 1,
-        page_size: 100,
+        page: currentPage,
+        page_size: PAGE_SIZE,
         log_type: logTypeParams,
       },
     ],
@@ -60,14 +64,27 @@ export default function UserPageIdentityActivityLog({
         endpoint: `profile-logs`,
         params: {
           profile: user,
-          page: "1",
-          page_size: "100",
+          page: `${currentPage}`,
+          page_size: `${PAGE_SIZE}`,
           log_type: logTypeParams,
         },
       }),
     enabled: !!user,
     // initialData: initialProfile,
   });
+
+  const [totalPages, setTotalPages] = useState<number>(1);
+
+  useEffect(() => {
+    if (isLoading) return;
+    if (!logs?.count) {
+      setCurrentPage(1);
+      setTotalPages(1);
+      return;
+    }
+    setTotalPages(Math.ceil(logs.count / PAGE_SIZE));
+  }, [logs?.count, logs?.page, isLoading]);
+
   return (
     <div className="tw-bg-iron-900 tw-border tw-border-white/5 tw-border-solid tw-rounded-xl">
       <UserPageIdentityActivityLogHeader profile={profile} />
@@ -79,7 +96,16 @@ export default function UserPageIdentityActivityLog({
           />
         )}
         {logs?.data.length ? (
-          <UserPageIdentityActivityLogList logs={logs.data} />
+          <>
+            <UserPageIdentityActivityLogList logs={logs.data} />
+            {totalPages > 1 && (
+              <UserPageIdentityPagination
+                currentPage={currentPage}
+                setCurrentPage={setCurrentPage}
+                totalPages={totalPages}
+              />
+            )}
+          </>
         ) : (
           <div className="tw-mt-4">
             <span className="tw-px-8 tw-text-sm tw-italic tw-text-iron-500">

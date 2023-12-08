@@ -1,8 +1,15 @@
-export default function UserCICTypeIconTooltipRate() {
+import { IProfileAndConsolidations } from "../../../../../entities/IProfile";
+import UserPageIdentityHeaderCICRateWrapper from "../../../identity/header/UserPageIdentityHeaderCICRateWrapper";
+
+export default function UserCICTypeIconTooltipRate({
+  profile,
+}: {
+  profile: IProfileAndConsolidations;
+}) {
   return (
     <div className="tw-mt-3.5 tw-pt-3.5 tw-border-t tw-border-solid tw-border-neutral-600 tw-border-x-0 tw-border-b-0">
       <div className="tw-flex tw-items-center tw-justify-between tw-w-full">
-        <a
+        {/* <a
           href=""
           target="blank"
           className="tw-flex tw-items-center tw-text-neutral-100 tw-text-sm tw-font-medium tw-no-underline tw-transition tw-duration-300 tw-ease-out"
@@ -22,13 +29,8 @@ export default function UserCICTypeIconTooltipRate() {
               strokeLinejoin="round"
             />
           </svg>
-        </a>
-        <button
-          type="button"
-          className="tw-cursor-pointer tw-bg-primary-500 tw-px-3.5 tw-py-2.5 tw-text-sm tw-font-semibold tw-text-white tw-border tw-border-solid tw-border-primary-500 tw-rounded-lg hover:tw-bg-primary-600 hover:tw-border-primary-600 tw-transition tw-duration-300 tw-ease-out"
-        >
-          CIC Rate
-        </button>
+        </a> */}
+        <UserPageIdentityHeaderCICRateWrapper profile={profile} />
       </div>
     </div>
   );

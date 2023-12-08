@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import {
   CICType,
   CIC_TO_TEXT,
@@ -6,16 +6,28 @@ import {
 } from "../../../../../entities/IProfile";
 import UserCICTypeIconTooltipHeaders from "./UserCICTypeIconTooltipHeaders";
 import UserCICTypeIconTooltipRate from "./UserCICTypeIconTooltipRate";
-import { cicToType } from "../../../../../helpers/Helpers";
+import { amIUser, cicToType } from "../../../../../helpers/Helpers";
+import { useAccount } from "wagmi";
+import { AuthContext } from "../../../../auth/Auth";
 
 export default function UserCICTypeIconTooltip({
   profile,
 }: {
   profile: IProfileAndConsolidations;
 }) {
+  const { address } = useAccount();
+  const { myProfile } = useContext(AuthContext);
+  const [isMyProfile, setIsMyProfile] = useState<boolean>(true);
+
   const [cicType, setCicType] = useState<CICType>(
     cicToType(profile.cic.cic_rating)
   );
+
+  useEffect(
+    () => setIsMyProfile(amIUser({ profile, address })),
+    [profile, address]
+  );
+
   useEffect(() => {
     setCicType(cicToType(profile.cic.cic_rating));
   }, [profile]);
@@ -68,7 +80,7 @@ export default function UserCICTypeIconTooltip({
           </p>
         </div>
       )}
-      <UserCICTypeIconTooltipRate />
+      {!isMyProfile && <UserCICTypeIconTooltipRate profile={profile} />}
     </div>
   );
 }

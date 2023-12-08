@@ -1,3 +1,4 @@
+import Tippy from "@tippyjs/react";
 import { ProfileActivityLogPrimaryWalletEdit } from "../../../../../../entities/IProfile";
 import { formatAddress } from "../../../../../../helpers/Helpers";
 import EthereumIcon from "../../../../utils/icons/EthereumIcon";
@@ -23,7 +24,9 @@ export default function UserPageIdentityActivityLogPrimaryWallet({
               primary wallet
             </span>
             <span className="tw-text-sm tw-font-semibold tw-text-neutral-100">
-              {formatAddress(log.contents.old_value)}
+              <Tippy content={log.contents.old_value} interactive={true}>
+                <div>{formatAddress(log.contents.old_value)}</div>
+              </Tippy>
             </span>
             <svg
               className="tw-h-5 tw-w-5 tw-text-neutral-400"
@@ -40,7 +43,9 @@ export default function UserPageIdentityActivityLogPrimaryWallet({
               />
             </svg>
             <span className="tw-truncate tw-max-w-[12rem] tw-text-sm tw-font-semibold tw-text-neutral-100">
-              {formatAddress(log.contents.new_value)}
+              <Tippy content={log.contents.new_value} interactive={true}>
+                <div>{formatAddress(log.contents.new_value)}</div>
+              </Tippy>
             </span>
           </div>
         </div>

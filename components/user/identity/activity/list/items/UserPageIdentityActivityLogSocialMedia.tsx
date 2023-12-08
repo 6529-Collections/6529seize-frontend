@@ -40,7 +40,7 @@ export default function UserPageIdentityActivityLogSocialMedia({
                 statementType={log.contents.statement.statement_type}
               />
             </div>
-            <span className="tw-text-sm tw-font-semibold tw-text-neutral-100">
+            <span className="tw-truncate tw-max-w-[12rem] tw-text-sm tw-font-semibold tw-text-neutral-100">
               {log.contents.statement.statement_value}
             </span>
           </div>
