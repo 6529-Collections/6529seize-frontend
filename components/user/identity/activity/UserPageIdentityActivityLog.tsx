@@ -17,8 +17,10 @@ const PAGE_SIZE = 10;
 
 export default function UserPageIdentityActivityLog({
   profile,
+  profileActivityLogs: initialPageActivityLogs,
 }: {
   profile: IProfileAndConsolidations;
+  profileActivityLogs: Page<ProfileActivityLog>;
 }) {
   const router = useRouter();
   const user = (router.query.user as string).toLowerCase();
@@ -70,7 +72,7 @@ export default function UserPageIdentityActivityLog({
         },
       }),
     enabled: !!user,
-    // initialData: initialProfile,
+    initialData: initialPageActivityLogs,
   });
 
   const [totalPages, setTotalPages] = useState<number>(1);

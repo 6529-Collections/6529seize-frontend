@@ -1,7 +1,7 @@
 import { useRouter } from "next/router";
 import {
   IProfileAndConsolidations,
-  ProfilesMatterRating,
+  ProfilesMatterRatingWithRaterLevel,
 } from "../../../../entities/IProfile";
 import { useQuery } from "@tanstack/react-query";
 import { Page } from "../../../../helpers/Types";
@@ -15,8 +15,10 @@ const PAGE_SIZE = 10;
 
 export default function CICRatings({
   profile,
+  profileCICRatings: initialProfileCICRatings,
 }: {
   profile: IProfileAndConsolidations;
+  profileCICRatings: Page<ProfilesMatterRatingWithRaterLevel>;
 }) {
   const router = useRouter();
   const user = (router.query.user as string).toLowerCase();
@@ -28,7 +30,7 @@ export default function CICRatings({
     isError,
     data: ratings,
     error,
-  } = useQuery<Page<ProfilesMatterRating>>({
+  } = useQuery<Page<ProfilesMatterRatingWithRaterLevel>>({
     queryKey: [
       "cic-ratings",
       {
@@ -38,7 +40,7 @@ export default function CICRatings({
       },
     ],
     queryFn: async () =>
-      await commonApiFetch<Page<ProfilesMatterRating>>({
+      await commonApiFetch<Page<ProfilesMatterRatingWithRaterLevel>>({
         endpoint: `profiles/${user}/cic/ratings`,
         params: {
           page: "1",
@@ -46,7 +48,7 @@ export default function CICRatings({
         },
       }),
     enabled: !!user,
-    // initialData: initialProfile,
+    initialData: initialProfileCICRatings,
   });
 
   const [totalPages, setTotalPages] = useState<number>(1);
