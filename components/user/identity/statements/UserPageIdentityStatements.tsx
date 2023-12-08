@@ -13,12 +13,12 @@ import UserPageIdentityStatementsSocialMediaAccounts from "./social-media-accoun
 import UserPageIdentityStatementsContacts from "./contacts/UserPageIdentityStatementsContacts";
 import UserPageIdentityStatementsSocialMediaVerificationPosts from "./social-media-verification-posts/UserPageIdentityStatementsSocialMediaVerificationPosts";
 
-
-
 export default function UserPageIdentityStatements({
   profile,
+  profileIdentityStatements: initialProfileIdentityStatements,
 }: {
   profile: IProfileAndConsolidations;
+  profileIdentityStatements: CicStatement[];
 }) {
   const router = useRouter();
   const user = (router.query.user as string).toLowerCase();
@@ -42,6 +42,7 @@ export default function UserPageIdentityStatements({
         endpoint: `profiles/${user}/cic/statements`,
       }),
     enabled: !!user,
+    initialData: initialProfileIdentityStatements,
   });
 
   useEffect(() => {

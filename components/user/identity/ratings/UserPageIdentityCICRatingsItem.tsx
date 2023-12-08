@@ -1,14 +1,34 @@
-import { ProfilesMatterRating } from "../../../../entities/IProfile";
+import { useEffect, useState } from "react";
 import {
+  CICType,
+  ProfilesMatterRatingWithRaterLevel,
+} from "../../../../entities/IProfile";
+import {
+  cicToType,
   formatNumberWithCommas,
   getTimeAgo,
 } from "../../../../helpers/Helpers";
 
+const CIC_COLOR: Record<CICType, string> = {
+  [CICType.INACCURATE]: "tw-bg-[#F97066]",
+  [CICType.UNKNOWN]: "tw-bg-[#FEDF89]",
+  [CICType.PROBABLY_ACCURATE]: "tw-bg-[#AAF0C4]",
+  [CICType.ACCURATE]: "tw-bg-[#73E2A3]",
+  [CICType.HIGHLY_ACCURATE]: "tw-bg-[#3CCB7F]",
+};
+
 export default function UserPageIdentityCICRatingsItem({
   rating,
 }: {
-  rating: ProfilesMatterRating;
+  rating: ProfilesMatterRatingWithRaterLevel;
 }) {
+  const [cicType, setCicType] = useState<CICType>(
+    cicToType(rating.rater_cic_rating)
+  );
+  useEffect(() => {
+    setCicType(cicToType(rating.rater_cic_rating));
+  }, [rating]);
+
   const getRatingStr = (rating: number) => {
     return rating > 0
       ? `+${formatNumberWithCommas(rating)}`
@@ -24,9 +44,11 @@ export default function UserPageIdentityCICRatingsItem({
         <div className="tw-inline-flex tw-items-center tw-space-x-3">
           <span className="tw-relative">
             <div className="tw-flex tw-items-center tw-justify-center tw-h-5 tw-w-5 tw-text-[0.625rem] tw-leading-3 tw-font-bold tw-rounded-full tw-ring-2 tw-ring-iron-300 tw-text-iron-300">
-              50
+              {rating.rater_level}
             </div>
-            <span className="tw-absolute -tw-right-1 -tw-top-1 tw-block tw-h-2.5 tw-w-2.5 tw-rounded-full tw-bg-green"></span>
+            <span
+              className={`tw-absolute -tw-right-1 -tw-top-1 tw-block tw-h-2.5 tw-w-2.5 tw-rounded-full ${CIC_COLOR[cicType]}`}
+            ></span>
           </span>
           <div className="tw-inline-flex tw-space-x-1 5">
             <span className="tw-text-sm tw-font-semibold tw-text-iron-100">

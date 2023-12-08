@@ -1,7 +1,12 @@
 import { ENS } from "../../entities/IENS";
 import { NFT, NFTLite } from "../../entities/INFT";
 import { OwnerLite } from "../../entities/IOwner";
-import { IProfileAndConsolidations } from "../../entities/IProfile";
+import {
+  CicStatement,
+  IProfileAndConsolidations,
+  ProfileActivityLog,
+  ProfilesMatterRatingWithRaterLevel,
+} from "../../entities/IProfile";
 import { Season } from "../../entities/ISeason";
 import { ConsolidatedTDHMetrics } from "../../entities/ITDH";
 import {
@@ -9,6 +14,7 @@ import {
   containsEmojis,
   formatAddress,
 } from "../../helpers/Helpers";
+import { Page } from "../../helpers/Types";
 import { commonApiFetch } from "../../services/api/common-api";
 
 export interface CommonUserServerSideProps {
@@ -105,6 +111,55 @@ export const userPageNeedsRedirect = ({
     };
   }
   return null;
+};
+
+export const getUserProfileActivityLogs = async ({
+  user,
+  headers,
+}: {
+  user: string;
+  headers: Record<string, string>;
+}): Promise<Page<ProfileActivityLog>> => {
+  return await commonApiFetch<Page<ProfileActivityLog>>({
+    endpoint: `profile-logs`,
+    params: {
+      profile: user,
+      page: `1`,
+      page_size: `10`,
+      log_type: "",
+    },
+    headers,
+  });
+};
+
+export const getUserProfileCICRatings = async ({
+  user,
+  headers,
+}: {
+  user: string;
+  headers: Record<string, string>;
+}): Promise<Page<ProfilesMatterRatingWithRaterLevel>> => {
+  return await commonApiFetch<Page<ProfilesMatterRatingWithRaterLevel>>({
+    endpoint: `profiles/${user}/cic/ratings`,
+    params: {
+      page: `1`,
+      page_size: `10`,
+    },
+    headers,
+  });
+};
+
+export const getUserProfileIdentityStatements = async ({
+  user,
+  headers,
+}: {
+  user: string;
+  headers: Record<string, string>;
+}): Promise<CicStatement[]> => {
+  return await commonApiFetch<CicStatement[]>({
+    endpoint: `profiles/${user}/cic/statements`,
+    headers,
+  });
 };
 
 export const getGradients = async (

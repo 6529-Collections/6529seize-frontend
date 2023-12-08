@@ -1,21 +1,33 @@
 import { ReactElement } from "react";
 import { NextPageWithLayout } from "../_app";
-import { IProfileAndConsolidations } from "../../entities/IProfile";
+import {
+  CicStatement,
+  IProfileAndConsolidations,
+  ProfileActivityLog,
+  ProfilesMatterRatingWithRaterLevel,
+} from "../../entities/IProfile";
 import { ConsolidatedTDHMetrics } from "../../entities/ITDH";
 import UserPageLayout from "../../components/user/layout/UserPageLayout";
 import {
   getCommonHeaders,
   getCommonUserServerSideProps,
+  getUserProfileActivityLogs,
+  getUserProfileCICRatings,
+  getUserProfileIdentityStatements,
   userPageNeedsRedirect,
 } from "./server.helpers";
 import UserPageIdentity from "../../components/user/identity/UserPageIdentity";
 import { useQueryClient } from "@tanstack/react-query";
 import UserPageIdentityNoProfile from "../../components/user/identity/UserPageIdentityNoProfile";
+import { Page as PageType } from "../../helpers/Types";
 
 export interface UserPageIdentityProps {
   profile: IProfileAndConsolidations;
   title: string;
   consolidatedTDH: ConsolidatedTDHMetrics | null;
+  profileActivityLogs: PageType<ProfileActivityLog>;
+  profileCICRatings: PageType<ProfilesMatterRatingWithRaterLevel>;
+  profileIdentityStatements: CicStatement[];
 }
 
 const Page: NextPageWithLayout<{ pageProps: UserPageIdentityProps }> = ({
@@ -29,25 +41,18 @@ const Page: NextPageWithLayout<{ pageProps: UserPageIdentityProps }> = ({
     );
   }
 
-  for (const wallet of pageProps.profile.consolidation.wallets) {
-    queryClient.setQueryData<IProfileAndConsolidations>(
-      ["profile", wallet.wallet.address.toLowerCase()],
-      pageProps.profile
-    );
-
-    if (wallet.wallet.ens) {
-      queryClient.setQueryData<IProfileAndConsolidations>(
-        ["profile", wallet.wallet.ens.toLowerCase()],
-        pageProps.profile
-      );
-    }
-  }
-
   if (!pageProps.profile.profile) {
     return <UserPageIdentityNoProfile profile={pageProps.profile} />;
   }
 
-  return <UserPageIdentity profile={pageProps.profile} />;
+  return (
+    <UserPageIdentity
+      profile={pageProps.profile}
+      profileActivityLogs={pageProps.profileActivityLogs}
+      profileCICRatings={pageProps.profileCICRatings}
+      profileIdentityStatements={pageProps.profileIdentityStatements}
+    />
+  );
 };
 
 Page.getLayout = function getLayout(
@@ -80,11 +85,30 @@ export async function getServerSideProps(
       return needsRedirect as any;
     }
 
+    const [profileActivityLogs, profileCICRatings, profileIdentityStatements] =
+      await Promise.all([
+        getUserProfileActivityLogs({
+          user: req.query.user,
+          headers,
+        }),
+        getUserProfileCICRatings({
+          user: req.query.user,
+          headers,
+        }),
+        getUserProfileIdentityStatements({
+          user: req.query.user,
+          headers,
+        }),
+      ]);
+
     return {
       props: {
         profile,
         title,
         consolidatedTDH,
+        profileActivityLogs,
+        profileCICRatings,
+        profileIdentityStatements,
       },
     };
   } catch (e: any) {
