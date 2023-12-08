@@ -3,7 +3,7 @@ import {
   IProfileAndConsolidations,
   ProfilesMatterRatingWithRaterLevel,
 } from "../../../../entities/IProfile";
-import { useQuery } from "@tanstack/react-query";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { Page } from "../../../../helpers/Types";
 import { commonApiFetch } from "../../../../services/api/common-api";
 import UserPageIdentityCICRatingsList from "./UserPageIdentityCICRatingsList";
@@ -48,7 +48,9 @@ export default function CICRatings({
         },
       }),
     enabled: !!user,
-    initialData: initialProfileCICRatings,
+    placeholderData: keepPreviousData,
+    initialData: () =>
+      currentPage === 1 ? initialProfileCICRatings : undefined,
   });
 
   const [totalPages, setTotalPages] = useState<number>(1);

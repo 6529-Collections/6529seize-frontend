@@ -8,7 +8,7 @@ import UserPageIdentityActivityLogHeader from "./UserPageIdentityActivityLogHead
 import UserPageIdentityActivityLogFilter from "./filter/UserPageIdentityActivityLogFilter";
 import { Page } from "../../../../helpers/Types";
 import { commonApiFetch } from "../../../../services/api/common-api";
-import { useQuery } from "@tanstack/react-query";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/router";
 import UserPageIdentityActivityLogList from "./list/UserPageIdentityActivityLogList";
 import UserPageIdentityPagination from "../utils/UserPageIdentityPagination";
@@ -72,7 +72,9 @@ export default function UserPageIdentityActivityLog({
         },
       }),
     enabled: !!user,
-    initialData: initialPageActivityLogs,
+    placeholderData: keepPreviousData,
+    initialData: () =>
+      currentPage === 1 ? initialPageActivityLogs : undefined,
   });
 
   const [totalPages, setTotalPages] = useState<number>(1);
