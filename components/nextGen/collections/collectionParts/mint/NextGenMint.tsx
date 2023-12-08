@@ -273,7 +273,7 @@ export default function NextGenMint(props: Readonly<Props>) {
           mintForAddress={setMintForAddress}
         />
       );
-    } else if (type == AllowlistType.EXTERNAL_BURN) {
+    } else if (collection && type == AllowlistType.EXTERNAL_BURN) {
       return (
         <NextGenMintBurnWidget
           collection={collection}
