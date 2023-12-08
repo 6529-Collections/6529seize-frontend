@@ -159,9 +159,9 @@ export default function UserPageIdentityHeaderCICRate({
   };
 
   return (
-    <div className="tw-mt-6">
+    <div>
       <form onSubmit={onSubmit}>
-        <div className="tw-flex tw-items-center tw-space-x-3.5">
+        <div className="tw-flex tw-items-end tw-space-x-3.5">
           <div>
             <div>
               <label className="tw-block tw-text-sm tw-font-normal tw-leading-5 tw-text-iron-400">
@@ -204,33 +204,9 @@ export default function UserPageIdentityHeaderCICRate({
                   onChange={handleChange}
                   required
                   autoComplete="off"
-                  className="tw-block tw-w-[12.5rem] tw-rounded-r-lg tw-border-0 tw-py-3 tw-pl-4 tw-pr-10 tw-bg-iron-700/40 tw-text-white tw-font-medium tw-text-right tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-white/5 placeholder:tw-text-iron-500 focus:tw-outline-none focus:tw-bg-transparent focus:tw-ring-1 focus:tw-ring-inset hover:tw-ring-iron-700 focus:tw-ring-primary-300 tw-text-base sm:tw-leading-6 tw-transition tw-duration-300 tw-ease-out"
+                  className="tw-block tw-max-w-[12rem] tw-rounded-r-lg tw-border-0 tw-py-3 tw-px-3 tw-bg-iron-700/40 tw-text-white tw-font-medium tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-white/5 placeholder:tw-text-iron-500 focus:tw-outline-none focus:tw-bg-transparent focus:tw-ring-1 focus:tw-ring-inset hover:tw-ring-iron-700 focus:tw-ring-primary-300 tw-text-base sm:tw-leading-6 tw-transition tw-duration-300 tw-ease-out"
                 />
-                <div className="tw-pointer-events-none tw-absolute tw-inset-y-0 tw-right-0 tw-flex tw-items-center tw-pr-3">
-                  <svg
-                    className="tw-h-5 tw-w-5 tw-text-iron-400"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      d="M12 16V12M12 8H12.01M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12Z"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
-                </div>
               </div>
-            </div>
-            <div className="tw-mt-3.5 tw-space-x-1 tw-flex tw-items-center tw-justify-between tw-w-full">
-              <span className="tw-text-sm tw-font-semibold tw-text-iron-200">
-                Your min/max CIC Rating:
-              </span>
-              <span className="tw-text-sm tw-font-semibold tw-text-iron-200">
-                (+/-){formatNumberWithCommas(myMaxCICRatings)}
-              </span>
             </div>
           </div>
           <div className="-tw-mt-1.5">
@@ -241,6 +217,14 @@ export default function UserPageIdentityHeaderCICRate({
               Rate
             </button>
           </div>
+        </div>
+        <div className="tw-mt-3 tw-space-x-1 tw-inline-flex tw-items-center">
+          <span className="tw-text-sm tw-font-semibold tw-text-iron-200">
+            Your min/max CIC Rating:
+          </span>
+          <span className="tw-pl-1 tw-text-sm tw-font-semibold tw-text-iron-200">
+            (+/-) {formatNumberWithCommas(myMaxCICRatings)}
+          </span>
         </div>
       </form>
     </div>

@@ -42,7 +42,9 @@ export default function UserPageIdentityHeader({
             </p>
           </div>
           <UserPageIdentityHeaderCIC profile={profile} />
+          <div className="tw-mt-6">
           <UserPageIdentityHeaderCICRateWrapper profile={profile} />
+          </div>
         </div>
       </div>
     </div>

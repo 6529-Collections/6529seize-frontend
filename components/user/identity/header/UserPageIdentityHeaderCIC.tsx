@@ -19,7 +19,7 @@ export default function UserPageIdentityHeaderCIC({
     setCicRaters(profile.cic.contributor_count);
   }, [profile]);
   return (
-    <div className="tw-mt-4 tw-flex tw-flex-col sm:tw-flex-row sm:tw-flex-wrap sm:tw-space-x-6">
+    <div className="tw-mt-4 tw-flex tw-flex-col sm:tw-flex-row sm:tw-flex-wrap sm:tw-space-x-6 tw-gap-y-1">
       <div className="tw-flex tw-items-center tw-text-base tw-font-semibold tw-text-iron-200">
         <div className="tw-flex tw items-center tw-space-x-1">
           <span>CIC:</span>

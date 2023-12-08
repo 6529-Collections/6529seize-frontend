@@ -78,9 +78,9 @@ export default function UserPageIdentityStatements({
     <div className="tw-mt-10">
       <div className="tw-bg-iron-900 tw-border tw-border-white/5 tw-border-solid tw-rounded-xl">
         <UserPageIdentityAddStatementsHeader profile={profile} />
-        <div className="tw-p-8 tw-mx-auto tw-grid tw-max-w-2xl tw-grid-cols-1 tw-gap-x-8 tw-gap-y-16 tw-sm:gap-y-20 tw-lg:mx-0 lg:tw-max-w-none lg:tw-grid-cols-3">
-          <div className="tw-col-span-2 tw-space-y-5">
-            <div className="tw-grid tw-grid-cols-1 tw-gap-x-8 tw-gap-y-5 sm:tw-grid-cols-2">
+        <div className="tw-p-6 md:tw-p-8 tw-mx-auto tw-grid tw-grid-cols-1 tw-gap-x-8 tw-gap-y-10 xl:tw-gap-y-16 lg:tw-mx-0 xl:tw-grid-cols-3">
+          <div className="tw-col-span-2 tw-space-y-6">
+            <div className="tw-grid tw-grid-cols-1 tw-gap-x-8 tw-gap-y-6 md:tw-grid-cols-2">
               <UserPageIdentityStatementsConsolidatedAddresses
                 profile={profile}
               />
@@ -90,7 +90,7 @@ export default function UserPageIdentityStatements({
               />
             </div>
 
-            <div className="tw-grid tw-grid-cols-1 tw-gap-x-8 tw-gap-y-5 sm:tw-grid-cols-2">
+            <div className="tw-grid tw-grid-cols-1 tw-gap-x-8 tw-gap-y-6 md:tw-grid-cols-2">
               <UserPageIdentityStatementsContacts
                 statements={contacts}
                 profile={profile}
@@ -102,8 +102,8 @@ export default function UserPageIdentityStatements({
             </div>
           </div>
 
-          <div className="tw-col-span-1 tw-ml-auto">
-            <ul className="tw-pl-0 tw-list-disc tw-text-iron-500 tw-text-sm tw-font-normal tw-space-y-1">
+          <div className="tw-col-span-1 xl:tw-ml-auto">
+            <ul className="tw-pl-2 xl:tw-px-0 tw-list-disc tw-text-iron-500 tw-text-sm tw-font-normal tw-space-y-1">
               <li>All statements are optional.</li>
               <li>All statements are fully and permanently public.</li>
               <li>
