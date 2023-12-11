@@ -27,7 +27,7 @@ export default function UserPageIdentityHeaderCICRateWrapper({
 
   if (!iAmConnected) {
     return (
-      <div className="tw-mt-6 tw-inline-flex tw-items-center tw-rounded-lg tw-bg-primary-400/5 tw-border tw-border-solid tw-border-primary-400/30 tw-px-4 tw-py-3">
+      <div className="tw-inline-flex tw-items-center tw-rounded-lg tw-bg-primary-400/5 tw-border tw-border-solid tw-border-primary-400/30 tw-px-4 tw-py-3">
         <div className="tw-flex tw-items-center">
           <svg
             className="tw-flex-shrink- tw-self-center tw-w-5 tw-h-5 tw-text-primary-300"
@@ -55,7 +55,7 @@ export default function UserPageIdentityHeaderCICRateWrapper({
 
   if (!iHaveProfile) {
     return (
-      <div className="tw-mt-6 tw-inline-flex tw-items-center tw-rounded-lg tw-bg-primary-400/5 tw-border tw-border-solid tw-border-primary-400/30 tw-px-4 tw-py-3">
+      <div className="tw-inline-flex tw-items-center tw-rounded-lg tw-bg-primary-400/5 tw-border tw-border-solid tw-border-primary-400/30 tw-px-4 tw-py-3">
         <div className="tw-flex tw-items-center">
           <svg
             className="tw-flex-shrink- tw-self-center tw-w-5 tw-h-5 tw-text-primary-300"

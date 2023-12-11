@@ -168,7 +168,7 @@ export default function UserPageLayout({
       <main className="tw-min-h-screen">
         <Header />
         <div
-          className={`tw-bg-iron-950 tw-min-h-screen tw-pb-16 ${inter.className}`}
+          className={`tw-bg-iron-950 tw-min-h-screen tw-pb-16 lg:tw-pb-20 ${inter.className}`}
         >
           <UserPageHeader
             profile={profile}

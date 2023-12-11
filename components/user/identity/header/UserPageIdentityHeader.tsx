@@ -29,6 +29,7 @@ export default function UserPageIdentityHeader({
     initialData: initialProfile,
   });
 
+
   return (
     <div>
       <div className="tw-mt-8 lg:tw-flex lg:tw-items-center tw-lg:justify-between">
@@ -43,9 +44,7 @@ export default function UserPageIdentityHeader({
             </p>
           </div>
           <UserPageIdentityHeaderCIC profile={profile} />
-          <div className="tw-mt-6">
-            <UserPageIdentityHeaderCICRateWrapper profile={profile} />
-          </div>
+          <UserPageIdentityHeaderCICRateWrapper profile={profile} />
         </div>
       </div>
     </div>

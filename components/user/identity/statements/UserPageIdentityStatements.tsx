@@ -103,7 +103,7 @@ export default function UserPageIdentityStatements({
           </div>
 
           <div className="tw-col-span-1 xl:tw-ml-auto">
-            <ul className="tw-pl-2 xl:tw-px-0 tw-list-disc tw-text-iron-500 tw-text-sm tw-font-normal tw-space-y-1">
+            <ul className="tw-pl-2 xl:tw-pl-10 2xl:px-0 tw-list-disc tw-text-iron-500 tw-text-sm tw-font-normal tw-space-y-1">
               <li>All statements are optional.</li>
               <li>All statements are fully and permanently public.</li>
               <li>

@@ -58,10 +58,10 @@ export default function UserPageHeaderAddresses({
         <button
           type="button"
           onClick={toggleOpen}
-          className="tw-text-left tw-block sm:tw-min-w-[12rem] tw-w-full tw-rounded-lg tw-border-0 tw-py-2 tw-pl-3 tw-pr-10 tw-bg-iron-800 focus:tw-bg-transparent tw-text-white tw-font-medium tw-caret-primary-300 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-700 placeholder:tw-text-iron-500 
-          focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-300 hover:tw-ring-iron-600 tw-text-base sm:tw-text-sm sm:tw-leading-6 tw-transition tw-duration-300 tw-ease-out"
+          className="tw-text-left tw-block sm:tw-min-w-[12rem] tw-w-full tw-rounded-lg tw-border-0 tw-py-2 tw-pl-3 tw-pr-10 tw-bg-iron-900 focus:tw-bg-transparent tw-text-iron-300 tw-font-semibold tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-700 
+          focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 tw-text-base sm:tw-text-sm sm:tw-leading-6 hover:tw-bg-iron-800 tw-transition tw-duration-300 tw-ease-out"
         >
-          <span className="tw-text-iron-200 tw-font-light">{title}</span>
+          <span>{title}</span>
         </button>
         <div className="tw-pointer-events-none tw-absolute tw-inset-y-0 tw-right-0 tw-flex tw-items-center tw-pr-3">
           <svg
