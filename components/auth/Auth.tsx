@@ -258,8 +258,10 @@ export default function Auth({ children }: { children: React.ReactNode }) {
       iat: number;
       exp: number;
     }>(jwt);
-    // TODO: check if token is expired and is signed by the server
-    return decodedJwt.sub.toLowerCase() === wallet.toLowerCase();
+    return (
+      decodedJwt.sub.toLowerCase() === wallet.toLowerCase() &&
+      decodedJwt.exp > Date.now() / 1000
+    );
   };
 
   const requestAuth = async (): Promise<{ success: boolean }> => {
