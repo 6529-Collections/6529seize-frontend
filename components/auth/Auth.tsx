@@ -1,4 +1,4 @@
-import { createContext, useEffect, useState } from "react";
+import { createContext, useEffect } from "react";
 import { Slide, ToastContainer, TypeOptions, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useAccount, useSignMessage } from "wagmi";
@@ -10,13 +10,8 @@ import {
 import { commonApiFetch, commonApiPost } from "../../services/api/common-api";
 import jwtDecode from "jwt-decode";
 import { UserRejectedRequestError } from "viem";
-import { IProfileAndConsolidations } from "../../entities/IProfile";
-
 
 type AuthContextType = {
-  myProfile: IProfileAndConsolidations | null;
-  loadingMyProfile: boolean;
-  updateMyProfile: () => Promise<void>;
   requestAuth: () => Promise<{ success: boolean }>;
   setToast: ({ message, type }: { message: string; type: TypeOptions }) => void;
 };
@@ -27,9 +22,6 @@ interface NonceResponse {
 }
 
 export const AuthContext = createContext<AuthContextType>({
-  myProfile: null,
-  loadingMyProfile: false,
-  updateMyProfile: async () => {},
   requestAuth: async () => ({ success: false }),
   setToast: () => {},
 });
@@ -37,11 +29,6 @@ export const AuthContext = createContext<AuthContextType>({
 export default function Auth({ children }: { children: React.ReactNode }) {
   const { address } = useAccount();
   const signMessage = useSignMessage();
-
-  const [myProfile, setMyProfile] = useState<IProfileAndConsolidations | null>(
-    null
-  );
-  const [loadingMyProfile, setLoadingMyProfile] = useState(false);
 
   useEffect(() => {
     if (!address) {
@@ -51,30 +38,6 @@ export default function Auth({ children }: { children: React.ReactNode }) {
       if (!isAuth) removeAuthJwt();
     }
   }, [address]);
-
-  const getMyProfile = async () => {
-    if (!address) {
-      setMyProfile(null);
-      return;
-    }
-    setLoadingMyProfile(true);
-    try {
-      const response = await commonApiFetch<IProfileAndConsolidations>({
-        endpoint: `profiles/${address}`,
-      });
-      setMyProfile(response);
-    } catch {
-      setMyProfile(null);
-    } finally {
-      setLoadingMyProfile(false);
-    }
-  };
-
-  useEffect(() => {
-    getMyProfile();
-  }, [address]);
-
-  const updateMyProfile = async () => await getMyProfile();
 
   const getNonce = async (): Promise<NonceResponse | null> => {
     try {
@@ -252,9 +215,6 @@ export default function Auth({ children }: { children: React.ReactNode }) {
         value={{
           requestAuth,
           setToast,
-          myProfile,
-          loadingMyProfile,
-          updateMyProfile,
         }}
       >
         {children}

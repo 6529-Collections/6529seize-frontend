@@ -3,7 +3,9 @@ import { IProfileAndConsolidations } from "../../../../entities/IProfile";
 import { amIUser } from "../../../../helpers/Helpers";
 import { useAccount } from "wagmi";
 import UserPageIdentityHeaderCICRate from "./UserPageIdentityHeaderCICRate";
-import { AuthContext } from "../../../auth/Auth";
+import { useQuery } from "@tanstack/react-query";
+import { QueryKey } from "../../../react-query-wrapper/ReactQueryWrapper";
+import { commonApiFetch } from "../../../../services/api/common-api";
 
 export default function UserPageIdentityHeaderCICRateWrapper({
   profile,
@@ -11,7 +13,14 @@ export default function UserPageIdentityHeaderCICRateWrapper({
   profile: IProfileAndConsolidations;
 }) {
   const { address } = useAccount();
-  const { myProfile } = useContext(AuthContext);
+  const { data: connectedProfile } = useQuery<IProfileAndConsolidations>({
+    queryKey: [QueryKey.PROFILE, address?.toLowerCase()],
+    queryFn: async () =>
+      await commonApiFetch<IProfileAndConsolidations>({
+        endpoint: `profiles/${address}`,
+      }),
+    enabled: !!address,
+  });
   const [isMyProfile, setIsMyProfile] = useState<boolean>(true);
   const [iHaveProfile, setIHaveProfile] = useState<boolean>(false);
   const [iAmConnected, setIAmConnected] = useState<boolean>(false);
@@ -21,7 +30,10 @@ export default function UserPageIdentityHeaderCICRateWrapper({
     [profile, address]
   );
 
-  useEffect(() => setIHaveProfile(!!myProfile?.profile?.handle), [myProfile]);
+  useEffect(
+    () => setIHaveProfile(!!connectedProfile?.profile?.handle),
+    [connectedProfile]
+  );
 
   useEffect(() => setIAmConnected(!!address), [address]);
 

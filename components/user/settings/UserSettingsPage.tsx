@@ -14,6 +14,7 @@ import UserSettingsBackground from "./UserSettingsBackground";
 import { getRandomColor } from "../../../helpers/Helpers";
 import UserSettingsWebsite from "./UserSettingsWebsite";
 import UserSettingsClassification from "./UserSettingsClassification";
+import { ReactQueryWrapperContext } from "../../react-query-wrapper/ReactQueryWrapper";
 
 interface ApiCreateOrUpdateProfileRequest {
   readonly handle: string;
@@ -32,7 +33,8 @@ export default function UserSettingsPage({
   user: IProfileAndConsolidations;
   onUser: (user: IProfileAndConsolidations) => void;
 }) {
-  const { requestAuth, setToast, updateMyProfile } = useContext(AuthContext);
+  const { requestAuth, setToast } = useContext(AuthContext);
+  const { invalidateProfile } = useContext(ReactQueryWrapperContext);
   const router = useRouter();
   const [userName, setUserName] = useState<string>(user.profile?.handle ?? "");
 
@@ -101,9 +103,12 @@ export default function UserSettingsPage({
 
       if (response.profile?.handle !== user.profile?.handle) {
         router.push(`/${response.profile?.handle}/settings`);
+        invalidateProfile(response);
+        invalidateProfile(user);
+      } else {
+        invalidateProfile(response);
       }
       onUser(response);
-      await updateMyProfile();
       setToast({
         message: "Profile updated",
         type: "success",
@@ -174,7 +179,7 @@ export default function UserSettingsPage({
             <UserSettingsSave loading={saving} disabled={!haveChanges} />
           </form>
         </div>
-        {user.profile && <UserSettingsImg profile={user.profile} />}
+        {user.profile && <UserSettingsImg profile={user} />}
       </div>
     </div>
   );
