@@ -42,7 +42,10 @@ export default function UserPageLayout({
   children: ReactNode;
 }) {
   const router = useRouter();
-  const user = router.query.user as string;
+  const [user, setUser] = useState<string>(router.query.user as string);
+  useEffect(() => {
+    setUser(router.query.user as string);
+  }, [router.query.user]);
 
   const {
     isLoading: isLoadingProfile,
@@ -122,15 +125,19 @@ export default function UserPageLayout({
     );
   };
 
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingTabData, setIsLoadingTabData] = useState(false);
+
 
   useEffect(() => {
-    const handleStart = () => {
-      setIsLoading(true);
+    const handleStart = (toPath: string) => {
+      const toUser = toPath.split("/")[1];
+      setIsLoadingTabData(
+        toUser.toLowerCase() === (router.query.user as string).toLowerCase()
+      );
     };
 
     const handleComplete = () => {
-      setIsLoading(false);
+      setIsLoadingTabData(false);
     };
 
     router.events.on("routeChangeStart", handleStart);
@@ -142,7 +149,7 @@ export default function UserPageLayout({
       router.events.off("routeChangeComplete", handleComplete);
       router.events.off("routeChangeError", handleComplete);
     };
-  }, []);
+  }, [router.query.user]);
 
   return (
     <>
@@ -180,7 +187,7 @@ export default function UserPageLayout({
           />
           <div className="tw-px-6 min-[1100px]:tw-max-w-[960px] min-[1200px]:tw-max-w-[1150px] min-[1300px]:tw-max-w-[1250px] min-[1400px]:tw-max-w-[1350px] min-[1500px]:tw-max-w-[1450px] min-[1600px]:tw-max-w-[1550px] min-[1800px]:tw-max-w-[1750px] min-[2000px]:tw-max-w-[1950px] tw-mx-auto">
             <UserPageTabs />
-            <div>{isLoading ? <div>Loading...</div> : children}</div>
+            <div>{isLoadingTabData ? <div>Loading...</div> : children}</div>
           </div>
         </div>
       </main>

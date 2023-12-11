@@ -10,7 +10,7 @@ import {
   commonApiPost,
 } from "../../../../services/api/common-api";
 import { useAccount } from "wagmi";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import {
   QueryKey,
   ReactQueryWrapperContext,
@@ -21,13 +21,13 @@ export default function UserPageIdentityHeaderCICRate({
 }: {
   profile: IProfileAndConsolidations;
 }) {
-  const queryClient = useQueryClient();
   const { address } = useAccount();
-  const { requestAuth, setToast } = useContext(AuthContext);
+  const { requestAuth, setToast, myProfile } = useContext(AuthContext);
   const {
     invalidateProfile,
     invalidateProfileRaterCICState,
     invalidateProfileCICRatings,
+    invalidateProfileLogsByHandles,
   } = useContext(ReactQueryWrapperContext);
   const {
     isLoading,
@@ -66,6 +66,21 @@ export default function UserPageIdentityHeaderCICRate({
 
       invalidateProfile(profile);
       invalidateProfileCICRatings(profile);
+      const myHandles: string[] = [];
+      if (myProfile?.profile?.handle) {
+        myHandles.push(myProfile.profile.handle.toLowerCase());
+      }
+      myProfile?.consolidation.wallets.forEach((wallet) => {
+        myHandles.push(wallet.wallet.address.toLowerCase());
+        if (wallet.wallet.ens) {
+          myHandles.push(wallet.wallet.ens.toLowerCase());
+        }
+      });
+      invalidateProfileLogsByHandles({
+        handles: myHandles,
+        keys: {},
+      });
+
       if (address) {
         invalidateProfileRaterCICState({
           profile,

@@ -80,6 +80,29 @@ export async function getServerSideProps(
       return needsRedirect as any;
     }
 
+    if (!profile.profile) {
+      return {
+        props: {
+          profile,
+          title,
+          consolidatedTDH,
+          profileActivityLogs: {
+            count: 0,
+            page: 1,
+            next: false,
+            data: [],
+          },
+          profileCICRatings: {
+            count: 0,
+            page: 1,
+            next: false,
+            data: [],
+          },
+          profileIdentityStatements: [],
+        },
+      };
+    }
+
     const [profileActivityLogs, profileCICRatings, profileIdentityStatements] =
       await Promise.all([
         getUserProfileActivityLogs({

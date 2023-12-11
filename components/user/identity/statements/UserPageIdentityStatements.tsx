@@ -12,6 +12,7 @@ import { STATEMENT_GROUP } from "../../../../helpers/Types";
 import UserPageIdentityStatementsSocialMediaAccounts from "./social-media-accounts/UserPageIdentityStatementsSocialMediaAccounts";
 import UserPageIdentityStatementsContacts from "./contacts/UserPageIdentityStatementsContacts";
 import UserPageIdentityStatementsSocialMediaVerificationPosts from "./social-media-verification-posts/UserPageIdentityStatementsSocialMediaVerificationPosts";
+import { QueryKey } from "../../../react-query-wrapper/ReactQueryWrapper";
 
 export default function UserPageIdentityStatements({
   profile,
@@ -36,7 +37,7 @@ export default function UserPageIdentityStatements({
     data: statements,
     error,
   } = useQuery<CicStatement[]>({
-    queryKey: ["user-cic-statements", user.toLowerCase()],
+    queryKey: [QueryKey.PROFILE_CIC_STATEMENTS, user.toLowerCase()],
     queryFn: async () =>
       await commonApiFetch<CicStatement[]>({
         endpoint: `profiles/${user}/cic/statements`,

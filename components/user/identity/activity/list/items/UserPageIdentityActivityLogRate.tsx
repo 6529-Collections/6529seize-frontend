@@ -16,7 +16,7 @@ export default function UserPageIdentityActivityLogRate({
   )}`;
 
   const goToProfile = () => {
-    router.push(`/${log.target_profile_handle}`);
+    router.push(`/${log.target_profile_handle}/identity`);
   };
 
   return (

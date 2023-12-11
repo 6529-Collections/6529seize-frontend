@@ -7,6 +7,7 @@ export enum QueryKey {
   PROFILE_LOGS = "PROFILE_LOGS",
   PROFILE_RATER_CIC_STATE = "PROFILE_RATER_CIC_STATE",
   CIC_RATINGS = "CIC_RATINGS",
+  PROFILE_CIC_STATEMENTS = "PROFILE_CIC_STATEMENTS",
 }
 
 type QueryType<T, U, V, W> = [T, U, V, W];
@@ -34,6 +35,7 @@ type ReactQueryWrapperContextType = {
     rater: string;
   }) => void;
   invalidateProfileCICRatings: (profile: IProfileAndConsolidations) => void;
+  invalidateProfileCICStatements: (profile: IProfileAndConsolidations) => void;
 };
 
 export const ReactQueryWrapperContext =
@@ -42,9 +44,10 @@ export const ReactQueryWrapperContext =
     invalidateProfile: () => {},
     invalidateHandles: () => {},
     invalidateProfileLogs: () => {},
-    invalidateProfileLogsByHandles: () => { },
-    invalidateProfileRaterCICState: () => { },
-    invalidateProfileCICRatings: () => { },
+    invalidateProfileLogsByHandles: () => {},
+    invalidateProfileRaterCICState: () => {},
+    invalidateProfileCICRatings: () => {},
+    invalidateProfileCICStatements: () => {},
   });
 
 export default function ReactQueryWrapper({
@@ -152,7 +155,7 @@ export default function ReactQueryWrapper({
         rater,
       })),
     });
-  }
+  };
 
   const invalidateProfileCICRatings = (profile: IProfileAndConsolidations) => {
     const handles = getHandlesFromProfile(profile);
@@ -162,7 +165,17 @@ export default function ReactQueryWrapper({
         profile: h,
       })),
     });
-  }
+  };
+
+  const invalidateProfileCICStatements = (
+    profile: IProfileAndConsolidations
+  ) => {
+    const handles = getHandlesFromProfile(profile);
+    invalidateQueries({
+      key: QueryKey.PROFILE_CIC_STATEMENTS,
+      values: handles,
+    });
+  };
 
   return (
     <ReactQueryWrapperContext.Provider
@@ -174,6 +187,7 @@ export default function ReactQueryWrapper({
         setProfile,
         invalidateProfileRaterCICState,
         invalidateProfileCICRatings,
+        invalidateProfileCICStatements,
       }}
     >
       {children}

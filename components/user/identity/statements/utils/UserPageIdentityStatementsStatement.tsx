@@ -9,6 +9,7 @@ import UserPageIdentityDeleteStatementButton from "./UserPageIdentityDeleteState
 import { useCopyToClipboard } from "react-use";
 import Tippy from "@tippyjs/react";
 import OutsideLinkIcon from "../../../../utils/icons/OutsideLinkIcon";
+import { CAN_OPEN_STATEMENT } from "../../../../../helpers/Types";
 
 export default function UserPageIdentityStatementsStatement({
   statement,
@@ -34,13 +35,15 @@ export default function UserPageIdentityStatementsStatement({
     window.open(statement.statement_value, "_blank");
   };
 
+  const canOpen = CAN_OPEN_STATEMENT[statement.statement_type];
+
   return (
     <li
       className={`${
         isMyProfile ? "hover:tw-bg-iron-800" : ""
       } tw-group -tw-ml-1 tw-inline-flex tw-h-8 tw-px-1.5 tw-rounded-lg tw-items-center tw-text-sm tw-font-medium tw-text-iron-50 hover:tw-text-iron-400 tw-transition tw-duration-300 tw-ease-out`}
     >
-      <div className="tw-inline-flex tw-items-center tw-space-x-3">
+      <div className="tw-inline-flex tw-mr-4 tw-items-center tw-space-x-3">
         <div className="tw-cursor-pointer tw-w-6 tw-h-6 group-hover:tw-scale-110 tw-transition tw-duration-300 tw-ease-out">
           <SocialStatementIcon statementType={statement.statement_type} />
         </div>
@@ -48,14 +51,16 @@ export default function UserPageIdentityStatementsStatement({
           <span>{title}</span>
         </div>
       </div>
-      <Tippy content="Open" theme="dark" placement="top">
-        <button
-          className="tw-hidden group-hover:tw-block tw-ml-4 tw-bg-transparent tw-cursor-pointer tw-text-sm tw-font-semibold tw-text-white tw-border-0 focus:tw-outline-none tw-transition tw-duration-300 tw-ease-out"
-          onClick={handleOpen}
-        >
-          <OutsideLinkIcon />
-        </button>
-      </Tippy>
+      {canOpen && (
+        <Tippy content="Open" theme="dark" placement="top">
+          <button
+            className="tw-hidden group-hover:tw-block  tw-bg-transparent tw-cursor-pointer tw-text-sm tw-font-semibold tw-text-white tw-border-0 focus:tw-outline-none tw-transition tw-duration-300 tw-ease-out"
+            onClick={handleOpen}
+          >
+            <OutsideLinkIcon />
+          </button>
+        </Tippy>
+      )}
       <Tippy content="Copy" theme="dark" placement="top">
         <button
           className="tw-hidden group-hover:tw-block tw-bg-transparent tw-cursor-pointer tw-text-sm tw-font-semibold tw-text-white tw-border-0 focus:tw-outline-none tw-transition tw-duration-300 tw-ease-out"

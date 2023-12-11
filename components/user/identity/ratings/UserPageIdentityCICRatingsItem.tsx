@@ -42,7 +42,7 @@ export default function UserPageIdentityCICRatingsItem({
   const timeAgo = getTimeAgo(new Date(rating.last_modified).getTime());
 
   const goToProfile = () => {
-    router.push(`/${rating.rater_handle}`);
+    router.push(`/${rating.rater_handle}/identity`);
   };
 
   return (
