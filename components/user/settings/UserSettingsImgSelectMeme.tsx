@@ -36,7 +36,7 @@ export default function UserSettingsImgSelectMeme({
   };
   return (
     <div ref={listRef} className="tw-max-w-full tw-relative">
-      <label className="tw-block tw-text-sm tw-font-normal tw-leading-5 tw-text-iron-350">
+      <label className="tw-block tw-text-sm tw-font-normal tw-leading-5 tw-text-iron-300">
         Select Meme
       </label>
       <div className="tw-mt-2 tw-relative">
@@ -46,11 +46,11 @@ export default function UserSettingsImgSelectMeme({
           onChange={(e) => setInput(e.target.value)}
           onFocus={() => setIsOpen(true)}
           placeholder="Search"
-          className="tw-text-left tw-block tw-w-full tw-rounded-lg tw-border-0 tw-py-3 tw-px-3 tw-bg-iron-900 focus:tw-bg-transparent tw-text-white tw-font-light tw-caret-primary-300 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-white/20 placeholder:tw-text-iron-500 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-300 hover:tw-ring-iron-500 tw-text-base sm:tw-leading-6 tw-transition tw-duration-300 tw-ease-out"
+          className="tw-text-left tw-block tw-w-full tw-rounded-lg tw-border-0 tw-py-3 tw-px-3 tw-bg-iron-900 focus:tw-bg-iron-900 tw-text-iron-50 tw-font-normal tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-700 placeholder:tw-text-iron-400 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 hover:tw-ring-iron-600 tw-text-base sm:tw-leading-6 tw-transition tw-duration-300 tw-ease-out"
         />
         <div className="tw-pointer-events-none tw-absolute tw-inset-y-0 tw-flex tw-items-center tw-right-0 tw-pr-3">
           <svg
-            className="tw-h-5 tw-w-5 tw-text-iron-300"
+            className="tw-h-5 tw-w-5 tw-text-iron-50"
             viewBox="0 0 24 24"
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
@@ -74,21 +74,21 @@ export default function UserSettingsImgSelectMeme({
             exit={{ opacity: 0, y: -20 }}
             transition={{ duration: 0.2 }}
           >
-            <div className="tw-absolute tw-z-10 tw-mt-1 tw-overflow-hidden tw-max-w-full tw-w-full tw-rounded-md tw-bg-iron-700 tw-shadow-2xl tw-ring-1 tw-ring-white/10">
+            <div className="tw-absolute tw-z-10 tw-mt-1 tw-overflow-hidden tw-max-w-full tw-w-full tw-rounded-md tw-bg-iron-900 tw-shadow-2xl tw-ring-1 tw-ring-white/10">
               <div className="tw-py-1 tw-flow-root tw-max-h-[calc(280px+_-5vh)] tw-overflow-x-hidden tw-overflow-y-auto">
                 <ul className="tw-flex tw-flex-col tw-px-2 tw-mx-0 tw-mb-0 tw-list-none">
                   {filteredMemes.map((meme) => (
                     <li
                       onClick={() => setMemeAndCloseDropdown(meme)}
                       key={meme.id}
-                      className="tw-group tw-text-white tw-rounded-lg tw-relative tw-cursor-pointer tw-select-none tw-p-2 hover:tw-bg-iron-600 tw-transition tw-duration-300 tw-ease-out"
+                      className="tw-group tw-text-iron-50 tw-rounded-lg tw-relative tw-cursor-pointer tw-select-none tw-p-2 hover:tw-bg-iron-700 tw-transition tw-duration-300 tw-ease-out"
                     >
                       <img
                         src={meme.thumbnail ?? meme.image ?? meme.scaled ?? ""}
                         alt=""
                         className="tw-flex-shrink-0 tw-ml-0 tw-pl-0 tw-rounded-full tw-bg-iron-700 tw-h-6 tw-w-6"
                       />
-                      <span className="tw-inline-block tw-ml-2 tw-text-sm tw-font-medium tw-text-white">
+                      <span className="tw-inline-block tw-ml-2 tw-text-sm tw-font-medium tw-text-iron-50">
                         {`#${meme.id} ${meme.name ?? ""}`}
                       </span>
                     </li>

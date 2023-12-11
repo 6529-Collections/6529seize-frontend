@@ -119,7 +119,7 @@ export default function UserSettingsComponent(props: Props) {
     <div
       className={`tailwind-scope tw-bg-iron-950 tw-overflow-y-auto tw-min-h-screen tw-relative ${inter.className}`}
     >
-      <div className="tw-max-w-2xl tw-mx-auto tw-pt-8 tw-pb-12">
+      <div className="tw-max-w-2xl tw-mx-auto tw-pt-8 tw-pb-16 lg:tw-pb-20 tw-px-6 md:tw-px-0">
         <UserSettingsGoToUser
           user={user.profile?.handle ?? userOrWallet.toLowerCase()}
         />

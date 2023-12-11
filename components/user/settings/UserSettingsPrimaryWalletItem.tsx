@@ -21,7 +21,7 @@ export default function UserSettingsPrimaryWalletItem({
   return (
     <li
       onClick={() => onSelect(wallet.wallet.address)}
-      className="tw-group tw-text-white tw-justify-between tw-w-full tw-flex tw-rounded-lg tw-relative tw-cursor-pointer tw-select-none tw-p-2 hover:tw-bg-neutral-600 tw-transition tw-duration-300 tw-ease-out"
+      className="tw-group tw-text-white tw-justify-between tw-w-full tw-flex tw-rounded-lg tw-relative tw-cursor-pointer tw-select-none tw-p-2 hover:tw-bg-iron-700 tw-transition tw-duration-300 tw-ease-out"
     >
       <span className="tw-inline-block tw-text-sm tw-font-medium tw-text-white">
         {`${wallet.wallet.ens ?? wallet.wallet.address} - ${

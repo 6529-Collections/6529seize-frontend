@@ -146,7 +146,7 @@ export default function UserSettingsPage({
   return (
     <div className="tw-pt-10 tw-space-y-6 tw-divide-y tw-divide-x-0 tw-divide-solid tw-divide-iron-700">
       <div className="tw-flex tw-flex-col tw-gap-y-6">
-        <div className="tw-bg-iron-800 tw-p-8 tw-rounded-lg">
+        <div className="tw-bg-iron-900 tw-border tw-border-solid tw-border-white/5 tw-p-8 tw-rounded-lg">
           <form onSubmit={onSubmit} className="tw-flex tw-flex-col tw-gap-y-6">
             <UserSettingsUsername
               userName={userName}

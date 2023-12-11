@@ -121,16 +121,16 @@ export default function UserSettingsImg({ profile }: { profile: IProfile }) {
   };
 
   return (
-    <div className="tw-bg-iron-800 tw-p-8 tw-rounded-lg">
-      <form onSubmit={onSubmit} className="tw-pt-6">
+    <div className="tw-bg-iron-900 tw-border tw-border-solid tw-border-white/5 tw-p-8 tw-rounded-lg">
+      <form onSubmit={onSubmit}>
         <UserSettingsImgSelectMeme
           memes={memes}
           onMeme={setSelectedMemeAndRemoveFile}
         />
 
         <div className="tw-inline-flex tw-items-center tw-my-2 tw-justify-center tw-w-full">
-          <hr className="tw-w-full tw-h-px tw-border tw-bg-iron-600" />
-          <span className="tw-absolute tw-px-3 tw-font-medium tw-text-sm tw-uppercase tw-text-white">
+          <hr className="tw-w-full tw-h-px tw-border tw-bg-iron-700" />
+          <span className="tw-absolute tw-px-3 tw-font-medium tw-text-sm tw-uppercase tw-text-iron-50">
             or
           </span>
         </div>

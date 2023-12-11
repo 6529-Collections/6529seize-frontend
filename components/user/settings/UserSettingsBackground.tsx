@@ -27,9 +27,9 @@ export default function UserSettingsBackground({
   };
 
   return (
-    <div className="tw-flex tw-gap-x-5 tw-mt-6">
-      <div className="tw-flex-1 tw-cursor-pointer">
-        <label className="tw-block tw-text-sm tw-font-normal tw-leading-5 tw-text-iron-350">
+    <div className="tw-flex tw-flex-wrap md:tw-flex-nowrap tw-gap-y-5 tw-gap-x-5">
+      <div className="tw-w-full md:tw-flex-1 tw-cursor-pointer">
+        <label className="tw-block tw-text-sm tw-font-normal tw-leading-5 tw-text-iron-300">
           Background Color 1
         </label>
         <div className="tw-mt-2 tw-relative">
@@ -40,7 +40,7 @@ export default function UserSettingsBackground({
             name="bgColor1"
             value={bgColor1}
             onChange={(e) => setBgColor1(e.target.value)}
-            className="tw-cursor-pointer tw-block tw-w-full tw-rounded-lg tw-border-0 tw-py-3 tw-h-12 tw-px-3 tw-pr-10 tw-bg-iron-900 tw-text-white tw-font-medium tw-caret-primary-300 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-white/20 placeholder:tw-text-iron-500 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-300 hover:tw-ring-iron-500 tw-text-base sm:tw-leading-6 tw-transition tw-duration-300 tw-ease-out"
+            className="tw-cursor-pointer tw-block tw-w-full tw-rounded-lg tw-border-0 tw-py-3 tw-h-12 tw-px-3 tw-pr-10 tw-bg-iron-900 tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-700 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 hover:tw-ring-iron-600 tw-text-base sm:tw-leading-6 tw-transition tw-duration-300 tw-ease-out"
           />
           <div
             onClick={onBgColor1Click}
@@ -64,8 +64,8 @@ export default function UserSettingsBackground({
         </div>
       </div>
 
-      <div className="tw-flex-1 tw-cursor-pointer">
-        <label className="tw-block tw-text-sm tw-font-normal tw-leading-5 tw-text-iron-350">
+      <div className="tw-w-full md:tw-flex-1 tw-cursor-pointer">
+        <label className="tw-block tw-text-sm tw-font-normal tw-leading-5 tw-text-iron-300">
           Background Color 2
         </label>
         <div className="tw-mt-2 tw-relative">
@@ -76,7 +76,7 @@ export default function UserSettingsBackground({
             name="bgColor2"
             value={bgColor2}
             onChange={(e) => setBgColor2(e.target.value)}
-            className="tw-cursor-pointer tw-block tw-w-full tw-rounded-lg tw-border-0 tw-py-3 tw-h-12 tw-px-3 tw-pr-10 tw-bg-iron-900 tw-text-white tw-font-medium tw-caret-primary-300 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-600 placeholder:tw-text-iron-500 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-300 hover:tw-ring-iron-500 tw-text-base sm:tw-leading-6 tw-transition tw-duration-300 tw-ease-out"
+            className="tw-cursor-pointer tw-block tw-w-full tw-rounded-lg tw-border-0 tw-py-3 tw-h-12 tw-px-3 tw-pr-10 tw-bg-iron-900 tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-700 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 hover:tw-ring-iron-600 tw-text-base sm:tw-leading-6 tw-transition tw-duration-300 tw-ease-out"
           />
           <div
             onClick={onBgColor2Click}
