@@ -1,5 +1,9 @@
-import { useContext, useState } from "react";
-import { STATEMENT_GROUP, STATEMENT_TYPE } from "../../../../../helpers/Types";
+import { useContext, useEffect, useState } from "react";
+import {
+  STATEMENT_GROUP,
+  STATEMENT_INPUT_INITIAL_VALUE,
+  STATEMENT_TYPE,
+} from "../../../../../helpers/Types";
 import UserPageIdentityAddStatementsInput from "./UserPageIdentityAddStatementsInput";
 import {
   CicStatement,
@@ -8,6 +12,7 @@ import {
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { commonApiPost } from "../../../../../services/api/common-api";
 import { AuthContext } from "../../../../auth/Auth";
+import { ReactQueryWrapperContext } from "../../../../react-query-wrapper/ReactQueryWrapper";
 
 type ApiCreateOrUpdateProfileCicStatement = Omit<
   CicStatement,
@@ -27,7 +32,14 @@ export default function UserPageIdentityAddStatementsForm({
 }) {
   const queryClient = useQueryClient();
   const { requestAuth, setToast } = useContext(AuthContext);
-  const [value, setValue] = useState<string>("");
+  const { invalidateProfileLogs } = useContext(ReactQueryWrapperContext);
+  const [value, setValue] = useState<string>(
+    STATEMENT_INPUT_INITIAL_VALUE[activeType] || ""
+  );
+
+  useEffect(() => {
+    setValue(STATEMENT_INPUT_INITIAL_VALUE[activeType] || "");
+  }, [activeType]);
 
   const addStatementMutation = useMutation({
     mutationFn: async (statement: string) =>
@@ -51,14 +63,11 @@ export default function UserPageIdentityAddStatementsForm({
           profile.profile?.handle.toLowerCase(),
         ],
       });
-      queryClient.invalidateQueries({
-        queryKey: [
-          "profile-logs",
-          {
-            profile: profile.profile?.handle.toLowerCase(),
-          },
-        ],
+      invalidateProfileLogs({
+        profile,
+        keys: {},
       });
+
       for (const wallet of profile.consolidation.wallets) {
         queryClient.invalidateQueries({
           queryKey: [
@@ -66,26 +75,10 @@ export default function UserPageIdentityAddStatementsForm({
             wallet.wallet.address.toLowerCase(),
           ],
         });
-        queryClient.invalidateQueries({
-          queryKey: [
-            "profile-logs",
-            {
-              profile: wallet.wallet.address.toLowerCase(),
-            },
-          ],
-        });
 
         if (wallet.wallet.ens) {
           queryClient.invalidateQueries({
             queryKey: ["user-cic-statements", wallet.wallet.ens.toLowerCase()],
-          });
-          queryClient.invalidateQueries({
-            queryKey: [
-              "profile-logs",
-              {
-                profile: wallet.wallet.ens.toLowerCase(),
-              },
-            ],
           });
         }
       }

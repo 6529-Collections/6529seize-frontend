@@ -11,6 +11,7 @@ import UserPageTabs from "./UserPageTabs";
 import { Inter } from "next/font/google";
 import { useQuery } from "@tanstack/react-query";
 import { commonApiFetch } from "../../../services/api/common-api";
+import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
 
 const Header = dynamic(() => import("../../header/Header"), {
   ssr: false,
@@ -49,7 +50,7 @@ export default function UserPageLayout({
     data: profile,
     error,
   } = useQuery<IProfileAndConsolidations>({
-    queryKey: ["profile", user.toLowerCase()],
+    queryKey: [QueryKey.PROFILE, user.toLowerCase()],
     queryFn: async () =>
       await commonApiFetch<IProfileAndConsolidations>({
         endpoint: `profiles/${user}`,

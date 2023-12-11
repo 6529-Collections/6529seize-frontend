@@ -1,5 +1,4 @@
 import {
-  ProfileActivityLog,
   ProfileActivityLogHandleEdit,
 } from "../../../../../../entities/IProfile";
 import UserPageIdentityActivityLogItemTimeAgo from "./UserPageIdentityActivityLogItemTimeAgo";

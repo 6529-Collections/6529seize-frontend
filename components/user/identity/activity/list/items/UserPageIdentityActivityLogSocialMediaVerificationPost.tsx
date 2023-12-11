@@ -1,15 +1,34 @@
+import { useState } from "react";
 import {
   PROFILE_ACTIVITY_LOG_ACTION_STR,
   ProfileActivityLogSocialVerificationPostEdit,
 } from "../../../../../../entities/IProfile";
 import SocialStatementIcon from "../../../../utils/icons/SocialStatementIcon";
 import UserPageIdentityActivityLogItemTimeAgo from "./UserPageIdentityActivityLogItemTimeAgo";
+import { truncateMiddle } from "../../../../../../helpers/Helpers";
+import { useCopyToClipboard } from "react-use";
+import Tippy from "@tippyjs/react";
+import CopyIcon from "../../../../../utils/icons/CopyIcon";
 
 export default function UserPageIdentityActivityLogSocialMediaVerificationPost({
   log,
 }: {
   log: ProfileActivityLogSocialVerificationPostEdit;
 }) {
+  const [title, setTitle] = useState(
+    truncateMiddle(log.contents.statement.statement_value)
+  );
+
+  const [_, copyToClipboard] = useCopyToClipboard();
+
+  const handleCopy = () => {
+    copyToClipboard(log.contents.statement.statement_value);
+    setTitle("Copied!");
+    setTimeout(() => {
+      setTitle(truncateMiddle(log.contents.statement.statement_value));
+    }, 1000);
+  };
+
   return (
     <li className="tw-py-4">
       <div className="tw-flex tw-items-center tw-justify-between tw-gap-x-3">
@@ -40,8 +59,16 @@ export default function UserPageIdentityActivityLogSocialMediaVerificationPost({
                 statementType={log.contents.statement.statement_type}
               />
             </div>
-            <span className="tw-truncate tw-max-w-[12rem] tw-text-sm tw-font-semibold tw-text-neutral-100">
-              {log.contents.statement.statement_value}
+            <span className="tw-group tw-inline-flex tw-text-sm tw-font-semibold tw-text-neutral-100">
+              {title}
+              <Tippy content="Copy" theme="dark" placement="top">
+                <button
+                  onClick={handleCopy}
+                  className="tw-hidden group-hover:tw-block tw-mx-1 tw-h-4 tw-w-4 tw-bg-transparent tw-cursor-pointer tw-text-sm tw-font-semibold tw-text-white tw-border-0 focus:tw-outline-none tw-transition tw-duration-300 tw-ease-out"
+                >
+                  <CopyIcon />
+                </button>
+              </Tippy>
             </span>
           </div>
         </div>

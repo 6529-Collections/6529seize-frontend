@@ -12,6 +12,7 @@ import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/router";
 import UserPageIdentityActivityLogList from "./list/UserPageIdentityActivityLogList";
 import UserPageIdentityPagination from "../utils/UserPageIdentityPagination";
+import { QueryKey } from "../../../react-query-wrapper/ReactQueryWrapper";
 
 const PAGE_SIZE = 10;
 
@@ -53,7 +54,7 @@ export default function UserPageIdentityActivityLog({
     error,
   } = useQuery<Page<ProfileActivityLog>>({
     queryKey: [
-      "profile-logs",
+      QueryKey.PROFILE_LOGS,
       {
         profile: user.toLowerCase(),
         page: currentPage,
@@ -74,7 +75,9 @@ export default function UserPageIdentityActivityLog({
     enabled: !!user,
     placeholderData: keepPreviousData,
     initialData: () =>
-      currentPage === 1 ? initialPageActivityLogs : undefined,
+      currentPage === 1 && !logTypeParams.length
+        ? initialPageActivityLogs
+        : undefined,
   });
 
   const [totalPages, setTotalPages] = useState<number>(1);

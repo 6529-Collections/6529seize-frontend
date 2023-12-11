@@ -11,6 +11,10 @@ import {
 } from "../../../../services/api/common-api";
 import { useAccount } from "wagmi";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  QueryKey,
+  ReactQueryWrapperContext,
+} from "../../../react-query-wrapper/ReactQueryWrapper";
 
 export default function UserPageIdentityHeaderCICRate({
   profile,
@@ -20,6 +24,7 @@ export default function UserPageIdentityHeaderCICRate({
   const queryClient = useQueryClient();
   const { address } = useAccount();
   const { requestAuth, setToast } = useContext(AuthContext);
+  const { invalidateProfile } = useContext(ReactQueryWrapperContext);
   const {
     isLoading,
     isError,
@@ -54,21 +59,8 @@ export default function UserPageIdentityHeaderCICRate({
         message: "CIC rating updated.",
         type: "success",
       });
-      queryClient.invalidateQueries({
-        queryKey: ["profile", profile.profile?.handle.toLowerCase()],
-      });
 
-      for (const wallet of profile.consolidation.wallets) {
-        queryClient.invalidateQueries({
-          queryKey: ["profile", wallet.wallet.address.toLowerCase()],
-        });
-
-        if (wallet.wallet.ens) {
-          queryClient.invalidateQueries({
-            queryKey: ["profile", wallet.wallet.ens.toLowerCase()],
-          });
-        }
-      }
+      invalidateProfile(profile);
 
       queryClient.invalidateQueries({
         queryKey: [

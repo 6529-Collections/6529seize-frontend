@@ -60,6 +60,10 @@ export default function UserPageTabs() {
     setTab(tab);
   };
 
+  useEffect(() => {
+    setTab(pathnameToTab(router.pathname));
+  }, [router.query.user]);
+
   return (
     <div className="tw-border-b tw-border-iron-700 tw-border-solid tw-border-x-0 tw-border-t-0">
       <div className="-tw-mb-px tw-flex tw-space-x-8" aria-label="Tabs">

@@ -1,16 +1,23 @@
+import Tippy from "@tippyjs/react";
 import { ProfileActivityLogRatingEdit } from "../../../../../../entities/IProfile";
 import { formatNumberWithCommas } from "../../../../../../helpers/Helpers";
 import UserPageIdentityActivityLogItemTimeAgo from "./UserPageIdentityActivityLogItemTimeAgo";
+import { useRouter } from "next/router";
 
 export default function UserPageIdentityActivityLogRate({
   log,
 }: {
   log: ProfileActivityLogRatingEdit;
 }) {
+  const router = useRouter();
   const isPositive = log.contents.new_rating > 0;
   const valueAsString = `${isPositive ? "+" : ""}${formatNumberWithCommas(
     log.contents.new_rating
   )}`;
+
+  const goToProfile = () => {
+    router.push(`/${log.target_profile_handle}`);
+  };
 
   return (
     <li className="tw-py-4">
@@ -37,9 +44,14 @@ export default function UserPageIdentityActivityLogRate({
             <span className="tw-text-sm tw-text-neutral-400 tw-font-medium">
               user
             </span>
-            <span className="tw-text-sm tw-font-semibold tw-text-neutral-100">
-              {log.target_profile_handle}
-            </span>
+            <Tippy content={log.target_profile_handle} theme="dark">
+              <span
+                onClick={goToProfile}
+                className="hover:tw-underline tw-cursor-pointer tw-truncate tw-max-w-[12rem] tw-text-sm tw-font-semibold tw-text-neutral-100"
+              >
+                {log.target_profile_handle}
+              </span>
+            </Tippy>
             <span
               className={`${
                 isPositive ? "tw-text-green" : "tw-text-red"

@@ -10,6 +10,11 @@ import {
   PROFILE_CLASSIFICATION,
 } from "../../../entities/IProfile";
 import UserSettingsPage from "./UserSettingsPage";
+import { useQueryClient } from "@tanstack/react-query";
+import {
+  QueryKey,
+  ReactQueryWrapperContext,
+} from "../../react-query-wrapper/ReactQueryWrapper";
 
 interface Props {
   user: string;
@@ -24,9 +29,16 @@ const inter = Inter({
 });
 
 export default function UserSettingsComponent(props: Props) {
+  const queryClient = useQueryClient();
   const account = useAccount();
   const router = useRouter();
   const { requestAuth, setToast } = useContext(AuthContext);
+  const {
+    invalidateProfile,
+    invalidateHandles,
+    invalidateProfileLogs,
+    invalidateProfileLogsByHandles,
+  } = useContext(ReactQueryWrapperContext);
   const [init, setInit] = useState(false);
   const [userOrWallet] = useState(
     Array.isArray(router.query.user)
@@ -60,8 +72,24 @@ export default function UserSettingsComponent(props: Props) {
     };
   };
 
-  const onUser = (user: IProfileAndConsolidations) =>
-    setUser(mapApiResponseToUser(user));
+  const onUser = (newUser: IProfileAndConsolidations) => {
+    const oldHandles: string[] = [];
+    if (user?.profile?.handle) {
+      oldHandles.push(user.profile.handle.toLowerCase());
+    }
+    user?.consolidation.wallets.forEach((wallet) => {
+      oldHandles.push(wallet.wallet.address.toLowerCase());
+      if (wallet.wallet.ens) {
+        oldHandles.push(wallet.wallet.ens.toLowerCase());
+      }
+    });
+    invalidateProfile(newUser);
+    invalidateProfileLogs({ profile: newUser, keys: {} });
+    invalidateHandles(oldHandles);
+    invalidateProfileLogsByHandles({ handles: oldHandles, keys: {} });
+    const newUserMapped = mapApiResponseToUser(newUser);
+    setUser(newUserMapped);
+  };
 
   useEffect(() => {
     if (!init || !userOrWallet) {

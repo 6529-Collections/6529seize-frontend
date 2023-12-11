@@ -87,6 +87,7 @@ import { NextPage, NextPageContext } from "next";
 import { ReactElement, ReactNode } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
+import ReactQueryWrapper from "../components/react-query-wrapper/ReactQueryWrapper";
 
 library.add(
   faArrowUp,
@@ -204,7 +205,9 @@ export default function App({ Component, ...rest }: AppPropsWithLayout) {
           </Head>
 
           <WagmiConfig config={wagmiConfig}>
-            <Auth>{getLayout(<Component {...props} />)}</Auth>
+            <ReactQueryWrapper>
+              <Auth>{getLayout(<Component {...props} />)}</Auth>
+            </ReactQueryWrapper>
           </WagmiConfig>
           <Web3Modal
             defaultChain={mainnet}

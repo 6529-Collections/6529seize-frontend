@@ -4,8 +4,6 @@ import {
   IProfileConsolidation,
 } from "../../../../../entities/IProfile";
 import EthereumIcon from "../../../utils/icons/EthereumIcon";
-import EtherscanIcon from "../../../utils/icons/EtherscanIcon";
-import OpenseaIcon from "../../../utils/icons/OpenseaIcon";
 import UserPageIdentityStatementsConsolidatedAddressesItem from "./UserPageIdentityStatementsConsolidatedAddressesItem";
 
 export default function UserPageIdentityStatementsConsolidatedAddresses({

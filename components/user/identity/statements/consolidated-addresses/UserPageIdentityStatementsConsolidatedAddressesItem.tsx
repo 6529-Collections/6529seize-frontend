@@ -1,6 +1,10 @@
+import Tippy from "@tippyjs/react";
 import { IProfileConsolidation } from "../../../../../entities/IProfile";
 import EtherscanIcon from "../../../utils/icons/EtherscanIcon";
 import OpenseaIcon from "../../../utils/icons/OpenseaIcon";
+import CopyIcon from "../../../../utils/icons/CopyIcon";
+import { useState } from "react";
+import { useCopyToClipboard } from "react-use";
 
 export default function UserPageIdentityStatementsConsolidatedAddressesItem({
   address,
@@ -24,22 +28,39 @@ export default function UserPageIdentityStatementsConsolidatedAddressesItem({
     );
   };
 
+  const isPrimary = address.wallet.address.toLowerCase() === primaryAddress;
+
+  const [title, setTitle] = useState(address.wallet.address.slice(0, 6));
+  const [_, copyToClipboard] = useCopyToClipboard();
+
+  const handleCopy = () => {
+    copyToClipboard(address.wallet.address);
+    setTitle("Copied!");
+    setTimeout(() => {
+      setTitle(address.wallet.address.slice(0, 6));
+    }, 1000);
+  };
+
   return (
-    <li
-      onClick={goToEtherscan}
-      className="tw-group tw-flex tw-items-center tw-group tw-cursor-pointer  tw-text-sm tw-font-medium tw-text-neutral-50 hover:tw-text-neutral-300 tw-transition tw-duration-300 tw-ease-out tw-space-x-3"
-    >
-      <div
-        onClick={goToOpensea}
-        className="tw-cursor-pointer tw-flex-shrink-0 tw-h-6 tw-w-6 hover:tw-scale-110 tw-transition tw-duration-300 tw-ease-out"
-      >
-        <OpenseaIcon />
-      </div>
-      <div className="tw-cursor-pointer tw-flex-shrink-0 tw-h-6 tw-w-6  hover:tw-scale-110 tw-transition tw-duration-300 tw-ease-out">
-        <EtherscanIcon />
-      </div>
+    <li className="tw-group tw-flex tw-items-center tw-group  tw-text-sm tw-font-medium tw-text-neutral-50 hover:tw-text-neutral-300 tw-transition tw-duration-300 tw-ease-out tw-space-x-3">
+      <Tippy content="Opensea" theme="dark" placement="top">
+        <div
+          onClick={goToOpensea}
+          className="tw-cursor-pointer tw-flex-shrink-0 tw-h-6 tw-w-6 hover:tw-scale-110 tw-transition tw-duration-300 tw-ease-out"
+        >
+          <OpenseaIcon />
+        </div>
+      </Tippy>
+      <Tippy content="Etherscan" theme="dark" placement="top">
+        <div
+          onClick={goToEtherscan}
+          className="tw-cursor-pointer tw-flex-shrink-0 tw-h-6 tw-w-6  hover:tw-scale-110 tw-transition tw-duration-300 tw-ease-out"
+        >
+          <EtherscanIcon />
+        </div>
+      </Tippy>
       <div className="tw-space-x-3 tw-inline-flex tw-items-center">
-        <span>{address.wallet.address.slice(0, 6)}</span>
+        <span>{title}</span>
         {address.wallet.ens && <span>{address.wallet.ens}</span>}
         <div className="tw-inline-flex tw-items-center">
           <svg
@@ -56,12 +77,19 @@ export default function UserPageIdentityStatementsConsolidatedAddressesItem({
               strokeLinejoin="round"
             />
           </svg>
-          {address.wallet.address.toLowerCase() ===
-            primaryAddress.toLowerCase() && (
+          {isPrimary && (
             <span className="tw-ml-1 tw-text-xs tw-font-bold tw-text-neutral-500">
               Primary
             </span>
           )}
+          <Tippy content="Copy" theme="dark" placement="top">
+            <button
+              className="tw-hidden group-hover:tw-block tw-ml-4 tw-bg-transparent tw-cursor-pointer tw-text-sm tw-font-semibold tw-text-white tw-border-0 focus:tw-outline-none tw-transition tw-duration-300 tw-ease-out"
+              onClick={handleCopy}
+            >
+              <CopyIcon />
+            </button>
+          </Tippy>
         </div>
       </div>
     </li>

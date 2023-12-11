@@ -7,6 +7,7 @@ import { useClickAway, useKeyPressEvent } from "react-use";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { AuthContext } from "../../../../auth/Auth";
 import { commonApiDelete } from "../../../../../services/api/common-api";
+import { ReactQueryWrapperContext } from "../../../../react-query-wrapper/ReactQueryWrapper";
 
 export default function UserPageIdentityDeleteStatementModal({
   statement,
@@ -23,6 +24,7 @@ export default function UserPageIdentityDeleteStatementModal({
 
   const queryClient = useQueryClient();
   const { requestAuth, setToast } = useContext(AuthContext);
+  const { invalidateProfileLogs } = useContext(ReactQueryWrapperContext);
 
   const deleteStatementMutation = useMutation({
     mutationFn: async () =>
@@ -35,15 +37,14 @@ export default function UserPageIdentityDeleteStatementModal({
         type: "warning",
       });
       queryClient.invalidateQueries({
-        queryKey: ["user-cic-statements", profile.profile?.handle.toLowerCase()],
-      });
-      queryClient.invalidateQueries({
         queryKey: [
-          "profile-logs",
-          {
-            profile: profile.profile?.handle.toLowerCase(),
-          },
+          "user-cic-statements",
+          profile.profile?.handle.toLowerCase(),
         ],
+      });
+      invalidateProfileLogs({
+        profile,
+        keys: {},
       });
       for (const wallet of profile.consolidation.wallets) {
         queryClient.invalidateQueries({
@@ -52,26 +53,12 @@ export default function UserPageIdentityDeleteStatementModal({
             wallet.wallet.address.toLowerCase(),
           ],
         });
-        queryClient.invalidateQueries({
-          queryKey: [
-            "profile-logs",
-            {
-              profile: wallet.wallet.address.toLowerCase(),
-            },
-          ],
-        });
+
+        
 
         if (wallet.wallet.ens) {
           queryClient.invalidateQueries({
             queryKey: ["user-cic-statements", wallet.wallet.ens.toLowerCase()],
-          });
-          queryClient.invalidateQueries({
-            queryKey: [
-              "profile-logs",
-              {
-                profile: wallet.wallet.ens.toLowerCase(),
-              },
-            ],
           });
         }
       }

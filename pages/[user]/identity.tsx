@@ -1,4 +1,4 @@
-import { ReactElement } from "react";
+import { ReactElement, useContext } from "react";
 import { NextPageWithLayout } from "../_app";
 import {
   CicStatement,
@@ -17,9 +17,9 @@ import {
   userPageNeedsRedirect,
 } from "../../helpers/server.helpers";
 import UserPageIdentity from "../../components/user/identity/UserPageIdentity";
-import { useQueryClient } from "@tanstack/react-query";
 import UserPageIdentityNoProfile from "../../components/user/identity/UserPageIdentityNoProfile";
 import { Page as PageType } from "../../helpers/Types";
+import { ReactQueryWrapperContext } from "../../components/react-query-wrapper/ReactQueryWrapper";
 
 export interface UserPageIdentityProps {
   profile: IProfileAndConsolidations;
@@ -33,13 +33,8 @@ export interface UserPageIdentityProps {
 const Page: NextPageWithLayout<{ pageProps: UserPageIdentityProps }> = ({
   pageProps,
 }) => {
-  const queryClient = useQueryClient();
-  if (pageProps.profile.profile?.handle) {
-    queryClient.setQueryData<IProfileAndConsolidations>(
-      ["profile", pageProps.profile.profile?.handle.toLowerCase()],
-      pageProps.profile
-    );
-  }
+  const { setProfile } = useContext(ReactQueryWrapperContext);
+  setProfile(pageProps.profile);
 
   if (!pageProps.profile.profile) {
     return <UserPageIdentityNoProfile profile={pageProps.profile} />;

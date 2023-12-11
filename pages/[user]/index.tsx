@@ -1,4 +1,4 @@
-import { ReactElement } from "react";
+import { ReactElement, useContext } from "react";
 import { NextPageWithLayout } from "../_app";
 import { IProfileAndConsolidations } from "../../entities/IProfile";
 import { ConsolidatedTDHMetrics } from "../../entities/ITDH";
@@ -16,7 +16,7 @@ import {
 import UserPageCollection from "../../components/user/collected/UserPageCollection";
 import { Season } from "../../entities/ISeason";
 import { OwnerLite } from "../../entities/IOwner";
-import { useQueryClient } from "@tanstack/react-query";
+import { ReactQueryWrapperContext } from "../../components/react-query-wrapper/ReactQueryWrapper";
 
 export interface UserPageProps {
   profile: IProfileAndConsolidations;
@@ -31,27 +31,8 @@ export interface UserPageProps {
 const Page: NextPageWithLayout<{ pageProps: UserPageProps }> = ({
   pageProps,
 }) => {
-  const queryClient = useQueryClient();
-  if (pageProps.profile.profile?.handle) {
-    queryClient.setQueryData<IProfileAndConsolidations>(
-      ["profile", pageProps.profile.profile?.handle.toLowerCase()],
-      pageProps.profile
-    );
-  }
-
-  for (const wallet of pageProps.profile.consolidation.wallets) {
-    queryClient.setQueryData<IProfileAndConsolidations>(
-      ["profile", wallet.wallet.address.toLowerCase()],
-      pageProps.profile
-    );
-
-    if (wallet.wallet.ens) {
-      queryClient.setQueryData<IProfileAndConsolidations>(
-        ["profile", wallet.wallet.ens.toLowerCase()],
-        pageProps.profile
-      );
-    }
-  }
+  const { setProfile } = useContext(ReactQueryWrapperContext);
+  setProfile(pageProps.profile);
 
   return (
     <UserPageCollection
@@ -105,7 +86,6 @@ export async function getServerSideProps(
           headers,
         }),
       ]);
-
 
     return {
       props: {

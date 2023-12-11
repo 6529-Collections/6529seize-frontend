@@ -526,3 +526,10 @@ export function getTimeAgo(milliseconds: number): string {
     return `${seconds} second${seconds !== 1 ? "s" : ""} ago`;
   }
 }
+
+export const truncateMiddle = (value: string): string => {
+  if (value.length > 50) {
+    return `${value.substring(0, 10)}...${value.substring(value.length - 30)}`;
+  }
+  return value;
+};
