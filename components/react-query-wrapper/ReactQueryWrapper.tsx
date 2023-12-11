@@ -5,7 +5,17 @@ import { IProfileAndConsolidations } from "../../entities/IProfile";
 export enum QueryKey {
   PROFILE = "PROFILE",
   PROFILE_LOGS = "PROFILE_LOGS",
+  PROFILE_RATER_CIC_STATE = "PROFILE_RATER_CIC_STATE",
+  CIC_RATINGS = "CIC_RATINGS",
 }
+
+type QueryType<T, U, V, W> = [T, U, V, W];
+export type ProfileQuery = QueryType<
+  IProfileAndConsolidations,
+  string,
+  IProfileAndConsolidations,
+  [QueryKey.PROFILE, string]
+>;
 
 type ReactQueryWrapperContextType = {
   setProfile: (profile: IProfileAndConsolidations) => void;
@@ -19,6 +29,11 @@ type ReactQueryWrapperContextType = {
     handles: string[];
     keys: Record<string, any>;
   }) => void;
+  invalidateProfileRaterCICState: (params: {
+    profile: IProfileAndConsolidations;
+    rater: string;
+  }) => void;
+  invalidateProfileCICRatings: (profile: IProfileAndConsolidations) => void;
 };
 
 export const ReactQueryWrapperContext =
@@ -27,7 +42,9 @@ export const ReactQueryWrapperContext =
     invalidateProfile: () => {},
     invalidateHandles: () => {},
     invalidateProfileLogs: () => {},
-    invalidateProfileLogsByHandles: () => {},
+    invalidateProfileLogsByHandles: () => { },
+    invalidateProfileRaterCICState: () => { },
+    invalidateProfileCICRatings: () => { },
   });
 
 export default function ReactQueryWrapper({
@@ -118,6 +135,33 @@ export default function ReactQueryWrapper({
         profile
       );
     }
+  };
+
+  const invalidateProfileRaterCICState = ({
+    profile,
+    rater,
+  }: {
+    profile: IProfileAndConsolidations;
+    rater: string;
+  }) => {
+    const handles = getHandlesFromProfile(profile);
+    invalidateQueries({
+      key: QueryKey.PROFILE_RATER_CIC_STATE,
+      values: handles.map((h) => ({
+        handle: h,
+        rater,
+      })),
+    });
+  }
+
+  const invalidateProfileCICRatings = (profile: IProfileAndConsolidations) => {
+    const handles = getHandlesFromProfile(profile);
+    invalidateQueries({
+      key: QueryKey.CIC_RATINGS,
+      values: handles.map((h) => ({
+        profile: h,
+      })),
+    });
   }
 
   return (
@@ -128,6 +172,8 @@ export default function ReactQueryWrapper({
         invalidateProfileLogs,
         invalidateProfileLogsByHandles,
         setProfile,
+        invalidateProfileRaterCICState,
+        invalidateProfileCICRatings,
       }}
     >
       {children}

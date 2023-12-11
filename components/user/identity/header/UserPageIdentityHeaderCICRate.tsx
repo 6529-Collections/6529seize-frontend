@@ -24,7 +24,11 @@ export default function UserPageIdentityHeaderCICRate({
   const queryClient = useQueryClient();
   const { address } = useAccount();
   const { requestAuth, setToast } = useContext(AuthContext);
-  const { invalidateProfile } = useContext(ReactQueryWrapperContext);
+  const {
+    invalidateProfile,
+    invalidateProfileRaterCICState,
+    invalidateProfileCICRatings,
+  } = useContext(ReactQueryWrapperContext);
   const {
     isLoading,
     isError,
@@ -32,7 +36,7 @@ export default function UserPageIdentityHeaderCICRate({
     error,
   } = useQuery<ApiProfileRaterCicState>({
     queryKey: [
-      "profile-rater-cic-state",
+      QueryKey.PROFILE_RATER_CIC_STATE,
       {
         handle: profile.profile?.handle.toLowerCase(),
         rater: address?.toLowerCase(),
@@ -61,22 +65,13 @@ export default function UserPageIdentityHeaderCICRate({
       });
 
       invalidateProfile(profile);
-
-      queryClient.invalidateQueries({
-        queryKey: [
-          "profile-rater-cic-state",
-          {
-            handle: profile.profile?.handle.toLowerCase(),
-            rater: address?.toLowerCase(),
-          },
-        ],
-      });
-      queryClient.invalidateQueries({
-        queryKey: [
-          "cic-ratings",
-          { profile: profile.profile?.handle.toLowerCase() },
-        ],
-      });
+      invalidateProfileCICRatings(profile);
+      if (address) {
+        invalidateProfileRaterCICState({
+          profile,
+          rater: address?.toLowerCase(),
+        });
+      }
     },
   });
 
@@ -215,7 +210,7 @@ export default function UserPageIdentityHeaderCICRate({
             Your min/max CIC Rating:
           </span>
           <span className="tw-pl-1 tw-text-sm tw-font-semibold tw-text-iron-200">
-            (+/-) {formatNumberWithCommas(myMaxCICRatings)}
+            -/+ {formatNumberWithCommas(myMaxCICRatings)}
           </span>
         </div>
       </form>

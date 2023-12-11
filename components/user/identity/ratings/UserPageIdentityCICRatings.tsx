@@ -10,6 +10,7 @@ import UserPageIdentityCICRatingsList from "./UserPageIdentityCICRatingsList";
 import UserPageIdentityCICRatingsHeader from "./UserPageIdentityCICRatingsHeader";
 import { useEffect, useState } from "react";
 import UserPageIdentityPagination from "../utils/UserPageIdentityPagination";
+import { QueryKey } from "../../../react-query-wrapper/ReactQueryWrapper";
 
 const PAGE_SIZE = 10;
 
@@ -32,7 +33,7 @@ export default function CICRatings({
     error,
   } = useQuery<Page<ProfilesMatterRatingWithRaterLevel>>({
     queryKey: [
-      "cic-ratings",
+      QueryKey.CIC_RATINGS,
       {
         profile: user.toLowerCase(),
         page: `${currentPage}`,
