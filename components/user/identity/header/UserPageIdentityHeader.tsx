@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { commonApiFetch } from "../../../../services/api/common-api";
 import UserPageIdentityHeaderCIC from "./UserPageIdentityHeaderCIC";
 import UserPageIdentityHeaderCICRateWrapper from "./UserPageIdentityHeaderCICRateWrapper";
-import { QueryKey } from "../../../react-query-wrapper/ReactQueryWrapper";
+import { ProfileQuery, QueryKey } from "../../../react-query-wrapper/ReactQueryWrapper";
 
 export default function UserPageIdentityHeader({
   profile: initialProfile,
@@ -19,7 +19,7 @@ export default function UserPageIdentityHeader({
     isError,
     data: profile,
     error,
-  } = useQuery<IProfileAndConsolidations>({
+  } = useQuery<ProfileQuery>({
     queryKey: [QueryKey.PROFILE, user.toLowerCase()],
     queryFn: async () =>
       await commonApiFetch<IProfileAndConsolidations>({

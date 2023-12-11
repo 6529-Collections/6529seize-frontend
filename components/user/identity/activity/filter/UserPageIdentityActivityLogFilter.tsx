@@ -28,7 +28,6 @@ export default function UserPageIdentityActivityLogFilter({
   const listRef = useRef<HTMLDivElement>(null);
   useClickAway(listRef, () => setIsOpen(false));
   useKeyPressEvent("Escape", () => setIsOpen(false));
-
   const [title, setTitle] = useState("Select");
 
   useEffect(() => {
