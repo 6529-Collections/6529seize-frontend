@@ -22,19 +22,24 @@ export default function UserPageIdentityHeaderCICRate({
   profile: IProfileAndConsolidations;
 }) {
   const { address } = useAccount();
-  const { requestAuth, setToast, myProfile } = useContext(AuthContext);
+  const { requestAuth, setToast } = useContext(AuthContext);
   const {
     invalidateProfile,
     invalidateProfileRaterCICState,
     invalidateProfileCICRatings,
-    invalidateProfileLogsByHandles,
+    invalidateProfileLogs,
   } = useContext(ReactQueryWrapperContext);
-  const {
-    isLoading,
-    isError,
-    data: myCICState,
-    error,
-  } = useQuery<ApiProfileRaterCicState>({
+
+  const { data: connectedProfile } = useQuery<IProfileAndConsolidations>({
+    queryKey: [QueryKey.PROFILE, address?.toLowerCase()],
+    queryFn: async () =>
+      await commonApiFetch<IProfileAndConsolidations>({
+        endpoint: `profiles/${address}`,
+      }),
+    enabled: !!address,
+  });
+
+  const { data: myCICState } = useQuery<ApiProfileRaterCicState>({
     queryKey: [
       QueryKey.PROFILE_RATER_CIC_STATE,
       {
@@ -66,20 +71,9 @@ export default function UserPageIdentityHeaderCICRate({
 
       invalidateProfile(profile);
       invalidateProfileCICRatings(profile);
-      const myHandles: string[] = [];
-      if (myProfile?.profile?.handle) {
-        myHandles.push(myProfile.profile.handle.toLowerCase());
+      if (connectedProfile) {
+        invalidateProfileLogs({ profile: connectedProfile, keys: {} });
       }
-      myProfile?.consolidation.wallets.forEach((wallet) => {
-        myHandles.push(wallet.wallet.address.toLowerCase());
-        if (wallet.wallet.ens) {
-          myHandles.push(wallet.wallet.ens.toLowerCase());
-        }
-      });
-      invalidateProfileLogsByHandles({
-        handles: myHandles,
-        keys: {},
-      });
 
       if (address) {
         invalidateProfileRaterCICState({

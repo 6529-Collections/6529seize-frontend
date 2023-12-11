@@ -41,7 +41,7 @@ export default function UserSettingsComponent(props: Props) {
   const [user, setUser] = useState<IProfileAndConsolidations | null>(null);
 
   const goToUser = () => {
-    router.push(`/${user}`);
+    router.push(`/${userOrWallet}`);
   };
 
   const onUser = (newUser: IProfileAndConsolidations) => {
@@ -106,7 +106,7 @@ export default function UserSettingsComponent(props: Props) {
     const checkLogin = async () => {
       const { success } = await requestAuth();
       if (!success) {
-        router.push("/404");
+        goToUser();
         return;
       }
       setInit(true);

@@ -1,5 +1,5 @@
-import { FormEvent, useContext, useEffect, useRef, useState } from "react";
-import { IProfile } from "../../../entities/IProfile";
+import { FormEvent, useContext, useEffect, useState } from "react";
+import { IProfileAndConsolidations } from "../../../entities/IProfile";
 import {
   commonApiFetch,
   commonApiPostForm,
@@ -8,7 +8,7 @@ import UserSettingsImgSelectMeme from "./UserSettingsImgSelectMeme";
 import { AuthContext } from "../../auth/Auth";
 import UserSettingsImgSelectFile from "./UserSettingsImgSelectFile";
 import UserSettingsSave from "./UserSettingsSave";
-import { useRouter } from "next/router";
+import { ReactQueryWrapperContext } from "../../react-query-wrapper/ReactQueryWrapper";
 
 export interface MemeLite {
   animation: any;
@@ -21,9 +21,13 @@ export interface MemeLite {
   thumbnail: string | null;
 }
 
-export default function UserSettingsImg({ profile }: { profile: IProfile }) {
-  const router = useRouter();
-  const { setToast, requestAuth, updateMyProfile } = useContext(AuthContext);
+export default function UserSettingsImg({
+  profile,
+}: {
+  profile: IProfileAndConsolidations;
+}) {
+  const { setToast, requestAuth } = useContext(AuthContext);
+  const { invalidateProfile } = useContext(ReactQueryWrapperContext);
   const [memes, setMemes] = useState<MemeLite[]>([]);
 
   useEffect(() => {
@@ -42,7 +46,7 @@ export default function UserSettingsImg({ profile }: { profile: IProfile }) {
   }, []);
 
   const [imageToShow, setImageToShow] = useState<string | null>(
-    profile.pfp_url ?? null
+    profile.profile?.pfp_url ?? null
   );
 
   const [selectedMeme, setSelectedMeme] = useState<MemeLite | null>(null);
@@ -75,7 +79,6 @@ export default function UserSettingsImg({ profile }: { profile: IProfile }) {
         message: "You must be logged in to save settings",
         type: "error",
       });
-      router.push("/404");
       return;
     }
     if (!file && !selectedMeme) {
@@ -95,10 +98,10 @@ export default function UserSettingsImg({ profile }: { profile: IProfile }) {
         formData.append("meme", selectedMeme.id.toString());
       }
       await commonApiPostForm<{ pfp_url: string }>({
-        endpoint: `profiles/${profile.handle}/pfp`,
+        endpoint: `profiles/${profile.profile?.handle}/pfp`,
         body: formData,
       });
-      await updateMyProfile();
+      invalidateProfile(profile);
       setFile(null);
       setSelectedMeme(null);
       setToast({
