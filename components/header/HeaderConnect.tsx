@@ -1,15 +1,18 @@
 import styles from "./Header.module.scss";
 import { useAccount } from "wagmi";
-import { useContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Web3Button } from "@web3modal/react";
-import { AuthContext } from "../auth/Auth";
 import WalletModal from "./walletModal/WalletModal";
 import { NavDropdown } from "react-bootstrap";
 import Cookies from "js-cookie";
 import { VIEW_MODE_COOKIE } from "../../constants";
 import Image from "next/image";
 import { WalletView } from "../../enums";
+import { useQuery } from "@tanstack/react-query";
+import { IProfileAndConsolidations } from "../../entities/IProfile";
+import { QueryKey } from "../react-query-wrapper/ReactQueryWrapper";
+import { commonApiFetch } from "../../services/api/common-api";
 
 interface Props {
   consolidations: string[];
@@ -18,8 +21,21 @@ interface Props {
 }
 
 export default function HeaderConnect(props: Props) {
-  const { myProfile, loadingMyProfile } = useContext(AuthContext);
   const account = useAccount();
+  const {
+    isLoading,
+    isError,
+    data: profile,
+    error,
+  } = useQuery<IProfileAndConsolidations>({
+    queryKey: [QueryKey.PROFILE, account.address?.toLowerCase()],
+    queryFn: async () =>
+      await commonApiFetch<IProfileAndConsolidations>({
+        endpoint: `profiles/${account.address}`,
+      }),
+    enabled: !!account.address,
+  });
+
   const [showWalletModal, setShowWalletModal] = useState(false);
   const [display, setDisplay] = useState("");
 
@@ -33,11 +49,11 @@ export default function HeaderConnect(props: Props) {
   }, []);
 
   useEffect(() => {
-    if (myProfile?.profile?.handle) {
-      setDisplay(myProfile?.profile?.handle);
+    if (profile?.profile?.handle) {
+      setDisplay(profile?.profile?.handle);
       return;
     }
-    const wallet = myProfile?.consolidation.wallets.find(
+    const wallet = profile?.consolidation.wallets.find(
       (w) =>
         w.wallet.address.toLowerCase() === account.address?.toLocaleLowerCase()
     );
@@ -50,11 +66,11 @@ export default function HeaderConnect(props: Props) {
       return;
     }
     setDisplay("Connect");
-  }, [myProfile, account.address]);
+  }, [profile, account.address]);
 
   return (
     <>
-      {loadingMyProfile ? (
+      {isLoading ? (
         <div></div>
       ) : account.isConnected && account.address ? (
         <>
@@ -72,7 +88,7 @@ export default function HeaderConnect(props: Props) {
             className={`${styles.userProfileBtn}`}
             onClick={() =>
               (window.location.href = `/${
-                myProfile?.profile?.handle ?? account.address
+                profile?.profile?.handle ?? account.address
               }`)
             }
           >

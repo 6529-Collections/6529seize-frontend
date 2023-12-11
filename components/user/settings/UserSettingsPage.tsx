@@ -6,7 +6,7 @@ import {
 import UserSettingsPrimaryWallet from "./UserSettingsPrimaryWallet";
 import UserSettingsSave from "./UserSettingsSave";
 import UserSettingsUsername from "./UserSettingsUsername";
-import { AuthContext, IProfileWithMeta } from "../../auth/Auth";
+import { AuthContext } from "../../auth/Auth";
 import { useRouter } from "next/router";
 import { commonApiPost } from "../../../services/api/common-api";
 import UserSettingsImg from "./UserSettingsImg";
@@ -29,7 +29,7 @@ export default function UserSettingsPage({
   user,
   onUser,
 }: {
-  user: IProfileWithMeta;
+  user: IProfileAndConsolidations;
   onUser: (user: IProfileAndConsolidations) => void;
 }) {
   const { requestAuth, setToast, updateMyProfile } = useContext(AuthContext);

@@ -1,15 +1,15 @@
 import { AnimatePresence, motion, useAnimate } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
 import { useClickAway, useKeyPressEvent } from "react-use";
-import { IProfileMetaWallet } from "../../auth/Auth";
 import UserSettingsPrimaryWalletItem from "./UserSettingsPrimaryWalletItem";
+import { IProfileConsolidation } from "../../../entities/IProfile";
 
 export default function UserSettingsPrimaryWallet({
   consolidations,
   selected,
   onSelect,
 }: {
-  consolidations: IProfileMetaWallet[];
+  consolidations: IProfileConsolidation[];
   selected: string;
   onSelect: (wallet: string) => void;
 }) {
@@ -29,10 +29,13 @@ export default function UserSettingsPrimaryWallet({
 
   const [title, setTitle] = useState<string>("Select wallet");
   useEffect(() => {
-    setTitle(
-      consolidations.find((w) => w.wallet.address === selected)?.displayName ??
-        "Select wallet"
+    const selectedWallet = consolidations.find(
+      (w) => w.wallet.address === selected
     );
+
+    const displayName =
+      selectedWallet?.wallet.ens ?? selectedWallet?.wallet.address;
+    setTitle(displayName ?? "Select wallet");
   }, [selected]);
 
   const selectWallet = (wallet: string) => {

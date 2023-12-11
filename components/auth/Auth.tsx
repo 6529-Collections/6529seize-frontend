@@ -10,27 +10,11 @@ import {
 import { commonApiFetch, commonApiPost } from "../../services/api/common-api";
 import jwtDecode from "jwt-decode";
 import { UserRejectedRequestError } from "viem";
-import { IProfile, IProfileAndConsolidations } from "../../entities/IProfile";
+import { IProfileAndConsolidations } from "../../entities/IProfile";
 
-export interface IProfileMetaWallet {
-  readonly wallet: {
-    readonly address: string;
-    readonly ens: string | null;
-  };
-  readonly displayName: string;
-  readonly tdh: number;
-}
-
-export interface IProfileWithMeta {
-  readonly profile: IProfile | null;
-  readonly consolidation: {
-    readonly wallets: IProfileMetaWallet[];
-    readonly tdh: number;
-  };
-}
 
 type AuthContextType = {
-  myProfile: IProfileWithMeta | null;
+  myProfile: IProfileAndConsolidations | null;
   loadingMyProfile: boolean;
   updateMyProfile: () => Promise<void>;
   requestAuth: () => Promise<{ success: boolean }>;
@@ -54,7 +38,9 @@ export default function Auth({ children }: { children: React.ReactNode }) {
   const { address } = useAccount();
   const signMessage = useSignMessage();
 
-  const [myProfile, setMyProfile] = useState<IProfileWithMeta | null>(null);
+  const [myProfile, setMyProfile] = useState<IProfileAndConsolidations | null>(
+    null
+  );
   const [loadingMyProfile, setLoadingMyProfile] = useState(false);
 
   useEffect(() => {
@@ -66,26 +52,6 @@ export default function Auth({ children }: { children: React.ReactNode }) {
     }
   }, [address]);
 
-  const mapApiResponseToUser = (
-    response: IProfileAndConsolidations
-  ): IProfileWithMeta => {
-    return {
-      ...response,
-      consolidation: {
-        ...response.consolidation,
-        wallets: response.consolidation.wallets.map((w) => ({
-          ...w,
-          wallet: {
-            ...w.wallet,
-            address: w.wallet.address.toLowerCase(),
-            ens: w.wallet.ens ?? null,
-          },
-          displayName: w.wallet.ens ?? w.wallet.address.toLowerCase(),
-        })),
-      },
-    };
-  };
-
   const getMyProfile = async () => {
     if (!address) {
       setMyProfile(null);
@@ -96,7 +62,7 @@ export default function Auth({ children }: { children: React.ReactNode }) {
       const response = await commonApiFetch<IProfileAndConsolidations>({
         endpoint: `profiles/${address}`,
       });
-      setMyProfile(mapApiResponseToUser(response));
+      setMyProfile(response);
     } catch {
       setMyProfile(null);
     } finally {

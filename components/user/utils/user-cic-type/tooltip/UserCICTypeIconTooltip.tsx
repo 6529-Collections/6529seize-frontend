@@ -8,7 +8,6 @@ import UserCICTypeIconTooltipHeaders from "./UserCICTypeIconTooltipHeaders";
 import UserCICTypeIconTooltipRate from "./UserCICTypeIconTooltipRate";
 import { amIUser, cicToType } from "../../../../../helpers/Helpers";
 import { useAccount } from "wagmi";
-import { AuthContext } from "../../../../auth/Auth";
 
 export default function UserCICTypeIconTooltip({
   profile,
@@ -16,7 +15,6 @@ export default function UserCICTypeIconTooltip({
   profile: IProfileAndConsolidations;
 }) {
   const { address } = useAccount();
-  const { myProfile } = useContext(AuthContext);
   const [isMyProfile, setIsMyProfile] = useState<boolean>(true);
 
   const [cicType, setCicType] = useState<CICType>(

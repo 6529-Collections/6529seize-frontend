@@ -2,19 +2,12 @@ import { useAccount } from "wagmi";
 import { Inter } from "next/font/google";
 import { useContext, useEffect, useState } from "react";
 import { useRouter } from "next/router";
-import { AuthContext, IProfileWithMeta } from "../../auth/Auth";
+import { AuthContext } from "../../auth/Auth";
 import UserSettingsGoToUser from "./UserSettingsGoToUser";
 import { commonApiFetch } from "../../../services/api/common-api";
-import {
-  IProfileAndConsolidations,
-  PROFILE_CLASSIFICATION,
-} from "../../../entities/IProfile";
+import { IProfileAndConsolidations } from "../../../entities/IProfile";
 import UserSettingsPage from "./UserSettingsPage";
-import { useQueryClient } from "@tanstack/react-query";
-import {
-  QueryKey,
-  ReactQueryWrapperContext,
-} from "../../react-query-wrapper/ReactQueryWrapper";
+import { ReactQueryWrapperContext } from "../../react-query-wrapper/ReactQueryWrapper";
 
 interface Props {
   user: string;
@@ -29,7 +22,6 @@ const inter = Inter({
 });
 
 export default function UserSettingsComponent(props: Props) {
-  const queryClient = useQueryClient();
   const account = useAccount();
   const router = useRouter();
   const { requestAuth, setToast } = useContext(AuthContext);
@@ -46,30 +38,10 @@ export default function UserSettingsComponent(props: Props) {
       : router.query.user
   );
 
-  const [user, setUser] = useState<IProfileWithMeta | null>(null);
+  const [user, setUser] = useState<IProfileAndConsolidations | null>(null);
 
   const goToUser = () => {
     router.push(`/${user}`);
-  };
-
-  const mapApiResponseToUser = (
-    response: IProfileAndConsolidations
-  ): IProfileWithMeta => {
-    return {
-      ...response,
-      consolidation: {
-        ...response.consolidation,
-        wallets: response.consolidation.wallets.map((w) => ({
-          ...w,
-          wallet: {
-            ...w.wallet,
-            address: w.wallet.address.toLowerCase(),
-            ens: w.wallet.ens ?? null,
-          },
-          displayName: w.wallet.ens ?? w.wallet.address.toLowerCase(),
-        })),
-      },
-    };
   };
 
   const onUser = (newUser: IProfileAndConsolidations) => {
@@ -87,8 +59,7 @@ export default function UserSettingsComponent(props: Props) {
     invalidateProfileLogs({ profile: newUser, keys: {} });
     invalidateHandles(oldHandles);
     invalidateProfileLogsByHandles({ handles: oldHandles, keys: {} });
-    const newUserMapped = mapApiResponseToUser(newUser);
-    setUser(newUserMapped);
+    setUser(newUser);
   };
 
   useEffect(() => {

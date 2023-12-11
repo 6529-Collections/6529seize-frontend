@@ -36,7 +36,8 @@ export default function UserPageSettings() {
 
     const profileTitle =
       myProfile.profile?.handle ??
-      consolidatedWalletsSortedByHighest.at(0)?.displayName ??
+      consolidatedWalletsSortedByHighest.at(0)?.wallet.ens ??
+      consolidatedWalletsSortedByHighest.at(0)?.wallet.address ??
       null;
 
     setPagenameFull(`${profileTitle} | 6529 SEIZE`);

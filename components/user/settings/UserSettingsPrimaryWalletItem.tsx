@@ -1,13 +1,13 @@
 import { useEffect, useState } from "react";
 import { areEqualAddresses, numberWithCommas } from "../../../helpers/Helpers";
-import { IProfileMetaWallet } from "../../auth/Auth";
+import { IProfileConsolidation } from "../../../entities/IProfile";
 
 export default function UserSettingsPrimaryWalletItem({
   wallet,
   selected,
   onSelect,
 }: {
-  wallet: IProfileMetaWallet;
+  wallet: IProfileConsolidation;
   selected: string;
   onSelect: (wallet: string) => void;
 }) {
@@ -24,7 +24,7 @@ export default function UserSettingsPrimaryWalletItem({
       className="tw-group tw-text-white tw-justify-between tw-w-full tw-flex tw-rounded-lg tw-relative tw-cursor-pointer tw-select-none tw-p-2 hover:tw-bg-neutral-600 tw-transition tw-duration-300 tw-ease-out"
     >
       <span className="tw-inline-block tw-text-sm tw-font-medium tw-text-white">
-        {`${wallet.displayName} - ${
+        {`${wallet.wallet.ens ?? wallet.wallet.address} - ${
           wallet.tdh > 0 ? numberWithCommas(wallet.tdh) : 0
         }TDH`}
       </span>
