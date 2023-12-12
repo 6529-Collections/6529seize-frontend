@@ -19,7 +19,7 @@ export default function UserPageStatsOverview({ tdh, loading }: { tdh: Consolida
   }, [tdh]);
 
   return (
-    <Container className="no-padding">
+    <Container className="no-padding tw-mt-8">
       {tdh && tdh.balance > 0 && (
         <Row>
           <Accordion

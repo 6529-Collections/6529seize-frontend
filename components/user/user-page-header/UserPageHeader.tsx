@@ -83,7 +83,7 @@ export default function UserPageHeader({
             <div className="tw-mt-6 md:tw-hidden">
               {isLoggedInUser && <UserEditProfileButton user={user} />}
             </div>
-            <div className="tw-w-full md:tw-w-auto tw-flex tw-mt-4 min-[347px]:tw-mt-6 tw-items-center tw-gap-x-3">
+            <div className="tw-w-full md:tw-w-auto tw-flex md:tw-mt-6 tw-items-center tw-gap-x-3">
               <div className="tw-hidden md:tw-block">
                 {isLoggedInUser && <UserEditProfileButton user={user} />}
               </div>

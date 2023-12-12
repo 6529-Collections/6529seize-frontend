@@ -45,7 +45,7 @@ export default function UserPageIdentityAddStatementsSelect({
       </div>
 
       {/*  Grid starts here */}
-      <div className="tw-mt-8 sm:tw-grid sm:tw-grid-cols-3 tw-gap-6">
+      <div className="tw-mt-8 tw-grid tw-grid-cols-1 md:tw-grid-cols-3 tw-gap-6">
         <div
           onClick={() => onViewChange(STATEMENT_ADD_VIEW.SOCIAL_MEDIA_ACCOUNT)}
           className="tw-cursor-pointer tw-rounded-lg tw-group tw-relative tw-bg-iron-800/80 tw-border tw-border-solid tw-border-white/5 hover:tw-bg-iron-800 tw-p-6 tw-transition tw-duration-300 tw-ease-out"

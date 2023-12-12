@@ -37,7 +37,7 @@ export default function UserPageIdentityActivityLogSocialMedia({
       <div className="tw-flex tw-items-center tw-justify-between tw-gap-x-3">
         <div className="tw-inline-flex tw-items-center tw-space-x-2">
           {/* <svg
-            className="tw-flex-shrink-0 tw-h-5 tw-w-5 tw-text-neutral-100"
+            className="tw-flex-shrink-0 tw-h-5 tw-w-5 tw-text-iron-100"
             viewBox="0 0 24 24"
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
@@ -51,21 +51,21 @@ export default function UserPageIdentityActivityLogSocialMedia({
             />
           </svg> */}
           <div className="tw-inline-flex tw-space-x-1.5">
-            <span className="tw-truncate tw-max-w-[12rem] tw-text-sm tw-font-semibold tw-text-neutral-100">
+            <span className="tw-truncate tw-max-w-[12rem] tw-text-sm tw-font-semibold tw-text-iron-100">
               {profile?.profile?.handle}
             </span>
-            <span className="tw-text-sm tw-text-neutral-400 tw-font-semibold">
+            <span className="tw-whitespace-nowrap tw-text-sm tw-text-iron-400 tw-font-semibold">
               {PROFILE_ACTIVITY_LOG_ACTION_STR[log.contents.action]}
             </span>
-            <span className="tw-whitespace-nowrap tw-text-sm tw-text-neutral-400 tw-font-medium">
+            <span className="tw-whitespace-nowrap tw-text-sm tw-text-iron-300 tw-font-medium">
               social media account
             </span>
-            <div className="tw-flex tw-items-center tw-flex-shrink-0 tw-h-5 tw-w-5 tw-text-neutral-100">
+            <div className="tw-flex tw-items-center tw-flex-shrink-0 tw-h-5 tw-w-5 tw-text-iron-100">
               <SocialStatementIcon
                 statementType={log.contents.statement.statement_type}
               />
             </div>
-            <span className="tw-group tw-inline-flex tw-text-sm tw-font-semibold tw-text-neutral-100">
+            <span className="tw-whitespace-nowrap tw-group tw-inline-flex tw-text-sm tw-font-semibold tw-text-iron-100">
               {title}
               <Tippy content="Copy" theme="dark" placement="top">
                 <button

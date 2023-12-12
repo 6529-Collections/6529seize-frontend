@@ -44,7 +44,7 @@ export default function UserPageCollectionControls({
 }) {
   return (
     <>
-      <Row>
+      <Row className="tw-mt-8">
         <Col xs={5}>
           <Col xs={12}>
             Sort&nbsp;&nbsp;

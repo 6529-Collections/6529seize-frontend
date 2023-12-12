@@ -29,7 +29,7 @@ export default function UserPageIdentityActivityLogRate({
       <div className="tw-flex tw-items-center tw-justify-between tw-gap-x-3">
         <div className="tw-inline-flex tw-items-center tw-space-x-2">
           {/* <svg
-            className="tw-flex-shrink-0 tw-h-5 tw-w-5 tw-text-neutral-100"
+            className="tw-flex-shrink-0 tw-h-5 tw-w-5 tw-text-iron-100"
             viewBox="0 0 24 24"
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
@@ -43,19 +43,19 @@ export default function UserPageIdentityActivityLogRate({
             />
           </svg> */}
           <div className="tw-inline-flex tw-space-x-1.5">
-            <span className="tw-truncate tw-max-w-[12rem] tw-text-sm tw-font-semibold tw-text-neutral-100">
+            <span className="tw-whitespace-nowrap tw-truncate tw-max-w-[12rem] tw-text-sm tw-font-semibold tw-text-iron-100">
               {profile?.profile?.handle}
             </span>
-            <span className="tw-text-sm tw-text-neutral-400 tw-font-semibold">
+            <span className="tw-text-sm tw-text-iron-400 tw-font-semibold">
               cic-rated
             </span>
-            <span className="tw-text-sm tw-text-neutral-400 tw-font-medium">
+            <span className="tw-text-sm tw-text-iron-300 tw-font-medium">
               user
             </span>
             <Tippy content={log.target_profile_handle} theme="dark">
               <span
                 onClick={goToProfile}
-                className="hover:tw-underline tw-cursor-pointer tw-truncate tw-max-w-[12rem] tw-text-sm tw-font-semibold tw-text-neutral-100"
+                className="tw-whitespace-nowrap hover:tw-underline tw-cursor-pointer tw-truncate tw-max-w-[12rem] tw-text-sm tw-font-semibold tw-text-iron-100"
               >
                 {log.target_profile_handle}
               </span>
