@@ -1,5 +1,8 @@
 import Tippy from "@tippyjs/react";
-import { ProfileActivityLogPrimaryWalletEdit } from "../../../../../../entities/IProfile";
+import {
+  IProfileAndConsolidations,
+  ProfileActivityLogPrimaryWalletEdit,
+} from "../../../../../../entities/IProfile";
 import { formatAddress } from "../../../../../../helpers/Helpers";
 import EthereumIcon from "../../../../utils/icons/EthereumIcon";
 import UserPageIdentityActivityLogItemTimeAgo from "./UserPageIdentityActivityLogItemTimeAgo";
@@ -9,8 +12,10 @@ import { useCopyToClipboard } from "react-use";
 
 export default function UserPageIdentityActivityLogPrimaryWallet({
   log,
+  profile,
 }: {
   log: ProfileActivityLogPrimaryWalletEdit;
+  profile: IProfileAndConsolidations;
 }) {
   const [oldTitle, setOldTitle] = useState(
     formatAddress(log.contents.old_value)
@@ -41,10 +46,13 @@ export default function UserPageIdentityActivityLogPrimaryWallet({
     <li className="tw-py-4">
       <div className="tw-flex tw-items-center tw-justify-between tw-gap-x-3">
         <div className="tw-inline-flex tw-items-center tw-space-x-2">
-          <div className="tw-flex tw-items-center tw-flex-shrink-0 tw-h-5 tw-w-5 tw-text-neutral-100">
+          {/* <div className="tw-flex tw-items-center tw-flex-shrink-0 tw-h-5 tw-w-5 tw-text-neutral-100">
             <EthereumIcon />
-          </div>
+          </div> */}
           <div className="tw-inline-flex tw-space-x-1.5">
+            <span className="tw-truncate tw-max-w-[12rem] tw-text-sm tw-font-semibold tw-text-neutral-100">
+              {profile?.profile?.handle}
+            </span>
             <span className="tw-text-sm tw-text-neutral-400 tw-font-semibold">
               changed
             </span>

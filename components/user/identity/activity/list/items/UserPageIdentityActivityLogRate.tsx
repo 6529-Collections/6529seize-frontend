@@ -1,13 +1,18 @@
 import Tippy from "@tippyjs/react";
-import { ProfileActivityLogRatingEdit } from "../../../../../../entities/IProfile";
+import {
+  IProfileAndConsolidations,
+  ProfileActivityLogRatingEdit,
+} from "../../../../../../entities/IProfile";
 import { formatNumberWithCommas } from "../../../../../../helpers/Helpers";
 import UserPageIdentityActivityLogItemTimeAgo from "./UserPageIdentityActivityLogItemTimeAgo";
 import { useRouter } from "next/router";
 
 export default function UserPageIdentityActivityLogRate({
   log,
+  profile,
 }: {
   log: ProfileActivityLogRatingEdit;
+  profile: IProfileAndConsolidations;
 }) {
   const router = useRouter();
   const isPositive = log.contents.new_rating > 0;
@@ -23,7 +28,7 @@ export default function UserPageIdentityActivityLogRate({
     <li className="tw-py-4">
       <div className="tw-flex tw-items-center tw-justify-between tw-gap-x-3">
         <div className="tw-inline-flex tw-items-center tw-space-x-2">
-          <svg
+          {/* <svg
             className="tw-flex-shrink-0 tw-h-5 tw-w-5 tw-text-neutral-100"
             viewBox="0 0 24 24"
             fill="none"
@@ -36,10 +41,13 @@ export default function UserPageIdentityActivityLogRate({
               strokeLinecap="round"
               strokeLinejoin="round"
             />
-          </svg>
+          </svg> */}
           <div className="tw-inline-flex tw-space-x-1.5">
+            <span className="tw-truncate tw-max-w-[12rem] tw-text-sm tw-font-semibold tw-text-neutral-100">
+              {profile?.profile?.handle}
+            </span>
             <span className="tw-text-sm tw-text-neutral-400 tw-font-semibold">
-              rated
+              cic-rated
             </span>
             <span className="tw-text-sm tw-text-neutral-400 tw-font-medium">
               user

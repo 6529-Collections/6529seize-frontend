@@ -104,7 +104,10 @@ export default function UserPageIdentityActivityLog({
         )}
         {logs?.data.length ? (
           <>
-            <UserPageIdentityActivityLogList logs={logs.data} />
+            <UserPageIdentityActivityLogList
+              logs={logs.data}
+              profile={profile}
+            />
             {totalPages > 1 && (
               <UserPageIdentityPagination
                 currentPage={currentPage}

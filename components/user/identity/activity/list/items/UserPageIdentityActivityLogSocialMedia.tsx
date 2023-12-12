@@ -1,5 +1,6 @@
 import { useState } from "react";
 import {
+  IProfileAndConsolidations,
   PROFILE_ACTIVITY_LOG_ACTION_STR,
   ProfileActivityLogSocialsEdit,
 } from "../../../../../../entities/IProfile";
@@ -12,8 +13,10 @@ import { useCopyToClipboard } from "react-use";
 
 export default function UserPageIdentityActivityLogSocialMedia({
   log,
+  profile,
 }: {
   log: ProfileActivityLogSocialsEdit;
+  profile: IProfileAndConsolidations;
 }) {
   const [title, setTitle] = useState(
     truncateMiddle(log.contents.statement.statement_value)
@@ -33,7 +36,7 @@ export default function UserPageIdentityActivityLogSocialMedia({
     <li className="tw-py-4">
       <div className="tw-flex tw-items-center tw-justify-between tw-gap-x-3">
         <div className="tw-inline-flex tw-items-center tw-space-x-2">
-          <svg
+          {/* <svg
             className="tw-flex-shrink-0 tw-h-5 tw-w-5 tw-text-neutral-100"
             viewBox="0 0 24 24"
             fill="none"
@@ -46,8 +49,11 @@ export default function UserPageIdentityActivityLogSocialMedia({
               strokeLinecap="round"
               strokeLinejoin="round"
             />
-          </svg>
+          </svg> */}
           <div className="tw-inline-flex tw-space-x-1.5">
+            <span className="tw-truncate tw-max-w-[12rem] tw-text-sm tw-font-semibold tw-text-neutral-100">
+              {profile?.profile?.handle}
+            </span>
             <span className="tw-text-sm tw-text-neutral-400 tw-font-semibold">
               {PROFILE_ACTIVITY_LOG_ACTION_STR[log.contents.action]}
             </span>

@@ -1,4 +1,5 @@
 import {
+  IProfileAndConsolidations,
   ProfileActivityLog,
   ProfileActivityLogType,
 } from "../../../../../entities/IProfile";
@@ -12,24 +13,33 @@ import UserPageIdentityActivityLogSocialMediaVerificationPost from "./items/User
 
 export default function UserPageIdentityActivityLogItem({
   log,
+  profile,
 }: {
   log: ProfileActivityLog;
-  }) {
+  profile: IProfileAndConsolidations;
+}) {
   const logType = log.type;
   switch (logType) {
     case ProfileActivityLogType.RATING_EDIT:
-      return <UserPageIdentityActivityLogRate log={log} />;
+      return <UserPageIdentityActivityLogRate log={log} profile={profile} />;
     case ProfileActivityLogType.HANDLE_EDIT:
-      return <UserPageIdentityActivityLogHandle log={log} />;
+      return <UserPageIdentityActivityLogHandle log={log} profile={profile} />;
     case ProfileActivityLogType.PRIMARY_WALLET_EDIT:
-      return <UserPageIdentityActivityLogPrimaryWallet log={log} />;
+      return (
+        <UserPageIdentityActivityLogPrimaryWallet log={log} profile={profile} />
+      );
     case ProfileActivityLogType.SOCIALS_EDIT:
-      return <UserPageIdentityActivityLogSocialMedia log={log} />;
+      return (
+        <UserPageIdentityActivityLogSocialMedia log={log} profile={profile} />
+      );
     case ProfileActivityLogType.CONTACTS_EDIT:
-      return <UserPageIdentityActivityLogContact log={log} />;
+      return <UserPageIdentityActivityLogContact log={log} profile={profile} />;
     case ProfileActivityLogType.SOCIAL_VERIFICATION_POST_EDIT:
       return (
-        <UserPageIdentityActivityLogSocialMediaVerificationPost log={log} />
+        <UserPageIdentityActivityLogSocialMediaVerificationPost
+          log={log}
+          profile={profile}
+        />
       );
     default:
       assertUnreachable(logType);
