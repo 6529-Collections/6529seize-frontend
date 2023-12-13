@@ -3,6 +3,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import useDownloader from "react-use-downloader";
 import { API_AUTH_COOKIE } from "../../constants";
 import Cookies from "js-cookie";
+import DotLoader from "../dotLoader/DotLoader";
 
 interface Props {
   preview: string;
@@ -32,6 +33,7 @@ export default function DownloadUrlWidget(props: Props) {
       aria-disabled={isInProgress}>
       <FontAwesomeIcon icon="download" />
       {isInProgress ? `Downloading` : `Download`} {props.preview}
+      {isInProgress && <DotLoader />}
     </span>
   );
 }

@@ -226,6 +226,17 @@ export default function Leaderboard(props: Props) {
     printNextTdhCountdown();
   }
 
+  function getFileName(page: number | undefined) {
+    const isConsolidationView = view === VIEW.CONSOLIDATION;
+    const consolidationPrefix = isConsolidationView ? 'consolidated-' : '';
+    const tdhBlockSuffix = lastTDH ? `-${lastTDH.block}` : '';
+    const csvFileName = `${consolidationPrefix}community-download${tdhBlockSuffix}`;
+    if (page) {
+      return `${csvFileName}-page${page}.csv`;
+    }
+    return `${csvFileName}.csv`;
+  }
+
   async function fetchResults() {
     setShowLoader(true);
     let tagFilter = "";
@@ -2620,11 +2631,7 @@ export default function Leaderboard(props: Props) {
           >
             <DownloadUrlWidget
               preview="Page"
-              name={`${
-                view === VIEW.CONSOLIDATION ? `consolidated-` : ""
-              }community-download${lastTDH ? `-${lastTDH.block}` : ""}-page${
-                pageProps.page
-              }.csv`}
+              name={getFileName(pageProps.page)}
               url={`${myFetchUrl}${
                 view === VIEW.CONSOLIDATION
                   ? `&include_primary_wallet=true`
@@ -2633,9 +2640,7 @@ export default function Leaderboard(props: Props) {
             />
             <DownloadUrlWidget
               preview="All Pages"
-              name={`${
-                view === VIEW.CONSOLIDATION ? `consolidated-` : ""
-              }community-download${lastTDH ? `-${lastTDH.block}` : ""}.csv`}
+              name={getFileName()}
               url={`${myFetchUrl}${
                 view === VIEW.CONSOLIDATION
                   ? `&include_primary_wallet=true`
