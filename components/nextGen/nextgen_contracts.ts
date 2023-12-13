@@ -38,7 +38,7 @@ export const NEXTGEN_CORE = {
 };
 
 export const NEXTGEN_MINTER = {
-  contract: "0xe73D086F3663c2969410b387898693A1E8fFCb93",
+  contract: "0x1a7040a7d4baf44f136c50626a4e8f4ae5ca170f",
   abi: NEXTGEN_MINTER_ABI,
 };
 
