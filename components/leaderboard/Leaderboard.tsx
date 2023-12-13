@@ -226,7 +226,7 @@ export default function Leaderboard(props: Props) {
     printNextTdhCountdown();
   }
 
-  function getFileName(page: number | undefined) {
+  function getFileName(page?: number) {
     const isConsolidationView = view === VIEW.CONSOLIDATION;
     const consolidationPrefix = isConsolidationView ? 'consolidated-' : '';
     const tdhBlockSuffix = lastTDH ? `-${lastTDH.block}` : '';
