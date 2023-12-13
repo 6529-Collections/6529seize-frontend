@@ -6,7 +6,11 @@ import {
 } from "../../../../../entities/IProfile";
 import UserCICTypeIconTooltipHeaders from "./UserCICTypeIconTooltipHeaders";
 import UserCICTypeIconTooltipRate from "./UserCICTypeIconTooltipRate";
-import { amIUser, cicToType } from "../../../../../helpers/Helpers";
+import {
+  amIUser,
+  cicToType,
+  formatNumberWithCommas,
+} from "../../../../../helpers/Helpers";
 import { useAccount } from "wagmi";
 
 export default function UserCICTypeIconTooltip({
@@ -60,13 +64,19 @@ export default function UserCICTypeIconTooltip({
         <span className="tw-block tw-text-iron-100 tw-font-semibold">
           <span>Rating:</span>
           <span className="tw-ml-1 tw-text-white tw-font-bold">
-            {profile.cic.cic_rating}
+            {formatNumberWithCommas(profile.cic.cic_rating)}
           </span>
         </span>
         <span className="tw-block tw-text-iron-100 tw-font-semibold">
           <span>Status:</span>
           <span className={`${CIC_META[cicType].class} tw-ml-1 tw-font-bold`}>
             {CIC_META[cicType].title}
+          </span>
+        </span>
+        <span className="tw-block tw-text-iron-100 tw-font-semibold">
+          <span>Raters:</span>
+          <span className="tw-ml-1 tw-font-bold tw-text-iron-100">
+            {formatNumberWithCommas(profile.cic.contributor_count)}
           </span>
         </span>
       </div>
