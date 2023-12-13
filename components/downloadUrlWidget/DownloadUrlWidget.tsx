@@ -21,7 +21,7 @@ export default function DownloadUrlWidget(props: Props) {
 
   function startDownload() {
     if (!isInProgress) {
-      download(props.url, `${props.name}.csv`);
+      download(props.url, `${props.name}`);
     }
   }
 
