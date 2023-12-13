@@ -1,4 +1,3 @@
-
 import { ProfileActivityLogType } from "../../../../../entities/IProfile";
 import { assertUnreachable } from "../../../../../helpers/AllowlistToolHelpers";
 import UserPageIdentityActivityLogCICRatingIcon from "./UserPageIdentityActivityLogCICRatingIcon";
@@ -26,6 +25,12 @@ export default function UserPageIdentityActivityLogIcon({
       return <UserPageIdentityActivityLogContactIcon />;
     case ProfileActivityLogType.SOCIAL_VERIFICATION_POST_EDIT:
       return <UserPageIdentityActivityLogSocialMediaVerificationPostIcon />;
+    case ProfileActivityLogType.CLASSIFICATION_EDIT:
+    case ProfileActivityLogType.BANNER_1_EDIT:
+    case ProfileActivityLogType.BANNER_2_EDIT:
+    case ProfileActivityLogType.WEBSITE_EDIT:
+    case ProfileActivityLogType.PFP_EDIT:
+      return <div></div>;
     default:
       assertUnreachable(logType);
   }

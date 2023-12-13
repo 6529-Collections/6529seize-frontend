@@ -101,9 +101,14 @@ export enum ProfileActivityLogType {
   RATING_EDIT = "RATING_EDIT",
   HANDLE_EDIT = "HANDLE_EDIT",
   PRIMARY_WALLET_EDIT = "PRIMARY_WALLET_EDIT",
+  CLASSIFICATION_EDIT = "CLASSIFICATION_EDIT",
   SOCIALS_EDIT = "SOCIALS_EDIT",
   CONTACTS_EDIT = "CONTACTS_EDIT",
   SOCIAL_VERIFICATION_POST_EDIT = "SOCIAL_VERIFICATION_POST_EDIT",
+  BANNER_1_EDIT = "BANNER_1_EDIT",
+  BANNER_2_EDIT = "BANNER_2_EDIT",
+  WEBSITE_EDIT = "WEBSITE_EDIT",
+  PFP_EDIT = "PFP_EDIT",
 }
 
 export const PROFILE_ACTIVITY_TYPE_TO_TEXT: Record<
@@ -113,10 +118,15 @@ export const PROFILE_ACTIVITY_TYPE_TO_TEXT: Record<
   [ProfileActivityLogType.RATING_EDIT]: "CIC Rating",
   [ProfileActivityLogType.HANDLE_EDIT]: "Handle",
   [ProfileActivityLogType.PRIMARY_WALLET_EDIT]: "Primary Wallet",
+  [ProfileActivityLogType.CLASSIFICATION_EDIT]: "Classification",
   [ProfileActivityLogType.SOCIALS_EDIT]: "Social Media Account",
   [ProfileActivityLogType.CONTACTS_EDIT]: "Contact",
   [ProfileActivityLogType.SOCIAL_VERIFICATION_POST_EDIT]:
     "Social Media Verification Post",
+  [ProfileActivityLogType.BANNER_1_EDIT]: "Banner 1",
+  [ProfileActivityLogType.BANNER_2_EDIT]: "Banner 2",
+  [ProfileActivityLogType.WEBSITE_EDIT]: "Website",
+  [ProfileActivityLogType.PFP_EDIT]: "Profile Picture",
 };
 
 export interface ProfileActivityLogBase {
@@ -154,6 +164,47 @@ export interface ProfileActivityLogHandleEdit extends ProfileActivityLogBase {
 export interface ProfileActivityLogPrimaryWalletEdit
   extends ProfileActivityLogBase {
   readonly type: ProfileActivityLogType.PRIMARY_WALLET_EDIT;
+  readonly contents: {
+    new_value: string;
+    old_value: string;
+  };
+}
+
+export interface ProfileActivityLogClassificationEdit
+  extends ProfileActivityLogBase {
+  readonly type: ProfileActivityLogType.CLASSIFICATION_EDIT;
+  readonly contents: {
+    new_value: PROFILE_CLASSIFICATION;
+    old_value: PROFILE_CLASSIFICATION;
+  };
+}
+
+export interface ProfileActivityLogBanner1Edit extends ProfileActivityLogBase {
+  readonly type: ProfileActivityLogType.BANNER_1_EDIT;
+  readonly contents: {
+    new_value: string;
+    old_value: string;
+  };
+}
+
+export interface ProfileActivityLogBanner2Edit extends ProfileActivityLogBase {
+  readonly type: ProfileActivityLogType.BANNER_2_EDIT;
+  readonly contents: {
+    new_value: string;
+    old_value: string;
+  };
+}
+
+export interface ProfileActivityLogWebsiteEdit extends ProfileActivityLogBase {
+  readonly type: ProfileActivityLogType.WEBSITE_EDIT;
+  readonly contents: {
+    new_value: string;
+    old_value: string;
+  };
+}
+
+export interface ProfileActivityLogPfpEdit extends ProfileActivityLogBase {
+  readonly type: ProfileActivityLogType.PFP_EDIT;
   readonly contents: {
     new_value: string;
     old_value: string;
@@ -202,11 +253,14 @@ export type ProfileActivityLog =
   | ProfileActivityLogRatingEdit
   | ProfileActivityLogHandleEdit
   | ProfileActivityLogPrimaryWalletEdit
+  | ProfileActivityLogClassificationEdit
   | ProfileActivityLogSocialsEdit
   | ProfileActivityLogContactsEdit
-  | ProfileActivityLogSocialVerificationPostEdit;
-
-
+  | ProfileActivityLogSocialVerificationPostEdit
+  | ProfileActivityLogBanner1Edit
+  | ProfileActivityLogBanner2Edit
+  | ProfileActivityLogWebsiteEdit
+  | ProfileActivityLogPfpEdit;
 
 export enum RateMatter {
   CIC = "CIC",

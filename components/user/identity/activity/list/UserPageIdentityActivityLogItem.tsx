@@ -4,12 +4,17 @@ import {
   ProfileActivityLogType,
 } from "../../../../../entities/IProfile";
 import { assertUnreachable } from "../../../../../helpers/AllowlistToolHelpers";
+import UserPageIdentityActivityLogBanner1 from "./items/UserPageIdentityActivityLogBanner1";
+import UserPageIdentityActivityLogBanner2 from "./items/UserPageIdentityActivityLogBanner2";
+import UserPageIdentityActivityLogClassification from "./items/UserPageIdentityActivityLogClassification";
 import UserPageIdentityActivityLogContact from "./items/UserPageIdentityActivityLogContact";
 import UserPageIdentityActivityLogHandle from "./items/UserPageIdentityActivityLogHandle";
+import UserPageIdentityActivityLogPfp from "./items/UserPageIdentityActivityLogPfp";
 import UserPageIdentityActivityLogPrimaryWallet from "./items/UserPageIdentityActivityLogPrimaryWallet";
 import UserPageIdentityActivityLogRate from "./items/UserPageIdentityActivityLogRate";
 import UserPageIdentityActivityLogSocialMedia from "./items/UserPageIdentityActivityLogSocialMedia";
 import UserPageIdentityActivityLogSocialMediaVerificationPost from "./items/UserPageIdentityActivityLogSocialMediaVerificationPost";
+import UserPageIdentityActivityLogWebsite from "./items/UserPageIdentityActivityLogWebsite";
 
 export default function UserPageIdentityActivityLogItem({
   log,
@@ -41,6 +46,21 @@ export default function UserPageIdentityActivityLogItem({
           profile={profile}
         />
       );
+    case ProfileActivityLogType.CLASSIFICATION_EDIT:
+      return (
+        <UserPageIdentityActivityLogClassification
+          log={log}
+          profile={profile}
+        />
+      );
+    case ProfileActivityLogType.BANNER_1_EDIT:
+      return <UserPageIdentityActivityLogBanner1 log={log} profile={profile} />;
+    case ProfileActivityLogType.BANNER_2_EDIT:
+      return <UserPageIdentityActivityLogBanner2 log={log} profile={profile} />;
+    case ProfileActivityLogType.WEBSITE_EDIT:
+      return <UserPageIdentityActivityLogWebsite log={log} profile={profile} />;
+    case ProfileActivityLogType.PFP_EDIT:
+      return <UserPageIdentityActivityLogPfp log={log} profile={profile} />;
     default:
       assertUnreachable(logType);
   }

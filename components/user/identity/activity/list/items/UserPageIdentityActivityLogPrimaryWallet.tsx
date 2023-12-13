@@ -42,6 +42,8 @@ export default function UserPageIdentityActivityLogPrimaryWallet({
     }, 1000);
   };
 
+  const isAdded = !log.contents.old_value;
+
   return (
     <li className="tw-py-4">
       <div className="tw-flex tw-items-center tw-justify-between tw-gap-x-3">
