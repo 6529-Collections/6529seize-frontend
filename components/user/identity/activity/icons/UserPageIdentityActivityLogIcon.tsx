@@ -1,11 +1,15 @@
 import { ProfileActivityLogType } from "../../../../../entities/IProfile";
 import { assertUnreachable } from "../../../../../helpers/AllowlistToolHelpers";
 import UserPageIdentityActivityLogCICRatingIcon from "./UserPageIdentityActivityLogCICRatingIcon";
+import UserPageIdentityActivityLogCertificateIcon from "./UserPageIdentityActivityLogCertificateIcon";
 import UserPageIdentityActivityLogContactIcon from "./UserPageIdentityActivityLogContactIcon";
 import UserPageIdentityActivityLogHandleIcon from "./UserPageIdentityActivityLogHandleIcon";
 import UserPageIdentityActivityLogPrimaryWalletIcon from "./UserPageIdentityActivityLogPrimaryWalletIcon";
+import UserPageIdentityActivityLogProfileImageIcon from "./UserPageIdentityActivityLogProfileImageIcon";
 import UserPageIdentityActivityLogSocialMediaAccountIcon from "./UserPageIdentityActivityLogSocialMediaAccountIcon";
 import UserPageIdentityActivityLogSocialMediaVerificationPostIcon from "./UserPageIdentityActivityLogSocialMediaVerificationPostIcon";
+import UserPageIdentityActivityLogWebsiteIcon from "./UserPageIdentityActivityLogWebsiteIcon";
+import UserPageIdentityActivityLogBannerIcon from "./UserPageIdentityActivityLogBannerIcon";
 
 export default function UserPageIdentityActivityLogIcon({
   logType,
@@ -26,11 +30,15 @@ export default function UserPageIdentityActivityLogIcon({
     case ProfileActivityLogType.SOCIAL_VERIFICATION_POST_EDIT:
       return <UserPageIdentityActivityLogSocialMediaVerificationPostIcon />;
     case ProfileActivityLogType.CLASSIFICATION_EDIT:
+      return <UserPageIdentityActivityLogCertificateIcon />;
     case ProfileActivityLogType.BANNER_1_EDIT:
+      return <UserPageIdentityActivityLogBannerIcon />;
     case ProfileActivityLogType.BANNER_2_EDIT:
+      return <UserPageIdentityActivityLogBannerIcon />;
     case ProfileActivityLogType.WEBSITE_EDIT:
+      return <UserPageIdentityActivityLogWebsiteIcon />;
     case ProfileActivityLogType.PFP_EDIT:
-      return <div></div>;
+      return <UserPageIdentityActivityLogProfileImageIcon />;
     default:
       assertUnreachable(logType);
   }

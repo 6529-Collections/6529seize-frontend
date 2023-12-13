@@ -17,7 +17,7 @@ export default function UserPageIdentityActivityLogBanner2({
     <li className="tw-py-4">
       <div className="tw-flex tw-items-center tw-justify-between tw-gap-x-3">
         <div className="tw-inline-flex tw-items-center tw-space-x-2">
-          <div className="tw-inline-flex tw-space-x-1.5">
+          <div className="tw-inline-flex tw-items-center tw-space-x-1.5">
             <span className="tw-truncate tw-max-w-[12rem] tw-text-sm tw-font-semibold tw-text-neutral-100">
               {profile?.profile?.handle}
             </span>
@@ -30,7 +30,7 @@ export default function UserPageIdentityActivityLogBanner2({
             {!isAdded && (
               <>
                 <span
-                  className="tw-text-sm tw-font-semibold tw-h-4 tw-w-4"
+                  className="tw-text-sm tw-font-semibold tw-h-4 tw-w-4 tw-rounded-sm"
                   style={{ backgroundColor: log.contents.old_value }}
                 ></span>
                 <svg
@@ -51,7 +51,7 @@ export default function UserPageIdentityActivityLogBanner2({
             )}
 
             <span
-              className="tw-text-sm tw-font-semibold tw-h-4 tw-w-4"
+              className="tw-text-sm tw-font-semibold tw-h-4 tw-w-4 tw-rounded-sm"
               style={{ backgroundColor: log.contents.new_value }}
             ></span>
           </div>

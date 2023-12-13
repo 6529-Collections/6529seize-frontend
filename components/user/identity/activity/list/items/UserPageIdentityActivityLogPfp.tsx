@@ -17,29 +17,31 @@ export default function UserPageIdentityActivityLogPfp({
     <li className="tw-py-4">
       <div className="tw-flex tw-items-center tw-justify-between tw-gap-x-3">
         <div className="tw-inline-flex tw-items-center tw-space-x-2">
-          <div className="tw-inline-flex tw-space-x-1.5">
-            <span className="tw-truncate tw-max-w-[12rem] tw-text-sm tw-font-semibold tw-text-neutral-100">
-              {profile?.profile?.handle}
-            </span>
-            <span className="tw-text-sm tw-text-neutral-400 tw-font-semibold">
-              {isAdded ? "added" : "changed"}
-            </span>
-            <span className="tw-text-sm tw-text-neutral-400 tw-font-medium">
-              profile picture
-            </span>
+          <div className="tw-inline-flex tw-items-center">
+            <div className="tw-inline-flex tw-items-center tw-space-x-1.5 tw-mr-3">
+              <span className="tw-truncate tw-max-w-[12rem] tw-text-sm tw-font-semibold tw-text-neutral-100">
+                {profile?.profile?.handle}
+              </span>
+              <span className="tw-text-sm tw-text-neutral-400 tw-font-semibold">
+                {isAdded ? "added" : "changed"}
+              </span>
+              <span className="tw-text-sm tw-text-neutral-400 tw-font-medium">
+                profile picture
+              </span>
+            </div>
             {!isAdded && (
               <>
-                <span className="tw-text-sm tw-font-semibold tw-text-neutral-100">
+                <div className="tw-mr-2">
                   {log.contents.old_value && (
                     <Image
                       src={log.contents.old_value}
                       alt="Profile picture"
                       width="20"
                       height="20"
-                      className="tw-flex-shrink-0 tw-object-contain tw-max-h-16 tw-min-w-16 tw-w-auto tw-h-auto tw-rounded-lg tw-ring-[3px] tw-ring-white/30 tw-bg-iron-800"
+                      className="tw-flex-shrink-0 tw-object-contain tw-max-h-10 tw-min-w-10 tw-w-auto tw-h-auto tw-rounded-sm tw-ring-2 tw-ring-white/30 tw-bg-iron-800"
                     />
                   )}
-                </span>
+                </div>
                 <svg
                   className="tw-flex-shrink-0 tw-h-5 tw-w-5 tw-text-neutral-400"
                   viewBox="0 0 24 24"
@@ -57,15 +59,15 @@ export default function UserPageIdentityActivityLogPfp({
               </>
             )}
 
-            <span className="tw-text-sm tw-font-semibold tw-text-neutral-100">
+            <div className="tw-ml-2">
               <Image
                 src={log.contents.new_value}
                 alt="Profile picture"
                 width="20"
                 height="20"
-                className="tw-flex-shrink-0 tw-object-contain tw-max-h-16 tw-min-w-16 tw-w-auto tw-h-auto tw-rounded-lg tw-ring-[3px] tw-ring-white/30 tw-bg-iron-800"
+                className="tw-flex-shrink-0 tw-object-contain tw-max-h-10 tw-min-w-10 tw-w-auto tw-h-auto tw-rounded-sm tw-ring-2 tw-ring-white/30 tw-bg-iron-800"
               />
-            </span>
+            </div>
           </div>
         </div>
         <UserPageIdentityActivityLogItemTimeAgo log={log} />

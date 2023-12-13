@@ -75,7 +75,6 @@ export default function UserPageIdentityActivityLogFilter({
         <AnimatePresence mode="wait" initial={false}>
           {isOpen && (
             <motion.div
-              className="tw-origin-top-right tw-absolute tw-right-0 tw-mt-1 tw-w-full tw-rounded-lg tw-shadow-xl tw-bg-iron-800 tw-ring-1 tw-ring-black tw-ring-opacity-5"
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
