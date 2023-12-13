@@ -2616,7 +2616,7 @@ export default function Leaderboard(props: Props) {
             xs={12}
             sm={12}
             md={6}
-            className="pt-4 pb-3 d-flex justify-content-start gap-3"
+            className="pt-4 pb-3 d-flex justify-content-center gap-4"
           >
             <DownloadUrlWidget
               preview="Page"
@@ -2648,7 +2648,7 @@ export default function Leaderboard(props: Props) {
               xs={12}
               sm={12}
               md={6}
-              className="pt-4 pb-3 d-flex justify-content-end"
+              className="pt-4 pb-3 d-flex justify-content-center"
             >
               <Pagination
                 page={pageProps.page}
