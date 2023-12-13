@@ -13,6 +13,7 @@ import {
   extractAttributes,
 } from "../nextgen_helpers";
 import { IAttribute } from "../../../entities/INFT";
+import { goerli } from "wagmi/chains";
 
 export function getTokenName(
   collection: number,
@@ -38,8 +39,9 @@ export function NextGenTokenImage(
     setAttributes?: (attributes: IAttribute[]) => void;
   }>
 ) {
+  const network = NEXTGEN_CHAIN_ID === goerli.id ? "testnet" : "mainnet";
   const cloudfrontUrl = `https://d3lqz0a4bldqgf.cloudfront.net/nextgen/tokens/images/${NEXTGEN_CHAIN_NAME}-${NEXTGEN_CORE.contract}/${props.token_id}.png`;
-  const generatorUrl = `https://nextgen-generator.seize.io/png/${props.token_id}`;
+  const generatorUrl = `https://nextgen-generator.seize.io/${network}/png/${props.token_id}`;
 
   const [name, setName] = useState<string>();
   const [description, setDescription] = useState<string>();
