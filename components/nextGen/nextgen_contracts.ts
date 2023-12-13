@@ -10,7 +10,7 @@ export const NEXTGEN_CHAIN_ID = goerli.id;
 
 export enum FunctionSelectors {
   CREATE_COLLECTION = "0x02de55d0",
-  SET_COLLECTION_DATA = "0xfb171694",
+  SET_COLLECTION_DATA = "0x7b5dbac5",
   UPDATE_COLLECTION_INFO = "0x16e7c899",
   CHANGE_METADATA_VIEW = "0xf6a85dd0",
   CHANGE_TOKEN_DATA = "0x9a8490f3", // not implemented
@@ -29,7 +29,6 @@ export enum FunctionSelectors {
   PAY_ARTIST = "0x2ebc24b3",
   MINT_AND_AUCTION = "0x46372ba6",
   INITIALIZE_EXTERNAL_BURN_SWAP = "0x4c29c6f2",
-  UPDATE_DELEGATION_COLLECTION = "0x81c1a52b",
 }
 
 export const NEXTGEN_CORE = {

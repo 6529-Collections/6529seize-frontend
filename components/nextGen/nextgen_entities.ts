@@ -80,4 +80,5 @@ export enum Status {
   UPCOMING = "UPCOMING",
   LIVE = "LIVE",
   COMPLETE = "COMPLETE",
+  UNAVAILABLE = "UNAVAILABLE",
 }

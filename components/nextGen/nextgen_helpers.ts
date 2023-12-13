@@ -331,14 +331,21 @@ export const getPhaseDateDisplay = (numberDate: number) => {
   return `STARTING ${formattedDate.toUpperCase()}`;
 };
 
-export function isMintingOpen(startTime: number, endTime: number) {
+export function getStatusFromDates(startTime: number, endTime: number) {
+  if ((startTime === 0 && endTime === 0) || endTime - startTime === 0) {
+    return Status.UNAVAILABLE;
+  }
   const now = new Date().getTime();
-  return now > startTime * 1000 && now < endTime * 1000;
-}
-
-export function isMintingUpcoming(startTime: number) {
-  const now = new Date().getTime();
-  return startTime * 1000 > now;
+  if (now > endTime * 1000) {
+    return Status.COMPLETE;
+  }
+  if (now > startTime * 1000 && now < endTime * 1000) {
+    return Status.LIVE;
+  }
+  if (startTime * 1000 > now) {
+    return Status.UPCOMING;
+  }
+  return Status.UNAVAILABLE;
 }
 
 export function extractURI(s: string) {
@@ -380,25 +387,13 @@ export function extractAttributes(s: string) {
 }
 
 export function extractPhases(d: any[]) {
-  let alStatus = Status.COMPLETE;
-  let publicStatus = Status.COMPLETE;
   const al_start = parseInt(d[0]);
   const al_end = parseInt(d[1]);
-  if (isMintingOpen(al_start, al_end)) {
-    alStatus = Status.LIVE;
-  }
-  if (isMintingUpcoming(al_start)) {
-    alStatus = Status.UPCOMING;
-  }
-
   const public_start = parseInt(d[3]);
   const public_end = parseInt(d[4]);
-  if (isMintingOpen(public_start, public_end)) {
-    publicStatus = Status.LIVE;
-  }
-  if (isMintingUpcoming(public_start)) {
-    publicStatus = Status.UPCOMING;
-  }
+
+  const alStatus = getStatusFromDates(al_start, al_end);
+  const publicStatus = getStatusFromDates(public_start, public_end);
 
   const phases: PhaseTimes = {
     allowlist_start_time: al_start,

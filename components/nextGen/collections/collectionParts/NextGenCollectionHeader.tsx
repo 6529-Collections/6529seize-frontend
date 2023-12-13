@@ -115,18 +115,22 @@ export function NextGenPhases(props: Readonly<PhaseProps>) {
 
   return (
     <span className="pt-2 pb-2 d-flex align-items-center gap-2 align-items-center">
-      <span
-        className={`font-bolder font-smaller ${
-          styles.nextgenTag
-        } ${getAllowlistClassName()}`}>
-        ALLOWLIST {props.phase_times.al_status.toUpperCase()}
-      </span>
-      <span
-        className={`font-bolder font-smaller ${
-          styles.nextgenTag
-        } ${getPublicStatusClassName()}`}>
-        PUBLIC PHASE {props.phase_times.public_status}
-      </span>
+      {props.phase_times.al_status !== Status.UNAVAILABLE && (
+        <span
+          className={`font-bolder font-smaller ${
+            styles.nextgenTag
+          } ${getAllowlistClassName()}`}>
+          ALLOWLIST {props.phase_times.al_status.toUpperCase()}
+        </span>
+      )}
+      {props.phase_times.public_status !== Status.UNAVAILABLE && (
+        <span
+          className={`font-bolder font-smaller ${
+            styles.nextgenTag
+          } ${getPublicStatusClassName()}`}>
+          PUBLIC PHASE {props.phase_times.public_status}
+        </span>
+      )}
     </span>
   );
 }
