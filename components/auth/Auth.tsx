@@ -32,7 +32,7 @@ export default function Auth({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     if (!address) {
-      removeAuthJwt();
+      return;
     } else {
       const isAuth = validateJwt({ jwt: getAuthJwt(), wallet: address });
       if (!isAuth) removeAuthJwt();
@@ -195,7 +195,6 @@ export default function Auth({ children }: { children: React.ReactNode }) {
 
   const requestAuth = async (): Promise<{ success: boolean }> => {
     if (!address) {
-      removeAuthJwt();
       setToast({
         message: "Please connect your wallet",
         type: "error",
