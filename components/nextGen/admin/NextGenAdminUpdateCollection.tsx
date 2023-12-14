@@ -199,7 +199,6 @@ export default function NextGenAdminUpdateCollection(props: Readonly<Props>) {
   useEffect(() => {
     if (submitting) {
       const params = getParams();
-      console.log("submitting - update params", params);
       contractWrite.write({
         args: params,
       });

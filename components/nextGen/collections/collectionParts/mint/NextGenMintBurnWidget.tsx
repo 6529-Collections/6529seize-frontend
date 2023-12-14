@@ -1,7 +1,7 @@
 import styles from "../../NextGen.module.scss";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Tippy from "@tippyjs/react";
-import { Container, Row, Col, Form, Button } from "react-bootstrap";
+import { Container, Row, Col, Form, Button, Table } from "react-bootstrap";
 import {
   areEqualAddresses,
   getNetworkName,
@@ -269,13 +269,34 @@ export default function NextGenMintBurnWidget(props: Readonly<Props>) {
               setErrors([]);
               setIsMinting(false);
             }}>
-            {props.collection.phase && (
-              <Row className="pt-1">
-                <Col>
-                  <h4 className="mb-0">{props.collection.phase}</h4>
-                </Col>
-              </Row>
-            )}
+            <Row>
+              <Col xs={12}>
+                <u>Burn Details</u>
+              </Col>
+              <Col xs={12}>
+                <Table className="mb-0">
+                  <tr>
+                    <td>Contract</td>
+                    <td>{props.collection.burn_collection}</td>
+                  </tr>
+                  {!!props.collection.burn_collection_id && (
+                    <tr>
+                      <td>Collection</td>
+                      <td>{props.collection.burn_collection_id}</td>
+                    </tr>
+                  )}
+                  {props.collection.max_token_index > 0 && (
+                    <tr>
+                      <td>Tokens</td>
+                      <td>
+                        #{props.collection.min_token_index} - #
+                        {props.collection.max_token_index}
+                      </td>
+                    </tr>
+                  )}
+                </Table>
+              </Col>
+            </Row>
             <NextGenAdminMintForModeFormGroup
               title="Burn to Mint For"
               connectedAddress={account.address}
@@ -307,21 +328,8 @@ export default function NextGenMintBurnWidget(props: Readonly<Props>) {
               </Col>
             </Form.Group>
             <Form.Group as={Row} className="pt-1 pb-1">
-              <Form.Label column sm={12} className="d-flex flex-column">
+              <Form.Label column sm={12}>
                 <span>Select token from Burn collection</span>
-                <span>
-                  {props.collection.burn_collection}
-                  {!!props.collection.burn_collection_id && (
-                    <> | Collection {props.collection.burn_collection_id}</>
-                  )}
-                  {props.collection.max_token_index > 0 && (
-                    <>
-                      {" "}
-                      | #{props.collection.min_token_index} - #
-                      {props.collection.max_token_index}
-                    </>
-                  )}
-                </span>
               </Form.Label>
               <Col sm={12}>
                 <Form.Select

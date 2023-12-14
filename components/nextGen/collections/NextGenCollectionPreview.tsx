@@ -33,7 +33,7 @@ export default function NextGenCollectionPreview(props: Readonly<Props>) {
   useCollectionAdditionalHook(props.collection, setAdditionalData);
   useCollectionInfoHook(props.collection, setInfo);
 
-  if (!additionalData || additionalData.total_supply == 0) {
+  if (!additionalData || additionalData.circulation_supply === 0) {
     return <></>;
   }
 

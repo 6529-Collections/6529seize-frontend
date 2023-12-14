@@ -118,6 +118,7 @@ export function NextGenTokenImage(
             width: "auto",
             maxHeight: "100%",
             maxWidth: "100%",
+            padding: "10px",
           }}
           src={cloudfrontUrl}
           onError={({ currentTarget }) => {

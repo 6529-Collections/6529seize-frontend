@@ -32,6 +32,7 @@ import NextGenMintBurnWidget from "./NextGenMintBurnWidget";
 import Image from "next/image";
 import { NextGenCountdown, NextGenPhases } from "../NextGenCollectionHeader";
 import { NextGenTokenImage } from "../../NextGenTokenImage";
+import DotLoader from "../../../../dotLoader/DotLoader";
 
 interface Props {
   collection: number;
@@ -290,6 +291,31 @@ export default function NextGenMint(props: Readonly<Props>) {
     }
   }
 
+  function printMintWidgetContent() {
+    if (collectionLoaded) {
+      if (collection) {
+        return printMintWidget(collection.al_type);
+      }
+      if (props.phase_times.public_status === Status.LIVE) {
+        return printMintWidget(AllowlistType.ALLOWLIST);
+      }
+      return (
+        <span className="d-flex gap-1 align-items-center">
+          <Image
+            loading="eager"
+            width="0"
+            height="0"
+            style={{ height: "50px", width: "auto" }}
+            src="/SummerGlasses.svg"
+            alt="SummerGlasses"
+          />
+          <b>Allowlist Not Found</b>
+        </span>
+      );
+    }
+    return <DotLoader />;
+  }
+
   return (
     <Container className="no-padding">
       <Row className="pt-2">
@@ -338,7 +364,6 @@ export default function NextGenMint(props: Readonly<Props>) {
               collection={props.collection}
               hide_info={true}
               hide_link={true}
-              // hide_background={true}
             />
           )}
           <Container className="no-padding">
@@ -362,25 +387,7 @@ export default function NextGenMint(props: Readonly<Props>) {
               </Col>
             </Row>
             <Row className="pt-3">
-              <Col>
-                {collectionLoaded && collection ? (
-                  printMintWidget(collection.al_type)
-                ) : props.phase_times.public_status === Status.LIVE ? (
-                  printMintWidget(AllowlistType.ALLOWLIST)
-                ) : (
-                  <span className="d-flex gap-1 align-items-center">
-                    <Image
-                      loading="eager"
-                      width="0"
-                      height="0"
-                      style={{ height: "50px", width: "auto" }}
-                      src="/SummerGlasses.svg"
-                      alt="SummerGlasses"
-                    />
-                    <b>Allowlist Not Found</b>
-                  </span>
-                )}
-              </Col>
+              <Col>{printMintWidgetContent()}</Col>
             </Row>
           </Container>
         </Col>

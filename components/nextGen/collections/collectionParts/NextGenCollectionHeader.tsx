@@ -3,6 +3,8 @@ import { Container, Row, Col, Button } from "react-bootstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   AdditionalData,
+  AllowlistType,
+  CollectionWithMerkle,
   Info,
   PhaseTimes,
   Status,
@@ -13,6 +15,8 @@ import { NEXTGEN_CHAIN_ID, NEXTGEN_CORE } from "../../nextgen_contracts";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import DateCountdown from "../../../date-countdown/DateCountdown";
+import { fetchUrl } from "../../../../services/6529api";
+import DotLoader from "../../../dotLoader/DotLoader";
 
 interface Props {
   collection: number;
@@ -36,6 +40,30 @@ interface PhaseProps {
 
 export function NextGenCountdown(props: Readonly<CountdownProps>) {
   const router = useRouter();
+
+  const [collection, setCollection] = useState<CollectionWithMerkle>();
+  const [collectionLoaded, setCollectionLoaded] = useState(false);
+
+  useEffect(() => {
+    const url = `${process.env.API_ENDPOINT}/api/nextgen/${props.phase_times.merkle_root}`;
+    fetchUrl(url).then((response: CollectionWithMerkle) => {
+      if (response) {
+        setCollection(response);
+      }
+      setCollectionLoaded(true);
+    });
+  }, [props.phase_times]);
+
+  function getButtonLabel() {
+    if (collectionLoaded) {
+      if (collection && collection.al_type === AllowlistType.EXTERNAL_BURN) {
+        return "BURN TO MINT";
+      }
+      return "MINT";
+    }
+    return <DotLoader />;
+  }
+
   function printCountdown(title: string, date: number) {
     return (
       <span className={styles.countdownContainer}>
@@ -47,7 +75,7 @@ export function NextGenCountdown(props: Readonly<CountdownProps>) {
         {!router.pathname.includes("mint") && (
           <a href={`/nextgen/collection/${props.collection}/mint`}>
             <Button className="seize-btn btn-block pt-2 pb-2 btn-black font-larger font-bolder">
-              MINT
+              {getButtonLabel()}
             </Button>
           </a>
         )}
