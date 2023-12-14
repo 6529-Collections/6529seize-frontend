@@ -26,9 +26,8 @@ export default function UserPageIdentityActivityLogRate({
 
   return (
     <tr>
-      <td className="tw-py-4 tw-flex tw-items-center tw-justify-between">
-        <div className="tw-inline-flex tw-items-center tw-space-x-2">
-          {/* <svg
+      <td className="tw-py-4 tw-flex tw-items-center">
+        {/* <svg
             className="tw-flex-shrink-0 tw-h-5 tw-w-5 tw-text-iron-100"
             viewBox="0 0 24 24"
             fill="none"
@@ -42,35 +41,34 @@ export default function UserPageIdentityActivityLogRate({
               strokeLinejoin="round"
             />
           </svg> */}
-          <div className="tw-inline-flex tw-space-x-1.5">
-            <span className="tw-whitespace-nowrap tw-text-sm tw-font-semibold tw-text-iron-100">
-              {profile?.profile?.handle}
-            </span>
-            <span className="tw-whitespace-nowrap tw-text-sm tw-text-iron-400 tw-font-semibold">
-              cic-rated
-            </span>
-            <span className="tw-whitespace-nowrap tw-text-sm tw-text-iron-300 tw-font-medium">
-              user
-            </span>
-            <Tippy content={log.target_profile_handle} theme="dark">
-              <span
-                onClick={goToProfile}
-                className="tw-whitespace-nowrap hover:tw-underline tw-cursor-pointer tw-truncate tw-max-w-[12rem] tw-text-sm tw-font-semibold tw-text-iron-100"
-              >
-                {log.target_profile_handle}
-              </span>
-            </Tippy>
+        <span className="tw-space-x-1.5">
+          <span className="tw-whitespace-nowrap tw-text-sm tw-font-semibold tw-text-iron-100">
+            {profile?.profile?.handle}
+          </span>
+          <span className="tw-whitespace-nowrap tw-text-sm tw-text-iron-400 tw-font-semibold">
+            cic-rated
+          </span>
+          <span className="tw-whitespace-nowrap tw-text-sm tw-text-iron-300 tw-font-medium">
+            user
+          </span>
+          <Tippy content={log.target_profile_handle} theme="dark">
             <span
-              className={`${
-                isPositive ? "tw-text-green" : "tw-text-red"
-              } tw-text-sm tw-font-semibold`}
+              onClick={goToProfile}
+              className="tw-whitespace-nowrap hover:tw-underline tw-cursor-pointer tw-truncate tw-max-w-[12rem] tw-text-sm tw-font-semibold tw-text-iron-100"
             >
-              {valueAsString}
+              {log.target_profile_handle}
             </span>
-          </div>
-        </div>
+          </Tippy>
+          <span
+            className={`${
+              isPositive ? "tw-text-green" : "tw-text-red"
+            } tw-text-sm tw-font-semibold`}
+          >
+            {valueAsString}
+          </span>
+        </span>
       </td>
-      <td className="tw-py-4 tw-pl-3">
+      <td className="tw-py-4 tw-pl-3 tw-text-right">
         <UserPageIdentityActivityLogItemTimeAgo log={log} />
       </td>
     </tr>

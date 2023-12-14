@@ -34,8 +34,8 @@ export default function UserPageIdentityActivityLogContact({
 
   return (
     <tr>
-      <td className="tw-py-4 tw-flex tw-items-center tw-justify-between">
-        <div className="tw-inline-flex tw-items-center tw-space-x-2">
+      <td className="tw-py-4 tw-flex tw-items-center">
+     
           {/* <svg
             className="tw-flex-shrink-0 tw-h-5 tw-w-5 tw-text-iron-100"
             aria-hidden="true"
@@ -51,7 +51,7 @@ export default function UserPageIdentityActivityLogContact({
               strokeLinejoin="round"
             />
           </svg> */}
-          <div className="tw-inline-flex tw-space-x-1.5">
+          <div className="tw-mt-1 tw-inline-flex tw-space-x-1.5">
             <span className="tw-whitespace-nowrap tw-text-sm tw-font-semibold tw-text-iron-100">
               {profile?.profile?.handle}
             </span>
@@ -78,9 +78,9 @@ export default function UserPageIdentityActivityLogContact({
               </Tippy>
             </span>
           </div>
-        </div>
+      
       </td>
-      <td className="tw-py-4 tw-pl-3">
+      <td className="tw-py-4 tw-pl-3 tw-text-right">
         <UserPageIdentityActivityLogItemTimeAgo log={log} />
       </td>
     </tr>
