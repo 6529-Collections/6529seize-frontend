@@ -34,7 +34,7 @@ export default function UserPageIdentityActivityLogSocialMedia({
 
   return (
     <tr>
-      <div className="tw-py-4 tw-flex tw-items-center tw-justify-between tw-gap-x-3">
+      <td className="tw-py-4 tw-flex tw-items-center tw-justify-between">
         <div className="tw-inline-flex tw-items-center tw-space-x-2">
           {/* <svg
             className="tw-flex-shrink-0 tw-h-5 tw-w-5 tw-text-iron-100"
@@ -78,8 +78,10 @@ export default function UserPageIdentityActivityLogSocialMedia({
             </span>
           </div>
         </div>
+      </td>
+      <td className="tw-py-4 tw-pl-3">
         <UserPageIdentityActivityLogItemTimeAgo log={log} />
-      </div>
+      </td>
     </tr>
   );
 }

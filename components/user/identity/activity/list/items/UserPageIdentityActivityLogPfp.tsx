@@ -15,7 +15,7 @@ export default function UserPageIdentityActivityLogPfp({
   const isAdded = !log.contents.old_value;
   return (
     <tr>
-      <div className="tw-py-4 tw-flex tw-items-center tw-justify-between tw-gap-x-3">
+      <td className="tw-py-4 tw-flex tw-items-center tw-justify-between">
         <div className="tw-inline-flex tw-items-center tw-space-x-2">
           <div className="tw-inline-flex tw-items-center">
             <div className="tw-inline-flex tw-items-center tw-space-x-1.5 tw-mr-3">
@@ -70,8 +70,10 @@ export default function UserPageIdentityActivityLogPfp({
             </div>
           </div>
         </div>
+      </td>
+      <td className="tw-py-4 tw-pl-3">
         <UserPageIdentityActivityLogItemTimeAgo log={log} />
-      </div>
+      </td>
     </tr>
   );
 }
