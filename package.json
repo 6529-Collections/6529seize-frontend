@@ -16,8 +16,7 @@
     "@reduxjs/toolkit": "^1.9.7",
     "@tailwindcss/forms": "^0.5.7",
     "@tippyjs/react": "^4.2.6",
-    "@web3modal/ethereum": "^2.7.1",
-    "@web3modal/react": "^2.7.1",
+    "@web3modal/wagmi": "^3.5.0",
     "alchemy-sdk": "^3.0.0",
     "bootstrap": "^5.2.3",
     "csv-parser": "^3.0.0",
@@ -38,8 +37,8 @@
     "react-use": "^17.4.0",
     "react-use-downloader": "^1.2.2",
     "sass": "^1.69.5",
-    "viem": "^1.19.5",
-    "wagmi": "^1.4.7"
+    "viem": "^1.19.15",
+    "wagmi": "^1.4.12"
   },
   "devDependencies": {
     "@next/bundle-analyzer": "^13.1.6",

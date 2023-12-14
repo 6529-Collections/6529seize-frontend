@@ -6,13 +6,7 @@ import { Provider } from "react-redux";
 import type { AppProps } from "next/app";
 import { wrapper } from "../store/store";
 import { CW_PROJECT_ID, DELEGATION_CONTRACT } from "../constants";
-import { alchemyProvider } from "wagmi/providers/alchemy";
-
-import {
-  EthereumClient,
-  w3mConnectors,
-  w3mProvider,
-} from "@web3modal/ethereum";
+import { createWeb3Modal, defaultWagmiConfig } from "@web3modal/wagmi/react";
 
 import { Chain, goerli, mainnet, sepolia } from "wagmi/chains";
 import { configureChains, createConfig, WagmiConfig } from "wagmi";
@@ -81,7 +75,6 @@ import {
   faFrown,
 } from "@fortawesome/free-solid-svg-icons";
 import Head from "next/head";
-import { Web3Modal } from "@web3modal/react";
 import Auth from "../components/auth/Auth";
 
 library.add(
@@ -157,17 +150,17 @@ if (DELEGATION_CONTRACT.chain_id === goerli.id) {
 
 DELEGATION_CONTRACT.chain_id === mainnet.id ? [mainnet] : [mainnet, sepolia];
 
-const { publicClient, chains } = configureChains(CONTRACT_CHAINS, [
-  alchemyProvider({ apiKey: process.env.ALCHEMY_API_KEY! }),
-  w3mProvider({ projectId: CW_PROJECT_ID }),
-]);
-
-const wagmiConfig = createConfig({
-  autoConnect: true,
-  connectors: w3mConnectors({ projectId: CW_PROJECT_ID, chains }),
-  publicClient,
+const wagmiConfig = defaultWagmiConfig({
+  chains: CONTRACT_CHAINS,
+  projectId: CW_PROJECT_ID,
 });
-const ethereumClient = new EthereumClient(wagmiConfig, chains);
+
+createWeb3Modal({
+  wagmiConfig,
+  projectId: CW_PROJECT_ID,
+  chains: CONTRACT_CHAINS,
+  themeMode: "dark",
+});
 
 export default function App({ Component, ...rest }: AppProps) {
   const { store, props } = wrapper.useWrappedStore(rest);
@@ -187,21 +180,6 @@ export default function App({ Component, ...rest }: AppProps) {
             <Component {...props} />
           </Auth>
         </WagmiConfig>
-        <Web3Modal
-          defaultChain={mainnet}
-          projectId={CW_PROJECT_ID}
-          ethereumClient={ethereumClient}
-          themeMode={"dark"}
-          themeVariables={{
-            "--w3m-background-color": "#282828",
-            "--w3m-logo-image-url":
-              "https://d3lqz0a4bldqgf.cloudfront.net/seize_images/Seize_Logo_Glasses_3.png",
-            "--w3m-accent-color": "#fff",
-            "--w3m-accent-fill-color": "#000",
-            "--w3m-button-border-radius": "0",
-            "--w3m-font-family": "Arial",
-          }}
-        />
       </Provider>
     </>
   );

@@ -2,14 +2,15 @@ import styles from "./Header.module.scss";
 import { useAccount } from "wagmi";
 import { useContext, useEffect, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { Web3Button } from "@web3modal/react";
 import { AuthContext } from "../auth/Auth";
 import WalletModal from "./walletModal/WalletModal";
-import { NavDropdown } from "react-bootstrap";
+import { Button, NavDropdown } from "react-bootstrap";
 import Cookies from "js-cookie";
 import { VIEW_MODE_COOKIE } from "../../constants";
 import Image from "next/image";
 import { WalletView } from "../../enums";
+import { useWeb3Modal, useWeb3ModalState } from "@web3modal/wagmi/react";
+import DotLoader from "../dotLoader/DotLoader";
 
 interface Props {
   consolidations: string[];
@@ -22,6 +23,9 @@ export default function HeaderConnect(props: Props) {
   const account = useAccount();
   const [showWalletModal, setShowWalletModal] = useState(false);
   const [display, setDisplay] = useState("");
+
+  const web3Modal = useWeb3Modal();
+  const web3ModalState = useWeb3ModalState();
 
   useEffect(() => {
     const viewMode = Cookies.get(VIEW_MODE_COOKIE);
@@ -121,7 +125,11 @@ export default function HeaderConnect(props: Props) {
           )}
         </>
       ) : (
-        <Web3Button label="Connect" icon="hide" avatar="hide" balance="hide" />
+        <Button
+          className={`seize-btn btn-white`}
+          onClick={() => web3Modal.open()}>
+          <b>{web3ModalState.open ? `Connecting...` : `Connect`}</b>
+        </Button>
       )}
       {account.address && (
         <WalletModal
