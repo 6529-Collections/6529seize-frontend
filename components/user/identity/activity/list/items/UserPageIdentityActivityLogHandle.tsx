@@ -17,18 +17,18 @@ export default function UserPageIdentityActivityLogHandle({
       <div className="tw-flex tw-items-center tw-justify-between tw-gap-x-3">
         <div className="tw-inline-flex tw-items-center tw-space-x-2">
           <div className="tw-inline-flex tw-space-x-1.5">
-            <span className="tw-truncate tw-max-w-[12rem] tw-text-sm tw-font-semibold tw-text-iron-100">
+            <span className="tw-whitespace-nowrap tw-text-sm tw-font-semibold tw-text-iron-100">
               {profile?.profile?.handle}
             </span>
-            <span className="tw-text-sm tw-text-iron-400 tw-font-semibold">
+            <span className="tw-whitespace-nowrap tw-text-sm tw-text-iron-400 tw-font-semibold">
               {isAdded ? "created" : "changed"}
             </span>
-            <span className="tw-text-sm tw-text-iron-300 tw-font-medium">
+            <span className="tw-whitespace-nowrap tw-text-sm tw-text-iron-300 tw-font-medium">
               handle
             </span>
             {!isAdded && (
               <>
-                <span className="tw-text-sm tw-font-semibold tw-text-neutral-100">
+                <span className="tw-whitespace-nowrap tw-text-sm tw-font-semibold tw-text-neutral-100">
                   {log.contents.old_value}
                 </span>
                 <svg

@@ -19,13 +19,13 @@ export default function UserPageIdentityActivityLogPfp({
         <div className="tw-inline-flex tw-items-center tw-space-x-2">
           <div className="tw-inline-flex tw-items-center">
             <div className="tw-inline-flex tw-items-center tw-space-x-1.5 tw-mr-3">
-              <span className="tw-truncate tw-max-w-[12rem] tw-text-sm tw-font-semibold tw-text-neutral-100">
+              <span className="tw-whitespace-nowrap tw-text-sm tw-font-semibold tw-text-neutral-100">
                 {profile?.profile?.handle}
               </span>
-              <span className="tw-text-sm tw-text-neutral-400 tw-font-semibold">
+              <span className="tw-whitespace-nowrap tw-text-sm tw-text-neutral-400 tw-font-semibold">
                 {isAdded ? "added" : "changed"}
               </span>
-              <span className="tw-text-sm tw-text-neutral-400 tw-font-medium">
+              <span className="tw-whitespace-nowrap tw-text-sm tw-text-neutral-400 tw-font-medium">
                 profile picture
               </span>
             </div>

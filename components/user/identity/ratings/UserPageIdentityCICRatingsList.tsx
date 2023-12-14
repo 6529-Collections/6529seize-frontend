@@ -9,7 +9,7 @@ export default function UserPageIdentityCICRatingsList({
   return (
     <ul
       role="list"
-      className="tw-px-8 tw-list-none tw-divide-y tw-divide-white/5 tw-divide-solid tw-divide-x-0"
+      className="tw-px-8 tw-list-none tw-divide-y tw-divide-white/10 tw-divide-solid tw-divide-x-0"
     >
       {ratings.map((rating) => (
         <UserPageIdentityCICRatingsItem

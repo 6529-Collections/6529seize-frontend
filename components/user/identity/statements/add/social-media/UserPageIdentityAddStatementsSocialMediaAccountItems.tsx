@@ -45,7 +45,7 @@ export default function UserPageIdentityAddStatementsSocialMediaAccountItems({
           />
         ))}
       </span>
-      <span className="tw-mt-2 tw-isolate tw-inline-flex tw-rounded-md tw-shadow-sm tw-w-full">
+      <span className="tw-mt-3 md:tw-mt-2 tw-isolate tw-inline-flex tw-rounded-md tw-shadow-sm tw-w-full">
         {secondRow.map((type, i) => (
           <UserPageIdentityAddStatementsTypeButton
             key={type}

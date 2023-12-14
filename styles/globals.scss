@@ -63,7 +63,7 @@ a:hover {
   button,
   textarea,
   select,
-  input,
+  input:not(.tailwind-scope input),
   button:not(.tailwind-scope button),
   video,
   select {

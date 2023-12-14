@@ -18,19 +18,19 @@ export default function UserPageIdentityActivityLogBanner1({
       <div className="tw-flex tw-items-center tw-justify-between tw-gap-x-3">
         <div className="tw-inline-flex tw-items-center tw-space-x-2">
           <div className="tw-inline-flex tw-items-center tw-space-x-1.5">
-            <span className="tw-truncate tw-max-w-[12rem] tw-text-sm tw-font-semibold tw-text-neutral-100">
+            <span className="tw-whitespace-nowrap tw-text-sm tw-font-semibold tw-text-neutral-100">
               {profile?.profile?.handle}
             </span>
-            <span className="tw-text-sm tw-text-neutral-400 tw-font-semibold">
+            <span className="tw-whitespace-nowrap tw-text-sm tw-text-neutral-400 tw-font-semibold">
               {isAdded ? "added" : "changed"}
             </span>
-            <span className="tw-text-sm tw-text-neutral-400 tw-font-medium">
+            <span className="tw-whitespace-nowrap tw-text-sm tw-text-neutral-400 tw-font-medium">
               Banner 1
             </span>
             {!isAdded && (
               <>
                 <span
-                  className="tw-text-sm tw-font-semibold tw-h-4 tw-w-4 tw-rounded-sm"
+                  className="tw-whitespace-nowrap tw-text-sm tw-font-semibold tw-h-4 tw-w-4 tw-rounded-sm"
                   style={{ backgroundColor: log.contents.old_value }}
                 ></span>
                 <svg
@@ -51,7 +51,7 @@ export default function UserPageIdentityActivityLogBanner1({
             )}
 
             <span
-              className="tw-text-sm tw-font-semibold tw-h-4 tw-w-4 tw-rounded-sm"
+              className="tw-whitespace-nowrap tw-text-sm tw-font-semibold tw-h-4 tw-w-4 tw-rounded-sm"
               style={{ backgroundColor: log.contents.new_value }}
             ></span>
           </div>

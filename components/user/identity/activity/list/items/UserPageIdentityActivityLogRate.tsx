@@ -43,13 +43,13 @@ export default function UserPageIdentityActivityLogRate({
             />
           </svg> */}
           <div className="tw-inline-flex tw-space-x-1.5">
-            <span className="tw-whitespace-nowrap tw-truncate tw-max-w-[12rem] tw-text-sm tw-font-semibold tw-text-iron-100">
+            <span className="tw-whitespace-nowrap tw-text-sm tw-font-semibold tw-text-iron-100">
               {profile?.profile?.handle}
             </span>
-            <span className="tw-text-sm tw-text-iron-400 tw-font-semibold">
+            <span className="tw-whitespace-nowrap tw-text-sm tw-text-iron-400 tw-font-semibold">
               cic-rated
             </span>
-            <span className="tw-text-sm tw-text-iron-300 tw-font-medium">
+            <span className="tw-whitespace-nowrap tw-text-sm tw-text-iron-300 tw-font-medium">
               user
             </span>
             <Tippy content={log.target_profile_handle} theme="dark">

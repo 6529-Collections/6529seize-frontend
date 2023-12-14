@@ -5,7 +5,7 @@ export default function UserPageIdentityAddStatementsContactHeader({
 }) {
   return (
     <div className="tw-flex tw-justify-between">
-      <div className="tw-max-w-xl tw-flex tw-items-center tw-space-x-4">
+      <div className="tw-max-w-xl sm:tw-flex tw-items-center sm:tw-space-x-4">
         <div>
           <span className="tw-inline-flex tw-items-center tw-justify-center tw-rounded-xl tw-h-11 tw-w-11 tw-bg-iron-700/60 tw-border tw-border-solid tw-border-iron-600/20">
             <svg
@@ -25,11 +25,11 @@ export default function UserPageIdentityAddStatementsContactHeader({
             </svg>
           </span>
         </div>
-        <p className="tw-max-w-sm tw-text-lg tw-text-iron-50 tw-font-medium tw-mb-0">
+        <p className="tw-mt-3 sm:tw-mt-0 tw-whitespace-wrap md:tw-max-w-sm tw-text-lg tw-text-iron-50 tw-font-medium tw-mb-0">
           Add Contact
         </p>
       </div>
-      <div className="tw-absolute tw-right-4 tw-top-6 tw-flex tw-justify-between tw-items-center">
+      <div className="tw-absolute tw-right-4 tw-top-4 sm:tw-top-6 tw-flex tw-justify-between tw-items-center">
         <button
           onClick={onClose}
           type="button"

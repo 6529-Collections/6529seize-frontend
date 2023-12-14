@@ -52,13 +52,13 @@ export default function UserPageIdentityActivityLogContact({
             />
           </svg> */}
           <div className="tw-inline-flex tw-space-x-1.5">
-            <span className="tw-truncate tw-max-w-[12rem] tw-text-sm tw-font-semibold tw-text-iron-100">
+            <span className="tw-whitespace-nowrap tw-text-sm tw-font-semibold tw-text-iron-100">
               {profile?.profile?.handle}
             </span>
-            <span className="tw-text-sm tw-text-iron-400 tw-font-semibold">
+            <span className="tw-whitespace-nowrap tw-text-sm tw-text-iron-400 tw-font-semibold">
               {PROFILE_ACTIVITY_LOG_ACTION_STR[log.contents.action]}
             </span>
-            <span className="tw-text-sm tw-text-iron-300 tw-font-medium">
+            <span className="tw-whitespace-nowrap tw-text-sm tw-text-iron-300 tw-font-medium">
               contact
             </span>
             <div className="tw-flex tw-items-center tw-flex-shrink-0 tw-h-5 tw-w-5 tw-text-iron-100">
@@ -71,7 +71,7 @@ export default function UserPageIdentityActivityLogContact({
               <Tippy content="Copy" theme="dark" placement="top">
                 <button
                   onClick={handleCopy}
-                  className="tw-hidden group-hover:tw-block tw-mx-1 tw-h-4 tw-w-4 tw-bg-transparent tw-cursor-pointer tw-text-sm tw-font-semibold tw-text-white tw-border-0 focus:tw-outline-none tw-transition tw-duration-300 tw-ease-out"
+                  className="tw-hidden group-hover:tw-block tw-mx-1 tw-h-5 tw-w-5 tw-bg-transparent tw-cursor-pointer tw-text-sm tw-font-semibold tw-text-white tw-border-0 focus:tw-outline-none tw-transition tw-duration-300 tw-ease-out"
                 >
                   <CopyIcon />
                 </button>

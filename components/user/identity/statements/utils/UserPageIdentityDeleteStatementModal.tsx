@@ -65,7 +65,7 @@ export default function UserPageIdentityDeleteStatementModal({
             className="sm:tw-max-w-xl tw-relative tw-w-full tw-transform tw-rounded-xl tw-bg-iron-900 tw-text-left tw-shadow-xl tw-transition-all tw-duration-500 sm:tw-w-full tw-p-6"
           >
             <div className="tw-flex tw-justify-between">
-              <div className="tw-max-w-xl tw-flex tw-space-x-4">
+              <div className="tw-max-w-xl sm:tw-flex sm:tw-space-x-4">
                 <div>
                   <span className="tw-inline-flex tw-items-center tw-justify-center tw-rounded-xl tw-h-11 tw-w-11 tw-bg-red/10 tw-border tw-border-solid tw-border-red/10">
                     <svg
@@ -84,7 +84,7 @@ export default function UserPageIdentityDeleteStatementModal({
                     </svg>
                   </span>
                 </div>
-                <div className="tw-max-w-sm tw-flex tw-flex-col">
+                <div className="tw-mt-3 sm:tw-mt-0 sm:tw-max-w-sm tw-flex tw-flex-col">
                   <p className=" tw-text-lg tw-text-iron-50 tw-font-medium tw-mb-0">
                     Delete Statement
                   </p>

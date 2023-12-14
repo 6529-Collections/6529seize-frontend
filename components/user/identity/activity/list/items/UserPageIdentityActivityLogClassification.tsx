@@ -19,18 +19,18 @@ export default function UserPageIdentityActivityLogClassification({
       <div className="tw-flex tw-items-center tw-justify-between tw-gap-x-3">
         <div className="tw-inline-flex tw-items-center tw-space-x-2">
           <div className="tw-inline-flex tw-space-x-1.5">
-            <span className="tw-truncate tw-max-w-[12rem] tw-text-sm tw-font-semibold tw-text-neutral-100">
+            <span className="tw-whitespace-nowrap tw-text-sm tw-font-semibold tw-text-neutral-100">
               {profile?.profile?.handle}
             </span>
-            <span className="tw-text-sm tw-text-neutral-400 tw-font-semibold">
+            <span className="tw-whitespace-nowrap tw-text-sm tw-text-neutral-400 tw-font-semibold">
               {isAdded ? "added" : "changed"}
             </span>
-            <span className="tw-text-sm tw-text-neutral-400 tw-font-medium">
+            <span className="tw-whitespace-nowrap tw-text-sm tw-text-neutral-400 tw-font-medium">
               classification
             </span>
             {!isAdded && (
               <>
-                <span className="tw-text-sm tw-font-semibold tw-text-neutral-100">
+                <span className="tw-whitespace-nowrap tw-text-sm tw-font-semibold tw-text-neutral-100">
                   {log.contents.old_value &&
                     CLASSIFICATIONS[log.contents.old_value].title}
                 </span>
@@ -51,7 +51,7 @@ export default function UserPageIdentityActivityLogClassification({
               </>
             )}
 
-            <span className="tw-text-sm tw-font-semibold tw-text-neutral-100">
+            <span className="tw-whitespace-nowrap tw-text-sm tw-font-semibold tw-text-neutral-100">
               {CLASSIFICATIONS[log.contents.new_value].title}
             </span>
           </div>

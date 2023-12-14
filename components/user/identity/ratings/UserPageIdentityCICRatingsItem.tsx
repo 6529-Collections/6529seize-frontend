@@ -54,25 +54,25 @@ export default function UserPageIdentityCICRatingsItem({
               {rating.rater_level}
             </div>
             <span
-              className={`tw-absolute -tw-right-1 -tw-top-1 tw-block tw-h-2.5 tw-w-2.5 tw-rounded-full ${CIC_COLOR[cicType]}`}
+              className={`tw-flex-shrink-0 tw-absolute -tw-right-1 -tw-top-1 tw-block tw-h-2.5 tw-w-2.5 tw-rounded-full ${CIC_COLOR[cicType]}`}
             ></span>
           </span>
           <div className="tw-inline-flex tw-space-x-1 5">
             <span
               onClick={goToProfile}
-              className="hover:tw-underline tw-cursor-pointer tw-text-sm tw-font-semibold tw-text-iron-100"
+              className="tw-whitespace-nowrap hover:tw-underline tw-cursor-pointer tw-text-sm tw-font-semibold tw-text-iron-100"
             >
               {rating.rater_handle}
             </span>
-            <span className="tw-text-sm tw-text-iron-400 tw-font-semibold">
+            <span className="tw-whitespace-nowrap tw-text-sm tw-text-iron-400 tw-font-semibold">
               rated
             </span>
-            <span className={`tw-text-sm tw-font-semibold ${ratingColor}`}>
+            <span className={`tw-whitespace-nowrap tw-text-sm tw-font-semibold ${ratingColor}`}>
               {ratingStr}
             </span>
           </div>
         </div>
-        <span className="tw-flex-none tw-text-[0.8125rem] tw-leading-5 tw-text-iron-500">
+        <span className="tw-whitespace-nowrap tw-flex-none tw-text-[0.8125rem] tw-leading-5 tw-text-iron-500">
           {timeAgo}
         </span>
       </div>

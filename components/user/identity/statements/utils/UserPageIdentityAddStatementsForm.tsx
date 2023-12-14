@@ -35,7 +35,9 @@ export default function UserPageIdentityAddStatementsForm({
 }) {
   const queryClient = useQueryClient();
   const { requestAuth, setToast } = useContext(AuthContext);
-  const { invalidateProfileLogs, invalidateProfileCICStatements } = useContext(ReactQueryWrapperContext);
+  const { invalidateProfileLogs, invalidateProfileCICStatements } = useContext(
+    ReactQueryWrapperContext
+  );
   const [value, setValue] = useState<string>(
     STATEMENT_INPUT_INITIAL_VALUE[activeType] || ""
   );
@@ -65,7 +67,6 @@ export default function UserPageIdentityAddStatementsForm({
         profile,
         keys: {},
       });
-
     },
     onError: (error) => {
       setToast({
@@ -94,19 +95,19 @@ export default function UserPageIdentityAddStatementsForm({
         />
 
         <div className="tw-mt-8">
-          <div className="tw-flex tw-items-center tw-justify-end tw-gap-x-3">
+          <div className="sm:tw-flex sm:tw-flex-row-reverse tw-gap-x-3">
+            <button
+              type="submit"
+              className="tw-w-full sm:tw-w-auto tw-cursor-pointer tw-bg-primary-500 tw-px-4 tw-py-3 tw-text-sm tw-font-medium tw-text-white tw-border tw-border-solid tw-border-primary-500 tw-rounded-lg hover:tw-bg-primary-600 hover:tw-border-primary-600 tw-transition tw-duration-300 tw-ease-out"
+            >
+              Save
+            </button>
             <button
               onClick={onClose}
               type="button"
-              className="tw-cursor-pointer tw-bg-iron-900 tw-px-4 tw-py-3 tw-text-sm tw-font-medium tw-text-white tw-border tw-border-solid tw-border-iron-600 tw-rounded-lg hover:tw-bg-iron-800 hover:tw-border-iron-700 tw-transition tw-duration-300 tw-ease-out"
+              className="tw-mt-3 sm:tw-mt-0 tw-w-full sm:tw-w-auto tw-cursor-pointer tw-bg-iron-900 tw-px-4 tw-py-3 tw-text-sm tw-font-medium tw-text-white tw-border tw-border-solid tw-border-iron-600 tw-rounded-lg hover:tw-bg-iron-800 hover:tw-border-iron-700 tw-transition tw-duration-300 tw-ease-out"
             >
               Cancel
-            </button>
-            <button
-              type="submit"
-              className="tw-cursor-pointer tw-bg-primary-500 tw-px-4 tw-py-3 tw-text-sm tw-font-medium tw-text-white tw-border tw-border-solid tw-border-primary-500 tw-rounded-lg hover:tw-bg-primary-600 hover:tw-border-primary-600 tw-transition tw-duration-300 tw-ease-out"
-            >
-              Save
             </button>
           </div>
         </div>
