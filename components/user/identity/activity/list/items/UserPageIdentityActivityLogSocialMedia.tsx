@@ -33,7 +33,7 @@ export default function UserPageIdentityActivityLogSocialMedia({
   };
 
   return (
-    <tr >
+    <tr>
       <div className="tw-py-4 tw-flex tw-items-center tw-justify-between tw-gap-x-3">
         <div className="tw-inline-flex tw-items-center tw-space-x-2">
           {/* <svg
