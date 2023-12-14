@@ -34,7 +34,9 @@ export default function UserPageHeaderName({
   return (
     <div className="tw-mt-4">
       <div className="tw-flex tw-items-center">
-        <p className="tw-mb-0 tw-text-3xl tw-font-semibold">{displayName}</p>
+        <p className="tw-break-words tw-mb-0 tw-text-3xl tw-font-semibold">
+          {displayName}
+        </p>
         {profile.profile?.handle && (
           <div className="tw-ml-2 tw-flex tw-items-center tw-justify-center tw-self-center tw-h-6 tw-w-6">
             <UserCICTypeIcon profile={profile} />
