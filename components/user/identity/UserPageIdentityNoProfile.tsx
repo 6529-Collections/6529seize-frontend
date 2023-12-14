@@ -78,7 +78,7 @@ export default function UserPageIdentityNoProfile({
         <div className="tw-ml-3 tw-self-center">
           <h3 className="tw-text-sm tw-mb-0 tw-font-semibold tw-text-iron-400">
             Address
-            <span className="tw-px-1.5 tw-font-semibold tw-text-iron-100">
+            <span className="tw-break-all tw-px-1.5 tw-font-semibold tw-text-iron-100">
               {user}
             </span>
             have not set up profile yet.
