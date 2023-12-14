@@ -175,7 +175,7 @@ export default function UserSettingsPage({
               setBgColor1={setBgColor1}
               setBgColor2={setBgColor2}
             />
-            <UserSettingsWebsite website={website} setWebsite={setWebsite} />
+            {/* <UserSettingsWebsite website={website} setWebsite={setWebsite} /> */}
             <UserSettingsSave loading={saving} disabled={!haveChanges} />
           </form>
         </div>
