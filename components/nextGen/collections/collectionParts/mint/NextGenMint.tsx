@@ -237,7 +237,11 @@ export default function NextGenMint(props: Readonly<Props>) {
       case 1:
         return "Fixed Price";
       case 2:
-        return "Exponential/Linear decrease";
+        if (mintingDetails.rate === 0) {
+          return "Exponential decrease";
+        } else {
+          return "Linear decrease";
+        }
       case 3:
         return "Periodic Sale";
       default:
@@ -296,9 +300,6 @@ export default function NextGenMint(props: Readonly<Props>) {
       if (collection) {
         return printMintWidget(collection.al_type);
       }
-      if (props.phase_times.public_status === Status.LIVE) {
-        return printMintWidget(AllowlistType.ALLOWLIST);
-      }
       return (
         <span className="d-flex gap-1 align-items-center">
           <Image
@@ -312,6 +313,9 @@ export default function NextGenMint(props: Readonly<Props>) {
           <b>Allowlist Not Found</b>
         </span>
       );
+    }
+    if (props.phase_times.public_status === Status.LIVE) {
+      return printMintWidget(AllowlistType.ALLOWLIST);
     }
     return <DotLoader />;
   }
