@@ -103,19 +103,21 @@ export default function UserPageIdentityActivityLog({
           />
         )}
         {logs?.data.length ? (
-          <>
-            <UserPageIdentityActivityLogList
-              logs={logs.data}
-              profile={profile}
-            />
-            {totalPages > 1 && (
-              <UserPageIdentityPagination
-                currentPage={currentPage}
-                setCurrentPage={setCurrentPage}
-                totalPages={totalPages}
+          <div className="tw-flow-root">
+            <div className="tw-overflow-x-auto">
+              <UserPageIdentityActivityLogList
+                logs={logs.data}
+                profile={profile}
               />
-            )}
-          </>
+              {totalPages > 1 && (
+                <UserPageIdentityPagination
+                  currentPage={currentPage}
+                  setCurrentPage={setCurrentPage}
+                  totalPages={totalPages}
+                />
+              )}
+            </div>
+          </div>
         ) : (
           <div className="tw-mt-4">
             <span className="tw-px-8 tw-text-sm tw-italic tw-text-iron-500">

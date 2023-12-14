@@ -12,8 +12,8 @@ export default function UserPageIdentityActivityLogList({
   profile: IProfileAndConsolidations;
 }) {
   return (
-    <div className="tw-flow-root">
-      <div className="tw-overflow-x-auto">
+  
+
         <div className="tw-inline-block tw-min-w-full tw-py-2 tw-align-middle tw-px-6 md:tw-px-8">
           <table className="tw-min-w-full">
             <tbody className="tw-divide-y tw-divide-white/10 tw-divide-solid tw-divide-x-0">
@@ -27,7 +27,7 @@ export default function UserPageIdentityActivityLogList({
             </tbody>
           </table>
         </div>
-      </div>
-    </div>
+
+
   );
 }
