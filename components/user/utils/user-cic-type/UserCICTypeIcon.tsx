@@ -34,7 +34,7 @@ export default function UserCICTypeIcon({
 
   return (
     <Tippy
-      placement={"top-end"}
+      placement={"auto"}
       interactive={true}
       content={<UserCICTypeIconTooltip profile={profile} />}
     >
