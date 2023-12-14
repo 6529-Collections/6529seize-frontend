@@ -89,8 +89,7 @@ export default function UserPageIdentityDeleteStatementModal({
                     Delete Statement
                   </p>
                   <p className="tw-mt-1 tw-mb-0 tw-text-sm tw-text-iron-400">
-                    Are you sure you want to delete this statement? This action
-                    cannot be undone.
+                    Are you sure you want to delete this statement?
                   </p>
                 </div>
               </div>

@@ -53,7 +53,7 @@ export default function UserPageHeader({
 
   return (
     <div className={`tailwind-scope ${inter.className}`}>
-      <section className="md:tw-pb-10">
+      <section className="tw-pb-6 md:tw-pb-8">
         <div
           className="tw-h-36"
           style={{

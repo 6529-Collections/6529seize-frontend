@@ -60,7 +60,7 @@ a:hover {
 
 @media only screen and (max-width: 800px) {
   body,
-  button,
+  button:not(.tailwind-scope button),
   textarea,
   select,
   input:not(.tailwind-scope input),
