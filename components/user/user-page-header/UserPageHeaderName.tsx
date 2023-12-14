@@ -34,7 +34,7 @@ export default function UserPageHeaderName({
   return (
     <div className="tw-mt-4">
       <div className="tw-flex tw-items-center">
-        <p className="tw-break-words tw-mb-0 tw-text-3xl tw-font-semibold">
+        <p className="tw-break-all tw-mb-0 tw-text-2xl sm:tw-text-3xl tw-font-semibold">
           {displayName}
         </p>
         {profile.profile?.handle && (
