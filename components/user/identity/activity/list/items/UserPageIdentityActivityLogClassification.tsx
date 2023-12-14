@@ -15,8 +15,8 @@ export default function UserPageIdentityActivityLogClassification({
 }) {
   const isAdded = !log.contents.old_value;
   return (
-    <li className="tw-py-4">
-      <div className="tw-flex tw-items-center tw-justify-between tw-gap-x-3">
+    <tr >
+      <div className="tw-py-4 tw-flex tw-items-center tw-justify-between tw-gap-x-3">
         <div className="tw-inline-flex tw-items-center tw-space-x-2">
           <div className="tw-inline-flex tw-space-x-1.5">
             <span className="tw-whitespace-nowrap tw-text-sm tw-font-semibold tw-text-neutral-100">
@@ -58,6 +58,6 @@ export default function UserPageIdentityActivityLogClassification({
         </div>
         <UserPageIdentityActivityLogItemTimeAgo log={log} />
       </div>
-    </li>
+    </tr>
   );
 }
