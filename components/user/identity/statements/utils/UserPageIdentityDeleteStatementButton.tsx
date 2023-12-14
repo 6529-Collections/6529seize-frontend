@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   CicStatement,
   IProfileAndConsolidations,
@@ -7,6 +7,7 @@ import CommonAnimationWrapper from "../../../../utils/animation/CommonAnimationW
 import CommonAnimationOpacity from "../../../../utils/animation/CommonAnimationOpacity";
 import UserPageIdentityDeleteStatementModal from "./UserPageIdentityDeleteStatementModal";
 import Tippy from "@tippyjs/react";
+import { useRouter } from "next/router";
 
 export default function UserPageIdentityDeleteStatementButton({
   statement,
@@ -15,16 +16,27 @@ export default function UserPageIdentityDeleteStatementButton({
   statement: CicStatement;
   profile: IProfileAndConsolidations;
 }) {
+  const router = useRouter();
   const [isDeleteStatementOpen, setIsDeleteStatementOpen] =
     useState<boolean>(false);
-
+  const [isTouchScreen, setIsTouchScreen] = useState(false);
+  useEffect(() => {
+    setIsTouchScreen(window.matchMedia("(pointer: coarse)").matches);
+  }, [router.isReady]);
   return (
-    <Tippy content="Delete" theme="dark" placement="top">
+    <Tippy
+      content="Delete"
+      theme="dark"
+      placement="top"
+      disabled={isTouchScreen}
+    >
       <div>
         <button
           onClick={() => setIsDeleteStatementOpen(true)}
           type="button"
-          className="tw-hidden group-hover:tw-block tw-bg-transparent tw-cursor-pointer tw-text-sm tw-font-semibold tw-text-white tw-border-0 focus:tw-outline-none tw-transition tw-duration-300 tw-ease-out"
+          className={`${
+            isTouchScreen ? "tw-block" : "tw-hidden group-hover:tw-block"
+          } tw-bg-transparent tw-cursor-pointer tw-text-sm tw-font-semibold tw-text-white tw-border-0 focus:tw-outline-none tw-transition tw-duration-300 tw-ease-out`}
         >
           <svg
             className="tw-flex-shrink-0 tw-w-6 tw-h-6 tw-text-red tw-transition tw-duration-300 tw-ease-out hover:tw-scale-110"

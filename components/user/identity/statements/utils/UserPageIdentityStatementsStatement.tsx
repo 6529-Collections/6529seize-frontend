@@ -10,6 +10,7 @@ import { useCopyToClipboard } from "react-use";
 import Tippy from "@tippyjs/react";
 import OutsideLinkIcon from "../../../../utils/icons/OutsideLinkIcon";
 import { CAN_OPEN_STATEMENT } from "../../../../../helpers/Types";
+import { useRouter } from "next/router";
 
 export default function UserPageIdentityStatementsStatement({
   statement,
@@ -20,6 +21,7 @@ export default function UserPageIdentityStatementsStatement({
   profile: IProfileAndConsolidations;
   isMyProfile: boolean;
 }) {
+  const router = useRouter();
   const [title, setTitle] = useState(statement.statement_value);
   const [_, copyToClipboard] = useCopyToClipboard();
 
@@ -36,6 +38,10 @@ export default function UserPageIdentityStatementsStatement({
   };
 
   const canOpen = CAN_OPEN_STATEMENT[statement.statement_type];
+  const [isTouchScreen, setIsTouchScreen] = useState(false);
+  useEffect(() => {
+    setIsTouchScreen(window.matchMedia("(pointer: coarse)").matches);
+  }, [router.isReady]);
 
   return (
     <li
@@ -52,18 +58,32 @@ export default function UserPageIdentityStatementsStatement({
         </div>
       </div>
       {canOpen && (
-        <Tippy content="Open" theme="dark" placement="top">
+        <Tippy
+          content="Open"
+          theme="dark"
+          placement="top"
+          disabled={isTouchScreen}
+        >
           <button
-            className="tw-p-2 tw-hidden group-hover:tw-block tw-bg-transparent tw-cursor-pointer tw-text-sm tw-font-semibold tw-text-white tw-border-0 focus:tw-outline-none tw-transition tw-duration-300 tw-ease-out"
+            className={`${
+              isTouchScreen ? "tw-block" : "tw-hidden group-hover:tw-block"
+            } tw-p-2  tw-bg-transparent tw-cursor-pointer tw-text-sm tw-font-semibold tw-text-white tw-border-0 focus:tw-outline-none tw-transition tw-duration-300 tw-ease-out`}
             onClick={handleOpen}
           >
             <OutsideLinkIcon />
           </button>
         </Tippy>
       )}
-      <Tippy content="Copy" theme="dark" placement="top">
+      <Tippy
+        content="Copy"
+        theme="dark"
+        placement="top"
+        disabled={isTouchScreen}
+      >
         <button
-          className="tw-p-2 tw-hidden group-hover:tw-block tw-bg-transparent tw-cursor-pointer tw-text-sm tw-font-semibold tw-text-white tw-border-0 focus:tw-outline-none tw-transition tw-duration-300 tw-ease-out"
+          className={`${
+            isTouchScreen ? "tw-block" : "tw-hidden group-hover:tw-block"
+          } tw-p-2 tw-bg-transparent tw-cursor-pointer tw-text-sm tw-font-semibold tw-text-white tw-border-0 focus:tw-outline-none tw-transition tw-duration-300 tw-ease-out`}
           onClick={handleCopy}
         >
           <CopyIcon />

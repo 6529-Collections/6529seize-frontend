@@ -3,8 +3,9 @@ import { IProfileConsolidation } from "../../../../../entities/IProfile";
 import EtherscanIcon from "../../../utils/icons/EtherscanIcon";
 import OpenseaIcon from "../../../utils/icons/OpenseaIcon";
 import CopyIcon from "../../../../utils/icons/CopyIcon";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useCopyToClipboard } from "react-use";
+import { useRouter } from "next/router";
 
 export default function UserPageIdentityStatementsConsolidatedAddressesItem({
   address,
@@ -13,6 +14,7 @@ export default function UserPageIdentityStatementsConsolidatedAddressesItem({
   address: IProfileConsolidation;
   primaryAddress: string;
 }) {
+  const router = useRouter();
   const goToOpensea = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
     e.stopPropagation();
     window.open(
@@ -40,10 +42,20 @@ export default function UserPageIdentityStatementsConsolidatedAddressesItem({
       setTitle(address.wallet.address.slice(0, 6));
     }, 1000);
   };
+  const [isTouchScreen, setIsTouchScreen] = useState(false);
+  useEffect(() => {
+    setIsTouchScreen(window.matchMedia("(pointer: coarse)").matches);
+  }, [router.isReady]);
+
 
   return (
     <li className="tw-group tw-flex tw-items-center tw-group  tw-text-sm tw-font-medium tw-text-neutral-50 hover:tw-text-neutral-300 tw-transition tw-duration-300 tw-ease-out tw-space-x-3">
-      <Tippy content="Opensea" theme="dark" placement="top">
+      <Tippy
+        content="Opensea"
+        theme="dark"
+        placement="top"
+        disabled={isTouchScreen}
+      >
         <div
           onClick={goToOpensea}
           className="tw-cursor-pointer tw-flex-shrink-0 tw-h-6 tw-w-6 hover:tw-scale-110 tw-transition tw-duration-300 tw-ease-out"
@@ -51,7 +63,12 @@ export default function UserPageIdentityStatementsConsolidatedAddressesItem({
           <OpenseaIcon />
         </div>
       </Tippy>
-      <Tippy content="Etherscan" theme="dark" placement="top">
+      <Tippy
+        content="Etherscan"
+        theme="dark"
+        placement="top"
+        disabled={isTouchScreen}
+      >
         <div
           onClick={goToEtherscan}
           className="tw-cursor-pointer tw-flex-shrink-0 tw-h-6 tw-w-6  hover:tw-scale-110 tw-transition tw-duration-300 tw-ease-out"
@@ -82,9 +99,16 @@ export default function UserPageIdentityStatementsConsolidatedAddressesItem({
               Primary
             </span>
           )}
-          <Tippy content="Copy" theme="dark" placement="top">
+          <Tippy
+            content="Copy"
+            theme="dark"
+            placement="top"
+            disabled={isTouchScreen}
+          >
             <button
-              className="tw-hidden group-hover:tw-block tw-ml-4 tw-bg-transparent tw-cursor-pointer tw-text-sm tw-font-semibold tw-text-white tw-border-0 focus:tw-outline-none tw-transition tw-duration-300 tw-ease-out"
+              className={`${
+                isTouchScreen ? "tw-block" : "tw-hidden group-hover:tw-block"
+              } tw-ml-4 tw-bg-transparent tw-cursor-pointer tw-text-sm tw-font-semibold tw-text-white tw-border-0 focus:tw-outline-none tw-transition tw-duration-300 tw-ease-out`}
               onClick={handleCopy}
             >
               <CopyIcon />
