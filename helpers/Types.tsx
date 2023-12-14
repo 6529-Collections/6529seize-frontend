@@ -100,12 +100,12 @@ export const STATEMENT_INPUT_PLACEHOLDER: Record<STATEMENT_TYPE, string> = {
 };
 
 export const STATEMENT_INPUT_INITIAL_VALUE: Record<STATEMENT_TYPE, string> = {
-  [STATEMENT_TYPE.X]: "https://x.com/",
+  [STATEMENT_TYPE.X]: "https://www.x.com/",
   [STATEMENT_TYPE.FACEBOOK]: "https://www.facebook.com/",
   [STATEMENT_TYPE.LINKED_IN]: "https://www.linkedin.com/in/",
   [STATEMENT_TYPE.INSTAGRAM]: "https://www.instagram.com/",
   [STATEMENT_TYPE.TIK_TOK]: "https://www.tiktok.com/@",
-  [STATEMENT_TYPE.GITHUB]: "https://github.com/",
+  [STATEMENT_TYPE.GITHUB]: "https://www.github.com/",
   [STATEMENT_TYPE.REDDIT]: "https://www.reddit.com/u/",
   [STATEMENT_TYPE.WEIBO]: "https://www.weibo.com/",
   [STATEMENT_TYPE.SUBSTACK]: "https://",
