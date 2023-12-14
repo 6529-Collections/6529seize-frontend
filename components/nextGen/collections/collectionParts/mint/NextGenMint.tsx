@@ -296,6 +296,9 @@ export default function NextGenMint(props: Readonly<Props>) {
   }
 
   function printMintWidgetContent() {
+    if (props.phase_times.public_status === Status.LIVE) {
+      return printMintWidget(AllowlistType.ALLOWLIST);
+    }
     if (collectionLoaded) {
       if (collection) {
         return printMintWidget(collection.al_type);
@@ -313,9 +316,6 @@ export default function NextGenMint(props: Readonly<Props>) {
           <b>Allowlist Not Found</b>
         </span>
       );
-    }
-    if (props.phase_times.public_status === Status.LIVE) {
-      return printMintWidget(AllowlistType.ALLOWLIST);
     }
     return <DotLoader />;
   }
