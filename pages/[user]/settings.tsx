@@ -4,9 +4,9 @@ import styles from "../../styles/Home.module.scss";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/router";
 import HeaderPlaceholder from "../../components/header/HeaderPlaceholder";
-import { useContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import UserSettingsComponent from "../../components/user/settings/UserSettings";
-import { AuthContext } from "../../components/auth/Auth";
+
 import { useAccount } from "wagmi";
 import { useQuery } from "@tanstack/react-query";
 import { IProfileAndConsolidations } from "../../entities/IProfile";
@@ -78,6 +78,7 @@ export default function UserPageSettings() {
 
       <main className={styles.main}>
         <Header onSetWallets={(wallets) => setConnectedWallets(wallets)} />
+        {router.isReady}
         {router.isReady && user && (
           <UserSettingsComponent user={user} wallets={connectedWallets} />
         )}

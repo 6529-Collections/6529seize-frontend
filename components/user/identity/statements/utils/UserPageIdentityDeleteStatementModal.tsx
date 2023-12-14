@@ -4,13 +4,10 @@ import {
   IProfileAndConsolidations,
 } from "../../../../../entities/IProfile";
 import { useClickAway, useKeyPressEvent } from "react-use";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import { AuthContext } from "../../../../auth/Auth";
 import { commonApiDelete } from "../../../../../services/api/common-api";
-import {
-  QueryKey,
-  ReactQueryWrapperContext,
-} from "../../../../react-query-wrapper/ReactQueryWrapper";
+import { ReactQueryWrapperContext } from "../../../../react-query-wrapper/ReactQueryWrapper";
 
 export default function UserPageIdentityDeleteStatementModal({
   statement,
@@ -25,7 +22,6 @@ export default function UserPageIdentityDeleteStatementModal({
   useClickAway(modalRef, onClose);
   useKeyPressEvent("Escape", onClose);
 
-  const queryClient = useQueryClient();
   const { requestAuth, setToast } = useContext(AuthContext);
   const { invalidateProfileLogs, invalidateProfileCICStatements } = useContext(
     ReactQueryWrapperContext
