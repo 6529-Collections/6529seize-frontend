@@ -72,19 +72,21 @@ export default function CICRatings({
 
       <div className="tw-min-h-[28rem] tw-max-h-[28rem] tw-transform-gpu tw-scroll-py-3 tw-overflow-y-auto">
         {ratings?.data.length ? (
-          <>
-            <UserPageIdentityCICRatingsList ratings={ratings.data} />
-            {totalPages > 1 && (
-              <UserPageIdentityPagination
-                currentPage={currentPage}
-                setCurrentPage={setCurrentPage}
-                totalPages={totalPages}
-              />
-            )}
-          </>
+          <div className="tw-flow-root">
+            <div className="tw-overflow-x-auto">
+              <UserPageIdentityCICRatingsList ratings={ratings.data} />
+              {totalPages > 1 && (
+                <UserPageIdentityPagination
+                  currentPage={currentPage}
+                  setCurrentPage={setCurrentPage}
+                  totalPages={totalPages}
+                />
+              )}
+            </div>
+          </div>
         ) : (
           <div className="tw-mt-4">
-            <span className="tw-px-8 tw-text-sm tw-italic tw-text-iron-500">
+            <span className="tw-px-6 md:tw-px-8 tw-text-sm tw-italic tw-text-iron-500">
               No CIC Ratings
             </span>
           </div>

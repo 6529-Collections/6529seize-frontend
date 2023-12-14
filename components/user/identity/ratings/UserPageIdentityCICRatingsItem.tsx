@@ -46,8 +46,8 @@ export default function UserPageIdentityCICRatingsItem({
   };
 
   return (
-    <li className="tw-py-4">
-      <div className="tw-flex tw-items-center tw-justify-between tw-gap-x-3">
+    <tr>
+      <td className="tw-py-4">
         <div className="tw-inline-flex tw-items-center tw-space-x-3">
           <span className="tw-relative">
             <div className="tw-flex tw-items-center tw-justify-center tw-h-5 tw-w-5 tw-text-[0.625rem] tw-leading-3 tw-font-bold tw-rounded-full tw-ring-2 tw-ring-iron-300 tw-text-iron-300">
@@ -67,15 +67,19 @@ export default function UserPageIdentityCICRatingsItem({
             <span className="tw-whitespace-nowrap tw-text-sm tw-text-iron-400 tw-font-semibold">
               rated
             </span>
-            <span className={`tw-whitespace-nowrap tw-text-sm tw-font-semibold ${ratingColor}`}>
+            <span
+              className={`tw-whitespace-nowrap tw-text-sm tw-font-semibold ${ratingColor}`}
+            >
               {ratingStr}
             </span>
           </div>
         </div>
-        <span className="tw-whitespace-nowrap tw-flex-none tw-text-[0.8125rem] tw-leading-5 tw-text-iron-500">
+      </td>
+      <td className="tw-py-4 tw-pl-3 tw-text-right">
+        <span className="tw-whitespace-nowrap tw-text-[0.8125rem] tw-leading-5 tw-text-iron-500">
           {timeAgo}
         </span>
-      </div>
-    </li>
+      </td>
+    </tr>
   );
 }

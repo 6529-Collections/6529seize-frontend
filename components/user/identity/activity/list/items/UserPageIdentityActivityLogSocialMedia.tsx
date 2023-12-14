@@ -70,7 +70,7 @@ export default function UserPageIdentityActivityLogSocialMedia({
               <Tippy content="Copy" theme="dark" placement="top">
                 <button
                   onClick={handleCopy}
-                  className="tw-hidden group-hover:tw-block tw-mx-1 tw-h-5 tw-w-5 tw-bg-transparent tw-cursor-pointer tw-text-sm tw-font-semibold tw-text-white tw-border-0 focus:tw-outline-none tw-transition tw-duration-300 tw-ease-out"
+                  className="tw-hidden group-hover:tw-block tw-mx-1 tw-h-6 tw-w-6 tw-bg-transparent tw-cursor-pointer tw-text-sm tw-font-semibold tw-text-iron-200 tw-border-0 focus:tw-outline-none tw-transition tw-duration-300 tw-ease-out"
                 >
                   <CopyIcon />
                 </button>

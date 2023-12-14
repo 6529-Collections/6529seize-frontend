@@ -120,7 +120,7 @@ export default function UserPageIdentityActivityLog({
           </div>
         ) : (
           <div className="tw-mt-4">
-            <span className="tw-px-8 tw-text-sm tw-italic tw-text-iron-500">
+            <span className="tw-px-6 md:tw-px-8 tw-text-sm tw-italic tw-text-iron-500">
               No Activity Log
             </span>
           </div>
