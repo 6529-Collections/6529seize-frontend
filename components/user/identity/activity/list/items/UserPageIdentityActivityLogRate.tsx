@@ -6,13 +6,15 @@ import {
 import { formatNumberWithCommas } from "../../../../../../helpers/Helpers";
 import UserPageIdentityActivityLogItemTimeAgo from "./UserPageIdentityActivityLogItemTimeAgo";
 import { useRouter } from "next/router";
+import UserPageIdentityActivityLogItemHandle from "./utils/UserPageIdentityActivityLogItemHandle";
+import UserPageIdentityActivityLogItemAction from "./utils/UserPageIdentityActivityLogItemAction";
 
 export default function UserPageIdentityActivityLogRate({
   log,
   profile,
 }: {
-  log: ProfileActivityLogRatingEdit;
-  profile: IProfileAndConsolidations;
+  readonly log: ProfileActivityLogRatingEdit;
+  readonly profile: IProfileAndConsolidations;
 }) {
   const router = useRouter();
   const isPositive = log.contents.new_rating > 0;
@@ -30,12 +32,10 @@ export default function UserPageIdentityActivityLogRate({
     <tr>
       <td className="tw-py-4 tw-flex tw-items-center">
         <span className="tw-space-x-1.5">
-          <span className="tw-whitespace-nowrap tw-text-sm tw-font-semibold tw-text-iron-100">
-            {profile?.profile?.handle}
-          </span>
-          <span className="tw-whitespace-nowrap tw-text-sm tw-text-iron-400 tw-font-semibold">
-            {isValueZero ? "removed cic-rating from" : "cic-rated"}
-          </span>
+          <UserPageIdentityActivityLogItemHandle profile={profile} />
+          <UserPageIdentityActivityLogItemAction
+            action={isValueZero ? "removed cic-rating from" : "cic-rated"}
+          />
           <span className="tw-whitespace-nowrap tw-text-sm tw-text-iron-300 tw-font-medium">
             user
           </span>

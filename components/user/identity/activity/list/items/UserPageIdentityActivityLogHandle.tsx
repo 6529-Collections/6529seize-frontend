@@ -3,6 +3,8 @@ import {
   ProfileActivityLogHandleEdit,
 } from "../../../../../../entities/IProfile";
 import UserPageIdentityActivityLogItemTimeAgo from "./UserPageIdentityActivityLogItemTimeAgo";
+import UserPageIdentityActivityLogItemAction from "./utils/UserPageIdentityActivityLogItemAction";
+import UserPageIdentityActivityLogItemHandle from "./utils/UserPageIdentityActivityLogItemHandle";
 
 export default function UserPageIdentityActivityLogHandle({
   log,
@@ -16,12 +18,10 @@ export default function UserPageIdentityActivityLogHandle({
     <tr>
       <td className="tw-py-4 tw-flex tw-items-center">
         <span className="tw-space-x-1.5">
-          <span className="tw-whitespace-nowrap tw-text-sm tw-font-semibold tw-text-iron-100">
-            {profile?.profile?.handle}
-          </span>
-          <span className="tw-whitespace-nowrap tw-text-sm tw-text-iron-400 tw-font-semibold">
-            {isAdded ? "created" : "changed"}
-          </span>
+          <UserPageIdentityActivityLogItemHandle profile={profile} />
+          <UserPageIdentityActivityLogItemAction
+            action={isAdded ? "created" : "changed"}
+          />
           <span className="tw-whitespace-nowrap tw-text-sm tw-text-iron-300 tw-font-medium">
             handle
           </span>

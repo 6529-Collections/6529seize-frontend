@@ -11,6 +11,8 @@ import { useCopyToClipboard } from "react-use";
 import Tippy from "@tippyjs/react";
 import CopyIcon from "../../../../../utils/icons/CopyIcon";
 import { useRouter } from "next/router";
+import UserPageIdentityActivityLogItemHandle from "./utils/UserPageIdentityActivityLogItemHandle";
+import UserPageIdentityActivityLogItemAction from "./utils/UserPageIdentityActivityLogItemAction";
 
 interface Props {
   log: ProfileActivityLogSocialVerificationPostEdit;
@@ -45,12 +47,10 @@ export default function UserPageIdentityActivityLogSocialMediaVerificationPost(
     <tr>
       <td className="tw-py-4 tw-flex tw-items-center">
         <div className="tw-mt-1 tw-inline-flex tw-space-x-1.5">
-          <span className="tw-whitespace-nowrap tw-text-sm tw-font-semibold tw-text-iron-100">
-            {props.profile?.profile?.handle}
-          </span>
-          <span className="tw-whitespace-nowrap tw-text-sm tw-text-iron-400 tw-font-semibold">
-            {PROFILE_ACTIVITY_LOG_ACTION_STR[props.log.contents.action]}
-          </span>
+          <UserPageIdentityActivityLogItemHandle profile={props.profile} />
+          <UserPageIdentityActivityLogItemAction
+            action={PROFILE_ACTIVITY_LOG_ACTION_STR[props.log.contents.action]}
+          />
           <span className="tw-whitespace-nowrap tw-text-sm tw-text-iron-300 tw-font-medium">
             social media verification post
           </span>

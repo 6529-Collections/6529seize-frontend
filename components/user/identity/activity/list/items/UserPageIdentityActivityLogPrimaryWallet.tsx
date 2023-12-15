@@ -9,6 +9,8 @@ import CopyIcon from "../../../../../utils/icons/CopyIcon";
 import { useEffect, useState } from "react";
 import { useCopyToClipboard } from "react-use";
 import { useRouter } from "next/router";
+import UserPageIdentityActivityLogItemHandle from "./utils/UserPageIdentityActivityLogItemHandle";
+import UserPageIdentityActivityLogItemAction from "./utils/UserPageIdentityActivityLogItemAction";
 
 export default function UserPageIdentityActivityLogPrimaryWallet({
   log,
@@ -53,12 +55,11 @@ export default function UserPageIdentityActivityLogPrimaryWallet({
     <tr>
       <td className="tw-py-4 tw-flex tw-items-center">
         <div className="tw-space-x-1.5">
-          <span className="tw-whitespace-nowrap tw-text-sm tw-font-semibold tw-text-iron-100">
-            {profile?.profile?.handle}
-          </span>
-          <span className="tw-whitespace-nowrap tw-text-sm tw-text-iron-400 tw-font-semibold">
-            {isAdded ? "added" : "changed"}
-          </span>
+          <UserPageIdentityActivityLogItemHandle profile={profile} />
+          <UserPageIdentityActivityLogItemAction
+            action={isAdded ? "added" : "changed"}
+          />
+
           <span className="tw-whitespace-nowrap tw-text-sm tw-text-iron-300 tw-font-medium">
             primary wallet
           </span>

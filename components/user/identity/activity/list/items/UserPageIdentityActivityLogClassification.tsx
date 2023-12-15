@@ -5,6 +5,8 @@ import {
   ProfileActivityLogClassificationEdit,
 } from "../../../../../../entities/IProfile";
 import UserPageIdentityActivityLogItemTimeAgo from "./UserPageIdentityActivityLogItemTimeAgo";
+import UserPageIdentityActivityLogItemHandle from "./utils/UserPageIdentityActivityLogItemHandle";
+import UserPageIdentityActivityLogItemAction from "./utils/UserPageIdentityActivityLogItemAction";
 
 export default function UserPageIdentityActivityLogClassification({
   log,
@@ -18,12 +20,10 @@ export default function UserPageIdentityActivityLogClassification({
     <tr>
       <td className="tw-py-4 tw-flex tw-items-center">
         <span className="tw-space-x-1.5">
-          <span className="tw-whitespace-nowrap tw-text-sm tw-font-semibold tw-text-neutral-100">
-            {profile?.profile?.handle}
-          </span>
-          <span className="tw-whitespace-nowrap tw-text-sm tw-text-neutral-400 tw-font-semibold">
-            {isAdded ? "added" : "changed"}
-          </span>
+          <UserPageIdentityActivityLogItemHandle profile={profile} />
+          <UserPageIdentityActivityLogItemAction
+            action={isAdded ? "added" : "changed"}
+          />
           <span className="tw-whitespace-nowrap tw-text-sm tw-text-neutral-400 tw-font-medium">
             classification
           </span>
