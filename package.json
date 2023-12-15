@@ -52,7 +52,7 @@
     "@types/react": "^18.2.38",
     "@types/react-scroll": "^1.8.10",
     "autoprefixer": "^10.4.14",
-    "eslint": "8.34.0",
+    "eslint": "8.55.0",
     "eslint-config-next": "13.1.6",
     "next-unused": "^0.0.6",
     "postcss": "^8.4.24",
