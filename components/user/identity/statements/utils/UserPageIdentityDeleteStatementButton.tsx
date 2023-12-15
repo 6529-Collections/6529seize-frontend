@@ -58,7 +58,7 @@ export default function UserPageIdentityDeleteStatementButton({
           {isDeleteStatementOpen && (
             <CommonAnimationOpacity
               key="modal"
-              elementClasses="tw-relative tw-z-10"
+              elementClasses="tw-absolute tw-z-10"
               elementRole="dialog"
               onClicked={(e) => e.stopPropagation()}
             >

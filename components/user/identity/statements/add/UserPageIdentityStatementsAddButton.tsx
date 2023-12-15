@@ -36,11 +36,12 @@ export default function UserPageIdentityStatementsAddButton({
           </svg>
           <span>Add</span>
         </button>
+
         <CommonAnimationWrapper mode="sync" initial={true}>
           {isAddStatementsOpen && (
             <CommonAnimationOpacity
               key="modal"
-              elementClasses="tw-relative tw-z-10"
+              elementClasses="tw-absolute tw-z-10"
               elementRole="dialog"
               onClicked={(e) => e.stopPropagation()}
             >
