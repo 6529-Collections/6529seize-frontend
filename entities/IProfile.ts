@@ -271,26 +271,3 @@ export interface ProfilesMatterRatingWithRaterLevel
   extends ProfilesMatterRating {
   readonly rater_level: number;
 }
-
-export const CIC_META: Record<CICType, { title: string; class: string }> = {
-  [CICType.INACCURATE]: {
-    title: CIC_TO_TEXT[CICType.INACCURATE],
-    class: "tw-text-[#F97066]",
-  },
-  [CICType.UNKNOWN]: {
-    title: CIC_TO_TEXT[CICType.UNKNOWN],
-    class: "tw-text-[#FEDF89]",
-  },
-  [CICType.PROBABLY_ACCURATE]: {
-    title: CIC_TO_TEXT[CICType.PROBABLY_ACCURATE],
-    class: "tw-text-[#AAF0C4]",
-  },
-  [CICType.ACCURATE]: {
-    title: CIC_TO_TEXT[CICType.ACCURATE],
-    class: "tw-text-[#73E2A3]",
-  },
-  [CICType.HIGHLY_ACCURATE]: {
-    title: CIC_TO_TEXT[CICType.HIGHLY_ACCURATE],
-    class: "tw-text-[#3CCB7F]",
-  },
-};
