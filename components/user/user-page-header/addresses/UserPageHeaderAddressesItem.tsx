@@ -43,7 +43,7 @@ export default function UserPageHeaderAddressesItem({
 
   return (
     <li
-      className="tw-h-full tw-flex tw-items-center tw-justify-between tw-text-white tw-rounded-lg tw-relative tw-cursor-pointer tw-select-none tw-p-2 hover:tw-bg-neutral-700 tw-transition tw-duration-300 tw-ease-out"
+      className="tw-h-full tw-flex tw-items-center tw-justify-between tw-text-white tw-rounded-lg tw-relative tw-cursor-pointer tw-select-none tw-p-2 hover:tw-bg-iron-700 tw-transition tw-duration-300 tw-ease-out"
       onClick={() => onActiveAddress(item.wallet.address.toLowerCase())}
     >
       <div className="tw-w-44 tw-truncate">
@@ -58,7 +58,7 @@ export default function UserPageHeaderAddressesItem({
             <path
               d="M20 6L9 17L4 12"
               stroke="currentColor"
-              stroke-width="2"
+              strokeWidth="2"
               strokeLinecap="round"
               strokeLinejoin="round"
             />
@@ -74,7 +74,7 @@ export default function UserPageHeaderAddressesItem({
           className="tw-inline-flex tw-items-center tw-w-7 tw-h-7 tw-border-0 tw-outline-0 tw-bg-transparent focus:tw-outline-none tw-group tw-cursor-pointer"
         >
           <svg
-            className="tw-h-5 tw-w-5 tw-text-neutral-400 group-hover:tw-text-white tw-transition tw-duration-300 tw-ease-out"
+            className="tw-h-5 tw-w-5 tw-text-iron-400 group-hover:tw-text-white tw-transition tw-duration-300 tw-ease-out"
             viewBox="0 0 24 24"
             fill="none"
             xmlns="http://www.w3.org/2000/svg"

@@ -6,16 +6,16 @@ import AllowlistToolAnimationOpacity from "../animation/AllowlistToolAnimationOp
 export enum AllowlistToolModalSize {
   SMALL = "SMALL",
   LARGE = "LARGE",
-  X_LARGE = "X_LARGE"
+  X_LARGE = "X_LARGE",
 }
 
 interface AllowlistToolCommonModalWrapperProps {
-  children: React.ReactNode;
-  showModal: boolean;
-  onClose: () => void;
-  title: string;
-  modalSize?: AllowlistToolModalSize;
-  showTitle?: boolean;
+  readonly children: React.ReactNode;
+  readonly showModal: boolean;
+  readonly onClose: () => void;
+  readonly title: string;
+  readonly modalSize?: AllowlistToolModalSize;
+  readonly showTitle?: boolean;
 }
 
 export default function AllowlistToolCommonModalWrapper({
@@ -33,7 +33,7 @@ export default function AllowlistToolCommonModalWrapper({
   const modalSizeClasses: Record<AllowlistToolModalSize, string> = {
     [AllowlistToolModalSize.SMALL]: "sm:tw-max-w-lg",
     [AllowlistToolModalSize.LARGE]: "sm:tw-max-w-xl",
-    [AllowlistToolModalSize.X_LARGE]: 'sm:tw-max-w-2xl'
+    [AllowlistToolModalSize.X_LARGE]: "sm:tw-max-w-2xl",
   };
 
   const modalSizeClass = modalSizeClasses[modalSize];
@@ -47,7 +47,7 @@ export default function AllowlistToolCommonModalWrapper({
           elementRole="dialog"
           onClicked={(e) => e.stopPropagation()}
         >
-          <div className="tw-relative tw-z-10" role="dialog">
+          <div className="tw-relative tw-z-10">
             <div className="tw-fixed tw-inset-0 tw-bg-gray-500 tw-bg-opacity-75"></div>
             <div className="tw-fixed tw-inset-0 tw-z-10 tw-overflow-y-auto">
               <div className="tw-flex tw-min-h-full tw-items-end tw-justify-center tw-p-4 tw-text-center sm:tw-items-center sm:tw-p-0">

@@ -4,9 +4,14 @@ import styles from "../../styles/Home.module.scss";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/router";
 import HeaderPlaceholder from "../../components/header/HeaderPlaceholder";
-import { useContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import UserSettingsComponent from "../../components/user/settings/UserSettings";
-import { AuthContext } from "../../components/auth/Auth";
+
+import { useAccount } from "wagmi";
+import { useQuery } from "@tanstack/react-query";
+import { IProfileAndConsolidations } from "../../entities/IProfile";
+import { QueryKey } from "../../components/react-query-wrapper/ReactQueryWrapper";
+import { commonApiFetch } from "../../services/api/common-api";
 
 const Header = dynamic(() => import("../../components/header/Header"), {
   ssr: false,
@@ -14,7 +19,15 @@ const Header = dynamic(() => import("../../components/header/Header"), {
 });
 
 export default function UserPageSettings() {
-  const { myProfile } = useContext(AuthContext);
+  const { address } = useAccount();
+  const { data: connectedProfile } = useQuery<IProfileAndConsolidations>({
+    queryKey: [QueryKey.PROFILE, address?.toLowerCase()],
+    queryFn: async () =>
+      await commonApiFetch<IProfileAndConsolidations>({
+        endpoint: `profiles/${address}`,
+      }),
+    enabled: !!address,
+  });
   const router = useRouter();
   const [user] = useState(
     Array.isArray(router.query.user) ? router.query.user[0] : router.query.user
@@ -25,24 +38,25 @@ export default function UserPageSettings() {
   const [url, setUrl] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!myProfile?.profile) {
+    if (!connectedProfile?.profile) {
       setPagenameFull(null);
       setTitle(null);
       setUrl(null);
       return;
     }
     const consolidatedWalletsSortedByHighest =
-      myProfile.consolidation.wallets.sort((a, d) => d.tdh - a.tdh);
+      connectedProfile.consolidation.wallets.sort((a, d) => d.tdh - a.tdh);
 
     const profileTitle =
-      myProfile.profile?.handle ??
-      consolidatedWalletsSortedByHighest.at(0)?.displayName ??
+      connectedProfile.profile?.handle ??
+      consolidatedWalletsSortedByHighest.at(0)?.wallet.ens ??
+      consolidatedWalletsSortedByHighest.at(0)?.wallet.address ??
       null;
 
     setPagenameFull(`${profileTitle} | 6529 SEIZE`);
     setTitle(profileTitle);
     setUrl(profileTitle);
-  }, [myProfile]);
+  }, [connectedProfile]);
 
   return (
     <>
@@ -64,6 +78,7 @@ export default function UserPageSettings() {
 
       <main className={styles.main}>
         <Header onSetWallets={(wallets) => setConnectedWallets(wallets)} />
+        {router.isReady}
         {router.isReady && user && (
           <UserSettingsComponent user={user} wallets={connectedWallets} />
         )}
