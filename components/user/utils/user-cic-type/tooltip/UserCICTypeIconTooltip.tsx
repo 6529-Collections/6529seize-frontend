@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import {
   CICType,
-  CIC_META,
   IProfileAndConsolidations,
 } from "../../../../../entities/IProfile";
 import UserCICTypeIconTooltipHeaders from "./UserCICTypeIconTooltipHeaders";
@@ -12,6 +11,7 @@ import {
   formatNumberWithCommas,
 } from "../../../../../helpers/Helpers";
 import { useAccount } from "wagmi";
+import { CIC_META } from "../../user-cic-status/UserCICStatus";
 
 export default function UserCICTypeIconTooltip({
   profile,
