@@ -78,16 +78,28 @@ export function numberWithCommasFromString(x: any) {
 export function numberWithCommas(x: number) {
   if (x === null || isNaN(x)) return "-";
   if (x === 0) return "-";
-  let parts = x.toString().split(".");
-  parts[0] = parts[0].replace(/\d(?=(\d{3})+$)/g, "$&,");
-  return parts.join(".");
+  const parts = x.toString().split(".");
+  let integerPart = parts[0];
+  let formattedInteger = "";
+  while (integerPart.length > 3) {
+    formattedInteger = "," + integerPart.slice(-3) + formattedInteger;
+    integerPart = integerPart.slice(0, -3);
+  }
+  formattedInteger = integerPart + formattedInteger;
+  return formattedInteger + (parts.length > 1 ? "." + parts[1] : "");
 }
 
 export function formatNumberWithCommas(x: number) {
   if (x === null || isNaN(x)) return "-";
-  let parts = x.toString().split(".");
-  parts[0] = parts[0].replace(/\d(?=(\d{3})+$)/g, "$&,");
-  return parts.join(".");
+  const parts = x.toString().split(".");
+  let integerPart = parts[0];
+  let formattedInteger = "";
+  while (integerPart.length > 3) {
+    formattedInteger = "," + integerPart.slice(-3) + formattedInteger;
+    integerPart = integerPart.slice(0, -3);
+  }
+  formattedInteger = integerPart + formattedInteger;
+  return formattedInteger + (parts.length > 1 ? "." + parts[1] : "");
 }
 
 export function getDateDisplay(date: Date) {
