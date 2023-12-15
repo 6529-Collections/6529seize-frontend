@@ -2,17 +2,16 @@ import styles from "./Rememes.module.scss";
 import { Container, Row, Col, Button } from "react-bootstrap";
 import Image from "next/image";
 import { useState, useEffect } from "react";
-import { MEMES_CONTRACT } from "../../constants";
 import { NFT } from "../../entities/INFT";
-import { fetchAllPages, fetchUrl, postData } from "../../services/6529api";
+import { fetchUrl, postData } from "../../services/6529api";
 import RememeAddComponent, { ProcessedRememe } from "./RememeAddComponent";
 import { useAccount, useSignMessage } from "wagmi";
-import { useWeb3Modal } from "@web3modal/react";
 import { DBResponse } from "../../entities/IDBResponse";
 import { ConsolidatedTDHMetrics } from "../../entities/ITDH";
 import { areEqualAddresses, numberWithCommas } from "../../helpers/Helpers";
 import { SeizeSettings } from "../../entities/ISeizeSettings";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { useSeizeWeb3Modal } from "../../hooks/web3Modal";
 
 interface CheckList {
   status: boolean;
@@ -20,8 +19,9 @@ interface CheckList {
 }
 
 export default function RememeAddPage() {
+  const seizeWeb3Modal = useSeizeWeb3Modal();
+
   const accountResolution = useAccount();
-  const web3modal = useWeb3Modal();
 
   const [seizeSettings, setSeizeSettings] = useState<SeizeSettings>();
 
@@ -294,9 +294,11 @@ export default function RememeAddPage() {
                 ) : (
                   <Button
                     className="seize-btn btn-white"
-                    disabled={web3modal.isOpen}
-                    onClick={() => web3modal.open()}>
-                    {web3modal.isOpen ? `Connecting...` : `Connect Wallet`}
+                    disabled={
+                      seizeWeb3Modal.isOpen || seizeWeb3Modal.connectDisabled
+                    }
+                    onClick={() => seizeWeb3Modal.open()}>
+                    {seizeWeb3Modal.isOpen ? `Connecting...` : `Connect Wallet`}
                   </Button>
                 )}
               </Col>

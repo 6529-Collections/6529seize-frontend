@@ -10,7 +10,7 @@ import { fetchUrl } from "../../services/6529api";
 import HeaderConnect from "./HeaderConnect";
 import Cookies from "js-cookie";
 import { VIEW_MODE_COOKIE } from "../../constants";
-import { useAccount } from "wagmi";
+import { useAccount, useDisconnect } from "wagmi";
 import { WalletView } from "../../enums";
 
 interface Props {

@@ -9,8 +9,8 @@ import Cookies from "js-cookie";
 import { VIEW_MODE_COOKIE } from "../../constants";
 import Image from "next/image";
 import { WalletView } from "../../enums";
-import { useWeb3Modal, useWeb3ModalState } from "@web3modal/wagmi/react";
-import DotLoader from "../dotLoader/DotLoader";
+import Tippy from "@tippyjs/react";
+import { useSeizeWeb3Modal } from "../../hooks/web3Modal";
 
 interface Props {
   consolidations: string[];
@@ -19,13 +19,12 @@ interface Props {
 }
 
 export default function HeaderConnect(props: Props) {
+  const seizeWeb3Modal = useSeizeWeb3Modal();
+
   const { myProfile, loadingMyProfile } = useContext(AuthContext);
   const account = useAccount();
   const [showWalletModal, setShowWalletModal] = useState(false);
   const [display, setDisplay] = useState("");
-
-  const web3Modal = useWeb3Modal();
-  const web3ModalState = useWeb3ModalState();
 
   useEffect(() => {
     const viewMode = Cookies.get(VIEW_MODE_COOKIE);
@@ -125,11 +124,22 @@ export default function HeaderConnect(props: Props) {
           )}
         </>
       ) : (
-        <Button
-          className={`seize-btn btn-white`}
-          onClick={() => web3Modal.open()}>
-          <b>{web3ModalState.open ? `Connecting...` : `Connect`}</b>
-        </Button>
+        <Tippy
+          disabled={!seizeWeb3Modal.connectDisabled}
+          hideOnClick={false}
+          content={"Connect is currently disabled"}
+          theme={"light"}>
+          <span>
+            <Button
+              disabled={seizeWeb3Modal.connectDisabled}
+              className={`seize-btn btn-white`}
+              onClick={() => {
+                seizeWeb3Modal.open();
+              }}>
+              <b>{seizeWeb3Modal.isOpen ? `Connecting...` : `Connect`}</b>
+            </Button>
+          </span>
+        </Tippy>
       )}
       {account.address && (
         <WalletModal
