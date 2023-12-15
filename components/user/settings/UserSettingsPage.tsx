@@ -6,35 +6,35 @@ import {
 import UserSettingsPrimaryWallet from "./UserSettingsPrimaryWallet";
 import UserSettingsSave from "./UserSettingsSave";
 import UserSettingsUsername from "./UserSettingsUsername";
-import { AuthContext, IProfileWithMeta } from "../../auth/Auth";
+import { AuthContext } from "../../auth/Auth";
 import { useRouter } from "next/router";
 import { commonApiPost } from "../../../services/api/common-api";
 import UserSettingsImg from "./UserSettingsImg";
 import UserSettingsBackground from "./UserSettingsBackground";
 import { getRandomColor } from "../../../helpers/Helpers";
-import UserSettingsWebsite from "./UserSettingsWebsite";
 import UserSettingsClassification from "./UserSettingsClassification";
+import { ReactQueryWrapperContext } from "../../react-query-wrapper/ReactQueryWrapper";
 
 interface ApiCreateOrUpdateProfileRequest {
   readonly handle: string;
   readonly primary_wallet: string;
   readonly classification: PROFILE_CLASSIFICATION;
-  pfp_url?: string | undefined;
-  banner_1?: string | undefined;
-  banner_2?: string | undefined;
-  website?: string | undefined;
+  pfp_url?: string;
+  banner_1?: string;
+  banner_2?: string;
+  website?: string;
 }
 
 export default function UserSettingsPage({
   user,
   onUser,
 }: {
-  user: IProfileWithMeta;
-  onUser: (user: IProfileAndConsolidations) => void;
+  readonly user: IProfileAndConsolidations;
+  readonly onUser: (user: IProfileAndConsolidations) => void;
 }) {
-  const { requestAuth, setToast, updateMyProfile } = useContext(AuthContext);
+  const { requestAuth, setToast } = useContext(AuthContext);
+  const { invalidateProfile } = useContext(ReactQueryWrapperContext);
   const router = useRouter();
-
   const [userName, setUserName] = useState<string>(user.profile?.handle ?? "");
 
   const getHighestTdhWalletOrNone = () => {
@@ -59,7 +59,7 @@ export default function UserSettingsPage({
     user.profile?.banner_2 ?? getRandomColor()
   );
 
-  const [website, setWebsite] = useState<string>(user.profile?.website ?? "");
+  const website = user.profile?.website ?? "";
   const [saving, setSaving] = useState<boolean>(false);
 
   const onSave = async () => {
@@ -99,11 +99,15 @@ export default function UserSettingsPage({
         endpoint: "profiles",
         body,
       });
+
       if (response.profile?.handle !== user.profile?.handle) {
         router.push(`/${response.profile?.handle}/settings`);
+        invalidateProfile(response);
+        invalidateProfile(user);
+      } else {
+        invalidateProfile(response);
       }
       onUser(response);
-      await updateMyProfile();
       setToast({
         message: "Profile updated",
         type: "success",
@@ -144,9 +148,9 @@ export default function UserSettingsPage({
   ]);
 
   return (
-    <div className="tw-pt-10 tw-space-y-6 tw-divide-y tw-divide-x-0 tw-divide-solid tw-divide-neutral-700">
+    <div className="tw-pt-10 tw-space-y-6 tw-divide-y tw-divide-x-0 tw-divide-solid tw-divide-iron-700">
       <div className="tw-flex tw-flex-col tw-gap-y-6">
-        <div className="tw-bg-neutral-800 tw-p-8 tw-rounded-lg">
+        <div className="tw-bg-iron-900 tw-border tw-border-solid tw-border-white/5 tw-p-8 tw-rounded-lg">
           <form onSubmit={onSubmit} className="tw-flex tw-flex-col tw-gap-y-6">
             <UserSettingsUsername
               userName={userName}
@@ -170,11 +174,11 @@ export default function UserSettingsPage({
               setBgColor1={setBgColor1}
               setBgColor2={setBgColor2}
             />
-            <UserSettingsWebsite website={website} setWebsite={setWebsite} />
+            {/* <UserSettingsWebsite website={website} setWebsite={setWebsite} /> */}
             <UserSettingsSave loading={saving} disabled={!haveChanges} />
           </form>
         </div>
-        {user.profile && <UserSettingsImg profile={user.profile} />}
+        {user.profile && <UserSettingsImg profile={user} />}
       </div>
     </div>
   );

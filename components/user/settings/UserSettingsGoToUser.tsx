@@ -22,10 +22,10 @@ export default function UserSettingsGoToUser({ user }: { user: string }) {
       <button
         onClick={goBackToUser}
         type="button"
-        className="tw-h-8 tw-w-8 tw-inline-flex tw-items-center tw-justify-center tw-border tw-border-solid tw-border-white tw-rounded-full tw-bg-white hover:tw-bg-neutral-200 hover:tw-border-white tw-transition tw-duration-300 tw-ease-out"
+        className="tw-h-8 tw-w-8 tw-inline-flex tw-items-center tw-justify-center tw-border tw-border-solid tw-border-white tw-rounded-full tw-bg-white hover:tw-bg-iron-200 hover:tw-border-white tw-transition tw-duration-300 tw-ease-out"
       >
         <svg
-          className="tw-w-5 tw-h-5 tw-text-neutral-900 tw-transition tw-duration-300 tw-ease-out"
+          className="tw-w-5 tw-h-5 tw-text-iron-900 tw-transition tw-duration-300 tw-ease-out"
           viewBox="0 0 24 24"
           fill="none"
           xmlns="http://www.w3.org/2000/svg"
