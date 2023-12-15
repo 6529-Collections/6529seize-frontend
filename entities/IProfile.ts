@@ -107,7 +107,6 @@ export enum ProfileActivityLogType {
   SOCIAL_VERIFICATION_POST_EDIT = "SOCIAL_VERIFICATION_POST_EDIT",
   BANNER_1_EDIT = "BANNER_1_EDIT",
   BANNER_2_EDIT = "BANNER_2_EDIT",
-  WEBSITE_EDIT = "WEBSITE_EDIT",
   PFP_EDIT = "PFP_EDIT",
 }
 
@@ -125,7 +124,6 @@ export const PROFILE_ACTIVITY_TYPE_TO_TEXT: Record<
     "Social Media Verification Post",
   [ProfileActivityLogType.BANNER_1_EDIT]: "Banner 1",
   [ProfileActivityLogType.BANNER_2_EDIT]: "Banner 2",
-  [ProfileActivityLogType.WEBSITE_EDIT]: "Website",
   [ProfileActivityLogType.PFP_EDIT]: "Profile Picture",
 };
 
@@ -195,14 +193,6 @@ export interface ProfileActivityLogBanner2Edit extends ProfileActivityLogBase {
   };
 }
 
-export interface ProfileActivityLogWebsiteEdit extends ProfileActivityLogBase {
-  readonly type: ProfileActivityLogType.WEBSITE_EDIT;
-  readonly contents: {
-    new_value: string;
-    old_value: string;
-  };
-}
-
 export interface ProfileActivityLogPfpEdit extends ProfileActivityLogBase {
   readonly type: ProfileActivityLogType.PFP_EDIT;
   readonly contents: {
@@ -259,7 +249,6 @@ export type ProfileActivityLog =
   | ProfileActivityLogSocialVerificationPostEdit
   | ProfileActivityLogBanner1Edit
   | ProfileActivityLogBanner2Edit
-  | ProfileActivityLogWebsiteEdit
   | ProfileActivityLogPfpEdit;
 
 export enum RateMatter {

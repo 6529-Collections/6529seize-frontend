@@ -14,7 +14,6 @@ import UserPageIdentityActivityLogPrimaryWallet from "./items/UserPageIdentityAc
 import UserPageIdentityActivityLogRate from "./items/UserPageIdentityActivityLogRate";
 import UserPageIdentityActivityLogSocialMedia from "./items/UserPageIdentityActivityLogSocialMedia";
 import UserPageIdentityActivityLogSocialMediaVerificationPost from "./items/UserPageIdentityActivityLogSocialMediaVerificationPost";
-import UserPageIdentityActivityLogWebsite from "./items/UserPageIdentityActivityLogWebsite";
 
 export default function UserPageIdentityActivityLogItem({
   log,
@@ -57,8 +56,6 @@ export default function UserPageIdentityActivityLogItem({
       return <UserPageIdentityActivityLogBanner1 log={log} profile={profile} />;
     case ProfileActivityLogType.BANNER_2_EDIT:
       return <UserPageIdentityActivityLogBanner2 log={log} profile={profile} />;
-    case ProfileActivityLogType.WEBSITE_EDIT:
-      return <UserPageIdentityActivityLogWebsite log={log} profile={profile} />;
     case ProfileActivityLogType.PFP_EDIT:
       return <UserPageIdentityActivityLogPfp log={log} profile={profile} />;
     default:

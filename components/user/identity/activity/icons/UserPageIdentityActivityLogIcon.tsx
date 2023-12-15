@@ -8,7 +8,6 @@ import UserPageIdentityActivityLogPrimaryWalletIcon from "./UserPageIdentityActi
 import UserPageIdentityActivityLogProfileImageIcon from "./UserPageIdentityActivityLogProfileImageIcon";
 import UserPageIdentityActivityLogSocialMediaAccountIcon from "./UserPageIdentityActivityLogSocialMediaAccountIcon";
 import UserPageIdentityActivityLogSocialMediaVerificationPostIcon from "./UserPageIdentityActivityLogSocialMediaVerificationPostIcon";
-import UserPageIdentityActivityLogWebsiteIcon from "./UserPageIdentityActivityLogWebsiteIcon";
 import UserPageIdentityActivityLogBannerIcon from "./UserPageIdentityActivityLogBannerIcon";
 
 export default function UserPageIdentityActivityLogIcon({
@@ -35,8 +34,6 @@ export default function UserPageIdentityActivityLogIcon({
       return <UserPageIdentityActivityLogBannerIcon />;
     case ProfileActivityLogType.BANNER_2_EDIT:
       return <UserPageIdentityActivityLogBannerIcon />;
-    case ProfileActivityLogType.WEBSITE_EDIT:
-      return <UserPageIdentityActivityLogWebsiteIcon />;
     case ProfileActivityLogType.PFP_EDIT:
       return <UserPageIdentityActivityLogProfileImageIcon />;
     default:
