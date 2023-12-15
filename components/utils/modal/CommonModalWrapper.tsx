@@ -10,11 +10,11 @@ export enum CommonModalWrapperSize {
 }
 
 interface CommonModalWrapperProps {
-  children: React.ReactNode;
-  showModal: boolean;
-  onClose: () => void;
-  title?: string;
-  modalSize?: CommonModalWrapperSize;
+  readonly children: React.ReactNode;
+  readonly showModal: boolean;
+  readonly onClose: () => void;
+  readonly title?: string;
+  readonly modalSize?: CommonModalWrapperSize;
 }
 
 const MODAL_SIZE_CLASSES: Record<CommonModalWrapperSize, string> = {
@@ -44,7 +44,7 @@ export default function CommonModalWrapper({
           elementRole="dialog"
           onClicked={(e) => e.stopPropagation()}
         >
-          <div className="tw-relative tw-z-10" role="dialog">
+          <div className="tw-relative tw-z-10">
             <div className="tw-fixed tw-inset-0 tw-bg-gray-500 tw-bg-opacity-75"></div>
             <div className="tw-fixed tw-inset-0 tw-z-10 tw-overflow-y-auto">
               <div className="tw-flex tw-min-h-full tw-items-end tw-justify-center tw-p-4 tw-text-center sm:tw-items-center sm:tw-p-0">

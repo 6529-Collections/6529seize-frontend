@@ -37,25 +37,23 @@ export default function WalletModal(props: Props) {
       if (!profile) {
         setEns(undefined);
       } else {
-        {
-          const highestTdhWallet = profile?.consolidation?.wallets?.reduce(
-            (prev, current) => (prev.tdh > current.tdh ? prev : current)
-          );
-          setEns({
-            created_at: profile.profile?.created_at ?? undefined,
-            wallet: props.wallet.toLowerCase(),
-            display:
-              profile.profile?.handle ??
-              profile.consolidation.consolidation_display ??
-              highestTdhWallet?.wallet?.ens ??
-              props.wallet.toLowerCase(),
-            consolidation_key: profile.consolidation.consolidation_key,
-            pfp: profile.profile?.pfp_url ?? undefined,
-            banner_1: profile.profile?.banner_1 ?? undefined,
-            banner_2: profile.profile?.banner_2 ?? undefined,
-            website: profile.profile?.website ?? undefined,
-          });
-        }
+        const highestTdhWallet = profile?.consolidation?.wallets?.reduce(
+          (prev, current) => (prev.tdh > current.tdh ? prev : current)
+        );
+        setEns({
+          created_at: profile.profile?.created_at ?? undefined,
+          wallet: props.wallet.toLowerCase(),
+          display:
+            profile.profile?.handle ??
+            profile.consolidation.consolidation_display ??
+            highestTdhWallet?.wallet?.ens ??
+            props.wallet.toLowerCase(),
+          consolidation_key: profile.consolidation.consolidation_key,
+          pfp: profile.profile?.pfp_url ?? undefined,
+          banner_1: profile.profile?.banner_1 ?? undefined,
+          banner_2: profile.profile?.banner_2 ?? undefined,
+          website: profile.profile?.website ?? undefined,
+        });
       }
     };
 
@@ -89,7 +87,7 @@ export default function WalletModal(props: Props) {
           onClick={() => props.onHide()}
         />
       </Modal.Header>
-      {ens && ens.pfp && ens.banner_1 && ens.banner_2 && (
+      {ens?.pfp && ens?.banner_1 && ens?.banner_2 && (
         <div
           className={styles.banner}
           style={{
@@ -115,10 +113,10 @@ export default function WalletModal(props: Props) {
           hideCopy={true}
         />
         <span className="d-flex flex-column align-items-end font-smaller">
-          {ens && ens.boosted_tdh && ens.boosted_tdh > 0 && (
+          {ens?.boosted_tdh && ens?.boosted_tdh > 0 && (
             <span>TDH: {numberWithCommas(ens.boosted_tdh)}</span>
           )}
-          {ens && ens.balance && ens.balance > 0 && (
+          {ens?.balance && ens?.balance > 0 && (
             <span>Cards: {numberWithCommas(ens.balance)}</span>
           )}
         </span>

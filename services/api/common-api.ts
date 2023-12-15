@@ -12,7 +12,7 @@ const getHeaders = (
     ...(contentType ? { "Content-Type": "application/json" } : {}),
     ...(apiAuth ? { "x-6529-auth": apiAuth } : {}),
     ...(walletAuth ? { Authorization: `Bearer ${walletAuth}` } : {}),
-    ...(headers || {}),
+    ...(headers ?? {}),
   };
 };
 
@@ -32,7 +32,6 @@ export const commonApiFetch = async <T>(param: {
   });
   if (!res.ok) {
     const body: any = await res.json();
-    // throw new Error(body?.error ?? res.statusText ?? "Something went wrong");
     return new Promise((_, rej) =>
       rej(body?.error ?? res.statusText ?? "Something went wrong")
     );
@@ -55,7 +54,6 @@ export const commonApiPost = async <T, U>(param: {
     return new Promise((_, rej) =>
       rej(body?.error ?? res.statusText ?? "Something went wrong")
     );
-    // throw new Error(body?.error ?? res.statusText ?? "Something went wrong");
   }
   return res.json();
 };
@@ -82,7 +80,6 @@ export const commonApiPostForm = async <U>(param: {
   });
   if (!res.ok) {
     const body: any = await res.json();
-    // throw new Error(body?.error ?? res.statusText ?? "Something went wrong");
     return new Promise((_, rej) =>
       rej(body?.error ?? res.statusText ?? "Something went wrong")
     );

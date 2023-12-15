@@ -45,9 +45,9 @@ export default function UserSettingsPrimaryWallet({
 
   return (
     <div className="tw-max-w-full tw-relative tw-mt-2" ref={listRef}>
-      <label className="tw-block tw-text-sm tw-font-normal tw-leading-5 tw-text-iron-300">
+      <span className="tw-block tw-text-sm tw-font-normal tw-leading-5 tw-text-iron-300">
         Primary wallet
-      </label>
+      </span>
       <div className="tw-mt-2 tw-relative">
         <button
           type="button"

@@ -13,17 +13,14 @@ export default function UserPageIdentityHeader({
 }) {
   const router = useRouter();
   const user = (router.query.user as string).toLowerCase();
-  const isValidUser = RegExp(/^[a-zA-Z0-9_]{3,15}$/).test(user);
-  const userUrl = isValidUser ? user : null;
-
 
   const { data: profile } = useQuery<IProfileAndConsolidations>({
-    queryKey: [QueryKey.PROFILE, userUrl?.toLowerCase()],
+    queryKey: [QueryKey.PROFILE, user.toLowerCase()],
     queryFn: async () =>
       await commonApiFetch<IProfileAndConsolidations>({
-        endpoint: `profiles/${userUrl?.toLowerCase()}`,
+        endpoint: `profiles/${user.toLowerCase()}`,
       }),
-    enabled: !!userUrl,
+    enabled: !!user,
     initialData: initialProfile,
   });
 
