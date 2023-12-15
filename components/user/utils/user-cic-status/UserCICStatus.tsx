@@ -2,6 +2,10 @@ import { useEffect, useState } from "react";
 import { CICType, CIC_TO_TEXT } from "../../../../entities/IProfile";
 import { cicToType } from "../../../../helpers/Helpers";
 
+interface Props {
+  cic: number;
+}
+
 const CIC_META: Record<CICType, { title: string; class: string }> = {
   [CICType.INACCURATE]: {
     title: CIC_TO_TEXT[CICType.INACCURATE],
@@ -25,11 +29,12 @@ const CIC_META: Record<CICType, { title: string; class: string }> = {
   },
 };
 
-export default function UserCICStatus({ cic }: { cic: number }) {
-  const [cicType, setCicType] = useState<CICType>(cicToType(cic));
+
+export default function UserCICStatus(props: Props) {
+  const [cicType, setCicType] = useState<CICType>(cicToType(props.cic));
   useEffect(() => {
-    setCicType(cicToType(cic));
-  }, [cic]);
+    setCicType(cicToType(props.cic));
+  }, [props.cic]);
 
   return (
     <span className={CIC_META[cicType].class}>{CIC_META[cicType].title}</span>

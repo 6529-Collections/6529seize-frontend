@@ -12,26 +12,25 @@ import Tippy from "@tippyjs/react";
 import CopyIcon from "../../../../../utils/icons/CopyIcon";
 import { useRouter } from "next/router";
 
-export default function UserPageIdentityActivityLogContact({
-  log,
-  profile,
-}: {
+interface Props {
   log: ProfileActivityLogContactsEdit;
   profile: IProfileAndConsolidations;
-}) {
+}
+
+export default function UserPageIdentityActivityLogContact(props: Props) {
   const router = useRouter();
 
   const [title, setTitle] = useState(
-    truncateMiddle(log.contents.statement.statement_value)
+    truncateMiddle(props.log.contents.statement.statement_value)
   );
 
   const [_, copyToClipboard] = useCopyToClipboard();
 
   const handleCopy = () => {
-    copyToClipboard(log.contents.statement.statement_value);
+    copyToClipboard(props.log.contents.statement.statement_value);
     setTitle("Copied!");
     setTimeout(() => {
-      setTitle(truncateMiddle(log.contents.statement.statement_value));
+      setTitle(truncateMiddle(props.log.contents.statement.statement_value));
     }, 1000);
   };
 
@@ -45,17 +44,17 @@ export default function UserPageIdentityActivityLogContact({
       <td className="tw-py-4 tw-flex tw-items-center">
         <div className="tw-mt-1 tw-inline-flex tw-space-x-1.5">
           <span className="tw-whitespace-nowrap tw-text-sm tw-font-semibold tw-text-iron-100">
-            {profile?.profile?.handle}
+            {props.profile?.profile?.handle}
           </span>
           <span className="tw-whitespace-nowrap tw-text-sm tw-text-iron-400 tw-font-semibold">
-            {PROFILE_ACTIVITY_LOG_ACTION_STR[log.contents.action]}
+            {PROFILE_ACTIVITY_LOG_ACTION_STR[props.log.contents.action]}
           </span>
           <span className="tw-whitespace-nowrap tw-text-sm tw-text-iron-300 tw-font-medium">
             contact
           </span>
           <div className="tw-flex tw-items-center tw-flex-shrink-0 tw-h-5 tw-w-5 tw-text-iron-100">
             <SocialStatementIcon
-              statementType={log.contents.statement.statement_type}
+              statementType={props.log.contents.statement.statement_type}
             />
           </div>
           <span className="tw-whitespace-nowrap tw-group tw-inline-flex tw-text-sm tw-font-semibold tw-text-iron-100">
@@ -79,7 +78,7 @@ export default function UserPageIdentityActivityLogContact({
         </div>
       </td>
       <td className="tw-py-4 tw-pl-3 tw-text-right">
-        <UserPageIdentityActivityLogItemTimeAgo log={log} />
+        <UserPageIdentityActivityLogItemTimeAgo log={props.log} />
       </td>
     </tr>
   );

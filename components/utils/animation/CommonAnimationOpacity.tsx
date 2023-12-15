@@ -8,22 +8,17 @@ interface Props {
   onClicked?: (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => void;
 }
 
-export default function CommonAnimationOpacity({
-  children,
-  elementClasses = "",
-  elementRole,
-  onClicked = () => undefined,
-}: Props) {
+export default function CommonAnimationOpacity(props: Props) {
   return (
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className={elementClasses}
-      role={elementRole}
-      onClick={onClicked}
+      className={props.elementClasses}
+      role={props.elementRole}
+      onClick={props.onClicked}
     >
-      {children}
+      {props.children}
     </motion.div>
   );
 }
