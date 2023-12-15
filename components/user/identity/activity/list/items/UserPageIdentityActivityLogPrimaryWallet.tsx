@@ -4,11 +4,11 @@ import {
   ProfileActivityLogPrimaryWalletEdit,
 } from "../../../../../../entities/IProfile";
 import { formatAddress } from "../../../../../../helpers/Helpers";
-import EthereumIcon from "../../../../utils/icons/EthereumIcon";
 import UserPageIdentityActivityLogItemTimeAgo from "./UserPageIdentityActivityLogItemTimeAgo";
 import CopyIcon from "../../../../../utils/icons/CopyIcon";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useCopyToClipboard } from "react-use";
+import { useRouter } from "next/router";
 
 export default function UserPageIdentityActivityLogPrimaryWallet({
   log,
@@ -17,6 +17,7 @@ export default function UserPageIdentityActivityLogPrimaryWallet({
   log: ProfileActivityLogPrimaryWalletEdit;
   profile: IProfileAndConsolidations;
 }) {
+  const router = useRouter();
   const [oldTitle, setOldTitle] = useState(
     formatAddress(log.contents.old_value)
   );
@@ -43,6 +44,10 @@ export default function UserPageIdentityActivityLogPrimaryWallet({
   };
 
   const isAdded = !log.contents.old_value;
+  const [isTouchScreen, setIsTouchScreen] = useState(false);
+  useEffect(() => {
+    setIsTouchScreen(window.matchMedia("(pointer: coarse)").matches);
+  }, [router.isReady]);
 
   return (
     <tr>
@@ -61,10 +66,19 @@ export default function UserPageIdentityActivityLogPrimaryWallet({
             <>
               <span className="tw-whitespace-nowrap tw-group tw-inline-flex tw-text-sm tw-font-semibold tw-text-iron-100">
                 {oldTitle}
-                <Tippy content="Copy" theme="dark" placement="top">
+                <Tippy
+                  content="Copy"
+                  theme="dark"
+                  placement="top"
+                  disabled={isTouchScreen}
+                >
                   <button
                     onClick={handleCopyOld}
-                    className="tw-hidden group-hover:tw-block tw-mx-1 tw-h-5 tw-w-5 tw-bg-transparent tw-cursor-pointer tw-text-sm tw-font-semibold tw-text-iron-200 tw-border-0 focus:tw-outline-none tw-transition tw-duration-300 tw-ease-out"
+                    className={`${
+                      isTouchScreen
+                        ? "tw-block"
+                        : "tw-hidden group-hover:tw-block"
+                    } tw-mx-1 tw-h-5 tw-w-5 tw-bg-transparent tw-cursor-pointer tw-text-sm tw-font-semibold tw-text-iron-200 tw-border-0 focus:tw-outline-none tw-transition tw-duration-300 tw-ease-out`}
                   >
                     <CopyIcon />
                   </button>
@@ -88,10 +102,17 @@ export default function UserPageIdentityActivityLogPrimaryWallet({
           )}
           <span className="tw-whitespace-nowrap tw-group tw-inline-flex  tw-text-sm tw-font-semibold tw-text-iron-100">
             {newTitle}
-            <Tippy content="Copy" theme="dark" placement="top">
+            <Tippy
+              content="Copy"
+              theme="dark"
+              placement="top"
+              disabled={isTouchScreen}
+            >
               <button
                 onClick={handleCopyNew}
-                className="tw-hidden group-hover:tw-block tw-mx-1 tw-h-5 tw-w-5 tw-bg-transparent tw-cursor-pointer tw-text-sm tw-font-semibold tw-text-iron-200 tw-border-0 focus:tw-outline-none tw-transition tw-duration-300 tw-ease-out"
+                className={`${
+                  isTouchScreen ? "tw-block" : "tw-hidden group-hover:tw-block"
+                } tw-mx-1 tw-h-5 tw-w-5 tw-bg-transparent tw-cursor-pointer tw-text-sm tw-font-semibold tw-text-iron-200 tw-border-0 focus:tw-outline-none tw-transition tw-duration-300 tw-ease-out`}
               >
                 <CopyIcon />
               </button>
