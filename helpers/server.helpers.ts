@@ -9,11 +9,7 @@ import {
 } from "../entities/IProfile";
 import { Season } from "../entities/ISeason";
 import { ConsolidatedTDHMetrics } from "../entities/ITDH";
-import {
-  areEqualAddresses,
-  containsEmojis,
-  formatAddress,
-} from "./Helpers";
+import { areEqualAddresses, containsEmojis, formatAddress } from "./Helpers";
 import { Page } from "./Types";
 import { commonApiFetch } from "../services/api/common-api";
 
@@ -23,30 +19,17 @@ export interface CommonUserServerSideProps {
   consolidatedTDH: ConsolidatedTDHMetrics | null;
 }
 
-const getEnsAndConsolidatedTDH = async (
-  address: string,
-  headers: Record<string, string>
-): Promise<{
-  ens: ENS | null;
-  consolidatedTDH: ConsolidatedTDHMetrics | null;
-}> => {
-  const ens = await commonApiFetch<ENS>({
-    endpoint: `user/${address}`,
+const getConsolidatedTdh = async ({
+  consolidationKey,
+  headers,
+}: {
+  consolidationKey: string;
+  headers: Record<string, string>;
+}): Promise<ConsolidatedTDHMetrics | null> =>
+  await commonApiFetch<ConsolidatedTDHMetrics>({
+    endpoint: `consolidated_owner_metrics/${consolidationKey}`,
     headers,
   });
-  const consolidationKey = ens?.consolidation_key ?? null;
-  const consolidatedTDH = consolidationKey
-    ? await commonApiFetch<ConsolidatedTDHMetrics>({
-        endpoint: `consolidated_owner_metrics/${consolidationKey}`,
-        headers,
-      })
-    : null;
-
-  return {
-    ens,
-    consolidatedTDH,
-  };
-};
 
 export const getCommonUserServerSideProps = async ({
   user,
@@ -60,14 +43,20 @@ export const getCommonUserServerSideProps = async ({
     headers: headers,
   });
 
-  const wallet = profile?.profile?.primary_wallet?.toLowerCase() ?? user;
-  const ensAndConsolidatedTDH = await getEnsAndConsolidatedTDH(wallet, headers);
+  const consolidatedTDH = profile?.consolidation?.consolidation_key
+    ? await getConsolidatedTdh({
+        consolidationKey: profile.consolidation.consolidation_key,
+        headers,
+      })
+    : null;
 
-  const { ens, consolidatedTDH } = ensAndConsolidatedTDH;
+  const display = profile?.consolidation?.consolidation_display ?? null;
+
+  const wallet = profile?.profile?.primary_wallet?.toLowerCase() ?? user;
   const title = profile?.profile?.handle
     ? profile.profile.handle
-    : ens?.display && !containsEmojis(ens.display)
-    ? ens.display
+    : display && !containsEmojis(display)
+    ? display
     : formatAddress(wallet);
 
   return {

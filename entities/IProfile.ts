@@ -20,6 +20,8 @@ export interface IProfileAndConsolidations {
   readonly consolidation: {
     wallets: IProfileConsolidation[];
     tdh: number;
+    consolidation_key: string | null;
+    consolidation_display: string | null;
   };
   readonly level: number;
   readonly cic: AggregatedCicRating;
