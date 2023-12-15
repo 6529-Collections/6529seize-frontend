@@ -1,7 +1,7 @@
-import { useContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   CICType,
-  CIC_TO_TEXT,
+  CIC_META,
   IProfileAndConsolidations,
 } from "../../../../../entities/IProfile";
 import UserCICTypeIconTooltipHeaders from "./UserCICTypeIconTooltipHeaders";
@@ -16,7 +16,7 @@ import { useAccount } from "wagmi";
 export default function UserCICTypeIconTooltip({
   profile,
 }: {
-  profile: IProfileAndConsolidations;
+  readonly profile: IProfileAndConsolidations;
 }) {
   const { address } = useAccount();
   const [isMyProfile, setIsMyProfile] = useState<boolean>(true);
@@ -33,29 +33,6 @@ export default function UserCICTypeIconTooltip({
   useEffect(() => {
     setCicType(cicToType(profile.cic.cic_rating));
   }, [profile]);
-
-  const CIC_META: Record<CICType, { title: string; class: string }> = {
-    [CICType.INACCURATE]: {
-      title: CIC_TO_TEXT[CICType.INACCURATE],
-      class: "tw-text-red",
-    },
-    [CICType.UNKNOWN]: {
-      title: CIC_TO_TEXT[CICType.UNKNOWN],
-      class: "tw-text-yellow",
-    },
-    [CICType.PROBABLY_ACCURATE]: {
-      title: CIC_TO_TEXT[CICType.PROBABLY_ACCURATE],
-      class: "tw-text-[#AAF0C4]",
-    },
-    [CICType.ACCURATE]: {
-      title: CIC_TO_TEXT[CICType.ACCURATE],
-      class: "tw-text-[#73E2A3]",
-    },
-    [CICType.HIGHLY_ACCURATE]: {
-      title: CIC_TO_TEXT[CICType.HIGHLY_ACCURATE],
-      class: "tw-text-[#3CCB7F]",
-    },
-  };
 
   return (
     <div className="tw-p-3">

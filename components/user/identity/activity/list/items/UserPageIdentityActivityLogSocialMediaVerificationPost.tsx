@@ -10,8 +10,8 @@ import UserPageIdentityActivityLogItemAction from "./utils/UserPageIdentityActiv
 import UserPageIdentityActivityLogItemValueWithCopy from "./utils/UserPageIdentityActivityLogItemValueWithCopy";
 
 interface Props {
-  log: ProfileActivityLogSocialVerificationPostEdit;
-  profile: IProfileAndConsolidations;
+  readonly log: ProfileActivityLogSocialVerificationPostEdit;
+  readonly profile: IProfileAndConsolidations;
 }
 
 export default function UserPageIdentityActivityLogSocialMediaVerificationPost(

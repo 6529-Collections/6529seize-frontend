@@ -4,8 +4,7 @@ import {
   ProfileActivityLogType,
 } from "../../../../../entities/IProfile";
 import { assertUnreachable } from "../../../../../helpers/AllowlistToolHelpers";
-import UserPageIdentityActivityLogBanner1 from "./items/UserPageIdentityActivityLogBanner1";
-import UserPageIdentityActivityLogBanner2 from "./items/UserPageIdentityActivityLogBanner2";
+import UserPageIdentityActivityLogBanner from "./items/UserPageIdentityActivityLogBanner";
 import UserPageIdentityActivityLogClassification from "./items/UserPageIdentityActivityLogClassification";
 import UserPageIdentityActivityLogContact from "./items/UserPageIdentityActivityLogContact";
 import UserPageIdentityActivityLogHandle from "./items/UserPageIdentityActivityLogHandle";
@@ -19,8 +18,8 @@ export default function UserPageIdentityActivityLogItem({
   log,
   profile,
 }: {
-  log: ProfileActivityLog;
-  profile: IProfileAndConsolidations;
+  readonly log: ProfileActivityLog;
+  readonly profile: IProfileAndConsolidations;
 }) {
   const logType = log.type;
   switch (logType) {
@@ -53,9 +52,9 @@ export default function UserPageIdentityActivityLogItem({
         />
       );
     case ProfileActivityLogType.BANNER_1_EDIT:
-      return <UserPageIdentityActivityLogBanner1 log={log} profile={profile} />;
+      return <UserPageIdentityActivityLogBanner log={log} profile={profile} />;
     case ProfileActivityLogType.BANNER_2_EDIT:
-      return <UserPageIdentityActivityLogBanner2 log={log} profile={profile} />;
+      return <UserPageIdentityActivityLogBanner log={log} profile={profile} />;
     case ProfileActivityLogType.PFP_EDIT:
       return <UserPageIdentityActivityLogPfp log={log} profile={profile} />;
     default:

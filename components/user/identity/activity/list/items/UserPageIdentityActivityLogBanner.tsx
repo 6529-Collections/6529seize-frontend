@@ -1,20 +1,30 @@
-import { useState } from "react";
 import {
   IProfileAndConsolidations,
   ProfileActivityLogBanner1Edit,
+  ProfileActivityLogBanner2Edit,
+  ProfileActivityLogType,
 } from "../../../../../../entities/IProfile";
 import UserPageIdentityActivityLogItemTimeAgo from "./UserPageIdentityActivityLogItemTimeAgo";
-import UserPageIdentityActivityLogItemHandle from "./utils/UserPageIdentityActivityLogItemHandle";
 import UserPageIdentityActivityLogItemAction from "./utils/UserPageIdentityActivityLogItemAction";
+import UserPageIdentityActivityLogItemHandle from "./utils/UserPageIdentityActivityLogItemHandle";
 
-export default function UserPageIdentityActivityLogBanner1({
+const TITLE: Record<
+  ProfileActivityLogType.BANNER_1_EDIT | ProfileActivityLogType.BANNER_2_EDIT,
+  string
+> = {
+  [ProfileActivityLogType.BANNER_1_EDIT]: "Banner 1",
+  [ProfileActivityLogType.BANNER_2_EDIT]: "Banner 2",
+};
+
+export default function UserPageIdentityActivityLogBanner({
   log,
   profile,
 }: {
-  log: ProfileActivityLogBanner1Edit;
-  profile: IProfileAndConsolidations;
+  readonly log: ProfileActivityLogBanner1Edit | ProfileActivityLogBanner2Edit;
+  readonly profile: IProfileAndConsolidations;
 }) {
   const isAdded = !log.contents.old_value;
+
   return (
     <tr>
       <td className="tw-py-4 tw-flex tw-items-center">
@@ -24,7 +34,7 @@ export default function UserPageIdentityActivityLogBanner1({
             action={isAdded ? "added" : "changed"}
           />
           <span className="tw-whitespace-nowrap tw-text-sm tw-text-neutral-400 tw-font-medium">
-            Banner 1
+            {TITLE[log.type]}
           </span>
           {!isAdded && (
             <>

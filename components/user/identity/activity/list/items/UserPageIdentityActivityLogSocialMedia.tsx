@@ -13,8 +13,8 @@ export default function UserPageIdentityActivityLogSocialMedia({
   log,
   profile,
 }: {
-  log: ProfileActivityLogSocialsEdit;
-  profile: IProfileAndConsolidations;
+  readonly log: ProfileActivityLogSocialsEdit;
+  readonly profile: IProfileAndConsolidations;
 }) {
   return (
     <tr>
