@@ -49,6 +49,7 @@ export default function MemeDistributionPage(props: any) {
           header="The Memes"
           contract={MEMES_CONTRACT}
           link="/the-memes"
+          minting_link="https://thememes.seize.io"
         />
       </main>
     </>
