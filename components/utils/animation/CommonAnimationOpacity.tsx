@@ -1,17 +1,19 @@
 import { motion } from "framer-motion";
 import React from "react";
 
+interface Props {
+  children: React.ReactNode;
+  elementClasses?: string | undefined;
+  elementRole?: string | undefined;
+  onClicked?: (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => void;
+}
+
 export default function CommonAnimationOpacity({
   children,
   elementClasses = "",
   elementRole,
   onClicked = () => undefined,
-}: {
-  children: React.ReactNode;
-  elementClasses?: string | undefined;
-  elementRole?: string | undefined;
-  onClicked?: (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => void;
-}) {
+}: Props) {
   return (
     <motion.div
       initial={{ opacity: 0 }}

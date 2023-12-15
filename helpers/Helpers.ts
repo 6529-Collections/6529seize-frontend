@@ -78,16 +78,12 @@ export function numberWithCommasFromString(x: any) {
 export function numberWithCommas(x: number) {
   if (x === null || isNaN(x)) return "-";
   if (x === 0) return "-";
-  const parts = x.toString().split(".");
-  parts[0] = parts[0].replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,");
-  return parts.join(".");
+  return x.toLocaleString();
 }
 
 export function formatNumberWithCommas(x: number) {
   if (x === null || isNaN(x)) return "-";
-  const parts = x.toString().split(".");
-  parts[0] = parts[0].replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,");
-  return parts.join(".");
+  return x.toLocaleString();
 }
 
 export function getDateDisplay(date: Date) {
