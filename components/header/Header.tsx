@@ -128,7 +128,7 @@ export default function Header(props: Props) {
               <h3
                 className={`d-flex justify-content-center ${styles.burgerMenuHeader}`}
               >
-                {/* {printHeaderConnect()} */}
+                {printHeaderConnect()}
               </h3>
             </Col>
           </Row>
@@ -925,7 +925,7 @@ export default function Header(props: Props) {
                                 Cookie Policy
                               </NavDropdown.Item>
                             </NavDropdown>
-                            {/* {printHeaderConnect()} */}
+                            {printHeaderConnect()}
                           </Nav>
                         </Navbar>
                         <Image
