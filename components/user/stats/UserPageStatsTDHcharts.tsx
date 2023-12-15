@@ -55,13 +55,13 @@ const GRAPH_OPTIONS = {
   },
 };
 export default function UserPageStatsTDHcharts({
-  mainAddress
+  mainAddress,
 }: {
-  mainAddress: string;
+  readonly mainAddress: string;
 }) {
   const [tdhHistory, setTdhHistory] = useState<TDHHistory[]>([]);
   const [tdhLabels, setTdhLabels] = useState<Date[]>([]);
-  const [pageSize, setPageSize] = useState(10);
+  const pageSize = 10;
   const [tdhHistoryLoaded, setTdhHistoryLoaded] = useState(false);
 
   useEffect(() => {
@@ -235,7 +235,6 @@ export default function UserPageStatsTDHcharts({
       </>
     );
   }
-
 
   if (!tdhHistoryLoaded) {
     return (

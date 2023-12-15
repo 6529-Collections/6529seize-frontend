@@ -13,7 +13,7 @@ import UserPageIdentityActivityLogBannerIcon from "./UserPageIdentityActivityLog
 export default function UserPageIdentityActivityLogIcon({
   logType,
 }: {
-  logType: ProfileActivityLogType;
+  readonly logType: ProfileActivityLogType;
 }) {
   switch (logType) {
     case ProfileActivityLogType.RATING_EDIT:

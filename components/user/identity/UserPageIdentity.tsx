@@ -16,10 +16,10 @@ export default function UserPageIdentity({
   profileCICRatings,
   profileIdentityStatements,
 }: {
-  profile: IProfileAndConsolidations;
-  profileActivityLogs: Page<ProfileActivityLog>;
-  profileCICRatings: Page<ProfilesMatterRatingWithRaterLevel>;
-  profileIdentityStatements: CicStatement[];
+  readonly profile: IProfileAndConsolidations;
+  readonly profileActivityLogs: Page<ProfileActivityLog>;
+  readonly profileCICRatings: Page<ProfilesMatterRatingWithRaterLevel>;
+  readonly profileIdentityStatements: CicStatement[];
 }) {
   return (
     <div className="tailwind-scope">

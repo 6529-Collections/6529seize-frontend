@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { assertUnreachable } from "../../../../../helpers/AllowlistToolHelpers";
 import UserPageIdentityAddStatementsSelect from "./UserPageIdentityAddStatementsSelect";
 import UserPageIdentityAddStatementsContact from "./contact/UserPageIdentityAddStatementsContact";
@@ -13,10 +12,10 @@ export default function UserPageIdentityAddStatementsViews({
   setActiveView,
   onClose,
 }: {
-  profile: IProfileAndConsolidations;
-  activeView: STATEMENT_ADD_VIEW;
-  setActiveView: (view: STATEMENT_ADD_VIEW) => void;
-  onClose: () => void;
+  readonly profile: IProfileAndConsolidations;
+  readonly activeView: STATEMENT_ADD_VIEW;
+  readonly setActiveView: (view: STATEMENT_ADD_VIEW) => void;
+  readonly onClose: () => void;
 }) {
   switch (activeView) {
     case STATEMENT_ADD_VIEW.SELECT:

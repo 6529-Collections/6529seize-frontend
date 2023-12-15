@@ -9,17 +9,12 @@ import { QueryKey } from "../../../react-query-wrapper/ReactQueryWrapper";
 export default function UserPageIdentityHeader({
   profile: initialProfile,
 }: {
-  profile: IProfileAndConsolidations;
+  readonly profile: IProfileAndConsolidations;
 }) {
   const router = useRouter();
   const user = (router.query.user as string).toLowerCase();
 
-  const {
-    isLoading,
-    isError,
-    data: profile,
-    error,
-  } = useQuery<IProfileAndConsolidations>({
+  const { data: profile } = useQuery<IProfileAndConsolidations>({
     queryKey: [QueryKey.PROFILE, user.toLowerCase()],
     queryFn: async () =>
       await commonApiFetch<IProfileAndConsolidations>({
@@ -28,7 +23,6 @@ export default function UserPageIdentityHeader({
     enabled: !!user,
     initialData: initialProfile,
   });
-
 
   return (
     <div>

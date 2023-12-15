@@ -13,8 +13,8 @@ export default function UserPageIdentityAddStatementsSocialMediaAccount({
   onClose,
   profile,
 }: {
-  onClose: () => void;
-  profile: IProfileAndConsolidations;
+  readonly onClose: () => void;
+  readonly profile: IProfileAndConsolidations;
 }) {
   const [socialMediaType, setSocialMediaType] =
     useState<SOCIAL_MEDIA_ACCOUNT_STATEMENT_TYPE>(STATEMENT_TYPE.X);

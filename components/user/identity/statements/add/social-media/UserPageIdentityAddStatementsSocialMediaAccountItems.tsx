@@ -2,26 +2,14 @@ import {
   SOCIAL_MEDIA_ACCOUNT_STATEMENT_TYPE,
   SOCIAL_MEDIA_ACCOUNT_STATEMENT_TYPES,
 } from "../../../../../../helpers/Types";
-import FacebookIcon from "../../../../utils/icons/FacebookIcon";
-import GithubIcon from "../../../../utils/icons/GithubIcon";
-import InstagramIcon from "../../../../utils/icons/InstagramIcon";
-import LinkedInIcon from "../../../../utils/icons/LinkedInIcon";
-import MediumIcon from "../../../../utils/icons/MediumIcon";
-import MirrorIcon from "../../../../utils/icons/MirrorIcon";
-import RedditIcon from "../../../../utils/icons/RedditIcon";
-import SubstackIcon from "../../../../utils/icons/SubstackIcon";
-import TikTokIcon from "../../../../utils/icons/TikTokIcon";
-import WeiboIcon from "../../../../utils/icons/WeiboIcon";
-import XIcon from "../../../../utils/icons/XIcon";
-import YoutubeIcon from "../../../../utils/icons/YoutubeIcon";
 import UserPageIdentityAddStatementsTypeButton from "../../utils/UserPageIdentityAddStatementsTypeButton";
 
 export default function UserPageIdentityAddStatementsSocialMediaAccountItems({
   activeType,
   setSocialType,
 }: {
-  activeType: SOCIAL_MEDIA_ACCOUNT_STATEMENT_TYPE;
-  setSocialType: (type: SOCIAL_MEDIA_ACCOUNT_STATEMENT_TYPE) => void;
+  readonly activeType: SOCIAL_MEDIA_ACCOUNT_STATEMENT_TYPE;
+  readonly setSocialType: (type: SOCIAL_MEDIA_ACCOUNT_STATEMENT_TYPE) => void;
 }) {
   const firstRow = SOCIAL_MEDIA_ACCOUNT_STATEMENT_TYPES.slice(
     0,

@@ -10,8 +10,8 @@ export default function UserPageIdentityActivityLogHandle({
   log,
   profile,
 }: {
-  log: ProfileActivityLogHandleEdit;
-  profile: IProfileAndConsolidations;
+  readonly log: ProfileActivityLogHandleEdit;
+  readonly profile: IProfileAndConsolidations;
 }) {
   const isAdded = !log.contents.old_value;
   return (

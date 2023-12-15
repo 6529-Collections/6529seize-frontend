@@ -1,4 +1,3 @@
-import { useRouter } from "next/router";
 import {
   CicStatement,
   IProfileAndConsolidations,
@@ -13,9 +12,9 @@ export default function UserPageIdentityStatementsStatementsList({
   profile,
   noItemsMessage,
 }: {
-  statements: CicStatement[];
-  profile: IProfileAndConsolidations;
-  noItemsMessage: string;
+  readonly statements: CicStatement[];
+  readonly profile: IProfileAndConsolidations;
+  readonly noItemsMessage: string;
 }) {
   const { address } = useAccount();
   const [isMyProfile, setIsMyProfile] = useState<boolean>(false);

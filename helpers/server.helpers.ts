@@ -1,4 +1,3 @@
-import { ENS } from "../entities/IENS";
 import { NFT, NFTLite } from "../entities/INFT";
 import { OwnerLite } from "../entities/IOwner";
 import {

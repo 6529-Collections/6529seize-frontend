@@ -19,7 +19,7 @@ import {
 export default function UserPageIdentityHeaderCICRate({
   profile,
 }: {
-  profile: IProfileAndConsolidations;
+  readonly profile: IProfileAndConsolidations;
 }) {
   const { address } = useAccount();
   const { requestAuth, setToast } = useContext(AuthContext);

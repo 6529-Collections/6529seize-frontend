@@ -9,7 +9,7 @@ import UserPageIdentityStatementsConsolidatedAddressesItem from "./UserPageIdent
 export default function UserPageIdentityStatementsConsolidatedAddresses({
   profile,
 }: {
-  profile: IProfileAndConsolidations;
+  readonly profile: IProfileAndConsolidations;
 }) {
   const getPrimaryAddress = () => {
     if (profile.profile?.primary_wallet) {

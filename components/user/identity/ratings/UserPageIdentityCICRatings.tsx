@@ -18,20 +18,17 @@ export default function CICRatings({
   profile,
   profileCICRatings: initialProfileCICRatings,
 }: {
-  profile: IProfileAndConsolidations;
-  profileCICRatings: Page<ProfilesMatterRatingWithRaterLevel>;
+  readonly profile: IProfileAndConsolidations;
+  readonly profileCICRatings: Page<ProfilesMatterRatingWithRaterLevel>;
 }) {
   const router = useRouter();
   const user = (router.query.user as string).toLowerCase();
 
   const [currentPage, setCurrentPage] = useState<number>(1);
 
-  const {
-    isLoading,
-    isError,
-    data: ratings,
-    error,
-  } = useQuery<Page<ProfilesMatterRatingWithRaterLevel>>({
+  const { isLoading, data: ratings } = useQuery<
+    Page<ProfilesMatterRatingWithRaterLevel>
+  >({
     queryKey: [
       QueryKey.CIC_RATINGS,
       {

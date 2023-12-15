@@ -4,7 +4,7 @@ import { getTimeAgo } from "../../../../../../helpers/Helpers";
 export default function UserPageIdentityActivityLogItemTimeAgo({
   log,
 }: {
-  log: ProfileActivityLog;
+  readonly log: ProfileActivityLog;
 }) {
   const timeAgo = getTimeAgo(new Date(log.created_at).getTime());
   return (

@@ -26,9 +26,9 @@ import { IProfileAndConsolidations } from "../../../entities/IProfile";
 import DotLoader from "../../dotLoader/DotLoader";
 
 interface Props {
-  show: boolean;
-  activeAddress: string | null;
-  profile: IProfileAndConsolidations;
+  readonly show: boolean;
+  readonly activeAddress: string | null;
+  readonly profile: IProfileAndConsolidations;
 }
 
 const DISTRIBUTIONS_PAGE_SIZE = 50;
@@ -86,18 +86,20 @@ export default function UserPageDistributions(props: Props) {
       walletFilter.push(props.activeAddress);
     }
 
-    let url = `${process.env.API_ENDPOINT
-      }/api/distributions?wallet=${walletFilter.join(
-        ","
-      )}&page_size=${DISTRIBUTIONS_PAGE_SIZE}&page=${distributionsPage}`;
+    let url = `${
+      process.env.API_ENDPOINT
+    }/api/distributions?wallet=${walletFilter.join(
+      ","
+    )}&page_size=${DISTRIBUTIONS_PAGE_SIZE}&page=${distributionsPage}`;
     if (!props.activeAddress) {
       const consolidatedWallets = props.profile.consolidation.wallets.map(
         (w) => w.wallet.address
       );
-      url = `${process.env.API_ENDPOINT
-        }/api/distributions?wallet=${consolidatedWallets.join(
-          ","
-        )}&page_size=${DISTRIBUTIONS_PAGE_SIZE}&page=${distributionsPage}`;
+      url = `${
+        process.env.API_ENDPOINT
+      }/api/distributions?wallet=${consolidatedWallets.join(
+        ","
+      )}&page_size=${DISTRIBUTIONS_PAGE_SIZE}&page=${distributionsPage}`;
     }
     fetchUrl(url).then((response: DBResponse) => {
       setDistributionsTotalResults(response.count);
@@ -167,7 +169,7 @@ export default function UserPageDistributions(props: Props) {
                   <th
                     colSpan={
                       !!props.profile.consolidation.wallets.length &&
-                        !props.activeAddress
+                      !props.activeAddress
                         ? 3
                         : 2
                     }
@@ -208,10 +210,10 @@ export default function UserPageDistributions(props: Props) {
                             areEqualAddresses(d.contract, MEMES_CONTRACT)
                               ? `/the-memes/${d.card_id}`
                               : areEqualAddresses(d.contract, GRADIENT_CONTRACT)
-                                ? `/6529-gradient/${d.card_id}`
-                                : areEqualAddresses(d.contract, MEMELAB_CONTRACT)
-                                  ? `/meme-lab/${d.card_id}`
-                                  : d.contract
+                              ? `/6529-gradient/${d.card_id}`
+                              : areEqualAddresses(d.contract, MEMELAB_CONTRACT)
+                              ? `/meme-lab/${d.card_id}`
+                              : d.contract
                           }
                         >
                           Card #{d.card_id}
@@ -219,14 +221,15 @@ export default function UserPageDistributions(props: Props) {
                       ) : (
                         `Card #${d.card_id}`
                       )}
-                      {` - ${areEqualAddresses(d.contract, MEMES_CONTRACT)
+                      {` - ${
+                        areEqualAddresses(d.contract, MEMES_CONTRACT)
                           ? `The Memes`
                           : areEqualAddresses(d.contract, GRADIENT_CONTRACT)
-                            ? `6529Gradient`
-                            : areEqualAddresses(d.contract, MEMELAB_CONTRACT)
-                              ? `Meme Lab`
-                              : d.contract
-                        }${d.card_name ? ` - ${d.card_name}` : ""}`}
+                          ? `6529Gradient`
+                          : areEqualAddresses(d.contract, MEMELAB_CONTRACT)
+                          ? `Meme Lab`
+                          : d.contract
+                      }${d.card_name ? ` - ${d.card_name}` : ""}`}
                     </td>
                     {!!props.profile.consolidation.wallets.length &&
                       !props.activeAddress && (

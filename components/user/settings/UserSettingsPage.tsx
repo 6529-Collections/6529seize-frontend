@@ -12,7 +12,6 @@ import { commonApiPost } from "../../../services/api/common-api";
 import UserSettingsImg from "./UserSettingsImg";
 import UserSettingsBackground from "./UserSettingsBackground";
 import { getRandomColor } from "../../../helpers/Helpers";
-import UserSettingsWebsite from "./UserSettingsWebsite";
 import UserSettingsClassification from "./UserSettingsClassification";
 import { ReactQueryWrapperContext } from "../../react-query-wrapper/ReactQueryWrapper";
 
@@ -20,18 +19,18 @@ interface ApiCreateOrUpdateProfileRequest {
   readonly handle: string;
   readonly primary_wallet: string;
   readonly classification: PROFILE_CLASSIFICATION;
-  pfp_url?: string | undefined;
-  banner_1?: string | undefined;
-  banner_2?: string | undefined;
-  website?: string | undefined;
+  pfp_url?: string;
+  banner_1?: string;
+  banner_2?: string;
+  website?: string;
 }
 
 export default function UserSettingsPage({
   user,
   onUser,
 }: {
-  user: IProfileAndConsolidations;
-  onUser: (user: IProfileAndConsolidations) => void;
+  readonly user: IProfileAndConsolidations;
+  readonly onUser: (user: IProfileAndConsolidations) => void;
 }) {
   const { requestAuth, setToast } = useContext(AuthContext);
   const { invalidateProfile } = useContext(ReactQueryWrapperContext);
@@ -60,7 +59,7 @@ export default function UserSettingsPage({
     user.profile?.banner_2 ?? getRandomColor()
   );
 
-  const [website, setWebsite] = useState<string>(user.profile?.website ?? "");
+  const website = user.profile?.website ?? "";
   const [saving, setSaving] = useState<boolean>(false);
 
   const onSave = async () => {

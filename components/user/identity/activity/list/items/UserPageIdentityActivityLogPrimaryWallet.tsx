@@ -12,8 +12,8 @@ export default function UserPageIdentityActivityLogPrimaryWallet({
   log,
   profile,
 }: {
-  log: ProfileActivityLogPrimaryWalletEdit;
-  profile: IProfileAndConsolidations;
+  readonly log: ProfileActivityLogPrimaryWalletEdit;
+  readonly profile: IProfileAndConsolidations;
 }) {
   const isAdded = !log.contents.old_value;
   return (

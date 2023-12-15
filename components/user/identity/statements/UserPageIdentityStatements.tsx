@@ -18,8 +18,8 @@ export default function UserPageIdentityStatements({
   profile,
   profileIdentityStatements: initialProfileIdentityStatements,
 }: {
-  profile: IProfileAndConsolidations;
-  profileIdentityStatements: CicStatement[];
+  readonly profile: IProfileAndConsolidations;
+  readonly profileIdentityStatements: CicStatement[];
 }) {
   const router = useRouter();
   const user = (router.query.user as string).toLowerCase();
@@ -31,12 +31,7 @@ export default function UserPageIdentityStatements({
   const [socialMediaVerificationPosts, setSocialMediaVerificationPosts] =
     useState<CicStatement[]>([]);
 
-  const {
-    isLoading,
-    isError,
-    data: statements,
-    error,
-  } = useQuery<CicStatement[]>({
+  const { data: statements } = useQuery<CicStatement[]>({
     queryKey: [QueryKey.PROFILE_CIC_STATEMENTS, user.toLowerCase()],
     queryFn: async () =>
       await commonApiFetch<CicStatement[]>({

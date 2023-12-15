@@ -4,7 +4,7 @@ import UserPageIdentityCICRatingsItem from "./UserPageIdentityCICRatingsItem";
 export default function UserPageIdentityCICRatingsList({
   ratings,
 }: {
-  ratings: ProfilesMatterRatingWithRaterLevel[];
+  readonly ratings: ProfilesMatterRatingWithRaterLevel[];
 }) {
   return (
     <div className="tw-inline-block tw-min-w-full tw-align-middle tw-px-6 md:tw-px-8">

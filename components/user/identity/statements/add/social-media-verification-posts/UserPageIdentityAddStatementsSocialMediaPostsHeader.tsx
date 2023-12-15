@@ -1,7 +1,7 @@
 export default function UserPageIdentityAddStatementsSocialMediaPostsHeader({
   onClose,
 }: {
-  onClose: () => void;
+  readonly onClose: () => void;
 }) {
   return (
     <div className="tw-flex tw-justify-between">

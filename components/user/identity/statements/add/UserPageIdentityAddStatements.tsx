@@ -14,8 +14,8 @@ export default function UserPageIdentityAddStatements({
   profile,
   onClose,
 }: {
-  profile: IProfileAndConsolidations;
-  onClose: () => void;
+  readonly profile: IProfileAndConsolidations;
+  readonly onClose: () => void;
 }) {
   const modalRef = useRef<HTMLDivElement>(null);
   useClickAway(modalRef, onClose);
@@ -33,7 +33,7 @@ export default function UserPageIdentityAddStatements({
   };
 
   return (
-    <div className="tw-relative tw-z-10" role="dialog">
+    <div className="tw-relative tw-z-10">
       <div className="tw-fixed tw-inset-0 tw-bg-gray-500 tw-bg-opacity-75"></div>
       <div className="tw-fixed tw-inset-0 tw-z-10 tw-overflow-y-auto">
         <div className="tw-flex tw-min-h-full tw-items-end tw-justify-center tw-text-center sm:tw-items-center tw-p-2 lg:tw-p-0">

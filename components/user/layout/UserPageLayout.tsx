@@ -29,17 +29,17 @@ const DEFAULT_IMAGE =
   "https://d3lqz0a4bldqgf.cloudfront.net/seize_images/Seize_Logo_Glasses_2.png";
 
 interface UserPageLayoutProps {
-  profile: IProfileAndConsolidations;
-  title: string;
-  consolidatedTDH: ConsolidatedTDHMetrics | null;
+  readonly profile: IProfileAndConsolidations;
+  readonly title: string;
+  readonly consolidatedTDH: ConsolidatedTDHMetrics | null;
 }
 
 export default function UserPageLayout({
   props,
   children,
 }: {
-  props: UserPageLayoutProps;
-  children: ReactNode;
+  readonly props: UserPageLayoutProps;
+  readonly children: ReactNode;
 }) {
   const router = useRouter();
   const [user, setUser] = useState<string>(router.query.user as string);
@@ -47,12 +47,7 @@ export default function UserPageLayout({
     setUser(router.query.user as string);
   }, [router.query.user]);
 
-  const {
-    isLoading: isLoadingProfile,
-    isError,
-    data: profile,
-    error,
-  } = useQuery<IProfileAndConsolidations>({
+  const { data: profile } = useQuery<IProfileAndConsolidations>({
     queryKey: [QueryKey.PROFILE, user.toLowerCase()],
     queryFn: async () =>
       await commonApiFetch<IProfileAndConsolidations>({
@@ -126,7 +121,6 @@ export default function UserPageLayout({
   };
 
   const [isLoadingTabData, setIsLoadingTabData] = useState(false);
-
 
   useEffect(() => {
     const handleStart = (toPath: string) => {

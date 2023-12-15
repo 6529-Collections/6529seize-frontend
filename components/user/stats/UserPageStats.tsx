@@ -3,20 +3,21 @@ import { IProfileAndConsolidations } from "../../../entities/IProfile";
 import { ConsolidatedTDHMetrics, TDHMetrics } from "../../../entities/ITDH";
 import { useEffect, useState } from "react";
 import { commonApiFetch } from "../../../services/api/common-api";
-import { fetchAllPages } from "../../../services/6529api";
 import UserPageStatsOverview from "./UserPageStatsOverview";
 import UserPageStatsTDHcharts from "./UserPageStatsTDHcharts";
 
 export default function UserPageStats({
   profile,
-  consolidatedTDH
+  consolidatedTDH,
 }: {
-  profile: IProfileAndConsolidations;
-  consolidatedTDH: ConsolidatedTDHMetrics | null;
+  readonly profile: IProfileAndConsolidations;
+  readonly consolidatedTDH: ConsolidatedTDHMetrics | null;
 }) {
   const isConsolidation = profile.consolidation.wallets.length > 1;
   const router = useRouter();
-  const mainAddress = profile.profile?.primary_wallet?.toLowerCase() ?? (router.query.user as string).toLowerCase();
+  const mainAddress =
+    profile.profile?.primary_wallet?.toLowerCase() ??
+    (router.query.user as string).toLowerCase();
   const [walletsTDH, setWalletsTDH] = useState<Record<string, TDHMetrics>>({});
   const [tdh, setTDH] = useState<ConsolidatedTDHMetrics | TDHMetrics | null>(
     null
@@ -57,8 +58,8 @@ export default function UserPageStats({
   }, [activeAddress, queryAddress, walletsTDH]);
 
   useEffect(() => {
-    setActiveAddress((router.query.address as string) ?? null)
-  }, [router.query.address])
+    setActiveAddress((router.query.address as string) ?? null);
+  }, [router.query.address]);
 
   useEffect(() => {
     setQueryAddress(activeAddress ?? mainAddress);
@@ -102,8 +103,10 @@ export default function UserPageStats({
     setLoading(loadingMetrics.length > 0);
   }, [loadingMetrics]);
 
-  return <>
-    <UserPageStatsOverview tdh={tdh} loading={loading} />
-    <UserPageStatsTDHcharts mainAddress={mainAddress} />
-  </>
+  return (
+    <>
+      <UserPageStatsOverview tdh={tdh} loading={loading} />
+      <UserPageStatsTDHcharts mainAddress={mainAddress} />
+    </>
+  );
 }

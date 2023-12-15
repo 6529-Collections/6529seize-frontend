@@ -23,7 +23,7 @@ import LinkIcon from "./LinkIcon";
 export default function SocialStatementIcon({
   statementType,
 }: {
-  statementType: STATEMENT_TYPE;
+  readonly statementType: STATEMENT_TYPE;
 }) {
   switch (statementType) {
     case STATEMENT_TYPE.X:

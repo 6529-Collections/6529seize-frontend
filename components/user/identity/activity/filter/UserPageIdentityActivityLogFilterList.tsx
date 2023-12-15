@@ -1,4 +1,3 @@
-
 import { ProfileActivityLogType } from "../../../../../entities/IProfile";
 import UserPageIdentityActivityLogFilterListItem from "./UserPageIdentityActivityLogFilterListItem";
 
@@ -6,8 +5,8 @@ export default function UserPageIdentityActivityLogFilterList({
   selected,
   setSelected,
 }: {
-  selected: ProfileActivityLogType[];
-  setSelected: (selected: ProfileActivityLogType) => void;
+  readonly selected: ProfileActivityLogType[];
+  readonly setSelected: (selected: ProfileActivityLogType) => void;
 }) {
   return (
     <div className="tw-origin-top-right tw-absolute tw-right-0 tw-mt-1 tw-w-full tw-rounded-lg tw-shadow-xl tw-bg-iron-800 tw-ring-1 tw-ring-black tw-ring-opacity-5">

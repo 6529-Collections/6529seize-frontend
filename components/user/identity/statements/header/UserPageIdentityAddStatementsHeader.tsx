@@ -7,7 +7,7 @@ import { createPossessionStr } from "../../../../../helpers/Helpers";
 export default function UserPageIdentityAddStatementsHeader({
   profile,
 }: {
-  profile: IProfileAndConsolidations;
+  readonly profile: IProfileAndConsolidations;
 }) {
   const account = useAccount();
   const [isMyProfile, setIsMyProfile] = useState<boolean>(false);
@@ -23,7 +23,6 @@ export default function UserPageIdentityAddStatementsHeader({
       )
     );
   }, [account, profile]);
-
 
   const [possessionName, setPossessionName] = useState<string>(
     createPossessionStr(profile.profile?.handle ?? null)

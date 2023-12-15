@@ -9,11 +9,11 @@ export default function UserPageIdentityAddStatementsTypeButton({
   isLast,
   onClick,
 }: {
-  statementType: STATEMENT_TYPE;
-  isActive: boolean;
-  isFirst: boolean;
-  isLast: boolean;
-  onClick: () => void;
+  readonly statementType: STATEMENT_TYPE;
+  readonly isActive: boolean;
+  readonly isFirst: boolean;
+  readonly isLast: boolean;
+  readonly onClick: () => void;
 }) {
   const getActivityClass = () =>
     isActive ? "tw-bg-iron-800" : "tw-bg-transparent";

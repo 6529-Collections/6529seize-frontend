@@ -1,4 +1,3 @@
-import { useState } from "react";
 import {
   CLASSIFICATIONS,
   IProfileAndConsolidations,
@@ -12,8 +11,8 @@ export default function UserPageIdentityActivityLogClassification({
   log,
   profile,
 }: {
-  log: ProfileActivityLogClassificationEdit;
-  profile: IProfileAndConsolidations;
+  readonly log: ProfileActivityLogClassificationEdit;
+  readonly profile: IProfileAndConsolidations;
 }) {
   const isAdded = !log.contents.old_value;
   return (

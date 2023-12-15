@@ -6,9 +6,9 @@ export default function CommonAnimationWrapper({
   mode = "wait",
   initial = false,
 }: {
-  children: React.ReactNode;
-  mode?: AnimatePresenceProps["mode"];
-  initial?: AnimatePresenceProps["initial"];
+  readonly children: React.ReactNode;
+  readonly mode?: AnimatePresenceProps["mode"];
+  readonly initial?: AnimatePresenceProps["initial"];
 }) {
   return (
     <AnimatePresence mode={mode} initial={initial}>

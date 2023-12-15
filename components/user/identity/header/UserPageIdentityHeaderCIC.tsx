@@ -8,7 +8,7 @@ import { useAccount } from "wagmi";
 export default function UserPageIdentityHeaderCIC({
   profile,
 }: {
-  profile: IProfileAndConsolidations;
+  readonly profile: IProfileAndConsolidations;
 }) {
   const [cicRating, setCicRating] = useState<number>(profile.cic.cic_rating);
   const [cicRaters, setCicRaters] = useState<number>(

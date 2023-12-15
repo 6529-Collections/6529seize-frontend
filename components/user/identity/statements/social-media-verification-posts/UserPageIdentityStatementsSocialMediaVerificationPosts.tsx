@@ -8,8 +8,8 @@ export default function UserPageIdentityStatementsSocialMediaVerificationPosts({
   statements,
   profile,
 }: {
-  statements: CicStatement[];
-  profile: IProfileAndConsolidations;
+  readonly statements: CicStatement[];
+  readonly profile: IProfileAndConsolidations;
 }) {
   return (
     <div>

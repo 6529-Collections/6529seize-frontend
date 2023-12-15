@@ -11,8 +11,8 @@ export default function UserPageIdentityActivityLogPfp({
   log,
   profile,
 }: {
-  log: ProfileActivityLogPfpEdit;
-  profile: IProfileAndConsolidations;
+  readonly log: ProfileActivityLogPfpEdit;
+  readonly profile: IProfileAndConsolidations;
 }) {
   const isAdded = !log.contents.old_value;
   return (

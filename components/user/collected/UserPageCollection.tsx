@@ -13,18 +13,20 @@ import { useRouter } from "next/router";
 import { commonApiFetch } from "../../../services/api/common-api";
 import { fetchAllPages } from "../../../services/6529api";
 
-const UserPageCollectionControls = dynamic(() => import("./UserPageCollectionControls"), {
-  ssr: false,
-});
+const UserPageCollectionControls = dynamic(
+  () => import("./UserPageCollectionControls"),
+  {
+    ssr: false,
+  }
+);
 
 interface Props {
-  profile: IProfileAndConsolidations;
-  consolidatedOwned: OwnerLite[];
-  consolidatedTDH: ConsolidatedTDHMetrics | TDHMetrics | null;
-  memesLite: NFTLite[];
-  gradients: NFT[];
-  seasons: Season[];
-
+  readonly profile: IProfileAndConsolidations;
+  readonly consolidatedOwned: OwnerLite[];
+  readonly consolidatedTDH: ConsolidatedTDHMetrics | TDHMetrics | null;
+  readonly memesLite: NFTLite[];
+  readonly gradients: NFT[];
+  readonly seasons: Season[];
 }
 
 export enum UserCollectionSort {
@@ -36,7 +38,9 @@ export enum UserCollectionSort {
 export default function UserPageCollection(props: Props) {
   const isConsolidation = props.profile.consolidation.wallets.length > 1;
   const router = useRouter();
-  const mainAddress = props.profile.profile?.primary_wallet?.toLowerCase() ?? (router.query.user as string).toLowerCase();
+  const mainAddress =
+    props.profile.profile?.primary_wallet?.toLowerCase() ??
+    (router.query.user as string).toLowerCase();
 
   const getAddressFromQuery = (): string | null => {
     if (!router.query.address) {
@@ -68,7 +72,6 @@ export default function UserPageCollection(props: Props) {
   );
   const [loadingMetrics, setLoadingMetrics] = useState<string[]>([]);
 
-
   const [sortDir, setSortDir] = useState<SortDirection>(SortDirection.ASC);
   const [sort, setSort] = useState<UserCollectionSort>(UserCollectionSort.ID);
   const [hideSeized, setHideSeized] = useState(false);
@@ -80,8 +83,8 @@ export default function UserPageCollection(props: Props) {
   const [loading, setLoading] = useState(loadingMetrics.length > 0);
 
   useEffect(() => {
-    setActiveAddress((router.query.address as string) ?? null)
-  }, [router.query.address])
+    setActiveAddress((router.query.address as string) ?? null);
+  }, [router.query.address]);
 
   useEffect(() => {
     setLoading(loadingMetrics.length > 0);

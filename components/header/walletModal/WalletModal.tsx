@@ -5,7 +5,6 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import { ENS } from "../../../entities/IENS";
-import { fetchUrl } from "../../../services/6529api";
 import { numberWithCommas } from "../../../helpers/Helpers";
 import Address from "../../address/Address";
 import { useAccount } from "wagmi";
@@ -15,19 +14,14 @@ import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
 import { commonApiFetch } from "../../../services/api/common-api";
 
 interface Props {
-  wallet: `0x${string}`;
-  show: boolean;
-  onHide: () => void;
+  readonly wallet: `0x${string}`;
+  readonly show: boolean;
+  readonly onHide: () => void;
 }
 
 export default function WalletModal(props: Props) {
   const account = useAccount();
-  const {
-    isLoading,
-    isError,
-    data: profile,
-    error,
-  } = useQuery<IProfileAndConsolidations>({
+  const { data: profile } = useQuery<IProfileAndConsolidations>({
     queryKey: [QueryKey.PROFILE, account.address?.toLowerCase()],
     queryFn: async () =>
       await commonApiFetch<IProfileAndConsolidations>({

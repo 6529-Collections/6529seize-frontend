@@ -11,9 +11,9 @@ export default function UserPageIdentityAddStatementsContactInput({
   value,
   onChange,
 }: {
-  activeType: STATEMENT_TYPE;
-  value: string;
-  onChange: (value: string) => void;
+  readonly activeType: STATEMENT_TYPE;
+  readonly value: string;
+  readonly onChange: (value: string) => void;
 }) {
   const inputRef = useRef<HTMLInputElement>(null);
 

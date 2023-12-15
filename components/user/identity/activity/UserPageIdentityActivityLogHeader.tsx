@@ -5,7 +5,7 @@ import { createPossessionStr } from "../../../../helpers/Helpers";
 export default function UserPageIdentityActivityLogHeader({
   profile,
 }: {
-  profile: IProfileAndConsolidations;
+  readonly profile: IProfileAndConsolidations;
 }) {
   const [possessionName, setPossessionName] = useState<string>(
     createPossessionStr(profile.profile?.handle ?? null)

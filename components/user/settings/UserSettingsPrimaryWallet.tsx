@@ -9,9 +9,9 @@ export default function UserSettingsPrimaryWallet({
   selected,
   onSelect,
 }: {
-  consolidations: IProfileConsolidation[];
-  selected: string;
-  onSelect: (wallet: string) => void;
+  readonly consolidations: IProfileConsolidation[];
+  readonly selected: string;
+  readonly onSelect: (wallet: string) => void;
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const [iconScope, animateIcon] = useAnimate();

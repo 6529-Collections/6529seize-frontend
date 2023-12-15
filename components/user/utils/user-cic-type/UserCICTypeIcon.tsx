@@ -15,7 +15,7 @@ import UserCICTypeIconTooltip from "./tooltip/UserCICTypeIconTooltip";
 export default function UserCICTypeIcon({
   profile,
 }: {
-  profile: IProfileAndConsolidations;
+  readonly profile: IProfileAndConsolidations;
 }) {
   const [cicType, setCicType] = useState<CICType>(
     cicToType(profile.cic.cic_rating)

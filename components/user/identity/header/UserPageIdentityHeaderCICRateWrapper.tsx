@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { IProfileAndConsolidations } from "../../../../entities/IProfile";
 import { amIUser } from "../../../../helpers/Helpers";
 import { useAccount } from "wagmi";
@@ -10,7 +10,7 @@ import { commonApiFetch } from "../../../../services/api/common-api";
 export default function UserPageIdentityHeaderCICRateWrapper({
   profile,
 }: {
-  profile: IProfileAndConsolidations;
+  readonly profile: IProfileAndConsolidations;
 }) {
   const { address } = useAccount();
   const { data: connectedProfile } = useQuery<IProfileAndConsolidations>({

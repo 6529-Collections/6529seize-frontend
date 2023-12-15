@@ -3,9 +3,9 @@ export default function UserPageIdentityPagination({
   setCurrentPage,
   totalPages,
 }: {
-  currentPage: number;
-  setCurrentPage: (page: number) => void;
-  totalPages: number;
+  readonly currentPage: number;
+  readonly setCurrentPage: (page: number) => void;
+  readonly totalPages: number;
 }) {
   return (
     <div className="tw-px-6 md:tw-px-8 tw-pb-6 md:tw-pb-4 tw-flex tw-justify-end">

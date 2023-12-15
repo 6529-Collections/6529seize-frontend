@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { NFTLite } from "../../../entities/INFT";
-import { Owner, OwnerLite } from "../../../entities/IOwner";
+import { OwnerLite } from "../../../entities/IOwner";
 import {
   areEqualAddresses,
   isGradientsContract,
@@ -37,17 +37,17 @@ export default function UserPageCollectionNfts({
   sort,
   sortDir,
 }: {
-  owned: OwnerLite[];
-  nfts: NFTLite[];
-  tdh: ConsolidatedTDHMetrics | TDHMetrics | null;
-  hideSeized: boolean;
-  hideNonSeized: boolean;
-  hideGradients: boolean;
-  hideMemes: boolean;
-  selectedSeason: number;
-  seasons: Season[];
-  sort: UserCollectionSort;
-  sortDir: SortDirection;
+  readonly owned: OwnerLite[];
+  readonly nfts: NFTLite[];
+  readonly tdh: ConsolidatedTDHMetrics | TDHMetrics | null;
+  readonly hideSeized: boolean;
+  readonly hideNonSeized: boolean;
+  readonly hideGradients: boolean;
+  readonly hideMemes: boolean;
+  readonly selectedSeason: number;
+  readonly seasons: Season[];
+  readonly sort: UserCollectionSort;
+  readonly sortDir: SortDirection;
 }) {
   const [allNfts, setAllNfts] = useState<IUserNFT[]>([]);
   const [filteredNfts, setFilteredNfts] = useState<IUserNFT[]>([]);
@@ -97,7 +97,7 @@ export default function UserPageCollectionNfts({
         owned.find(
           (b) =>
             b.token_id === nft.id && areEqualAddresses(b.contract, nft.contract)
-        )?.balance || 0;
+        )?.balance ?? 0;
       const isMemes = isMemesContract(nft.contract);
       const isGradients = isGradientsContract(nft.contract);
       const { tdh: nftTDH, rank: nftRank } = getNftTdhAndRank({

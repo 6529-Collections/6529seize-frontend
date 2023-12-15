@@ -20,8 +20,8 @@ export default function UserPageIdentityActivityLog({
   profile,
   profileActivityLogs: initialPageActivityLogs,
 }: {
-  profile: IProfileAndConsolidations;
-  profileActivityLogs: Page<ProfileActivityLog>;
+  readonly profile: IProfileAndConsolidations;
+  readonly profileActivityLogs: Page<ProfileActivityLog>;
 }) {
   const router = useRouter();
   const user = (router.query.user as string).toLowerCase();
@@ -49,9 +49,7 @@ export default function UserPageIdentityActivityLog({
   const [currentPage, setCurrentPage] = useState<number>(1);
   const {
     isLoading,
-    isError,
     data: logs,
-    error,
   } = useQuery<Page<ProfileActivityLog>>({
     queryKey: [
       QueryKey.PROFILE_LOGS,
@@ -96,7 +94,7 @@ export default function UserPageIdentityActivityLog({
     <div className="tw-bg-iron-900 tw-border tw-border-white/5 tw-border-solid tw-rounded-xl">
       <UserPageIdentityActivityLogHeader profile={profile} />
       <div className="tw-min-h-[28rem] tw-max-h-[28rem] tw-transform-gpu tw-scroll-py-3 tw-overflow-auto">
-        {!!(logs?.data.length || selectedFilters.length) && (
+        {!!(logs?.data.length ?? selectedFilters.length) && (
           <UserPageIdentityActivityLogFilter
             selected={selectedFilters}
             setSelected={onFilter}

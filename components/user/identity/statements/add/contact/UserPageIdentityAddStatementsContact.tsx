@@ -13,8 +13,8 @@ export default function UserPageIdentityAddStatementsContact({
   profile,
   onClose,
 }: {
-  profile: IProfileAndConsolidations;
-  onClose: () => void;
+  readonly profile: IProfileAndConsolidations;
+  readonly onClose: () => void;
 }) {
   const [contactType, setContactType] = useState<CONTACT_STATEMENT_TYPE>(
     STATEMENT_TYPE.DISCORD

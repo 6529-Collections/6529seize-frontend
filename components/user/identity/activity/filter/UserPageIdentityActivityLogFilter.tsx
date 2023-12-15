@@ -3,16 +3,16 @@ import UserPageIdentityActivityLogFilterList from "./UserPageIdentityActivityLog
 import { AnimatePresence, motion, useAnimate } from "framer-motion";
 import { useClickAway, useKeyPressEvent } from "react-use";
 import {
-
-  PROFILE_ACTIVITY_TYPE_TO_TEXT, ProfileActivityLogType,
+  PROFILE_ACTIVITY_TYPE_TO_TEXT,
+  ProfileActivityLogType,
 } from "../../../../../entities/IProfile";
 
 export default function UserPageIdentityActivityLogFilter({
   selected,
   setSelected,
 }: {
-  selected: ProfileActivityLogType[];
-  setSelected: (selected: ProfileActivityLogType) => void;
+  readonly selected: ProfileActivityLogType[];
+  readonly setSelected: (selected: ProfileActivityLogType) => void;
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const [iconScope, animateIcon] = useAnimate();

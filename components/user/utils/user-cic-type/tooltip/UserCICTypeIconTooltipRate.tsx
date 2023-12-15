@@ -4,7 +4,7 @@ import UserPageIdentityHeaderCICRateWrapper from "../../../identity/header/UserP
 export default function UserCICTypeIconTooltipRate({
   profile,
 }: {
-  profile: IProfileAndConsolidations;
+  readonly profile: IProfileAndConsolidations;
 }) {
   return (
     <div className="tw-mt-3.5 tw-pt-3.5 tw-border-t tw-border-solid tw-border-neutral-600 tw-border-x-0 tw-border-b-0">

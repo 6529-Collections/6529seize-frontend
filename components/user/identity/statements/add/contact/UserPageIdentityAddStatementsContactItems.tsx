@@ -8,8 +8,8 @@ export default function UserPageIdentityAddStatementsContactItems({
   activeType,
   setContactType,
 }: {
-  activeType: CONTACT_STATEMENT_TYPE;
-  setContactType: (type: CONTACT_STATEMENT_TYPE) => void;
+  readonly activeType: CONTACT_STATEMENT_TYPE;
+  readonly setContactType: (type: CONTACT_STATEMENT_TYPE) => void;
 }) {
   return (
     <div className="tw-mt-8">

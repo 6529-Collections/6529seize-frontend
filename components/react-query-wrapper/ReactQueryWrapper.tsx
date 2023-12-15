@@ -53,7 +53,7 @@ export const ReactQueryWrapperContext =
 export default function ReactQueryWrapper({
   children,
 }: {
-  children: React.ReactNode;
+  readonly children: React.ReactNode;
 }) {
   const queryClient = useQueryClient();
 

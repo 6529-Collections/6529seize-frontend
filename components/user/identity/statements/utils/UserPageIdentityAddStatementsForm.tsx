@@ -9,13 +9,10 @@ import {
   CicStatement,
   IProfileAndConsolidations,
 } from "../../../../../entities/IProfile";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import { commonApiPost } from "../../../../../services/api/common-api";
 import { AuthContext } from "../../../../auth/Auth";
-import {
-  QueryKey,
-  ReactQueryWrapperContext,
-} from "../../../../react-query-wrapper/ReactQueryWrapper";
+import { ReactQueryWrapperContext } from "../../../../react-query-wrapper/ReactQueryWrapper";
 
 type ApiCreateOrUpdateProfileCicStatement = Omit<
   CicStatement,
@@ -28,12 +25,11 @@ export default function UserPageIdentityAddStatementsForm({
   group,
   onClose,
 }: {
-  profile: IProfileAndConsolidations;
-  activeType: STATEMENT_TYPE;
-  group: STATEMENT_GROUP;
-  onClose: () => void;
+  readonly profile: IProfileAndConsolidations;
+  readonly activeType: STATEMENT_TYPE;
+  readonly group: STATEMENT_GROUP;
+  readonly onClose: () => void;
 }) {
-  const queryClient = useQueryClient();
   const { requestAuth, setToast } = useContext(AuthContext);
   const { invalidateProfileLogs, invalidateProfileCICStatements } = useContext(
     ReactQueryWrapperContext

@@ -15,18 +15,16 @@ import { QueryKey } from "../react-query-wrapper/ReactQueryWrapper";
 import { commonApiFetch } from "../../services/api/common-api";
 
 interface Props {
-  consolidations: string[];
-  view?: WalletView;
-  setView: (view: WalletView) => void;
+  readonly consolidations: string[];
+  readonly view?: WalletView;
+  readonly setView: (view: WalletView) => void;
 }
 
 export default function HeaderConnect(props: Props) {
   const account = useAccount();
   const {
     isLoading,
-    isError,
     data: profile,
-    error,
   } = useQuery<IProfileAndConsolidations>({
     queryKey: [QueryKey.PROFILE, account.address?.toLowerCase()],
     queryFn: async () =>

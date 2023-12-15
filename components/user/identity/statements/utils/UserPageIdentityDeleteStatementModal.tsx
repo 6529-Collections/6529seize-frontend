@@ -14,9 +14,9 @@ export default function UserPageIdentityDeleteStatementModal({
   profile,
   onClose,
 }: {
-  statement: CicStatement;
-  profile: IProfileAndConsolidations;
-  onClose: () => void;
+  readonly statement: CicStatement;
+  readonly profile: IProfileAndConsolidations;
+  readonly onClose: () => void;
 }) {
   const modalRef = useRef<HTMLDivElement>(null);
   useClickAway(modalRef, onClose);
@@ -52,7 +52,7 @@ export default function UserPageIdentityDeleteStatementModal({
   };
 
   return (
-    <div className="tw-cursor-default tw-relative tw-z-10" role="dialog">
+    <div className="tw-cursor-default tw-relative tw-z-10">
       <div className="tw-fixed tw-inset-0 tw-bg-gray-500 tw-bg-opacity-75"></div>
       <div className="tw-fixed tw-inset-0 tw-z-10 tw-overflow-y-auto">
         <div className="tw-flex tw-min-h-full tw-items-end tw-justify-center tw-p-4 tw-text-center sm:tw-items-center sm:tw-p-0">

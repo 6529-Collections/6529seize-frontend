@@ -17,9 +17,9 @@ export default function UserPageIdentityStatementsStatement({
   profile,
   isMyProfile,
 }: {
-  statement: CicStatement;
-  profile: IProfileAndConsolidations;
-  isMyProfile: boolean;
+  readonly statement: CicStatement;
+  readonly profile: IProfileAndConsolidations;
+  readonly isMyProfile: boolean;
 }) {
   const router = useRouter();
   const [title, setTitle] = useState(statement.statement_value);

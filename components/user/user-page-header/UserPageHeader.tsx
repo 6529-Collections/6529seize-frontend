@@ -1,5 +1,4 @@
 import { IProfileAndConsolidations } from "../../../entities/IProfile";
-import UserPageHeaderAddresses from "./addresses/UserPageHeaderAddresses";
 import { ConsolidatedTDHMetrics } from "../../../entities/ITDH";
 import UserPageHeaderPfp from "./userPageHeaderPfp";
 import UserPageHeaderName from "./UserPageHeaderName";
@@ -24,17 +23,15 @@ const inter = Inter({
 export default function UserPageHeader({
   profile,
   mainAddress,
-  activeAddress,
-  onActiveAddress,
   consolidatedTDH,
   user,
 }: {
-  profile: IProfileAndConsolidations;
-  mainAddress: string;
-  activeAddress: string | null;
-  onActiveAddress: (address: string) => void;
-  consolidatedTDH: ConsolidatedTDHMetrics | null;
-  user: string;
+  readonly profile: IProfileAndConsolidations;
+  readonly mainAddress: string;
+  readonly activeAddress: string | null;
+  readonly onActiveAddress: (address: string) => void;
+  readonly consolidatedTDH: ConsolidatedTDHMetrics | null;
+  readonly user: string;
 }) {
   const account = useAccount();
   const [isLoggedInUser, setIsLoggedInUser] = useState<boolean>(false);

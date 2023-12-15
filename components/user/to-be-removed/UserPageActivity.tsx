@@ -14,10 +14,10 @@ import UserPageDetailsNothingHere from "../UserPageDetailsNothingHere";
 import DotLoader from "../../dotLoader/DotLoader";
 
 interface Props {
-  show: boolean;
-  activeAddress: string | null;
-  memesLite: NFTLite[];
-  profile: IProfileAndConsolidations;
+  readonly show: boolean;
+  readonly activeAddress: string | null;
+  readonly memesLite: NFTLite[];
+  readonly profile: IProfileAndConsolidations;
 }
 
 const ACTIVITY_PAGE_SIZE = 25;
@@ -87,10 +87,11 @@ export default function UserPageActivity(props: Props) {
         (w) => w.wallet.address
       );
 
-      url = `${process.env.API_ENDPOINT
-        }/api/transactions?contract=${MEMES_CONTRACT}&wallet=${wallets.join(
-          ","
-        )}&page_size=${ACTIVITY_PAGE_SIZE}&page=${activityPage}`;
+      url = `${
+        process.env.API_ENDPOINT
+      }/api/transactions?contract=${MEMES_CONTRACT}&wallet=${wallets.join(
+        ","
+      )}&page_size=${ACTIVITY_PAGE_SIZE}&page=${activityPage}`;
     }
     switch (activityTypeFilter) {
       case UserActivityTypeFilter.SALES:
@@ -154,17 +155,20 @@ export default function UserPageActivity(props: Props) {
           xs={{ span: 7 }}
           sm={{ span: 7 }}
           md={{ span: 9 }}
-          lg={{ span: 10 }}>
+          lg={{ span: 10 }}
+        >
           <h3>Wallet Activity</h3>
         </Col>
         <Col
           xs={{ span: 5 }}
           sm={{ span: 5 }}
           md={{ span: 3 }}
-          lg={{ span: 2 }}>
+          lg={{ span: 2 }}
+        >
           <Dropdown
             className={styles.activityFilterDropdown}
-            drop={"down-centered"}>
+            drop={"down-centered"}
+          >
             <Dropdown.Toggle>Filter: {activityTypeFilter}</Dropdown.Toggle>
             <Dropdown.Menu>
               {Object.values(UserActivityTypeFilter).map((filter) => (
@@ -175,7 +179,8 @@ export default function UserPageActivity(props: Props) {
                       page: 1,
                       filter,
                     })
-                  }>
+                  }
+                >
                   {filter}
                 </Dropdown.Item>
               ))}

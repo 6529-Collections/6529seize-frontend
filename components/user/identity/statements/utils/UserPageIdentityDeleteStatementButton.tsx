@@ -13,8 +13,8 @@ export default function UserPageIdentityDeleteStatementButton({
   statement,
   profile,
 }: {
-  statement: CicStatement;
-  profile: IProfileAndConsolidations;
+  readonly statement: CicStatement;
+  readonly profile: IProfileAndConsolidations;
 }) {
   const router = useRouter();
   const [isDeleteStatementOpen, setIsDeleteStatementOpen] =
