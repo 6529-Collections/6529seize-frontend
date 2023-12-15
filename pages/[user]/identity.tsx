@@ -67,8 +67,27 @@ export async function getServerSideProps(
 }> {
   try {
     const headers = getCommonHeaders(req);
-    const { profile, title, consolidatedTDH } =
-      await getCommonUserServerSideProps({ user: req.query.user, headers });
+
+    const [
+      { profile, title, consolidatedTDH },
+      profileActivityLogs,
+      profileCICRatings,
+      profileIdentityStatements,
+    ] = await Promise.all([
+      getCommonUserServerSideProps({ user: req.query.user, headers }),
+      getUserProfileActivityLogs({
+        user: req.query.user,
+        headers,
+      }),
+      getUserProfileCICRatings({
+        user: req.query.user,
+        headers,
+      }),
+      getUserProfileIdentityStatements({
+        user: req.query.user,
+        headers,
+      }),
+    ]);
 
     const needsRedirect = userPageNeedsRedirect({
       profile,
@@ -79,45 +98,6 @@ export async function getServerSideProps(
     if (needsRedirect) {
       return needsRedirect as any;
     }
-
-    if (!profile.profile) {
-      return {
-        props: {
-          profile,
-          title,
-          consolidatedTDH,
-          profileActivityLogs: {
-            count: 0,
-            page: 1,
-            next: false,
-            data: [],
-          },
-          profileCICRatings: {
-            count: 0,
-            page: 1,
-            next: false,
-            data: [],
-          },
-          profileIdentityStatements: [],
-        },
-      };
-    }
-
-    const [profileActivityLogs, profileCICRatings, profileIdentityStatements] =
-      await Promise.all([
-        getUserProfileActivityLogs({
-          user: req.query.user,
-          headers,
-        }),
-        getUserProfileCICRatings({
-          user: req.query.user,
-          headers,
-        }),
-        getUserProfileIdentityStatements({
-          user: req.query.user,
-          headers,
-        }),
-      ]);
 
     return {
       props: {

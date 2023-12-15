@@ -63,8 +63,13 @@ export async function getServerSideProps(
 }> {
   try {
     const headers = getCommonHeaders(req);
-    const { profile, title, consolidatedTDH } =
-      await getCommonUserServerSideProps({ user: req.query.user, headers });
+    const [{ profile, title, consolidatedTDH }, gradients, memesLite, seasons] =
+      await Promise.all([
+        getCommonUserServerSideProps({ user: req.query.user, headers }),
+        getGradients(headers),
+        getMemesLite(headers),
+        getSeasons(headers),
+      ]);
 
     const needsRedirect = userPageNeedsRedirect({
       profile,
@@ -75,17 +80,10 @@ export async function getServerSideProps(
     if (needsRedirect) {
       return needsRedirect as any;
     }
-
-    const [gradients, memesLite, seasons, consolidatedOwned] =
-      await Promise.all([
-        getGradients(headers),
-        getMemesLite(headers),
-        getSeasons(headers),
-        getOwned({
-          wallets: profile.consolidation.wallets.map((w) => w.wallet.address),
-          headers,
-        }),
-      ]);
+    const consolidatedOwned = await getOwned({
+      wallets: profile.consolidation.wallets.map((w) => w.wallet.address),
+      headers,
+    });
 
     return {
       props: {

@@ -108,16 +108,25 @@ export const getUserProfileActivityLogs = async ({
   user: string;
   headers: Record<string, string>;
 }): Promise<Page<ProfileActivityLog>> => {
-  return await commonApiFetch<Page<ProfileActivityLog>>({
-    endpoint: `profile-logs`,
-    params: {
-      profile: user,
-      page: `1`,
-      page_size: `10`,
-      log_type: "",
-    },
-    headers,
-  });
+  try {
+    return await commonApiFetch<Page<ProfileActivityLog>>({
+      endpoint: `profile-logs`,
+      params: {
+        profile: user,
+        page: `1`,
+        page_size: `10`,
+        log_type: "",
+      },
+      headers,
+    });
+  } catch {
+    return {
+      count: 0,
+      page: 1,
+      next: false,
+      data: [],
+    };
+  }
 };
 
 export const getUserProfileCICRatings = async ({
@@ -127,14 +136,23 @@ export const getUserProfileCICRatings = async ({
   user: string;
   headers: Record<string, string>;
 }): Promise<Page<ProfilesMatterRatingWithRaterLevel>> => {
-  return await commonApiFetch<Page<ProfilesMatterRatingWithRaterLevel>>({
-    endpoint: `profiles/${user}/cic/ratings`,
-    params: {
-      page: `1`,
-      page_size: `10`,
-    },
-    headers,
-  });
+  try {
+    return await commonApiFetch<Page<ProfilesMatterRatingWithRaterLevel>>({
+      endpoint: `profiles/${user}/cic/ratings`,
+      params: {
+        page: `1`,
+        page_size: `10`,
+      },
+      headers,
+    });
+  } catch {
+    return {
+      count: 0,
+      page: 1,
+      next: false,
+      data: [],
+    };
+  }
 };
 
 export const getUserProfileIdentityStatements = async ({
@@ -144,10 +162,14 @@ export const getUserProfileIdentityStatements = async ({
   user: string;
   headers: Record<string, string>;
 }): Promise<CicStatement[]> => {
-  return await commonApiFetch<CicStatement[]>({
-    endpoint: `profiles/${user}/cic/statements`,
-    headers,
-  });
+  try {
+    return await commonApiFetch<CicStatement[]>({
+      endpoint: `profiles/${user}/cic/statements`,
+      headers,
+    });
+  } catch {
+    return [];
+  }
 };
 
 export const getGradients = async (
