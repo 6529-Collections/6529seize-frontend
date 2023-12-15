@@ -40,12 +40,14 @@ export default function UserPageIdentityActivityLogRate({
             user
           </span>
           <Tippy content={log.target_profile_handle} theme="dark">
-            <span
+            <button
               onClick={goToProfile}
-              className="tw-whitespace-nowrap hover:tw-underline tw-cursor-pointer tw-truncate tw-max-w-[12rem] tw-text-sm tw-font-semibold tw-text-iron-100"
+              className="tw-bg-transparent tw-border-none"
             >
-              {log.target_profile_handle}
-            </span>
+              <span className="tw-whitespace-nowrap hover:tw-underline tw-cursor-pointer tw-truncate tw-max-w-[12rem] tw-text-sm tw-font-semibold tw-text-iron-100">
+                {log.target_profile_handle}
+              </span>
+            </button>
           </Tippy>
           {!isValueZero && (
             <span

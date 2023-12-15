@@ -21,7 +21,7 @@ const CIC_COLOR: Record<CICType, string> = {
 export default function UserPageIdentityCICRatingsItem({
   rating,
 }: {
-  rating: ProfilesMatterRatingWithRaterLevel;
+  readonly rating: ProfilesMatterRatingWithRaterLevel;
 }) {
   const router = useRouter();
   const [cicType, setCicType] = useState<CICType>(
@@ -57,13 +57,15 @@ export default function UserPageIdentityCICRatingsItem({
               className={`tw-flex-shrink-0 tw-absolute -tw-right-1 -tw-top-1 tw-block tw-h-2.5 tw-w-2.5 tw-rounded-full ${CIC_COLOR[cicType]}`}
             ></span>
           </span>
-          <div className="tw-inline-flex tw-space-x-1 5">
-            <span
+          <div className="tw-inline-flex tw-items-center tw-space-x-1">
+            <button
               onClick={goToProfile}
-              className="tw-whitespace-nowrap hover:tw-underline tw-cursor-pointer tw-text-sm tw-font-semibold tw-text-iron-100"
+              className="tw-bg-transparent tw-border-none tw-flex tw-items-center"
             >
-              {rating.rater_handle}
-            </span>
+              <span className="tw-whitespace-nowrap hover:tw-underline tw-cursor-pointer tw-text-sm tw-font-semibold tw-text-iron-100">
+                {rating.rater_handle}
+              </span>
+            </button>
             <span className="tw-whitespace-nowrap tw-text-sm tw-text-iron-400 tw-font-semibold">
               rated
             </span>

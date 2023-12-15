@@ -7,7 +7,7 @@ import { amIUser } from "../../../helpers/Helpers";
 export default function UserPageIdentityNoProfile({
   profile,
 }: {
-  profile: IProfileAndConsolidations;
+  readonly profile: IProfileAndConsolidations;
 }) {
   const router = useRouter();
   const { address } = useAccount();
@@ -45,12 +45,14 @@ export default function UserPageIdentityNoProfile({
           <div className="tw-ml-3 tw-self-center">
             <h3 className="tw-text-sm tw-mb-0 tw-font-semibold tw-text-primary-300">
               You have not set up your profile yet, to set up your profile click{" "}
-              <span
+              <button
                 onClick={goToSettings}
-                className="tw-cursor-pointer tw-tracking-wider tw-font-bold tw-underline tw-text-white tw-transition tw-duration-300 tw-ease-out"
+                className="tw-bg-transparent tw-border-none"
               >
-                here
-              </span>
+                <span className="tw-text-sm tw-cursor-pointer tw-tracking-wider tw-font-bold tw-underline tw-text-white tw-transition tw-duration-300 tw-ease-out">
+                  here
+                </span>
+              </button>
             </h3>
           </div>
         </div>
@@ -77,10 +79,10 @@ export default function UserPageIdentityNoProfile({
         </svg>
         <div className="tw-ml-3 tw-self-center">
           <h3 className="tw-text-sm tw-mb-0 tw-font-semibold tw-text-iron-400">
-            Address
+            Address{" "}
             <span className="tw-break-all tw-px-1.5 tw-font-semibold tw-text-iron-100">
               {user}
-            </span>
+            </span>{" "}
             have not set up profile yet.
           </h3>
         </div>

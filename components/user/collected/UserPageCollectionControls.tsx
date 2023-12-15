@@ -25,22 +25,22 @@ export default function UserPageCollectionControls({
   selectedSeason,
   setSelectedSeason,
 }: {
-  tdh: ConsolidatedTDHMetrics | TDHMetrics | null;
-  hideSeized: boolean;
-  hideNonSeized: boolean;
-  setHideSeized: (hide: boolean) => void;
-  setHideNonSeized: (hide: boolean) => void;
-  hideGradients: boolean;
-  setHideGradients: (hide: boolean) => void;
-  hideMemes: boolean;
-  setHideMemes: (hide: boolean) => void;
-  sort: UserCollectionSort;
-  setSort: (sort: UserCollectionSort) => void;
-  sortDir: SortDirection;
-  setSortDir: (sortDir: SortDirection) => void;
-  seasons: Season[];
-  selectedSeason: number;
-  setSelectedSeason: (season: number) => void;
+  readonly tdh: ConsolidatedTDHMetrics | TDHMetrics | null;
+  readonly hideSeized: boolean;
+  readonly hideNonSeized: boolean;
+  readonly setHideSeized: (hide: boolean) => void;
+  readonly setHideNonSeized: (hide: boolean) => void;
+  readonly hideGradients: boolean;
+  readonly setHideGradients: (hide: boolean) => void;
+  readonly hideMemes: boolean;
+  readonly setHideMemes: (hide: boolean) => void;
+  readonly sort: UserCollectionSort;
+  readonly setSort: (sort: UserCollectionSort) => void;
+  readonly sortDir: SortDirection;
+  readonly setSortDir: (sortDir: SortDirection) => void;
+  readonly seasons: Season[];
+  readonly selectedSeason: number;
+  readonly setSelectedSeason: (season: number) => void;
 }) {
   return (
     <>
@@ -51,38 +51,43 @@ export default function UserPageCollectionControls({
             <FontAwesomeIcon
               icon="chevron-circle-up"
               onClick={() => setSortDir(SortDirection.ASC)}
-              className={`${styles.sortDirection} ${sortDir !== SortDirection.ASC ? styles.disabled : ""
-                }`}
+              className={`${styles.sortDirection} ${
+                sortDir !== SortDirection.ASC ? styles.disabled : ""
+              }`}
             />{" "}
             <FontAwesomeIcon
               icon="chevron-circle-down"
               onClick={() => setSortDir(SortDirection.DESC)}
-              className={`${styles.sortDirection} ${sortDir !== SortDirection.DESC ? styles.disabled : ""
-                }`}
+              className={`${styles.sortDirection} ${
+                sortDir !== SortDirection.DESC ? styles.disabled : ""
+              }`}
             />
           </Col>
           <Col xs={12} className="pt-2">
-            <span
+            <button
               onClick={() => setSort(UserCollectionSort.ID)}
-              className={`${styles.sort} ${sort !== UserCollectionSort.ID ? styles.disabled : ""
-                }`}
+              className={`${styles.sort} ${
+                sort !== UserCollectionSort.ID ? styles.disabled : ""
+              } tw-bg-transparent tw-border-none`}
             >
               ID
-            </span>
-            <span
+            </button>
+            <button
               onClick={() => setSort(UserCollectionSort.TDH)}
-              className={`${styles.sort} ${sort !== UserCollectionSort.TDH ? styles.disabled : ""
-                }`}
+              className={`${styles.sort} ${
+                sort !== UserCollectionSort.TDH ? styles.disabled : ""
+              } tw-bg-transparent tw-border-none`}
             >
               TDH
-            </span>
-            <span
+            </button>
+            <button
               onClick={() => setSort(UserCollectionSort.RANK)}
-              className={`${styles.sort} ${sort !== UserCollectionSort.RANK ? styles.disabled : ""
-                }`}
+              className={`${styles.sort} ${
+                sort !== UserCollectionSort.RANK ? styles.disabled : ""
+              }  tw-bg-transparent tw-border-none`}
             >
               RANK
-            </span>
+            </button>
           </Col>
         </Col>
         <Col className="d-flex align-items-center justify-content-end" xs={7}>

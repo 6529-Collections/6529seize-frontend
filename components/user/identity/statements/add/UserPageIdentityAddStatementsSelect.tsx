@@ -4,8 +4,8 @@ export default function UserPageIdentityAddStatementsSelect({
   onClose,
   onViewChange,
 }: {
-  onClose: () => void;
-  onViewChange: (view: STATEMENT_ADD_VIEW) => void;
+  readonly onClose: () => void;
+  readonly onViewChange: (view: STATEMENT_ADD_VIEW) => void;
 }) {
   return (
     <>
@@ -46,9 +46,9 @@ export default function UserPageIdentityAddStatementsSelect({
 
       {/*  Grid starts here */}
       <div className="tw-mt-8 tw-grid tw-grid-cols-1 md:tw-grid-cols-3 tw-gap-6">
-        <div
+        <button
           onClick={() => onViewChange(STATEMENT_ADD_VIEW.SOCIAL_MEDIA_ACCOUNT)}
-          className="tw-cursor-pointer tw-rounded-lg tw-group tw-relative tw-bg-iron-800/80 tw-border tw-border-solid tw-border-white/5 hover:tw-bg-iron-800 tw-p-6 tw-transition tw-duration-300 tw-ease-out"
+          className="tw-text-left tw-rounded-lg tw-group tw-relative tw-bg-iron-800/80 tw-border tw-border-solid tw-border-white/5 hover:tw-bg-iron-800 tw-p-6 tw-transition tw-duration-300 tw-ease-out"
         >
           <div>
             <span className="tw-inline-flex tw-items-center tw-justify-center tw-rounded-xl tw-h-11 tw-w-11 tw-bg-iron-700/60 tw-border tw-border-solid tw-border-iron-600/20">
@@ -76,10 +76,10 @@ export default function UserPageIdentityAddStatementsSelect({
               Your handle on social media platforms.
             </p>
           </div>
-        </div>
-        <div
+        </button>
+        <button
           onClick={() => onViewChange(STATEMENT_ADD_VIEW.CONTACT)}
-          className="tw-group tw-cursor-pointer tw-rounded-lg tw-group tw-relative tw-bg-iron-800/80 tw-border tw-border-solid tw-border-white/5 hover:tw-bg-iron-800 tw-p-6 tw-transition tw-duration-300 tw-ease-out"
+          className="tw-text-left  tw-rounded-lg tw-group tw-relative tw-bg-iron-800/80 tw-border tw-border-solid tw-border-white/5 hover:tw-bg-iron-800 tw-p-6 tw-transition tw-duration-300 tw-ease-out"
         >
           <div>
             <span className="tw-inline-flex tw-items-center tw-justify-center tw-rounded-xl tw-h-11 tw-w-11 tw-bg-iron-700/60 tw-border tw-border-solid tw-border-iron-600/20">
@@ -107,12 +107,12 @@ export default function UserPageIdentityAddStatementsSelect({
               Your handle on messaging platforms.
             </p>
           </div>
-        </div>
-        <div
+        </button>
+        <button
           onClick={() =>
             onViewChange(STATEMENT_ADD_VIEW.SOCIAL_MEDIA_VERIFICATION_POST)
           }
-          className="tw-cursor-pointer tw-rounded-lg tw-group tw-relative tw-bg-iron-800/80 tw-border tw-border-solid tw-border-white/5 hover:tw-bg-iron-800 tw-p-6 tw-transition tw-duration-300 tw-ease-out"
+          className="tw-text-left tw-rounded-lg tw-group tw-relative tw-bg-iron-800/80 tw-border tw-border-solid tw-border-white/5 hover:tw-bg-iron-800 tw-p-6 tw-transition tw-duration-300 tw-ease-out"
         >
           <div>
             <span className="tw-inline-flex tw-items-center tw-justify-center tw-rounded-xl tw-h-11 tw-w-11 tw-bg-iron-700/60 tw-border tw-border-solid tw-border-iron-600/20">
@@ -140,7 +140,7 @@ export default function UserPageIdentityAddStatementsSelect({
               Your posts verifying your profile here.
             </p>
           </div>
-        </div>
+        </button>
       </div>
       {/* Bottom bullet points */}
       <div className="tw-px-4 tw-pt-6 tw-mt-6 tw-border-t tw-border-solid tw-border-[#333333] tw-border-x-0 tw-border-b-0">

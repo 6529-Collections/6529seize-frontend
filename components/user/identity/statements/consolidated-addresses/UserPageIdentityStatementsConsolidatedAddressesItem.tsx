@@ -11,11 +11,11 @@ export default function UserPageIdentityStatementsConsolidatedAddressesItem({
   address,
   primaryAddress,
 }: {
-  address: IProfileConsolidation;
-  primaryAddress: string;
+  readonly address: IProfileConsolidation;
+  readonly primaryAddress: string;
 }) {
   const router = useRouter();
-  const goToOpensea = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+  const goToOpensea = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
     e.stopPropagation();
     window.open(
       `https://opensea.io/accounts/${address.wallet.address}`,
@@ -47,21 +47,22 @@ export default function UserPageIdentityStatementsConsolidatedAddressesItem({
     setIsTouchScreen(window.matchMedia("(pointer: coarse)").matches);
   }, [router.isReady]);
 
-
   return (
-    <li className="tw-group tw-flex tw-items-center tw-group  tw-text-sm tw-font-medium tw-text-neutral-50 hover:tw-text-neutral-300 tw-transition tw-duration-300 tw-ease-out tw-space-x-3">
+    <li className="tw-group tw-flex tw-items-center tw-group  tw-text-sm tw-font-medium tw-text-neutral-50 hover:tw-text-neutral-300 tw-transition tw-duration-300 tw-ease-out tw-space-x-1">
       <Tippy
         content="Opensea"
         theme="dark"
         placement="top"
         disabled={isTouchScreen}
       >
-        <div
+        <button
           onClick={goToOpensea}
-          className="tw-cursor-pointer tw-flex-shrink-0 tw-h-6 tw-w-6 hover:tw-scale-110 tw-transition tw-duration-300 tw-ease-out"
+          className="tw-bg-transparent tw-border-none"
         >
-          <OpenseaIcon />
-        </div>
+          <div className="tw-flex-shrink-0 tw-h-5 tw-w-5 hover:tw-scale-110 tw-transition tw-duration-300 tw-ease-out">
+            <OpenseaIcon />
+          </div>
+        </button>
       </Tippy>
       <Tippy
         content="Etherscan"
@@ -69,12 +70,14 @@ export default function UserPageIdentityStatementsConsolidatedAddressesItem({
         placement="top"
         disabled={isTouchScreen}
       >
-        <div
+        <button
           onClick={goToEtherscan}
-          className="tw-cursor-pointer tw-flex-shrink-0 tw-h-6 tw-w-6  hover:tw-scale-110 tw-transition tw-duration-300 tw-ease-out"
+          className="tw-bg-transparent tw-border-none"
         >
-          <EtherscanIcon />
-        </div>
+          <div className="tw-flex-shrink-0 tw-h-5 tw-w-5  hover:tw-scale-110 tw-transition tw-duration-300 tw-ease-out">
+            <EtherscanIcon />
+          </div>
+        </button>
       </Tippy>
       <div className="tw-space-x-3 tw-inline-flex tw-items-center">
         <span>{title}</span>
