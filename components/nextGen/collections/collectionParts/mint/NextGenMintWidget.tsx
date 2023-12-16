@@ -420,7 +420,9 @@ export default function NextGenMintWidget(props: Readonly<Props>) {
                   value={mintCount}
                   disabled={
                     !account.isConnected ||
-                    (proofResponse && proofResponse.spots <= 0)
+                    (props.phase_times.public_status !== Status.LIVE &&
+                      proofResponse &&
+                      proofResponse.spots <= 0)
                   }
                   onChange={(e: any) => {
                     setMintCount(parseInt(e.currentTarget.value));

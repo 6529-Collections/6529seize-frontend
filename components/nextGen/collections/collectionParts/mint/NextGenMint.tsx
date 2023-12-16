@@ -238,9 +238,9 @@ export default function NextGenMint(props: Readonly<Props>) {
         return "Fixed Price";
       case 2:
         if (mintingDetails.rate === 0) {
-          return "Exponential decrease";
+          return "Exponential Descending";
         } else {
-          return "Linear decrease";
+          return "Linear Descending";
         }
       case 3:
         return "Periodic Sale";
