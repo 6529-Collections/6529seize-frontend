@@ -17,7 +17,7 @@ export default function ProfileActivityLogItemHandle({
   return (
     <button
       onClick={goToProfile}
-      className="tw-bg-transparent tw-border-none"
+      className="tw-bg-transparent tw-border-none tw-leading-4 tw-p-0"
       disabled={!!user}
     >
       <span

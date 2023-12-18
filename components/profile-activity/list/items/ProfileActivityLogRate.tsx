@@ -30,7 +30,7 @@ export default function ProfileActivityLogRate({
 
       <button
         onClick={goToProfile}
-        className="tw-bg-transparent tw-border-none"
+        className="tw-bg-transparent tw-border-none tw-leading-4 tw-p-0"
       >
         <span className="tw-whitespace-nowrap hover:tw-underline tw-cursor-pointer tw-truncate tw-max-w-[12rem] tw-text-sm tw-font-semibold tw-text-iron-100">
           {log.target_profile_handle}

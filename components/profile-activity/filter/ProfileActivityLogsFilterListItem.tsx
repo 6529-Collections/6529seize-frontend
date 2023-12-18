@@ -9,10 +9,12 @@ export default function ProfileActivityLogsFilterListItem({
   itemType,
   selectedItems,
   setSelected,
+  user,
 }: {
   readonly itemType: ProfileActivityLogType;
   readonly selectedItems: ProfileActivityLogType[];
   readonly setSelected: (selected: ProfileActivityLogType) => void;
+  readonly user: string | null;
 }) {
   const [isSelected, setIsSelected] = useState(
     selectedItems.includes(itemType)

@@ -10,9 +10,11 @@ import {
 export default function ProfileActivityLogsFilter({
   selected,
   setSelected,
+  user,
 }: {
   readonly selected: ProfileActivityLogType[];
   readonly setSelected: (selected: ProfileActivityLogType) => void;
+  readonly user: string | null;
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const [iconScope, animateIcon] = useAnimate();
@@ -83,6 +85,7 @@ export default function ProfileActivityLogsFilter({
               <ProfileActivityLogsFilterList
                 selected={selected}
                 setSelected={setSelected}
+                user={user}
               />
             </motion.div>
           )}

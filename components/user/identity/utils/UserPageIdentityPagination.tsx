@@ -2,13 +2,15 @@ export default function UserPageIdentityPagination({
   currentPage,
   setCurrentPage,
   totalPages,
+  user,
 }: {
   readonly currentPage: number;
   readonly setCurrentPage: (page: number) => void;
   readonly totalPages: number;
+  readonly user: string | null;
 }) {
   return (
-    <div className="tw-px-6 md:tw-px-8 tw-pb-6 md:tw-pb-4 tw-flex tw-justify-end">
+    <div className="tw-mt-4 tw-px-6 md:tw-px-8 tw-pb-6 md:tw-pb-4 tw-flex tw-justify-end">
       <div className="tw-flex tw-items-center">
         <div className="tw-text-sm tw-text-neutral-400 tw-font-normal tw-mr-3">
           {currentPage} of {totalPages}

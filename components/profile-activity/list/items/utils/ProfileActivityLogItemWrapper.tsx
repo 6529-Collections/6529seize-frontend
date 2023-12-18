@@ -12,14 +12,14 @@ export default function ProfileActivityLogItemWrapper({
   readonly user: string | null;
 }) {
   return (
-    <tr>
-      <td className="tw-py-2 tw-flex tw-items-center">
+    <tr className="tw-flex tw-items-center tw-justify-between">
+      <td className="tw-py-2.5">
         <span className="tw-space-x-1.5 tw-inline-flex tw-items-center">
           <ProfileActivityLogItemHandle log={log} user={user} />
           {children}
         </span>
       </td>
-      <td className="tw-py-2 tw-pl-3 tw-text-right">
+      <td className="tw-py-2.5 tw-pl-3 tw-text-right">
         <ProfileActivityLogItemTimeAgo log={log} />
       </td>
     </tr>
