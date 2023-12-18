@@ -2,9 +2,9 @@ import Tippy from "@tippyjs/react";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { useCopyToClipboard } from "react-use";
-import CopyIcon from "../../../../../../utils/icons/CopyIcon";
+import CopyIcon from "../../../../utils/icons/CopyIcon";
 
-export default function UserPageIdentityActivityLogItemValueWithCopy({
+export default function ProfileActivityLogItemValueWithCopy({
   title,
   value,
 }: {

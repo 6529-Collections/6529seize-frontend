@@ -2,17 +2,19 @@ import { useEffect, useState } from "react";
 import {
   PROFILE_ACTIVITY_TYPE_TO_TEXT,
   ProfileActivityLogType,
-} from "../../../../../entities/IProfile";
-import UserPageIdentityActivityLogIcon from "../icons/UserPageIdentityActivityLogIcon";
+} from "../../../entities/IProfile";
+import ProfileActivityLogsIcon from "../icons/ProfileActivityLogsIcon";
 
-export default function UserPageIdentityActivityLogFilterListItem({
+export default function ProfileActivityLogsFilterListItem({
   itemType,
   selectedItems,
   setSelected,
+  user,
 }: {
   readonly itemType: ProfileActivityLogType;
   readonly selectedItems: ProfileActivityLogType[];
   readonly setSelected: (selected: ProfileActivityLogType) => void;
+  readonly user: string | null;
 }) {
   const [isSelected, setIsSelected] = useState(
     selectedItems.includes(itemType)
@@ -29,7 +31,7 @@ export default function UserPageIdentityActivityLogFilterListItem({
         onClick={() => setSelected(itemType)}
       >
         <div className="tw-w-full tw-flex tw-items-center tw-space-x-3 tw-pr-4">
-          <UserPageIdentityActivityLogIcon logType={itemType} />
+          <ProfileActivityLogsIcon logType={itemType} />
           <span className="tw-font-normal tw-block tw-truncate">
             {PROFILE_ACTIVITY_TYPE_TO_TEXT[itemType]}
           </span>

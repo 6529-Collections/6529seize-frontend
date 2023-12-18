@@ -23,7 +23,6 @@ export default function CICRatings({
 }) {
   const router = useRouter();
   const user = (router.query.user as string).toLowerCase();
-
   const [currentPage, setCurrentPage] = useState<number>(1);
 
   const { isLoading, data: ratings } = useQuery<
@@ -41,8 +40,8 @@ export default function CICRatings({
       await commonApiFetch<Page<ProfilesMatterRatingWithRaterLevel>>({
         endpoint: `profiles/${user}/cic/ratings`,
         params: {
-          page: "1",
-          page_size: "100",
+          page: `${currentPage}`,
+          page_size: `${PAGE_SIZE}`,
         },
       }),
     enabled: !!user,
@@ -77,6 +76,7 @@ export default function CICRatings({
                   currentPage={currentPage}
                   setCurrentPage={setCurrentPage}
                   totalPages={totalPages}
+                  user={user}
                 />
               )}
             </div>

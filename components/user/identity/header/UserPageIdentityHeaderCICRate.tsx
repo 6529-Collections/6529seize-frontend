@@ -217,10 +217,10 @@ export default function UserPageIdentityHeaderCICRate({
         </div>
         <div className="tw-mt-3 tw-space-x-1 tw-inline-flex tw-items-center">
           <span className="tw-text-sm tw-font-semibold tw-text-iron-200">
-            Your min/max CIC Rating:
+            Your max/in CIC Rating:
           </span>
           <span className="tw-pl-1 tw-text-sm tw-font-semibold tw-text-iron-200">
-            -/+ {formatNumberWithCommas(myMaxCICRatings)}
+            +/- {formatNumberWithCommas(myMaxCICRatings)}
           </span>
         </div>
       </form>
