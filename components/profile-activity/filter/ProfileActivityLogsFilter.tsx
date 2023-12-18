@@ -43,7 +43,7 @@ export default function ProfileActivityLogsFilter({
   }, [selected]);
 
   return (
-    <div ref={listRef} className="tw-px-6 md:tw-px-8 tw-mt-4 tw-max-w-sm">
+    <div ref={listRef} className={`${ user ? "tw-px-6 md:tw-px-8" : ""} tw-mt-4 tw-max-w-sm`}>
       <div className="tw-relative">
         <button
           type="button"

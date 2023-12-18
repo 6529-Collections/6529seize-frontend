@@ -97,7 +97,7 @@ export default function ProfileActivityLogs({
   return (
     <div
       className={`${
-        user ? "tw-min-h-[28rem] tw-max-h-[28rem]" : "tw-min-h-screen"
+        user ? "tw-min-h-[28rem] tw-max-h-[28rem]" : "tw-mt-2 tw-min-h-screen"
       } tw-transform-gpu tw-scroll-py-3 tw-overflow-auto`}
     >
       {showFilters && (
@@ -128,7 +128,11 @@ export default function ProfileActivityLogs({
         </div>
       ) : (
         <div className="tw-mt-4">
-          <span className="tw-px-6 md:tw-px-8 tw-text-sm tw-italic tw-text-iron-500">
+          <span
+            className={`${
+              user ? "tw-px-6 md:tw-px-8" : ""
+            } tw-text-sm tw-italic tw-text-iron-500`}
+          >
             No Activity Log
           </span>
         </div>

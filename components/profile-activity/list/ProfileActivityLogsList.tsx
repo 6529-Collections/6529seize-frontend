@@ -10,7 +10,7 @@ export default function UserPageIdentityActivityLogList({
   readonly user: string | null;
 }) {
   return (
-    <div className="tw-mt-4 tw-inline-block tw-min-w-full tw-align-middle tw-px-6 md:tw-px-8">
+    <div className={`${ user ? "tw-px-6 md:tw-px-8" : ""} tw-mt-4 tw-inline-block tw-min-w-full tw-align-middle `}>
       <table className="tw-min-w-full">
         <tbody className="tw-divide-y tw-divide-white/10 tw-divide-solid tw-divide-x-0">
           {logs.map((log) => (
