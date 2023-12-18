@@ -30,6 +30,7 @@ export enum DelegationCenterSection {
   GRADIENTS_COLLECTION = "6529-gradient",
   WALLET_ARCHITECTURE = "wallet-architecture",
   FAQ = "delegation-faq",
+  CONSOLIDATION_USE_CASES = "consolidation-use-cases",
   CHECKER = "wallet-checker",
   HTML = "html",
 }
@@ -153,6 +154,8 @@ export default function DelegationCenterMenu(props: Props) {
         return <DelegationHTML path="reference-overview-wallet-architecture" />;
       case DelegationCenterSection.FAQ:
         return <DelegationHTML path="delegation-faq" />;
+      case DelegationCenterSection.CONSOLIDATION_USE_CASES:
+        return <DelegationHTML path="consolidation-use-cases" />;
       case DelegationCenterSection.HTML:
         return (
           <DelegationHTML
@@ -208,6 +211,22 @@ export default function DelegationCenterMenu(props: Props) {
                     : ""
                 }`}>
                 Delegation FAQs
+              </Col>
+            </Row>
+            <Row className="pt-1 pb-2">
+              <Col
+                onClick={() =>
+                  props.setActiveSection(
+                    DelegationCenterSection.CONSOLIDATION_USE_CASES
+                  )
+                }
+                className={`${styles.menuLeftItem} ${
+                  props.section ===
+                  DelegationCenterSection.CONSOLIDATION_USE_CASES
+                    ? styles.menuLeftItemActive
+                    : ""
+                }`}>
+                Consolidation Use Cases
               </Col>
             </Row>
             <Row className="pt-1 pb-2">
@@ -328,6 +347,22 @@ export default function DelegationCenterMenu(props: Props) {
                           : ""
                       }`}>
                       Delegation FAQs
+                    </Col>
+                  </Row>
+                  <Row className="pt-1 pb-2">
+                    <Col
+                      onClick={() =>
+                        props.setActiveSection(
+                          DelegationCenterSection.CONSOLIDATION_USE_CASES
+                        )
+                      }
+                      className={`${styles.menuLeftItem} ${
+                        props.section ===
+                        DelegationCenterSection.CONSOLIDATION_USE_CASES
+                          ? styles.menuLeftItemActive
+                          : ""
+                      }`}>
+                      Consolidation Use Cases
                     </Col>
                   </Row>
                 </Container>
