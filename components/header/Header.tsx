@@ -82,6 +82,28 @@ export default function Header(props: Props) {
     }
   }, [account.address]);
 
+  function printMobileRow(name: string, path: string) {
+    return (
+      <Row className="pt-3">
+        <Col>
+          <a href={path}>
+            <h3>{name}</h3>
+          </a>
+        </Col>
+      </Row>
+    );
+  }
+
+  function printNavDropdown(name: string, path: string) {
+    return (
+      <NavDropdown.Item
+        className={styles.dropdownItem}
+        onClick={() => (window.location.href = path)}>
+        {name}
+      </NavDropdown.Item>
+    );
+  }
+
   function printHeaderConnect() {
     return (
       <HeaderConnect
@@ -233,25 +255,6 @@ export default function Header(props: Props) {
                     <hr />
                   </Col>
                 </Row>
-                <Row className="pt-3">
-                  <Col>
-                    <a href="/meme-accounting">
-                      <h3>Meme Accounting </h3>
-                    </a>
-                  </Col>
-                </Row>
-                <Row className="pt-3">
-                  <Col>
-                    <a href="/meme-gas">
-                      <h3>Meme Gas</h3>
-                    </a>
-                  </Col>
-                </Row>
-                <Row>
-                  <Col xs={{ span: 6, offset: 3 }}>
-                    <hr />
-                  </Col>
-                </Row>
               </Container>
             )}
           </Row>
@@ -317,32 +320,8 @@ export default function Header(props: Props) {
                     <hr />
                   </Col>
                 </Row>
-                <Row className="pt-3">
-                  <Col>
-                    <a href="/meme-accounting">
-                      <h3>Meme Accounting </h3>
-                    </a>
-                  </Col>
-                </Row>
-                <Row className="pt-3">
-                  <Col>
-                    <a href="/meme-gas">
-                      <h3>Meme Gas</h3>
-                    </a>
-                  </Col>
-                </Row>
-                <Row>
-                  <Col xs={{ span: 6, offset: 3 }}>
-                    <hr />
-                  </Col>
-                </Row>
-                <Row className="pt-3">
-                  <Col>
-                    <a href="/open-data">
-                      <h3>Open Data</h3>
-                    </a>
-                  </Col>
-                </Row>
+                {printMobileRow("Meme Accounting", "/meme-accounting")}
+                {printMobileRow("Meme Gas", "/meme-gas")}
                 <Row>
                   <Col xs={{ span: 6, offset: 3 }}>
                     <hr />
@@ -702,20 +681,11 @@ export default function Header(props: Props) {
                                 Open Data
                               </NavDropdown.Item>
                               <NavDropdown.Divider />
-                              <NavDropdown.Item
-                                className={styles.dropdownItem}
-                                onClick={() =>
-                                  (window.location.href = "/meme-accounting")
-                                }>
-                                Meme Accounting
-                              </NavDropdown.Item>
-                              <NavDropdown.Item
-                                className={styles.dropdownItem}
-                                onClick={() =>
-                                  (window.location.href = "/meme-gas")
-                                }>
-                                Meme Gas
-                              </NavDropdown.Item>
+                              {printNavDropdown(
+                                "Meme Accounting",
+                                "/meme-accounting"
+                              )}
+                              {printNavDropdown("Meme Gas", "/meme-gas")}
                             </NavDropdown>
                             <NavDropdown
                               title="About"
