@@ -294,6 +294,7 @@ export function parseEmojis(s: string) {
   });
 }
 
+
 export function printMintDate(date: Date) {
   const mintDate = new Date(date);
   return `

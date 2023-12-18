@@ -20,20 +20,20 @@ const Header = dynamic(() => import("../components/header/Header"), {
 export default function TheMemesPage() {
   const [breadcrumbs, setBreadcrumbs] = useState<Crumb[]>([
     { display: "Home", href: "/" },
-    { display: "Latest Activity" },
+    { display: "Nft Activity" },
   ]);
 
   return (
     <>
       <Head>
-        <title>Latest Activity | 6529 SEIZE</title>
+        <title>NFT Activity | 6529 SEIZE</title>
         <link rel="icon" href="/favicon.ico" />
-        <meta name="description" content="Latest Activity | 6529 SEIZE" />
+        <meta name="description" content="NFT Activity | 6529 SEIZE" />
         <meta
           property="og:url"
-          content={`${process.env.BASE_ENDPOINT}/latest-activity`}
+          content={`${process.env.BASE_ENDPOINT}/nft-activity`}
         />
-        <meta property="og:title" content="Latest Activity" />
+        <meta property="og:title" content="NFT Activity" />
         <meta property="og:description" content="6529 SEIZE" />
         <meta
           property="og:image"
@@ -46,7 +46,8 @@ export default function TheMemesPage() {
         <Breadcrumb breadcrumbs={breadcrumbs} />
         <Container
           fluid
-          className={`${styles.mainContainer} ${styles.leaderboardContainer}`}>
+          className={`${styles.mainContainer} ${styles.leaderboardContainer}`}
+        >
           <Row>
             <Col>
               <LatestActivity page={1} pageSize={50} showMore={true} />

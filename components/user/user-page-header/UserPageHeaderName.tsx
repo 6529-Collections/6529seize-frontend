@@ -10,9 +10,9 @@ export default function UserPageHeaderName({
   mainAddress,
   consolidatedTDH,
 }: {
-  profile: IProfileAndConsolidations;
-  mainAddress: string;
-  consolidatedTDH: ConsolidatedTDHMetrics | null;
+  readonly profile: IProfileAndConsolidations;
+  readonly mainAddress: string;
+  readonly consolidatedTDH: ConsolidatedTDHMetrics | null;
 }) {
   const getDisplayName = (): string => {
     if (profile.profile?.handle) {

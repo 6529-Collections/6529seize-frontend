@@ -32,7 +32,7 @@ export default function LatestActivity(props: Props) {
   const [page, setPage] = useState(props.page);
   const [next, setNext] = useState(null);
   const [showViewAll, setShowViewAll] = useState(
-    !window.location.pathname.includes("latest-activity")
+    !window.location.pathname.includes("nft-activity")
   );
   const [totalResults, setTotalResults] = useState(0);
 
@@ -88,9 +88,9 @@ export default function LatestActivity(props: Props) {
         <Col className="d-flex align-items-center justify-content-between">
           <span className="d-flex flex-wrap align-items-center gap-2">
             <h1>
-              LATEST ACTIVITY{" "}
+              NFT ACTIVITY{" "}
               {showViewAll ? (
-                <a href="/latest-activity">
+                <a href="/nft-activity">
                   <span className={styles.viewAllLink}>VIEW ALL</span>
                 </a>
               ) : (
@@ -108,7 +108,8 @@ export default function LatestActivity(props: Props) {
                     onClick={() => {
                       setPage(1);
                       setTypeFilter(filter);
-                    }}>
+                    }}
+                  >
                     {filter}
                   </Dropdown.Item>
                 ))}
