@@ -5,6 +5,8 @@ import { ProfileMinimal } from "../../../entities/IProfile";
 import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
 import { commonApiFetch } from "../../../services/api/common-api";
 
+const MIN_SEARCH_LENGTH = 1;
+
 export default function SearchProfileModal({
   onClose,
 }: {
@@ -38,7 +40,7 @@ export default function SearchProfileModal({
     }
   }, []);
 
-  const { data: profiles } = useQuery<ProfileMinimal[]>({
+  const { isFetching, data: profiles } = useQuery<ProfileMinimal[]>({
     queryKey: [QueryKey.PROFILE_SEARCH, debouncedValue],
     queryFn: async () =>
       await commonApiFetch<ProfileMinimal[]>({
@@ -93,9 +95,14 @@ export default function SearchProfileModal({
                 </button>
               ))}
             </div>
-            <p className="tw-p-4 tw-text-sm tw-text-gray-500">
-              No Profiles found.
-            </p>
+            <div>{isFetching.toString()}</div>
+            {!profiles?.length &&
+              !isFetching &&
+              debouncedValue.length > MIN_SEARCH_LENGTH && (
+                <p className="tw-p-4 tw-text-sm tw-text-gray-500">
+                  No Profiles found.
+                </p>
+              )}
           </div>
         </div>
       </div>
