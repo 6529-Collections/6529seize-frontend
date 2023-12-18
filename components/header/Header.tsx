@@ -82,6 +82,28 @@ export default function Header(props: Props) {
     }
   }, [account.address]);
 
+  function printMobileRow(name: string, path: string) {
+    return (
+      <Row className="pt-3">
+        <Col>
+          <a href={path}>
+            <h3>{name}</h3>
+          </a>
+        </Col>
+      </Row>
+    );
+  }
+
+  function printNavDropdown(name: string, path: string) {
+    return (
+      <NavDropdown.Item
+        className={styles.dropdownItem}
+        onClick={() => (window.location.href = path)}>
+        {name}
+      </NavDropdown.Item>
+    );
+  }
+
   function printHeaderConnect() {
     return (
       <HeaderConnect
@@ -97,8 +119,7 @@ export default function Header(props: Props) {
       <div
         className={`${styles.burgerMenu} ${
           burgerMenuOpen ? styles.burgerMenuOpen : ""
-        }`}
-      >
+        }`}>
         <FontAwesomeIcon
           className={styles.burgerMenuClose}
           icon="times-circle"
@@ -107,8 +128,7 @@ export default function Header(props: Props) {
             setShowBurgerMenuAbout(false);
             setShowBurgerMenuCommunity(false);
             setShowBurgerMenuTools(false);
-          }}
-        ></FontAwesomeIcon>
+          }}></FontAwesomeIcon>
         <Container className="text-center">
           <Row className="pt-5 pb-4">
             <Col>
@@ -126,8 +146,7 @@ export default function Header(props: Props) {
           <Row className="pt-3 pb-3">
             <Col>
               <h3
-                className={`d-flex justify-content-center ${styles.burgerMenuHeader}`}
-              >
+                className={`d-flex justify-content-center ${styles.burgerMenuHeader}`}>
                 {printHeaderConnect()}
               </h3>
             </Col>
@@ -180,8 +199,7 @@ export default function Header(props: Props) {
                     showBurgerMenuCommunity
                       ? styles.burgerMenuCaretClose
                       : styles.burgerMenuCaretOpen
-                  }`}
-              >
+                  }`}>
                 Community
               </h3>
             </Col>
@@ -237,25 +255,6 @@ export default function Header(props: Props) {
                     <hr />
                   </Col>
                 </Row>
-                <Row className="pt-3">
-                  <Col>
-                    <a href="/meme-accounting">
-                      <h3>Meme Accounting </h3>
-                    </a>
-                  </Col>
-                </Row>
-                <Row className="pt-3">
-                  <Col>
-                    <a href="/gas">
-                      <h3>Gas</h3>
-                    </a>
-                  </Col>
-                </Row>
-                <Row>
-                  <Col xs={{ span: 6, offset: 3 }}>
-                    <hr />
-                  </Col>
-                </Row>
               </Container>
             )}
           </Row>
@@ -272,8 +271,7 @@ export default function Header(props: Props) {
                     showBurgerMenuTools
                       ? styles.burgerMenuCaretClose
                       : styles.burgerMenuCaretOpen
-                  }`}
-              >
+                  }`}>
                 Tools
               </h3>
             </Col>
@@ -310,29 +308,10 @@ export default function Header(props: Props) {
                     </a>
                   </Col>
                 </Row>
-                <Row>
-                  <Col xs={{ span: 6, offset: 3 }}>
-                    <hr />
-                  </Col>
-                </Row>
                 <Row className="pt-3">
                   <Col>
-                    <a href="/delegation-mapping-tool">
-                      <h3>Delegation Mapping</h3>
-                    </a>
-                  </Col>
-                </Row>
-                <Row className="pt-3">
-                  <Col>
-                    <a href="/consolidation-mapping-tool">
-                      <h3>Consolidation Mapping</h3>
-                    </a>
-                  </Col>
-                </Row>
-                <Row className="pt-3">
-                  <Col>
-                    <a href="/consolidation-use-cases">
-                      <h3>Consolidation Use Cases</h3>
+                    <a href="/open-data">
+                      <h3>Open Data</h3>
                     </a>
                   </Col>
                 </Row>
@@ -341,13 +320,8 @@ export default function Header(props: Props) {
                     <hr />
                   </Col>
                 </Row>
-                <Row className="pt-3">
-                  <Col>
-                    <a href="/downloads">
-                      <h3>Downloads</h3>
-                    </a>
-                  </Col>
-                </Row>
+                {printMobileRow("Meme Accounting", "/meme-accounting")}
+                {printMobileRow("Meme Gas", "/meme-gas")}
                 <Row>
                   <Col xs={{ span: 6, offset: 3 }}>
                     <hr />
@@ -369,8 +343,7 @@ export default function Header(props: Props) {
                     showBurgerMenuAbout
                       ? styles.burgerMenuCaretClose
                       : styles.burgerMenuCaretOpen
-                  }`}
-              >
+                  }`}>
                 About
               </h3>
             </Col>
@@ -551,8 +524,7 @@ export default function Header(props: Props) {
                   sm={{ span: 8 }}
                   md={{ span: 8 }}
                   lg={{ span: 3 }}
-                  className={`d-flex align-items-center justify-content-start ${styles.headerLeft}`}
-                >
+                  className={`d-flex align-items-center justify-content-start ${styles.headerLeft}`}>
                   <a href="/">
                     <Image
                       loading="eager"
@@ -570,13 +542,11 @@ export default function Header(props: Props) {
                   sm={{ span: 4 }}
                   md={{ span: 4 }}
                   lg={{ span: 9 }}
-                  className={`d-flex align-items-center justify-content-end ${styles.headerRight}`}
-                >
+                  className={`d-flex align-items-center justify-content-end ${styles.headerRight}`}>
                   <Container>
                     <Navbar expand="lg" variant="dark">
                       <Container
-                        className={`d-flex align-items-center justify-content-end no-padding`}
-                      >
+                        className={`d-flex align-items-center justify-content-end no-padding`}>
                         <Image
                           loading="eager"
                           priority
@@ -595,15 +565,13 @@ export default function Header(props: Props) {
                         />
                         <Navbar
                           id="seize-navbar-nav"
-                          className={`justify-content-end d-none ${styles.dMdBlock}`}
-                        >
+                          className={`justify-content-end d-none ${styles.dMdBlock}`}>
                           <Nav className="justify-content-end ml-auto">
                             <Nav.Link
                               className={`${styles.mainNavLink} ${
                                 router.pathname === "/the-memes" ? "active" : ""
                               }`}
-                              href="/the-memes?sort=age&sort_dir=ASC"
-                            >
+                              href="/the-memes?sort=age&sort_dir=ASC">
                               The Memes
                             </Nav.Link>
                             <Nav.Link
@@ -612,53 +580,46 @@ export default function Header(props: Props) {
                                   ? "active"
                                   : ""
                               }`}
-                              href="/6529-gradient?sort=id&sort_dir=ASC"
-                            >
+                              href="/6529-gradient?sort=id&sort_dir=ASC">
                               Gradient
                             </Nav.Link>
                             <Nav.Link
                               className={`${styles.mainNavLink} ${
                                 router.pathname === "/meme-lab" ? "active" : ""
                               }`}
-                              href="/meme-lab"
-                            >
+                              href="/meme-lab">
                               Meme Lab
                             </Nav.Link>
                             <Nav.Link
                               className={`${styles.mainNavLink} ${
                                 router.pathname === "/rememes" ? "active" : ""
                               }`}
-                              href="/rememes"
-                            >
+                              href="/rememes">
                               ReMemes
                             </Nav.Link>
                             <Nav.Link
                               className={`${styles.mainNavLink} ${
                                 router.pathname === "/nextgen" ? "active" : ""
                               }`}
-                              href="/nextgen"
-                            >
+                              href="/nextgen">
                               NextGen
                             </Nav.Link>
                             <NavDropdown
                               title="Community"
                               align={"start"}
-                              className={`${styles.mainNavLink} ${styles.mainNavLinkPadding}`}
-                            >
+                              className={`${styles.mainNavLink} ${styles.mainNavLinkPadding}`}>
                               <NavDropdown.Item
                                 className={styles.dropdownItem}
                                 onClick={() =>
                                   (window.location.href = "/community")
-                                }
-                              >
+                                }>
                                 Community
                               </NavDropdown.Item>
                               <NavDropdown.Item
                                 className={styles.dropdownItem}
                                 onClick={() =>
                                   (window.location.href = "/latest-activity")
-                                }
-                              >
+                                }>
                                 Latest Activity
                               </NavDropdown.Item>
                               <NavDropdown.Divider />
@@ -666,54 +627,34 @@ export default function Header(props: Props) {
                                 className={styles.dropdownItem}
                                 onClick={() =>
                                   (window.location.href = "/community-metrics")
-                                }
-                              >
+                                }>
                                 Community Metrics
                               </NavDropdown.Item>
                               <NavDropdown.Item
                                 className={styles.dropdownItem}
                                 onClick={() =>
                                   (window.location.href = "/community-stats")
-                                }
-                              >
+                                }>
                                 Community Stats
                               </NavDropdown.Item>
                               <NavDropdown.Item
                                 className={styles.dropdownItem}
                                 onClick={() =>
                                   (window.location.href = "/levels")
-                                }
-                              >
+                                }>
                                 Levels
-                              </NavDropdown.Item>
-                              <NavDropdown.Divider />
-                              <NavDropdown.Item
-                                className={styles.dropdownItem}
-                                onClick={() =>
-                                  (window.location.href = "/meme-accounting")
-                                }
-                              >
-                                Meme Accounting
-                              </NavDropdown.Item>
-                              <NavDropdown.Item
-                                className={styles.dropdownItem}
-                                onClick={() => (window.location.href = "/gas")}
-                              >
-                                Gas
                               </NavDropdown.Item>
                             </NavDropdown>
                             <NavDropdown
                               title="Tools"
                               align={"start"}
-                              className={`${styles.mainNavLink} ${styles.mainNavLinkPadding}`}
-                            >
+                              className={`${styles.mainNavLink} ${styles.mainNavLinkPadding}`}>
                               <NavDropdown.Item
                                 className={styles.dropdownItem}
                                 onClick={() =>
                                   (window.location.href =
                                     "/delegation/delegation-center")
-                                }
-                              >
+                                }>
                                 Delegation Center
                               </NavDropdown.Item>
                               <NavDropdown.Divider />
@@ -722,55 +663,29 @@ export default function Header(props: Props) {
                                 onClick={() =>
                                   (window.location.href =
                                     "/distribution-plan-tool")
-                                }
-                              >
+                                }>
                                 EMMA
                               </NavDropdown.Item>
                               <NavDropdown.Item
                                 className={styles.dropdownItem}
                                 onClick={() =>
                                   (window.location.href = "/meme-blocks")
-                                }
-                              >
+                                }>
                                 Meme Blocks
                               </NavDropdown.Item>
-                              <NavDropdown.Divider />
                               <NavDropdown.Item
                                 className={styles.dropdownItem}
                                 onClick={() =>
-                                  (window.location.href =
-                                    "/delegation-mapping-tool")
-                                }
-                              >
-                                Delegation Mapping
-                              </NavDropdown.Item>
-                              <NavDropdown.Item
-                                className={styles.dropdownItem}
-                                onClick={() =>
-                                  (window.location.href =
-                                    "/consolidation-mapping-tool")
-                                }
-                              >
-                                Consolidation Mapping
-                              </NavDropdown.Item>
-                              <NavDropdown.Item
-                                className={styles.dropdownItem}
-                                onClick={() =>
-                                  (window.location.href =
-                                    "/consolidation-use-cases")
-                                }
-                              >
-                                Consolidation Use Cases
+                                  (window.location.href = "/open-data")
+                                }>
+                                Open Data
                               </NavDropdown.Item>
                               <NavDropdown.Divider />
-                              <NavDropdown.Item
-                                className={styles.dropdownItem}
-                                onClick={() =>
-                                  (window.location.href = "/downloads")
-                                }
-                              >
-                                Downloads
-                              </NavDropdown.Item>
+                              {printNavDropdown(
+                                "Meme Accounting",
+                                "/meme-accounting"
+                              )}
+                              {printNavDropdown("Meme Gas", "/meme-gas")}
                             </NavDropdown>
                             <NavDropdown
                               title="About"
@@ -781,38 +696,33 @@ export default function Header(props: Props) {
                                   ? "active"
                                   : ""
                               }`}
-                              align={"start"}
-                            >
+                              align={"start"}>
                               <NavDropdown.Item
                                 className={styles.dropdownItem}
                                 onClick={() =>
                                   (window.location.href = `/about/${AboutSection.MEMES}`)
-                                }
-                              >
+                                }>
                                 The Memes
                               </NavDropdown.Item>
                               <NavDropdown.Item
                                 className={styles.dropdownItem}
                                 onClick={() =>
                                   (window.location.href = `/about/${AboutSection.MEMES_CALENDAR}`)
-                                }
-                              >
+                                }>
                                 Memes Calendar
                               </NavDropdown.Item>
                               <NavDropdown.Item
                                 className={styles.dropdownItem}
                                 onClick={() =>
                                   (window.location.href = `/about/${AboutSection.MEME_LAB}`)
-                                }
-                              >
+                                }>
                                 Meme Lab
                               </NavDropdown.Item>
                               <NavDropdown.Item
                                 className={styles.dropdownItem}
                                 onClick={() =>
                                   (window.location.href = `/about/${AboutSection.GRADIENTS}`)
-                                }
-                              >
+                                }>
                                 Gradient
                               </NavDropdown.Item>
                               <NavDropdown.Divider />
@@ -820,8 +730,7 @@ export default function Header(props: Props) {
                                 className={styles.dropdownItem}
                                 onClick={() =>
                                   (window.location.href = `/about/${AboutSection.GDRC1}`)
-                                }
-                              >
+                                }>
                                 GDRC1
                               </NavDropdown.Item>
                               <NavDropdown.Divider />
@@ -829,8 +738,7 @@ export default function Header(props: Props) {
                                 className={styles.dropdownItem}
                                 onClick={() =>
                                   (window.location.href = `/about/${AboutSection.NFT_DELEGATION}`)
-                                }
-                              >
+                                }>
                                 NFT Delegation
                               </NavDropdown.Item>
                               <NavDropdown.Divider />
@@ -838,32 +746,28 @@ export default function Header(props: Props) {
                                 className={styles.dropdownItem}
                                 onClick={() =>
                                   (window.location.href = `/about/${AboutSection.FAQ}`)
-                                }
-                              >
+                                }>
                                 FAQ
                               </NavDropdown.Item>
                               <NavDropdown.Item
                                 className={styles.dropdownItem}
                                 onClick={() =>
                                   (window.location.href = `/about/${AboutSection.ENS}`)
-                                }
-                              >
+                                }>
                                 ENS
                               </NavDropdown.Item>
                               <NavDropdown.Item
                                 className={styles.dropdownItem}
                                 onClick={() =>
                                   (window.location.href = `/about/${AboutSection.MINTING}`)
-                                }
-                              >
+                                }>
                                 Minting
                               </NavDropdown.Item>
                               <NavDropdown.Item
                                 className={styles.dropdownItem}
                                 onClick={() =>
                                   (window.location.href = `/about/${AboutSection.LICENSE}`)
-                                }
-                              >
+                                }>
                                 License
                               </NavDropdown.Item>
                               <NavDropdown.Divider />
@@ -871,32 +775,28 @@ export default function Header(props: Props) {
                                 className={styles.dropdownItem}
                                 onClick={() =>
                                   (window.location.href = `/about/${AboutSection.APPLY}`)
-                                }
-                              >
+                                }>
                                 Apply
                               </NavDropdown.Item>
                               <NavDropdown.Item
                                 className={styles.dropdownItem}
                                 onClick={() =>
                                   (window.location.href = `/about/${AboutSection.CONTACT_US}`)
-                                }
-                              >
+                                }>
                                 Contact Us
                               </NavDropdown.Item>
                               <NavDropdown.Item
                                 className={styles.dropdownItem}
                                 onClick={() =>
                                   (window.location.href = `/about/${AboutSection.RELEASE_NOTES}`)
-                                }
-                              >
+                                }>
                                 Release Notes
                               </NavDropdown.Item>
                               <NavDropdown.Item
                                 className={styles.dropdownItem}
                                 onClick={() =>
                                   (window.location.href = `/about/${AboutSection.DATA_DECENTR}`)
-                                }
-                              >
+                                }>
                                 Data Decentralization
                               </NavDropdown.Item>
                               <NavDropdown.Divider />
@@ -904,24 +804,21 @@ export default function Header(props: Props) {
                                 className={styles.dropdownItem}
                                 onClick={() =>
                                   (window.location.href = `/about/${AboutSection.TERMS_OF_SERVICE}`)
-                                }
-                              >
+                                }>
                                 Terms of Service
                               </NavDropdown.Item>
                               <NavDropdown.Item
                                 className={styles.dropdownItem}
                                 onClick={() =>
                                   (window.location.href = `/about/${AboutSection.PRIVACY_POLICY}`)
-                                }
-                              >
+                                }>
                                 Privacy Policy
                               </NavDropdown.Item>
                               <NavDropdown.Item
                                 className={styles.dropdownItem}
                                 onClick={() =>
                                   (window.location.href = `/about/${AboutSection.COOKIE_POLICY}`)
-                                }
-                              >
+                                }>
                                 Cookie Policy
                               </NavDropdown.Item>
                             </NavDropdown>
