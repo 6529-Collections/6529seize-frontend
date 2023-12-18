@@ -18,22 +18,22 @@ const CommunityDownloads = dynamic(
 );
 
 export default function Downloads() {
-  const [breadcrumbs, setBreadcrumbs] = useState<Crumb[]>([
+  const breadcrumbs = [
     { display: "Home", href: "/" },
-    { display: "Downloads" },
-  ]);
+    { display: "Open Data" },
+  ];
 
   return (
     <>
       <Head>
-        <title>Downloads | 6529 SEIZE</title>
+        <title>Open Data | 6529 SEIZE</title>
         <link rel="icon" href="/favicon.ico" />
-        <meta name="description" content="Downloads | 6529 SEIZE" />
+        <meta name="description" content="Open Data | 6529 SEIZE" />
         <meta
           property="og:url"
-          content={`${process.env.BASE_ENDPOINT}/downloads`}
+          content={`${process.env.BASE_ENDPOINT}/open-data`}
         />
-        <meta property="og:title" content={`Downloads`} />
+        <meta property="og:title" content={`Open Data`} />
         <meta property="og:description" content="6529 SEIZE" />
         <meta
           property="og:image"
