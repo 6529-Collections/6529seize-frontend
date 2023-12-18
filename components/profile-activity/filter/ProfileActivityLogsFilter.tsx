@@ -1,13 +1,13 @@
 import { useEffect, useRef, useState } from "react";
-import UserPageIdentityActivityLogFilterList from "./UserPageIdentityActivityLogFilterList";
+import ProfileActivityLogsFilterList from "./ProfileActivityLogsFilterList";
 import { AnimatePresence, motion, useAnimate } from "framer-motion";
 import { useClickAway, useKeyPressEvent } from "react-use";
 import {
   PROFILE_ACTIVITY_TYPE_TO_TEXT,
   ProfileActivityLogType,
-} from "../../../../../entities/IProfile";
+} from "../../../entities/IProfile";
 
-export default function UserPageIdentityActivityLogFilter({
+export default function ProfileActivityLogsFilter({
   selected,
   setSelected,
 }: {
@@ -80,7 +80,7 @@ export default function UserPageIdentityActivityLogFilter({
               exit={{ opacity: 0, y: -20 }}
               transition={{ duration: 0.2 }}
             >
-              <UserPageIdentityActivityLogFilterList
+              <ProfileActivityLogsFilterList
                 selected={selected}
                 setSelected={setSelected}
               />

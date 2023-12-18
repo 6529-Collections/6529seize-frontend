@@ -1,26 +1,22 @@
-import {
-  IProfileAndConsolidations,
-  ProfileActivityLog,
-} from "../../../../../entities/IProfile";
-import UserPageIdentityActivityLogItem from "./UserPageIdentityActivityLogItem";
+import { ProfileActivityLog } from "../../../entities/IProfile";
+import ProfileActivityLogsItem from "./ProfileActivityLogsItem";
+import ProfileActivityLogItemWrapper from "./items/utils/ProfileActivityLogItemWrapper";
 
 export default function UserPageIdentityActivityLogList({
   logs,
-  profile,
+  user,
 }: {
   readonly logs: ProfileActivityLog[];
-  readonly profile: IProfileAndConsolidations;
+  readonly user: string | null;
 }) {
   return (
     <div className="tw-inline-block tw-min-w-full tw-align-middle tw-px-6 md:tw-px-8">
       <table className="tw-min-w-full">
         <tbody className="tw-divide-y tw-divide-white/10 tw-divide-solid tw-divide-x-0">
           {logs.map((log) => (
-            <UserPageIdentityActivityLogItem
-              key={log.id}
-              log={log}
-              profile={profile}
-            />
+            <ProfileActivityLogItemWrapper key={log.id} log={log} user={user}>
+              <ProfileActivityLogsItem log={log} />
+            </ProfileActivityLogItemWrapper>
           ))}
         </tbody>
       </table>
