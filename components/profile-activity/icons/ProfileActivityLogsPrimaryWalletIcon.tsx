@@ -1,4 +1,4 @@
-import EthereumIcon from "../../../utils/icons/EthereumIcon";
+import EthereumIcon from "../../user/utils/icons/EthereumIcon";
 
 export default function UserPageIdentityActivityLogPrimaryWalletIcon() {
   return (
