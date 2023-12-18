@@ -1,4 +1,7 @@
-import { ProfileActivityLog } from "../../../../../entities/IProfile";
+import {
+  ProfileActivityLog,
+  ProfileActivityLogType,
+} from "../../../../../entities/IProfile";
 import ProfileActivityLogItemTimeAgo from "./ProfileActivityLogItemTimeAgo";
 import ProfileActivityLogItemHandle from "./ProfileActivityLogItemHandle";
 
@@ -11,11 +14,15 @@ export default function ProfileActivityLogItemWrapper({
   readonly children: React.ReactNode;
   readonly user: string | null;
 }) {
+  const isArchived = log.type === ProfileActivityLogType.PROFILE_ARCHIVED;
+
   return (
     <tr className="tw-flex tw-items-center tw-justify-between">
       <td className="tw-py-2.5">
         <span className="tw-space-x-1.5 tw-inline-flex tw-items-center">
-          <ProfileActivityLogItemHandle log={log} user={user} />
+          {!isArchived && (
+            <ProfileActivityLogItemHandle log={log} user={user} />
+          )}
           {children}
         </span>
       </td>

@@ -9,6 +9,7 @@ import ProfileActivityLogContact from "./items/ProfileActivityLogContact";
 import ProfileActivityLogHandle from "./items/ProfileActivityLogHandle";
 import ProfileActivityLogPfp from "./items/ProfileActivityLogPfp";
 import ProfileActivityLogPrimaryWallet from "./items/ProfileActivityLogPrimaryWallet";
+import ProfileActivityLogProfileArchived from "./items/ProfileActivityLogProfileArchived";
 import ProfileActivityLogRate from "./items/ProfileActivityLogRate";
 import ProfileActivityLogSocialMedia from "./items/ProfileActivityLogSocialMedia";
 import ProfileActivityLogSocialMediaVerificationPost from "./items/ProfileActivityLogSocialMediaVerificationPost";
@@ -40,6 +41,8 @@ export default function UserPageIdentityActivityLogItem({
       return <ProfileActivityLogBanner log={log} />;
     case ProfileActivityLogType.PFP_EDIT:
       return <ProfileActivityLogPfp log={log} />;
+    case ProfileActivityLogType.PROFILE_ARCHIVED:
+      return <ProfileActivityLogProfileArchived log={log} />;
     default:
       assertUnreachable(logType);
   }

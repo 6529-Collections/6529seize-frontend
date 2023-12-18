@@ -110,12 +110,7 @@ export default function ProfileActivityLogs({
       {logs?.data.length ? (
         <div className="tw-flow-root">
           <div className="tw-overflow-x-auto">
-            <ProfileActivityLogsList
-              logs={logs.data.filter((log) =>
-                Object.values(ProfileActivityLogType).includes(log.type)
-              )}
-              user={user}
-            />
+            <ProfileActivityLogsList logs={logs.data} user={user} />
             {totalPages > 1 && (
               <UserPageIdentityPagination
                 currentPage={currentPage}
