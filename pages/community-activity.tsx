@@ -49,10 +49,10 @@ export default function CommunityActivityPage({
         <meta property="og:description" content="6529 SEIZE" />
       </Head>
 
-      <main className="tw-min-h-screen">
+      <main className="tw-min-h-screen tw-bg-iron-950">
         <Header />
         <div
-          className={`tailwind-scope tw-bg-iron-950 tw-min-h-screen tw-pb-16 lg:tw-pb-20 ${inter.className}`}
+          className={`tailwind-scope tw-bg-iron-950 tw-min-h-screen tw-pb-16 lg:tw-pb-20 tw-relative tw-px-6 min-[1100px]:tw-max-w-[960px] min-[1200px]:tw-max-w-[1150px] min-[1300px]:tw-max-w-[1250px] min-[1400px]:tw-max-w-[1350px] min-[1500px]:tw-max-w-[1450px] min-[1600px]:tw-max-w-[1550px] min-[1800px]:tw-max-w-[1750px] min-[2000px]:tw-max-w-[1950px] tw-mx-auto ${inter.className}`}
         >
           <ProfileActivityLogs
             initialLogs={pageProps.logsPage}
