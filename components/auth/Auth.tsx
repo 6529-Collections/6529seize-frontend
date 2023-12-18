@@ -1,4 +1,4 @@
-import { createContext, useEffect, useState } from "react";
+import { createContext, useEffect } from "react";
 import { Slide, ToastContainer, TypeOptions, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useAccount, useSignMessage } from "wagmi";
@@ -10,29 +10,8 @@ import {
 import { commonApiFetch, commonApiPost } from "../../services/api/common-api";
 import jwtDecode from "jwt-decode";
 import { UserRejectedRequestError } from "viem";
-import { IProfile, IProfileAndConsolidations } from "../../entities/IProfile";
-
-export interface IProfileMetaWallet {
-  readonly wallet: {
-    readonly address: string;
-    readonly ens: string | null;
-  };
-  readonly displayName: string;
-  readonly tdh: number;
-}
-
-export interface IProfileWithMeta {
-  readonly profile: IProfile | null;
-  readonly consolidation: {
-    readonly wallets: IProfileMetaWallet[];
-    readonly tdh: number;
-  };
-}
 
 type AuthContextType = {
-  myProfile: IProfileWithMeta | null;
-  loadingMyProfile: boolean;
-  updateMyProfile: () => Promise<void>;
   requestAuth: () => Promise<{ success: boolean }>;
   setToast: ({ message, type }: { message: string; type: TypeOptions }) => void;
 };
@@ -43,9 +22,6 @@ interface NonceResponse {
 }
 
 export const AuthContext = createContext<AuthContextType>({
-  myProfile: null,
-  loadingMyProfile: false,
-  updateMyProfile: async () => {},
   requestAuth: async () => ({ success: false }),
   setToast: () => {},
 });
@@ -54,60 +30,14 @@ export default function Auth({ children }: { children: React.ReactNode }) {
   const { address } = useAccount();
   const signMessage = useSignMessage();
 
-  const [myProfile, setMyProfile] = useState<IProfileWithMeta | null>(null);
-  const [loadingMyProfile, setLoadingMyProfile] = useState(false);
-
   useEffect(() => {
-    if (!address) removeAuthJwt();
-    else {
+    if (!address) {
+      return;
+    } else {
       const isAuth = validateJwt({ jwt: getAuthJwt(), wallet: address });
       if (!isAuth) removeAuthJwt();
     }
   }, [address]);
-
-  const mapApiResponseToUser = (
-    response: IProfileAndConsolidations
-  ): IProfileWithMeta => {
-    return {
-      ...response,
-      consolidation: {
-        ...response.consolidation,
-        wallets: response.consolidation.wallets.map((w) => ({
-          ...w,
-          wallet: {
-            ...w.wallet,
-            address: w.wallet.address.toLowerCase(),
-            ens: w.wallet.ens ?? null,
-          },
-          displayName: w.wallet.ens ?? w.wallet.address.toLowerCase(),
-        })),
-      },
-    };
-  };
-
-  const getMyProfile = async () => {
-    if (!address) {
-      setMyProfile(null);
-      return;
-    }
-    setLoadingMyProfile(true);
-    try {
-      const response = await commonApiFetch<IProfileAndConsolidations>({
-        endpoint: `profiles/${address}`,
-      });
-      setMyProfile(mapApiResponseToUser(response));
-    } catch {
-      setMyProfile(null);
-    } finally {
-      setLoadingMyProfile(false);
-    }
-  };
-
-  useEffect(() => {
-    getMyProfile();
-  }, [address]);
-
-  const updateMyProfile = async () => await getMyProfile();
 
   const getNonce = async (): Promise<NonceResponse | null> => {
     try {
@@ -257,13 +187,14 @@ export default function Auth({ children }: { children: React.ReactNode }) {
       iat: number;
       exp: number;
     }>(jwt);
-    // TODO: check if token is expired and is signed by the server
-    return decodedJwt.sub.toLowerCase() === wallet.toLowerCase();
+    return (
+      decodedJwt.sub.toLowerCase() === wallet.toLowerCase() &&
+      decodedJwt.exp > Date.now() / 1000
+    );
   };
 
   const requestAuth = async (): Promise<{ success: boolean }> => {
     if (!address) {
-      removeAuthJwt();
       setToast({
         message: "Please connect your wallet",
         type: "error",
@@ -283,9 +214,6 @@ export default function Auth({ children }: { children: React.ReactNode }) {
         value={{
           requestAuth,
           setToast,
-          myProfile,
-          loadingMyProfile,
-          updateMyProfile,
         }}
       >
         {children}

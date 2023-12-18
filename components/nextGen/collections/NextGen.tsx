@@ -35,6 +35,8 @@ export default function NextGen() {
   >([]);
 
   const [collectionsLoaded, setCollectionsLoaded] = useState(false);
+  const [filteredCollectionsLoaded, setFilteredCollectionsLoaded] =
+    useState(false);
 
   const [filteredCollections, setFilteredCollections] = useState<
     { id: number; phaseTimes?: PhaseTimes }[]
@@ -46,50 +48,53 @@ export default function NextGen() {
       newCollections.push({ id: i + 1 });
     }
     setCollections(newCollections);
+    setCollectionsLoaded(true);
   }, [collectionIndex]);
 
   useEffect(() => {
-    if (!typeFilter) {
-      setFilteredCollections(collections);
-    } else {
-      switch (typeFilter) {
-        case TypeFilter.ALL:
-          setFilteredCollections(collections);
-          break;
-        case TypeFilter.LIVE:
-          setFilteredCollections(
-            collections.filter(
-              (c) =>
-                c.phaseTimes?.al_status === Status.LIVE ||
-                c.phaseTimes?.public_status === Status.LIVE
-            )
-          );
-          break;
-        case TypeFilter.AL_UPCOMING:
-          setFilteredCollections(
-            collections.filter(
-              (c) => c.phaseTimes?.al_status === Status.UPCOMING
-            )
-          );
-          break;
-        case TypeFilter.PUBLIC_UPCOMING:
-          setFilteredCollections(
-            collections.filter(
-              (c) => c.phaseTimes?.public_status === Status.UPCOMING
-            )
-          );
-          break;
-        case TypeFilter.COMPLETE:
-          setFilteredCollections(
-            collections.filter(
-              (c) => c.phaseTimes?.public_status === Status.COMPLETE
-            )
-          );
-          break;
+    if (collectionsLoaded) {
+      if (!typeFilter) {
+        setFilteredCollections(collections);
+      } else {
+        switch (typeFilter) {
+          case TypeFilter.ALL:
+            setFilteredCollections(collections);
+            break;
+          case TypeFilter.LIVE:
+            setFilteredCollections(
+              collections.filter(
+                (c) =>
+                  c.phaseTimes?.al_status === Status.LIVE ||
+                  c.phaseTimes?.public_status === Status.LIVE
+              )
+            );
+            break;
+          case TypeFilter.AL_UPCOMING:
+            setFilteredCollections(
+              collections.filter(
+                (c) => c.phaseTimes?.al_status === Status.UPCOMING
+              )
+            );
+            break;
+          case TypeFilter.PUBLIC_UPCOMING:
+            setFilteredCollections(
+              collections.filter(
+                (c) => c.phaseTimes?.public_status === Status.UPCOMING
+              )
+            );
+            break;
+          case TypeFilter.COMPLETE:
+            setFilteredCollections(
+              collections.filter(
+                (c) => c.phaseTimes?.public_status === Status.COMPLETE
+              )
+            );
+            break;
+        }
       }
+      setFilteredCollectionsLoaded(true);
     }
-    setCollectionsLoaded(true);
-  }, [typeFilter, collections]);
+  }, [typeFilter, collections, collectionsLoaded]);
 
   return (
     <Container>
@@ -143,7 +148,7 @@ export default function NextGen() {
             />
           </Col>
         ))}
-        {collectionsLoaded && filteredCollections.length === 0 && (
+        {filteredCollectionsLoaded && filteredCollections.length === 0 && (
           <Col className="text-center">
             <h4>No collections found</h4>
           </Col>

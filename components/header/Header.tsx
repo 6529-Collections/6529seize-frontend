@@ -127,7 +127,8 @@ export default function Header(props: Readonly<Props>) {
           <Row className="pt-3 pb-3">
             <Col>
               <h3
-                className={`d-flex justify-content-center ${styles.burgerMenuHeader}`}>
+                className={`d-flex justify-content-center ${styles.burgerMenuHeader}`}
+              >
                 {printHeaderConnect()}
               </h3>
             </Col>

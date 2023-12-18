@@ -6,6 +6,7 @@ import {
 } from "../constants";
 import { BaseNFT, VolumeType } from "../entities/INFT";
 import { DateIntervalsSelection } from "../enums";
+import { CICType, IProfileAndConsolidations } from "../entities/IProfile";
 
 export function formatAddress(address: string) {
   if (
@@ -78,8 +79,27 @@ export function numberWithCommas(x: number) {
   if (x === null || isNaN(x)) return "-";
   if (x === 0) return "-";
   const parts = x.toString().split(".");
-  parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-  return parts.join(".");
+  let integerPart = parts[0];
+  let formattedInteger = "";
+  while (integerPart.length > 3) {
+    formattedInteger = "," + integerPart.slice(-3) + formattedInteger;
+    integerPart = integerPart.slice(0, -3);
+  }
+  formattedInteger = integerPart + formattedInteger;
+  return formattedInteger + (parts.length > 1 ? "." + parts[1] : "");
+}
+
+export function formatNumberWithCommas(x: number) {
+  if (x === null || isNaN(x)) return "-";
+  const parts = x.toString().split(".");
+  let integerPart = parts[0];
+  let formattedInteger = "";
+  while (integerPart.length > 3) {
+    formattedInteger = "," + integerPart.slice(-3) + formattedInteger;
+    integerPart = integerPart.slice(0, -3);
+  }
+  formattedInteger = integerPart + formattedInteger;
+  return formattedInteger + (parts.length > 1 ? "." + parts[1] : "");
 }
 
 export function getDateDisplay(date: Date) {
@@ -481,3 +501,75 @@ export function getDateFilters(
   }
   return filters;
 }
+
+export const cicToType = (cic: number): CICType => {
+  if (cic < -20) {
+    return CICType.INACCURATE;
+  }
+
+  if (cic < 1000) {
+    return CICType.UNKNOWN;
+  }
+
+  if (cic < 10000) {
+    return CICType.PROBABLY_ACCURATE;
+  }
+
+  if (cic < 25000) {
+    return CICType.ACCURATE;
+  }
+
+  return CICType.HIGHLY_ACCURATE;
+};
+
+export const amIUser = ({
+  profile,
+  address,
+}: {
+  profile: IProfileAndConsolidations;
+  address: string | undefined;
+}): boolean =>
+  profile.consolidation.wallets.some(
+    (wallet) => wallet.wallet.address.toLowerCase() === address?.toLowerCase()
+  );
+
+export const createPossessionStr = (name: string | null): string => {
+  if (name) {
+    const possession = name.endsWith("s") ? `${name}'` : `${name}'s`;
+    return possession;
+  }
+  return "";
+};
+
+export function getTimeAgo(milliseconds: number): string {
+  const currentTime = new Date().getTime();
+  const timeDifference = currentTime - milliseconds;
+
+  const seconds = Math.floor(timeDifference / 1000);
+  const minutes = Math.floor(seconds / 60);
+  const hours = Math.floor(minutes / 60);
+  const days = Math.floor(hours / 24);
+  const months = Math.floor(days / 30);
+  const years = Math.floor(months / 12);
+
+  if (years > 0) {
+    return `${years} year${years > 1 ? "s" : ""} ago`;
+  } else if (months > 0) {
+    return `${months} month${months > 1 ? "s" : ""} ago`;
+  } else if (days > 0) {
+    return `${days} day${days > 1 ? "s" : ""} ago`;
+  } else if (hours > 0) {
+    return `${hours} hour${hours > 1 ? "s" : ""} ago`;
+  } else if (minutes > 0) {
+    return `${minutes} minute${minutes > 1 ? "s" : ""} ago`;
+  } else {
+    return `${seconds} second${seconds !== 1 ? "s" : ""} ago`;
+  }
+}
+
+export const truncateMiddle = (value: string): string => {
+  if (value.length > 50) {
+    return `${value.substring(0, 10)}...${value.substring(value.length - 30)}`;
+  }
+  return value;
+};

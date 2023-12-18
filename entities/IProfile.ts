@@ -1,3 +1,5 @@
+import { STATEMENT_GROUP, STATEMENT_TYPE } from "../helpers/Types";
+
 export interface IProfileWallet {
   readonly address: string;
   readonly ens?: string;
@@ -8,13 +10,21 @@ export interface IProfileConsolidation {
   readonly tdh: number;
 }
 
+export interface AggregatedCicRating {
+  cic_rating: number;
+  contributor_count: number;
+}
+
 export interface IProfileAndConsolidations {
   readonly profile: IProfile | null;
   readonly consolidation: {
     wallets: IProfileConsolidation[];
     tdh: number;
+    consolidation_key: string | null;
+    consolidation_display: string | null;
   };
   readonly level: number;
+  readonly cic: AggregatedCicRating;
 }
 
 export enum PROFILE_CLASSIFICATION {
@@ -51,4 +61,213 @@ export interface IProfile {
   readonly banner_1?: string | undefined;
   readonly banner_2?: string | undefined;
   readonly website?: string | undefined;
+}
+
+export enum CICType {
+  INACCURATE = "INACCURATE",
+  UNKNOWN = "UNKNOWN",
+  PROBABLY_ACCURATE = "PROBABLY_ACCURATE",
+  ACCURATE = "ACCURATE",
+  HIGHLY_ACCURATE = "HIGHLY_ACCURATE",
+}
+
+export const CIC_TO_TEXT: Record<CICType, string> = {
+  [CICType.INACCURATE]: "Inaccurate",
+  [CICType.UNKNOWN]: "Not Enough Ratings Yet",
+  [CICType.PROBABLY_ACCURATE]: "Probably Accurate",
+  [CICType.ACCURATE]: "Accurate",
+  [CICType.HIGHLY_ACCURATE]: "Highly Accurate",
+};
+
+export interface ApiProfileRaterCicState {
+  readonly cic_rating_by_rater: number | null;
+  readonly cic_ratings_left_to_give_by_rater: number | null;
+}
+
+export interface CicStatement {
+  id: string;
+  profile_id: string;
+  statement_group: STATEMENT_GROUP;
+  statement_type: STATEMENT_TYPE;
+  statement_comment: string | null;
+  statement_value: string;
+  crated_at: Date;
+  updated_at: Date | null;
+}
+
+export enum ProfileActivityLogTargetType {
+  PROFILE_ID = "PROFILE_ID",
+}
+
+export enum ProfileActivityLogType {
+  RATING_EDIT = "RATING_EDIT",
+  HANDLE_EDIT = "HANDLE_EDIT",
+  PRIMARY_WALLET_EDIT = "PRIMARY_WALLET_EDIT",
+  CLASSIFICATION_EDIT = "CLASSIFICATION_EDIT",
+  SOCIALS_EDIT = "SOCIALS_EDIT",
+  CONTACTS_EDIT = "CONTACTS_EDIT",
+  SOCIAL_VERIFICATION_POST_EDIT = "SOCIAL_VERIFICATION_POST_EDIT",
+  BANNER_1_EDIT = "BANNER_1_EDIT",
+  BANNER_2_EDIT = "BANNER_2_EDIT",
+  PFP_EDIT = "PFP_EDIT",
+}
+
+export const PROFILE_ACTIVITY_TYPE_TO_TEXT: Record<
+  ProfileActivityLogType,
+  string
+> = {
+  [ProfileActivityLogType.RATING_EDIT]: "CIC Rating",
+  [ProfileActivityLogType.HANDLE_EDIT]: "Handle",
+  [ProfileActivityLogType.PRIMARY_WALLET_EDIT]: "Primary Wallet",
+  [ProfileActivityLogType.CLASSIFICATION_EDIT]: "Classification",
+  [ProfileActivityLogType.SOCIALS_EDIT]: "Social Media Account",
+  [ProfileActivityLogType.CONTACTS_EDIT]: "Contact",
+  [ProfileActivityLogType.SOCIAL_VERIFICATION_POST_EDIT]:
+    "Social Media Verification Post",
+  [ProfileActivityLogType.BANNER_1_EDIT]: "Banner 1",
+  [ProfileActivityLogType.BANNER_2_EDIT]: "Banner 2",
+  [ProfileActivityLogType.PFP_EDIT]: "Profile Picture",
+};
+
+export interface ProfileActivityLogBase {
+  readonly id: string;
+  readonly profile_id: string;
+  readonly target_id: string | null;
+  readonly target_type: ProfileActivityLogTargetType | null;
+  readonly created_at: Date;
+  readonly profile_handle: string;
+  readonly target_profile_handle: string | null;
+}
+
+export interface ProfileActivityLogRatingEdit extends ProfileActivityLogBase {
+  readonly type: ProfileActivityLogType.RATING_EDIT;
+  readonly contents: {
+    change_reason: string;
+    new_rating: number;
+    old_rating: {
+      rating: number;
+      total_tdh_spent_on_matter: number;
+    };
+    rating_category: string;
+    rating_matter: string;
+  };
+}
+
+export interface ProfileActivityLogHandleEdit extends ProfileActivityLogBase {
+  readonly type: ProfileActivityLogType.HANDLE_EDIT;
+  readonly contents: {
+    new_value: string;
+    old_value: string;
+  };
+}
+
+export interface ProfileActivityLogPrimaryWalletEdit
+  extends ProfileActivityLogBase {
+  readonly type: ProfileActivityLogType.PRIMARY_WALLET_EDIT;
+  readonly contents: {
+    new_value: string;
+    old_value: string;
+  };
+}
+
+export interface ProfileActivityLogClassificationEdit
+  extends ProfileActivityLogBase {
+  readonly type: ProfileActivityLogType.CLASSIFICATION_EDIT;
+  readonly contents: {
+    new_value: PROFILE_CLASSIFICATION;
+    old_value: PROFILE_CLASSIFICATION;
+  };
+}
+
+export interface ProfileActivityLogBanner1Edit extends ProfileActivityLogBase {
+  readonly type: ProfileActivityLogType.BANNER_1_EDIT;
+  readonly contents: {
+    new_value: string;
+    old_value: string;
+  };
+}
+
+export interface ProfileActivityLogBanner2Edit extends ProfileActivityLogBase {
+  readonly type: ProfileActivityLogType.BANNER_2_EDIT;
+  readonly contents: {
+    new_value: string;
+    old_value: string;
+  };
+}
+
+export interface ProfileActivityLogPfpEdit extends ProfileActivityLogBase {
+  readonly type: ProfileActivityLogType.PFP_EDIT;
+  readonly contents: {
+    new_value: string;
+    old_value: string;
+  };
+}
+
+export enum ProfileActivityLogSocialsEditContentAction {
+  ADD = "ADD",
+  DELETE = "DELETE",
+}
+
+export const PROFILE_ACTIVITY_LOG_ACTION_STR: Record<
+  ProfileActivityLogSocialsEditContentAction,
+  string
+> = {
+  [ProfileActivityLogSocialsEditContentAction.ADD]: "added",
+  [ProfileActivityLogSocialsEditContentAction.DELETE]: "removed",
+};
+
+export interface ProfileActivityLogSocialsEdit extends ProfileActivityLogBase {
+  readonly type: ProfileActivityLogType.SOCIALS_EDIT;
+  readonly contents: {
+    action: ProfileActivityLogSocialsEditContentAction;
+    statement: CicStatement;
+  };
+}
+
+export interface ProfileActivityLogContactsEdit extends ProfileActivityLogBase {
+  readonly type: ProfileActivityLogType.CONTACTS_EDIT;
+  readonly contents: {
+    action: ProfileActivityLogSocialsEditContentAction;
+    statement: CicStatement;
+  };
+}
+
+export interface ProfileActivityLogSocialVerificationPostEdit
+  extends ProfileActivityLogBase {
+  readonly type: ProfileActivityLogType.SOCIAL_VERIFICATION_POST_EDIT;
+  readonly contents: {
+    action: ProfileActivityLogSocialsEditContentAction;
+    statement: CicStatement;
+  };
+}
+
+export type ProfileActivityLog =
+  | ProfileActivityLogRatingEdit
+  | ProfileActivityLogHandleEdit
+  | ProfileActivityLogPrimaryWalletEdit
+  | ProfileActivityLogClassificationEdit
+  | ProfileActivityLogSocialsEdit
+  | ProfileActivityLogContactsEdit
+  | ProfileActivityLogSocialVerificationPostEdit
+  | ProfileActivityLogBanner1Edit
+  | ProfileActivityLogBanner2Edit
+  | ProfileActivityLogPfpEdit;
+
+export enum RateMatter {
+  CIC = "CIC",
+}
+
+export interface ProfilesMatterRating {
+  readonly rater_handle: string;
+  readonly matter: RateMatter;
+  readonly matter_category: string;
+  readonly rating: number;
+  readonly rater_cic_rating: number;
+  readonly rater_tdh: number;
+  readonly last_modified: Date;
+}
+
+export interface ProfilesMatterRatingWithRaterLevel
+  extends ProfilesMatterRating {
+  readonly rater_level: number;
 }

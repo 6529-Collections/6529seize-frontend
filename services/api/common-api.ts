@@ -12,20 +12,29 @@ const getHeaders = (
     ...(contentType ? { "Content-Type": "application/json" } : {}),
     ...(apiAuth ? { "x-6529-auth": apiAuth } : {}),
     ...(walletAuth ? { Authorization: `Bearer ${walletAuth}` } : {}),
-    ...(headers || {}),
+    ...(headers ?? {}),
   };
 };
 
 export const commonApiFetch = async <T>(param: {
   endpoint: string;
   headers?: Record<string, string>;
+  params?: Record<string, string>;
 }): Promise<T> => {
-  const res = await fetch(`${process.env.API_ENDPOINT}/api/${param.endpoint}`, {
+  let url = `${process.env.API_ENDPOINT}/api/${param.endpoint}`;
+  if (param.params) {
+    const queryParams = new URLSearchParams(param.params);
+    url += `?${queryParams.toString()}`;
+  }
+
+  const res = await fetch(url, {
     headers: getHeaders(param.headers),
   });
   if (!res.ok) {
     const body: any = await res.json();
-    throw new Error(body?.error ?? res.statusText ?? "Something went wrong");
+    return new Promise((_, rej) =>
+      rej(body?.error ?? res.statusText ?? "Something went wrong")
+    );
   }
   return res.json();
 };
@@ -42,9 +51,21 @@ export const commonApiPost = async <T, U>(param: {
   });
   if (!res.ok) {
     const body: any = await res.json();
-    throw new Error(body?.error ?? res.statusText ?? "Something went wrong");
+    return new Promise((_, rej) =>
+      rej(body?.error ?? res.statusText ?? "Something went wrong")
+    );
   }
   return res.json();
+};
+
+export const commonApiDelete = async (param: {
+  endpoint: string;
+  headers?: Record<string, string>;
+}): Promise<void> => {
+  await fetch(`${process.env.API_ENDPOINT}/api/${param.endpoint}`, {
+    method: "DELETE",
+    headers: getHeaders(param.headers),
+  });
 };
 
 export const commonApiPostForm = async <U>(param: {
@@ -59,7 +80,9 @@ export const commonApiPostForm = async <U>(param: {
   });
   if (!res.ok) {
     const body: any = await res.json();
-    throw new Error(body?.error ?? res.statusText ?? "Something went wrong");
+    return new Promise((_, rej) =>
+      rej(body?.error ?? res.statusText ?? "Something went wrong")
+    );
   }
   return res.json();
 };

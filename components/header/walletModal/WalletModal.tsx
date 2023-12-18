@@ -3,56 +3,62 @@ import styles from "./WalletModal.module.scss";
 import { disconnect } from "@wagmi/core";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Image from "next/image";
-import { useContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { ENS } from "../../../entities/IENS";
-import { fetchUrl } from "../../../services/6529api";
 import { numberWithCommas } from "../../../helpers/Helpers";
 import Address from "../../address/Address";
-import { AuthContext } from "../../auth/Auth";
+import { useAccount } from "wagmi";
+import { useQuery } from "@tanstack/react-query";
+import { IProfileAndConsolidations } from "../../../entities/IProfile";
+import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
+import { commonApiFetch } from "../../../services/api/common-api";
 
 interface Props {
-  wallet: `0x${string}`;
-  show: boolean;
-  onHide: () => void;
+  readonly wallet: `0x${string}`;
+  readonly show: boolean;
+  readonly onHide: () => void;
 }
 
 export default function WalletModal(props: Readonly<Props>) {
-  const { myProfile } = useContext(AuthContext);
+  const account = useAccount();
+  const { data: profile } = useQuery<IProfileAndConsolidations>({
+    queryKey: [QueryKey.PROFILE, account.address?.toLowerCase()],
+    queryFn: async () =>
+      await commonApiFetch<IProfileAndConsolidations>({
+        endpoint: `profiles/${account.address}`,
+      }),
+    enabled: !!account.address,
+  });
   const [ens, setEns] = useState<ENS>();
   const [copied, setIsCopied] = useState<boolean>(false);
 
   useEffect(() => {
     const getUser = async () => {
-      if (!myProfile) {
+      if (!profile) {
         setEns(undefined);
       } else {
-        const user = await fetchUrl(
-          `${process.env.API_ENDPOINT}/api/user/${props.wallet}`
-        ).catch(() => null);
-        {
-          const highestTdhWallet = myProfile?.consolidation?.wallets?.reduce(
-            (prev, current) => (prev.tdh > current.tdh ? prev : current)
-          );
-
-          setEns({
-            created_at: myProfile.profile?.created_at ?? undefined,
-            wallet: props.wallet.toLowerCase(),
-            display:
-              myProfile.profile?.handle ??
-              highestTdhWallet?.wallet?.ens ??
-              props.wallet.toLowerCase(),
-            consolidation_key: user.consolidation_key,
-            pfp: myProfile.profile?.pfp_url ?? undefined,
-            banner_1: myProfile.profile?.banner_1 ?? undefined,
-            banner_2: myProfile.profile?.banner_2 ?? undefined,
-            website: myProfile.profile?.website ?? undefined,
-          });
-        }
+        const highestTdhWallet = profile?.consolidation?.wallets?.reduce(
+          (prev, current) => (prev.tdh > current.tdh ? prev : current)
+        );
+        setEns({
+          created_at: profile.profile?.created_at ?? undefined,
+          wallet: props.wallet.toLowerCase(),
+          display:
+            profile.profile?.handle ??
+            profile.consolidation.consolidation_display ??
+            highestTdhWallet?.wallet?.ens ??
+            props.wallet.toLowerCase(),
+          consolidation_key: profile.consolidation.consolidation_key,
+          pfp: profile.profile?.pfp_url ?? undefined,
+          banner_1: profile.profile?.banner_1 ?? undefined,
+          banner_2: profile.profile?.banner_2 ?? undefined,
+          website: profile.profile?.website ?? undefined,
+        });
       }
     };
 
     getUser();
-  }, [props.wallet, myProfile]);
+  }, [props.wallet, profile]);
 
   function copy() {
     navigator.clipboard.writeText(props.wallet);
@@ -81,7 +87,7 @@ export default function WalletModal(props: Readonly<Props>) {
           onClick={() => props.onHide()}
         />
       </Modal.Header>
-      {ens && ens.pfp && ens.banner_1 && ens.banner_2 && (
+      {ens?.pfp && ens?.banner_1 && ens?.banner_2 && (
         <div
           className={styles.banner}
           style={{
@@ -105,10 +111,10 @@ export default function WalletModal(props: Readonly<Props>) {
           hideCopy={true}
         />
         <span className="d-flex flex-column align-items-end font-smaller">
-          {ens && ens.boosted_tdh && ens.boosted_tdh > 0 && (
+          {ens?.boosted_tdh && ens?.boosted_tdh > 0 && (
             <span>TDH: {numberWithCommas(ens.boosted_tdh)}</span>
           )}
-          {ens && ens.balance && ens.balance > 0 && (
+          {ens?.balance && ens?.balance > 0 && (
             <span>Cards: {numberWithCommas(ens.balance)}</span>
           )}
         </span>

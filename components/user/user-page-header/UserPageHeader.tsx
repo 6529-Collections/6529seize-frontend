@@ -1,5 +1,4 @@
 import { IProfileAndConsolidations } from "../../../entities/IProfile";
-import UserPageHeaderAddresses from "./addresses/UserPageHeaderAddresses";
 import { ConsolidatedTDHMetrics } from "../../../entities/ITDH";
 import UserPageHeaderPfp from "./userPageHeaderPfp";
 import UserPageHeaderName from "./UserPageHeaderName";
@@ -24,17 +23,15 @@ const inter = Inter({
 export default function UserPageHeader({
   profile,
   mainAddress,
-  activeAddress,
-  onActiveAddress,
   consolidatedTDH,
   user,
 }: {
-  profile: IProfileAndConsolidations;
-  mainAddress: string;
-  activeAddress: string | null;
-  onActiveAddress: (address: string) => void;
-  consolidatedTDH: ConsolidatedTDHMetrics | null;
-  user: string;
+  readonly profile: IProfileAndConsolidations;
+  readonly mainAddress: string;
+  readonly activeAddress: string | null;
+  readonly onActiveAddress: (address: string) => void;
+  readonly consolidatedTDH: ConsolidatedTDHMetrics | null;
+  readonly user: string;
 }) {
   const account = useAccount();
   const [isLoggedInUser, setIsLoggedInUser] = useState<boolean>(false);
@@ -53,7 +50,7 @@ export default function UserPageHeader({
 
   return (
     <div className={`tailwind-scope ${inter.className}`}>
-      <section className="tw-pb-16">
+      <section className="tw-pb-6 md:tw-pb-8">
         <div
           className="tw-h-36"
           style={{
@@ -77,24 +74,23 @@ export default function UserPageHeader({
                 mainAddress={mainAddress}
                 consolidatedTDH={consolidatedTDH}
               />
-
               <UserPageHeaderLevel level={profile.level} />
               <UserPageHeaderStats consolidatedTDH={consolidatedTDH} />
             </div>
             <div className="tw-mt-6 md:tw-hidden">
               {isLoggedInUser && <UserEditProfileButton user={user} />}
             </div>
-            <div className="tw-w-full md:tw-w-auto tw-flex tw-mt-4 min-[347px]:tw-mt-6 tw-items-center tw-gap-x-6">
+            <div className="tw-w-full md:tw-w-auto tw-flex md:tw-mt-6 tw-items-center tw-gap-x-3">
               <div className="tw-hidden md:tw-block">
                 {isLoggedInUser && <UserEditProfileButton user={user} />}
               </div>
-              <div className="tw-w-full sm:tw-w-auto">
+              {/* <div className="tw-w-full sm:tw-w-auto">
                 <UserPageHeaderAddresses
                   addresses={profile.consolidation.wallets}
                   activeAddress={activeAddress}
                   onActiveAddress={onActiveAddress}
                 />
-              </div>
+              </div> */}
             </div>
           </div>
         </div>
