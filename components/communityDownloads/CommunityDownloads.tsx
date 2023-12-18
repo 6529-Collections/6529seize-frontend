@@ -9,34 +9,34 @@ export default function CommunityDownloads() {
           <Container className="pt-4">
             <Row>
               <Col>
-                <h1>DOWNLOADS</h1>
+                <h1>OPEN DATA</h1>
               </Col>
             </Row>
             <Row className="pt-4">
               <Col xs={12} sm={6} md={4} className="pt-2 pb-3">
-                <a href="/downloads/community-metrics">
+                <a href="/open-data/community-metrics">
                   <span className={styles.downloadLink}>Community Metrics</span>
                 </a>
               </Col>
               <Col xs={12} sm={6} md={4} className="pt-2 pb-3">
-                <a href="/downloads/consolidated-community-metrics">
+                <a href="/open-data/consolidated-community-metrics">
                   <span className={styles.downloadLink}>
                     Consolidated Community Metrics
                   </span>
                 </a>
               </Col>
               <Col xs={12} sm={6} md={4} className="pt-2 pb-3">
-                <a href="/downloads/rememes">
+                <a href="/open-data/rememes">
                   <span className={styles.downloadLink}>Rememes</span>
                 </a>
               </Col>
               <Col xs={12} sm={6} md={4} className="pt-2 pb-3">
-                <a href="/downloads/team">
+                <a href="/open-data/team">
                   <span className={styles.downloadLink}>Team</span>
                 </a>
               </Col>
               <Col xs={12} sm={6} md={4} className="pt-2 pb-3">
-                <a href="/downloads/royalties">
+                <a href="/open-data/royalties">
                   <span className={styles.downloadLink}>Royalties</span>
                 </a>
               </Col>

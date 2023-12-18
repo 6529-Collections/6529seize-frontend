@@ -1,8 +1,7 @@
 import Head from "next/head";
 import styles from "../../styles/Home.module.scss";
-import { useState } from "react";
 import dynamic from "next/dynamic";
-import Breadcrumb, { Crumb } from "../../components/breadcrumb/Breadcrumb";
+import Breadcrumb from "../../components/breadcrumb/Breadcrumb";
 import HeaderPlaceholder from "../../components/header/HeaderPlaceholder";
 
 const Header = dynamic(() => import("../../components/header/Header"), {
@@ -10,30 +9,31 @@ const Header = dynamic(() => import("../../components/header/Header"), {
   loading: () => <HeaderPlaceholder />,
 });
 
-const CommunityDownloads = dynamic(
-  () => import("../../components/communityDownloads/CommunityDownloads"),
+const CommunityDownloadsTeam = dynamic(
+  () => import("../../components/communityDownloads/CommunityDownloadsTeam"),
   {
     ssr: false,
   }
 );
 
-export default function Downloads() {
-  const [breadcrumbs, setBreadcrumbs] = useState<Crumb[]>([
+export default function TeamDownloads() {
+  const breadcrumbs = [
     { display: "Home", href: "/" },
-    { display: "Downloads" },
-  ]);
+    { display: "Downloads", href: "/downloads" },
+    { display: "Team" },
+  ];
 
   return (
     <>
       <Head>
-        <title>Downloads | 6529 SEIZE</title>
+        <title>Team Downloads | 6529 SEIZE</title>
         <link rel="icon" href="/favicon.ico" />
-        <meta name="description" content="Downloads | 6529 SEIZE" />
+        <meta name="description" content="Team Downloads | 6529 SEIZE" />
         <meta
           property="og:url"
-          content={`${process.env.BASE_ENDPOINT}/downloads`}
+          content={`${process.env.BASE_ENDPOINT}/downloads/team`}
         />
-        <meta property="og:title" content={`Downloads`} />
+        <meta property="og:title" content={`Team Downloads`} />
         <meta property="og:description" content="6529 SEIZE" />
         <meta
           property="og:image"
@@ -44,7 +44,7 @@ export default function Downloads() {
       <main className={styles.main}>
         <Header />
         <Breadcrumb breadcrumbs={breadcrumbs} />
-        <CommunityDownloads />
+        <CommunityDownloadsTeam />
       </main>
     </>
   );
