@@ -10,7 +10,7 @@ import {
 } from "../../../../helpers/Helpers";
 import { useRouter } from "next/router";
 
-const CIC_COLOR: Record<CICType, string> = {
+export const CIC_COLOR: Record<CICType, string> = {
   [CICType.INACCURATE]: "tw-bg-[#F97066]",
   [CICType.UNKNOWN]: "tw-bg-[#FEDF89]",
   [CICType.PROBABLY_ACCURATE]: "tw-bg-[#AAF0C4]",

@@ -76,6 +76,7 @@ export default function CICRatings({
                   currentPage={currentPage}
                   setCurrentPage={setCurrentPage}
                   totalPages={totalPages}
+                  user={user}
                 />
               )}
             </div>

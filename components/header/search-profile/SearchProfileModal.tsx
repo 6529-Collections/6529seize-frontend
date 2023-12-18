@@ -1,17 +1,30 @@
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
-import { useClickAway, useDebounce, useKeyPressEvent } from "react-use";
+import {
+  useClickAway,
+  useDebounce,
+  useKeyPress,
+  useKeyPressEvent,
+} from "react-use";
 import { ProfileMinimal } from "../../../entities/IProfile";
 import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
 import { commonApiFetch } from "../../../services/api/common-api";
+import SearchProfileModalItem from "./SearchProfileModalItem";
+import { useRouter } from "next/router";
 
-const MIN_SEARCH_LENGTH = 1;
+enum STATE {
+  INITIAL = "INITIAL",
+  LOADING = "LOADING",
+  NO_RESULTS = "NO_RESULTS",
+  SUCCESS = "SUCCESS",
+}
 
 export default function SearchProfileModal({
   onClose,
 }: {
   readonly onClose: () => void;
 }) {
+  const router = useRouter();
   const modalRef = useRef<HTMLDivElement>(null);
   useClickAway(modalRef, onClose);
   useKeyPressEvent("Escape", onClose);
@@ -52,6 +65,58 @@ export default function SearchProfileModal({
     enabled: debouncedValue.length > 0,
   });
 
+  const onHover = (index: number, state: boolean) => {
+    if (!state) return;
+    setSelectedProfileIndex(index);
+  };
+
+  const [selectedProfileIndex, setSelectedProfileIndex] = useState<number>(0);
+  useKeyPressEvent("ArrowDown", () =>
+    setSelectedProfileIndex((i) =>
+      profiles && profiles.length >= i + 2 ? i + 1 : i
+    )
+  );
+  useKeyPressEvent("ArrowUp", () =>
+    setSelectedProfileIndex((i) => (i > 0 ? i - 1 : i))
+  );
+  useKeyPressEvent("Enter", () => {
+    if (profiles && profiles.length > 0) {
+      const profile = profiles[selectedProfileIndex];
+      if (!profile) {
+        return;
+      }
+      router.push(`/${profile.handle}/identity`);
+      onClose();
+    }
+  });
+
+  const [state, setState] = useState<STATE>(STATE.INITIAL);
+
+  useEffect(() => {
+    setSelectedProfileIndex(0);
+    if (isFetching) {
+      setState(STATE.LOADING);
+    } else if (profiles?.length === 0) {
+      setState(STATE.NO_RESULTS);
+    } else if (profiles && profiles?.length > 0) {
+      setState(STATE.SUCCESS);
+    } else {
+      setState(STATE.INITIAL);
+    }
+  }, [isFetching, profiles]);
+
+  const activeElementRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (activeElementRef.current) {
+      activeElementRef.current.scrollIntoView({
+        behavior: "smooth",
+        block: "nearest",
+        inline: "start",
+      });
+    }
+  }, [selectedProfileIndex]);
+
   return (
     <div className="tw-cursor-default tw-relative tw-z-10">
       <div className="tw-fixed tw-inset-0 tw-bg-gray-500 tw-bg-opacity-75"></div>
@@ -85,24 +150,38 @@ export default function SearchProfileModal({
                 placeholder="Search..."
               />
             </div>
-            <div className="tw-max-h-72 tw-scroll-py-2 tw-overflow-y-auto tw-py-2 tw-text-sm tw-text-white">
-              {profiles?.map((profile) => (
-                <button
-                  key={profile.handle}
-                  className="tw-cursor-default tw-select-none tw-rounded-md tw-px-4 tw-py-2"
-                >
-                  {profile.handle}
-                </button>
-              ))}
-            </div>
-            <div>{isFetching.toString()}</div>
-            {!profiles?.length &&
-              !isFetching &&
-              debouncedValue.length > MIN_SEARCH_LENGTH && (
-                <p className="tw-p-4 tw-text-sm tw-text-gray-500">
-                  No Profiles found.
-                </p>
-              )}
+            {state === STATE.SUCCESS && (
+              <div className="tw-h-72 tw-scroll-py-2 tw-overflow-y-auto tw-py-2 tw-text-sm tw-text-white">
+                {profiles?.map((profile, i) => (
+                  <div
+                    ref={i === selectedProfileIndex ? activeElementRef : null}
+                    key={profile.handle}
+                  >
+                    <SearchProfileModalItem
+                      profile={profile}
+                      onClose={onClose}
+                      isSelected={i === selectedProfileIndex}
+                      onHover={(state) => onHover(i, state)}
+                    />
+                  </div>
+                ))}
+              </div>
+            )}
+            {state === STATE.LOADING && (
+              <div className="tw-h-72 tw-flex tw-items-center tw-justify-center">
+                Loading...
+              </div>
+            )}
+            {state === STATE.NO_RESULTS && (
+              <div className="tw-h-72 tw-flex tw-items-center tw-justify-center">
+                <p className="tw-text-white">No results found.</p>
+              </div>
+            )}
+            {state === STATE.INITIAL && (
+              <div className="tw-h-72 tw-flex tw-items-center tw-justify-center">
+                <p className="tw-text-white">Search for a profile.</p>
+              </div>
+            )}
           </div>
         </div>
       </div>
