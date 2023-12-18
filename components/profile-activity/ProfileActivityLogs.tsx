@@ -104,6 +104,7 @@ export default function ProfileActivityLogs({
         <ProfileActivityLogsFilter
           selected={selectedFilters}
           setSelected={onFilter}
+          user={user}
         />
       )}
       {logs?.data.length ? (
@@ -120,6 +121,7 @@ export default function ProfileActivityLogs({
                 currentPage={currentPage}
                 setCurrentPage={setCurrentPage}
                 totalPages={totalPages}
+                user={user}
               />
             )}
           </div>
