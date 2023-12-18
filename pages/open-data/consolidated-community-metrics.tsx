@@ -3,38 +3,44 @@ import styles from "../../styles/Home.module.scss";
 import dynamic from "next/dynamic";
 import Breadcrumb from "../../components/breadcrumb/Breadcrumb";
 import HeaderPlaceholder from "../../components/header/HeaderPlaceholder";
+import { VIEW } from "../../components/consolidation-switch/ConsolidationSwitch";
 
 const Header = dynamic(() => import("../../components/header/Header"), {
   ssr: false,
   loading: () => <HeaderPlaceholder />,
 });
 
-const CommunityDownloadsRoyalties = dynamic(
-  () =>
-    import("../../components/communityDownloads/CommunityDownloadsRoyalties"),
+const CommunityDownloadsTDH = dynamic(
+  () => import("../../components/communityDownloads/CommunityDownloadsTDH"),
   {
     ssr: false,
   }
 );
 
-export default function Downloads() {
+export default function ConsolidatedCommunityMetricsDownloads() {
   const breadcrumbs = [
     { display: "Home", href: "/" },
     { display: "Downloads", href: "/downloads" },
-    { display: "Royalties" },
+    { display: "Consolidated Community Metrics" },
   ];
 
   return (
     <>
       <Head>
-        <title>Team Downloads | 6529 SEIZE</title>
+        <title>Consolidated Community Metrics Downloads | 6529 SEIZE</title>
         <link rel="icon" href="/favicon.ico" />
-        <meta name="description" content="Royalties Downloads | 6529 SEIZE" />
+        <meta
+          name="description"
+          content="Consolidated Community Metrics Downloads | 6529 SEIZE"
+        />
         <meta
           property="og:url"
-          content={`${process.env.BASE_ENDPOINT}/downloads/royalties`}
+          content={`${process.env.BASE_ENDPOINT}/downloads/consolidated-community-metrics`}
         />
-        <meta property="og:title" content={`Royalties Downloads`} />
+        <meta
+          property="og:title"
+          content={`Consolidated Community Metrics Downloads`}
+        />
         <meta property="og:description" content="6529 SEIZE" />
         <meta
           property="og:image"
@@ -45,7 +51,7 @@ export default function Downloads() {
       <main className={styles.main}>
         <Header />
         <Breadcrumb breadcrumbs={breadcrumbs} />
-        <CommunityDownloadsRoyalties />
+        <CommunityDownloadsTDH view={VIEW.CONSOLIDATION} />
       </main>
     </>
   );

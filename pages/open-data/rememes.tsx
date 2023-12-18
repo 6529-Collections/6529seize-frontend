@@ -1,44 +1,39 @@
 import Head from "next/head";
 import styles from "../../styles/Home.module.scss";
-import { useState } from "react";
 import dynamic from "next/dynamic";
-import Breadcrumb, { Crumb } from "../../components/breadcrumb/Breadcrumb";
+import Breadcrumb from "../../components/breadcrumb/Breadcrumb";
 import HeaderPlaceholder from "../../components/header/HeaderPlaceholder";
-import { VIEW } from "../../components/consolidation-switch/ConsolidationSwitch";
 
 const Header = dynamic(() => import("../../components/header/Header"), {
   ssr: false,
   loading: () => <HeaderPlaceholder />,
 });
 
-const CommunityDownloadsTDH = dynamic(
-  () => import("../../components/communityDownloads/CommunityDownloadsTDH"),
+const CommunityDownloadsRememes = dynamic(
+  () => import("../../components/communityDownloads/CommunityDownloadsRememes"),
   {
     ssr: false,
   }
 );
 
-export default function Downloads() {
-  const [breadcrumbs, setBreadcrumbs] = useState<Crumb[]>([
+export default function RememesDownloads() {
+  const breadcrumbs = [
     { display: "Home", href: "/" },
     { display: "Downloads", href: "/downloads" },
-    { display: "Community Metrics" },
-  ]);
+    { display: "Rememes" },
+  ];
 
   return (
     <>
       <Head>
-        <title>Community Metrics Downloads | 6529 SEIZE</title>
+        <title>Rememes Downloads | 6529 SEIZE</title>
         <link rel="icon" href="/favicon.ico" />
-        <meta
-          name="description"
-          content="Community Metrics Downloads | 6529 SEIZE"
-        />
+        <meta name="description" content="Rememes Downloads | 6529 SEIZE" />
         <meta
           property="og:url"
-          content={`${process.env.BASE_ENDPOINT}/downloads/community-metrics`}
+          content={`${process.env.BASE_ENDPOINT}/downloads/rememes`}
         />
-        <meta property="og:title" content={`Community Metrics Downloads`} />
+        <meta property="og:title" content={`Rememes Downloads`} />
         <meta property="og:description" content="6529 SEIZE" />
         <meta
           property="og:image"
@@ -49,7 +44,7 @@ export default function Downloads() {
       <main className={styles.main}>
         <Header />
         <Breadcrumb breadcrumbs={breadcrumbs} />
-        <CommunityDownloadsTDH view={VIEW.WALLET} />
+        <CommunityDownloadsRememes />
       </main>
     </>
   );
