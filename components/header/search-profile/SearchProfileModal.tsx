@@ -1,5 +1,9 @@
+import { useQuery } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
 import { useClickAway, useDebounce, useKeyPressEvent } from "react-use";
+import { ProfileMinimal } from "../../../entities/IProfile";
+import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
+import { commonApiFetch } from "../../../services/api/common-api";
 
 export default function SearchProfileModal({
   onClose,
@@ -33,6 +37,18 @@ export default function SearchProfileModal({
       inputRef.current.focus();
     }
   }, []);
+
+  const { data: profiles } = useQuery<ProfileMinimal[]>({
+    queryKey: [QueryKey.PROFILE_SEARCH, debouncedValue],
+    queryFn: async () =>
+      await commonApiFetch<ProfileMinimal[]>({
+        endpoint: "profiles-search",
+        params: {
+          param: debouncedValue,
+        },
+      }),
+    enabled: debouncedValue.length > 2,
+  });
 
   return (
     <div className="tw-cursor-default tw-relative tw-z-10">
@@ -71,18 +87,7 @@ export default function SearchProfileModal({
               <button className="tw-cursor-default tw-select-none tw-rounded-md tw-px-4 tw-py-2">
                 Leslie Alexander
               </button>
-              <button className="cursor-default select-none rounded-md px-4 py-2">
-                Michael Foster
-              </button>
-              <button className="cursor-default select-none rounded-md px-4 py-2">
-                Dries Vincent
-              </button>
-              <button className="cursor-default select-none rounded-md px-4 py-2">
-                Lindsay Walton
-              </button>
-              <button className="cursor-default select-none rounded-md px-4 py-2">
-                Courtney Henry
-              </button>
+
             </div>
             <p className="tw-p-4 tw-text-sm tw-text-gray-500">
               No Profiles found.
