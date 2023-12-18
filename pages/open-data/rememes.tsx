@@ -17,12 +17,12 @@ const CommunityDownloadsRememes = dynamic(
   }
 );
 
-export default function Downloads() {
-  const [breadcrumbs, setBreadcrumbs] = useState<Crumb[]>([
+export default function RememesDownloads() {
+  const breadcrumbs = [
     { display: "Home", href: "/" },
     { display: "Downloads", href: "/downloads" },
     { display: "Rememes" },
-  ]);
+  ];
 
   return (
     <>

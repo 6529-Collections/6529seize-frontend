@@ -17,12 +17,12 @@ const CommunityDownloadsTeam = dynamic(
   }
 );
 
-export default function Downloads() {
-  const [breadcrumbs, setBreadcrumbs] = useState<Crumb[]>([
+export default function TeamDownloads() {
+  const breadcrumbs = [
     { display: "Home", href: "/" },
     { display: "Downloads", href: "/downloads" },
     { display: "Team" },
-  ]);
+  ];
 
   return (
     <>

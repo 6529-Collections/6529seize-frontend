@@ -18,12 +18,12 @@ const CommunityDownloadsTDH = dynamic(
   }
 );
 
-export default function Downloads() {
-  const [breadcrumbs, setBreadcrumbs] = useState<Crumb[]>([
+export default function ConsolidatedCommunityMetricsDownloads() {
+  const breadcrumbs = [
     { display: "Home", href: "/" },
     { display: "Downloads", href: "/downloads" },
     { display: "Consolidated Community Metrics" },
-  ]);
+  ];
 
   return (
     <>

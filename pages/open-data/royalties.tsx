@@ -17,7 +17,7 @@ const CommunityDownloadsRoyalties = dynamic(
   }
 );
 
-export default function Downloads() {
+export default function RoyaltiesDownloads() {
   const breadcrumbs = [
     { display: "Home", href: "/" },
     { display: "Downloads", href: "/downloads" },
