@@ -47,7 +47,7 @@ export default function SearchProfileModal({
           param: debouncedValue,
         },
       }),
-    enabled: debouncedValue.length > 2,
+    enabled: debouncedValue.length > 0,
   });
 
   return (
@@ -84,10 +84,14 @@ export default function SearchProfileModal({
               />
             </div>
             <div className="tw-max-h-72 tw-scroll-py-2 tw-overflow-y-auto tw-py-2 tw-text-sm tw-text-white">
-              <button className="tw-cursor-default tw-select-none tw-rounded-md tw-px-4 tw-py-2">
-                Leslie Alexander
-              </button>
-
+              {profiles?.map((profile) => (
+                <button
+                  key={profile.handle}
+                  className="tw-cursor-default tw-select-none tw-rounded-md tw-px-4 tw-py-2"
+                >
+                  {profile.handle}
+                </button>
+              ))}
             </div>
             <p className="tw-p-4 tw-text-sm tw-text-gray-500">
               No Profiles found.
