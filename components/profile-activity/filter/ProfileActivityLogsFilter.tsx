@@ -1,18 +1,20 @@
 import { useEffect, useRef, useState } from "react";
-import UserPageIdentityActivityLogFilterList from "./UserPageIdentityActivityLogFilterList";
+import ProfileActivityLogsFilterList from "./ProfileActivityLogsFilterList";
 import { AnimatePresence, motion, useAnimate } from "framer-motion";
 import { useClickAway, useKeyPressEvent } from "react-use";
 import {
   PROFILE_ACTIVITY_TYPE_TO_TEXT,
   ProfileActivityLogType,
-} from "../../../../../entities/IProfile";
+} from "../../../entities/IProfile";
 
-export default function UserPageIdentityActivityLogFilter({
+export default function ProfileActivityLogsFilter({
   selected,
   setSelected,
+  user,
 }: {
   readonly selected: ProfileActivityLogType[];
   readonly setSelected: (selected: ProfileActivityLogType) => void;
+  readonly user: string | null;
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const [iconScope, animateIcon] = useAnimate();
@@ -41,7 +43,7 @@ export default function UserPageIdentityActivityLogFilter({
   }, [selected]);
 
   return (
-    <div ref={listRef} className="tw-px-6 md:tw-px-8 tw-mt-4 tw-max-w-sm">
+    <div ref={listRef} className={`${ user ? "tw-px-6 md:tw-px-8" : ""} tw-mt-4 tw-max-w-sm`}>
       <div className="tw-relative">
         <button
           type="button"
@@ -80,9 +82,10 @@ export default function UserPageIdentityActivityLogFilter({
               exit={{ opacity: 0, y: -20 }}
               transition={{ duration: 0.2 }}
             >
-              <UserPageIdentityActivityLogFilterList
+              <ProfileActivityLogsFilterList
                 selected={selected}
                 setSelected={setSelected}
+                user={user}
               />
             </motion.div>
           )}

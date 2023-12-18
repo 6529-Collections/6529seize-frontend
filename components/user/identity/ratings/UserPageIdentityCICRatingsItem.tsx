@@ -47,7 +47,7 @@ export default function UserPageIdentityCICRatingsItem({
 
   return (
     <tr>
-      <td className="tw-py-4">
+      <td className="tw-py-2.5">
         <div className="tw-inline-flex tw-items-center tw-space-x-3">
           <span className="tw-relative">
             <div className="tw-flex tw-items-center tw-justify-center tw-h-5 tw-w-5 tw-text-[0.625rem] tw-leading-3 tw-font-bold tw-rounded-full tw-ring-2 tw-ring-iron-300 tw-text-iron-300">
@@ -77,7 +77,7 @@ export default function UserPageIdentityCICRatingsItem({
           </div>
         </div>
       </td>
-      <td className="tw-py-4 tw-pl-3 tw-text-right">
+      <td className="tw-py-2.5 tw-pl-3 tw-text-right">
         <span className="tw-whitespace-nowrap tw-text-[0.8125rem] tw-leading-5 tw-text-iron-500">
           {timeAgo}
         </span>

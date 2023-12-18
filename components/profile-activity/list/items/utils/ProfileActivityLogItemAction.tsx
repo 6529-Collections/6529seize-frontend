@@ -1,5 +1,4 @@
-
-export default function UserPageIdentityActivityLogItemAction({
+export default function ProfileActivityLogItemAction({
   action,
 }: {
   readonly action: string;
