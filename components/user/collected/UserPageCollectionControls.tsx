@@ -24,6 +24,7 @@ export default function UserPageCollectionControls({
   seasons,
   selectedSeason,
   setSelectedSeason,
+  children,
 }: {
   readonly tdh: ConsolidatedTDHMetrics | TDHMetrics | null;
   readonly hideSeized: boolean;
@@ -41,6 +42,7 @@ export default function UserPageCollectionControls({
   readonly seasons: Season[];
   readonly selectedSeason: number;
   readonly setSelectedSeason: (season: number) => void;
+  readonly children: React.ReactNode;
 }) {
   return (
     <>
@@ -91,15 +93,11 @@ export default function UserPageCollectionControls({
           </Col>
         </Col>
         <Col className="d-flex align-items-center justify-content-end" xs={7}>
-          <SeasonsDropdown
-            seasons={seasons.map((s) => s.season)}
-            selectedSeason={selectedSeason}
-            setSelectedSeason={setSelectedSeason}
-          />
+          {children}
         </Col>
       </Row>
       <Row className="pt-3">
-        <Col>
+        <Col xs={6}>
           <Form.Check
             type="radio"
             name="hide"
@@ -155,6 +153,13 @@ export default function UserPageCollectionControls({
               />
             </>
           )}
+        </Col>
+        <Col className="d-flex align-items-center justify-content-end" xs={6}>
+          <SeasonsDropdown
+            seasons={seasons.map((s) => s.season)}
+            selectedSeason={selectedSeason}
+            setSelectedSeason={setSelectedSeason}
+          />
         </Col>
       </Row>
     </>

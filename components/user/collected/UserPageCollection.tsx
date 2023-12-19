@@ -12,6 +12,7 @@ import { IProfileAndConsolidations } from "../../../entities/IProfile";
 import { useRouter } from "next/router";
 import { commonApiFetch } from "../../../services/api/common-api";
 import { fetchAllPages } from "../../../services/6529api";
+import UserPageHeaderAddresses from "../user-page-header/addresses/UserPageHeaderAddresses";
 
 const UserPageCollectionControls = dynamic(
   () => import("./UserPageCollectionControls"),
@@ -42,26 +43,9 @@ export default function UserPageCollection(props: Props) {
     props.profile.profile?.primary_wallet?.toLowerCase() ??
     (router.query.user as string).toLowerCase();
 
-  const getAddressFromQuery = (): string | null => {
-    if (!router.query.address) {
-      return null;
-    }
-    if (typeof router.query.address === "string") {
-      return router.query.address.toLowerCase();
-    }
-
-    if (router.query.address.length > 0) {
-      return router.query.address[0].toLowerCase();
-    }
-    return null;
-  };
-
-  const [activeAddress, setActiveAddress] = useState<string | null>(
-    getAddressFromQuery()
-  );
-
+  const [activeAddress, setActiveAddress] = useState<string | null>(null);
   const [queryAddress, setQueryAddress] = useState<string>(
-    getAddressFromQuery() ?? mainAddress
+    activeAddress ?? mainAddress
   );
 
   const [walletsOwned, setWalletsOwned] = useState<Record<string, Owner[]>>({});
@@ -81,10 +65,6 @@ export default function UserPageCollection(props: Props) {
   const [selectedSeason, setSelectedSeason] = useState(0);
 
   const [loading, setLoading] = useState(loadingMetrics.length > 0);
-
-  useEffect(() => {
-    setActiveAddress((router.query.address as string) ?? null);
-  }, [router.query.address]);
 
   useEffect(() => {
     setLoading(loadingMetrics.length > 0);
@@ -178,7 +158,14 @@ export default function UserPageCollection(props: Props) {
         seasons={props.seasons}
         selectedSeason={selectedSeason}
         setSelectedSeason={setSelectedSeason}
-      />
+      >
+        <div className="tailwind-scope">
+          <UserPageHeaderAddresses
+            addresses={props.profile.consolidation.wallets}
+            onActiveAddress={setActiveAddress}
+          />
+        </div>
+      </UserPageCollectionControls>
       {loading ? (
         <DotLoader />
       ) : (
