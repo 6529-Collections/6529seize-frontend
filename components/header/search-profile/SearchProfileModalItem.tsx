@@ -1,6 +1,6 @@
 import { useHover, useHoverDirty } from "react-use";
 import { ProfileMinimal } from "../../../entities/IProfile";
-import { cicToType } from "../../../helpers/Helpers";
+import { cicToType, formatNumberWithCommas } from "../../../helpers/Helpers";
 import { CIC_COLOR } from "../../user/identity/ratings/UserPageIdentityCICRatingsItem";
 import { useRouter } from "next/router";
 import { useEffect, useRef } from "react";
@@ -51,6 +51,7 @@ export default function SearchProfileModalItem({
           ></span>
         </div>
         {profile.handle}
+        {!!profile.tdh && <span>{formatNumberWithCommas(profile.tdh)}tdh</span>}
       </button>
     </div>
   );
