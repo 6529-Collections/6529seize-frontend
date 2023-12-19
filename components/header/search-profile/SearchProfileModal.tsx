@@ -6,7 +6,6 @@ import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
 import { commonApiFetch } from "../../../services/api/common-api";
 import SearchProfileModalItem from "./SearchProfileModalItem";
 import { useRouter } from "next/router";
-import { Inter } from "next/font/google";
 
 enum STATE {
   INITIAL = "INITIAL",
@@ -14,13 +13,6 @@ enum STATE {
   NO_RESULTS = "NO_RESULTS",
   SUCCESS = "SUCCESS",
 }
-
-const inter = Inter({
-  weight: ["300", "400", "500", "600", "700"],
-  style: ["normal"],
-  subsets: ["latin"],
-  display: "swap",
-});
 
 export default function SearchProfileModal({
   onClose,
