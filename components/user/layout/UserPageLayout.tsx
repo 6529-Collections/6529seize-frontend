@@ -73,53 +73,6 @@ export default function UserPageLayout({
   descriptionArray.push("6529 SEIZE");
 
   const mainAddress = profile.profile?.primary_wallet ?? user.toLowerCase();
-
-  const getAddressFromQuery = (): string | null => {
-    if (!router.query.address) {
-      return null;
-    }
-    if (typeof router.query.address === "string") {
-      return router.query.address.toLowerCase();
-    }
-
-    if (router.query.address.length > 0) {
-      return router.query.address[0].toLowerCase();
-    }
-    return null;
-  };
-
-  const [activeAddress, setActiveAddress] = useState<string | null>(
-    getAddressFromQuery()
-  );
-
-  const onActiveAddress = (address: string) => {
-    if (address === activeAddress) {
-      setActiveAddress(null);
-      const currentQuery = { ...router.query };
-      delete currentQuery.address;
-      router.push(
-        {
-          pathname: router.pathname,
-          query: currentQuery,
-        },
-        undefined,
-        { shallow: true }
-      );
-      return;
-    }
-    setActiveAddress(address);
-    const currentQuery = { ...router.query };
-    currentQuery.address = address;
-    router.push(
-      {
-        pathname: router.pathname,
-        query: currentQuery,
-      },
-      undefined,
-      { shallow: true }
-    );
-  };
-
   const [isLoadingTabData, setIsLoadingTabData] = useState(false);
 
   useEffect(() => {
@@ -175,8 +128,6 @@ export default function UserPageLayout({
             profile={profile}
             mainAddress={mainAddress}
             consolidatedTDH={props.consolidatedTDH}
-            activeAddress={activeAddress}
-            onActiveAddress={onActiveAddress}
             user={user}
           />
           <div className="tw-px-6 min-[1100px]:tw-max-w-[960px] min-[1200px]:tw-max-w-[1150px] min-[1300px]:tw-max-w-[1250px] min-[1400px]:tw-max-w-[1350px] min-[1500px]:tw-max-w-[1450px] min-[1600px]:tw-max-w-[1550px] min-[1800px]:tw-max-w-[1750px] min-[2000px]:tw-max-w-[1950px] tw-mx-auto">

@@ -4,16 +4,17 @@ import { AnimatePresence, motion, useAnimate } from "framer-motion";
 import { useClickAway, useKeyPressEvent } from "react-use";
 import UserPageHeaderAddressesItem from "./UserPageHeaderAddressesItem";
 import { areEqualAddresses, formatAddress } from "../../../../helpers/Helpers";
+import { useRouter } from "next/router";
 
 export default function UserPageHeaderAddresses({
   addresses,
-  activeAddress,
   onActiveAddress,
 }: {
-  addresses: IProfileConsolidation[];
-  activeAddress: string | null;
-  onActiveAddress: (address: string) => void;
+  readonly addresses: IProfileConsolidation[];
+
+  readonly onActiveAddress: (address: string | null) => void;
 }) {
+  const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const [iconScope, animateIcon] = useAnimate();
   const toggleOpen = () => setIsOpen(!isOpen);
@@ -29,6 +30,33 @@ export default function UserPageHeaderAddresses({
   useKeyPressEvent("Escape", () => setIsOpen(false));
 
   const [title, setTitle] = useState<string>("Addresses");
+
+  const getAddressFromQuery = (): string | null => {
+    if (!router.query.address) {
+      return null;
+    }
+    if (typeof router.query.address === "string") {
+      return router.query.address.toLowerCase();
+    }
+
+    if (router.query.address.length > 0) {
+      return router.query.address[0].toLowerCase();
+    }
+    return null;
+  };
+
+  const [activeAddress, setActiveAddress] = useState<string | null>(
+    getAddressFromQuery()
+  );
+
+  useEffect(() => {
+    setActiveAddress((router.query.address as string) ?? null);
+  }, [router.query.address]);
+
+  useEffect(() => {
+    onActiveAddress(activeAddress);
+    setIsOpen(false);
+  }, [activeAddress]);
 
   useEffect(() => {
     if (!activeAddress) {
@@ -47,10 +75,33 @@ export default function UserPageHeaderAddresses({
     setTitle(address.wallet.ens ?? formatAddress(address.wallet.address));
   }, [activeAddress, addresses]);
 
-  const setActiveAddress = (address: string) => {
-    onActiveAddress(address);
-    setIsOpen(false);
-  };
+    const onAddressChange = (address: string) => {
+      if (address === activeAddress) {
+        setActiveAddress(null);
+        const currentQuery = { ...router.query };
+        delete currentQuery.address;
+        router.push(
+          {
+            pathname: router.pathname,
+            query: currentQuery,
+          },
+          undefined,
+          { shallow: true }
+        );
+        return;
+      }
+      setActiveAddress(address);
+      const currentQuery = { ...router.query };
+      currentQuery.address = address;
+      router.push(
+        {
+          pathname: router.pathname,
+          query: currentQuery,
+        },
+        undefined,
+        { shallow: true }
+      );
+    };
 
   return (
     <div className="tw-relative" ref={listRef}>
@@ -98,7 +149,7 @@ export default function UserPageHeaderAddresses({
                       key={item.wallet.address}
                       item={item}
                       activeAddress={activeAddress}
-                      onActiveAddress={setActiveAddress}
+                      onActiveAddress={onAddressChange}
                     />
                   ))}
                 </ul>
