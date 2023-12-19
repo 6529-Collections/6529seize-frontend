@@ -9,6 +9,7 @@ import ProfileActivityLogsProfileImageIcon from "./ProfileActivityLogsProfileIma
 import ProfileActivityLogsSocialMediaAccountIcon from "./ProfileActivityLogsSocialMediaAccountIcon";
 import ProfileActivityLogsSocialMediaVerificationPostIcon from "./ProfileActivityLogsSocialMediaVerificationPostIcon";
 import ProfileActivityLogsBannerIcon from "./ProfileActivityLogsBannerIcon";
+import ProfileActivityLogsProfileArchivedIcon from "./ProfileActivityLogsProfileArchivedIcon";
 
 export default function ProfileActivityLogsIcon({
   logType,
@@ -36,6 +37,8 @@ export default function ProfileActivityLogsIcon({
       return <ProfileActivityLogsBannerIcon />;
     case ProfileActivityLogType.PFP_EDIT:
       return <ProfileActivityLogsProfileImageIcon />;
+    case ProfileActivityLogType.PROFILE_ARCHIVED:
+      return <ProfileActivityLogsProfileArchivedIcon />;
     default:
       assertUnreachable(logType);
   }

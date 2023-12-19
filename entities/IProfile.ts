@@ -110,6 +110,7 @@ export enum ProfileActivityLogType {
   BANNER_1_EDIT = "BANNER_1_EDIT",
   BANNER_2_EDIT = "BANNER_2_EDIT",
   PFP_EDIT = "PFP_EDIT",
+  PROFILE_ARCHIVED = "PROFILE_ARCHIVED",
 }
 
 export const PROFILE_ACTIVITY_TYPE_TO_TEXT: Record<
@@ -127,6 +128,7 @@ export const PROFILE_ACTIVITY_TYPE_TO_TEXT: Record<
   [ProfileActivityLogType.BANNER_1_EDIT]: "Banner 1",
   [ProfileActivityLogType.BANNER_2_EDIT]: "Banner 2",
   [ProfileActivityLogType.PFP_EDIT]: "Profile Picture",
+  [ProfileActivityLogType.PROFILE_ARCHIVED]: "Profile Archived",
 };
 
 export interface ProfileActivityLogBase {
@@ -241,6 +243,14 @@ export interface ProfileActivityLogSocialVerificationPostEdit
   };
 }
 
+export interface ProfileActivityLogArchived extends ProfileActivityLogBase {
+  readonly type: ProfileActivityLogType.PROFILE_ARCHIVED;
+  readonly contents: {
+    readonly handle: string;
+    readonly reason: string;
+  };
+}
+
 export type ProfileActivityLog =
   | ProfileActivityLogRatingEdit
   | ProfileActivityLogHandleEdit
@@ -251,7 +261,8 @@ export type ProfileActivityLog =
   | ProfileActivityLogSocialVerificationPostEdit
   | ProfileActivityLogBanner1Edit
   | ProfileActivityLogBanner2Edit
-  | ProfileActivityLogPfpEdit;
+  | ProfileActivityLogPfpEdit
+  | ProfileActivityLogArchived;
 
 export enum RateMatter {
   CIC = "CIC",
