@@ -10,7 +10,7 @@ import ProfileActivityLogHandle from "./items/ProfileActivityLogHandle";
 import ProfileActivityLogPfp from "./items/ProfileActivityLogPfp";
 import ProfileActivityLogPrimaryWallet from "./items/ProfileActivityLogPrimaryWallet";
 import ProfileActivityLogProfileArchived from "./items/ProfileActivityLogProfileArchived";
-import ProfileActivityLogRate from "./items/ProfileActivityLogRate";
+import ProfileActivityLogRate from "./items/log-rate/ProfileActivityLogRate";
 import ProfileActivityLogSocialMedia from "./items/ProfileActivityLogSocialMedia";
 import ProfileActivityLogSocialMediaVerificationPost from "./items/ProfileActivityLogSocialMediaVerificationPost";
 
