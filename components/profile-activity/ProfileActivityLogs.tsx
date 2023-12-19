@@ -109,17 +109,15 @@ export default function ProfileActivityLogs({
       )}
       {logs?.data.length ? (
         <div className="tw-flow-root">
-          <div className="tw-overflow-x-auto">
-            <ProfileActivityLogsList logs={logs.data} user={user} />
-            {totalPages > 1 && (
-              <UserPageIdentityPagination
-                currentPage={currentPage}
-                setCurrentPage={setCurrentPage}
-                totalPages={totalPages}
-                user={user}
-              />
-            )}
-          </div>
+          <ProfileActivityLogsList logs={logs.data} user={user} />
+          {totalPages > 1 && (
+            <UserPageIdentityPagination
+              currentPage={currentPage}
+              setCurrentPage={setCurrentPage}
+              totalPages={totalPages}
+              user={user}
+            />
+          )}
         </div>
       ) : (
         <div className="tw-mt-4">

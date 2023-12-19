@@ -30,7 +30,7 @@ export default function UserCICTypeIconTooltipRate({
             />
           </svg>
         </a> */}
-        <UserPageIdentityHeaderCICRateWrapper profile={profile} />
+        <UserPageIdentityHeaderCICRateWrapper profile={profile} isTooltip={true} />
       </div>
     </div>
   );

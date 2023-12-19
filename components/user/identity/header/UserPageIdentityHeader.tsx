@@ -38,7 +38,7 @@ export default function UserPageIdentityHeader({
             </p>
           </div>
           <UserPageIdentityHeaderCIC profile={profile} />
-          <UserPageIdentityHeaderCICRateWrapper profile={profile} />
+          <UserPageIdentityHeaderCICRateWrapper profile={profile} isTooltip={false} />
         </div>
       </div>
     </div>
