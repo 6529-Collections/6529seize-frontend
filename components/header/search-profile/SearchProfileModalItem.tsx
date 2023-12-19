@@ -1,4 +1,4 @@
-import { useHover, useHoverDirty } from "react-use";
+import { useHoverDirty } from "react-use";
 import { ProfileMinimal } from "../../../entities/IProfile";
 import { cicToType, formatNumberWithCommas } from "../../../helpers/Helpers";
 import { CIC_COLOR } from "../../user/identity/ratings/UserPageIdentityCICRatingsItem";

@@ -1,11 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
-import {
-  useClickAway,
-  useDebounce,
-  useKeyPress,
-  useKeyPressEvent,
-} from "react-use";
+import { useClickAway, useDebounce, useKeyPressEvent } from "react-use";
 import { ProfileMinimal } from "../../../entities/IProfile";
 import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
 import { commonApiFetch } from "../../../services/api/common-api";
