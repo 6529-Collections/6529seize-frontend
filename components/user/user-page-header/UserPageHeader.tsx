@@ -28,8 +28,6 @@ export default function UserPageHeader({
 }: {
   readonly profile: IProfileAndConsolidations;
   readonly mainAddress: string;
-  readonly activeAddress: string | null;
-  readonly onActiveAddress: (address: string) => void;
   readonly consolidatedTDH: ConsolidatedTDHMetrics | null;
   readonly user: string;
 }) {
@@ -84,13 +82,6 @@ export default function UserPageHeader({
               <div className="tw-hidden md:tw-block">
                 {isLoggedInUser && <UserEditProfileButton user={user} />}
               </div>
-              {/* <div className="tw-w-full sm:tw-w-auto">
-                <UserPageHeaderAddresses
-                  addresses={profile.consolidation.wallets}
-                  activeAddress={activeAddress}
-                  onActiveAddress={onActiveAddress}
-                />
-              </div> */}
             </div>
           </div>
         </div>

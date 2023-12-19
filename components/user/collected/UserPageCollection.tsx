@@ -12,6 +12,7 @@ import { IProfileAndConsolidations } from "../../../entities/IProfile";
 import { useRouter } from "next/router";
 import { commonApiFetch } from "../../../services/api/common-api";
 import { fetchAllPages } from "../../../services/6529api";
+import UserPageHeaderAddresses from "../user-page-header/addresses/UserPageHeaderAddresses";
 
 const UserPageCollectionControls = dynamic(
   () => import("./UserPageCollectionControls"),
@@ -159,6 +160,34 @@ export default function UserPageCollection(props: Props) {
     setOwned(walletsOwned[queryAddress] ?? []);
   }, [activeAddress, walletsOwned, queryAddress, walletsTDH]);
 
+  const onActiveAddress = (address: string) => {
+    if (address === activeAddress) {
+      setActiveAddress(null);
+      const currentQuery = { ...router.query };
+      delete currentQuery.address;
+      router.push(
+        {
+          pathname: router.pathname,
+          query: currentQuery,
+        },
+        undefined,
+        { shallow: true }
+      );
+      return;
+    }
+    setActiveAddress(address);
+    const currentQuery = { ...router.query };
+    currentQuery.address = address;
+    router.push(
+      {
+        pathname: router.pathname,
+        query: currentQuery,
+      },
+      undefined,
+      { shallow: true }
+    );
+  };
+
   return (
     <>
       <UserPageCollectionControls
@@ -178,7 +207,15 @@ export default function UserPageCollection(props: Props) {
         seasons={props.seasons}
         selectedSeason={selectedSeason}
         setSelectedSeason={setSelectedSeason}
-      />
+      >
+        <div className="tailwind-scope">
+          <UserPageHeaderAddresses
+            addresses={props.profile.consolidation.wallets}
+            activeAddress={activeAddress}
+            onActiveAddress={onActiveAddress}
+          />
+        </div>
+      </UserPageCollectionControls>
       {loading ? (
         <DotLoader />
       ) : (

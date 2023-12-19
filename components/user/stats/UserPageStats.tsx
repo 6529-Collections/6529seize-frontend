@@ -5,13 +5,19 @@ import { useEffect, useState } from "react";
 import { commonApiFetch } from "../../../services/api/common-api";
 import UserPageStatsOverview from "./UserPageStatsOverview";
 import UserPageStatsTDHcharts from "./UserPageStatsTDHcharts";
+import { NFTLite } from "../../../entities/INFT";
+import UserPageActivity from "../to-be-removed/UserPageActivity";
+import UserPageDistributions from "../to-be-removed/UserPageDistributions";
+import UserPageHeaderAddresses from "../user-page-header/addresses/UserPageHeaderAddresses";
 
 export default function UserPageStats({
   profile,
   consolidatedTDH,
+  memesLite,
 }: {
   readonly profile: IProfileAndConsolidations;
   readonly consolidatedTDH: ConsolidatedTDHMetrics | null;
+  readonly memesLite: NFTLite[];
 }) {
   const isConsolidation = profile.consolidation.wallets.length > 1;
   const router = useRouter();
@@ -103,8 +109,59 @@ export default function UserPageStats({
     setLoading(loadingMetrics.length > 0);
   }, [loadingMetrics]);
 
+  const onActiveAddress = (address: string) => {
+    if (address === activeAddress) {
+      setActiveAddress(null);
+      const currentQuery = { ...router.query };
+      delete currentQuery.address;
+      router.push(
+        {
+          pathname: router.pathname,
+          query: currentQuery,
+        },
+        undefined,
+        { shallow: true }
+      );
+      return;
+    }
+    setActiveAddress(address);
+    const currentQuery = { ...router.query };
+    currentQuery.address = address;
+    router.push(
+      {
+        pathname: router.pathname,
+        query: currentQuery,
+      },
+      undefined,
+      { shallow: true }
+    );
+  };
+
   return (
     <>
+      <div className="tailwind-scope tw-inline-flex tw-justify-between tw-w-full tw-mt-4">
+        <h2 className="tw-text-xl tw-font-semibold tw-text-white tw-sm:truncate sm:tw-text-2xl sm:tw-tracking-tight tw-text-right">
+          Under construction
+        </h2>
+        <div>
+          <UserPageHeaderAddresses
+            addresses={profile.consolidation.wallets}
+            activeAddress={activeAddress}
+            onActiveAddress={onActiveAddress}
+          />
+        </div>
+      </div>
+      <UserPageActivity
+        show={true}
+        activeAddress={activeAddress}
+        memesLite={memesLite}
+        profile={profile}
+      />
+      <UserPageDistributions
+        show={true}
+        activeAddress={activeAddress}
+        profile={profile}
+      />
       <UserPageStatsOverview tdh={tdh} loading={loading} />
       <UserPageStatsTDHcharts mainAddress={mainAddress} />
     </>
