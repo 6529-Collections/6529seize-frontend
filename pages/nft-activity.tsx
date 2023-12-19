@@ -19,11 +19,7 @@ export default function TheMemesPage() {
   const breadcrumbs: Crumb[] = [
     { display: "Home", href: "/" },
     { display: "Nft Activity" },
-<<<<<<< HEAD
-  ]);
-=======
   ];
->>>>>>> main
 
   return (
     <>
