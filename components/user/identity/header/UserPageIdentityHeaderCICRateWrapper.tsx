@@ -9,8 +9,10 @@ import { commonApiFetch } from "../../../../services/api/common-api";
 
 export default function UserPageIdentityHeaderCICRateWrapper({
   profile,
+  isTooltip
 }: {
   readonly profile: IProfileAndConsolidations;
+  readonly isTooltip: boolean;
 }) {
   const { address } = useAccount();
   const { data: connectedProfile } = useQuery<IProfileAndConsolidations>({
@@ -97,5 +99,5 @@ export default function UserPageIdentityHeaderCICRateWrapper({
     return null;
   }
 
-  return <UserPageIdentityHeaderCICRate profile={profile} />;
+  return <UserPageIdentityHeaderCICRate profile={profile} isTooltip={isTooltip} />;
 }

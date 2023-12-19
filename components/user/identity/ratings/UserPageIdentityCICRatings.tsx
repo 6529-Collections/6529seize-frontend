@@ -69,17 +69,15 @@ export default function CICRatings({
       <div className="tw-min-h-[28rem] tw-max-h-[28rem] tw-transform-gpu tw-scroll-py-3 tw-overflow-y-auto">
         {ratings?.data.length ? (
           <div className="tw-flow-root">
-            <div className="tw-overflow-x-auto">
-              <UserPageIdentityCICRatingsList ratings={ratings.data} />
-              {totalPages > 1 && (
-                <UserPageIdentityPagination
-                  currentPage={currentPage}
-                  setCurrentPage={setCurrentPage}
-                  totalPages={totalPages}
-                  user={user}
-                />
-              )}
-            </div>
+            <UserPageIdentityCICRatingsList ratings={ratings.data} />
+            {totalPages > 1 && (
+              <UserPageIdentityPagination
+                currentPage={currentPage}
+                setCurrentPage={setCurrentPage}
+                totalPages={totalPages}
+                user={user}
+              />
+            )}
           </div>
         ) : (
           <div className="tw-mt-4">
