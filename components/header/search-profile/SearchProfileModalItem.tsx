@@ -35,7 +35,7 @@ export default function SearchProfileModalItem({
     <div
       ref={ref}
       className={`${
-        isSelected ? "tw-bg-primary-500" : ""
+        isSelected ? "tw-bg-iron-800" : ""
       } tw-rounded-md tw-px-2 tw-my-1 tw-transition tw-duration-300 tw-ease-out`}
     >
       <button
