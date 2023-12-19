@@ -18,8 +18,10 @@ import {
 
 export default function UserPageIdentityHeaderCICRate({
   profile,
+  isTooltip
 }: {
   readonly profile: IProfileAndConsolidations;
+  readonly isTooltip: boolean;
 }) {
   const { address } = useAccount();
   const { requestAuth, setToast } = useContext(AuthContext);
@@ -144,9 +146,12 @@ export default function UserPageIdentityHeaderCICRate({
       return;
     }
 
-    await updateCICMutation.mutateAsync(
-      getMyCICRatingsAsNumber(myCICRatingsStr)
-    );
+    const newRating = getMyCICRatingsAsNumber(myCICRatingsStr);
+    if (newRating === myCICRatings) {
+      return;
+    }
+
+    await updateCICMutation.mutateAsync(newRating);
   };
 
   const onSubmit = async (e: FormEvent<HTMLFormElement>) => {
@@ -159,52 +164,51 @@ export default function UserPageIdentityHeaderCICRate({
       <form onSubmit={onSubmit}>
         <div className="tw-flex tw-items-end tw-space-x-3.5">
           <div>
-            <div>
-              <label className="tw-block tw-text-sm tw-font-normal tw-leading-5 tw-text-iron-400">
-                Your total CIC Rating of {profile.profile?.handle}:
-              </label>
-              <div className="tw-relative tw-flex tw-mt-1.5">
-                <span className="tw-flex tw-flex-col tw-items-center tw-justify-center tw-bg-iron-900 tw-rounded-l-lg tw-border tw-border-solid tw-border-iron-700 tw-px-3">
-                  <svg
-                    className="tw-w-3.5 tw-h-3.5 tw-flex-shrink-0 tw-text-iron-500"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      d="M12 5V19M5 12H19"
-                      stroke="currentColor"
-                      strokeWidth="3"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
-                  <svg
-                    className="tw-w-3.5 tw-h-3.5 tw-flex-shrink-0 tw-text-iron-500"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      d="M5 12H19"
-                      stroke="currentColor"
-                      strokeWidth="3"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
-                </span>
-                <input
-                  type="text"
-                  value={myCICRatingsStr}
-                  onChange={handleChange}
-                  required
-                  autoComplete="off"
-                  className="tw-block tw-max-w-[12rem] tw-rounded-r-lg tw-border-0 tw-py-3 tw-px-3 tw-bg-iron-900 tw-text-iron-300 tw-font-medium tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-700 placeholder:tw-text-iron-500 focus:tw-outline-none  focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-300 tw-text-base tw-transition tw-duration-300 tw-ease-out"
-                />
-              </div>
+            <label className="tw-block tw-text-sm tw-font-normal tw-text-iron-400">
+              Your total CIC Rating of {profile.profile?.handle}:
+            </label>
+            <div className="tw-relative tw-flex tw-mt-1.5">
+              <span className="tw-flex tw-flex-col tw-items-center tw-justify-center tw-bg-iron-900 tw-rounded-l-lg tw-border tw-border-solid tw-border-iron-700 tw-px-3">
+                <svg
+                  className="tw-w-3.5 tw-h-3.5 tw-flex-shrink-0 tw-text-iron-500"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M12 5V19M5 12H19"
+                    stroke="currentColor"
+                    strokeWidth="3"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+                <svg
+                  className="tw-w-3.5 tw-h-3.5 tw-flex-shrink-0 tw-text-iron-500"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M5 12H19"
+                    stroke="currentColor"
+                    strokeWidth="3"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </span>
+              <input
+                type="text"
+                value={myCICRatingsStr}
+                onChange={handleChange}
+                required
+                autoComplete="off"
+                className={`${isTooltip? 'tw-max-w-[12rem]' : ''} tw-block tw-rounded-r-lg tw-border-0 tw-py-3 tw-px-3 tw-bg-iron-900 tw-text-iron-300 tw-font-medium tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-700 placeholder:tw-text-iron-500 focus:tw-outline-none  focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-300 tw-text-base tw-transition tw-duration-300 tw-ease-out`}
+              />
             </div>
           </div>
+
           <div className="-tw-mt-1.5">
             <button
               type="submit"
@@ -217,7 +221,7 @@ export default function UserPageIdentityHeaderCICRate({
         </div>
         <div className="tw-mt-3 tw-space-x-1 tw-inline-flex tw-items-center">
           <span className="tw-text-sm tw-font-semibold tw-text-iron-200">
-            Your max/in CIC Rating:
+            Your max/min CIC Rating:
           </span>
           <span className="tw-pl-1 tw-text-sm tw-font-semibold tw-text-iron-200">
             +/- {formatNumberWithCommas(myMaxCICRatings)}
