@@ -144,9 +144,12 @@ export default function UserPageIdentityHeaderCICRate({
       return;
     }
 
-    await updateCICMutation.mutateAsync(
-      getMyCICRatingsAsNumber(myCICRatingsStr)
-    );
+    const newRating = getMyCICRatingsAsNumber(myCICRatingsStr);
+    if (newRating === myCICRatings) {
+      return;
+    }
+
+    await updateCICMutation.mutateAsync(newRating);
   };
 
   const onSubmit = async (e: FormEvent<HTMLFormElement>) => {

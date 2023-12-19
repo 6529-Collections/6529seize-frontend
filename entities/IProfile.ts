@@ -146,10 +146,7 @@ export interface ProfileActivityLogRatingEdit extends ProfileActivityLogBase {
   readonly contents: {
     change_reason: string;
     new_rating: number;
-    old_rating: {
-      rating: number;
-      total_tdh_spent_on_matter: number;
-    };
+    old_rating: number;
     rating_category: string;
     rating_matter: string;
   };

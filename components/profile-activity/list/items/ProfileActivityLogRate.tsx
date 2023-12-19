@@ -9,16 +9,25 @@ export default function ProfileActivityLogRate({
   readonly log: ProfileActivityLogRatingEdit;
 }) {
   const router = useRouter();
-  const isPositive = log.contents.new_rating > 0;
-  const valueAsString = `${isPositive ? "+" : ""}${formatNumberWithCommas(
-    log.contents.new_rating
-  )}`;
+
+  const change = log.contents.new_rating - log.contents.old_rating;
+  const isChangePositive = change > 0;
+  const changeAsString = `${
+    isChangePositive ? "+" : ""
+  }${formatNumberWithCommas(change)}`;
+
+  const isNewRatingPositive = log.contents.new_rating > 0;
+
+  const newRatingValueAsString = `${
+    isNewRatingPositive ? "+" : ""
+  }${formatNumberWithCommas(log.contents.new_rating)}`;
 
   const goToProfile = () => {
     router.push(`/${log.target_profile_handle}/identity`);
   };
 
   const isValueZero = log.contents.new_rating === 0;
+
   return (
     <>
       <ProfileActivityLogItemAction
@@ -40,10 +49,10 @@ export default function ProfileActivityLogRate({
       {!isValueZero && (
         <span
           className={`${
-            isPositive ? "tw-text-green" : "tw-text-red"
+            isChangePositive ? "tw-text-green" : "tw-text-red"
           } tw-text-sm tw-font-semibold`}
         >
-          {valueAsString}
+          {changeAsString}
         </span>
       )}
     </>
