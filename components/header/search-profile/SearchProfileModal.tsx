@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
 import { useClickAway, useDebounce, useKeyPressEvent } from "react-use";
-import { ProfileMinimal } from "../../../entities/IProfile";
+import { CommunityMemberMinimal } from "../../../entities/IProfile";
 import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
 import { commonApiFetch } from "../../../services/api/common-api";
 import SearchProfileModalItem from "./SearchProfileModalItem";
@@ -48,16 +48,16 @@ export default function SearchProfileModal({
     }
   }, []);
 
-  const { isFetching, data: profiles } = useQuery<ProfileMinimal[]>({
+  const { isFetching, data: profiles } = useQuery<CommunityMemberMinimal[]>({
     queryKey: [QueryKey.PROFILE_SEARCH, debouncedValue],
     queryFn: async () =>
-      await commonApiFetch<ProfileMinimal[]>({
-        endpoint: "profiles-search",
+      await commonApiFetch<CommunityMemberMinimal[]>({
+        endpoint: "community-members",
         params: {
           param: debouncedValue,
         },
       }),
-    enabled: debouncedValue.length > 0,
+    enabled: debouncedValue.length > 2,
   });
 
   const onHover = (index: number, state: boolean) => {
@@ -158,6 +158,7 @@ export default function SearchProfileModal({
                     <SearchProfileModalItem
                       profile={profile}
                       onClose={onClose}
+                      searchValue={debouncedValue}
                       isSelected={i === selectedProfileIndex}
                       onHover={(state) => onHover(i, state)}
                     />
@@ -178,7 +179,9 @@ export default function SearchProfileModal({
             {state === STATE.INITIAL && (
               <div className="tw-h-72 tw-flex tw-items-center tw-justify-center">
                 <p className="tw-text-iron-200 tw-font-normal">
-                  Search for a profile
+                  {!searchValue.length
+                    ? "No results found"
+                    : "Type at least 3 characters"}
                 </p>
               </div>
             )}

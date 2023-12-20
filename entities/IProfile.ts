@@ -286,10 +286,11 @@ export interface ProfilesMatterRatingWithRaterLevel
 }
 
 
-export interface ProfileMinimal {
-  readonly handle: string;
-  readonly normalised_handle: string;
-  readonly primary_wallet: string;
+export interface CommunityMemberMinimal {
+  readonly handle: string | null;
+  readonly normalised_handle: string | null;
+  readonly primary_wallet: string | null;
+  readonly display: string | null;
   readonly tdh: number;
   readonly level: number;
   readonly cic_rating: number;
