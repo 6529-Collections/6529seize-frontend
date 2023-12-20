@@ -294,4 +294,5 @@ export interface CommunityMemberMinimal {
   readonly tdh: number;
   readonly level: number;
   readonly cic_rating: number;
+  readonly wallet: string;
 }

@@ -6,6 +6,7 @@ import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
 import { commonApiFetch } from "../../../services/api/common-api";
 import SearchProfileModalItem from "./SearchProfileModalItem";
 import { useRouter } from "next/router";
+import { getRandomObjectId } from "../../../helpers/AllowlistToolHelpers";
 
 enum STATE {
   INITIAL = "INITIAL",
@@ -153,7 +154,7 @@ export default function SearchProfileModal({
                 {profiles?.map((profile, i) => (
                   <div
                     ref={i === selectedProfileIndex ? activeElementRef : null}
-                    key={profile.handle}
+                    key={getRandomObjectId()}
                   >
                     <SearchProfileModalItem
                       profile={profile}

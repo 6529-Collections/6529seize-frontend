@@ -13,7 +13,7 @@ export default function SearchProfileModalItem({
   isSelected,
   onHover,
 }: {
-    readonly isSelected: boolean;
+  readonly isSelected: boolean;
   readonly searchValue: string;
   readonly profile: CommunityMemberMinimal;
   readonly onClose: () => void;
@@ -23,7 +23,7 @@ export default function SearchProfileModalItem({
   const cicType = cicToType(profile.cic_rating);
 
   const goToProfile = () => {
-    router.push(`/${profile.handle}/identity`);
+    router.push(`/${profile.handle ?? profile.wallet}/identity`);
     onClose();
   };
 
