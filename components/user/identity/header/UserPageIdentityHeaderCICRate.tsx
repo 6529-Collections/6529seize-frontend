@@ -15,10 +15,11 @@ import {
   QueryKey,
   ReactQueryWrapperContext,
 } from "../../../react-query-wrapper/ReactQueryWrapper";
+import UserPageIdentityHeaderCICRateAdjustments from "./UserPageIdentityHeaderCICRateAdjustments";
 
 export default function UserPageIdentityHeaderCICRate({
   profile,
-  isTooltip
+  isTooltip,
 }: {
   readonly profile: IProfileAndConsolidations;
   readonly isTooltip: boolean;
@@ -160,8 +161,31 @@ export default function UserPageIdentityHeaderCICRate({
   };
 
   return (
-    <div>
-      <form onSubmit={onSubmit}>
+    <div
+      className={`${
+        isTooltip
+          ? ""
+          : "tw-bg-iron-800 tw-p-4 md:tw-p-6 tw-rounded-xl tw-border tw-border-solid tw-border-white/5"
+      } `}
+    >
+      <div
+        className={`${
+          isTooltip ? "tw-text-sm" : "tw-text-base"
+        } tw-flex tw-flex-col tw-space-y-1`}
+      >
+        <span className="tw-block tw-text-iron-200 tw-font-semibold">
+          <span>Your available CIC:</span>
+          <span className="tw-ml-1">1,200</span>
+        </span>
+        <span className="tw-block tw-text-iron-200 tw-font-semibold">
+          <span>Your max/min CIC Rating to punk6529:</span>
+          <span className="tw-ml-1">+/- {formatNumberWithCommas(120000)}</span>
+        </span>
+      </div>
+      <form
+        onSubmit={onSubmit}
+        className={`${isTooltip ? "tw-mt-4" : "tw-mt-6"}`}
+      >
         <div className="tw-flex tw-items-end tw-space-x-3.5">
           <div>
             <label className="tw-block tw-text-sm tw-font-normal tw-text-iron-400">
@@ -204,29 +228,27 @@ export default function UserPageIdentityHeaderCICRate({
                 onChange={handleChange}
                 required
                 autoComplete="off"
-                className={`${isTooltip? 'tw-max-w-[12rem]' : ''} tw-block tw-rounded-r-lg tw-border-0 tw-py-3 tw-px-3 tw-bg-iron-900 tw-text-iron-300 tw-font-medium tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-700 placeholder:tw-text-iron-500 focus:tw-outline-none  focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-300 tw-text-base tw-transition tw-duration-300 tw-ease-out`}
+                className={`${
+                  isTooltip ? "tw-max-w-[12rem]" : ""
+                } tw-block tw-rounded-r-lg tw-border-0 tw-py-3 tw-px-3 tw-bg-iron-900 tw-text-iron-300 tw-font-medium tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-700 placeholder:tw-text-iron-500 focus:tw-outline-none  focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-300 tw-text-base tw-transition tw-duration-300 tw-ease-out`}
               />
             </div>
           </div>
 
-          <div className="-tw-mt-1.5">
-            <button
-              type="submit"
-              className="tw-cursor-pointer tw-bg-primary-500 tw-px-4 tw-py-3 tw-text-sm tw-font-medium tw-text-white 
+          <div>
+            <div className="tw-inline-flex tw-items-end tw-space-x-6">
+              <button
+                type="submit"
+                className="tw-cursor-pointer tw-bg-primary-500 tw-px-4 tw-py-3 tw-text-sm tw-font-medium tw-text-white 
               tw-border tw-border-solid tw-border-primary-500 tw-rounded-lg hover:tw-bg-primary-600 hover:tw-border-primary-600 tw-transition tw-duration-300 tw-ease-out"
-            >
-              Rate
-            </button>
+              >
+                Rate
+              </button>
+             {!isTooltip && <UserPageIdentityHeaderCICRateAdjustments isTooltip={isTooltip} />}
+            </div>
           </div>
         </div>
-        <div className="tw-mt-3 tw-space-x-1 tw-inline-flex tw-items-center">
-          <span className="tw-text-sm tw-font-semibold tw-text-iron-200">
-            Your max/min CIC Rating:
-          </span>
-          <span className="tw-pl-1 tw-text-sm tw-font-semibold tw-text-iron-200">
-            +/- {formatNumberWithCommas(myMaxCICRatings)}
-          </span>
-        </div>
+        <UserPageIdentityHeaderCICRateAdjustments isTooltip={isTooltip} />
       </form>
     </div>
   );
