@@ -7,10 +7,9 @@ export default function SearchProfileModalItemHighlight({
   text: string;
   readonly highlight: string;
 }) {
-  // tw-text-iron-200
   const parts = text.split(new RegExp(`(${highlight})`, "gi"));
   return parts.map((part, index) => (
-    <React.Fragment key={index}>
+    <React.Fragment key={`highlight-fragment-${index}`}>
       {part.toLowerCase() === highlight.toLowerCase() ? (
         <b className="tw-text-blue-200">{part}</b>
       ) : (
