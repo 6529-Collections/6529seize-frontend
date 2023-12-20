@@ -2,20 +2,23 @@ import { FormEvent, useContext, useEffect, useState } from "react";
 import {
   ApiProfileRaterCicState,
   IProfileAndConsolidations,
-} from "../../../../entities/IProfile";
-import { formatNumberWithCommas } from "../../../../helpers/Helpers";
-import { AuthContext } from "../../../auth/Auth";
+} from "../../../../../entities/IProfile";
+import { formatNumberWithCommas } from "../../../../../helpers/Helpers";
+import { AuthContext } from "../../../../auth/Auth";
 import {
   commonApiFetch,
   commonApiPost,
-} from "../../../../services/api/common-api";
+} from "../../../../../services/api/common-api";
 import { useAccount } from "wagmi";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import {
   QueryKey,
   ReactQueryWrapperContext,
-} from "../../../react-query-wrapper/ReactQueryWrapper";
+} from "../../../../react-query-wrapper/ReactQueryWrapper";
 import UserPageIdentityHeaderCICRateAdjustments from "./UserPageIdentityHeaderCICRateAdjustments";
+import { createBreakpoint } from "react-use";
+
+const useBreakpoint = createBreakpoint({ MD: 768, S: 0 });
 
 export default function UserPageIdentityHeaderCICRate({
   profile,
@@ -100,6 +103,10 @@ export default function UserPageIdentityHeaderCICRate({
       Math.abs(myCICState?.cic_rating_by_rater ?? 0)
   );
 
+  const [myAvailableCIC, setMyAvailableCIC] = useState<number>(
+    myCICState?.cic_ratings_left_to_give_by_rater ?? 0
+  );
+
   const getMyCICRatingsAsNumber = (cic: string) => {
     if (isNaN(parseInt(cic))) {
       return 0;
@@ -126,6 +133,7 @@ export default function UserPageIdentityHeaderCICRate({
       (myCICState?.cic_ratings_left_to_give_by_rater ?? 0) +
         Math.abs(myCICState?.cic_rating_by_rater ?? 0)
     );
+    setMyAvailableCIC(myCICState?.cic_ratings_left_to_give_by_rater ?? 0);
   }, [myCICState]);
 
   const handleChange = (e: FormEvent<HTMLInputElement>) => {
@@ -160,6 +168,8 @@ export default function UserPageIdentityHeaderCICRate({
     await onSave();
   };
 
+  const breakpoint = useBreakpoint();
+
   return (
     <div
       className={`${
@@ -175,11 +185,15 @@ export default function UserPageIdentityHeaderCICRate({
       >
         <span className="tw-block tw-text-iron-200 tw-font-semibold">
           <span>Your available CIC:</span>
-          <span className="tw-ml-1">1,200</span>
+          <span className="tw-ml-1">
+            {formatNumberWithCommas(myAvailableCIC)}
+          </span>
         </span>
         <span className="tw-block tw-text-iron-200 tw-font-semibold">
-          <span>Your max/min CIC Rating to punk6529:</span>
-          <span className="tw-ml-1">+/- {formatNumberWithCommas(120000)}</span>
+          <span>Your max/min CIC Rating to {profile.profile?.handle}:</span>
+          <span className="tw-ml-1">
+            +/- {formatNumberWithCommas(myMaxCICRatings)}
+          </span>
         </span>
       </div>
       <form
@@ -244,11 +258,23 @@ export default function UserPageIdentityHeaderCICRate({
               >
                 Rate
               </button>
-             {!isTooltip && <UserPageIdentityHeaderCICRateAdjustments isTooltip={isTooltip} />}
+              {!isTooltip && breakpoint === "MD" && (
+                <UserPageIdentityHeaderCICRateAdjustments
+                  isTooltip={isTooltip}
+                  originalValue={myCICRatings}
+                  adjustedValue={getMyCICRatingsAsNumber(myCICRatingsStr)}
+                />
+              )}
             </div>
           </div>
         </div>
-        <UserPageIdentityHeaderCICRateAdjustments isTooltip={isTooltip} />
+        {!!(isTooltip || breakpoint !== "MD") && (
+          <UserPageIdentityHeaderCICRateAdjustments
+            isTooltip={isTooltip}
+            originalValue={myCICRatings}
+            adjustedValue={getMyCICRatingsAsNumber(myCICRatingsStr)}
+          />
+        )}
       </form>
     </div>
   );

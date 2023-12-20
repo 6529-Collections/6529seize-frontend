@@ -1,5 +1,5 @@
 import { IProfileAndConsolidations } from "../../../../../entities/IProfile";
-import UserPageIdentityHeaderCICRateWrapper from "../../../identity/header/UserPageIdentityHeaderCICRateWrapper";
+import UserPageIdentityHeaderCICRateWrapper from "../../../identity/header/cic-rate/UserPageIdentityHeaderCICRateWrapper";
 
 export default function UserCICTypeIconTooltipRate({
   profile,
