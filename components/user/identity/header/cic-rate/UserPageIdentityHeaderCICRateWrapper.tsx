@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
-import { IProfileAndConsolidations } from "../../../../entities/IProfile";
-import { amIUser } from "../../../../helpers/Helpers";
+import { IProfileAndConsolidations } from "../../../../../entities/IProfile";
+import { amIUser } from "../../../../../helpers/Helpers";
 import { useAccount } from "wagmi";
 import UserPageIdentityHeaderCICRate from "./UserPageIdentityHeaderCICRate";
 import { useQuery } from "@tanstack/react-query";
-import { QueryKey } from "../../../react-query-wrapper/ReactQueryWrapper";
-import { commonApiFetch } from "../../../../services/api/common-api";
+import { QueryKey } from "../../../../react-query-wrapper/ReactQueryWrapper";
+import { commonApiFetch } from "../../../../../services/api/common-api";
 
 export default function UserPageIdentityHeaderCICRateWrapper({
   profile,
