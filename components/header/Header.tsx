@@ -12,6 +12,7 @@ import Cookies from "js-cookie";
 import { VIEW_MODE_COOKIE } from "../../constants";
 import { useAccount } from "wagmi";
 import { WalletView } from "../../enums";
+import SearchProfileButton from "./search-profile/SearchProfileButton";
 
 interface Props {
   onLoad?: () => void;
@@ -883,6 +884,7 @@ export default function Header(props: Props) {
                               </NavDropdown.Item>
                             </NavDropdown>
                             {printHeaderConnect()}
+                            <SearchProfileButton />
                           </Nav>
                         </Navbar>
                         <Image
