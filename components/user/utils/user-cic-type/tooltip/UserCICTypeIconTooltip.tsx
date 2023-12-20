@@ -38,21 +38,21 @@ export default function UserCICTypeIconTooltip({
     <div className="tw-p-3">
       <UserCICTypeIconTooltipHeaders />
       <div className="tw-mt-4 tw-space-y-0.5">
-        <span className="tw-block tw-text-iron-100 tw-font-semibold">
+        <span className="tw-block tw-text-iron-200 tw-font-semibold">
           <span>Rating:</span>
-          <span className="tw-ml-1 tw-text-white tw-font-bold">
+          <span className="tw-ml-1 tw-text-iron-200 tw-font-bold">
             {formatNumberWithCommas(profile.cic.cic_rating)}
           </span>
         </span>
-        <span className="tw-block tw-text-iron-100 tw-font-semibold">
+        <span className="tw-block tw-text-iron-200 tw-font-semibold">
           <span>Status:</span>
           <span className={`${CIC_META[cicType].class} tw-ml-1 tw-font-bold`}>
             {CIC_META[cicType].title}
           </span>
         </span>
-        <span className="tw-block tw-text-iron-100 tw-font-semibold">
+        <span className="tw-block tw-text-iron-200 tw-font-semibold">
           <span>Raters:</span>
-          <span className="tw-ml-1 tw-font-bold tw-text-iron-100">
+          <span className="tw-ml-1 tw-font-bold tw-text-iron-200">
             {formatNumberWithCommas(profile.cic.contributor_count)}
           </span>
         </span>
