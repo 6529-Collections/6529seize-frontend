@@ -19,7 +19,7 @@ export default function UserPageIdentityHeaderCICRateAdjustments({
     >
       <UserPageIdentityHeaderCICRateAdjustmentsValue
         value={originalValue}
-        title="Original CIC:"
+        title="Current CIC:"
       />
       <UserPageIdentityHeaderCICRateAdjustmentsValue
         value={adjustedValue - originalValue}
