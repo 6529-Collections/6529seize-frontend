@@ -2,13 +2,21 @@ import { useState } from "react";
 import CommonAnimationWrapper from "../../utils/animation/CommonAnimationWrapper";
 import CommonAnimationOpacity from "../../utils/animation/CommonAnimationOpacity";
 import SearchProfileModal from "./SearchProfileModal";
+import { Inter } from "next/font/google";
+
+const inter = Inter({
+  weight: ["300", "400", "500", "600", "700"],
+  style: ["normal"],
+  subsets: ["latin"],
+  display: "swap",
+});
 
 export default function SearchProfileButton() {
   const [isSearchProfileOpen, setIsSearchProfileOpen] =
     useState<boolean>(false);
 
   return (
-    <div className="tailwind-scope">
+    <div className={`tailwind-scope ${inter.className}`}>
       <button
         type="button"
         onClick={() => setIsSearchProfileOpen(true)}
