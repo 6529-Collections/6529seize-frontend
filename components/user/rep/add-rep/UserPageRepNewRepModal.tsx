@@ -1,6 +1,14 @@
-import { useEffect, useRef, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import { useClickAway, useKeyPressEvent } from "react-use";
 import { IProfileAndConsolidations } from "../../../../entities/IProfile";
+import { useMutation } from "@tanstack/react-query";
+import { AuthContext } from "../../../auth/Auth";
+import { commonApiPost } from "../../../../services/api/common-api";
+
+interface ApiAddRepRatingToProfileRequest {
+  readonly amount: number;
+  readonly category: string;
+}
 
 export default function UserPageRepNewRepModal({
   onClose,
@@ -11,6 +19,7 @@ export default function UserPageRepNewRepModal({
   readonly profile: IProfileAndConsolidations;
   readonly repName: string;
 }) {
+  const { requestAuth, setToast } = useContext(AuthContext);
   const inputRef = useRef<HTMLInputElement>(null);
   useEffect(() => {
     if (inputRef.current) {
@@ -27,10 +36,39 @@ export default function UserPageRepNewRepModal({
     setValue(event.target.value);
   };
 
+  const addRepMutation = useMutation({
+    mutationFn: async ({
+      amount,
+      category,
+    }: {
+      amount: number;
+      category: string;
+    }) =>
+      await commonApiPost<ApiAddRepRatingToProfileRequest, void>({
+        endpoint: `profiles/${profile.profile?.handle}/rep/rating`,
+        body: {
+          amount,
+          category,
+        },
+      }),
+    onSuccess: () => {
+      setToast({
+        message: "Rep added.",
+        type: "success",
+      });
+    },
+  });
+
   const onSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (!value) return;
-    console.log("submit", value);
+    if (!repName) return;
+    const { success } = await requestAuth();
+    if (!success) return;
+    await addRepMutation.mutateAsync({
+      amount: parseInt(value),
+      category: repName,
+    });
   };
 
   return (

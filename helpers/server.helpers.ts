@@ -12,6 +12,7 @@ import { ConsolidatedTDHMetrics } from "../entities/ITDH";
 import { areEqualAddresses, containsEmojis, formatAddress } from "./Helpers";
 import { Page } from "./Types";
 import { commonApiFetch } from "../services/api/common-api";
+import jwtDecode from "jwt-decode";
 
 export interface CommonUserServerSideProps {
   profile: IProfileAndConsolidations;
@@ -276,14 +277,37 @@ export const getProfileLogs = async ({
 export const getProfileRatings = async ({
   user,
   headers,
+  signedWallet,
 }: {
   user: string;
   headers: Record<string, string>;
-}): Promise<ApiProfileRepRatesState> => {
-  return await commonApiFetch<ApiProfileRepRatesState>({
-    endpoint: `profiles/${user}/rep/ratings`,
-    headers,
-  });
+  signedWallet: string | null;
+}): Promise<{
+  readonly ratings: ApiProfileRepRatesState;
+  readonly rater: string | null;
+}> => {
+  const raterProfile = signedWallet
+    ? await commonApiFetch<IProfileAndConsolidations>({
+        endpoint: `profiles/${signedWallet}`,
+        headers: headers,
+      })
+    : null;
+
+  const rater = raterProfile?.profile?.handle.toLowerCase() ?? null;
+
+  const params: Record<string, string> = {};
+  if (rater) {
+    params.rater = rater;
+  }
+
+  return {
+    ratings: await commonApiFetch<ApiProfileRepRatesState>({
+      endpoint: `profiles/${user}/rep/ratings`,
+      params,
+      headers,
+    }),
+    rater,
+  };
 };
 
 export const getCommonHeaders = (req: any): Record<string, string> => {
@@ -295,4 +319,19 @@ export const getCommonHeaders = (req: any): Record<string, string> => {
       ? { Authorization: `Bearer ${walletAuthCookie}` }
       : {}),
   };
+};
+
+export const getSignedWalletOrNull = (req: any): string | null => {
+  const walletAuthCookie = req?.req?.cookies["wallet-auth"] ?? null;
+  if (!walletAuthCookie) {
+    return null;
+  }
+  const decodedJwt = jwtDecode<{
+    id: string;
+    sub: string;
+    iat: number;
+    exp: number;
+  }>(walletAuthCookie);
+
+  return decodedJwt?.sub?.toLowerCase() ?? null;
 };
