@@ -553,6 +553,7 @@ export default function Header(props: Props) {
                     />
                   </a>
                 </Col>
+
                 <Col
                   xs={{ span: 4 }}
                   sm={{ span: 4 }}
@@ -565,22 +566,24 @@ export default function Header(props: Props) {
                       <Container
                         className={`d-flex align-items-center justify-content-end no-padding`}
                       >
-                        <Image
-                          loading="eager"
-                          priority
-                          width="0"
-                          height="0"
-                          style={{
-                            height: "auto",
-                            width: "auto",
-                            maxHeight: "42px",
-                            paddingLeft: "35px",
-                          }}
-                          className={`${styles.burgerMenuBtn} d-block ${styles.dMdNone}`}
-                          src="https://d3lqz0a4bldqgf.cloudfront.net/seize_images/Seize_Logo_Icon.png"
-                          alt="6529Seize"
-                          onClick={() => setBurgerMenuOpen(true)}
-                        />
+                        <div className={`${styles.dMdNone} d-flex align-items-center`}>
+                          <SearchProfileButton />
+                          <Image
+                            loading="eager"
+                            priority
+                            width="0"
+                            height="0"
+                            style={{
+                              height: "auto",
+                              width: "auto",
+                              maxHeight: "42px",
+                            }}
+                            className={`${styles.burgerMenuBtn} d-block `}
+                            src="https://d3lqz0a4bldqgf.cloudfront.net/seize_images/Seize_Logo_Icon.png"
+                            alt="6529Seize"
+                            onClick={() => setBurgerMenuOpen(true)}
+                          />
+                        </div>
                         <Navbar
                           id="seize-navbar-nav"
                           className={`justify-content-end d-none ${styles.dMdBlock}`}
