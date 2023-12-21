@@ -48,7 +48,7 @@ export default function UserPageIdentityCICRatingsItem({
   return (
     <tr>
       <td className="tw-py-2.5">
-        <div className="tw-inline-flex tw-items-center tw-space-x-3">
+        <div className="tw-inline-flex tw-items-center tw-space-x-2">
           <span className="tw-relative">
             <div className="tw-flex tw-items-center tw-justify-center tw-h-5 tw-w-5 tw-text-[0.625rem] tw-leading-3 tw-font-bold tw-rounded-full tw-ring-2 tw-ring-iron-300 tw-text-iron-300">
               {rating.rater_level}
