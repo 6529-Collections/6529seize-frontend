@@ -13,7 +13,6 @@ export default function UserPageRep({
   readonly profile: IProfileAndConsolidations;
   readonly repRates: ApiProfileRepRatesState;
 }) {
-  console.log(repRates);
   return (
     <div className="tailwind-scope">
       {/*  1st */}
@@ -37,7 +36,7 @@ export default function UserPageRep({
       </div>
       {/*  1st end */}
 
-      <UserPageRepNewRep />
+      <UserPageRepNewRep profile={profile} />
 
       {/*  3rd start */}
       <div className="tw-mt-6 tw-flex tw-flex-wrap tw-gap-4">
