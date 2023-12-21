@@ -43,9 +43,9 @@ export default function SearchProfileModalItem({
     >
       <button
         onClick={goToProfile}
-        className="tw-group tw-bg-transparent tw-border-none tw-cursor-default tw-select-none tw-rounded-md tw-space-x-3 tw-flex tw-w-full tw-text-left"
+        className="tw-group tw-bg-transparent tw-border-none tw-cursor-default tw-select-none tw-rounded-md tw-space-x-3 tw-flex tw-items-center tw-w-full tw-text-left"
       >
-        <div className="tw-relative tw-mt-0.5">
+        <div className="tw-relative">
           <div className="tw-flex tw-items-center tw-justify-center tw-h-5 tw-w-5 tw-text-[0.625rem] tw-leading-3 tw-font-bold tw-rounded-full tw-ring-2 tw-ring-iron-300 tw-text-iron-300">
             {profile.level}
           </div>
