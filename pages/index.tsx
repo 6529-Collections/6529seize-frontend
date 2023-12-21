@@ -20,7 +20,7 @@ export interface IndexPageProps {
   readonly logsPage: Page<ProfileActivityLog>;
 }
 
-const ACTIVITY_LOG_PAGE_SIZE = 50;
+const ACTIVITY_LOG_PAGE_SIZE = 20;
 
 const inter = Inter({
   weight: ["300", "400", "500", "600", "700"],
