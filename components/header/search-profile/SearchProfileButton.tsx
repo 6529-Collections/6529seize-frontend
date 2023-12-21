@@ -12,7 +12,7 @@ export default function SearchProfileButton() {
       <button
         type="button"
         onClick={() => setIsSearchProfileOpen(true)}
-        className="tw-ml-4 tw-h-10 tw-w-10 tw-flex tw-items-center tw-justify-center tw-bg-transparent tw-focus-none tw-border-none"
+        className="lg:tw-ml-4 tw-mr-4 sm:tw-mr-6 min-[1300px]:tw-mr-0 tw-h-10 tw-w-10 tw-flex tw-items-center tw-justify-center tw-bg-transparent tw-focus-none tw-border-none"
       >
         <svg
           className="tw-h-6 tw-w-6 tw-flex-shrink-0 tw-text-iron-300 tw-transition tw-duration-300 tw-ease-out hover:tw-text-iron-50"
