@@ -254,6 +254,24 @@ export const getOwned = async ({
   }, []);
 };
 
+export const getProfileLogs = async ({
+  headers,
+  pageSize,
+}: {
+  headers: Record<string, string>;
+  pageSize: number;
+}): Promise<Page<ProfileActivityLog>> => {
+  return await commonApiFetch<Page<ProfileActivityLog>>({
+    endpoint: `profile-logs`,
+    params: {
+      page: "1",
+      page_size: `${pageSize}`,
+      log_type: "",
+    },
+    headers,
+  });
+};
+
 export const getCommonHeaders = (req: any): Record<string, string> => {
   const authCookie = req?.req?.cookies["x-6529-auth"] ?? null;
   const walletAuthCookie = req?.req?.cookies["wallet-auth"] ?? null;

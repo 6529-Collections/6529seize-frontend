@@ -93,13 +93,19 @@ export function formatNumberWithCommas(x: number) {
   if (x === null || isNaN(x)) return "-";
   const parts = x.toString().split(".");
   let integerPart = parts[0];
+  const isNegative = integerPart.startsWith("-");
+  if (isNegative) {
+    integerPart = integerPart.slice(1);
+  }
   let formattedInteger = "";
   while (integerPart.length > 3) {
     formattedInteger = "," + integerPart.slice(-3) + formattedInteger;
     integerPart = integerPart.slice(0, -3);
   }
   formattedInteger = integerPart + formattedInteger;
-  return formattedInteger + (parts.length > 1 ? "." + parts[1] : "");
+  const formattedNumber =
+    formattedInteger + (parts.length > 1 ? "." + parts[1] : "");
+  return isNegative ? `-${formattedNumber}` : formattedNumber;
 }
 
 export function getDateDisplay(date: Date) {
@@ -292,6 +298,7 @@ export function parseEmojis(s: string) {
     return `&#x${hexValue};`;
   });
 }
+
 
 export function printMintDate(date: Date) {
   const mintDate = new Date(date);

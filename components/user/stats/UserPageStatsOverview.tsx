@@ -1,5 +1,5 @@
 import styles from "../UserPage.module.scss";
-import { Container, Row, Accordion, Table } from "react-bootstrap";
+import { Container, Row, Accordion, Table, Col } from "react-bootstrap";
 import { useEffect, useState } from "react";
 import { ConsolidatedTDHMetrics, TDHMetrics } from "../../../entities/ITDH";
 import { numberWithCommas } from "../../../helpers/Helpers";
@@ -25,7 +25,18 @@ export default function UserPageStatsOverview({
   }, [tdh]);
 
   return (
-    <Container className="no-padding tw-mt-8">
+    <Container className="no-padding">
+      <Row>
+        <Col
+          className="d-flex align-items-center"
+          xs={{ span: 7 }}
+          sm={{ span: 7 }}
+          md={{ span: 9 }}
+          lg={{ span: 10 }}
+        >
+          <h3>Stats</h3>
+        </Col>
+      </Row>
       {tdh && tdh.balance > 0 && (
         <Row>
           <Accordion defaultActiveKey="0" className={styles.userPageAccordion}>

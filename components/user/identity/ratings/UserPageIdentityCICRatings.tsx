@@ -23,7 +23,6 @@ export default function CICRatings({
 }) {
   const router = useRouter();
   const user = (router.query.user as string).toLowerCase();
-
   const [currentPage, setCurrentPage] = useState<number>(1);
 
   const { isLoading, data: ratings } = useQuery<
@@ -41,8 +40,8 @@ export default function CICRatings({
       await commonApiFetch<Page<ProfilesMatterRatingWithRaterLevel>>({
         endpoint: `profiles/${user}/cic/ratings`,
         params: {
-          page: "1",
-          page_size: "100",
+          page: `${currentPage}`,
+          page_size: `${PAGE_SIZE}`,
         },
       }),
     enabled: !!user,
@@ -70,16 +69,15 @@ export default function CICRatings({
       <div className="tw-min-h-[28rem] tw-max-h-[28rem] tw-transform-gpu tw-scroll-py-3 tw-overflow-y-auto">
         {ratings?.data.length ? (
           <div className="tw-flow-root">
-            <div className="tw-overflow-x-auto">
-              <UserPageIdentityCICRatingsList ratings={ratings.data} />
-              {totalPages > 1 && (
-                <UserPageIdentityPagination
-                  currentPage={currentPage}
-                  setCurrentPage={setCurrentPage}
-                  totalPages={totalPages}
-                />
-              )}
-            </div>
+            <UserPageIdentityCICRatingsList ratings={ratings.data} />
+            {totalPages > 1 && (
+              <UserPageIdentityPagination
+                currentPage={currentPage}
+                setCurrentPage={setCurrentPage}
+                totalPages={totalPages}
+                user={user}
+              />
+            )}
           </div>
         ) : (
           <div className="tw-mt-4">

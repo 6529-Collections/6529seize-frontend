@@ -84,6 +84,28 @@ export default function Header(props: Readonly<Props>) {
     }
   }, [account.address]);
 
+  function printMobileRow(name: string, path: string) {
+    return (
+      <Row className="pt-3">
+        <Col>
+          <a href={path}>
+            <h3>{name}</h3>
+          </a>
+        </Col>
+      </Row>
+    );
+  }
+
+  function printNavDropdown(name: string, path: string) {
+    return (
+      <NavDropdown.Item
+        className={styles.dropdownItem}
+        onClick={() => (window.location.href = path)}>
+        {name}
+      </NavDropdown.Item>
+    );
+  }
+
   function printHeaderConnect() {
     return (
       <HeaderConnect
@@ -127,8 +149,7 @@ export default function Header(props: Readonly<Props>) {
           <Row className="pt-3 pb-3">
             <Col>
               <h3
-                className={`d-flex justify-content-center ${styles.burgerMenuHeader}`}
-              >
+                className={`d-flex justify-content-center ${styles.burgerMenuHeader}`}>
                 {printHeaderConnect()}
               </h3>
             </Col>
@@ -250,8 +271,15 @@ export default function Header(props: Readonly<Props>) {
                 </Row>
                 <Row className="pt-3">
                   <Col>
-                    <a href="/latest-activity">
-                      <h3>Latest Activity</h3>
+                    <a href="/community-activity">
+                      <h3>Community Activity</h3>
+                    </a>
+                  </Col>
+                </Row>
+                <Row className="pt-3">
+                  <Col>
+                    <a href="/nft-activity">
+                      <h3>NFT Activity</h3>
                     </a>
                   </Col>
                 </Row>
@@ -278,25 +306,6 @@ export default function Header(props: Readonly<Props>) {
                   <Col>
                     <a href="/levels">
                       <h3>Levels</h3>
-                    </a>
-                  </Col>
-                </Row>
-                <Row>
-                  <Col xs={{ span: 6, offset: 3 }}>
-                    <hr />
-                  </Col>
-                </Row>
-                <Row className="pt-3">
-                  <Col>
-                    <a href="/meme-accounting">
-                      <h3>Meme Accounting </h3>
-                    </a>
-                  </Col>
-                </Row>
-                <Row className="pt-3">
-                  <Col>
-                    <a href="/gas">
-                      <h3>Gas</h3>
                     </a>
                   </Col>
                 </Row>
@@ -359,29 +368,10 @@ export default function Header(props: Readonly<Props>) {
                     </a>
                   </Col>
                 </Row>
-                <Row>
-                  <Col xs={{ span: 6, offset: 3 }}>
-                    <hr />
-                  </Col>
-                </Row>
                 <Row className="pt-3">
                   <Col>
-                    <a href="/delegation-mapping-tool">
-                      <h3>Delegation Mapping</h3>
-                    </a>
-                  </Col>
-                </Row>
-                <Row className="pt-3">
-                  <Col>
-                    <a href="/consolidation-mapping-tool">
-                      <h3>Consolidation Mapping</h3>
-                    </a>
-                  </Col>
-                </Row>
-                <Row className="pt-3">
-                  <Col>
-                    <a href="/consolidation-use-cases">
-                      <h3>Consolidation Use Cases</h3>
+                    <a href="/open-data">
+                      <h3>Open Data</h3>
                     </a>
                   </Col>
                 </Row>
@@ -390,13 +380,8 @@ export default function Header(props: Readonly<Props>) {
                     <hr />
                   </Col>
                 </Row>
-                <Row className="pt-3">
-                  <Col>
-                    <a href="/downloads">
-                      <h3>Downloads</h3>
-                    </a>
-                  </Col>
-                </Row>
+                {printMobileRow("Meme Accounting", "/meme-accounting")}
+                {printMobileRow("Meme Gas", "/meme-gas")}
                 <Row>
                   <Col xs={{ span: 6, offset: 3 }}>
                     <hr />
@@ -706,9 +691,16 @@ export default function Header(props: Readonly<Props>) {
                               <NavDropdown.Item
                                 className={styles.dropdownItem}
                                 onClick={() =>
-                                  (window.location.href = "/latest-activity")
+                                  (window.location.href = "/community-activity")
                                 }>
-                                Latest Activity
+                                Community Activity
+                              </NavDropdown.Item>
+                              <NavDropdown.Item
+                                className={styles.dropdownItem}
+                                onClick={() =>
+                                  (window.location.href = "/nft-activity")
+                                }>
+                                NFT Activity
                               </NavDropdown.Item>
                               <NavDropdown.Divider />
                               <NavDropdown.Item
@@ -731,19 +723,6 @@ export default function Header(props: Readonly<Props>) {
                                   (window.location.href = "/levels")
                                 }>
                                 Levels
-                              </NavDropdown.Item>
-                              <NavDropdown.Divider />
-                              <NavDropdown.Item
-                                className={styles.dropdownItem}
-                                onClick={() =>
-                                  (window.location.href = "/meme-accounting")
-                                }>
-                                Meme Accounting
-                              </NavDropdown.Item>
-                              <NavDropdown.Item
-                                className={styles.dropdownItem}
-                                onClick={() => (window.location.href = "/gas")}>
-                                Gas
                               </NavDropdown.Item>
                             </NavDropdown>
                             <NavDropdown
@@ -774,39 +753,19 @@ export default function Header(props: Readonly<Props>) {
                                 }>
                                 Meme Blocks
                               </NavDropdown.Item>
-                              <NavDropdown.Divider />
                               <NavDropdown.Item
                                 className={styles.dropdownItem}
                                 onClick={() =>
-                                  (window.location.href =
-                                    "/delegation-mapping-tool")
+                                  (window.location.href = "/open-data")
                                 }>
-                                Delegation Mapping
-                              </NavDropdown.Item>
-                              <NavDropdown.Item
-                                className={styles.dropdownItem}
-                                onClick={() =>
-                                  (window.location.href =
-                                    "/consolidation-mapping-tool")
-                                }>
-                                Consolidation Mapping
-                              </NavDropdown.Item>
-                              <NavDropdown.Item
-                                className={styles.dropdownItem}
-                                onClick={() =>
-                                  (window.location.href =
-                                    "/consolidation-use-cases")
-                                }>
-                                Consolidation Use Cases
+                                Open Data
                               </NavDropdown.Item>
                               <NavDropdown.Divider />
-                              <NavDropdown.Item
-                                className={styles.dropdownItem}
-                                onClick={() =>
-                                  (window.location.href = "/downloads")
-                                }>
-                                Downloads
-                              </NavDropdown.Item>
+                              {printNavDropdown(
+                                "Meme Accounting",
+                                "/meme-accounting"
+                              )}
+                              {printNavDropdown("Meme Gas", "/meme-gas")}
                             </NavDropdown>
                             <NavDropdown
                               title="About"
