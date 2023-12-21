@@ -38,6 +38,11 @@ const NFTImage = dynamic(() => import("../components/nft-image/NFTImage"), {
   ssr: false,
 });
 
+const LatestActivity = dynamic(
+  () => import("../components/latest-activity/LatestActivity"),
+  { ssr: false }
+);
+
 export default function Home({
   pageProps,
 }: {
@@ -360,7 +365,7 @@ export default function Home({
               </Row>
             </Container>
             <div
-              className={`tailwind-scope  tw-min-h-screen tw-pb-16 lg:tw-pb-20 tw-relative tw-px-6 min-[1100px]:tw-max-w-[960px] min-[1200px]:tw-max-w-[1150px] min-[1300px]:tw-max-w-[1250px] min-[1400px]:tw-max-w-[1350px] min-[1500px]:tw-max-w-[1450px] min-[1600px]:tw-max-w-[1550px] min-[1800px]:tw-max-w-[1750px] min-[2000px]:tw-max-w-[1950px] tw-mx-auto ${inter.className}`}
+              className={`tailwind-scope tw-relative tw-px-6 min-[1100px]:tw-max-w-[960px] min-[1200px]:tw-max-w-[1150px] min-[1300px]:tw-max-w-[1250px] min-[1400px]:tw-max-w-[1350px] min-[1500px]:tw-max-w-[1450px] min-[1600px]:tw-max-w-[1550px] min-[1800px]:tw-max-w-[1750px] min-[2000px]:tw-max-w-[1950px] tw-mx-auto ${inter.className}`}
             >
               <div className="tw-mt-6">
                 <h1 className="tw-block tw-uppercase tw-text-iron-50 tw-float-none tw-pb-0 tw-mb-0">
@@ -373,6 +378,15 @@ export default function Home({
                 user={null}
               />
             </div>
+            {isNftImageLoaded && (
+              <Container className={styles.mainContainer}>
+                <Row>
+                  <Col xs={12} sm={12} md={12} lg={12}>
+                    <LatestActivity page={1} pageSize={12} showMore={false} />
+                  </Col>
+                </Row>
+              </Container>
+            )}
           </>
         )}
       </main>
