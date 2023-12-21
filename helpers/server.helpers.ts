@@ -1,6 +1,7 @@
 import { NFT, NFTLite } from "../entities/INFT";
 import { OwnerLite } from "../entities/IOwner";
 import {
+  ApiProfileRepRatesState,
   CicStatement,
   IProfileAndConsolidations,
   ProfileActivityLog,
@@ -268,6 +269,19 @@ export const getProfileLogs = async ({
       page_size: `${pageSize}`,
       log_type: "",
     },
+    headers,
+  });
+};
+
+export const getProfileRatings = async ({
+  user,
+  headers,
+}: {
+  user: string;
+  headers: Record<string, string>;
+}): Promise<ApiProfileRepRatesState> => {
+  return await commonApiFetch<ApiProfileRepRatesState>({
+    endpoint: `profiles/${user}/rep/ratings`,
     headers,
   });
 };

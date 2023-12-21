@@ -296,3 +296,18 @@ export interface CommunityMemberMinimal {
   readonly cic_rating: number;
   readonly wallet: string;
 }
+
+
+export interface RatingStats {
+  category: number;
+  rating: number;
+  contributor_count: number;
+  rater_contribution: number | null;
+}
+
+export interface ApiProfileRepRatesState {
+  readonly total_rep_rating: number;
+  readonly total_rep_rating_by_rater: number | null;
+  readonly rep_rates_left_for_rater: number | null;
+  readonly rating_stats: RatingStats[];
+}
