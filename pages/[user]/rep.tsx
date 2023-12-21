@@ -9,6 +9,7 @@ import {
   getCommonUserServerSideProps,
   userPageNeedsRedirect,
 } from "../../helpers/server.helpers";
+import UserPageRep from "../../components/user/rep/UserPageRep";
 
 export interface UserPageRepProps {
   readonly profile: IProfileAndConsolidations;
@@ -24,7 +25,7 @@ const Page: NextPageWithLayout<{ pageProps: UserPageRepProps }> = ({
 
   return (
     <div className="tailwind-scope">
-      <h1>Rep</h1>
+      <UserPageRep profile={pageProps.profile} />
     </div>
   );
 };
