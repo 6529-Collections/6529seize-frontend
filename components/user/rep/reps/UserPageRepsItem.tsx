@@ -23,7 +23,7 @@ export default function UserPageRepsItem({
 
   return (
     <div>
-      <span className="tw-flex tw-items-center tw-justify-between tw-gap-x-3 tw-rounded-lg tw-bg-iorn-900 tw-bordet tw-border-solid tw-border-white/10 tw-px-3 tw-py-1.5">
+      <span className="tw-flex tw-items-center tw-justify-between tw-gap-x-3 tw-rounded-lg tw-bg-iron-900 tw-bordet tw-border-solid tw-border-white/10 tw-px-3 tw-py-1">
         <span className="tw-whitespace-nowrap tw-text-sm tw-font-semibold tw-text-iron-200">
           {rep.category}
         </span>
@@ -45,7 +45,7 @@ export default function UserPageRepsItem({
         <button
           onClick={() => setIsEditRepModalOpen(true)}
           type="button"
-          className="tw-group tw-relative tw-inline-flex tw-items-center tw-text-sm tw-font-medium tw-rounded-lg tw-bg-iron-800 tw-p-2 tw-text-iron-200 focus:tw-outline-none tw-border-0 tw-ring-1 tw-ring-inset tw-ring-iron-700 hover:tw-bg-iron-700 focus:tw-z-10 tw-transition tw-duration-300 tw-ease-out"
+          className="-tw-mr-1 tw-group tw-relative tw-inline-flex tw-items-center tw-text-sm tw-font-medium tw-rounded-lg tw-bg-iron-800 tw-p-1.5 tw-text-iron-200 focus:tw-outline-none tw-border-0 tw-ring-1 tw-ring-inset tw-ring-iron-700 hover:tw-bg-iron-700 focus:tw-z-10 tw-transition tw-duration-300 tw-ease-out"
         >
           {rep.rater_contribution ? (
             <UserPageRepsItemEditIcon />

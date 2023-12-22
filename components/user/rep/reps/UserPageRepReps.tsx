@@ -35,10 +35,14 @@ export default function UserPageRepReps({
     [repRates.rating_stats]
   );
   return (
-    <div className="tw-mt-6 tw-flex tw-flex-wrap tw-gap-4">
-      {reps.map((rep) => (
-        <UserPageRepsItem rep={rep} key={rep.category} profile={profile} />
-      ))}
+    <div>
+      {!!reps.length && (
+        <div className="tw-mt-6 tw-flex tw-flex-wrap tw-gap-4">
+          {reps.map((rep) => (
+            <UserPageRepsItem rep={rep} key={rep.category} profile={profile} />
+          ))}
+        </div>
+      )}
     </div>
   );
 }

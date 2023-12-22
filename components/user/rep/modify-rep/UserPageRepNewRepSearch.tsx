@@ -59,14 +59,27 @@ export default function UserPageRepNewRepSearch({
   };
 
   return (
-    <div className="tw-max-w-full tw-relative tw-mt-2" ref={listRef}>
-      <div className="tw-mt-2 tw-relative">
-        <form onSubmit={onSubmit} className="tw-max-w-xs tw-mt-4">
+    <div
+      className="tw-max-w-full tw-relative tw-bg-iron-800 tw-p-4 md:tw-p-6 tw-rounded-xl tw-border tw-border-solid tw-border-white/5"
+      ref={listRef}
+    >
+      <div className="tw-flex tw-flex-col tw-space-y-1">
+        <span className="tw-text-base tw-block tw-text-iron-200 tw-font-semibold">
+          <span>Your available Rep:</span>
+          <span className="tw-ml-1">123</span>
+        </span>
+        <span className="tw-text-base tw-block tw-text-iron-200 tw-font-semibold">
+          <span>Your max/min Rep Rating to GelatoGenesis:</span>
+          <span className="tw-ml-1">+/- 12,341</span>
+        </span>
+      </div>
+      <div className="tw-mt-6 tw-relative">
+        <form onSubmit={onSubmit} className="tw-max-w-xs">
           <label
             htmlFor="search-rep"
             className="tw-block tw-text-sm tw-font-normal tw-text-iron-400"
           >
-            Add rep
+            Add new rep
           </label>
           <div className="tw-relative tw-mt-1.5">
             <svg
