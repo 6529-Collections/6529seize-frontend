@@ -7,10 +7,7 @@ import {
 import { useMutation } from "@tanstack/react-query";
 import { AuthContext } from "../../../auth/Auth";
 import { commonApiPost } from "../../../../services/api/common-api";
-import {
-  formatNumberWithCommas,
-  getStringAsNumberOrZero,
-} from "../../../../helpers/Helpers";
+import { getStringAsNumberOrZero } from "../../../../helpers/Helpers";
 import UserPageRepModifyModalHeader from "./UserPageRepModifyModalHeader";
 import UserPageRepModifyModalRaterStats from "./UserPageRepModifyModalRaterStats";
 import UserRateAdjustmentHelper from "../../utils/rate/UserRateAdjustmentHelper";
@@ -62,13 +59,18 @@ export default function UserPageRepModifyModal({
     if (valueAsNumber < -maxPositiveValue) {
       return `-${maxPositiveValue}`;
     }
+
+    if (value.length > 1 && value.startsWith("0")) {
+      return value.slice(1);
+    }
+
     return value;
   };
 
   const onValueChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const inputValue = event.currentTarget.value;
-    if (/^-?\d*$/.test(inputValue)) {
-      const strCIC = inputValue === "-0" ? "-" : inputValue;
+    const strCIC = ["-0", "0-"].includes(inputValue) ? "-" : inputValue;
+    if (/^-?\d*$/.test(strCIC)) {
       const newCicValue = getValueStrOrMax(strCIC);
       setAdjustedRatingStr(newCicValue);
     }
