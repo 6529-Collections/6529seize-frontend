@@ -14,6 +14,7 @@ import {
 import UserPageRepModifyModalHeader from "./UserPageRepModifyModalHeader";
 import UserPageRepModifyModalRaterStats from "./UserPageRepModifyModalRaterStats";
 import UserRateAdjustmentHelper from "../../utils/rate/UserRateAdjustmentHelper";
+import { ReactQueryWrapperContext } from "../../../react-query-wrapper/ReactQueryWrapper";
 
 interface ApiAddRepRatingToProfileRequest {
   readonly amount: number;
@@ -31,6 +32,7 @@ export default function UserPageRepModifyModal({
   readonly repState: RatingStats;
   readonly giverAvailableRep: number;
 }) {
+  const { invalidateProfileRepRatings } = useContext(ReactQueryWrapperContext);
   const { requestAuth, setToast } = useContext(AuthContext);
   const inputRef = useRef<HTMLInputElement>(null);
   useEffect(() => {
@@ -92,6 +94,7 @@ export default function UserPageRepModifyModal({
         message: "Rep updated.",
         type: "success",
       });
+      invalidateProfileRepRatings(profile);
       onClose();
     },
     onError: (error) => {

@@ -25,6 +25,7 @@ import {
 import UserPageRep from "../../components/user/rep/UserPageRep";
 import { useQueryClient } from "@tanstack/react-query";
 import { Page as PageType } from "../../helpers/Types";
+import { useRouter } from "next/router";
 
 export interface UserPageRepPropsRepRates {
   readonly ratings: ApiProfileRepRatesState;
@@ -46,6 +47,8 @@ const REP_RATERS_PAGE_SIZE = 10;
 const Page: NextPageWithLayout<{ pageProps: UserPageRepProps }> = ({
   pageProps,
 }) => {
+  const router = useRouter();
+  const user = (router.query.user as string).toLowerCase();
   const queryClient = useQueryClient();
   const { setProfile } = useContext(ReactQueryWrapperContext);
   setProfile(pageProps.profile);
@@ -62,7 +65,13 @@ const Page: NextPageWithLayout<{ pageProps: UserPageRepProps }> = ({
     })),
   };
   queryClient.setQueryData(
-    [QueryKey.PROFILE_REP_RATINGS, { rater: undefined }],
+    [
+      QueryKey.PROFILE_REP_RATINGS,
+      {
+        handleOrWallet: user,
+        rater: undefined,
+      },
+    ],
     initialEmptyRepRates
   );
 
@@ -71,6 +80,7 @@ const Page: NextPageWithLayout<{ pageProps: UserPageRepProps }> = ({
       [
         QueryKey.PROFILE_REP_RATINGS,
         {
+          handleOrWallet: user,
           rater: pageProps.repRates.rater.toLowerCase(),
         },
       ],

@@ -39,6 +39,7 @@ type ReactQueryWrapperContextType = {
   }) => void;
   invalidateProfileCICRatings: (profile: IProfileAndConsolidations) => void;
   invalidateProfileCICStatements: (profile: IProfileAndConsolidations) => void;
+  invalidateProfileRepRatings: (profile: IProfileAndConsolidations) => void;
 };
 
 export const ReactQueryWrapperContext =
@@ -51,6 +52,7 @@ export const ReactQueryWrapperContext =
     invalidateProfileRaterCICState: () => {},
     invalidateProfileCICRatings: () => {},
     invalidateProfileCICStatements: () => {},
+    invalidateProfileRepRatings: () => {},
   });
 
 export default function ReactQueryWrapper({
@@ -180,6 +182,16 @@ export default function ReactQueryWrapper({
     });
   };
 
+  const invalidateProfileRepRatings = (profile: IProfileAndConsolidations) => {
+    const handles = getHandlesFromProfile(profile);
+    invalidateQueries({
+      key: QueryKey.PROFILE_REP_RATINGS,
+      values: handles.map((h) => ({
+        handleOrWallet: h,
+      })),
+    });
+  };
+
   return (
     <ReactQueryWrapperContext.Provider
       value={{
@@ -191,6 +203,7 @@ export default function ReactQueryWrapper({
         invalidateProfileRaterCICState,
         invalidateProfileCICRatings,
         invalidateProfileCICStatements,
+        invalidateProfileRepRatings,
       }}
     >
       {children}

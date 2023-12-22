@@ -14,6 +14,12 @@ export default function UserPageRepNewRepSearchHeader({
           {formatNumberWithCommas(repRates.rep_rates_left_for_rater ?? 0)}
         </span>
       </span>
+      <span className="tw-text-base tw-block tw-text-iron-200 tw-font-semibold">
+        <span>Your given out Rep:</span>
+        <span className="tw-ml-1">
+          {formatNumberWithCommas(repRates.total_rep_rating_by_rater ?? 0)}
+        </span>
+      </span>
     </div>
   );
 }

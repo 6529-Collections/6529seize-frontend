@@ -59,11 +59,14 @@ export default function UserPageRep({
   );
 
   const { data: repRates } = useQuery<ApiProfileRepRatesState>({
-    queryKey: [QueryKey.PROFILE_REP_RATINGS, { rater: rater }],
+    queryKey: [
+      QueryKey.PROFILE_REP_RATINGS,
+      { rater: rater, handleOrWallet: user },
+    ],
     queryFn: async () =>
       await commonApiFetch<ApiProfileRepRatesState>({
-        endpoint: `profiles/${user.toLowerCase()}/rep/ratings/received`,
-        params: rater ? { rater: rater } : {},
+        endpoint: `profiles/${user}/rep/ratings/received`,
+        params: rater ? { rater } : {},
       }),
     enabled: !!user,
   });
