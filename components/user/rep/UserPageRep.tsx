@@ -2,10 +2,11 @@ import {
   ApiProfileRepRatesState,
   IProfileAndConsolidations,
   ProfileActivityLogRatingEdit,
+  RatingWithProfileInfoAndLevel,
 } from "../../../entities/IProfile";
 import UserPageRepRaters from "./UserPageRepRaters";
 import UserPageRepActivityLog from "./UserPageRepActivityLog";
-import UserPageRepNewRep from "./modify-rep/UserPageRepNewRep";
+import UserPageRepNewRep from "./new-rep/UserPageRepNewRep";
 import { useRouter } from "next/router";
 import { useQuery } from "@tanstack/react-query";
 import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
@@ -19,9 +20,13 @@ import { Page } from "../../../helpers/Types";
 export default function UserPageRep({
   profile: initialProfile,
   repLogs,
+  repGivenToUsers,
+  repReceivedFromUsers,
 }: {
   readonly profile: IProfileAndConsolidations;
   readonly repLogs: Page<ProfileActivityLogRatingEdit>;
+  readonly repGivenToUsers: Page<RatingWithProfileInfoAndLevel>;
+  readonly repReceivedFromUsers: Page<RatingWithProfileInfoAndLevel>;
 }) {
   const router = useRouter();
   const user = (router.query.user as string).toLowerCase();
@@ -68,22 +73,26 @@ export default function UserPageRep({
       {repRates && (
         <>
           <UserPageRepHeader repRates={repRates} />
-          <UserPageRepNewRep profile={profile} />
+          <UserPageRepNewRep profile={profile} repRates={repRates} />
           <UserPageRepReps repRates={repRates} profile={profile} />
         </>
       )}
 
       <div className="tw-mt-10 tw-grid tw-grid-cols-1 xl:tw-grid-cols-2 tw-gap-y-10 tw-gap-x-10">
         <div>
-          <UserPageRepRaters />
+          <UserPageRepRaters reps={repReceivedFromUsers.data} />
         </div>
         <div>
-          <UserPageRepRaters />
+          <UserPageRepRaters reps={repGivenToUsers.data} />
         </div>
       </div>
 
       <div className="tw-mt-10">
-        <UserPageRepActivityLog repLogs={repLogs} />
+        {/* <UserPageRepActivityLog
+          repLogs={repLogs}
+          profile={profile}
+          user={user}
+        /> */}
       </div>
     </div>
   );

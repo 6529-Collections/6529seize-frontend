@@ -307,5 +307,19 @@ export interface ApiProfileRepRatesState {
   readonly total_rep_rating: number;
   readonly total_rep_rating_by_rater: number | null;
   readonly rep_rates_left_for_rater: number | null;
+  readonly number_of_raters: number;
   readonly rating_stats: RatingStats[];
 }
+
+export interface RatingWithProfileInfo {
+  handle: string;
+  tdh: number;
+  rating: number;
+  cic: number;
+  last_modified: string;
+}
+
+
+export type RatingWithProfileInfoAndLevel = RatingWithProfileInfo & {
+  level: number;
+};

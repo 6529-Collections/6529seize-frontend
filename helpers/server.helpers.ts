@@ -7,6 +7,7 @@ import {
   ProfileActivityLog,
   ProfileActivityLogRatingEditContentMatter,
   ProfilesMatterRatingWithRaterLevel,
+  RatingWithProfileInfoAndLevel,
 } from "../entities/IProfile";
 import { Season } from "../entities/ISeason";
 import { ConsolidatedTDHMetrics } from "../entities/ITDH";
@@ -323,6 +324,33 @@ export const getProfileRatings = async ({
     }),
     rater,
   };
+};
+
+export const getProfileRatingsByRater = async ({
+  user,
+  headers,
+  given,
+  pageSize,
+}: {
+  readonly user: string;
+  readonly headers: Record<string, string>;
+  readonly given: boolean;
+  readonly pageSize: number;
+}): Promise<Page<RatingWithProfileInfoAndLevel>> => {
+  const params: Record<string, string> = {
+    page: "1",
+    page_size: `${pageSize}`,
+    log_type: "",
+  };
+  if (given) {
+    params.given = "true";
+  }
+
+  return await commonApiFetch<Page<RatingWithProfileInfoAndLevel>>({
+    endpoint: `profiles/${user}/rep/ratings/by-rater`,
+    params,
+    headers,
+  });
 };
 
 export const getCommonHeaders = (req: any): Record<string, string> => {

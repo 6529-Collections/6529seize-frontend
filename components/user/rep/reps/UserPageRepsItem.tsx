@@ -13,9 +13,11 @@ import UserPageRepModifyModal from "../modify-rep/UserPageRepModifyModal";
 export default function UserPageRepsItem({
   rep,
   profile,
+  giverAvailableRep,
 }: {
   readonly rep: RatingStats;
   readonly profile: IProfileAndConsolidations;
+  readonly giverAvailableRep: number;
 }) {
   const isPositiveRating = rep.rating > 0;
 
@@ -64,7 +66,8 @@ export default function UserPageRepsItem({
           >
             <UserPageRepModifyModal
               profile={profile}
-              repName={rep.category}
+              repState={rep}
+              giverAvailableRep={giverAvailableRep}
               onClose={() => setIsEditRepModalOpen(false)}
             />
           </CommonAnimationOpacity>

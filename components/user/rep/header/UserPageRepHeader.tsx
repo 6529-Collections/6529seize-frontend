@@ -19,7 +19,7 @@ export default function UserPageRepHeader({
             </div>
             <div className="tw-flex tw-items-center tw-text-base tw-font-semibold tw-text-iron-200 tw-space-x-1">
               <span>Raters:</span>
-              <span>1,234</span>
+              <span>{formatNumberWithCommas(repRates.number_of_raters)}</span>
             </div>
           </div>
         </div>

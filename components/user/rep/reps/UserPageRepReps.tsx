@@ -39,7 +39,12 @@ export default function UserPageRepReps({
       {!!reps.length && (
         <div className="tw-mt-6 tw-flex tw-flex-wrap tw-gap-4">
           {reps.map((rep) => (
-            <UserPageRepsItem rep={rep} key={rep.category} profile={profile} />
+            <UserPageRepsItem
+              rep={rep}
+              key={rep.category}
+              profile={profile}
+              giverAvailableRep={repRates.rep_rates_left_for_rater ?? 0}
+            />
           ))}
         </div>
       )}

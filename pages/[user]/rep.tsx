@@ -4,7 +4,7 @@ import {
   IProfileAndConsolidations,
   ProfileActivityLogRatingEdit,
   ProfileActivityLogRatingEditContentMatter,
-  ProfileActivityLogType,
+  RatingWithProfileInfoAndLevel,
 } from "../../entities/IProfile";
 import { NextPageWithLayout } from "../_app";
 import {
@@ -17,6 +17,7 @@ import {
   getCommonHeaders,
   getCommonUserServerSideProps,
   getProfileRatings,
+  getProfileRatingsByRater,
   getSignedWalletOrNull,
   getUserProfileActivityLogs,
   userPageNeedsRedirect,
@@ -36,7 +37,11 @@ export interface UserPageRepProps {
   readonly consolidatedTDH: ConsolidatedTDHMetrics | null;
   readonly repRates: UserPageRepPropsRepRates;
   readonly repLogs: PageType<ProfileActivityLogRatingEdit>;
+  readonly repGivenToUsers: PageType<RatingWithProfileInfoAndLevel>;
+  readonly repReceivedFromUsers: PageType<RatingWithProfileInfoAndLevel>;
 }
+
+const REP_RATERS_PAGE_SIZE = 10;
 
 const Page: NextPageWithLayout<{ pageProps: UserPageRepProps }> = ({
   pageProps,
@@ -46,6 +51,7 @@ const Page: NextPageWithLayout<{ pageProps: UserPageRepProps }> = ({
   setProfile(pageProps.profile);
   const initialEmptyRepRates: ApiProfileRepRatesState = {
     total_rep_rating: pageProps.repRates.ratings.total_rep_rating,
+    number_of_raters: pageProps.repRates.ratings.number_of_raters,
     total_rep_rating_by_rater: null,
     rep_rates_left_for_rater: null,
     rating_stats: pageProps.repRates.ratings.rating_stats.map((rating) => ({
@@ -74,7 +80,12 @@ const Page: NextPageWithLayout<{ pageProps: UserPageRepProps }> = ({
 
   return (
     <div className="tailwind-scope">
-      <UserPageRep profile={pageProps.profile} repLogs={pageProps.repLogs} />
+      <UserPageRep
+        profile={pageProps.profile}
+        repLogs={pageProps.repLogs}
+        repGivenToUsers={pageProps.repGivenToUsers}
+        repReceivedFromUsers={pageProps.repReceivedFromUsers}
+      />
     </div>
   );
 };
@@ -98,21 +109,38 @@ export async function getServerSideProps(
     const headers = getCommonHeaders(req);
     const signedWalletOrNull = getSignedWalletOrNull(req);
 
-    const [{ profile, title, consolidatedTDH }, repLogs, repRates] =
-      await Promise.all([
-        getCommonUserServerSideProps({ user: req.query.user, headers }),
-        getUserProfileActivityLogs<ProfileActivityLogRatingEdit>({
-          user: req.query.user,
-          headers,
-          matter: ProfileActivityLogRatingEditContentMatter.REP,
-          includeIncoming: true,
-        }),
-        getProfileRatings({
-          user: req.query.user,
-          headers,
-          signedWallet: signedWalletOrNull,
-        }),
-      ]);
+    const [
+      { profile, title, consolidatedTDH },
+      repLogs,
+      repRates,
+      repGivenToUsers,
+      repReceivedFromUsers,
+    ] = await Promise.all([
+      getCommonUserServerSideProps({ user: req.query.user, headers }),
+      getUserProfileActivityLogs<ProfileActivityLogRatingEdit>({
+        user: req.query.user,
+        headers,
+        matter: ProfileActivityLogRatingEditContentMatter.REP,
+        includeIncoming: true,
+      }),
+      getProfileRatings({
+        user: req.query.user,
+        headers,
+        signedWallet: signedWalletOrNull,
+      }),
+      getProfileRatingsByRater({
+        user: req.query.user,
+        headers,
+        pageSize: REP_RATERS_PAGE_SIZE,
+        given: true,
+      }),
+      getProfileRatingsByRater({
+        user: req.query.user,
+        headers,
+        pageSize: REP_RATERS_PAGE_SIZE,
+        given: false,
+      }),
+    ]);
 
     const needsRedirect = userPageNeedsRedirect({
       profile,
@@ -131,6 +159,8 @@ export async function getServerSideProps(
         consolidatedTDH,
         repRates,
         repLogs,
+        repGivenToUsers,
+        repReceivedFromUsers,
       },
     };
   } catch (e: any) {

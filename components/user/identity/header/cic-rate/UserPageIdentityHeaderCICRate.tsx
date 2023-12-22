@@ -3,7 +3,7 @@ import {
   ApiProfileRaterCicState,
   IProfileAndConsolidations,
 } from "../../../../../entities/IProfile";
-import { formatNumberWithCommas } from "../../../../../helpers/Helpers";
+import { formatNumberWithCommas, getStringAsNumberOrZero } from "../../../../../helpers/Helpers";
 import { AuthContext } from "../../../../auth/Auth";
 import {
   commonApiFetch,
@@ -15,8 +15,8 @@ import {
   QueryKey,
   ReactQueryWrapperContext,
 } from "../../../../react-query-wrapper/ReactQueryWrapper";
-import UserPageIdentityHeaderCICRateAdjustments from "./UserPageIdentityHeaderCICRateAdjustments";
 import { createBreakpoint } from "react-use";
+import UserRateAdjustmentHelper from "../../../utils/rate/UserRateAdjustmentHelper";
 
 const useBreakpoint = createBreakpoint({ MD: 768, S: 0 });
 
@@ -90,32 +90,25 @@ export default function UserPageIdentityHeaderCICRate({
     },
   });
 
-  const [myCICRatings, setMyCICRatings] = useState<number>(
+  const [originalRating, setOriginalRating] = useState<number>(
     myCICState?.cic_rating_by_rater ?? 0
   );
 
-  const [myCICRatingsStr, setMyCICRatingsStr] = useState<string>(
-    `${myCICRatings}`
+  const [adjustedRatingStr, setAdjustedRatingStr] = useState<string>(
+    `${originalRating}`
   );
 
   const [myMaxCICRatings, setMyMaxCICRatings] = useState<number>(
     (myCICState?.cic_ratings_left_to_give_by_rater ?? 0) +
-      Math.abs(myCICState?.cic_rating_by_rater ?? 0)
+      Math.abs(originalRating)
   );
 
   const [myAvailableCIC, setMyAvailableCIC] = useState<number>(
     myCICState?.cic_ratings_left_to_give_by_rater ?? 0
   );
 
-  const getMyCICRatingsAsNumber = (cic: string) => {
-    if (isNaN(parseInt(cic))) {
-      return 0;
-    }
-    return parseInt(cic);
-  };
-
   const getCICStrOrMaxStr = (strCIC: string): string => {
-    const cicAsNumber = getMyCICRatingsAsNumber(strCIC);
+    const cicAsNumber = getStringAsNumberOrZero(strCIC);
     if (cicAsNumber > myMaxCICRatings) {
       return `${myMaxCICRatings}`;
     }
@@ -127,8 +120,8 @@ export default function UserPageIdentityHeaderCICRate({
   };
 
   useEffect(() => {
-    setMyCICRatings(myCICState?.cic_rating_by_rater ?? 0);
-    setMyCICRatingsStr(`${myCICState?.cic_rating_by_rater ?? 0}`);
+    setOriginalRating(myCICState?.cic_rating_by_rater ?? 0);
+    setAdjustedRatingStr(`${myCICState?.cic_rating_by_rater ?? 0}`);
     setMyMaxCICRatings(
       (myCICState?.cic_ratings_left_to_give_by_rater ?? 0) +
         Math.abs(myCICState?.cic_rating_by_rater ?? 0)
@@ -141,7 +134,7 @@ export default function UserPageIdentityHeaderCICRate({
     if (/^-?\d*$/.test(inputValue)) {
       const strCIC = inputValue === "-0" ? "-" : inputValue;
       const newCicValue = getCICStrOrMaxStr(strCIC);
-      setMyCICRatingsStr(newCicValue);
+      setAdjustedRatingStr(newCicValue);
     }
   };
 
@@ -155,8 +148,8 @@ export default function UserPageIdentityHeaderCICRate({
       return;
     }
 
-    const newRating = getMyCICRatingsAsNumber(myCICRatingsStr);
-    if (newRating === myCICRatings) {
+    const newRating = getStringAsNumberOrZero(adjustedRatingStr);
+    if (newRating === originalRating) {
       return;
     }
 
@@ -238,7 +231,7 @@ export default function UserPageIdentityHeaderCICRate({
               </span>
               <input
                 type="text"
-                value={myCICRatingsStr}
+                value={adjustedRatingStr}
                 onChange={handleChange}
                 required
                 autoComplete="off"
@@ -259,20 +252,22 @@ export default function UserPageIdentityHeaderCICRate({
                 Rate
               </button>
               {!isTooltip && breakpoint === "MD" && (
-                <UserPageIdentityHeaderCICRateAdjustments
-                  isTooltip={isTooltip}
-                  originalValue={myCICRatings}
-                  adjustedValue={getMyCICRatingsAsNumber(myCICRatingsStr)}
+                <UserRateAdjustmentHelper
+                  inLineValues={isTooltip}
+                  originalValue={originalRating}
+                  adjustedValue={getStringAsNumberOrZero(adjustedRatingStr)}
+                  adjustmentType="CIC"
                 />
               )}
             </div>
           </div>
         </div>
         {!!(isTooltip || breakpoint !== "MD") && (
-          <UserPageIdentityHeaderCICRateAdjustments
-            isTooltip={isTooltip}
-            originalValue={myCICRatings}
-            adjustedValue={getMyCICRatingsAsNumber(myCICRatingsStr)}
+          <UserRateAdjustmentHelper
+            inLineValues={isTooltip}
+            originalValue={originalRating}
+            adjustedValue={getStringAsNumberOrZero(adjustedRatingStr)}
+            adjustmentType="CIC"
           />
         )}
       </form>
