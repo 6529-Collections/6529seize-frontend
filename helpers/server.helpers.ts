@@ -302,7 +302,7 @@ export const getProfileRatings = async ({
 
   return {
     ratings: await commonApiFetch<ApiProfileRepRatesState>({
-      endpoint: `profiles/${user}/rep/ratings`,
+      endpoint: `profiles/${user}/rep/ratings/received`,
       params,
       headers,
     }),

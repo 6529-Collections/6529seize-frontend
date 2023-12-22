@@ -1,14 +1,17 @@
 import { useEffect, useState } from "react";
 import {
   ApiProfileRepRatesState,
+  IProfileAndConsolidations,
   RatingStats,
 } from "../../../../entities/IProfile";
 import UserPageRepsItem from "./UserPageRepsItem";
 
 export default function UserPageRepReps({
   repRates,
+  profile,
 }: {
   readonly repRates: ApiProfileRepRatesState;
+  readonly profile: IProfileAndConsolidations;
 }) {
   const sortReps = (reps: RatingStats[]) =>
     [...reps].sort((a, d) => {
@@ -34,7 +37,7 @@ export default function UserPageRepReps({
   return (
     <div className="tw-mt-6 tw-flex tw-flex-wrap tw-gap-4">
       {reps.map((rep) => (
-        <UserPageRepsItem rep={rep} key={rep.category} />
+        <UserPageRepsItem rep={rep} key={rep.category} profile={profile} />
       ))}
     </div>
   );

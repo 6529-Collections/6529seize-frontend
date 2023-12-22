@@ -285,7 +285,6 @@ export interface ProfilesMatterRatingWithRaterLevel
   readonly rater_level: number;
 }
 
-
 export interface CommunityMemberMinimal {
   readonly handle: string | null;
   readonly normalised_handle: string | null;
@@ -297,12 +296,11 @@ export interface CommunityMemberMinimal {
   readonly wallet: string;
 }
 
-
 export interface RatingStats {
-  category: number;
-  rating: number;
-  contributor_count: number;
-  rater_contribution: number | null;
+  readonly category: string;
+  readonly rating: number;
+  readonly contributor_count: number;
+  readonly rater_contribution: number | null;
 }
 
 export interface ApiProfileRepRatesState {

@@ -7,9 +7,9 @@ export default function UserSettingsPrimaryWalletItem({
   selected,
   onSelect,
 }: {
-  wallet: IProfileConsolidation;
-  selected: string;
-  onSelect: (wallet: string) => void;
+  readonly wallet: IProfileConsolidation;
+  readonly selected: string;
+  readonly onSelect: (wallet: string) => void;
 }) {
   const [isActive, setIsActive] = useState(
     areEqualAddresses(wallet.wallet.address, selected)

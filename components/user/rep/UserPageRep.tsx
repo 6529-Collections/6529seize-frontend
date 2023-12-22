@@ -4,8 +4,7 @@ import {
 } from "../../../entities/IProfile";
 import UserPageRepRaters from "./UserPageRepRaters";
 import UserPageRepActivityLog from "./UserPageRepActivityLog";
-import UserPageRepNewRep from "./add-rep/UserPageRepNewRep";
-import { UserPageRepPropsRepRates } from "../../../pages/[user]/rep";
+import UserPageRepNewRep from "./modify-rep/UserPageRepNewRep";
 import { useRouter } from "next/router";
 import { useQuery } from "@tanstack/react-query";
 import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
@@ -54,7 +53,7 @@ export default function UserPageRep({
     queryKey: [QueryKey.PROFILE_REP_RATINGS, { rater: rater }],
     queryFn: async () =>
       await commonApiFetch<ApiProfileRepRatesState>({
-        endpoint: `profiles/${user.toLowerCase()}/rep/ratings`,
+        endpoint: `profiles/${user.toLowerCase()}/rep/ratings/received`,
         params: rater ? { rater: rater } : {},
       }),
     enabled: !!user,
@@ -66,7 +65,7 @@ export default function UserPageRep({
         <>
           <UserPageRepHeader repRates={repRates} />
           <UserPageRepNewRep profile={profile} />
-          <UserPageRepReps repRates={repRates} />
+          <UserPageRepReps repRates={repRates} profile={profile} />
         </>
       )}
 

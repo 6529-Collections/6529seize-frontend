@@ -10,7 +10,7 @@ interface ApiAddRepRatingToProfileRequest {
   readonly category: string;
 }
 
-export default function UserPageRepNewRepModal({
+export default function UserPageRepModifyModal({
   onClose,
   profile,
   repName,
