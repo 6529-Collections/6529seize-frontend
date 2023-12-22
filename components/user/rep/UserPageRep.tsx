@@ -69,7 +69,6 @@ export default function UserPageRep({
         </>
       )}
 
-      {/*  4th start */}
       <div className="tw-mt-10 tw-grid tw-grid-cols-1 xl:tw-grid-cols-2 tw-gap-y-10 tw-gap-x-10">
         <div>
           <UserPageRepRaters />
@@ -78,9 +77,7 @@ export default function UserPageRep({
           <UserPageRepRaters />
         </div>
       </div>
-      {/*  4th end */}
 
-      {/*  5th start */}
       <div className="tw-mt-10">
         <UserPageRepActivityLog />
       </div>
