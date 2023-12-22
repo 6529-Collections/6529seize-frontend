@@ -95,10 +95,6 @@ export interface CicStatement {
   updated_at: Date | null;
 }
 
-export enum ProfileActivityLogTargetType {
-  PROFILE_ID = "PROFILE_ID",
-}
-
 export enum ProfileActivityLogType {
   RATING_EDIT = "RATING_EDIT",
   HANDLE_EDIT = "HANDLE_EDIT",
@@ -135,7 +131,6 @@ export interface ProfileActivityLogBase {
   readonly id: string;
   readonly profile_id: string;
   readonly target_id: string | null;
-  readonly target_type: ProfileActivityLogTargetType | null;
   readonly created_at: Date;
   readonly profile_handle: string;
   readonly target_profile_handle: string | null;
@@ -146,6 +141,11 @@ export enum ProfileActivityLogRatingEditContentChangeReason {
   LOST_TDH = "LOST_TDH",
 }
 
+export enum ProfileActivityLogRatingEditContentMatter {
+  CIC = "CIC",
+  REP = "REP",
+}
+
 export interface ProfileActivityLogRatingEdit extends ProfileActivityLogBase {
   readonly type: ProfileActivityLogType.RATING_EDIT;
   readonly contents: {
@@ -153,7 +153,7 @@ export interface ProfileActivityLogRatingEdit extends ProfileActivityLogBase {
     new_rating: number;
     old_rating: number;
     rating_category: string;
-    rating_matter: string;
+    rating_matter: ProfileActivityLogRatingEditContentMatter;
   };
 }
 

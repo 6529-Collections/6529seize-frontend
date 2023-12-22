@@ -5,6 +5,7 @@ import {
   CicStatement,
   IProfileAndConsolidations,
   ProfileActivityLog,
+  ProfileActivityLogRatingEditContentMatter,
   ProfilesMatterRatingWithRaterLevel,
 } from "../entities/IProfile";
 import { Season } from "../entities/ISeason";
@@ -103,22 +104,36 @@ export const userPageNeedsRedirect = ({
   return null;
 };
 
-export const getUserProfileActivityLogs = async ({
+export const getUserProfileActivityLogs = async <T = ProfileActivityLog>({
   user,
   headers,
+  matter,
+  includeIncoming,
 }: {
   user: string;
   headers: Record<string, string>;
-}): Promise<Page<ProfileActivityLog>> => {
+  matter: ProfileActivityLogRatingEditContentMatter | null;
+  includeIncoming: boolean;
+}): Promise<Page<T>> => {
+  const params: Record<string, string> = {
+    profile: user,
+    page: `1`,
+    page_size: `10`,
+    log_type: "",
+  };
+
+  if (matter) {
+    params.rating_matter = matter;
+  }
+
+  if (includeIncoming) {
+    params.include_incoming = "true";
+  }
+
   try {
-    return await commonApiFetch<Page<ProfileActivityLog>>({
+    return await commonApiFetch<Page<T>>({
       endpoint: `profile-logs`,
-      params: {
-        profile: user,
-        page: `1`,
-        page_size: `10`,
-        log_type: "",
-      },
+      params,
       headers,
     });
   } catch {

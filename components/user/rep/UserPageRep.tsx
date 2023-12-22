@@ -1,6 +1,7 @@
 import {
   ApiProfileRepRatesState,
   IProfileAndConsolidations,
+  ProfileActivityLogRatingEdit,
 } from "../../../entities/IProfile";
 import UserPageRepRaters from "./UserPageRepRaters";
 import UserPageRepActivityLog from "./UserPageRepActivityLog";
@@ -13,11 +14,14 @@ import { useAccount } from "wagmi";
 import { useEffect, useState } from "react";
 import UserPageRepReps from "./reps/UserPageRepReps";
 import UserPageRepHeader from "./header/UserPageRepHeader";
+import { Page } from "../../../helpers/Types";
 
 export default function UserPageRep({
   profile: initialProfile,
+  repLogs,
 }: {
   readonly profile: IProfileAndConsolidations;
+  readonly repLogs: Page<ProfileActivityLogRatingEdit>;
 }) {
   const router = useRouter();
   const user = (router.query.user as string).toLowerCase();
@@ -82,7 +86,7 @@ export default function UserPageRep({
 
       {/*  5th start */}
       <div className="tw-mt-10">
-        <UserPageRepActivityLog />
+        <UserPageRepActivityLog repLogs={repLogs} />
       </div>
     </div>
   );

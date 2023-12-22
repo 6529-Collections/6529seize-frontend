@@ -78,6 +78,8 @@ export async function getServerSideProps(
       getUserProfileActivityLogs({
         user: req.query.user,
         headers,
+        matter: null,
+        includeIncoming: false,
       }),
       getUserProfileCICRatings({
         user: req.query.user,

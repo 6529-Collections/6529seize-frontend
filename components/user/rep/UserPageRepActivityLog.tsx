@@ -1,4 +1,12 @@
-export default function UserPageRepActivityLog() {
+import { ProfileActivityLogRatingEdit } from "../../../entities/IProfile";
+import { Page } from "../../../helpers/Types";
+import ProfileActivityLogItemTimeAgo from "../../profile-activity/list/items/utils/ProfileActivityLogItemTimeAgo";
+
+export default function UserPageRepActivityLog({
+  repLogs,
+}: {
+  readonly repLogs: Page<ProfileActivityLogRatingEdit>;
+}) {
   return (
     <div className="tw-bg-iron-900 tw-border tw-border-white/5 tw-border-solid tw-rounded-xl">
       <div className="tw-h-16 tw-px-6 md:tw-px-8">
@@ -16,36 +24,41 @@ export default function UserPageRepActivityLog() {
           <div className="tw-inline-block tw-min-w-full tw-align-middle tw-px-6 md:tw-px-8">
             <table className="tw-min-w-full">
               <tbody className="tw-px-6 md:tw-px-8 tw-list-none tw-divide-y tw-divide-white/10 tw-divide-solid tw-divide-x-0">
-                <tr className="tw-flex tw-items-center tw-justify-between">
-                  <td className="tw-py-2.5">
-                    <div className="tw-space-x-1.5 tw-inline-flex tw-items-center">
-                      <button className="tw-bg-transparent tw-border-none tw-leading-4 tw-p-0">
-                        <span className=" tw-whitespace-nowrap tw-text-sm tw-font-semibold tw-text-iron-100">
-                          punk6529
+                {repLogs.data.map((log) => (
+                  <tr
+                    key={log.id}
+                    className="tw-flex tw-items-center tw-justify-between"
+                  >
+                    <td className="tw-py-2.5">
+                      <div className="tw-space-x-1.5 tw-inline-flex tw-items-center">
+                        <button className="tw-bg-transparent tw-border-none tw-leading-4 tw-p-0">
+                          <span className=" tw-whitespace-nowrap tw-text-sm tw-font-semibold tw-text-iron-100">
+                            {log.profile_handle}
+                          </span>
+                        </button>
+                        <span className="tw-whitespace-nowrap tw-text-sm tw-text-iron-400 tw-font-semibold">
+                          gave to
                         </span>
-                      </button>
-                      <span className="tw-whitespace-nowrap tw-text-sm tw-text-iron-400 tw-font-semibold">
-                        gave to
-                      </span>
-                      <button className="tw-bg-transparent tw-border-none tw-leading-4 tw-p-0">
-                        <span className=" tw-whitespace-nowrap tw-text-sm tw-font-semibold tw-text-iron-100">
-                          simo
+                        <button className="tw-bg-transparent tw-border-none tw-leading-4 tw-p-0">
+                          <span className=" tw-whitespace-nowrap tw-text-sm tw-font-semibold tw-text-iron-100">
+                            {log.target_profile_handle}
+                          </span>
+                        </button>
+                        <span className="tw-whitespace-nowrap tw-text-sm tw-text-iron-400 tw-font-semibold">
+                          {log.contents.rating_category}
                         </span>
-                      </button>
-                      <span className="tw-whitespace-nowrap tw-text-sm tw-text-iron-400 tw-font-semibold">
-                        Typescript Expert
+                        <span className="tw-whitespace-nowrap tw-text-sm tw-text-green tw-font-semibold">
+                          +1243
+                        </span>
+                      </div>
+                    </td>
+                    <td className="tw-py-2.5 tw-pl-3 tw-text-right">
+                      <span className="tw-whitespace-nowrap tw-text-[0.8125rem] tw-leading-5 tw-text-iron-500">
+                        <ProfileActivityLogItemTimeAgo log={log} />
                       </span>
-                      <span className="tw-whitespace-nowrap tw-text-sm tw-text-green tw-font-semibold">
-                        +1243
-                      </span>
-                    </div>
-                  </td>
-                  <td className="tw-py-2.5 tw-pl-3 tw-text-right">
-                    <span className="tw-whitespace-nowrap tw-text-[0.8125rem] tw-leading-5 tw-text-iron-500">
-                      14 minutes ago
-                    </span>
-                  </td>
-                </tr>
+                    </td>
+                  </tr>
+                ))}
               </tbody>
             </table>
           </div>

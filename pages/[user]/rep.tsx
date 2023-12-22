@@ -2,6 +2,9 @@ import { ReactElement, useContext } from "react";
 import {
   ApiProfileRepRatesState,
   IProfileAndConsolidations,
+  ProfileActivityLogRatingEdit,
+  ProfileActivityLogRatingEditContentMatter,
+  ProfileActivityLogType,
 } from "../../entities/IProfile";
 import { NextPageWithLayout } from "../_app";
 import {
@@ -15,10 +18,12 @@ import {
   getCommonUserServerSideProps,
   getProfileRatings,
   getSignedWalletOrNull,
+  getUserProfileActivityLogs,
   userPageNeedsRedirect,
 } from "../../helpers/server.helpers";
 import UserPageRep from "../../components/user/rep/UserPageRep";
 import { useQueryClient } from "@tanstack/react-query";
+import { Page as PageType } from "../../helpers/Types";
 
 export interface UserPageRepPropsRepRates {
   readonly ratings: ApiProfileRepRatesState;
@@ -30,6 +35,7 @@ export interface UserPageRepProps {
   readonly title: string;
   readonly consolidatedTDH: ConsolidatedTDHMetrics | null;
   readonly repRates: UserPageRepPropsRepRates;
+  readonly repLogs: PageType<ProfileActivityLogRatingEdit>;
 }
 
 const Page: NextPageWithLayout<{ pageProps: UserPageRepProps }> = ({
@@ -68,7 +74,7 @@ const Page: NextPageWithLayout<{ pageProps: UserPageRepProps }> = ({
 
   return (
     <div className="tailwind-scope">
-      <UserPageRep profile={pageProps.profile} />
+      <UserPageRep profile={pageProps.profile} repLogs={pageProps.repLogs} />
     </div>
   );
 };
@@ -92,14 +98,21 @@ export async function getServerSideProps(
     const headers = getCommonHeaders(req);
     const signedWalletOrNull = getSignedWalletOrNull(req);
 
-    const [{ profile, title, consolidatedTDH }, repRates] = await Promise.all([
-      getCommonUserServerSideProps({ user: req.query.user, headers }),
-      getProfileRatings({
-        user: req.query.user,
-        headers,
-        signedWallet: signedWalletOrNull,
-      }),
-    ]);
+    const [{ profile, title, consolidatedTDH }, repLogs, repRates] =
+      await Promise.all([
+        getCommonUserServerSideProps({ user: req.query.user, headers }),
+        getUserProfileActivityLogs<ProfileActivityLogRatingEdit>({
+          user: req.query.user,
+          headers,
+          matter: ProfileActivityLogRatingEditContentMatter.REP,
+          includeIncoming: true,
+        }),
+        getProfileRatings({
+          user: req.query.user,
+          headers,
+          signedWallet: signedWalletOrNull,
+        }),
+      ]);
 
     const needsRedirect = userPageNeedsRedirect({
       profile,
@@ -117,6 +130,7 @@ export async function getServerSideProps(
         title,
         consolidatedTDH,
         repRates,
+        repLogs,
       },
     };
   } catch (e: any) {
