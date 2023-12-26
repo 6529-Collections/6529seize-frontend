@@ -5,7 +5,6 @@ import {
   CicStatement,
   IProfileAndConsolidations,
   ProfileActivityLog,
-  ProfileActivityLogRatingEditContentMatter,
   ProfilesMatterRatingWithRaterLevel,
   RatingWithProfileInfoAndLevel,
 } from "../entities/IProfile";
@@ -15,6 +14,7 @@ import { areEqualAddresses, containsEmojis, formatAddress } from "./Helpers";
 import { Page } from "./Types";
 import { commonApiFetch } from "../services/api/common-api";
 import jwtDecode from "jwt-decode";
+import { ActivityLogParamsConverted } from "../components/profile-activity/ProfileActivityLogs";
 
 export interface CommonUserServerSideProps {
   profile: IProfileAndConsolidations;
@@ -106,33 +106,14 @@ export const userPageNeedsRedirect = ({
 };
 
 export const getUserProfileActivityLogs = async <T = ProfileActivityLog>({
-  user,
   headers,
-  matter,
-  includeIncoming,
+  params,
 }: {
-  user: string;
   headers: Record<string, string>;
-  matter: ProfileActivityLogRatingEditContentMatter | null;
-  includeIncoming: boolean;
+  params: ActivityLogParamsConverted;
 }): Promise<Page<T>> => {
-  const params: Record<string, string> = {
-    profile: user,
-    page: `1`,
-    page_size: `10`,
-    log_type: "",
-  };
-
-  if (matter) {
-    params.rating_matter = matter;
-  }
-
-  if (includeIncoming) {
-    params.include_incoming = "true";
-  }
-
   try {
-    return await commonApiFetch<Page<T>>({
+    return await commonApiFetch<Page<T>, ActivityLogParamsConverted>({
       endpoint: `profile-logs`,
       params,
       headers,
@@ -272,24 +253,6 @@ export const getOwned = async ({
   }, []);
 };
 
-export const getProfileLogs = async ({
-  headers,
-  pageSize,
-}: {
-  headers: Record<string, string>;
-  pageSize: number;
-}): Promise<Page<ProfileActivityLog>> => {
-  return await commonApiFetch<Page<ProfileActivityLog>>({
-    endpoint: `profile-logs`,
-    params: {
-      page: "1",
-      page_size: `${pageSize}`,
-      log_type: "",
-    },
-    headers,
-  });
-};
-
 export const getProfileRatings = async ({
   user,
   headers,
@@ -330,17 +293,21 @@ export const getProfileRatingsByRater = async ({
   user,
   headers,
   given,
+  page,
+  logType,
   pageSize,
 }: {
   readonly user: string;
   readonly headers: Record<string, string>;
+  readonly page: number;
+  readonly logType: string;
   readonly given: boolean;
   readonly pageSize: number;
 }): Promise<Page<RatingWithProfileInfoAndLevel>> => {
   const params: Record<string, string> = {
-    page: "1",
+    page: `${page}`,
     page_size: `${pageSize}`,
-    log_type: "",
+    log_type: logType,
   };
   if (given) {
     params.given = "true";

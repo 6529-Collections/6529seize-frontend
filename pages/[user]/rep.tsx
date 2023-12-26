@@ -7,10 +7,7 @@ import {
   RatingWithProfileInfoAndLevel,
 } from "../../entities/IProfile";
 import { NextPageWithLayout } from "../_app";
-import {
-  QueryKey,
-  ReactQueryWrapperContext,
-} from "../../components/react-query-wrapper/ReactQueryWrapper";
+import { ReactQueryWrapperContext } from "../../components/react-query-wrapper/ReactQueryWrapper";
 import UserPageLayout from "../../components/user/layout/UserPageLayout";
 import { ConsolidatedTDHMetrics } from "../../entities/ITDH";
 import {
@@ -23,9 +20,12 @@ import {
   userPageNeedsRedirect,
 } from "../../helpers/server.helpers";
 import UserPageRep from "../../components/user/rep/UserPageRep";
-import { useQueryClient } from "@tanstack/react-query";
 import { Page as PageType } from "../../helpers/Types";
-import { useRouter } from "next/router";
+import {
+  ActivityLogParams,
+  convertActivityLogParams,
+} from "../../components/profile-activity/ProfileActivityLogs";
+import { FilterTargetType } from "../../components/utils/CommonFilterTargetSelect";
 
 export interface UserPageRepPropsRepRates {
   readonly ratings: ApiProfileRepRatesState;
@@ -34,6 +34,7 @@ export interface UserPageRepPropsRepRates {
 
 export interface UserPageRepProps {
   readonly profile: IProfileAndConsolidations;
+  readonly handleOrWallet: string;
   readonly title: string;
   readonly consolidatedTDH: ConsolidatedTDHMetrics | null;
   readonly repRates: UserPageRepPropsRepRates;
@@ -42,59 +43,57 @@ export interface UserPageRepProps {
   readonly repReceivedFromUsers: PageType<RatingWithProfileInfoAndLevel>;
 }
 
-const REP_RATERS_PAGE_SIZE = 10;
+const PROFILE_REP_RATERS_PAGE = 1;
+const PROFILE_REP_RATERS_PAGE_SIZE = 10;
+const PROFILE_REP_RATERS_LOG_TYPE = "";
+
+const getInitialActivityLogParams = (
+  handleOrWallet: string
+): ActivityLogParams => ({
+  page: 1,
+  pageSize: 10,
+  logTypes: [],
+  matter: ProfileActivityLogRatingEditContentMatter.REP,
+  targetType: FilterTargetType.OUTGOING,
+  handleOrWallet,
+});
 
 const Page: NextPageWithLayout<{ pageProps: UserPageRepProps }> = ({
   pageProps,
 }) => {
-  const router = useRouter();
-  const user = (router.query.user as string).toLowerCase();
-  const queryClient = useQueryClient();
-  const { setProfile } = useContext(ReactQueryWrapperContext);
-  setProfile(pageProps.profile);
-  const initialEmptyRepRates: ApiProfileRepRatesState = {
-    total_rep_rating: pageProps.repRates.ratings.total_rep_rating,
-    number_of_raters: pageProps.repRates.ratings.number_of_raters,
-    total_rep_rating_by_rater: null,
-    rep_rates_left_for_rater: null,
-    rating_stats: pageProps.repRates.ratings.rating_stats.map((rating) => ({
-      category: rating.category,
-      rating: rating.rating,
-      contributor_count: rating.contributor_count,
-      rater_contribution: null,
-    })),
-  };
-  queryClient.setQueryData(
-    [
-      QueryKey.PROFILE_REP_RATINGS,
-      {
-        handleOrWallet: user,
-        rater: undefined,
-      },
-    ],
-    initialEmptyRepRates
+  const initialActivityLogParams = getInitialActivityLogParams(
+    pageProps.handleOrWallet
   );
-
-  if (pageProps.repRates.rater) {
-    queryClient.setQueryData(
-      [
-        QueryKey.PROFILE_REP_RATINGS,
-        {
-          handleOrWallet: user,
-          rater: pageProps.repRates.rater.toLowerCase(),
-        },
-      ],
-      pageProps.repRates.ratings
-    );
-  }
+  const { initProfileRepPage } = useContext(ReactQueryWrapperContext);
+  initProfileRepPage({
+    profile: pageProps.profile,
+    repRates: pageProps.repRates,
+    repLogs: {
+      data: pageProps.repLogs,
+      params: initialActivityLogParams,
+    },
+    repGivenToUsers: {
+      data: pageProps.repGivenToUsers,
+      page: PROFILE_REP_RATERS_PAGE,
+      pageSize: PROFILE_REP_RATERS_PAGE_SIZE,
+      logType: PROFILE_REP_RATERS_LOG_TYPE,
+      given: true,
+    },
+    repReceivedFromUsers: {
+      data: pageProps.repReceivedFromUsers,
+      page: PROFILE_REP_RATERS_PAGE,
+      pageSize: PROFILE_REP_RATERS_PAGE_SIZE,
+      logType: PROFILE_REP_RATERS_LOG_TYPE,
+      given: false,
+    },
+    handleOrWallet: pageProps.handleOrWallet,
+  });
 
   return (
     <div className="tailwind-scope">
       <UserPageRep
         profile={pageProps.profile}
-        repLogs={pageProps.repLogs}
-        repGivenToUsers={pageProps.repGivenToUsers}
-        repReceivedFromUsers={pageProps.repReceivedFromUsers}
+        initialActivityLogParams={initialActivityLogParams}
       />
     </div>
   );
@@ -118,7 +117,7 @@ export async function getServerSideProps(
   try {
     const headers = getCommonHeaders(req);
     const signedWalletOrNull = getSignedWalletOrNull(req);
-
+    const handleOrWallet = req.query.user.toLowerCase() as string;
     const [
       { profile, title, consolidatedTDH },
       repLogs,
@@ -126,28 +125,32 @@ export async function getServerSideProps(
       repGivenToUsers,
       repReceivedFromUsers,
     ] = await Promise.all([
-      getCommonUserServerSideProps({ user: req.query.user, headers }),
+      getCommonUserServerSideProps({ user: handleOrWallet, headers }),
       getUserProfileActivityLogs<ProfileActivityLogRatingEdit>({
-        user: req.query.user,
         headers,
-        matter: ProfileActivityLogRatingEditContentMatter.REP,
-        includeIncoming: true,
+        params: convertActivityLogParams(
+          getInitialActivityLogParams(handleOrWallet)
+        ),
       }),
       getProfileRatings({
-        user: req.query.user,
+        user: handleOrWallet,
         headers,
         signedWallet: signedWalletOrNull,
       }),
       getProfileRatingsByRater({
-        user: req.query.user,
+        user: handleOrWallet,
         headers,
-        pageSize: REP_RATERS_PAGE_SIZE,
+        page: PROFILE_REP_RATERS_PAGE,
+        pageSize: PROFILE_REP_RATERS_PAGE_SIZE,
         given: true,
+        logType: PROFILE_REP_RATERS_LOG_TYPE,
       }),
       getProfileRatingsByRater({
-        user: req.query.user,
+        user: handleOrWallet,
         headers,
-        pageSize: REP_RATERS_PAGE_SIZE,
+        page: PROFILE_REP_RATERS_PAGE,
+        logType: PROFILE_REP_RATERS_LOG_TYPE,
+        pageSize: PROFILE_REP_RATERS_PAGE_SIZE,
         given: false,
       }),
     ]);
@@ -165,6 +168,7 @@ export async function getServerSideProps(
     return {
       props: {
         profile,
+        handleOrWallet,
         title,
         consolidatedTDH,
         repRates,
@@ -174,7 +178,6 @@ export async function getServerSideProps(
       },
     };
   } catch (e: any) {
-    console.log(e);
     return {
       redirect: {
         permanent: false,

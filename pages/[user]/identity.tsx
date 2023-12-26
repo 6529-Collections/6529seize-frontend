@@ -20,9 +20,15 @@ import UserPageIdentity from "../../components/user/identity/UserPageIdentity";
 import UserPageIdentityNoProfile from "../../components/user/identity/UserPageIdentityNoProfile";
 import { Page as PageType } from "../../helpers/Types";
 import { ReactQueryWrapperContext } from "../../components/react-query-wrapper/ReactQueryWrapper";
+import {
+  ActivityLogParams,
+  convertActivityLogParams,
+} from "../../components/profile-activity/ProfileActivityLogs";
+import { FilterTargetType } from "../../components/utils/CommonFilterTargetSelect";
 
 export interface UserPageIdentityProps {
   profile: IProfileAndConsolidations;
+  handleOrWallet: string;
   title: string;
   consolidatedTDH: ConsolidatedTDHMetrics | null;
   profileActivityLogs: PageType<ProfileActivityLog>;
@@ -30,11 +36,31 @@ export interface UserPageIdentityProps {
   profileIdentityStatements: CicStatement[];
 }
 
+const getInitialActivityLogParams = (
+  handleOrWallet: string
+): ActivityLogParams => ({
+  page: 1,
+  pageSize: 10,
+  logTypes: [],
+  matter: null,
+  targetType: FilterTargetType.OUTGOING,
+  handleOrWallet,
+});
+
 const Page: NextPageWithLayout<{ pageProps: UserPageIdentityProps }> = ({
   pageProps,
 }) => {
-  const { setProfile } = useContext(ReactQueryWrapperContext);
-  setProfile(pageProps.profile);
+  const initialActivityLogParams = getInitialActivityLogParams(
+    pageProps.handleOrWallet
+  );
+  const { initProfileIdentityPage } = useContext(ReactQueryWrapperContext);
+  initProfileIdentityPage({
+    profile: pageProps.profile,
+    activityLogs: {
+      data: pageProps.profileActivityLogs,
+      params: initialActivityLogParams,
+    },
+  });
 
   if (!pageProps.profile.profile) {
     return <UserPageIdentityNoProfile profile={pageProps.profile} />;
@@ -43,7 +69,7 @@ const Page: NextPageWithLayout<{ pageProps: UserPageIdentityProps }> = ({
   return (
     <UserPageIdentity
       profile={pageProps.profile}
-      profileActivityLogs={pageProps.profileActivityLogs}
+      initialActivityLogParams={initialActivityLogParams}
       profileCICRatings={pageProps.profileCICRatings}
       profileIdentityStatements={pageProps.profileIdentityStatements}
     />
@@ -67,6 +93,7 @@ export async function getServerSideProps(
 }> {
   try {
     const headers = getCommonHeaders(req);
+    const handleOrWallet = req.query.user.toLowerCase() as string;
 
     const [
       { profile, title, consolidatedTDH },
@@ -74,19 +101,19 @@ export async function getServerSideProps(
       profileCICRatings,
       profileIdentityStatements,
     ] = await Promise.all([
-      getCommonUserServerSideProps({ user: req.query.user, headers }),
+      getCommonUserServerSideProps({ user: handleOrWallet, headers }),
       getUserProfileActivityLogs({
-        user: req.query.user,
         headers,
-        matter: null,
-        includeIncoming: false,
+        params: convertActivityLogParams(
+          getInitialActivityLogParams(handleOrWallet)
+        ),
       }),
       getUserProfileCICRatings({
-        user: req.query.user,
+        user: handleOrWallet,
         headers,
       }),
       getUserProfileIdentityStatements({
-        user: req.query.user,
+        user: handleOrWallet,
         headers,
       }),
     ]);
@@ -104,6 +131,7 @@ export async function getServerSideProps(
     return {
       props: {
         profile,
+        handleOrWallet,
         title,
         consolidatedTDH,
         profileActivityLogs,
@@ -112,6 +140,7 @@ export async function getServerSideProps(
       },
     };
   } catch (e: any) {
+    console.log(e);
     return {
       redirect: {
         permanent: false,

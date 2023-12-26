@@ -316,7 +316,7 @@ export interface RatingWithProfileInfo {
   tdh: number;
   rating: number;
   cic: number;
-  last_modified: string;
+  last_modified: Date;
 }
 
 

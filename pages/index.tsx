@@ -2,19 +2,47 @@ import Head from "next/head";
 import styles from "../styles/Home.module.scss";
 import Image from "next/image";
 import { Col, Container, Row, Table } from "react-bootstrap";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { MEMES_CONTRACT } from "../constants";
 import { DBResponse } from "../entities/IDBResponse";
-import { NFT, MemesExtendedData, LabNFT, BaseNFT } from "../entities/INFT";
+import { NFT, MemesExtendedData, LabNFT } from "../entities/INFT";
 
 import dynamic from "next/dynamic";
-import {
-  getDateDisplay,
-  numberWithCommas,
-  printMintDate,
-} from "../helpers/Helpers";
+import { numberWithCommas, printMintDate } from "../helpers/Helpers";
 import { fetchUrl } from "../services/6529api";
 import HeaderPlaceholder from "../components/header/HeaderPlaceholder";
+import { ProfileActivityLog } from "../entities/IProfile";
+import { Page } from "../helpers/Types";
+import {
+  getCommonHeaders,
+  getUserProfileActivityLogs,
+} from "../helpers/server.helpers";
+import ProfileActivityLogs, {
+  ActivityLogParams,
+  convertActivityLogParams,
+} from "../components/profile-activity/ProfileActivityLogs";
+import { Inter } from "next/font/google";
+import { FilterTargetType } from "../components/utils/CommonFilterTargetSelect";
+import { ReactQueryWrapperContext } from "../components/react-query-wrapper/ReactQueryWrapper";
+export interface IndexPageProps {
+  readonly logsPage: Page<ProfileActivityLog>;
+}
+
+const INITIAL_ACTIVITY_LOGS_PARAMS: ActivityLogParams = {
+  page: 1,
+  pageSize: 20,
+  logTypes: [],
+  matter: null,
+  targetType: FilterTargetType.ALL,
+  handleOrWallet: null,
+};
+
+const inter = Inter({
+  weight: ["300", "400", "500", "600", "700"],
+  style: ["normal"],
+  subsets: ["latin"],
+  display: "swap",
+});
 
 const Header = dynamic(() => import("../components/header/Header"), {
   ssr: false,
@@ -25,17 +53,23 @@ const NFTImage = dynamic(() => import("../components/nft-image/NFTImage"), {
   ssr: false,
 });
 
-const Leaderboard = dynamic(
-  () => import("../components/leaderboard/Leaderboard"),
-  { ssr: false }
-);
-
 const LatestActivity = dynamic(
   () => import("../components/latest-activity/LatestActivity"),
   { ssr: false }
 );
 
-export default function Home() {
+export default function Home({
+  pageProps,
+}: {
+  readonly pageProps: IndexPageProps;
+}) {
+  const { initLandingPage } = useContext(ReactQueryWrapperContext);
+  initLandingPage({
+    activityLogs: {
+      data: pageProps.logsPage,
+      params: INITIAL_ACTIVITY_LOGS_PARAMS,
+    },
+  });
   const [isHeaderLoaded, setIsHeaderLoaded] = useState(false);
   const [isNftImageLoaded, setIsNftImageLoaded] = useState(false);
   const [connectedWallets, setConnectedWallets] = useState<string[]>([]);
@@ -123,14 +157,14 @@ export default function Home() {
                   xs={{ span: 12 }}
                   sm={{ span: 12 }}
                   md={{ span: 6 }}
-                  lg={{ span: 6 }}>
+                  lg={{ span: 6 }}
+                >
                   <Container className="no-padding">
                     <Row>
                       {nft.animation ? (
                         <span
-                          className={
-                            connectedWallets && styles.nftImagePadding
-                          }>
+                          className={connectedWallets && styles.nftImagePadding}
+                        >
                           <NFTImage
                             nft={nft}
                             animation={true}
@@ -145,9 +179,8 @@ export default function Home() {
                       ) : (
                         <a
                           href={`/the-memes/${nft.id}`}
-                          className={
-                            connectedWallets && styles.nftImagePadding
-                          }>
+                          className={connectedWallets && styles.nftImagePadding}
+                        >
                           <NFTImage
                             nft={nft}
                             animation={true}
@@ -169,7 +202,8 @@ export default function Home() {
                     xs={{ span: 12 }}
                     sm={{ span: 12 }}
                     md={{ span: 6 }}
-                    lg={{ span: 6 }}>
+                    lg={{ span: 6 }}
+                  >
                     <Container>
                       <Row>
                         <Col>
@@ -243,7 +277,8 @@ export default function Home() {
                                 : `https://github.com/6529-Collections/thememecards/tree/main/card${nft.id}`
                             }
                             target={nft.has_distribution ? "_self" : "_blank"}
-                            rel="noreferrer">
+                            rel="noreferrer"
+                          >
                             Distribution Plan
                           </a>
                         </Col>
@@ -309,7 +344,8 @@ export default function Home() {
                           <a
                             href={`https://opensea.io/assets/ethereum/${MEMES_CONTRACT}/${nft.id}`}
                             target="_blank"
-                            rel="noreferrer">
+                            rel="noreferrer"
+                          >
                             <Image
                               className={styles.marketplace}
                               src="/opensea.png"
@@ -333,7 +369,8 @@ export default function Home() {
                           <a
                             href={`https://x2y2.io/eth/${MEMES_CONTRACT}/${nft.id}`}
                             target="_blank"
-                            rel="noreferrer">
+                            rel="noreferrer"
+                          >
                             <Image
                               className={styles.marketplace}
                               src="/x2y2.png"
@@ -349,27 +386,60 @@ export default function Home() {
                 )}
               </Row>
             </Container>
+            <div
+              className={`tailwind-scope tw-relative tw-px-6 min-[1100px]:tw-max-w-[960px] min-[1200px]:tw-max-w-[1150px] min-[1300px]:tw-max-w-[1250px] min-[1400px]:tw-max-w-[1350px] min-[1500px]:tw-max-w-[1450px] min-[1600px]:tw-max-w-[1550px] min-[1800px]:tw-max-w-[1750px] min-[2000px]:tw-max-w-[1950px] tw-mx-auto ${inter.className}`}
+            >
+              <div className="tw-mt-6">
+                <h1 className="tw-block tw-uppercase tw-text-iron-50 tw-float-none tw-pb-0 tw-mb-0">
+                  Community Activity
+                </h1>
+              </div>
+              <ProfileActivityLogs
+                initialParams={INITIAL_ACTIVITY_LOGS_PARAMS}
+                withFilters={true}
+              />
+            </div>
             {isNftImageLoaded && (
-              <>
-                <Container className={styles.mainContainer}>
-                  <Row>
-                    <Col xs={12} sm={12} md={12} lg={12}>
-                      <Leaderboard page={1} pageSize={10} showMore={false} />
-                    </Col>
-                  </Row>
-                </Container>
-                <Container className={styles.mainContainer}>
-                  <Row>
-                    <Col xs={12} sm={12} md={12} lg={12}>
-                      <LatestActivity page={1} pageSize={12} showMore={false} />
-                    </Col>
-                  </Row>
-                </Container>
-              </>
+              <Container className={styles.mainContainer}>
+                <Row>
+                  <Col xs={12} sm={12} md={12} lg={12}>
+                    <LatestActivity page={1} pageSize={12} showMore={false} />
+                  </Col>
+                </Row>
+              </Container>
             )}
           </>
         )}
       </main>
     </>
   );
+}
+
+export async function getServerSideProps(
+  req: any,
+  res: any,
+  resolvedUrl: any
+): Promise<{
+  props: IndexPageProps;
+}> {
+  try {
+    const headers = getCommonHeaders(req);
+    const logsPage = await getUserProfileActivityLogs({
+      headers,
+      params: convertActivityLogParams(INITIAL_ACTIVITY_LOGS_PARAMS),
+    });
+    return {
+      props: {
+        logsPage,
+      },
+    };
+  } catch (e: any) {
+    return {
+      redirect: {
+        permanent: false,
+        destination: "/404",
+      },
+      props: {},
+    } as any;
+  }
 }

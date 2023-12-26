@@ -1,6 +1,7 @@
 import {
   ProfileActivityLogRatingEdit,
   ProfileActivityLogRatingEditContentChangeReason,
+  ProfileActivityLogRatingEditContentMatter,
 } from "../../../../entities/IProfile";
 import { useRouter } from "next/router";
 import ProfileActivityLogItemAction from "./utils/ProfileActivityLogItemAction";
@@ -14,6 +15,14 @@ enum ProfileActivityLogRateType {
 const ACTION: Record<ProfileActivityLogRateType, string> = {
   [ProfileActivityLogRateType.ADDED]: "added",
   [ProfileActivityLogRateType.REMOVED]: "removed",
+};
+
+const LOG_MATTER_STR: Record<
+  ProfileActivityLogRatingEditContentMatter,
+  string
+> = {
+  [ProfileActivityLogRatingEditContentMatter.REP]: "Rep rating",
+  [ProfileActivityLogRatingEditContentMatter.CIC]: "CIC-rating",
 };
 
 const TO_FROM: Record<ProfileActivityLogRateType, string> = {
@@ -71,7 +80,14 @@ export default function ProfileActivityLogRate({
         {changeStr}
       </span>
       <ProfileActivityLogItemAction
-        action={`CIC-rating ${TO_FROM[ratingType]}`}
+        action={`${
+          log.contents.rating_matter ===
+          ProfileActivityLogRatingEditContentMatter.REP
+            ? log.contents.rating_category
+            : ""
+        } ${LOG_MATTER_STR[log.contents.rating_matter]}  ${
+          TO_FROM[ratingType]
+        }`}
       />
       <button
         onClick={goToProfile}
@@ -81,7 +97,9 @@ export default function ProfileActivityLogRate({
           {log.target_profile_handle}
         </span>
       </button>
-      <span className={`${getTotalRatingClass()} tw-whitespace-nowrap tw-text-sm tw-font-semibold`}>
+      <span
+        className={`${getTotalRatingClass()} tw-whitespace-nowrap tw-text-sm tw-font-semibold`}
+      >
         (total {newRatingStr})
       </span>
       {isSystemAdjustment && (
@@ -93,7 +111,7 @@ export default function ProfileActivityLogRate({
           >
             <circle cx="3" cy="3" r="3" />
           </svg>
-         <span> System Adjustment</span>
+          <span> System Adjustment</span>
         </span>
       )}
     </>

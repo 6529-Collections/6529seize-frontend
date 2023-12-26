@@ -1,32 +1,19 @@
-import {
-  IProfileAndConsolidations,
-  ProfileActivityLog,
-} from "../../../../entities/IProfile";
-import UserPageIdentityActivityLogHeader from "./UserPageIdentityActivityLogHeader";
-
-import { Page } from "../../../../helpers/Types";
-import { useRouter } from "next/router";
-import ProfileActivityLogs from "../../../profile-activity/ProfileActivityLogs";
-
-const PAGE_SIZE = 10;
+import ProfileActivityLogs, {
+  ActivityLogParams,
+} from "../../../profile-activity/ProfileActivityLogs";
+import ProfileActivityLogsHeader from "../../../profile-activity/ProfileActivityLogsHeader";
 
 export default function UserPageIdentityActivityLog({
-  profile,
-  profileActivityLogs: initialPageActivityLogs,
+  initialActivityLogParams,
 }: {
-  readonly profile: IProfileAndConsolidations;
-  readonly profileActivityLogs: Page<ProfileActivityLog>;
+  readonly initialActivityLogParams: ActivityLogParams;
 }) {
-  const router = useRouter();
-  const user = (router.query.user as string).toLowerCase();
-
   return (
     <div className="tw-bg-iron-900 tw-border tw-border-white/5 tw-border-solid tw-rounded-xl">
-      <UserPageIdentityActivityLogHeader profile={profile} />
+      <ProfileActivityLogsHeader subTitle="CIC"/>
       <ProfileActivityLogs
-        user={user}
-        initialLogs={initialPageActivityLogs}
-        pageSize={PAGE_SIZE}
+        initialParams={initialActivityLogParams}
+        withFilters={true}
       />
     </div>
   );

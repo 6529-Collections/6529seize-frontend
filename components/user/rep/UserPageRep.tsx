@@ -1,33 +1,30 @@
 import {
   ApiProfileRepRatesState,
   IProfileAndConsolidations,
-  ProfileActivityLogRatingEdit,
-  RatingWithProfileInfoAndLevel,
 } from "../../../entities/IProfile";
 import UserPageRepRaters from "./UserPageRepRaters";
-import UserPageRepActivityLog from "./UserPageRepActivityLog";
 import UserPageRepNewRep from "./new-rep/UserPageRepNewRep";
 import { useRouter } from "next/router";
 import { useQuery } from "@tanstack/react-query";
 import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
 import { commonApiFetch } from "../../../services/api/common-api";
-import { useAccount } from "wagmi";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import UserPageRepReps from "./reps/UserPageRepReps";
 import UserPageRepHeader from "./header/UserPageRepHeader";
-import { Page } from "../../../helpers/Types";
+import { AuthContext } from "../../auth/Auth";
+import { ProfileRatersTableType } from "../utils/raters-table/wrapper/ProfileRatersTableWrapper";
+import UserPageRepActivityLog from "./UserPageRepActivityLog";
+import { ActivityLogParams } from "../../profile-activity/ProfileActivityLogs";
 
 export default function UserPageRep({
   profile: initialProfile,
-  repLogs,
-  repGivenToUsers,
-  repReceivedFromUsers,
+  initialActivityLogParams,
 }: {
   readonly profile: IProfileAndConsolidations;
-  readonly repLogs: Page<ProfileActivityLogRatingEdit>;
-  readonly repGivenToUsers: Page<RatingWithProfileInfoAndLevel>;
-  readonly repReceivedFromUsers: Page<RatingWithProfileInfoAndLevel>;
+  readonly initialActivityLogParams: ActivityLogParams;
 }) {
+  const { connectedProfile } = useContext(AuthContext);
+
   const router = useRouter();
   const user = (router.query.user as string).toLowerCase();
 
@@ -39,16 +36,6 @@ export default function UserPageRep({
       }),
     enabled: !!user,
     initialData: initialProfile,
-  });
-
-  const { address } = useAccount();
-  const { data: connectedProfile } = useQuery<IProfileAndConsolidations>({
-    queryKey: [QueryKey.PROFILE, address?.toLowerCase()],
-    queryFn: async () =>
-      await commonApiFetch<IProfileAndConsolidations>({
-        endpoint: `profiles/${address}`,
-      }),
-    enabled: !!address,
   });
 
   const [rater, setRater] = useState<string | undefined>(undefined);
@@ -83,19 +70,17 @@ export default function UserPageRep({
 
       <div className="tw-mt-10 tw-grid tw-grid-cols-1 xl:tw-grid-cols-2 tw-gap-y-10 tw-gap-x-10">
         <div>
-          <UserPageRepRaters reps={repReceivedFromUsers.data} />
+          <UserPageRepRaters type={ProfileRatersTableType.REP_RECEIVED} />
         </div>
         <div>
-          <UserPageRepRaters reps={repGivenToUsers.data} />
+          <UserPageRepRaters type={ProfileRatersTableType.REP_GIVEN} />
         </div>
       </div>
 
       <div className="tw-mt-10">
-        {/* <UserPageRepActivityLog
-          repLogs={repLogs}
-          profile={profile}
-          user={user}
-        /> */}
+        <UserPageRepActivityLog
+          initialActivityLogParams={initialActivityLogParams}
+        />
       </div>
     </div>
   );

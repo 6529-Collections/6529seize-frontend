@@ -16,10 +16,10 @@ const getHeaders = (
   };
 };
 
-export const commonApiFetch = async <T>(param: {
+export const commonApiFetch = async <T, U = Record<string, string>>(param: {
   endpoint: string;
   headers?: Record<string, string>;
-  params?: Record<string, string>;
+  params?: U;
 }): Promise<T> => {
   let url = `${process.env.API_ENDPOINT}/api/${param.endpoint}`;
   if (param.params) {

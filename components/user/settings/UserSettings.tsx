@@ -10,8 +10,8 @@ import UserSettingsPage from "./UserSettingsPage";
 import { ReactQueryWrapperContext } from "../../react-query-wrapper/ReactQueryWrapper";
 
 interface Props {
-  user: string;
-  wallets: string[];
+  readonly user: string;
+  readonly wallets: string[];
 }
 
 const inter = Inter({
@@ -32,11 +32,9 @@ export default function UserSettingsComponent(props: Props) {
     invalidateProfileLogsByHandles,
   } = useContext(ReactQueryWrapperContext);
   const [init, setInit] = useState(false);
-  const [userOrWallet] = useState(
-    Array.isArray(router.query.user)
-      ? router.query.user.at(0)
-      : router.query.user
-  );
+  const userOrWallet = Array.isArray(router.query.user)
+    ? router.query.user.at(0)
+    : router.query.user;
 
   const [user, setUser] = useState<IProfileAndConsolidations | null>(null);
 

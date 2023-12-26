@@ -1,14 +1,16 @@
+import { useRouter } from "next/router";
+import { CICType } from "../../../../entities/IProfile";
 import { useEffect, useState } from "react";
-import {
-  CICType,
-  ProfilesMatterRatingWithRaterLevel,
-} from "../../../../entities/IProfile";
 import {
   cicToType,
   formatNumberWithCommas,
   getTimeAgo,
 } from "../../../../helpers/Helpers";
-import { useRouter } from "next/router";
+import {
+  IProfileRatersTableItem,
+  ProfileRatersTableType,
+} from "./wrapper/ProfileRatersTableWrapper";
+import { assertUnreachable } from "../../../../helpers/AllowlistToolHelpers";
 
 export const CIC_COLOR: Record<CICType, string> = {
   [CICType.INACCURATE]: "tw-bg-[#F97066]",
@@ -18,17 +20,17 @@ export const CIC_COLOR: Record<CICType, string> = {
   [CICType.HIGHLY_ACCURATE]: "tw-bg-[#3CCB7F]",
 };
 
-export default function UserPageIdentityCICRatingsItem({
+export default function ProfileRatersTableItem({
   rating,
+  type,
 }: {
-  readonly rating: ProfilesMatterRatingWithRaterLevel;
+  readonly rating: IProfileRatersTableItem;
+  readonly type: ProfileRatersTableType;
 }) {
   const router = useRouter();
-  const [cicType, setCicType] = useState<CICType>(
-    cicToType(rating.rater_cic_rating)
-  );
+  const [cicType, setCicType] = useState<CICType>(cicToType(rating.raterCIC));
   useEffect(() => {
-    setCicType(cicToType(rating.rater_cic_rating));
+    setCicType(cicToType(rating.raterCIC));
   }, [rating]);
 
   const getRatingStr = (rating: number) => {
@@ -39,10 +41,23 @@ export default function UserPageIdentityCICRatingsItem({
   const ratingStr = getRatingStr(rating.rating);
   const isPositiveRating = rating.rating > 0;
   const ratingColor = isPositiveRating ? "tw-text-green" : "tw-text-red";
-  const timeAgo = getTimeAgo(new Date(rating.last_modified).getTime());
+  const timeAgo = getTimeAgo(new Date(rating.lastModified).getTime());
+
+  const getProfileRoute = (): string => {
+    switch (type) {
+      case ProfileRatersTableType.CIC_RECEIVED:
+        return `/${rating.raterHandle}/identity`;
+      case ProfileRatersTableType.REP_RECEIVED:
+      case ProfileRatersTableType.REP_GIVEN:
+        return `/${rating.raterHandle}/rep`;
+      default:
+        assertUnreachable(type);
+        return "";
+    }
+  };
 
   const goToProfile = () => {
-    router.push(`/${rating.rater_handle}/identity`);
+    router.push(getProfileRoute());
   };
 
   return (
@@ -51,7 +66,7 @@ export default function UserPageIdentityCICRatingsItem({
         <div className="tw-inline-flex tw-items-center tw-space-x-2">
           <span className="tw-relative">
             <div className="tw-flex tw-items-center tw-justify-center tw-h-5 tw-w-5 tw-text-[0.625rem] tw-leading-3 tw-font-bold tw-rounded-full tw-ring-2 tw-ring-iron-300 tw-text-iron-300">
-              {rating.rater_level}
+              {rating.raterLevel}
             </div>
             <span
               className={`tw-flex-shrink-0 tw-absolute -tw-right-1 -tw-top-1 tw-block tw-h-2.5 tw-w-2.5 tw-rounded-full ${CIC_COLOR[cicType]}`}
@@ -63,7 +78,7 @@ export default function UserPageIdentityCICRatingsItem({
               className="tw-bg-transparent tw-border-none tw-flex tw-items-center"
             >
               <span className="tw-whitespace-nowrap hover:tw-underline tw-cursor-pointer tw-text-sm tw-font-semibold tw-text-iron-100">
-                {rating.rater_handle}
+                {rating.raterHandle}
               </span>
             </button>
             <span className="tw-whitespace-nowrap tw-text-sm tw-text-iron-400 tw-font-semibold">

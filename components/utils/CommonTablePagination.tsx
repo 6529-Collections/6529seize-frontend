@@ -1,18 +1,18 @@
-export default function UserPageIdentityPagination({
+export default function CommonTablePagination({
+  small,
   currentPage,
   setCurrentPage,
   totalPages,
-  user,
 }: {
+  readonly small: boolean;
   readonly currentPage: number;
   readonly setCurrentPage: (page: number) => void;
   readonly totalPages: number;
-  readonly user: string | null;
 }) {
   return (
     <div
       className={`${
-        user ? "tw-px-6 md:tw-px-8" : ""
+        small ? "tw-px-6 md:tw-px-8" : ""
       } tw-mt-4  tw-pb-6 md:tw-pb-4 tw-flex tw-justify-end`}
     >
       <div className="tw-flex tw-items-center">

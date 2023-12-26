@@ -10,8 +10,12 @@ import {
 import { commonApiFetch, commonApiPost } from "../../services/api/common-api";
 import jwtDecode from "jwt-decode";
 import { UserRejectedRequestError } from "viem";
+import { IProfileAndConsolidations } from "../../entities/IProfile";
+import { useQuery } from "@tanstack/react-query";
+import { QueryKey } from "../react-query-wrapper/ReactQueryWrapper";
 
 type AuthContextType = {
+  connectedProfile: IProfileAndConsolidations | null;
   requestAuth: () => Promise<{ success: boolean }>;
   setToast: ({ message, type }: { message: string; type: TypeOptions }) => void;
 };
@@ -22,6 +26,7 @@ interface NonceResponse {
 }
 
 export const AuthContext = createContext<AuthContextType>({
+  connectedProfile: null,
   requestAuth: async () => ({ success: false }),
   setToast: () => {},
 });
@@ -29,6 +34,15 @@ export const AuthContext = createContext<AuthContextType>({
 export default function Auth({ children }: { children: React.ReactNode }) {
   const { address } = useAccount();
   const signMessage = useSignMessage();
+
+  const { data: connectedProfile } = useQuery<IProfileAndConsolidations>({
+    queryKey: [QueryKey.PROFILE, address?.toLowerCase()],
+    queryFn: async () =>
+      await commonApiFetch<IProfileAndConsolidations>({
+        endpoint: `profiles/${address}`,
+      }),
+    enabled: !!address,
+  });
 
   useEffect(() => {
     if (!address) {
@@ -214,6 +228,7 @@ export default function Auth({ children }: { children: React.ReactNode }) {
         value={{
           requestAuth,
           setToast,
+          connectedProfile: connectedProfile ?? null,
         }}
       >
         {children}

@@ -29,7 +29,7 @@ export default function UserPageRepModifyModal({
   readonly repState: RatingStats;
   readonly giverAvailableRep: number;
 }) {
-  const { invalidateProfileRepRatings } = useContext(ReactQueryWrapperContext);
+  const { onProfileRepModify } = useContext(ReactQueryWrapperContext);
   const { requestAuth, setToast } = useContext(AuthContext);
   const inputRef = useRef<HTMLInputElement>(null);
   useEffect(() => {
@@ -96,7 +96,7 @@ export default function UserPageRepModifyModal({
         message: "Rep updated.",
         type: "success",
       });
-      invalidateProfileRepRatings(profile);
+      onProfileRepModify(profile);
       onClose();
     },
     onError: (error) => {

@@ -1,24 +1,20 @@
 import { useRouter } from "next/router";
-import {
-  IProfileAndConsolidations,
-  ProfilesMatterRatingWithRaterLevel,
-} from "../../../../entities/IProfile";
+import { ProfilesMatterRatingWithRaterLevel } from "../../../../entities/IProfile";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { Page } from "../../../../helpers/Types";
 import { commonApiFetch } from "../../../../services/api/common-api";
-import UserPageIdentityCICRatingsList from "./UserPageIdentityCICRatingsList";
-import UserPageIdentityCICRatingsHeader from "./UserPageIdentityCICRatingsHeader";
 import { useEffect, useState } from "react";
-import UserPageIdentityPagination from "../utils/UserPageIdentityPagination";
 import { QueryKey } from "../../../react-query-wrapper/ReactQueryWrapper";
+import ProfileRatersTableWrapper, {
+  IProfileRatersTableItem,
+  ProfileRatersTableType,
+} from "../../utils/raters-table/wrapper/ProfileRatersTableWrapper";
 
 const PAGE_SIZE = 10;
 
 export default function CICRatings({
-  profile,
   profileCICRatings: initialProfileCICRatings,
 }: {
-  readonly profile: IProfileAndConsolidations;
   readonly profileCICRatings: Page<ProfilesMatterRatingWithRaterLevel>;
 }) {
   const router = useRouter();
@@ -62,31 +58,36 @@ export default function CICRatings({
     setTotalPages(Math.ceil(ratings.count / PAGE_SIZE));
   }, [ratings?.count, ratings?.page, isLoading]);
 
-  return (
-    <div className="tw-bg-iron-900 tw-border tw-border-white/5 tw-border-solid tw-rounded-xl">
-      <UserPageIdentityCICRatingsHeader profile={profile} />
+  const mapRating = (
+    rating: ProfilesMatterRatingWithRaterLevel
+  ): IProfileRatersTableItem => ({
+    raterHandle: rating.rater_handle,
+    rating: rating.rating,
+    raterCIC: rating.rater_cic_rating,
+    raterLevel: rating.rater_level,
+    lastModified: rating.last_modified,
+  });
 
-      <div className="tw-min-h-[28rem] tw-max-h-[28rem] tw-transform-gpu tw-scroll-py-3 tw-overflow-y-auto">
-        {ratings?.data.length ? (
-          <div className="tw-flow-root">
-            <UserPageIdentityCICRatingsList ratings={ratings.data} />
-            {totalPages > 1 && (
-              <UserPageIdentityPagination
-                currentPage={currentPage}
-                setCurrentPage={setCurrentPage}
-                totalPages={totalPages}
-                user={user}
-              />
-            )}
-          </div>
-        ) : (
-          <div className="tw-mt-4">
-            <span className="tw-px-6 md:tw-px-8 tw-text-sm tw-italic tw-text-iron-500">
-              No CIC Ratings
-            </span>
-          </div>
-        )}
-      </div>
-    </div>
+  const [ratingsMapped, setRatingsMapped] = useState<IProfileRatersTableItem[]>(
+    ratings?.data.map(mapRating) ?? []
+  );
+
+  useEffect(() => {
+    if (!ratings?.data) {
+      setRatingsMapped([]);
+      return;
+    }
+    setRatingsMapped(ratings.data.map(mapRating));
+  }, [ratings?.data]);
+
+  return (
+    <ProfileRatersTableWrapper
+      type={ProfileRatersTableType.CIC_RECEIVED}
+      ratings={ratingsMapped}
+      noRatingsMessage="No CIC Ratings"
+      currentPage={currentPage}
+      totalPages={totalPages}
+      setCurrentPage={setCurrentPage}
+    />
   );
 }
