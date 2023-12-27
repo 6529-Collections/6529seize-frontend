@@ -25,7 +25,7 @@ export function Spinner() {
 export default function NextGen() {
   const collectionIndexRead = useCollectionIndex();
   const collectionIndex = collectionIndexRead.data
-    ? parseInt(collectionIndexRead?.data as string) - 1
+    ? parseInt(collectionIndexRead?.data as any) - 1
     : 0;
 
   const [typeFilter, setTypeFilter] = useState<TypeFilter>();

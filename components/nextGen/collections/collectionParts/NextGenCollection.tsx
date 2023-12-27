@@ -68,7 +68,7 @@ export default function NextGenCollection(props: Readonly<Props>) {
     if (tokenStartIndex && tokenEndIndex) {
       for (let i = tokenStartIndex; i <= tokenEndIndex; i++) {
         params.push({
-          address: NEXTGEN_CORE.contract,
+          address: NEXTGEN_CORE[NEXTGEN_CHAIN_ID],
           abi: NEXTGEN_CORE.abi,
           chainId: NEXTGEN_CHAIN_ID,
           functionName: "tokenURI",
@@ -117,7 +117,7 @@ export default function NextGenCollection(props: Readonly<Props>) {
   });
 
   useContractRead({
-    address: NEXTGEN_CORE.contract as `0x${string}`,
+    address: NEXTGEN_CORE[NEXTGEN_CHAIN_ID] as `0x${string}`,
     abi: NEXTGEN_CORE.abi,
     chainId: NEXTGEN_CHAIN_ID,
     functionName: "artistsSignatures",
@@ -134,7 +134,7 @@ export default function NextGenCollection(props: Readonly<Props>) {
   useCollectionAdditionalHook(props.collection, setAdditionalData, true);
 
   useContractRead({
-    address: NEXTGEN_CORE.contract as `0x${string}`,
+    address: NEXTGEN_CORE[NEXTGEN_CHAIN_ID] as `0x${string}`,
     abi: NEXTGEN_CORE.abi,
     chainId: NEXTGEN_CHAIN_ID,
     functionName: "burnAmount",
@@ -148,7 +148,7 @@ export default function NextGenCollection(props: Readonly<Props>) {
   });
 
   useContractRead({
-    address: NEXTGEN_MINTER.contract as `0x${string}`,
+    address: NEXTGEN_MINTER[NEXTGEN_CHAIN_ID] as `0x${string}`,
     abi: NEXTGEN_MINTER.abi,
     chainId: NEXTGEN_CHAIN_ID,
     functionName: "getPrice",

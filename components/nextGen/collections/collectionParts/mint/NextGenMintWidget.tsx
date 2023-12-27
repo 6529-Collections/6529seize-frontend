@@ -116,7 +116,7 @@ export default function NextGenMintWidget(props: Readonly<Props>) {
   }, [props.phase_times, account.address, mintingForDelegator]);
 
   const mintWrite = useContractWrite({
-    address: NEXTGEN_MINTER.contract as `0x${string}`,
+    address: NEXTGEN_MINTER[NEXTGEN_CHAIN_ID] as `0x${string}`,
     abi: NEXTGEN_MINTER.abi,
     chainId: NEXTGEN_CHAIN_ID,
     value: getMintValue(mintCount, props.mint_price),

@@ -42,14 +42,14 @@ export default function NextGenAdminAcceptAddressesAndPercentages(
   const collectionIndex = useCollectionIndex();
   const collectionAdmin = useCollectionAdmin(
     account.address as string,
-    parseInt(collectionIndex?.data as string)
+    parseInt(collectionIndex?.data as any)
   );
 
   const collectionIds = getCollectionIdsForAddress(
-    globalAdmin.data === true,
-    functionAdmin.data === true,
+    (globalAdmin.data as any) === true,
+    (functionAdmin.data as any) === true,
     collectionAdmin?.data,
-    parseInt(collectionIndex?.data as string)
+    parseInt(collectionIndex?.data as any)
   );
 
   const [collectionID, setCollectionID] = useState("");
@@ -69,7 +69,7 @@ export default function NextGenAdminAcceptAddressesAndPercentages(
   const [submitting, setSubmitting] = useState(false);
 
   useContractRead({
-    address: NEXTGEN_MINTER.contract as `0x${string}`,
+    address: NEXTGEN_MINTER[NEXTGEN_CHAIN_ID] as `0x${string}`,
     abi: NEXTGEN_MINTER.abi,
     chainId: NEXTGEN_CHAIN_ID,
     functionName: "retrievePrimaryAddressesAndPercentages",
@@ -94,7 +94,7 @@ export default function NextGenAdminAcceptAddressesAndPercentages(
   });
 
   useContractRead({
-    address: NEXTGEN_MINTER.contract as `0x${string}`,
+    address: NEXTGEN_MINTER[NEXTGEN_CHAIN_ID] as `0x${string}`,
     abi: NEXTGEN_MINTER.abi,
     chainId: NEXTGEN_CHAIN_ID,
     functionName: "retrieveSecondaryAddressesAndPercentages",

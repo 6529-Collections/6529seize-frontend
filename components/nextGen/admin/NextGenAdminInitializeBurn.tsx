@@ -43,14 +43,14 @@ export default function NextGenAdminInitializeBurn(props: Readonly<Props>) {
   const collectionIndex = useCollectionIndex();
   const collectionAdmin = useCollectionAdmin(
     account.address as string,
-    parseInt(collectionIndex?.data as string)
+    parseInt(collectionIndex?.data as any)
   );
 
   const collectionIds = getCollectionIdsForAddress(
-    globalAdmin.data === true,
-    functionAdmin.data === true,
+    (globalAdmin.data as any) === true,
+    (functionAdmin.data as any) === true,
     collectionAdmin.data,
-    parseInt(collectionIndex?.data as string)
+    parseInt(collectionIndex?.data as any)
   );
 
   const [burnCollectionID, setBurnCollectionID] = useState("");
@@ -64,7 +64,7 @@ export default function NextGenAdminInitializeBurn(props: Readonly<Props>) {
   const [uploadError, setUploadError] = useState<string>();
 
   useContractRead({
-    address: NEXTGEN_MINTER.contract as `0x${string}`,
+    address: NEXTGEN_MINTER[NEXTGEN_CHAIN_ID] as `0x${string}`,
     abi: NEXTGEN_MINTER.abi,
     chainId: NEXTGEN_CHAIN_ID,
     functionName: "burnToMintCollections",
@@ -89,7 +89,7 @@ export default function NextGenAdminInitializeBurn(props: Readonly<Props>) {
         signature: signMessage.data,
         uuid: uuid,
         collection_id: mintCollectionID,
-        burn_collection: NEXTGEN_CORE.contract,
+        burn_collection: NEXTGEN_CORE[NEXTGEN_CHAIN_ID],
         burn_collection_id: burnCollectionID,
         min_token_index: 0,
         max_token_index: 0,

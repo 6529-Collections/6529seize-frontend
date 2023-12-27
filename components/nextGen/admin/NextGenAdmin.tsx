@@ -176,12 +176,12 @@ export default function NextGenAdmin() {
   const collectionIndex = useCollectionIndex();
   const collectionAdmin = useCollectionAdmin(
     account.address as string,
-    parseInt(collectionIndex?.data as string)
+    parseInt(collectionIndex?.data as any)
   );
   const isWalletCollectionAdmin = isCollectionAdmin(collectionAdmin);
 
   const collectionArtists = useCollectionArtist(
-    parseInt(collectionIndex?.data as string)
+    parseInt(collectionIndex?.data as any)
   );
 
   const isArtist = isCollectionArtist(
@@ -270,7 +270,8 @@ export default function NextGenAdmin() {
 
   function printCreateCollection() {
     return (
-      (isGlobalAdmin() || createCollectionFunctionAdmin.data === true) && (
+      (isGlobalAdmin() ||
+        (createCollectionFunctionAdmin.data as any) === true) && (
         <Button
           className="seize-btn btn-white"
           onClick={() => setGlobalFocus(GlobalFocus.CREATE_COLLECTION)}>
@@ -282,7 +283,8 @@ export default function NextGenAdmin() {
 
   function printAirdropTokens() {
     return (
-      (isGlobalAdmin() || airdropTokensFunctionAdmin.data === true) && (
+      (isGlobalAdmin() ||
+        (airdropTokensFunctionAdmin.data as any) === true) && (
         <Button
           className="seize-btn btn-white"
           onClick={() => setGlobalFocus(GlobalFocus.AIRDROP_TOKENS)}>
@@ -295,7 +297,7 @@ export default function NextGenAdmin() {
   function printUpdateImagesAttributes() {
     return (
       (isGlobalAdmin() ||
-        updateImagesAttributesFunctionAdmin.data === true) && (
+        (updateImagesAttributesFunctionAdmin.data as any) === true) && (
         <Button
           className="seize-btn btn-white"
           onClick={() => setGlobalFocus(GlobalFocus.UPDATE_IMAGES_ATTRIBUTES)}>
@@ -307,7 +309,8 @@ export default function NextGenAdmin() {
 
   function printSetFinalSupply() {
     return (
-      (isGlobalAdmin() || setFinalSupplyFunctionAdmin.data === true) && (
+      (isGlobalAdmin() ||
+        (setFinalSupplyFunctionAdmin.data as any) === true) && (
         <Button
           className="seize-btn btn-white"
           onClick={() => setGlobalFocus(GlobalFocus.SET_FINAL_SUPPLY)}>
@@ -319,7 +322,8 @@ export default function NextGenAdmin() {
 
   function printInitBurn() {
     return (
-      (isGlobalAdmin() || initializeBurnFunctionAdmin.data === true) && (
+      (isGlobalAdmin() ||
+        (initializeBurnFunctionAdmin.data as any) === true) && (
         <Button
           className="seize-btn btn-white"
           onClick={() => setGlobalFocus(GlobalFocus.INITIALIZE_BURN)}>
@@ -332,7 +336,7 @@ export default function NextGenAdmin() {
   function printInitExternalBurnSwap() {
     return (
       (isGlobalAdmin() ||
-        initializeExternalBurnSwapFunctionAdmin.data === true) && (
+        (initializeExternalBurnSwapFunctionAdmin.data as any) === true) && (
         <Button
           className="seize-btn btn-white"
           onClick={() =>
@@ -346,7 +350,8 @@ export default function NextGenAdmin() {
 
   function printMintAuction() {
     return (
-      (isGlobalAdmin() || mintAndAuctionFunctionAdmin.data === true) && (
+      (isGlobalAdmin() ||
+        (mintAndAuctionFunctionAdmin.data as any) === true) && (
         <Button
           className="seize-btn btn-white"
           onClick={() => setGlobalFocus(GlobalFocus.MINT_AND_AUCTION)}>
@@ -359,13 +364,13 @@ export default function NextGenAdmin() {
   function printAdminCollectionActions() {
     return (
       (isGlobalAdmin() ||
-        createCollectionFunctionAdmin.data === true ||
-        airdropTokensFunctionAdmin.data === true ||
-        updateImagesAttributesFunctionAdmin.data === true ||
-        setFinalSupplyFunctionAdmin.data === true ||
-        initializeBurnFunctionAdmin.data === true ||
-        mintAndAuctionFunctionAdmin.data === true ||
-        initializeExternalBurnSwapFunctionAdmin.data === true) && (
+        (createCollectionFunctionAdmin.data as any) === true ||
+        (airdropTokensFunctionAdmin.data as any) === true ||
+        (updateImagesAttributesFunctionAdmin.data as any) === true ||
+        (setFinalSupplyFunctionAdmin.data as any) === true ||
+        (initializeBurnFunctionAdmin.data as any) === true ||
+        (mintAndAuctionFunctionAdmin.data as any) === true ||
+        (initializeExternalBurnSwapFunctionAdmin.data as any) === true) && (
         <>
           <Row className="pt-4">
             <Col xs={12}>
@@ -419,7 +424,7 @@ export default function NextGenAdmin() {
 
   function printSetSplits() {
     return (
-      (isGlobalAdmin() || setSplitsFunctionAdmin.data === true) && (
+      (isGlobalAdmin() || (setSplitsFunctionAdmin.data as any) === true) && (
         <Button
           className="seize-btn btn-white"
           onClick={() =>
@@ -434,7 +439,8 @@ export default function NextGenAdmin() {
   function printProposePrimary() {
     return (
       (isGlobalAdmin() ||
-        proposePrimaryAddressesAndPercentagesFunctionAdmin.data === true) && (
+        (proposePrimaryAddressesAndPercentagesFunctionAdmin.data as any) ===
+          true) && (
         <Button
           className="seize-btn btn-white"
           onClick={() =>
@@ -451,7 +457,8 @@ export default function NextGenAdmin() {
   function printProposeSecondary() {
     return (
       (isGlobalAdmin() ||
-        proposeSecondaryAddressesAndPercentagesFunctionAdmin.data === true) && (
+        (proposeSecondaryAddressesAndPercentagesFunctionAdmin.data as any) ===
+          true) && (
         <Button
           className="seize-btn btn-white"
           onClick={() =>
@@ -468,7 +475,7 @@ export default function NextGenAdmin() {
   function printAcceptAddressesAndPercentages() {
     return (
       (isGlobalAdmin() ||
-        acceptAddressesAndPercentagesFunctionAdmin.data === true) && (
+        (acceptAddressesAndPercentagesFunctionAdmin.data as any) === true) && (
         <Button
           className="seize-btn btn-white"
           onClick={() =>
@@ -482,7 +489,7 @@ export default function NextGenAdmin() {
 
   function printPayArtist() {
     return (
-      (isGlobalAdmin() || payArtistFunctionAdmin.data === true) && (
+      (isGlobalAdmin() || (payArtistFunctionAdmin.data as any) === true) && (
         <Button
           className="seize-btn btn-white"
           onClick={() => setGlobalFocus(GlobalFocus.PAY_ARTIST)}>
@@ -495,11 +502,13 @@ export default function NextGenAdmin() {
   function printPayActions() {
     return (
       (isGlobalAdmin() ||
-        setSplitsFunctionAdmin.data === true ||
-        proposePrimaryAddressesAndPercentagesFunctionAdmin.data === true ||
-        proposeSecondaryAddressesAndPercentagesFunctionAdmin.data === true ||
-        acceptAddressesAndPercentagesFunctionAdmin.data === true ||
-        payArtistFunctionAdmin.data === true) && (
+        (setSplitsFunctionAdmin.data as any) === true ||
+        (proposePrimaryAddressesAndPercentagesFunctionAdmin.data as any) ===
+          true ||
+        (proposeSecondaryAddressesAndPercentagesFunctionAdmin.data as any) ===
+          true ||
+        (acceptAddressesAndPercentagesFunctionAdmin.data as any) === true ||
+        (payArtistFunctionAdmin.data as any) === true) && (
         <>
           <Row className="pt-4">
             <Col xs={12}>
@@ -552,18 +561,20 @@ export default function NextGenAdmin() {
   function printGlobal() {
     if (
       !isGlobalAdmin() &&
-      createCollectionFunctionAdmin.data === false &&
-      airdropTokensFunctionAdmin.data === false &&
-      setSplitsFunctionAdmin.data === false &&
-      updateImagesAttributesFunctionAdmin.data === false &&
-      setFinalSupplyFunctionAdmin.data === false &&
-      initializeBurnFunctionAdmin.data === false &&
-      proposePrimaryAddressesAndPercentagesFunctionAdmin.data === false &&
-      proposeSecondaryAddressesAndPercentagesFunctionAdmin.data === false &&
-      acceptAddressesAndPercentagesFunctionAdmin.data === false &&
-      payArtistFunctionAdmin.data === false &&
-      mintAndAuctionFunctionAdmin.data === false &&
-      initializeExternalBurnSwapFunctionAdmin.data === false
+      (createCollectionFunctionAdmin.data as any) === false &&
+      (airdropTokensFunctionAdmin.data as any) === false &&
+      (setSplitsFunctionAdmin.data as any) === false &&
+      (updateImagesAttributesFunctionAdmin.data as any) === false &&
+      (setFinalSupplyFunctionAdmin.data as any) === false &&
+      (initializeBurnFunctionAdmin.data as any) === false &&
+      (proposePrimaryAddressesAndPercentagesFunctionAdmin.data as any) ===
+        false &&
+      (proposeSecondaryAddressesAndPercentagesFunctionAdmin.data as any) ===
+        false &&
+      (acceptAddressesAndPercentagesFunctionAdmin.data as any) === false &&
+      (payArtistFunctionAdmin.data as any) === false &&
+      (mintAndAuctionFunctionAdmin.data as any) === false &&
+      (initializeExternalBurnSwapFunctionAdmin.data as any) === false
     ) {
       return printAdminRestrictionMessage();
     }
@@ -628,7 +639,8 @@ export default function NextGenAdmin() {
             </Row>
           </>
         )}
-        {(isGlobalAdmin() || addRandomizerFunctionAdmin.data === true) && (
+        {(isGlobalAdmin() ||
+          (addRandomizerFunctionAdmin.data as any) === true) && (
           <>
             <Row className="pt-4">
               <Col xs={12}>
@@ -638,7 +650,7 @@ export default function NextGenAdmin() {
                 xs={12}
                 className="pt-2 d-flex flex-wrap align-items-center gap-3">
                 {(isGlobalAdmin() ||
-                  addRandomizerFunctionAdmin.data === true) && (
+                  (addRandomizerFunctionAdmin.data as any) === true) && (
                   <Button
                     className="seize-btn btn-white"
                     onClick={() => setGlobalFocus(GlobalFocus.ADD_RANDOMIZER)}>
@@ -664,9 +676,9 @@ export default function NextGenAdmin() {
     return (
       (isGlobalAdmin() ||
         isWalletCollectionAdmin ||
-        setDataFunctionAdmin.data === true ||
-        setCostsFunctionAdmin.data === true ||
-        setPhasesFunctionAdmin.data === true) && (
+        (setDataFunctionAdmin.data as any) === true ||
+        (setCostsFunctionAdmin.data as any) === true ||
+        (setPhasesFunctionAdmin.data as any) === true) && (
         <>
           <Row className="pt-4">
             <Col xs={12}>
@@ -677,7 +689,7 @@ export default function NextGenAdmin() {
               className="pt-2 d-flex flex-wrap align-items-center gap-3">
               {(isGlobalAdmin() ||
                 isWalletCollectionAdmin ||
-                setDataFunctionAdmin.data === true) && (
+                (setDataFunctionAdmin.data as any) === true) && (
                 <Button
                   className="seize-btn btn-white"
                   onClick={() => setCollectionFocus(CollectionFocus.SET_DATA)}>
@@ -686,7 +698,7 @@ export default function NextGenAdmin() {
               )}
               {(isGlobalAdmin() ||
                 isWalletCollectionAdmin ||
-                setCostsFunctionAdmin.data === true) && (
+                (setCostsFunctionAdmin.data as any) === true) && (
                 <Button
                   className="seize-btn btn-white"
                   onClick={() => setCollectionFocus(CollectionFocus.SET_COSTS)}>
@@ -695,7 +707,7 @@ export default function NextGenAdmin() {
               )}
               {(isGlobalAdmin() ||
                 isWalletCollectionAdmin ||
-                setPhasesFunctionAdmin.data === true) && (
+                (setPhasesFunctionAdmin.data as any) === true) && (
                 <Button
                   className="seize-btn btn-white"
                   onClick={() =>
@@ -728,8 +740,8 @@ export default function NextGenAdmin() {
     return (
       (isGlobalAdmin() ||
         isWalletCollectionAdmin ||
-        updateInfoFunctionAdmin.data === true ||
-        changeMetadataViewFunctionAdmin.data === true) && (
+        (updateInfoFunctionAdmin.data as any) === true ||
+        (changeMetadataViewFunctionAdmin.data as any) === true) && (
         <>
           <Row className="pt-4">
             <Col xs={12}>
@@ -740,7 +752,7 @@ export default function NextGenAdmin() {
               className="pt-2 d-flex flex-wrap align-items-center gap-3">
               {(isGlobalAdmin() ||
                 isWalletCollectionAdmin ||
-                updateInfoFunctionAdmin.data === true) && (
+                (updateInfoFunctionAdmin.data as any) === true) && (
                 <Button
                   className="seize-btn btn-white"
                   onClick={() =>
@@ -751,7 +763,7 @@ export default function NextGenAdmin() {
               )}
               {(isGlobalAdmin() ||
                 isWalletCollectionAdmin ||
-                updateInfoFunctionAdmin.data === true) && (
+                (updateInfoFunctionAdmin.data as any) === true) && (
                 <Button
                   className="seize-btn btn-white"
                   onClick={() =>
@@ -762,7 +774,7 @@ export default function NextGenAdmin() {
               )}
               {(isGlobalAdmin() ||
                 isWalletCollectionAdmin ||
-                updateInfoFunctionAdmin.data === true) && (
+                (updateInfoFunctionAdmin.data as any) === true) && (
                 <Button
                   className="seize-btn btn-white"
                   onClick={() =>
@@ -773,7 +785,7 @@ export default function NextGenAdmin() {
               )}
               {(isGlobalAdmin() ||
                 isWalletCollectionAdmin ||
-                changeMetadataViewFunctionAdmin.data === true) && (
+                (changeMetadataViewFunctionAdmin.data as any) === true) && (
                 <Button
                   className="seize-btn btn-white"
                   onClick={() =>
@@ -818,11 +830,11 @@ export default function NextGenAdmin() {
     if (
       !isGlobalAdmin() &&
       !isWalletCollectionAdmin &&
-      setDataFunctionAdmin.data === false &&
-      setCostsFunctionAdmin.data === false &&
-      setPhasesFunctionAdmin.data === false &&
-      updateInfoFunctionAdmin.data === false &&
-      changeMetadataViewFunctionAdmin.data === false
+      (setDataFunctionAdmin.data as any) === false &&
+      (setCostsFunctionAdmin.data as any) === false &&
+      (setPhasesFunctionAdmin.data as any) === false &&
+      (updateInfoFunctionAdmin.data as any) === false &&
+      (changeMetadataViewFunctionAdmin.data as any) === false
     ) {
       return printAdminRestrictionMessage();
     }
@@ -928,7 +940,7 @@ export default function NextGenAdmin() {
   }
 
   function isGlobalAdmin() {
-    return globalAdmin.data === true;
+    return (globalAdmin.data as any) === true;
   }
 
   return (

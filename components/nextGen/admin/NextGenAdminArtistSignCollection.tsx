@@ -26,7 +26,7 @@ export default function NextGenAdminArtistSignCollection(
 
   const collectionIndex = useCollectionIndex();
   const collectionArtists = useCollectionArtist(
-    parseInt(collectionIndex?.data as string)
+    parseInt(collectionIndex?.data as any)
   );
 
   function getCollectionIds() {

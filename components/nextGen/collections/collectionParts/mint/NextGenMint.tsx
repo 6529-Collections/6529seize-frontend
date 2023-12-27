@@ -153,7 +153,7 @@ export default function NextGenMint(props: Readonly<Props>) {
 
   function retrievePerAddressParams() {
     return {
-      address: NEXTGEN_CORE.contract as `0x${string}`,
+      address: NEXTGEN_CORE[NEXTGEN_CHAIN_ID] as `0x${string}`,
       abi: NEXTGEN_CORE.abi,
       chainId: NEXTGEN_CHAIN_ID,
       watch: true,

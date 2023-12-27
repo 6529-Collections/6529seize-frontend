@@ -18,7 +18,7 @@ if (VERSION) {
 }
 
 const withBundleAnalyzer = require("@next/bundle-analyzer")({
-  enabled: process.env.NODE_ENV === "development" ? false : true,
+  enabled: process.env.NODE_ENV !== "development",
   openAnalyzer: false,
 });
 
@@ -67,6 +67,7 @@ const nextConfig = {
     BASE_ENDPOINT: process.env.BASE_ENDPOINT,
     ALCHEMY_API_KEY: process.env.ALCHEMY_API_KEY,
     VERSION: VERSION,
+    NEXTGEN_CHAIN_ID: process.env.NEXTGEN_CHAIN_ID,
   },
   async generateBuildId() {
     return VERSION;

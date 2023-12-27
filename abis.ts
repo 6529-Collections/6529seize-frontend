@@ -805,6 +805,25 @@ export const NEXTGEN_CORE_ABI = [
   {
     anonymous: false,
     inputs: [
+      {
+        indexed: true,
+        internalType: "address",
+        name: "previousOwner",
+        type: "address",
+      },
+      {
+        indexed: true,
+        internalType: "address",
+        name: "newOwner",
+        type: "address",
+      },
+    ],
+    name: "OwnershipTransferred",
+    type: "event",
+  },
+  {
+    anonymous: false,
+    inputs: [
       { indexed: true, internalType: "address", name: "from", type: "address" },
       { indexed: true, internalType: "address", name: "to", type: "address" },
       {
@@ -1040,10 +1059,24 @@ export const NEXTGEN_CORE_ABI = [
     type: "function",
   },
   {
+    inputs: [],
+    name: "owner",
+    outputs: [{ internalType: "address", name: "", type: "address" }],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
     inputs: [{ internalType: "uint256", name: "tokenId", type: "uint256" }],
     name: "ownerOf",
     outputs: [{ internalType: "address", name: "", type: "address" }],
     stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "renounceOwnership",
+    outputs: [],
+    stateMutability: "nonpayable",
     type: "function",
   },
   {
@@ -1239,16 +1272,6 @@ export const NEXTGEN_CORE_ABI = [
   },
   {
     inputs: [
-      { internalType: "address", name: "_royaltyAddress", type: "address" },
-      { internalType: "uint96", name: "_bps", type: "uint96" },
-    ],
-    name: "setDefaultRoyalties",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [
       { internalType: "uint256", name: "_collectionID", type: "uint256" },
     ],
     name: "setFinalSupply",
@@ -1335,6 +1358,13 @@ export const NEXTGEN_CORE_ABI = [
       { internalType: "uint256", name: "tokenId", type: "uint256" },
     ],
     name: "transferFrom",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [{ internalType: "address", name: "newOwner", type: "address" }],
+    name: "transferOwnership",
     outputs: [],
     stateMutability: "nonpayable",
     type: "function",

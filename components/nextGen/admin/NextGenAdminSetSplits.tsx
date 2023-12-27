@@ -37,10 +37,10 @@ export default function NextGenAdminSetSplits(props: Readonly<Props>) {
   const collectionIndex = useCollectionIndex();
 
   const collectionIds = getCollectionIdsForAddress(
-    globalAdmin.data === true,
-    functionAdmin.data === true,
+    (globalAdmin.data as any) === true,
+    (functionAdmin.data as any) === true,
     undefined,
-    parseInt(collectionIndex?.data as string)
+    parseInt(collectionIndex?.data as any)
   );
 
   const [collectionID, setCollectionID] = useState("");
@@ -50,7 +50,7 @@ export default function NextGenAdminSetSplits(props: Readonly<Props>) {
   const [teamSecondary, setTeamSecondary] = useState("");
 
   useContractRead({
-    address: NEXTGEN_MINTER.contract as `0x${string}`,
+    address: NEXTGEN_MINTER[NEXTGEN_CHAIN_ID] as `0x${string}`,
     abi: NEXTGEN_MINTER.abi,
     chainId: NEXTGEN_CHAIN_ID,
     functionName: "retrievePrimarySplits",
@@ -66,7 +66,7 @@ export default function NextGenAdminSetSplits(props: Readonly<Props>) {
   });
 
   useContractRead({
-    address: NEXTGEN_MINTER.contract as `0x${string}`,
+    address: NEXTGEN_MINTER[NEXTGEN_CHAIN_ID] as `0x${string}`,
     abi: NEXTGEN_MINTER.abi,
     chainId: NEXTGEN_CHAIN_ID,
     functionName: "retrieveSecondarySplits",

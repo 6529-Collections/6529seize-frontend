@@ -70,10 +70,10 @@ export default function NextGenAdminRegisterAdmin(props: Readonly<Props>) {
   const collectionIndex = useCollectionIndex();
 
   const collectionIds = getCollectionIdsForAddress(
-    globalAdmin.data === true,
+    (globalAdmin.data as any) === true,
     false,
     undefined,
-    parseInt(collectionIndex?.data as string)
+    parseInt(collectionIndex?.data as any)
   );
 
   const contractWrite = useAdminContractWrite(getFunctionName(), () => {

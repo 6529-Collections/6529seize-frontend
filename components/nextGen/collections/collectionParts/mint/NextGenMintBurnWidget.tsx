@@ -91,7 +91,10 @@ export default function NextGenMintBurnWidget(props: Readonly<Props>) {
       });
     }
     if (
-      areEqualAddresses(props.collection.burn_collection, NEXTGEN_CORE.contract)
+      areEqualAddresses(
+        props.collection.burn_collection,
+        NEXTGEN_CORE[NEXTGEN_CHAIN_ID]
+      )
     ) {
       r = r.filter((t) =>
         t.tokenId.toString().startsWith(props.collection.burn_collection_id)
@@ -105,7 +108,7 @@ export default function NextGenMintBurnWidget(props: Readonly<Props>) {
     if (burnAddress) {
       getNftsForContractAndOwner(
         NEXTGEN_CHAIN_ID,
-        NEXTGEN_CORE.contract,
+        NEXTGEN_CORE[NEXTGEN_CHAIN_ID],
         burnAddress
       ).then((r) => {
         setTokensOwnedForBurnAddressLoaded(true);
@@ -144,7 +147,7 @@ export default function NextGenMintBurnWidget(props: Readonly<Props>) {
   }, [tokenId]);
 
   const mintWrite = useContractWrite({
-    address: NEXTGEN_MINTER.contract as `0x${string}`,
+    address: NEXTGEN_MINTER[NEXTGEN_CHAIN_ID] as `0x${string}`,
     abi: NEXTGEN_MINTER.abi,
     chainId: NEXTGEN_CHAIN_ID,
     value: BigInt(props.mint_price ? props.mint_price : 0),

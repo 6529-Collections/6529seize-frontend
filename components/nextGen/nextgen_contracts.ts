@@ -1,12 +1,29 @@
-import { goerli } from "wagmi/chains";
+import { goerli, mainnet } from "wagmi/chains";
 import {
   NEXTGEN_ADMIN_ABI,
   NEXTGEN_CORE_ABI,
   NEXTGEN_MINTER_ABI,
 } from "../../abis";
 
-export const NEXTGEN_CHAIN_NAME = "eth-goerli";
-export const NEXTGEN_CHAIN_ID = goerli.id;
+export interface NextGenContract {
+  [goerli.id]: string;
+  [mainnet.id]: string;
+  abi: any;
+}
+
+export function getNextGenChainId() {
+  if (process.env.NEXTGEN_CHAIN_ID) {
+    const chainId: number = parseInt(process.env.NEXTGEN_CHAIN_ID);
+    if (chainId == goerli.id) {
+      return goerli.id;
+    }
+  }
+  return mainnet.id;
+}
+
+export const NEXTGEN_CHAIN_ID = getNextGenChainId();
+export const NEXTGEN_CHAIN_NAME =
+  NEXTGEN_CHAIN_ID == goerli.id ? "eth-goerli" : "eth-mainnet";
 
 export enum FunctionSelectors {
   CREATE_COLLECTION = "0x02de55d0",
@@ -31,17 +48,20 @@ export enum FunctionSelectors {
   INITIALIZE_EXTERNAL_BURN_SWAP = "0x4c29c6f2",
 }
 
-export const NEXTGEN_CORE = {
-  contract: "0xA25645414EEE330342b9382B73b1023a7dB99CC9",
+export const NEXTGEN_CORE: NextGenContract = {
+  [goerli.id]: "0x25a972f1bf3c816061ceaea59d2bb3fe4c130766",
+  [mainnet.id]: "0xC3390e3D2e98544DcBB6f235a3B15345A6728E8c",
   abi: NEXTGEN_CORE_ABI,
 };
 
-export const NEXTGEN_MINTER = {
-  contract: "0x1a7040a7d4baf44f136c50626a4e8f4ae5ca170f",
+export const NEXTGEN_MINTER: NextGenContract = {
+  [goerli.id]: "0x1a7040a7d4baf44f136c50626a4e8f4ae5ca170f",
+  [mainnet.id]: "0x6113fd2c91514e84e6149c6ede47f2e09545253a",
   abi: NEXTGEN_MINTER_ABI,
 };
 
-export const NEXTGEN_ADMIN = {
-  contract: "0x1bAe1D145Dd61fBBB62C85f8A6d7B6eDe0D150f5",
+export const NEXTGEN_ADMIN: NextGenContract = {
+  [goerli.id]: "0x1bAe1D145Dd61fBBB62C85f8A6d7B6eDe0D150f5",
+  [mainnet.id]: "0x26ad9c64930bf5e057cb895a183436b30ad140f8",
   abi: NEXTGEN_ADMIN_ABI,
 };

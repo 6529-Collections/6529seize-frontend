@@ -225,7 +225,7 @@ export default function NextGenCollectionHeader(props: Readonly<Props>) {
                     : `opensea`
                 }.io/assets/${
                   NEXTGEN_CHAIN_ID === goerli.id ? `goerli` : `ethereum`
-                }/${NEXTGEN_CORE.contract}`}
+                }/${NEXTGEN_CORE[NEXTGEN_CHAIN_ID]}`}
                 target="_blank"
                 rel="noreferrer">
                 <Image
@@ -239,7 +239,7 @@ export default function NextGenCollectionHeader(props: Readonly<Props>) {
               <a
                 href={`https://${
                   NEXTGEN_CHAIN_ID === goerli.id ? `goerli.x2y2` : `x2y2`
-                }.io/eth/${NEXTGEN_CORE.contract}`}
+                }.io/eth/${NEXTGEN_CORE[NEXTGEN_CHAIN_ID]}`}
                 target="_blank"
                 rel="noreferrer">
                 <Image

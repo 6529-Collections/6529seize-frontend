@@ -40,7 +40,7 @@ export function NextGenTokenImage(
   }>
 ) {
   const network = NEXTGEN_CHAIN_ID === goerli.id ? "testnet" : "mainnet";
-  const cloudfrontUrl = `https://d3lqz0a4bldqgf.cloudfront.net/nextgen/tokens/images/${NEXTGEN_CHAIN_NAME}-${NEXTGEN_CORE.contract}/${props.token_id}.png`;
+  const cloudfrontUrl = `https://d3lqz0a4bldqgf.cloudfront.net/nextgen/tokens/images/${NEXTGEN_CHAIN_NAME}-${NEXTGEN_CORE[NEXTGEN_CHAIN_ID]}/${props.token_id}.png`;
   const generatorUrl = `https://nextgen-generator.seize.io/${network}/png/${props.token_id}`;
 
   const [name, setName] = useState<string>();
@@ -70,7 +70,7 @@ export function NextGenTokenImage(
   }, [attributes]);
 
   useContractRead({
-    address: NEXTGEN_CORE.contract as `0x${string}`,
+    address: NEXTGEN_CORE[NEXTGEN_CHAIN_ID] as `0x${string}`,
     abi: NEXTGEN_CORE.abi,
     chainId: NEXTGEN_CHAIN_ID,
     functionName: "tokenURI",

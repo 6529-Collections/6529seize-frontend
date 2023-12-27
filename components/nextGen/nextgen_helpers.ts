@@ -4,6 +4,7 @@ import {
   NEXTGEN_CHAIN_ID,
   NEXTGEN_CORE,
   NEXTGEN_MINTER,
+  NextGenContract,
 } from "./nextgen_contracts";
 import { areEqualAddresses } from "../../helpers/Helpers";
 import {
@@ -23,7 +24,7 @@ import { Crumb } from "../breadcrumb/Breadcrumb";
 
 export function useGlobalAdmin(address: string) {
   return useContractRead({
-    address: NEXTGEN_ADMIN.contract as `0x${string}`,
+    address: NEXTGEN_ADMIN[NEXTGEN_CHAIN_ID] as `0x${string}`,
     abi: NEXTGEN_ADMIN.abi,
     chainId: NEXTGEN_CHAIN_ID,
     functionName: "retrieveGlobalAdmin",
@@ -33,7 +34,7 @@ export function useGlobalAdmin(address: string) {
 
 export function useFunctionAdmin(address: string, functionSelector: string) {
   return useContractRead({
-    address: NEXTGEN_ADMIN.contract as `0x${string}`,
+    address: NEXTGEN_ADMIN[NEXTGEN_CHAIN_ID] as `0x${string}`,
     abi: NEXTGEN_ADMIN.abi,
     chainId: NEXTGEN_CHAIN_ID,
     functionName: "retrieveFunctionAdmin",
@@ -43,7 +44,7 @@ export function useFunctionAdmin(address: string, functionSelector: string) {
 
 export function useCollectionIndex() {
   return useContractRead({
-    address: NEXTGEN_CORE.contract as `0x${string}`,
+    address: NEXTGEN_CORE[NEXTGEN_CHAIN_ID] as `0x${string}`,
     abi: NEXTGEN_CORE.abi,
     chainId: NEXTGEN_CHAIN_ID,
     functionName: "newCollectionIndex",
@@ -57,7 +58,7 @@ function getCollectionAdminReadParams(
   const params: any = [];
   for (let i = 1; i <= collectionIndex - 1; i++) {
     params.push({
-      address: NEXTGEN_ADMIN.contract as `0x${string}`,
+      address: NEXTGEN_ADMIN[NEXTGEN_CHAIN_ID] as `0x${string}`,
       abi: NEXTGEN_ADMIN.abi,
       chainId: NEXTGEN_CHAIN_ID,
       functionName: "retrieveCollectionAdmin",
@@ -81,7 +82,7 @@ function getCollectionArtistReadParams(collectionIndex: number) {
   const params: any = [];
   for (let i = 1; i <= collectionIndex - 1; i++) {
     params.push({
-      address: NEXTGEN_CORE.contract as `0x${string}`,
+      address: NEXTGEN_CORE[NEXTGEN_CHAIN_ID] as `0x${string}`,
       abi: NEXTGEN_CORE.abi,
       chainId: NEXTGEN_CHAIN_ID,
       functionName: "retrieveArtistAddress",
@@ -131,7 +132,7 @@ export function useCollectionPhases(
   watch: boolean = false
 ) {
   return useContractRead({
-    address: NEXTGEN_MINTER.contract as `0x${string}`,
+    address: NEXTGEN_MINTER[NEXTGEN_CHAIN_ID] as `0x${string}`,
     abi: NEXTGEN_MINTER.abi,
     chainId: NEXTGEN_CHAIN_ID,
     watch: watch,
@@ -161,7 +162,7 @@ export function useCollectionAdditionalData(
   watch: boolean = false
 ) {
   return useContractRead({
-    address: NEXTGEN_CORE.contract as `0x${string}`,
+    address: NEXTGEN_CORE[NEXTGEN_CHAIN_ID] as `0x${string}`,
     abi: NEXTGEN_CORE.abi,
     chainId: NEXTGEN_CHAIN_ID,
     watch: watch,
@@ -204,7 +205,7 @@ export function useCollectionInfo(
   watch: boolean = false
 ) {
   return useContractRead({
-    address: NEXTGEN_CORE.contract as `0x${string}`,
+    address: NEXTGEN_CORE[NEXTGEN_CHAIN_ID] as `0x${string}`,
     abi: NEXTGEN_CORE.abi,
     chainId: NEXTGEN_CHAIN_ID,
     watch: watch,
@@ -249,7 +250,7 @@ export function useCollectionLibraryAndScript(
   watch: boolean = false
 ) {
   return useContractRead({
-    address: NEXTGEN_CORE.contract as `0x${string}`,
+    address: NEXTGEN_CORE[NEXTGEN_CHAIN_ID] as `0x${string}`,
     abi: NEXTGEN_CORE.abi,
     chainId: NEXTGEN_CHAIN_ID,
     watch: watch,
@@ -274,7 +275,7 @@ export function useCollectionCosts(
   watch: boolean = false
 ) {
   useContractRead({
-    address: NEXTGEN_MINTER.contract as `0x${string}`,
+    address: NEXTGEN_MINTER[NEXTGEN_CHAIN_ID] as `0x${string}`,
     abi: NEXTGEN_MINTER.abi,
     chainId: NEXTGEN_CHAIN_ID,
     functionName: "retrieveCollectionMintingDetails",
@@ -413,7 +414,7 @@ export function useTokensIndex(
   callback: (data: any) => void
 ) {
   return useContractRead({
-    address: NEXTGEN_CORE.contract as `0x${string}`,
+    address: NEXTGEN_CORE[NEXTGEN_CHAIN_ID] as `0x${string}`,
     abi: NEXTGEN_CORE.abi,
     chainId: NEXTGEN_CHAIN_ID,
     functionName: type === "min" ? "viewTokensIndexMin" : "viewTokensIndexMax",
@@ -449,12 +450,12 @@ export function useAdminContractWrite(
 }
 
 function useContractWriteForFunction(
-  contract: { contract: string; abi: any },
+  contract: NextGenContract,
   functionName: string,
   onError: () => void
 ) {
   return useContractWrite({
-    address: contract.contract as `0x${string}`,
+    address: contract[NEXTGEN_CHAIN_ID] as `0x${string}`,
     abi: contract.abi,
     chainId: NEXTGEN_CHAIN_ID,
     functionName: functionName,

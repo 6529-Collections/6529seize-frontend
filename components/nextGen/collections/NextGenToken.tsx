@@ -50,7 +50,7 @@ export default function NextGenToken(props: Readonly<Props>) {
   useCollectionInfoHook(props.collection, setInfo);
 
   useContractRead({
-    address: NEXTGEN_CORE.contract as `0x${string}`,
+    address: NEXTGEN_CORE[NEXTGEN_CHAIN_ID] as `0x${string}`,
     abi: NEXTGEN_CORE.abi,
     chainId: NEXTGEN_CHAIN_ID,
     functionName: "ownerOf",
@@ -147,7 +147,7 @@ export default function NextGenToken(props: Readonly<Props>) {
                             : `opensea`
                         }.io/assets/${
                           NEXTGEN_CHAIN_ID === goerli.id ? `goerli` : `ethereum`
-                        }/${NEXTGEN_CORE.contract}/${props.token_id}`}
+                        }/${NEXTGEN_CORE[NEXTGEN_CHAIN_ID]}/${props.token_id}`}
                         target="_blank"
                         rel="noreferrer">
                         <Image
@@ -163,7 +163,9 @@ export default function NextGenToken(props: Readonly<Props>) {
                           NEXTGEN_CHAIN_ID === goerli.id
                             ? `goerli.x2y2`
                             : `x2y2`
-                        }.io/eth/${NEXTGEN_CORE.contract}/${props.token_id}`}
+                        }.io/eth/${NEXTGEN_CORE[NEXTGEN_CHAIN_ID]}/${
+                          props.token_id
+                        }`}
                         target="_blank"
                         rel="noreferrer">
                         <Image

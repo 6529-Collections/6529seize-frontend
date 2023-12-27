@@ -52,10 +52,10 @@ export default function NextGenAdminProposeAddressesAndPercentages(
   const collectionIndex = useCollectionIndex();
 
   const collectionIds = getCollectionIdsForAddress(
-    globalAdmin.data === true,
-    functionAdmin.data === true,
+    (globalAdmin.data as any) === true,
+    (functionAdmin.data as any) === true,
     undefined,
-    parseInt(collectionIndex?.data as string)
+    parseInt(collectionIndex?.data as any)
   );
 
   const [collectionID, setCollectionID] = useState("");

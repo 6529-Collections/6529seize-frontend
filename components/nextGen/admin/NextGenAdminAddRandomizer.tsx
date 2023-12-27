@@ -35,14 +35,14 @@ export default function NextGenAdminUpdateRandomizer(props: Readonly<Props>) {
   const collectionIndex = useCollectionIndex();
   const collectionAdmin = useCollectionAdmin(
     account.address as string,
-    parseInt(collectionIndex?.data as string)
+    parseInt(collectionIndex?.data as any)
   );
 
   const collectionIds = getCollectionIdsForAddress(
-    globalAdmin.data === true,
-    functionAdmin.data === true,
+    (globalAdmin.data as any) === true,
+    (functionAdmin.data as any) === true,
     collectionAdmin.data,
-    parseInt(collectionIndex?.data as string)
+    parseInt(collectionIndex?.data as any)
   );
 
   const [collectionID, setCollectionID] = useState("");

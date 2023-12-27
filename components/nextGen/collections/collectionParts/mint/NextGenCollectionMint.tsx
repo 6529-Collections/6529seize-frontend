@@ -51,7 +51,7 @@ export default function NextGenCollectionMint(props: Readonly<Props>) {
   }, []);
 
   useContractRead({
-    address: NEXTGEN_CORE.contract as `0x${string}`,
+    address: NEXTGEN_CORE[NEXTGEN_CHAIN_ID] as `0x${string}`,
     abi: NEXTGEN_CORE.abi,
     chainId: NEXTGEN_CHAIN_ID,
     functionName: "burnAmount",
@@ -85,7 +85,7 @@ export default function NextGenCollectionMint(props: Readonly<Props>) {
   });
 
   useContractRead({
-    address: NEXTGEN_MINTER.contract as `0x${string}`,
+    address: NEXTGEN_MINTER[NEXTGEN_CHAIN_ID] as `0x${string}`,
     abi: NEXTGEN_MINTER.abi,
     chainId: NEXTGEN_CHAIN_ID,
     functionName: "getPrice",
