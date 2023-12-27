@@ -42,18 +42,19 @@ export default function UserPageLayout({
   readonly children: ReactNode;
 }) {
   const router = useRouter();
-  const [user, setUser] = useState<string>(router.query.user as string);
+  const [user, setUser] = useState<string>(
+    (router.query.user as string).toLowerCase()
+  );
   useEffect(() => {
-    setUser(router.query.user as string);
+    setUser((router.query.user as string).toLowerCase());
   }, [router.query.user]);
 
   const { data: profile } = useQuery<IProfileAndConsolidations>({
-    queryKey: [QueryKey.PROFILE, user.toLowerCase()],
+    queryKey: [QueryKey.PROFILE, user],
     queryFn: async () =>
       await commonApiFetch<IProfileAndConsolidations>({
         endpoint: `profiles/${user}`,
       }),
-    enabled: !!user,
     initialData: props.profile,
   });
 

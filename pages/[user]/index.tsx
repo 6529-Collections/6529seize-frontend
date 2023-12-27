@@ -63,9 +63,10 @@ export async function getServerSideProps(
 }> {
   try {
     const headers = getCommonHeaders(req);
+    const walletOrHandle = (req.query.user as string).toLowerCase();
     const [{ profile, title, consolidatedTDH }, gradients, memesLite, seasons] =
       await Promise.all([
-        getCommonUserServerSideProps({ user: req.query.user, headers }),
+        getCommonUserServerSideProps({ user: walletOrHandle, headers }),
         getGradients(headers),
         getMemesLite(headers),
         getSeasons(headers),

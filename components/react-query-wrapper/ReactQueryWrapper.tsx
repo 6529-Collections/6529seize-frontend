@@ -142,6 +142,7 @@ export default function ReactQueryWrapper({
       if (wallet.wallet.ens) {
         handles.push(wallet.wallet.ens.toLowerCase());
       }
+      handles.push(wallet.wallet.address.toLowerCase());
     });
 
     return handles;
