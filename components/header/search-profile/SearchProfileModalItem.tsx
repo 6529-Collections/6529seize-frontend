@@ -4,7 +4,6 @@ import { cicToType, formatNumberWithCommas } from "../../../helpers/Helpers";
 import { useRouter } from "next/router";
 import { useEffect, useRef } from "react";
 import SearchProfileModalItemHighlight from "./SearchProfileModalItemHighlight";
-import { CIC_COLOR } from "../../user/utils/raters-table/ProfileRatersTableItem";
 import UserCICAndLevel from "../../user/utils/UserCICAndLevel";
 
 export default function SearchProfileModalItem({
