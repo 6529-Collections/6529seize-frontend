@@ -16,7 +16,6 @@ export default function UserPageRepNewRep({
   readonly profile: IProfileAndConsolidations;
   readonly repRates: ApiProfileRepRatesState;
 }) {
-
   const [isAddNewRepModalOpen, setIsAddNewRepModalOpen] =
     useState<boolean>(false);
 
@@ -42,11 +41,7 @@ export default function UserPageRepNewRep({
 
   return (
     <>
-      <UserPageRepNewRepSearch
-        onRepSearch={onRepSearch}
-        repRates={repRates}
-        profile={profile}
-      />
+      <UserPageRepNewRepSearch onRepSearch={onRepSearch} repRates={repRates} />
       <CommonAnimationWrapper mode="sync" initial={true}>
         {isAddNewRepModalOpen && repToAdd && (
           <CommonAnimationOpacity

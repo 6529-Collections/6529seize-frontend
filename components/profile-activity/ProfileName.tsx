@@ -5,11 +5,17 @@ import { QueryKey } from "../react-query-wrapper/ReactQueryWrapper";
 import { commonApiFetch } from "../../services/api/common-api";
 import { useEffect, useState } from "react";
 import { createPossessionStr } from "../../helpers/Helpers";
+import { assertUnreachable } from "../../helpers/AllowlistToolHelpers";
 
-export default function ProfileActivityLogsHeader({
-  subTitle,
+export enum ProfileNameType {
+  POSSESSION = "POSSESSION",
+  DEFAULT = "DEFAULT",
+}
+
+export default function ProfileName({
+  type,
 }: {
-  readonly subTitle: string;
+  readonly type: ProfileNameType;
 }) {
   const router = useRouter();
   const handleOrWallet = (router.query.user as string).toLowerCase();
@@ -23,20 +29,23 @@ export default function ProfileActivityLogsHeader({
     enabled: !!handleOrWallet,
   });
 
-  const [possessionName, setPossessionName] = useState<string>(
-    createPossessionStr(profile?.profile?.handle ?? null)
-  );
+  const createName = (profile: IProfileAndConsolidations | null): string => {
+    switch (type) {
+      case ProfileNameType.POSSESSION:
+        return createPossessionStr(profile?.profile?.handle ?? null);
+      case ProfileNameType.DEFAULT:
+        return profile?.profile?.handle ?? "";
+      default:
+        assertUnreachable(type);
+        return "";
+    }
+  };
+
+  const [name, setName] = useState<string>(createName(profile ?? null));
 
   useEffect(() => {
-    setPossessionName(createPossessionStr(profile?.profile?.handle ?? null));
+    setName(createName(profile ?? null));
   }, [profile]);
-  return (
-    <div className="tw-h-16 tw-px-6 md:tw-px-8">
-      <div className="tw-h-full tw-flex tw-items-center tw-justify-between tw-w-full tw-border-b tw-border-t-0 tw-border-x-0 tw-border-solid tw-border-white/10">
-        <h3 className="mb-0 tw-text-lg tw-font-semibold tw-text-iron-50 tw-tracking-tight">
-          <span>{possessionName}</span> {subTitle} Activity Log
-        </h3>
-      </div>
-    </div>
-  );
+
+  return <>{name}</>;
 }

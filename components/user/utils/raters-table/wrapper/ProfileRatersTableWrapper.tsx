@@ -1,8 +1,4 @@
 import React from "react";
-import {
-  IProfileAndConsolidations,
-  ProfilesMatterRatingWithRaterLevel,
-} from "../../../../../entities/IProfile";
 import ProfileRatersTable from "../ProfileRatersTable";
 import ProfileRatersTableWrapperHeader from "./ProfileRatersTableWrapperHeader";
 import CommonTablePagination from "../../../../utils/CommonTablePagination";

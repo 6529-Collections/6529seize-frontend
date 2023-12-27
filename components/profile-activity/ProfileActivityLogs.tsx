@@ -14,7 +14,6 @@ import CommonTablePagination from "../utils/CommonTablePagination";
 import CommonFilterTargetSelect, {
   FilterTargetType,
 } from "../utils/CommonFilterTargetSelect";
-import { useRouter } from "next/router";
 
 export interface ActivityLogParams {
   readonly page: number;
@@ -115,7 +114,7 @@ export default function ProfileActivityLogs({
   const onTargetType = (target: FilterTargetType) => {
     setTargetType(target);
     setCurrentPage(1);
-  }
+  };
 
   const [params, setParams] = useState<ActivityLogParamsConverted>(
     convertActivityLogParams({

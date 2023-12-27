@@ -9,7 +9,7 @@ import { IProfileAndConsolidations } from "../../../entities/IProfile";
 import { ConsolidatedTDHMetrics } from "../../../entities/ITDH";
 import UserPageTabs from "./UserPageTabs";
 import { Inter } from "next/font/google";
-import { keepPreviousData, useQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { commonApiFetch } from "../../../services/api/common-api";
 import {
   QueryKey,
@@ -46,7 +46,7 @@ export default function UserPageLayout({
 }) {
   const { setProfile } = useContext(ReactQueryWrapperContext);
   setProfile(props.profile);
-  
+
   const router = useRouter();
   const [user, setUser] = useState<string>(router.query.user as string);
   useEffect(() => {

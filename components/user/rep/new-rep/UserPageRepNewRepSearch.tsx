@@ -1,24 +1,19 @@
 import { useQuery } from "@tanstack/react-query";
 import { QueryKey } from "../../../react-query-wrapper/ReactQueryWrapper";
 import { commonApiFetch } from "../../../../services/api/common-api";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useClickAway, useDebounce, useKeyPressEvent } from "react-use";
 import { AnimatePresence, motion } from "framer-motion";
-import {
-  ApiProfileRepRatesState,
-  IProfileAndConsolidations,
-} from "../../../../entities/IProfile";
+import { ApiProfileRepRatesState } from "../../../../entities/IProfile";
 import UserPageRepNewRepSearchHeader from "./UserPageRepNewRepSearchHeader";
 import UserPageRepNewRepSearchDropdown from "./UserPageRepNewRepSearchDropdown";
 
 const MIN_SEARCH_LENGTH = 3;
 
 export default function UserPageRepNewRepSearch({
-  profile,
   repRates,
   onRepSearch,
 }: {
-  readonly profile: IProfileAndConsolidations;
   readonly repRates: ApiProfileRepRatesState;
   readonly onRepSearch: (repSearch: string) => void;
 }) {
@@ -69,6 +64,19 @@ export default function UserPageRepNewRepSearch({
     if (!debouncedValue) return;
     onRepSelect(debouncedValue);
   };
+
+  const [categoriesToDisplay, setCategoriesToDisplay] = useState<string[]>([]);
+  useEffect(() => {
+    if (categories?.length) {
+      setCategoriesToDisplay(categories);
+      return;
+    }
+    if (debouncedValue.length >= MIN_SEARCH_LENGTH) {
+      setCategoriesToDisplay([debouncedValue]);
+      return;
+    }
+    setCategoriesToDisplay([]);
+  }, [debouncedValue, categories]);
 
   return (
     <div className="tw-max-w-full tw-relative tw-bg-iron-800 tw-p-4 md:tw-p-6 tw-rounded-xl tw-border tw-border-solid tw-border-white/5">
@@ -121,13 +129,7 @@ export default function UserPageRepNewRepSearch({
               transition={{ duration: 0.2 }}
             >
               <UserPageRepNewRepSearchDropdown
-                categories={
-                  categories?.length
-                    ? categories
-                    : debouncedValue.length >= MIN_SEARCH_LENGTH
-                    ? [debouncedValue]
-                    : []
-                }
+                categories={categoriesToDisplay}
                 loading={isFetching}
                 onRepSelect={onRepSelect}
               />
