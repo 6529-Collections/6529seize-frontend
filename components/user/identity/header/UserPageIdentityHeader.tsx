@@ -3,8 +3,11 @@ import { IProfileAndConsolidations } from "../../../../entities/IProfile";
 import { useQuery } from "@tanstack/react-query";
 import { commonApiFetch } from "../../../../services/api/common-api";
 import UserPageIdentityHeaderCIC from "./UserPageIdentityHeaderCIC";
-import UserPageIdentityHeaderCICRateWrapper from "./cic-rate/UserPageIdentityHeaderCICRateWrapper";
 import { QueryKey } from "../../../react-query-wrapper/ReactQueryWrapper";
+import UserPageRateWrapper, {
+  UserPageRateWrapperType,
+} from "../../utils/rate/UserPageRateWrapper";
+import UserPageIdentityHeaderCICRate from "./cic-rate/UserPageIdentityHeaderCICRate";
 
 export default function UserPageIdentityHeader({
   profile: initialProfile,
@@ -38,7 +41,15 @@ export default function UserPageIdentityHeader({
             </p>
           </div>
           <UserPageIdentityHeaderCIC profile={profile} />
-          <UserPageIdentityHeaderCICRateWrapper profile={profile} isTooltip={false} />
+          <UserPageRateWrapper
+            profile={profile}
+            type={UserPageRateWrapperType.CIC}
+          >
+            <UserPageIdentityHeaderCICRate
+              profile={profile}
+              isTooltip={false}
+            />
+          </UserPageRateWrapper>
         </div>
       </div>
     </div>

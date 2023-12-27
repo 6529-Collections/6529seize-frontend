@@ -279,14 +279,27 @@ export const getProfileRatings = async ({
     params.rater = rater;
   }
 
-  return {
-    ratings: await commonApiFetch<ApiProfileRepRatesState>({
-      endpoint: `profiles/${user}/rep/ratings/received`,
-      params,
-      headers,
-    }),
-    rater,
-  };
+  try {
+    return {
+      ratings: await commonApiFetch<ApiProfileRepRatesState>({
+        endpoint: `profiles/${user}/rep/ratings/received`,
+        params,
+        headers,
+      }),
+      rater,
+    };
+  } catch {
+    return {
+      ratings: {
+        total_rep_rating: 0,
+        total_rep_rating_by_rater: null,
+        rep_rates_left_for_rater: null,
+        number_of_raters: 0,
+        rating_stats: [],
+      },
+      rater,
+    };
+  }
 };
 
 export const getProfileRatingsByRater = async ({
@@ -313,11 +326,20 @@ export const getProfileRatingsByRater = async ({
     params.given = "true";
   }
 
-  return await commonApiFetch<Page<RatingWithProfileInfoAndLevel>>({
-    endpoint: `profiles/${user}/rep/ratings/by-rater`,
-    params,
-    headers,
-  });
+  try {
+    return await commonApiFetch<Page<RatingWithProfileInfoAndLevel>>({
+      endpoint: `profiles/${user}/rep/ratings/by-rater`,
+      params,
+      headers,
+    });
+  } catch {
+    return {
+      count: 0,
+      page: 1,
+      next: false,
+      data: [],
+    };
+  }
 };
 
 export const getCommonHeaders = (req: any): Record<string, string> => {

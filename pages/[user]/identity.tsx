@@ -17,7 +17,7 @@ import {
   userPageNeedsRedirect,
 } from "../../helpers/server.helpers";
 import UserPageIdentity from "../../components/user/identity/UserPageIdentity";
-import UserPageIdentityNoProfile from "../../components/user/identity/UserPageIdentityNoProfile";
+import UserPageNoProfile from "../../components/user/utils/UserPageNoProfile";
 import { Page as PageType } from "../../helpers/Types";
 import { ReactQueryWrapperContext } from "../../components/react-query-wrapper/ReactQueryWrapper";
 import {
@@ -63,7 +63,7 @@ const Page: NextPageWithLayout<{ pageProps: UserPageIdentityProps }> = ({
   });
 
   if (!pageProps.profile.profile) {
-    return <UserPageIdentityNoProfile profile={pageProps.profile} />;
+    return <UserPageNoProfile profile={pageProps.profile} />;
   }
 
   return (
@@ -140,7 +140,6 @@ export async function getServerSideProps(
       },
     };
   } catch (e: any) {
-    console.log(e);
     return {
       redirect: {
         permanent: false,

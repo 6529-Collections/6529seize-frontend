@@ -1,5 +1,5 @@
 import Head from "next/head";
-import { ReactNode, useEffect, useState } from "react";
+import { ReactNode, useContext, useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 import HeaderPlaceholder from "../../header/HeaderPlaceholder";
 import { numberWithCommas } from "../../../helpers/Helpers";
@@ -9,9 +9,12 @@ import { IProfileAndConsolidations } from "../../../entities/IProfile";
 import { ConsolidatedTDHMetrics } from "../../../entities/ITDH";
 import UserPageTabs from "./UserPageTabs";
 import { Inter } from "next/font/google";
-import { useQuery } from "@tanstack/react-query";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { commonApiFetch } from "../../../services/api/common-api";
-import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
+import {
+  QueryKey,
+  ReactQueryWrapperContext,
+} from "../../react-query-wrapper/ReactQueryWrapper";
 
 const Header = dynamic(() => import("../../header/Header"), {
   ssr: false,
@@ -41,20 +44,22 @@ export default function UserPageLayout({
   readonly props: UserPageLayoutProps;
   readonly children: ReactNode;
 }) {
+  const { setProfile } = useContext(ReactQueryWrapperContext);
+  setProfile(props.profile);
+  
   const router = useRouter();
-  const [user, setUser] = useState<string>(
-    (router.query.user as string).toLowerCase()
-  );
+  const [user, setUser] = useState<string>(router.query.user as string);
   useEffect(() => {
-    setUser((router.query.user as string).toLowerCase());
+    setUser(router.query.user as string);
   }, [router.query.user]);
 
   const { data: profile } = useQuery<IProfileAndConsolidations>({
-    queryKey: [QueryKey.PROFILE, user],
+    queryKey: [QueryKey.PROFILE, user.toLowerCase()],
     queryFn: async () =>
       await commonApiFetch<IProfileAndConsolidations>({
         endpoint: `profiles/${user}`,
       }),
+    enabled: !!user,
     initialData: props.profile,
   });
 
@@ -78,7 +83,7 @@ export default function UserPageLayout({
 
   useEffect(() => {
     const handleStart = (toPath: string) => {
-      const toUser = toPath.split("/")[1];
+      const toUser = toPath.split("/")[1].toLowerCase();
       setIsLoadingTabData(
         toUser.toLowerCase() === (router.query.user as string).toLowerCase()
       );

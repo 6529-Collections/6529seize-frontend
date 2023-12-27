@@ -31,7 +31,11 @@ export const AuthContext = createContext<AuthContextType>({
   setToast: () => {},
 });
 
-export default function Auth({ children }: { children: React.ReactNode }) {
+export default function Auth({
+  children,
+}: {
+  readonly children: React.ReactNode;
+}) {
   const { address } = useAccount();
   const signMessage = useSignMessage();
 
@@ -223,17 +227,15 @@ export default function Auth({ children }: { children: React.ReactNode }) {
     return { success: !!getAuthJwt() };
   };
   return (
-    <>
-      <AuthContext.Provider
-        value={{
-          requestAuth,
-          setToast,
-          connectedProfile: connectedProfile ?? null,
-        }}
-      >
-        {children}
-        <ToastContainer />
-      </AuthContext.Provider>
-    </>
+    <AuthContext.Provider
+      value={{
+        requestAuth,
+        setToast,
+        connectedProfile: connectedProfile ?? null,
+      }}
+    >
+      {children}
+      <ToastContainer />
+    </AuthContext.Provider>
   );
 }

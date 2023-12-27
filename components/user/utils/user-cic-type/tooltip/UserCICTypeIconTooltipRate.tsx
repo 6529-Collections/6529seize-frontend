@@ -1,5 +1,6 @@
 import { IProfileAndConsolidations } from "../../../../../entities/IProfile";
-import UserPageIdentityHeaderCICRateWrapper from "../../../identity/header/cic-rate/UserPageIdentityHeaderCICRateWrapper";
+import UserPageIdentityHeaderCICRate from "../../../identity/header/cic-rate/UserPageIdentityHeaderCICRate";
+import UserPageRateWrapper from "../../rate/UserPageRateWrapper";
 
 export default function UserCICTypeIconTooltipRate({
   profile,
@@ -30,7 +31,9 @@ export default function UserCICTypeIconTooltipRate({
             />
           </svg>
         </a> */}
-        <UserPageIdentityHeaderCICRateWrapper profile={profile} isTooltip={true} />
+        <UserPageRateWrapper profile={profile}>
+          <UserPageIdentityHeaderCICRate profile={profile} isTooltip={true} />
+        </UserPageRateWrapper>
       </div>
     </div>
   );

@@ -26,6 +26,7 @@ import {
   convertActivityLogParams,
 } from "../../components/profile-activity/ProfileActivityLogs";
 import { FilterTargetType } from "../../components/utils/CommonFilterTargetSelect";
+import UserPageNoProfile from "../../components/user/utils/UserPageNoProfile";
 
 export interface UserPageRepPropsRepRates {
   readonly ratings: ApiProfileRepRatesState;
@@ -88,6 +89,10 @@ const Page: NextPageWithLayout<{ pageProps: UserPageRepProps }> = ({
     },
     handleOrWallet: pageProps.handleOrWallet,
   });
+
+  if (!pageProps.profile.profile) {
+    return <UserPageNoProfile profile={pageProps.profile} />;
+  }
 
   return (
     <div className="tailwind-scope">
