@@ -18,7 +18,7 @@ export default function CICRatings({
   readonly profileCICRatings: Page<ProfilesMatterRatingWithRaterLevel>;
 }) {
   const router = useRouter();
-  const user = (router.query.user as string).toLowerCase();
+  const handleOrWallet = (router.query.user as string).toLowerCase();
   const [currentPage, setCurrentPage] = useState<number>(1);
 
   const { isLoading, data: ratings } = useQuery<
@@ -27,20 +27,20 @@ export default function CICRatings({
     queryKey: [
       QueryKey.CIC_RATINGS,
       {
-        profile: user.toLowerCase(),
+        profile: handleOrWallet,
         page: `${currentPage}`,
         page_size: `${PAGE_SIZE}`,
       },
     ],
     queryFn: async () =>
       await commonApiFetch<Page<ProfilesMatterRatingWithRaterLevel>>({
-        endpoint: `profiles/${user}/cic/ratings`,
+        endpoint: `profiles/${handleOrWallet}/cic/ratings`,
         params: {
           page: `${currentPage}`,
           page_size: `${PAGE_SIZE}`,
         },
       }),
-    enabled: !!user,
+    enabled: !!handleOrWallet,
     placeholderData: keepPreviousData,
     initialData: () =>
       currentPage === 1 ? initialProfileCICRatings : undefined,

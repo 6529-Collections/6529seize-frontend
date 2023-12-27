@@ -79,13 +79,6 @@ export default function ProfileActivityLogs({
   readonly initialParams: ActivityLogParams;
   readonly withFilters: boolean;
 }) {
-  //   readonly page: number;
-  // readonly pageSize: number;
-  // readonly logTypes: ProfileActivityLogType[];
-  // readonly matter: ProfileActivityLogRatingEditContentMatter | null;
-  // readonly targetType: FilterTargetType;
-  // readonly handleOrWallet: string | null;
-
   const [selectedFilters, setSelectedFilters] = useState<
     ProfileActivityLogType[]
   >(initialParams.logTypes);
@@ -94,7 +87,6 @@ export default function ProfileActivityLogs({
   );
   const [currentPage, setCurrentPage] = useState<number>(initialParams.page);
   const [totalPages, setTotalPages] = useState<number>(1);
-  const [showFilters, setShowFilters] = useState<boolean>(false);
 
   useEffect(() => {
     setSelectedFilters(initialParams.logTypes);
@@ -163,14 +155,6 @@ export default function ProfileActivityLogs({
     setTotalPages(Math.ceil(logs.count / initialParams.pageSize));
   }, [logs?.count, logs?.page, isLoading]);
 
-  useEffect(() => {
-    if (!withFilters) {
-      setShowFilters(false);
-      return;
-    }
-    setShowFilters(!!selectedFilters.length || !!logs?.data.length);
-  }, [selectedFilters, logs?.data]);
-
   return (
     <div
       className={`${
@@ -179,7 +163,7 @@ export default function ProfileActivityLogs({
           : "tw-mt-2 tw-min-h-screen"
       } tw-transform-gpu tw-scroll-py-3 tw-overflow-auto`}
     >
-      {showFilters && (
+      {withFilters && (
         <ProfileActivityLogsFilter
           selected={selectedFilters}
           setSelected={onFilter}

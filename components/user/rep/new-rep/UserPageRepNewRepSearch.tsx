@@ -54,6 +54,7 @@ export default function UserPageRepNewRepSearch({
   useKeyPressEvent("Escape", () => setIsOpen(false));
 
   const onRepSelect = (rep: string) => {
+    if (rep.length < MIN_SEARCH_LENGTH) return;
     onRepSearch(rep);
     setRepSearch("");
     setIsOpen(false);
@@ -67,21 +68,27 @@ export default function UserPageRepNewRepSearch({
 
   const [categoriesToDisplay, setCategoriesToDisplay] = useState<string[]>([]);
   useEffect(() => {
-    if (categories?.length) {
-      setCategoriesToDisplay(categories);
-      return;
-    }
+    const items: string[] = [];
     if (debouncedValue.length >= MIN_SEARCH_LENGTH) {
-      setCategoriesToDisplay([debouncedValue]);
-      return;
+      items.push(debouncedValue);
     }
-    setCategoriesToDisplay([]);
+
+    if (categories?.length) {
+      items.push(
+        ...categories.filter((category) => category !== debouncedValue)
+      );
+    }
+
+    setCategoriesToDisplay(items);
+    if (debouncedValue.length) {
+      setIsOpen(true);
+    }
   }, [debouncedValue, categories]);
 
   return (
     <div className="tw-max-w-full tw-relative tw-bg-iron-800 tw-p-4 md:tw-p-6 tw-rounded-xl tw-border tw-border-solid tw-border-white/5">
       <UserPageRepNewRepSearchHeader repRates={repRates} />
-      <div ref={listRef}>
+      <div ref={listRef} className="tw-max-w-xs">
         <div className="tw-mt-6 tw-relative">
           <form onSubmit={onSubmit} className="tw-max-w-xs">
             <label
@@ -112,7 +119,6 @@ export default function UserPageRepNewRepSearch({
                 value={repSearch}
                 onChange={handleRepSearchChange}
                 onFocus={() => setIsOpen(true)}
-                onBlur={() => setIsOpen(false)}
                 className="tw-form-input tw-block tw-w-full tw-rounded-lg tw-border-0 tw-py-3 tw-pl-11 tw-pr-4 tw-bg-iron-900 tw-text-iron-300 tw-font-normal tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-700 placeholder:tw-text-iron-500 focus:tw-outline-none  focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 tw-text-base tw-transition tw-duration-300 tw-ease-out"
                 placeholder="Search"
               />
@@ -122,11 +128,12 @@ export default function UserPageRepNewRepSearch({
         <AnimatePresence mode="wait" initial={false}>
           {isOpen && (
             <motion.div
-              className="tw-origin-top-right tw-absolute tw-z-10 tw-right-0 tw-mt-1 tw-w-full tw-rounded-lg tw-shadow-xl tw-bg-iron-800 tw-ring-1 tw-ring-black tw-ring-opacity-5"
+              className="tw-origin-top-right tw-absolute tw-z-10  tw-mt-1 tw-w-full tw-max-w-xs tw-rounded-lg tw-shadow-xl tw-bg-iron-800 tw-ring-1 tw-ring-black tw-ring-opacity-5"
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
               transition={{ duration: 0.2 }}
+              onClick={(e) => e.stopPropagation()}
             >
               <UserPageRepNewRepSearchDropdown
                 categories={categoriesToDisplay}

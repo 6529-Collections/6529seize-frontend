@@ -42,13 +42,17 @@ export default function UserPageRepNewRepSearchDropdown({
             </li>
           )}
           {state === STATE.HAVE_RESULTS &&
-            categories?.map((category) => (
+            categories.map((category) => (
               <li
                 key={category}
                 className="tw-group tw-text-white tw-justify-between tw-w-full tw-flex tw-rounded-lg tw-relative tw-cursor-pointer tw-select-none tw-p-2 hover:tw-bg-iron-700 tw-transition tw-duration-300 tw-ease-out"
               >
                 <button
-                  onClick={() => onRepSelect(category)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    console.log("onRepSelect");
+                    onRepSelect(category);
+                  }}
                   className="tw-bg-transparent tw-border-none tw-w-full tw-h-full tw-text-left"
                 >
                   <span className="tw-inline-block tw-text-sm tw-font-medium tw-text-white">

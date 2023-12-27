@@ -48,7 +48,26 @@ export default function ProfileActivityLogRate({
 
   const ratingType = getRatingType();
   const goToProfile = () => {
-    router.push(`/${log.target_profile_handle}/identity`);
+    const user = log.target_profile_handle;
+    if (!user) return;
+    if (router.route === "/[user]/rep") {
+      router.push(`/${user}/rep`);
+      return;
+    }
+    if (router.route === "/[user]/identity") {
+      router.push(`/${user}/identity`);
+      return;
+    }
+
+    if (
+      log.contents.rating_matter ===
+      ProfileActivityLogRatingEditContentMatter.REP
+    ) {
+      router.push(`/${user}/rep`);
+      return;
+    }
+
+    router.push(`/${user}/identity`);
   };
 
   const change = log.contents.new_rating - log.contents.old_rating;
@@ -68,6 +87,10 @@ export default function ProfileActivityLogRate({
       return "tw-text-iron-400";
     }
   };
+
+  const isCurrentUser =
+    (router.query.user as string)?.toLowerCase() ===
+    log.target_profile_handle?.toLowerCase();
 
   return (
     <>
@@ -92,8 +115,13 @@ export default function ProfileActivityLogRate({
       <button
         onClick={goToProfile}
         className="tw-bg-transparent tw-border-none tw-leading-4 tw-p-0"
+        disabled={isCurrentUser}
       >
-        <span className="tw-whitespace-nowrap hover:tw-underline tw-cursor-pointer tw-truncate tw-max-w-[12rem] tw-text-sm tw-font-semibold tw-text-iron-100">
+        <span
+          className={`${
+            isCurrentUser ? "" : "hover:tw-underline tw-cursor-pointer"
+          } tw-whitespace-nowrap tw-text-sm tw-font-semibold tw-text-iron-100`}
+        >
           {log.target_profile_handle}
         </span>
       </button>

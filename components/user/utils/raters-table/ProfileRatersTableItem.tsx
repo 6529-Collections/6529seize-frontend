@@ -11,6 +11,7 @@ import {
   ProfileRatersTableType,
 } from "./wrapper/ProfileRatersTableWrapper";
 import { assertUnreachable } from "../../../../helpers/AllowlistToolHelpers";
+import UserCICAndLevel from "../UserCICAndLevel";
 
 export const CIC_COLOR: Record<CICType, string> = {
   [CICType.INACCURATE]: "tw-bg-[#F97066]",
@@ -27,6 +28,11 @@ export default function ProfileRatersTableItem({
   readonly rating: IProfileRatersTableItem;
   readonly type: ProfileRatersTableType;
 }) {
+  const TYPE_TO_TEXT: Record<ProfileRatersTableType, string> = {
+    [ProfileRatersTableType.CIC_RECEIVED]: "CIC rated",
+    [ProfileRatersTableType.REP_RECEIVED]: "gave total Rep",
+    [ProfileRatersTableType.REP_GIVEN]: "received total Rep",
+  };
   const router = useRouter();
   const [cicType, setCicType] = useState<CICType>(cicToType(rating.raterCIC));
   useEffect(() => {
@@ -64,14 +70,7 @@ export default function ProfileRatersTableItem({
     <tr>
       <td className="tw-py-2.5">
         <div className="tw-inline-flex tw-items-center tw-space-x-2">
-          <span className="tw-relative">
-            <div className="tw-flex tw-items-center tw-justify-center tw-h-5 tw-w-5 tw-text-[0.625rem] tw-leading-3 tw-font-bold tw-rounded-full tw-ring-2 tw-ring-iron-300 tw-text-iron-300">
-              {rating.raterLevel}
-            </div>
-            <span
-              className={`tw-flex-shrink-0 tw-absolute -tw-right-1 -tw-top-1 tw-block tw-h-2.5 tw-w-2.5 tw-rounded-full ${CIC_COLOR[cicType]}`}
-            ></span>
-          </span>
+          <UserCICAndLevel level={rating.raterLevel} cicType={cicType} />
           <div className="tw-inline-flex tw-items-center tw-space-x-1">
             <button
               onClick={goToProfile}
@@ -82,7 +81,7 @@ export default function ProfileRatersTableItem({
               </span>
             </button>
             <span className="tw-whitespace-nowrap tw-text-sm tw-text-iron-400 tw-font-semibold">
-              rated
+              {TYPE_TO_TEXT[type]}
             </span>
             <span
               className={`tw-whitespace-nowrap tw-text-sm tw-font-semibold ${ratingColor}`}

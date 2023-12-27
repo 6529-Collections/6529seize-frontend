@@ -113,7 +113,7 @@ export const PROFILE_ACTIVITY_TYPE_TO_TEXT: Record<
   ProfileActivityLogType,
   string
 > = {
-  [ProfileActivityLogType.RATING_EDIT]: "CIC Rating",
+  [ProfileActivityLogType.RATING_EDIT]: "Rating",
   [ProfileActivityLogType.HANDLE_EDIT]: "Handle",
   [ProfileActivityLogType.PRIMARY_WALLET_EDIT]: "Primary Wallet",
   [ProfileActivityLogType.CLASSIFICATION_EDIT]: "Classification",
@@ -318,7 +318,6 @@ export interface RatingWithProfileInfo {
   cic: number;
   last_modified: Date;
 }
-
 
 export type RatingWithProfileInfoAndLevel = RatingWithProfileInfo & {
   level: number;
