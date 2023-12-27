@@ -12,6 +12,7 @@ import Cookies from "js-cookie";
 import { VIEW_MODE_COOKIE } from "../../constants";
 import { useAccount } from "wagmi";
 import { WalletView } from "../../enums";
+import SearchProfileButton from "./search-profile/SearchProfileButton";
 
 interface Props {
   onLoad?: () => void;
@@ -598,6 +599,7 @@ export default function Header(props: Readonly<Props>) {
                     />
                   </a>
                 </Col>
+
                 <Col
                   xs={{ span: 4 }}
                   sm={{ span: 4 }}
@@ -608,22 +610,25 @@ export default function Header(props: Readonly<Props>) {
                     <Navbar expand="lg" variant="dark">
                       <Container
                         className={`d-flex align-items-center justify-content-end no-padding`}>
-                        <Image
-                          loading="eager"
-                          priority
-                          width="0"
-                          height="0"
-                          style={{
-                            height: "auto",
-                            width: "auto",
-                            maxHeight: "42px",
-                            paddingLeft: "35px",
-                          }}
-                          className={`${styles.burgerMenuBtn} d-block ${styles.dMdNone}`}
-                          src="https://d3lqz0a4bldqgf.cloudfront.net/seize_images/Seize_Logo_Icon.png"
-                          alt="6529Seize"
-                          onClick={() => setBurgerMenuOpen(true)}
-                        />
+                        <div
+                          className={`${styles.dMdNone} d-flex align-items-center`}>
+                          <SearchProfileButton />
+                          <Image
+                            loading="eager"
+                            priority
+                            width="0"
+                            height="0"
+                            style={{
+                              height: "auto",
+                              width: "auto",
+                              maxHeight: "42px",
+                            }}
+                            className={`${styles.burgerMenuBtn} d-block `}
+                            src="https://d3lqz0a4bldqgf.cloudfront.net/seize_images/Seize_Logo_Icon.png"
+                            alt="6529Seize"
+                            onClick={() => setBurgerMenuOpen(true)}
+                          />
+                        </div>
                         <Navbar
                           id="seize-navbar-nav"
                           className={`justify-content-end d-none ${styles.dMdBlock}`}>
@@ -903,6 +908,7 @@ export default function Header(props: Readonly<Props>) {
                               </NavDropdown.Item>
                             </NavDropdown>
                             {printHeaderConnect()}
+                            <SearchProfileButton />
                           </Nav>
                         </Navbar>
                         <Image

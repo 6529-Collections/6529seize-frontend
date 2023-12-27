@@ -284,3 +284,15 @@ export interface ProfilesMatterRatingWithRaterLevel
   extends ProfilesMatterRating {
   readonly rater_level: number;
 }
+
+
+export interface CommunityMemberMinimal {
+  readonly handle: string | null;
+  readonly normalised_handle: string | null;
+  readonly primary_wallet: string | null;
+  readonly display: string | null;
+  readonly tdh: number;
+  readonly level: number;
+  readonly cic_rating: number;
+  readonly wallet: string;
+}
