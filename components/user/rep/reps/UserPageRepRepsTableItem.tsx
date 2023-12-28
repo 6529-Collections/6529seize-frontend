@@ -1,5 +1,8 @@
 import { useState } from "react";
-import { IProfileAndConsolidations, RatingStats } from "../../../../entities/IProfile";
+import {
+  IProfileAndConsolidations,
+  RatingStats,
+} from "../../../../entities/IProfile";
 import CommonAnimationWrapper from "../../../utils/animation/CommonAnimationWrapper";
 import CommonAnimationOpacity from "../../../utils/animation/CommonAnimationOpacity";
 import UserPageRepModifyModal from "../modify-rep/UserPageRepModifyModal";
@@ -53,7 +56,7 @@ export default function UserPageRepRepsTableItem({
           isPositiveRaterContribution ? "tw-text-green" : "tw-text-red"
         } tw-whitespace-nowrap tw-py-3.5 tw-pl-3 tw-pr-3 tw-text-sm tw-font-medium sm:pl-6`}
       >
-        {rep.rater_contribution}
+        {rep.rater_contribution ? rep.rater_contribution : " "}
       </td>
       <CommonAnimationWrapper mode="sync" initial={true}>
         {isEditRepModalOpen && (

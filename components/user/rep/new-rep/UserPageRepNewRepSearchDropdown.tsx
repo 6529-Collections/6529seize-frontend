@@ -50,7 +50,6 @@ export default function UserPageRepNewRepSearchDropdown({
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
-                    console.log("onRepSelect");
                     onRepSelect(category);
                   }}
                   className="tw-bg-transparent tw-border-none tw-w-full tw-h-full tw-text-left"

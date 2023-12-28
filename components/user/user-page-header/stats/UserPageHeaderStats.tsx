@@ -1,4 +1,3 @@
-import { useEffect } from "react";
 import { IProfileAndConsolidations } from "../../../../entities/IProfile";
 import { formatNumberWithCommas } from "../../../../helpers/Helpers";
 
