@@ -27,6 +27,7 @@ import SearchModal from "../searchModal/SearchModal";
 import DownloadUrlWidget from "../downloadUrlWidget/DownloadUrlWidget";
 import DotLoader from "../dotLoader/DotLoader";
 import { assertUnreachable } from "../../helpers/AllowlistToolHelpers";
+import { getDisplay, getDisplayEns } from "./LeaderboardHelpers";
 
 interface Props {
   page: number;
@@ -658,37 +659,6 @@ export default function Leaderboard(props: Props) {
       return [lead.wallet];
     }
     return [];
-  }
-
-  function getDisplay(lead: any) {
-    if (lead.handle) {
-      return lead.handle;
-    }
-    if (lead.consolidation_display) {
-      return lead.consolidation_display;
-    }
-    return lead.wallet_display;
-  }
-
-  function getDisplayEns(lead: any) {
-    if (!lead.handle) {
-      return;
-    }
-    if (lead.wallet_display?.includes(" ")) {
-      return;
-    }
-
-    if (lead.wallet_display?.endsWith(".eth")) {
-      return lead.wallet_display;
-    }
-
-    if (lead.consolidation_display?.includes(" ")) {
-      return;
-    }
-    if (lead.consolidation_display?.endsWith(".eth")) {
-      return lead.consolidation_display;
-    }
-    return;
   }
 
   function getCardsHodled(lead: TDHMetrics) {

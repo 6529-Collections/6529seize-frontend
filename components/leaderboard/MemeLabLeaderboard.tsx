@@ -11,6 +11,7 @@ import { Owner, OwnerTags } from "../../entities/IOwner";
 import { useRouter } from "next/router";
 import { fetchAllPages, fetchUrl } from "../../services/6529api";
 import Address from "../address/Address";
+import { getDisplay, getDisplayEns } from "./LeaderboardHelpers";
 
 interface Props {
   contract: string;
@@ -78,37 +79,6 @@ export default function MemeLabLeaderboard(props: Props) {
   useEffect(() => {
     fetchResults();
   }, [pageProps.page]);
-
-  function getDisplay(lead: any) {
-    if (lead.handle) {
-      return lead.handle;
-    }
-    if (lead.consolidation_display) {
-      return lead.consolidation_display;
-    }
-    return lead.wallet_display;
-  }
-
-  function getDisplayEns(lead: any) {
-    if (!lead.handle) {
-      return;
-    }
-    if (lead.wallet_display?.includes(" ")) {
-      return;
-    }
-
-    if (lead.wallet_display?.endsWith(".eth")) {
-      return lead.wallet_display;
-    }
-
-    if (lead.consolidation_display?.includes(" ")) {
-      return;
-    }
-    if (lead.consolidation_display?.endsWith(".eth")) {
-      return lead.consolidation_display;
-    }
-    return;
-  }
 
   return (
     <Container className={`no-padding`} id={`leaderboard-${props.nftId}`}>
