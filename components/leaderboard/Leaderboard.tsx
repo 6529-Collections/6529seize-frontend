@@ -1025,7 +1025,7 @@ export default function Leaderboard(props: Props) {
         return lead.boosted_memes_tdh_season4;
       case Content.MEMES5:
         return lead.boosted_memes_tdh_season5;
-      case Content.MEMES5:
+      case Content.MEMES6:
         return lead.boosted_memes_tdh_season6;
       case Content.GRADIENTS:
         return lead.boosted_gradients_tdh;
@@ -1115,7 +1115,7 @@ export default function Leaderboard(props: Props) {
         return Sort.unique_memes_szn4;
       case Content.MEMES5:
         return Sort.unique_memes_szn5;
-      case Content.MEMES5:
+      case Content.MEMES6:
         return Sort.unique_memes_szn6;
       default:
         return Sort.unique_memes;
@@ -1417,6 +1417,9 @@ export default function Leaderboard(props: Props) {
           </Dropdown.Item>
           <Dropdown.Item onClick={() => setContent(Content.MEMES5)}>
             &nbsp;&nbsp;{Content.MEMES5}
+          </Dropdown.Item>
+          <Dropdown.Item onClick={() => setContent(Content.MEMES6)}>
+            &nbsp;&nbsp;{Content.MEMES6}
           </Dropdown.Item>
           <Dropdown.Item onClick={() => setContent(Content.GRADIENTS)}>
             {Content.GRADIENTS}
