@@ -1,10 +1,14 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import {
   ApiProfileRepRatesState,
   IProfileAndConsolidations,
   RatingStats,
 } from "../../../../entities/IProfile";
-import UserPageRepsItem from "./UserPageRepsItem";
+import UserPageRepRepsTop from "./UserPageRepRepsTop";
+import UserPageRepRepsTable from "./UserPageRepRepsTable";
+import { AuthContext } from "../../../auth/Auth";
+
+const TOP_REPS_COUNT = 5;
 
 export default function UserPageRepReps({
   repRates,
@@ -13,40 +17,81 @@ export default function UserPageRepReps({
   readonly repRates: ApiProfileRepRatesState;
   readonly profile: IProfileAndConsolidations;
 }) {
-  const sortReps = (reps: RatingStats[]) =>
-    [...reps].sort((a, d) => {
-      if (a.rater_contribution && d.rater_contribution) {
-        return Math.abs(d.rater_contribution) - Math.abs(a.rater_contribution);
+  const { connectedProfile } = useContext(AuthContext);
+
+  const sortReps = (items: RatingStats[]) =>
+    [...items].sort((a, d) => {
+      if (a.rating === d.rating) {
+        return d.contributor_count - a.contributor_count;
       }
-      if (a.rater_contribution) {
-        return -1;
-      }
-      if (d.rater_contribution) {
-        return 1;
-      }
-      return Math.abs(d.rating) - Math.abs(a.rating);
+      return d.rating - a.rating;
     });
 
   const [reps, setReps] = useState<RatingStats[]>(
     sortReps(repRates.rating_stats)
   );
+
+  const getTopReps = (items: RatingStats[]) => {
+    return items.slice(0, TOP_REPS_COUNT);
+  };
+
+  const [topReps, setTopReps] = useState<RatingStats[]>(getTopReps(reps));
   useEffect(
     () => setReps(sortReps(repRates.rating_stats)),
     [repRates.rating_stats]
   );
+
+  useEffect(() => setTopReps(getTopReps(reps)), [reps]);
+
+  const getCanEditRep = ({
+    myProfile,
+    targetProfile,
+  }: {
+    myProfile: IProfileAndConsolidations | null;
+    targetProfile: IProfileAndConsolidations;
+  }) => {
+    if (!myProfile?.profile?.handle) {
+      return false;
+    }
+    if (myProfile.profile.handle === targetProfile.profile?.handle) {
+      return false;
+    }
+    return true;
+  };
+
+  const [canEditRep, setCanEditRep] = useState<boolean>(
+    getCanEditRep({
+      myProfile: connectedProfile,
+      targetProfile: profile,
+    })
+  );
+
+  useEffect(() => {
+    setCanEditRep(
+      getCanEditRep({
+        myProfile: connectedProfile,
+        targetProfile: profile,
+      })
+    );
+  }, [connectedProfile, profile]);
+
   return (
     <div>
       {!!reps.length && (
-        <div className="tw-mt-6 tw-flex tw-flex-wrap tw-gap-4">
-          {reps.map((rep) => (
-            <UserPageRepsItem
-              rep={rep}
-              key={rep.category}
-              profile={profile}
-              giverAvailableRep={repRates.rep_rates_left_for_rater ?? 0}
-            />
-          ))}
-        </div>
+        <>
+          <UserPageRepRepsTop
+            reps={topReps}
+            profile={profile}
+            giverAvailableRep={repRates.rep_rates_left_for_rater ?? 0}
+            canEditRep={canEditRep}
+          />
+          <UserPageRepRepsTable
+            reps={reps}
+            profile={profile}
+            giverAvailableRep={repRates.rep_rates_left_for_rater ?? 0}
+            canEditRep={canEditRep}
+          />
+        </>
       )}
     </div>
   );

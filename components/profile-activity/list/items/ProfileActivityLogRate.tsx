@@ -14,7 +14,7 @@ enum ProfileActivityLogRateType {
 
 const ACTION: Record<ProfileActivityLogRateType, string> = {
   [ProfileActivityLogRateType.ADDED]: "added",
-  [ProfileActivityLogRateType.REMOVED]: "removed",
+  [ProfileActivityLogRateType.REMOVED]: "reduced",
 };
 
 const LOG_MATTER_STR: Record<
@@ -102,13 +102,14 @@ export default function ProfileActivityLogRate({
       >
         {changeStr}
       </span>
+      {log.contents.rating_matter ===
+        ProfileActivityLogRatingEditContentMatter.REP && (
+        <span className="tw-whitespace-nowrap tw-text-sm tw-font-semibold tw-text-iron-100">
+          {log.contents.rating_category}
+        </span>
+      )}
       <ProfileActivityLogItemAction
-        action={`${
-          log.contents.rating_matter ===
-          ProfileActivityLogRatingEditContentMatter.REP
-            ? log.contents.rating_category
-            : ""
-        } ${LOG_MATTER_STR[log.contents.rating_matter]}  ${
+        action={` ${LOG_MATTER_STR[log.contents.rating_matter]}  ${
           TO_FROM[ratingType]
         }`}
       />
@@ -126,7 +127,7 @@ export default function ProfileActivityLogRate({
         </span>
       </button>
       <span
-        className={`${getTotalRatingClass()} tw-whitespace-nowrap tw-text-sm tw-font-semibold`}
+        className={`${getTotalRatingClass()} tw-whitespace-nowrap tw-text-sm tw-font-medium`}
       >
         (total {newRatingStr})
       </span>

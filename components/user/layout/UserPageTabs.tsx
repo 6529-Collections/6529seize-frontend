@@ -4,9 +4,10 @@ import UserPageTab from "./UserPageTab";
 
 export enum UserPageTabType {
   COLLECTED = "COLLECTED",
-  STATS = "STATS",
+
   REP = "REP",
   IDENTITY = "IDENTITY",
+  STATS = "STATS",
 }
 
 export const USER_PAGE_TAB_META: Record<

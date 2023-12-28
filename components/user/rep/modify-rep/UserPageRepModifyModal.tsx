@@ -76,6 +76,8 @@ export default function UserPageRepModifyModal({
     }
   };
 
+  const [mutating, setMutating] = useState<boolean>(false);
+
   const addRepMutation = useMutation({
     mutationFn: async ({
       amount,
@@ -104,22 +106,29 @@ export default function UserPageRepModifyModal({
         message: error as unknown as string,
         type: "error",
       });
+      setMutating(false);
     },
   });
 
   const onSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    if (mutating) {
+      return;
+    }
+    setMutating(true);
     const { success } = await requestAuth();
     if (!success) {
       setToast({
         message: "You must be logged in.",
         type: "error",
       });
+      setMutating(false);
       return;
     }
 
     const newRating = getStringAsNumberOrZero(adjustedRatingStr);
     if (newRating === originalRating) {
+      setMutating(false);
       return;
     }
 

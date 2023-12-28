@@ -1,12 +1,19 @@
-import { CustomTokenPoolParamsToken } from "../../../allowlist-tool/allowlist-tool.types";
-import CreateCustomSnapshotFormTableItem from "./CreateCustomSnapshotFormTableItem";
+import {
+  IProfileAndConsolidations,
+  RatingStats,
+} from "../../../../entities/IProfile";
+import UserPageRepRepsTableItem from "./UserPageRepRepsTableItem";
 
-export default function CreateCustomSnapshotFormTable({
-  tokens,
-  onRemoveToken
+export default function UserPageRepRepsTable({
+  reps,
+  profile,
+  giverAvailableRep,
+  canEditRep,
 }: {
-  readonly tokens: CustomTokenPoolParamsToken[];
-  readonly onRemoveToken: (index: number) => void;
+  readonly reps: RatingStats[];
+  readonly profile: IProfileAndConsolidations;
+  readonly giverAvailableRep: number;
+  readonly canEditRep: boolean;
 }) {
   return (
     <div className="tw-mt-6 tw-flow-root">
@@ -15,12 +22,13 @@ export default function CreateCustomSnapshotFormTable({
           <div className="tw-overflow-hidden tw-shadow tw-ring-1 tw-ring-black tw-ring-opacity-5 sm:tw-rounded-lg">
             <table className="tw-min-w-full tw-divide-y tw-divide-solid tw-divide-neutral-700">
               <tbody className="tw-divide-y tw-divide-solid tw-divide-neutral-700/40 tw-bg-neutral-800">
-                {tokens.map((token, i) => (
-                  <CreateCustomSnapshotFormTableItem
-                    key={`create-custom-snapshot-form-table-token-${i}`}
-                    token={token}
-                    index={i}
-                    onRemoveToken={onRemoveToken}
+                {reps.map((rep) => (
+                  <UserPageRepRepsTableItem
+                    key={rep.category}
+                    rep={rep}
+                    profile={profile}
+                    giverAvailableRep={giverAvailableRep}
+                    canEditRep={canEditRep}
                   />
                 ))}
               </tbody>
