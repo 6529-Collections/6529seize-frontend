@@ -73,7 +73,7 @@ export default function UserPageHeader({
                 consolidatedTDH={consolidatedTDH}
               />
               <UserPageHeaderLevel level={profile.level} />
-              <UserPageHeaderStats consolidatedTDH={consolidatedTDH} />
+              <UserPageHeaderStats profile={profile} />
             </div>
             <div className="tw-mt-6 md:tw-hidden">
               {isLoggedInUser && <UserEditProfileButton user={user} />}

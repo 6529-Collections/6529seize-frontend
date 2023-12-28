@@ -17,7 +17,7 @@ import { QueryKey } from "../react-query-wrapper/ReactQueryWrapper";
 type AuthContextType = {
   connectedProfile: IProfileAndConsolidations | null;
   requestAuth: () => Promise<{ success: boolean }>;
-  setToast: ({ message, type }: { message: string; type: TypeOptions }) => void;
+  setToast: ({ message, type }: { message: string | React.ReactNode; type: TypeOptions }) => void;
 };
 
 interface NonceResponse {
@@ -71,7 +71,7 @@ export default function Auth({
     message,
     type,
   }: {
-    message: string;
+    message: string | React.ReactNode;
     type: TypeOptions;
   }) => {
     toast(message, {

@@ -1,4 +1,4 @@
-import { ReactElement, useContext } from "react";
+import { ReactElement } from "react";
 import { NextPageWithLayout } from "../_app";
 import { IProfileAndConsolidations } from "../../entities/IProfile";
 import { ConsolidatedTDHMetrics } from "../../entities/ITDH";
@@ -16,7 +16,6 @@ import {
 import UserPageCollection from "../../components/user/collected/UserPageCollection";
 import { Season } from "../../entities/ISeason";
 import { OwnerLite } from "../../entities/IOwner";
-import { ReactQueryWrapperContext } from "../../components/react-query-wrapper/ReactQueryWrapper";
 
 export interface UserPageProps {
   profile: IProfileAndConsolidations;
@@ -31,9 +30,6 @@ export interface UserPageProps {
 const Page: NextPageWithLayout<{ pageProps: UserPageProps }> = ({
   pageProps,
 }) => {
-  const { setProfile } = useContext(ReactQueryWrapperContext);
-  setProfile(pageProps.profile);
-
   return (
     <UserPageCollection
       profile={pageProps.profile}

@@ -25,6 +25,7 @@ export interface IProfileAndConsolidations {
   };
   readonly level: number;
   readonly cic: AggregatedCicRating;
+  readonly rep: number;
 }
 
 export enum PROFILE_CLASSIFICATION {

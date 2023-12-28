@@ -25,6 +25,7 @@ export enum QueryKey {
   PROFILE_REP_RATINGS = "PROFILE_REP_RATINGS",
   PROFILE_REP_RATERS = "PROFILE_REP_RATERS",
   REP_CATEGORIES_SEARCH = "REP_CATEGORIES_SEARCH",
+
 }
 
 type QueryType<T, U, V, W> = [T, U, V, W];
@@ -339,6 +340,7 @@ export default function ReactQueryWrapper({
   };
 
   const onProfileRepModify = (profile: IProfileAndConsolidations) => {
+    invalidateProfile(profile);
     invalidateProfileRepRatings(profile);
     invalidateProfileRepRaters(profile);
     invalidateProfileLogs({ profile, keys: {} });

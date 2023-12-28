@@ -43,7 +43,7 @@ const getInitialActivityLogParams = (
   pageSize: 10,
   logTypes: [],
   matter: null,
-  targetType: FilterTargetType.OUTGOING,
+  targetType: FilterTargetType.ALL,
   handleOrWallet,
 });
 

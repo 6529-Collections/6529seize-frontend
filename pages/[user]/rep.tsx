@@ -55,7 +55,7 @@ const getInitialActivityLogParams = (
   pageSize: 10,
   logTypes: [],
   matter: ProfileActivityLogRatingEditContentMatter.REP,
-  targetType: FilterTargetType.OUTGOING,
+  targetType: FilterTargetType.ALL,
   handleOrWallet,
 });
 

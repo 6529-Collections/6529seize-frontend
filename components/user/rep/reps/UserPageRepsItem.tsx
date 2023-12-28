@@ -74,28 +74,18 @@ export default function UserPageRepsItem({
         <span
           className={`${
             isPositiveRating ? "tw-text-green" : "tw-text-red"
-          } tw-whitespace-nowrap tw-pt-0.5 tw-font-semibold tw-text-sm`}
+          } tw-whitespace-nowrap tw-font-medium tw-text-sm`}
         >
           <Tippy
-            content="Total Rep"
+            content={`My Rep: ${formatNumberWithCommas(
+              rep.rater_contribution ?? 0
+            )}`}
             theme="dark"
             placement="top"
-            disabled={isTouchScreen}
+            disabled={isTouchScreen || !rep.rater_contribution}
           >
             <span>{formatNumberWithCommas(rep.rating)}</span>
           </Tippy>
-          {rep.rater_contribution && (
-            <Tippy
-              content="Your Rep"
-              theme="dark"
-              placement="top"
-              disabled={isTouchScreen}
-            >
-              <span className="tw-ml-1 tw-text-[0.6875rem] tw-leading-5 tw-text-iron-400 tw-font-semibold">
-                ({formatNumberWithCommas(rep.rater_contribution)})
-              </span>
-            </Tippy>
-          )}
         </span>
         <span className="-tw-mt-0.5">
           <Tippy
@@ -104,8 +94,9 @@ export default function UserPageRepsItem({
             placement="top"
             disabled={isTouchScreen}
           >
-            <span className="tw-whitespace-nowrap tw-text-sm tw-font-medium tw-text-iron-200">
-              {formatNumberWithCommas(rep.contributor_count)}
+            <span className="tw-whitespace-nowrap tw-text-xs tw-font-medium tw-text-iron-200">
+              ({formatNumberWithCommas(rep.contributor_count)}{" "}
+              {rep.contributor_count === 1 ? "rater" : "raters"})
             </span>
           </Tippy>
         </span>
