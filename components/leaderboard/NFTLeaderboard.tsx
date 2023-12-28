@@ -129,15 +129,13 @@ export default function NFTLeaderboard(props: Props) {
                   <th className={styles.gap}></th>
                   <th
                     colSpan={3}
-                    className={`${styles.tdh} ${styles.borderBottom}`}
-                  >
+                    className={`${styles.tdh} ${styles.borderBottom}`}>
                     <b>This Card</b>
                   </th>
                   <th className={styles.gap}></th>
                   <th
                     colSpan={3}
-                    className={`${styles.tdh} ${styles.borderBottom}`}
-                  >
+                    className={`${styles.tdh} ${styles.borderBottom}`}>
                     <b>Total</b>
                   </th>
                 </tr>
@@ -400,6 +398,7 @@ export default function NFTLeaderboard(props: Props) {
                                   memesCardsSetS3: lead.memes_cards_sets_szn3,
                                   memesCardsSetS4: lead.memes_cards_sets_szn4,
                                   memesCardsSetS5: lead.memes_cards_sets_szn5,
+                                  memesCardsSetS6: lead.memes_cards_sets_szn6,
                                   memesBalance: lead.unique_memes,
                                   gradientsBalance: lead.gradients_balance,
                                   genesis: lead.genesis,

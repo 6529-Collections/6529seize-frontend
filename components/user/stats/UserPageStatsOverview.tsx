@@ -32,8 +32,7 @@ export default function UserPageStatsOverview({
           xs={{ span: 7 }}
           sm={{ span: 7 }}
           md={{ span: 9 }}
-          lg={{ span: 10 }}
-        >
+          lg={{ span: 10 }}>
           <h3>Stats</h3>
         </Col>
       </Row>
@@ -42,8 +41,7 @@ export default function UserPageStatsOverview({
           <Accordion defaultActiveKey="0" className={styles.userPageAccordion}>
             <Accordion.Item
               className={styles.userPageAccordionItem}
-              eventKey={"0"}
-            >
+              eventKey={"0"}>
               <Accordion.Header>Cards Collected</Accordion.Header>
               <Accordion.Body className={styles.primaryTableScrollContainer}>
                 <Table className={styles.primaryTable}>
@@ -70,6 +68,9 @@ export default function UserPageStatsOverview({
                       </td>
                       <td>
                         <b>SZN5</b>
+                      </td>
+                      <td>
+                        <b>SZN6</b>
                       </td>
                       <td>
                         <b>Gradient</b>
@@ -114,6 +115,11 @@ export default function UserPageStatsOverview({
                       <td>
                         {tdh.memes_balance_season5 > 0
                           ? `x${numberWithCommas(tdh.memes_balance_season5)}`
+                          : "-"}
+                      </td>
+                      <td>
+                        {tdh.memes_balance_season6 > 0
+                          ? `x${numberWithCommas(tdh.memes_balance_season6)}`
                           : "-"}
                       </td>
                       <td>
@@ -197,6 +203,17 @@ export default function UserPageStatsOverview({
                           : "-"}
                       </td>
                       <td>
+                        {tdh.memes_balance_season6 > 0
+                          ? `#${numberWithCommas(
+                              tdh.dense_rank_balance_memes_season6
+                            )}${
+                              tdh.dense_rank_balance_memes_season6__ties > 1
+                                ? ` (tie)`
+                                : ""
+                            }`
+                          : "-"}
+                      </td>
+                      <td>
                         {tdh.gradients_balance > 0
                           ? `#${numberWithCommas(
                               tdh.dense_rank_balance_gradients
@@ -247,6 +264,11 @@ export default function UserPageStatsOverview({
                       <td>
                         {tdh.unique_memes_szn5 > 0
                           ? `x${numberWithCommas(tdh.unique_memes_szn5)}`
+                          : "-"}
+                      </td>
+                      <td>
+                        {tdh.unique_memes_szn6 > 0
+                          ? `x${numberWithCommas(tdh.unique_memes_szn6)}`
                           : "-"}
                       </td>
                       <td>
@@ -328,6 +350,17 @@ export default function UserPageStatsOverview({
                           : "-"}
                       </td>
                       <td>
+                        {tdh.memes_balance_season6 > 0
+                          ? `#${numberWithCommas(
+                              tdh.dense_rank_unique_memes_season6
+                            )}${
+                              tdh.dense_rank_unique_memes_season6__ties > 1
+                                ? ` (tie)`
+                                : ""
+                            }`
+                          : "-"}
+                      </td>
+                      <td>
                         {tdh.gradients_balance > 0
                           ? `#${numberWithCommas(
                               tdh.dense_rank_balance_gradients
@@ -371,6 +404,11 @@ export default function UserPageStatsOverview({
                       <td>
                         {numberWithCommas(
                           Math.round(tdh.boosted_memes_tdh_season5)
+                        )}
+                      </td>
+                      <td>
+                        {numberWithCommas(
+                          Math.round(tdh.boosted_memes_tdh_season6)
                         )}
                       </td>
                       <td>
@@ -419,6 +457,11 @@ export default function UserPageStatsOverview({
                           : "-"}
                       </td>
                       <td>
+                        {tdh.tdh_rank_memes_szn6 > 0
+                          ? `#${numberWithCommas(tdh.tdh_rank_memes_szn6)}`
+                          : "-"}
+                      </td>
+                      <td>
                         {tdh.tdh_rank_gradients > 0
                           ? `#${numberWithCommas(tdh.tdh_rank_gradients)}`
                           : "-"}
@@ -436,8 +479,7 @@ export default function UserPageStatsOverview({
           <Accordion className={styles.userPageAccordion}>
             <Accordion.Item
               className={`${styles.userPageAccordionItem} mt-4`}
-              eventKey={"1"}
-            >
+              eventKey={"1"}>
               <Accordion.Header>Activity Overview</Accordion.Header>
               <Accordion.Body className={styles.primaryTableScrollContainer}>
                 <Table className={styles.primaryTableActivity}>
@@ -464,6 +506,9 @@ export default function UserPageStatsOverview({
                       </td>
                       <td>
                         <b>SZN5</b>
+                      </td>
+                      <td>
+                        <b>SZN6</b>
                       </td>
                       <td>
                         <b>Gradient</b>
@@ -520,6 +565,13 @@ export default function UserPageStatsOverview({
                           : "-"}
                       </td>
                       <td>
+                        {tdh.transfers_in_memes_season6 > 0
+                          ? `x${numberWithCommas(
+                              tdh.transfers_in_memes_season6
+                            )}`
+                          : "-"}
+                      </td>
+                      <td>
                         {tdh.transfers_in_gradients > 0
                           ? `x${numberWithCommas(tdh.transfers_in_gradients)}`
                           : "-"}
@@ -571,6 +623,13 @@ export default function UserPageStatsOverview({
                         {tdh.purchases_count_memes_season5 > 0
                           ? `x${numberWithCommas(
                               tdh.purchases_count_memes_season5
+                            )}`
+                          : "-"}
+                      </td>
+                      <td>
+                        {tdh.purchases_count_memes_season6 > 0
+                          ? `x${numberWithCommas(
+                              tdh.purchases_count_memes_season6
                             )}`
                           : "-"}
                       </td>
@@ -646,6 +705,15 @@ export default function UserPageStatsOverview({
                           : "-"}
                       </td>
                       <td>
+                        {tdh.purchases_value_memes_season6 > 0
+                          ? `${numberWithCommas(
+                              Math.round(
+                                tdh.purchases_value_memes_season6 * 100
+                              ) / 100
+                            )}`
+                          : "-"}
+                      </td>
+                      <td>
                         {tdh.purchases_value_gradients > 0
                           ? `${numberWithCommas(
                               Math.round(tdh.purchases_value_gradients * 100) /
@@ -705,6 +773,13 @@ export default function UserPageStatsOverview({
                           : "-"}
                       </td>
                       <td>
+                        {tdh.transfers_out_memes_season6 > 0
+                          ? `x${numberWithCommas(
+                              tdh.transfers_out_memes_season6
+                            )}`
+                          : "-"}
+                      </td>
+                      <td>
                         {tdh.transfers_out_gradients > 0
                           ? `x${numberWithCommas(tdh.transfers_out_gradients)}`
                           : "-"}
@@ -756,6 +831,13 @@ export default function UserPageStatsOverview({
                         {tdh.sales_count_memes_season5 > 0
                           ? `x${numberWithCommas(
                               tdh.sales_count_memes_season5
+                            )}`
+                          : "-"}
+                      </td>
+                      <td>
+                        {tdh.sales_count_memes_season6 > 0
+                          ? `x${numberWithCommas(
+                              tdh.sales_count_memes_season6
                             )}`
                           : "-"}
                       </td>
@@ -819,6 +901,14 @@ export default function UserPageStatsOverview({
                         {tdh.sales_value_memes_season5 > 0
                           ? `${numberWithCommas(
                               Math.round(tdh.sales_value_memes_season5 * 100) /
+                                100
+                            )}`
+                          : "-"}
+                      </td>
+                      <td>
+                        {tdh.sales_value_memes_season6 > 0
+                          ? `${numberWithCommas(
+                              Math.round(tdh.sales_value_memes_season6 * 100) /
                                 100
                             )}`
                           : "-"}
