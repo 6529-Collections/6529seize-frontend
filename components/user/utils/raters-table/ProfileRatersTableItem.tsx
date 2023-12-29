@@ -71,7 +71,7 @@ export default function ProfileRatersTableItem({
       <td className="tw-py-2.5">
         <div className="tw-inline-flex tw-items-center tw-space-x-2">
           <UserCICAndLevel level={rating.raterLevel} cicType={cicType} />
-          <div className="tw-inline-flex tw-items-center tw-space-x-1">
+          <div className="tw-inline-flex tw-items-center">
             <button
               onClick={goToProfile}
               className="tw-bg-transparent tw-border-none tw-flex tw-items-center"
@@ -84,7 +84,7 @@ export default function ProfileRatersTableItem({
               {TYPE_TO_TEXT[type]}
             </span>
             <span
-              className={`tw-whitespace-nowrap tw-text-sm tw-font-semibold ${ratingColor}`}
+              className={`tw-ml-1.5 tw-whitespace-nowrap tw-text-sm tw-font-semibold ${ratingColor}`}
             >
               {ratingStr}
             </span>

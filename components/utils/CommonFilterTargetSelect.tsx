@@ -19,7 +19,7 @@ export default function CommonFilterTargetSelect({
 }) {
   return (
     <fieldset className="tw-px-6 md:tw-px-8 tw-mt-4 tw-max-w-sm">
-      <div className="tw-flex tw-items-center tw-space-x-10 tw-space-y-0">
+      <div className="tw-flex tw-items-center tw-space-x-6 tw-space-y-0">
         {TARGETS.map((target) => (
           <button
             key={target.id}
@@ -31,11 +31,11 @@ export default function CommonFilterTargetSelect({
               type="radio"
               checked={selected === target.id}
               onChange={() => onChange(target.id)}
-              className="tw-h-4 tw-w-4 tw-border-gray-300 tw-text-indigo-600 focus:tw-ring-indigo-600 tw-cursor-pointer"
+              className="tw-form-radio tw-h-4 tw-w-4 tw-bg-iron-700 tw-border-iron-600 tw-border tw-border-solid focus:tw-ring-2 tw-ring-offset-iron-800 tw-text-primary-400 focus:tw-ring-primary-400 tw-cursor-pointer"
             />
             <label
               htmlFor={target.id}
-              className="tw-ml-3 tw-block tw-text-sm tw-font-medium tw-leading-6 tw-text-iron-400 tw-cursor-pointer"
+              className="tw-ml-2 tw-block tw-text-sm tw-font-medium tw-leading-6 tw-text-iron-300 tw-cursor-pointer"
             >
               {target.name}
             </label>

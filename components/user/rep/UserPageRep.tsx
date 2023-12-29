@@ -76,7 +76,7 @@ export default function UserPageRep({
         </>
       )}
 
-      <div className="tw-mt-10 tw-grid tw-grid-cols-1 xl:tw-grid-cols-2 tw-gap-y-10 tw-gap-x-10">
+      <div className="tw-mt-8 lg:tw-mt-10 tw-grid tw-grid-cols-1 xl:tw-grid-cols-2 tw-gap-y-8 lg:tw-gap-y-10 tw-gap-x-8 lg:tw-gap-x-10">
         <div>
           <UserPageRepRaters type={ProfileRatersTableType.REP_RECEIVED} />
         </div>
@@ -85,7 +85,7 @@ export default function UserPageRep({
         </div>
       </div>
 
-      <div className="tw-mt-10">
+      <div className="tw-mt-8 lg:tw-mt-10">
         <UserPageRepActivityLog
           initialActivityLogParams={initialActivityLogParams}
         />

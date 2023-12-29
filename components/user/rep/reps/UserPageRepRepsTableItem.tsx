@@ -33,28 +33,28 @@ export default function UserPageRepRepsTableItem({
       key={rep.category}
       className={
         canEditRep
-          ? "hover:tw-bg-neutral-700 tw-transition tw-duration-300 tw-ease-out tw-cursor-pointer"
+          ? "hover:tw-bg-iron-800 tw-transition tw-duration-300 tw-ease-out tw-cursor-pointer"
           : ""
       }
       onClick={onTableClick}
     >
-      <td className="tw-whitespace-nowrap tw-py-3.5 tw-pl-4 tw-pr-3 tw-text-sm tw-font-semibold tw-text-iron-200 sm:pl-6">
+      <td className="tw-whitespace-nowrap tw-py-3.5 tw-px-6 tw-text-sm tw-font-semibold tw-text-iron-50">
         {rep.category}
       </td>
       <td
         className={`${
           isPositiveRating ? "tw-text-green" : "tw-text-red"
-        } tw-whitespace-nowrap tw-py-3.5 tw-pl-3 tw-pr-3 tw-text-sm tw-font-medium sm:pl-6`}
+        } tw-whitespace-nowrap tw-py-3.5 tw-px-6 tw-text-sm tw-font-medium tw-text-right`}
       >
         {rep.rating}
       </td>
-      <td className="tw-whitespace-nowrap tw-py-3.5 tw-pl-3 tw-pr-3 tw-text-sm tw-font-medium tw-text-iron-200 sm:pl-6">
+      <td className="tw-whitespace-nowrap tw-py-3.5 tw-px-6 tw-text-sm tw-font-medium tw-text-right tw-text-iron-400">
         {rep.contributor_count}
       </td>
       <td
         className={`${
           isPositiveRaterContribution ? "tw-text-green" : "tw-text-red"
-        } tw-whitespace-nowrap tw-py-3.5 tw-pl-3 tw-pr-3 tw-text-sm tw-font-medium sm:pl-6`}
+        } tw-whitespace-nowrap tw-py-3.5 tw-px-6 tw-text-sm tw-font-medium tw-text-right`}
       >
         {rep.rater_contribution ? rep.rater_contribution : " "}
       </td>

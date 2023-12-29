@@ -29,10 +29,10 @@ export default function UserPageIdentityHeader({
 
   return (
     <div>
-      <div className="tw-mt-8 lg:tw-flex lg:tw-items-center tw-lg:justify-between">
+      <div className="tw-mt-6 lg:tw-mt-8 lg:tw-flex lg:tw-items-center tw-lg:justify-between">
         <div className="tw-min-w-0 tw-flex-1">
           <div className="tw-flex tw-flex-col">
-            <h2 className="tw-mb-1 tw-text-xl tw-font-semibold tw-text-white tw-sm:truncate sm:tw-text-2xl sm:tw-tracking-tight">
+            <h2 className="tw-mb-1 tw-text-xl tw-font-semibold tw-text-iron-50 tw-sm:truncate sm:tw-text-2xl sm:tw-tracking-tight">
               Community Identity Check (CIC)
             </h2>
             <p className="tw-font-normal tw-text-iron-400 tw-text-base tw-mb-0">

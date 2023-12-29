@@ -11,15 +11,15 @@ export default function UserPageRepModifyModalRaterStats({
   return (
     <div className="tw-mt-8">
       <div className="tw-flex tw-flex-col tw-space-y-1">
-        <span className="tw-text-sm tw-block tw-text-iron-200 tw-font-semibold">
+        <span className="tw-text-sm tw-block tw-text-iron-300 tw-font-normal">
           <span>Your available Rep:</span>
-          <span className="tw-ml-1">
+          <span className="tw-ml-1 tw-font-semibold tw-text-iron-50">
             {formatNumberWithCommas(giverAvailableRep)}
           </span>
         </span>
-        <span className="tw-text-sm tw-block tw-text-iron-200 tw-font-semibold">
+        <span className="tw-text-sm tw-block tw-text-iron-300 tw-font-normal">
           <span>Your max/min Rep Rating to {repState.category}:</span>
-          <span className="tw-ml-1">
+          <span className="tw-ml-1 tw-font-semibold tw-text-iron-50">
             +/-{" "}
             {formatNumberWithCommas(
               giverAvailableRep + Math.abs(repState.rater_contribution ?? 0)

@@ -43,10 +43,10 @@ export default function UserRateAdjustmentHelperValue({
 
     return (
       <div className="tw-space-x-1.5">
-        <span className="tw-text-sm tw-text-iron-200 tw-font-medium">
+        <span className="tw-text-sm tw-text-iron-300 tw-font-normal">
           {title}
         </span>
-        <span className={`${CLASSES[valueState]} tw-text-sm tw-font-semibold`}>
+        <span className={`${CLASSES[valueState]} tw-text-sm tw-font-semibold tw-text-iron-50`}>
           {valueString}
         </span>
       </div>

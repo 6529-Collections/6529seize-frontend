@@ -32,7 +32,7 @@ export default function UserPageRepNewRepSearchDropdown({
       <div className="tw-py-1 tw-flow-root tw-max-h-[calc(240px+_-5vh)] tw-overflow-x-hidden tw-overflow-y-auto">
         <ul className="tw-flex tw-flex-col tw-px-2 tw-mx-0 tw-mb-0 tw-list-none">
           {state === STATE.INITIAL && (
-            <li className="tw-group tw-justify-between tw-w-full tw-flex tw-rounded-lg tw-relative  tw-select-none tw-p-2 tw-text-iron-200 tw-font-normal">
+            <li className="tw-group tw-justify-between tw-w-full tw-flex tw-rounded-lg tw-relative  tw-select-none tw-p-2 tw-text-iron-200 tw-font-normal tw-text-sm">
               Type at least 3 characters
             </li>
           )}

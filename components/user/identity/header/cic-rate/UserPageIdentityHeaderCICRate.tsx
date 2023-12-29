@@ -3,7 +3,10 @@ import {
   ApiProfileRaterCicState,
   IProfileAndConsolidations,
 } from "../../../../../entities/IProfile";
-import { formatNumberWithCommas, getStringAsNumberOrZero } from "../../../../../helpers/Helpers";
+import {
+  formatNumberWithCommas,
+  getStringAsNumberOrZero,
+} from "../../../../../helpers/Helpers";
 import { AuthContext } from "../../../../auth/Auth";
 import {
   commonApiFetch,
@@ -176,15 +179,15 @@ export default function UserPageIdentityHeaderCICRate({
           isTooltip ? "tw-text-sm" : "tw-text-base"
         } tw-flex tw-flex-col tw-space-y-1`}
       >
-        <span className="tw-block tw-text-iron-200 tw-font-semibold">
+        <span className="tw-block tw-text-iron-300 tw-font-normal">
           <span>Your available CIC:</span>
-          <span className="tw-ml-1">
+          <span className="tw-ml-1 tw-font-semibold tw-text-iron-50">
             {formatNumberWithCommas(myAvailableCIC)}
           </span>
         </span>
-        <span className="tw-block tw-text-iron-200 tw-font-semibold">
+        <span className="tw-block tw-text-iron-300 tw-font-normal">
           <span>Your max/min CIC Rating to {profile.profile?.handle}:</span>
-          <span className="tw-ml-1">
+          <span className="tw-ml-1 tw-font-semibold tw-text-iron-50">
             +/- {formatNumberWithCommas(myMaxCICRatings)}
           </span>
         </span>
@@ -193,12 +196,16 @@ export default function UserPageIdentityHeaderCICRate({
         onSubmit={onSubmit}
         className={`${isTooltip ? "tw-mt-4" : "tw-mt-6"}`}
       >
-        <div className="tw-flex tw-items-end tw-space-x-3.5">
-          <div>
+        <div
+          className={`${
+            isTooltip ? "" : "tw-flex-wrap"
+          } tw-flex tw-items-end tw-gap-3`}
+        >
+          <div className="tw-w-full sm:tw-w-auto">
             <label className="tw-block tw-text-sm tw-font-normal tw-text-iron-400">
               Your total CIC Rating of {profile.profile?.handle}:
             </label>
-            <div className="tw-relative tw-flex tw-mt-1.5">
+            <div className="tw-w-full tw-relative tw-flex tw-mt-1.5">
               <span className="tw-flex tw-flex-col tw-items-center tw-justify-center tw-bg-iron-900 tw-rounded-l-lg tw-border tw-border-solid tw-border-iron-700 tw-px-3">
                 <svg
                   className="tw-w-3.5 tw-h-3.5 tw-flex-shrink-0 tw-text-iron-500"
@@ -236,17 +243,17 @@ export default function UserPageIdentityHeaderCICRate({
                 required
                 autoComplete="off"
                 className={`${
-                  isTooltip ? "tw-max-w-[12rem]" : ""
-                } tw-block tw-rounded-r-lg tw-border-0 tw-py-3 tw-px-3 tw-bg-iron-900 tw-text-iron-300 tw-font-medium tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-700 placeholder:tw-text-iron-500 focus:tw-outline-none  focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 tw-text-base tw-transition tw-duration-300 tw-ease-out`}
+                  isTooltip ? "tw-max-w-[12rem]" : "tw-w-full sm:tw-w-auto"
+                } tw-block  tw-rounded-r-lg tw-border-0 tw-py-3 tw-px-3 tw-bg-iron-900 tw-text-iron-300 tw-font-medium tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-700 placeholder:tw-text-iron-500 focus:tw-outline-none  focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 tw-text-base tw-transition tw-duration-300 tw-ease-out`}
               />
             </div>
           </div>
 
-          <div>
-            <div className="tw-inline-flex tw-items-end tw-space-x-6">
+          <div className="tw-w-full sm:tw-w-auto">
+            <div className="tw-w-full sm:tw-w-auto tw-inline-flex tw-items-end tw-space-x-6">
               <button
                 type="submit"
-                className="tw-cursor-pointer tw-bg-primary-500 tw-px-4 tw-py-3 tw-text-sm tw-font-medium tw-text-white 
+                className="tw-w-full sm:tw-w-auto tw-cursor-pointer tw-bg-primary-500 tw-px-4 tw-py-3 tw-text-sm tw-font-medium tw-text-white 
               tw-border tw-border-solid tw-border-primary-500 tw-rounded-lg hover:tw-bg-primary-600 hover:tw-border-primary-600 tw-transition tw-duration-300 tw-ease-out"
               >
                 Rate

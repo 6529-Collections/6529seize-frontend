@@ -129,16 +129,16 @@ export default function UserPageRepNewRepSearch({
   return (
     <div className="tw-max-w-full tw-relative tw-bg-iron-800 tw-p-4 md:tw-p-6 tw-rounded-xl tw-border tw-border-solid tw-border-white/5">
       <UserPageRepNewRepSearchHeader repRates={repRates} />
-      <div ref={listRef} className="tw-max-w-xs">
-        <div className="tw-mt-6 tw-relative">
-          <form onSubmit={onSubmit} className="tw-max-w-xs">
+      <div ref={listRef} className="tw-w-full sm:tw-max-w-xs">
+        <div className="tw-w-full tw-mt-6 tw-relative">
+          <form onSubmit={onSubmit} className="tw-w-full sm:tw-max-w-xs">
             <label
               htmlFor="search-rep"
               className="tw-block tw-text-sm tw-font-normal tw-text-iron-400"
             >
               Add new rep
             </label>
-            <div className="tw-relative tw-mt-1.5">
+            <div className="tw-w-full tw-relative tw-mt-1.5">
               <svg
                 className="tw-pointer-events-none tw-absolute tw-left-4 tw-top-3.5 tw-h-5 tw-w-5 tw-text-iron-300"
                 viewBox="0 0 20 20"
