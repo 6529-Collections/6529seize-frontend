@@ -467,6 +467,13 @@ export default function UserPageStatsOverview({
                           : "-"}
                       </td>
                     </tr>
+                    <tr className={styles.primaryTableGap}></tr>
+                    <tr>
+                      <td>
+                        <b>Boost</b>
+                      </td>
+                      <td>x{tdh.boost}</td>
+                    </tr>
                   </tbody>
                 </Table>
               </Accordion.Body>
