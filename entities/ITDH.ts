@@ -13,6 +13,7 @@ export interface BaseTDH {
   tdh_rank_memes_szn3: number;
   tdh_rank_memes_szn4: number;
   tdh_rank_memes_szn5: number;
+  tdh_rank_memes_szn6: number;
   tdh_rank_gradients: number;
   balance: number;
   genesis: number;
@@ -23,6 +24,7 @@ export interface BaseTDH {
   unique_memes_szn3: number;
   unique_memes_szn4: number;
   unique_memes_szn5: number;
+  unique_memes_szn6: number;
   boosted_memes_tdh: number;
   memes_tdh: number;
   memes_tdh__raw: number;
@@ -47,6 +49,10 @@ export interface BaseTDH {
   memes_tdh_season5: number;
   memes_balance_season5: number;
   memes_tdh_season5__raw: number;
+  boosted_memes_tdh_season6: number;
+  memes_tdh_season6: number;
+  memes_balance_season6: number;
+  memes_tdh_season6__raw: number;
   memes: NftTDH[];
   memes_ranks: NftRank[];
   gradients_balance: number;
@@ -62,6 +68,7 @@ export interface BaseTDH {
   memes_cards_sets_szn3: number;
   memes_cards_sets_szn4: number;
   memes_cards_sets_szn5: number;
+  memes_cards_sets_szn6: number;
   day_change: number;
 }
 
@@ -90,6 +97,8 @@ export interface BaseTDHMetrics extends TDH {
   purchases_count_memes_season4: number;
   purchases_value_memes_season5: number;
   purchases_count_memes_season5: number;
+  purchases_value_memes_season6: number;
+  purchases_count_memes_season6: number;
   purchases_value_gradients: number;
   purchases_count_gradients: number;
   purchases_value_primary: number;
@@ -106,6 +115,8 @@ export interface BaseTDHMetrics extends TDH {
   purchases_count_primary_memes_season4: number;
   purchases_value_primary_memes_season5: number;
   purchases_count_primary_memes_season5: number;
+  purchases_value_primary_memes_season6: number;
+  purchases_count_primary_memes_season6: number;
   purchases_value_primary_gradients: number;
   purchases_count_primary_gradients: number;
   purchases_value_secondary: number;
@@ -122,6 +133,8 @@ export interface BaseTDHMetrics extends TDH {
   purchases_count_secondary_memes_season4: number;
   purchases_value_secondary_memes_season5: number;
   purchases_count_secondary_memes_season5: number;
+  purchases_value_secondary_memes_season6: number;
+  purchases_count_secondary_memes_season6: number;
   purchases_value_secondary_gradients: number;
   purchases_count_secondary_gradients: number;
   sales_value: number;
@@ -138,6 +151,8 @@ export interface BaseTDHMetrics extends TDH {
   sales_count_memes_season4: number;
   sales_value_memes_season5: number;
   sales_count_memes_season5: number;
+  sales_value_memes_season6: number;
+  sales_count_memes_season6: number;
   sales_value_gradients: number;
   sales_count_gradients: number;
   transfers_in: number;
@@ -147,6 +162,7 @@ export interface BaseTDHMetrics extends TDH {
   transfers_in_memes_season3: number;
   transfers_in_memes_season4: number;
   transfers_in_memes_season5: number;
+  transfers_in_memes_season6: number;
   transfers_in_gradients: number;
   transfers_out: number;
   transfers_out_memes: number;
@@ -155,6 +171,7 @@ export interface BaseTDHMetrics extends TDH {
   transfers_out_memes_season3: number;
   transfers_out_memes_season4: number;
   transfers_out_memes_season5: number;
+  transfers_out_memes_season6: number;
   transfers_out_gradients: number;
   dense_rank_balance: number;
   dense_rank_balance_memes: number;
@@ -163,6 +180,7 @@ export interface BaseTDHMetrics extends TDH {
   dense_rank_balance_memes_season3: number;
   dense_rank_balance_memes_season4: number;
   dense_rank_balance_memes_season5: number;
+  dense_rank_balance_memes_season6: number;
   dense_rank_balance_gradients: number;
   dense_rank_balance__ties: number;
   dense_rank_balance_memes__ties: number;
@@ -171,6 +189,7 @@ export interface BaseTDHMetrics extends TDH {
   dense_rank_balance_memes_season3__ties: number;
   dense_rank_balance_memes_season4__ties: number;
   dense_rank_balance_memes_season5__ties: number;
+  dense_rank_balance_memes_season6__ties: number;
   dense_rank_balance_gradients__ties: number;
   dense_rank_sort: number;
   dense_rank_unique: number;
@@ -187,6 +206,8 @@ export interface BaseTDHMetrics extends TDH {
   dense_rank_unique_memes_season4__ties: number;
   dense_rank_unique_memes_season5: number;
   dense_rank_unique_memes_season5__ties: number;
+  dense_rank_unique_memes_season6: number;
+  dense_rank_unique_memes_season6__ties: number;
 }
 
 export interface TDHMetrics extends TDH, BaseTDHMetrics {}

@@ -4,7 +4,6 @@ export interface OwnerLite {
   balance: number;
 }
 
-
 export interface Owner {
   created_at: Date;
   wallet: `0x${string}`;
@@ -36,4 +35,5 @@ export interface OwnerTags {
   memes_cards_sets_szn3: number;
   memes_cards_sets_szn4: number;
   memes_cards_sets_szn5: number;
+  memes_cards_sets_szn6: number;
 }
