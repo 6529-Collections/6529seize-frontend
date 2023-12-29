@@ -12,6 +12,7 @@ import UserPageRepModifyModalHeader from "./UserPageRepModifyModalHeader";
 import UserPageRepModifyModalRaterStats from "./UserPageRepModifyModalRaterStats";
 import UserRateAdjustmentHelper from "../../utils/rate/UserRateAdjustmentHelper";
 import { ReactQueryWrapperContext } from "../../../react-query-wrapper/ReactQueryWrapper";
+import CircleLoader from "../../../distribution-plan-tool/common/CircleLoader";
 
 interface ApiAddRepRatingToProfileRequest {
   readonly amount: number;
@@ -42,7 +43,7 @@ export default function UserPageRepModifyModal({
   useClickAway(modalRef, onClose);
   useKeyPressEvent("Escape", onClose);
 
-  const originalRating = repState.rater_contribution ?? 0;
+  const originalRating = repState.rater_contribution;
 
   const [adjustedRatingStr, setAdjustedRatingStr] = useState<string>(
     `${originalRating}`
@@ -212,7 +213,13 @@ export default function UserPageRepModifyModal({
                     type="submit"
                     className="tw-w-full sm:tw-w-auto tw-cursor-pointer tw-bg-primary-500 tw-px-4 tw-py-3 tw-text-sm tw-font-medium tw-text-white tw-border tw-border-solid tw-border-primary-500 tw-rounded-lg hover:tw-bg-primary-600 hover:tw-border-primary-600 tw-transition tw-duration-300 tw-ease-out"
                   >
-                    Save
+                    {mutating ? (
+                      <div className="tw-w-8">
+                        <CircleLoader />
+                      </div>
+                    ) : (
+                      <>Save</>
+                    )}
                   </button>
                   <button
                     onClick={onClose}

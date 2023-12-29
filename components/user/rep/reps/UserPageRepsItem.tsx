@@ -48,7 +48,7 @@ export default function UserPageRepsItem({
         >
           <Tippy
             content={`My Rep: ${formatNumberWithCommas(
-              rep.rater_contribution ?? 0
+              rep.rater_contribution
             )}`}
             theme="dark"
             placement="top"

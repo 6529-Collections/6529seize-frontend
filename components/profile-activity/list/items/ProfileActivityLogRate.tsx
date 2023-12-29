@@ -21,8 +21,8 @@ const LOG_MATTER_STR: Record<
   ProfileActivityLogRatingEditContentMatter,
   string
 > = {
-  [ProfileActivityLogRatingEditContentMatter.REP]: "Rep rating",
-  [ProfileActivityLogRatingEditContentMatter.CIC]: "CIC-rating",
+  [ProfileActivityLogRatingEditContentMatter.REP]: "Rep",
+  [ProfileActivityLogRatingEditContentMatter.CIC]: "CIC",
 };
 
 const TO_FROM: Record<ProfileActivityLogRateType, string> = {
@@ -102,6 +102,11 @@ export default function ProfileActivityLogRate({
       >
         {changeStr}
       </span>
+      <span
+        className={`${getTotalRatingClass()} tw-whitespace-nowrap tw-text-sm tw-font-medium`}
+      >
+        (total {newRatingStr})
+      </span>
       {log.contents.rating_matter ===
         ProfileActivityLogRatingEditContentMatter.REP && (
         <span className="tw-whitespace-nowrap tw-text-sm tw-font-semibold tw-text-iron-100">
@@ -109,10 +114,10 @@ export default function ProfileActivityLogRate({
         </span>
       )}
       <ProfileActivityLogItemAction
-        action={` ${LOG_MATTER_STR[log.contents.rating_matter]}  ${
-          TO_FROM[ratingType]
-        }`}
+        action={LOG_MATTER_STR[log.contents.rating_matter]}
       />
+
+      <ProfileActivityLogItemAction action={TO_FROM[ratingType]} />
       <button
         onClick={goToProfile}
         className="tw-bg-transparent tw-border-none tw-leading-4 tw-p-0"
@@ -126,11 +131,7 @@ export default function ProfileActivityLogRate({
           {log.target_profile_handle}
         </span>
       </button>
-      <span
-        className={`${getTotalRatingClass()} tw-whitespace-nowrap tw-text-sm tw-font-medium`}
-      >
-        (total {newRatingStr})
-      </span>
+
       {isSystemAdjustment && (
         <span className="tw-whitespace-nowrap tw-inline-flex tw-items-center tw-gap-x-1.5 tw-rounded-md tw-px-2 tw-py-1 tw-text-xs tw-font-medium tw-text-iron-300 tw-ring-1 tw-ring-inset tw-ring-iron-700">
           <svg

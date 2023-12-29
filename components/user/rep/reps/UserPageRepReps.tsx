@@ -5,7 +5,7 @@ import {
   RatingStats,
 } from "../../../../entities/IProfile";
 import UserPageRepRepsTop from "./UserPageRepRepsTop";
-import UserPageRepRepsTable from "./UserPageRepRepsTable";
+import UserPageRepRepsTable from "./table/UserPageRepRepsTable";
 import { AuthContext } from "../../../auth/Auth";
 
 const TOP_REPS_COUNT = 5;

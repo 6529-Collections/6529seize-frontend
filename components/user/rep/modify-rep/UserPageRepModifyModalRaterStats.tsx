@@ -22,7 +22,7 @@ export default function UserPageRepModifyModalRaterStats({
           <span className="tw-ml-1 tw-font-semibold tw-text-iron-50">
             +/-{" "}
             {formatNumberWithCommas(
-              giverAvailableRep + Math.abs(repState.rater_contribution ?? 0)
+              giverAvailableRep + Math.abs(repState.rater_contribution)
             )}
           </span>
         </span>

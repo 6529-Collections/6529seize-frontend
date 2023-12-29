@@ -2,10 +2,10 @@ import { useState } from "react";
 import {
   IProfileAndConsolidations,
   RatingStats,
-} from "../../../../entities/IProfile";
-import CommonAnimationWrapper from "../../../utils/animation/CommonAnimationWrapper";
-import CommonAnimationOpacity from "../../../utils/animation/CommonAnimationOpacity";
-import UserPageRepModifyModal from "../modify-rep/UserPageRepModifyModal";
+} from "../../../../../entities/IProfile";
+import CommonAnimationWrapper from "../../../../utils/animation/CommonAnimationWrapper";
+import CommonAnimationOpacity from "../../../../utils/animation/CommonAnimationOpacity";
+import UserPageRepModifyModal from "../../modify-rep/UserPageRepModifyModal";
 
 export default function UserPageRepRepsTableItem({
   rep,
@@ -19,7 +19,7 @@ export default function UserPageRepRepsTableItem({
   readonly canEditRep: boolean;
 }) {
   const isPositiveRating = rep.rating > 0;
-  const isPositiveRaterContribution = (rep.rater_contribution ?? 0) > 0;
+  const isPositiveRaterContribution = rep.rater_contribution > 0;
   const [isEditRepModalOpen, setIsEditRepModalOpen] = useState<boolean>(false);
 
   const onTableClick = () => {

@@ -301,7 +301,7 @@ export interface RatingStats {
   readonly category: string;
   readonly rating: number;
   readonly contributor_count: number;
-  readonly rater_contribution: number | null;
+  readonly rater_contribution: number;
 }
 
 export interface ApiProfileRepRatesState {

@@ -269,7 +269,7 @@ export default function ReactQueryWrapper({
         category: rating.category,
         rating: rating.rating,
         contributor_count: rating.contributor_count,
-        rater_contribution: null,
+        rater_contribution: 0,
       })),
     };
     queryClient.setQueryData(
