@@ -39,7 +39,7 @@ export default function ProfileActivityLogItemHandle({
   };
 
   const isCurrentUser =
-    user?.toLowerCase() === log?.profile_handle.toLowerCase();
+    user?.toLowerCase() === log?.profile_handle?.toLowerCase();
 
   return (
     <button

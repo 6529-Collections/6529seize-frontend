@@ -46,15 +46,14 @@ export default function CommunityActivityPage({
   pageProps,
 }: {
   readonly pageProps: CommunityActivityPage;
-  }) {
-  
-    const { initLandingPage } = useContext(ReactQueryWrapperContext);
-    initLandingPage({
-      activityLogs: {
-        data: pageProps.logsPage,
-        params: INITIAL_ACTIVITY_LOGS_PARAMS,
-      },
-    });
+}) {
+  const { initCommunityActivityPage } = useContext(ReactQueryWrapperContext);
+  initCommunityActivityPage({
+    activityLogs: {
+      data: pageProps.logsPage,
+      params: INITIAL_ACTIVITY_LOGS_PARAMS,
+    },
+  });
   return (
     <>
       <Head>
