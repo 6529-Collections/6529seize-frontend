@@ -111,6 +111,22 @@ export default function UserPageRepModifyModal({
     },
   });
 
+  const [newRating, setNewRating] = useState<number>(
+    getStringAsNumberOrZero(adjustedRatingStr)
+  );
+
+  useEffect(() => {
+    setNewRating(getStringAsNumberOrZero(adjustedRatingStr));
+  }, [adjustedRatingStr]);
+
+  const [haveChanged, setHaveChanged] = useState<boolean>(
+    newRating !== originalRating
+  );
+
+  useEffect(() => {
+    setHaveChanged(newRating !== originalRating);
+  }, [newRating, originalRating]);
+
   const onSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (mutating) {
@@ -126,9 +142,7 @@ export default function UserPageRepModifyModal({
       setMutating(false);
       return;
     }
-
-    const newRating = getStringAsNumberOrZero(adjustedRatingStr);
-    if (newRating === originalRating) {
+    if (!haveChanged) {
       setMutating(false);
       return;
     }
@@ -211,7 +225,12 @@ export default function UserPageRepModifyModal({
                 <div className="sm:tw-flex sm:tw-flex-row-reverse tw-gap-x-3">
                   <button
                     type="submit"
-                    className="tw-w-full sm:tw-w-auto tw-cursor-pointer tw-bg-primary-500 tw-px-4 tw-py-3 tw-text-sm tw-font-semibold tw-text-white tw-border tw-border-solid tw-border-primary-500 tw-rounded-lg hover:tw-bg-primary-600 hover:tw-border-primary-600 tw-transition tw-duration-300 tw-ease-out"
+                    disabled={!haveChanged}
+                    className={`${
+                      haveChanged
+                        ? "tw-cursor-pointer hover:tw-bg-primary-600 hover:tw-border-primary-600"
+                        : "tw-cursor-not-allowed tw-opacity-50"
+                    } tw-w-full sm:tw-w-auto tw-bg-primary-500 tw-border-primary-500 tw-px-4 tw-py-3 tw-text-sm tw-font-semibold tw-text-white tw-border tw-border-solid  tw-rounded-lg  tw-transition tw-duration-300 tw-ease-out`}
                   >
                     {mutating ? (
                       <div className="tw-w-8">
