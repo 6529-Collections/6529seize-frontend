@@ -71,7 +71,7 @@ export default function UserPageIdentityStatements({
   }, [statements]);
 
   return (
-    <div className="tw-mt-8 lg:tw-mt-10">
+    <div className="tw-mt-6 lg:tw-mt-10">
       <div className="tw-bg-iron-900 tw-border tw-border-white/5 tw-border-solid tw-rounded-xl tw-scroll-py-3 tw-overflow-auto">
         <UserPageIdentityAddStatementsHeader profile={profile} />
         <div className="tw-px-4 tw-py-6 sm:tw-p-6 md:tw-p-8 tw-mx-auto tw-grid tw-grid-cols-1 tw-gap-x-8 tw-gap-y-10 xl:tw-gap-y-16 lg:tw-mx-0 xl:tw-grid-cols-5">
