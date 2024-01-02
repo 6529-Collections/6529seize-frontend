@@ -1,18 +1,29 @@
-import { useEffect, useState } from "react";
-import { IProfileAndConsolidations } from "../../../../../entities/IProfile";
-import { amIUser } from "../../../../../helpers/Helpers";
 import { useAccount } from "wagmi";
-import UserPageIdentityHeaderCICRate from "./UserPageIdentityHeaderCICRate";
+import { IProfileAndConsolidations } from "../../../../entities/IProfile";
 import { useQuery } from "@tanstack/react-query";
-import { QueryKey } from "../../../../react-query-wrapper/ReactQueryWrapper";
-import { commonApiFetch } from "../../../../../services/api/common-api";
+import { QueryKey } from "../../../react-query-wrapper/ReactQueryWrapper";
+import { commonApiFetch } from "../../../../services/api/common-api";
+import { useEffect, useState } from "react";
+import { amIUser } from "../../../../helpers/Helpers";
 
-export default function UserPageIdentityHeaderCICRateWrapper({
+export enum UserPageRateWrapperType {
+  CIC = "CIC",
+  REP = "REP",
+}
+
+const SUB_TITLE: Record<UserPageRateWrapperType, string> = {
+  [UserPageRateWrapperType.CIC]: "CIC rate",
+  [UserPageRateWrapperType.REP]: "give Rep for",
+};
+
+export default function UserPageRateWrapper({
   profile,
-  isTooltip
+  type,
+  children,
 }: {
   readonly profile: IProfileAndConsolidations;
-  readonly isTooltip: boolean;
+  readonly type: UserPageRateWrapperType;
+  readonly children: React.ReactNode;
 }) {
   const { address } = useAccount();
   const { data: connectedProfile } = useQuery<IProfileAndConsolidations>({
@@ -59,7 +70,7 @@ export default function UserPageIdentityHeaderCICRateWrapper({
           </svg>
           <div className="tw-ml-3 tw-self-center">
             <h3 className="tw-text-sm tw-mb-0 tw-font-semibold tw-text-primary-300">
-              Please connect to rate
+              Please connect to {SUB_TITLE[type]} {profile.profile?.handle}
             </h3>
           </div>
         </div>
@@ -87,7 +98,7 @@ export default function UserPageIdentityHeaderCICRateWrapper({
           </svg>
           <div className="tw-ml-3 tw-self-center">
             <h3 className="tw-text-sm tw-mb-0 tw-font-semibold tw-text-primary-300">
-              Please make profile to rate
+              Please make profile to {SUB_TITLE[type]} {profile.profile?.handle}
             </h3>
           </div>
         </div>
@@ -99,5 +110,5 @@ export default function UserPageIdentityHeaderCICRateWrapper({
     return null;
   }
 
-  return <UserPageIdentityHeaderCICRate profile={profile} isTooltip={isTooltip} />;
+  return <>{children}</>;
 }

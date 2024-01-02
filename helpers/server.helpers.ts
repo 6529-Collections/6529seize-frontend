@@ -1,16 +1,20 @@
 import { NFT, NFTLite } from "../entities/INFT";
 import { OwnerLite } from "../entities/IOwner";
 import {
+  ApiProfileRepRatesState,
   CicStatement,
   IProfileAndConsolidations,
   ProfileActivityLog,
   ProfilesMatterRatingWithRaterLevel,
+  RatingWithProfileInfoAndLevel,
 } from "../entities/IProfile";
 import { Season } from "../entities/ISeason";
 import { ConsolidatedTDHMetrics } from "../entities/ITDH";
 import { areEqualAddresses, containsEmojis, formatAddress } from "./Helpers";
 import { Page } from "./Types";
 import { commonApiFetch } from "../services/api/common-api";
+import jwtDecode from "jwt-decode";
+import { ActivityLogParamsConverted } from "../components/profile-activity/ProfileActivityLogs";
 
 export interface CommonUserServerSideProps {
   profile: IProfileAndConsolidations;
@@ -101,22 +105,17 @@ export const userPageNeedsRedirect = ({
   return null;
 };
 
-export const getUserProfileActivityLogs = async ({
-  user,
+export const getUserProfileActivityLogs = async <T = ProfileActivityLog>({
   headers,
+  params,
 }: {
-  user: string;
   headers: Record<string, string>;
-}): Promise<Page<ProfileActivityLog>> => {
+  params: ActivityLogParamsConverted;
+}): Promise<Page<T>> => {
   try {
-    return await commonApiFetch<Page<ProfileActivityLog>>({
+    return await commonApiFetch<Page<T>, ActivityLogParamsConverted>({
       endpoint: `profile-logs`,
-      params: {
-        profile: user,
-        page: `1`,
-        page_size: `10`,
-        log_type: "",
-      },
+      params,
       headers,
     });
   } catch {
@@ -254,22 +253,93 @@ export const getOwned = async ({
   }, []);
 };
 
-export const getProfileLogs = async ({
+export const getProfileRatings = async ({
+  user,
   headers,
+  signedWallet,
+}: {
+  user: string;
+  headers: Record<string, string>;
+  signedWallet: string | null;
+}): Promise<{
+  readonly ratings: ApiProfileRepRatesState;
+  readonly rater: string | null;
+}> => {
+  const raterProfile = signedWallet
+    ? await commonApiFetch<IProfileAndConsolidations>({
+        endpoint: `profiles/${signedWallet}`,
+        headers: headers,
+      })
+    : null;
+
+  const rater = raterProfile?.profile?.handle.toLowerCase() ?? null;
+
+  const params: Record<string, string> = {};
+  if (rater) {
+    params.rater = rater;
+  }
+
+  try {
+    return {
+      ratings: await commonApiFetch<ApiProfileRepRatesState>({
+        endpoint: `profiles/${user}/rep/ratings/received`,
+        params,
+        headers,
+      }),
+      rater,
+    };
+  } catch {
+    return {
+      ratings: {
+        total_rep_rating: 0,
+        total_rep_rating_by_rater: null,
+        rep_rates_left_for_rater: null,
+        number_of_raters: 0,
+        rating_stats: [],
+      },
+      rater,
+    };
+  }
+};
+
+export const getProfileRatingsByRater = async ({
+  user,
+  headers,
+  given,
+  page,
+  logType,
   pageSize,
 }: {
-  headers: Record<string, string>;
-  pageSize: number;
-}): Promise<Page<ProfileActivityLog>> => {
-  return await commonApiFetch<Page<ProfileActivityLog>>({
-    endpoint: `profile-logs`,
-    params: {
-      page: "1",
-      page_size: `${pageSize}`,
-      log_type: "",
-    },
-    headers,
-  });
+  readonly user: string;
+  readonly headers: Record<string, string>;
+  readonly page: number;
+  readonly logType: string;
+  readonly given: boolean;
+  readonly pageSize: number;
+}): Promise<Page<RatingWithProfileInfoAndLevel>> => {
+  const params: Record<string, string> = {
+    page: `${page}`,
+    page_size: `${pageSize}`,
+    log_type: logType,
+  };
+  if (given) {
+    params.given = "true";
+  }
+
+  try {
+    return await commonApiFetch<Page<RatingWithProfileInfoAndLevel>>({
+      endpoint: `profiles/${user}/rep/ratings/by-rater`,
+      params,
+      headers,
+    });
+  } catch {
+    return {
+      count: 0,
+      page: 1,
+      next: false,
+      data: [],
+    };
+  }
 };
 
 export const getCommonHeaders = (req: any): Record<string, string> => {
@@ -281,4 +351,19 @@ export const getCommonHeaders = (req: any): Record<string, string> => {
       ? { Authorization: `Bearer ${walletAuthCookie}` }
       : {}),
   };
+};
+
+export const getSignedWalletOrNull = (req: any): string | null => {
+  const walletAuthCookie = req?.req?.cookies["wallet-auth"] ?? null;
+  if (!walletAuthCookie) {
+    return null;
+  }
+  const decodedJwt = jwtDecode<{
+    id: string;
+    sub: string;
+    iat: number;
+    exp: number;
+  }>(walletAuthCookie);
+
+  return decodedJwt?.sub?.toLowerCase() ?? null;
 };

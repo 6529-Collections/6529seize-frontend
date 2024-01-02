@@ -2,7 +2,7 @@ import Head from "next/head";
 import styles from "../styles/Home.module.scss";
 import Image from "next/image";
 import { Col, Container, Row, Table } from "react-bootstrap";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { MEMES_CONTRACT } from "../constants";
 import { DBResponse } from "../entities/IDBResponse";
 import { NFT, MemesExtendedData, LabNFT } from "../entities/INFT";
@@ -13,14 +13,29 @@ import { fetchUrl } from "../services/6529api";
 import HeaderPlaceholder from "../components/header/HeaderPlaceholder";
 import { ProfileActivityLog } from "../entities/IProfile";
 import { Page } from "../helpers/Types";
-import { getCommonHeaders, getProfileLogs } from "../helpers/server.helpers";
-import ProfileActivityLogs from "../components/profile-activity/ProfileActivityLogs";
+import {
+  getCommonHeaders,
+  getUserProfileActivityLogs,
+} from "../helpers/server.helpers";
+import ProfileActivityLogs, {
+  ActivityLogParams,
+  convertActivityLogParams,
+} from "../components/profile-activity/ProfileActivityLogs";
 import { Inter } from "next/font/google";
+import { FilterTargetType } from "../components/utils/CommonFilterTargetSelect";
+import { ReactQueryWrapperContext } from "../components/react-query-wrapper/ReactQueryWrapper";
 export interface IndexPageProps {
   readonly logsPage: Page<ProfileActivityLog>;
 }
 
-const ACTIVITY_LOG_PAGE_SIZE = 20;
+const INITIAL_ACTIVITY_LOGS_PARAMS: ActivityLogParams = {
+  page: 1,
+  pageSize: 20,
+  logTypes: [],
+  matter: null,
+  targetType: FilterTargetType.ALL,
+  handleOrWallet: null,
+};
 
 const inter = Inter({
   weight: ["300", "400", "500", "600", "700"],
@@ -48,6 +63,13 @@ export default function Home({
 }: {
   readonly pageProps: IndexPageProps;
 }) {
+  const { initLandingPage } = useContext(ReactQueryWrapperContext);
+  initLandingPage({
+    activityLogs: {
+      data: pageProps.logsPage,
+      params: INITIAL_ACTIVITY_LOGS_PARAMS,
+    },
+  });
   const [isHeaderLoaded, setIsHeaderLoaded] = useState(false);
   const [isNftImageLoaded, setIsNftImageLoaded] = useState(false);
   const [connectedWallets, setConnectedWallets] = useState<string[]>([]);
@@ -373,9 +395,8 @@ export default function Home({
                 </h1>
               </div>
               <ProfileActivityLogs
-                initialLogs={pageProps.logsPage}
-                pageSize={ACTIVITY_LOG_PAGE_SIZE}
-                user={null}
+                initialParams={INITIAL_ACTIVITY_LOGS_PARAMS}
+                withFilters={true}
               />
             </div>
             {isNftImageLoaded && (
@@ -403,9 +424,9 @@ export async function getServerSideProps(
 }> {
   try {
     const headers = getCommonHeaders(req);
-    const logsPage = await getProfileLogs({
+    const logsPage = await getUserProfileActivityLogs({
       headers,
-      pageSize: ACTIVITY_LOG_PAGE_SIZE,
+      params: convertActivityLogParams(INITIAL_ACTIVITY_LOGS_PARAMS),
     });
     return {
       props: {

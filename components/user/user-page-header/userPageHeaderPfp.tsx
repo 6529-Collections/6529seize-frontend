@@ -17,13 +17,13 @@ export default function UserPageHeaderPfp({
         alt="Profile picture"
         width="176"
         height="176"
-        className="tw-flex-shrink-0 tw-object-contain tw-max-h-44 tw-min-w-44 tw-w-auto tw-h-auto tw-rounded-lg tw-ring-[3px] tw-ring-white/30 tw-bg-iron-800"
+        className="tw-flex-shrink-0 tw-object-contain tw-max-h-36 tw-min-w-36 sm:tw-max-h-44 sm:tw-min-w-44 tw-w-auto tw-h-auto tw-rounded-lg tw-ring-[3px] tw-ring-white/30 tw-bg-iron-800"
       />
     );
   }
   return (
     <div
-      className="tw-flex-shrink-0 tw-h-44 tw-w-44 tw-rounded-lg tw-ring-[3px] tw-ring-white/30 "
+      className="tw-flex-shrink-0 tw-h-36 sm:tw-h-44 tw-w-36 sm:tw-w-44 tw-rounded-lg tw-ring-[3px] tw-ring-white/30 "
       style={{
         background: `linear-gradient(45deg, ${defaultBanner1} 0%, ${defaultBanner2} 100%)`,
       }}

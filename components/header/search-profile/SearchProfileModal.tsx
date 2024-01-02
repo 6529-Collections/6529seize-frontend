@@ -169,17 +169,17 @@ export default function SearchProfileModal({
             )}
             {state === STATE.LOADING && (
               <div className="tw-h-72 tw-flex tw-items-center tw-justify-center">
-                <p className="tw-text-iron-200 tw-font-normal">Loading...</p>
+                <p className="tw-text-iron-200 tw-font-normal tw-text-sm">Loading...</p>
               </div>
             )}
             {state === STATE.NO_RESULTS && (
               <div className="tw-h-72 tw-flex tw-items-center tw-justify-center">
-                <p className="tw-text-iron-200">No results found</p>
+                <p className="tw-text-iron-200 tw-text-sm">No results found</p>
               </div>
             )}
             {state === STATE.INITIAL && (
               <div className="tw-h-72 tw-flex tw-items-center tw-justify-center">
-                <p className="tw-text-iron-200 tw-font-normal">
+                <p className="tw-text-iron-200 tw-font-normal tw-text-sm">
                   {!searchValue.length
                     ? "No results found"
                     : "Type at least 3 characters"}

@@ -3,8 +3,11 @@ import { IProfileAndConsolidations } from "../../../../entities/IProfile";
 import { useQuery } from "@tanstack/react-query";
 import { commonApiFetch } from "../../../../services/api/common-api";
 import UserPageIdentityHeaderCIC from "./UserPageIdentityHeaderCIC";
-import UserPageIdentityHeaderCICRateWrapper from "./cic-rate/UserPageIdentityHeaderCICRateWrapper";
 import { QueryKey } from "../../../react-query-wrapper/ReactQueryWrapper";
+import UserPageRateWrapper, {
+  UserPageRateWrapperType,
+} from "../../utils/rate/UserPageRateWrapper";
+import UserPageIdentityHeaderCICRate from "./cic-rate/UserPageIdentityHeaderCICRate";
 
 export default function UserPageIdentityHeader({
   profile: initialProfile,
@@ -26,10 +29,10 @@ export default function UserPageIdentityHeader({
 
   return (
     <div>
-      <div className="tw-mt-8 lg:tw-flex lg:tw-items-center tw-lg:justify-between">
+      <div className="tw-mt-6 lg:tw-mt-8 lg:tw-flex lg:tw-items-center tw-lg:justify-between">
         <div className="tw-min-w-0 tw-flex-1">
           <div className="tw-flex tw-flex-col">
-            <h2 className="tw-mb-1 tw-text-xl tw-font-semibold tw-text-white tw-sm:truncate sm:tw-text-2xl sm:tw-tracking-tight">
+            <h2 className="tw-mb-1 tw-text-xl tw-font-semibold tw-text-iron-50 tw-sm:truncate sm:tw-text-2xl sm:tw-tracking-tight">
               Community Identity Check (CIC)
             </h2>
             <p className="tw-font-normal tw-text-iron-400 tw-text-base tw-mb-0">
@@ -38,7 +41,15 @@ export default function UserPageIdentityHeader({
             </p>
           </div>
           <UserPageIdentityHeaderCIC profile={profile} />
-          <UserPageIdentityHeaderCICRateWrapper profile={profile} isTooltip={false} />
+          <UserPageRateWrapper
+            profile={profile}
+            type={UserPageRateWrapperType.CIC}
+          >
+            <UserPageIdentityHeaderCICRate
+              profile={profile}
+              isTooltip={false}
+            />
+          </UserPageRateWrapper>
         </div>
       </div>
     </div>

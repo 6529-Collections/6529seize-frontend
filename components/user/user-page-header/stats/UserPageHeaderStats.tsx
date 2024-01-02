@@ -1,21 +1,17 @@
-import { ConsolidatedTDHMetrics } from "../../../../entities/ITDH";
-import { formatNumber } from "../../../../helpers/Helpers";
+import { IProfileAndConsolidations } from "../../../../entities/IProfile";
+import { formatNumberWithCommas } from "../../../../helpers/Helpers";
 
 export default function UserPageHeaderStats({
-  consolidatedTDH,
+  profile,
 }: {
-  consolidatedTDH: ConsolidatedTDHMetrics | null;
+  readonly profile: IProfileAndConsolidations;
 }) {
-  const TDHFormatted = consolidatedTDH?.boosted_tdh
-    ? formatNumber(consolidatedTDH.boosted_tdh)
-    : null;
-
   return (
-    <div className="tw-mt-6">
+    <div className="tw-mt-4 sm:tw-mt-6">
       <div className="tw-flex tw-gap-x-6">
         <div className="tw-inline-flex tw-items-center tw-gap-x-1">
           <span className="tw-text-base tw-font-medium tw-text-iron-50">
-            {TDHFormatted}
+            {formatNumberWithCommas(profile.consolidation.tdh)}
           </span>
           <span className="tw-block tw-text-base tw-font-medium tw-text-iron-400">
             TDH
@@ -23,7 +19,7 @@ export default function UserPageHeaderStats({
         </div>
         <div className="tw-inline-flex tw-items-center tw-gap-x-1">
           <span className="tw-text-base tw-font-medium tw-text-iron-50">
-            Soon™
+            {formatNumberWithCommas(profile.rep)}
           </span>
           <span className="tw-block tw-text-base tw-font-medium tw-text-iron-400">
             Rep

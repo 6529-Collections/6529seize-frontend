@@ -71,10 +71,10 @@ export default function UserPageIdentityStatements({
   }, [statements]);
 
   return (
-    <div className="tw-mt-10">
+    <div className="tw-mt-6 lg:tw-mt-10">
       <div className="tw-bg-iron-900 tw-border tw-border-white/5 tw-border-solid tw-rounded-xl tw-scroll-py-3 tw-overflow-auto">
         <UserPageIdentityAddStatementsHeader profile={profile} />
-        <div className="tw-p-6 md:tw-p-8 tw-mx-auto tw-grid tw-grid-cols-1 tw-gap-x-8 tw-gap-y-10 xl:tw-gap-y-16 lg:tw-mx-0 xl:tw-grid-cols-5">
+        <div className="tw-px-4 tw-py-6 sm:tw-p-6 md:tw-p-8 tw-mx-auto tw-grid tw-grid-cols-1 tw-gap-x-8 tw-gap-y-10 xl:tw-gap-y-16 lg:tw-mx-0 xl:tw-grid-cols-5">
           <div className="tw-col-span-3 tw-space-y-6">
             <div className="tw-grid tw-grid-cols-1 tw-gap-x-8 tw-gap-y-6 md:tw-grid-cols-2">
               <UserPageIdentityStatementsConsolidatedAddresses
@@ -99,7 +99,7 @@ export default function UserPageIdentityStatements({
           </div>
 
           <div className="tw-col-span-2 xl:tw-ml-auto">
-            <ul className="tw-pl-4 xl:tw-pl-10 2xl:px-0 tw-list-disc tw-text-iron-500 tw-text-sm tw-font-normal tw-space-y-1">
+            <ul className="tw-pl-4 xl:tw-pl-10 2xl:px-0 tw-list-disc tw-text-iron-400 tw-text-sm tw-font-normal tw-space-y-1">
               <li>All statements are optional.</li>
               <li>All statements are fully and permanently public.</li>
               <li>
