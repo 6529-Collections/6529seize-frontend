@@ -31,7 +31,7 @@ const inter = Inter({
 
 const INITIAL_ACTIVITY_LOGS_PARAMS: ActivityLogParams = {
   page: 1,
-  pageSize: 50,
+  pageSize: 40,
   logTypes: [],
   matter: null,
   targetType: FilterTargetType.ALL,
