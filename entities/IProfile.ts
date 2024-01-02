@@ -25,6 +25,7 @@ export interface IProfileAndConsolidations {
   };
   readonly level: number;
   readonly cic: AggregatedCicRating;
+  readonly rep: number;
 }
 
 export enum PROFILE_CLASSIFICATION {
@@ -95,10 +96,6 @@ export interface CicStatement {
   updated_at: Date | null;
 }
 
-export enum ProfileActivityLogTargetType {
-  PROFILE_ID = "PROFILE_ID",
-}
-
 export enum ProfileActivityLogType {
   RATING_EDIT = "RATING_EDIT",
   HANDLE_EDIT = "HANDLE_EDIT",
@@ -117,7 +114,7 @@ export const PROFILE_ACTIVITY_TYPE_TO_TEXT: Record<
   ProfileActivityLogType,
   string
 > = {
-  [ProfileActivityLogType.RATING_EDIT]: "CIC Rating",
+  [ProfileActivityLogType.RATING_EDIT]: "Rating",
   [ProfileActivityLogType.HANDLE_EDIT]: "Handle",
   [ProfileActivityLogType.PRIMARY_WALLET_EDIT]: "Primary Wallet",
   [ProfileActivityLogType.CLASSIFICATION_EDIT]: "Classification",
@@ -135,7 +132,6 @@ export interface ProfileActivityLogBase {
   readonly id: string;
   readonly profile_id: string;
   readonly target_id: string | null;
-  readonly target_type: ProfileActivityLogTargetType | null;
   readonly created_at: Date;
   readonly profile_handle: string;
   readonly target_profile_handle: string | null;
@@ -146,6 +142,11 @@ export enum ProfileActivityLogRatingEditContentChangeReason {
   LOST_TDH = "LOST_TDH",
 }
 
+export enum ProfileActivityLogRatingEditContentMatter {
+  CIC = "CIC",
+  REP = "REP",
+}
+
 export interface ProfileActivityLogRatingEdit extends ProfileActivityLogBase {
   readonly type: ProfileActivityLogType.RATING_EDIT;
   readonly contents: {
@@ -153,7 +154,7 @@ export interface ProfileActivityLogRatingEdit extends ProfileActivityLogBase {
     new_rating: number;
     old_rating: number;
     rating_category: string;
-    rating_matter: string;
+    rating_matter: ProfileActivityLogRatingEditContentMatter;
   };
 }
 
@@ -285,7 +286,6 @@ export interface ProfilesMatterRatingWithRaterLevel
   readonly rater_level: number;
 }
 
-
 export interface CommunityMemberMinimal {
   readonly handle: string | null;
   readonly normalised_handle: string | null;
@@ -296,3 +296,30 @@ export interface CommunityMemberMinimal {
   readonly cic_rating: number;
   readonly wallet: string;
 }
+
+export interface RatingStats {
+  readonly category: string;
+  readonly rating: number;
+  readonly contributor_count: number;
+  readonly rater_contribution: number;
+}
+
+export interface ApiProfileRepRatesState {
+  readonly total_rep_rating: number;
+  readonly total_rep_rating_by_rater: number | null;
+  readonly rep_rates_left_for_rater: number | null;
+  readonly number_of_raters: number;
+  readonly rating_stats: RatingStats[];
+}
+
+export interface RatingWithProfileInfo {
+  handle: string;
+  tdh: number;
+  rating: number;
+  cic: number;
+  last_modified: Date;
+}
+
+export type RatingWithProfileInfoAndLevel = RatingWithProfileInfo & {
+  level: number;
+};

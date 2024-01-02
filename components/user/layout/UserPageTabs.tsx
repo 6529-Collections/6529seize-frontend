@@ -4,8 +4,10 @@ import UserPageTab from "./UserPageTab";
 
 export enum UserPageTabType {
   COLLECTED = "COLLECTED",
-  STATS = "STATS",
+
+  REP = "REP",
   IDENTITY = "IDENTITY",
+  STATS = "STATS",
 }
 
 export const USER_PAGE_TAB_META: Record<
@@ -21,6 +23,11 @@ export const USER_PAGE_TAB_META: Record<
     tab: UserPageTabType.STATS,
     title: "Stats",
     route: "stats",
+  },
+  [UserPageTabType.REP]: {
+    tab: UserPageTabType.REP,
+    title: "Rep",
+    route: "rep",
   },
   [UserPageTabType.IDENTITY]: {
     tab: UserPageTabType.IDENTITY,
@@ -41,6 +48,8 @@ export default function UserPageTabs() {
       return UserPageTabType.COLLECTED;
     } else if (name === "stats") {
       return UserPageTabType.STATS;
+    } else if (name === "rep") {
+      return UserPageTabType.REP;
     } else if (name === "identity") {
       return UserPageTabType.IDENTITY;
     }

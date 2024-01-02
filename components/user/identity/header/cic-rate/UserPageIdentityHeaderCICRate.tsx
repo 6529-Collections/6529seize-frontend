@@ -3,7 +3,10 @@ import {
   ApiProfileRaterCicState,
   IProfileAndConsolidations,
 } from "../../../../../entities/IProfile";
-import { formatNumberWithCommas } from "../../../../../helpers/Helpers";
+import {
+  formatNumberWithCommas,
+  getStringAsNumberOrZero,
+} from "../../../../../helpers/Helpers";
 import { AuthContext } from "../../../../auth/Auth";
 import {
   commonApiFetch,
@@ -15,8 +18,8 @@ import {
   QueryKey,
   ReactQueryWrapperContext,
 } from "../../../../react-query-wrapper/ReactQueryWrapper";
-import UserPageIdentityHeaderCICRateAdjustments from "./UserPageIdentityHeaderCICRateAdjustments";
 import { createBreakpoint } from "react-use";
+import UserRateAdjustmentHelper from "../../../utils/rate/UserRateAdjustmentHelper";
 
 const useBreakpoint = createBreakpoint({ MD: 768, S: 0 });
 
@@ -90,32 +93,25 @@ export default function UserPageIdentityHeaderCICRate({
     },
   });
 
-  const [myCICRatings, setMyCICRatings] = useState<number>(
+  const [originalRating, setOriginalRating] = useState<number>(
     myCICState?.cic_rating_by_rater ?? 0
   );
 
-  const [myCICRatingsStr, setMyCICRatingsStr] = useState<string>(
-    `${myCICRatings}`
+  const [adjustedRatingStr, setAdjustedRatingStr] = useState<string>(
+    `${originalRating}`
   );
 
   const [myMaxCICRatings, setMyMaxCICRatings] = useState<number>(
     (myCICState?.cic_ratings_left_to_give_by_rater ?? 0) +
-      Math.abs(myCICState?.cic_rating_by_rater ?? 0)
+      Math.abs(originalRating)
   );
 
   const [myAvailableCIC, setMyAvailableCIC] = useState<number>(
     myCICState?.cic_ratings_left_to_give_by_rater ?? 0
   );
 
-  const getMyCICRatingsAsNumber = (cic: string) => {
-    if (isNaN(parseInt(cic))) {
-      return 0;
-    }
-    return parseInt(cic);
-  };
-
   const getCICStrOrMaxStr = (strCIC: string): string => {
-    const cicAsNumber = getMyCICRatingsAsNumber(strCIC);
+    const cicAsNumber = getStringAsNumberOrZero(strCIC);
     if (cicAsNumber > myMaxCICRatings) {
       return `${myMaxCICRatings}`;
     }
@@ -127,8 +123,8 @@ export default function UserPageIdentityHeaderCICRate({
   };
 
   useEffect(() => {
-    setMyCICRatings(myCICState?.cic_rating_by_rater ?? 0);
-    setMyCICRatingsStr(`${myCICState?.cic_rating_by_rater ?? 0}`);
+    setOriginalRating(myCICState?.cic_rating_by_rater ?? 0);
+    setAdjustedRatingStr(`${myCICState?.cic_rating_by_rater ?? 0}`);
     setMyMaxCICRatings(
       (myCICState?.cic_ratings_left_to_give_by_rater ?? 0) +
         Math.abs(myCICState?.cic_rating_by_rater ?? 0)
@@ -141,7 +137,7 @@ export default function UserPageIdentityHeaderCICRate({
     if (/^-?\d*$/.test(inputValue)) {
       const strCIC = inputValue === "-0" ? "-" : inputValue;
       const newCicValue = getCICStrOrMaxStr(strCIC);
-      setMyCICRatingsStr(newCicValue);
+      setAdjustedRatingStr(newCicValue);
     }
   };
 
@@ -155,8 +151,8 @@ export default function UserPageIdentityHeaderCICRate({
       return;
     }
 
-    const newRating = getMyCICRatingsAsNumber(myCICRatingsStr);
-    if (newRating === myCICRatings) {
+    const newRating = getStringAsNumberOrZero(adjustedRatingStr);
+    if (newRating === originalRating) {
       return;
     }
 
@@ -183,15 +179,15 @@ export default function UserPageIdentityHeaderCICRate({
           isTooltip ? "tw-text-sm" : "tw-text-base"
         } tw-flex tw-flex-col tw-space-y-1`}
       >
-        <span className="tw-block tw-text-iron-200 tw-font-semibold">
+        <span className="tw-block tw-text-iron-300 tw-font-normal">
           <span>Your available CIC:</span>
-          <span className="tw-ml-1">
+          <span className="tw-ml-1 tw-font-semibold tw-text-iron-50">
             {formatNumberWithCommas(myAvailableCIC)}
           </span>
         </span>
-        <span className="tw-block tw-text-iron-200 tw-font-semibold">
+        <span className="tw-block tw-text-iron-300 tw-font-normal">
           <span>Your max/min CIC Rating to {profile.profile?.handle}:</span>
-          <span className="tw-ml-1">
+          <span className="tw-ml-1 tw-font-semibold tw-text-iron-50">
             +/- {formatNumberWithCommas(myMaxCICRatings)}
           </span>
         </span>
@@ -200,12 +196,16 @@ export default function UserPageIdentityHeaderCICRate({
         onSubmit={onSubmit}
         className={`${isTooltip ? "tw-mt-4" : "tw-mt-6"}`}
       >
-        <div className="tw-flex tw-items-end tw-space-x-3.5">
-          <div>
+        <div
+          className={`${
+            isTooltip ? "" : "tw-flex-wrap"
+          } tw-flex tw-items-end tw-gap-3`}
+        >
+          <div className="tw-w-full sm:tw-w-auto">
             <label className="tw-block tw-text-sm tw-font-normal tw-text-iron-400">
               Your total CIC Rating of {profile.profile?.handle}:
             </label>
-            <div className="tw-relative tw-flex tw-mt-1.5">
+            <div className="tw-w-full tw-relative tw-flex tw-mt-1.5">
               <span className="tw-flex tw-flex-col tw-items-center tw-justify-center tw-bg-iron-900 tw-rounded-l-lg tw-border tw-border-solid tw-border-iron-700 tw-px-3">
                 <svg
                   className="tw-w-3.5 tw-h-3.5 tw-flex-shrink-0 tw-text-iron-500"
@@ -238,41 +238,43 @@ export default function UserPageIdentityHeaderCICRate({
               </span>
               <input
                 type="text"
-                value={myCICRatingsStr}
+                value={adjustedRatingStr}
                 onChange={handleChange}
                 required
                 autoComplete="off"
                 className={`${
-                  isTooltip ? "tw-max-w-[12rem]" : ""
-                } tw-block tw-rounded-r-lg tw-border-0 tw-py-3 tw-px-3 tw-bg-iron-900 tw-text-iron-300 tw-font-medium tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-700 placeholder:tw-text-iron-500 focus:tw-outline-none  focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 tw-text-base tw-transition tw-duration-300 tw-ease-out`}
+                  isTooltip ? "tw-max-w-[12rem]" : "tw-w-full sm:tw-w-auto"
+                } tw-appearance-none tw-block tw-rounded-l-none tw-rounded-r-lg tw-border-0 tw-py-3 tw-px-3 tw-bg-iron-900 tw-text-iron-300 tw-font-medium tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-700 placeholder:tw-text-iron-500 focus:tw-outline-none  focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 tw-text-base tw-transition tw-duration-300 tw-ease-out`}
               />
             </div>
           </div>
 
-          <div>
-            <div className="tw-inline-flex tw-items-end tw-space-x-6">
+          <div className="tw-w-full sm:tw-w-auto">
+            <div className="tw-w-full sm:tw-w-auto tw-inline-flex tw-items-end tw-space-x-6">
               <button
                 type="submit"
-                className="tw-cursor-pointer tw-bg-primary-500 tw-px-4 tw-py-3 tw-text-sm tw-font-medium tw-text-white 
+                className="tw-w-full sm:tw-w-auto tw-cursor-pointer tw-bg-primary-500 tw-px-4 tw-py-3 tw-text-sm tw-font-semibold tw-text-white 
               tw-border tw-border-solid tw-border-primary-500 tw-rounded-lg hover:tw-bg-primary-600 hover:tw-border-primary-600 tw-transition tw-duration-300 tw-ease-out"
               >
                 Rate
               </button>
               {!isTooltip && breakpoint === "MD" && (
-                <UserPageIdentityHeaderCICRateAdjustments
-                  isTooltip={isTooltip}
-                  originalValue={myCICRatings}
-                  adjustedValue={getMyCICRatingsAsNumber(myCICRatingsStr)}
+                <UserRateAdjustmentHelper
+                  inLineValues={isTooltip}
+                  originalValue={originalRating}
+                  adjustedValue={getStringAsNumberOrZero(adjustedRatingStr)}
+                  adjustmentType="CIC"
                 />
               )}
             </div>
           </div>
         </div>
         {!!(isTooltip || breakpoint !== "MD") && (
-          <UserPageIdentityHeaderCICRateAdjustments
-            isTooltip={isTooltip}
-            originalValue={myCICRatings}
-            adjustedValue={getMyCICRatingsAsNumber(myCICRatingsStr)}
+          <UserRateAdjustmentHelper
+            inLineValues={isTooltip}
+            originalValue={originalRating}
+            adjustedValue={getStringAsNumberOrZero(adjustedRatingStr)}
+            adjustmentType="CIC"
           />
         )}
       </form>

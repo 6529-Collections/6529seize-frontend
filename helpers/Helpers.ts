@@ -552,3 +552,9 @@ export const truncateMiddle = (value: string): string => {
   }
   return value;
 };
+
+
+export const getStringAsNumberOrZero = (value: string): number => {
+  const parsedValue = parseInt(value);
+  return isNaN(parsedValue) ? 0 : parsedValue;
+}

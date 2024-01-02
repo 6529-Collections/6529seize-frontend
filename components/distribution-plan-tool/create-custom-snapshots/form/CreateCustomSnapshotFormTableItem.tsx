@@ -5,9 +5,9 @@ export default function CreateCustomSnapshotFormTableItem({
   index,
   onRemoveToken,
 }: {
-  token: CustomTokenPoolParamsToken;
-  index: number;
-  onRemoveToken: (index: number) => void;
+  readonly token: CustomTokenPoolParamsToken;
+  readonly index: number;
+  readonly onRemoveToken: (index: number) => void;
 }) {
   return (
     <tr>

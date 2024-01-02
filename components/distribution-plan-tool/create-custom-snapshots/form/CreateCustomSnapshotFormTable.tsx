@@ -5,8 +5,8 @@ export default function CreateCustomSnapshotFormTable({
   tokens,
   onRemoveToken
 }: {
-  tokens: CustomTokenPoolParamsToken[];
-  onRemoveToken: (index: number) => void;
+  readonly tokens: CustomTokenPoolParamsToken[];
+  readonly onRemoveToken: (index: number) => void;
 }) {
   return (
     <div className="tw-mt-6 tw-flow-root">

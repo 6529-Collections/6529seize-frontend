@@ -32,7 +32,7 @@ export default function UserPageHeaderName({
 
   const displayName = getDisplayName();
   return (
-    <div className="tw-mt-4">
+    <div className="tw-mt-2 sm:tw-mt-4">
       <div className="tw-flex tw-items-center">
         <p className="tw-break-all tw-mb-0 tw-text-2xl sm:tw-text-3xl tw-font-semibold">
           {displayName}
