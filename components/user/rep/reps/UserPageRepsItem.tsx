@@ -31,38 +31,40 @@ export default function UserPageRepsItem({
   }, [router.isReady]);
 
   return (
-    <button
-      onClick={() => setIsEditRepModalOpen(true)}
-      disabled={!canEditRep}
-      className="tw-bg-transparent tw-border-none tw-p-0"
-    >
-      <span className="tw-flex tw-items-center tw-justify-between tw-gap-x-2 tw-rounded-lg tw-bg-iron-800 hover:tw-bg-iron-700 tw-border tw-border-solid tw-border-white/10 tw-px-3 tw-py-1.5 sm:tw-py-1 tw-transition tw-duration-300 tw-ease-out">
-        <span className="tw-whitespace-nowrap tw-text-sm tw-font-semibold tw-text-iron-50">
-          {rep.category}
-        </span>
+    <>
+      <button
+        onClick={() => setIsEditRepModalOpen(true)}
+        disabled={!canEditRep}
+        className="tw-bg-transparent tw-border-none tw-p-0"
+      >
+        <span className="tw-flex tw-items-center tw-justify-between tw-gap-x-2 tw-rounded-lg tw-bg-iron-800 hover:tw-bg-iron-700 tw-border tw-border-solid tw-border-white/10 tw-px-3 tw-py-1.5 sm:tw-py-1 tw-transition tw-duration-300 tw-ease-out">
+          <span className="tw-whitespace-nowrap tw-text-sm tw-font-semibold tw-text-iron-50">
+            {rep.category}
+          </span>
 
-        <span
-          className={`${
-            isPositiveRating ? "tw-text-green" : "tw-text-red"
-          } tw-whitespace-nowrap tw-font-medium tw-text-sm`}
-        >
-          <Tippy
-            content={`My Rep: ${formatNumberWithCommas(
-              rep.rater_contribution
-            )}`}
-            theme="dark"
-            placement="top"
-            disabled={isTouchScreen || !rep.rater_contribution}
+          <span
+            className={`${
+              isPositiveRating ? "tw-text-green" : "tw-text-red"
+            } tw-whitespace-nowrap tw-font-medium tw-text-sm`}
           >
-            <span>{formatNumberWithCommas(rep.rating)}</span>
-          </Tippy>
-        </span>
+            <Tippy
+              content={`My Rep: ${formatNumberWithCommas(
+                rep.rater_contribution
+              )}`}
+              theme="dark"
+              placement="top"
+              disabled={isTouchScreen || !rep.rater_contribution}
+            >
+              <span>{formatNumberWithCommas(rep.rating)}</span>
+            </Tippy>
+          </span>
 
-        <span className="tw-whitespace-nowrap tw-text-xs tw-font-medium tw-text-iron-400">
-          ({formatNumberWithCommas(rep.contributor_count)}{" "}
-          {rep.contributor_count === 1 ? "rater" : "raters"})
+          <span className="tw-whitespace-nowrap tw-text-xs tw-font-medium tw-text-iron-400">
+            ({formatNumberWithCommas(rep.contributor_count)}{" "}
+            {rep.contributor_count === 1 ? "rater" : "raters"})
+          </span>
         </span>
-      </span>
+      </button>
       <CommonAnimationWrapper mode="sync" initial={true}>
         {isEditRepModalOpen && (
           <CommonAnimationOpacity
@@ -80,6 +82,6 @@ export default function UserPageRepsItem({
           </CommonAnimationOpacity>
         )}
       </CommonAnimationWrapper>
-    </button>
+    </>
   );
 }

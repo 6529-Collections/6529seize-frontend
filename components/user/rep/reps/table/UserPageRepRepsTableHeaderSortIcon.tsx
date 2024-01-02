@@ -1,15 +1,47 @@
+import { useEffect, useState } from "react";
 import { SortDirection } from "../../../../../entities/ISort";
+
+// tw-text-primary-400
 
 export default function UserPageRepRepsTableHeaderSortIcon({
   direction,
+  isActive,
 }: {
   readonly direction: SortDirection;
+  readonly isActive: boolean;
 }) {
+  const getClasses = ({
+    active,
+    dir,
+  }: {
+    active: boolean;
+    dir: SortDirection;
+  }): string => {
+    let c = "";
+    if (active) {
+      c += "tw-text-primary-400";
+    } else {
+      c += "tw-text-iron-400 group-hover:tw-text-iron-200";
+    }
+    if (dir === SortDirection.ASC) {
+      c += " tw-rotate-180";
+    } else {
+      c += " tw-rotate-0";
+    }
+    return c;
+  };
+
+  const [classes, setClasses] = useState<string>(
+    getClasses({ active: isActive, dir: direction })
+  );
+
+  useEffect(() => {
+    setClasses(getClasses({ active: isActive, dir: direction }));
+  }, [isActive, direction]);
+
   return (
     <svg
-      className={`${
-        direction === SortDirection.ASC ? "tw-rotate-180" : "tw-rotate-0"
-      } -tw-mt-0.5 tw-ml-2 tw-text-iron-400 group-hover:tw-text-iron-200 tw-transition tw-duration-300 tw-ease-out tw-h-4 tw-w-4`}
+      className={`${classes} -tw-mt-0.5 tw-ml-2 tw-transition tw-duration-300 tw-ease-out tw-h-4 tw-w-4`}
       viewBox="0 0 24 24"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"

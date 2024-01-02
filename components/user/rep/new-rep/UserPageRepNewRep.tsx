@@ -41,7 +41,11 @@ export default function UserPageRepNewRep({
 
   return (
     <>
-      <UserPageRepNewRepSearch onRepSearch={onRepSearch} repRates={repRates} />
+      <UserPageRepNewRepSearch
+        onRepSearch={onRepSearch}
+        repRates={repRates}
+        profile={profile}
+      />
       <CommonAnimationWrapper mode="sync" initial={true}>
         {isAddNewRepModalOpen && repToAdd && (
           <CommonAnimationOpacity

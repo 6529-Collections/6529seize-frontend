@@ -1,10 +1,15 @@
-import { ApiProfileRepRatesState } from "../../../../entities/IProfile";
+import {
+  ApiProfileRepRatesState,
+  IProfileAndConsolidations,
+} from "../../../../entities/IProfile";
 import { formatNumberWithCommas } from "../../../../helpers/Helpers";
 
 export default function UserPageRepNewRepSearchHeader({
   repRates,
+  profile,
 }: {
   readonly repRates: ApiProfileRepRatesState;
+  readonly profile: IProfileAndConsolidations;
 }) {
   return (
     <div className="tw-flex tw-flex-col tw-space-y-1">
@@ -15,7 +20,7 @@ export default function UserPageRepNewRepSearchHeader({
         </span>
       </span>
       <span className="tw-text-base tw-block tw-text-iron-300 tw-font-normal">
-        <span>Your given out Rep:</span>
+        <span>Your Rep assigned to {profile.profile?.handle}:</span>
         <span className="tw-ml-1 tw-font-semibold tw-text-iron-50">
           {formatNumberWithCommas(repRates.total_rep_rating_by_rater ?? 0)}
         </span>

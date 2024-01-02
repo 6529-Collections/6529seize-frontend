@@ -4,7 +4,10 @@ import { commonApiFetch } from "../../../../services/api/common-api";
 import { useContext, useEffect, useRef, useState } from "react";
 import { useClickAway, useDebounce, useKeyPressEvent } from "react-use";
 import { AnimatePresence, motion } from "framer-motion";
-import { ApiProfileRepRatesState } from "../../../../entities/IProfile";
+import {
+  ApiProfileRepRatesState,
+  IProfileAndConsolidations,
+} from "../../../../entities/IProfile";
 import UserPageRepNewRepSearchHeader from "./UserPageRepNewRepSearchHeader";
 import UserPageRepNewRepSearchDropdown from "./UserPageRepNewRepSearchDropdown";
 import { AuthContext } from "../../../auth/Auth";
@@ -15,9 +18,11 @@ const MIN_SEARCH_LENGTH = 3;
 export default function UserPageRepNewRepSearch({
   repRates,
   onRepSearch,
+  profile,
 }: {
   readonly repRates: ApiProfileRepRatesState;
   readonly onRepSearch: (repSearch: string) => void;
+  readonly profile: IProfileAndConsolidations;
 }) {
   const { setToast } = useContext(AuthContext);
   const [repSearch, setRepSearch] = useState<string>("");
@@ -128,7 +133,7 @@ export default function UserPageRepNewRepSearch({
 
   return (
     <div className="tw-max-w-full tw-relative tw-bg-iron-800 tw-p-4 sm:tw-p-6 tw-rounded-xl tw-border tw-border-solid tw-border-white/5">
-      <UserPageRepNewRepSearchHeader repRates={repRates} />
+      <UserPageRepNewRepSearchHeader repRates={repRates} profile={profile} />
       <div ref={listRef} className="tw-w-full sm:tw-max-w-xs">
         <div className="tw-w-full tw-mt-6 tw-relative">
           <form onSubmit={onSubmit} className="tw-w-full sm:tw-max-w-xs">

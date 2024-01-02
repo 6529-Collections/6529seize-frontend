@@ -40,12 +40,14 @@ export default function UserPageRepRepsTableHeaderSortableCell({
       className="tw-px-4 sm:tw-px-6 tw-whitespace-nowrap tw-group tw-cursor-pointer tw-py-3 tw-text-right tw-text-sm tw-font-medium tw-text-iron-400"
       onClick={() => onSortTypeClick(type)}
     >
-      <span className="group-hover:tw-text-iron-200 tw-transition tw-duration-300 tw-ease-out">
+      <span
+        className={`${
+          isActive ? "tw-text-primary-400" : "group-hover:tw-text-iron-200"
+        } tw-transition tw-duration-300 tw-ease-out`}
+      >
         {SORT_TYPE_TO_TEXT[type]}
       </span>
-      <span className={isActive ? "" : "group-hover:tw-visible tw-invisible"}>
-        <UserPageRepRepsTableHeaderSortIcon direction={sor} />
-      </span>
+      <UserPageRepRepsTableHeaderSortIcon direction={sor} isActive={isActive} />
     </th>
   );
 }
