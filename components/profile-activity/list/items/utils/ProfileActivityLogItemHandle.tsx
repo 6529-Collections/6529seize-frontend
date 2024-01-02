@@ -15,7 +15,7 @@ export default function ProfileActivityLogItemHandle({
   const router = useRouter();
 
   const goToProfile = () => {
-    const targetUser = log.profile_handle;
+    const targetUser = log?.profile_handle;
     if (!targetUser) return;
     if (router.route === "/[user]/rep") {
       router.push(`/${targetUser}/rep`);
@@ -39,7 +39,7 @@ export default function ProfileActivityLogItemHandle({
   };
 
   const isCurrentUser =
-    user?.toLowerCase() === log.profile_handle.toLowerCase();
+    user?.toLowerCase() === log?.profile_handle.toLowerCase();
 
   return (
     <button
@@ -52,7 +52,7 @@ export default function ProfileActivityLogItemHandle({
           isCurrentUser ? "" : "hover:tw-underline tw-cursor-pointer"
         } tw-whitespace-nowrap tw-text-sm tw-font-semibold tw-text-iron-100`}
       >
-        {log.profile_handle}
+        {log?.profile_handle}
       </span>
     </button>
   );
