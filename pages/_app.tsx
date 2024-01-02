@@ -176,7 +176,7 @@ const ethereumClient = new EthereumClient(wagmiConfig, chains);
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 60000,
+      staleTime: 10000,
       refetchOnWindowFocus: false,
     },
   },

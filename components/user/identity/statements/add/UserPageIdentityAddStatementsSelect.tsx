@@ -24,7 +24,7 @@ export default function UserPageIdentityAddStatementsSelect({
           <button
             onClick={onClose}
             type="button"
-            className="tw-p-2.5 tw-flex tw-items-center tw-justify-center tw-rounded-full tw-bg-iron-900 tw-border-0 tw-text-iron-400 hover:tw-text-iron-50 focus:tw-outline-none tw-transition tw-duration-300 tw-ease-out"
+            className="tw-p-2.5 tw-flex tw-items-center tw-justify-center tw-rounded-full tw-bg-iron-950 tw-border-0 tw-text-iron-400 hover:tw-text-iron-50 focus:tw-outline-none tw-transition tw-duration-300 tw-ease-out"
           >
             <span className="tw-sr-only tw-text-sm">Close</span>
             <svg
@@ -51,7 +51,7 @@ export default function UserPageIdentityAddStatementsSelect({
           className="tw-text-left tw-rounded-lg tw-group tw-relative tw-bg-iron-800/80 tw-border tw-border-solid tw-border-white/5 hover:tw-bg-iron-800 tw-p-6 tw-transition tw-duration-300 tw-ease-out"
         >
           <div>
-            <span className="tw-inline-flex tw-items-center tw-justify-center tw-rounded-xl tw-h-11 tw-w-11 tw-bg-iron-700/60 tw-border tw-border-solid tw-border-iron-600/20">
+            <span className="tw-inline-flex tw-items-center tw-justify-center tw-rounded-xl tw-h-11 tw-w-11 tw-bg-iron-800 tw-border tw-border-solid tw-border-iron-700">
               <svg
                 className="tw-flex-shrink-0 tw-h-6 tw-w-6 tw-text-iron-50 group-hover:tw-scale-105 tw-transition tw-duration-300 tw-ease-out"
                 viewBox="0 0 24 24"
@@ -69,7 +69,7 @@ export default function UserPageIdentityAddStatementsSelect({
             </span>
           </div>
           <div className="tw-mt-8">
-            <p className="tw-mb-0 tw-text-sm tw-font-semibold tw-text-iron-50">
+            <p className="tw-mb-0 tw-text-sm tw-font-semibold tw-text-iron-50 group-hover:tw-text-white">
               Social Media Accounts
             </p>
             <p className="tw-mt-1 tw-mb-0 tw-text-sm tw-text-iron-500">
@@ -82,7 +82,7 @@ export default function UserPageIdentityAddStatementsSelect({
           className="tw-text-left  tw-rounded-lg tw-group tw-relative tw-bg-iron-800/80 tw-border tw-border-solid tw-border-white/5 hover:tw-bg-iron-800 tw-p-6 tw-transition tw-duration-300 tw-ease-out"
         >
           <div>
-            <span className="tw-inline-flex tw-items-center tw-justify-center tw-rounded-xl tw-h-11 tw-w-11 tw-bg-iron-700/60 tw-border tw-border-solid tw-border-iron-600/20">
+            <span className="tw-inline-flex tw-items-center tw-justify-center tw-rounded-xl tw-h-11 tw-w-11 tw-bg-iron-800 tw-border tw-border-solid tw-border-iron-700">
               <svg
                 className="tw-flex-shrink-0 tw-h-6 tw-w-6 tw-text-iron-50 group-hover:tw-scale-105 tw-transition tw-duration-300 tw-ease-out"
                 viewBox="0 0 24 24"
@@ -100,7 +100,7 @@ export default function UserPageIdentityAddStatementsSelect({
             </span>
           </div>
           <div className="tw-mt-8">
-            <p className="tw-mb-0 tw-text-sm tw-font-semibold tw-text-iron-50">
+            <p className="tw-mb-0 tw-text-sm tw-font-semibold tw-text-iron-50 group-hover:tw-text-white">
               Contact
             </p>
             <p className="tw-mt-1 tw-mb-0 tw-text-sm tw-text-iron-500">
@@ -115,7 +115,7 @@ export default function UserPageIdentityAddStatementsSelect({
           className="tw-text-left tw-rounded-lg tw-group tw-relative tw-bg-iron-800/80 tw-border tw-border-solid tw-border-white/5 hover:tw-bg-iron-800 tw-p-6 tw-transition tw-duration-300 tw-ease-out"
         >
           <div>
-            <span className="tw-inline-flex tw-items-center tw-justify-center tw-rounded-xl tw-h-11 tw-w-11 tw-bg-iron-700/60 tw-border tw-border-solid tw-border-iron-600/20">
+            <span className="tw-inline-flex tw-items-center tw-justify-center tw-rounded-xl tw-h-11 tw-w-11 tw-bg-iron-800 tw-border tw-border-solid tw-border-iron-700">
               <svg
                 className="tw-flex-shrink-0 tw-h-6 tw-w-6 tw-text-iron-50 group-hover:tw-scale-105 tw-transition tw-duration-300 tw-ease-out"
                 viewBox="0 0 24 24"
@@ -133,7 +133,7 @@ export default function UserPageIdentityAddStatementsSelect({
             </span>
           </div>
           <div className="tw-mt-8">
-            <p className="tw-mb-0 tw-text-sm tw-font-semibold tw-text-iron-50">
+            <p className="tw-mb-0 tw-text-sm tw-font-semibold tw-text-iron-50 group-hover:tw-text-white">
               Social Media Verification Posts
             </p>
             <p className="tw-mt-1 tw-mb-0 tw-text-sm tw-text-iron-500">

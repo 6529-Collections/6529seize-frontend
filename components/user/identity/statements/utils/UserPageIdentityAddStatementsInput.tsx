@@ -29,7 +29,7 @@ export default function UserPageIdentityAddStatementsContactInput({
   };
   return (
     <>
-      <label className="tw-block tw-text-sm tw-font-normal tw-leading-5 tw-text-[#B0B0B0]">
+      <label className="tw-block tw-text-sm tw-font-normal tw-leading-5 tw-text-iron-400">
         {STATEMENT_TITLE[activeType]}
       </label>
       <div className="tw-relative tw-mt-2">
