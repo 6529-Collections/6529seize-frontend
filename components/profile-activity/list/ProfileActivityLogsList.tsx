@@ -12,7 +12,7 @@ export default function UserPageIdentityActivityLogList({
   return (
     <div
       className={`${
-        user ? "tw-px-6 md:tw-px-8" : ""
+        user ? "tw-px-4 sm:tw-px-6 md:tw-px-8" : ""
       } tw-mt-2 tw-inline-block tw-min-w-full tw-align-middle `}
     >
       <table className="tw-min-w-full">

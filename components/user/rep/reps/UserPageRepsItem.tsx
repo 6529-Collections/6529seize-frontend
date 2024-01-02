@@ -36,7 +36,7 @@ export default function UserPageRepsItem({
       disabled={!canEditRep}
       className="tw-bg-transparent tw-border-none tw-p-0"
     >
-      <span className="tw-flex tw-items-center tw-justify-between tw-gap-x-2 tw-rounded-lg tw-bg-iron-900 hover:tw-bg-iron-800 tw-border tw-border-solid tw-border-white/10 tw-px-3 tw-py-1.5 sm:tw-py-1 tw-transition tw-duration-300 tw-ease-out">
+      <span className="tw-flex tw-items-center tw-justify-between tw-gap-x-2 tw-rounded-lg tw-bg-iron-800 hover:tw-bg-iron-700 tw-border tw-border-solid tw-border-white/10 tw-px-3 tw-py-1.5 sm:tw-py-1 tw-transition tw-duration-300 tw-ease-out">
         <span className="tw-whitespace-nowrap tw-text-sm tw-font-semibold tw-text-iron-50">
           {rep.category}
         </span>

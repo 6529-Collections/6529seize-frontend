@@ -18,13 +18,13 @@ export default function CommonFilterTargetSelect({
   readonly onChange: (filter: FilterTargetType) => void;
 }) {
   return (
-    <fieldset className="tw-px-6 md:tw-px-8 tw-mt-4 tw-max-w-sm">
+    <fieldset className="tw-px-4 sm:tw-px-6 md:tw-px-8 tw-mt-4 tw-max-w-sm">
       <div className="tw-flex tw-items-center tw-space-x-6 tw-space-y-0">
         {TARGETS.map((target) => (
           <button
             key={target.id}
             onClick={() => onChange(target.id)}
-            className="tw-flex tw-items-center tw-bg-transparent tw-border-none"
+            className="tw-p-0 tw-flex tw-items-center tw-bg-transparent tw-border-none"
           >
             <input
               id={target.id}

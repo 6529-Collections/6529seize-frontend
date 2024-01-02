@@ -161,7 +161,7 @@ export default function ProfileActivityLogs({
         initialParams.handleOrWallet
           ? "tw-min-h-[28rem] tw-max-h-[28rem]"
           : "tw-mt-2 tw-min-h-screen"
-      } tw-transform-gpu tw-scroll-py-3 tw-overflow-auto`}
+      }  tw-scroll-py-3 tw-overflow-auto`}
     >
       {withFilters && (
         <ProfileActivityLogsFilter
@@ -195,7 +195,7 @@ export default function ProfileActivityLogs({
         <div className="tw-mt-4">
           <span
             className={`${
-              initialParams.handleOrWallet ? "tw-px-6 md:tw-px-8" : ""
+              initialParams.handleOrWallet ? "tw-px-4 sm:tw-px-6 md:tw-px-8" : ""
             } tw-text-sm tw-italic tw-text-iron-500`}
           >
             No Activity Log

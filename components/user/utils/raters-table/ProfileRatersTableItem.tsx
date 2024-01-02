@@ -92,7 +92,7 @@ export default function ProfileRatersTableItem({
         </div>
       </td>
       <td className="tw-py-2.5 tw-pl-3 tw-text-right">
-        <span className="tw-whitespace-nowrap tw-text-[0.8125rem] tw-leading-5 tw-text-iron-500">
+        <span className="tw-whitespace-nowrap tw-text-sm tw-text-iron-500">
           {timeAgo}
         </span>
       </td>

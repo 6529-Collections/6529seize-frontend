@@ -127,7 +127,7 @@ export default function UserPageRepNewRepSearch({
   }, [debouncedValue, categories]);
 
   return (
-    <div className="tw-max-w-full tw-relative tw-bg-iron-800 tw-p-4 md:tw-p-6 tw-rounded-xl tw-border tw-border-solid tw-border-white/5">
+    <div className="tw-max-w-full tw-relative tw-bg-iron-800 tw-p-4 sm:tw-p-6 tw-rounded-xl tw-border tw-border-solid tw-border-white/5">
       <UserPageRepNewRepSearchHeader repRates={repRates} />
       <div ref={listRef} className="tw-w-full sm:tw-max-w-xs">
         <div className="tw-w-full tw-mt-6 tw-relative">
@@ -136,7 +136,7 @@ export default function UserPageRepNewRepSearch({
               htmlFor="search-rep"
               className="tw-block tw-text-sm tw-font-normal tw-text-iron-400"
             >
-              Add new rep
+              Assign Rep
             </label>
             <div className="tw-w-full tw-relative tw-mt-1.5">
               <svg
