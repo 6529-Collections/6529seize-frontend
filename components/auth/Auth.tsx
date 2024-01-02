@@ -17,7 +17,13 @@ import { QueryKey } from "../react-query-wrapper/ReactQueryWrapper";
 type AuthContextType = {
   connectedProfile: IProfileAndConsolidations | null;
   requestAuth: () => Promise<{ success: boolean }>;
-  setToast: ({ message, type }: { message: string | React.ReactNode; type: TypeOptions }) => void;
+  setToast: ({
+    message,
+    type,
+  }: {
+    message: string | React.ReactNode;
+    type: TypeOptions;
+  }) => void;
 };
 
 interface NonceResponse {
@@ -38,7 +44,6 @@ export default function Auth({
 }) {
   const { address } = useAccount();
   const signMessage = useSignMessage();
-
   const { data: connectedProfile } = useQuery<IProfileAndConsolidations>({
     queryKey: [QueryKey.PROFILE, address?.toLowerCase()],
     queryFn: async () =>
