@@ -14,8 +14,6 @@ import ProfileActivityLogs, {
   convertActivityLogParams,
 } from "../components/profile-activity/ProfileActivityLogs";
 import { FilterTargetType } from "../components/utils/CommonFilterTargetSelect";
-import { useContext } from "react";
-import { ReactQueryWrapperContext } from "../components/react-query-wrapper/ReactQueryWrapper";
 
 const Header = dynamic(() => import("../components/header/Header"), {
   ssr: false,
@@ -31,7 +29,7 @@ const inter = Inter({
 
 const INITIAL_ACTIVITY_LOGS_PARAMS: ActivityLogParams = {
   page: 1,
-  pageSize: 40,
+  pageSize: 50,
   logTypes: [],
   matter: null,
   targetType: FilterTargetType.ALL,
@@ -47,13 +45,6 @@ export default function CommunityActivityPage({
 }: {
   readonly pageProps: CommunityActivityPage;
 }) {
-  // const { initCommunityActivityPage } = useContext(ReactQueryWrapperContext);
-  // initCommunityActivityPage({
-  //   activityLogs: {
-  //     data: pageProps.logsPage,
-  //     params: INITIAL_ACTIVITY_LOGS_PARAMS,
-  //   },
-  // });
   return (
     <>
       <Head>
