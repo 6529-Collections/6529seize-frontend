@@ -14,8 +14,6 @@ import ProfileActivityLogs, {
   convertActivityLogParams,
 } from "../components/profile-activity/ProfileActivityLogs";
 import { FilterTargetType } from "../components/utils/CommonFilterTargetSelect";
-import { useContext } from "react";
-import { ReactQueryWrapperContext } from "../components/react-query-wrapper/ReactQueryWrapper";
 
 const Header = dynamic(() => import("../components/header/Header"), {
   ssr: false,
@@ -31,7 +29,7 @@ const inter = Inter({
 
 const INITIAL_ACTIVITY_LOGS_PARAMS: ActivityLogParams = {
   page: 1,
-  pageSize: 40,
+  pageSize: 50,
   logTypes: [],
   matter: null,
   targetType: FilterTargetType.ALL,
@@ -47,13 +45,6 @@ export default function CommunityActivityPage({
 }: {
   readonly pageProps: CommunityActivityPage;
 }) {
-  const { initCommunityActivityPage } = useContext(ReactQueryWrapperContext);
-  initCommunityActivityPage({
-    activityLogs: {
-      data: pageProps.logsPage,
-      params: INITIAL_ACTIVITY_LOGS_PARAMS,
-    },
-  });
   return (
     <>
       <Head>
@@ -72,7 +63,7 @@ export default function CommunityActivityPage({
         <meta property="og:description" content="6529 SEIZE" />
       </Head>
 
-      <main className="tw-min-h-screen tw-bg-iron-950">
+      <main className="tailwind-scope tw-min-h-screen tw-bg-iron-950">
         <Header />
         <div
           className={`tailwind-scope tw-bg-iron-950 tw-min-h-screen tw-pb-16 lg:tw-pb-20 tw-relative tw-px-6 min-[1100px]:tw-max-w-[960px] min-[1200px]:tw-max-w-[1150px] min-[1300px]:tw-max-w-[1250px] min-[1400px]:tw-max-w-[1350px] min-[1500px]:tw-max-w-[1450px] min-[1600px]:tw-max-w-[1550px] min-[1800px]:tw-max-w-[1750px] min-[2000px]:tw-max-w-[1950px] tw-mx-auto ${inter.className}`}
