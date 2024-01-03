@@ -62,10 +62,17 @@ export default function Auth({
     }
   }, [address]);
 
-  const getNonce = async (): Promise<NonceResponse | null> => {
+  const getNonce = async ({
+    signerAddress,
+  }: {
+    signerAddress: string;
+  }): Promise<NonceResponse | null> => {
     try {
       return await commonApiFetch<NonceResponse>({
         endpoint: "auth/nonce",
+        params: {
+          signerAddress,
+        },
       });
     } catch {
       return null;
@@ -139,8 +146,12 @@ export default function Auth({
     };
   };
 
-  const requestSignIn = async () => {
-    const nonceResponse = await getNonce();
+  const requestSignIn = async ({
+    signerAddress,
+  }: {
+    signerAddress: string;
+  }) => {
+    const nonceResponse = await getNonce({ signerAddress });
     if (!nonceResponse) {
       setToast({
         message: "Error requesting authentication, please try again",
@@ -227,7 +238,7 @@ export default function Auth({
     const isAuth = validateJwt({ jwt: getAuthJwt(), wallet: address });
     if (!isAuth) {
       removeAuthJwt();
-      await requestSignIn();
+      await requestSignIn({ signerAddress: address });
     }
     return { success: !!getAuthJwt() };
   };

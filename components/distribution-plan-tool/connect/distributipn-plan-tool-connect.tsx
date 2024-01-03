@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { useAccount } from "wagmi";
-import { removeDistributionPlanCookie } from "../../../services/distribution-plan-api";
 import {
   assertUnreachable,
   isEthereumAddress,
@@ -19,7 +18,6 @@ export default function DistributionPlanToolConnect() {
   );
 
   useEffect(() => {
-    removeDistributionPlanCookie();
     if (address && isEthereumAddress(address)) {
       setAuthStatus(DistributionPlanAuth.CONNECTED);
       return;
