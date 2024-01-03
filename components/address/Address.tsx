@@ -83,6 +83,13 @@ export default function Address(props: Props) {
     };
   };
 
+  function getProfileLink() {
+    if (props.display) {
+      return `/${props.display}`;
+    }
+    return `/${props.wallets[0]}`;
+  }
+
   return (
     <>
       {props.wallets.length === 1 ? (
@@ -100,11 +107,6 @@ export default function Address(props: Props) {
           className={`${styles.consolidationDropdown}`}
           autoClose="outside">
           <Dropdown.Toggle
-            onClick={() => {
-              if (!props.isUserPage) {
-                setConsolidationExpanded(!consolidationExpanded);
-              }
-            }}
             name={`consolidation-toggle`}
             aria-label={`consolidation-toggle`}>
             <Image
@@ -114,15 +116,30 @@ export default function Address(props: Props) {
               alt="consolidation"
               width={25}
               height={25}
+              style={{
+                transition: "transform 0.2s ease",
+                transform: consolidationExpanded
+                  ? "rotate(90deg)"
+                  : "rotate(0deg)",
+              }}
+              onClick={() => {
+                if (!props.isUserPage) {
+                  setConsolidationExpanded(!consolidationExpanded);
+                }
+              }}
             />
             &nbsp;&nbsp;
-            <span
-              className={`${styles.consolidationDisplay} ${
-                props.isUserPage ? styles.consolidationDisplayUserPage : ""
-              }`}
-              dangerouslySetInnerHTML={{
-                __html: props.display ? parseEmojis(props.display) : ``,
-              }}></span>
+            <a
+              className="decoration-none decoration-hover-underline"
+              href={getProfileLink()}>
+              <span
+                className={`${styles.consolidationDisplay} ${
+                  props.isUserPage ? styles.consolidationDisplayUserPage : ""
+                }`}
+                dangerouslySetInnerHTML={{
+                  __html: props.display ? parseEmojis(props.display) : ``,
+                }}></span>
+            </a>
           </Dropdown.Toggle>
         </Dropdown>
       )}
