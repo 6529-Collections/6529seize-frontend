@@ -28,12 +28,15 @@ export default function Header(props: Props) {
 
   const [view, setView] = useState<WalletView>();
 
+  const [showBurgerMenuCollections, setShowBurgerMenuCollections] =
+    useState(false);
   const [showBurgerMenuAbout, setShowBurgerMenuAbout] = useState(false);
   const [showBurgerMenuCommunity, setShowBurgerMenuCommunity] = useState(false);
   const [showBurgerMenuTools, setShowBurgerMenuTools] = useState(false);
 
   useEffect(() => {
     function handleResize() {
+      setShowBurgerMenuCollections(false);
       setBurgerMenuOpen(false);
       setShowBurgerMenuAbout(false);
       setShowBurgerMenuCommunity(false);
@@ -99,8 +102,7 @@ export default function Header(props: Props) {
     return (
       <NavDropdown.Item
         className={styles.dropdownItem}
-        onClick={() => (window.location.href = path)}
-      >
+        onClick={() => (window.location.href = path)}>
         {name}
       </NavDropdown.Item>
     );
@@ -121,20 +123,25 @@ export default function Header(props: Props) {
       <div
         className={`${styles.burgerMenu} ${
           burgerMenuOpen ? styles.burgerMenuOpen : ""
-        }`}
-      >
-        <FontAwesomeIcon
-          className={styles.burgerMenuClose}
-          icon="times-circle"
-          onClick={() => {
-            setBurgerMenuOpen(false);
-            setShowBurgerMenuAbout(false);
-            setShowBurgerMenuCommunity(false);
-            setShowBurgerMenuTools(false);
-          }}
-        ></FontAwesomeIcon>
+        }`}>
+        <Container className="pt-2 pb-2">
+          <Row>
+            <Col className="d-flex justify-content-end">
+              <FontAwesomeIcon
+                className={styles.burgerMenuClose}
+                icon="times-circle"
+                onClick={() => {
+                  setBurgerMenuOpen(false);
+                  setShowBurgerMenuCollections(false);
+                  setShowBurgerMenuAbout(false);
+                  setShowBurgerMenuCommunity(false);
+                  setShowBurgerMenuTools(false);
+                }}></FontAwesomeIcon>
+            </Col>
+          </Row>
+        </Container>
         <Container className="text-center">
-          <Row className="pt-5 pb-4">
+          <Row className="pt-3 pb-3">
             <Col>
               <Image
                 loading="eager"
@@ -147,47 +154,18 @@ export default function Header(props: Props) {
               />
             </Col>
           </Row>
-          <Row className="pt-3 pb-3">
+          <Row className="pt-4 pb-3">
             <Col>
               <h3
-                className={`d-flex justify-content-center ${styles.burgerMenuHeader}`}
-              >
+                className={`d-flex justify-content-center ${styles.burgerMenuHeader}`}>
                 {printHeaderConnect()}
               </h3>
             </Col>
           </Row>
           <Row className="pt-3 pb-3">
             <Col>
-              <a href="/the-memes?sort=age&sort_dir=ASC">
-                <h3>The Memes</h3>
-              </a>
-            </Col>
-          </Row>
-          <Row className="pt-3 pb-3">
-            <Col>
-              <a href="/6529-gradient?sort=id&sort_dir=ASC">
-                <h3>Gradient</h3>
-              </a>
-            </Col>
-          </Row>
-          <Row className="pt-3 pb-3">
-            <Col>
-              <a href="/meme-lab">
-                <h3>Meme Lab</h3>
-              </a>
-            </Col>
-          </Row>
-          <Row className="pt-3 pb-3">
-            <Col>
-              <a href="/rememes">
-                <h3>ReMemes</h3>
-              </a>
-            </Col>
-          </Row>
-          <Row className="pt-3 pb-3">
-            <Col>
-              <a href="/nextgen">
-                <h3>NextGen</h3>
+              <a href="/">
+                <h3>Home</h3>
               </a>
             </Col>
           </Row>
@@ -195,17 +173,101 @@ export default function Header(props: Props) {
             <Col>
               <h3
                 onClick={() => {
-                  setShowBurgerMenuCommunity(!showBurgerMenuCommunity);
+                  setShowBurgerMenuCollections(!showBurgerMenuCollections);
+                  setShowBurgerMenuCommunity(false);
                   setShowBurgerMenuAbout(false);
                   setShowBurgerMenuTools(false);
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    setShowBurgerMenuCollections(!showBurgerMenuCollections);
+                    setShowBurgerMenuCommunity(false);
+                    setShowBurgerMenuAbout(false);
+                    setShowBurgerMenuTools(false);
+                  }
+                }}
+                className={`${styles.burgerMenuHeader}
+                  ${
+                    showBurgerMenuCollections
+                      ? styles.burgerMenuCaretClose
+                      : styles.burgerMenuCaretOpen
+                  }`}>
+                Collections
+              </h3>
+            </Col>
+            {showBurgerMenuCollections && (
+              <Container>
+                <Row>
+                  <Col xs={{ span: 6, offset: 3 }}>
+                    <hr />
+                  </Col>
+                </Row>
+                <Row className="pt-3">
+                  <Col>
+                    <a href="/the-memes">
+                      <h3>The Memes</h3>
+                    </a>
+                  </Col>
+                </Row>
+                <Row className="pt-3">
+                  <Col>
+                    <a href="/6529-gradient">
+                      <h3>Gradient</h3>
+                    </a>
+                  </Col>
+                </Row>
+                <Row className="pt-3">
+                  <Col>
+                    <a href="/nextgen">
+                      <h3>NextGen</h3>
+                    </a>
+                  </Col>
+                </Row>
+                <Row className="pt-3">
+                  <Col>
+                    <a href="/meme-lab">
+                      <h3>Meme Lab</h3>
+                    </a>
+                  </Col>
+                </Row>
+                <Row className="pt-3">
+                  <Col>
+                    <a href="/rememes">
+                      <h3>ReMemes</h3>
+                    </a>
+                  </Col>
+                </Row>
+                <Row>
+                  <Col xs={{ span: 6, offset: 3 }}>
+                    <hr />
+                  </Col>
+                </Row>
+              </Container>
+            )}
+          </Row>
+          <Row className="pt-3 pb-3">
+            <Col>
+              <h3
+                onClick={() => {
+                  setShowBurgerMenuCommunity(!showBurgerMenuCommunity);
+                  setShowBurgerMenuCollections(false);
+                  setShowBurgerMenuAbout(false);
+                  setShowBurgerMenuTools(false);
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    setShowBurgerMenuCommunity(!showBurgerMenuCommunity);
+                    setShowBurgerMenuCollections(false);
+                    setShowBurgerMenuAbout(false);
+                    setShowBurgerMenuTools(false);
+                  }
                 }}
                 className={`${styles.burgerMenuHeader}
                   ${
                     showBurgerMenuCommunity
                       ? styles.burgerMenuCaretClose
                       : styles.burgerMenuCaretOpen
-                  }`}
-              >
+                  }`}>
                 Community
               </h3>
             </Col>
@@ -276,16 +338,24 @@ export default function Header(props: Props) {
               <h3
                 onClick={() => {
                   setShowBurgerMenuTools(!showBurgerMenuTools);
+                  setShowBurgerMenuCollections(false);
                   setShowBurgerMenuCommunity(false);
                   setShowBurgerMenuAbout(false);
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    setShowBurgerMenuTools(!showBurgerMenuTools);
+                    setShowBurgerMenuCollections(false);
+                    setShowBurgerMenuCommunity(false);
+                    setShowBurgerMenuAbout(false);
+                  }
                 }}
                 className={`${styles.burgerMenuHeader}
                   ${
                     showBurgerMenuTools
                       ? styles.burgerMenuCaretClose
                       : styles.burgerMenuCaretOpen
-                  }`}
-              >
+                  }`}>
                 Tools
               </h3>
             </Col>
@@ -349,6 +419,7 @@ export default function Header(props: Props) {
               <h3
                 onClick={() => {
                   setShowBurgerMenuAbout(!showBurgerMenuAbout);
+                  setShowBurgerMenuCollections(false);
                   setShowBurgerMenuCommunity(false);
                   setShowBurgerMenuTools(false);
                 }}
@@ -357,8 +428,7 @@ export default function Header(props: Props) {
                     showBurgerMenuAbout
                       ? styles.burgerMenuCaretClose
                       : styles.burgerMenuCaretOpen
-                  }`}
-              >
+                  }`}>
                 About
               </h3>
             </Col>
@@ -539,8 +609,7 @@ export default function Header(props: Props) {
                   sm={{ span: 8 }}
                   md={{ span: 8 }}
                   lg={{ span: 3 }}
-                  className={`d-flex align-items-center justify-content-start ${styles.headerLeft}`}
-                >
+                  className={`d-flex align-items-center justify-content-start ${styles.headerLeft}`}>
                   <a href="/">
                     <Image
                       loading="eager"
@@ -559,14 +628,13 @@ export default function Header(props: Props) {
                   sm={{ span: 4 }}
                   md={{ span: 4 }}
                   lg={{ span: 9 }}
-                  className={`d-flex align-items-center justify-content-end ${styles.headerRight}`}
-                >
+                  className={`d-flex align-items-center justify-content-end ${styles.headerRight}`}>
                   <Container>
                     <Navbar expand="lg" variant="dark">
                       <Container
-                        className={`d-flex align-items-center justify-content-end no-padding`}
-                      >
-                        <div className={`${styles.dMdNone} d-flex align-items-center`}>
+                        className={`d-flex align-items-center justify-content-end no-padding`}>
+                        <div
+                          className={`${styles.dMdNone} d-flex align-items-center`}>
                           <SearchProfileButton />
                           <Image
                             loading="eager"
@@ -586,78 +654,78 @@ export default function Header(props: Props) {
                         </div>
                         <Navbar
                           id="seize-navbar-nav"
-                          className={`justify-content-end d-none ${styles.dMdBlock}`}
-                        >
+                          className={`justify-content-end d-none ${styles.dMdBlock}`}>
                           <Nav className="justify-content-end ml-auto">
                             <Nav.Link
                               className={`${styles.mainNavLink} ${
-                                router.pathname === "/the-memes" ? "active" : ""
+                                router.pathname === "/" ? "active" : ""
                               }`}
-                              href="/the-memes?sort=age&sort_dir=ASC"
-                            >
-                              The Memes
+                              href="/">
+                              Home
                             </Nav.Link>
-                            <Nav.Link
-                              className={`${styles.mainNavLink} ${
-                                router.pathname === "/6529-gradient"
-                                  ? "active"
-                                  : ""
-                              }`}
-                              href="/6529-gradient?sort=id&sort_dir=ASC"
-                            >
-                              Gradient
-                            </Nav.Link>
-                            <Nav.Link
-                              className={`${styles.mainNavLink} ${
-                                router.pathname === "/meme-lab" ? "active" : ""
-                              }`}
-                              href="/meme-lab"
-                            >
-                              Meme Lab
-                            </Nav.Link>
-                            <Nav.Link
-                              className={`${styles.mainNavLink} ${
-                                router.pathname === "/rememes" ? "active" : ""
-                              }`}
-                              href="/rememes"
-                            >
-                              ReMemes
-                            </Nav.Link>
-                            <Nav.Link
-                              className={`${styles.mainNavLink} ${
-                                router.pathname === "/nextgen" ? "active" : ""
-                              }`}
-                              href="/nextgen"
-                            >
-                              NextGen
-                            </Nav.Link>
+                            <NavDropdown
+                              title="Collections"
+                              align={"start"}
+                              className={`${styles.mainNavLink} ${styles.mainNavLinkPadding}`}>
+                              <NavDropdown.Item
+                                className={styles.dropdownItem}
+                                onClick={() =>
+                                  (window.location.href = "/the-memes")
+                                }>
+                                The Memes
+                              </NavDropdown.Item>
+                              <NavDropdown.Item
+                                className={styles.dropdownItem}
+                                onClick={() =>
+                                  (window.location.href = "/6529-gradient")
+                                }>
+                                Gradient
+                              </NavDropdown.Item>
+                              <NavDropdown.Item
+                                className={styles.dropdownItem}
+                                onClick={() =>
+                                  (window.location.href = "/nextgen")
+                                }>
+                                NextGen
+                              </NavDropdown.Item>
+                              <NavDropdown.Item
+                                className={styles.dropdownItem}
+                                onClick={() =>
+                                  (window.location.href = "/meme-lab")
+                                }>
+                                Meme Lab
+                              </NavDropdown.Item>
+                              <NavDropdown.Item
+                                className={styles.dropdownItem}
+                                onClick={() =>
+                                  (window.location.href = "/rememes")
+                                }>
+                                ReMemes
+                              </NavDropdown.Item>
+                            </NavDropdown>
                             <NavDropdown
                               title="Community"
                               align={"start"}
-                              className={`${styles.mainNavLink} ${styles.mainNavLinkPadding}`}
-                            >
+                              className={`${styles.mainNavLink} ${styles.mainNavLinkPadding}`}>
                               <NavDropdown.Item
                                 className={styles.dropdownItem}
                                 onClick={() =>
                                   (window.location.href = "/community")
-                                }
-                              >
+                                }>
                                 Community
                               </NavDropdown.Item>
                               <NavDropdown.Item
                                 className={styles.dropdownItem}
                                 onClick={() =>
                                   (window.location.href = "/community-activity")
-                                }
-                              >
+                                }>
                                 Community Activity
                               </NavDropdown.Item>
                               <NavDropdown.Item
                                 className={styles.dropdownItem}
                                 onClick={() =>
                                   (window.location.href = "/nft-activity")
-                                }
-                              >
+                                }>
                                 NFT Activity
                               </NavDropdown.Item>
                               <NavDropdown.Divider />
@@ -665,39 +733,34 @@ export default function Header(props: Props) {
                                 className={styles.dropdownItem}
                                 onClick={() =>
                                   (window.location.href = "/community-metrics")
-                                }
-                              >
+                                }>
                                 Community Metrics
                               </NavDropdown.Item>
                               <NavDropdown.Item
                                 className={styles.dropdownItem}
                                 onClick={() =>
                                   (window.location.href = "/community-stats")
-                                }
-                              >
+                                }>
                                 Community Stats
                               </NavDropdown.Item>
                               <NavDropdown.Item
                                 className={styles.dropdownItem}
                                 onClick={() =>
                                   (window.location.href = "/levels")
-                                }
-                              >
+                                }>
                                 Levels
                               </NavDropdown.Item>
                             </NavDropdown>
                             <NavDropdown
                               title="Tools"
                               align={"start"}
-                              className={`${styles.mainNavLink} ${styles.mainNavLinkPadding}`}
-                            >
+                              className={`${styles.mainNavLink} ${styles.mainNavLinkPadding}`}>
                               <NavDropdown.Item
                                 className={styles.dropdownItem}
                                 onClick={() =>
                                   (window.location.href =
                                     "/delegation/delegation-center")
-                                }
-                              >
+                                }>
                                 Delegation Center
                               </NavDropdown.Item>
                               <NavDropdown.Divider />
@@ -706,24 +769,21 @@ export default function Header(props: Props) {
                                 onClick={() =>
                                   (window.location.href =
                                     "/distribution-plan-tool")
-                                }
-                              >
+                                }>
                                 EMMA
                               </NavDropdown.Item>
                               <NavDropdown.Item
                                 className={styles.dropdownItem}
                                 onClick={() =>
                                   (window.location.href = "/meme-blocks")
-                                }
-                              >
+                                }>
                                 Meme Blocks
                               </NavDropdown.Item>
                               <NavDropdown.Item
                                 className={styles.dropdownItem}
                                 onClick={() =>
                                   (window.location.href = "/open-data")
-                                }
-                              >
+                                }>
                                 Open Data
                               </NavDropdown.Item>
                               <NavDropdown.Divider />
@@ -742,38 +802,33 @@ export default function Header(props: Props) {
                                   ? "active"
                                   : ""
                               }`}
-                              align={"start"}
-                            >
+                              align={"start"}>
                               <NavDropdown.Item
                                 className={styles.dropdownItem}
                                 onClick={() =>
                                   (window.location.href = `/about/${AboutSection.MEMES}`)
-                                }
-                              >
+                                }>
                                 The Memes
                               </NavDropdown.Item>
                               <NavDropdown.Item
                                 className={styles.dropdownItem}
                                 onClick={() =>
                                   (window.location.href = `/about/${AboutSection.MEMES_CALENDAR}`)
-                                }
-                              >
+                                }>
                                 Memes Calendar
                               </NavDropdown.Item>
                               <NavDropdown.Item
                                 className={styles.dropdownItem}
                                 onClick={() =>
                                   (window.location.href = `/about/${AboutSection.MEME_LAB}`)
-                                }
-                              >
+                                }>
                                 Meme Lab
                               </NavDropdown.Item>
                               <NavDropdown.Item
                                 className={styles.dropdownItem}
                                 onClick={() =>
                                   (window.location.href = `/about/${AboutSection.GRADIENTS}`)
-                                }
-                              >
+                                }>
                                 Gradient
                               </NavDropdown.Item>
                               <NavDropdown.Divider />
@@ -781,8 +836,7 @@ export default function Header(props: Props) {
                                 className={styles.dropdownItem}
                                 onClick={() =>
                                   (window.location.href = `/about/${AboutSection.GDRC1}`)
-                                }
-                              >
+                                }>
                                 GDRC1
                               </NavDropdown.Item>
                               <NavDropdown.Divider />
@@ -790,8 +844,7 @@ export default function Header(props: Props) {
                                 className={styles.dropdownItem}
                                 onClick={() =>
                                   (window.location.href = `/about/${AboutSection.NFT_DELEGATION}`)
-                                }
-                              >
+                                }>
                                 NFT Delegation
                               </NavDropdown.Item>
                               <NavDropdown.Divider />
@@ -799,32 +852,28 @@ export default function Header(props: Props) {
                                 className={styles.dropdownItem}
                                 onClick={() =>
                                   (window.location.href = `/about/${AboutSection.FAQ}`)
-                                }
-                              >
+                                }>
                                 FAQ
                               </NavDropdown.Item>
                               <NavDropdown.Item
                                 className={styles.dropdownItem}
                                 onClick={() =>
                                   (window.location.href = `/about/${AboutSection.ENS}`)
-                                }
-                              >
+                                }>
                                 ENS
                               </NavDropdown.Item>
                               <NavDropdown.Item
                                 className={styles.dropdownItem}
                                 onClick={() =>
                                   (window.location.href = `/about/${AboutSection.MINTING}`)
-                                }
-                              >
+                                }>
                                 Minting
                               </NavDropdown.Item>
                               <NavDropdown.Item
                                 className={styles.dropdownItem}
                                 onClick={() =>
                                   (window.location.href = `/about/${AboutSection.LICENSE}`)
-                                }
-                              >
+                                }>
                                 License
                               </NavDropdown.Item>
                               <NavDropdown.Divider />
@@ -832,32 +881,28 @@ export default function Header(props: Props) {
                                 className={styles.dropdownItem}
                                 onClick={() =>
                                   (window.location.href = `/about/${AboutSection.APPLY}`)
-                                }
-                              >
+                                }>
                                 Apply
                               </NavDropdown.Item>
                               <NavDropdown.Item
                                 className={styles.dropdownItem}
                                 onClick={() =>
                                   (window.location.href = `/about/${AboutSection.CONTACT_US}`)
-                                }
-                              >
+                                }>
                                 Contact Us
                               </NavDropdown.Item>
                               <NavDropdown.Item
                                 className={styles.dropdownItem}
                                 onClick={() =>
                                   (window.location.href = `/about/${AboutSection.RELEASE_NOTES}`)
-                                }
-                              >
+                                }>
                                 Release Notes
                               </NavDropdown.Item>
                               <NavDropdown.Item
                                 className={styles.dropdownItem}
                                 onClick={() =>
                                   (window.location.href = `/about/${AboutSection.DATA_DECENTR}`)
-                                }
-                              >
+                                }>
                                 Data Decentralization
                               </NavDropdown.Item>
                               <NavDropdown.Divider />
@@ -865,24 +910,21 @@ export default function Header(props: Props) {
                                 className={styles.dropdownItem}
                                 onClick={() =>
                                   (window.location.href = `/about/${AboutSection.TERMS_OF_SERVICE}`)
-                                }
-                              >
+                                }>
                                 Terms of Service
                               </NavDropdown.Item>
                               <NavDropdown.Item
                                 className={styles.dropdownItem}
                                 onClick={() =>
                                   (window.location.href = `/about/${AboutSection.PRIVACY_POLICY}`)
-                                }
-                              >
+                                }>
                                 Privacy Policy
                               </NavDropdown.Item>
                               <NavDropdown.Item
                                 className={styles.dropdownItem}
                                 onClick={() =>
                                   (window.location.href = `/about/${AboutSection.COOKIE_POLICY}`)
-                                }
-                              >
+                                }>
                                 Cookie Policy
                               </NavDropdown.Item>
                             </NavDropdown>
