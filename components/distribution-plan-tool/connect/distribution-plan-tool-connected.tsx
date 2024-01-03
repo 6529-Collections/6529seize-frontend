@@ -1,71 +1,16 @@
-import { useAccount, useSignMessage } from "wagmi";
-import {
-  distributionPlanApiFetch,
-  distributionPlanApiPost,
-  removeDistributionPlanCookie,
-  setDistributionPlanCookie,
-} from "../../../services/distribution-plan-api";
-
-import { makeErrorToast } from "../../../services/distribution-plan.utils";
-import { useEffect } from "react";
 import { useRouter } from "next/router";
-interface DistributionPlanNonce {
-  readonly nonce: string;
-  readonly serverSignature: string;
-}
+import { useContext } from "react";
+import { AuthContext } from "../../auth/Auth";
 
 export default function DistributionPlanToolConnected() {
-  const signMessage = useSignMessage();
-  const { address } = useAccount();
+  const { requestAuth } = useContext(AuthContext);
   const router = useRouter();
 
-  const getSignature = async ({
-    message,
-  }: {
-    message: string;
-  }): Promise<string | null> => {
-    try {
-      const signedMessage = await signMessage.signMessageAsync({
-        message,
-      });
-      return signedMessage;
-    } catch (error: any) {
-      makeErrorToast(error.toString());
-      return null;
-    }
-  };
-
   const trySignIn = async () => {
-    removeDistributionPlanCookie();
-    const nonceResponse = await distributionPlanApiFetch<DistributionPlanNonce>(
-      `/auth/nonce`
-    );
-    if (!nonceResponse) return;
-    const { data: nonceData } = nonceResponse;
-    if (!nonceData) return;
-    const { nonce, serverSignature } = nonceData;
-    const clientSignature = await getSignature({ message: nonce });
-    if (!clientSignature) return;
-    const tokenResponse = await distributionPlanApiPost<{ token: string }>({
-      endpoint: "/auth/login",
-      body: {
-        serverSignature,
-        clientSignature,
-      },
-    });
-
-    if (!tokenResponse) return;
-    const { data: tokenData } = tokenResponse;
-    if (!tokenData) return;
-    const { token } = tokenData;
-    if (!token) return;
-    setDistributionPlanCookie(token);
+    const { success } = await requestAuth();
+    if (!success) return;
     router.push("/distribution-plan-tool/plans");
   };
-
-  useEffect(() => {
-    removeDistributionPlanCookie();
-  }, []);
 
   return (
     <div className="tw-flex tw-flex-col">

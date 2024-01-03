@@ -149,10 +149,3 @@ export const distributionPlanApiDelete = async <T>({
   }
 };
 
-export const setDistributionPlanCookie = (token: string) => {
-  Cookies.set(WALLET_AUTH_COOKIE, token);
-};
-
-export const removeDistributionPlanCookie = () => {
-  Cookies.remove(WALLET_AUTH_COOKIE);
-};
