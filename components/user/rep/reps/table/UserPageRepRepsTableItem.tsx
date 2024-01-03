@@ -44,7 +44,7 @@ export default function UserPageRepRepsTableItem({
       <td
         className={`${
           isPositiveRating ? "tw-text-green" : "tw-text-red"
-        } tw-whitespace-nowrap tw-py-3 tw-px-4 sm:tw-px-6 tw-text-sm tw-font-medium tw-text-right`}
+        } tw-whitespace-nowrap tw-py-3 tw-px-4 sm:tw-px-6 tw-text-sm tw-font-semibold tw-text-right`}
       >
         {rep.rating}
       </td>

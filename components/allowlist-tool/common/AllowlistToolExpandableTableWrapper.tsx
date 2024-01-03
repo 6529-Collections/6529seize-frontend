@@ -41,7 +41,7 @@ export default function AllowlistToolExpandableTableWrapper({
   return (
     <>
       <div>
-        <div className="tw-bg-neutral-900 tw-border tw-border-solid tw-border-white/5 tw-rounded-lg tw-transition tw-duration-300 tw-ease-out">
+        <div className="tw-bg-neutral-900 tw-border tw-border-solid tw-border-white/10 tw-rounded-lg tw-transition tw-duration-300 tw-ease-out">
           <div
             onClick={(e) => {
               e.stopPropagation();

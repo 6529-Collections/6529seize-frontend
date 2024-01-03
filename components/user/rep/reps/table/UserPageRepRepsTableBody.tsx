@@ -13,7 +13,7 @@ export default function UserPageRepRepsTableBody({
   readonly canEditRep: boolean;
 }) {
   return (
-    <tbody className="tw-divide-y tw-divide-solid tw-divide-white/10 tw-bg-iron-950">
+    <tbody className="tw-divide-y tw-divide-solid tw-divide-white/10">
       {reps.map((rep) => (
         <UserPageRepRepsTableItem
           key={rep.category}
