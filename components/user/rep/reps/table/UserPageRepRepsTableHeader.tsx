@@ -12,7 +12,7 @@ export default function UserPageRepRepsTableHeader({
   readonly onSortTypeClick: (newSortType: RepsTableSort) => void;
 }) {
   return (
-    <thead className="tw-bg-iron-900">
+    <thead className="tw-bg-iron-900 tw-border-b tw-border-x-0 tw-border-t-0 tw-border-white/10">
       <tr>
         <th
           scope="col"

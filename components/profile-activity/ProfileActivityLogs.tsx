@@ -159,7 +159,7 @@ export default function ProfileActivityLogs({
     <div
       className={`${
         initialParams.handleOrWallet
-          ? "tw-min-h-[28rem] tw-max-h-[28rem]"
+          ? ""
           : "tw-mt-2 tw-min-h-screen"
       }  tw-scroll-py-3 tw-overflow-auto`}
     >
@@ -192,7 +192,7 @@ export default function ProfileActivityLogs({
           )}
         </div>
       ) : (
-        <div className="tw-mt-4">
+        <div className="tw-py-4">
           <span
             className={`${
               initialParams.handleOrWallet ? "tw-px-4 sm:tw-px-6 md:tw-px-8" : ""

@@ -132,7 +132,7 @@ export default function UserPageRepNewRepSearch({
   }, [debouncedValue, categories]);
 
   return (
-    <div className="tw-max-w-full tw-relative tw-bg-iron-800 tw-p-4 sm:tw-p-6 tw-rounded-xl tw-border tw-border-solid tw-border-white/5">
+    <div className="tw-max-w-full tw-relative tw-bg-iron-800 tw-p-4 sm:tw-p-6 tw-rounded-xl tw-border tw-border-solid tw-border-white/10">
       <UserPageRepNewRepSearchHeader repRates={repRates} profile={profile} />
       <div ref={listRef} className="tw-w-full sm:tw-max-w-xs">
         <div className="tw-w-full tw-mt-6 tw-relative">
@@ -165,7 +165,7 @@ export default function UserPageRepNewRepSearch({
                 value={repSearch}
                 onChange={handleRepSearchChange}
                 onFocus={() => setIsOpen(true)}
-                className="tw-form-input tw-block tw-w-full tw-rounded-lg tw-border-0 tw-py-3 tw-pl-11 tw-pr-4 tw-bg-iron-900 tw-text-iron-300 tw-font-normal tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-700 placeholder:tw-text-iron-500 focus:tw-outline-none  focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 tw-text-base tw-transition tw-duration-300 tw-ease-out"
+                className="tw-form-input tw-block tw-w-full tw-rounded-lg tw-border-0 tw-py-3 tw-pl-11 tw-pr-4 tw-bg-iron-900 focus:tw-bg-iron-950 tw-text-iron-300 tw-font-normal tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-700 placeholder:tw-text-iron-500 focus:tw-outline-none  focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 tw-text-base tw-transition tw-duration-300 tw-ease-out"
                 placeholder="Search"
               />
               {checkingAvailability && (

@@ -12,17 +12,19 @@ export default function UserPageIdentityActivityLog({
   readonly initialActivityLogParams: ActivityLogParams;
 }) {
   return (
-    <div className="tw-bg-iron-900 tw-border tw-border-white/5 tw-border-solid tw-rounded-xl">
+    <div>
       <UserTableHeaderWrapper>
         <span>
           <ProfileName type={ProfileNameType.POSSESSION} />
         </span>{" "}
         CIC Activity Log
       </UserTableHeaderWrapper>
-      <ProfileActivityLogs
-        initialParams={initialActivityLogParams}
-        withFilters={true}
-      />
+      <div className="tw-mt-4 tw-bg-iron-900 tw-border tw-border-white/10 tw-border-solid tw-rounded-xl">
+        <ProfileActivityLogs
+          initialParams={initialActivityLogParams}
+          withFilters={true}
+        />
+      </div>
     </div>
   );
 }
