@@ -124,18 +124,24 @@ export default function Header(props: Props) {
         className={`${styles.burgerMenu} ${
           burgerMenuOpen ? styles.burgerMenuOpen : ""
         }`}>
-        <FontAwesomeIcon
-          className={styles.burgerMenuClose}
-          icon="times-circle"
-          onClick={() => {
-            setBurgerMenuOpen(false);
-            setShowBurgerMenuCollections(false);
-            setShowBurgerMenuAbout(false);
-            setShowBurgerMenuCommunity(false);
-            setShowBurgerMenuTools(false);
-          }}></FontAwesomeIcon>
+        <Container className="pt-2 pb-2">
+          <Row>
+            <Col className="d-flex justify-content-end">
+              <FontAwesomeIcon
+                className={styles.burgerMenuClose}
+                icon="times-circle"
+                onClick={() => {
+                  setBurgerMenuOpen(false);
+                  setShowBurgerMenuCollections(false);
+                  setShowBurgerMenuAbout(false);
+                  setShowBurgerMenuCommunity(false);
+                  setShowBurgerMenuTools(false);
+                }}></FontAwesomeIcon>
+            </Col>
+          </Row>
+        </Container>
         <Container className="text-center">
-          <Row className="pt-5 pb-4">
+          <Row className="pt-4 pb-4">
             <Col>
               <Image
                 loading="eager"
@@ -148,7 +154,7 @@ export default function Header(props: Props) {
               />
             </Col>
           </Row>
-          <Row className="pt-3 pb-3">
+          <Row className="pt-4 pb-4">
             <Col>
               <h3
                 className={`d-flex justify-content-center ${styles.burgerMenuHeader}`}>
@@ -156,7 +162,7 @@ export default function Header(props: Props) {
               </h3>
             </Col>
           </Row>
-          <Row className="pt-3 pb-3">
+          <Row className="pt-4 pb-4">
             <Col>
               <h3
                 onClick={() => {
@@ -232,7 +238,7 @@ export default function Header(props: Props) {
               </Container>
             )}
           </Row>
-          <Row className="pt-3 pb-3">
+          <Row className="pt-4 pb-4">
             <Col>
               <h3
                 onClick={() => {
@@ -320,7 +326,7 @@ export default function Header(props: Props) {
               </Container>
             )}
           </Row>
-          <Row className="pt-3 pb-3">
+          <Row className="pt-4 pb-4">
             <Col>
               <h3
                 onClick={() => {
@@ -401,7 +407,7 @@ export default function Header(props: Props) {
               </Container>
             )}
           </Row>
-          <Row className="pt-3 pb-3">
+          <Row className="pt-4 pb-4">
             <Col>
               <h3
                 onClick={() => {
