@@ -141,7 +141,7 @@ export default function Header(props: Props) {
           </Row>
         </Container>
         <Container className="text-center">
-          <Row className="pt-4 pb-4">
+          <Row className="pt-3 pb-3">
             <Col>
               <Image
                 loading="eager"
@@ -154,7 +154,7 @@ export default function Header(props: Props) {
               />
             </Col>
           </Row>
-          <Row className="pt-4 pb-4">
+          <Row className="pt-4 pb-3">
             <Col>
               <h3
                 className={`d-flex justify-content-center ${styles.burgerMenuHeader}`}>
@@ -162,7 +162,14 @@ export default function Header(props: Props) {
               </h3>
             </Col>
           </Row>
-          <Row className="pt-4 pb-4">
+          <Row className="pt-3 pb-3">
+            <Col>
+              <a href="/">
+                <h3>Home</h3>
+              </a>
+            </Col>
+          </Row>
+          <Row className="pt-3 pb-3">
             <Col>
               <h3
                 onClick={() => {
@@ -238,7 +245,7 @@ export default function Header(props: Props) {
               </Container>
             )}
           </Row>
-          <Row className="pt-4 pb-4">
+          <Row className="pt-3 pb-3">
             <Col>
               <h3
                 onClick={() => {
@@ -326,7 +333,7 @@ export default function Header(props: Props) {
               </Container>
             )}
           </Row>
-          <Row className="pt-4 pb-4">
+          <Row className="pt-3 pb-3">
             <Col>
               <h3
                 onClick={() => {
@@ -407,7 +414,7 @@ export default function Header(props: Props) {
               </Container>
             )}
           </Row>
-          <Row className="pt-4 pb-4">
+          <Row className="pt-3 pb-3">
             <Col>
               <h3
                 onClick={() => {
@@ -649,6 +656,13 @@ export default function Header(props: Props) {
                           id="seize-navbar-nav"
                           className={`justify-content-end d-none ${styles.dMdBlock}`}>
                           <Nav className="justify-content-end ml-auto">
+                            <Nav.Link
+                              className={`${styles.mainNavLink} ${
+                                router.pathname === "/" ? "active" : ""
+                              }`}
+                              href="/">
+                              Home
+                            </Nav.Link>
                             <NavDropdown
                               title="Collections"
                               align={"start"}
