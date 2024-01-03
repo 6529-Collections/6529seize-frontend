@@ -165,6 +165,14 @@ export default function Header(props: Props) {
                   setShowBurgerMenuAbout(false);
                   setShowBurgerMenuTools(false);
                 }}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    setShowBurgerMenuCollections(!showBurgerMenuCollections);
+                    setShowBurgerMenuCommunity(false);
+                    setShowBurgerMenuAbout(false);
+                    setShowBurgerMenuTools(false);
+                  }
+                }}
                 className={`${styles.burgerMenuHeader}
                   ${
                     showBurgerMenuCollections
