@@ -143,3 +143,14 @@
   align-items: center;
   justify-content: center;
 }
+
+.viewAllLink {
+  white-space: nowrap;
+  font-size: 15px !important;
+  font-family: $main-font;
+  font-weight: lighter;
+
+  @media only screen and (max-width: 800px) {
+    font-size: 12px !important;
+  }
+}
