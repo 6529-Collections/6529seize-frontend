@@ -20,7 +20,7 @@ export default function UserPageRepNewRepSearch({
   onRepSearch,
   profile,
 }: {
-  readonly repRates: ApiProfileRepRatesState;
+  readonly repRates: ApiProfileRepRatesState | null;
   readonly onRepSearch: (repSearch: string) => void;
   readonly profile: IProfileAndConsolidations;
 }) {

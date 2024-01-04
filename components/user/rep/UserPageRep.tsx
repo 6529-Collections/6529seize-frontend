@@ -67,15 +67,11 @@ export default function UserPageRep({
 
   return (
     <div className="tailwind-scope">
-      {repRates && (
-        <>
-          <UserPageRepHeader repRates={repRates} />
-          <UserPageRateWrapper profile={profile} type={RateMatter.REP}>
-            <UserPageRepNewRep profile={profile} repRates={repRates} />
-          </UserPageRateWrapper>
-          <UserPageRepReps repRates={repRates} profile={profile} />
-        </>
-      )}
+      <UserPageRepHeader repRates={repRates ?? null} />
+      <UserPageRateWrapper profile={profile} type={RateMatter.REP}>
+        <UserPageRepNewRep profile={profile} repRates={repRates ?? null} />
+      </UserPageRateWrapper>
+      <UserPageRepReps repRates={repRates ?? null} profile={profile} />
 
       <div className="tw-mt-6 lg:tw-mt-10 tw-grid tw-grid-cols-1 xl:tw-grid-cols-2 tw-gap-y-8 lg:tw-gap-y-10 tw-gap-x-8 lg:tw-gap-x-10">
         <div>

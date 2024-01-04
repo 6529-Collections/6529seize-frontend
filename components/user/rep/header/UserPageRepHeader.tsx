@@ -4,7 +4,7 @@ import { formatNumberWithCommas } from "../../../../helpers/Helpers";
 export default function UserPageRepHeader({
   repRates,
 }: {
-  readonly repRates: ApiProfileRepRatesState;
+  readonly repRates: ApiProfileRepRatesState | null;
 }) {
   return (
     <div>
@@ -14,12 +14,20 @@ export default function UserPageRepHeader({
             <div className="tw-flex tw-items-center tw-text-base tw-font-medium tw-text-iron-300">
               <div className="tw-flex tw items-center tw-space-x-1">
                 <span>Rep:</span>
-                <span className="tw-text-iron-50 tw-font-semibold">{formatNumberWithCommas(repRates.total_rep_rating)}</span>
+                <span className="tw-text-iron-50 tw-font-semibold">
+                  {repRates
+                    ? formatNumberWithCommas(repRates.total_rep_rating)
+                    : ""}
+                </span>
               </div>
             </div>
             <div className="tw-flex tw-items-center tw-text-base tw-font-medium tw-text-iron-300 tw-space-x-1">
               <span>Raters:</span>
-              <span className="tw-text-iron-50 tw-font-semibold">{formatNumberWithCommas(repRates.number_of_raters)}</span>
+              <span className="tw-text-iron-50 tw-font-semibold">
+                {repRates
+                  ? formatNumberWithCommas(repRates.number_of_raters)
+                  : ""}
+              </span>
             </div>
           </div>
         </div>
