@@ -309,6 +309,8 @@ export const getProfileRatingsByRater = async ({
   page,
   logType,
   pageSize,
+  order,
+  orderBy,
 }: {
   readonly user: string;
   readonly headers: Record<string, string>;
@@ -316,11 +318,15 @@ export const getProfileRatingsByRater = async ({
   readonly logType: string;
   readonly given: boolean;
   readonly pageSize: number;
+  readonly order: string;
+  readonly orderBy: string;
 }): Promise<Page<RatingWithProfileInfoAndLevel>> => {
   const params: Record<string, string> = {
     page: `${page}`,
     page_size: `${pageSize}`,
     log_type: logType,
+    // order,
+    // order_by: orderBy,
   };
   if (given) {
     params.given = "true";

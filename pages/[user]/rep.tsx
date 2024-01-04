@@ -47,6 +47,8 @@ export interface UserPageRepProps {
 const PROFILE_REP_RATERS_PAGE = 1;
 const PROFILE_REP_RATERS_PAGE_SIZE = 10;
 const PROFILE_REP_RATERS_LOG_TYPE = "";
+const PROFILE_REP_RATERS_ORDER = "desc";
+const PROFILE_REP_RATERS_ORDER_BY = "rating";
 
 const getInitialActivityLogParams = (
   handleOrWallet: string
@@ -149,6 +151,8 @@ export async function getServerSideProps(
         pageSize: PROFILE_REP_RATERS_PAGE_SIZE,
         given: true,
         logType: PROFILE_REP_RATERS_LOG_TYPE,
+        orderBy: PROFILE_REP_RATERS_ORDER_BY,
+        order: PROFILE_REP_RATERS_ORDER,
       }),
       getProfileRatingsByRater({
         user: handleOrWallet,
@@ -157,6 +161,8 @@ export async function getServerSideProps(
         logType: PROFILE_REP_RATERS_LOG_TYPE,
         pageSize: PROFILE_REP_RATERS_PAGE_SIZE,
         given: false,
+        orderBy: PROFILE_REP_RATERS_ORDER_BY,
+        order: PROFILE_REP_RATERS_ORDER,
       }),
     ]);
 
