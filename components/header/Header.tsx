@@ -8,8 +8,6 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { DBResponse } from "../../entities/IDBResponse";
 import { fetchUrl } from "../../services/6529api";
 import HeaderConnect from "./HeaderConnect";
-import Cookies from "js-cookie";
-import { VIEW_MODE_COOKIE } from "../../constants";
 import { useAccount } from "wagmi";
 import SearchProfileButton from "./search-profile/SearchProfileButton";
 
@@ -48,11 +46,6 @@ export default function Header(props: Props) {
       props.onLoad();
     }
     return () => window.removeEventListener("resize", handleResize);
-  }, []);
-
-  useEffect(() => {
-    const viewMode = Cookies.get(VIEW_MODE_COOKIE);
-    console.log(VIEW_MODE_COOKIE, viewMode);
   }, []);
 
   useEffect(() => {
