@@ -6,6 +6,7 @@ import {
 import CommonAnimationWrapper from "../../../../utils/animation/CommonAnimationWrapper";
 import CommonAnimationOpacity from "../../../../utils/animation/CommonAnimationOpacity";
 import UserPageRepModifyModal from "../../modify-rep/UserPageRepModifyModal";
+import { formatNumberWithCommas } from "../../../../../helpers/Helpers";
 
 export default function UserPageRepRepsTableItem({
   rep,
@@ -46,35 +47,41 @@ export default function UserPageRepRepsTableItem({
           isPositiveRating ? "tw-text-green" : "tw-text-red"
         } tw-whitespace-nowrap tw-py-3 tw-px-4 sm:tw-px-6 tw-text-sm tw-font-semibold tw-text-right`}
       >
-        {rep.rating}
+        {formatNumberWithCommas(rep.rating)}
       </td>
       <td className="tw-whitespace-nowrap tw-py-3 tw-px-4 sm:tw-px-6 tw-text-sm tw-font-medium tw-text-right tw-text-iron-400">
-        {rep.contributor_count}
+        {formatNumberWithCommas(rep.contributor_count)}
       </td>
-      <td
-        className={`${
-          isPositiveRaterContribution ? "tw-text-green" : "tw-text-red"
-        } tw-whitespace-nowrap tw-py-3 tw-px-4 sm:tw-px-6 tw-text-sm tw-font-medium tw-text-right`}
-      >
-        {rep.rater_contribution ? rep.rater_contribution : " "}
-      </td>
-      <CommonAnimationWrapper mode="sync" initial={true}>
-        {isEditRepModalOpen && (
-          <CommonAnimationOpacity
-            key="modal"
-            elementClasses="tw-absolute tw-z-10"
-            elementRole="dialog"
-            onClicked={(e) => e.stopPropagation()}
+      {canEditRep && (
+        <>
+          <td
+            className={`${
+              isPositiveRaterContribution ? "tw-text-green" : "tw-text-red"
+            } tw-whitespace-nowrap tw-py-3 tw-px-4 sm:tw-px-6 tw-text-sm tw-font-medium tw-text-right`}
           >
-            <UserPageRepModifyModal
-              profile={profile}
-              repState={rep}
-              giverAvailableRep={giverAvailableRep}
-              onClose={() => setIsEditRepModalOpen(false)}
-            />
-          </CommonAnimationOpacity>
-        )}
-      </CommonAnimationWrapper>
+            {rep.rater_contribution
+              ? formatNumberWithCommas(rep.rater_contribution)
+              : " "}
+          </td>
+          <CommonAnimationWrapper mode="sync" initial={true}>
+            {isEditRepModalOpen && (
+              <CommonAnimationOpacity
+                key="modal"
+                elementClasses="tw-absolute tw-z-10"
+                elementRole="dialog"
+                onClicked={(e) => e.stopPropagation()}
+              >
+                <UserPageRepModifyModal
+                  profile={profile}
+                  repState={rep}
+                  giverAvailableRep={giverAvailableRep}
+                  onClose={() => setIsEditRepModalOpen(false)}
+                />
+              </CommonAnimationOpacity>
+            )}
+          </CommonAnimationWrapper>
+        </>
+      )}
     </tr>
   );
 }

@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { SortDirection } from "../../../../../entities/ISort";
 import { RepsTableSort } from "./UserPageRepRepsTable";
 import UserPageRepRepsTableHeaderSortableCell from "./UserPageRepRepsTableHeaderSortableCell";
@@ -5,12 +6,24 @@ import UserPageRepRepsTableHeaderSortableCell from "./UserPageRepRepsTableHeader
 export default function UserPageRepRepsTableHeader({
   activeType,
   sortDirection,
+  showMyRates,
   onSortTypeClick,
 }: {
   readonly activeType: RepsTableSort;
   readonly sortDirection: SortDirection;
+  readonly showMyRates: boolean;
   readonly onSortTypeClick: (newSortType: RepsTableSort) => void;
 }) {
+  const getTypes = (myRates: boolean) => {
+    if (myRates) {
+      return [RepsTableSort.REP, RepsTableSort.RATERS, RepsTableSort.MY_RATES];
+    }
+    return [RepsTableSort.REP, RepsTableSort.RATERS];
+  };
+
+  const [types, setTypes] = useState<RepsTableSort[]>(getTypes(showMyRates));
+  useEffect(() => setTypes(getTypes(showMyRates)), [showMyRates]);
+
   return (
     <thead className="tw-bg-iron-900 tw-border-b tw-border-x-0 tw-border-t-0 tw-border-white/10">
       <tr>
@@ -20,7 +33,7 @@ export default function UserPageRepRepsTableHeader({
         >
           Category
         </th>
-        {Object.values(RepsTableSort).map((sortType) => (
+        {types.map((sortType) => (
           <UserPageRepRepsTableHeaderSortableCell
             key={sortType}
             type={sortType}

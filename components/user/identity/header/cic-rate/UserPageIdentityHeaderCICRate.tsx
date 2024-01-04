@@ -20,6 +20,7 @@ import {
 } from "../../../../react-query-wrapper/ReactQueryWrapper";
 import { createBreakpoint } from "react-use";
 import UserRateAdjustmentHelper from "../../../utils/rate/UserRateAdjustmentHelper";
+import CircleLoader from "../../../../distribution-plan-tool/common/CircleLoader";
 
 const useBreakpoint = createBreakpoint({ MD: 768, S: 0 });
 
@@ -59,25 +60,31 @@ export default function UserPageIdentityHeaderCICRate({
     staleTime: 0,
   });
 
+  const [mutating, setMutating] = useState<boolean>(false);
+
   const updateCICMutation = useMutation({
-    mutationFn: async (amount: number) =>
-      await commonApiPost({
+    mutationFn: async (amount: number) => {
+      setMutating(true);
+      return await commonApiPost({
         endpoint: `profiles/${profile.profile?.handle}/cic/rating`,
         body: {
           amount,
         },
-      }),
+      });
+    },
     onSuccess: () => {
       setToast({
         message: "CIC rating updated.",
         type: "success",
       });
-
       onProfileCICModify({
         targetProfile: profile,
         connectedProfile: connectedProfile ?? null,
         rater: address?.toLowerCase() ?? null,
       });
+    },
+    onSettled: () => {
+      setMutating(false);
     },
   });
 
@@ -107,6 +114,10 @@ export default function UserPageIdentityHeaderCICRate({
     if (cicAsNumber < -myMaxCICRatings) {
       return `-${myMaxCICRatings}`;
     }
+
+    if (strCIC.length > 1 && strCIC.startsWith("0")) {
+      return strCIC.slice(1);
+    }
     return strCIC;
   };
 
@@ -122,8 +133,8 @@ export default function UserPageIdentityHeaderCICRate({
 
   const handleChange = (e: FormEvent<HTMLInputElement>) => {
     const inputValue = e.currentTarget.value;
-    if (/^-?\d*$/.test(inputValue)) {
-      const strCIC = inputValue === "-0" ? "-" : inputValue;
+    const strCIC = ["-0", "0-"].includes(inputValue) ? "-" : inputValue;
+    if (/^-?\d*$/.test(strCIC)) {
       const newCicValue = getCICStrOrMaxStr(strCIC);
       setAdjustedRatingStr(newCicValue);
     }
@@ -244,7 +255,13 @@ export default function UserPageIdentityHeaderCICRate({
                 className="tw-w-full sm:tw-w-auto tw-cursor-pointer tw-bg-primary-500 tw-px-4 tw-py-3 tw-text-sm tw-font-semibold tw-text-white 
               tw-border tw-border-solid tw-border-primary-500 tw-rounded-lg hover:tw-bg-primary-600 hover:tw-border-primary-600 tw-transition tw-duration-300 tw-ease-out"
               >
-                Rate
+                {mutating ? (
+                  <div className="tw-w-8">
+                    <CircleLoader />
+                  </div>
+                ) : (
+                  <>Rate</>
+                )}
               </button>
               {!isTooltip && breakpoint === "MD" && (
                 <UserRateAdjustmentHelper

@@ -107,6 +107,8 @@ export default function UserPageRepModifyModal({
         message: error as unknown as string,
         type: "error",
       });
+    },
+    onSettled: () => {
       setMutating(false);
     },
   });
@@ -170,7 +172,7 @@ export default function UserPageRepModifyModal({
             <form onSubmit={onSubmit} className="tw-mt-4">
               <div>
                 <label className="tw-block tw-text-sm tw-font-normal tw-leading-5 tw-text-iron-400">
-                  Your total CIC Rating of {repState.category}:
+                  Your total Rep for {repState.category}:
                 </label>
                 <div className="tw-relative tw-flex tw-mt-1.5">
                   <span className="tw-flex tw-flex-col tw-items-center tw-justify-center tw-bg-iron-900 tw-rounded-l-lg tw-border tw-border-solid tw-border-iron-700 tw-px-3">

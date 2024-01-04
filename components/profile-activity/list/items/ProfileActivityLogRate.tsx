@@ -1,7 +1,7 @@
 import {
   ProfileActivityLogRatingEdit,
   ProfileActivityLogRatingEditContentChangeReason,
-  ProfileActivityLogRatingEditContentMatter,
+  RateMatter,
 } from "../../../../entities/IProfile";
 import { useRouter } from "next/router";
 import ProfileActivityLogItemAction from "./utils/ProfileActivityLogItemAction";
@@ -17,12 +17,9 @@ const ACTION: Record<ProfileActivityLogRateType, string> = {
   [ProfileActivityLogRateType.REMOVED]: "reduced",
 };
 
-const LOG_MATTER_STR: Record<
-  ProfileActivityLogRatingEditContentMatter,
-  string
-> = {
-  [ProfileActivityLogRatingEditContentMatter.REP]: "Rep",
-  [ProfileActivityLogRatingEditContentMatter.CIC]: "CIC",
+const LOG_MATTER_STR: Record<RateMatter, string> = {
+  [RateMatter.REP]: "Rep",
+  [RateMatter.CIC]: "CIC",
 };
 
 const TO_FROM: Record<ProfileActivityLogRateType, string> = {
@@ -59,10 +56,7 @@ export default function ProfileActivityLogRate({
       return;
     }
 
-    if (
-      log.contents.rating_matter ===
-      ProfileActivityLogRatingEditContentMatter.REP
-    ) {
+    if (log.contents.rating_matter === RateMatter.REP) {
       router.push(`/${user}/rep`);
       return;
     }
@@ -107,8 +101,7 @@ export default function ProfileActivityLogRate({
       >
         (total {newRatingStr})
       </span>
-      {log.contents.rating_matter ===
-        ProfileActivityLogRatingEditContentMatter.REP && (
+      {log.contents.rating_matter === RateMatter.REP && (
         <span className="tw-whitespace-nowrap tw-text-sm tw-font-semibold tw-text-iron-100">
           {log.contents.rating_category}
         </span>

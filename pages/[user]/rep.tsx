@@ -3,7 +3,6 @@ import {
   ApiProfileRepRatesState,
   IProfileAndConsolidations,
   ProfileActivityLogRatingEdit,
-  ProfileActivityLogRatingEditContentMatter,
   RateMatter,
   RatingWithProfileInfoAndLevel,
 } from "../../entities/IProfile";
@@ -54,7 +53,7 @@ const getInitialActivityLogParams = (
   page: 1,
   pageSize: 10,
   logTypes: [],
-  matter: ProfileActivityLogRatingEditContentMatter.REP,
+  matter: RateMatter.REP,
   targetType: FilterTargetType.ALL,
   handleOrWallet,
 });

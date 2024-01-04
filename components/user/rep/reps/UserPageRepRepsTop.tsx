@@ -17,7 +17,6 @@ export default function UserPageRepRepsTop({
 }) {
   return (
     <div className="tw-mt-4 tw-flex tw-flex-wrap tw-gap-y-4 tw-gap-x-4">
-    
       {reps.map((rep) => (
         <UserPageRepsItem
           rep={rep}

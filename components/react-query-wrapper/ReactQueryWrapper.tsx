@@ -5,7 +5,6 @@ import {
   IProfileAndConsolidations,
   ProfileActivityLog,
   ProfileActivityLogRatingEdit,
-  ProfileActivityLogRatingEditContentMatter,
   RateMatter,
   RatingWithProfileInfoAndLevel,
 } from "../../entities/IProfile";
@@ -41,7 +40,7 @@ export interface InitProfileActivityLogsParamsAndData {
   readonly page: number;
   readonly pageSize: number;
   readonly logType: string;
-  readonly matter: ProfileActivityLogRatingEditContentMatter | null;
+  readonly matter: RateMatter | null;
   readonly includeIncoming: boolean;
 }
 

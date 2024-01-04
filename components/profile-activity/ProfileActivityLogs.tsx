@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import {
   ProfileActivityLog,
-  ProfileActivityLogRatingEditContentMatter,
   ProfileActivityLogType,
+  RateMatter,
 } from "../../entities/IProfile";
 import { Page } from "../../helpers/Types";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
@@ -19,7 +19,7 @@ export interface ActivityLogParams {
   readonly page: number;
   readonly pageSize: number;
   readonly logTypes: ProfileActivityLogType[];
-  readonly matter: ProfileActivityLogRatingEditContentMatter | null;
+  readonly matter: RateMatter | null;
   readonly targetType: FilterTargetType;
   readonly handleOrWallet: string | null;
 }

@@ -98,6 +98,13 @@ export default function UserPageRepRepsTable({
     setSortedReps(sortReps(reps, sortType, sortDirection));
   }, [reps, sortType, sortDirection]);
 
+  useEffect(() => {
+    if (!canEditRep && sortType === RepsTableSort.MY_RATES) {
+      setSortType(RepsTableSort.REP);
+      setSortDirection(SortDirection.DESC);
+    }
+  }, [canEditRep, sortType]);
+
   return (
     <div className="tw-mt-4 tw-flow-root">
       <div className="tw-bg-iron-900/50 tw-overflow-x-auto tw-shadow tw-ring-1 tw-ring-white/10 tw-rounded-lg tw-divide-y tw-divide-solid tw-divide-white/10">
@@ -105,6 +112,7 @@ export default function UserPageRepRepsTable({
           <UserPageRepRepsTableHeader
             activeType={sortType}
             sortDirection={sortDirection}
+            showMyRates={canEditRep}
             onSortTypeClick={onSortTypeClick}
           />
           <UserPageRepRepsTableBody

@@ -142,10 +142,6 @@ export enum ProfileActivityLogRatingEditContentChangeReason {
   LOST_TDH = "LOST_TDH",
 }
 
-export enum ProfileActivityLogRatingEditContentMatter {
-  CIC = "CIC",
-  REP = "REP",
-}
 
 export interface ProfileActivityLogRatingEdit extends ProfileActivityLogBase {
   readonly type: ProfileActivityLogType.RATING_EDIT;
@@ -154,7 +150,7 @@ export interface ProfileActivityLogRatingEdit extends ProfileActivityLogBase {
     new_rating: number;
     old_rating: number;
     rating_category: string;
-    rating_matter: ProfileActivityLogRatingEditContentMatter;
+    rating_matter: RateMatter;
   };
 }
 
