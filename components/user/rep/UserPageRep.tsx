@@ -2,7 +2,6 @@ import {
   ApiProfileRepRatesState,
   IProfileAndConsolidations,
 } from "../../../entities/IProfile";
-import UserPageRepRaters from "./UserPageRepRaters";
 import UserPageRepNewRep from "./new-rep/UserPageRepNewRep";
 import { useRouter } from "next/router";
 import { useQuery } from "@tanstack/react-query";
@@ -12,7 +11,9 @@ import { useContext, useEffect, useState } from "react";
 import UserPageRepReps from "./reps/UserPageRepReps";
 import UserPageRepHeader from "./header/UserPageRepHeader";
 import { AuthContext } from "../../auth/Auth";
-import { ProfileRatersTableType } from "../utils/raters-table/wrapper/ProfileRatersTableWrapper";
+import ProfileRatersTableWrapper, {
+  ProfileRatersParams,
+} from "../utils/raters-table/wrapper/ProfileRatersTableWrapper";
 import UserPageRepActivityLog from "./UserPageRepActivityLog";
 import { ActivityLogParams } from "../../profile-activity/ProfileActivityLogs";
 import UserPageRateWrapper, {
@@ -21,9 +22,13 @@ import UserPageRateWrapper, {
 
 export default function UserPageRep({
   profile: initialProfile,
+  initialRepReceivedParams,
+  initialRepGivenParams,
   initialActivityLogParams,
 }: {
   readonly profile: IProfileAndConsolidations;
+  readonly initialRepReceivedParams: ProfileRatersParams;
+  readonly initialRepGivenParams: ProfileRatersParams;
   readonly initialActivityLogParams: ActivityLogParams;
 }) {
   const { connectedProfile } = useContext(AuthContext);
@@ -78,10 +83,10 @@ export default function UserPageRep({
 
       <div className="tw-mt-6 lg:tw-mt-10 tw-grid tw-grid-cols-1 xl:tw-grid-cols-2 tw-gap-y-8 lg:tw-gap-y-10 tw-gap-x-8 lg:tw-gap-x-10">
         <div>
-          <UserPageRepRaters type={ProfileRatersTableType.REP_RECEIVED} />
+          <ProfileRatersTableWrapper initialParams={initialRepGivenParams} />
         </div>
         <div>
-          <UserPageRepRaters type={ProfileRatersTableType.REP_GIVEN} />
+          <ProfileRatersTableWrapper initialParams={initialRepReceivedParams} />
         </div>
       </div>
 

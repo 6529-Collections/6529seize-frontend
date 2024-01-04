@@ -1,9 +1,7 @@
 import { useEffect, useState } from "react";
 import { SortDirection } from "../../../../../entities/ISort";
 import { RepsTableSort } from "./UserPageRepRepsTable";
-import UserPageRepRepsTableHeaderSortIcon from "./UserPageRepRepsTableHeaderSortIcon";
-
-// tw-text-primary-400
+import CommonTableSortIcon from "../../../utils/icons/CommonTableSortIcon";
 
 export default function UserPageRepRepsTableHeaderSortableCell({
   type,
@@ -47,7 +45,7 @@ export default function UserPageRepRepsTableHeaderSortableCell({
       >
         {SORT_TYPE_TO_TEXT[type]}
       </span>
-      <UserPageRepRepsTableHeaderSortIcon direction={sor} isActive={isActive} />
+      <CommonTableSortIcon direction={sor} isActive={isActive} />
     </th>
   );
 }

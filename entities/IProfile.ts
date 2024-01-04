@@ -269,6 +269,7 @@ export type ProfileActivityLog =
 
 export enum RateMatter {
   CIC = "CIC",
+  REP = "REP",
 }
 
 export interface ProfilesMatterRating {

@@ -32,12 +32,7 @@ export default function UserPageIdentityHeaderCICRate({
 }) {
   const { address } = useAccount();
   const { requestAuth, setToast } = useContext(AuthContext);
-  const {
-    invalidateProfile,
-    invalidateProfileRaterCICState,
-    invalidateProfileCICRatings,
-    invalidateProfileLogs,
-  } = useContext(ReactQueryWrapperContext);
+  const { onProfileCICModify } = useContext(ReactQueryWrapperContext);
 
   const { data: connectedProfile } = useQuery<IProfileAndConsolidations>({
     queryKey: [QueryKey.PROFILE, address?.toLowerCase()],
@@ -78,18 +73,11 @@ export default function UserPageIdentityHeaderCICRate({
         type: "success",
       });
 
-      invalidateProfile(profile);
-      invalidateProfileCICRatings(profile);
-      if (connectedProfile) {
-        invalidateProfileLogs({ profile: connectedProfile, keys: {} });
-      }
-
-      if (address) {
-        invalidateProfileRaterCICState({
-          profile,
-          rater: address?.toLowerCase(),
-        });
-      }
+      onProfileCICModify({
+        targetProfile: profile,
+        connectedProfile: connectedProfile ?? null,
+        rater: address?.toLowerCase() ?? null,
+      });
     },
   });
 

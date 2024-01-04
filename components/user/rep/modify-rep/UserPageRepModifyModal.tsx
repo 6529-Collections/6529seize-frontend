@@ -31,7 +31,7 @@ export default function UserPageRepModifyModal({
   readonly giverAvailableRep: number;
 }) {
   const { onProfileRepModify } = useContext(ReactQueryWrapperContext);
-  const { requestAuth, setToast } = useContext(AuthContext);
+  const { requestAuth, setToast, connectedProfile } = useContext(AuthContext);
   const inputRef = useRef<HTMLInputElement>(null);
   useEffect(() => {
     if (inputRef.current) {
@@ -99,7 +99,7 @@ export default function UserPageRepModifyModal({
         message: "Rep updated.",
         type: "success",
       });
-      onProfileRepModify(profile);
+      onProfileRepModify({ targetProfile: profile, connectedProfile });
       onClose();
     },
     onError: (error) => {

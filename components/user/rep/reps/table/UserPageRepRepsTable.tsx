@@ -32,11 +32,9 @@ export default function UserPageRepRepsTable({
 
   const onSortTypeClick = (newSortType: RepsTableSort) => {
     if (newSortType === sortType) {
-      if (sortDirection === SortDirection.DESC) {
-        setSortDirection(SortDirection.ASC);
-      } else {
-        setSortDirection(SortDirection.DESC);
-      }
+      setSortDirection((prev) =>
+        prev === SortDirection.ASC ? SortDirection.DESC : SortDirection.ASC
+      );
     } else {
       setSortType(newSortType);
       setSortDirection(SortDirection.DESC);

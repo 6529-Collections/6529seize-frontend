@@ -1,24 +1,26 @@
 import {
   CicStatement,
   IProfileAndConsolidations,
-  ProfilesMatterRatingWithRaterLevel,
 } from "../../../entities/IProfile";
 import UserPageIdentityStatements from "./statements/UserPageIdentityStatements";
 import UserPageIdentityHeader from "./header/UserPageIdentityHeader";
-import UserPageIdentityCICRatings from "./ratings/UserPageIdentityCICRatings";
 import UserPageIdentityActivityLog from "./activity/UserPageIdentityActivityLog";
-import { Page } from "../../../helpers/Types";
 import { ActivityLogParams } from "../../profile-activity/ProfileActivityLogs";
+import ProfileRatersTableWrapper, {
+  ProfileRatersParams,
+} from "../utils/raters-table/wrapper/ProfileRatersTableWrapper";
 
 export default function UserPageIdentity({
   profile,
-  profileCICRatings,
   profileIdentityStatements,
+  initialCICReceivedParams,
+  initialCICGivenParams,
   initialActivityLogParams,
 }: {
   readonly profile: IProfileAndConsolidations;
-  readonly profileCICRatings: Page<ProfilesMatterRatingWithRaterLevel>;
   readonly profileIdentityStatements: CicStatement[];
+  readonly initialCICReceivedParams: ProfileRatersParams;
+  readonly initialCICGivenParams: ProfileRatersParams;
   readonly initialActivityLogParams: ActivityLogParams;
 }) {
   return (
@@ -28,15 +30,20 @@ export default function UserPageIdentity({
         profile={profile}
         profileIdentityStatements={profileIdentityStatements}
       />
-      <div className="tw-mt-8 lg:tw-mt-10 tw-grid tw-grid-cols-1 xl:tw-grid-cols-2 tw-gap-y-8 lg:tw-gap-y-10 tw-gap-x-8 lg:tw-gap-x-10">
+
+      <div className="tw-mt-6 lg:tw-mt-10 tw-grid tw-grid-cols-1 xl:tw-grid-cols-2 tw-gap-y-8 lg:tw-gap-y-10 tw-gap-x-8 lg:tw-gap-x-10">
         <div>
-          <UserPageIdentityCICRatings profileCICRatings={profileCICRatings} />
+          <ProfileRatersTableWrapper initialParams={initialCICGivenParams} />
         </div>
         <div>
-          <UserPageIdentityActivityLog
-            initialActivityLogParams={initialActivityLogParams}
-          />
+          <ProfileRatersTableWrapper initialParams={initialCICReceivedParams} />
         </div>
+      </div>
+
+      <div className="tw-mt-8 lg:tw-mt-10">
+        <UserPageIdentityActivityLog
+          initialActivityLogParams={initialActivityLogParams}
+        />
       </div>
     </div>
   );

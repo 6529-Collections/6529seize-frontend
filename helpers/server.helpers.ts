@@ -6,6 +6,7 @@ import {
   IProfileAndConsolidations,
   ProfileActivityLog,
   ProfilesMatterRatingWithRaterLevel,
+  RateMatter,
   RatingWithProfileInfoAndLevel,
 } from "../entities/IProfile";
 import { Season } from "../entities/ISeason";
@@ -15,6 +16,11 @@ import { Page } from "./Types";
 import { commonApiFetch } from "../services/api/common-api";
 import jwtDecode from "jwt-decode";
 import { ActivityLogParamsConverted } from "../components/profile-activity/ProfileActivityLogs";
+import {
+  ProfileRatersParams,
+  ProfileRatersParamsOrderBy,
+} from "../components/user/utils/raters-table/wrapper/ProfileRatersTableWrapper";
+import { SortDirection } from "../entities/ISort";
 
 export interface CommonUserServerSideProps {
   profile: IProfileAndConsolidations;
@@ -116,32 +122,6 @@ export const getUserProfileActivityLogs = async <T = ProfileActivityLog>({
     return await commonApiFetch<Page<T>, ActivityLogParamsConverted>({
       endpoint: `profile-logs`,
       params,
-      headers,
-    });
-  } catch {
-    return {
-      count: 0,
-      page: 1,
-      next: false,
-      data: [],
-    };
-  }
-};
-
-export const getUserProfileCICRatings = async ({
-  user,
-  headers,
-}: {
-  user: string;
-  headers: Record<string, string>;
-}): Promise<Page<ProfilesMatterRatingWithRaterLevel>> => {
-  try {
-    return await commonApiFetch<Page<ProfilesMatterRatingWithRaterLevel>>({
-      endpoint: `profiles/${user}/cic/ratings`,
-      params: {
-        page: `1`,
-        page_size: `10`,
-      },
       headers,
     });
   } catch {
@@ -302,40 +282,44 @@ export const getProfileRatings = async ({
   }
 };
 
-export const getProfileRatingsByRater = async ({
-  user,
-  headers,
+export const getInitialRatersParams = ({
+  handleOrWallet,
   given,
-  page,
-  logType,
-  pageSize,
-  order,
-  orderBy,
+  matter,
 }: {
-  readonly user: string;
+  handleOrWallet: string;
+  given: boolean;
+  matter: RateMatter;
+}): ProfileRatersParams => ({
+  page: 1,
+  pageSize: 7,
+  given,
+  matter,
+  order: SortDirection.DESC,
+  orderBy: ProfileRatersParamsOrderBy.RATING,
+  handleOrWallet,
+});
+
+export const getProfileRatingsByRater = async ({
+  params,
+  headers,
+}: {
+  readonly params: ProfileRatersParams;
   readonly headers: Record<string, string>;
-  readonly page: number;
-  readonly logType: string;
-  readonly given: boolean;
-  readonly pageSize: number;
-  readonly order: string;
-  readonly orderBy: string;
 }): Promise<Page<RatingWithProfileInfoAndLevel>> => {
-  const params: Record<string, string> = {
-    page: `${page}`,
-    page_size: `${pageSize}`,
-    log_type: logType,
-    // order,
-    // order_by: orderBy,
-  };
-  if (given) {
-    params.given = "true";
-  }
+  const { page, pageSize, given, matter, order, orderBy, handleOrWallet } =
+    params;
 
   try {
     return await commonApiFetch<Page<RatingWithProfileInfoAndLevel>>({
-      endpoint: `profiles/${user}/rep/ratings/by-rater`,
-      params,
+      endpoint: `profiles/${handleOrWallet}/${matter.toLowerCase()}/ratings/by-rater`,
+      params: {
+        page: `${page}`,
+        page_size: `${pageSize}`,
+        order: order.toLowerCase(),
+        order_by: orderBy.toLowerCase(),
+        given: given ? "true" : "false",
+      },
       headers,
     });
   } catch {

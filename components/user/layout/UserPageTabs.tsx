@@ -4,7 +4,6 @@ import UserPageTab from "./UserPageTab";
 
 export enum UserPageTabType {
   COLLECTED = "COLLECTED",
-
   REP = "REP",
   IDENTITY = "IDENTITY",
   STATS = "STATS",
