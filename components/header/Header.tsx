@@ -103,7 +103,7 @@ export default function Header(props: Props) {
   }
 
   function printHeaderConnect() {
-    return <HeaderConnect consolidations={consolidations} />;
+    return <HeaderConnect />;
   }
 
   function printBurgerMenu() {

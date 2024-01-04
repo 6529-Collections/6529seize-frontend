@@ -4,20 +4,12 @@ import { useEffect, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Web3Button } from "@web3modal/react";
 import WalletModal from "./walletModal/WalletModal";
-import { NavDropdown } from "react-bootstrap";
-import Cookies from "js-cookie";
-import { VIEW_MODE_COOKIE } from "../../constants";
-import Image from "next/image";
 import { useQuery } from "@tanstack/react-query";
 import { IProfileAndConsolidations } from "../../entities/IProfile";
 import { QueryKey } from "../react-query-wrapper/ReactQueryWrapper";
 import { commonApiFetch } from "../../services/api/common-api";
 
-interface Props {
-  readonly consolidations: string[];
-}
-
-export default function HeaderConnect(props: Props) {
+export default function HeaderConnect() {
   const account = useAccount();
   const { isLoading, data: profile } = useQuery<IProfileAndConsolidations>({
     queryKey: [QueryKey.PROFILE, account.address?.toLowerCase()],
