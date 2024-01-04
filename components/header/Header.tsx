@@ -11,7 +11,6 @@ import HeaderConnect from "./HeaderConnect";
 import Cookies from "js-cookie";
 import { VIEW_MODE_COOKIE } from "../../constants";
 import { useAccount } from "wagmi";
-import { WalletView } from "../../enums";
 import SearchProfileButton from "./search-profile/SearchProfileButton";
 
 interface Props {
@@ -25,8 +24,6 @@ export default function Header(props: Props) {
 
   const [consolidations, setConsolidations] = useState<string[]>([]);
   const [burgerMenuOpen, setBurgerMenuOpen] = useState(false);
-
-  const [view, setView] = useState<WalletView>();
 
   const [showBurgerMenuCollections, setShowBurgerMenuCollections] =
     useState(false);
@@ -59,20 +56,17 @@ export default function Header(props: Props) {
   }, []);
 
   useEffect(() => {
-    if (view) {
-      Cookies.set(VIEW_MODE_COOKIE, view);
-      if (props.onSetWallets) {
-        const isConsolidation = consolidations.length > 1;
-        if (isConsolidation && view === WalletView.CONSOLIDATION) {
-          props.onSetWallets(consolidations);
-        } else if (account.address) {
-          props.onSetWallets([account.address]);
-        } else {
-          props.onSetWallets([]);
-        }
+    if (props.onSetWallets) {
+      const isConsolidation = consolidations.length > 1;
+      if (isConsolidation) {
+        props.onSetWallets(consolidations);
+      } else if (account.address) {
+        props.onSetWallets([account.address]);
+      } else {
+        props.onSetWallets([]);
       }
     }
-  }, [view, consolidations, account.address]);
+  }, [consolidations, account.address]);
 
   useEffect(() => {
     if (account.address) {
@@ -109,13 +103,7 @@ export default function Header(props: Props) {
   }
 
   function printHeaderConnect() {
-    return (
-      <HeaderConnect
-        consolidations={consolidations}
-        view={view}
-        setView={setView}
-      />
-    );
+    return <HeaderConnect />;
   }
 
   function printBurgerMenu() {
