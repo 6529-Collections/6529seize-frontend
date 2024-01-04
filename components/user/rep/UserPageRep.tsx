@@ -1,6 +1,7 @@
 import {
   ApiProfileRepRatesState,
   IProfileAndConsolidations,
+  RateMatter,
 } from "../../../entities/IProfile";
 import UserPageRepNewRep from "./new-rep/UserPageRepNewRep";
 import { useRouter } from "next/router";
@@ -16,9 +17,7 @@ import ProfileRatersTableWrapper, {
 } from "../utils/raters-table/wrapper/ProfileRatersTableWrapper";
 import UserPageRepActivityLog from "./UserPageRepActivityLog";
 import { ActivityLogParams } from "../../profile-activity/ProfileActivityLogs";
-import UserPageRateWrapper, {
-  UserPageRateWrapperType,
-} from "../utils/rate/UserPageRateWrapper";
+import UserPageRateWrapper from "../utils/rate/UserPageRateWrapper";
 
 export default function UserPageRep({
   profile: initialProfile,
@@ -71,10 +70,7 @@ export default function UserPageRep({
       {repRates && (
         <>
           <UserPageRepHeader repRates={repRates} />
-          <UserPageRateWrapper
-            profile={profile}
-            type={UserPageRateWrapperType.REP}
-          >
+          <UserPageRateWrapper profile={profile} type={RateMatter.REP}>
             <UserPageRepNewRep profile={profile} repRates={repRates} />
           </UserPageRateWrapper>
           <UserPageRepReps repRates={repRates} profile={profile} />

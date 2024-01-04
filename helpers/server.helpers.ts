@@ -5,7 +5,6 @@ import {
   CicStatement,
   IProfileAndConsolidations,
   ProfileActivityLog,
-  ProfilesMatterRatingWithRaterLevel,
   RateMatter,
   RatingWithProfileInfoAndLevel,
 } from "../entities/IProfile";

@@ -1,19 +1,14 @@
 import { useAccount } from "wagmi";
-import { IProfileAndConsolidations } from "../../../../entities/IProfile";
+import { IProfileAndConsolidations, RateMatter } from "../../../../entities/IProfile";
 import { useQuery } from "@tanstack/react-query";
 import { QueryKey } from "../../../react-query-wrapper/ReactQueryWrapper";
 import { commonApiFetch } from "../../../../services/api/common-api";
 import { useEffect, useState } from "react";
 import { amIUser } from "../../../../helpers/Helpers";
 
-export enum UserPageRateWrapperType {
-  CIC = "CIC",
-  REP = "REP",
-}
-
-const SUB_TITLE: Record<UserPageRateWrapperType, string> = {
-  [UserPageRateWrapperType.CIC]: "CIC rate",
-  [UserPageRateWrapperType.REP]: "give Rep for",
+const SUB_TITLE: Record<RateMatter, string> = {
+  [RateMatter.CIC]: "CIC rate",
+  [RateMatter.REP]: "give Rep for",
 };
 
 export default function UserPageRateWrapper({
@@ -22,7 +17,7 @@ export default function UserPageRateWrapper({
   children,
 }: {
   readonly profile: IProfileAndConsolidations;
-  readonly type: UserPageRateWrapperType;
+  readonly type: RateMatter;
   readonly children: React.ReactNode;
 }) {
   const { address } = useAccount();

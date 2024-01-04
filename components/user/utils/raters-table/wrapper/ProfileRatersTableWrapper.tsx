@@ -72,9 +72,11 @@ export default function ProfileRatersTableWrapper({
 
   const type = getType();
 
-  const { isLoading, data: ratings } = useQuery<
-    Page<RatingWithProfileInfoAndLevel>
-  >({
+  const {
+    isLoading,
+    isFetching,
+    data: ratings,
+  } = useQuery<Page<RatingWithProfileInfoAndLevel>>({
     queryKey: [
       QueryKey.PROFILE_RATERS,
       {
@@ -139,7 +141,7 @@ export default function ProfileRatersTableWrapper({
       setOrderBy(newSortType);
       setOrder(SortDirection.DESC);
     }
-  }
+  };
 
   return (
     <div>
@@ -153,6 +155,7 @@ export default function ProfileRatersTableWrapper({
                   type={type}
                   sortDirection={order}
                   sortOrderBy={orderBy}
+                  isLoading={isFetching}
                   onSortTypeClick={onSortTypeClick}
                 />
                 <ProfileRatersTableBody ratings={ratings.data} type={type} />

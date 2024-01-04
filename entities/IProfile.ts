@@ -282,11 +282,6 @@ export interface ProfilesMatterRating {
   readonly last_modified: Date;
 }
 
-export interface ProfilesMatterRatingWithRaterLevel
-  extends ProfilesMatterRating {
-  readonly rater_level: number;
-}
-
 export interface CommunityMemberMinimal {
   readonly handle: string | null;
   readonly normalised_handle: string | null;

@@ -23,7 +23,7 @@ export default function UserPageIdentityDeleteStatementModal({
   useKeyPressEvent("Escape", onClose);
 
   const { requestAuth, setToast } = useContext(AuthContext);
-  const { invalidateProfileLogs, invalidateProfileCICStatements } = useContext(
+  const { invalidateLogs, invalidateProfileCICStatements } = useContext(
     ReactQueryWrapperContext
   );
 
@@ -38,10 +38,7 @@ export default function UserPageIdentityDeleteStatementModal({
         type: "warning",
       });
       invalidateProfileCICStatements(profile);
-      invalidateProfileLogs({
-        profile,
-        keys: {},
-      });
+      invalidateLogs();
     },
   });
 

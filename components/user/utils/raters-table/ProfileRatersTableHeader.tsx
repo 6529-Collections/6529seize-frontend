@@ -1,6 +1,6 @@
 import { SortDirection } from "../../../../entities/ISort";
 import { assertUnreachable } from "../../../../helpers/AllowlistToolHelpers";
-import CommonTableSortIcon from "../icons/CommonTableSortIcon";
+import ProfileRatersTableHeaderSortableCell from "./ProfileRatersTableHeaderSortableCell";
 import {
   ProfileRatersParamsOrderBy,
   ProfileRatersTableType,
@@ -10,11 +10,13 @@ export default function ProfileRatersTableHeader({
   type,
   sortDirection,
   sortOrderBy,
+  isLoading,
   onSortTypeClick,
 }: {
   readonly type: ProfileRatersTableType;
   readonly sortDirection: SortDirection;
   readonly sortOrderBy: ProfileRatersParamsOrderBy;
+  readonly isLoading: boolean;
   readonly onSortTypeClick: (newSortType: ProfileRatersParamsOrderBy) => void;
 }) {
   const getTotalTitle = (): string => {
@@ -37,52 +39,22 @@ export default function ProfileRatersTableHeader({
         <th className="tw-whitespace-nowrap tw-px-4 sm:tw-px-6 tw-py-3.5 tw-text-left tw-text-sm tw-font-medium tw-text-iron-400">
           Name
         </th>
-        <th
-          onClick={() => onSortTypeClick(ProfileRatersParamsOrderBy.RATING)}
-          className="tw-group tw-cursor-pointer tw-whitespace-nowrap tw-px-4 sm:tw-px-6 tw-py-3.5 tw-text-right tw-text-sm tw-font-medium tw-text-iron-400"
-        >
-          <span
-            className={`${
-              sortOrderBy === ProfileRatersParamsOrderBy.RATING
-                ? "tw-text-primary-400"
-                : "group-hover:tw-text-iron-200"
-            }`}
-          >
-            {getTotalTitle()}
-          </span>
-          <CommonTableSortIcon
-            direction={
-              sortOrderBy === ProfileRatersParamsOrderBy.RATING
-                ? sortDirection
-                : SortDirection.DESC
-            }
-            isActive={sortOrderBy === ProfileRatersParamsOrderBy.RATING}
-          />
-        </th>
-        <th
-          onClick={() =>
-            onSortTypeClick(ProfileRatersParamsOrderBy.LAST_MODIFIED)
-          }
-          className="tw-group tw-cursor-pointer tw-whitespace-nowrap tw-px-4 sm:tw-px-6 tw-py-3.5 tw-text-right tw-text-sm tw-font-medium tw-text-iron-400"
-        >
-          <span
-            className={`${
-              sortOrderBy === ProfileRatersParamsOrderBy.LAST_MODIFIED
-                ? "tw-text-primary-400"
-                : "group-hover:tw-text-iron-200"
-            }`}
-          >
-            Last Updated
-          </span>
-          <CommonTableSortIcon
-            direction={
-              sortOrderBy === ProfileRatersParamsOrderBy.LAST_MODIFIED
-                ? sortDirection
-                : SortDirection.DESC
-            }
-            isActive={sortOrderBy === ProfileRatersParamsOrderBy.LAST_MODIFIED}
-          />
-        </th>
+        <ProfileRatersTableHeaderSortableCell
+          title={getTotalTitle()}
+          sortType={ProfileRatersParamsOrderBy.RATING}
+          sortDirection={sortDirection}
+          sortOrderBy={sortOrderBy}
+          isLoading={isLoading}
+          onSortTypeClick={onSortTypeClick}
+        />
+        <ProfileRatersTableHeaderSortableCell
+          title="Last Updated"
+          sortType={ProfileRatersParamsOrderBy.LAST_MODIFIED}
+          sortDirection={sortDirection}
+          sortOrderBy={sortOrderBy}
+          isLoading={isLoading}
+          onSortTypeClick={onSortTypeClick}
+        />
       </tr>
     </thead>
   );
