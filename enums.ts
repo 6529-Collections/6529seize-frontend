@@ -1,8 +1,3 @@
-export enum WalletView {
-  CONSOLIDATION = "Consolidation",
-  WALLET = "Wallet",
-}
-
 export enum DateIntervalsSelection {
   TODAY = "Today",
   YESTERDAY = "Yesterday",
