@@ -12,17 +12,21 @@ export default function UserPageRepActivityLog({
   readonly initialActivityLogParams: ActivityLogParams;
 }) {
   return (
-    <div className="tw-bg-iron-900 tw-border tw-border-white/5 tw-border-solid tw-rounded-xl">
+    <div>
       <UserTableHeaderWrapper>
         <span>
           <ProfileName type={ProfileNameType.POSSESSION} />
         </span>{" "}
         Rep Activity Log
       </UserTableHeaderWrapper>
-      <ProfileActivityLogs
-        initialParams={initialActivityLogParams}
-        withFilters={false}
-      />
+      <div className="tw-mt-2 lg:tw-mt-4">
+        <div className="tw-bg-iron-900 tw-border tw-border-iron-800 tw-border-solid tw-rounded-xl">
+          <ProfileActivityLogs
+            initialParams={initialActivityLogParams}
+            withFilters={false}
+          />
+        </div>
+      </div>
     </div>
   );
 }

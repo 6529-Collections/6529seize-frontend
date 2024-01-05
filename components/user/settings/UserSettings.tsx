@@ -25,12 +25,9 @@ export default function UserSettingsComponent(props: Props) {
   const account = useAccount();
   const router = useRouter();
   const { requestAuth, setToast } = useContext(AuthContext);
-  const {
-    invalidateProfile,
-    invalidateHandles,
-    invalidateProfileLogs,
-    invalidateProfileLogsByHandles,
-  } = useContext(ReactQueryWrapperContext);
+  const { invalidateProfile, invalidateHandles, invalidateLogs } = useContext(
+    ReactQueryWrapperContext
+  );
   const [init, setInit] = useState(false);
   const userOrWallet = Array.isArray(router.query.user)
     ? router.query.user.at(0)
@@ -54,9 +51,8 @@ export default function UserSettingsComponent(props: Props) {
       }
     });
     invalidateProfile(newUser);
-    invalidateProfileLogs({ profile: newUser, keys: {} });
+    invalidateLogs()
     invalidateHandles(oldHandles);
-    invalidateProfileLogsByHandles({ handles: oldHandles, keys: {} });
     setUser(newUser);
   };
 

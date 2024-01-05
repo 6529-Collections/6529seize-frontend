@@ -14,7 +14,7 @@ export default function UserPageRepNewRep({
   repRates,
 }: {
   readonly profile: IProfileAndConsolidations;
-  readonly repRates: ApiProfileRepRatesState;
+  readonly repRates: ApiProfileRepRatesState | null;
 }) {
   const [isAddNewRepModalOpen, setIsAddNewRepModalOpen] =
     useState<boolean>(false);
@@ -22,7 +22,7 @@ export default function UserPageRepNewRep({
   const [repToAdd, setRepToAdd] = useState<RatingStats | null>(null);
 
   const onRepSearch = (repSearch: string) => {
-    const rep: RatingStats = repRates.rating_stats.find(
+    const rep: RatingStats = repRates?.rating_stats.find(
       (r) => r.category === repSearch
     ) ?? {
       category: repSearch,
@@ -57,7 +57,7 @@ export default function UserPageRepNewRep({
             <UserPageRepModifyModal
               profile={profile}
               repState={repToAdd}
-              giverAvailableRep={repRates.rep_rates_left_for_rater ?? 0}
+              giverAvailableRep={repRates?.rep_rates_left_for_rater ?? 0}
               onClose={onCloseModal}
             />
           </CommonAnimationOpacity>

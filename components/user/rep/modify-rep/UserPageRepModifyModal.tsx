@@ -31,7 +31,7 @@ export default function UserPageRepModifyModal({
   readonly giverAvailableRep: number;
 }) {
   const { onProfileRepModify } = useContext(ReactQueryWrapperContext);
-  const { requestAuth, setToast } = useContext(AuthContext);
+  const { requestAuth, setToast, connectedProfile } = useContext(AuthContext);
   const inputRef = useRef<HTMLInputElement>(null);
   useEffect(() => {
     if (inputRef.current) {
@@ -99,7 +99,7 @@ export default function UserPageRepModifyModal({
         message: "Rep updated.",
         type: "success",
       });
-      onProfileRepModify(profile);
+      onProfileRepModify({ targetProfile: profile, connectedProfile });
       onClose();
     },
     onError: (error) => {
@@ -107,6 +107,8 @@ export default function UserPageRepModifyModal({
         message: error as unknown as string,
         type: "error",
       });
+    },
+    onSettled: () => {
       setMutating(false);
     },
   });
@@ -160,7 +162,7 @@ export default function UserPageRepModifyModal({
         <div className="tw-flex tw-min-h-full tw-items-end tw-justify-center tw-text-center sm:tw-items-center tw-p-2 lg:tw-p-0">
           <div
             ref={modalRef}
-            className="sm:tw-max-w-md tw-relative tw-w-full tw-transform tw-rounded-xl tw-bg-iron-950 tw-text-left tw-shadow-xl tw-transition-all tw-duration-500 sm:tw-w-full tw-p-6"
+            className="sm:tw-max-w-md tw-relative tw-w-full tw-transform tw-rounded-xl tw-bg-iron-900 tw-text-left tw-shadow-xl tw-transition-all tw-duration-500 sm:tw-w-full tw-p-6"
           >
             <UserPageRepModifyModalHeader profile={profile} onClose={onClose} />
             <UserPageRepModifyModalRaterStats
@@ -170,10 +172,10 @@ export default function UserPageRepModifyModal({
             <form onSubmit={onSubmit} className="tw-mt-4">
               <div>
                 <label className="tw-block tw-text-sm tw-font-normal tw-leading-5 tw-text-iron-400">
-                  Your total CIC Rating of {repState.category}:
+                  Your total Rep for {repState.category}:
                 </label>
                 <div className="tw-relative tw-flex tw-mt-1.5">
-                  <span className="tw-flex tw-flex-col tw-items-center tw-justify-center tw-bg-iron-900 tw-rounded-l-lg tw-border tw-border-solid tw-border-iron-700 tw-px-3">
+                  <span className="tw-flex tw-flex-col tw-items-center tw-justify-center tw-bg-iron-950 tw-rounded-l-lg tw-border tw-border-solid tw-border-white/10 tw-px-3">
                     <svg
                       className="tw-w-3.5 tw-h-3.5 tw-flex-shrink-0 tw-text-iron-500"
                       viewBox="0 0 24 24"
@@ -210,7 +212,7 @@ export default function UserPageRepModifyModal({
                     autoComplete="off"
                     value={adjustedRatingStr}
                     onChange={onValueChange}
-                    className="tw-appearance-none -tw-ml-0.5 tw-block tw-w-full tw-rounded-l-none tw-rounded-r-lg tw-border-0 tw-py-3 tw-px-3 tw-bg-iron-900 tw-text-iron-300 tw-font-medium tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-700 placeholder:tw-text-iron-500 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 tw-text-base tw-transition tw-duration-300 tw-ease-out"
+                    className="tw-appearance-none -tw-ml-0.5 tw-block tw-w-full tw-rounded-l-none tw-rounded-r-lg tw-border-0 tw-py-3 tw-px-3 tw-bg-iron-950 tw-text-iron-300 tw-font-medium tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-white/10 placeholder:tw-text-iron-500 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 tw-text-base tw-transition tw-duration-300 tw-ease-out"
                   />
                 </div>
                 <UserRateAdjustmentHelper

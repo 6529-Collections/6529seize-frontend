@@ -1,12 +1,10 @@
 import { useRouter } from "next/router";
-import { IProfileAndConsolidations } from "../../../../entities/IProfile";
+import { IProfileAndConsolidations, RateMatter } from "../../../../entities/IProfile";
 import { useQuery } from "@tanstack/react-query";
 import { commonApiFetch } from "../../../../services/api/common-api";
 import UserPageIdentityHeaderCIC from "./UserPageIdentityHeaderCIC";
 import { QueryKey } from "../../../react-query-wrapper/ReactQueryWrapper";
-import UserPageRateWrapper, {
-  UserPageRateWrapperType,
-} from "../../utils/rate/UserPageRateWrapper";
+import UserPageRateWrapper from "../../utils/rate/UserPageRateWrapper";
 import UserPageIdentityHeaderCICRate from "./cic-rate/UserPageIdentityHeaderCICRate";
 
 export default function UserPageIdentityHeader({
@@ -41,10 +39,7 @@ export default function UserPageIdentityHeader({
             </p>
           </div>
           <UserPageIdentityHeaderCIC profile={profile} />
-          <UserPageRateWrapper
-            profile={profile}
-            type={UserPageRateWrapperType.CIC}
-          >
+          <UserPageRateWrapper profile={profile} type={RateMatter.CIC}>
             <UserPageIdentityHeaderCICRate
               profile={profile}
               isTooltip={false}

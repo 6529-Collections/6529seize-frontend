@@ -13,10 +13,12 @@ export default function ProfileRatersTableWrapperHeader({
     <UserTableHeaderWrapper>
       {type === ProfileRatersTableType.CIC_RECEIVED && (
         <div>
-          CIC Ratings of{" "}
-          <span>
-            <ProfileName type={ProfileNameType.POSSESSION} />
-          </span>
+          Who&apos;s CIC-Rating <ProfileName type={ProfileNameType.DEFAULT} />
+        </div>
+      )}
+      {type === ProfileRatersTableType.CIC_GIVEN && (
+        <div>
+          Who&apos;s <ProfileName type={ProfileNameType.DEFAULT} /> CIC-Rating
         </div>
       )}
       {type === ProfileRatersTableType.REP_RECEIVED && (

@@ -14,7 +14,7 @@ export default function UserPageRepReps({
   repRates,
   profile,
 }: {
-  readonly repRates: ApiProfileRepRatesState;
+  readonly repRates: ApiProfileRepRatesState | null;
   readonly profile: IProfileAndConsolidations;
 }) {
   const { connectedProfile } = useContext(AuthContext);
@@ -28,7 +28,7 @@ export default function UserPageRepReps({
     });
 
   const [reps, setReps] = useState<RatingStats[]>(
-    sortReps(repRates.rating_stats)
+    sortReps(repRates?.rating_stats ?? [])
   );
 
   const getTopReps = (items: RatingStats[]) => {
@@ -37,8 +37,8 @@ export default function UserPageRepReps({
 
   const [topReps, setTopReps] = useState<RatingStats[]>(getTopReps(reps));
   useEffect(
-    () => setReps(sortReps(repRates.rating_stats)),
-    [repRates.rating_stats]
+    () => setReps(sortReps(repRates?.rating_stats ?? [])),
+    [repRates?.rating_stats]
   );
 
   useEffect(() => setTopReps(getTopReps(reps)), [reps]);
@@ -87,7 +87,7 @@ export default function UserPageRepReps({
           <UserPageRepRepsTop
             reps={topReps}
             profile={profile}
-            giverAvailableRep={repRates.rep_rates_left_for_rater ?? 0}
+            giverAvailableRep={repRates?.rep_rates_left_for_rater ?? 0}
             canEditRep={canEditRep}
           />
           <div className="tw-mt-6 lg:tw-mt-8">
@@ -98,7 +98,7 @@ export default function UserPageRepReps({
           <UserPageRepRepsTable
             reps={reps}
             profile={profile}
-            giverAvailableRep={repRates.rep_rates_left_for_rater ?? 0}
+            giverAvailableRep={repRates?.rep_rates_left_for_rater ?? 0}
             canEditRep={canEditRep}
           />
         </>

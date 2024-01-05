@@ -1,9 +1,7 @@
 import { useEffect, useState } from "react";
-import { SortDirection } from "../../../../../entities/ISort";
+import { SortDirection } from "../../../../entities/ISort";
 
-// tw-text-primary-400
-
-export default function UserPageRepRepsTableHeaderSortIcon({
+export default function CommonTableSortIcon({
   direction,
   isActive,
 }: {

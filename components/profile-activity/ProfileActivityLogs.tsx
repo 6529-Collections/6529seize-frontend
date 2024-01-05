@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import {
   ProfileActivityLog,
-  ProfileActivityLogRatingEditContentMatter,
   ProfileActivityLogType,
+  RateMatter,
 } from "../../entities/IProfile";
 import { Page } from "../../helpers/Types";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
@@ -19,7 +19,7 @@ export interface ActivityLogParams {
   readonly page: number;
   readonly pageSize: number;
   readonly logTypes: ProfileActivityLogType[];
-  readonly matter: ProfileActivityLogRatingEditContentMatter | null;
+  readonly matter: RateMatter | null;
   readonly targetType: FilterTargetType;
   readonly handleOrWallet: string | null;
 }
@@ -159,7 +159,7 @@ export default function ProfileActivityLogs({
     <div
       className={`${
         initialParams.handleOrWallet
-          ? "tw-min-h-[28rem] tw-max-h-[28rem]"
+          ? ""
           : "tw-mt-2 tw-min-h-screen"
       }  tw-scroll-py-3 tw-overflow-auto`}
     >
@@ -192,10 +192,10 @@ export default function ProfileActivityLogs({
           )}
         </div>
       ) : (
-        <div className="tw-mt-4">
+        <div className="tw-py-4">
           <span
             className={`${
-              initialParams.handleOrWallet ? "tw-px-4 sm:tw-px-6 md:tw-px-8" : ""
+              initialParams.handleOrWallet ? "tw-px-4 sm:tw-px-6" : ""
             } tw-text-sm tw-italic tw-text-iron-500`}
           >
             No Activity Log

@@ -4,15 +4,17 @@ import {
   CicStatement,
   IProfileAndConsolidations,
   ProfileActivityLog,
-  ProfilesMatterRatingWithRaterLevel,
+  RateMatter,
+  RatingWithProfileInfoAndLevel,
 } from "../../entities/IProfile";
 import { ConsolidatedTDHMetrics } from "../../entities/ITDH";
 import UserPageLayout from "../../components/user/layout/UserPageLayout";
 import {
   getCommonHeaders,
   getCommonUserServerSideProps,
+  getInitialRatersParams,
+  getProfileRatingsByRater,
   getUserProfileActivityLogs,
-  getUserProfileCICRatings,
   getUserProfileIdentityStatements,
   userPageNeedsRedirect,
 } from "../../helpers/server.helpers";
@@ -27,14 +29,17 @@ import {
 import { FilterTargetType } from "../../components/utils/CommonFilterTargetSelect";
 
 export interface UserPageIdentityProps {
-  profile: IProfileAndConsolidations;
-  handleOrWallet: string;
-  title: string;
-  consolidatedTDH: ConsolidatedTDHMetrics | null;
-  profileActivityLogs: PageType<ProfileActivityLog>;
-  profileCICRatings: PageType<ProfilesMatterRatingWithRaterLevel>;
-  profileIdentityStatements: CicStatement[];
+  readonly profile: IProfileAndConsolidations;
+  readonly handleOrWallet: string;
+  readonly title: string;
+  readonly consolidatedTDH: ConsolidatedTDHMetrics | null;
+  readonly profileActivityLogs: PageType<ProfileActivityLog>;
+  readonly cicGivenToUser: PageType<RatingWithProfileInfoAndLevel>;
+  readonly cicReceivedFromUser: PageType<RatingWithProfileInfoAndLevel>;
+  readonly profileIdentityStatements: CicStatement[];
 }
+
+const MATTER_TYPE = RateMatter.CIC;
 
 const getInitialActivityLogParams = (
   handleOrWallet: string
@@ -50,6 +55,18 @@ const getInitialActivityLogParams = (
 const Page: NextPageWithLayout<{ pageProps: UserPageIdentityProps }> = ({
   pageProps,
 }) => {
+  const initialCICGivenParams = getInitialRatersParams({
+    handleOrWallet: pageProps.handleOrWallet,
+    matter: MATTER_TYPE,
+    given: false,
+  });
+
+  const initialCICReceivedParams = getInitialRatersParams({
+    handleOrWallet: pageProps.handleOrWallet,
+    matter: MATTER_TYPE,
+    given: true,
+  });
+
   const initialActivityLogParams = getInitialActivityLogParams(
     pageProps.handleOrWallet
   );
@@ -60,6 +77,14 @@ const Page: NextPageWithLayout<{ pageProps: UserPageIdentityProps }> = ({
       data: pageProps.profileActivityLogs,
       params: initialActivityLogParams,
     },
+    cicGivenToUsers: {
+      data: pageProps.cicGivenToUser,
+      params: initialCICGivenParams,
+    },
+    cicReceivedFromUsers: {
+      data: pageProps.cicReceivedFromUser,
+      params: initialCICReceivedParams,
+    },
   });
 
   if (!pageProps.profile.profile) {
@@ -69,8 +94,9 @@ const Page: NextPageWithLayout<{ pageProps: UserPageIdentityProps }> = ({
   return (
     <UserPageIdentity
       profile={pageProps.profile}
+      initialCICReceivedParams={initialCICReceivedParams}
+      initialCICGivenParams={initialCICGivenParams}
       initialActivityLogParams={initialActivityLogParams}
-      profileCICRatings={pageProps.profileCICRatings}
       profileIdentityStatements={pageProps.profileIdentityStatements}
     />
   );
@@ -98,7 +124,8 @@ export async function getServerSideProps(
     const [
       { profile, title, consolidatedTDH },
       profileActivityLogs,
-      profileCICRatings,
+      cicGivenToUser,
+      cicReceivedFromUser,
       profileIdentityStatements,
     ] = await Promise.all([
       getCommonUserServerSideProps({ user: handleOrWallet, headers }),
@@ -108,8 +135,20 @@ export async function getServerSideProps(
           getInitialActivityLogParams(handleOrWallet)
         ),
       }),
-      getUserProfileCICRatings({
-        user: handleOrWallet,
+      getProfileRatingsByRater({
+        params: getInitialRatersParams({
+          handleOrWallet,
+          matter: MATTER_TYPE,
+          given: false,
+        }),
+        headers,
+      }),
+      getProfileRatingsByRater({
+        params: getInitialRatersParams({
+          handleOrWallet,
+          matter: MATTER_TYPE,
+          given: true,
+        }),
         headers,
       }),
       getUserProfileIdentityStatements({
@@ -135,7 +174,8 @@ export async function getServerSideProps(
         title,
         consolidatedTDH,
         profileActivityLogs,
-        profileCICRatings,
+        cicGivenToUser,
+        cicReceivedFromUser,
         profileIdentityStatements,
       },
     };

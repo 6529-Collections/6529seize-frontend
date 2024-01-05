@@ -124,7 +124,7 @@ export default function UserSettingsImg({
   };
 
   return (
-    <div className="tw-bg-iron-900 tw-border tw-border-solid tw-border-white/5 tw-p-4 sm:tw-p-6 lg:tw-p-8 tw-rounded-lg">
+    <div className="tw-bg-iron-900 tw-border tw-border-solid tw-border-iron-800 tw-p-4 sm:tw-p-6 lg:tw-p-8 tw-rounded-lg">
       <form onSubmit={onSubmit}>
         <UserSettingsImgSelectMeme
           memes={memes}

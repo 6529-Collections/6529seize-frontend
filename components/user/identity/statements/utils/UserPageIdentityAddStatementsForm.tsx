@@ -31,7 +31,7 @@ export default function UserPageIdentityAddStatementsForm({
   readonly onClose: () => void;
 }) {
   const { requestAuth, setToast } = useContext(AuthContext);
-  const { invalidateProfileLogs, invalidateProfileCICStatements } = useContext(
+  const { invalidateLogs, invalidateProfileCICStatements } = useContext(
     ReactQueryWrapperContext
   );
   const [value, setValue] = useState<string>(
@@ -59,10 +59,7 @@ export default function UserPageIdentityAddStatementsForm({
         type: "success",
       });
       invalidateProfileCICStatements(profile);
-      invalidateProfileLogs({
-        profile,
-        keys: {},
-      });
+      invalidateLogs();
     },
     onError: (error) => {
       setToast({
