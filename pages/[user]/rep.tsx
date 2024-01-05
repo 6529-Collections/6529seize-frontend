@@ -3,7 +3,7 @@ import {
   ApiProfileRepRatesState,
   IProfileAndConsolidations,
   ProfileActivityLogRatingEdit,
-  ProfileActivityLogRatingEditContentMatter,
+  RateMatter,
   RatingWithProfileInfoAndLevel,
 } from "../../entities/IProfile";
 import { NextPageWithLayout } from "../_app";
@@ -13,6 +13,7 @@ import { ConsolidatedTDHMetrics } from "../../entities/ITDH";
 import {
   getCommonHeaders,
   getCommonUserServerSideProps,
+  getInitialRatersParams,
   getProfileRatings,
   getProfileRatingsByRater,
   getSignedWalletOrNull,
@@ -44,9 +45,7 @@ export interface UserPageRepProps {
   readonly repReceivedFromUsers: PageType<RatingWithProfileInfoAndLevel>;
 }
 
-const PROFILE_REP_RATERS_PAGE = 1;
-const PROFILE_REP_RATERS_PAGE_SIZE = 10;
-const PROFILE_REP_RATERS_LOG_TYPE = "";
+const MATTER_TYPE = RateMatter.REP;
 
 const getInitialActivityLogParams = (
   handleOrWallet: string
@@ -54,7 +53,7 @@ const getInitialActivityLogParams = (
   page: 1,
   pageSize: 10,
   logTypes: [],
-  matter: ProfileActivityLogRatingEditContentMatter.REP,
+  matter: RateMatter.REP,
   targetType: FilterTargetType.ALL,
   handleOrWallet,
 });
@@ -62,6 +61,17 @@ const getInitialActivityLogParams = (
 const Page: NextPageWithLayout<{ pageProps: UserPageRepProps }> = ({
   pageProps,
 }) => {
+  const initialRepGivenParams = getInitialRatersParams({
+    handleOrWallet: pageProps.handleOrWallet,
+    matter: MATTER_TYPE,
+    given: false,
+  });
+
+  const initialRepReceivedParams = getInitialRatersParams({
+    handleOrWallet: pageProps.handleOrWallet,
+    matter: MATTER_TYPE,
+    given: true,
+  });
   const initialActivityLogParams = getInitialActivityLogParams(
     pageProps.handleOrWallet
   );
@@ -75,17 +85,11 @@ const Page: NextPageWithLayout<{ pageProps: UserPageRepProps }> = ({
     },
     repGivenToUsers: {
       data: pageProps.repGivenToUsers,
-      page: PROFILE_REP_RATERS_PAGE,
-      pageSize: PROFILE_REP_RATERS_PAGE_SIZE,
-      logType: PROFILE_REP_RATERS_LOG_TYPE,
-      given: true,
+      params: initialRepGivenParams,
     },
     repReceivedFromUsers: {
       data: pageProps.repReceivedFromUsers,
-      page: PROFILE_REP_RATERS_PAGE,
-      pageSize: PROFILE_REP_RATERS_PAGE_SIZE,
-      logType: PROFILE_REP_RATERS_LOG_TYPE,
-      given: false,
+      params: initialRepReceivedParams,
     },
     handleOrWallet: pageProps.handleOrWallet,
   });
@@ -98,6 +102,8 @@ const Page: NextPageWithLayout<{ pageProps: UserPageRepProps }> = ({
     <div className="tailwind-scope">
       <UserPageRep
         profile={pageProps.profile}
+        initialRepReceivedParams={initialRepReceivedParams}
+        initialRepGivenParams={initialRepGivenParams}
         initialActivityLogParams={initialActivityLogParams}
       />
     </div>
@@ -143,20 +149,20 @@ export async function getServerSideProps(
         signedWallet: signedWalletOrNull,
       }),
       getProfileRatingsByRater({
-        user: handleOrWallet,
+        params: getInitialRatersParams({
+          handleOrWallet,
+          matter: MATTER_TYPE,
+          given: false,
+        }),
         headers,
-        page: PROFILE_REP_RATERS_PAGE,
-        pageSize: PROFILE_REP_RATERS_PAGE_SIZE,
-        given: true,
-        logType: PROFILE_REP_RATERS_LOG_TYPE,
       }),
       getProfileRatingsByRater({
-        user: handleOrWallet,
+        params: getInitialRatersParams({
+          handleOrWallet,
+          matter: MATTER_TYPE,
+          given: true,
+        }),
         headers,
-        page: PROFILE_REP_RATERS_PAGE,
-        logType: PROFILE_REP_RATERS_LOG_TYPE,
-        pageSize: PROFILE_REP_RATERS_PAGE_SIZE,
-        given: false,
       }),
     ]);
 

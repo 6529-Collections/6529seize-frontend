@@ -1,8 +1,8 @@
 import {
   ApiProfileRepRatesState,
   IProfileAndConsolidations,
+  RateMatter,
 } from "../../../entities/IProfile";
-import UserPageRepRaters from "./UserPageRepRaters";
 import UserPageRepNewRep from "./new-rep/UserPageRepNewRep";
 import { useRouter } from "next/router";
 import { useQuery } from "@tanstack/react-query";
@@ -12,18 +12,22 @@ import { useContext, useEffect, useState } from "react";
 import UserPageRepReps from "./reps/UserPageRepReps";
 import UserPageRepHeader from "./header/UserPageRepHeader";
 import { AuthContext } from "../../auth/Auth";
-import { ProfileRatersTableType } from "../utils/raters-table/wrapper/ProfileRatersTableWrapper";
+import ProfileRatersTableWrapper, {
+  ProfileRatersParams,
+} from "../utils/raters-table/wrapper/ProfileRatersTableWrapper";
 import UserPageRepActivityLog from "./UserPageRepActivityLog";
 import { ActivityLogParams } from "../../profile-activity/ProfileActivityLogs";
-import UserPageRateWrapper, {
-  UserPageRateWrapperType,
-} from "../utils/rate/UserPageRateWrapper";
+import UserPageRateWrapper from "../utils/rate/UserPageRateWrapper";
 
 export default function UserPageRep({
   profile: initialProfile,
+  initialRepReceivedParams,
+  initialRepGivenParams,
   initialActivityLogParams,
 }: {
   readonly profile: IProfileAndConsolidations;
+  readonly initialRepReceivedParams: ProfileRatersParams;
+  readonly initialRepGivenParams: ProfileRatersParams;
   readonly initialActivityLogParams: ActivityLogParams;
 }) {
   const { connectedProfile } = useContext(AuthContext);
@@ -63,29 +67,22 @@ export default function UserPageRep({
 
   return (
     <div className="tailwind-scope">
-      {repRates && (
-        <>
-          <UserPageRepHeader repRates={repRates} />
-          <UserPageRateWrapper
-            profile={profile}
-            type={UserPageRateWrapperType.REP}
-          >
-            <UserPageRepNewRep profile={profile} repRates={repRates} />
-          </UserPageRateWrapper>
-          <UserPageRepReps repRates={repRates} profile={profile} />
-        </>
-      )}
+      <UserPageRepHeader repRates={repRates ?? null} />
+      <UserPageRateWrapper profile={profile} type={RateMatter.REP}>
+        <UserPageRepNewRep profile={profile} repRates={repRates ?? null} />
+      </UserPageRateWrapper>
+      <UserPageRepReps repRates={repRates ?? null} profile={profile} />
 
-      <div className="tw-mt-6 lg:tw-mt-10 tw-grid tw-grid-cols-1 xl:tw-grid-cols-2 tw-gap-y-8 lg:tw-gap-y-10 tw-gap-x-8 lg:tw-gap-x-10">
+      <div className="tw-mt-6 lg:tw-mt-8 tw-grid tw-grid-cols-1 xl:tw-grid-cols-2 tw-gap-y-6 lg:tw-gap-y-10 tw-gap-x-8 lg:tw-gap-x-10">
         <div>
-          <UserPageRepRaters type={ProfileRatersTableType.REP_RECEIVED} />
+          <ProfileRatersTableWrapper initialParams={initialRepGivenParams} />
         </div>
         <div>
-          <UserPageRepRaters type={ProfileRatersTableType.REP_GIVEN} />
+          <ProfileRatersTableWrapper initialParams={initialRepReceivedParams} />
         </div>
       </div>
 
-      <div className="tw-mt-8 lg:tw-mt-10">
+      <div className="tw-mt-6 lg:tw-mt-8">
         <UserPageRepActivityLog
           initialActivityLogParams={initialActivityLogParams}
         />

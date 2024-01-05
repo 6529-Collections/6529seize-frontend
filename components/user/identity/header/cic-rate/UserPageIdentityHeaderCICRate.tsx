@@ -20,6 +20,7 @@ import {
 } from "../../../../react-query-wrapper/ReactQueryWrapper";
 import { createBreakpoint } from "react-use";
 import UserRateAdjustmentHelper from "../../../utils/rate/UserRateAdjustmentHelper";
+import CircleLoader from "../../../../distribution-plan-tool/common/CircleLoader";
 
 const useBreakpoint = createBreakpoint({ MD: 768, S: 0 });
 
@@ -32,12 +33,7 @@ export default function UserPageIdentityHeaderCICRate({
 }) {
   const { address } = useAccount();
   const { requestAuth, setToast } = useContext(AuthContext);
-  const {
-    invalidateProfile,
-    invalidateProfileRaterCICState,
-    invalidateProfileCICRatings,
-    invalidateProfileLogs,
-  } = useContext(ReactQueryWrapperContext);
+  const { onProfileCICModify } = useContext(ReactQueryWrapperContext);
 
   const { data: connectedProfile } = useQuery<IProfileAndConsolidations>({
     queryKey: [QueryKey.PROFILE, address?.toLowerCase()],
@@ -64,32 +60,31 @@ export default function UserPageIdentityHeaderCICRate({
     staleTime: 0,
   });
 
+  const [mutating, setMutating] = useState<boolean>(false);
+
   const updateCICMutation = useMutation({
-    mutationFn: async (amount: number) =>
-      await commonApiPost({
+    mutationFn: async (amount: number) => {
+      setMutating(true);
+      return await commonApiPost({
         endpoint: `profiles/${profile.profile?.handle}/cic/rating`,
         body: {
           amount,
         },
-      }),
+      });
+    },
     onSuccess: () => {
       setToast({
         message: "CIC rating updated.",
         type: "success",
       });
-
-      invalidateProfile(profile);
-      invalidateProfileCICRatings(profile);
-      if (connectedProfile) {
-        invalidateProfileLogs({ profile: connectedProfile, keys: {} });
-      }
-
-      if (address) {
-        invalidateProfileRaterCICState({
-          profile,
-          rater: address?.toLowerCase(),
-        });
-      }
+      onProfileCICModify({
+        targetProfile: profile,
+        connectedProfile: connectedProfile ?? null,
+        rater: address?.toLowerCase() ?? null,
+      });
+    },
+    onSettled: () => {
+      setMutating(false);
     },
   });
 
@@ -119,6 +114,10 @@ export default function UserPageIdentityHeaderCICRate({
     if (cicAsNumber < -myMaxCICRatings) {
       return `-${myMaxCICRatings}`;
     }
+
+    if (strCIC.length > 1 && strCIC.startsWith("0")) {
+      return strCIC.slice(1);
+    }
     return strCIC;
   };
 
@@ -134,8 +133,8 @@ export default function UserPageIdentityHeaderCICRate({
 
   const handleChange = (e: FormEvent<HTMLInputElement>) => {
     const inputValue = e.currentTarget.value;
-    if (/^-?\d*$/.test(inputValue)) {
-      const strCIC = inputValue === "-0" ? "-" : inputValue;
+    const strCIC = ["-0", "0-"].includes(inputValue) ? "-" : inputValue;
+    if (/^-?\d*$/.test(strCIC)) {
       const newCicValue = getCICStrOrMaxStr(strCIC);
       setAdjustedRatingStr(newCicValue);
     }
@@ -171,7 +170,7 @@ export default function UserPageIdentityHeaderCICRate({
       className={`${
         isTooltip
           ? ""
-          : "tw-bg-iron-800 tw-p-4 md:tw-p-6 tw-rounded-xl tw-border tw-border-solid tw-border-white/5"
+          : "tw-bg-iron-900 tw-px-4 tw-py-6 lg:tw-p-8 tw-rounded-xl tw-border tw-border-solid tw-border-iron-800"
       } `}
     >
       <div
@@ -206,7 +205,7 @@ export default function UserPageIdentityHeaderCICRate({
               Your total CIC Rating of {profile.profile?.handle}:
             </label>
             <div className="tw-w-full tw-relative tw-flex tw-mt-1.5">
-              <span className="tw-flex tw-flex-col tw-items-center tw-justify-center tw-bg-iron-900 tw-rounded-l-lg tw-border tw-border-solid tw-border-iron-700 tw-px-3">
+              <span className="tw-flex tw-flex-col tw-items-center tw-justify-center tw-bg-iron-950 tw-rounded-l-lg tw-border tw-border-solid tw-border-white/10 tw-px-3">
                 <svg
                   className="tw-w-3.5 tw-h-3.5 tw-flex-shrink-0 tw-text-iron-500"
                   viewBox="0 0 24 24"
@@ -244,7 +243,7 @@ export default function UserPageIdentityHeaderCICRate({
                 autoComplete="off"
                 className={`${
                   isTooltip ? "tw-max-w-[12rem]" : "tw-w-full sm:tw-w-auto"
-                } tw-appearance-none tw-block tw-rounded-l-none tw-rounded-r-lg tw-border-0 tw-py-3 tw-px-3 tw-bg-iron-900 tw-text-iron-300 tw-font-medium tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-700 placeholder:tw-text-iron-500 focus:tw-outline-none  focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 tw-text-base tw-transition tw-duration-300 tw-ease-out`}
+                } -tw-ml-0.5 tw-appearance-none tw-block tw-rounded-l-none tw-rounded-r-lg tw-border-0 tw-py-3 tw-px-3 tw-bg-iron-950 tw-text-iron-300 tw-font-medium tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-white/10 placeholder:tw-text-iron-500 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 tw-text-base tw-transition tw-duration-300 tw-ease-out`}
               />
             </div>
           </div>
@@ -256,7 +255,13 @@ export default function UserPageIdentityHeaderCICRate({
                 className="tw-w-full sm:tw-w-auto tw-cursor-pointer tw-bg-primary-500 tw-px-4 tw-py-3 tw-text-sm tw-font-semibold tw-text-white 
               tw-border tw-border-solid tw-border-primary-500 tw-rounded-lg hover:tw-bg-primary-600 hover:tw-border-primary-600 tw-transition tw-duration-300 tw-ease-out"
               >
-                Rate
+                {mutating ? (
+                  <div className="tw-w-8">
+                    <CircleLoader />
+                  </div>
+                ) : (
+                  <>Rate</>
+                )}
               </button>
               {!isTooltip && breakpoint === "MD" && (
                 <UserRateAdjustmentHelper

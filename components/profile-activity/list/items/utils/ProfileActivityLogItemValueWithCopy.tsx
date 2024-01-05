@@ -29,7 +29,7 @@ export default function ProfileActivityLogItemValueWithCopy({
     }, 1000);
   };
   return (
-    <span className="tw-h-5 tw-whitespace-nowrap tw-group tw-inline-flex tw-text-sm tw-font-semibold tw-text-iron-100">
+    <span className="tw-h-5 tw-whitespace-nowrap tw-group tw-inline-flex tw-text-sm tw-font-medium tw-text-iron-100">
       {titleToShow}
       <Tippy
         content="Copy"
