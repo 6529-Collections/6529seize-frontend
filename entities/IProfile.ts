@@ -142,10 +142,6 @@ export enum ProfileActivityLogRatingEditContentChangeReason {
   LOST_TDH = "LOST_TDH",
 }
 
-export enum ProfileActivityLogRatingEditContentMatter {
-  CIC = "CIC",
-  REP = "REP",
-}
 
 export interface ProfileActivityLogRatingEdit extends ProfileActivityLogBase {
   readonly type: ProfileActivityLogType.RATING_EDIT;
@@ -154,7 +150,7 @@ export interface ProfileActivityLogRatingEdit extends ProfileActivityLogBase {
     new_rating: number;
     old_rating: number;
     rating_category: string;
-    rating_matter: ProfileActivityLogRatingEditContentMatter;
+    rating_matter: RateMatter;
   };
 }
 
@@ -269,6 +265,7 @@ export type ProfileActivityLog =
 
 export enum RateMatter {
   CIC = "CIC",
+  REP = "REP",
 }
 
 export interface ProfilesMatterRating {
@@ -279,11 +276,6 @@ export interface ProfilesMatterRating {
   readonly rater_cic_rating: number;
   readonly rater_tdh: number;
   readonly last_modified: Date;
-}
-
-export interface ProfilesMatterRatingWithRaterLevel
-  extends ProfilesMatterRating {
-  readonly rater_level: number;
 }
 
 export interface CommunityMemberMinimal {

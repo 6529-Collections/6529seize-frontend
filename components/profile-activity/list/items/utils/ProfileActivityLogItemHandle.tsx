@@ -1,8 +1,8 @@
 import { useRouter } from "next/router";
 import {
   ProfileActivityLog,
-  ProfileActivityLogRatingEditContentMatter,
   ProfileActivityLogType,
+  RateMatter,
 } from "../../../../../entities/IProfile";
 
 export default function ProfileActivityLogItemHandle({
@@ -28,8 +28,7 @@ export default function ProfileActivityLogItemHandle({
 
     if (
       log.type === ProfileActivityLogType.RATING_EDIT &&
-      log.contents.rating_matter ===
-        ProfileActivityLogRatingEditContentMatter.REP
+      log.contents.rating_matter === RateMatter.REP
     ) {
       router.push(`/${targetUser}/rep`);
       return;

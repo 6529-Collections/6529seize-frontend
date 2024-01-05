@@ -1,7 +1,7 @@
 import {
   ProfileActivityLogRatingEdit,
   ProfileActivityLogRatingEditContentChangeReason,
-  ProfileActivityLogRatingEditContentMatter,
+  RateMatter,
 } from "../../../../entities/IProfile";
 import { useRouter } from "next/router";
 import ProfileActivityLogItemAction from "./utils/ProfileActivityLogItemAction";
@@ -17,12 +17,9 @@ const ACTION: Record<ProfileActivityLogRateType, string> = {
   [ProfileActivityLogRateType.REMOVED]: "reduced",
 };
 
-const LOG_MATTER_STR: Record<
-  ProfileActivityLogRatingEditContentMatter,
-  string
-> = {
-  [ProfileActivityLogRatingEditContentMatter.REP]: "Rep",
-  [ProfileActivityLogRatingEditContentMatter.CIC]: "CIC",
+const LOG_MATTER_STR: Record<RateMatter, string> = {
+  [RateMatter.REP]: "Rep",
+  [RateMatter.CIC]: "CIC",
 };
 
 const TO_FROM: Record<ProfileActivityLogRateType, string> = {
@@ -59,10 +56,7 @@ export default function ProfileActivityLogRate({
       return;
     }
 
-    if (
-      log.contents.rating_matter ===
-      ProfileActivityLogRatingEditContentMatter.REP
-    ) {
+    if (log.contents.rating_matter === RateMatter.REP) {
       router.push(`/${user}/rep`);
       return;
     }
@@ -98,7 +92,7 @@ export default function ProfileActivityLogRate({
       <span
         className={`${
           isChangePositive ? "tw-text-green" : "tw-text-red"
-        } tw-text-sm tw-font-semibold`}
+        } tw-text-sm tw-font-medium`}
       >
         {changeStr}
       </span>
@@ -107,9 +101,8 @@ export default function ProfileActivityLogRate({
       >
         (total {newRatingStr})
       </span>
-      {log.contents.rating_matter ===
-        ProfileActivityLogRatingEditContentMatter.REP && (
-        <span className="tw-whitespace-nowrap tw-text-sm tw-font-semibold tw-text-iron-100">
+      {log.contents.rating_matter === RateMatter.REP && (
+        <span className="tw-whitespace-nowrap tw-text-sm tw-font-medium tw-text-iron-100">
           {log.contents.rating_category}
         </span>
       )}
@@ -126,7 +119,7 @@ export default function ProfileActivityLogRate({
         <span
           className={`${
             isCurrentUser ? "" : "hover:tw-underline tw-cursor-pointer"
-          } tw-whitespace-nowrap tw-text-sm tw-font-semibold tw-text-iron-100`}
+          } tw-whitespace-nowrap tw-text-sm tw-font-medium tw-text-iron-100`}
         >
           {log.target_profile_handle}
         </span>
@@ -141,7 +134,7 @@ export default function ProfileActivityLogRate({
           >
             <circle cx="3" cy="3" r="3" />
           </svg>
-          <span> System Adjustment</span>
+          <span>System Adjustment</span>
         </span>
       )}
     </>

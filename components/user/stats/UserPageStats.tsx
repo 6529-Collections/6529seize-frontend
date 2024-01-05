@@ -102,6 +102,7 @@ export default function UserPageStats({
           />
         </div>
       </div>
+      <UserPageStatsOverview tdh={tdh} loading={loading} />
       <UserPageActivity
         show={true}
         activeAddress={activeAddress}
@@ -113,7 +114,7 @@ export default function UserPageStats({
         activeAddress={activeAddress}
         profile={profile}
       />
-      <UserPageStatsOverview tdh={tdh} loading={loading} />
+
       <UserPageStatsTDHcharts mainAddress={mainAddress} />
     </>
   );
