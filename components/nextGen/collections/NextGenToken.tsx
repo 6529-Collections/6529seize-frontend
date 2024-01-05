@@ -75,7 +75,8 @@ export default function NextGenToken(props: Readonly<Props>) {
 
   function printMetadata() {
     if (metadata) {
-      if (isUrl(metadata)) {
+      const isMetadataUrl = isUrl(metadata);
+      if (isMetadataUrl) {
         return (
           <span className="d-flex align-items-center gap-1">
             <span>Off-Chain</span>
@@ -104,7 +105,7 @@ export default function NextGenToken(props: Readonly<Props>) {
               icon="copy"
               onClick={() => {
                 if (navigator.clipboard) {
-                  navigator.clipboard.writeText(metadata);
+                  navigator.clipboard.writeText(parseUri(metadata));
                   setCodeCopied(true);
                   setTimeout(() => {
                     setCodeCopied(false);
@@ -117,6 +118,14 @@ export default function NextGenToken(props: Readonly<Props>) {
     }
 
     return printFetching();
+  }
+
+  function parseUri(str: string) {
+    const startIndex = str.indexOf("{");
+    const endIndex = str.lastIndexOf("}");
+    const p1 = str.substring(0, startIndex);
+    const p2 = str.substring(startIndex + 1, endIndex);
+    return `${p1}{${encodeURIComponent(p2)}}`;
   }
 
   function printFetching() {

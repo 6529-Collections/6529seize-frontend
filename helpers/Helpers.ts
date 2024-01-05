@@ -278,8 +278,7 @@ export function isEmptyObject(obj: any) {
 }
 
 export function isUrl(s: string) {
-  const pattern =
-    /(https:\/\/www\.|http:\/\/www\.|https:\/\/|http:\/\/)?[a-zA-Z]{2,}(\.[a-zA-Z]{2,})(\.[a-zA-Z]{2,})?\/[a-zA-Z0-9]{2,}|((https:\/\/www\.|http:\/\/www\.|https:\/\/|http:\/\/)?[a-zA-Z]{2,}(\.[a-zA-Z]{2,})(\.[a-zA-Z]{2,})?)|(https:\/\/www\.|http:\/\/www\.|https:\/\/|http:\/\/)?[a-zA-Z0-9]{2,}\.[a-zA-Z0-9]{2,}\.[a-zA-Z0-9]{2,}(\.[a-zA-Z0-9]{2,})?/g;
+  const pattern = /^(https?:\/\/)?[\w.-]+\.[a-zA-Z]{2,}(:\d{1,5})?\/?([^\s]*)$/;
   return pattern.test(s);
 }
 
@@ -298,7 +297,6 @@ export function parseEmojis(s: string) {
     return `&#x${hexValue};`;
   });
 }
-
 
 export function printMintDate(date: Date) {
   const mintDate = new Date(date);
@@ -581,8 +579,7 @@ export const truncateMiddle = (value: string): string => {
   return value;
 };
 
-
 export const getStringAsNumberOrZero = (value: string): number => {
   const parsedValue = parseInt(value);
   return isNaN(parsedValue) ? 0 : parsedValue;
-}
+};

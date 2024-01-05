@@ -85,38 +85,56 @@ export default function NextGenAdminUpdateImagesAttributes(
         <Col>
           <Form>
             <Form.Group className="mb-3">
-              <Form.Label>Token IDs</Form.Label>
+              <Form.Label>
+                Token IDs {tokenIds.length > 0 && `x${tokenIds.length}`}
+              </Form.Label>
               <Form.Control
                 as="textarea"
                 rows={3}
                 placeholder="One line per entry"
                 value={tokenIds.join("\n")}
                 onChange={(e) => {
-                  setTokenIds(e.target.value.split("\n"));
+                  if (e.target.value) {
+                    setTokenIds(e.target.value.split("\n"));
+                  } else {
+                    setTokenIds([]);
+                  }
                 }}
               />
             </Form.Group>
             <Form.Group className="mb-3">
-              <Form.Label>Images</Form.Label>
+              <Form.Label>
+                Images {images.length > 0 && `x${images.length}`}
+              </Form.Label>
               <Form.Control
                 as="textarea"
                 rows={3}
                 placeholder="One line per entry"
                 value={images.join("\n")}
                 onChange={(e) => {
-                  setImages(e.target.value.split("\n"));
+                  if (e.target.value) {
+                    setImages(e.target.value.split("\n"));
+                  } else {
+                    setImages([]);
+                  }
                 }}
               />
             </Form.Group>
             <Form.Group className="mb-3">
-              <Form.Label>Attributes</Form.Label>
+              <Form.Label>
+                Attributes {attributes.length > 0 && `x${attributes.length}`}
+              </Form.Label>
               <Form.Control
                 as="textarea"
                 rows={3}
                 placeholder="One line per entry"
                 value={attributes.join("\n")}
                 onChange={(e) => {
-                  setAttributes(e.target.value.split("\n"));
+                  if (e.target.value) {
+                    setAttributes(e.target.value.split("\n"));
+                  } else {
+                    setAttributes([]);
+                  }
                 }}
               />
             </Form.Group>
