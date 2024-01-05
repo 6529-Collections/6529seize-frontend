@@ -1,33 +1,30 @@
-import {
-  IProfileAndConsolidations,
-  ProfileActivityLog,
-} from "../../../../entities/IProfile";
-import UserPageIdentityActivityLogHeader from "./UserPageIdentityActivityLogHeader";
-
-import { Page } from "../../../../helpers/Types";
-import { useRouter } from "next/router";
-import ProfileActivityLogs from "../../../profile-activity/ProfileActivityLogs";
-
-const PAGE_SIZE = 10;
+import ProfileActivityLogs, {
+  ActivityLogParams,
+} from "../../../profile-activity/ProfileActivityLogs";
+import ProfileName, {
+  ProfileNameType,
+} from "../../../profile-activity/ProfileName";
+import UserTableHeaderWrapper from "../../utils/UserTableHeaderWrapper";
 
 export default function UserPageIdentityActivityLog({
-  profile,
-  profileActivityLogs: initialPageActivityLogs,
+  initialActivityLogParams,
 }: {
-  readonly profile: IProfileAndConsolidations;
-  readonly profileActivityLogs: Page<ProfileActivityLog>;
+  readonly initialActivityLogParams: ActivityLogParams;
 }) {
-  const router = useRouter();
-  const user = (router.query.user as string).toLowerCase();
-
   return (
-    <div className="tw-bg-iron-900 tw-border tw-border-white/5 tw-border-solid tw-rounded-xl">
-      <UserPageIdentityActivityLogHeader profile={profile} />
-      <ProfileActivityLogs
-        user={user}
-        initialLogs={initialPageActivityLogs}
-        pageSize={PAGE_SIZE}
-      />
+    <div>
+      <UserTableHeaderWrapper>
+        <span>
+          <ProfileName type={ProfileNameType.POSSESSION} />
+        </span>{" "}
+        CIC Activity Log
+      </UserTableHeaderWrapper>
+      <div className="tw-mt-4 tw-bg-iron-900 tw-border tw-border-iron-800 tw-border-solid tw-rounded-xl">
+        <ProfileActivityLogs
+          initialParams={initialActivityLogParams}
+          withFilters={true}
+        />
+      </div>
     </div>
   );
 }

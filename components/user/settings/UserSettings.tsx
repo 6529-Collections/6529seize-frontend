@@ -10,8 +10,8 @@ import UserSettingsPage from "./UserSettingsPage";
 import { ReactQueryWrapperContext } from "../../react-query-wrapper/ReactQueryWrapper";
 
 interface Props {
-  user: string;
-  wallets: string[];
+  readonly user: string;
+  readonly wallets: string[];
 }
 
 const inter = Inter({
@@ -25,18 +25,13 @@ export default function UserSettingsComponent(props: Readonly<Props>) {
   const account = useAccount();
   const router = useRouter();
   const { requestAuth, setToast } = useContext(AuthContext);
-  const {
-    invalidateProfile,
-    invalidateHandles,
-    invalidateProfileLogs,
-    invalidateProfileLogsByHandles,
-  } = useContext(ReactQueryWrapperContext);
-  const [init, setInit] = useState(false);
-  const [userOrWallet] = useState(
-    Array.isArray(router.query.user)
-      ? router.query.user.at(0)
-      : router.query.user
+  const { invalidateProfile, invalidateHandles, invalidateLogs } = useContext(
+    ReactQueryWrapperContext
   );
+  const [init, setInit] = useState(false);
+  const userOrWallet = Array.isArray(router.query.user)
+    ? router.query.user.at(0)
+    : router.query.user;
 
   const [user, setUser] = useState<IProfileAndConsolidations | null>(null);
 
@@ -56,9 +51,8 @@ export default function UserSettingsComponent(props: Readonly<Props>) {
       }
     });
     invalidateProfile(newUser);
-    invalidateProfileLogs({ profile: newUser, keys: {} });
+    invalidateLogs()
     invalidateHandles(oldHandles);
-    invalidateProfileLogsByHandles({ handles: oldHandles, keys: {} });
     setUser(newUser);
   };
 

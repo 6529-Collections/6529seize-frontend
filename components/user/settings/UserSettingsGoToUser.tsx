@@ -25,7 +25,7 @@ export default function UserSettingsGoToUser({ user }: { user: string }) {
         className="tw-h-8 tw-w-8 tw-inline-flex tw-items-center tw-justify-center tw-border tw-border-solid tw-border-white tw-rounded-full tw-bg-white hover:tw-bg-iron-200 hover:tw-border-white tw-transition tw-duration-300 tw-ease-out"
       >
         <svg
-          className="tw-w-5 tw-h-5 tw-text-iron-900 tw-transition tw-duration-300 tw-ease-out"
+          className="tw-flex-shrink-0 tw-w-5 tw-h-5 tw-text-iron-900 tw-transition tw-duration-300 tw-ease-out"
           viewBox="0 0 24 24"
           fill="none"
           xmlns="http://www.w3.org/2000/svg"
@@ -40,7 +40,7 @@ export default function UserSettingsGoToUser({ user }: { user: string }) {
         </svg>
       </button>
       <div className="tw-inline-flex tw-items-center tw-gap-x-2">
-        <span className="tw-text-2xl tw-font-bold tw-text-white">{title}</span>
+        <span className="tw-text-2xl tw-font-bold tw-text-iron-50">{title}</span>
       </div>
     </div>
   );

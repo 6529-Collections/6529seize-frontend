@@ -10,10 +10,20 @@ import {
 import { commonApiFetch, commonApiPost } from "../../services/api/common-api";
 import jwtDecode from "jwt-decode";
 import { UserRejectedRequestError } from "viem";
+import { IProfileAndConsolidations } from "../../entities/IProfile";
+import { useQuery } from "@tanstack/react-query";
+import { QueryKey } from "../react-query-wrapper/ReactQueryWrapper";
 
 type AuthContextType = {
+  connectedProfile: IProfileAndConsolidations | null;
   requestAuth: () => Promise<{ success: boolean }>;
-  setToast: ({ message, type }: { message: string; type: TypeOptions }) => void;
+  setToast: ({
+    message,
+    type,
+  }: {
+    message: string | React.ReactNode;
+    type: TypeOptions;
+  }) => void;
 };
 
 interface NonceResponse {
@@ -22,13 +32,26 @@ interface NonceResponse {
 }
 
 export const AuthContext = createContext<AuthContextType>({
+  connectedProfile: null,
   requestAuth: async () => ({ success: false }),
   setToast: () => {},
 });
 
-export default function Auth({ children }: { children: React.ReactNode }) {
+export default function Auth({
+  children,
+}: {
+  readonly children: React.ReactNode;
+}) {
   const { address } = useAccount();
   const signMessage = useSignMessage();
+  const { data: connectedProfile } = useQuery<IProfileAndConsolidations>({
+    queryKey: [QueryKey.PROFILE, address?.toLowerCase()],
+    queryFn: async () =>
+      await commonApiFetch<IProfileAndConsolidations>({
+        endpoint: `profiles/${address}`,
+      }),
+    enabled: !!address,
+  });
 
   useEffect(() => {
     if (!address) {
@@ -39,10 +62,17 @@ export default function Auth({ children }: { children: React.ReactNode }) {
     }
   }, [address]);
 
-  const getNonce = async (): Promise<NonceResponse | null> => {
+  const getNonce = async ({
+    signerAddress,
+  }: {
+    signerAddress: string;
+  }): Promise<NonceResponse | null> => {
     try {
       return await commonApiFetch<NonceResponse>({
         endpoint: "auth/nonce",
+        params: {
+          signerAddress,
+        },
       });
     } catch {
       return null;
@@ -53,7 +83,7 @@ export default function Auth({ children }: { children: React.ReactNode }) {
     message,
     type,
   }: {
-    message: string;
+    message: string | React.ReactNode;
     type: TypeOptions;
   }) => {
     toast(message, {
@@ -116,8 +146,12 @@ export default function Auth({ children }: { children: React.ReactNode }) {
     };
   };
 
-  const requestSignIn = async () => {
-    const nonceResponse = await getNonce();
+  const requestSignIn = async ({
+    signerAddress,
+  }: {
+    signerAddress: string;
+  }) => {
+    const nonceResponse = await getNonce({ signerAddress });
     if (!nonceResponse) {
       setToast({
         message: "Error requesting authentication, please try again",
@@ -204,21 +238,20 @@ export default function Auth({ children }: { children: React.ReactNode }) {
     const isAuth = validateJwt({ jwt: getAuthJwt(), wallet: address });
     if (!isAuth) {
       removeAuthJwt();
-      await requestSignIn();
+      await requestSignIn({ signerAddress: address });
     }
     return { success: !!getAuthJwt() };
   };
   return (
-    <>
-      <AuthContext.Provider
-        value={{
-          requestAuth,
-          setToast,
-        }}
-      >
-        {children}
-        <ToastContainer />
-      </AuthContext.Provider>
-    </>
+    <AuthContext.Provider
+      value={{
+        requestAuth,
+        setToast,
+        connectedProfile: connectedProfile ?? null,
+      }}
+    >
+      {children}
+      <ToastContainer />
+    </AuthContext.Provider>
   );
 }

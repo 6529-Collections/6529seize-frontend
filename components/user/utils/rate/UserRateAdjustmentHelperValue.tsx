@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { formatNumberWithCommas } from "../../../../../helpers/Helpers";
+import { formatNumberWithCommas } from "../../../../helpers/Helpers";
 
 enum VALUE_STATE {
   POSITIVE = "POSITIVE",
@@ -10,10 +10,10 @@ enum VALUE_STATE {
 const CLASSES: Record<VALUE_STATE, string> = {
   [VALUE_STATE.POSITIVE]: "tw-text-green",
   [VALUE_STATE.NEGATIVE]: "tw-text-red",
-  [VALUE_STATE.NEUTRAL]: "",
+  [VALUE_STATE.NEUTRAL]: "tw-text-iron-50",
 };
 
-export default function UserPageIdentityHeaderCICRateAdjustmentsValue({
+export default function UserRateAdjustmentHelperValue({
   value,
   title,
 }: {
@@ -43,10 +43,10 @@ export default function UserPageIdentityHeaderCICRateAdjustmentsValue({
 
   return (
     <div className="tw-space-x-1.5">
-      <span className="tw-text-sm tw-text-iron-200 tw-font-medium">
+      <span className="tw-text-sm tw-text-iron-300 tw-font-normal">
         {title}
       </span>
-      <span className={`${CLASSES[valueState]} tw-text-sm tw-font-semibold`}>
+      <span className={`${CLASSES[valueState]} tw-text-sm tw-font-semibold `}>
         {valueString}
       </span>
     </div>

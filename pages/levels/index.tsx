@@ -460,16 +460,11 @@ export default function Levels() {
                   our ecosystem.
                 </li>
                 <li className="tw-text-justify tw-mb-0 tw-mt-2 tw-font-normal tw-text-base tw-text-neutral-100">
-                  Rep is not live yet so, for this initial release, levels are
-                  determined solely by TDH.
-                </li>
-                <li className="tw-text-justify tw-mb-0 tw-mt-2 tw-font-normal tw-text-base tw-text-neutral-100">
                   Levels start at zero and are currently capped at 100 (for
                   25,000,000 TDH).
                 </li>
                 <li className="tw-text-justify tw-mb-0 tw-mt-2 tw-font-normal tw-text-base tw-text-neutral-100">
-                  Levels are determined by the table below. Once rep rolls out,
-                  it is possible to have a negative level.
+                  Levels are determined by the table below.
                 </li>
                 <li className="tw-text-justify tw-mb-0 tw-mt-2 tw-font-normal tw-text-base tw-text-neutral-100">
                   As with all metrics, they may be adjusted to better meet their
@@ -485,7 +480,7 @@ export default function Levels() {
                       Level
                     </td>
                     <td className="tw-py-3 tw-pl-4 tw-pr-3 tw-whitespace-nowrap tw-text-left tw-text-[0.6875rem] tw-leading-[1.125rem] tw-font-semibold tw-text-white tw-uppercase sm:tw-pl-6">
-                      TDH
+                      TDH + Rep
                     </td>
                   </tr>
                 </thead>

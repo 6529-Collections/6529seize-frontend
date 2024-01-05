@@ -1,6 +1,7 @@
 import {
   ProfileActivityLogRatingEdit,
   ProfileActivityLogRatingEditContentChangeReason,
+  RateMatter,
 } from "../../../../entities/IProfile";
 import { useRouter } from "next/router";
 import ProfileActivityLogItemAction from "./utils/ProfileActivityLogItemAction";
@@ -13,7 +14,12 @@ enum ProfileActivityLogRateType {
 
 const ACTION: Record<ProfileActivityLogRateType, string> = {
   [ProfileActivityLogRateType.ADDED]: "added",
-  [ProfileActivityLogRateType.REMOVED]: "removed",
+  [ProfileActivityLogRateType.REMOVED]: "reduced",
+};
+
+const LOG_MATTER_STR: Record<RateMatter, string> = {
+  [RateMatter.REP]: "Rep",
+  [RateMatter.CIC]: "CIC",
 };
 
 const TO_FROM: Record<ProfileActivityLogRateType, string> = {
@@ -39,7 +45,23 @@ export default function ProfileActivityLogRate({
 
   const ratingType = getRatingType();
   const goToProfile = () => {
-    router.push(`/${log.target_profile_handle}/identity`);
+    const user = log.target_profile_handle;
+    if (!user) return;
+    if (router.route === "/[user]/rep") {
+      router.push(`/${user}/rep`);
+      return;
+    }
+    if (router.route === "/[user]/identity") {
+      router.push(`/${user}/identity`);
+      return;
+    }
+
+    if (log.contents.rating_matter === RateMatter.REP) {
+      router.push(`/${user}/rep`);
+      return;
+    }
+
+    router.push(`/${user}/identity`);
   };
 
   const change = log.contents.new_rating - log.contents.old_rating;
@@ -60,30 +82,49 @@ export default function ProfileActivityLogRate({
     }
   };
 
+  const isCurrentUser =
+    (router.query.user as string)?.toLowerCase() ===
+    log.target_profile_handle?.toLowerCase();
+
   return (
     <>
       <ProfileActivityLogItemAction action={ACTION[ratingType]} />
       <span
         className={`${
           isChangePositive ? "tw-text-green" : "tw-text-red"
-        } tw-text-sm tw-font-semibold`}
+        } tw-text-sm tw-font-medium`}
       >
         {changeStr}
       </span>
+      <span
+        className={`${getTotalRatingClass()} tw-whitespace-nowrap tw-text-sm tw-font-medium`}
+      >
+        (total {newRatingStr})
+      </span>
+      {log.contents.rating_matter === RateMatter.REP && (
+        <span className="tw-whitespace-nowrap tw-text-sm tw-font-medium tw-text-iron-100">
+          {log.contents.rating_category}
+        </span>
+      )}
       <ProfileActivityLogItemAction
-        action={`CIC-rating ${TO_FROM[ratingType]}`}
+        action={LOG_MATTER_STR[log.contents.rating_matter]}
       />
+
+      <ProfileActivityLogItemAction action={TO_FROM[ratingType]} />
       <button
         onClick={goToProfile}
         className="tw-bg-transparent tw-border-none tw-leading-4 tw-p-0"
+        disabled={isCurrentUser}
       >
-        <span className="tw-whitespace-nowrap hover:tw-underline tw-cursor-pointer tw-truncate tw-max-w-[12rem] tw-text-sm tw-font-semibold tw-text-iron-100">
+        <span
+          className={`${
+            isCurrentUser ? "" : "hover:tw-underline tw-cursor-pointer"
+          } tw-whitespace-nowrap tw-text-sm tw-font-medium tw-text-iron-100`}
+        >
           {log.target_profile_handle}
         </span>
       </button>
-      <span className={`${getTotalRatingClass()} tw-whitespace-nowrap tw-text-sm tw-font-semibold`}>
-        (total {newRatingStr})
-      </span>
+
       {isSystemAdjustment && (
         <span className="tw-whitespace-nowrap tw-inline-flex tw-items-center tw-gap-x-1.5 tw-rounded-md tw-px-2 tw-py-1 tw-text-xs tw-font-medium tw-text-iron-300 tw-ring-1 tw-ring-inset tw-ring-iron-700">
           <svg
@@ -93,7 +134,7 @@ export default function ProfileActivityLogRate({
           >
             <circle cx="3" cy="3" r="3" />
           </svg>
-         <span> System Adjustment</span>
+          <span>System Adjustment</span>
         </span>
       )}
     </>

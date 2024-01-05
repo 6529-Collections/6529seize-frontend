@@ -8,10 +8,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { DBResponse } from "../../entities/IDBResponse";
 import { fetchUrl } from "../../services/6529api";
 import HeaderConnect from "./HeaderConnect";
-import Cookies from "js-cookie";
-import { VIEW_MODE_COOKIE } from "../../constants";
 import { useAccount } from "wagmi";
-import { WalletView } from "../../enums";
 import SearchProfileButton from "./search-profile/SearchProfileButton";
 
 interface Props {
@@ -26,16 +23,15 @@ export default function Header(props: Readonly<Props>) {
   const [consolidations, setConsolidations] = useState<string[]>([]);
   const [burgerMenuOpen, setBurgerMenuOpen] = useState(false);
 
-  const [showBurgerMenuNextgen, setShowBurgerMenuNextgen] = useState(false);
-  const [view, setView] = useState<WalletView>();
-
+  const [showBurgerMenuCollections, setShowBurgerMenuCollections] =
+    useState(false);
   const [showBurgerMenuAbout, setShowBurgerMenuAbout] = useState(false);
   const [showBurgerMenuCommunity, setShowBurgerMenuCommunity] = useState(false);
   const [showBurgerMenuTools, setShowBurgerMenuTools] = useState(false);
 
   useEffect(() => {
     function handleResize() {
-      setShowBurgerMenuNextgen(false);
+      setShowBurgerMenuCollections(false);
       setBurgerMenuOpen(false);
       setShowBurgerMenuAbout(false);
       setShowBurgerMenuCommunity(false);
@@ -53,25 +49,17 @@ export default function Header(props: Readonly<Props>) {
   }, []);
 
   useEffect(() => {
-    const viewMode = Cookies.get(VIEW_MODE_COOKIE);
-    console.log(VIEW_MODE_COOKIE, viewMode);
-  }, []);
-
-  useEffect(() => {
-    if (view) {
-      Cookies.set(VIEW_MODE_COOKIE, view);
-      if (props.onSetWallets) {
-        const isConsolidation = consolidations.length > 1;
-        if (isConsolidation && view === WalletView.CONSOLIDATION) {
-          props.onSetWallets(consolidations);
-        } else if (account.address) {
-          props.onSetWallets([account.address]);
-        } else {
-          props.onSetWallets([]);
-        }
+    if (props.onSetWallets) {
+      const isConsolidation = consolidations.length > 1;
+      if (isConsolidation) {
+        props.onSetWallets(consolidations);
+      } else if (account.address) {
+        props.onSetWallets([account.address]);
+      } else {
+        props.onSetWallets([]);
       }
     }
-  }, [view, consolidations, account.address]);
+  }, [consolidations, account.address]);
 
   useEffect(() => {
     if (account.address) {
@@ -108,13 +96,7 @@ export default function Header(props: Readonly<Props>) {
   }
 
   function printHeaderConnect() {
-    return (
-      <HeaderConnect
-        consolidations={consolidations}
-        view={view}
-        setView={setView}
-      />
-    );
+    return <HeaderConnect />;
   }
 
   function printBurgerMenu() {
@@ -123,18 +105,24 @@ export default function Header(props: Readonly<Props>) {
         className={`${styles.burgerMenu} ${
           burgerMenuOpen ? styles.burgerMenuOpen : ""
         }`}>
-        <FontAwesomeIcon
-          className={styles.burgerMenuClose}
-          icon="times-circle"
-          onClick={() => {
-            setShowBurgerMenuNextgen(false);
-            setBurgerMenuOpen(false);
-            setShowBurgerMenuAbout(false);
-            setShowBurgerMenuCommunity(false);
-            setShowBurgerMenuTools(false);
-          }}></FontAwesomeIcon>
+        <Container className="pt-2 pb-2">
+          <Row>
+            <Col className="d-flex justify-content-end">
+              <FontAwesomeIcon
+                className={styles.burgerMenuClose}
+                icon="times-circle"
+                onClick={() => {
+                  setBurgerMenuOpen(false);
+                  setShowBurgerMenuCollections(false);
+                  setShowBurgerMenuAbout(false);
+                  setShowBurgerMenuCommunity(false);
+                  setShowBurgerMenuTools(false);
+                }}></FontAwesomeIcon>
+            </Col>
+          </Row>
+        </Container>
         <Container className="text-center">
-          <Row className="pt-5 pb-4">
+          <Row className="pt-3 pb-3">
             <Col>
               <Image
                 loading="eager"
@@ -147,7 +135,7 @@ export default function Header(props: Readonly<Props>) {
               />
             </Col>
           </Row>
-          <Row className="pt-3 pb-3">
+          <Row className="pt-4 pb-3">
             <Col>
               <h3
                 className={`d-flex justify-content-center ${styles.burgerMenuHeader}`}>
@@ -157,29 +145,8 @@ export default function Header(props: Readonly<Props>) {
           </Row>
           <Row className="pt-3 pb-3">
             <Col>
-              <a href="/the-memes?sort=age&sort_dir=ASC">
-                <h3>The Memes</h3>
-              </a>
-            </Col>
-          </Row>
-          <Row className="pt-3 pb-3">
-            <Col>
-              <a href="/6529-gradient?sort=id&sort_dir=ASC">
-                <h3>Gradient</h3>
-              </a>
-            </Col>
-          </Row>
-          <Row className="pt-3 pb-3">
-            <Col>
-              <a href="/meme-lab">
-                <h3>Meme Lab</h3>
-              </a>
-            </Col>
-          </Row>
-          <Row className="pt-3 pb-3">
-            <Col>
-              <a href="/rememes">
-                <h3>ReMemes</h3>
+              <a href="/">
+                <h3>Home</h3>
               </a>
             </Col>
           </Row>
@@ -187,21 +154,29 @@ export default function Header(props: Readonly<Props>) {
             <Col>
               <h3
                 onClick={() => {
-                  setShowBurgerMenuNextgen(!showBurgerMenuNextgen);
+                  setShowBurgerMenuCollections(!showBurgerMenuCollections);
                   setShowBurgerMenuCommunity(false);
                   setShowBurgerMenuAbout(false);
                   setShowBurgerMenuTools(false);
                 }}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    setShowBurgerMenuCollections(!showBurgerMenuCollections);
+                    setShowBurgerMenuCommunity(false);
+                    setShowBurgerMenuAbout(false);
+                    setShowBurgerMenuTools(false);
+                  }
+                }}
                 className={`${styles.burgerMenuHeader}
                   ${
-                    showBurgerMenuNextgen
+                    showBurgerMenuCollections
                       ? styles.burgerMenuCaretClose
                       : styles.burgerMenuCaretOpen
                   }`}>
-                NextGen
+                Collections
               </h3>
             </Col>
-            {showBurgerMenuNextgen && (
+            {showBurgerMenuCollections && (
               <Container>
                 <Row>
                   <Col xs={{ span: 6, offset: 3 }}>
@@ -210,15 +185,36 @@ export default function Header(props: Readonly<Props>) {
                 </Row>
                 <Row className="pt-3">
                   <Col>
-                    <a href="/nextgen">
-                      <h3>Collections</h3>
+                    <a href="/the-memes">
+                      <h3>The Memes</h3>
                     </a>
                   </Col>
                 </Row>
                 <Row className="pt-3">
                   <Col>
-                    <a href="/nextgen/admin">
-                      <h3>Admin</h3>
+                    <a href="/6529-gradient">
+                      <h3>Gradient</h3>
+                    </a>
+                  </Col>
+                </Row>
+                <Row className="pt-3">
+                  <Col>
+                    <a href="/nextgen">
+                      <h3>NextGen</h3>
+                    </a>
+                  </Col>
+                </Row>
+                <Row className="pt-3">
+                  <Col>
+                    <a href="/meme-lab">
+                      <h3>Meme Lab</h3>
+                    </a>
+                  </Col>
+                </Row>
+                <Row className="pt-3">
+                  <Col>
+                    <a href="/rememes">
+                      <h3>ReMemes</h3>
                     </a>
                   </Col>
                 </Row>
@@ -235,14 +231,14 @@ export default function Header(props: Readonly<Props>) {
               <h3
                 onClick={() => {
                   setShowBurgerMenuCommunity(!showBurgerMenuCommunity);
-                  setShowBurgerMenuNextgen(false);
+                  setShowBurgerMenuCollections(false);
                   setShowBurgerMenuAbout(false);
                   setShowBurgerMenuTools(false);
                 }}
                 onKeyDown={(e) => {
                   if (e.key === "Enter" || e.key === " ") {
                     setShowBurgerMenuCommunity(!showBurgerMenuCommunity);
-                    setShowBurgerMenuNextgen(false);
+                    setShowBurgerMenuCollections(false);
                     setShowBurgerMenuAbout(false);
                     setShowBurgerMenuTools(false);
                   }
@@ -323,9 +319,17 @@ export default function Header(props: Readonly<Props>) {
               <h3
                 onClick={() => {
                   setShowBurgerMenuTools(!showBurgerMenuTools);
-                  setShowBurgerMenuNextgen(false);
+                  setShowBurgerMenuCollections(false);
                   setShowBurgerMenuCommunity(false);
                   setShowBurgerMenuAbout(false);
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    setShowBurgerMenuTools(!showBurgerMenuTools);
+                    setShowBurgerMenuCollections(false);
+                    setShowBurgerMenuCommunity(false);
+                    setShowBurgerMenuAbout(false);
+                  }
                 }}
                 className={`${styles.burgerMenuHeader}
                   ${
@@ -396,7 +400,7 @@ export default function Header(props: Readonly<Props>) {
               <h3
                 onClick={() => {
                   setShowBurgerMenuAbout(!showBurgerMenuAbout);
-                  setShowBurgerMenuNextgen(false);
+                  setShowBurgerMenuCollections(false);
                   setShowBurgerMenuCommunity(false);
                   setShowBurgerMenuTools(false);
                 }}
@@ -635,51 +639,49 @@ export default function Header(props: Readonly<Props>) {
                           <Nav className="justify-content-end ml-auto">
                             <Nav.Link
                               className={`${styles.mainNavLink} ${
-                                router.pathname === "/the-memes" ? "active" : ""
+                                router.pathname === "/" ? "active" : ""
                               }`}
-                              href="/the-memes?sort=age&sort_dir=ASC">
-                              The Memes
-                            </Nav.Link>
-                            <Nav.Link
-                              className={`${styles.mainNavLink} ${
-                                router.pathname === "/6529-gradient"
-                                  ? "active"
-                                  : ""
-                              }`}
-                              href="/6529-gradient?sort=id&sort_dir=ASC">
-                              Gradient
-                            </Nav.Link>
-                            <Nav.Link
-                              className={`${styles.mainNavLink} ${
-                                router.pathname === "/meme-lab" ? "active" : ""
-                              }`}
-                              href="/meme-lab">
-                              Meme Lab
-                            </Nav.Link>
-                            <Nav.Link
-                              className={`${styles.mainNavLink} ${
-                                router.pathname === "/rememes" ? "active" : ""
-                              }`}
-                              href="/rememes">
-                              ReMemes
+                              href="/">
+                              Home
                             </Nav.Link>
                             <NavDropdown
-                              title="NextGen"
+                              title="Collections"
                               align={"start"}
                               className={`${styles.mainNavLink} ${styles.mainNavLinkPadding}`}>
                               <NavDropdown.Item
                                 className={styles.dropdownItem}
                                 onClick={() =>
-                                  (window.location.href = "/nextgen")
+                                  (window.location.href = "/the-memes")
                                 }>
-                                Collections
+                                The Memes
                               </NavDropdown.Item>
                               <NavDropdown.Item
                                 className={styles.dropdownItem}
                                 onClick={() =>
-                                  (window.location.href = "/nextgen/admin")
+                                  (window.location.href = "/6529-gradient")
                                 }>
-                                Admin
+                                Gradient
+                              </NavDropdown.Item>
+                              <NavDropdown.Item
+                                className={styles.dropdownItem}
+                                onClick={() =>
+                                  (window.location.href = "/nextgen")
+                                }>
+                                NextGen
+                              </NavDropdown.Item>
+                              <NavDropdown.Item
+                                className={styles.dropdownItem}
+                                onClick={() =>
+                                  (window.location.href = "/meme-lab")
+                                }>
+                                Meme Lab
+                              </NavDropdown.Item>
+                              <NavDropdown.Item
+                                className={styles.dropdownItem}
+                                onClick={() =>
+                                  (window.location.href = "/rememes")
+                                }>
+                                ReMemes
                               </NavDropdown.Item>
                             </NavDropdown>
                             <NavDropdown

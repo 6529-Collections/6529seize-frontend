@@ -4,47 +4,99 @@ import {
   CicStatement,
   IProfileAndConsolidations,
   ProfileActivityLog,
-  ProfilesMatterRatingWithRaterLevel,
+  RateMatter,
+  RatingWithProfileInfoAndLevel,
 } from "../../entities/IProfile";
 import { ConsolidatedTDHMetrics } from "../../entities/ITDH";
 import UserPageLayout from "../../components/user/layout/UserPageLayout";
 import {
   getCommonHeaders,
   getCommonUserServerSideProps,
+  getInitialRatersParams,
+  getProfileRatingsByRater,
   getUserProfileActivityLogs,
-  getUserProfileCICRatings,
   getUserProfileIdentityStatements,
   userPageNeedsRedirect,
 } from "../../helpers/server.helpers";
 import UserPageIdentity from "../../components/user/identity/UserPageIdentity";
-import UserPageIdentityNoProfile from "../../components/user/identity/UserPageIdentityNoProfile";
+import UserPageNoProfile from "../../components/user/utils/UserPageNoProfile";
 import { Page as PageType } from "../../helpers/Types";
 import { ReactQueryWrapperContext } from "../../components/react-query-wrapper/ReactQueryWrapper";
+import {
+  ActivityLogParams,
+  convertActivityLogParams,
+} from "../../components/profile-activity/ProfileActivityLogs";
+import { FilterTargetType } from "../../components/utils/CommonFilterTargetSelect";
 
 export interface UserPageIdentityProps {
-  profile: IProfileAndConsolidations;
-  title: string;
-  consolidatedTDH: ConsolidatedTDHMetrics | null;
-  profileActivityLogs: PageType<ProfileActivityLog>;
-  profileCICRatings: PageType<ProfilesMatterRatingWithRaterLevel>;
-  profileIdentityStatements: CicStatement[];
+  readonly profile: IProfileAndConsolidations;
+  readonly handleOrWallet: string;
+  readonly title: string;
+  readonly consolidatedTDH: ConsolidatedTDHMetrics | null;
+  readonly profileActivityLogs: PageType<ProfileActivityLog>;
+  readonly cicGivenToUser: PageType<RatingWithProfileInfoAndLevel>;
+  readonly cicReceivedFromUser: PageType<RatingWithProfileInfoAndLevel>;
+  readonly profileIdentityStatements: CicStatement[];
 }
+
+const MATTER_TYPE = RateMatter.CIC;
+
+const getInitialActivityLogParams = (
+  handleOrWallet: string
+): ActivityLogParams => ({
+  page: 1,
+  pageSize: 10,
+  logTypes: [],
+  matter: null,
+  targetType: FilterTargetType.ALL,
+  handleOrWallet,
+});
 
 const Page: NextPageWithLayout<{ pageProps: UserPageIdentityProps }> = ({
   pageProps,
 }) => {
-  const { setProfile } = useContext(ReactQueryWrapperContext);
-  setProfile(pageProps.profile);
+  const initialCICGivenParams = getInitialRatersParams({
+    handleOrWallet: pageProps.handleOrWallet,
+    matter: MATTER_TYPE,
+    given: false,
+  });
+
+  const initialCICReceivedParams = getInitialRatersParams({
+    handleOrWallet: pageProps.handleOrWallet,
+    matter: MATTER_TYPE,
+    given: true,
+  });
+
+  const initialActivityLogParams = getInitialActivityLogParams(
+    pageProps.handleOrWallet
+  );
+  const { initProfileIdentityPage } = useContext(ReactQueryWrapperContext);
+  initProfileIdentityPage({
+    profile: pageProps.profile,
+    activityLogs: {
+      data: pageProps.profileActivityLogs,
+      params: initialActivityLogParams,
+    },
+    cicGivenToUsers: {
+      data: pageProps.cicGivenToUser,
+      params: initialCICGivenParams,
+    },
+    cicReceivedFromUsers: {
+      data: pageProps.cicReceivedFromUser,
+      params: initialCICReceivedParams,
+    },
+  });
 
   if (!pageProps.profile.profile) {
-    return <UserPageIdentityNoProfile profile={pageProps.profile} />;
+    return <UserPageNoProfile profile={pageProps.profile} />;
   }
 
   return (
     <UserPageIdentity
       profile={pageProps.profile}
-      profileActivityLogs={pageProps.profileActivityLogs}
-      profileCICRatings={pageProps.profileCICRatings}
+      initialCICReceivedParams={initialCICReceivedParams}
+      initialCICGivenParams={initialCICGivenParams}
+      initialActivityLogParams={initialActivityLogParams}
       profileIdentityStatements={pageProps.profileIdentityStatements}
     />
   );
@@ -67,24 +119,40 @@ export async function getServerSideProps(
 }> {
   try {
     const headers = getCommonHeaders(req);
+    const handleOrWallet = req.query.user.toLowerCase() as string;
 
     const [
       { profile, title, consolidatedTDH },
       profileActivityLogs,
-      profileCICRatings,
+      cicGivenToUser,
+      cicReceivedFromUser,
       profileIdentityStatements,
     ] = await Promise.all([
-      getCommonUserServerSideProps({ user: req.query.user, headers }),
+      getCommonUserServerSideProps({ user: handleOrWallet, headers }),
       getUserProfileActivityLogs({
-        user: req.query.user,
+        headers,
+        params: convertActivityLogParams(
+          getInitialActivityLogParams(handleOrWallet)
+        ),
+      }),
+      getProfileRatingsByRater({
+        params: getInitialRatersParams({
+          handleOrWallet,
+          matter: MATTER_TYPE,
+          given: false,
+        }),
         headers,
       }),
-      getUserProfileCICRatings({
-        user: req.query.user,
+      getProfileRatingsByRater({
+        params: getInitialRatersParams({
+          handleOrWallet,
+          matter: MATTER_TYPE,
+          given: true,
+        }),
         headers,
       }),
       getUserProfileIdentityStatements({
-        user: req.query.user,
+        user: handleOrWallet,
         headers,
       }),
     ]);
@@ -102,10 +170,12 @@ export async function getServerSideProps(
     return {
       props: {
         profile,
+        handleOrWallet,
         title,
         consolidatedTDH,
         profileActivityLogs,
-        profileCICRatings,
+        cicGivenToUser,
+        cicReceivedFromUser,
         profileIdentityStatements,
       },
     };

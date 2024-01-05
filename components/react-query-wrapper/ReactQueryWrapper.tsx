@@ -1,14 +1,30 @@
 import { createContext } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { IProfileAndConsolidations } from "../../entities/IProfile";
+import {
+  ApiProfileRepRatesState,
+  IProfileAndConsolidations,
+  ProfileActivityLog,
+  ProfileActivityLogRatingEdit,
+  RateMatter,
+  RatingWithProfileInfoAndLevel,
+} from "../../entities/IProfile";
+import { UserPageRepPropsRepRates } from "../../pages/[user]/rep";
+import { Page } from "../../helpers/Types";
+import {
+  ActivityLogParams,
+  convertActivityLogParams,
+} from "../profile-activity/ProfileActivityLogs";
+import { ProfileRatersParams } from "../user/utils/raters-table/wrapper/ProfileRatersTableWrapper";
 
 export enum QueryKey {
   PROFILE = "PROFILE",
   PROFILE_LOGS = "PROFILE_LOGS",
   PROFILE_RATER_CIC_STATE = "PROFILE_RATER_CIC_STATE",
-  CIC_RATINGS = "CIC_RATINGS",
+  PROFILE_RATERS = "PROFILE_RATERS",
   PROFILE_CIC_STATEMENTS = "PROFILE_CIC_STATEMENTS",
   PROFILE_SEARCH = "PROFILE_SEARCH",
+  PROFILE_REP_RATINGS = "PROFILE_REP_RATINGS",
+  REP_CATEGORIES_SEARCH = "REP_CATEGORIES_SEARCH",
 }
 
 type QueryType<T, U, V, W> = [T, U, V, W];
@@ -19,24 +35,76 @@ export type ProfileQuery = QueryType<
   [QueryKey.PROFILE, string]
 >;
 
+export interface InitProfileActivityLogsParamsAndData {
+  readonly data: Page<ProfileActivityLogRatingEdit>;
+  readonly page: number;
+  readonly pageSize: number;
+  readonly logType: string;
+  readonly matter: RateMatter | null;
+  readonly includeIncoming: boolean;
+}
+
+export interface InitProfileRatersParamsAndData {
+  readonly data: Page<RatingWithProfileInfoAndLevel>;
+  readonly params: ProfileRatersParams;
+}
+
+export interface InitProfileActivityLogsParams {
+  readonly params: ActivityLogParams;
+  readonly data: Page<ProfileActivityLog>;
+}
+
+export interface InitProfileRepPageParams {
+  readonly profile: IProfileAndConsolidations;
+  readonly repRates: UserPageRepPropsRepRates;
+  readonly repLogs: InitProfileActivityLogsParams;
+  readonly repGivenToUsers: InitProfileRatersParamsAndData;
+  readonly repReceivedFromUsers: InitProfileRatersParamsAndData;
+  readonly handleOrWallet: string;
+}
+
+export interface InitProfileIdentityPageParams {
+  readonly profile: IProfileAndConsolidations;
+  readonly activityLogs: InitProfileActivityLogsParams;
+  readonly cicGivenToUsers: InitProfileRatersParamsAndData;
+  readonly cicReceivedFromUsers: InitProfileRatersParamsAndData;
+}
+
 type ReactQueryWrapperContextType = {
   setProfile: (profile: IProfileAndConsolidations) => void;
   invalidateProfile: (profile: IProfileAndConsolidations) => void;
   invalidateHandles: (handles: string[]) => void;
-  invalidateProfileLogs: (params: {
-    profile: IProfileAndConsolidations;
-    keys: Record<string, any>;
-  }) => void;
-  invalidateProfileLogsByHandles: (params: {
-    handles: string[];
-    keys: Record<string, any>;
-  }) => void;
+  invalidateLogs: () => void;
   invalidateProfileRaterCICState: (params: {
     profile: IProfileAndConsolidations;
     rater: string;
   }) => void;
-  invalidateProfileCICRatings: (profile: IProfileAndConsolidations) => void;
   invalidateProfileCICStatements: (profile: IProfileAndConsolidations) => void;
+  onProfileCICModify: (params: {
+    readonly targetProfile: IProfileAndConsolidations;
+    readonly connectedProfile: IProfileAndConsolidations | null;
+    readonly rater: string | null;
+  }) => void;
+  onProfileRepModify: ({
+    targetProfile,
+    connectedProfile,
+  }: {
+    targetProfile: IProfileAndConsolidations;
+    connectedProfile: IProfileAndConsolidations | null;
+  }) => void;
+
+  initProfileRepPage: (params: InitProfileRepPageParams) => void;
+  initProfileIdentityPage: (params: InitProfileIdentityPageParams) => void;
+  initLandingPage: ({
+    activityLogs,
+  }: {
+    activityLogs: InitProfileActivityLogsParams;
+  }) => void;
+  initCommunityActivityPage: ({
+    activityLogs,
+  }: {
+    activityLogs: InitProfileActivityLogsParams;
+  }) => void;
 };
 
 export const ReactQueryWrapperContext =
@@ -44,11 +112,15 @@ export const ReactQueryWrapperContext =
     setProfile: () => {},
     invalidateProfile: () => {},
     invalidateHandles: () => {},
-    invalidateProfileLogs: () => {},
-    invalidateProfileLogsByHandles: () => {},
+    invalidateLogs: () => {},
     invalidateProfileRaterCICState: () => {},
-    invalidateProfileCICRatings: () => {},
     invalidateProfileCICStatements: () => {},
+    onProfileCICModify: () => {},
+    onProfileRepModify: () => {},
+    initProfileRepPage: () => {},
+    initProfileIdentityPage: () => {},
+    initLandingPage: () => {},
+    initCommunityActivityPage: () => {},
   });
 
 export default function ReactQueryWrapper({
@@ -70,6 +142,7 @@ export default function ReactQueryWrapper({
       if (wallet.wallet.ens) {
         handles.push(wallet.wallet.ens.toLowerCase());
       }
+      handles.push(wallet.wallet.address.toLowerCase());
     });
 
     return handles;
@@ -98,36 +171,9 @@ export default function ReactQueryWrapper({
     invalidateQueries({ key: QueryKey.PROFILE, values: handles });
   };
 
-  const invalidateProfileLogs = ({
-    profile,
-    keys,
-  }: {
-    profile: IProfileAndConsolidations;
-    keys: Record<string, any>;
-  }) => {
-    const handles = getHandlesFromProfile(profile);
-    invalidateQueries({
-      key: QueryKey.PROFILE_LOGS,
-      values: handles.map((h) => ({
-        profile: h,
-        ...keys,
-      })),
-    });
-  };
-
-  const invalidateProfileLogsByHandles = ({
-    handles,
-    keys,
-  }: {
-    handles: string[];
-    keys: Record<string, any>;
-  }) => {
-    invalidateQueries({
-      key: QueryKey.PROFILE_LOGS,
-      values: handles.map((h) => ({
-        profile: h,
-        ...keys,
-      })),
+  const invalidateLogs = () => {
+    queryClient.invalidateQueries({
+      queryKey: [QueryKey.PROFILE_LOGS],
     });
   };
 
@@ -158,16 +204,6 @@ export default function ReactQueryWrapper({
     });
   };
 
-  const invalidateProfileCICRatings = (profile: IProfileAndConsolidations) => {
-    const handles = getHandlesFromProfile(profile);
-    invalidateQueries({
-      key: QueryKey.CIC_RATINGS,
-      values: handles.map((h) => ({
-        profile: h,
-      })),
-    });
-  };
-
   const invalidateProfileCICStatements = (
     profile: IProfileAndConsolidations
   ) => {
@@ -178,17 +214,232 @@ export default function ReactQueryWrapper({
     });
   };
 
+  const setRepRates = ({
+    data,
+    handleOrWallet,
+  }: {
+    data: UserPageRepPropsRepRates;
+    handleOrWallet: string;
+  }) => {
+    const { ratings, rater } = data;
+    const initialEmptyRepRates: ApiProfileRepRatesState = {
+      total_rep_rating: ratings.total_rep_rating,
+      number_of_raters: ratings.number_of_raters,
+      total_rep_rating_by_rater: null,
+      rep_rates_left_for_rater: null,
+      rating_stats: ratings.rating_stats.map((rating) => ({
+        category: rating.category,
+        rating: rating.rating,
+        contributor_count: rating.contributor_count,
+        rater_contribution: 0,
+      })),
+    };
+    queryClient.setQueryData(
+      [
+        QueryKey.PROFILE_REP_RATINGS,
+        {
+          handleOrWallet,
+          rater: undefined,
+        },
+      ],
+      initialEmptyRepRates
+    );
+    if (rater) {
+      queryClient.setQueryData(
+        [
+          QueryKey.PROFILE_REP_RATINGS,
+          {
+            handleOrWallet: handleOrWallet,
+            rater: rater.toLowerCase(),
+          },
+        ],
+        ratings
+      );
+    }
+  };
+
+  const setProfileRaters = ({
+    data,
+    params,
+  }: InitProfileRatersParamsAndData) => {
+    const { page, pageSize, given, order, orderBy, handleOrWallet, matter } =
+      params;
+
+    queryClient.setQueryData(
+      [
+        QueryKey.PROFILE_RATERS,
+        {
+          handleOrWallet,
+          matter,
+          page: `${page}`,
+          pageSize: `${pageSize}`,
+          order,
+          orderBy,
+          given,
+        },
+      ],
+      data
+    );
+  };
+
+  const invalidateProfileRepRatings = (profile: IProfileAndConsolidations) => {
+    const handles = getHandlesFromProfile(profile);
+    invalidateQueries({
+      key: QueryKey.PROFILE_REP_RATINGS,
+      values: handles.map((h) => ({
+        handleOrWallet: h,
+      })),
+    });
+  };
+
+  const invalidateProfileRaters = ({
+    profile,
+    matter,
+    given,
+  }: {
+    profile: IProfileAndConsolidations;
+    matter: RateMatter;
+    given: boolean;
+  }) => {
+    const handles = getHandlesFromProfile(profile);
+    invalidateQueries({
+      key: QueryKey.PROFILE_RATERS,
+      values: handles.map((h) => ({
+        handleOrWallet: h,
+        matter,
+        given,
+      })),
+    });
+  };
+
+  const onProfileCICModify = ({
+    targetProfile,
+    connectedProfile,
+    rater,
+  }: {
+    readonly targetProfile: IProfileAndConsolidations;
+    readonly connectedProfile: IProfileAndConsolidations | null;
+    readonly rater: string | null;
+  }) => {
+    invalidateProfile(targetProfile);
+    invalidateLogs();
+    invalidateProfileRaters({
+      profile: targetProfile,
+      matter: RateMatter.CIC,
+      given: false,
+    });
+
+    if (connectedProfile) {
+      invalidateProfileRaters({
+        profile: connectedProfile,
+        matter: RateMatter.CIC,
+        given: true,
+      });
+    }
+    if (rater) {
+      invalidateProfileRaterCICState({
+        profile: targetProfile,
+        rater: rater.toLowerCase(),
+      });
+    }
+  };
+
+  const onProfileRepModify = ({
+    targetProfile,
+    connectedProfile,
+  }: {
+    targetProfile: IProfileAndConsolidations;
+    connectedProfile: IProfileAndConsolidations | null;
+  }) => {
+    invalidateProfile(targetProfile);
+    invalidateProfileRepRatings(targetProfile);
+    invalidateLogs();
+    invalidateProfileRaters({
+      profile: targetProfile,
+      matter: RateMatter.REP,
+      given: false,
+    });
+
+    if (connectedProfile) {
+      invalidateProfileRaters({
+        profile: connectedProfile,
+        matter: RateMatter.REP,
+        given: true,
+      });
+    }
+  };
+
+  const initProfileActivityLogs = ({
+    params,
+    data,
+  }: {
+    readonly params: ActivityLogParams;
+    readonly data: Page<ProfileActivityLog>;
+  }) => {
+    queryClient.setQueryData(
+      [QueryKey.PROFILE_LOGS, convertActivityLogParams(params)],
+      data
+    );
+  };
+
+  const initProfileRepPage = ({
+    profile,
+    repRates,
+    repLogs,
+    repGivenToUsers,
+    repReceivedFromUsers,
+    handleOrWallet,
+  }: InitProfileRepPageParams) => {
+    setProfile(profile);
+    setRepRates({ data: repRates, handleOrWallet });
+    initProfileActivityLogs(repLogs);
+    setProfileRaters(repGivenToUsers);
+    setProfileRaters(repReceivedFromUsers);
+  };
+
+  const initProfileIdentityPage = ({
+    profile,
+    activityLogs,
+    cicGivenToUsers,
+    cicReceivedFromUsers,
+  }: InitProfileIdentityPageParams) => {
+    setProfile(profile);
+    initProfileActivityLogs(activityLogs);
+    setProfileRaters(cicGivenToUsers);
+    setProfileRaters(cicReceivedFromUsers);
+  };
+
+  const initLandingPage = ({
+    activityLogs,
+  }: {
+    activityLogs: InitProfileActivityLogsParams;
+  }) => {
+    initProfileActivityLogs(activityLogs);
+  };
+
+  const initCommunityActivityPage = ({
+    activityLogs,
+  }: {
+    activityLogs: InitProfileActivityLogsParams;
+  }) => {
+    initProfileActivityLogs(activityLogs);
+  };
+
   return (
     <ReactQueryWrapperContext.Provider
       value={{
         invalidateProfile,
         invalidateHandles,
-        invalidateProfileLogs,
-        invalidateProfileLogsByHandles,
+        invalidateLogs,
         setProfile,
         invalidateProfileRaterCICState,
-        invalidateProfileCICRatings,
         invalidateProfileCICStatements,
+        initProfileRepPage,
+        onProfileCICModify,
+        onProfileRepModify,
+        initProfileIdentityPage,
+        initLandingPage,
+        initCommunityActivityPage,
       }}
     >
       {children}

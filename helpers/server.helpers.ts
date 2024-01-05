@@ -1,16 +1,25 @@
 import { NFT, NFTLite } from "../entities/INFT";
 import { OwnerLite } from "../entities/IOwner";
 import {
+  ApiProfileRepRatesState,
   CicStatement,
   IProfileAndConsolidations,
   ProfileActivityLog,
-  ProfilesMatterRatingWithRaterLevel,
+  RateMatter,
+  RatingWithProfileInfoAndLevel,
 } from "../entities/IProfile";
 import { Season } from "../entities/ISeason";
 import { ConsolidatedTDHMetrics } from "../entities/ITDH";
 import { areEqualAddresses, containsEmojis, formatAddress } from "./Helpers";
 import { Page } from "./Types";
 import { commonApiFetch } from "../services/api/common-api";
+import jwtDecode from "jwt-decode";
+import { ActivityLogParamsConverted } from "../components/profile-activity/ProfileActivityLogs";
+import {
+  ProfileRatersParams,
+  ProfileRatersParamsOrderBy,
+} from "../components/user/utils/raters-table/wrapper/ProfileRatersTableWrapper";
+import { SortDirection } from "../entities/ISort";
 
 export interface CommonUserServerSideProps {
   profile: IProfileAndConsolidations;
@@ -101,48 +110,17 @@ export const userPageNeedsRedirect = ({
   return null;
 };
 
-export const getUserProfileActivityLogs = async ({
-  user,
+export const getUserProfileActivityLogs = async <T = ProfileActivityLog>({
   headers,
+  params,
 }: {
-  user: string;
   headers: Record<string, string>;
-}): Promise<Page<ProfileActivityLog>> => {
+  params: ActivityLogParamsConverted;
+}): Promise<Page<T>> => {
   try {
-    return await commonApiFetch<Page<ProfileActivityLog>>({
+    return await commonApiFetch<Page<T>, ActivityLogParamsConverted>({
       endpoint: `profile-logs`,
-      params: {
-        profile: user,
-        page: `1`,
-        page_size: `10`,
-        log_type: "",
-      },
-      headers,
-    });
-  } catch {
-    return {
-      count: 0,
-      page: 1,
-      next: false,
-      data: [],
-    };
-  }
-};
-
-export const getUserProfileCICRatings = async ({
-  user,
-  headers,
-}: {
-  user: string;
-  headers: Record<string, string>;
-}): Promise<Page<ProfilesMatterRatingWithRaterLevel>> => {
-  try {
-    return await commonApiFetch<Page<ProfilesMatterRatingWithRaterLevel>>({
-      endpoint: `profiles/${user}/cic/ratings`,
-      params: {
-        page: `1`,
-        page_size: `10`,
-      },
+      params,
       headers,
     });
   } catch {
@@ -254,22 +232,103 @@ export const getOwned = async ({
   }, []);
 };
 
-export const getProfileLogs = async ({
+export const getProfileRatings = async ({
+  user,
   headers,
-  pageSize,
+  signedWallet,
 }: {
+  user: string;
   headers: Record<string, string>;
-  pageSize: number;
-}): Promise<Page<ProfileActivityLog>> => {
-  return await commonApiFetch<Page<ProfileActivityLog>>({
-    endpoint: `profile-logs`,
-    params: {
-      page: "1",
-      page_size: `${pageSize}`,
-      log_type: "",
-    },
-    headers,
-  });
+  signedWallet: string | null;
+}): Promise<{
+  readonly ratings: ApiProfileRepRatesState;
+  readonly rater: string | null;
+}> => {
+  const raterProfile = signedWallet
+    ? await commonApiFetch<IProfileAndConsolidations>({
+        endpoint: `profiles/${signedWallet}`,
+        headers: headers,
+      })
+    : null;
+
+  const rater = raterProfile?.profile?.handle.toLowerCase() ?? null;
+
+  const params: Record<string, string> = {};
+  if (rater) {
+    params.rater = rater;
+  }
+
+  try {
+    return {
+      ratings: await commonApiFetch<ApiProfileRepRatesState>({
+        endpoint: `profiles/${user}/rep/ratings/received`,
+        params,
+        headers,
+      }),
+      rater,
+    };
+  } catch {
+    return {
+      ratings: {
+        total_rep_rating: 0,
+        total_rep_rating_by_rater: null,
+        rep_rates_left_for_rater: null,
+        number_of_raters: 0,
+        rating_stats: [],
+      },
+      rater,
+    };
+  }
+};
+
+export const getInitialRatersParams = ({
+  handleOrWallet,
+  given,
+  matter,
+}: {
+  handleOrWallet: string;
+  given: boolean;
+  matter: RateMatter;
+}): ProfileRatersParams => ({
+  page: 1,
+  pageSize: 7,
+  given,
+  matter,
+  order: SortDirection.DESC,
+  orderBy: ProfileRatersParamsOrderBy.RATING,
+  handleOrWallet,
+});
+
+export const getProfileRatingsByRater = async ({
+  params,
+  headers,
+}: {
+  readonly params: ProfileRatersParams;
+  readonly headers: Record<string, string>;
+}): Promise<Page<RatingWithProfileInfoAndLevel>> => {
+  const { page, pageSize, given, matter, order, orderBy, handleOrWallet } =
+    params;
+
+  try {
+    return await commonApiFetch<Page<RatingWithProfileInfoAndLevel>>({
+      endpoint: `profiles/${handleOrWallet}/${matter.toLowerCase()}/ratings/by-rater`,
+      params: {
+        page: `${page}`,
+        page_size: `${pageSize}`,
+        order: order.toLowerCase(),
+        order_by: orderBy.toLowerCase(),
+        given: given ? "true" : "false",
+      },
+      headers,
+    });
+  } catch {
+    return {
+      count: 0,
+      page: 1,
+      next: false,
+      data: [],
+    };
+  }
 };
 
 export const getCommonHeaders = (req: any): Record<string, string> => {
@@ -281,4 +340,19 @@ export const getCommonHeaders = (req: any): Record<string, string> => {
       ? { Authorization: `Bearer ${walletAuthCookie}` }
       : {}),
   };
+};
+
+export const getSignedWalletOrNull = (req: any): string | null => {
+  const walletAuthCookie = req?.req?.cookies["wallet-auth"] ?? null;
+  if (!walletAuthCookie) {
+    return null;
+  }
+  const decodedJwt = jwtDecode<{
+    id: string;
+    sub: string;
+    iat: number;
+    exp: number;
+  }>(walletAuthCookie);
+
+  return decodedJwt?.sub?.toLowerCase() ?? null;
 };

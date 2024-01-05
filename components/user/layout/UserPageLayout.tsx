@@ -1,5 +1,5 @@
 import Head from "next/head";
-import { ReactNode, useEffect, useState } from "react";
+import { ReactNode, useContext, useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 import HeaderPlaceholder from "../../header/HeaderPlaceholder";
 import { numberWithCommas } from "../../../helpers/Helpers";
@@ -9,9 +9,12 @@ import { IProfileAndConsolidations } from "../../../entities/IProfile";
 import { ConsolidatedTDHMetrics } from "../../../entities/ITDH";
 import UserPageTabs from "./UserPageTabs";
 import { Inter } from "next/font/google";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { commonApiFetch } from "../../../services/api/common-api";
-import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
+import {
+  QueryKey,
+  ReactQueryWrapperContext,
+} from "../../react-query-wrapper/ReactQueryWrapper";
 
 const Header = dynamic(() => import("../../header/Header"), {
   ssr: false,
@@ -41,8 +44,21 @@ export default function UserPageLayout({
   readonly props: UserPageLayoutProps;
   readonly children: ReactNode;
 }) {
+  const queryClient = useQueryClient();
   const router = useRouter();
+  const { setProfile } = useContext(ReactQueryWrapperContext);
+
   const [user, setUser] = useState<string>(router.query.user as string);
+
+  const profileInit = queryClient.getQueryData<IProfileAndConsolidations>([
+    QueryKey.PROFILE,
+    user.toLowerCase(),
+  ]);
+
+  if (!profileInit) {
+    setProfile(props.profile);
+  }
+
   useEffect(() => {
     setUser(router.query.user as string);
   }, [router.query.user]);
@@ -77,7 +93,7 @@ export default function UserPageLayout({
 
   useEffect(() => {
     const handleStart = (toPath: string) => {
-      const toUser = toPath.split("/")[1];
+      const toUser = toPath.split("/")[1].toLowerCase();
       setIsLoadingTabData(
         toUser.toLowerCase() === (router.query.user as string).toLowerCase()
       );
@@ -132,7 +148,7 @@ export default function UserPageLayout({
           />
           <div className="tw-px-6 min-[1100px]:tw-max-w-[960px] min-[1200px]:tw-max-w-[1150px] min-[1300px]:tw-max-w-[1250px] min-[1400px]:tw-max-w-[1350px] min-[1500px]:tw-max-w-[1450px] min-[1600px]:tw-max-w-[1550px] min-[1800px]:tw-max-w-[1750px] min-[2000px]:tw-max-w-[1950px] tw-mx-auto">
             <UserPageTabs />
-            <div>{isLoadingTabData ? <div>Loading...</div> : children}</div>
+            <div className="tw-mt-6">{isLoadingTabData ? <div className="tw-text-base tw-font-normal tw-text-iron-200">Loading...</div> : children}</div>
           </div>
         </div>
       </main>

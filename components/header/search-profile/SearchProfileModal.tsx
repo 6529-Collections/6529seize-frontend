@@ -15,6 +15,8 @@ enum STATE {
   SUCCESS = "SUCCESS",
 }
 
+const MIN_SEARCH_LENGTH = 3;
+
 export default function SearchProfileModal({
   onClose,
 }: {
@@ -58,7 +60,7 @@ export default function SearchProfileModal({
           param: debouncedValue,
         },
       }),
-    enabled: debouncedValue.length > 2,
+    enabled: debouncedValue.length >= MIN_SEARCH_LENGTH,
   });
 
   const onHover = (index: number, state: boolean) => {
@@ -169,18 +171,20 @@ export default function SearchProfileModal({
             )}
             {state === STATE.LOADING && (
               <div className="tw-h-72 tw-flex tw-items-center tw-justify-center">
-                <p className="tw-text-iron-200 tw-font-normal">Loading...</p>
+                <p className="tw-text-iron-200 tw-font-normal tw-text-sm">
+                  Loading...
+                </p>
               </div>
             )}
             {state === STATE.NO_RESULTS && (
               <div className="tw-h-72 tw-flex tw-items-center tw-justify-center">
-                <p className="tw-text-iron-200">No results found</p>
+                <p className="tw-text-iron-200 tw-text-sm">No results found</p>
               </div>
             )}
             {state === STATE.INITIAL && (
               <div className="tw-h-72 tw-flex tw-items-center tw-justify-center">
-                <p className="tw-text-iron-200 tw-font-normal">
-                  {!searchValue.length
+                <p className="tw-text-iron-200 tw-font-normal tw-text-sm">
+                  {searchValue.length >= MIN_SEARCH_LENGTH
                     ? "No results found"
                     : "Type at least 3 characters"}
                 </p>

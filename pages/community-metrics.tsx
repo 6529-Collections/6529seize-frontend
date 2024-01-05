@@ -12,27 +12,16 @@ const Header = dynamic(() => import("../components/header/Header"), {
   loading: () => <HeaderPlaceholder />,
 });
 
-export default function CommunityMetrics() {
-  const [breadcrumbs, setBreadcrumbs] = useState<Crumb[]>([
+interface Props {
+  html: string;
+}
+
+export default function CommunityMetrics(props: Readonly<any>) {
+  const pageProps: Props = props.pageProps;
+  const breadcrumbs = [
     { display: "Home", href: "/" },
     { display: "Community Metrics" },
-  ]);
-  const [html, setHtml] = useState("");
-  const [error, setError] = useState(false);
-
-  useEffect(() => {
-    const url = `https://6529bucket.s3.eu-west-1.amazonaws.com/seize_html/community-metrics.html`;
-    fetch(url).then((response) => {
-      if (response.status === 200) {
-        response.text().then((htmlText) => {
-          setHtml(htmlText);
-          setError(false);
-        });
-      } else {
-        setError(true);
-      }
-    });
-  }, []);
+  ];
 
   return (
     <>
@@ -65,24 +54,11 @@ export default function CommunityMetrics() {
                   </Col>
                 </Row>
                 <Row className="pt-3 pb-3">
-                  {error ? (
-                    <div className="d-flex flex-column gap-3 justify-content-center align-items-center">
-                      <Image
-                        width="0"
-                        height="0"
-                        style={{ height: "auto", width: "100px" }}
-                        src="/SummerGlasses.svg"
-                        alt="SummerGlasses"
-                      />
-                      <h2>Loading HTML Failed</h2>
-                    </div>
-                  ) : (
-                    <Col
-                      className={styles.htmlContainer}
-                      dangerouslySetInnerHTML={{
-                        __html: html,
-                      }}></Col>
-                  )}
+                  <Col
+                    className={styles.htmlContainer}
+                    dangerouslySetInnerHTML={{
+                      __html: pageProps.html,
+                    }}></Col>
                 </Row>
               </Container>
             </Col>
@@ -91,4 +67,16 @@ export default function CommunityMetrics() {
       </main>
     </>
   );
+}
+
+export async function getServerSideProps(req: any, res: any, resolvedUrl: any) {
+  const request = await fetch(
+    `https://6529bucket.s3.eu-west-1.amazonaws.com/seize_html/community-metrics.html`
+  );
+  const text = request.status === 200 ? await request.text() : "";
+  return {
+    props: {
+      html: text,
+    },
+  };
 }

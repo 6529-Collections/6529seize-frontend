@@ -43,11 +43,12 @@ export default function ProfileActivityLogsFilter({
   }, [selected]);
 
   return (
-    <div ref={listRef} className={`${ user ? "tw-px-6 md:tw-px-8" : ""} tw-mt-4 tw-max-w-sm`}>
+    <div ref={listRef} className={`${ user ? "tw-px-4 sm:tw-px-6" : ""} tw-mt-6 tw-max-w-sm`}>
       <div className="tw-relative">
         <button
           type="button"
-          className="tw-relative tw-flex tw-items-center tw-w-full tw-rounded-lg tw-border-0 tw-py-2.5 tw-px-3.5 tw-bg-iron-800 tw-text-iron-50 tw-font-light tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-white/5 placeholder:tw-text-iron-500 focus:tw-outline-none focus:tw-bg-transparent focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 hover:tw-ring-iron-600 tw-text-base sm:tw-leading-6 tw-transition tw-duration-300 tw-ease-out"
+          className="tw-relative tw-flex tw-items-center tw-w-full tw-rounded-lg tw-border-0 tw-py-2.5 tw-px-3.5 tw-bg-iron-800 
+          tw-text-iron-50 tw-font-light tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-700 placeholder:tw-text-iron-500 focus:tw-outline-none focus:tw-bg-transparent focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 hover:tw-ring-iron-600 tw-text-base sm:tw-leading-6 tw-transition tw-duration-300 tw-ease-out"
           onClick={(e) => {
             e.stopPropagation();
             toggleOpen();

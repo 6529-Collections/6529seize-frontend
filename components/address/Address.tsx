@@ -20,6 +20,7 @@ interface Props {
     memesCardsSetS3: number;
     memesCardsSetS4: number;
     memesCardsSetS5: number;
+    memesCardsSetS6: number;
     memesBalance: number;
     genesis: number;
     gradientsBalance: number;
@@ -47,6 +48,8 @@ export const SZN_3_ICON = "";
 export const SZN_4_ICON = "";
 
 export const SZN_5_ICON = "";
+
+export const SZN_6_ICON = "";
 
 export const GRADIENT_ICON = "";
 
@@ -80,6 +83,13 @@ export default function Address(props: Readonly<Props>) {
     };
   };
 
+  function getProfileLink() {
+    if (props.display) {
+      return `/${props.display}`;
+    }
+    return `/${props.wallets[0]}`;
+  }
+
   return (
     <>
       {props.wallets.length === 1 ? (
@@ -97,11 +107,6 @@ export default function Address(props: Readonly<Props>) {
           className={`${styles.consolidationDropdown}`}
           autoClose="outside">
           <Dropdown.Toggle
-            onClick={() => {
-              if (!props.isUserPage) {
-                setConsolidationExpanded(!consolidationExpanded);
-              }
-            }}
             name={`consolidation-toggle`}
             aria-label={`consolidation-toggle`}>
             <Image
@@ -111,15 +116,30 @@ export default function Address(props: Readonly<Props>) {
               alt="consolidation"
               width={25}
               height={25}
+              style={{
+                transition: "transform 0.2s ease",
+                transform: consolidationExpanded
+                  ? "rotate(90deg)"
+                  : "rotate(0deg)",
+              }}
+              onClick={() => {
+                if (!props.isUserPage) {
+                  setConsolidationExpanded(!consolidationExpanded);
+                }
+              }}
             />
             &nbsp;&nbsp;
-            <span
-              className={`${styles.consolidationDisplay} ${
-                props.isUserPage ? styles.consolidationDisplayUserPage : ""
-              }`}
-              dangerouslySetInnerHTML={{
-                __html: props.display ? parseEmojis(props.display) : ``,
-              }}></span>
+            <a
+              className="decoration-none decoration-hover-underline"
+              href={getProfileLink()}>
+              <span
+                className={`${styles.consolidationDisplay} ${
+                  props.isUserPage ? styles.consolidationDisplayUserPage : ""
+                }`}
+                dangerouslySetInnerHTML={{
+                  __html: props.display ? parseEmojis(props.display) : ``,
+                }}></span>
+            </a>
           </Dropdown.Toggle>
         </Dropdown>
       )}
@@ -315,6 +335,23 @@ export default function Address(props: Readonly<Props>) {
                         src={SZN_5_ICON}
                         className={styles.addressTagIcon}
                         alt="Memes SZN5"
+                      />
+                    )}
+                  </span>
+                )}
+              {props.tags.memesCardsSetS6 > 0 &&
+                (props.tags.memesCardsSets === 0 || props.expandedTags) && (
+                  <span
+                    className={`${styles.addressTag} ${
+                      !SZN_6_ICON ? styles.memeSzn6Tag : ""
+                    }`}>
+                    {(props.isUserPage || !SZN_6_ICON) && `SZN6 Sets x`}
+                    {props.tags.memesCardsSetS6}
+                    {SZN_6_ICON && (
+                      <img
+                        src={SZN_6_ICON}
+                        className={styles.addressTagIcon}
+                        alt="Memes SZN6"
                       />
                     )}
                   </span>

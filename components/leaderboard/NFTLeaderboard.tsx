@@ -12,6 +12,7 @@ import { BaseTDHMetrics } from "../../entities/ITDH";
 import ConsolidationSwitch, {
   VIEW,
 } from "../consolidation-switch/ConsolidationSwitch";
+import { getDisplay, getDisplayEns } from "./LeaderboardHelpers";
 
 interface Props {
   contract: string;
@@ -70,37 +71,6 @@ export default function NFTLeaderboard(props: Readonly<Props>) {
       return lead.wallets;
     }
     return [lead.wallet];
-  }
-
-  function getDisplay(lead: any) {
-    if (lead.handle) {
-      return lead.handle;
-    }
-    if (lead.consolidation_display) {
-      return lead.consolidation_display;
-    }
-    return lead.wallet_display;
-  }
-
-  function getDisplayEns(lead: any) {
-    if (!lead.handle) {
-      return;
-    }
-    if (lead.wallet_display?.includes(" ")) {
-      return;
-    }
-
-    if (lead.wallet_display?.endsWith(".eth")) {
-      return lead.wallet_display;
-    }
-
-    if (lead.consolidation_display?.includes(" ")) {
-      return;
-    }
-    if (lead.consolidation_display?.endsWith(".eth")) {
-      return lead.consolidation_display;
-    }
-    return;
   }
 
   return (
@@ -398,6 +368,7 @@ export default function NFTLeaderboard(props: Readonly<Props>) {
                                   memesCardsSetS3: lead.memes_cards_sets_szn3,
                                   memesCardsSetS4: lead.memes_cards_sets_szn4,
                                   memesCardsSetS5: lead.memes_cards_sets_szn5,
+                                  memesCardsSetS6: lead.memes_cards_sets_szn6,
                                   memesBalance: lead.unique_memes,
                                   gradientsBalance: lead.gradients_balance,
                                   genesis: lead.genesis,
