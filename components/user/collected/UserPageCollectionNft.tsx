@@ -17,8 +17,7 @@ export default function UserPageCollectionNft({
       xs={{ span: 6 }}
       sm={{ span: 4 }}
       md={{ span: 3 }}
-      lg={{ span: 3 }}
-    >
+      lg={{ span: 3 }}>
       <Container fluid className="no-padding">
         <Row>
           <a
@@ -27,8 +26,7 @@ export default function UserPageCollectionNft({
               areEqualAddresses(nft.contract, MEMES_CONTRACT)
                 ? "the-memes"
                 : "6529-gradient"
-            }/${nft.id}`}
-          >
+            }/${nft.id}`}>
             <NFTImage
               nft={nft}
               animation={false}
@@ -52,19 +50,18 @@ export default function UserPageCollectionNft({
                 areEqualAddresses(nft.contract, MEMES_CONTRACT)
                   ? "the-memes"
                   : "6529-gradient"
-              }/${nft.id}`}
-            >
+              }/${nft.id}`}>
               {areEqualAddresses(nft.contract, MEMES_CONTRACT)
                 ? `#${nft.id} - ${nft.name}`
                 : nft.name}
             </a>
           </Col>
         </Row>
-        {nft.boostedTDH && nft.nftRank && (
+        {nft.boostedTDH && (
           <Row>
             <Col className="text-center pt-2">
-              TDH: {numberWithCommas(Math.round(nft.boostedTDH))} | Rank #
-              {nft.nftRank}
+              TDH: {numberWithCommas(Math.round(nft.boostedTDH))}
+              {nft.nftRank && ` | Rank ${nft.nftRank}`}
             </Col>
           </Row>
         )}
