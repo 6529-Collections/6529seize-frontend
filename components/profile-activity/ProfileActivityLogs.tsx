@@ -195,7 +195,7 @@ export default function ProfileActivityLogs({
         <div className="tw-py-4">
           <span
             className={`${
-              initialParams.handleOrWallet ? "tw-px-4 sm:tw-px-6 md:tw-px-8" : ""
+              initialParams.handleOrWallet ? "tw-px-4 sm:tw-px-6" : ""
             } tw-text-sm tw-italic tw-text-iron-500`}
           >
             No Activity Log

@@ -14,7 +14,7 @@ export default function ProfileRatersTableBody({
   readonly type: ProfileRatersTableType;
 }) {
   return (
-    <tbody className="tw-divide-y tw-divide-white/10 tw-divide-solid tw-divide-x-0">
+    <tbody className="tw-divide-y tw-divide-iron-800 tw-divide-solid tw-divide-x-0">
       {ratings.map((rating) => (
         <ProfileRatersTableItem
           key={getRandomObjectId()}

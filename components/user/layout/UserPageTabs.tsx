@@ -74,7 +74,7 @@ export default function UserPageTabs() {
 
   return (
     <div className="tw-border-b tw-border-iron-700 tw-border-solid tw-border-x-0 tw-border-t-0">
-      <div className="-tw-mb-px tw-flex tw-space-x-6" aria-label="Tabs">
+      <div className="-tw-mb-px tw-flex tw-space-x-4 lg:tw-space-x-5" aria-label="Tabs">
         {Object.values(UserPageTabType).map((tabType) => (
           <UserPageTab
             key={tabType}

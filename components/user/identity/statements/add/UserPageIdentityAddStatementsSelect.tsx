@@ -24,7 +24,7 @@ export default function UserPageIdentityAddStatementsSelect({
           <button
             onClick={onClose}
             type="button"
-            className="tw-p-2.5 tw-flex tw-items-center tw-justify-center tw-rounded-full tw-bg-iron-950 tw-border-0 tw-text-iron-400 hover:tw-text-iron-50 focus:tw-outline-none tw-transition tw-duration-300 tw-ease-out"
+            className="tw-p-2.5 tw-flex tw-items-center tw-justify-center tw-rounded-full tw-bg-iron-900 tw-border-0 tw-text-iron-400 hover:tw-text-iron-50 focus:tw-outline-none tw-transition tw-duration-300 tw-ease-out"
           >
             <span className="tw-sr-only tw-text-sm">Close</span>
             <svg
@@ -48,7 +48,7 @@ export default function UserPageIdentityAddStatementsSelect({
       <div className="tw-mt-8 tw-grid tw-grid-cols-1 md:tw-grid-cols-3 tw-gap-6">
         <button
           onClick={() => onViewChange(STATEMENT_ADD_VIEW.SOCIAL_MEDIA_ACCOUNT)}
-          className="tw-text-left tw-rounded-lg tw-group tw-relative tw-bg-iron-800/80 tw-border tw-border-solid tw-border-white/10 hover:tw-bg-iron-800 tw-p-6 tw-transition tw-duration-300 tw-ease-out"
+          className="tw-text-left tw-rounded-lg tw-group tw-relative tw-bg-iron-800/80 tw-border tw-border-solid tw-border-white/5 hover:tw-bg-iron-800 tw-p-6 tw-transition tw-duration-300 tw-ease-out"
         >
           <div>
             <span className="tw-inline-flex tw-items-center tw-justify-center tw-rounded-xl tw-h-11 tw-w-11 tw-bg-iron-800 tw-border tw-border-solid tw-border-iron-700">
@@ -79,7 +79,7 @@ export default function UserPageIdentityAddStatementsSelect({
         </button>
         <button
           onClick={() => onViewChange(STATEMENT_ADD_VIEW.CONTACT)}
-          className="tw-text-left  tw-rounded-lg tw-group tw-relative tw-bg-iron-800/80 tw-border tw-border-solid tw-border-white/10 hover:tw-bg-iron-800 tw-p-6 tw-transition tw-duration-300 tw-ease-out"
+          className="tw-text-left  tw-rounded-lg tw-group tw-relative tw-bg-iron-800/80 tw-border tw-border-solid tw-border-white/5 hover:tw-bg-iron-800 tw-p-6 tw-transition tw-duration-300 tw-ease-out"
         >
           <div>
             <span className="tw-inline-flex tw-items-center tw-justify-center tw-rounded-xl tw-h-11 tw-w-11 tw-bg-iron-800 tw-border tw-border-solid tw-border-iron-700">
@@ -112,7 +112,7 @@ export default function UserPageIdentityAddStatementsSelect({
           onClick={() =>
             onViewChange(STATEMENT_ADD_VIEW.SOCIAL_MEDIA_VERIFICATION_POST)
           }
-          className="tw-text-left tw-rounded-lg tw-group tw-relative tw-bg-iron-800/80 tw-border tw-border-solid tw-border-white/10 hover:tw-bg-iron-800 tw-p-6 tw-transition tw-duration-300 tw-ease-out"
+          className="tw-text-left tw-rounded-lg tw-group tw-relative tw-bg-iron-800/80 tw-border tw-border-solid tw-border-white/5 hover:tw-bg-iron-800 tw-p-6 tw-transition tw-duration-300 tw-ease-out"
         >
           <div>
             <span className="tw-inline-flex tw-items-center tw-justify-center tw-rounded-xl tw-h-11 tw-w-11 tw-bg-iron-800 tw-border tw-border-solid tw-border-iron-700">

@@ -146,7 +146,7 @@ export default function ProfileRatersTableWrapper({
   return (
     <div>
       <ProfileRatersTableWrapperHeader type={type} />
-      <div className="tw-mt-4 tw-bg-iron-900 tw-border tw-border-white/10 tw-border-solid tw-rounded-xl xl:tw-min-h-[29rem] tw-max-h-[29rem] tw-scroll-py-3 tw-overflow-y-auto">
+      <div className="tw-mt-2 lg:tw-mt-4 tw-bg-iron-900 tw-border tw-border-iron-800 tw-border-solid tw-rounded-xl xl:tw-min-h-[29rem] tw-max-h-[29rem] tw-scroll-py-3 tw-overflow-y-auto">
         {ratings?.data.length ? (
           <div className="tw-flow-root">
             <div className="tw-inline-block tw-min-w-full tw-align-middle">
@@ -173,7 +173,7 @@ export default function ProfileRatersTableWrapper({
           </div>
         ) : (
           <div className="tw-py-4">
-            <span className="tw-px-4 sm:tw-px-6 md:tw-px-8 tw-text-sm tw-italic tw-text-iron-500">
+            <span className="tw-px-4 sm:tw-px-6 tw-text-sm tw-italic tw-text-iron-500">
               {getNoRatingsMessage()}
             </span>
           </div>

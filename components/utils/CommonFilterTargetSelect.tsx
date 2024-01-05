@@ -18,7 +18,7 @@ export default function CommonFilterTargetSelect({
   readonly onChange: (filter: FilterTargetType) => void;
 }) {
   return (
-    <fieldset className="tw-px-4 sm:tw-px-6 md:tw-px-8 tw-mt-6 tw-max-w-sm">
+    <fieldset className="tw-px-4 sm:tw-px-6 tw-mt-6 tw-max-w-sm">
       <div className="tw-flex tw-items-center tw-space-x-6 tw-space-y-0">
         {TARGETS.map((target) => (
           <button

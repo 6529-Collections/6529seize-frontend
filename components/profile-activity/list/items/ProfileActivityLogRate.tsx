@@ -92,7 +92,7 @@ export default function ProfileActivityLogRate({
       <span
         className={`${
           isChangePositive ? "tw-text-green" : "tw-text-red"
-        } tw-text-sm tw-font-semibold`}
+        } tw-text-sm tw-font-medium`}
       >
         {changeStr}
       </span>
@@ -102,7 +102,7 @@ export default function ProfileActivityLogRate({
         (total {newRatingStr})
       </span>
       {log.contents.rating_matter === RateMatter.REP && (
-        <span className="tw-whitespace-nowrap tw-text-sm tw-font-semibold tw-text-iron-100">
+        <span className="tw-whitespace-nowrap tw-text-sm tw-font-medium tw-text-iron-100">
           {log.contents.rating_category}
         </span>
       )}
@@ -119,7 +119,7 @@ export default function ProfileActivityLogRate({
         <span
           className={`${
             isCurrentUser ? "" : "hover:tw-underline tw-cursor-pointer"
-          } tw-whitespace-nowrap tw-text-sm tw-font-semibold tw-text-iron-100`}
+          } tw-whitespace-nowrap tw-text-sm tw-font-medium tw-text-iron-100`}
         >
           {log.target_profile_handle}
         </span>
@@ -134,7 +134,7 @@ export default function ProfileActivityLogRate({
           >
             <circle cx="3" cy="3" r="3" />
           </svg>
-          <span> System Adjustment</span>
+          <span>System Adjustment</span>
         </span>
       )}
     </>

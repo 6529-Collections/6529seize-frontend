@@ -19,7 +19,7 @@ export default function UserPageIdentityActivityLog({
         </span>{" "}
         CIC Activity Log
       </UserTableHeaderWrapper>
-      <div className="tw-mt-4 tw-bg-iron-900 tw-border tw-border-white/10 tw-border-solid tw-rounded-xl">
+      <div className="tw-mt-4 tw-bg-iron-900 tw-border tw-border-iron-800 tw-border-solid tw-rounded-xl">
         <ProfileActivityLogs
           initialParams={initialActivityLogParams}
           withFilters={true}

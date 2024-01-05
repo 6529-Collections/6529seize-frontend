@@ -8,7 +8,7 @@ export default function UserPageRepHeader({
 }) {
   return (
     <div>
-      <div className="tw-mt-6 lg:tw-mt-8 tw-mb-6 lg:tw-flex lg:tw-items-center tw-lg:justify-between">
+      <div className="tw-mt-6 lg:tw-mt-8 tw-mb-4 lg:tw-flex lg:tw-items-center tw-lg:justify-between">
         <div className="tw-min-w-0 tw-flex-1">
           <div className="tw-flex tw-flex-col sm:tw-flex-row sm:tw-flex-wrap sm:tw-space-x-6 tw-gap-y-1">
             <div className="tw-flex tw-items-center tw-text-base tw-font-medium tw-text-iron-300">

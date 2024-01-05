@@ -71,18 +71,18 @@ export default function ProfileRatersTableItem({
   return (
     <tr>
       <td className="tw-px-4 sm:tw-px-6 tw-py-2.5">
-        <div className="tw-inline-flex tw-items-center tw-space-x-2">
+        <div className="tw-inline-flex tw-items-center tw-space-x-2.5">
           <UserCICAndLevel level={rating.level} cicType={cicType} />
-          <div className="tw-inline-flex tw-items-center">
+          <div className="tw-inline-flex tw-items-center tw-space-x-1">
             <button
               onClick={goToProfile}
-              className="tw-bg-transparent tw-border-none tw-flex tw-items-center"
+              className="tw-p-0 tw-bg-transparent tw-border-none tw-flex tw-items-center"
             >
-              <span className="tw-whitespace-nowrap hover:tw-underline tw-cursor-pointer tw-text-sm tw-font-semibold tw-text-iron-100">
+              <span className="tw-whitespace-nowrap hover:tw-underline tw-cursor-pointer tw-text-sm tw-font-medium tw-text-iron-100">
                 {rating.handle}
               </span>
             </button>
-            <span className="tw-whitespace-nowrap tw-text-sm tw-text-iron-400 tw-font-semibold">
+            <span className="tw-whitespace-nowrap tw-text-sm tw-text-iron-400 tw-font-medium">
               {TYPE_TO_TEXT[type]}
             </span>
           </div>
@@ -90,7 +90,7 @@ export default function ProfileRatersTableItem({
       </td>
       <td className="tw-px-4 sm:tw-px-6 tw-py-2.5 tw-text-right">
         <span
-          className={`tw-ml-1.5 tw-whitespace-nowrap tw-text-sm tw-font-semibold ${ratingColor}`}
+          className={`tw-whitespace-nowrap tw-text-sm tw-font-medium ${ratingColor}`}
         >
           {ratingStr}
         </span>

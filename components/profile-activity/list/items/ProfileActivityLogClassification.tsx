@@ -18,7 +18,7 @@ export default function ProfileActivityLogClassification({
       </span>
       {!isAdded && (
         <>
-          <span className="tw-whitespace-nowrap tw-text-sm tw-font-semibold tw-text-iron-100">
+          <span className="tw-whitespace-nowrap tw-text-sm tw-font-medium tw-text-iron-100">
             {log.contents.old_value &&
               CLASSIFICATIONS[log.contents.old_value].title}
           </span>
@@ -39,7 +39,7 @@ export default function ProfileActivityLogClassification({
         </>
       )}
 
-      <span className="tw-whitespace-nowrap tw-text-sm tw-font-semibold tw-text-iron-100">
+      <span className="tw-whitespace-nowrap tw-text-sm tw-font-medium tw-text-iron-100">
         {CLASSIFICATIONS[log.contents.new_value].title}
       </span>
     </>

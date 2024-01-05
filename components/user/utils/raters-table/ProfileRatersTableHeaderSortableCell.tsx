@@ -33,7 +33,7 @@ export default function ProfileRatersTableHeaderSortableCell({
     >
       <span
         className={`${
-          isActive ? "tw-text-primary-400" : "group-hover:tw-text-iron-200"
+          isActive ? "tw-text-primary-400" : "group-hover:tw-text-iron-200 tw-transition tw-duration-300 tw-ease-out"
         }`}
       >
         {title}

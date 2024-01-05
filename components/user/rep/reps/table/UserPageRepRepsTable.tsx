@@ -106,8 +106,8 @@ export default function UserPageRepRepsTable({
   }, [canEditRep, sortType]);
 
   return (
-    <div className="tw-mt-4 tw-flow-root">
-      <div className="tw-bg-iron-900/50 tw-overflow-x-auto tw-shadow tw-ring-1 tw-ring-white/10 tw-rounded-lg tw-divide-y tw-divide-solid tw-divide-white/10">
+    <div className="tw-mt-2 lg:tw-mt-4 tw-flow-root">
+      <div className="tw-bg-iron-900/50 tw-overflow-x-auto tw-shadow tw-ring-1 tw-ring-iron-800 tw-rounded-lg tw-divide-y tw-divide-solid tw-divide-iron-800">
         <table className="tw-min-w-full">
           <UserPageRepRepsTableHeader
             activeType={sortType}
