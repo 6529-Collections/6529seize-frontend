@@ -102,6 +102,7 @@ export default function UserPageHeaderEditName({
   };
 
   const [available, setAvailable] = useState<boolean>(false);
+  const [checkingUsername, setCheckingUsername] = useState<boolean>(false);
 
   return (
     <div className="tw-relative tw-z-10">
@@ -121,11 +122,12 @@ export default function UserPageHeaderEditName({
                 originalUsername={profile.profile?.handle ?? ""}
                 setUserName={setUserName}
                 setIsAvailable={setAvailable}
+                setIsLoading={setCheckingUsername}
               />
 
               <UserSettingsSave
                 loading={mutating}
-                disabled={!haveChanges || !available}
+                disabled={!haveChanges || !available || checkingUsername}
               />
             </form>
           </div>

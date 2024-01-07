@@ -6,7 +6,7 @@ import CircleLoader from "../../distribution-plan-tool/common/CircleLoader";
 enum AVAILABILITY {
   AVAILABLE = "AVAILABLE",
   NOT_AVAILABLE = "NOT_AVAILABLE",
-  iron = "iron", // empty or username not changed
+  IDLE = "IDLE", // empty or username not changed
 }
 
 export default function UserSettingsUsername({
@@ -14,11 +14,13 @@ export default function UserSettingsUsername({
   originalUsername,
   setUserName,
   setIsAvailable,
+  setIsLoading,
 }: {
   readonly userName: string;
   readonly originalUsername: string;
   readonly setUserName: (userName: string) => void;
   readonly setIsAvailable: (isAvailable: boolean) => void;
+  readonly setIsLoading: (isLoading: boolean) => void;
 }) {
   const [debouncedUsername, setDebouncedUsername] = useState<string>(
     userName ?? ""
@@ -26,19 +28,22 @@ export default function UserSettingsUsername({
   useDebounce(() => setDebouncedUsername(userName), 300, [userName]);
   const [usernameAvailability, setUsernameAvailability] = useState("");
   const [availabilityState, setAvailabilityState] = useState<AVAILABILITY>(
-    AVAILABILITY.iron
+    AVAILABILITY.IDLE
   );
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => setIsLoading(loading), [loading]);
+
   useEffect(() => {
     const getUsernameAvailability = async () => {
       if (!debouncedUsername) {
         setUsernameAvailability("");
-        setAvailabilityState(AVAILABILITY.iron);
+        setAvailabilityState(AVAILABILITY.IDLE);
         return;
       }
       if (debouncedUsername.toLowerCase() === originalUsername.toLowerCase()) {
         setUsernameAvailability("");
-        setAvailabilityState(AVAILABILITY.iron);
+        setAvailabilityState(AVAILABILITY.IDLE);
         return;
       }
       setLoading(true);

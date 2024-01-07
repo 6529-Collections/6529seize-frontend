@@ -8,8 +8,6 @@ import {
 } from "../../../../../entities/IProfile";
 import UserSettingsClassification from "../../../settings/UserSettingsClassification";
 import UserSettingsPrimaryWallet from "../../../settings/UserSettingsPrimaryWallet";
-import { getRandomColor } from "../../../../../helpers/Helpers";
-import UserSettingsBackground from "../../../settings/UserSettingsBackground";
 import UserSettingsSave from "../../../settings/UserSettingsSave";
 import { AuthContext } from "../../../../auth/Auth";
 import { commonApiPost } from "../../../../../services/api/common-api";
@@ -47,23 +45,14 @@ export default function UserPageSetUpProfile({
 
   const haveConsolidations = profile.consolidation.wallets.length > 1;
 
-  const [bgColor1, setBgColor1] = useState<string>(
-    profile.profile?.banner_1 ?? getRandomColor()
-  );
-  const [bgColor2, setBgColor2] = useState<string>(
-    profile.profile?.banner_2 ?? getRandomColor()
-  );
-
   const [haveChanges, setHaveChanges] = useState<boolean>(false);
   useEffect(() => {
     setHaveChanges(
       userName?.toLowerCase() !== profile.profile?.handle.toLowerCase() ||
         primaryWallet !== profile.profile?.primary_wallet ||
-        classification !== profile.profile?.classification ||
-        bgColor1 !== profile.profile?.banner_1 ||
-        bgColor2 !== profile.profile?.banner_2
+        classification !== profile.profile?.classification
     );
-  }, [profile, userName, primaryWallet, bgColor1, bgColor2, classification]);
+  }, [profile, userName, primaryWallet, classification]);
 
   const [mutating, setMutating] = useState<boolean>(false);
 
@@ -121,16 +110,11 @@ export default function UserPageSetUpProfile({
       classification,
     };
 
-    if (bgColor1) {
-      body.banner_1 = bgColor1;
-    }
-
-    if (bgColor2) {
-      body.banner_2 = bgColor2;
-    }
-
     await updateUser.mutateAsync(body);
   };
+
+  const [userNameAvailable, setIsUserNameAvailable] = useState<boolean>(false);
+  const [checkingUsername, setCheckingUsername] = useState<boolean>(false);
 
   return (
     <div className="tailwind-scope">
@@ -146,7 +130,8 @@ export default function UserPageSetUpProfile({
                 userName={userName}
                 originalUsername={profile.profile?.handle ?? ""}
                 setUserName={setUserName}
-                setIsAvailable={() => undefined}
+                setIsAvailable={setIsUserNameAvailable}
+                setIsLoading={setCheckingUsername}
               />
 
               <UserSettingsClassification
@@ -161,17 +146,15 @@ export default function UserPageSetUpProfile({
                   onSelect={setPrimaryWallet}
                 />
               )}
-              <UserSettingsBackground
-                bgColor1={bgColor1}
-                bgColor2={bgColor2}
-                setBgColor1={setBgColor1}
-                setBgColor2={setBgColor2}
-              />
 
-              <UserSettingsSave loading={mutating} disabled={!haveChanges} />
+              <UserSettingsSave
+                loading={mutating}
+                disabled={
+                  !haveChanges || !userNameAvailable || checkingUsername
+                }
+              />
             </form>
           </div>
-          {/* {user.profile && <UserSettingsImg profile={user} />} */}
         </div>
       </div>
     </div>
