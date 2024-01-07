@@ -24,10 +24,10 @@ export interface MemeLite {
 export default function UserSettingsImg({
   profile,
 }: {
-  profile: IProfileAndConsolidations;
+  readonly profile: IProfileAndConsolidations;
 }) {
   const { setToast, requestAuth } = useContext(AuthContext);
-  const { invalidateProfile } = useContext(ReactQueryWrapperContext);
+  const { onProfileEdit } = useContext(ReactQueryWrapperContext);
   const [memes, setMemes] = useState<MemeLite[]>([]);
 
   useEffect(() => {
@@ -101,7 +101,7 @@ export default function UserSettingsImg({
         endpoint: `profiles/${profile.profile?.handle}/pfp`,
         body: formData,
       });
-      invalidateProfile(profile);
+      onProfileEdit({ profile, previousProfile: null });
       setFile(null);
       setSelectedMeme(null);
       setToast({

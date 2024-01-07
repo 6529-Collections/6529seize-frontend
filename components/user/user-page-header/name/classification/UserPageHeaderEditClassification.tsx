@@ -25,8 +25,7 @@ export default function UserPageHeaderEditClassification({
   useKeyPressEvent("Escape", onClose);
 
   const { setToast, requestAuth } = useContext(AuthContext);
-  const { invalidateProfile } = useContext(ReactQueryWrapperContext);
-  const router = useRouter();
+  const { onProfileEdit } = useContext(ReactQueryWrapperContext);
 
   const [classification, setClassification] = useState<PROFILE_CLASSIFICATION>(
     profile.profile?.classification ?? PROFILE_CLASSIFICATION.PSEUDONYM
@@ -56,17 +55,7 @@ export default function UserPageHeaderEditClassification({
         message: "Profile updated.",
         type: "success",
       });
-      invalidateProfile(updatedProfile);
-      if (updatedProfile.profile?.handle !== profile.profile?.handle) {
-        invalidateProfile(profile);
-        if (updatedProfile.profile?.handle) {
-          const newPath = router.pathname.replace(
-            "[user]",
-            updatedProfile.profile?.handle?.toLowerCase()
-          );
-          router.replace(newPath);
-        }
-      }
+      onProfileEdit({ profile: updatedProfile, previousProfile: null });
       onClose();
     },
     onError: (error: unknown) => {

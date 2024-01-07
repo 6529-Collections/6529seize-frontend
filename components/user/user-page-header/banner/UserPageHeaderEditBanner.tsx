@@ -28,9 +28,7 @@ export default function UserPageHeaderEditBanner({
   useKeyPressEvent("Escape", onClose);
 
   const { setToast, requestAuth } = useContext(AuthContext);
-  const { invalidateProfile } = useContext(ReactQueryWrapperContext);
-  const router = useRouter();
-
+  const { onProfileEdit } = useContext(ReactQueryWrapperContext);
   const [bgColor1, setBgColor1] = useState<string>(
     profile.profile?.banner_1 ?? defaultBanner1
   );
@@ -65,17 +63,7 @@ export default function UserPageHeaderEditBanner({
         message: "Profile updated.",
         type: "success",
       });
-      invalidateProfile(updatedProfile);
-      if (updatedProfile.profile?.handle !== profile.profile?.handle) {
-        invalidateProfile(profile);
-        if (updatedProfile.profile?.handle) {
-          const newPath = router.pathname.replace(
-            "[user]",
-            updatedProfile.profile?.handle?.toLowerCase()
-          );
-          router.replace(newPath);
-        }
-      }
+      onProfileEdit({ profile: updatedProfile, previousProfile: null });
       onClose();
     },
     onError: (error: unknown) => {

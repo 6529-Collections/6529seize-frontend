@@ -20,7 +20,7 @@ import { ActivityLogParams } from "../../profile-activity/ProfileActivityLogs";
 import UserPageRateWrapper from "../utils/rate/UserPageRateWrapper";
 
 export default function UserPageRep({
-  profile: initialProfile,
+  profile,
   initialRepReceivedParams,
   initialRepGivenParams,
   initialActivityLogParams,
@@ -35,15 +35,7 @@ export default function UserPageRep({
   const router = useRouter();
   const user = (router.query.user as string).toLowerCase();
 
-  const { data: profile } = useQuery<IProfileAndConsolidations>({
-    queryKey: [QueryKey.PROFILE, user.toLowerCase()],
-    queryFn: async () =>
-      await commonApiFetch<IProfileAndConsolidations>({
-        endpoint: `profiles/${user.toLowerCase()}`,
-      }),
-    enabled: !!user,
-    initialData: initialProfile,
-  });
+
 
   const [rater, setRater] = useState<string | undefined>(undefined);
   useEffect(

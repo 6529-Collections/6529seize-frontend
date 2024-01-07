@@ -24,7 +24,7 @@ export default function UserPageHeaderEditName({
   useKeyPressEvent("Escape", onClose);
 
   const { setToast, requestAuth } = useContext(AuthContext);
-  const { invalidateProfile } = useContext(ReactQueryWrapperContext);
+  const { onProfileEdit } = useContext(ReactQueryWrapperContext);
   const router = useRouter();
 
   const [userName, setUserName] = useState<string>(
@@ -50,22 +50,18 @@ export default function UserPageHeaderEditName({
         body,
       });
     },
-    onSuccess: (updatedProfile) => {
+    onSuccess: async (updatedProfile) => {
       setToast({
         message: "Profile updated.",
         type: "success",
       });
-      invalidateProfile(updatedProfile);
-      if (updatedProfile.profile?.handle !== profile.profile?.handle) {
-        invalidateProfile(profile);
-        if (updatedProfile.profile?.handle) {
-          const newPath = router.pathname.replace(
-            "[user]",
-            updatedProfile.profile?.handle?.toLowerCase()
-          );
-          router.replace(newPath);
-        }
-      }
+      const newPath = router.pathname.replace(
+        "[user]",
+        updatedProfile.profile?.handle!?.toLowerCase()
+      );
+      await router.replace(newPath);
+      onProfileEdit({ profile: updatedProfile, previousProfile: profile });
+
       onClose();
     },
     onError: (error: unknown) => {
@@ -106,6 +102,8 @@ export default function UserPageHeaderEditName({
     await updateUser.mutateAsync(body);
   };
 
+  const [available, setAvailable] = useState<boolean>(false);
+
   return (
     <div className="tw-relative tw-z-10">
       <div className="tw-fixed tw-inset-0 tw-bg-gray-500 tw-bg-opacity-75"></div>
@@ -123,9 +121,13 @@ export default function UserPageHeaderEditName({
                 userName={userName}
                 originalUsername={profile.profile?.handle ?? ""}
                 setUserName={setUserName}
+                setIsAvailable={setAvailable}
               />
 
-              <UserSettingsSave loading={mutating} disabled={!haveChanges} />
+              <UserSettingsSave
+                loading={mutating}
+                disabled={!haveChanges || !available}
+              />
             </form>
           </div>
         </div>

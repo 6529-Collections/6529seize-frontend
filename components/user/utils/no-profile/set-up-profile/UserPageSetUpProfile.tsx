@@ -23,7 +23,7 @@ export default function UserPageSetUpProfile({
   readonly profile: IProfileAndConsolidations;
 }) {
   const { requestAuth, setToast } = useContext(AuthContext);
-  const { invalidateProfile } = useContext(ReactQueryWrapperContext);
+  const { onProfileEdit } = useContext(ReactQueryWrapperContext);
   const router = useRouter();
 
   const [userName, setUserName] = useState<string>(
@@ -78,22 +78,21 @@ export default function UserPageSetUpProfile({
         body,
       });
     },
-    onSuccess: (updatedProfile) => {
+    onSuccess: async (updatedProfile) => {
       setToast({
         message: "Profile updated.",
         type: "success",
       });
-      invalidateProfile(updatedProfile);
-      if (updatedProfile.profile?.handle !== profile.profile?.handle) {
-        invalidateProfile(profile);
-        if (updatedProfile.profile?.handle) {
-          const newPath = router.pathname.replace(
-            "[user]",
-            updatedProfile.profile?.handle?.toLowerCase()
-          );
-          router.replace(newPath);
-        }
-      }
+
+      const newPath = router.pathname.replace(
+        "[user]",
+        updatedProfile.profile?.handle!?.toLowerCase()
+      );
+      await router.replace(newPath);
+      onProfileEdit({
+        profile: updatedProfile,
+        previousProfile: null,
+      });
     },
     onError: (error: unknown) => {
       setToast({
@@ -105,7 +104,7 @@ export default function UserPageSetUpProfile({
       setMutating(false);
     },
   });
-  
+
   const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const { success } = await requestAuth();
@@ -147,6 +146,7 @@ export default function UserPageSetUpProfile({
                 userName={userName}
                 originalUsername={profile.profile?.handle ?? ""}
                 setUserName={setUserName}
+                setIsAvailable={() => undefined}
               />
 
               <UserSettingsClassification

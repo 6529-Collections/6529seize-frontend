@@ -33,7 +33,7 @@ export default function UserSettingsPage({
   readonly onUser: (user: IProfileAndConsolidations) => void;
 }) {
   const { requestAuth, setToast } = useContext(AuthContext);
-  const { invalidateProfile } = useContext(ReactQueryWrapperContext);
+  const { onProfileEdit } = useContext(ReactQueryWrapperContext);
   const router = useRouter();
   const [userName, setUserName] = useState<string>(user.profile?.handle ?? "");
 
@@ -102,10 +102,9 @@ export default function UserSettingsPage({
 
       if (response.profile?.handle !== user.profile?.handle) {
         router.push(`/${response.profile?.handle}/settings`);
-        invalidateProfile(response);
-        invalidateProfile(user);
+        onProfileEdit({ profile: response, previousProfile: user });
       } else {
-        invalidateProfile(response);
+        onProfileEdit({ profile: response, previousProfile: null });
       }
       onUser(response);
       setToast({
@@ -147,6 +146,7 @@ export default function UserSettingsPage({
     classification,
   ]);
 
+
   return (
     <div className="tw-pt-10 tw-space-y-6 tw-divide-y tw-divide-x-0 tw-divide-solid tw-divide-iron-700">
       <div className="tw-flex tw-flex-col tw-gap-y-6">
@@ -156,6 +156,7 @@ export default function UserSettingsPage({
               userName={userName}
               originalUsername={user.profile?.handle ?? ""}
               setUserName={setUserName}
+              setIsAvailable={() => undefined}
             />
 
             <UserSettingsClassification
@@ -175,7 +176,10 @@ export default function UserSettingsPage({
               setBgColor2={setBgColor2}
             />
             {/* <UserSettingsWebsite website={website} setWebsite={setWebsite} /> */}
-            <UserSettingsSave loading={saving} disabled={!haveChanges} />
+            <UserSettingsSave
+              loading={saving}
+              disabled={!haveChanges}
+            />
           </form>
         </div>
         {user.profile && <UserSettingsImg profile={user} />}

@@ -73,7 +73,6 @@ export interface InitProfileIdentityPageParams {
 
 type ReactQueryWrapperContextType = {
   setProfile: (profile: IProfileAndConsolidations) => void;
-  invalidateProfile: (profile: IProfileAndConsolidations) => void;
   invalidateHandles: (handles: string[]) => void;
   invalidateLogs: () => void;
   invalidateProfileRaterCICState: (params: {
@@ -90,10 +89,16 @@ type ReactQueryWrapperContextType = {
     targetProfile,
     connectedProfile,
   }: {
-    targetProfile: IProfileAndConsolidations;
-    connectedProfile: IProfileAndConsolidations | null;
+    readonly targetProfile: IProfileAndConsolidations;
+    readonly connectedProfile: IProfileAndConsolidations | null;
   }) => void;
-
+  onProfileEdit: ({
+    profile,
+    previousProfile,
+  }: {
+    readonly profile: IProfileAndConsolidations;
+    readonly previousProfile: IProfileAndConsolidations | null;
+  }) => void;
   initProfileRepPage: (params: InitProfileRepPageParams) => void;
   initProfileIdentityPage: (params: InitProfileIdentityPageParams) => void;
   initLandingPage: ({
@@ -111,13 +116,13 @@ type ReactQueryWrapperContextType = {
 export const ReactQueryWrapperContext =
   createContext<ReactQueryWrapperContextType>({
     setProfile: () => {},
-    invalidateProfile: () => {},
     invalidateHandles: () => {},
     invalidateLogs: () => {},
     invalidateProfileRaterCICState: () => {},
     invalidateProfileCICStatements: () => {},
     onProfileCICModify: () => {},
     onProfileRepModify: () => {},
+    onProfileEdit: () => {},
     initProfileRepPage: () => {},
     initProfileIdentityPage: () => {},
     initLandingPage: () => {},
@@ -370,6 +375,21 @@ export default function ReactQueryWrapper({
     }
   };
 
+  const onProfileEdit = ({
+    profile,
+    previousProfile,
+  }: {
+    readonly profile: IProfileAndConsolidations;
+    readonly previousProfile: IProfileAndConsolidations | null;
+  }) => {
+    setProfile(profile);
+    invalidateLogs();
+
+    if (previousProfile) {
+      invalidateProfile(previousProfile);
+    }
+  };
+
   const initProfileActivityLogs = ({
     params,
     data,
@@ -429,7 +449,6 @@ export default function ReactQueryWrapper({
   return (
     <ReactQueryWrapperContext.Provider
       value={{
-        invalidateProfile,
         invalidateHandles,
         invalidateLogs,
         setProfile,
@@ -438,6 +457,7 @@ export default function ReactQueryWrapper({
         initProfileRepPage,
         onProfileCICModify,
         onProfileRepModify,
+        onProfileEdit,
         initProfileIdentityPage,
         initLandingPage,
         initCommunityActivityPage,

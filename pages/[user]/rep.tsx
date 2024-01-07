@@ -34,6 +34,7 @@ import UserPageNoProfile from "../../components/user/utils/no-profile/UserPageNo
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/router";
 import { commonApiFetch } from "../../services/api/common-api";
+import UserPageRepWrapper from "../../components/user/rep/UserPageRepWrapper";
 
 export interface UserPageRepPropsRepRates {
   readonly ratings: ApiProfileRepRatesState;
@@ -103,24 +104,10 @@ const Page: NextPageWithLayout<{ pageProps: UserPageRepProps }> = ({
     handleOrWallet: pageProps.handleOrWallet,
   });
 
-  const { data: profile } = useQuery({
-    queryKey: [QueryKey.PROFILE, user],
-    queryFn: async () =>
-      await commonApiFetch<IProfileAndConsolidations>({
-        endpoint: `profiles/${user}`,
-      }),
-    enabled: !!user,
-    initialData: pageProps.profile,
-  });
-
-  if (!profile.profile) {
-    return <UserPageNoProfile profile={profile} />;
-  }
-
   return (
     <div className="tailwind-scope">
-      <UserPageRep
-        profile={profile}
+      <UserPageRepWrapper
+        profile={pageProps.profile}
         initialRepReceivedParams={initialRepReceivedParams}
         initialRepGivenParams={initialRepGivenParams}
         initialActivityLogParams={initialActivityLogParams}

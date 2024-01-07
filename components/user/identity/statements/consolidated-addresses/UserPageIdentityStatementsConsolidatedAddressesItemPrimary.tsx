@@ -8,6 +8,7 @@ import { AuthContext } from "../../../../auth/Auth";
 import { ReactQueryWrapperContext } from "../../../../react-query-wrapper/ReactQueryWrapper";
 import { useMutation } from "@tanstack/react-query";
 import { commonApiPost } from "../../../../../services/api/common-api";
+import CircleLoader from "../../../../distribution-plan-tool/common/CircleLoader";
 
 export default function UserPageIdentityStatementsConsolidatedAddressesItemPrimary({
   isPrimary,
@@ -21,7 +22,7 @@ export default function UserPageIdentityStatementsConsolidatedAddressesItemPrima
   readonly profile: IProfileAndConsolidations;
 }) {
   const { setToast, requestAuth } = useContext(AuthContext);
-  const { invalidateProfile } = useContext(ReactQueryWrapperContext);
+  const { onProfileEdit } = useContext(ReactQueryWrapperContext);
 
   const [mutating, setMutating] = useState<boolean>(false);
 
@@ -41,7 +42,7 @@ export default function UserPageIdentityStatementsConsolidatedAddressesItemPrima
         message: "Profile updated.",
         type: "success",
       });
-      invalidateProfile(updatedProfile);
+      onProfileEdit({ profile: updatedProfile, previousProfile: null });
     },
     onError: (error: unknown) => {
       setToast({
@@ -94,7 +95,7 @@ export default function UserPageIdentityStatementsConsolidatedAddressesItemPrima
         onClick={onSave}
         className="tw-bg-transparent tw-border-none tw-ml-1 tw-text-xs tw-font-bold tw-text-neutral-500 hover:tw-text-primary-500"
       >
-        Set as Primary
+        {mutating ? <CircleLoader /> : "Make Primary"}
       </button>
     );
   }

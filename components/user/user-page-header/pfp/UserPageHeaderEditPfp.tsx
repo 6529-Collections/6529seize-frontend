@@ -28,7 +28,7 @@ export default function UserPageHeaderEditPfp({
   useKeyPressEvent("Escape", onClose);
 
   const { setToast, requestAuth } = useContext(AuthContext);
-  const { invalidateProfile } = useContext(ReactQueryWrapperContext);
+  const { onProfileEdit } = useContext(ReactQueryWrapperContext);
 
   const { data: memes } = useQuery({
     queryKey: [QueryKey.MEMES_LITE],
@@ -75,13 +75,21 @@ export default function UserPageHeaderEditPfp({
   const updatePfp = useMutation({
     mutationFn: async (body: FormData) => {
       setSaving(true);
-      return await commonApiPostForm({
+      return await commonApiPostForm<{ pfp_url: string }>({
         endpoint: `profiles/${profile.profile?.handle}/pfp`,
         body: body,
       });
     },
-    onSuccess: (data) => {
-      invalidateProfile(profile);
+    onSuccess: (response) => {
+      onProfileEdit({
+        profile: {
+          ...profile,
+          profile: profile.profile
+            ? { ...profile.profile, pfp_url: response.pfp_url }
+            : null,
+        },
+        previousProfile: null,
+      });
       setFile(null);
       setSelectedMeme(null);
       setToast({

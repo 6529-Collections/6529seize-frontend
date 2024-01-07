@@ -47,29 +47,26 @@ export default function UserPageLayout({
   const queryClient = useQueryClient();
   const router = useRouter();
   const { setProfile } = useContext(ReactQueryWrapperContext);
-
-  const [user, setUser] = useState<string>(router.query.user as string);
+  const handleOrWallet = (router.query.user as string).toLowerCase();
 
   const profileInit = queryClient.getQueryData<IProfileAndConsolidations>([
     QueryKey.PROFILE,
-    user.toLowerCase(),
+    handleOrWallet,
   ]);
 
   if (!profileInit) {
     setProfile(props.profile);
   }
 
-  useEffect(() => {
-    setUser(router.query.user as string);
-  }, [router.query.user]);
-
   const { data: profile } = useQuery<IProfileAndConsolidations>({
-    queryKey: [QueryKey.PROFILE, user.toLowerCase()],
-    queryFn: async () =>
-      await commonApiFetch<IProfileAndConsolidations>({
-        endpoint: `profiles/${user}`,
-      }),
-    enabled: !!user,
+    queryKey: [QueryKey.PROFILE, handleOrWallet],
+    queryFn: async () => {
+      console.log(handleOrWallet);
+      return await commonApiFetch<IProfileAndConsolidations>({
+        endpoint: `profiles/${handleOrWallet}`,
+      });
+    },
+    enabled: !!handleOrWallet,
     initialData: props.profile,
   });
 
@@ -88,7 +85,7 @@ export default function UserPageLayout({
   }
   descriptionArray.push("6529 SEIZE");
 
-  const mainAddress = profile.profile?.primary_wallet ?? user.toLowerCase();
+  const mainAddress = profile.profile?.primary_wallet ?? handleOrWallet.toLowerCase();
   const [isLoadingTabData, setIsLoadingTabData] = useState(false);
 
   useEffect(() => {
@@ -122,7 +119,7 @@ export default function UserPageLayout({
         <meta name="description" content={props.title} />
         <meta
           property="og:url"
-          content={`${process.env.BASE_ENDPOINT}/${user}`}
+          content={`${process.env.BASE_ENDPOINT}/${handleOrWallet}`}
         />
         <meta property="og:title" content={props.title} />
         <meta
@@ -144,11 +141,19 @@ export default function UserPageLayout({
             profile={profile}
             mainAddress={mainAddress}
             consolidatedTDH={props.consolidatedTDH}
-            user={user}
+            user={handleOrWallet}
           />
           <div className="tw-px-6 min-[1100px]:tw-max-w-[960px] min-[1200px]:tw-max-w-[1150px] min-[1300px]:tw-max-w-[1250px] min-[1400px]:tw-max-w-[1350px] min-[1500px]:tw-max-w-[1450px] min-[1600px]:tw-max-w-[1550px] min-[1800px]:tw-max-w-[1750px] min-[2000px]:tw-max-w-[1950px] tw-mx-auto">
             <UserPageTabs />
-            <div className="tw-mt-6">{isLoadingTabData ? <div className="tw-text-base tw-font-normal tw-text-iron-200">Loading...</div> : children}</div>
+            <div className="tw-mt-6">
+              {isLoadingTabData ? (
+                <div className="tw-text-base tw-font-normal tw-text-iron-200">
+                  Loading...
+                </div>
+              ) : (
+                children
+              )}
+            </div>
           </div>
         </div>
       </main>

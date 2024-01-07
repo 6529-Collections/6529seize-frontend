@@ -13,10 +13,12 @@ export default function UserSettingsUsername({
   userName,
   originalUsername,
   setUserName,
+  setIsAvailable,
 }: {
   readonly userName: string;
   readonly originalUsername: string;
   readonly setUserName: (userName: string) => void;
+  readonly setIsAvailable: (isAvailable: boolean) => void;
 }) {
   const [debouncedUsername, setDebouncedUsername] = useState<string>(
     userName ?? ""
@@ -56,6 +58,14 @@ export default function UserSettingsUsername({
     };
     getUsernameAvailability();
   }, [debouncedUsername, originalUsername]);
+
+  useEffect(() => {
+    if (availabilityState === AVAILABILITY.AVAILABLE) {
+      setIsAvailable(true);
+    } else {
+      setIsAvailable(false);
+    }
+  }, [availabilityState]);
 
   return (
     <div>

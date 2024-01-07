@@ -23,6 +23,8 @@ export default function UserPageIdentity({
   readonly initialCICGivenParams: ProfileRatersParams;
   readonly initialActivityLogParams: ActivityLogParams;
 }) {
+
+
   return (
     <div className="tailwind-scope">
       <UserPageIdentityHeader profile={profile} />
