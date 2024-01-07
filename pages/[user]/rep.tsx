@@ -7,7 +7,10 @@ import {
   RatingWithProfileInfoAndLevel,
 } from "../../entities/IProfile";
 import { NextPageWithLayout } from "../_app";
-import { ReactQueryWrapperContext } from "../../components/react-query-wrapper/ReactQueryWrapper";
+import {
+  QueryKey,
+  ReactQueryWrapperContext,
+} from "../../components/react-query-wrapper/ReactQueryWrapper";
 import UserPageLayout from "../../components/user/layout/UserPageLayout";
 import { ConsolidatedTDHMetrics } from "../../entities/ITDH";
 import {
@@ -27,7 +30,10 @@ import {
   convertActivityLogParams,
 } from "../../components/profile-activity/ProfileActivityLogs";
 import { FilterTargetType } from "../../components/utils/CommonFilterTargetSelect";
-import UserPageNoProfile from "../../components/user/utils/UserPageNoProfile";
+import UserPageNoProfile from "../../components/user/utils/no-profile/UserPageNoProfile";
+import { useQuery } from "@tanstack/react-query";
+import { useRouter } from "next/router";
+import { commonApiFetch } from "../../services/api/common-api";
 
 export interface UserPageRepPropsRepRates {
   readonly ratings: ApiProfileRepRatesState;
@@ -61,6 +67,9 @@ const getInitialActivityLogParams = (
 const Page: NextPageWithLayout<{ pageProps: UserPageRepProps }> = ({
   pageProps,
 }) => {
+  const router = useRouter();
+  const user = (router.query.user as string).toLowerCase();
+
   const initialRepGivenParams = getInitialRatersParams({
     handleOrWallet: pageProps.handleOrWallet,
     matter: MATTER_TYPE,
@@ -94,6 +103,20 @@ const Page: NextPageWithLayout<{ pageProps: UserPageRepProps }> = ({
     handleOrWallet: pageProps.handleOrWallet,
   });
 
+  const { data: profile } = useQuery({
+    queryKey: [QueryKey.PROFILE, user],
+    queryFn: async () =>
+      await commonApiFetch<IProfileAndConsolidations>({
+        endpoint: `profiles/${user}`,
+      }),
+    enabled: !!user,
+    initialData: pageProps.profile,
+  });
+
+  if (!profile.profile) {
+    return <UserPageNoProfile profile={profile} />;
+  }
+
   if (!pageProps.profile.profile) {
     return <UserPageNoProfile profile={pageProps.profile} />;
   }
@@ -101,7 +124,7 @@ const Page: NextPageWithLayout<{ pageProps: UserPageRepProps }> = ({
   return (
     <div className="tailwind-scope">
       <UserPageRep
-        profile={pageProps.profile}
+        profile={profile}
         initialRepReceivedParams={initialRepReceivedParams}
         initialRepGivenParams={initialRepGivenParams}
         initialActivityLogParams={initialActivityLogParams}

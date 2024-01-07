@@ -1,4 +1,4 @@
-import { ReactElement, useContext } from "react";
+import { ReactElement, useContext, useEffect } from "react";
 import { NextPageWithLayout } from "../_app";
 import {
   CicStatement,
@@ -19,14 +19,20 @@ import {
   userPageNeedsRedirect,
 } from "../../helpers/server.helpers";
 import UserPageIdentity from "../../components/user/identity/UserPageIdentity";
-import UserPageNoProfile from "../../components/user/utils/UserPageNoProfile";
+import UserPageNoProfile from "../../components/user/utils/no-profile/UserPageNoProfile";
 import { Page as PageType } from "../../helpers/Types";
-import { ReactQueryWrapperContext } from "../../components/react-query-wrapper/ReactQueryWrapper";
+import {
+  QueryKey,
+  ReactQueryWrapperContext,
+} from "../../components/react-query-wrapper/ReactQueryWrapper";
 import {
   ActivityLogParams,
   convertActivityLogParams,
 } from "../../components/profile-activity/ProfileActivityLogs";
 import { FilterTargetType } from "../../components/utils/CommonFilterTargetSelect";
+import { useRouter } from "next/router";
+import { useQuery } from "@tanstack/react-query";
+import { commonApiFetch } from "../../services/api/common-api";
 
 export interface UserPageIdentityProps {
   readonly profile: IProfileAndConsolidations;
@@ -55,6 +61,9 @@ const getInitialActivityLogParams = (
 const Page: NextPageWithLayout<{ pageProps: UserPageIdentityProps }> = ({
   pageProps,
 }) => {
+  const router = useRouter();
+  const user = (router.query.user as string).toLowerCase();
+
   const initialCICGivenParams = getInitialRatersParams({
     handleOrWallet: pageProps.handleOrWallet,
     matter: MATTER_TYPE,
@@ -87,13 +96,23 @@ const Page: NextPageWithLayout<{ pageProps: UserPageIdentityProps }> = ({
     },
   });
 
-  if (!pageProps.profile.profile) {
-    return <UserPageNoProfile profile={pageProps.profile} />;
+  const { data: profile } = useQuery({
+    queryKey: [QueryKey.PROFILE, user],
+    queryFn: async () =>
+      await commonApiFetch<IProfileAndConsolidations>({
+        endpoint: `profiles/${user}`,
+      }),
+    enabled: !!user,
+    initialData: pageProps.profile,
+  });
+
+  if (!profile.profile) {
+    return <UserPageNoProfile profile={profile} />;
   }
 
   return (
     <UserPageIdentity
-      profile={pageProps.profile}
+      profile={profile}
       initialCICReceivedParams={initialCICReceivedParams}
       initialCICGivenParams={initialCICGivenParams}
       initialActivityLogParams={initialActivityLogParams}

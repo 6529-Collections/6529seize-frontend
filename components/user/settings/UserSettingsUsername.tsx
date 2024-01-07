@@ -14,9 +14,9 @@ export default function UserSettingsUsername({
   originalUsername,
   setUserName,
 }: {
-  userName: string;
-  originalUsername: string;
-  setUserName: (userName: string) => void;
+  readonly userName: string;
+  readonly originalUsername: string;
+  readonly setUserName: (userName: string) => void;
 }) {
   const [debouncedUsername, setDebouncedUsername] = useState<string>(
     userName ?? ""

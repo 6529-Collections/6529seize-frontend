@@ -1,16 +1,19 @@
 import {
   CLASSIFICATIONS,
   IProfileAndConsolidations,
-} from "../../../entities/IProfile";
-import { ConsolidatedTDHMetrics } from "../../../entities/ITDH";
-import UserCICTypeIcon from "../utils/user-cic-type/UserCICTypeIcon";
+} from "../../../../entities/IProfile";
+import { ConsolidatedTDHMetrics } from "../../../../entities/ITDH";
+import UserCICTypeIcon from "../../utils/user-cic-type/UserCICTypeIcon";
+import UserPageHeaderNameWrapper from "./UserPageHeaderNameWrapper";
 
 export default function UserPageHeaderName({
   profile,
+  canEdit,
   mainAddress,
   consolidatedTDH,
 }: {
   readonly profile: IProfileAndConsolidations;
+  readonly canEdit: boolean;
   readonly mainAddress: string;
   readonly consolidatedTDH: ConsolidatedTDHMetrics | null;
 }) {
@@ -34,9 +37,11 @@ export default function UserPageHeaderName({
   return (
     <div className="tw-mt-2 sm:tw-mt-4">
       <div className="tw-flex tw-items-center">
-        <p className="tw-break-all tw-mb-0 tw-text-2xl sm:tw-text-3xl tw-font-semibold">
-          {displayName}
-        </p>
+        <UserPageHeaderNameWrapper profile={profile} canEdit={canEdit}>
+          <p className="tw-break-all tw-mb-0 tw-text-2xl sm:tw-text-3xl tw-font-semibold">
+            {displayName}
+          </p>
+        </UserPageHeaderNameWrapper>
         {profile.profile?.handle && (
           <div className="tw-ml-2 tw-flex tw-items-center tw-justify-center tw-self-center tw-h-6 tw-w-6">
             <UserCICTypeIcon profile={profile} />
