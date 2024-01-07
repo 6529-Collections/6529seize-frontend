@@ -94,9 +94,15 @@ export default function UserPageHeaderEditName({
       handle: userName,
       primary_wallet: profile.profile?.primary_wallet,
       classification: profile.profile?.classification,
-      banner_1: profile.profile?.banner_1,
-      banner_2: profile.profile?.banner_2,
     };
+
+    if (profile.profile?.banner_1) {
+      body.banner_1 = profile.profile?.banner_1;
+    }
+
+    if (profile.profile?.banner_2) {
+      body.banner_2 = profile.profile?.banner_2;
+    }
 
     await updateUser.mutateAsync(body);
   };
