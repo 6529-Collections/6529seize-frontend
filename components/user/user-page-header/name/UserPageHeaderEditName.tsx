@@ -61,7 +61,6 @@ export default function UserPageHeaderEditName({
       );
       await router.replace(newPath);
       onProfileEdit({ profile: updatedProfile, previousProfile: profile });
-
       onClose();
     },
     onError: (error: unknown) => {

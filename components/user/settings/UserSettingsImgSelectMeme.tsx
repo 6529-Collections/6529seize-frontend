@@ -1,14 +1,24 @@
 import { useEffect, useRef, useState } from "react";
-import { MemeLite } from "./UserSettingsImg";
 import { AnimatePresence, motion } from "framer-motion";
 import { useClickAway } from "react-use";
+
+export interface MemeLite {
+  animation: any;
+  contract: string;
+  icon: string | null;
+  id: 1;
+  image: string | null;
+  name: string | null;
+  scaled: string | null;
+  thumbnail: string | null;
+}
 
 export default function UserSettingsImgSelectMeme({
   memes,
   onMeme,
 }: {
-  memes: MemeLite[];
-  onMeme: (meme: MemeLite) => void;
+  readonly memes: MemeLite[];
+  readonly onMeme: (meme: MemeLite) => void;
 }) {
   const [input, setInput] = useState<string>("");
 

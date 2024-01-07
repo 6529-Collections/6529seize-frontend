@@ -6,7 +6,6 @@ import {
 import { useClickAway, useKeyPressEvent } from "react-use";
 import { AuthContext } from "../../../auth/Auth";
 import { ReactQueryWrapperContext } from "../../../react-query-wrapper/ReactQueryWrapper";
-import { useRouter } from "next/router";
 import UserSettingsBackground from "../../settings/UserSettingsBackground";
 import UserSettingsSave from "../../settings/UserSettingsSave";
 import { useMutation } from "@tanstack/react-query";

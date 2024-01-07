@@ -1,7 +1,7 @@
 import { FormEvent, useContext, useEffect, useRef, useState } from "react";
 import { IProfileAndConsolidations } from "../../../../entities/IProfile";
 import { useClickAway, useKeyPressEvent } from "react-use";
-import UserSettingsImgSelectMeme from "../../settings/UserSettingsImgSelectMeme";
+import UserSettingsImgSelectMeme, { MemeLite } from "../../settings/UserSettingsImgSelectMeme";
 import UserSettingsImgSelectFile from "../../settings/UserSettingsImgSelectFile";
 import UserSettingsSave from "../../settings/UserSettingsSave";
 import { AuthContext } from "../../../auth/Auth";
@@ -9,7 +9,6 @@ import {
   QueryKey,
   ReactQueryWrapperContext,
 } from "../../../react-query-wrapper/ReactQueryWrapper";
-import { MemeLite } from "../../settings/UserSettingsImg";
 import {
   commonApiFetch,
   commonApiPostForm,
