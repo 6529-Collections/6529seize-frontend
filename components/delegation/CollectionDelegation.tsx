@@ -789,7 +789,8 @@ export default function CollectionDelegationComponent(props: Props) {
         <Accordion alwaysOpen className={styles.collectionDelegationsAccordion}>
           <Accordion.Item
             className={`${styles.collectionDelegationsAccordionItem}`}
-            eventKey={"0"}>
+            eventKey={"0"}
+          >
             <Accordion.Header>Outgoing</Accordion.Header>
             <Accordion.Body>
               {printOutgoingDelegations(
@@ -804,7 +805,8 @@ export default function CollectionDelegationComponent(props: Props) {
           </Accordion.Item>
           <Accordion.Item
             className={`${styles.collectionDelegationsAccordionItem} mt-3`}
-            eventKey={"1"}>
+            eventKey={"1"}
+          >
             <Accordion.Header>Incoming</Accordion.Header>
             <Accordion.Body>
               {printIncomingDelegations(
@@ -826,14 +828,16 @@ export default function CollectionDelegationComponent(props: Props) {
     return (
       <>
         <h5 className="float-none pt-5 pb-1">
-          Delegation Managers (Sub-Delegations)
+          Use A Delegation Manager (For Delegations or Consolidations)
         </h5>
         <Accordion
           alwaysOpen
-          className={`${styles.collectionDelegationsAccordion} `}>
+          className={`${styles.collectionDelegationsAccordion} `}
+        >
           <Accordion.Item
             className={`${styles.collectionDelegationsAccordionItem}`}
-            eventKey={"0"}>
+            eventKey={"0"}
+          >
             <Accordion.Header>Outgoing</Accordion.Header>
             <Accordion.Body>
               {printOutgoingDelegations(
@@ -846,7 +850,8 @@ export default function CollectionDelegationComponent(props: Props) {
           </Accordion.Item>
           <Accordion.Item
             className={`${styles.collectionDelegationsAccordionItem} mt-3`}
-            eventKey={"1"}>
+            eventKey={"1"}
+          >
             <Accordion.Header>Incoming</Accordion.Header>
             <Accordion.Body>
               {printIncomingDelegations(
@@ -869,10 +874,12 @@ export default function CollectionDelegationComponent(props: Props) {
         <h5 className="float-none pt-5 pb-1">Consolidations</h5>
         <Accordion
           alwaysOpen
-          className={`${styles.collectionDelegationsAccordion}`}>
+          className={`${styles.collectionDelegationsAccordion}`}
+        >
           <Accordion.Item
             className={`${styles.collectionDelegationsAccordionItem}`}
-            eventKey={"0"}>
+            eventKey={"0"}
+          >
             <Accordion.Header>Outgoing</Accordion.Header>
             <Accordion.Body>
               {printOutgoingDelegations(
@@ -885,7 +892,8 @@ export default function CollectionDelegationComponent(props: Props) {
           </Accordion.Item>
           <Accordion.Item
             className={`${styles.collectionDelegationsAccordionItem} mt-3`}
-            eventKey={"1"}>
+            eventKey={"1"}
+          >
             <Accordion.Header>Incoming</Accordion.Header>
             <Accordion.Body>
               {printIncomingDelegations(
@@ -926,11 +934,13 @@ export default function CollectionDelegationComponent(props: Props) {
                         CONSOLIDATION_USE_CASE.use_case;
                       return (
                         <Fragment
-                          key={`outgoing-${del.useCase.use_case}-${index}`}>
+                          key={`outgoing-${del.useCase.use_case}-${index}`}
+                        >
                           <tr>
                             <td
                               colSpan={4}
-                              className={styles.delegationsTableUseCaseHeader}>
+                              className={styles.delegationsTableUseCaseHeader}
+                            >
                               #{del.useCase.use_case} - {del.useCase.display}
                             </td>
                           </tr>
@@ -944,7 +954,8 @@ export default function CollectionDelegationComponent(props: Props) {
                               "consolidation incomplete";
                             return (
                               <tr
-                                key={`outgoing-${del.useCase.use_case}-${index}-${w.wallet}-${addressIndex}`}>
+                                key={`outgoing-${del.useCase.use_case}-${index}-${w.wallet}-${addressIndex}`}
+                              >
                                 <td className={styles.formCheckColumn}>
                                   <FormCheck
                                     disabled={
@@ -991,7 +1002,8 @@ export default function CollectionDelegationComponent(props: Props) {
                                 <td>
                                   <DelegationWallet address={w.wallet} />{" "}
                                   <span
-                                    className={styles.delegationActiveLabel}>
+                                    className={styles.delegationActiveLabel}
+                                  >
                                     {w.expiry}
                                     {w.all
                                       ? ` - all tokens`
@@ -1003,7 +1015,8 @@ export default function CollectionDelegationComponent(props: Props) {
                                         !pending
                                           ? styles.consolidationActiveLabel
                                           : styles.consolidationNotAcceptedLabel
-                                      }>
+                                      }
+                                    >
                                       {consolidationStatus}
                                       {pending && (
                                         <Tippy
@@ -1011,10 +1024,12 @@ export default function CollectionDelegationComponent(props: Props) {
                                             "Incoming consolidation missing"
                                           }
                                           placement={"top"}
-                                          theme={"light"}>
+                                          theme={"light"}
+                                        >
                                           <FontAwesomeIcon
                                             className={styles.infoIcon}
-                                            icon="info-circle"></FontAwesomeIcon>
+                                            icon="info-circle"
+                                          ></FontAwesomeIcon>
                                         </Tippy>
                                       )}
                                     </span>
@@ -1031,7 +1046,8 @@ export default function CollectionDelegationComponent(props: Props) {
                                       });
                                       setShowUpdateDelegation(true);
                                       window.scrollTo(0, 0);
-                                    }}>
+                                    }}
+                                  >
                                     Update
                                   </span>
                                 </td>
@@ -1057,7 +1073,8 @@ export default function CollectionDelegationComponent(props: Props) {
                                         message = getSwitchToHtml();
                                       }
                                       setToast({ title, message });
-                                    }}>
+                                    }}
+                                  >
                                     Revoke
                                     {(contractWriteRevoke.isLoading ||
                                       waitContractWriteRevoke.isLoading) &&
@@ -1070,7 +1087,8 @@ export default function CollectionDelegationComponent(props: Props) {
                                         <div className="d-inline">
                                           <div
                                             className={`spinner-border ${styles.loader}`}
-                                            role="status">
+                                            role="status"
+                                          >
                                             <span className="sr-only"></span>
                                           </div>
                                         </div>
@@ -1133,14 +1151,16 @@ export default function CollectionDelegationComponent(props: Props) {
                               message = getSwitchToHtml();
                             }
                             setToast({ title, message });
-                          }}>
+                          }}
+                        >
                           Batch Revoke
                           {(contractWriteBatchRevoke.isLoading ||
                             waitContractWriteBatchRevoke.isLoading) && (
                             <div className="d-inline">
                               <div
                                 className={`spinner-border ${styles.loader}`}
-                                role="status">
+                                role="status"
+                              >
                                 <span className="sr-only"></span>
                               </div>
                             </div>
@@ -1184,11 +1204,13 @@ export default function CollectionDelegationComponent(props: Props) {
                         CONSOLIDATION_USE_CASE.use_case;
                       return (
                         <Fragment
-                          key={`incoming-${del.useCase.use_case}-${index}`}>
+                          key={`incoming-${del.useCase.use_case}-${index}`}
+                        >
                           <tr>
                             <td
                               colSpan={4}
-                              className={styles.delegationsTableUseCaseHeader}>
+                              className={styles.delegationsTableUseCaseHeader}
+                            >
                               #{del.useCase.use_case} - {del.useCase.display}
                             </td>
                           </tr>
@@ -1202,7 +1224,8 @@ export default function CollectionDelegationComponent(props: Props) {
                               "consolidation incomplete";
                             return (
                               <tr
-                                key={`incoming-${del.useCase}-${index}-${w.wallet}`}>
+                                key={`incoming-${del.useCase}-${index}-${w.wallet}`}
+                              >
                                 <td className={styles.formCheckColumn}>
                                   {del.useCase.use_case ==
                                   SUB_DELEGATION_USE_CASE.use_case ? (
@@ -1230,7 +1253,8 @@ export default function CollectionDelegationComponent(props: Props) {
                                 <td>
                                   <DelegationWallet address={w.wallet} />{" "}
                                   <span
-                                    className={styles.delegationActiveLabel}>
+                                    className={styles.delegationActiveLabel}
+                                  >
                                     {w.expiry}
                                     {w.all
                                       ? ` - all tokens`
@@ -1242,7 +1266,8 @@ export default function CollectionDelegationComponent(props: Props) {
                                         !pending
                                           ? styles.consolidationActiveLabel
                                           : styles.consolidationNotAcceptedLabel
-                                      }>
+                                      }
+                                    >
                                       {consolidationStatus}
                                       {pending && (
                                         <Tippy
@@ -1250,10 +1275,12 @@ export default function CollectionDelegationComponent(props: Props) {
                                             "Outgoing consolidation missing"
                                           }
                                           placement={"top"}
-                                          theme={"light"}>
+                                          theme={"light"}
+                                        >
                                           <FontAwesomeIcon
                                             className={styles.infoIcon}
-                                            icon="info-circle"></FontAwesomeIcon>
+                                            icon="info-circle"
+                                          ></FontAwesomeIcon>
                                         </Tippy>
                                       )}
                                     </span>
@@ -1289,7 +1316,8 @@ export default function CollectionDelegationComponent(props: Props) {
                           onClick={() => {
                             setShowCreateNewDelegationWithSub(true);
                             window.scrollTo(0, 0);
-                          }}>
+                          }}
+                        >
                           <FontAwesomeIcon
                             icon="plus"
                             className={styles.buttonIcon}
@@ -1305,7 +1333,8 @@ export default function CollectionDelegationComponent(props: Props) {
                           onClick={() => {
                             setShowCreateNewSubDelegationWithSub(true);
                             window.scrollTo(0, 0);
-                          }}>
+                          }}
+                        >
                           <FontAwesomeIcon
                             icon="plus"
                             className={styles.buttonIcon}
@@ -1321,7 +1350,8 @@ export default function CollectionDelegationComponent(props: Props) {
                           onClick={() => {
                             setShowCreateNewConsolidationWithSub(true);
                             window.scrollTo(0, 0);
-                          }}>
+                          }}
+                        >
                           <FontAwesomeIcon
                             icon="plus"
                             className={styles.buttonIcon}
@@ -1337,7 +1367,8 @@ export default function CollectionDelegationComponent(props: Props) {
                           onClick={() => {
                             setShowRevokeDelegationWithSub(true);
                             window.scrollTo(0, 0);
-                          }}>
+                          }}
+                        >
                           <FontAwesomeIcon
                             icon="minus"
                             className={styles.buttonIcon}
@@ -1368,10 +1399,12 @@ export default function CollectionDelegationComponent(props: Props) {
                     "Lock Wallet or Use Case to stop accepting incoming delegations"
                   }
                   placement={"right"}
-                  theme={"light"}>
+                  theme={"light"}
+                >
                   <FontAwesomeIcon
                     className={styles.infoIcon}
-                    icon="info-circle"></FontAwesomeIcon>
+                    icon="info-circle"
+                  ></FontAwesomeIcon>
                 </Tippy>
               </h4>
             </Col>
@@ -1398,7 +1431,8 @@ export default function CollectionDelegationComponent(props: Props) {
                       message = getSwitchToHtml();
                     }
                     setToast({ title, message });
-                  }}>
+                  }}
+                >
                   <FontAwesomeIcon
                     icon={collectionLockRead.data ? "lock" : "lock-open"}
                     className={styles.buttonIcon}
@@ -1416,7 +1450,8 @@ export default function CollectionDelegationComponent(props: Props) {
                     <div className="d-inline">
                       <div
                         className={`spinner-border ${styles.loader}`}
-                        role="status">
+                        role="status"
+                      >
                         <span className="sr-only"></span>
                       </div>
                     </div>
@@ -1445,7 +1480,8 @@ export default function CollectionDelegationComponent(props: Props) {
                     setLockUseCaseIndex(value - 1);
                   }
                   useCaseLockWrite.reset();
-                }}>
+                }}
+              >
                 <option value={0}>
                   <>
                     Lock/Unlock Use Case
@@ -1459,7 +1495,8 @@ export default function CollectionDelegationComponent(props: Props) {
                     return (
                       <option
                         key={`collection-delegation-select-use-case-${uc.use_case}`}
-                        value={uc.use_case}>
+                        value={uc.use_case}
+                      >
                         #{uc.use_case} - {uc.display}
                         {(useCaseLockStatuses.data &&
                           (useCaseLockStatuses.data[index] as any as boolean) ==
@@ -1490,7 +1527,8 @@ export default function CollectionDelegationComponent(props: Props) {
                 sm={12}
                 md={8}
                 lg={8}
-                className="pt-2 pb-2 d-flex align-items-center">
+                className="pt-2 pb-2 d-flex align-items-center"
+              >
                 {!useCaseLockStatusesGlobal ||
                 (useCaseLockStatusesGlobal?.data &&
                   (useCaseLockStatusesGlobal?.data[
@@ -1516,7 +1554,8 @@ export default function CollectionDelegationComponent(props: Props) {
                         message = getSwitchToHtml();
                       }
                       setToast({ title, message });
-                    }}>
+                    }}
+                  >
                     <FontAwesomeIcon
                       icon={
                         useCaseLockStatuses.data &&
@@ -1536,7 +1575,8 @@ export default function CollectionDelegationComponent(props: Props) {
                       <div className="d-inline">
                         <div
                           className={`spinner-border ${styles.loader}`}
-                          role="status">
+                          role="status"
+                        >
                           <span className="sr-only"></span>
                         </div>
                       </div>
@@ -1596,8 +1636,9 @@ export default function CollectionDelegationComponent(props: Props) {
                 !showRevokeDelegationWithSub && (
                   <>
                     {printDelegations()}
-                    {printSubDelegations()}
                     {printConsolidations()}
+                    {printSubDelegations()}
+
                     {printLocks()}
                     <Container className="no-padding">
                       <Row className="pt-5 pb-3">
@@ -1606,7 +1647,8 @@ export default function CollectionDelegationComponent(props: Props) {
                             className={styles.backBtn}
                             onClick={() =>
                               props.setSection(DelegationCenterSection.CENTER)
-                            }>
+                            }
+                          >
                             <FontAwesomeIcon icon="circle-arrow-left" />
                             Back to Delegation Center
                           </span>
@@ -1735,11 +1777,13 @@ export default function CollectionDelegationComponent(props: Props) {
             ) {
               setShowToast(false);
             }
-          }}>
+          }}
+        >
           <ToastContainer
             position={"top-center"}
             className={styles.toast}
-            ref={toastRef}>
+            ref={toastRef}
+          >
             <Toast onClose={() => setShowToast(false)} show={showToast}>
               <Toast.Header>
                 <strong className="me-auto">{toast.title}</strong>
@@ -1748,7 +1792,8 @@ export default function CollectionDelegationComponent(props: Props) {
                 <Toast.Body
                   dangerouslySetInnerHTML={{
                     __html: toast.message,
-                  }}></Toast.Body>
+                  }}
+                ></Toast.Body>
               )}
             </Toast>
           </ToastContainer>
