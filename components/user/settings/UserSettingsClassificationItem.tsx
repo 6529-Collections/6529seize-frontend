@@ -9,9 +9,9 @@ export default function UserSettingsClassificationItem({
   selected,
   onClassification,
 }: {
-  selected: PROFILE_CLASSIFICATION | null;
-  classification: PROFILE_CLASSIFICATION;
-  onClassification: (classification: PROFILE_CLASSIFICATION) => void;
+  readonly selected: PROFILE_CLASSIFICATION | null;
+  readonly classification: PROFILE_CLASSIFICATION;
+  readonly onClassification: (classification: PROFILE_CLASSIFICATION) => void;
 }) {
   const [isActive, setIsActive] = useState<boolean>(
     classification === selected

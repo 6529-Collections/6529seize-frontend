@@ -11,8 +11,8 @@ export default function UserSettingsClassification({
   selected,
   onSelect,
 }: {
-  selected: PROFILE_CLASSIFICATION;
-  onSelect: (selected: PROFILE_CLASSIFICATION) => void;
+  readonly selected: PROFILE_CLASSIFICATION;
+  readonly onSelect: (selected: PROFILE_CLASSIFICATION) => void;
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const [iconScope, animateIcon] = useAnimate();

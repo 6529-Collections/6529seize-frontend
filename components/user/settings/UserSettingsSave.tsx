@@ -5,9 +5,9 @@ export default function UserSettingsSave({
   disabled,
   title = "Save",
 }: {
-  loading: boolean;
-  disabled?: boolean | undefined;
-  title?: string | undefined;
+  readonly loading: boolean;
+  readonly disabled?: boolean | undefined;
+  readonly title?: string | undefined;
 }) {
   const [isDisabled, setIsDisabled] = useState<boolean>(
     (loading || disabled) ?? false

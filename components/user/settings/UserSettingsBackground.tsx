@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useRef } from "react";
 
 export default function UserSettingsBackground({
   bgColor1,
@@ -6,10 +6,10 @@ export default function UserSettingsBackground({
   setBgColor1,
   setBgColor2,
 }: {
-  bgColor1: string;
-  bgColor2: string;
-  setBgColor1: (color: string) => void;
-  setBgColor2: (color: string) => void;
+  readonly bgColor1: string;
+  readonly bgColor2: string;
+  readonly setBgColor1: (color: string) => void;
+  readonly setBgColor2: (color: string) => void;
 }) {
   const bgColor1Ref = useRef<HTMLInputElement>(null);
   const bgColor2Ref = useRef<HTMLInputElement>(null);

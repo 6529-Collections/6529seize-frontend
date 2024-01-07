@@ -19,8 +19,8 @@ export default function UserSettingsImgSelectFile({
   imageToShow,
   setFile,
 }: {
-  imageToShow: string | null;
-  setFile: (file: File) => void;
+  readonly imageToShow: string | null;
+  readonly setFile: (file: File) => void;
 }) {
   const { setToast } = useContext(AuthContext);
   const inputRef = useRef<HTMLInputElement>(null);
