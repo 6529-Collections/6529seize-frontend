@@ -1,17 +1,14 @@
 import { IProfileAndConsolidations } from "../../../entities/IProfile";
 import { ConsolidatedTDHMetrics } from "../../../entities/ITDH";
-
 import UserPageHeaderName from "./name/UserPageHeaderName";
 import UserPageHeaderLevel from "./UserPageHeaderLevel";
 import UserPageHeaderStats from "./stats/UserPageHeaderStats";
 import { useAccount } from "wagmi";
 import { useEffect, useState } from "react";
-import UserEditProfileButton from "../settings/UserEditProfileButton";
 import { amIUser, getRandomColor } from "../../../helpers/Helpers";
 import { Inter } from "next/font/google";
 import UserPageHeaderPfpWrapper from "./pfp/UserPageHeaderPfpWrapper";
 import UserPageHeaderPfp from "./pfp/UserPageHeaderPfp";
-import PencilIcon from "../../utils/icons/PencilIcon";
 import UserPageHeaderBanner from "./banner/UserPageHeaderBanner";
 
 const DEFAULT_BANNER_1 = getRandomColor();
@@ -84,14 +81,6 @@ export default function UserPageHeader({
               />
               <UserPageHeaderLevel level={profile.level} />
               <UserPageHeaderStats profile={profile} />
-            </div>
-            <div className="tw-mt-6 md:tw-hidden">
-              {isMyProfile && <UserEditProfileButton user={user} />}
-            </div>
-            <div className="tw-w-full md:tw-w-auto tw-flex md:tw-mt-6 tw-items-center tw-gap-x-3">
-              <div className="tw-hidden md:tw-block">
-                {isMyProfile && <UserEditProfileButton user={user} />}
-              </div>
             </div>
           </div>
         </div>

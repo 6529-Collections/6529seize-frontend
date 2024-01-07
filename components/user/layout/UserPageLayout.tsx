@@ -60,12 +60,10 @@ export default function UserPageLayout({
 
   const { data: profile } = useQuery<IProfileAndConsolidations>({
     queryKey: [QueryKey.PROFILE, handleOrWallet],
-    queryFn: async () => {
-      console.log(handleOrWallet);
-      return await commonApiFetch<IProfileAndConsolidations>({
+    queryFn: async () =>
+      await commonApiFetch<IProfileAndConsolidations>({
         endpoint: `profiles/${handleOrWallet}`,
-      });
-    },
+      }),
     enabled: !!handleOrWallet,
     initialData: props.profile,
   });
@@ -85,7 +83,8 @@ export default function UserPageLayout({
   }
   descriptionArray.push("6529 SEIZE");
 
-  const mainAddress = profile.profile?.primary_wallet ?? handleOrWallet.toLowerCase();
+  const mainAddress =
+    profile.profile?.primary_wallet ?? handleOrWallet.toLowerCase();
   const [isLoadingTabData, setIsLoadingTabData] = useState(false);
 
   useEffect(() => {
