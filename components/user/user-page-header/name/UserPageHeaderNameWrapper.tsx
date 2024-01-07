@@ -28,7 +28,7 @@ export default function UserPageHeaderNameWrapper({
         {children}
         {canEdit && (
           <div className="group-hover:tw-block tw-hidden tw-absolute tw-inset-0 tw-text-neutral-400">
-            <div className="tw-absolute tw-top-2 -tw-left-8">
+            <div className="tw-absolute tw-top-2 -tw-left-6">
               <PencilIcon />
             </div>
           </div>

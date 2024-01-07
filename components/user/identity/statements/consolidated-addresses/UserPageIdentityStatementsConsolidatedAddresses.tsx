@@ -5,18 +5,28 @@ import {
 } from "../../../../../entities/IProfile";
 import EthereumIcon from "../../../utils/icons/EthereumIcon";
 import UserPageIdentityStatementsConsolidatedAddressesItem from "./UserPageIdentityStatementsConsolidatedAddressesItem";
+import { useAccount } from "wagmi";
+import { amIUser } from "../../../../../helpers/Helpers";
 
 export default function UserPageIdentityStatementsConsolidatedAddresses({
   profile,
 }: {
   readonly profile: IProfileAndConsolidations;
 }) {
-  const getPrimaryAddress = () => {
-    if (profile.profile?.primary_wallet) {
-      return profile.profile.primary_wallet.toLowerCase();
+  const { address } = useAccount();
+
+  const [isMyProfile, setIsMyProfile] = useState<boolean>(true);
+  useEffect(
+    () => setIsMyProfile(amIUser({ profile, address })),
+    [profile, address]
+  );
+
+  const getPrimaryAddress = (p: IProfileAndConsolidations) => {
+    if (p.profile?.primary_wallet) {
+      return p.profile.primary_wallet.toLowerCase();
     }
 
-    const highestTdhWallet = profile.consolidation.wallets.reduce(
+    const highestTdhWallet = p.consolidation.wallets.reduce(
       (highest, wallet) => {
         if (wallet.tdh > highest.tdh) {
           return wallet;
@@ -30,11 +40,11 @@ export default function UserPageIdentityStatementsConsolidatedAddresses({
   };
 
   const [primaryAddress, setPrimaryAddress] = useState<string>(
-    getPrimaryAddress()
+    getPrimaryAddress(profile)
   );
 
   useEffect(() => {
-    setPrimaryAddress(getPrimaryAddress());
+    setPrimaryAddress(getPrimaryAddress(profile));
   }, [profile]);
 
   const sortByPrimary = (wallets: IProfileConsolidation[]) => {
@@ -79,7 +89,9 @@ export default function UserPageIdentityStatementsConsolidatedAddresses({
           <UserPageIdentityStatementsConsolidatedAddressesItem
             key={wallet.wallet.address}
             address={wallet}
+            profile={profile}
             primaryAddress={primaryAddress}
+            canEdit={isMyProfile}
           />
         ))}
       </ul>

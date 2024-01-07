@@ -1,8 +1,5 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useState } from "react";
 import { IProfileAndConsolidations } from "../../../../entities/IProfile";
-import { AuthContext } from "../../../auth/Auth";
-import { useAccount } from "wagmi";
-import { amIUser } from "../../../../helpers/Helpers";
 import PencilIcon from "../../../utils/icons/PencilIcon";
 import CommonAnimationWrapper from "../../../utils/animation/CommonAnimationWrapper";
 import CommonAnimationOpacity from "../../../utils/animation/CommonAnimationOpacity";
@@ -54,4 +51,3 @@ export default function UserPageHeaderPfpWrapper({
     </div>
   );
 }
-

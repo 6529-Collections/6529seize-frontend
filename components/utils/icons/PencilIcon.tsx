@@ -1,8 +1,21 @@
-export default function PencilIcon() {
+export enum PencilIconSize {
+  SMALL = "SMALL",
+  MEDIUM = "MEDIUM",
+}
+
+export default function PencilIcon({
+  size = PencilIconSize.MEDIUM,
+}: {
+  readonly size?: PencilIconSize;
+}) {
+  const classes: Record<PencilIconSize, string> = {
+    [PencilIconSize.SMALL]: "tw-w-3 tw-h-3",
+    [PencilIconSize.MEDIUM]: "tw-w-5 tw-h-5",
+  };
+
   return (
     <svg
-      width="24"
-      height="24"
+      className={classes[size]}
       viewBox="0 0 24 24"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"

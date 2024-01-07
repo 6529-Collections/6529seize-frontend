@@ -117,10 +117,6 @@ const Page: NextPageWithLayout<{ pageProps: UserPageRepProps }> = ({
     return <UserPageNoProfile profile={profile} />;
   }
 
-  if (!pageProps.profile.profile) {
-    return <UserPageNoProfile profile={pageProps.profile} />;
-  }
-
   return (
     <div className="tailwind-scope">
       <UserPageRep

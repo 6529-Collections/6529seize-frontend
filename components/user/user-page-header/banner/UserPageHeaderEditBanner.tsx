@@ -6,17 +6,21 @@ import {
 import { useClickAway, useKeyPressEvent } from "react-use";
 import { AuthContext } from "../../../auth/Auth";
 import { ReactQueryWrapperContext } from "../../../react-query-wrapper/ReactQueryWrapper";
-import UserSettingsUsername from "../../settings/UserSettingsUsername";
+import { useRouter } from "next/router";
+import UserSettingsBackground from "../../settings/UserSettingsBackground";
 import UserSettingsSave from "../../settings/UserSettingsSave";
 import { useMutation } from "@tanstack/react-query";
 import { commonApiPost } from "../../../../services/api/common-api";
-import { useRouter } from "next/router";
 
-export default function UserPageHeaderEditName({
+export default function UserPageHeaderEditBanner({
   profile,
+  defaultBanner1,
+  defaultBanner2,
   onClose,
 }: {
   readonly profile: IProfileAndConsolidations;
+  readonly defaultBanner1: string;
+  readonly defaultBanner2: string;
   readonly onClose: () => void;
 }) {
   const modalRef = useRef<HTMLDivElement>(null);
@@ -27,17 +31,23 @@ export default function UserPageHeaderEditName({
   const { invalidateProfile } = useContext(ReactQueryWrapperContext);
   const router = useRouter();
 
-  const [userName, setUserName] = useState<string>(
-    profile.profile?.handle ?? ""
+  const [bgColor1, setBgColor1] = useState<string>(
+    profile.profile?.banner_1 ?? defaultBanner1
   );
+  const [bgColor2, setBgColor2] = useState<string>(
+    profile.profile?.banner_2 ?? defaultBanner2
+  );
+
+  const [mutating, setMutating] = useState<boolean>(false);
 
   const [haveChanges, setHaveChanges] = useState<boolean>(false);
 
   useEffect(() => {
-    setHaveChanges(userName !== profile.profile?.handle);
-  }, [userName]);
-
-  const [mutating, setMutating] = useState<boolean>(false);
+    setHaveChanges(
+      bgColor1 !== profile.profile?.banner_1 ||
+        bgColor2 !== profile.profile?.banner_2
+    );
+  }, [profile, bgColor1, bgColor2]);
 
   const updateUser = useMutation({
     mutationFn: async (body: ApiCreateOrUpdateProfileRequest) => {
@@ -96,11 +106,11 @@ export default function UserPageHeaderEditName({
     }
 
     const body: ApiCreateOrUpdateProfileRequest = {
-      handle: userName,
+      handle: profile.profile?.handle,
       primary_wallet: profile.profile?.primary_wallet,
       classification: profile.profile?.classification,
-      banner_1: profile.profile?.banner_1,
-      banner_2: profile.profile?.banner_2,
+      banner_1: bgColor1,
+      banner_2: bgColor2,
     };
 
     await updateUser.mutateAsync(body);
@@ -119,10 +129,11 @@ export default function UserPageHeaderEditName({
               onSubmit={onSubmit}
               className="tw-flex tw-flex-col tw-gap-y-6"
             >
-              <UserSettingsUsername
-                userName={userName}
-                originalUsername={profile.profile?.handle ?? ""}
-                setUserName={setUserName}
+              <UserSettingsBackground
+                bgColor1={bgColor1}
+                bgColor2={bgColor2}
+                setBgColor1={setBgColor1}
+                setBgColor2={setBgColor2}
               />
 
               <UserSettingsSave loading={mutating} disabled={!haveChanges} />

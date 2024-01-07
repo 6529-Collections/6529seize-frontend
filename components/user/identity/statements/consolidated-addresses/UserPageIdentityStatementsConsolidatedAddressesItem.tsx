@@ -1,18 +1,26 @@
 import Tippy from "@tippyjs/react";
-import { IProfileConsolidation } from "../../../../../entities/IProfile";
+import {
+  IProfileAndConsolidations,
+  IProfileConsolidation,
+} from "../../../../../entities/IProfile";
 import EtherscanIcon from "../../../utils/icons/EtherscanIcon";
 import OpenseaIcon from "../../../utils/icons/OpenseaIcon";
 import CopyIcon from "../../../../utils/icons/CopyIcon";
 import { useEffect, useState } from "react";
 import { useCopyToClipboard } from "react-use";
 import { useRouter } from "next/router";
+import UserPageIdentityStatementsConsolidatedAddressesItemPrimary from "./UserPageIdentityStatementsConsolidatedAddressesItemPrimary";
 
 export default function UserPageIdentityStatementsConsolidatedAddressesItem({
   address,
   primaryAddress,
+  canEdit,
+  profile,
 }: {
   readonly address: IProfileConsolidation;
   readonly primaryAddress: string;
+  readonly canEdit: boolean;
+  readonly profile: IProfileAndConsolidations;
 }) {
   const router = useRouter();
   const goToOpensea = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
@@ -97,11 +105,12 @@ export default function UserPageIdentityStatementsConsolidatedAddressesItem({
               strokeLinejoin="round"
             />
           </svg>
-          {isPrimary && (
-            <span className="tw-ml-1 tw-text-xs tw-font-bold tw-text-neutral-500">
-              Primary
-            </span>
-          )}
+          <UserPageIdentityStatementsConsolidatedAddressesItemPrimary
+            isPrimary={isPrimary}
+            canEdit={canEdit}
+            profile={profile}
+            address={address}
+          />
           <Tippy
             content="Copy"
             theme="dark"

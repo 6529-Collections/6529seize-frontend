@@ -2,17 +2,18 @@ import { useContext, useEffect, useRef, useState } from "react";
 import {
   ApiCreateOrUpdateProfileRequest,
   IProfileAndConsolidations,
-} from "../../../../entities/IProfile";
+  PROFILE_CLASSIFICATION,
+} from "../../../../../entities/IProfile";
 import { useClickAway, useKeyPressEvent } from "react-use";
-import { AuthContext } from "../../../auth/Auth";
-import { ReactQueryWrapperContext } from "../../../react-query-wrapper/ReactQueryWrapper";
-import UserSettingsUsername from "../../settings/UserSettingsUsername";
-import UserSettingsSave from "../../settings/UserSettingsSave";
-import { useMutation } from "@tanstack/react-query";
-import { commonApiPost } from "../../../../services/api/common-api";
+import { AuthContext } from "../../../../auth/Auth";
+import { ReactQueryWrapperContext } from "../../../../react-query-wrapper/ReactQueryWrapper";
 import { useRouter } from "next/router";
+import UserSettingsSave from "../../../settings/UserSettingsSave";
+import UserSettingsClassification from "../../../settings/UserSettingsClassification";
+import { useMutation } from "@tanstack/react-query";
+import { commonApiPost } from "../../../../../services/api/common-api";
 
-export default function UserPageHeaderEditName({
+export default function UserPageHeaderEditClassification({
   profile,
   onClose,
 }: {
@@ -27,15 +28,15 @@ export default function UserPageHeaderEditName({
   const { invalidateProfile } = useContext(ReactQueryWrapperContext);
   const router = useRouter();
 
-  const [userName, setUserName] = useState<string>(
-    profile.profile?.handle ?? ""
+  const [classification, setClassification] = useState<PROFILE_CLASSIFICATION>(
+    profile.profile?.classification ?? PROFILE_CLASSIFICATION.PSEUDONYM
   );
 
   const [haveChanges, setHaveChanges] = useState<boolean>(false);
 
   useEffect(() => {
-    setHaveChanges(userName !== profile.profile?.handle);
-  }, [userName]);
+    setHaveChanges(classification !== profile.profile?.classification);
+  }, [classification]);
 
   const [mutating, setMutating] = useState<boolean>(false);
 
@@ -81,8 +82,7 @@ export default function UserPageHeaderEditName({
 
   const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-
-    if (!profile.profile?.primary_wallet || !profile.profile?.classification) {
+    if (!profile.profile) {
       return;
     }
 
@@ -96,9 +96,9 @@ export default function UserPageHeaderEditName({
     }
 
     const body: ApiCreateOrUpdateProfileRequest = {
-      handle: userName,
+      handle: profile.profile.handle,
       primary_wallet: profile.profile?.primary_wallet,
-      classification: profile.profile?.classification,
+      classification,
       banner_1: profile.profile?.banner_1,
       banner_2: profile.profile?.banner_2,
     };
@@ -119,10 +119,9 @@ export default function UserPageHeaderEditName({
               onSubmit={onSubmit}
               className="tw-flex tw-flex-col tw-gap-y-6"
             >
-              <UserSettingsUsername
-                userName={userName}
-                originalUsername={profile.profile?.handle ?? ""}
-                setUserName={setUserName}
+              <UserSettingsClassification
+                selected={classification}
+                onSelect={setClassification}
               />
 
               <UserSettingsSave loading={mutating} disabled={!haveChanges} />

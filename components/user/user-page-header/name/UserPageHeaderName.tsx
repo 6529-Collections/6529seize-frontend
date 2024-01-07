@@ -5,6 +5,7 @@ import {
 import { ConsolidatedTDHMetrics } from "../../../../entities/ITDH";
 import UserCICTypeIcon from "../../utils/user-cic-type/UserCICTypeIcon";
 import UserPageHeaderNameWrapper from "./UserPageHeaderNameWrapper";
+import UserPageClassificationWrapper from "./classification/UserPageClassificationWrapper";
 
 export default function UserPageHeaderName({
   profile,
@@ -49,9 +50,11 @@ export default function UserPageHeaderName({
         )}
       </div>
       {profile.profile?.classification && (
-        <div className="tw-block tw-mt-1 tw-text-iron-400 tw-font-normal tw-text-[13px] tw-leading-3">
-          {CLASSIFICATIONS[profile.profile.classification].title}
-        </div>
+        <UserPageClassificationWrapper profile={profile} canEdit={canEdit}>
+          <div className="tw-block tw-text-iron-400 tw-font-normal tw-text-[13px] tw-leading-3">
+            {CLASSIFICATIONS[profile.profile.classification].title}
+          </div>
+        </UserPageClassificationWrapper>
       )}
     </div>
   );
