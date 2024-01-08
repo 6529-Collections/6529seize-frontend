@@ -826,7 +826,7 @@ export default function CollectionDelegationComponent(props: Props) {
     return (
       <>
         <h5 className="float-none pt-5 pb-1">
-          Delegation Managers (Sub-Delegations)
+        Use A Delegation Manager (For Delegations or Consolidations)
         </h5>
         <Accordion
           alwaysOpen
@@ -1596,8 +1596,8 @@ export default function CollectionDelegationComponent(props: Props) {
                 !showRevokeDelegationWithSub && (
                   <>
                     {printDelegations()}
-                    {printSubDelegations()}
                     {printConsolidations()}
+                    {printSubDelegations()}
                     {printLocks()}
                     <Container className="no-padding">
                       <Row className="pt-5 pb-3">
