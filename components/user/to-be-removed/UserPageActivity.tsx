@@ -149,26 +149,23 @@ export default function UserPageActivity(props: Props) {
 
   return (
     <>
-      <Row>
+      <Row className="pt-4">
         <Col
           className="d-flex align-items-center"
           xs={{ span: 7 }}
           sm={{ span: 7 }}
           md={{ span: 9 }}
-          lg={{ span: 10 }}
-        >
+          lg={{ span: 10 }}>
           <h3>Wallet Activity</h3>
         </Col>
         <Col
           xs={{ span: 5 }}
           sm={{ span: 5 }}
           md={{ span: 3 }}
-          lg={{ span: 2 }}
-        >
+          lg={{ span: 2 }}>
           <Dropdown
             className={styles.activityFilterDropdown}
-            drop={"down-centered"}
-          >
+            drop={"down-centered"}>
             <Dropdown.Toggle>Filter: {activityTypeFilter}</Dropdown.Toggle>
             <Dropdown.Menu>
               {Object.values(UserActivityTypeFilter).map((filter) => (
@@ -179,8 +176,7 @@ export default function UserPageActivity(props: Props) {
                       page: 1,
                       filter,
                     })
-                  }
-                >
+                  }>
                   {filter}
                 </Dropdown.Item>
               ))}
