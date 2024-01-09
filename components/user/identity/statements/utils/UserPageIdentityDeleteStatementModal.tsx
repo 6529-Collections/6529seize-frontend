@@ -23,9 +23,7 @@ export default function UserPageIdentityDeleteStatementModal({
   useKeyPressEvent("Escape", onClose);
 
   const { requestAuth, setToast } = useContext(AuthContext);
-  const { invalidateLogs, invalidateProfileCICStatements } = useContext(
-    ReactQueryWrapperContext
-  );
+  const { onProfileStatementRemove } = useContext(ReactQueryWrapperContext);
 
   const deleteStatementMutation = useMutation({
     mutationFn: async () =>
@@ -37,8 +35,7 @@ export default function UserPageIdentityDeleteStatementModal({
         message: "CIC statement deleted.",
         type: "warning",
       });
-      invalidateProfileCICStatements(profile);
-      invalidateLogs();
+      onProfileStatementRemove({ profile });
     },
   });
 

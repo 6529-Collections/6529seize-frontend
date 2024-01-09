@@ -113,7 +113,7 @@ export default function UserPageSetUpProfile({
     await updateUser.mutateAsync(body);
   };
 
-  const [userNameAvailable, setIsUserNameAvailable] = useState<boolean>(false);
+  const [userNameAvailable, setUserNameAvailable] = useState<boolean>(false);
   const [checkingUsername, setCheckingUsername] = useState<boolean>(false);
 
   return (
@@ -125,7 +125,7 @@ export default function UserPageSetUpProfile({
             userName={userName}
             originalUsername={profile.profile?.handle ?? ""}
             setUserName={setUserName}
-            setIsAvailable={setIsUserNameAvailable}
+            setIsAvailable={setUserNameAvailable}
             setIsLoading={setCheckingUsername}
           />
 
