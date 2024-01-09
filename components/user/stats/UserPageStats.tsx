@@ -9,6 +9,7 @@ import { NFTLite } from "../../../entities/INFT";
 import UserPageActivity from "../to-be-removed/UserPageActivity";
 import UserPageDistributions from "../to-be-removed/UserPageDistributions";
 import UserPageHeaderAddresses from "../user-page-header/addresses/UserPageHeaderAddresses";
+import UserPageStatsTags from "./UserPageStatsTags";
 
 export default function UserPageStats({
   profile,
@@ -91,6 +92,7 @@ export default function UserPageStats({
 
   return (
     <>
+      <UserPageStatsTags tdh={tdh} />
       <div className="tailwind-scope tw-inline-flex tw-justify-between tw-w-full tw-mt-8">
         <h2 className="tw-text-xl tw-font-semibold tw-text-white tw-sm:truncate sm:tw-text-2xl sm:tw-tracking-tight tw-text-right">
           Under construction
