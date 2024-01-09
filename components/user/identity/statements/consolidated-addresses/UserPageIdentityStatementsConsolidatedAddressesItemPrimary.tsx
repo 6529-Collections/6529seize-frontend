@@ -93,7 +93,7 @@ export default function UserPageIdentityStatementsConsolidatedAddressesItemPrima
       <button
         disabled={mutating}
         onClick={onSave}
-        className="tw-bg-transparent tw-border-none tw-ml-1 tw-text-xs tw-font-bold tw-text-neutral-500 hover:tw-text-primary-500"
+        className="tw-bg-transparent tw-whitespace-nowrap tw-border-none tw-ml-1 tw-text-xs tw-font-bold tw-text-neutral-500 hover:tw-text-primary-400"
       >
         {mutating ? <CircleLoader /> : "Make Primary"}
       </button>
