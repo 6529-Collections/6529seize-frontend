@@ -56,7 +56,7 @@ export default function UserPageIdentityStatementsConsolidatedAddressesItem({
   }, [router.isReady]);
 
   return (
-    <li className="tw-h-5 tw-group tw-flex tw-items-center tw-group  tw-text-sm tw-font-medium tw-text-neutral-200 hover:tw-text-neutral-400 tw-transition tw-duration-300 tw-ease-out tw-space-x-1">
+    <li className="tw-h-5 tw-group tw-flex tw-items-center tw-group tw-text-sm tw-font-medium tw-text-neutral-200 hover:tw-text-neutral-400 tw-transition tw-duration-300 tw-ease-out tw-space-x-1">
       <Tippy
         content="Opensea"
         theme="dark"
@@ -88,8 +88,13 @@ export default function UserPageIdentityStatementsConsolidatedAddressesItem({
         </button>
       </Tippy>
       <div className="tw-space-x-3 tw-inline-flex tw-items-center">
-        <span>{title}</span>
-        {address.wallet.ens && <span>{address.wallet.ens}</span>}
+        <div className="tw-truncate md:tw-max-w-[8rem] lg:tw-max-w-[11rem] tw-text-iron-200">
+          <span>{title}</span>
+          {address.wallet.ens && (
+            <span className="tw-ml-3">{address.wallet.ens}</span>
+          )}
+        </div>
+
         <div className="tw-inline-flex tw-items-center">
           <svg
             className="tw-flex-shrink-0 tw-w-5 tw-h-5"
