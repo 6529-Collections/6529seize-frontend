@@ -2,7 +2,7 @@ import { numberWithCommas } from "../../helpers/Helpers";
 import styles from "./Address.module.scss";
 
 export enum TagType {
-  RANK,
+  BOOST,
   MEME_SETS,
   MEMES,
   SZN1,
@@ -24,8 +24,8 @@ interface TagProps {
 export default function Tag(props: TagProps) {
   function getStyle() {
     switch (props.type) {
-      case TagType.RANK:
-        return styles.rankTag;
+      case TagType.BOOST:
+        return styles.boostTag;
       case TagType.MEME_SETS:
         return styles.memesSetTag;
       case TagType.MEMES:
@@ -48,7 +48,7 @@ export default function Tag(props: TagProps) {
   }
 
   return (
-    <span className={`${styles.tag} ${getStyle()}`}>
+    <span className={`${styles.tag} ${styles.profileTag} ${getStyle()}`}>
       {props.text}
       {props.value && numberWithCommas(props.value)}
       {props.text_after}
