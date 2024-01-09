@@ -74,6 +74,19 @@ export const getCommonUserServerSideProps = async ({
   };
 };
 
+export const getUserProfile = async ({
+  user,
+  headers,
+}: {
+  user: string;
+  headers: Record<string, string>;
+}): Promise<IProfileAndConsolidations> => {
+  return await commonApiFetch<IProfileAndConsolidations>({
+    endpoint: `profiles/${user}`,
+    headers: headers,
+  });
+};
+
 export const userPageNeedsRedirect = ({
   profile,
   req,

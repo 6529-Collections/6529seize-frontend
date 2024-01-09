@@ -7,9 +7,11 @@ import UserPageIdentityStatementsStatementsList from "../utils/UserPageIdentityS
 export default function UserPageIdentityStatementsSocialMediaVerificationPosts({
   statements,
   profile,
+  loading,
 }: {
   readonly statements: CicStatement[];
   readonly profile: IProfileAndConsolidations;
+  readonly loading: boolean;
 }) {
   return (
     <div>
@@ -38,6 +40,7 @@ export default function UserPageIdentityStatementsSocialMediaVerificationPosts({
         statements={statements}
         profile={profile}
         noItemsMessage="No Social Media Verification Post added yet"
+        loading={loading}
       />
     </div>
   );

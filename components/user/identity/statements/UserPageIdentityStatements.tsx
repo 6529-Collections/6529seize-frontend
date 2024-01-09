@@ -16,10 +16,8 @@ import { QueryKey } from "../../../react-query-wrapper/ReactQueryWrapper";
 
 export default function UserPageIdentityStatements({
   profile,
-  profileIdentityStatements: initialProfileIdentityStatements,
 }: {
   readonly profile: IProfileAndConsolidations;
-  readonly profileIdentityStatements: CicStatement[];
 }) {
   const router = useRouter();
   const user = (router.query.user as string).toLowerCase();
@@ -31,14 +29,13 @@ export default function UserPageIdentityStatements({
   const [socialMediaVerificationPosts, setSocialMediaVerificationPosts] =
     useState<CicStatement[]>([]);
 
-  const { data: statements } = useQuery<CicStatement[]>({
+  const { isLoading, data: statements } = useQuery<CicStatement[]>({
     queryKey: [QueryKey.PROFILE_CIC_STATEMENTS, user.toLowerCase()],
     queryFn: async () =>
       await commonApiFetch<CicStatement[]>({
         endpoint: `profiles/${user}/cic/statements`,
       }),
     enabled: !!user,
-    initialData: initialProfileIdentityStatements,
   });
 
   useEffect(() => {
@@ -84,6 +81,7 @@ export default function UserPageIdentityStatements({
                 <UserPageIdentityStatementsSocialMediaAccounts
                   statements={socialMediaAccounts}
                   profile={profile}
+                  loading={isLoading}
                 />
               </div>
 
@@ -91,10 +89,12 @@ export default function UserPageIdentityStatements({
                 <UserPageIdentityStatementsContacts
                   statements={contacts}
                   profile={profile}
+                  loading={isLoading}
                 />
                 <UserPageIdentityStatementsSocialMediaVerificationPosts
                   statements={socialMediaVerificationPosts}
                   profile={profile}
+                  loading={isLoading}
                 />
               </div>
             </div>

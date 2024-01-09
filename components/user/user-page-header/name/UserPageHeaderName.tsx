@@ -2,7 +2,6 @@ import {
   CLASSIFICATIONS,
   IProfileAndConsolidations,
 } from "../../../../entities/IProfile";
-import { ConsolidatedTDHMetrics } from "../../../../entities/ITDH";
 import UserCICTypeIcon from "../../utils/user-cic-type/UserCICTypeIcon";
 import UserPageHeaderNameWrapper from "./UserPageHeaderNameWrapper";
 import UserPageClassificationWrapper from "./classification/UserPageClassificationWrapper";
@@ -11,12 +10,10 @@ export default function UserPageHeaderName({
   profile,
   canEdit,
   mainAddress,
-  consolidatedTDH,
 }: {
   readonly profile: IProfileAndConsolidations;
   readonly canEdit: boolean;
   readonly mainAddress: string;
-  readonly consolidatedTDH: ConsolidatedTDHMetrics | null;
 }) {
   const getDisplayName = (): string => {
     if (profile.profile?.handle) {

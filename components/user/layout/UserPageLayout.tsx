@@ -2,11 +2,14 @@ import Head from "next/head";
 import { ReactNode, useContext, useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 import HeaderPlaceholder from "../../header/HeaderPlaceholder";
-import { numberWithCommas } from "../../../helpers/Helpers";
+import {
+  containsEmojis,
+  formatAddress,
+  numberWithCommas,
+} from "../../../helpers/Helpers";
 import UserPageHeader from "../user-page-header/UserPageHeader";
 import { useRouter } from "next/router";
 import { IProfileAndConsolidations } from "../../../entities/IProfile";
-import { ConsolidatedTDHMetrics } from "../../../entities/ITDH";
 import UserPageTabs from "./UserPageTabs";
 import { Inter } from "next/font/google";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -31,17 +34,11 @@ const inter = Inter({
 const DEFAULT_IMAGE =
   "https://d3lqz0a4bldqgf.cloudfront.net/seize_images/Seize_Logo_Glasses_2.png";
 
-interface UserPageLayoutProps {
-  readonly profile: IProfileAndConsolidations;
-  readonly title: string;
-  readonly consolidatedTDH: ConsolidatedTDHMetrics | null;
-}
-
 export default function UserPageLayout({
-  props,
+  profile: initialProfile,
   children,
 }: {
-  readonly props: UserPageLayoutProps;
+  readonly profile: IProfileAndConsolidations;
   readonly children: ReactNode;
 }) {
   const queryClient = useQueryClient();
@@ -55,7 +52,7 @@ export default function UserPageLayout({
   ]);
 
   if (!profileInit) {
-    setProfile(props.profile);
+    setProfile(initialProfile);
   }
 
   const { data: profile } = useQuery<IProfileAndConsolidations>({
@@ -65,10 +62,25 @@ export default function UserPageLayout({
         endpoint: `profiles/${handleOrWallet}`,
       }),
     enabled: !!handleOrWallet,
-    initialData: props.profile,
+    initialData: initialProfile,
   });
 
-  const pagenameFull = `${props.title} | 6529 SEIZE`;
+  const getTitle = (): string => {
+    if (profile.profile?.handle) {
+      return profile.profile.handle;
+    }
+    if (
+      profile.consolidation.consolidation_display &&
+      !containsEmojis(profile.consolidation.consolidation_display)
+    ) {
+      return profile.consolidation.consolidation_display;
+    }
+    return formatAddress(handleOrWallet);
+  };
+
+  const title = getTitle();
+
+  const pagenameFull = `${title} | 6529 SEIZE`;
 
   const descriptionArray = [];
   if (profile.consolidation.tdh && profile.consolidation.tdh > 0) {
@@ -76,10 +88,8 @@ export default function UserPageLayout({
       `TDH: ${numberWithCommas(profile.consolidation.tdh)}`
     );
   }
-  if (props.consolidatedTDH?.balance && props.consolidatedTDH?.balance > 0) {
-    descriptionArray.push(
-      `Cards: ${numberWithCommas(props.consolidatedTDH?.balance)}`
-    );
+  if (initialProfile.balance > 0) {
+    descriptionArray.push(`Cards: ${numberWithCommas(initialProfile.balance)}`);
   }
   descriptionArray.push("6529 SEIZE");
 
@@ -115,12 +125,12 @@ export default function UserPageLayout({
       <Head>
         <title>{pagenameFull}</title>
         <link rel="icon" href="/favicon.ico" />
-        <meta name="description" content={props.title} />
+        <meta name="description" content={title} />
         <meta
           property="og:url"
           content={`${process.env.BASE_ENDPOINT}/${handleOrWallet}`}
         />
-        <meta property="og:title" content={props.title} />
+        <meta property="og:title" content={title} />
         <meta
           property="og:image"
           content={profile.profile?.pfp_url ?? DEFAULT_IMAGE}
@@ -136,12 +146,7 @@ export default function UserPageLayout({
         <div
           className={`tw-bg-iron-950 tw-min-h-screen tw-pb-16 lg:tw-pb-20 ${inter.className}`}
         >
-          <UserPageHeader
-            profile={profile}
-            mainAddress={mainAddress}
-            consolidatedTDH={props.consolidatedTDH}
-            user={handleOrWallet}
-          />
+          <UserPageHeader profile={profile} mainAddress={mainAddress} />
           <div className="tw-px-6 min-[1100px]:tw-max-w-[960px] min-[1200px]:tw-max-w-[1150px] min-[1300px]:tw-max-w-[1250px] min-[1400px]:tw-max-w-[1350px] min-[1500px]:tw-max-w-[1450px] min-[1600px]:tw-max-w-[1550px] min-[1800px]:tw-max-w-[1750px] min-[2000px]:tw-max-w-[1950px] tw-mx-auto">
             <UserPageTabs />
             <div className="tw-mt-6">

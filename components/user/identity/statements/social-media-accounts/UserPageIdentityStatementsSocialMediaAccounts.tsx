@@ -7,9 +7,11 @@ import UserPageIdentityStatementsStatementsList from "../utils/UserPageIdentityS
 export default function UserPageIdentityStatementsSocialMediaAccounts({
   statements,
   profile,
+  loading,
 }: {
   readonly statements: CicStatement[];
   readonly profile: IProfileAndConsolidations;
+  readonly loading: boolean;
 }) {
   return (
     <div>
@@ -40,6 +42,7 @@ export default function UserPageIdentityStatementsSocialMediaAccounts({
         statements={statements}
         profile={profile}
         noItemsMessage="No Social Media Account added yet"
+        loading={loading}
       />
     </div>
   );
