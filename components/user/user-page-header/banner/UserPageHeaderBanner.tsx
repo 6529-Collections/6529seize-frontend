@@ -30,7 +30,7 @@ export default function UserPageHeaderBanner({
       }}
     >
       {canEdit && (
-        <div className="group-hover:tw-block tw-hidden tw-absolute tw-inset-0 tw-bg-black tw-bg-opacity-50 tw-transition tw-duration-300 tw-ease-out">
+        <div className="group-hover:tw-visible tw-invisible tw-absolute tw-inset-0 tw-bg-black tw-bg-opacity-50 tw-transition tw-duration-300 tw-ease-out">
           <button
             onClick={() => setIsEditOpen(true)}
             className="tw-w-full tw-h-full tw-bg-transparent tw-border-none"

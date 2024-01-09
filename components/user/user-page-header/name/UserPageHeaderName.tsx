@@ -23,8 +23,8 @@ export default function UserPageHeaderName({
       return profile.profile.handle;
     }
 
-    if (consolidatedTDH?.consolidation_display) {
-      return consolidatedTDH.consolidation_display;
+    if (profile.consolidation.consolidation_display) {
+      return profile.consolidation.consolidation_display;
     }
 
     if (mainAddress.endsWith(".eth")) {

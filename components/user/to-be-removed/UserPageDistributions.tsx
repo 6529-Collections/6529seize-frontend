@@ -149,7 +149,7 @@ export default function UserPageDistributions(props: Props) {
 
   return (
     <>
-      <Row>
+      <Row className="pt-4">
         <Col
           className="d-flex align-items-center"
           xs={{ span: 7 }}
