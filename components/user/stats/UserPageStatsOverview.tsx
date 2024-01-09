@@ -25,7 +25,7 @@ export default function UserPageStatsOverview({
   }, [tdh]);
 
   return (
-    <Container className="no-padding">
+    <Container className="no-padding pt-2">
       <Row>
         <Col
           className="d-flex align-items-center"
@@ -468,12 +468,6 @@ export default function UserPageStatsOverview({
                       </td>
                     </tr>
                     <tr className={styles.primaryTableGap}></tr>
-                    <tr>
-                      <td>
-                        <b>Boost</b>
-                      </td>
-                      <td>x{tdh.boost}</td>
-                    </tr>
                   </tbody>
                 </Table>
               </Accordion.Body>

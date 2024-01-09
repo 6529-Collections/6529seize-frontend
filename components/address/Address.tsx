@@ -84,7 +84,7 @@ export default function Address(props: Readonly<Props>) {
   };
 
   function getProfileLink() {
-    if (props.display) {
+    if (props.display && !props.display.includes(" ")) {
       return `/${props.display}`;
     }
     return `/${props.wallets[0]}`;
