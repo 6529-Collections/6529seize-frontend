@@ -25,12 +25,10 @@ export default function UserPageHeader({
   profile,
   mainAddress,
   consolidatedTDH,
-  user,
 }: {
   readonly profile: IProfileAndConsolidations;
   readonly mainAddress: string;
   readonly consolidatedTDH: ConsolidatedTDHMetrics | null;
-  readonly user: string;
 }) {
   const { address } = useAccount();
   const [isMyProfile, setIsMyProfile] = useState<boolean>(true);
