@@ -7,12 +7,8 @@ import {
   RatingWithProfileInfoAndLevel,
 } from "../../entities/IProfile";
 import { NextPageWithLayout } from "../_app";
-import {
-  QueryKey,
-  ReactQueryWrapperContext,
-} from "../../components/react-query-wrapper/ReactQueryWrapper";
+import { ReactQueryWrapperContext } from "../../components/react-query-wrapper/ReactQueryWrapper";
 import UserPageLayout from "../../components/user/layout/UserPageLayout";
-import { ConsolidatedTDHMetrics } from "../../entities/ITDH";
 import {
   getCommonHeaders,
   getCommonUserServerSideProps,
@@ -20,20 +16,16 @@ import {
   getProfileRatings,
   getProfileRatingsByRater,
   getSignedWalletOrNull,
+  getUserProfile,
   getUserProfileActivityLogs,
   userPageNeedsRedirect,
 } from "../../helpers/server.helpers";
-import UserPageRep from "../../components/user/rep/UserPageRep";
 import { Page as PageType } from "../../helpers/Types";
 import {
   ActivityLogParams,
   convertActivityLogParams,
 } from "../../components/profile-activity/ProfileActivityLogs";
 import { FilterTargetType } from "../../components/utils/CommonFilterTargetSelect";
-import UserPageNoProfile from "../../components/user/utils/no-profile/UserPageNoProfile";
-import { useQuery } from "@tanstack/react-query";
-import { useRouter } from "next/router";
-import { commonApiFetch } from "../../services/api/common-api";
 import UserPageRepWrapper from "../../components/user/rep/UserPageRepWrapper";
 
 export interface UserPageRepPropsRepRates {
@@ -44,8 +36,6 @@ export interface UserPageRepPropsRepRates {
 export interface UserPageRepProps {
   readonly profile: IProfileAndConsolidations;
   readonly handleOrWallet: string;
-  readonly title: string;
-  readonly consolidatedTDH: ConsolidatedTDHMetrics | null;
   readonly repRates: UserPageRepPropsRepRates;
   readonly repLogs: PageType<ProfileActivityLogRatingEdit>;
   readonly repGivenToUsers: PageType<RatingWithProfileInfoAndLevel>;
@@ -68,9 +58,6 @@ const getInitialActivityLogParams = (
 const Page: NextPageWithLayout<{ pageProps: UserPageRepProps }> = ({
   pageProps,
 }) => {
-  const router = useRouter();
-  const user = (router.query.user as string).toLowerCase();
-
   const initialRepGivenParams = getInitialRatersParams({
     handleOrWallet: pageProps.handleOrWallet,
     matter: MATTER_TYPE,
@@ -119,7 +106,11 @@ const Page: NextPageWithLayout<{ pageProps: UserPageRepProps }> = ({
 Page.getLayout = function getLayout(
   page: ReactElement<{ pageProps: UserPageRepProps }>
 ) {
-  return <UserPageLayout props={page.props.pageProps}>{page}</UserPageLayout>;
+  return (
+    <UserPageLayout profile={page.props.pageProps.profile}>
+      {page}
+    </UserPageLayout>
+  );
 };
 
 export default Page;
@@ -135,42 +126,37 @@ export async function getServerSideProps(
     const headers = getCommonHeaders(req);
     const signedWalletOrNull = getSignedWalletOrNull(req);
     const handleOrWallet = req.query.user.toLowerCase() as string;
-    const [
-      { profile, title, consolidatedTDH },
-      repLogs,
-      repRates,
-      repGivenToUsers,
-      repReceivedFromUsers,
-    ] = await Promise.all([
-      getCommonUserServerSideProps({ user: handleOrWallet, headers }),
-      getUserProfileActivityLogs<ProfileActivityLogRatingEdit>({
-        headers,
-        params: convertActivityLogParams(
-          getInitialActivityLogParams(handleOrWallet)
-        ),
-      }),
-      getProfileRatings({
-        user: handleOrWallet,
-        headers,
-        signedWallet: signedWalletOrNull,
-      }),
-      getProfileRatingsByRater({
-        params: getInitialRatersParams({
-          handleOrWallet,
-          matter: MATTER_TYPE,
-          given: false,
+    const [profile, repLogs, repRates, repGivenToUsers, repReceivedFromUsers] =
+      await Promise.all([
+        getUserProfile({ user: handleOrWallet, headers }),
+        getUserProfileActivityLogs<ProfileActivityLogRatingEdit>({
+          headers,
+          params: convertActivityLogParams(
+            getInitialActivityLogParams(handleOrWallet)
+          ),
         }),
-        headers,
-      }),
-      getProfileRatingsByRater({
-        params: getInitialRatersParams({
-          handleOrWallet,
-          matter: MATTER_TYPE,
-          given: true,
+        getProfileRatings({
+          user: handleOrWallet,
+          headers,
+          signedWallet: signedWalletOrNull,
         }),
-        headers,
-      }),
-    ]);
+        getProfileRatingsByRater({
+          params: getInitialRatersParams({
+            handleOrWallet,
+            matter: MATTER_TYPE,
+            given: false,
+          }),
+          headers,
+        }),
+        getProfileRatingsByRater({
+          params: getInitialRatersParams({
+            handleOrWallet,
+            matter: MATTER_TYPE,
+            given: true,
+          }),
+          headers,
+        }),
+      ]);
 
     const needsRedirect = userPageNeedsRedirect({
       profile,
@@ -186,8 +172,6 @@ export async function getServerSideProps(
       props: {
         profile,
         handleOrWallet,
-        title,
-        consolidatedTDH,
         repRates,
         repLogs,
         repGivenToUsers,

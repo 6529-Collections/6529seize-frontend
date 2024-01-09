@@ -18,14 +18,15 @@ export interface AggregatedCicRating {
 export interface IProfileAndConsolidations {
   readonly profile: IProfile | null;
   readonly consolidation: {
-    wallets: IProfileConsolidation[];
-    tdh: number;
-    consolidation_key: string | null;
-    consolidation_display: string | null;
+    readonly wallets: IProfileConsolidation[];
+    readonly tdh: number;
+    readonly consolidation_key: string | null;
+    readonly consolidation_display: string | null;
   };
   readonly level: number;
   readonly cic: AggregatedCicRating;
   readonly rep: number;
+  readonly balance: number;
 }
 
 export enum PROFILE_CLASSIFICATION {
@@ -141,7 +142,6 @@ export enum ProfileActivityLogRatingEditContentChangeReason {
   USER_EDIT = "USER_EDIT",
   LOST_TDH = "LOST_TDH",
 }
-
 
 export interface ProfileActivityLogRatingEdit extends ProfileActivityLogBase {
   readonly type: ProfileActivityLogType.RATING_EDIT;
@@ -315,7 +315,6 @@ export interface RatingWithProfileInfo {
 export type RatingWithProfileInfoAndLevel = RatingWithProfileInfo & {
   level: number;
 };
-
 
 export interface ApiCreateOrUpdateProfileRequest {
   readonly handle: string;
