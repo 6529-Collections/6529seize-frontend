@@ -319,3 +319,13 @@ h5 {
 .cursor-pointer {
   cursor: pointer;
 }
+
+.edit-profile {
+  opacity: 0;
+  transition: visibility 0s, opacity 0.3s ease-out;
+}
+
+.edit-profile:hover {
+  visibility: visible;
+  opacity: 1;
+}

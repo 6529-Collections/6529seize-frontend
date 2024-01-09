@@ -74,10 +74,10 @@ export default function UserSettingsImgSelectFile({
         className={`
         ${
           dragging
-            ? "tw-border-iron-500 tw-bg-iron-700"
-            : "tw-bg-iron-800/80 tw-border-iron-600"
+            ? "tw-border-iron-600 tw-bg-iron-800"
+            : "tw-bg-iron-900 tw-border-iron-700"
         }
-      tw-flex tw-flex-col tw-items-center tw-justify-center tw-w-full tw-h-64 tw-border-2 tw-border-dashed tw-rounded-lg tw-cursor-pointer  hover:tw-border-iron-500 hover:tw-bg-iron-800 tw-transition tw-duration-300 tw-ease-out
+      tw-flex tw-flex-col tw-items-center tw-justify-center tw-w-full tw-h-64 tw-border-2 tw-border-dashed tw-rounded-lg tw-cursor-pointer  hover:tw-border-iron-600 hover:tw-bg-iron-800 tw-transition tw-duration-300 tw-ease-out
       `}
       >
         <div className="tw-flex tw-flex-col tw-items-center tw-justify-center tw-pt-5 tw-pb-6">

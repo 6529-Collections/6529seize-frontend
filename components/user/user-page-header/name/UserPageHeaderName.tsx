@@ -36,7 +36,7 @@ export default function UserPageHeaderName({
 
   const displayName = getDisplayName();
   return (
-    <div className="tw-mt-2 sm:tw-mt-4">
+    <div className="tw-mt-2 sm:tw-mt-3">
       <div className="tw-flex tw-items-center">
         <UserPageHeaderNameWrapper profile={profile} canEdit={canEdit}>
           <p className="tw-break-all tw-text-left tw-mb-0 tw-text-2xl sm:tw-text-3xl tw-font-semibold">

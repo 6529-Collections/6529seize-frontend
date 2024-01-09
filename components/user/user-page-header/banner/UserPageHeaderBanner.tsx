@@ -18,8 +18,6 @@ export default function UserPageHeaderBanner({
 }) {
   const [isEditOpen, setIsEditOpen] = useState<boolean>(false);
 
-
-
   return (
     <div
       className="tw-h-28 sm:tw-h-36 tw-group tw-relative tw-overflow-hidden"
@@ -30,13 +28,15 @@ export default function UserPageHeaderBanner({
       }}
     >
       {canEdit && (
-        <div className="group-hover:tw-visible tw-invisible tw-absolute tw-inset-0 tw-bg-black tw-bg-opacity-50 tw-transition tw-duration-300 tw-ease-out">
+        <div className="">
           <button
             onClick={() => setIsEditOpen(true)}
-            className="tw-w-full tw-h-full tw-bg-transparent tw-border-none"
+            className="tw-w-full tw-h-full tw-bg-transparent tw-border-none tw-p-0"
           >
-            <div className="tw-absolute tw-bottom-4 tw-right-4">
-              <PencilIcon />
+            <div className="edit-profile tw-absolute tw-inset-0 tw-bg-black/30">
+              <div className="tw-absolute tw-bottom-4 tw-right-4">
+                <PencilIcon />
+              </div>
             </div>
           </button>
         </div>

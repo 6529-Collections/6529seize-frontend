@@ -56,7 +56,7 @@ export default function UserPageIdentityStatementsConsolidatedAddressesItem({
   }, [router.isReady]);
 
   return (
-    <li className="tw-h-5 tw-group tw-flex tw-items-center tw-group tw-text-sm tw-font-medium tw-text-neutral-200 hover:tw-text-neutral-400 tw-transition tw-duration-300 tw-ease-out tw-space-x-1">
+    <li className="tw-h-5 tw-group tw-flex tw-items-center tw-group tw-text-sm tw-font-medium tw-text-neutral-200 hover:tw-text-neutral-400 tw-transition tw-duration-300 tw-ease-out tw-space-x-3">
       <Tippy
         content="Opensea"
         theme="dark"
@@ -65,7 +65,7 @@ export default function UserPageIdentityStatementsConsolidatedAddressesItem({
       >
         <button
           onClick={goToOpensea}
-          className="tw-bg-transparent tw-border-none"
+          className="tw-bg-transparent tw-border-none tw-p-0"
         >
           <div className="tw-flex-shrink-0 tw-w-6 tw-h-6 sm:tw-w-5 sm:tw-h-5 hover:tw-scale-110 tw-transition tw-duration-300 tw-ease-out">
             <OpenseaIcon />
@@ -80,7 +80,7 @@ export default function UserPageIdentityStatementsConsolidatedAddressesItem({
       >
         <button
           onClick={goToEtherscan}
-          className="tw-bg-transparent tw-border-none"
+          className="tw-bg-transparent tw-border-none tw-p-0"
         >
           <div className="tw-flex-shrink-0 tw-w-6 tw-h-6 sm:tw-w-5 sm:tw-h-5 hover:tw-scale-110 tw-transition tw-duration-300 tw-ease-out">
             <EtherscanIcon />

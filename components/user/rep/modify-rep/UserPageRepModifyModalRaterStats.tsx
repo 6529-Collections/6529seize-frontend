@@ -9,7 +9,7 @@ export default function UserPageRepModifyModalRaterStats({
   readonly giverAvailableRep: number;
 }) {
   return (
-    <div className="tw-mt-8">
+    <div className="tw-mt-6 sm:tw-mt-8">
       <div className="tw-flex tw-flex-col tw-space-y-1">
         <span className="tw-text-sm tw-block tw-text-iron-300 tw-font-normal">
           <span>Your available Rep:</span>
