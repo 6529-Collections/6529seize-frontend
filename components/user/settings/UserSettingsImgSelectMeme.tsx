@@ -46,12 +46,13 @@ export default function UserSettingsImgSelectMeme({
   };
   return (
     <div ref={listRef} className="tw-max-w-full tw-relative">
-      <label className="tw-block tw-text-sm tw-font-semibold tw-leading-5 tw-text-iron-300">
+      <label htmlFor="search-meme" className="tw-block tw-text-sm tw-font-semibold tw-leading-5 tw-text-iron-300">
         Select Meme
       </label>
       <div className="tw-mt-2 tw-relative">
         <input
           type="text"
+          name="search-meme"
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onFocus={() => setIsOpen(true)}

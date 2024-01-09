@@ -11,7 +11,6 @@ import { ReactQueryWrapperContext } from "../../components/react-query-wrapper/R
 import UserPageLayout from "../../components/user/layout/UserPageLayout";
 import {
   getCommonHeaders,
-  getCommonUserServerSideProps,
   getInitialRatersParams,
   getProfileRatings,
   getProfileRatingsByRater,

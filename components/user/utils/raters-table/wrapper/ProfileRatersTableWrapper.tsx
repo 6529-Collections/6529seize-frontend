@@ -1,7 +1,5 @@
 import React, { useEffect, useState } from "react";
-import ProfileRatersTableBody from "../ProfileRatersTableBody";
 import ProfileRatersTableWrapperHeader from "./ProfileRatersTableWrapperHeader";
-import CommonTablePagination from "../../../../utils/CommonTablePagination";
 import {
   RateMatter,
   RatingWithProfileInfoAndLevel,
@@ -13,7 +11,6 @@ import { QueryKey } from "../../../../react-query-wrapper/ReactQueryWrapper";
 import { commonApiFetch } from "../../../../../services/api/common-api";
 import { assertUnreachable } from "../../../../../helpers/AllowlistToolHelpers";
 import { SortDirection } from "../../../../../entities/ISort";
-import ProfileRatersTableHeader from "../ProfileRatersTableHeader";
 import ProfileRatersTable from "../ProfileRatersTable";
 import CommonSkeletonLoader from "../../../../utils/animation/CommonSkeletonLoader";
 

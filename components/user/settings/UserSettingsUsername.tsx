@@ -74,7 +74,7 @@ export default function UserSettingsUsername({
 
   return (
     <div>
-      <label className="tw-block tw-text-sm tw-font-semibold tw-leading-5 tw-text-iron-300">
+      <label htmlFor="name" className="tw-block tw-text-sm tw-font-semibold tw-leading-5 tw-text-iron-300">
         Username
       </label>
       <div className="tw-mt-2 tw-relative">

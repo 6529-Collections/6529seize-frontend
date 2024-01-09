@@ -81,7 +81,6 @@ export async function getServerSideProps(
   try {
     const headers = getCommonHeaders(req);
     const handleOrWallet = req.query.user.toLowerCase() as string;
-    console.time
     const profile = await getUserProfile({ user: handleOrWallet, headers });
     const needsRedirect = userPageNeedsRedirect({
       profile,
