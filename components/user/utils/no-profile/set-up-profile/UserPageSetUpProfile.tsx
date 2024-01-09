@@ -119,43 +119,36 @@ export default function UserPageSetUpProfile({
   return (
     <div className="tailwind-scope">
       <UserPageSetUpProfileHeader />
-      <div className="tw-pt-10 tw-space-y-6 tw-divide-y tw-divide-x-0 tw-divide-solid tw-divide-iron-700">
-        <div className="tw-flex tw-flex-col tw-gap-y-6">
-          <div className="tw-bg-iron-900 tw-border tw-border-solid tw-border-iron-800 tw-p-4 sm:tw-p-6 lg:tw-p-8 tw-rounded-lg">
-            <form
-              onSubmit={onSubmit}
-              className="tw-flex tw-flex-col tw-gap-y-6"
-            >
-              <UserSettingsUsername
-                userName={userName}
-                originalUsername={profile.profile?.handle ?? ""}
-                setUserName={setUserName}
-                setIsAvailable={setIsUserNameAvailable}
-                setIsLoading={setCheckingUsername}
-              />
+      <div className="lg:tw-max-w-lg tw-pt-6">
+        <form onSubmit={onSubmit} className="tw-flex tw-flex-col">
+          <UserSettingsUsername
+            userName={userName}
+            originalUsername={profile.profile?.handle ?? ""}
+            setUserName={setUserName}
+            setIsAvailable={setIsUserNameAvailable}
+            setIsLoading={setCheckingUsername}
+          />
 
-              <UserSettingsClassification
-                selected={classification}
-                onSelect={setClassification}
-              />
+          <UserSettingsClassification
+            selected={classification}
+            onSelect={setClassification}
+          />
 
-              {haveConsolidations && (
-                <UserSettingsPrimaryWallet
-                  consolidations={profile.consolidation.wallets}
-                  selected={primaryWallet}
-                  onSelect={setPrimaryWallet}
-                />
-              )}
+          {haveConsolidations && (
+            <UserSettingsPrimaryWallet
+              consolidations={profile.consolidation.wallets}
+              selected={primaryWallet}
+              onSelect={setPrimaryWallet}
+            />
+          )}
 
-              <UserSettingsSave
-                loading={mutating}
-                disabled={
-                  !haveChanges || !userNameAvailable || checkingUsername
-                }
-              />
-            </form>
+          <div className="tw-mt-7">
+            <UserSettingsSave
+              loading={mutating}
+              disabled={!haveChanges || !userNameAvailable || checkingUsername}
+            />
           </div>
-        </div>
+        </form>
       </div>
     </div>
   );

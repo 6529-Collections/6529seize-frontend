@@ -22,7 +22,7 @@ export default function UserPageHeaderBanner({
 
   return (
     <div
-      className="tw-h-28 sm:tw-h-36 tw-group tw-relative"
+      className="tw-h-28 sm:tw-h-36 tw-group tw-relative tw-overflow-hidden"
       style={{
         background: `linear-gradient(45deg, ${
           profile.profile?.banner_1 ?? defaultBanner1
@@ -35,7 +35,7 @@ export default function UserPageHeaderBanner({
             onClick={() => setIsEditOpen(true)}
             className="tw-w-full tw-h-full tw-bg-transparent tw-border-none"
           >
-            <div className="tw-absolute tw-top-2 tw-right-2">
+            <div className="tw-absolute tw-bottom-4 tw-right-4">
               <PencilIcon />
             </div>
           </button>

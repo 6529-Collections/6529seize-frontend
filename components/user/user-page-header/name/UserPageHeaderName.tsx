@@ -39,7 +39,7 @@ export default function UserPageHeaderName({
     <div className="tw-mt-2 sm:tw-mt-4">
       <div className="tw-flex tw-items-center">
         <UserPageHeaderNameWrapper profile={profile} canEdit={canEdit}>
-          <p className="tw-break-all tw-mb-0 tw-text-2xl sm:tw-text-3xl tw-font-semibold">
+          <p className="tw-break-all tw-text-left tw-mb-0 tw-text-2xl sm:tw-text-3xl tw-font-semibold">
             {displayName}
           </p>
         </UserPageHeaderNameWrapper>
@@ -51,7 +51,7 @@ export default function UserPageHeaderName({
       </div>
       {profile.profile?.classification && (
         <UserPageClassificationWrapper profile={profile} canEdit={canEdit}>
-          <div className="tw-block tw-text-iron-400 tw-font-normal tw-text-[13px] tw-leading-3">
+          <div className="tw-block tw-text-iron-400 hover:tw-text-iron-300 tw-font-normal tw-text-[13px] tw-leading-3 tw-transition tw-duration-300 tw-ease-out">
             {CLASSIFICATIONS[profile.profile.classification].title}
           </div>
         </UserPageClassificationWrapper>

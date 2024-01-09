@@ -67,7 +67,7 @@ export default function UserPageIdentityStatementsConsolidatedAddressesItem({
           onClick={goToOpensea}
           className="tw-bg-transparent tw-border-none"
         >
-          <div className="tw-flex-shrink-0 tw-h-5 tw-w-5 hover:tw-scale-110 tw-transition tw-duration-300 tw-ease-out">
+          <div className="tw-flex-shrink-0 tw-w-6 tw-h-6 sm:tw-w-5 sm:tw-h-5 hover:tw-scale-110 tw-transition tw-duration-300 tw-ease-out">
             <OpenseaIcon />
           </div>
         </button>
@@ -82,7 +82,7 @@ export default function UserPageIdentityStatementsConsolidatedAddressesItem({
           onClick={goToEtherscan}
           className="tw-bg-transparent tw-border-none"
         >
-          <div className="tw-flex-shrink-0 tw-h-5 tw-w-5  hover:tw-scale-110 tw-transition tw-duration-300 tw-ease-out">
+          <div className="tw-flex-shrink-0 tw-w-6 tw-h-6 sm:tw-w-5 sm:tw-h-5 hover:tw-scale-110 tw-transition tw-duration-300 tw-ease-out">
             <EtherscanIcon />
           </div>
         </button>

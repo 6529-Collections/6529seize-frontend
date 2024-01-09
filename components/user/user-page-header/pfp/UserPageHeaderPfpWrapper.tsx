@@ -26,7 +26,7 @@ export default function UserPageHeaderPfpWrapper({
         {children}
 
         {canEdit && (
-          <div className="group-hover:tw-block tw-hidden tw-absolute tw-inset-0 tw-bg-black tw-bg-opacity-50 tw-transition tw-duration-300 tw-ease-out tw-rounded-lg">
+          <div className="tw-h-42 tw-w-42 tw-left-1.5 tw-right-1.5 tw-top-[1px] tw-bottom-[1px] group-hover:tw-block tw-hidden tw-absolute tw-inset-0 tw-bg-black tw-bg-opacity-50 tw-transition tw-duration-300 tw-ease-out tw-rounded-lg">
             <div className="tw-absolute tw-bottom-2 tw-right-2">
               <PencilIcon />
             </div>
