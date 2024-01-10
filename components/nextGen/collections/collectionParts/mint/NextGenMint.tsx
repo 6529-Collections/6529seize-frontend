@@ -218,7 +218,7 @@ export default function NextGenMint(props: Readonly<Props>) {
       account.address &&
       props.phase_times.allowlist_end_time > 0
     ) {
-      const url = `${process.env.API_ENDPOINT}/api/nextgen/${props.phase_times.merkle_root}`;
+      const url = `${process.env.API_ENDPOINT}/api/nextgen/merkle_roots/${props.phase_times.merkle_root}`;
       fetchUrl(url).then((response: CollectionWithMerkle) => {
         if (response) {
           setCollection(response);

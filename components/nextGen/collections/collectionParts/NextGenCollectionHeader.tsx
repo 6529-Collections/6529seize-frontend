@@ -45,7 +45,7 @@ export function NextGenCountdown(props: Readonly<CountdownProps>) {
   const [collectionLoaded, setCollectionLoaded] = useState(false);
 
   useEffect(() => {
-    const url = `${process.env.API_ENDPOINT}/api/nextgen/${props.phase_times.merkle_root}`;
+    const url = `${process.env.API_ENDPOINT}/api/nextgen/merkle_roots/${props.phase_times.merkle_root}`;
     fetchUrl(url).then((response: CollectionWithMerkle) => {
       if (response) {
         setCollection(response);
