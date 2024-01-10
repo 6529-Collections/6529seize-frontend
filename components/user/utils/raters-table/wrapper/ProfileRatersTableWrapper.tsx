@@ -1,7 +1,5 @@
 import React, { useEffect, useState } from "react";
-import ProfileRatersTableBody from "../ProfileRatersTableBody";
 import ProfileRatersTableWrapperHeader from "./ProfileRatersTableWrapperHeader";
-import CommonTablePagination from "../../../../utils/CommonTablePagination";
 import {
   RateMatter,
   RatingWithProfileInfoAndLevel,
@@ -13,7 +11,8 @@ import { QueryKey } from "../../../../react-query-wrapper/ReactQueryWrapper";
 import { commonApiFetch } from "../../../../../services/api/common-api";
 import { assertUnreachable } from "../../../../../helpers/AllowlistToolHelpers";
 import { SortDirection } from "../../../../../entities/ISort";
-import ProfileRatersTableHeader from "../ProfileRatersTableHeader";
+import ProfileRatersTable from "../ProfileRatersTable";
+import CommonSkeletonLoader from "../../../../utils/animation/CommonSkeletonLoader";
 
 export enum ProfileRatersTableType {
   CIC_RECEIVED = "CIC_RECEIVED",
@@ -147,36 +146,23 @@ export default function ProfileRatersTableWrapper({
     <div>
       <ProfileRatersTableWrapperHeader type={type} />
       <div className="tw-mt-2 lg:tw-mt-4 tw-bg-iron-900 tw-border tw-border-iron-800 tw-border-solid tw-rounded-xl xl:tw-min-h-[29rem] tw-max-h-[29rem] tw-scroll-py-3 tw-overflow-y-auto">
-        {ratings?.data.length ? (
-          <div className="tw-flow-root">
-            <div className="tw-inline-block tw-min-w-full tw-align-middle">
-              <table className="tw-min-w-full">
-                <ProfileRatersTableHeader
-                  type={type}
-                  sortDirection={order}
-                  sortOrderBy={orderBy}
-                  isLoading={isFetching}
-                  onSortTypeClick={onSortTypeClick}
-                />
-                <ProfileRatersTableBody ratings={ratings.data} type={type} />
-              </table>
-            </div>
-
-            {totalPages > 1 && (
-              <CommonTablePagination
-                currentPage={currentPage}
-                setCurrentPage={setCurrentPage}
-                totalPages={totalPages}
-                small={true}
-              />
-            )}
+        {isLoading ? (
+          <div className="tw-p-4">
+            <CommonSkeletonLoader />
           </div>
         ) : (
-          <div className="tw-py-4">
-            <span className="tw-px-4 sm:tw-px-6 tw-text-sm tw-italic tw-text-iron-500">
-              {getNoRatingsMessage()}
-            </span>
-          </div>
+          <ProfileRatersTable
+            ratings={ratings?.data || []}
+            type={type}
+            order={order}
+            orderBy={orderBy}
+            loading={isFetching}
+            totalPages={totalPages}
+            currentPage={currentPage}
+            setCurrentPage={setCurrentPage}
+            onSortTypeClick={onSortTypeClick}
+            noRatingsMessage={getNoRatingsMessage()}
+          />
         )}
       </div>
     </div>

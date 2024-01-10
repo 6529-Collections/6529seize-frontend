@@ -11,8 +11,8 @@ export default function UserSettingsClassification({
   selected,
   onSelect,
 }: {
-  selected: PROFILE_CLASSIFICATION;
-  onSelect: (selected: PROFILE_CLASSIFICATION) => void;
+  readonly selected: PROFILE_CLASSIFICATION;
+  readonly onSelect: (selected: PROFILE_CLASSIFICATION) => void;
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const [iconScope, animateIcon] = useAnimate();
@@ -42,14 +42,14 @@ export default function UserSettingsClassification({
 
   return (
     <div className="tw-max-w-full tw-relative" ref={listRef}>
-      <label className="tw-block tw-text-sm tw-font-normal tw-leading-5 tw-text-iron-300">
+      <label className="tw-block tw-text-sm tw-font-semibold tw-leading-5 tw-text-iron-300">
         Profile classification
       </label>
       <div className="tw-mt-2 tw-relative">
         <button
           type="button"
           onClick={toggleOpen}
-          className="tw-text-left tw-form-input tw-block tw-w-full tw-rounded-lg tw-border-0 tw-py-3 tw-px-3 tw-bg-iron-900 tw-text-iron-50  tw-font-normal tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-700 placeholder:tw-text-iron-400 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 hover:tw-ring-iron-600 tw-text-base sm:tw-leading-6 tw-transition tw-duration-300 tw-ease-out"
+          className="tw-text-left tw-form-input tw-block tw-w-full tw-rounded-lg tw-border-0 tw-py-3 tw-px-3 tw-bg-iron-900 tw-text-iron-50 tw-font-normal tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-700 placeholder:tw-text-iron-400 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 hover:tw-ring-iron-600 tw-text-base tw-transition tw-duration-300 tw-ease-out"
         >
           <span className="tw-text-iron-50">{title}</span>
         </button>

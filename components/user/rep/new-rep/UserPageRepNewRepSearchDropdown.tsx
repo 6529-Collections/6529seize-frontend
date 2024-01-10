@@ -37,7 +37,7 @@ export default function UserPageRepNewRepSearchDropdown({
             </li>
           )}
           {state === STATE.LOADING && (
-            <li className="tw-group tw-text-white tw-justify-between tw-w-full tw-flex tw-rounded-lg tw-relative tw-cursor-pointer tw-select-none tw-p-2 hover:tw-bg-iron-700 tw-transition tw-duration-300 tw-ease-out">
+            <li className="tw-group tw-text-white tw-text-sm tw-justify-between tw-w-full tw-flex tw-rounded-lg tw-relative tw-cursor-pointer tw-select-none tw-p-2 hover:tw-bg-iron-700 tw-transition tw-duration-300 tw-ease-out">
               Loading...
             </li>
           )}
@@ -45,7 +45,7 @@ export default function UserPageRepNewRepSearchDropdown({
             categories.map((category) => (
               <li
                 key={category}
-                className="tw-group tw-text-white tw-justify-between tw-w-full tw-flex tw-rounded-lg tw-relative tw-cursor-pointer tw-select-none tw-p-2 hover:tw-bg-iron-800 tw-transition tw-duration-300 tw-ease-out"
+                className="tw-group tw-text-white tw-justify-between tw-w-full tw-flex tw-rounded-lg tw-relative tw-cursor-pointer tw-select-none tw-px-2 tw-py-1 hover:tw-bg-iron-800 tw-transition tw-duration-300 tw-ease-out"
               >
                 <button
                   onClick={(e) => {
