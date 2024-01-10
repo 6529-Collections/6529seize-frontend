@@ -143,7 +143,7 @@ export default function UserPageIdentityAddStatementsSelect({
         </button>
       </div>
       {/* Bottom bullet points */}
-      <div className="tw-px-4 tw-pt-6 tw-mt-6 tw-border-t tw-border-solid tw-border-[#333333] tw-border-x-0 tw-border-b-0">
+      <div className="tw-px-4 tw-pt-6 tw-mt-6 tw-border-t tw-border-solid tw-border-iron-800 tw-border-x-0 tw-border-b-0">
         <ul className="tw-pl-0 tw-list-disc tw-text-iron-500 tw-text-xs tw-font-normal tw-space-y-1">
           <li>All statements are optional.</li>
           <li>All statements are fully and permanently public.</li>
