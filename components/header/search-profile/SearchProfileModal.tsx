@@ -68,6 +68,17 @@ export default function SearchProfileModal({
     setSelectedProfileIndex(index);
   };
 
+  const goToProfile = async (profile: CommunityMemberMinimal) => {
+    const target = profile.handle ?? profile.wallet.toLowerCase();
+    if (router.route.includes("[user]")) {
+      const newPath = router.pathname.replace("[user]", target);
+      await router.replace(newPath);
+    } else {
+      await router.push(`/${target}/identity`);
+    }
+    onClose();
+  };
+
   const [selectedProfileIndex, setSelectedProfileIndex] = useState<number>(0);
   useKeyPressEvent("ArrowDown", () =>
     setSelectedProfileIndex((i) =>
@@ -83,8 +94,7 @@ export default function SearchProfileModal({
       if (!profile) {
         return;
       }
-      router.push(`/${profile.handle}/identity`);
-      onClose();
+      goToProfile(profile);
     }
   });
 
@@ -160,7 +170,7 @@ export default function SearchProfileModal({
                   >
                     <SearchProfileModalItem
                       profile={profile}
-                      onClose={onClose}
+                      goToProfile={goToProfile}
                       searchValue={debouncedValue}
                       isSelected={i === selectedProfileIndex}
                       onHover={(state) => onHover(i, state)}

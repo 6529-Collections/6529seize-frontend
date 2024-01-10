@@ -1,7 +1,6 @@
 import { useHoverDirty } from "react-use";
 import { CommunityMemberMinimal } from "../../../entities/IProfile";
 import { cicToType, formatNumberWithCommas } from "../../../helpers/Helpers";
-import { useRouter } from "next/router";
 import { useEffect, useRef } from "react";
 import SearchProfileModalItemHighlight from "./SearchProfileModalItemHighlight";
 import UserCICAndLevel from "../../user/utils/UserCICAndLevel";
@@ -9,24 +8,17 @@ import UserCICAndLevel from "../../user/utils/UserCICAndLevel";
 export default function SearchProfileModalItem({
   profile,
   searchValue,
-  onClose,
+  goToProfile,
   isSelected,
   onHover,
 }: {
   readonly isSelected: boolean;
   readonly searchValue: string;
   readonly profile: CommunityMemberMinimal;
-  readonly onClose: () => void;
+  readonly goToProfile: (profile: CommunityMemberMinimal) => void;
   readonly onHover: (state: boolean) => void;
 }) {
-  const router = useRouter();
   const cicType = cicToType(profile.cic_rating);
-
-  const goToProfile = () => {
-    router.push(`/${profile.handle ?? profile.wallet}/identity`);
-    onClose();
-  };
-
   const ref = useRef<HTMLDivElement>(null);
   const isHovering = useHoverDirty(ref);
 
@@ -42,7 +34,7 @@ export default function SearchProfileModalItem({
       } tw-rounded-md tw-px-2 tw-py-2 tw-my-1 tw-transition tw-duration-300 tw-ease-out tw-w-full`}
     >
       <button
-        onClick={goToProfile}
+        onClick={() => goToProfile(profile)}
         className="tw-group tw-bg-transparent tw-border-none tw-cursor-default tw-select-none tw-rounded-md tw-space-x-3 tw-flex tw-items-center tw-w-full tw-text-left"
       >
         <UserCICAndLevel level={profile.level} cicType={cicType} />
