@@ -5,7 +5,7 @@ import HeaderPlaceholder from "../../header/HeaderPlaceholder";
 import {
   containsEmojis,
   formatAddress,
-  numberWithCommas,
+  formatNumberWithCommas,
 } from "../../../helpers/Helpers";
 import UserPageHeader from "../user-page-header/UserPageHeader";
 import { useRouter } from "next/router";
@@ -83,14 +83,18 @@ export default function UserPageLayout({
   const pagenameFull = `${title} | 6529 SEIZE`;
 
   const descriptionArray = [];
-  if (profile.consolidation.tdh && profile.consolidation.tdh > 0) {
-    descriptionArray.push(
-      `TDH: ${numberWithCommas(profile.consolidation.tdh)}`
-    );
-  }
-  if (initialProfile.balance > 0) {
-    descriptionArray.push(`Cards: ${numberWithCommas(initialProfile.balance)}`);
-  }
+
+  descriptionArray.push(`Level: ${formatNumberWithCommas(profile.level)}`);
+
+  descriptionArray.push(
+    `CIC: ${formatNumberWithCommas(profile.cic.cic_rating)}`
+  );
+  descriptionArray.push(`Rep: ${formatNumberWithCommas(profile.rep)}`);
+  descriptionArray.push(
+    `TDH: ${formatNumberWithCommas(profile.consolidation.tdh)}`
+  );
+  descriptionArray.push(`Cards: ${formatNumberWithCommas(profile.balance)}`);
+
   descriptionArray.push("6529 SEIZE");
 
   const mainAddress =
@@ -137,7 +141,7 @@ export default function UserPageLayout({
         />
         <meta
           property="og:description"
-          content={descriptionArray.join(" | ")}
+          content={descriptionArray.join(" \n ")}
         />
       </Head>
 
