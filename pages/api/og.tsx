@@ -9,15 +9,23 @@ export default function () {
     (
       <div
         style={{
-          display: "flex",
-          fontSize: 128,
+          fontSize: 40,
+          color: "black",
           background: "white",
           width: "100%",
           height: "100%",
+          padding: "50px 200px",
+          textAlign: "center",
+          justifyContent: "center",
+          alignItems: "center",
         }}
       >
-        Hello, World!
+        👋 Hello
       </div>
-    )
+    ),
+    {
+      width: 1200,
+      height: 630,
+    }
   );
 }
