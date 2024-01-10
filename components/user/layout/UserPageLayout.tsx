@@ -6,7 +6,6 @@ import {
   containsEmojis,
   formatAddress,
   formatNumberWithCommas,
-  numberWithCommas,
 } from "../../../helpers/Helpers";
 import UserPageHeader from "../user-page-header/UserPageHeader";
 import { useRouter } from "next/router";
