@@ -122,7 +122,7 @@ export default function SearchProfileModal({
         <div className="tw-flex tw-min-h-full tw-items-start tw-justify-center tw-p-4 tw-text-center sm:tw-items-center sm:tw-p-0">
           <div
             ref={modalRef}
-            className="sm:tw-max-w-xl tw-relative tw-w-full tw-transform tw-rounded-xl tw-bg-iron-900 tw-text-left tw-shadow-xl tw-transition-all tw-duration-500 sm:tw-w-full tw-overflow-hidden"
+            className="sm:tw-max-w-xl tw-relative tw-w-full tw-transform tw-rounded-xl tw-bg-iron-950 tw-text-left tw-shadow-xl tw-transition-all tw-duration-500 sm:tw-w-full tw-overflow-hidden"
           >
             <div className="tw-border-b tw-border-x-0 tw-border-t-0 tw-border-solid tw-border-white/10 tw-pb-4 tw-px-4 tw-mt-4">
               <div className="tw-relative">
@@ -145,7 +145,7 @@ export default function SearchProfileModal({
                   autoComplete="off"
                   value={searchValue}
                   onChange={handleInputChange}
-                  className="tw-form-input tw-block tw-w-full tw-rounded-lg tw-border-0 tw-py-3 tw-pl-11 tw-pr-4 tw-bg-white/5 tw-text-white tw-font-medium tw-caret-primary-300 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-white/10 placeholder:tw-text-iron-500 focus:tw-outline-none focus:tw-bg-transparent focus:tw-ring-1 focus:tw-ring-inset hover:tw-ring-iron-700 focus:tw-ring-primary-300 tw-text-base sm:text-sm tw-transition tw-duration-300 tw-ease-out"
+                  className="tw-form-input tw-block tw-w-full tw-rounded-lg tw-border-0 tw-py-3 tw-pl-11 tw-pr-4 tw-bg-iron-900 tw-text-iron-50 tw-font-normal tw-caret-primary-300 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-700 hover:tw-ring-iron-600 placeholder:tw-text-iron-500 focus:tw-outline-none focus:tw-bg-transparent focus:tw-ring-1 focus:tw-ring-inset  focus:tw-ring-primary-300 tw-text-base sm:text-sm tw-transition tw-duration-300 tw-ease-out"
                   placeholder="Search"
                 />
               </div>
@@ -171,19 +171,19 @@ export default function SearchProfileModal({
             )}
             {state === STATE.LOADING && (
               <div className="tw-h-72 tw-flex tw-items-center tw-justify-center">
-                <p className="tw-text-iron-200 tw-font-normal tw-text-sm">
+                <p className="tw-text-iron-300 tw-font-normal tw-text-sm">
                   Loading...
                 </p>
               </div>
             )}
             {state === STATE.NO_RESULTS && (
               <div className="tw-h-72 tw-flex tw-items-center tw-justify-center">
-                <p className="tw-text-iron-200 tw-text-sm">No results found</p>
+                <p className="tw-text-iron-300 tw-text-sm">No results found</p>
               </div>
             )}
             {state === STATE.INITIAL && (
               <div className="tw-h-72 tw-flex tw-items-center tw-justify-center">
-                <p className="tw-text-iron-200 tw-font-normal tw-text-sm">
+                <p className="tw-text-iron-300 tw-font-normal tw-text-sm">
                   {searchValue.length >= MIN_SEARCH_LENGTH
                     ? "No results found"
                     : "Type at least 3 characters"}
