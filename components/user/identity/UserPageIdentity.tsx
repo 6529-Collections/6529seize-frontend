@@ -1,5 +1,4 @@
 import {
-  CicStatement,
   IProfileAndConsolidations,
 } from "../../../entities/IProfile";
 import UserPageIdentityStatements from "./statements/UserPageIdentityStatements";
@@ -12,13 +11,11 @@ import ProfileRatersTableWrapper, {
 
 export default function UserPageIdentity({
   profile,
-  profileIdentityStatements,
   initialCICReceivedParams,
   initialCICGivenParams,
   initialActivityLogParams,
 }: {
   readonly profile: IProfileAndConsolidations;
-  readonly profileIdentityStatements: CicStatement[];
   readonly initialCICReceivedParams: ProfileRatersParams;
   readonly initialCICGivenParams: ProfileRatersParams;
   readonly initialActivityLogParams: ActivityLogParams;
@@ -26,10 +23,7 @@ export default function UserPageIdentity({
   return (
     <div className="tailwind-scope">
       <UserPageIdentityHeader profile={profile} />
-      <UserPageIdentityStatements
-        profile={profile}
-        profileIdentityStatements={profileIdentityStatements}
-      />
+      <UserPageIdentityStatements profile={profile} />
 
       <div className="tw-mt-6 lg:tw-mt-10 tw-grid tw-grid-cols-1 xl:tw-grid-cols-2 tw-gap-y-8 lg:tw-gap-y-10 tw-gap-x-8 lg:tw-gap-x-10">
         <div>

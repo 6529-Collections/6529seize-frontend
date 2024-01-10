@@ -137,56 +137,27 @@ export default function WalletModal(props: Props) {
               </span>
             </Col>
             {ens && (
-              <>
-                <Col
-                  xs={3}
-                  className={`${styles.footerBtnContainer} d-flex flex-column align-items-center gap-2`}
-                  onClick={() => {
-                    const newPath = ens?.display
-                      ? `/${ens.display}`
-                      : `/${props.wallet as string}`;
-                    if (window.location.pathname !== newPath) {
-                      window.location.href = newPath;
-                    } else {
-                      props.onHide();
-                    }
-                  }}
-                >
-                  <span className={styles.footerBtn}>
-                    <FontAwesomeIcon
-                      className={styles.footerIcon}
-                      icon="user"
-                    />
-                  </span>
-                  <span className="font-smaller no-wrap">
-                    <b>View Profile</b>
-                  </span>
-                </Col>
-                <Col
-                  xs={3}
-                  className={`${styles.footerBtnContainer} d-flex flex-column align-items-center gap-2`}
-                  onClick={() => {
-                    const newPath = ens?.display
-                      ? `/${ens.display}/settings`
-                      : `/${props.wallet as string}/settings`;
-                    if (window.location.pathname !== newPath) {
-                      window.location.href = newPath;
-                    } else {
-                      props.onHide();
-                    }
-                  }}
-                >
-                  <span className={styles.footerBtn}>
-                    <FontAwesomeIcon
-                      className={styles.footerIcon}
-                      icon="gear"
-                    />
-                  </span>
-                  <span className="font-smaller no-wrap">
-                    <b>Edit Profile</b>
-                  </span>
-                </Col>
-              </>
+              <Col
+                xs={3}
+                className={`${styles.footerBtnContainer} d-flex flex-column align-items-center gap-2`}
+                onClick={() => {
+                  const newPath = ens?.display
+                    ? `/${ens.display}`
+                    : `/${props.wallet as string}`;
+                  if (window.location.pathname !== newPath) {
+                    window.location.href = newPath;
+                  } else {
+                    props.onHide();
+                  }
+                }}
+              >
+                <span className={styles.footerBtn}>
+                  <FontAwesomeIcon className={styles.footerIcon} icon="user" />
+                </span>
+                <span className="font-smaller no-wrap">
+                  <b>View Profile</b>
+                </span>
+              </Col>
             )}
             <Col
               xs={3}
