@@ -6,6 +6,7 @@ import {
 import { useRouter } from "next/router";
 import ProfileActivityLogItemAction from "./utils/ProfileActivityLogItemAction";
 import { formatNumberWithCommas } from "../../../../helpers/Helpers";
+import { UserPageTabType } from "../../../user/layout/UserPageTabs";
 
 enum ProfileActivityLogRateType {
   ADDED = "ADDED",
@@ -82,9 +83,17 @@ export default function ProfileActivityLogRate({
     }
   };
 
+  const handleOrWallet = log.target_profile_handle ?? "";
+
   const isCurrentUser =
     (router.query.user as string)?.toLowerCase() ===
-    log.target_profile_handle?.toLowerCase();
+    handleOrWallet.toLowerCase();
+
+  // look it over of ProfileActivityLogItemWrapper also, since if we are at [user] we want to keep tab same
+  // const tabTarget =
+  //   log.contents.rating_matter === RateMatter.REP
+  //     ? UserPageTabType.REP
+  //     : UserPageTabType.IDENTITY;
 
   return (
     <>

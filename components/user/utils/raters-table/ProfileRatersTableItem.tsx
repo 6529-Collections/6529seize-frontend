@@ -1,4 +1,3 @@
-import { useRouter } from "next/router";
 import {
   CICType,
   RatingWithProfileInfoAndLevel,
@@ -12,6 +11,7 @@ import {
 import { ProfileRatersTableType } from "./wrapper/ProfileRatersTableWrapper";
 import { assertUnreachable } from "../../../../helpers/AllowlistToolHelpers";
 import UserCICAndLevel from "../UserCICAndLevel";
+import Link from "next/link";
 
 export const CIC_COLOR: Record<CICType, string> = {
   [CICType.INACCURATE]: "tw-bg-[#F97066]",
@@ -34,7 +34,6 @@ export default function ProfileRatersTableItem({
     [ProfileRatersTableType.REP_RECEIVED]: "gave total Rep",
     [ProfileRatersTableType.REP_GIVEN]: "received total Rep",
   };
-  const router = useRouter();
   const [cicType, setCicType] = useState<CICType>(cicToType(rating.cic));
   useEffect(() => {
     setCicType(cicToType(rating.cic));
@@ -64,9 +63,7 @@ export default function ProfileRatersTableItem({
     }
   };
 
-  const goToProfile = () => {
-    router.push(getProfileRoute());
-  };
+  const profileRoute = getProfileRoute();
 
   return (
     <tr>
@@ -74,14 +71,14 @@ export default function ProfileRatersTableItem({
         <div className="tw-inline-flex tw-items-center tw-space-x-2.5">
           <UserCICAndLevel level={rating.level} cicType={cicType} />
           <div className="tw-inline-flex tw-items-center tw-space-x-1">
-            <button
-              onClick={goToProfile}
-              className="tw-p-0 tw-bg-transparent tw-border-none tw-flex tw-items-center"
+            <Link
+              href={profileRoute}
+              className="tw-no-underline tw-p-0 tw-flex tw-items-center"
             >
               <span className="tw-whitespace-nowrap hover:tw-underline tw-cursor-pointer tw-text-sm tw-font-medium tw-text-iron-100">
                 {rating.handle}
               </span>
-            </button>
+            </Link>
             <span className="tw-whitespace-nowrap tw-text-sm tw-text-iron-400 tw-font-medium">
               {TYPE_TO_TEXT[type]}
             </span>
