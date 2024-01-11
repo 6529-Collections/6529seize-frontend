@@ -8,7 +8,7 @@ import {
   RateMatter,
   RatingWithProfileInfoAndLevel,
 } from "../../entities/IProfile";
-import { UserPageRepPropsRepRates } from "../../pages/[user]/rep";
+import { UserPageRepPropsRepRates } from "../../pages/[user]";
 import { Page } from "../../helpers/Types";
 import {
   ActivityLogParams,
@@ -26,6 +26,7 @@ export enum QueryKey {
   PROFILE_REP_RATINGS = "PROFILE_REP_RATINGS",
   REP_CATEGORIES_SEARCH = "REP_CATEGORIES_SEARCH",
   MEMES_LITE = "MEMES_LITE",
+  WALLET_CONSOLIDATIONS_CHECK = "WALLET_CONSOLIDATIONS_CHECK",
 }
 
 type QueryType<T, U, V, W> = [T, U, V, W];

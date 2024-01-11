@@ -158,9 +158,7 @@ export default function ProfileActivityLogs({
   return (
     <div
       className={`${
-        initialParams.handleOrWallet
-          ? ""
-          : "tw-mt-2 tw-min-h-screen"
+        initialParams.handleOrWallet ? "" : "tw-mt-2 tw-min-h-screen"
       }  tw-scroll-py-3 tw-overflow-auto`}
     >
       {withFilters && (
