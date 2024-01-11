@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { QueryKey } from "../../../react-query-wrapper/ReactQueryWrapper";
 import { commonApiFetch } from "../../../../services/api/common-api";
-import { useContext, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useClickAway, useDebounce, useKeyPressEvent } from "react-use";
 import { AnimatePresence, motion } from "framer-motion";
 import {
@@ -10,10 +10,20 @@ import {
 } from "../../../../entities/IProfile";
 import UserPageRepNewRepSearchHeader from "./UserPageRepNewRepSearchHeader";
 import UserPageRepNewRepSearchDropdown from "./UserPageRepNewRepSearchDropdown";
-import { AuthContext } from "../../../auth/Auth";
 import CircleLoader from "../../../distribution-plan-tool/common/CircleLoader";
+import UserPageRepNewRepError from "./UserPageRepNewRepError";
 
-const MIN_SEARCH_LENGTH = 3;
+const SEARCH_LENGTH = {
+  MIN: 3,
+  MAX: 100,
+};
+
+export enum RepSearchState {
+  MIN_LENGTH_ERROR = "MIN_LENGTH_ERROR",
+  MAX_LENGTH_ERROR = "MAX_LENGTH_ERROR",
+  LOADING = "LOADING",
+  HAVE_RESULTS = "HAVE_RESULTS",
+}
 
 export default function UserPageRepNewRepSearch({
   repRates,
@@ -24,7 +34,6 @@ export default function UserPageRepNewRepSearch({
   readonly onRepSearch: (repSearch: string) => void;
   readonly profile: IProfileAndConsolidations;
 }) {
-  const { setToast } = useContext(AuthContext);
   const [repSearch, setRepSearch] = useState<string>("");
 
   const handleRepSearchChange = (
@@ -34,14 +43,29 @@ export default function UserPageRepNewRepSearch({
     setRepSearch(newValue);
   };
 
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+
   const [debouncedValue, setDebouncedValue] = useState<string>("");
   useDebounce(
     () => {
       setDebouncedValue(repSearch);
+      setErrorMsg(null);
     },
     500,
     [repSearch]
   );
+
+  const [matchingSearchLength, setMatchingSearchLength] = useState<boolean>(
+    debouncedValue.length >= SEARCH_LENGTH.MIN &&
+      debouncedValue.length <= SEARCH_LENGTH.MAX
+  );
+
+  useEffect(() => {
+    setMatchingSearchLength(
+      debouncedValue.length >= SEARCH_LENGTH.MIN &&
+        debouncedValue.length <= SEARCH_LENGTH.MAX
+    );
+  }, [debouncedValue]);
 
   const { isFetching, data: categories } = useQuery<string[]>({
     queryKey: [QueryKey.REP_CATEGORIES_SEARCH, debouncedValue],
@@ -52,7 +76,7 @@ export default function UserPageRepNewRepSearch({
           param: debouncedValue,
         },
       }),
-    enabled: debouncedValue.length >= MIN_SEARCH_LENGTH,
+    enabled: matchingSearchLength,
   });
 
   const [isOpen, setIsOpen] = useState(false);
@@ -64,7 +88,7 @@ export default function UserPageRepNewRepSearch({
   const [checkingAvailability, setCheckingAvailability] = useState(false);
 
   const onRepSelect = async (rep: string) => {
-    if (rep.length < MIN_SEARCH_LENGTH) return;
+    if (!matchingSearchLength) return;
     if (checkingAvailability) return;
     setCheckingAvailability(true);
     try {
@@ -76,31 +100,10 @@ export default function UserPageRepNewRepSearch({
       });
       onRepSearch(rep);
       setRepSearch("");
+      setErrorMsg(null);
       setIsOpen(false);
     } catch (error: any) {
-      setToast({
-        message: (
-          <div>
-            {error} <br />
-            <br />
-            <span className="tw-text-sm">
-              Rep is not meant for insults so we run proposed rep categories
-              through an AI filter.
-            </span>
-            <br />
-            <span className="tw-text-sm">
-              If you think the filter got your proposed category wrong, hop into
-              Discord and let us know.
-            </span>
-            <br />
-            <span className="tw-text-sm">
-              In the meantime, perhaps you can rephrase that you are trying to
-              say.
-            </span>
-          </div>
-        ),
-        type: "error",
-      });
+      setErrorMsg(error);
     } finally {
       setCheckingAvailability(false);
     }
@@ -115,7 +118,7 @@ export default function UserPageRepNewRepSearch({
   const [categoriesToDisplay, setCategoriesToDisplay] = useState<string[]>([]);
   useEffect(() => {
     const items: string[] = [];
-    if (debouncedValue.length >= MIN_SEARCH_LENGTH) {
+    if (matchingSearchLength) {
       items.push(debouncedValue);
     }
 
@@ -129,7 +132,23 @@ export default function UserPageRepNewRepSearch({
     if (debouncedValue.length) {
       setIsOpen(true);
     }
-  }, [debouncedValue, categories]);
+  }, [debouncedValue, categories, matchingSearchLength]);
+
+  const [repSearchState, setRepSearchState] = useState<RepSearchState>(
+    RepSearchState.MIN_LENGTH_ERROR
+  );
+
+  useEffect(() => {
+    if (debouncedValue.length < SEARCH_LENGTH.MIN) {
+      setRepSearchState(RepSearchState.MIN_LENGTH_ERROR);
+    } else if (debouncedValue.length > SEARCH_LENGTH.MAX) {
+      setRepSearchState(RepSearchState.MAX_LENGTH_ERROR);
+    } else if (isFetching) {
+      setRepSearchState(RepSearchState.LOADING);
+    } else {
+      setRepSearchState(RepSearchState.HAVE_RESULTS);
+    }
+  }, [debouncedValue, isFetching, categories]);
 
   return (
     <div className="tw-max-w-full tw-relative tw-bg-iron-900 tw-px-4 tw-py-6 lg:tw-p-8 tw-rounded-xl tw-border tw-border-solid tw-border-iron-800">
@@ -193,7 +212,9 @@ export default function UserPageRepNewRepSearch({
                 >
                   <UserPageRepNewRepSearchDropdown
                     categories={categoriesToDisplay}
-                    loading={isFetching}
+                    state={repSearchState}
+                    minSearchLength={SEARCH_LENGTH.MIN}
+                    maxSearchLength={SEARCH_LENGTH.MAX}
                     onRepSelect={onRepSelect}
                   />
                 </motion.div>
@@ -201,38 +222,9 @@ export default function UserPageRepNewRepSearch({
             </AnimatePresence>
           </div>
         </div>
-        <div className="tw-w-full md:tw-w-auto tw-inline-flex tw-items-center tw-rounded-lg tw-bg-red/5 tw-border tw-border-solid tw-border-red/30 tw-p-4">
-          <div className="tw-flex">
-            <svg
-              className="tw-flex-shrink-0 tw-w-5 tw-h-5 tw-text-red"
-              viewBox="0 0 24 24"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="M11.9998 8.99999V13M11.9998 17H12.0098M10.6151 3.89171L2.39019 18.0983C1.93398 18.8863 1.70588 19.2803 1.73959 19.6037C1.769 19.8857 1.91677 20.142 2.14613 20.3088C2.40908 20.5 2.86435 20.5 3.77487 20.5H20.2246C21.1352 20.5 21.5904 20.5 21.8534 20.3088C22.0827 20.142 22.2305 19.8857 22.2599 19.6037C22.2936 19.2803 22.0655 18.8863 21.6093 18.0983L13.3844 3.89171C12.9299 3.10654 12.7026 2.71396 12.4061 2.58211C12.1474 2.4671 11.8521 2.4671 11.5935 2.58211C11.2969 2.71396 11.0696 3.10655 10.6151 3.89171Z"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              />
-            </svg>
-            <div className="tw-ml-3 tw-self-center tw-flex tw-flex-col lg:tw-max-w-xl">
-              <h3 className="tw-text-sm tw-mb-0 tw-font-semibold tw-text-red">
-                Insulting term
-              </h3>
-              <div>
-                <p className="tw-text-justify tw-mt-2 tw-mb-0 tw-text-sm tw-text-iron-300 tw-font-normal">
-                  Rep is not meant for insults so we run proposed rep categories
-                  through an AI filter. If you think the filter got your
-                  proposed category wrong, hop into Discord and let us know. In
-                  the meantime, perhaps you can rephrase that you are trying to
-                  say.
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
+        <AnimatePresence mode="wait" initial={false}>
+          {!!errorMsg && <UserPageRepNewRepError msg={errorMsg} />}
+        </AnimatePresence>
       </div>
     </div>
   );
