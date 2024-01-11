@@ -75,9 +75,11 @@ export const convertActivityLogParams = (
 export default function ProfileActivityLogs({
   initialParams,
   withFilters,
+  children,
 }: {
   readonly initialParams: ActivityLogParams;
   readonly withFilters: boolean;
+  readonly children?: React.ReactNode;
 }) {
   const [selectedFilters, setSelectedFilters] = useState<
     ProfileActivityLogType[]
@@ -161,13 +163,22 @@ export default function ProfileActivityLogs({
         initialParams.handleOrWallet ? "" : "tw-mt-2 tw-min-h-screen"
       }  tw-scroll-py-3 tw-overflow-auto`}
     >
-      {withFilters && (
-        <ProfileActivityLogsFilter
-          selected={selectedFilters}
-          setSelected={onFilter}
-          user={initialParams.handleOrWallet}
-        />
-      )}
+      <div className="tw-w-full tw-flex tw-flex-col min-[1200px]:tw-flex-row tw-gap-y-8 min-[1200px]:tw-gap-x-16 min-[1200px]:tw-justify-between min-[1200px]:tw-items-center">
+        {children && <div>{children}</div>}
+        {withFilters && (
+          <div className="min-[1200px]:tw-flex min-[1200px]:tw-justify-end">
+            <div
+              className={`${children ? "" : "tw-mt-6"} min-[1200px]:tw-w-96`}
+            >
+              <ProfileActivityLogsFilter
+                selected={selectedFilters}
+                setSelected={onFilter}
+                user={initialParams.handleOrWallet}
+              />
+            </div>
+          </div>
+        )}
+      </div>
       {initialParams.handleOrWallet && (
         <CommonFilterTargetSelect
           selected={targetType}
