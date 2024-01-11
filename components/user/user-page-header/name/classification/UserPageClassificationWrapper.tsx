@@ -17,7 +17,7 @@ export default function UserPageClassificationWrapper({
   const [isEditOpen, setIsEditOpen] = useState<boolean>(false);
 
   return (
-    <div>
+    <div className="md:-tw-mt-0.5">
       <button
         onClick={() => setIsEditOpen(true)}
         disabled={!canEdit}
@@ -30,7 +30,7 @@ export default function UserPageClassificationWrapper({
         {children}
         {canEdit && (
           <div className="group-hover:tw-block tw-hidden tw-absolute tw-text-neutral-400">
-            <div className="tw-absolute -tw-top-5 -tw-left-5">
+            <div className="tw-absolute -tw-top-4 sm:-tw-top-5 -tw-left-4 sm:-tw-left-5">
               <PencilIcon size={PencilIconSize.SMALL} />
             </div>
           </div>

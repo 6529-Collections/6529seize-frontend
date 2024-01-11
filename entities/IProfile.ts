@@ -324,3 +324,13 @@ export interface ApiCreateOrUpdateProfileRequest {
   banner_1?: string;
   banner_2?: string;
 }
+
+export interface WalletConsolidationState {
+  readonly created_at: Date;
+  readonly block: number;
+  readonly wallet1: string;
+  readonly wallet2: string;
+  readonly confirmed: 0 | 1;
+  readonly wallet1_display: string | null;
+  readonly wallet2_display: string | null;
+}
