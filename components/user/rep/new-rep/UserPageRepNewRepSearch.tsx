@@ -133,84 +133,106 @@ export default function UserPageRepNewRepSearch({
 
   return (
     <div className="tw-max-w-full tw-relative tw-bg-iron-900 tw-px-4 tw-py-6 lg:tw-p-8 tw-rounded-xl tw-border tw-border-solid tw-border-iron-800">
-      <UserPageRepNewRepSearchHeader repRates={repRates} profile={profile} />
-      <div ref={listRef} className="tw-w-full sm:tw-max-w-xs">
-        <div className="tw-w-full tw-mt-6 tw-relative">
-          <form onSubmit={onSubmit} className="tw-w-full sm:tw-max-w-xs">
-            <label
-              htmlFor="search-rep"
-              className="tw-block tw-text-sm tw-font-normal tw-text-iron-400"
-            >
-              Assign Rep
-            </label>
-            <div className="tw-w-full tw-relative tw-mt-1.5">
-              <svg
-                className="tw-pointer-events-none tw-absolute tw-left-4 tw-top-3.5 tw-h-5 tw-w-5 tw-text-iron-300"
-                viewBox="0 0 20 20"
-                fill="currentColor"
-                aria-hidden="true"
-              >
-                <path
-                  fillRule="evenodd"
-                  d="M9 3.5a5.5 5.5 0 100 11 5.5 5.5 0 000-11zM2 9a7 7 0 1112.452 4.391l3.328 3.329a.75.75 0 11-1.06 1.06l-3.329-3.328A7 7 0 012 9z"
-                  clipRule="evenodd"
-                />
-              </svg>
-              <input
-                id="search-rep"
-                name="search-rep"
-                type="text"
-                required
-                autoComplete="off"
-                value={repSearch}
-                onChange={handleRepSearchChange}
-                onFocus={() => setIsOpen(true)}
-                className="tw-form-input tw-appearance-none tw-block tw-w-full tw-rounded-lg tw-border-0 tw-py-3 tw-pl-11 tw-pr-4 tw-bg-iron-950 focus:tw-bg-iron-950  tw-text-iron-300 tw-font-normal tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-700 hover:tw-ring-iron-600 placeholder:tw-text-iron-500 focus:tw-outline-none  focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 tw-text-base tw-transition tw-duration-300 tw-ease-out"
-                placeholder="Search"
-              />
-              {checkingAvailability && (
-                <div className="tw-pointer-events-none tw-absolute tw-inset-y-0 tw-flex tw-items-center tw-right-0 tw-pr-3">
-                  <CircleLoader />
+      <div className="tw-w-full tw-flex tw-flex-col lg:tw-flex-row tw-gap-y-8 lg:tw-gap-x-16 lg:tw-justify-between tw-items-start">
+        <div className="tw-w-full lg:tw-w-1/2">
+          <UserPageRepNewRepSearchHeader
+            repRates={repRates}
+            profile={profile}
+          />
+          <div ref={listRef} className="tw-w-full sm:tw-max-w-xs">
+            <div className="tw-w-full tw-mt-6 tw-relative">
+              <form onSubmit={onSubmit} className="tw-w-full sm:tw-max-w-xs">
+                <label
+                  htmlFor="search-rep"
+                  className="tw-block tw-text-sm tw-font-normal tw-text-iron-400"
+                >
+                  Assign Rep
+                </label>
+                <div className="tw-w-full tw-relative tw-mt-1.5">
+                  <svg
+                    className="tw-pointer-events-none tw-absolute tw-left-4 tw-top-3.5 tw-h-5 tw-w-5 tw-text-iron-300"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                    aria-hidden="true"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M9 3.5a5.5 5.5 0 100 11 5.5 5.5 0 000-11zM2 9a7 7 0 1112.452 4.391l3.328 3.329a.75.75 0 11-1.06 1.06l-3.329-3.328A7 7 0 012 9z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                  <input
+                    id="search-rep"
+                    name="search-rep"
+                    type="text"
+                    required
+                    autoComplete="off"
+                    value={repSearch}
+                    onChange={handleRepSearchChange}
+                    onFocus={() => setIsOpen(true)}
+                    className="tw-form-input tw-appearance-none tw-block tw-w-full tw-rounded-lg tw-border-0 tw-py-3 tw-pl-11 tw-pr-4 tw-bg-iron-950 focus:tw-bg-iron-950  tw-text-iron-300 tw-font-normal tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-700 hover:tw-ring-iron-600 placeholder:tw-text-iron-500 focus:tw-outline-none  focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 tw-text-base tw-transition tw-duration-300 tw-ease-out"
+                    placeholder="Search"
+                  />
+                  {checkingAvailability && (
+                    <div className="tw-pointer-events-none tw-absolute tw-inset-y-0 tw-flex tw-items-center tw-right-0 tw-pr-3">
+                      <CircleLoader />
+                    </div>
+                  )}
                 </div>
-              )}
+              </form>
             </div>
-          </form>
+            <AnimatePresence mode="wait" initial={false}>
+              {isOpen && (
+                <motion.div
+                  className="tw-origin-top-right tw-absolute tw-z-10  tw-mt-1 tw-w-full tw-max-w-xs tw-rounded-lg tw-shadow-xl tw-bg-iron-900 tw-ring-1 tw-ring-black tw-ring-opacity-5"
+                  initial={{ opacity: 0, y: -20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  transition={{ duration: 0.2 }}
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <UserPageRepNewRepSearchDropdown
+                    categories={categoriesToDisplay}
+                    loading={isFetching}
+                    onRepSelect={onRepSelect}
+                  />
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
         </div>
-        <AnimatePresence mode="wait" initial={false}>
-          {isOpen && (
-            <motion.div
-              className="tw-origin-top-right tw-absolute tw-z-10  tw-mt-1 tw-w-full tw-max-w-xs tw-rounded-lg tw-shadow-xl tw-bg-iron-900 tw-ring-1 tw-ring-black tw-ring-opacity-5"
-              initial={{ opacity: 0, y: -20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.2 }}
-              onClick={(e) => e.stopPropagation()}
+        <div className="tw-w-full md:tw-w-auto tw-inline-flex tw-items-center tw-rounded-lg tw-bg-red/5 tw-border tw-border-solid tw-border-red/30 tw-p-4">
+          <div className="tw-flex">
+            <svg
+              className="tw-flex-shrink-0 tw-w-5 tw-h-5 tw-text-red"
+              viewBox="0 0 24 24"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
             >
-              <UserPageRepNewRepSearchDropdown
-                categories={categoriesToDisplay}
-                loading={isFetching}
-                onRepSelect={onRepSelect}
+              <path
+                d="M11.9998 8.99999V13M11.9998 17H12.0098M10.6151 3.89171L2.39019 18.0983C1.93398 18.8863 1.70588 19.2803 1.73959 19.6037C1.769 19.8857 1.91677 20.142 2.14613 20.3088C2.40908 20.5 2.86435 20.5 3.77487 20.5H20.2246C21.1352 20.5 21.5904 20.5 21.8534 20.3088C22.0827 20.142 22.2305 19.8857 22.2599 19.6037C22.2936 19.2803 22.0655 18.8863 21.6093 18.0983L13.3844 3.89171C12.9299 3.10654 12.7026 2.71396 12.4061 2.58211C12.1474 2.4671 11.8521 2.4671 11.5935 2.58211C11.2969 2.71396 11.0696 3.10655 10.6151 3.89171Z"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
               />
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
-      <div>
-        Insulting term <br />
-        <br />
-        <span className="tw-text-sm">
-          Rep is not meant for insults so we run proposed rep categories through
-          an AI filter.
-        </span>
-        <br />
-        <span className="tw-text-sm">
-          If you think the filter got your proposed category wrong, hop into
-          Discord and let us know.
-        </span>
-        <br />
-        <span className="tw-text-sm">
-          In the meantime, perhaps you can rephrase that you are trying to say.
-        </span>
+            </svg>
+            <div className="tw-ml-3 tw-self-center tw-flex tw-flex-col lg:tw-max-w-xl">
+              <h3 className="tw-text-sm tw-mb-0 tw-font-semibold tw-text-red">
+                Insulting term
+              </h3>
+              <div>
+                <p className="tw-text-justify tw-mt-2 tw-mb-0 tw-text-sm tw-text-iron-300 tw-font-normal">
+                  Rep is not meant for insults so we run proposed rep categories
+                  through an AI filter. If you think the filter got your
+                  proposed category wrong, hop into Discord and let us know. In
+                  the meantime, perhaps you can rephrase that you are trying to
+                  say.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
