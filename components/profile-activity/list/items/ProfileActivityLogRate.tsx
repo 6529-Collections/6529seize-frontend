@@ -46,25 +46,6 @@ export default function ProfileActivityLogRate({
       : ProfileActivityLogRateType.ADDED;
 
   const ratingType = getRatingType();
-  const goToProfile = () => {
-    const user = log.target_profile_handle;
-    if (!user) return;
-    if (router.route === "/[user]/rep") {
-      router.push(`/${user}/rep`);
-      return;
-    }
-    if (router.route === "/[user]/identity") {
-      router.push(`/${user}/identity`);
-      return;
-    }
-
-    if (log.contents.rating_matter === RateMatter.REP) {
-      router.push(`/${user}/rep`);
-      return;
-    }
-
-    router.push(`/${user}/identity`);
-  };
 
   const change = log.contents.new_rating - log.contents.old_rating;
   const isChangePositive = change > 0;
