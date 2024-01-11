@@ -195,6 +195,23 @@ export default function UserPageRepNewRepSearch({
           )}
         </AnimatePresence>
       </div>
+      <div>
+        Insulting term <br />
+        <br />
+        <span className="tw-text-sm">
+          Rep is not meant for insults so we run proposed rep categories through
+          an AI filter.
+        </span>
+        <br />
+        <span className="tw-text-sm">
+          If you think the filter got your proposed category wrong, hop into
+          Discord and let us know.
+        </span>
+        <br />
+        <span className="tw-text-sm">
+          In the meantime, perhaps you can rephrase that you are trying to say.
+        </span>
+      </div>
     </div>
   );
 }
