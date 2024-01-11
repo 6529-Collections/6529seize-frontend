@@ -3,9 +3,9 @@ import { useEffect, useState } from "react";
 import UserPageTab from "./UserPageTab";
 
 export enum UserPageTabType {
-  COLLECTED = "COLLECTED",
   REP = "REP",
   IDENTITY = "IDENTITY",
+  COLLECTED = "COLLECTED",
   STATS = "STATS",
 }
 
@@ -13,25 +13,25 @@ export const USER_PAGE_TAB_META: Record<
   UserPageTabType,
   { tab: UserPageTabType; title: string; route: string }
 > = {
-  [UserPageTabType.COLLECTED]: {
-    tab: UserPageTabType.COLLECTED,
-    title: "Collected",
-    route: "",
-  },
-  [UserPageTabType.STATS]: {
-    tab: UserPageTabType.STATS,
-    title: "Stats",
-    route: "stats",
-  },
   [UserPageTabType.REP]: {
     tab: UserPageTabType.REP,
     title: "Rep",
-    route: "rep",
+    route: "",
   },
   [UserPageTabType.IDENTITY]: {
     tab: UserPageTabType.IDENTITY,
     title: "Identity",
     route: "identity",
+  },
+  [UserPageTabType.COLLECTED]: {
+    tab: UserPageTabType.COLLECTED,
+    title: "Collected",
+    route: "collected",
+  },
+  [UserPageTabType.STATS]: {
+    tab: UserPageTabType.STATS,
+    title: "Stats",
+    route: "stats",
   },
 };
 
@@ -42,17 +42,12 @@ export default function UserPageTabs() {
     const regex = /\/\[user\]\/([^/?]+)/;
     const match = pathname.match(regex);
     const name = Array.isArray(match) ? match.at(1) : "";
-    if (name === "") {
-      return UserPageTabType.COLLECTED;
-    } else if (name === "stats") {
-      return UserPageTabType.STATS;
-    } else if (name === "rep") {
-      return UserPageTabType.REP;
-    } else if (name === "identity") {
-      return UserPageTabType.IDENTITY;
-    }
-
-    return UserPageTabType.COLLECTED;
+    const tab = Object.values(UserPageTabType).find(
+      (tab) =>
+        USER_PAGE_TAB_META[tab].route.toLowerCase() ===
+        name?.toLocaleLowerCase()
+    );
+    return tab ?? UserPageTabType.COLLECTED;
   };
 
   const [tab, setTab] = useState<UserPageTabType>(
@@ -70,11 +65,7 @@ export default function UserPageTabs() {
         aria-label="Tabs"
       >
         {Object.values(UserPageTabType).map((tabType) => (
-          <UserPageTab
-            key={tabType}
-            tab={tabType}
-            activeTab={tab}
-          />
+          <UserPageTab key={tabType} tab={tabType} activeTab={tab} />
         ))}
       </div>
     </div>

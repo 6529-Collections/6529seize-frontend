@@ -172,10 +172,10 @@ export default function SearchProfileModal({
                   >
                     <SearchProfileModalItem
                       profile={profile}
-                      goToProfile={goToProfile}
                       searchValue={debouncedValue}
                       isSelected={i === selectedProfileIndex}
                       onHover={(state) => onHover(i, state)}
+                      onClose={onClose}
                     />
                   </div>
                 ))}
