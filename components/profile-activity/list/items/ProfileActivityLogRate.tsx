@@ -7,6 +7,7 @@ import { useRouter } from "next/router";
 import ProfileActivityLogItemAction from "./utils/ProfileActivityLogItemAction";
 import { formatNumberWithCommas } from "../../../../helpers/Helpers";
 import { UserPageTabType } from "../../../user/layout/UserPageTabs";
+import CommonProfileLink from "../../../user/utils/CommonProfileLink";
 
 enum ProfileActivityLogRateType {
   ADDED = "ADDED",
@@ -89,11 +90,10 @@ export default function ProfileActivityLogRate({
     (router.query.user as string)?.toLowerCase() ===
     handleOrWallet.toLowerCase();
 
-  // look it over of ProfileActivityLogItemWrapper also, since if we are at [user] we want to keep tab same
-  // const tabTarget =
-  //   log.contents.rating_matter === RateMatter.REP
-  //     ? UserPageTabType.REP
-  //     : UserPageTabType.IDENTITY;
+  const tabTarget =
+    log.contents.rating_matter === RateMatter.REP
+      ? UserPageTabType.REP
+      : UserPageTabType.IDENTITY;
 
   return (
     <>
@@ -120,19 +120,11 @@ export default function ProfileActivityLogRate({
       />
 
       <ProfileActivityLogItemAction action={TO_FROM[ratingType]} />
-      <button
-        onClick={goToProfile}
-        className="tw-bg-transparent tw-border-none tw-leading-4 tw-p-0"
-        disabled={isCurrentUser}
-      >
-        <span
-          className={`${
-            isCurrentUser ? "" : "hover:tw-underline tw-cursor-pointer"
-          } tw-whitespace-nowrap tw-text-sm tw-font-medium tw-text-iron-100`}
-        >
-          {log.target_profile_handle}
-        </span>
-      </button>
+      <CommonProfileLink
+        handleOrWallet={handleOrWallet}
+        isCurrentUser={isCurrentUser}
+        tabTarget={tabTarget}
+      />
 
       {isSystemAdjustment && (
         <span className="tw-whitespace-nowrap tw-inline-flex tw-items-center tw-gap-x-1.5 tw-rounded-md tw-px-2 tw-py-1 tw-text-xs tw-font-medium tw-text-iron-300 tw-ring-1 tw-ring-inset tw-ring-iron-700">

@@ -1,5 +1,7 @@
 import Link from "next/link";
-import { USER_PAGE_TAB_META, UserPageTabType } from "../layout/UserPageTabs";
+import { UserPageTabType } from "../layout/UserPageTabs";
+import { getProfileTargetRoute } from "../../../helpers/Helpers";
+import { useRouter } from "next/router";
 
 export default function CommonProfileLink({
   handleOrWallet,
@@ -10,7 +12,12 @@ export default function CommonProfileLink({
   readonly isCurrentUser: boolean;
   readonly tabTarget: UserPageTabType;
 }) {
-  const url = `/${handleOrWallet}/${USER_PAGE_TAB_META[tabTarget].route}`;
+  const router = useRouter();
+  const url = getProfileTargetRoute({
+    handleOrWallet,
+    router,
+    defaultPath: tabTarget,
+  });
 
   return (
     <Link

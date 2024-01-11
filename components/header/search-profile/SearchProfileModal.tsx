@@ -7,6 +7,8 @@ import { commonApiFetch } from "../../../services/api/common-api";
 import SearchProfileModalItem from "./SearchProfileModalItem";
 import { useRouter } from "next/router";
 import { getRandomObjectId } from "../../../helpers/AllowlistToolHelpers";
+import { getProfileTargetRoute } from "../../../helpers/Helpers";
+import { UserPageTabType } from "../../user/layout/UserPageTabs";
 
 enum STATE {
   INITIAL = "INITIAL",
@@ -69,13 +71,13 @@ export default function SearchProfileModal({
   };
 
   const goToProfile = async (profile: CommunityMemberMinimal) => {
-    const target = profile.handle ?? profile.wallet.toLowerCase();
-    if (router.route.includes("[user]")) {
-      const newPath = router.pathname.replace("[user]", target);
-      await router.replace(newPath);
-    } else {
-      await router.push(`/${target}/identity`);
-    }
+    const handleOrWallet = profile.handle ?? profile.wallet.toLowerCase();
+    const path = getProfileTargetRoute({
+      handleOrWallet,
+      router,
+      defaultPath: UserPageTabType.IDENTITY,
+    });
+    await router.push(path);
     onClose();
   };
 

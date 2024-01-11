@@ -37,7 +37,6 @@ export const USER_PAGE_TAB_META: Record<
 
 export default function UserPageTabs() {
   const router = useRouter();
-  const user = router.query.user as string;
 
   const pathnameToTab = (pathname: string): UserPageTabType => {
     const regex = /\/\[user\]\/([^/?]+)/;
@@ -60,14 +59,6 @@ export default function UserPageTabs() {
     pathnameToTab(router.pathname)
   );
 
-  const goToTab = (tab: UserPageTabType) => {
-    router.push({
-      pathname: `/${user}/${USER_PAGE_TAB_META[tab].route}`,
-      query: router.query.address ? { address: router.query.address } : {},
-    });
-    setTab(tab);
-  };
-
   useEffect(() => {
     setTab(pathnameToTab(router.pathname));
   }, [router.query]);
@@ -83,7 +74,6 @@ export default function UserPageTabs() {
             key={tabType}
             tab={tabType}
             activeTab={tab}
-            goToTab={goToTab}
           />
         ))}
       </div>

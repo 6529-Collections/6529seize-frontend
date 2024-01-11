@@ -1,15 +1,20 @@
 import { useEffect, useState } from "react";
 import { USER_PAGE_TAB_META, UserPageTabType } from "./UserPageTabs";
+import { useRouter } from "next/router";
+import Link from "next/link";
 
 export default function UserPageTab({
   tab,
   activeTab,
-  goToTab,
 }: {
   readonly tab: UserPageTabType;
   readonly activeTab: UserPageTabType;
-  readonly goToTab: (tab: UserPageTabType) => void;
 }) {
+  const router = useRouter();
+  const handleOrWallet = router.query.user as string;
+
+  const path = `/${handleOrWallet}/${USER_PAGE_TAB_META[tab].route}`;
+
   const [isActive, setIsActive] = useState<boolean>(tab === activeTab);
   useEffect(() => {
     setIsActive(tab === activeTab);
@@ -29,11 +34,16 @@ export default function UserPageTab({
   }, [isActive]);
 
   return (
-    <button
-      onClick={() => goToTab(tab)}
-      className="tw-bg-transparent tw-border-none tw-m-0 tw-p-0"
+    <Link
+      href={{
+        pathname: path,
+        query: router.query.address ? { address: router.query.address } : {},
+      }}
+      className={`${
+        isActive ? "tw-pointer-events-none" : ""
+      } tw-no-underline tw-leading-4 tw-p-0`}
     >
       <div className={classes}>{USER_PAGE_TAB_META[tab].title}</div>
-    </button>
+    </Link>
   );
 }
