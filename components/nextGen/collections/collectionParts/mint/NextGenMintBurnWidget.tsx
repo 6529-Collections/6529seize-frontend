@@ -26,16 +26,19 @@ import { fetchUrl } from "../../../../../services/6529api";
 import { useWeb3Modal } from "@web3modal/react";
 import { getNftsForContractAndOwner } from "../../../../../services/alchemy-api";
 import { Spinner } from "../../NextGen";
-import { useMintSharedState } from "../../../nextgen_helpers";
+import {
+  getStatusFromDates,
+  useMintSharedState,
+} from "../../../nextgen_helpers";
 import {
   NextGenAdminMintForModeFormGroup,
   NextGenAdminMintingForDelegator,
 } from "./NextGenMintShared";
+import { NextGenCollection } from "../../../../../entities/INextgen";
 
 interface Props {
-  collection: CollectionWithMerkle;
-  phase_times: PhaseTimes;
-  additional_data: AdditionalData;
+  collection: NextGenCollection;
+  collection_merkle: CollectionWithMerkle;
   available_supply: number;
   mint_price: number;
   mint_counts: TokensPerAddress;
@@ -48,6 +51,16 @@ export default function NextGenMintBurnWidget(props: Readonly<Props>) {
   const account = useAccount();
   const chainId = useChainId();
   const web3Modal = useWeb3Modal();
+
+  const alStatus = getStatusFromDates(
+    props.collection.allowlist_start,
+    props.collection.allowlist_end
+  );
+
+  const publicStatus = getStatusFromDates(
+    props.collection.public_start,
+    props.collection.public_end
+  );
 
   const {
     burnProofResponse,
@@ -82,22 +95,24 @@ export default function NextGenMintBurnWidget(props: Readonly<Props>) {
   >([]);
 
   function filterTokensOwnedForBurnAddress(r: any[]) {
-    if (props.collection.max_token_index > 0) {
+    if (props.collection_merkle.max_token_index > 0) {
       r = r.filter((t) => {
         return (
-          t.tokenId >= props.collection.min_token_index &&
-          t.tokenId <= props.collection.max_token_index
+          t.tokenId >= props.collection_merkle.min_token_index &&
+          t.tokenId <= props.collection_merkle.max_token_index
         );
       });
     }
     if (
       areEqualAddresses(
-        props.collection.burn_collection,
+        props.collection_merkle.burn_collection,
         NEXTGEN_CORE[NEXTGEN_CHAIN_ID]
       )
     ) {
       r = r.filter((t) =>
-        t.tokenId.toString().startsWith(props.collection.burn_collection_id)
+        t.tokenId
+          .toString()
+          .startsWith(props.collection_merkle.burn_collection_id)
       );
     }
     return r;
@@ -138,7 +153,7 @@ export default function NextGenMintBurnWidget(props: Readonly<Props>) {
     mintWrite.reset();
     if (tokenId) {
       setFetchingProofs(true);
-      const url = `${process.env.API_ENDPOINT}/api/nextgen/burn_proofs/${props.phase_times.merkle_root}/${tokenId}`;
+      const url = `${process.env.API_ENDPOINT}/api/nextgen/burn_proofs/${props.collection_merkle.merkle_root}/${tokenId}`;
       fetchUrl(url).then((response: ProofResponse) => {
         setBurnProofResponse(response);
         setFetchingProofs(false);
@@ -190,21 +205,18 @@ export default function NextGenMintBurnWidget(props: Readonly<Props>) {
     if (!account.isConnected || chainId !== NEXTGEN_CHAIN_ID) {
       return false;
     }
-    if (!props.collection.status) {
+    if (!props.collection_merkle.status) {
       return true;
     }
     return (
-      !props.phase_times ||
-      !props.additional_data ||
       !props.mint_counts ||
-      (props.phase_times.al_status == Status.LIVE && !burnProofResponse) ||
-      (props.phase_times.al_status != Status.LIVE &&
-        props.phase_times.public_status != Status.LIVE) ||
-      (props.phase_times.al_status == Status.LIVE &&
+      (alStatus == Status.LIVE && !burnProofResponse) ||
+      (alStatus != Status.LIVE && publicStatus != Status.LIVE) ||
+      (alStatus == Status.LIVE &&
         burnProofResponse &&
         burnProofResponse.proof.length === 0) ||
-      (props.phase_times.public_status == Status.LIVE &&
-        0 >= props.additional_data.max_purchases - props.mint_counts.public) ||
+      (publicStatus == Status.LIVE &&
+        0 >= props.collection.max_purchases - props.mint_counts.public) ||
       0 >= props.available_supply ||
       isMinting
     );
@@ -214,14 +226,12 @@ export default function NextGenMintBurnWidget(props: Readonly<Props>) {
     if (isMinting) {
       mintWrite.write({
         args: [
-          props.collection.burn_collection,
-          props.collection.burn_collection_id,
+          props.collection_merkle.burn_collection,
+          props.collection_merkle.burn_collection_id,
           tokenId,
-          props.collection.collection_id,
+          props.collection_merkle.collection_id,
           burnProofResponse ? burnProofResponse.info : "",
-          props.phase_times &&
-          burnProofResponse &&
-          props.phase_times.al_status == Status.LIVE
+          burnProofResponse && alStatus == Status.LIVE
             ? burnProofResponse.proof
             : [],
           salt,
@@ -244,7 +254,7 @@ export default function NextGenMintBurnWidget(props: Readonly<Props>) {
     if (isMinting) {
       return "Processing...";
     }
-    if (!props.collection.status) {
+    if (!props.collection_merkle.status) {
       return "Burn Not Active";
     }
 
@@ -280,20 +290,20 @@ export default function NextGenMintBurnWidget(props: Readonly<Props>) {
                 <Table className="mb-0">
                   <tr>
                     <td>Contract</td>
-                    <td>{props.collection.burn_collection}</td>
+                    <td>{props.collection_merkle.burn_collection}</td>
                   </tr>
-                  {!!props.collection.burn_collection_id && (
+                  {!!props.collection_merkle.burn_collection_id && (
                     <tr>
                       <td>Collection</td>
-                      <td>{props.collection.burn_collection_id}</td>
+                      <td>{props.collection_merkle.burn_collection_id}</td>
                     </tr>
                   )}
-                  {props.collection.max_token_index > 0 && (
+                  {props.collection_merkle.max_token_index > 0 && (
                     <tr>
                       <td>Tokens</td>
                       <td>
-                        #{props.collection.min_token_index} - #
-                        {props.collection.max_token_index}
+                        #{props.collection_merkle.min_token_index} - #
+                        {props.collection_merkle.max_token_index}
                       </td>
                     </tr>
                   )}

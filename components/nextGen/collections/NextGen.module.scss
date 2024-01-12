@@ -335,3 +335,34 @@
   flex-direction: column;
   gap: 0.5rem;
 }
+
+.logsTable {
+  tr td {
+    white-space: nowrap;
+  }
+  tr td:first-child {
+    width: 1%;
+  }
+
+  tr {
+    line-height: 40px;
+  }
+
+  tr:nth-child(odd) {
+    background-color: $almost-very-dark-grey;
+  }
+
+  & > :not(caption) > * > * {
+    padding: 0.5rem !important;
+  }
+}
+
+.collectionProvenance {
+  white-space: pre-wrap !important;
+}
+
+.logsScrollContainer {
+  -ms-overflow-style: none; /* Internet Explorer 10+ */
+  scrollbar-width: none; /* Firefox */
+  overflow-x: auto;
+}

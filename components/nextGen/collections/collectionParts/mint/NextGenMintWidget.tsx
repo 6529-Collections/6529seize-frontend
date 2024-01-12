@@ -28,16 +28,18 @@ import { NULL_ADDRESS } from "../../../../../constants";
 import { fetchUrl } from "../../../../../services/6529api";
 import { useWeb3Modal } from "@web3modal/react";
 import { Spinner } from "../../NextGen";
-import { useMintSharedState } from "../../../nextgen_helpers";
+import {
+  getStatusFromDates,
+  useMintSharedState,
+} from "../../../nextgen_helpers";
 import {
   NextGenAdminMintForModeFormGroup,
   NextGenAdminMintingForDelegator,
 } from "./NextGenMintShared";
+import { NextGenCollection } from "../../../../../entities/INextgen";
 
 interface Props {
-  collection: number;
-  phase_times: PhaseTimes;
-  additional_data: AdditionalData;
+  collection: NextGenCollection;
   available_supply: number;
   mint_price: number;
   mint_counts: TokensPerAddress;
@@ -57,6 +59,16 @@ export default function NextGenMintWidget(props: Readonly<Props>) {
   const account = useAccount();
   const chainId = useChainId();
   const web3Modal = useWeb3Modal();
+
+  const alStatus = getStatusFromDates(
+    props.collection.allowlist_start,
+    props.collection.allowlist_end
+  );
+
+  const publicStatus = getStatusFromDates(
+    props.collection.public_start,
+    props.collection.public_end
+  );
 
   const {
     available,
@@ -81,11 +93,9 @@ export default function NextGenMintWidget(props: Readonly<Props>) {
   } = useMintSharedState();
 
   useEffect(() => {
-    const a =
-      props.additional_data.total_supply -
-      props.additional_data.circulation_supply;
+    const a = props.collection.total_supply - props.collection.mint_count;
     setAvailable(a);
-  }, [props.additional_data]);
+  }, [props.collection]);
 
   useEffect(() => {
     if (props.delegators.length > 0) {
@@ -100,20 +110,16 @@ export default function NextGenMintWidget(props: Readonly<Props>) {
   }, [mintingForDelegator]);
 
   useEffect(() => {
-    if (
-      props.phase_times &&
-      account.address &&
-      props.phase_times.allowlist_end_time > 0
-    ) {
+    if (account.address && props.collection.allowlist_end > 0) {
       const wallet = mintingForDelegator ? mintForAddress : account.address;
       if (wallet) {
-        const url = `${process.env.API_ENDPOINT}/api/nextgen/proofs/${props.phase_times.merkle_root}/${wallet}`;
+        const url = `${process.env.API_ENDPOINT}/api/nextgen/proofs/${props.collection.merkle_root}/${wallet}`;
         fetchUrl(url).then((response: ProofResponse) => {
           setProofResponse(response);
         });
       }
     }
-  }, [props.phase_times, account.address, mintingForDelegator]);
+  }, [props.collection, account.address, mintingForDelegator]);
 
   const mintWrite = useContractWrite({
     address: NEXTGEN_MINTER[NEXTGEN_CHAIN_ID] as `0x${string}`,
@@ -132,12 +138,7 @@ export default function NextGenMintWidget(props: Readonly<Props>) {
 
   function validate() {
     let e: string[] = [];
-    if (
-      props.phase_times &&
-      proofResponse &&
-      props.phase_times.al_status == Status.LIVE &&
-      0 >= proofResponse.spots
-    ) {
+    if (proofResponse && alStatus == Status.LIVE && 0 >= proofResponse.spots) {
       e.push("Not in Allowlist");
     }
     return e;
@@ -168,18 +169,14 @@ export default function NextGenMintWidget(props: Readonly<Props>) {
       return true;
     }
     return (
-      !props.phase_times ||
-      !props.additional_data ||
-      !props.phase_times ||
       !props.mint_counts ||
-      (props.phase_times.al_status == Status.LIVE && !proofResponse) ||
-      (props.phase_times.al_status != Status.LIVE &&
-        props.phase_times.public_status != Status.LIVE) ||
-      (props.phase_times.al_status == Status.LIVE &&
+      (alStatus == Status.LIVE && !proofResponse) ||
+      (alStatus != Status.LIVE && publicStatus != Status.LIVE) ||
+      (alStatus == Status.LIVE &&
         proofResponse &&
         0 >= proofResponse.spots - props.mint_counts.allowlist) ||
-      (props.phase_times.public_status == Status.LIVE &&
-        0 >= props.additional_data.max_purchases - props.mint_counts.public) ||
+      (publicStatus == Status.LIVE &&
+        0 >= props.collection.max_purchases - props.mint_counts.public) ||
       0 >= props.available_supply ||
       isMinting
     );
@@ -189,21 +186,14 @@ export default function NextGenMintWidget(props: Readonly<Props>) {
     if (isMinting) {
       mintWrite.write({
         args: [
-          props.collection,
+          props.collection.id,
           mintCount,
-          props.phase_times &&
-          proofResponse &&
-          proofResponse.spots > 0 &&
-          props.phase_times.al_status == Status.LIVE
+          proofResponse && proofResponse.spots > 0 && alStatus == Status.LIVE
             ? proofResponse.spots
             : 0,
           proofResponse ? proofResponse.info : "",
           mintToAddress,
-          props.phase_times &&
-          proofResponse &&
-          props.phase_times.al_status == Status.LIVE
-            ? proofResponse.proof
-            : [],
+          proofResponse && alStatus == Status.LIVE ? proofResponse.proof : [],
           mintingForDelegator ? mintForAddress : NULL_ADDRESS,
           salt,
         ],
@@ -264,7 +254,7 @@ export default function NextGenMintWidget(props: Readonly<Props>) {
   }, [props.mint_counts]);
 
   function renderAllowlistStatus() {
-    if (proofResponse && props.phase_times.al_status === Status.LIVE) {
+    if (proofResponse && alStatus === Status.LIVE) {
       if (proofResponse.spots > 0) {
         const spotsRemaining =
           proofResponse.spots > props.mint_counts.allowlist
@@ -281,24 +271,20 @@ export default function NextGenMintWidget(props: Readonly<Props>) {
   }
 
   function renderPublicStatus() {
-    if (props.phase_times.public_status == Status.LIVE) {
+    if (publicStatus == Status.LIVE) {
       const publicRemaining =
-        props.additional_data.max_purchases > props.mint_counts.public
+        props.collection.max_purchases > props.mint_counts.public
           ? ` (${
-              props.additional_data.max_purchases - props.mint_counts.public
+              props.collection.max_purchases - props.mint_counts.public
             } remaining)`
           : "";
-      return `${props.mint_counts.public} / ${props.additional_data.max_purchases}${publicRemaining}`;
+      return `${props.mint_counts.public} / ${props.collection.max_purchases}${publicRemaining}`;
     }
     return null;
   }
 
   function renderAllowlistOptions() {
-    if (
-      props.phase_times.al_status == Status.LIVE &&
-      proofResponse &&
-      proofResponse.spots > 0
-    ) {
+    if (alStatus == Status.LIVE && proofResponse && proofResponse.spots > 0) {
       return createArray(
         1,
         proofResponse.spots - props.mint_counts.allowlist
@@ -312,10 +298,10 @@ export default function NextGenMintWidget(props: Readonly<Props>) {
   }
 
   function renderPublicOptions() {
-    if (props.phase_times.public_status == Status.LIVE) {
+    if (publicStatus == Status.LIVE) {
       return createArray(
         1,
-        props.additional_data.max_purchases - props.mint_counts.public
+        props.collection.max_purchases - props.mint_counts.public
       ).map((i) => (
         <option key={`public-mint-count-${i}`} value={i}>
           {i > 0 ? i : `n/a`}
@@ -390,9 +376,9 @@ export default function NextGenMintWidget(props: Readonly<Props>) {
             <Form.Group as={Row} className="pt-2">
               <Form.Label column sm={12} className="d-flex align-items-center">
                 Wallet Mints
-                {props.phase_times.al_status === Status.LIVE
+                {alStatus === Status.LIVE
                   ? " Allowlist"
-                  : props.phase_times.public_status === Status.LIVE
+                  : publicStatus === Status.LIVE
                   ? " Public Phase"
                   : ""}
                 :&nbsp;
@@ -420,14 +406,14 @@ export default function NextGenMintWidget(props: Readonly<Props>) {
                   value={mintCount}
                   disabled={
                     !account.isConnected ||
-                    (props.phase_times.public_status !== Status.LIVE &&
+                    (publicStatus !== Status.LIVE &&
                       proofResponse &&
                       proofResponse.spots <= 0)
                   }
                   onChange={(e: any) => {
                     setMintCount(parseInt(e.currentTarget.value));
                   }}>
-                  {props.phase_times && props.mint_counts ? (
+                  {props.mint_counts ? (
                     renderAllowlistOptions() ?? renderPublicOptions()
                   ) : (
                     <option value={0}>n/a</option>

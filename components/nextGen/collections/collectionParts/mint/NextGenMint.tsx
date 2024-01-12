@@ -8,11 +8,8 @@ import {
 import { Col, Container, Row } from "react-bootstrap";
 import { useEffect, useState } from "react";
 import {
-  AdditionalData,
-  PhaseTimes,
   CollectionWithMerkle,
   AllowlistType,
-  Info,
   Status,
 } from "../../../nextgen_entities";
 import { fromGWEI } from "../../../../../helpers/Helpers";
@@ -23,6 +20,7 @@ import {
 import { NEXTGEN_CHAIN_ID, NEXTGEN_CORE } from "../../../nextgen_contracts";
 import { fetchUrl } from "../../../../../services/6529api";
 import {
+  getStatusFromDates,
   useCollectionCostsHook,
   useMintSharedState,
   useSharedState,
@@ -33,14 +31,15 @@ import Image from "next/image";
 import { NextGenCountdown, NextGenPhases } from "../NextGenCollectionHeader";
 import { NextGenTokenImage } from "../../NextGenTokenImage";
 import DotLoader from "../../../../dotLoader/DotLoader";
+import {
+  NextGenCollection,
+  NextGenToken,
+} from "../../../../../entities/INextgen";
+import { commonApiFetch } from "../../../../../services/api/common-api";
 
 interface Props {
-  collection: number;
-  collection_preview?: number;
-  info: Info;
-  phase_times: PhaseTimes;
+  collection: NextGenCollection;
   mint_price: number;
-  additional_data: AdditionalData;
   burn_amount: number;
 }
 
@@ -51,7 +50,12 @@ export default function NextGenMint(props: Readonly<Props>) {
   const [collectionLoaded, setCollectionLoaded] = useState<boolean>(false);
 
   const { mintingDetails, setMintingDetails } = useSharedState();
-  useCollectionCostsHook(props.collection, setMintingDetails);
+  useCollectionCostsHook(props.collection.id, setMintingDetails);
+
+  const publicStatus = getStatusFromDates(
+    props.collection.public_start,
+    props.collection.public_end
+  );
 
   const {
     available,
@@ -66,15 +70,32 @@ export default function NextGenMint(props: Readonly<Props>) {
     setAddressMintCounts,
   } = useMintSharedState();
 
+  const [tokenPreview, setTokenPreview] = useState<NextGenToken>();
+
   useEffect(() => {
-    if (props.additional_data && props.burn_amount > -1) {
+    commonApiFetch<{
+      count: number;
+      page: number;
+      next: any;
+      data: NextGenToken[];
+    }>({
+      endpoint: `nextgen/collections/${props.collection.id}/tokens?page_size=1`,
+    }).then((response) => {
+      if (response.data.length > 0) {
+        setTokenPreview(response.data[0]);
+      }
+    });
+  }, [props.collection]);
+
+  useEffect(() => {
+    if (props.burn_amount > -1) {
       setAvailable(
-        props.additional_data.total_supply -
+        props.collection.total_supply -
           props.burn_amount -
-          props.additional_data.circulation_supply
+          props.collection.mint_count
       );
     }
-  }, [props.additional_data, props.burn_amount]);
+  }, [props.burn_amount]);
 
   function getDelegationAddress() {
     if (collection && mintingDetails) {
@@ -140,6 +161,7 @@ export default function NextGenMint(props: Readonly<Props>) {
       mintingDetails !== undefined &&
       collection !== undefined,
     onSettled(data: any, error: any) {
+      alert("hi");
       if (data) {
         const del: string[] = [];
         const d = data as any[];
@@ -161,7 +183,7 @@ export default function NextGenMint(props: Readonly<Props>) {
         ? account.isConnected && mintForAddress != ""
         : account.isConnected,
       args: [
-        props.collection,
+        props.collection.id,
         mintingForDelegator ? mintForAddress : account.address,
       ],
     };
@@ -213,12 +235,8 @@ export default function NextGenMint(props: Readonly<Props>) {
   });
 
   useEffect(() => {
-    if (
-      props.phase_times &&
-      account.address &&
-      props.phase_times.allowlist_end_time > 0
-    ) {
-      const url = `${process.env.API_ENDPOINT}/api/nextgen/merkle_roots/${props.phase_times.merkle_root}`;
+    if (account.address && props.collection.merkle_root) {
+      const url = `${process.env.API_ENDPOINT}/api/nextgen/merkle_roots/${props.collection.merkle_root}`;
       fetchUrl(url).then((response: CollectionWithMerkle) => {
         if (response) {
           setCollection(response);
@@ -226,7 +244,7 @@ export default function NextGenMint(props: Readonly<Props>) {
         setCollectionLoaded(true);
       });
     }
-  }, [props.phase_times]);
+  }, [account.address, props.collection.merkle_root]);
 
   function getSalesModel() {
     if (!mintingDetails) {
@@ -268,8 +286,6 @@ export default function NextGenMint(props: Readonly<Props>) {
       return (
         <NextGenMintWidget
           collection={props.collection}
-          phase_times={props.phase_times}
-          additional_data={props.additional_data}
           available_supply={available}
           mint_price={props.mint_price}
           mint_counts={addressMintCounts}
@@ -281,9 +297,8 @@ export default function NextGenMint(props: Readonly<Props>) {
     } else if (collection && type == AllowlistType.EXTERNAL_BURN) {
       return (
         <NextGenMintBurnWidget
-          collection={collection}
-          phase_times={props.phase_times}
-          additional_data={props.additional_data}
+          collection={props.collection}
+          collection_merkle={collection}
           available_supply={available}
           mint_price={props.mint_price}
           mint_counts={addressMintCounts}
@@ -296,7 +311,7 @@ export default function NextGenMint(props: Readonly<Props>) {
   }
 
   function printMintWidgetContent() {
-    if (props.phase_times.public_status === Status.LIVE) {
+    if (publicStatus === Status.LIVE) {
       return printMintWidget(AllowlistType.ALLOWLIST);
     }
     if (collectionLoaded) {
@@ -327,45 +342,38 @@ export default function NextGenMint(props: Readonly<Props>) {
           xs={12}
           className="d-flex align-items-center justify-content-between">
           <a
-            href={`/nextgen/collection/${props.collection}`}
+            href={`/nextgen/collection/${props.collection.id}`}
             className="decoration-hover-underline">
             <h1 className="mb-0 font-color">
-              #{props.collection} - <b>{props.info.name.toUpperCase()}</b>
+              #{props.collection.id} -{" "}
+              <b>{props.collection.name.toUpperCase()}</b>
             </h1>
           </a>
-          <NextGenPhases
-            phase_times={props.phase_times}
-            available={available}
-          />
+          <NextGenPhases collection={props.collection} available={available} />
         </Col>
         <Col
           xs={12}
           className="d-flex align-items-center justify-content-between">
           <span className="font-larger">
-            by <b>{props.info.artist}</b>
+            by <b>{props.collection.artist}</b>
           </span>
           <span className="font-larger d-inline-flex align-items-center">
             <b>
-              {props.additional_data.circulation_supply} /{" "}
-              {props.additional_data.total_supply} minted
+              {props.collection.mint_count} / {props.collection.total_supply}{" "}
+              minted
               {available > 0 && ` | ${available} remaining`}
             </b>
           </span>
         </Col>
         <Col xs={12} className="pt-3">
-          <NextGenCountdown
-            collection={props.collection}
-            phase_times={props.phase_times}
-            align="horizontal"
-          />
+          <NextGenCountdown collection={props.collection} align="horizontal" />
         </Col>
       </Row>
       <Row className="pt-4 pb-4">
         <Col className="d-flex align-items-start justify-content-start gap-3">
-          {props.collection_preview && (
+          {tokenPreview && (
             <NextGenTokenImage
-              token_id={props.collection_preview}
-              collection={props.collection}
+              token={tokenPreview}
               hide_info={true}
               hide_link={true}
             />

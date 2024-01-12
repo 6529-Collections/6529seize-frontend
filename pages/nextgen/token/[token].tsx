@@ -4,6 +4,11 @@ import styles from "../../../styles/Home.module.scss";
 import dynamic from "next/dynamic";
 import HeaderPlaceholder from "../../../components/header/HeaderPlaceholder";
 import Breadcrumb from "../../../components/breadcrumb/Breadcrumb";
+import { fetchUrl } from "../../../services/6529api";
+import { NextGenCollection, NextGenToken } from "../../../entities/INextgen";
+import { isEmptyObject } from "../../../helpers/Helpers";
+import { getCommonHeaders } from "../../../helpers/server.helpers";
+import { commonApiFetch } from "../../../services/api/common-api";
 
 const Header = dynamic(() => import("../../../components/header/Header"), {
   ssr: false,
@@ -17,25 +22,29 @@ const NextGenTokenComponent = dynamic(
   }
 );
 
-export default function NextGenCollectionToken(props: any) {
-  const pageProps = props.pageProps;
-  const pagenameFull = `${pageProps.name} | 6529 SEIZE`;
+const NextGenTokenOnChainComponent = dynamic(
+  () => import("../../../components/nextGen/collections/NextGenTokenOnChain"),
+  {
+    ssr: false,
+  }
+);
 
-  const breadcrumbs =
-    pageProps.collection > 0
-      ? [
-          { display: "Home", href: "/" },
-          { display: "NextGen", href: "/nextgen" },
-          {
-            display: `Collection #${pageProps.collection}`,
-            href: `/nextgen/collection/${pageProps.collection}`,
-          },
-          { display: `Token #${pageProps.token}` },
-        ]
-      : [
-          { display: "Home", href: "/" },
-          { display: "NextGen", href: "/nextgen" },
-        ];
+export default function NextGenCollectionToken(props: any) {
+  const tokenId: number = props.pageProps.token_id;
+  const token: NextGenToken | null = props.pageProps.token;
+  const collection: NextGenCollection = props.pageProps.collection;
+  const pagenameFull = token?.name ?? `${collection.name} - #${tokenId}`;
+  const pageImage = token?.image_url ?? collection.image;
+
+  const breadcrumbs = [
+    { display: "Home", href: "/" },
+    { display: "NextGen", href: "/nextgen" },
+    {
+      display: collection.name,
+      href: `/nextgen/collection/${collection.id}`,
+    },
+    { display: pagenameFull },
+  ];
 
   return (
     <>
@@ -45,52 +54,67 @@ export default function NextGenCollectionToken(props: any) {
         <meta name="description" content={pagenameFull} />
         <meta
           property="og:url"
-          content={`${process.env.BASE_ENDPOINT}/nextgen/token/${pageProps.token}`}
+          content={`${process.env.BASE_ENDPOINT}/nextgen/token/${tokenId}`}
         />
-        <meta property="og:title" content={pageProps.name} />
-        <meta
-          property="og:image"
-          content={`${process.env.BASE_ENDPOINT}/nextgen.png`}
-        />
+        <meta property="og:title" content={pagenameFull} />
+        <meta property="og:image" content={pageImage} />
         <meta property="og:description" content="6529 SEIZE" />
         <meta name="twitter:card" content={pagenameFull} />
-        <meta name="twitter:image:alt" content={pageProps.name} />
-        <meta name="twitter:title" content={pageProps.name} />
+        <meta name="twitter:image:alt" content={pagenameFull} />
+        <meta name="twitter:title" content={pagenameFull} />
         <meta name="twitter:description" content="6529 SEIZE" />
-        <meta name="twitter:image" content={pageProps.image} />
+        <meta name="twitter:image" content={pageImage} />
       </Head>
 
       <main className={styles.main}>
         <Header />
         <Breadcrumb breadcrumbs={breadcrumbs} />
-        <NextGenTokenComponent
-          collection={pageProps.collection}
-          token_id={pageProps.token}
-        />
+        {token ? (
+          <NextGenTokenComponent collection={collection} token={token} />
+        ) : (
+          <NextGenTokenOnChainComponent
+            collection={collection}
+            token_id={tokenId}
+          />
+        )}
       </main>
     </>
   );
 }
 
 export async function getServerSideProps(req: any, res: any, resolvedUrl: any) {
-  const token = req.query.token;
-  const tokenparts = token.toString().split(`0`);
-  let collection = 0;
-  if (tokenparts.length >= 2) {
-    collection = tokenparts[0];
+  const tokenId = req.query.token;
+  const headers = getCommonHeaders(req);
+  let token: NextGenToken | null = await commonApiFetch<NextGenToken>({
+    endpoint: `nextgen/tokens/${tokenId}`,
+    headers: headers,
+  });
+  if (isEmptyObject(token) || token.pending) {
+    token = null;
   }
 
-  let name = `NextGen ${
-    collection > 0 ? `Collection #${collection}` : ``
-  } Token #${token}`;
+  const collectionId =
+    token?.collection_id ?? Math.round(tokenId / 10000000000);
 
-  const props = {
-    collection,
-    token,
-    name,
-  };
+  const collection = await fetchUrl(
+    `${process.env.API_ENDPOINT}/api/nextgen/collections/${collectionId}`
+  );
+
+  if (!collection) {
+    return {
+      redirect: {
+        permanent: false,
+        destination: "/404",
+      },
+      props: {},
+    } as any;
+  }
 
   return {
-    props,
+    props: {
+      token_id: tokenId,
+      token: token,
+      collection: collection,
+    },
   };
 }

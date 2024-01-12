@@ -1,27 +1,38 @@
 import styles from "../NextGen.module.scss";
 import { Button, Col, Container, Row } from "react-bootstrap";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation, Pagination, A11y } from "swiper/modules";
 import { NextGenTokenImage } from "../NextGenTokenImage";
+import { NextGenCollection, NextGenToken } from "../../../../entities/INextgen";
+import { commonApiFetch } from "../../../../services/api/common-api";
 
 interface Props {
-  collection: number;
-  collection_name: string;
-  start_index: number;
-  length: number;
+  collection: NextGenCollection;
 }
 
-const SLIDESHOW_LIMIT = -1;
 const SLIDES_PER_VIEW = 4;
+const SLIDESHOW_LIMIT = 25;
 
 export default function NextGenCollectionSlideshow(props: Readonly<Props>) {
-  const tokens = Array.from(
-    { length: props.length },
-    (_, i) => props.start_index + i
-  );
+  const startIndex = props.collection.id * 10000000000;
+  const [tokens, setTokens] = useState<NextGenToken[]>([]);
+  const [currentSlide, setCurrentSlide] = useState(startIndex);
+  const [hasMore, setHasMore] = useState(false);
 
-  const [currentSlide, setCurrentSlide] = useState(props.start_index);
+  useEffect(() => {
+    commonApiFetch<{
+      count: number;
+      page: number;
+      next: any;
+      data: NextGenToken[];
+    }>({
+      endpoint: `nextgen/collections/${props.collection.id}/tokens?page_size=${SLIDESHOW_LIMIT}`,
+    }).then((response) => {
+      setTokens(response.data);
+      setHasMore(response.next);
+    });
+  }, [props.collection.id]);
 
   return (
     <Container fluid className={styles.slideshowContainer}>
@@ -31,34 +42,36 @@ export default function NextGenCollectionSlideshow(props: Readonly<Props>) {
             <Row>
               <Col>
                 <Swiper
-                  modules={[Navigation, Pagination, A11y]}
+                  modules={[Navigation, A11y]}
                   spaceBetween={20}
-                  slidesPerView={Math.min(SLIDES_PER_VIEW, props.length)}
+                  slidesPerView={Math.min(
+                    SLIDES_PER_VIEW,
+                    props.collection.mint_count
+                  )}
                   navigation
                   centeredSlides
-                  loop={props.length > SLIDES_PER_VIEW}
+                  loop={props.collection.mint_count > SLIDES_PER_VIEW}
                   pagination={{ clickable: true }}
                   onSlideChange={(swiper) => {
-                    setCurrentSlide(props.start_index + swiper.realIndex);
+                    setCurrentSlide(startIndex + swiper.realIndex);
                   }}>
                   {tokens.map((token) => (
                     <SwiperSlide
                       key={`nextgen-carousel-${token}`}
-                      className="pt-2 pb-2">
+                      className="pt-2 pb-5">
                       <NextGenTokenImage
-                        collection={props.collection}
-                        token_id={token}
-                        hide_info={currentSlide !== token}
+                        token={token}
+                        hide_info={currentSlide !== token.id}
                       />
                     </SwiperSlide>
                   ))}
-                  {SLIDESHOW_LIMIT > 0 && props.length > SLIDESHOW_LIMIT && (
+                  {hasMore && (
                     <SwiperSlide>
                       <Container className="no-padding pt-3 pb-3">
                         <Row>
                           <Col className="d-flex align-items-center justify-content-center">
                             <a
-                              href={`/nextgen/collection/${props.collection}/art`}>
+                              href={`/nextgen/collection/${props.collection.id}/art`}>
                               <Button className="seize-btn btn-white">
                                 View All
                               </Button>

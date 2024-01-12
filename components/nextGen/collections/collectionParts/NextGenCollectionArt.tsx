@@ -1,14 +1,11 @@
 import styles from "../NextGen.module.scss";
 import { Container, Row, Col } from "react-bootstrap";
-import { AdditionalData } from "../../nextgen_entities";
 import NextGenTokenList from "../NextGenTokenList";
-import DotLoader from "../../../dotLoader/DotLoader";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { NextGenCollection } from "../../../../entities/INextgen";
 
 interface Props {
-  collection: number;
-  additional_data: AdditionalData;
-  token_ids: number[];
+  collection: NextGenCollection;
   show_view_all?: boolean;
 }
 
@@ -20,7 +17,7 @@ export default function NextGenCollectionArt(props: Readonly<Props>) {
           <h3 className="mb-0">The Art</h3>
           {props.show_view_all && (
             <a
-              href={`/nextgen/collection/${props.collection}/art`}
+              href={`/nextgen/collection/${props.collection.id}/art`}
               className={`d-flex align-items-center gap-2 decoration-none ${styles.viewAllTokens}`}>
               <h5 className="mb-0 font-color d-flex align-items-center gap-2">
                 View All
@@ -34,27 +31,14 @@ export default function NextGenCollectionArt(props: Readonly<Props>) {
         </Col>
       </Row>
       <hr />
-      {props.token_ids.length > 0 && (
-        <Row>
-          <Col>
-            {props.token_ids && (
-              <NextGenTokenList
-                collection={props.collection}
-                tokens={props.token_ids}
-                hide_info={false}
-              />
-            )}
-          </Col>
-        </Row>
-      )}
-      {props.token_ids.length === 0 &&
-        props.additional_data.circulation_supply > 0 && (
-          <Row>
-            <Col>
-              <DotLoader />
-            </Col>
-          </Row>
-        )}
+      <Row>
+        <Col>
+          <NextGenTokenList
+            collection={props.collection}
+            limit={props.show_view_all ? 9 : undefined}
+          />
+        </Col>
+      </Row>
     </Container>
   );
 }

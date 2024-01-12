@@ -17,6 +17,7 @@ import { NFTLite } from "../../entities/INFT";
 import Address from "../address/Address";
 import Tippy from "@tippyjs/react";
 import { Container, Row, Col } from "react-bootstrap";
+import { NEXTGEN_CHAIN_ID, NEXTGEN_CORE } from "../nextGen/nextgen_contracts";
 
 interface Props {
   nft?: NFTLite;
@@ -129,6 +130,242 @@ export default function LatestActivityRow(props: Readonly<Props>) {
     );
   }
 
+  function printDescription() {
+    return (
+      <span className="d-flex">
+        {(areEqualAddresses(MANIFOLD, props.tr.from_address) ||
+          areEqualAddresses(NULL_ADDRESS, props.tr.from_address)) && (
+          <>
+            {props.tr.value > 0 ? (
+              <>
+                <Address
+                  wallets={[props.tr.to_address]}
+                  display={props.tr.to_display}
+                />
+                minted
+              </>
+            ) : (
+              "airdrop"
+            )}
+            &nbsp;
+            {props.tr.token_count}x&nbsp;
+            {props.nft ? (
+              <a
+                href={
+                  isMemesContract(props.tr.contract)
+                    ? `/the-memes/${props.nft?.id}`
+                    : isGradientsContract(props.tr.contract)
+                    ? `/6529-gradient/${props.nft?.id}`
+                    : isMemeLabContract(props.tr.contract)
+                    ? `/meme-lab/${props.nft?.id}`
+                    : ``
+                }
+                target="_blank"
+                rel="noreferrer">
+                <Image
+                  width={0}
+                  height={0}
+                  style={{ height: "40px", width: "auto" }}
+                  src={getNftImageSrc(props.nft)}
+                  alt={props.nft.name}
+                  onError={({ currentTarget }) => {
+                    currentTarget.src = getNftImageSrc(
+                      props.nft,
+                      currentTarget.src
+                    );
+                  }}
+                  className={styles.nftImage}
+                />
+              </a>
+            ) : isMemesContract(props.tr.contract) ? (
+              `Meme #${props.tr.token_id}`
+            ) : isGradientsContract(props.tr.contract) ? (
+              `Gradient #${props.tr.token_id}`
+            ) : isMemeLabContract(props.tr.contract) ? (
+              `MemeLab #${props.tr.token_id}`
+            ) : (
+              `#${props.tr.token_id}`
+            )}
+            {props.tr.value === 0 && (
+              <>
+                &nbsp; to&nbsp;
+                <Address
+                  wallets={[props.tr.to_address]}
+                  display={props.tr.to_display}
+                />
+              </>
+            )}
+            &nbsp;&nbsp;
+            {props.tr.value > 0 &&
+              `for ${Math.round(props.tr.value * 100000) / 100000} ETH`}
+          </>
+        )}
+        {areEqualAddresses(NULL_ADDRESS, props.tr.to_address) && (
+          <>
+            <Address
+              wallets={[props.tr.from_address]}
+              display={props.tr.from_display}
+            />
+            {" burnt "}
+            {props.tr.token_count}x&nbsp;
+            {props.nft ? (
+              <a
+                href={
+                  isMemesContract(props.tr.contract)
+                    ? `/the-memes/${props.nft?.id}`
+                    : isGradientsContract(props.tr.contract)
+                    ? `/6529-gradient/${props.nft?.id}`
+                    : isMemeLabContract(props.tr.contract)
+                    ? `/meme-lab/${props.nft?.id}`
+                    : ``
+                }
+                target="_blank"
+                rel="noreferrer">
+                <Image
+                  title={
+                    isMemesContract(props.tr.contract)
+                      ? `Meme #${props.tr.token_id}`
+                      : isGradientsContract(props.tr.contract)
+                      ? `Gradient #${props.tr.token_id}`
+                      : isMemeLabContract(props.tr.contract)
+                      ? `MemeLab #${props.tr.token_id}`
+                      : `#${props.tr.token_id}`
+                  }
+                  width={0}
+                  height={0}
+                  style={{ height: "40px", width: "auto" }}
+                  src={getNftImageSrc(props.nft)}
+                  alt={props.nft.name}
+                  onError={({ currentTarget }) => {
+                    currentTarget.src = getNftImageSrc(
+                      props.nft,
+                      currentTarget.src
+                    );
+                  }}
+                  className={styles.nftImage}
+                />
+              </a>
+            ) : isMemesContract(props.tr.contract) ? (
+              `Meme #${props.tr.token_id}`
+            ) : isGradientsContract(props.tr.contract) ? (
+              `Gradient #${props.tr.token_id}`
+            ) : isMemeLabContract(props.tr.contract) ? (
+              `MemeLab #${props.tr.token_id}`
+            ) : (
+              `#${props.tr.token_id}`
+            )}
+            &nbsp;
+          </>
+        )}
+        {!areEqualAddresses(MANIFOLD, props.tr.from_address) &&
+          !areEqualAddresses(NULL_ADDRESS, props.tr.from_address) &&
+          !areEqualAddresses(NULL_ADDRESS, props.tr.to_address) && (
+            <>
+              <Address
+                wallets={[props.tr.to_address]}
+                display={props.tr.to_display}
+              />
+              &nbsp;
+              {props.tr.value > 0 ? "bought" : "received"}&nbsp;
+              {props.tr.token_count}x&nbsp;
+              {props.nft ? (
+                <a
+                  href={
+                    isMemesContract(props.tr.contract)
+                      ? `/the-memes/${props.nft?.id}`
+                      : isGradientsContract(props.tr.contract)
+                      ? `/6529-gradient/${props.nft?.id}`
+                      : isMemeLabContract(props.tr.contract)
+                      ? `/meme-lab/${props.nft?.id}`
+                      : ``
+                  }
+                  target="_blank"
+                  rel="noreferrer">
+                  <Image
+                    title={
+                      isMemesContract(props.tr.contract)
+                        ? `Meme #${props.tr.token_id}`
+                        : isGradientsContract(props.tr.contract)
+                        ? `Gradient #${props.tr.token_id}`
+                        : isMemeLabContract(props.tr.contract)
+                        ? `MemeLab #${props.tr.token_id}`
+                        : `#${props.tr.token_id}`
+                    }
+                    width={0}
+                    height={0}
+                    style={{ height: "40px", width: "auto" }}
+                    src={getNftImageSrc(props.nft)}
+                    alt={props.nft.name}
+                    onError={({ currentTarget }) => {
+                      currentTarget.src = getNftImageSrc(
+                        props.nft,
+                        currentTarget.src
+                      );
+                    }}
+                    className={styles.nftImage}
+                  />
+                </a>
+              ) : isMemesContract(props.tr.contract) ? (
+                `Meme #${props.tr.token_id}`
+              ) : isGradientsContract(props.tr.contract) ? (
+                `Gradient #${props.tr.token_id}`
+              ) : isMemeLabContract(props.tr.contract) ? (
+                `MemeLab #${props.tr.token_id}`
+              ) : (
+                `#${props.tr.token_id}`
+              )}
+              &nbsp; from&nbsp;
+              <Address
+                wallets={[props.tr.from_address]}
+                display={props.tr.from_display}
+              />
+              {props.tr.value > 0 &&
+                ` for ${Math.round(props.tr.value * 100000) / 100000} ETH`}
+            </>
+          )}
+      </span>
+    );
+  }
+
+  function printDescriptionNextgen() {
+    return (
+      <span className="d-flex">
+        {areEqualAddresses(NULL_ADDRESS, props.tr.from_address) ? (
+          <>
+            Minted to&nbsp;
+            <Address
+              wallets={[props.tr.to_address]}
+              display={props.tr.to_display}
+            />
+          </>
+        ) : areEqualAddresses(NULL_ADDRESS, props.tr.to_address) ? (
+          <>
+            Burnt by&nbsp;
+            <Address
+              wallets={[props.tr.from_address]}
+              display={props.tr.from_display}
+            />
+          </>
+        ) : (
+          <>
+            {props.tr.value > 0 ? <>Purchased by</> : <>Transferred to</>}&nbsp;
+            <Address
+              wallets={[props.tr.to_address]}
+              display={props.tr.to_display}
+            />
+            from&nbsp;
+            <Address
+              wallets={[props.tr.from_address]}
+              display={props.tr.from_display}
+            />
+          </>
+        )}
+        {props.tr.value > 0 &&
+          ` for ${Math.round(props.tr.value * 100000) / 100000} ETH`}
+      </span>
+    );
+  }
+
   function printInfo() {
     return (
       <span className="d-flex align-items-center gap-3">
@@ -194,198 +431,9 @@ export default function LatestActivityRow(props: Readonly<Props>) {
         />
       </td>
       <td className="d-flex align-items-center justify-content-between gap-2">
-        <span className="d-flex">
-          {(areEqualAddresses(MANIFOLD, props.tr.from_address) ||
-            areEqualAddresses(NULL_ADDRESS, props.tr.from_address)) && (
-            <>
-              {props.tr.value > 0 ? (
-                <>
-                  <Address
-                    wallets={[props.tr.to_address]}
-                    display={props.tr.to_display}
-                  />
-                  minted
-                </>
-              ) : (
-                "airdrop"
-              )}
-              &nbsp;
-              {props.tr.token_count}x&nbsp;
-              {props.nft ? (
-                <a
-                  href={
-                    isMemesContract(props.tr.contract)
-                      ? `/the-memes/${props.nft?.id}`
-                      : isGradientsContract(props.tr.contract)
-                      ? `/6529-gradient/${props.nft?.id}`
-                      : isMemeLabContract(props.tr.contract)
-                      ? `/meme-lab/${props.nft?.id}`
-                      : ``
-                  }
-                  target="_blank"
-                  rel="noreferrer">
-                  <Image
-                    width={0}
-                    height={0}
-                    style={{ height: "40px", width: "auto" }}
-                    src={getNftImageSrc(props.nft)}
-                    alt={props.nft.name}
-                    onError={({ currentTarget }) => {
-                      currentTarget.src = getNftImageSrc(
-                        props.nft,
-                        currentTarget.src
-                      );
-                    }}
-                    className={styles.nftImage}
-                  />
-                </a>
-              ) : isMemesContract(props.tr.contract) ? (
-                `Meme #${props.tr.token_id}`
-              ) : isGradientsContract(props.tr.contract) ? (
-                `Gradient #${props.tr.token_id}`
-              ) : isMemeLabContract(props.tr.contract) ? (
-                `MemeLab #${props.tr.token_id}`
-              ) : (
-                `#${props.tr.token_id}`
-              )}
-              {props.tr.value === 0 && (
-                <>
-                  &nbsp; to&nbsp;
-                  <Address
-                    wallets={[props.tr.to_address]}
-                    display={props.tr.to_display}
-                  />
-                </>
-              )}
-              &nbsp;&nbsp;
-              {props.tr.value > 0 &&
-                `for ${Math.round(props.tr.value * 100000) / 100000} ETH`}
-            </>
-          )}
-          {areEqualAddresses(NULL_ADDRESS, props.tr.to_address) && (
-            <>
-              <Address
-                wallets={[props.tr.from_address]}
-                display={props.tr.from_display}
-              />
-              {" burnt "}
-              {props.tr.token_count}x&nbsp;
-              {props.nft ? (
-                <a
-                  href={
-                    isMemesContract(props.tr.contract)
-                      ? `/the-memes/${props.nft?.id}`
-                      : isGradientsContract(props.tr.contract)
-                      ? `/6529-gradient/${props.nft?.id}`
-                      : isMemeLabContract(props.tr.contract)
-                      ? `/meme-lab/${props.nft?.id}`
-                      : ``
-                  }
-                  target="_blank"
-                  rel="noreferrer">
-                  <Image
-                    title={
-                      isMemesContract(props.tr.contract)
-                        ? `Meme #${props.tr.token_id}`
-                        : isGradientsContract(props.tr.contract)
-                        ? `Gradient #${props.tr.token_id}`
-                        : isMemeLabContract(props.tr.contract)
-                        ? `MemeLab #${props.tr.token_id}`
-                        : `#${props.tr.token_id}`
-                    }
-                    width={0}
-                    height={0}
-                    style={{ height: "40px", width: "auto" }}
-                    src={getNftImageSrc(props.nft)}
-                    alt={props.nft.name}
-                    onError={({ currentTarget }) => {
-                      currentTarget.src = getNftImageSrc(
-                        props.nft,
-                        currentTarget.src
-                      );
-                    }}
-                    className={styles.nftImage}
-                  />
-                </a>
-              ) : isMemesContract(props.tr.contract) ? (
-                `Meme #${props.tr.token_id}`
-              ) : isGradientsContract(props.tr.contract) ? (
-                `Gradient #${props.tr.token_id}`
-              ) : isMemeLabContract(props.tr.contract) ? (
-                `MemeLab #${props.tr.token_id}`
-              ) : (
-                `#${props.tr.token_id}`
-              )}
-              &nbsp;
-            </>
-          )}
-          {!areEqualAddresses(MANIFOLD, props.tr.from_address) &&
-            !areEqualAddresses(NULL_ADDRESS, props.tr.from_address) &&
-            !areEqualAddresses(NULL_ADDRESS, props.tr.to_address) && (
-              <>
-                <Address
-                  wallets={[props.tr.to_address]}
-                  display={props.tr.to_display}
-                />
-                &nbsp;
-                {props.tr.value > 0 ? "bought" : "received"}&nbsp;
-                {props.tr.token_count}x&nbsp;
-                {props.nft ? (
-                  <a
-                    href={
-                      isMemesContract(props.tr.contract)
-                        ? `/the-memes/${props.nft?.id}`
-                        : isGradientsContract(props.tr.contract)
-                        ? `/6529-gradient/${props.nft?.id}`
-                        : isMemeLabContract(props.tr.contract)
-                        ? `/meme-lab/${props.nft?.id}`
-                        : ``
-                    }
-                    target="_blank"
-                    rel="noreferrer">
-                    <Image
-                      title={
-                        isMemesContract(props.tr.contract)
-                          ? `Meme #${props.tr.token_id}`
-                          : isGradientsContract(props.tr.contract)
-                          ? `Gradient #${props.tr.token_id}`
-                          : isMemeLabContract(props.tr.contract)
-                          ? `MemeLab #${props.tr.token_id}`
-                          : `#${props.tr.token_id}`
-                      }
-                      width={0}
-                      height={0}
-                      style={{ height: "40px", width: "auto" }}
-                      src={getNftImageSrc(props.nft)}
-                      alt={props.nft.name}
-                      onError={({ currentTarget }) => {
-                        currentTarget.src = getNftImageSrc(
-                          props.nft,
-                          currentTarget.src
-                        );
-                      }}
-                      className={styles.nftImage}
-                    />
-                  </a>
-                ) : isMemesContract(props.tr.contract) ? (
-                  `Meme #${props.tr.token_id}`
-                ) : isGradientsContract(props.tr.contract) ? (
-                  `Gradient #${props.tr.token_id}`
-                ) : isMemeLabContract(props.tr.contract) ? (
-                  `MemeLab #${props.tr.token_id}`
-                ) : (
-                  `#${props.tr.token_id}`
-                )}
-                &nbsp; from&nbsp;
-                <Address
-                  wallets={[props.tr.from_address]}
-                  display={props.tr.from_display}
-                />
-                {props.tr.value > 0 &&
-                  ` for ${Math.round(props.tr.value * 100000) / 100000} ETH`}
-              </>
-            )}
-        </span>
+        {areEqualAddresses(props.tr.contract, NEXTGEN_CORE[NEXTGEN_CHAIN_ID])
+          ? printDescriptionNextgen()
+          : printDescription()}
         {printInfo()}
       </td>
     </tr>

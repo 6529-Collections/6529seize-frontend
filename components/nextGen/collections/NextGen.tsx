@@ -2,16 +2,17 @@ import styles from "./NextGen.module.scss";
 import { Container, Row, Col, Dropdown } from "react-bootstrap";
 import { useEffect, useState } from "react";
 import NextGenCollectionPreview from "./NextGenCollectionPreview";
-import { useCollectionIndex } from "../nextgen_helpers";
 import Image from "next/image";
-import { PhaseTimes, Status } from "../nextgen_entities";
+import { NextGenCollection } from "../../../entities/INextgen";
+import { fetchUrl } from "../../../services/6529api";
+import { DBResponse } from "../../../entities/IDBResponse";
+import Pagination from "../../pagination/Pagination";
 
-enum TypeFilter {
+enum StatusFilter {
   ALL = "ALL",
   LIVE = "LIVE",
-  AL_UPCOMING = "ALLOWLIST UPCOMING",
-  PUBLIC_UPCOMING = "PUBLIC PHASE UPCOMING",
-  COMPLETE = "COMPLETE",
+  UPCOMING = "UPCOMING",
+  COMPLETED = "COMPLETED",
 }
 
 export function Spinner() {
@@ -22,79 +23,44 @@ export function Spinner() {
   );
 }
 
+const PAGE_SIZE = 25;
+
 export default function NextGen() {
-  const collectionIndexRead = useCollectionIndex();
-  const collectionIndex = collectionIndexRead.data
-    ? parseInt(collectionIndexRead?.data as any) - 1
-    : 0;
+  const [selectedStatus, setSelectedStatus] = useState<StatusFilter>(
+    StatusFilter.ALL
+  );
 
-  const [typeFilter, setTypeFilter] = useState<TypeFilter>();
-
-  const [collections, setCollections] = useState<
-    { id: number; phaseTimes?: PhaseTimes }[]
-  >([]);
-
+  const [collections, setCollections] = useState<NextGenCollection[]>([]);
   const [collectionsLoaded, setCollectionsLoaded] = useState(false);
-  const [filteredCollectionsLoaded, setFilteredCollectionsLoaded] =
-    useState(false);
+  const [totalResults, setTotalResults] = useState(0);
+  const [page, setPage] = useState(1);
 
-  const [filteredCollections, setFilteredCollections] = useState<
-    { id: number; phaseTimes?: PhaseTimes }[]
-  >([]);
+  function fetchResults(mypage: number) {
+    setCollectionsLoaded(false);
+    let statusFilter = "";
+    if (selectedStatus !== StatusFilter.ALL) {
+      statusFilter = `&status=${selectedStatus}`;
+    }
+
+    let url = `${process.env.API_ENDPOINT}/api/nextgen/collections?page_size=${PAGE_SIZE}&page=${mypage}${statusFilter}`;
+    fetchUrl(url).then((response: DBResponse) => {
+      setTotalResults(response.count);
+      setCollections(response.data);
+      setCollectionsLoaded(true);
+    });
+  }
 
   useEffect(() => {
-    const newCollections = [];
-    for (let i = 0; i < collectionIndex; i++) {
-      newCollections.push({ id: i + 1 });
+    if (page === 1) {
+      fetchResults(page);
+    } else {
+      setPage(1);
     }
-    setCollections(newCollections);
-    setCollectionsLoaded(true);
-  }, [collectionIndex]);
+  }, [selectedStatus]);
 
   useEffect(() => {
-    if (collectionsLoaded) {
-      if (!typeFilter) {
-        setFilteredCollections(collections);
-      } else {
-        switch (typeFilter) {
-          case TypeFilter.ALL:
-            setFilteredCollections(collections);
-            break;
-          case TypeFilter.LIVE:
-            setFilteredCollections(
-              collections.filter(
-                (c) =>
-                  c.phaseTimes?.al_status === Status.LIVE ||
-                  c.phaseTimes?.public_status === Status.LIVE
-              )
-            );
-            break;
-          case TypeFilter.AL_UPCOMING:
-            setFilteredCollections(
-              collections.filter(
-                (c) => c.phaseTimes?.al_status === Status.UPCOMING
-              )
-            );
-            break;
-          case TypeFilter.PUBLIC_UPCOMING:
-            setFilteredCollections(
-              collections.filter(
-                (c) => c.phaseTimes?.public_status === Status.UPCOMING
-              )
-            );
-            break;
-          case TypeFilter.COMPLETE:
-            setFilteredCollections(
-              collections.filter(
-                (c) => c.phaseTimes?.public_status === Status.COMPLETE
-              )
-            );
-            break;
-        }
-      }
-      setFilteredCollectionsLoaded(true);
-    }
-  }, [typeFilter, collections, collectionsLoaded]);
+    fetchResults(page);
+  }, [page]);
 
   return (
     <Container>
@@ -111,12 +77,12 @@ export default function NextGen() {
             alt="nextgen"
           />
           <Dropdown className={styles.filterDropdown} drop={"down-centered"}>
-            <Dropdown.Toggle>Status: {typeFilter ?? "ALL"}</Dropdown.Toggle>
+            <Dropdown.Toggle>Status: {selectedStatus}</Dropdown.Toggle>
             <Dropdown.Menu>
-              {Object.values(TypeFilter).map((filter) => (
+              {Object.values(StatusFilter).map((filter) => (
                 <Dropdown.Item
                   key={`filter-${filter}`}
-                  onClick={() => setTypeFilter(filter)}>
+                  onClick={() => setSelectedStatus(filter)}>
                   {filter}
                 </Dropdown.Item>
               ))}
@@ -125,7 +91,7 @@ export default function NextGen() {
         </Col>
       </Row>
       <Row className="pt-4 pb-4">
-        {filteredCollections.map((collection) => (
+        {collections.map((collection) => (
           <Col
             className="pb-3"
             xs={12}
@@ -134,26 +100,30 @@ export default function NextGen() {
             lg={4}
             key={`collection-preview-${collection.id}`}>
             <NextGenCollectionPreview
-              collection={collection.id}
-              setPhaseTimes={(phaseTimes) => {
-                setCollections((collections) =>
-                  collections.map((c) =>
-                    c.id === collection.id
-                      ? { ...c, phaseTimes: phaseTimes }
-                      : c
-                  )
-                );
-              }}
+              collection={collection}
               key={`gen-memes-collection-${collection.id}`}
             />
           </Col>
         ))}
-        {filteredCollectionsLoaded && filteredCollections.length === 0 && (
+        {collectionsLoaded && collections.length === 0 && (
           <Col className="text-center">
             <h4>No collections found</h4>
           </Col>
         )}
       </Row>
+      {totalResults > PAGE_SIZE && collectionsLoaded && (
+        <Row className="text-center pt-4 pb-4">
+          <Pagination
+            page={page}
+            pageSize={PAGE_SIZE}
+            totalResults={totalResults}
+            setPage={function (newPage: number) {
+              setPage(newPage);
+              window.scrollTo(0, 0);
+            }}
+          />
+        </Row>
+      )}
     </Container>
   );
 }

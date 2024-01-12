@@ -17,42 +17,48 @@ import { useRouter } from "next/router";
 import DateCountdown from "../../../date-countdown/DateCountdown";
 import { fetchUrl } from "../../../../services/6529api";
 import DotLoader from "../../../dotLoader/DotLoader";
+import { NextGenCollection } from "../../../../entities/INextgen";
+import { getStatusFromDates } from "../../nextgen_helpers";
 
 interface Props {
-  collection: number;
-  info: Info;
-  phase_times: PhaseTimes;
-  additional_data: AdditionalData;
+  collection: NextGenCollection;
   collection_link?: boolean;
   mint_page?: boolean;
 }
 
 interface CountdownProps {
-  collection: number;
-  phase_times: PhaseTimes;
+  collection: NextGenCollection;
   align: "vertical" | "horizontal";
 }
 
 interface PhaseProps {
-  phase_times: PhaseTimes;
+  collection: NextGenCollection;
   available: number;
 }
 
 export function NextGenCountdown(props: Readonly<CountdownProps>) {
   const router = useRouter();
+  const alStatus = getStatusFromDates(
+    props.collection.allowlist_start,
+    props.collection.allowlist_end
+  );
+  const publicStatus = getStatusFromDates(
+    props.collection.public_start,
+    props.collection.public_end
+  );
 
   const [collection, setCollection] = useState<CollectionWithMerkle>();
   const [collectionLoaded, setCollectionLoaded] = useState(false);
 
   useEffect(() => {
-    const url = `${process.env.API_ENDPOINT}/api/nextgen/merkle_roots/${props.phase_times.merkle_root}`;
+    const url = `${process.env.API_ENDPOINT}/api/nextgen/merkle_roots/${props.collection.merkle_root}`;
     fetchUrl(url).then((response: CollectionWithMerkle) => {
       if (response) {
         setCollection(response);
       }
       setCollectionLoaded(true);
     });
-  }, [props.phase_times]);
+  }, [props.collection]);
 
   function getButtonLabel() {
     if (collectionLoaded) {
@@ -85,40 +91,39 @@ export function NextGenCountdown(props: Readonly<CountdownProps>) {
 
   return (
     <>
-      {props.phase_times.al_status == Status.UPCOMING &&
+      {alStatus == Status.UPCOMING &&
         printCountdown(
           "Allowlist Starting in",
-          props.phase_times.allowlist_start_time
+          props.collection.allowlist_start
         )}
-      {props.phase_times.al_status == Status.LIVE &&
-        printCountdown(
-          "Allowlist Ending in",
-          props.phase_times.allowlist_end_time
-        )}
-      {props.phase_times.al_status != Status.LIVE &&
-        props.phase_times.al_status != Status.UPCOMING &&
-        props.phase_times.public_status == Status.UPCOMING &&
+      {alStatus == Status.LIVE &&
+        printCountdown("Allowlist Ending in", props.collection.allowlist_end)}
+      {alStatus != Status.LIVE &&
+        alStatus != Status.UPCOMING &&
+        publicStatus == Status.UPCOMING &&
         printCountdown(
           "Public Phase Starting in",
-          props.phase_times.public_start_time
+          props.collection.public_start
         )}
-      {props.phase_times.public_status == Status.LIVE &&
-        printCountdown(
-          "Public Phase Ending in",
-          props.phase_times.public_end_time
-        )}
+      {publicStatus == Status.LIVE &&
+        printCountdown("Public Phase Ending in", props.collection.public_end)}
     </>
   );
 }
 
 export function NextGenPhases(props: Readonly<PhaseProps>) {
+  const alStatus = getStatusFromDates(
+    props.collection.allowlist_start,
+    props.collection.allowlist_end
+  );
+  const publicStatus = getStatusFromDates(
+    props.collection.public_start,
+    props.collection.public_end
+  );
   function getAllowlistClassName() {
-    if (props.phase_times.al_status === Status.LIVE && props.available > 0) {
+    if (alStatus === Status.LIVE && props.available > 0) {
       return styles.phaseTimeTagActive;
-    } else if (
-      props.phase_times.al_status === Status.UPCOMING &&
-      props.available > 0
-    ) {
+    } else if (alStatus === Status.UPCOMING && props.available > 0) {
       return styles.phaseTimeTagUpcoming;
     } else {
       return styles.phaseTimeTagComplete;
@@ -126,15 +131,9 @@ export function NextGenPhases(props: Readonly<PhaseProps>) {
   }
 
   function getPublicStatusClassName() {
-    if (
-      props.phase_times.public_status === Status.LIVE &&
-      props.available > 0
-    ) {
+    if (publicStatus === Status.LIVE && props.available > 0) {
       return styles.phaseTimeTagActive;
-    } else if (
-      props.phase_times.public_status === Status.UPCOMING &&
-      props.available > 0
-    ) {
+    } else if (publicStatus === Status.UPCOMING && props.available > 0) {
       return styles.phaseTimeTagUpcoming;
     } else {
       return styles.phaseTimeTagComplete;
@@ -143,20 +142,20 @@ export function NextGenPhases(props: Readonly<PhaseProps>) {
 
   return (
     <span className="pt-2 pb-2 d-flex align-items-center gap-2 align-items-center">
-      {props.phase_times.al_status !== Status.UNAVAILABLE && (
+      {alStatus !== Status.UNAVAILABLE && (
         <span
           className={`font-bolder font-smaller ${
             styles.nextgenTag
           } ${getAllowlistClassName()}`}>
-          ALLOWLIST {props.phase_times.al_status.toUpperCase()}
+          ALLOWLIST {alStatus}
         </span>
       )}
-      {props.phase_times.public_status !== Status.UNAVAILABLE && (
+      {publicStatus !== Status.UNAVAILABLE && (
         <span
           className={`font-bolder font-smaller ${
             styles.nextgenTag
           } ${getPublicStatusClassName()}`}>
-          PUBLIC PHASE {props.phase_times.public_status}
+          PUBLIC PHASE {publicStatus}
         </span>
       )}
     </span>
@@ -167,34 +166,27 @@ export default function NextGenCollectionHeader(props: Readonly<Props>) {
   const [available, setAvailable] = useState<number>(0);
 
   function showMint() {
-    if (!props.phase_times || !props.additional_data) {
-      return false;
-    }
-
-    if (
-      props.additional_data.circulation_supply ==
-      props.additional_data.total_supply
-    ) {
+    if (props.collection.mint_count == props.collection.total_supply) {
       return false;
     }
 
     const now = new Date().getTime();
-    const allowlistStartsIn = props.phase_times.allowlist_start_time - now;
+    const allowlistStartsIn = props.collection.allowlist_start - now;
     if (allowlistStartsIn > 0 && allowlistStartsIn < 1000 * 60 * 60 * 24) {
       return true;
     }
     return (
-      props.phase_times.al_status == Status.LIVE ||
-      props.phase_times.public_status == Status.LIVE
+      (now >= props.collection.allowlist_start &&
+        props.collection.allowlist_end > now) ||
+      (now >= props.collection.public_start &&
+        props.collection.public_end > now)
     );
   }
 
   useEffect(() => {
-    const a =
-      props.additional_data.total_supply -
-      props.additional_data.circulation_supply;
+    const a = props.collection.total_supply - props.collection.mint_count;
     setAvailable(a);
-  }, [props.additional_data]);
+  }, [props.collection]);
 
   return (
     <Container className="no-padding">
@@ -202,7 +194,7 @@ export default function NextGenCollectionHeader(props: Readonly<Props>) {
         <Col className="d-flex justify-content-between align-items-center flex-wrap">
           {
             <NextGenPhases
-              phase_times={props.phase_times}
+              collection={props.collection}
               available={available}
             />
           }
@@ -212,7 +204,7 @@ export default function NextGenCollectionHeader(props: Readonly<Props>) {
                 className={`${styles.globeIcon} ${styles.marketplace}`}
                 icon="globe"
                 onClick={() => {
-                  let url = props.info.website;
+                  let url = props.collection.website;
                   if (!url.startsWith("http")) {
                     url = `http://${url}`;
                   }
@@ -236,20 +228,6 @@ export default function NextGenCollectionHeader(props: Readonly<Props>) {
                   height={32}
                 />
               </a>
-              <a
-                href={`https://${
-                  NEXTGEN_CHAIN_ID === goerli.id ? `goerli.x2y2` : `x2y2`
-                }.io/eth/${NEXTGEN_CORE[NEXTGEN_CHAIN_ID]}`}
-                target="_blank"
-                rel="noreferrer">
-                <Image
-                  className={styles.marketplace}
-                  src="/x2y2.png"
-                  alt="x2y2"
-                  width={32}
-                  height={32}
-                />
-              </a>
             </span>
           )}
         </Col>
@@ -261,11 +239,12 @@ export default function NextGenCollectionHeader(props: Readonly<Props>) {
           }`}>
           <span className="d-flex flex-column align-items-start">
             <h1 className="mb-0 font-color">
-              #{props.collection} - <b>{props.info.name.toUpperCase()}</b>
+              #{props.collection.id} -{" "}
+              <b>{props.collection.name.toUpperCase()}</b>
             </h1>
             {props.collection_link && (
               <a
-                href={`/nextgen/collection/${props.collection}`}
+                href={`/nextgen/collection/${props.collection.id}`}
                 className="decoration-none d-flex align-items-center gap-2 pb-2">
                 <FontAwesomeIcon
                   icon="arrow-circle-left"
@@ -276,12 +255,12 @@ export default function NextGenCollectionHeader(props: Readonly<Props>) {
             )}
           </span>
           <span className="font-larger">
-            by <b>{props.info.artist}</b>
+            by <b>{props.collection.artist}</b>
           </span>
           <span className="font-larger d-inline-flex align-items-center">
             <b>
-              {props.additional_data.circulation_supply} /{" "}
-              {props.additional_data.total_supply} minted
+              {props.collection.mint_count} / {props.collection.total_supply}{" "}
+              minted
               {available > 0 && ` | ${available} remaining`}
             </b>
           </span>
@@ -291,7 +270,6 @@ export default function NextGenCollectionHeader(props: Readonly<Props>) {
             {showMint() && (
               <NextGenCountdown
                 collection={props.collection}
-                phase_times={props.phase_times}
                 align="vertical"
               />
             )}

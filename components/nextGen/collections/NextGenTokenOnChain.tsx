@@ -2,55 +2,78 @@ import styles from "./NextGen.module.scss";
 import { mainnet, useAccount, useContractRead, useEnsName } from "wagmi";
 import { Col, Container, Row } from "react-bootstrap";
 import { useEffect, useState } from "react";
-import { NextGenTokenImage } from "./NextGenTokenImage";
-import Address from "../../address/Address";
 import Image from "next/image";
 import { goerli } from "wagmi/chains";
 import { NEXTGEN_CHAIN_ID, NEXTGEN_CORE } from "../nextgen_contracts";
 import NextGenCollectionHeader from "./collectionParts/NextGenCollectionHeader";
-import { areEqualAddresses, isUrl } from "../../../helpers/Helpers";
-import {
-  useSharedState,
-  useCollectionPhasesHook,
-  useCollectionAdditionalHook,
-  useCollectionInfoHook,
-} from "../nextgen_helpers";
 import DotLoader from "../../dotLoader/DotLoader";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import Tippy from "@tippyjs/react";
-import { IAttribute } from "../../../entities/INFT";
-import { NextGenCollection, NextGenToken } from "../../../entities/INextgen";
-import { fetchUrl } from "../../../services/6529api";
-import { commonApiFetch } from "../../../services/api/common-api";
+import { NextGenCollection } from "../../../entities/INextgen";
 import { IProfileAndConsolidations } from "../../../entities/IProfile";
-import NextGenTokenProvenance from "./collectionParts/NextGenTokenProvenance";
+import { commonApiFetch } from "../../../services/api/common-api";
+import Address from "../../address/Address";
+import { areEqualAddresses } from "../../../helpers/Helpers";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 interface Props {
   collection: NextGenCollection;
-  token: NextGenToken;
+  token_id: number;
 }
 
-export default function NextGenToken(props: Readonly<Props>) {
+export default function NextGenTokenOnChain(props: Readonly<Props>) {
   const account = useAccount();
 
+  const [owner, setOwner] = useState<`0x${string}`>();
   const [ownerENS, setOwnerENS] = useState<string>();
-  const [attributes, setAttributes] = useState<IAttribute[]>([]);
-  const [codeCopied, setCodeCopied] = useState(false);
+
+  const [fetchingMetadata, setFetchingMetadata] = useState<boolean>(true);
+  const [tokenNotFound, setTokenNotFound] = useState<boolean>(false);
+  const [tokenMetadataUrl, setTokenMetadataUrl] = useState<string>("");
+  const [tokenImage, setTokenImage] = useState<string>("");
 
   const [ownerProfileHandle, setOwnerProfileHandle] = useState<string>();
 
-  useEffect(() => {
-    commonApiFetch<IProfileAndConsolidations>({
-      endpoint: `profiles/${props.token.owner}`,
-    }).then((profile) => {
-      if (profile.profile?.handle) {
-        setOwnerProfileHandle(profile.profile.handle);
+  const normalisedTokenId = props.token_id - props.collection.id * 10000000000;
+  const tokenName = `${props.collection.name} - #${normalisedTokenId}`;
+
+  useContractRead({
+    address: NEXTGEN_CORE[NEXTGEN_CHAIN_ID] as `0x${string}`,
+    abi: NEXTGEN_CORE.abi,
+    chainId: NEXTGEN_CHAIN_ID,
+    functionName: "tokenURI",
+    watch: true,
+    args: [props.token_id],
+    onSettled(data: any, error: any) {
+      if (data) {
+        const tokenUri = data;
+        setTokenMetadataUrl(tokenUri);
+        fetch(tokenUri).then((meta) => {
+          meta.json().then((metaJson) => {
+            setTokenImage(metaJson.image);
+          });
+        });
+      } else {
+        setTokenNotFound(true);
       }
-    });
-  }, [props.token.owner]);
+      setFetchingMetadata(false);
+    },
+  });
+
+  useContractRead({
+    address: NEXTGEN_CORE[NEXTGEN_CHAIN_ID] as `0x${string}`,
+    abi: NEXTGEN_CORE.abi,
+    chainId: NEXTGEN_CHAIN_ID,
+    functionName: "ownerOf",
+    watch: true,
+    args: [props.token_id],
+    onSettled(data: any, error: any) {
+      if (data) {
+        setOwner(data);
+      }
+    },
+  });
 
   useEnsName({
-    address: props.token.owner as `0x${string}`,
+    address: owner,
     chainId: mainnet.id,
     onSettled(data: any, error: any) {
       if (data) {
@@ -58,6 +81,18 @@ export default function NextGenToken(props: Readonly<Props>) {
       }
     },
   });
+
+  useEffect(() => {
+    if (owner) {
+      commonApiFetch<IProfileAndConsolidations>({
+        endpoint: `profiles/${owner}`,
+      }).then((profile) => {
+        if (profile.profile?.handle) {
+          setOwnerProfileHandle(profile.profile.handle);
+        }
+      });
+    }
+  }, [owner]);
 
   function printToken() {
     return (
@@ -68,7 +103,7 @@ export default function NextGenToken(props: Readonly<Props>) {
               <Container>
                 <Row>
                   <Col className="d-flex align-items-center justify-content-between">
-                    <h2>{props.token.name}</h2>
+                    <h2>{tokenName}</h2>
                     <span className="d-flex gap-4">
                       <a
                         href={`https://${
@@ -77,7 +112,7 @@ export default function NextGenToken(props: Readonly<Props>) {
                             : `opensea`
                         }.io/assets/${
                           NEXTGEN_CHAIN_ID === goerli.id ? `goerli` : `ethereum`
-                        }/${NEXTGEN_CORE[NEXTGEN_CHAIN_ID]}/${props.token.id}`}
+                        }/${NEXTGEN_CORE[NEXTGEN_CHAIN_ID]}/${props.token_id}`}
                         target="_blank"
                         rel="noreferrer">
                         <Image
@@ -93,11 +128,20 @@ export default function NextGenToken(props: Readonly<Props>) {
                 </Row>
                 <Row className="pt-3">
                   <Col className="text-center">
-                    <NextGenTokenImage
-                      token={props.token}
-                      hide_info={true}
-                      hide_link={true}
-                      show_animation={true}
+                    <Image
+                      priority
+                      loading={"eager"}
+                      width="0"
+                      height="0"
+                      style={{
+                        height: "auto",
+                        width: "auto",
+                        maxHeight: "100%",
+                        maxWidth: "100%",
+                        padding: "10px",
+                      }}
+                      src={tokenImage}
+                      alt={tokenName}
                     />
                   </Col>
                 </Row>
@@ -115,7 +159,7 @@ export default function NextGenToken(props: Readonly<Props>) {
             <Col className="d-flex align-items-center gap-5">
               <span className="pt-1 pb-1 d-flex flex-column">
                 <span className="font-color-h">Token ID</span>
-                <span>#{props.token.id}</span>
+                <span>#{props.token_id}</span>
               </span>
               <span className="pt-1 pb-1 d-flex flex-column">
                 <span className="font-color-h">Collection</span>
@@ -133,10 +177,10 @@ export default function NextGenToken(props: Readonly<Props>) {
                 <span className="font-color-h">Owner</span>
                 <span className="d-flex">
                   <Address
-                    wallets={[props.token.owner as `0x${string}`]}
+                    wallets={[owner as `0x${string}`]}
                     display={ownerProfileHandle ?? ownerENS}
                   />
-                  {areEqualAddresses(props.token.owner, account.address) && (
+                  {areEqualAddresses(owner, account.address) && (
                     <span>(you)</span>
                   )}
                 </span>
@@ -146,10 +190,7 @@ export default function NextGenToken(props: Readonly<Props>) {
                 <span className="d-flex align-items-center gap-1">
                   <span>
                     {props.collection.on_chain ? "On-Chain" : "Off-Chain"}{" "}
-                    <a
-                      href={props.token.metadata_url}
-                      target="_blank"
-                      rel="noreferrer">
+                    <a href={tokenMetadataUrl} target="_blank" rel="noreferrer">
                       <FontAwesomeIcon
                         className={styles.copyIcon}
                         icon="external-link-square"></FontAwesomeIcon>
@@ -159,47 +200,11 @@ export default function NextGenToken(props: Readonly<Props>) {
               </span>
             </Col>
           </Row>
-        </Container>
-        <Container className="pt-3 pb-3">
-          {attributes.length > 0 && (
-            <Row>
-              <Col>
-                <Container className="no-padding">
-                  <Row>
-                    <Col>
-                      <h4>Properties</h4>
-                    </Col>
-                  </Row>
-                  <Row>
-                    {attributes.map((a) => (
-                      <Col
-                        key={a.trait_type}
-                        xs={{ span: 6 }}
-                        sm={{ span: 3 }}
-                        md={{ span: 2 }}
-                        lg={{ span: 2 }}
-                        className="pt-2 pb-2">
-                        <Container>
-                          <Row>
-                            <Col className={styles.nftAttribute}>
-                              <span>{a.trait_type}</span>
-                              <br />
-                              <span title={a.value}>{a.value}</span>
-                            </Col>
-                          </Row>
-                        </Container>
-                      </Col>
-                    ))}
-                  </Row>
-                </Container>
-              </Col>
-            </Row>
-          )}
-        </Container>
-        <Container className="pt-3 pb-3">
-          <Row>
+          <Row className="pt-3">
             <Col>
-              <NextGenTokenProvenance token_id={props.token.id} />
+              <b>
+                Token Indexing, check back later <DotLoader />
+              </b>
             </Col>
           </Row>
         </Container>
@@ -207,6 +212,25 @@ export default function NextGenToken(props: Readonly<Props>) {
     );
   }
 
+  if (fetchingMetadata || tokenNotFound) {
+    return (
+      <Container className="pt-5">
+        <Row>
+          <Col className="text-center">
+            <h4 className="mb-0 float-none">
+              {fetchingMetadata ? (
+                <>
+                  Fetching Token <DotLoader />
+                </>
+              ) : (
+                `Token Not Found`
+              )}
+            </h4>
+          </Col>
+        </Row>
+      </Container>
+    );
+  }
   return (
     <>
       <Container className="pt-4 pb-4">
