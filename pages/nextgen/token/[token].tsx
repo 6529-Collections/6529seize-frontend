@@ -96,9 +96,10 @@ export async function getServerSideProps(req: any, res: any, resolvedUrl: any) {
   const collectionId =
     token?.collection_id ?? Math.round(tokenId / 10000000000);
 
-  const collection = await fetchUrl(
-    `${process.env.API_ENDPOINT}/api/nextgen/collections/${collectionId}`
-  );
+  const collection = await commonApiFetch<NextGenCollection>({
+    endpoint: `nextgen/collections/${collectionId}`,
+    headers: headers,
+  });
 
   if (!collection) {
     return {

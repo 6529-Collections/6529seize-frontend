@@ -3,6 +3,7 @@ import { getTransactionLink } from "../../helpers/Helpers";
 import { NEXTGEN_CHAIN_ID } from "./nextgen_contracts";
 import DotLoader from "../dotLoader/DotLoader";
 import { useEffect, useState } from "react";
+import { NULL_ADDRESS } from "../../constants";
 
 const TRANSFER_EVENT =
   "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef";
@@ -25,7 +26,7 @@ export default function NextGenContractWriteStatus(props: Readonly<Props>) {
     if (waitContractWrite.data) {
       const tokenIds: number[] = [];
       waitContractWrite.data.logs.forEach((l) => {
-        if (l.topics[0] === TRANSFER_EVENT) {
+        if (l.topics[0] === TRANSFER_EVENT && l.topics[1] === NULL_ADDRESS) {
           const tokenIdHex = l.topics[3];
           if (tokenIdHex) {
             tokenIds.push(parseInt(tokenIdHex, 16));
