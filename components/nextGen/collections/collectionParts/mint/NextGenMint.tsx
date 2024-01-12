@@ -161,7 +161,6 @@ export default function NextGenMint(props: Readonly<Props>) {
       mintingDetails !== undefined &&
       collection !== undefined,
     onSettled(data: any, error: any) {
-      alert("hi");
       if (data) {
         const del: string[] = [];
         const d = data as any[];
