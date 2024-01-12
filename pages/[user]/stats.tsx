@@ -37,7 +37,11 @@ const Page: NextPageWithLayout<{ pageProps: UserPageStatsProps }> = ({
 Page.getLayout = function getLayout(
   page: ReactElement<{ pageProps: UserPageStatsProps }>
 ) {
-  return <UserPageLayout props={page.props.pageProps}>{page}</UserPageLayout>;
+  return (
+    <UserPageLayout profile={page.props.pageProps.profile}>
+      {page}
+    </UserPageLayout>
+  );
 };
 
 export default Page;

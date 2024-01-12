@@ -81,7 +81,7 @@ export default function UserPageRepReps({
         <>
           <div className="tw-mt-6 lg:tw-mt-8">
             <h3 className="tw-float-none tw-mb-0 tw-text-lg tw-font-semibold tw-text-iron-50 tw-tracking-tight">
-              Top Categories
+              Top Rep
             </h3>
           </div>
           <UserPageRepRepsTop
@@ -92,7 +92,7 @@ export default function UserPageRepReps({
           />
           <div className="tw-mt-6 lg:tw-mt-8">
             <h3 className="tw-float-none tw-block tw-mb-0 tw-text-lg tw-font-semibold tw-text-iron-50 tw-tracking-tight">
-              All Categories
+              Total Rep
             </h3>
           </div>
           <UserPageRepRepsTable

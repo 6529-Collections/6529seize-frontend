@@ -10,6 +10,7 @@ import { fetchUrl } from "../../services/6529api";
 import HeaderConnect from "./HeaderConnect";
 import { useAccount } from "wagmi";
 import SearchProfileButton from "./search-profile/SearchProfileButton";
+import UserSetUpProfileCta from "../user/utils/no-profile/set-up-profile/UserSetUpProfileCta";
 
 interface Props {
   onLoad?: () => void;
@@ -616,6 +617,7 @@ export default function Header(props: Readonly<Props>) {
                         className={`d-flex align-items-center justify-content-end no-padding`}>
                         <div
                           className={`${styles.dMdNone} d-flex align-items-center`}>
+                          <UserSetUpProfileCta/>
                           <SearchProfileButton />
                           <Image
                             loading="eager"
@@ -910,6 +912,7 @@ export default function Header(props: Readonly<Props>) {
                               </NavDropdown.Item>
                             </NavDropdown>
                             {printHeaderConnect()}
+                            <UserSetUpProfileCta/>
                             <SearchProfileButton />
                           </Nav>
                         </Navbar>

@@ -341,17 +341,12 @@ h5 {
   cursor: pointer;
 }
 
-.area-clamped {
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 3;
-  overflow: hidden;
+.edit-profile {
+  opacity: 0;
+  transition: visibility 0s, opacity 0.3s ease-out;
 }
 
-.area-expanded {
-  -webkit-line-clamp: none;
-}
-
-.unselectable {
-  user-select: none;
+.edit-profile:hover {
+  visibility: visible;
+  opacity: 1;
 }

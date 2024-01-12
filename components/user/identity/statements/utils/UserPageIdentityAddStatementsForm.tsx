@@ -31,9 +31,7 @@ export default function UserPageIdentityAddStatementsForm({
   readonly onClose: () => void;
 }) {
   const { requestAuth, setToast } = useContext(AuthContext);
-  const { invalidateLogs, invalidateProfileCICStatements } = useContext(
-    ReactQueryWrapperContext
-  );
+  const { onProfileStatementAdd } = useContext(ReactQueryWrapperContext);
   const [value, setValue] = useState<string>(
     STATEMENT_INPUT_INITIAL_VALUE[activeType] || ""
   );
@@ -58,8 +56,9 @@ export default function UserPageIdentityAddStatementsForm({
         message: "CIC statement added.",
         type: "success",
       });
-      invalidateProfileCICStatements(profile);
-      invalidateLogs();
+      onProfileStatementAdd({
+        profile,
+      });
     },
     onError: (error) => {
       setToast({

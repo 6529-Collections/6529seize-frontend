@@ -2,21 +2,38 @@ import { useEffect, useState } from "react";
 import {
   IProfileAndConsolidations,
   IProfileConsolidation,
+  WalletConsolidationState,
 } from "../../../../../entities/IProfile";
 import EthereumIcon from "../../../utils/icons/EthereumIcon";
 import UserPageIdentityStatementsConsolidatedAddressesItem from "./UserPageIdentityStatementsConsolidatedAddressesItem";
+import { useAccount } from "wagmi";
+import { amIUser } from "../../../../../helpers/Helpers";
+import { commonApiFetch } from "../../../../../services/api/common-api";
+import { useQueries } from "@tanstack/react-query";
+import { QueryKey } from "../../../../react-query-wrapper/ReactQueryWrapper";
+import { Page } from "../../../../../helpers/Types";
+import Link from "next/link";
+import { AnimatePresence } from "framer-motion";
 
 export default function UserPageIdentityStatementsConsolidatedAddresses({
   profile,
 }: {
   readonly profile: IProfileAndConsolidations;
 }) {
-  const getPrimaryAddress = () => {
-    if (profile.profile?.primary_wallet) {
-      return profile.profile.primary_wallet.toLowerCase();
+  const { address } = useAccount();
+
+  const [isMyProfile, setIsMyProfile] = useState<boolean>(true);
+  useEffect(
+    () => setIsMyProfile(amIUser({ profile, address })),
+    [profile, address]
+  );
+
+  const getPrimaryAddress = (p: IProfileAndConsolidations) => {
+    if (p.profile?.primary_wallet) {
+      return p.profile.primary_wallet.toLowerCase();
     }
 
-    const highestTdhWallet = profile.consolidation.wallets.reduce(
+    const highestTdhWallet = p.consolidation.wallets.reduce(
       (highest, wallet) => {
         if (wallet.tdh > highest.tdh) {
           return wallet;
@@ -30,11 +47,11 @@ export default function UserPageIdentityStatementsConsolidatedAddresses({
   };
 
   const [primaryAddress, setPrimaryAddress] = useState<string>(
-    getPrimaryAddress()
+    getPrimaryAddress(profile)
   );
 
   useEffect(() => {
-    setPrimaryAddress(getPrimaryAddress());
+    setPrimaryAddress(getPrimaryAddress(profile));
   }, [profile]);
 
   const sortByPrimary = (wallets: IProfileConsolidation[]) => {
@@ -62,6 +79,41 @@ export default function UserPageIdentityStatementsConsolidatedAddresses({
     setSortedByPrimary(sortByPrimary(profile.consolidation.wallets));
   }, [profile, primaryAddress]);
 
+  const walletConsolidations = useQueries({
+    queries: profile.consolidation.wallets.map((wallet) => ({
+      queryKey: [
+        QueryKey.WALLET_CONSOLIDATIONS_CHECK,
+        wallet.wallet.address.toLowerCase(),
+      ],
+      queryFn: () =>
+        commonApiFetch<Page<WalletConsolidationState>>({
+          endpoint: `consolidations/${wallet.wallet.address.toLowerCase()}`,
+          params: {
+            show_incomplete: "true",
+          },
+        }),
+      enabled: !!address,
+    })),
+  });
+
+  const [showDelegationCenter, setShowDelegationCenter] = useState(false);
+
+  useEffect(() => {
+    if (walletConsolidations.length === 0 || !address) {
+      setShowDelegationCenter(false);
+      return;
+    }
+
+    const haveAffectedWallets = walletConsolidations.some((w) =>
+      w.data?.data.some(
+        (c) =>
+          c.wallet1.toLowerCase() === address?.toLowerCase() ||
+          c.wallet2.toLowerCase() === address?.toLowerCase()
+      )
+    );
+    setShowDelegationCenter(haveAffectedWallets);
+  }, [walletConsolidations, address]);
+
   return (
     <div>
       <div className="tw-flex tw-items-center tw-space-x-4">
@@ -79,10 +131,30 @@ export default function UserPageIdentityStatementsConsolidatedAddresses({
           <UserPageIdentityStatementsConsolidatedAddressesItem
             key={wallet.wallet.address}
             address={wallet}
+            profile={profile}
             primaryAddress={primaryAddress}
+            canEdit={isMyProfile}
           />
         ))}
       </ul>
+      <div className="tw-space-x-4 tw-pt-4">
+        <Link
+          href="/delegation/wallet-checker"
+          className="tw-no-underline tw-text-sm tw-font-medium tw-inline-flex tw-items-center tw-rounded-lg tw-bg-iron-800 tw-px-2.5 tw-py-2 tw-text-iron-200 focus:tw-outline-none tw-border-0 tw-ring-1 tw-ring-inset tw-ring-iron-700 hover:tw-bg-iron-700 focus:tw-z-10 tw-transition tw-duration-300 tw-ease-out"
+        >
+          Wallet Checker
+        </Link>
+        <AnimatePresence mode="wait" initial={false}>
+          {showDelegationCenter && (
+            <Link
+              href="/delegation/delegation-center"
+              className="tw-no-underline tw-text-sm tw-font-medium tw-inline-flex tw-items-center tw-rounded-lg tw-bg-iron-800 tw-px-2.5 tw-py-2 tw-text-iron-200 focus:tw-outline-none tw-border-0 tw-ring-1 tw-ring-inset tw-ring-iron-700 hover:tw-bg-iron-700 focus:tw-z-10 tw-transition tw-duration-300 tw-ease-out"
+            >
+              Delegation Center
+            </Link>
+          )}
+        </AnimatePresence>
+      </div>
     </div>
   );
 }

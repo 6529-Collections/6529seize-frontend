@@ -7,6 +7,11 @@ import {
 import { BaseNFT, VolumeType } from "../entities/INFT";
 import { DateIntervalsSelection } from "../enums";
 import { CICType, IProfileAndConsolidations } from "../entities/IProfile";
+import { NextRouter } from "next/router";
+import {
+  USER_PAGE_TAB_META,
+  UserPageTabType,
+} from "../components/user/layout/UserPageTabs";
 
 export function formatAddress(address: string) {
   if (
@@ -582,4 +587,18 @@ export const truncateMiddle = (value: string): string => {
 export const getStringAsNumberOrZero = (value: string): number => {
   const parsedValue = parseInt(value);
   return isNaN(parsedValue) ? 0 : parsedValue;
+};
+export const getProfileTargetRoute = ({
+  handleOrWallet,
+  router,
+  defaultPath,
+}: {
+  readonly handleOrWallet: string;
+  readonly router: NextRouter;
+  readonly defaultPath: UserPageTabType;
+}): string => {
+  if (router.route.includes("[user]")) {
+    return router.route.replace("[user]", handleOrWallet);
+  }
+  return `${handleOrWallet}/${USER_PAGE_TAB_META[defaultPath].route}`;
 };

@@ -18,14 +18,15 @@ export interface AggregatedCicRating {
 export interface IProfileAndConsolidations {
   readonly profile: IProfile | null;
   readonly consolidation: {
-    wallets: IProfileConsolidation[];
-    tdh: number;
-    consolidation_key: string | null;
-    consolidation_display: string | null;
+    readonly wallets: IProfileConsolidation[];
+    readonly tdh: number;
+    readonly consolidation_key: string | null;
+    readonly consolidation_display: string | null;
   };
   readonly level: number;
   readonly cic: AggregatedCicRating;
   readonly rep: number;
+  readonly balance: number;
 }
 
 export enum PROFILE_CLASSIFICATION {
@@ -141,7 +142,6 @@ export enum ProfileActivityLogRatingEditContentChangeReason {
   USER_EDIT = "USER_EDIT",
   LOST_TDH = "LOST_TDH",
 }
-
 
 export interface ProfileActivityLogRatingEdit extends ProfileActivityLogBase {
   readonly type: ProfileActivityLogType.RATING_EDIT;
@@ -315,3 +315,22 @@ export interface RatingWithProfileInfo {
 export type RatingWithProfileInfoAndLevel = RatingWithProfileInfo & {
   level: number;
 };
+
+export interface ApiCreateOrUpdateProfileRequest {
+  readonly handle: string;
+  readonly primary_wallet: string;
+  readonly classification: PROFILE_CLASSIFICATION;
+  pfp_url?: string;
+  banner_1?: string;
+  banner_2?: string;
+}
+
+export interface WalletConsolidationState {
+  readonly created_at: Date;
+  readonly block: number;
+  readonly wallet1: string;
+  readonly wallet2: string;
+  readonly confirmed: 0 | 1;
+  readonly wallet1_display: string | null;
+  readonly wallet2_display: string | null;
+}
