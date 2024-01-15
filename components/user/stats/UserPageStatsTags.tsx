@@ -76,7 +76,7 @@ export default function UserPageStatsTags({
                 <Tag
                   type={TagType.SZN5}
                   text={"Meme Sets SZN5 x"}
-                  value={tdh?.memes_cards_sets_szn2}
+                  value={tdh?.memes_cards_sets_szn5}
                 />
               )}
             </Col>
