@@ -4,9 +4,11 @@ import { addProtocol } from "../../../../helpers/Helpers";
 import { useState } from "react";
 import { NextGenCollection } from "../../../../entities/INextgen";
 import NextGenCollectionProvenance from "./NextGenCollectionProvenance";
+import { ContentView } from "./NextGenCollection";
 
 interface Props {
   collection: NextGenCollection;
+  view: ContentView;
 }
 
 export default function NextGenCollectionDetails(props: Readonly<Props>) {
@@ -36,42 +38,37 @@ export default function NextGenCollectionDetails(props: Readonly<Props>) {
     );
   }
 
+  if (props.view === ContentView.PROVENANCE) {
+    return <NextGenCollectionProvenance collection={props.collection} />;
+  }
+
   return (
-    <>
-      <NextGenCollectionProvenance collection={props.collection} />
-      <Container className="no-padding pt-5">
-        <Row>
-          <Col>
-            <h3 className="mb-0">About</h3>
-          </Col>
-        </Row>
-        <hr />
-        <Row className="pt-2">
-          <Col sm={12} md={8}>
-            <Container className="no-padding">
-              {props.collection.artist_signature && (
-                <>
-                  <Row>
-                    <Col>
-                      <b>Artist Signature</b>
-                    </Col>
-                  </Row>
-                  <Row className="pb-4">
-                    <Col xs={12} className="pt-2">
-                      <div
-                        className={styles.artistSignature}
-                        dangerouslySetInnerHTML={{
-                          __html: props.collection.artist_signature,
-                        }}></div>
-                    </Col>
-                  </Row>
-                </>
-              )}
-              <Row>
-                <Col xs={12}>
-                  <b>Website</b>
-                </Col>
-                <Col xs={12}>
+    <Container className="no-padding">
+      <Row>
+        <Col>
+          <Container className="no-padding">
+            {props.collection.artist_signature && (
+              <>
+                <Row>
+                  <Col>
+                    <b>Artist Signature</b>
+                  </Col>
+                </Row>
+                <Row className="pb-4">
+                  <Col xs={12} className="pt-2">
+                    <div
+                      className={styles.artistSignature}
+                      dangerouslySetInnerHTML={{
+                        __html: props.collection.artist_signature,
+                      }}></div>
+                  </Col>
+                </Row>
+              </>
+            )}
+            <Row>
+              <Col xs={12} className="pt-2 pb-2 d-flex flex-column">
+                <span className="font-color-h">Website</span>
+                <span>
                   <a
                     className="font-color text-decoration-none"
                     href={addProtocol(props.collection.website)}
@@ -79,44 +76,30 @@ export default function NextGenCollectionDetails(props: Readonly<Props>) {
                     rel="noreferrer">
                     {props.collection.website}
                   </a>
-                </Col>
-              </Row>
-              <Row className="pt-3">
-                <Col xs={12}>
-                  <b>Collection Overview</b>
-                </Col>
-                <Col xs={12}>{props.collection.description}</Col>
-              </Row>
-              <Row className="pt-3">
-                <Col xs={12}>
-                  <b>Licence</b>
-                </Col>
-                <Col xs={12}>{props.collection.licence}</Col>
-              </Row>
-              <Row className="pt-3">
-                <Col xs={12}>
-                  <b>Base URI</b>
-                </Col>
-                <Col xs={12}>{props.collection.base_uri}</Col>
-              </Row>
-              <Row className="pt-3">
-                <Col xs={12}>
-                  <b>Merkle Root</b>
-                </Col>
-                <Col xs={12}>{props.collection.merkle_root}</Col>
-              </Row>
-              <Row className="pt-3">
-                <Col xs={12}>
-                  <b>Library</b>
-                </Col>
-                <Col xs={12}>
+                </span>
+              </Col>
+              <Col xs={12} className="pt-2 pb-2 d-flex flex-column">
+                <span className="font-color-h">Collection Overview</span>
+                <span>{props.collection.description}</span>
+              </Col>
+              <Col xs={12} className="pt-2 pb-2 d-flex flex-column">
+                <span className="font-color-h">Licence</span>
+                <span>{props.collection.licence}</span>
+              </Col>
+              <Col xs={12} className="pt-2 pb-2 d-flex flex-column">
+                <span className="font-color-h">Base URI</span>
+                <span>{props.collection.base_uri}</span>
+              </Col>
+              <Col xs={12} className="pt-2 pb-2 d-flex flex-column">
+                <span className="font-color-h">Library</span>
+                <span>
                   {props.collection.library ? props.collection.library : "-"}
-                </Col>
-              </Row>
-            </Container>
-          </Col>
-        </Row>
-      </Container>
-    </>
+                </span>
+              </Col>
+            </Row>
+          </Container>
+        </Col>
+      </Row>
+    </Container>
   );
 }

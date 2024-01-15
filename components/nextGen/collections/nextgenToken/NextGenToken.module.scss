@@ -1,0 +1,52 @@
+@import "../../../../styles/variables.scss";
+
+.modeRow {
+  background-color: black;
+}
+
+.modeIcon {
+  width: 22px;
+  height: 22px;
+  color: $font-color-h;
+  cursor: pointer;
+  transition: transform 0.2s;
+
+  &:hover {
+    color: lightgray;
+    transform: scale(1.1);
+  }
+}
+
+.modeIconSelected {
+  color: $font-color;
+  pointer-events: none;
+}
+
+.lightBox {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(245, 245, 245, 0.97);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.lightBoxContent {
+  width: 80%;
+  height: 80%;
+}
+
+.lightBoxCloseIcon {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  width: 30px;
+  height: 30px;
+  color: black;
+  cursor: pointer;
+  transition: transform 0.2s;
+}

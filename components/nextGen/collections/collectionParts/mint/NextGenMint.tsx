@@ -29,7 +29,7 @@ import NextGenMintWidget from "./NextGenMintWidget";
 import NextGenMintBurnWidget from "./NextGenMintBurnWidget";
 import Image from "next/image";
 import { NextGenCountdown, NextGenPhases } from "../NextGenCollectionHeader";
-import { NextGenTokenImage } from "../../NextGenTokenImage";
+import { NextGenTokenImage } from "../../nextgenToken/NextGenTokenImage";
 import DotLoader from "../../../../dotLoader/DotLoader";
 import {
   NextGenCollection,

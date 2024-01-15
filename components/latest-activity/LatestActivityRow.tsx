@@ -9,10 +9,11 @@ import {
   isGradientsContract,
   isMemeLabContract,
   isMemesContract,
+  isNullAddress,
   numberWithCommas,
 } from "../../helpers/Helpers";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { MANIFOLD, NULL_ADDRESS } from "../../constants";
+import { MANIFOLD } from "../../constants";
 import { NFTLite } from "../../entities/INFT";
 import Address from "../address/Address";
 import Tippy from "@tippyjs/react";
@@ -50,7 +51,7 @@ export default function LatestActivityRow(props: Readonly<Props>) {
   function printRoyalties() {
     if (
       props.tr.value == 0 ||
-      areEqualAddresses(props.tr.from_address, NULL_ADDRESS) ||
+      isNullAddress(props.tr.from_address) ||
       areEqualAddresses(props.tr.from_address, MANIFOLD)
     ) {
       return <></>;
@@ -134,7 +135,7 @@ export default function LatestActivityRow(props: Readonly<Props>) {
     return (
       <span className="d-flex">
         {(areEqualAddresses(MANIFOLD, props.tr.from_address) ||
-          areEqualAddresses(NULL_ADDRESS, props.tr.from_address)) && (
+          isNullAddress(props.tr.from_address)) && (
           <>
             {props.tr.value > 0 ? (
               <>
@@ -200,7 +201,7 @@ export default function LatestActivityRow(props: Readonly<Props>) {
               `for ${Math.round(props.tr.value * 100000) / 100000} ETH`}
           </>
         )}
-        {areEqualAddresses(NULL_ADDRESS, props.tr.to_address) && (
+        {isNullAddress(props.tr.to_address) && (
           <>
             <Address
               wallets={[props.tr.from_address]}
@@ -258,8 +259,8 @@ export default function LatestActivityRow(props: Readonly<Props>) {
           </>
         )}
         {!areEqualAddresses(MANIFOLD, props.tr.from_address) &&
-          !areEqualAddresses(NULL_ADDRESS, props.tr.from_address) &&
-          !areEqualAddresses(NULL_ADDRESS, props.tr.to_address) && (
+          !isNullAddress(props.tr.from_address) &&
+          !isNullAddress(props.tr.to_address) && (
             <>
               <Address
                 wallets={[props.tr.to_address]}
@@ -330,7 +331,7 @@ export default function LatestActivityRow(props: Readonly<Props>) {
   function printDescriptionNextgen() {
     return (
       <span className="d-flex">
-        {areEqualAddresses(NULL_ADDRESS, props.tr.from_address) ? (
+        {isNullAddress(props.tr.from_address) ? (
           <>
             Minted to&nbsp;
             <Address
@@ -338,7 +339,7 @@ export default function LatestActivityRow(props: Readonly<Props>) {
               display={props.tr.to_display}
             />
           </>
-        ) : areEqualAddresses(NULL_ADDRESS, props.tr.to_address) ? (
+        ) : isNullAddress(props.tr.to_address) ? (
           <>
             Burnt by&nbsp;
             <Address
@@ -385,18 +386,18 @@ export default function LatestActivityRow(props: Readonly<Props>) {
   }
 
   function isBurn() {
-    return areEqualAddresses(NULL_ADDRESS, props.tr.to_address);
+    return isNullAddress(props.tr.to_address);
   }
 
   function isMint() {
     return (
       areEqualAddresses(MANIFOLD, props.tr.from_address) ||
-      areEqualAddresses(NULL_ADDRESS, props.tr.from_address)
+      isNullAddress(props.tr.from_address)
     );
   }
 
   function isAirdrop() {
-    return areEqualAddresses(NULL_ADDRESS, props.tr.from_address);
+    return isNullAddress(props.tr.from_address);
   }
 
   return (

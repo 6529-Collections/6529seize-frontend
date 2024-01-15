@@ -16,7 +16,8 @@ const Header = dynamic(() => import("../../../components/header/Header"), {
 });
 
 const NextGenTokenComponent = dynamic(
-  () => import("../../../components/nextGen/collections/NextGenToken"),
+  () =>
+    import("../../../components/nextGen/collections/nextgenToken/NextGenToken"),
   {
     ssr: false,
   }
@@ -43,7 +44,11 @@ export default function NextGenCollectionToken(props: any) {
       display: collection.name,
       href: `/nextgen/collection/${collection.id}`,
     },
-    { display: pagenameFull },
+    {
+      display: token
+        ? `#${token.normalised_id}`
+        : `${tokenId - collection.id * 10000000000}`,
+    },
   ];
 
   return (
@@ -101,7 +106,7 @@ export async function getServerSideProps(req: any, res: any, resolvedUrl: any) {
     headers: headers,
   });
 
-  if (!collection) {
+  if (isEmptyObject(collection)) {
     return {
       redirect: {
         permanent: false,

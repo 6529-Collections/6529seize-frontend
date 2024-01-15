@@ -223,13 +223,7 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-
-  span:nth-of-type(1) {
-    font-size: smaller;
-    white-space: nowrap;
-  }
-  span:nth-of-type(2) {
-    font-weight: bolder;
+  span {
     white-space: nowrap;
   }
 }
@@ -365,4 +359,16 @@
   -ms-overflow-style: none; /* Internet Explorer 10+ */
   scrollbar-width: none; /* Firefox */
   overflow-x: auto;
+}
+
+.tokenLogsScrollContainer {
+  min-height: 445px;
+}
+
+.nextgenTokenDetailsLinkSelected {
+  border-bottom: 1px solid white;
+}
+
+.tokenLogsTable {
+  min-height: 450px;
 }

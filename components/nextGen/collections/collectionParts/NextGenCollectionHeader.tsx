@@ -142,22 +142,22 @@ export function NextGenPhases(props: Readonly<PhaseProps>) {
 
   return (
     <span className="pt-2 pb-2 d-flex align-items-center gap-2 align-items-center">
-      {alStatus !== Status.UNAVAILABLE && (
-        <span
-          className={`font-bolder font-smaller ${
-            styles.nextgenTag
-          } ${getAllowlistClassName()}`}>
-          ALLOWLIST {alStatus}
-        </span>
-      )}
-      {publicStatus !== Status.UNAVAILABLE && (
-        <span
-          className={`font-bolder font-smaller ${
-            styles.nextgenTag
-          } ${getPublicStatusClassName()}`}>
-          PUBLIC PHASE {publicStatus}
-        </span>
-      )}
+      {/* {alStatus !== Status.UNAVAILABLE && ( */}
+      <span
+        className={`font-bolder font-smaller ${
+          styles.nextgenTag
+        } ${getAllowlistClassName()}`}>
+        ALLOWLIST {alStatus}
+      </span>
+      {/* )} */}
+      {/* {publicStatus !== Status.UNAVAILABLE && ( */}
+      <span
+        className={`font-bolder font-smaller ${
+          styles.nextgenTag
+        } ${getPublicStatusClassName()}`}>
+        PUBLIC PHASE {publicStatus}
+      </span>
+      {/* )} */}
     </span>
   );
 }
@@ -265,7 +265,7 @@ export default function NextGenCollectionHeader(props: Readonly<Props>) {
             </b>
           </span>
         </Col>
-        {!props.mint_page && (
+        {/* {!props.mint_page && (
           <Col className="d-flex align-items-center">
             {showMint() && (
               <NextGenCountdown
@@ -274,7 +274,7 @@ export default function NextGenCollectionHeader(props: Readonly<Props>) {
               />
             )}
           </Col>
-        )}
+        )} */}
       </Row>
     </Container>
   );

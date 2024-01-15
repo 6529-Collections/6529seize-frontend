@@ -1,3 +1,4 @@
+import styles from "../NextGen.module.scss";
 import { Container, Row, Col } from "react-bootstrap";
 import Breadcrumb, { Crumb } from "../../../breadcrumb/Breadcrumb";
 import NextGenCollectionHeader from "./NextGenCollectionHeader";
@@ -5,9 +6,15 @@ import NextGenCollectionArt from "./NextGenCollectionArt";
 import NextGenCollectionDetails from "./NextGenCollectionDetails";
 import NextGenCollectionSlideshow from "./NextGenCollectionSlideshow";
 import { NextGenCollection } from "../../../../entities/INextgen";
+import { useState } from "react";
 
 interface Props {
   collection: NextGenCollection;
+}
+
+export enum ContentView {
+  ABOUT,
+  PROVENANCE,
 }
 
 export default function NextGenCollection(props: Readonly<Props>) {
@@ -16,6 +23,8 @@ export default function NextGenCollection(props: Readonly<Props>) {
     { display: "NextGen", href: "/nextgen" },
     { display: `#${props.collection.id} - ${props.collection.name}` },
   ];
+
+  const [view, setView] = useState<ContentView>(ContentView.ABOUT);
 
   return (
     <>
@@ -33,8 +42,47 @@ export default function NextGenCollection(props: Readonly<Props>) {
             </Col>
           </Row>
           <Row className="pt-5">
+            <Col className="d-flex gap-4">
+              <a
+                onClick={() => setView(ContentView.ABOUT)}
+                className={
+                  view === ContentView.ABOUT
+                    ? styles.nextgenTokenDetailsLinkSelected
+                    : ""
+                }>
+                <h4
+                  className={
+                    view === ContentView.ABOUT
+                      ? "font-color"
+                      : "font-color-h cursor-pointer"
+                  }>
+                  About
+                </h4>
+              </a>
+              <a
+                onClick={() => setView(ContentView.PROVENANCE)}
+                className={
+                  view === ContentView.PROVENANCE
+                    ? styles.nextgenTokenDetailsLinkSelected
+                    : ""
+                }>
+                <h4
+                  className={
+                    view === ContentView.PROVENANCE
+                      ? "font-color"
+                      : "font-color-h cursor-pointer"
+                  }>
+                  Provenance
+                </h4>
+              </a>
+            </Col>
+          </Row>
+          <Row className="pt-4 pb-4">
             <Col>
-              <NextGenCollectionDetails collection={props.collection} />
+              <NextGenCollectionDetails
+                collection={props.collection}
+                view={view}
+              />
             </Col>
           </Row>
         </>

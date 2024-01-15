@@ -1,15 +1,15 @@
 import { Col, Container, Row } from "react-bootstrap";
-import { NextGenTokenImage } from "./NextGenTokenImage";
+import { NextGenTokenImage } from "./nextgenToken/NextGenTokenImage";
 import { NextGenCollection, NextGenToken } from "../../../entities/INextgen";
 import { useEffect, useState } from "react";
-import { DBResponse } from "../../../entities/IDBResponse";
-import { fetchUrl } from "../../../services/6529api";
 import Pagination from "../../pagination/Pagination";
 import { commonApiFetch } from "../../../services/api/common-api";
+import DotLoader from "../../dotLoader/DotLoader";
 
 interface Props {
   collection: NextGenCollection;
   limit?: number;
+  selected_traits?: string[];
 }
 
 export default function NextGenTokenList(props: Readonly<Props>) {
@@ -22,13 +22,17 @@ export default function NextGenTokenList(props: Readonly<Props>) {
 
   function fetchResults(mypage: number) {
     setTokensLoaded(false);
+    let endpoint = `nextgen/collections/${props.collection.id}/tokens?page_size=${pageSize}&page=${mypage}`;
+    if (props.selected_traits) {
+      endpoint += `&traits=${props.selected_traits.join(",")}`;
+    }
     commonApiFetch<{
       count: number;
       page: number;
       next: any;
       data: NextGenToken[];
     }>({
-      endpoint: `nextgen/collections/${props.collection.id}/tokens?page_size=${pageSize}&page=${mypage}`,
+      endpoint: endpoint,
     }).then((response) => {
       setTotalResults(response.count);
       setTokens(response.data);
@@ -37,22 +41,40 @@ export default function NextGenTokenList(props: Readonly<Props>) {
   }
 
   useEffect(() => {
+    if (page === 1) {
+      fetchResults(page);
+    } else {
+      setPage(1);
+    }
+  }, [props.selected_traits]);
+
+  useEffect(() => {
     fetchResults(page);
   }, [page]);
 
   return (
     <Container className="no-padding">
       <Row>
-        {tokens.map((t) => (
-          <Col
-            xs={6}
-            sm={4}
-            md={4}
-            key={`collection-${props.collection.id}-token-list-${t.id}`}
-            className="pt-2 pb-2">
-            <NextGenTokenImage token={t} />
+        {tokensLoaded ? (
+          tokens.length > 0 ? (
+            tokens.map((t) => (
+              <Col
+                xs={6}
+                sm={4}
+                md={4}
+                key={`collection-${props.collection.id}-token-list-${t.id}`}
+                className="pt-2 pb-2">
+                <NextGenTokenImage token={t} />
+              </Col>
+            ))
+          ) : (
+            <Col className="pt-2 pb-2">No results found</Col>
+          )
+        ) : (
+          <Col className="pt-2 pb-2">
+            <DotLoader />
           </Col>
-        ))}
+        )}
       </Row>
       {totalResults > pageSize && tokensLoaded && !props.limit && (
         <Row className="text-center pt-4 pb-4">

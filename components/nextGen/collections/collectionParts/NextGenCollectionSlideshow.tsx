@@ -3,7 +3,7 @@ import { Button, Col, Container, Row } from "react-bootstrap";
 import { useEffect, useState } from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation, Pagination, A11y } from "swiper/modules";
-import { NextGenTokenImage } from "../NextGenTokenImage";
+import { NextGenTokenImage } from "../nextgenToken/NextGenTokenImage";
 import { NextGenCollection, NextGenToken } from "../../../../entities/INextgen";
 import { commonApiFetch } from "../../../../services/api/common-api";
 

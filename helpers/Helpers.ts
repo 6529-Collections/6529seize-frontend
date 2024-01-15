@@ -3,6 +3,8 @@ import {
   GRADIENT_CONTRACT,
   MEMELAB_CONTRACT,
   MEMES_CONTRACT,
+  NULL_ADDRESS,
+  NULL_ADDRESS_DEAD,
 } from "../constants";
 import { BaseNFT, VolumeType } from "../entities/INFT";
 import { DateIntervalsSelection } from "../enums";
@@ -602,3 +604,13 @@ export const getProfileTargetRoute = ({
   }
   return `${handleOrWallet}/${USER_PAGE_TAB_META[defaultPath].route}`;
 };
+
+export function isNullAddress(address: string) {
+  if (areEqualAddresses(address, NULL_ADDRESS)) {
+    return true;
+  }
+  if (areEqualAddresses(address, NULL_ADDRESS_DEAD)) {
+    return true;
+  }
+  return false;
+}

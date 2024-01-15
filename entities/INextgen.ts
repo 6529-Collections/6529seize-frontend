@@ -50,3 +50,14 @@ export interface NextGenLog {
   collection_id: number;
   source: string;
 }
+
+export interface NextGenTrait {
+  created_at: string;
+  updated_at: string;
+  token_id: number;
+  collection_id: number;
+  trait: string;
+  trait_score: number;
+  value: string;
+  value_score: number;
+}

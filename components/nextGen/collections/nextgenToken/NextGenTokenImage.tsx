@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { NextGenToken } from "../../../entities/INextgen";
+import { NextGenToken } from "../../../../entities/INextgen";
 
 export function NextGenTokenImage(
   props: Readonly<{
@@ -7,6 +7,7 @@ export function NextGenTokenImage(
     hide_link?: boolean;
     hide_info?: boolean;
     show_animation?: boolean;
+    live?: boolean;
   }>
 ) {
   function getImage() {
@@ -29,10 +30,7 @@ export function NextGenTokenImage(
         />
         {!props.hide_info && (
           <>
-            <span className="pt-1 text-center font-smaller font-color-h">
-              #{props.token.id}
-            </span>
-            <span>{props.token.name}</span>
+            <span>#{props.token.normalised_id}</span>
           </>
         )}
       </span>
@@ -46,8 +44,13 @@ export function NextGenTokenImage(
           style={{
             width: "100%",
             height: "80vh",
+            marginBottom: "-8px",
           }}
-          src={props.token.animation_url}
+          src={
+            props.live
+              ? props.token.generator_url.replace("metadata", "html")
+              : props.token.animation_url
+          }
           title={props.token.name}
         />
       );
@@ -57,7 +60,7 @@ export function NextGenTokenImage(
   }
 
   if (props.hide_link) {
-    return <span className="unselectable">{getContent()}</span>;
+    return getContent();
   } else {
     return (
       <a

@@ -1,13 +1,7 @@
 import styles from "../NextGen.module.scss";
 import { Container, Row, Col, Table } from "react-bootstrap";
-import {
-  getDateDisplay,
-  getTransactionLink,
-} from "../../../../helpers/Helpers";
 import { useEffect, useRef, useState } from "react";
 import { commonApiFetch } from "../../../../services/api/common-api";
-import { NEXTGEN_CHAIN_ID } from "../../nextgen_contracts";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Pagination from "../../../pagination/Pagination";
 import { Transaction } from "../../../../entities/ITransaction";
 import LatestActivityRow from "../../../latest-activity/LatestActivityRow";
@@ -49,13 +43,14 @@ export default function NextGenTokenProvenance(props: Readonly<Props>) {
   return (
     <>
       <Container className="no-padding" ref={scrollTarget}>
-        <Row>
+        {/* <Row>
           <Col>
             <h3 className="mb-0">Provenance</h3>
           </Col>
         </Row>
-        <hr />
-        <Row className={`pt-2 ${styles.logsScrollContainer}`}>
+        <hr /> */}
+        <Row
+          className={`pt-2 ${styles.logsScrollContainer} ${styles.tokenLogsScrollContainer}`}>
           <Col>
             <Table bordered={false} className={styles.logsTable}>
               <tbody>
