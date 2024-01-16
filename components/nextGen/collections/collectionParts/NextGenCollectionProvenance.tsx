@@ -66,7 +66,7 @@ export default function NextGenCollectionProvenance(props: Readonly<Props>) {
                     <td className={styles.collectionProvenance}>
                       <span className="d-fl">{log.log}</span>
                     </td>
-                    <td className="align-middle">
+                    <td className="text-right">
                       <a
                         href={getTransactionLink(
                           NEXTGEN_CHAIN_ID,

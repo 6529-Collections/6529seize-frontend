@@ -63,15 +63,15 @@ export default function NextGenToken(props: Readonly<Props>) {
           ) : (
             <>
               <Col>
-                <NextgenTokenProperties
-                  collection_id={props.collection.id}
-                  token_id={props.token.id}
-                />
-              </Col>
-              <Col>
                 <NextGenTokenAbout
                   collection={props.collection}
                   token={props.token}
+                />
+              </Col>
+              <Col>
+                <NextgenTokenProperties
+                  collection_id={props.collection.id}
+                  token_id={props.token.id}
                 />
               </Col>
             </>
