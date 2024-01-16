@@ -39,6 +39,8 @@ export default function ProfileActivityLogsIcon({
       return <ProfileActivityLogsProfileImageIcon />;
     case ProfileActivityLogType.PROFILE_ARCHIVED:
       return <ProfileActivityLogsProfileArchivedIcon />;
+    case ProfileActivityLogType.GENERAL_CIC_STATEMENT_EDIT:
+      return <ProfileActivityLogsSocialMediaVerificationPostIcon />;
     default:
       assertUnreachable(logType);
   }

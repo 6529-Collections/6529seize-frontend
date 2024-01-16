@@ -64,6 +64,8 @@ export default function SocialStatementIcon({
       return <WebsiteIcon aria-hidden="true" />;
     case STATEMENT_TYPE.LINK:
       return <LinkIcon aria-hidden="true" />;
+    case STATEMENT_TYPE.BIO:
+      return null;
     default:
       assertUnreachable(statementType);
   }

@@ -32,6 +32,7 @@ export enum STATEMENT_TYPE {
   EMAIL = "EMAIL",
   WEBSITE = "WEBSITE",
   LINK = "LINK",
+  BIO = "BIO",
 }
 
 export const CAN_OPEN_STATEMENT: Record<STATEMENT_TYPE, boolean> = {
@@ -54,6 +55,7 @@ export const CAN_OPEN_STATEMENT: Record<STATEMENT_TYPE, boolean> = {
   [STATEMENT_TYPE.EMAIL]: false,
   [STATEMENT_TYPE.WEBSITE]: true,
   [STATEMENT_TYPE.LINK]: true,
+  [STATEMENT_TYPE.BIO]: false,
 };
 
 export const STATEMENT_TITLE: Record<STATEMENT_TYPE, string> = {
@@ -76,6 +78,7 @@ export const STATEMENT_TITLE: Record<STATEMENT_TYPE, string> = {
   [STATEMENT_TYPE.EMAIL]: "Email",
   [STATEMENT_TYPE.WEBSITE]: "Website",
   [STATEMENT_TYPE.LINK]: "Link",
+  [STATEMENT_TYPE.BIO]: "About",
 };
 
 export const STATEMENT_INPUT_PLACEHOLDER: Record<STATEMENT_TYPE, string> = {
@@ -98,6 +101,7 @@ export const STATEMENT_INPUT_PLACEHOLDER: Record<STATEMENT_TYPE, string> = {
   [STATEMENT_TYPE.EMAIL]: "Email",
   [STATEMENT_TYPE.WEBSITE]: "Website (starting with http or https)",
   [STATEMENT_TYPE.LINK]: "Website (starting with http or https)",
+  [STATEMENT_TYPE.BIO]: "About",
 };
 
 export const STATEMENT_INPUT_INITIAL_VALUE: Record<STATEMENT_TYPE, string> = {
@@ -120,6 +124,7 @@ export const STATEMENT_INPUT_INITIAL_VALUE: Record<STATEMENT_TYPE, string> = {
   [STATEMENT_TYPE.EMAIL]: "",
   [STATEMENT_TYPE.WEBSITE]: "https://",
   [STATEMENT_TYPE.LINK]: "https://",
+  [STATEMENT_TYPE.BIO]: "",
 };
 
 export const SOCIAL_MEDIA_ACCOUNT_STATEMENT_TYPES = [

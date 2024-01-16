@@ -128,7 +128,7 @@ export const PROFILE_ACTIVITY_TYPE_TO_TEXT: Record<
   [ProfileActivityLogType.BANNER_2_EDIT]: "Banner 2",
   [ProfileActivityLogType.PFP_EDIT]: "Profile Picture",
   [ProfileActivityLogType.PROFILE_ARCHIVED]: "Profile Archived",
-  [ProfileActivityLogType.GENERAL_CIC_STATEMENT_EDIT]: "NO IDEA YET",
+  [ProfileActivityLogType.GENERAL_CIC_STATEMENT_EDIT]: "About",
 };
 
 export interface ProfileActivityLogBase {

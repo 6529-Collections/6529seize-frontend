@@ -140,7 +140,7 @@ export default function UserPageIdentityStatementsAboutEdit({
           {loading && (
             <svg
               aria-hidden="true"
-              role="status"
+              role="output"
               className="tw-inline tw-w-5 tw-h-5 tw-text-primary-400 tw-animate-spin tw-absolute"
               viewBox="0 0 100 101"
               fill="none"
