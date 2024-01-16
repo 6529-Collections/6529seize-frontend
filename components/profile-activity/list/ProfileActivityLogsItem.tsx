@@ -6,6 +6,7 @@ import { assertUnreachable } from "../../../helpers/AllowlistToolHelpers";
 import ProfileActivityLogBanner from "./items/ProfileActivityLogBanner";
 import ProfileActivityLogClassification from "./items/ProfileActivityLogClassification";
 import ProfileActivityLogContact from "./items/ProfileActivityLogContact";
+import ProfileActivityLogGeneralStatement from "./items/ProfileActivityLogGeneralStatement";
 import ProfileActivityLogHandle from "./items/ProfileActivityLogHandle";
 import ProfileActivityLogPfp from "./items/ProfileActivityLogPfp";
 import ProfileActivityLogPrimaryWallet from "./items/ProfileActivityLogPrimaryWallet";
@@ -44,7 +45,7 @@ export default function UserPageIdentityActivityLogItem({
     case ProfileActivityLogType.PROFILE_ARCHIVED:
       return <ProfileActivityLogProfileArchived log={log} />;
     case ProfileActivityLogType.GENERAL_CIC_STATEMENT_EDIT:
-      return null;
+      return <ProfileActivityLogGeneralStatement log={log} />;
     default:
       assertUnreachable(logType);
   }
