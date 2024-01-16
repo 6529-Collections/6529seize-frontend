@@ -8,10 +8,6 @@ interface Props {
 }
 
 export default function NextGenCollectionPreview(props: Readonly<Props>) {
-  if (props.collection.mint_count === 0) {
-    return <></>;
-  }
-
   return (
     <a
       href={`/nextgen/collection/${props.collection.id}`}

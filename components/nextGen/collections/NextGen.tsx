@@ -91,20 +91,22 @@ export default function NextGen() {
         </Col>
       </Row>
       <Row className="pt-4 pb-4">
-        {collections.map((collection) => (
-          <Col
-            className="pb-3"
-            xs={12}
-            sm={12}
-            md={6}
-            lg={4}
-            key={`collection-preview-${collection.id}`}>
-            <NextGenCollectionPreview
-              collection={collection}
-              key={`gen-memes-collection-${collection.id}`}
-            />
-          </Col>
-        ))}
+        {collections
+          .filter((c) => c.mint_count > 0)
+          .map((collection) => (
+            <Col
+              className="pb-3"
+              xs={12}
+              sm={12}
+              md={6}
+              lg={4}
+              key={`collection-preview-${collection.id}`}>
+              <NextGenCollectionPreview
+                collection={collection}
+                key={`gen-memes-collection-${collection.id}`}
+              />
+            </Col>
+          ))}
         {collectionsLoaded && collections.length === 0 && (
           <Col className="text-center">
             <h4>No collections found</h4>
