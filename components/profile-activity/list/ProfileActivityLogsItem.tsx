@@ -43,6 +43,8 @@ export default function UserPageIdentityActivityLogItem({
       return <ProfileActivityLogPfp log={log} />;
     case ProfileActivityLogType.PROFILE_ARCHIVED:
       return <ProfileActivityLogProfileArchived log={log} />;
+    case ProfileActivityLogType.GENERAL_CIC_STATEMENT_EDIT:
+      return null;
     default:
       assertUnreachable(logType);
   }

@@ -6,6 +6,7 @@ import {
 } from "../../../../../helpers/Types";
 import UserPageIdentityAddStatementsInput from "./UserPageIdentityAddStatementsInput";
 import {
+  ApiCreateOrUpdateProfileCicStatement,
   CicStatement,
   IProfileAndConsolidations,
 } from "../../../../../entities/IProfile";
@@ -14,10 +15,7 @@ import { commonApiPost } from "../../../../../services/api/common-api";
 import { AuthContext } from "../../../../auth/Auth";
 import { ReactQueryWrapperContext } from "../../../../react-query-wrapper/ReactQueryWrapper";
 
-type ApiCreateOrUpdateProfileCicStatement = Omit<
-  CicStatement,
-  "id" | "crated_at" | "updated_at" | "profile_id"
->;
+
 
 export default function UserPageIdentityAddStatementsForm({
   profile,

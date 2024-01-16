@@ -109,6 +109,7 @@ export enum ProfileActivityLogType {
   BANNER_2_EDIT = "BANNER_2_EDIT",
   PFP_EDIT = "PFP_EDIT",
   PROFILE_ARCHIVED = "PROFILE_ARCHIVED",
+  GENERAL_CIC_STATEMENT_EDIT = "GENERAL_CIC_STATEMENT_EDIT",
 }
 
 export const PROFILE_ACTIVITY_TYPE_TO_TEXT: Record<
@@ -127,6 +128,7 @@ export const PROFILE_ACTIVITY_TYPE_TO_TEXT: Record<
   [ProfileActivityLogType.BANNER_2_EDIT]: "Banner 2",
   [ProfileActivityLogType.PFP_EDIT]: "Profile Picture",
   [ProfileActivityLogType.PROFILE_ARCHIVED]: "Profile Archived",
+  [ProfileActivityLogType.GENERAL_CIC_STATEMENT_EDIT]: "NO IDEA YET",
 };
 
 export interface ProfileActivityLogBase {
@@ -250,6 +252,14 @@ export interface ProfileActivityLogArchived extends ProfileActivityLogBase {
   };
 }
 
+export interface ProfileActivityLogGeneralCicStatementEdit
+  extends ProfileActivityLogBase {
+  readonly type: ProfileActivityLogType.GENERAL_CIC_STATEMENT_EDIT;
+  readonly contents: {
+    readonly statement: CicStatement;
+  };
+}
+
 export type ProfileActivityLog =
   | ProfileActivityLogRatingEdit
   | ProfileActivityLogHandleEdit
@@ -261,7 +271,8 @@ export type ProfileActivityLog =
   | ProfileActivityLogBanner1Edit
   | ProfileActivityLogBanner2Edit
   | ProfileActivityLogPfpEdit
-  | ProfileActivityLogArchived;
+  | ProfileActivityLogArchived
+  | ProfileActivityLogGeneralCicStatementEdit;
 
 export enum RateMatter {
   CIC = "CIC",
@@ -334,3 +345,8 @@ export interface WalletConsolidationState {
   readonly wallet1_display: string | null;
   readonly wallet2_display: string | null;
 }
+
+export type ApiCreateOrUpdateProfileCicStatement = Omit<
+  CicStatement,
+  "id" | "crated_at" | "updated_at" | "profile_id"
+>;
