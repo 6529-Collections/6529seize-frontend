@@ -126,7 +126,7 @@ export default function UserPageIdentityStatementsConsolidatedAddresses({
           Consolidated Addresses
         </span>
       </div>
-      <ul className="tw-mt-4 md:tw-mt-6 tw-list-none tw-space-y-4 tw-pl-0 tw-text-base tw-leading-7 tw-text-gray-600">
+      <ul className="tw-mb-0 tw-mt-4 md:tw-mt-6 tw-list-none tw-space-y-4 tw-pl-0 tw-text-base tw-leading-7 tw-text-gray-600">
         {sortedByPrimary.map((wallet) => (
           <UserPageIdentityStatementsConsolidatedAddressesItem
             key={wallet.wallet.address}
@@ -137,7 +137,7 @@ export default function UserPageIdentityStatementsConsolidatedAddresses({
           />
         ))}
       </ul>
-      <div className="tw-space-x-3 tw-pt-1">
+      <div className="tw-space-x-3 tw-pt-5 xl:tw-pt-4">
         <Link
           href="/delegation/wallet-checker"
           className="tw-no-underline tw-relative tw-text-xs tw-font-medium tw-inline-flex tw-items-center tw-rounded-lg tw-bg-iron-800 tw-px-2.5 tw-py-2 tw-text-iron-200 hover:tw-text-iron-200 focus:tw-outline-none tw-border-0 tw-ring-1 tw-ring-inset tw-ring-iron-700 hover:tw-bg-iron-700 focus:tw-z-10 tw-transition tw-duration-300 tw-ease-out"

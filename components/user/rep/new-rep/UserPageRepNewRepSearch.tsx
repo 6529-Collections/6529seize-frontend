@@ -151,7 +151,7 @@ export default function UserPageRepNewRepSearch({
   }, [debouncedValue, isFetching, categories]);
 
   return (
-    <div className="tw-max-w-full tw-relative tw-bg-iron-900 tw-px-4 tw-py-6 lg:tw-p-8 tw-rounded-xl tw-border tw-border-solid tw-border-iron-800">
+    <div className="tw-max-w-full tw-relative tw-bg-iron-900 tw-px-4 tw-py-6 lg:tw-px-8 tw-rounded-xl tw-border tw-border-solid tw-border-iron-800">
       <div className="tw-w-full tw-flex tw-flex-col lg:tw-flex-row tw-gap-y-8 lg:tw-gap-x-16 lg:tw-justify-between tw-items-start">
         <div className="tw-w-full lg:tw-w-1/2">
           <UserPageRepNewRepSearchHeader

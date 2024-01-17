@@ -13,7 +13,7 @@ export default function UserPageIdentityStatementsNFTAccounts({
   return (
     <div>
       <div className="tw-flex tw-items-center tw-space-x-4">
-        <div className="tw-flex tw-h-9 tw-w-9 tw-items-center tw-justify-center tw-rounded-lg tw-bg-iron-800 tw-border tw-border-solid tw-border-iron-700">
+        <div className="tw-flex tw-h-9 tw-w-9 tw-items-center tw-justify-center tw-rounded-lg tw-bg-iron-900 tw-border tw-border-solid tw-border-iron-700">
           <div className="tw-flex tw-items-center tw-justify-center tw-flex-shrink-0 tw-h-5 tw-w-5 tw-text-iron-50">
             <svg
               className="tw-flex-shrink-0 tw-h-5 tw-w-5 tw-text-iron-50"
@@ -38,7 +38,7 @@ export default function UserPageIdentityStatementsNFTAccounts({
       <UserPageIdentityStatementsStatementsList
         statements={statements}
         profile={profile}
-        noItemsMessage="No Social Media Account added yet"
+        noItemsMessage="No NFT Account added yet"
         loading={loading}
       />
     </div>

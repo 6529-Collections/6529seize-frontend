@@ -46,20 +46,20 @@ export default function UserPageIdentityStatementsAbout({
   };
 
   return (
-    <div className="tw-col-span-full tw-pb-6 tw-mb-6 tw-border-b tw-border-solid tw-border-t-0 tw-border-x-0  tw-border-iron-800">
-      <div className="tw-max-w-full sm:tw-max-w-prose">
+    <div className="tw-col-span-full tw-pb-5 tw-mb-5 tw-border-b tw-border-solid tw-border-t-0 tw-border-x-0  tw-border-iron-800">
+      <div className="tw-max-w-full lg:tw-max-w-prose">
         <div>
           {isMyProfile && (
             <>
               {view === AboutStatementView.STATEMENT && (
                 <button
                   onClick={toggleView}
-                  className="tw-p-0 tw-group tw-bg-transparent tw-inline-flex tw-items-center tw-border-none tw-text-iron-400 tw-transition tw-duration-300 tw-ease-out"
+                  className="tw-p-0 tw-group tw-bg-transparent tw-inline-flex tw-items-center tw-border-none tw-transition tw-duration-300 tw-ease-out"
                 >
-                  <span className="tw-block tw-text-base tw-font-medium tw-text-iron-50 group-hover:tw-text-iron-400 tw-transition tw-duration-300 tw-ease-out">
+                  <span className="tw-block tw-text-base tw-font-medium tw-text-iron-50 tw-transition tw-duration-300 tw-ease-out">
                     About
                   </span>
-                  <div className="tw-p-2 -tw-mt-0.5">
+                  <div className="tw-p-2 -tw-mt-0.5 tw-text-iron-50 group-hover:tw-text-iron-400 tw-transform group-hover:tw-scale-110 tw-transition tw-duration-300 tw-ease-out">
                     <PencilIcon size={PencilIconSize.SMALL} />
                   </div>
                 </button>
@@ -70,12 +70,12 @@ export default function UserPageIdentityStatementsAbout({
                   onClick={toggleView}
                   className="tw-p-0 tw-group tw-bg-transparent tw-inline-flex tw-items-center tw-border-none tw-text-iron-400 tw-transition tw-duration-300 tw-ease-out"
                 >
-                  <span className="tw-block tw-text-base tw-font-medium tw-text-iron-50 group-hover:tw-text-iron-400 tw-transition tw-duration-300 tw-ease-out">
+                  <span className="tw-block tw-text-base tw-text-iron-50 tw-font-medium tw-transition tw-duration-300 tw-ease-out">
                     About
                   </span>
                   <div className="tw-p-2 -tw-mt-0.5">
                     <svg
-                      className="tw-flex-shrink-0 tw-h-6 tw-w-6"
+                      className="tw-flex-shrink-0 tw-h-6 tw-w-6 group-hover:tw-text-iron-50 tw-transition tw-duration-300 tw-ease-out"
                       aria-hidden="true"
                       fill="none"
                       viewBox="0 0 24 24"
