@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { STATEMENT_TITLE, STATEMENT_TYPE } from "../../../../../helpers/Types";
+import { STATEMENT_META, STATEMENT_TYPE } from "../../../../../helpers/Types";
 import SocialStatementIcon from "../../../utils/icons/SocialStatementIcon";
 
 export default function UserPageIdentityAddStatementsTypeButton({
@@ -43,7 +43,7 @@ export default function UserPageIdentityAddStatementsTypeButton({
       <div className="tw-flex-shrink-0 tw-w-5 tw-h-5">
         <SocialStatementIcon statementType={statementType} />
       </div>
-      <span className="tw-sr-only">{STATEMENT_TITLE[statementType]}</span>
+      <span className="tw-sr-only">{STATEMENT_META[statementType].title}</span>
     </button>
   );
 }

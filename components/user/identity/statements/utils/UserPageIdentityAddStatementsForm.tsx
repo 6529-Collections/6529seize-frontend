@@ -1,7 +1,7 @@
 import { useContext, useEffect, useState } from "react";
 import {
   STATEMENT_GROUP,
-  STATEMENT_INPUT_INITIAL_VALUE,
+  STATEMENT_META,
   STATEMENT_TYPE,
 } from "../../../../../helpers/Types";
 import UserPageIdentityAddStatementsInput from "./UserPageIdentityAddStatementsInput";
@@ -28,12 +28,10 @@ export default function UserPageIdentityAddStatementsForm({
 }) {
   const { requestAuth, setToast } = useContext(AuthContext);
   const { onProfileStatementAdd } = useContext(ReactQueryWrapperContext);
-  const [value, setValue] = useState<string>(
-    STATEMENT_INPUT_INITIAL_VALUE[activeType] || ""
-  );
+  const [value, setValue] = useState<string>(STATEMENT_META[activeType].inputInitialValue);
 
   useEffect(() => {
-    setValue(STATEMENT_INPUT_INITIAL_VALUE[activeType] || "");
+    setValue(STATEMENT_META[activeType].inputInitialValue);
   }, [activeType]);
 
   const [loading, setLoading] = useState(false);

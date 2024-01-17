@@ -9,8 +9,9 @@ import UserPageIdentityDeleteStatementButton from "./UserPageIdentityDeleteState
 import { useCopyToClipboard } from "react-use";
 import Tippy from "@tippyjs/react";
 import OutsideLinkIcon from "../../../../utils/icons/OutsideLinkIcon";
-import { CAN_OPEN_STATEMENT } from "../../../../../helpers/Types";
+
 import { useRouter } from "next/router";
+import { STATEMENT_META } from "../../../../../helpers/Types";
 
 export default function UserPageIdentityStatementsStatement({
   statement,
@@ -33,7 +34,7 @@ export default function UserPageIdentityStatementsStatement({
     }, 1000);
   };
 
-  const canOpen = CAN_OPEN_STATEMENT[statement.statement_type];
+  const canOpen = STATEMENT_META[statement.statement_type].canOpenStatement;
   const [isTouchScreen, setIsTouchScreen] = useState(false);
   useEffect(() => {
     setIsTouchScreen(window.matchMedia("(pointer: coarse)").matches);
