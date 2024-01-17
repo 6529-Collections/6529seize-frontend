@@ -8,6 +8,7 @@ import ProfileActivityLogClassification from "./items/ProfileActivityLogClassifi
 import ProfileActivityLogContact from "./items/ProfileActivityLogContact";
 import ProfileActivityLogGeneralStatement from "./items/ProfileActivityLogGeneralStatement";
 import ProfileActivityLogHandle from "./items/ProfileActivityLogHandle";
+import ProfileActivityLogNFTAccount from "./items/ProfileActivityLogNFTAccount";
 import ProfileActivityLogPfp from "./items/ProfileActivityLogPfp";
 import ProfileActivityLogPrimaryWallet from "./items/ProfileActivityLogPrimaryWallet";
 import ProfileActivityLogProfileArchived from "./items/ProfileActivityLogProfileArchived";
@@ -47,7 +48,7 @@ export default function UserPageIdentityActivityLogItem({
     case ProfileActivityLogType.GENERAL_CIC_STATEMENT_EDIT:
       return <ProfileActivityLogGeneralStatement log={log} />;
     case ProfileActivityLogType.NFT_ACCOUNTS_EDIT:
-      return null;
+      return <ProfileActivityLogNFTAccount log={log} />;
     default:
       assertUnreachable(logType);
   }

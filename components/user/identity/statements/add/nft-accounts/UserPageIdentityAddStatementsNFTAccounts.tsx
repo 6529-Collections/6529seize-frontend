@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { IProfileAndConsolidations } from "../../../../../../entities/IProfile";
-import UserPageIdentityAddStatementsNFTAccountHeader from "./UserPageIdentityAddStatementsNFTAccountsHeader";
+import UserPageIdentityAddStatementsNFTAccountHeader from "./UserPageIdentityAddStatementsNFTAccountHeader";
 import {
   NFT_ACCOUNTS_STATEMENT_TYPE,
   STATEMENT_GROUP,

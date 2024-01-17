@@ -33,10 +33,6 @@ export default function UserPageIdentityStatementsStatement({
     }, 1000);
   };
 
-  const handleOpen = () => {
-    window.open(statement.statement_value, "_blank");
-  };
-
   const canOpen = CAN_OPEN_STATEMENT[statement.statement_type];
   const [isTouchScreen, setIsTouchScreen] = useState(false);
   useEffect(() => {
@@ -60,14 +56,15 @@ export default function UserPageIdentityStatementsStatement({
           placement="top"
           disabled={isTouchScreen}
         >
-          <button
+          <a
+            href={statement.statement_value}
+            target="_blank"
             className={`${
               isTouchScreen ? "tw-block" : "tw-hidden group-hover:tw-block"
             } tw-p-2  tw-bg-transparent tw-cursor-pointer tw-text-sm tw-font-semibold tw-text-iron-200 tw-border-0 focus:tw-outline-none tw-transition tw-duration-300 tw-ease-out`}
-            onClick={handleOpen}
           >
             <OutsideLinkIcon />
-          </button>
+          </a>
         </Tippy>
       )}
       <Tippy
