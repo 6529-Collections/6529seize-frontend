@@ -65,7 +65,17 @@ export default function SocialStatementIcon({
     case STATEMENT_TYPE.LINK:
       return <LinkIcon aria-hidden="true" />;
     case STATEMENT_TYPE.BIO:
-      return null;
+    case STATEMENT_TYPE.SUPER_RARE:
+    case STATEMENT_TYPE.FOUNDATION:
+    case STATEMENT_TYPE.MAKERS_PLACE:
+    case STATEMENT_TYPE.KNOWN_ORIGIN:
+    case STATEMENT_TYPE.PEPE_WTF:
+    case STATEMENT_TYPE.OPENSEA:
+    case STATEMENT_TYPE.ART_BLOCKS:
+    case STATEMENT_TYPE.DECA_ART:
+    case STATEMENT_TYPE.ON_CYBER:
+    case STATEMENT_TYPE.THE_LINE:
+      return <LinkIcon aria-hidden="true" />;
     default:
       assertUnreachable(statementType);
   }

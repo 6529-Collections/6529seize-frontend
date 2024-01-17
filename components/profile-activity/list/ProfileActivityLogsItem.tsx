@@ -46,6 +46,8 @@ export default function UserPageIdentityActivityLogItem({
       return <ProfileActivityLogProfileArchived log={log} />;
     case ProfileActivityLogType.GENERAL_CIC_STATEMENT_EDIT:
       return <ProfileActivityLogGeneralStatement log={log} />;
+    case ProfileActivityLogType.NFT_ACCOUNTS_EDIT:
+      return null;
     default:
       assertUnreachable(logType);
   }

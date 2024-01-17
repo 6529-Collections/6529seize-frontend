@@ -14,6 +14,7 @@ import UserPageIdentityStatementsContacts from "./contacts/UserPageIdentityState
 import UserPageIdentityStatementsSocialMediaVerificationPosts from "./social-media-verification-posts/UserPageIdentityStatementsSocialMediaVerificationPosts";
 import { QueryKey } from "../../../react-query-wrapper/ReactQueryWrapper";
 import UserPageIdentityStatementsAbout from "./about/UserPageIdentityStatementsAbout";
+import UserPageIdentityStatementsNFTAccounts from "./nft-accounts/UserPageIdentityStatementsNFTAccounts";
 
 export default function UserPageIdentityStatements({
   profile,
@@ -30,6 +31,7 @@ export default function UserPageIdentityStatements({
     null
   );
   const [contacts, setContacts] = useState<CicStatement[]>([]);
+  const [nftAccounts, setNftAccounts] = useState<CicStatement[]>([]);
   const [socialMediaVerificationPosts, setSocialMediaVerificationPosts] =
     useState<CicStatement[]>([]);
 
@@ -45,6 +47,7 @@ export default function UserPageIdentityStatements({
   useEffect(() => {
     if (!statements) {
       setAboutStatement(null);
+      setNftAccounts([]);
       setSocialMediaAccounts([]);
       setContacts([]);
       setSocialMediaVerificationPosts([]);
@@ -71,6 +74,12 @@ export default function UserPageIdentityStatements({
       )
     );
 
+    setNftAccounts(
+      sortedStatements.filter(
+        (s) => s.statement_group === STATEMENT_GROUP.NFT_ACCOUNTS
+      )
+    );
+
     setSocialMediaVerificationPosts(
       sortedStatements.filter(
         (s) =>
@@ -78,6 +87,8 @@ export default function UserPageIdentityStatements({
       )
     );
   }, [statements]);
+
+  useEffect(() => console.log(nftAccounts), [nftAccounts]);
 
   return (
     <div className="tw-mt-6 lg:tw-mt-8">
@@ -105,6 +116,11 @@ export default function UserPageIdentityStatements({
               <div className="tw-grid tw-grid-cols-1 tw-gap-x-8 tw-gap-y-6 md:tw-grid-cols-2">
                 <UserPageIdentityStatementsContacts
                   statements={contacts}
+                  profile={profile}
+                  loading={isLoading}
+                />
+                <UserPageIdentityStatementsNFTAccounts
+                  statements={nftAccounts}
                   profile={profile}
                   loading={isLoading}
                 />

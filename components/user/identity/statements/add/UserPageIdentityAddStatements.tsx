@@ -6,6 +6,7 @@ import { IProfileAndConsolidations } from "../../../../../entities/IProfile";
 export enum STATEMENT_ADD_VIEW {
   SELECT = "SELECT",
   CONTACT = "CONTACT",
+  NFT_ACCOUNT = "NFT_ACCOUNT",
   SOCIAL_MEDIA_ACCOUNT = "SOCIAL_MEDIA_ACCOUNT",
   SOCIAL_MEDIA_VERIFICATION_POST = "SOCIAL_MEDIA_VERIFICATION_POST",
 }
@@ -29,6 +30,7 @@ export default function UserPageIdentityAddStatements({
     [STATEMENT_ADD_VIEW.SELECT]: "sm:tw-max-w-4xl",
     [STATEMENT_ADD_VIEW.CONTACT]: "sm:tw-max-w-[26.25rem]",
     [STATEMENT_ADD_VIEW.SOCIAL_MEDIA_ACCOUNT]: "sm:tw-max-w-[26.25rem]",
+    [STATEMENT_ADD_VIEW.NFT_ACCOUNT]: "sm:tw-max-w-[26.25rem]",
     [STATEMENT_ADD_VIEW.SOCIAL_MEDIA_VERIFICATION_POST]: "sm:tw-max-w-lg ",
   };
 

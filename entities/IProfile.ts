@@ -104,6 +104,7 @@ export enum ProfileActivityLogType {
   CLASSIFICATION_EDIT = "CLASSIFICATION_EDIT",
   SOCIALS_EDIT = "SOCIALS_EDIT",
   CONTACTS_EDIT = "CONTACTS_EDIT",
+  NFT_ACCOUNTS_EDIT = "NFT_ACCOUNTS_EDIT",
   SOCIAL_VERIFICATION_POST_EDIT = "SOCIAL_VERIFICATION_POST_EDIT",
   BANNER_1_EDIT = "BANNER_1_EDIT",
   BANNER_2_EDIT = "BANNER_2_EDIT",
@@ -121,6 +122,7 @@ export const PROFILE_ACTIVITY_TYPE_TO_TEXT: Record<
   [ProfileActivityLogType.PRIMARY_WALLET_EDIT]: "Primary Wallet",
   [ProfileActivityLogType.CLASSIFICATION_EDIT]: "Classification",
   [ProfileActivityLogType.SOCIALS_EDIT]: "Social Media Account",
+  [ProfileActivityLogType.NFT_ACCOUNTS_EDIT]: "NFT Account",
   [ProfileActivityLogType.CONTACTS_EDIT]: "Contact",
   [ProfileActivityLogType.SOCIAL_VERIFICATION_POST_EDIT]:
     "Social Media Verification Post",
@@ -227,6 +229,15 @@ export interface ProfileActivityLogSocialsEdit extends ProfileActivityLogBase {
   };
 }
 
+export interface ProfileActivityLogNftAccountsEdit
+  extends ProfileActivityLogBase {
+  readonly type: ProfileActivityLogType.NFT_ACCOUNTS_EDIT;
+  readonly contents: {
+    action: ProfileActivityLogSocialsEditContentAction;
+    statement: CicStatement;
+  };
+}
+
 export interface ProfileActivityLogContactsEdit extends ProfileActivityLogBase {
   readonly type: ProfileActivityLogType.CONTACTS_EDIT;
   readonly contents: {
@@ -272,7 +283,8 @@ export type ProfileActivityLog =
   | ProfileActivityLogBanner2Edit
   | ProfileActivityLogPfpEdit
   | ProfileActivityLogArchived
-  | ProfileActivityLogGeneralCicStatementEdit;
+  | ProfileActivityLogGeneralCicStatementEdit
+  | ProfileActivityLogNftAccountsEdit;
 
 export enum RateMatter {
   CIC = "CIC",
