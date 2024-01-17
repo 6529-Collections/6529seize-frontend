@@ -7,9 +7,11 @@ export default function UserPageIdentityStatementsAboutStatement({
 }) {
   if (!statement) {
     return (
-      <span className="tw-text-sm tw-italic tw-text-iron-500">
-        No About statement yet.
+     <div className="-tw-mt-1">
+       <span className="tw-text-sm tw-italic tw-text-iron-500">
+        No About statement yet
       </span>
+     </div>
     );
   }
   return (

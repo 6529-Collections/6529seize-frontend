@@ -115,7 +115,7 @@ export default function UserPageIdentityStatementsAboutEdit({
   return (
     <form onSubmit={onSubmit}>
       <textarea
-        className="tw-form-input tw-appearance-none tw-block tw-w-full tw-rounded-lg tw-border-0 tw-py-3 tw-pl-10 tw-pr-3 tw-bg-iron-900 tw-text-iron-50 tw-font-normal tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-700 placeholder:tw-text-iron-400 focus:tw-outline-none focus:tw-bg-transparent focus:tw-ring-1 focus:tw-ring-inset hover:tw-ring-neutral-600 focus:tw-ring-primary-400 tw-text-base sm:tw-leading-6 tw-transition tw-duration-300 tw-ease-out"
+        className="tw-form-input tw-appearance-none tw-block tw-w-full tw-rounded-lg tw-border-0 tw-py-3 tw-pl-4 tw-pr-3 tw-bg-iron-900 tw-text-iron-50 tw-font-normal tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-700 placeholder:tw-text-iron-400 focus:tw-outline-none focus:tw-bg-transparent focus:tw-ring-1 focus:tw-ring-inset hover:tw-ring-neutral-600 focus:tw-ring-primary-400 tw-text-base sm:tw-leading-6 tw-transition tw-duration-300 tw-ease-out"
         name="profile-about"
         id="profile-about-input"
         cols={30}
@@ -127,10 +127,13 @@ export default function UserPageIdentityStatementsAboutEdit({
         style={{ resize: "none" }}
       ></textarea>
       <div className="tw-inline-flex tw-w-full tw-justify-between">
+        <div className="tw-text-sm tw-text-iron-500">
+          {value.length}/{MAX_STATEMENT_LENGTH}
+        </div>
         <button
           disabled={isDisabled}
           type="submit"
-          className={`tw-w-full sm:tw-w-auto tw-flex tw-items-center tw-justify-center tw-relative tw-px-4 tw-py-3 tw-text-sm tw-font-semibold tw-text-white tw-border tw-border-solid tw-rounded-lg tw-transition tw-duration-300 tw-ease-out ${
+          className={`tw-mt-3 tw-w-full sm:tw-w-auto tw-flex tw-items-center tw-justify-center tw-relative tw-px-4 tw-py-3 tw-text-sm tw-font-semibold tw-text-white tw-border tw-border-solid tw-rounded-lg tw-transition tw-duration-300 tw-ease-out ${
             isDisabled
               ? "tw-cursor-not-allowed tw-bg-iron-400 tw-border-iron-400"
               : "tw-cursor-pointer tw-bg-primary-500 tw-border-primary-500 hover:tw-bg-primary-600 hover:tw-border-primary-600"
@@ -158,9 +161,6 @@ export default function UserPageIdentityStatementsAboutEdit({
             </svg>
           )}
         </button>
-        <div>
-          {value.length}/{MAX_STATEMENT_LENGTH}
-        </div>
       </div>
     </form>
   );
