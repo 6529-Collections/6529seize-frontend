@@ -92,7 +92,8 @@ export default function UserPageStats({
 
   return (
     <>
-      <UserPageStatsTags tdh={tdh} />
+      <div>content</div>
+      {/* <UserPageStatsTags tdh={tdh} />
       <div className="tailwind-scope tw-inline-flex tw-justify-between tw-w-full tw-mt-8">
         <h2 className="tw-text-xl tw-font-semibold tw-text-white sm:tw-text-2xl sm:tw-tracking-tight tw-text-right">
           Under construction
@@ -117,7 +118,7 @@ export default function UserPageStats({
         profile={profile}
       />
 
-      <UserPageStatsTDHcharts mainAddress={mainAddress} />
+      <UserPageStatsTDHcharts mainAddress={mainAddress} /> */}
     </>
   );
 }
