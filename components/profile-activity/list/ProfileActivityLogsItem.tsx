@@ -6,7 +6,9 @@ import { assertUnreachable } from "../../../helpers/AllowlistToolHelpers";
 import ProfileActivityLogBanner from "./items/ProfileActivityLogBanner";
 import ProfileActivityLogClassification from "./items/ProfileActivityLogClassification";
 import ProfileActivityLogContact from "./items/ProfileActivityLogContact";
+import ProfileActivityLogGeneralStatement from "./items/ProfileActivityLogGeneralStatement";
 import ProfileActivityLogHandle from "./items/ProfileActivityLogHandle";
+import ProfileActivityLogNFTAccount from "./items/ProfileActivityLogNFTAccount";
 import ProfileActivityLogPfp from "./items/ProfileActivityLogPfp";
 import ProfileActivityLogPrimaryWallet from "./items/ProfileActivityLogPrimaryWallet";
 import ProfileActivityLogProfileArchived from "./items/ProfileActivityLogProfileArchived";
@@ -43,6 +45,10 @@ export default function UserPageIdentityActivityLogItem({
       return <ProfileActivityLogPfp log={log} />;
     case ProfileActivityLogType.PROFILE_ARCHIVED:
       return <ProfileActivityLogProfileArchived log={log} />;
+    case ProfileActivityLogType.GENERAL_CIC_STATEMENT_EDIT:
+      return <ProfileActivityLogGeneralStatement log={log} />;
+    case ProfileActivityLogType.NFT_ACCOUNTS_EDIT:
+      return <ProfileActivityLogNFTAccount log={log} />;
     default:
       assertUnreachable(logType);
   }

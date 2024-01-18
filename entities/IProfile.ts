@@ -104,11 +104,13 @@ export enum ProfileActivityLogType {
   CLASSIFICATION_EDIT = "CLASSIFICATION_EDIT",
   SOCIALS_EDIT = "SOCIALS_EDIT",
   CONTACTS_EDIT = "CONTACTS_EDIT",
+  NFT_ACCOUNTS_EDIT = "NFT_ACCOUNTS_EDIT",
   SOCIAL_VERIFICATION_POST_EDIT = "SOCIAL_VERIFICATION_POST_EDIT",
   BANNER_1_EDIT = "BANNER_1_EDIT",
   BANNER_2_EDIT = "BANNER_2_EDIT",
   PFP_EDIT = "PFP_EDIT",
   PROFILE_ARCHIVED = "PROFILE_ARCHIVED",
+  GENERAL_CIC_STATEMENT_EDIT = "GENERAL_CIC_STATEMENT_EDIT",
 }
 
 export const PROFILE_ACTIVITY_TYPE_TO_TEXT: Record<
@@ -120,6 +122,7 @@ export const PROFILE_ACTIVITY_TYPE_TO_TEXT: Record<
   [ProfileActivityLogType.PRIMARY_WALLET_EDIT]: "Primary Wallet",
   [ProfileActivityLogType.CLASSIFICATION_EDIT]: "Classification",
   [ProfileActivityLogType.SOCIALS_EDIT]: "Social Media Account",
+  [ProfileActivityLogType.NFT_ACCOUNTS_EDIT]: "NFT Account",
   [ProfileActivityLogType.CONTACTS_EDIT]: "Contact",
   [ProfileActivityLogType.SOCIAL_VERIFICATION_POST_EDIT]:
     "Social Media Verification Post",
@@ -127,6 +130,7 @@ export const PROFILE_ACTIVITY_TYPE_TO_TEXT: Record<
   [ProfileActivityLogType.BANNER_2_EDIT]: "Banner 2",
   [ProfileActivityLogType.PFP_EDIT]: "Profile Picture",
   [ProfileActivityLogType.PROFILE_ARCHIVED]: "Profile Archived",
+  [ProfileActivityLogType.GENERAL_CIC_STATEMENT_EDIT]: "About",
 };
 
 export interface ProfileActivityLogBase {
@@ -225,6 +229,15 @@ export interface ProfileActivityLogSocialsEdit extends ProfileActivityLogBase {
   };
 }
 
+export interface ProfileActivityLogNftAccountsEdit
+  extends ProfileActivityLogBase {
+  readonly type: ProfileActivityLogType.NFT_ACCOUNTS_EDIT;
+  readonly contents: {
+    action: ProfileActivityLogSocialsEditContentAction;
+    statement: CicStatement;
+  };
+}
+
 export interface ProfileActivityLogContactsEdit extends ProfileActivityLogBase {
   readonly type: ProfileActivityLogType.CONTACTS_EDIT;
   readonly contents: {
@@ -250,6 +263,14 @@ export interface ProfileActivityLogArchived extends ProfileActivityLogBase {
   };
 }
 
+export interface ProfileActivityLogGeneralCicStatementEdit
+  extends ProfileActivityLogBase {
+  readonly type: ProfileActivityLogType.GENERAL_CIC_STATEMENT_EDIT;
+  readonly contents: {
+    readonly statement: CicStatement;
+  };
+}
+
 export type ProfileActivityLog =
   | ProfileActivityLogRatingEdit
   | ProfileActivityLogHandleEdit
@@ -261,7 +282,9 @@ export type ProfileActivityLog =
   | ProfileActivityLogBanner1Edit
   | ProfileActivityLogBanner2Edit
   | ProfileActivityLogPfpEdit
-  | ProfileActivityLogArchived;
+  | ProfileActivityLogArchived
+  | ProfileActivityLogGeneralCicStatementEdit
+  | ProfileActivityLogNftAccountsEdit;
 
 export enum RateMatter {
   CIC = "CIC",
@@ -334,3 +357,8 @@ export interface WalletConsolidationState {
   readonly wallet1_display: string | null;
   readonly wallet2_display: string | null;
 }
+
+export type ApiCreateOrUpdateProfileCicStatement = Omit<
+  CicStatement,
+  "id" | "crated_at" | "updated_at" | "profile_id"
+>;
