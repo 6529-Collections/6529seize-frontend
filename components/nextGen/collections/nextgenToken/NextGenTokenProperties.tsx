@@ -31,7 +31,7 @@ export default function NextgenTokenProperties(props: Readonly<Props>) {
                 <tr key={`trait-${t.trait.replaceAll(" ", "-")}`}>
                   <td>
                     <a
-                      href={`/nextgen/collection/${props.collection_id}/art?traits=${t.trait}`}
+                      href={`/nextgen/collection/${props.collection_id}/art?traits=${t.trait}:${t.value}`}
                       className="decoration-none decoration-hover-underline">
                       {t.trait}
                     </a>

@@ -9,7 +9,7 @@ import { useState, useEffect } from "react";
 import { useAccount, useEnsName, mainnet } from "wagmi";
 import { IProfileAndConsolidations } from "../../../../entities/IProfile";
 import { commonApiFetch } from "../../../../services/api/common-api";
-import { goerli } from "viem/chains";
+import { goerli, sepolia } from "viem/chains";
 import { NEXTGEN_CHAIN_ID, NEXTGEN_CORE } from "../../nextgen_contracts";
 import Image from "next/image";
 
@@ -95,11 +95,16 @@ export default function NextgenTokenAbout(props: Readonly<Props>) {
             <span>
               <a
                 href={`https://${
+                  NEXTGEN_CHAIN_ID === sepolia.id ||
                   NEXTGEN_CHAIN_ID === goerli.id
                     ? `testnets.opensea`
                     : `opensea`
                 }.io/assets/${
-                  NEXTGEN_CHAIN_ID === goerli.id ? `goerli` : `ethereum`
+                  NEXTGEN_CHAIN_ID === sepolia.id
+                    ? `sepolia`
+                    : NEXTGEN_CHAIN_ID === goerli.id
+                    ? `goerli`
+                    : `ethereum`
                 }/${NEXTGEN_CORE[NEXTGEN_CHAIN_ID]}/${props.token.id}`}
                 target="_blank"
                 rel="noreferrer">

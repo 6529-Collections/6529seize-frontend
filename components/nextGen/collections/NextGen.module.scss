@@ -372,3 +372,30 @@
 .tokenLogsTable {
   min-height: 450px;
 }
+
+.traitsAccordion {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5 {
+    float: none;
+  }
+
+  button {
+    padding-left: 0;
+    padding-right: 0;
+    font-weight: bolder;
+    background-color: $very-dark-grey !important;
+  }
+}
+
+.traitsAccordionItem {
+  background-color: $very-dark-grey !important;
+}
+
+.traitsAccordionBody {
+  padding: 0px;
+  color: $font-color;
+  background-color: $very-dark-grey !important;
+}

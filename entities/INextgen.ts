@@ -61,3 +61,8 @@ export interface NextGenTrait {
   value: string;
   value_score: number;
 }
+
+export interface TraitValues {
+  trait: string;
+  values: string[];
+}

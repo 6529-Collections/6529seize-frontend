@@ -1,4 +1,4 @@
-import { goerli } from "wagmi/chains";
+import { goerli, sepolia } from "wagmi/chains";
 import { NEXTGEN_CHAIN_ID } from "../components/nextGen/nextgen_contracts";
 
 const options = { method: "GET", headers: { accept: "application/json" } };
@@ -19,7 +19,9 @@ export async function getNftsForContractAndOwner(
     nfts = [];
   }
   let path = "eth-mainnet";
-  if (chainId === goerli.id) {
+  if (chainId === sepolia.id) {
+    path = "eth-sepolia";
+  } else if (chainId === goerli.id) {
     path = "eth-goerli";
   }
 

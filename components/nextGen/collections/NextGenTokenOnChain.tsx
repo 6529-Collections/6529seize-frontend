@@ -1,9 +1,8 @@
 import styles from "./NextGen.module.scss";
-import { mainnet, useAccount, useContractRead, useEnsName } from "wagmi";
+import { useAccount, useContractRead, useEnsName } from "wagmi";
 import { Col, Container, Row } from "react-bootstrap";
 import { useEffect, useState } from "react";
 import Image from "next/image";
-import { goerli } from "wagmi/chains";
 import { NEXTGEN_CHAIN_ID, NEXTGEN_CORE } from "../nextgen_contracts";
 import NextGenCollectionHeader from "./collectionParts/NextGenCollectionHeader";
 import DotLoader from "../../dotLoader/DotLoader";
@@ -13,6 +12,7 @@ import { commonApiFetch } from "../../../services/api/common-api";
 import Address from "../../address/Address";
 import { areEqualAddresses } from "../../../helpers/Helpers";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { mainnet, sepolia, goerli } from "viem/chains";
 
 interface Props {
   collection: NextGenCollection;
@@ -107,11 +107,16 @@ export default function NextGenTokenOnChain(props: Readonly<Props>) {
                     <span className="d-flex gap-4">
                       <a
                         href={`https://${
+                          NEXTGEN_CHAIN_ID === sepolia.id ||
                           NEXTGEN_CHAIN_ID === goerli.id
                             ? `testnets.opensea`
                             : `opensea`
                         }.io/assets/${
-                          NEXTGEN_CHAIN_ID === goerli.id ? `goerli` : `ethereum`
+                          NEXTGEN_CHAIN_ID === sepolia.id
+                            ? `sepolia`
+                            : NEXTGEN_CHAIN_ID === goerli.id
+                            ? `goerli`
+                            : `ethereum`
                         }/${NEXTGEN_CORE[NEXTGEN_CHAIN_ID]}/${props.token_id}`}
                         target="_blank"
                         rel="noreferrer">

@@ -90,11 +90,18 @@ export default function NextGenCollectionToken(props: any) {
 export async function getServerSideProps(req: any, res: any, resolvedUrl: any) {
   const tokenId = req.query.token;
   const headers = getCommonHeaders(req);
-  let token: NextGenToken | null = await commonApiFetch<NextGenToken>({
-    endpoint: `nextgen/tokens/${tokenId}`,
-    headers: headers,
-  });
-  if (isEmptyObject(token) || token.pending) {
+
+  let token: NextGenToken | null;
+  try {
+    token = await commonApiFetch<NextGenToken>({
+      endpoint: `nextgen/tokens/${tokenId}`,
+      headers: headers,
+    });
+  } catch (e) {
+    token = null;
+  }
+
+  if (!token || isEmptyObject(token) || token.pending) {
     token = null;
   }
 

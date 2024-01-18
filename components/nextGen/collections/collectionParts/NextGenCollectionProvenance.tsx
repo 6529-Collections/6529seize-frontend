@@ -46,63 +46,61 @@ export default function NextGenCollectionProvenance(props: Readonly<Props>) {
   }, [page]);
 
   return (
-    <>
-      <Container className="no-padding" ref={scrollTarget}>
-        {/* <Row>
+    <Container className="no-padding" ref={scrollTarget}>
+      {/* <Row>
           <Col>
             <h3 className="mb-0">Provenance</h3>
           </Col>
         </Row>
         <hr /> */}
-        <Row className={`pt-2 ${styles.logsScrollContainer}`}>
-          <Col>
-            <Table bordered={false} className={styles.logsTable}>
-              <tbody>
-                {logs.map((log) => (
-                  <tr key={`${log.block}-${log.transaction}`}>
-                    <td className="align-middle text-center">
-                      {getDateDisplay(new Date(log.block_timestamp * 1000))}
-                    </td>
-                    <td className={styles.collectionProvenance}>
-                      <span className="d-fl">{log.log}</span>
-                    </td>
-                    <td className="text-right">
-                      <a
-                        href={getTransactionLink(
-                          NEXTGEN_CHAIN_ID,
-                          log.transaction
-                        )}
-                        target="_blank"
-                        rel="noreferrer">
-                        <FontAwesomeIcon
-                          className={styles.globeIcon}
-                          icon="external-link-square"></FontAwesomeIcon>
-                      </a>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </Table>
-          </Col>
+      <Row className={`pt-2 ${styles.logsScrollContainer}`}>
+        <Col>
+          <Table bordered={false} className={styles.logsTable}>
+            <tbody>
+              {logs.map((log) => (
+                <tr key={`${log.block}-${log.transaction}`}>
+                  <td className="align-middle text-center">
+                    {getDateDisplay(new Date(log.block_timestamp * 1000))}
+                  </td>
+                  <td className={styles.collectionProvenance}>
+                    <span className="d-fl">{log.log}</span>
+                  </td>
+                  <td className="text-right">
+                    <a
+                      href={getTransactionLink(
+                        NEXTGEN_CHAIN_ID,
+                        log.transaction
+                      )}
+                      target="_blank"
+                      rel="noreferrer">
+                      <FontAwesomeIcon
+                        className={styles.globeIcon}
+                        icon="external-link-square"></FontAwesomeIcon>
+                    </a>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </Table>
+        </Col>
+      </Row>
+      {totalResults > PAGE_SIZE && logsLoaded && (
+        <Row className="text-center pt-4 pb-4">
+          <Pagination
+            page={page}
+            pageSize={PAGE_SIZE}
+            totalResults={totalResults}
+            setPage={function (newPage: number) {
+              setPage(newPage);
+              if (scrollTarget.current) {
+                scrollTarget.current.scrollIntoView({
+                  behavior: "smooth",
+                });
+              }
+            }}
+          />
         </Row>
-        {totalResults > PAGE_SIZE && logsLoaded && (
-          <Row className="text-center pt-4 pb-4">
-            <Pagination
-              page={page}
-              pageSize={PAGE_SIZE}
-              totalResults={totalResults}
-              setPage={function (newPage: number) {
-                setPage(newPage);
-                if (scrollTarget.current) {
-                  scrollTarget.current.scrollIntoView({
-                    behavior: "smooth",
-                  });
-                }
-              }}
-            />
-          </Row>
-        )}
-      </Container>
-    </>
+      )}
+    </Container>
   );
 }

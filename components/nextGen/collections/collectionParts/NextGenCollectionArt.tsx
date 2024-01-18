@@ -1,48 +1,74 @@
 import styles from "../NextGen.module.scss";
-import { Container, Row, Col, Dropdown, FormCheck } from "react-bootstrap";
+import { Container, Row, Col, FormCheck, Accordion } from "react-bootstrap";
 import NextGenTokenList from "../NextGenTokenList";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { NextGenCollection } from "../../../../entities/INextgen";
-import { use, useEffect, useState } from "react";
+import { NextGenCollection, TraitValues } from "../../../../entities/INextgen";
+import { useEffect, useState } from "react";
 import { commonApiFetch } from "../../../../services/api/common-api";
 import { useRouter } from "next/router";
+import DotLoader from "../../../dotLoader/DotLoader";
 
 interface Props {
   collection: NextGenCollection;
   show_view_all?: boolean;
 }
 
+interface TraitValuePair {
+  trait: string;
+  value: string;
+}
+
 export default function NextGenCollectionArt(props: Readonly<Props>) {
   const router = useRouter();
-  const [traits, setTraits] = useState<string[]>([]);
-  const [selectedTraits, setSelectedTraits] = useState<string[]>([]);
+  const [traits, setTraits] = useState<TraitValues[]>([]);
+  const [traitsLoaded, setTraitsLoaded] = useState(false);
+  const [routerLoaded, setRouterLoaded] = useState(false);
+  const [selectedTraitValues, setSelectedTraitValues] = useState<
+    TraitValuePair[]
+  >([]);
 
   useEffect(() => {
-    if (router.query.traits) {
-      setSelectedTraits(
-        (router.query.traits as string).toLowerCase().split(",")
-      );
-    } else {
-      setSelectedTraits([]);
+    if (traitsLoaded) {
+      if (router.query.traits) {
+        const traitsQuery = router.query.traits as string;
+        const traitValues = traitsQuery.split(",");
+        const selectedTraits: TraitValuePair[] = [];
+        traitValues.map((tv) => {
+          const traitValue = tv.split(":");
+          const t = traitValue[0];
+          const v = traitValue[1];
+          if (traits.some((tr) => tr.trait === t && tr.values.includes(v))) {
+            selectedTraits.push({
+              trait: t,
+              value: v,
+            });
+          }
+        });
+        setSelectedTraitValues(selectedTraits);
+      } else {
+        setSelectedTraitValues([]);
+      }
+      setRouterLoaded(true);
     }
-  }, [router.query.traits]);
+  }, [router.query.traits, traitsLoaded]);
 
   useEffect(() => {
-    commonApiFetch<any[]>({
+    commonApiFetch<TraitValues[]>({
       endpoint: `nextgen/collections/${props.collection.id}/traits`,
     }).then((response) => {
-      const traits = response.map((trait) => trait.trait);
-      setTraits(traits);
+      setTraits(response);
+      setTraitsLoaded(true);
     });
   }, [props.collection.id]);
 
   useEffect(() => {
-    if (!props.show_view_all) {
-      if (selectedTraits.length > 0) {
+    if (!props.show_view_all && routerLoaded) {
+      if (selectedTraitValues.length > 0) {
+        const traitsQuery = selectedTraitValues
+          .map((t) => `${t.trait}:${t.value}`)
+          .join(",");
         router.push(
-          `/nextgen/collection/${
-            props.collection.id
-          }/art?traits=${selectedTraits.join(",")}`,
+          `/nextgen/collection/${props.collection.id}/art?traits=${traitsQuery}`,
           undefined,
           { shallow: true }
         );
@@ -56,7 +82,20 @@ export default function NextGenCollectionArt(props: Readonly<Props>) {
         );
       }
     }
-  }, [props.show_view_all, selectedTraits]);
+  }, [props.show_view_all, selectedTraitValues, routerLoaded]);
+
+  function getDefaultActiveKeys() {
+    const activeKeys: string[] = [];
+    traits.map((t, index) => {
+      if (
+        selectedTraitValues.some((st) => st.trait === t.trait) ||
+        selectedTraitValues.length === 0
+      ) {
+        activeKeys.push(index.toString());
+      }
+    });
+    return activeKeys;
+  }
 
   return (
     <Container className="no-padding">
@@ -89,30 +128,70 @@ export default function NextGenCollectionArt(props: Readonly<Props>) {
                 </Col>
               </Row>
               <Row>
-                <Col className="d-flex flex-column pt-2 pb-2">
-                  {traits.map((tr) => (
-                    <FormCheck
-                      key={`trait-${tr.replaceAll(" ", "-")}`}
-                      type="checkbox"
-                      label={tr}
-                      name="trait"
-                      id={`trait-${tr.replaceAll(" ", "-")}`}
-                      checked={selectedTraits.includes(tr.toLowerCase())}
-                      className="pt-1 pb-1"
-                      onChange={() => {
-                        if (selectedTraits.includes(tr.toLowerCase())) {
-                          setSelectedTraits(
-                            selectedTraits.filter((t) => t !== tr.toLowerCase())
-                          );
-                        } else {
-                          setSelectedTraits([
-                            ...selectedTraits,
-                            tr.toLowerCase(),
-                          ]);
-                        }
-                      }}
-                    />
-                  ))}
+                <Col className="d-flex flex-column pt-2 pb-2 no-padding">
+                  {routerLoaded && (
+                    <Accordion
+                      className={styles.traitsAccordion}
+                      defaultActiveKey={getDefaultActiveKeys()}>
+                      {traits.map((tr, index) => (
+                        <Accordion.Item
+                          key={`trait-${tr.trait.replaceAll(" ", "-")}`}
+                          defaultChecked={true}
+                          className={styles.traitsAccordionItem}
+                          eventKey={index.toString()}>
+                          <Accordion.Button className="d-flex">
+                            <span>{tr.trait}</span>&nbsp;&nbsp;
+                            <span className="font-color-h">
+                              x{tr.values.length}
+                            </span>
+                          </Accordion.Button>
+                          <Accordion.Body
+                            className={styles.traitsAccordionBody}>
+                            {tr.values.map((v) => (
+                              <FormCheck
+                                key={`trait-${v.replaceAll(" ", "-")}`}
+                                type="checkbox"
+                                label={v}
+                                name="trait"
+                                checked={selectedTraitValues.some(
+                                  (t) =>
+                                    t.trait === tr.trait &&
+                                    t.value.toLowerCase() === v.toLowerCase()
+                                )}
+                                className="pt-1 pb-1"
+                                onChange={() => {
+                                  if (
+                                    selectedTraitValues.some(
+                                      (t) =>
+                                        t.trait === tr.trait &&
+                                        t.value.toLowerCase() ===
+                                          v.toLowerCase()
+                                    )
+                                  ) {
+                                    setSelectedTraitValues(
+                                      selectedTraitValues.filter(
+                                        (t) =>
+                                          t.trait !== tr.trait &&
+                                          t.value !== v.toLowerCase()
+                                      )
+                                    );
+                                  } else {
+                                    setSelectedTraitValues([
+                                      ...selectedTraitValues,
+                                      {
+                                        trait: tr.trait,
+                                        value: v.toLowerCase(),
+                                      },
+                                    ]);
+                                  }
+                                }}
+                              />
+                            ))}
+                          </Accordion.Body>
+                        </Accordion.Item>
+                      ))}
+                    </Accordion>
+                  )}
                 </Col>
               </Row>
             </Container>
@@ -122,7 +201,7 @@ export default function NextGenCollectionArt(props: Readonly<Props>) {
           <NextGenTokenList
             collection={props.collection}
             limit={props.show_view_all ? 9 : undefined}
-            selected_traits={selectedTraits}
+            // selected_traits={selectedTraits}
           />
         </Col>
       </Row>

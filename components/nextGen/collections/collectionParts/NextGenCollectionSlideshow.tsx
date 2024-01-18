@@ -18,21 +18,32 @@ export default function NextGenCollectionSlideshow(props: Readonly<Props>) {
   const startIndex = props.collection.id * 10000000000;
   const [tokens, setTokens] = useState<NextGenToken[]>([]);
   const [currentSlide, setCurrentSlide] = useState(startIndex);
+  const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(false);
 
-  useEffect(() => {
+  async function loadNextPage() {
     commonApiFetch<{
       count: number;
       page: number;
       next: any;
       data: NextGenToken[];
     }>({
-      endpoint: `nextgen/collections/${props.collection.id}/tokens?page_size=${SLIDESHOW_LIMIT}`,
+      endpoint: `nextgen/collections/${props.collection.id}/tokens?page_size=${SLIDESHOW_LIMIT}&page=${page}`,
     }).then((response) => {
-      setTokens(response.data);
+      setTokens([...tokens, ...response.data]);
       setHasMore(response.next);
     });
-  }, [props.collection.id]);
+  }
+
+  useEffect(() => {
+    loadNextPage();
+  }, [props.collection.id, page]);
+
+  useEffect(() => {
+    if (currentSlide >= startIndex + tokens.length - 5 && hasMore) {
+      setPage(page + 1);
+    }
+  }, [currentSlide]);
 
   return (
     <Container fluid className={styles.slideshowContainer}>
@@ -50,14 +61,14 @@ export default function NextGenCollectionSlideshow(props: Readonly<Props>) {
                   )}
                   navigation
                   centeredSlides
-                  loop={props.collection.mint_count > SLIDES_PER_VIEW}
+                  // loop={props.collection.mint_count > SLIDES_PER_VIEW}
                   pagination={{ clickable: true }}
                   onSlideChange={(swiper) => {
                     setCurrentSlide(startIndex + swiper.realIndex);
                   }}>
                   {tokens.map((token) => (
                     <SwiperSlide
-                      key={`nextgen-carousel-${token}`}
+                      key={`nextgen-carousel-${token.id}`}
                       className="pt-2 pb-5">
                       <NextGenTokenImage
                         token={token}
@@ -65,7 +76,7 @@ export default function NextGenCollectionSlideshow(props: Readonly<Props>) {
                       />
                     </SwiperSlide>
                   ))}
-                  {hasMore && (
+                  {/* {hasMore && (
                     <SwiperSlide>
                       <Container className="no-padding pt-3 pb-3">
                         <Row>
@@ -80,7 +91,7 @@ export default function NextGenCollectionSlideshow(props: Readonly<Props>) {
                         </Row>
                       </Container>
                     </SwiperSlide>
-                  )}
+                  )} */}
                 </Swiper>
               </Col>
             </Row>

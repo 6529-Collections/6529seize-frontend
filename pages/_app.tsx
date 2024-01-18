@@ -178,8 +178,6 @@ if (
   CONTRACT_CHAINS.push(goerli);
 }
 
-DELEGATION_CONTRACT.chain_id === mainnet.id ? [mainnet] : [mainnet, sepolia];
-
 const { publicClient, chains } = configureChains(CONTRACT_CHAINS, [
   alchemyProvider({ apiKey: process.env.ALCHEMY_API_KEY! }),
   w3mProvider({ projectId: CW_PROJECT_ID }),
