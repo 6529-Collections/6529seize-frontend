@@ -198,11 +198,24 @@ export default function Header(props: Readonly<Props>) {
                     </a>
                   </Col>
                 </Row>
+                <Row>
+                  <Col xs={{ span: 6, offset: 3 }}>
+                    <hr />
+                  </Col>
+                </Row>
                 <Row className="pt-3">
                   <Col>
                     <a href="/nextgen">
-                      <h3>NextGen</h3>
+                      <h3>
+                        NextGen
+                        <span className={styles.new}>new</span>
+                      </h3>
                     </a>
+                  </Col>
+                </Row>
+                <Row>
+                  <Col xs={{ span: 6, offset: 3 }}>
+                    <hr />
                   </Col>
                 </Row>
                 <Row className="pt-3">
@@ -617,7 +630,7 @@ export default function Header(props: Readonly<Props>) {
                         className={`d-flex align-items-center justify-content-end no-padding`}>
                         <div
                           className={`${styles.dMdNone} d-flex align-items-center`}>
-                          <UserSetUpProfileCta/>
+                          <UserSetUpProfileCta />
                           <SearchProfileButton />
                           <Image
                             loading="eager"
@@ -664,13 +677,16 @@ export default function Header(props: Readonly<Props>) {
                                 }>
                                 Gradient
                               </NavDropdown.Item>
+                              <NavDropdown.Divider />
                               <NavDropdown.Item
                                 className={styles.dropdownItem}
                                 onClick={() =>
                                   (window.location.href = "/nextgen")
                                 }>
                                 NextGen
+                                <span className={styles.new}>new</span>
                               </NavDropdown.Item>
+                              <NavDropdown.Divider />
                               <NavDropdown.Item
                                 className={styles.dropdownItem}
                                 onClick={() =>
@@ -912,7 +928,7 @@ export default function Header(props: Readonly<Props>) {
                               </NavDropdown.Item>
                             </NavDropdown>
                             {printHeaderConnect()}
-                            <UserSetUpProfileCta/>
+                            <UserSetUpProfileCta />
                             <SearchProfileButton />
                           </Nav>
                         </Navbar>
