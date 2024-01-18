@@ -9,8 +9,9 @@ import UserPageIdentityDeleteStatementButton from "./UserPageIdentityDeleteState
 import { useCopyToClipboard } from "react-use";
 import Tippy from "@tippyjs/react";
 import OutsideLinkIcon from "../../../../utils/icons/OutsideLinkIcon";
-import { CAN_OPEN_STATEMENT } from "../../../../../helpers/Types";
+
 import { useRouter } from "next/router";
+import { STATEMENT_META } from "../../../../../helpers/Types";
 
 export default function UserPageIdentityStatementsStatement({
   statement,
@@ -33,11 +34,7 @@ export default function UserPageIdentityStatementsStatement({
     }, 1000);
   };
 
-  const handleOpen = () => {
-    window.open(statement.statement_value, "_blank");
-  };
-
-  const canOpen = CAN_OPEN_STATEMENT[statement.statement_type];
+  const canOpen = STATEMENT_META[statement.statement_type].canOpenStatement;
   const [isTouchScreen, setIsTouchScreen] = useState(false);
   useEffect(() => {
     setIsTouchScreen(window.matchMedia("(pointer: coarse)").matches);
@@ -60,14 +57,16 @@ export default function UserPageIdentityStatementsStatement({
           placement="top"
           disabled={isTouchScreen}
         >
-          <button
+          <a
+            href={statement.statement_value}
+            target="_blank"
+            rel="noopener noreferrer"
             className={`${
               isTouchScreen ? "tw-block" : "tw-hidden group-hover:tw-block"
             } tw-p-2  tw-bg-transparent tw-cursor-pointer tw-text-sm tw-font-semibold tw-text-iron-200 tw-border-0 focus:tw-outline-none tw-transition tw-duration-300 tw-ease-out`}
-            onClick={handleOpen}
           >
             <OutsideLinkIcon />
-          </button>
+          </a>
         </Tippy>
       )}
       <Tippy

@@ -5,6 +5,7 @@ import UserPageIdentityAddStatementsSocialMediaAccount from "./social-media/User
 import { IProfileAndConsolidations } from "../../../../../entities/IProfile";
 import UserPageIdentityAddStatementsSocialMediaPosts from "./social-media-verification-posts/UserPageIdentityAddStatementsSocialMediaPosts";
 import { STATEMENT_ADD_VIEW } from "./UserPageIdentityAddStatements";
+import UserPageIdentityAddStatementsNFTAccounts from "./nft-accounts/UserPageIdentityAddStatementsNFTAccounts";
 
 export default function UserPageIdentityAddStatementsViews({
   profile,
@@ -30,6 +31,13 @@ export default function UserPageIdentityAddStatementsViews({
         <UserPageIdentityAddStatementsSocialMediaAccount
           profile={profile}
           onClose={onClose}
+        />
+      );
+    case STATEMENT_ADD_VIEW.NFT_ACCOUNT:
+      return (
+        <UserPageIdentityAddStatementsNFTAccounts
+          onClose={onClose}
+          profile={profile}
         />
       );
     case STATEMENT_ADD_VIEW.CONTACT:

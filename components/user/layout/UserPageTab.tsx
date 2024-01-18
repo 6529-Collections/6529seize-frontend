@@ -21,7 +21,7 @@ export default function UserPageTab({
   }, [activeTab]);
 
   const activeClasses =
-    "tw-border-primary-400 tw-border-solid tw-border-x-0 tw-border-t-0 tw-text-iron-100 tw-whitespace-nowrap tw-border-b-2 tw-py-4 tw-px-1";
+    "tw-border-primary-400 tw-border-solid tw-border-x-0 tw-border-t-0 tw-text-iron-100 tw-whitespace-nowrap tw-border-b-2 tw-font-semibold tw-py-4 tw-px-1";
   const inActiveClasses =
     "tw-border-transparent tw-text-iron-500 hover:tw-border-gray-300 hover:tw-text-iron-100 tw-whitespace-nowrap tw-border-b-2 tw-py-4 tw-px-1 tw-transition tw-duration-300 tw-ease-out";
 
@@ -41,7 +41,7 @@ export default function UserPageTab({
       }}
       className={`${
         isActive ? "tw-pointer-events-none" : ""
-      } tw-no-underline tw-leading-4 tw-p-0 tw-text-sm tw-font-medium`}
+      } tw-no-underline tw-leading-4 tw-p-0 tw-text-sm sm:tw-text-base tw-font-medium`}
     >
       <div className={classes}>{USER_PAGE_TAB_META[tab].title}</div>
     </Link>
