@@ -121,7 +121,6 @@ export async function getServerSideProps(
 ): Promise<{
   props: UserPageRepProps;
 }> {
-  console.log(req);
   try {
     const headers = getCommonHeaders(req);
     const signedWalletOrNull = getSignedWalletOrNull(req);
