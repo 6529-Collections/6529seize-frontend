@@ -9,3 +9,12 @@ export enum DateIntervalsSelection {
   ALL = "All",
   CUSTOM_DATES = "Custom Dates",
 }
+
+export enum MEMES_SEASON {
+  SZN1 = "SZN1",
+  SZN2 = "SZN2",
+  SZN3 = "SZN3",
+  SZN4 = "SZN4",
+  SZN5 = "SZN5",
+  SZN6 = "SZN6",
+}

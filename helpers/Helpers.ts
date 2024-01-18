@@ -113,6 +113,11 @@ export function formatNumberWithCommas(x: number) {
   return isNegative ? `-${formattedNumber}` : formattedNumber;
 }
 
+export function formatNumberWithCommasOrDash(x: number): string {
+  if (x === null || isNaN(x) || x === 0) return "-";
+  return formatNumberWithCommas(x);
+}
+
 export function getDateDisplay(date: Date) {
   const secondsAgo = (new Date().getTime() - date.getTime()) / 1000;
   if (60 > secondsAgo) {

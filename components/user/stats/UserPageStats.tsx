@@ -3,13 +3,17 @@ import { IProfileAndConsolidations } from "../../../entities/IProfile";
 import { ConsolidatedTDHMetrics, TDHMetrics } from "../../../entities/ITDH";
 import { useEffect, useState } from "react";
 import { commonApiFetch } from "../../../services/api/common-api";
-import UserPageStatsOverview from "./UserPageStatsOverview";
-import UserPageStatsTDHcharts from "./UserPageStatsTDHcharts";
+import UserPageStatsTDHcharts from "../to-be-removed/UserPageStatsTDHcharts";
 import { NFTLite } from "../../../entities/INFT";
 import UserPageActivity from "../to-be-removed/UserPageActivity";
 import UserPageDistributions from "../to-be-removed/UserPageDistributions";
 import UserPageHeaderAddresses from "../user-page-header/addresses/UserPageHeaderAddresses";
-import UserPageStatsTags from "./UserPageStatsTags";
+import UserPageStatsTags from "./tags/UserPageStatsTags";
+import UserPageStatsCollected from "./UserPageStatsCollected";
+import UserPageStatsActivityOverview from "./UserPageStatsActivityOverview";
+import UserPageActivityWrapper from "./activity/UserPageActivityWrapper";
+
+export type UserPageStatsTDHType = ConsolidatedTDHMetrics | TDHMetrics | null;
 
 export default function UserPageStats({
   profile,
@@ -21,15 +25,24 @@ export default function UserPageStats({
   readonly memesLite: NFTLite[];
 }) {
   const router = useRouter();
-  const isConsolidation = profile.consolidation.wallets.length > 1;
-
-  const mainAddress =
-    profile.profile?.primary_wallet?.toLowerCase() ??
-    (router.query.user as string).toLowerCase();
-  const [walletsTDH, setWalletsTDH] = useState<Record<string, TDHMetrics>>({});
-  const [tdh, setTDH] = useState<ConsolidatedTDHMetrics | TDHMetrics | null>(
-    null
+  const [isConsolidation, setIsConsolidation] = useState<boolean>(
+    profile.consolidation.wallets.length > 1
   );
+  const [mainAddress, setMainAddress] = useState<string>(
+    profile.profile?.primary_wallet?.toLowerCase() ??
+      (router.query.user as string).toLowerCase()
+  );
+
+  useEffect(() => {
+    setIsConsolidation(profile.consolidation.wallets.length > 1);
+    setMainAddress(
+      profile.profile?.primary_wallet?.toLowerCase() ??
+        (router.query.user as string).toLowerCase()
+    );
+  }, [profile, router.query.user]);
+
+  const [walletsTDH, setWalletsTDH] = useState<Record<string, TDHMetrics>>({});
+  const [tdh, setTDH] = useState<UserPageStatsTDHType>(null);
 
   const [loadingMetrics, setLoadingMetrics] = useState<string[]>([]);
   const [loading, setLoading] = useState(loadingMetrics.length > 0);
@@ -46,11 +59,11 @@ export default function UserPageStats({
     }
 
     setTDH(walletsTDH[queryAddress]);
-  }, [activeAddress, queryAddress, walletsTDH]);
+  }, [activeAddress, queryAddress, walletsTDH, profile, isConsolidation]);
 
   useEffect(() => {
     setQueryAddress(activeAddress ?? mainAddress);
-  }, [activeAddress]);
+  }, [activeAddress, isConsolidation, mainAddress]);
 
   useEffect(() => {
     const loadMetrics = async (wallet: string) => {
@@ -91,22 +104,22 @@ export default function UserPageStats({
   }, [loadingMetrics]);
 
   return (
-    <>
-      <div>content</div>
-      {/* <UserPageStatsTags tdh={tdh} />
+    <div className="tailwind-scope">
       <div className="tailwind-scope tw-inline-flex tw-justify-between tw-w-full tw-mt-8">
-        <h2 className="tw-text-xl tw-font-semibold tw-text-white sm:tw-text-2xl sm:tw-tracking-tight tw-text-right">
-          Under construction
-        </h2>
-        <div>
-          <UserPageHeaderAddresses
-            addresses={profile.consolidation.wallets}
-            onActiveAddress={setActiveAddress}
-          />
-        </div>
+        <UserPageStatsTags tdh={tdh} />
+        <UserPageHeaderAddresses
+          addresses={profile.consolidation.wallets}
+          onActiveAddress={setActiveAddress}
+        />
       </div>
-      <UserPageStatsOverview tdh={tdh} loading={loading} />
-      <UserPageActivity
+      <UserPageStatsCollected tdh={tdh} />
+      <UserPageStatsActivityOverview tdh={tdh} />
+      <UserPageActivityWrapper
+        profile={profile}
+        activeAddress={activeAddress}
+      />
+
+      {/*   <UserPageActivity
         show={true}
         activeAddress={activeAddress}
         memesLite={memesLite}
@@ -119,6 +132,6 @@ export default function UserPageStats({
       />
 
       <UserPageStatsTDHcharts mainAddress={mainAddress} /> */}
-    </>
+    </div>
   );
 }
