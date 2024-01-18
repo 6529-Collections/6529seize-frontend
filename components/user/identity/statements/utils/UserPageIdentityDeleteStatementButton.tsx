@@ -28,7 +28,7 @@ export default function UserPageIdentityDeleteStatementButton({
       content="Delete"
       theme="dark"
       placement="top"
-      disabled={isTouchScreen}
+      disabled={isTouchScreen || isDeleteStatementOpen}
     >
       <div>
         <button
