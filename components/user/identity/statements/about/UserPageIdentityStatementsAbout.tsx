@@ -48,7 +48,10 @@ export default function UserPageIdentityStatementsAbout({
   return (
     <div className="tw-col-span-full tw-pb-5 tw-mb-5 tw-border-b tw-border-solid tw-border-t-0 tw-border-x-0  tw-border-iron-800">
       <div className="tw-max-w-full lg:tw-max-w-prose">
-        <div>
+        <div className="tw-inline-flex tw-items-center">
+          <span className="tw-block tw-text-base tw-font-medium tw-text-iron-50 tw-transition tw-duration-300 tw-ease-out">
+            About
+          </span>
           {isMyProfile && (
             <>
               {view === AboutStatementView.STATEMENT && (
@@ -56,9 +59,6 @@ export default function UserPageIdentityStatementsAbout({
                   onClick={toggleView}
                   className="tw-p-0 tw-group tw-bg-transparent tw-inline-flex tw-items-center tw-border-none tw-transition tw-duration-300 tw-ease-out"
                 >
-                  <span className="tw-block tw-text-base tw-font-medium tw-text-iron-50 tw-transition tw-duration-300 tw-ease-out">
-                    About
-                  </span>
                   <div className="tw-p-2 -tw-mt-0.5 tw-text-iron-50 group-hover:tw-text-iron-400 tw-transform group-hover:tw-scale-110 tw-transition tw-duration-300 tw-ease-out">
                     <PencilIcon size={PencilIconSize.SMALL} />
                   </div>
@@ -70,9 +70,6 @@ export default function UserPageIdentityStatementsAbout({
                   onClick={toggleView}
                   className="tw-p-0 tw-group tw-bg-transparent tw-inline-flex tw-items-center tw-border-none tw-text-iron-400 tw-transition tw-duration-300 tw-ease-out"
                 >
-                  <span className="tw-block tw-text-base tw-text-iron-50 tw-font-medium tw-transition tw-duration-300 tw-ease-out">
-                    About
-                  </span>
                   <div className="tw-p-2 -tw-mt-0.5">
                     <svg
                       className="tw-flex-shrink-0 tw-h-6 tw-w-6 group-hover:tw-text-iron-50 tw-transition tw-duration-300 tw-ease-out"
