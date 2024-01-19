@@ -137,6 +137,12 @@ export default function NextGenMintWidget(props: Readonly<Props>) {
         const url = `${process.env.API_ENDPOINT}/api/nextgen/proofs/${merkleRoot}/${wallet}`;
         fetchUrl(url).then((response: ProofResponse[]) => {
           const proofResponses: ProofResponse[] = [];
+          proofResponses.push({
+            keccak: response[0].keccak,
+            spots: response[0].spots,
+            info: response[0].info,
+            proof: response[0].proof,
+          });
           for (let i = 1; i < response.length; i++) {
             const spots = response[i].spots - response[i - 1].spots;
             proofResponses.push({
