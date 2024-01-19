@@ -219,6 +219,7 @@ export default function NextGenCollectionArt(props: Readonly<Props>) {
         {(routerLoaded || totalResultsSet) && (
           <Col sm={12} md={props.show_view_all ? 12 : 10}>
             <NextGenTokenList
+              limit={props.show_view_all ? 9 : undefined}
               collection={props.collection}
               selected_traits={selectedTraitValues}
               setTotalResults={(totalResults: number) => {
