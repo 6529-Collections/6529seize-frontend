@@ -136,10 +136,17 @@ export default function NextGenMintWidget(props: Readonly<Props>) {
         const merkleRoot = props.collection.merkle_root;
         const url = `${process.env.API_ENDPOINT}/api/nextgen/proofs/${merkleRoot}/${wallet}`;
         fetchUrl(url).then((response: ProofResponse[]) => {
+          const proofResponses: ProofResponse[] = [];
           for (let i = 1; i < response.length; i++) {
-            response[i].spots -= response[i - 1].spots;
+            const spots = response[i].spots - response[i - 1].spots;
+            proofResponses.push({
+              keccak: response[i].keccak,
+              spots: spots,
+              info: response[i].info,
+              proof: response[i].proof,
+            });
           }
-          setProofResponse(response);
+          setProofResponse(proofResponses);
           setCurrentProof(findActiveProof(response));
         });
       }
@@ -284,9 +291,10 @@ export default function NextGenMintWidget(props: Readonly<Props>) {
 
   function renderAllowlistStatus() {
     if (proofResponse && alStatus === Status.LIVE) {
-      const maxSpots = proofResponse.reduce((max, response) => {
-        return response.spots > max ? response.spots : max;
-      }, 0);
+      const maxSpots = proofResponse.reduce(
+        (acc, response) => acc + response.spots,
+        0
+      );
       if (maxSpots > 0) {
         const spotsRemaining =
           maxSpots > props.mint_counts.allowlist
