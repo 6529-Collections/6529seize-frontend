@@ -55,21 +55,6 @@ export default function UserPageStatsActivityWallet({
   const searchParams = useSearchParams();
   const activity = searchParams.get(WALLET_ACTIVITY_FILTER_PARAM);
 
-  const { data: memes } = useQuery({
-    queryKey: [QueryKey.MEMES_LITE],
-    queryFn: async () => {
-      const memesResponse = await commonApiFetch<{
-        count: number;
-        data: MemeLite[];
-        next: string | null;
-        page: number;
-      }>({
-        endpoint: "memes_lite",
-      });
-      return memesResponse.data;
-    },
-  });
-
   const [activeFilter, setActiveFilter] =
     useState<UserPageStatsActivityWalletFilterType>(
       UserPageStatsActivityWalletFilterType.ALL
@@ -89,10 +74,17 @@ export default function UserPageStatsActivityWallet({
   );
 
   const onActiveFilter = (filter: UserPageStatsActivityWalletFilterType) => {
+    const targetFilter =
+      filter === activeFilter
+        ? UserPageStatsActivityWalletFilterType.ALL
+        : filter;
     router.replace(
       pathname +
         "?" +
-        createQueryString(WALLET_ACTIVITY_FILTER_PARAM, enumToPath(filter)),
+        createQueryString(
+          WALLET_ACTIVITY_FILTER_PARAM,
+          enumToPath(targetFilter)
+        ),
       undefined,
       { shallow: true }
     );

@@ -83,7 +83,10 @@ export default function UserPageActivityWrapper({
         />
       )}
       {activeTab === USER_PAGE_ACTIVITY_TAB.DISTRIBUTIONS && (
-        <UserPageStatsActivityDistributions />
+        <UserPageStatsActivityDistributions
+          profile={profile}
+          activeAddress={activeAddress}
+        />
       )}
       {activeTab === USER_PAGE_ACTIVITY_TAB.TDH_HISTORY && (
         <UserPageStatsActivityTDHHistory />

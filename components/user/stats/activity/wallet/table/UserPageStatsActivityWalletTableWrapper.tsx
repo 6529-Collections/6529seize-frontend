@@ -9,6 +9,7 @@ import { commonApiFetch } from "../../../../../../services/api/common-api";
 import { MEMES_CONTRACT } from "../../../../../../constants";
 import UserPageStatsActivityWalletTable from "./UserPageStatsActivityWalletTable";
 import CommonTablePagination from "../../../../../utils/CommonTablePagination";
+import { MemeLite } from "../../../../settings/UserSettingsImgSelectMeme";
 
 export default function UserPageStatsActivityWalletTableWrapper({
   filter,
@@ -92,11 +93,30 @@ export default function UserPageStatsActivityWalletTableWrapper({
     setTotalPages(Math.ceil(data.count / PAGE_SIZE));
   }, [data?.count, data?.page, isLoading]);
 
+  const { data: memes } = useQuery({
+    queryKey: [QueryKey.MEMES_LITE],
+    queryFn: async () => {
+      const memesResponse = await commonApiFetch<{
+        count: number;
+        data: MemeLite[];
+        next: string | null;
+        page: number;
+      }>({
+        endpoint: "memes_lite",
+      });
+      return memesResponse.data;
+    },
+  });
+
   return (
     <div>
-      {data?.data.length ? (
+      {data?.data.length && memes?.length ? (
         <div className="tw-flow-root">
-          <UserPageStatsActivityWalletTable transactions={data.data} />
+          <UserPageStatsActivityWalletTable
+            transactions={data.data}
+            profile={profile}
+            memes={memes}
+          />
           {totalPages > 1 && (
             <CommonTablePagination
               currentPage={page}

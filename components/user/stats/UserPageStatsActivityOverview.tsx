@@ -45,30 +45,30 @@ export default function UserPageStatsActivityOverview({
       {
         title: "Purchases (ETH)",
         isMain: false,
-        total: formatNumberWithCommasOrDash(+props.purchases_value.toFixed(2)),
+        total: formatNumberWithCommasOrDash(+props.purchases_value?.toFixed(2)),
         memes: formatNumberWithCommasOrDash(
-          +props.purchases_value_memes.toFixed(2)
+          +props.purchases_value_memes?.toFixed(2)
         ),
         gradient: formatNumberWithCommasOrDash(
-          +props.purchases_value_gradients.toFixed(2)
+          +props?.purchases_value_gradients?.toFixed(2)
         ),
         SZN1: formatNumberWithCommasOrDash(
-          +props.purchases_value_memes_season1.toFixed(2)
+          +props.purchases_value_memes_season1?.toFixed(2)
         ),
         SZN2: formatNumberWithCommasOrDash(
-          +props.purchases_value_memes_season2.toFixed(2)
+          +props.purchases_value_memes_season2?.toFixed(2)
         ),
         SZN3: formatNumberWithCommasOrDash(
-          +props.purchases_value_memes_season3.toFixed(2)
+          +props.purchases_value_memes_season3?.toFixed(2)
         ),
         SZN4: formatNumberWithCommasOrDash(
-          +props.purchases_value_memes_season4.toFixed(2)
+          +props.purchases_value_memes_season4?.toFixed(2)
         ),
         SZN5: formatNumberWithCommasOrDash(
-          +props.purchases_value_memes_season5.toFixed(2)
+          +props.purchases_value_memes_season5?.toFixed(2)
         ),
         SZN6: formatNumberWithCommasOrDash(
-          +props.purchases_value_memes_season6.toFixed(2)
+          +props.purchases_value_memes_season6?.toFixed(2)
         ),
       },
     ];
@@ -108,30 +108,30 @@ export default function UserPageStatsActivityOverview({
       {
         title: "Sales (ETH)",
         isMain: false,
-        total: formatNumberWithCommasOrDash(+props.sales_value.toFixed(2)),
+        total: formatNumberWithCommasOrDash(+props.sales_value?.toFixed(2)),
         memes: formatNumberWithCommasOrDash(
-          +props.sales_value_memes.toFixed(2)
+          +props.sales_value_memes?.toFixed(2)
         ),
         gradient: formatNumberWithCommasOrDash(
-          +props.sales_value_gradients.toFixed(2)
+          +props.sales_value_gradients?.toFixed(2)
         ),
         SZN1: formatNumberWithCommasOrDash(
-          +props.sales_value_memes_season1.toFixed(2)
+          +props.sales_value_memes_season1?.toFixed(2)
         ),
         SZN2: formatNumberWithCommasOrDash(
-          +props.sales_value_memes_season2.toFixed(2)
+          +props.sales_value_memes_season2?.toFixed(2)
         ),
         SZN3: formatNumberWithCommasOrDash(
-          +props.sales_value_memes_season3.toFixed(2)
+          +props.sales_value_memes_season3?.toFixed(2)
         ),
         SZN4: formatNumberWithCommasOrDash(
-          +props.sales_value_memes_season4.toFixed(2)
+          +props.sales_value_memes_season4?.toFixed(2)
         ),
         SZN5: formatNumberWithCommasOrDash(
-          +props.sales_value_memes_season5.toFixed(2)
+          +props.sales_value_memes_season5?.toFixed(2)
         ),
         SZN6: formatNumberWithCommasOrDash(
-          +props.sales_value_memes_season6.toFixed(2)
+          +props.sales_value_memes_season6?.toFixed(2)
         ),
       },
     ];

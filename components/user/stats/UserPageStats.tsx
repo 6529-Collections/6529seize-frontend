@@ -119,12 +119,7 @@ export default function UserPageStats({
         activeAddress={activeAddress}
       />
 
-      {/*   <UserPageActivity
-        show={true}
-        activeAddress={activeAddress}
-        memesLite={memesLite}
-        profile={profile}
-      />
+      {/* 
       <UserPageDistributions
         show={true}
         activeAddress={activeAddress}
