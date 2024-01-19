@@ -105,14 +105,16 @@ export default function UserPageStats({
 
   return (
     <div className="tailwind-scope">
-      <div className="tailwind-scope tw-inline-flex tw-justify-between tw-w-full tw-mt-8">
+      <div className="tw-flex-col-reverse tw-flex md:tw-flex-row tw-justify-between tw-gap-6 lg:tw-space-y-0 tw-w-full tw-mt-6 lg:tw-mt-8">
         <UserPageStatsTags tdh={tdh} />
         <UserPageHeaderAddresses
           addresses={profile.consolidation.wallets}
           onActiveAddress={setActiveAddress}
         />
       </div>
+
       <UserPageStatsCollected tdh={tdh} />
+
       <UserPageStatsActivityOverview tdh={tdh} />
       <UserPageActivityWrapper
         profile={profile}

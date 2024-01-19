@@ -19,6 +19,7 @@ export default function UserPageStatsActivityOverview({
       {
         title: "Transfers In",
         isMain: true,
+        isLast: false,
         total: formatNumberWithCommasOrDash(props.transfers_in),
         memes: formatNumberWithCommasOrDash(props.transfers_in_memes),
         gradient: formatNumberWithCommasOrDash(props.transfers_in_gradients),
@@ -32,6 +33,7 @@ export default function UserPageStatsActivityOverview({
       {
         title: "Purchases",
         isMain: false,
+        isLast: false,
         total: formatNumberWithCommasOrDash(props.purchases_count),
         memes: formatNumberWithCommasOrDash(props.purchases_count_memes),
         gradient: formatNumberWithCommasOrDash(props.purchases_count_gradients),
@@ -45,6 +47,7 @@ export default function UserPageStatsActivityOverview({
       {
         title: "Purchases (ETH)",
         isMain: false,
+        isLast: true,
         total: formatNumberWithCommasOrDash(+props.purchases_value.toFixed(2)),
         memes: formatNumberWithCommasOrDash(
           +props.purchases_value_memes.toFixed(2)
@@ -82,6 +85,7 @@ export default function UserPageStatsActivityOverview({
       {
         title: "Transfers Out",
         isMain: true,
+        isLast: false,
         total: formatNumberWithCommasOrDash(props.transfers_out),
         memes: formatNumberWithCommasOrDash(props.transfers_out_memes),
         gradient: formatNumberWithCommasOrDash(props.transfers_out_gradients),
@@ -95,6 +99,7 @@ export default function UserPageStatsActivityOverview({
       {
         title: "Sales",
         isMain: false,
+        isLast: false,
         total: formatNumberWithCommasOrDash(props.sales_count),
         memes: formatNumberWithCommasOrDash(props.sales_count_memes),
         gradient: formatNumberWithCommasOrDash(props.sales_count_gradients),
@@ -108,6 +113,7 @@ export default function UserPageStatsActivityOverview({
       {
         title: "Sales (ETH)",
         isMain: false,
+        isLast: true,
         total: formatNumberWithCommasOrDash(+props.sales_value.toFixed(2)),
         memes: formatNumberWithCommasOrDash(
           +props.sales_value_memes.toFixed(2)

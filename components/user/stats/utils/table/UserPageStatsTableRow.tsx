@@ -5,20 +5,67 @@ export default function UserPageStatsTableRow({
 }: {
   readonly data: UserPageStatsTableItemData;
 }) {
-  const classes = data.isMain ? "" : "tw-text-neutral-400";
+  const mainClasses = data.isMain
+    ? "tw-pt-2.5 tw-border-t tw-border-x-0 tw-border-b-0 tw-border-solid tw-border-iron-700"
+    : "tw-text-iron-500";
+
+  const lastClasses = data.isLast ? "tw-pb-2.5" : "";
+
+  const classes = `${mainClasses} ${lastClasses}`;
   return (
     <>
-      <div className={`${classes} tw-col-span-2`}>{data.title}</div>
-      <div className={`${classes} w-col-span-1`}>{data.total}</div>
-      <div className={`${classes} w-col-span-1`}>{data.memes}</div>
+      <td
+        className={`${classes} tw-font-medium tw-px-4 sm:tw-px-6 tw-whitespace-nowrap tw-text-base`}
+      >
+        {data.title}
+      </td>
+
+      <td
+        className={`${classes} tw-font-normal tw-px-4 sm:tw-px-6 tw-whitespace-nowrap tw-text-base tw-text-right`}
+      >
+        {data.total}
+      </td>
+      <td
+        className={`${classes} tw-font-normal tw-px-4 sm:tw-px-6 tw-whitespace-nowrap tw-text-base tw-text-right`}
+      >
+        {data.memes}
+      </td>
       {/* TODO: make SZN type safe */}
-      <div className={`${classes} w-col-span-1`}>{data.SZN1}</div>
-      <div className={`${classes} w-col-span-1`}>{data.SZN2}</div>
-      <div className={`${classes} w-col-span-1`}>{data.SZN3}</div>
-      <div className={`${classes} w-col-span-1`}>{data.SZN4}</div>
-      <div className={`${classes} w-col-span-1`}>{data.SZN5}</div>
-      <div className={`${classes} w-col-span-1`}>{data.SZN6}</div>
-      <div className={`${classes} w-col-span-1`}>{data.gradient}</div>
+      <td
+        className={`${classes} tw-font-normal tw-px-4 sm:tw-px-6 tw-whitespace-nowrap tw-text-base tw-text-right`}
+      >
+        {data.SZN1}
+      </td>
+      <td
+        className={`${classes} tw-font-normal tw-px-4 sm:tw-px-6 tw-whitespace-nowrap tw-text-base tw-text-right`}
+      >
+        {data.SZN2}
+      </td>
+      <td
+        className={`${classes} tw-font-normal tw-px-4 sm:tw-px-6 tw-whitespace-nowrap tw-text-base tw-text-right`}
+      >
+        {data.SZN3}
+      </td>
+      <td
+        className={`${classes} tw-font-normal tw-px-4 sm:tw-px-6 tw-whitespace-nowrap tw-text-base tw-text-right`}
+      >
+        {data.SZN4}
+      </td>
+      <td
+        className={`${classes} tw-font-normal tw-px-4 sm:tw-px-6 tw-whitespace-nowrap tw-text-base tw-text-right`}
+      >
+        {data.SZN5}
+      </td>
+      <td
+        className={`${classes} tw-font-normal tw-px-4 sm:tw-px-6 tw-whitespace-nowrap tw-text-base tw-text-right`}
+      >
+        {data.SZN6}
+      </td>
+      <td
+        className={`${classes} tw-font-normal tw-px-4 sm:tw-px-6 tw-whitespace-nowrap tw-text-base tw-text-right`}
+      >
+        {data.gradient}
+      </td>
     </>
   );
 }
