@@ -4,6 +4,11 @@ import { commonApiFetch } from "../../../../../services/api/common-api";
 import { MemeLite } from "../../../settings/UserSettingsImgSelectMeme";
 import { QueryKey } from "../../../../react-query-wrapper/ReactQueryWrapper";
 import UserPageStatsActivityWalletFilter from "./filter/UserPageStatsActivityWalletFilter";
+import { useRouter } from "next/router";
+import { usePathname, useSearchParams } from "next/navigation";
+import { useCallback, useEffect, useState } from "react";
+import { WALLET_ACTIVITY_FILTER_PARAM } from "../UserPageActivityWrapper";
+import UserPageStatsActivityWalletTableWrapper from "./table/UserPageStatsActivityWalletTableWrapper";
 
 export enum UserPageStatsActivityWalletFilterType {
   ALL = "ALL",
@@ -15,6 +20,29 @@ export enum UserPageStatsActivityWalletFilterType {
   BURNS = "BURNS",
 }
 
+const ENUM_AND_PATH: {
+  type: UserPageStatsActivityWalletFilterType;
+  path: string;
+}[] = [
+  { type: UserPageStatsActivityWalletFilterType.ALL, path: "all" },
+  { type: UserPageStatsActivityWalletFilterType.AIRDROPS, path: "airdrops" },
+  { type: UserPageStatsActivityWalletFilterType.MINTS, path: "mints" },
+  { type: UserPageStatsActivityWalletFilterType.SALES, path: "sales" },
+  { type: UserPageStatsActivityWalletFilterType.PURCHASES, path: "purchases" },
+  { type: UserPageStatsActivityWalletFilterType.TRANSFERS, path: "transfers" },
+  { type: UserPageStatsActivityWalletFilterType.BURNS, path: "burns" },
+];
+
+const enumToPath = (type: UserPageStatsActivityWalletFilterType): string => {
+  const found = ENUM_AND_PATH.find((e) => e.type === type);
+  return found?.path ?? "";
+};
+
+const pathToEnum = (path: string): UserPageStatsActivityWalletFilterType => {
+  const found = ENUM_AND_PATH.find((e) => e.path === path);
+  return found?.type ?? UserPageStatsActivityWalletFilterType.ALL;
+};
+
 export default function UserPageStatsActivityWallet({
   profile,
   activeAddress,
@@ -22,24 +50,58 @@ export default function UserPageStatsActivityWallet({
   readonly profile: IProfileAndConsolidations;
   readonly activeAddress: string | null;
 }) {
-  const { data: memes } = useQuery({
-    queryKey: [QueryKey.MEMES_LITE],
-    queryFn: async () => {
-      const memesResponse = await commonApiFetch<{
-        count: number;
-        data: MemeLite[];
-        next: string | null;
-        page: number;
-      }>({
-        endpoint: "memes_lite",
-      });
-      return memesResponse.data;
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const activity = searchParams.get(WALLET_ACTIVITY_FILTER_PARAM);
+
+  const [activeFilter, setActiveFilter] =
+    useState<UserPageStatsActivityWalletFilterType>(
+      UserPageStatsActivityWalletFilterType.ALL
+    );
+
+  useEffect(() => {
+    setActiveFilter(pathToEnum(activity ?? ""));
+  }, [activity]);
+
+  const createQueryString = useCallback(
+    (name: string, value: string) => {
+      const params = new URLSearchParams(searchParams.toString());
+      params.set(name, value);
+      return params.toString();
     },
-  });
+    [searchParams]
+  );
+
+  const onActiveFilter = (filter: UserPageStatsActivityWalletFilterType) => {
+    const targetFilter =
+      filter === activeFilter
+        ? UserPageStatsActivityWalletFilterType.ALL
+        : filter;
+    router.replace(
+      pathname +
+        "?" +
+        createQueryString(
+          WALLET_ACTIVITY_FILTER_PARAM,
+          enumToPath(targetFilter)
+        ),
+      undefined,
+      { shallow: true }
+    );
+  };
+
   return (
     <div>
       <div>Wallet activity</div>
-      <UserPageStatsActivityWalletFilter />
+      <UserPageStatsActivityWalletFilter
+        activeFilter={activeFilter}
+        setActiveFilter={onActiveFilter}
+      />
+      <UserPageStatsActivityWalletTableWrapper
+        filter={activeFilter}
+        profile={profile}
+        activeAddress={activeAddress}
+      />
     </div>
   );
 }
