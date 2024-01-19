@@ -450,7 +450,7 @@ export default function NextGenMintWidget(props: Readonly<Props>) {
                       }
                       id={`${response.keccak}`}
                       checked={currentProof && currentProof.index >= index}
-                      disabled={currentProof && index > currentProof.index}
+                      disabled={currentProof && index != currentProof.index}
                       className={`pt-1 pb-1 `}></Form.Check>
                   </Col>
                 </Form.Group>
