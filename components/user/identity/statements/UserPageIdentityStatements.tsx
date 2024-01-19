@@ -8,11 +8,13 @@ import UserPageIdentityAddStatementsHeader from "./header/UserPageIdentityAddSta
 import { useRouter } from "next/router";
 import { commonApiFetch } from "../../../../services/api/common-api";
 import { useEffect, useState } from "react";
-import { STATEMENT_GROUP } from "../../../../helpers/Types";
+import { STATEMENT_GROUP, STATEMENT_TYPE } from "../../../../helpers/Types";
 import UserPageIdentityStatementsSocialMediaAccounts from "./social-media-accounts/UserPageIdentityStatementsSocialMediaAccounts";
 import UserPageIdentityStatementsContacts from "./contacts/UserPageIdentityStatementsContacts";
 import UserPageIdentityStatementsSocialMediaVerificationPosts from "./social-media-verification-posts/UserPageIdentityStatementsSocialMediaVerificationPosts";
 import { QueryKey } from "../../../react-query-wrapper/ReactQueryWrapper";
+import UserPageIdentityStatementsAbout from "./about/UserPageIdentityStatementsAbout";
+import UserPageIdentityStatementsNFTAccounts from "./nft-accounts/UserPageIdentityStatementsNFTAccounts";
 
 export default function UserPageIdentityStatements({
   profile,
@@ -25,7 +27,11 @@ export default function UserPageIdentityStatements({
     CicStatement[]
   >([]);
 
+  const [aboutStatement, setAboutStatement] = useState<CicStatement | null>(
+    null
+  );
   const [contacts, setContacts] = useState<CicStatement[]>([]);
+  const [nftAccounts, setNftAccounts] = useState<CicStatement[]>([]);
   const [socialMediaVerificationPosts, setSocialMediaVerificationPosts] =
     useState<CicStatement[]>([]);
 
@@ -40,6 +46,8 @@ export default function UserPageIdentityStatements({
 
   useEffect(() => {
     if (!statements) {
+      setAboutStatement(null);
+      setNftAccounts([]);
       setSocialMediaAccounts([]);
       setContacts([]);
       setSocialMediaVerificationPosts([]);
@@ -48,6 +56,13 @@ export default function UserPageIdentityStatements({
     const sortedStatements = [...statements].sort((a, d) => {
       return new Date(d.crated_at).getTime() - new Date(a.crated_at).getTime();
     });
+    setAboutStatement(
+      sortedStatements.find(
+        (s) =>
+          s.statement_group === STATEMENT_GROUP.GENERAL &&
+          s.statement_type === STATEMENT_TYPE.BIO
+      ) ?? null
+    );
     setSocialMediaAccounts(
       sortedStatements.filter(
         (s) => s.statement_group === STATEMENT_GROUP.SOCIAL_MEDIA_ACCOUNT
@@ -56,6 +71,12 @@ export default function UserPageIdentityStatements({
     setContacts(
       sortedStatements.filter(
         (s) => s.statement_group === STATEMENT_GROUP.CONTACT
+      )
+    );
+
+    setNftAccounts(
+      sortedStatements.filter(
+        (s) => s.statement_group === STATEMENT_GROUP.NFT_ACCOUNTS
       )
     );
 
@@ -72,43 +93,63 @@ export default function UserPageIdentityStatements({
       <div>
         <UserPageIdentityAddStatementsHeader profile={profile} />
         <div className="tw-mt-2 lg:tw-mt-4 tw-bg-iron-900 tw-border tw-border-iron-800 tw-border-solid tw-rounded-xl tw-scroll-py-3 tw-overflow-auto">
-          <div className="tw-px-4 tw-py-6 lg:tw-p-8 tw-mx-auto tw-grid tw-grid-cols-1 tw-gap-x-8 tw-gap-y-6 xl:tw-gap-y-16 lg:tw-mx-0 xl:tw-grid-cols-5">
-            <div className="tw-col-span-3 tw-space-y-6">
-              <div className="tw-grid tw-grid-cols-1 tw-gap-x-8 tw-gap-y-6 md:tw-grid-cols-2">
-                <UserPageIdentityStatementsConsolidatedAddresses
-                  profile={profile}
-                />
-                <UserPageIdentityStatementsSocialMediaAccounts
-                  statements={socialMediaAccounts}
-                  profile={profile}
-                  loading={isLoading}
-                />
+          <div className="tw-px-4 tw-py-6 lg:tw-px-8 tw-mx-auto tw-grid tw-grid-cols-1 xl:tw-gap-x-8 xl:tw-gap-y-2 lg:tw-mx-0 xl:tw-grid-cols-5">
+            <UserPageIdentityStatementsAbout
+              profile={profile}
+              statement={aboutStatement}
+            />
+
+            <div className="tw-col-span-full tw-space-y-6 md:tw-space-y-8">
+              <div className="tw-grid tw-grid-cols-1 tw-gap-x-8 tw-gap-y-8 xl:tw-gap-y-6 xl:tw-grid-cols-7">
+                <div className="tw-col-span-2">
+                  <UserPageIdentityStatementsConsolidatedAddresses
+                    profile={profile}
+                  />
+                </div>
+                <div className="tw-col-span-2">
+                  <UserPageIdentityStatementsSocialMediaAccounts
+                    statements={socialMediaAccounts}
+                    profile={profile}
+                    loading={isLoading}
+                  />
+                </div>
+                <div className="tw-col-span-3">
+                  <UserPageIdentityStatementsNFTAccounts
+                    statements={nftAccounts}
+                    profile={profile}
+                    loading={isLoading}
+                  />
+                </div>
               </div>
 
-              <div className="tw-grid tw-grid-cols-1 tw-gap-x-8 tw-gap-y-6 md:tw-grid-cols-2">
-                <UserPageIdentityStatementsContacts
-                  statements={contacts}
-                  profile={profile}
-                  loading={isLoading}
-                />
-                <UserPageIdentityStatementsSocialMediaVerificationPosts
-                  statements={socialMediaVerificationPosts}
-                  profile={profile}
-                  loading={isLoading}
-                />
-              </div>
-            </div>
+              <div className="tw-grid tw-grid-cols-1 tw-gap-x-8 tw-gap-y-8 xl:tw-gap-y-6 xl:tw-grid-cols-7">
+                <div className="tw-col-span-2">
+                  <UserPageIdentityStatementsContacts
+                    statements={contacts}
+                    profile={profile}
+                    loading={isLoading}
+                  />
+                </div>
 
-            <div className="tw-col-span-2 xl:tw-ml-auto">
-              <ul className="tw-pl-4 xl:tw-pl-10 2xl:px-0 tw-list-disc tw-text-iron-400 tw-text-sm tw-font-normal tw-space-y-1">
-                <li>All statements are optional.</li>
-                <li>All statements are fully and permanently public.</li>
-                <li>
-                  Seize does not connect to social media accounts or verify
-                  posts.
-                </li>
-                <li>The community will rate the accuracy of statements.</li>
-              </ul>
+                <div className="tw-col-span-2">
+                  <UserPageIdentityStatementsSocialMediaVerificationPosts
+                    statements={socialMediaVerificationPosts}
+                    profile={profile}
+                    loading={isLoading}
+                  />
+                </div>
+                <div className="tw-col-span-3">
+                  <ul className="tw-pl-4 tw-list-disc tw-text-iron-500 tw-text-sm tw-font-normal tw-space-y-1">
+                    <li>All statements are optional.</li>
+                    <li>All statements are fully and permanently public.</li>
+                    <li>
+                      Seize does not connect to social media accounts or verify
+                      posts.
+                    </li>
+                    <li>The community will rate the accuracy of statements.</li>
+                  </ul>
+                </div>
+              </div>
             </div>
           </div>
         </div>

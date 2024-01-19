@@ -22,10 +22,10 @@ export default function UserSettingsSave({
       <button
         disabled={isDisabled}
         type="submit"
-        className={`tw-w-full sm:tw-w-auto tw-flex tw-items-center tw-justify-center tw-relative tw-px-4 tw-py-3 tw-text-sm tw-font-semibold tw-text-white tw-border tw-border-solid tw-rounded-lg tw-transition tw-duration-300 tw-ease-out ${
+        className={`tw-w-full sm:tw-w-auto tw-flex tw-items-center tw-justify-center tw-relative tw-px-4 tw-py-3 tw-text-sm tw-font-semibold tw-border tw-border-solid tw-rounded-lg tw-transition tw-duration-300 tw-ease-out ${
           isDisabled
-            ? "tw-cursor-not-allowed tw-bg-iron-400 tw-border-iron-400"
-            : "tw-cursor-pointer tw-bg-primary-500 tw-border-primary-500 hover:tw-bg-primary-600 hover:tw-border-primary-600"
+            ? "tw-cursor-not-allowed tw-text-iron-500 tw-bg-iron-800 tw-border-iron-800"
+            : "tw-cursor-pointer tw-text-white tw-bg-primary-500 tw-border-primary-500 hover:tw-bg-primary-600 hover:tw-border-primary-600"
         }`}
       >
         <div style={{ visibility: loading ? "hidden" : "visible" }}>
@@ -34,7 +34,7 @@ export default function UserSettingsSave({
         {loading && (
           <svg
             aria-hidden="true"
-            role="status"
+            role="output"
             className="tw-inline tw-w-5 tw-h-5 tw-text-primary-400 tw-animate-spin tw-absolute"
             viewBox="0 0 100 101"
             fill="none"

@@ -68,7 +68,7 @@ export default function UserSettingsImgSelectFile({
       onDragEnter={handleDrag}
       onDragLeave={handleDrag}
       onDragOver={handleDrag}
-      className="tw-flex tw-items-center tw-justify-center tw-w-full"
+      className="tw-group tw-flex tw-items-center tw-justify-center tw-w-full"
     >
       <label
         className={`
@@ -92,7 +92,7 @@ export default function UserSettingsImgSelectFile({
           )}
           {!imageToShow && (
             <>
-              <div className="tw-flex tw-h-10 tw-w-10 tw-items-center tw-justify-center tw-rounded-lg tw-bg-iron-800 tw-border tw-border-solid tw-border-iron-700">
+              <div className="tw-flex tw-h-10 tw-w-10 tw-items-center tw-justify-center tw-rounded-lg tw-bg-iron-900 group-hover:tw-bg-iron-800 tw-border tw-border-solid tw-border-iron-700 tw-transition tw-duration-300 tw-ease-out">
                 <div className="tw-flex tw-items-center tw-justify-center tw-flex-shrink-0 tw-h-5 tw-w-5 tw-text-iron-50">
                   <svg
                     className="tw-flex-shrink-0 tw-h-6 tw-w-6 tw-text-iron-50"

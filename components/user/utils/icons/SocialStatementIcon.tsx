@@ -19,6 +19,17 @@ import MediumIcon from "./MediumIcon";
 import MirrorIcon from "./MirrorIcon";
 import YoutubeIcon from "./YoutubeIcon";
 import LinkIcon from "./LinkIcon";
+import BioIcon from "./BioIcon";
+import SuperRareIcon from "./SuperRareIcon";
+import FoundationIcon from "./FoundationIcon";
+import MakersPlaceIcon from "./MakersPlaceIcon";
+import KnownOriginIcon from "./KnownOriginIcon";
+import PepeWTFIcon from "./PepeWTFIcon";
+import OpenseaIcon from "./OpenseaIcon";
+import ArtBlocksIcon from "./ArtBlocksIcon";
+import DecaArtIcon from "./DecaArtIcon";
+import OnCyberIcon from "./OnCyberIcon";
+import TheLineIcon from "./TheLineIcon";
 
 export default function SocialStatementIcon({
   statementType,
@@ -64,6 +75,28 @@ export default function SocialStatementIcon({
       return <WebsiteIcon aria-hidden="true" />;
     case STATEMENT_TYPE.LINK:
       return <LinkIcon aria-hidden="true" />;
+    case STATEMENT_TYPE.BIO:
+      return <BioIcon aria-hidden="true" />;
+    case STATEMENT_TYPE.SUPER_RARE:
+      return <SuperRareIcon aria-hidden="true" />;
+    case STATEMENT_TYPE.FOUNDATION:
+      return <FoundationIcon aria-hidden="true" />;
+    case STATEMENT_TYPE.MAKERS_PLACE:
+      return <MakersPlaceIcon aria-hidden="true" />;
+    case STATEMENT_TYPE.KNOWN_ORIGIN:
+      return <KnownOriginIcon aria-hidden="true" />;
+    case STATEMENT_TYPE.PEPE_WTF:
+      return <PepeWTFIcon aria-hidden="true" />;
+    case STATEMENT_TYPE.OPENSEA:
+      return <OpenseaIcon aria-hidden="true" />;
+    case STATEMENT_TYPE.ART_BLOCKS:
+      return <ArtBlocksIcon aria-hidden="true" />;
+    case STATEMENT_TYPE.DECA_ART:
+      return <DecaArtIcon aria-hidden="true" />;
+    case STATEMENT_TYPE.ON_CYBER:
+      return <OnCyberIcon aria-hidden="true" />;
+    case STATEMENT_TYPE.THE_LINE:
+      return <TheLineIcon aria-hidden="true" />;
     default:
       assertUnreachable(statementType);
   }

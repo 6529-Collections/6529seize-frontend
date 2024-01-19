@@ -82,7 +82,7 @@ export default function UserPageIdentityStatementsConsolidatedAddressesItemPrima
 
   if (isPrimary) {
     return (
-      <span className="tw-ml-1 tw-text-xs tw-font-bold tw-text-neutral-500">
+      <span className="tw-ml-1 tw-text-xs tw-font-bold tw-text-iron-500">
         Primary
       </span>
     );
@@ -93,7 +93,7 @@ export default function UserPageIdentityStatementsConsolidatedAddressesItemPrima
       <button
         disabled={mutating}
         onClick={onSave}
-        className="tw-bg-transparent tw-whitespace-nowrap tw-border-none tw-ml-1 tw-text-xs tw-font-bold tw-text-neutral-500 hover:tw-text-primary-400"
+        className="tw-bg-transparent tw-whitespace-nowrap tw-border-none tw-ml-1 tw-text-xs tw-font-bold tw-text-iron-500 hover:tw-text-primary-400 tw-transition tw-duration-300 tw-ease-out"
       >
         {mutating ? <CircleLoader /> : "Make Primary"}
       </button>
