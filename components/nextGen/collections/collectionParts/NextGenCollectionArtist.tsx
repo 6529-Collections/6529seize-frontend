@@ -111,7 +111,9 @@ export default function NextGenCollectionArtist(props: Readonly<Props>) {
               <Row className="pt-3">
                 <Col className="d-flex align-items-center gap-2">
                   {cicStatements.map((s) => (
-                    <div className="tw-flex tw-items-center tw-flex-shrink-0 tw-h-8 tw-w-8 tw-text-iron-100">
+                    <div
+                      key={`cic-${s.statement_type}-${s.statement_value}`}
+                      className="tw-flex tw-items-center tw-flex-shrink-0 tw-h-8 tw-w-8 tw-text-iron-100">
                       <a
                         title={formatCiCTitle(s.statement_type)}
                         href={s.statement_value}

@@ -422,7 +422,10 @@ export default function NextGenMintWidget(props: Readonly<Props>) {
             </Form.Group>
             {alStatus === Status.LIVE &&
               proofResponse.map((response, index) => (
-                <Form.Group as={Row} className="pt-2 pl-2">
+                <Form.Group
+                  key={response.keccak}
+                  as={Row}
+                  className="pt-2 pl-2">
                   <Col>
                     <Form.Check
                       type="checkbox"
