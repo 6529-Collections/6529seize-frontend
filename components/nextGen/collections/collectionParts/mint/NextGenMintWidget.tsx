@@ -126,7 +126,10 @@ export default function NextGenMintWidget(props: Readonly<Props>) {
       }
     }
 
-    return proofs[proofs.length - 1];
+    return {
+      proof: proofs[proofs.length - 1],
+      index: proofs.length - 1,
+    };
   }
 
   useEffect(() => {
