@@ -4,7 +4,16 @@ import { useClickAway, useKeyPressEvent } from "react-use";
 import { UserPageStatsActivityWalletFilterType } from "../UserPageStatsActivityWallet";
 import UserPageStatsActivityWalletFilterItem from "./UserPageStatsActivityWalletFilterItem";
 
-export default function UserPageStatsActivityWalletFilter() {
+
+export default function UserPageStatsActivityWalletFilter({
+  activeFilter,
+  setActiveFilter,
+}: {
+  readonly activeFilter: UserPageStatsActivityWalletFilterType;
+  readonly setActiveFilter: (
+    filter: UserPageStatsActivityWalletFilterType
+  ) => void;
+}) {
   const ACTIVITY_WALLET_FILTER_TYPE_TO_TITLE: Record<
     UserPageStatsActivityWalletFilterType,
     string
@@ -17,6 +26,7 @@ export default function UserPageStatsActivityWalletFilter() {
     [UserPageStatsActivityWalletFilterType.TRANSFERS]: "Transfers",
     [UserPageStatsActivityWalletFilterType.BURNS]: "Burns",
   };
+
   const [isOpen, setIsOpen] = useState(false);
   const [iconScope, animateIcon] = useAnimate();
   const toggleOpen = () => setIsOpen(!isOpen);
@@ -30,11 +40,6 @@ export default function UserPageStatsActivityWalletFilter() {
   const listRef = useRef<HTMLDivElement>(null);
   useClickAway(listRef, () => setIsOpen(false));
   useKeyPressEvent("Escape", () => setIsOpen(false));
-
-  const [activeFilter, setActiveFilter] =
-    useState<UserPageStatsActivityWalletFilterType>(
-      UserPageStatsActivityWalletFilterType.ALL
-    );
 
   const onFilter = (filter: UserPageStatsActivityWalletFilterType) => {
     setActiveFilter(filter);

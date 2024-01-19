@@ -14,6 +14,7 @@ export enum USER_PAGE_ACTIVITY_TAB {
 }
 
 const SEARCH_PARAM_ACTIVITY = "activity";
+export const WALLET_ACTIVITY_FILTER_PARAM = "wallet-activity";
 
 const ENUM_AND_PATH: { type: USER_PAGE_ACTIVITY_TAB; path: string }[] = [
   { type: USER_PAGE_ACTIVITY_TAB.WALLET_ACTIVITY, path: "wallet-activity" },
@@ -52,9 +53,12 @@ export default function UserPageActivityWrapper({
   }, [activity]);
 
   const createQueryString = useCallback(
-    (name: string, value: string) => {
+    (name: string, value: USER_PAGE_ACTIVITY_TAB) => {
       const params = new URLSearchParams(searchParams.toString());
-      params.set(name, value);
+      params.set(name, enumToPath(value));
+      if (value !== USER_PAGE_ACTIVITY_TAB.WALLET_ACTIVITY) {
+        params.delete(WALLET_ACTIVITY_FILTER_PARAM);
+      }
 
       return params.toString();
     },
@@ -63,9 +67,7 @@ export default function UserPageActivityWrapper({
 
   const onActiveTab = (tab: USER_PAGE_ACTIVITY_TAB) => {
     router.replace(
-      pathname +
-        "?" +
-        createQueryString(SEARCH_PARAM_ACTIVITY, enumToPath(tab)),
+      pathname + "?" + createQueryString(SEARCH_PARAM_ACTIVITY, tab),
       undefined,
       { shallow: true }
     );
