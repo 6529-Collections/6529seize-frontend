@@ -117,12 +117,11 @@ export default function UserPageHeaderAboutEdit({
   return (
     <form onSubmit={onSubmit}>
       <textarea
-        className="tw-form-input tw-appearance-none tw-block tw-w-full tw-rounded-lg tw-border-0 tw-py-3 tw-pl-4 tw-pr-3 tw-bg-iron-950 tw-text-iron-50 tw-font-normal tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-800 placeholder:tw-text-iron-400 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset hover:tw-ring-neutral-700 focus:tw-ring-primary-400 tw-text-base sm:tw-leading-6 
-        tw-transition tw-duration-300 tw-ease-out"
+        className="tw-form-input tw-appearance-none tw-block tw-w-full tw-rounded-lg tw-border-0 tw-py-3 tw-px-3 tw-bg-iron-900 tw-text-iron-50 tw-font-normal tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-700 placeholder:tw-text-iron-400 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 hover:tw-ring-iron-600 tw-text-base tw-transition tw-duration-300 tw-ease-out"
         name="profile-about"
         id="profile-about-input"
         cols={60}
-        rows={10}
+        rows={4}
         required
         value={value}
         onChange={handleInputChange}
@@ -133,12 +132,12 @@ export default function UserPageHeaderAboutEdit({
         <div className="tw-text-sm tw-text-iron-500">
           {value.length}/{MAX_STATEMENT_LENGTH}
         </div>
-        <div className="tw-inline-flex tw-space-x-2">
+        <div className="tw-mt-3 tw-inline-flex tw-space-x-3">
           <button
             disabled={loading}
             onClick={onClose}
             type="button"
-            className={`tw-mt-3 sm:tw-mt-0 tw-w-full sm:tw-w-auto tw-bg-iron-900 tw-px-4 tw-py-3 tw-text-sm tw-font-semibold tw-text-white tw-border tw-border-solid tw-border-iron-700 tw-rounded-lg tw-transition tw-duration-300 tw-ease-out ${
+            className={`tw-w-full sm:tw-w-auto tw-bg-iron-900 tw-px-4 tw-py-3 tw-text-sm tw-font-semibold tw-text-white tw-border tw-border-solid tw-border-iron-700 tw-rounded-lg tw-transition tw-duration-300 tw-ease-out ${
               loading
                 ? "tw-cursor-not-allowed"
                 : "hover:tw-bg-iron-800 hover:tw-border-iron-700"
@@ -149,7 +148,7 @@ export default function UserPageHeaderAboutEdit({
           <button
             disabled={isDisabled}
             type="submit"
-            className={`tw-mt-3 tw-w-full sm:tw-w-auto tw-flex tw-items-center tw-justify-center tw-relative tw-px-4 tw-py-3 tw-text-sm tw-font-semibold tw-border tw-border-solid tw-rounded-lg tw-transition tw-duration-300 tw-ease-out ${
+            className={`tw-w-full sm:tw-w-auto tw-flex tw-items-center tw-justify-center tw-relative tw-px-4 tw-py-3 tw-text-sm tw-font-semibold tw-border tw-border-solid tw-rounded-lg tw-transition tw-duration-300 tw-ease-out ${
               isDisabled
                 ? "tw-cursor-not-allowed tw-text-iron-500 tw-bg-iron-800 tw-border-iron-800"
                 : "tw-cursor-pointer tw-text-white tw-bg-primary-500 tw-border-primary-500 hover:tw-bg-primary-600 hover:tw-border-primary-600"

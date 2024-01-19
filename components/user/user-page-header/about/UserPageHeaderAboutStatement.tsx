@@ -7,13 +7,13 @@ export default function UserPageHeaderAboutStatement({
 }) {
   if (!statement) {
     return (
-      <div className="tw-mt-3 tw-text-sm tw-italic tw-text-iron-500">
-        No About statement set yet. Click to add one.
+      <div className="tw-mt-3 tw-text-sm tw-italic">
+        Click to add an About statement
       </div>
     );
   }
   return (
-    <div className="tw-mb-0 tw-mt-2 tw-text-iron-400 tw-text-base tw-font-normal tw-whitespace-pre-line">
+    <div className="tw-mb-0 tw-text-iron-400 tw-text-sm sm:tw-text-base tw-font-normal tw-whitespace-pre-line">
       {statement.statement_value}
     </div>
   );

@@ -44,20 +44,18 @@ export default function UserPageHeaderAbout({
   };
 
   return (
-    <div className="tw-col-span-full tw-pb-5 tw-mb-5 tw-border-b tw-border-solid tw-border-t-0 tw-border-x-0  tw-border-iron-800">
+    <div className="tw-col-span-full">
       <div className="tw-max-w-full lg:tw-max-w-prose tw-mt-4">
         {view === AboutStatementView.STATEMENT && (
           <button
             onClick={onEditClick}
             disabled={!canEdit}
-            className={`${
-              canEdit ? "hover:tw-text-neutral-400" : ""
-            } tw-text-left tw-group tw-bg-transparent tw-border-none tw-m-0 tw-p-0 tw-relative tw-transition tw-duration-300 tw-ease-out`}
+            className="tw-text-iron-500 hover:tw-text-iron-200 tw-text-left tw-group tw-bg-transparent tw-border-none tw-m-0 tw-p-0 tw-relative tw-transition tw-duration-300 tw-ease-out"
           >
             <UserPageHeaderAboutStatement statement={statement} />
             {canEdit && (
               <div className="group-hover:tw-block tw-hidden tw-absolute tw-inset-0 tw-text-neutral-400">
-                <div className="tw-absolute tw-top-1.5 -tw-left-5 sm:-tw-left-6">
+                <div className="tw-absolute tw-top-1.5 -tw-right-7">
                   <PencilIcon />
                 </div>
               </div>
