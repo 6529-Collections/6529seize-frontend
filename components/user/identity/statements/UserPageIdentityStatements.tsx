@@ -8,7 +8,7 @@ import UserPageIdentityAddStatementsHeader from "./header/UserPageIdentityAddSta
 import { useRouter } from "next/router";
 import { commonApiFetch } from "../../../../services/api/common-api";
 import { useEffect, useState } from "react";
-import { STATEMENT_GROUP, STATEMENT_TYPE } from "../../../../helpers/Types";
+import { STATEMENT_GROUP } from "../../../../helpers/Types";
 import UserPageIdentityStatementsSocialMediaAccounts from "./social-media-accounts/UserPageIdentityStatementsSocialMediaAccounts";
 import UserPageIdentityStatementsContacts from "./contacts/UserPageIdentityStatementsContacts";
 import UserPageIdentityStatementsSocialMediaVerificationPosts from "./social-media-verification-posts/UserPageIdentityStatementsSocialMediaVerificationPosts";
@@ -26,9 +26,6 @@ export default function UserPageIdentityStatements({
     CicStatement[]
   >([]);
 
-  const [aboutStatement, setAboutStatement] = useState<CicStatement | null>(
-    null
-  );
   const [contacts, setContacts] = useState<CicStatement[]>([]);
   const [nftAccounts, setNftAccounts] = useState<CicStatement[]>([]);
   const [socialMediaVerificationPosts, setSocialMediaVerificationPosts] =
@@ -45,7 +42,6 @@ export default function UserPageIdentityStatements({
 
   useEffect(() => {
     if (!statements) {
-      setAboutStatement(null);
       setNftAccounts([]);
       setSocialMediaAccounts([]);
       setContacts([]);
@@ -55,13 +51,6 @@ export default function UserPageIdentityStatements({
     const sortedStatements = [...statements].sort((a, d) => {
       return new Date(d.crated_at).getTime() - new Date(a.crated_at).getTime();
     });
-    setAboutStatement(
-      sortedStatements.find(
-        (s) =>
-          s.statement_group === STATEMENT_GROUP.GENERAL &&
-          s.statement_type === STATEMENT_TYPE.BIO
-      ) ?? null
-    );
     setSocialMediaAccounts(
       sortedStatements.filter(
         (s) => s.statement_group === STATEMENT_GROUP.SOCIAL_MEDIA_ACCOUNT

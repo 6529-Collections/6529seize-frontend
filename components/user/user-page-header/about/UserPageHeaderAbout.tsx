@@ -3,7 +3,7 @@ import {
   IProfileAndConsolidations,
 } from "../../../../entities/IProfile";
 import { useEffect, useState } from "react";
-import PencilIcon, { PencilIconSize } from "../../../utils/icons/PencilIcon";
+import PencilIcon from "../../../utils/icons/PencilIcon";
 import UserPageHeaderAboutStatement from "./UserPageHeaderAboutStatement";
 import UserPageHeaderAboutEdit from "./UserPageHeaderAboutEdit";
 
