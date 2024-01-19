@@ -5,8 +5,6 @@ import { useEffect, useState } from "react";
 import { commonApiFetch } from "../../../services/api/common-api";
 import UserPageStatsTDHcharts from "../to-be-removed/UserPageStatsTDHcharts";
 import { NFTLite } from "../../../entities/INFT";
-import UserPageActivity from "../to-be-removed/UserPageActivity";
-import UserPageDistributions from "../to-be-removed/UserPageDistributions";
 import UserPageHeaderAddresses from "../user-page-header/addresses/UserPageHeaderAddresses";
 import UserPageStatsTags from "./tags/UserPageStatsTags";
 import UserPageStatsCollected from "./UserPageStatsCollected";
