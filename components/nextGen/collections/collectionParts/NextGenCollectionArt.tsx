@@ -1,8 +1,12 @@
 import styles from "../NextGen.module.scss";
-import { Container, Row, Col, FormCheck, Accordion } from "react-bootstrap";
+import { Container, Row, Col, Accordion, Form } from "react-bootstrap";
 import NextGenTokenList from "../NextGenTokenList";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { NextGenCollection, TraitValues } from "../../../../entities/INextgen";
+import {
+  NextGenCollection,
+  TraitValuePair,
+  TraitValues,
+} from "../../../../entities/INextgen";
 import { useEffect, useState } from "react";
 import { commonApiFetch } from "../../../../services/api/common-api";
 import { useRouter } from "next/router";
@@ -13,11 +17,6 @@ interface Props {
   show_view_all?: boolean;
 }
 
-interface TraitValuePair {
-  trait: string;
-  value: string;
-}
-
 export default function NextGenCollectionArt(props: Readonly<Props>) {
   const router = useRouter();
   const [traits, setTraits] = useState<TraitValues[]>([]);
@@ -26,9 +25,11 @@ export default function NextGenCollectionArt(props: Readonly<Props>) {
   const [selectedTraitValues, setSelectedTraitValues] = useState<
     TraitValuePair[]
   >([]);
+  const [totalResults, setTotalResults] = useState(0);
+  const [totalResultsSet, setTotalResultsSet] = useState(false);
 
   useEffect(() => {
-    if (traitsLoaded) {
+    if (traitsLoaded && !routerLoaded) {
       if (router.query.traits) {
         const traitsQuery = router.query.traits as string;
         const traitValues = traitsQuery.split(",");
@@ -64,11 +65,11 @@ export default function NextGenCollectionArt(props: Readonly<Props>) {
   useEffect(() => {
     if (!props.show_view_all && routerLoaded) {
       if (selectedTraitValues.length > 0) {
-        const traitsQuery = selectedTraitValues
+        const traitsQ = selectedTraitValues
           .map((t) => `${t.trait}:${t.value}`)
           .join(",");
         router.push(
-          `/nextgen/collection/${props.collection.id}/art?traits=${traitsQuery}`,
+          `/nextgen/collection/${props.collection.id}/art?traits=${traitsQ}`,
           undefined,
           { shallow: true }
         );
@@ -84,13 +85,16 @@ export default function NextGenCollectionArt(props: Readonly<Props>) {
     }
   }, [props.show_view_all, selectedTraitValues, routerLoaded]);
 
+  useEffect(() => {
+    if (totalResultsSet) {
+      setTotalResultsSet(false);
+    }
+  }, [selectedTraitValues]);
+
   function getDefaultActiveKeys() {
     const activeKeys: string[] = [];
     traits.map((t, index) => {
-      if (
-        selectedTraitValues.some((st) => st.trait === t.trait) ||
-        selectedTraitValues.length === 0
-      ) {
+      if (selectedTraitValues.some((st) => st.trait === t.trait)) {
         activeKeys.push(index.toString());
       }
     });
@@ -101,7 +105,16 @@ export default function NextGenCollectionArt(props: Readonly<Props>) {
     <Container className="no-padding">
       <Row>
         <Col className="d-flex align-items-center justify-content-between">
-          <h3 className="mb-0">The Art</h3>
+          <h3 className="mb-0">
+            The Art{" "}
+            {totalResultsSet ? (
+              <span className="font-color-h font-smaller">
+                (x{totalResults})
+              </span>
+            ) : (
+              <DotLoader />
+            )}
+          </h3>
           {props.show_view_all && (
             <a
               href={`/nextgen/collection/${props.collection.id}/art`}
@@ -123,19 +136,24 @@ export default function NextGenCollectionArt(props: Readonly<Props>) {
           <Col sm={12} md={2}>
             <Container>
               <Row>
-                <Col className="font-color-h font-bolder font-larger">
-                  Traits
+                <Col className="font-color-h font-bolder font-larger no-padding">
+                  Traits{" "}
+                  {selectedTraitValues.length > 0 && (
+                    <span className="font-color-h font-smaller">
+                      ({selectedTraitValues.length} selected)
+                    </span>
+                  )}
                 </Col>
               </Row>
               <Row>
                 <Col className="d-flex flex-column pt-2 pb-2 no-padding">
-                  {routerLoaded && (
-                    <Accordion
-                      className={styles.traitsAccordion}
-                      defaultActiveKey={getDefaultActiveKeys()}>
-                      {traits.map((tr, index) => (
+                  {routerLoaded &&
+                    traits.map((tr, index) => (
+                      <Accordion
+                        key={`trait-${tr.trait.replaceAll(" ", "-")}`}
+                        className={styles.traitsAccordion}
+                        defaultActiveKey={getDefaultActiveKeys()}>
                         <Accordion.Item
-                          key={`trait-${tr.trait.replaceAll(" ", "-")}`}
                           defaultChecked={true}
                           className={styles.traitsAccordionItem}
                           eventKey={index.toString()}>
@@ -145,14 +163,14 @@ export default function NextGenCollectionArt(props: Readonly<Props>) {
                               x{tr.values.length}
                             </span>
                           </Accordion.Button>
-                          <Accordion.Body
-                            className={styles.traitsAccordionBody}>
-                            {tr.values.map((v) => (
-                              <FormCheck
-                                key={`trait-${v.replaceAll(" ", "-")}`}
+                          {tr.values.map((v) => (
+                            <Accordion.Body
+                              key={`trait-${v.replaceAll(" ", "-")}`}
+                              className={styles.traitsAccordionBody}>
+                              <Form.Check
                                 type="checkbox"
                                 label={v}
-                                name="trait"
+                                id={`trait-${v.replaceAll(" ", "-")}`}
                                 checked={selectedTraitValues.some(
                                   (t) =>
                                     t.trait === tr.trait &&
@@ -171,8 +189,10 @@ export default function NextGenCollectionArt(props: Readonly<Props>) {
                                     setSelectedTraitValues(
                                       selectedTraitValues.filter(
                                         (t) =>
-                                          t.trait !== tr.trait &&
-                                          t.value !== v.toLowerCase()
+                                          t.trait !== tr.trait ||
+                                          (t.trait === tr.trait &&
+                                            t.value.toLowerCase() !==
+                                              v.toLowerCase())
                                       )
                                     );
                                   } else {
@@ -186,24 +206,28 @@ export default function NextGenCollectionArt(props: Readonly<Props>) {
                                   }
                                 }}
                               />
-                            ))}
-                          </Accordion.Body>
+                            </Accordion.Body>
+                          ))}
                         </Accordion.Item>
-                      ))}
-                    </Accordion>
-                  )}
+                      </Accordion>
+                    ))}
                 </Col>
               </Row>
             </Container>
           </Col>
         )}
-        <Col sm={12} md={props.show_view_all ? 12 : 10}>
-          <NextGenTokenList
-            collection={props.collection}
-            limit={props.show_view_all ? 9 : undefined}
-            // selected_traits={selectedTraits}
-          />
-        </Col>
+        {(routerLoaded || totalResultsSet) && (
+          <Col sm={12} md={props.show_view_all ? 12 : 10}>
+            <NextGenTokenList
+              collection={props.collection}
+              selected_traits={selectedTraitValues}
+              setTotalResults={(totalResults: number) => {
+                setTotalResults(totalResults);
+                setTotalResultsSet(true);
+              }}
+            />
+          </Col>
+        )}
       </Row>
     </Container>
   );

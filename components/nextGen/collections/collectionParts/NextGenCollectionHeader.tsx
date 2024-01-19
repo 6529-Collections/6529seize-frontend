@@ -257,7 +257,12 @@ export default function NextGenCollectionHeader(props: Readonly<Props>) {
             )}
           </span>
           <span className="font-larger">
-            by <b>{props.collection.artist}</b>
+            by{" "}
+            <b>
+              <a href={`/${props.collection.artist_address}`}>
+                {props.collection.artist}
+              </a>
+            </b>
           </span>
           <span className="font-larger d-inline-flex align-items-center">
             <b>

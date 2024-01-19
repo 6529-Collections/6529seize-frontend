@@ -7,6 +7,7 @@ import NextGenCollectionDetails from "./NextGenCollectionDetails";
 import NextGenCollectionSlideshow from "./NextGenCollectionSlideshow";
 import { NextGenCollection } from "../../../../entities/INextgen";
 import { useState } from "react";
+import NextGenCollectionArtist from "./NextGenCollectionArtist";
 
 interface Props {
   collection: NextGenCollection;
@@ -86,6 +87,13 @@ export default function NextGenCollection(props: Readonly<Props>) {
             </Col>
           </Row>
         </>
+      </Container>
+      <Container className="pt-2 pb-4">
+        <Row>
+          <Col>
+            <NextGenCollectionArtist collection={props.collection} />
+          </Col>
+        </Row>
       </Container>
     </>
   );

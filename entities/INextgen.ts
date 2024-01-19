@@ -66,3 +66,8 @@ export interface TraitValues {
   trait: string;
   values: string[];
 }
+
+export interface TraitValuePair {
+  trait: string;
+  value: string;
+}

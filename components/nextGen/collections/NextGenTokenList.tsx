@@ -1,6 +1,10 @@
 import { Col, Container, Row } from "react-bootstrap";
 import { NextGenTokenImage } from "./nextgenToken/NextGenTokenImage";
-import { NextGenCollection, NextGenToken } from "../../../entities/INextgen";
+import {
+  NextGenCollection,
+  NextGenToken,
+  TraitValuePair,
+} from "../../../entities/INextgen";
 import { useEffect, useState } from "react";
 import Pagination from "../../pagination/Pagination";
 import { commonApiFetch } from "../../../services/api/common-api";
@@ -9,7 +13,8 @@ import DotLoader from "../../dotLoader/DotLoader";
 interface Props {
   collection: NextGenCollection;
   limit?: number;
-  selected_traits?: string[];
+  selected_traits?: TraitValuePair[];
+  setTotalResults?: (totalResults: number) => void;
 }
 
 export default function NextGenTokenList(props: Readonly<Props>) {
@@ -24,7 +29,10 @@ export default function NextGenTokenList(props: Readonly<Props>) {
     setTokensLoaded(false);
     let endpoint = `nextgen/collections/${props.collection.id}/tokens?page_size=${pageSize}&page=${mypage}`;
     if (props.selected_traits) {
-      endpoint += `&traits=${props.selected_traits.join(",")}`;
+      const traitsQ = props.selected_traits
+        .map((t) => `${t.trait}:${t.value}`)
+        .join(",");
+      endpoint += `&traits=${traitsQ}`;
     }
     commonApiFetch<{
       count: number;
@@ -35,6 +43,9 @@ export default function NextGenTokenList(props: Readonly<Props>) {
       endpoint: endpoint,
     }).then((response) => {
       setTotalResults(response.count);
+      if (props.setTotalResults) {
+        props.setTotalResults(response.count);
+      }
       setTokens(response.data);
       setTokensLoaded(true);
     });

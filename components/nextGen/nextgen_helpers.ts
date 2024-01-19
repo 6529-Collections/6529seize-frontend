@@ -522,7 +522,7 @@ export function useMintSharedState() {
     public: 0,
     total: 0,
   });
-  const [proofResponse, setProofResponse] = useState<ProofResponse>();
+  const [proofResponse, setProofResponse] = useState<ProofResponse[]>([]);
   const [burnProofResponse, setBurnProofResponse] =
     useState<ProofResponseBurn>();
   const [mintForAddress, setMintForAddress] = useState<string>();

@@ -10,8 +10,6 @@ import {
 import NextGenContractWriteStatus from "../../../NextGenContractWriteStatus";
 import { NEXTGEN_CHAIN_ID, NEXTGEN_MINTER } from "../../../nextgen_contracts";
 import {
-  AdditionalData,
-  PhaseTimes,
   ProofResponse,
   Status,
   TokensPerAddress,
@@ -23,7 +21,7 @@ import {
   useEnsAddress,
   useEnsName,
 } from "wagmi";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { NULL_ADDRESS } from "../../../../../constants";
 import { fetchUrl } from "../../../../../services/6529api";
 import { useWeb3Modal } from "@web3modal/react";
@@ -59,6 +57,14 @@ export default function NextGenMintWidget(props: Readonly<Props>) {
   const account = useAccount();
   const chainId = useChainId();
   const web3Modal = useWeb3Modal();
+
+  const [currentProof, setCurrentProof] = useState<
+    | {
+        index: number;
+        proof: ProofResponse;
+      }
+    | undefined
+  >();
 
   const alStatus = getStatusFromDates(
     props.collection.allowlist_start,
@@ -109,13 +115,32 @@ export default function NextGenMintWidget(props: Readonly<Props>) {
     props.mintingForDelegator(mintingForDelegator);
   }, [mintingForDelegator]);
 
+  function findActiveProof(proofs: ProofResponse[]) {
+    let runningTotal = 0;
+
+    for (let index = 0; index < proofs.length; index++) {
+      const response = proofs[index];
+      runningTotal += response.spots;
+      if (props.mint_counts.allowlist < runningTotal) {
+        return { proof: response, index };
+      }
+    }
+
+    return undefined;
+  }
+
   useEffect(() => {
     if (account.address && props.collection.allowlist_end > 0) {
       const wallet = mintingForDelegator ? mintForAddress : account.address;
       if (wallet) {
-        const url = `${process.env.API_ENDPOINT}/api/nextgen/proofs/${props.collection.merkle_root}/${wallet}`;
-        fetchUrl(url).then((response: ProofResponse) => {
+        const merkleRoot = props.collection.merkle_root;
+        const url = `${process.env.API_ENDPOINT}/api/nextgen/proofs/${merkleRoot}/${wallet}`;
+        fetchUrl(url).then((response: ProofResponse[]) => {
+          for (let i = 1; i < response.length; i++) {
+            response[i].spots -= response[i - 1].spots;
+          }
           setProofResponse(response);
+          setCurrentProof(findActiveProof(response));
         });
       }
     }
@@ -138,7 +163,7 @@ export default function NextGenMintWidget(props: Readonly<Props>) {
 
   function validate() {
     let e: string[] = [];
-    if (proofResponse && alStatus == Status.LIVE && 0 >= proofResponse.spots) {
+    if (proofResponse && alStatus == Status.LIVE && 0 >= proofResponse.length) {
       e.push("Not in Allowlist");
     }
     return e;
@@ -173,8 +198,8 @@ export default function NextGenMintWidget(props: Readonly<Props>) {
       (alStatus == Status.LIVE && !proofResponse) ||
       (alStatus != Status.LIVE && publicStatus != Status.LIVE) ||
       (alStatus == Status.LIVE &&
-        proofResponse &&
-        0 >= proofResponse.spots - props.mint_counts.allowlist) ||
+        currentProof &&
+        0 >= currentProof.proof.spots - props.mint_counts.allowlist) ||
       (publicStatus == Status.LIVE &&
         0 >= props.collection.max_purchases - props.mint_counts.public) ||
       0 >= props.available_supply ||
@@ -188,12 +213,16 @@ export default function NextGenMintWidget(props: Readonly<Props>) {
         args: [
           props.collection.id,
           mintCount,
-          proofResponse && proofResponse.spots > 0 && alStatus == Status.LIVE
-            ? proofResponse.spots
+          currentProof &&
+          currentProof.proof.spots > 0 &&
+          alStatus == Status.LIVE
+            ? currentProof.proof.spots
             : 0,
-          proofResponse ? proofResponse.info : "",
+          currentProof ? currentProof.proof.info : "",
           mintToAddress,
-          proofResponse && alStatus == Status.LIVE ? proofResponse.proof : [],
+          currentProof && alStatus == Status.LIVE
+            ? currentProof.proof.proof
+            : [],
           mintingForDelegator ? mintForAddress : NULL_ADDRESS,
           salt,
         ],
@@ -202,7 +231,7 @@ export default function NextGenMintWidget(props: Readonly<Props>) {
   }, [isMinting]);
 
   useEffect(() => {
-    setProofResponse(undefined);
+    setProofResponse([]);
     if (account.address) {
       setMintToAddress(account.address);
       setMintToInput(account.address);
@@ -255,14 +284,15 @@ export default function NextGenMintWidget(props: Readonly<Props>) {
 
   function renderAllowlistStatus() {
     if (proofResponse && alStatus === Status.LIVE) {
-      if (proofResponse.spots > 0) {
+      const maxSpots = proofResponse.reduce((max, response) => {
+        return response.spots > max ? response.spots : max;
+      }, 0);
+      if (maxSpots > 0) {
         const spotsRemaining =
-          proofResponse.spots > props.mint_counts.allowlist
-            ? ` (${
-                proofResponse.spots - props.mint_counts.allowlist
-              } remaining)`
+          maxSpots > props.mint_counts.allowlist
+            ? ` (${maxSpots - props.mint_counts.allowlist} remaining)`
             : "";
-        return `${props.mint_counts.allowlist} / ${proofResponse.spots}${spotsRemaining}`;
+        return `${props.mint_counts.allowlist} / ${maxSpots}${spotsRemaining}`;
       } else {
         return "You don't have any spots in the allowlist";
       }
@@ -284,10 +314,12 @@ export default function NextGenMintWidget(props: Readonly<Props>) {
   }
 
   function renderAllowlistOptions() {
-    if (alStatus == Status.LIVE && proofResponse && proofResponse.spots > 0) {
+    if (alStatus == Status.LIVE && proofResponse && proofResponse.length > 0) {
       return createArray(
         1,
-        proofResponse.spots - props.mint_counts.allowlist
+        currentProof
+          ? currentProof.proof.spots - props.mint_counts.allowlist
+          : 0
       ).map((i) => (
         <option selected key={`allowlist-mint-count-${i}`} value={i}>
           {i > 0 ? i : `n/a`}
@@ -388,6 +420,24 @@ export default function NextGenMintWidget(props: Readonly<Props>) {
                 </b>
               </Form.Label>
             </Form.Group>
+            {alStatus === Status.LIVE &&
+              proofResponse.map((response, index) => (
+                <Form.Group as={Row} className="pt-2 pl-2">
+                  <Col>
+                    <Form.Check
+                      type="checkbox"
+                      label={
+                        <>
+                          Spots: {response.spots}, Data: {response.info}
+                        </>
+                      }
+                      id={`${response.keccak}`}
+                      checked={currentProof && currentProof.index >= index}
+                      disabled={currentProof && index > currentProof.index}
+                      className={`pt-1 pb-1 `}></Form.Check>
+                  </Col>
+                </Form.Group>
+              ))}
             <Form.Group as={Row} className="pb-2">
               <Form.Label column sm={12} className="d-flex align-items-center">
                 Mint Count
@@ -407,8 +457,8 @@ export default function NextGenMintWidget(props: Readonly<Props>) {
                   disabled={
                     !account.isConnected ||
                     (publicStatus !== Status.LIVE &&
-                      proofResponse &&
-                      proofResponse.spots <= 0)
+                      currentProof &&
+                      currentProof.proof.spots <= 0)
                   }
                   onChange={(e: any) => {
                     setMintCount(parseInt(e.currentTarget.value));

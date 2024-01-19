@@ -235,7 +235,8 @@ export default function NextGenMint(props: Readonly<Props>) {
 
   useEffect(() => {
     if (account.address && props.collection.merkle_root) {
-      const url = `${process.env.API_ENDPOINT}/api/nextgen/merkle_roots/${props.collection.merkle_root}`;
+      const merkleRoot = props.collection.merkle_root;
+      const url = `${process.env.API_ENDPOINT}/api/nextgen/merkle_roots/${merkleRoot}`;
       fetchUrl(url).then((response: CollectionWithMerkle) => {
         if (response) {
           setCollection(response);
@@ -370,13 +371,20 @@ export default function NextGenMint(props: Readonly<Props>) {
       </Row>
       <Row className="pt-4 pb-4">
         <Col className="d-flex align-items-start justify-content-start gap-3">
-          {tokenPreview && (
-            <NextGenTokenImage
-              token={tokenPreview}
-              hide_info={true}
-              hide_link={true}
-            />
-          )}
+          <Image
+            loading="eager"
+            width="0"
+            height="0"
+            style={{
+              height: "auto",
+              width: "auto",
+              maxHeight: "100%",
+              maxWidth: "100%",
+              padding: "10px",
+            }}
+            src={props.collection.image}
+            alt={props.collection.name}
+          />
           <Container className="no-padding">
             <Row className="pt-2">
               <Col className="d-flex gap-2">

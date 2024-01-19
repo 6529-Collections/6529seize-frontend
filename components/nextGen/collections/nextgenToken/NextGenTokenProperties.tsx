@@ -25,18 +25,22 @@ export default function NextgenTokenProperties(props: Readonly<Props>) {
     <Container className="no-padding">
       <Row>
         <Col>
+          <h5>Traits</h5>
+        </Col>
+      </Row>
+      <Row>
+        <Col>
           <Table bordered={false}>
             <tbody>
               {traits.map((t) => (
-                <tr key={`trait-${t.trait.replaceAll(" ", "-")}`}>
-                  <td>
-                    <a
-                      href={`/nextgen/collection/${props.collection_id}/art?traits=${t.trait}:${t.value}`}
-                      className="decoration-none decoration-hover-underline">
-                      {t.trait}
-                    </a>
-                  </td>
-                  <td className="d-flex gap-2">
+                <tr
+                  key={`trait-${t.trait.replaceAll(" ", "-")}`}
+                  className="decoration-hover-underline cursor-pointer"
+                  onClick={() =>
+                    (window.location.href = `/nextgen/collection/${props.collection_id}/art?traits=${t.trait}:${t.value}`)
+                  }>
+                  <td className="pt-1 pb-1">{t.trait}</td>
+                  <td className="pt-1 pb-1 d-flex gap-2">
                     <b>{t.value}</b>
                     <span className="font-color-h">
                       {t.value_score}/{t.trait_score}
