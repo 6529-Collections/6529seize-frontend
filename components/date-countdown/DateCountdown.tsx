@@ -1,9 +1,16 @@
 import { useState, useEffect } from "react";
+import { Time } from "../../helpers/time";
 
 interface Props {
   title: string;
   date: Date;
   align: "vertical" | "horizontal";
+  calendar_event?: {
+    name: string;
+    start_seconds: number;
+    end_seconds: number;
+    description?: string;
+  };
 }
 
 export default function DateCountdown(props: Readonly<Props>) {
@@ -60,8 +67,33 @@ export default function DateCountdown(props: Readonly<Props>) {
           ? `d-flex align-items-center gap-2 justify-content-center`
           : "d-flex flex-column"
       }>
-      <span>{props.title}</span>
-      <span className="font-larger font-bolder">
+      <span className="d-flex justify-content-between align-items-center">
+        {props.title}
+        {props.calendar_event && (
+          <add-to-calendar-button
+            size="3"
+            name={props.calendar_event.name}
+            startDate={Time.seconds(
+              props.calendar_event.start_seconds
+            ).toIsoDateString()}
+            startTime={Time.seconds(
+              props.calendar_event.start_seconds
+            ).toIsoTimeString()}
+            endDate={Time.seconds(
+              props.calendar_event.end_seconds
+            ).toIsoDateString()}
+            endTime={Time.seconds(
+              props.calendar_event.end_seconds
+            ).toIsoTimeString()}
+            options="'Apple','Google','iCal','Microsoft365','MicrosoftTeams','Outlook.com','Yahoo'"
+            timeZone="UTC"
+            location="seize.io"
+            iCalFileName={props.calendar_event.name}
+            description={props.calendar_event.description}
+          />
+        )}
+      </span>
+      <span className="pt-2 font-larger font-bolder">
         {timeLeft.days > 0 && (
           <>
             {timeLeft.days} day{timeLeft.days !== 1 ? "s" : ""},{" "}

@@ -1,17 +1,17 @@
 import Head from "next/head";
-import styles from "../../styles/Home.module.scss";
-import Breadcrumb from "../../components/breadcrumb/Breadcrumb";
+import styles from "../../../styles/Home.module.scss";
+import Breadcrumb from "../../../components/breadcrumb/Breadcrumb";
 import { Container, Row, Col } from "react-bootstrap";
 import dynamic from "next/dynamic";
-import HeaderPlaceholder from "../../components/header/HeaderPlaceholder";
+import HeaderPlaceholder from "../../../components/header/HeaderPlaceholder";
 
-const Header = dynamic(() => import("../../components/header/Header"), {
+const Header = dynamic(() => import("../../../components/header/Header"), {
   ssr: false,
   loading: () => <HeaderPlaceholder />,
 });
 
 const NextGenAdminComponent = dynamic(
-  () => import("../../components/nextGen/admin/NextGenAdmin"),
+  () => import("../../../components/nextGen/admin/NextGenAdmin"),
   {
     ssr: false,
   }

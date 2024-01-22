@@ -1,8 +1,8 @@
 import styles from "../NextGen.module.scss";
-import { Button, Col, Container, Row } from "react-bootstrap";
+import { Col, Container, Row } from "react-bootstrap";
 import { useEffect, useState } from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
-import { Navigation, Pagination, A11y } from "swiper/modules";
+import { Navigation, A11y } from "swiper/modules";
 import { NextGenTokenImage } from "../nextgenToken/NextGenTokenImage";
 import { NextGenCollection, NextGenToken } from "../../../../entities/INextgen";
 import { commonApiFetch } from "../../../../services/api/common-api";
@@ -69,7 +69,7 @@ export default function NextGenCollectionSlideshow(props: Readonly<Props>) {
                   {tokens.map((token) => (
                     <SwiperSlide
                       key={`nextgen-carousel-${token.id}`}
-                      className="pt-2 pb-5">
+                      className="pt-2 pb-5 unselectable">
                       <NextGenTokenImage
                         token={token}
                         hide_info={currentSlide !== token.id}

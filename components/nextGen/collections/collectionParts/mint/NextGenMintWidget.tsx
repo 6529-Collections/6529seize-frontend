@@ -25,7 +25,6 @@ import { useEffect, useState } from "react";
 import { NULL_ADDRESS } from "../../../../../constants";
 import { fetchUrl } from "../../../../../services/6529api";
 import { useWeb3Modal } from "@web3modal/react";
-import { Spinner } from "../../NextGen";
 import {
   getStatusFromDates,
   useMintSharedState,
@@ -35,6 +34,7 @@ import {
   NextGenAdminMintingForDelegator,
 } from "./NextGenMintShared";
 import { NextGenCollection } from "../../../../../entities/INextgen";
+import { Spinner } from "./NextGenMint";
 
 interface Props {
   collection: NextGenCollection;
@@ -65,6 +65,7 @@ export default function NextGenMintWidget(props: Readonly<Props>) {
       }
     | undefined
   >();
+  const [originalProofs, setOriginalProofs] = useState<ProofResponse[]>([]);
 
   const alStatus = getStatusFromDates(
     props.collection.allowlist_start,
@@ -121,15 +122,15 @@ export default function NextGenMintWidget(props: Readonly<Props>) {
     for (let index = 0; index < proofs.length; index++) {
       const response = proofs[index];
       runningTotal += response.spots;
+      if (index > 0) {
+        runningTotal -= proofs[index - 1].spots;
+      }
       if (props.mint_counts.allowlist < runningTotal) {
         return { proof: response, index };
       }
     }
 
-    return {
-      proof: proofs[proofs.length - 1],
-      index: proofs.length - 1,
-    };
+    return undefined;
   }
 
   useEffect(() => {
@@ -157,6 +158,7 @@ export default function NextGenMintWidget(props: Readonly<Props>) {
           }
           setProofResponse(proofResponses);
           setCurrentProof(findActiveProof(response));
+          setOriginalProofs(response);
         });
       }
     }
@@ -523,6 +525,9 @@ export default function NextGenMintWidget(props: Readonly<Props>) {
               isLoading={mintWrite.isLoading}
               hash={mintWrite.data?.hash}
               error={mintWrite.error}
+              onSuccess={() => {
+                setCurrentProof(findActiveProof(originalProofs));
+              }}
             />
           </Form>
         </Col>

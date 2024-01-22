@@ -12,6 +12,7 @@ import SocialStatementIcon from "../../../user/utils/icons/SocialStatementIcon";
 
 interface Props {
   collection: NextGenCollection;
+  link_collection?: boolean;
 }
 
 function formatCiCTitle(s: string) {
@@ -60,29 +61,28 @@ export default function NextGenCollectionArtist(props: Readonly<Props>) {
 
   return (
     <Container className="no-padding">
-      <Row>
-        <Col>
-          <h4>About the Artist</h4>
-        </Col>
-      </Row>
       <Row className="pt-4">
         <Col
           sm={12}
           md={6}
           className="d-flex align-items-center justify-content-center">
-          <Image
-            width={0}
-            height={0}
-            style={{
-              height: "auto",
-              width: "auto",
-              maxHeight: "400px",
-              maxWidth: "100%",
-            }}
-            src={pfp}
-            alt={props.collection.artist}
-            className="cursor-pointer"
-          />
+          {pfp && (
+            <Image
+              priority
+              loading="eager"
+              width={0}
+              height={0}
+              style={{
+                height: "auto",
+                width: "auto",
+                maxHeight: "400px",
+                maxWidth: "100%",
+              }}
+              src={pfp}
+              alt={props.collection.artist}
+              className="cursor-pointer"
+            />
+          )}
         </Col>
         <Col sm={12} md={5}>
           <Container className="no-padding">
@@ -123,6 +123,16 @@ export default function NextGenCollectionArtist(props: Readonly<Props>) {
                       </a>
                     </div>
                   ))}
+                </Col>
+              </Row>
+            )}
+            {props.link_collection && (
+              <Row className="pt-4">
+                <Col>
+                  Collection:{" "}
+                  <a href={`/nextgen/collection/${props.collection.id}`}>
+                    #{props.collection.id} - {props.collection.name}
+                  </a>
                 </Col>
               </Row>
             )}

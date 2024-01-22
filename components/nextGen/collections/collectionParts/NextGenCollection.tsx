@@ -91,6 +91,11 @@ export default function NextGenCollection(props: Readonly<Props>) {
       <Container className="pt-2 pb-4">
         <Row>
           <Col>
+            <h4>About the Artist</h4>
+          </Col>
+        </Row>
+        <Row>
+          <Col>
             <NextGenCollectionArtist collection={props.collection} />
           </Col>
         </Row>

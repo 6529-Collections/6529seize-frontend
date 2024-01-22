@@ -86,7 +86,7 @@ export default function NextgenTokenAbout(props: Readonly<Props>) {
           </span>
         </Col>
         <Col xs={12} className="pt-1 pb-1 d-flex flex-column">
-          <span className="font-color-h">Licence</span>
+          <span className="font-color-h">License</span>
           <span>{props.collection.licence}</span>
         </Col>
         <Col xs={12} className="pt-1 pb-1 d-flex flex-column">

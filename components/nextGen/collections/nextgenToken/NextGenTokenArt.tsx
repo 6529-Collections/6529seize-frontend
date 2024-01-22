@@ -6,6 +6,7 @@ import { NextGenTokenImage } from "./NextGenTokenImage";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import useDownloader from "react-use-downloader";
 import Tippy from "@tippyjs/react";
+import Lightbulb from "./Lightbulb";
 
 interface Props {
   collection: NextGenCollection;
@@ -22,6 +23,7 @@ export function NextGenTokenArtImage(
   props: Readonly<{
     token: NextGenToken;
     mode: Mode;
+    is_fullscreen: boolean;
   }>
 ) {
   return (
@@ -31,12 +33,15 @@ export function NextGenTokenArtImage(
       hide_link={true}
       show_animation={props.mode !== Mode.IMAGE}
       live={props.mode === Mode.LIVE}
+      is_fullscreen={props.is_fullscreen}
     />
   );
 }
 
 export default function NextGenToken(props: Readonly<Props>) {
   const [mode, setMode] = useState<Mode>(Mode.DEFAULT);
+  const [isFullScreen, setIsFullScreen] = useState<boolean>(false);
+  const [showBlackbox, setShowBlackbox] = useState<boolean>(false);
   const [showLightbox, setShowLightbox] = useState<boolean>(false);
 
   const tokenImageRef = useRef(null);
@@ -46,14 +51,24 @@ export default function NextGenToken(props: Readonly<Props>) {
   useEffect(() => {
     const handleKeyDown = (event: any) => {
       if (event.key === "Escape") {
-        if (showLightbox) {
-          setShowLightbox(false);
-        }
+        setShowLightbox(false);
+        setShowBlackbox(false);
       }
     };
     window.addEventListener("keydown", handleKeyDown);
+
+    const handleFullscreenChange = () => {
+      if (document.fullscreenElement === tokenImageRef.current) {
+        setIsFullScreen(true);
+      } else {
+        setIsFullScreen(false);
+      }
+    };
+    window.addEventListener("fullscreenchange", handleFullscreenChange);
+
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
+      window.removeEventListener("fullscreenchange", handleFullscreenChange);
     };
   }, []);
 
@@ -88,21 +103,36 @@ export default function NextGenToken(props: Readonly<Props>) {
     return (
       <>
         <span className="d-flex gap-3">
-          <Tippy content="Default" placement="bottom" theme="light" delay={350}>
+          <Tippy
+            content="Default"
+            hideOnClick={true}
+            placement="bottom"
+            theme="light"
+            delay={350}>
             <FontAwesomeIcon
               className={getModeStyle(Mode.DEFAULT)}
               onClick={() => setMode(Mode.DEFAULT)}
               icon="play-circle"
             />
           </Tippy>
-          <Tippy content="Image" placement="bottom" theme="light" delay={350}>
+          <Tippy
+            content="Image"
+            hideOnClick={true}
+            placement="bottom"
+            theme="light"
+            delay={350}>
             <FontAwesomeIcon
               className={getModeStyle(Mode.IMAGE)}
               onClick={() => setMode(Mode.IMAGE)}
               icon="image"
             />
           </Tippy>
-          <Tippy content="Live" placement="bottom" theme="light" delay={350}>
+          <Tippy
+            content="Live"
+            hideOnClick={true}
+            placement="bottom"
+            theme="light"
+            delay={350}>
             <FontAwesomeIcon
               className={getModeStyle(Mode.LIVE)}
               onClick={() => setMode(Mode.LIVE)}
@@ -111,19 +141,19 @@ export default function NextGenToken(props: Readonly<Props>) {
           </Tippy>
         </span>
         <span className="d-flex gap-3">
-          <Tippy
-            content="Lightbox"
-            placement="bottom"
-            theme="light"
-            delay={350}>
-            <FontAwesomeIcon
-              className={styles.modeIcon}
-              onClick={() => setShowLightbox(true)}
-              icon="lightbulb"
-            />
-          </Tippy>
+          <Lightbulb
+            mode="black"
+            className={styles.modeIcon}
+            onClick={() => setShowBlackbox(true)}
+          />
+          <Lightbulb
+            mode="light"
+            className={styles.modeIcon}
+            onClick={() => setShowLightbox(true)}
+          />
           <Tippy
             content="Download"
+            hideOnClick={true}
             placement="bottom"
             theme="light"
             delay={350}>
@@ -141,6 +171,7 @@ export default function NextGenToken(props: Readonly<Props>) {
           </Tippy>
           <Tippy
             content="Open in new tab"
+            hideOnClick={true}
             placement="bottom"
             theme="light"
             delay={350}>
@@ -155,6 +186,7 @@ export default function NextGenToken(props: Readonly<Props>) {
           </Tippy>
           <Tippy
             content="Fullscreen"
+            hideOnClick={true}
             placement="bottom"
             theme="light"
             delay={350}>
@@ -186,46 +218,63 @@ export default function NextGenToken(props: Readonly<Props>) {
   };
 
   return (
-    <>
-      <Container>
-        <Row>
-          <Col>
-            <Container>
+    <Container>
+      <Row>
+        <Col>
+          <Container>
+            <div
+              className={
+                showLightbox
+                  ? styles.lightBox
+                  : showBlackbox
+                  ? styles.blackBox
+                  : `row ${styles.modeRow}`
+              }>
               <div
                 className={
-                  showLightbox ? styles.lightBox : `row ${styles.modeRow}`
-                }>
-                <div
-                  className={showLightbox ? styles.lightBoxContent : "col pt-3"}
-                  ref={tokenImageRef}>
-                  <>
-                    {showLightbox && (
-                      <div>
-                        <FontAwesomeIcon
-                          onClick={() => setShowLightbox(false)}
-                          className={styles.lightBoxCloseIcon}
-                          icon="times-circle"></FontAwesomeIcon>
-                      </div>
-                    )}
-                    <NextGenTokenArtImage token={props.token} mode={mode} />
-                  </>
-                </div>
+                  showLightbox || showBlackbox
+                    ? styles.lightBoxContent
+                    : "col pt-3"
+                }
+                ref={tokenImageRef}>
+                <>
+                  {(showLightbox || showBlackbox) && (
+                    <div>
+                      <FontAwesomeIcon
+                        onClick={() => {
+                          setShowLightbox(false);
+                          setShowBlackbox(false);
+                        }}
+                        className={
+                          showBlackbox
+                            ? styles.blackBoxCloseIcon
+                            : styles.lightBoxCloseIcon
+                        }
+                        icon="times-circle"></FontAwesomeIcon>
+                    </div>
+                  )}
+                  <NextGenTokenArtImage
+                    token={props.token}
+                    mode={mode}
+                    is_fullscreen={isFullScreen}
+                  />
+                </>
               </div>
-            </Container>
-          </Col>
-        </Row>
-        <Row>
-          <Col>
-            <Container className={styles.modeRow}>
-              <Row>
-                <Col className="pt-4 pb-3 d-flex gap-2 align-items-center justify-content-center gap-5">
-                  {printModeIcons()}
-                </Col>
-              </Row>
-            </Container>
-          </Col>
-        </Row>
-      </Container>
-    </>
+            </div>
+          </Container>
+        </Col>
+      </Row>
+      <Row>
+        <Col>
+          <Container className={styles.modeRow}>
+            <Row>
+              <Col className="pt-4 pb-3 d-flex gap-2 align-items-center justify-content-center gap-5">
+                {printModeIcons()}
+              </Col>
+            </Row>
+          </Container>
+        </Col>
+      </Row>
+    </Container>
   );
 }

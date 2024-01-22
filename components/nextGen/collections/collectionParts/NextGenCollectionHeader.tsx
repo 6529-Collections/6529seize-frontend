@@ -16,11 +16,11 @@ import DotLoader from "../../../dotLoader/DotLoader";
 import { NextGenCollection } from "../../../../entities/INextgen";
 import { getStatusFromDates } from "../../nextgen_helpers";
 import { sepolia, goerli } from "viem/chains";
+import "add-to-calendar-button";
 
 interface Props {
   collection: NextGenCollection;
   collection_link?: boolean;
-  mint_page?: boolean;
 }
 
 interface CountdownProps {
@@ -67,17 +67,32 @@ export function NextGenCountdown(props: Readonly<CountdownProps>) {
     return <DotLoader />;
   }
 
-  function printCountdown(title: string, date: number) {
+  function printCountdown(
+    title: string,
+    date: number,
+    phase: "Allowlist" | "Public",
+    start: number,
+    end: number
+  ) {
+    const name = `${phase} Minting - NextGen Collection #${props.collection.id} - ${props.collection.name}`;
+    const calEvent = {
+      name: name,
+      start_seconds: start,
+      end_seconds: end,
+      description: `${name}\n\n${process.env.BASE_ENDPOINT}/nextgen/collection/${props.collection.id}`,
+    };
+
     return (
       <span className={styles.countdownContainer}>
         <DateCountdown
-          title={title}
+          title={`${title} in`}
           date={new Date(date * 1000)}
           align={props.align}
+          calendar_event={calEvent}
         />
         {!router.pathname.includes("mint") && (
-          <a href={`/nextgen/collection/${props.collection}/mint`}>
-            <Button className="seize-btn btn-block pt-2 pb-2 btn-black font-larger font-bolder">
+          <a href={`/nextgen/collection/${props.collection.id}/mint`}>
+            <Button className="seize-btn btn-block pt-2 pb-2 btn-white font-larger font-bolder">
               {getButtonLabel()}
             </Button>
           </a>
@@ -90,20 +105,38 @@ export function NextGenCountdown(props: Readonly<CountdownProps>) {
     <>
       {alStatus == Status.UPCOMING &&
         printCountdown(
-          "Allowlist Starting in",
-          props.collection.allowlist_start
+          "Allowlist Starting",
+          props.collection.allowlist_start,
+          "Allowlist",
+          props.collection.allowlist_start,
+          props.collection.allowlist_end
         )}
       {alStatus == Status.LIVE &&
-        printCountdown("Allowlist Ending in", props.collection.allowlist_end)}
+        printCountdown(
+          "Allowlist Ending",
+          props.collection.allowlist_end,
+          "Allowlist",
+          props.collection.allowlist_start,
+          props.collection.allowlist_end
+        )}
       {alStatus != Status.LIVE &&
         alStatus != Status.UPCOMING &&
         publicStatus == Status.UPCOMING &&
         printCountdown(
-          "Public Phase Starting in",
-          props.collection.public_start
+          "Public Phase Starting",
+          props.collection.public_start,
+          "Public",
+          props.collection.allowlist_start,
+          props.collection.allowlist_end
         )}
       {publicStatus == Status.LIVE &&
-        printCountdown("Public Phase Ending in", props.collection.public_end)}
+        printCountdown(
+          "Public Phase Ending",
+          props.collection.public_end,
+          "Public",
+          props.collection.allowlist_start,
+          props.collection.allowlist_end
+        )}
     </>
   );
 }
@@ -167,9 +200,13 @@ export default function NextGenCollectionHeader(props: Readonly<Props>) {
       return false;
     }
 
-    const now = new Date().getTime();
+    const now = new Date().getTime() / 1000;
     const allowlistStartsIn = props.collection.allowlist_start - now;
     if (allowlistStartsIn > 0 && allowlistStartsIn < 1000 * 60 * 60 * 24) {
+      return true;
+    }
+    const publicStartsIn = props.collection.public_start - now;
+    if (publicStartsIn > 0 && publicStartsIn < 1000 * 60 * 60 * 24) {
       return true;
     }
     return (
@@ -195,50 +232,45 @@ export default function NextGenCollectionHeader(props: Readonly<Props>) {
               available={available}
             />
           }
-          {!props.mint_page && (
-            <span className="pt-2 pb-2 d-flex align-items-center justify-content-end gap-4">
-              <FontAwesomeIcon
-                className={`${styles.globeIcon} ${styles.marketplace}`}
-                icon="globe"
-                onClick={() => {
-                  let url = props.collection.website;
-                  if (!url.startsWith("http")) {
-                    url = `http://${url}`;
-                  }
-                  window.open(url, "_blank");
-                }}></FontAwesomeIcon>
-              <a
-                href={`https://${
-                  NEXTGEN_CHAIN_ID === sepolia.id ||
-                  NEXTGEN_CHAIN_ID === goerli.id
-                    ? `testnets.opensea`
-                    : `opensea`
-                }.io/assets/${
-                  NEXTGEN_CHAIN_ID === sepolia.id
-                    ? `sepolia`
-                    : NEXTGEN_CHAIN_ID === goerli.id
-                    ? `goerli`
-                    : `ethereum`
-                }/${NEXTGEN_CORE[NEXTGEN_CHAIN_ID]}`}
-                target="_blank"
-                rel="noreferrer">
-                <Image
-                  className={styles.marketplace}
-                  src="/opensea.png"
-                  alt="opensea"
-                  width={32}
-                  height={32}
-                />
-              </a>
-            </span>
-          )}
+          <span className="pt-2 pb-2 d-flex align-items-center justify-content-end gap-4">
+            <FontAwesomeIcon
+              className={`${styles.globeIcon} ${styles.marketplace}`}
+              icon="globe"
+              onClick={() => {
+                let url = props.collection.website;
+                if (!url.startsWith("http")) {
+                  url = `http://${url}`;
+                }
+                window.open(url, "_blank");
+              }}></FontAwesomeIcon>
+            <a
+              href={`https://${
+                NEXTGEN_CHAIN_ID === sepolia.id ||
+                NEXTGEN_CHAIN_ID === goerli.id
+                  ? `testnets.opensea`
+                  : `opensea`
+              }.io/assets/${
+                NEXTGEN_CHAIN_ID === sepolia.id
+                  ? `sepolia`
+                  : NEXTGEN_CHAIN_ID === goerli.id
+                  ? `goerli`
+                  : `ethereum`
+              }/${NEXTGEN_CORE[NEXTGEN_CHAIN_ID]}`}
+              target="_blank"
+              rel="noreferrer">
+              <Image
+                className={styles.marketplace}
+                src="/opensea.png"
+                alt="opensea"
+                width={32}
+                height={32}
+              />
+            </a>
+          </span>
         </Col>
       </Row>
       <Row>
-        <Col
-          className={`d-flex flex-column align-items-start ${
-            !props.mint_page ? "pt-3 gap-3" : ""
-          }`}>
+        <Col className={`d-flex flex-column align-items-start pt-3 gap-3`}>
           <span className="d-flex flex-column align-items-start">
             <h1 className="mb-0 font-color">
               #{props.collection.id} -{" "}
@@ -264,7 +296,7 @@ export default function NextGenCollectionHeader(props: Readonly<Props>) {
               </a>
             </b>
           </span>
-          <span className="font-larger d-inline-flex align-items-center">
+          <span className="pt-2 font-larger d-inline-flex align-items-center">
             <b>
               {props.collection.mint_count} / {props.collection.total_supply}{" "}
               minted
@@ -272,16 +304,11 @@ export default function NextGenCollectionHeader(props: Readonly<Props>) {
             </b>
           </span>
         </Col>
-        {/* {!props.mint_page && (
-          <Col className="d-flex align-items-center">
-            {showMint() && (
-              <NextGenCountdown
-                collection={props.collection}
-                align="vertical"
-              />
-            )}
-          </Col>
-        )} */}
+        <Col className="pt-3 d-flex align-items-center" sm={12} md={6}>
+          {showMint() && (
+            <NextGenCountdown collection={props.collection} align="vertical" />
+          )}
+        </Col>
       </Row>
     </Container>
   );

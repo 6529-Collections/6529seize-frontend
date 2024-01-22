@@ -35,7 +35,7 @@ export default function NextGenCollectionArt(props: Readonly<Props>) {
         const traitsQuery = router.query.traits as string;
         const traitValues = traitsQuery.split(",");
         const selectedTraits: TraitValuePair[] = [];
-        traitValues.map((tv) => {
+        traitValues.forEach((tv) => {
           const traitValue = tv.split(":");
           const t = traitValue[0];
           const v = traitValue[1];
@@ -145,23 +145,25 @@ export default function NextGenCollectionArt(props: Readonly<Props>) {
               <Row>
                 <Col
                   xs={12}
-                  className="font-color-h font-bolder font-larger no-padding">
-                  Traits
-                </Col>
-                {selectedTraitValues.length > 0 && (
-                  <Col
-                    xs={12}
-                    className="no-padding d-flex justify-content-between align-items-center">
-                    <span className="font-color-h font-smaller">
-                      ({selectedTraitValues.length} selected)
+                  className="no-padding d-flex justify-content-between align-items-center">
+                  <span className="d-flex flex-column">
+                    <span className="font-color-h font-bolder font-larger">
+                      Traits
                     </span>
+                    {selectedTraitValues.length > 0 && (
+                      <span className="font-color-h font-smaller">
+                        ({selectedTraitValues.length} selected)
+                      </span>
+                    )}
+                  </span>
+                  {selectedTraitValues.length > 0 && (
                     <span
                       className="font-cmaller cursor-pointer decoration-hover-underline"
                       onClick={() => setSelectedTraitValues([])}>
                       Clear
                     </span>
-                  </Col>
-                )}
+                  )}
+                </Col>
               </Row>
               <Row>
                 <Col className="d-flex flex-column pt-2 pb-2 no-padding">
@@ -206,10 +208,12 @@ export default function NextGenCollectionArt(props: Readonly<Props>) {
                                     setSelectedTraitValues(
                                       selectedTraitValues.filter(
                                         (t) =>
-                                          areEqualAddresses(
-                                            t.trait,
-                                            tr.trait
-                                          ) && areEqualAddresses(t.value, v)
+                                          !(
+                                            areEqualAddresses(
+                                              t.trait,
+                                              tr.trait
+                                            ) && areEqualAddresses(t.value, v)
+                                          )
                                       )
                                     );
                                   } else {
@@ -236,7 +240,7 @@ export default function NextGenCollectionArt(props: Readonly<Props>) {
         {(routerLoaded || totalResultsSet) && (
           <Col sm={12} md={props.show_view_all ? 12 : 10}>
             <NextGenTokenList
-              limit={props.show_view_all ? 9 : undefined}
+              limit={props.show_view_all ? 6 : undefined}
               collection={props.collection}
               selected_traits={selectedTraitValues}
               setTotalResults={(totalResults: number) => {

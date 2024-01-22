@@ -29,7 +29,6 @@ import NextGenMintWidget from "./NextGenMintWidget";
 import NextGenMintBurnWidget from "./NextGenMintBurnWidget";
 import Image from "next/image";
 import { NextGenCountdown, NextGenPhases } from "../NextGenCollectionHeader";
-import { NextGenTokenImage } from "../../nextgenToken/NextGenTokenImage";
 import DotLoader from "../../../../dotLoader/DotLoader";
 import {
   NextGenCollection,
@@ -41,6 +40,14 @@ interface Props {
   collection: NextGenCollection;
   mint_price: number;
   burn_amount: number;
+}
+
+export function Spinner() {
+  return (
+    <div className="d-inline">
+      <output className={`spinner-border ${styles.loader}`}></output>
+    </div>
+  );
 }
 
 export default function NextGenMint(props: Readonly<Props>) {
@@ -338,9 +345,8 @@ export default function NextGenMint(props: Readonly<Props>) {
   return (
     <Container className="no-padding">
       <Row className="pt-2">
-        <Col
-          xs={12}
-          className="d-flex align-items-center justify-content-between">
+        <Col sm={12} md={6} className="d-flex flex-column">
+          <NextGenPhases collection={props.collection} available={available} />
           <a
             href={`/nextgen/collection/${props.collection.id}`}
             className="decoration-hover-underline">
@@ -349,15 +355,15 @@ export default function NextGenMint(props: Readonly<Props>) {
               <b>{props.collection.name.toUpperCase()}</b>
             </h1>
           </a>
-          <NextGenPhases collection={props.collection} available={available} />
-        </Col>
-        <Col
-          xs={12}
-          className="d-flex align-items-center justify-content-between">
           <span className="font-larger">
-            by <b>{props.collection.artist}</b>
+            by{" "}
+            <b>
+              <a href={`/${props.collection.artist_address}`}>
+                {props.collection.artist}
+              </a>
+            </b>
           </span>
-          <span className="font-larger d-inline-flex align-items-center">
+          <span className="pt-2 font-larger d-inline-flex align-items-center">
             <b>
               {props.collection.mint_count} / {props.collection.total_supply}{" "}
               minted
@@ -365,8 +371,8 @@ export default function NextGenMint(props: Readonly<Props>) {
             </b>
           </span>
         </Col>
-        <Col xs={12} className="pt-3">
-          <NextGenCountdown collection={props.collection} align="horizontal" />
+        <Col sm={12} md={6} className="d-flex align-items-center">
+          <NextGenCountdown collection={props.collection} align="vertical" />
         </Col>
       </Row>
       <Row className="pt-4 pb-4">

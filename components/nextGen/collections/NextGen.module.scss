@@ -323,11 +323,16 @@
 .countdownContainer {
   padding: 10px 20px;
   width: 100%;
-  color: $dark-grey;
-  background-color: white;
+  color: white;
+  box-shadow: 0.5px 0.5px 3px 0px rgba(255, 255, 255, 0.02),
+    1px 3px 6px 0px rgba(0, 0, 0, 0.15),
+    -0.5px -1px 3px 0px rgba(255, 255, 255, 0.02),
+    -3px -3px 5px 0px rgba(255, 255, 255, 0.02) inset,
+    6px 3px 6px 0px rgba(0, 0, 0, 0.4) inset;
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
+  border-radius: 0.5rem;
 }
 
 .logsTable {

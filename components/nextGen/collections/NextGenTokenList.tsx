@@ -87,7 +87,7 @@ export default function NextGenTokenList(props: Readonly<Props>) {
           </Col>
         )}
       </Row>
-      {totalResults > pageSize && tokensLoaded && !props.limit && (
+      {totalResults > pageSize && tokensLoaded && (
         <Row className="text-center pt-4 pb-4">
           <Pagination
             page={page}

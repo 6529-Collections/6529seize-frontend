@@ -8,6 +8,7 @@ export function NextGenTokenImage(
     hide_info?: boolean;
     show_animation?: boolean;
     live?: boolean;
+    is_fullscreen?: boolean;
   }>
 ) {
   function getImage() {
@@ -43,7 +44,7 @@ export function NextGenTokenImage(
         <iframe
           style={{
             width: "100%",
-            height: "80vh",
+            height: props.is_fullscreen ? "100vh" : "80vh",
             marginBottom: "-8px",
           }}
           src={

@@ -13,9 +13,7 @@ import {
   NEXTGEN_MINTER,
 } from "../../../nextgen_contracts";
 import {
-  AdditionalData,
   CollectionWithMerkle,
-  PhaseTimes,
   ProofResponse,
   Status,
   TokensPerAddress,
@@ -25,7 +23,6 @@ import { useState, useEffect } from "react";
 import { fetchUrl } from "../../../../../services/6529api";
 import { useWeb3Modal } from "@web3modal/react";
 import { getNftsForContractAndOwner } from "../../../../../services/alchemy-api";
-import { Spinner } from "../../NextGen";
 import {
   getStatusFromDates,
   useMintSharedState,
@@ -35,6 +32,7 @@ import {
   NextGenAdminMintingForDelegator,
 } from "./NextGenMintShared";
 import { NextGenCollection } from "../../../../../entities/INextgen";
+import { Spinner } from "./NextGenMint";
 
 interface Props {
   collection: NextGenCollection;
