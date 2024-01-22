@@ -3,8 +3,6 @@ import { IProfileAndConsolidations } from "../../../entities/IProfile";
 import { ConsolidatedTDHMetrics, TDHMetrics } from "../../../entities/ITDH";
 import { useEffect, useState } from "react";
 import { commonApiFetch } from "../../../services/api/common-api";
-import UserPageStatsTDHcharts from "../to-be-removed/UserPageStatsTDHcharts";
-import { NFTLite } from "../../../entities/INFT";
 import UserPageHeaderAddresses from "../user-page-header/addresses/UserPageHeaderAddresses";
 import UserPageStatsTags from "./tags/UserPageStatsTags";
 import UserPageStatsCollected from "./UserPageStatsCollected";
@@ -22,6 +20,13 @@ export default function UserPageStats({
 }) {
   const router = useRouter();
   const [activeAddress, setActiveAddress] = useState<string | null>(null);
+  const [isConsolidation, setIsConsolidation] = useState<boolean>(
+    profile.consolidation.wallets.length > 1
+  );
+
+  useEffect(() => {
+    setIsConsolidation(profile.consolidation.wallets.length > 1);
+  }, [profile, router.query.user]);
 
   const { data: consolidatedTDH } = useQuery<ConsolidatedTDHMetrics>({
     queryKey: [
@@ -35,85 +40,31 @@ export default function UserPageStats({
     enabled: !!profile.consolidation.consolidation_key,
   });
 
-  const { data: walletTDH } = useQuery<TDHMetrics>({
+  const { data: walletTDH } = useQuery<TDHMetrics | null>({
     queryKey: [QueryKey.WALLET_TDH, activeAddress?.toLowerCase()],
-    queryFn: async () =>
-      await commonApiFetch<TDHMetrics>({
+    queryFn: async () => {
+      const response = await commonApiFetch<{ data: TDHMetrics[] }>({
         endpoint: `owner_metrics`,
         params: {
           wallet: activeAddress!,
           profile_page: "true",
         },
-      }),
+      });
+      return response.data?.at(0) ?? null;
+    },
     enabled: !!activeAddress,
   });
 
-  const [isConsolidation, setIsConsolidation] = useState<boolean>(
-    profile.consolidation.wallets.length > 1
-  );
-  const [mainAddress, setMainAddress] = useState<string>(
-    profile.profile?.primary_wallet?.toLowerCase() ??
-      (router.query.user as string).toLowerCase()
-  );
+  const [tdh, setTDH] = useState<UserPageStatsTDHType>(consolidatedTDH ?? null);
 
   useEffect(() => {
-    setIsConsolidation(profile.consolidation.wallets.length > 1);
-    setMainAddress(
-      profile.profile?.primary_wallet?.toLowerCase() ??
-        (router.query.user as string).toLowerCase()
-    );
-  }, [profile, router.query.user]);
-
-  const [queryAddress, setQueryAddress] = useState<string>(
-    activeAddress ?? mainAddress
-  );
-
-  // useEffect(() => {
-  //   if (!activeAddress || !isConsolidation) {
-  //     setTDH(consolidatedTDH);
-  //     return;
-  //   }
-
-  //   setTDH(walletsTDH[queryAddress]);
-  // }, [activeAddress, queryAddress, walletsTDH, profile, isConsolidation]);
-
-  useEffect(() => {
-    setQueryAddress(activeAddress ?? mainAddress);
-  }, [activeAddress, isConsolidation, mainAddress]);
-
-  useEffect(() => {
-    const loadMetrics = async (wallet: string) => {
-      setLoadingMetrics((prev) => [...prev, wallet]);
-      const tdhResponses = await commonApiFetch<{ data: TDHMetrics[] }>({
-        endpoint: `owner_metrics/?wallet=${wallet}&profile_page=true`,
-      });
-
-      if (!tdhResponses.data.length) {
-        setLoadingMetrics((prev) => prev.filter((w) => w !== wallet));
-        return;
-      }
-      const tdhResponse = tdhResponses.data[0];
-      setWalletsTDH((prev) => ({
-        ...prev,
-        [wallet]: tdhResponse,
-      }));
-      setLoadingMetrics((prev) => prev.filter((w) => w !== wallet));
-    };
-
-    if (!activeAddress) {
+    if (!activeAddress || !isConsolidation) {
+      setTDH(consolidatedTDH ?? null);
       return;
     }
 
-    if (!consolidatedTDH) {
-      return;
-    }
-
-    if (!isConsolidation) {
-      return;
-    }
-
-    loadMetrics(activeAddress);
-  }, [activeAddress]);
+    setTDH(walletTDH ?? null);
+  }, [activeAddress, isConsolidation, consolidatedTDH, walletTDH]);
 
   return (
     <div className="tailwind-scope">
@@ -138,9 +89,7 @@ export default function UserPageStats({
         show={true}
         activeAddress={activeAddress}
         profile={profile}
-      />
-
-      <UserPageStatsTDHcharts mainAddress={mainAddress} /> */}
+      /> */}
     </div>
   );
 }

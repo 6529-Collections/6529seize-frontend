@@ -89,7 +89,7 @@ export default function UserPageActivityWrapper({
         />
       )}
       {activeTab === USER_PAGE_ACTIVITY_TAB.TDH_HISTORY && (
-        <UserPageStatsActivityTDHHistory />
+        <UserPageStatsActivityTDHHistory profile={profile} />
       )}
     </div>
   );
