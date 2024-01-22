@@ -83,7 +83,7 @@ export default function NextGenCollectionDetails(props: Readonly<Props>) {
                 <span>{props.collection.description}</span>
               </Col>
               <Col xs={12} className="pt-2 pb-2 d-flex flex-column">
-                <span className="font-color-h">Licence</span>
+                <span className="font-color-h">License</span>
                 <span>{props.collection.licence}</span>
               </Col>
               <Col xs={12} className="pt-2 pb-2 d-flex flex-column">
