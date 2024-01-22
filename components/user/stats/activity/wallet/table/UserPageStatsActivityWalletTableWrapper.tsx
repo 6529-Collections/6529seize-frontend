@@ -31,6 +31,19 @@ export default function UserPageStatsActivityWalletTableWrapper({
       [UserPageStatsActivityWalletFilterType.BURNS]: "burns",
     };
 
+  const FILTER_TO_NO_DATA: Record<
+    UserPageStatsActivityWalletFilterType,
+    string
+  > = {
+    [UserPageStatsActivityWalletFilterType.ALL]: "No transactions",
+    [UserPageStatsActivityWalletFilterType.AIRDROPS]: "No airdrops",
+    [UserPageStatsActivityWalletFilterType.MINTS]: "No mints",
+    [UserPageStatsActivityWalletFilterType.SALES]: "No sales",
+    [UserPageStatsActivityWalletFilterType.PURCHASES]: "No purchases",
+    [UserPageStatsActivityWalletFilterType.TRANSFERS]: "No transfers",
+    [UserPageStatsActivityWalletFilterType.BURNS]: "No burns",
+  };
+
   const PAGE_SIZE = 10;
 
   const [page, setPage] = useState(1);
@@ -128,7 +141,7 @@ export default function UserPageStatsActivityWalletTableWrapper({
         </div>
       ) : (
         <div className="tw-py-4 tw-px-4 sm:tw-px-6 tw-text-sm tw-italic tw-text-iron-500">
-          No transactions
+          {FILTER_TO_NO_DATA[filter]}
         </div>
       )}
     </div>
