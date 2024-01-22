@@ -1,5 +1,4 @@
 import { IProfileAndConsolidations } from "../../../../../entities/IProfile";
-import UserPageStatsActivityWalletFilter from "./filter/UserPageStatsActivityWalletFilter";
 import { useRouter } from "next/router";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";

@@ -1,15 +1,10 @@
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { IProfileAndConsolidations } from "../../../../../entities/IProfile";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { QueryKey } from "../../../../react-query-wrapper/ReactQueryWrapper";
 import { Page } from "../../../../../helpers/Types";
 import { IDistribution } from "../../../../../entities/IDistribution";
 import { commonApiFetch } from "../../../../../services/api/common-api";
-import UserPageStatsActivityDistributionsTable from "./UserPageStatsActivityDistributionsTable";
-import CommonTablePagination from "../../../../utils/CommonTablePagination";
-import CommonCardSkeleton from "../../../../utils/animation/CommonCardSkeleton";
-import { useRouter } from "next/router";
-import { usePathname, useSearchParams } from "next/navigation";
 import UserPageStatsActivityDistributionsTableWrapper from "./UserPageStatsActivityDistributionsTableWrapper";
 
 export default function UserPageStatsActivityDistributions({
