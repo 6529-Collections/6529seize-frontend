@@ -51,43 +51,15 @@ export default function UserPageStatsTable({
                   >
                     Memes
                   </th>
-                  {/* TODO: make SZN type safe */}
-                  <th
-                    scope="col"
-                    className="tw-px-4 sm:tw-px-6 tw-whitespace-nowrap tw-group tw-cursor-pointer tw-py-3 tw-text-right tw-text-sm tw-font-medium tw-text-iron-400"
-                  >
-                    SZN1
-                  </th>
-                  <th
-                    scope="col"
-                    className="tw-px-4 sm:tw-px-6 tw-whitespace-nowrap tw-group tw-cursor-pointer tw-py-3 tw-text-right tw-text-sm tw-font-medium tw-text-iron-400"
-                  >
-                    SZN2
-                  </th>
-                  <th
-                    scope="col"
-                    className="tw-px-4 sm:tw-px-6 tw-whitespace-nowrap tw-group tw-cursor-pointer tw-py-3 tw-text-right tw-text-sm tw-font-medium tw-text-iron-400"
-                  >
-                    SZN3
-                  </th>
-                  <th
-                    scope="col"
-                    className="tw-px-4 sm:tw-px-6 tw-whitespace-nowrap tw-group tw-cursor-pointer tw-py-3 tw-text-right tw-text-sm tw-font-medium tw-text-iron-400"
-                  >
-                    SZN4
-                  </th>
-                  <th
-                    scope="col"
-                    className="tw-px-4 sm:tw-px-6 tw-whitespace-nowrap tw-group tw-cursor-pointer tw-py-3 tw-text-right tw-text-sm tw-font-medium tw-text-iron-400"
-                  >
-                    SZN5
-                  </th>
-                  <th
-                    scope="col"
-                    className="tw-px-4 sm:tw-px-6 tw-whitespace-nowrap tw-group tw-cursor-pointer tw-py-3 tw-text-right tw-text-sm tw-font-medium tw-text-iron-400"
-                  >
-                    SZN6
-                  </th>
+                  {Object.values(MEMES_SEASON).map((season) => (
+                    <th
+                      key={season}
+                      scope="col"
+                      className="tw-px-4 sm:tw-px-6 tw-whitespace-nowrap tw-group tw-cursor-pointer tw-py-3 tw-text-right tw-text-sm tw-font-medium tw-text-iron-400"
+                    >
+                      {season}
+                    </th>
+                  ))}
                   <th
                     scope="col"
                     className="tw-px-4 sm:tw-px-6 tw-whitespace-nowrap tw-group tw-cursor-pointer tw-py-3 tw-text-right tw-text-sm tw-font-medium tw-text-iron-400"
