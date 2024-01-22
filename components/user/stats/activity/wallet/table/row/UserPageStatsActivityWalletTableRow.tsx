@@ -110,26 +110,61 @@ export default function UserPageStatsActivityWalletTableRow({
 
   return (
     <tr className="tw-flex tw-items-center tw-justify-between">
-      <td className="tw-py-2.5 tw-inline-flex tw-space-x-2">
+      <td className="tw-py-2.5 tw-gap-x-1 tw-inline-flex tw-items-center">
         <UserPageStatsActivityWalletTableRowIcon type={type} />
         <UserPageStatsActivityWalletTableRowMainAddress
           transaction={transaction}
           type={type}
           profile={profile}
         />
-        <div>{TYPE_TP_ACTION[type]}</div>
-        {transaction.token_count > 1 && <div>x{transaction.token_count}</div>}
-        <div>
+        <div className="tw-whitespace-nowrap tw-text-sm tw-text-iron-400 tw-font-medium">
+          {TYPE_TP_ACTION[type]}
+        </div>
+        {transaction.token_count > 1 && (
+          <div className="tw-whitespace-nowrap tw-text-sm tw-text-iron-300 tw-font-medium">
+            x{transaction.token_count}
+          </div>
+        )}
+        <div className="tw-text-sm tw-text-iron-100 tw-font-semibold">
           {meme?.name} (#{transaction.token_id})
         </div>
-        <img src={meme?.icon ?? ""} alt={meme?.name ?? ""} />
-        {showAnotherSide && (
-          <UserPageStatsActivityWalletTableRowSecondAddress
-            type={type}
-            transaction={transaction}
-          />
+        <img
+          className="tw-mx-1 tw-flex-shrink-0 tw-object-contain tw-max-h-10 tw-min-w-10 tw-w-auto tw-h-auto tw-rounded-sm tw-ring-2 tw-ring-white/30 tw-bg-iron-800"
+          src={meme?.icon ?? ""}
+          alt={meme?.name ?? ""}
+        />
+        <div className="tw-text-sm tw-text-iron-100 tw-font-semibold">
+          {showAnotherSide && (
+            <UserPageStatsActivityWalletTableRowSecondAddress
+              type={type}
+              transaction={transaction}
+            />
+          )}
+        </div>
+        {value && (
+          <div className="tw-inline-flex tw-items-center tw-whitespace-nowrap tw-text-sm tw-text-iron-400 tw-font-medium">
+            for
+            <span className="tw-inline-flex tw-items-center">
+              <svg
+                className="tw-h-5 tw-w-5"
+                enable-background="new 0 0 1920 1920"
+                viewBox="0 0 1920 1920"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path d="m959.8 80.7-539.7 895.6 539.7-245.3z" fill="#8a92b2" />
+                <path d="m959.8 731-539.7 245.3 539.7 319.1z" fill="#62688f" />
+                <path d="m1499.6 976.3-539.8-895.6v650.3z" fill="#62688f" />
+                <path
+                  d="m959.8 1295.4 539.8-319.1-539.8-245.3z"
+                  fill="#454a75"
+                />
+                <path d="m420.1 1078.7 539.7 760.6v-441.7z" fill="#8a92b2" />
+                <path d="m959.8 1397.6v441.7l540.1-760.6z" fill="#62688f" />
+              </svg>
+              <span className="tw-text-iron-100">{value}</span>
+            </span>
+          </div>
         )}
-        {value && <div>for {value} ETH</div>}
       </td>
       <td className="tw-py-2.5 tw-pl-3 tw-text-right">
         <CommonTimeAgo

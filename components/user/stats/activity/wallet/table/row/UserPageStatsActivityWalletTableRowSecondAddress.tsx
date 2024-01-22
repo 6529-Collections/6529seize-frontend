@@ -48,9 +48,9 @@ export default function UserPageStatsActivityWalletTableRowSecondAddress({
   const walletDisplay = getWalletDisplay();
 
   return (
-    <div className="tw-inline-flex tw-space-x-2">
-      <div>{TYPE_TO_ACTION[type]}</div>
-      <div>{walletDisplay}</div>
-    </div>
+    <span className="tw-inline-flex tw-space-x-1">
+      <span>{TYPE_TO_ACTION[type]}</span>
+      <span>{walletDisplay}</span>
+    </span>
   );
 }

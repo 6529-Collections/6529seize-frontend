@@ -40,5 +40,5 @@ export default function UserPageStatsActivityWalletTableRowMainAddress({
     ? "unknown"
     : wallet.wallet.ens ?? formatAddress(wallet.wallet.address);
 
-  return <div>{walletDisplay}</div>;
+  return <div className="tw-text-sm tw-text-iron-100 tw-font-semibold">{walletDisplay}</div>;
 }
