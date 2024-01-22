@@ -74,7 +74,7 @@ export default function UserPageActivityWrapper({
   };
 
   return (
-    <div>
+    <div className="tw-mt-6 lg:tw-mt-8">
       <UserPageActivityTabs activeTab={activeTab} setActiveTab={onActiveTab} />
       {activeTab === USER_PAGE_ACTIVITY_TAB.WALLET_ACTIVITY && (
         <UserPageStatsActivityWallet

@@ -9,7 +9,7 @@ export default function UserPageActivityTabs({
   readonly setActiveTab: (tab: USER_PAGE_ACTIVITY_TAB) => void;
 }) {
   return (
-    <div>
+    <div className="tw-inline-flex tw-rounded-lg tw-overflow-hidden" role="group">
       {Object.values(USER_PAGE_ACTIVITY_TAB).map((tab) => (
         <UserPageActivityTab
           key={tab}

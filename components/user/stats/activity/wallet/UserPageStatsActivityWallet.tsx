@@ -91,17 +91,21 @@ export default function UserPageStatsActivityWallet({
   };
 
   return (
-    <div>
-      <div>Wallet activity</div>
+    <div className="tw-mt-2 lg:tw-mt-4">
+      <h3 className="tw-mb-0 tw-text-lg tw-font-semibold tw-text-iron-50 tw-tracking-tight">
+        Wallet activity
+      </h3>
       <UserPageStatsActivityWalletFilter
         activeFilter={activeFilter}
         setActiveFilter={onActiveFilter}
       />
-      <UserPageStatsActivityWalletTableWrapper
-        filter={activeFilter}
-        profile={profile}
-        activeAddress={activeAddress}
-      />
+      <div className="tw-mt-2 lg:tw-mt-4">
+        <UserPageStatsActivityWalletTableWrapper
+          filter={activeFilter}
+          profile={profile}
+          activeAddress={activeAddress}
+        />
+      </div>
     </div>
   );
 }
