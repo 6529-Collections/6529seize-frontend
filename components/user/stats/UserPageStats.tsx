@@ -10,6 +10,8 @@ import UserPageStatsActivityOverview from "./UserPageStatsActivityOverview";
 import UserPageActivityWrapper from "./activity/UserPageActivityWrapper";
 import { useQuery } from "@tanstack/react-query";
 import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
+import CommonSkeletonLoader from "../../utils/animation/CommonSkeletonLoader";
+import CommonCardSkeleton from "../../utils/animation/CommonCardSkeleton";
 
 export type UserPageStatsTDHType = ConsolidatedTDHMetrics | TDHMetrics | null;
 
@@ -28,32 +30,34 @@ export default function UserPageStats({
     setIsConsolidation(profile.consolidation.wallets.length > 1);
   }, [profile, router.query.user]);
 
-  const { data: consolidatedTDH } = useQuery<ConsolidatedTDHMetrics>({
-    queryKey: [
-      QueryKey.PROFILE_CONSOLIDATED_TDH,
-      profile.consolidation.consolidation_key,
-    ],
-    queryFn: async () =>
-      await commonApiFetch<ConsolidatedTDHMetrics>({
-        endpoint: `consolidated_owner_metrics/${profile.consolidation.consolidation_key}/`,
-      }),
-    enabled: !!profile.consolidation.consolidation_key,
-  });
+  const { isFetching: isFetchingConsolidatedTDH, data: consolidatedTDH } =
+    useQuery<ConsolidatedTDHMetrics>({
+      queryKey: [
+        QueryKey.PROFILE_CONSOLIDATED_TDH,
+        profile.consolidation.consolidation_key,
+      ],
+      queryFn: async () =>
+        await commonApiFetch<ConsolidatedTDHMetrics>({
+          endpoint: `consolidated_owner_metrics/${profile.consolidation.consolidation_key}/`,
+        }),
+      enabled: !!profile.consolidation.consolidation_key,
+    });
 
-  const { data: walletTDH } = useQuery<TDHMetrics | null>({
-    queryKey: [QueryKey.WALLET_TDH, activeAddress?.toLowerCase()],
-    queryFn: async () => {
-      const response = await commonApiFetch<{ data: TDHMetrics[] }>({
-        endpoint: `owner_metrics`,
-        params: {
-          wallet: activeAddress!,
-          profile_page: "true",
-        },
-      });
-      return response.data?.at(0) ?? null;
-    },
-    enabled: !!activeAddress,
-  });
+  const { isFetching: isFetchingWalletTDH, data: walletTDH } =
+    useQuery<TDHMetrics | null>({
+      queryKey: [QueryKey.WALLET_TDH, activeAddress?.toLowerCase()],
+      queryFn: async () => {
+        const response = await commonApiFetch<{ data: TDHMetrics[] }>({
+          endpoint: `owner_metrics`,
+          params: {
+            wallet: activeAddress!,
+            profile_page: "true",
+          },
+        });
+        return response.data?.at(0) ?? null;
+      },
+      enabled: !!activeAddress,
+    });
 
   const [tdh, setTDH] = useState<UserPageStatsTDHType>(consolidatedTDH ?? null);
 
@@ -66,18 +70,37 @@ export default function UserPageStats({
     setTDH(walletTDH ?? null);
   }, [activeAddress, isConsolidation, consolidatedTDH, walletTDH]);
 
+  const [isLoading, setIsLoading] = useState<boolean>(
+    isFetchingConsolidatedTDH || isFetchingWalletTDH
+  );
+
+  useEffect(() => {
+    setIsLoading(isFetchingConsolidatedTDH || isFetchingWalletTDH);
+  }, [isFetchingConsolidatedTDH, isFetchingWalletTDH]);
+
   return (
     <div className="tailwind-scope">
       <div className="tw-flex-col-reverse tw-flex md:tw-flex-row tw-justify-between tw-gap-6 lg:tw-space-y-0 tw-w-full tw-mt-6 lg:tw-mt-8">
-        <UserPageStatsTags tdh={tdh} />
+        {isLoading ? (
+          <div className="tw-w-full">
+            <CommonSkeletonLoader />
+            <CommonSkeletonLoader />
+          </div>
+        ) : (
+          <UserPageStatsTags tdh={tdh} />
+        )}
+
         <UserPageHeaderAddresses
           addresses={profile.consolidation.wallets}
           onActiveAddress={setActiveAddress}
         />
       </div>
 
-      <UserPageStatsCollected tdh={tdh} />
+      <div className="tw-w-full tw-pt-8 tw-h-92">
+        <CommonCardSkeleton />
+      </div>
 
+      <UserPageStatsCollected tdh={tdh} />
       <UserPageStatsActivityOverview tdh={tdh} />
       <UserPageActivityWrapper
         profile={profile}
