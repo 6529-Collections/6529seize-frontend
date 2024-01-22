@@ -143,11 +143,11 @@ export default function UserPageStatsActivityWalletTableRow({
         </div>
         {!!value && (
           <div className="tw-inline-flex tw-items-center tw-whitespace-nowrap tw-text-sm tw-text-iron-400 tw-font-medium">
-            for
+            for{" "}
             <span className="tw-inline-flex tw-items-center">
               <svg
                 className="tw-h-5 tw-w-5"
-                enable-background="new 0 0 1920 1920"
+                enableBackground="new 0 0 1920 1920"
                 viewBox="0 0 1920 1920"
                 xmlns="http://www.w3.org/2000/svg"
               >

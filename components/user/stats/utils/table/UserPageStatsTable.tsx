@@ -1,6 +1,5 @@
 import { MEMES_SEASON } from "../../../../../enums";
 import { getRandomObjectId } from "../../../../../helpers/AllowlistToolHelpers";
-import UserPageStatsTableRow from "./UserPageStatsTableRow";
 import UserPageStatsTableSection from "./UserPageStatsTableSection";
 
 export interface UserPageStatsTableProps {

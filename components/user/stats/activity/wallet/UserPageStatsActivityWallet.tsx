@@ -1,8 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
 import { IProfileAndConsolidations } from "../../../../../entities/IProfile";
-import { commonApiFetch } from "../../../../../services/api/common-api";
-import { MemeLite } from "../../../settings/UserSettingsImgSelectMeme";
-import { QueryKey } from "../../../../react-query-wrapper/ReactQueryWrapper";
 import UserPageStatsActivityWalletFilter from "./filter/UserPageStatsActivityWalletFilter";
 import { useRouter } from "next/router";
 import { usePathname, useSearchParams } from "next/navigation";
