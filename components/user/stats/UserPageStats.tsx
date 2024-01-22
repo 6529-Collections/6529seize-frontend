@@ -16,11 +16,9 @@ export type UserPageStatsTDHType = ConsolidatedTDHMetrics | TDHMetrics | null;
 export default function UserPageStats({
   profile,
   consolidatedTDH,
-  memesLite,
 }: {
   readonly profile: IProfileAndConsolidations;
   readonly consolidatedTDH: ConsolidatedTDHMetrics | null;
-  readonly memesLite: NFTLite[];
 }) {
   const router = useRouter();
   const [isConsolidation, setIsConsolidation] = useState<boolean>(
