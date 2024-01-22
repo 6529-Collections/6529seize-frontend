@@ -76,6 +76,8 @@ export default function UserPageIdentityStatements({
     );
   }, [statements]);
 
+  useEffect(() => console.log(nftAccounts), [nftAccounts]);
+
   return (
     <div className="tw-mt-6 lg:tw-mt-8">
       <div>

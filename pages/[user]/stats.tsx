@@ -1,23 +1,17 @@
 import { ReactElement, useContext } from "react";
 import { NextPageWithLayout } from "../_app";
 import { IProfileAndConsolidations } from "../../entities/IProfile";
-import { ConsolidatedTDHMetrics } from "../../entities/ITDH";
 import UserPageLayout from "../../components/user/layout/UserPageLayout";
 import {
   getCommonHeaders,
-  getCommonUserServerSideProps,
-  getMemesLite,
+  getUserProfile,
   userPageNeedsRedirect,
 } from "../../helpers/server.helpers";
 import UserPageStats from "../../components/user/stats/UserPageStats";
 import { ReactQueryWrapperContext } from "../../components/react-query-wrapper/ReactQueryWrapper";
-import { NFTLite } from "../../entities/INFT";
 
 export interface UserPageStatsProps {
   readonly profile: IProfileAndConsolidations;
-  readonly title: string;
-  readonly consolidatedTDH: ConsolidatedTDHMetrics | null;
-  readonly memesLite: NFTLite[];
 }
 
 const Page: NextPageWithLayout<{ pageProps: UserPageStatsProps }> = ({
@@ -25,13 +19,7 @@ const Page: NextPageWithLayout<{ pageProps: UserPageStatsProps }> = ({
 }) => {
   const { setProfile } = useContext(ReactQueryWrapperContext);
   setProfile(pageProps.profile);
-  return (
-    <UserPageStats
-      profile={pageProps.profile}
-      consolidatedTDH={pageProps.consolidatedTDH}
-      memesLite={pageProps.memesLite}
-    />
-  );
+  return <UserPageStats profile={pageProps.profile} />;
 };
 
 Page.getLayout = function getLayout(
@@ -55,11 +43,8 @@ export async function getServerSideProps(
 }> {
   try {
     const headers = getCommonHeaders(req);
-
-    const [{ profile, title, consolidatedTDH }, memesLite] = await Promise.all([
-      getCommonUserServerSideProps({ user: req.query.user, headers }),
-      getMemesLite(headers),
-    ]);
+    const handleOrWallet = req.query.user.toLowerCase() as string;
+    const profile = await getUserProfile({ user: handleOrWallet, headers });
     const needsRedirect = userPageNeedsRedirect({
       profile,
       req,
@@ -73,9 +58,6 @@ export async function getServerSideProps(
     return {
       props: {
         profile,
-        title,
-        consolidatedTDH,
-        memesLite,
       },
     };
   } catch (e: any) {

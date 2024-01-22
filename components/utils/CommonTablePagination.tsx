@@ -1,13 +1,16 @@
+
 export default function CommonTablePagination({
   small,
   currentPage,
   setCurrentPage,
   totalPages,
+  loading = false,
 }: {
   readonly small: boolean;
   readonly currentPage: number;
   readonly setCurrentPage: (page: number) => void;
   readonly totalPages: number;
+  readonly loading?: boolean;
 }) {
   return (
     <div
@@ -24,6 +27,7 @@ export default function CommonTablePagination({
           {currentPage > 1 && (
             <button
               onClick={() => setCurrentPage(currentPage - 1)}
+              disabled={loading}
               type="button"
               className="tw-relative tw-text-sm tw-font-medium tw-inline-flex tw-items-center tw-rounded-lg tw-bg-iron-800 tw-px-2.5 tw-py-2 tw-text-iron-200 focus:tw-outline-none tw-border-0 tw-ring-1 tw-ring-inset tw-ring-iron-700 hover:tw-bg-iron-700 focus:tw-z-10 tw-transition tw-duration-300 tw-ease-out"
             >
@@ -44,6 +48,7 @@ export default function CommonTablePagination({
           )}
           {currentPage < totalPages && (
             <button
+              disabled={loading}
               onClick={() => setCurrentPage(currentPage + 1)}
               type="button"
               className="tw-relative tw-text-sm tw-font-medium tw-inline-flex tw-items-center tw-rounded-lg tw-bg-iron-800 tw-px-2.5 tw-py-2 tw-text-iron-200 focus:tw-outline-none tw-border-0 tw-ring-1 tw-ring-inset tw-ring-iron-700 hover:tw-bg-iron-700 focus:tw-z-10 tw-transition tw-duration-300 tw-ease-out"
