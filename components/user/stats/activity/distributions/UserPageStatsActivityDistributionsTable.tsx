@@ -11,15 +11,24 @@ export enum DistributionPhase {
 }
 
 export interface DistributionTableItem {
-  readonly wallet: string;
-  readonly contract: string;
+  readonly collection: string;
   readonly tokenId: string;
+  readonly name: string;
+  readonly wallet: string;
   readonly phase: DistributionPhase;
   readonly amountMinted: number;
   readonly amountTotal: number;
-  readonly tokenName: string;
   readonly date: string;
 }
+
+const PHASE_TO_TEXT: { [key in DistributionPhase]: string } = {
+  [DistributionPhase.AIRDROP]: "Airdrop",
+  [DistributionPhase.ALLOWLIST]: "Allowlist",
+  [DistributionPhase.PHASE_0]: "Phase 0",
+  [DistributionPhase.PHASE_1]: "Phase 1",
+  [DistributionPhase.PHASE_2]: "Phase 2",
+  [DistributionPhase.PHASE_3]: "Phase 3",
+};
 
 export default function UserPageStatsActivityDistributionsTable({
   items,
@@ -59,13 +68,80 @@ export default function UserPageStatsActivityDistributionsTable({
     setAvailablePhases(getAvailablePhases());
   }, [items]);
 
+
+
+
+
   return (
-    <div>
-      {items.map((item) => (
-        <div key={`${item.contract}-${item.card_id}-${item.wallet}`}>
-          {item.card_id}
-        </div>
-      ))}
-    </div>
+    // <div>
+    //   {items.map((item) => (
+    //     <div key={`${item.contract}-${item.card_id}-${item.wallet}`}>
+    //       {item.card_id}
+    //     </div>
+    //   ))}
+    // </div>
+    <table className="tw-min-w-full">
+      <thead className="tw-bg-iron-900">
+        <tr>
+          <th
+            scope="col"
+            className="tw-px-4 sm:tw-px-6 tw-whitespace-nowrap tw-group tw-cursor-pointer tw-py-3 tw-text-sm tw-font-medium tw-text-iron-400"
+          >
+            Collection
+          </th>
+          <th
+            scope="col"
+            className="tw-px-4 sm:tw-px-6 tw-whitespace-nowrap tw-group tw-cursor-pointer tw-py-3 tw-text-right tw-text-sm tw-font-medium tw-text-iron-400"
+          >
+            ID
+          </th>
+          <th
+            scope="col"
+            className="tw-px-4 sm:tw-px-6 tw-whitespace-nowrap tw-group tw-cursor-pointer tw-py-3 tw-text-right tw-text-sm tw-font-medium tw-text-iron-400"
+          >
+            Name
+          </th>
+
+          <th
+            scope="col"
+            className="tw-px-4 sm:tw-px-6 tw-whitespace-nowrap tw-group tw-cursor-pointer tw-py-3 tw-text-right tw-text-sm tw-font-medium tw-text-iron-400"
+          >
+            Wallet
+          </th>
+          {availablePhases.map((phase) => (
+            <th
+              key={phase}
+              scope="col"
+              className="tw-px-4 sm:tw-px-6 tw-whitespace-nowrap tw-group tw-cursor-pointer tw-py-3 tw-text-right tw-text-sm tw-font-medium tw-text-iron-400"
+            >
+              {PHASE_TO_TEXT[phase]}
+            </th>
+          ))}
+          <th
+            scope="col"
+            className="tw-px-4 sm:tw-px-6 tw-whitespace-nowrap tw-group tw-cursor-pointer tw-py-3 tw-text-right tw-text-sm tw-font-medium tw-text-iron-400"
+          >
+            Minted
+          </th>
+          <th
+            scope="col"
+            className="tw-px-4 sm:tw-px-6 tw-whitespace-nowrap tw-group tw-cursor-pointer tw-py-3 tw-text-right tw-text-sm tw-font-medium tw-text-iron-400"
+          >
+            Total
+          </th>
+          <th
+            scope="col"
+            className="tw-px-4 sm:tw-px-6 tw-whitespace-nowrap tw-group tw-cursor-pointer tw-py-3 tw-text-right tw-text-sm tw-font-medium tw-text-iron-400"
+          ></th>
+        </tr>
+      </thead>
+      <tbody className="">
+        {/* {data.data.flatMap((rows) =>
+          rows.map((row) => (
+            <UserPageStatsTableSection key={getRandomObjectId()} data={row} />
+          ))
+        )} */}
+      </tbody>
+    </table>
   );
 }
