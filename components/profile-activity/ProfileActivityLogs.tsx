@@ -161,7 +161,7 @@ export default function ProfileActivityLogs({
     <div
       className={`${
         initialParams.handleOrWallet ? "" : "tw-mt-2 tw-min-h-screen"
-      }  tw-scroll-py-3 tw-overflow-auto`}
+      }  `}
     >
       <div className="tw-w-full tw-flex tw-flex-col min-[1200px]:tw-flex-row tw-gap-y-8 min-[1200px]:tw-gap-x-16 min-[1200px]:tw-justify-between min-[1200px]:tw-items-center">
         {children && <div>{children}</div>}
@@ -186,7 +186,7 @@ export default function ProfileActivityLogs({
         />
       )}
       {logs?.data.length ? (
-        <div className="tw-flow-root">
+        <div className="tw-flow-root tw-scroll-py-3 tw-overflow-auto">
           <ProfileActivityLogsList
             logs={logs.data}
             user={initialParams.handleOrWallet}

@@ -47,7 +47,7 @@ export default function UserPageStatsActivityWalletFilter({
 
   return (
     <div
-      className="tw-px-4 sm:tw-px-6 tw-mt-6 tw-max-w-sm"
+      className="tw-px-4 sm:tw-px-6 tw-mt-6 tw-w-full sm:tw-max-w-sm"
       ref={listRef}
     >
       <div className="tw-relative">
@@ -85,7 +85,7 @@ export default function UserPageStatsActivityWalletFilter({
               transition={{ duration: 0.2 }}
             >
               <div className="tw-absolute tw-z-10 tw-mt-1 tw-overflow-hidden tw-w-full tw-rounded-md tw-bg-iron-800 tw-shadow-2xl tw-ring-1 tw-ring-white/10">
-                <div className="tw-py-1 tw-flow-root tw-max-h-[calc(240px+_-5vh)] tw-overflow-x-hidden tw-overflow-y-auto">
+                <div className="tw-py-1 tw-flow-root tw-max-h-[calc(16rem+_-10svh)] tw-overflow-x-hidden tw-overflow-y-auto">
                   <ul className="tw-flex tw-flex-col tw-px-2 tw-mx-0 tw-mb-0 tw-list-none">
                     {Object.values(UserPageStatsActivityWalletFilterType).map(
                       (filter) => (
