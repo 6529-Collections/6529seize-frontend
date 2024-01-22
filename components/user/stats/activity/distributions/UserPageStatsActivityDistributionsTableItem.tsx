@@ -38,7 +38,10 @@ export default function UserPageStatsActivityDistributionsTableItem({
         {COLLECTION_TO_TEXT[item.collection]}
       </td>
       <td className="tw-text-iron-500 tw-font-normal tw-px-4 sm:tw-px-6 tw-whitespace-nowrap tw-text-base tw-text-right">
-        <Link href={`${COLLECTION_TO_PATH[item.collection]}/${item.tokenId}`}>
+        <Link
+          className="tw-no-underline hover:tw-underline"
+          href={`${COLLECTION_TO_PATH[item.collection]}/${item.tokenId}`}
+        >
           # {item.tokenId}
         </Link>
       </td>

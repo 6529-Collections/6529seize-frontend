@@ -4,7 +4,10 @@ import CommonTimeAgo from "../../../../../../utils/CommonTimeAgo";
 import UserPageStatsActivityWalletTableRowIcon from "./UserPageStatsActivityWalletTableRowIcon";
 import { areEqualAddresses } from "../../../../../../../helpers/Helpers";
 import {
+  GRADIENT_CONTRACT,
   MANIFOLD,
+  MEMELAB_CONTRACT,
+  MEMES_CONTRACT,
   NULL_ADDRESS,
   NULL_DEAD_ADDRESS,
 } from "../../../../../../../constants";
@@ -12,6 +15,7 @@ import { IProfileAndConsolidations } from "../../../../../../../entities/IProfil
 import UserPageStatsActivityWalletTableRowMainAddress from "./UserPageStatsActivityWalletTableRowMainAddress";
 import { MemeLite } from "../../../../../settings/UserSettingsImgSelectMeme";
 import UserPageStatsActivityWalletTableRowSecondAddress from "./UserPageStatsActivityWalletTableRowSecondAddress";
+import Link from "next/link";
 
 export enum TransactionType {
   AIRDROP = "AIRDROP",
@@ -108,6 +112,19 @@ export default function UserPageStatsActivityWalletTableRow({
 
   const value = transaction.value;
 
+  const getPath = (): string => {
+    if (areEqualAddresses(MEMES_CONTRACT, transaction.contract)) {
+      return `/the-memes/${transaction.token_id}`;
+    }
+    if (areEqualAddresses(GRADIENT_CONTRACT, transaction.contract)) {
+      return `/6529-gradient/${transaction.token_id}`;
+    }
+    if (areEqualAddresses(MEMELAB_CONTRACT, transaction.contract)) {
+      return `/meme-lab/${transaction.token_id}`;
+    }
+    return "";
+  };
+
   return (
     <tr className="tw-flex tw-items-center tw-justify-between">
       <td className="tw-py-2.5 tw-gap-x-1 tw-inline-flex tw-items-center">
@@ -126,7 +143,9 @@ export default function UserPageStatsActivityWalletTableRow({
           </div>
         )}
         <div className="tw-whitespace-nowrap tw-text-sm tw-text-iron-100 tw-font-semibold">
-          {meme?.name} (#{transaction.token_id})
+          <Link className="tw-no-underline hover:tw-underline" href={getPath()}>
+            {meme?.name} (#{transaction.token_id})
+          </Link>
         </div>
         <img
           className="tw-mx-1 tw-flex-shrink-0 tw-object-contain tw-max-h-10 tw-min-w-10 tw-w-auto tw-h-auto tw-rounded-sm tw-ring-1 tw-ring-white/30 tw-bg-iron-800"

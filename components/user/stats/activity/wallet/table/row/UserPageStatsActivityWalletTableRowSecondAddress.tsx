@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Transaction } from "../../../../../../../entities/ITransaction";
 import { assertUnreachable } from "../../../../../../../helpers/AllowlistToolHelpers";
 import { formatAddress } from "../../../../../../../helpers/Helpers";
@@ -20,37 +21,49 @@ export default function UserPageStatsActivityWalletTableRowSecondAddress({
     [TransactionType.BURN]: "",
   };
 
-  const getWalletDisplay = (): string => {
+  const getWalletDisplayAndAddress = (): {
+    display: string;
+    address: string;
+  } => {
     switch (type) {
       case TransactionType.AIRDROP:
       case TransactionType.MINT:
       case TransactionType.PURCHASE:
       case TransactionType.TRANSFER_IN:
-        return (
-          transaction.from_display ??
-          formatAddress(transaction.from_address) ??
-          "unknown"
-        );
+        return {
+          display:
+            transaction.from_display ??
+            formatAddress(transaction.from_address) ??
+            "unknown",
+          address: transaction.from_address,
+        };
       case TransactionType.SALE:
       case TransactionType.BURN:
       case TransactionType.TRANSFER_OUT:
-        return (
-          transaction.to_display ??
-          formatAddress(transaction.to_address) ??
-          "unknown"
-        );
+        return {
+          display:
+            transaction.to_display ??
+            formatAddress(transaction.to_address) ??
+            "unknown",
+          address: transaction.to_address,
+        };
       default:
         assertUnreachable(type);
-        return "";
+        return {
+          display: "",
+          address: "",
+        };
     }
   };
 
-  const walletDisplay = getWalletDisplay();
+  const { display, address } = getWalletDisplayAndAddress();
 
   return (
     <span className="tw-inline-flex tw-space-x-1">
       <span>{TYPE_TO_ACTION[type]}</span>
-      <span>{walletDisplay}</span>
+      <Link className="tw-no-underline hover:tw-underline" href={`/${address}`}>
+        {display}
+      </Link>
     </span>
   );
 }
