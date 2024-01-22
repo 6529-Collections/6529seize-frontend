@@ -1,20 +1,12 @@
 import { ReactElement } from "react";
 import { NextPageWithLayout } from "../_app";
 import { IProfileAndConsolidations } from "../../entities/IProfile";
-import { ConsolidatedTDHMetrics } from "../../entities/ITDH";
-import { NFT, NFTLite } from "../../entities/INFT";
 import UserPageLayout from "../../components/user/layout/UserPageLayout";
 import {
   getCommonHeaders,
-  getCommonUserServerSideProps,
-  getGradients,
-  getMemesLite,
-  getOwned,
-  getSeasons,
+  getUserProfile,
   userPageNeedsRedirect,
 } from "../../helpers/server.helpers";
-import { Season } from "../../entities/ISeason";
-import { OwnerLite } from "../../entities/IOwner";
 import UserPageCollected from "../../components/user/collected/UserPageCollected";
 
 export interface UserPageProps {
@@ -24,7 +16,7 @@ export interface UserPageProps {
 const Page: NextPageWithLayout<{ pageProps: UserPageProps }> = ({
   pageProps,
 }) => {
-  return <UserPageCollected />;
+  return <UserPageCollected profile={pageProps.profile} />;
 };
 
 Page.getLayout = function getLayout(
@@ -48,14 +40,8 @@ export async function getServerSideProps(
 }> {
   try {
     const headers = getCommonHeaders(req);
-    const walletOrHandle = (req.query.user as string).toLowerCase();
-    const [{ profile, title, consolidatedTDH }, gradients, memesLite, seasons] =
-      await Promise.all([
-        getCommonUserServerSideProps({ user: walletOrHandle, headers }),
-        getGradients(headers),
-        getMemesLite(headers),
-        getSeasons(headers),
-      ]);
+    const handleOrWallet = (req.query.user as string).toLowerCase();
+    const profile = await getUserProfile({ user: handleOrWallet, headers });
 
     const needsRedirect = userPageNeedsRedirect({
       profile,
@@ -70,7 +56,6 @@ export async function getServerSideProps(
     return {
       props: {
         profile,
-
       },
     };
   } catch (e: any) {
