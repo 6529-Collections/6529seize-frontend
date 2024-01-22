@@ -3,101 +3,68 @@ import { IProfileAndConsolidations } from "../../../entities/IProfile";
 import { ConsolidatedTDHMetrics, TDHMetrics } from "../../../entities/ITDH";
 import { useEffect, useState } from "react";
 import { commonApiFetch } from "../../../services/api/common-api";
-import UserPageStatsTDHcharts from "../to-be-removed/UserPageStatsTDHcharts";
-import { NFTLite } from "../../../entities/INFT";
 import UserPageHeaderAddresses from "../user-page-header/addresses/UserPageHeaderAddresses";
 import UserPageStatsTags from "./tags/UserPageStatsTags";
 import UserPageStatsCollected from "./UserPageStatsCollected";
 import UserPageStatsActivityOverview from "./UserPageStatsActivityOverview";
 import UserPageActivityWrapper from "./activity/UserPageActivityWrapper";
+import { useQuery } from "@tanstack/react-query";
+import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
 
 export type UserPageStatsTDHType = ConsolidatedTDHMetrics | TDHMetrics | null;
 
 export default function UserPageStats({
   profile,
-  consolidatedTDH,
 }: {
   readonly profile: IProfileAndConsolidations;
-  readonly consolidatedTDH: ConsolidatedTDHMetrics | null;
 }) {
   const router = useRouter();
+  const [activeAddress, setActiveAddress] = useState<string | null>(null);
   const [isConsolidation, setIsConsolidation] = useState<boolean>(
     profile.consolidation.wallets.length > 1
-  );
-  const [mainAddress, setMainAddress] = useState<string>(
-    profile.profile?.primary_wallet?.toLowerCase() ??
-      (router.query.user as string).toLowerCase()
   );
 
   useEffect(() => {
     setIsConsolidation(profile.consolidation.wallets.length > 1);
-    setMainAddress(
-      profile.profile?.primary_wallet?.toLowerCase() ??
-        (router.query.user as string).toLowerCase()
-    );
   }, [profile, router.query.user]);
 
-  const [walletsTDH, setWalletsTDH] = useState<Record<string, TDHMetrics>>({});
-  const [tdh, setTDH] = useState<UserPageStatsTDHType>(null);
+  const { data: consolidatedTDH } = useQuery<ConsolidatedTDHMetrics>({
+    queryKey: [
+      QueryKey.PROFILE_CONSOLIDATED_TDH,
+      profile.consolidation.consolidation_key,
+    ],
+    queryFn: async () =>
+      await commonApiFetch<ConsolidatedTDHMetrics>({
+        endpoint: `consolidated_owner_metrics/${profile.consolidation.consolidation_key}/`,
+      }),
+    enabled: !!profile.consolidation.consolidation_key,
+  });
 
-  const [loadingMetrics, setLoadingMetrics] = useState<string[]>([]);
-  const [loading, setLoading] = useState(loadingMetrics.length > 0);
+  const { data: walletTDH } = useQuery<TDHMetrics | null>({
+    queryKey: [QueryKey.WALLET_TDH, activeAddress?.toLowerCase()],
+    queryFn: async () => {
+      const response = await commonApiFetch<{ data: TDHMetrics[] }>({
+        endpoint: `owner_metrics`,
+        params: {
+          wallet: activeAddress!,
+          profile_page: "true",
+        },
+      });
+      return response.data?.at(0) ?? null;
+    },
+    enabled: !!activeAddress,
+  });
 
-  const [activeAddress, setActiveAddress] = useState<string | null>(null);
-  const [queryAddress, setQueryAddress] = useState<string>(
-    activeAddress ?? mainAddress
-  );
+  const [tdh, setTDH] = useState<UserPageStatsTDHType>(consolidatedTDH ?? null);
 
   useEffect(() => {
     if (!activeAddress || !isConsolidation) {
-      setTDH(consolidatedTDH);
+      setTDH(consolidatedTDH ?? null);
       return;
     }
 
-    setTDH(walletsTDH[queryAddress]);
-  }, [activeAddress, queryAddress, walletsTDH, profile, isConsolidation]);
-
-  useEffect(() => {
-    setQueryAddress(activeAddress ?? mainAddress);
-  }, [activeAddress, isConsolidation, mainAddress]);
-
-  useEffect(() => {
-    const loadMetrics = async (wallet: string) => {
-      setLoadingMetrics((prev) => [...prev, wallet]);
-      const tdhResponses = await commonApiFetch<{ data: TDHMetrics[] }>({
-        endpoint: `owner_metrics/?wallet=${wallet}&profile_page=true`,
-      });
-
-      if (!tdhResponses.data.length) {
-        setLoadingMetrics((prev) => prev.filter((w) => w !== wallet));
-        return;
-      }
-      const tdhResponse = tdhResponses.data[0];
-      setWalletsTDH((prev) => ({
-        ...prev,
-        [wallet]: tdhResponse,
-      }));
-      setLoadingMetrics((prev) => prev.filter((w) => w !== wallet));
-    };
-
-    if (!activeAddress) {
-      return;
-    }
-
-    if (!consolidatedTDH) {
-      return;
-    }
-
-    if (!isConsolidation) {
-      return;
-    }
-
-    loadMetrics(activeAddress);
-  }, [activeAddress]);
-
-  useEffect(() => {
-    setLoading(loadingMetrics.length > 0);
-  }, [loadingMetrics]);
+    setTDH(walletTDH ?? null);
+  }, [activeAddress, isConsolidation, consolidatedTDH, walletTDH]);
 
   return (
     <div className="tailwind-scope">
@@ -122,9 +89,7 @@ export default function UserPageStats({
         show={true}
         activeAddress={activeAddress}
         profile={profile}
-      />
-
-      <UserPageStatsTDHcharts mainAddress={mainAddress} /> */}
+      /> */}
     </div>
   );
 }
