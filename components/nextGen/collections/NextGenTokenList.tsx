@@ -32,7 +32,7 @@ export default function NextGenTokenList(props: Readonly<Props>) {
       const traitsQ = props.selected_traits
         .map((t) => `${t.trait}:${t.value}`)
         .join(",");
-      endpoint += `&traits=${traitsQ}`;
+      endpoint += `&traits=${encodeURIComponent(traitsQ)}`;
     }
     commonApiFetch<{
       count: number;
