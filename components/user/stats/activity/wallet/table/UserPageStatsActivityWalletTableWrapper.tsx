@@ -78,6 +78,7 @@ export default function UserPageStatsActivityWalletTableWrapper({
                   setCurrentPage={setPage}
                   totalPages={totalPages}
                   small={true}
+                  loading={loading}
                 />
               )}
             </div>

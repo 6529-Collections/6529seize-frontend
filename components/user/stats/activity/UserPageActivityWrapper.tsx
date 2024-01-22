@@ -15,7 +15,8 @@ export enum USER_PAGE_ACTIVITY_TAB {
 
 const SEARCH_PARAM_ACTIVITY = "activity";
 export const WALLET_ACTIVITY_FILTER_PARAM = "wallet-activity";
-
+export const WALLET_ACTIVITY_PAGE_PARAM = "page";
+export const WALLET_DISTRIBUTION_PAGE_PARAM = "page";
 
 const ENUM_AND_PATH: { type: USER_PAGE_ACTIVITY_TAB; path: string }[] = [
   { type: USER_PAGE_ACTIVITY_TAB.WALLET_ACTIVITY, path: "wallet-activity" },
@@ -57,9 +58,9 @@ export default function UserPageActivityWrapper({
     (name: string, value: USER_PAGE_ACTIVITY_TAB) => {
       const params = new URLSearchParams(searchParams.toString());
       params.set(name, enumToPath(value));
-      if (value !== USER_PAGE_ACTIVITY_TAB.WALLET_ACTIVITY) {
-        params.delete(WALLET_ACTIVITY_FILTER_PARAM);
-      }
+      params.delete(WALLET_ACTIVITY_FILTER_PARAM);
+      params.delete(WALLET_ACTIVITY_PAGE_PARAM);
+      params.delete(WALLET_DISTRIBUTION_PAGE_PARAM);
       return params.toString();
     },
     [searchParams]

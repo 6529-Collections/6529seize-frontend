@@ -6,6 +6,9 @@ import { Page } from "../../../../../helpers/Types";
 import { IDistribution } from "../../../../../entities/IDistribution";
 import { commonApiFetch } from "../../../../../services/api/common-api";
 import UserPageStatsActivityDistributionsTableWrapper from "./UserPageStatsActivityDistributionsTableWrapper";
+import { useRouter } from "next/router";
+import { usePathname, useSearchParams } from "next/navigation";
+import { WALLET_DISTRIBUTION_PAGE_PARAM } from "../UserPageActivityWrapper";
 
 export default function UserPageStatsActivityDistributions({
   profile,
@@ -15,8 +18,47 @@ export default function UserPageStatsActivityDistributions({
   readonly activeAddress: string | null;
 }) {
   const PAGE_SIZE = 10;
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const page = searchParams.get(WALLET_DISTRIBUTION_PAGE_PARAM);
 
-  const [page, setPage] = useState(1);
+  const [pageFilter, setPageFilter] = useState(
+    page && !isNaN(+page) ? +page : 1
+  );
+
+  useEffect(() => {
+    setPageFilter(page && !isNaN(+page) ? +page : 1);
+  }, [page]);
+
+  const createQueryString = (
+    config: {
+      name: string;
+      value: string;
+    }[]
+  ): string => {
+    const params = new URLSearchParams(searchParams.toString());
+    for (const { name, value } of config) {
+      params.set(name, value);
+    }
+    return params.toString();
+  };
+
+  const onPageFilter = (page: number) => {
+    router.replace(
+      pathname +
+        "?" +
+        createQueryString([
+          {
+            name: WALLET_DISTRIBUTION_PAGE_PARAM,
+            value: `${page}`,
+          },
+        ]),
+      undefined,
+      { shallow: true }
+    );
+  };
+
   const [totalPages, setTotalPages] = useState<number>(1);
 
   const getWalletsParam = () =>
@@ -30,7 +72,6 @@ export default function UserPageStatsActivityDistributions({
   const [walletsParam, setWalletsParam] = useState<string>(getWalletsParam());
   useEffect(() => {
     setWalletsParam(getWalletsParam());
-    setPage(1);
   }, [activeAddress, profile]);
 
   const {
@@ -42,7 +83,7 @@ export default function UserPageStatsActivityDistributions({
       QueryKey.PROFILE_DISTRIBUTIONS,
       {
         page_size: `${PAGE_SIZE}`,
-        page,
+        page: `${pageFilter}`,
         wallet: walletsParam,
       },
     ],
@@ -51,7 +92,7 @@ export default function UserPageStatsActivityDistributions({
         endpoint: "distributions",
         params: {
           page_size: `${PAGE_SIZE}`,
-          page: `${page}`,
+          page: `${pageFilter}`,
           wallet: walletsParam,
         },
       }),
@@ -61,13 +102,13 @@ export default function UserPageStatsActivityDistributions({
   useEffect(() => {
     if (isFetching) return;
     if (!data?.count) {
-      setPage(1);
+      onPageFilter(1);
       setTotalPages(1);
       return;
     }
     const totalPages = Math.ceil(data.count / PAGE_SIZE);
-    if (totalPages < page) {
-      setPage(1);
+    if (totalPages < pageFilter) {
+      onPageFilter(totalPages);
     }
     setTotalPages(totalPages);
   }, [data?.count, data?.page, isFetching]);
@@ -84,9 +125,9 @@ export default function UserPageStatsActivityDistributions({
         profile={profile}
         isFirstLoading={isFirstLoading}
         loading={isFetching}
-        page={page}
+        page={pageFilter}
         totalPages={totalPages}
-        setPage={setPage}
+        setPage={onPageFilter}
       />
     </div>
   );

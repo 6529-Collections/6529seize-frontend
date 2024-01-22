@@ -2,7 +2,10 @@ import { IProfileAndConsolidations } from "../../../../../entities/IProfile";
 import { useRouter } from "next/router";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
-import { WALLET_ACTIVITY_FILTER_PARAM } from "../UserPageActivityWrapper";
+import {
+  WALLET_ACTIVITY_FILTER_PARAM,
+  WALLET_ACTIVITY_PAGE_PARAM,
+} from "../UserPageActivityWrapper";
 import UserPageStatsActivityWalletTableWrapper from "./table/UserPageStatsActivityWalletTableWrapper";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { Page } from "../../../../../helpers/Types";
@@ -68,24 +71,37 @@ export default function UserPageStatsActivityWallet({
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const activity = searchParams.get(WALLET_ACTIVITY_FILTER_PARAM);
+  const page = searchParams.get(WALLET_ACTIVITY_PAGE_PARAM);
 
   const [activeFilter, setActiveFilter] =
     useState<UserPageStatsActivityWalletFilterType>(
       UserPageStatsActivityWalletFilterType.ALL
     );
 
+  const [pageFilter, setPageFilter] = useState(
+    page && !isNaN(+page) ? +page : 1
+  );
+
   useEffect(() => {
     setActiveFilter(pathToEnum(activity ?? ""));
   }, [activity]);
 
-  const createQueryString = useCallback(
-    (name: string, value: string) => {
-      const params = new URLSearchParams(searchParams.toString());
+  useEffect(() => {
+    setPageFilter(page && !isNaN(+page) ? +page : 1);
+  }, [page]);
+
+  const createQueryString = (
+    config: {
+      name: string;
+      value: string;
+    }[]
+  ): string => {
+    const params = new URLSearchParams(searchParams.toString());
+    for (const { name, value } of config) {
       params.set(name, value);
-      return params.toString();
-    },
-    [searchParams]
-  );
+    }
+    return params.toString();
+  };
 
   const onActiveFilter = (filter: UserPageStatsActivityWalletFilterType) => {
     const targetFilter =
@@ -95,16 +111,36 @@ export default function UserPageStatsActivityWallet({
     router.replace(
       pathname +
         "?" +
-        createQueryString(
-          WALLET_ACTIVITY_FILTER_PARAM,
-          enumToPath(targetFilter)
-        ),
+        createQueryString([
+          {
+            name: WALLET_ACTIVITY_FILTER_PARAM,
+            value: enumToPath(targetFilter),
+          },
+          {
+            name: WALLET_ACTIVITY_PAGE_PARAM,
+            value: "1",
+          },
+        ]),
       undefined,
       { shallow: true }
     );
   };
 
-  const [page, setPage] = useState(1);
+  const onPageFilter = (page: number) => {
+    router.replace(
+      pathname +
+        "?" +
+        createQueryString([
+          {
+            name: WALLET_ACTIVITY_PAGE_PARAM,
+            value: `${page}`,
+          },
+        ]),
+      undefined,
+      { shallow: true }
+    );
+  };
+
   const [totalPages, setTotalPages] = useState<number>(1);
 
   const getWalletsParam = () =>
@@ -118,10 +154,7 @@ export default function UserPageStatsActivityWallet({
   const [walletsParam, setWalletsParam] = useState<string>(getWalletsParam());
   useEffect(() => {
     setWalletsParam(getWalletsParam());
-    setPage(1);
   }, [activeAddress, profile]);
-
-  useEffect(() => setPage(1), [activeFilter]);
 
   const {
     isFetching,
@@ -133,7 +166,7 @@ export default function UserPageStatsActivityWallet({
       {
         contract: MEMES_CONTRACT,
         page_size: `${PAGE_SIZE}`,
-        page,
+        page: `${pageFilter}`,
         wallet: walletsParam,
         filter: activeFilter,
       },
@@ -143,7 +176,7 @@ export default function UserPageStatsActivityWallet({
         contract: MEMES_CONTRACT,
         wallet: walletsParam,
         page_size: `${PAGE_SIZE}`,
-        page: `${page}`,
+        page: `${pageFilter}`,
       };
 
       if (activeFilter) {
@@ -161,11 +194,16 @@ export default function UserPageStatsActivityWallet({
   useEffect(() => {
     if (isFetching) return;
     if (!data?.count) {
-      setPage(1);
+      onPageFilter(1);
       setTotalPages(1);
       return;
     }
-    setTotalPages(Math.ceil(data.count / PAGE_SIZE));
+    const pagesCount = Math.ceil(data.count / PAGE_SIZE);
+    if (pagesCount < pageFilter) {
+      onPageFilter(pagesCount);
+      return;
+    }
+    setTotalPages(pagesCount);
   }, [data?.count, data?.page, isFetching]);
 
   const { isFetching: isFirstLoadingMemes, data: memes } = useQuery({
@@ -196,10 +234,10 @@ export default function UserPageStatsActivityWallet({
         transactions={data?.data ?? []}
         memes={memes ?? []}
         totalPages={totalPages}
-        page={page}
+        page={pageFilter}
         isFirstLoading={isFirstLoading || isFirstLoadingMemes}
         loading={isFetching}
-        setPage={setPage}
+        setPage={onPageFilter}
         onActiveFilter={onActiveFilter}
       />
     </div>
