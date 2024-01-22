@@ -13,7 +13,7 @@ export default function UserPageHeaderAboutStatement({
     );
   }
   return (
-    <div className="tw-mb-0 tw-text-iron-400 tw-text-sm sm:tw-text-base tw-font-normal tw-whitespace-pre-line">
+    <div className="tw-mb-0 tw-text-iron-200 tw-text-sm sm:tw-text-base tw-font-normal tw-whitespace-pre-line">
       {statement.statement_value}
     </div>
   );
