@@ -57,8 +57,12 @@ export default function UserPageStatsActivityTDHHistoryChart({
 }) {
   return (
     <div>
-      <div>{data.title}</div>
-      <div className="tw-mt-4">
+      <div className="tw-flex">
+        <h3 className="tw-mb-0 tw-text-lg tw-font-semibold tw-text-iron-50 tw-tracking-tight">
+          {data.title}
+        </h3>
+      </div>
+      <div className="tw-mt-4 tw-mb-6">
         <Bar data={data} options={GRAPH_OPTIONS} />
       </div>
     </div>
