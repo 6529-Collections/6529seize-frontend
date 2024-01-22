@@ -116,13 +116,6 @@ export default function UserPageStats({
         profile={profile}
         activeAddress={activeAddress}
       />
-
-      {/* 
-      <UserPageDistributions
-        show={true}
-        activeAddress={activeAddress}
-        profile={profile}
-      /> */}
     </div>
   );
 }

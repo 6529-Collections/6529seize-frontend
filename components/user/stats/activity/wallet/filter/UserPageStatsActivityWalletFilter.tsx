@@ -46,10 +46,7 @@ export default function UserPageStatsActivityWalletFilter({
   };
 
   return (
-    <div
-      className="tw-px-4 sm:tw-px-6 tw-mt-6 tw-w-full sm:tw-max-w-sm"
-      ref={listRef}
-    >
+    <div className="tw-w-full sm:tw-max-w-sm" ref={listRef}>
       <div className="tw-relative">
         <button
           type="button"

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { IProfileAndConsolidations } from "../../../../../entities/IProfile";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { QueryKey } from "../../../../react-query-wrapper/ReactQueryWrapper";
@@ -7,6 +7,10 @@ import { IDistribution } from "../../../../../entities/IDistribution";
 import { commonApiFetch } from "../../../../../services/api/common-api";
 import UserPageStatsActivityDistributionsTable from "./UserPageStatsActivityDistributionsTable";
 import CommonTablePagination from "../../../../utils/CommonTablePagination";
+import CommonCardSkeleton from "../../../../utils/animation/CommonCardSkeleton";
+import { useRouter } from "next/router";
+import { usePathname, useSearchParams } from "next/navigation";
+import UserPageStatsActivityDistributionsTableWrapper from "./UserPageStatsActivityDistributionsTableWrapper";
 
 export default function UserPageStatsActivityDistributions({
   profile,
@@ -16,6 +20,7 @@ export default function UserPageStatsActivityDistributions({
   readonly activeAddress: string | null;
 }) {
   const PAGE_SIZE = 10;
+
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState<number>(1);
 
@@ -33,7 +38,11 @@ export default function UserPageStatsActivityDistributions({
     setPage(1);
   }, [activeAddress, profile]);
 
-  const { isLoading, data } = useQuery<Page<IDistribution>>({
+  const {
+    isFetching,
+    isLoading: isFirstLoading,
+    data,
+  } = useQuery<Page<IDistribution>>({
     queryKey: [
       QueryKey.PROFILE_DISTRIBUTIONS,
       {
@@ -55,34 +64,35 @@ export default function UserPageStatsActivityDistributions({
   });
 
   useEffect(() => {
-    if (isLoading) return;
+    if (isFetching) return;
     if (!data?.count) {
       setPage(1);
       setTotalPages(1);
       return;
     }
-    setTotalPages(Math.ceil(data.count / PAGE_SIZE));
-  }, [data?.count, data?.page, isLoading]);
+    const totalPages = Math.ceil(data.count / PAGE_SIZE);
+    if (totalPages < page) {
+      setPage(1);
+    }
+    setTotalPages(totalPages);
+  }, [data?.count, data?.page, isFetching]);
 
   return (
     <div className="tw-mt-4">
-      {data?.data.length ? (
-        <div className="tw-flow-root">
-          <UserPageStatsActivityDistributionsTable items={data.data} />
-          {totalPages > 1 && (
-            <CommonTablePagination
-              currentPage={page}
-              setCurrentPage={setPage}
-              totalPages={totalPages}
-              small={false}
-            />
-          )}
-        </div>
-      ) : (
-        <div className="tw-text-sm tw-italic tw-text-iron-500">
-          No distributions
-        </div>
-      )}
+      <div className="tw-flex">
+        <h3 className="tw-mb-0 tw-text-lg tw-font-semibold tw-text-iron-50 tw-tracking-tight">
+          Distributions
+        </h3>
+      </div>
+      <UserPageStatsActivityDistributionsTableWrapper
+        data={data?.data ?? []}
+        profile={profile}
+        isFirstLoading={isFirstLoading}
+        loading={isFetching}
+        page={page}
+        totalPages={totalPages}
+        setPage={setPage}
+      />
     </div>
   );
 }

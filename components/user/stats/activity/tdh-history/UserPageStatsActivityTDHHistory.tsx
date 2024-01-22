@@ -5,6 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import { QueryKey } from "../../../../react-query-wrapper/ReactQueryWrapper";
 import { commonApiFetch } from "../../../../../services/api/common-api";
 import UserPageStatsActivityTDHHistoryCharts from "./UserPageStatsActivityTDHHistoryCharts";
+import CommonCardSkeleton from "../../../../utils/animation/CommonCardSkeleton";
 
 export default function UserPageStatsActivityTDHHistory({
   profile,
@@ -16,7 +17,7 @@ export default function UserPageStatsActivityTDHHistory({
     profile.profile?.primary_wallet?.toLowerCase() ??
     (router.query.user as string).toLowerCase();
 
-  const { data: tdhHistory } = useQuery<TDHHistory[]>({
+  const { isFetching, data: tdhHistory } = useQuery<TDHHistory[]>({
     queryKey: [
       QueryKey.WALLET_TDH_HISTORY,
       {
@@ -38,7 +39,18 @@ export default function UserPageStatsActivityTDHHistory({
 
   return (
     <div className="tw-mt-4">
-      <UserPageStatsActivityTDHHistoryCharts tdhHistory={tdhHistory ?? []} />
+      <div className="tw-flex">
+        <h3 className="tw-mb-0 tw-text-lg tw-font-semibold tw-text-iron-50 tw-tracking-tight">
+          TDH History
+        </h3>
+      </div>
+      {isFetching ? (
+        <div className="tw-w-full tw-h-96">
+          <CommonCardSkeleton />
+        </div>
+      ) : (
+        <UserPageStatsActivityTDHHistoryCharts tdhHistory={tdhHistory ?? []} />
+      )}
     </div>
   );
 }

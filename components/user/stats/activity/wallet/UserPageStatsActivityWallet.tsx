@@ -5,6 +5,13 @@ import { usePathname, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { WALLET_ACTIVITY_FILTER_PARAM } from "../UserPageActivityWrapper";
 import UserPageStatsActivityWalletTableWrapper from "./table/UserPageStatsActivityWalletTableWrapper";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
+import { Page } from "../../../../../helpers/Types";
+import { Transaction } from "../../../../../entities/ITransaction";
+import { QueryKey } from "../../../../react-query-wrapper/ReactQueryWrapper";
+import { MEMES_CONTRACT } from "../../../../../constants";
+import { commonApiFetch } from "../../../../../services/api/common-api";
+import { MemeLite } from "../../../settings/UserSettingsImgSelectMeme";
 
 export enum UserPageStatsActivityWalletFilterType {
   ALL = "ALL",
@@ -46,6 +53,18 @@ export default function UserPageStatsActivityWallet({
   readonly profile: IProfileAndConsolidations;
   readonly activeAddress: string | null;
 }) {
+  const FILTER_TO_PARAM: Record<UserPageStatsActivityWalletFilterType, string> =
+    {
+      [UserPageStatsActivityWalletFilterType.ALL]: "",
+      [UserPageStatsActivityWalletFilterType.AIRDROPS]: "airdrops",
+      [UserPageStatsActivityWalletFilterType.MINTS]: "mints",
+      [UserPageStatsActivityWalletFilterType.SALES]: "sales",
+      [UserPageStatsActivityWalletFilterType.PURCHASES]: "purchases",
+      [UserPageStatsActivityWalletFilterType.TRANSFERS]: "transfers",
+      [UserPageStatsActivityWalletFilterType.BURNS]: "burns",
+    };
+
+  const PAGE_SIZE = 10;
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -86,6 +105,85 @@ export default function UserPageStatsActivityWallet({
     );
   };
 
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState<number>(1);
+
+  const getWalletsParam = () =>
+    [
+      activeAddress?.toLowerCase() ??
+        profile.consolidation.wallets.map((w) =>
+          w.wallet.address.toLowerCase()
+        ),
+    ].join(",");
+
+  const [walletsParam, setWalletsParam] = useState<string>(getWalletsParam());
+  useEffect(() => {
+    setWalletsParam(getWalletsParam());
+    setPage(1);
+  }, [activeAddress, profile]);
+
+  useEffect(() => setPage(1), [activeFilter]);
+
+  const {
+    isFetching,
+    isLoading: isFirstLoading,
+    data,
+  } = useQuery<Page<Transaction>>({
+    queryKey: [
+      QueryKey.PROFILE_TRANSACTIONS,
+      {
+        contract: MEMES_CONTRACT,
+        page_size: `${PAGE_SIZE}`,
+        page,
+        wallet: walletsParam,
+        filter: activeFilter,
+      },
+    ],
+    queryFn: async () => {
+      const params: Record<string, string> = {
+        contract: MEMES_CONTRACT,
+        wallet: walletsParam,
+        page_size: `${PAGE_SIZE}`,
+        page: `${page}`,
+      };
+
+      if (activeFilter) {
+        params.filter = FILTER_TO_PARAM[activeFilter];
+      }
+
+      return await commonApiFetch<Page<Transaction>>({
+        endpoint: "transactions",
+        params,
+      });
+    },
+    placeholderData: keepPreviousData,
+  });
+
+  useEffect(() => {
+    if (isFetching) return;
+    if (!data?.count) {
+      setPage(1);
+      setTotalPages(1);
+      return;
+    }
+    setTotalPages(Math.ceil(data.count / PAGE_SIZE));
+  }, [data?.count, data?.page, isFetching]);
+
+  const { isFetching: isFirstLoadingMemes, data: memes } = useQuery({
+    queryKey: [QueryKey.MEMES_LITE],
+    queryFn: async () => {
+      const memesResponse = await commonApiFetch<{
+        count: number;
+        data: MemeLite[];
+        next: string | null;
+        page: number;
+      }>({
+        endpoint: "memes_lite",
+      });
+      return memesResponse.data;
+    },
+  });
+
   return (
     <div className="tw-mt-4">
       <div className="tw-flex">
@@ -93,19 +191,18 @@ export default function UserPageStatsActivityWallet({
           Wallet activity
         </h3>
       </div>
-      <div className="tw-mt-2 lg:tw-mt-4 tw-bg-iron-900 tw-border tw-border-iron-800 tw-border-solid tw-rounded-xl ">
-        <UserPageStatsActivityWalletFilter
-          activeFilter={activeFilter}
-          setActiveFilter={onActiveFilter}
-        />
-        <div className="tw-scroll-py-3 tw-overflow-auto">
-          <UserPageStatsActivityWalletTableWrapper
-            filter={activeFilter}
-            profile={profile}
-            activeAddress={activeAddress}
-          />
-        </div>
-      </div>
+      <UserPageStatsActivityWalletTableWrapper
+        filter={activeFilter}
+        profile={profile}
+        transactions={data?.data ?? []}
+        memes={memes ?? []}
+        totalPages={totalPages}
+        page={page}
+        isFirstLoading={isFirstLoading || isFirstLoadingMemes}
+        loading={isFetching}
+        setPage={setPage}
+        onActiveFilter={onActiveFilter}
+      />
     </div>
   );
 }
