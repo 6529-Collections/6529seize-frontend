@@ -22,6 +22,195 @@ export default function UserPageStatsActivityTDHHistoryCharts({
 }) {
   const [dataSets, setDataSets] = useState<ChartProps[]>([]);
 
+  const isNumber = (n: any): n is number => typeof n === "number";
+
+  const getData = ({
+    tdh,
+    labels,
+    field,
+  }: {
+    tdh: TDHHistory[];
+    labels: Date[];
+    field: keyof TDHHistory;
+  }): number[] => {
+    return labels.map((l) => {
+      const tdhItem = tdh.find((t) => t.date === l);
+      if (!tdhItem) {
+        return 0;
+      }
+      const value = tdhItem[field];
+      return tdhItem && isNumber(value) ? value : 0;
+    });
+  };
+
+  const getBoostedTDH = ({
+    tdh,
+    labels,
+  }: {
+    tdh: TDHHistory[];
+    labels: Date[];
+  }) => {
+    const data: ChartProps = {
+      title: "Total TDH",
+      labels,
+      datasets: [
+        {
+          label: "Total Boosted TDH",
+          data: getData({ tdh, labels, field: "boosted_tdh" }),
+          borderColor: "#00DC21",
+          backgroundColor: "#00DC21",
+        },
+        {
+          label: "Total Unboosted TDH",
+          data: getData({ tdh, labels, field: "tdh" }),
+          borderColor: "#1861FF",
+          backgroundColor: "#1861FF",
+        },
+        {
+          label: "Total Unweighted TDH",
+          data: getData({ tdh, labels, field: "tdh__raw" }),
+          borderColor: "#e55137",
+          backgroundColor: "#e55137",
+        },
+      ],
+    };
+
+    const haveValues = data.datasets.some((d) => d.data.some((d) => d));
+    return haveValues ? data : null;
+  };
+
+  const getNetTDH = ({
+    tdh,
+    labels,
+  }: {
+    tdh: TDHHistory[];
+    labels: Date[];
+  }) => {
+    const data: ChartProps = {
+      title: "Net TDH Daily Change",
+      labels,
+      datasets: [
+        {
+          label: "Net Boosted TDH",
+          data: getData({ tdh, labels, field: "net_boosted_tdh" }),
+          borderColor: "#00DC21",
+          backgroundColor: "#00DC21",
+        },
+        {
+          label: "Net Unboosted TDH",
+          data: getData({ tdh, labels, field: "net_tdh" }),
+          borderColor: "#1861FF",
+          backgroundColor: "#1861FF",
+        },
+        {
+          label: "Net Unweighted TDH",
+          data: getData({ tdh, labels, field: "net_tdh__raw" }),
+          borderColor: "#e55137",
+          backgroundColor: "#e55137",
+        },
+      ],
+    };
+
+    const haveValues = data.datasets.some((d) => d.data.some((d) => d));
+    return haveValues ? data : null;
+  };
+
+  const getCreatedTDH = ({
+    tdh,
+    labels,
+  }: {
+    tdh: TDHHistory[];
+    labels: Date[];
+  }) => {
+    const data: ChartProps = {
+      title: "Created TDH Daily Change",
+      labels,
+      datasets: [
+        {
+          label: "Created Boosted TDH",
+          data: getData({
+            tdh,
+            labels,
+            field: "created_boosted_tdh",
+          }),
+          borderColor: "#00DC21",
+          backgroundColor: "#00DC21",
+        },
+        {
+          label: "Created Unboosted TDH",
+          data: getData({
+            tdh,
+            labels,
+            field: "created_tdh",
+          }),
+          borderColor: "#1861FF",
+          backgroundColor: "#1861FF",
+        },
+        {
+          label: "Created Unweighted TDH",
+          data: getData({
+            tdh,
+            labels,
+            field: "created_tdh__raw",
+          }),
+          borderColor: "#e55137",
+          backgroundColor: "#e55137",
+        },
+      ],
+    };
+
+    const haveValues = data.datasets.some((d) => d.data.some((d) => d));
+    return haveValues ? data : null;
+  };
+
+  const getDestroyedTDH = ({
+    tdh,
+    labels,
+  }: {
+    tdh: TDHHistory[];
+    labels: Date[];
+  }) => {
+    const data: ChartProps = {
+      title: "Destroyed TDH Daily Change",
+      labels,
+      datasets: [
+        {
+          label: "Destroyed Boosted TDH",
+          data: getData({
+            tdh,
+            labels,
+            field: "destroyed_boosted_tdh",
+          }),
+          borderColor: "#00DC21",
+          backgroundColor: "#00DC21",
+        },
+        {
+          label: "Destroyed Unboosted TDH",
+          data: getData({
+            tdh,
+            labels,
+            field: "destroyed_tdh",
+          }),
+          borderColor: "#1861FF",
+          backgroundColor: "#1861FF",
+        },
+        {
+          label: "Destroyed Unweighted TDH",
+          data: getData({
+            tdh,
+            labels,
+            field: "destroyed_tdh__raw",
+          }),
+          borderColor: "#e55137",
+          backgroundColor: "#e55137",
+        },
+      ],
+    };
+
+    const haveValues = data.datasets.some((d) => d.data.some((d) => d));
+    return haveValues ? data : null;
+  };
+
   useEffect(() => {
     if (!tdhHistory.length) {
       setDataSets([]);
@@ -32,156 +221,39 @@ export default function UserPageStatsActivityTDHHistoryCharts({
     const tdhLabels = tdhHistoryReversed.map((t) => t.date);
     const data: ChartProps[] = [];
 
-    const boostedTDH: ChartProps = {
-      title: "Total TDH",
+    const boostedTDH = getBoostedTDH({
+      tdh: tdhHistoryReversed,
       labels: tdhLabels,
-      datasets: [
-        {
-          label: "Total Boosted TDH",
-          data: tdhLabels.map(
-            (l) =>
-              tdhHistoryReversed.find((t) => t.date === l)?.boosted_tdh ?? 0
-          ),
-          borderColor: "#00DC21",
-          backgroundColor: "#00DC21",
-        },
-        {
-          label: "Total Unboosted TDH",
-          data: tdhLabels.map(
-            (l) => tdhHistoryReversed.find((t) => t.date === l)?.tdh ?? 0
-          ),
-          borderColor: "#1861FF",
-          backgroundColor: "#1861FF",
-        },
-        {
-          label: "Total Unweighted TDH",
-          data: tdhLabels.map(
-            (l) => tdhHistoryReversed.find((t) => t.date === l)?.tdh__raw ?? 0
-          ),
-          borderColor: "#e55137",
-          backgroundColor: "#e55137",
-        },
-      ],
-    };
+    });
 
-    const haveBoostedTdh = boostedTDH.datasets.some((d) =>
-      d.data.some((d) => d)
-    );
-    if (haveBoostedTdh) {
+    if (boostedTDH) {
       data.push(boostedTDH);
     }
 
-    const netTDH: ChartProps = {
-      title: "Net TDH Daily Change",
+    const netTDH = getNetTDH({
+      tdh: tdhHistoryReversed,
       labels: tdhLabels,
-      datasets: [
-        {
-          label: "Net Boosted TDH",
-          data: tdhLabels.map(
-            (l) => tdhHistory.find((t) => t.date === l)?.net_boosted_tdh ?? 0
-          ),
-          borderColor: "#00DC21",
-          backgroundColor: "#00DC21",
-        },
-        {
-          label: "Net Unboosted TDH",
-          data: tdhLabels.map(
-            (l) => tdhHistory.find((t) => t.date === l)?.net_tdh ?? 0
-          ),
-          borderColor: "#1861FF",
-          backgroundColor: "#1861FF",
-        },
-        {
-          label: "Net Unweighted TDH",
-          data: tdhLabels.map(
-            (l) => tdhHistory.find((t) => t.date === l)?.net_tdh__raw ?? 0
-          ),
-          borderColor: "#e55137",
-          backgroundColor: "#e55137",
-        },
-      ],
-    };
+    });
 
-    const haveNetTdh = netTDH.datasets.some((d) => d.data.some((d) => d));
-    if (haveNetTdh) {
+    if (netTDH) {
       data.push(netTDH);
     }
 
-    const createdTDH: ChartProps = {
-      title: "Created TDH Daily Change",
+    const createdTDH = getCreatedTDH({
+      tdh: tdhHistoryReversed,
       labels: tdhLabels,
-      datasets: [
-        {
-          label: "Created Boosted TDH",
-          data: tdhLabels.map(
-            (l) =>
-              tdhHistory.find((t) => t.date === l)?.created_boosted_tdh ?? 0
-          ),
-          borderColor: "#00DC21",
-          backgroundColor: "#00DC21",
-        },
-        {
-          label: "Created Unboosted TDH",
-          data: tdhLabels.map(
-            (l) => tdhHistory.find((t) => t.date === l)?.created_tdh ?? 0
-          ),
-          borderColor: "#1861FF",
-          backgroundColor: "#1861FF",
-        },
-        {
-          label: "Created Unweighted TDH",
-          data: tdhLabels.map(
-            (l) => tdhHistory.find((t) => t.date === l)?.created_tdh__raw ?? 0
-          ),
-          borderColor: "#e55137",
-          backgroundColor: "#e55137",
-        },
-      ],
-    };
+    });
 
-    const haveCreatedTdh = createdTDH.datasets.some((d) =>
-      d.data.some((d) => d)
-    );
-    if (haveCreatedTdh) {
+    if (createdTDH) {
       data.push(createdTDH);
     }
 
-    const destroyedTDH: ChartProps = {
-      title: "Destroyed TDH Daily Change",
+    const destroyedTDH = getDestroyedTDH({
+      tdh: tdhHistoryReversed,
       labels: tdhLabels,
-      datasets: [
-        {
-          label: "Destroyed Boosted TDH",
-          data: tdhLabels.map(
-            (l) =>
-              tdhHistory.find((t) => t.date === l)?.destroyed_boosted_tdh ?? 0
-          ),
-          borderColor: "#00DC21",
-          backgroundColor: "#00DC21",
-        },
-        {
-          label: "Destroyed Unboosted TDH",
-          data: tdhLabels.map(
-            (l) => tdhHistory.find((t) => t.date === l)?.destroyed_tdh ?? 0
-          ),
-          borderColor: "#1861FF",
-          backgroundColor: "#1861FF",
-        },
-        {
-          label: "Destroyed Unweighted TDH",
-          data: tdhLabels.map(
-            (l) => tdhHistory.find((t) => t.date === l)?.destroyed_tdh__raw ?? 0
-          ),
-          borderColor: "#e55137",
-          backgroundColor: "#e55137",
-        },
-      ],
-    };
+    });
 
-    const haveDestroyedTdh = destroyedTDH.datasets.some((d) =>
-      d.data.some((d) => d)
-    );
-    if (haveDestroyedTdh) {
+    if (destroyedTDH) {
       data.push(destroyedTDH);
     }
     setDataSets(data);

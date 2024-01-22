@@ -50,7 +50,7 @@ export default function UserPageStats({
         const response = await commonApiFetch<{ data: TDHMetrics[] }>({
           endpoint: `owner_metrics`,
           params: {
-            wallet: activeAddress!,
+            wallet: activeAddress?.toLowerCase() ?? "",
             profile_page: "true",
           },
         });
@@ -96,12 +96,22 @@ export default function UserPageStats({
         />
       </div>
 
-      <div className="tw-w-full tw-pt-8 tw-h-92">
-        <CommonCardSkeleton />
-      </div>
+      {isLoading ? (
+        <>
+          <div className="tw-w-full tw-pt-8 tw-h-96">
+            <CommonCardSkeleton />
+          </div>
+          <div className="tw-w-full tw-pt-8 tw-h-96">
+            <CommonCardSkeleton />
+          </div>
+        </>
+      ) : (
+        <>
+          <UserPageStatsCollected tdh={tdh} />
+          <UserPageStatsActivityOverview tdh={tdh} />
+        </>
+      )}
 
-      <UserPageStatsCollected tdh={tdh} />
-      <UserPageStatsActivityOverview tdh={tdh} />
       <UserPageActivityWrapper
         profile={profile}
         activeAddress={activeAddress}
