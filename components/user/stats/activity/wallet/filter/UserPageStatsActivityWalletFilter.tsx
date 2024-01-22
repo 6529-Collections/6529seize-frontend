@@ -47,7 +47,7 @@ export default function UserPageStatsActivityWalletFilter({
 
   return (
     <div
-      className="tw-px-4 sm:tw-px-6 tw-mt-6 tw-max-w-sm "
+      className="tw-px-4 sm:tw-px-6 tw-mt-6 tw-max-w-sm"
       ref={listRef}
     >
       <div className="tw-relative">
@@ -78,7 +78,7 @@ export default function UserPageStatsActivityWalletFilter({
         <AnimatePresence mode="wait" initial={false}>
           {isOpen && (
             <motion.div
-              className="tw-origin-top-right tw-absolute tw-right-0 tw-mt-1 tw-w-full tw-rounded-lg tw-shadow-xl tw-bg-iron-800 tw-ring-1 tw-ring-black tw-ring-opacity-5"
+              className="tw-origin-top-right tw-absolute tw-z-10 tw-right-0 tw-mt-1 tw-w-full tw-rounded-lg tw-shadow-xl tw-bg-iron-800 tw-ring-1 tw-ring-black tw-ring-opacity-5"
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}

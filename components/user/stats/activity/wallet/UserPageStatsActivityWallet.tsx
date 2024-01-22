@@ -94,11 +94,11 @@ export default function UserPageStatsActivityWallet({
         </h3>
       </div>
       <div className="tw-mt-2 lg:tw-mt-4 tw-bg-iron-900 tw-border tw-border-iron-800 tw-border-solid tw-rounded-xl ">
+        <UserPageStatsActivityWalletFilter
+          activeFilter={activeFilter}
+          setActiveFilter={onActiveFilter}
+        />
         <div className="tw-scroll-py-3 tw-overflow-auto">
-          <UserPageStatsActivityWalletFilter
-            activeFilter={activeFilter}
-            setActiveFilter={onActiveFilter}
-          />
           <UserPageStatsActivityWalletTableWrapper
             filter={activeFilter}
             profile={profile}
