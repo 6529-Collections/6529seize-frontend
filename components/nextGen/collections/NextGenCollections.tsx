@@ -57,7 +57,7 @@ export default function NextGenCollections() {
     <Container className="no-padding">
       <Row className="pt-3 pb-3">
         <Col className="d-flex justify-content-between">
-          <h1>NEXTGEN COLLECTIONS</h1>
+          <h1>COLLECTIONS</h1>
           <Dropdown className={styles.filterDropdown} drop={"down-centered"}>
             <Dropdown.Toggle>Status: {selectedStatus}</Dropdown.Toggle>
             <Dropdown.Menu>

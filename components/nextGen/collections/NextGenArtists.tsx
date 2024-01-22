@@ -23,7 +23,7 @@ export default function NextGenCollections() {
     <Container className="no-padding">
       <Row className="pt-3 pb-3">
         <Col>
-          <h1>NEXTGEN ARTISTS</h1>
+          <h1>ARTISTS</h1>
         </Col>
       </Row>
       {collections.map((collection: NextGenCollection, index: number) => {
