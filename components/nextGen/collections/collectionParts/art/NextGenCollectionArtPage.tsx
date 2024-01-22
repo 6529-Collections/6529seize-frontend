@@ -1,13 +1,6 @@
 import { Col, Container, Row } from "react-bootstrap";
 import { useEffect } from "react";
 import { Info } from "../../../nextgen_entities";
-import {
-  useCollectionInfo,
-  useTokensIndex,
-  useSharedState,
-  useCollectionPhasesHook,
-  useCollectionAdditionalHook,
-} from "../../../nextgen_helpers";
 import NextGenCollectionHeader from "../NextGenCollectionHeader";
 import Breadcrumb, { Crumb } from "../../../../breadcrumb/Breadcrumb";
 import NextGenCollectionArt from "../NextGenCollectionArt";

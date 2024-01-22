@@ -11,6 +11,7 @@ import { useEffect, useState } from "react";
 import { commonApiFetch } from "../../../../services/api/common-api";
 import { useRouter } from "next/router";
 import DotLoader from "../../../dotLoader/DotLoader";
+import { areEqualAddresses } from "../../../../helpers/Helpers";
 
 interface Props {
   collection: NextGenCollection;
@@ -38,7 +39,13 @@ export default function NextGenCollectionArt(props: Readonly<Props>) {
           const traitValue = tv.split(":");
           const t = traitValue[0];
           const v = traitValue[1];
-          if (traits.some((tr) => tr.trait === t && tr.values.includes(v))) {
+          if (
+            traits.some(
+              (tr) =>
+                areEqualAddresses(tr.trait, t) &&
+                tr.values.some((vl) => areEqualAddresses(vl, v))
+            )
+          ) {
             selectedTraits.push({
               trait: t,
               value: v,
@@ -136,14 +143,25 @@ export default function NextGenCollectionArt(props: Readonly<Props>) {
           <Col sm={12} md={2}>
             <Container>
               <Row>
-                <Col className="font-color-h font-bolder font-larger no-padding">
-                  Traits{" "}
-                  {selectedTraitValues.length > 0 && (
+                <Col
+                  xs={12}
+                  className="font-color-h font-bolder font-larger no-padding">
+                  Traits
+                </Col>
+                {selectedTraitValues.length > 0 && (
+                  <Col
+                    xs={12}
+                    className="no-padding d-flex justify-content-between align-items-center">
                     <span className="font-color-h font-smaller">
                       ({selectedTraitValues.length} selected)
                     </span>
-                  )}
-                </Col>
+                    <span
+                      className="font-cmaller cursor-pointer decoration-hover-underline"
+                      onClick={() => setSelectedTraitValues([])}>
+                      Clear
+                    </span>
+                  </Col>
+                )}
               </Row>
               <Row>
                 <Col className="d-flex flex-column pt-2 pb-2 no-padding">
@@ -173,26 +191,25 @@ export default function NextGenCollectionArt(props: Readonly<Props>) {
                                 id={`trait-${v.replaceAll(" ", "-")}`}
                                 checked={selectedTraitValues.some(
                                   (t) =>
-                                    t.trait === tr.trait &&
-                                    t.value.toLowerCase() === v.toLowerCase()
+                                    areEqualAddresses(t.trait, tr.trait) &&
+                                    areEqualAddresses(t.value, v)
                                 )}
                                 className="pt-1 pb-1"
                                 onChange={() => {
                                   if (
                                     selectedTraitValues.some(
                                       (t) =>
-                                        t.trait === tr.trait &&
-                                        t.value.toLowerCase() ===
-                                          v.toLowerCase()
+                                        areEqualAddresses(t.trait, tr.trait) &&
+                                        areEqualAddresses(t.value, v)
                                     )
                                   ) {
                                     setSelectedTraitValues(
                                       selectedTraitValues.filter(
                                         (t) =>
-                                          t.trait !== tr.trait ||
-                                          (t.trait === tr.trait &&
-                                            t.value.toLowerCase() !==
-                                              v.toLowerCase())
+                                          areEqualAddresses(
+                                            t.trait,
+                                            tr.trait
+                                          ) && areEqualAddresses(t.value, v)
                                       )
                                     );
                                   } else {
@@ -200,7 +217,7 @@ export default function NextGenCollectionArt(props: Readonly<Props>) {
                                       ...selectedTraitValues,
                                       {
                                         trait: tr.trait,
-                                        value: v.toLowerCase(),
+                                        value: v,
                                       },
                                     ]);
                                   }
