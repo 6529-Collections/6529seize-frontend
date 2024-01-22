@@ -13,33 +13,18 @@ import {
   getSeasons,
   userPageNeedsRedirect,
 } from "../../helpers/server.helpers";
-import UserPageCollection from "../../components/user/collected/UserPageCollection";
 import { Season } from "../../entities/ISeason";
 import { OwnerLite } from "../../entities/IOwner";
+import UserPageCollected from "../../components/user/collected/UserPageCollected";
 
 export interface UserPageProps {
   profile: IProfileAndConsolidations;
-  title: string;
-  consolidatedTDH: ConsolidatedTDHMetrics | null;
-  memesLite: NFTLite[];
-  gradients: NFT[];
-  seasons: Season[];
-  consolidatedOwned: OwnerLite[];
 }
 
 const Page: NextPageWithLayout<{ pageProps: UserPageProps }> = ({
   pageProps,
 }) => {
-  return (
-    <UserPageCollection
-      profile={pageProps.profile}
-      consolidatedOwned={pageProps.consolidatedOwned}
-      consolidatedTDH={pageProps.consolidatedTDH}
-      memesLite={pageProps.memesLite}
-      gradients={pageProps.gradients}
-      seasons={pageProps.seasons}
-    />
-  );
+  return <UserPageCollected />;
 };
 
 Page.getLayout = function getLayout(
@@ -75,26 +60,17 @@ export async function getServerSideProps(
     const needsRedirect = userPageNeedsRedirect({
       profile,
       req,
-      subroute: 'collected',
+      subroute: "collected",
     });
 
     if (needsRedirect) {
       return needsRedirect as any;
     }
-    const consolidatedOwned = await getOwned({
-      wallets: profile.consolidation.wallets.map((w) => w.wallet.address),
-      headers,
-    });
 
     return {
       props: {
         profile,
-        title,
-        consolidatedTDH,
-        gradients,
-        memesLite,
-        seasons,
-        consolidatedOwned,
+
       },
     };
   } catch (e: any) {

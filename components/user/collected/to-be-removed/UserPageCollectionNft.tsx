@@ -1,8 +1,11 @@
 import styles from "../UserPage.module.scss";
 import { Col, Container, Row } from "react-bootstrap";
-import { areEqualAddresses, numberWithCommas } from "../../../helpers/Helpers";
-import { GRADIENT_CONTRACT, MEMES_CONTRACT } from "../../../constants";
-import NFTImage from "../../nft-image/NFTImage";
+import {
+  areEqualAddresses,
+  numberWithCommas,
+} from "../../../../helpers/Helpers";
+import { GRADIENT_CONTRACT, MEMES_CONTRACT } from "../../../../constants";
+import NFTImage from "../../../nft-image/NFTImage";
 import { IUserNFT } from "./UserPageCollectionNfts";
 
 export default function UserPageCollectionNft({
@@ -17,7 +20,8 @@ export default function UserPageCollectionNft({
       xs={{ span: 6 }}
       sm={{ span: 4 }}
       md={{ span: 3 }}
-      lg={{ span: 3 }}>
+      lg={{ span: 3 }}
+    >
       <Container fluid className="no-padding">
         <Row>
           <a
@@ -26,7 +30,8 @@ export default function UserPageCollectionNft({
               areEqualAddresses(nft.contract, MEMES_CONTRACT)
                 ? "the-memes"
                 : "6529-gradient"
-            }/${nft.id}`}>
+            }/${nft.id}`}
+          >
             <NFTImage
               nft={nft}
               animation={false}
@@ -50,7 +55,8 @@ export default function UserPageCollectionNft({
                 areEqualAddresses(nft.contract, MEMES_CONTRACT)
                   ? "the-memes"
                   : "6529-gradient"
-              }/${nft.id}`}>
+              }/${nft.id}`}
+            >
               {areEqualAddresses(nft.contract, MEMES_CONTRACT)
                 ? `#${nft.id} - ${nft.name}`
                 : nft.name}

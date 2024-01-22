@@ -1,11 +1,11 @@
-import { ConsolidatedTDHMetrics, TDHMetrics } from "../../../entities/ITDH";
+import { ConsolidatedTDHMetrics, TDHMetrics } from "../../../../entities/ITDH";
 import styles from "../UserPage.module.scss";
 import { Row, Col, Form } from "react-bootstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { SortDirection } from "../../../entities/ISort";
-import SeasonsDropdown from "../../seasons-dropdown/SeasonsDropdown";
+import { SortDirection } from "../../../../entities/ISort";
+import SeasonsDropdown from "../../../seasons-dropdown/SeasonsDropdown";
 import { UserCollectionSort } from "./UserPageCollection";
-import { Season } from "../../../entities/ISeason";
+import { Season } from "../../../../entities/ISeason";
 
 export default function UserPageCollectionControls({
   tdh,
