@@ -1,6 +1,10 @@
 import { useRouter } from "next/router";
 import { IProfileAndConsolidations } from "../../../../../entities/IProfile";
-import UserPageStatsTDHcharts from "../../../to-be-removed/UserPageStatsTDHcharts";
+import { TDHHistory } from "../../../../../entities/ITDH";
+import { useQuery } from "@tanstack/react-query";
+import { QueryKey } from "../../../../react-query-wrapper/ReactQueryWrapper";
+import { commonApiFetch } from "../../../../../services/api/common-api";
+import UserPageStatsActivityTDHHistoryCharts from "./UserPageStatsActivityTDHHistoryCharts";
 
 export default function UserPageStatsActivityTDHHistory({
   profile,
@@ -11,5 +15,28 @@ export default function UserPageStatsActivityTDHHistory({
   const mainAddress =
     profile.profile?.primary_wallet?.toLowerCase() ??
     (router.query.user as string).toLowerCase();
-  return <UserPageStatsTDHcharts mainAddress={mainAddress} />;
+
+  const { data: tdhHistory } = useQuery<TDHHistory[]>({
+    queryKey: [
+      QueryKey.WALLET_TDH_HISTORY,
+      {
+        wallet: mainAddress,
+        page_size: "10",
+      },
+    ],
+    queryFn: async () => {
+      const response = await commonApiFetch<{ data: TDHHistory[] }>({
+        endpoint: `tdh_history`,
+        params: {
+          wallet: mainAddress,
+          page_size: "10",
+        },
+      });
+      return response.data;
+    },
+  });
+
+  return (
+    <UserPageStatsActivityTDHHistoryCharts tdhHistory={tdhHistory ?? []} />
+  );
 }
