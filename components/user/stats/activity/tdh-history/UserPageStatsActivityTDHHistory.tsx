@@ -37,6 +37,8 @@ export default function UserPageStatsActivityTDHHistory({
   });
 
   return (
-    <UserPageStatsActivityTDHHistoryCharts tdhHistory={tdhHistory ?? []} />
+    <div className="tw-mt-4">
+      <UserPageStatsActivityTDHHistoryCharts tdhHistory={tdhHistory ?? []} />
+    </div>
   );
 }

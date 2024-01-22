@@ -125,15 +125,15 @@ export default function UserPageStatsActivityWalletTableRow({
             x{transaction.token_count}
           </div>
         )}
-        <div className="tw-text-sm tw-text-iron-100 tw-font-semibold">
+        <div className="tw-whitespace-nowrap tw-text-sm tw-text-iron-100 tw-font-semibold">
           {meme?.name} (#{transaction.token_id})
         </div>
         <img
-          className="tw-mx-1 tw-flex-shrink-0 tw-object-contain tw-max-h-10 tw-min-w-10 tw-w-auto tw-h-auto tw-rounded-sm tw-ring-2 tw-ring-white/30 tw-bg-iron-800"
+          className="tw-mx-1 tw-flex-shrink-0 tw-object-contain tw-max-h-10 tw-min-w-10 tw-w-auto tw-h-auto tw-rounded-sm tw-ring-1 tw-ring-white/30 tw-bg-iron-800"
           src={meme?.icon ?? ""}
           alt={meme?.name ?? ""}
         />
-        <div className="tw-text-sm tw-text-iron-100 tw-font-semibold">
+        <div className="tw-whitespace-nowrap tw-text-sm tw-text-iron-100 tw-font-semibold">
           {showAnotherSide && (
             <UserPageStatsActivityWalletTableRowSecondAddress
               type={type}
@@ -141,7 +141,7 @@ export default function UserPageStatsActivityWalletTableRow({
             />
           )}
         </div>
-        {value && (
+        {!!value && (
           <div className="tw-inline-flex tw-items-center tw-whitespace-nowrap tw-text-sm tw-text-iron-400 tw-font-medium">
             for
             <span className="tw-inline-flex tw-items-center">
@@ -161,7 +161,9 @@ export default function UserPageStatsActivityWalletTableRow({
                 <path d="m420.1 1078.7 539.7 760.6v-441.7z" fill="#8a92b2" />
                 <path d="m959.8 1397.6v441.7l540.1-760.6z" fill="#62688f" />
               </svg>
-              <span className="tw-text-iron-100">{value}</span>
+              <span className="tw-whitespace-nowrap tw-text-iron-100">
+                {value}
+              </span>
             </span>
           </div>
         )}

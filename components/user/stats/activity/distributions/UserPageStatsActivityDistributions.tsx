@@ -65,7 +65,7 @@ export default function UserPageStatsActivityDistributions({
   }, [data?.count, data?.page, isLoading]);
 
   return (
-    <div>
+    <div className="tw-mt-4">
       {data?.data.length ? (
         <div className="tw-flow-root">
           <UserPageStatsActivityDistributionsTable items={data.data} />
@@ -79,7 +79,9 @@ export default function UserPageStatsActivityDistributions({
           )}
         </div>
       ) : (
-        <div>No distributions</div>
+        <div className="tw-text-sm tw-italic tw-text-iron-500">
+          No distributions
+        </div>
       )}
     </div>
   );

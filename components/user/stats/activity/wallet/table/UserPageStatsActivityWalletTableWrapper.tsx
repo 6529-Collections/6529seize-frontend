@@ -122,12 +122,14 @@ export default function UserPageStatsActivityWalletTableWrapper({
               currentPage={page}
               setCurrentPage={setPage}
               totalPages={totalPages}
-              small={false}
+              small={true}
             />
           )}
         </div>
       ) : (
-        <div>No transactions</div>
+        <div className="tw-py-4 tw-px-4 sm:tw-px-6 tw-text-sm tw-italic tw-text-iron-500">
+          No transactions
+        </div>
       )}
     </div>
   );
