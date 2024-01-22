@@ -119,16 +119,17 @@ export default function UserPageHeader({
                 canEdit={canEdit}
                 mainAddress={mainAddress}
               />
+
               <UserPageHeaderLevel level={profile.level} />
+              {showAbout && (
+                <UserPageHeaderAbout
+                  profile={profile}
+                  statement={aboutStatement}
+                  canEdit={canEdit}
+                />
+              )}
               <UserPageHeaderStats profile={profile} />
             </div>
-            {showAbout && (
-              <UserPageHeaderAbout
-                profile={profile}
-                statement={aboutStatement}
-                canEdit={canEdit}
-              />
-            )}
           </div>
         </div>
       </section>
