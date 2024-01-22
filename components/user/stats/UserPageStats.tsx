@@ -10,17 +10,44 @@ import UserPageStatsTags from "./tags/UserPageStatsTags";
 import UserPageStatsCollected from "./UserPageStatsCollected";
 import UserPageStatsActivityOverview from "./UserPageStatsActivityOverview";
 import UserPageActivityWrapper from "./activity/UserPageActivityWrapper";
+import { useQuery } from "@tanstack/react-query";
+import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
 
 export type UserPageStatsTDHType = ConsolidatedTDHMetrics | TDHMetrics | null;
 
 export default function UserPageStats({
   profile,
-  consolidatedTDH,
 }: {
   readonly profile: IProfileAndConsolidations;
-  readonly consolidatedTDH: ConsolidatedTDHMetrics | null;
 }) {
   const router = useRouter();
+  const [activeAddress, setActiveAddress] = useState<string | null>(null);
+
+  const { data: consolidatedTDH } = useQuery<ConsolidatedTDHMetrics>({
+    queryKey: [
+      QueryKey.PROFILE_CONSOLIDATED_TDH,
+      profile.consolidation.consolidation_key,
+    ],
+    queryFn: async () =>
+      await commonApiFetch<ConsolidatedTDHMetrics>({
+        endpoint: `consolidated_owner_metrics/${profile.consolidation.consolidation_key}/`,
+      }),
+    enabled: !!profile.consolidation.consolidation_key,
+  });
+
+  const { data: walletTDH } = useQuery<TDHMetrics>({
+    queryKey: [QueryKey.WALLET_TDH, activeAddress?.toLowerCase()],
+    queryFn: async () =>
+      await commonApiFetch<TDHMetrics>({
+        endpoint: `owner_metrics`,
+        params: {
+          wallet: activeAddress!,
+          profile_page: "true",
+        },
+      }),
+    enabled: !!activeAddress,
+  });
+
   const [isConsolidation, setIsConsolidation] = useState<boolean>(
     profile.consolidation.wallets.length > 1
   );
@@ -37,25 +64,18 @@ export default function UserPageStats({
     );
   }, [profile, router.query.user]);
 
-  const [walletsTDH, setWalletsTDH] = useState<Record<string, TDHMetrics>>({});
-  const [tdh, setTDH] = useState<UserPageStatsTDHType>(null);
-
-  const [loadingMetrics, setLoadingMetrics] = useState<string[]>([]);
-  const [loading, setLoading] = useState(loadingMetrics.length > 0);
-
-  const [activeAddress, setActiveAddress] = useState<string | null>(null);
   const [queryAddress, setQueryAddress] = useState<string>(
     activeAddress ?? mainAddress
   );
 
-  useEffect(() => {
-    if (!activeAddress || !isConsolidation) {
-      setTDH(consolidatedTDH);
-      return;
-    }
+  // useEffect(() => {
+  //   if (!activeAddress || !isConsolidation) {
+  //     setTDH(consolidatedTDH);
+  //     return;
+  //   }
 
-    setTDH(walletsTDH[queryAddress]);
-  }, [activeAddress, queryAddress, walletsTDH, profile, isConsolidation]);
+  //   setTDH(walletsTDH[queryAddress]);
+  // }, [activeAddress, queryAddress, walletsTDH, profile, isConsolidation]);
 
   useEffect(() => {
     setQueryAddress(activeAddress ?? mainAddress);
@@ -94,10 +114,6 @@ export default function UserPageStats({
 
     loadMetrics(activeAddress);
   }, [activeAddress]);
-
-  useEffect(() => {
-    setLoading(loadingMetrics.length > 0);
-  }, [loadingMetrics]);
 
   return (
     <div className="tailwind-scope">
