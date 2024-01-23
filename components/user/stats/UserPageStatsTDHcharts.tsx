@@ -1,4 +1,4 @@
-import { Bar } from "react-chartjs-2";
+import { Line } from "react-chartjs-2";
 import { Col, Container, Row } from "react-bootstrap";
 import {
   Chart as ChartJS,
@@ -14,8 +14,7 @@ import { useEffect, useState } from "react";
 import { TDHHistory } from "../../../entities/ITDH";
 import { fetchUrl } from "../../../services/6529api";
 import { DBResponse } from "../../../entities/IDBResponse";
-import DotLoader from "../../dotLoader/DotLoader";
-import UserPageDetailsNothingHere from "../UserPageDetailsNothingHere";
+import CommunityStatsDaysSelector from "../../communityStats/CommunityStatsDaysSelector";
 
 ChartJS.register(
   CategoryScale,
@@ -61,8 +60,9 @@ export default function UserPageStatsTDHcharts({
 }) {
   const [tdhHistory, setTdhHistory] = useState<TDHHistory[]>([]);
   const [tdhLabels, setTdhLabels] = useState<Date[]>([]);
-  const pageSize = 10;
   const [tdhHistoryLoaded, setTdhHistoryLoaded] = useState(false);
+
+  const [pageSize, setPageSize] = useState(30);
 
   useEffect(() => {
     setTdhHistoryLoaded(false);
@@ -113,8 +113,8 @@ export default function UserPageStatsTDHcharts({
 
     return (
       <>
-        <Bar data={data} options={GRAPH_OPTIONS} />
-        {/* <Line data={data} /> */}
+        {/* <Bar data={data} options={GRAPH_OPTIONS} /> */}
+        <Line data={data} />
       </>
     );
   }
@@ -152,8 +152,8 @@ export default function UserPageStatsTDHcharts({
 
     return (
       <>
-        <Bar data={data} options={GRAPH_OPTIONS} />
-        {/* <Line data={data} /> */}
+        {/* <Bar data={data} options={GRAPH_OPTIONS} /> */}
+        <Line data={data} />
       </>
     );
   }
@@ -191,8 +191,8 @@ export default function UserPageStatsTDHcharts({
 
     return (
       <>
-        <Bar data={data} options={GRAPH_OPTIONS} />
-        {/* <Line data={data} /> */}
+        {/* <Bar data={data} options={GRAPH_OPTIONS} /> */}
+        <Line data={data} />
       </>
     );
   }
@@ -230,44 +230,30 @@ export default function UserPageStatsTDHcharts({
 
     return (
       <>
-        <Bar data={data} options={GRAPH_OPTIONS} />
-        {/* <Line data={data} /> */}
+        {/* <Bar data={data} options={GRAPH_OPTIONS} /> */}
+        <Line data={data} />
       </>
     );
   }
 
-  if (!tdhHistoryLoaded) {
-    return (
-      <Row>
-        <DotLoader />
-      </Row>
-    );
-  }
-
-  if (!tdhHistory.length) {
-    return <UserPageDetailsNothingHere />;
+  if (!tdhHistory.length && tdhHistoryLoaded) {
+    return <></>;
   }
 
   return (
-    <>
-      {/* <Row className="pt-3">
-          <Col className="d-flex align-items-center justify-content-end gap-2 pt-4">
-            <span
-              className={`${styles.statsTimeSelectionSpan} ${
-                pageSize == 7 ? styles.statsTimeSelectionSpanSelected : ""
-              }`}
-              onClick={() => setPageSize(7)}>
-              7D
-            </span>
-            <span
-              className={`${styles.statsTimeSelectionSpan} ${
-                pageSize == 30 ? styles.statsTimeSelectionSpanSelected : ""
-              }`}
-              onClick={() => setPageSize(30)}>
-              1M
-            </span>
-          </Col>
-        </Row> */}
+    <Container className="no-padding">
+      <Row className="pt-3">
+        <Col className="d-flex align-items-center">
+          <h3 className="mb-0">Graphs</h3>
+        </Col>
+        <Col>
+          <CommunityStatsDaysSelector
+            loaded={tdhHistoryLoaded}
+            page_size={pageSize}
+            setPageSize={setPageSize}
+          />
+        </Col>
+      </Row>
       <Row className="pt-4 pb-4">
         <Col sm={12} md={{ span: 10, offset: 1 }}>
           <Container className="no-padding">
@@ -318,6 +304,6 @@ export default function UserPageStatsTDHcharts({
           </Col>
         </Row>
       )}
-    </>
+    </Container>
   );
 }

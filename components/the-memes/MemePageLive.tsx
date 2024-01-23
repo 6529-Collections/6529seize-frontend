@@ -53,6 +53,32 @@ export function MemePageLiveRightMenu(props: {
                       {props.nftMeta.collection_size}
                     </td>
                   </tr>
+                  {props.nftMeta.burnt > 0 && (
+                    <>
+                      <tr>
+                        <td>
+                          <span className="d-flex align-items-center gap-2">
+                            <span>Burnt</span>
+                            <FontAwesomeIcon
+                              icon="fire"
+                              style={{ height: "22px", color: "#c51d34" }}
+                            />
+                          </span>
+                        </td>
+                        <td className="text-right">{props.nftMeta.burnt}</td>
+                      </tr>
+                      <tr>
+                        <td>Edition Size ex. Burnt</td>
+                        <td className="text-right">
+                          {props.nftMeta.edition_size_not_burnt}
+                        </td>
+                        <td className="text-right">
+                          {props.nftMeta.edition_size_not_burnt_rank}/
+                          {props.nftMeta.collection_size}
+                        </td>
+                      </tr>
+                    </>
+                  )}
                   <tr>
                     <td>6529 Museum</td>
                     <td className="text-right">
@@ -64,7 +90,10 @@ export function MemePageLiveRightMenu(props: {
                     </td>
                   </tr>
                   <tr>
-                    <td>Edition Size ex. 6529 Museum</td>
+                    <td>
+                      Edition Size ex.{props.nftMeta.burnt > 0 && " Burnt and"}{" "}
+                      6529 Museum
+                    </td>
                     <td className="text-right">
                       {props.nftMeta.edition_size_cleaned}
                     </td>
@@ -92,8 +121,26 @@ export function MemePageLiveRightMenu(props: {
                       {props.nftMeta.collection_size}
                     </td>
                   </tr>
+                  {props.nftMeta.burnt > 0 && (
+                    <tr>
+                      <td>% Unique ex. Burnt</td>
+                      <td className="text-right">
+                        {Math.round(
+                          props.nftMeta.percent_unique_not_burnt * 100 * 10
+                        ) / 10}
+                        %
+                      </td>
+                      <td className="text-right">
+                        {props.nftMeta.percent_unique_not_burnt_rank}/
+                        {props.nftMeta.collection_size}
+                      </td>
+                    </tr>
+                  )}
                   <tr>
-                    <td>% Unique ex. 6529 Museum</td>
+                    <td>
+                      % Unique ex.{props.nftMeta.burnt > 0 && " Burnt and"} 6529
+                      Museum
+                    </td>
                     <td className="text-right">
                       {Math.round(
                         props.nftMeta.percent_unique_cleaned * 100 * 10

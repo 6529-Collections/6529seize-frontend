@@ -4,7 +4,7 @@ import { Container, Row, Col, Table } from "react-bootstrap";
 import { DBResponse } from "../../entities/IDBResponse";
 import { fetchUrl } from "../../services/6529api";
 import { GlobalTDHHistory } from "../../entities/ITDH";
-import { Bar } from "react-chartjs-2";
+import { Bar, Line } from "react-chartjs-2";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -16,6 +16,7 @@ import {
   BarElement,
 } from "chart.js";
 import { numberWithCommas } from "../../helpers/Helpers";
+import CommunityStatsDaysSelector from "./CommunityStatsDaysSelector";
 
 ChartJS.register(
   CategoryScale,
@@ -56,13 +57,18 @@ const GRAPH_OPTIONS = {
 };
 
 export default function CommunityStats() {
-  const [page, setPage] = useState(1);
-
-  const [pageSize, setPageSize] = useState(10);
+  const page = 1;
 
   const [tdhHistory, setTdhHistory] = useState<GlobalTDHHistory[]>([]);
   const [latestHistory, setLatestHistory] = useState<GlobalTDHHistory>();
   const [tdhLabels, setTdhLabels] = useState<Date[]>([]);
+
+  const [pageSize, setPageSize] = useState(30);
+  const [tdhHistoryLoaded, setTdhHistoryLoaded] = useState(false);
+
+  useEffect(() => {
+    setTdhHistoryLoaded(false);
+  }, [pageSize]);
 
   function getEstimatedDaysUntil(x: number) {
     const diff = x - latestHistory!.total_boosted_tdh;
@@ -77,6 +83,7 @@ export default function CommunityStats() {
       setTdhHistory(tdhH);
       setTdhLabels(tdhH.map((t) => t.date));
       setLatestHistory(tdhH[tdhH.length - 1]);
+      setTdhHistoryLoaded(true);
     });
   }, [pageSize]);
 
@@ -113,8 +120,8 @@ export default function CommunityStats() {
 
     return (
       <>
-        <Bar data={data} options={GRAPH_OPTIONS} />
-        {/* <Line data={data} /> */}
+        {/* <Bar data={data} options={GRAPH_OPTIONS} /> */}
+        <Line data={data} />
       </>
     );
   }
@@ -152,8 +159,8 @@ export default function CommunityStats() {
 
     return (
       <>
-        <Bar data={data} options={GRAPH_OPTIONS} />
-        {/* <Line data={data} /> */}
+        {/* <Bar data={data} options={GRAPH_OPTIONS} /> */}
+        <Line data={data} />
       </>
     );
   }
@@ -191,8 +198,8 @@ export default function CommunityStats() {
 
     return (
       <>
-        <Bar data={data} options={GRAPH_OPTIONS} />
-        {/* <Line data={data} /> */}
+        {/* <Bar data={data} options={GRAPH_OPTIONS} /> */}
+        <Line data={data} />
       </>
     );
   }
@@ -230,8 +237,8 @@ export default function CommunityStats() {
 
     return (
       <>
-        <Bar data={data} options={GRAPH_OPTIONS} />
-        {/* <Line data={data} /> */}
+        {/* <Bar data={data} options={GRAPH_OPTIONS} /> */}
+        <Line data={data} />
       </>
     );
   }
@@ -329,6 +336,15 @@ export default function CommunityStats() {
                   </Col>
                 </Row>
               </Container>
+            </Col>
+          </Row>
+          <Row className="pt-3">
+            <Col>
+              <CommunityStatsDaysSelector
+                loaded={tdhHistoryLoaded}
+                page_size={pageSize}
+                setPageSize={setPageSize}
+              />
             </Col>
           </Row>
           <Row className="pt-4 pb-4">

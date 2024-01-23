@@ -60,13 +60,18 @@ export interface MemesExtendedData {
   edition_size: number;
   edition_size_rank: number;
   museum_holdings: number;
+  burnt: number;
   museum_holdings_rank: number;
+  edition_size_not_burnt: number;
+  edition_size_not_burnt_rank: number;
   edition_size_cleaned: number;
   edition_size_cleaned_rank: number;
   hodlers: number;
   hodlers_rank: number;
   percent_unique: number;
   percent_unique_rank: number;
+  percent_unique_not_burnt: number;
+  percent_unique_not_burnt_rank: number;
   percent_unique_cleaned: number;
   percent_unique_cleaned_rank: number;
 }
