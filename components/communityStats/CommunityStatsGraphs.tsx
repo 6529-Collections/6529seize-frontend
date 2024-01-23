@@ -57,7 +57,7 @@ const GRAPH_OPTIONS = {
 export default function CommunityStatsGraphs(
   props: Readonly<{
     wallet?: string;
-    setLatestHistory?: (history: TDHHistory) => void;
+    setLatestHistory?: (history: any) => void;
   }>
 ) {
   const [tdhHistory, setTdhHistory] = useState<
