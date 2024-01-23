@@ -2,16 +2,15 @@ import { useEffect, useState } from "react";
 import { IProfileConsolidation } from "../../../../entities/IProfile";
 import { areEqualAddresses, formatAddress } from "../../../../helpers/Helpers";
 import { useCopyToClipboard } from "react-use";
-import { it } from "node:test";
 
 export default function UserPageHeaderAddressesItem({
   item,
   activeAddress,
   onActiveAddress,
 }: {
-  item: IProfileConsolidation;
-  activeAddress: string | null;
-  onActiveAddress: (address: string) => void;
+  readonly item: IProfileConsolidation;
+  readonly activeAddress: string | null;
+  readonly onActiveAddress: (address: string) => void;
 }) {
   const getEnsOrWallet = () => item.wallet.ens ?? item.wallet.address;
   const getTitle = () => item.wallet.ens ?? formatAddress(item.wallet.address);

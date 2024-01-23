@@ -12,6 +12,7 @@ export interface UserPageStatsTableItemData
   readonly title: string;
   readonly isLast: boolean;
   readonly isMain: boolean;
+  readonly tooltip: string | null;
   readonly total: string;
   readonly memes: string;
   readonly gradient: string;
