@@ -116,16 +116,14 @@ export default function CommunityStatsGraphs(
         {
           label: "Total Unboosted TDH",
           data: tdhLabels.map((l) => {
-            {
-              const a: any = tdhHistory.find((t) => t.date === l);
-              if (!a) {
-                return 0;
-              }
-              if (a.total_tdh) {
-                return a.total_tdh;
-              }
-              return a.tdh;
+            const a: any = tdhHistory.find((t) => t.date === l);
+            if (!a) {
+              return 0;
             }
+            if (a.total_tdh) {
+              return a.total_tdh;
+            }
+            return a.tdh;
           }),
           borderColor: "#1861FF",
           backgroundColor: "#1861FF",
@@ -133,14 +131,14 @@ export default function CommunityStatsGraphs(
         {
           label: "Total Unweighted TDH",
           data: tdhLabels.map((l) => {
-            const a = tdhHistory.find((t) => t.date === l);
+            const a: any = tdhHistory.find((t) => t.date === l);
             if (!a) {
               return 0;
             }
-            if ((a as any).total_tdh__raw) {
-              return (a as any).total_tdh__raw;
+            if (a.total_tdh__raw) {
+              return a.total_tdh__raw;
             }
-            return (a as any).tdh__raw;
+            return a.tdh__raw;
           }),
           borderColor: "#e55137",
           backgroundColor: "#e55137",
