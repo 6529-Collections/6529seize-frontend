@@ -152,7 +152,7 @@ export default function UserPageStatsActivityDistributionsTable({
   }, [items]);
 
   return (
-    <table className="tw-min-w-full">
+    <table className="tw-min-w-full tw-divide-y tw-divide-iron-700">
       <thead className="tw-bg-iron-900">
         <tr>
           <th
@@ -211,7 +211,7 @@ export default function UserPageStatsActivityDistributionsTable({
           </th>
         </tr>
       </thead>
-      <tbody className="">
+      <tbody className="tw-divide-y tw-divide-iron-800">
         {results.map((item) => (
           <UserPageStatsActivityDistributionsTableItem
             key={`${item.collection}-${item.tokenId}-${item.wallet}`}

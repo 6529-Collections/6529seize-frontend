@@ -20,7 +20,7 @@ export default function UserPageStatsCollected({
         title: "All Cards",
         isMain: true,
         isLast: false,
-
+        tooltip: null,
         total: formatNumberWithCommasOrDash(
           props.memes_balance + props.gradients_balance
         ),
@@ -37,6 +37,7 @@ export default function UserPageStatsCollected({
         title: "Rank",
         isMain: false,
         isLast: true,
+        tooltip: null,
         total: `#${formatNumberWithCommasOrDash(props.dense_rank_balance)}${
           props.dense_rank_balance__ties > 1 ? " (tie)" : ""
         }`,
@@ -77,6 +78,7 @@ export default function UserPageStatsCollected({
         title: "Unique Cards",
         isMain: true,
         isLast: false,
+        tooltip: null,
         total: formatNumberWithCommasOrDash(
           props.unique_memes + props.gradients_balance
         ),
@@ -93,6 +95,7 @@ export default function UserPageStatsCollected({
         title: "Rank",
         isMain: false,
         isLast: true,
+        tooltip: null,
         total: `#${formatNumberWithCommasOrDash(props.dense_rank_unique)}${
           props.dense_rank_unique__ties > 1 ? " (tie)" : ""
         }`,
@@ -133,6 +136,7 @@ export default function UserPageStatsCollected({
         title: "TDH",
         isMain: true,
         isLast: false,
+        tooltip: null,
         total: formatNumberWithCommasOrDash(props.boosted_tdh),
         memes: formatNumberWithCommasOrDash(
           Math.round(props.boosted_memes_tdh)
@@ -163,6 +167,7 @@ export default function UserPageStatsCollected({
         title: "Rank",
         isMain: false,
         isLast: true,
+        tooltip: null,
         total: `#${formatNumberWithCommasOrDash(props.tdh_rank)}`,
         memes: `#${formatNumberWithCommasOrDash(props.tdh_rank_memes)}`,
         gradient: `#${formatNumberWithCommasOrDash(props.tdh_rank_gradients)}`,

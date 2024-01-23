@@ -42,16 +42,6 @@ const CHART_CONFIGS: ChartConfig[] = [
         field: "boosted_tdh",
         color: "#00DC21",
       },
-      {
-        label: "Total Unboosted TDH",
-        field: "tdh",
-        color: "#1861FF",
-      },
-      {
-        label: "Total Unweighted TDH",
-        field: "tdh__raw",
-        color: "#e55137",
-      },
     ],
   },
   {
@@ -61,16 +51,6 @@ const CHART_CONFIGS: ChartConfig[] = [
         label: "Net Boosted TDH",
         field: "net_boosted_tdh",
         color: "#00DC21",
-      },
-      {
-        label: "Net Unboosted TDH",
-        field: "net_tdh",
-        color: "#1861FF",
-      },
-      {
-        label: "Net Unweighted TDH",
-        field: "net_tdh__raw",
-        color: "#e55137",
       },
     ],
   },
@@ -82,16 +62,6 @@ const CHART_CONFIGS: ChartConfig[] = [
         field: "created_boosted_tdh",
         color: "#00DC21",
       },
-      {
-        label: "Created Unboosted TDH",
-        field: "created_tdh",
-        color: "#1861FF",
-      },
-      {
-        label: "Created Unweighted TDH",
-        field: "created_tdh__raw",
-        color: "#e55137",
-      },
     ],
   },
   {
@@ -101,16 +71,6 @@ const CHART_CONFIGS: ChartConfig[] = [
         label: "Destroyed Boosted TDH",
         field: "destroyed_boosted_tdh",
         color: "#00DC21",
-      },
-      {
-        label: "Destroyed Unboosted TDH",
-        field: "destroyed_tdh",
-        color: "#1861FF",
-      },
-      {
-        label: "Destroyed Unweighted TDH",
-        field: "destroyed_tdh__raw",
-        color: "#e55137",
       },
     ],
   },
@@ -177,7 +137,7 @@ export default function UserPageStatsActivityTDHHistoryCharts({
   }, [tdhHistory]);
 
   return (
-    <div>
+    <div className="tw-mt-2 sm:tw-mt-4 tw-flex tw-flex-col tw-gap-y-6 md:tw-gap-y-8">
       {dataSets.map((dataSet, i) => (
         <UserPageStatsActivityTDHHistoryChart
           key={getRandomObjectId()}

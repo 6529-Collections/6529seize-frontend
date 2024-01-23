@@ -29,7 +29,7 @@ export default function ProfileActivityLogBanner({
       {!isAdded && (
         <>
           <span
-            className="tw-whitespace-nowrap tw-text-sm tw-font-semibold tw-h-4 tw-w-4 tw-rounded-sm"
+            className="tw-whitespace-nowrap tw-text-sm tw-font-medium tw-h-4 tw-w-4 tw-rounded-sm"
             style={{ backgroundColor: log.contents.old_value }}
           ></span>
           <svg
@@ -50,7 +50,7 @@ export default function ProfileActivityLogBanner({
       )}
 
       <span
-        className="tw-whitespace-nowrap tw-text-sm tw-font-semibold tw-h-4 tw-w-4 tw-rounded-sm"
+        className="tw-whitespace-nowrap tw-text-sm tw-font-medium tw-h-4 tw-w-4 tw-rounded-sm"
         style={{ backgroundColor: log.contents.new_value }}
       ></span>
     </>

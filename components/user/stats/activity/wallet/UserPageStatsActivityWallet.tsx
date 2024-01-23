@@ -1,7 +1,7 @@
 import { IProfileAndConsolidations } from "../../../../../entities/IProfile";
 import { useRouter } from "next/router";
 import { usePathname, useSearchParams } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   WALLET_ACTIVITY_FILTER_PARAM,
   WALLET_ACTIVITY_PAGE_PARAM,
@@ -222,10 +222,10 @@ export default function UserPageStatsActivityWallet({
   });
 
   return (
-    <div className="tw-mt-4">
+    <div className="tw-mt-4 md:tw-mt-5">
       <div className="tw-flex">
         <h3 className="tw-mb-0 tw-text-lg tw-font-semibold tw-text-iron-50 tw-tracking-tight">
-          Wallet activity
+          Wallet Activity
         </h3>
       </div>
       <UserPageStatsActivityWalletTableWrapper

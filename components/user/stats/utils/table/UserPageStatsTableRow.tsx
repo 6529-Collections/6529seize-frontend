@@ -1,5 +1,7 @@
+import Tippy from "@tippyjs/react";
 import { MEMES_SEASON } from "../../../../../enums";
 import { assertUnreachable } from "../../../../../helpers/AllowlistToolHelpers";
+import TooltipIcon from "../../../../utils/icons/TooltipIcon";
 import { UserPageStatsTableItemData } from "./UserPageStatsTable";
 
 export default function UserPageStatsTableRow({
@@ -8,7 +10,7 @@ export default function UserPageStatsTableRow({
   readonly data: UserPageStatsTableItemData;
 }) {
   const mainClasses = data.isMain
-    ? "tw-pt-2.5 tw-border-t tw-border-x-0 tw-border-b-0 tw-border-solid tw-border-iron-700"
+    ? "tw-pt-2.5 tw-border-t tw-border-x-0 tw-border-b-0 tw-border-solid tw-border-iron-700 tw-text-iron-50"
     : "tw-text-iron-500";
 
   const lastClasses = data.isLast ? "tw-pb-2.5" : "";
@@ -38,32 +40,39 @@ export default function UserPageStatsTableRow({
   return (
     <>
       <td
-        className={`${classes} tw-font-medium tw-px-4 sm:tw-px-6 tw-whitespace-nowrap tw-text-base`}
+        className={`${classes} tw-font-medium tw-px-4 sm:tw-px-6 tw-whitespace-nowrap tw-text-md`}
       >
-        {data.title}
+        {data.title}{" "}
+        {data.tooltip && (
+          <Tippy content={data.tooltip} theme="dark" placement="top">
+            <span className="tw-ml-1 tw-text-iron-300">
+              <TooltipIcon />
+            </span>
+          </Tippy>
+        )}
       </td>
 
       <td
-        className={`${classes} tw-font-normal tw-px-4 sm:tw-px-6 tw-whitespace-nowrap tw-text-base tw-text-right`}
+        className={`${classes} tw-font-normal tw-px-4 sm:tw-px-6 tw-whitespace-nowrap tw-text-md tw-text-right`}
       >
         {data.total}
       </td>
       <td
-        className={`${classes} tw-font-normal tw-px-4 sm:tw-px-6 tw-whitespace-nowrap tw-text-base tw-text-right`}
+        className={`${classes} tw-font-normal tw-px-4 sm:tw-px-6 tw-whitespace-nowrap tw-text-md tw-text-right`}
       >
         {data.memes}
       </td>
       {Object.values(MEMES_SEASON).map((season) => (
         <td
           key={season}
-          className={`${classes} tw-font-normal tw-px-4 sm:tw-px-6 tw-whitespace-nowrap tw-text-base tw-text-right`}
+          className={`${classes} tw-font-normal tw-px-4 sm:tw-px-6 tw-whitespace-nowrap tw-text-md tw-text-right`}
         >
           {getSZNData(season)}
         </td>
       ))}
 
       <td
-        className={`${classes} tw-font-normal tw-px-4 sm:tw-px-6 tw-whitespace-nowrap tw-text-base tw-text-right`}
+        className={`${classes} tw-font-normal tw-px-4 sm:tw-px-6 tw-whitespace-nowrap tw-text-md tw-text-right`}
       >
         {data.gradient}
       </td>
