@@ -14,7 +14,7 @@ export default function Lightbulb(
         hideOnClick={true}
         placement="bottom"
         theme="light"
-        delay={350}>
+        delay={100}>
         <svg
           onClick={props.onClick}
           className={props.className}
@@ -33,7 +33,7 @@ export default function Lightbulb(
       hideOnClick={true}
       placement="bottom"
       theme="light"
-      delay={350}>
+      delay={100}>
       <svg
         onClick={props.onClick}
         className={props.className}

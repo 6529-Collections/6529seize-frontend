@@ -371,12 +371,15 @@ export default function NextGenMint(props: Readonly<Props>) {
             </b>
           </span>
         </Col>
-        <Col sm={12} md={6} className="d-flex align-items-center">
+        <Col sm={12} md={6} className="pt-1 pb-1 d-flex align-items-center">
           <NextGenCountdown collection={props.collection} align="vertical" />
         </Col>
       </Row>
       <Row className="pt-4 pb-4">
-        <Col className="d-flex align-items-start justify-content-start gap-3">
+        <Col
+          sm={12}
+          md={6}
+          className="d-flex align-items-start justify-content-start gap-3">
           <Image
             loading="eager"
             width="0"
@@ -391,6 +394,8 @@ export default function NextGenMint(props: Readonly<Props>) {
             src={props.collection.image}
             alt={props.collection.name}
           />
+        </Col>
+        <Col sm={12} md={6}>
           <Container className="no-padding">
             <Row className="pt-2">
               <Col className="d-flex gap-2">

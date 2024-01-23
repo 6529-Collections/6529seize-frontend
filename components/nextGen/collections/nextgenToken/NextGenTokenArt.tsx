@@ -108,7 +108,7 @@ export default function NextGenToken(props: Readonly<Props>) {
             hideOnClick={true}
             placement="bottom"
             theme="light"
-            delay={350}>
+            delay={100}>
             <FontAwesomeIcon
               className={getModeStyle(Mode.DEFAULT)}
               onClick={() => setMode(Mode.DEFAULT)}
@@ -120,7 +120,7 @@ export default function NextGenToken(props: Readonly<Props>) {
             hideOnClick={true}
             placement="bottom"
             theme="light"
-            delay={350}>
+            delay={100}>
             <FontAwesomeIcon
               className={getModeStyle(Mode.IMAGE)}
               onClick={() => setMode(Mode.IMAGE)}
@@ -132,7 +132,7 @@ export default function NextGenToken(props: Readonly<Props>) {
             hideOnClick={true}
             placement="bottom"
             theme="light"
-            delay={350}>
+            delay={100}>
             <FontAwesomeIcon
               className={getModeStyle(Mode.LIVE)}
               onClick={() => setMode(Mode.LIVE)}
@@ -156,7 +156,7 @@ export default function NextGenToken(props: Readonly<Props>) {
             hideOnClick={true}
             placement="bottom"
             theme="light"
-            delay={350}>
+            delay={100}>
             <FontAwesomeIcon
               className={styles.modeIcon}
               onClick={() => {
@@ -174,7 +174,7 @@ export default function NextGenToken(props: Readonly<Props>) {
             hideOnClick={true}
             placement="bottom"
             theme="light"
-            delay={350}>
+            delay={100}>
             <FontAwesomeIcon
               className={styles.modeIcon}
               onClick={() => {
@@ -189,7 +189,7 @@ export default function NextGenToken(props: Readonly<Props>) {
             hideOnClick={true}
             placement="bottom"
             theme="light"
-            delay={350}>
+            delay={100}>
             <FontAwesomeIcon
               className={styles.modeIcon}
               icon="maximize"

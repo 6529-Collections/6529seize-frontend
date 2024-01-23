@@ -36,6 +36,26 @@ import {
 import { NextGenCollection } from "../../../../../entities/INextgen";
 import { Spinner } from "./NextGenMint";
 
+function getJsonData(keccak: string, data: string) {
+  const parsed = JSON.parse(data);
+  const results: any[] = [];
+  Object.entries(parsed).forEach(([key, value]) => {
+    results.push({
+      key,
+      value,
+    });
+  });
+  return (
+    <ul className="mb-0">
+      {results.map((r) => (
+        <li key={`ul-${keccak}-${r.key}-${r.value}`}>
+          {r.key}: {r.value}
+        </li>
+      ))}
+    </ul>
+  );
+}
+
 interface Props {
   collection: NextGenCollection;
   available_supply: number;
@@ -130,7 +150,10 @@ export default function NextGenMintWidget(props: Readonly<Props>) {
       }
     }
 
-    return undefined;
+    return {
+      proof: proofs[proofs.length - 1],
+      index: proofs.length - 1,
+    };
   }
 
   useEffect(() => {
@@ -159,6 +182,10 @@ export default function NextGenMintWidget(props: Readonly<Props>) {
           setProofResponse(proofResponses);
           setCurrentProof(findActiveProof(response));
           setOriginalProofs(response);
+          const maxSpots = proofResponse.reduce(
+            (acc, response) => acc + response.spots,
+            0
+          );
         });
       }
     }
@@ -415,7 +442,7 @@ export default function NextGenMintWidget(props: Readonly<Props>) {
                   className={`${styles.formInput} ${styles.formInputDisabled}`}
                   type="text"
                   placeholder="0x..."
-                  disabled={!account.isConnected}
+                  disabled={!account.isConnected || disableMint()}
                   value={mintToInput}
                   onChange={(e) => {
                     setMintToInput(e.target.value);
@@ -450,12 +477,19 @@ export default function NextGenMintWidget(props: Readonly<Props>) {
                       type="checkbox"
                       label={
                         <>
-                          Spots: {response.spots}, Data: {response.info}
+                          Spots: {response.spots}
+                          <br />
+                          <span className="d-flex gap-1">
+                            Data: {getJsonData(response.keccak, response.info)}
+                          </span>
                         </>
                       }
                       id={`${response.keccak}`}
                       checked={currentProof && currentProof.index >= index}
-                      disabled={currentProof && index != currentProof.index}
+                      disabled={
+                        (currentProof && index != currentProof.index) ||
+                        disableMint()
+                      }
                       className={`pt-1 pb-1 `}></Form.Check>
                   </Col>
                 </Form.Group>
@@ -480,7 +514,8 @@ export default function NextGenMintWidget(props: Readonly<Props>) {
                     !account.isConnected ||
                     (publicStatus !== Status.LIVE &&
                       currentProof &&
-                      currentProof.proof.spots <= 0)
+                      currentProof.proof.spots <= 0) ||
+                    disableMint()
                   }
                   onChange={(e: any) => {
                     setMintCount(parseInt(e.currentTarget.value));

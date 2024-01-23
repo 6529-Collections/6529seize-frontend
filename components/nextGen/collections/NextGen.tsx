@@ -22,9 +22,8 @@ export default function NextGen(props: Readonly<Props>) {
           <h1 className="mb-0">FEATURED COLLECTION</h1>
         </Col>
       </Row>
-
       <Row>
-        <Col className="pt-2">
+        <Col sm={12} md={6} className="pt-2">
           <a
             href={`/nextgen/collection/${props.collection.id}`}
             className="decoration-none">
@@ -44,7 +43,7 @@ export default function NextGen(props: Readonly<Props>) {
             />
           </a>
         </Col>
-        <Col className="pt-3">
+        <Col sm={12} md={6} className="pt-3">
           <Container className="no-padding">
             <Row>
               <Col>

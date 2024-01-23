@@ -55,20 +55,20 @@ export default function NextGenToken(props: Readonly<Props>) {
             </a>
           </Col>
         </Row>
-        <Row className="pt-4 pb-4">
+        <Row>
           {view === ContentView.PROVENANCE ? (
-            <Col>
+            <Col className="pt-4 pb-4">
               <NextGenTokenProvenance token_id={props.token.id} />
             </Col>
           ) : (
             <>
-              <Col>
+              <Col sm={12} md={6} className="pt-4 pb-4">
                 <NextGenTokenAbout
                   collection={props.collection}
                   token={props.token}
                 />
               </Col>
-              <Col>
+              <Col sm={12} md={6} className="pt-4 pb-4">
                 <NextgenTokenProperties
                   collection_id={props.collection.id}
                   token_id={props.token.id}

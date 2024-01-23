@@ -42,8 +42,27 @@ export default function NextGen(props: any) {
   const [view, setView] = useState<NextGenView | undefined>(
     props.pageProps.view
   );
-
   const [breadcrumbs, setBreadcrumbs] = useState<Crumb[]>([]);
+  const [isMobile, setIsMobile] = useState(false);
+
+  function checkMobile() {
+    const screenSize = window.innerWidth;
+    if (screenSize <= 750) {
+      setIsMobile(true);
+    } else {
+      setIsMobile(false);
+    }
+  }
+
+  useEffect(() => {
+    checkMobile();
+  }, []);
+
+  useEffect(() => {
+    const handleResize = () => checkMobile();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   function setCrumbs() {
     const crumbs: Crumb[] = [{ display: "Home", href: "/" }];
@@ -117,38 +136,56 @@ export default function NextGen(props: any) {
         <Breadcrumb breadcrumbs={breadcrumbs} />
         <Container fluid className={`${styles.main}`}>
           <Row className="d-flex align-items-center">
-            <Container className="no-padding pt-4">
-              <Row>
-                <Col
-                  xs={12}
-                  className="pt-3 pb-3 d-flex align-items-center justify-content-between">
-                  <Image
-                    priority
-                    width="0"
-                    height="0"
-                    className="cursor-pointer"
-                    style={{ width: "400px", maxWidth: "85vw", height: "auto" }}
-                    src="/nextgen-logo.png"
-                    alt="nextgen"
-                    onClick={() => setView(undefined)}
-                  />
-                  <span className="d-flex gap-4">
-                    {printView(undefined)}
-                    {printView(NextGenView.COLLECTIONS)}
-                    {printView(NextGenView.ARTISTS)}
-                  </span>
-                </Col>
-              </Row>
-            </Container>
-          </Row>
-          <Row className="pb-4">
             <Col>
-              {view === NextGenView.COLLECTIONS && (
-                <NextgenCollectionsComponent />
-              )}
-              {view === NextGenView.ARTISTS && <NextgenArtistsComponent />}
+              <Container className="pt-4">
+                <Row>
+                  <Col
+                    className={`pt-3 pb-3 d-flex ${
+                      isMobile
+                        ? "justify-content-center"
+                        : "justify-content-start"
+                    }`}>
+                    <Image
+                      priority
+                      width="0"
+                      height="0"
+                      className="cursor-pointer"
+                      style={{
+                        width: "400px",
+                        maxWidth: "85vw",
+                        height: "auto",
+                      }}
+                      src="/nextgen-logo.png"
+                      alt="nextgen"
+                      onClick={() => setView(undefined)}
+                    />
+                  </Col>
+                  <Col
+                    className={`d-flex align-items-center ${
+                      isMobile
+                        ? "justify-content-center pt-3 pb-3"
+                        : "justify-content-end"
+                    }`}>
+                    <span className="d-flex gap-4">
+                      {printView(undefined)}
+                      {printView(NextGenView.COLLECTIONS)}
+                      {printView(NextGenView.ARTISTS)}
+                    </span>
+                  </Col>
+                </Row>
+                <Row className="pb-4">
+                  <Col>
+                    {view === NextGenView.COLLECTIONS && (
+                      <NextgenCollectionsComponent />
+                    )}
+                    {view === NextGenView.ARTISTS && (
+                      <NextgenArtistsComponent />
+                    )}
 
-              {!view && <NextGenComponent collection={collection} />}
+                    {!view && <NextGenComponent collection={collection} />}
+                  </Col>
+                </Row>
+              </Container>
             </Col>
           </Row>
         </Container>
