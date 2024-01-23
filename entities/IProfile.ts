@@ -362,3 +362,27 @@ export type ApiCreateOrUpdateProfileCicStatement = Omit<
   CicStatement,
   "id" | "crated_at" | "updated_at" | "profile_id"
 >;
+
+
+export enum CollectedCollectionType {
+  MEMES = "MEMES",
+  GRADIENTS = "GRADIENTS",
+  MEMELAB = "MEMELAB",
+  NEXTGEN = "NEXTGEN",
+}
+
+export enum CollectionSeized {
+  SEIZED = "SEIZED",
+  NOT_SEIZED = "NOT_SEIZED",
+}
+
+export interface CollectedCard {
+  readonly collection: string;
+  readonly token_id: number;
+  readonly token_name: string;
+  readonly img: string;
+  readonly tdh: number | null;
+  readonly rank: number | null;
+  readonly seized_count: number | null;
+  readonly szn: number | null;
+}
