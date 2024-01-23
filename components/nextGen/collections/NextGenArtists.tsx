@@ -15,24 +15,22 @@ export default function NextGenCollections() {
     let url = `${process.env.API_ENDPOINT}/api/nextgen/collections`;
     fetchUrl(url).then((response: DBResponse) => {
       setArtistCollections(
-        response.data.reduce((acc: any, collection: NextGenCollection) => {
+        response.data.reduce((acc, collection) => {
           if (
-            acc.find((a: any) =>
+            !acc.find((a: any) =>
               areEqualAddresses(a.address, collection.artist_address)
             )
           ) {
-            return acc;
-          } else {
-            return [
-              ...acc,
-              {
-                address: collection.artist_address,
-                collections: response.data.filter((c: NextGenCollection) =>
+            acc.push({
+              address: collection.artist_address,
+              collections: response.data
+                .filter((c) =>
                   areEqualAddresses(c.artist_address, collection.artist_address)
-                ),
-              },
-            ];
+                )
+                .sort((a, b) => a.id - b.id),
+            });
           }
+          return acc;
         }, [])
       );
     });
@@ -67,7 +65,7 @@ export default function NextGenCollections() {
               <Col>
                 <NextGenCollectionArtist
                   collection={ac.collections[0]}
-                  link_collections={ac.collections.sort((a, b) => a.id - b.id)}
+                  link_collections={ac.collections}
                 />
               </Col>
               <Col xs={12} className="pt-4">
