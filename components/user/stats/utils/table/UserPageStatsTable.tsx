@@ -69,7 +69,7 @@ export default function UserPageStatsTable({
                   </th>
                 </tr>
               </thead>
-              <tbody className="">
+              <tbody>
                 {data.data.flatMap((rows) =>
                   rows.map((row) => (
                     <UserPageStatsTableSection

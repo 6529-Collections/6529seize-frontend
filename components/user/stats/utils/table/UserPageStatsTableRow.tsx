@@ -45,7 +45,7 @@ export default function UserPageStatsTableRow({
         {data.title}{" "}
         {data.tooltip && (
           <Tippy content={data.tooltip} theme="dark" placement="top">
-            <span>
+            <span className="tw-ml-1 tw-text-iron-300">
               <TooltipIcon />
             </span>
           </Tippy>
