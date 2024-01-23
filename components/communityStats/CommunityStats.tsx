@@ -1,10 +1,9 @@
-import styles from "./CommunityStats.module.scss";
 import { useEffect, useState } from "react";
 import { Container, Row, Col, Table } from "react-bootstrap";
 import { DBResponse } from "../../entities/IDBResponse";
 import { fetchUrl } from "../../services/6529api";
 import { GlobalTDHHistory } from "../../entities/ITDH";
-import { Bar, Line } from "react-chartjs-2";
+import { Line } from "react-chartjs-2";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -121,7 +120,7 @@ export default function CommunityStats() {
     return (
       <>
         {/* <Bar data={data} options={GRAPH_OPTIONS} /> */}
-        <Line data={data} />
+        <Line data={data} options={GRAPH_OPTIONS} />
       </>
     );
   }
@@ -160,7 +159,7 @@ export default function CommunityStats() {
     return (
       <>
         {/* <Bar data={data} options={GRAPH_OPTIONS} /> */}
-        <Line data={data} />
+        <Line data={data} options={GRAPH_OPTIONS} />
       </>
     );
   }
@@ -199,7 +198,7 @@ export default function CommunityStats() {
     return (
       <>
         {/* <Bar data={data} options={GRAPH_OPTIONS} /> */}
-        <Line data={data} />
+        <Line data={data} options={GRAPH_OPTIONS} />
       </>
     );
   }
@@ -238,7 +237,7 @@ export default function CommunityStats() {
     return (
       <>
         {/* <Bar data={data} options={GRAPH_OPTIONS} /> */}
-        <Line data={data} />
+        <Line data={data} options={GRAPH_OPTIONS} />
       </>
     );
   }

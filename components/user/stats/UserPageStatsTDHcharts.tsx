@@ -114,7 +114,7 @@ export default function UserPageStatsTDHcharts({
     return (
       <>
         {/* <Bar data={data} options={GRAPH_OPTIONS} /> */}
-        <Line data={data} />
+        <Line data={data} options={GRAPH_OPTIONS} />
       </>
     );
   }
@@ -153,7 +153,7 @@ export default function UserPageStatsTDHcharts({
     return (
       <>
         {/* <Bar data={data} options={GRAPH_OPTIONS} /> */}
-        <Line data={data} />
+        <Line data={data} options={GRAPH_OPTIONS} />
       </>
     );
   }
@@ -192,7 +192,7 @@ export default function UserPageStatsTDHcharts({
     return (
       <>
         {/* <Bar data={data} options={GRAPH_OPTIONS} /> */}
-        <Line data={data} />
+        <Line data={data} options={GRAPH_OPTIONS} />
       </>
     );
   }
@@ -231,7 +231,7 @@ export default function UserPageStatsTDHcharts({
     return (
       <>
         {/* <Bar data={data} options={GRAPH_OPTIONS} /> */}
-        <Line data={data} />
+        <Line data={data} options={GRAPH_OPTIONS} />
       </>
     );
   }

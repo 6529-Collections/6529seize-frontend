@@ -9,41 +9,27 @@ export default function CommunityStatsDaysSelector(
     setPageSize: (size: number) => void;
   }>
 ) {
+  function printSelection(title: string, value: number) {
+    return (
+      <button
+        className={`btn-link decoration-none ${styles.statsTimeSelectionSpan} ${
+          props.page_size == value ? styles.statsTimeSelectionSpanSelected : ""
+        }`}
+        onClick={() => props.setPageSize(value)}>
+        {title}
+      </button>
+    );
+  }
+
   return (
     <Container className="no-padding">
       <Row>
         <Col className="d-flex align-items-center justify-content-end gap-2 pt-4">
           {!props.loaded && <DotLoader />}
-          <span
-            className={`${styles.statsTimeSelectionSpan} ${
-              props.page_size == 7 ? styles.statsTimeSelectionSpanSelected : ""
-            }`}
-            onClick={() => props.setPageSize(7)}>
-            7D
-          </span>
-          <span
-            className={`${styles.statsTimeSelectionSpan} ${
-              props.page_size == 30 ? styles.statsTimeSelectionSpanSelected : ""
-            }`}
-            onClick={() => props.setPageSize(30)}>
-            1M
-          </span>
-          <span
-            className={`${styles.statsTimeSelectionSpan} ${
-              props.page_size == 90 ? styles.statsTimeSelectionSpanSelected : ""
-            }`}
-            onClick={() => props.setPageSize(90)}>
-            3M
-          </span>
-          <span
-            className={`${styles.statsTimeSelectionSpan} ${
-              props.page_size == 200
-                ? styles.statsTimeSelectionSpanSelected
-                : ""
-            }`}
-            onClick={() => props.setPageSize(200)}>
-            All
-          </span>
+          {printSelection("7D", 7)}
+          {printSelection("1M", 30)}
+          {printSelection("3M", 90)}
+          {printSelection("ALL", 200)}
         </Col>
       </Row>
     </Container>

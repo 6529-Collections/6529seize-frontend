@@ -17,11 +17,19 @@
   font-size: larger;
   padding: 5px 10px;
   cursor: pointer;
-  color: $font-color;
+  color: $font-color !important;
+  font-weight: bolder;
+
+  &:hover {
+    color: $font-color-h !important;
+  }
 }
 
 .statsTimeSelectionSpanSelected {
   background-color: $off-white;
-  color: $very-dark-grey;
+  color: $very-dark-grey !important;
   font-size: larger;
+  &:hover {
+    color: $very-dark-grey !important;
+  }
 }
