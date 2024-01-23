@@ -1,7 +1,7 @@
 import { IProfileAndConsolidations } from "../../../../../entities/IProfile";
 import { useRouter } from "next/router";
 import { usePathname, useSearchParams } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   WALLET_ACTIVITY_FILTER_PARAM,
   WALLET_ACTIVITY_PAGE_PARAM,
