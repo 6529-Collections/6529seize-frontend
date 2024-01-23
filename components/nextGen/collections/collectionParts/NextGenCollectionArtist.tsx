@@ -12,7 +12,7 @@ import SocialStatementIcon from "../../../user/utils/icons/SocialStatementIcon";
 
 interface Props {
   collection: NextGenCollection;
-  link_collection?: boolean;
+  link_collections?: NextGenCollection[];
 }
 
 function formatCiCTitle(s: string) {
@@ -126,13 +126,20 @@ export default function NextGenCollectionArtist(props: Readonly<Props>) {
                 </Col>
               </Row>
             )}
-            {props.link_collection && (
+            {props.link_collections && (
               <Row className="pt-4">
                 <Col>
-                  Collection:{" "}
-                  <a href={`/nextgen/collection/${props.collection.id}`}>
-                    #{props.collection.id} - {props.collection.name}
-                  </a>
+                  Collection{props.link_collections.length > 1 ? "s" : ""}:{" "}
+                  {props.link_collections.map((c, index) => (
+                    <>
+                      {index > 0 && ", "}
+                      <a
+                        key={`link-collection-${c.id}`}
+                        href={`/nextgen/collection/${c.id}`}>
+                        #{c.id} - {c.name}
+                      </a>
+                    </>
+                  ))}
                 </Col>
               </Row>
             )}
