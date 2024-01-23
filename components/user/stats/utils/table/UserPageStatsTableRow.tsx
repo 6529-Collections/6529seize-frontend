@@ -1,5 +1,7 @@
+import Tippy from "@tippyjs/react";
 import { MEMES_SEASON } from "../../../../../enums";
 import { assertUnreachable } from "../../../../../helpers/AllowlistToolHelpers";
+import TooltipIcon from "../../../../utils/icons/TooltipIcon";
 import { UserPageStatsTableItemData } from "./UserPageStatsTable";
 
 export default function UserPageStatsTableRow({
@@ -40,7 +42,14 @@ export default function UserPageStatsTableRow({
       <td
         className={`${classes} tw-font-medium tw-px-4 sm:tw-px-6 tw-whitespace-nowrap tw-text-base`}
       >
-        {data.title}
+        {data.title}{" "}
+        {data.tooltip && (
+          <Tippy content={data.tooltip} theme="dark" placement="top">
+            <span>
+              <TooltipIcon />
+            </span>
+          </Tippy>
+        )}
       </td>
 
       <td
