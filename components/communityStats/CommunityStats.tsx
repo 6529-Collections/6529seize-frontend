@@ -1,9 +1,6 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Container, Row, Col, Table } from "react-bootstrap";
-import { DBResponse } from "../../entities/IDBResponse";
-import { fetchUrl } from "../../services/6529api";
 import { GlobalTDHHistory } from "../../entities/ITDH";
-import { Line } from "react-chartjs-2";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -15,7 +12,6 @@ import {
   BarElement,
 } from "chart.js";
 import { numberWithCommas } from "../../helpers/Helpers";
-import CommunityStatsDaysSelector from "./CommunityStatsDaysSelector";
 import CommunityStatsGraphs from "./CommunityStatsGraphs";
 
 ChartJS.register(
