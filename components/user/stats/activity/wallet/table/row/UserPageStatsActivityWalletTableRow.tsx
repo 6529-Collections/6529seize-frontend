@@ -142,17 +142,20 @@ export default function UserPageStatsActivityWalletTableRow({
             x{transaction.token_count}
           </div>
         )}
-        <div className="tw-whitespace-nowrap tw-text-sm tw-text-iron-100 tw-font-semibold">
-          <Link className="tw-no-underline hover:tw-underline" href={getPath()}>
+        <div className="tw-whitespace-nowrap tw-text-sm tw-font-medium">
+          <Link
+            className="tw-no-underline hover:tw-underline tw-text-iron-100 hover:tw-text-iron-400 tw-transition tw-duration-300 tw-ease-out"
+            href={getPath()}
+          >
             {meme?.name} (#{transaction.token_id})
           </Link>
         </div>
         <img
-          className="tw-mx-1 tw-flex-shrink-0 tw-object-contain tw-max-h-10 tw-min-w-10 tw-w-auto tw-h-auto tw-rounded-sm tw-ring-1 tw-ring-white/30 tw-bg-iron-800"
+          className="tw-mx-0.5 tw-flex-shrink-0 tw-object-contain tw-max-h-10 tw-min-w-10 tw-w-auto tw-h-auto tw-rounded-sm tw-ring-1 tw-ring-white/30 tw-bg-iron-800"
           src={meme?.icon ?? ""}
           alt={meme?.name ?? ""}
         />
-        <div className="tw-whitespace-nowrap tw-text-sm tw-text-iron-100 tw-font-semibold">
+        <div className="tw-whitespace-nowrap tw-text-sm tw-text-iron-100 tw-font-medium">
           {showAnotherSide && (
             <UserPageStatsActivityWalletTableRowSecondAddress
               type={type}
@@ -163,7 +166,7 @@ export default function UserPageStatsActivityWalletTableRow({
         {!!value && (
           <div className="tw-inline-flex tw-items-center tw-whitespace-nowrap tw-text-sm tw-text-iron-400 tw-font-medium">
             for{" "}
-            <span className="tw-inline-flex tw-items-center">
+            <span className="tw-ml-0.5 tw-inline-flex tw-items-center">
               <svg
                 className="tw-h-5 tw-w-5"
                 enableBackground="new 0 0 1920 1920"

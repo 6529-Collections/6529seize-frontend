@@ -48,7 +48,7 @@ export default function UserPageStatsActivityWalletTableWrapper({
 
   if (isFirstLoading) {
     return (
-      <div className="tw-w-full tw-h-96">
+      <div className="tw-mt-2 sm:tw-mt-4 tw-w-full tw-h-96">
         <CommonCardSkeleton />
       </div>
     );

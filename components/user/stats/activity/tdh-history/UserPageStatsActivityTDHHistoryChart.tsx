@@ -56,13 +56,13 @@ export default function UserPageStatsActivityTDHHistoryChart({
   readonly data: ChartProps;
 }) {
   return (
-    <div className="tw-mt-2 lg:tw-mt-4 tw-bg-iron-900 tw-border tw-border-iron-800 tw-border-solid tw-rounded-xl ">
-      <div className="tw-flex">
-        <h3 className="tw-mb-0 tw-m-4 tw-text-lg tw-font-semibold tw-text-iron-50 tw-tracking-tight">
+    <div className="tw-bg-iron-950 tw-border tw-border-iron-800 tw-border-solid tw-rounded-xl ">
+      <div className="tw-pt-6 tw-px-4 sm:tw-px-6 tw-flex">
+        <h3 className="tw-mb-0 tw-text-lg tw-font-semibold tw-text-iron-50 tw-tracking-tight">
           {data.title}
         </h3>
       </div>
-      <div className="tw-mt-4 tw-mb-6">
+      <div className="tw-p-6">
         <Bar data={data} options={GRAPH_OPTIONS} />
       </div>
     </div>

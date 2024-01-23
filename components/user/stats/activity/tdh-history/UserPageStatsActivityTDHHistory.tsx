@@ -38,14 +38,14 @@ export default function UserPageStatsActivityTDHHistory({
   });
 
   return (
-    <div className="tw-mt-4">
+    <div className="tw-mt-5">
       <div className="tw-flex">
         <h3 className="tw-mb-0 tw-text-lg tw-font-semibold tw-text-iron-50 tw-tracking-tight">
           TDH History
         </h3>
       </div>
       {isFetching ? (
-        <div className="tw-w-full tw-h-96">
+        <div className="tw-mt-2 sm:tw-mt-4 tw-w-full tw-h-96">
           <CommonCardSkeleton />
         </div>
       ) : (

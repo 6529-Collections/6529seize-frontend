@@ -23,7 +23,7 @@ export default function UserPageStatsActivityDistributionsTableWrapper({
 }) {
   if (isFirstLoading) {
     return (
-      <div className="tw-w-full tw-h-96">
+      <div className="tw-mt-2 sm:tw-mt-4 tw-w-full tw-h-96">
         <CommonCardSkeleton />
       </div>
     );
@@ -49,7 +49,7 @@ export default function UserPageStatsActivityDistributionsTableWrapper({
           )}
         </div>
       ) : (
-        <div className="tw-text-sm tw-italic tw-text-iron-500">
+        <div className="tw-p-4 sm:tw-px-6 tw-text-sm tw-italic tw-text-iron-500">
           No distributions
         </div>
       )}
