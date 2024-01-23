@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import UserPageStatsTagsSet from "./UserPageStatsTagsSet";
 import { MEMES_SEASON } from "../../../../enums";
 import { UserPageStatsTDHType } from "../UserPageStats";
+import { formatNumberWithCommasOrDash } from "../../../../helpers/Helpers";
 
 export interface UserPageStatsTag {
   readonly id: string;
@@ -76,7 +77,9 @@ export default function UserPageStatsTags({
     if (props.memes_cards_sets) {
       result.push({
         id: "memes_sets",
-        title: `Meme Sets x${props.memes_cards_sets}`,
+        title: `Meme Sets x${formatNumberWithCommasOrDash(
+          props.memes_cards_sets
+        )}`,
         classes:
           "tw-whitespace-nowrap tw-inline-flex tw-items-center tw-rounded-full tw-bg-iron-400/10 tw-px-2 tw-py-1 tw-text-sm tw-font-medium tw-text-iron-300 tw-ring-1 tw-ring-inset tw-ring-iron-400/20",
       });
@@ -85,10 +88,10 @@ export default function UserPageStatsTags({
     if (props.memes_balance) {
       result.push({
         id: "memes",
-        title: `Memes x${props.memes_balance} ${
+        title: `Memes x${formatNumberWithCommasOrDash(props.memes_balance)} ${
           props.unique_memes === props.memes_balance
             ? ""
-            : `(unique x${props.unique_memes})`
+            : `(unique x${formatNumberWithCommasOrDash(props.unique_memes)})`
         }`,
         classes:
           "tw-whitespace-nowrap tw-inline-flex tw-items-center tw-rounded-full tw-bg-iron-400/10 tw-px-2 tw-py-1 tw-text-sm tw-font-medium tw-text-iron-300 tw-ring-1 tw-ring-inset tw-ring-iron-400/20",
@@ -98,7 +101,9 @@ export default function UserPageStatsTags({
     if (props.gradients_balance) {
       result.push({
         id: "gradients",
-        title: `Gradients x${props.gradients_balance}`,
+        title: `Gradients x${formatNumberWithCommasOrDash(
+          props.gradients_balance
+        )}`,
         classes:
           "tw-whitespace-nowrap tw-inline-flex tw-items-center tw-rounded-full tw-bg-iron-400/10 tw-px-2 tw-py-1 tw-text-sm tw-font-medium tw-text-iron-300 tw-ring-1 tw-ring-inset tw-ring-iron-400/20",
       });
@@ -107,7 +112,7 @@ export default function UserPageStatsTags({
     if (props.boost) {
       result.push({
         id: "boost",
-        title: `Boost x${props.boost}`,
+        title: `Boost x${formatNumberWithCommasOrDash(props.boost)}`,
         classes:
           "tw-whitespace-nowrap tw-inline-flex tw-items-center tw-rounded-full tw-bg-iron-400/10 tw-px-2 tw-py-1 tw-text-sm tw-font-medium tw-text-iron-300 tw-ring-1 tw-ring-inset tw-ring-iron-400/20",
       });
@@ -129,7 +134,9 @@ export default function UserPageStatsTags({
       if (sznValue) {
         result.push({
           id: sznConfig.id,
-          title: `Meme Sets ${sznConfig.title} x${sznValue}`,
+          title: `Meme Sets ${sznConfig.title} x${formatNumberWithCommasOrDash(
+            sznValue
+          )}`,
           classes: sznConfig.classes,
         });
       }
@@ -150,6 +157,18 @@ export default function UserPageStatsTags({
     setMainTags(getMainTags(tdh));
     setSeasonTags(getSeasonTags(tdh));
   }, [tdh]);
+
+  const [haveAnyTags, setHaveAnyTags] = useState<boolean>(
+    !!mainTags.length || !!seasonTags.length
+  );
+
+  useEffect(() => {
+    setHaveAnyTags(!!mainTags.length || !!seasonTags.length);
+  }, [mainTags, seasonTags]);
+
+  if (!haveAnyTags) {
+    return <div></div>;
+  }
 
   return (
     <div className="tw-space-y-2 sm:tw-space-y-3">

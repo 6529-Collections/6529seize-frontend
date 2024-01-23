@@ -7,6 +7,8 @@ import { commonApiFetch } from "../../../../../services/api/common-api";
 import UserPageStatsActivityTDHHistoryCharts from "./UserPageStatsActivityTDHHistoryCharts";
 import CommonCardSkeleton from "../../../../utils/animation/CommonCardSkeleton";
 
+const PAGE_SIZE = 30;
+
 export default function UserPageStatsActivityTDHHistory({
   profile,
 }: {
@@ -22,7 +24,7 @@ export default function UserPageStatsActivityTDHHistory({
       QueryKey.WALLET_TDH_HISTORY,
       {
         wallet: mainAddress,
-        page_size: "10",
+        page_size: `${PAGE_SIZE}`,
       },
     ],
     queryFn: async () => {
@@ -30,7 +32,7 @@ export default function UserPageStatsActivityTDHHistory({
         endpoint: `tdh_history`,
         params: {
           wallet: mainAddress,
-          page_size: "10",
+          page_size: `${PAGE_SIZE}`,
         },
       });
       return response.data;

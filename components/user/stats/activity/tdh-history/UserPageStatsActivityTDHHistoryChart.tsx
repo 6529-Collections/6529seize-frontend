@@ -1,4 +1,4 @@
-import { Bar } from "react-chartjs-2";
+import { Line } from "react-chartjs-2";
 
 import {
   Chart as ChartJS,
@@ -63,7 +63,7 @@ export default function UserPageStatsActivityTDHHistoryChart({
         </h3>
       </div>
       <div className="tw-p-6">
-        <Bar data={data} options={GRAPH_OPTIONS} />
+        <Line data={data} options={GRAPH_OPTIONS} />
       </div>
     </div>
   );
