@@ -29,7 +29,7 @@ export default function CommonProfileLink({
       <span
         className={`${
           isCurrentUser ? "" : "hover:tw-underline tw-cursor-pointer"
-        } tw-whitespace-nowrap tw-text-sm tw-font-semibold tw-text-iron-100`}
+        } tw-whitespace-nowrap tw-text-sm tw-font-medium tw-text-iron-100`}
       >
         {handleOrWallet}
       </span>
