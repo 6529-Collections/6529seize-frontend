@@ -83,7 +83,8 @@ export default function CommunityStatsGraphs(
         : "tdh_global_history?"
     }&page_size=${pageSize}&page=1`;
     fetchUrl(url).then((response: DBResponse) => {
-      const tdhH = response.data.reverse();
+      const tdhH = response.data;
+      tdhH.reverse();
       setTdhHistory(tdhH);
       if (props.setLatestHistory) {
         props.setLatestHistory(tdhH[tdhH.length - 1]);
@@ -100,14 +101,14 @@ export default function CommunityStatsGraphs(
         {
           label: "Total Boosted TDH",
           data: tdhLabels.map((l) => {
-            const a = tdhHistory.find((t) => t.date === l);
+            const a: any = tdhHistory.find((t) => t.date === l);
             if (!a) {
               return 0;
             }
-            if ((a as any).total_boosted_tdh) {
-              return (a as any).total_boosted_tdh;
+            if (a.total_boosted_tdh) {
+              return a.total_boosted_tdh;
             }
-            return (a as any).boosted_tdh;
+            return a.boosted_tdh;
           }),
           borderColor: "#00DC21",
           backgroundColor: "#00DC21",
@@ -116,14 +117,14 @@ export default function CommunityStatsGraphs(
           label: "Total Unboosted TDH",
           data: tdhLabels.map((l) => {
             {
-              const a = tdhHistory.find((t) => t.date === l);
+              const a: any = tdhHistory.find((t) => t.date === l);
               if (!a) {
                 return 0;
               }
-              if ((a as any).total_tdh) {
-                return (a as any).total_tdh;
+              if (a.total_tdh) {
+                return a.total_tdh;
               }
-              return (a as any).tdh;
+              return a.tdh;
             }
           }),
           borderColor: "#1861FF",
