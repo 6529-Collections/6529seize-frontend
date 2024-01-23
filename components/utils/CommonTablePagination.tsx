@@ -1,4 +1,3 @@
-
 export default function CommonTablePagination({
   small,
   currentPage,
@@ -15,12 +14,14 @@ export default function CommonTablePagination({
   return (
     <div
       className={`${
-        small ? "tw-px-4 sm:tw-px-6" : ""
-      } tw-mt-2 tw-pb-6 tw-flex tw-justify-end`}
+        small
+          ? "tw-px-4 sm:tw-px-6 tw-border-t tw-border-solid tw-border-x-0 tw-border-b-0 tw-border-iron-800"
+          : ""
+      } tw-mt-2 tw-pt-3 tw-pb-3`}
     >
-      <div className="tw-flex tw-items-center">
-        <div className="tw-text-sm tw-text-neutral-400 tw-font-normal tw-mr-3">
-          {currentPage} of {totalPages}
+      <div className="tw-flex tw-items-center tw-justify-between tw-w-full">
+        <div className="tw-text-sm tw-text-iron-300 tw-font-normal tw-mr-3">
+          Page {currentPage} of {totalPages}
         </div>
 
         <span className="tw-isolate tw-inline-flex tw-gap-x-3 tw-rounded-md tw-shadow-sm">

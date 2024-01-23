@@ -225,7 +225,7 @@ export default function UserPageStatsActivityWallet({
     <div className="tw-mt-4">
       <div className="tw-flex">
         <h3 className="tw-mb-0 tw-text-lg tw-font-semibold tw-text-iron-50 tw-tracking-tight">
-          Wallet activity
+          Wallet Activity
         </h3>
       </div>
       <UserPageStatsActivityWalletTableWrapper
