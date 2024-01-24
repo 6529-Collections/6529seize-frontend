@@ -47,7 +47,9 @@ export function MemePageLiveRightMenu(props: {
                 <tbody>
                   <tr>
                     <td>Edition Size</td>
-                    <td className="text-right">{props.nftMeta.edition_size}</td>
+                    <td className="text-right">
+                      {numberWithCommas(props.nftMeta.edition_size)}
+                    </td>
                     <td className="text-right">
                       {props.nftMeta.edition_size_rank}/
                       {props.nftMeta.collection_size}
@@ -65,12 +67,16 @@ export function MemePageLiveRightMenu(props: {
                             />
                           </span>
                         </td>
-                        <td className="text-right">{props.nftMeta.burnt}</td>
+                        <td className="text-right">
+                          {numberWithCommas(props.nftMeta.burnt)}
+                        </td>
                       </tr>
                       <tr>
                         <td>Edition Size ex. Burnt</td>
                         <td className="text-right">
-                          {props.nftMeta.edition_size_not_burnt}
+                          {numberWithCommas(
+                            props.nftMeta.edition_size_not_burnt
+                          )}
                         </td>
                         <td className="text-right">
                           {props.nftMeta.edition_size_not_burnt_rank}/
@@ -82,7 +88,7 @@ export function MemePageLiveRightMenu(props: {
                   <tr>
                     <td>6529 Museum</td>
                     <td className="text-right">
-                      {props.nftMeta.museum_holdings}
+                      {numberWithCommas(props.nftMeta.museum_holdings)}
                     </td>
                     <td className="text-right">
                       {props.nftMeta.museum_holdings_rank}/
@@ -95,7 +101,7 @@ export function MemePageLiveRightMenu(props: {
                       6529 Museum
                     </td>
                     <td className="text-right">
-                      {props.nftMeta.edition_size_cleaned}
+                      {numberWithCommas(props.nftMeta.edition_size_cleaned)}
                     </td>
                     <td className="text-right">
                       {props.nftMeta.edition_size_cleaned_rank}/
@@ -104,7 +110,9 @@ export function MemePageLiveRightMenu(props: {
                   </tr>
                   <tr>
                     <td>Collectors</td>
-                    <td className="text-right">{props.nftMeta.hodlers}</td>
+                    <td className="text-right">
+                      {numberWithCommas(props.nftMeta.hodlers)}
+                    </td>
                     <td className="text-right">
                       {props.nftMeta.hodlers_rank}/
                       {props.nftMeta.collection_size}

@@ -416,11 +416,12 @@ export default function LabCollection(props: Props) {
           <Row>
             <Col className="text-center pt-1">
               {sort && sort === Sort.AGE && printMintDate(nft.mint_date)}
-              {sort === Sort.EDITION_SIZE && `Edition Size: ${nft.supply}`}
+              {sort === Sort.EDITION_SIZE &&
+                `Edition Size: ${numberWithCommas(nft.supply)}`}
               {sort === Sort.HODLERS &&
-                `Collectors: ${
-                  nftMetas.find((nftm) => nftm.id === nft.id)?.hodlers
-                }`}
+                `Collectors: ${numberWithCommas(
+                  nftMetas.find((nftm) => nftm.id === nft.id)!.hodlers
+                )}`}
               {sort === Sort.UNIQUE_PERCENT &&
                 `Unique: ${
                   Math.round(

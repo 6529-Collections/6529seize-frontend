@@ -516,13 +516,14 @@ export default function TheMemesComponent(props: Props) {
                   {sort &&
                     (sort === Sort.AGE || sort === Sort.MEME) &&
                     printMintDate(nft.mint_date)}
-                  {sort === Sort.EDITION_SIZE && `Edition Size: ${nft.supply}`}
+                  {sort === Sort.EDITION_SIZE &&
+                    `Edition Size: ${numberWithCommas(nft.supply)}`}
                   {sort === Sort.TDH &&
                     `TDH: ${numberWithCommas(Math.round(nft.boosted_tdh))}`}
                   {sort === Sort.HODLERS &&
-                    `Collectors: ${
-                      nftMetas.find((nftm) => nftm.id === nft.id)?.hodlers
-                    }`}
+                    `Collectors: ${numberWithCommas(
+                      nftMetas.find((nftm) => nftm.id === nft.id)!.hodlers
+                    )}`}
                   {sort === Sort.UNIQUE_PERCENT &&
                     `Unique: ${
                       Math.round(
