@@ -571,3 +571,14 @@ export function useMintSharedState() {
     setErrors,
   };
 }
+
+export function useCollectionMintCount(collectionId: number) {
+  return useContractRead({
+    address: NEXTGEN_CORE[NEXTGEN_CHAIN_ID] as `0x${string}`,
+    abi: NEXTGEN_CORE.abi,
+    chainId: NEXTGEN_CHAIN_ID,
+    watch: true,
+    functionName: "viewCirSupply",
+    args: [collectionId],
+  });
+}

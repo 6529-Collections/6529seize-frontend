@@ -28,7 +28,11 @@ import {
 import NextGenMintWidget from "./NextGenMintWidget";
 import NextGenMintBurnWidget from "./NextGenMintBurnWidget";
 import Image from "next/image";
-import { NextGenCountdown, NextGenPhases } from "../NextGenCollectionHeader";
+import {
+  NextGenCountdown,
+  NextGenMintCounts,
+  NextGenPhases,
+} from "../NextGenCollectionHeader";
 import DotLoader from "../../../../dotLoader/DotLoader";
 import { NextGenCollection } from "../../../../../entities/INextgen";
 
@@ -60,6 +64,8 @@ export default function NextGenMint(props: Readonly<Props>) {
     props.collection.public_end
   );
 
+  const [shouldRefetchMintCounts, setShouldRefetchMintCounts] = useState(false);
+
   const {
     available,
     setAvailable,
@@ -74,16 +80,6 @@ export default function NextGenMint(props: Readonly<Props>) {
     fetchingMintCounts,
     setFetchingMintCounts,
   } = useMintSharedState();
-
-  useEffect(() => {
-    if (props.burn_amount > -1) {
-      setAvailable(
-        props.collection.total_supply -
-          props.burn_amount -
-          props.collection.mint_count
-      );
-    }
-  }, [props.burn_amount]);
 
   function getDelegationAddress() {
     if (collection && mintingDetails) {
@@ -272,7 +268,6 @@ export default function NextGenMint(props: Readonly<Props>) {
       addressMintCountAirdropRead.isFetching ||
       addressMintCountMintedALRead.isFetching ||
       addressMintCountMintedPublicRead.isFetching;
-    // alert(isFetching);
     setFetchingMintCounts(isFetching);
   }, [
     addressMintCountAirdropRead.isFetching,
@@ -292,6 +287,9 @@ export default function NextGenMint(props: Readonly<Props>) {
           mintingForDelegator={setMintingForDelegator}
           mintForAddress={setMintForAddress}
           fetchingMintCounts={fetchingMintCounts}
+          refreshMintCounts={() => {
+            setShouldRefetchMintCounts(true);
+          }}
         />
       );
     } else if (collection && type == AllowlistType.EXTERNAL_BURN) {
@@ -306,6 +304,9 @@ export default function NextGenMint(props: Readonly<Props>) {
           mintingForDelegator={setMintingForDelegator}
           mintForAddress={setMintForAddress}
           fetchingMintCounts={fetchingMintCounts}
+          refreshMintCounts={() => {
+            setShouldRefetchMintCounts(true);
+          }}
         />
       );
     }
@@ -358,11 +359,12 @@ export default function NextGenMint(props: Readonly<Props>) {
             </b>
           </span>
           <span className="pt-2 font-larger d-inline-flex align-items-center">
-            <b>
-              {props.collection.mint_count} / {props.collection.total_supply}{" "}
-              minted
-              {available > 0 && ` | ${available} remaining`}
-            </b>
+            <NextGenMintCounts
+              collection={props.collection}
+              setAvailable={setAvailable}
+              shouldRefetchMintCounts={shouldRefetchMintCounts}
+              setShouldRefetchMintCounts={setShouldRefetchMintCounts}
+            />
           </span>
         </Col>
         <Col sm={12} md={6} className="pt-1 pb-1 d-flex align-items-center">

@@ -5,6 +5,7 @@ import NextGenCollections from "./NextGenCollections";
 import { NextGenCollection } from "../../../entities/INextgen";
 import {
   NextGenCountdown,
+  NextGenMintCounts,
   NextGenPhases,
 } from "./collectionParts/NextGenCollectionHeader";
 
@@ -76,11 +77,7 @@ export default function NextGen(props: Readonly<Props>) {
             </Row>
             <Row className="pt-3 font-larger font-color">
               <Col>
-                <b>
-                  {props.collection.mint_count} /{" "}
-                  {props.collection.total_supply} minted
-                  {available > 0 && ` | ${available} remaining`}
-                </b>
+                <NextGenMintCounts collection={props.collection} />
               </Col>
             </Row>
             <Row className="pt-5">

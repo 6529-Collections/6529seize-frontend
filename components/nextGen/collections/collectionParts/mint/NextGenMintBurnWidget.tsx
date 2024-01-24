@@ -44,6 +44,7 @@ interface Props {
   mintingForDelegator: (mintingForDelegator: boolean) => void;
   mintForAddress: (mintForAddress: string | undefined) => void;
   fetchingMintCounts: boolean;
+  refreshMintCounts: () => void;
 }
 
 export default function NextGenMintBurnWidget(props: Readonly<Props>) {
@@ -397,6 +398,9 @@ export default function NextGenMintBurnWidget(props: Readonly<Props>) {
               isLoading={mintWrite.isLoading}
               hash={mintWrite.data?.hash}
               error={mintWrite.error}
+              onSuccess={() => {
+                props.refreshMintCounts();
+              }}
             />
           </Form>
         </Col>

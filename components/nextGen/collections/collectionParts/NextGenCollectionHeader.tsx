@@ -14,7 +14,10 @@ import DateCountdown from "../../../date-countdown/DateCountdown";
 import { fetchUrl } from "../../../../services/6529api";
 import DotLoader from "../../../dotLoader/DotLoader";
 import { NextGenCollection } from "../../../../entities/INextgen";
-import { getStatusFromDates } from "../../nextgen_helpers";
+import {
+  getStatusFromDates,
+  useCollectionMintCount,
+} from "../../nextgen_helpers";
 import { sepolia, goerli } from "viem/chains";
 import "add-to-calendar-button";
 
@@ -217,11 +220,6 @@ export default function NextGenCollectionHeader(props: Readonly<Props>) {
     );
   }
 
-  useEffect(() => {
-    const a = props.collection.total_supply - props.collection.mint_count;
-    setAvailable(a);
-  }, [props.collection]);
-
   return (
     <Container className="no-padding">
       <Row>
@@ -297,11 +295,10 @@ export default function NextGenCollectionHeader(props: Readonly<Props>) {
             </b>
           </span>
           <span className="pt-2 font-larger d-inline-flex align-items-center">
-            <b>
-              {props.collection.mint_count} / {props.collection.total_supply}{" "}
-              minted
-              {available > 0 && ` | ${available} remaining`}
-            </b>
+            <NextGenMintCounts
+              collection={props.collection}
+              setAvailable={setAvailable}
+            />
           </span>
         </Col>
         <Col className="pt-3 d-flex align-items-center" sm={12} md={6}>
@@ -311,5 +308,60 @@ export default function NextGenCollectionHeader(props: Readonly<Props>) {
         </Col>
       </Row>
     </Container>
+  );
+}
+
+export function NextGenMintCounts(
+  props: Readonly<{
+    collection: NextGenCollection;
+    setAvailable?(available: number): void;
+    shouldRefetchMintCounts?: boolean;
+    setShouldRefetchMintCounts?(shouldRefetchMintCounts: boolean): void;
+  }>
+) {
+  const [available, setAvailable] = useState<number>(0);
+
+  const collectionMintCount = useCollectionMintCount(props.collection.id);
+  const [mintCount, setMintCount] = useState<number>(0);
+
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+
+  useEffect(() => {
+    if (props.shouldRefetchMintCounts) {
+      collectionMintCount.refetch().then(() => {
+        if (props.setShouldRefetchMintCounts) {
+          props.setShouldRefetchMintCounts(false);
+        }
+      });
+    }
+  }, [props.shouldRefetchMintCounts]);
+
+  useEffect(() => {
+    setIsLoading(collectionMintCount.isFetching);
+  }, [collectionMintCount.isFetching]);
+
+  useEffect(() => {
+    if (collectionMintCount.data) {
+      const mintC = parseInt(collectionMintCount.data as any);
+      setMintCount(mintC);
+      const avail = props.collection.total_supply - mintC;
+      setAvailable(avail);
+      if (props.setAvailable) {
+        props.setAvailable(avail);
+      }
+    }
+  }, [collectionMintCount.data]);
+
+  return (
+    <b>
+      {mintCount} / {props.collection.total_supply} minted
+      {available > 0 && ` | ${available} remaining`}
+      {isLoading && (
+        <>
+          &nbsp;
+          <DotLoader />
+        </>
+      )}
+    </b>
   );
 }

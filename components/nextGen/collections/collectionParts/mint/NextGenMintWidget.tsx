@@ -66,6 +66,7 @@ interface Props {
   mintingForDelegator: (mintingForDelegator: boolean) => void;
   mintForAddress: (mintForAddress: string | undefined) => void;
   fetchingMintCounts: boolean;
+  refreshMintCounts: () => void;
 }
 
 function getMintValue(mintCount: number, mintPrice: number) {
@@ -143,6 +144,9 @@ export default function NextGenMintWidget(props: Readonly<Props>) {
   }, [mintForAddress]);
 
   function findActiveProof(proofs: ProofResponse[]) {
+    if (publicStatus == Status.LIVE) {
+      return undefined;
+    }
     let runningTotal = 0;
 
     for (let index = 0; index < proofs.length; index++) {
@@ -589,6 +593,7 @@ export default function NextGenMintWidget(props: Readonly<Props>) {
               error={mintWrite.error}
               onSuccess={() => {
                 setCurrentProof(findActiveProof(originalProofs));
+                props.refreshMintCounts();
               }}
             />
           </Form>

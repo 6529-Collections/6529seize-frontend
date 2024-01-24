@@ -2,6 +2,7 @@ import styles from "./NextGen.module.scss";
 import { Container, Row, Col } from "react-bootstrap";
 import { NextGenCollection } from "../../../entities/INextgen";
 import Image from "next/image";
+import { NextGenMintCounts } from "./collectionParts/NextGenCollectionHeader";
 
 interface Props {
   collection: NextGenCollection;
@@ -49,8 +50,7 @@ export default function NextGenCollectionPreview(props: Readonly<Props>) {
               </Row>
               <Row>
                 <Col className="font-color-h d-flex">
-                  {props.collection.mint_count} /{" "}
-                  {props.collection.total_supply} minted
+                  <NextGenMintCounts collection={props.collection} />
                 </Col>
               </Row>
             </Container>
