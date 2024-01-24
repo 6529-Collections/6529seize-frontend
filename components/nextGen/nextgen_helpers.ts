@@ -522,6 +522,7 @@ export function useMintSharedState() {
     public: 0,
     total: 0,
   });
+  const [fetchingMintCounts, setFetchingMintCounts] = useState(false);
   const [proofResponse, setProofResponse] = useState<ProofResponse[]>([]);
   const [burnProofResponse, setBurnProofResponse] =
     useState<ProofResponseBurn>();
@@ -543,6 +544,8 @@ export function useMintSharedState() {
     setDelegators,
     addressMintCounts,
     setAddressMintCounts,
+    fetchingMintCounts,
+    setFetchingMintCounts,
     proofResponse,
     setProofResponse,
     burnProofResponse,

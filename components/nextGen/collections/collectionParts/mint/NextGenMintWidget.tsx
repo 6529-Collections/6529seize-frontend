@@ -30,11 +30,12 @@ import {
   useMintSharedState,
 } from "../../../nextgen_helpers";
 import {
-  NextGenAdminMintForModeFormGroup,
-  NextGenAdminMintingForDelegator,
+  NextGenMintForModeFormGroup,
+  NextGenMintingForDelegator,
 } from "./NextGenMintShared";
 import { NextGenCollection } from "../../../../../entities/INextgen";
 import { Spinner } from "./NextGenMint";
+import DotLoader from "../../../../dotLoader/DotLoader";
 
 function getJsonData(keccak: string, data: string) {
   const parsed = JSON.parse(data);
@@ -63,7 +64,8 @@ interface Props {
   mint_counts: TokensPerAddress;
   delegators: string[];
   mintingForDelegator: (mintingForDelegator: boolean) => void;
-  mintForAddress: (mintForAddress: string) => void;
+  mintForAddress: (mintForAddress: string | undefined) => void;
+  fetchingMintCounts: boolean;
 }
 
 function getMintValue(mintCount: number, mintPrice: number) {
@@ -86,6 +88,7 @@ export default function NextGenMintWidget(props: Readonly<Props>) {
     | undefined
   >();
   const [originalProofs, setOriginalProofs] = useState<ProofResponse[]>([]);
+  const [fetchingProofs, setFetchingProofs] = useState<boolean>(false);
 
   const alStatus = getStatusFromDates(
     props.collection.allowlist_start,
@@ -125,16 +128,19 @@ export default function NextGenMintWidget(props: Readonly<Props>) {
   }, [props.collection]);
 
   useEffect(() => {
-    if (props.delegators.length > 0) {
-      setMintForAddress(props.delegators[0]);
+    if (mintingForDelegator) {
+      if (!mintForAddress) {
+        setMintForAddress(props.delegators[0]);
+      }
     } else {
       setMintForAddress(undefined);
     }
-  }, [props.delegators]);
-
-  useEffect(() => {
     props.mintingForDelegator(mintingForDelegator);
   }, [mintingForDelegator]);
+
+  useEffect(() => {
+    props.mintForAddress(mintForAddress);
+  }, [mintForAddress]);
 
   function findActiveProof(proofs: ProofResponse[]) {
     let runningTotal = 0;
@@ -158,38 +164,38 @@ export default function NextGenMintWidget(props: Readonly<Props>) {
 
   useEffect(() => {
     if (account.address && props.collection.allowlist_end > 0) {
-      const wallet = mintingForDelegator ? mintForAddress : account.address;
+      let wallet = mintingForDelegator ? mintForAddress : account.address;
       if (wallet) {
+        setFetchingProofs(true);
         const merkleRoot = props.collection.merkle_root;
         const url = `${process.env.API_ENDPOINT}/api/nextgen/proofs/${merkleRoot}/${wallet}`;
         fetchUrl(url).then((response: ProofResponse[]) => {
           const proofResponses: ProofResponse[] = [];
-          proofResponses.push({
-            keccak: response[0].keccak,
-            spots: response[0].spots,
-            info: response[0].info,
-            proof: response[0].proof,
-          });
-          for (let i = 1; i < response.length; i++) {
-            const spots = response[i].spots - response[i - 1].spots;
+          if (response.length > 0) {
             proofResponses.push({
-              keccak: response[i].keccak,
-              spots: spots,
-              info: response[i].info,
-              proof: response[i].proof,
+              keccak: response[0].keccak,
+              spots: response[0].spots,
+              info: response[0].info,
+              proof: response[0].proof,
             });
+            for (let i = 1; i < response.length; i++) {
+              const spots = response[i].spots - response[i - 1].spots;
+              proofResponses.push({
+                keccak: response[i].keccak,
+                spots: spots,
+                info: response[i].info,
+                proof: response[i].proof,
+              });
+            }
           }
           setProofResponse(proofResponses);
           setCurrentProof(findActiveProof(response));
           setOriginalProofs(response);
-          const maxSpots = proofResponse.reduce(
-            (acc, response) => acc + response.spots,
-            0
-          );
+          setFetchingProofs(false);
         });
       }
     }
-  }, [props.collection, account.address, mintingForDelegator]);
+  }, [props.collection, account.address, mintForAddress]);
 
   const mintWrite = useContractWrite({
     address: NEXTGEN_MINTER[NEXTGEN_CHAIN_ID] as `0x${string}`,
@@ -206,9 +212,15 @@ export default function NextGenMintWidget(props: Readonly<Props>) {
     setIsMinting(false);
   }, [mintWrite.isSuccess || mintWrite.isError]);
 
+  function isAllowlistError() {
+    return (
+      proofResponse && alStatus == Status.LIVE && 0 >= proofResponse.length
+    );
+  }
+
   function validate() {
     let e: string[] = [];
-    if (proofResponse && alStatus == Status.LIVE && 0 >= proofResponse.length) {
+    if (isAllowlistError()) {
       e.push("Not in Allowlist");
     }
     return e;
@@ -238,8 +250,12 @@ export default function NextGenMintWidget(props: Readonly<Props>) {
     if (available <= 0) {
       return true;
     }
+    if (isAllowlistError()) {
+      return true;
+    }
     return (
       !props.mint_counts ||
+      props.fetchingMintCounts ||
       (alStatus == Status.LIVE && !proofResponse) ||
       (alStatus != Status.LIVE && publicStatus != Status.LIVE) ||
       (alStatus == Status.LIVE &&
@@ -325,6 +341,7 @@ export default function NextGenMintWidget(props: Readonly<Props>) {
     if (props.mint_counts) {
       setMintCount(1);
     }
+    setCurrentProof(findActiveProof(originalProofs));
   }, [props.mint_counts]);
 
   function renderAllowlistStatus() {
@@ -411,7 +428,7 @@ export default function NextGenMintWidget(props: Readonly<Props>) {
               setErrors([]);
               setIsMinting(false);
             }}>
-            <NextGenAdminMintForModeFormGroup
+            <NextGenMintForModeFormGroup
               title="Mint For"
               connectedAddress={account.address}
               delegators={props.delegators.length}
@@ -419,7 +436,7 @@ export default function NextGenMintWidget(props: Readonly<Props>) {
               setMintingForDelegator={setMintingForDelegator}
             />
             {mintingForDelegator && (
-              <NextGenAdminMintingForDelegator
+              <NextGenMintingForDelegator
                 delegators={props.delegators}
                 mintForAddress={mintForAddress}
                 setMintForAddress={setMintForAddress}
@@ -460,39 +477,48 @@ export default function NextGenMintWidget(props: Readonly<Props>) {
                   ? " Public Phase"
                   : ""}
                 :&nbsp;
-                <b>
-                  {renderAllowlistStatus()}
-                  {renderPublicStatus()}
-                </b>
+                {props.fetchingMintCounts ? (
+                  <DotLoader />
+                ) : (
+                  <b>
+                    {renderAllowlistStatus()}
+                    {renderPublicStatus()}
+                  </b>
+                )}
               </Form.Label>
             </Form.Group>
             {alStatus === Status.LIVE &&
-              proofResponse.map((response, index) => (
-                <Form.Group
-                  key={response.keccak}
-                  as={Row}
-                  className="pt-2 pl-2">
-                  <Col>
-                    <Form.Check
-                      type="checkbox"
-                      label={
-                        <>
-                          Spots: {response.spots}
-                          <br />
-                          <span className="d-flex gap-1">
-                            Data: {getJsonData(response.keccak, response.info)}
-                          </span>
-                        </>
-                      }
-                      id={`${response.keccak}`}
-                      checked={currentProof && currentProof.index >= index}
-                      disabled={
-                        (currentProof && index != currentProof.index) ||
-                        disableMint()
-                      }
-                      className={`pt-1 pb-1 `}></Form.Check>
-                  </Col>
-                </Form.Group>
+              (fetchingProofs ? (
+                <DotLoader />
+              ) : (
+                proofResponse.map((response, index) => (
+                  <Form.Group
+                    key={response.keccak}
+                    as={Row}
+                    className="pt-2 pl-2">
+                    <Col>
+                      <Form.Check
+                        type="checkbox"
+                        label={
+                          <>
+                            Spots: {response.spots}
+                            <br />
+                            <span className="d-flex gap-1">
+                              Data:{" "}
+                              {getJsonData(response.keccak, response.info)}
+                            </span>
+                          </>
+                        }
+                        id={`${response.keccak}`}
+                        checked={currentProof && currentProof.index >= index}
+                        disabled={
+                          (currentProof && index != currentProof.index) ||
+                          disableMint()
+                        }
+                        className={`pt-1 pb-1 `}></Form.Check>
+                    </Col>
+                  </Form.Group>
+                ))
               ))}
             <Form.Group as={Row} className="pb-2">
               <Form.Label column sm={12} className="d-flex align-items-center">
@@ -514,6 +540,7 @@ export default function NextGenMintWidget(props: Readonly<Props>) {
                     !account.isConnected ||
                     (publicStatus !== Status.LIVE &&
                       currentProof &&
+                      currentProof.proof &&
                       currentProof.proof.spots <= 0) ||
                     disableMint()
                   }

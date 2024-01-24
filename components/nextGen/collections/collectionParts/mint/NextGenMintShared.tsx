@@ -19,7 +19,7 @@ export function NextGenMintDelegatorOption(
   );
 }
 
-export function NextGenAdminMintForModeFormGroup(
+export function NextGenMintForModeFormGroup(
   props: Readonly<{
     title: string;
     connectedAddress: string | undefined;
@@ -85,7 +85,7 @@ export function NextGenAdminMintForModeFormGroup(
   );
 }
 
-export function NextGenAdminMintingForDelegator(
+export function NextGenMintingForDelegator(
   props: Readonly<{
     delegators: string[];
     mintForAddress: string | undefined;

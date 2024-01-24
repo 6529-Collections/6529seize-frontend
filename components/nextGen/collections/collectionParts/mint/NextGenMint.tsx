@@ -30,11 +30,7 @@ import NextGenMintBurnWidget from "./NextGenMintBurnWidget";
 import Image from "next/image";
 import { NextGenCountdown, NextGenPhases } from "../NextGenCollectionHeader";
 import DotLoader from "../../../../dotLoader/DotLoader";
-import {
-  NextGenCollection,
-  NextGenToken,
-} from "../../../../../entities/INextgen";
-import { commonApiFetch } from "../../../../../services/api/common-api";
+import { NextGenCollection } from "../../../../../entities/INextgen";
 
 interface Props {
   collection: NextGenCollection;
@@ -75,24 +71,9 @@ export default function NextGenMint(props: Readonly<Props>) {
     setMintForAddress,
     addressMintCounts,
     setAddressMintCounts,
+    fetchingMintCounts,
+    setFetchingMintCounts,
   } = useMintSharedState();
-
-  const [tokenPreview, setTokenPreview] = useState<NextGenToken>();
-
-  useEffect(() => {
-    commonApiFetch<{
-      count: number;
-      page: number;
-      next: any;
-      data: NextGenToken[];
-    }>({
-      endpoint: `nextgen/collections/${props.collection.id}/tokens?page_size=1`,
-    }).then((response) => {
-      if (response.data.length > 0) {
-        setTokenPreview(response.data[0]);
-      }
-    });
-  }, [props.collection]);
 
   useEffect(() => {
     if (props.burn_amount > -1) {
@@ -281,12 +262,23 @@ export default function NextGenMint(props: Readonly<Props>) {
       public: 0,
       total: 0,
     });
-    if (!mintingForDelegator) {
-      addressMintCountAirdropRead.refetch();
-      addressMintCountMintedALRead.refetch();
-      addressMintCountMintedPublicRead.refetch();
-    }
-  }, [mintingForDelegator]);
+    addressMintCountAirdropRead.refetch();
+    addressMintCountMintedALRead.refetch();
+    addressMintCountMintedPublicRead.refetch();
+  }, [mintForAddress]);
+
+  useEffect(() => {
+    const isFetching =
+      addressMintCountAirdropRead.isFetching ||
+      addressMintCountMintedALRead.isFetching ||
+      addressMintCountMintedPublicRead.isFetching;
+    // alert(isFetching);
+    setFetchingMintCounts(isFetching);
+  }, [
+    addressMintCountAirdropRead.isFetching,
+    addressMintCountMintedALRead.isFetching,
+    addressMintCountMintedPublicRead.isFetching,
+  ]);
 
   function printMintWidget(type: AllowlistType) {
     if (type === AllowlistType.ALLOWLIST) {
@@ -299,6 +291,7 @@ export default function NextGenMint(props: Readonly<Props>) {
           delegators={delegators}
           mintingForDelegator={setMintingForDelegator}
           mintForAddress={setMintForAddress}
+          fetchingMintCounts={fetchingMintCounts}
         />
       );
     } else if (collection && type == AllowlistType.EXTERNAL_BURN) {
@@ -312,6 +305,7 @@ export default function NextGenMint(props: Readonly<Props>) {
           delegators={delegators}
           mintingForDelegator={setMintingForDelegator}
           mintForAddress={setMintForAddress}
+          fetchingMintCounts={fetchingMintCounts}
         />
       );
     }

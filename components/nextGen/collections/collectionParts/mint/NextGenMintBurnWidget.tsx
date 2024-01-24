@@ -28,8 +28,8 @@ import {
   useMintSharedState,
 } from "../../../nextgen_helpers";
 import {
-  NextGenAdminMintForModeFormGroup,
-  NextGenAdminMintingForDelegator,
+  NextGenMintForModeFormGroup,
+  NextGenMintingForDelegator,
 } from "./NextGenMintShared";
 import { NextGenCollection } from "../../../../../entities/INextgen";
 import { Spinner } from "./NextGenMint";
@@ -42,7 +42,8 @@ interface Props {
   mint_counts: TokensPerAddress;
   delegators: string[];
   mintingForDelegator: (mintingForDelegator: boolean) => void;
-  mintForAddress: (mintForAddress: string) => void;
+  mintForAddress: (mintForAddress: string | undefined) => void;
+  fetchingMintCounts: boolean;
 }
 
 export default function NextGenMintBurnWidget(props: Readonly<Props>) {
@@ -142,9 +143,7 @@ export default function NextGenMintBurnWidget(props: Readonly<Props>) {
   }, [mintingForDelegator]);
 
   useEffect(() => {
-    if (mintForAddress) {
-      props.mintForAddress(mintForAddress);
-    }
+    props.mintForAddress(mintForAddress);
   }, [mintForAddress]);
 
   useEffect(() => {
@@ -208,6 +207,7 @@ export default function NextGenMintBurnWidget(props: Readonly<Props>) {
     }
     return (
       !props.mint_counts ||
+      props.fetchingMintCounts ||
       (alStatus == Status.LIVE && !burnProofResponse) ||
       (alStatus != Status.LIVE && publicStatus != Status.LIVE) ||
       (alStatus == Status.LIVE &&
@@ -308,7 +308,7 @@ export default function NextGenMintBurnWidget(props: Readonly<Props>) {
                 </Table>
               </Col>
             </Row>
-            <NextGenAdminMintForModeFormGroup
+            <NextGenMintForModeFormGroup
               title="Burn to Mint For"
               connectedAddress={account.address}
               delegators={props.delegators.length}
@@ -316,7 +316,7 @@ export default function NextGenMintBurnWidget(props: Readonly<Props>) {
               setMintingForDelegator={setMintingForDelegator}
             />
             {mintingForDelegator && (
-              <NextGenAdminMintingForDelegator
+              <NextGenMintingForDelegator
                 delegators={props.delegators}
                 mintForAddress={mintForAddress}
                 setMintForAddress={setMintForAddress}
