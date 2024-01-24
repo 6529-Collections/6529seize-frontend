@@ -57,6 +57,12 @@ export default function NextGenToken(props: Readonly<Props>) {
     };
     window.addEventListener("keydown", handleKeyDown);
 
+    const handleClick = () => {
+      setShowLightbox(false);
+      setShowBlackbox(false);
+    };
+    window.addEventListener("mousedown", handleClick);
+
     const handleFullscreenChange = () => {
       if (document.fullscreenElement === tokenImageRef.current) {
         setIsFullScreen(true);
@@ -69,6 +75,7 @@ export default function NextGenToken(props: Readonly<Props>) {
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
       window.removeEventListener("fullscreenchange", handleFullscreenChange);
+      window.removeEventListener("mousedown", handleClick);
     };
   }, []);
 
@@ -217,50 +224,40 @@ export default function NextGenToken(props: Readonly<Props>) {
     }
   };
 
+  function getBoxStyle() {
+    if (showLightbox) {
+      return styles.lightBox;
+    }
+    if (showBlackbox) {
+      return styles.blackBox;
+    }
+    return `row ${styles.modeRow}`;
+  }
+
   return (
     <Container>
       <Row>
         <Col>
           <Container>
-            <div
-              className={
-                showLightbox
-                  ? styles.lightBox
-                  : showBlackbox
-                  ? styles.blackBox
-                  : `row ${styles.modeRow}`
-              }>
-              <div
-                className={
-                  showLightbox || showBlackbox
-                    ? styles.lightBoxContent
-                    : "col pt-3"
-                }
-                ref={tokenImageRef}>
-                <>
-                  {(showLightbox || showBlackbox) && (
-                    <div>
-                      <FontAwesomeIcon
-                        onClick={() => {
-                          setShowLightbox(false);
-                          setShowBlackbox(false);
-                        }}
-                        className={
-                          showBlackbox
-                            ? styles.blackBoxCloseIcon
-                            : styles.lightBoxCloseIcon
-                        }
-                        icon="times-circle"></FontAwesomeIcon>
-                    </div>
-                  )}
-                  <NextGenTokenArtImage
-                    token={props.token}
-                    mode={mode}
-                    is_fullscreen={isFullScreen}
-                  />
-                </>
-              </div>
-            </div>
+            <Row>
+              <Col>
+                <div className={getBoxStyle()}>
+                  <div
+                    className={
+                      showLightbox || showBlackbox
+                        ? styles.lightBoxContent
+                        : "col pt-3"
+                    }
+                    ref={tokenImageRef}>
+                    <NextGenTokenArtImage
+                      token={props.token}
+                      mode={mode}
+                      is_fullscreen={isFullScreen}
+                    />
+                  </div>
+                </div>
+              </Col>
+            </Row>
           </Container>
         </Col>
       </Row>
@@ -268,7 +265,7 @@ export default function NextGenToken(props: Readonly<Props>) {
         <Col>
           <Container className={styles.modeRow}>
             <Row>
-              <Col className="pt-4 pb-3 d-flex gap-2 align-items-center justify-content-center gap-5">
+              <Col className="pt-4 pb-3 d-flex align-items-center justify-content-between">
                 {printModeIcons()}
               </Col>
             </Row>

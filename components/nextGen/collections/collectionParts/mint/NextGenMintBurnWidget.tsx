@@ -287,25 +287,27 @@ export default function NextGenMintBurnWidget(props: Readonly<Props>) {
               </Col>
               <Col xs={12}>
                 <Table className="mb-0">
-                  <tr>
-                    <td>Contract</td>
-                    <td>{props.collection_merkle.burn_collection}</td>
-                  </tr>
-                  {!!props.collection_merkle.burn_collection_id && (
+                  <tbody>
                     <tr>
-                      <td>Collection</td>
-                      <td>{props.collection_merkle.burn_collection_id}</td>
+                      <td>Contract</td>
+                      <td>{props.collection_merkle.burn_collection}</td>
                     </tr>
-                  )}
-                  {props.collection_merkle.max_token_index > 0 && (
-                    <tr>
-                      <td>Tokens</td>
-                      <td>
-                        #{props.collection_merkle.min_token_index} - #
-                        {props.collection_merkle.max_token_index}
-                      </td>
-                    </tr>
-                  )}
+                    {!!props.collection_merkle.burn_collection_id && (
+                      <tr>
+                        <td>Collection</td>
+                        <td>{props.collection_merkle.burn_collection_id}</td>
+                      </tr>
+                    )}
+                    {props.collection_merkle.max_token_index > 0 && (
+                      <tr>
+                        <td>Tokens</td>
+                        <td>
+                          #{props.collection_merkle.min_token_index} - #
+                          {props.collection_merkle.max_token_index}
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
                 </Table>
               </Col>
             </Row>

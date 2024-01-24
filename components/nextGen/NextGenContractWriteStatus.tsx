@@ -107,7 +107,7 @@ export default function NextGenContractWriteStatus(props: Readonly<Props>) {
       )}
       {!props.isLoading && mintedTokens.length > 0 && (
         <div className="pt-2">
-          Tokens Minted:{" "}
+          Token{mintedTokens.length > 1 ? "s" : ""} Minted:{" "}
           <ul>
             {mintedTokens.map((t) => (
               <li key={`minted-token-${t}`}>
