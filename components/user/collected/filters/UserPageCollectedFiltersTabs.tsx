@@ -7,19 +7,26 @@ export interface UserPageCollectedFiltersTabsItem<T> {
   readonly key: string;
 }
 
-export default function UserPageCollectedFiltersTabs<T, U extends boolean>({
-  tabs,
-  activeTab,
-  sortable,
-  sortDirection,
-  setSelected,
-}: {
+export interface UserPageCollectedFiltersTabsDefaultProps<T> {
   readonly tabs: UserPageCollectedFiltersTabsItem<T>[];
   readonly activeTab: T;
-  readonly sortable: U;
-  readonly sortDirection?: U extends true ? SortDirection : undefined;
   readonly setSelected: (tab: T) => void;
-}) {
+}
+
+export interface UserPageCollectedFiltersTabsWithSortProps<T>
+  extends UserPageCollectedFiltersTabsDefaultProps<T> {
+  readonly sortDirection: SortDirection;
+}
+
+export type UserPageCollectedFiltersTabsProps<T> =
+  | UserPageCollectedFiltersTabsDefaultProps<T>
+  | UserPageCollectedFiltersTabsWithSortProps<T>;
+
+export default function UserPageCollectedFiltersTabs<T>(
+  props: UserPageCollectedFiltersTabsProps<T>
+) {
+  const { tabs, activeTab, setSelected } = props;
+
   return (
     <div className="tw-inline-flex tw-rounded-lg tw-overflow-hidden">
       {Object.values(tabs).map((tab, i) => (
@@ -29,6 +36,9 @@ export default function UserPageCollectedFiltersTabs<T, U extends boolean>({
           isFirst={i === 0}
           isLast={i === tabs.length - 1}
           activeTab={activeTab}
+          sortDirection={
+            "sortDirection" in props ? props.sortDirection : undefined
+          }
           setSelected={setSelected}
         />
       ))}

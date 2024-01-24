@@ -8,18 +8,20 @@ export default function UserPageCollectedFiltersTab<T>({
   activeTab,
   isFirst,
   isLast,
-
   setSelected,
+  sortDirection,
 }: {
   readonly tab: UserPageCollectedFiltersTabsItem<T>;
   readonly activeTab: T;
   readonly isFirst: boolean;
   readonly isLast: boolean;
   readonly setSelected: (tab: T) => void;
+  readonly sortDirection?: SortDirection;
 }) {
   const getIsActive = (): boolean => tab.value === activeTab;
 
   const [isActive, setIsActive] = useState<boolean>(getIsActive());
+
   useEffect(() => {
     setIsActive(getIsActive());
   }, [activeTab]);
@@ -55,8 +57,11 @@ export default function UserPageCollectedFiltersTab<T>({
       className={`${dynamicClasses} tw-px-4 tw-py-2 tw-text-sm tw-font-semibold tw-border tw-border-solid tw-border-iron-700 tw-transition tw-duration-300 tw-ease-out`}
     >
       {tab.label}
-      {tab.sortable && (
-        <CommonTableSortIcon direction={sortDirection} isActive={isActive} />
+      {sortDirection && (
+        <CommonTableSortIcon
+          direction={isActive ? sortDirection : SortDirection.DESC}
+          isActive={isActive}
+        />
       )}
     </button>
   );

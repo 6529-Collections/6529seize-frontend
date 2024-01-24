@@ -35,7 +35,6 @@ export default function UserPageCollectedFiltersSeized({
       tabs={tabs}
       activeTab={selected}
       setSelected={setSelected}
-      sortable={false}
     />
   );
 }

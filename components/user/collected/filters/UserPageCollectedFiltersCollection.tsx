@@ -36,7 +36,6 @@ export default function UserPageCollectedFiltersCollection({
       tabs={tabs}
       activeTab={selected}
       setSelected={setSelected}
-      sortable={false}
     />
   );
 }
