@@ -363,17 +363,21 @@ export type ApiCreateOrUpdateProfileCicStatement = Omit<
   "id" | "crated_at" | "updated_at" | "profile_id"
 >;
 
-
 export enum CollectedCollectionType {
   MEMES = "MEMES",
   GRADIENTS = "GRADIENTS",
   MEMELAB = "MEMELAB",
-  NEXTGEN = "NEXTGEN",
 }
 
 export enum CollectionSeized {
   SEIZED = "SEIZED",
   NOT_SEIZED = "NOT_SEIZED",
+}
+
+export enum CollectionSort {
+  TOKEN_ID = "TOKEN_ID",
+  TDH = "TDH",
+  RANK = "RANK",
 }
 
 export interface CollectedCard {

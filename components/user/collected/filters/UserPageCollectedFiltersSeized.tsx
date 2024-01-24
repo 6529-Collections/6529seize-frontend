@@ -1,38 +1,41 @@
 import { CollectionSeized } from "../../../../entities/IProfile";
-import CommonRadioButton from "../../../utils/radio/CommonRadioButton";
-import CommonRadioButtonWrapper from "../../../utils/radio/CommonRadioButtonWrapper";
+import UserPageCollectedFiltersTabs, {
+  UserPageCollectedFiltersTabsItem,
+} from "./UserPageCollectedFiltersTabs";
+
+type SelectedType = CollectionSeized | null;
 
 export default function UserPageCollectedFiltersSeized({
   selected,
   setSelected,
 }: {
-  readonly selected: CollectionSeized | null;
-  readonly setSelected: (selected: CollectionSeized | null) => void;
+  readonly selected: SelectedType;
+  readonly setSelected: (selected: SelectedType) => void;
 }) {
   const labels: { [key in CollectionSeized]: string } = {
     [CollectionSeized.SEIZED]: "Seized",
     [CollectionSeized.NOT_SEIZED]: "Not Seized",
   };
 
+  const tabs: UserPageCollectedFiltersTabsItem<SelectedType>[] = [
+    {
+      label: "All",
+      value: null,
+      key: "all",
+    },
+    ...Object.values(CollectionSeized).map((seized) => ({
+      label: labels[seized],
+      value: seized,
+      key: seized,
+    })),
+  ];
+
   return (
-    <CommonRadioButtonWrapper>
-      <>
-        <CommonRadioButton
-          value={null}
-          label="All"
-          selected={selected}
-          setSelected={setSelected}
-        />
-        {Object.values(CollectionSeized).map((seized) => (
-          <CommonRadioButton
-            key={seized}
-            value={seized}
-            label={labels[seized]}
-            selected={selected}
-            setSelected={setSelected}
-          />
-        ))}
-      </>
-    </CommonRadioButtonWrapper>
+    <UserPageCollectedFiltersTabs
+      tabs={tabs}
+      activeTab={selected}
+      setSelected={setSelected}
+      sortable={false}
+    />
   );
 }

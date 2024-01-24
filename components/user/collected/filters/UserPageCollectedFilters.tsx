@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import {
   CollectedCollectionType,
   CollectionSeized,
+  CollectionSort,
   IProfileAndConsolidations,
 } from "../../../../entities/IProfile";
 import UserPageHeaderAddresses from "../../user-page-header/addresses/UserPageHeaderAddresses";
@@ -12,6 +13,7 @@ import { MEMES_SEASON } from "../../../../enums";
 import UserPageCollectedFiltersSzn from "./UserPageCollectedFiltersSzn";
 import { SortDirection } from "../../../../entities/ISort";
 import UserPageCollectedFiltersCollection from "./UserPageCollectedFiltersCollection";
+import UserPageCollectedFiltersSortBy from "./UserPageCollectedFiltersSortBy";
 
 // consolidations?: string;
 // "true" | "false";
@@ -43,26 +45,48 @@ export default function UserPageCollectedFilters({
     !!activeAddress
   );
 
-  const [seized, setSeized] = useState<CollectionSeized | null>(null);
-  const [szn, setSzn] = useState<MEMES_SEASON | null>(null);
   const [collection, setCollection] = useState<CollectedCollectionType | null>(
     null
   );
+
+  const [seized, setSeized] = useState<CollectionSeized | null>(null);
+  const [szn, setSzn] = useState<MEMES_SEASON | null>(null);
+  const [sortBy, setSortBy] = useState<CollectionSort>(CollectionSort.TOKEN_ID);
+  const [sortDirection, setSortDirection] = useState<SortDirection>(
+    SortDirection.DESC
+  );
+
+  const onSort = (newSortBy: CollectionSort) => {
+    if (newSortBy === sortBy) {
+      setSortDirection((prev) =>
+        prev === SortDirection.ASC ? SortDirection.DESC : SortDirection.ASC
+      );
+    } else {
+      setSortBy(newSortBy);
+      setSortDirection(SortDirection.DESC);
+    }
+  };
 
   useEffect(() => {
     setConsolidations(!!activeAddress);
   }, [activeAddress]);
   return (
-    <div>
+    <div className="tw-w-full tw-inline-flex tw-justify-between">
+      <UserPageCollectedFiltersCollection
+        selected={collection}
+        setSelected={setCollection}
+      />
+      <UserPageCollectedFiltersSortBy
+        selected={sortBy}
+        direction={sortDirection}
+        setSelected={onSort}
+      />
       <UserPageCollectedFiltersSeized
         selected={seized}
         setSelected={setSeized}
       />
       <UserPageCollectedFiltersSzn selected={szn} setSelected={setSzn} />
-      <UserPageCollectedFiltersCollection
-        selected={collection}
-        setSelected={setCollection}
-      />
+
       <UserPageHeaderAddresses
         addresses={profile.consolidation.wallets}
         onActiveAddress={setActiveAddress}

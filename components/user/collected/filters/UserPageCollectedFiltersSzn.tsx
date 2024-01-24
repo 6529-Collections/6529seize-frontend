@@ -1,13 +1,16 @@
 import { MEMES_SEASON } from "../../../../enums";
-import CommonRadioButton from "../../../utils/radio/CommonRadioButton";
-import CommonRadioButtonWrapper from "../../../utils/radio/CommonRadioButtonWrapper";
+import CommonDropdown, {
+  CommonDropdownItemType,
+} from "../../../utils/dropdown/CommonDropdown";
+
+type SelectedType = MEMES_SEASON | null;
 
 export default function UserPageCollectedFiltersSzn({
   selected,
   setSelected,
 }: {
-  readonly selected: MEMES_SEASON | null;
-  readonly setSelected: (selected: MEMES_SEASON | null) => void;
+  readonly selected: SelectedType;
+  readonly setSelected: (selected: SelectedType) => void;
 }) {
   const labels: { [key in MEMES_SEASON]: string } = {
     [MEMES_SEASON.SZN1]: "Szn 1",
@@ -18,25 +21,24 @@ export default function UserPageCollectedFiltersSzn({
     [MEMES_SEASON.SZN6]: "Szn 6",
   };
 
+  const items: CommonDropdownItemType<SelectedType>[] = [
+    {
+      label: "All Seasons",
+      value: null,
+      key: "all",
+    },
+    ...Object.values(MEMES_SEASON).map((value) => ({
+      label: labels[value],
+      value,
+      key: value,
+    })),
+  ];
+
   return (
-    <CommonRadioButtonWrapper>
-      <>
-        <CommonRadioButton
-          value={null}
-          label="All"
-          selected={selected}
-          setSelected={setSelected}
-        />
-        {Object.values(MEMES_SEASON).map((value) => (
-          <CommonRadioButton
-            key={value}
-            value={value}
-            label={labels[value]}
-            selected={selected}
-            setSelected={setSelected}
-          />
-        ))}
-      </>
-    </CommonRadioButtonWrapper>
+    <CommonDropdown
+      items={items}
+      activeItem={selected}
+      setActiveItem={setSelected}
+    />
   );
 }
