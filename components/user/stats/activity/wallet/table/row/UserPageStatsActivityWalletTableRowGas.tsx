@@ -30,9 +30,9 @@ export default function UserPageStatsActivityWalletTableRowGas({
         </div>
       }
     >
-      <div>
+      <div className="tw-h-10 tw-w-10 tw-flex tw-justify-center tw-items-center">
         <svg
-          className="tw-flex-shrink-0 tw-h-5 tw-w-5 tw-text-iron-300"
+          className="tw-flex-shrink-0 tw-w-6 tw-h-6 sm:tw-w-5 sm:tw-h-5 tw-text-iron-300"
           x="0px"
           y="0px"
           viewBox="0 0 494.06 494.06"

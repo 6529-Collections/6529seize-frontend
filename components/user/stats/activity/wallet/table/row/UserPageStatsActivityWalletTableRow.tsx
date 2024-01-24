@@ -194,7 +194,7 @@ export default function UserPageStatsActivityWalletTableRow({
         </div>
         {!!value && (
           <div className="tw-inline-flex tw-items-center tw-whitespace-nowrap tw-text-sm tw-text-iron-400 tw-font-medium">
-            for{" "}
+            for
             <span className="tw-ml-0.5 tw-inline-flex tw-items-center">
               <svg
                 className="tw-h-5 tw-w-5"
@@ -219,15 +219,14 @@ export default function UserPageStatsActivityWalletTableRow({
           </div>
         )}
       </td>
-      <td className="tw-py-2.5 tw-w-36 tw-flex tw-items-center tw-justify-end tw-text-right tw-gap-x-4 tw-px-4">
+      <td className="tw-py-2.5 sm:tw-w-36 tw-h-full tw-flex tw-items-center tw-justify-end tw-text-right tw-px-6 sm:tw-px-4">
         {showRoyalties && (
-          <div>
-            <UserPageStatsActivityWalletTableRowRoyalties
-              transactionValue={transaction.value}
-              royalties={transaction.royalties}
-            />
-          </div>
+          <UserPageStatsActivityWalletTableRowRoyalties
+            transactionValue={transaction.value}
+            royalties={transaction.royalties}
+          />
         )}
+
         <UserPageStatsActivityWalletTableRowGas
           gas={transaction.gas}
           gasGwei={transaction.gas_gwei}
@@ -238,14 +237,14 @@ export default function UserPageStatsActivityWalletTableRow({
           href={`https://etherscan.io/tx/${transaction.transaction}`}
           target="_blank"
           rel="noopener noreferrer"
-          className="tw-bg-transparent tw-border-none tw-p-0"
+          className="tw-bg-transparent tw-border-none tw-h-10 tw-w-10 tw-flex tw-justify-center tw-items-center hover:tw-scale-110 tw-transition tw-duration-300 tw-ease-out"
         >
-          <div className="-tw-mt-1 tw-flex-shrink-0 tw-w-6 tw-h-6 sm:tw-w-5 sm:tw-h-5 hover:tw-scale-110 tw-transition tw-duration-300 tw-ease-out">
+          <div className="tw-flex-shrink-0 tw-w-6 tw-h-6 sm:tw-w-5 sm:tw-h-5">
             <EtherscanIcon />
           </div>
         </a>
       </td>
-      <td className="tw-py-2.5 tw-w-24 tw-pl-4 tw-text-right">
+      <td className="tw-py-2.5 tw-w-24 tw-pl-6 sm:tw-pl-4 tw-text-right">
         <CommonTimeAgo
           timestamp={new Date(transaction.transaction_date).getTime()}
         />

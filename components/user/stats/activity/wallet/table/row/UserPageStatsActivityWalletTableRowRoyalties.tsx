@@ -59,21 +59,25 @@ export default function UserPageStatsActivityWalletTableRowRoyalties({
     case RoyaltiesType.BELOW_THRESHOLD:
       return (
         <Tippy content={getContent()} theme="dark" placement="top">
-          <img
-            src="/pepe-smile.png"
-            className="tw-h-5 tw-w-5 tw-object-contain tw-flex-shrink-0"
-            alt="pepe-smile"
-          />
+          <div className="tw-h-10 tw-w-10 tw-flex tw-justify-center tw-items-center">
+            <img
+              src="/pepe-smile.png"
+              className="tw-w-6 tw-h-6 sm:tw-w-5 sm:tw-h-5 tw-object-contain tw-flex-shrink-0"
+              alt="pepe-smile"
+            />
+          </div>
         </Tippy>
       );
     case RoyaltiesType.ABOVE_THRESHOLD:
       return (
         <Tippy content={getContent()} theme="dark" placement="top">
-          <img
-            src="/pepe-xglasses.png"
-            className="tw-h-5 tw-w-5 tw-object-contain tw-flex-shrink-0"
-            alt="pepe-xglasses"
-          />
+          <div className="tw-h-10 tw-w-10 tw-flex tw-justify-center tw-items-center">
+            <img
+              src="/pepe-xglasses.png"
+              className="tw-w-6 tw-h-6 sm:tw-w-5 sm:tw-h-5 tw-object-contain tw-flex-shrink-0"
+              alt="pepe-xglasses"
+            />
+          </div>
         </Tippy>
       );
     default:
