@@ -345,6 +345,7 @@ export default function NextGenMintWidget(props: Readonly<Props>) {
     if (props.mint_counts) {
       setMintCount(1);
     }
+    setCurrentProof(findActiveProof(originalProofs));
   }, [props.mint_counts]);
 
   function renderAllowlistStatus() {
