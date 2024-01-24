@@ -50,8 +50,8 @@ export default function UserPageStatsActivityWalletTableRowRoyalties({
 
   const getContent = (): string =>
     `Royalties: ${formatNumberWithCommas(
-      royalties
-    )}ETH (${formatNumberWithCommas(percentage * 100)}%)`;
+      +royalties.toFixed(7)
+    )}ETH (${formatNumberWithCommas(+(percentage * 100).toFixed(3))}%)`;
 
   switch (royaltiesType) {
     case RoyaltiesType.NONE:
