@@ -194,7 +194,7 @@ export default function UserPageStatsActivityWalletTableRow({
         </div>
         {!!value && (
           <div className="tw-inline-flex tw-items-center tw-whitespace-nowrap tw-text-sm tw-text-iron-400 tw-font-medium">
-            for
+            for{" "}
             <span className="tw-ml-0.5 tw-inline-flex tw-items-center">
               <svg
                 className="tw-h-5 tw-w-5"
