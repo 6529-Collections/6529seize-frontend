@@ -199,7 +199,7 @@ export default function NextGenMintWidget(props: Readonly<Props>) {
         });
       }
     }
-  }, [props.collection, account.address, mintForAddress]);
+  }, [props.collection, account.address, mintForAddress, props.mint_counts]);
 
   const mintWrite = useContractWrite({
     address: NEXTGEN_MINTER[NEXTGEN_CHAIN_ID] as `0x${string}`,
@@ -345,7 +345,6 @@ export default function NextGenMintWidget(props: Readonly<Props>) {
     if (props.mint_counts) {
       setMintCount(1);
     }
-    setCurrentProof(findActiveProof(originalProofs));
   }, [props.mint_counts]);
 
   function renderAllowlistStatus() {
