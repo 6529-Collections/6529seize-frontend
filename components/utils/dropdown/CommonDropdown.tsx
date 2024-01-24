@@ -17,7 +17,6 @@ export default function CommonDropdown<T>({
   readonly items: CommonDropdownItemType<T>[];
   readonly activeItem: T;
   readonly setActiveItem: (item: T) => void;
-  
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const [iconScope, animateIcon] = useAnimate();
@@ -39,6 +38,11 @@ export default function CommonDropdown<T>({
   useEffect(() => {
     setTitle(getTitle());
   }, [activeItem]);
+
+  const onActiveItemChange = (item: T) => {
+    setActiveItem(item);
+    setIsOpen(false);
+  };
 
   return (
     <div className="tw-relative" ref={listRef}>
@@ -86,7 +90,7 @@ export default function CommonDropdown<T>({
                       key={item.key}
                       item={item}
                       activeItem={activeItem}
-                      setActiveItem={setActiveItem}
+                      setActiveItem={onActiveItemChange}
                     />
                   ))}
                 </ul>
