@@ -102,8 +102,6 @@ export default function NextGenMintWidget(props: Readonly<Props>) {
   );
 
   const {
-    available,
-    setAvailable,
     proofResponse,
     setProofResponse,
     mintForAddress,
@@ -124,11 +122,6 @@ export default function NextGenMintWidget(props: Readonly<Props>) {
   } = useMintSharedState();
 
   useEffect(() => {
-    const a = props.collection.total_supply - props.collection.mint_count;
-    setAvailable(a);
-  }, [props.collection]);
-
-  useEffect(() => {
     if (mintingForDelegator) {
       if (!mintForAddress) {
         setMintForAddress(props.delegators[0]);
@@ -147,6 +140,7 @@ export default function NextGenMintWidget(props: Readonly<Props>) {
     if (publicStatus == Status.LIVE) {
       return undefined;
     }
+
     let runningTotal = 0;
 
     for (let index = 0; index < proofs.length; index++) {
@@ -159,7 +153,6 @@ export default function NextGenMintWidget(props: Readonly<Props>) {
         return { proof: response, index };
       }
     }
-
     return {
       proof: proofs[proofs.length - 1],
       index: proofs.length - 1,
@@ -199,7 +192,7 @@ export default function NextGenMintWidget(props: Readonly<Props>) {
         });
       }
     }
-  }, [props.collection, account.address, mintForAddress, props.mint_counts]);
+  }, [props.collection, account.address, mintForAddress]);
 
   const mintWrite = useContractWrite({
     address: NEXTGEN_MINTER[NEXTGEN_CHAIN_ID] as `0x${string}`,
@@ -251,7 +244,7 @@ export default function NextGenMintWidget(props: Readonly<Props>) {
     if (!account.isConnected || chainId !== NEXTGEN_CHAIN_ID) {
       return false;
     }
-    if (available <= 0) {
+    if (props.available_supply <= 0) {
       return true;
     }
     if (isAllowlistError()) {
@@ -345,8 +338,11 @@ export default function NextGenMintWidget(props: Readonly<Props>) {
     if (props.mint_counts) {
       setMintCount(1);
     }
-    setCurrentProof(findActiveProof(originalProofs));
   }, [props.mint_counts]);
+
+  useEffect(() => {
+    setCurrentProof(findActiveProof(originalProofs));
+  }, [props.fetchingMintCounts]);
 
   function renderAllowlistStatus() {
     if (proofResponse && alStatus === Status.LIVE) {
