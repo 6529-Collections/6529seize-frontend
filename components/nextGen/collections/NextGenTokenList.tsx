@@ -40,6 +40,8 @@ export default function NextGenTokenList(props: Readonly<Props>) {
     }
     if (props.sort) {
       endpoint += `&sort=${props.sort.replaceAll(" ", "_").toLowerCase()}`;
+    } else {
+      endpoint += `&sort=random`;
     }
     if (props.sort_direction) {
       endpoint += `&sort_direction=${props.sort_direction.toLowerCase()}`;

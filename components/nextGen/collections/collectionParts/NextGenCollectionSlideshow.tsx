@@ -15,9 +15,8 @@ interface Props {
 const SLIDESHOW_LIMIT = 25;
 
 export default function NextGenCollectionSlideshow(props: Readonly<Props>) {
-  const startIndex = props.collection.id * 10000000000;
   const [tokens, setTokens] = useState<NextGenToken[]>([]);
-  const [currentSlide, setCurrentSlide] = useState(startIndex);
+  const [currentSlide, setCurrentSlide] = useState<number>(0);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(false);
   const [slidesPerView, setSlidesPerView] = useState(getSlidesPerView());
@@ -50,7 +49,7 @@ export default function NextGenCollectionSlideshow(props: Readonly<Props>) {
       next: any;
       data: NextGenToken[];
     }>({
-      endpoint: `nextgen/collections/${props.collection.id}/tokens?page_size=${SLIDESHOW_LIMIT}&page=${page}`,
+      endpoint: `nextgen/collections/${props.collection.id}/tokens?page_size=${SLIDESHOW_LIMIT}&page=${page}&sort=random`,
     }).then((response) => {
       setTokens([...tokens, ...response.data]);
       setHasMore(response.next);
@@ -62,7 +61,7 @@ export default function NextGenCollectionSlideshow(props: Readonly<Props>) {
   }, [props.collection.id, page]);
 
   useEffect(() => {
-    if (currentSlide >= startIndex + tokens.length - 5 && hasMore) {
+    if (currentSlide >= tokens.length - 5 && hasMore) {
       setPage(page + 1);
     }
   }, [currentSlide]);
@@ -86,17 +85,17 @@ export default function NextGenCollectionSlideshow(props: Readonly<Props>) {
                   centeredSlides
                   pagination={{ clickable: true }}
                   onSlideChange={(swiper) => {
-                    setCurrentSlide(startIndex + swiper.realIndex);
+                    setCurrentSlide(swiper.realIndex);
                   }}>
                   <SwiperAutoplayButton />
-                  {tokens.map((token) => (
+                  {tokens.map((token, index) => (
                     <SwiperSlide
                       key={`nextgen-carousel-${token.id}`}
                       className="pt-2 pb-5 unselectable">
                       <NextGenTokenImage
-                        hide_link={true}
+                        hide_link={currentSlide !== index}
                         token={token}
-                        hide_info={currentSlide !== token.id}
+                        hide_info={currentSlide !== index}
                       />
                     </SwiperSlide>
                   ))}

@@ -311,8 +311,8 @@ export default function NextGenCollectionArt(props: Readonly<Props>) {
             <NextGenTokenList
               limit={props.show_view_all ? 6 : undefined}
               collection={props.collection}
-              sort={sort}
-              sort_direction={sortDir}
+              sort={props.show_view_all ? undefined : sort}
+              sort_direction={props.show_view_all ? undefined : sortDir}
               selected_traits={selectedTraitValues}
               setTotalResults={(totalResults: number) => {
                 setTotalResults(totalResults);
