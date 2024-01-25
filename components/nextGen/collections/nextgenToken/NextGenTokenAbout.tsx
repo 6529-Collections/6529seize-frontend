@@ -3,7 +3,7 @@ import styles from "../NextGen.module.scss";
 import { Col, Container, Row } from "react-bootstrap";
 import { NextGenCollection, NextGenToken } from "../../../../entities/INextgen";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { areEqualAddresses } from "../../../../helpers/Helpers";
+import { areEqualAddresses, isNullAddress } from "../../../../helpers/Helpers";
 import Address from "../../../address/Address";
 import { useState, useEffect } from "react";
 import { useAccount, useEnsName, mainnet } from "wagmi";
@@ -12,6 +12,8 @@ import { commonApiFetch } from "../../../../services/api/common-api";
 import { goerli, sepolia } from "viem/chains";
 import { NEXTGEN_CHAIN_ID, NEXTGEN_CORE } from "../../nextgen_contracts";
 import Image from "next/image";
+import X2Y2Icon from "../../../user/utils/icons/X2Y2Icon";
+import Tippy from "@tippyjs/react";
 
 interface Props {
   collection: NextGenCollection;
@@ -46,39 +48,55 @@ export default function NextgenTokenAbout(props: Readonly<Props>) {
   return (
     <Container className="no-padding">
       <Row>
-        <Col xs={6} sm={4} md={3} className="pt-1 pb-1 d-flex gap-5">
-          <span className="d-flex flex-column">
-            <span className="font-color-h">Rarity Score</span>
-            <span>
-              {Number(props.token.rarity_score.toFixed(2)).toLocaleString()}
-            </span>
-          </span>
-          <span className="d-flex flex-column">
-            <span className="font-color-h">Rank</span>
-            <span>
-              #{Number(props.token.rarity_score.toFixed(2)).toLocaleString()}
-            </span>
-          </span>
+        <Col xs={6} sm={4} md={3} className="pb-4 d-flex gap-5">
+          <TraitScore
+            trait="Rarity Score"
+            score={props.token.rarity_score}
+            rank={props.token.rarity_score_rank}
+          />
         </Col>
-        <Col xs={6} sm={4} md={3} className="pt-1 pb-1 d-flex flex-column">
-          <span className="font-color-h">Token ID</span>
+        <Col xs={6} sm={4} md={3} className="pb-4 d-flex gap-5">
+          <TraitScore
+            trait="Normalized Rarity Score"
+            score={props.token.rarity_score_normalised}
+            rank={props.token.rarity_score_normalised_rank}
+          />
+        </Col>
+        <Col xs={6} sm={4} md={3} className="pb-4 d-flex gap-5">
+          <TraitScore
+            trait="Statistical Score"
+            score={props.token.statistical_score}
+            rank={props.token.statistical_score_rank}
+            places={3}
+          />
+        </Col>
+      </Row>
+      <Row>
+        <Col xs={6} sm={4} md={3} className="pb-4 d-flex flex-column">
+          <span className="font-color-h">Contract Token ID</span>
           <span>#{props.token.id}</span>
         </Col>
-        <Col xs={6} sm={4} md={3} className="pt-1 pb-1 d-flex flex-column">
+        <Col xs={6} sm={4} md={3} className="pb-4 d-flex flex-column">
           <span className="font-color-h">Collection</span>
           <a href={`/nextgen/collection/${props.collection.id}`}>
             #{props.collection.id} {props.collection.name}
           </a>
         </Col>
-        <Col xs={6} sm={4} md={3} className="pt-1 pb-1 d-flex flex-column">
+        <Col xs={6} sm={4} md={3} className="pb-4 d-flex flex-column">
           <span className="font-color-h">Artist</span>
           <a href={`/${props.collection.artist_address}`}>
             {props.collection.artist}
           </a>
         </Col>
-        <Col xs={6} sm={4} md={3} className="pt-1 pb-1 d-flex flex-column">
+        <Col xs={6} sm={4} md={3} className="pb-4 d-flex flex-column">
           <span className="font-color-h">Owner</span>
-          <span className="d-flex">
+          <span className="d-flex gap-2 align-items-center">
+            {(props.token.burnt || isNullAddress(props.token.owner)) && (
+              <FontAwesomeIcon
+                icon="fire"
+                style={{ height: "22px", color: "#c51d34" }}
+              />
+            )}
             <Address
               wallets={[props.token.owner as `0x${string}`]}
               display={ownerProfileHandle ?? ownerENS}
@@ -88,7 +106,7 @@ export default function NextgenTokenAbout(props: Readonly<Props>) {
             )}
           </span>
         </Col>
-        <Col xs={6} sm={4} md={3} className="pt-1 pb-1 d-flex flex-column">
+        <Col xs={6} sm={4} md={3} className="pb-4 d-flex flex-column">
           <span className="font-color-h">Metadata</span>
           <span className="d-flex align-items-center gap-1">
             <span>{props.collection.on_chain ? "On-Chain" : "Off-Chain"}</span>
@@ -99,41 +117,64 @@ export default function NextgenTokenAbout(props: Readonly<Props>) {
             </a>
           </span>
         </Col>
-        <Col xs={6} sm={4} md={3} className="pt-1 pb-1 d-flex flex-column">
+        <Col xs={6} sm={4} md={3} className="pb-4 d-flex flex-column">
           <span className="font-color-h">License</span>
           <span>{props.collection.licence}</span>
         </Col>
-        <Col xs={6} sm={4} md={3} className="pt-1 pb-1 d-flex flex-column">
+        <Col xs={6} sm={4} md={3} className="pb-4 d-flex flex-column">
           <span className="font-color-h">Marketplaces</span>
-          <span className="d-flex align-items-center gap-1 pt-1">
+          <span className="d-flex align-items-center gap-2 pt-1">
             <span>
-              <a
-                href={`https://${
-                  NEXTGEN_CHAIN_ID === sepolia.id ||
-                  NEXTGEN_CHAIN_ID === goerli.id
-                    ? `testnets.opensea`
-                    : `opensea`
-                }.io/assets/${
-                  NEXTGEN_CHAIN_ID === sepolia.id
-                    ? `sepolia`
-                    : NEXTGEN_CHAIN_ID === goerli.id
-                    ? `goerli`
-                    : `ethereum`
-                }/${NEXTGEN_CORE[NEXTGEN_CHAIN_ID]}/${props.token.id}`}
-                target="_blank"
-                rel="noreferrer">
-                <Image
-                  className={styles.marketplace}
-                  src="/opensea.png"
-                  alt="opensea"
-                  width={28}
-                  height={28}
-                />
-              </a>
+              <Tippy content={"Opensea"} theme={"light"} delay={250}>
+                <a
+                  href={`https://${
+                    NEXTGEN_CHAIN_ID === sepolia.id ||
+                    NEXTGEN_CHAIN_ID === goerli.id
+                      ? `testnets.opensea`
+                      : `opensea`
+                  }.io/assets/${
+                    NEXTGEN_CHAIN_ID === sepolia.id
+                      ? `sepolia`
+                      : NEXTGEN_CHAIN_ID === goerli.id
+                      ? `goerli`
+                      : `ethereum`
+                  }/${NEXTGEN_CORE[NEXTGEN_CHAIN_ID]}/${props.token.id}`}
+                  target="_blank"
+                  rel="noreferrer">
+                  <Image
+                    className={styles.marketplace}
+                    src="/opensea.png"
+                    alt="opensea"
+                    width={28}
+                    height={28}
+                  />
+                </a>
+              </Tippy>
             </span>
           </span>
         </Col>
       </Row>
     </Container>
+  );
+}
+
+export function TraitScore(
+  props: Readonly<{
+    trait: string;
+    score: number;
+    rank: number;
+    places?: number;
+  }>
+) {
+  return (
+    <span className="d-flex flex-column">
+      <span className="font-color-h">{props.trait}</span>
+      <span className="d-flex gap-2">
+        <span>
+          {Number(props.score.toFixed(props.places ?? 2)).toLocaleString()}
+        </span>
+        <span>#{props.rank.toLocaleString()}</span>
+      </span>
+    </span>
   );
 }

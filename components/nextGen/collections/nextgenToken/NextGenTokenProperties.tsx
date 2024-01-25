@@ -5,6 +5,8 @@ import { NextGenTrait } from "../../../../entities/INextgen";
 import { useEffect, useState } from "react";
 import { commonApiFetch } from "../../../../services/api/common-api";
 import Toggle from "react-toggle";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import Tippy from "@tippyjs/react";
 
 interface Props {
   collection_id: number;
@@ -35,7 +37,19 @@ export default function NextgenTokenProperties(props: Readonly<Props>) {
                 setShowNormalised(!showNormalised);
               }}
             />
-            <span>Normalized Score</span>
+            <span className="d-flex gap-2 align-items-center">
+              Trait Normalization
+              <Tippy
+                content={
+                  "This extends past the basic scoring formula. By normalizing in line with each method's aggregation approach, it ensures the scores are more relevant and fair across different traits."
+                }
+                placement={"top"}
+                theme={"light"}>
+                <FontAwesomeIcon
+                  style={{ height: "20px", cursor: "help" }}
+                  icon="info-circle"></FontAwesomeIcon>
+              </Tippy>
+            </span>
           </span>
         </Col>
       </Row>

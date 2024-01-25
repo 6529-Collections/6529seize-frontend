@@ -1,30 +1,39 @@
 import Head from "next/head";
-import styles from "../../../styles/Home.module.scss";
+import styles from "../../../../../styles/Home.module.scss";
 
 import dynamic from "next/dynamic";
-import HeaderPlaceholder from "../../../components/header/HeaderPlaceholder";
-import Breadcrumb from "../../../components/breadcrumb/Breadcrumb";
-import { fetchUrl } from "../../../services/6529api";
-import { NextGenCollection, NextGenToken } from "../../../entities/INextgen";
-import { isEmptyObject } from "../../../helpers/Helpers";
-import { getCommonHeaders } from "../../../helpers/server.helpers";
-import { commonApiFetch } from "../../../services/api/common-api";
+import HeaderPlaceholder from "../../../../../components/header/HeaderPlaceholder";
+import Breadcrumb from "../../../../../components/breadcrumb/Breadcrumb";
+import {
+  NextGenCollection,
+  NextGenToken,
+} from "../../../../../entities/INextgen";
+import { isEmptyObject } from "../../../../../helpers/Helpers";
+import { getCommonHeaders } from "../../../../../helpers/server.helpers";
+import { commonApiFetch } from "../../../../../services/api/common-api";
+import { ContentView } from "../../../../../components/nextGen/collections/collectionParts/NextGenCollection";
 
-const Header = dynamic(() => import("../../../components/header/Header"), {
-  ssr: false,
-  loading: () => <HeaderPlaceholder />,
-});
+const Header = dynamic(
+  () => import("../../../../../components/header/Header"),
+  {
+    ssr: false,
+    loading: () => <HeaderPlaceholder />,
+  }
+);
 
 const NextGenTokenComponent = dynamic(
   () =>
-    import("../../../components/nextGen/collections/nextgenToken/NextGenToken"),
+    import(
+      "../../../../../components/nextGen/collections/nextgenToken/NextGenToken"
+    ),
   {
     ssr: false,
   }
 );
 
 const NextGenTokenOnChainComponent = dynamic(
-  () => import("../../../components/nextGen/collections/NextGenTokenOnChain"),
+  () =>
+    import("../../../../../components/nextGen/collections/NextGenTokenOnChain"),
   {
     ssr: false,
   }
@@ -36,6 +45,7 @@ export default function NextGenCollectionToken(props: any) {
   const collection: NextGenCollection = props.pageProps.collection;
   const pagenameFull = token?.name ?? `${collection.name} - #${tokenId}`;
   const pageImage = token?.image_url ?? collection.image;
+  const tokenView = props.pageProps.view;
 
   const breadcrumbs = [
     { display: "Home", href: "/" },
@@ -75,7 +85,11 @@ export default function NextGenCollectionToken(props: any) {
         <Header />
         <Breadcrumb breadcrumbs={breadcrumbs} />
         {token ? (
-          <NextGenTokenComponent collection={collection} token={token} />
+          <NextGenTokenComponent
+            collection={collection}
+            token={token}
+            view={tokenView}
+          />
         ) : (
           <NextGenTokenOnChainComponent
             collection={collection}
@@ -113,6 +127,17 @@ export async function getServerSideProps(req: any, res: any, resolvedUrl: any) {
     headers: headers,
   });
 
+  let view = req.query.view as string;
+  let tokenView: ContentView | null = null;
+  if (view) {
+    view = view[0].toLowerCase();
+    if (view === ContentView.TRAITS.toLowerCase()) {
+      tokenView = ContentView.TRAITS;
+    } else if (view == ContentView.PROVENANCE.toLowerCase()) {
+      tokenView = ContentView.PROVENANCE;
+    }
+  }
+
   if (isEmptyObject(collection)) {
     return {
       redirect: {
@@ -128,6 +153,7 @@ export async function getServerSideProps(req: any, res: any, resolvedUrl: any) {
       token_id: tokenId,
       token: token,
       collection: collection,
+      view: tokenView,
     },
   };
 }

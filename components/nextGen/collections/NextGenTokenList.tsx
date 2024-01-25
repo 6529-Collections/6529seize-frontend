@@ -9,10 +9,14 @@ import { useEffect, useState } from "react";
 import Pagination from "../../pagination/Pagination";
 import { commonApiFetch } from "../../../services/api/common-api";
 import DotLoader from "../../dotLoader/DotLoader";
+import { NextGenListFilters } from "../nextgen_helpers";
+import { SortDirection } from "../../../entities/ISort";
 
 interface Props {
   collection: NextGenCollection;
   limit?: number;
+  sort?: NextGenListFilters;
+  sort_direction?: SortDirection;
   selected_traits?: TraitValuePair[];
   setTotalResults?: (totalResults: number) => void;
 }
@@ -33,6 +37,12 @@ export default function NextGenTokenList(props: Readonly<Props>) {
         .map((t) => `${t.trait}:${t.value}`)
         .join(",");
       endpoint += `&traits=${encodeURIComponent(traitsQ)}`;
+    }
+    if (props.sort) {
+      endpoint += `&sort=${props.sort.replaceAll(" ", "_").toLowerCase()}`;
+    }
+    if (props.sort_direction) {
+      endpoint += `&sort_direction=${props.sort_direction.toLowerCase()}`;
     }
     commonApiFetch<{
       count: number;
@@ -57,7 +67,7 @@ export default function NextGenTokenList(props: Readonly<Props>) {
     } else {
       setPage(1);
     }
-  }, [props.selected_traits]);
+  }, [props.selected_traits, props.sort, props.sort_direction]);
 
   useEffect(() => {
     fetchResults(page);
@@ -66,26 +76,38 @@ export default function NextGenTokenList(props: Readonly<Props>) {
   return (
     <Container className="no-padding">
       <Row>
-        {tokensLoaded ? (
-          tokens.length > 0 ? (
-            tokens.map((t) => (
-              <Col
-                xs={6}
-                sm={4}
-                md={4}
-                key={`collection-${props.collection.id}-token-list-${t.id}`}
-                className="pt-2 pb-2">
-                <NextGenTokenImage token={t} />
+        {(() => {
+          if (tokensLoaded) {
+            if (tokens.length > 0) {
+              return tokens.map((t) => (
+                <Col
+                  xs={6}
+                  sm={4}
+                  md={4}
+                  key={`collection-${props.collection.id}-token-list-${t.id}`}
+                  className="pt-2 pb-2">
+                  <NextGenTokenImage
+                    token={t}
+                    show_rarity_score={
+                      props.sort === NextGenListFilters.RARITY_SCORE
+                    }
+                    show_statistical_score={
+                      props.sort === NextGenListFilters.STATISTICAL_SCORE
+                    }
+                  />
+                </Col>
+              ));
+            } else {
+              return <Col className="pt-2 pb-2">No results found</Col>;
+            }
+          } else {
+            return (
+              <Col className="pt-2 pb-2">
+                <DotLoader />
               </Col>
-            ))
-          ) : (
-            <Col className="pt-2 pb-2">No results found</Col>
-          )
-        ) : (
-          <Col className="pt-2 pb-2">
-            <DotLoader />
-          </Col>
-        )}
+            );
+          }
+        })()}
       </Row>
       {totalResults > pageSize && tokensLoaded && (
         <Row className="text-center pt-4 pb-4">

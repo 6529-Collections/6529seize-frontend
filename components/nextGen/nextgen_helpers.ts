@@ -582,3 +582,9 @@ export function useCollectionMintCount(collectionId: number) {
     args: [collectionId],
   });
 }
+
+export enum NextGenListFilters {
+  ID = "ID",
+  RARITY_SCORE = "Rarity Score",
+  STATISTICAL_SCORE = "Statistical Score",
+}

@@ -1,5 +1,12 @@
 import styles from "../NextGen.module.scss";
-import { Container, Row, Col, Accordion, Form } from "react-bootstrap";
+import {
+  Container,
+  Row,
+  Col,
+  Accordion,
+  Form,
+  Dropdown,
+} from "react-bootstrap";
 import NextGenTokenList from "../NextGenTokenList";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -12,6 +19,8 @@ import { commonApiFetch } from "../../../../services/api/common-api";
 import { useRouter } from "next/router";
 import DotLoader from "../../../dotLoader/DotLoader";
 import { areEqualAddresses } from "../../../../helpers/Helpers";
+import { SortDirection } from "../../../../entities/ISort";
+import { NextGenListFilters } from "../../nextgen_helpers";
 
 interface Props {
   collection: NextGenCollection;
@@ -28,33 +37,57 @@ export default function NextGenCollectionArt(props: Readonly<Props>) {
   >([]);
   const [totalResults, setTotalResults] = useState(0);
   const [totalResultsSet, setTotalResultsSet] = useState(false);
+  const [sortDir, setSortDir] = useState(
+    props.show_view_all ? SortDirection.ASC : SortDirection.DESC
+  );
+  const [sort, setSort] = useState(NextGenListFilters.ID);
+
+  function setTraitsQuery(q: string) {
+    if (q) {
+      const traitsQuery = router.query.traits as string;
+      const traitValues = traitsQuery.split(",");
+      const selectedTraits: TraitValuePair[] = [];
+      traitValues.forEach((tv) => {
+        const traitValue = tv.split(":");
+        const t = traitValue[0];
+        const v = traitValue[1];
+        if (
+          traits.some(
+            (tr) =>
+              areEqualAddresses(tr.trait, t) &&
+              tr.values.some((vl) => areEqualAddresses(vl, v))
+          )
+        ) {
+          selectedTraits.push({
+            trait: t,
+            value: v,
+          });
+        }
+      });
+      setSelectedTraitValues(selectedTraits);
+    } else {
+      setSelectedTraitValues([]);
+    }
+  }
 
   useEffect(() => {
     if (traitsLoaded && !routerLoaded) {
-      if (router.query.traits) {
-        const traitsQuery = router.query.traits as string;
-        const traitValues = traitsQuery.split(",");
-        const selectedTraits: TraitValuePair[] = [];
-        traitValues.forEach((tv) => {
-          const traitValue = tv.split(":");
-          const t = traitValue[0];
-          const v = traitValue[1];
-          if (
-            traits.some(
-              (tr) =>
-                areEqualAddresses(tr.trait, t) &&
-                tr.values.some((vl) => areEqualAddresses(vl, v))
-            )
-          ) {
-            selectedTraits.push({
-              trait: t,
-              value: v,
-            });
-          }
-        });
-        setSelectedTraitValues(selectedTraits);
-      } else {
-        setSelectedTraitValues([]);
+      setTraitsQuery(router.query.traits as string);
+      if (router.query.sort) {
+        const sortQuery = router.query.sort as string;
+        setSort(
+          NextGenListFilters[
+            sortQuery?.toUpperCase() as keyof typeof NextGenListFilters
+          ] || NextGenListFilters.ID
+        );
+      }
+      if (router.query.sort_direction) {
+        const sortDirQuery = router.query.sort_direction as string;
+        setSortDir(
+          SortDirection[
+            sortDirQuery?.toUpperCase() as keyof typeof SortDirection
+          ] || SortDirection.DESC
+        );
       }
       setRouterLoaded(true);
     }
@@ -71,26 +104,29 @@ export default function NextGenCollectionArt(props: Readonly<Props>) {
 
   useEffect(() => {
     if (!props.show_view_all && routerLoaded) {
+      let query = "";
+
       if (selectedTraitValues.length > 0) {
         const traitsQ = selectedTraitValues
           .map((t) => `${t.trait}:${t.value}`)
           .join(",");
-        router.push(
-          `/nextgen/collection/${props.collection.id}/art?traits=${traitsQ}`,
-          undefined,
-          { shallow: true }
-        );
-      } else {
-        router.push(
-          `/nextgen/collection/${props.collection.id}/art`,
-          undefined,
-          {
-            shallow: true,
-          }
-        );
+        query += `traits=${encodeURIComponent(traitsQ)}`;
       }
+      if (sort) {
+        query += `&sort=${sort.replaceAll(" ", "_").toLowerCase()}`;
+      }
+      if (sortDir) {
+        query += `&sort_direction=${sortDir.toLowerCase()}`;
+      }
+      router.push(
+        `/nextgen/collection/${props.collection.id}/art${
+          query ? `?${query}` : ""
+        }`,
+        undefined,
+        { shallow: true }
+      );
     }
-  }, [props.show_view_all, selectedTraitValues, routerLoaded]);
+  }, [routerLoaded, selectedTraitValues, sort, sortDir]);
 
   useEffect(() => {
     if (totalResultsSet) {
@@ -100,7 +136,7 @@ export default function NextGenCollectionArt(props: Readonly<Props>) {
 
   function getDefaultActiveKeys() {
     const activeKeys: string[] = [];
-    traits.map((t, index) => {
+    traits.forEach((t, index) => {
       if (selectedTraitValues.some((st) => st.trait === t.trait)) {
         activeKeys.push(index.toString());
       }
@@ -109,7 +145,7 @@ export default function NextGenCollectionArt(props: Readonly<Props>) {
   }
 
   return (
-    <Container className="no-padding">
+    <Container className="no-padding pt-4">
       <Row>
         <Col className="d-flex align-items-center justify-content-between">
           <h3 className="mb-0">
@@ -122,7 +158,7 @@ export default function NextGenCollectionArt(props: Readonly<Props>) {
               <DotLoader />
             )}
           </h3>
-          {props.show_view_all && (
+          {props.show_view_all ? (
             <a
               href={`/nextgen/collection/${props.collection.id}/art`}
               className={`d-flex align-items-center gap-2 decoration-none ${styles.viewAllTokens}`}>
@@ -134,6 +170,39 @@ export default function NextGenCollectionArt(props: Readonly<Props>) {
                 />
               </h5>
             </a>
+          ) : (
+            <span className="d-flex gap-2 align-items-center">
+              <Dropdown className={styles.rarityDropdown}>
+                <Dropdown.Toggle>Sort: {sort}</Dropdown.Toggle>
+                <Dropdown.Menu>
+                  {Object.values(NextGenListFilters).map((lf) => (
+                    <Dropdown.Item
+                      key={`sort-${lf}`}
+                      onClick={() => setSort(lf)}>
+                      {lf}
+                    </Dropdown.Item>
+                  ))}
+                </Dropdown.Menu>
+              </Dropdown>
+              <FontAwesomeIcon
+                icon="chevron-circle-up"
+                style={{
+                  cursor: "pointer",
+                  height: "22px",
+                  color: sortDir === SortDirection.ASC ? "white" : "#9a9a9a",
+                }}
+                onClick={() => setSortDir(SortDirection.ASC)}
+              />
+              <FontAwesomeIcon
+                icon="chevron-circle-down"
+                style={{
+                  cursor: "pointer",
+                  height: "22px",
+                  color: sortDir === SortDirection.DESC ? "white" : "#9a9a9a",
+                }}
+                onClick={() => setSortDir(SortDirection.DESC)}
+              />
+            </span>
           )}
         </Col>
       </Row>
@@ -157,11 +226,11 @@ export default function NextGenCollectionArt(props: Readonly<Props>) {
                     )}
                   </span>
                   {selectedTraitValues.length > 0 && (
-                    <span
-                      className="font-cmaller cursor-pointer decoration-hover-underline"
+                    <button
+                      className="btn-link font-cmaller cursor-pointer decoration-hover-underline"
                       onClick={() => setSelectedTraitValues([])}>
                       Clear
-                    </span>
+                    </button>
                   )}
                 </Col>
               </Row>
@@ -242,6 +311,8 @@ export default function NextGenCollectionArt(props: Readonly<Props>) {
             <NextGenTokenList
               limit={props.show_view_all ? 6 : undefined}
               collection={props.collection}
+              sort={sort}
+              sort_direction={sortDir}
               selected_traits={selectedTraitValues}
               setTotalResults={(totalResults: number) => {
                 setTotalResults(totalResults);

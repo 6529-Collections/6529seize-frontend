@@ -14,9 +14,9 @@ interface Props {
 }
 
 export enum ContentView {
-  ABOUT,
-  TRAITS,
-  PROVENANCE,
+  ABOUT = "About",
+  TRAITS = "Traits",
+  PROVENANCE = "Provenance",
 }
 
 export default function NextGenCollection(props: Readonly<Props>) {

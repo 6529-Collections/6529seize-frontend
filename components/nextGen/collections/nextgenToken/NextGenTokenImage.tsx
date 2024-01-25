@@ -1,5 +1,6 @@
 import Image from "next/image";
 import { NextGenToken } from "../../../../entities/INextgen";
+import { TraitScore } from "./NextGenTokenAbout";
 
 export function NextGenTokenImage(
   props: Readonly<{
@@ -9,28 +10,50 @@ export function NextGenTokenImage(
     show_animation?: boolean;
     live?: boolean;
     is_fullscreen?: boolean;
+    show_rarity_score?: boolean;
+    show_statistical_score?: boolean;
   }>
 ) {
   function getImage() {
     return (
-      <span className="d-flex flex-column align-items-center">
-        <Image
-          priority
-          loading={"eager"}
-          width="0"
-          height="0"
-          style={{
-            height: "auto",
-            width: "auto",
-            maxHeight: "100%",
-            maxWidth: "100%",
-            padding: "10px",
-          }}
-          src={props.token.image_url}
-          alt={props.token.name}
-        />
-        {!props.hide_info && <span>#{props.token.normalised_id}</span>}
-      </span>
+      <>
+        <span className="d-flex flex-column align-items-center">
+          <Image
+            priority
+            loading={"eager"}
+            width="0"
+            height="0"
+            style={{
+              height: "auto",
+              width: "auto",
+              maxHeight: "100%",
+              maxWidth: "100%",
+              padding: "10px",
+            }}
+            src={props.token.image_url}
+            alt={props.token.name}
+          />
+        </span>
+        {!props.hide_info && (
+          <span className="d-flex justify-content-around align-items-center">
+            <span>#{props.token.normalised_id}</span>
+            {props.show_rarity_score && (
+              <TraitScore
+                trait="Rarity Score"
+                score={props.token.rarity_score}
+                rank={props.token.rarity_score_rank}
+              />
+            )}
+            {props.show_statistical_score && (
+              <TraitScore
+                trait="Statistical Score"
+                score={props.token.statistical_score}
+                rank={props.token.statistical_score_rank}
+              />
+            )}
+          </span>
+        )}
+      </>
     );
   }
 

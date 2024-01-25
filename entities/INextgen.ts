@@ -38,8 +38,13 @@ export interface NextGenToken {
   generator_url: string;
   owner: string;
   pending: boolean;
+  burnt: boolean;
   rarity_score: number;
   rarity_score_normalised: number;
+  statistical_score: number;
+  rarity_score_rank: number;
+  rarity_score_normalised_rank: number;
+  statistical_score_rank: number;
 }
 
 export interface NextGenLog {

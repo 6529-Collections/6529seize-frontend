@@ -404,3 +404,19 @@
   color: $font-color;
   background-color: $very-dark-grey !important;
 }
+
+.rarityDropdown {
+  button {
+    padding: 6px 20px;
+    background-color: transparent !important;
+    border: none !important;
+
+    &:hover {
+      color: $font-color-h;
+    }
+  }
+
+  div {
+    width: 100%;
+  }
+}

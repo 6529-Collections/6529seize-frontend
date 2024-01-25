@@ -4,17 +4,36 @@ import { NextGenCollection, NextGenToken } from "../../../../entities/INextgen";
 import NextGenTokenProvenance from "./NextGenTokenProvenance";
 import NextgenTokenProperties from "./NextGenTokenProperties";
 import NextGenTokenAbout from "./NextGenTokenAbout";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import NextGenTokenArt from "./NextGenTokenArt";
 import { ContentView } from "../collectionParts/NextGenCollection";
+import { isNullAddress } from "../../../../helpers/Helpers";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import router, { useRouter } from "next/router";
 
 interface Props {
   collection: NextGenCollection;
   token: NextGenToken;
+  view: ContentView;
 }
 
 export default function NextGenToken(props: Readonly<Props>) {
-  const [view, setView] = useState<ContentView>(ContentView.ABOUT);
+  const router = useRouter();
+
+  const [view, setView] = useState<ContentView>(
+    props.view ?? ContentView.ABOUT
+  );
+
+  useEffect(() => {
+    const basePath = `/nextgen/token/${props.token.id}`;
+    if (view && view !== ContentView.ABOUT) {
+      router.push(`${basePath}/${view.toLowerCase()}`, undefined, {
+        shallow: true,
+      });
+    } else {
+      router.push(basePath, undefined, { shallow: true });
+    }
+  }, [view]);
 
   function printDetails() {
     return (
@@ -104,6 +123,13 @@ export default function NextGenToken(props: Readonly<Props>) {
                 <Row className="pb-4">
                   <Col className="d-flex align-items-center justify-content-between">
                     <h2 className="mb-0">{props.token.name}</h2>
+                    {(props.token.burnt ||
+                      isNullAddress(props.token.owner)) && (
+                      <FontAwesomeIcon
+                        icon="fire"
+                        style={{ height: "35px", color: "#c51d34" }}
+                      />
+                    )}
                   </Col>
                 </Row>
               </Container>
