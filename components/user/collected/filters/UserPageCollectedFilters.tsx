@@ -41,8 +41,8 @@ export default function UserPageCollectedFilters({
   }, [filters.collection]);
 
   return (
-    <div className="tw-w-full tw-inline-flex tw-justify-between tw-space-x-2">
-      <div className="tw-inline-flex tw-w-full tw-space-x-2">
+    <div className="tw-w-full tw-inline-flex tw-justify-between tw-space-x-4">
+      <div className="tw-inline-flex tw-w-full tw-space-x-4">
         <UserPageCollectedFiltersCollection
           selected={filters.collection}
           setSelected={setCollection}

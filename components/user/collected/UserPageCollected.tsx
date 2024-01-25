@@ -308,7 +308,7 @@ export default function UserPageCollected({
         setSzn={setSzn}
       />
 
-      <div>
+      <div className="tw-mt-6 lg:tw-mt-8">
         {data?.data.length ? (
           <div className="tw-flow-root">
             <UserPageCollectedCards cards={data.data} />
@@ -317,7 +317,7 @@ export default function UserPageCollected({
                 currentPage={filters.page}
                 setCurrentPage={setPage}
                 totalPages={totalPages}
-                small={true}
+                small={false}
                 loading={false}
               />
             )}
