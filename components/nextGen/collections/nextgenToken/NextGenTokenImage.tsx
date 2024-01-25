@@ -29,11 +29,7 @@ export function NextGenTokenImage(
           src={props.token.image_url}
           alt={props.token.name}
         />
-        {!props.hide_info && (
-          <>
-            <span>#{props.token.normalised_id}</span>
-          </>
-        )}
+        {!props.hide_info && <span>#{props.token.normalised_id}</span>}
       </span>
     );
   }

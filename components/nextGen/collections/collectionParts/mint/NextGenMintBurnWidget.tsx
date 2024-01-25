@@ -80,14 +80,6 @@ export default function NextGenMintBurnWidget(props: Readonly<Props>) {
     setErrors,
   } = useMintSharedState();
 
-  useEffect(() => {
-    if (props.delegators.length > 0) {
-      setMintForAddress(props.delegators[0]);
-    } else {
-      setMintForAddress(undefined);
-    }
-  }, [props.delegators]);
-
   const [tokensOwnedForBurnAddressLoaded, setTokensOwnedForBurnAddressLoaded] =
     useState(false);
   const [tokensOwnedForBurnAddress, setTokensOwnedForBurnAddress] = useState<
@@ -140,6 +132,13 @@ export default function NextGenMintBurnWidget(props: Readonly<Props>) {
   }, [mintingForDelegator, mintForAddress]);
 
   useEffect(() => {
+    if (mintingForDelegator) {
+      if (!mintForAddress) {
+        setMintForAddress(props.delegators[0]);
+      }
+    } else {
+      setMintForAddress(undefined);
+    }
     props.mintingForDelegator(mintingForDelegator);
   }, [mintingForDelegator]);
 
