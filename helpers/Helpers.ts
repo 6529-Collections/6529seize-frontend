@@ -4,7 +4,7 @@ import {
   MEMELAB_CONTRACT,
   MEMES_CONTRACT,
   NULL_ADDRESS,
-  NULL_ADDRESS_DEAD,
+  NULL_DEAD_ADDRESS,
 } from "../constants";
 import { BaseNFT, VolumeType } from "../entities/INFT";
 import { DateIntervalsSelection } from "../enums";
@@ -113,6 +113,11 @@ export function formatNumberWithCommas(x: number) {
   const formattedNumber =
     formattedInteger + (parts.length > 1 ? "." + parts[1] : "");
   return isNegative ? `-${formattedNumber}` : formattedNumber;
+}
+
+export function formatNumberWithCommasOrDash(x: number): string {
+  if (x === null || isNaN(x) || x === 0) return "-";
+  return formatNumberWithCommas(x);
 }
 
 export function getDateDisplay(date: Date) {
@@ -609,7 +614,7 @@ export function isNullAddress(address: string) {
   if (areEqualAddresses(address, NULL_ADDRESS)) {
     return true;
   }
-  if (areEqualAddresses(address, NULL_ADDRESS_DEAD)) {
+  if (areEqualAddresses(address, NULL_DEAD_ADDRESS)) {
     return true;
   }
   return false;

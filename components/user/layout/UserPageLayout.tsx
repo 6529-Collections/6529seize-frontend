@@ -102,10 +102,11 @@ export default function UserPageLayout({
   const [isLoadingTabData, setIsLoadingTabData] = useState(false);
 
   useEffect(() => {
-    const handleStart = (toPath: string) => {
+    const handleStart = (toPath: string, options: { shallow: boolean }) => {
       const toUser = toPath.split("/")[1].toLowerCase();
       setIsLoadingTabData(
-        toUser.toLowerCase() === (router.query.user as string).toLowerCase()
+        toUser.toLowerCase() === (router.query.user as string).toLowerCase() &&
+          !options.shallow
       );
     };
 
