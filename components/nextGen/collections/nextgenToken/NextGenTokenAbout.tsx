@@ -46,23 +46,37 @@ export default function NextgenTokenAbout(props: Readonly<Props>) {
   return (
     <Container className="no-padding">
       <Row>
-        <Col xs={12} className="pt-1 pb-1 d-flex flex-column">
+        <Col xs={6} sm={4} md={3} className="pt-1 pb-1 d-flex gap-5">
+          <span className="d-flex flex-column">
+            <span className="font-color-h">Rarity Score</span>
+            <span>
+              {Number(props.token.rarity_score.toFixed(2)).toLocaleString()}
+            </span>
+          </span>
+          <span className="d-flex flex-column">
+            <span className="font-color-h">Rank</span>
+            <span>
+              #{Number(props.token.rarity_score.toFixed(2)).toLocaleString()}
+            </span>
+          </span>
+        </Col>
+        <Col xs={6} sm={4} md={3} className="pt-1 pb-1 d-flex flex-column">
           <span className="font-color-h">Token ID</span>
           <span>#{props.token.id}</span>
         </Col>
-        <Col xs={12} className="pt-1 pb-1 d-flex flex-column">
+        <Col xs={6} sm={4} md={3} className="pt-1 pb-1 d-flex flex-column">
           <span className="font-color-h">Collection</span>
           <a href={`/nextgen/collection/${props.collection.id}`}>
             #{props.collection.id} {props.collection.name}
           </a>
         </Col>
-        <Col xs={12} className="pt-1 pb-1 d-flex flex-column">
+        <Col xs={6} sm={4} md={3} className="pt-1 pb-1 d-flex flex-column">
           <span className="font-color-h">Artist</span>
           <a href={`/${props.collection.artist_address}`}>
             {props.collection.artist}
           </a>
         </Col>
-        <Col xs={12} className="pt-1 pb-1 d-flex flex-column">
+        <Col xs={6} sm={4} md={3} className="pt-1 pb-1 d-flex flex-column">
           <span className="font-color-h">Owner</span>
           <span className="d-flex">
             <Address
@@ -74,7 +88,7 @@ export default function NextgenTokenAbout(props: Readonly<Props>) {
             )}
           </span>
         </Col>
-        <Col xs={12} className="pt-1 pb-1 d-flex flex-column">
+        <Col xs={6} sm={4} md={3} className="pt-1 pb-1 d-flex flex-column">
           <span className="font-color-h">Metadata</span>
           <span className="d-flex align-items-center gap-1">
             <span>{props.collection.on_chain ? "On-Chain" : "Off-Chain"}</span>
@@ -85,11 +99,11 @@ export default function NextgenTokenAbout(props: Readonly<Props>) {
             </a>
           </span>
         </Col>
-        <Col xs={12} className="pt-1 pb-1 d-flex flex-column">
+        <Col xs={6} sm={4} md={3} className="pt-1 pb-1 d-flex flex-column">
           <span className="font-color-h">License</span>
           <span>{props.collection.licence}</span>
         </Col>
-        <Col xs={12} className="pt-1 pb-1 d-flex flex-column">
+        <Col xs={6} sm={4} md={3} className="pt-1 pb-1 d-flex flex-column">
           <span className="font-color-h">Marketplaces</span>
           <span className="d-flex align-items-center gap-1 pt-1">
             <span>

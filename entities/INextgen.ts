@@ -38,6 +38,8 @@ export interface NextGenToken {
   generator_url: string;
   owner: string;
   pending: boolean;
+  rarity_score: number;
+  rarity_score_normalised: number;
 }
 
 export interface NextGenLog {
@@ -57,9 +59,12 @@ export interface NextGenTrait {
   token_id: number;
   collection_id: number;
   trait: string;
-  trait_score: number;
   value: string;
-  value_score: number;
+  rarity: number;
+  rarity_score: number;
+  rarity_score_normalised: number;
+  token_count: number;
+  trait_count: number;
 }
 
 export interface TraitValues {

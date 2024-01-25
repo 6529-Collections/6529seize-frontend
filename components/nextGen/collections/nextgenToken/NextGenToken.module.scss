@@ -75,3 +75,12 @@
   cursor: pointer;
   transition: transform 0.2s;
 }
+
+.traitDiv {
+  background-color: rgb(23, 22, 28);
+  transition: transform 0.3s ease;
+
+  &:hover {
+    transform: scale(1.015);
+  }
+}

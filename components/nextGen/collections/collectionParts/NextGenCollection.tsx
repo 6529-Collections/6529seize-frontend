@@ -15,6 +15,7 @@ interface Props {
 
 export enum ContentView {
   ABOUT,
+  TRAITS,
   PROVENANCE,
 }
 

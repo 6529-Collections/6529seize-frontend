@@ -1,9 +1,10 @@
-import styles from "../NextGen.module.scss";
+import styles from "./NextGenToken.module.scss";
 
 import { Col, Container, Row, Table } from "react-bootstrap";
 import { NextGenTrait } from "../../../../entities/INextgen";
 import { useEffect, useState } from "react";
 import { commonApiFetch } from "../../../../services/api/common-api";
+import Toggle from "react-toggle";
 
 interface Props {
   collection_id: number;
@@ -12,6 +13,7 @@ interface Props {
 
 export default function NextgenTokenProperties(props: Readonly<Props>) {
   const [traits, setTraits] = useState<NextGenTrait[]>([]);
+  const [showNormalised, setShowNormalised] = useState(false);
 
   useEffect(() => {
     commonApiFetch<NextGenTrait[]>({
@@ -24,33 +26,58 @@ export default function NextgenTokenProperties(props: Readonly<Props>) {
   return (
     <Container className="no-padding">
       <Row>
-        <Col>
-          <h5>Traits</h5>
+        <Col className="d-flex justify-content-end align-items-center">
+          {/* <h5>Traits</h5> */}
+          <span className="d-flex align-items-center gap-2">
+            <Toggle
+              checked={showNormalised}
+              onChange={() => {
+                setShowNormalised(!showNormalised);
+              }}
+            />
+            <span>Normalized Score</span>
+          </span>
         </Col>
       </Row>
-      <Row>
-        <Col>
-          <Table bordered={false}>
-            <tbody>
-              {traits.map((t) => (
-                <tr
-                  key={`trait-${t.trait.replaceAll(" ", "-")}`}
-                  className="decoration-hover-underline cursor-pointer"
-                  onClick={() =>
-                    (window.location.href = `/nextgen/collection/${props.collection_id}/art?traits=${t.trait}:${t.value}`)
-                  }>
-                  <td className="pt-1 pb-1">{t.trait}</td>
-                  <td className="pt-1 pb-1 d-flex gap-2">
-                    <b>{t.value}</b>
-                    <span className="font-color-h">
-                      {t.value_score}/{t.trait_score}
+      <Row className="pt-2 pb-5">
+        {traits.map((t) => (
+          <Col
+            xs={12}
+            md={6}
+            key={`trait-${t.trait.replaceAll(" ", "-")}`}
+            className="pt-1 pb-1">
+            <a
+              className="decoration-none"
+              href={`/nextgen/collection/${props.collection_id}/art?traits=${t.trait}:${t.value}`}>
+              <Container className={styles.traitDiv}>
+                <Row className="pt-2 pb-2">
+                  <Col xs={6} className="d-flex flex-column">
+                    <span>{t.trait}</span>
+                    <span>{t.value}</span>
+                  </Col>
+                  <Col
+                    xs={3}
+                    className="d-flex flex-column align-items-center justify-content-center">
+                    <span className="font-smaller font-color-h">Score</span>
+                    <span>
+                      {Number(
+                        showNormalised
+                          ? t.rarity_score_normalised.toFixed(2)
+                          : t.rarity_score.toFixed(2)
+                      ).toLocaleString()}
                     </span>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </Table>
-        </Col>
+                  </Col>
+                  <Col
+                    xs={3}
+                    className="d-flex flex-column align-items-center justify-content-center">
+                    <span className="font-smaller font-color-h">Rarity</span>
+                    <span>{Number(t.rarity.toFixed(2)).toLocaleString()}%</span>
+                  </Col>
+                </Row>
+              </Container>
+            </a>
+          </Col>
+        ))}
       </Row>
     </Container>
   );
