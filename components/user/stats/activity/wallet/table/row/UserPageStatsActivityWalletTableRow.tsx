@@ -16,6 +16,9 @@ import UserPageStatsActivityWalletTableRowMainAddress from "./UserPageStatsActiv
 import { MemeLite } from "../../../../../settings/UserSettingsImgSelectMeme";
 import UserPageStatsActivityWalletTableRowSecondAddress from "./UserPageStatsActivityWalletTableRowSecondAddress";
 import Link from "next/link";
+import EtherscanIcon from "../../../../../utils/icons/EtherscanIcon";
+import UserPageStatsActivityWalletTableRowRoyalties from "./UserPageStatsActivityWalletTableRowRoyalties";
+import UserPageStatsActivityWalletTableRowGas from "./UserPageStatsActivityWalletTableRowGas";
 
 export enum TransactionType {
   AIRDROP = "AIRDROP",
@@ -46,6 +49,32 @@ export default function UserPageStatsActivityWalletTableRow({
   readonly profile: IProfileAndConsolidations;
   readonly memes: MemeLite[];
 }) {
+  const getShowRoyalties = (): boolean => {
+    if (!transaction.value) {
+      return false;
+    }
+
+    if (areEqualAddresses(transaction.from_address, NULL_ADDRESS)) {
+      return false;
+    }
+
+    if (areEqualAddresses(transaction.from_address, NULL_DEAD_ADDRESS)) {
+      return false;
+    }
+
+    if (areEqualAddresses(transaction.from_address, MANIFOLD)) {
+      return false;
+    }
+
+    if (!transaction.royalties) {
+      return false;
+    }
+
+    return true;
+  };
+
+  const showRoyalties = getShowRoyalties();
+
   const [consolidatedAddresses, setConsolidatedAddresses] = useState<string[]>(
     profile.consolidation.wallets.map((w) => w.wallet.address.toLowerCase())
   );
@@ -127,7 +156,7 @@ export default function UserPageStatsActivityWalletTableRow({
 
   return (
     <tr className="tw-flex tw-items-center tw-justify-between">
-      <td className="tw-py-2.5 tw-gap-x-1 tw-inline-flex tw-items-center">
+      <td className="tw-flex-1 tw-py-2.5 tw-gap-x-1 tw-inline-flex tw-items-center">
         <UserPageStatsActivityWalletTableRowIcon type={type} />
         <UserPageStatsActivityWalletTableRowMainAddress
           transaction={transaction}
@@ -190,7 +219,32 @@ export default function UserPageStatsActivityWalletTableRow({
           </div>
         )}
       </td>
-      <td className="tw-py-2.5 tw-pl-3 tw-text-right">
+      <td className="tw-py-2.5 sm:tw-w-36 tw-h-full tw-flex tw-items-center tw-justify-end tw-text-right tw-px-6 sm:tw-px-4">
+        {showRoyalties && (
+          <UserPageStatsActivityWalletTableRowRoyalties
+            transactionValue={transaction.value}
+            royalties={transaction.royalties}
+          />
+        )}
+
+        <UserPageStatsActivityWalletTableRowGas
+          gas={transaction.gas}
+          gasGwei={transaction.gas_gwei}
+          gasPriceGwei={transaction.gas_price_gwei}
+        />
+
+        <a
+          href={`https://etherscan.io/tx/${transaction.transaction}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="tw-bg-transparent tw-border-none tw-h-10 tw-w-10 tw-flex tw-justify-center tw-items-center hover:tw-scale-110 tw-transition tw-duration-300 tw-ease-out"
+        >
+          <div className="tw-flex-shrink-0 tw-w-6 tw-h-6 sm:tw-w-5 sm:tw-h-5">
+            <EtherscanIcon />
+          </div>
+        </a>
+      </td>
+      <td className="tw-py-2.5 tw-w-24 tw-pl-6 sm:tw-pl-4 tw-text-right">
         <CommonTimeAgo
           timestamp={new Date(transaction.transaction_date).getTime()}
         />
