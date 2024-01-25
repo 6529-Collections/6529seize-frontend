@@ -17,6 +17,8 @@ import { useEffect, useState } from "react";
 import UserPageCollectedCards from "./cards/UserPageCollectedCards";
 import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
 import CommonTablePagination from "../../utils/CommonTablePagination";
+import { watchEvent } from "viem/_types/actions/public/watchEvent";
+import UserPageCollectedFirstLoading from "./UserPageCollectedFirstLoading";
 
 export interface ProfileCollectedFilters {
   readonly handleOrWallet: string;
@@ -245,9 +247,12 @@ export default function UserPageCollected({
   };
 
   useEffect(() => setFilters(getFilters()), [searchParams]);
-  useEffect(() => console.log(filters), [filters]);
 
-  const { isFetching, data } = useQuery<Page<CollectedCard>>({
+  const {
+    isFetching,
+    isLoading: isInitialLoading,
+    data,
+  } = useQuery<Page<CollectedCard>>({
     queryKey: [QueryKey.PROFILE_COLLECTED, filters],
     queryFn: async () => {
       const params: Record<string, string> = {
@@ -299,35 +304,28 @@ export default function UserPageCollected({
 
   return (
     <div className="tailwind-scope">
-      <UserPageCollectedFilters
-        profile={profile}
-        filters={filters}
-        setCollection={setCollection}
-        setSortBy={setSortBy}
-        setSeized={setSeized}
-        setSzn={setSzn}
-      />
-
-      <div className="tw-mt-6 lg:tw-mt-8">
-        {data?.data.length ? (
-          <div className="tw-flow-root">
-            <UserPageCollectedCards cards={data.data} />
-            {totalPages > 1 && (
-              <CommonTablePagination
-                currentPage={filters.page}
-                setCurrentPage={setPage}
-                totalPages={totalPages}
-                small={false}
-                loading={false}
-              />
-            )}
+      {isInitialLoading ? (
+        <UserPageCollectedFirstLoading />
+      ) : (
+        <>
+          <UserPageCollectedFilters
+            profile={profile}
+            filters={filters}
+            setCollection={setCollection}
+            setSortBy={setSortBy}
+            setSeized={setSeized}
+            setSzn={setSzn}
+          />
+          <div className="tw-mt-6 lg:tw-mt-8">
+            <UserPageCollectedCards
+              cards={data?.data ?? []}
+              totalPages={totalPages}
+              page={filters.page}
+              setPage={setPage}
+            />
           </div>
-        ) : (
-          <div className="tw-py-4 tw-px-4 sm:tw-px-6 tw-text-sm tw-italic tw-text-iron-500">
-            No cards found
-          </div>
-        )}
-      </div>
+        </>
+      )}
     </div>
   );
 }
