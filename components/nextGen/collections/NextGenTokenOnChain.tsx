@@ -13,6 +13,7 @@ import Address from "../../address/Address";
 import { areEqualAddresses } from "../../../helpers/Helpers";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { mainnet, sepolia, goerli } from "viem/chains";
+import { getOpenseaLink } from "../nextgen_helpers";
 
 interface Props {
   collection: NextGenCollection;
@@ -106,18 +107,7 @@ export default function NextGenTokenOnChain(props: Readonly<Props>) {
                     <h2>{tokenName}</h2>
                     <span className="d-flex gap-4">
                       <a
-                        href={`https://${
-                          NEXTGEN_CHAIN_ID === sepolia.id ||
-                          NEXTGEN_CHAIN_ID === goerli.id
-                            ? `testnets.opensea`
-                            : `opensea`
-                        }.io/assets/${
-                          NEXTGEN_CHAIN_ID === sepolia.id
-                            ? `sepolia`
-                            : NEXTGEN_CHAIN_ID === goerli.id
-                            ? `goerli`
-                            : `ethereum`
-                        }/${NEXTGEN_CORE[NEXTGEN_CHAIN_ID]}/${props.token_id}`}
+                        href={getOpenseaLink(NEXTGEN_CHAIN_ID, props.token_id)}
                         target="_blank"
                         rel="noreferrer">
                         <Image

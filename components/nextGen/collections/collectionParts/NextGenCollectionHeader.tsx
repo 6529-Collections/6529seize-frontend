@@ -15,6 +15,7 @@ import { fetchUrl } from "../../../../services/6529api";
 import DotLoader from "../../../dotLoader/DotLoader";
 import { NextGenCollection } from "../../../../entities/INextgen";
 import {
+  getOpenseaLink,
   getStatusFromDates,
   useCollectionMintCount,
 } from "../../nextgen_helpers";
@@ -242,18 +243,7 @@ export default function NextGenCollectionHeader(props: Readonly<Props>) {
                 window.open(url, "_blank");
               }}></FontAwesomeIcon>
             <a
-              href={`https://${
-                NEXTGEN_CHAIN_ID === sepolia.id ||
-                NEXTGEN_CHAIN_ID === goerli.id
-                  ? `testnets.opensea`
-                  : `opensea`
-              }.io/assets/${
-                NEXTGEN_CHAIN_ID === sepolia.id
-                  ? `sepolia`
-                  : NEXTGEN_CHAIN_ID === goerli.id
-                  ? `goerli`
-                  : `ethereum`
-              }/${NEXTGEN_CORE[NEXTGEN_CHAIN_ID]}`}
+              href={getOpenseaLink(NEXTGEN_CHAIN_ID)}
               target="_blank"
               rel="noreferrer">
               <Image

@@ -21,6 +21,7 @@ import {
 import { NEVER_DATE } from "../../constants";
 import { useState } from "react";
 import { Crumb } from "../breadcrumb/Breadcrumb";
+import { goerli, mainnet, sepolia } from "viem/chains";
 
 export function useGlobalAdmin(address: string) {
   return useContractRead({
@@ -587,4 +588,17 @@ export enum NextGenListFilters {
   ID = "ID",
   RARITY_SCORE = "Rarity Score",
   STATISTICAL_SCORE = "Statistical Score",
+}
+
+export function getOpenseaLink(chainId: number, tokenId?: number) {
+  const domain = chainId === mainnet.id ? "opensea" : "testnets.opensea";
+  let path = "ethereum";
+  if (chainId === sepolia.id) {
+    path = "sepolia";
+  } else if (chainId === goerli.id) {
+    path = "goerli";
+  }
+  return `https://${domain}.io/assets/${path}/${
+    NEXTGEN_CORE[NEXTGEN_CHAIN_ID]
+  }/${tokenId ?? ""}`;
 }

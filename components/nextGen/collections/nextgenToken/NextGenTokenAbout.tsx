@@ -12,8 +12,8 @@ import { commonApiFetch } from "../../../../services/api/common-api";
 import { goerli, sepolia } from "viem/chains";
 import { NEXTGEN_CHAIN_ID, NEXTGEN_CORE } from "../../nextgen_contracts";
 import Image from "next/image";
-import X2Y2Icon from "../../../user/utils/icons/X2Y2Icon";
 import Tippy from "@tippyjs/react";
+import { getOpenseaLink } from "../../nextgen_helpers";
 
 interface Props {
   collection: NextGenCollection;
@@ -127,18 +127,7 @@ export default function NextgenTokenAbout(props: Readonly<Props>) {
             <span>
               <Tippy content={"Opensea"} theme={"light"} delay={250}>
                 <a
-                  href={`https://${
-                    NEXTGEN_CHAIN_ID === sepolia.id ||
-                    NEXTGEN_CHAIN_ID === goerli.id
-                      ? `testnets.opensea`
-                      : `opensea`
-                  }.io/assets/${
-                    NEXTGEN_CHAIN_ID === sepolia.id
-                      ? `sepolia`
-                      : NEXTGEN_CHAIN_ID === goerli.id
-                      ? `goerli`
-                      : `ethereum`
-                  }/${NEXTGEN_CORE[NEXTGEN_CHAIN_ID]}/${props.token.id}`}
+                  href={getOpenseaLink(NEXTGEN_CHAIN_ID, props.token.id)}
                   target="_blank"
                   rel="noreferrer">
                   <Image
