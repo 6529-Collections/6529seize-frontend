@@ -9,106 +9,79 @@ export default function UserPageUpcoming({
   const router = useRouter();
   const slug = router.query.slug as string;
 
-  const people = [
-    {
-      name: "Leslie Alexander",
-      email: "leslie.alexander@example.com",
-      role: "Co-Founder / CEO",
-      imageUrl:
-        "https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80",
-      lastSeen: "3h ago",
-      lastSeenDateTime: "2023-01-23T13:23Z",
-    },
-    {
-      name: "Michael Foster",
-      email: "michael.foster@example.com",
-      role: "Co-Founder / CTO",
-      imageUrl:
-        "https://images.unsplash.com/photo-1519244703995-f4e0f30006d5?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80",
-      lastSeen: "3h ago",
-      lastSeenDateTime: "2023-01-23T13:23Z",
-    },
-    {
-      name: "Dries Vincent",
-      email: "dries.vincent@example.com",
-      role: "Business Relations",
-      imageUrl:
-        "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80",
-      lastSeen: null,
-    },
-    {
-      name: "Lindsay Walton",
-      email: "lindsay.walton@example.com",
-      role: "Front-end Developer",
-      imageUrl:
-        "https://images.unsplash.com/photo-1517841905240-472988babdf9?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80",
-      lastSeen: "3h ago",
-      lastSeenDateTime: "2023-01-23T13:23Z",
-    },
-    {
-      name: "Courtney Henry",
-      email: "courtney.henry@example.com",
-      role: "Designer",
-      imageUrl:
-        "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80",
-      lastSeen: "3h ago",
-      lastSeenDateTime: "2023-01-23T13:23Z",
-    },
-    {
-      name: "Tom Cook",
-      email: "tom.cook@example.com",
-      role: "Director of Product",
-      imageUrl:
-        "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80",
-      lastSeen: null,
-    },
-  ];
   return (
-    <ul role="list" className="tw-divide-y tw-divide-gray-800">
-      {people.map((person) => (
-        <li
-          key={person.email}
-          className="tw-flex tw-justify-between tw-gap-x-6 tw-py-5"
-        >
-          <div className="tw-flex tw-min-w-0 tw-gap-x-4">
-            <img
-              className="tw-h-12 tw-w-12 tw-flex-none tw-rounded-full tw-bg-gray-800"
-              src={person.imageUrl}
-              alt=""
-            />
-            <div className="tw-min-w-0 tw-flex-auto">
-              <p className="tw-text-sm tw-font-semibold tw-leading-6 tw-text-white">
-                {person.name}
-              </p>
-              <p className="tw-mt-1 tw-truncate tw-text-xs tw-leading-5 tw-text-gray-400">
-                {person.email}
-              </p>
-            </div>
+    <div className="tw-divide-y tw-divide-gray-800">
+      <div className="tw-flex">
+        <h2 className="tw-mb-1 tw-text-xl tw-font-semibold tw-text-iron-50 sm:tw-text-2xl sm:tw-tracking-tight">
+          NextGen - Pebbles
+        </h2>
+      </div>
+      <p className="tw-font-normal tw-text-iron-400 tw-text-sm sm:tw-text-base tw-mb-0">
+        Congratulations! You are eligible to mint Pebbles in
+        <span className="tw-pl-1 tw-font-semibold tw-text-iron-200">
+          Phase 0.
+        </span>
+      </p>
+      <div className="tw-mt-6 tw-flex tw-flex-col">
+        <span className="tw-text-lg tw-font-semibold tw-text-iron-50">
+          Phase 0
+        </span>
+        <div className="tw-mt-1 tw-flex tw-flex-col">
+          <span className="tw-text-iron-400 tw-text-base">Start Time:</span>
+          <span className="tw-text-iron-400 tw-text-base">End Time:</span>
+        </div>
+      </div>
+      <div className="tw-mt-6 tw-flex tw-flex-col">
+        <span className="tw-text-lg tw-font-semibold tw-text-iron-50">
+          Minting Page
+        </span>
+        <div className="tw-mt-1">
+          <a href="www.seize.io/nextgen/pebbles/mint" target="_blank">
+            Link title
+          </a>
+        </div>
+      </div>
+      <div className="tw-mt-6 tw-flex tw-flex-col">
+        <span className="tw-text-lg tw-font-semibold tw-text-iron-50">
+          Your Available Mints
+        </span>
+        <div className="tw-max-w-xs">
+          <div className="tw-mt-1 tw-flex tw-flex-col tw-gap-y-1">
+            <span className="tw-flex tw-justify-between tw-w-full">
+              <span className="tw-text-iron-400 tw-text-base">
+                Palettes: UltraMaxis
+              </span>
+              <span className="tw-text-iron-400 tw-text-base">1</span>
+            </span>
+            <span className="tw-flex tw-justify-between tw-w-full">
+              <span className="tw-text-iron-400 tw-text-base">
+                Palettes: HyperMaxis
+              </span>
+              <span className="tw-text-iron-400 tw-text-base">1</span>
+            </span>
+            <span className="tw-flex tw-justify-between tw-w-full">
+              <span className="tw-text-iron-400 tw-text-base">
+                Palettes: SetPEPE
+              </span>
+              <span className="tw-text-iron-400 tw-text-base">1</span>
+            </span>
+            <span className="tw-flex tw-justify-between tw-w-full">
+              <span className="tw-text-iron-400 tw-text-base">
+                Palettes: MemeMaxis
+              </span>
+              <span className="tw-text-iron-400 tw-text-base">3</span>
+            </span>
+            <span className="tw-pt-2 tw-mt-2 tw-flex tw-justify-between tw-w-full tw-border-t tw-border-solid tw-border-x-0 tw-border-b-0 tw-border-iron-700">
+              <span className="tw-text-iron-200 tw-text-base tw-font-medium">
+                Total
+              </span>
+              <span className="tw-text-iron-200 tw-text-base tw-font-medium">
+                6
+              </span>
+            </span>
           </div>
-          <div className="tw-hidden tw-shrink-0 tw-sm:flex tw-flex-col tw-items-end">
-            <p className="tw-text-sm tw-leading-6 tw-text-white">
-              {person.role}
-            </p>
-            {person.lastSeen ? (
-              <p className="tw-mt-1 tw-text-xs tw-leading-5 tw-text-gray-400">
-                Last seen{" "}
-                <time dateTime={person.lastSeenDateTime}>
-                  {person.lastSeen}
-                </time>
-              </p>
-            ) : (
-              <div className="tw-mt-1 tw-flex tw-items-center tw-gap-x-1.5">
-                <div className="tw-flex-none tw-rounded-full tw-bg-emerald-500/20 tw-p-1">
-                  <div className="tw-h-1.5 tw-w-1.5 tw-rounded-full tw-bg-emerald-500" />
-                </div>
-                <p className="tw-text-xs tw-leading-5 tw-text-gray-400">
-                  Online
-                </p>
-              </div>
-            )}
-          </div>
-        </li>
-      ))}
-    </ul>
+        </div>
+      </div>
+    </div>
   );
 }
