@@ -138,7 +138,7 @@ export function NextGenPhases(props: Readonly<PhaseProps>) {
     <span className="pt-2 pb-2 d-flex align-items-center gap-2 align-items-center">
       {/* {alStatus !== Status.UNAVAILABLE && ( */}
       <span
-        className={`font-bolder font-smaller ${
+        className={`d-flex align-items-center font-bolder font-smaller ${
           styles.nextgenTag
         } ${getAllowlistClassName()}`}>
         ALLOWLIST {alStatus}
@@ -146,7 +146,7 @@ export function NextGenPhases(props: Readonly<PhaseProps>) {
       {/* )} */}
       {/* {publicStatus !== Status.UNAVAILABLE && ( */}
       <span
-        className={`font-bolder font-smaller ${
+        className={`d-flex align-items-center font-bolder font-smaller ${
           styles.nextgenTag
         } ${getPublicStatusClassName()}`}>
         PUBLIC PHASE {publicStatus}

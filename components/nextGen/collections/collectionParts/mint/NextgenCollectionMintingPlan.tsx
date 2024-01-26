@@ -52,7 +52,9 @@ export default function NextgenCollectionMintingPlan(props: Readonly<Props>) {
     commonApiFetch<{
       data: NextgenAllowlist[];
     }>({
-      endpoint: `nextgen/allowlist_merkle/${selectedPhase?.merkle_root ?? ""}`,
+      endpoint: `nextgen/${props.collection.id}/allowlist_merkle/${
+        selectedPhase?.merkle_root ?? ""
+      }`,
     }).then((al) => {
       setAllowlist(al.data);
     });
