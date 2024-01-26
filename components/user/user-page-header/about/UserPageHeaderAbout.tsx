@@ -44,7 +44,7 @@ export default function UserPageHeaderAbout({
   };
 
   return (
-    <div className="tw-col-span-full">
+    <div>
       {view === AboutStatementView.STATEMENT && (
         <div className="tw-max-w-full lg:tw-max-w-prose tw-mt-4">
           <button

@@ -118,10 +118,10 @@ export default function UserPageHeaderAboutEdit({
   };
 
   return (
-    <div className="tw-w-full tw-flex tw-flex-col lg:tw-flex-row tw-gap-y-8 lg:tw-gap-x-16 lg:tw-justify-between tw-items-start">
+    <div className="tw-w-full tw-flex tw-flex-col-reverse lg:tw-flex-row tw-gap-y-4 lg:tw-gap-x-8 lg:tw-items-start">
       <form onSubmit={onSubmit}>
         <textarea
-          className="tw-form-input tw-appearance-none tw-block tw-w-full tw-rounded-lg tw-border-0 tw-py-3 tw-px-3 tw-bg-iron-900 tw-text-iron-50 tw-font-normal tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-700 placeholder:tw-text-iron-400 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 hover:tw-ring-iron-600 tw-text-base tw-transition tw-duration-300 tw-ease-out"
+          className="tw-form-input tw-appearance-none tw-block tw-w-full min-[1024px]:tw-max-w-md lg:tw-w-auto min-[1200px]:tw-max-w-none tw-rounded-lg tw-border-0 tw-py-3 tw-px-3 tw-bg-iron-900 tw-text-iron-50 tw-font-normal tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-700 placeholder:tw-text-iron-400 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 hover:tw-ring-iron-600 tw-text-base tw-transition tw-duration-300 tw-ease-out"
           name="profile-about"
           id="profile-about-input"
           cols={60}

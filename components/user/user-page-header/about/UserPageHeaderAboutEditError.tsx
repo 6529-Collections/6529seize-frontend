@@ -70,7 +70,29 @@ export default function UserPageHeaderAboutEditError({
       : ERROR_TEXT[errorType];
 
   return (
-    <div className="tw-w-full md:tw-w-auto tw-inline-flex tw-items-center tw-rounded-lg tw-bg-red/5 tw-border tw-border-solid tw-border-red/30 tw-p-4">
+    <div className="tw-relative tw-w-full lg:tw-max-w-xl tw-inline-flex tw-items-center tw-rounded-lg tw-bg-red/5 tw-border tw-border-solid tw-border-red/30 tw-p-4">
+      <div className="tw-absolute tw-right-2 tw-top-2">
+        <button
+          type="button"
+          className="tw-group tw-bg-transparent tw-border-none tw-inline-flex tw-rounded-md focus:tw-outline-none"
+        >
+          <span className="tw-sr-only">Close</span>
+          <svg
+            className="tw-w-6 tw-h-6 tw-text-iron-300 group-hover:tw-text-iron-400 tw-transition tw-duration-300 tw-ease-out"
+            viewBox="0 0 24 24"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M17 7L7 17M7 7L17 17"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+        </button>
+      </div>
       <div className="tw-flex">
         <svg
           className="tw-flex-shrink-0 tw-w-5 tw-h-5 tw-text-red"
