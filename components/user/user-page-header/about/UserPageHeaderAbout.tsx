@@ -44,9 +44,9 @@ export default function UserPageHeaderAbout({
   };
 
   return (
-    <div className="tw-col-span-full">
-      <div className="tw-max-w-full lg:tw-max-w-prose tw-mt-4">
-        {view === AboutStatementView.STATEMENT && (
+    <div>
+      {view === AboutStatementView.STATEMENT && (
+        <div className="tw-max-w-full lg:tw-max-w-prose tw-mt-4">
           <button
             onClick={onEditClick}
             disabled={!canEdit}
@@ -61,16 +61,18 @@ export default function UserPageHeaderAbout({
               </div>
             )}
           </button>
-        )}
+        </div>
+      )}
 
-        {view === AboutStatementView.EDIT && (
+      {view === AboutStatementView.EDIT && (
+        <div className="tw-max-w-full tw-mt-4">
           <UserPageHeaderAboutEdit
             profile={profile}
             statement={statement}
             onClose={() => setView(AboutStatementView.STATEMENT)}
           />
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 }
