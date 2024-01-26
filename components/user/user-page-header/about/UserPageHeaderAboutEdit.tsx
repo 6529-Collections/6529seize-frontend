@@ -186,7 +186,12 @@ export default function UserPageHeaderAboutEdit({
         </div>
       </form>
       <AnimatePresence mode="wait" initial={false}>
-        {errorMsg && <UserPageHeaderAboutEditError msg={errorMsg} />}
+        {errorMsg && (
+          <UserPageHeaderAboutEditError
+            msg={errorMsg}
+            closeError={() => setErrorMsg(null)}
+          />
+        )}
       </AnimatePresence>
     </div>
   );
