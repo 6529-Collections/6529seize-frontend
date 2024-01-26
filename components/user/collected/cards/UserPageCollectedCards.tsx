@@ -17,7 +17,7 @@ export default function UserPageCollectedCards({
     <div className="tw-mt-6 lg:tw-mt-8">
       {cards.length ? (
         <div className="tw-flow-root">
-          <div className="tw-grid tw-grid-cols-4 tw-gap-6 tw-pb-2">
+          <div className="tw-grid tw-grid-cols-1 sm:tw-grid-cols-2 lg:tw-grid-cols-3 xl:tw-grid-cols-4 2xl:tw-grid-cols-6 tw-gap-6 tw-pb-2">
             {cards.map((card) => (
               <UserPageCollectedCard
                 card={card}
@@ -36,7 +36,7 @@ export default function UserPageCollectedCards({
           )}
         </div>
       ) : (
-        <div className="tw-py-4 tw-px-4 sm:tw-px-6 tw-text-sm tw-italic tw-text-iron-500">
+        <div className="tw-py-4 tw-text-sm tw-italic tw-text-iron-500">
           No cards found
         </div>
       )}

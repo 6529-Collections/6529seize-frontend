@@ -49,7 +49,7 @@ export default function UserPageHeaderAddressesItem({
         <span className="tw-text-sm tw-font-medium tw-text-white">{title}</span>
         {isActive && (
           <svg
-            className="tw-h-5 tw-w-5 tw-ml-2 tw-text-primary-300 tw-transition tw-duration-300 tw-ease-out"
+            className="tw-flex-shrink-0 tw-h-5 tw-w-5 tw-ml-2 tw-text-primary-300 tw-transition tw-duration-300 tw-ease-out"
             viewBox="0 0 24 24"
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
@@ -65,7 +65,7 @@ export default function UserPageHeaderAddressesItem({
         )}
       </div>
 
-      <div className="tw-h-full tw-flex tw-items-center tw-gap-x-3 -tw-mr-2">
+      <div className="tw-h-full tw-flex tw-items-center tw-gap-x-6 lg:tw-gap-x-4 -tw-mr-2">
         <button
           onClick={copyAddress}
           type="button"
@@ -73,7 +73,7 @@ export default function UserPageHeaderAddressesItem({
           className="tw-inline-flex tw-items-center tw-w-7 tw-h-7 tw-border-0 tw-outline-0 tw-bg-transparent focus:tw-outline-none tw-group tw-cursor-pointer"
         >
           <svg
-            className="tw-h-5 tw-w-5 tw-text-iron-400 group-hover:tw-text-white tw-transition tw-duration-300 tw-ease-out"
+            className="tw-flex-shrink-0 tw-h-5 tw-w-5 tw-text-iron-400 group-hover:tw-text-white tw-transition tw-duration-300 tw-ease-out"
             viewBox="0 0 24 24"
             fill="none"
             xmlns="http://www.w3.org/2000/svg"

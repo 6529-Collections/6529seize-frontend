@@ -104,17 +104,16 @@ export default function UserPageHeaderAddresses({
   };
 
   return (
-    <div className="tw-relative" ref={listRef}>
-      <div className="tw-relative tw-w-full sm:tw-w-72">
+    <div className="tw-relative tw-w-full sm:tw-w-auto" ref={listRef}>
+      <div className="tw-relative tw-w-full sm:tw-w-auto">
         <button
           type="button"
           onClick={toggleOpen}
-          className="tw-text-left tw-block sm:tw-min-w-[12rem] tw-w-full sm:tw-w-72 tw-rounded-lg tw-border-0 tw-py-2.5 sm:tw-py-2 tw-pl-3 tw-pr-10 tw-bg-iron-900 focus:tw-bg-transparent tw-text-iron-300 tw-font-semibold tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-700 
-          focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 tw-text-base sm:tw-text-sm sm:tw-leading-6 hover:tw-bg-iron-800 tw-transition tw-duration-300 tw-ease-out"
+          className="tw-text-left tw-block tw-whitespace-nowrap tw-w-full sm:tw-w-auto tw-rounded-lg tw-border-0 tw-py-2.5 tw-pl-3.5 tw-pr-10 tw-bg-iron-900 focus:tw-bg-transparent tw-text-iron-300 tw-font-semibold tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-700 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 tw-text-base sm:tw-text-sm sm:tw-leading-6 hover:tw-bg-iron-800 tw-transition tw-duration-300 tw-ease-out"
         >
           <span>{title}</span>
         </button>
-        <div className="tw-pointer-events-none tw-absolute tw-inset-y-0 tw-right-0 tw-flex tw-items-center tw-pr-3">
+        <div className="tw-pointer-events-none tw-absolute tw-inset-y-0 tw-right-0 tw-flex tw-items-center -tw-mr-1 tw-pr-3.5">
           <svg
             ref={iconScope}
             className="tw-h-5 tw-w-5 tw-text-white"
@@ -135,7 +134,7 @@ export default function UserPageHeaderAddresses({
       <AnimatePresence mode="wait" initial={false}>
         {isOpen && (
           <motion.div
-            className="tw-origin-top-right tw-absolute lg:tw-right-0 tw-mt-1 tw-w-full sm:tw-w-72 tw-rounded-lg tw-shadow-xl tw-bg-iron-800 tw-ring-1 tw-ring-black tw-ring-opacity-5"
+            className="tw-origin-top-right tw-absolute md:tw-right-0 tw-mt-1 tw-w-full sm:tw-w-72 tw-rounded-lg tw-shadow-xl tw-bg-iron-800 tw-ring-1 tw-ring-black tw-ring-opacity-5"
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
