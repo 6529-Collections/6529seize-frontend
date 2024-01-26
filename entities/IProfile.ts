@@ -362,3 +362,17 @@ export type ApiCreateOrUpdateProfileCicStatement = Omit<
   CicStatement,
   "id" | "crated_at" | "updated_at" | "profile_id"
 >;
+
+export interface WalletDelegation {
+  readonly created_at: Date;
+  readonly block: number;
+  readonly from_address: string;
+  readonly to_address: string;
+  readonly collection: string; //"0x8888888888888888888888888888888888888888" = any collection
+  readonly use_case: number;
+  readonly expiry: number;
+  readonly all_tokens: number;
+  readonly token_id: number;
+  readonly from_display: string | null;
+  readonly to_display: string | null;
+}
