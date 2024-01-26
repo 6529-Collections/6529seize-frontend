@@ -1,8 +1,7 @@
+import styles from "./NextGenAdmin.module.scss";
 import { Container, Row, Col, Button, Form } from "react-bootstrap";
-import { v4 as uuidv4 } from "uuid";
-import { useAccount, useSignMessage } from "wagmi";
-import { useEffect, useRef, useState } from "react";
-import { postFormData } from "../../../services/6529api";
+import { useAccount } from "wagmi";
+import { useEffect, useState } from "react";
 import { FunctionSelectors } from "../nextgen_contracts";
 import {
   useGlobalAdmin,
@@ -21,22 +20,19 @@ import {
   NextGenCollectionIdFormGroup,
   NextGenAdminHeadingRow,
 } from "./NextGenAdminShared";
+import {
+  NextgenAllowlistCollectionType,
+  NextgenAllowlistCollection,
+} from "../../../entities/INextgen";
+import { commonApiFetch } from "../../../services/api/common-api";
 interface Props {
   close: () => void;
 }
 
 const MARKLE_ZERO_PATTERN = /^0x0+$/;
 
-enum Type {
-  ALLOWLIST = "allowlist",
-  NO_ALLOWLIST = "no_allowlist",
-  EXTERNAL_BURN = "external_burn",
-}
-
 export default function NextGenAdminSetPhases(props: Readonly<Props>) {
   const account = useAccount();
-  const signMessage = useSignMessage();
-  const uuid = useRef(uuidv4()).current;
 
   const globalAdmin = useGlobalAdmin(account.address as string);
   const functionAdmin = useFunctionAdmin(
@@ -57,50 +53,52 @@ export default function NextGenAdminSetPhases(props: Readonly<Props>) {
   );
 
   const [collectionID, setCollectionID] = useState("");
-  const [allowlistFile, setAllowlistFile] = useState<any>();
-  const [allowlistStartTime, setAllowlistStartTime] = useState("");
-  const [allowlistEndTime, setAllowlistEndTime] = useState("");
   const [publicStartTime, setPublicStartTime] = useState("");
   const [publicEndTime, setPublicEndTime] = useState("");
-  const [merkleRoot, setMerkleRoot] = useState("");
-  const [phaseName, setPhaseName] = useState("");
   const [onChainMerkleRoot, setOnChainMerkleRoot] = useState("");
-
-  const [type, setType] = useState(Type.ALLOWLIST);
+  const [selectedAllowlist, setSelectedAllowlist] =
+    useState<NextgenAllowlistCollection>();
 
   const [errors, setErrors] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
-  const [uploading, setUploading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
-  const [uploadSuccess, setUploadSuccess] = useState(false);
-  const [uploadError, setUploadError] = useState<string>();
+  const [availableAllowlistCollections, setAvailableAllowlistCollections] =
+    useState<NextgenAllowlistCollection[]>([]);
+
+  useEffect(() => {
+    if (collectionID) {
+      commonApiFetch<NextgenAllowlistCollection[]>({
+        endpoint: `nextgen/allowlist_phases/${collectionID}`,
+      }).then((collections) => {
+        setAvailableAllowlistCollections(collections);
+      });
+    }
+  }, [collectionID]);
 
   useCollectionPhases(collectionID, (data: PhaseTimes) => {
     if (collectionID) {
       if (MARKLE_ZERO_PATTERN.test(data.merkle_root)) {
         setOnChainMerkleRoot("");
-        setMerkleRoot("");
-        setType(Type.NO_ALLOWLIST);
       } else {
         setOnChainMerkleRoot(data.merkle_root);
-        setMerkleRoot(data.merkle_root);
-        setType(Type.ALLOWLIST);
       }
-      setAllowlistStartTime(data.allowlist_start_time.toString());
-      setAllowlistEndTime(data.allowlist_end_time.toString());
       setPublicStartTime(data.public_start_time.toString());
       setPublicEndTime(data.public_end_time.toString());
     }
   });
 
+  useEffect(() => {
+    if (onChainMerkleRoot && collectionID) {
+      const selected = availableAllowlistCollections.find(
+        (c) => c.merkle_root === onChainMerkleRoot
+      );
+      setSelectedAllowlist(selected);
+    }
+  }, [onChainMerkleRoot, collectionID]);
+
   function clear() {
-    setUploadSuccess(false);
-    setAllowlistFile(undefined);
-    setUploadError("");
-    setMerkleRoot("");
-    setAllowlistStartTime("");
-    setAllowlistEndTime("");
+    setSelectedAllowlist(undefined);
     setPublicStartTime("");
     setPublicEndTime("");
     setErrors([]);
@@ -119,17 +117,6 @@ export default function NextGenAdminSetPhases(props: Readonly<Props>) {
 
     if (!collectionID) {
       errors.push("Collection id is required");
-    }
-    if (type != Type.NO_ALLOWLIST) {
-      if (!merkleRoot) {
-        errors.push("Merkle Root is required");
-      }
-      if (!allowlistStartTime) {
-        errors.push("Allowlist start time is required");
-      }
-      if (!allowlistEndTime) {
-        errors.push("Allowlist ending time is required");
-      }
     }
     if (!publicStartTime) {
       errors.push("Public minting time is required");
@@ -151,11 +138,11 @@ export default function NextGenAdminSetPhases(props: Readonly<Props>) {
       contractWrite.write({
         args: [
           collectionID,
-          type === Type.NO_ALLOWLIST ? publicStartTime : allowlistStartTime,
-          type === Type.NO_ALLOWLIST ? publicStartTime : allowlistEndTime,
+          selectedAllowlist?.start_time ?? publicStartTime,
+          selectedAllowlist?.end_time ?? publicStartTime,
           publicStartTime,
           publicEndTime,
-          type !== Type.NO_ALLOWLIST ? merkleRoot : NULL_MERKLE,
+          selectedAllowlist?.merkle_root ?? NULL_MERKLE,
         ],
       });
     }
@@ -167,59 +154,6 @@ export default function NextGenAdminSetPhases(props: Readonly<Props>) {
       setSubmitting(false);
     }
   }, [contractWrite.isSuccess || contractWrite.isError]);
-
-  function uploadFile() {
-    setUploadError(undefined);
-    signMessage.reset();
-    setUploading(true);
-    signMessage.signMessage({
-      message: uuid,
-    });
-  }
-
-  useEffect(() => {
-    if (signMessage.isError) {
-      setUploading(false);
-      setUploadError(`Error: ${signMessage.error?.message.split(".")[0]}`);
-    }
-  }, [signMessage.isError]);
-
-  useEffect(() => {
-    if (signMessage.isSuccess && signMessage.data) {
-      const formData = new FormData();
-      formData.append("allowlist", allowlistFile);
-      formData.append(
-        "nextgen",
-        JSON.stringify({
-          collection_id: collectionID,
-          wallet: account.address as string,
-          signature: signMessage.data,
-          uuid: uuid,
-          al_type: type,
-          phase: phaseName,
-        })
-      );
-
-      postFormData(
-        `${process.env.API_ENDPOINT}/api/nextgen/create_allowlist`,
-        formData
-      ).then((response) => {
-        setUploading(false);
-        if (response.status === 200 && response.response.merkle_root) {
-          setMerkleRoot(response.response.merkle_root);
-          setUploadSuccess(true);
-        } else {
-          setUploadError(
-            `Error: ${
-              response.response.error
-                ? response.response.error
-                : "Unknown error"
-            }`
-          );
-        }
-      });
-    }
-  }, [signMessage.data]);
 
   return (
     <Container className="no-padding">
@@ -239,112 +173,71 @@ export default function NextGenAdminSetPhases(props: Readonly<Props>) {
               }}
             />
             <Form.Group className="mb-3">
-              <span className="d-flex align-items-center gap-3">
-                <Form.Check
-                  checked={type == Type.ALLOWLIST}
-                  type="radio"
-                  label="Allowlist"
-                  name="hasAllowlistRadio"
-                  onChange={() => {
-                    setType(Type.ALLOWLIST);
-                    setMerkleRoot(onChainMerkleRoot);
-                  }}
-                />
-                <Form.Check
-                  checked={type == Type.NO_ALLOWLIST}
-                  type="radio"
-                  label="No Allowlist"
-                  name="hasAllowlistRadio"
-                  onChange={() => {
-                    setType(Type.NO_ALLOWLIST);
-                  }}
-                />
-                <Form.Check
-                  checked={type === Type.EXTERNAL_BURN}
-                  type="radio"
-                  label="Burn Allowlist"
-                  name="hasAllowlistRadio"
-                  onChange={() => {
-                    setType(Type.EXTERNAL_BURN);
-                    setMerkleRoot(onChainMerkleRoot);
-                  }}
-                />
-              </span>
+              <Form.Label>Merkle Roots</Form.Label>
+              <Form.Select
+                className={`${styles.formInput}`}
+                value={selectedAllowlist?.merkle_root ?? ""}
+                onChange={(e) => {
+                  const merkleRoot = e.target.value;
+                  const selected = availableAllowlistCollections.find(
+                    (c) => c.merkle_root === merkleRoot
+                  );
+                  setSelectedAllowlist(selected);
+                }}>
+                <option value="">Null Merkle Root</option>
+                {availableAllowlistCollections.map((c) => (
+                  <option
+                    key={`merkle-collection-${c.merkle_root}`}
+                    value={c.merkle_root}>
+                    {c.phase} - {c.merkle_root}
+                  </option>
+                ))}
+              </Form.Select>
             </Form.Group>
-            {type !== Type.NO_ALLOWLIST && (
-              <>
-                <Form.Group className="mb-3">
-                  <Form.Label>Phase</Form.Label>
-                  <Form.Control
-                    type="string"
-                    placeholder="Phase 1"
-                    value={phaseName}
-                    onChange={(e: any) => setPhaseName(e.target.value)}
-                  />
-                </Form.Group>
-                <Form.Group className="mb-3">
-                  <Form.Control
-                    type="file"
-                    accept={".csv"}
-                    value={allowlistFile ? allowlistFile.fileName : ""}
-                    onChange={(e: any) => {
-                      if (e.target.files) {
-                        const f = e.target.files[0];
-                        setAllowlistFile(f);
-                      }
-                    }}
-                  />
-                  <div className="d-flex align-items-center mt-3 gap-3">
-                    <Button
-                      className="seize-btn"
-                      disabled={
-                        !collectionID ||
-                        !allowlistFile ||
-                        uploading ||
-                        uploadSuccess
-                      }
-                      onClick={() => uploadFile()}>
-                      Upload
-                    </Button>
-                    {uploading && (
-                      <span>
-                        Uploading... Sign Message <code>{uuid}</code> in your
-                        wallet...
-                      </span>
-                    )}
-                    {uploadSuccess && (
-                      <span className="text-success">Uploaded</span>
-                    )}
-                    {!uploading && uploadError && (
-                      <span className="text-danger">{uploadError}</span>
-                    )}
-                  </div>
-                </Form.Group>
-                <Form.Group className="mb-3">
-                  <Form.Label>Merkle Root</Form.Label>
-                  <Form.Control
-                    type="text"
-                    placeholder={merkleRoot || "Upload file to generate"}
-                    value={merkleRoot}
+            {selectedAllowlist && (
+              <Form.Group className="mb-3">
+                <span className="d-flex align-items-center gap-3">
+                  <Form.Check
                     disabled
+                    checked={
+                      selectedAllowlist?.al_type ===
+                      NextgenAllowlistCollectionType.ALLOWLIST
+                    }
+                    type="radio"
+                    label="Allowlist"
+                    name="hasAllowlistRadio"
                   />
-                </Form.Group>
+                  <Form.Check
+                    disabled
+                    checked={
+                      selectedAllowlist?.al_type ===
+                      NextgenAllowlistCollectionType.EXTERNAL_BURN
+                    }
+                    type="radio"
+                    label="Burn Allowlist"
+                    name="hasAllowlistRadio"
+                  />
+                </span>
+              </Form.Group>
+            )}
+            {selectedAllowlist && (
+              <>
                 <Form.Group className="mb-3">
                   <Form.Label>Allowlist Start Time</Form.Label>
                   <Form.Control
+                    disabled
                     type="integer"
                     placeholder="Unix epoch time"
-                    value={allowlistStartTime}
-                    onChange={(e: any) => setAllowlistStartTime(e.target.value)}
+                    value={selectedAllowlist?.start_time}
                   />
                 </Form.Group>
                 <Form.Group className="mb-3">
-                  <Form.Label>Allowlist Ending Time</Form.Label>
+                  <Form.Label>Allowlist End Time</Form.Label>
                   <Form.Control
+                    disabled
                     type="integer"
                     placeholder="Unix epoch time"
-                    value={allowlistEndTime}
-                    onChange={(e: any) => setAllowlistEndTime(e.target.value)}
+                    value={selectedAllowlist?.end_time}
                   />
                 </Form.Group>
               </>
@@ -359,7 +252,7 @@ export default function NextGenAdminSetPhases(props: Readonly<Props>) {
               />
             </Form.Group>
             <Form.Group className="mb-3">
-              <Form.Label>Public Minting Ending Time</Form.Label>
+              <Form.Label>Public Minting End Time</Form.Label>
               <Form.Control
                 type="integer"
                 placeholder="Unix epoch time"

@@ -81,3 +81,30 @@ export interface TraitValuePair {
   trait: string;
   value: string;
 }
+
+export enum NextgenAllowlistCollectionType {
+  ALLOWLIST = "allowlist",
+  EXTERNAL_BURN = "external_burn",
+}
+
+export interface NextgenAllowlistCollection {
+  created_at: string;
+  merkle_root: string;
+  collection_id: number;
+  added_by: string;
+  al_type: NextgenAllowlistCollectionType;
+  phase: string;
+  start_time: number;
+  end_time: number;
+}
+
+export interface NextgenAllowlist {
+  created_at: string;
+  collection_id: number;
+  merkle_root: string;
+  address: string;
+  spots: number;
+  info: string;
+  keccak: string;
+  wallet_display: string;
+}

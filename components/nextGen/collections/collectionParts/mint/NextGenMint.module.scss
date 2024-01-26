@@ -1,0 +1,30 @@
+@import "../../../../../styles/variables.scss";
+
+.phaseBox {
+  background-color: rgb(23, 22, 28);
+  cursor: pointer;
+  padding: 20px;
+  transition: transform 0.3s ease;
+
+  &:hover {
+    transform: scale(1.015);
+  }
+}
+
+.allowlistTable {
+  tr td {
+    white-space: nowrap;
+  }
+
+  td {
+    line-height: 40px;
+  }
+
+  tbody tr:nth-child(odd) {
+    background-color: $almost-very-dark-grey;
+  }
+
+  & > :not(caption) > * > * {
+    padding: 0.5rem !important;
+  }
+}

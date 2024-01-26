@@ -371,4 +371,8 @@ h5 {
   font: inherit;
   cursor: pointer;
   outline: inherit;
+
+  &:hover {
+    color: inherit;
+  }
 }

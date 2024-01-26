@@ -37,7 +37,7 @@ import { NextGenCollection } from "../../../../../entities/INextgen";
 import { Spinner } from "./NextGenMint";
 import DotLoader from "../../../../dotLoader/DotLoader";
 
-function getJsonData(keccak: string, data: string) {
+export function getJsonData(keccak: string, data: string) {
   const parsed = JSON.parse(data);
   const results: any[] = [];
   Object.entries(parsed).forEach(([key, value]) => {
@@ -520,8 +520,10 @@ export default function NextGenMintWidget(props: Readonly<Props>) {
                   </Form.Group>
                 ))
               ))}
-            <Form.Group as={Row} className="pb-2">
-              <Form.Label column sm={12} className="d-flex align-items-center">
+            <Form.Group
+              as={Row}
+              className="pt-2 pb-2 d-flex align-items-center">
+              <Form.Label className="d-flex align-items-center">
                 Mint Count
                 <Tippy
                   content={`How many tokens to mint`}
@@ -532,7 +534,7 @@ export default function NextGenMintWidget(props: Readonly<Props>) {
                     icon="info-circle"></FontAwesomeIcon>
                 </Tippy>
               </Form.Label>
-              <Col sm={12}>
+              <Col xs={3}>
                 <Form.Select
                   className={styles.mintSelect}
                   value={mintCount}
@@ -554,9 +556,7 @@ export default function NextGenMintWidget(props: Readonly<Props>) {
                   )}
                 </Form.Select>
               </Col>
-            </Form.Group>
-            <Form.Group as={Row} className="pt-4 mb-3">
-              <Col sm={12}>
+              <Col xs={9}>
                 <Button
                   className={styles.mintBtn}
                   disabled={disableMint()}

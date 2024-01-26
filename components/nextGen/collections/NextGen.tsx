@@ -80,7 +80,15 @@ export default function NextGen(props: Readonly<Props>) {
                 <NextGenMintCounts collection={props.collection} />
               </Col>
             </Row>
-            <Row className="pt-5">
+            {/* <Row className="pt-3 font-larger font-color">
+              <Col>
+                <a
+                  href={`/nextgen/collection/${props.collection.id}/minting-plan`}>
+                  Minting Plan
+                </a>
+              </Col>
+            </Row> */}
+            <Row className="pt-4">
               <Col>
                 <NextGenCountdown
                   collection={props.collection}

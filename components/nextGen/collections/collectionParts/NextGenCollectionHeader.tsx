@@ -19,8 +19,7 @@ import {
   getStatusFromDates,
   useCollectionMintCount,
 } from "../../nextgen_helpers";
-import { sepolia, goerli } from "viem/chains";
-import "add-to-calendar-button";
+import { numberWithCommas } from "../../../../helpers/Helpers";
 
 interface Props {
   collection: NextGenCollection;
@@ -74,17 +73,10 @@ export function NextGenCountdown(props: Readonly<CountdownProps>) {
   function printCountdown(
     title: string,
     date: number,
-    phase: "Allowlist" | "Public",
-    start: number,
-    end: number
+    phase: "Allowlist" | "Public"
   ) {
-    const name = `${phase} Minting - NextGen Collection #${props.collection.id} - ${props.collection.name}`;
-    const calEvent = {
-      name: name,
-      start_seconds: start,
-      end_seconds: end,
-      description: `${name}\n\n${process.env.BASE_ENDPOINT}/nextgen/collection/${props.collection.id}`,
-    };
+    const pathParts = router.pathname.split("/");
+    const hideMintBtn = pathParts[pathParts.length - 1] === "mint";
 
     return (
       <span className={styles.countdownContainer}>
@@ -92,9 +84,8 @@ export function NextGenCountdown(props: Readonly<CountdownProps>) {
           title={`${title} in`}
           date={new Date(date * 1000)}
           align={props.align}
-          calendar_event={calEvent}
         />
-        {!router.pathname.includes("mint") && (
+        {!hideMintBtn && (
           <a href={`/nextgen/collection/${props.collection.id}/mint`}>
             <Button className="seize-btn btn-block pt-2 pb-2 btn-white font-larger font-bolder">
               {getButtonLabel()}
@@ -111,17 +102,13 @@ export function NextGenCountdown(props: Readonly<CountdownProps>) {
         printCountdown(
           "Allowlist Starting",
           props.collection.allowlist_start,
-          "Allowlist",
-          props.collection.allowlist_start,
-          props.collection.allowlist_end
+          "Allowlist"
         )}
       {alStatus == Status.LIVE &&
         printCountdown(
           "Allowlist Ending",
           props.collection.allowlist_end,
-          "Allowlist",
-          props.collection.allowlist_start,
-          props.collection.allowlist_end
+          "Allowlist"
         )}
       {alStatus != Status.LIVE &&
         alStatus != Status.UPCOMING &&
@@ -129,17 +116,13 @@ export function NextGenCountdown(props: Readonly<CountdownProps>) {
         printCountdown(
           "Public Phase Starting",
           props.collection.public_start,
-          "Public",
-          props.collection.allowlist_start,
-          props.collection.allowlist_end
+          "Public"
         )}
       {publicStatus == Status.LIVE &&
         printCountdown(
           "Public Phase Ending",
           props.collection.public_end,
-          "Public",
-          props.collection.allowlist_start,
-          props.collection.allowlist_end
+          "Public"
         )}
     </>
   );
@@ -344,8 +327,9 @@ export function NextGenMintCounts(
 
   return (
     <b>
-      {mintCount} / {props.collection.total_supply} minted
-      {available > 0 && ` | ${available} remaining`}
+      {numberWithCommas(mintCount)} /{" "}
+      {numberWithCommas(props.collection.total_supply)} minted
+      {available > 0 && ` | ${numberWithCommas(available)} remaining`}
       {isLoading && (
         <>
           &nbsp;

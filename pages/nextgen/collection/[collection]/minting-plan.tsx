@@ -7,24 +7,34 @@ import { NextGenCollection } from "../../../../entities/INextgen";
 import { isEmptyObject } from "../../../../helpers/Helpers";
 import { getCommonHeaders } from "../../../../helpers/server.helpers";
 import { commonApiFetch } from "../../../../services/api/common-api";
+import Breadcrumb from "../../../../components/breadcrumb/Breadcrumb";
 
 const Header = dynamic(() => import("../../../../components/header/Header"), {
   ssr: false,
   loading: () => <HeaderPlaceholder />,
 });
 
-const NextGenCollectionTokenListComponent = dynamic(
+const NextGenCollectionMintingPlanComponent = dynamic(
   () =>
     import(
-      "../../../../components/nextGen/collections/collectionParts/art/NextGenCollectionArtPage"
+      "../../../../components/nextGen/collections/collectionParts/mint/NextgenCollectionMintingPlan"
     ),
   { ssr: false }
 );
 
 export default function NextGenCollectionTokensPage(props: any) {
   const collection: NextGenCollection = props.pageProps.collection;
-  const pagenameFull = `Art | #${collection.id} - ${collection.name}`;
+  const pagenameFull = `Minting Plan | #${collection.id} - ${collection.name}`;
 
+  const crumbs = [
+    { display: "Home", href: "/" },
+    { display: "NextGen", href: "/nextgen" },
+    {
+      display: `#${collection.id} - ${collection.name}`,
+      href: `/nextgen/collection/${collection.id}`,
+    },
+    { display: `Minting Plan` },
+  ];
   return (
     <>
       <Head>
@@ -47,7 +57,8 @@ export default function NextGenCollectionTokensPage(props: any) {
 
       <main className={styles.main}>
         <Header />
-        <NextGenCollectionTokenListComponent collection={collection} />
+        <Breadcrumb breadcrumbs={crumbs} />
+        <NextGenCollectionMintingPlanComponent collection={collection} />
       </main>
     </>
   );

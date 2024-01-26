@@ -92,14 +92,12 @@ export default function NextGen(props: any) {
   const path = view ? `/nextgen/${view.toLowerCase()}` : "/nextgen";
 
   function printView(v: NextGenView | undefined) {
-    let className;
-    if (!v) {
-      className = view ? "font-color" : "font-color-h";
-    } else {
-      className = v === view ? "font-color-h" : "font-color";
+    let styles: any = { borderBottom: "1px solid white", cursor: "default" };
+    if ((!v && view) || (v && v !== view)) {
+      styles = {};
     }
     const viewHeader = (
-      <h4 className={`mb-0 ${className}`}>
+      <h4 className={`mb-0 pb-2 font-color unselectable`} style={styles}>
         <b>{v ?? "Featured"}</b>
       </h4>
     );

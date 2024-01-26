@@ -8,27 +8,16 @@ import {
 import { commonApiFetch } from "../../../../services/api/common-api";
 import { STATEMENT_GROUP, STATEMENT_TYPE } from "../../../../helpers/Types";
 import Image from "next/image";
-import SocialStatementIcon from "../../../user/utils/icons/SocialStatementIcon";
 
 interface Props {
   collection: NextGenCollection;
   link_collections?: NextGenCollection[];
 }
 
-function formatCiCTitle(s: string) {
-  return s
-    .replace(/[_-]/g, " ")
-    .toLowerCase()
-    .split(" ")
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(" ");
-}
-
 export default function NextGenCollectionArtist(props: Readonly<Props>) {
   const [profileHandle, setProfileHandle] = useState<string>("");
   const [pfp, setPfp] = useState<string>("");
   const [bio, setBio] = useState<string>("");
-  const [cicStatements, setCicStatements] = useState<CicStatement[]>([]);
 
   useEffect(() => {
     commonApiFetch<IProfileAndConsolidations>({
@@ -47,15 +36,6 @@ export default function NextGenCollectionArtist(props: Readonly<Props>) {
         (s) => s.statement_type === STATEMENT_TYPE.BIO
       );
       setBio(bioStatement?.statement_value ?? "");
-      setCicStatements(
-        statements.filter((s) =>
-          [
-            STATEMENT_GROUP.SOCIAL_MEDIA_ACCOUNT,
-            STATEMENT_GROUP.NFT_ACCOUNTS,
-            STATEMENT_GROUP,
-          ].includes(s.statement_group)
-        )
-      );
     });
   }, []);
 
@@ -74,9 +54,7 @@ export default function NextGenCollectionArtist(props: Readonly<Props>) {
               height={0}
               style={{
                 height: "auto",
-                width: "auto",
-                maxHeight: "400px",
-                maxWidth: "100%",
+                width: "100%",
               }}
               src={pfp}
               alt={props.collection.artist}
@@ -104,25 +82,6 @@ export default function NextGenCollectionArtist(props: Readonly<Props>) {
                     rel="noreferrer">
                     @{profileHandle}
                   </a>
-                </Col>
-              </Row>
-            )}
-            {cicStatements.length > 0 && (
-              <Row className="pt-3">
-                <Col className="d-flex align-items-center gap-2">
-                  {cicStatements.map((s) => (
-                    <div
-                      key={`cic-${s.statement_type}-${s.statement_value}`}
-                      className="tw-flex tw-items-center tw-flex-shrink-0 tw-h-8 tw-w-8 tw-text-iron-100">
-                      <a
-                        title={formatCiCTitle(s.statement_type)}
-                        href={s.statement_value}
-                        target="_blank"
-                        rel="noreferrer">
-                        <SocialStatementIcon statementType={s.statement_type} />
-                      </a>
-                    </div>
-                  ))}
                 </Col>
               </Row>
             )}

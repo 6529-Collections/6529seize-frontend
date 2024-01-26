@@ -39,6 +39,7 @@ import NextGenAdminCreateCollection from "./NextGenAdminCreateCollection";
 import NextGenAdminUpdateCollection, {
   UpdateType,
 } from "./NextGenAdminUpdateCollection";
+import NextGenAdminUploadAL from "./NextGenAdminUploadAL";
 
 enum Focus {
   GLOBAL = "global",
@@ -68,6 +69,7 @@ enum GlobalFocus {
 enum CollectionFocus {
   SET_DATA = "set_data",
   SET_COSTS = "set_costs",
+  UPLOAD_AL = "upload_al",
   SET_PHASES = "set_phases",
   UPDATE_INFO = "update_info",
   UPDATE_BASE_URI = "update_base_uri",
@@ -708,13 +710,22 @@ export default function NextGenAdmin() {
               {(isGlobalAdmin() ||
                 isWalletCollectionAdmin ||
                 (setPhasesFunctionAdmin.data as any) === true) && (
-                <Button
-                  className="seize-btn btn-white"
-                  onClick={() =>
-                    setCollectionFocus(CollectionFocus.SET_PHASES)
-                  }>
-                  Set Phases
-                </Button>
+                <>
+                  <Button
+                    className="seize-btn btn-white"
+                    onClick={() =>
+                      setCollectionFocus(CollectionFocus.UPLOAD_AL)
+                    }>
+                    Upload Allowlist
+                  </Button>
+                  <Button
+                    className="seize-btn btn-white"
+                    onClick={() =>
+                      setCollectionFocus(CollectionFocus.SET_PHASES)
+                    }>
+                    Set Phases
+                  </Button>
+                </>
               )}
             </Col>
           </Row>
@@ -725,6 +736,9 @@ export default function NextGenAdmin() {
               )}
               {collectionFocus === CollectionFocus.SET_COSTS && (
                 <NextGenAdminSetCosts close={() => close()} />
+              )}
+              {collectionFocus === CollectionFocus.UPLOAD_AL && (
+                <NextGenAdminUploadAL close={() => close()} />
               )}
               {collectionFocus === CollectionFocus.SET_PHASES && (
                 <NextGenAdminSetPhases close={() => close()} />
