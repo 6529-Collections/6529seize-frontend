@@ -62,7 +62,7 @@ export default function UserCICTypeIconTooltip({
           <p className="tw-mb-0 tw-mt-1 tw-text-sm tw-text-iron-400 tw-font-medium">
             This profile is at risk of losing its handle if its CIC does not
             turn positive. The detailed process will go live after the
-            experimental period. is complete.
+            experimental period is complete.
           </p>
         </div>
       )}
