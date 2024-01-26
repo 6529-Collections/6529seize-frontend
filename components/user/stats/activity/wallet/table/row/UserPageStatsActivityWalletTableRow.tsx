@@ -22,22 +22,24 @@ import UserPageStatsActivityWalletTableRowGas from "./UserPageStatsActivityWalle
 
 export enum TransactionType {
   AIRDROP = "AIRDROP",
-  MINT = "MINT",
+  MINTED = "MINTED",
   SALE = "SALE",
   PURCHASE = "PURCHASE",
   TRANSFER_IN = "TRANSFER_IN",
   TRANSFER_OUT = "TRANSFER_OUT",
-  BURN = "BURN",
+  BURNED = "BURNED",
+  RECEIVED_BURN = "RECEIVED_BURN",
 }
 
 const TYPE_TP_ACTION: Record<TransactionType, string> = {
   [TransactionType.AIRDROP]: "received airdrop",
-  [TransactionType.MINT]: "minted",
+  [TransactionType.MINTED]: "minted",
   [TransactionType.SALE]: "sold",
   [TransactionType.PURCHASE]: "purchased",
   [TransactionType.TRANSFER_IN]: "received",
   [TransactionType.TRANSFER_OUT]: "transferred",
-  [TransactionType.BURN]: "burned",
+  [TransactionType.BURNED]: "burned",
+  [TransactionType.RECEIVED_BURN]: "received burn",
 };
 
 export default function UserPageStatsActivityWalletTableRow({
@@ -99,14 +101,24 @@ export default function UserPageStatsActivityWalletTableRow({
       areEqualAddresses(NULL_ADDRESS, transaction.from_address) ||
       areEqualAddresses(MANIFOLD, transaction.from_address)
     ) {
-      return TransactionType.MINT;
+      return TransactionType.MINTED;
     }
 
     if (
       areEqualAddresses(NULL_ADDRESS, transaction.to_address) ||
       areEqualAddresses(NULL_DEAD_ADDRESS, transaction.to_address)
     ) {
-      return TransactionType.BURN;
+      const isProfileNullAddress = profile.consolidation.wallets.some(
+        (w) =>
+          areEqualAddresses(w.wallet.address, NULL_ADDRESS) ||
+          areEqualAddresses(w.wallet.address, NULL_DEAD_ADDRESS)
+      );
+
+      if (isProfileNullAddress) {
+        return TransactionType.RECEIVED_BURN;
+      }
+
+      return TransactionType.BURNED;
     }
 
     if (
@@ -137,6 +149,7 @@ export default function UserPageStatsActivityWalletTableRow({
     TransactionType.SALE,
     TransactionType.TRANSFER_IN,
     TransactionType.TRANSFER_OUT,
+    TransactionType.RECEIVED_BURN,
   ].includes(type);
 
   const value = transaction.value;

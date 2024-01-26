@@ -28,7 +28,7 @@ export default function UserPageStatsActivityWalletTableRowIcon({
           </defs>
         </svg>
       );
-    case TransactionType.MINT:
+    case TransactionType.MINTED:
       return (
         <svg
           className="tw-flex-shrink-0 tw-w-5 tw-h-5 tw-mr-1 tw-text-iron-300"
@@ -156,7 +156,8 @@ export default function UserPageStatsActivityWalletTableRowIcon({
           />
         </svg>
       );
-    case TransactionType.BURN:
+    case TransactionType.BURNED:
+    case TransactionType.RECEIVED_BURN:
       return (
         <svg
           className="tw-flex-shrink-0 tw-w-5 tw-h-5 tw-mr-1 tw-text-iron-300"
@@ -177,7 +178,6 @@ export default function UserPageStatsActivityWalletTableRowIcon({
             d="M12 18a3.75 3.75 0 0 0 .495-7.468 5.99 5.99 0 0 0-1.925 3.547 5.975 5.975 0 0 1-2.133-1.001A3.75 3.75 0 0 0 12 18Z"
           />
         </svg>
-        
       );
     default:
       assertUnreachable(type);

@@ -16,15 +16,16 @@ export default function UserPageStatsActivityWalletTableRowMainAddress({
   const wallet = profile.consolidation.wallets.find((w) => {
     switch (type) {
       case TransactionType.AIRDROP:
-      case TransactionType.MINT:
+      case TransactionType.MINTED:
       case TransactionType.PURCHASE:
       case TransactionType.TRANSFER_IN:
+      case TransactionType.RECEIVED_BURN:
         return (
           w.wallet.address.toLowerCase() ===
           transaction.to_address.toLowerCase()
         );
       case TransactionType.SALE:
-      case TransactionType.BURN:
+      case TransactionType.BURNED:
       case TransactionType.TRANSFER_OUT:
         return (
           w.wallet.address.toLowerCase() ===
@@ -40,5 +41,9 @@ export default function UserPageStatsActivityWalletTableRowMainAddress({
     ? "unknown"
     : wallet.wallet.ens ?? formatAddress(wallet.wallet.address);
 
-  return <div className="tw-text-sm tw-text-iron-100 tw-font-medium">{walletDisplay}</div>;
+  return (
+    <div className="tw-text-sm tw-text-iron-100 tw-font-medium">
+      {walletDisplay}
+    </div>
+  );
 }

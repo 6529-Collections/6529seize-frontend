@@ -13,12 +13,13 @@ export default function UserPageStatsActivityWalletTableRowSecondAddress({
 }) {
   const TYPE_TO_ACTION: Record<TransactionType, string> = {
     [TransactionType.AIRDROP]: "",
-    [TransactionType.MINT]: "",
+    [TransactionType.MINTED]: "",
     [TransactionType.SALE]: "to",
     [TransactionType.PURCHASE]: "from",
     [TransactionType.TRANSFER_IN]: "from",
     [TransactionType.TRANSFER_OUT]: "to",
-    [TransactionType.BURN]: "",
+    [TransactionType.BURNED]: "",
+    [TransactionType.RECEIVED_BURN]: "from",
   };
 
   const getWalletDisplayAndAddress = (): {
@@ -27,9 +28,10 @@ export default function UserPageStatsActivityWalletTableRowSecondAddress({
   } => {
     switch (type) {
       case TransactionType.AIRDROP:
-      case TransactionType.MINT:
+      case TransactionType.MINTED:
       case TransactionType.PURCHASE:
       case TransactionType.TRANSFER_IN:
+      case TransactionType.RECEIVED_BURN:
         return {
           display:
             transaction.from_display ??
@@ -38,7 +40,7 @@ export default function UserPageStatsActivityWalletTableRowSecondAddress({
           address: transaction.from_address,
         };
       case TransactionType.SALE:
-      case TransactionType.BURN:
+      case TransactionType.BURNED:
       case TransactionType.TRANSFER_OUT:
         return {
           display:
