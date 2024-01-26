@@ -106,5 +106,6 @@ export interface NextgenAllowlist {
   spots: number;
   info: string;
   keccak: string;
-  wallet_display: string;
+  wallet_display?: string;
+  phase?: string;
 }

@@ -34,7 +34,10 @@ export default function NextGenCollection(props: Readonly<Props>) {
       <NextGenCollectionSlideshow collection={props.collection} />
       <Container className="pt-3 pb-2">
         <>
-          <NextGenCollectionHeader collection={props.collection} />
+          <NextGenCollectionHeader
+            collection={props.collection}
+            showDistributionLink={true}
+          />
           <Row className="pt-5">
             <Col>
               <NextGenCollectionArt

@@ -20,15 +20,16 @@ import {
   useCollectionMintCount,
 } from "../../nextgen_helpers";
 import { numberWithCommas } from "../../../../helpers/Helpers";
+import { DistributionLink } from "../NextGen";
 
 interface Props {
   collection: NextGenCollection;
   collection_link?: boolean;
+  showDistributionLink?: boolean;
 }
 
 interface CountdownProps {
   collection: NextGenCollection;
-  align: "vertical" | "horizontal";
 }
 
 interface PhaseProps {
@@ -70,21 +71,13 @@ export function NextGenCountdown(props: Readonly<CountdownProps>) {
     return <DotLoader />;
   }
 
-  function printCountdown(
-    title: string,
-    date: number,
-    phase: "Allowlist" | "Public"
-  ) {
+  function printCountdown(title: string, date: number) {
     const pathParts = router.pathname.split("/");
     const hideMintBtn = pathParts[pathParts.length - 1] === "mint";
 
     return (
       <span className={styles.countdownContainer}>
-        <DateCountdown
-          title={`${title} in`}
-          date={new Date(date * 1000)}
-          align={props.align}
-        />
+        <DateCountdown title={`${title} in`} date={new Date(date * 1000)} />
         {!hideMintBtn && (
           <a href={`/nextgen/collection/${props.collection.id}/mint`}>
             <Button className="seize-btn btn-block pt-2 pb-2 btn-white font-larger font-bolder">
@@ -99,31 +92,15 @@ export function NextGenCountdown(props: Readonly<CountdownProps>) {
   return (
     <>
       {alStatus == Status.UPCOMING &&
-        printCountdown(
-          "Allowlist Starting",
-          props.collection.allowlist_start,
-          "Allowlist"
-        )}
+        printCountdown("Allowlist Starting", props.collection.allowlist_start)}
       {alStatus == Status.LIVE &&
-        printCountdown(
-          "Allowlist Ending",
-          props.collection.allowlist_end,
-          "Allowlist"
-        )}
+        printCountdown("Allowlist Ending", props.collection.allowlist_end)}
       {alStatus != Status.LIVE &&
         alStatus != Status.UPCOMING &&
         publicStatus == Status.UPCOMING &&
-        printCountdown(
-          "Public Phase Starting",
-          props.collection.public_start,
-          "Public"
-        )}
+        printCountdown("Public Phase Starting", props.collection.public_start)}
       {publicStatus == Status.LIVE &&
-        printCountdown(
-          "Public Phase Ending",
-          props.collection.public_end,
-          "Public"
-        )}
+        printCountdown("Public Phase Ending", props.collection.public_end)}
     </>
   );
 }
@@ -274,11 +251,20 @@ export default function NextGenCollectionHeader(props: Readonly<Props>) {
             />
           </span>
         </Col>
-        <Col className="pt-3 d-flex align-items-center" sm={12} md={6}>
-          {showMint() && (
-            <NextGenCountdown collection={props.collection} align="vertical" />
-          )}
-        </Col>
+        {showMint() && (
+          <Col
+            className="pt-3 d-flex flex-column align-items-center"
+            sm={12}
+            md={6}>
+            <NextGenCountdown collection={props.collection} />
+            {props.showDistributionLink && (
+              <DistributionLink
+                collection={props.collection}
+                class="text-center"
+              />
+            )}
+          </Col>
+        )}
       </Row>
     </Container>
   );

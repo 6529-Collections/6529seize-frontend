@@ -1,5 +1,5 @@
-import styles from "./NextGenMint.module.scss";
-import { Col, Container, Row, Table } from "react-bootstrap";
+import styles from "../../NextGen.module.scss";
+import { Col, Container, Dropdown, Row, Table } from "react-bootstrap";
 import {
   NextGenCollection,
   NextgenAllowlist,
@@ -15,6 +15,8 @@ import { areEqualAddresses } from "../../../../../helpers/Helpers";
 interface Props {
   collection: NextGenCollection;
 }
+
+const PAGE_SIZE = 250;
 
 export default function NextgenCollectionMintingPlan(props: Readonly<Props>) {
   const [phases, setPhases] = useState<NextgenAllowlistCollection[]>([]);
@@ -40,23 +42,61 @@ export default function NextgenCollectionMintingPlan(props: Readonly<Props>) {
 
   useEffect(() => {
     commonApiFetch<NextgenAllowlistCollection[]>({
-      endpoint: `nextgen/allowlist_phases/${props.collection.id}`,
+      endpoint: `nextgen/allowlist_phases/${props.collection.id}?page_size=${PAGE_SIZE}`,
     }).then((collections) => {
       setPhases(collections);
     });
   }, []);
 
   useEffect(() => {
-    if (selectedPhase) {
-      commonApiFetch<{
-        data: NextgenAllowlist[];
-      }>({
-        endpoint: `nextgen/proofs/${selectedPhase.merkle_root}`,
-      }).then((al) => {
-        setAllowlist(al.data);
-      });
-    }
+    commonApiFetch<{
+      data: NextgenAllowlist[];
+    }>({
+      endpoint: `nextgen/allowlist_merkle/${selectedPhase?.merkle_root ?? ""}`,
+    }).then((al) => {
+      setAllowlist(al.data);
+    });
   }, [selectedPhase]);
+
+  function printPhase(phaseName: string, start: number, end: number) {
+    const startTime = Time.seconds(start);
+    const endTime = Time.seconds(end);
+    return (
+      <Col>
+        <span className="d-flex align-items-center justify-content-center pb-4">
+          <h4 className="font-color mb-0">{phaseName}</h4>
+        </span>
+        <Table>
+          <tbody>
+            <tr>
+              <td className="d-flex justify-content-center gap-3">
+                <span>
+                  <b>Start</b>
+                </span>
+                <span>
+                  <b>
+                    {startTime.toIsoDateString()} {startTime.toIsoTimeString()}
+                  </b>
+                </span>
+              </td>
+            </tr>
+            <tr>
+              <td className="d-flex justify-content-center gap-3">
+                <span>
+                  <b>End</b>
+                </span>
+                <span>
+                  <b>
+                    {endTime.toIsoDateString()} {endTime.toIsoTimeString()}
+                  </b>
+                </span>
+              </td>
+            </tr>
+          </tbody>
+        </Table>
+      </Col>
+    );
+  }
 
   return (
     <Container className="pt-4 pb-4">
@@ -67,7 +107,7 @@ export default function NextgenCollectionMintingPlan(props: Readonly<Props>) {
       </Row>
       <Row className="pt-4">
         <Col>
-          <h3 className="mb-0">Minting Plan</h3>
+          <h3 className="mb-0">Distribution Plan</h3>
         </Col>
       </Row>
       <hr />
@@ -84,66 +124,55 @@ export default function NextgenCollectionMintingPlan(props: Readonly<Props>) {
             className="pt-2 pb-2 d-flex flex-column">
             <Container className={styles.phaseBox}>
               <Row>
-                <a onClick={() => setSelectedPhase(phase)}>
-                  <Col>
-                    <span className="d-flex align-items-center justify-content-between pb-4">
-                      <h4 className="font-color mb-0">{phase.phase}</h4>
-                      <span>View Distribution</span>
-                    </span>
-                    <Table>
-                      <tbody>
-                        <tr>
-                          <td className="d-flex justify-content-center gap-3">
-                            <span>
-                              <b>Start</b>
-                            </span>
-                            <span>
-                              <b>
-                                {Time.seconds(
-                                  phase.start_time
-                                ).toIsoDateString()}{" "}
-                                {Time.seconds(
-                                  phase.start_time
-                                ).toIsoTimeString()}
-                              </b>
-                            </span>
-                          </td>
-                        </tr>
-                        <tr>
-                          <td className="d-flex justify-content-center gap-3">
-                            <span>
-                              <b>End</b>
-                            </span>
-                            <span>
-                              <b>
-                                {Time.seconds(phase.end_time).toIsoDateString()}{" "}
-                                {Time.seconds(phase.end_time).toIsoTimeString()}
-                              </b>
-                            </span>
-                          </td>
-                        </tr>
-                      </tbody>
-                    </Table>
-                  </Col>
-                </a>
+                {printPhase(phase.phase, phase.start_time, phase.end_time)}
               </Row>
             </Container>
           </Col>
         ))}
+        <Col xs={12} sm={6} md={4} className="pt-2 pb-2 d-flex flex-column">
+          <Container className={styles.phaseBox}>
+            <Row>
+              {printPhase(
+                "Public Phase",
+                props.collection.public_start,
+                props.collection.public_end
+              )}
+            </Row>
+          </Container>
+        </Col>
       </Row>
-      {selectedPhase && allowlist.length > 0 && (
+      {allowlist.length > 0 && (
         <>
           <Row className="pt-4">
-            <Col>
-              <h4>{selectedPhase.phase} Distribution</h4>
+            <Col xs={12} sm={6} md={4} className="d-flex">
+              <Dropdown
+                className={styles.filterDropdown}
+                drop={"down-centered"}>
+                <Dropdown.Toggle>
+                  {selectedPhase?.phase ?? "All Phases"}
+                </Dropdown.Toggle>
+                <Dropdown.Menu>
+                  <Dropdown.Item onClick={() => setSelectedPhase(undefined)}>
+                    All Phases
+                  </Dropdown.Item>
+                  {phases.map((p) => (
+                    <Dropdown.Item
+                      key={`filter-${p.phase}`}
+                      onClick={() => setSelectedPhase(p)}>
+                      {p.phase}
+                    </Dropdown.Item>
+                  ))}
+                </Dropdown.Menu>
+              </Dropdown>
             </Col>
           </Row>
           <Row>
             <Col>
-              <Table className={styles.allowlistTable}>
+              <Table className={styles.logsTable}>
                 <thead>
                   <tr>
                     <th>Address</th>
+                    <th className="text-center">Phase</th>
                     <th className="text-center">Spots</th>
                     <th className="text-center">Data</th>
                   </tr>
@@ -155,6 +184,7 @@ export default function NextgenCollectionMintingPlan(props: Readonly<Props>) {
                         {al.wallet_display && `${al.wallet_display} - `}
                         {al.address}
                       </td>
+                      <td className="text-center">{al.phase}</td>
                       <td className="text-center">
                         {adjustSpots(al.address, al.keccak)}
                       </td>

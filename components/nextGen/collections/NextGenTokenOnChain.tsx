@@ -232,6 +232,7 @@ export default function NextGenTokenOnChain(props: Readonly<Props>) {
         <NextGenCollectionHeader
           collection={props.collection}
           collection_link={true}
+          showDistributionLink={true}
         />
       </Container>
       {printToken()}

@@ -368,7 +368,7 @@ export default function NextGenMint(props: Readonly<Props>) {
           </span>
         </Col>
         <Col sm={12} md={6} className="pt-1 pb-1 d-flex align-items-center">
-          <NextGenCountdown collection={props.collection} align="vertical" />
+          <NextGenCountdown collection={props.collection} />
         </Col>
       </Row>
       <Row className="pt-4 pb-4">

@@ -43,12 +43,6 @@ export default function NextGenTokenProvenance(props: Readonly<Props>) {
   return (
     <>
       <Container className="no-padding" ref={scrollTarget}>
-        {/* <Row>
-          <Col>
-            <h3 className="mb-0">Provenance</h3>
-          </Col>
-        </Row>
-        <hr /> */}
         <Row
           className={`pt-2 ${styles.logsScrollContainer} ${styles.tokenLogsScrollContainer}`}>
           <Col>

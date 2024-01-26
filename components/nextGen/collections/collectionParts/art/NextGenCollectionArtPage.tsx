@@ -27,7 +27,11 @@ export default function NextGenCollectionArtPage(props: Readonly<Props>) {
       <Container className="pt-4 pb-4">
         <Row>
           <Col>
-            <NextGenCollectionHeader collection={props.collection} />
+            <NextGenCollectionHeader
+              collection={props.collection}
+              collection_link={true}
+              showDistributionLink={true}
+            />
           </Col>
         </Row>
         <Row className="pt-4">

@@ -1,10 +1,8 @@
 import { useState, useEffect } from "react";
-import { Time } from "../../helpers/time";
 
 interface Props {
   title: string;
   date: Date;
-  align: "vertical" | "horizontal";
 }
 
 export default function DateCountdown(props: Readonly<Props>) {
@@ -55,12 +53,7 @@ export default function DateCountdown(props: Readonly<Props>) {
   }, [props.date]);
 
   return (
-    <span
-      className={
-        props.align === "horizontal"
-          ? `d-flex align-items-center gap-2 justify-content-center`
-          : "d-flex flex-column"
-      }>
+    <span className={"d-flex flex-column"}>
       <span className="d-flex justify-content-between align-items-center">
         {props.title}
       </span>

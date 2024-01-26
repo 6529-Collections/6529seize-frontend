@@ -24,7 +24,7 @@ const NextGenCollectionMintingPlanComponent = dynamic(
 
 export default function NextGenCollectionTokensPage(props: any) {
   const collection: NextGenCollection = props.pageProps.collection;
-  const pagenameFull = `Minting Plan | #${collection.id} - ${collection.name}`;
+  const pagenameFull = `Distribution Plan | #${collection.id} - ${collection.name}`;
 
   const crumbs = [
     { display: "Home", href: "/" },
@@ -33,7 +33,7 @@ export default function NextGenCollectionTokensPage(props: any) {
       display: `#${collection.id} - ${collection.name}`,
       href: `/nextgen/collection/${collection.id}`,
     },
-    { display: `Minting Plan` },
+    { display: `Distribution Plan` },
   ];
   return (
     <>

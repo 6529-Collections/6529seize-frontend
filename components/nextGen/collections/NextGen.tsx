@@ -1,13 +1,13 @@
-import styles from "./NextGen.module.scss";
 import { Container, Row, Col } from "react-bootstrap";
 import Image from "next/image";
-import NextGenCollections from "./NextGenCollections";
 import { NextGenCollection } from "../../../entities/INextgen";
 import {
   NextGenCountdown,
   NextGenMintCounts,
   NextGenPhases,
 } from "./collectionParts/NextGenCollectionHeader";
+import { getStatusFromDates } from "../nextgen_helpers";
+import { Status } from "../nextgen_entities";
 
 interface Props {
   collection: NextGenCollection;
@@ -80,26 +80,43 @@ export default function NextGen(props: Readonly<Props>) {
                 <NextGenMintCounts collection={props.collection} />
               </Col>
             </Row>
-            {/* <Row className="pt-3 font-larger font-color">
-              <Col>
-                <a
-                  href={`/nextgen/collection/${props.collection.id}/minting-plan`}>
-                  Minting Plan
-                </a>
-              </Col>
-            </Row> */}
+            <DistributionLink collection={props.collection} class="pt-3" />
             <Row className="pt-4">
               <Col>
-                <NextGenCountdown
-                  collection={props.collection}
-                  align="vertical"
-                />
+                <NextGenCountdown collection={props.collection} />
               </Col>
             </Row>
           </Container>
         </Col>
       </Row>
-      {/* <NextGenCollections /> */}
     </Container>
   );
+}
+
+export function DistributionLink(
+  props: Readonly<{
+    collection: NextGenCollection;
+    class: string;
+  }>
+) {
+  const alStatus = getStatusFromDates(
+    props.collection.allowlist_start,
+    props.collection.allowlist_end
+  );
+
+  if (alStatus === Status.LIVE || alStatus === Status.UPCOMING) {
+    return (
+      <Container className="no-padding">
+        <Row className={`pt-1 font-color ${props.class}`}>
+          <Col>
+            <a
+              href={`/nextgen/collection/${props.collection.id}/distribution-plan`}>
+              Distribution Plan
+            </a>
+          </Col>
+        </Row>
+      </Container>
+    );
+    return <></>;
+  }
 }
