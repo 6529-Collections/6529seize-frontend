@@ -77,6 +77,63 @@ export default function UserPageCollected({
     return null;
   };
 
+  const convertSeized = ({
+    seized,
+    isMemes,
+  }: {
+    readonly seized: string | null;
+    isMemes: boolean;
+  }): CollectionSeized | null => {
+    if (!isMemes) return defaultSeized;
+    if (!seized) return null;
+    return (
+      Object.values(CollectionSeized).find((c) => c === seized.toUpperCase()) ??
+      null
+    );
+  };
+
+  const convertSzn = ({
+    szn,
+    isMemes,
+  }: {
+    readonly szn: string | null;
+    readonly isMemes: boolean;
+  }): MEMES_SEASON | null => {
+    if (!isMemes) return null;
+    if (!szn) return null;
+    return (
+      Object.values(MEMES_SEASON).find((c) => c === szn.toUpperCase()) ?? null
+    );
+  };
+
+  const convertCollection = (
+    collection: string | null
+  ): CollectedCollectionType | null => {
+    if (!collection) return null;
+    return (
+      Object.values(CollectedCollectionType).find(
+        (c) => c === collection.toUpperCase()
+      ) ?? null
+    );
+  };
+
+  const convertSortedBy = (sortBy: string | null): CollectionSort => {
+    if (!sortBy) return defaultSortBy;
+    return (
+      Object.values(CollectionSort).find((c) => c === sortBy.toUpperCase()) ??
+      defaultSortBy
+    );
+  };
+
+  const convertSortDirection = (sortDirection: string | null) => {
+    if (!sortDirection) return defaultSortDirection;
+    return (
+      Object.values(SortDirection).find(
+        (c) => c === sortDirection.toUpperCase()
+      ) ?? defaultSortDirection
+    );
+  }
+
   const getFilters = (): ProfileCollectedFilters => {
     const address = searchParams.get(SEARCH_PARAMS_FIELDS.address);
     const collection = searchParams.get(SEARCH_PARAMS_FIELDS.collection);
@@ -87,50 +144,19 @@ export default function UserPageCollected({
     const sortDirection = searchParams.get(SEARCH_PARAMS_FIELDS.sortDirection);
 
     const convertedAddress = convertAddress(address);
-
-    const convertedCollection = collection
-      ? Object.values(CollectedCollectionType).find(
-          (c) => c === collection.toUpperCase()
-        ) ?? null
-      : null;
-
+    const convertedCollection = convertCollection(collection);
     const isMemes = convertedCollection === CollectedCollectionType.MEMES;
 
-    const convertedSeized =
-      seized && isMemes
-        ? Object.values(CollectionSeized).find(
-            (c) => c === seized.toUpperCase()
-          ) ?? defaultSeized
-        : defaultSeized;
-
-    const convertedSzn =
-      szn && isMemes
-        ? Object.values(MEMES_SEASON).find(
-            (c) => SNZ_TO_SEARCH_PARAMS[c] === szn
-          ) ?? null
-        : null;
-
-    const convertedPage = page ? parseInt(page) : 1;
-
-    const convertedSortBy = sortBy
-      ? Object.values(CollectionSort).find((c) => c === sortBy.toUpperCase()) ??
-        defaultSortBy
-      : defaultSortBy;
-    const convertedSortDirection = sortDirection
-      ? Object.values(SortDirection).find(
-          (c) => c === sortDirection.toUpperCase()
-        ) ?? defaultSortDirection
-      : defaultSortDirection;
     return {
       handleOrWallet: convertedAddress ?? profile.profile?.handle ?? user,
       accountForConsolidations: !convertedAddress,
       collection: convertedCollection,
-      seized: convertedSeized,
-      szn: convertedSzn,
-      page: convertedPage,
+      seized: convertSeized({ seized, isMemes }),
+      szn: convertSzn({ szn, isMemes }),
+      page: page ? parseInt(page) : 1,
       pageSize: PAGE_SIZE,
-      sortBy: convertedSortBy,
-      sortDirection: convertedSortDirection,
+      sortBy: convertSortedBy(sortBy),
+      sortDirection: convertSortDirection(sortDirection),
     };
   };
 
@@ -262,7 +288,7 @@ export default function UserPageCollected({
         sort_direction: filters.sortDirection,
       };
 
-      if (!params.account_for_consolidations) {
+      if (!filters.accountForConsolidations) {
         params.account_for_consolidations = "false";
       }
 
@@ -311,6 +337,7 @@ export default function UserPageCollected({
           <UserPageCollectedFilters
             profile={profile}
             filters={filters}
+            loading={isFetching}
             setCollection={setCollection}
             setSortBy={setSortBy}
             setSeized={setSeized}

@@ -12,7 +12,10 @@ export default function UserPageCollectedFirstLoading() {
         <div className="tw-flow-root">
           <div className="tw-grid tw-grid-cols-4 tw-gap-6 tw-pb-2">
             {Array.from({ length: 20 }).map((_, index) => (
-              <div className="tw-w-f tw-pt-8 tw-h-96">
+              <div
+                key={`user-page-skeleton-${index}`}
+                className="tw-w-f tw-pt-8 tw-h-96"
+              >
                 <CommonCardSkeleton />
               </div>
             ))}

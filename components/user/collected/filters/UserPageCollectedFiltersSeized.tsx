@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { CollectionSeized } from "../../../../entities/IProfile";
 import UserPageCollectedFiltersTabs, {
   UserPageCollectedFiltersTabsItem,
