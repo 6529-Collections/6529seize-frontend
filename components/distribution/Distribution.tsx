@@ -42,7 +42,7 @@ interface Props {
   minting_link: string;
 }
 
-export default function Distribution(props: Props) {
+export default function Distribution(props: Readonly<Props>) {
   const router = useRouter();
   const [pageProps, setPageProps] = useState<{
     page: number;

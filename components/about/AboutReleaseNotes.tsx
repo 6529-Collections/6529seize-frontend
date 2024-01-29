@@ -5,7 +5,7 @@ interface Props {
   html: string;
 }
 
-export default function AboutReleaseNotes(props: Props) {
+export default function AboutReleaseNotes(props: Readonly<Props>) {
   return (
     <>
       <Container>

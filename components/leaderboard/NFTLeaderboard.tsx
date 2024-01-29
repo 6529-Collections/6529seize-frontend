@@ -30,7 +30,7 @@ enum Sort {
   total_balance = "total_balance",
 }
 
-export default function NFTLeaderboard(props: Props) {
+export default function NFTLeaderboard(props: Readonly<Props>) {
   const [view, setView] = useState<VIEW>(VIEW.CONSOLIDATION);
   const [pageProps, setPageProps] = useState<Props>(props);
   const [totalResults, setTotalResults] = useState(0);

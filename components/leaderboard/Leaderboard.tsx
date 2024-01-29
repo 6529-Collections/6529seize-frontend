@@ -198,7 +198,7 @@ export interface LeaderboardTDH extends BaseTDHMetrics {
   level: number;
 }
 
-export default function Leaderboard(props: Props) {
+export default function Leaderboard(props: Readonly<Props>) {
   const router = useRouter();
 
   const [view, setView] = useState<VIEW>(VIEW.CONSOLIDATION);

@@ -28,7 +28,7 @@ interface Props {
   wallets: string[];
 }
 
-export default function GradientPage(props: Props) {
+export default function GradientPage(props: Readonly<Props>) {
   const router = useRouter();
 
   const [nftId, setNftId] = useState<string>();

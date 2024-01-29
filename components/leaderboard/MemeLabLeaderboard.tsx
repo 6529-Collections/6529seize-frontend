@@ -24,7 +24,7 @@ enum Sort {
   card_balance = "balance",
 }
 
-export default function MemeLabLeaderboard(props: Props) {
+export default function MemeLabLeaderboard(props: Readonly<Props>) {
   const router = useRouter();
   const [pageProps, setPageProps] = useState<Props>(props);
   const [totalResults, setTotalResults] = useState(0);

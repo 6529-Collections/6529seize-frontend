@@ -11,7 +11,7 @@ interface Props {
   name: string;
 }
 
-export default function DownloadUrlWidget(props: Props) {
+export default function DownloadUrlWidget(props: Readonly<Props>) {
   const apiAuth = Cookies.get(API_AUTH_COOKIE);
   let headers = {};
   if (apiAuth) {

@@ -112,7 +112,7 @@
 }
 
 .mainNavLinkPadding {
-  padding-right: 18px;
+  padding-right: 15px;
 }
 
 .connectBtn {
@@ -264,4 +264,14 @@
 
 .dropdownItemHeader {
   color: $font-color-h !important;
+}
+
+.new {
+  margin-left: 8px;
+  background-color: white;
+  border-radius: 5px;
+  color: black;
+  font-size: smaller;
+  padding: 2px 5px;
+  border: 1px solid white;
 }

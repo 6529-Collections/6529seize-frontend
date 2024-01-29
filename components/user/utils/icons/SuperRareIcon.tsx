@@ -1,4 +1,11 @@
 export default function SuperRareIcon() {
+  // return (
+  //   <img
+  //     src="/SuperRare-icon.jpg"
+  //     alt="SuperRare"
+  //     className={`tw-rounded-full tw-object-contain tw-flex-shrink-0 ${className}`}
+  //   />
+  // );
   return (
     <svg
       className="tw-w-full tw-h-full d-flex align-items-center"

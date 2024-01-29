@@ -216,7 +216,11 @@ export class Time {
   }
 
   public toIsoDateString(): string {
-    return this.toIsoString().split('T')[0];
+    return this.toIsoString().split("T")[0];
+  }
+
+  public toIsoTimeString(): string {
+    return this.toIsoString().split("T")[1].split(".")[0];
   }
 
   public toString = (): string => {
@@ -233,7 +237,7 @@ export class Time {
     left = left - Time.minutes(mindf).toMillis();
     const secsdf = Math.floor(Time.millis(left).toSeconds());
     left = left - Time.seconds(secsdf).toMillis();
-    let str = '';
+    let str = "";
     if (daydf) {
       str += `${daydf}d `;
     }
@@ -254,23 +258,23 @@ export class Time {
 
     if (elapsed < MILLIS_IN_UNIT[TimeUnit.MINUTES]) {
       return (
-        Math.round(elapsed / MILLIS_IN_UNIT[TimeUnit.SECONDS]) + ' seconds'
+        Math.round(elapsed / MILLIS_IN_UNIT[TimeUnit.SECONDS]) + " seconds"
       );
     } else if (elapsed < MILLIS_IN_UNIT[TimeUnit.HOURS]) {
       return (
-        Math.round(elapsed / MILLIS_IN_UNIT[TimeUnit.MINUTES]) + ' minutes'
+        Math.round(elapsed / MILLIS_IN_UNIT[TimeUnit.MINUTES]) + " minutes"
       );
     } else if (elapsed < MILLIS_IN_UNIT[TimeUnit.DAYS]) {
-      return Math.round(elapsed / MILLIS_IN_UNIT[TimeUnit.HOURS]) + ' hours';
+      return Math.round(elapsed / MILLIS_IN_UNIT[TimeUnit.HOURS]) + " hours";
     } else if (elapsed < MILLIS_IN_UNIT[TimeUnit.DAYS] * 30) {
-      return Math.round(elapsed / MILLIS_IN_UNIT[TimeUnit.DAYS]) + ' days';
+      return Math.round(elapsed / MILLIS_IN_UNIT[TimeUnit.DAYS]) + " days";
     } else if (elapsed < MILLIS_IN_UNIT[TimeUnit.DAYS] * 365) {
       return (
-        Math.round(elapsed / (MILLIS_IN_UNIT[TimeUnit.DAYS] * 30)) + ' months'
+        Math.round(elapsed / (MILLIS_IN_UNIT[TimeUnit.DAYS] * 30)) + " months"
       );
     } else {
       return (
-        Math.round(elapsed / (MILLIS_IN_UNIT[TimeUnit.DAYS] * 365)) + ' years'
+        Math.round(elapsed / (MILLIS_IN_UNIT[TimeUnit.DAYS] * 365)) + " years"
       );
     }
   }
@@ -297,12 +301,12 @@ export class Time {
 }
 
 enum TimeUnit {
-  MILLIS = 'MILLIS',
-  SECONDS = 'SECONDS',
-  MINUTES = 'MINUTES',
-  HOURS = 'HOURS',
-  DAYS = 'DAYS',
-  WEEKS = 'WEEKS'
+  MILLIS = "MILLIS",
+  SECONDS = "SECONDS",
+  MINUTES = "MINUTES",
+  HOURS = "HOURS",
+  DAYS = "DAYS",
+  WEEKS = "WEEKS",
 }
 
 const MILLIS_IN_UNIT: Record<TimeUnit, number> = {
@@ -311,5 +315,5 @@ const MILLIS_IN_UNIT: Record<TimeUnit, number> = {
   MINUTES: 60000,
   HOURS: 3600000,
   DAYS: 86400000,
-  WEEKS: 604800000
+  WEEKS: 604800000,
 };

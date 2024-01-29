@@ -64,13 +64,7 @@ export function getUrlParams(
       filters += `&to_block=${toBlock}`;
     }
   } else {
-    filters += getDateFilters(
-      dateSelection,
-      fromDate,
-      toDate,
-      fromBlock,
-      toBlock
-    );
+    filters += getDateFilters(dateSelection, fromDate, toDate);
   }
 
   const collection =

@@ -1,0 +1,45 @@
+import { Col, Container, Row } from "react-bootstrap";
+import { useEffect } from "react";
+import { Info } from "../../../nextgen_entities";
+import NextGenCollectionHeader from "../NextGenCollectionHeader";
+import Breadcrumb, { Crumb } from "../../../../breadcrumb/Breadcrumb";
+import NextGenCollectionArt from "../NextGenCollectionArt";
+import { NextGenCollection } from "../../../../../entities/INextgen";
+
+interface Props {
+  collection: NextGenCollection;
+}
+
+export default function NextGenCollectionArtPage(props: Readonly<Props>) {
+  const crumbs: Crumb[] = [
+    { display: "Home", href: "/" },
+    { display: "NextGen", href: "/nextgen" },
+    {
+      display: `#${props.collection.id} - ${props.collection.name}`,
+      href: `/nextgen/collection/${props.collection.id}`,
+    },
+    { display: "Art" },
+  ];
+
+  return (
+    <>
+      <Breadcrumb breadcrumbs={crumbs} />
+      <Container className="pt-4 pb-4">
+        <Row>
+          <Col>
+            <NextGenCollectionHeader
+              collection={props.collection}
+              collection_link={true}
+              showDistributionLink={true}
+            />
+          </Col>
+        </Row>
+        <Row className="pt-4">
+          <Col>
+            <NextGenCollectionArt collection={props.collection} />
+          </Col>
+        </Row>
+      </Container>
+    </>
+  );
+}
