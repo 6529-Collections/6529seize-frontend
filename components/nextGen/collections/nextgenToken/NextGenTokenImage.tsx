@@ -8,7 +8,6 @@ export function NextGenTokenImage(
     hide_link?: boolean;
     hide_info?: boolean;
     show_animation?: boolean;
-    live?: boolean;
     is_fullscreen?: boolean;
     show_rarity_score?: boolean;
     show_statistical_score?: boolean;
@@ -66,11 +65,7 @@ export function NextGenTokenImage(
             height: props.is_fullscreen ? "100vh" : "80vh",
             marginBottom: "-8px",
           }}
-          src={
-            props.live
-              ? props.token.generator_url.replace("metadata", "html")
-              : props.token.animation_url
-          }
+          src={props.token.animation_url}
           title={props.token.name}
         />
       );

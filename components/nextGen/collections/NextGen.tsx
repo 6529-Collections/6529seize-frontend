@@ -104,7 +104,7 @@ export function DistributionLink(
     props.collection.allowlist_end
   );
 
-  if (alStatus === Status.LIVE || alStatus === Status.UPCOMING) {
+  if (alStatus !== Status.UNAVAILABLE) {
     return (
       <Container className="no-padding">
         <Row className={`pt-1 font-color ${props.class}`}>
@@ -117,6 +117,6 @@ export function DistributionLink(
         </Row>
       </Container>
     );
-    return <></>;
   }
+  return <></>;
 }

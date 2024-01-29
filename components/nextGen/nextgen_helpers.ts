@@ -1,4 +1,9 @@
-import { useContractRead, useContractReads, useContractWrite } from "wagmi";
+import {
+  useAccount,
+  useContractRead,
+  useContractReads,
+  useContractWrite,
+} from "wagmi";
 import {
   NEXTGEN_ADMIN,
   NEXTGEN_CHAIN_ID,
@@ -262,7 +267,8 @@ export function useCollectionLibraryAndScript(
         const d = data as any[];
         const ls: LibraryScript = {
           library: d[0],
-          script: d[1],
+          dependency_script: d[1],
+          script: d[2],
         };
         callback(ls);
       }
@@ -515,6 +521,7 @@ export function useSharedState() {
 }
 
 export function useMintSharedState() {
+  const account = useAccount();
   const [available, setAvailable] = useState<number>(0);
   const [delegators, setDelegators] = useState<string[]>([]);
   const [addressMintCounts, setAddressMintCounts] = useState<TokensPerAddress>({
@@ -527,9 +534,10 @@ export function useMintSharedState() {
   const [proofResponse, setProofResponse] = useState<ProofResponse[]>([]);
   const [burnProofResponse, setBurnProofResponse] =
     useState<ProofResponseBurn>();
-  const [mintForAddress, setMintForAddress] = useState<string>();
+  const [mintForAddress, setMintForAddress] = useState<string>(
+    account.isConnected ? (account.address as string) : ""
+  );
   const [tokenId, setTokenId] = useState<string>("");
-  const [mintingForDelegator, setMintingForDelegator] = useState(false);
   const salt = 0;
   const [mintCount, setMintCount] = useState<number>(0);
   const [mintToInput, setMintToInput] = useState<string>("");
@@ -555,8 +563,6 @@ export function useMintSharedState() {
     setMintForAddress,
     tokenId,
     setTokenId,
-    mintingForDelegator,
-    setMintingForDelegator,
     salt,
     mintCount,
     setMintCount,

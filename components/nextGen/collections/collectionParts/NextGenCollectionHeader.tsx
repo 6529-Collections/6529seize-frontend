@@ -7,7 +7,7 @@ import {
   Status,
 } from "../../nextgen_entities";
 import Image from "next/image";
-import { NEXTGEN_CHAIN_ID, NEXTGEN_CORE } from "../../nextgen_contracts";
+import { NEXTGEN_CHAIN_ID } from "../../nextgen_contracts";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import DateCountdown from "../../../date-countdown/DateCountdown";
@@ -192,6 +192,14 @@ export default function NextGenCollectionHeader(props: Readonly<Props>) {
             />
           }
           <span className="pt-2 pb-2 d-flex align-items-center justify-content-end gap-4">
+            {props.showDistributionLink && (
+              <span>
+                <DistributionLink
+                  collection={props.collection}
+                  class="text-center"
+                />
+              </span>
+            )}
             <FontAwesomeIcon
               className={`${styles.globeIcon} ${styles.marketplace}`}
               icon="globe"
@@ -257,12 +265,6 @@ export default function NextGenCollectionHeader(props: Readonly<Props>) {
             sm={12}
             md={6}>
             <NextGenCountdown collection={props.collection} />
-            {props.showDistributionLink && (
-              <DistributionLink
-                collection={props.collection}
-                class="text-center"
-              />
-            )}
           </Col>
         )}
       </Row>

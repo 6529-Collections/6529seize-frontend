@@ -21,6 +21,7 @@ import {
   NextGenAdminScriptsFormGroup,
   NextGenAdminTextFormGroup,
 } from "./NextGenAdminShared";
+import { NULL_MERKLE } from "../../../constants";
 
 export enum UpdateType {
   UPDATE_INFO,
@@ -65,6 +66,7 @@ export default function NextGenAdminUpdateCollection(props: Readonly<Props>) {
   const [license, setLicense] = useState("");
   const [baseURI, setBaseURI] = useState("");
   const [library, setLibrary] = useState("");
+  const [dependencyScript, setDependencyScript] = useState<string>("");
   const [scriptIndex, setScriptIndex] = useState("");
   const [scripts, setScripts] = useState<string[]>([]);
 
@@ -84,11 +86,14 @@ export default function NextGenAdminUpdateCollection(props: Readonly<Props>) {
   });
 
   useCollectionLibraryAndScript(collectionID, (data: LibraryScript) => {
-    setLibrary(data.library);
-    if (props.type === UpdateType.UPDATE_SCRIPT) {
-      setExistingScripts(data.script);
-    } else {
-      setScripts(data.script);
+    if (collectionID) {
+      setLibrary(data.library);
+      setDependencyScript(data.dependency_script);
+      if (props.type === UpdateType.UPDATE_SCRIPT) {
+        setExistingScripts(data.script);
+      } else {
+        setScripts(data.script);
+      }
     }
   });
 
@@ -102,6 +107,7 @@ export default function NextGenAdminUpdateCollection(props: Readonly<Props>) {
     params.push(license);
     params.push(baseURI);
     params.push(library);
+    params.push(dependencyScript);
 
     if (props.type === UpdateType.UPDATE_INFO) {
       params.push(UPDATE_INFO_INDEX);
@@ -267,6 +273,11 @@ export default function NextGenAdminUpdateCollection(props: Readonly<Props>) {
                   value={library}
                   setValue={setLibrary}
                 />
+                <NextGenAdminTextFormGroup
+                  title="Dependency Script"
+                  value={dependencyScript}
+                  setValue={setDependencyScript}
+                />
               </>
             )}
             {(props.type === UpdateType.UPDATE_INFO ||
@@ -275,13 +286,6 @@ export default function NextGenAdminUpdateCollection(props: Readonly<Props>) {
                 title="Base URI"
                 value={baseURI}
                 setValue={setBaseURI}
-              />
-            )}
-            {props.type === UpdateType.UPDATE_INFO && (
-              <NextGenAdminTextFormGroup
-                title="Library"
-                value={library}
-                setValue={setLibrary}
               />
             )}
             {props.type === UpdateType.UPDATE_SCRIPT && (

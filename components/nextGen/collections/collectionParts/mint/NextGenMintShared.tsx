@@ -2,11 +2,9 @@ import styles from "../../NextGen.module.scss";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Tippy from "@tippyjs/react";
 import { Form, Row, Col } from "react-bootstrap";
-import { useEnsName } from "wagmi";
+import { useAccount, useEnsName } from "wagmi";
 
-export function NextGenMintDelegatorOption(
-  props: Readonly<{ address: string }>
-) {
+export function NextGenMintAddressOption(props: Readonly<{ address: string }>) {
   const ens = useEnsName({
     address: props.address as `0x${string}`,
     chainId: 1,
@@ -19,83 +17,20 @@ export function NextGenMintDelegatorOption(
   );
 }
 
-export function NextGenMintForModeFormGroup(
+export function NextGenMintingFor(
   props: Readonly<{
     title: string;
-    connectedAddress: string | undefined;
-    delegators: number;
-    mintingForDelegator: boolean;
-    setMintingForDelegator: (mintFor: boolean) => void;
-  }>
-) {
-  return (
-    <Form.Group as={Row} className="pt-1 pb-1">
-      <Form.Label column sm={12} className="d-flex align-items-center">
-        {props.title}
-      </Form.Label>
-      <Col sm={12} className="d-flex align-items-center gap-3 flex-wrap">
-        <span className="d-flex align-items-center">
-          <Form.Check
-            checked={!props.mintingForDelegator}
-            className={styles.mintingForRadio}
-            type="radio"
-            label="Connected Wallet"
-            name="expiryRadio"
-            disabled={!props.connectedAddress}
-            onChange={() => {
-              props.setMintingForDelegator(false);
-            }}
-          />
-          <Tippy
-            content={`Mint for your connected wallet ${props.connectedAddress}`}
-            placement={"top"}
-            theme={"light"}>
-            <FontAwesomeIcon
-              className={styles.infoIcon}
-              icon="info-circle"></FontAwesomeIcon>
-          </Tippy>
-        </span>
-        <span className="d-flex align-items-center">
-          <Form.Check
-            checked={props.mintingForDelegator}
-            className={styles.mintingForRadio}
-            type="radio"
-            label="Delegator"
-            name="expiryRadio"
-            disabled={props.delegators === 0}
-            onChange={() => {
-              props.setMintingForDelegator(true);
-            }}
-          />
-          <Tippy
-            content={`Mint for an address that has delegated to you${
-              props.delegators === 0
-                ? ` - you currently have no delegators`
-                : ``
-            }`}
-            placement={"top"}
-            theme={"light"}>
-            <FontAwesomeIcon
-              className={styles.infoIcon}
-              icon="info-circle"></FontAwesomeIcon>
-          </Tippy>
-        </span>
-      </Col>
-    </Form.Group>
-  );
-}
-
-export function NextGenMintingForDelegator(
-  props: Readonly<{
     delegators: string[];
     mintForAddress: string | undefined;
     setMintForAddress: (address: string) => void;
   }>
 ) {
+  const account = useAccount();
+
   return (
     <Form.Group as={Row} className="pb-2">
       <Form.Label column sm={12} className="d-flex align-items-center">
-        Delegator
+        {props.title}
         <Tippy
           content={`The address you are minting for`}
           placement={"top"}
@@ -113,10 +48,13 @@ export function NextGenMintingForDelegator(
             props.setMintForAddress(e.currentTarget.value);
           }}>
           <option value="" disabled>
-            Select Delegator
+            Select Address to {props.title}
           </option>
+          {account.address && (
+            <NextGenMintAddressOption address={account.address} />
+          )}
           {props.delegators.map((delegator) => (
-            <NextGenMintDelegatorOption
+            <NextGenMintAddressOption
               address={delegator}
               key={`delegator-${delegator}`}
             />

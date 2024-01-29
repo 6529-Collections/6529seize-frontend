@@ -86,6 +86,7 @@ import {
   faMaximize,
   faPlayCircle,
   faPauseCircle,
+  faSpinner,
 } from "@fortawesome/free-solid-svg-icons";
 import Head from "next/head";
 import { Web3Modal } from "@web3modal/react";
@@ -163,7 +164,8 @@ library.add(
   faLightbulb,
   faMaximize,
   faPlayCircle,
-  faPauseCircle
+  faPauseCircle,
+  faSpinner
 );
 
 const CONTRACT_CHAINS: Chain[] = [mainnet];

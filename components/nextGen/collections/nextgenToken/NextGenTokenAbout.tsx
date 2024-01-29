@@ -14,6 +14,7 @@ import { NEXTGEN_CHAIN_ID, NEXTGEN_CORE } from "../../nextgen_contracts";
 import Image from "next/image";
 import Tippy from "@tippyjs/react";
 import { getOpenseaLink } from "../../nextgen_helpers";
+import NextGenTokenDownloads from "./NextGenTokenDownloads";
 
 interface Props {
   collection: NextGenCollection;
@@ -92,10 +93,12 @@ export default function NextgenTokenAbout(props: Readonly<Props>) {
           <span className="font-color-h">Owner</span>
           <span className="d-flex gap-2 align-items-center">
             {(props.token.burnt || isNullAddress(props.token.owner)) && (
-              <FontAwesomeIcon
-                icon="fire"
-                style={{ height: "22px", color: "#c51d34" }}
-              />
+              <Tippy content={"Burnt"} theme={"light"} delay={100}>
+                <FontAwesomeIcon
+                  icon="fire"
+                  style={{ height: "22px", color: "#c51d34" }}
+                />
+              </Tippy>
             )}
             <Address
               wallets={[props.token.owner as `0x${string}`]}
@@ -143,6 +146,11 @@ export default function NextgenTokenAbout(props: Readonly<Props>) {
           </span>
         </Col>
       </Row>
+      <Row>
+        <Col>
+          <NextGenTokenDownloads token={props.token} />
+        </Col>
+      </Row>
     </Container>
   );
 }
@@ -159,10 +167,10 @@ export function TraitScore(
     <span className="d-flex flex-column">
       <span className="font-color-h">{props.trait}</span>
       <span className="d-flex gap-2">
+        <span>#{props.rank.toLocaleString()}</span>
         <span>
           {Number(props.score.toFixed(props.places ?? 2)).toLocaleString()}
         </span>
-        <span>#{props.rank.toLocaleString()}</span>
       </span>
     </span>
   );

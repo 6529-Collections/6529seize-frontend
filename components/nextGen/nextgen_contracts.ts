@@ -35,9 +35,9 @@ export const NEXTGEN_CHAIN_NAME =
     : "eth-mainnet";
 
 export enum FunctionSelectors {
-  CREATE_COLLECTION = "0x02de55d0",
+  CREATE_COLLECTION = "0xe1fa8089",
   SET_COLLECTION_DATA = "0x7b5dbac5",
-  UPDATE_COLLECTION_INFO = "0x16e7c899",
+  UPDATE_COLLECTION_INFO = "0x73b40ae9",
   CHANGE_METADATA_VIEW = "0xf6a85dd0",
   CHANGE_TOKEN_DATA = "0x9a8490f3", // not implemented
   UPDATE_IMAGES_AND_ATTRIBUTES = "0xad241020",
@@ -59,7 +59,7 @@ export enum FunctionSelectors {
 
 export const NEXTGEN_CORE: NextGenContract = {
   [goerli.id]: "0x25a972f1bf3c816061ceaea59d2bb3fe4c130766",
-  [sepolia.id]: "0x16757ad6Ed2e26B17E7d0fD501908e88B79a6BAb",
+  [sepolia.id]: "0x60671e59a349589Ad74bE6cd643003a0Abb38cC3",
   [mainnet.id]: "0xC3390e3D2e98544DcBB6f235a3B15345A6728E8c",
   abi: NEXTGEN_CORE_ABI,
 };

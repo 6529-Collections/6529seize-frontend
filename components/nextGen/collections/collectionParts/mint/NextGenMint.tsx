@@ -71,8 +71,6 @@ export default function NextGenMint(props: Readonly<Props>) {
     setAvailable,
     delegators,
     setDelegators,
-    mintingForDelegator,
-    setMintingForDelegator,
     mintForAddress,
     setMintForAddress,
     addressMintCounts,
@@ -162,13 +160,8 @@ export default function NextGenMint(props: Readonly<Props>) {
       abi: NEXTGEN_CORE.abi,
       chainId: NEXTGEN_CHAIN_ID,
       watch: true,
-      enabled: mintingForDelegator
-        ? account.isConnected && mintForAddress != ""
-        : account.isConnected,
-      args: [
-        props.collection.id,
-        mintingForDelegator ? mintForAddress : account.address,
-      ],
+      enabled: account.isConnected,
+      args: [props.collection.id, mintForAddress],
     };
   }
 
@@ -284,7 +277,6 @@ export default function NextGenMint(props: Readonly<Props>) {
           mint_price={props.mint_price}
           mint_counts={addressMintCounts}
           delegators={delegators}
-          mintingForDelegator={setMintingForDelegator}
           mintForAddress={setMintForAddress}
           fetchingMintCounts={fetchingMintCounts}
           refreshMintCounts={() => {
@@ -301,7 +293,6 @@ export default function NextGenMint(props: Readonly<Props>) {
           mint_price={props.mint_price}
           mint_counts={addressMintCounts}
           delegators={delegators}
-          mintingForDelegator={setMintingForDelegator}
           mintForAddress={setMintForAddress}
           fetchingMintCounts={fetchingMintCounts}
           refreshMintCounts={() => {
@@ -397,8 +388,7 @@ export default function NextGenMint(props: Readonly<Props>) {
               <Col className="d-flex gap-2">
                 <span
                   className={`mb-0 d-flex align-items-center gap-2 no-wrap ${styles.nextgenTag}`}>
-                  <span>Mint Cost</span>
-                  <span>|</span>
+                  <span>Mint Cost:</span>
                   <span className="font-bolder">
                     {props.mint_price > 0 ? fromGWEI(props.mint_price) : `Free`}{" "}
                     {props.mint_price > 0 ? `ETH` : ``}
@@ -406,8 +396,7 @@ export default function NextGenMint(props: Readonly<Props>) {
                 </span>
                 <span
                   className={`mb-0 d-flex align-items-center gap-2 no-wrap ${styles.nextgenTag}`}>
-                  <span>Sales Model</span>
-                  <span>|</span>
+                  <span>Sales Model:</span>
                   <span className="font-bolder">{getSalesModel()}</span>
                 </span>
               </Col>

@@ -20,7 +20,6 @@
 
 .modeIconSelected {
   color: $font-color;
-  pointer-events: none;
 }
 
 .lightBox {
@@ -82,5 +81,16 @@
 
   &:hover {
     transform: scale(1.015);
+  }
+}
+
+.downloadBtn {
+  padding: 0;
+  background-color: transparent !important;
+  border: none !important;
+  display: flex;
+
+  &::after {
+    display: none !important;
   }
 }

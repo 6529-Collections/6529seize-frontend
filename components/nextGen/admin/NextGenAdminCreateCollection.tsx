@@ -8,6 +8,7 @@ import {
   NextGenAdminTextFormGroup,
   NextGenAdminHeadingRow,
 } from "./NextGenAdminShared";
+import { NULL_MERKLE } from "../../../constants";
 
 interface Props {
   close: () => void;
@@ -21,6 +22,7 @@ export default function NextGenAdminCreateCollection(props: Readonly<Props>) {
   const [license, setLicense] = useState("");
   const [baseURI, setBaseURI] = useState("");
   const [library, setLibrary] = useState("");
+  const [dependencyScript, setDependencyScript] = useState<string>(NULL_MERKLE);
   const [scripts, setScripts] = useState<string[]>([]);
 
   const [errors, setErrors] = useState<string[]>([]);
@@ -57,6 +59,9 @@ export default function NextGenAdminCreateCollection(props: Readonly<Props>) {
     if (!library) {
       errors.push("Library is required");
     }
+    if (!dependencyScript) {
+      errors.push("Dependency script is required");
+    }
     if (scripts.length === 0) {
       errors.push("Script is required");
     }
@@ -81,6 +86,7 @@ export default function NextGenAdminCreateCollection(props: Readonly<Props>) {
           license,
           baseURI,
           library,
+          dependencyScript,
           scripts,
         ],
       });
@@ -134,6 +140,11 @@ export default function NextGenAdminCreateCollection(props: Readonly<Props>) {
               title="Library"
               value={library}
               setValue={setLibrary}
+            />
+            <NextGenAdminTextFormGroup
+              title="Dependency Script"
+              value={dependencyScript}
+              setValue={setDependencyScript}
             />
             <NextGenAdminScriptsFormGroup
               scripts={scripts}

@@ -29,10 +29,7 @@ import {
   getStatusFromDates,
   useMintSharedState,
 } from "../../../nextgen_helpers";
-import {
-  NextGenMintForModeFormGroup,
-  NextGenMintingForDelegator,
-} from "./NextGenMintShared";
+import { NextGenMintingFor } from "./NextGenMintShared";
 import { NextGenCollection } from "../../../../../entities/INextgen";
 import { Spinner } from "./NextGenMint";
 import DotLoader from "../../../../dotLoader/DotLoader";
@@ -63,8 +60,7 @@ interface Props {
   mint_price: number;
   mint_counts: TokensPerAddress;
   delegators: string[];
-  mintingForDelegator: (mintingForDelegator: boolean) => void;
-  mintForAddress: (mintForAddress: string | undefined) => void;
+  mintForAddress: (mintForAddress: string) => void;
   fetchingMintCounts: boolean;
   refreshMintCounts: () => void;
 }
@@ -106,8 +102,6 @@ export default function NextGenMintWidget(props: Readonly<Props>) {
     setProofResponse,
     mintForAddress,
     setMintForAddress,
-    mintingForDelegator,
-    setMintingForDelegator,
     salt,
     mintCount,
     setMintCount,
@@ -120,17 +114,6 @@ export default function NextGenMintWidget(props: Readonly<Props>) {
     errors,
     setErrors,
   } = useMintSharedState();
-
-  useEffect(() => {
-    if (mintingForDelegator) {
-      if (!mintForAddress) {
-        setMintForAddress(props.delegators[0]);
-      }
-    } else {
-      setMintForAddress(undefined);
-    }
-    props.mintingForDelegator(mintingForDelegator);
-  }, [mintingForDelegator]);
 
   useEffect(() => {
     props.mintForAddress(mintForAddress);
@@ -161,11 +144,10 @@ export default function NextGenMintWidget(props: Readonly<Props>) {
 
   useEffect(() => {
     if (account.address && props.collection.allowlist_end > 0) {
-      let wallet = mintingForDelegator ? mintForAddress : account.address;
-      if (wallet) {
+      if (mintForAddress) {
         setFetchingProofs(true);
         const merkleRoot = props.collection.merkle_root;
-        const url = `${process.env.API_ENDPOINT}/api/nextgen/proofs/${merkleRoot}/${wallet}`;
+        const url = `${process.env.API_ENDPOINT}/api/nextgen/proofs/${merkleRoot}/${mintForAddress}`;
         fetchUrl(url).then((response: ProofResponse[]) => {
           const proofResponses: ProofResponse[] = [];
           if (response.length > 0) {
@@ -281,7 +263,7 @@ export default function NextGenMintWidget(props: Readonly<Props>) {
           currentProof && alStatus == Status.LIVE
             ? currentProof.proof.proof
             : [],
-          mintingForDelegator ? mintForAddress : NULL_ADDRESS,
+          mintForAddress ?? NULL_ADDRESS,
           salt,
         ],
       });
@@ -428,20 +410,12 @@ export default function NextGenMintWidget(props: Readonly<Props>) {
               setErrors([]);
               setIsMinting(false);
             }}>
-            <NextGenMintForModeFormGroup
-              title="Mint For"
-              connectedAddress={account.address}
-              delegators={props.delegators.length}
-              mintingForDelegator={mintingForDelegator}
-              setMintingForDelegator={setMintingForDelegator}
+            <NextGenMintingFor
+              title={"Mint For"}
+              delegators={props.delegators}
+              mintForAddress={mintForAddress}
+              setMintForAddress={setMintForAddress}
             />
-            {mintingForDelegator && (
-              <NextGenMintingForDelegator
-                delegators={props.delegators}
-                mintForAddress={mintForAddress}
-                setMintForAddress={setMintForAddress}
-              />
-            )}
             <Form.Group as={Row} className="pb-2">
               <Form.Label column sm={12} className="d-flex align-items-center">
                 Mint To

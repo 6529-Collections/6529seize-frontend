@@ -10,6 +10,7 @@ import { ContentView } from "../collectionParts/NextGenCollection";
 import { isNullAddress } from "../../../../helpers/Helpers";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import router, { useRouter } from "next/router";
+import Tippy from "@tippyjs/react";
 
 interface Props {
   collection: NextGenCollection;
@@ -125,10 +126,12 @@ export default function NextGenToken(props: Readonly<Props>) {
                     <h2 className="mb-0">{props.token.name}</h2>
                     {(props.token.burnt ||
                       isNullAddress(props.token.owner)) && (
-                      <FontAwesomeIcon
-                        icon="fire"
-                        style={{ height: "35px", color: "#c51d34" }}
-                      />
+                      <Tippy content={"Burnt"} theme={"light"} delay={100}>
+                        <FontAwesomeIcon
+                          icon="fire"
+                          style={{ height: "35px", color: "#c51d34" }}
+                        />
+                      </Tippy>
                     )}
                   </Col>
                 </Row>

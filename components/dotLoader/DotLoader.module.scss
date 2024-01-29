@@ -36,3 +36,20 @@
     opacity: 1;
   }
 }
+
+.spinner {
+  cursor: pointer;
+  height: 24px;
+  width: 24px;
+  animation: circle 0.5s steps(8) infinite;
+}
+
+@keyframes circle {
+  from {
+    transform: rotate(90deg);
+  }
+
+  to {
+    transform: rotate(450deg);
+  }
+}

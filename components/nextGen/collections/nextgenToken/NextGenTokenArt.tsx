@@ -1,12 +1,13 @@
 import styles from "./NextGenToken.module.scss";
 import { useEffect, useRef, useState } from "react";
 import { NextGenCollection, NextGenToken } from "../../../../entities/INextgen";
-import { Container, Row, Col } from "react-bootstrap";
+import { Container, Row, Col, Dropdown } from "react-bootstrap";
 import { NextGenTokenImage } from "./NextGenTokenImage";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import useDownloader from "react-use-downloader";
 import Tippy from "@tippyjs/react";
 import Lightbulb from "./Lightbulb";
+import { Quality, getUrl } from "./NextGenTokenDownloads";
 
 interface Props {
   collection: NextGenCollection;
@@ -14,9 +15,8 @@ interface Props {
 }
 
 enum Mode {
-  DEFAULT = "Default",
+  HTML = "HTML",
   IMAGE = "Image",
-  LIVE = "Live",
 }
 
 export function NextGenTokenArtImage(
@@ -32,17 +32,17 @@ export function NextGenTokenArtImage(
       hide_info={true}
       hide_link={true}
       show_animation={props.mode !== Mode.IMAGE}
-      live={props.mode === Mode.LIVE}
       is_fullscreen={props.is_fullscreen}
     />
   );
 }
 
 export default function NextGenToken(props: Readonly<Props>) {
-  const [mode, setMode] = useState<Mode>(Mode.DEFAULT);
+  const [mode, setMode] = useState<Mode>(Mode.HTML);
   const [isFullScreen, setIsFullScreen] = useState<boolean>(false);
   const [showBlackbox, setShowBlackbox] = useState<boolean>(false);
   const [showLightbox, setShowLightbox] = useState<boolean>(false);
+  const [showDownloadDropdown, setShowDownloadDropdown] = useState(false);
 
   const tokenImageRef = useRef(null);
 
@@ -89,12 +89,12 @@ export default function NextGenToken(props: Readonly<Props>) {
 
   function getCurrentHref() {
     switch (mode) {
-      case Mode.DEFAULT:
+      case Mode.HTML:
         return {
           href: props.token.animation_url,
           extension: "html",
         };
-      case Mode.LIVE:
+      case Mode.IMAGE:
         return {
           href: props.token.generator_url.replace("metadata", "html"),
           extension: "html",
@@ -111,14 +111,14 @@ export default function NextGenToken(props: Readonly<Props>) {
       <>
         <span className="d-flex gap-3">
           <Tippy
-            content="Default"
+            content="HTML"
             hideOnClick={true}
             placement="bottom"
             theme="light"
             delay={100}>
             <FontAwesomeIcon
-              className={getModeStyle(Mode.DEFAULT)}
-              onClick={() => setMode(Mode.DEFAULT)}
+              className={getModeStyle(Mode.HTML)}
+              onClick={() => setMode(Mode.HTML)}
               icon="play-circle"
             />
           </Tippy>
@@ -134,18 +134,6 @@ export default function NextGenToken(props: Readonly<Props>) {
               icon="image"
             />
           </Tippy>
-          <Tippy
-            content="Live"
-            hideOnClick={true}
-            placement="bottom"
-            theme="light"
-            delay={100}>
-            <FontAwesomeIcon
-              className={getModeStyle(Mode.LIVE)}
-              onClick={() => setMode(Mode.LIVE)}
-              icon="tower-broadcast"
-            />
-          </Tippy>
         </span>
         <span className="d-flex gap-3">
           <Lightbulb
@@ -158,24 +146,37 @@ export default function NextGenToken(props: Readonly<Props>) {
             className={styles.modeIcon}
             onClick={() => setShowLightbox(true)}
           />
-          <Tippy
-            content="Download"
-            hideOnClick={true}
-            placement="bottom"
-            theme="light"
-            delay={100}>
-            <FontAwesomeIcon
-              className={styles.modeIcon}
-              onClick={() => {
-                const href = getCurrentHref();
-                downloader.download(
-                  href.href,
-                  `${props.token.name} - ${mode}.${href.extension}`
-                );
-              }}
-              icon="download"
-            />
-          </Tippy>
+          {/* <NextGenTokenDownloadButton
+            class={styles.modeIcon}
+            token={props.token}
+            quality={Quality.HD}
+          /> */}
+          <Dropdown drop={"down-centered"} className="d-flex">
+            <Dropdown.Toggle className={styles.downloadBtn}>
+              <Tippy
+                content="Download"
+                hideOnClick={true}
+                placement="bottom"
+                theme="light"
+                delay={100}>
+                <FontAwesomeIcon className={styles.modeIcon} icon="download" />
+              </Tippy>
+            </Dropdown.Toggle>
+            <Dropdown.Menu show={showDownloadDropdown}>
+              {Object.values(Quality).map((quality) => (
+                <Dropdown.Item
+                  key={quality}
+                  onClick={() => {
+                    downloader.download(
+                      getUrl(props.token, quality),
+                      `${props.token.id}_${quality.toUpperCase()}`
+                    );
+                  }}>
+                  {quality}
+                </Dropdown.Item>
+              ))}
+            </Dropdown.Menu>
+          </Dropdown>
           <Tippy
             content="Open in new tab"
             hideOnClick={true}

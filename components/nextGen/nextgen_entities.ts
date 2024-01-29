@@ -9,6 +9,7 @@ export interface Info {
 
 export interface LibraryScript {
   library: string;
+  dependency_script: string;
   script: string[];
 }
 

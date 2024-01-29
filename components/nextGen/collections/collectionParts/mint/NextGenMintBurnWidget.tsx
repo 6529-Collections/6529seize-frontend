@@ -27,10 +27,7 @@ import {
   getStatusFromDates,
   useMintSharedState,
 } from "../../../nextgen_helpers";
-import {
-  NextGenMintForModeFormGroup,
-  NextGenMintingForDelegator,
-} from "./NextGenMintShared";
+import { NextGenMintingFor } from "./NextGenMintShared";
 import { NextGenCollection } from "../../../../../entities/INextgen";
 import { Spinner } from "./NextGenMint";
 
@@ -41,8 +38,7 @@ interface Props {
   mint_price: number;
   mint_counts: TokensPerAddress;
   delegators: string[];
-  mintingForDelegator: (mintingForDelegator: boolean) => void;
-  mintForAddress: (mintForAddress: string | undefined) => void;
+  mintForAddress: (mintForAddress: string) => void;
   fetchingMintCounts: boolean;
   refreshMintCounts: () => void;
 }
@@ -69,8 +65,6 @@ export default function NextGenMintBurnWidget(props: Readonly<Props>) {
     setMintForAddress,
     tokenId,
     setTokenId,
-    mintingForDelegator,
-    setMintingForDelegator,
     salt,
     isMinting,
     setIsMinting,
@@ -111,7 +105,7 @@ export default function NextGenMintBurnWidget(props: Readonly<Props>) {
   }
 
   useEffect(() => {
-    const burnAddress = mintingForDelegator ? mintForAddress : account.address;
+    const burnAddress = mintForAddress;
     if (burnAddress) {
       getNftsForContractAndOwner(
         NEXTGEN_CHAIN_ID,
@@ -123,24 +117,13 @@ export default function NextGenMintBurnWidget(props: Readonly<Props>) {
         setTokensOwnedForBurnAddress(filteredTokens);
       });
     }
-  }, [account.address, mintingForDelegator, mintForAddress]);
+  }, [account.address, mintForAddress]);
 
   useEffect(() => {
     setTokenId("");
     setTokensOwnedForBurnAddressLoaded(false);
     setTokensOwnedForBurnAddress([]);
-  }, [mintingForDelegator, mintForAddress]);
-
-  useEffect(() => {
-    if (mintingForDelegator) {
-      if (!mintForAddress) {
-        setMintForAddress(props.delegators[0]);
-      }
-    } else {
-      setMintForAddress(undefined);
-    }
-    props.mintingForDelegator(mintingForDelegator);
-  }, [mintingForDelegator]);
+  }, [mintForAddress]);
 
   useEffect(() => {
     props.mintForAddress(mintForAddress);
@@ -310,20 +293,12 @@ export default function NextGenMintBurnWidget(props: Readonly<Props>) {
                 </Table>
               </Col>
             </Row>
-            <NextGenMintForModeFormGroup
-              title="Burn to Mint For"
-              connectedAddress={account.address}
-              delegators={props.delegators.length}
-              mintingForDelegator={mintingForDelegator}
-              setMintingForDelegator={setMintingForDelegator}
+            <NextGenMintingFor
+              title="Burn and Mint For"
+              delegators={props.delegators}
+              mintForAddress={mintForAddress}
+              setMintForAddress={setMintForAddress}
             />
-            {mintingForDelegator && (
-              <NextGenMintingForDelegator
-                delegators={props.delegators}
-                mintForAddress={mintForAddress}
-                setMintForAddress={setMintForAddress}
-              />
-            )}
             <Form.Group as={Row} className="pt-1 pb-1">
               <Form.Label column sm={12} className="d-flex align-items-center">
                 Mint To
@@ -336,9 +311,7 @@ export default function NextGenMintBurnWidget(props: Readonly<Props>) {
                     icon="info-circle"></FontAwesomeIcon>
                 </Tippy>
               </Form.Label>
-              <Col sm={12}>
-                {mintingForDelegator ? mintForAddress : account.address}
-              </Col>
+              <Col sm={12}>{mintForAddress}</Col>
             </Form.Group>
             <Form.Group as={Row} className="pt-1 pb-1">
               <Form.Label column sm={12}>
