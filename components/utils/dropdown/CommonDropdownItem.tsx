@@ -11,7 +11,9 @@ export default function CommonDropdownItem<T>({
 }) {
   return (
     <li
-      className="tw-h-full tw-flex tw-items-center tw-justify-between tw-text-white tw-rounded-lg tw-relative tw-cursor-pointer tw-select-none tw-p-2 hover:tw-bg-iron-700 tw-transition tw-duration-300 tw-ease-out"
+      key={item.key}
+      tabIndex={0}
+      className="tw-h-full tw-flex tw-items-center tw-justify-between tw-text-white tw-rounded-lg tw-relative tw-cursor-pointer tw-select-none tw-p-2 hover:tw-bg-iron-700 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400 tw-transition tw-duration-300 tw-ease-out"
       onClick={() => setActiveItem(item.value)}
     >
       <div className="tw-w-44 tw-truncate">

@@ -7,7 +7,7 @@ export default function UserPageCollectedCard({
   readonly card: CollectedCard;
 }) {
   return (
-    <div className="tw-cursor-pointer tw-bg-iron-900 tw-rounded-lg tw-overflow-hidden tw-px-2 tw-ring-1 tw-ring-inset tw-ring-iron-800 tw-transition tw-duration-500 tw-ease-out">
+    <div className="tw-cursor-pointer tw-bg-gradient-to-br tw-from-iron-900 tw-to-white/5 tw-rounded-lg tw-overflow-hidden tw-px-2 tw-pt-2 tw-ring-1 tw-ring-inset tw-ring-iron-700 hover:tw-to-white/10 tw-transition-opacity tw-duration-500 tw-ease-out">
       <a className="tw-w-full tw-max-w-full">
         <div className="md:tw-h-[18.75rem] tw-text-center">
           <img
@@ -18,10 +18,10 @@ export default function UserPageCollectedCard({
         </div>
       </a>
       <div className="tw-pt-4 tw-pb-4 tw-px-2">
-        <span className="tw-text-md tw-font-medium tw-text-iron-50">
+        <span className="tw-text-md tw-font-medium tw-text-iron-300">
           {card.collection}
         </span>
-        <div className="tw-pt-2 tw-flex tw-flex-col tw-gap-y-2 tw-divide-y tw-divide-solid tw-divide-iron-700 tw-divide-x-0">
+        <div className="tw-pt-1.5 tw-flex tw-flex-col tw-gap-y-2.5 tw-divide-y tw-divide-solid tw-divide-iron-700 tw-divide-x-0">
           <div className="tw-flex tw-justify-between">
             <span className="tw-text-md tw-font-medium tw-text-iron-50">
               {card.token_name}
@@ -30,16 +30,16 @@ export default function UserPageCollectedCard({
               {card.seized_count}x
             </span>
           </div>
-          <div className="tw-pt-2 tw-flex tw-items-center tw-justify-between">
+          <div className="tw-pt-2.5 tw-flex tw-items-center tw-justify-between">
             <span className="tw-text-md tw-font-medium">
-              <span className="tw-mr-2 tw-text-iron-50">
+              <span className="tw-mr-1 tw-text-iron-50">
                 {formatNumberWithCommas(+(card.tdh ?? 0).toFixed(0))}
               </span>
-              <span className="tw-text-iron-400 ">TDH</span>
+              <span className="tw-text-iron-400">TDH</span>
             </span>
             <span className="tw-text-md tw-font-medium">
-              <span className="tw-mr-2  tw-text-iron-50">{card.rank}</span>
-              <span className="tw-text-iron-400 ">Rank</span>
+              <span className="tw-mr-1 tw-text-iron-50">{card.rank}</span>
+              <span className="tw-text-iron-400">Rank</span>
             </span>
           </div>
         </div>

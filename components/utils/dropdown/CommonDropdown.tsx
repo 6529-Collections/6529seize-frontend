@@ -49,6 +49,7 @@ export default function CommonDropdown<T>({
       <div className="tw-relative tw-w-full sm:tw-w-auto">
         <button
           type="button"
+          aria-haspopup="true"
           onClick={toggleOpen}
           className="tw-text-left tw-block tw-whitespace-nowrap tw-w-full sm:tw-w-auto tw-rounded-lg tw-border-0 tw-py-2.5 tw-pl-3.5 tw-pr-10 tw-bg-iron-900 focus:tw-bg-transparent tw-text-iron-300 tw-font-semibold tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-700 
           focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 tw-text-base sm:tw-text-sm sm:tw-leading-6 hover:tw-bg-iron-800 tw-transition tw-duration-300 tw-ease-out"
@@ -76,7 +77,7 @@ export default function CommonDropdown<T>({
       <AnimatePresence mode="wait" initial={false}>
         {isOpen && (
           <motion.div
-            className="tw-origin-top-right tw-absolute xl:tw-right-0 tw-mt-1 tw-w-full sm:tw-w-72 tw-rounded-lg tw-shadow-xl tw-bg-iron-800 tw-ring-1 tw-ring-black tw-ring-opacity-5"
+            className="tw-origin-top-right tw-absolute tw-z-10 xl:tw-right-0 tw-mt-1 tw-w-full sm:tw-w-72 tw-rounded-lg tw-shadow-xl tw-bg-iron-800 tw-ring-1 tw-ring-black tw-ring-opacity-5"
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}

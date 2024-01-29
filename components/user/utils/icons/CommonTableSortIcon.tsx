@@ -42,6 +42,7 @@ export default function CommonTableSortIcon({
       className={`${classes} -tw-mt-0.5 tw-ml-2 tw-transition tw-duration-300 tw-ease-out tw-h-4 tw-w-4`}
       viewBox="0 0 24 24"
       fill="none"
+      aria-hidden="true"
       xmlns="http://www.w3.org/2000/svg"
     >
       <path

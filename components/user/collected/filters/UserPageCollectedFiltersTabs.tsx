@@ -28,7 +28,7 @@ export default function UserPageCollectedFiltersTabs<T>(
   const { tabs, activeTab, setSelected } = props;
 
   return (
-    <div className="tw-inline-flex tw-rounded-lg tw-overflow-hidden tw-w-full sm:tw-w-auto">
+    <div className="tw-inline-flex tw-rounded-lg tw-w-full sm:tw-w-auto -tw-space-x-px">
       {Object.values(tabs).map((tab, i) => (
         <UserPageCollectedFiltersTab
           key={tab.key}
