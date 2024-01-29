@@ -288,3 +288,13 @@ export const SOCIAL_MEDIA_VERIFICATION_POSTS_STATEMENT_TYPES = [
 
 export type SOCIAL_MEDIA_VERIFICATION_POSTS_STATEMENT_TYPE =
   (typeof SOCIAL_MEDIA_VERIFICATION_POSTS_STATEMENT_TYPES)[number];
+
+export interface AllowlistPhase {
+  readonly added_by: string; // wallet
+  readonly al_type: string; // search for allowlist
+  readonly collection_id: number;
+  readonly end_time: number;
+  readonly merkle_root: string;
+  readonly phase: string;
+  readonly start_time: number;
+}

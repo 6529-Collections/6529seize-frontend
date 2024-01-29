@@ -11,6 +11,7 @@ import { Page } from "../../../helpers/Types";
 import { DELEGATION_ALL_ADDRESS, MEMES_CONTRACT } from "../../../constants";
 import EthereumIcon from "../utils/icons/EthereumIcon";
 import { formatAddress } from "../../../helpers/Helpers";
+import { watchEvent } from "viem/_types/actions/public/watchEvent";
 
 const VALID_DELEGATION_ADDRESSES = [DELEGATION_ALL_ADDRESS, MEMES_CONTRACT].map(
   (c) => c.toLowerCase()
@@ -123,6 +124,16 @@ export default function UserPageMints({
     }
     setMintingWallets(wallets);
   }, [data]);
+
+  const { data: collectionPhses } = useQuery({
+    queryKey: [QueryKey.COLLECTION_PHASES, "nextgen"],
+    queryFn: async () =>
+      await commonApiFetch<Page<WalletDelegation>>({
+        endpoint: `nextgen/allowlist_phases`,
+      }),
+  });
+
+  useEffect(() => console.log(collectionPhses), [collectionPhses]);
 
   return (
     <div className="tailwind-scope">
