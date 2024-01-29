@@ -170,7 +170,7 @@ export default function NextGenAdminUploadAL(props: Readonly<Props>) {
               <Form.Label>Phase</Form.Label>
               <Form.Control
                 type="string"
-                placeholder="Phase 1"
+                placeholder="...Phase name"
                 value={phaseName}
                 onChange={(e: any) => setPhaseName(e.target.value)}
               />

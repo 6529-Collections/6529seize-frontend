@@ -132,50 +132,75 @@ export default function NextGenAdminAirdropTokens(props: Readonly<Props>) {
               }}
             />
             <Form.Group className="mb-3">
-              <Form.Label>Recipients</Form.Label>
+              <Form.Label>
+                Recipients {recipients.length > 0 && `x${recipients.length}`}
+              </Form.Label>
               <Form.Control
                 as="textarea"
                 rows={3}
                 placeholder="One line per entry"
                 value={recipients.join("\n")}
                 onChange={(e) => {
-                  setRecipients(e.target.value.split("\n"));
+                  if (e.target.value) {
+                    setRecipients(e.target.value.split("\n"));
+                  } else {
+                    setRecipients([]);
+                  }
                 }}
               />
             </Form.Group>
             <Form.Group className="mb-3">
-              <Form.Label>Token Data</Form.Label>
+              <Form.Label>
+                Token Data {tokenData.length > 0 && `x${tokenData.length}`}
+              </Form.Label>
               <Form.Control
                 as="textarea"
                 rows={3}
                 placeholder="One line per entry"
                 value={tokenData.join("\n")}
                 onChange={(e) => {
-                  setTokenData(e.target.value.split("\n"));
+                  if (e.target.value) {
+                    setTokenData(e.target.value.split("\n"));
+                  } else {
+                    setTokenData([]);
+                  }
                 }}
               />
             </Form.Group>
             <Form.Group className="mb-3">
-              <Form.Label>Salts</Form.Label>
+              <Form.Label>
+                Salts {salts.length > 0 && `x${salts.length}`}
+              </Form.Label>
               <Form.Control
                 as="textarea"
                 rows={3}
                 placeholder="One line per entry"
                 value={salts.join("\n")}
                 onChange={(e) => {
-                  setSalts(e.target.value.split("\n"));
+                  if (e.target.value) {
+                    setSalts(e.target.value.split("\n"));
+                  } else {
+                    setSalts([]);
+                  }
                 }}
               />
             </Form.Group>
             <Form.Group className="mb-3">
-              <Form.Label>Token Counts</Form.Label>
+              <Form.Label>
+                Token Counts{" "}
+                {tokenCounts.length > 0 && `x${tokenCounts.length}`}
+              </Form.Label>
               <Form.Control
                 as="textarea"
                 rows={3}
                 placeholder="One line per entry"
                 value={tokenCounts.join("\n")}
                 onChange={(e) => {
-                  setTokenCounts(e.target.value.split("\n"));
+                  if (e.target.value) {
+                    setTokenCounts(e.target.value.split("\n"));
+                  } else {
+                    setTokenCounts([]);
+                  }
                 }}
               />
             </Form.Group>
