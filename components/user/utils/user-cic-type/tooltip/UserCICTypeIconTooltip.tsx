@@ -60,8 +60,9 @@ export default function UserCICTypeIconTooltip({
       {cicType === CICType.INACCURATE && (
         <div className="mt-2">
           <p className="tw-mb-0 tw-mt-1 tw-text-sm tw-text-iron-400 tw-font-medium">
-            This profile will lose its handle on Jan 4, 2024 at midnight UTC if
-            its rating does not turn positive before then.
+            This profile is at risk of losing its handle if its CIC does not
+            turn positive. The detailed process will go live after the
+            experimental period is complete.
           </p>
         </div>
       )}
