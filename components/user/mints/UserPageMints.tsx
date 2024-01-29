@@ -1,10 +1,10 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQueries, useQuery } from "@tanstack/react-query";
 import {
   IProfileAndConsolidations,
   IProfileConsolidation,
   WalletDelegation,
 } from "../../../entities/IProfile";
-import { useEffect, useState } from "react";
+import { use, useEffect, useState } from "react";
 import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
 import { commonApiFetch } from "../../../services/api/common-api";
 import { Page } from "../../../helpers/Types";
@@ -12,6 +12,11 @@ import { DELEGATION_ALL_ADDRESS, MEMES_CONTRACT } from "../../../constants";
 import EthereumIcon from "../utils/icons/EthereumIcon";
 import { formatAddress } from "../../../helpers/Helpers";
 import { watchEvent } from "viem/_types/actions/public/watchEvent";
+import {
+  NextgenAllowlist,
+  NextgenAllowlistCollection,
+} from "../../../entities/INextgen";
+import UserPageMintsPhases from "./UserPageMintsPhases";
 
 const VALID_DELEGATION_ADDRESSES = [DELEGATION_ALL_ADDRESS, MEMES_CONTRACT].map(
   (c) => c.toLowerCase()
@@ -19,49 +24,28 @@ const VALID_DELEGATION_ADDRESSES = [DELEGATION_ALL_ADDRESS, MEMES_CONTRACT].map(
 
 const VALID_USE_CASES = [1, 2];
 
+export interface UserPageMintsPhaseSpotItem {
+  readonly spots: number;
+  readonly address: string;
+}
+
+export interface UserPageMintsPhaseSpot {
+  readonly name: string;
+  readonly items: UserPageMintsPhaseSpotItem[];
+}
+
+export interface UserPageMintsPhase {
+  readonly startTime: number;
+  readonly endTime: number;
+  readonly name: string;
+  readonly spots: UserPageMintsPhaseSpot[];
+}
+
 export default function UserPageMints({
   profile,
 }: {
   readonly profile: IProfileAndConsolidations;
 }) {
-  const targetDate = 1706868000000;
-  const [timeRemaining, setTimeRemaining] = useState<number>(0);
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      const currentTime = new Date().getTime();
-      const difference = targetDate - currentTime;
-
-      if (difference <= 0) {
-        clearInterval(interval);
-        setTimeRemaining(0);
-      } else {
-        setTimeRemaining(difference);
-      }
-    }, 1000);
-
-    return () => {
-      clearInterval(interval);
-    };
-  }, [targetDate]);
-
-  const formatTime = (time: number): string => {
-    if (time <= 0) {
-      return "0 Days 0 Hours 0 Minutes 0 Seconds";
-    }
-    const seconds = Math.floor((time / 1000) % 60);
-    const minutes = Math.floor((time / 1000 / 60) % 60);
-    const hours = Math.floor((time / (1000 * 60 * 60)) % 24);
-    const days = Math.floor(time / (1000 * 60 * 60 * 24));
-
-    return `${days} ${days === 1 ? "Day" : "Days"} ${hours} ${
-      hours === 1 ? "Hour" : "Hours"
-    } ${minutes} ${minutes === 1 ? "Minute" : "Minutes"} ${seconds} ${
-      seconds === 1 ? "Second" : "Seconds"
-    }
-    `;
-  };
-
   const getHighestTdhWallet = (): IProfileConsolidation | undefined => {
     if (!profile) {
       return undefined;
@@ -125,15 +109,114 @@ export default function UserPageMints({
     setMintingWallets(wallets);
   }, [data]);
 
-  const { data: collectionPhses } = useQuery({
-    queryKey: [QueryKey.COLLECTION_PHASES, "nextgen"],
+  const { data: collectionPhases } = useQuery({
+    queryKey: [QueryKey.COLLECTION_ALLOWLIST_PHASES, "nextgen"],
     queryFn: async () =>
-      await commonApiFetch<Page<WalletDelegation>>({
+      await commonApiFetch<Page<NextgenAllowlistCollection>>({
         endpoint: `nextgen/allowlist_phases`,
       }),
   });
 
-  useEffect(() => console.log(collectionPhses), [collectionPhses]);
+  const [walletsParams, setWalletsParams] = useState<string>(
+    profile.consolidation.wallets
+      .map((w) => w.wallet.address.toLowerCase())
+      .join(",")
+  );
+  useEffect(() => {
+    const wallets = profile.consolidation.wallets
+      .map((w) => w.wallet.address.toLowerCase())
+      .join(",");
+    setWalletsParams(wallets);
+  }, [profile]);
+
+  const { data: walletsProofs } = useQuery({
+    queryKey: [
+      QueryKey.COLLECTION_ALLOWLIST_PROOFS,
+      { collection: "nextgen", address: walletsParams },
+    ],
+    queryFn: async () =>
+      await commonApiFetch<Page<NextgenAllowlist>>({
+        endpoint: `nextgen/proofs`,
+        params: {
+          address: walletsParams,
+        },
+      }),
+    enabled: !!walletsParams.length,
+  });
+
+  const [phases, setPhases] = useState<UserPageMintsPhase[]>([]);
+
+  useEffect(() => {
+    if (!collectionPhases || !walletsProofs) {
+      setPhases([]);
+      return;
+    }
+    const merkleRoots = new Set<string>(
+      walletsProofs.data.map((w) => w.merkle_root)
+    );
+    const validPhases = collectionPhases.data.filter((p) =>
+      merkleRoots.has(p.merkle_root)
+    );
+    const phases = validPhases.map((p) => ({
+      startTime: p.start_time,
+      endTime: p.end_time,
+      name: p.phase,
+      spots: walletsProofs.data
+        .filter((w) => w.merkle_root === p.merkle_root)
+        .reduce<UserPageMintsPhaseSpot[]>((prev, curr) => {
+          const name = JSON.parse(curr.info).palette;
+          const address = curr.address.toLowerCase();
+          const spots = curr.spots;
+          const item = prev.find((i) => i.name === name);
+          if (item) {
+            item.items.push({ spots, address });
+          } else {
+            prev.push({
+              name,
+              items: [{ spots, address }],
+            });
+          }
+          return prev;
+        }, []),
+    }));
+    setPhases(phases);
+  }, [collectionPhases, walletsProofs]);
+
+  const [phaseNames, setPhaseNames] = useState<string | null>();
+
+  useEffect(() => {
+    const names = phases.map((p) => p.name);
+    setPhaseNames(names.join(", "));
+  }, [phases]);
+
+  const [affectedWallets, setAffectedWallets] = useState<Set<string>>(
+    new Set()
+  );
+
+  useEffect(() => {
+    const wallets = new Set<string>();
+    phases.forEach((p) =>
+      p.spots.forEach((s) => s.items.forEach((i) => wallets.add(i.address)))
+    );
+    setAffectedWallets(wallets);
+  }, [phases]);
+
+  const delegations = useQueries({
+    queries: Array.from(affectedWallets).map((wallet) => ({
+      queryKey: [QueryKey.WALLET_MINTING_DELEGATIONS, wallet],
+      queryFn: async () =>
+        await commonApiFetch<Page<WalletDelegation>>({
+          endpoint: `delegations/minting/${wallet}`,
+        }),
+    })),
+  });
+
+  useEffect(() => {
+    for (const delegation of delegations) {
+      console.log(delegation.data);
+    }
+    console.log(affectedWallets);
+  }, [delegations]);
 
   return (
     <div className="tailwind-scope">
@@ -146,7 +229,7 @@ export default function UserPageMints({
         <p className="tw-font-normal tw-text-iron-400 tw-text-sm sm:tw-text-base tw-mb-0">
           Congratulations! You are eligible to mint Pebbles in
           <span className="tw-pl-1 tw-font-semibold tw-text-iron-200">
-            Phase 0.
+            {phaseNames}.
           </span>
         </p>
         <div className="tw-mt-8 tw-flex tw-flex-col">
@@ -177,116 +260,7 @@ export default function UserPageMints({
             </a>
           </div>
         </div>
-        <div className="tw-mt-8 tw-flex tw-flex-col">
-          <span className="tw-text-lg tw-font-semibold tw-text-iron-50">
-            Phase 0
-          </span>
-          <div className="tw-mt-2 tw-flex tw-gap-x-8">
-            <div className="tw-flex tw-flex-col">
-              <span className="tw-text-iron-400 tw-text-sm tw-font-medium">
-                Start Time
-              </span>
-              <span className="tw-mt-1 tw-text-iron-300 tw-font-medium tw-text-base">
-                Friday, Feb 2, 10:00 UTC
-              </span>
-            </div>
-            <div className="tw-flex tw-flex-col">
-              <span className="tw-text-iron-400 tw-text-sm tw-font-medium">
-                End Time
-              </span>
-              <span className="tw-mt-1 tw-text-iron-300 tw-font-medium tw-text-base">
-                Friday, Feb 2, 18:00 UTC
-              </span>
-            </div>
-            <div className="tw-flex tw-flex-col">
-              <span className="tw-text-iron-400 tw-text-sm tw-font-medium">
-                Countdown
-              </span>
-              <span className="tw-inline-flex tw-items-center tw-mt-1 tw-text-iron-300 tw-font-medium tw-text-base">
-                <svg
-                  className="tw-h-5 tw-w-5 tw-mr-2 tw-text-primary-300"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M12 6V12L16 14M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12Z"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-                <span>{formatTime(timeRemaining)}</span>
-              </span>
-            </div>
-          </div>
-        </div>
-
-        <div className="tw-mt-8 tw-flex tw-flex-col tw-max-w-md">
-          <span className="tw-text-lg tw-font-semibold tw-text-iron-50">
-            Your Available Mints
-          </span>
-          <div className="tw-mt-2 tw-flex tw-flex-col">
-            <span className="tw-text-iron-400 tw-text-sm tw-font-medium">
-              Mint Price
-            </span>
-            <span className="tw-mt-1 tw-inline-flex tw-items-center tw-text-iron-300 tw-font-medium tw-text-base">
-              <div className="tw-h-5 tw-w-5">
-                <EthereumIcon />
-              </div>
-              <span className="tw-mx-1">0.06529</span> / mint
-            </span>
-          </div>
-          <div className="tw-mt-4 tw-flow-root">
-            <div className="tw-bg-iron-950 tw-overflow-x-auto tw-shadow tw-ring-1 tw-ring-iron-700 tw-rounded-lg">
-              <table className="tw-min-w-full">
-                <tbody className="tw-divide-y tw-divide-solid tw-divide-iron-700 tw-bg-iron-950">
-                  <tr>
-                    <td className="tw-whitespace-nowrap tw-py-2.5 tw-pl-4 tw-pr-3 tw-text-md tw-font-medium tw-text-iron-300 sm:tw-pl-4">
-                      Palettes: UltraMaxis
-                    </td>
-                    <td className="tw-whitespace-nowrap tw-px-3 tw-py-2.5 tw-text-md tw-text-iron-400">
-                      1
-                    </td>
-                  </tr>
-                  <tr>
-                    <td className="tw-whitespace-nowrap tw-py-2.5 tw-pl-4 tw-pr-3 tw-text-md tw-font-medium tw-text-iron-300 sm:tw-pl-4">
-                      Palettes: HyperMaxis
-                    </td>
-                    <td className="tw-whitespace-nowrap tw-px-3 tw-py-2.5 tw-text-md tw-text-iron-400">
-                      1
-                    </td>
-                  </tr>
-                  <tr>
-                    <td className="tw-whitespace-nowrap tw-py-2.5 tw-pl-4 tw-pr-3 tw-text-md tw-font-medium tw-text-iron-300 sm:tw-pl-4">
-                      Palettes: SgtPEPE
-                    </td>
-                    <td className="tw-whitespace-nowrap tw-px-3 tw-py-2.5 tw-text-md tw-text-iron-400">
-                      1
-                    </td>
-                  </tr>
-                  <tr>
-                    <td className="tw-whitespace-nowrap tw-py-2.5 tw-pl-4 tw-pr-3 tw-text-md tw-font-medium tw-text-iron-300 sm:tw-pl-4">
-                      Palettes: MemeMaxis
-                    </td>
-                    <td className="tw-whitespace-nowrap tw-px-3 tw-py-2.5 tw-text-md tw-text-iron-400">
-                      3
-                    </td>
-                  </tr>
-                  <tr className="tw-bg-iron-900">
-                    <td className="tw-whitespace-nowrap tw-py-2.5 tw-pl-4 tw-pr-3 tw-text-md tw-font-semibold tw-text-iron-50 sm:tw-pl-4">
-                      Total
-                    </td>
-                    <td className="tw-whitespace-nowrap tw-px-3 tw-py-2.5 tw-text-md tw-font-semibold tw-text-iron-50">
-                      6
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
+        <UserPageMintsPhases phases={phases} />
 
         <div className="tw-mt-8 tw-flex tw-flex-col">
           <span className="tw-text-lg tw-font-semibold tw-text-iron-50">
