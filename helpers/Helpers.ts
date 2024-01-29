@@ -575,7 +575,6 @@ export const getProfileTargetRoute = ({
   readonly router: NextRouter;
   readonly defaultPath: UserPageTabType;
 }): string => {
-  console.log(router.route);
   if (router.route.includes("[user]")) {
     return router.route.replace("[user]", handleOrWallet);
   }
