@@ -11,6 +11,7 @@ export default function UserPageStatsActivityWalletTableRowSecondAddress({
   readonly transaction: Transaction;
   readonly type: TransactionType;
 }) {
+  
   const TYPE_TO_ACTION: Record<TransactionType, string> = {
     [TransactionType.AIRDROP]: "",
     [TransactionType.MINT]: "",
