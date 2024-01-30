@@ -11,6 +11,7 @@ import {
   getCollectionIdsForAddress,
   useCollectionPhases,
   useMinterContractWrite,
+  useParsedCollectionIndex,
 } from "../nextgen_helpers";
 import NextGenContractWriteStatus from "../NextGenContractWriteStatus";
 import { PhaseTimes } from "../nextgen_entities";
@@ -40,16 +41,17 @@ export default function NextGenAdminSetPhases(props: Readonly<Props>) {
     FunctionSelectors.SET_COLLECTION_PHASES
   );
   const collectionIndex = useCollectionIndex();
+  const parsedCollectionIndex = useParsedCollectionIndex(collectionIndex);
   const collectionAdmin = useCollectionAdmin(
     account.address as string,
-    parseInt(collectionIndex?.data as any)
+    parsedCollectionIndex
   );
 
   const collectionIds = getCollectionIdsForAddress(
     (globalAdmin.data as any) === true,
     (functionAdmin.data as any) === true,
     collectionAdmin.data,
-    parseInt(collectionIndex?.data as any)
+    parsedCollectionIndex
   );
 
   const [collectionID, setCollectionID] = useState("");

@@ -57,6 +57,11 @@ export function useCollectionIndex() {
   });
 }
 
+export function useParsedCollectionIndex(collectionIndex: any) {
+  const collectionIndexData = collectionIndex?.data;
+  return collectionIndexData ? parseInt(collectionIndexData.toString()) : 0;
+}
+
 function getCollectionAdminReadParams(
   collectionIndex: number,
   address: string

@@ -13,6 +13,7 @@ import {
   useCollectionAdmin,
   getCollectionIdsForAddress,
   useMinterContractWrite,
+  useParsedCollectionIndex,
 } from "../nextgen_helpers";
 import NextGenContractWriteStatus from "../NextGenContractWriteStatus";
 import {
@@ -40,16 +41,17 @@ export default function NextGenAdminAcceptAddressesAndPercentages(
     FunctionSelectors.ACCEPT_ADDRESSES_AND_PERCENTAGES
   );
   const collectionIndex = useCollectionIndex();
+  const parsedCollectionIndex = useParsedCollectionIndex(collectionIndex);
   const collectionAdmin = useCollectionAdmin(
     account.address as string,
-    parseInt(collectionIndex?.data as any)
+    parsedCollectionIndex
   );
 
   const collectionIds = getCollectionIdsForAddress(
     (globalAdmin.data as any) === true,
     (functionAdmin.data as any) === true,
     collectionAdmin?.data,
-    parseInt(collectionIndex?.data as any)
+    parsedCollectionIndex
   );
 
   const [collectionID, setCollectionID] = useState("");

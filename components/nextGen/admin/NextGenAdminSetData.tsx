@@ -9,6 +9,7 @@ import {
   getCollectionIdsForAddress,
   useCollectionAdditionalData,
   useCoreContractWrite,
+  useParsedCollectionIndex,
 } from "../nextgen_helpers";
 import { FunctionSelectors } from "../nextgen_contracts";
 import NextGenContractWriteStatus from "../NextGenContractWriteStatus";
@@ -33,16 +34,17 @@ export default function NextGenAdminSetData(props: Readonly<Props>) {
     FunctionSelectors.SET_COLLECTION_DATA
   );
   const collectionIndex = useCollectionIndex();
+  const parsedCollectionIndex = useParsedCollectionIndex(collectionIndex);
   const collectionAdmin = useCollectionAdmin(
     account.address as string,
-    parseInt(collectionIndex?.data as any)
+    parsedCollectionIndex
   );
 
   const collectionIds = getCollectionIdsForAddress(
     (globalAdmin.data as any) === true,
     (functionAdmin.data as any) === true,
     collectionAdmin.data,
-    parseInt(collectionIndex?.data as any)
+    parsedCollectionIndex
   );
 
   const [collectionID, setCollectionID] = useState("");

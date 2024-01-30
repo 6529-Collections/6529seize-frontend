@@ -10,6 +10,7 @@ import {
   getCollectionIdsForAddress,
   useCollectionCosts,
   useMinterContractWrite,
+  useParsedCollectionIndex,
 } from "../nextgen_helpers";
 import NextGenContractWriteStatus from "../NextGenContractWriteStatus";
 import { ANY_COLLECTION } from "../../../pages/delegation/[...section]";
@@ -33,16 +34,17 @@ export default function NextGenAdminSetCosts(props: Readonly<Props>) {
     FunctionSelectors.SET_COLLECTION_COSTS
   );
   const collectionIndex = useCollectionIndex();
+  const parsedCollectionIndex = useParsedCollectionIndex(collectionIndex);
   const collectionAdmin = useCollectionAdmin(
     account.address as string,
-    parseInt(collectionIndex?.data as any)
+    parsedCollectionIndex
   );
 
   const collectionIds = getCollectionIdsForAddress(
     (globalAdmin.data as any) === true,
     (functionAdmin.data as any) === true,
     collectionAdmin.data,
-    parseInt(collectionIndex?.data as any)
+    parsedCollectionIndex
   );
 
   const [collectionID, setCollectionID] = useState("");

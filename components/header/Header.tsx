@@ -207,7 +207,7 @@ export default function Header(props: Readonly<Props>) {
                   <Col>
                     <a href="/nextgen">
                       <h3>
-                        NextGen
+                        <span>NextGen</span>&nbsp;
                         <span className={styles.new}>new</span>
                       </h3>
                     </a>
@@ -683,7 +683,7 @@ export default function Header(props: Readonly<Props>) {
                                 onClick={() =>
                                   (window.location.href = "/nextgen")
                                 }>
-                                NextGen
+                                <span>NextGen</span>&nbsp;
                                 <span className={styles.new}>new</span>
                               </NavDropdown.Item>
                               <NavDropdown.Divider />

@@ -15,6 +15,7 @@ import {
   useCollectionAdmin,
   getCollectionIdsForAddress,
   useMinterContractWrite,
+  useParsedCollectionIndex,
 } from "../nextgen_helpers";
 import NextGenContractWriteStatus from "../NextGenContractWriteStatus";
 import { v4 as uuidv4 } from "uuid";
@@ -41,16 +42,17 @@ export default function NextGenAdminInitializeBurn(props: Readonly<Props>) {
     FunctionSelectors.INITIALIZE_BURN
   );
   const collectionIndex = useCollectionIndex();
+  const parsedCollectionIndex = useParsedCollectionIndex(collectionIndex);
   const collectionAdmin = useCollectionAdmin(
     account.address as string,
-    parseInt(collectionIndex?.data as any)
+    parsedCollectionIndex
   );
 
   const collectionIds = getCollectionIdsForAddress(
     (globalAdmin.data as any) === true,
     (functionAdmin.data as any) === true,
     collectionAdmin.data,
-    parseInt(collectionIndex?.data as any)
+    parsedCollectionIndex
   );
 
   const [burnCollectionID, setBurnCollectionID] = useState("");

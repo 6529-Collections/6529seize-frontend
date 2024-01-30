@@ -10,6 +10,7 @@ import {
   useCollectionIndex,
   useCollectionAdmin,
   getCollectionIdsForAddress,
+  useParsedCollectionIndex,
 } from "../nextgen_helpers";
 import { printAdminErrors } from "./NextGenAdmin";
 import {
@@ -39,16 +40,16 @@ export default function NextGenAdminUploadAL(props: Readonly<Props>) {
     FunctionSelectors.SET_COLLECTION_PHASES
   );
   const collectionIndex = useCollectionIndex();
+  const parsedCollectionIndex = useParsedCollectionIndex(collectionIndex);
   const collectionAdmin = useCollectionAdmin(
     account.address as string,
-    parseInt(collectionIndex?.data as any)
+    parsedCollectionIndex
   );
-
   const collectionIds = getCollectionIdsForAddress(
     (globalAdmin.data as any) === true,
     (functionAdmin.data as any) === true,
     collectionAdmin.data,
-    parseInt(collectionIndex?.data as any)
+    parsedCollectionIndex
   );
 
   const [collectionID, setCollectionID] = useState("");
@@ -60,7 +61,6 @@ export default function NextGenAdminUploadAL(props: Readonly<Props>) {
   const [type, setType] = useState(Type.ALLOWLIST);
 
   const [errors, setErrors] = useState<string[]>([]);
-  const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
 
   const [uploadSuccess, setUploadSuccess] = useState(false);
@@ -206,7 +206,7 @@ export default function NextGenAdminUploadAL(props: Readonly<Props>) {
                 onChange={(e: any) => setAllowlistEndTime(e.target.value)}
               />
             </Form.Group>
-            {!loading && errors.length > 0 && printAdminErrors(errors)}
+            {!uploading && errors.length > 0 && printAdminErrors(errors)}
             <div className="d-flex align-items-center mt-4 gap-3">
               <Button
                 className="seize-btn"

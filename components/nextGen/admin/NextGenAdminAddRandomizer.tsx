@@ -11,6 +11,7 @@ import {
   getCollectionIdsForAddress,
   useCollectionAdditionalData,
   useCoreContractWrite,
+  useParsedCollectionIndex,
 } from "../nextgen_helpers";
 import { AdditionalData } from "../nextgen_entities";
 import { printAdminErrors } from "./NextGenAdmin";
@@ -33,16 +34,17 @@ export default function NextGenAdminUpdateRandomizer(props: Readonly<Props>) {
     FunctionSelectors.ADD_RANDOMIZER
   );
   const collectionIndex = useCollectionIndex();
+  const parsedCollectionIndex = useParsedCollectionIndex(collectionIndex);
   const collectionAdmin = useCollectionAdmin(
     account.address as string,
-    parseInt(collectionIndex?.data as any)
+    parsedCollectionIndex
   );
 
   const collectionIds = getCollectionIdsForAddress(
     (globalAdmin.data as any) === true,
     (functionAdmin.data as any) === true,
     collectionAdmin.data,
-    parseInt(collectionIndex?.data as any)
+    parsedCollectionIndex
   );
 
   const [collectionID, setCollectionID] = useState("");

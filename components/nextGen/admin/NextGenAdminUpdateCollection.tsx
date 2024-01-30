@@ -12,6 +12,7 @@ import {
   useCollectionIndex,
   useFunctionAdmin,
   useGlobalAdmin,
+  useParsedCollectionIndex,
 } from "../nextgen_helpers";
 import { Info, LibraryScript } from "../nextgen_entities";
 import { printAdminErrors } from "./NextGenAdmin";
@@ -46,16 +47,17 @@ export default function NextGenAdminUpdateCollection(props: Readonly<Props>) {
     FunctionSelectors.UPDATE_COLLECTION_INFO
   );
   const collectionIndex = useCollectionIndex();
+  const parsedCollectionIndex = useParsedCollectionIndex(collectionIndex);
   const collectionAdmin = useCollectionAdmin(
     account.address as string,
-    parseInt(collectionIndex?.data as any)
+    parsedCollectionIndex
   );
 
   const collectionIds = getCollectionIdsForAddress(
     (globalAdmin.data as any) === true,
     (functionAdmin.data as any) === true,
     collectionAdmin.data,
-    parseInt(collectionIndex?.data as any)
+    parsedCollectionIndex
   );
 
   const [collectionID, setCollectionID] = useState("");
