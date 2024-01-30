@@ -57,6 +57,7 @@ export default function NextGenAdminUploadAL(props: Readonly<Props>) {
   const [allowlistStartTime, setAllowlistStartTime] = useState("");
   const [allowlistEndTime, setAllowlistEndTime] = useState("");
   const [phaseName, setPhaseName] = useState("");
+  const [mintPrice, setMintPrice] = useState("");
 
   const [type, setType] = useState(Type.ALLOWLIST);
 
@@ -106,6 +107,7 @@ export default function NextGenAdminUploadAL(props: Readonly<Props>) {
           phase: phaseName,
           start_time: Number(allowlistStartTime),
           end_time: Number(allowlistEndTime),
+          mint_price: Number(mintPrice),
         })
       );
 
@@ -206,6 +208,15 @@ export default function NextGenAdminUploadAL(props: Readonly<Props>) {
                 onChange={(e: any) => setAllowlistEndTime(e.target.value)}
               />
             </Form.Group>
+            <Form.Group className="mb-3">
+              <Form.Label>Allowlist end Time</Form.Label>
+              <Form.Control
+                type="integer"
+                placeholder="Mint Price (ETH)"
+                value={mintPrice}
+                onChange={(e: any) => setMintPrice(e.target.value)}
+              />
+            </Form.Group>
             {!uploading && errors.length > 0 && printAdminErrors(errors)}
             <div className="d-flex align-items-center mt-4 gap-3">
               <Button
@@ -215,6 +226,8 @@ export default function NextGenAdminUploadAL(props: Readonly<Props>) {
                   !allowlistFile ||
                   !allowlistStartTime ||
                   !allowlistEndTime ||
+                  !phaseName ||
+                  !mintPrice ||
                   uploading ||
                   uploadSuccess
                 }
