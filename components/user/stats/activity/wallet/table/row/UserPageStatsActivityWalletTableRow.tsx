@@ -46,6 +46,11 @@ const TYPE_TP_ACTION: Record<TransactionType, string> = {
   [TransactionType.AIRDROPPED]: "airdropped",
 };
 
+const NULL_AND_DEAD_ADDRESSES = [NULL_ADDRESS, NULL_DEAD_ADDRESS].map((w) =>
+  w.toLowerCase()
+);
+const MINTING_ADDRESSES = [NULL_ADDRESS, MANIFOLD].map((w) => w.toLowerCase());
+
 export default function UserPageStatsActivityWalletTableRow({
   transaction,
   profile,
@@ -93,52 +98,71 @@ export default function UserPageStatsActivityWalletTableRow({
     [profile]
   );
 
+  const includingAddresses = ({
+    address,
+    addresses,
+  }: {
+    readonly address: string;
+    readonly addresses: string[];
+  }): boolean =>
+    addresses.some((a) =>
+      areEqualAddresses(a.toLowerCase(), address.toLowerCase())
+    );
+
+  const getAirDropType = (): TransactionType =>
+    profile.consolidation.wallets.some((w) =>
+      includingAddresses({
+        address: w.wallet.address,
+        addresses: NULL_AND_DEAD_ADDRESSES,
+      })
+    )
+      ? TransactionType.AIRDROPPED
+      : TransactionType.RECEIVED_AIRDROP;
+
+  const getMintingType = (): TransactionType =>
+    profile.consolidation.wallets.some((w) =>
+      includingAddresses({
+        address: w.wallet.address,
+        addresses: MINTING_ADDRESSES,
+      })
+    )
+      ? TransactionType.MINTED_TO
+      : TransactionType.MINTED;
+
+  const getBurnType = (): TransactionType =>
+    profile.consolidation.wallets.some((w) =>
+      includingAddresses({
+        address: w.wallet.address,
+        addresses: NULL_AND_DEAD_ADDRESSES,
+      })
+    )
+      ? TransactionType.RECEIVED_BURN
+      : TransactionType.BURNED;
+
   const getType = (): TransactionType => {
     if (
       areEqualAddresses(NULL_ADDRESS, transaction.from_address) &&
       !transaction.value
     ) {
-      const isProfileNullAddress = profile.consolidation.wallets.some(
-        (w) =>
-          areEqualAddresses(w.wallet.address, NULL_ADDRESS) ||
-          areEqualAddresses(w.wallet.address, NULL_DEAD_ADDRESS)
-      );
-      if (isProfileNullAddress) {
-        return TransactionType.AIRDROPPED;
-      }
-      return TransactionType.RECEIVED_AIRDROP;
+      return getAirDropType();
     }
 
     if (
-      areEqualAddresses(NULL_ADDRESS, transaction.from_address) || 
-      areEqualAddresses(MANIFOLD, transaction.from_address)
+      includingAddresses({
+        address: transaction.from_address,
+        addresses: MINTING_ADDRESSES,
+      })
     ) {
-        const isProfileNullAddress = profile.consolidation.wallets.some(
-          (w) =>
-            areEqualAddresses(w.wallet.address, NULL_ADDRESS) ||
-            areEqualAddresses(w.wallet.address, MANIFOLD)
-        );
-        if (isProfileNullAddress) {
-          return TransactionType.MINTED_TO;
-        }
-        return TransactionType.MINTED;
+      return getMintingType();
     }
 
     if (
-      areEqualAddresses(NULL_ADDRESS, transaction.to_address) ||
-      areEqualAddresses(NULL_DEAD_ADDRESS, transaction.to_address)
+      includingAddresses({
+        address: transaction.to_address,
+        addresses: NULL_AND_DEAD_ADDRESSES,
+      })
     ) {
-      const isProfileNullAddress = profile.consolidation.wallets.some(
-        (w) =>
-          areEqualAddresses(w.wallet.address, NULL_ADDRESS) ||
-          areEqualAddresses(w.wallet.address, NULL_DEAD_ADDRESS)
-      );
-
-      if (isProfileNullAddress) {
-        return TransactionType.RECEIVED_BURN;
-      }
-
-      return TransactionType.BURNED;
+      return getBurnType();
     }
 
     if (
@@ -171,7 +195,7 @@ export default function UserPageStatsActivityWalletTableRow({
     TransactionType.TRANSFER_OUT,
     TransactionType.RECEIVED_BURN,
     TransactionType.AIRDROPPED,
-    TransactionType.MINTED_TO
+    TransactionType.MINTED_TO,
   ].includes(type);
 
   const value = transaction.value;
