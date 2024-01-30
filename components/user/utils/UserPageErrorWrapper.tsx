@@ -2,8 +2,8 @@ export default function UserPageErrorWrapper({
   closeError,
   children,
 }: {
-  closeError: () => void;
-  children: React.ReactNode;
+  readonly closeError: () => void;
+  readonly children: React.ReactNode;
 }) {
   return (
     <div className="tw-relative tw-w-full md:tw-w-auto tw-inline-flex tw-items-center tw-rounded-lg tw-bg-red/5 tw-border tw-border-solid tw-border-red/30 tw-p-4">

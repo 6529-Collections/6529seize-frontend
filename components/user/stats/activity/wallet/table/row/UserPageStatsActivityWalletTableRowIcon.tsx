@@ -129,23 +129,6 @@ export default function UserPageStatsActivityWalletTableRowIcon({
         </svg>
       );
     case TransactionType.TRANSFER_IN:
-      return (
-        <svg
-          className="tw-flex-shrink-0 tw-w-5 tw-h-5 tw-mr-1 tw-text-iron-300"
-          viewBox="0 0 24 24"
-          fill="none"
-          aria-hidden="true"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <path
-            d="M20 17H4M4 17L8 13M4 17L8 21M4 7H20M20 7L16 3M20 7L16 11"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          />
-        </svg>
-      );
     case TransactionType.TRANSFER_OUT:
       return (
         <svg
@@ -158,9 +141,9 @@ export default function UserPageStatsActivityWalletTableRowIcon({
           <path
             d="M20 17H4M4 17L8 13M4 17L8 21M4 7H20M20 7L16 3M20 7L16 11"
             stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
           />
         </svg>
       );

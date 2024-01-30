@@ -32,7 +32,6 @@ export default function UserPageStatsActivityWalletTableRowGas({
     >
       <div
         aria-label="Gas Information"
-        tabIndex={0}
         className="tw-h-10 tw-w-10 tw-flex tw-justify-center tw-items-center tw-rounded-full focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400"
       >
         <svg
