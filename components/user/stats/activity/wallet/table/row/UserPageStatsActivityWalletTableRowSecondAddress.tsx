@@ -15,6 +15,7 @@ export default function UserPageStatsActivityWalletTableRowSecondAddress({
     [TransactionType.AIRDROPPED]: "to",
     [TransactionType.RECEIVED_AIRDROP]: "from",
     [TransactionType.MINTED]: "",
+    [TransactionType.MINTED_TO]: "to",
     [TransactionType.SALE]: "to",
     [TransactionType.PURCHASE]: "from",
     [TransactionType.TRANSFER_IN]: "from",
@@ -44,6 +45,7 @@ export default function UserPageStatsActivityWalletTableRowSecondAddress({
       case TransactionType.SALE:
       case TransactionType.BURNED:
       case TransactionType.TRANSFER_OUT:
+      case TransactionType.MINTED_TO:
         return {
           display:
             transaction.to_display ??

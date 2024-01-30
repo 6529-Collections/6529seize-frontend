@@ -30,6 +30,7 @@ export default function UserPageStatsActivityWalletTableRowIcon({
         </svg>
       );
     case TransactionType.MINTED:
+    case TransactionType.MINTED_TO:
       return (
         <svg
           className="tw-flex-shrink-0 tw-w-5 tw-h-5 tw-mr-1 tw-text-iron-300"

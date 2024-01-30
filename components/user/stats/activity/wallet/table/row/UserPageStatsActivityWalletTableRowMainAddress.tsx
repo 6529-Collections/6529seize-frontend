@@ -19,8 +19,6 @@ export default function UserPageStatsActivityWalletTableRowMainAddress({
       case TransactionType.MINTED:
       case TransactionType.PURCHASE:
       case TransactionType.TRANSFER_IN:
-      case TransactionType.RECEIVED_BURN:
-      case TransactionType.AIRDROPPED:
         return (
           w.wallet.address.toLowerCase() ===
           transaction.to_address.toLowerCase()
@@ -32,6 +30,10 @@ export default function UserPageStatsActivityWalletTableRowMainAddress({
           w.wallet.address.toLowerCase() ===
           transaction.from_address.toLowerCase()
         );
+      case TransactionType.RECEIVED_BURN:
+      case TransactionType.AIRDROPPED:
+      case TransactionType.MINTED_TO:
+        return false;
       default:
         assertUnreachable(type);
         return false;
@@ -42,7 +44,7 @@ export default function UserPageStatsActivityWalletTableRowMainAddress({
     if (
       type === TransactionType.RECEIVED_BURN ||
       type === TransactionType.AIRDROPPED ||
-      type === TransactionType.MINTED
+      type === TransactionType.MINTED_TO
     ) {
       return "Null Address";
     }
