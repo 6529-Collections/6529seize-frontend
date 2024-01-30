@@ -427,3 +427,64 @@
     transform: scale(1.015);
   }
 }
+
+.searchBtn {
+  background-color: white;
+  color: black;
+  width: 40px;
+  height: 40px;
+  text-align: center;
+  border-radius: 20px;
+  padding: 10px;
+  cursor: pointer;
+  &:hover {
+    background-color: $off-white;
+  }
+}
+
+.searchBtnActive {
+  background-color: lighten($color: $green, $amount: 10);
+
+  &:hover {
+    background-color: $green;
+  }
+}
+
+.searchWalletDisplay {
+  background-color: #333;
+  padding: 5px 10px;
+  margin-right: 10px;
+  border-top-right-radius: 5px;
+  border-bottom-right-radius: 5px;
+}
+
+.searchWalletDisplayBtn {
+  width: 30px;
+  background-color: #333;
+  padding: 2.5px 5px;
+  border-right: 1px solid #999;
+  border-top-left-radius: 5px;
+  border-bottom-left-radius: 5px;
+  cursor: pointer;
+  outline: 0 !important;
+  text-decoration: none;
+
+  &:hover {
+    background-color: $lighter-grey;
+  }
+}
+
+.clearSearchBtnIcon {
+  width: 40px;
+  height: 40px;
+  margin-right: 10px;
+  cursor: pointer;
+
+  &:hover {
+    color: $lightest-grey;
+  }
+
+  &:focus {
+    outline: none !important;
+  }
+}
