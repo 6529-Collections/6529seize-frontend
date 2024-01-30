@@ -1,9 +1,8 @@
 import { Container, Row, Col } from "react-bootstrap";
 import { NextGenToken } from "../../../../entities/INextgen";
-import DownloadUrlWidget from "../../../downloadUrlWidget/DownloadUrlWidget";
 import useDownloader from "react-use-downloader";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import DotLoader, { Spinner } from "../../../dotLoader/DotLoader";
+import { Spinner } from "../../../dotLoader/DotLoader";
 import Tippy from "@tippyjs/react";
 
 export enum Quality {

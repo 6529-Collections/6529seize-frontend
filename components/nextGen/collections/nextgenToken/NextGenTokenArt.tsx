@@ -42,7 +42,6 @@ export default function NextGenToken(props: Readonly<Props>) {
   const [isFullScreen, setIsFullScreen] = useState<boolean>(false);
   const [showBlackbox, setShowBlackbox] = useState<boolean>(false);
   const [showLightbox, setShowLightbox] = useState<boolean>(false);
-  const [showDownloadDropdown, setShowDownloadDropdown] = useState(false);
 
   const tokenImageRef = useRef(null);
 
@@ -162,7 +161,7 @@ export default function NextGenToken(props: Readonly<Props>) {
                 <FontAwesomeIcon className={styles.modeIcon} icon="download" />
               </Tippy>
             </Dropdown.Toggle>
-            <Dropdown.Menu show={showDownloadDropdown}>
+            <Dropdown.Menu>
               {Object.values(Quality).map((quality) => (
                 <Dropdown.Item
                   key={quality}
@@ -218,9 +217,7 @@ export default function NextGenToken(props: Readonly<Props>) {
           );
         });
       } else {
-        if (document.exitFullscreen) {
-          document.exitFullscreen();
-        }
+        document.exitFullscreen?.();
       }
     }
   };

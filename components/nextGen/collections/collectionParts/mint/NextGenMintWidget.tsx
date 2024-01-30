@@ -401,6 +401,17 @@ export default function NextGenMintWidget(props: Readonly<Props>) {
     return "Mint";
   }
 
+  function getWalletMintsLabel() {
+    let label = "";
+    if (alStatus === Status.LIVE) {
+      label = "Allowlist";
+    }
+    if (publicStatus === Status.LIVE) {
+      label = "Public Phase";
+    }
+    return <>Wallet Mints {label}</>;
+  }
+
   return (
     <Container className="no-padding">
       <Row>
@@ -444,12 +455,7 @@ export default function NextGenMintWidget(props: Readonly<Props>) {
             </Form.Group>
             <Form.Group as={Row} className="pt-2">
               <Form.Label column sm={12} className="d-flex align-items-center">
-                Wallet Mints
-                {alStatus === Status.LIVE
-                  ? " Allowlist"
-                  : publicStatus === Status.LIVE
-                  ? " Public Phase"
-                  : ""}
+                {getWalletMintsLabel()}
                 :&nbsp;
                 {props.fetchingMintCounts ? (
                   <DotLoader />

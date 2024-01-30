@@ -328,39 +328,51 @@ export default function LatestActivityRow(props: Readonly<Props>) {
     );
   }
 
+  function getDescription() {
+    if (isNullAddress(props.tr.from_address)) {
+      return (
+        <>
+          Minted to&nbsp;
+          <Address
+            wallets={[props.tr.to_address]}
+            display={props.tr.to_display}
+          />
+        </>
+      );
+    }
+
+    if (isNullAddress(props.tr.to_address)) {
+      return (
+        <>
+          Burnt by&nbsp;
+          <Address
+            wallets={[props.tr.from_address]}
+            display={props.tr.from_display}
+          />
+        </>
+      );
+    }
+
+    return (
+      <>
+        {props.tr.value > 0 ? <>Purchased by</> : <>Transferred to</>}&nbsp;
+        <Address
+          wallets={[props.tr.to_address]}
+          display={props.tr.to_display}
+        />
+        from&nbsp;
+        <Address
+          wallets={[props.tr.from_address]}
+          display={props.tr.from_display}
+        />
+      </>
+    );
+  }
+
   function printDescriptionNextgen() {
     return (
       <span className="d-flex">
-        {isNullAddress(props.tr.from_address) ? (
-          <>
-            Minted to&nbsp;
-            <Address
-              wallets={[props.tr.to_address]}
-              display={props.tr.to_display}
-            />
-          </>
-        ) : isNullAddress(props.tr.to_address) ? (
-          <>
-            Burnt by&nbsp;
-            <Address
-              wallets={[props.tr.from_address]}
-              display={props.tr.from_display}
-            />
-          </>
-        ) : (
-          <>
-            {props.tr.value > 0 ? <>Purchased by</> : <>Transferred to</>}&nbsp;
-            <Address
-              wallets={[props.tr.to_address]}
-              display={props.tr.to_display}
-            />
-            from&nbsp;
-            <Address
-              wallets={[props.tr.from_address]}
-              display={props.tr.from_display}
-            />
-          </>
-        )}
+        {getDescription()}
         {props.tr.value > 0 &&
           ` for ${Math.round(props.tr.value * 100000) / 100000} ETH`}
       </span>
