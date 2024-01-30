@@ -1,17 +1,13 @@
 import { useQueries, useQuery } from "@tanstack/react-query";
 import {
   IProfileAndConsolidations,
-  IProfileConsolidation,
   WalletDelegation,
 } from "../../../entities/IProfile";
-import { use, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
 import { commonApiFetch } from "../../../services/api/common-api";
 import { Page } from "../../../helpers/Types";
 import { DELEGATION_ALL_ADDRESS, MEMES_CONTRACT } from "../../../constants";
-import EthereumIcon from "../utils/icons/EthereumIcon";
-import { formatAddress } from "../../../helpers/Helpers";
-import { watchEvent } from "viem/_types/actions/public/watchEvent";
 import {
   NextgenAllowlist,
   NextgenAllowlistCollection,
@@ -174,7 +170,7 @@ export default function UserPageMints({
           </h2>
         </div>
         <p className="tw-font-normal tw-text-iron-400 tw-text-sm sm:tw-text-base tw-mb-0">
-          Congratulations! You are eligible to mint Pebbles in
+          Congratulations! You are eligible to mint Pebbles in{" "}
           <span className="tw-pl-1 tw-font-semibold tw-text-iron-200">
             {phaseNames}.
           </span>
@@ -263,7 +259,7 @@ export default function UserPageMints({
             To change your minting address, change your minting delegate for All
             NFTs or The Memes in the{" "}
             <a
-              href=""
+              href="https://seize.io/delegation/delegation-center"
               className="tw-group tw-inline-flex tw-items-center tw-text-iron-200 hover:tw-text-primary-300 tw-font-medium tw-text-sm tw-duration-300 tw-transition tw-ease-out"
               target="_blank"
             >

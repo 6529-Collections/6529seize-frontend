@@ -1,4 +1,3 @@
-import { useEffect, useState } from "react";
 import EthereumIcon from "../utils/icons/EthereumIcon";
 import { UserPageMintsPhase } from "./UserPageMints";
 import UserPageMintsPhasesPhaseSpot from "./UserPageMintsPhasesPhaseSpot";

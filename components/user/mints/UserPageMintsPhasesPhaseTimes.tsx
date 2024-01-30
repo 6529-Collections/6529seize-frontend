@@ -1,4 +1,3 @@
-import { useEffect, useState } from "react";
 import UserPageMintsPhasesPhaseTimesCountdown from "./UserPageMintsPhasesPhaseTimesCountdown";
 
 export default function UserPageMintsPhasesPhaseTimes({
