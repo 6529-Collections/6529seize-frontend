@@ -1,14 +1,16 @@
 import { useEffect, useState } from "react";
 import UserPageMintsPhasesPhaseTimesCountdown from "./UserPageMintsPhasesPhaseTimesCountdown";
 
-export default function UserPageMintsPhasesPhaseTimes({}: //startTime,
-// endTime,
+export default function UserPageMintsPhasesPhaseTimes({
+  startTime,
+  endTime,
+}: 
+
 {
   readonly startTime: number;
   readonly endTime: number;
 }) {
-  const startTime = 1706631956000;
-  const endTime = 1706646356000;
+
   const getFormattedTs = (ts: number) => {
     const date = new Date(ts);
     const daysOfWeek = [

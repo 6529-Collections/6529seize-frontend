@@ -41,74 +41,16 @@ export interface UserPageMintsPhase {
   readonly spots: UserPageMintsPhaseSpot[];
 }
 
+export interface UserPageMintsDelegation {
+  readonly address: string;
+  readonly delegation: string | null;
+}
+
 export default function UserPageMints({
   profile,
 }: {
   readonly profile: IProfileAndConsolidations;
 }) {
-  const getHighestTdhWallet = (): IProfileConsolidation | undefined => {
-    if (!profile) {
-      return undefined;
-    }
-    const wallets = profile.consolidation.wallets;
-    const highestTdhWallet = wallets.reduce((prev, curr) =>
-      prev.tdh > curr.tdh ? prev : curr
-    );
-
-    return highestTdhWallet;
-  };
-
-  const [highestTdhWallet, setHighestTdhWallet] = useState<
-    IProfileConsolidation | undefined
-  >();
-
-  useEffect(() => setHighestTdhWallet(getHighestTdhWallet()), [profile]);
-
-  const { data } = useQuery<Page<WalletDelegation>>({
-    queryKey: [
-      QueryKey.WALLET_DELEGATIONS,
-      highestTdhWallet?.wallet.address.toLowerCase(),
-    ],
-    queryFn: async () =>
-      await commonApiFetch<Page<WalletDelegation>>({
-        endpoint: `delegations/${highestTdhWallet?.wallet.address.toLowerCase()}`,
-      }),
-    enabled: !!highestTdhWallet,
-  });
-
-  const [mintingWallets, setMintingWallets] = useState<
-    { wallet: string; display: string | null }[]
-  >([]);
-
-  useEffect(() => {
-    const wallets: { wallet: string; display: string | null }[] = [];
-
-    if (highestTdhWallet) {
-      wallets.push({
-        wallet: highestTdhWallet.wallet.address.toLowerCase(),
-        display:
-          highestTdhWallet.wallet.ens ??
-          highestTdhWallet.wallet.address.toLowerCase(),
-      });
-    }
-
-    const delegationWallets = data?.data
-      .filter(
-        (d) =>
-          VALID_DELEGATION_ADDRESSES.includes(d.collection.toLowerCase()) &&
-          VALID_USE_CASES.includes(d.use_case)
-      )
-      .map((d) => ({
-        wallet: d.to_address.toLowerCase(),
-        display: d.to_display ?? d.to_address.toLocaleLowerCase(),
-      }));
-
-    if (delegationWallets) {
-      wallets.push(...delegationWallets);
-    }
-    setMintingWallets(wallets);
-  }, [data]);
-
   const { data: collectionPhases } = useQuery({
     queryKey: [QueryKey.COLLECTION_ALLOWLIST_PHASES, "nextgen"],
     queryFn: async () =>
@@ -164,7 +106,7 @@ export default function UserPageMints({
       spots: walletsProofs.data
         .filter((w) => w.merkle_root === p.merkle_root)
         .reduce<UserPageMintsPhaseSpot[]>((prev, curr) => {
-          const name = JSON.parse(curr.info).palette;
+          const name = JSON.parse(curr.info).palettes;
           const address = curr.address.toLowerCase();
           const spots = curr.spots;
           const item = prev.find((i) => i.name === name);
@@ -204,19 +146,24 @@ export default function UserPageMints({
   const delegations = useQueries({
     queries: Array.from(affectedWallets).map((wallet) => ({
       queryKey: [QueryKey.WALLET_MINTING_DELEGATIONS, wallet],
-      queryFn: async () =>
-        await commonApiFetch<Page<WalletDelegation>>({
+      queryFn: async (): Promise<UserPageMintsDelegation> => {
+        const res = await commonApiFetch<Page<WalletDelegation>>({
           endpoint: `delegations/minting/${wallet}`,
-        }),
+        });
+        if (res.data.length === 0) {
+          return {
+            address: wallet.toLowerCase(),
+            delegation: null,
+          };
+        }
+        const delegation = res.data[0];
+        return {
+          address: wallet.toLowerCase(),
+          delegation: delegation.to_address.toLowerCase(),
+        };
+      },
     })),
   });
-
-  useEffect(() => {
-    for (const delegation of delegations) {
-      console.log(delegation.data);
-    }
-    console.log(affectedWallets);
-  }, [delegations]);
 
   return (
     <div className="tailwind-scope">
@@ -270,31 +217,45 @@ export default function UserPageMints({
             You can mint from any of the following addresses
           </p>
           <div className="tw-mt-3 tw-flex tw-flex-col tw-gap-y-1.5 ">
-            {mintingWallets.map((wallet) => (
-              <div
-                key={wallet.wallet}
-                className="tw-inline-flex tw-items-center"
-              >
-                <svg
-                  className="tw-h-5 tw-w-5 tw-mr-2 tw-text-iron-300"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M20 9.5V7.2C20 6.0799 20 5.51984 19.782 5.09202C19.5903 4.7157 19.2843 4.40974 18.908 4.21799C18.4802 4 17.9201 4 16.8 4H5.2C4.0799 4 3.51984 4 3.09202 4.21799C2.7157 4.40973 2.40973 4.71569 2.21799 5.09202C2 5.51984 2 6.0799 2 7.2V16.8C2 17.9201 2 18.4802 2.21799 18.908C2.40973 19.2843 2.71569 19.5903 3.09202 19.782C3.51984 20 4.07989 20 5.2 20L16.8 20C17.9201 20 18.4802 20 18.908 19.782C19.2843 19.5903 19.5903 19.2843 19.782 18.908C20 18.4802 20 17.9201 20 16.8V14.5M15 12C15 11.5353 15 11.303 15.0384 11.1098C15.1962 10.3164 15.8164 9.69624 16.6098 9.53843C16.803 9.5 17.0353 9.5 17.5 9.5H19.5C19.9647 9.5 20.197 9.5 20.3902 9.53843C21.1836 9.69624 21.8038 10.3164 21.9616 11.1098C22 11.303 22 11.5353 22 12C22 12.4647 22 12.697 21.9616 12.8902C21.8038 13.6836 21.1836 14.3038 20.3902 14.4616C20.197 14.5 19.9647 14.5 19.5 14.5H17.5C17.0353 14.5 16.803 14.5 16.6098 14.4616C15.8164 14.3038 15.1962 13.6836 15.0384 12.8902C15 12.697 15 12.4647 15 12Z"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
+            {delegations
+              .filter((wallet) => wallet.data?.address)
+              .flatMap((wallet) => {
+                const res: string[] = [];
+                const address = wallet.data?.address;
+                if (address) {
+                  res.push(address);
+                }
+                const delegation = wallet.data?.delegation;
+                if (
+                  delegation &&
+                  !VALID_DELEGATION_ADDRESSES.includes(delegation)
+                ) {
+                  res.push(delegation);
+                }
+                return res;
+              })
+              .map((wallet) => (
+                <div key={wallet} className="tw-inline-flex tw-items-center">
+                  <svg
+                    className="tw-h-5 tw-w-5 tw-mr-2 tw-text-iron-300"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M20 9.5V7.2C20 6.0799 20 5.51984 19.782 5.09202C19.5903 4.7157 19.2843 4.40974 18.908 4.21799C18.4802 4 17.9201 4 16.8 4H5.2C4.0799 4 3.51984 4 3.09202 4.21799C2.7157 4.40973 2.40973 4.71569 2.21799 5.09202C2 5.51984 2 6.0799 2 7.2V16.8C2 17.9201 2 18.4802 2.21799 18.908C2.40973 19.2843 2.71569 19.5903 3.09202 19.782C3.51984 20 4.07989 20 5.2 20L16.8 20C17.9201 20 18.4802 20 18.908 19.782C19.2843 19.5903 19.5903 19.2843 19.782 18.908C20 18.4802 20 17.9201 20 16.8V14.5M15 12C15 11.5353 15 11.303 15.0384 11.1098C15.1962 10.3164 15.8164 9.69624 16.6098 9.53843C16.803 9.5 17.0353 9.5 17.5 9.5H19.5C19.9647 9.5 20.197 9.5 20.3902 9.53843C21.1836 9.69624 21.8038 10.3164 21.9616 11.1098C22 11.303 22 11.5353 22 12C22 12.4647 22 12.697 21.9616 12.8902C21.8038 13.6836 21.1836 14.3038 20.3902 14.4616C20.197 14.5 19.9647 14.5 19.5 14.5H17.5C17.0353 14.5 16.803 14.5 16.6098 14.4616C15.8164 14.3038 15.1962 13.6836 15.0384 12.8902C15 12.697 15 12.4647 15 12Z"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
 
-                <span className="tw-text-iron-300 tw-font-medium tw-text-base">
-                  {wallet.display}
-                </span>
-              </div>
-            ))}
+                  <span className="tw-text-iron-300 tw-font-medium tw-text-base">
+                    {wallet}
+                  </span>
+                </div>
+              ))}
           </div>
         </div>
         <div className="tw-mt-6">

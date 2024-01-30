@@ -41,10 +41,9 @@ export default function UserPageMintsPhasesPhaseTimesCountdown({
 
     return response;
   };
-  const [temp, setTemp] = useState<number>(0);
 
-  const getProgress = (startTime: number, endTime: number, temp: number) => {
-    const currentTime = new Date().getTime(); //1706646356000 + temp ?? new Date().getTime();
+  const getProgress = (startTime: number, endTime: number) => {
+    const currentTime = new Date().getTime(); 
     if (currentTime < startTime) {
       return CountdownState.NOT_STARTED;
     } else if (currentTime > endTime) {
@@ -54,8 +53,8 @@ export default function UserPageMintsPhasesPhaseTimesCountdown({
     }
   };
 
-  const getDifference = (startTime: number, endTime: number, temp: number) => {
-    const currentTime = new Date().getTime(); //1706646356000 + temp ?? new Date().getTime();
+  const getDifference = (startTime: number, endTime: number) => {
+    const currentTime = new Date().getTime(); 
     if (currentTime < startTime) {
       return startTime - currentTime;
     } else if (currentTime < endTime) {
@@ -66,16 +65,16 @@ export default function UserPageMintsPhasesPhaseTimesCountdown({
   };
 
   const [progress, setProgress] = useState<CountdownState>(
-    getProgress(startTime, endTime, temp)
+    getProgress(startTime, endTime)
   );
 
   const [time, setTime] = useState<number>(0);
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setTime(getDifference(startTime, endTime, temp));
-      setProgress(getProgress(startTime, endTime, temp));
-      // setTemp((t) => t + 1000);
+      setTime(getDifference(startTime, endTime));
+      setProgress(getProgress(startTime, endTime));
+
     }, 1000);
     return () => {
       clearInterval(interval);
