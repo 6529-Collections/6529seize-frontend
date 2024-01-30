@@ -209,10 +209,10 @@ export default function NextGenAdminUploadAL(props: Readonly<Props>) {
               />
             </Form.Group>
             <Form.Group className="mb-3">
-              <Form.Label>Allowlist end Time</Form.Label>
+              <Form.Label>Mint Price (ETH)</Form.Label>
               <Form.Control
                 type="integer"
-                placeholder="Mint Price (ETH)"
+                placeholder="...0.06529"
                 value={mintPrice}
                 onChange={(e: any) => setMintPrice(e.target.value)}
               />
