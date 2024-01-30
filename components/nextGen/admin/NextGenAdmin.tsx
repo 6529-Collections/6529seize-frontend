@@ -176,15 +176,18 @@ export default function NextGenAdmin() {
     FunctionSelectors.INITIALIZE_EXTERNAL_BURN_SWAP
   );
   const collectionIndex = useCollectionIndex();
+  const collectionIndexData = collectionIndex?.data;
+  const parsedCollectionIndex = collectionIndexData
+    ? parseInt(collectionIndexData.toString())
+    : 0;
   const collectionAdmin = useCollectionAdmin(
     account.address as string,
-    parseInt(collectionIndex?.data as any)
+    parsedCollectionIndex
   );
+
   const isWalletCollectionAdmin = isCollectionAdmin(collectionAdmin);
 
-  const collectionArtists = useCollectionArtist(
-    parseInt(collectionIndex?.data as any)
-  );
+  const collectionArtists = useCollectionArtist(parsedCollectionIndex);
 
   const isArtist = isCollectionArtist(
     account.address as string,
