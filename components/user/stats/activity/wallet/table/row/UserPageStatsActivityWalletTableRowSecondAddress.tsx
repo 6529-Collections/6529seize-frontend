@@ -12,7 +12,8 @@ export default function UserPageStatsActivityWalletTableRowSecondAddress({
   readonly type: TransactionType;
 }) {
   const TYPE_TO_ACTION: Record<TransactionType, string> = {
-    [TransactionType.AIRDROP]: "",
+    [TransactionType.AIRDROPPED]: "to",
+    [TransactionType.RECEIVED_AIRDROP]: "from",
     [TransactionType.MINTED]: "",
     [TransactionType.SALE]: "to",
     [TransactionType.PURCHASE]: "from",
@@ -27,11 +28,11 @@ export default function UserPageStatsActivityWalletTableRowSecondAddress({
     address: string;
   } => {
     switch (type) {
-      case TransactionType.AIRDROP:
       case TransactionType.MINTED:
       case TransactionType.PURCHASE:
       case TransactionType.TRANSFER_IN:
       case TransactionType.RECEIVED_BURN:
+      case TransactionType.RECEIVED_AIRDROP:
         return {
           display:
             transaction.from_display ??
@@ -39,6 +40,7 @@ export default function UserPageStatsActivityWalletTableRowSecondAddress({
             "unknown",
           address: transaction.from_address,
         };
+      case TransactionType.AIRDROPPED:
       case TransactionType.SALE:
       case TransactionType.BURNED:
       case TransactionType.TRANSFER_OUT:

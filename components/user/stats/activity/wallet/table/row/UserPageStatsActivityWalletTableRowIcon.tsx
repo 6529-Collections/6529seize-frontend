@@ -7,7 +7,8 @@ export default function UserPageStatsActivityWalletTableRowIcon({
   readonly type: TransactionType;
 }) {
   switch (type) {
-    case TransactionType.AIRDROP:
+    case TransactionType.RECEIVED_AIRDROP:
+    case TransactionType.AIRDROPPED:
       return (
         <svg
           className="tw-flex-shrink-0 tw-h-5 tw-w-5 tw-mr-1 tw-text-iron-300"

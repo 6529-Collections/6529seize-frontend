@@ -21,7 +21,8 @@ import UserPageStatsActivityWalletTableRowRoyalties from "./UserPageStatsActivit
 import UserPageStatsActivityWalletTableRowGas from "./UserPageStatsActivityWalletTableRowGas";
 
 export enum TransactionType {
-  AIRDROP = "AIRDROP",
+  AIRDROPPED = "AIRDROPPED",
+  RECEIVED_AIRDROP = "RECEIVED_AIRDROP",
   MINTED = "MINTED",
   SALE = "SALE",
   PURCHASE = "PURCHASE",
@@ -32,7 +33,7 @@ export enum TransactionType {
 }
 
 const TYPE_TP_ACTION: Record<TransactionType, string> = {
-  [TransactionType.AIRDROP]: "received airdrop",
+  [TransactionType.RECEIVED_AIRDROP]: "received airdrop",
   [TransactionType.MINTED]: "minted",
   [TransactionType.SALE]: "sold",
   [TransactionType.PURCHASE]: "purchased",
@@ -40,6 +41,7 @@ const TYPE_TP_ACTION: Record<TransactionType, string> = {
   [TransactionType.TRANSFER_OUT]: "transferred",
   [TransactionType.BURNED]: "burned",
   [TransactionType.RECEIVED_BURN]: "received burn",
+  [TransactionType.AIRDROPPED]: "airdropped",
 };
 
 export default function UserPageStatsActivityWalletTableRow({
@@ -94,7 +96,15 @@ export default function UserPageStatsActivityWalletTableRow({
       areEqualAddresses(NULL_ADDRESS, transaction.from_address) &&
       !transaction.value
     ) {
-      return TransactionType.AIRDROP;
+      const isProfileNullAddress = profile.consolidation.wallets.some(
+        (w) =>
+          areEqualAddresses(w.wallet.address, NULL_ADDRESS) ||
+          areEqualAddresses(w.wallet.address, NULL_DEAD_ADDRESS)
+      );
+      if (isProfileNullAddress) {
+        return TransactionType.AIRDROPPED;
+      }
+      return TransactionType.RECEIVED_AIRDROP;
     }
 
     if (
@@ -150,6 +160,7 @@ export default function UserPageStatsActivityWalletTableRow({
     TransactionType.TRANSFER_IN,
     TransactionType.TRANSFER_OUT,
     TransactionType.RECEIVED_BURN,
+    TransactionType.AIRDROPPED,
   ].includes(type);
 
   const value = transaction.value;
@@ -165,6 +176,29 @@ export default function UserPageStatsActivityWalletTableRow({
       return `/meme-lab/${transaction.token_id}`;
     }
     return "";
+  };
+
+  const showValue = (): boolean => {
+    if (!value) {
+      return false;
+    }
+    if (type === TransactionType.RECEIVED_BURN) {
+      return false;
+    }
+
+    if (type === TransactionType.BURNED) {
+      return false;
+    }
+
+    if (type === TransactionType.RECEIVED_AIRDROP) {
+      return false;
+    }
+
+    if (type === TransactionType.AIRDROPPED) {
+      return false;
+    }
+
+    return true;
   };
 
   return (
@@ -205,7 +239,7 @@ export default function UserPageStatsActivityWalletTableRow({
             />
           )}
         </div>
-        {!!value && (
+        {showValue() && (
           <div className="tw-inline-flex tw-items-center tw-whitespace-nowrap tw-text-sm tw-text-iron-400 tw-font-medium">
             for{" "}
             <span className="tw-ml-0.5 tw-inline-flex tw-items-center">
