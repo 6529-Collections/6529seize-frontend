@@ -49,6 +49,7 @@ export default function UserPageStatsActivityWalletTableRowMainAddress({
       return "Null Address";
     }
     if (!wallet) {
+      console.log(transaction);
       return "unknown";
     }
     return wallet.wallet.ens ?? formatAddress(wallet.wallet.address);

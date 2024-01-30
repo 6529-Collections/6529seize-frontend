@@ -1,8 +1,13 @@
 import Link from "next/link";
 import { Transaction } from "../../../../../../../entities/ITransaction";
 import { assertUnreachable } from "../../../../../../../helpers/AllowlistToolHelpers";
-import { formatAddress } from "../../../../../../../helpers/Helpers";
+import {
+  formatAddress,
+  getProfileTargetRoute,
+} from "../../../../../../../helpers/Helpers";
 import { TransactionType } from "./UserPageStatsActivityWalletTableRow";
+import { useRouter } from "next/router";
+import { UserPageTabType } from "../../../../../layout/UserPageTabs";
 
 export default function UserPageStatsActivityWalletTableRowSecondAddress({
   transaction,
@@ -11,6 +16,7 @@ export default function UserPageStatsActivityWalletTableRowSecondAddress({
   readonly transaction: Transaction;
   readonly type: TransactionType;
 }) {
+  const router = useRouter();
   const TYPE_TO_ACTION: Record<TransactionType, string> = {
     [TransactionType.AIRDROPPED]: "to",
     [TransactionType.RECEIVED_AIRDROP]: "from",
@@ -63,11 +69,16 @@ export default function UserPageStatsActivityWalletTableRowSecondAddress({
   };
 
   const { display, address } = getWalletDisplayAndAddress();
+  const path = getProfileTargetRoute({
+    handleOrWallet: address,
+    router,
+    defaultPath: UserPageTabType.STATS,
+  });
 
   return (
     <span className="tw-inline-flex tw-space-x-1">
       <span className="tw-text-iron-400">{TYPE_TO_ACTION[type]}</span>
-      <Link className="tw-no-underline hover:tw-underline" href={`/${address}`}>
+      <Link className="tw-no-underline hover:tw-underline" href={path}>
         {display}
       </Link>
     </span>
