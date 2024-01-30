@@ -30,8 +30,12 @@ export default function UserPageStatsActivityWalletTableRowGas({
         </div>
       }
     >
-      <div className="tw-h-10 tw-w-10 tw-flex tw-justify-center tw-items-center">
+      <div
+        aria-label="Gas Information"
+        className="tw-h-10 tw-w-10 tw-flex tw-justify-center tw-items-center tw-rounded-full focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400"
+      >
         <svg
+          aria-hidden="true"
           className="tw-flex-shrink-0 tw-w-6 tw-h-6 sm:tw-w-5 sm:tw-h-5 tw-text-iron-300"
           x="0px"
           y="0px"

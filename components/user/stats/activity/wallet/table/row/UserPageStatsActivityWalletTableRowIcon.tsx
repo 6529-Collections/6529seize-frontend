@@ -7,12 +7,14 @@ export default function UserPageStatsActivityWalletTableRowIcon({
   readonly type: TransactionType;
 }) {
   switch (type) {
-    case TransactionType.AIRDROP:
+    case TransactionType.RECEIVED_AIRDROP:
+    case TransactionType.AIRDROPPED:
       return (
         <svg
           className="tw-flex-shrink-0 tw-h-5 tw-w-5 tw-mr-1 tw-text-iron-300"
           viewBox="0 0 24 24"
           fill="none"
+          aria-hidden="true"
           xmlns="http://www.w3.org/2000/svg"
         >
           <g clipPath="url(#clip0_419_169)">
@@ -28,12 +30,14 @@ export default function UserPageStatsActivityWalletTableRowIcon({
           </defs>
         </svg>
       );
-    case TransactionType.MINT:
+    case TransactionType.MINTED:
+    case TransactionType.MINTED_TO:
       return (
         <svg
           className="tw-flex-shrink-0 tw-w-5 tw-h-5 tw-mr-1 tw-text-iron-300"
           viewBox="0 0 27 27"
           fill="none"
+          aria-hidden="true"
           xmlns="http://www.w3.org/2000/svg"
         >
           <path
@@ -64,6 +68,7 @@ export default function UserPageStatsActivityWalletTableRowIcon({
           className="tw-flex-shrink-0 tw-w-5 tw-h-5 tw-mr-1 tw-text-iron-300"
           viewBox="0 0 27 27"
           fill="none"
+          aria-hidden="true"
           xmlns="http://www.w3.org/2000/svg"
         >
           <path
@@ -96,6 +101,7 @@ export default function UserPageStatsActivityWalletTableRowIcon({
           className="tw-flex-shrink-0 tw-w-5 tw-h-5 tw-mr-1 tw-text-iron-300"
           viewBox="0 0 27 27"
           fill="none"
+          aria-hidden="true"
           xmlns="http://www.w3.org/2000/svg"
         >
           <path
@@ -123,32 +129,17 @@ export default function UserPageStatsActivityWalletTableRowIcon({
         </svg>
       );
     case TransactionType.TRANSFER_IN:
-      return (
-        <svg
-          className="tw-flex-shrink-0 tw-w-5 tw-h-5 tw-mr-1 tw-text-iron-300"
-          viewBox="0 0 24 24"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <path
-            d="M20 12H4M4 12L10 18M4 12L10 6"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </svg>
-      );
     case TransactionType.TRANSFER_OUT:
       return (
         <svg
           className="tw-flex-shrink-0 tw-w-5 tw-h-5 tw-mr-1 tw-text-iron-300"
           viewBox="0 0 24 24"
           fill="none"
+          aria-hidden="true"
           xmlns="http://www.w3.org/2000/svg"
         >
           <path
-            d="M4 12H20M20 12L14 6M20 12L14 18"
+            d="M20 17H4M4 17L8 13M4 17L8 21M4 7H20M20 7L16 3M20 7L16 11"
             stroke="currentColor"
             strokeWidth="2"
             strokeLinecap="round"
@@ -156,12 +147,14 @@ export default function UserPageStatsActivityWalletTableRowIcon({
           />
         </svg>
       );
-    case TransactionType.BURN:
+    case TransactionType.BURNED:
+    case TransactionType.RECEIVED_BURN:
       return (
         <svg
           className="tw-flex-shrink-0 tw-w-5 tw-h-5 tw-mr-1 tw-text-iron-300"
           xmlns="http://www.w3.org/2000/svg"
           fill="none"
+          aria-hidden="true"
           viewBox="0 0 24 24"
           strokeWidth="1.5"
           stroke="currentColor"
@@ -177,7 +170,6 @@ export default function UserPageStatsActivityWalletTableRowIcon({
             d="M12 18a3.75 3.75 0 0 0 .495-7.468 5.99 5.99 0 0 0-1.925 3.547 5.975 5.975 0 0 1-2.133-1.001A3.75 3.75 0 0 0 12 18Z"
           />
         </svg>
-        
       );
     default:
       assertUnreachable(type);
