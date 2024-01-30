@@ -78,9 +78,10 @@ export default function UserPageHeaderAboutEditError({
           <button
             onClick={closeError}
             type="button"
+            title="Close"
+            aria-label="Close"
             className="tw-group tw-bg-transparent tw-border-none tw-inline-flex tw-rounded-md focus:tw-outline-none"
           >
-            <span className="tw-sr-only">Close</span>
             <svg
               className="tw-w-6 tw-h-6 tw-text-iron-300 group-hover:tw-text-iron-400 tw-transition tw-duration-300 tw-ease-out"
               viewBox="0 0 24 24"

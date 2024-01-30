@@ -59,7 +59,10 @@ export default function UserPageStatsActivityWalletTableRowRoyalties({
     case RoyaltiesType.BELOW_THRESHOLD:
       return (
         <Tippy content={getContent()} theme="dark" placement="top">
-          <div className="tw-h-10 tw-w-10 tw-flex tw-justify-center tw-items-center">
+          <div
+            tabIndex={0}
+            className="tw-h-10 tw-w-10 tw-flex tw-justify-center tw-items-center tw-rounded-full focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400"
+          >
             <img
               src="/pepe-smile.png"
               className="tw-w-6 tw-h-6 sm:tw-w-5 sm:tw-h-5 tw-object-contain tw-flex-shrink-0"
@@ -71,7 +74,10 @@ export default function UserPageStatsActivityWalletTableRowRoyalties({
     case RoyaltiesType.ABOVE_THRESHOLD:
       return (
         <Tippy content={getContent()} theme="dark" placement="top">
-          <div className="tw-h-10 tw-w-10 tw-flex tw-justify-center tw-items-center">
+          <div
+            tabIndex={0}
+            className="tw-h-10 tw-w-10 tw-flex tw-justify-center tw-items-center tw-rounded-full focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400"
+          >
             <img
               src="/pepe-xglasses.png"
               className="tw-w-6 tw-h-6 sm:tw-w-5 sm:tw-h-5 tw-object-contain tw-flex-shrink-0"

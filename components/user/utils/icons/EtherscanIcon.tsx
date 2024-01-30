@@ -2,6 +2,7 @@ export default function EtherscanIcon() {
   return (
     <svg
       className="tw-w-full tw-h-full tw-align-top"
+      aria-hidden="true"
       viewBox="0 0 122 122"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"

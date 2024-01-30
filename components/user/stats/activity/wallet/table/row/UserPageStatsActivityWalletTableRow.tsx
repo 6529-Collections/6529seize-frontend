@@ -198,6 +198,7 @@ export default function UserPageStatsActivityWalletTableRow({
             <span className="tw-ml-0.5 tw-inline-flex tw-items-center">
               <svg
                 className="tw-h-5 tw-w-5"
+                aria-hidden="true"
                 enableBackground="new 0 0 1920 1920"
                 viewBox="0 0 1920 1920"
                 xmlns="http://www.w3.org/2000/svg"
@@ -215,6 +216,7 @@ export default function UserPageStatsActivityWalletTableRow({
               <span className="tw-whitespace-nowrap tw-text-iron-100">
                 {value}
               </span>
+              <span className="tw-sr-only">ETH</span>
             </span>
           </div>
         )}
@@ -236,15 +238,17 @@ export default function UserPageStatsActivityWalletTableRow({
         <a
           href={`https://etherscan.io/tx/${transaction.transaction}`}
           target="_blank"
+          title="Go to etherscan"
+          aria-label="Go to etherscan"
           rel="noopener noreferrer"
-          className="tw-bg-transparent tw-border-none tw-h-10 tw-w-10 tw-flex tw-justify-center tw-items-center hover:tw-scale-110 tw-transition tw-duration-300 tw-ease-out"
+          className="tw-bg-transparent tw-border-none tw-h-10 tw-w-10 tw-flex tw-justify-center tw-items-center hover:tw-scale-110 tw-rounded-full focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 tw-transition tw-duration-300 tw-ease-out"
         >
-          <div className="tw-flex-shrink-0 tw-w-6 tw-h-6 sm:tw-w-5 sm:tw-h-5">
+          <div className="tw-flex-shrink-0 tw-w-6 tw-h-6 sm:tw-w-5 sm:tw-h-5">      
             <EtherscanIcon />
           </div>
         </a>
       </td>
-      <td className="tw-py-2.5 tw-w-24 tw-pl-6 sm:tw-pl-4 tw-text-right">
+      <td className="tw-py-2.5 tw-pl-6 sm:tw-pl-4 tw-text-right">
         <CommonTimeAgo
           timestamp={new Date(transaction.transaction_date).getTime()}
         />
