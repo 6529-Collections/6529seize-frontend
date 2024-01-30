@@ -106,7 +106,6 @@ export default function UserPageIdentityStatements({
                   />
                 </div>
               </div>
-
               <div className="tw-grid tw-grid-cols-1 tw-gap-x-8 tw-gap-y-8 xl:tw-gap-y-6 xl:tw-grid-cols-6">
                 <div className="tw-col-span-2">
                   <UserPageIdentityStatementsContacts
@@ -115,7 +114,6 @@ export default function UserPageIdentityStatements({
                     loading={isLoading}
                   />
                 </div>
-
                 <div className="tw-col-span-2">
                   <UserPageIdentityStatementsSocialMediaVerificationPosts
                     statements={socialMediaVerificationPosts}
