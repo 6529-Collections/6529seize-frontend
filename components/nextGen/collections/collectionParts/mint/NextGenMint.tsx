@@ -211,7 +211,7 @@ export default function NextGenMint(props: Readonly<Props>) {
   });
 
   useEffect(() => {
-    if (account.address && props.collection.merkle_root) {
+    if (props.collection.merkle_root) {
       const merkleRoot = props.collection.merkle_root;
       const url = `${process.env.API_ENDPOINT}/api/nextgen/merkle_roots/${merkleRoot}`;
       fetchUrl(url).then((response: CollectionWithMerkle) => {
@@ -221,7 +221,7 @@ export default function NextGenMint(props: Readonly<Props>) {
         setCollectionLoaded(true);
       });
     }
-  }, [account.address, props.collection.merkle_root]);
+  }, [props.collection.merkle_root]);
 
   function getSalesModel() {
     if (!mintingDetails) {
