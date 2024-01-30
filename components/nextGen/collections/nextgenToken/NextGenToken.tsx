@@ -106,7 +106,10 @@ export default function NextGenToken(props: Readonly<Props>) {
               />
             )}
             {view === ContentView.PROVENANCE && (
-              <NextGenTokenProvenance token_id={props.token.id} />
+              <NextGenTokenProvenance
+                collection_id={props.collection.id}
+                token_id={props.token.id}
+              />
             )}
           </Col>
         </Row>

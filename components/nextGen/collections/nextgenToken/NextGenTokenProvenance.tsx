@@ -5,8 +5,11 @@ import { commonApiFetch } from "../../../../services/api/common-api";
 import Pagination from "../../../pagination/Pagination";
 import { Transaction } from "../../../../entities/ITransaction";
 import LatestActivityRow from "../../../latest-activity/LatestActivityRow";
+import { NextGenLog } from "../../../../entities/INextgen";
+import { NextGenCollectionProvenanceRow } from "../collectionParts/NextGenCollectionProvenance";
 
 interface Props {
+  collection_id: number;
   token_id: number;
 }
 
@@ -14,11 +17,17 @@ const PAGE_SIZE = 20;
 
 export default function NextGenTokenProvenance(props: Readonly<Props>) {
   const scrollTarget = useRef<HTMLImageElement>(null);
+  const logsScrollTarget = useRef<HTMLImageElement>(null);
 
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [transactionsLoaded, setTransactionsLoaded] = useState(false);
   const [totalResults, setTotalResults] = useState(0);
   const [page, setPage] = useState(1);
+
+  const [logs, setLogs] = useState<NextGenLog[]>([]);
+  const [logsLoaded, setLogsLoaded] = useState(false);
+  const [logsTotalResults, setLogsTotalResults] = useState(0);
+  const [logsPage, setLogsPage] = useState(1);
 
   function fetchResults(mypage: number) {
     setTransactionsLoaded(false);
@@ -40,11 +49,39 @@ export default function NextGenTokenProvenance(props: Readonly<Props>) {
     fetchResults(page);
   }, [page]);
 
+  function fetchLogsResults(mypage: number) {
+    setLogsLoaded(false);
+    commonApiFetch<{
+      count: number;
+      page: number;
+      next: any;
+      data: NextGenLog[];
+    }>({
+      endpoint: `nextgen/collections/${props.collection_id}/logs/${props.token_id}?page_size=${PAGE_SIZE}&page=${mypage}`,
+    }).then((response) => {
+      setLogsTotalResults(response.count);
+      setLogs(response.data);
+      setLogsLoaded(true);
+    });
+  }
+
+  useEffect(() => {
+    fetchResults(page);
+  }, [page]);
+
+  useEffect(() => {
+    fetchLogsResults(page);
+  }, [logsPage]);
+
   return (
     <>
       <Container className="no-padding" ref={scrollTarget}>
-        <Row
-          className={`pt-2 ${styles.logsScrollContainer} ${styles.tokenLogsScrollContainer}`}>
+        <Row>
+          <Col>
+            <h3>Activity</h3>
+          </Col>
+        </Row>
+        <Row className={`pt-2 ${styles.logsScrollContainer}`}>
           <Col>
             <Table bordered={false} className={styles.logsTable}>
               <tbody>
@@ -68,6 +105,44 @@ export default function NextGenTokenProvenance(props: Readonly<Props>) {
                 setPage(newPage);
                 if (scrollTarget.current) {
                   scrollTarget.current.scrollIntoView({
+                    behavior: "smooth",
+                  });
+                }
+              }}
+            />
+          </Row>
+        )}
+      </Container>
+      <Container className="pt-4 no-padding" ref={logsScrollTarget}>
+        <Row>
+          <Col>
+            <h3>History</h3>
+          </Col>
+        </Row>
+        <Row className={`pt-2 ${styles.logsScrollContainer}`}>
+          <Col>
+            <Table bordered={false} className={styles.logsTable}>
+              <tbody>
+                {logs.map((log) => (
+                  <NextGenCollectionProvenanceRow
+                    log={log}
+                    key={`${log.block}-${log.transaction}`}
+                  />
+                ))}
+              </tbody>
+            </Table>
+          </Col>
+        </Row>
+        {logsTotalResults > PAGE_SIZE && logsLoaded && (
+          <Row className="text-center pt-4 pb-4">
+            <Pagination
+              page={logsPage}
+              pageSize={PAGE_SIZE}
+              totalResults={logsTotalResults}
+              setPage={function (newPage: number) {
+                setLogsPage(newPage);
+                if (logsScrollTarget.current) {
+                  logsScrollTarget.current.scrollIntoView({
                     behavior: "smooth",
                   });
                 }

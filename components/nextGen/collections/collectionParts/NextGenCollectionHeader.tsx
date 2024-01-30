@@ -315,7 +315,7 @@ export function NextGenMintCounts(
 
   return (
     <b>
-      {numberWithCommas(mintCount)} /{" "}
+      {mintCount > 0 ? numberWithCommas(mintCount) : mintCount} /{" "}
       {numberWithCommas(props.collection.total_supply)} minted
       {available > 0 && ` | ${numberWithCommas(available)} remaining`}
       {isLoading && (
