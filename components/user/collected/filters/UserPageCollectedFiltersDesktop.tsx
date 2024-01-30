@@ -26,7 +26,7 @@ export default function UserPageCollectedFiltersDesktop({
   readonly showSeizedAndSzn: boolean;
 }) {
   return (
-    <div>
+    <div className="tw-gap-x-4 tw-gap-y-3 tw-flex tw-flex-wrap tw-items-center">
       <UserPageCollectedFiltersCollection
         selected={filters.collection}
         setSelected={setCollection}

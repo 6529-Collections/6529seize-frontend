@@ -52,7 +52,7 @@ export default function CommonDropdown<T>({
           aria-haspopup="true"
           onClick={toggleOpen}
           className="tw-text-left tw-block tw-whitespace-nowrap tw-w-full sm:tw-w-auto tw-rounded-lg tw-border-0 tw-py-2.5 tw-pl-3.5 tw-pr-10 tw-bg-iron-900 focus:tw-bg-transparent tw-text-iron-300 tw-font-semibold tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-700 
-          focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 tw-text-base sm:tw-text-sm sm:tw-leading-6 hover:tw-bg-iron-800 tw-transition tw-duration-300 tw-ease-out"
+          focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 tw-text-base sm:tw-text-sm hover:tw-bg-iron-800 tw-transition tw-duration-300 tw-ease-out"
         >
           <span>{title}</span>
         </button>
