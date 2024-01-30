@@ -3,6 +3,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Tippy from "@tippyjs/react";
 import { Container, Row, Col, Form, Button } from "react-bootstrap";
 import {
+  areEqualAddresses,
   capitalizeFirstChar,
   createArray,
   getNetworkName,
@@ -264,7 +265,9 @@ export default function NextGenMintWidget(props: Readonly<Props>) {
           currentProof && alStatus == Status.LIVE
             ? currentProof.proof.proof
             : [],
-          mintForAddress ?? NULL_ADDRESS,
+          areEqualAddresses(mintForAddress, account.address)
+            ? NULL_ADDRESS
+            : mintForAddress,
           salt,
         ],
       });
