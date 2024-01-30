@@ -183,8 +183,14 @@ export default function NextgenCollectionMintingPlan(props: Readonly<Props>) {
                   {allowlist.map((al) => (
                     <tr key={`${al.address}-${al.spots}-${al.info}`}>
                       <td>
-                        {al.wallet_display && `${al.wallet_display} - `}
-                        {al.address}
+                        <a
+                          href={`/${al.address}/mints`}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="decoration-hover-underline">
+                          {al.wallet_display && `${al.wallet_display} - `}
+                          {al.address}
+                        </a>
                       </td>
                       <td className="text-center">{al.phase}</td>
                       <td className="text-center">

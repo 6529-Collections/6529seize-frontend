@@ -3,6 +3,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Tippy from "@tippyjs/react";
 import { Container, Row, Col, Form, Button } from "react-bootstrap";
 import {
+  capitalizeFirstChar,
   createArray,
   getNetworkName,
   isValidEthAddress,
@@ -47,7 +48,7 @@ export function getJsonData(keccak: string, data: string) {
     <ul className="mb-0">
       {results.map((r) => (
         <li key={`ul-${keccak}-${r.key}-${r.value}`}>
-          {r.key}: {r.value}
+          {capitalizeFirstChar(r.key)}: {r.value}
         </li>
       ))}
     </ul>
