@@ -143,9 +143,11 @@ export default function ProfileRatersTableWrapper({
   };
 
   return (
-    <div>
-      <ProfileRatersTableWrapperHeader type={type} />
-      <div className="tw-mt-2 lg:tw-mt-4 tw-bg-iron-900 tw-border tw-border-iron-800 tw-border-solid tw-rounded-xl xl:tw-min-h-[29rem] tw-max-h-[29rem] tw-scroll-py-3 tw-overflow-y-auto">
+    <div className="tw-flex-1 tw-min-h-full tw-flex tw-flex-col">
+      <div>
+        <ProfileRatersTableWrapperHeader type={type} />
+      </div>
+      <div className="tw-flex-1 tw-mt-2 lg:tw-mt-4 tw-bg-iron-900 tw-border tw-border-iron-800 tw-border-solid tw-rounded-xl tw-max-h-[29rem] tw-scroll-py-3 tw-overflow-y-auto">
         {isLoading ? (
           <div className="tw-p-4">
             <CommonSkeletonLoader />
