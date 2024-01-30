@@ -7,7 +7,8 @@ export default function UserPageStatsActivityWalletTableRowIcon({
   readonly type: TransactionType;
 }) {
   switch (type) {
-    case TransactionType.AIRDROP:
+    case TransactionType.RECEIVED_AIRDROP:
+    case TransactionType.AIRDROPPED:
       return (
         <svg
           className="tw-flex-shrink-0 tw-h-5 tw-w-5 tw-mr-1 tw-text-iron-300"
@@ -29,7 +30,8 @@ export default function UserPageStatsActivityWalletTableRowIcon({
           </defs>
         </svg>
       );
-    case TransactionType.MINT:
+    case TransactionType.MINTED:
+    case TransactionType.MINTED_TO:
       return (
         <svg
           className="tw-flex-shrink-0 tw-w-5 tw-h-5 tw-mr-1 tw-text-iron-300"
@@ -162,7 +164,8 @@ export default function UserPageStatsActivityWalletTableRowIcon({
           />
         </svg>
       );
-    case TransactionType.BURN:
+    case TransactionType.BURNED:
+    case TransactionType.RECEIVED_BURN:
       return (
         <svg
           className="tw-flex-shrink-0 tw-w-5 tw-h-5 tw-mr-1 tw-text-iron-300"

@@ -21,24 +21,35 @@ import UserPageStatsActivityWalletTableRowRoyalties from "./UserPageStatsActivit
 import UserPageStatsActivityWalletTableRowGas from "./UserPageStatsActivityWalletTableRowGas";
 
 export enum TransactionType {
-  AIRDROP = "AIRDROP",
-  MINT = "MINT",
+  AIRDROPPED = "AIRDROPPED",
+  RECEIVED_AIRDROP = "RECEIVED_AIRDROP",
+  MINTED = "MINTED",
+  MINTED_TO = "MINTED_TO",
   SALE = "SALE",
   PURCHASE = "PURCHASE",
   TRANSFER_IN = "TRANSFER_IN",
   TRANSFER_OUT = "TRANSFER_OUT",
-  BURN = "BURN",
+  BURNED = "BURNED",
+  RECEIVED_BURN = "RECEIVED_BURN",
 }
 
 const TYPE_TP_ACTION: Record<TransactionType, string> = {
-  [TransactionType.AIRDROP]: "received airdrop",
-  [TransactionType.MINT]: "minted",
+  [TransactionType.RECEIVED_AIRDROP]: "received airdrop",
+  [TransactionType.MINTED]: "minted",
+  [TransactionType.MINTED_TO]: "minted",
   [TransactionType.SALE]: "sold",
   [TransactionType.PURCHASE]: "purchased",
   [TransactionType.TRANSFER_IN]: "received",
   [TransactionType.TRANSFER_OUT]: "transferred",
-  [TransactionType.BURN]: "burned",
+  [TransactionType.BURNED]: "burned",
+  [TransactionType.RECEIVED_BURN]: "received burn",
+  [TransactionType.AIRDROPPED]: "airdropped",
 };
+
+const NULL_AND_DEAD_ADDRESSES = [NULL_ADDRESS, NULL_DEAD_ADDRESS].map((w) =>
+  w.toLowerCase()
+);
+const MINTING_ADDRESSES = [NULL_ADDRESS, MANIFOLD].map((w) => w.toLowerCase());
 
 export default function UserPageStatsActivityWalletTableRow({
   transaction,
@@ -87,26 +98,71 @@ export default function UserPageStatsActivityWalletTableRow({
     [profile]
   );
 
+  const includingAddresses = ({
+    address,
+    addresses,
+  }: {
+    readonly address: string;
+    readonly addresses: string[];
+  }): boolean =>
+    addresses.some((a) =>
+      areEqualAddresses(a.toLowerCase(), address.toLowerCase())
+    );
+
+  const getAirDropType = (): TransactionType =>
+    profile.consolidation.wallets.some((w) =>
+      includingAddresses({
+        address: w.wallet.address,
+        addresses: NULL_AND_DEAD_ADDRESSES,
+      })
+    )
+      ? TransactionType.AIRDROPPED
+      : TransactionType.RECEIVED_AIRDROP;
+
+  const getMintingType = (): TransactionType =>
+    profile.consolidation.wallets.some((w) =>
+      includingAddresses({
+        address: w.wallet.address,
+        addresses: MINTING_ADDRESSES,
+      })
+    )
+      ? TransactionType.MINTED_TO
+      : TransactionType.MINTED;
+
+  const getBurnType = (): TransactionType =>
+    profile.consolidation.wallets.some((w) =>
+      includingAddresses({
+        address: w.wallet.address,
+        addresses: NULL_AND_DEAD_ADDRESSES,
+      })
+    )
+      ? TransactionType.RECEIVED_BURN
+      : TransactionType.BURNED;
+
   const getType = (): TransactionType => {
     if (
       areEqualAddresses(NULL_ADDRESS, transaction.from_address) &&
       !transaction.value
     ) {
-      return TransactionType.AIRDROP;
+      return getAirDropType();
     }
 
     if (
-      areEqualAddresses(NULL_ADDRESS, transaction.from_address) ||
-      areEqualAddresses(MANIFOLD, transaction.from_address)
+      includingAddresses({
+        address: transaction.from_address,
+        addresses: MINTING_ADDRESSES,
+      })
     ) {
-      return TransactionType.MINT;
+      return getMintingType();
     }
 
     if (
-      areEqualAddresses(NULL_ADDRESS, transaction.to_address) ||
-      areEqualAddresses(NULL_DEAD_ADDRESS, transaction.to_address)
+      includingAddresses({
+        address: transaction.to_address,
+        addresses: NULL_AND_DEAD_ADDRESSES,
+      })
     ) {
-      return TransactionType.BURN;
+      return getBurnType();
     }
 
     if (
@@ -137,6 +193,9 @@ export default function UserPageStatsActivityWalletTableRow({
     TransactionType.SALE,
     TransactionType.TRANSFER_IN,
     TransactionType.TRANSFER_OUT,
+    TransactionType.RECEIVED_BURN,
+    TransactionType.AIRDROPPED,
+    TransactionType.MINTED_TO,
   ].includes(type);
 
   const value = transaction.value;
@@ -152,6 +211,29 @@ export default function UserPageStatsActivityWalletTableRow({
       return `/meme-lab/${transaction.token_id}`;
     }
     return "";
+  };
+
+  const showValue = (): boolean => {
+    if (!value) {
+      return false;
+    }
+    if (type === TransactionType.RECEIVED_BURN) {
+      return false;
+    }
+
+    if (type === TransactionType.BURNED) {
+      return false;
+    }
+
+    if (type === TransactionType.RECEIVED_AIRDROP) {
+      return false;
+    }
+
+    if (type === TransactionType.AIRDROPPED) {
+      return false;
+    }
+
+    return true;
   };
 
   return (
@@ -192,7 +274,7 @@ export default function UserPageStatsActivityWalletTableRow({
             />
           )}
         </div>
-        {!!value && (
+        {showValue() && (
           <div className="tw-inline-flex tw-items-center tw-whitespace-nowrap tw-text-sm tw-text-iron-400 tw-font-medium">
             for{" "}
             <span className="tw-ml-0.5 tw-inline-flex tw-items-center">
