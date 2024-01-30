@@ -1,8 +1,13 @@
 import Link from "next/link";
 import { Transaction } from "../../../../../../../entities/ITransaction";
 import { assertUnreachable } from "../../../../../../../helpers/AllowlistToolHelpers";
-import { formatAddress } from "../../../../../../../helpers/Helpers";
+import {
+  formatAddress,
+  getProfileTargetRoute,
+} from "../../../../../../../helpers/Helpers";
 import { TransactionType } from "./UserPageStatsActivityWalletTableRow";
+import { useRouter } from "next/router";
+import { UserPageTabType } from "../../../../../layout/UserPageTabs";
 
 export default function UserPageStatsActivityWalletTableRowSecondAddress({
   transaction,
@@ -11,14 +16,18 @@ export default function UserPageStatsActivityWalletTableRowSecondAddress({
   readonly transaction: Transaction;
   readonly type: TransactionType;
 }) {
+  const router = useRouter();
   const TYPE_TO_ACTION: Record<TransactionType, string> = {
-    [TransactionType.AIRDROP]: "",
-    [TransactionType.MINT]: "",
+    [TransactionType.AIRDROPPED]: "to",
+    [TransactionType.RECEIVED_AIRDROP]: "from",
+    [TransactionType.MINTED]: "",
+    [TransactionType.MINTED_TO]: "to",
     [TransactionType.SALE]: "to",
     [TransactionType.PURCHASE]: "from",
     [TransactionType.TRANSFER_IN]: "from",
     [TransactionType.TRANSFER_OUT]: "to",
-    [TransactionType.BURN]: "",
+    [TransactionType.BURNED]: "",
+    [TransactionType.RECEIVED_BURN]: "from",
   };
 
   const getWalletDisplayAndAddress = (): {
@@ -26,10 +35,11 @@ export default function UserPageStatsActivityWalletTableRowSecondAddress({
     address: string;
   } => {
     switch (type) {
-      case TransactionType.AIRDROP:
-      case TransactionType.MINT:
+      case TransactionType.MINTED:
       case TransactionType.PURCHASE:
       case TransactionType.TRANSFER_IN:
+      case TransactionType.RECEIVED_BURN:
+      case TransactionType.RECEIVED_AIRDROP:
         return {
           display:
             transaction.from_display ??
@@ -37,9 +47,11 @@ export default function UserPageStatsActivityWalletTableRowSecondAddress({
             "unknown",
           address: transaction.from_address,
         };
+      case TransactionType.AIRDROPPED:
       case TransactionType.SALE:
-      case TransactionType.BURN:
+      case TransactionType.BURNED:
       case TransactionType.TRANSFER_OUT:
+      case TransactionType.MINTED_TO:
         return {
           display:
             transaction.to_display ??
@@ -57,11 +69,16 @@ export default function UserPageStatsActivityWalletTableRowSecondAddress({
   };
 
   const { display, address } = getWalletDisplayAndAddress();
+  const path = getProfileTargetRoute({
+    handleOrWallet: address,
+    router,
+    defaultPath: UserPageTabType.STATS,
+  });
 
   return (
     <span className="tw-inline-flex tw-space-x-1">
       <span className="tw-text-iron-400">{TYPE_TO_ACTION[type]}</span>
-      <Link className="tw-no-underline hover:tw-underline" href={`/${address}`}>
+      <Link className="tw-no-underline hover:tw-underline" href={path}>
         {display}
       </Link>
     </span>
