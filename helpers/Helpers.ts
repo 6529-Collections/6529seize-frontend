@@ -290,7 +290,7 @@ export function isEmptyObject(obj: any) {
 }
 
 export function isUrl(s: string) {
-  const pattern = /^(https?:\/\/)?[\w.-]+\.[a-zA-Z]{2,}(:\d{1,5})?\/?([^\s]*)$/;
+  const pattern = /^(https?:\/\/)?([\w-]+\.)+[\w-]+(\/[\w- ./?%&=]*)?$/i;
   return pattern.test(s);
 }
 

@@ -22,7 +22,6 @@ import {
   NextGenAdminScriptsFormGroup,
   NextGenAdminTextFormGroup,
 } from "./NextGenAdminShared";
-import { NULL_MERKLE } from "../../../constants";
 
 export enum UpdateType {
   UPDATE_INFO,

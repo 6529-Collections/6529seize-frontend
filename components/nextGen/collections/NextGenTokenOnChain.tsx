@@ -12,7 +12,7 @@ import { commonApiFetch } from "../../../services/api/common-api";
 import Address from "../../address/Address";
 import { areEqualAddresses } from "../../../helpers/Helpers";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { mainnet, sepolia, goerli } from "viem/chains";
+import { mainnet } from "viem/chains";
 import { getOpenseaLink } from "../nextgen_helpers";
 
 interface Props {

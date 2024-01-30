@@ -9,7 +9,7 @@ import NextGenTokenArt from "./NextGenTokenArt";
 import { ContentView } from "../collectionParts/NextGenCollection";
 import { isNullAddress } from "../../../../helpers/Helpers";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import router, { useRouter } from "next/router";
+import { useRouter } from "next/router";
 import Tippy from "@tippyjs/react";
 
 interface Props {

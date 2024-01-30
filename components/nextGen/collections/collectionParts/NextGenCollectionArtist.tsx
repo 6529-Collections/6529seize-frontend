@@ -6,7 +6,7 @@ import {
   IProfileAndConsolidations,
 } from "../../../../entities/IProfile";
 import { commonApiFetch } from "../../../../services/api/common-api";
-import { STATEMENT_GROUP, STATEMENT_TYPE } from "../../../../helpers/Types";
+import { STATEMENT_TYPE } from "../../../../helpers/Types";
 import Image from "next/image";
 
 interface Props {

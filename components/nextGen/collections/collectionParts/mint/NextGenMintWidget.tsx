@@ -515,8 +515,7 @@ export default function NextGenMintWidget(props: Readonly<Props>) {
                   disabled={
                     !account.isConnected ||
                     (publicStatus !== Status.LIVE &&
-                      currentProof &&
-                      currentProof.proof &&
+                      currentProof?.proof &&
                       currentProof.proof.spots <= 0) ||
                     disableMint()
                   }
