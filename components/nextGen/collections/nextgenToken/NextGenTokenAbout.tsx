@@ -51,21 +51,21 @@ export default function NextgenTokenAbout(props: Readonly<Props>) {
       <Row>
         <Col xs={6} sm={4} md={3} className="pb-4 d-flex gap-5">
           <TraitScore
-            trait="Rarity Score"
+            trait="Rarity"
             score={props.token.rarity_score}
             rank={props.token.rarity_score_rank}
           />
         </Col>
         <Col xs={6} sm={4} md={3} className="pb-4 d-flex gap-5">
           <TraitScore
-            trait="Normalized Rarity Score"
+            trait="Normalized Rarity"
             score={props.token.rarity_score_normalised}
             rank={props.token.rarity_score_normalised_rank}
           />
         </Col>
         <Col xs={6} sm={4} md={3} className="pb-4 d-flex gap-5">
           <TraitScore
-            trait="Statistical Score"
+            trait="Statistical Rarity"
             score={props.token.statistical_score}
             rank={props.token.statistical_score_rank}
             places={3}
@@ -166,11 +166,13 @@ export function TraitScore(
   return (
     <span className="d-flex flex-column">
       <span className="font-color-h">{props.trait}</span>
-      <span className="d-flex gap-2">
-        <span>#{props.rank.toLocaleString()}</span>
+      <span className="d-flex gap-3">
         <span>
+          Score{" "}
           {Number(props.score.toFixed(props.places ?? 2)).toLocaleString()}
         </span>
+        <span>|</span>
+        <span>Rank #{props.rank.toLocaleString()}</span>
       </span>
     </span>
   );
