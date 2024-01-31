@@ -288,7 +288,7 @@ export default function UserPageMints({
               className="tw-group tw-inline-flex tw-items-center tw-text-iron-200 hover:tw-text-primary-300 tw-font-medium tw-text-sm tw-duration-300 tw-transition tw-ease-out"
             >
               www.seize.io/the-memes/192/distribution
-            </a>
+            </a>{" "}
             ).
           </div>
         </div>
