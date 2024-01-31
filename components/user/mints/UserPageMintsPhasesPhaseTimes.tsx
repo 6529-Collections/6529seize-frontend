@@ -46,7 +46,7 @@ export default function UserPageMintsPhasesPhaseTimes({
   };
 
   return (
-    <div className="tw-mt-2 tw-flex tw-gap-x-8">
+    <div className="tw-mt-2 tw-flex tw-flex-col md:tw-flex-row tw-gap-y-4 tw-gap-x-8">
       <div className="tw-flex tw-flex-col">
         <span className="tw-text-iron-400 tw-text-sm tw-font-medium">
           Start Time

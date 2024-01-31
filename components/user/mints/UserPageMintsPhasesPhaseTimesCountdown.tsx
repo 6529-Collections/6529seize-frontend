@@ -87,9 +87,10 @@ export default function UserPageMintsPhasesPhaseTimesCountdown({
       </span>
       <span className="tw-inline-flex tw-items-center tw-mt-1 tw-text-iron-300 tw-font-medium tw-text-base">
         <svg
-          className="tw-h-5 tw-w-5 tw-mr-2 tw-text-primary-300"
+          className="tw-flex-shrink-0 tw-h-5 tw-w-5 tw-mr-2 tw-text-primary-300"
           viewBox="0 0 24 24"
           fill="none"
+          aria-hidden="true"
           xmlns="http://www.w3.org/2000/svg"
         >
           <path

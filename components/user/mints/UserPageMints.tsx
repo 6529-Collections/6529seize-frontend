@@ -175,8 +175,8 @@ export default function UserPageMints({
             {phaseNames}.
           </span>
         </p>
-        <div className="tw-mt-8 tw-flex tw-flex-col">
-          <span className="tw-text-lg tw-font-semibold tw-text-iron-50">
+        <div className="tw-mt-6 sm:tw-mt-8 tw-flex tw-flex-col">
+          <span className="tw-text-base sm:tw-text-lg tw-font-semibold tw-text-iron-50">
             Minting Page
           </span>
           <div className="tw-mt-1">
@@ -190,6 +190,7 @@ export default function UserPageMints({
                 className="tw-h-6 tw-w-6 tw-ml-2 tw-text-primary-300 group-hover:tw-text-primary-400 tw-duration-400 tw-transition tw-ease-out group-hover:-tw-translate-y-0.5 group-hover:tw-translate-x-0.5"
                 viewBox="0 0 24 24"
                 fill="none"
+                aria-hidden="true"
                 xmlns="http://www.w3.org/2000/svg"
               >
                 <path
@@ -205,8 +206,8 @@ export default function UserPageMints({
         </div>
         <UserPageMintsPhases phases={phases} />
 
-        <div className="tw-mt-8 tw-flex tw-flex-col">
-          <span className="tw-text-lg tw-font-semibold tw-text-iron-50">
+        <div className="tw-mt-7 sm:tw-mt-9 tw-flex tw-flex-col">
+          <span className="tw-text-base sm:tw-text-lg tw-font-semibold tw-text-iron-50">
             Your Minting Addresses
           </span>
           <p className="tw-mb-0 tw-mt-1 tw-text-iron-400 tw-text-sm tw-font-medium">
@@ -231,11 +232,12 @@ export default function UserPageMints({
                 return res;
               })
               .map((wallet) => (
-                <div key={wallet} className="tw-inline-flex tw-items-center">
+                <div key={wallet} className="tw-inline-flex sm:tw-items-center">
                   <svg
-                    className="tw-h-5 tw-w-5 tw-mr-2 tw-text-iron-300"
+                    className="tw-flex-shrink-0 tw-h-5 tw-w-5 tw-mr-2 tw-text-iron-300"
                     viewBox="0 0 24 24"
                     fill="none"
+                    aria-hidden="true"
                     xmlns="http://www.w3.org/2000/svg"
                   >
                     <path
@@ -247,7 +249,7 @@ export default function UserPageMints({
                     />
                   </svg>
 
-                  <span className="tw-text-iron-300 tw-font-medium tw-text-base">
+                  <span className="tw-text-iron-300 tw-break-all tw-font-medium tw-text-base">
                     {wallet}
                   </span>
                 </div>
@@ -268,19 +270,20 @@ export default function UserPageMints({
             at any time before the mint.
           </p>
         </div>
-        <div className="tw-mt-10 tw-pt-10 tw-border-t tw-border-solid tw-border-x-0 tw-border-b tw-mb-0 tw-text-iron-400 tw-text-sm tw-font-normal">
-          <div className="tw-max-w-5xl">
-            <span className="tw-text-iron-300">Note:</span> The Your Mint tab
-            will later be made available for Memes frops too, but is is not
+        <div className="tw-mt-8 tw-pt-8 md:tw-mt-10 md:tw-pt-10 tw-border-t tw-border-solid tw-border-x-0 tw-border-b tw-mb-0 tw-text-iron-400 tw-text-sm tw-font-normal">
+          <div className="md:tw-max-w-5xl">
+            <span className="tw-text-iron-300">Note:</span> The Your Mints tab
+            will later be made available for Memes drops too, but is is not
             active yet. For now, please continue to use the Distribution Plan
             page for each card (example:{" "}
             <a
               href="https://seize.io/the-memes/192/distribution"
+              target="_blank"
               className="tw-group tw-inline-flex tw-items-center tw-text-iron-200 hover:tw-text-primary-300 tw-font-medium tw-text-sm tw-duration-300 tw-transition tw-ease-out"
             >
               www.seize.io/the-memes/192/distribution
             </a>
-            )
+            ).
           </div>
         </div>
       </div>

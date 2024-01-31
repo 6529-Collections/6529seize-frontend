@@ -16,8 +16,8 @@ export default function UserPageMintsPhasesPhase({
 
   return (
     <>
-      <div className="tw-mt-8 tw-flex tw-flex-col">
-        <span className="tw-text-lg tw-font-semibold tw-text-iron-50">
+      <div className="tw-mt-6 sm:tw-mt-8 tw-flex tw-flex-col">
+        <span className="tw-text-base sm:tw-text-lg tw-font-semibold tw-text-iron-50">
           {phase?.name}
         </span>
         <UserPageMintsPhasesPhaseTimes
@@ -25,8 +25,8 @@ export default function UserPageMintsPhasesPhase({
           endTime={phase.endTime * 1000}
         />
       </div>
-      <div className="tw-mt-8 tw-flex tw-flex-col tw-max-w-md">
-        <span className="tw-text-lg tw-font-semibold tw-text-iron-50">
+      <div className="tw-mt-6 sm:tw-mt-8 tw-flex tw-flex-col tw-max-w-md">
+        <span className="tw-text-base sm:tw-text-lg tw-font-semibold tw-text-iron-50">
           Your Available Mints
         </span>
         <div className="tw-mt-2 tw-flex tw-flex-col">
@@ -37,7 +37,8 @@ export default function UserPageMintsPhasesPhase({
             <div className="tw-h-5 tw-w-5">
               <EthereumIcon />
             </div>
-            <span className="tw-mx-1">0.06529</span> / mint
+            <span className="tw-mx-1">0.06529</span>
+            <span className="tw-sr-only">eth</span> / mint
           </span>
         </div>
         <div className="tw-mt-4 tw-flow-root">
