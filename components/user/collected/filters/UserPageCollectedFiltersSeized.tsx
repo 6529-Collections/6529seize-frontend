@@ -1,8 +1,7 @@
-import { useEffect } from "react";
 import { CollectionSeized } from "../../../../entities/IProfile";
-import UserPageCollectedFiltersTabs, {
-  UserPageCollectedFiltersTabsItem,
-} from "./UserPageCollectedFiltersTabs";
+import CommonSelect, {
+  CommonSelectItem,
+} from "../../../utils/select/CommonSelect";
 
 type SelectedType = CollectionSeized | null;
 
@@ -18,9 +17,10 @@ export default function UserPageCollectedFiltersSeized({
     [CollectionSeized.NOT_SEIZED]: "Not Seized",
   };
 
-  const tabs: UserPageCollectedFiltersTabsItem<SelectedType>[] = [
+  const items: CommonSelectItem<SelectedType>[] = [
     {
       label: "All",
+      mobileLabel: "All Cards",
       value: null,
       key: "all",
     },
@@ -32,9 +32,10 @@ export default function UserPageCollectedFiltersSeized({
   ];
 
   return (
-    <UserPageCollectedFiltersTabs
-      tabs={tabs}
-      activeTab={selected}
+    <CommonSelect
+      items={items}
+      activeItem={selected}
+      filterLabel="Seized"
       setSelected={setSelected}
     />
   );

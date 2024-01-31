@@ -104,9 +104,10 @@ export default function UserPageCollected({
   }): MEMES_SEASON | null => {
     if (!isMemes) return null;
     if (!szn) return null;
-    return (
-      Object.values(MEMES_SEASON).find((c) => c === szn.toUpperCase()) ?? null
+    const entry = Object.entries(SNZ_TO_SEARCH_PARAMS).find(
+      ([k, v]) => v === szn
     );
+    return entry ? (entry[0] as MEMES_SEASON) : null;
   };
 
   const convertCollection = (
@@ -149,7 +150,6 @@ export default function UserPageCollected({
     const convertedAddress = convertAddress(address);
     const convertedCollection = convertCollection(collection);
     const isMemes = convertedCollection === CollectedCollectionType.MEMES;
-
     return {
       handleOrWallet: convertedAddress ?? profile.profile?.handle ?? user,
       accountForConsolidations: !convertedAddress,

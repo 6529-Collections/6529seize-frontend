@@ -1,9 +1,8 @@
-import { useEffect, useState } from "react";
 import { CollectionSort } from "../../../../entities/IProfile";
 import { SortDirection } from "../../../../entities/ISort";
-import UserPageCollectedFiltersTabs, {
-  UserPageCollectedFiltersTabsItem,
-} from "./UserPageCollectedFiltersTabs";
+import CommonSelect, {
+  CommonSelectItem,
+} from "../../../utils/select/CommonSelect";
 
 export default function UserPageCollectedFiltersSortBy({
   selected,
@@ -20,17 +19,19 @@ export default function UserPageCollectedFiltersSortBy({
     [CollectionSort.RANK]: "Rank",
   };
 
-  const tabs: UserPageCollectedFiltersTabsItem<CollectionSort>[] =
-    Object.values(CollectionSort).map((sort) => ({
-      label: labels[sort],
-      value: sort,
-      key: sort,
-    }));
+  const items: CommonSelectItem<CollectionSort>[] = Object.values(
+    CollectionSort
+  ).map((sort) => ({
+    label: labels[sort],
+    value: sort,
+    key: sort,
+  }));
 
   return (
-    <UserPageCollectedFiltersTabs
-      tabs={tabs}
-      activeTab={selected}
+    <CommonSelect
+      items={items}
+      activeItem={selected}
+      filterLabel="Sort By"
       setSelected={setSelected}
       sortDirection={direction}
     />

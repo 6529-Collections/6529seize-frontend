@@ -1,7 +1,6 @@
 import { MEMES_SEASON } from "../../../../enums";
-import CommonDropdown, {
-  CommonDropdownItemType,
-} from "../../../utils/dropdown/CommonDropdown";
+import { CommonSelectItem } from "../../../utils/select/CommonSelect";
+import CommonDropdown from "../../../utils/select/dropdown/CommonDropdown";
 
 type SelectedType = MEMES_SEASON | null;
 
@@ -21,7 +20,7 @@ export default function UserPageCollectedFiltersSzn({
     [MEMES_SEASON.SZN6]: "Szn 6",
   };
 
-  const items: CommonDropdownItemType<SelectedType>[] = [
+  const items: CommonSelectItem<SelectedType>[] = [
     {
       label: "All Seasons",
       value: null,
@@ -37,8 +36,9 @@ export default function UserPageCollectedFiltersSzn({
   return (
     <CommonDropdown
       items={items}
+      filterLabel="Season"
       activeItem={selected}
-      setActiveItem={setSelected}
+      setSelected={setSelected}
     />
   );
 }

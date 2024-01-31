@@ -1,30 +1,19 @@
 import { useEffect, useState } from "react";
-import { UserPageCollectedFiltersTabsItem } from "./UserPageCollectedFiltersTabs";
-import CommonTableSortIcon from "../../utils/icons/CommonTableSortIcon";
 import { SortDirection } from "../../../../entities/ISort";
+import CommonTableSortIcon from "../../../user/utils/icons/CommonTableSortIcon";
+import { CommonSelectItemProps } from "../CommonSelect";
 
-export default function UserPageCollectedFiltersTab<T>({
-  tab,
-  activeTab,
-  isFirst,
-  isLast,
-  setSelected,
-  sortDirection,
-}: {
-  readonly tab: UserPageCollectedFiltersTabsItem<T>;
-  readonly activeTab: T;
-  readonly isFirst: boolean;
-  readonly isLast: boolean;
-  readonly setSelected: (tab: T) => void;
-  readonly sortDirection?: SortDirection;
-}) {
-  const getIsActive = (): boolean => tab.value === activeTab;
+export default function CommonTabsTab<T>(props: CommonSelectItemProps<T>) {
+  const { item, activeItem, isFirst, isLast, setSelected, sortDirection } =
+    props;
+
+  const getIsActive = (): boolean => item.value === activeItem;
 
   const [isActive, setIsActive] = useState<boolean>(getIsActive());
 
   useEffect(() => {
     setIsActive(getIsActive());
-  }, [activeTab]);
+  }, [activeItem]);
 
   const getDynamicClasses = (): string => {
     let response = "";
@@ -53,10 +42,10 @@ export default function UserPageCollectedFiltersTab<T>({
   return (
     <button
       type="button"
-      onClick={() => setSelected(tab.value)}
+      onClick={() => setSelected(item.value)}
       className={`${dynamicClasses}  tw-whitespace-nowrap tw-flex-1 sm:tw-flex-none tw-px-4 tw-py-2 tw-text-sm tw-font-semibold tw-border tw-border-solid tw-border-iron-700 tw-transition tw-duration-300 tw-ease-out`}
     >
-      {tab.label}
+      {item.label}
       {sortDirection && (
         <CommonTableSortIcon
           direction={isActive ? sortDirection : SortDirection.DESC}

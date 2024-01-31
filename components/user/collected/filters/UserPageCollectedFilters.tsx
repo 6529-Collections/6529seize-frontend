@@ -8,12 +8,11 @@ import {
 import UserPageHeaderAddresses from "../../user-page-header/addresses/UserPageHeaderAddresses";
 import { MEMES_SEASON } from "../../../../enums";
 import { ProfileCollectedFilters } from "../UserPageCollected";
-import { createBreakpoint } from "react-use";
-import UserPageCollectedFiltersDesktop from "./UserPageCollectedFiltersDesktop";
-import UserPageCollectedFiltersMobile from "./UserPageCollectedFiltersMobile";
 import CircleLoader from "../../../distribution-plan-tool/common/CircleLoader";
-
-const useBreakpoint = createBreakpoint({ LG: 1024, S: 0 });
+import UserPageCollectedFiltersCollection from "./UserPageCollectedFiltersCollection";
+import UserPageCollectedFiltersSortBy from "./UserPageCollectedFiltersSortBy";
+import UserPageCollectedFiltersSeized from "./UserPageCollectedFiltersSeized";
+import UserPageCollectedFiltersSzn from "./UserPageCollectedFiltersSzn";
 
 export default function UserPageCollectedFilters({
   profile,
@@ -44,41 +43,35 @@ export default function UserPageCollectedFilters({
     setShowSeizedAndSzn(getShowSeizedAndSzn(filters.collection));
   }, [filters.collection]);
 
-  const breakpoint = useBreakpoint();
-
   return (
     <div className="tw-flex tw-justify-between tw-gap-y-6 tw-gap-x-4">
       <div className="tw-flex tw-items-center tw-flex-wrap tw-gap-y-3 tw-gap-x-4">
-        <UserPageCollectedFiltersDesktop
-          filters={filters}
-          setCollection={setCollection}
-          setSortBy={setSortBy}
-          setSeized={setSeized}
-          setSzn={setSzn}
-          showSeizedAndSzn={showSeizedAndSzn}
-        />
-        {/* {breakpoint === "LG" ? (
-          <UserPageCollectedFiltersDesktop
-            filters={filters}
-            setCollection={setCollection}
-            setSortBy={setSortBy}
-            setSeized={setSeized}
-            setSzn={setSzn}
-            showSeizedAndSzn={showSeizedAndSzn}
+        <div className="tw-gap-x-4 tw-gap-y-3 tw-flex tw-flex-wrap tw-items-center">
+          <UserPageCollectedFiltersCollection
+            selected={filters.collection}
+            setSelected={setCollection}
           />
-        ) : (
-          <UserPageCollectedFiltersMobile
-            filters={filters}
-            setCollection={setCollection}
-            setSortBy={setSortBy}
-            setSeized={setSeized}
-            setSzn={setSzn}
-            showSeizedAndSzn={showSeizedAndSzn}
+          <UserPageCollectedFiltersSortBy
+            selected={filters.sortBy}
+            direction={filters.sortDirection}
+            setSelected={setSortBy}
           />
-        )} */}
+
+          {showSeizedAndSzn && (
+            <>
+              <UserPageCollectedFiltersSeized
+                selected={filters.seized}
+                setSelected={setSeized}
+              />
+              <UserPageCollectedFiltersSzn
+                selected={filters.szn}
+                setSelected={setSzn}
+              />
+            </>
+          )}
+        </div>
       </div>
       <div className="tw-inline-flex tw-space-x-4">
-        {loading && <CircleLoader />}
         <UserPageHeaderAddresses
           addresses={profile.consolidation.wallets}
           onActiveAddress={() => undefined}

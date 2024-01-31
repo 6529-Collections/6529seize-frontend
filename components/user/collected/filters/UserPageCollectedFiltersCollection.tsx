@@ -1,7 +1,7 @@
 import { CollectedCollectionType } from "../../../../entities/IProfile";
-import UserPageCollectedFiltersTabs, {
-  UserPageCollectedFiltersTabsItem,
-} from "./UserPageCollectedFiltersTabs";
+import CommonSelect, {
+  CommonSelectItem,
+} from "../../../utils/select/CommonSelect";
 
 type SelectedType = CollectedCollectionType | null;
 
@@ -18,9 +18,10 @@ export default function UserPageCollectedFiltersCollection({
     [CollectedCollectionType.MEMELAB]: "Meme Lab",
   };
 
-  const tabs: UserPageCollectedFiltersTabsItem<SelectedType>[] = [
+  const items: CommonSelectItem<SelectedType>[] = [
     {
       label: "All",
+      mobileLabel: "All Collections",
       value: null,
       key: "all",
     },
@@ -32,9 +33,10 @@ export default function UserPageCollectedFiltersCollection({
   ];
 
   return (
-    <UserPageCollectedFiltersTabs
-      tabs={tabs}
-      activeTab={selected}
+    <CommonSelect
+      items={items}
+      activeItem={selected}
+      filterLabel="Collection"
       setSelected={setSelected}
     />
   );
