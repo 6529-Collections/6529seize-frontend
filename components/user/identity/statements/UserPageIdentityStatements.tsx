@@ -85,7 +85,7 @@ export default function UserPageIdentityStatements({
         <div className="tw-mt-2 lg:tw-mt-4 tw-bg-iron-900 tw-border tw-border-iron-800 tw-border-solid tw-rounded-xl tw-scroll-py-3 tw-overflow-auto">
           <div className="tw-px-4 tw-py-6 lg:tw-p-8 tw-mx-auto tw-grid tw-grid-cols-1 xl:tw-gap-x-8 xl:tw-gap-y-2 lg:tw-mx-0 xl:tw-grid-cols-5">
             <div className="tw-col-span-full tw-space-y-6 md:tw-space-y-8">
-              <div className="tw-grid tw-grid-cols-1 tw-gap-x-8 tw-gap-y-8 xl:tw-gap-y-6 xl:tw-grid-cols-7">
+              <div className="tw-grid tw-grid-cols-1 tw-gap-x-8 tw-gap-y-8 xl:tw-gap-y-6 xl:tw-grid-cols-6">
                 <div className="tw-col-span-2">
                   <UserPageIdentityStatementsConsolidatedAddresses
                     profile={profile}
@@ -98,7 +98,7 @@ export default function UserPageIdentityStatements({
                     loading={isLoading}
                   />
                 </div>
-                <div className="tw-col-span-3">
+                <div className="tw-col-span-2">
                   <UserPageIdentityStatementsNFTAccounts
                     statements={nftAccounts}
                     profile={profile}
@@ -106,8 +106,7 @@ export default function UserPageIdentityStatements({
                   />
                 </div>
               </div>
-
-              <div className="tw-grid tw-grid-cols-1 tw-gap-x-8 tw-gap-y-8 xl:tw-gap-y-6 xl:tw-grid-cols-7">
+              <div className="tw-grid tw-grid-cols-1 tw-gap-x-8 tw-gap-y-8 xl:tw-gap-y-6 xl:tw-grid-cols-6">
                 <div className="tw-col-span-2">
                   <UserPageIdentityStatementsContacts
                     statements={contacts}
@@ -115,7 +114,6 @@ export default function UserPageIdentityStatements({
                     loading={isLoading}
                   />
                 </div>
-
                 <div className="tw-col-span-2">
                   <UserPageIdentityStatementsSocialMediaVerificationPosts
                     statements={socialMediaVerificationPosts}
@@ -123,7 +121,7 @@ export default function UserPageIdentityStatements({
                     loading={isLoading}
                   />
                 </div>
-                <div className="tw-col-span-3">
+                <div className="tw-col-span-2">
                   <ul className="tw-pl-4 tw-list-disc tw-text-iron-500 tw-text-sm tw-font-normal tw-space-y-1">
                     <li>All statements are optional.</li>
                     <li>All statements are fully and permanently public.</li>
