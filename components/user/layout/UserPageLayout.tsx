@@ -18,6 +18,7 @@ import {
   QueryKey,
   ReactQueryWrapperContext,
 } from "../../react-query-wrapper/ReactQueryWrapper";
+import { isAddress } from "viem";
 
 const Header = dynamic(() => import("../../header/Header"), {
   ssr: false,
@@ -82,20 +83,29 @@ export default function UserPageLayout({
 
   const pagenameFull = `${title} | 6529 SEIZE`;
 
-  const descriptionArray = [];
-
-  descriptionArray.push(`Level: ${formatNumberWithCommas(profile.level)}`);
-
-  descriptionArray.push(
-    `CIC: ${formatNumberWithCommas(profile.cic.cic_rating)}`
-  );
-  descriptionArray.push(`Rep: ${formatNumberWithCommas(profile.rep)}`);
-  descriptionArray.push(
-    `TDH: ${formatNumberWithCommas(profile.consolidation.tdh)}`
-  );
-  descriptionArray.push(`Cards: ${formatNumberWithCommas(profile.balance)}`);
-
-  descriptionArray.push("6529 SEIZE");
+  let pfpUrl = `${process.env.BASE_ENDPOINT}/api/profiles/pfp?handle=${
+    isAddress(title) ? formatAddress(title) : title
+  }`;
+  if (profile.profile?.pfp_url) {
+    pfpUrl += `&image=${profile.profile.pfp_url}`;
+  } else {
+    pfpUrl += `&image=${DEFAULT_IMAGE}`;
+  }
+  if (profile.level) {
+    pfpUrl += `&level=${profile.level}`;
+  }
+  if (profile.balance) {
+    pfpUrl += `&cards=${formatNumberWithCommas(profile.balance)}`;
+  }
+  if (profile.consolidation.tdh) {
+    pfpUrl += `&tdh=${formatNumberWithCommas(profile.consolidation.tdh)}`;
+  }
+  if (profile.cic.cic_rating) {
+    pfpUrl += `&cic=${formatNumberWithCommas(profile.cic.cic_rating)}`;
+  }
+  if (profile.rep) {
+    pfpUrl += `&rep=${formatNumberWithCommas(profile.rep)}`;
+  }
 
   const mainAddress =
     profile.profile?.primary_wallet ?? handleOrWallet.toLowerCase();
@@ -136,21 +146,15 @@ export default function UserPageLayout({
           content={`${process.env.BASE_ENDPOINT}/${handleOrWallet}`}
         />
         <meta property="og:title" content={title} />
-        <meta
-          property="og:image"
-          content={profile.profile?.pfp_url ?? DEFAULT_IMAGE}
-        />
-        <meta
-          property="og:description"
-          content={descriptionArray.join(" \n ")}
-        />
+        <meta property="og:image" content={pfpUrl} />
+        <meta property="og:description" content={pagenameFull} />
+        <meta name="twitter:card" content="summary_large_image" />
       </Head>
 
       <main className="tw-min-h-screen">
         <Header />
         <div
-          className={`tw-bg-iron-950 tw-min-h-screen tw-pb-16 lg:tw-pb-20 ${inter.className}`}
-        >
+          className={`tw-bg-iron-950 tw-min-h-screen tw-pb-16 lg:tw-pb-20 ${inter.className}`}>
           <UserPageHeader profile={profile} mainAddress={mainAddress} />
           <div className="tw-px-6 min-[1100px]:tw-max-w-[960px] min-[1200px]:tw-max-w-[1150px] min-[1300px]:tw-max-w-[1250px] min-[1400px]:tw-max-w-[1350px] min-[1500px]:tw-max-w-[1450px] min-[1600px]:tw-max-w-[1550px] min-[1800px]:tw-max-w-[1750px] min-[2000px]:tw-max-w-[1950px] tw-mx-auto">
             <UserPageTabs />
