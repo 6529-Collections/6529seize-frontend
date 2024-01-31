@@ -15,8 +15,8 @@ export default function UserPageStatsActivityWalletTableRowMainAddress({
 }) {
   const wallet = profile.consolidation.wallets.find((w) => {
     switch (type) {
-      case TransactionType.AIRDROP:
-      case TransactionType.MINT:
+      case TransactionType.RECEIVED_AIRDROP:
+      case TransactionType.MINTED:
       case TransactionType.PURCHASE:
       case TransactionType.TRANSFER_IN:
         return (
@@ -24,21 +24,42 @@ export default function UserPageStatsActivityWalletTableRowMainAddress({
           transaction.to_address.toLowerCase()
         );
       case TransactionType.SALE:
-      case TransactionType.BURN:
+      case TransactionType.BURNED:
       case TransactionType.TRANSFER_OUT:
         return (
           w.wallet.address.toLowerCase() ===
           transaction.from_address.toLowerCase()
         );
+      case TransactionType.RECEIVED_BURN:
+      case TransactionType.AIRDROPPED:
+      case TransactionType.MINTED_TO:
+        return false;
       default:
         assertUnreachable(type);
         return false;
     }
   });
 
-  const walletDisplay = !wallet
-    ? "unknown"
-    : wallet.wallet.ens ?? formatAddress(wallet.wallet.address);
+  const getWalletDisplay = () => {
+    if (
+      type === TransactionType.RECEIVED_BURN ||
+      type === TransactionType.AIRDROPPED ||
+      type === TransactionType.MINTED_TO
+    ) {
+      return "Null Address";
+    }
+    if (!wallet) {
+      console.log(transaction);
+      return "unknown";
+    }
+    return wallet.wallet.ens ?? formatAddress(wallet.wallet.address);
+  };
 
-  return <div className="tw-text-sm tw-text-iron-100 tw-font-medium">{walletDisplay}</div>;
+  const walletDisplay = getWalletDisplay();
+
+  return (
+    <div className="tw-text-sm tw-text-iron-100 tw-font-medium">
+      {walletDisplay}
+    </div>
+  );
 }
