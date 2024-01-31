@@ -12,7 +12,7 @@ import { commonApiFetch } from "../../../../services/api/common-api";
 import { NEXTGEN_CHAIN_ID } from "../../nextgen_contracts";
 import Image from "next/image";
 import Tippy from "@tippyjs/react";
-import { getOpenseaLink } from "../../nextgen_helpers";
+import { formatNameForUrl, getOpenseaLink } from "../../nextgen_helpers";
 import NextGenTokenDownloads from "./NextGenTokenDownloads";
 
 interface Props {
@@ -78,7 +78,10 @@ export default function NextgenTokenAbout(props: Readonly<Props>) {
         </Col>
         <Col xs={6} sm={4} md={3} className="pb-4 d-flex flex-column">
           <span className="font-color-h">Collection</span>
-          <a href={`/nextgen/collection/${props.collection.id}`}>
+          <a
+            href={`/nextgen/collection/${formatNameForUrl(
+              props.collection.name
+            )}`}>
             #{props.collection.id} {props.collection.name}
           </a>
         </Col>

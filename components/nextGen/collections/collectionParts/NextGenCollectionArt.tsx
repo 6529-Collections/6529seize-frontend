@@ -20,7 +20,7 @@ import { useRouter } from "next/router";
 import DotLoader from "../../../dotLoader/DotLoader";
 import { areEqualAddresses } from "../../../../helpers/Helpers";
 import { SortDirection } from "../../../../entities/ISort";
-import { NextGenListFilters } from "../../nextgen_helpers";
+import { NextGenListFilters, formatNameForUrl } from "../../nextgen_helpers";
 
 interface Props {
   collection: NextGenCollection;
@@ -119,7 +119,7 @@ export default function NextGenCollectionArt(props: Readonly<Props>) {
         query += `&sort_direction=${sortDir.toLowerCase()}`;
       }
       router.push(
-        `/nextgen/collection/${props.collection.id}/art${
+        `/nextgen/collection/${formatNameForUrl(props.collection.name)}/art${
           query ? `?${query}` : ""
         }`,
         undefined,
@@ -160,7 +160,9 @@ export default function NextGenCollectionArt(props: Readonly<Props>) {
           </h3>
           {props.show_view_all ? (
             <a
-              href={`/nextgen/collection/${props.collection.id}/art`}
+              href={`/nextgen/collection/${formatNameForUrl(
+                props.collection.name
+              )}/art`}
               className={`d-flex align-items-center gap-2 decoration-none ${styles.viewAllTokens}`}>
               <h5 className="mb-0 font-color d-flex align-items-center gap-2">
                 View All

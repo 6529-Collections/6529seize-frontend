@@ -8,6 +8,7 @@ import { isEmptyObject } from "../../../../helpers/Helpers";
 import { getCommonHeaders } from "../../../../helpers/server.helpers";
 import { commonApiFetch } from "../../../../services/api/common-api";
 import Breadcrumb from "../../../../components/breadcrumb/Breadcrumb";
+import { useShallowRedirect } from ".";
 
 const Header = dynamic(() => import("../../../../components/header/Header"), {
   ssr: false,
@@ -24,6 +25,7 @@ const NextGenCollectionMintingPlanComponent = dynamic(
 
 export default function NextGenCollectionTokensPage(props: any) {
   const collection: NextGenCollection = props.pageProps.collection;
+  useShallowRedirect(collection.name, "/distribution-plan");
   const pagenameFull = `Distribution Plan | #${collection.id} - ${collection.name}`;
 
   const crumbs = [

@@ -13,7 +13,7 @@ import Address from "../../address/Address";
 import { areEqualAddresses } from "../../../helpers/Helpers";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { mainnet } from "viem/chains";
-import { getOpenseaLink } from "../nextgen_helpers";
+import { formatNameForUrl, getOpenseaLink } from "../nextgen_helpers";
 
 interface Props {
   collection: NextGenCollection;
@@ -158,7 +158,10 @@ export default function NextGenTokenOnChain(props: Readonly<Props>) {
               </span>
               <span className="pt-1 pb-1 d-flex flex-column">
                 <span className="font-color-h">Collection</span>
-                <a href={`/nextgen/collection/${props.collection.id}`}>
+                <a
+                  href={`/nextgen/collection/${formatNameForUrl(
+                    props.collection.name
+                  )}`}>
                   #{props.collection.id} {props.collection.name}
                 </a>
               </span>

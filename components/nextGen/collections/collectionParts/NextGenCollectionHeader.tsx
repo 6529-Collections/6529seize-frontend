@@ -15,6 +15,7 @@ import { fetchUrl } from "../../../../services/6529api";
 import DotLoader from "../../../dotLoader/DotLoader";
 import { NextGenCollection } from "../../../../entities/INextgen";
 import {
+  formatNameForUrl,
   getOpenseaLink,
   getStatusFromDates,
   useCollectionMintCount,
@@ -79,7 +80,10 @@ export function NextGenCountdown(props: Readonly<CountdownProps>) {
       <span className={styles.countdownContainer}>
         <DateCountdown title={`${title} in`} date={new Date(date * 1000)} />
         {!hideMintBtn && (
-          <a href={`/nextgen/collection/${props.collection.id}/mint`}>
+          <a
+            href={`/nextgen/collection/${formatNameForUrl(
+              props.collection.name
+            )}/mint`}>
             <Button className="seize-btn btn-block pt-2 pb-2 btn-white font-larger font-bolder">
               {getButtonLabel()}
             </Button>
@@ -234,7 +238,9 @@ export default function NextGenCollectionHeader(props: Readonly<Props>) {
             </h1>
             {props.collection_link && (
               <a
-                href={`/nextgen/collection/${props.collection.id}`}
+                href={`/nextgen/collection/${formatNameForUrl(
+                  props.collection.name
+                )}`}
                 className="decoration-none d-flex align-items-center gap-2 pb-2">
                 <FontAwesomeIcon
                   icon="arrow-circle-left"

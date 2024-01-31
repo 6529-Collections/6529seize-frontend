@@ -20,6 +20,7 @@ import {
 import { NEXTGEN_CHAIN_ID, NEXTGEN_CORE } from "../../../nextgen_contracts";
 import { fetchUrl } from "../../../../../services/6529api";
 import {
+  formatNameForUrl,
   getStatusFromDates,
   useCollectionCostsHook,
   useMintSharedState,
@@ -334,7 +335,9 @@ export default function NextGenMint(props: Readonly<Props>) {
         <Col sm={12} md={6} className="d-flex flex-column">
           <NextGenPhases collection={props.collection} available={available} />
           <a
-            href={`/nextgen/collection/${props.collection.id}`}
+            href={`/nextgen/collection/${formatNameForUrl(
+              props.collection.name
+            )}`}
             className="decoration-hover-underline">
             <h1 className="mb-0 font-color">
               #{props.collection.id} -{" "}

@@ -613,3 +613,7 @@ export function getOpenseaLink(chainId: number, tokenId?: number) {
     NEXTGEN_CORE[NEXTGEN_CHAIN_ID]
   }/${tokenId ?? ""}`;
 }
+
+export function formatNameForUrl(name: string) {
+  return name.replace(/ /g, "-").toLowerCase();
+}

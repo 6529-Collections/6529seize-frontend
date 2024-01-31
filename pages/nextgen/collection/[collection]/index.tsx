@@ -7,6 +7,9 @@ import { NextGenCollection } from "../../../../entities/INextgen";
 import { isEmptyObject } from "../../../../helpers/Helpers";
 import { commonApiFetch } from "../../../../services/api/common-api";
 import { getCommonHeaders } from "../../../../helpers/server.helpers";
+import { useEffect } from "react";
+import { useRouter } from "next/router";
+import { formatNameForUrl } from "../../../../components/nextGen/nextgen_helpers";
 
 const Header = dynamic(() => import("../../../../components/header/Header"), {
   ssr: false,
@@ -25,6 +28,7 @@ const NextGenCollectionComponent = dynamic(
 
 export default function NextGenCollection(props: any) {
   const collection: NextGenCollection = props.pageProps.collection;
+  useShallowRedirect(collection.name);
   const pagenameFull = `#${collection.id} - ${collection.name}`;
 
   return (
@@ -56,11 +60,16 @@ export default function NextGenCollection(props: any) {
 }
 
 export async function getServerSideProps(req: any, res: any, resolvedUrl: any) {
-  const collectionId = req.query.collection;
+  const collectionId: string = req.query.collection;
+  const parsedCollectionId = encodeURIComponent(
+    collectionId.replaceAll(/-/g, " ")
+  );
   const headers = getCommonHeaders(req);
   const collection = await commonApiFetch<NextGenCollection>({
-    endpoint: `nextgen/collections/${collectionId}`,
+    endpoint: `nextgen/collections/${parsedCollectionId}`,
     headers: headers,
+  }).catch(() => {
+    return {};
   });
 
   if (isEmptyObject(collection)) {
@@ -75,4 +84,35 @@ export async function getServerSideProps(req: any, res: any, resolvedUrl: any) {
       collection: collection,
     },
   };
+}
+
+export function useShallowRedirect(name: string, currentPath?: string) {
+  const router = useRouter();
+
+  function getPath() {
+    let p = router.asPath;
+    if (currentPath) {
+      p = p.split(currentPath)[0];
+    }
+    const collectionId = p.split("/")[p.split("/").length - 1];
+    if (!isNaN(parseInt(collectionId))) {
+      p = p.replace(collectionId, formatNameForUrl(name));
+    }
+
+    if (currentPath) {
+      p = p + currentPath;
+    }
+
+    return p;
+  }
+
+  useEffect(() => {
+    router.replace(
+      {
+        pathname: getPath(),
+      },
+      undefined,
+      { shallow: true }
+    );
+  }, []);
 }

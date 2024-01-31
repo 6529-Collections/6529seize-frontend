@@ -7,6 +7,7 @@ import { NextGenCollection } from "../../../../entities/INextgen";
 import { isEmptyObject } from "../../../../helpers/Helpers";
 import { getCommonHeaders } from "../../../../helpers/server.helpers";
 import { commonApiFetch } from "../../../../services/api/common-api";
+import { useShallowRedirect } from ".";
 
 const Header = dynamic(() => import("../../../../components/header/Header"), {
   ssr: false,
@@ -23,6 +24,7 @@ const NextGenCollectionTokenListComponent = dynamic(
 
 export default function NextGenCollectionTokensPage(props: any) {
   const collection: NextGenCollection = props.pageProps.collection;
+  useShallowRedirect(collection.name, "/art");
   const pagenameFull = `Art | #${collection.id} - ${collection.name}`;
 
   return (
