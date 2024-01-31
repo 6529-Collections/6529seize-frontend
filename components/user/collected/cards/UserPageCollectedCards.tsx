@@ -6,11 +6,13 @@ export default function UserPageCollectedCards({
   cards,
   totalPages,
   page,
+  showDataRow,
   setPage,
 }: {
   readonly cards: CollectedCard[];
   readonly totalPages: number;
   readonly page: number;
+  readonly showDataRow: boolean;
   readonly setPage: (page: number) => void;
 }) {
   return (
@@ -20,8 +22,9 @@ export default function UserPageCollectedCards({
           <div className="tw-grid tw-grid-cols-1 sm:tw-grid-cols-2 md:tw-grid-cols-3 xl:tw-grid-cols-4 2xl:tw-grid-cols-5 3xl:tw-grid-cols-6 tw-gap-6 tw-pb-2">
             {cards.map((card) => (
               <UserPageCollectedCard
-                card={card}
                 key={`${card.collection}-${card.token_id}`}
+                card={card}
+                showDataRow={showDataRow}
               />
             ))}
           </div>

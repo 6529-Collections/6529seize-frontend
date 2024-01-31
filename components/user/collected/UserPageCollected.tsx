@@ -16,8 +16,6 @@ import { usePathname, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import UserPageCollectedCards from "./cards/UserPageCollectedCards";
 import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
-import CommonTablePagination from "../../utils/CommonTablePagination";
-import { watchEvent } from "viem/_types/actions/public/watchEvent";
 import UserPageCollectedFirstLoading from "./UserPageCollectedFirstLoading";
 
 export interface ProfileCollectedFilters {
@@ -55,6 +53,11 @@ const SNZ_TO_SEARCH_PARAMS: Record<MEMES_SEASON, string> = {
   [MEMES_SEASON.SZN5]: "5",
   [MEMES_SEASON.SZN6]: "6",
 };
+
+const SHOW_DATA_ROW_COLLECTIONS: CollectedCollectionType[] = [
+  CollectedCollectionType.MEMES,
+  CollectedCollectionType.GRADIENTS,
+];
 
 export default function UserPageCollected({
   profile,
@@ -132,7 +135,7 @@ export default function UserPageCollected({
         (c) => c === sortDirection.toUpperCase()
       ) ?? defaultSortDirection
     );
-  }
+  };
 
   const getFilters = (): ProfileCollectedFilters => {
     const address = searchParams.get(SEARCH_PARAMS_FIELDS.address);
@@ -328,6 +331,17 @@ export default function UserPageCollected({
     setTotalPages(pagesCount);
   }, [data?.count, data?.page, isFetching]);
 
+  const getShowDataRow = (): boolean => {
+    if (!filters.collection) return true;
+    return SHOW_DATA_ROW_COLLECTIONS.includes(filters.collection);
+  };
+
+  const [showDataRow, setShowDataRow] = useState<boolean>(getShowDataRow());
+
+  useEffect(() => {
+    setShowDataRow(getShowDataRow());
+  }, [filters.collection]);
+
   return (
     <div className="tailwind-scope">
       {isInitialLoading ? (
@@ -348,6 +362,7 @@ export default function UserPageCollected({
               cards={data?.data ?? []}
               totalPages={totalPages}
               page={filters.page}
+              showDataRow={showDataRow}
               setPage={setPage}
             />
           </div>
