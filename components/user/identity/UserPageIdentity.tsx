@@ -1,6 +1,4 @@
-import {
-  IProfileAndConsolidations,
-} from "../../../entities/IProfile";
+import { IProfileAndConsolidations } from "../../../entities/IProfile";
 import UserPageIdentityStatements from "./statements/UserPageIdentityStatements";
 import UserPageIdentityHeader from "./header/UserPageIdentityHeader";
 import UserPageIdentityActivityLog from "./activity/UserPageIdentityActivityLog";
@@ -25,13 +23,9 @@ export default function UserPageIdentity({
       <UserPageIdentityHeader profile={profile} />
       <UserPageIdentityStatements profile={profile} />
 
-      <div className="tw-mt-6 lg:tw-mt-10 tw-grid tw-grid-cols-1 xl:tw-grid-cols-2 tw-gap-y-8 lg:tw-gap-y-10 tw-gap-x-8 lg:tw-gap-x-10">
-        <div>
-          <ProfileRatersTableWrapper initialParams={initialCICGivenParams} />
-        </div>
-        <div>
-          <ProfileRatersTableWrapper initialParams={initialCICReceivedParams} />
-        </div>
+      <div className="tw-mt-6 lg:tw-mt-10 xl:tw-flex tw-items-stretch tw-gap-y-8 lg:tw-gap-y-10 tw-gap-x-8 lg:tw-gap-x-10">
+        <ProfileRatersTableWrapper initialParams={initialCICGivenParams} />
+        <ProfileRatersTableWrapper initialParams={initialCICReceivedParams} />
       </div>
 
       <div className="tw-mt-8 lg:tw-mt-10">

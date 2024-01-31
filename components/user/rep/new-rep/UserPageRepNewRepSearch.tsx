@@ -223,7 +223,7 @@ export default function UserPageRepNewRepSearch({
           </div>
         </div>
         <AnimatePresence mode="wait" initial={false}>
-          {!!errorMsg && <UserPageRepNewRepError msg={errorMsg} />}
+          {!!errorMsg && <UserPageRepNewRepError msg={errorMsg} closeError={()=> setErrorMsg(null)} />}
         </AnimatePresence>
       </div>
     </div>

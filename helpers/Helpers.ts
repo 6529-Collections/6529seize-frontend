@@ -607,7 +607,7 @@ export const getProfileTargetRoute = ({
   if (router.route.includes("[user]")) {
     return router.route.replace("[user]", handleOrWallet);
   }
-  return `${handleOrWallet}/${USER_PAGE_TAB_META[defaultPath].route}`;
+  return `/${handleOrWallet}/${USER_PAGE_TAB_META[defaultPath].route}`;
 };
 
 export function isNullAddress(address: string) {

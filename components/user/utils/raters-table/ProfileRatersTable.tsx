@@ -35,7 +35,7 @@ export default function ProfileRatersTable({
     <>
       {ratings.length ? (
         <div className="tw-flow-root">
-          <div className="tw-inline-block tw-min-w-full tw-align-middle">
+          <div className="tw-inline-block tw-min-w-full tw-align-middle tw-pb-2">
             <table className="tw-min-w-full">
               <ProfileRatersTableHeader
                 type={type}
