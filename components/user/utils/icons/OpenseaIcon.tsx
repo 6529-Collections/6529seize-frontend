@@ -1,9 +1,10 @@
 export default function OpenseaIcon() {
   return (
     <svg
-      className="tw-w-full tw-h-full"
+      className="tw-w-full tw-h-full tw-align-top"
       viewBox="0 0 90 90"
       fill="none"
+      aria-hidden="true"
       xmlns="http://www.w3.org/2000/svg"
     >
       <path
