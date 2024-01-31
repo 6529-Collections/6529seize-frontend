@@ -35,13 +35,19 @@ export default function UserPageMintsPhasesPhase({
             Mint Price
           </span>
           <span className="tw-mt-1 tw-inline-flex tw-items-center tw-text-iron-300 tw-font-medium tw-text-base">
-            <div className="tw-h-5 tw-w-5">
-              <EthereumIcon />
-            </div>
-            <span className="tw-mx-1">
-              {formatNumberWithCommas(phase.mintPrice)}
-            </span>
-            <span className="tw-sr-only">eth</span> / mint
+            {phase.mintPrice ? (
+              <>
+                <div className="tw-h-5 tw-w-5">
+                  <EthereumIcon />
+                </div>
+                <span className="tw-mx-1">
+                  {formatNumberWithCommas(phase.mintPrice)}
+                </span>
+                <span className="tw-sr-only">eth</span> / mint
+              </>
+            ) : (
+              "Free"
+            )}
           </span>
         </div>
         <div className="tw-mt-4 tw-flow-root">

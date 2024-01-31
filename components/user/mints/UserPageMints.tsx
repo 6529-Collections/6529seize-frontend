@@ -18,8 +18,6 @@ const VALID_DELEGATION_ADDRESSES = [DELEGATION_ALL_ADDRESS, MEMES_CONTRACT].map(
   (c) => c.toLowerCase()
 );
 
-const VALID_USE_CASES = [1, 2];
-
 export interface UserPageMintsPhaseSpotItem {
   readonly spots: number;
   readonly address: string;
@@ -103,10 +101,14 @@ export default function UserPageMints({
       mintPrice: p.mint_price,
       spots: walletsProofs.data
         .filter((w) => w.merkle_root === p.merkle_root)
+        .toSorted((a, b) => a.spots - b.spots)
         .reduce<UserPageMintsPhaseSpot[]>((prev, curr) => {
           const name = JSON.parse(curr.info).palettes;
           const address = curr.address.toLowerCase();
-          const spots = curr.spots;
+          const previousSpots = prev
+            .flatMap((s) => s.items.filter((i) => i.address === address))
+            .reduce((prev, curr) => prev + curr.spots, 0);
+          const spots = curr.spots - previousSpots;
           const item = prev.find((i) => i.name === name);
           if (item) {
             item.items.push({ spots, address });
