@@ -264,6 +264,7 @@ export default function UserPageMints({
             NFTs or The Memes in the{" "}
             <a
               href="https://seize.io/delegation/delegation-center"
+              rel="noopener noreferrer"
               className="tw-group tw-inline-flex tw-items-center tw-text-iron-200 hover:tw-text-primary-300 tw-font-medium tw-text-sm tw-duration-300 tw-transition tw-ease-out"
               target="_blank"
             >
@@ -280,6 +281,7 @@ export default function UserPageMints({
             page for each card (example:{" "}
             <a
               href="https://seize.io/the-memes/192/distribution"
+              rel="noopener noreferrer"
               target="_blank"
               className="tw-group tw-inline-flex tw-items-center tw-text-iron-200 hover:tw-text-primary-300 tw-font-medium tw-text-sm tw-duration-300 tw-transition tw-ease-out"
             >
