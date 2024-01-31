@@ -34,6 +34,7 @@ export interface UserPageMintsPhase {
   readonly startTime: number;
   readonly endTime: number;
   readonly name: string;
+  readonly mintPrice: number;
   readonly spots: UserPageMintsPhaseSpot[];
 }
 
@@ -99,6 +100,7 @@ export default function UserPageMints({
       startTime: p.start_time,
       endTime: p.end_time,
       name: p.phase,
+      mintPrice: p.mint_price,
       spots: walletsProofs.data
         .filter((w) => w.merkle_root === p.merkle_root)
         .reduce<UserPageMintsPhaseSpot[]>((prev, curr) => {

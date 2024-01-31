@@ -1,3 +1,4 @@
+import { formatNumberWithCommas } from "../../../helpers/Helpers";
 import EthereumIcon from "../utils/icons/EthereumIcon";
 import { UserPageMintsPhase } from "./UserPageMints";
 import UserPageMintsPhasesPhaseSpot from "./UserPageMintsPhasesPhaseSpot";
@@ -37,7 +38,9 @@ export default function UserPageMintsPhasesPhase({
             <div className="tw-h-5 tw-w-5">
               <EthereumIcon />
             </div>
-            <span className="tw-mx-1">0.06529</span>
+            <span className="tw-mx-1">
+              {formatNumberWithCommas(phase.mintPrice)}
+            </span>
             <span className="tw-sr-only">eth</span> / mint
           </span>
         </div>
