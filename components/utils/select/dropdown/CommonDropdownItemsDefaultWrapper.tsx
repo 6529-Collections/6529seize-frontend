@@ -1,18 +1,25 @@
 import { AnimatePresence, motion } from "framer-motion";
-import { ReactNode, useRef } from "react";
+import { ReactNode, RefObject, useRef } from "react";
 import { useClickAway, useKeyPressEvent } from "react-use";
 
 export default function CommonDropdownItemsDefaultWrapper<T>({
   isOpen,
   setOpen,
+  buttonRef,
   children,
 }: {
   readonly isOpen: boolean;
   readonly setOpen: (isOpen: boolean) => void;
+  readonly buttonRef: RefObject<HTMLButtonElement>;
   readonly children: ReactNode;
 }) {
   const listRef = useRef<HTMLDivElement>(null);
-  useClickAway(listRef, () => setOpen(false));
+  useClickAway(listRef, (e) => {
+
+    if (e.target !== buttonRef.current) {
+      setOpen(false);
+    }
+  });
   useKeyPressEvent("Escape", () => setOpen(false));
   return (
     <div className="tw-absolute">

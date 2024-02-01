@@ -53,7 +53,6 @@ export default function UserPageCollectedFilters({
     useState<boolean>(false);
 
   const checkVisibility = (elementRef: RefObject<HTMLDivElement>): boolean => {
-    console.log("checkVisibility");
     const element = elementRef.current;
     const container = containerRef.current;
 
@@ -93,13 +92,26 @@ export default function UserPageCollectedFilters({
 
   return (
     <div>
-      <div className="tw-w-full tw-flex tw-justify-between tw-gap-3">
+      <div className="tw-w-full tw-flex tw-justify-between tw-gap-3 tw-items-center">
         {!isMostLeftFilterVisible && (
           <button
-            className="tw-absolute tw-left-0"
+            className="tw-absolute tw-left-0 tw-bg-transparent tw-border-none"
             onClick={() => scrollHorizontally("left")}
           >
-            Left
+            <svg
+              className="tw-h-5 tw-w-5 tw-text-white tw-rotate-90"
+              viewBox="0 0 24 24"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M6 9L12 15L18 9"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
           </button>
         )}
         <div className="tw-gap-x-3 lg:tw-gap-x-4 tw-gap-y-3 tw-flex tw-items-center">
@@ -136,10 +148,23 @@ export default function UserPageCollectedFilters({
         </div>
         {!isMostRightFilterVisible && (
           <button
-            className="tw-absolute tw-right-0"
+            className="tw-absolute tw-right-0 tw-bg-transparent tw-border-none"
             onClick={() => scrollHorizontally("right")}
           >
-            Right
+            <svg
+              className="tw-h-5 tw-w-5 tw-text-white -tw-rotate-90"
+              viewBox="0 0 24 24"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M6 9L12 15L18 9"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
           </button>
         )}
       </div>
