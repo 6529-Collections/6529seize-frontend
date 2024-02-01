@@ -13,8 +13,24 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
 
   try {
     const baseImageSharp = sharp(response.data);
-    const baseImageBuffer = await baseImageSharp.toFormat("png").toBuffer();
-    const baseImageMeta = await baseImageSharp.metadata();
+    let baseImageMeta = await baseImageSharp.metadata();
+    let baseImageBuffer;
+    if (baseImageMeta.width! > 500) {
+      baseImageBuffer = await baseImageSharp
+        .toFormat("png")
+        .resize({ width: 500 })
+        .toBuffer();
+      baseImageMeta = await sharp(baseImageBuffer).metadata();
+      if (450 > baseImageMeta.height!) {
+        baseImageBuffer = await sharp(baseImageBuffer)
+          .toFormat("png")
+          .resize({ height: 450 })
+          .toBuffer();
+        baseImageMeta = await sharp(baseImageBuffer).metadata();
+      }
+    } else {
+      baseImageBuffer = await baseImageSharp.toFormat("png").toBuffer();
+    }
 
     const textCanvas = await createTextOverlay(
       baseImageBuffer,
@@ -69,7 +85,7 @@ async function createTextOverlay(
   ctx.fillStyle = "white";
 
   //handle
-  ctx.font = "30px Arial";
+  ctx.font = "bold 35px Arial";
   ctx.fillText(handle, textCenterX, 50);
 
   //link
@@ -88,34 +104,42 @@ async function createTextOverlay(
   let currentY = 220;
   const yOffset = 32;
   ctx.fillStyle = "white";
-  ctx.font = "22px Arial";
 
   if (cards) {
+    ctx.font = "bold 22px Arial";
     ctx.fillText(`Cards`, textCenterX, currentY);
+    ctx.font = "22px Arial";
     ctx.fillText(cards, textCenterX + 100, currentY);
     currentY += yOffset;
   }
 
   if (tdh) {
+    ctx.font = "bold 22px Arial";
     ctx.fillText(`TDH`, textCenterX, currentY);
+    ctx.font = "22px Arial";
     ctx.fillText(tdh, textCenterX + 100, currentY);
     currentY += yOffset;
   }
 
   if (rep) {
+    ctx.font = "bold 22px Arial";
     ctx.fillText(`REP`, textCenterX, currentY);
+    ctx.font = "22px Arial";
     ctx.fillText(rep, textCenterX + 100, currentY);
     currentY += yOffset;
   }
 
   if (cic) {
+    ctx.font = "bold 22px Arial";
     ctx.fillText(`CIC`, textCenterX, currentY);
+    ctx.font = "22px Arial";
     ctx.fillText(cic, textCenterX + 100, currentY);
   }
 
   //trademark
   const trademark = "6529 Seize";
   ctx.fillStyle = "#9a9a9a";
+  ctx.font = "22px Arial";
   ctx.fillText(trademark, textCenterX, height - 22);
 
   const logo = await loadImage("public/Seize_Logo_2.png");

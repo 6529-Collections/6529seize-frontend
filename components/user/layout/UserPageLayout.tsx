@@ -81,7 +81,8 @@ export default function UserPageLayout({
 
   const title = getTitle();
 
-  const pagenameFull = `${title} | 6529 SEIZE`;
+  const trademark = "6529 SEIZE";
+  const pagenameFull = `${title} | ${trademark}`;
 
   let pfpUrl = `${process.env.BASE_ENDPOINT}/api/profiles/pfp?handle=${
     isAddress(title) ? formatAddress(title) : title
@@ -147,7 +148,7 @@ export default function UserPageLayout({
         />
         <meta property="og:title" content={title} />
         <meta property="og:image" content={pfpUrl} />
-        <meta property="og:description" content={pagenameFull} />
+        <meta property="og:description" content={trademark} />
         <meta name="twitter:card" content="summary_large_image" />
       </Head>
 
