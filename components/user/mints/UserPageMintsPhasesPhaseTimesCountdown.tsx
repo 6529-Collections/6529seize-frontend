@@ -82,8 +82,8 @@ export default function UserPageMintsPhasesPhaseTimesCountdown({
 
   if (progress === CountdownState.ENDED) {
     return (
-      <div className="tw-flex tw-flex-col">
-        <span className="tw-inline-flex tw-items-center tw-mt-1 tw-text-iron-300 tw-font-medium tw-text-base">
+      <div className="md:tw-self-end">
+        <span className="tw-inline-flex tw-items-center tw-rounded-md tw-bg-red/10 tw-px-2 tw-py-1 tw-text-sm tw-font-medium tw-text-red tw-ring-1 tw-ring-inset tw-ring-red/20">
           Ended
         </span>
       </div>

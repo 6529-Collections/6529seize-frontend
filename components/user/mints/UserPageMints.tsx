@@ -241,7 +241,7 @@ export default function UserPageMints({
                   className="tw-group tw-inline-flex tw-items-center tw-text-primary-300 hover:tw-text-primary-400 tw-font-medium tw-text-base tw-duration-300 tw-transition tw-ease-out"
                   target="_blank"
                 >
-                  <span>{mintUrl}</span>
+                  <span className="tw-break-all">{mintUrl}</span>
                   <svg
                     className="tw-h-6 tw-w-6 tw-ml-2 tw-text-primary-300 group-hover:tw-text-primary-400 tw-duration-400 tw-transition tw-ease-out group-hover:-tw-translate-y-0.5 group-hover:tw-translate-x-0.5"
                     viewBox="0 0 24 24"
