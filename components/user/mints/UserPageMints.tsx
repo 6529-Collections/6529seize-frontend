@@ -88,6 +88,7 @@ export default function UserPageMints({
       setPhases([]);
       return;
     }
+    console.log(collectionPhases.data);
     const merkleRoots = new Set<string>(
       walletsProofs.data.map((w) => w.merkle_root)
     );
