@@ -77,10 +77,7 @@ export default function NextGenCollectionSlideshow(props: Readonly<Props>) {
                   modules={[Navigation, A11y, Autoplay]}
                   autoplay
                   spaceBetween={20}
-                  slidesPerView={Math.min(
-                    slidesPerView,
-                    props.collection.mint_count
-                  )}
+                  slidesPerView={Math.min(slidesPerView, tokens.length)}
                   navigation
                   centeredSlides
                   pagination={{ clickable: true }}
