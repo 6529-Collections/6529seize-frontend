@@ -22,8 +22,8 @@ export default function UserPageMintsPhasesPhase({
           {phase?.name}
         </span>
         <UserPageMintsPhasesPhaseTimes
-          startTime={phase.startTime * 1000}
-          endTime={phase.endTime * 1000}
+          startTime={phase.startTime}
+          endTime={phase.endTime}
         />
       </div>
       <div className="tw-mt-6 sm:tw-mt-8 tw-flex tw-flex-col tw-max-w-md">

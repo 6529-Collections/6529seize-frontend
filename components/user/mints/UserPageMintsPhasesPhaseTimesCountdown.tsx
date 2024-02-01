@@ -43,7 +43,7 @@ export default function UserPageMintsPhasesPhaseTimesCountdown({
   };
 
   const getProgress = (startTime: number, endTime: number) => {
-    const currentTime = new Date().getTime(); 
+    const currentTime = new Date().getTime();
     if (currentTime < startTime) {
       return CountdownState.NOT_STARTED;
     } else if (currentTime > endTime) {
@@ -54,7 +54,7 @@ export default function UserPageMintsPhasesPhaseTimesCountdown({
   };
 
   const getDifference = (startTime: number, endTime: number) => {
-    const currentTime = new Date().getTime(); 
+    const currentTime = new Date().getTime();
     if (currentTime < startTime) {
       return startTime - currentTime;
     } else if (currentTime < endTime) {
@@ -74,12 +74,22 @@ export default function UserPageMintsPhasesPhaseTimesCountdown({
     const interval = setInterval(() => {
       setTime(getDifference(startTime, endTime));
       setProgress(getProgress(startTime, endTime));
-
     }, 1000);
     return () => {
       clearInterval(interval);
     };
   }, [startTime, endTime]); // temp
+
+  if (progress === CountdownState.ENDED) {
+    return (
+      <div className="tw-flex tw-flex-col">
+        <span className="tw-inline-flex tw-items-center tw-mt-1 tw-text-iron-300 tw-font-medium tw-text-base">
+          Ended
+        </span>
+      </div>
+    );
+  }
+
   return (
     <div className="tw-flex tw-flex-col">
       <span className="tw-text-iron-400 tw-text-sm tw-font-medium">
@@ -101,9 +111,7 @@ export default function UserPageMintsPhasesPhaseTimesCountdown({
             strokeLinejoin="round"
           />
         </svg>
-        <span>
-          {formatTime(time)} {progress === CountdownState.ENDED ? " ago" : ""}
-        </span>
+        <span>{formatTime(time)}</span>
       </span>
     </div>
   );
