@@ -7,7 +7,7 @@ export default function ProfileActivityLogGeneralStatement({
   readonly log: ProfileActivityLogGeneralCicStatementEdit;
 }) {
   return (
-    <div className="tw-inline-flex tw-space-x-1 tw-max-w-xs sm:tw-max-w-sm md:tw-max-w-md lg:tw-max-w-lg xl:tw-max-w-xl 2xl:tw-max-w-2xl">
+    <div className="tw-inline-flex tw-space-x-1 tw-max-w-xs sm:tw-max-w-sm md:tw-max-w-xl lg:tw-max-w-2xl xl:tw-max-w-4xl 2xl:tw-max-w-6xl">
       <ProfileActivityLogItemAction action="changed" />
       <span className="tw-whitespace-nowrap tw-text-sm tw-text-neutral-400 tw-font-medium">
         About
