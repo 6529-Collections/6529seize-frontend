@@ -184,7 +184,7 @@ export default function UserPageMints({
 
   const getNotEligibleText = () => {
     const sub = profile.profile?.handle ? "profile" : "wallet";
-    return `This wallet ${sub} is not eligible to mint Pebbles at this time.`;
+    return `This ${sub} is not eligible to mint Pebbles at this time.`;
   };
 
   const getMintingWallets = (): Set<string> => {
