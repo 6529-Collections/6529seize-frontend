@@ -65,6 +65,7 @@ export default function UserPageIdentityStatementsConsolidatedAddressesItem({
       >
         <button
           onClick={goToOpensea}
+          aria-label="Go to Opensea"
           className="tw-bg-transparent tw-border-none tw-p-0"
         >
           <div className="tw-flex-shrink-0 tw-w-6 tw-h-6 sm:tw-w-5 sm:tw-h-5 hover:tw-scale-110 tw-transition tw-duration-300 tw-ease-out">
@@ -80,6 +81,7 @@ export default function UserPageIdentityStatementsConsolidatedAddressesItem({
       >
         <button
           onClick={goToEtherscan}
+          aria-label="Go to Etherscan"
           className="tw-bg-transparent tw-border-none tw-p-0"
         >
           <div className="tw-flex-shrink-0 tw-w-6 tw-h-6 sm:tw-w-5 sm:tw-h-5 hover:tw-scale-110 tw-transition tw-duration-300 tw-ease-out">
@@ -94,12 +96,12 @@ export default function UserPageIdentityStatementsConsolidatedAddressesItem({
             <span className="tw-ml-3">{address.wallet.ens}</span>
           )}
         </div>
-
         <div className="tw-inline-flex tw-items-center">
           <svg
             className="tw-flex-shrink-0 tw-w-5 tw-h-5"
             viewBox="0 0 24 24"
             fill="none"
+            aria-hidden="true"
             xmlns="http://www.w3.org/2000/svg"
           >
             <path
@@ -123,9 +125,10 @@ export default function UserPageIdentityStatementsConsolidatedAddressesItem({
             disabled={isTouchScreen}
           >
             <button
+              aria-label="Copy address"
               className={`${
                 isTouchScreen ? "tw-block" : "tw-hidden group-hover:tw-block"
-              } tw-ml-4 tw-bg-transparent tw-cursor-pointer tw-text-sm tw-font-semibold tw-text-iron-200 tw-border-0 focus:tw-outline-none tw-transition tw-duration-300 tw-ease-out`}
+              } tw-ml-2 tw-bg-transparent tw-cursor-pointer tw-text-sm tw-font-semibold tw-text-iron-200 tw-border-0 focus:tw-outline-none tw-transition tw-duration-300 tw-ease-out`}
               onClick={handleCopy}
             >
               <CopyIcon />
