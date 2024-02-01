@@ -38,7 +38,7 @@ export function NextGenTokenArtImage(
 }
 
 export default function NextGenToken(props: Readonly<Props>) {
-  const [mode, setMode] = useState<Mode>(Mode.HTML);
+  const [mode, setMode] = useState<Mode>(Mode.IMAGE);
   const [isFullScreen, setIsFullScreen] = useState<boolean>(false);
   const [showBlackbox, setShowBlackbox] = useState<boolean>(false);
   const [showLightbox, setShowLightbox] = useState<boolean>(false);
@@ -110,18 +110,6 @@ export default function NextGenToken(props: Readonly<Props>) {
       <>
         <span className="d-flex gap-3">
           <Tippy
-            content="HTML"
-            hideOnClick={true}
-            placement="bottom"
-            theme="light"
-            delay={100}>
-            <FontAwesomeIcon
-              className={getModeStyle(Mode.HTML)}
-              onClick={() => setMode(Mode.HTML)}
-              icon="play-circle"
-            />
-          </Tippy>
-          <Tippy
             content="Image"
             hideOnClick={true}
             placement="bottom"
@@ -131,6 +119,18 @@ export default function NextGenToken(props: Readonly<Props>) {
               className={getModeStyle(Mode.IMAGE)}
               onClick={() => setMode(Mode.IMAGE)}
               icon="image"
+            />
+          </Tippy>
+          <Tippy
+            content="Live"
+            hideOnClick={true}
+            placement="bottom"
+            theme="light"
+            delay={100}>
+            <FontAwesomeIcon
+              className={getModeStyle(Mode.HTML)}
+              onClick={() => setMode(Mode.HTML)}
+              icon="play-circle"
             />
           </Tippy>
         </span>
