@@ -13,7 +13,7 @@ import { MEMES_SEASON } from "../../../enums";
 import { SortDirection } from "../../../entities/ISort";
 import { useRouter } from "next/router";
 import { usePathname, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import UserPageCollectedCards from "./cards/UserPageCollectedCards";
 import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
 import UserPageCollectedFirstLoading from "./UserPageCollectedFirstLoading";
@@ -342,21 +342,64 @@ export default function UserPageCollected({
     setShowDataRow(getShowDataRow());
   }, [filters.collection]);
 
+  const scrollContainer = useRef<HTMLDivElement>(null);
+
+  const calculateScroll = ({
+    direction,
+    scrollLeft,
+    scrollRight,
+    scrollStep,
+  }: {
+    direction: "left" | "right";
+    scrollLeft: number;
+    scrollRight: number;
+    scrollStep: number;
+  }): number => {
+    switch (direction) {
+      case "left":
+        return -1 * (scrollLeft > scrollStep ? scrollStep : scrollLeft);
+      case "right":
+        return scrollRight > scrollStep ? scrollStep : scrollRight;
+      default:
+        return 0;
+    }
+  };
+
+  const scrollHorizontally = (direction: "left" | "right") => {
+    if (!scrollContainer.current) return;
+    const scrollLeft = scrollContainer.current.scrollLeft;
+    const scrollWidth = scrollContainer.current.scrollWidth;
+    const clientWidth = scrollContainer.current.clientWidth;
+    const scrollRight = scrollWidth - scrollLeft - clientWidth;
+    const scrollStep = clientWidth / 2;
+
+    scrollContainer.current.scrollTo({
+      left:
+        scrollLeft +
+        calculateScroll({ direction, scrollLeft, scrollRight, scrollStep }),
+      behavior: "smooth",
+    });
+  };
+
   return (
     <div className="tailwind-scope">
       {isInitialLoading ? (
         <UserPageCollectedFirstLoading />
       ) : (
         <>
-          <div className="tw-overflow-auto">
+          <div
+            className="tw-overflow-auto horizontal-menu-hide-scrollbar"
+            ref={scrollContainer}
+          >
             <UserPageCollectedFilters
               profile={profile}
               filters={filters}
-              loading={isFetching}
+              containerRef={scrollContainer}
               setCollection={setCollection}
               setSortBy={setSortBy}
               setSeized={setSeized}
               setSzn={setSzn}
+              scrollHorizontally={scrollHorizontally}
             />
           </div>
           <div className="tw-mt-6">

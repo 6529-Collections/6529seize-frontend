@@ -60,7 +60,7 @@ export default function CommonDropdown<T>(props: CommonSelectProps<T>) {
   };
 
   return (
-    <div className={`tw-relative ${inter.className}`}>
+    <div className={`${inter.className}`}>
       <div className="tw-relative">
         <button
           type="button"
