@@ -39,14 +39,22 @@ export default function UserPageCollectedFilters({
     getShowSeizedAndSzn(filters.collection)
   );
 
+  const [isTouchDevice, setIsTouchDevice] = useState(false);
+
+  useEffect(() => {
+    if ("ontouchstart" in window || navigator.maxTouchPoints) {
+      setIsTouchDevice(true);
+    }
+  }, []);
+
   useEffect(() => {
     setShowSeizedAndSzn(getShowSeizedAndSzn(filters.collection));
   }, [filters.collection]);
 
   return (
-    <div className="tw-flex tw-justify-between tw-gap-y-6 tw-gap-x-4">
-      <div className="tw-flex tw-items-center tw-flex-wrap tw-gap-y-3 tw-gap-x-4">
-        <div className="tw-gap-x-4 tw-gap-y-3 tw-flex tw-flex-wrap tw-items-center">
+    <div className="">
+      <div className="tw-w-full tw-flex tw-justify-between tw-gap-3">
+        <div className="tw-gap-x-3 lg:tw-gap-x-4 tw-gap-y-3 tw-flex tw-items-center">
           <UserPageCollectedFiltersCollection
             selected={filters.collection}
             setSelected={setCollection}
@@ -70,8 +78,6 @@ export default function UserPageCollectedFilters({
             </>
           )}
         </div>
-      </div>
-      <div className="tw-inline-flex tw-space-x-4">
         <UserPageHeaderAddresses
           addresses={profile.consolidation.wallets}
           onActiveAddress={() => undefined}

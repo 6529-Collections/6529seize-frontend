@@ -16,7 +16,7 @@ export default function UserPageCollectedCards({
   readonly setPage: (page: number) => void;
 }) {
   return (
-    <div className="tw-mt-6 lg:tw-mt-8">
+    <div>
       {cards.length ? (
         <div className="tw-flow-root">
           <div className="tw-grid tw-grid-cols-1 sm:tw-grid-cols-2 md:tw-grid-cols-3 xl:tw-grid-cols-4 2xl:tw-grid-cols-5 3xl:tw-grid-cols-6 tw-gap-6 tw-pb-2">

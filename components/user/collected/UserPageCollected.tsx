@@ -348,16 +348,18 @@ export default function UserPageCollected({
         <UserPageCollectedFirstLoading />
       ) : (
         <>
-          <UserPageCollectedFilters
-            profile={profile}
-            filters={filters}
-            loading={isFetching}
-            setCollection={setCollection}
-            setSortBy={setSortBy}
-            setSeized={setSeized}
-            setSzn={setSzn}
-          />
-          <div className="tw-mt-6 lg:tw-mt-8">
+          <div className="tw-overflow-auto">
+            <UserPageCollectedFilters
+              profile={profile}
+              filters={filters}
+              loading={isFetching}
+              setCollection={setCollection}
+              setSortBy={setSortBy}
+              setSeized={setSeized}
+              setSzn={setSzn}
+            />
+          </div>
+          <div className="tw-mt-6">
             <UserPageCollectedCards
               cards={data?.data ?? []}
               totalPages={totalPages}

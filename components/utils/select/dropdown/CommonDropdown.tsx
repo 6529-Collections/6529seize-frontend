@@ -5,11 +5,20 @@ import CommonDropdownItemsWrapper from "./CommonDropdownItemsWrapper";
 import CommonDropdownItem from "./CommonDropdownItem";
 import { SortDirection } from "../../../../entities/ISort";
 import CommonTableSortIcon from "../../../user/utils/icons/CommonTableSortIcon";
+import { Inter } from "next/font/google";
+
+const inter = Inter({
+  weight: ["300", "400", "500", "600", "700"],
+  style: ["normal"],
+  subsets: ["latin"],
+  display: "swap",
+});
 
 export default function CommonDropdown<T>(props: CommonSelectProps<T>) {
   const { items, activeItem, noneLabel, filterLabel, setSelected } = props;
   const [isOpen, setIsOpen] = useState(false);
   const [iconScope, animateIcon] = useAnimate();
+
   useEffect(() => {
     if (isOpen) {
       animateIcon(iconScope.current, { rotate: 0 });
@@ -51,14 +60,14 @@ export default function CommonDropdown<T>(props: CommonSelectProps<T>) {
   };
 
   return (
-    <div className="tw-relative tw-w-full sm:tw-w-auto">
-      <div className="tw-relative tw-w-full sm:tw-w-auto">
+    <div className={`tw-relative ${inter.className}`}>
+      <div className="tw-relative">
         <button
           type="button"
           aria-haspopup="true"
           onClick={() => setIsOpen(true)}
-          className="tw-text-left tw-block tw-whitespace-nowrap tw-w-full sm:tw-w-auto tw-rounded-lg tw-border-0 tw-py-2.5 tw-pl-3.5 tw-pr-10 tw-bg-iron-900 focus:tw-bg-transparent tw-text-iron-300 tw-font-semibold tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-700 
-          focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 tw-text-base sm:tw-text-sm hover:tw-bg-iron-800 tw-transition tw-duration-300 tw-ease-out tw-justify-between"
+          className="tw-text-left tw-block tw-whitespace-nowrap tw-rounded-lg tw-border-0 tw-py-2.5 tw-pl-3.5 tw-pr-10 tw-bg-iron-800 lg:tw-bg-iron-900 focus:tw-bg-transparent tw-text-iron-300 tw-font-semibold tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-700 
+          focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 tw-text-sm hover:tw-bg-iron-800 tw-transition tw-duration-300 tw-ease-out tw-justify-between"
         >
           <span>{label}</span>
           {sortDirection && (

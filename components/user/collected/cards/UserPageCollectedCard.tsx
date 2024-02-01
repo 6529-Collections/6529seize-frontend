@@ -34,7 +34,7 @@ export default function UserPageCollectedCard({
   const path = getPath();
 
   return (
-    <div className="tw-cursor-pointer tw-bg-gradient-to-br tw-from-iron-900 tw-to-white/5 tw-rounded-lg tw-overflow-hidden tw-px-2 tw-pt-2 tw-ring-1 tw-ring-inset tw-ring-iron-700 hover:tw-to-white/10 tw-transition-opacity tw-duration-500 tw-ease-out">
+    <div className="tw-cursor-pointer tw-bg-gradient-to-br tw-from-iron-900 tw-to-white/5 tw-rounded-lg tw-overflow-hidden tw-px-2 tw-pt-2 tw-ring-1 tw-ring-inset tw-ring-iron-700 hover:tw-ring-iron-600/60 hover:tw-to-white/10 tw-transition-opacity tw-duration-500 tw-ease-out">
       <Link href={path} className="tw-w-full tw-max-w-full">
         <div className="md:tw-h-[18.75rem] tw-text-center">
           <img

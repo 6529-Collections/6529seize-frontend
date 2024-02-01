@@ -79,7 +79,7 @@ export default function CommonDropdownItemsMobileWrapper({
                       </button>
                     </div>
                   </Transition.Child>
-                  <div className="tw-flex tw-h-full tw-flex-col tw-bg-iron-950 tw-rounded-t-lg tw-overflow-y-auto tw-py-6">
+                  <div className="tw-flex tw-h-full tw-flex-col tw-bg-iron-950 tw-rounded-t-xl tw-overflow-y-auto tw-py-6">
                     <div className="tw-px-4 sm:tw-px-6">
                       <Dialog.Title className="tw-text-base tw-font-semibold tw-text-iron-50">
                         {filterLabel}
