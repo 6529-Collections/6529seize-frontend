@@ -3,7 +3,7 @@ import CommonTableSortIcon from "../../../user/utils/icons/CommonTableSortIcon";
 import { CommonSelectItemProps } from "../CommonSelect";
 import { SortDirection } from "../../../../entities/ISort";
 
-export default function CommonDropdownItem<T>(props: CommonSelectItemProps<T>) {
+export default function CommonDropdownItem<T>(props: Readonly<CommonSelectItemProps<T>>) {
   const { item, activeItem, setSelected, sortDirection } = props;
 
   const [isActive, setIsActive] = useState<boolean>(item.value === activeItem);

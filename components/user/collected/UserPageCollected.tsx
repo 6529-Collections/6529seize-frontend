@@ -214,6 +214,24 @@ export default function UserPageCollected({
     await updateFields(items);
   };
 
+  const calculateSortDirection = ({
+    newSortBy,
+    currentSortBy,
+    currentSortDirection,
+  }: {
+    newSortBy: CollectionSort;
+    currentSortBy: CollectionSort;
+    currentSortDirection: SortDirection;
+  }): SortDirection | null => {
+    if (newSortBy === currentSortBy) {
+      if (currentSortDirection === SortDirection.ASC) {
+        return SortDirection.DESC;
+      }
+      return SortDirection.ASC;
+    }
+    return defaultSortDirection;
+  };
+
   const setSortBy = async (sortBy: CollectionSort): Promise<void> => {
     const items: QueryUpdateInput[] = [
       {
@@ -222,12 +240,11 @@ export default function UserPageCollected({
       },
       {
         name: "sortDirection",
-        value:
-          sortBy === filters.sortBy
-            ? filters.sortDirection === SortDirection.ASC
-              ? SortDirection.DESC
-              : SortDirection.ASC
-            : defaultSortDirection,
+        value: calculateSortDirection({
+          newSortBy: sortBy,
+          currentSortBy: filters.sortBy,
+          currentSortDirection: filters.sortDirection,
+        }),
       },
       {
         name: "page",
@@ -371,7 +388,7 @@ export default function UserPageCollected({
     const scrollWidth = scrollContainer.current.scrollWidth;
     const clientWidth = scrollContainer.current.clientWidth;
     const scrollRight = scrollWidth - scrollLeft - clientWidth;
-    const scrollStep = clientWidth / 2;
+    const scrollStep = clientWidth / 1.1;
 
     scrollContainer.current.scrollTo({
       left:
