@@ -10,6 +10,7 @@ import {
   useCollectionIndex,
   useCollectionAdmin,
   getCollectionIdsForAddress,
+  useParsedCollectionIndex,
 } from "../nextgen_helpers";
 import { printAdminErrors } from "./NextGenAdmin";
 import {
@@ -39,16 +40,16 @@ export default function NextGenAdminUploadAL(props: Readonly<Props>) {
     FunctionSelectors.SET_COLLECTION_PHASES
   );
   const collectionIndex = useCollectionIndex();
+  const parsedCollectionIndex = useParsedCollectionIndex(collectionIndex);
   const collectionAdmin = useCollectionAdmin(
     account.address as string,
-    parseInt(collectionIndex?.data as any)
+    parsedCollectionIndex
   );
-
   const collectionIds = getCollectionIdsForAddress(
     (globalAdmin.data as any) === true,
     (functionAdmin.data as any) === true,
     collectionAdmin.data,
-    parseInt(collectionIndex?.data as any)
+    parsedCollectionIndex
   );
 
   const [collectionID, setCollectionID] = useState("");
@@ -56,11 +57,11 @@ export default function NextGenAdminUploadAL(props: Readonly<Props>) {
   const [allowlistStartTime, setAllowlistStartTime] = useState("");
   const [allowlistEndTime, setAllowlistEndTime] = useState("");
   const [phaseName, setPhaseName] = useState("");
+  const [mintPrice, setMintPrice] = useState("");
 
   const [type, setType] = useState(Type.ALLOWLIST);
 
   const [errors, setErrors] = useState<string[]>([]);
-  const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
 
   const [uploadSuccess, setUploadSuccess] = useState(false);
@@ -106,6 +107,7 @@ export default function NextGenAdminUploadAL(props: Readonly<Props>) {
           phase: phaseName,
           start_time: Number(allowlistStartTime),
           end_time: Number(allowlistEndTime),
+          mint_price: Number(mintPrice),
         })
       );
 
@@ -206,7 +208,16 @@ export default function NextGenAdminUploadAL(props: Readonly<Props>) {
                 onChange={(e: any) => setAllowlistEndTime(e.target.value)}
               />
             </Form.Group>
-            {!loading && errors.length > 0 && printAdminErrors(errors)}
+            <Form.Group className="mb-3">
+              <Form.Label>Mint Price (ETH)</Form.Label>
+              <Form.Control
+                type="integer"
+                placeholder="...0.06529"
+                value={mintPrice}
+                onChange={(e: any) => setMintPrice(e.target.value)}
+              />
+            </Form.Group>
+            {!uploading && errors.length > 0 && printAdminErrors(errors)}
             <div className="d-flex align-items-center mt-4 gap-3">
               <Button
                 className="seize-btn"
@@ -215,6 +226,8 @@ export default function NextGenAdminUploadAL(props: Readonly<Props>) {
                   !allowlistFile ||
                   !allowlistStartTime ||
                   !allowlistEndTime ||
+                  !phaseName ||
+                  !mintPrice ||
                   uploading ||
                   uploadSuccess
                 }

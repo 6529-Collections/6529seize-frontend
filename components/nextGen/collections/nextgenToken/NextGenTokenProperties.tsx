@@ -1,6 +1,6 @@
 import styles from "./NextGenToken.module.scss";
 
-import { Col, Container, Row, Table } from "react-bootstrap";
+import { Col, Container, Row } from "react-bootstrap";
 import { NextGenTrait } from "../../../../entities/INextgen";
 import { useEffect, useState } from "react";
 import { commonApiFetch } from "../../../../services/api/common-api";

@@ -58,27 +58,10 @@ export default function NextGenCollectionProvenance(props: Readonly<Props>) {
           <Table bordered={false} className={styles.logsTable}>
             <tbody>
               {logs.map((log) => (
-                <tr key={`${log.block}-${log.transaction}`}>
-                  <td className="align-middle text-center">
-                    {getDateDisplay(new Date(log.block_timestamp * 1000))}
-                  </td>
-                  <td className={styles.collectionProvenance}>
-                    <span className="d-fl">{log.log}</span>
-                  </td>
-                  <td className="text-right">
-                    <a
-                      href={getTransactionLink(
-                        NEXTGEN_CHAIN_ID,
-                        log.transaction
-                      )}
-                      target="_blank"
-                      rel="noreferrer">
-                      <FontAwesomeIcon
-                        className={styles.globeIcon}
-                        icon="external-link-square"></FontAwesomeIcon>
-                    </a>
-                  </td>
-                </tr>
+                <NextGenCollectionProvenanceRow
+                  log={log}
+                  key={`${log.block}-${log.transaction}`}
+                />
               ))}
             </tbody>
           </Table>
@@ -102,5 +85,33 @@ export default function NextGenCollectionProvenance(props: Readonly<Props>) {
         </Row>
       )}
     </Container>
+  );
+}
+
+export function NextGenCollectionProvenanceRow(
+  props: Readonly<{
+    log: NextGenLog;
+  }>
+) {
+  const log = props.log;
+  return (
+    <tr>
+      <td className="align-middle text-center">
+        {getDateDisplay(new Date(log.block_timestamp * 1000))}
+      </td>
+      <td className={styles.collectionProvenance}>
+        <span className="d-flex">{log.log}</span>
+      </td>
+      <td className="text-right">
+        <a
+          href={getTransactionLink(NEXTGEN_CHAIN_ID, log.transaction)}
+          target="_blank"
+          rel="noreferrer">
+          <FontAwesomeIcon
+            className={styles.globeIcon}
+            icon="external-link-square"></FontAwesomeIcon>
+        </a>
+      </td>
+    </tr>
   );
 }

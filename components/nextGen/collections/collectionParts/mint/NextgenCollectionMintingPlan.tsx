@@ -6,17 +6,24 @@ import {
   NextgenAllowlistCollection,
 } from "../../../../../entities/INextgen";
 import NextGenCollectionHeader from "../NextGenCollectionHeader";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { commonApiFetch } from "../../../../../services/api/common-api";
 import { Time } from "../../../../../helpers/time";
 import { getJsonData } from "./NextGenMintWidget";
-import { areEqualAddresses } from "../../../../../helpers/Helpers";
+import {
+  areEqualAddresses,
+  formatAddress,
+} from "../../../../../helpers/Helpers";
+import Pagination from "../../../../pagination/Pagination";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import Tippy from "@tippyjs/react";
+import SearchModal from "../../../../searchModal/SearchModal";
 
 interface Props {
   collection: NextGenCollection;
 }
 
-const PAGE_SIZE = 250;
+const PAGE_SIZE = 100;
 
 export default function NextgenCollectionMintingPlan(props: Readonly<Props>) {
   const [phases, setPhases] = useState<NextgenAllowlistCollection[]>([]);
@@ -24,7 +31,14 @@ export default function NextgenCollectionMintingPlan(props: Readonly<Props>) {
   const [selectedPhase, setSelectedPhase] =
     useState<NextgenAllowlistCollection>();
 
+  const allowlistScrollTarget = useRef<HTMLImageElement>(null);
   const [allowlist, setAllowlist] = useState<NextgenAllowlist[]>([]);
+  const [page, setPage] = useState(1);
+  const [totalResults, setTotalResults] = useState(0);
+  const [allowlistLoaded, setAllowlistLoaded] = useState(false);
+
+  const [showSearchModal, setShowSearchModal] = useState(false);
+  const [searchWallets, setSearchWallets] = useState<string[]>([]);
 
   function adjustSpots(address: string, keccak: string) {
     const addressEntries = allowlist.filter((al) =>
@@ -42,23 +56,45 @@ export default function NextgenCollectionMintingPlan(props: Readonly<Props>) {
 
   useEffect(() => {
     commonApiFetch<NextgenAllowlistCollection[]>({
-      endpoint: `nextgen/allowlist_phases/${props.collection.id}?page_size=${PAGE_SIZE}`,
+      endpoint: `nextgen/allowlist_phases/${props.collection.id}?page_size=250`,
     }).then((collections) => {
       setPhases(collections);
     });
   }, []);
 
-  useEffect(() => {
+  function fetchAllowlist(mypage: number) {
+    setAllowlistLoaded(false);
+    const filters = [];
+    if (searchWallets.length > 0) {
+      filters.push(`&address=${searchWallets.join(",")}`);
+    }
     commonApiFetch<{
+      count: number;
+      page: number;
+      next: any;
       data: NextgenAllowlist[];
     }>({
       endpoint: `nextgen/${props.collection.id}/allowlist_merkle/${
         selectedPhase?.merkle_root ?? ""
-      }`,
-    }).then((al) => {
-      setAllowlist(al.data);
+      }?page_size=${PAGE_SIZE}&page=${mypage}${filters}`,
+    }).then((response) => {
+      setTotalResults(response.count);
+      setAllowlist(response.data);
+      setAllowlistLoaded(true);
     });
-  }, [selectedPhase]);
+  }
+
+  useEffect(() => {
+    fetchAllowlist(page);
+  }, [page]);
+
+  useEffect(() => {
+    if (page > 1) {
+      setPage(1);
+    } else {
+      fetchAllowlist(1);
+    }
+  }, [selectedPhase, searchWallets]);
 
   function printPhase(phaseName: string, start: number, end: number) {
     const startTime = Time.seconds(start);
@@ -145,8 +181,8 @@ export default function NextgenCollectionMintingPlan(props: Readonly<Props>) {
       </Row>
       {allowlist.length > 0 && (
         <>
-          <Row className="pt-4">
-            <Col xs={12} sm={6} md={4} className="d-flex">
+          <Row className="pt-4" ref={allowlistScrollTarget}>
+            <Col className="d-flex align-items-center justify-content-between">
               <Dropdown
                 className={styles.filterDropdown}
                 drop={"down-centered"}>
@@ -166,6 +202,52 @@ export default function NextgenCollectionMintingPlan(props: Readonly<Props>) {
                   ))}
                 </Dropdown.Menu>
               </Dropdown>
+              <span className="d-flex flex-wrap align-items-center">
+                {searchWallets.length > 0 &&
+                  searchWallets.map((sw) => (
+                    <span
+                      className={styles.searchWalletDisplayWrapper}
+                      key={sw}>
+                      <Tippy
+                        delay={250}
+                        content={"Clear"}
+                        placement={"top"}
+                        theme={"light"}>
+                        <button
+                          className={`btn-link ${styles.searchWalletDisplayBtn}`}
+                          onClick={() =>
+                            setSearchWallets((sr) => sr.filter((s) => s != sw))
+                          }>
+                          x
+                        </button>
+                      </Tippy>
+                      <span className={styles.searchWalletDisplay}>
+                        {sw.endsWith(".eth") ? sw : formatAddress(sw)}
+                      </span>
+                    </span>
+                  ))}
+                {searchWallets.length > 0 && (
+                  <Tippy
+                    delay={250}
+                    content={"Clear All"}
+                    placement={"top"}
+                    theme={"light"}>
+                    <FontAwesomeIcon
+                      onClick={() => setSearchWallets([])}
+                      className={styles.clearSearchBtnIcon}
+                      icon="times-circle"></FontAwesomeIcon>
+                  </Tippy>
+                )}
+                <button
+                  onClick={() => setShowSearchModal(true)}
+                  className={`btn-link ${styles.searchBtn} ${
+                    searchWallets.length > 0 ? styles.searchBtnActive : ""
+                  } d-inline-flex align-items-center justify-content-center`}>
+                  <FontAwesomeIcon
+                    style={{ width: "20px", height: "20px", cursor: "pointer" }}
+                    icon="search"></FontAwesomeIcon>
+                </button>
+              </span>
             </Col>
           </Row>
           <Row>
@@ -173,7 +255,7 @@ export default function NextgenCollectionMintingPlan(props: Readonly<Props>) {
               <Table className={styles.logsTable}>
                 <thead>
                   <tr>
-                    <th>Address</th>
+                    <th>Address x{totalResults > 0 && totalResults}</th>
                     <th className="text-center">Phase</th>
                     <th className="text-center">Spots</th>
                     <th className="text-center">Data</th>
@@ -183,8 +265,14 @@ export default function NextgenCollectionMintingPlan(props: Readonly<Props>) {
                   {allowlist.map((al) => (
                     <tr key={`${al.address}-${al.spots}-${al.info}`}>
                       <td>
-                        {al.wallet_display && `${al.wallet_display} - `}
-                        {al.address}
+                        <a
+                          href={`/${al.address}/mints`}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="decoration-hover-underline">
+                          {al.wallet_display && `${al.wallet_display} - `}
+                          {al.address}
+                        </a>
                       </td>
                       <td className="text-center">{al.phase}</td>
                       <td className="text-center">
@@ -201,6 +289,39 @@ export default function NextgenCollectionMintingPlan(props: Readonly<Props>) {
           </Row>
         </>
       )}
+      {totalResults > PAGE_SIZE && allowlistLoaded && (
+        <Row className="text-center pt-4 pb-4">
+          <Pagination
+            page={page}
+            pageSize={PAGE_SIZE}
+            totalResults={totalResults}
+            setPage={function (newPage: number) {
+              setPage(newPage);
+              if (allowlistScrollTarget.current) {
+                allowlistScrollTarget.current.scrollIntoView({
+                  behavior: "smooth",
+                });
+              }
+            }}
+          />
+        </Row>
+      )}
+      <SearchModal
+        show={showSearchModal}
+        searchWallets={searchWallets}
+        setShow={function (show: boolean) {
+          setShowSearchModal(show);
+        }}
+        addSearchWallet={function (newW: string) {
+          setSearchWallets((searchWallets) => [...searchWallets, newW]);
+        }}
+        removeSearchWallet={function (removeW: string) {
+          setSearchWallets([...searchWallets].filter((sw) => sw != removeW));
+        }}
+        clearSearchWallets={function () {
+          setSearchWallets([]);
+        }}
+      />
     </Container>
   );
 }

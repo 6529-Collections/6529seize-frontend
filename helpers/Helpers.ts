@@ -126,7 +126,8 @@ export function getDateDisplay(date: Date) {
     return `${Math.round(secondsAgo)} seconds ago`;
   }
   if (60 * 60 > secondsAgo) {
-    return `${Math.round(secondsAgo / 60)} minutes ago`;
+    const minutes = Math.round(secondsAgo / 60);
+    return `${minutes} minute${minutes > 1 ? "s" : ""} ago`;
   }
   if (60 * 60 * 24 > secondsAgo) {
     const hours = Math.floor(secondsAgo / (60 * 60));
@@ -290,7 +291,7 @@ export function isEmptyObject(obj: any) {
 }
 
 export function isUrl(s: string) {
-  const pattern = /^(https?:\/\/)?[\w.-]+\.[a-zA-Z]{2,}(:\d{1,5})?\/?([^\s]*)$/;
+  const pattern = /^(https?:\/\/)?([\w-]+\.)+[\w-]+(\/[\w- ./?%&=]*)?$/i;
   return pattern.test(s);
 }
 
@@ -461,23 +462,26 @@ export function getDateFilters(
     case DateIntervalsSelection.TODAY:
       filters += `&from_date=${formatDateFilterDate(new Date())}`;
       break;
-    case DateIntervalsSelection.YESTERDAY:
+    case DateIntervalsSelection.YESTERDAY: {
       const yesterday = new Date();
       yesterday.setUTCDate(yesterday.getUTCDate() - 1);
       filters += `&from_date=${formatDateFilterDate(yesterday)}`;
       filters += `&to_date=${formatDateFilterDate(yesterday)}`;
       break;
-    case DateIntervalsSelection.LAST_7:
+    }
+    case DateIntervalsSelection.LAST_7: {
       const weekAgo = new Date();
       weekAgo.setUTCDate(weekAgo.getUTCDate() - 7);
       filters += `&from_date=${formatDateFilterDate(weekAgo)}`;
       break;
-    case DateIntervalsSelection.THIS_MONTH:
+    }
+    case DateIntervalsSelection.THIS_MONTH: {
       const firstDayOfMonth = new Date();
       firstDayOfMonth.setUTCDate(1);
       filters += `&from_date=${formatDateFilterDate(firstDayOfMonth)}`;
       break;
-    case DateIntervalsSelection.PREVIOUS_MONTH:
+    }
+    case DateIntervalsSelection.PREVIOUS_MONTH: {
       const firstDayOfPreviousMonth = new Date();
       firstDayOfPreviousMonth.setUTCMonth(
         firstDayOfPreviousMonth.getUTCMonth() - 1
@@ -488,13 +492,15 @@ export function getDateFilters(
       filters += `&from_date=${formatDateFilterDate(firstDayOfPreviousMonth)}`;
       filters += `&to_date=${formatDateFilterDate(lastDayOfPreviousMonth)}`;
       break;
-    case DateIntervalsSelection.YEAR_TO_DATE:
+    }
+    case DateIntervalsSelection.YEAR_TO_DATE: {
       const firstDayOfYear = new Date();
       firstDayOfYear.setUTCMonth(0);
       firstDayOfYear.setUTCDate(1);
       filters += `&from_date=${formatDateFilterDate(firstDayOfYear)}`;
       break;
-    case DateIntervalsSelection.LAST_YEAR:
+    }
+    case DateIntervalsSelection.LAST_YEAR: {
       const firstDayOfLastYear = new Date();
       firstDayOfLastYear.setUTCFullYear(
         firstDayOfLastYear.getUTCFullYear() - 1
@@ -507,6 +513,7 @@ export function getDateFilters(
       filters += `&from_date=${formatDateFilterDate(firstDayOfLastYear)}`;
       filters += `&to_date=${formatDateFilterDate(lastDayOfLastYear)}`;
       break;
+    }
     case DateIntervalsSelection.CUSTOM_DATES:
       if (fromDate) {
         filters += `&from_date=${formatDateFilterDate(fromDate)}`;
@@ -618,4 +625,8 @@ export function isNullAddress(address: string) {
     return true;
   }
   return false;
+}
+
+export function capitalizeFirstChar(str: string): string {
+  return str.charAt(0).toUpperCase() + str.slice(1);
 }

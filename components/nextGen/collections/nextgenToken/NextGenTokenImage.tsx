@@ -38,14 +38,14 @@ export function NextGenTokenImage(
             <span>#{props.token.normalised_id}</span>
             {props.show_rarity_score && (
               <TraitScore
-                trait="Rarity Score"
+                trait="Rarity"
                 score={props.token.rarity_score}
                 rank={props.token.rarity_score_rank}
               />
             )}
             {props.show_statistical_score && (
               <TraitScore
-                trait="Statistical Score"
+                trait="Statistical Rarity"
                 score={props.token.statistical_score}
                 rank={props.token.statistical_score_rank}
               />

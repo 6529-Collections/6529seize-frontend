@@ -6,6 +6,7 @@ import {
   useCollectionArtist,
   isCollectionArtist,
   useCoreContractWrite,
+  useParsedCollectionIndex,
 } from "../nextgen_helpers";
 import NextGenContractWriteStatus from "../NextGenContractWriteStatus";
 import { areEqualAddresses } from "../../../helpers/Helpers";
@@ -25,9 +26,8 @@ export default function NextGenAdminArtistSignCollection(
   const account = useAccount();
 
   const collectionIndex = useCollectionIndex();
-  const collectionArtists = useCollectionArtist(
-    parseInt(collectionIndex?.data as any)
-  );
+  const parsedCollectionIndex = useParsedCollectionIndex(collectionIndex);
+  const collectionArtists = useCollectionArtist(parsedCollectionIndex);
 
   function getCollectionIds() {
     const ids: string[] = [];

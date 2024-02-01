@@ -9,6 +9,7 @@ export interface NextGenCollection {
   licence: string;
   base_uri: string;
   library: string;
+  dependency_script: string;
   image: string;
   artist_address: string;
   artist_signature: string;

@@ -27,13 +27,6 @@ export function getNextGenChainId() {
 
 export const NEXTGEN_CHAIN_ID = getNextGenChainId();
 
-export const NEXTGEN_CHAIN_NAME =
-  NEXTGEN_CHAIN_ID == goerli.id
-    ? "eth-goerli"
-    : NEXTGEN_CHAIN_ID == sepolia.id
-    ? "eth-sepolia"
-    : "eth-mainnet";
-
 export enum FunctionSelectors {
   CREATE_COLLECTION = "0xe1fa8089",
   SET_COLLECTION_DATA = "0x7b5dbac5",

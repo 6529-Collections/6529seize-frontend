@@ -1,10 +1,9 @@
 import { Col, Container, Row } from "react-bootstrap";
-import { useEffect } from "react";
-import { Info } from "../../../nextgen_entities";
 import NextGenCollectionHeader from "../NextGenCollectionHeader";
 import Breadcrumb, { Crumb } from "../../../../breadcrumb/Breadcrumb";
 import NextGenCollectionArt from "../NextGenCollectionArt";
 import { NextGenCollection } from "../../../../../entities/INextgen";
+import { formatNameForUrl } from "../../../nextgen_helpers";
 
 interface Props {
   collection: NextGenCollection;
@@ -16,7 +15,7 @@ export default function NextGenCollectionArtPage(props: Readonly<Props>) {
     { display: "NextGen", href: "/nextgen" },
     {
       display: `#${props.collection.id} - ${props.collection.name}`,
-      href: `/nextgen/collection/${props.collection.id}`,
+      href: `/nextgen/collection/${formatNameForUrl(props.collection.name)}`,
     },
     { display: "Art" },
   ];

@@ -48,6 +48,16 @@ export default function LatestActivityRow(props: Readonly<Props>) {
     return "";
   }
 
+  function calculateRoyaltiesPercentage() {
+    return Math.round((props.tr.royalties / props.tr.value) * 10000) / 10000;
+  }
+
+  function getRoyaltyImage(royaltiesPercentage: number) {
+    return royaltiesPercentage >= ROYALTIES_PERCENTAGE
+      ? "pepe-xglasses.png"
+      : "pepe-smile.png";
+  }
+
   function printRoyalties() {
     if (
       props.tr.value == 0 ||
@@ -56,44 +66,41 @@ export default function LatestActivityRow(props: Readonly<Props>) {
     ) {
       return <></>;
     }
-    const royaltiesPercentage =
-      Math.round((props.tr.royalties / props.tr.value) * 10000) / 10000;
-    if (props.tr.royalties > 0) {
-      let imgSrc: string = "pepe-smile.png";
-      if (royaltiesPercentage >= ROYALTIES_PERCENTAGE) {
-        imgSrc = "pepe-xglasses.png";
-      }
-      return (
-        <Tippy
-          content={
-            <Container>
-              <Row>
-                <Col className="no-wrap">Royalties</Col>
-                <Col className="text-right no-wrap">
-                  {props.tr.royalties > 0
-                    ? `${displayDecimal(
-                        props.tr.royalties,
-                        5
-                      )} (${displayDecimal(royaltiesPercentage * 100, 2)}%)`
-                    : "-"}
-                </Col>
-              </Row>
-            </Container>
-          }
-          placement={"top-end"}
-          theme={"light"}
-          hideOnClick={false}>
-          <Image
-            width={0}
-            height={0}
-            style={{ height: "25px", width: "auto" }}
-            src={`/${imgSrc}`}
-            alt={imgSrc}
-            className="cursor-pointer"
-          />
-        </Tippy>
-      );
-    }
+    const royaltiesPercentage = calculateRoyaltiesPercentage();
+    if (props.tr.royalties <= 0) return <></>;
+
+    const imgSrc = getRoyaltyImage(royaltiesPercentage);
+
+    return (
+      <Tippy
+        content={
+          <Container>
+            <Row>
+              <Col className="no-wrap">Royalties</Col>
+              <Col className="text-right no-wrap">
+                {props.tr.royalties > 0
+                  ? `${displayDecimal(props.tr.royalties, 5)} (${displayDecimal(
+                      royaltiesPercentage * 100,
+                      2
+                    )}%)`
+                  : "-"}
+              </Col>
+            </Row>
+          </Container>
+        }
+        placement={"top-end"}
+        theme={"light"}
+        hideOnClick={false}>
+        <Image
+          width={0}
+          height={0}
+          style={{ height: "25px", width: "auto" }}
+          src={`/${imgSrc}`}
+          alt={imgSrc}
+          className="cursor-pointer"
+        />
+      </Tippy>
+    );
   }
 
   function printGas() {
@@ -131,6 +138,47 @@ export default function LatestActivityRow(props: Readonly<Props>) {
     );
   }
 
+  function getHref() {
+    if (isMemesContract(props.tr.contract)) {
+      return `/the-memes/${props.nft?.id}`;
+    }
+    if (isGradientsContract(props.tr.contract)) {
+      return `/6529-gradient/${props.nft?.id}`;
+    }
+    if (isMemeLabContract(props.tr.contract)) {
+      return `/meme-lab/${props.nft?.id}`;
+    }
+    return `#${props.tr.token_id}`;
+  }
+
+  function printNft() {
+    if (props.nft) {
+      return (
+        <a href={getHref()} target="_blank" rel="noreferrer">
+          <Image
+            width={0}
+            height={0}
+            style={{ height: "40px", width: "auto" }}
+            src={getNftImageSrc(props.nft)}
+            alt={props.nft.name}
+            onError={({ currentTarget }) => {
+              currentTarget.src = getNftImageSrc(props.nft, currentTarget.src);
+            }}
+            className={styles.nftImage}
+          />
+        </a>
+      );
+    } else if (isMemesContract(props.tr.contract)) {
+      return `Meme #${props.tr.token_id}`;
+    } else if (isGradientsContract(props.tr.contract)) {
+      return `Gradient #${props.tr.token_id}`;
+    } else if (isMemeLabContract(props.tr.contract)) {
+      return `MemeLab #${props.tr.token_id}`;
+    } else {
+      return `#${props.tr.token_id}`;
+    }
+  }
+
   function printDescription() {
     return (
       <span className="d-flex">
@@ -150,43 +198,7 @@ export default function LatestActivityRow(props: Readonly<Props>) {
             )}
             &nbsp;
             {props.tr.token_count}x&nbsp;
-            {props.nft ? (
-              <a
-                href={
-                  isMemesContract(props.tr.contract)
-                    ? `/the-memes/${props.nft?.id}`
-                    : isGradientsContract(props.tr.contract)
-                    ? `/6529-gradient/${props.nft?.id}`
-                    : isMemeLabContract(props.tr.contract)
-                    ? `/meme-lab/${props.nft?.id}`
-                    : ``
-                }
-                target="_blank"
-                rel="noreferrer">
-                <Image
-                  width={0}
-                  height={0}
-                  style={{ height: "40px", width: "auto" }}
-                  src={getNftImageSrc(props.nft)}
-                  alt={props.nft.name}
-                  onError={({ currentTarget }) => {
-                    currentTarget.src = getNftImageSrc(
-                      props.nft,
-                      currentTarget.src
-                    );
-                  }}
-                  className={styles.nftImage}
-                />
-              </a>
-            ) : isMemesContract(props.tr.contract) ? (
-              `Meme #${props.tr.token_id}`
-            ) : isGradientsContract(props.tr.contract) ? (
-              `Gradient #${props.tr.token_id}`
-            ) : isMemeLabContract(props.tr.contract) ? (
-              `MemeLab #${props.tr.token_id}`
-            ) : (
-              `#${props.tr.token_id}`
-            )}
+            {printNft()}
             {props.tr.value === 0 && (
               <>
                 &nbsp; to&nbsp;
@@ -209,52 +221,7 @@ export default function LatestActivityRow(props: Readonly<Props>) {
             />
             {" burnt "}
             {props.tr.token_count}x&nbsp;
-            {props.nft ? (
-              <a
-                href={
-                  isMemesContract(props.tr.contract)
-                    ? `/the-memes/${props.nft?.id}`
-                    : isGradientsContract(props.tr.contract)
-                    ? `/6529-gradient/${props.nft?.id}`
-                    : isMemeLabContract(props.tr.contract)
-                    ? `/meme-lab/${props.nft?.id}`
-                    : ``
-                }
-                target="_blank"
-                rel="noreferrer">
-                <Image
-                  title={
-                    isMemesContract(props.tr.contract)
-                      ? `Meme #${props.tr.token_id}`
-                      : isGradientsContract(props.tr.contract)
-                      ? `Gradient #${props.tr.token_id}`
-                      : isMemeLabContract(props.tr.contract)
-                      ? `MemeLab #${props.tr.token_id}`
-                      : `#${props.tr.token_id}`
-                  }
-                  width={0}
-                  height={0}
-                  style={{ height: "40px", width: "auto" }}
-                  src={getNftImageSrc(props.nft)}
-                  alt={props.nft.name}
-                  onError={({ currentTarget }) => {
-                    currentTarget.src = getNftImageSrc(
-                      props.nft,
-                      currentTarget.src
-                    );
-                  }}
-                  className={styles.nftImage}
-                />
-              </a>
-            ) : isMemesContract(props.tr.contract) ? (
-              `Meme #${props.tr.token_id}`
-            ) : isGradientsContract(props.tr.contract) ? (
-              `Gradient #${props.tr.token_id}`
-            ) : isMemeLabContract(props.tr.contract) ? (
-              `MemeLab #${props.tr.token_id}`
-            ) : (
-              `#${props.tr.token_id}`
-            )}
+            {printNft()}
             &nbsp;
           </>
         )}
@@ -269,52 +236,7 @@ export default function LatestActivityRow(props: Readonly<Props>) {
               &nbsp;
               {props.tr.value > 0 ? "bought" : "received"}&nbsp;
               {props.tr.token_count}x&nbsp;
-              {props.nft ? (
-                <a
-                  href={
-                    isMemesContract(props.tr.contract)
-                      ? `/the-memes/${props.nft?.id}`
-                      : isGradientsContract(props.tr.contract)
-                      ? `/6529-gradient/${props.nft?.id}`
-                      : isMemeLabContract(props.tr.contract)
-                      ? `/meme-lab/${props.nft?.id}`
-                      : ``
-                  }
-                  target="_blank"
-                  rel="noreferrer">
-                  <Image
-                    title={
-                      isMemesContract(props.tr.contract)
-                        ? `Meme #${props.tr.token_id}`
-                        : isGradientsContract(props.tr.contract)
-                        ? `Gradient #${props.tr.token_id}`
-                        : isMemeLabContract(props.tr.contract)
-                        ? `MemeLab #${props.tr.token_id}`
-                        : `#${props.tr.token_id}`
-                    }
-                    width={0}
-                    height={0}
-                    style={{ height: "40px", width: "auto" }}
-                    src={getNftImageSrc(props.nft)}
-                    alt={props.nft.name}
-                    onError={({ currentTarget }) => {
-                      currentTarget.src = getNftImageSrc(
-                        props.nft,
-                        currentTarget.src
-                      );
-                    }}
-                    className={styles.nftImage}
-                  />
-                </a>
-              ) : isMemesContract(props.tr.contract) ? (
-                `Meme #${props.tr.token_id}`
-              ) : isGradientsContract(props.tr.contract) ? (
-                `Gradient #${props.tr.token_id}`
-              ) : isMemeLabContract(props.tr.contract) ? (
-                `MemeLab #${props.tr.token_id}`
-              ) : (
-                `#${props.tr.token_id}`
-              )}
+              {printNft()}
               &nbsp; from&nbsp;
               <Address
                 wallets={[props.tr.from_address]}
@@ -328,39 +250,51 @@ export default function LatestActivityRow(props: Readonly<Props>) {
     );
   }
 
+  function getDescription() {
+    if (isNullAddress(props.tr.from_address)) {
+      return (
+        <>
+          Minted to&nbsp;
+          <Address
+            wallets={[props.tr.to_address]}
+            display={props.tr.to_display}
+          />
+        </>
+      );
+    }
+
+    if (isNullAddress(props.tr.to_address)) {
+      return (
+        <>
+          Burnt by&nbsp;
+          <Address
+            wallets={[props.tr.from_address]}
+            display={props.tr.from_display}
+          />
+        </>
+      );
+    }
+
+    return (
+      <>
+        {props.tr.value > 0 ? <>Purchased by</> : <>Transferred to</>}&nbsp;
+        <Address
+          wallets={[props.tr.to_address]}
+          display={props.tr.to_display}
+        />
+        from&nbsp;
+        <Address
+          wallets={[props.tr.from_address]}
+          display={props.tr.from_display}
+        />
+      </>
+    );
+  }
+
   function printDescriptionNextgen() {
     return (
       <span className="d-flex">
-        {isNullAddress(props.tr.from_address) ? (
-          <>
-            Minted to&nbsp;
-            <Address
-              wallets={[props.tr.to_address]}
-              display={props.tr.to_display}
-            />
-          </>
-        ) : isNullAddress(props.tr.to_address) ? (
-          <>
-            Burnt by&nbsp;
-            <Address
-              wallets={[props.tr.from_address]}
-              display={props.tr.from_display}
-            />
-          </>
-        ) : (
-          <>
-            {props.tr.value > 0 ? <>Purchased by</> : <>Transferred to</>}&nbsp;
-            <Address
-              wallets={[props.tr.to_address]}
-              display={props.tr.to_display}
-            />
-            from&nbsp;
-            <Address
-              wallets={[props.tr.from_address]}
-              display={props.tr.from_display}
-            />
-          </>
-        )}
+        {getDescription()}
         {props.tr.value > 0 &&
           ` for ${Math.round(props.tr.value * 100000) / 100000} ETH`}
       </span>
@@ -400,6 +334,35 @@ export default function LatestActivityRow(props: Readonly<Props>) {
     return isNullAddress(props.tr.from_address);
   }
 
+  function getIconClass() {
+    if (isBurn()) {
+      return styles.iconRed;
+    }
+    if (isMint() || isAirdrop()) {
+      return styles.iconWhite;
+    }
+    if (props.tr.value > 0) {
+      return styles.iconBlue;
+    }
+    return styles.iconGreen;
+  }
+
+  function getIcon() {
+    if (isBurn()) {
+      return "fire";
+    }
+
+    if (props.tr.value > 0) {
+      return isMint() ? "cart-plus" : "shopping-cart";
+    }
+
+    if (isAirdrop()) {
+      return "parachute-box";
+    }
+
+    return "exchange";
+  }
+
   return (
     <tr
       key={`${props.tr.from_address}-${props.tr.to_address}-${props.tr.transaction}-${props.tr.token_id}-latestactivity-row`}
@@ -408,28 +371,7 @@ export default function LatestActivityRow(props: Readonly<Props>) {
         {getDateDisplay(new Date(props.tr.transaction_date))}
       </td>
       <td className="align-middle text-center">
-        <FontAwesomeIcon
-          className={
-            isBurn()
-              ? styles.iconRed
-              : isMint() || isAirdrop()
-              ? styles.iconWhite
-              : props.tr.value > 0
-              ? styles.iconBlue
-              : styles.iconGreen
-          }
-          icon={
-            isBurn()
-              ? `fire`
-              : props.tr.value > 0
-              ? isMint()
-                ? "cart-plus"
-                : "shopping-cart"
-              : isAirdrop()
-              ? "parachute-box"
-              : "exchange"
-          }
-        />
+        <FontAwesomeIcon className={getIconClass()} icon={getIcon()} />
       </td>
       <td className="d-flex align-items-center justify-content-between gap-2">
         {areEqualAddresses(props.tr.contract, NEXTGEN_CORE[NEXTGEN_CHAIN_ID])

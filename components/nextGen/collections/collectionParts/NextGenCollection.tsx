@@ -19,6 +19,27 @@ export enum ContentView {
   PROVENANCE = "Provenance",
 }
 
+export function printViewButton(
+  currentView: ContentView,
+  v: ContentView,
+  setView: (v: ContentView) => void
+) {
+  return (
+    <button
+      onClick={() => setView(v)}
+      className={`btn-link ${
+        v === currentView ? styles.nextgenTokenDetailsLinkSelected : ""
+      }`}>
+      <h4
+        className={
+          v === currentView ? "font-color" : "font-color-h cursor-pointer"
+        }>
+        {v}
+      </h4>
+    </button>
+  );
+}
+
 export default function NextGenCollection(props: Readonly<Props>) {
   const crumbs: Crumb[] = [
     { display: "Home", href: "/" },
@@ -48,38 +69,8 @@ export default function NextGenCollection(props: Readonly<Props>) {
           </Row>
           <Row className="pt-5">
             <Col className="d-flex gap-4">
-              <a
-                onClick={() => setView(ContentView.ABOUT)}
-                className={
-                  view === ContentView.ABOUT
-                    ? styles.nextgenTokenDetailsLinkSelected
-                    : ""
-                }>
-                <h4
-                  className={
-                    view === ContentView.ABOUT
-                      ? "font-color"
-                      : "font-color-h cursor-pointer"
-                  }>
-                  About
-                </h4>
-              </a>
-              <a
-                onClick={() => setView(ContentView.PROVENANCE)}
-                className={
-                  view === ContentView.PROVENANCE
-                    ? styles.nextgenTokenDetailsLinkSelected
-                    : ""
-                }>
-                <h4
-                  className={
-                    view === ContentView.PROVENANCE
-                      ? "font-color"
-                      : "font-color-h cursor-pointer"
-                  }>
-                  Provenance
-                </h4>
-              </a>
+              {printViewButton(view, ContentView.ABOUT, setView)}
+              {printViewButton(view, ContentView.PROVENANCE, setView)}
             </Col>
           </Row>
           <Row className="pt-4 pb-4">

@@ -3,6 +3,8 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Tippy from "@tippyjs/react";
 import { Container, Row, Col, Form, Button } from "react-bootstrap";
 import {
+  areEqualAddresses,
+  capitalizeFirstChar,
   createArray,
   getNetworkName,
   isValidEthAddress,
@@ -47,7 +49,7 @@ export function getJsonData(keccak: string, data: string) {
     <ul className="mb-0">
       {results.map((r) => (
         <li key={`ul-${keccak}-${r.key}-${r.value}`}>
-          {r.key}: {r.value}
+          {capitalizeFirstChar(r.key)}: {r.value}
         </li>
       ))}
     </ul>
@@ -263,7 +265,9 @@ export default function NextGenMintWidget(props: Readonly<Props>) {
           currentProof && alStatus == Status.LIVE
             ? currentProof.proof.proof
             : [],
-          mintForAddress ?? NULL_ADDRESS,
+          areEqualAddresses(mintForAddress, account.address)
+            ? NULL_ADDRESS
+            : mintForAddress,
           salt,
         ],
       });
@@ -401,6 +405,17 @@ export default function NextGenMintWidget(props: Readonly<Props>) {
     return "Mint";
   }
 
+  function getWalletMintsLabel() {
+    let label = "";
+    if (alStatus === Status.LIVE) {
+      label = "Allowlist";
+    }
+    if (publicStatus === Status.LIVE) {
+      label = "Public Phase";
+    }
+    return <>Wallet Mints {label}</>;
+  }
+
   return (
     <Container className="no-padding">
       <Row>
@@ -444,12 +459,7 @@ export default function NextGenMintWidget(props: Readonly<Props>) {
             </Form.Group>
             <Form.Group as={Row} className="pt-2">
               <Form.Label column sm={12} className="d-flex align-items-center">
-                Wallet Mints
-                {alStatus === Status.LIVE
-                  ? " Allowlist"
-                  : publicStatus === Status.LIVE
-                  ? " Public Phase"
-                  : ""}
+                {getWalletMintsLabel()}
                 :&nbsp;
                 {props.fetchingMintCounts ? (
                   <DotLoader />
@@ -515,8 +525,7 @@ export default function NextGenMintWidget(props: Readonly<Props>) {
                   disabled={
                     !account.isConnected ||
                     (publicStatus !== Status.LIVE &&
-                      currentProof &&
-                      currentProof.proof &&
+                      currentProof?.proof &&
                       currentProof.proof.spots <= 0) ||
                     disableMint()
                   }

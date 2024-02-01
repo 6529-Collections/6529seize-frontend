@@ -9,6 +9,7 @@ import {
 } from "../../../nextgen_contracts";
 import Breadcrumb, { Crumb } from "../../../../breadcrumb/Breadcrumb";
 import { NextGenCollection } from "../../../../../entities/INextgen";
+import { formatNameForUrl } from "../../../nextgen_helpers";
 
 interface Props {
   collection: NextGenCollection;
@@ -20,7 +21,7 @@ export default function NextGenCollectionMint(props: Readonly<Props>) {
     { display: "NextGen", href: "/nextgen" },
     {
       display: `#${props.collection.id} - ${props.collection.name}`,
-      href: `/nextgen/collection/${props.collection.id}`,
+      href: `/nextgen/collection/${formatNameForUrl(props.collection.name)}`,
     },
     { display: "Mint" },
   ];

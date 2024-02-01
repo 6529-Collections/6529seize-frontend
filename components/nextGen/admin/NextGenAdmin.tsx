@@ -11,6 +11,7 @@ import {
   isCollectionAdmin,
   isCollectionArtist,
   useCollectionArtist,
+  useParsedCollectionIndex,
 } from "../nextgen_helpers";
 import ConnectWalletButton from "../../delegation/ConnectWalletButton";
 import { FunctionSelectors, NEXTGEN_CHAIN_ID } from "../nextgen_contracts";
@@ -176,15 +177,16 @@ export default function NextGenAdmin() {
     FunctionSelectors.INITIALIZE_EXTERNAL_BURN_SWAP
   );
   const collectionIndex = useCollectionIndex();
+  const parsedCollectionIndex = useParsedCollectionIndex(collectionIndex);
+
   const collectionAdmin = useCollectionAdmin(
     account.address as string,
-    parseInt(collectionIndex?.data as any)
+    parsedCollectionIndex
   );
+
   const isWalletCollectionAdmin = isCollectionAdmin(collectionAdmin);
 
-  const collectionArtists = useCollectionArtist(
-    parseInt(collectionIndex?.data as any)
-  );
+  const collectionArtists = useCollectionArtist(parsedCollectionIndex);
 
   const isArtist = isCollectionArtist(
     account.address as string,

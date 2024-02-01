@@ -6,7 +6,7 @@ import {
   NextGenMintCounts,
   NextGenPhases,
 } from "./collectionParts/NextGenCollectionHeader";
-import { getStatusFromDates } from "../nextgen_helpers";
+import { formatNameForUrl, getStatusFromDates } from "../nextgen_helpers";
 import { Status } from "../nextgen_entities";
 
 interface Props {
@@ -26,7 +26,9 @@ export default function NextGen(props: Readonly<Props>) {
       <Row>
         <Col sm={12} md={6} className="pt-2">
           <a
-            href={`/nextgen/collection/${props.collection.id}`}
+            href={`/nextgen/collection/${formatNameForUrl(
+              props.collection.name
+            )}`}
             className="decoration-none">
             <Image
               loading="eager"
@@ -57,7 +59,9 @@ export default function NextGen(props: Readonly<Props>) {
             <Row className="pt-2">
               <Col>
                 <a
-                  href={`/nextgen/collection/${props.collection.id}`}
+                  href={`/nextgen/collection/${formatNameForUrl(
+                    props.collection.name
+                  )}`}
                   className="decoration-none">
                   <h2 className="font-color mb-0">
                     #{props.collection.id} - {props.collection.name}
@@ -110,7 +114,9 @@ export function DistributionLink(
         <Row className={`pt-1 font-color ${props.class}`}>
           <Col>
             <a
-              href={`/nextgen/collection/${props.collection.id}/distribution-plan`}>
+              href={`/nextgen/collection/${formatNameForUrl(
+                props.collection.name
+              )}/distribution-plan`}>
               Distribution Plan
             </a>
           </Col>

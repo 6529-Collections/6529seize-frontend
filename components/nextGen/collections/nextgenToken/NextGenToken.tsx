@@ -6,10 +6,13 @@ import NextgenTokenProperties from "./NextGenTokenProperties";
 import NextGenTokenAbout from "./NextGenTokenAbout";
 import { useEffect, useState } from "react";
 import NextGenTokenArt from "./NextGenTokenArt";
-import { ContentView } from "../collectionParts/NextGenCollection";
+import {
+  ContentView,
+  printViewButton,
+} from "../collectionParts/NextGenCollection";
 import { isNullAddress } from "../../../../helpers/Helpers";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import router, { useRouter } from "next/router";
+import { useRouter } from "next/router";
 import Tippy from "@tippyjs/react";
 
 interface Props {
@@ -41,54 +44,9 @@ export default function NextGenToken(props: Readonly<Props>) {
       <Container className="pt-4">
         <Row>
           <Col className="d-flex gap-4">
-            <a
-              onClick={() => setView(ContentView.ABOUT)}
-              className={
-                view === ContentView.ABOUT
-                  ? styles.nextgenTokenDetailsLinkSelected
-                  : ""
-              }>
-              <h4
-                className={
-                  view === ContentView.ABOUT
-                    ? "font-color"
-                    : "font-color-h cursor-pointer"
-                }>
-                About
-              </h4>
-            </a>
-            <a
-              onClick={() => setView(ContentView.TRAITS)}
-              className={
-                view === ContentView.TRAITS
-                  ? styles.nextgenTokenDetailsLinkSelected
-                  : ""
-              }>
-              <h4
-                className={
-                  view === ContentView.TRAITS
-                    ? "font-color"
-                    : "font-color-h cursor-pointer"
-                }>
-                Traits
-              </h4>
-            </a>
-            <a
-              onClick={() => setView(ContentView.PROVENANCE)}
-              className={
-                view === ContentView.PROVENANCE
-                  ? styles.nextgenTokenDetailsLinkSelected
-                  : ""
-              }>
-              <h4
-                className={
-                  view === ContentView.PROVENANCE
-                    ? "font-color"
-                    : "font-color-h cursor-pointer"
-                }>
-                Provenance
-              </h4>
-            </a>
+            {printViewButton(view, ContentView.ABOUT, setView)}
+            {printViewButton(view, ContentView.TRAITS, setView)}
+            {printViewButton(view, ContentView.PROVENANCE, setView)}
           </Col>
         </Row>
         <Row>
@@ -106,7 +64,10 @@ export default function NextGenToken(props: Readonly<Props>) {
               />
             )}
             {view === ContentView.PROVENANCE && (
-              <NextGenTokenProvenance token_id={props.token.id} />
+              <NextGenTokenProvenance
+                collection_id={props.collection.id}
+                token_id={props.token.id}
+              />
             )}
           </Col>
         </Row>

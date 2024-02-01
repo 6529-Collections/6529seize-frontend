@@ -12,6 +12,7 @@ import {
   useCollectionIndex,
   getCollectionIdsForAddress,
   useMinterContractWrite,
+  useParsedCollectionIndex,
 } from "../nextgen_helpers";
 import NextGenContractWriteStatus from "../NextGenContractWriteStatus";
 import { printAdminErrors } from "./NextGenAdmin";
@@ -35,12 +36,12 @@ export default function NextGenAdminSetSplits(props: Readonly<Props>) {
   );
 
   const collectionIndex = useCollectionIndex();
-
+  const parsedCollectionIndex = useParsedCollectionIndex(collectionIndex);
   const collectionIds = getCollectionIdsForAddress(
     (globalAdmin.data as any) === true,
     (functionAdmin.data as any) === true,
     undefined,
-    parseInt(collectionIndex?.data as any)
+    parsedCollectionIndex
   );
 
   const [collectionID, setCollectionID] = useState("");

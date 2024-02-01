@@ -1,7 +1,6 @@
 import styles from "../NextGen.module.scss";
 import { Container, Row, Col } from "react-bootstrap";
 import { addProtocol, formatAddress } from "../../../../helpers/Helpers";
-import { useState } from "react";
 import { NextGenCollection } from "../../../../entities/INextgen";
 import NextGenCollectionProvenance from "./NextGenCollectionProvenance";
 import { ContentView } from "./NextGenCollection";
@@ -15,34 +14,20 @@ interface Props {
 }
 
 export default function NextGenCollectionDetails(props: Readonly<Props>) {
-  const [scriptClamped, setScriptClamped] = useState<boolean>(true);
-  const [isCopied, setIsCopied] = useState<boolean>(false);
-
-  function copy(text: any) {
-    navigator.clipboard.writeText(text);
-    setIsCopied(true);
-    setTimeout(() => {
-      setIsCopied(false);
-    }, 1000);
-  }
-
-  function printScriptClamp() {
-    return (
-      <span
-        className="font-smaller font-color-h cursor-pointer decoration-hover-underline"
-        onClick={() => setScriptClamped(!scriptClamped)}
-        onKeyDown={(e) => {
-          if (e.key === "Enter" || e.key === " ") {
-            setScriptClamped(!scriptClamped);
-          }
-        }}>
-        {scriptClamped ? `Show More` : `Show Less`}
-      </span>
-    );
-  }
-
   if (props.view === ContentView.PROVENANCE) {
     return <NextGenCollectionProvenance collection={props.collection} />;
+  }
+
+  function getEtherscanLink() {
+    let chainName = "";
+    if (NEXTGEN_CHAIN_ID === sepolia.id) {
+      chainName = "sepolia.";
+    }
+    if (NEXTGEN_CHAIN_ID === goerli.id) {
+      chainName = "goerli.";
+    }
+
+    return `https://${chainName}etherscan.io/address/${NEXTGEN_CORE[NEXTGEN_CHAIN_ID]}`;
   }
 
   return (
@@ -107,15 +92,7 @@ export default function NextGenCollectionDetails(props: Readonly<Props>) {
                         delay={500}>
                         <a
                           className="font-color text-decoration-none"
-                          href={`https://${
-                            NEXTGEN_CHAIN_ID === sepolia.id
-                              ? "sepolia."
-                              : NEXTGEN_CHAIN_ID === goerli.id
-                              ? "goerli."
-                              : ""
-                          }etherscan.io/address/${
-                            NEXTGEN_CORE[NEXTGEN_CHAIN_ID]
-                          }`}
+                          href={getEtherscanLink()}
                           target="_blank"
                           rel="noreferrer">
                           {formatAddress(NEXTGEN_CORE[NEXTGEN_CHAIN_ID])}

@@ -9,11 +9,10 @@ import { useState, useEffect } from "react";
 import { useAccount, useEnsName, mainnet } from "wagmi";
 import { IProfileAndConsolidations } from "../../../../entities/IProfile";
 import { commonApiFetch } from "../../../../services/api/common-api";
-import { goerli, sepolia } from "viem/chains";
-import { NEXTGEN_CHAIN_ID, NEXTGEN_CORE } from "../../nextgen_contracts";
+import { NEXTGEN_CHAIN_ID } from "../../nextgen_contracts";
 import Image from "next/image";
 import Tippy from "@tippyjs/react";
-import { getOpenseaLink } from "../../nextgen_helpers";
+import { formatNameForUrl, getOpenseaLink } from "../../nextgen_helpers";
 import NextGenTokenDownloads from "./NextGenTokenDownloads";
 
 interface Props {
@@ -51,21 +50,21 @@ export default function NextgenTokenAbout(props: Readonly<Props>) {
       <Row>
         <Col xs={6} sm={4} md={3} className="pb-4 d-flex gap-5">
           <TraitScore
-            trait="Rarity Score"
+            trait="Rarity"
             score={props.token.rarity_score}
             rank={props.token.rarity_score_rank}
           />
         </Col>
         <Col xs={6} sm={4} md={3} className="pb-4 d-flex gap-5">
           <TraitScore
-            trait="Normalized Rarity Score"
+            trait="Normalized Rarity"
             score={props.token.rarity_score_normalised}
             rank={props.token.rarity_score_normalised_rank}
           />
         </Col>
         <Col xs={6} sm={4} md={3} className="pb-4 d-flex gap-5">
           <TraitScore
-            trait="Statistical Score"
+            trait="Statistical Rarity"
             score={props.token.statistical_score}
             rank={props.token.statistical_score_rank}
             places={3}
@@ -79,7 +78,10 @@ export default function NextgenTokenAbout(props: Readonly<Props>) {
         </Col>
         <Col xs={6} sm={4} md={3} className="pb-4 d-flex flex-column">
           <span className="font-color-h">Collection</span>
-          <a href={`/nextgen/collection/${props.collection.id}`}>
+          <a
+            href={`/nextgen/collection/${formatNameForUrl(
+              props.collection.name
+            )}`}>
             #{props.collection.id} {props.collection.name}
           </a>
         </Col>
@@ -166,11 +168,13 @@ export function TraitScore(
   return (
     <span className="d-flex flex-column">
       <span className="font-color-h">{props.trait}</span>
-      <span className="d-flex gap-2">
-        <span>#{props.rank.toLocaleString()}</span>
+      <span className="d-flex gap-3">
         <span>
+          Score{" "}
           {Number(props.score.toFixed(props.places ?? 2)).toLocaleString()}
         </span>
+        <span>|</span>
+        <span>Rank #{props.rank.toLocaleString()}</span>
       </span>
     </span>
   );

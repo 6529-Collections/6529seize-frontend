@@ -11,6 +11,7 @@ import {
   useCollectionAdmin,
   getCollectionIdsForAddress,
   useMinterContractWrite,
+  useParsedCollectionIndex,
 } from "../nextgen_helpers";
 import NextGenContractWriteStatus from "../NextGenContractWriteStatus";
 import { postData } from "../../../services/6529api";
@@ -38,16 +39,17 @@ export default function NextGenAdminInitializeExternalBurnSwap(
     FunctionSelectors.INITIALIZE_EXTERNAL_BURN_SWAP
   );
   const collectionIndex = useCollectionIndex();
+  const parsedCollectionIndex = useParsedCollectionIndex(collectionIndex);
   const collectionAdmin = useCollectionAdmin(
     account.address as string,
-    parseInt(collectionIndex?.data as any)
+    parsedCollectionIndex
   );
 
   const collectionIds = getCollectionIdsForAddress(
     (globalAdmin.data as any) === true,
     (functionAdmin.data as any) === true,
     collectionAdmin.data,
-    parseInt(collectionIndex?.data as any)
+    parsedCollectionIndex
   );
 
   const [erc721Collection, setErc721Collection] = useState("");

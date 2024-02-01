@@ -57,6 +57,11 @@ export function useCollectionIndex() {
   });
 }
 
+export function useParsedCollectionIndex(collectionIndex: any) {
+  const collectionIndexData = collectionIndex?.data;
+  return collectionIndexData ? parseInt(collectionIndexData.toString()) : 0;
+}
+
 function getCollectionAdminReadParams(
   collectionIndex: number,
   address: string
@@ -607,4 +612,8 @@ export function getOpenseaLink(chainId: number, tokenId?: number) {
   return `https://${domain}.io/assets/${path}/${
     NEXTGEN_CORE[NEXTGEN_CHAIN_ID]
   }/${tokenId ?? ""}`;
+}
+
+export function formatNameForUrl(name: string) {
+  return name.replace(/ /g, "-").toLowerCase();
 }

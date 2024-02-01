@@ -9,6 +9,7 @@ import {
   useCollectionIndex,
   getCollectionIdsForAddress,
   useAdminContractWrite,
+  useParsedCollectionIndex,
 } from "../nextgen_helpers";
 import { printAdminErrors } from "./NextGenAdmin";
 import {
@@ -68,12 +69,12 @@ export default function NextGenAdminRegisterAdmin(props: Readonly<Props>) {
 
   const globalAdmin = useGlobalAdmin(account.address as string);
   const collectionIndex = useCollectionIndex();
-
+  const parsedCollectionIndex = useParsedCollectionIndex(collectionIndex);
   const collectionIds = getCollectionIdsForAddress(
     (globalAdmin.data as any) === true,
     false,
     undefined,
-    parseInt(collectionIndex?.data as any)
+    parsedCollectionIndex
   );
 
   const contractWrite = useAdminContractWrite(getFunctionName(), () => {
