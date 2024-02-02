@@ -43,6 +43,7 @@ export default function UserPageCollectedFiltersSzn({
       activeItem={selected}
       containerRef={containerRef}
       setSelected={setSelected}
+      renderItemChildren={(item) => <div>123</div>}
     />
   );
 }
