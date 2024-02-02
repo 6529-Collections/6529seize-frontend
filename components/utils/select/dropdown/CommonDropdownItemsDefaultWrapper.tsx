@@ -1,32 +1,45 @@
 import { AnimatePresence, motion } from "framer-motion";
-import { ReactNode, RefObject, useRef } from "react";
+import { ReactNode, RefObject, useEffect, useRef, useState } from "react";
 import { useClickAway, useKeyPressEvent } from "react-use";
 
 export default function CommonDropdownItemsDefaultWrapper<T>({
   isOpen,
   setOpen,
   buttonRef,
+  buttonPosition,
   children,
 }: {
   readonly isOpen: boolean;
   readonly setOpen: (isOpen: boolean) => void;
   readonly buttonRef: RefObject<HTMLButtonElement>;
+  readonly buttonPosition?: { readonly bottom: number; readonly right: number };
   readonly children: ReactNode;
 }) {
   const listRef = useRef<HTMLDivElement>(null);
   useClickAway(listRef, (e) => {
-
     if (e.target !== buttonRef.current) {
       setOpen(false);
     }
   });
   useKeyPressEvent("Escape", () => setOpen(false));
+
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (buttonPosition?.right && dropdownRef.current) {
+      const { bottom, right } = buttonPosition;
+      dropdownRef.current.style.left = `${
+        right - dropdownRef.current.offsetWidth
+      }px`;
+    }
+  }, [buttonPosition, dropdownRef]);
+
   return (
-    <div className="tw-absolute">
+    <div className="tw-absolute" ref={dropdownRef}>
       <AnimatePresence mode="wait" initial={false}>
         {isOpen && (
           <motion.div
-            className="tw-z-10 tw-right-0 tw-mt-1 tw-min-w-[18rem] tw-rounded-lg tw-shadow-xl tw-bg-iron-800 tw-ring-1 tw-ring-black tw-ring-opacity-5"
+            className="tw-z-10 tw-mt-1 tw-min-w-[18rem] tw-rounded-lg tw-shadow-xl tw-bg-iron-800 tw-ring-1 tw-ring-black tw-ring-opacity-5"
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}

@@ -1,19 +1,28 @@
 import { useEffect, useState } from "react";
 import { SortDirection } from "../../../../entities/ISort";
 
+const rotatedDirections: Record<SortDirection, SortDirection> = {
+  [SortDirection.ASC]: SortDirection.DESC,
+  [SortDirection.DESC]: SortDirection.ASC,
+};
+
 export default function CommonTableSortIcon({
   direction,
   isActive,
+  shouldRotate,
 }: {
   readonly direction: SortDirection;
   readonly isActive: boolean;
+  readonly shouldRotate?: boolean;
 }) {
   const getClasses = ({
     active,
     dir,
+    rotate,
   }: {
     active: boolean;
     dir: SortDirection;
+    rotate: boolean;
   }): string => {
     let c = "";
     if (active) {
@@ -21,7 +30,8 @@ export default function CommonTableSortIcon({
     } else {
       c += "tw-text-iron-400 group-hover:tw-text-iron-200";
     }
-    if (dir === SortDirection.ASC) {
+    const targetDirection = rotate ? rotatedDirections[dir] : dir;
+    if (targetDirection === SortDirection.ASC) {
       c += " tw-rotate-180";
     } else {
       c += " tw-rotate-0";
@@ -30,12 +40,22 @@ export default function CommonTableSortIcon({
   };
 
   const [classes, setClasses] = useState<string>(
-    getClasses({ active: isActive, dir: direction })
+    getClasses({
+      active: isActive,
+      dir: direction,
+      rotate: shouldRotate ?? false,
+    })
   );
 
   useEffect(() => {
-    setClasses(getClasses({ active: isActive, dir: direction }));
-  }, [isActive, direction]);
+    setClasses(
+      getClasses({
+        active: isActive,
+        dir: direction,
+        rotate: shouldRotate ?? false,
+      })
+    );
+  }, [isActive, direction, shouldRotate]);
 
   return (
     <svg

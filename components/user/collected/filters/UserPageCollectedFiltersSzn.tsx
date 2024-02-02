@@ -1,3 +1,4 @@
+import { RefObject } from "react";
 import { MEMES_SEASON } from "../../../../enums";
 import { CommonSelectItem } from "../../../utils/select/CommonSelect";
 import CommonDropdown from "../../../utils/select/dropdown/CommonDropdown";
@@ -6,9 +7,11 @@ type SelectedType = MEMES_SEASON | null;
 
 export default function UserPageCollectedFiltersSzn({
   selected,
+  containerRef,
   setSelected,
 }: {
   readonly selected: SelectedType;
+  readonly containerRef: RefObject<HTMLDivElement>;
   readonly setSelected: (selected: SelectedType) => void;
 }) {
   const labels: { [key in MEMES_SEASON]: string } = {
@@ -38,6 +41,7 @@ export default function UserPageCollectedFiltersSzn({
       items={items}
       filterLabel="Season"
       activeItem={selected}
+      containerRef={containerRef}
       setSelected={setSelected}
     />
   );

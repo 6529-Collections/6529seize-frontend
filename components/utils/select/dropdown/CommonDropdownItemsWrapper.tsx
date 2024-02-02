@@ -9,12 +9,14 @@ export default function CommonDropdownItemsWrapper({
   isOpen,
   filterLabel,
   buttonRef,
+  buttonPosition,
   setOpen,
   children,
 }: {
   readonly isOpen: boolean;
   readonly filterLabel: string;
   readonly buttonRef: RefObject<HTMLButtonElement>;
+  readonly buttonPosition?: { readonly bottom: number; readonly right: number };
   readonly setOpen: (isOpen: boolean) => void;
   readonly children: ReactNode;
 }) {
@@ -25,6 +27,7 @@ export default function CommonDropdownItemsWrapper({
         isOpen={isOpen}
         setOpen={setOpen}
         buttonRef={buttonRef}
+        buttonPosition={buttonPosition}
       >
         {children}
       </CommonDropdownItemsDefaultWrapper>

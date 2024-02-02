@@ -15,7 +15,14 @@ const inter = Inter({
 });
 
 export default function CommonDropdown<T>(props: CommonSelectProps<T>) {
-  const { items, activeItem, noneLabel, filterLabel, setSelected } = props;
+  const {
+    items,
+    activeItem,
+    noneLabel,
+    filterLabel,
+    setSelected,
+    containerRef,
+  } = props;
   const [isOpen, setIsOpen] = useState(false);
   const [iconScope, animateIcon] = useAnimate();
 
@@ -60,8 +67,44 @@ export default function CommonDropdown<T>(props: CommonSelectProps<T>) {
   };
 
   const buttonRef = useRef<HTMLButtonElement>(null);
+
+  const getButtonPosition = () => {
+    if (buttonRef.current) {
+      const { bottom, right } = buttonRef.current.getBoundingClientRect();
+      return { bottom, right };
+    }
+    return { bottom: 0, right: 0 };
+  };
+
+  const [buttonPosition, setButtonPosition] = useState(getButtonPosition());
+
+  const onButtonPositionChange = () => {
+    if (buttonRef.current) {
+      setButtonPosition(getButtonPosition());
+    }
+  };
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const container = containerRef?.current;
+    if (container) {
+      // Listen for scroll events on the parent container
+      container.addEventListener("scroll", onButtonPositionChange);
+      window.addEventListener("resize", onButtonPositionChange);
+      onButtonPositionChange(); // Initial check
+
+      // Cleanup
+      return () => {
+        container.removeEventListener("scroll", onButtonPositionChange);
+        window.removeEventListener("resize", onButtonPositionChange);
+      };
+    } else {
+      onButtonPositionChange();
+    }
+  }, [isOpen]);
+
   return (
-    <div className={`${inter.className} tw-relative `}>
+    <div className={`${inter.className} `}>
       <div className="tw-relative">
         <button
           ref={buttonRef}
@@ -98,6 +141,7 @@ export default function CommonDropdown<T>(props: CommonSelectProps<T>) {
         isOpen={isOpen}
         setOpen={setIsOpen}
         buttonRef={buttonRef}
+        buttonPosition={buttonPosition}
         filterLabel={filterLabel}
       >
         {Object.values(items).map((item, i) => (

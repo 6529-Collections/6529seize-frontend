@@ -123,7 +123,6 @@ export async function getServerSideProps(
 }> {
   try {
     const headers = getCommonHeaders(req);
-    console.log(headers);
     const signedWalletOrNull = getSignedWalletOrNull(req);
     const handleOrWallet = req.query.user.toLowerCase() as string;
     const [profile, repLogs, repRates, repGivenToUsers, repReceivedFromUsers] =

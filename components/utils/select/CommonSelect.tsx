@@ -2,6 +2,7 @@ import { createBreakpoint } from "react-use";
 import { SortDirection } from "../../../entities/ISort";
 import CommonTabs from "./tabs/CommonTabs";
 import CommonDropdown from "./dropdown/CommonDropdown";
+import { RefObject } from "react";
 
 export interface CommonSelectItem<T> {
   readonly label: string;
@@ -15,6 +16,7 @@ export interface CommonSelectDefaultProps<T> {
   readonly activeItem: T;
   readonly filterLabel: string;
   readonly noneLabel?: string;
+  readonly containerRef?: RefObject<HTMLDivElement>; // this is useful if you have horizontal scrolling and want to keep the dropdown in attached to its trigger
   readonly setSelected: (item: T) => void;
 }
 

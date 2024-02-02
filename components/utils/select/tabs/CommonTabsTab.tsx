@@ -41,10 +41,19 @@ export default function CommonTabsTab<T>(
     setDynamicClasses(getDynamicClasses());
   }, [isActive, isFirst, isLast]);
 
+  const [shouldRotate, setShouldRotate] = useState<boolean>(false);
+
+  const onSelected = () => {
+    setSelected(item.value);
+    setShouldRotate(false);
+  };
+
   return (
     <button
       type="button"
-      onClick={() => setSelected(item.value)}
+      onClick={onSelected}
+      onMouseEnter={() => setShouldRotate(true)}
+      onMouseLeave={() => setShouldRotate(false)}
       className={`${dynamicClasses}  tw-whitespace-nowrap tw-flex-1 sm:tw-flex-none tw-px-4 tw-py-2 tw-text-sm tw-font-semibold tw-border tw-border-solid tw-border-iron-700 tw-transition tw-duration-300 tw-ease-out`}
     >
       {item.label}
@@ -52,6 +61,7 @@ export default function CommonTabsTab<T>(
         <CommonTableSortIcon
           direction={isActive ? sortDirection : SortDirection.DESC}
           isActive={isActive}
+          shouldRotate={isActive && shouldRotate}
         />
       )}
     </button>

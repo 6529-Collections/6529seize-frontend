@@ -53,9 +53,11 @@ export default function UserPageCollectedCard({
             <span className="tw-text-md tw-font-medium tw-text-iron-50">
               {card.token_name}
             </span>
-            <span className="tw-text-md tw-font-medium tw-text-iron-400">
-              {card.seized_count}x
-            </span>
+            {!!card.seized_count && (
+              <span className="tw-text-md tw-font-medium tw-text-iron-400">
+                {card.seized_count}x
+              </span>
+            )}
           </div>
           {showDataRow && (
             <div className="tw-pt-2.5 tw-flex tw-items-center tw-justify-between">

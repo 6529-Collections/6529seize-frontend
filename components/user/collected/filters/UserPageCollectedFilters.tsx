@@ -47,6 +47,9 @@ export default function UserPageCollectedFilters({
   const mostLeftFilterRef = useRef<HTMLDivElement>(null);
   const mostRightFilterRef = useRef<HTMLDivElement>(null);
 
+  const leftArrowRef = useRef<HTMLButtonElement>(null);
+  const rightArrowRef = useRef<HTMLButtonElement>(null);
+
   const [isMostLeftFilterVisible, setIsMostLeftFilterVisible] =
     useState<boolean>(false);
   const [isMostRightFilterVisible, setIsMostRightFilterVisible] =
@@ -59,17 +62,35 @@ export default function UserPageCollectedFilters({
     if (element && container) {
       const containerRect = container.getBoundingClientRect();
       const elementRect = element.getBoundingClientRect();
-
       const fullyVisible =
-        elementRect.left >= containerRect.left &&
-        elementRect.right <= containerRect.right;
+        +elementRect.left.toFixed(0) >= +containerRect.left.toFixed(0) &&
+        +elementRect.right.toFixed(0) <= +containerRect.right.toFixed(0);
 
       return fullyVisible;
     }
     return false;
   };
 
+  const getContainerLeftRightPositions = () => {
+    const container = containerRef.current;
+    if (container) {
+      const { left, right } = container.getBoundingClientRect();
+      return { left, right };
+    }
+    return { left: 0, right: 0 };
+  };
+
   const setVisibility = () => {
+    const { left, right } = getContainerLeftRightPositions();
+    const leftArrow = leftArrowRef.current;
+    const rightArrow = rightArrowRef.current;
+    if (leftArrow) {
+      leftArrow.style.left = `${left - 30}px`;
+    }
+    if (rightArrow) {
+      rightArrow.style.left = `${right}px`;
+    }
+
     setIsMostLeftFilterVisible(checkVisibility(mostLeftFilterRef));
     setIsMostRightFilterVisible(checkVisibility(mostRightFilterRef));
   };
@@ -77,12 +98,9 @@ export default function UserPageCollectedFilters({
   useEffect(() => {
     const container = containerRef.current;
     if (container) {
-      // Listen for scroll events on the parent container
       container.addEventListener("scroll", setVisibility);
       window.addEventListener("resize", setVisibility);
-      setVisibility(); // Initial check
-
-      // Cleanup
+      setVisibility();
       return () => {
         container.removeEventListener("scroll", setVisibility);
         window.removeEventListener("resize", setVisibility);
@@ -95,6 +113,7 @@ export default function UserPageCollectedFilters({
       <div className="tw-w-full tw-flex tw-justify-between tw-gap-3 tw-items-center">
         {!isMostLeftFilterVisible && (
           <button
+            ref={leftArrowRef}
             className="tw-absolute tw-left-0 tw-bg-transparent tw-border-none"
             onClick={() => scrollHorizontally("left")}
           >
@@ -135,6 +154,7 @@ export default function UserPageCollectedFilters({
               />
               <UserPageCollectedFiltersSzn
                 selected={filters.szn}
+                containerRef={containerRef}
                 setSelected={setSzn}
               />
             </>
@@ -143,11 +163,13 @@ export default function UserPageCollectedFilters({
         <div ref={mostRightFilterRef}>
           <UserAddressesSelectDropdown
             addresses={profile.consolidation.wallets}
+            containerRef={containerRef}
             onActiveAddress={() => undefined}
           />
         </div>
         {!isMostRightFilterVisible && (
           <button
+            ref={rightArrowRef}
             className="tw-absolute tw-right-0 tw-bg-transparent tw-border-none"
             onClick={() => scrollHorizontally("right")}
           >

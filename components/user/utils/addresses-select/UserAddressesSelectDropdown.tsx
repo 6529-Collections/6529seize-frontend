@@ -2,16 +2,18 @@ import { useRouter } from "next/router";
 import { IProfileConsolidation } from "../../../../entities/IProfile";
 import { CommonSelectItem } from "../../../utils/select/CommonSelect";
 import CommonDropdown from "../../../utils/select/dropdown/CommonDropdown";
-import { useEffect, useState } from "react";
+import { RefObject, useEffect, useState } from "react";
 import { formatAddress } from "../../../../helpers/Helpers";
 
 type SelectedType = string | null;
 
 export default function UserAddressesSelectDropdown({
   addresses,
+  containerRef,
   onActiveAddress,
 }: {
   readonly addresses: IProfileConsolidation[];
+  readonly containerRef: RefObject<HTMLDivElement>;
   readonly onActiveAddress: (address: SelectedType) => void;
 }) {
   const router = useRouter();
@@ -97,6 +99,7 @@ export default function UserAddressesSelectDropdown({
       items={items}
       filterLabel="Address"
       activeItem={activeItem}
+      containerRef={containerRef}
       setSelected={onAddressChange}
     />
   );
