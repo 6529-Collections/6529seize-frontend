@@ -7,7 +7,7 @@ export default function UserAddressesSelectDropdownItem({
 }: {
   readonly item: IProfileConsolidation;
 }) {
-  const [copyState, copyToClipboard] = useCopyToClipboard();
+  const [_, copyToClipboard] = useCopyToClipboard();
   const getEnsOrWallet = () => item.wallet.ens ?? item.wallet.address;
 
   const [isCopied, setIsCopied] = useState(false);

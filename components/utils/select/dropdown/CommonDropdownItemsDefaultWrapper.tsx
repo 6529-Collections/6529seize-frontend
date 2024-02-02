@@ -1,5 +1,5 @@
 import { AnimatePresence, motion } from "framer-motion";
-import { ReactNode, RefObject, useEffect, useRef, useState } from "react";
+import { ReactNode, RefObject, useEffect, useRef } from "react";
 import { useClickAway, useKeyPressEvent } from "react-use";
 
 export default function CommonDropdownItemsDefaultWrapper<T>({
@@ -27,7 +27,7 @@ export default function CommonDropdownItemsDefaultWrapper<T>({
 
   useEffect(() => {
     if (buttonPosition?.right && dropdownRef.current) {
-      const { bottom, right } = buttonPosition;
+      const { right } = buttonPosition;
       dropdownRef.current.style.left = `${
         right - dropdownRef.current.offsetWidth
       }px`;
