@@ -25,7 +25,7 @@ export function NextGenTokenImage(
             style={{
               height: "auto",
               width: "auto",
-              maxHeight: "100%",
+              maxHeight: "90vh",
               maxWidth: "100%",
               padding: "10px",
             }}
@@ -65,7 +65,7 @@ export function NextGenTokenImage(
             height: props.is_fullscreen ? "100vh" : "80vh",
             marginBottom: "-8px",
           }}
-          src={props.token.animation_url}
+          src={props.token.animation_url ?? props.token.generator?.html}
           title={props.token.name}
         />
       );

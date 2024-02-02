@@ -78,7 +78,7 @@ export default function NextGenTokenProvenance(props: Readonly<Props>) {
       <Container className="no-padding" ref={scrollTarget}>
         <Row>
           <Col>
-            <h3>Activity</h3>
+            <h3>Token Activity</h3>
           </Col>
         </Row>
         <Row className={`pt-2 ${styles.logsScrollContainer}`}>
@@ -116,7 +116,7 @@ export default function NextGenTokenProvenance(props: Readonly<Props>) {
       <Container className="pt-4 no-padding" ref={logsScrollTarget}>
         <Row>
           <Col>
-            <h3>History</h3>
+            <h3>Collection History</h3>
           </Col>
         </Row>
         <Row className={`pt-2 ${styles.logsScrollContainer}`}>

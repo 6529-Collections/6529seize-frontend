@@ -91,27 +91,29 @@ export default function NextGen(props: any) {
         <Header />
         <Breadcrumb breadcrumbs={breadcrumbs} />
         <NextGenNavigationHeader view={view} setView={setView} />
-        {/* <Container fluid className={`${styles.main}`}>
-          <Row className="d-flex align-items-center">
-            <Col>
-              {view && (
-                <Container className="pb-4">
-                  <Row>
-                    <Col>
-                      {view === NextGenView.COLLECTIONS && (
-                        <NextgenCollectionsComponent />
-                      )}
-                      {view === NextGenView.ARTISTS && (
-                        <NextgenArtistsComponent />
-                      )}
-                    </Col>
-                  </Row>
-                </Container>
-              )}
-            </Col>
-          </Row>
-        </Container> */}
         {!view && <NextGenComponent collection={collection} />}
+        {view && (
+          <Container fluid className={`${styles.main}`}>
+            <Row className="d-flex align-items-center">
+              <Col>
+                {view && (
+                  <Container className="pb-4">
+                    <Row>
+                      <Col>
+                        {view === NextGenView.COLLECTIONS && (
+                          <NextgenCollectionsComponent />
+                        )}
+                        {view === NextGenView.ARTISTS && (
+                          <NextgenArtistsComponent />
+                        )}
+                      </Col>
+                    </Row>
+                  </Container>
+                )}
+              </Col>
+            </Row>
+          </Container>
+        )}
       </main>
     </>
   );

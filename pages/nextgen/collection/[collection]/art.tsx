@@ -24,7 +24,6 @@ const NextGenCollectionTokenListComponent = dynamic(
 
 export default function NextGenCollectionTokensPage(props: any) {
   const collection: NextGenCollection = props.pageProps.collection;
-  useShallowRedirect(collection.name, "/art");
   const pagenameFull = `Art | #${collection.id} - ${collection.name}`;
 
   return (

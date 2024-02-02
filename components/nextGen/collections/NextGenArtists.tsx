@@ -42,7 +42,7 @@ export default function NextGenCollections() {
 
   return (
     <Container className="no-padding">
-      <Row className="pt-3 pb-3">
+      <Row className="pb-3">
         <Col>
           <h1>ARTISTS</h1>
         </Col>

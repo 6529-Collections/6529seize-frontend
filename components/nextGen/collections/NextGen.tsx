@@ -1,6 +1,5 @@
 import styles from "./NextGen.module.scss";
 import { Container, Row, Col } from "react-bootstrap";
-import Image from "next/image";
 import { NextGenCollection } from "../../../entities/INextgen";
 import {
   NextGenCountdown,
@@ -21,11 +20,14 @@ export default function NextGen(props: Readonly<Props>) {
   return (
     <>
       <div className={styles.nextgenBannerWrapper}>
-        <div className={styles.nextgenBanner} />
+        <div
+          className={styles.nextgenBanner}
+          style={{ background: `url(${props.collection.banner})` }}
+        />
         <Container>
           <Row>
             <Col>
-              <Container className="pt-5 pb-5 no-padding">
+              <Container className="pt-4 pb-4 no-padding">
                 <Row>
                   <Col sm={12} md={6}>
                     <Row>
@@ -42,16 +44,13 @@ export default function NextGen(props: Readonly<Props>) {
                           href={`/nextgen/collection/${formatNameForUrl(
                             props.collection.name
                           )}`}
-                          className="decoration-none">
-                          <h2 className="font-color mb-0">
-                            <b>
-                              #{props.collection.id} - {props.collection.name}
-                            </b>
-                          </h2>
+                          className="decoration-none font-bolder"
+                          style={{ fontSize: "60px" }}>
+                          #{props.collection.id} - {props.collection.name}
                         </a>
                       </Col>
                     </Row>
-                    <Row className="pt-3 font-larger font-color font-bolder">
+                    <Row className="font-larger font-color font-bolder">
                       <Col>
                         by{" "}
                         <b>
@@ -66,10 +65,23 @@ export default function NextGen(props: Readonly<Props>) {
                         <NextGenMintCounts collection={props.collection} />
                       </Col>
                     </Row>
-                    <DistributionLink
-                      collection={props.collection}
-                      class="pt-3 font-bolder font-larger"
-                    />
+                    <Row className="pt-3">
+                      <Col className="d-flex align-items-center gap-4">
+                        <a
+                          href={`/nextgen/collection/${formatNameForUrl(
+                            props.collection.name
+                          )}`}>
+                          <button
+                            className={`pt-2 pb-2 seize-btn no-wrap ${styles.exploreBtn}`}>
+                            Explore Collection
+                          </button>
+                        </a>
+                        <DistributionLink
+                          collection={props.collection}
+                          class="pt-0  font-bolder font-larger"
+                        />
+                      </Col>
+                    </Row>
                     <Row className="pt-4">
                       <Col>
                         <NextGenCountdown collection={props.collection} />

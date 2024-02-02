@@ -11,6 +11,7 @@ export interface NextGenCollection {
   library: string;
   dependency_script: string;
   image: string;
+  banner: string;
   artist_address: string;
   artist_signature: string;
   max_purchases: number;
@@ -36,16 +37,23 @@ export interface NextGenToken {
   metadata_url: string;
   image_url: string;
   animation_url: string;
-  generator_url: string;
+  generator?: {
+    html: string;
+    metadata: string;
+    image: string;
+  };
   owner: string;
   pending: boolean;
+  mint_date: Date;
   burnt: boolean;
+  burnt_date?: string;
   rarity_score: number;
   rarity_score_normalised: number;
   statistical_score: number;
   rarity_score_rank: number;
   rarity_score_normalised_rank: number;
   statistical_score_rank: number;
+  hodl_rate: number;
 }
 
 export interface NextGenLog {

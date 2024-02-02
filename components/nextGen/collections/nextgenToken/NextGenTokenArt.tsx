@@ -7,7 +7,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import useDownloader from "react-use-downloader";
 import Tippy from "@tippyjs/react";
 import Lightbulb from "./Lightbulb";
-import { Quality, getUrl } from "./NextGenTokenDownloads";
+import { Quality, getUrl } from "./NextGenTokenDownload";
 
 interface Props {
   collection: NextGenCollection;
@@ -15,7 +15,7 @@ interface Props {
 }
 
 enum Mode {
-  HTML = "HTML",
+  LIVE = "Live",
   IMAGE = "Image",
 }
 
@@ -88,21 +88,10 @@ export default function NextGenToken(props: Readonly<Props>) {
 
   function getCurrentHref() {
     switch (mode) {
-      case Mode.HTML:
-        return {
-          href: props.token.animation_url,
-          extension: "html",
-        };
-      case Mode.IMAGE:
-        return {
-          href: props.token.generator_url.replace("metadata", "html"),
-          extension: "html",
-        };
+      case Mode.LIVE:
+        return props.token.animation_url ?? props.token.generator?.html;
     }
-    return {
-      href: props.token.image_url,
-      extension: "png",
-    };
+    return props.token.image_url;
   }
 
   function printModeIcons() {
@@ -128,8 +117,8 @@ export default function NextGenToken(props: Readonly<Props>) {
             theme="light"
             delay={100}>
             <FontAwesomeIcon
-              className={getModeStyle(Mode.HTML)}
-              onClick={() => setMode(Mode.HTML)}
+              className={getModeStyle(Mode.LIVE)}
+              onClick={() => setMode(Mode.LIVE)}
               icon="play-circle"
             />
           </Tippy>
@@ -186,7 +175,7 @@ export default function NextGenToken(props: Readonly<Props>) {
               className={styles.modeIcon}
               onClick={() => {
                 const href = getCurrentHref();
-                window.open(href.href, "_blank");
+                window.open(href, "_blank");
               }}
               icon="external-link"
             />
@@ -270,6 +259,16 @@ export default function NextGenToken(props: Readonly<Props>) {
           </Container>
         </Col>
       </Row>
+      {mode === Mode.LIVE && (
+        <Row className="pt-2 font-color-h font-smaller">
+          <Col>
+            * Live view generates the image dynamically from scratch in your
+            browser. Pebbles have a computationally expensive script and the
+            live view may take several minutes to render on your computer or
+            phone. &quot;Image view&quot; will download faster.
+          </Col>
+        </Row>
+      )}
     </Container>
   );
 }

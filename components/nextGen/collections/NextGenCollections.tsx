@@ -55,7 +55,7 @@ export default function NextGenCollections() {
 
   return (
     <Container className="no-padding">
-      <Row className="pt-3 pb-3">
+      <Row className="pb-3">
         <Col className="d-flex justify-content-between">
           <h1>COLLECTIONS</h1>
           <Dropdown className={styles.filterDropdown} drop={"down-centered"}>

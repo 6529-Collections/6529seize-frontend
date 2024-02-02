@@ -15,8 +15,9 @@ interface Props {
 
 export enum ContentView {
   ABOUT = "About",
-  TRAITS = "Traits",
   PROVENANCE = "Provenance",
+  RENDER_CENTER = "Render Center",
+  RARITY = "Rarity",
 }
 
 export function printViewButton(

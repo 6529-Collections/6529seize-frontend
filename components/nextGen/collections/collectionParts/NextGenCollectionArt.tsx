@@ -320,6 +320,7 @@ export default function NextGenCollectionArt(props: Readonly<Props>) {
                 setTotalResults(totalResults);
                 setTotalResultsSet(true);
               }}
+              show_pagination={!props.show_view_all}
             />
           </Col>
         )}

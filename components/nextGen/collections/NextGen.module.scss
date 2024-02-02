@@ -8,7 +8,6 @@
 }
 
 .nextgenBannerWrapper {
-  min-height: calc(100vh - 120px);
   position: relative;
   display: flex;
   align-items: center;
@@ -20,10 +19,17 @@
   left: 0;
   width: 100%;
   height: 100%;
-  background: url("https://d3lqz0a4bldqgf.cloudfront.net/nextgen/banners/1.jpg");
-  background-size: "cover";
-  opacity: 0.5;
   z-index: -1;
+
+  &:before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+  }
 }
 
 .collectionPreview {
@@ -513,5 +519,17 @@
 
   &:focus {
     outline: none !important;
+  }
+}
+
+.exploreBtn {
+  background-color: rgba($color: #000000, $alpha: 0.5);
+  border: 2px solid white !important;
+  font-size: larger !important;
+  font-weight: bolder;
+
+  &:hover {
+    background-color: white;
+    color: black;
   }
 }

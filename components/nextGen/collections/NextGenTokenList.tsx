@@ -19,6 +19,7 @@ interface Props {
   sort_direction?: SortDirection;
   selected_traits?: TraitValuePair[];
   setTotalResults?: (totalResults: number) => void;
+  show_pagination?: boolean;
 }
 
 export default function NextGenTokenList(props: Readonly<Props>) {
@@ -111,7 +112,7 @@ export default function NextGenTokenList(props: Readonly<Props>) {
           }
         })()}
       </Row>
-      {totalResults > pageSize && tokensLoaded && (
+      {totalResults > pageSize && tokensLoaded && props.show_pagination && (
         <Row className="text-center pt-4 pb-4">
           <Pagination
             page={page}

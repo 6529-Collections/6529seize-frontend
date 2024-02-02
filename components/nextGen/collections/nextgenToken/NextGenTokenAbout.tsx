@@ -3,7 +3,12 @@ import styles from "../NextGen.module.scss";
 import { Col, Container, Row } from "react-bootstrap";
 import { NextGenCollection, NextGenToken } from "../../../../entities/INextgen";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { areEqualAddresses, isNullAddress } from "../../../../helpers/Helpers";
+import {
+  areEqualAddresses,
+  isNullAddress,
+  numberWithCommas,
+  printMintDate,
+} from "../../../../helpers/Helpers";
 import Address from "../../../address/Address";
 import { useState, useEffect } from "react";
 import { useAccount, useEnsName, mainnet } from "wagmi";
@@ -13,7 +18,8 @@ import { NEXTGEN_CHAIN_ID } from "../../nextgen_contracts";
 import Image from "next/image";
 import Tippy from "@tippyjs/react";
 import { formatNameForUrl, getOpenseaLink } from "../../nextgen_helpers";
-import NextGenTokenDownloads from "./NextGenTokenDownloads";
+import NextGenTokenDownload, { Quality } from "./NextGenTokenDownload";
+import { Time } from "../../../../helpers/time";
 
 interface Props {
   collection: NextGenCollection;
@@ -48,52 +54,32 @@ export default function NextgenTokenAbout(props: Readonly<Props>) {
   return (
     <Container className="no-padding">
       <Row>
-        <Col xs={6} sm={4} md={3} className="pb-4 d-flex gap-5">
-          <TraitScore
-            trait="Rarity"
-            score={props.token.rarity_score}
-            rank={props.token.rarity_score_rank}
-          />
-        </Col>
-        <Col xs={6} sm={4} md={3} className="pb-4 d-flex gap-5">
-          <TraitScore
-            trait="Normalized Rarity"
-            score={props.token.rarity_score_normalised}
-            rank={props.token.rarity_score_normalised_rank}
-          />
-        </Col>
-        <Col xs={6} sm={4} md={3} className="pb-4 d-flex gap-5">
-          <TraitScore
-            trait="Statistical Rarity"
-            score={props.token.statistical_score}
-            rank={props.token.statistical_score_rank}
-            places={3}
-          />
+        <Col className="pb-3">
+          <h3 className="mb-0">About</h3>
         </Col>
       </Row>
       <Row>
-        <Col xs={6} sm={4} md={3} className="pb-4 d-flex flex-column">
-          <span className="font-color-h">Contract Token ID</span>
-          <span>#{props.token.id}</span>
+        <Col className="pb-3 d-flex gap-1">
+          <span className="font-color-h">Collection Token ID:</span>
+          <span>{props.token.normalised_id}</span>
         </Col>
-        <Col xs={6} sm={4} md={3} className="pb-4 d-flex flex-column">
-          <span className="font-color-h">Collection</span>
-          <a
-            href={`/nextgen/collection/${formatNameForUrl(
-              props.collection.name
-            )}`}>
-            #{props.collection.id} {props.collection.name}
-          </a>
+      </Row>
+      <Row>
+        <Col className="pb-3 d-flex gap-1">
+          <span className="font-color-h">Contract Token ID:</span>
+          <span>{props.token.id}</span>
         </Col>
-        <Col xs={6} sm={4} md={3} className="pb-4 d-flex flex-column">
-          <span className="font-color-h">Artist</span>
-          <a href={`/${props.collection.artist_address}`}>
-            {props.collection.artist}
-          </a>
+      </Row>
+      <Row>
+        <Col className="pb-3 d-flex gap-1">
+          <span className="font-color-h">Minted:</span>
+          <span>{printMintDate(props.token.mint_date)}</span>
         </Col>
-        <Col xs={6} sm={4} md={3} className="pb-4 d-flex flex-column">
-          <span className="font-color-h">Owner</span>
-          <span className="d-flex gap-2 align-items-center">
+      </Row>
+      <Row>
+        <Col className="pb-3 d-flex gap-1">
+          <span className="font-color-h">Owner:</span>
+          <span className="d-flex gap-1 align-items-center">
             {(props.token.burnt || isNullAddress(props.token.owner)) && (
               <Tippy content={"Burnt"} theme={"light"} delay={100}>
                 <FontAwesomeIcon
@@ -111,23 +97,10 @@ export default function NextgenTokenAbout(props: Readonly<Props>) {
             )}
           </span>
         </Col>
-        <Col xs={6} sm={4} md={3} className="pb-4 d-flex flex-column">
-          <span className="font-color-h">Metadata</span>
-          <span className="d-flex align-items-center gap-1">
-            <span>{props.collection.on_chain ? "On-Chain" : "Off-Chain"}</span>
-            <a href={props.token.metadata_url} target="_blank" rel="noreferrer">
-              <FontAwesomeIcon
-                className={styles.copyIcon}
-                icon="external-link-square"></FontAwesomeIcon>
-            </a>
-          </span>
-        </Col>
-        <Col xs={6} sm={4} md={3} className="pb-4 d-flex flex-column">
-          <span className="font-color-h">License</span>
-          <span>{props.collection.licence}</span>
-        </Col>
-        <Col xs={6} sm={4} md={3} className="pb-4 d-flex flex-column">
-          <span className="font-color-h">Marketplaces</span>
+      </Row>
+      <Row>
+        <Col className="pb-3 d-flex gap-1 align-items-center">
+          <span className="font-color-h">Marketplaces:</span>
           <span className="d-flex align-items-center gap-2 pt-1">
             <span>
               <Tippy content={"Opensea"} theme={"light"} delay={250}>
@@ -149,8 +122,61 @@ export default function NextgenTokenAbout(props: Readonly<Props>) {
         </Col>
       </Row>
       <Row>
-        <Col>
-          <NextGenTokenDownloads token={props.token} />
+        <Col className="pb-3 d-flex gap-1">
+          <span className="font-color-h">Collection:</span>
+          <span>
+            <a
+              href={`/nextgen/collection/${formatNameForUrl(
+                props.collection.name
+              )}`}>
+              {props.collection.name}
+            </a>
+          </span>
+        </Col>
+      </Row>
+      <Row>
+        <Col className="pb-3 d-flex gap-1">
+          <span className="font-color-h">Artist:</span>
+          <span>
+            <a href={`/${props.collection.artist_address}`}>
+              {props.collection.artist}
+            </a>
+          </span>
+        </Col>
+      </Row>
+      <Row>
+        <Col className="pb-3 d-flex gap-1">
+          <span className="font-color-h">TDH Rate:</span>
+          <span>
+            {numberWithCommas(Math.round(props.token.hodl_rate * 100) / 100)}
+          </span>
+        </Col>
+      </Row>
+      <Row>
+        <Col className="pb-3 d-flex gap-1">
+          <span className="font-color-h">Image Licence:</span>
+          <span>{props.collection.licence}</span>
+        </Col>
+      </Row>
+      <Row>
+        <Col className="pb-3 d-flex flex-column gap-2">
+          <span className="font-color-h">Rendered Versions:</span>
+          <NextGenTokenDownload token={props.token} quality={Quality["2K"]} />
+          <NextGenTokenDownload token={props.token} quality={Quality["4K"]} />
+          <NextGenTokenDownload token={props.token} quality={Quality["8K"]} />
+          <NextGenTokenDownload token={props.token} quality={Quality["16K"]} />
+        </Col>
+      </Row>
+      <Row>
+        <Col className="pb-3 d-flex gap-1">
+          <span className="font-color-h">Order Print:</span>
+          <span>Coming Soon</span>
+        </Col>
+      </Row>
+      <Row>
+        <Col className="pb-3 d-flex gap-1">
+          <span className="font-color-h">Visualize:</span>
+          <span>Coming Soon</span>
         </Col>
       </Row>
     </Container>
