@@ -60,7 +60,8 @@ export default function DateCountdown(props: Readonly<Props>) {
       <span className="pt-2 font-larger font-bolder">
         {timeLeft.days > 0 && (
           <>
-            {timeLeft.days} day{timeLeft.days !== 1 ? "s" : ""},{" "}
+            {timeLeft.days.toLocaleString()} day{timeLeft.days !== 1 ? "s" : ""}
+            ,{" "}
           </>
         )}
         {timeLeft.hours > 0 && (
