@@ -4,43 +4,50 @@ import CommonTabs from "./tabs/CommonTabs";
 import CommonDropdown from "./dropdown/CommonDropdown";
 import { RefObject } from "react";
 
-export interface CommonSelectItem<T> {
+export interface CommonSelectItem<T, U = unknown> {
   readonly label: string;
   readonly mobileLabel?: string;
   readonly value: T;
   readonly key: string;
+  readonly childrenProps?: U;
 }
 
-export interface CommonSelectDefaultProps<T> {
-  readonly items: CommonSelectItem<T>[];
+export interface CommonSelectDefaultProps<T, U> {
+  readonly items: CommonSelectItem<T, U>[];
   readonly activeItem: T;
   readonly filterLabel: string;
   readonly noneLabel?: string;
   readonly containerRef?: RefObject<HTMLDivElement>; // this is useful if you have horizontal scrolling and want to keep the dropdown in attached to its trigger
   readonly setSelected: (item: T) => void;
+  readonly renderItemChildren?: (
+    item: CommonSelectItem<T, U>
+  ) => React.ReactNode;
 }
 
-export interface CommonSelectsWithSortProps<T>
-  extends CommonSelectDefaultProps<T> {
+export interface CommonSelectsWithSortProps<T, U>
+  extends CommonSelectDefaultProps<T, U> {
   readonly sortDirection: SortDirection;
 }
 
-export interface CommonSelectItemProps<T> {
-  readonly item: CommonSelectItem<T>;
+export interface CommonSelectItemProps<T, U> {
+  readonly item: CommonSelectItem<T, U>;
   readonly activeItem: T;
   readonly isFirst: boolean;
   readonly isLast: boolean;
   readonly setSelected: (item: T) => void;
   readonly sortDirection?: SortDirection;
+  readonly children?: React.ReactNode;
 }
 
-export type CommonSelectProps<T> =
-  | CommonSelectDefaultProps<T>
-  | CommonSelectsWithSortProps<T>;
+export type CommonSelectProps<T, U> =
+  | CommonSelectDefaultProps<T, U>
+  | CommonSelectsWithSortProps<T, U>;
 
 const useBreakpoint = createBreakpoint({ LG: 1024, S: 0 });
 
-export default function CommonSelect<T>(props: CommonSelectProps<T>) {
+export default function CommonSelect<T, U = unknown>(
+  props: CommonSelectProps<T, U>
+) {
   const breakpoint = useBreakpoint();
   if (breakpoint === "LG") {
     return <CommonTabs {...props} />;

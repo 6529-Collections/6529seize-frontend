@@ -1,7 +1,7 @@
 import { CommonSelectProps } from "../CommonSelect";
 import CommonTabsTab from "./CommonTabsTab";
 
-export default function CommonTabs<T>(props: CommonSelectProps<T>) {
+export default function CommonTabs<T, U = unknown>(props: CommonSelectProps<T, U>) {
   const { items, activeItem, setSelected } = props;
   return (
     <div className="tw-inline-flex tw-rounded-lg tw-w-full sm:tw-w-auto -tw-space-x-px">

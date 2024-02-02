@@ -3,8 +3,8 @@ import { SortDirection } from "../../../../entities/ISort";
 import CommonTableSortIcon from "../../../user/utils/icons/CommonTableSortIcon";
 import { CommonSelectItemProps } from "../CommonSelect";
 
-export default function CommonTabsTab<T>(
-  props: Readonly<CommonSelectItemProps<T>>
+export default function CommonTabsTab<T, U = unknown>(
+  props: Readonly<CommonSelectItemProps<T, U>>
 ) {
   const { item, activeItem, isFirst, isLast, setSelected, sortDirection } =
     props;

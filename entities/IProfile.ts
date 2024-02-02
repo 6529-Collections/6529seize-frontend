@@ -381,7 +381,7 @@ export enum CollectionSort {
 }
 
 export interface CollectedCard {
-  readonly collection: string;
+  readonly collection: CollectedCollectionType;
   readonly token_id: number;
   readonly token_name: string;
   readonly img: string;

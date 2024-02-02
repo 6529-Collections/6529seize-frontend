@@ -12,10 +12,10 @@ const inter = Inter({
   display: "swap",
 });
 
-export default function CommonDropdownItem<T>(
-  props: Readonly<CommonSelectItemProps<T>>
+export default function CommonDropdownItem<T, U = unknown>(
+  props: Readonly<CommonSelectItemProps<T, U>>
 ) {
-  const { item, activeItem, setSelected, sortDirection } = props;
+  const { item, activeItem, setSelected, sortDirection, children } = props;
 
   const [isActive, setIsActive] = useState<boolean>(item.value === activeItem);
 
@@ -66,6 +66,7 @@ export default function CommonDropdownItem<T>(
               />
             </svg>
           )}
+          {children}
         </div>
       </button>
     </li>

@@ -6,6 +6,12 @@ import {
 import { assertUnreachable } from "../../../../helpers/AllowlistToolHelpers";
 import { formatNumberWithCommasOrDash } from "../../../../helpers/Helpers";
 
+const COLLECTION_TYPE_TO_TEXT: Record<CollectedCollectionType, string> = {
+  [CollectedCollectionType.MEMES]: "The Memes",
+  [CollectedCollectionType.GRADIENTS]: "Gradients",
+  [CollectedCollectionType.MEMELAB]: "Meme Lab",
+};
+
 export default function UserPageCollectedCard({
   card,
   showDataRow,
@@ -46,7 +52,7 @@ export default function UserPageCollectedCard({
       </Link>
       <div className="tw-pt-4 tw-pb-4 tw-px-2">
         <span className="tw-text-md tw-font-medium tw-text-iron-300">
-          {card.collection}
+          {COLLECTION_TYPE_TO_TEXT[card.collection]}
         </span>
         <div className="tw-pt-1.5 tw-flex tw-flex-col tw-gap-y-2.5 tw-divide-y tw-divide-solid tw-divide-iron-700 tw-divide-x-0">
           <div className="tw-flex tw-justify-between">

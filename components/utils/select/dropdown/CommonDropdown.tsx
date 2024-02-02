@@ -14,7 +14,7 @@ const inter = Inter({
   display: "swap",
 });
 
-export default function CommonDropdown<T>(props: CommonSelectProps<T>) {
+export default function CommonDropdown<T, U = unknown>(props: CommonSelectProps<T, U>) {
   const {
     items,
     activeItem,
@@ -22,6 +22,7 @@ export default function CommonDropdown<T>(props: CommonSelectProps<T>) {
     filterLabel,
     setSelected,
     containerRef,
+    renderItemChildren,
   } = props;
   const [isOpen, setIsOpen] = useState(false);
   const [iconScope, animateIcon] = useAnimate();
@@ -153,7 +154,9 @@ export default function CommonDropdown<T>(props: CommonSelectProps<T>) {
             activeItem={activeItem}
             sortDirection={sortDirection}
             setSelected={onSelect}
-          />
+          >
+            {renderItemChildren?.(item)}
+          </CommonDropdownItem>
         ))}
       </CommonDropdownItemsWrapper>
     </div>
