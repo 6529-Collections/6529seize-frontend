@@ -6,7 +6,6 @@ import CommonDropdownItem from "./CommonDropdownItem";
 import { SortDirection } from "../../../../entities/ISort";
 import CommonTableSortIcon from "../../../user/utils/icons/CommonTableSortIcon";
 import { Inter } from "next/font/google";
-import { getRandomObjectId } from "../../../../helpers/AllowlistToolHelpers";
 
 const inter = Inter({
   weight: ["300", "400", "500", "600", "700"],

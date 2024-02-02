@@ -53,12 +53,12 @@ export default function CommonDropdownItemsMobileWrapper({
                     leaveFrom="tw-opacity-100"
                     leaveTo="tw-opacity-0"
                   >
-                    <div className="tw-absolute tw-right-0 -tw-top-14 -tw-ml-8 tw-flex tw-pr-2 tw-pt-4 sm:-tw-ml-10 sm:tw-pr-4">
+                    <div className="tw-absolute tw-right-0 -tw-top-16 -tw-ml-8 tw-flex tw-pr-2 tw-pt-4 sm:-tw-ml-10 sm:tw-pr-4">
                       <button
                         type="button"
                         title="Close panel"
                         aria-label="Close panel"
-                        className="tw-p-0 tw-relative tw-bg-transparent tw-rounded-md focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-white"
+                        className="tw-p-2.5 tw-relative tw-bg-transparent tw-rounded-md focus:tw-outline-none tw-border-none focus:tw-ring-2 focus:tw-ring-white"
                         onClick={() => setOpen(false)}
                       >
                         <svg
@@ -79,14 +79,17 @@ export default function CommonDropdownItemsMobileWrapper({
                       </button>
                     </div>
                   </Transition.Child>
-                  <div className="tw-flex tw-h-full tw-flex-col tw-bg-iron-950 tw-rounded-t-xl tw-overflow-y-auto tw-py-6">
-                    <div className="tw-px-4 sm:tw-px-6">
+                  <div
+                    className="tw-flex tw-flex-col tw-bg-iron-950 tw-rounded-t-xl tw-overflow-y-auto tw-scroll-py-3 tw-py-6"
+                    style={{ maxHeight: "calc(100vh - 4rem)" }}
+                  >
+                    <div className="tw-px-6">
                       <Dialog.Title className="tw-text-base tw-font-semibold tw-text-iron-50">
                         {filterLabel}
                       </Dialog.Title>
                     </div>
-                    <div className="tw-relative tw-mt-6 tw-flex-1 tw-px-4 sm:tw-px-6 tw-gap-y-6 tw-flex tw-flex-col">
-                      <ul className="tw-flex tw-flex-col tw-px-2 tw-mx-0 tw-mb-0 tw-list-none">
+                    <div className="tw-relative tw-mt-3 tw-flex-1 tw-px-4 sm:tw-px-6 tw-gap-y-6 tw-flex tw-flex-col">
+                      <ul className="tw-flex tw-flex-col tw-mx-0 tw-pl-0 tw-space-y-3 tw-mb-0 tw-list-none">
                         {children}
                       </ul>
                     </div>

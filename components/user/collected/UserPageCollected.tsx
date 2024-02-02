@@ -405,7 +405,7 @@ export default function UserPageCollected({
       ) : (
         <>
           <div
-            className="tw-overflow-auto horizontal-menu-hide-scrollbar"
+            className="tw-overflow-x-auto horizontal-menu-hide-scrollbar horizontal-menu-scrollable-x"
             ref={scrollContainer}
           >
             <UserPageCollectedFilters
