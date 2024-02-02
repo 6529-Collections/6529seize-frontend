@@ -66,8 +66,8 @@ export default function CommonDropdownItem<T, U = unknown>(
               />
             </svg>
           )}
-          {children}
         </div>
+        {children}
       </button>
     </li>
   );

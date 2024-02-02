@@ -4,6 +4,7 @@ import { CommonSelectItem } from "../../../utils/select/CommonSelect";
 import CommonDropdown from "../../../utils/select/dropdown/CommonDropdown";
 import { RefObject, useEffect, useState } from "react";
 import { formatAddress } from "../../../../helpers/Helpers";
+import UserAddressesSelectDropdownItem from "./UserAddressesSelectDropdownItem";
 
 type SelectedType = string | null;
 
@@ -17,18 +18,21 @@ export default function UserAddressesSelectDropdown({
   readonly onActiveAddress: (address: SelectedType) => void;
 }) {
   const router = useRouter();
-  const items: CommonSelectItem<SelectedType>[] = [
-    {
-      label: "All Addresses",
-      value: null,
-      key: "all",
-    },
-    ...addresses.map((address) => ({
-      label: address.wallet.ens ?? formatAddress(address.wallet.address),
-      value: address.wallet.address.toLowerCase(),
-      key: address.wallet.address.toLowerCase(),
-    })),
-  ];
+  const items: CommonSelectItem<SelectedType, IProfileConsolidation | null>[] =
+    [
+      {
+        label: "All Addresses",
+        value: null,
+        key: "all",
+        childrenProps: null,
+      },
+      ...addresses.map((address) => ({
+        label: address.wallet.ens ?? formatAddress(address.wallet.address),
+        value: address.wallet.address.toLowerCase(),
+        key: address.wallet.address.toLowerCase(),
+        childrenProps: address,
+      })),
+    ];
 
   const getAddressFromQuery = (): string | null => {
     if (!router.query.address) {
@@ -101,6 +105,13 @@ export default function UserAddressesSelectDropdown({
       activeItem={activeItem}
       containerRef={containerRef}
       setSelected={onAddressChange}
+      renderItemChildren={(item) =>
+        item.childrenProps && (
+          <UserAddressesSelectDropdownItem
+            item={item.childrenProps}
+          />
+        )
+      }
     />
   );
 }
