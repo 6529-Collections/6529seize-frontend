@@ -34,7 +34,7 @@ export default function CommonDropdownItem<T, U = unknown>(
     <li tabIndex={0} className={`${inter.className} tw-h-full`}>
       <button
         type="button"
-        className="tw-w-full tw-h-full tw-bg-transparent tw-border-none tw-text-left tw-flex tw-items-center tw-justify-between tw-text-white tw-rounded-lg tw-relative tw-cursor-pointer tw-select-none tw-px-2 tw-py-3 hover:tw-bg-iron-700 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400 tw-transition tw-duration-300 tw-ease-out"
+        className="tw-w-full tw-h-full tw-bg-transparent tw-border-none tw-text-left tw-flex tw-items-center tw-justify-between tw-text-white tw-rounded-lg tw-relative tw-cursor-pointer tw-select-none tw-px-2 tw-py-3 hover:tw-bg-iron-800 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400 tw-transition tw-duration-300 tw-ease-out"
         onClick={onSelected}
         onMouseEnter={() => setShouldRotate(true)}
         onMouseLeave={() => setShouldRotate(false)}

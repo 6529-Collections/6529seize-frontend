@@ -330,7 +330,7 @@ export default function UserPageStatsActivityWalletTableRow({
           </div>
         </a>
       </td>
-      <td className="tw-py-2.5 tw-pl-6 sm:tw-pl-4 tw-text-right">
+      <td className="tw-py-2.5 tw-w-24 tw-text-right">
         <CommonTimeAgo
           timestamp={new Date(transaction.transaction_date).getTime()}
         />
