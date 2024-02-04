@@ -54,7 +54,7 @@ export default function NextGenCollections() {
   }, [page]);
 
   return (
-    <Container className="no-padding">
+    <Container className="no-padding pt-4 pb-4">
       <Row className="pb-3">
         <Col className="d-flex justify-content-between">
           <h1>COLLECTIONS</h1>

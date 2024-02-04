@@ -74,6 +74,7 @@ export default function NextGen(props: any) {
       <Head>
         <title>{title}</title>
         <link rel="icon" href="/favicon.ico" />
+        <link rel="preload" href={collection.banner} as="image" />
         <meta name="description" content={`${title} | 6529 SEIZE`} />
         <meta
           property="og:url"

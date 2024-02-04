@@ -9,6 +9,7 @@ import { getCommonHeaders } from "../../../../helpers/server.helpers";
 import { commonApiFetch } from "../../../../services/api/common-api";
 import Breadcrumb from "../../../../components/breadcrumb/Breadcrumb";
 import { useShallowRedirect } from ".";
+import NextGenNavigationHeader from "../../../../components/nextGen/collections/NextGenNavigationHeader";
 
 const Header = dynamic(() => import("../../../../components/header/Header"), {
   ssr: false,
@@ -60,6 +61,7 @@ export default function NextGenCollectionTokensPage(props: any) {
       <main className={styles.main}>
         <Header />
         <Breadcrumb breadcrumbs={crumbs} />
+        <NextGenNavigationHeader />
         <NextGenCollectionMintingPlanComponent collection={collection} />
       </main>
     </>

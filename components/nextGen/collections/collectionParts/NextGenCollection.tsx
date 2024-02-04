@@ -8,6 +8,7 @@ import NextGenCollectionSlideshow from "./NextGenCollectionSlideshow";
 import { NextGenCollection } from "../../../../entities/INextgen";
 import { useState } from "react";
 import NextGenCollectionArtist from "./NextGenCollectionArtist";
+import NextGenNavigationHeader from "../NextGenNavigationHeader";
 
 interface Props {
   collection: NextGenCollection;
@@ -53,6 +54,7 @@ export default function NextGenCollection(props: Readonly<Props>) {
   return (
     <>
       <Breadcrumb breadcrumbs={crumbs} />
+      <NextGenNavigationHeader />
       <NextGenCollectionSlideshow collection={props.collection} />
       <Container className="pt-3 pb-2">
         <>

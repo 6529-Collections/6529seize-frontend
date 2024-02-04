@@ -12,6 +12,7 @@ import { isEmptyObject } from "../../../../../helpers/Helpers";
 import { getCommonHeaders } from "../../../../../helpers/server.helpers";
 import { commonApiFetch } from "../../../../../services/api/common-api";
 import { ContentView } from "../../../../../components/nextGen/collections/collectionParts/NextGenCollection";
+import NextGenNavigationHeader from "../../../../../components/nextGen/collections/NextGenNavigationHeader";
 
 const Header = dynamic(
   () => import("../../../../../components/header/Header"),
@@ -85,6 +86,7 @@ export default function NextGenCollectionToken(props: any) {
       <main className={styles.main}>
         <Header />
         <Breadcrumb breadcrumbs={breadcrumbs} />
+        <NextGenNavigationHeader />
         {token ? (
           <NextGenTokenComponent
             collection={collection}
