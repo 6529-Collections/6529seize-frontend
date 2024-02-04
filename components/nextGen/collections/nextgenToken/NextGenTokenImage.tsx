@@ -23,11 +23,10 @@ export function NextGenTokenImage(
             width="0"
             height="0"
             style={{
-              height: "auto",
+              height: props.is_fullscreen ? "100vh" : "auto",
               width: "auto",
               maxHeight: "90vh",
               maxWidth: "100%",
-              padding: "10px",
             }}
             src={props.token.image_url}
             alt={props.token.name}
@@ -62,7 +61,7 @@ export function NextGenTokenImage(
         <iframe
           style={{
             width: "100%",
-            height: props.is_fullscreen ? "100vh" : "80vh",
+            height: props.is_fullscreen ? "100vh" : "90vh",
             marginBottom: "-8px",
           }}
           src={props.token.animation_url ?? props.token.generator?.html}

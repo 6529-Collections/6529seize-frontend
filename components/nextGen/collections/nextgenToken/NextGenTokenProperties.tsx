@@ -2,8 +2,7 @@ import styles from "./NextGenToken.module.scss";
 
 import { Accordion, Col, Container, Row } from "react-bootstrap";
 import { NextGenToken, NextGenTrait } from "../../../../entities/INextgen";
-import { useEffect, useState } from "react";
-import { commonApiFetch } from "../../../../services/api/common-api";
+import { useState } from "react";
 import Toggle from "react-toggle";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Tippy from "@tippyjs/react";
@@ -11,6 +10,8 @@ import Tippy from "@tippyjs/react";
 interface Props {
   collection_id: number;
   token: NextGenToken;
+  traits: NextGenTrait[];
+  tokenCount: number;
 }
 
 function TraitAccordion(
@@ -18,15 +19,20 @@ function TraitAccordion(
     title: string;
     score: number;
     rank: number;
-    tokenCount: number;
+    token_count: number;
+    collection_id: number;
+    traits?: {
+      trait: string;
+      value: string;
+      score: number;
+      rank: number;
+      trait_count: number;
+    }[];
   }>
 ) {
   return (
-    <Accordion className={styles.traitsAccordion}>
-      <Accordion.Item
-        defaultChecked={true}
-        className={styles.traitsAccordionItem}
-        eventKey={"0"}>
+    <Accordion>
+      <Accordion.Item defaultChecked={true} eventKey={"0"}>
         <Accordion.Button className="d-flex justify-content-between">
           <Container>
             <Row>
@@ -34,31 +40,56 @@ function TraitAccordion(
               <Col xs={5} className="d-flex align-items-center gap-5">
                 <span>
                   #{props.rank.toLocaleString()}/
-                  {props.tokenCount.toLocaleString()}
+                  {props.token_count.toLocaleString()}
                 </span>
-                <span>{Number(props.score.toFixed(2)).toLocaleString()}</span>
+                <span>
+                  {Number(
+                    props.score.toFixed(props.score > 100 ? 2 : 3)
+                  ).toLocaleString()}
+                </span>
               </Col>
             </Row>
           </Container>
         </Accordion.Button>
+        {props.traits && (
+          <Accordion.Body className={styles.tokenPropertiesAccordionBody}>
+            <Container>
+              {props.traits.map((t) => (
+                <Row
+                  className="pt-2 pb-2"
+                  key={`trait-${t.trait.replaceAll(
+                    " ",
+                    "-"
+                  )}-${t.value.replaceAll(" ", "-")}`}>
+                  <Col xs={5}>
+                    <span className="font-color-h">{t.trait}:</span>{" "}
+                    <a
+                      href={`/nextgen/collection/${props.collection_id}/art?traits=${t.trait}:${t.value}`}>
+                      {t.value}
+                    </a>
+                  </Col>
+                  <Col xs={5} className="d-flex align-items-center gap-5">
+                    <span>
+                      #{t.rank}/{t.trait_count}
+                    </span>
+                    <span>
+                      {Number(
+                        t.score.toFixed(t.score > 100 ? 2 : 3)
+                      ).toLocaleString()}
+                    </span>
+                  </Col>
+                </Row>
+              ))}
+            </Container>
+          </Accordion.Body>
+        )}
       </Accordion.Item>
     </Accordion>
   );
 }
 
 export default function NextgenTokenProperties(props: Readonly<Props>) {
-  const [traits, setTraits] = useState<NextGenTrait[]>([]);
-  const [showNormalised, setShowNormalised] = useState(false);
-  const [tokenCount, setTokenCount] = useState<number>(0);
-
-  useEffect(() => {
-    commonApiFetch<NextGenTrait[]>({
-      endpoint: `nextgen/tokens/${props.token.id}/traits`,
-    }).then((response) => {
-      setTraits(response);
-      setTokenCount(response[0]?.trait_count ?? 0);
-    });
-  }, [props.token]);
+  // const [showNormalised, setShowNormalised] = useState(false);
 
   return (
     <Container className="no-padding">
@@ -81,55 +112,61 @@ export default function NextgenTokenProperties(props: Readonly<Props>) {
       <Row className="pt-4 pb-2">
         <Col className="font-larger font-bolder">{props.token.name}</Col>
       </Row>
-      <Row className="pt-2">
+      <Row className="pt-2 pb-2">
         <Col>
           <TraitAccordion
             title={"Rarity"}
-            score={
-              showNormalised
-                ? props.token.rarity_score_normalised
-                : props.token.rarity_score
-            }
-            rank={
-              showNormalised
-                ? props.token.rarity_score_normalised_rank
-                : props.token.rarity_score_rank
-            }
-            tokenCount={tokenCount}
+            score={props.token.rarity_score}
+            rank={props.token.rarity_score_rank}
+            collection_id={props.collection_id}
+            token_count={props.tokenCount}
+            traits={props.traits.map((t) => ({
+              trait: t.trait,
+              value: t.value,
+              score: t.rarity_score,
+              rank: t.rarity_score_rank,
+              trait_count: t.trait_count,
+            }))}
           />
         </Col>
       </Row>
-      <Row className="pt-2">
+      <Row className="pt-2 pb-2">
+        <Col>
+          <TraitAccordion
+            title={"Rarity with Trait Normalization"}
+            score={props.token.rarity_score_normalised}
+            rank={props.token.rarity_score_normalised_rank}
+            collection_id={props.collection_id}
+            token_count={props.tokenCount}
+            traits={props.traits.map((t) => ({
+              trait: t.trait,
+              value: t.value,
+              score: t.rarity_score_normalised,
+              rank: t.rarity_score_normalised_rank,
+              trait_count: t.trait_count,
+            }))}
+          />
+        </Col>
+      </Row>
+      <Row className="pt-2 pb-2">
         <Col>
           <TraitAccordion
             title={"Statistical Rarity"}
-            score={
-              showNormalised
-                ? // ? props.token.statistical_score_normalised
-                  props.token.statistical_score
-                : props.token.statistical_score
-            }
-            rank={
-              showNormalised
-                ? // ? props.token.statistical_score_normalised_rank
-                  props.token.statistical_score_rank
-                : props.token.statistical_score_rank
-            }
-            tokenCount={tokenCount}
+            score={props.token.statistical_score}
+            rank={props.token.statistical_score_rank}
+            collection_id={props.collection_id}
+            token_count={props.tokenCount}
+            traits={props.traits.map((t) => ({
+              trait: t.trait,
+              value: t.value,
+              score: 0,
+              rank: 0,
+              trait_count: t.trait_count,
+            }))}
           />
         </Col>
       </Row>
-      <Row className="pt-2">
-        <Col>
-          <TraitAccordion
-            title={"Single Trait Rarity"}
-            score={0}
-            rank={0}
-            tokenCount={tokenCount}
-          />
-        </Col>
-      </Row>
-      <Row className="pt-4">
+      {/* <Row className="pt-4">
         <Col>
           <span className="d-flex align-items-center gap-2">
             <Toggle
@@ -153,7 +190,7 @@ export default function NextgenTokenProperties(props: Readonly<Props>) {
             </span>
           </span>
         </Col>
-      </Row>
+      </Row> */}
       {/* <Row className="pt-5">
         <Col className="d-flex justify-content-end align-items-center">
           <span className="d-flex align-items-center gap-2">
@@ -224,16 +261,6 @@ export default function NextgenTokenProperties(props: Readonly<Props>) {
 }
 
 export function NextgenTokenTraits(props: Readonly<Props>) {
-  const [traits, setTraits] = useState<NextGenTrait[]>([]);
-
-  useEffect(() => {
-    commonApiFetch<NextGenTrait[]>({
-      endpoint: `nextgen/tokens/${props.token.id}/traits`,
-    }).then((response) => {
-      setTraits(response);
-    });
-  }, [props.token.id]);
-
   return (
     <Container className="no-padding">
       <Row>
@@ -241,9 +268,9 @@ export function NextgenTokenTraits(props: Readonly<Props>) {
           <h3 className="mb-0">Traits</h3>
         </Col>
       </Row>
-      {traits.map((t) => (
+      {props.traits.map((t) => (
         <Row key={`trait-${t.trait.replaceAll(" ", "-")}`}>
-          <Col className="pb-3 d-flex gap-1">
+          <Col className="pb-3 d-flex gap-2">
             <span className="font-color-h">{t.trait}:</span>
             <span>
               <a
@@ -251,7 +278,9 @@ export function NextgenTokenTraits(props: Readonly<Props>) {
                 {t.value}
               </a>
             </span>
-            <span>1/{t.trait_count}</span>
+            <span className="font-color-h">
+              {t.value_count}/{t.trait_count}
+            </span>
           </Col>
         </Row>
       ))}

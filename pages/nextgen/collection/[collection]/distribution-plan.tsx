@@ -43,6 +43,12 @@ export default function NextGenCollectionTokensPage(props: any) {
       <Head>
         <title>{pagenameFull}</title>
         <link rel="icon" href="/favicon.ico" />
+        <link
+          rel="preload"
+          href={collection.distribution_plan}
+          as="fetch"
+          crossOrigin="anonymous"
+        />
         <meta name="description" content={pagenameFull} />
         <meta
           property="og:url"

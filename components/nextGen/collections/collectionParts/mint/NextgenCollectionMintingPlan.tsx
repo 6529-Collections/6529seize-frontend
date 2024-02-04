@@ -18,6 +18,7 @@ import Pagination from "../../../../pagination/Pagination";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Tippy from "@tippyjs/react";
 import SearchModal from "../../../../searchModal/SearchModal";
+import PdfViewer from "../../../../pdfViewer/PdfViewer";
 
 interface Props {
   collection: NextGenCollection;
@@ -179,6 +180,13 @@ export default function NextgenCollectionMintingPlan(props: Readonly<Props>) {
           </Container>
         </Col>
       </Row>
+      {props.collection.distribution_plan && (
+        <Row className="pt-3">
+          <Col>
+            <PdfViewer file={props.collection.distribution_plan} />
+          </Col>
+        </Row>
+      )}
       {allowlist.length > 0 && (
         <>
           <Row className="pt-4" ref={allowlistScrollTarget}>

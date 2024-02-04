@@ -1,6 +1,10 @@
 import styles from "../NextGen.module.scss";
 import { Col, Container, Row } from "react-bootstrap";
-import { NextGenCollection, NextGenToken } from "../../../../entities/INextgen";
+import {
+  NextGenCollection,
+  NextGenToken,
+  NextGenTrait,
+} from "../../../../entities/INextgen";
 import NextGenTokenProvenance from "./NextGenTokenProvenance";
 import NextgenTokenProperties, {
   NextgenTokenTraits,
@@ -21,6 +25,8 @@ import NextGenTokenRenderCenter from "./NextGenTokenRenderCenter";
 interface Props {
   collection: NextGenCollection;
   token: NextGenToken;
+  traits: NextGenTrait[];
+  tokenCount: number;
   view: ContentView;
 }
 
@@ -70,6 +76,8 @@ export default function NextGenToken(props: Readonly<Props>) {
                 <NextgenTokenTraits
                   collection_id={props.collection.id}
                   token={props.token}
+                  traits={props.traits}
+                  tokenCount={props.tokenCount}
                 />
               </Col>
             </>
@@ -92,6 +100,8 @@ export default function NextGenToken(props: Readonly<Props>) {
               <NextgenTokenProperties
                 collection_id={props.collection.id}
                 token={props.token}
+                traits={props.traits}
+                tokenCount={props.tokenCount}
               />
             </Col>
           )}

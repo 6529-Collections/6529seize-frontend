@@ -20,6 +20,8 @@ import Tippy from "@tippyjs/react";
 import { formatNameForUrl, getOpenseaLink } from "../../nextgen_helpers";
 import NextGenTokenDownload, { Quality } from "./NextGenTokenDownload";
 import { Time } from "../../../../helpers/time";
+import { DBResponse } from "../../../../entities/IDBResponse";
+import EthereumIcon from "../../../user/utils/icons/EthereumIcon";
 
 interface Props {
   collection: NextGenCollection;
@@ -31,12 +33,24 @@ export default function NextgenTokenAbout(props: Readonly<Props>) {
   const [ownerENS, setOwnerENS] = useState<string>();
   const [ownerProfileHandle, setOwnerProfileHandle] = useState<string>();
 
+  const [tdh, setTdh] = useState<number>(0);
+
   useEffect(() => {
     commonApiFetch<IProfileAndConsolidations>({
       endpoint: `profiles/${props.token.owner}`,
     }).then((profile) => {
       if (profile.profile?.handle) {
         setOwnerProfileHandle(profile.profile.handle);
+      }
+    });
+  }, [props.token.owner]);
+
+  useEffect(() => {
+    commonApiFetch<DBResponse>({
+      endpoint: `nextgen/tdh?token_id=${props.token.id}`,
+    }).then((result) => {
+      if (result.data.length === 1) {
+        setTdh(result.data[0].boosted_tdh);
       }
     });
   }, [props.token.owner]);
@@ -74,6 +88,23 @@ export default function NextgenTokenAbout(props: Readonly<Props>) {
         <Col className="pb-3 d-flex gap-1">
           <span className="font-color-h">Minted:</span>
           <span>{printMintDate(props.token.mint_date)}</span>
+        </Col>
+      </Row>
+      <Row>
+        <Col className="pb-3 d-flex gap-1">
+          <span className="font-color-h">Mint Price:</span>
+          <span>
+            {props.token.mint_price ? (
+              <span className="d-flex align-items-center gap-1">
+                {props.token.mint_price}
+                <div className="tw-flex tw-items-center tw-justify-center tw-flex-shrink-0 tw-h-5 tw-w-5 tw-text-iron-50">
+                  <EthereumIcon />
+                </div>
+              </span>
+            ) : (
+              "Free"
+            )}
+          </span>
         </Col>
       </Row>
       <Row>
@@ -150,6 +181,9 @@ export default function NextgenTokenAbout(props: Readonly<Props>) {
           <span>
             {numberWithCommas(Math.round(props.token.hodl_rate * 100) / 100)}
           </span>
+          &nbsp;&nbsp;|&nbsp;&nbsp;
+          <span className="font-color-h">TDH:</span>
+          <span>{numberWithCommas(Math.round(tdh * 100) / 100)}</span>
         </Col>
       </Row>
       <Row>

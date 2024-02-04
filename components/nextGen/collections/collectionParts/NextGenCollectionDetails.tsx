@@ -36,13 +36,11 @@ export default function NextGenCollectionDetails(props: Readonly<Props>) {
         <Col>
           <Container className="no-padding">
             <Row>
-              <Col sm={12} md={4}>
+              <Col sm={12} md={4} className="pt-2 pb-2">
                 {props.collection.artist_signature && (
                   <>
                     <Row>
-                      <Col>
-                        <b>Artist Signature</b>
-                      </Col>
+                      <Col className="font-color-h">Artist Signature</Col>
                     </Row>
                     <Row className="pb-4">
                       <Col xs={12} className="pt-2">

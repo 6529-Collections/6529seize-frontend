@@ -7,6 +7,7 @@ import Breadcrumb from "../../../../../components/breadcrumb/Breadcrumb";
 import {
   NextGenCollection,
   NextGenToken,
+  NextGenTrait,
 } from "../../../../../entities/INextgen";
 import { isEmptyObject } from "../../../../../helpers/Helpers";
 import { getCommonHeaders } from "../../../../../helpers/server.helpers";
@@ -43,6 +44,8 @@ const NextGenTokenOnChainComponent = dynamic(
 export default function NextGenCollectionToken(props: any) {
   const tokenId: number = props.pageProps.token_id;
   const token: NextGenToken | null = props.pageProps.token;
+  const traits: NextGenTrait[] = props.pageProps.traits;
+  const tokenCount: number = props.pageProps.tokenCount;
   const collection: NextGenCollection = props.pageProps.collection;
   const pagenameFull = token?.name ?? `${collection.name} - #${tokenId}`;
   const pageImage = token?.image_url ?? collection.image;
@@ -91,6 +94,8 @@ export default function NextGenCollectionToken(props: any) {
           <NextGenTokenComponent
             collection={collection}
             token={token}
+            traits={traits}
+            tokenCount={tokenCount}
             view={tokenView}
           />
         ) : (
@@ -118,8 +123,16 @@ export async function getServerSideProps(req: any, res: any, resolvedUrl: any) {
     token = null;
   }
 
+  let tokenTraits: NextGenTrait[] = [];
+  let tokenCount: number = 0;
   if (!token || isEmptyObject(token) || token.pending) {
     token = null;
+  } else {
+    tokenTraits = await commonApiFetch<NextGenTrait[]>({
+      endpoint: `nextgen/tokens/${token.id}/traits`,
+      headers: headers,
+    });
+    tokenCount = tokenTraits[0]?.token_count ?? 0;
   }
 
   const collectionId =
@@ -157,6 +170,8 @@ export async function getServerSideProps(req: any, res: any, resolvedUrl: any) {
     props: {
       token_id: tokenId,
       token: token,
+      traits: tokenTraits,
+      tokenCount: tokenCount,
       collection: collection,
       view: tokenView,
     },

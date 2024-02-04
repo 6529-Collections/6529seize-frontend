@@ -18,8 +18,7 @@ export enum Quality {
 export function getUrl(token: NextGenToken, quality: Quality) {
   let u = token.image_url;
   if (quality !== Quality["2K"]) {
-    // u = u.replace("/png/", `/png${quality.toLowerCase()}/`);
-    u = `${u}_${quality.toLowerCase()}`;
+    u = u.replace("/png/", `/png${quality.toLowerCase()}/`);
   }
   return u;
 }

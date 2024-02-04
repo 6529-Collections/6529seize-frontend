@@ -49,8 +49,8 @@
 }
 
 .lightBoxContent {
-  width: 80%;
-  height: 80%;
+  width: 100%;
+  height: 100%;
 }
 
 .lightBoxCloseIcon {
@@ -93,4 +93,9 @@
   &::after {
     display: none !important;
   }
+}
+
+.tokenPropertiesAccordionBody {
+  color: white;
+  background-color: $nextgen-grey;
 }
