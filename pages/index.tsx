@@ -387,13 +387,11 @@ export default function Home({
               </Row>
             </Container>
             <div
-              className={`tailwind-scope tw-relative tw-px-2 min-[1100px]:tw-max-w-[960px] min-[1200px]:tw-max-w-[1150px] min-[1300px]:tw-max-w-[1250px] min-[1400px]:tw-max-w-[1350px] min-[1500px]:tw-max-w-[1450px] min-[1600px]:tw-max-w-[1550px] min-[1800px]:tw-max-w-[1750px] min-[2000px]:tw-max-w-[1950px] tw-mx-auto ${inter.className}`}
-            >
+              className={`tailwind-scope tw-relative tw-px-2 min-[1000px]:tw-max-w-[850px] min-[1100px]:tw-max-w-[950px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px] tw-mx-auto ${inter.className}`}>
               <div className="tw-px-2">
                 <ProfileActivityLogs
                   initialParams={INITIAL_ACTIVITY_LOGS_PARAMS}
-                  withFilters={true}
-                >
+                  withFilters={true}>
                   <h1 className="tw-block tw-uppercase tw-whitespace-nowrap tw-float-none tw-pb-0 tw-mb-0">
                     Community Activity{" "}
                     <a href="/community-activity">
