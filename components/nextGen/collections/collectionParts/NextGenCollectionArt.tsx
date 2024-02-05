@@ -97,7 +97,7 @@ export default function NextGenCollectionArt(props: Readonly<Props>) {
     commonApiFetch<TraitValues[]>({
       endpoint: `nextgen/collections/${props.collection.id}/traits`,
     }).then((response) => {
-      setTraits(response);
+      setTraits(response.filter((t) => t.trait !== "Collection Name"));
       setTraitsLoaded(true);
     });
   }, [props.collection.id]);

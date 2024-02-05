@@ -61,7 +61,7 @@ export default function NextGenCollectionToken(props: any) {
     {
       display: token
         ? `#${token.normalised_id}`
-        : `${tokenId - collection.id * 10000000000}`,
+        : `#${tokenId - collection.id * 10000000000}`,
     },
   ];
 
