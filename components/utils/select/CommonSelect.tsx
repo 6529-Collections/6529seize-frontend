@@ -4,6 +4,10 @@ import CommonTabs from "./tabs/CommonTabs";
 import CommonDropdown from "./dropdown/CommonDropdown";
 import { RefObject } from "react";
 
+interface ChildComponentProps {
+  onTitle?: (newTitle: string) => void;
+}
+
 export interface CommonSelectItem<T, U = unknown> {
   readonly label: string;
   readonly mobileLabel?: string;
@@ -21,7 +25,7 @@ export interface CommonSelectDefaultProps<T, U> {
   readonly setSelected: (item: T) => void;
   readonly renderItemChildren?: (
     item: CommonSelectItem<T, U>
-  ) => React.ReactNode;
+  ) => React.ReactElement<ChildComponentProps>;
 }
 
 export interface CommonSelectsWithSortProps<T, U>
@@ -36,7 +40,7 @@ export interface CommonSelectItemProps<T, U> {
   readonly isLast: boolean;
   readonly setSelected: (item: T) => void;
   readonly sortDirection?: SortDirection;
-  readonly children?: React.ReactNode;
+  readonly children?: React.ReactElement<ChildComponentProps>;
 }
 
 export type CommonSelectProps<T, U> =

@@ -4,6 +4,7 @@ import { CommonSelectItemProps } from "../CommonSelect";
 import { SortDirection } from "../../../../entities/ISort";
 
 import { Inter } from "next/font/google";
+import React from "react";
 
 const inter = Inter({
   weight: ["300", "400", "500", "600", "700"],
@@ -68,7 +69,10 @@ export default function CommonDropdownItem<T, U = unknown>(
             </svg>
           )}
         </div>
-        {children}
+        {React.isValidElement(children) &&
+          React.cloneElement(children, {
+            onTitle: () => console.log("childs"),
+          })}
       </button>
     </li>
   );

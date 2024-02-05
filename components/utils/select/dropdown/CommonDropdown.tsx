@@ -14,7 +14,9 @@ const inter = Inter({
   display: "swap",
 });
 
-export default function CommonDropdown<T, U = unknown>(props: CommonSelectProps<T, U>) {
+export default function CommonDropdown<T, U = unknown>(
+  props: CommonSelectProps<T, U>
+) {
   const {
     items,
     activeItem,

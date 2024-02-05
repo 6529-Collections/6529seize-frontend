@@ -1,11 +1,13 @@
 import { useCopyToClipboard } from "react-use";
 import { IProfileConsolidation } from "../../../../entities/IProfile";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export default function UserAddressesSelectDropdownItem({
   item,
+  onTitle,
 }: {
   readonly item: IProfileConsolidation;
+  readonly onTitle?: (newTitle: string) => void;
 }) {
   const [_, copyToClipboard] = useCopyToClipboard();
   const getEnsOrWallet = () => item.wallet.ens ?? item.wallet.address;
@@ -20,6 +22,11 @@ export default function UserAddressesSelectDropdownItem({
       setIsCopied(false);
     }, 1000);
   };
+
+  useEffect(
+    () => onTitle(isCopied ? "Copied" : getEnsOrWallet()),
+    [item, isCopied]
+  );
 
   const openOpensea = (event: React.MouseEvent<HTMLButtonElement>) => {
     event.stopPropagation();

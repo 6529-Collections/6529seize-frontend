@@ -14,7 +14,7 @@ export default function UserAddressesSelectDropdown({
   onActiveAddress,
 }: {
   readonly addresses: IProfileConsolidation[];
-  readonly containerRef: RefObject<HTMLDivElement>;
+  readonly containerRef?: RefObject<HTMLDivElement>;
   readonly onActiveAddress: (address: SelectedType) => void;
 }) {
   const router = useRouter();
@@ -106,10 +106,10 @@ export default function UserAddressesSelectDropdown({
       containerRef={containerRef}
       setSelected={onAddressChange}
       renderItemChildren={(item) =>
-        item.childrenProps && (
-          <UserAddressesSelectDropdownItem
-            item={item.childrenProps}
-          />
+        item.childrenProps ? (
+          <UserAddressesSelectDropdownItem item={item.childrenProps} />
+        ) : (
+          <></> // return an empty fragment when item.childrenProps is not available
         )
       }
     />

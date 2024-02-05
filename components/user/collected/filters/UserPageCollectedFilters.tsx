@@ -12,6 +12,7 @@ import UserPageCollectedFiltersSortBy from "./UserPageCollectedFiltersSortBy";
 import UserPageCollectedFiltersSeized from "./UserPageCollectedFiltersSeized";
 import UserPageCollectedFiltersSzn from "./UserPageCollectedFiltersSzn";
 import UserAddressesSelectDropdown from "../../utils/addresses-select/UserAddressesSelectDropdown";
+import { useRouter } from "next/router";
 
 export default function UserPageCollectedFilters({
   profile,
@@ -32,6 +33,7 @@ export default function UserPageCollectedFilters({
   readonly setSzn: (szn: MEMES_SEASON | null) => void;
   readonly scrollHorizontally: (direction: "left" | "right") => void;
 }) {
+  const router = useRouter();
   const getShowSeizedAndSzn = (
     targetCollection: CollectedCollectionType | null
   ): boolean => targetCollection === CollectedCollectionType.MEMES;
@@ -56,6 +58,7 @@ export default function UserPageCollectedFilters({
     useState<boolean>(false);
 
   const checkVisibility = (elementRef: RefObject<HTMLDivElement>): boolean => {
+    if (isTouchScreen) return false;
     const element = elementRef.current;
     const container = containerRef.current;
 
@@ -85,7 +88,7 @@ export default function UserPageCollectedFilters({
     const leftArrow = leftArrowRef.current;
     const rightArrow = rightArrowRef.current;
     if (leftArrow) {
-      leftArrow.style.left = `${left - 40 }px`;
+      leftArrow.style.left = `${left - 40}px`;
     }
     if (rightArrow) {
       rightArrow.style.left = `${right + 8}px`;
@@ -107,6 +110,11 @@ export default function UserPageCollectedFilters({
       };
     }
   }, []);
+
+  const [isTouchScreen, setIsTouchScreen] = useState(false);
+  useEffect(() => {
+    setIsTouchScreen(window.matchMedia("(pointer: coarse)").matches);
+  }, [router.isReady]);
 
   return (
     <div>
