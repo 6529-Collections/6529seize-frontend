@@ -85,10 +85,10 @@ export default function UserPageCollectedFilters({
     const leftArrow = leftArrowRef.current;
     const rightArrow = rightArrowRef.current;
     if (leftArrow) {
-      leftArrow.style.left = `${left - 30}px`;
+      leftArrow.style.left = `${left - 40 }px`;
     }
     if (rightArrow) {
-      rightArrow.style.left = `${right}px`;
+      rightArrow.style.left = `${right + 8}px`;
     }
 
     setIsMostLeftFilterVisible(checkVisibility(mostLeftFilterRef));
@@ -114,19 +114,20 @@ export default function UserPageCollectedFilters({
         {!isMostLeftFilterVisible && (
           <button
             ref={leftArrowRef}
-            className="tw-absolute tw-left-0 tw-bg-transparent tw-border-none"
+            className="tw-inline-flex tw-items-center tw-justify-center tw-group tw-absolute tw-z-10 tw-p-0 tw-h-8 tw-w-8 tw-left-0 tw-bg-iron-700 tw-ring-1 tw-ring-inset tw-ring-white/5 tw-rounded-md tw-border-none"
             onClick={() => scrollHorizontally("left")}
           >
             <svg
-              className="tw-h-5 tw-w-5 tw-text-white tw-rotate-90"
+              className="tw-h-5 tw-w-5 tw-text-iron-200 group-hover:tw-text-iron-400 tw-rotate-90 tw-transition tw-duration-300 tw-ease-out"
               viewBox="0 0 24 24"
               fill="none"
+              aria-hidden="true"
               xmlns="http://www.w3.org/2000/svg"
             >
               <path
                 d="M6 9L12 15L18 9"
                 stroke="currentColor"
-                strokeWidth="2"
+                strokeWidth="2.5"
                 strokeLinecap="round"
                 strokeLinejoin="round"
               />
@@ -170,19 +171,20 @@ export default function UserPageCollectedFilters({
         {!isMostRightFilterVisible && (
           <button
             ref={rightArrowRef}
-            className="tw-absolute tw-right-0 tw-bg-transparent tw-border-none"
+            className="tw-inline-flex tw-items-center tw-justify-center tw-group tw-absolute tw-z-10 tw-p-0 tw-h-8 tw-w-8 tw-right-0 tw-bg-iron-700 tw-ring-1 tw-ring-inset tw-ring-white/5 tw-rounded-md tw-border-none"
             onClick={() => scrollHorizontally("right")}
           >
             <svg
-              className="tw-h-5 tw-w-5 tw-text-white -tw-rotate-90"
+              className="tw-h-5 tw-w-5 tw-text-iron-200 group-hover:tw-text-iron-400 -tw-rotate-90 tw-transition tw-duration-300 tw-ease-out"
               viewBox="0 0 24 24"
+              aria-hidden="true"
               fill="none"
               xmlns="http://www.w3.org/2000/svg"
             >
               <path
                 d="M6 9L12 15L18 9"
                 stroke="currentColor"
-                strokeWidth="2"
+                strokeWidth="2.5"
                 strokeLinecap="round"
                 strokeLinejoin="round"
               />

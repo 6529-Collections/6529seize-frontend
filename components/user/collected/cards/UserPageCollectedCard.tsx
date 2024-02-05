@@ -46,7 +46,7 @@ export default function UserPageCollectedCard({
           <img
             src={card.img}
             alt={card.collection}
-            className="tw-bg-transparent tw-max-w-full tw-max-h-[18.75rem] md:tw-max-h-full tw-h-auto tw-w-auto tw-mx-auto tw-object-contain"
+            className="tw-bg-transparent tw-max-w-full tw-max-h-full tw-h-auto tw-w-auto tw-mx-auto tw-object-contain"
           />
         </div>
       </Link>

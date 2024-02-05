@@ -31,7 +31,7 @@ export default function CommonDropdownItem<T, U = unknown>(
   };
 
   return (
-    <li tabIndex={0} className={`${inter.className} tw-h-full`}>
+    <li className={`${inter.className} tw-h-full`}>
       <button
         type="button"
         className="tw-w-full tw-h-full tw-bg-transparent tw-border-none tw-text-left tw-flex tw-items-center tw-justify-between tw-text-white tw-rounded-lg tw-relative tw-cursor-pointer tw-select-none tw-px-2 tw-py-3 hover:tw-bg-iron-800 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400 tw-transition tw-duration-300 tw-ease-out"
@@ -55,6 +55,7 @@ export default function CommonDropdownItem<T, U = unknown>(
               className="tw-h-5 tw-w-5 tw-ml-2 tw-text-primary-300 tw-transition tw-duration-300 tw-ease-out"
               viewBox="0 0 24 24"
               fill="none"
+              aria-hidden="true"
               xmlns="http://www.w3.org/2000/svg"
             >
               <path
