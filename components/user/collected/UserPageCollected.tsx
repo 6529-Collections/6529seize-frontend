@@ -67,7 +67,7 @@ export default function UserPageCollected({
   const defaultSortBy = CollectionSort.TOKEN_ID;
   const defaultSortDirection = SortDirection.DESC;
   const defaultSeized = CollectionSeized.SEIZED;
-  const PAGE_SIZE = 20;
+  const PAGE_SIZE = 24;
 
   const router = useRouter();
   const pathname = usePathname();
