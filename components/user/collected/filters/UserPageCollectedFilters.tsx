@@ -12,7 +12,6 @@ import UserPageCollectedFiltersSortBy from "./UserPageCollectedFiltersSortBy";
 import UserPageCollectedFiltersSeized from "./UserPageCollectedFiltersSeized";
 import UserPageCollectedFiltersSzn from "./UserPageCollectedFiltersSzn";
 import UserAddressesSelectDropdown from "../../utils/addresses-select/UserAddressesSelectDropdown";
-import { useRouter } from "next/router";
 
 export default function UserPageCollectedFilters({
   profile,
@@ -33,8 +32,6 @@ export default function UserPageCollectedFilters({
   readonly setSzn: (szn: MEMES_SEASON | null) => void;
   readonly scrollHorizontally: (direction: "left" | "right") => void;
 }) {
-  const router = useRouter();
-
   const getShowSeizedAndSzn = (
     targetCollection: CollectedCollectionType | null
   ): boolean => targetCollection === CollectedCollectionType.MEMES;
