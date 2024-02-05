@@ -23,6 +23,7 @@
     "@web3modal/react": "^2.7.1",
     "alchemy-sdk": "^3.0.0",
     "bootstrap": "^5.2.3",
+    "canvas": "^2.11.2",
     "csv-parser": "^3.0.0",
     "ethereum-cryptography": "^2.1.2",
     "framer-motion": "^10.16.5",
@@ -43,6 +44,7 @@
     "react-use": "^17.4.0",
     "react-use-downloader": "^1.2.2",
     "sass": "^1.69.5",
+    "sharp": "^0.33.2",
     "viem": "^1.19.5",
     "wagmi": "1.4.12"
   },

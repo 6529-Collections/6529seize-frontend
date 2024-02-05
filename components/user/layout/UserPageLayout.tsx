@@ -18,6 +18,7 @@ import {
   QueryKey,
   ReactQueryWrapperContext,
 } from "../../react-query-wrapper/ReactQueryWrapper";
+import { isAddress } from "viem";
 
 const Header = dynamic(() => import("../../header/Header"), {
   ssr: false,
@@ -80,22 +81,32 @@ export default function UserPageLayout({
 
   const title = getTitle();
 
-  const pagenameFull = `${title} | 6529 SEIZE`;
+  const trademark = "6529 SEIZE";
+  const pagenameFull = `${title} | ${trademark}`;
 
-  const descriptionArray = [];
-
-  descriptionArray.push(`Level: ${formatNumberWithCommas(profile.level)}`);
-
-  descriptionArray.push(
-    `CIC: ${formatNumberWithCommas(profile.cic.cic_rating)}`
-  );
-  descriptionArray.push(`Rep: ${formatNumberWithCommas(profile.rep)}`);
-  descriptionArray.push(
-    `TDH: ${formatNumberWithCommas(profile.consolidation.tdh)}`
-  );
-  descriptionArray.push(`Cards: ${formatNumberWithCommas(profile.balance)}`);
-
-  descriptionArray.push("6529 SEIZE");
+  let pfpUrl = `${process.env.BASE_ENDPOINT}/api/profiles/pfp?handle=${
+    isAddress(title) ? formatAddress(title) : title
+  }`;
+  if (profile.profile?.pfp_url) {
+    pfpUrl += `&image=${profile.profile.pfp_url}`;
+  } else {
+    pfpUrl += `&image=${DEFAULT_IMAGE}`;
+  }
+  if (profile.level) {
+    pfpUrl += `&level=${profile.level}`;
+  }
+  if (profile.balance) {
+    pfpUrl += `&cards=${formatNumberWithCommas(profile.balance)}`;
+  }
+  if (profile.consolidation.tdh) {
+    pfpUrl += `&tdh=${formatNumberWithCommas(profile.consolidation.tdh)}`;
+  }
+  if (profile.cic.cic_rating) {
+    pfpUrl += `&cic=${formatNumberWithCommas(profile.cic.cic_rating)}`;
+  }
+  if (profile.rep) {
+    pfpUrl += `&rep=${formatNumberWithCommas(profile.rep)}`;
+  }
 
   const mainAddress =
     profile.profile?.primary_wallet ?? handleOrWallet.toLowerCase();
@@ -136,14 +147,9 @@ export default function UserPageLayout({
           content={`${process.env.BASE_ENDPOINT}/${handleOrWallet}`}
         />
         <meta property="og:title" content={title} />
-        <meta
-          property="og:image"
-          content={profile.profile?.pfp_url ?? DEFAULT_IMAGE}
-        />
-        <meta
-          property="og:description"
-          content={descriptionArray.join(" \n ")}
-        />
+        <meta property="og:image" content={pfpUrl} />
+        <meta property="og:description" content={trademark} />
+        <meta name="twitter:card" content="summary_large_image" />
       </Head>
 
       <main className="tw-min-h-[100dvh]">
