@@ -39,7 +39,7 @@ export default function DistributionPlanToolWrapper({
       setInitialized(true);
       return;
     }
-    router.push("/distribution-plan-tool");
+    router.push("/emma");
   }, [address]);
   return (
     <>
@@ -47,10 +47,7 @@ export default function DistributionPlanToolWrapper({
         <title>EMMA | 6529 SEIZE</title>
         <link rel="icon" href="/favicon.ico" />
         <meta name="description" content="EMMA | 6529 SEIZE" />
-        <meta
-          property="og:url"
-          content={`${process.env.BASE_ENDPOINT}/distribution-plan-tool`}
-        />
+        <meta property="og:url" content={`${process.env.BASE_ENDPOINT}/emma`} />
         <meta property="og:title" content="EMMA" />
         <meta property="og:description" content="6529 SEIZE" />
         <meta
