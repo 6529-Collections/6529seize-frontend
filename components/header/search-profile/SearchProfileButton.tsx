@@ -19,6 +19,8 @@ export default function SearchProfileButton() {
     <div className={`tailwind-scope ${inter.className}`}>
       <button
         type="button"
+        title="Search"
+        aria-label="Search"
         onClick={() => setIsSearchProfileOpen(true)}
         className="lg:tw-ml-4 tw-mr-4 sm:tw-mr-6 min-[1300px]:tw-mr-0 tw-h-10 tw-w-10 tw-flex tw-items-center tw-justify-center tw-bg-transparent tw-focus-none tw-border-none"
       >

@@ -1,45 +1,22 @@
 import { ReactElement } from "react";
 import { NextPageWithLayout } from "../_app";
 import { IProfileAndConsolidations } from "../../entities/IProfile";
-import { ConsolidatedTDHMetrics } from "../../entities/ITDH";
-import { NFT, NFTLite } from "../../entities/INFT";
 import UserPageLayout from "../../components/user/layout/UserPageLayout";
 import {
   getCommonHeaders,
-  getCommonUserServerSideProps,
-  getGradients,
-  getMemesLite,
-  getOwned,
-  getSeasons,
+  getUserProfile,
   userPageNeedsRedirect,
 } from "../../helpers/server.helpers";
-import UserPageCollection from "../../components/user/collected/UserPageCollection";
-import { Season } from "../../entities/ISeason";
-import { OwnerLite } from "../../entities/IOwner";
+import UserPageCollected from "../../components/user/collected/UserPageCollected";
 
 export interface UserPageProps {
   profile: IProfileAndConsolidations;
-  title: string;
-  consolidatedTDH: ConsolidatedTDHMetrics | null;
-  memesLite: NFTLite[];
-  gradients: NFT[];
-  seasons: Season[];
-  consolidatedOwned: OwnerLite[];
 }
 
 const Page: NextPageWithLayout<{ pageProps: UserPageProps }> = ({
   pageProps,
 }) => {
-  return (
-    <UserPageCollection
-      profile={pageProps.profile}
-      consolidatedOwned={pageProps.consolidatedOwned}
-      consolidatedTDH={pageProps.consolidatedTDH}
-      memesLite={pageProps.memesLite}
-      gradients={pageProps.gradients}
-      seasons={pageProps.seasons}
-    />
-  );
+  return <UserPageCollected profile={pageProps.profile} />;
 };
 
 Page.getLayout = function getLayout(
@@ -63,38 +40,22 @@ export async function getServerSideProps(
 }> {
   try {
     const headers = getCommonHeaders(req);
-    const walletOrHandle = (req.query.user as string).toLowerCase();
-    const [{ profile, title, consolidatedTDH }, gradients, memesLite, seasons] =
-      await Promise.all([
-        getCommonUserServerSideProps({ user: walletOrHandle, headers }),
-        getGradients(headers),
-        getMemesLite(headers),
-        getSeasons(headers),
-      ]);
+    const handleOrWallet = (req.query.user as string).toLowerCase();
+    const profile = await getUserProfile({ user: handleOrWallet, headers });
 
     const needsRedirect = userPageNeedsRedirect({
       profile,
       req,
-      subroute: 'collected',
+      subroute: "collected",
     });
 
     if (needsRedirect) {
       return needsRedirect as any;
     }
-    const consolidatedOwned = await getOwned({
-      wallets: profile.consolidation.wallets.map((w) => w.wallet.address),
-      headers,
-    });
 
     return {
       props: {
         profile,
-        title,
-        consolidatedTDH,
-        gradients,
-        memesLite,
-        seasons,
-        consolidatedOwned,
       },
     };
   } catch (e: any) {
