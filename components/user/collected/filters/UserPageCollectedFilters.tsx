@@ -15,7 +15,7 @@ import UserAddressesSelectDropdown from "../../utils/addresses-select/UserAddres
 import { useRouter } from "next/router";
 import { createBreakpoint } from "react-use";
 
-const useBreakpoint = createBreakpoint({ MOBILE: 640 });
+const useBreakpoint = createBreakpoint({ DESKTOP: 800 });
 
 export default function UserPageCollectedFilters({
   profile,
@@ -63,7 +63,7 @@ export default function UserPageCollectedFilters({
     useState<boolean>(false);
 
   const checkVisibility = (elementRef: RefObject<HTMLDivElement>): boolean => {
-    if (isTouchScreen || breakpoint === "MOBILE") return false;
+    if (isTouchScreen) return false;
     const element = elementRef.current;
     const container = containerRef.current;
 
@@ -92,11 +92,14 @@ export default function UserPageCollectedFilters({
     const { left, right } = getContainerLeftRightPositions();
     const leftArrow = leftArrowRef.current;
     const rightArrow = rightArrowRef.current;
+    const isDesktop = breakpoint === "DESKTOP";
+    const newLeft = isDesktop ? left - 40 : left - 40;
+    const newRight = isDesktop ? right + 8 : right + 8;
     if (leftArrow) {
-      leftArrow.style.left = `${left - 40}px`;
+      leftArrow.style.left = `${newLeft}px`;
     }
     if (rightArrow) {
-      rightArrow.style.left = `${right + 8}px`;
+      rightArrow.style.left = `${newRight}px`;
     }
 
     setIsMostLeftFilterVisible(checkVisibility(mostLeftFilterRef));
