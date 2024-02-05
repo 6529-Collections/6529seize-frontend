@@ -147,8 +147,8 @@ export async function getServerSideProps(req: any, res: any, resolvedUrl: any) {
   let tokenView: ContentView | null = null;
   if (view) {
     view = view[0].toLowerCase().replaceAll("-", " ");
-    if (view === ContentView.RENDER_CENTER.toLowerCase()) {
-      tokenView = ContentView.RENDER_CENTER;
+    if (view === ContentView.DISPLAY_CENTER.toLowerCase()) {
+      tokenView = ContentView.DISPLAY_CENTER;
     } else if (view == ContentView.PROVENANCE.toLowerCase()) {
       tokenView = ContentView.PROVENANCE;
     } else if (view == ContentView.RARITY.toLowerCase()) {

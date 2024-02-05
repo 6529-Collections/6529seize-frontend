@@ -20,7 +20,7 @@ interface Props {
 export enum ContentView {
   ABOUT = "About",
   PROVENANCE = "Provenance",
-  RENDER_CENTER = "Render Center",
+  DISPLAY_CENTER = "Display Center",
   RARITY = "Rarity",
   OVERVIEW = "Overview",
 }

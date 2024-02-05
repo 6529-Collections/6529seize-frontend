@@ -63,7 +63,7 @@ export default function NextGenToken(props: Readonly<Props>) {
           <Col className="d-flex gap-4">
             {printViewButton(view, ContentView.ABOUT, setView)}
             {printViewButton(view, ContentView.PROVENANCE, setView)}
-            {printViewButton(view, ContentView.RENDER_CENTER, setView)}
+            {printViewButton(view, ContentView.DISPLAY_CENTER, setView)}
             {printViewButton(view, ContentView.RARITY, setView)}
           </Col>
         </Row>
@@ -94,7 +94,7 @@ export default function NextGenToken(props: Readonly<Props>) {
               />
             </Col>
           )}
-          {view === ContentView.RENDER_CENTER && (
+          {view === ContentView.DISPLAY_CENTER && (
             <Col className="pt-4 pb-4">
               <NextGenTokenRenderCenter />
             </Col>

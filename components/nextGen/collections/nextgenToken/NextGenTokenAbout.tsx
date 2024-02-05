@@ -201,18 +201,6 @@ export default function NextgenTokenAbout(props: Readonly<Props>) {
           <NextGenTokenDownload token={props.token} quality={Quality["16K"]} />
         </Col>
       </Row>
-      <Row>
-        <Col className="pb-3 d-flex gap-1">
-          <span className="font-color-h">Order Print:</span>
-          <span>Coming Soon</span>
-        </Col>
-      </Row>
-      <Row>
-        <Col className="pb-3 d-flex gap-1">
-          <span className="font-color-h">Visualize:</span>
-          <span>Coming Soon</span>
-        </Col>
-      </Row>
     </Container>
   );
 }

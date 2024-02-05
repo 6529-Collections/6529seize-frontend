@@ -5,7 +5,7 @@ export default function NextgenTokenRenderCenter() {
     <Container className="no-padding">
       <Row>
         <Col className="pb-3">
-          <h3 className="mb-0">Render Center</h3>
+          <h3 className="mb-0">Display Center</h3>
         </Col>
       </Row>
       <Row>
