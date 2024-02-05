@@ -1,18 +1,22 @@
 import { CollectedCard } from "../../../../entities/IProfile";
 import CommonTablePagination from "../../../utils/CommonTablePagination";
+import { ProfileCollectedFilters } from "../UserPageCollected";
 import UserPageCollectedCard from "./UserPageCollectedCard";
+import UserPageCollectedCardsNoCards from "./UserPageCollectedCardsNoCards";
 
 export default function UserPageCollectedCards({
   cards,
   totalPages,
   page,
   showDataRow,
+  filters,
   setPage,
 }: {
   readonly cards: CollectedCard[];
   readonly totalPages: number;
   readonly page: number;
   readonly showDataRow: boolean;
+  readonly filters: ProfileCollectedFilters;
   readonly setPage: (page: number) => void;
 }) {
   return (
@@ -39,9 +43,7 @@ export default function UserPageCollectedCards({
           )}
         </div>
       ) : (
-        <div className="tw-py-4 tw-text-sm tw-italic tw-text-iron-500">
-          No cards found
-        </div>
+        <UserPageCollectedCardsNoCards filters={filters} />
       )}
     </div>
   );

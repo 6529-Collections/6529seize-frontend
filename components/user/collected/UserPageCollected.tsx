@@ -425,6 +425,7 @@ export default function UserPageCollected({
               totalPages={totalPages}
               page={filters.page}
               showDataRow={showDataRow}
+              filters={filters}
               setPage={setPage}
             />
           </div>
