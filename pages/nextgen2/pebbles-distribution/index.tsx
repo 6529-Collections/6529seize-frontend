@@ -41,7 +41,7 @@ export default function NextGen(props: any) {
         <meta property="og:description" content="6529 Seize" />
         <meta
           property="og:image"
-          content={`${process.env.BASE_ENDPOINT}/nextgen-logo.png`}
+          content={`${process.env.BASE_ENDPOINT}/pebbles-loading.jpeg`}
         />
         <meta name="twitter:card" content="summary_large_image" />
       </Head>
