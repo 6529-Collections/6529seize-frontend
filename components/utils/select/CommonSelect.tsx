@@ -5,7 +5,7 @@ import CommonDropdown from "./dropdown/CommonDropdown";
 import { RefObject } from "react";
 
 interface ChildComponentProps {
-  onTitle?: (newTitle: string) => void;
+  onCopy?: () => void;
 }
 
 export interface CommonSelectItem<T, U = unknown> {

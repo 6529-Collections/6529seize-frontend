@@ -1,10 +1,8 @@
-import { useEffect, useState } from "react";
+import { cloneElement, isValidElement, useEffect, useState } from "react";
 import CommonTableSortIcon from "../../../user/utils/icons/CommonTableSortIcon";
 import { CommonSelectItemProps } from "../CommonSelect";
 import { SortDirection } from "../../../../entities/ISort";
-
 import { Inter } from "next/font/google";
-import React from "react";
 
 const inter = Inter({
   weight: ["300", "400", "500", "600", "700"],
@@ -31,6 +29,17 @@ export default function CommonDropdownItem<T, U = unknown>(
     setShouldRotate(false);
   };
 
+  const getLabel = (): string => item.mobileLabel ?? item.label;
+
+  const [label, setLabel] = useState<string>(getLabel());
+
+  const onCopy = () => {
+    setLabel("Copied!");
+    setTimeout(() => {
+      setLabel(getLabel());
+    }, 1000);
+  };
+
   return (
     <li className={`${inter.className} tw-h-full`}>
       <button
@@ -42,7 +51,7 @@ export default function CommonDropdownItem<T, U = unknown>(
       >
         <div className="tw-w-44 tw-truncate">
           <span className="tw-text-sm tw-font-medium tw-text-white">
-            {item.mobileLabel ?? item.label}
+            {label}
           </span>
           {sortDirection && (
             <CommonTableSortIcon
@@ -69,9 +78,9 @@ export default function CommonDropdownItem<T, U = unknown>(
             </svg>
           )}
         </div>
-        {React.isValidElement(children) &&
-          React.cloneElement(children, {
-            onTitle: () => console.log("childs"),
+        {isValidElement(children) &&
+          cloneElement(children, {
+            onCopy,
           })}
       </button>
     </li>
