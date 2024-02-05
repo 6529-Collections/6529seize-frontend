@@ -13,6 +13,7 @@ import { areEqualAddresses } from "../../../helpers/Helpers";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { mainnet } from "viem/chains";
 import { formatNameForUrl, getOpenseaLink } from "../nextgen_helpers";
+import Tippy from "@tippyjs/react";
 
 interface Props {
   collection: NextGenCollection;
@@ -33,7 +34,7 @@ export default function NextGenTokenOnChain(props: Readonly<Props>) {
   const [ownerProfileHandle, setOwnerProfileHandle] = useState<string>();
 
   const normalisedTokenId = props.token_id - props.collection.id * 10000000000;
-  const tokenName = `${props.collection.name} - #${normalisedTokenId}`;
+  const tokenName = `${props.collection.name} #${normalisedTokenId}`;
 
   useContractRead({
     address: NEXTGEN_CORE[NEXTGEN_CHAIN_ID] as `0x${string}`,
@@ -103,24 +104,10 @@ export default function NextGenTokenOnChain(props: Readonly<Props>) {
               <Container>
                 <Row>
                   <Col className="d-flex align-items-center justify-content-between">
-                    <h2>{tokenName}</h2>
-                    <span className="d-flex gap-4">
-                      <a
-                        href={getOpenseaLink(NEXTGEN_CHAIN_ID, props.token_id)}
-                        target="_blank"
-                        rel="noreferrer">
-                        <Image
-                          className={styles.marketplace}
-                          src="/opensea.png"
-                          alt="opensea"
-                          width={32}
-                          height={32}
-                        />
-                      </a>
-                    </span>
+                    <h2 className="mb-0">{tokenName}</h2>
                   </Col>
                 </Row>
-                <Row className="pt-3">
+                <Row className="pt-4">
                   <Col className="text-center">
                     <Image
                       priority
@@ -192,6 +179,25 @@ export default function NextGenTokenOnChain(props: Readonly<Props>) {
                         icon="external-link-square"></FontAwesomeIcon>
                     </a>
                   </span>
+                </span>
+              </span>
+              <span className="pt-1 pb-1 d-flex flex-column">
+                <span className="font-color-h">Marketplaces</span>
+                <span className="d-flex gap-4">
+                  <Tippy content={"Opensea"} theme={"light"} delay={250}>
+                    <a
+                      href={getOpenseaLink(NEXTGEN_CHAIN_ID, props.token_id)}
+                      target="_blank"
+                      rel="noreferrer">
+                      <Image
+                        className={styles.marketplace}
+                        src="/opensea.png"
+                        alt="opensea"
+                        width={28}
+                        height={28}
+                      />
+                    </a>
+                  </Tippy>
                 </span>
               </span>
             </Col>
