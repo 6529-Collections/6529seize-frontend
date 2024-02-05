@@ -25,7 +25,7 @@ export default function DistributionPlanTool() {
                     rel="noreferrer"
                   >
                     Janus
-                  </a>
+                  </a>{""}
                   , a domain-specific language for deeply customized allowlist
                   management.
                 </p>

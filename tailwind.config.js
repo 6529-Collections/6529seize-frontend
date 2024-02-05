@@ -15,6 +15,9 @@ module.exports = {
   },
   theme: {
     extend: {
+      screens: {
+        "3xl": "2048px",
+      },
       fontSize: {
         md: ["0.938rem", "20px"],
       },

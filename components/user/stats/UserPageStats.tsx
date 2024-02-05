@@ -3,7 +3,7 @@ import { IProfileAndConsolidations } from "../../../entities/IProfile";
 import { ConsolidatedTDHMetrics, TDHMetrics } from "../../../entities/ITDH";
 import { useEffect, useState } from "react";
 import { commonApiFetch } from "../../../services/api/common-api";
-import UserPageHeaderAddresses from "../user-page-header/addresses/UserPageHeaderAddresses";
+
 import UserPageStatsTags from "./tags/UserPageStatsTags";
 import UserPageStatsCollected from "./UserPageStatsCollected";
 import UserPageStatsActivityOverview from "./UserPageStatsActivityOverview";
@@ -12,6 +12,7 @@ import { useQuery } from "@tanstack/react-query";
 import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
 import CommonSkeletonLoader from "../../utils/animation/CommonSkeletonLoader";
 import CommonCardSkeleton from "../../utils/animation/CommonCardSkeleton";
+import UserAddressesSelectDropdown from "../utils/addresses-select/UserAddressesSelectDropdown";
 
 export type UserPageStatsTDHType = ConsolidatedTDHMetrics | TDHMetrics | null;
 
@@ -90,7 +91,7 @@ export default function UserPageStats({
           <UserPageStatsTags tdh={tdh} />
         )}
 
-        <UserPageHeaderAddresses
+        <UserAddressesSelectDropdown
           addresses={profile.consolidation.wallets}
           onActiveAddress={setActiveAddress}
         />

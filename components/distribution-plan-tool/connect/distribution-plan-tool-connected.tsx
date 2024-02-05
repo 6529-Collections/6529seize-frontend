@@ -9,7 +9,7 @@ export default function DistributionPlanToolConnected() {
   const trySignIn = async () => {
     const { success } = await requestAuth();
     if (!success) return;
-    router.push("/distribution-plan-tool/plans");
+    router.push("/emma/plans");
   };
 
   return (
