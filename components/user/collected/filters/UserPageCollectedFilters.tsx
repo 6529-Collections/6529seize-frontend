@@ -13,9 +13,6 @@ import UserPageCollectedFiltersSeized from "./UserPageCollectedFiltersSeized";
 import UserPageCollectedFiltersSzn from "./UserPageCollectedFiltersSzn";
 import UserAddressesSelectDropdown from "../../utils/addresses-select/UserAddressesSelectDropdown";
 import { useRouter } from "next/router";
-import { createBreakpoint } from "react-use";
-
-const useBreakpoint = createBreakpoint({ DESKTOP: 1024 });
 
 export default function UserPageCollectedFilters({
   profile,
@@ -37,7 +34,6 @@ export default function UserPageCollectedFilters({
   readonly scrollHorizontally: (direction: "left" | "right") => void;
 }) {
   const router = useRouter();
-  const breakpoint = useBreakpoint();
 
   const getShowSeizedAndSzn = (
     targetCollection: CollectedCollectionType | null
@@ -90,9 +86,10 @@ export default function UserPageCollectedFilters({
 
   const setVisibility = () => {
     const { left, right } = getContainerLeftRightPositions();
+    const viewportWidth = window.innerWidth;
     const leftArrow = leftArrowRef.current;
     const rightArrow = rightArrowRef.current;
-    const isDesktop = breakpoint === "DESKTOP";
+    const isDesktop = viewportWidth >= 1024;
     const newLeft = isDesktop ? left - 40 : left - 40;
     const newRight = isDesktop ? right + 8 : right + 8;
     if (leftArrow) {
@@ -108,6 +105,7 @@ export default function UserPageCollectedFilters({
 
   useEffect(() => {
     const container = containerRef.current;
+
     if (container) {
       container.addEventListener("scroll", setVisibility);
       window.addEventListener("resize", setVisibility);
