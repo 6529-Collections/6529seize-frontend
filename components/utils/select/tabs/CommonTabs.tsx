@@ -16,6 +16,7 @@ export default function CommonTabs<T, U = unknown>(props: CommonSelectProps<T, U
             "sortDirection" in props ? props.sortDirection : undefined
           }
           setSelected={setSelected}
+          isMobile={false}
         />
       ))}
     </div>
