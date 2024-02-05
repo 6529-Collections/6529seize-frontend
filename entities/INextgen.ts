@@ -55,6 +55,8 @@ export interface NextGenToken {
   rarity_score_rank: number;
   rarity_score_normalised_rank: number;
   statistical_score_rank: number;
+  single_trait_rarity_score: number;
+  single_trait_rarity_score_rank: number;
   hodl_rate: number;
 }
 
@@ -76,7 +78,8 @@ export interface NextGenTrait {
   collection_id: number;
   trait: string;
   value: string;
-  rarity: number;
+  statistical_rarity: number;
+  statistical_rarity_rank: number;
   rarity_score: number;
   rarity_score_rank: number;
   rarity_score_normalised: number;
