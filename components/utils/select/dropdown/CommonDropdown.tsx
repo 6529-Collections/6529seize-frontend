@@ -106,6 +106,8 @@ export default function CommonDropdown<T, U = unknown>(
     }
   }, [isOpen]);
 
+  const [isMobile, setIsMobile] = useState<boolean>(false);
+
   return (
     <div className={`${inter.className} `}>
       <div className="tw-relative">
@@ -147,6 +149,7 @@ export default function CommonDropdown<T, U = unknown>(
         buttonRef={buttonRef}
         buttonPosition={buttonPosition}
         filterLabel={filterLabel}
+        onIsMobile={setIsMobile}
       >
         {Object.values(items).map((item, i) => (
           <CommonDropdownItem
@@ -156,6 +159,7 @@ export default function CommonDropdown<T, U = unknown>(
             isLast={i === items.length - 1}
             activeItem={activeItem}
             sortDirection={sortDirection}
+            isMobile={isMobile}
             setSelected={onSelect}
           >
             {renderItemChildren?.(item)}

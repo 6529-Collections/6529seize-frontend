@@ -13,6 +13,9 @@ import UserPageCollectedFiltersSeized from "./UserPageCollectedFiltersSeized";
 import UserPageCollectedFiltersSzn from "./UserPageCollectedFiltersSzn";
 import UserAddressesSelectDropdown from "../../utils/addresses-select/UserAddressesSelectDropdown";
 import { useRouter } from "next/router";
+import { createBreakpoint } from "react-use";
+
+const useBreakpoint = createBreakpoint({ MOBILE: 640 });
 
 export default function UserPageCollectedFilters({
   profile,
@@ -34,6 +37,8 @@ export default function UserPageCollectedFilters({
   readonly scrollHorizontally: (direction: "left" | "right") => void;
 }) {
   const router = useRouter();
+  const breakpoint = useBreakpoint();
+
   const getShowSeizedAndSzn = (
     targetCollection: CollectedCollectionType | null
   ): boolean => targetCollection === CollectedCollectionType.MEMES;
@@ -58,7 +63,7 @@ export default function UserPageCollectedFilters({
     useState<boolean>(false);
 
   const checkVisibility = (elementRef: RefObject<HTMLDivElement>): boolean => {
-    if (isTouchScreen) return false;
+    if (isTouchScreen || breakpoint === "MOBILE") return false;
     const element = elementRef.current;
     const container = containerRef.current;
 

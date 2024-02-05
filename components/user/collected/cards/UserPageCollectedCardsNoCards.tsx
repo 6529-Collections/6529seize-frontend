@@ -14,7 +14,7 @@ export default function UserPageCollectedCardsNoCards({
 }) {
   const getMsg = (): string => {
     if (filters.seized !== CollectionSeized.NOT_SEIZED) {
-      return "You have not seized any cards";
+      return "No cards to display";
     }
     switch (filters.collection) {
       case null:

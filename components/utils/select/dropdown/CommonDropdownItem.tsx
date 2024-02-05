@@ -14,7 +14,8 @@ const inter = Inter({
 export default function CommonDropdownItem<T, U = unknown>(
   props: Readonly<CommonSelectItemProps<T, U>>
 ) {
-  const { item, activeItem, setSelected, sortDirection, children } = props;
+  const { item, activeItem, setSelected, sortDirection, children, isMobile } =
+    props;
 
   const [isActive, setIsActive] = useState<boolean>(item.value === activeItem);
 

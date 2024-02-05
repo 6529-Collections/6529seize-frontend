@@ -38,6 +38,7 @@ export interface CommonSelectItemProps<T, U> {
   readonly activeItem: T;
   readonly isFirst: boolean;
   readonly isLast: boolean;
+  readonly isMobile: boolean;
   readonly setSelected: (item: T) => void;
   readonly sortDirection?: SortDirection;
   readonly children?: React.ReactElement<ChildComponentProps>;
