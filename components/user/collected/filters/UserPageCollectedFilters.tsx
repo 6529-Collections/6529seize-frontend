@@ -59,7 +59,7 @@ export default function UserPageCollectedFilters({
     useState<boolean>(false);
 
   const checkVisibility = (elementRef: RefObject<HTMLDivElement>): boolean => {
-    if (isTouchScreen) return false;
+    if (window.matchMedia("(pointer: coarse)").matches) return true;
     const element = elementRef.current;
     const container = containerRef.current;
 
@@ -117,10 +117,6 @@ export default function UserPageCollectedFilters({
     }
   }, []);
 
-  const [isTouchScreen, setIsTouchScreen] = useState(false);
-  useEffect(() => {
-    setIsTouchScreen(window.matchMedia("(pointer: coarse)").matches);
-  }, [router.isReady]);
 
   return (
     <div>
