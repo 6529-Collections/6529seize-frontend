@@ -90,7 +90,7 @@ export default function UserPageCollectedFilters({
     const leftArrow = leftArrowRef.current;
     const rightArrow = rightArrowRef.current;
     const isDesktop = viewportWidth >= 1024;
-    const newLeft = isDesktop ? left - 40 : left - 10;
+    const newLeft = isDesktop ? left - 40 : left - 20;
     const newRight = isDesktop ? right + 8 : right - 12;
     if (leftArrow) {
       leftArrow.style.left = `${newLeft}px`;
