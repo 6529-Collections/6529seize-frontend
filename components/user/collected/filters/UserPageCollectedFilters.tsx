@@ -15,7 +15,7 @@ import UserAddressesSelectDropdown from "../../utils/addresses-select/UserAddres
 import { useRouter } from "next/router";
 import { createBreakpoint } from "react-use";
 
-const useBreakpoint = createBreakpoint({ DESKTOP: 800 });
+const useBreakpoint = createBreakpoint({ DESKTOP: 1024 });
 
 export default function UserPageCollectedFilters({
   profile,

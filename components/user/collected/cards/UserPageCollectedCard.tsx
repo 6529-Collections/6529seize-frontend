@@ -52,7 +52,7 @@ export default function UserPageCollectedCard({
           </div>
         </Link>
         <div className="tw-pt-3 tw-px-2">
-          <span className="tw-text-sm min-[1200px]:tw-text-md tw-font-medium tw-text-iron-400">
+          <span className="tw-text-sm min-[1200px]:tw-text-md tw-font-medium tw-text-iron-400 tw-tracking-wide">
             {COLLECTION_TYPE_TO_TEXT[card.collection]}
           </span>
         </div>
@@ -73,16 +73,16 @@ export default function UserPageCollectedCard({
           {showDataRow && (
             <div className="tw-pt-2 tw-flex tw-items-center tw-justify-between">
               <span className="tw-text-sm min-[1200px]:tw-text-md tw-font-medium">
-                <span className="tw-mr-1 tw-text-iron-50">
+                <span className="tw-text-iron-400">TDH</span>
+                <span className="tw-ml-1 tw-text-iron-50">
                   {formatNumberWithCommasOrDash(+(card.tdh ?? 0).toFixed(0))}
                 </span>
-                <span className="tw-text-iron-400">TDH</span>
               </span>
               <span className="tw-text-sm min-[1200px]:tw-text-md tw-font-medium">
-                <span className="tw-mr-1 tw-text-iron-50">
+                <span className="tw-text-iron-400">Rank</span>
+                <span className="tw-ml-1 tw-text-iron-50">
                   {formatNumberWithCommasOrDash(card.rank ?? 0)}
                 </span>
-                <span className="tw-text-iron-400">Rank</span>
               </span>
             </div>
           )}
