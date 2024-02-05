@@ -214,12 +214,12 @@ export default function NextGenTokenOnChain(props: Readonly<Props>) {
         <Row>
           <Col className="text-center">
             <h4 className="mb-0 float-none">
-              {fetchingMetadata || !tokenImage ? (
+              {tokenNotFound ? (
+                <>Token Not Found</>
+              ) : (
                 <>
                   Fetching Token <DotLoader />
                 </>
-              ) : (
-                `Token Not Found`
               )}
             </h4>
           </Col>
@@ -227,5 +227,6 @@ export default function NextGenTokenOnChain(props: Readonly<Props>) {
       </Container>
     );
   }
-  return <>{printToken()}</>;
+
+  return printToken();
 }

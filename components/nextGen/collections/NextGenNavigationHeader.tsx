@@ -57,7 +57,11 @@ export default function NextGenNavigationHeader(
           if (props.setView) {
             props.setView(v);
           } else {
-            window.location.href = `/nextgen/${v?.toLowerCase()}`;
+            let href = "/nextgen";
+            if (v) {
+              href += `/${v.toLowerCase()}`;
+            }
+            window.location.href = href;
           }
         }}>
         {viewHeader}

@@ -114,6 +114,73 @@ export default function NextGenToken(props: Readonly<Props>) {
     );
   }
 
+  function printPreviousToken() {
+    const hasPreviousToken = props.token.normalised_id > 0;
+    const prev = (
+      <FontAwesomeIcon
+        title="Previous Token"
+        icon="chevron-circle-left"
+        onClick={() => {
+          if (!hasPreviousToken) {
+            return;
+          }
+          const currentHref = window.location.href;
+          const prevHref = currentHref.replace(
+            props.token.id.toString(),
+            (props.token.id - 1).toString()
+          );
+          window.location.href = prevHref;
+        }}
+        style={{
+          height: "35px",
+          color: hasPreviousToken ? "#fff" : "#9a9a9a",
+          cursor: hasPreviousToken ? "pointer" : "default",
+        }}
+      />
+    );
+    if (hasPreviousToken) {
+      return (
+        <Tippy content={"Previous Token"} theme={"light"} delay={100}>
+          {prev}
+        </Tippy>
+      );
+    }
+    return prev;
+  }
+
+  function printNextToken() {
+    const hasNextToken = props.tokenCount - 1 > props.token.normalised_id;
+    const next = (
+      <FontAwesomeIcon
+        icon="chevron-circle-right"
+        onClick={() => {
+          if (!hasNextToken) {
+            return;
+          }
+          const currentHref = window.location.href;
+          const nextHref = currentHref.replace(
+            props.token.id.toString(),
+            (props.token.id + 1).toString()
+          );
+          window.location.href = nextHref;
+        }}
+        style={{
+          height: "35px",
+          color: hasNextToken ? "#fff" : "#9a9a9a",
+          cursor: hasNextToken ? "pointer" : "default",
+        }}
+      />
+    );
+    if (hasNextToken) {
+      return (
+        <Tippy content={"Next Token"} theme={"light"} delay={100}>
+          {next}
+        </Tippy>
+      );
+    }
+    return next;
+  }
+
   function printToken() {
     return (
       <>
@@ -123,16 +190,22 @@ export default function NextGenToken(props: Readonly<Props>) {
               <Container>
                 <Row className="pb-4">
                   <Col className="d-flex align-items-center justify-content-between">
-                    <h2 className="mb-0 font-color">{props.token.name}</h2>
-                    {(props.token.burnt ||
-                      isNullAddress(props.token.owner)) && (
-                      <Tippy content={"Burnt"} theme={"light"} delay={100}>
-                        <FontAwesomeIcon
-                          icon="fire"
-                          style={{ height: "35px", color: "#c51d34" }}
-                        />
-                      </Tippy>
-                    )}
+                    <span className="d-flex gap-3">
+                      <h2 className="mb-0 font-color">{props.token.name}</h2>
+                      {(props.token.burnt ||
+                        isNullAddress(props.token.owner)) && (
+                        <Tippy content={"Burnt"} theme={"light"} delay={100}>
+                          <FontAwesomeIcon
+                            icon="fire"
+                            style={{ height: "35px", color: "#c51d34" }}
+                          />
+                        </Tippy>
+                      )}
+                    </span>
+                    <span className="d-flex gap-2">
+                      {printPreviousToken()}
+                      {printNextToken()}
+                    </span>
                   </Col>
                 </Row>
               </Container>
