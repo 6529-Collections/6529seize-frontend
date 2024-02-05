@@ -23,7 +23,7 @@ export default function UserPageCollectedCards({
     <div>
       {cards.length ? (
         <div className="tw-flow-root">
-          <div className="tw-grid tw-grid-cols-2 sm:tw-grid-cols-3 md:tw-grid-cols-4 tw-gap-6 tw-pb-2">
+          <div className="tw-grid tw-grid-cols-2 sm:tw-grid-cols-3 md:tw-grid-cols-4 tw-gap-4 lg:tw-gap-6 tw-pb-2">
             {cards.map((card) => (
               <UserPageCollectedCard
                 key={`${card.collection}-${card.token_id}`}
