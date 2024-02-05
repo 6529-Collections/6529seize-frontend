@@ -1,10 +1,10 @@
 import Head from "next/head";
-import styles from "../styles/Home.module.scss";
+import styles from "../../styles/Home.module.scss";
 import dynamic from "next/dynamic";
 import Image from "next/image";
-import HeaderPlaceholder from "../components/header/HeaderPlaceholder";
+import HeaderPlaceholder from "../../components/header/HeaderPlaceholder";
 
-const Header = dynamic(() => import("../components/header/Header"), {
+const Header = dynamic(() => import("../../components/header/Header"), {
   ssr: false,
   loading: () => <HeaderPlaceholder />,
 });
@@ -24,7 +24,7 @@ export default function NextGen() {
         <meta property="og:description" content="6529 Seize" />
         <meta
           property="og:image"
-          content={`${process.env.BASE_ENDPOINT}/Seize_Logo_Glasses_2.png`}
+          content={`${process.env.BASE_ENDPOINT}/nextgen-logo.png`}
         />
       </Head>
 
@@ -38,6 +38,11 @@ export default function NextGen() {
             src="/question.png"
             alt="questionmark"
           />
+          <a
+            href="/nextgen/pebbles-distribution"
+            className="font-larger font-bolder pt-4">
+            Pebbles Distribution Plan
+          </a>
         </div>
       </main>
     </>
