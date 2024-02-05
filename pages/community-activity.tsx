@@ -75,12 +75,10 @@ export default function CommunityActivityPage({
       <main className="tailwind-scope tw-min-h-screen tw-bg-iron-950">
         <Header />
         <div
-          className={`tailwind-scope tw-bg-iron-950 tw-min-h-screen tw-pb-16 lg:tw-pb-20 tw-relative tw-px-6 min-[1100px]:tw-max-w-[960px] min-[1200px]:tw-max-w-[1150px] min-[1300px]:tw-max-w-[1250px] min-[1400px]:tw-max-w-[1350px] min-[1500px]:tw-max-w-[1450px] min-[1600px]:tw-max-w-[1550px] min-[1800px]:tw-max-w-[1750px] min-[2000px]:tw-max-w-[1950px] tw-mx-auto ${inter.className}`}
-        >
+          className={`tailwind-scope tw-bg-iron-950 tw-min-h-screen tw-pb-16 lg:tw-pb-20 tw-relative tw-px-6 min-[1000px]:tw-max-w-[850px] min-[1100px]:tw-max-w-[950px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px] tw-mx-auto ${inter.className}`}>
           <ProfileActivityLogs
             initialParams={INITIAL_ACTIVITY_LOGS_PARAMS}
-            withFilters={true}
-          >
+            withFilters={true}>
             <h1 className="tw-block tw-uppercase  tw-float-none tw-pb-0 tw-mb-0">
               Community Activity
             </h1>
