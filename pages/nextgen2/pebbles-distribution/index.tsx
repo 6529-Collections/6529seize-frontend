@@ -21,13 +21,6 @@ const Header = dynamic(() => import("../../../components/header/Header"), {
   loading: () => <HeaderPlaceholder />,
 });
 
-const PdfViewer = dynamic(
-  () => import("../../../components/pdfViewer/PdfViewer"),
-  {
-    ssr: false,
-  }
-);
-
 export default function NextGen(props: any) {
   const pageProps = props.pageProps;
 
@@ -50,6 +43,7 @@ export default function NextGen(props: any) {
           property="og:image"
           content={`${process.env.BASE_ENDPOINT}/nextgen-logo.png`}
         />
+        <meta name="twitter:card" content="summary_large_image" />
       </Head>
 
       <main className={styles.main}>

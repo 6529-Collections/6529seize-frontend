@@ -26,6 +26,7 @@ export default function NextGen() {
           property="og:image"
           content={`${process.env.BASE_ENDPOINT}/nextgen-logo.png`}
         />
+        <meta name="twitter:card" content="summary_large_image" />
       </Head>
 
       <main className={styles.main}>
