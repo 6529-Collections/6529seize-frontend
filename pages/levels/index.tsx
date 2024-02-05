@@ -447,7 +447,7 @@ export default function Levels() {
       <Breadcrumb breadcrumbs={breadcrumbs} />
       <div className={`tailwind-scope ${inter.className}`}>
         <div className="tw-pt-12 tw-pb-12">
-          <div className="tw-max-w-5xl tw-mx-auto tw-px-6">
+          <div className="tw-px-6 min-[992px]:tw-px-3 min-[992px]:tw-max-w-[960px] max-[1100px]:tw-max-w-[950px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px] tw-mx-auto">
             <div className="tw-max-w-3xl tw-pb-4 tw-flex tw-flex-col">
               <h1 className="tw-uppercase">Levels</h1>
               <ul className="tw-ml-4 tw-pl-0">
@@ -472,7 +472,7 @@ export default function Levels() {
                 </li>
               </ul>
             </div>
-            <div className="tw-overflow-x-auto tw-ring-1 tw-ring-white/[0.15] tw-rounded-lg">
+            <div className="xl:tw-max-w-4xl tw-overflow-x-auto tw-ring-1 tw-ring-white/[0.15] tw-rounded-lg">
               <table className="tw-min-w-full tw-divide-y tw-divide-neutral-700/60">
                 <thead className="tw-bg-neutral-700">
                   <tr>
