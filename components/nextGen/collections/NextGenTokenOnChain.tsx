@@ -208,13 +208,13 @@ export default function NextGenTokenOnChain(props: Readonly<Props>) {
     );
   }
 
-  if (fetchingMetadata || tokenNotFound) {
+  if (fetchingMetadata || tokenNotFound || !tokenImage) {
     return (
       <Container className="pt-5">
         <Row>
           <Col className="text-center">
             <h4 className="mb-0 float-none">
-              {fetchingMetadata ? (
+              {fetchingMetadata || !tokenImage ? (
                 <>
                   Fetching Token <DotLoader />
                 </>
