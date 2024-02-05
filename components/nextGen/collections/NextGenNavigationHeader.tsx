@@ -47,7 +47,7 @@ export default function NextGenNavigationHeader(
         <b>{v ?? "Featured"}</b>
       </h4>
     );
-    if (props.view == v) {
+    if (props.view == v && props.setView) {
       return viewHeader;
     }
     return (
