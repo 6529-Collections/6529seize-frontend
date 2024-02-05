@@ -22,6 +22,7 @@ import NextGenTokenDownload, { Quality } from "./NextGenTokenDownload";
 import { Time } from "../../../../helpers/time";
 import { DBResponse } from "../../../../entities/IDBResponse";
 import EthereumIcon from "../../../user/utils/icons/EthereumIcon";
+import { displayScore } from "./NextGenTokenProperties";
 
 interface Props {
   collection: NextGenCollection;
@@ -217,10 +218,7 @@ export function TraitScore(
     <span className="d-flex flex-column">
       <span className="font-color-h">{props.trait}</span>
       <span className="d-flex gap-3">
-        <span>
-          Score{" "}
-          {Number(props.score.toFixed(props.places ?? 2)).toLocaleString()}
-        </span>
+        <span>Score {displayScore(props.score)}</span>
         <span>|</span>
         <span>Rank #{props.rank.toLocaleString()}</span>
       </span>

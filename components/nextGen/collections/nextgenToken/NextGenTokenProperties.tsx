@@ -10,6 +10,22 @@ interface Props {
   tokenCount: number;
 }
 
+export function displayScore(number: number) {
+  if (number >= 0.01) {
+    return Number(number.toFixed(3)).toLocaleString();
+  }
+
+  const numberStr = number.toString();
+  const match = numberStr.match(/0\.0*([1-9])/);
+
+  if (match && typeof match.index !== "undefined") {
+    const position = match.index + match[0].length;
+    return numberStr.substring(0, position);
+  }
+
+  return number;
+}
+
 function TraitAccordion(
   props: Readonly<{
     title: string;
@@ -28,25 +44,6 @@ function TraitAccordion(
     }[];
   }>
 ) {
-  function displayScore(number: number) {
-    if (number >= 0.01) {
-      return Number(number.toFixed(3)).toLocaleString();
-    }
-
-    if (0.0001 > number) {
-      return "< 0.0001";
-    }
-    const numberStr = number.toString();
-    const match = numberStr.match(/0\.0*([1-9])/);
-
-    if (match && typeof match.index !== "undefined") {
-      const position = match.index + match[0].length;
-      return numberStr.substring(0, position);
-    }
-
-    return number;
-  }
-
   return (
     <Accordion>
       <Accordion.Item defaultChecked={true} eventKey={"0"}>
