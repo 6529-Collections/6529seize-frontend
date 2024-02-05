@@ -6,7 +6,7 @@ import {
   NextGenTrait,
 } from "../../../../entities/INextgen";
 import NextGenTokenProvenance from "./NextGenTokenProvenance";
-import NextgenTokenProperties, {
+import NextgenTokenRarity, {
   NextgenTokenTraits,
 } from "./NextGenTokenProperties";
 import NextGenTokenAbout from "./NextGenTokenAbout";
@@ -35,6 +35,10 @@ export default function NextGenToken(props: Readonly<Props>) {
 
   const [view, setView] = useState<ContentView>(
     props.view ?? ContentView.ABOUT
+  );
+
+  const tokenTraits = props.traits.filter(
+    (trait) => trait.trait !== "Collection Name"
   );
 
   useEffect(() => {
@@ -76,7 +80,7 @@ export default function NextGenToken(props: Readonly<Props>) {
                 <NextgenTokenTraits
                   collection_id={props.collection.id}
                   token={props.token}
-                  traits={props.traits}
+                  traits={tokenTraits}
                   tokenCount={props.tokenCount}
                 />
               </Col>
@@ -97,10 +101,10 @@ export default function NextGenToken(props: Readonly<Props>) {
           )}
           {view === ContentView.RARITY && (
             <Col className="pt-4 pb-4">
-              <NextgenTokenProperties
+              <NextgenTokenRarity
                 collection_id={props.collection.id}
                 token={props.token}
-                traits={props.traits}
+                traits={tokenTraits}
                 tokenCount={props.tokenCount}
               />
             </Col>

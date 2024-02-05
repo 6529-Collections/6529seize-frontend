@@ -211,7 +211,7 @@ export default function NextGenCollectionArt(props: Readonly<Props>) {
       <hr />
       <Row>
         {!props.show_view_all && (
-          <Col sm={12} md={2}>
+          <Col sm={12} md={3}>
             <Container>
               <Row>
                 <Col
@@ -309,7 +309,7 @@ export default function NextGenCollectionArt(props: Readonly<Props>) {
           </Col>
         )}
         {(routerLoaded || totalResultsSet) && (
-          <Col sm={12} md={props.show_view_all ? 12 : 10}>
+          <Col sm={12} md={props.show_view_all ? 12 : 9}>
             <NextGenTokenList
               limit={props.show_view_all ? 6 : undefined}
               collection={props.collection}

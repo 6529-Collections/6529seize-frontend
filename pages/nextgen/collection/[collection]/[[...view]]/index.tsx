@@ -1,25 +1,29 @@
 import Head from "next/head";
-import styles from "../../../../styles/Home.module.scss";
+import styles from "../../../../../styles/Home.module.scss";
 
 import dynamic from "next/dynamic";
-import HeaderPlaceholder from "../../../../components/header/HeaderPlaceholder";
-import { NextGenCollection } from "../../../../entities/INextgen";
-import { isEmptyObject } from "../../../../helpers/Helpers";
-import { commonApiFetch } from "../../../../services/api/common-api";
-import { getCommonHeaders } from "../../../../helpers/server.helpers";
+import HeaderPlaceholder from "../../../../../components/header/HeaderPlaceholder";
+import { NextGenCollection } from "../../../../../entities/INextgen";
+import { isEmptyObject } from "../../../../../helpers/Helpers";
+import { commonApiFetch } from "../../../../../services/api/common-api";
+import { getCommonHeaders } from "../../../../../helpers/server.helpers";
 import { useEffect } from "react";
 import { useRouter } from "next/router";
-import { formatNameForUrl } from "../../../../components/nextGen/nextgen_helpers";
+import { formatNameForUrl } from "../../../../../components/nextGen/nextgen_helpers";
+import { ContentView } from "../../../../../components/nextGen/collections/collectionParts/NextGenCollection";
 
-const Header = dynamic(() => import("../../../../components/header/Header"), {
-  ssr: false,
-  loading: () => <HeaderPlaceholder />,
-});
+const Header = dynamic(
+  () => import("../../../../../components/header/Header"),
+  {
+    ssr: false,
+    loading: () => <HeaderPlaceholder />,
+  }
+);
 
 const NextGenCollectionComponent = dynamic(
   () =>
     import(
-      "../../../../components/nextGen/collections/collectionParts/NextGenCollection"
+      "../../../../../components/nextGen/collections/collectionParts/NextGenCollection"
     ),
   {
     ssr: false,
@@ -27,7 +31,9 @@ const NextGenCollectionComponent = dynamic(
 );
 
 export default function NextGenCollection(props: any) {
+  const router = useRouter();
   const collection: NextGenCollection = props.pageProps.collection;
+  const view: ContentView = props.pageProps.view;
   useShallowRedirect(collection.name);
   const pagenameFull = `#${collection.id} - ${collection.name}`;
 
@@ -53,7 +59,7 @@ export default function NextGenCollection(props: any) {
 
       <main className={styles.main}>
         <Header />
-        <NextGenCollectionComponent collection={collection} />
+        <NextGenCollectionComponent collection={collection} view={view} />
       </main>
     </>
   );
@@ -79,9 +85,21 @@ export async function getServerSideProps(req: any, res: any, resolvedUrl: any) {
     };
   }
 
+  let view = req.query.view as string;
+  let collectionView: ContentView = ContentView.OVERVIEW;
+  if (view) {
+    view = view[0].toLowerCase();
+    if (view === ContentView.PROVENANCE.toLowerCase()) {
+      collectionView = ContentView.PROVENANCE;
+    } else if (view == ContentView.OVERVIEW.toLowerCase()) {
+      collectionView = ContentView.OVERVIEW;
+    }
+  }
+
   return {
     props: {
       collection: collection,
+      view: collectionView,
     },
   };
 }

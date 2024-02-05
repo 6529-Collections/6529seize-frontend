@@ -6,12 +6,15 @@ import NextGenCollectionArt from "./NextGenCollectionArt";
 import NextGenCollectionDetails from "./NextGenCollectionDetails";
 import NextGenCollectionSlideshow from "./NextGenCollectionSlideshow";
 import { NextGenCollection } from "../../../../entities/INextgen";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import NextGenCollectionArtist from "./NextGenCollectionArtist";
 import NextGenNavigationHeader from "../NextGenNavigationHeader";
+import router from "next/router";
+import { formatNameForUrl } from "../../nextgen_helpers";
 
 interface Props {
   collection: NextGenCollection;
+  view: ContentView;
 }
 
 export enum ContentView {
@@ -19,6 +22,7 @@ export enum ContentView {
   PROVENANCE = "Provenance",
   RENDER_CENTER = "Render Center",
   RARITY = "Rarity",
+  OVERVIEW = "Overview",
 }
 
 export function printViewButton(
@@ -49,7 +53,18 @@ export default function NextGenCollection(props: Readonly<Props>) {
     { display: `#${props.collection.id} - ${props.collection.name}` },
   ];
 
-  const [view, setView] = useState<ContentView>(ContentView.ABOUT);
+  const [view, setView] = useState<ContentView>(props.view);
+
+  useEffect(() => {
+    const path = view === ContentView.OVERVIEW ? "/" : `/${view.toLowerCase()}`;
+    router.push(
+      `/nextgen/collection/${formatNameForUrl(props.collection.name)}${path}`,
+      undefined,
+      {
+        shallow: true,
+      }
+    );
+  }, [view]);
 
   return (
     <>
@@ -72,6 +87,7 @@ export default function NextGenCollection(props: Readonly<Props>) {
           </Row>
           <Row className="pt-5">
             <Col className="d-flex gap-4">
+              {printViewButton(view, ContentView.OVERVIEW, setView)}
               {printViewButton(view, ContentView.ABOUT, setView)}
               {printViewButton(view, ContentView.PROVENANCE, setView)}
             </Col>

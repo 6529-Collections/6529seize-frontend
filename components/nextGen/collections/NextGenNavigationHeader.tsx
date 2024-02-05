@@ -7,6 +7,7 @@ import Image from "next/image";
 export enum NextGenView {
   COLLECTIONS = "Collections",
   ARTISTS = "Artists",
+  ABOUT = "About",
 }
 
 export default function NextGenNavigationHeader(
@@ -66,7 +67,14 @@ export default function NextGenNavigationHeader(
 
   return (
     <>
-      <Container className={styles.navigationHeader}>
+      <Container
+        className={`${styles.navigationHeader} ${
+          isMobile ? `flex-column gap-2` : `justify-content-between`
+        }`}
+        style={{
+          height: isMobile ? "auto" : "90px",
+          paddingTop: isMobile ? "20px" : "0",
+        }}>
         <div>
           <Image
             priority
@@ -99,6 +107,7 @@ export default function NextGenNavigationHeader(
             {printView(undefined)}
             {printView(NextGenView.COLLECTIONS)}
             {printView(NextGenView.ARTISTS)}
+            {printView(NextGenView.ABOUT)}
           </span>
         </div>
       </Container>

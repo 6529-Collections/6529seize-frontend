@@ -7,7 +7,6 @@ import HeaderPlaceholder from "../../../components/header/HeaderPlaceholder";
 import { getCommonHeaders } from "../../../helpers/server.helpers";
 import { commonApiFetch } from "../../../services/api/common-api";
 import { NextGenCollection } from "../../../entities/INextgen";
-import Image from "next/image";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import NextGenNavigationHeader, {
@@ -31,6 +30,11 @@ const NextgenCollectionsComponent = dynamic(
 
 const NextgenArtistsComponent = dynamic(
   () => import("../../../components/nextGen/collections/NextGenArtists"),
+  { ssr: false }
+);
+
+const NextgenAboutComponent = dynamic(
+  () => import("../../../components/nextGen/collections/NextGenAbout"),
   { ssr: false }
 );
 
@@ -107,6 +111,9 @@ export default function NextGen(props: any) {
                         {view === NextGenView.ARTISTS && (
                           <NextgenArtistsComponent />
                         )}
+                        {view === NextGenView.ABOUT && (
+                          <NextgenAboutComponent />
+                        )}
                       </Col>
                     </Row>
                   </Container>
@@ -135,6 +142,8 @@ export async function getServerSideProps(req: any, res: any, resolvedUrl: any) {
       nextgenView = NextGenView.COLLECTIONS;
     } else if (view == NextGenView.ARTISTS.toLowerCase()) {
       nextgenView = NextGenView.ARTISTS;
+    } else if (view == NextGenView.ABOUT.toLowerCase()) {
+      nextgenView = NextGenView.ABOUT;
     }
   }
 

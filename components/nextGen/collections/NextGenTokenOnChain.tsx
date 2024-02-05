@@ -4,7 +4,6 @@ import { Col, Container, Row } from "react-bootstrap";
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import { NEXTGEN_CHAIN_ID, NEXTGEN_CORE } from "../nextgen_contracts";
-import NextGenCollectionHeader from "./collectionParts/NextGenCollectionHeader";
 import DotLoader from "../../dotLoader/DotLoader";
 import { NextGenCollection } from "../../../entities/INextgen";
 import { IProfileAndConsolidations } from "../../../entities/IProfile";
@@ -131,9 +130,8 @@ export default function NextGenTokenOnChain(props: Readonly<Props>) {
                       style={{
                         height: "auto",
                         width: "auto",
-                        maxHeight: "100%",
+                        maxHeight: "90vh",
                         maxWidth: "100%",
-                        padding: "10px",
                       }}
                       src={tokenImage}
                       alt={tokenName}
@@ -229,16 +227,5 @@ export default function NextGenTokenOnChain(props: Readonly<Props>) {
       </Container>
     );
   }
-  return (
-    <>
-      <Container className="pt-4 pb-4">
-        <NextGenCollectionHeader
-          collection={props.collection}
-          collection_link={true}
-          showDistributionLink={true}
-        />
-      </Container>
-      {printToken()}
-    </>
-  );
+  return <>{printToken()}</>;
 }

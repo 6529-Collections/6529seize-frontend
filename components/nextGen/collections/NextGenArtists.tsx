@@ -6,7 +6,7 @@ import { NextGenCollection } from "../../../entities/INextgen";
 import NextGenCollectionArtist from "./collectionParts/NextGenCollectionArtist";
 import { areEqualAddresses } from "../../../helpers/Helpers";
 
-export default function NextGenCollections() {
+export default function NextGenArtists() {
   const [artistCollections, setArtistCollections] = useState<
     { address: string; collections: NextGenCollection[] }[]
   >([]);

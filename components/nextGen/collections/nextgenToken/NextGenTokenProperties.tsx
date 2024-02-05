@@ -2,10 +2,6 @@ import styles from "./NextGenToken.module.scss";
 
 import { Accordion, Col, Container, Row } from "react-bootstrap";
 import { NextGenToken, NextGenTrait } from "../../../../entities/INextgen";
-import { useState } from "react";
-import Toggle from "react-toggle";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import Tippy from "@tippyjs/react";
 
 interface Props {
   collection_id: number;
@@ -25,11 +21,32 @@ function TraitAccordion(
       trait: string;
       value: string;
       score: number;
+      score_dps?: number;
       rank: number;
       trait_count: number;
+      value_count: number;
     }[];
   }>
 ) {
+  function displayScore(number: number) {
+    if (number >= 0.01) {
+      return Number(number.toFixed(3)).toLocaleString();
+    }
+
+    if (0.0001 > number) {
+      return "< 0.0001";
+    }
+    const numberStr = number.toString();
+    const match = numberStr.match(/0\.0*([1-9])/);
+
+    if (match && typeof match.index !== "undefined") {
+      const position = match.index + match[0].length;
+      return numberStr.substring(0, position);
+    }
+
+    return number;
+  }
+
   return (
     <Accordion>
       <Accordion.Item defaultChecked={true} eventKey={"0"}>
@@ -37,14 +54,16 @@ function TraitAccordion(
           <Container>
             <Row>
               <Col xs={5}>{props.title}</Col>
-              <Col xs={1}>
-                #{props.rank.toLocaleString()}/
-                {props.token_count.toLocaleString()}
+              <Col xs={2}></Col>
+              <Col xs={2} className="text-center">
+                {/* {props.rank.toLocaleString()}/
+                {props.token_count.toLocaleString()} */}
+                <span className="font-color-h">Rank:</span> #
+                {props.rank.toLocaleString()}
               </Col>
-              <Col xs={2}>
-                {Number(
-                  props.score.toFixed(props.score > 100 ? 2 : 3)
-                ).toLocaleString()}
+              <Col xs={2} className="text-center">
+                <span className="font-color-h">Score:</span>{" "}
+                {displayScore(props.score)}
               </Col>
             </Row>
           </Container>
@@ -52,6 +71,19 @@ function TraitAccordion(
         {props.traits && (
           <Accordion.Body className={styles.tokenPropertiesAccordionBody}>
             <Container>
+              <Row className="pt-2 pb-2">
+                <Col xs={5}>Trait</Col>
+                <Col xs={2} className="text-center">
+                  Quantity
+                </Col>
+                <Col xs={2} className="text-center">
+                  Rank
+                </Col>
+                <Col xs={2} className="text-center">
+                  Score
+                </Col>
+              </Row>
+              <hr className="mb-1 mt-0" />
               {props.traits.map((t) => (
                 <Row
                   className="pt-2 pb-2"
@@ -66,13 +98,15 @@ function TraitAccordion(
                       {t.value}
                     </a>
                   </Col>
-                  <Col xs={1}>
-                    #{t.rank}/{t.trait_count}
+                  <Col xs={2} className="text-center">
+                    {t.value_count} (
+                    {((t.value_count / props.token_count) * 100).toFixed(1)}%)
                   </Col>
-                  <Col xs={2}>
-                    {Number(
-                      t.score.toFixed(t.score > 100 ? 2 : 3)
-                    ).toLocaleString()}
+                  <Col xs={2} className="text-center">
+                    {t.rank}/{t.trait_count}
+                  </Col>
+                  <Col xs={2} className="text-center">
+                    {displayScore(t.score)}
                   </Col>
                 </Row>
               ))}
@@ -84,7 +118,7 @@ function TraitAccordion(
   );
 }
 
-export default function NextgenTokenProperties(props: Readonly<Props>) {
+export default function NextgenTokenRarity(props: Readonly<Props>) {
   // const [showNormalised, setShowNormalised] = useState(false);
 
   return (
@@ -106,7 +140,10 @@ export default function NextgenTokenProperties(props: Readonly<Props>) {
         </Col>
       </Row>
       <Row className="pt-4 pb-2">
-        <Col className="font-larger font-bolder">{props.token.name}</Col>
+        <Col className="d-flex justify-content-between align-items-center">
+          <span className="font-larger font-bolder">{props.token.name}</span>
+          <span>Token Count: {props.tokenCount}</span>
+        </Col>
       </Row>
       <Row className="pt-2 pb-2">
         <Col>
@@ -122,6 +159,7 @@ export default function NextgenTokenProperties(props: Readonly<Props>) {
               score: t.rarity_score,
               rank: t.rarity_score_rank,
               trait_count: t.trait_count,
+              value_count: t.value_count,
             }))}
           />
         </Col>
@@ -140,6 +178,7 @@ export default function NextgenTokenProperties(props: Readonly<Props>) {
               score: t.rarity_score_normalised,
               rank: t.rarity_score_normalised_rank,
               trait_count: t.trait_count,
+              value_count: t.value_count,
             }))}
           />
         </Col>
@@ -158,6 +197,7 @@ export default function NextgenTokenProperties(props: Readonly<Props>) {
               score: t.statistical_rarity,
               rank: t.statistical_rarity_rank,
               trait_count: t.trait_count,
+              value_count: t.value_count,
             }))}
           />
         </Col>
@@ -176,9 +216,13 @@ export default function NextgenTokenProperties(props: Readonly<Props>) {
               score: t.statistical_rarity,
               rank: t.statistical_rarity_rank,
               trait_count: t.trait_count,
+              value_count: t.value_count,
             }))}
           />
         </Col>
+      </Row>
+      <Row>
+        <Col></Col>
       </Row>
     </Container>
   );

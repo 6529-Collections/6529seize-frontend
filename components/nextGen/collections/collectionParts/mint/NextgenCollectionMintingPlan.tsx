@@ -141,7 +141,10 @@ export default function NextgenCollectionMintingPlan(props: Readonly<Props>) {
     <Container className="pt-4 pb-4">
       <Row className="pb-4">
         <Col>
-          <NextGenCollectionHeader collection={props.collection} />
+          <NextGenCollectionHeader
+            collection={props.collection}
+            collection_link={true}
+          />
         </Col>
       </Row>
       <Row className="pt-4">

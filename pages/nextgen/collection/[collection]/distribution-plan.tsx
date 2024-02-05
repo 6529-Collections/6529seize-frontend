@@ -8,7 +8,7 @@ import { isEmptyObject } from "../../../../helpers/Helpers";
 import { getCommonHeaders } from "../../../../helpers/server.helpers";
 import { commonApiFetch } from "../../../../services/api/common-api";
 import Breadcrumb from "../../../../components/breadcrumb/Breadcrumb";
-import { useShallowRedirect } from ".";
+import { useShallowRedirect } from "./[[...view]]";
 import NextGenNavigationHeader from "../../../../components/nextGen/collections/NextGenNavigationHeader";
 
 const Header = dynamic(() => import("../../../../components/header/Header"), {

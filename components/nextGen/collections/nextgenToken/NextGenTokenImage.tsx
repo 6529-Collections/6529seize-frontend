@@ -33,7 +33,7 @@ export function NextGenTokenImage(
           />
         </span>
         {!props.hide_info && (
-          <span className="d-flex justify-content-around align-items-center">
+          <span className="pt-1 d-flex justify-content-around align-items-center">
             <span>#{props.token.normalised_id}</span>
             {props.show_rarity_score && (
               <TraitScore
