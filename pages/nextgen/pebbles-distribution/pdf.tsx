@@ -28,9 +28,6 @@ const PdfViewer = dynamic(
 export default function NextGen(props: any) {
   const pageProps = props.pageProps;
 
-  const data0: DataRow[] = pageProps.data0;
-  const data1: DataRow[] = pageProps.data1;
-
   return (
     <>
       <PebblesHead title="Pebbles Distribution" />

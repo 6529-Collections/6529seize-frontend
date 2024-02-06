@@ -1,4 +1,3 @@
-import styles from "./PdfViewer.module.scss";
 import { Document, Page, pdfjs } from "react-pdf";
 import { useRef, useState } from "react";
 import { Col, Container, Row } from "react-bootstrap";
