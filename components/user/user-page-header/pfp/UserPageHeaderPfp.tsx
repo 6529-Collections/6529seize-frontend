@@ -19,7 +19,7 @@ export default function UserPageHeaderPfp({
         alt="Profile picture"
         width="176"
         height="176"
-        className="tw-flex-shrink-0 tw-object-contain tw-max-h-36 tw-min-w-36 sm:tw-max-h-44 sm:tw-min-w-44 tw-w-auto tw-h-auto tw-rounded-lg tw-ring-[3px] tw-ring-white/30 tw-bg-iron-800"
+        className="tw-flex-shrink-0 tw-object-contain tw-max-h-36 tw-min-w-[9rem] sm:tw-max-h-44 sm:tw-min-w-[11rem] tw-w-auto tw-h-auto tw-rounded-lg tw-ring-[3px] tw-ring-white/30 tw-bg-iron-800"
       />
     );
   }

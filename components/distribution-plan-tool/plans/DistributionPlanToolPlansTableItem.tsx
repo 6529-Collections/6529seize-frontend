@@ -14,7 +14,7 @@ export default function DistributionPlanToolPlansTableItem({
 }) {
   const router = useRouter();
   const goToDistributionPlan = (id: string) => {
-    router.push(`/distribution-plan-tool/plans/${id}`);
+    router.push(`/emma/plans/${id}`);
   };
 
   const getDate = (timestamp: number): string => {

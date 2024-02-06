@@ -376,3 +376,15 @@ h5 {
     color: inherit;
   }
 }
+.horizontal-menu-hide-scrollbar {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}
+
+.horizontal-menu-hide-scrollbar::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera*/
+}
+
+.horizontal-menu-scrollable-x {
+  -webkit-overflow-scrolling: touch; /* For momentum scroll on iOS */
+}
