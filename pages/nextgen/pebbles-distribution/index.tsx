@@ -16,6 +16,9 @@ interface DataRow {
   };
 }
 
+export const PDF_LINK =
+  "https://d3lqz0a4bldqgf.cloudfront.net/nextgen/assets/1/distribution.pdf";
+
 const Header = dynamic(() => import("../../../components/header/Header"), {
   ssr: false,
   loading: () => <HeaderPlaceholder />,
@@ -29,37 +32,11 @@ export default function NextGen(props: any) {
 
   return (
     <>
-      <Head>
-        <title>Pebbles Distribution | NextGen | 6529 SEIZE</title>
-        <link rel="icon" href="/favicon.ico" />
-        <meta name="description" content="NextGen | 6529 SEIZE" />
-        <meta
-          property="og:url"
-          content={`${process.env.BASE_ENDPOINT}/nextgen`}
-        />
-        <meta property="og:title" content="Pebbles Distribution | NextGen" />
-        <meta property="og:description" content="6529 Seize" />
-        <meta
-          property="og:image"
-          content={`${process.env.BASE_ENDPOINT}/pebbles-loading.jpeg`}
-        />
-        <meta name="twitter:card" content="summary_large_image" />
-      </Head>
-
+      <PebblesHead title="Pebbles Distribution" />
       <main className={styles.main}>
         <Header />
         <Container className="pt-5 pb-5">
-          <Row>
-            <Col>
-              <Image
-                width="0"
-                height="0"
-                style={{ height: "auto", width: "400px" }}
-                src="/nextgen-logo.png"
-                alt="nextgen"
-              />
-            </Col>
-          </Row>
+          <NextgenLogo />
           <Row className="pt-5">
             <Col>
               <a
@@ -138,7 +115,7 @@ function printTable(data: DataRow[], phase: number) {
       </thead>
       <tbody>
         {data.map((row) => (
-          <tr key={row.address}>
+          <tr key={`${row.address}-${row.mint_count}-${row.token_data}`}>
             <td>{row.address}</td>
             <td className="text-center">{row.mint_count}</td>
             <td className="text-center">{row.token_data.palettes}</td>
@@ -163,4 +140,51 @@ export async function getStaticProps() {
       data1,
     },
   };
+}
+
+export function NextgenLogo() {
+  return (
+    <Row>
+      <Col>
+        <Image
+          width="0"
+          height="0"
+          style={{ height: "auto", width: "400px" }}
+          src="/nextgen-logo.png"
+          alt="nextgen"
+        />
+      </Col>
+    </Row>
+  );
+}
+
+export function PebblesHead(
+  props: Readonly<{
+    title: string;
+  }>
+) {
+  return (
+    <Head>
+      <title>{props.title}</title>
+      <link rel="icon" href="/favicon.ico" />
+      <meta name="description" content="NextGen | 6529 SEIZE" />
+      <meta
+        property="og:url"
+        content={`${process.env.BASE_ENDPOINT}/nextgen`}
+      />
+      <meta property="og:title" content={`${props.title}`} />
+      <meta property="og:description" content="NextGen | 6529 Seize" />
+      <meta
+        property="og:image"
+        content={`${process.env.BASE_ENDPOINT}/pebbles-loading.jpeg`}
+      />
+      <meta name="twitter:card" content="summary_large_image" />
+      <link
+        rel="preload"
+        href={PDF_LINK}
+        as="document"
+        type="application/pdf"
+      />
+    </Head>
+  );
 }
