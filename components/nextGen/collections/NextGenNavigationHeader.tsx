@@ -115,7 +115,7 @@ export default function NextGenNavigationHeader(
           </span>
         </div>
       </Container>
-      <hr className="mt-0 mb-0" />
+      <hr className={styles.navigationHeaderHr} />
     </>
   );
 }

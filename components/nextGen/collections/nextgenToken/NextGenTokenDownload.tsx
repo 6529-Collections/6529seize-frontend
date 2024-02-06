@@ -1,65 +1,96 @@
-import { Container, Row, Col } from "react-bootstrap";
+import { Container, Row, Col, Dropdown } from "react-bootstrap";
 import { NextGenToken } from "../../../../entities/INextgen";
 import useDownloader from "react-use-downloader";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Spinner } from "../../../dotLoader/DotLoader";
 import Tippy from "@tippyjs/react";
 import { useEffect, useState } from "react";
-import { parse } from "querystring";
 import { numberWithCommas } from "../../../../helpers/Helpers";
 
-export enum Quality {
+export enum Resolution {
   "2K" = "2K",
   "4K" = "4K",
   "8K" = "8K",
   "16K" = "16K",
 }
 
-export function getUrl(token: NextGenToken, quality: Quality) {
+export function getUrl(token: NextGenToken, resolution: Resolution) {
   let u = token.image_url;
-  if (quality !== Quality["2K"]) {
-    u = u.replace("/png/", `/png${quality.toLowerCase()}/`);
+  if (resolution !== Resolution["2K"]) {
+    u = u.replace("/png/", `/png${resolution.toLowerCase()}/`);
   }
   return u;
 }
 
-export default function NextGenTokenDownload(
-  props: Readonly<{
-    token: NextGenToken;
-    quality: Quality;
-  }>
-) {
+type NextGenTokenProps = Readonly<{
+  token: NextGenToken;
+  resolution: Resolution;
+}>;
+
+function useImageChecker(token: NextGenToken, resolution: Resolution) {
   const [imageExists, setImageExists] = useState(false);
   const [imageSize, setImageSize] = useState(0);
 
-  function checkImage() {
-    const url = getUrl(props.token, props.quality);
-    fetch(url, {
-      method: "HEAD",
-    })
+  useEffect(() => {
+    const url = getUrl(token, resolution);
+    fetch(url, { method: "HEAD" })
       .then((response) => {
         if (response.ok) {
           setImageExists(true);
           const contentLength = response.headers.get("content-length");
           if (contentLength) {
-            const sizeBytes = parseInt(contentLength);
-            const sizeMb = sizeBytes / (1024 * 1024);
-            setImageSize(Math.round(sizeMb * 100) / 100);
+            const sizeBytes = parseInt(contentLength, 10);
+            setImageSize(Math.round((sizeBytes / (1024 * 1024)) * 100) / 100);
           }
         } else {
           setImageExists(false);
         }
       })
-      .catch(() => {
-        setImageExists(false);
-      });
-  }
+      .catch(() => setImageExists(false));
+  }, [token, resolution]);
 
-  useEffect(() => {
-    checkImage();
-  }, []);
+  return { imageExists, imageSize };
+}
 
-  function printQuality(quality: Quality) {
+export function NextGenTokenDownloadDropdownItem(props: NextGenTokenProps) {
+  const { imageExists, imageSize } = useImageChecker(
+    props.token,
+    props.resolution
+  );
+  const downloader = useDownloader();
+
+  return (
+    <Dropdown.Item
+      key={props.resolution}
+      disabled={!imageExists}
+      onClick={() => {
+        if (imageExists) {
+          downloader.download(
+            getUrl(props.token, props.resolution),
+            `${props.token.id}_${props.resolution.toUpperCase()}`
+          );
+        }
+      }}>
+      {props.resolution}
+      {imageExists && imageSize > 0
+        ? ` (${numberWithCommas(imageSize)} MB)`
+        : " Coming Soon"}
+    </Dropdown.Item>
+  );
+}
+
+export default function NextGenTokenDownload(
+  props: Readonly<{
+    token: NextGenToken;
+    resolution: Resolution;
+  }>
+) {
+  const { imageExists, imageSize } = useImageChecker(
+    props.token,
+    props.resolution
+  );
+
+  function printResolution(quality: Resolution) {
     return (
       <span className="d-flex gap-3 align-items-center">
         <Tippy
@@ -87,12 +118,12 @@ export default function NextGenTokenDownload(
       <Row>
         <Col className="d-flex flex-wrap align-items-center gap-5">
           <span>
-            <span>{props.quality}</span>
+            <span>{props.resolution}</span>
             {imageExists && imageSize > 0
               ? ` (${numberWithCommas(imageSize)} MB)`
               : " Coming Soon"}
           </span>
-          {imageExists && printQuality(props.quality)}
+          {imageExists && printResolution(props.resolution)}
         </Col>
       </Row>
     </Container>
@@ -102,7 +133,7 @@ export default function NextGenTokenDownload(
 export function NextGenTokenDownloadButton(
   props: Readonly<{
     token: NextGenToken;
-    quality: Quality;
+    quality: Resolution;
     class?: string;
   }>
 ) {

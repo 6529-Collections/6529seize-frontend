@@ -18,7 +18,7 @@ import { NEXTGEN_CHAIN_ID } from "../../nextgen_contracts";
 import Image from "next/image";
 import Tippy from "@tippyjs/react";
 import { formatNameForUrl, getOpenseaLink } from "../../nextgen_helpers";
-import NextGenTokenDownload, { Quality } from "./NextGenTokenDownload";
+import NextGenTokenDownload, { Resolution } from "./NextGenTokenDownload";
 import { Time } from "../../../../helpers/time";
 import { DBResponse } from "../../../../entities/IDBResponse";
 import EthereumIcon from "../../../user/utils/icons/EthereumIcon";
@@ -196,10 +196,22 @@ export default function NextgenTokenAbout(props: Readonly<Props>) {
       <Row>
         <Col className="pb-3 d-flex flex-column gap-2">
           <span className="font-color-h">Rendered Versions:</span>
-          <NextGenTokenDownload token={props.token} quality={Quality["2K"]} />
-          <NextGenTokenDownload token={props.token} quality={Quality["4K"]} />
-          <NextGenTokenDownload token={props.token} quality={Quality["8K"]} />
-          <NextGenTokenDownload token={props.token} quality={Quality["16K"]} />
+          <NextGenTokenDownload
+            token={props.token}
+            resolution={Resolution["2K"]}
+          />
+          <NextGenTokenDownload
+            token={props.token}
+            resolution={Resolution["4K"]}
+          />
+          <NextGenTokenDownload
+            token={props.token}
+            resolution={Resolution["8K"]}
+          />
+          <NextGenTokenDownload
+            token={props.token}
+            resolution={Resolution["16K"]}
+          />
         </Col>
       </Row>
     </Container>

@@ -7,7 +7,11 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import useDownloader from "react-use-downloader";
 import Tippy from "@tippyjs/react";
 import Lightbulb from "./Lightbulb";
-import { Quality, getUrl } from "./NextGenTokenDownload";
+import {
+  NextGenTokenDownloadDropdownItem,
+  Resolution,
+  getUrl,
+} from "./NextGenTokenDownload";
 
 interface Props {
   collection: NextGenCollection;
@@ -87,9 +91,8 @@ export default function NextGenToken(props: Readonly<Props>) {
   }
 
   function getCurrentHref() {
-    switch (mode) {
-      case Mode.LIVE:
-        return props.token.animation_url ?? props.token.generator?.html;
+    if (mode === Mode.LIVE) {
+      return props.token.animation_url ?? props.token.generator?.html;
     }
     return props.token.image_url;
   }
@@ -134,11 +137,6 @@ export default function NextGenToken(props: Readonly<Props>) {
             className={styles.modeIcon}
             onClick={() => setShowLightbox(true)}
           />
-          {/* <NextGenTokenDownloadButton
-            class={styles.modeIcon}
-            token={props.token}
-            quality={Quality.HD}
-          /> */}
           <Dropdown drop={"down-centered"} className="d-flex">
             <Dropdown.Toggle className={styles.downloadBtn}>
               <Tippy
@@ -151,17 +149,22 @@ export default function NextGenToken(props: Readonly<Props>) {
               </Tippy>
             </Dropdown.Toggle>
             <Dropdown.Menu>
-              {Object.values(Quality).map((quality) => (
-                <Dropdown.Item
-                  key={quality}
-                  onClick={() => {
-                    downloader.download(
-                      getUrl(props.token, quality),
-                      `${props.token.id}_${quality.toUpperCase()}`
-                    );
-                  }}>
-                  {quality}
-                </Dropdown.Item>
+              {Object.values(Resolution).map((resolution) => (
+                <NextGenTokenDownloadDropdownItem
+                  resolution={resolution}
+                  token={props.token}
+                  key={resolution}
+                />
+                // <Dropdown.Item
+                //   key={resolution}
+                //   onClick={() => {
+                //     downloader.download(
+                //       getUrl(props.token, resolution),
+                //       `${props.token.id}_${resolution.toUpperCase()}`
+                //     );
+                //   }}>
+                //   {resolution}
+                // </Dropdown.Item>
               ))}
             </Dropdown.Menu>
           </Dropdown>
