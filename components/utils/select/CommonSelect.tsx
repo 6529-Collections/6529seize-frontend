@@ -36,8 +36,8 @@ export interface CommonSelectsWithSortProps<T, U>
 export interface CommonSelectItemProps<T, U> {
   readonly item: CommonSelectItem<T, U>;
   readonly activeItem: T;
-  readonly isFirst: boolean;
-  readonly isLast: boolean;
+  readonly itemIdx: number;
+  readonly totalItems: number;
   readonly isMobile: boolean;
   readonly setSelected: (item: T) => void;
   readonly sortDirection?: SortDirection;

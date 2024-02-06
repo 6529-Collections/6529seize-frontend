@@ -36,12 +36,21 @@ export default function UserPageCollectedFilters({
     targetCollection: CollectedCollectionType | null
   ): boolean => targetCollection === CollectedCollectionType.MEMES;
 
+  const getShowOnlyTokenIdSort = (
+    targetCollection: CollectedCollectionType | null
+  ): boolean => targetCollection === CollectedCollectionType.MEMELAB;
+
   const [showSeizedAndSzn, setShowSeizedAndSzn] = useState<boolean>(
     getShowSeizedAndSzn(filters.collection)
   );
 
+  const [showOnlyTokenIdSort, setShowOnlyTokenIdSort] = useState<boolean>(
+    getShowOnlyTokenIdSort(filters.collection)
+  );
+
   useEffect(() => {
     setShowSeizedAndSzn(getShowSeizedAndSzn(filters.collection));
+    setShowOnlyTokenIdSort(getShowOnlyTokenIdSort(filters.collection));
   }, [filters.collection]);
 
   const mostLeftFilterRef = useRef<HTMLDivElement>(null);
@@ -174,6 +183,7 @@ export default function UserPageCollectedFilters({
           <UserPageCollectedFiltersSortBy
             selected={filters.sortBy}
             direction={filters.sortDirection}
+            showOnlyTokenIdSort={showOnlyTokenIdSort}
             setSelected={setSortBy}
           />
 
