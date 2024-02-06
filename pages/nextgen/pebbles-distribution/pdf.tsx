@@ -25,9 +25,7 @@ const PdfViewer = dynamic(
   }
 );
 
-export default function NextGen(props: any) {
-  const pageProps = props.pageProps;
-
+export default function NextGenPDF() {
   return (
     <>
       <PebblesHead title="Pebbles Distribution" />

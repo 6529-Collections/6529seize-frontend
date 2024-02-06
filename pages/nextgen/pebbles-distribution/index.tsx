@@ -16,8 +16,7 @@ interface DataRow {
   };
 }
 
-export const PDF_LINK =
-  "https://d3lqz0a4bldqgf.cloudfront.net/nextgen/assets/1/distribution.pdf";
+export const PDF_LINK = "/pebbles/distribution-plan.pdf";
 
 const Header = dynamic(() => import("../../../components/header/Header"), {
   ssr: false,
@@ -128,8 +127,8 @@ function printTable(data: DataRow[], phase: number) {
 }
 
 export async function getStaticProps() {
-  const phase0path = "./public/pebbles-phase0.csv";
-  const phase1path = "./public/pebbles-phase1.csv";
+  const phase0path = "./public/pebbles/phase0.csv";
+  const phase1path = "./public/pebbles/phase1.csv";
 
   const data0: DataRow[] = await readCsvFile(phase0path);
   const data1: DataRow[] = await readCsvFile(phase1path);
