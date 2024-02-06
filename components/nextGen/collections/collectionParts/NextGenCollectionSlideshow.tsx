@@ -75,7 +75,7 @@ export default function NextGenCollectionSlideshow(props: Readonly<Props>) {
               <Col>
                 <Swiper
                   modules={[Navigation, A11y, Autoplay]}
-                  autoplay={tokens.length > 1 ? { delay: 1000 } : false}
+                  autoplay
                   spaceBetween={20}
                   slidesPerView={Math.min(slidesPerView, tokens.length)}
                   navigation
