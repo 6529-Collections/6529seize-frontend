@@ -155,8 +155,8 @@ export default function CommonDropdown<T, U = unknown>(
           <CommonDropdownItem
             key={item.key}
             item={item}
-            isFirst={i === 0}
-            isLast={i === items.length - 1}
+            itemIdx={i}
+            totalItems={items.length}
             activeItem={activeItem}
             sortDirection={sortDirection}
             isMobile={isMobile}
