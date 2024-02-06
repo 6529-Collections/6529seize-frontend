@@ -121,8 +121,15 @@ export default function UserPageCollected({
     );
   };
 
-  const convertSortedBy = (sortBy: string | null): CollectionSort => {
+  const convertSortedBy = ({
+    sortBy,
+    isMemeLab,
+  }: {
+    sortBy: string | null;
+    isMemeLab: boolean;
+  }): CollectionSort => {
     if (!sortBy) return defaultSortBy;
+    if (isMemeLab && sortBy !== CollectionSort.TOKEN_ID) return defaultSortBy;
     return (
       Object.values(CollectionSort).find((c) => c === sortBy.toUpperCase()) ??
       defaultSortBy
@@ -150,6 +157,7 @@ export default function UserPageCollected({
     const convertedAddress = convertAddress(address);
     const convertedCollection = convertCollection(collection);
     const isMemes = convertedCollection === CollectedCollectionType.MEMES;
+    const isMemeLab = convertedCollection === CollectedCollectionType.MEMELAB;
     return {
       handleOrWallet: convertedAddress ?? profile.profile?.handle ?? user,
       accountForConsolidations: !convertedAddress,
@@ -158,7 +166,7 @@ export default function UserPageCollected({
       szn: convertSzn({ szn, isMemes }),
       page: page ? parseInt(page) : 1,
       pageSize: PAGE_SIZE,
-      sortBy: convertSortedBy(sortBy),
+      sortBy: convertSortedBy({ sortBy, isMemeLab }),
       sortDirection: convertSortDirection(sortDirection),
     };
   };
@@ -210,6 +218,17 @@ export default function UserPageCollected({
         value: null,
       },
     ];
+
+    if (collection === CollectedCollectionType.MEMELAB && filters.sortBy !== CollectionSort.TOKEN_ID) {
+      items.push({
+        name: "sortBy",
+        value: CollectionSort.TOKEN_ID,
+      });
+      items.push({
+        name: "sortDirection",
+        value: SortDirection.DESC,
+      });
+    }
 
     await updateFields(items);
   };
