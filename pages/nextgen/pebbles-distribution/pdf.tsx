@@ -28,7 +28,7 @@ const PdfViewer = dynamic(
 export default function NextGenPDF() {
   return (
     <>
-      <PebblesHead title="Pebbles Distribution" />
+      <PebblesHead title="Pebbles Distribution Plan" />
 
       <main className={styles.main}>
         <Header />

@@ -26,6 +26,7 @@ const Header = dynamic(() => import("../../../components/header/Header"), {
 export default function NextGen(props: any) {
   const pageProps = props.pageProps;
 
+  const dataArtist: DataRow[] = pageProps.dataArtist;
   const data0: DataRow[] = pageProps.data0;
   const data1: DataRow[] = pageProps.data1;
 
@@ -47,11 +48,19 @@ export default function NextGen(props: any) {
           </Row>
           <Row className="pt-5">
             <Col>
+              <h2>Artist Proof</h2>
+            </Col>
+          </Row>
+          <Row className="pt-3">
+            <Col>{printTable(dataArtist)}</Col>
+          </Row>
+          <Row className="pt-5">
+            <Col>
               <h2>Phase 0</h2>
             </Col>
           </Row>
           <Row className="pt-3">
-            <Col>{printTable(data0, 0)}</Col>
+            <Col>{printTable(data0, "Phase 0")}</Col>
           </Row>
           <Row className="pt-5">
             <Col>
@@ -59,7 +68,7 @@ export default function NextGen(props: any) {
             </Col>
           </Row>
           <Row className="pt-3">
-            <Col>{printTable(data1, 1)}</Col>
+            <Col>{printTable(data1, "Phase 0")}</Col>
           </Row>
         </Container>
       </main>
@@ -101,7 +110,7 @@ async function readCsvFile(path: string) {
   return data;
 }
 
-function printTable(data: DataRow[], phase: number) {
+function printTable(data: DataRow[], phase?: string) {
   return (
     <Table className={styles.distributionTable}>
       <thead>
@@ -109,7 +118,7 @@ function printTable(data: DataRow[], phase: number) {
           <th>Address</th>
           <th className="text-center">Mint Count</th>
           <th className="text-center">Palettes</th>
-          <th className="text-center">Phase</th>
+          {phase && <th className="text-center">Phase</th>}
         </tr>
       </thead>
       <tbody>
@@ -118,7 +127,7 @@ function printTable(data: DataRow[], phase: number) {
             <td>{row.address}</td>
             <td className="text-center">{row.mint_count}</td>
             <td className="text-center">{row.token_data.palettes}</td>
-            <td className="text-center">Phase {phase}</td>
+            {phase && <td className="text-center">{phase}</td>}
           </tr>
         ))}
       </tbody>
@@ -127,14 +136,17 @@ function printTable(data: DataRow[], phase: number) {
 }
 
 export async function getStaticProps() {
-  const phase0path = "./public/pebbles/phase0.csv";
-  const phase1path = "./public/pebbles/phase1.csv";
+  const phaseArtistPath = "./public/pebbles/phase-artist.csv";
+  const phase0path = "./public/pebbles/phase-0.csv";
+  const phase1path = "./public/pebbles/phase-1.csv";
 
+  const dataArtist: DataRow[] = await readCsvFile(phaseArtistPath);
   const data0: DataRow[] = await readCsvFile(phase0path);
   const data1: DataRow[] = await readCsvFile(phase1path);
 
   return {
     props: {
+      dataArtist,
       data0,
       data1,
     },

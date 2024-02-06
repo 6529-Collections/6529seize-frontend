@@ -24,6 +24,7 @@
 0x009f284bb658c55d292904ee733c50827dbb8e5a,1,{"palettes":"MemeMaxis"}
 0x00a7f53d5a574a71ad23fb85f18f3b4c5a21ef54,1,{"palettes":"MemeMaxis"}
 0x00acf1f79ff43b1ff5b4ff28b537cbf27445869f,1,{"palettes":"MemeMaxis"}
+0x6d35392121a6687fe19d6159601b17517f73d0ea,1,{"palettes":"MemeMaxis"}
 0x00baeaa84510584a6e4624964b75321ddb6766cc,1,{"palettes":"MemeMaxis"}
 0x00dbe3800f1988e6a027b56b3c0bd3a30b6e7b69,1,{"palettes":"MemeMaxis"}
 0x00dcdd43bd25f78ae91c12f3c295dc11d3065e00,1,{"palettes":"MemeMaxis"}
@@ -67,6 +68,7 @@
 0x019accbe7f0823598ea968b7271f39735016da9b,1,{"palettes":"MemeMaxis"}
 0x019d370ada720786cda2c4f78f0f4657af2ff92e,1,{"palettes":"MemeMaxis"}
 0x01a319d74bdb2ebd4381d9baa3dceead665fa613,1,{"palettes":"MemeMaxis"}
+0x0e81a8a496f9cb7e1d29382e91f06a6f7416cb9a,1,{"palettes":"MemeMaxis"}
 0x01b71498cde91a613eacca67fa46463b0dad724f,1,{"palettes":"MemeMaxis"}
 0x01c38875ab789cb12efcd791db91217a00fd01fa,1,{"palettes":"MemeMaxis"}
 0x01d1cc95f80849a4564c9dae114255dba06a8d35,1,{"palettes":"MemeMaxis"}
@@ -77,6 +79,7 @@
 0x01e92264abaccd5e77be8a9a0ed5f1115fa36163,1,{"palettes":"MemeMaxis"}
 0x01ed2fec13ad545568d9af1afcd1ac5748388f81,1,{"palettes":"MemeMaxis"}
 0x02009370ff755704e9acbd96042c1ab832d6067e,1,{"palettes":"MemeMaxis"}
+0x0216ac50fdb6b46f6b74254b84ecdd1d431d670c,1,{"palettes":"MemeMaxis"}
 0x021767dd74beef783fc28ad858048cdd9ed7e3bb,1,{"palettes":"MemeMaxis"}
 0x0223b033fe732601907a9ba50406082c39266221,1,{"palettes":"MemeMaxis"}
 0x02285503d4dc62fb235ad3aacb4be2e665463ecc,1,{"palettes":"MemeMaxis"}
@@ -132,6 +135,8 @@
 0x03593a431c7c3b01cea6836c2199c43614e17e71,1,{"palettes":"MemeMaxis"}
 0x0360b9acda197703cb3040715c75659c38f13cf7,1,{"palettes":"MemeMaxis"}
 0x036302a75c0f7dafe15f83c8a1faec282a74a03b,1,{"palettes":"MemeMaxis"}
+0x036aeaa55ba6cf87984a5f0a467b21c63b9bf9d1,1,{"palettes":"MemeMaxis"}
+0x0387876a09a45581109eecab2ff4ac049e76ba37,1,{"palettes":"MemeMaxis"}
 0x038826bb3557b7225512b60e30f10ca7fa178d93,1,{"palettes":"MemeMaxis"}
 0x039053b4674d12dcdfe69fadc25afdb0c17360e3,1,{"palettes":"MemeMaxis"}
 0x0395ed8151455465b5b41d278f911d282225d62b,1,{"palettes":"MemeMaxis"}
@@ -166,6 +171,7 @@
 0x044f3c4d87a68d7e31284a63213f02396ff177ee,1,{"palettes":"MemeMaxis"}
 0x04547314afabd1060fe6513518584b1ca602b51c,1,{"palettes":"MemeMaxis"}
 0x0471e9569afb0c3a46924100e0110c1cc625bd0a,1,{"palettes":"MemeMaxis"}
+0x047c4d7af709ae19d3bbbd5f9e10461d2554da00,1,{"palettes":"MemeMaxis"}
 0x047cd96372ddff0e38a836d4f6758cc1cf2954e3,1,{"palettes":"MemeMaxis"}
 0x047d7e0a147026e41169f0f168986caafaa0c6c7,1,{"palettes":"MemeMaxis"}
 0x048c61294f5152b8c507d0d366791656a632ea3c,1,{"palettes":"MemeMaxis"}
@@ -353,12 +359,14 @@
 0x0a21a14fe203a267a13c3455abfc9d5f5ae982ee,1,{"palettes":"MemeMaxis"}
 0x0a2542a170aa02b96b588aa3af8b09ab22a9d7ac,1,{"palettes":"MemeMaxis"}
 0x0a327ca208535c9ca44cad4cb754cab9a9e1c0b8,1,{"palettes":"MemeMaxis"}
+0xecea65d22233e7beed752a06c46cefc6c90a1d7f,1,{"palettes":"MemeMaxis"}
 0x0a5b7c226ee4c3510a6f567a5e081971a0f79a90,1,{"palettes":"MemeMaxis"}
 0x0a605f26a5b6c37b27fddb155ccb495fd4f128c0,1,{"palettes":"MemeMaxis"}
 0x0a689d7687f20ad37918291fcb0160452fcd4af0,1,{"palettes":"MemeMaxis"}
 0x0a6f270ff37facd07aa85e48add3e73bb8101686,1,{"palettes":"MemeMaxis"}
 0x0a7669015fef82f5136c9a2e44e1ecbd2a5aec19,1,{"palettes":"MemeMaxis"}
 0x0a81816f351dac9deea2977df128d3d25dc202d8,1,{"palettes":"MemeMaxis"}
+0x0a87cbf5eec20d8d9880ad21f0260522ff5a675a,1,{"palettes":"MemeMaxis"}
 0x0a8da356dc80da3a114d63e752cb42923b124019,1,{"palettes":"MemeMaxis"}
 0x0a8df2089d0596a9594fd82dc199a42590d066bd,1,{"palettes":"MemeMaxis"}
 0x0a8f4c21a980b0a76b4f7071cb4713d8a74753f1,1,{"palettes":"MemeMaxis"}
@@ -369,12 +377,12 @@
 0x0a9f85014478279c83eb0fc981cd8d14687adbf6,1,{"palettes":"MemeMaxis"}
 0x0aa78b747dfc137ef96b428951ebe32f9ac4efa3,1,{"palettes":"MemeMaxis"}
 0x0aaaac358f29ca7290f78651ae9b08285b5e16d4,1,{"palettes":"MemeMaxis"}
-0x0aadeef83545196ccb2ce70fabf8be1afa3c9b87,1,{"palettes":"MemeMaxis"}
 0x0aaf7ea77d6df1761da21f269f65dc5c0db22fea,1,{"palettes":"MemeMaxis"}
 0x0abd672a6f2a3e2907ee3d8ac9744670c04df8e2,1,{"palettes":"MemeMaxis"}
 0x0ac25e1a3dc9a10ebcb52328c6b8bffd3ad4b5b4,1,{"palettes":"MemeMaxis"}
 0x0ac4423868f07df156826e0349c3f62b95ccacf1,1,{"palettes":"MemeMaxis"}
 0x0ac619a43eb536b8522c6e39403a47a495856c5e,1,{"palettes":"MemeMaxis"}
+0x0acabdaceab63c08bc5aea63d7e07da7c2e42959,1,{"palettes":"MemeMaxis"}
 0x0ace76b681084e0f7fd9fe4eab763275d43bec8f,1,{"palettes":"MemeMaxis"}
 0x0aceea7577fdcedfa1d60588db15e18b8d763f3f,1,{"palettes":"MemeMaxis"}
 0x0ae1d436e7af8222f07e06869b8b4d20ae8e2011,1,{"palettes":"MemeMaxis"}
@@ -416,6 +424,7 @@
 0x0c5c2e6a4ce269106ba9ae1ea397b02b9643111d,1,{"palettes":"MemeMaxis"}
 0x0c6306c1ff8f0ca8432b761085d5ce74160a499a,1,{"palettes":"MemeMaxis"}
 0x0c6314dc501bbe7a26fc0ecc82280ef29388301c,1,{"palettes":"MemeMaxis"}
+0x0c76717074a973f3f6e3d422166c999483f6c7fd,1,{"palettes":"MemeMaxis"}
 0x0c7fd3cefc75842987ca65a65c46c1faa823591d,1,{"palettes":"MemeMaxis"}
 0x0c81f4885b20fdcc97ce679ecfea9b94879f12b1,1,{"palettes":"MemeMaxis"}
 0x0c844ba95ee1d4a7c54ef35435775e2d5bd2a3d6,1,{"palettes":"MemeMaxis"}
@@ -481,6 +490,7 @@
 0x0e6c0d631684ad5383fdcd3ff34821c03065c710,1,{"palettes":"MemeMaxis"}
 0x0e6c4af64e141ed52e3082dd4fd47416ea4f321b,1,{"palettes":"MemeMaxis"}
 0x0e6c79ce2cd7f3ab2a2d512979974a4a7707ffa4,1,{"palettes":"MemeMaxis"}
+0xa21e1e6c69dfed02b6a69c4c89ea46a1e6e31b86,1,{"palettes":"MemeMaxis"}
 0x0e7a408a775af29310970de51b59501e21eee87a,1,{"palettes":"MemeMaxis"}
 0x0e8397856f6107e38e2d8fbea046bd3047cfefa1,1,{"palettes":"MemeMaxis"}
 0x0e859498e116771fced86826fed7bba3a99a3ffc,1,{"palettes":"MemeMaxis"}
@@ -528,6 +538,7 @@
 0x0f6b0e0ce002b09b60610241ef2518974af0b377,1,{"palettes":"MemeMaxis"}
 0x0f6f5883c6ea1476d753c38764a3a566c420969e,1,{"palettes":"MemeMaxis"}
 0x0f82f6b926d26621ac0acdaef7c0cf461f6430fd,1,{"palettes":"MemeMaxis"}
+0x0f9ab846449ca068f9714818a6ed0da5d819e9e4,1,{"palettes":"MemeMaxis"}
 0x0fa012947add495be26641b00915cd9a1e5f6ce3,1,{"palettes":"MemeMaxis"}
 0x0fafa30d377704eada7a9c83f374f409b3b46046,1,{"palettes":"MemeMaxis"}
 0x0fb3fa40850c1e472b6eced8fb10781763d42193,1,{"palettes":"MemeMaxis"}
@@ -539,10 +550,12 @@
 0x0fd3e2c50ee69fd59e3ad545fc07587adb6fb39e,1,{"palettes":"MemeMaxis"}
 0x0fe61de274aed1803e66ba1b863d966079cb9116,1,{"palettes":"MemeMaxis"}
 0x0ff14dad100343a01cb7599aa7485c4892378e74,1,{"palettes":"MemeMaxis"}
+0x100f28c9b8b1fda897eadc775caf74e0f3560f73,1,{"palettes":"MemeMaxis"}
 0x1012270925a4f629b2f6e006a2416d855c6a2444,1,{"palettes":"MemeMaxis"}
 0x10191ca151d7d7dd6bb2b3cbb358cb4a1e7e7361,1,{"palettes":"MemeMaxis"}
 0x1022245eb550f9778209ca4514dcb693b45498be,1,{"palettes":"MemeMaxis"}
 0x102f0c653de8692df6e601dc98f2f058fb6fdabf,1,{"palettes":"MemeMaxis"}
+0x1033caf4e55579e8aa1cc59c3c302d7d924f9f89,1,{"palettes":"MemeMaxis"}
 0x1034e624b8fc6ea265e1d04f32efff5f812a563d,1,{"palettes":"MemeMaxis"}
 0x105965f34e29f55efade78337e3eea727faa8f67,1,{"palettes":"MemeMaxis"}
 0x1064a9f6003cb2637a5fed88501198457fe2aae1,1,{"palettes":"MemeMaxis"}
@@ -573,6 +586,7 @@
 0x110886b13e4a932396c0e9d53bf887770ca16784,1,{"palettes":"MemeMaxis"}
 0x11099ac9cc097d0c9759635b8e16c6a91ecc43da,1,{"palettes":"MemeMaxis"}
 0x11142e97271d26febef714a117fea7d279f77378,1,{"palettes":"MemeMaxis"}
+0x111818a51c4177e8980566beea68fe334be7b76a,1,{"palettes":"MemeMaxis"}
 0x11184b10d426826667c449b345f99e5fcd340e2c,1,{"palettes":"MemeMaxis"}
 0x1121fdd2900abcd844d36f0d6b6e8d69bc38c121,1,{"palettes":"MemeMaxis"}
 0x11267972b5ec7554fe1b315390c8315f91c4826e,1,{"palettes":"MemeMaxis"}
@@ -587,6 +601,7 @@
 0x1187ec27eb94e65717af65f3ae8c326bd8bb47c1,1,{"palettes":"MemeMaxis"}
 0x118aced72cd640407c1153d78c419215af9a5300,1,{"palettes":"MemeMaxis"}
 0x118bf0693d1f51541e28253e67bb1d88ab24b7b8,1,{"palettes":"MemeMaxis"}
+0x118d6f5d61a9d881d452510f29c703abe9d80cdc,1,{"palettes":"MemeMaxis"}
 0x118e3472a73e72dd85cff8ff09fd89dd48fc4733,1,{"palettes":"MemeMaxis"}
 0x118fe7cec5f26a7c50f6c5bf732f0e6951222ef9,1,{"palettes":"MemeMaxis"}
 0x118fe9d1dc8efa98f3bf41618d9a3d7f049a61b1,1,{"palettes":"MemeMaxis"}
@@ -660,6 +675,7 @@
 0x13bc4cc06e15abc085fbe05140fe9a0ecef0e6d2,1,{"palettes":"MemeMaxis"}
 0x13bfd26cf7d981aae5f8d4d88af4b34b4b1d4da4,1,{"palettes":"MemeMaxis"}
 0x13c0dabeb938c21524c59cdc40bcb6fdb3618754,1,{"palettes":"MemeMaxis"}
+0x13c39b3e6e6159bc233fad90825f1f9f84fcb102,1,{"palettes":"MemeMaxis"}
 0x13c612f1eba31f1a6566d94bab8a4c482b2c2360,1,{"palettes":"MemeMaxis"}
 0x13c942e3f8be4faf966ef03e6038b33d000db22f,1,{"palettes":"MemeMaxis"}
 0x13dc3217ea930bcf7d2ac9cadcb4d4f54cfd97ae,1,{"palettes":"MemeMaxis"}
@@ -784,6 +800,7 @@
 0x16e9cfe34541d8601da1fab1707fe2b1b867887f,1,{"palettes":"MemeMaxis"}
 0x16f627971b10c0de197db3396ff3a73567bc32ce,1,{"palettes":"MemeMaxis"}
 0x170032af92edf38c9bb1e51f28a503f124e26b3f,1,{"palettes":"MemeMaxis"}
+0x8b4567fa8c4715c27a682215a031033a8b544206,1,{"palettes":"MemeMaxis"}
 0x17106b7ee3c4d1ad690b9caf2b2a2a6e1bde49d0,1,{"palettes":"MemeMaxis"}
 0x1711bc52bf7e0494325799717fe640f1924617b7,1,{"palettes":"MemeMaxis"}
 0x17154fb9a5ae2b24cf81f3d813c27d8f741d25bf,1,{"palettes":"MemeMaxis"}
@@ -800,7 +817,9 @@
 0x175366fd3e2cd57bc82eff05c9295a29688e6ceb,1,{"palettes":"MemeMaxis"}
 0x1756e785c364e30031e90f34e5d3b5aa4c83c1a6,1,{"palettes":"MemeMaxis"}
 0x17681ae02f9ee53c8138b508810d61a08a70d627,1,{"palettes":"MemeMaxis"}
+0xeeeb5dd03eaf4ab6b72949191d8ffcfe27f7d973,1,{"palettes":"MemeMaxis"}
 0x17726f58ba7350a33d08d1bbad623e155fa2daa0,1,{"palettes":"MemeMaxis"}
+0x3d3af253b037d3b22c4c810673c5d14de16d1af3,1,{"palettes":"MemeMaxis"}
 0x177751396d8236569c5c7b04232c7b7281a3b9f3,1,{"palettes":"MemeMaxis"}
 0x177adf0f661ce080da1fa3f491f18e768182c2bf,1,{"palettes":"MemeMaxis"}
 0x177e6254970a4e4f340fc1a130d701d91bdeaf95,1,{"palettes":"MemeMaxis"}
@@ -902,6 +921,7 @@
 0x1a775079fde189642ec93829e298148813274bff,1,{"palettes":"MemeMaxis"}
 0x1a7861a39e74d93c8eb883d774f168be46f81228,1,{"palettes":"MemeMaxis"}
 0x1a7e6c5a59f070681640d59222757781fe090b89,1,{"palettes":"MemeMaxis"}
+0x1a7f174dcd4211d41c7c4d7dbb3a0e4db5780c67,1,{"palettes":"MemeMaxis"}
 0x1a8e059d53bf0f50983c4e03e4931e8535b1aa1b,1,{"palettes":"MemeMaxis"}
 0x1a8e1e11276baa0c05b89d350b0174355febc005,1,{"palettes":"MemeMaxis"}
 0x1a9b762a62dd15d8e49e950721fa19e67fdb0590,1,{"palettes":"MemeMaxis"}
@@ -999,7 +1019,6 @@
 0x1d4752ec4aaaf60d0d6817fed1d2784fe2080218,1,{"palettes":"MemeMaxis"}
 0x1d4b9b250b1bd41daa35d94bf9204ec1b0494ee3,1,{"palettes":"MemeMaxis"}
 0x1d4bfeeae08be4069145460f8f765fdb6332bc90,1,{"palettes":"MemeMaxis"}
-0x1d522bd33cdd1f60be71b0b7b2efe4e9f20a5263,1,{"palettes":"MemeMaxis"}
 0x1d60a03980bfa70c70b0c5c085f7f4034a1e3210,1,{"palettes":"MemeMaxis"}
 0x1d6128628d63415a0aaaed455ed1ea38d880f645,1,{"palettes":"MemeMaxis"}
 0x1d67c37ae619ff7e3f19727febf4438a180d5793,1,{"palettes":"MemeMaxis"}
@@ -1012,6 +1031,7 @@
 0x1da5331994e781ab0e2af9f85bfce2037a514170,1,{"palettes":"MemeMaxis"}
 0x1db6dc362abe8ebee595cc08e16b3473bae60a4d,1,{"palettes":"MemeMaxis"}
 0x1dc78daa56e0e2be1edfe5e38f602290809c4c0e,1,{"palettes":"MemeMaxis"}
+0x1dcfdcb24456a7dba5342479cff0f9ff30145fb8,1,{"palettes":"MemeMaxis"}
 0x1dda870a07e2604fc107aa72753f2aa4dada6c2e,1,{"palettes":"MemeMaxis"}
 0x1de387d8d4d7000910761d7030f58568d207b56d,1,{"palettes":"MemeMaxis"}
 0x1de4d49959eafa01ab3706aa20707a3f1dbe2424,1,{"palettes":"MemeMaxis"}
@@ -1027,6 +1047,7 @@
 0x1e2f87542ba49c77d71cd28d9d8e70f0b642288a,1,{"palettes":"MemeMaxis"}
 0x1e2fa044a25bca1576ed94562db50f51dcc24ca8,1,{"palettes":"MemeMaxis"}
 0x1e31c297fd3d88710c35e9e1d7eb5ce27494fc72,1,{"palettes":"MemeMaxis"}
+0x1e31c76b78ff00e3cb64d41d5844626d991ab9e8,1,{"palettes":"MemeMaxis"}
 0x1e36a3a437d6dcaf052a52848eec5e012934695b,1,{"palettes":"MemeMaxis"}
 0x1e38317b64e0ff5d3c500b3250afa2527357cc0f,1,{"palettes":"MemeMaxis"}
 0x1e39ebad76f75a514ebe5432f4efa2e8e50bc52c,1,{"palettes":"MemeMaxis"}
@@ -1055,8 +1076,10 @@
 0x1ec396ac5964b69c394d2f97f91908e15b3a046f,1,{"palettes":"MemeMaxis"}
 0x1ec5b80844ca0fe85b2249989f81a41b072d16a1,1,{"palettes":"MemeMaxis"}
 0x1ec9dd67af275fa69b6ecf7e4c3c4c0968a28fa8,1,{"palettes":"MemeMaxis"}
+0x1ecded4519a9688ef4bfb5f15811c52f048ba1a6,1,{"palettes":"MemeMaxis"}
 0x1ed6c39c8b8f21e25cf766ab2c19d6d51542f815,1,{"palettes":"MemeMaxis"}
 0x1ed73cd65a1ebef57ef61022017f998705787fdc,1,{"palettes":"MemeMaxis"}
+0x1ee5106b2233169b84dad2acdbf498b29c3c7d15,1,{"palettes":"MemeMaxis"}
 0x1eea95f2d2ed24cd3451da93a69efdd08767cc5b,1,{"palettes":"MemeMaxis"}
 0x1ef43b94fcb00872ec73d60ff37f5c77df80ee66,1,{"palettes":"MemeMaxis"}
 0x1ef710af2d02018cfc96521f83e54a516a6ba765,1,{"palettes":"MemeMaxis"}
@@ -1074,6 +1097,7 @@
 0x1f82cfcd6a494c4da544c5aaaf79bcc054d6d52b,1,{"palettes":"MemeMaxis"}
 0x1f8a8ac54244e4016a376152b2f92d467552fa7b,1,{"palettes":"MemeMaxis"}
 0x1f8dec5061b0d9bf17e5828f249142b39dab84b4,1,{"palettes":"MemeMaxis"}
+0x1f916bbf39ab189a9e3d9e1823a7b1a8e9e5f204,1,{"palettes":"MemeMaxis"}
 0x1f92fc15bcbeb4dd24eefbead8d7aee409f891dc,1,{"palettes":"MemeMaxis"}
 0x1f9f7531a3d5102f9cbafe7425fc945fbf58678c,1,{"palettes":"MemeMaxis"}
 0x1fac6f9734ca8454d4b0dc4dbe7d802275152d28,1,{"palettes":"MemeMaxis"}
@@ -1153,6 +1177,7 @@
 0x21ac878dd5db6ba349a443d37d1a1a36844e2800,1,{"palettes":"MemeMaxis"}
 0x21adb4aaddb2d02715ff51b1f0cdc839f72e3695,1,{"palettes":"MemeMaxis"}
 0x21b5a27ca8d5681a4dc9e9c29615716bdff7cb7d,1,{"palettes":"MemeMaxis"}
+0x21b9c7556376efdbf9ee316a4ede0c8257fb7533,1,{"palettes":"MemeMaxis"}
 0x21e2254ab84a5ecab8ad6b66320d1d1b375c56f9,1,{"palettes":"MemeMaxis"}
 0x21f63fec716869f726d309cd7cb65a1370463f65,1,{"palettes":"MemeMaxis"}
 0x2206445d241ccb7dae93b2d2acfc67f75b90fd76,1,{"palettes":"MemeMaxis"}
@@ -1183,6 +1208,7 @@
 0x22d785f2558945a4c2aa6946771eb16fd1689bdd,1,{"palettes":"MemeMaxis"}
 0x22ed7a936d3dea108004e3229f3bd3d84c7225db,1,{"palettes":"MemeMaxis"}
 0x22f3366ba9887e3cec1ef09c8fb8608e24c9ddd3,1,{"palettes":"MemeMaxis"}
+0x22fbaa2dd20b848084545515fb04b9c846942779,1,{"palettes":"MemeMaxis"}
 0x22fc06a488b236753a89caeed39b58046b153069,1,{"palettes":"MemeMaxis"}
 0x2307482c97ffa776ab7a391a707889e15d62dd98,1,{"palettes":"MemeMaxis"}
 0x230d0096d6a60c6fdaa65b6d0370a6ba2b96fbea,1,{"palettes":"MemeMaxis"}
@@ -1251,6 +1277,7 @@
 0x24ed7409cb9f1adbe5b83c86a237049da6eca675,1,{"palettes":"MemeMaxis"}
 0x24ee3cfc053d13f1c2a395471cc305b3ba831d8c,1,{"palettes":"MemeMaxis"}
 0x24f0a0a76f6057829f292a09287df79d24249186,1,{"palettes":"MemeMaxis"}
+0x24fbadccd6684106e24065694ac87b0e98819235,1,{"palettes":"MemeMaxis"}
 0x2500343bc827272c5e1843183ec42dbb032ce0ee,1,{"palettes":"MemeMaxis"}
 0x2507e2f200fbbff420793585b2a10ee4031845ae,1,{"palettes":"MemeMaxis"}
 0x250accb8b81f758039f054188132fe0a8474cd9e,1,{"palettes":"MemeMaxis"}
@@ -1368,6 +1395,7 @@
 0x287fbbd0c48498c49a48674f57d67237dd11c205,1,{"palettes":"MemeMaxis"}
 0x288235a308282d99d474e16f55cd24616b6e3a48,1,{"palettes":"MemeMaxis"}
 0x289089cee85200e9e07d09bc266aa58a3266bf1e,1,{"palettes":"MemeMaxis"}
+0x289256fa6de33947fd292a9e94a738c3d986f8e5,1,{"palettes":"MemeMaxis"}
 0x289d545e52b97524278f94672d2be8c44eb3f369,1,{"palettes":"MemeMaxis"}
 0x28a8e6441f7d9fd324fb13b477748b9c30d34f0a,1,{"palettes":"MemeMaxis"}
 0x28b0ec2af8d6d30e02888b543652365180c6b3c9,1,{"palettes":"MemeMaxis"}
@@ -1435,7 +1463,6 @@
 0x2aa13151ae4dc0579de946ca8db3341b707edad0,1,{"palettes":"MemeMaxis"}
 0x2aa82c35f3bd48bd4e5141ce595a0628d2435aaf,1,{"palettes":"MemeMaxis"}
 0x2aa8c3aa07a3b6968a54749f0d770626239c0f43,1,{"palettes":"MemeMaxis"}
-0x2aaba4b94a805f0fea696dc11de324c2320ff4e1,1,{"palettes":"MemeMaxis"}
 0x2ab173ada010a29de3c312edc0d6d39608c69697,1,{"palettes":"MemeMaxis"}
 0x2ac151bb889bca4354e3727b1c356654b8c12469,1,{"palettes":"MemeMaxis"}
 0x2ac217236e93bd3fa7eb2536c1b69072a54fa394,1,{"palettes":"MemeMaxis"}
@@ -1449,7 +1476,6 @@
 0x2ae31abf71ce95a10d3a9eec7bd68745bed56160,1,{"palettes":"MemeMaxis"}
 0x2aea5d8a7e1bf1e820f3057a47cc5f82627f7ff0,1,{"palettes":"MemeMaxis"}
 0x2aef0a84308fd2f40eed5260b126411e371e970f,1,{"palettes":"MemeMaxis"}
-0x2afc032aaf6d7ead33fb05f9d42d874874dfb9d1,1,{"palettes":"MemeMaxis"}
 0x2b0386bbdd314d8356c21f39be2491f975bd6361,1,{"palettes":"MemeMaxis"}
 0x2b0d374573cac356f4d2d74be3aa62b23db6e4ae,1,{"palettes":"MemeMaxis"}
 0x2b26da567c2a8c220daf91be8e37a429d33aef0b,1,{"palettes":"MemeMaxis"}
@@ -1474,12 +1500,14 @@
 0x2bad77c1ae11ff611bd23f6f350d23079ad8a6e1,1,{"palettes":"MemeMaxis"}
 0x2bb2ee28a5bba51db2c104b6c36a6907c21d4d4b,1,{"palettes":"MemeMaxis"}
 0x2bc52900a118390ea8a97b29eb5e7e75f1cd912c,1,{"palettes":"MemeMaxis"}
+0xb099a3c3043b262518d9b6cd4d5c9f589b15e2ad,1,{"palettes":"MemeMaxis"}
 0x2bcfb6355c57646cd196ce4f14a8caf571a10e58,1,{"palettes":"MemeMaxis"}
 0x2bd17fa766dcbc697c8fcb29f311da53fde0074f,1,{"palettes":"MemeMaxis"}
 0x2bd4a0c15f21e4606edbd4421597e472135ca862,1,{"palettes":"MemeMaxis"}
 0x2bde15dfbc4cab612f8288b9e2acd8f6298ac018,1,{"palettes":"MemeMaxis"}
 0x2bdf9c76fb123f2895e7aaa906b8fedfbe0ba884,1,{"palettes":"MemeMaxis"}
 0x2be21793155e0d5b3dd715c348f7e712471e0873,1,{"palettes":"MemeMaxis"}
+0x2be96c05fb7e81b020c42086b69d21bbf427b53a,1,{"palettes":"MemeMaxis"}
 0x2be9f18c46df11f05b581131af4d339c20c7254e,1,{"palettes":"MemeMaxis"}
 0x2bf308d324985dd121c366fd3fc398ec19d6651e,1,{"palettes":"MemeMaxis"}
 0x2bfe66759f0331066f3e7d57b3dc9a96bfc17927,1,{"palettes":"MemeMaxis"}
@@ -1503,6 +1531,7 @@
 0x2c9d56f321fd120009743fef09e2a6110178e200,1,{"palettes":"MemeMaxis"}
 0x2ca043bf85fe1553bdef8c0dbf021ad6202efb41,1,{"palettes":"MemeMaxis"}
 0x2ca212af7e65631d46a1cf406427f257d2976a71,1,{"palettes":"MemeMaxis"}
+0x2ca75a892b59bc7cf863ba261e49ab40a4844ee3,1,{"palettes":"MemeMaxis"}
 0x2caa3893ed4300186671265727b90ae0b518114b,1,{"palettes":"MemeMaxis"}
 0x2cabcfdfb87df7e03d5ea9491c1362d8bfc596b5,1,{"palettes":"MemeMaxis"}
 0x2cae0ac9a7a7048516868aad672c49ab632b38c8,1,{"palettes":"MemeMaxis"}
@@ -1614,6 +1643,7 @@
 0x2fa5ac62ff5c3a2800e3eff0d1bdd14bdeb0e1a4,1,{"palettes":"MemeMaxis"}
 0x2fa5b63690d63f9c3d5deeb32cdc5aebfe1cf32b,1,{"palettes":"MemeMaxis"}
 0x2fb0e475f6d495dfdfd9176af9113f48f7687565,1,{"palettes":"MemeMaxis"}
+0x2fb24b1021e51fa23db91a9b995000181fda0963,1,{"palettes":"MemeMaxis"}
 0x2fb55f58dd40af75dc019c2a3d09eb6878d376ea,1,{"palettes":"MemeMaxis"}
 0x2fc6549a67162bd653a136c88bbefccd46942c57,1,{"palettes":"MemeMaxis"}
 0x2fc67edbb3d37cf8c373e8b53215a0e9ac347767,1,{"palettes":"MemeMaxis"}
@@ -1649,6 +1679,7 @@
 0x30eaf1e4db6e830e112988b87a300c03c75cc566,1,{"palettes":"MemeMaxis"}
 0x30eea1e603b556eef164b4554bb6e7471b3e70f7,1,{"palettes":"MemeMaxis"}
 0x30f0f915a4752445cfeadfac0beb539fa1192b38,1,{"palettes":"MemeMaxis"}
+0x30f2a414945ba487f6a9ca909d0cc0919c6a1812,1,{"palettes":"MemeMaxis"}
 0x30f96a8defbfd7729d1b9ca0cb148e0c8460b9d8,1,{"palettes":"MemeMaxis"}
 0x30fa6a8a544721396884606daae72b550dc5c1a7,1,{"palettes":"MemeMaxis"}
 0x31004f28babda1f632cb445944892b04a411e7f7,1,{"palettes":"MemeMaxis"}
@@ -1711,6 +1742,7 @@
 0x328569c27203b453d3aab24ce49d4d3002067ac9,1,{"palettes":"MemeMaxis"}
 0x3299b96d78aada4191e4aad22e585fb613f3b420,1,{"palettes":"MemeMaxis"}
 0x329bd4e3b8f1493c37f6a46cbf40fe559ee1d9a4,1,{"palettes":"MemeMaxis"}
+0x32a0d6b013cf8ecad1e37e99532570411d398d05,1,{"palettes":"MemeMaxis"}
 0x32a0e5b656c2777d0f4d1f834e097d76505c2cd0,1,{"palettes":"MemeMaxis"}
 0x32a348ead7ed30d35b96b9f87320fef862033574,1,{"palettes":"MemeMaxis"}
 0x32ab360477f6e401522d1d1d9dc76fbb565c095a,1,{"palettes":"MemeMaxis"}
@@ -1927,12 +1959,12 @@
 0x386e96e10447095a99b919defc955c6d4835c279,1,{"palettes":"MemeMaxis"}
 0x3877279860320a0c6ec6c458c9d63c67c97b489b,1,{"palettes":"MemeMaxis"}
 0x3877b4c39476e3af04cb1ff8003db09f39f068f9,1,{"palettes":"MemeMaxis"}
-0x387f802c6a9ecffc8b8f6bb7b80ea0db4cef9810,1,{"palettes":"MemeMaxis"}
 0x388892c25255c89f73ce9e22515f4b996f1768b7,1,{"palettes":"MemeMaxis"}
 0x388cbeec5a031e4aad12599b04a4aa4f088e0f73,1,{"palettes":"MemeMaxis"}
 0x38909c6dd9bb50ffe647b06026ace0c8eac1950e,1,{"palettes":"MemeMaxis"}
 0x389458f93e387fc568ca4568c231a64ffd0456d2,1,{"palettes":"MemeMaxis"}
 0x38b2739bcb869494cc7953c79c97e3bcad7eac04,1,{"palettes":"MemeMaxis"}
+0xcea266acb92d5603dc53b5d6bc6e568dcde0d311,1,{"palettes":"MemeMaxis"}
 0x38c3cabb114f9eb5393ebf28d8473733121801b7,1,{"palettes":"MemeMaxis"}
 0x38cb81cea002c1a7659762e57b2878a5b93969f6,1,{"palettes":"MemeMaxis"}
 0x38d779b6dc61acdf864cd289f3594ad05088df95,1,{"palettes":"MemeMaxis"}
@@ -1974,7 +2006,6 @@
 0x39fbe769de5c86daba06d3ecf889f2812b8038a8,1,{"palettes":"MemeMaxis"}
 0x3a051f1d0cf548f5c24893934bb69cbf61844c9f,1,{"palettes":"MemeMaxis"}
 0x3a0c596a40bbbb558d86b0f692884aadf1dbf20d,1,{"palettes":"MemeMaxis"}
-0x3a10fd1387555cd75db8142393fbaba98efe28d4,1,{"palettes":"MemeMaxis"}
 0x3a1dfee2c37bb632dc3391ea7ea59ca9086c35b2,1,{"palettes":"MemeMaxis"}
 0x3a2c6b9d1548d752b85a17bb8cde226ee70980e2,1,{"palettes":"MemeMaxis"}
 0x3a2ea5595098565e7362e04da30c5ec29435731f,1,{"palettes":"MemeMaxis"}
@@ -1998,7 +2029,6 @@
 0x3ab6ebce2ad183ca65b432d715512cf8640111e2,1,{"palettes":"MemeMaxis"}
 0x3ac11001eb64b86008ef9bedb49bb687a663bf48,1,{"palettes":"MemeMaxis"}
 0x3ac2cc26fbb230e704393dc79e97cca47e709247,1,{"palettes":"MemeMaxis"}
-0x3ac61447a75149ba67639100ecc92c76fb20941c,1,{"palettes":"MemeMaxis"}
 0x3ac734159d2668a95b6478265ff4fe2792ce9802,1,{"palettes":"MemeMaxis"}
 0x3acc6ce8530227575c94459e7581ea665b2c6475,1,{"palettes":"MemeMaxis"}
 0x3ad3030e9623e9e09ae21cd0632aaa62446a5c97,1,{"palettes":"MemeMaxis"}
@@ -2094,6 +2124,7 @@
 0x3dab079d2040073335e989330270e6fc8fe880ea,1,{"palettes":"MemeMaxis"}
 0x3db0b224099e56488d93f4e887a6bad88c39cfa4,1,{"palettes":"MemeMaxis"}
 0x3db28e19b63cb8b3c257d37f56bf0455faf11e0b,1,{"palettes":"MemeMaxis"}
+0x3dbc93aecd50e485ecd2dd6dbe73d1ec19a4d839,1,{"palettes":"MemeMaxis"}
 0x3dc3bd6b08849e2489f928f020b8731bc032f87f,1,{"palettes":"MemeMaxis"}
 0x3dc3be0a9278028fde0e3ff65c6154e2e36dee9d,1,{"palettes":"MemeMaxis"}
 0x3dcff2782f07b19baed2f992e901d2d8990400d3,1,{"palettes":"MemeMaxis"}
@@ -2192,6 +2223,7 @@
 0x40ebf8a762801d1706d9d16a8abfec4c452d15e5,1,{"palettes":"MemeMaxis"}
 0x40f465f1ba4c2aba91c0c896cb92bbe4c7e545df,1,{"palettes":"MemeMaxis"}
 0x410a9f44948576c60f94b165f63eb79ce769a04c,1,{"palettes":"MemeMaxis"}
+0x8856dcf8d1f9be083a25251b0149ad74f971b806,1,{"palettes":"MemeMaxis"}
 0x41146e2b9dfdfc47724a20cb86a15dc206c97e44,1,{"palettes":"MemeMaxis"}
 0x412d974ca20038402a4e50d586fee6ba6a9279ed,1,{"palettes":"MemeMaxis"}
 0x4145a736eeb23174f3874fb9d3418f4acfed6de1,1,{"palettes":"MemeMaxis"}
@@ -2316,6 +2348,7 @@
 0x44d89b36fce03e9cb6a3ef589668f93620aa1ac1,1,{"palettes":"MemeMaxis"}
 0x44e204e872dae8ac81584247f48f317494bf8184,1,{"palettes":"MemeMaxis"}
 0x44e84bb96968d341455796ef1f72b6348d8f5411,1,{"palettes":"MemeMaxis"}
+0xd6f9dab19ebed62a617bce6481a372c6e142b6cb,1,{"palettes":"MemeMaxis"}
 0x44f829ccbdc9c15ca84d4fd3f00c4682c35f228e,1,{"palettes":"MemeMaxis"}
 0x44fbae5935520647eb98115e1c2f09a0d642e2b7,1,{"palettes":"MemeMaxis"}
 0x4502679fa4484f708efe050c8e3404ef229d9621,1,{"palettes":"MemeMaxis"}
@@ -2498,9 +2531,12 @@
 0x49f9c2be1aa71afac6f2f2ce5b884d8cda10e26d,1,{"palettes":"MemeMaxis"}
 0x49ff66d90c67ca99feaa5e8e473396d5c25aa71a,1,{"palettes":"MemeMaxis"}
 0x49ffbb2c43ad5298db85912f87e3781fe2ed1770,1,{"palettes":"MemeMaxis"}
+0x86ff945e6dc2470317ca082a01de7d24188671ac,1,{"palettes":"MemeMaxis"}
 0x4a0d9d160291db0da784c8331aafd112755feeed,1,{"palettes":"MemeMaxis"}
 0x4a10db49d36c39934bac4e882e94d268a67dbce7,1,{"palettes":"MemeMaxis"}
+0x4a13c9dd705e7d7d40f2f40a83cf73ae4032633c,1,{"palettes":"MemeMaxis"}
 0x4a15e3d354043fdefbb8fa77a55da211f4058190,1,{"palettes":"MemeMaxis"}
+0xd7d941ff2890bda98f40a5dda0593d239a603f09,1,{"palettes":"MemeMaxis"}
 0x4a22528949fecf2bd2bf7364c83e389d1071ddd1,1,{"palettes":"MemeMaxis"}
 0x4a22910f4db3e7bf000eacfa06126d5db7f0efd5,1,{"palettes":"MemeMaxis"}
 0x4a2bc6f59948174714657735af944261ceddf67a,1,{"palettes":"MemeMaxis"}
@@ -2571,11 +2607,11 @@
 0x4c42c0b130e8c13655d85f93d00f77cde1aa623c,1,{"palettes":"MemeMaxis"}
 0x4c49977d285c29a6d7caf3f1fc563103e79f9010,1,{"palettes":"MemeMaxis"}
 0x4c4b8d30813a59ce6a3e590f745ab9815a206858,1,{"palettes":"MemeMaxis"}
-0x63923511f7b628483f9e160cc173e68a5ded11b6,1,{"palettes":"MemeMaxis"}
 0x4c7cbba31f8abd69a3a931ea86e721fb9b9891f8,1,{"palettes":"MemeMaxis"}
 0x4c7f1354ae3d30f7a88c9d972ad7f96b44ce0dee,1,{"palettes":"MemeMaxis"}
 0x4c80bc92532225bfc71ebfb0bd75f7f71ab99fc0,1,{"palettes":"MemeMaxis"}
 0x4c85ece5bbf191d3e1b76934c8372d4ae3bf6927,1,{"palettes":"MemeMaxis"}
+0x4c941a23ec94580d3b5442aa8d5851583fd8bcce,1,{"palettes":"MemeMaxis"}
 0x4c9995900790d3b33f2c49342a6b82add8c94827,1,{"palettes":"MemeMaxis"}
 0x4c9ab1064da9c0d384530131498e3c34617a1508,1,{"palettes":"MemeMaxis"}
 0x4c9b3b18a54e59b23a75250425670e6a7467d225,1,{"palettes":"MemeMaxis"}
@@ -2656,7 +2692,6 @@
 0x4f08620c53f2b92fca61c78ee502ad50ccecb10d,1,{"palettes":"MemeMaxis"}
 0x4f0901b739ecb3c3235d59b9eb5833ae6ba619f3,1,{"palettes":"MemeMaxis"}
 0x4f115f91672413d272ce4d99c5e756caddfdf19d,1,{"palettes":"MemeMaxis"}
-0x4f13eabaf32ef4ad3837ae88fcfc6c69edba0377,1,{"palettes":"MemeMaxis"}
 0x4f234ae48179a51e02b0566e885fcc8a1487db02,1,{"palettes":"MemeMaxis"}
 0x4f26685ecf6524d70349e697a50ce8ecefda9c11,1,{"palettes":"MemeMaxis"}
 0x4f2b438e02abcaa832872f896ad4497c0ca81b6c,1,{"palettes":"MemeMaxis"}
@@ -2768,9 +2803,11 @@
 0x5263d3df74cddafafa867d404a94dcb4e3c50661,1,{"palettes":"MemeMaxis"}
 0x526525fe1222613defca291bcf176d9849d91c6d,1,{"palettes":"MemeMaxis"}
 0x526903a3b4c876696600b15f43e88b3c43c08ea3,1,{"palettes":"MemeMaxis"}
+0x52690f90740621f89f58521433e9b0921d626708,1,{"palettes":"MemeMaxis"}
 0x527136cf29a1df9024a6493f219a1da64398fdc5,1,{"palettes":"MemeMaxis"}
 0x5278d0fa9c48e7264af23dd0eaf06e75785d7777,1,{"palettes":"MemeMaxis"}
 0x527ad5b6d8ad7cdf62f353a55bac5492fa2e73b1,1,{"palettes":"MemeMaxis"}
+0x527bb834cc5c8ff730c673880e51372282b06e14,1,{"palettes":"MemeMaxis"}
 0x5286bc17220d51a36e55f5664d63a61bf9b127a6,1,{"palettes":"MemeMaxis"}
 0x528e7db54e33c52277ebd5daac7fcde897ca5085,1,{"palettes":"MemeMaxis"}
 0x529096c3065d8a82355bc358e0f2af764c337a20,1,{"palettes":"MemeMaxis"}
@@ -2816,6 +2853,7 @@
 0x540e16d0e898e45850ffa5bbb4d117d5aaef8f0b,1,{"palettes":"MemeMaxis"}
 0x541237a3e049f2ef1105694b491152f450aba4db,1,{"palettes":"MemeMaxis"}
 0x5414d08228b4dbc4e9193ecd1ad97225dfe8ebfe,1,{"palettes":"MemeMaxis"}
+0x542c5648d46462207fba8a4bd7d890b4154b722f,1,{"palettes":"MemeMaxis"}
 0x542fce2f47cbbbba00ba59f844b8e1aaaed1f84d,1,{"palettes":"MemeMaxis"}
 0x54330c69ac5fc215998c10dcee58c9f0364a7bf9,1,{"palettes":"MemeMaxis"}
 0x5458c15ff220bf75b92a76229fae88f93df9c6c6,1,{"palettes":"MemeMaxis"}
@@ -2888,6 +2926,7 @@
 0x5643a3518350ae920b442ab70aac56ae6d45b8be,1,{"palettes":"MemeMaxis"}
 0x564d94e94326a9c35345de6bbedf03d1c7513db4,1,{"palettes":"MemeMaxis"}
 0x56517e41ef464db3753ecfdd2dbcdd2f045b573c,1,{"palettes":"MemeMaxis"}
+0x56543717d994d09d5862ab9c6f99bce964ae664a,1,{"palettes":"MemeMaxis"}
 0x565465a0e19309ecb839319453e2c83aa0befdf2,1,{"palettes":"MemeMaxis"}
 0x56577f982e2066fec566108f0a63f3d09555c6ca,1,{"palettes":"MemeMaxis"}
 0x565f34ec537c1e49d7821d713d392027559fe5f6,1,{"palettes":"MemeMaxis"}
@@ -2947,9 +2986,11 @@
 0x57bacf5d4646c1a2b27fdbdb5d8cd4c8dc5d6803,1,{"palettes":"MemeMaxis"}
 0x57bd982d577660ab22d0a65d2c0a32e482112348,1,{"palettes":"MemeMaxis"}
 0x57be31b403ed3dcd8033a19d85afbdbb8ce3c3a8,1,{"palettes":"MemeMaxis"}
+0x86c71b7d27d00d7814a763f9e6f16fdb09f7e4df,1,{"palettes":"MemeMaxis"}
 0x57d579a203d8b5d1cfa6b751307c2d68ab2b15e4,1,{"palettes":"MemeMaxis"}
 0x57d5cd5d0fcf182fb46fe0ef7c0ec4cc3a4bde79,1,{"palettes":"MemeMaxis"}
 0x57dd129276d327b11891b7ae0ba4ead59215b08c,1,{"palettes":"MemeMaxis"}
+0x57dec6115e561f3de9fb7429cf14de429713b3d6,1,{"palettes":"MemeMaxis"}
 0x57f138b1e9c859151533f4dba90891eb4971d319,1,{"palettes":"MemeMaxis"}
 0x58058169d69f9c24a53ca88947cd2f9fc4e5561e,1,{"palettes":"MemeMaxis"}
 0x580a96bc816c2324bdff5eb2a7e159ae7ee63022,1,{"palettes":"MemeMaxis"}
@@ -3259,6 +3300,7 @@
 0x618c7671366caaab6701f06ae9925ae682c6bf97,1,{"palettes":"MemeMaxis"}
 0x618d17fa59c67aea20a88dc75d4e28e728a6ff28,1,{"palettes":"MemeMaxis"}
 0x618f55773cdd0dbcff63a49f3957e22db32052af,1,{"palettes":"MemeMaxis"}
+0xa6d4758ef49d2ae8e65e1a02216cb9744aee6b23,1,{"palettes":"MemeMaxis"}
 0x6194bda4590bbdc6a128851aaaf34802dfa8e4a1,1,{"palettes":"MemeMaxis"}
 0x61b04d2b5cb1f1f8505e7b4e1cb3d9e8a0b15bae,1,{"palettes":"MemeMaxis"}
 0x61b2889889591267229b8d05a7893ebe3822a8a0,1,{"palettes":"MemeMaxis"}
@@ -3306,6 +3348,7 @@
 0x6298e18c627e6fad358f3e4633fa0fd54a88d015,1,{"palettes":"MemeMaxis"}
 0x62994397d331259ff2004304b6985545698318e2,1,{"palettes":"MemeMaxis"}
 0x629fd2b73c8e01888597e3d2344ec6098575af13,1,{"palettes":"MemeMaxis"}
+0x62af590649b7abe80f8c6dffbb92e0875b65e37c,1,{"palettes":"MemeMaxis"}
 0x62c572a9f3ef103b0a9a1ab7b70933b6c92e7cd3,1,{"palettes":"MemeMaxis"}
 0x62c868061cddbe38e01e7a8295fdcec72c10ca06,1,{"palettes":"MemeMaxis"}
 0x62cd63e7203f53476ea8956276238fe839a23103,1,{"palettes":"MemeMaxis"}
@@ -3333,7 +3376,6 @@
 0x63b39fec34e761f30a025989409344efdd7dd4f1,1,{"palettes":"MemeMaxis"}
 0x63b7d0006102e672e6936fcfe6197e4c782f51d4,1,{"palettes":"MemeMaxis"}
 0x63c0be9e89d8cd092e27d0edb9e6b19d43cc6a4b,1,{"palettes":"MemeMaxis"}
-0x63f11d2060d147e75c2bfb83dbebe155b4d06b66,1,{"palettes":"MemeMaxis"}
 0x63f4c36bd548c3ad3dd18364c987e9a062a330ce,1,{"palettes":"MemeMaxis"}
 0x63f67e0fbd197f7441d92a0d63044c5f94f018e2,1,{"palettes":"MemeMaxis"}
 0x64036879f71a2448cfa629090e83876c5d72a16d,1,{"palettes":"MemeMaxis"}
@@ -3470,6 +3512,7 @@
 0x6928bfb114d228dffa0604f990d4a964bf1b6e61,1,{"palettes":"MemeMaxis"}
 0xec47cbbd9e05f8c4d587eb604f41740b0b2f33e4,1,{"palettes":"MemeMaxis"}
 0x692d1fce318f98865203a256b1024e070295c6f4,1,{"palettes":"MemeMaxis"}
+0x692d6cf19e0c082185e20ff5ea6bb267e7aeb278,1,{"palettes":"MemeMaxis"}
 0x693d28cbfb6a6788dfa8b034f75d9ff21edda9f0,1,{"palettes":"MemeMaxis"}
 0x693fb4c126da8e126687b16c809fc19d2409d522,1,{"palettes":"MemeMaxis"}
 0x69419b29e25dfcb0f1f27906cadfa332fc145d7f,1,{"palettes":"MemeMaxis"}
@@ -3491,10 +3534,12 @@
 0x69ba1ec4d95e1a5422f5b8a420245f2fa1ed723b,1,{"palettes":"MemeMaxis"}
 0x69c38c760634c23f3a3d9be441eccbd2e50e5f73,1,{"palettes":"MemeMaxis"}
 0x69cc363055d8c3d5e211865e805e145ab9208d57,1,{"palettes":"MemeMaxis"}
+0x69cd43dd4ecf3a076b1b9d2cfd41589987129bc0,1,{"palettes":"MemeMaxis"}
 0x69cda809c40bbae9c16517d2d620a88f7c0c0336,1,{"palettes":"MemeMaxis"}
 0x69cee4cb90eede1feb66c7953adf172e3f937dae,1,{"palettes":"MemeMaxis"}
 0x69da4ccc1e4c56949639558b21ab52da336e5fba,1,{"palettes":"MemeMaxis"}
 0x69dfc587589868716dbed6667cdd50073edc8f9c,1,{"palettes":"MemeMaxis"}
+0x8ffa8d00db5df56a20c30b737c5efdaabe140df4,1,{"palettes":"MemeMaxis"}
 0x69e68074f1aada957edd39c5eae0069973343f30,1,{"palettes":"MemeMaxis"}
 0x69f15ca90038b437a1027f9ea40dd81638713325,1,{"palettes":"MemeMaxis"}
 0x6a03361252f4894292256bc2173df430ab1fb691,1,{"palettes":"MemeMaxis"}
@@ -3533,6 +3578,7 @@
 0x6b1368d3a890c46ce9b0d6eac4d36f2a432904b8,1,{"palettes":"MemeMaxis"}
 0x6b17e9a9871f354a324b6d141b3a6b2b93b707b8,1,{"palettes":"MemeMaxis"}
 0x6b1d9489208f6693ac85fed38cddd1fcf278b094,1,{"palettes":"MemeMaxis"}
+0x6b29380bb9955d5b2df1624c5c6a72a5e69a6b80,1,{"palettes":"MemeMaxis"}
 0x6b2aa5fc4508ec023a8e355959eaccef5e3a250b,1,{"palettes":"MemeMaxis"}
 0x6b32a10fab26bab0a92dea063f2261a196982c40,1,{"palettes":"MemeMaxis"}
 0x6b3ab283947afb581a461770d7c52d47b2624788,1,{"palettes":"MemeMaxis"}
@@ -3542,6 +3588,7 @@
 0x6b4b60cd239b5b7947c98bb2b9bbd01db5bdf44c,1,{"palettes":"MemeMaxis"}
 0x6b4fedc18a1e8cc0523e56cc9b45080e1ea00005,1,{"palettes":"MemeMaxis"}
 0x6b67623ff56c10d9dcfc2152425f90285fc74ddd,1,{"palettes":"MemeMaxis"}
+0x6b6d5c57533d22d0de14db59fcd28b9ea5296090,1,{"palettes":"MemeMaxis"}
 0x6b7a91c6a6832bc3498883ff65268612f67c8119,1,{"palettes":"MemeMaxis"}
 0x6b8a7304a3c7e6cf3c06f10aa7261348a22cd800,1,{"palettes":"MemeMaxis"}
 0x6b8f5e3aa817dac35d211342819fc60d99e5f0fe,1,{"palettes":"MemeMaxis"}
@@ -3699,6 +3746,7 @@
 0x705ba829681ec7e78746531ac86de8ae836072da,1,{"palettes":"MemeMaxis"}
 0x70604bd577edf06d618d581d76e2fa88f8670a73,1,{"palettes":"MemeMaxis"}
 0x7079bfcd09ac050d3c8ca5d230336505bf5beb8a,1,{"palettes":"MemeMaxis"}
+0x70814fb113d5b2b22902b568b67ebef657d9d66d,1,{"palettes":"MemeMaxis"}
 0x7083ca77ad912ebdb3dfb3c6acd76556f8d6a5d1,1,{"palettes":"MemeMaxis"}
 0x7086f9b9ef5ab6653385f6751ee21bd82febe1a7,1,{"palettes":"MemeMaxis"}
 0x709c13074ed89a5d8efe996b4f1e2315d833f431,1,{"palettes":"MemeMaxis"}
@@ -3706,11 +3754,11 @@
 0x70b28ae80a7dd83c9b14840b25b3a6a85a91703b,1,{"palettes":"MemeMaxis"}
 0x70bde14a67f6ccace6d27f07b58c96c6c6bf9dc3,1,{"palettes":"MemeMaxis"}
 0x70c7d8775d6b98d863729006aae380b6a58bb494,1,{"palettes":"MemeMaxis"}
+0x70c8db61d09271f4c90950ba8c6cbaef918f12f2,1,{"palettes":"MemeMaxis"}
 0x70c9786568ec1cad07b0b47c24bb6861d4cb5613,1,{"palettes":"MemeMaxis"}
 0x70d9b2084d24823789073d3732a327b2c18a7e6f,1,{"palettes":"MemeMaxis"}
 0x70ddda43d4f616263b1db0ec672cbd8795db13b1,1,{"palettes":"MemeMaxis"}
 0x70e3c8cad61e0850f553db3646123007b26a026e,1,{"palettes":"MemeMaxis"}
-0x70e680b9493685f72e76243c09993fca768eedf1,1,{"palettes":"MemeMaxis"}
 0x70e7a6621f4cb3c3e073d0539899f49fc88424c0,1,{"palettes":"MemeMaxis"}
 0x70e7ee4dbbf6f91ef363cd701f4b98b70ec1ba52,1,{"palettes":"MemeMaxis"}
 0x70ea6798510298b2eb333ebe3fd63f5959149444,1,{"palettes":"MemeMaxis"}
@@ -3730,6 +3778,7 @@
 0x71301407eba75461fb03654683ecf0cff98c3cfd,1,{"palettes":"MemeMaxis"}
 0x7132f37e94e8752ed37f3239597e3d927ccc2d83,1,{"palettes":"MemeMaxis"}
 0x7143f19d9df476227013260f015b06359918ef3f,1,{"palettes":"MemeMaxis"}
+0x714b194ba18daf0288848054bec788de08c00cea,1,{"palettes":"MemeMaxis"}
 0x715fd9d95c5302e4f7febd8476e3f9c6db4c918a,1,{"palettes":"MemeMaxis"}
 0x7165a04c41c9e5e67d4850eab1dc6ede84d117f0,1,{"palettes":"MemeMaxis"}
 0x71784687d4c74338bf284bea22956c74fbe6d631,1,{"palettes":"MemeMaxis"}
@@ -3774,8 +3823,10 @@
 0x72bc237cf598505dc00d4fcc23b1663e206455a9,1,{"palettes":"MemeMaxis"}
 0x72be121ecebe178fd3dd0afb0bb91f75739a681b,1,{"palettes":"MemeMaxis"}
 0x72c293eefdb532bd448e876174bd54161f984096,1,{"palettes":"MemeMaxis"}
+0x72c95a7580c7f842fb30823b8a8c82a4961e144a,1,{"palettes":"MemeMaxis"}
 0x72cb2d89bf120f1a4677f94befec51b614f1f4cf,1,{"palettes":"MemeMaxis"}
 0x72cccabd18786edb51877ee47e4098e992e95976,1,{"palettes":"MemeMaxis"}
+0x72cea5aaaabd1cc5232bd2117e5d21e83cbd0e51,1,{"palettes":"MemeMaxis"}
 0x72d037f63a6c782f85c059fc917a12e71b2e0c73,1,{"palettes":"MemeMaxis"}
 0x72d2731a30b0bf4abfbd2f98391c5157645b36a5,1,{"palettes":"MemeMaxis"}
 0x72e680156324b5afa5d0d84b621844424a8bce42,1,{"palettes":"MemeMaxis"}
@@ -3880,6 +3931,7 @@
 0x763fc7107d87579f95614622d1dbba7253884ecc,1,{"palettes":"MemeMaxis"}
 0x76417ac85338c705ee75465699b02e738578adc6,1,{"palettes":"MemeMaxis"}
 0x7649bc6ed90f677b889dbc3cfe6fdfede69d9e5b,1,{"palettes":"MemeMaxis"}
+0x764abe778aa96cd04972444a8e1db83df13f7e66,1,{"palettes":"MemeMaxis"}
 0x764da1f1d34f4bfb1bd3b8550870bd034b2b3651,1,{"palettes":"MemeMaxis"}
 0x7656e919f2af9c7d339333cf29a20c8d7f7bad13,1,{"palettes":"MemeMaxis"}
 0x765718a8e4a5562be34b122af259ce5a71372e12,1,{"palettes":"MemeMaxis"}
@@ -4066,6 +4118,7 @@
 0x7ad225751ed67118e9f54f87e08f64e43ffbef0a,1,{"palettes":"MemeMaxis"}
 0x7ad2b076d7523cd68b6cd1cbb29a2f173cbb8e22,1,{"palettes":"MemeMaxis"}
 0x7adcbd5b9e43f3f012400b08cb9e2c1dfe0ca133,1,{"palettes":"MemeMaxis"}
+0x7ae3b0627dac32d3ee16c204ef791e37067b8460,1,{"palettes":"MemeMaxis"}
 0x7aefd0856861060603fce2910a95d576f6f9fbe0,1,{"palettes":"MemeMaxis"}
 0x7af061a6ec9616135231cb8de2ed2a0a4140e90b,1,{"palettes":"MemeMaxis"}
 0x7afe1e49e6a44b2f1374a20eee4406a8fa691519,1,{"palettes":"MemeMaxis"}
@@ -4118,6 +4171,7 @@
 0x7c553919d52ff0c6a65224d453cb756e3f7d9b68,1,{"palettes":"MemeMaxis"}
 0x7c58805e40d431d13c06fefa0e26695a47e06bc4,1,{"palettes":"MemeMaxis"}
 0x7c6b066cd8538687f8719397ece8a038573ef54f,1,{"palettes":"MemeMaxis"}
+0x7c741ed01ee259feba4b7f9cac114f48bcafacf3,1,{"palettes":"MemeMaxis"}
 0x7c76cf8894d42ed11b53236da54f05add1d44073,1,{"palettes":"MemeMaxis"}
 0x7c789d13654fc6cb030b3cb23e8ea54e72b17b58,1,{"palettes":"MemeMaxis"}
 0x7c8a0a4bab02b7c6928952fc806776bad68b4340,1,{"palettes":"MemeMaxis"}
@@ -4148,7 +4202,6 @@
 0x7d462af7fb6aa7b5b91fd5ca5bdabb7fd6124b26,1,{"palettes":"MemeMaxis"}
 0x7d4c69f2c1d640a807e27824c95706829d381dcf,1,{"palettes":"MemeMaxis"}
 0x7d4d3e72d540474e24bfdd19644e8df14581664f,1,{"palettes":"MemeMaxis"}
-0x7d5300e22db1b2850da1beed10a894893731c1a7,1,{"palettes":"MemeMaxis"}
 0x7d5b6c5a0db997e704b72e5acb33a45b50138a39,1,{"palettes":"MemeMaxis"}
 0x7d60a758f47822ec591b24df5a9d58fac84cb07e,1,{"palettes":"MemeMaxis"}
 0x7d639b54904816df6ef24f10ad421a874621b512,1,{"palettes":"MemeMaxis"}
@@ -4170,6 +4223,7 @@
 0x7dc166391edba45b124e236cd099fdb266e541ff,1,{"palettes":"MemeMaxis"}
 0x7dc35b473b6ff652c1c437996244a8d14d026252,1,{"palettes":"MemeMaxis"}
 0x7dcb39fe010a205f16ee3249f04b24d74c4f44f1,1,{"palettes":"MemeMaxis"}
+0x7dd14501c25c221ffe213d7d56d225f4fe411038,1,{"palettes":"MemeMaxis"}
 0x7dd3005f938feecf091151c0e4f5f53327b035a2,1,{"palettes":"MemeMaxis"}
 0x7dd758d5b7e10bd45cef5b2bc79d17bf45192e10,1,{"palettes":"MemeMaxis"}
 0x7ddae9afcdf981729b18ad3ac0fcef50d9662c24,1,{"palettes":"MemeMaxis"}
@@ -4235,6 +4289,7 @@
 0x7fe650c97925e3e17450208ae3eee2024fcc04a5,1,{"palettes":"MemeMaxis"}
 0x800ddbd272472f8ad19acf656fb0eee32cc2f479,1,{"palettes":"MemeMaxis"}
 0x8018bbadf493a80051ab73b83df31d1bf37790b6,1,{"palettes":"MemeMaxis"}
+0x801ac1049467293c3d8564a039c63eb133757e82,1,{"palettes":"MemeMaxis"}
 0x8028bfbbb68ac004e0704161cd080409a8cf2950,1,{"palettes":"MemeMaxis"}
 0x8030e495ea55d8ec8ae1e10bf7498bf7f0eac1aa,1,{"palettes":"MemeMaxis"}
 0x80311d7511c8e65cb8b897be6e403de4a67eaa61,1,{"palettes":"MemeMaxis"}
@@ -4376,6 +4431,7 @@
 0x8427cd35ad8d1248d203bae6f64f2a4c98d84a2f,1,{"palettes":"MemeMaxis"}
 0x84300dcc7ca9cf447e886fa17c11fa22557d1af0,1,{"palettes":"MemeMaxis"}
 0x8436e9a3aed9f8d595684edb1fa7ebd6ea6a2cfa,1,{"palettes":"MemeMaxis"}
+0x843708d85621273f3bbc643b348da3a60d5b0334,1,{"palettes":"MemeMaxis"}
 0x843e5a575fa950056a890861df920f7f8ebfd4e7,1,{"palettes":"MemeMaxis"}
 0x843f2e3d685caa87ae089c1b95cec9f43ee65afc,1,{"palettes":"MemeMaxis"}
 0x84428a30234712da09c639847401b7a84ee30a65,1,{"palettes":"MemeMaxis"}
@@ -4399,6 +4455,7 @@
 0x84b833ac214d8bc9d0159b5416879e2bb8cd876f,1,{"palettes":"MemeMaxis"}
 0x84b9cb209d28152103e7b03d54b286886ee05c67,1,{"palettes":"MemeMaxis"}
 0x84cd67d2bcb28694b7b02ccb9736bc9547181588,1,{"palettes":"MemeMaxis"}
+0x84df1fb4801e72cf6958a994dc0b690f9e7cb23b,1,{"palettes":"MemeMaxis"}
 0x84f8bff48b845e7cc2f5a9175860ef6b0016c1d6,1,{"palettes":"MemeMaxis"}
 0x84f9aeca6f9ecaca340bd9535b4f642ee74360ae,1,{"palettes":"MemeMaxis"}
 0x84faf1f993d2261a6a6dc53047719a5815719877,1,{"palettes":"MemeMaxis"}
@@ -4445,6 +4502,7 @@
 0x86125855ea134f1da31015663fd3c19a657a8d16,1,{"palettes":"MemeMaxis"}
 0x8613b26537bb5875c27c94b57bb61a7a14f949fb,1,{"palettes":"MemeMaxis"}
 0x861d4d0d553ca4c316d426b12faeee95d0113d09,1,{"palettes":"MemeMaxis"}
+0x8623a32af48544b055fb6ae64f33eb43edf091ff,1,{"palettes":"MemeMaxis"}
 0x86286d93d79a9e5b78de97cbbc8dcaba0f2489fc,1,{"palettes":"MemeMaxis"}
 0x862eb245e19172dc3da2e16248ade9deba757004,1,{"palettes":"MemeMaxis"}
 0x863c9aade08c7e024a4c7a2884c6024711ccb11a,1,{"palettes":"MemeMaxis"}
@@ -4452,6 +4510,7 @@
 0x864298c823925036dae6976e03d2b2a59053f12c,1,{"palettes":"MemeMaxis"}
 0x8647e94eb2845e2ffe884a5c6edb7ba62a3b7fff,1,{"palettes":"MemeMaxis"}
 0x864f44fc29728ba1261a61a1b210f5348c6373d2,1,{"palettes":"MemeMaxis"}
+0x8668681d2017c2322d7ba37070a8ea223ef3729c,1,{"palettes":"MemeMaxis"}
 0x867db38c83f4287a71ffd0cdfba6ffae93150ff7,1,{"palettes":"MemeMaxis"}
 0x8695a4f9d2345fa0e2d87a0ceaa9d5ba48e66cd3,1,{"palettes":"MemeMaxis"}
 0x8699793e22403b355185d8ff76e7392f98aafa46,1,{"palettes":"MemeMaxis"}
@@ -4498,6 +4557,7 @@
 0x87d8dcef48c9632e87de450e55941d68db0b1463,1,{"palettes":"MemeMaxis"}
 0x87da297a832706b5115ee1feb47b7fdb7c476261,1,{"palettes":"MemeMaxis"}
 0x87e32d4631d728d6ad7ebcd133b11febc9da9b93,1,{"palettes":"MemeMaxis"}
+0x87e91205adab9e2b0be9f7562af3f5b42fad0838,1,{"palettes":"MemeMaxis"}
 0x87f3820d2afc4b212052b0c3c0eef8375869d865,1,{"palettes":"MemeMaxis"}
 0x87f7f3dd57afef06b7ab16c9b0bcf9eed9fac9b4,1,{"palettes":"MemeMaxis"}
 0x87ffc335a97471f969b4d263ba9c20fbee3db03a,1,{"palettes":"MemeMaxis"}
@@ -4509,9 +4569,11 @@
 0x88188aa8406201f427f171c28e489c897d75ac7a,1,{"palettes":"MemeMaxis"}
 0x883ce32e186c69559e94c8ba276bfc4322fc194a,1,{"palettes":"MemeMaxis"}
 0x884befa765a966508cb0bd8ca36e300a4529f380,1,{"palettes":"MemeMaxis"}
+0x8854ad314fdbcc275eb0d5f4fd6dd86ab7981cce,1,{"palettes":"MemeMaxis"}
 0x88582408a01e9be2f5f1f0ff6f486a5ca043b8d1,1,{"palettes":"MemeMaxis"}
 0x885869cb03bfa16e2e21e0e0d1b64b8ae9374f4d,1,{"palettes":"MemeMaxis"}
 0x885cb1217070bc7e05661a6b2a906ce3d9cea705,1,{"palettes":"MemeMaxis"}
+0x886478d3cf9581b624cb35b5446693fc8a58b787,1,{"palettes":"MemeMaxis"}
 0x8865f90c1eeec398b6639ad73d0a5ac90e9ea095,1,{"palettes":"MemeMaxis"}
 0x886c4d1d4bc99399a42ef9cdcbf0f0dfa700a860,1,{"palettes":"MemeMaxis"}
 0x886e16654fecf66c056960811ecc50fe43701494,1,{"palettes":"MemeMaxis"}
@@ -4637,6 +4699,7 @@
 0x8bbc693d042cea740e4ff01d7e0efb36110c36bf,1,{"palettes":"MemeMaxis"}
 0x8bc0d88262a24996b634eb274dc4434ef7b28eb9,1,{"palettes":"MemeMaxis"}
 0x8bc303246b92b797cbd83e8527677402db2b2609,1,{"palettes":"MemeMaxis"}
+0x8bc3757a675be4c2e459813769992ec2c60baaaf,1,{"palettes":"MemeMaxis"}
 0x8bc80e913fb7f1e315d787f5c3cf445e44ab40a4,1,{"palettes":"MemeMaxis"}
 0x8bdd94ae16ba2bcc172dd5b66666c58abd1dc568,1,{"palettes":"MemeMaxis"}
 0x8be8ae739f560fb0ebc0b1520ea5c4bcfeec5129,1,{"palettes":"MemeMaxis"}
@@ -4748,6 +4811,7 @@
 0x8f5d478647f5b7ef9c18a9a0186e7b3af50d89d7,1,{"palettes":"MemeMaxis"}
 0x8f61040ac8f42f67e33592e711238a3f71788bba,1,{"palettes":"MemeMaxis"}
 0x8f77e5212ad133ac1ba5f63816719202234fcfcc,1,{"palettes":"MemeMaxis"}
+0xb26c452e8ac20ae7445fcf46b6478d3984f5d8e9,1,{"palettes":"MemeMaxis"}
 0x8f8a1e5113b11926950185d74567dbafb0aece0b,1,{"palettes":"MemeMaxis"}
 0x8f8dd74055434bb3ca490df5b2f3c14ce797faa8,1,{"palettes":"MemeMaxis"}
 0x8f903cfc0af3c2ec0d872c57538af5e071544a57,1,{"palettes":"MemeMaxis"}
@@ -4818,6 +4882,7 @@
 0x9168fa36b033006090a9159e9ec47609d84b1e45,1,{"palettes":"MemeMaxis"}
 0x917aa1fe4ee8154ce8c4eeb8f4768ba615245799,1,{"palettes":"MemeMaxis"}
 0x918dfe9145e0c5a8ef1c9dcb6e5c0b17f669affb,1,{"palettes":"MemeMaxis"}
+0x9197f339cca98b2bc14e98235ec1a59cb2090d77,1,{"palettes":"MemeMaxis"}
 0x91a3ebce4e0d326539c6e2720f25449774cb615e,1,{"palettes":"MemeMaxis"}
 0x91aa2610067019cb9930106d1fae7998ba1e73ee,1,{"palettes":"MemeMaxis"}
 0x91aca13b42ac160c9e79a3cdcbb42cf68c1f15b4,1,{"palettes":"MemeMaxis"}
@@ -4878,7 +4943,6 @@
 0x9313d20e1657ab7fd434943c931f4b796841bac2,1,{"palettes":"MemeMaxis"}
 0x9318f724edfcf60066a924ddb9133a312becf0f7,1,{"palettes":"MemeMaxis"}
 0x931d0dcc21410c0410faafc6b7913c59e948e020,1,{"palettes":"MemeMaxis"}
-0x931e8194d361571cc8476b15f8ce2f6e72d593f5,1,{"palettes":"MemeMaxis"}
 0x931f974d02d25beb1f2f510fa051f81fcb8837e3,1,{"palettes":"MemeMaxis"}
 0x93243bf5f577c1e325987862267d0314f72e0050,1,{"palettes":"MemeMaxis"}
 0x93316235ca4d1227ca3cc51de928aba21fc809b8,1,{"palettes":"MemeMaxis"}
@@ -4899,9 +4963,11 @@
 0x93a635440f2d8e303177f033b56408ca03e746c5,1,{"palettes":"MemeMaxis"}
 0x93a781d6e6a8e8916ea766a40c46ed2064b55141,1,{"palettes":"MemeMaxis"}
 0x93a95e4aeb71bc0c8dc82c408248a33f57e94f7a,1,{"palettes":"MemeMaxis"}
+0x93ab3c4e6daa20b2b7ea65754a8c11311fbdba38,1,{"palettes":"MemeMaxis"}
 0x93b8d71f1c3370aff82bfaa1b022fd36975f45b8,1,{"palettes":"MemeMaxis"}
 0x93bbcf3310771090e88f19057c940524bb43bbba,1,{"palettes":"MemeMaxis"}
 0x93c620d2af377c6c37e3e3c1d3e065eb04b08ae2,1,{"palettes":"MemeMaxis"}
+0x93c838add3ac72b42f65417408f900a7155e1bb8,1,{"palettes":"MemeMaxis"}
 0x93cf0a22a26895650a8aae960bf85a01ec6a551c,1,{"palettes":"MemeMaxis"}
 0x93d8d7cdff64d4a31ea2554a3735e58fd69f052f,1,{"palettes":"MemeMaxis"}
 0x93dc8de488504932db3bc900045afcf88fa79160,1,{"palettes":"MemeMaxis"}
@@ -4953,6 +5019,7 @@
 0x953b0f8afc70e0fca9e2e43b0a4914be002c4e94,1,{"palettes":"MemeMaxis"}
 0x9547dca1cadb86e6c3d80811de4ecc5b7ead2b1a,1,{"palettes":"MemeMaxis"}
 0x954a5549283c936575249d50fae039598b403a25,1,{"palettes":"MemeMaxis"}
+0x954d65e5310607e12f93f6156de92cd37ffcae8e,1,{"palettes":"MemeMaxis"}
 0x9553803357f9441ee426e701a1bd8031f814fcf0,1,{"palettes":"MemeMaxis"}
 0x955d7584aabe835e898151294de93b1fd97d00f6,1,{"palettes":"MemeMaxis"}
 0x95649f108393a38d182e148f0424c2604cda8cc9,1,{"palettes":"MemeMaxis"}
@@ -5048,6 +5115,7 @@
 0x97d03b829abbeefb64a4fc2c498d849856a9505b,1,{"palettes":"MemeMaxis"}
 0x97dddcbb6a6209cb02432b8d7a6e3aabb0372b8a,1,{"palettes":"MemeMaxis"}
 0x97e98bc8faa00f58a33e04f33fecfc043945f809,1,{"palettes":"MemeMaxis"}
+0x97ece7185467c78293f3b796bde3704421d4fa69,1,{"palettes":"MemeMaxis"}
 0x97f2966a0ac90d24e80416a3cbaede5b66aa4b00,1,{"palettes":"MemeMaxis"}
 0x98025f7776884d38093508e31f4e3119e2979cad,1,{"palettes":"MemeMaxis"}
 0x980e22587fc29d25cf2c82baa6933dc0f73c09c4,1,{"palettes":"MemeMaxis"}
@@ -5057,6 +5125,7 @@
 0x982b1d44ac3ff17e4e0b6e2091fe0ca62c9442a0,1,{"palettes":"MemeMaxis"}
 0x984b8f799f8a2efb188f7be8b386130fc4651bbb,1,{"palettes":"MemeMaxis"}
 0x985adc7b3f514db68802e44557ccf1af3fa95e25,1,{"palettes":"MemeMaxis"}
+0x986d1bfc94671b5633d90d0540820bd3813e3a50,1,{"palettes":"MemeMaxis"}
 0x9878e0079f5d51241e4dadea3d3ef9d5cfb9361e,1,{"palettes":"MemeMaxis"}
 0x987bc531a66ac7443ce45db69e6e7f08e91ea7e0,1,{"palettes":"MemeMaxis"}
 0x988070d1060fd2c826ccbc9b1446296a96fa75ad,1,{"palettes":"MemeMaxis"}
@@ -5177,6 +5246,7 @@
 0x9bf0555ce71d529a8f2d79fc4cfe9aabc2de21b2,1,{"palettes":"MemeMaxis"}
 0x9bf10a9a1254edadef6a2a4a34e51b34a5928cf9,1,{"palettes":"MemeMaxis"}
 0x9c062b18920e31c90759558764f564752f9af328,1,{"palettes":"MemeMaxis"}
+0x9c163eb3589b0dcf366fc23c581307618b68fb06,1,{"palettes":"MemeMaxis"}
 0x9c2f86730fd191c23f2be8df96de94826fc47983,1,{"palettes":"MemeMaxis"}
 0x9c31f5112faa5f8996562e2a2139988e3db63063,1,{"palettes":"MemeMaxis"}
 0x9c335e4d8cacda86647ff4497789019c7a762a62,1,{"palettes":"MemeMaxis"}
@@ -5207,6 +5277,7 @@
 0x9d272dbe471a11b1c0f819375f9d8875f91c72b1,1,{"palettes":"MemeMaxis"}
 0x9d2fd63c49509e82c7abe56d864deabf41ff4a1e,1,{"palettes":"MemeMaxis"}
 0x9d45c8492f94687ec1317ee81e2b8647af5a1759,1,{"palettes":"MemeMaxis"}
+0x9d52fd3f58557f3b5fcd2b10314bf566cabca60a,1,{"palettes":"MemeMaxis"}
 0x9d7e0a8bba1313fe7048e4ca4870ecafec13c416,1,{"palettes":"MemeMaxis"}
 0x9d8945e2c08751ce18bab505a57073c8de16cd11,1,{"palettes":"MemeMaxis"}
 0x9d9103b2951450fad4884c0f19a18e5f9cd4171c,1,{"palettes":"MemeMaxis"}
@@ -5238,6 +5309,7 @@
 0x9ea50708e47a237182a56c481a4d11dd021b7ec2,1,{"palettes":"MemeMaxis"}
 0x9eaa362844dbe545b63b8c0bda90fed9ea1f5625,1,{"palettes":"MemeMaxis"}
 0x9eab4b2feed9483838d2e9b7c1ad407a18624df4,1,{"palettes":"MemeMaxis"}
+0x9eb69d42dc42c0b20bc93caf1a15a92afa5c4569,1,{"palettes":"MemeMaxis"}
 0x9ec022d5d0b2540941ce76b3ec65936542246fa6,1,{"palettes":"MemeMaxis"}
 0x9ec11f051e8cf2b3a4ae9c8d93e8729cc3b966b4,1,{"palettes":"MemeMaxis"}
 0x9ec73d0003b49cc7a889f4ebbd38e192ee3a4620,1,{"palettes":"MemeMaxis"}
@@ -5254,6 +5326,7 @@
 0x9f281c5b04c091096ac468a9388f0ee6b0b8b1f5,1,{"palettes":"MemeMaxis"}
 0x9f2dee49af076fddc50ffcdb9d7b5b69ba22f754,1,{"palettes":"MemeMaxis"}
 0x9f3456016d3d5d7066a8b7d2138515d733553cb2,1,{"palettes":"MemeMaxis"}
+0x9f35af4727fb91114563d8a8f779a792cb557f3f,1,{"palettes":"MemeMaxis"}
 0x9f3c44a7331ca9da2d3432bcb0df91186a27e3d7,1,{"palettes":"MemeMaxis"}
 0x9f455b1fb95d998ab1f25a0e957352fe11f508c0,1,{"palettes":"MemeMaxis"}
 0x9f4c8e21a79ba14de15300c48d0f42e87e45ff08,1,{"palettes":"MemeMaxis"}
@@ -5281,6 +5354,7 @@
 0xa033962385ca19c7a7109fafee356daa7a9291d3,1,{"palettes":"MemeMaxis"}
 0xa04611ac0438bdada004680628704151c8db044f,1,{"palettes":"MemeMaxis"}
 0xa0480920ae916ff51fb57f29751fe830ea02b5b7,1,{"palettes":"MemeMaxis"}
+0xa0494ebea98f71b0f5daafbe3c7e77d933a85e56,1,{"palettes":"MemeMaxis"}
 0xa0506d623ea4cce494f38c25b1ff47e823b120f9,1,{"palettes":"MemeMaxis"}
 0xa05cd277ba50ec72fc41917437a6c09e39b99bbb,1,{"palettes":"MemeMaxis"}
 0xa061fbfa7dc7ee9f838a717e8b55fbc34641bf6e,1,{"palettes":"MemeMaxis"}
@@ -5339,6 +5413,7 @@
 0xa222204acf1be4077d34102fab38a759060b77c2,1,{"palettes":"MemeMaxis"}
 0xa224016632c0680d6469213008fe8c973f98aa1f,1,{"palettes":"MemeMaxis"}
 0xa22414e4af5767448624017c7e0151d22490412b,1,{"palettes":"MemeMaxis"}
+0xa225158ea124f311cd0d50cfeaf3407b9412b077,1,{"palettes":"MemeMaxis"}
 0xa2272469c824d2b34407c08c1b377f3027406fea,1,{"palettes":"MemeMaxis"}
 0xa22c229073dc66b76720bfdd915b9450ef6c0611,1,{"palettes":"MemeMaxis"}
 0xa230d3d35600e66ef9c087bfd7c588e0f4e1d545,1,{"palettes":"MemeMaxis"}
@@ -5383,6 +5458,7 @@
 0xa323a54987ce8f51a648af2826beb49c368b8bc6,1,{"palettes":"MemeMaxis"}
 0xa324f75f6d642b97b3f9172ab36c87e1e8aa48a4,1,{"palettes":"MemeMaxis"}
 0xa32560268dfff7e62cd0cda1dcc699406321aed6,1,{"palettes":"MemeMaxis"}
+0xa32c38646299818ccedc6401818c2e1639c39c08,1,{"palettes":"MemeMaxis"}
 0xa32f735fee61c1707188588b7c08263e60f3d125,1,{"palettes":"MemeMaxis"}
 0xa33e5e1ccf57c0caf78ae399061f270dd24ffcdf,1,{"palettes":"MemeMaxis"}
 0xa342e537bea996a2c96864c31dd9b3d9e40eb2fb,1,{"palettes":"MemeMaxis"}
@@ -5401,6 +5477,7 @@
 0xa385aa420381100768cf5280464858602ce3acaf,1,{"palettes":"MemeMaxis"}
 0xa3861a789d05597bc046e8e6d5e10ecde947569f,1,{"palettes":"MemeMaxis"}
 0xa3943ddbfb21ece9b47066f1aa200b1ebdcd3c45,1,{"palettes":"MemeMaxis"}
+0xf4df143e90c2095e173f861a22f1e6a2503d06cb,1,{"palettes":"MemeMaxis"}
 0xa3974a097095b542f9439bed7abdb7ebed2487ee,1,{"palettes":"MemeMaxis"}
 0xa39d385628bd00438f8a9ba4050a25a0210f84eb,1,{"palettes":"MemeMaxis"}
 0xa3b11d1f06d71eaa9cd3d0142f08e7ace9b474ec,1,{"palettes":"MemeMaxis"}
@@ -5413,6 +5490,7 @@
 0xa3cc58eaa3800dc163726e031a2da49a9bb64eb3,1,{"palettes":"MemeMaxis"}
 0xa3e826a5d1631baa4cf77d02ed829d2c6fcbc9e9,1,{"palettes":"MemeMaxis"}
 0xa3fbabd1ee57af8e779531c75444cb4c259214f6,1,{"palettes":"MemeMaxis"}
+0xa40117a1394fc5cfb3576fe12632381b0b79c0c0,1,{"palettes":"MemeMaxis"}
 0xa40d281de9c15d501ef21ac32f777a5a551fddd6,1,{"palettes":"MemeMaxis"}
 0xa412daa017927c717887ed27aefa0b720ae25b42,1,{"palettes":"MemeMaxis"}
 0xa41cd41474f7b59736da76b7fe12b9b8d9afb94f,1,{"palettes":"MemeMaxis"}
@@ -5460,6 +5538,7 @@
 0xa582484cc6016a298de57ff45b77ac286ebeac61,1,{"palettes":"MemeMaxis"}
 0xa5855f4f40a409ffde3a171eb616926aec5d7b9c,1,{"palettes":"MemeMaxis"}
 0xa58714c5884f5e217df9583d1f8151826e938b02,1,{"palettes":"MemeMaxis"}
+0xa59422ec0634a0263bcdfce5e29dd2df3803447e,1,{"palettes":"MemeMaxis"}
 0xa595e9525b0b2dbf91054689e385f5611207b9c1,1,{"palettes":"MemeMaxis"}
 0xa59c86a6336c3e0932ae89206e2501d482c4f520,1,{"palettes":"MemeMaxis"}
 0xa5a8fb5d3132510381a3206d232f375205f809e6,1,{"palettes":"MemeMaxis"}
@@ -5545,6 +5624,7 @@
 0xa810ee0b25765421f1772428e6a5c5357cf55183,1,{"palettes":"MemeMaxis"}
 0xa812ae608d18b528da5683cdc77f6334c706ef74,1,{"palettes":"MemeMaxis"}
 0xa81725fae8bb3930a95debb0adeaa184b5e9cc10,1,{"palettes":"MemeMaxis"}
+0xa8174abc36b3298356d273e512cd87223a2b3ffa,1,{"palettes":"MemeMaxis"}
 0xa817a1cb451c6faf973e54fe3a6732acd5cc4d2c,1,{"palettes":"MemeMaxis"}
 0xa81d194cfc13364eee82abf32c8451264287aadd,1,{"palettes":"MemeMaxis"}
 0xa81f3639275eecf79247b7ad455cebcf4dda3d87,1,{"palettes":"MemeMaxis"}
@@ -5581,6 +5661,7 @@
 0xa90dc6d356b622b9783f5020722e6f92b663438f,1,{"palettes":"MemeMaxis"}
 0xa90ed8870669e53c8fefba6c8a1150f799793e20,1,{"palettes":"MemeMaxis"}
 0xa91e80ad06da278c618ea629198957d934f72e44,1,{"palettes":"MemeMaxis"}
+0xa9237c4eeebc879208e59c867cb6d7cbffc1df30,1,{"palettes":"MemeMaxis"}
 0xa9283f9e3b4f549acceef63bbff76f958e1f57c7,1,{"palettes":"MemeMaxis"}
 0xa92e541cb7035b71fb83e7cb6b8a41c96d8e0a47,1,{"palettes":"MemeMaxis"}
 0xa92e794e2b196e612a59b9b5c5051e1888fd7b24,1,{"palettes":"MemeMaxis"}
@@ -5636,6 +5717,7 @@
 0xaad2fea57a22262ffec3bc917e11d8e493d37cf0,1,{"palettes":"MemeMaxis"}
 0xaad4210b800f14660ef4068029d428936ebd21fd,1,{"palettes":"MemeMaxis"}
 0xaae33d661bb2604158748ea861280231600cfe61,1,{"palettes":"MemeMaxis"}
+0xaae8c50d76c76fb8947c9a203103d28b55862977,1,{"palettes":"MemeMaxis"}
 0xaaedd94c92e7079e22786e5931235622b68520b4,1,{"palettes":"MemeMaxis"}
 0xab0e2f3c3c29deaa7c3ca0dacec97a33d5c26708,1,{"palettes":"MemeMaxis"}
 0xab0f8f971ea3263e14135a0d4705d6bc13c85ada,1,{"palettes":"MemeMaxis"}
@@ -5758,6 +5840,7 @@
 0xaee0a2f71f317553ec62aed8f50b8ff6dd5fed6c,1,{"palettes":"MemeMaxis"}
 0xaee4c04c8ab29fbc397ea89dff2a81558e5772cf,1,{"palettes":"MemeMaxis"}
 0xaee804662613443938b35ed428afa5e90f8c1407,1,{"palettes":"MemeMaxis"}
+0xff3bc8de74bb1d2f9066c9687f62bf810c66c5ea,1,{"palettes":"MemeMaxis"}
 0xaef12b5976b89f1379f10df2be30fc22480277fe,1,{"palettes":"MemeMaxis"}
 0xaef48e7fb14048cc2438745165b6f72157d89cac,1,{"palettes":"MemeMaxis"}
 0xaef63b54eacbdceff0b63609623d038195008d88,1,{"palettes":"MemeMaxis"}
@@ -5807,6 +5890,7 @@
 0xb072ac527b8f872d269449175d08e6df818dc377,1,{"palettes":"MemeMaxis"}
 0xb07c70eccb3373e9108a436cc1028d2ec6312ebf,1,{"palettes":"MemeMaxis"}
 0xb0807e628889575bf368ca4cde070a903a4b9ea2,1,{"palettes":"MemeMaxis"}
+0xf28fc8d0eb98a34f2b03d384f7db6f1e7b877a33,1,{"palettes":"MemeMaxis"}
 0xb0824a58f3d26b6df4a037fc85b548f2a6eec096,1,{"palettes":"MemeMaxis"}
 0xb09316b71c0ae83f1306c5a8dc67f32450e0adf9,1,{"palettes":"MemeMaxis"}
 0xb09a022d4114696324a54a80e6a62a24f8e38599,1,{"palettes":"MemeMaxis"}
@@ -5840,6 +5924,7 @@
 0xb175855d114f6560105e0d7c608785466879a27d,1,{"palettes":"MemeMaxis"}
 0xb18e3c41faf4139b89b4ebf1f5ef645a3ad0ec7f,1,{"palettes":"MemeMaxis"}
 0xb1904abbff9c65e538b7b4cf9e876c801a2bef23,1,{"palettes":"MemeMaxis"}
+0xb196931ec22517b0510705eb56d5652fe73877f0,1,{"palettes":"MemeMaxis"}
 0xb1af13b2e4be55ca69829a23c09a1f5663adf8d0,1,{"palettes":"MemeMaxis"}
 0xb1b7c542196d532dcde45fbabf1aaaedab620357,1,{"palettes":"MemeMaxis"}
 0xb1c1997d94039adb2b62e3bdbdb77edae7365ec0,1,{"palettes":"MemeMaxis"}
@@ -5997,6 +6082,7 @@
 0xb6ad61b7558c718269a9129bd9ed9839d88a126a,1,{"palettes":"MemeMaxis"}
 0xb6b4a02dca517564eb98790ff67d42b5b37a3d4e,1,{"palettes":"MemeMaxis"}
 0xb6bc666d1d9a1d8ad8c8d83acba3e8b3d5f5d685,1,{"palettes":"MemeMaxis"}
+0xb6c189179b204d14fcc0b608bc97243b389b0030,1,{"palettes":"MemeMaxis"}
 0xb6c469ad9f2d399c5baa1a8a8861eefb7ac91fbe,1,{"palettes":"MemeMaxis"}
 0xb6c4ce4eae85066f8fc45093d12444c8b89a6aa9,1,{"palettes":"MemeMaxis"}
 0xb6c50f4dcdbcf91e10aab06db6ec839b0e7ddd00,1,{"palettes":"MemeMaxis"}
@@ -6050,14 +6136,12 @@
 0xb82e3477359a95d983d247dd89bcebcbe4c3fbf0,1,{"palettes":"MemeMaxis"}
 0xb837d59e71d11610c0d3d0d78016fd682fdd4bab,1,{"palettes":"MemeMaxis"}
 0xb83e98f8188782b6d5f1bc4d32b935aabefd020c,1,{"palettes":"MemeMaxis"}
-0xb848a0b0ba24a233e2f05d0a382e1c2035bfc5f0,1,{"palettes":"MemeMaxis"}
 0xb855567a17c266c1d82a52bb093ef5b6a66deb01,1,{"palettes":"MemeMaxis"}
 0xb85ae6c9398f5730d954b82b2a6e0eb61bd50e8d,1,{"palettes":"MemeMaxis"}
 0xb86ea3223fa32f1bd7f7ffe9dec2f01d30ec3046,1,{"palettes":"MemeMaxis"}
 0xb876e9e9d89998a483dc9fbf83a12ecab172ac9f,1,{"palettes":"MemeMaxis"}
 0xb87f629af14aa5dd414cb3ca2c07009175c8a0be,1,{"palettes":"MemeMaxis"}
 0xb88194f9bcc5ec80cf80c163ca2b123917468793,1,{"palettes":"MemeMaxis"}
-0xb88f61e6fbda83fbfffabe364112137480398018,1,{"palettes":"MemeMaxis"}
 0xb8903d33924b10b9cda7fd9505e395f1ae0b8532,1,{"palettes":"MemeMaxis"}
 0xb8a1277b827d69ff3626f0853c370ebdfb035ac5,1,{"palettes":"MemeMaxis"}
 0xb8a4624d5eb9dbf05fde82a3af920100c7a19086,1,{"palettes":"MemeMaxis"}
@@ -6213,9 +6297,9 @@
 0xbc8e2212599d8389338db5c77f218c396525f767,1,{"palettes":"MemeMaxis"}
 0xbc9295c4b8363049a62c930700d409c8fd2b7050,1,{"palettes":"MemeMaxis"}
 0xbc94e04a219ebd4d12b881fb0d6ff019d15a8885,1,{"palettes":"MemeMaxis"}
+0xbc9ca5bd0f07700929f8d538233b0a9e60f4ddc5,1,{"palettes":"MemeMaxis"}
 0xbcaeb5ddadbb3ba2880b19d254e0cf5e23a68917,1,{"palettes":"MemeMaxis"}
 0xbcc94f4c922736925e0e9c15391657888e85f435,1,{"palettes":"MemeMaxis"}
-0xbccc968eeebffc2586a50eef0ee1cf12273c9604,1,{"palettes":"MemeMaxis"}
 0xbcd653c2c96856fe1844d049bc9cabe5fb91a55b,1,{"palettes":"MemeMaxis"}
 0xbcf31a444c1c83f7421bb7c0a57f54b1c27fea8a,1,{"palettes":"MemeMaxis"}
 0xbcf68dc1c2a1a57658ea18641ee317dc249e1428,1,{"palettes":"MemeMaxis"}
@@ -6310,6 +6394,7 @@
 0xbf98fb88344f74a9a94629d6ae9988055d1ceb76,1,{"palettes":"MemeMaxis"}
 0xbf99363007b348b7a019e70cce02e8ba62e95129,1,{"palettes":"MemeMaxis"}
 0xbf9d462c9c6880d44001bcb8ca4a38a351d583d3,1,{"palettes":"MemeMaxis"}
+0xbfb7969e75ee4e58620f74135d167f5bdd60800a,1,{"palettes":"MemeMaxis"}
 0xbfbaa97b4f95758df42f6ea6b2a2efba0460efb3,1,{"palettes":"MemeMaxis"}
 0xbfc956645c65ebc3fc7010c057feafde57ff05ca,1,{"palettes":"MemeMaxis"}
 0xbfd90a5fa214a5e868bca65fd37b2acd7643ec85,1,{"palettes":"MemeMaxis"}
@@ -6421,6 +6506,7 @@
 0xc3be75af49a71bd36b08c513cc4520b5e5290928,1,{"palettes":"MemeMaxis"}
 0xf585800a4182e5c21abad86308b22a315ae8991a,1,{"palettes":"MemeMaxis"}
 0xc3c393367bca317d3aa37132e72ab2bd94957df3,1,{"palettes":"MemeMaxis"}
+0xc3c9737cce778d7583f31ae7c4f2ab8782ed51e5,1,{"palettes":"MemeMaxis"}
 0xc3cb2cc3a52c821e72205fffd81a32139bb6c0d8,1,{"palettes":"MemeMaxis"}
 0xc3cf5565433873113e48e0147656c30b827d814b,1,{"palettes":"MemeMaxis"}
 0xc3dafb0f5cbf4e857a0151b732f54d2410209a97,1,{"palettes":"MemeMaxis"}
@@ -6492,6 +6578,7 @@
 0xc62cdac5ea2ed377cce2f4ea16ecb2394f5ee469,1,{"palettes":"MemeMaxis"}
 0xc62fcc9f2e8ad81b0212c10144152aca217af508,1,{"palettes":"MemeMaxis"}
 0xc63ca1263d8c79fae328154da0b7be5d08e9a8c9,1,{"palettes":"MemeMaxis"}
+0xc6411ff69f1ec6bfb4b082f47db61dbedcab250d,1,{"palettes":"MemeMaxis"}
 0xc6439ed57731c3952e7c4f8218af779250680908,1,{"palettes":"MemeMaxis"}
 0xc64ff776e44379863bae2df4b96c78d5dfa379a9,1,{"palettes":"MemeMaxis"}
 0xc659fd78a395d70ec69ff034b4378a712e7edb64,1,{"palettes":"MemeMaxis"}
@@ -6508,9 +6595,10 @@
 0xc6a9f985af8737124aac0cc407a2ace271602261,1,{"palettes":"MemeMaxis"}
 0xc6add18129cc34707193e11eb180368c7371c28f,1,{"palettes":"MemeMaxis"}
 0xc6b5163a2897a941019d59beda657b3550a260d3,1,{"palettes":"MemeMaxis"}
+0xc6bd194286802c5975cf681201e41f21a4e256aa,1,{"palettes":"MemeMaxis"}
 0xc6bdfbe223a6de6a17d49cf54763392ecc21529b,1,{"palettes":"MemeMaxis"}
-0xc6c3752bdab737b8cfa174e6ecfa620ec0cc162e,1,{"palettes":"MemeMaxis"}
 0xc6ce3202b4c5da7db2736e92383f6405afb57715,1,{"palettes":"MemeMaxis"}
+0xc6cf5a020bcfc65c6f8181c04cbb5ef5050fe28e,1,{"palettes":"MemeMaxis"}
 0xc6d41bf45df12a03ccbb91240c3e135417505033,1,{"palettes":"MemeMaxis"}
 0xc6d4b36751233d1c509bc94bdaaa8133b3a281f3,1,{"palettes":"MemeMaxis"}
 0xc6eb0fbb058f6988fb6a7217f8089b89abd00b4a,1,{"palettes":"MemeMaxis"}
@@ -6592,7 +6680,6 @@
 0xc968fffb7c3dd8c870d7149f454c4730844a60e5,1,{"palettes":"MemeMaxis"}
 0xc97705a8e073c9c0ba05d71aede57903a4a359f6,1,{"palettes":"MemeMaxis"}
 0xc97a112ca84a12cbdb7f47384a38e19c8622a6ac,1,{"palettes":"MemeMaxis"}
-0xc97a5623578a832354988e7e40869f5207193d53,1,{"palettes":"MemeMaxis"}
 0xc97cc6cc4b07ad3f5919165c99ce43437d6114a1,1,{"palettes":"MemeMaxis"}
 0xc97cfd2c3a3e61316e931b784bde21e61ce15b82,1,{"palettes":"MemeMaxis"}
 0xc9847030f808de66c18e9360b4712d395ce28627,1,{"palettes":"MemeMaxis"}
@@ -6717,6 +6804,7 @@
 0xcd38ebb19044c07662c0569e3d4a5e5dfda1b9fc,1,{"palettes":"MemeMaxis"}
 0xcd4be8a7908d6d95d3bae4b19298405e28dd0ce7,1,{"palettes":"MemeMaxis"}
 0xcd4d5fd34c73e9ab939288f5e569c6d9cfe92d1e,1,{"palettes":"MemeMaxis"}
+0xcd69150ece65cf880eaa7b91ca6fbb7d38e97cc3,1,{"palettes":"MemeMaxis"}
 0xcd733fea07b1b68a63b6ffa84ce0d12a94f0bc22,1,{"palettes":"MemeMaxis"}
 0xcd76da10cacec513822cbdbaf9044682dc8d4fa4,1,{"palettes":"MemeMaxis"}
 0xcd892ebddd19e3f23e4ff660f09b784d5d2b6ed8,1,{"palettes":"MemeMaxis"}
@@ -6763,6 +6851,7 @@
 0xce56a746edaf84e65aa6a2bbb45b2328f6a99935,1,{"palettes":"MemeMaxis"}
 0xce716837e7b9469e7da0816a8a7f3e487a119186,1,{"palettes":"MemeMaxis"}
 0xce8383f451ff2b94336fba4370c92d3b871e97a7,1,{"palettes":"MemeMaxis"}
+0xce90a7949bb78892f159f428d0dc23a8e3584d75,1,{"palettes":"MemeMaxis"}
 0xcea8168719c8ea0e03b5da3631127797d99a5178,1,{"palettes":"MemeMaxis"}
 0xceab2935e06c646e560e2f6083c55db6e8e12099,1,{"palettes":"MemeMaxis"}
 0xcead3aa547dc6e7851795292ceb9d1690767ecf1,1,{"palettes":"MemeMaxis"}
@@ -6774,7 +6863,6 @@
 0xcec1930935e6148c6d74a9a8d18e99c216a75b9a,1,{"palettes":"MemeMaxis"}
 0xcece625176cead11c8d2dd6149fda2496b0c192d,1,{"palettes":"MemeMaxis"}
 0xced40b789eb0073b412acf6b03bc95b5b04d7eff,1,{"palettes":"MemeMaxis"}
-0xced4ba69bc33fa58f2ebbf2be1a9655b7ed7e1d1,1,{"palettes":"MemeMaxis"}
 0xceeab2af38e6b086cdce120c49f93b65f0b92b76,1,{"palettes":"MemeMaxis"}
 0xceed9585854f12f81a0103861b83b995a64ad915,1,{"palettes":"MemeMaxis"}
 0xcefb3ff344a0680b59896d8f273c473184c69281,1,{"palettes":"MemeMaxis"}
@@ -6867,6 +6955,7 @@
 0xd18c33ef15f878dce373458a7da93da4f3f9ce0c,1,{"palettes":"MemeMaxis"}
 0xd191441efd409fb3ddf1992b0af2f9955d447c97,1,{"palettes":"MemeMaxis"}
 0xd19286bdd1a2b06df3c1105407c38511ffb87959,1,{"palettes":"MemeMaxis"}
+0xd1afbe4da2a5adc6faf30fcbea9e4eea0ba8c70a,1,{"palettes":"MemeMaxis"}
 0xd1b643c63d4dfcf4fae32b58d87843553a64b58e,1,{"palettes":"MemeMaxis"}
 0xd1c6d8127312ba8715db4a666e7cab1af898abfe,1,{"palettes":"MemeMaxis"}
 0xd1d99f286adc9ca0bdd7c0b234277aff95372dd8,1,{"palettes":"MemeMaxis"}
@@ -6905,6 +6994,7 @@
 0xd31b73749edcb6d5f3c9fe1bd6c0312185838c18,1,{"palettes":"MemeMaxis"}
 0xd327c01dd4a10249cba328913684276698d4bfa5,1,{"palettes":"MemeMaxis"}
 0xd3291f4d3ab4f18e1fb86b1042c00a8de6b52107,1,{"palettes":"MemeMaxis"}
+0xf620422e1e2cbf123386ea664f536d1016e5a5d0,1,{"palettes":"MemeMaxis"}
 0xd3422dff94487bd7014855080022b06d7cae4f98,1,{"palettes":"MemeMaxis"}
 0xd343b8dae88e117d25c181317cf6811166911b11,1,{"palettes":"MemeMaxis"}
 0xd3473dae381fffa319bcc885442dec29ba906d13,1,{"palettes":"MemeMaxis"}
@@ -6913,6 +7003,7 @@
 0xb10d617109342926fc845dd6943e5e86c88fa4cc,1,{"palettes":"MemeMaxis"}
 0xd35f84a9f82fbec2082b2b6c9afd20b4a8f7c959,1,{"palettes":"MemeMaxis"}
 0xd360ce05dd56768d6a55bfea787fa628135ddfa2,1,{"palettes":"MemeMaxis"}
+0xd361363a6401870ff8a23b7c77c004aecb8c8b84,1,{"palettes":"MemeMaxis"}
 0xd364e907248c4af123fdac2f8f59e16f7b000076,1,{"palettes":"MemeMaxis"}
 0xd36590461162795ee33099b2076a0d4e017ae17c,1,{"palettes":"MemeMaxis"}
 0xd36954df517cfd9d533d4494b0e62b61c02fc29a,1,{"palettes":"MemeMaxis"}
@@ -6939,6 +7030,7 @@
 0xd3f7fb00c10c56f848622b1f83ac0a766b0820d1,1,{"palettes":"MemeMaxis"}
 0xd4012143f24c2a02a89110241942b9628c1fe636,1,{"palettes":"MemeMaxis"}
 0xd4091d661a44648d61bd3bb51e129d0d60892056,1,{"palettes":"MemeMaxis"}
+0xefb3da5189a6169a61176d1357579e135a1d1187,1,{"palettes":"MemeMaxis"}
 0xd4100a2e1aacdeb18bcda92a280124a7111a12b6,1,{"palettes":"MemeMaxis"}
 0xd42545bc62521805c2093a30df6bb5f71f030590,1,{"palettes":"MemeMaxis"}
 0xd4284c8cc59941565f1bf687209cebbba6da1d5a,1,{"palettes":"MemeMaxis"}
@@ -6947,6 +7039,7 @@
 0xd430fc849c60107201ea4f569108716a90ab65e2,1,{"palettes":"MemeMaxis"}
 0xd438ae68a9da56c6c9670eb7d1f61dbec05555f0,1,{"palettes":"MemeMaxis"}
 0xd44e9b676e74ae45c0a39150be771eb189bb2337,1,{"palettes":"MemeMaxis"}
+0xd4588854bb0ac80927ef9b91d945d68757c30d6a,1,{"palettes":"MemeMaxis"}
 0xd49b0d0a5d3013444e7f142b2706ab8b881d2994,1,{"palettes":"MemeMaxis"}
 0xd4a08cf067c83d1b2cc1d26831569b7850804be7,1,{"palettes":"MemeMaxis"}
 0xd4af6c2027eec82b6ea16700a1ce0c532873aa82,1,{"palettes":"MemeMaxis"}
@@ -7038,10 +7131,12 @@
 0xd72a01ad4b5005c3e47559861b0964f5c28912bb,1,{"palettes":"MemeMaxis"}
 0xd732748071e38a48b4e9a3ff1b2e7e87c0a39c2e,1,{"palettes":"MemeMaxis"}
 0xd73280d61210370d32c3dd05639753ec7f0ad4a9,1,{"palettes":"MemeMaxis"}
+0xd7342ea20a5afbf24352b5ca61e09844167914cb,1,{"palettes":"MemeMaxis"}
 0xd73bd59e7c0d075c9a83cad272cf17c46f7f2784,1,{"palettes":"MemeMaxis"}
 0xd73e55a3f739fbd783f7a2a307831afc31c6510b,1,{"palettes":"MemeMaxis"}
 0xd7480f462aa2f485454eb928c479c76dd904f2ab,1,{"palettes":"MemeMaxis"}
 0xd74bfb5811d50e8ca88b33dbf900659dc03eace9,1,{"palettes":"MemeMaxis"}
+0xd74e767c77d2e9f9e467e7914f2379da81b63a44,1,{"palettes":"MemeMaxis"}
 0xd74f728f4dc133d5eeecee9ce1cf693c9db2be21,1,{"palettes":"MemeMaxis"}
 0xd752b961a0e911f4a6f0d2e36701a0633b3954ab,1,{"palettes":"MemeMaxis"}
 0xd7597df2a4e40fffb742ee7c119cdcccb6841940,1,{"palettes":"MemeMaxis"}
@@ -7092,7 +7187,9 @@
 0xd8e93ccf41f079627f40573152bea5178041e1be,1,{"palettes":"MemeMaxis"}
 0xd8ef37a3b1f727deaeb07194b333da4be9c75bec,1,{"palettes":"MemeMaxis"}
 0xd8f1ed7606605aa50af12a1a99e2678c553595e9,1,{"palettes":"MemeMaxis"}
+0xd8f3d5e9a199a35429870fca8befd159bfe48747,1,{"palettes":"MemeMaxis"}
 0xd8ffe30a93155afb5d6bee5a155b0ea8b6788ca2,1,{"palettes":"MemeMaxis"}
+0xd905de91f928b20ea0ccf455e5ba07eb6373955c,1,{"palettes":"MemeMaxis"}
 0xd90fd51c9fa7d51b9c53c158231ff8498ede1140,1,{"palettes":"MemeMaxis"}
 0xd919845cdd095eb3094c0cf18aed1153c48c747d,1,{"palettes":"MemeMaxis"}
 0xd9270fd770b3e06f7b4a7452f531f035826a2eac,1,{"palettes":"MemeMaxis"}
@@ -7106,6 +7203,7 @@
 0xd96a41af259755aebbd7d13afef763dfe8197e04,1,{"palettes":"MemeMaxis"}
 0xd96ab2e36ef9b3ec905ddc25ae36f31ea150825a,1,{"palettes":"MemeMaxis"}
 0xd98009d2d013c74d3ffdbdcab3494d0e8f8bbaae,1,{"palettes":"MemeMaxis"}
+0xd981a38d80de1c1528349b841833d3a9a745cb37,1,{"palettes":"MemeMaxis"}
 0xd987dfaee54fee1045983c643edd0c13304b1d70,1,{"palettes":"MemeMaxis"}
 0xd9ba239a881f718072e57d9810846c8d705f93a4,1,{"palettes":"MemeMaxis"}
 0xd9c09e1ddacce4ee6548b66773bf4e6fe9dd0882,1,{"palettes":"MemeMaxis"}
@@ -7121,6 +7219,7 @@
 0xd9fa295d29f022d34028182329b051cbceb92579,1,{"palettes":"MemeMaxis"}
 0xda21d116a3f1a001c3e3a300dd75422263c8dcd6,1,{"palettes":"MemeMaxis"}
 0xda22ecb2897040eb15da2a98765446ee07fdcc81,1,{"palettes":"MemeMaxis"}
+0xda23ab0b2636c3f9806a868278d73aef2439ab60,1,{"palettes":"MemeMaxis"}
 0xda258e794c0465904e4973bb96ed462ffaa8879e,1,{"palettes":"MemeMaxis"}
 0xda37896e56f12d640230a9e5115756a5cda9a581,1,{"palettes":"MemeMaxis"}
 0xda3e1a823f8c4979701a83a16ac95f25f0fa9a01,1,{"palettes":"MemeMaxis"}
@@ -7185,6 +7284,7 @@
 0xdbeca36c48306867d9285e0e0d5ed1f5aec28a35,1,{"palettes":"MemeMaxis"}
 0xdbefee517025559e7898d3a48f18221c32d3fcf5,1,{"palettes":"MemeMaxis"}
 0xdbf049b470e7cdb1bfc19d9ca15b1c8c1128aa20,1,{"palettes":"MemeMaxis"}
+0xdbf55298b349984a50fa98c7c6965994e30fc3f4,1,{"palettes":"MemeMaxis"}
 0xdc0cd73fbebd5e5a10227d982fb9bc212b80fccc,1,{"palettes":"MemeMaxis"}
 0xdc0d28f3d09b292d41b836db991b157d641ad64f,1,{"palettes":"MemeMaxis"}
 0xdc19d539369c3da9172de453c05bc503c9ac6bc2,1,{"palettes":"MemeMaxis"}
@@ -7205,6 +7305,7 @@
 0xdc8d581cc9ad83d61e5f5aa9d998bd325a4b8b06,1,{"palettes":"MemeMaxis"}
 0xdca334874727e8f67070e16b20e8f02ffc4595c2,1,{"palettes":"MemeMaxis"}
 0xdcaa90d9f3b75cda80764326f6594b58d0585d21,1,{"palettes":"MemeMaxis"}
+0xdcab53e3c8a2c37cc5e2509c2db0caa6c04f3ce0,1,{"palettes":"MemeMaxis"}
 0xdcaba4bf782b693def3adf5b21d81de6328e00f7,1,{"palettes":"MemeMaxis"}
 0xdcb43ec233c0816d7648a5577241871289c5450b,1,{"palettes":"MemeMaxis"}
 0xdcb4482bf49a5e5faff49388b13f6cc512cd87a6,1,{"palettes":"MemeMaxis"}
@@ -7214,6 +7315,7 @@
 0xdcd87f8c295c5cdd1dda66f11ed1a01c42a5f1a3,1,{"palettes":"MemeMaxis"}
 0xdcefc9ff1e47e458e56959154c1cdcf56003d30b,1,{"palettes":"MemeMaxis"}
 0xdcfe06271a89d454ff3302bab78d564ad6952607,1,{"palettes":"MemeMaxis"}
+0xdd0a979d9a277144e73e05aab18261f71ee020a7,1,{"palettes":"MemeMaxis"}
 0xdd0c246165c8b4a90bc5a446da9ee0908a45966f,1,{"palettes":"MemeMaxis"}
 0xdd0c252067e1197ef2c4ec48ea024d705159ed0a,1,{"palettes":"MemeMaxis"}
 0xdd115ef817fab7b54bcbf3d4152d2e7c9d7c4e37,1,{"palettes":"MemeMaxis"}
@@ -7283,6 +7385,7 @@
 0xdf7cc19cb1066c80760dc1b5464c4798dacfe407,1,{"palettes":"MemeMaxis"}
 0xdf849eafee13891d2552789452bd8db31685dfbf,1,{"palettes":"MemeMaxis"}
 0xdf85b9146d73a852d7b900d1abd974f2a8119f57,1,{"palettes":"MemeMaxis"}
+0xdf8b134fb7743acd805ecdee11335dd0cca921fc,1,{"palettes":"MemeMaxis"}
 0xdf90682f3c884651e13d48acb7e4431764c92c48,1,{"palettes":"MemeMaxis"}
 0xdf947f1e3031fe63bd432f4e7b684dece92c0bda,1,{"palettes":"MemeMaxis"}
 0xdf95a9ca4f6a7dfe2576ca99d96417a62deb2e0a,1,{"palettes":"MemeMaxis"}
@@ -7297,8 +7400,10 @@
 0xdfefbc7c5f2ec0313734eca58bc1fb17210bd34b,1,{"palettes":"MemeMaxis"}
 0xdffac8814ba3184c79fa2f6c465feacffa0a3a6d,1,{"palettes":"MemeMaxis"}
 0xdffb2d60e5ecb233d448239988d3a6fb6470a8d6,1,{"palettes":"MemeMaxis"}
+0xdffd6968900b3f4f667b69c5f9df65d9d7796a1c,1,{"palettes":"MemeMaxis"}
 0xdffd933cead5eac96397a0c290c5dd715366bad5,1,{"palettes":"MemeMaxis"}
 0xe003256f4cc1ae9d7545326efe8f05f12f066c81,1,{"palettes":"MemeMaxis"}
+0xe01a97fc4607a388a41626d5e039fdecbfc6acd9,1,{"palettes":"MemeMaxis"}
 0xe02a199b22fa76c823b066370f715b8c9db430de,1,{"palettes":"MemeMaxis"}
 0xe036a80f628e531982189fb6c4f277deca521e36,1,{"palettes":"MemeMaxis"}
 0xe0402c4e929956445bfc3244b24b1e8f5e3a675d,1,{"palettes":"MemeMaxis"}
@@ -7307,6 +7412,7 @@
 0xe04e8afeae36d99dc370630f1333d43f87f52173,1,{"palettes":"MemeMaxis"}
 0xe051e0f69dde28f263fb2fbfc056a34e42c6570a,1,{"palettes":"MemeMaxis"}
 0xe05ab36d8e6e5969968df13508d35aabedf75b77,1,{"palettes":"MemeMaxis"}
+0xe05adcb63a66e6e590961133694a382936c85d9d,1,{"palettes":"MemeMaxis"}
 0xe061ea94f07de987a55a49067b0d7ca3feaffbc7,1,{"palettes":"MemeMaxis"}
 0xe069e297de0d8bbeaf65dcd9ee0b0a90b2f59820,1,{"palettes":"MemeMaxis"}
 0xe06b24ebd56726a44e8c7f888dd185e9175d169d,1,{"palettes":"MemeMaxis"}
@@ -7381,6 +7487,7 @@
 0xe26027e219998c0acfbd00b74795dc850aee244a,1,{"palettes":"MemeMaxis"}
 0xe262b5a7fa6d23be9007eeb93833d2e51d89834c,1,{"palettes":"MemeMaxis"}
 0xe26c736b9c0a65bab44565cfb7bee66a81197c0d,1,{"palettes":"MemeMaxis"}
+0xe28470253f0c9c7afbae7f61795d6b1ca4644b2f,1,{"palettes":"MemeMaxis"}
 0xe2880a450f9c565e01a91e83cbdce2b695b7bc18,1,{"palettes":"MemeMaxis"}
 0xe29bfd5761a18b5c3ac4a4271eb7fadd4c7fb942,1,{"palettes":"MemeMaxis"}
 0xe29c6ee34871cbc6fe503a06bd7776a63f375a93,1,{"palettes":"MemeMaxis"}
@@ -7553,6 +7660,7 @@
 0xe761a9b9c149f6d3e34a295ff4695b729890b848,1,{"palettes":"MemeMaxis"}
 0xe768687cf9ff40a1319f4847d3afd5b9fb6a4700,1,{"palettes":"MemeMaxis"}
 0xe77563da10227d35e077bd0439a8282dd1c4db32,1,{"palettes":"MemeMaxis"}
+0xe776de32c9dc8889e2dcf1cf0606010a51d1abb2,1,{"palettes":"MemeMaxis"}
 0xe77a08d1513974f9cc89fd2eb043eb68355eed20,1,{"palettes":"MemeMaxis"}
 0xe7811da743bb6cce0c49e1d362b2e9120360a373,1,{"palettes":"MemeMaxis"}
 0xe781fe7a6f65ee6b3efe66ed8f7f5c1e9f01cc55,1,{"palettes":"MemeMaxis"}
@@ -7582,8 +7690,8 @@
 0xe84d612c36ae63c639e7cdbb0aa9ed207e58e658,1,{"palettes":"MemeMaxis"}
 0xe859ef79c40250a4554a35c84794ca6c80516200,1,{"palettes":"MemeMaxis"}
 0xe87a10d5b212d169ccbc9a50cf5e23dd3da27cb6,1,{"palettes":"MemeMaxis"}
+0xe8a05c7f4e9c1aa060cf941dbb50381f342d7d43,1,{"palettes":"MemeMaxis"}
 0xe8a0cc457405c250a3142db639b3e058fd431510,1,{"palettes":"MemeMaxis"}
-0xe8bee2f6bf252ed9efbbd483ca4093ace7350c92,1,{"palettes":"MemeMaxis"}
 0xe8c4156a19951deff3203f116fc63274da746baa,1,{"palettes":"MemeMaxis"}
 0xe8c9333d6ba367ebd7ed1afd83088b5b5ea15d84,1,{"palettes":"MemeMaxis"}
 0xe8cae16201d97ea8240e05064f75199d4da0d45e,1,{"palettes":"MemeMaxis"}
@@ -7870,6 +7978,7 @@
 0xf1c498d975e3da42707e481008ec55ba3733e95d,1,{"palettes":"MemeMaxis"}
 0xf1c6736aac927fdd9f8b1e8c58463262aac6afe2,1,{"palettes":"MemeMaxis"}
 0xf1d48b593f11111db5ce35d87fe9d6a6deeae53b,1,{"palettes":"MemeMaxis"}
+0xf1e1c701b49b1dc2405a9e8ef40f9f88802b80fa,1,{"palettes":"MemeMaxis"}
 0xf1f174ab7f3e7c2c97a220650e0136e178fdcbd1,1,{"palettes":"MemeMaxis"}
 0xf1f96bc2efeac69051a995321cd2fa11a1bdc9a9,1,{"palettes":"MemeMaxis"}
 0xf209c21d2c29f733492b6cbf16105a4e43623e1a,1,{"palettes":"MemeMaxis"}
@@ -7961,6 +8070,7 @@
 0xf4cd60a92a7d20997d8dd3ed30eb7b340f05f135,1,{"palettes":"MemeMaxis"}
 0xf4cdfea7fdf85872141e4f8eb0e953427de7626f,1,{"palettes":"MemeMaxis"}
 0xf4cee91bea1d763841d516c4704c865c7641f4bc,1,{"palettes":"MemeMaxis"}
+0xf4dde6ea673fb810b6f503bf441908bb30b929f8,1,{"palettes":"MemeMaxis"}
 0xf4ea2ddd1b59686a6e359976ed65674e97215df8,1,{"palettes":"MemeMaxis"}
 0xf4f5702683ca7bdbc7ce5fe7e360147779bc39aa,1,{"palettes":"MemeMaxis"}
 0xf4fd230e3a0c4bb518185880290bb6131e019e31,1,{"palettes":"MemeMaxis"}
@@ -8283,7 +8393,9 @@
 0xfece3a78855b52db21bf868e0141927fc7e0d719,1,{"palettes":"MemeMaxis"}
 0xfecf9b009af216056d27759c1489f00fc62428e2,1,{"palettes":"MemeMaxis"}
 0xfed473cd045563542414e31af846a43bf58fc59a,1,{"palettes":"MemeMaxis"}
+0xfed52d251e31178ff8bf4a0d611721c544f74fc0,1,{"palettes":"MemeMaxis"}
 0xfed93f0ad93ff25993274d8245a2bb2133de38c0,1,{"palettes":"MemeMaxis"}
+0xfeea8258077cc06444679958185f4198dd4cd324,1,{"palettes":"MemeMaxis"}
 0xfef1697cfa1a6c1211020681405013fee40fe2f2,1,{"palettes":"MemeMaxis"}
 0xfef8bf42f7658cfb496365cfb1d75f6e5b29edfd,1,{"palettes":"MemeMaxis"}
 0xfefc2850b25fe1aa3e9aa154df61c6b9bc7aa374,1,{"palettes":"MemeMaxis"}
@@ -8297,6 +8409,7 @@
 0xff41da21ff3c36ed08b2640d499b6943b881ca35,1,{"palettes":"MemeMaxis"}
 0xff4393d591251eabce31a951340f77c412c9095d,1,{"palettes":"MemeMaxis"}
 0xff4b5bd0820dc94b95fdd7f2b82f52205c800d0f,1,{"palettes":"MemeMaxis"}
+0xff4f0dbc9ee7583c0c61c7333a5daf8d0ab4aeb3,1,{"palettes":"MemeMaxis"}
 0xff546e41d928472bd99fafd30913e41a7f6106d3,1,{"palettes":"MemeMaxis"}
 0xff55a4519f3a9a94c5528079d25f3dabe148612f,1,{"palettes":"MemeMaxis"}
 0xff56d36ff30751e43804dbb1b904afbc115b3b53,1,{"palettes":"MemeMaxis"}
@@ -8371,7 +8484,6 @@
 0x1a7a7a438f211db2a9b83c88cf32bc1cc2043749,1,{"palettes":"MemeMaxis"}
 0x1ac7bb22554e04a05f9e3c8e8978a215af3c068a,1,{"palettes":"MemeMaxis"}
 0x1b9d39da4aab19dccfbc17a16f876effcc73eafd,1,{"palettes":"MemeMaxis"}
-0x1be93794a0db6a4d9c3b2ab1a4d125bfdeb6387e,1,{"palettes":"MemeMaxis"}
 0x1bec08e9f91301d4446c3a70895379bb8a39844d,1,{"palettes":"MemeMaxis"}
 0x1c2b1310c986cf71752a5a4b805444913722e1c9,1,{"palettes":"MemeMaxis"}
 0x1c71122bb75c6ceee7dfe50a45dc571f784f5cab,1,{"palettes":"MemeMaxis"}
@@ -8383,7 +8495,6 @@
 0x1e7127c81c8a58661a0811f026b6be66533934be,1,{"palettes":"MemeMaxis"}
 0x1f0c2ed625ff93d00bc62260f821d97c318840bc,1,{"palettes":"MemeMaxis"}
 0x20335c504a4f0d8db934e9f77a67b55e6ae8e1e1,1,{"palettes":"MemeMaxis"}
-0x207b3c1083a62e282d375a11f52730879cbfbbbb,1,{"palettes":"MemeMaxis"}
 0x20a2e9253c9fd8db2c5c5f84bcbf9a74cd79b60f,1,{"palettes":"MemeMaxis"}
 0x20e39f002ba523aceed5fd9cd5e738b76caf1982,1,{"palettes":"MemeMaxis"}
 0x21f6e6b5db1fee9ed1565bdf36c323452d09070d,1,{"palettes":"MemeMaxis"}
@@ -8400,7 +8511,6 @@
 0x29ac3223af611f5524adf1ae6ec4e0f082350dea,1,{"palettes":"MemeMaxis"}
 0x2a07272af1327699f36f06835a2410f4367e7a5c,1,{"palettes":"MemeMaxis"}
 0x2a52192885a9d5b1da412d60f50a0dbd9ce47107,1,{"palettes":"MemeMaxis"}
-0x2a538000a53f38d89f37fa43a301cee2c0f9e331,1,{"palettes":"MemeMaxis"}
 0x2ae30c553ccf440d5464f8d53cf2f001b90cdc37,1,{"palettes":"MemeMaxis"}
 0x2b8a011dd8e8e2edaa5c4ef6ea8139502189f68c,1,{"palettes":"MemeMaxis"}
 0x2c0055354b13ba2c8929a71f8577445902e84e4a,1,{"palettes":"MemeMaxis"}
@@ -8463,8 +8573,6 @@
 0x51c25230335472236853676290062c8c7a0825b6,1,{"palettes":"MemeMaxis"}
 0x52021632e37500fa03cad93ea385f8d9e6138e33,1,{"palettes":"MemeMaxis"}
 0x52edef8d82d7541563734ee634ec557c51213e60,1,{"palettes":"MemeMaxis"}
-0x5338035c008ea8c4b850052bc8dad6a33dc2206c,1,{"palettes":"MemeMaxis"}
-0x537037c5ae805b9d4cecab5ee07f12a8e59a15b2,1,{"palettes":"MemeMaxis"}
 0x53b517968dbd242de0348a2f0d70d55c1bf7bcd3,1,{"palettes":"MemeMaxis"}
 0x5445092634581774a680e4dedd4ec9bfc35a26fd,1,{"palettes":"MemeMaxis"}
 0x5470c5a6fce7447afd2c9be3a0f25e362c093661,1,{"palettes":"MemeMaxis"}
@@ -8505,7 +8613,6 @@
 0x6491bce963fcae210b7c843c4829202dc2479c03,1,{"palettes":"MemeMaxis"}
 0x6514304c439565bc6bf5e60dc69dc355a034e6c3,1,{"palettes":"MemeMaxis"}
 0x656c0623830ed16f55372473b542e2b045b74e4b,1,{"palettes":"MemeMaxis"}
-0x65720aa2959d745a2a24bc779f05100a0217d905,1,{"palettes":"MemeMaxis"}
 0x65ad743c3b253113af2d8cb311e35900cba18390,1,{"palettes":"MemeMaxis"}
 0x65e6d2ce4c7d095a84433b6e10b4ee98507fb1e1,1,{"palettes":"MemeMaxis"}
 0x668eb4a84dd6a8eb8cb99a5ca118e4ef1e4ccb04,1,{"palettes":"MemeMaxis"}
@@ -8583,7 +8690,6 @@
 0x8a52636f20c500b2a007c8d01a79e83060607dac,1,{"palettes":"MemeMaxis"}
 0x8b5b2e41edb080a477ada0c4fb3a99c74c31f8e2,1,{"palettes":"MemeMaxis"}
 0x8bccdc8c19d01e43465937cabb6e9cb69c00f8d0,1,{"palettes":"MemeMaxis"}
-0x8bdf6b52959581c0a8f4e99fa71b2225dc691814,1,{"palettes":"MemeMaxis"}
 0x8c0558485e37ff142255d5c9556d832b5dd251a1,1,{"palettes":"MemeMaxis"}
 0x8c0d2b62f133db265ec8554282ee60eca0fd5a9e,1,{"palettes":"MemeMaxis"}
 0x8c778a46752a46d09b50aeab6425dcc39360e248,1,{"palettes":"MemeMaxis"}
@@ -8594,7 +8700,6 @@
 0x8f0f8e854a096466ed0a479db90a7b085aef694f,1,{"palettes":"MemeMaxis"}
 0x8fb00a76b421907f599f9e32d9102e0161c87c40,1,{"palettes":"MemeMaxis"}
 0x8fb0bd26b6d78e4642b238d94fa9a157f5524fbe,1,{"palettes":"MemeMaxis"}
-0x916986deea4a3f031f82b0412f17dbcff9fa39d2,1,{"palettes":"MemeMaxis"}
 0x926bf90196781cf2161535d48af542889cac4d2e,1,{"palettes":"MemeMaxis"}
 0x92b60b4bf081dd485e110afe65e08669e4a0afcc,1,{"palettes":"MemeMaxis"}
 0x92e05eeea6cdf2813fee404bfb37233fc5a8c7bb,1,{"palettes":"MemeMaxis"}
@@ -8728,7 +8833,6 @@
 0xd754d917368965e623243a348e9bebe017601b34,1,{"palettes":"MemeMaxis"}
 0xd76ed14e9dbb0983489f4a1bbb45ec18ac78b7df,1,{"palettes":"MemeMaxis"}
 0xd794ccd4a5cb914af8b8aeb6d49b9c262f934c8e,1,{"palettes":"MemeMaxis"}
-0xd7a22c594a8874e53b9630922d13b014e83032bf,1,{"palettes":"MemeMaxis"}
 0xd88227fc237177a9692e1fd34bae5d4aee7a9e7f,1,{"palettes":"MemeMaxis"}
 0xd975ce5f52478d7430169d57516c97f7b5497ecc,1,{"palettes":"MemeMaxis"}
 0xda86daf23598ea688a541f3e3f34744dcfc2b8db,1,{"palettes":"MemeMaxis"}
@@ -8749,7 +8853,6 @@
 0xe3e182bc39951f99af86d8cd0c42a4b7c4cd93f7,1,{"palettes":"MemeMaxis"}
 0xe3f27deff96fe178e87559f36cbf868b9e75967d,1,{"palettes":"MemeMaxis"}
 0xe4446d52e2bdb3e31470643ab1753a4c2aeee3ea,1,{"palettes":"MemeMaxis"}
-0xe49b82c3233602d68f51611a05b2ca2dd690c606,1,{"palettes":"MemeMaxis"}
 0xe5545c0e1b2dcfcd7c713877ceb6f897705ed62a,1,{"palettes":"MemeMaxis"}
 0xe5c030d8af0e024e60bc04fb0240fd470e6ab28a,1,{"palettes":"MemeMaxis"}
 0xe5cb166853ae703106c561c78b8f33b9af81ec5e,1,{"palettes":"MemeMaxis"}
@@ -8760,7 +8863,6 @@
 0xea333c8ebac2010bf70da013e5d56525f0c65581,1,{"palettes":"MemeMaxis"}
 0xea73e4d298c5b4df2729f27eff9e2d50ca6f78e0,1,{"palettes":"MemeMaxis"}
 0xea796889889a71056f0f2e8aeea6ca0230d3f840,1,{"palettes":"MemeMaxis"}
-0xeae448e1537aa3c6b2a37e2ab26bba7ca2de9436,1,{"palettes":"MemeMaxis"}
 0xebda75c5e193bbb82377b77e3c62c0b323240307,1,{"palettes":"MemeMaxis"}
 0xebf02c6e12c3ee119abba161c40bfeead0a06b15,1,{"palettes":"MemeMaxis"}
 0xec83808154666dfeb4ec96f3ddc717b41394d119,1,{"palettes":"MemeMaxis"}
@@ -8919,7 +9021,6 @@
 0xb684afe21d28dc6bf235ca7c7da3c21df19b3bcd,1,{"palettes":"MemeMaxis"}
 0xb6a58b4ca11309859031e55c45d8add1db8e0664,1,{"palettes":"MemeMaxis"}
 0xba1f719c54fcf35f4917ceb8ad4d568f0fdac848,1,{"palettes":"MemeMaxis"}
-0xbc49de68bcbd164574847a7ced47e7475179c76b,1,{"palettes":"MemeMaxis"}
 0xbd1293983cbdc189f986bafda8cbf9f37fb30e2c,1,{"palettes":"MemeMaxis"}
 0xbdd8c23c8e8a39e2cad6159c3a9483f4c106c616,1,{"palettes":"MemeMaxis"}
 0xbee6db5060eb05628745b944ae38c31f8837b2cf,1,{"palettes":"MemeMaxis"}
@@ -8966,7 +9067,6 @@
 0xfd1494e7eadbd7a4b8c0f7ac098723493f3993a4,1,{"palettes":"MemeMaxis"}
 0xffcaa7a5c01eea7241ed458bd09b61aae4f9fb94,1,{"palettes":"MemeMaxis"}
 0x008d4cf7381bdb5ae944dde7097b9562d57ed468,1,{"palettes":"MemeMaxis"}
-0x059d148425861041d402e205985c61af766e325b,1,{"palettes":"MemeMaxis"}
 0x05afd13ce408a732e43d203336fd2ec4698d777b,1,{"palettes":"MemeMaxis"}
 0x08aa3c2a4cd5ac974f4b70cc315a798d480fff16,1,{"palettes":"MemeMaxis"}
 0x08cbf876614c9917e29669ffedd014e04b314ccd,1,{"palettes":"MemeMaxis"}
@@ -8998,7 +9098,6 @@
 0x3240f75e36d6843a281c66bb929765f1b351b7ab,1,{"palettes":"MemeMaxis"}
 0x329c787b163a730bd7900df2beb3ff4fe4670375,1,{"palettes":"MemeMaxis"}
 0x3346cd017044d3e5c35e54ae8ea9bda0526f00d1,1,{"palettes":"MemeMaxis"}
-0x334c036e3125dcb6d93e9b998f6d9d7a1be4b17f,1,{"palettes":"MemeMaxis"}
 0x33de5f7c0dcffbbc399b603ff539250a2c132e3c,1,{"palettes":"MemeMaxis"}
 0x34ebf4d5a424051b120902779481b88b2edaf54c,1,{"palettes":"MemeMaxis"}
 0x34f13109029482d71627e32f386b4b1c860bb606,1,{"palettes":"MemeMaxis"}
@@ -9114,7 +9213,6 @@
 0xdfbe7a3bc6a188068405387a56414ba0be2c9dd4,1,{"palettes":"MemeMaxis"}
 0xe250e05fa6a14a3bea241878e74b150223850472,1,{"palettes":"MemeMaxis"}
 0xe3a595c9f24e653a112fb3c698b9a04e75e3bf03,1,{"palettes":"MemeMaxis"}
-0xe4bb5b561d23313c89f53d80f049545f1afd2caf,1,{"palettes":"MemeMaxis"}
 0xe4ddd6fabcac3fbf2ce25653fae01cb2649f3e58,1,{"palettes":"MemeMaxis"}
 0xe7016b1f363c62b31c00fa9091ec1dab05ff195f,1,{"palettes":"MemeMaxis"}
 0xe8973f7638b56258dbfc0908452b3123e70e5edb,1,{"palettes":"MemeMaxis"}
@@ -9213,7 +9311,6 @@
 0x43d0cac6c1f2ea67ba47cf84a745b17db77f247c,1,{"palettes":"MemeMaxis"}
 0x45829407b164e5fba010a34320a0a21372e2f8a8,1,{"palettes":"MemeMaxis"}
 0x468218136d1a25ab9eeb1e8fcfce789090855880,1,{"palettes":"MemeMaxis"}
-0x472c8af0fd11067afe8c74adf57def0594b620c3,1,{"palettes":"MemeMaxis"}
 0x48b99a8f1bf456d755113a429dd7e3758b620044,1,{"palettes":"MemeMaxis"}
 0x4a36d0cafe9a052493725b99aef80a70c25598cd,1,{"palettes":"MemeMaxis"}
 0x4c26c796abcf3513807efa54d54c34405b84a36a,1,{"palettes":"MemeMaxis"}
@@ -9282,7 +9379,6 @@
 0x8b3383ffb325e3169c26b0d9cd6d0ae8c48f6331,1,{"palettes":"MemeMaxis"}
 0x8d38423f346c4695a3482f3a286d0d31893bdf24,1,{"palettes":"MemeMaxis"}
 0x8f5069d52c05cb21881c6d10e0004bd3ae4909e1,1,{"palettes":"MemeMaxis"}
-0x8f688a91695f7d2a1e93e57cedcbf5c5202f617b,1,{"palettes":"MemeMaxis"}
 0x903258f3049d46c7ecbf9a089e9b64da31ba6b2c,1,{"palettes":"MemeMaxis"}
 0x908564a38b010828f82f30b610372cab2af4747d,1,{"palettes":"MemeMaxis"}
 0x911a6ad1b0811a909a22a071d421998aa3ccece8,1,{"palettes":"MemeMaxis"}
@@ -9369,7 +9465,6 @@
 0xd863f699b49f0a1d62142a2e5914f08b1620583f,1,{"palettes":"MemeMaxis"}
 0xd889a0220805f83afca7798bb6aa88720b18eed7,1,{"palettes":"MemeMaxis"}
 0xd9a64ab214cc849ae97c67a40caac2a71e38acf3,1,{"palettes":"MemeMaxis"}
-0xda48a00aedb635bfb08a31a308fbeeb92c2f2dc1,1,{"palettes":"MemeMaxis"}
 0xde30181bebd88f7b32fd2ab4f57e4c557e675e8b,1,{"palettes":"MemeMaxis"}
 0xde34a59b30b8ecaeceab8c169fe73abe950938c1,1,{"palettes":"MemeMaxis"}
 0xde38a4f997c4bb06e2085fc8bfa0f43032b40e98,1,{"palettes":"MemeMaxis"}
