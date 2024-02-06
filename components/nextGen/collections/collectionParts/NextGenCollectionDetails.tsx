@@ -7,6 +7,7 @@ import { ContentView } from "./NextGenCollection";
 import { NEXTGEN_CHAIN_ID, NEXTGEN_CORE } from "../../nextgen_contracts";
 import { goerli, sepolia } from "viem/chains";
 import Tippy from "@tippyjs/react";
+import { DistributionLink } from "../NextGen";
 
 interface CollectionProps {
   collection: NextGenCollection;
@@ -64,6 +65,10 @@ function NextGenCollectionDetailsOverview(props: Readonly<CollectionProps>) {
                         {props.collection.website}
                       </a>
                     </span>
+                  </Col>
+                  <Col xs={12} className="pt-2 pb-2 d-flex flex-column">
+                    <span className="font-color-h">Allowlist</span>
+                    <DistributionLink collection={props.collection} />
                   </Col>
                   <Col xs={12} className="pt-2 pb-2 d-flex gap-5">
                     <span className="d-flex flex-column">

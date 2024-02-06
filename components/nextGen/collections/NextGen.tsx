@@ -130,7 +130,7 @@ export default function NextGen(props: Readonly<Props>) {
 export function DistributionLink(
   props: Readonly<{
     collection: NextGenCollection;
-    class: string;
+    class?: string;
   }>
 ) {
   const alStatus = getStatusFromDates(
@@ -138,10 +138,19 @@ export function DistributionLink(
     props.collection.allowlist_end
   );
 
-  if (alStatus !== Status.UNAVAILABLE) {
+  const publicStatus = getStatusFromDates(
+    props.collection.public_start,
+    props.collection.public_end
+  );
+
+  if (
+    alStatus !== Status.UNAVAILABLE &&
+    publicStatus !== Status.UNAVAILABLE &&
+    publicStatus !== Status.COMPLETE
+  ) {
     return (
       <Container className="no-padding">
-        <Row className={`pt-1 font-color ${props.class}`}>
+        <Row className={`pt-1 font-color ${props.class ? props.class : ""}`}>
           <Col>
             <a
               href={`/nextgen/collection/${formatNameForUrl(

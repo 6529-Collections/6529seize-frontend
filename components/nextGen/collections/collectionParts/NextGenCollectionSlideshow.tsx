@@ -7,6 +7,7 @@ import { NextGenTokenImage } from "../nextgenToken/NextGenTokenImage";
 import { NextGenCollection, NextGenToken } from "../../../../entities/INextgen";
 import { commonApiFetch } from "../../../../services/api/common-api";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { delay } from "@reduxjs/toolkit/dist/utils";
 
 interface Props {
   collection: NextGenCollection;
@@ -75,7 +76,7 @@ export default function NextGenCollectionSlideshow(props: Readonly<Props>) {
               <Col>
                 <Swiper
                   modules={[Navigation, A11y, Autoplay]}
-                  autoplay
+                  autoplay={tokens.length > 1 ? { delay: 1000 } : false}
                   spaceBetween={20}
                   slidesPerView={Math.min(slidesPerView, tokens.length)}
                   navigation
@@ -84,7 +85,7 @@ export default function NextGenCollectionSlideshow(props: Readonly<Props>) {
                   onSlideChange={(swiper) => {
                     setCurrentSlide(swiper.realIndex);
                   }}>
-                  <SwiperAutoplayButton />
+                  {tokens.length > 1 && <SwiperAutoplayButton />}
                   {tokens.map((token, index) => (
                     <SwiperSlide
                       key={`nextgen-carousel-${token.id}`}
