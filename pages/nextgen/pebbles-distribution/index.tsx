@@ -7,6 +7,7 @@ import { Col, Container, Row, Table } from "react-bootstrap";
 import fs from "fs";
 import csvParser from "csv-parser";
 import React from "react";
+import { numberWithCommas } from "../../../helpers/Helpers";
 
 interface DataRow {
   address: string;
@@ -68,7 +69,7 @@ export default function NextGen(props: any) {
             </Col>
           </Row>
           <Row className="pt-3">
-            <Col>{printTable(data1, "Phase 0")}</Col>
+            <Col>{printTable(data1, "Phase 1")}</Col>
           </Row>
         </Container>
       </main>
@@ -157,13 +158,15 @@ export function NextgenLogo() {
   return (
     <Row>
       <Col>
-        <Image
-          width="0"
-          height="0"
-          style={{ height: "auto", width: "400px" }}
-          src="/nextgen-logo.png"
-          alt="nextgen"
-        />
+        <a href="/nextgen">
+          <Image
+            width="0"
+            height="0"
+            style={{ height: "auto", width: "400px" }}
+            src="/nextgen-logo.png"
+            alt="nextgen"
+          />
+        </a>
       </Col>
     </Row>
   );
