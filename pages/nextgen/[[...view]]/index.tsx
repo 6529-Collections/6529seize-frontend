@@ -96,7 +96,9 @@ export default function NextGen(props: any) {
         <Header />
         <Breadcrumb breadcrumbs={breadcrumbs} />
         <NextGenNavigationHeader view={view} setView={setView} />
-        {!view && <NextGenComponent collection={collection} />}
+        {!view && (
+          <NextGenComponent collection={collection} setView={setView} />
+        )}
         {view && (
           <Container fluid className={`${styles.main}`}>
             <Row className="d-flex align-items-center">

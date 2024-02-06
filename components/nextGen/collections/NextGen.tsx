@@ -9,9 +9,11 @@ import {
 import { formatNameForUrl, getStatusFromDates } from "../nextgen_helpers";
 import { Status } from "../nextgen_entities";
 import NextGenCollectionArtist from "./collectionParts/NextGenCollectionArtist";
+import { NextGenView } from "./NextGenNavigationHeader";
 
 interface Props {
   collection: NextGenCollection;
+  setView: (view: NextGenView) => void;
 }
 
 export default function NextGen(props: Readonly<Props>) {
@@ -107,7 +109,15 @@ export default function NextGen(props: Readonly<Props>) {
             is created and collected but also offers a new avenue for artists to
             express themselves digitally, providing them with a global stage to
             showcase their creativity and for collectors to discover and invest
-            in digital art like never before.
+            in digital art like never before.{" "}
+            <button
+              className="btn-link"
+              onClick={() => {
+                props.setView(NextGenView.ABOUT);
+                window.scrollTo(0, 120);
+              }}>
+              <span className="font-larger">Learn More</span>
+            </button>
           </Col>
         </Row>
       </Container>

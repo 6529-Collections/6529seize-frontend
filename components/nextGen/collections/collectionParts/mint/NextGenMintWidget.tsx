@@ -283,6 +283,8 @@ export default function NextGenMintWidget(props: Readonly<Props>) {
       setMintToInput("");
       setMintToAddress("");
     }
+    setMintCount(0);
+    mintWrite.reset();
   }, [account.address]);
 
   const mintToAddressEns = useEnsName({
