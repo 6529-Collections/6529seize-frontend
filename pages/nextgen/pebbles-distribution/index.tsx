@@ -7,7 +7,6 @@ import { Col, Container, Row, Table } from "react-bootstrap";
 import fs from "fs";
 import csvParser from "csv-parser";
 import React from "react";
-import { numberWithCommas } from "../../../helpers/Helpers";
 
 interface DataRow {
   address: string;
