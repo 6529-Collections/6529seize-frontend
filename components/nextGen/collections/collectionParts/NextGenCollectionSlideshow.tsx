@@ -7,7 +7,6 @@ import { NextGenTokenImage } from "../nextgenToken/NextGenTokenImage";
 import { NextGenCollection, NextGenToken } from "../../../../entities/INextgen";
 import { commonApiFetch } from "../../../../services/api/common-api";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { delay } from "@reduxjs/toolkit/dist/utils";
 
 interface Props {
   collection: NextGenCollection;
