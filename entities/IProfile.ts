@@ -367,6 +367,7 @@ export enum CollectedCollectionType {
   MEMES = "MEMES",
   GRADIENTS = "GRADIENTS",
   MEMELAB = "MEMELAB",
+  NEXTGEN = "NEXTGEN",
 }
 
 export enum CollectionSeized {

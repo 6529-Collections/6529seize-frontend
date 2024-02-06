@@ -17,6 +17,7 @@ import { useEffect, useRef, useState } from "react";
 import UserPageCollectedCards from "./cards/UserPageCollectedCards";
 import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
 import UserPageCollectedFirstLoading from "./UserPageCollectedFirstLoading";
+import { COLLECTED_COLLECTIONS_META, convertAddressToLowerCase } from "./filters/user-page-collected-filters.helpers";
 
 export interface ProfileCollectedFilters {
   readonly handleOrWallet: string;
@@ -29,6 +30,8 @@ export interface ProfileCollectedFilters {
   readonly sortBy: CollectionSort;
   readonly sortDirection: SortDirection;
 }
+
+
 
 interface QueryUpdateInput {
   name: keyof typeof SEARCH_PARAMS_FIELDS;
@@ -54,10 +57,7 @@ const SNZ_TO_SEARCH_PARAMS: Record<MEMES_SEASON, string> = {
   [MEMES_SEASON.SZN6]: "6",
 };
 
-const SHOW_DATA_ROW_COLLECTIONS: CollectedCollectionType[] = [
-  CollectedCollectionType.MEMES,
-  CollectedCollectionType.GRADIENTS,
-];
+
 
 export default function UserPageCollected({
   profile,
@@ -73,12 +73,6 @@ export default function UserPageCollected({
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const user = (router.query.user as string).toLowerCase();
-
-  const convertAddress = (address: any): string | null => {
-    if (!address) return null;
-    if (typeof address === "string") return address.toLowerCase();
-    return null;
-  };
 
   const convertSeized = ({
     seized,
@@ -154,7 +148,7 @@ export default function UserPageCollected({
     const sortBy = searchParams.get(SEARCH_PARAMS_FIELDS.sortBy);
     const sortDirection = searchParams.get(SEARCH_PARAMS_FIELDS.sortDirection);
 
-    const convertedAddress = convertAddress(address);
+    const convertedAddress = convertAddressToLowerCase(address);
     const convertedCollection = convertCollection(collection);
     const isMemes = convertedCollection === CollectedCollectionType.MEMES;
     const isMemeLab = convertedCollection === CollectedCollectionType.MEMELAB;
@@ -219,7 +213,10 @@ export default function UserPageCollected({
       },
     ];
 
-    if (collection === CollectedCollectionType.MEMELAB && filters.sortBy !== CollectionSort.TOKEN_ID) {
+    if (
+      collection === CollectedCollectionType.MEMELAB &&
+      filters.sortBy !== CollectionSort.TOKEN_ID
+    ) {
       items.push({
         name: "sortBy",
         value: CollectionSort.TOKEN_ID,
@@ -367,10 +364,10 @@ export default function UserPageCollected({
     setTotalPages(pagesCount);
   }, [data?.count, data?.page, isFetching]);
 
-  const getShowDataRow = (): boolean => {
-    if (!filters.collection) return true;
-    return SHOW_DATA_ROW_COLLECTIONS.includes(filters.collection);
-  };
+  const getShowDataRow = (): boolean =>
+    filters.collection
+      ? COLLECTED_COLLECTIONS_META[filters.collection].showCardDataRow
+      : true;
 
   const [showDataRow, setShowDataRow] = useState<boolean>(getShowDataRow());
 
