@@ -77,7 +77,7 @@ export default function ConsolidationMappingToolPage() {
                     md={{ span: 10, offset: 1 }}
                     lg={{ span: 8, offset: 2 }}>
                     <h1 className="float-none text-center">
-                      CONSOLIDATION MAPPING TOOL
+                      Consolidation Mapping Tool
                     </h1>
                   </Col>
                 </Row>

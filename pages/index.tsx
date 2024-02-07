@@ -392,7 +392,7 @@ export default function Home({
                   <h1 className="tw-block tw-whitespace-nowrap tw-float-none tw-pb-0 tw-mb-0">
                     Community Activity{" "}
                     <a href="/community-activity">
-                      <span className={styles.viewAllLink}>VIEW ALL</span>
+                      <span className={styles.viewAllLink}>View All</span>
                     </a>
                   </h1>
                 </ProfileActivityLogs>

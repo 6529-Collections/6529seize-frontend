@@ -79,7 +79,7 @@ export default function CommunityActivityPage({
           <ProfileActivityLogs
             initialParams={INITIAL_ACTIVITY_LOGS_PARAMS}
             withFilters={true}>
-            <h1 className="tw-block tw-uppercase  tw-float-none tw-pb-0 tw-mb-0">
+            <h1 className="tw-block tw-float-none tw-pb-0 tw-mb-0">
               Community Activity
             </h1>
           </ProfileActivityLogs>

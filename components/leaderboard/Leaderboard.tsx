@@ -1412,7 +1412,7 @@ export default function Leaderboard(props: Readonly<Props>) {
             Community{" "}
             {showViewAll && (
               <a href="/community">
-                <span className={styles.viewAllLink}>VIEW ALL</span>
+                <span className={styles.viewAllLink}>View All</span>
               </a>
             )}
           </h1>

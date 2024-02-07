@@ -89,7 +89,7 @@ export default function LatestActivity(props: Readonly<Props>) {
               NFT Activity{" "}
               {showViewAll ? (
                 <a href="/nft-activity">
-                  <span className={styles.viewAllLink}>VIEW ALL</span>
+                  <span className={styles.viewAllLink}>View All</span>
                 </a>
               ) : (
                 fetching && <DotLoader />

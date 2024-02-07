@@ -198,6 +198,10 @@ export default function NextgenTokenAbout(props: Readonly<Props>) {
           <span className="font-color-h">Rendered Versions:</span>
           <NextGenTokenDownload
             token={props.token}
+            resolution={Resolution["1K"]}
+          />
+          <NextGenTokenDownload
+            token={props.token}
             resolution={Resolution["2K"]}
           />
           <NextGenTokenDownload
