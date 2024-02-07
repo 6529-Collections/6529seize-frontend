@@ -380,6 +380,9 @@ export default function NextGenMint(props: Readonly<Props>) {
             }}
             src={props.collection.image}
             alt={props.collection.name}
+            onError={(e) => {
+              e.currentTarget.src = "/pebbles-loading.jpeg";
+            }}
           />
         </Col>
         <Col sm={12} md={6}>

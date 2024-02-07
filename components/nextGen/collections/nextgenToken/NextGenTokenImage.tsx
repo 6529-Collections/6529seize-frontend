@@ -30,6 +30,9 @@ export function NextGenTokenImage(
             }}
             src={props.token.image_url}
             alt={props.token.name}
+            onError={(e) => {
+              e.currentTarget.src = "/pebbles-loading.jpeg";
+            }}
           />
         </span>
         {!props.hide_info && (

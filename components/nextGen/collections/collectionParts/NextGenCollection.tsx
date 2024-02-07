@@ -70,7 +70,9 @@ export default function NextGenCollection(props: Readonly<Props>) {
     <>
       <Breadcrumb breadcrumbs={crumbs} />
       <NextGenNavigationHeader />
-      <NextGenCollectionSlideshow collection={props.collection} />
+      {props.collection.mint_count > 0 && (
+        <NextGenCollectionSlideshow collection={props.collection} />
+      )}
       <Container className="pt-3 pb-2">
         <>
           <NextGenCollectionHeader

@@ -31,6 +31,9 @@ export default function NextGenCollectionPreview(props: Readonly<Props>) {
               }}
               src={props.collection.image}
               alt={`NextGen Collection #${props.collection.id} - ${props.collection.name}`}
+              onError={(e) => {
+                e.currentTarget.src = "/pebbles-loading.jpeg";
+              }}
             />
           </Col>
         </Row>

@@ -97,7 +97,7 @@ export default function NextGen(props: any) {
       <main className={styles.main}>
         <Header />
         <Breadcrumb breadcrumbs={breadcrumbs} />
-        {collection?.mint_count ? (
+        {collection?.id ? (
           <>
             <NextGenNavigationHeader view={view} setView={setView} />
             {!view && (
