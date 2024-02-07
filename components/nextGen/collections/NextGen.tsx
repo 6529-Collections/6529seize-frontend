@@ -29,7 +29,7 @@ export default function NextGen(props: Readonly<Props>) {
         <Container>
           <Row>
             <Col>
-              <Container className="pt-4 pb-4 no-padding">
+              <Container className="pt-5 pb-5 no-padding">
                 <Row>
                   <Col sm={12} md={6}>
                     <Row>
@@ -69,7 +69,7 @@ export default function NextGen(props: Readonly<Props>) {
                         <NextGenMintCounts collection={props.collection} />
                       </Col>
                     </Row>
-                    <Row className="pt-4">
+                    <Row className="pt-4 pb-2">
                       <Col>
                         <NextGenCountdown collection={props.collection} />
                       </Col>
