@@ -27,6 +27,7 @@ interface Props {
 const PAGE_SIZE = 100;
 
 export default function NextgenCollectionMintingPlan(props: Readonly<Props>) {
+  const [phasesSet, setPhasesSet] = useState(false);
   const [phases, setPhases] = useState<NextgenAllowlistCollection[]>([]);
 
   const [selectedPhase, setSelectedPhase] =
@@ -60,6 +61,7 @@ export default function NextgenCollectionMintingPlan(props: Readonly<Props>) {
       endpoint: `nextgen/allowlist_phases/${props.collection.id}?page_size=250`,
     }).then((collections) => {
       setPhases(collections.toSorted((a, b) => a.start_time - b.start_time));
+      setPhasesSet(true);
     });
   }, []);
 
@@ -171,17 +173,19 @@ export default function NextgenCollectionMintingPlan(props: Readonly<Props>) {
             </Container>
           </Col>
         ))}
-        <Col xs={12} sm={6} md={4} className="pt-2 pb-2 d-flex flex-column">
-          <Container className={styles.phaseBox}>
-            <Row>
-              {printPhase(
-                "Public Phase",
-                props.collection.public_start,
-                props.collection.public_end
-              )}
-            </Row>
-          </Container>
-        </Col>
+        {phasesSet && (
+          <Col xs={12} sm={6} md={4} className="pt-2 pb-2 d-flex flex-column">
+            <Container className={styles.phaseBox}>
+              <Row>
+                {printPhase(
+                  "Public Phase",
+                  props.collection.public_start,
+                  props.collection.public_end
+                )}
+              </Row>
+            </Container>
+          </Col>
+        )}
       </Row>
       {props.collection.distribution_plan && (
         <Row className="pt-3">
