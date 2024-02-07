@@ -60,7 +60,7 @@ export default function NextGenTokenProvenance(props: Readonly<Props>) {
       endpoint: `nextgen/collections/${props.collection_id}/logs/${props.token_id}?page_size=${PAGE_SIZE}&page=${mypage}`,
     }).then((response) => {
       setLogsTotalResults(response.count);
-      setLogs(response.data);
+      setLogs(response.data.filter((log) => !log.log.startsWith("Mint of")));
       setLogsLoaded(true);
     });
   }

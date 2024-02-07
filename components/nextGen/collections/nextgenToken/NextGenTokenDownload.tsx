@@ -67,7 +67,7 @@ export function NextGenTokenDownloadDropdownItem(props: NextGenTokenProps) {
         if (imageExists) {
           downloader.download(
             getUrl(props.token, props.resolution),
-            `${props.token.id}_${props.resolution.toUpperCase()}`
+            `${props.token.id}_${props.resolution.toUpperCase()}.png`
           );
         }
       }}>
@@ -157,7 +157,7 @@ export function NextGenTokenDownloadButton(
         onClick={() => {
           downloader.download(
             getUrl(props.token, props.quality),
-            `${props.token.id}_${props.quality.toUpperCase()}`
+            `${props.token.id}_${props.quality.toUpperCase()}.png`
           );
         }}
       />
