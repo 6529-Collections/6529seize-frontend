@@ -20,7 +20,7 @@ if (VERSION) {
 }
 
 const withBundleAnalyzer = require("@next/bundle-analyzer")({
-  enabled: process.env.NODE_ENV === "development" ? false : true,
+  enabled: process.env.NODE_ENV !== "development",
   openAnalyzer: false,
 });
 
@@ -31,7 +31,7 @@ const securityHeaders = [
   },
   {
     key: "Content-Security-Policy",
-    value: `default-src 'none'; script-src 'self' 'unsafe-inline' https://dnclu2fna0b2b.cloudfront.net https://www.google-analytics.com https://www.googletagmanager.com/ 'unsafe-eval'; connect-src * 'self' ${process.env.API_ENDPOINT} https://registry.walletconnect.com/api/v2/wallets wss://*.bridge.walletconnect.org wss://*.walletconnect.com wss://www.walletlink.org/rpc https://explorer-api.walletconnect.com/v3/wallets https://www.googletagmanager.com https://*.google-analytics.com https://cloudflare-eth.com/ https://arweave.net/* https://rpc.walletconnect.com/v1/; font-src 'self' https://dnclu2fna0b2b.cloudfront.net; img-src 'self' data: blob: *; media-src 'self' https://*.cloudfront.net https://arweave.net https://*.arweave.net https://ipfs.io/ipfs/* https://cf-ipfs.com/ipfs/*; frame-src 'self' https://arweave.net https://*.arweave.net https://ipfs.io/ipfs/* https://cf-ipfs.com/ipfs/* https://nftstorage.link https://nftstorage.link https://*.ipfs.nftstorage.link https://verify.walletconnect.com https://verify.walletconnect.org; style-src 'self' 'unsafe-inline' https://dnclu2fna0b2b.cloudfront.net https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; object-src data:;`,
+    value: `default-src 'none'; script-src 'self' 'unsafe-inline' https://dnclu2fna0b2b.cloudfront.net https://www.google-analytics.com https://www.googletagmanager.com/ 'unsafe-eval'; connect-src * 'self' ${process.env.API_ENDPOINT} https://registry.walletconnect.com/api/v2/wallets wss://*.bridge.walletconnect.org wss://*.walletconnect.com wss://www.walletlink.org/rpc https://explorer-api.walletconnect.com/v3/wallets https://www.googletagmanager.com https://*.google-analytics.com https://cloudflare-eth.com/ https://arweave.net/* https://rpc.walletconnect.com/v1/; font-src 'self' https://dnclu2fna0b2b.cloudfront.net; img-src 'self' data: blob: *; media-src 'self' https://*.cloudfront.net https://arweave.net https://*.arweave.net https://ipfs.io/ipfs/* https://cf-ipfs.com/ipfs/*; frame-src 'self' https://media.generator.seize.io https://generator.seize.io https://arweave.net https://*.arweave.net https://ipfs.io/ipfs/* https://cf-ipfs.com/ipfs/* https://nftstorage.link https://nftstorage.link https://*.ipfs.nftstorage.link https://verify.walletconnect.com https://verify.walletconnect.org; style-src 'self' 'unsafe-inline' https://dnclu2fna0b2b.cloudfront.net https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; object-src data:;`,
   },
   {
     key: "X-Frame-Options",
@@ -69,6 +69,7 @@ const nextConfig = {
     BASE_ENDPOINT: process.env.BASE_ENDPOINT,
     ALCHEMY_API_KEY: process.env.ALCHEMY_API_KEY,
     VERSION: VERSION,
+    NEXTGEN_CHAIN_ID: process.env.NEXTGEN_CHAIN_ID,
   },
   async generateBuildId() {
     return VERSION;
@@ -82,14 +83,21 @@ const nextConfig = {
       },
     ];
   },
+
   webpack: (config, { buildId, dev, isServer, defaultLoaders, webpack }) => {
-    // Overwrite the Webpack config to enable verbose logging
-        config.plugins.push(
-          new webpack.ProgressPlugin((percentage, message, ...args) => {
-            // Custom log message
-            console.log(`${(percentage * 100).toFixed(2)}%`, message, ...args);
-          })
+    config.resolve.alias.canvas = false;
+    config.plugins.push(
+      new webpack.ProgressPlugin((percentage, message, ...args) => {
+        // Detailed log message
+        console.log(
+          `${(percentage * 100).toFixed(2)}%`,
+          message,
+          ...args.map((arg) =>
+            typeof arg === "string" ? arg : JSON.stringify(arg)
+          )
         );
+      })
+    );
     return config;
   },
 };

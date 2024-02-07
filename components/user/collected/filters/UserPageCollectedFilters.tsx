@@ -33,7 +33,6 @@ export default function UserPageCollectedFilters({
   readonly setSzn: (szn: MEMES_SEASON | null) => void;
   readonly scrollHorizontally: (direction: "left" | "right") => void;
 }) {
-
   const mostLeftFilterRef = useRef<HTMLDivElement>(null);
   const mostRightFilterRef = useRef<HTMLDivElement>(null);
 
@@ -92,7 +91,6 @@ export default function UserPageCollectedFilters({
 
   useEffect(() => {
     const container = containerRef.current;
-
     if (container) {
       container.addEventListener("scroll", setVisibility);
       window.addEventListener("resize", setVisibility);

@@ -1,3 +1,4 @@
+import styles from "./PdfViewer.module.scss";
 import { Document, Page, pdfjs } from "react-pdf";
 import { useRef, useState } from "react";
 import { Col, Container, Row } from "react-bootstrap";
@@ -17,6 +18,7 @@ interface Props {
 export default function PdfViewer(props: Readonly<Props>) {
   const [numPages, setNumPages] = useState(0);
   const [pageNumber, setPageNumber] = useState(1);
+  const [renderedPageNumber, setRenderedPageNumber] = useState(1);
 
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -28,14 +30,25 @@ export default function PdfViewer(props: Readonly<Props>) {
     setNumPages(numPages);
   }
 
+  const isLoading = renderedPageNumber !== pageNumber;
+
   return (
     <Container className="no-padding">
       <Row>
         <Col ref={containerRef}>
           <Document file={props.file} onLoadSuccess={onDocumentLoadSuccess}>
+            {isLoading && renderedPageNumber ? (
+              <Page
+                key={renderedPageNumber}
+                className={styles.prevPage}
+                pageNumber={renderedPageNumber}
+                width={containerRef.current?.offsetWidth}
+              />
+            ) : null}
             <Page
               key={pageNumber}
               pageNumber={pageNumber}
+              onRenderSuccess={() => setRenderedPageNumber(pageNumber)}
               width={containerRef.current?.offsetWidth}
             />
           </Document>

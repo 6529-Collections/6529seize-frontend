@@ -1,4 +1,5 @@
 @import "./variables.scss";
+@import "react-toggle/style.css";
 
 @tailwind base;
 @tailwind components;
@@ -79,46 +80,48 @@ a:hover {
   }
 }
 
+b {
+  font-weight: 600;
+}
+
 h1 {
-  font-family: $square-font !important;
-  font-display: swap;
   font-size: 48px;
+  font-weight: 700;
   float: left;
-  color: $font-color-h;
+  color: $font-color;
 }
 
 h2 {
   font-size: 32px;
-  font-weight: bold;
+  font-weight: 700;
   float: left;
-  color: $font-color-h;
+  color: $font-color;
 }
 
 h3 {
   font-size: 28px;
-  font-weight: bold;
+  font-weight: 700;
   float: left;
-  color: $font-color-h;
+  color: $font-color;
 }
 
 h4 {
   font-size: 24px;
-  font-weight: bold;
+  font-weight: 700;
   float: left;
-  color: $font-color-h;
+  color: $font-color;
 }
 
 h5 {
   font-size: 20px;
-  font-weight: bold;
+  font-weight: 700;
   float: left;
-  color: $font-color-h;
+  color: $font-color;
 }
 
 @media only screen and (max-width: 800px) {
   h1 {
     font-family: $square-font !important;
-    font-display: swap;
     font-size: 26px;
     float: left;
   }
@@ -237,7 +240,11 @@ h5 {
 }
 
 .font-bolder {
-  font-weight: bolder;
+  font-weight: bold;
+}
+
+.font-lighter {
+  font-weight: 200;
 }
 
 .no-wrap {
@@ -291,6 +298,7 @@ h5 {
   border: 0 !important;
   padding-left: 20px;
   padding-right: 20px;
+  font-weight: bold;
 }
 
 .seize-btn-link {
@@ -316,6 +324,28 @@ h5 {
   }
 }
 
+.btn-black {
+  background-color: black !important;
+  color: white !important;
+
+  &:hover {
+    background-color: $dark-grey !important;
+  }
+}
+
+.btn-green {
+  background-color: $green;
+  color: white !important;
+
+  &:hover {
+    background-color: lighten($color: $green, $amount: 5);
+  }
+}
+
+.btn-block {
+  width: 100%;
+}
+
 .cursor-pointer {
   cursor: pointer;
 }
@@ -330,9 +360,33 @@ h5 {
   opacity: 1;
 }
 
+.unselectable {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+
+  &:focus {
+    outline: none !important;
+  }
+}
+
+.btn-link {
+  background: none;
+  color: inherit;
+  border: none;
+  padding: 0;
+  font: inherit;
+  cursor: pointer;
+  outline: inherit;
+
+  &:hover {
+    color: inherit;
+  }
+}
 .horizontal-menu-hide-scrollbar {
-  -ms-overflow-style: none;  /* IE and Edge */
-  scrollbar-width: none;  /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
 }
 
 .horizontal-menu-hide-scrollbar::-webkit-scrollbar {

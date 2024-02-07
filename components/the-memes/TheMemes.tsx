@@ -44,7 +44,7 @@ interface Props {
   wallets: string[];
 }
 
-export default function TheMemesComponent(props: Props) {
+export default function TheMemesComponent(props: Readonly<Props>) {
   const router = useRouter();
 
   useEffect(() => {
@@ -608,7 +608,7 @@ export default function TheMemesComponent(props: Props) {
             <>
               <Row>
                 <Col className="d-flex align-items-center justify-content-start">
-                  <h1>THE MEMES</h1>
+                  <h1>The Memes</h1>
                 </Col>
                 <Col className="d-flex align-items-center justify-content-end">
                   <SeasonsDropdown

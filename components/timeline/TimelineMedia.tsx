@@ -11,7 +11,7 @@ export enum MediaType {
   HTML,
 }
 
-export default function TimelineMediaComponent(props: Props) {
+export default function TimelineMediaComponent(props: Readonly<Props>) {
   if (props.type === MediaType.VIDEO) {
     return (
       <video

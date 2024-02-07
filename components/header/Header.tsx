@@ -17,7 +17,7 @@ interface Props {
   onSetWallets?(wallets: string[]): any;
 }
 
-export default function Header(props: Props) {
+export default function Header(props: Readonly<Props>) {
   const router = useRouter();
   const account = useAccount();
 
@@ -198,11 +198,24 @@ export default function Header(props: Props) {
                     </a>
                   </Col>
                 </Row>
+                <Row>
+                  <Col xs={{ span: 6, offset: 3 }}>
+                    <hr />
+                  </Col>
+                </Row>
                 <Row className="pt-3">
                   <Col>
                     <a href="/nextgen">
-                      <h3>NextGen</h3>
+                      <h3>
+                        <span>NextGen</span>&nbsp;
+                        <span className={styles.new}>new</span>
+                      </h3>
                     </a>
+                  </Col>
+                </Row>
+                <Row>
+                  <Col xs={{ span: 6, offset: 3 }}>
+                    <hr />
                   </Col>
                 </Row>
                 <Row className="pt-3">
@@ -664,13 +677,16 @@ export default function Header(props: Props) {
                                 }>
                                 Gradient
                               </NavDropdown.Item>
+                              <NavDropdown.Divider />
                               <NavDropdown.Item
                                 className={styles.dropdownItem}
                                 onClick={() =>
                                   (window.location.href = "/nextgen")
                                 }>
-                                NextGen
+                                <span>NextGen</span>&nbsp;
+                                <span className={styles.new}>new</span>
                               </NavDropdown.Item>
+                              <NavDropdown.Divider />
                               <NavDropdown.Item
                                 className={styles.dropdownItem}
                                 onClick={() =>
@@ -924,7 +940,7 @@ export default function Header(props: Props) {
                             height: "auto",
                             width: "auto",
                             maxHeight: "42px",
-                            paddingLeft: "35px",
+                            paddingLeft: "15px",
                           }}
                           className={`d-none ${styles.dMdBlock}`}
                           src="https://d3lqz0a4bldqgf.cloudfront.net/seize_images/Seize_Logo_Icon.png"

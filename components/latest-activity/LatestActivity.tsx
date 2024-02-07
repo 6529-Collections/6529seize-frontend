@@ -26,7 +26,7 @@ export enum TypeFilter {
   BURNS = "Burns",
 }
 
-export default function LatestActivity(props: Props) {
+export default function LatestActivity(props: Readonly<Props>) {
   const router = useRouter();
   const [activity, setActivity] = useState<Transaction[]>([]);
   const [page, setPage] = useState(props.page);
@@ -88,7 +88,7 @@ export default function LatestActivity(props: Props) {
         <Col className="d-flex align-items-center justify-content-between">
           <span className="d-flex flex-wrap align-items-center gap-2">
             <h1>
-              NFT ACTIVITY{" "}
+              NFT Activity{" "}
               {showViewAll ? (
                 <a href="/nft-activity">
                   <span className={styles.viewAllLink}>VIEW ALL</span>
@@ -108,8 +108,7 @@ export default function LatestActivity(props: Props) {
                     onClick={() => {
                       setPage(1);
                       setTypeFilter(filter);
-                    }}
-                  >
+                    }}>
                     {filter}
                   </Dropdown.Item>
                 ))}
