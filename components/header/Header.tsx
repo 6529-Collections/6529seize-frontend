@@ -940,7 +940,7 @@ export default function Header(props: Readonly<Props>) {
                             height: "auto",
                             width: "auto",
                             maxHeight: "42px",
-                            paddingLeft: "35px",
+                            paddingLeft: "15px",
                           }}
                           className={`d-none ${styles.dMdBlock}`}
                           src="https://d3lqz0a4bldqgf.cloudfront.net/seize_images/Seize_Logo_Icon.png"

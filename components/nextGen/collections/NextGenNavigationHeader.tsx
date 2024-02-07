@@ -43,9 +43,9 @@ export default function NextGenNavigationHeader(
       styles = {};
     }
     const viewHeader = (
-      <h4 className={`mb-0 pb-2 font-color unselectable`} style={styles}>
+      <h5 className={`mb-0 pb-2 font-color unselectable`} style={styles}>
         <b>{v ?? "Featured"}</b>
-      </h4>
+      </h5>
     );
     if (props.view == v && props.setView) {
       return viewHeader;

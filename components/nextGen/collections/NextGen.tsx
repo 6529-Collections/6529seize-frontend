@@ -64,7 +64,7 @@ export default function NextGen(props: Readonly<Props>) {
                         </a>
                       </Col>
                     </Row>
-                    <Row className="pt-3 font-larger font-color font-bolder">
+                    <Row className="pt-3 font-larger font-color">
                       <Col>
                         <NextGenMintCounts collection={props.collection} />
                       </Col>
@@ -72,14 +72,6 @@ export default function NextGen(props: Readonly<Props>) {
                     <Row className="pt-4">
                       <Col>
                         <NextGenCountdown collection={props.collection} />
-                      </Col>
-                    </Row>
-                    <Row className="pt-2">
-                      <Col>
-                        <DistributionLink
-                          collection={props.collection}
-                          class="pt-0  font-bolder font-larger"
-                        />
                       </Col>
                     </Row>
                   </Col>

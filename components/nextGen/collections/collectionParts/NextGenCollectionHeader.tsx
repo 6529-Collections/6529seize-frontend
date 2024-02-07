@@ -26,7 +26,6 @@ import { DistributionLink } from "../NextGen";
 interface Props {
   collection: NextGenCollection;
   collection_link?: boolean;
-  showDistributionLink?: boolean;
 }
 
 interface CountdownProps {
@@ -84,15 +83,13 @@ export function NextGenCountdown(props: Readonly<CountdownProps>) {
             href={`/nextgen/collection/${formatNameForUrl(
               props.collection.name
             )}/mint`}>
-            {/* <Button className="seize-btn btn-block pt-2 pb-2 btn-white font-larger font-bolder">
-              {getButtonLabel()}
-            </Button> */}
             <button
               className={`pt-2 pb-2 seize-btn btn-block no-wrap ${styles.exploreBtn}`}>
               {getButtonLabel()}
             </button>
           </a>
         )}
+        <DistributionLink collection={props.collection} />
       </span>
     );
   }
@@ -200,14 +197,6 @@ export default function NextGenCollectionHeader(props: Readonly<Props>) {
             />
           }
           <span className="pt-2 pb-2 d-flex align-items-center justify-content-end gap-4">
-            {props.showDistributionLink && (
-              <span>
-                <DistributionLink
-                  collection={props.collection}
-                  class="text-center"
-                />
-              </span>
-            )}
             <FontAwesomeIcon
               className={`${styles.globeIcon} ${styles.marketplace}`}
               icon="globe"
@@ -324,7 +313,7 @@ export function NextGenMintCounts(
   }, [collectionMintCount.data]);
 
   return (
-    <b>
+    <span>
       {mintCount > 0 ? numberWithCommas(mintCount) : mintCount} /{" "}
       {numberWithCommas(props.collection.total_supply)} minted
       {available > 0 && ` | ${numberWithCommas(available)} remaining`}
@@ -334,6 +323,6 @@ export function NextGenMintCounts(
           <DotLoader />
         </>
       )}
-    </b>
+    </span>
   );
 }
