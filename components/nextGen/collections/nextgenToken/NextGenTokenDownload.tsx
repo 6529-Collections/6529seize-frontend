@@ -114,16 +114,18 @@ export default function NextGenTokenDownload(
   }
 
   return (
-    <Container className="no-padding">
-      <Row>
-        <Col className="d-flex flex-wrap align-items-center gap-5">
+    <Container className="no-padding pt-1 pb-1 ">
+      <Row className="d-flex flex-wrap align-items-center">
+        <Col xs={4}>
           <span>
             <span>{props.resolution}</span>
-            {imageExists && imageSize > 0
-              ? ` (${numberWithCommas(imageSize)} MB)`
-              : " Coming Soon"}
+            {imageExists &&
+              imageSize > 0 &&
+              ` (${numberWithCommas(imageSize)} MB)`}
           </span>
-          {imageExists && printResolution(props.resolution)}
+        </Col>
+        <Col>
+          {imageExists ? printResolution(props.resolution) : "Coming Soon"}
         </Col>
       </Row>
     </Container>

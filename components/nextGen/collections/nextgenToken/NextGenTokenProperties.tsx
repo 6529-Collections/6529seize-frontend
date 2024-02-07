@@ -12,11 +12,11 @@ interface Props {
 
 export function displayScore(number: number) {
   if (number >= 0.01) {
-    return Number(number.toFixed(3)).toLocaleString();
+    return Number(number).toFixed(3).toLocaleString();
   }
 
   const numberStr = number.toString();
-  const match = numberStr.match(/0\.0*([1-9])/);
+  const match = RegExp(/0\.0*([1-9])/).exec(numberStr);
 
   if (match && typeof match.index !== "undefined") {
     const position = match.index + match[0].length;
@@ -53,8 +53,6 @@ function TraitAccordion(
               <Col xs={5}>{props.title}</Col>
               <Col xs={2}></Col>
               <Col xs={2} className="text-center">
-                {/* {props.rank.toLocaleString()}/
-                {props.token_count.toLocaleString()} */}
                 <span className="font-color-h">Rank:</span> #
                 {props.rank.toLocaleString()}
               </Col>
