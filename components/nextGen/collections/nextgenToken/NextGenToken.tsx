@@ -21,6 +21,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useRouter } from "next/router";
 import Tippy from "@tippyjs/react";
 import NextGenTokenRenderCenter from "./NextGenTokenRenderCenter";
+import { NextGenBackToCollectionPageLink } from "../collectionParts/NextGenCollectionHeader";
 
 interface Props {
   collection: NextGenCollection;
@@ -188,19 +189,24 @@ export default function NextGenToken(props: Readonly<Props>) {
           <Row>
             <Col>
               <Container>
-                <Row className="pb-4">
+                <Row className="pb-2">
                   <Col className="d-flex align-items-center justify-content-between">
-                    <span className="d-flex gap-3">
-                      <h2 className="mb-0 font-color">{props.token.name}</h2>
-                      {(props.token.burnt ||
-                        isNullAddress(props.token.owner)) && (
-                        <Tippy content={"Burnt"} theme={"light"} delay={100}>
-                          <FontAwesomeIcon
-                            icon="fire"
-                            style={{ height: "35px", color: "#c51d34" }}
-                          />
-                        </Tippy>
-                      )}
+                    <span className="d-flex flex-column">
+                      <span className="d-flex gap-3">
+                        <h2 className="mb-0 font-color">{props.token.name}</h2>
+                        {(props.token.burnt ||
+                          isNullAddress(props.token.owner)) && (
+                          <Tippy content={"Burnt"} theme={"light"} delay={100}>
+                            <FontAwesomeIcon
+                              icon="fire"
+                              style={{ height: "35px", color: "#c51d34" }}
+                            />
+                          </Tippy>
+                        )}
+                      </span>
+                      <NextGenBackToCollectionPageLink
+                        collection={props.collection}
+                      />
                     </span>
                     <span className="d-flex gap-2">
                       {printPreviousToken()}

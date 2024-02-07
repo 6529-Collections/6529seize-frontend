@@ -38,6 +38,19 @@ interface PhaseProps {
   available: number;
 }
 
+export function NextGenBackToCollectionPageLink(
+  props: Readonly<{ collection: NextGenCollection }>
+) {
+  return (
+    <a
+      href={`/nextgen/collection/${formatNameForUrl(props.collection.name)}`}
+      className="pt-2 decoration-none d-flex align-items-center gap-2 pb-2">
+      <FontAwesomeIcon icon="arrow-circle-left" className={styles.backIcon} />
+      Back to collection Page
+    </a>
+  );
+}
+
 export function NextGenCountdown(props: Readonly<CountdownProps>) {
   const router = useRouter();
   const alStatus = getStatusFromDates(
@@ -220,17 +233,7 @@ export default function NextGenCollectionHeader(props: Readonly<Props>) {
           <span className="d-flex flex-column align-items-start">
             <h1 className="mb-0 font-color">{props.collection.name}</h1>
             {props.collection_link && (
-              <a
-                href={`/nextgen/collection/${formatNameForUrl(
-                  props.collection.name
-                )}`}
-                className="decoration-none d-flex align-items-center gap-2 pb-2">
-                <FontAwesomeIcon
-                  icon="arrow-circle-left"
-                  className={styles.backIcon}
-                />
-                Back to collection Page
-              </a>
+              <NextGenBackToCollectionPageLink collection={props.collection} />
             )}
           </span>
           <span className="font-larger">

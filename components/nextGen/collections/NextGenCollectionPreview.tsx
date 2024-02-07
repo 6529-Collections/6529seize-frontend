@@ -38,8 +38,8 @@ export default function NextGenCollectionPreview(props: Readonly<Props>) {
           <Col>
             <Container className={styles.collectionPreviewTitle}>
               <Row>
-                <Col className="font-larger">
-                  <b>{props.collection.name}</b>
+                <Col>
+                  <h3 className="mb-0">{props.collection.name}</h3>
                 </Col>
               </Row>
               <Row>
