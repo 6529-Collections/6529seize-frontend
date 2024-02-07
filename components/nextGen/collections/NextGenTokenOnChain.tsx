@@ -147,7 +147,7 @@ export default function NextGenTokenOnChain(props: Readonly<Props>) {
                   href={`/nextgen/collection/${formatNameForUrl(
                     props.collection.name
                   )}`}>
-                  #{props.collection.id} {props.collection.name}
+                  {props.collection.name}
                 </a>
               </span>
               <span className="pt-1 pb-1 d-flex flex-column">

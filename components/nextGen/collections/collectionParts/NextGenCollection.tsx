@@ -50,7 +50,7 @@ export default function NextGenCollection(props: Readonly<Props>) {
   const crumbs: Crumb[] = [
     { display: "Home", href: "/" },
     { display: "NextGen", href: "/nextgen" },
-    { display: `#${props.collection.id} - ${props.collection.name}` },
+    { display: `${props.collection.name}` },
   ];
 
   const [view, setView] = useState<ContentView>(props.view);

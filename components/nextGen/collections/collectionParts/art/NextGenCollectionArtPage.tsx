@@ -15,7 +15,7 @@ export default function NextGenCollectionArtPage(props: Readonly<Props>) {
     { display: "Home", href: "/" },
     { display: "NextGen", href: "/nextgen" },
     {
-      display: `#${props.collection.id} - ${props.collection.name}`,
+      display: `${props.collection.name}`,
       href: `/nextgen/collection/${formatNameForUrl(props.collection.name)}`,
     },
     { display: "Art" },

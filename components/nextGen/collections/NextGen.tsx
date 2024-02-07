@@ -48,7 +48,7 @@ export default function NextGen(props: Readonly<Props>) {
                           )}`}
                           className="decoration-none font-bolder"
                           style={{ fontSize: "60px" }}>
-                          #{props.collection.id} - {props.collection.name}
+                          {props.collection.name}
                         </a>
                       </Col>
                     </Row>
