@@ -86,20 +86,14 @@ export default function NextGen(props: Readonly<Props>) {
           <Col>
             <Container className="pt-3 pb-3">
               <Row>
-                <Col
-                  className="font-larger text-center"
-                  style={{
-                    backgroundColor: "white",
-                    color: "black",
-                    padding: "8vh 8vw",
-                  }}>
+                <Col className="font-larger text-center">
                   <b>NextGen</b> is an on-chain generative art NFT contract. It
                   is also a tool to support the ambitious aspirations of the
                   6529 community in the areas of art experimentation and
                   decentralized social organization.
                   <br />
                   <button
-                    className="btn-link pt-3"
+                    className="btn-link pt-2"
                     onClick={() => {
                       props.setView(NextGenView.ABOUT);
                       window.scrollTo(0, 120);
