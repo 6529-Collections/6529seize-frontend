@@ -3,13 +3,10 @@ import UserPageMintsPhasesPhaseTimesCountdown from "./UserPageMintsPhasesPhaseTi
 export default function UserPageMintsPhasesPhaseTimes({
   startTime,
   endTime,
-}: 
-
-{
+}: {
   readonly startTime: number;
   readonly endTime: number;
 }) {
-
   const getFormattedTs = (ts: number) => {
     const date = new Date(ts);
     const daysOfWeek = [
@@ -36,13 +33,16 @@ export default function UserPageMintsPhasesPhaseTimes({
       "Dec",
     ];
 
-    const dayOfWeek = daysOfWeek[date.getUTCDay()];
-    const month = months[date.getUTCMonth()];
-    const day = date.getUTCDate();
-    const hours = date.getUTCHours().toString().padStart(2, "0");
-    const minutes = date.getUTCMinutes().toString().padStart(2, "0");
-
-    return `${dayOfWeek}, ${month} ${day}, ${hours}:${minutes} UTC`;
+    const dayOfWeek = daysOfWeek[date.getDay()];
+    const month = months[date.getMonth()];
+    const day = date.getDate();
+    const hours = date.getHours().toString().padStart(2, "0");
+    const minutes = date.getMinutes().toString().padStart(2, "0");
+    const timeZone = new Intl.DateTimeFormat("en-US", { timeZoneName: "short" })
+      .format(date)
+      .split(" ")
+      .pop();
+    return `${dayOfWeek}, ${month} ${day}, ${hours}:${minutes} ${timeZone}`;
   };
 
   return (
