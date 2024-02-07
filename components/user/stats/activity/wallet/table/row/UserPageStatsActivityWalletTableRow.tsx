@@ -250,7 +250,7 @@ export default function UserPageStatsActivityWalletTableRow({
             {TYPE_TP_ACTION[type]}
           </span>
           {transaction.token_count > 1 && (
-            <span className="tw-whitespace-nowrap tw-text-sm tw-text-iron-300 tw-font-medium">
+            <span className="tw-whitespace-nowrap tw-text-base tw-text-iron-300 tw-font-medium">
               x{transaction.token_count}
             </span>
           )}
