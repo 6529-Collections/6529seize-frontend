@@ -285,6 +285,7 @@ export default function NextGenMintWidget(props: Readonly<Props>) {
     }
     setMintCount(0);
     mintWrite.reset();
+    props.refreshMintCounts();
   }, [account.address]);
 
   const mintToAddressEns = useEnsName({

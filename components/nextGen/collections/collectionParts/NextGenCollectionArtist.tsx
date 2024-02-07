@@ -44,7 +44,7 @@ export default function NextGenCollectionArtist(props: Readonly<Props>) {
       <Row>
         <Col
           sm={12}
-          md={6}
+          md={3}
           className="pt-4 d-flex align-items-center justify-content-center">
           {pfp && (
             <Image
@@ -62,7 +62,7 @@ export default function NextGenCollectionArtist(props: Readonly<Props>) {
             />
           )}
         </Col>
-        <Col sm={12} md={5} className="pt-4">
+        <Col sm={12} md={9} className="pt-4">
           <Container className="no-padding">
             <Row>
               <Col>
