@@ -53,13 +53,15 @@ export default function NextGen(props: Readonly<Props>) {
                       </Col>
                     </Row>
                     <Row className="font-larger font-color font-bolder">
-                      <Col>
+                      <Col
+                        className="font-larger font-lighter"
+                        style={{ fontSize: "48px", lineHeight: "48px" }}>
                         by{" "}
-                        <b>
-                          <a href={`/${props.collection.artist_address}`}>
-                            {props.collection.artist}
-                          </a>
-                        </b>
+                        <a
+                          href={`/${props.collection.artist_address}`}
+                          className="decoration-hover-underline">
+                          {props.collection.artist}
+                        </a>
                       </Col>
                     </Row>
                     <Row className="pt-3 font-larger font-color font-bolder">
@@ -154,8 +156,8 @@ export function DistributionLink(
   );
 
   if (
-    alStatus !== Status.UNAVAILABLE &&
-    publicStatus !== Status.UNAVAILABLE &&
+    alStatus === Status.UPCOMING ||
+    alStatus === Status.LIVE ||
     publicStatus !== Status.COMPLETE
   ) {
     return (

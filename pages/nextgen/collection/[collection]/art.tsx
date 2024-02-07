@@ -23,7 +23,7 @@ const NextGenCollectionTokenListComponent = dynamic(
 
 export default function NextGenCollectionTokensPage(props: any) {
   const collection: NextGenCollection = props.pageProps.collection;
-  const pagenameFull = `Art | #${collection.id} - ${collection.name}`;
+  const pagenameFull = `Art | ${collection.name}`;
 
   return (
     <>

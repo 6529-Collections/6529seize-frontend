@@ -35,7 +35,7 @@ export default function NextGenCollection(props: any) {
   const collection: NextGenCollection = props.pageProps.collection;
   const view: ContentView = props.pageProps.view;
   useShallowRedirect(collection.name);
-  const pagenameFull = `#${collection.id} - ${collection.name}`;
+  const pagenameFull = `${collection.name}`;
 
   return (
     <>

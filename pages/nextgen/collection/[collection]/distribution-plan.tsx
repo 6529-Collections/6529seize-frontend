@@ -27,13 +27,13 @@ const NextGenCollectionMintingPlanComponent = dynamic(
 export default function NextGenCollectionTokensPage(props: any) {
   const collection: NextGenCollection = props.pageProps.collection;
   useShallowRedirect(collection.name, "/distribution-plan");
-  const pagenameFull = `Distribution Plan | #${collection.id} - ${collection.name}`;
+  const pagenameFull = `Distribution Plan | ${collection.name}`;
 
   const crumbs = [
     { display: "Home", href: "/" },
     { display: "NextGen", href: "/nextgen" },
     {
-      display: `#${collection.id} - ${collection.name}`,
+      display: `${collection.name}`,
       href: `/nextgen/collection/${collection.id}`,
     },
     { display: `Distribution Plan` },

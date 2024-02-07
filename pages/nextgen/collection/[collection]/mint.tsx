@@ -27,7 +27,7 @@ const NextGenCollectionMintComponent = dynamic(
 export default function NextGenCollectionMintPage(props: any) {
   const collection: NextGenCollection = props.pageProps.collection;
   useShallowRedirect(collection.name, "/mint");
-  const pagenameFull = `Mint | #${collection.id} - ${collection.name}`;
+  const pagenameFull = `Mint | ${collection.name}`;
 
   return (
     <>
