@@ -1,6 +1,6 @@
 import { RefObject } from "react";
 import { CollectionSeized } from "../../../../entities/IProfile";
-import CommonSelect, {
+import {
   CommonSelectItem,
 } from "../../../utils/select/CommonSelect";
 import CommonDropdown from "../../../utils/select/dropdown/CommonDropdown";

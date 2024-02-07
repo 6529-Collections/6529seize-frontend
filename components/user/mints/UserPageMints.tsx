@@ -7,7 +7,6 @@ import { useEffect, useState } from "react";
 import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
 import { commonApiFetch } from "../../../services/api/common-api";
 import { Page } from "../../../helpers/Types";
-import { DELEGATION_ALL_ADDRESS, MEMES_CONTRACT } from "../../../constants";
 import {
   NextgenAllowlist,
   NextgenAllowlistCollection,
@@ -46,7 +45,6 @@ export default function UserPageMints({
 }: {
   readonly profile: IProfileAndConsolidations;
 }) {
-  const router = useRouter();
   const { data: collectionPhases } = useQuery({
     queryKey: [QueryKey.COLLECTION_ALLOWLIST_PHASES, "nextgen"],
     queryFn: async () =>
