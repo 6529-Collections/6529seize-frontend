@@ -55,18 +55,6 @@ function NextGenCollectionDetailsOverview(props: Readonly<CollectionProps>) {
                 )}
                 <Row>
                   <Col xs={12} className="pt-2 pb-2 d-flex flex-column">
-                    <span className="font-color-h">Website</span>
-                    <span>
-                      <a
-                        className="font-color text-decoration-none"
-                        href={addProtocol(props.collection.website)}
-                        target="_blank"
-                        rel="noreferrer">
-                        {props.collection.website}
-                      </a>
-                    </span>
-                  </Col>
-                  <Col xs={12} className="pt-2 pb-2 d-flex flex-column">
                     <span className="font-color-h">Allowlist</span>
                     <DistributionLink collection={props.collection} />
                   </Col>

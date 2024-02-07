@@ -26,6 +26,7 @@ import { DistributionLink } from "../NextGen";
 interface Props {
   collection: NextGenCollection;
   collection_link?: boolean;
+  show_links?: boolean;
 }
 
 interface CountdownProps {
@@ -196,30 +197,22 @@ export default function NextGenCollectionHeader(props: Readonly<Props>) {
               available={available}
             />
           }
-          <span className="pt-2 pb-2 d-flex align-items-center justify-content-end gap-4">
-            <FontAwesomeIcon
-              className={`${styles.globeIcon} ${styles.marketplace}`}
-              icon="globe"
-              onClick={() => {
-                let url = props.collection.website;
-                if (!url.startsWith("http")) {
-                  url = `http://${url}`;
-                }
-                window.open(url, "_blank");
-              }}></FontAwesomeIcon>
-            <a
-              href={getOpenseaLink(NEXTGEN_CHAIN_ID)}
-              target="_blank"
-              rel="noreferrer">
-              <Image
-                className={styles.marketplace}
-                src="/opensea.png"
-                alt="opensea"
-                width={32}
-                height={32}
-              />
-            </a>
-          </span>
+          {props.show_links && (
+            <span className="pt-2 pb-2 d-flex align-items-center justify-content-end gap-4">
+              <a
+                href={getOpenseaLink(NEXTGEN_CHAIN_ID)}
+                target="_blank"
+                rel="noreferrer">
+                <Image
+                  className={styles.marketplace}
+                  src="/opensea.png"
+                  alt="opensea"
+                  width={32}
+                  height={32}
+                />
+              </a>
+            </span>
+          )}
         </Col>
       </Row>
       <Row>
