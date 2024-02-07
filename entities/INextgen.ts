@@ -113,6 +113,8 @@ export interface NextgenAllowlistCollection {
   phase: string;
   start_time: number;
   end_time: number;
+  mint_price: number;
+  collection_name: string;
 }
 
 export interface NextgenAllowlist {

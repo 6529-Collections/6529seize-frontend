@@ -17,6 +17,10 @@ import { useEffect, useRef, useState } from "react";
 import UserPageCollectedCards from "./cards/UserPageCollectedCards";
 import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
 import UserPageCollectedFirstLoading from "./UserPageCollectedFirstLoading";
+import {
+  COLLECTED_COLLECTIONS_META,
+  convertAddressToLowerCase,
+} from "./filters/user-page-collected-filters.helpers";
 
 export interface ProfileCollectedFilters {
   readonly handleOrWallet: string;
@@ -54,11 +58,6 @@ const SNZ_TO_SEARCH_PARAMS: Record<MEMES_SEASON, string> = {
   [MEMES_SEASON.SZN6]: "6",
 };
 
-const SHOW_DATA_ROW_COLLECTIONS: CollectedCollectionType[] = [
-  CollectedCollectionType.MEMES,
-  CollectedCollectionType.GRADIENTS,
-];
-
 export default function UserPageCollected({
   profile,
 }: {
@@ -74,20 +73,16 @@ export default function UserPageCollected({
   const searchParams = useSearchParams();
   const user = (router.query.user as string).toLowerCase();
 
-  const convertAddress = (address: any): string | null => {
-    if (!address) return null;
-    if (typeof address === "string") return address.toLowerCase();
-    return null;
-  };
-
   const convertSeized = ({
     seized,
-    isMemes,
+    collection,
   }: {
     readonly seized: string | null;
-    isMemes: boolean;
+    readonly collection: CollectedCollectionType | null;
   }): CollectionSeized | null => {
-    if (!isMemes) return defaultSeized;
+    if (!collection) return defaultSeized;
+    if (!COLLECTED_COLLECTIONS_META[collection].filters.seized)
+      return defaultSeized;
     if (!seized) return null;
     return (
       Object.values(CollectionSeized).find((c) => c === seized.toUpperCase()) ??
@@ -97,12 +92,13 @@ export default function UserPageCollected({
 
   const convertSzn = ({
     szn,
-    isMemes,
+    collection,
   }: {
     readonly szn: string | null;
-    readonly isMemes: boolean;
+    readonly collection: CollectedCollectionType | null;
   }): MEMES_SEASON | null => {
-    if (!isMemes) return null;
+    if (!collection) return null;
+    if (!COLLECTED_COLLECTIONS_META[collection].filters.szn) return null;
     if (!szn) return null;
     const entry = Object.entries(SNZ_TO_SEARCH_PARAMS).find(
       ([k, v]) => v === szn
@@ -123,13 +119,20 @@ export default function UserPageCollected({
 
   const convertSortedBy = ({
     sortBy,
-    isMemeLab,
+    collection,
   }: {
-    sortBy: string | null;
-    isMemeLab: boolean;
+    readonly sortBy: string | null;
+    readonly collection: CollectedCollectionType | null;
   }): CollectionSort => {
     if (!sortBy) return defaultSortBy;
-    if (isMemeLab && sortBy !== CollectionSort.TOKEN_ID) return defaultSortBy;
+    if (
+      collection &&
+      !COLLECTED_COLLECTIONS_META[collection].filters.sort.includes(
+        sortBy.toUpperCase() as CollectionSort
+      )
+    ) {
+      return defaultSortBy;
+    }
     return (
       Object.values(CollectionSort).find((c) => c === sortBy.toUpperCase()) ??
       defaultSortBy
@@ -154,19 +157,17 @@ export default function UserPageCollected({
     const sortBy = searchParams.get(SEARCH_PARAMS_FIELDS.sortBy);
     const sortDirection = searchParams.get(SEARCH_PARAMS_FIELDS.sortDirection);
 
-    const convertedAddress = convertAddress(address);
+    const convertedAddress = convertAddressToLowerCase(address);
     const convertedCollection = convertCollection(collection);
-    const isMemes = convertedCollection === CollectedCollectionType.MEMES;
-    const isMemeLab = convertedCollection === CollectedCollectionType.MEMELAB;
     return {
       handleOrWallet: convertedAddress ?? profile.profile?.handle ?? user,
       accountForConsolidations: !convertedAddress,
       collection: convertedCollection,
-      seized: convertSeized({ seized, isMemes }),
-      szn: convertSzn({ szn, isMemes }),
+      seized: convertSeized({ seized, collection: convertedCollection }),
+      szn: convertSzn({ szn, collection: convertedCollection }),
       page: page ? parseInt(page) : 1,
       pageSize: PAGE_SIZE,
-      sortBy: convertSortedBy({ sortBy, isMemeLab }),
+      sortBy: convertSortedBy({ sortBy, collection: convertedCollection }),
       sortDirection: convertSortDirection(sortDirection),
     };
   };
@@ -219,7 +220,12 @@ export default function UserPageCollected({
       },
     ];
 
-    if (collection === CollectedCollectionType.MEMELAB && filters.sortBy !== CollectionSort.TOKEN_ID) {
+    if (
+      collection &&
+      !COLLECTED_COLLECTIONS_META[collection].filters.sort.includes(
+        filters.sortBy
+      )
+    ) {
       items.push({
         name: "sortBy",
         value: CollectionSort.TOKEN_ID,
@@ -367,10 +373,10 @@ export default function UserPageCollected({
     setTotalPages(pagesCount);
   }, [data?.count, data?.page, isFetching]);
 
-  const getShowDataRow = (): boolean => {
-    if (!filters.collection) return true;
-    return SHOW_DATA_ROW_COLLECTIONS.includes(filters.collection);
-  };
+  const getShowDataRow = (): boolean =>
+    filters.collection
+      ? COLLECTED_COLLECTIONS_META[filters.collection].showCardDataRow
+      : true;
 
   const [showDataRow, setShowDataRow] = useState<boolean>(getShowDataRow());
 
