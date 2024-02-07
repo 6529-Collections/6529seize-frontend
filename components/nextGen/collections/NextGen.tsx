@@ -83,26 +83,32 @@ export default function NextGen(props: Readonly<Props>) {
       </div>
       <Container className="pt-5">
         <Row>
-          <Col className="font-larger">
-            <b>NextGen</b> is a dynamic platform tailored for the creation and
-            exploration of generative NFT art, positioning itself at the
-            intersection of art, technology, and blockchain. It empowers artists
-            and creators to use algorithmic methods to generate unique, digital
-            artworks that are tokenized as non-fungible tokens (NFTs). This
-            ensures each piece of art is one-of-a-kind, owned and traded
-            securely on the blockchain. NextGen not only revolutionizes how art
-            is created and collected but also offers a new avenue for artists to
-            express themselves digitally, providing them with a global stage to
-            showcase their creativity and for collectors to discover and invest
-            in digital art like never before.{" "}
-            <button
-              className="btn-link"
-              onClick={() => {
-                props.setView(NextGenView.ABOUT);
-                window.scrollTo(0, 120);
-              }}>
-              <span className="font-larger">Learn More</span>
-            </button>
+          <Col>
+            <Container className="pt-3 pb-3">
+              <Row>
+                <Col
+                  className="font-larger text-center"
+                  style={{
+                    backgroundColor: "white",
+                    color: "black",
+                    padding: "8vh 8vw",
+                  }}>
+                  NextGen is an on-chain generative art NFT contract. It is also
+                  a tool to support the ambitious aspirations of the 6529
+                  community in the areas of art experimentation and
+                  decentralized social organization.
+                  <br />
+                  <button
+                    className="btn-link pt-3"
+                    onClick={() => {
+                      props.setView(NextGenView.ABOUT);
+                      window.scrollTo(0, 120);
+                    }}>
+                    <span className="font-larger">Learn More</span>
+                  </button>
+                </Col>
+              </Row>
+            </Container>
           </Col>
         </Row>
       </Container>

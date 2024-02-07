@@ -95,7 +95,7 @@ export default function NextGenCollectionArtist(props: Readonly<Props>) {
                       <a
                         key={`link-collection-${c.id}`}
                         href={`/nextgen/collection/${c.id}`}>
-                        #{c.id} - {c.name}
+                        {c.name}
                       </a>
                     </>
                   ))}

@@ -226,7 +226,6 @@ export default function NextGenCollectionHeader(props: Readonly<Props>) {
         <Col className={`d-flex flex-column align-items-start pt-3 gap-3`}>
           <span className="d-flex flex-column align-items-start">
             <h1 className="mb-0 font-color">
-              #{props.collection.id} -{" "}
               <b>{props.collection.name.toUpperCase()}</b>
             </h1>
             {props.collection_link && (
