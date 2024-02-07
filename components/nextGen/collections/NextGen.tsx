@@ -93,9 +93,9 @@ export default function NextGen(props: Readonly<Props>) {
                     color: "black",
                     padding: "8vh 8vw",
                   }}>
-                  NextGen is an on-chain generative art NFT contract. It is also
-                  a tool to support the ambitious aspirations of the 6529
-                  community in the areas of art experimentation and
+                  <b>NextGen</b> is an on-chain generative art NFT contract. It
+                  is also a tool to support the ambitious aspirations of the
+                  6529 community in the areas of art experimentation and
                   decentralized social organization.
                   <br />
                   <button
