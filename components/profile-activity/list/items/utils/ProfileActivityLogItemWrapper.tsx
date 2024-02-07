@@ -31,7 +31,7 @@ export default function ProfileActivityLogItemWrapper({
   return (
     <tr className="tw-flex tw-items-center tw-justify-between">
       <td className="tw-py-2.5">
-        <span className="tw-space-x-1 tw-inline-flex tw-items-center">
+        <span className="tw-space-x-1.5 tw-inline-flex tw-items-center">
           {!isArchived && (
             <CommonProfileLink
               handleOrWallet={handleOrWallet}
