@@ -325,25 +325,6 @@ export function useCollectionCostsHook(
   );
 }
 
-export const getPhaseDateDisplay = (numberDate: number) => {
-  const date = new Date(numberDate * 1000);
-  if (
-    isNaN(date.getTime()) ||
-    numberDate >= NEVER_DATE * 1000 ||
-    numberDate === 0
-  ) {
-    return "UNAVAILABLE";
-  }
-  const formattedDate = date.toLocaleString("default", {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-  return `STARTING ${formattedDate.toUpperCase()}`;
-};
-
 export function getStatusFromDates(startTime: number, endTime: number) {
   if ((startTime === 0 && endTime === 0) || endTime - startTime === 0) {
     return Status.UNAVAILABLE;

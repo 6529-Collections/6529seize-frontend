@@ -77,9 +77,7 @@ export default function NextGenCollectionArtist(props: Readonly<Props>) {
                       profileHandle
                         ? `/${profileHandle}`
                         : `/${props.collection.artist_address}`
-                    }
-                    target="_blank"
-                    rel="noreferrer">
+                    }>
                     @{profileHandle}
                   </a>
                 </Col>

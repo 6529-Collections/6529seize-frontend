@@ -193,7 +193,7 @@ export default function NextGenToken(props: Readonly<Props>) {
                   <Col className="d-flex align-items-center justify-content-between">
                     <span className="d-flex flex-column">
                       <span className="d-flex gap-3">
-                        <h2 className="mb-0 font-color">{props.token.name}</h2>
+                        <h1 className="mb-0 font-color">{props.token.name}</h1>
                         {(props.token.burnt ||
                           isNullAddress(props.token.owner)) && (
                           <Tippy content={"Burnt"} theme={"light"} delay={100}>

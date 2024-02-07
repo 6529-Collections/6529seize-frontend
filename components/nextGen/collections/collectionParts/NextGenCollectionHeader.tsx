@@ -155,15 +155,12 @@ export function NextGenPhases(props: Readonly<PhaseProps>) {
 
   return (
     <span className="pt-2 pb-2 d-flex align-items-center gap-2 align-items-center">
-      {/* {alStatus !== Status.UNAVAILABLE && ( */}
       <span
         className={`d-flex align-items-center font-bolder font-smaller ${
           styles.nextgenTag
         } ${getAllowlistClassName()}`}>
         ALLOWLIST {alStatus}
       </span>
-      {/* )} */}
-      {/* {publicStatus !== Status.UNAVAILABLE && ( */}
       <span
         className={`d-flex align-items-center font-bolder font-smaller ${
           styles.nextgenTag
