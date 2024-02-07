@@ -14,6 +14,7 @@ import {
 import { formatNameForUrl } from "../../nextGen/nextgen_helpers";
 import UserPageMintsPhasesPhase from "./UserPageMintsPhasesPhase";
 import UserPageMintsMintingAddresses from "./UserPageMintsMintingAddresses";
+import Image from "next/image";
 
 export interface UserPageMintsPhaseSpotItem {
   readonly spots: number;
@@ -278,6 +279,14 @@ export default function UserPageMints({
                 &quot;The Memes&quot; with use-case &quot;#1 All&quot; or
                 &quot;#2 Minting / Allowlist&quot; before the mint start time.
               </p>
+            </div>
+            <div className="tw-mt-4">
+              <Image
+                width={1379}
+                height={594}
+                src="/timezones.png"
+                alt="NextGen Pebbles Minting Timezones"
+              />
             </div>
           </>
         ) : (
