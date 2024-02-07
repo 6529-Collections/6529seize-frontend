@@ -22,13 +22,6 @@ import { STATEMENT_GROUP, STATEMENT_TYPE } from "../../../helpers/Types";
 const DEFAULT_BANNER_1 = getRandomColor();
 const DEFAULT_BANNER_2 = getRandomColor();
 
-const inter = Inter({
-  weight: ["300", "400", "500", "600", "700"],
-  style: ["normal"],
-  subsets: ["latin"],
-  display: "swap",
-});
-
 export default function UserPageHeader({
   profile,
   mainAddress,
@@ -89,7 +82,7 @@ export default function UserPageHeader({
   }, [aboutStatement, canEdit, isFetched]);
 
   return (
-    <div className={`tailwind-scope ${inter.className}`}>
+    <div className="tailwind-scope">
       <section className="tw-pb-6 md:tw-pb-8">
         <UserPageHeaderBanner
           profile={profile}

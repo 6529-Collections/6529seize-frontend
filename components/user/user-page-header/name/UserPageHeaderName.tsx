@@ -48,7 +48,7 @@ export default function UserPageHeaderName({
       </div>
       {profile.profile?.classification && (
         <UserPageClassificationWrapper profile={profile} canEdit={canEdit}>
-          <div className="tw-block tw-text-iron-400 hover:tw-text-iron-300 tw-font-normal tw-text-[13px] tw-leading-3 tw-transition tw-duration-300 tw-ease-out">
+          <div className="tw-block tw-text-iron-400 hover:tw-text-iron-300 tw-font-normal tw-text-sm tw-leading-3 tw-transition tw-duration-300 tw-ease-out">
             {CLASSIFICATIONS[profile.profile.classification].title}
           </div>
         </UserPageClassificationWrapper>
