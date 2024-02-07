@@ -2,6 +2,7 @@ import { CollectedCollectionType } from "../../../../entities/IProfile";
 import CommonSelect, {
   CommonSelectItem,
 } from "../../../utils/select/CommonSelect";
+import { COLLECTED_COLLECTIONS_META } from "./user-page-collected-filters.helpers";
 
 type SelectedType = CollectedCollectionType | null;
 
@@ -12,12 +13,6 @@ export default function UserPageCollectedFiltersCollection({
   readonly selected: SelectedType;
   readonly setSelected: (selected: SelectedType) => void;
 }) {
-  const labels: { [key in CollectedCollectionType]: string } = {
-    [CollectedCollectionType.MEMES]: "Memes",
-    [CollectedCollectionType.GRADIENTS]: "Gradient",
-    [CollectedCollectionType.MEMELAB]: "Meme Lab",
-  };
-
   const items: CommonSelectItem<SelectedType>[] = [
     {
       label: "All",
@@ -26,7 +21,7 @@ export default function UserPageCollectedFiltersCollection({
       key: "all",
     },
     ...Object.values(CollectedCollectionType).map((collection) => ({
-      label: labels[collection],
+      label: COLLECTED_COLLECTIONS_META[collection].label,
       value: collection,
       key: collection,
     })),

@@ -32,7 +32,7 @@ enum Tabs {
   REFERENCES = "References",
 }
 
-export default function RememePage(props: Props) {
+export default function RememePage(props: Readonly<Props>) {
   const [rememe, setRememe] = useState<Rememe>();
 
   const [activeTab, setActiveTab] = useState<Tabs>(Tabs.LIVE);
@@ -353,7 +353,7 @@ export default function RememePage(props: Props) {
           </Row>
           <Row className="pt-4">
             <Col xs={12}>
-              <h1>DESCRIPTION</h1>
+              <h1>Description</h1>
             </Col>
             <Col
               xs={12}
@@ -363,7 +363,7 @@ export default function RememePage(props: Props) {
           </Row>
           <Row className="pt-4">
             <Col xs={12}>
-              <h1>METADATA</h1>
+              <h1>Metadata</h1>
             </Col>
             <Col xs={12}>
               <Table className={styles.metadataTable}>
@@ -403,7 +403,7 @@ export default function RememePage(props: Props) {
           {rememe.metadata.attributes && (
             <Row className="pt-4">
               <Col xs={12}>
-                <h1>ATTRIBUTES</h1>
+                <h1>Attributes</h1>
               </Col>
               {getAttributes().map((a: any) => (
                 <Col
@@ -435,7 +435,7 @@ export default function RememePage(props: Props) {
     return (
       <Row className="pt-4">
         <Col xs={12}>
-          <h1>THE MEMES REFERENCES</h1>
+          <h1>The Memes References</h1>
         </Col>
         {memes.map((nft) => (
           <Col

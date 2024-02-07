@@ -1,7 +1,7 @@
 @import "../../styles/variables.scss";
 
 .address {
-  font-weight: bolder;
+  font-weight: bold;
   color: white;
   margin-bottom: 0 !important;
 }
@@ -12,7 +12,7 @@
 }
 
 .consolidationDisplay {
-  font-weight: bolder;
+  font-weight: bold;
   color: white;
   margin-bottom: 0 !important;
   float: none !important;
@@ -74,7 +74,7 @@
 .addressTag {
   font-family: $main-font;
   font-size: $font-size;
-  font-weight: bolder;
+  font-weight: bold;
   color: $font-color !important;
   margin-right: 10px;
   padding: 2px 5px;
@@ -86,7 +86,7 @@
 .tag {
   font-family: $main-font;
   font-size: $font-size;
-  font-weight: bolder;
+  font-weight: bold;
   color: $font-color !important;
   padding: 2px 5px;
   white-space: nowrap;

@@ -5,7 +5,7 @@ interface Props {
   view: VIEW;
 }
 
-export default function CommunityDownloadsTDH(props: Props) {
+export default function CommunityDownloadsTDH(props: Readonly<Props>) {
   const url = `${process.env.API_ENDPOINT}/api/${
     props.view === VIEW.WALLET ? "uploads" : "consolidated_uploads"
   }`;

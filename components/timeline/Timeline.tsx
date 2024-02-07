@@ -10,7 +10,7 @@ interface Props {
   steps: NFTHistory[];
 }
 
-export default function Timeline(props: Props) {
+export default function Timeline(props: Readonly<Props>) {
   const getDateDisplay = (date: Date) => {
     date = new Date(date);
     return `${date.getUTCFullYear()}/${(date.getUTCMonth() + 1)
