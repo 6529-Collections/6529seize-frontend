@@ -12,7 +12,7 @@ env:
   API_ENDPOINT: "https://api.seize.io"
   ALLOWLIST_API_ENDPOINT: "https://allowlist-api.seize.io"
   BASE_ENDPOINT: "https://seize.io"
-  NEXTGEN_CHAIN_ID: 5
+  NEXTGEN_CHAIN_ID: 1
 
 jobs:
   build-upload-deploy:
