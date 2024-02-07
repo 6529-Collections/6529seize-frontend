@@ -1,8 +1,13 @@
-import { CollectedCollectionType } from "../../../../entities/IProfile";
+import { CollectedCollectionType, CollectionSort } from "../../../../entities/IProfile";
 
 interface CollectedCollectionMeta {
   readonly label: string;
   readonly showCardDataRow: boolean;
+  readonly filters: {
+    readonly seized: boolean;
+    readonly szn: boolean;
+    readonly sort: CollectionSort[];
+  };
   readonly cardPath: string;
 }
 
@@ -13,22 +18,42 @@ export const COLLECTED_COLLECTIONS_META: Record<
   [CollectedCollectionType.MEMES]: {
     label: "The Memes",
     showCardDataRow: true,
-    cardPath: "/the-memes/",
+    filters: {
+      seized: true,
+      szn: true,
+      sort: [CollectionSort.TOKEN_ID, CollectionSort.TDH, CollectionSort.RANK],
+    },
+    cardPath: "/the-memes",
   },
   [CollectedCollectionType.GRADIENTS]: {
     label: "Gradients",
     showCardDataRow: true,
-    cardPath: "/6529-gradient/",
+    filters: {
+      seized: false,
+      szn: false,
+      sort: [CollectionSort.TOKEN_ID, CollectionSort.TDH, CollectionSort.RANK],
+    },
+    cardPath: "/6529-gradient",
   },
   [CollectedCollectionType.NEXTGEN]: {
     label: "NextGen",
     showCardDataRow: true,
-    cardPath: "/nextgen/token/",
+    filters: {
+      seized: false,
+      szn: false,
+      sort: [CollectionSort.TOKEN_ID, CollectionSort.TDH, CollectionSort.RANK],
+    },
+    cardPath: "/nextgen/token",
   },
   [CollectedCollectionType.MEMELAB]: {
     label: "Meme Lab",
     showCardDataRow: false,
-    cardPath: "/meme-lab/",
+    filters: {
+      seized: false,
+      szn: false,
+      sort: [CollectionSort.TOKEN_ID],
+    },
+    cardPath: "/meme-lab",
   },
 };
 

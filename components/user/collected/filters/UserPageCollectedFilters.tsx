@@ -12,6 +12,7 @@ import UserPageCollectedFiltersSortBy from "./UserPageCollectedFiltersSortBy";
 import UserPageCollectedFiltersSeized from "./UserPageCollectedFiltersSeized";
 import UserPageCollectedFiltersSzn from "./UserPageCollectedFiltersSzn";
 import UserAddressesSelectDropdown from "../../utils/addresses-select/UserAddressesSelectDropdown";
+import { COLLECTED_COLLECTIONS_META } from "./user-page-collected-filters.helpers";
 
 export default function UserPageCollectedFilters({
   profile,
@@ -32,26 +33,6 @@ export default function UserPageCollectedFilters({
   readonly setSzn: (szn: MEMES_SEASON | null) => void;
   readonly scrollHorizontally: (direction: "left" | "right") => void;
 }) {
-  const getShowSeizedAndSzn = (
-    targetCollection: CollectedCollectionType | null
-  ): boolean => targetCollection === CollectedCollectionType.MEMES;
-
-  const getShowOnlyTokenIdSort = (
-    targetCollection: CollectedCollectionType | null
-  ): boolean => targetCollection === CollectedCollectionType.MEMELAB;
-
-  const [showSeizedAndSzn, setShowSeizedAndSzn] = useState<boolean>(
-    getShowSeizedAndSzn(filters.collection)
-  );
-
-  const [showOnlyTokenIdSort, setShowOnlyTokenIdSort] = useState<boolean>(
-    getShowOnlyTokenIdSort(filters.collection)
-  );
-
-  useEffect(() => {
-    setShowSeizedAndSzn(getShowSeizedAndSzn(filters.collection));
-    setShowOnlyTokenIdSort(getShowOnlyTokenIdSort(filters.collection));
-  }, [filters.collection]);
 
   const mostLeftFilterRef = useRef<HTMLDivElement>(null);
   const mostRightFilterRef = useRef<HTMLDivElement>(null);
@@ -123,6 +104,11 @@ export default function UserPageCollectedFilters({
     }
   }, []);
 
+  const getShowSeized = (collection: CollectedCollectionType | null): boolean =>
+    collection ? COLLECTED_COLLECTIONS_META[collection].filters.seized : false;
+
+  const getShowSzn = (collection: CollectedCollectionType | null): boolean =>
+    collection ? COLLECTED_COLLECTIONS_META[collection].filters.szn : false;
 
   return (
     <div>
@@ -183,22 +169,24 @@ export default function UserPageCollectedFilters({
           <UserPageCollectedFiltersSortBy
             selected={filters.sortBy}
             direction={filters.sortDirection}
-            showOnlyTokenIdSort={showOnlyTokenIdSort}
+            collection={filters.collection}
             setSelected={setSortBy}
           />
 
-          {showSeizedAndSzn && (
-            <>
-              <UserPageCollectedFiltersSeized
-                selected={filters.seized}
-                setSelected={setSeized}
-              />
-              <UserPageCollectedFiltersSzn
-                selected={filters.szn}
-                containerRef={containerRef}
-                setSelected={setSzn}
-              />
-            </>
+          {getShowSeized(filters.collection) && (
+            <UserPageCollectedFiltersSeized
+              selected={filters.seized}
+              containerRef={containerRef}
+              setSelected={setSeized}
+            />
+          )}
+
+          {getShowSzn(filters.collection) && (
+            <UserPageCollectedFiltersSzn
+              selected={filters.szn}
+              containerRef={containerRef}
+              setSelected={setSzn}
+            />
           )}
         </div>
         <div ref={mostRightFilterRef}>

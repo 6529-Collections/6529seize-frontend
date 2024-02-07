@@ -1,5 +1,7 @@
 /** @type {import('next').NextConfig} */
 
+const webpack = require("webpack");
+
 let VERSION = process.env.VERSION;
 let LOAD_S3;
 
@@ -79,6 +81,16 @@ const nextConfig = {
         headers: securityHeaders,
       },
     ];
+  },
+  webpack: (config, { buildId, dev, isServer, defaultLoaders, webpack }) => {
+    // Overwrite the Webpack config to enable verbose logging
+        config.plugins.push(
+          new webpack.ProgressPlugin((percentage, message, ...args) => {
+            // Custom log message
+            console.log(`${(percentage * 100).toFixed(2)}%`, message, ...args);
+          })
+        );
+    return config;
   },
 };
 

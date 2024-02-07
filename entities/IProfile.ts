@@ -365,9 +365,9 @@ export type ApiCreateOrUpdateProfileCicStatement = Omit<
 
 export enum CollectedCollectionType {
   MEMES = "MEMES",
+  NEXTGEN = "NEXTGEN",
   GRADIENTS = "GRADIENTS",
   MEMELAB = "MEMELAB",
-  NEXTGEN = "NEXTGEN",
 }
 
 export enum CollectionSeized {

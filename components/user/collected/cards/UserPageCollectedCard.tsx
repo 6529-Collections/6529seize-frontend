@@ -11,7 +11,6 @@ export default function UserPageCollectedCard({
   readonly showDataRow: boolean;
 }) {
   const collectionMeta = COLLECTED_COLLECTIONS_META[card.collection];
-
   const path = `${collectionMeta.cardPath}/${card.token_id}`;
 
   return (

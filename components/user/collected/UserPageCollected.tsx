@@ -17,7 +17,10 @@ import { useEffect, useRef, useState } from "react";
 import UserPageCollectedCards from "./cards/UserPageCollectedCards";
 import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
 import UserPageCollectedFirstLoading from "./UserPageCollectedFirstLoading";
-import { COLLECTED_COLLECTIONS_META, convertAddressToLowerCase } from "./filters/user-page-collected-filters.helpers";
+import {
+  COLLECTED_COLLECTIONS_META,
+  convertAddressToLowerCase,
+} from "./filters/user-page-collected-filters.helpers";
 
 export interface ProfileCollectedFilters {
   readonly handleOrWallet: string;
@@ -30,8 +33,6 @@ export interface ProfileCollectedFilters {
   readonly sortBy: CollectionSort;
   readonly sortDirection: SortDirection;
 }
-
-
 
 interface QueryUpdateInput {
   name: keyof typeof SEARCH_PARAMS_FIELDS;
@@ -57,8 +58,6 @@ const SNZ_TO_SEARCH_PARAMS: Record<MEMES_SEASON, string> = {
   [MEMES_SEASON.SZN6]: "6",
 };
 
-
-
 export default function UserPageCollected({
   profile,
 }: {
@@ -76,12 +75,14 @@ export default function UserPageCollected({
 
   const convertSeized = ({
     seized,
-    isMemes,
+    collection,
   }: {
     readonly seized: string | null;
-    isMemes: boolean;
+    readonly collection: CollectedCollectionType | null;
   }): CollectionSeized | null => {
-    if (!isMemes) return defaultSeized;
+    if (!collection) return defaultSeized;
+    if (!COLLECTED_COLLECTIONS_META[collection].filters.seized)
+      return defaultSeized;
     if (!seized) return null;
     return (
       Object.values(CollectionSeized).find((c) => c === seized.toUpperCase()) ??
@@ -91,12 +92,13 @@ export default function UserPageCollected({
 
   const convertSzn = ({
     szn,
-    isMemes,
+    collection,
   }: {
     readonly szn: string | null;
-    readonly isMemes: boolean;
+    readonly collection: CollectedCollectionType | null;
   }): MEMES_SEASON | null => {
-    if (!isMemes) return null;
+    if (!collection) return null;
+    if (!COLLECTED_COLLECTIONS_META[collection].filters.szn) return null;
     if (!szn) return null;
     const entry = Object.entries(SNZ_TO_SEARCH_PARAMS).find(
       ([k, v]) => v === szn
@@ -117,13 +119,20 @@ export default function UserPageCollected({
 
   const convertSortedBy = ({
     sortBy,
-    isMemeLab,
+    collection,
   }: {
-    sortBy: string | null;
-    isMemeLab: boolean;
+    readonly sortBy: string | null;
+    readonly collection: CollectedCollectionType | null;
   }): CollectionSort => {
     if (!sortBy) return defaultSortBy;
-    if (isMemeLab && sortBy !== CollectionSort.TOKEN_ID) return defaultSortBy;
+    if (
+      collection &&
+      !COLLECTED_COLLECTIONS_META[collection].filters.sort.includes(
+        sortBy.toUpperCase() as CollectionSort
+      )
+    ) {
+      return defaultSortBy;
+    }
     return (
       Object.values(CollectionSort).find((c) => c === sortBy.toUpperCase()) ??
       defaultSortBy
@@ -150,17 +159,15 @@ export default function UserPageCollected({
 
     const convertedAddress = convertAddressToLowerCase(address);
     const convertedCollection = convertCollection(collection);
-    const isMemes = convertedCollection === CollectedCollectionType.MEMES;
-    const isMemeLab = convertedCollection === CollectedCollectionType.MEMELAB;
     return {
       handleOrWallet: convertedAddress ?? profile.profile?.handle ?? user,
       accountForConsolidations: !convertedAddress,
       collection: convertedCollection,
-      seized: convertSeized({ seized, isMemes }),
-      szn: convertSzn({ szn, isMemes }),
+      seized: convertSeized({ seized, collection: convertedCollection }),
+      szn: convertSzn({ szn, collection: convertedCollection }),
       page: page ? parseInt(page) : 1,
       pageSize: PAGE_SIZE,
-      sortBy: convertSortedBy({ sortBy, isMemeLab }),
+      sortBy: convertSortedBy({ sortBy, collection: convertedCollection }),
       sortDirection: convertSortDirection(sortDirection),
     };
   };
@@ -214,8 +221,10 @@ export default function UserPageCollected({
     ];
 
     if (
-      collection === CollectedCollectionType.MEMELAB &&
-      filters.sortBy !== CollectionSort.TOKEN_ID
+      collection &&
+      !COLLECTED_COLLECTIONS_META[collection].filters.sort.includes(
+        filters.sortBy
+      )
     ) {
       items.push({
         name: "sortBy",
