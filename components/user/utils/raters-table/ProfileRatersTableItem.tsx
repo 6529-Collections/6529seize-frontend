@@ -67,7 +67,7 @@ export default function ProfileRatersTableItem({
 
   return (
     <tr>
-      <td className="tw-px-4 sm:tw-px-6 tw-py-2.5">
+      <td className="tw-px-4 sm:tw-px-6 lg:tw-pr-4 tw-py-2.5">
         <div className="tw-inline-flex tw-items-center tw-space-x-2.5">
           <UserCICAndLevel level={rating.level} cicType={cicType} />
           <div className="tw-inline-flex tw-items-center tw-space-x-1">
@@ -85,15 +85,15 @@ export default function ProfileRatersTableItem({
           </div>
         </div>
       </td>
-      <td className="tw-px-4 sm:tw-px-6 tw-py-2.5 tw-text-right">
+      <td className="tw-px-4 sm:tw-px-6 lg:tw-pl-4 tw-py-2.5 tw-text-right">
         <span
           className={`tw-whitespace-nowrap tw-text-sm tw-font-medium ${ratingColor}`}
         >
           {ratingStr}
         </span>
       </td>
-      <td className="tw-px-4 sm:tw-px-6 tw-py-2.5 tw-text-right">
-        <span className="tw-whitespace-nowrap tw-text-sm tw-text-iron-500">
+      <td className="tw-px-4 sm:tw-px-6 lg:tw-pl-4 tw-py-2.5 tw-text-right">
+        <span className="tw-whitespace-nowrap tw-text-sm tw-font-light tw-text-iron-500">
           {timeAgo}
         </span>
       </td>

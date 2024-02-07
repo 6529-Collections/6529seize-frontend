@@ -78,7 +78,7 @@ export default function UserPageStatsActivityWalletTableRowSecondAddress({
   return (
     <span className="tw-inline-flex tw-space-x-1">
       <span className="tw-text-iron-400">{TYPE_TO_ACTION[type]}</span>
-      <Link className="tw-no-underline hover:tw-underline" href={path}>
+      <Link href={path} className="tw-text-iron-100 hover:tw-text-iron-400 tw-transition tw-duration-300 tw-ease-out">
         {display}
       </Link>
     </span>
