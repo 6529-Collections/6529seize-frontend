@@ -366,7 +366,7 @@ export default function NextGenMint(props: Readonly<Props>) {
         <Col
           sm={12}
           md={6}
-          className="d-flex align-items-start justify-content-start gap-3">
+          className="no-padding d-flex align-items-start justify-content-start gap-3">
           <Image
             loading="eager"
             width="0"

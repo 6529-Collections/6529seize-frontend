@@ -12,6 +12,7 @@ import { useRouter } from "next/router";
 import NextGenNavigationHeader, {
   NextGenView,
 } from "../../../components/nextGen/collections/NextGenNavigationHeader";
+import Image from "next/image";
 
 const Header = dynamic(() => import("../../../components/header/Header"), {
   ssr: false,
@@ -41,6 +42,7 @@ const NextgenAboutComponent = dynamic(
 export default function NextGen(props: any) {
   const router = useRouter();
   const collection: NextGenCollection = props.pageProps.collection;
+
   const [view, setView] = useState<NextGenView | undefined>(
     props.pageProps.view
   );
@@ -95,34 +97,48 @@ export default function NextGen(props: any) {
       <main className={styles.main}>
         <Header />
         <Breadcrumb breadcrumbs={breadcrumbs} />
-        <NextGenNavigationHeader view={view} setView={setView} />
-        {!view && (
-          <NextGenComponent collection={collection} setView={setView} />
-        )}
-        {view && (
-          <Container fluid className={`${styles.main}`}>
-            <Row className="d-flex align-items-center">
-              <Col>
-                {view && (
-                  <Container className="pb-4">
-                    <Row>
-                      <Col>
-                        {view === NextGenView.COLLECTIONS && (
-                          <NextgenCollectionsComponent />
-                        )}
-                        {view === NextGenView.ARTISTS && (
-                          <NextgenArtistsComponent />
-                        )}
-                        {view === NextGenView.ABOUT && (
-                          <NextgenAboutComponent />
-                        )}
-                      </Col>
-                    </Row>
-                  </Container>
-                )}
-              </Col>
-            </Row>
-          </Container>
+        {collection?.mint_count ? (
+          <>
+            <NextGenNavigationHeader view={view} setView={setView} />
+            {!view && (
+              <NextGenComponent collection={collection} setView={setView} />
+            )}
+            {view && (
+              <Container fluid className={`${styles.main}`}>
+                <Row className="d-flex align-items-center">
+                  <Col>
+                    {view && (
+                      <Container className="pb-4">
+                        <Row>
+                          <Col>
+                            {view === NextGenView.COLLECTIONS && (
+                              <NextgenCollectionsComponent />
+                            )}
+                            {view === NextGenView.ARTISTS && (
+                              <NextgenArtistsComponent />
+                            )}
+                            {view === NextGenView.ABOUT && (
+                              <NextgenAboutComponent />
+                            )}
+                          </Col>
+                        </Row>
+                      </Container>
+                    )}
+                  </Col>
+                </Row>
+              </Container>
+            )}
+          </>
+        ) : (
+          <div className={`${styles.nextGenQuestion}`}>
+            <Image
+              width="0"
+              height="0"
+              style={{ height: "auto", width: "25vw" }}
+              src="/question.png"
+              alt="questionmark"
+            />
+          </div>
         )}
       </main>
     </>
