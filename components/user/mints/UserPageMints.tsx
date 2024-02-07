@@ -264,7 +264,7 @@ export default function UserPageMints({
             ))}
 
             <UserPageMintsMintingAddresses wallets={mintingWallets} />
-            <div className="tw-mt-6">
+            <div className="tw-mt-6 tw-max-w-4xl ">
               <p className="tw-mb-0 tw-text-iron-400 tw-text-sm tw-font-normal">
                 NextGen mints check{" "}
                 <a
@@ -296,7 +296,7 @@ export default function UserPageMints({
                   width={1379}
                   height={594}
                   src="/timezones.png"
-                  className="tw-w-full tw-h-full tw-object-contain tw-rounded-md"
+                  className="tw-w-2/3 tw-h-2/3 tw-object-contain tw-rounded-md"
                   alt="NextGen Pebbles Minting Timezones"
                 />
               </div>
