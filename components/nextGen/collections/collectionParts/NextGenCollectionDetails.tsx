@@ -1,5 +1,5 @@
 import styles from "../NextGen.module.scss";
-import { Container, Row, Col } from "react-bootstrap";
+import { Container, Row, Col, Table } from "react-bootstrap";
 import { addProtocol, formatAddress } from "../../../../helpers/Helpers";
 import { NextGenCollection } from "../../../../entities/INextgen";
 import NextGenCollectionProvenance from "./NextGenCollectionProvenance";
@@ -106,43 +106,213 @@ function NextGenCollectionDetailsOverview(props: Readonly<CollectionProps>) {
 
 function NextGenCollectionDetailsAbout(props: Readonly<CollectionProps>) {
   return (
-    <Container className="no-padding">
-      <Row>
+    <Container className="no-padding pt-4">
+      <Row className="pb-3">
+        <Col>
+          <h4>About Pebbles</h4>
+        </Col>
+      </Row>
+      <Row className="pb-3">
         <Col>
           <p>
-            Lorem ipsum dolor sit amet, ius an idque falli periculis, vero
-            eligendi recteque et nam, sea detraxit phaedrum periculis ne. No
-            prima soluta sea. Has cu praesent dignissim vulputate, mel cu
-            placerat accusata. Solum latine adversarium id mei, ea mel nonumy
-            commune, consul fabulas an vel. Pri in adipisci praesent urbanitas,
-            legimus imperdiet vituperatoribus has cu, ex possim definiebas per.
+            Pebbles aims to explore the order that can emerge from a small set
+            of organically inspired elements of points, lines, textures, and
+            light.
+          </p>
+        </Col>
+      </Row>
+      <Row className="pb-3">
+        <Col>
+          <h4>History of Technical Innovation</h4>
+        </Col>
+      </Row>
+      <Row className="pb-3">
+        <Col>
+          <p>
+            ZeBlocks prides itself on technical innovation in its generative
+            mints and on-chain work. Most ZeBlocks projects, including Pebbles,
+            are 100% on-chain, and do not use any external libraries.
+          </p>
+          <p>Pebbles follows in the tradition of prior ZeBlocks projects:</p>
+          <p>
+            <ul>
+              <li>Unigrids: SVG-based generative art & music project</li>
+              <li>
+                Beatboxes: First fully immersive VR audiovisual generative art
+              </li>
+              <li>Sensthesia: Audio-sensitive generative art NFTs</li>
+            </ul>
+          </p>
+        </Col>
+      </Row>
+      <Row className="pb-3">
+        <Col>
+          <h4>Pebbles: Matched To The Human Eye</h4>
+        </Col>
+      </Row>
+      <Row className="pb-3">
+        <Col>
+          <p>
+            Pebble is one of the highest-resolution generative collections ever
+            released
           </p>
           <p>
-            Quando suavitate sea ei, duo ut propriae singulis quaerendum. Sumo
-            partem duo ut, agam aliquando ne eos. Pro delenit adipisci at, no
-            mei eligendi dissentias consectetuer. Ut solum fastidii vel, ei quo
-            invidunt evertitur disputando.
+            <ul>
+              <li>The Challenge:</li>
+              <ul>
+                <li>
+                  With the exception of SVG-based collections (that typically
+                  have simpler structures), most generative collections do not,
+                  in practice, have unlimited scalability resolution-wise
+                </li>
+                <li>
+                  An output can be scaled up and rendered to a higher resolution
+                  but if the underlying data point density does not exist in the
+                  algorithm, render quality will typically start to suffer above
+                  4K
+                </li>
+              </ul>
+            </ul>
           </p>
           <p>
-            Ne omittam appareat nec, cum modo iisque intellegebat cu. Has no
-            altera dolorem appetere, sea omnes corpora fastidii cu. Munere
-            epicuri id duo. Justo voluptua moderatius usu ei, partiendo
-            disputationi ne eos. Bonorum pertinacia eloquentiam at ius, id
-            molestie appetere dissentias sea. Omnes inimicus ad sit.
+            <ul>
+              <li>The Goal</li>
+              <ul>
+                <li>
+                  Pebbles aims to provide sufficient resolution to match or
+                  exceed the acuity of the human eye even in a world of
+                  wall-sized TVs or AR devices
+                </li>
+                <li>
+                  Under typical large-screen TV viewing distances, 4K or 8K is
+                  more than sufficient to exceed the acuity of the human eye
+                </li>
+                <li>
+                  If wall-size TVs become common in the future, the limit of
+                  human vision to discern differences in resolutions, under
+                  normal conditions, will move up to somewhere between 8K and
+                  16K
+                </li>
+                <li>
+                  Pebbles is designed to have no loss of resolution at all up to
+                  12.5K and continue to provide extraordinary detail at 16K and
+                  beyond
+                </li>
+                <li>
+                  In practice, and under the large majority of future display
+                  conditions, every Pebble has more resolution than the human
+                  eye can discern
+                </li>
+              </ul>
+            </ul>
           </p>
           <p>
-            Quo ipsum phaedrum definitiones ei. Mea eu ornatus minimum, ut
-            eruditi conceptam usu, id albucius urbanitas adversarium eum.
-            Eripuit eloquentiam mel ex, id has unum facilisi voluptaria. Pro
-            illum complectitur ut, id cetero constituto accommodare cum, sed ea
-            deleniti voluptatibus. No per modus assum omnes, nostro offendit
-            ocurreret mel ad.
+            <ul>
+              <li>The Approach</li>
+              <ul>
+                <li>The Pebble algorithm address this issue in two ways:</li>
+                <ul>
+                  <li>Very dense number of data points</li>
+                  <li>
+                    Matches the data points to the exact pixels available at
+                    each render, regardless of resolution
+                  </li>
+                </ul>
+                <li>
+                  This makes it computationally expensive to render. Pebbles
+                  does not use p5.js or other processing libraries to improve
+                  rendering performance, particularly at large sizes.
+                </li>
+              </ul>
+            </ul>
+          </p>
+        </Col>
+      </Row>
+      <Row className="pb-3">
+        <Col>
+          <h4>NextGen x Pebbles</h4>
+        </Col>
+      </Row>
+      <Row className="pb-3">
+        <Col>
+          <p>
+            NextGen will take the following approach to support Pebbles’s
+            extraordinary resolution:
           </p>
           <p>
-            Everti viderer legendos ne cum, per epicuri suscipit percipit et,
-            mel verear nostrud convenire cu. Mazim quando eum at. Id vel posse
-            fugit cetero, ne agam detracto eum. Scriptorem necessitatibus no
-            vis.
+            <ul>
+              <li>
+                On mint day, NextGen will initially render Pebble mints in 1K
+                (it will still take several minutes per mint given the
+                complexity). This will allow a first look at the outputs.
+              </li>
+              <li>
+                Post mint, the base image will be re-rendered in 2K for online
+                viewing.
+              </li>
+              <li>
+                NextGen will also provide 4K, 8K and 16K renders for download
+                and printing. We can’t wait for people to dig into these super
+                high quality renders.
+              </li>
+              <li>
+                Though NextGen can serve collection renders 100% on-chain, the
+                switch to on-chain rendering for the Pebbles Collection will be
+                delayed until GPU improvements allow for reasonable real-time
+                rendering times. This does not impact other NextGen collections
+                which can go fully on-chain independently.
+              </li>
+            </ul>
+          </p>
+        </Col>
+      </Row>
+      <Row className="pb-3">
+        <Col>
+          <h4>Key Collection Parameters</h4>
+        </Col>
+      </Row>
+      <Row className="pb-3">
+        <Col>
+          <p>
+            <Table>
+              <tbody>
+                <tr>
+                  <td>Collection Size:</td>
+                  <td>1,000 (or fewer, if fewer are minted in 24 hours)</td>
+                </tr>
+                <tr>
+                  <td>Orientation:</td>
+                  <td>Vertical</td>
+                </tr>
+                <tr>
+                  <td>Aspect Ratio:</td>
+                  <td>1:1.294</td>
+                </tr>
+                <tr>
+                  <td>Script:</td>
+                  <td>Javascript</td>
+                </tr>
+                <tr>
+                  <td>Script Size:</td>
+                  <td>17Kb</td>
+                </tr>
+                <tr>
+                  <td>External libraries used:</td>
+                  <td>None</td>
+                </tr>
+                <tr>
+                  <td>License:</td>
+                  <td>Creative Commons 0 (CC0)</td>
+                </tr>
+                <tr>
+                  <td>Prints:</td>
+                  <td>
+                    An official ZeBlocks approved printing process will be
+                    available in a few weeks
+                  </td>
+                </tr>
+              </tbody>
+            </Table>
           </p>
         </Col>
       </Row>

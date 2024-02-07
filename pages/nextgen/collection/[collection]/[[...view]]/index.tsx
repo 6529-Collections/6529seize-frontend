@@ -92,6 +92,8 @@ export async function getServerSideProps(req: any, res: any, resolvedUrl: any) {
       collectionView = ContentView.PROVENANCE;
     } else if (view == ContentView.OVERVIEW.toLowerCase()) {
       collectionView = ContentView.OVERVIEW;
+    } else if (view == ContentView.ABOUT.toLowerCase()) {
+      collectionView = ContentView.ABOUT;
     }
   }
 
