@@ -7,7 +7,7 @@ import { NextGenCollection } from "../../../../entities/INextgen";
 import { isEmptyObject } from "../../../../helpers/Helpers";
 import { getCommonHeaders } from "../../../../helpers/server.helpers";
 import { commonApiFetch } from "../../../../services/api/common-api";
-import { useShallowRedirect } from ".";
+import { useShallowRedirect } from "./[[...view]]";
 
 const Header = dynamic(() => import("../../../../components/header/Header"), {
   ssr: false,
@@ -27,7 +27,7 @@ const NextGenCollectionMintComponent = dynamic(
 export default function NextGenCollectionMintPage(props: any) {
   const collection: NextGenCollection = props.pageProps.collection;
   useShallowRedirect(collection.name, "/mint");
-  const pagenameFull = `Mint | #${collection.id} - ${collection.name}`;
+  const pagenameFull = `Mint | ${collection.name}`;
 
   return (
     <>

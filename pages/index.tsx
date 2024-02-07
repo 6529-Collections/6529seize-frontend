@@ -148,7 +148,7 @@ export default function Home({
             <Container className={`pt-4 ${styles.mainContainer}`}>
               <Row>
                 <Col>
-                  <h1>LATEST DROP</h1>
+                  <h1>Latest Drop</h1>
                 </Col>
               </Row>
               <Row>
@@ -157,14 +157,14 @@ export default function Home({
                   xs={{ span: 12 }}
                   sm={{ span: 12 }}
                   md={{ span: 6 }}
-                  lg={{ span: 6 }}
-                >
+                  lg={{ span: 6 }}>
                   <Container className="no-padding">
                     <Row>
                       {nft.animation ? (
                         <span
-                          className={connectedWallets && styles.nftImagePadding}
-                        >
+                          className={
+                            connectedWallets && styles.nftImagePadding
+                          }>
                           <NFTImage
                             nft={nft}
                             animation={true}
@@ -179,8 +179,9 @@ export default function Home({
                       ) : (
                         <a
                           href={`/the-memes/${nft.id}`}
-                          className={connectedWallets && styles.nftImagePadding}
-                        >
+                          className={
+                            connectedWallets && styles.nftImagePadding
+                          }>
                           <NFTImage
                             nft={nft}
                             animation={true}
@@ -202,8 +203,7 @@ export default function Home({
                     xs={{ span: 12 }}
                     sm={{ span: 12 }}
                     md={{ span: 6 }}
-                    lg={{ span: 6 }}
-                  >
+                    lg={{ span: 6 }}>
                     <Container>
                       <Row>
                         <Col>
@@ -277,8 +277,7 @@ export default function Home({
                                 : `https://github.com/6529-Collections/thememecards/tree/main/card${nft.id}`
                             }
                             target={nft.has_distribution ? "_self" : "_blank"}
-                            rel="noreferrer"
-                          >
+                            rel="noreferrer">
                             Distribution Plan
                           </a>
                         </Col>
@@ -344,8 +343,7 @@ export default function Home({
                           <a
                             href={`https://opensea.io/assets/ethereum/${MEMES_CONTRACT}/${nft.id}`}
                             target="_blank"
-                            rel="noreferrer"
-                          >
+                            rel="noreferrer">
                             <Image
                               className={styles.marketplace}
                               src="/opensea.png"
@@ -369,8 +367,7 @@ export default function Home({
                           <a
                             href={`https://x2y2.io/eth/${MEMES_CONTRACT}/${nft.id}`}
                             target="_blank"
-                            rel="noreferrer"
-                          >
+                            rel="noreferrer">
                             <Image
                               className={styles.marketplace}
                               src="/x2y2.png"
@@ -387,13 +384,11 @@ export default function Home({
               </Row>
             </Container>
             <div
-              className={`tailwind-scope tw-relative tw-px-2 min-[1100px]:tw-max-w-[960px] min-[1200px]:tw-max-w-[1150px] min-[1300px]:tw-max-w-[1250px] min-[1400px]:tw-max-w-[1350px] min-[1500px]:tw-max-w-[1450px] min-[1600px]:tw-max-w-[1550px] min-[1800px]:tw-max-w-[1750px] min-[2000px]:tw-max-w-[1950px] tw-mx-auto ${inter.className}`}
-            >
+              className={`tailwind-scope tw-relative tw-px-2 min-[1000px]:tw-max-w-[850px] min-[1100px]:tw-max-w-[950px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px] tw-mx-auto ${inter.className}`}>
               <div className="tw-px-2">
                 <ProfileActivityLogs
                   initialParams={INITIAL_ACTIVITY_LOGS_PARAMS}
-                  withFilters={true}
-                >
+                  withFilters={true}>
                   <h1 className="tw-block tw-uppercase tw-whitespace-nowrap tw-float-none tw-pb-0 tw-mb-0">
                     Community Activity{" "}
                     <a href="/community-activity">

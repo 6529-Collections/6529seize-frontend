@@ -80,39 +80,43 @@ a:hover {
   }
 }
 
+b {
+  font-weight: 600;
+}
+
 h1 {
-  font-family: $square-font !important;
   font-size: 48px;
+  font-weight: 700;
   float: left;
-  color: $font-color-h;
+  color: $font-color;
 }
 
 h2 {
   font-size: 32px;
-  font-weight: bold;
+  font-weight: 700;
   float: left;
-  color: $font-color-h;
+  color: $font-color;
 }
 
 h3 {
   font-size: 28px;
-  font-weight: bold;
+  font-weight: 700;
   float: left;
-  color: $font-color-h;
+  color: $font-color;
 }
 
 h4 {
   font-size: 24px;
-  font-weight: bold;
+  font-weight: 700;
   float: left;
-  color: $font-color-h;
+  color: $font-color;
 }
 
 h5 {
   font-size: 20px;
-  font-weight: bold;
+  font-weight: 700;
   float: left;
-  color: $font-color-h;
+  color: $font-color;
 }
 
 @media only screen and (max-width: 800px) {
@@ -236,7 +240,11 @@ h5 {
 }
 
 .font-bolder {
-  font-weight: bolder;
+  font-weight: bold;
+}
+
+.font-lighter {
+  font-weight: 200;
 }
 
 .no-wrap {
@@ -290,7 +298,7 @@ h5 {
   border: 0 !important;
   padding-left: 20px;
   padding-right: 20px;
-  font-weight: bolder;
+  font-weight: bold;
 }
 
 .seize-btn-link {
@@ -375,4 +383,16 @@ h5 {
   &:hover {
     color: inherit;
   }
+}
+.horizontal-menu-hide-scrollbar {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}
+
+.horizontal-menu-hide-scrollbar::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera*/
+}
+
+.horizontal-menu-scrollable-x {
+  -webkit-overflow-scrolling: touch; /* For momentum scroll on iOS */
 }

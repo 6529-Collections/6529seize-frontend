@@ -340,7 +340,6 @@ export default function NextGenMint(props: Readonly<Props>) {
             )}`}
             className="decoration-hover-underline">
             <h1 className="mb-0 font-color">
-              #{props.collection.id} -{" "}
               <b>{props.collection.name.toUpperCase()}</b>
             </h1>
           </a>

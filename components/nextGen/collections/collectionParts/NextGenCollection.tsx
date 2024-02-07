@@ -6,17 +6,23 @@ import NextGenCollectionArt from "./NextGenCollectionArt";
 import NextGenCollectionDetails from "./NextGenCollectionDetails";
 import NextGenCollectionSlideshow from "./NextGenCollectionSlideshow";
 import { NextGenCollection } from "../../../../entities/INextgen";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import NextGenCollectionArtist from "./NextGenCollectionArtist";
+import NextGenNavigationHeader from "../NextGenNavigationHeader";
+import router from "next/router";
+import { formatNameForUrl } from "../../nextgen_helpers";
 
 interface Props {
   collection: NextGenCollection;
+  view: ContentView;
 }
 
 export enum ContentView {
   ABOUT = "About",
-  TRAITS = "Traits",
   PROVENANCE = "Provenance",
+  DISPLAY_CENTER = "Display Center",
+  RARITY = "Rarity",
+  OVERVIEW = "Overview",
 }
 
 export function printViewButton(
@@ -44,20 +50,32 @@ export default function NextGenCollection(props: Readonly<Props>) {
   const crumbs: Crumb[] = [
     { display: "Home", href: "/" },
     { display: "NextGen", href: "/nextgen" },
-    { display: `#${props.collection.id} - ${props.collection.name}` },
+    { display: `${props.collection.name}` },
   ];
 
-  const [view, setView] = useState<ContentView>(ContentView.ABOUT);
+  const [view, setView] = useState<ContentView>(props.view);
+
+  useEffect(() => {
+    const path = view === ContentView.OVERVIEW ? "/" : `/${view.toLowerCase()}`;
+    router.push(
+      `/nextgen/collection/${formatNameForUrl(props.collection.name)}${path}`,
+      undefined,
+      {
+        shallow: true,
+      }
+    );
+  }, [view]);
 
   return (
     <>
       <Breadcrumb breadcrumbs={crumbs} />
+      <NextGenNavigationHeader />
       <NextGenCollectionSlideshow collection={props.collection} />
       <Container className="pt-3 pb-2">
         <>
           <NextGenCollectionHeader
             collection={props.collection}
-            showDistributionLink={true}
+            show_links={true}
           />
           <Row className="pt-5">
             <Col>
@@ -69,6 +87,7 @@ export default function NextGenCollection(props: Readonly<Props>) {
           </Row>
           <Row className="pt-5">
             <Col className="d-flex gap-4">
+              {printViewButton(view, ContentView.OVERVIEW, setView)}
               {printViewButton(view, ContentView.ABOUT, setView)}
               {printViewButton(view, ContentView.PROVENANCE, setView)}
             </Col>

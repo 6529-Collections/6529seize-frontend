@@ -1400,7 +1400,7 @@ export default function Leaderboard(props: Readonly<Props>) {
   }
 
   return (
-    <Container className={`no-padding pt-4`} id={`leaderboard-page`}>
+    <Container className={`pt-4`} id={`leaderboard-page`}>
       <Row>
         <Col
           className={`d-flex align-items-center`}
@@ -1409,7 +1409,7 @@ export default function Leaderboard(props: Readonly<Props>) {
           md={{ span: 4 }}
           lg={{ span: 4 }}>
           <h1>
-            COMMUNITY{" "}
+            Community{" "}
             {showViewAll && (
               <a href="/community">
                 <span className={styles.viewAllLink}>VIEW ALL</span>
@@ -1523,20 +1523,26 @@ export default function Leaderboard(props: Readonly<Props>) {
               <Container className="no-padding">
                 <Row>
                   <Col className="d-flex align-items-center justify-content-center">
-                    <Form.Check
-                      type="switch"
-                      checked={hideMuseum}
-                      className={`${styles.museumToggle}`}
-                      label={`Hide 6529Museum`}
-                      onChange={() => setHideMuseum(!hideMuseum)}
-                    />
-                    <Form.Check
-                      type="switch"
-                      checked={hideTeam}
-                      className={`${styles.museumToggle}`}
-                      label={`Hide 6529Team`}
-                      onChange={() => setHideTeam(!hideTeam)}
-                    />
+                    <Container className="no-padding">
+                      <Row>
+                        <Col>
+                          <Form.Check
+                            type="switch"
+                            checked={hideMuseum}
+                            className={`${styles.museumToggle}`}
+                            label={`Hide 6529Museum`}
+                            onChange={() => setHideMuseum(!hideMuseum)}
+                          />
+                          <Form.Check
+                            type="switch"
+                            checked={hideTeam}
+                            className={`${styles.museumToggle}`}
+                            label={`Hide 6529Team`}
+                            onChange={() => setHideTeam(!hideTeam)}
+                          />
+                        </Col>
+                      </Row>
+                    </Container>
                   </Col>
                 </Row>
               </Container>

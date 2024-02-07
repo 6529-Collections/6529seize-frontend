@@ -7,11 +7,13 @@ import Breadcrumb from "../../../../../components/breadcrumb/Breadcrumb";
 import {
   NextGenCollection,
   NextGenToken,
+  NextGenTrait,
 } from "../../../../../entities/INextgen";
 import { isEmptyObject } from "../../../../../helpers/Helpers";
 import { getCommonHeaders } from "../../../../../helpers/server.helpers";
 import { commonApiFetch } from "../../../../../services/api/common-api";
 import { ContentView } from "../../../../../components/nextGen/collections/collectionParts/NextGenCollection";
+import NextGenNavigationHeader from "../../../../../components/nextGen/collections/NextGenNavigationHeader";
 
 const Header = dynamic(
   () => import("../../../../../components/header/Header"),
@@ -42,6 +44,8 @@ const NextGenTokenOnChainComponent = dynamic(
 export default function NextGenCollectionToken(props: any) {
   const tokenId: number = props.pageProps.token_id;
   const token: NextGenToken | null = props.pageProps.token;
+  const traits: NextGenTrait[] = props.pageProps.traits;
+  const tokenCount: number = props.pageProps.tokenCount;
   const collection: NextGenCollection = props.pageProps.collection;
   const pagenameFull = token?.name ?? `${collection.name} - #${tokenId}`;
   const pageImage = token?.image_url ?? collection.image;
@@ -57,7 +61,7 @@ export default function NextGenCollectionToken(props: any) {
     {
       display: token
         ? `#${token.normalised_id}`
-        : `${tokenId - collection.id * 10000000000}`,
+        : `#${tokenId - collection.id * 10000000000}`,
     },
   ];
 
@@ -85,10 +89,13 @@ export default function NextGenCollectionToken(props: any) {
       <main className={styles.main}>
         <Header />
         <Breadcrumb breadcrumbs={breadcrumbs} />
+        <NextGenNavigationHeader />
         {token ? (
           <NextGenTokenComponent
             collection={collection}
             token={token}
+            traits={traits}
+            tokenCount={tokenCount}
             view={tokenView}
           />
         ) : (
@@ -116,8 +123,16 @@ export async function getServerSideProps(req: any, res: any, resolvedUrl: any) {
     token = null;
   }
 
+  let tokenTraits: NextGenTrait[] = [];
+  let tokenCount: number = 0;
   if (!token || isEmptyObject(token) || token.pending) {
     token = null;
+  } else {
+    tokenTraits = await commonApiFetch<NextGenTrait[]>({
+      endpoint: `nextgen/tokens/${token.id}/traits`,
+      headers: headers,
+    });
+    tokenCount = tokenTraits[0]?.token_count ?? 0;
   }
 
   const collectionId =
@@ -131,11 +146,13 @@ export async function getServerSideProps(req: any, res: any, resolvedUrl: any) {
   let view = req.query.view as string;
   let tokenView: ContentView | null = null;
   if (view) {
-    view = view[0].toLowerCase();
-    if (view === ContentView.TRAITS.toLowerCase()) {
-      tokenView = ContentView.TRAITS;
+    view = view[0].toLowerCase().replaceAll("-", " ");
+    if (view === ContentView.DISPLAY_CENTER.toLowerCase()) {
+      tokenView = ContentView.DISPLAY_CENTER;
     } else if (view == ContentView.PROVENANCE.toLowerCase()) {
       tokenView = ContentView.PROVENANCE;
+    } else if (view == ContentView.RARITY.toLowerCase()) {
+      tokenView = ContentView.RARITY;
     }
   }
 
@@ -153,6 +170,8 @@ export async function getServerSideProps(req: any, res: any, resolvedUrl: any) {
     props: {
       token_id: tokenId,
       token: token,
+      traits: tokenTraits,
+      tokenCount: tokenCount,
       collection: collection,
       view: tokenView,
     },

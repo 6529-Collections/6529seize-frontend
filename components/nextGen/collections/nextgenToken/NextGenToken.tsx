@@ -1,8 +1,14 @@
 import styles from "../NextGen.module.scss";
 import { Col, Container, Row } from "react-bootstrap";
-import { NextGenCollection, NextGenToken } from "../../../../entities/INextgen";
+import {
+  NextGenCollection,
+  NextGenToken,
+  NextGenTrait,
+} from "../../../../entities/INextgen";
 import NextGenTokenProvenance from "./NextGenTokenProvenance";
-import NextgenTokenProperties from "./NextGenTokenProperties";
+import NextgenTokenRarity, {
+  NextgenTokenTraits,
+} from "./NextGenTokenProperties";
 import NextGenTokenAbout from "./NextGenTokenAbout";
 import { useEffect, useState } from "react";
 import NextGenTokenArt from "./NextGenTokenArt";
@@ -14,10 +20,13 @@ import { isNullAddress } from "../../../../helpers/Helpers";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useRouter } from "next/router";
 import Tippy from "@tippyjs/react";
+import NextGenTokenRenderCenter from "./NextGenTokenRenderCenter";
 
 interface Props {
   collection: NextGenCollection;
   token: NextGenToken;
+  traits: NextGenTrait[];
+  tokenCount: number;
   view: ContentView;
 }
 
@@ -28,12 +37,20 @@ export default function NextGenToken(props: Readonly<Props>) {
     props.view ?? ContentView.ABOUT
   );
 
+  const tokenTraits = props.traits.filter(
+    (trait) => trait.trait !== "Collection Name"
+  );
+
   useEffect(() => {
     const basePath = `/nextgen/token/${props.token.id}`;
     if (view && view !== ContentView.ABOUT) {
-      router.push(`${basePath}/${view.toLowerCase()}`, undefined, {
-        shallow: true,
-      });
+      router.push(
+        `${basePath}/${view.toLowerCase().replaceAll(/ /g, "-")}`,
+        undefined,
+        {
+          shallow: true,
+        }
+      );
     } else {
       router.push(basePath, undefined, { shallow: true });
     }
@@ -45,34 +62,123 @@ export default function NextGenToken(props: Readonly<Props>) {
         <Row>
           <Col className="d-flex gap-4">
             {printViewButton(view, ContentView.ABOUT, setView)}
-            {printViewButton(view, ContentView.TRAITS, setView)}
             {printViewButton(view, ContentView.PROVENANCE, setView)}
+            {printViewButton(view, ContentView.DISPLAY_CENTER, setView)}
+            {printViewButton(view, ContentView.RARITY, setView)}
           </Col>
         </Row>
         <Row>
-          <Col sm={12} className="pt-4 pb-4">
-            {view === ContentView.ABOUT && (
-              <NextGenTokenAbout
-                collection={props.collection}
-                token={props.token}
-              />
-            )}
-            {view === ContentView.TRAITS && (
-              <NextgenTokenProperties
-                collection_id={props.collection.id}
-                token_id={props.token.id}
-              />
-            )}
-            {view === ContentView.PROVENANCE && (
+          {view === ContentView.ABOUT && (
+            <>
+              <Col sm={12} md={6} className="pt-4 pb-4">
+                <NextGenTokenAbout
+                  collection={props.collection}
+                  token={props.token}
+                />
+              </Col>
+              <Col sm={12} md={6} className="pt-4 pb-4">
+                <NextgenTokenTraits
+                  collection_id={props.collection.id}
+                  token={props.token}
+                  traits={tokenTraits}
+                  tokenCount={props.tokenCount}
+                />
+              </Col>
+            </>
+          )}
+          {view === ContentView.PROVENANCE && (
+            <Col className="pt-4 pb-4">
               <NextGenTokenProvenance
-                collection_id={props.collection.id}
                 token_id={props.token.id}
+                collection_id={props.collection.id}
               />
-            )}
-          </Col>
+            </Col>
+          )}
+          {view === ContentView.DISPLAY_CENTER && (
+            <Col className="pt-4 pb-4">
+              <NextGenTokenRenderCenter />
+            </Col>
+          )}
+          {view === ContentView.RARITY && (
+            <Col className="pt-4 pb-4">
+              <NextgenTokenRarity
+                collection_id={props.collection.id}
+                token={props.token}
+                traits={tokenTraits}
+                tokenCount={props.tokenCount}
+              />
+            </Col>
+          )}
         </Row>
       </Container>
     );
+  }
+
+  function printPreviousToken() {
+    const hasPreviousToken = props.token.normalised_id > 0;
+    const prev = (
+      <FontAwesomeIcon
+        title="Previous Token"
+        icon="chevron-circle-left"
+        onClick={() => {
+          if (!hasPreviousToken) {
+            return;
+          }
+          const currentHref = window.location.href;
+          const prevHref = currentHref.replace(
+            props.token.id.toString(),
+            (props.token.id - 1).toString()
+          );
+          window.location.href = prevHref;
+        }}
+        style={{
+          height: "35px",
+          color: hasPreviousToken ? "#fff" : "#9a9a9a",
+          cursor: hasPreviousToken ? "pointer" : "default",
+        }}
+      />
+    );
+    if (hasPreviousToken) {
+      return (
+        <Tippy content={"Previous Token"} theme={"light"} delay={100}>
+          {prev}
+        </Tippy>
+      );
+    }
+    return prev;
+  }
+
+  function printNextToken() {
+    const hasNextToken = props.tokenCount - 1 > props.token.normalised_id;
+    const next = (
+      <FontAwesomeIcon
+        icon="chevron-circle-right"
+        onClick={() => {
+          if (!hasNextToken) {
+            return;
+          }
+          const currentHref = window.location.href;
+          const nextHref = currentHref.replace(
+            props.token.id.toString(),
+            (props.token.id + 1).toString()
+          );
+          window.location.href = nextHref;
+        }}
+        style={{
+          height: "35px",
+          color: hasNextToken ? "#fff" : "#9a9a9a",
+          cursor: hasNextToken ? "pointer" : "default",
+        }}
+      />
+    );
+    if (hasNextToken) {
+      return (
+        <Tippy content={"Next Token"} theme={"light"} delay={100}>
+          {next}
+        </Tippy>
+      );
+    }
+    return next;
   }
 
   function printToken() {
@@ -84,16 +190,22 @@ export default function NextGenToken(props: Readonly<Props>) {
               <Container>
                 <Row className="pb-4">
                   <Col className="d-flex align-items-center justify-content-between">
-                    <h2 className="mb-0">{props.token.name}</h2>
-                    {(props.token.burnt ||
-                      isNullAddress(props.token.owner)) && (
-                      <Tippy content={"Burnt"} theme={"light"} delay={100}>
-                        <FontAwesomeIcon
-                          icon="fire"
-                          style={{ height: "35px", color: "#c51d34" }}
-                        />
-                      </Tippy>
-                    )}
+                    <span className="d-flex gap-3">
+                      <h2 className="mb-0 font-color">{props.token.name}</h2>
+                      {(props.token.burnt ||
+                        isNullAddress(props.token.owner)) && (
+                        <Tippy content={"Burnt"} theme={"light"} delay={100}>
+                          <FontAwesomeIcon
+                            icon="fire"
+                            style={{ height: "35px", color: "#c51d34" }}
+                          />
+                        </Tippy>
+                      )}
+                    </span>
+                    <span className="d-flex gap-2">
+                      {printPreviousToken()}
+                      {printNextToken()}
+                    </span>
                   </Col>
                 </Row>
               </Container>

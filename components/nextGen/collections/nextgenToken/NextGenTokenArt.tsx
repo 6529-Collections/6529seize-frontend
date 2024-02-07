@@ -7,7 +7,11 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import useDownloader from "react-use-downloader";
 import Tippy from "@tippyjs/react";
 import Lightbulb from "./Lightbulb";
-import { Quality, getUrl } from "./NextGenTokenDownloads";
+import {
+  NextGenTokenDownloadDropdownItem,
+  Resolution,
+  getUrl,
+} from "./NextGenTokenDownload";
 
 interface Props {
   collection: NextGenCollection;
@@ -15,7 +19,7 @@ interface Props {
 }
 
 enum Mode {
-  HTML = "HTML",
+  LIVE = "Live",
   IMAGE = "Image",
 }
 
@@ -38,7 +42,7 @@ export function NextGenTokenArtImage(
 }
 
 export default function NextGenToken(props: Readonly<Props>) {
-  const [mode, setMode] = useState<Mode>(Mode.HTML);
+  const [mode, setMode] = useState<Mode>(Mode.IMAGE);
   const [isFullScreen, setIsFullScreen] = useState<boolean>(false);
   const [showBlackbox, setShowBlackbox] = useState<boolean>(false);
   const [showLightbox, setShowLightbox] = useState<boolean>(false);
@@ -87,40 +91,16 @@ export default function NextGenToken(props: Readonly<Props>) {
   }
 
   function getCurrentHref() {
-    switch (mode) {
-      case Mode.HTML:
-        return {
-          href: props.token.animation_url,
-          extension: "html",
-        };
-      case Mode.IMAGE:
-        return {
-          href: props.token.generator_url.replace("metadata", "html"),
-          extension: "html",
-        };
+    if (mode === Mode.LIVE) {
+      return props.token.animation_url ?? props.token.generator?.html;
     }
-    return {
-      href: props.token.image_url,
-      extension: "png",
-    };
+    return props.token.image_url;
   }
 
   function printModeIcons() {
     return (
       <>
         <span className="d-flex gap-3">
-          <Tippy
-            content="HTML"
-            hideOnClick={true}
-            placement="bottom"
-            theme="light"
-            delay={100}>
-            <FontAwesomeIcon
-              className={getModeStyle(Mode.HTML)}
-              onClick={() => setMode(Mode.HTML)}
-              icon="play-circle"
-            />
-          </Tippy>
           <Tippy
             content="Image"
             hideOnClick={true}
@@ -131,6 +111,18 @@ export default function NextGenToken(props: Readonly<Props>) {
               className={getModeStyle(Mode.IMAGE)}
               onClick={() => setMode(Mode.IMAGE)}
               icon="image"
+            />
+          </Tippy>
+          <Tippy
+            content="Live"
+            hideOnClick={true}
+            placement="bottom"
+            theme="light"
+            delay={100}>
+            <FontAwesomeIcon
+              className={getModeStyle(Mode.LIVE)}
+              onClick={() => setMode(Mode.LIVE)}
+              icon="play-circle"
             />
           </Tippy>
         </span>
@@ -145,11 +137,6 @@ export default function NextGenToken(props: Readonly<Props>) {
             className={styles.modeIcon}
             onClick={() => setShowLightbox(true)}
           />
-          {/* <NextGenTokenDownloadButton
-            class={styles.modeIcon}
-            token={props.token}
-            quality={Quality.HD}
-          /> */}
           <Dropdown drop={"down-centered"} className="d-flex">
             <Dropdown.Toggle className={styles.downloadBtn}>
               <Tippy
@@ -162,17 +149,22 @@ export default function NextGenToken(props: Readonly<Props>) {
               </Tippy>
             </Dropdown.Toggle>
             <Dropdown.Menu>
-              {Object.values(Quality).map((quality) => (
-                <Dropdown.Item
-                  key={quality}
-                  onClick={() => {
-                    downloader.download(
-                      getUrl(props.token, quality),
-                      `${props.token.id}_${quality.toUpperCase()}`
-                    );
-                  }}>
-                  {quality}
-                </Dropdown.Item>
+              {Object.values(Resolution).map((resolution) => (
+                <NextGenTokenDownloadDropdownItem
+                  resolution={resolution}
+                  token={props.token}
+                  key={resolution}
+                />
+                // <Dropdown.Item
+                //   key={resolution}
+                //   onClick={() => {
+                //     downloader.download(
+                //       getUrl(props.token, resolution),
+                //       `${props.token.id}_${resolution.toUpperCase()}`
+                //     );
+                //   }}>
+                //   {resolution}
+                // </Dropdown.Item>
               ))}
             </Dropdown.Menu>
           </Dropdown>
@@ -186,7 +178,7 @@ export default function NextGenToken(props: Readonly<Props>) {
               className={styles.modeIcon}
               onClick={() => {
                 const href = getCurrentHref();
-                window.open(href.href, "_blank");
+                window.open(href, "_blank");
               }}
               icon="external-link"
             />
@@ -270,6 +262,16 @@ export default function NextGenToken(props: Readonly<Props>) {
           </Container>
         </Col>
       </Row>
+      {mode === Mode.LIVE && (
+        <Row className="pt-2 font-color-h font-smaller">
+          <Col>
+            * Live view generates the image dynamically from scratch in your
+            browser. Pebbles have a computationally expensive script and the
+            live view may take several minutes to render on your computer or
+            phone. &quot;Image view&quot; will download faster.
+          </Col>
+        </Row>
+      )}
     </Container>
   );
 }

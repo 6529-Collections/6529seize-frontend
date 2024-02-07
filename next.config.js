@@ -81,6 +81,23 @@ const nextConfig = {
       },
     ];
   },
+
+  webpack: (config, { buildId, dev, isServer, defaultLoaders, webpack }) => {
+    config.resolve.alias.canvas = false;
+    config.plugins.push(
+      new webpack.ProgressPlugin((percentage, message, ...args) => {
+        // Detailed log message
+        console.log(
+          `${(percentage * 100).toFixed(2)}%`,
+          message,
+          ...args.map((arg) =>
+            typeof arg === "string" ? arg : JSON.stringify(arg)
+          )
+        );
+      })
+    );
+    return config;
+  },
 };
 
 module.exports = withBundleAnalyzer(nextConfig);

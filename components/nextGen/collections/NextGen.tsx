@@ -1,5 +1,5 @@
+import styles from "./NextGen.module.scss";
 import { Container, Row, Col } from "react-bootstrap";
-import Image from "next/image";
 import { NextGenCollection } from "../../../entities/INextgen";
 import {
   NextGenCountdown,
@@ -8,99 +8,127 @@ import {
 } from "./collectionParts/NextGenCollectionHeader";
 import { formatNameForUrl, getStatusFromDates } from "../nextgen_helpers";
 import { Status } from "../nextgen_entities";
+import NextGenCollectionArtist from "./collectionParts/NextGenCollectionArtist";
+import { NextGenView } from "./NextGenNavigationHeader";
 
 interface Props {
   collection: NextGenCollection;
+  setView: (view: NextGenView) => void;
 }
 
 export default function NextGen(props: Readonly<Props>) {
   const available = props.collection.total_supply - props.collection.mint_count;
 
   return (
-    <Container className="no-padding">
-      <Row className="pt-3 pb-3">
-        <Col>
-          <h1 className="mb-0">FEATURED COLLECTION</h1>
-        </Col>
-      </Row>
-      <Row>
-        <Col sm={12} md={6} className="pt-2">
-          <a
-            href={`/nextgen/collection/${formatNameForUrl(
-              props.collection.name
-            )}`}
-            className="decoration-none">
-            <Image
-              loading="eager"
-              width="0"
-              height="0"
-              style={{
-                height: "auto",
-                width: "auto",
-                maxHeight: "100%",
-                maxWidth: "100%",
-                padding: "10px",
-              }}
-              src={props.collection.image}
-              alt={props.collection.name}
-            />
-          </a>
-        </Col>
-        <Col sm={12} md={6} className="pt-3">
-          <Container className="no-padding">
-            <Row>
-              <Col>
-                <NextGenPhases
-                  collection={props.collection}
-                  available={available}
-                />
-              </Col>
-            </Row>
-            <Row className="pt-2">
-              <Col>
-                <a
-                  href={`/nextgen/collection/${formatNameForUrl(
-                    props.collection.name
-                  )}`}
-                  className="decoration-none">
-                  <h2 className="font-color mb-0">
-                    #{props.collection.id} - {props.collection.name}
-                  </h2>
-                </a>
-              </Col>
-            </Row>
-            <Row className="pt-3 font-larger font-color">
-              <Col>
-                by{" "}
-                <b>
-                  <a href={`/${props.collection.artist_address}`}>
-                    {props.collection.artist}
-                  </a>
-                </b>
-              </Col>
-            </Row>
-            <Row className="pt-3 font-larger font-color">
-              <Col>
-                <NextGenMintCounts collection={props.collection} />
-              </Col>
-            </Row>
-            <DistributionLink collection={props.collection} class="pt-3" />
-            <Row className="pt-4">
-              <Col>
-                <NextGenCountdown collection={props.collection} />
-              </Col>
-            </Row>
-          </Container>
-        </Col>
-      </Row>
-    </Container>
+    <>
+      <div className={styles.nextgenBannerWrapper}>
+        <div
+          className={styles.nextgenBanner}
+          style={{ background: `url(${props.collection.banner})` }}
+        />
+        <Container>
+          <Row>
+            <Col>
+              <Container className="pt-5 pb-5 no-padding">
+                <Row>
+                  <Col sm={12} md={6}>
+                    <Row>
+                      <Col>
+                        <NextGenPhases
+                          collection={props.collection}
+                          available={available}
+                        />
+                      </Col>
+                    </Row>
+                    <Row className="pt-2">
+                      <Col>
+                        <a
+                          href={`/nextgen/collection/${formatNameForUrl(
+                            props.collection.name
+                          )}`}
+                          className="decoration-none font-bolder"
+                          style={{ fontSize: "60px" }}>
+                          {props.collection.name}
+                        </a>
+                      </Col>
+                    </Row>
+                    <Row className="font-larger font-color font-bolder">
+                      <Col
+                        className="font-larger font-lighter"
+                        style={{ fontSize: "48px", lineHeight: "48px" }}>
+                        by{" "}
+                        <a
+                          href={`/${props.collection.artist_address}`}
+                          className="decoration-hover-underline">
+                          {props.collection.artist}
+                        </a>
+                      </Col>
+                    </Row>
+                    <Row className="pt-3 font-larger font-color">
+                      <Col>
+                        <NextGenMintCounts collection={props.collection} />
+                      </Col>
+                    </Row>
+                    <Row className="pt-4 pb-2">
+                      <Col>
+                        <NextGenCountdown collection={props.collection} />
+                      </Col>
+                    </Row>
+                  </Col>
+                </Row>
+              </Container>
+            </Col>
+          </Row>
+        </Container>
+      </div>
+      <Container
+        fluid
+        className="pt-5 pb-5"
+        style={{ backgroundColor: "black" }}>
+        <Row>
+          <Col>
+            <Container className="pt-3 pb-3">
+              <Row>
+                <Col className="font-larger text-center">
+                  <b>NextGen</b> is an on-chain generative art NFT contract. It
+                  is also a tool to support the ambitious aspirations of the
+                  6529 community in the areas of art experimentation and
+                  decentralized social organization.
+                  <br />
+                  <button
+                    className="btn-link pt-2"
+                    onClick={() => {
+                      props.setView(NextGenView.ABOUT);
+                      window.scrollTo(0, 120);
+                    }}>
+                    <span className="font-larger">Learn More</span>
+                  </button>
+                </Col>
+              </Row>
+            </Container>
+          </Col>
+        </Row>
+      </Container>
+      <Container className="pt-5 pb-5">
+        <Row>
+          <Col>
+            <h1>Featured Artist</h1>
+          </Col>
+        </Row>
+        <Row>
+          <Col>
+            <NextGenCollectionArtist collection={props.collection} />
+          </Col>
+        </Row>
+      </Container>
+    </>
   );
 }
 
 export function DistributionLink(
   props: Readonly<{
     collection: NextGenCollection;
-    class: string;
+    class?: string;
   }>
 ) {
   const alStatus = getStatusFromDates(
@@ -108,10 +136,19 @@ export function DistributionLink(
     props.collection.allowlist_end
   );
 
-  if (alStatus !== Status.UNAVAILABLE) {
+  const publicStatus = getStatusFromDates(
+    props.collection.public_start,
+    props.collection.public_end
+  );
+
+  if (
+    alStatus === Status.UPCOMING ||
+    alStatus === Status.LIVE ||
+    publicStatus !== Status.COMPLETE
+  ) {
     return (
       <Container className="no-padding">
-        <Row className={`pt-1 font-color ${props.class}`}>
+        <Row className={`pt-1 font-color ${props.class ? props.class : ""}`}>
           <Col>
             <a
               href={`/nextgen/collection/${formatNameForUrl(

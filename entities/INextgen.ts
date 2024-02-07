@@ -11,6 +11,8 @@ export interface NextGenCollection {
   library: string;
   dependency_script: string;
   image: string;
+  banner: string;
+  distribution_plan: string;
   artist_address: string;
   artist_signature: string;
   max_purchases: number;
@@ -33,19 +35,29 @@ export interface NextGenToken {
   name: string;
   collection_id: number;
   collection_name: string;
+  mint_date: Date;
+  mint_price: number;
   metadata_url: string;
   image_url: string;
   animation_url: string;
-  generator_url: string;
+  generator?: {
+    html: string;
+    metadata: string;
+    image: string;
+  };
   owner: string;
   pending: boolean;
   burnt: boolean;
+  burnt_date?: string;
   rarity_score: number;
   rarity_score_normalised: number;
   statistical_score: number;
   rarity_score_rank: number;
   rarity_score_normalised_rank: number;
   statistical_score_rank: number;
+  single_trait_rarity_score: number;
+  single_trait_rarity_score_rank: number;
+  hodl_rate: number;
 }
 
 export interface NextGenLog {
@@ -66,11 +78,15 @@ export interface NextGenTrait {
   collection_id: number;
   trait: string;
   value: string;
-  rarity: number;
+  statistical_rarity: number;
+  statistical_rarity_rank: number;
   rarity_score: number;
+  rarity_score_rank: number;
   rarity_score_normalised: number;
+  rarity_score_normalised_rank: number;
   token_count: number;
   trait_count: number;
+  value_count: number;
 }
 
 export interface TraitValues {

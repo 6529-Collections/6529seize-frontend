@@ -8,7 +8,8 @@ import { isEmptyObject } from "../../../../helpers/Helpers";
 import { getCommonHeaders } from "../../../../helpers/server.helpers";
 import { commonApiFetch } from "../../../../services/api/common-api";
 import Breadcrumb from "../../../../components/breadcrumb/Breadcrumb";
-import { useShallowRedirect } from ".";
+import { useShallowRedirect } from "./[[...view]]";
+import NextGenNavigationHeader from "../../../../components/nextGen/collections/NextGenNavigationHeader";
 
 const Header = dynamic(() => import("../../../../components/header/Header"), {
   ssr: false,
@@ -26,13 +27,13 @@ const NextGenCollectionMintingPlanComponent = dynamic(
 export default function NextGenCollectionTokensPage(props: any) {
   const collection: NextGenCollection = props.pageProps.collection;
   useShallowRedirect(collection.name, "/distribution-plan");
-  const pagenameFull = `Distribution Plan | #${collection.id} - ${collection.name}`;
+  const pagenameFull = `Distribution Plan | ${collection.name}`;
 
   const crumbs = [
     { display: "Home", href: "/" },
     { display: "NextGen", href: "/nextgen" },
     {
-      display: `#${collection.id} - ${collection.name}`,
+      display: `${collection.name}`,
       href: `/nextgen/collection/${collection.id}`,
     },
     { display: `Distribution Plan` },
@@ -42,6 +43,12 @@ export default function NextGenCollectionTokensPage(props: any) {
       <Head>
         <title>{pagenameFull}</title>
         <link rel="icon" href="/favicon.ico" />
+        <link
+          rel="preload"
+          href={collection.distribution_plan}
+          as="fetch"
+          crossOrigin="anonymous"
+        />
         <meta name="description" content={pagenameFull} />
         <meta
           property="og:url"
@@ -60,6 +67,7 @@ export default function NextGenCollectionTokensPage(props: any) {
       <main className={styles.main}>
         <Header />
         <Breadcrumb breadcrumbs={crumbs} />
+        <NextGenNavigationHeader />
         <NextGenCollectionMintingPlanComponent collection={collection} />
       </main>
     </>

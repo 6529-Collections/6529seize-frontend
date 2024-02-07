@@ -6,7 +6,7 @@ import { NextGenCollection } from "../../../entities/INextgen";
 import NextGenCollectionArtist from "./collectionParts/NextGenCollectionArtist";
 import { areEqualAddresses } from "../../../helpers/Helpers";
 
-export default function NextGenCollections() {
+export default function NextGenArtists() {
   const [artistCollections, setArtistCollections] = useState<
     { address: string; collections: NextGenCollection[] }[]
   >([]);
@@ -41,10 +41,10 @@ export default function NextGenCollections() {
   }, []);
 
   return (
-    <Container className="no-padding">
-      <Row className="pt-3 pb-3">
+    <Container className="no-padding pt-4 pb-4">
+      <Row className="pb-3">
         <Col>
-          <h1>ARTISTS</h1>
+          <h1>Artists</h1>
         </Col>
       </Row>
       {artistCollections.map(
@@ -57,19 +57,11 @@ export default function NextGenCollections() {
         ) => {
           return (
             <Row key={`nextgen-artist-${ac.address}`}>
-              {index === 0 && (
-                <Col xs={12}>
-                  <hr />
-                </Col>
-              )}
               <Col>
                 <NextGenCollectionArtist
                   collection={ac.collections[0]}
                   link_collections={ac.collections}
                 />
-              </Col>
-              <Col xs={12} className="pt-4">
-                <hr />
               </Col>
             </Row>
           );

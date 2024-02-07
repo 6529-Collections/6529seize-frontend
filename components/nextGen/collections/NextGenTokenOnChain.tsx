@@ -4,7 +4,6 @@ import { Col, Container, Row } from "react-bootstrap";
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import { NEXTGEN_CHAIN_ID, NEXTGEN_CORE } from "../nextgen_contracts";
-import NextGenCollectionHeader from "./collectionParts/NextGenCollectionHeader";
 import DotLoader from "../../dotLoader/DotLoader";
 import { NextGenCollection } from "../../../entities/INextgen";
 import { IProfileAndConsolidations } from "../../../entities/IProfile";
@@ -14,6 +13,7 @@ import { areEqualAddresses } from "../../../helpers/Helpers";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { mainnet } from "viem/chains";
 import { formatNameForUrl, getOpenseaLink } from "../nextgen_helpers";
+import Tippy from "@tippyjs/react";
 
 interface Props {
   collection: NextGenCollection;
@@ -34,7 +34,7 @@ export default function NextGenTokenOnChain(props: Readonly<Props>) {
   const [ownerProfileHandle, setOwnerProfileHandle] = useState<string>();
 
   const normalisedTokenId = props.token_id - props.collection.id * 10000000000;
-  const tokenName = `${props.collection.name} - #${normalisedTokenId}`;
+  const tokenName = `${props.collection.name} #${normalisedTokenId}`;
 
   useContractRead({
     address: NEXTGEN_CORE[NEXTGEN_CHAIN_ID] as `0x${string}`,
@@ -104,24 +104,10 @@ export default function NextGenTokenOnChain(props: Readonly<Props>) {
               <Container>
                 <Row>
                   <Col className="d-flex align-items-center justify-content-between">
-                    <h2>{tokenName}</h2>
-                    <span className="d-flex gap-4">
-                      <a
-                        href={getOpenseaLink(NEXTGEN_CHAIN_ID, props.token_id)}
-                        target="_blank"
-                        rel="noreferrer">
-                        <Image
-                          className={styles.marketplace}
-                          src="/opensea.png"
-                          alt="opensea"
-                          width={32}
-                          height={32}
-                        />
-                      </a>
-                    </span>
+                    <h2 className="mb-0">{tokenName}</h2>
                   </Col>
                 </Row>
-                <Row className="pt-3">
+                <Row className="pt-4">
                   <Col className="text-center">
                     <Image
                       priority
@@ -131,9 +117,8 @@ export default function NextGenTokenOnChain(props: Readonly<Props>) {
                       style={{
                         height: "auto",
                         width: "auto",
-                        maxHeight: "100%",
+                        maxHeight: "90vh",
                         maxWidth: "100%",
-                        padding: "10px",
                       }}
                       src={tokenImage}
                       alt={tokenName}
@@ -162,7 +147,7 @@ export default function NextGenTokenOnChain(props: Readonly<Props>) {
                   href={`/nextgen/collection/${formatNameForUrl(
                     props.collection.name
                   )}`}>
-                  #{props.collection.id} {props.collection.name}
+                  {props.collection.name}
                 </a>
               </span>
               <span className="pt-1 pb-1 d-flex flex-column">
@@ -196,6 +181,25 @@ export default function NextGenTokenOnChain(props: Readonly<Props>) {
                   </span>
                 </span>
               </span>
+              <span className="pt-1 pb-1 d-flex flex-column">
+                <span className="font-color-h">Marketplaces</span>
+                <span className="d-flex gap-4">
+                  <Tippy content={"Opensea"} theme={"light"} delay={250}>
+                    <a
+                      href={getOpenseaLink(NEXTGEN_CHAIN_ID, props.token_id)}
+                      target="_blank"
+                      rel="noreferrer">
+                      <Image
+                        className={styles.marketplace}
+                        src="/opensea.png"
+                        alt="opensea"
+                        width={28}
+                        height={28}
+                      />
+                    </a>
+                  </Tippy>
+                </span>
+              </span>
             </Col>
           </Row>
           <Row className="pt-3">
@@ -210,18 +214,18 @@ export default function NextGenTokenOnChain(props: Readonly<Props>) {
     );
   }
 
-  if (fetchingMetadata || tokenNotFound) {
+  if (fetchingMetadata || tokenNotFound || !tokenImage) {
     return (
       <Container className="pt-5">
         <Row>
           <Col className="text-center">
             <h4 className="mb-0 float-none">
-              {fetchingMetadata ? (
+              {tokenNotFound ? (
+                <>Token Not Found</>
+              ) : (
                 <>
                   Fetching Token <DotLoader />
                 </>
-              ) : (
-                `Token Not Found`
               )}
             </h4>
           </Col>
@@ -229,16 +233,6 @@ export default function NextGenTokenOnChain(props: Readonly<Props>) {
       </Container>
     );
   }
-  return (
-    <>
-      <Container className="pt-4 pb-4">
-        <NextGenCollectionHeader
-          collection={props.collection}
-          collection_link={true}
-          showDistributionLink={true}
-        />
-      </Container>
-      {printToken()}
-    </>
-  );
+
+  return printToken();
 }

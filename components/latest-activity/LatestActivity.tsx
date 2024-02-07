@@ -88,7 +88,7 @@ export default function LatestActivity(props: Readonly<Props>) {
         <Col className="d-flex align-items-center justify-content-between">
           <span className="d-flex flex-wrap align-items-center gap-2">
             <h1>
-              NFT ACTIVITY{" "}
+              NFT Activity{" "}
               {showViewAll ? (
                 <a href="/nft-activity">
                   <span className={styles.viewAllLink}>VIEW ALL</span>
@@ -108,8 +108,7 @@ export default function LatestActivity(props: Readonly<Props>) {
                     onClick={() => {
                       setPage(1);
                       setTypeFilter(filter);
-                    }}
-                  >
+                    }}>
                     {filter}
                   </Dropdown.Item>
                 ))}

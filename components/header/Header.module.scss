@@ -100,7 +100,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  margin-right: 15px;
+  margin-right: 16px;
   white-space: nowrap;
   a span {
     text-decoration: none !important;
@@ -127,7 +127,7 @@
   }
 }
 
-@media (min-width: 1300px) {
+@media (min-width: 1200px) {
   .dMdNone {
     display: none !important;
   }

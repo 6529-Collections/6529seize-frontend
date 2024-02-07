@@ -375,7 +375,7 @@ export default function Header(props: Readonly<Props>) {
                 </Row>
                 <Row className="pt-3">
                   <Col>
-                    <a href="/distribution-plan-tool">
+                    <a href="/emma">
                       <h3>EMMA</h3>
                     </a>
                   </Col>
@@ -623,8 +623,8 @@ export default function Header(props: Readonly<Props>) {
                   sm={{ span: 4 }}
                   md={{ span: 4 }}
                   lg={{ span: 9 }}
-                  className={`d-flex align-items-center justify-content-end ${styles.headerRight}`}>
-                  <Container>
+                  className={`no-padding d-flex align-items-center justify-content-end ${styles.headerRight}`}>
+                  <Container className="no-padding">
                     <Navbar expand="lg" variant="dark">
                       <Container
                         className={`d-flex align-items-center justify-content-end no-padding`}>
@@ -766,8 +766,7 @@ export default function Header(props: Readonly<Props>) {
                               <NavDropdown.Item
                                 className={styles.dropdownItem}
                                 onClick={() =>
-                                  (window.location.href =
-                                    "/distribution-plan-tool")
+                                  (window.location.href = "/emma")
                                 }>
                                 EMMA
                               </NavDropdown.Item>
@@ -941,7 +940,7 @@ export default function Header(props: Readonly<Props>) {
                             height: "auto",
                             width: "auto",
                             maxHeight: "42px",
-                            paddingLeft: "35px",
+                            paddingLeft: "15px",
                           }}
                           className={`d-none ${styles.dMdBlock}`}
                           src="https://d3lqz0a4bldqgf.cloudfront.net/seize_images/Seize_Logo_Icon.png"

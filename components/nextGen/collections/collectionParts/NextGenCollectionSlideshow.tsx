@@ -77,17 +77,14 @@ export default function NextGenCollectionSlideshow(props: Readonly<Props>) {
                   modules={[Navigation, A11y, Autoplay]}
                   autoplay
                   spaceBetween={20}
-                  slidesPerView={Math.min(
-                    slidesPerView,
-                    props.collection.mint_count
-                  )}
+                  slidesPerView={Math.min(slidesPerView, tokens.length)}
                   navigation
                   centeredSlides
                   pagination={{ clickable: true }}
                   onSlideChange={(swiper) => {
                     setCurrentSlide(swiper.realIndex);
                   }}>
-                  <SwiperAutoplayButton />
+                  {tokens.length > 1 && <SwiperAutoplayButton />}
                   {tokens.map((token, index) => (
                     <SwiperSlide
                       key={`nextgen-carousel-${token.id}`}

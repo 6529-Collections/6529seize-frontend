@@ -54,7 +54,11 @@ export default function UserPageHeaderAbout({
           >
             <UserPageHeaderAboutStatement statement={statement} />
             {canEdit && (
-              <div className="group-hover:tw-block tw-hidden tw-absolute tw-inset-0 tw-text-neutral-400">
+              <div
+                className={`${
+                  statement ? "group-hover:tw-block tw-hidden" : "tw-block"
+                } tw-absolute tw-inset-0 tw-text-neutral-400`}
+              >
                 <div className="tw-absolute tw-top-1.5 -tw-right-7">
                   <PencilIcon />
                 </div>

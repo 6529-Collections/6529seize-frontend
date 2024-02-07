@@ -357,7 +357,7 @@ export default function MemePage(props: Readonly<Props>) {
             <Container className="pt-4 pb-4">
               <Row>
                 <Col>
-                  <h1>THE MEMES</h1>
+                  <h1>The Memes</h1>
                 </Col>
                 {/* {nft && (
                   <Col className="d-flex align-items-center justify-content-end">

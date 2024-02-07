@@ -9,7 +9,7 @@ export default function CommunityDownloads() {
           <Container className="pt-4">
             <Row>
               <Col>
-                <h1>OPEN DATA</h1>
+                <h1>Open Data</h1>
               </Col>
             </Row>
             <Row className="pt-4">
