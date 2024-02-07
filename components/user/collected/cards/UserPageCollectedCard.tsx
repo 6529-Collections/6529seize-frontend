@@ -13,6 +13,10 @@ export default function UserPageCollectedCard({
   const collectionMeta = COLLECTED_COLLECTIONS_META[card.collection];
   const path = `${collectionMeta.cardPath}/${card.token_id}`;
 
+  const showSeizedCount =
+    COLLECTED_COLLECTIONS_META[card.collection].dataRows.seizedCount &&
+    !!card.seized_count;
+
   return (
     <Link href={path} className="tw-no-underline">
       <div className="tw-cursor-pointer tw-flex tw-flex-col tw-bg-gradient-to-br tw-from-iron-900 tw-to-white/5 tw-rounded-lg tw-overflow-hidden tw-ring-1 tw-px-0.5 tw-pt-0.5 tw-ring-inset tw-ring-iron-700 hover:tw-ring-iron-600/60 hover:tw-to-white/10 tw-transition-opacity tw-duration-500 tw-ease-out">
@@ -41,7 +45,7 @@ export default function UserPageCollectedCard({
               <span className="tw-text-sm min-[1200px]:tw-text-md tw-font-medium tw-text-iron-50">
                 {card.token_name}
               </span>
-              {!!card.seized_count && (
+              {showSeizedCount && (
                 <span className="tw-text-sm min-[1200px]:tw-text-md tw-font-normal tw-text-iron-400">
                   {card.seized_count}x
                 </span>

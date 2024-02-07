@@ -1,8 +1,14 @@
-import { CollectedCollectionType, CollectionSort } from "../../../../entities/IProfile";
+import {
+  CollectedCollectionType,
+  CollectionSort,
+} from "../../../../entities/IProfile";
 
 interface CollectedCollectionMeta {
   readonly label: string;
   readonly showCardDataRow: boolean;
+  readonly dataRows: {
+    readonly seizedCount: boolean;
+  };
   readonly filters: {
     readonly seized: boolean;
     readonly szn: boolean;
@@ -18,6 +24,9 @@ export const COLLECTED_COLLECTIONS_META: Record<
   [CollectedCollectionType.MEMES]: {
     label: "The Memes",
     showCardDataRow: true,
+    dataRows: {
+      seizedCount: true,
+    },
     filters: {
       seized: true,
       szn: true,
@@ -28,6 +37,9 @@ export const COLLECTED_COLLECTIONS_META: Record<
   [CollectedCollectionType.GRADIENTS]: {
     label: "Gradients",
     showCardDataRow: true,
+    dataRows: {
+      seizedCount: false,
+    },
     filters: {
       seized: false,
       szn: false,
@@ -37,6 +49,9 @@ export const COLLECTED_COLLECTIONS_META: Record<
   },
   [CollectedCollectionType.NEXTGEN]: {
     label: "NextGen",
+    dataRows: {
+      seizedCount: false,
+    },
     showCardDataRow: true,
     filters: {
       seized: false,
@@ -47,6 +62,9 @@ export const COLLECTED_COLLECTIONS_META: Record<
   },
   [CollectedCollectionType.MEMELAB]: {
     label: "Meme Lab",
+    dataRows: {
+      seizedCount: true,
+    },
     showCardDataRow: false,
     filters: {
       seized: false,
