@@ -151,7 +151,7 @@ export default function GradientsComponent(props: Readonly<Props>) {
             <>
               <Row>
                 <Col>
-                  <h1>6529 GRADIENT</h1>
+                  <h1>6529 Gradient</h1>
                 </Col>
               </Row>
               <Row className="pt-2">

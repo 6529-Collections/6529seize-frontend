@@ -336,7 +336,7 @@ export default function LabPage(props: Readonly<Props>) {
       <>
         <Row className="pt-3">
           <Col>
-            <h1>THE MEMES</h1>
+            <h1>The Memes</h1>
           </Col>
         </Row>
         <Row className="pt-2 pb-2">
@@ -1330,7 +1330,7 @@ export default function LabPage(props: Readonly<Props>) {
             <Container className="pt-4 pb-4">
               <Row>
                 <Col>
-                  <h1>MEME LAB</h1>
+                  <h1>Meme Lab</h1>
                 </Col>
                 {/* {nft && (
                   <Col className="d-flex align-items-center justify-content-end">

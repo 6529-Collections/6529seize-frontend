@@ -484,7 +484,7 @@ export default function LabCollection(props: Readonly<Props>) {
             <Container className="pt-4 pb-4">
               <Row>
                 <Col>
-                  <h1>MEME LAB COLLECTIONS</h1>
+                  <h1>Meme Lab Collections</h1>
                 </Col>
               </Row>
               <Row className="pt-3">

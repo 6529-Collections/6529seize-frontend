@@ -85,38 +85,38 @@ b {
 }
 
 h1 {
-  font-family: $square-font !important;
   font-size: 48px;
+  font-weight: 700;
   float: left;
-  color: $font-color-h;
+  color: $font-color;
 }
 
 h2 {
   font-size: 32px;
-  font-weight: bold;
+  font-weight: 700;
   float: left;
-  color: $font-color-h;
+  color: $font-color;
 }
 
 h3 {
   font-size: 28px;
-  font-weight: bold;
+  font-weight: 700;
   float: left;
-  color: $font-color-h;
+  color: $font-color;
 }
 
 h4 {
   font-size: 24px;
-  font-weight: bold;
+  font-weight: 700;
   float: left;
-  color: $font-color-h;
+  color: $font-color;
 }
 
 h5 {
   font-size: 20px;
-  font-weight: bold;
+  font-weight: 700;
   float: left;
-  color: $font-color-h;
+  color: $font-color;
 }
 
 @media only screen and (max-width: 800px) {

@@ -44,7 +44,7 @@ export default function NextGenArtists() {
     <Container className="no-padding pt-4 pb-4">
       <Row className="pb-3">
         <Col>
-          <h1>ARTISTS</h1>
+          <h1>Artists</h1>
         </Col>
       </Row>
       {artistCollections.map(

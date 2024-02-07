@@ -148,7 +148,7 @@ export default function Home({
             <Container className={`pt-4 ${styles.mainContainer}`}>
               <Row>
                 <Col>
-                  <h1>LATEST DROP</h1>
+                  <h1>Latest Drop</h1>
                 </Col>
               </Row>
               <Row>
@@ -157,14 +157,14 @@ export default function Home({
                   xs={{ span: 12 }}
                   sm={{ span: 12 }}
                   md={{ span: 6 }}
-                  lg={{ span: 6 }}
-                >
+                  lg={{ span: 6 }}>
                   <Container className="no-padding">
                     <Row>
                       {nft.animation ? (
                         <span
-                          className={connectedWallets && styles.nftImagePadding}
-                        >
+                          className={
+                            connectedWallets && styles.nftImagePadding
+                          }>
                           <NFTImage
                             nft={nft}
                             animation={true}
@@ -179,8 +179,9 @@ export default function Home({
                       ) : (
                         <a
                           href={`/the-memes/${nft.id}`}
-                          className={connectedWallets && styles.nftImagePadding}
-                        >
+                          className={
+                            connectedWallets && styles.nftImagePadding
+                          }>
                           <NFTImage
                             nft={nft}
                             animation={true}
@@ -202,8 +203,7 @@ export default function Home({
                     xs={{ span: 12 }}
                     sm={{ span: 12 }}
                     md={{ span: 6 }}
-                    lg={{ span: 6 }}
-                  >
+                    lg={{ span: 6 }}>
                     <Container>
                       <Row>
                         <Col>
@@ -277,8 +277,7 @@ export default function Home({
                                 : `https://github.com/6529-Collections/thememecards/tree/main/card${nft.id}`
                             }
                             target={nft.has_distribution ? "_self" : "_blank"}
-                            rel="noreferrer"
-                          >
+                            rel="noreferrer">
                             Distribution Plan
                           </a>
                         </Col>
@@ -344,8 +343,7 @@ export default function Home({
                           <a
                             href={`https://opensea.io/assets/ethereum/${MEMES_CONTRACT}/${nft.id}`}
                             target="_blank"
-                            rel="noreferrer"
-                          >
+                            rel="noreferrer">
                             <Image
                               className={styles.marketplace}
                               src="/opensea.png"
@@ -369,8 +367,7 @@ export default function Home({
                           <a
                             href={`https://x2y2.io/eth/${MEMES_CONTRACT}/${nft.id}`}
                             target="_blank"
-                            rel="noreferrer"
-                          >
+                            rel="noreferrer">
                             <Image
                               className={styles.marketplace}
                               src="/x2y2.png"

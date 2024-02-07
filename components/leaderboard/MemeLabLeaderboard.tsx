@@ -84,8 +84,8 @@ export default function MemeLabLeaderboard(props: Readonly<Props>) {
     <Container className={`no-padding`} id={`leaderboard-${props.nftId}`}>
       <Row>
         <Col>
-          <h1>COMMUNITY -</h1>
-          <h1>&nbsp;CARD {props.nftId}</h1>
+          <h1>Community -</h1>
+          <h1>&nbsp;Card {props.nftId}</h1>
         </Col>
         {/* {lastTDH && (
           <Col className={`text-right ${styles.lastTDH}`}>

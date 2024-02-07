@@ -81,7 +81,10 @@ export default function NextGen(props: Readonly<Props>) {
           </Row>
         </Container>
       </div>
-      <Container className="pt-5">
+      <Container
+        fluid
+        className="pt-5 pb-5"
+        style={{ backgroundColor: "black" }}>
         <Row>
           <Col>
             <Container className="pt-3 pb-3">
@@ -109,7 +112,7 @@ export default function NextGen(props: Readonly<Props>) {
       <Container className="pt-5 pb-5">
         <Row>
           <Col>
-            <h1>FEATURED ARTIST</h1>
+            <h1>Featured Artist</h1>
           </Col>
         </Row>
         <Row>
