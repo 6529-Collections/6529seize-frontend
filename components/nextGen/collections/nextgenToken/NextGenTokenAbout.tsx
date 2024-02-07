@@ -131,7 +131,7 @@ export default function NextgenTokenAbout(props: Readonly<Props>) {
         </Col>
       </Row>
       <Row>
-        <Col className="pb-3 d-flex gap-1 align-items-center">
+        <Col className="pb-3 d-flex gap-1 align-items-end">
           <span className="font-color-h">Marketplaces:</span>
           <span className="d-flex align-items-center gap-2 pt-1">
             <span>
@@ -144,8 +144,8 @@ export default function NextgenTokenAbout(props: Readonly<Props>) {
                     className={styles.marketplace}
                     src="/opensea.png"
                     alt="opensea"
-                    width={28}
-                    height={28}
+                    width={24}
+                    height={24}
                   />
                 </a>
               </Tippy>
