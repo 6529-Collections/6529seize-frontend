@@ -12,7 +12,6 @@ import {
   NextgenAllowlistCollection,
 } from "../../../entities/INextgen";
 import { formatNameForUrl } from "../../nextGen/nextgen_helpers";
-import { useRouter } from "next/router";
 import UserPageMintsPhasesPhase from "./UserPageMintsPhasesPhase";
 import UserPageMintsMintingAddresses from "./UserPageMintsMintingAddresses";
 
