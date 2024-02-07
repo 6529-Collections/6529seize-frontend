@@ -5,7 +5,6 @@ import styles from "./LatestActivity.module.scss";
 import { Transaction } from "../../entities/ITransaction";
 import Pagination from "../pagination/Pagination";
 import LatestActivityRow from "./LatestActivityRow";
-import { useRouter } from "next/router";
 import { NFT } from "../../entities/INFT";
 import { areEqualAddresses } from "../../helpers/Helpers";
 import { fetchAllPages, fetchUrl } from "../../services/6529api";
@@ -27,13 +26,13 @@ export enum TypeFilter {
 }
 
 export default function LatestActivity(props: Readonly<Props>) {
-  const router = useRouter();
   const [activity, setActivity] = useState<Transaction[]>([]);
   const [page, setPage] = useState(props.page);
-  const [next, setNext] = useState(null);
-  const [showViewAll, setShowViewAll] = useState(
-    !window.location.pathname.includes("nft-activity")
-  );
+  const [showViewAll, setShowViewAll] = useState(false);
+
+  useEffect(() => {
+    setShowViewAll(!window.location.pathname.includes("nft-activity"));
+  }, []);
   const [totalResults, setTotalResults] = useState(0);
 
   const [nfts, setNfts] = useState<NFT[]>([]);
@@ -63,7 +62,6 @@ export default function LatestActivity(props: Readonly<Props>) {
     }
     fetchUrl(url).then((response: DBResponse) => {
       setTotalResults(response.count);
-      setNext(response.next);
       setActivity(response.data);
       setFetching(false);
     });

@@ -14,6 +14,10 @@ import {
   USER_PAGE_TAB_META,
   UserPageTabType,
 } from "../components/user/layout/UserPageTabs";
+import {
+  NEXTGEN_CHAIN_ID,
+  NEXTGEN_CORE,
+} from "../components/nextGen/nextgen_contracts";
 
 export function formatAddress(address: string) {
   if (
@@ -38,6 +42,10 @@ export function isMemesContract(contract: string) {
 
 export function isGradientsContract(contract: string) {
   return contract.toUpperCase() === GRADIENT_CONTRACT.toUpperCase();
+}
+
+export function isNextgenContract(contract: string) {
+  return areEqualAddresses(contract, NEXTGEN_CORE[NEXTGEN_CHAIN_ID]);
 }
 
 export function isMemeLabContract(contract: string) {

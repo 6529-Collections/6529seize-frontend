@@ -88,6 +88,7 @@ export default function NextGenTokenProvenance(props: Readonly<Props>) {
                 {transactions.map((tr) => (
                   <LatestActivityRow
                     tr={tr}
+                    hideNextgenTokenId={true}
                     key={`${tr.from_address}-${tr.to_address}-${tr.transaction}-${tr.token_id}`}
                   />
                 ))}

@@ -6,6 +6,7 @@ import {
   areEqualURLS,
   displayDecimal,
   getDateDisplay,
+  isNextgenContract,
   isGradientsContract,
   isMemeLabContract,
   isMemesContract,
@@ -24,6 +25,7 @@ interface Props {
   nft?: NFTLite;
   tr: Transaction;
   mykey?: string;
+  hideNextgenTokenId?: boolean;
 }
 
 const ROYALTIES_PERCENTAGE = 0.069;
@@ -174,6 +176,8 @@ export default function LatestActivityRow(props: Readonly<Props>) {
       return `Gradient #${props.tr.token_id}`;
     } else if (isMemeLabContract(props.tr.contract)) {
       return `MemeLab #${props.tr.token_id}`;
+    } else if (isNextgenContract(props.tr.contract)) {
+      return `NextGen #${props.tr.token_id}`;
     } else {
       return `#${props.tr.token_id}`;
     }
@@ -254,7 +258,10 @@ export default function LatestActivityRow(props: Readonly<Props>) {
     if (isNullAddress(props.tr.from_address)) {
       return (
         <>
-          Minted to&nbsp;
+          {!props.hideNextgenTokenId
+            ? `Nextgen #${props.tr.token_id} minted to`
+            : `Minted to`}
+          &nbsp;
           <Address
             wallets={[props.tr.to_address]}
             display={props.tr.to_display}
