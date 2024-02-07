@@ -237,6 +237,7 @@ export default function UserPageMints({
                   href={mintUrl}
                   className="tw-group tw-inline-flex tw-items-center tw-text-primary-300 hover:tw-text-primary-400 tw-font-medium tw-text-base tw-duration-300 tw-transition tw-ease-out"
                   target="_blank"
+                  rel="noopener noreferrer"
                 >
                   <span className="tw-break-all">{mintUrl}</span>
                   <svg
@@ -273,9 +274,9 @@ export default function UserPageMints({
                 >
                   Delegation Center
                 </a>
-                {""}, by creating a delegation for "Any Collection" or "The
-                Memes" with use-case "#1 All" or "#2 Minting / Allowlist" before
-                the mint start time.
+                {""}, by creating a delegation for &quot;Any Collection&quot; or
+                &quot;The Memes&quot; with use-case &quot;#1 All&quot; or
+                &quot;#2 Minting / Allowlist&quot; before the mint start time.
               </p>
             </div>
           </>
