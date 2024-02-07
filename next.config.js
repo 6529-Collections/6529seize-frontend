@@ -3,6 +3,8 @@
 let VERSION = process.env.VERSION;
 let LOAD_S3;
 
+const webpack = require("webpack");
+
 if (VERSION) {
   LOAD_S3 = true;
 } else {
@@ -81,8 +83,15 @@ const nextConfig = {
       },
     ];
   },
-  webpack: (config) => {
+  webpack: (config, { buildId, dev, isServer, defaultLoaders, webpack }) => {
     config.resolve.alias.canvas = false;
+    // Overwrite the Webpack config to enable verbose logging
+    config.plugins.push(
+        new webpack.ProgressPlugin((percentage, message, ...args) => {
+          // Custom log message
+          console.log(`${(percentage * 100).toFixed(2)}%`, message, ...args);
+        })
+    );
     return config;
   },
 };
