@@ -59,7 +59,7 @@ export default function NextgenCollectionMintingPlan(props: Readonly<Props>) {
     commonApiFetch<NextgenAllowlistCollection[]>({
       endpoint: `nextgen/allowlist_phases/${props.collection.id}?page_size=250`,
     }).then((collections) => {
-      setPhases(collections);
+      setPhases(collections.toSorted((a, b) => a.start_time - b.start_time));
     });
   }, []);
 
@@ -190,116 +190,108 @@ export default function NextgenCollectionMintingPlan(props: Readonly<Props>) {
           </Col>
         </Row>
       )}
-      {allowlist.length > 0 && (
-        <>
-          <Row className="pt-4" ref={allowlistScrollTarget}>
-            <Col className="d-flex align-items-center justify-content-between">
-              <Dropdown
-                className={styles.filterDropdown}
-                drop={"down-centered"}>
-                <Dropdown.Toggle>
-                  {selectedPhase?.phase ?? "All Phases"}
-                </Dropdown.Toggle>
-                <Dropdown.Menu>
-                  <Dropdown.Item onClick={() => setSelectedPhase(undefined)}>
-                    All Phases
-                  </Dropdown.Item>
-                  {phases.map((p) => (
-                    <Dropdown.Item
-                      key={`filter-${p.phase}`}
-                      onClick={() => setSelectedPhase(p)}>
-                      {p.phase}
-                    </Dropdown.Item>
-                  ))}
-                </Dropdown.Menu>
-              </Dropdown>
-              <span className="d-flex flex-wrap align-items-center">
-                {searchWallets.length > 0 &&
-                  searchWallets.map((sw) => (
-                    <span
-                      className={styles.searchWalletDisplayWrapper}
-                      key={sw}>
-                      <Tippy
-                        delay={250}
-                        content={"Clear"}
-                        placement={"top"}
-                        theme={"light"}>
-                        <button
-                          className={`btn-link ${styles.searchWalletDisplayBtn}`}
-                          onClick={() =>
-                            setSearchWallets((sr) => sr.filter((s) => s != sw))
-                          }>
-                          x
-                        </button>
-                      </Tippy>
-                      <span className={styles.searchWalletDisplay}>
-                        {sw.endsWith(".eth") ? sw : formatAddress(sw)}
-                      </span>
-                    </span>
-                  ))}
-                {searchWallets.length > 0 && (
+      <Row className="pt-4" ref={allowlistScrollTarget}>
+        <Col className="d-flex align-items-center justify-content-between">
+          <Dropdown className={styles.filterDropdown} drop={"down-centered"}>
+            <Dropdown.Toggle>
+              {selectedPhase?.phase ?? "All Phases"}
+            </Dropdown.Toggle>
+            <Dropdown.Menu>
+              <Dropdown.Item onClick={() => setSelectedPhase(undefined)}>
+                All Phases
+              </Dropdown.Item>
+              {phases.map((p) => (
+                <Dropdown.Item
+                  key={`filter-${p.phase}`}
+                  onClick={() => setSelectedPhase(p)}>
+                  {p.phase}
+                </Dropdown.Item>
+              ))}
+            </Dropdown.Menu>
+          </Dropdown>
+          <span className="d-flex flex-wrap align-items-center">
+            {searchWallets.length > 0 &&
+              searchWallets.map((sw) => (
+                <span className={styles.searchWalletDisplayWrapper} key={sw}>
                   <Tippy
                     delay={250}
-                    content={"Clear All"}
+                    content={"Clear"}
                     placement={"top"}
                     theme={"light"}>
-                    <FontAwesomeIcon
-                      onClick={() => setSearchWallets([])}
-                      className={styles.clearSearchBtnIcon}
-                      icon="times-circle"></FontAwesomeIcon>
+                    <button
+                      className={`btn-link ${styles.searchWalletDisplayBtn}`}
+                      onClick={() =>
+                        setSearchWallets((sr) => sr.filter((s) => s != sw))
+                      }>
+                      x
+                    </button>
                   </Tippy>
-                )}
-                <button
-                  onClick={() => setShowSearchModal(true)}
-                  className={`btn-link ${styles.searchBtn} ${
-                    searchWallets.length > 0 ? styles.searchBtnActive : ""
-                  } d-inline-flex align-items-center justify-content-center`}>
-                  <FontAwesomeIcon
-                    style={{ width: "20px", height: "20px", cursor: "pointer" }}
-                    icon="search"></FontAwesomeIcon>
-                </button>
-              </span>
-            </Col>
-          </Row>
-          <Row>
-            <Col>
-              <Table className={styles.logsTable}>
-                <thead>
-                  <tr>
-                    <th>Address x{totalResults > 0 && totalResults}</th>
-                    <th className="text-center">Phase</th>
-                    <th className="text-center">Spots</th>
-                    <th className="text-center">Data</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {allowlist.map((al) => (
-                    <tr key={`${al.address}-${al.spots}-${al.info}`}>
-                      <td>
-                        <a
-                          href={`/${al.address}/mints`}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="decoration-hover-underline">
-                          {al.wallet_display && `${al.wallet_display} - `}
-                          {al.address}
-                        </a>
-                      </td>
-                      <td className="text-center">{al.phase}</td>
-                      <td className="text-center">
-                        {adjustSpots(al.address, al.keccak)}
-                      </td>
-                      <td className="d-flex justify-content-center">
-                        {getJsonData(al.keccak, al.info)}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </Table>
-            </Col>
-          </Row>
-        </>
-      )}
+                  <span className={styles.searchWalletDisplay}>
+                    {sw.endsWith(".eth") ? sw : formatAddress(sw)}
+                  </span>
+                </span>
+              ))}
+            {searchWallets.length > 0 && (
+              <Tippy
+                delay={250}
+                content={"Clear All"}
+                placement={"top"}
+                theme={"light"}>
+                <FontAwesomeIcon
+                  onClick={() => setSearchWallets([])}
+                  className={styles.clearSearchBtnIcon}
+                  icon="times-circle"></FontAwesomeIcon>
+              </Tippy>
+            )}
+            <button
+              onClick={() => setShowSearchModal(true)}
+              className={`btn-link ${styles.searchBtn} ${
+                searchWallets.length > 0 ? styles.searchBtnActive : ""
+              } d-inline-flex align-items-center justify-content-center`}>
+              <FontAwesomeIcon
+                style={{ width: "20px", height: "20px", cursor: "pointer" }}
+                icon="search"></FontAwesomeIcon>
+            </button>
+          </span>
+        </Col>
+      </Row>
+      <Row>
+        <Col>
+          <Table className={styles.logsTable}>
+            <thead>
+              <tr>
+                <th>Address x{totalResults}</th>
+                <th className="text-center">Phase</th>
+                <th className="text-center">Spots</th>
+                <th className="text-center">Data</th>
+              </tr>
+            </thead>
+            <tbody>
+              {allowlist.map((al) => (
+                <tr key={`${al.address}-${al.spots}-${al.info}`}>
+                  <td>
+                    <a
+                      href={`/${al.address}/mints`}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="decoration-hover-underline">
+                      {al.wallet_display && `${al.wallet_display} - `}
+                      {al.address}
+                    </a>
+                  </td>
+                  <td className="text-center">{al.phase}</td>
+                  <td className="text-center">
+                    {adjustSpots(al.address, al.keccak)}
+                  </td>
+                  <td className="d-flex justify-content-center">
+                    {getJsonData(al.keccak, al.info)}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </Table>
+        </Col>
+      </Row>
       {totalResults > PAGE_SIZE && allowlistLoaded && (
         <Row className="text-center pt-4 pb-4">
           <Pagination
