@@ -42,7 +42,7 @@ function NextGenCollectionDetailsOverview(props: Readonly<CollectionProps>) {
                     <Row>
                       <Col className="font-color-h">Artist Signature</Col>
                     </Row>
-                    <Row className="pb-4">
+                    <Row className="pb-2">
                       <Col xs={12} className="pt-2">
                         <div
                           className={styles.artistSignature}
