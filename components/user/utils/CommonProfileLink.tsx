@@ -23,13 +23,13 @@ export default function CommonProfileLink({
     <Link
       href={url}
       className={`${
-        isCurrentUser ? "tw-pointer-events-none" : ""
-      } tw-no-underline tw-leading-4 tw-p-0`}
+        isCurrentUser ? "tw-pointer-events-none tw-no-underline" : ""
+      } tw-leading-4 tw-p-0`}
     >
       <span
         className={`${
-          isCurrentUser ? "" : "hover:tw-underline tw-cursor-pointer"
-        } tw-whitespace-nowrap tw-text-sm tw-font-medium tw-text-iron-100`}
+          isCurrentUser ? "" : "tw-cursor-pointer"
+        } tw-whitespace-nowrap tw-text-sm tw-font-medium tw-text-iron-100 hover:tw-text-iron-400 tw-transition tw-duration-300 tw-ease-out`}
       >
         {handleOrWallet}
       </span>

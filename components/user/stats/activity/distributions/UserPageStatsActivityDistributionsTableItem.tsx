@@ -34,10 +34,10 @@ export default function UserPageStatsActivityDistributionsTableItem({
 
   return (
     <tr className="even:tw-bg-iron-900">
-      <td className="tw-text-iron-400 tw-py-3.5 tw-font-medium tw-px-4 sm:tw-px-6 tw-whitespace-nowrap tw-text-md">
+      <td className="tw-text-iron-400 tw-py-3.5 tw-font-medium tw-px-4 sm:tw-px-6 lg:tw-pr-4 tw-whitespace-nowrap tw-text-md">
         {COLLECTION_TO_TEXT[item.collection]}
       </td>
-      <td className="tw-py-3.5 tw-font-medium tw-px-4 sm:tw-px-6 tw-text-right tw-whitespace-nowrap tw-text-md">
+      <td className="tw-py-3.5 tw-font-medium tw-px-4 sm:tw-px-6 lg:tw-pl-4 tw-text-right tw-whitespace-nowrap tw-text-md">
         <Link
           className="tw-no-underline hover:tw-underline tw-text-iron-50"
           href={`${COLLECTION_TO_PATH[item.collection]}/${item.tokenId}`}
@@ -45,27 +45,27 @@ export default function UserPageStatsActivityDistributionsTableItem({
           # {item.tokenId}
         </Link>
       </td>
-      <td className="tw-text-iron-50 tw-py-3.5 tw-font-medium tw-px-4 sm:tw-px-6 tw-whitespace-nowrap tw-text-md">
+      <td className="tw-text-iron-50 tw-py-3.5 tw-font-medium tw-px-4 sm:tw-px-6 lg:tw-pl-4 tw-whitespace-nowrap tw-text-md">
         {item.name}
       </td>
-      <td className="tw-text-iron-400 tw-py-3.5 tw-font-normal tw-px-4 sm:tw-px-6 tw-whitespace-nowrap tw-text-md">
+      <td className="tw-text-iron-400 tw-py-3.5 tw-font-normal tw-px-4 sm:tw-px-6 lg:tw-pl-4 tw-whitespace-nowrap tw-text-md">
         {item.wallet}
       </td>
       {item.phases.map((phase) => (
         <td
           key={getRandomObjectId()}
-          className="tw-text-iron-400 tw-py-3.5 tw-font-normal tw-px-4 tw-text-right sm:tw-px-6 tw-whitespace-nowrap tw-text-md"
+          className="tw-text-iron-400 tw-py-3.5 tw-font-normal tw-px-4 tw-text-right sm:tw-px-6 lg:tw-pl-4 tw-whitespace-nowrap tw-text-md"
         >
           {formatNumberWithCommasOrDash(phase)}
         </td>
       ))}
-      <td className="tw-text-iron-400 tw-py-3.5 tw-font-normal tw-px-4 sm:tw-px-6 tw-whitespace-nowrap tw-text-md tw-text-right">
+      <td className="tw-text-iron-400 tw-py-3.5 tw-font-normal tw-px-4 sm:tw-px-6 lg:tw-pl-4 tw-whitespace-nowrap tw-text-md tw-text-right">
         {formatNumberWithCommasOrDash(item.amountMinted)}
       </td>
-      <td className="tw-text-iron-400 tw-py-3.5 tw-font-normal tw-px-4 sm:tw-px-6 tw-whitespace-nowrap tw-text-md tw-text-right">
+      <td className="tw-text-iron-400 tw-py-3.5 tw-font-normal tw-px-4 sm:tw-px-6 lg:tw-pl-4 tw-whitespace-nowrap tw-text-md tw-text-right">
         {formatNumberWithCommasOrDash(item.amountTotal)}
       </td>
-      <td className="tw-text-iron-500 tw-py-3.5 tw-font-light tw-px-4 sm:tw-px-6 tw-whitespace-nowrap tw-text-md tw-text-right">
+      <td className="tw-text-iron-500 tw-py-3.5 tw-font-light tw-px-4 sm:tw-px-6 lg:tw-pl-4 tw-whitespace-nowrap tw-text-md tw-text-right">
         {timeAgo}
       </td>
     </tr>
