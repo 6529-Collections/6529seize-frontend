@@ -84,9 +84,13 @@ export function NextGenCountdown(props: Readonly<CountdownProps>) {
             href={`/nextgen/collection/${formatNameForUrl(
               props.collection.name
             )}/mint`}>
-            <Button className="seize-btn btn-block pt-2 pb-2 btn-white font-larger font-bolder">
+            {/* <Button className="seize-btn btn-block pt-2 pb-2 btn-white font-larger font-bolder">
               {getButtonLabel()}
-            </Button>
+            </Button> */}
+            <button
+              className={`pt-2 pb-2 seize-btn btn-block no-wrap ${styles.exploreBtn}`}>
+              {getButtonLabel()}
+            </button>
           </a>
         )}
       </span>
@@ -233,6 +237,7 @@ export default function NextGenCollectionHeader(props: Readonly<Props>) {
         <Col className={`d-flex flex-column align-items-start pt-3 gap-3`}>
           <span className="d-flex flex-column align-items-start">
             <h1 className="mb-0 font-color">
+              #{props.collection.id} -{" "}
               <b>{props.collection.name.toUpperCase()}</b>
             </h1>
             {props.collection_link && (

@@ -69,26 +69,17 @@ export default function NextGen(props: Readonly<Props>) {
                         <NextGenMintCounts collection={props.collection} />
                       </Col>
                     </Row>
-                    <Row className="pt-3">
-                      <Col className="d-flex align-items-center gap-4">
-                        <a
-                          href={`/nextgen/collection/${formatNameForUrl(
-                            props.collection.name
-                          )}`}>
-                          <button
-                            className={`pt-2 pb-2 seize-btn no-wrap ${styles.exploreBtn}`}>
-                            Explore Collection
-                          </button>
-                        </a>
+                    <Row className="pt-4">
+                      <Col>
+                        <NextGenCountdown collection={props.collection} />
+                      </Col>
+                    </Row>
+                    <Row className="pt-2">
+                      <Col>
                         <DistributionLink
                           collection={props.collection}
                           class="pt-0  font-bolder font-larger"
                         />
-                      </Col>
-                    </Row>
-                    <Row className="pt-4">
-                      <Col>
-                        <NextGenCountdown collection={props.collection} />
                       </Col>
                     </Row>
                   </Col>
