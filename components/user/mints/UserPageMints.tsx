@@ -266,7 +266,7 @@ export default function UserPageMints({
             <UserPageMintsMintingAddresses wallets={mintingWallets} />
             <div className="tw-mt-6">
               <p className="tw-mb-0 tw-text-iron-400 tw-text-sm tw-font-normal">
-                Minting addresses are configured in the{" "}
+                NextGen mints check{" "}
                 <a
                   href="https://seize.io/delegation/delegation-center"
                   rel="noopener noreferrer"
@@ -274,10 +274,12 @@ export default function UserPageMints({
                   target="_blank"
                 >
                   Delegation Center
-                </a>
-                {""}, by creating a delegation for &quot;Any Collection&quot; or
-                &quot;The Memes&quot; with use-case &quot;#1 All&quot; or
-                &quot;#2 Minting / Allowlist&quot; before the mint start time.
+                </a>{" "}
+                in realtime. You can update your delegated minting addresses at
+                any time before you mint. Configure your delegations at the
+                Delegation Center by creating a delegation for &quot;Any
+                Collection&quot; or &quot;The Memes&quot; with use-case &quot;#1
+                All&quot; or &quot;#2 Minting / Allowlist&quot;
               </p>
             </div>
             <div className="tw-mt-6 sm:tw-mt-8">
@@ -300,9 +302,9 @@ export default function UserPageMints({
         <div className="tw-mt-8 tw-pt-8 md:tw-mt-10 md:tw-pt-10 tw-border-t tw-border-solid tw-border-x-0 tw-border-b tw-mb-0 tw-text-iron-400 tw-text-sm tw-font-normal">
           <div className="md:tw-max-w-5xl">
             <span className="tw-text-iron-300">Note:</span> The Your Mints tab
-            will later be made available for Memes drops too, but is is not
-            active yet. For now, please continue to use the Distribution Plan
-            page for each card (example:{" "}
+            will later be made available for Memes drops too, but is not active
+            yet. For now, please continue to use the Distribution Plan page for
+            each card (example:{" "}
             <a
               href="https://seize.io/the-memes/192/distribution"
               rel="noopener noreferrer"
