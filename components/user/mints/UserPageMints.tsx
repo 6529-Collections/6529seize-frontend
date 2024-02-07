@@ -276,10 +276,18 @@ export default function UserPageMints({
                   Delegation Center
                 </a>{" "}
                 in realtime. You can update your delegated minting addresses at
-                any time before you mint. Configure your delegations at the
-                Delegation Center by creating a delegation for &quot;Any
-                Collection&quot; or &quot;The Memes&quot; with use-case &quot;#1
-                All&quot; or &quot;#2 Minting / Allowlist&quot;
+                any time before you mint. Configure your delegations at the{" "}
+                <a
+                  href="https://seize.io/delegation/delegation-center"
+                  rel="noopener noreferrer"
+                  className="tw-group tw-inline-flex tw-items-center tw-text-iron-200 hover:tw-text-primary-300 tw-font-medium tw-text-sm tw-duration-300 tw-transition tw-ease-out"
+                  target="_blank"
+                >
+                  Delegation Center
+                </a>{" "}
+                by creating a delegation for &quot;Any Collection&quot; or
+                &quot;The Memes&quot; with use-case &quot;#1 All&quot; or
+                &quot;#2 Minting / Allowlist&quot;
               </p>
             </div>
             <div className="tw-mt-6 sm:tw-mt-8">
