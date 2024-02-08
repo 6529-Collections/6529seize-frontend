@@ -10,7 +10,7 @@ interface Props {
   breadcrumbs: Crumb[];
 }
 
-export default function Breadcrumb(props: Props) {
+export default function Breadcrumb(props: Readonly<Props>) {
   return (
     <Container fluid className={styles.breadcrumb}>
       <Row className={styles.headerRow}>

@@ -1,8 +1,10 @@
-import { sepolia } from "wagmi/chains";
+import { mainnet, sepolia, goerli } from "wagmi/chains";
 import {
   GRADIENT_CONTRACT,
   MEMELAB_CONTRACT,
   MEMES_CONTRACT,
+  NULL_ADDRESS,
+  NULL_DEAD_ADDRESS,
 } from "../constants";
 import { BaseNFT, VolumeType } from "../entities/INFT";
 import { DateIntervalsSelection } from "../enums";
@@ -12,6 +14,10 @@ import {
   USER_PAGE_TAB_META,
   UserPageTabType,
 } from "../components/user/layout/UserPageTabs";
+import {
+  NEXTGEN_CHAIN_ID,
+  NEXTGEN_CORE,
+} from "../components/nextGen/nextgen_contracts";
 
 export function formatAddress(address: string) {
   if (
@@ -36,6 +42,10 @@ export function isMemesContract(contract: string) {
 
 export function isGradientsContract(contract: string) {
   return contract.toUpperCase() === GRADIENT_CONTRACT.toUpperCase();
+}
+
+export function isNextgenContract(contract: string) {
+  return areEqualAddresses(contract, NEXTGEN_CORE[NEXTGEN_CHAIN_ID]);
 }
 
 export function isMemeLabContract(contract: string) {
@@ -124,7 +134,8 @@ export function getDateDisplay(date: Date) {
     return `${Math.round(secondsAgo)} seconds ago`;
   }
   if (60 * 60 > secondsAgo) {
-    return `${Math.round(secondsAgo / 60)} minutes ago`;
+    const minutes = Math.round(secondsAgo / 60);
+    return `${minutes} minute${minutes > 1 ? "s" : ""} ago`;
   }
   if (60 * 60 * 24 > secondsAgo) {
     const hours = Math.floor(secondsAgo / (60 * 60));
@@ -182,13 +193,13 @@ export function nextTdh() {
   const now = new Date();
   const utcMidnight = new Date(now).setUTCHours(24, 0, 0, 0);
 
-  var diffMS = utcMidnight / 1000 - now.getTime() / 1000;
-  var diffHr = Math.floor(diffMS / 3600);
+  let diffMS = utcMidnight / 1000 - now.getTime() / 1000;
+  let diffHr = Math.floor(diffMS / 3600);
   diffMS = diffMS - diffHr * 3600;
-  var diffMi = Math.floor(diffMS / 60);
+  let diffMi = Math.floor(diffMS / 60);
   diffMS = diffMS - diffMi * 60;
-  var diffS = Math.floor(diffMS);
-  var result = diffHr < 10 ? "0" + diffHr : diffHr;
+  let diffS = Math.floor(diffMS);
+  let result = diffHr < 10 ? "0" + diffHr : diffHr;
   result += ":" + (diffMi < 10 ? "0" + diffMi : diffMi);
   result += ":" + (diffS < 10 ? "0" + diffS : diffS);
   return result.toString();
@@ -242,9 +253,14 @@ export const isValidEthAddress = (address: string) =>
   /^0x[0-9a-fA-F]{40}$/.test(address);
 
 export function getTransactionLink(chain_id: number, hash: string) {
-  return chain_id === sepolia.id
-    ? `https://sepolia.etherscan.io/tx/${hash}`
-    : `https://etherscan.io/tx/${hash}`;
+  switch (chain_id) {
+    case sepolia.id:
+      return `https://sepolia.etherscan.io/tx/${hash}`;
+    case goerli.id:
+      return `https://goerli.etherscan.io/tx/${hash}`;
+    default:
+      return `https://etherscan.io/tx/${hash}`;
+  }
 }
 
 export async function getContentTypeFromURL(url: string) {
@@ -283,8 +299,7 @@ export function isEmptyObject(obj: any) {
 }
 
 export function isUrl(s: string) {
-  const pattern =
-    /(https:\/\/www\.|http:\/\/www\.|https:\/\/|http:\/\/)?[a-zA-Z]{2,}(\.[a-zA-Z]{2,})(\.[a-zA-Z]{2,})?\/[a-zA-Z0-9]{2,}|((https:\/\/www\.|http:\/\/www\.|https:\/\/|http:\/\/)?[a-zA-Z]{2,}(\.[a-zA-Z]{2,})(\.[a-zA-Z]{2,})?)|(https:\/\/www\.|http:\/\/www\.|https:\/\/|http:\/\/)?[a-zA-Z0-9]{2,}\.[a-zA-Z0-9]{2,}\.[a-zA-Z0-9]{2,}(\.[a-zA-Z0-9]{2,})?/g;
+  const pattern = /^(https?:\/\/)?([\w-]+\.)+[\w-]+(\/[\w- ./?%&=]*)?$/i;
   return pattern.test(s);
 }
 
@@ -355,6 +370,31 @@ export function capitalizeEveryWord(input: string): string {
     .replace(/^(.)|\s+(.)/g, (match: string) => match.toUpperCase());
 }
 
+export function getNetworkName(chainId: number) {
+  if (chainId === mainnet.id) {
+    return "Etherium Mainnet";
+  } else if (chainId === sepolia.id) {
+    return "Sepolia Testnet";
+  } else if (chainId === goerli.id) {
+    return "Goerli Testnet";
+  } else {
+    return `Network ID ${chainId}`;
+  }
+}
+
+export function createArray(startNum: number, endNum: number) {
+  let result = [];
+
+  if (startNum <= endNum) {
+    for (let i = startNum; i <= endNum; i++) {
+      result.push(i);
+    }
+  } else {
+    result.push(0);
+  }
+
+  return result;
+}
 export const formatNumber = (num: number): string => {
   // For numbers less than 1000, return the number as is
   if (num < 1000) {
@@ -421,9 +461,7 @@ function formatDateFilterDate(d: Date) {
 export function getDateFilters(
   dateSelection: DateIntervalsSelection,
   fromDate: Date | undefined,
-  toDate: Date | undefined,
-  fromBlock: number | undefined,
-  toBlock: number | undefined
+  toDate: Date | undefined
 ) {
   let filters = "";
   switch (dateSelection) {
@@ -432,23 +470,26 @@ export function getDateFilters(
     case DateIntervalsSelection.TODAY:
       filters += `&from_date=${formatDateFilterDate(new Date())}`;
       break;
-    case DateIntervalsSelection.YESTERDAY:
+    case DateIntervalsSelection.YESTERDAY: {
       const yesterday = new Date();
       yesterday.setUTCDate(yesterday.getUTCDate() - 1);
       filters += `&from_date=${formatDateFilterDate(yesterday)}`;
       filters += `&to_date=${formatDateFilterDate(yesterday)}`;
       break;
-    case DateIntervalsSelection.LAST_7:
+    }
+    case DateIntervalsSelection.LAST_7: {
       const weekAgo = new Date();
       weekAgo.setUTCDate(weekAgo.getUTCDate() - 7);
       filters += `&from_date=${formatDateFilterDate(weekAgo)}`;
       break;
-    case DateIntervalsSelection.THIS_MONTH:
+    }
+    case DateIntervalsSelection.THIS_MONTH: {
       const firstDayOfMonth = new Date();
       firstDayOfMonth.setUTCDate(1);
       filters += `&from_date=${formatDateFilterDate(firstDayOfMonth)}`;
       break;
-    case DateIntervalsSelection.PREVIOUS_MONTH:
+    }
+    case DateIntervalsSelection.PREVIOUS_MONTH: {
       const firstDayOfPreviousMonth = new Date();
       firstDayOfPreviousMonth.setUTCMonth(
         firstDayOfPreviousMonth.getUTCMonth() - 1
@@ -459,13 +500,15 @@ export function getDateFilters(
       filters += `&from_date=${formatDateFilterDate(firstDayOfPreviousMonth)}`;
       filters += `&to_date=${formatDateFilterDate(lastDayOfPreviousMonth)}`;
       break;
-    case DateIntervalsSelection.YEAR_TO_DATE:
+    }
+    case DateIntervalsSelection.YEAR_TO_DATE: {
       const firstDayOfYear = new Date();
       firstDayOfYear.setUTCMonth(0);
       firstDayOfYear.setUTCDate(1);
       filters += `&from_date=${formatDateFilterDate(firstDayOfYear)}`;
       break;
-    case DateIntervalsSelection.LAST_YEAR:
+    }
+    case DateIntervalsSelection.LAST_YEAR: {
       const firstDayOfLastYear = new Date();
       firstDayOfLastYear.setUTCFullYear(
         firstDayOfLastYear.getUTCFullYear() - 1
@@ -478,6 +521,7 @@ export function getDateFilters(
       filters += `&from_date=${formatDateFilterDate(firstDayOfLastYear)}`;
       filters += `&to_date=${formatDateFilterDate(lastDayOfLastYear)}`;
       break;
+    }
     case DateIntervalsSelection.CUSTOM_DATES:
       if (fromDate) {
         filters += `&from_date=${formatDateFilterDate(fromDate)}`;
@@ -580,3 +624,17 @@ export const getProfileTargetRoute = ({
   }
   return `/${handleOrWallet}/${USER_PAGE_TAB_META[defaultPath].route}`;
 };
+
+export function isNullAddress(address: string) {
+  if (areEqualAddresses(address, NULL_ADDRESS)) {
+    return true;
+  }
+  if (areEqualAddresses(address, NULL_DEAD_ADDRESS)) {
+    return true;
+  }
+  return false;
+}
+
+export function capitalizeFirstChar(str: string): string {
+  return str.charAt(0).toUpperCase() + str.slice(1);
+}

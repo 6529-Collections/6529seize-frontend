@@ -8,7 +8,7 @@ export default function AboutTermsOfService() {
       <Container>
         <Row>
           <Col className="text-center">
-            <h1 className="float-none">TERMS OF SERVICE</h1>
+            <h1 className="float-none">Terms Of Service</h1>
           </Col>
         </Row>
         <Row>

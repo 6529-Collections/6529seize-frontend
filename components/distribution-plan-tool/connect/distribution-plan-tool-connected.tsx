@@ -14,7 +14,7 @@ export default function DistributionPlanToolConnected() {
 
   return (
     <div className="tw-flex tw-flex-col">
-      <h1 className="tw-uppercase tw-text-white">Sign in</h1>
+      <h1 className="tw-text-white">Sign in</h1>
       <div className="tw-mb-6 tw-max-w-2xl">
         <ul className="tw-text-justify tw-space-y-1 tw-mb-0 tw-mt-2 tw-text-base tw-leading-[1.6] tw-font-normal tw-text-neutral-300">
           <li>
@@ -35,8 +35,7 @@ export default function DistributionPlanToolConnected() {
         <button
           onClick={trySignIn}
           type="submit"
-          className="tw-group tw-flex tw-gap-x-3 tw-items-center tw-justify-center tw-bg-primary-500 tw-px-6 tw-py-3.5 tw-font-medium tw-text-sm tw-text-white tw-border tw-border-primary-500 tw-rounded-lg hover:tw-bg-primary-600 hover:tw-border-primary-600 tw-transition tw-duration-300 tw-ease-out"
-        >
+          className="tw-group tw-flex tw-gap-x-3 tw-items-center tw-justify-center tw-bg-primary-500 tw-px-6 tw-py-3.5 tw-font-medium tw-text-sm tw-text-white tw-border tw-border-primary-500 tw-rounded-lg hover:tw-bg-primary-600 hover:tw-border-primary-600 tw-transition tw-duration-300 tw-ease-out">
           Sign In with Web3
         </button>
       </div>

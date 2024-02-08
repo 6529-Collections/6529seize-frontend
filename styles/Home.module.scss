@@ -67,7 +67,7 @@
   line-height: 75px;
   color: lightblue;
   font-size: larger;
-  font-weight: bolder;
+  font-weight: bold;
   padding-left: 20px;
 }
 
@@ -142,7 +142,6 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  flex-direction: column;
 }
 
 .viewAllLink {
@@ -154,14 +153,4 @@
   @media only screen and (max-width: 800px) {
     font-size: 12px !important;
   }
-}
-
-.distributionTable {
-  tbody tr:nth-child(odd) {
-    background-color: $almost-very-dark-grey;
-  }
-}
-
-.distributionTable > :not(caption) > * > * {
-  padding: 0.5rem !important;
 }

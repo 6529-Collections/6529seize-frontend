@@ -11,13 +11,13 @@ export default function ProfileActivityLogPfp({
   return (
     <>
       <ProfileActivityLogItemAction action={isAdded ? "added" : "changed"} />
-      <span className="tw-whitespace-nowrap tw-text-sm tw-text-neutral-400 tw-font-medium">
+      <span className="tw-whitespace-nowrap tw-text-base tw-text-iron-300 tw-font-medium">
         profile picture
       </span>
 
       {!isAdded && (
         <>
-          <div className="tw-mr-2">
+          <div className="tw-pl-1">
             {log.contents.old_value && (
               <Image
                 src={log.contents.old_value}

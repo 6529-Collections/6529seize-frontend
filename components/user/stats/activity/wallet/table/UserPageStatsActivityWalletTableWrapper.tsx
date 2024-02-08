@@ -63,31 +63,29 @@ export default function UserPageStatsActivityWalletTableWrapper({
         />
         {loading && <CircleLoader />}
       </div>
-      <div className="tw-scroll-py-3 tw-overflow-auto">
-        <div>
-          {transactions.length && memes?.length ? (
-            <div className="tw-flow-root">
-              <UserPageStatsActivityWalletTable
-                transactions={transactions}
-                profile={profile}
-                memes={memes}
+      <div>
+        {transactions.length && memes?.length ? (
+          <div className="tw-flow-root tw-scroll-py-3 tw-overflow-auto">
+            <UserPageStatsActivityWalletTable
+              transactions={transactions}
+              profile={profile}
+              memes={memes}
+            />
+            {totalPages > 1 && (
+              <CommonTablePagination
+                currentPage={page}
+                setCurrentPage={setPage}
+                totalPages={totalPages}
+                small={true}
+                loading={loading}
               />
-              {totalPages > 1 && (
-                <CommonTablePagination
-                  currentPage={page}
-                  setCurrentPage={setPage}
-                  totalPages={totalPages}
-                  small={true}
-                  loading={loading}
-                />
-              )}
-            </div>
-          ) : (
-            <div className="tw-py-4 tw-px-4 sm:tw-px-6 tw-text-sm tw-italic tw-text-iron-500">
-              {FILTER_TO_NO_DATA[filter]}
-            </div>
-          )}
-        </div>
+            )}
+          </div>
+        ) : (
+          <div className="tw-py-4 tw-px-4 sm:tw-px-6 tw-text-sm tw-italic tw-text-iron-500">
+            {FILTER_TO_NO_DATA[filter]}
+          </div>
+        )}
       </div>
     </div>
   );
