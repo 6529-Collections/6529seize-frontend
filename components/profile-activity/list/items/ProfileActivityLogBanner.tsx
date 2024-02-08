@@ -23,7 +23,7 @@ export default function ProfileActivityLogBanner({
   return (
     <>
       <ProfileActivityLogItemAction action={isAdded ? "added" : "changed"} />
-      <span className="tw-whitespace-nowrap tw-text-sm tw-text-neutral-400 tw-font-medium">
+      <span className="tw-whitespace-nowrap tw-text-base tw-text-iron-300 tw-font-medium">
         {TITLE[log.type]}
       </span>
       {!isAdded && (
@@ -33,7 +33,7 @@ export default function ProfileActivityLogBanner({
             style={{ backgroundColor: log.contents.old_value }}
           ></span>
           <svg
-            className="tw-flex-shrink-0 tw-h-5 tw-w-5 tw-text-neutral-400"
+            className="tw-flex-shrink-0 tw-h-5 tw-w-5 tw-text-iron-300"
             viewBox="0 0 24 24"
             fill="none"
             xmlns="http://www.w3.org/2000/svg"

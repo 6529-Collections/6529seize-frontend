@@ -5,7 +5,6 @@ import styles from "./LatestActivity.module.scss";
 import { Transaction } from "../../entities/ITransaction";
 import Pagination from "../pagination/Pagination";
 import LatestActivityRow from "./LatestActivityRow";
-import { useRouter } from "next/router";
 import { NFT } from "../../entities/INFT";
 import { areEqualAddresses } from "../../helpers/Helpers";
 import { fetchAllPages, fetchUrl } from "../../services/6529api";
@@ -26,14 +25,14 @@ export enum TypeFilter {
   BURNS = "Burns",
 }
 
-export default function LatestActivity(props: Props) {
-  const router = useRouter();
+export default function LatestActivity(props: Readonly<Props>) {
   const [activity, setActivity] = useState<Transaction[]>([]);
   const [page, setPage] = useState(props.page);
-  const [next, setNext] = useState(null);
-  const [showViewAll, setShowViewAll] = useState(
-    !window.location.pathname.includes("nft-activity")
-  );
+  const [showViewAll, setShowViewAll] = useState(false);
+
+  useEffect(() => {
+    setShowViewAll(!window.location.pathname.includes("nft-activity"));
+  }, []);
   const [totalResults, setTotalResults] = useState(0);
 
   const [nfts, setNfts] = useState<NFT[]>([]);
@@ -63,7 +62,6 @@ export default function LatestActivity(props: Props) {
     }
     fetchUrl(url).then((response: DBResponse) => {
       setTotalResults(response.count);
-      setNext(response.next);
       setActivity(response.data);
       setFetching(false);
     });
@@ -88,10 +86,10 @@ export default function LatestActivity(props: Props) {
         <Col className="d-flex align-items-center justify-content-between">
           <span className="d-flex flex-wrap align-items-center gap-2">
             <h1>
-              NFT ACTIVITY{" "}
+              NFT Activity{" "}
               {showViewAll ? (
                 <a href="/nft-activity">
-                  <span className={styles.viewAllLink}>VIEW ALL</span>
+                  <span className={styles.viewAllLink}>View All</span>
                 </a>
               ) : (
                 fetching && <DotLoader />
@@ -108,8 +106,7 @@ export default function LatestActivity(props: Props) {
                     onClick={() => {
                       setPage(1);
                       setTypeFilter(filter);
-                    }}
-                  >
+                    }}>
                     {filter}
                   </Dropdown.Item>
                 ))}

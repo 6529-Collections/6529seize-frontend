@@ -7,7 +7,7 @@ interface Props {
   setSelectedSeason(season: number): void;
 }
 
-export default function SeasonsDropdown(props: Props) {
+export default function SeasonsDropdown(props: Readonly<Props>) {
   return (
     <Dropdown className={styles.seasonDropdown} drop={"down-centered"}>
       <Dropdown.Toggle>

@@ -1,9 +1,10 @@
 export default function EthereumIcon() {
   return (
     <svg
-      className="tw-w-full tw-h-full"
+      className="tw-w-full tw-h-full tw-align-top"
       viewBox="0 0 112 182"
       fill="none"
+      aria-hidden="true"
       xmlns="http://www.w3.org/2000/svg"
     >
       <path d="M55.8647 0L0 92.6869L55.8647 67.3005V0Z" fill="currentColor" />

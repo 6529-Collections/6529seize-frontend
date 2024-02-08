@@ -1,15 +1,19 @@
+import { RefObject } from "react";
 import { CollectionSeized } from "../../../../entities/IProfile";
-import CommonSelect, {
+import {
   CommonSelectItem,
 } from "../../../utils/select/CommonSelect";
+import CommonDropdown from "../../../utils/select/dropdown/CommonDropdown";
 
 type SelectedType = CollectionSeized | null;
 
 export default function UserPageCollectedFiltersSeized({
   selected,
+  containerRef,
   setSelected,
 }: {
   readonly selected: SelectedType;
+  readonly containerRef: RefObject<HTMLDivElement>;
   readonly setSelected: (selected: SelectedType) => void;
 }) {
   const labels: { [key in CollectionSeized]: string } = {
@@ -32,10 +36,11 @@ export default function UserPageCollectedFiltersSeized({
   ];
 
   return (
-    <CommonSelect
+    <CommonDropdown
       items={items}
       activeItem={selected}
       filterLabel="Seized"
+      containerRef={containerRef}
       setSelected={setSelected}
     />
   );

@@ -35,7 +35,7 @@ interface Props {
   wallets: string[];
 }
 
-export default function MemeLabComponent(props: Props) {
+export default function MemeLabComponent(props: Readonly<Props>) {
   const router = useRouter();
 
   useEffect(() => {
@@ -538,7 +538,7 @@ export default function MemeLabComponent(props: Props) {
             <>
               <Row>
                 <Col>
-                  <h1>MEME LAB</h1>
+                  <h1>Meme Lab</h1>
                 </Col>
               </Row>
               <Row className="pt-2">

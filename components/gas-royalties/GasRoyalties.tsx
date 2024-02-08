@@ -64,13 +64,7 @@ export function getUrlParams(
       filters += `&to_block=${toBlock}`;
     }
   } else {
-    filters += getDateFilters(
-      dateSelection,
-      fromDate,
-      toDate,
-      fromBlock,
-      toBlock
-    );
+    filters += getDateFilters(dateSelection, fromDate, toDate);
   }
 
   const collection =
@@ -181,7 +175,7 @@ export function GasRoyaltiesHeader(props: Readonly<HeaderProps>) {
           <Col className="d-flex align-items-center justify-content-between">
             <span className="d-flex align-items-center gap-2">
               <h1>
-                {props.title.toUpperCase()} {props.fetching && <DotLoader />}
+                {props.title} {props.fetching && <DotLoader />}
               </h1>
             </span>
             <span className="d-flex align-items-center gap-3">

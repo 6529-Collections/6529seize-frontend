@@ -168,3 +168,12 @@ export interface Rememe {
   source: string;
   added_by: string;
 }
+
+export interface IAttribute {
+  trait_type: string;
+  value: string;
+  display_type?: string;
+  max_value?: number;
+  trait_count?: number;
+  order?: number;
+}

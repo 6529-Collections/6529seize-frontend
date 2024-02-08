@@ -42,7 +42,7 @@ interface Props {
   minting_link: string;
 }
 
-export default function Distribution(props: Props) {
+export default function Distribution(props: Readonly<Props>) {
   const router = useRouter();
   const [pageProps, setPageProps] = useState<{
     page: number;
@@ -321,7 +321,7 @@ export default function Distribution(props: Props) {
               <Row>
                 <Col className={`${styles.distributionHeader} pb-1`}>
                   <h1 className="text-center mb-0">
-                    {props.header.toUpperCase()} CARD #{nftId} DISTRIBUTION
+                    {props.header.toUpperCase()} Card #{nftId} Distribution
                   </h1>
                   <Button
                     className="seize-btn btn-white"

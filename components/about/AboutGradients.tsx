@@ -7,7 +7,7 @@ export default function AboutGradients() {
       <Container>
         <Row>
           <Col className="text-center">
-            <h1 className="float-none">THE 6529 GRADIENT COLLECTION</h1>
+            <h1 className="float-none">The 6529 Gradient Collection</h1>
           </Col>
         </Row>
         <Row className="pt-2 pb-2">

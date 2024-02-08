@@ -6,7 +6,7 @@ export default function AboutApply() {
       <Container>
         <Row>
           <Col className="text-center">
-            <h1 className="float-none">APPLY</h1>
+            <h1 className="float-none">Apply</h1>
           </Col>
         </Row>
         <Row className="pt-3 pb-3">

@@ -5,7 +5,7 @@ interface Props {
   html: string;
 }
 
-export default function AboutGDRC1(props: Props) {
+export default function AboutGDRC1(props: Readonly<Props>) {
   return (
     <>
       <Container>

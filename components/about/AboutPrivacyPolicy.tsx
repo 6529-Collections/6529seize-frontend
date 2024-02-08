@@ -8,7 +8,7 @@ export default function AboutPrivacyPolicy() {
       <Container>
         <Row>
           <Col className="text-center">
-            <h1 className="float-none">PRIVACY POLICY</h1>
+            <h1 className="float-none">Privacy Policy</h1>
           </Col>
         </Row>
         <Row>

@@ -198,7 +198,7 @@ export interface LeaderboardTDH extends BaseTDHMetrics {
   level: number;
 }
 
-export default function Leaderboard(props: Props) {
+export default function Leaderboard(props: Readonly<Props>) {
   const router = useRouter();
 
   const [view, setView] = useState<VIEW>(VIEW.CONSOLIDATION);
@@ -1409,10 +1409,10 @@ export default function Leaderboard(props: Props) {
           md={{ span: 4 }}
           lg={{ span: 4 }}>
           <h1>
-            COMMUNITY{" "}
+            Community{" "}
             {showViewAll && (
               <a href="/community">
-                <span className={styles.viewAllLink}>VIEW ALL</span>
+                <span className={styles.viewAllLink}>View All</span>
               </a>
             )}
           </h1>
