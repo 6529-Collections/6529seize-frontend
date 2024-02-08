@@ -1,7 +1,5 @@
 /** @type {import('next').NextConfig} */
 
-const webpack = require("webpack");
-
 let VERSION = process.env.VERSION;
 let LOAD_S3;
 
