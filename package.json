@@ -48,10 +48,10 @@
     "swiper": "^11.0.5",
     "uuid": "^9.0.1",
     "viem": "^1.19.5",
-    "wagmi": "1.4.12",
-    "@next/bundle-analyzer": "^13.1.6"
+    "wagmi": "1.4.12"
   },
   "devDependencies": {
+    "@next/bundle-analyzer": "^13.1.6",
     "@tanstack/eslint-plugin-query": "^5.8.4",
     "@types/js-cookie": "^3.0.2",
     "@types/node": "^18.13.0",
