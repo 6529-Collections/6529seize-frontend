@@ -1,3 +1,4 @@
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import styles from "./DotLoader.module.scss";
 
 export default function DotLoader() {
@@ -8,4 +9,8 @@ export default function DotLoader() {
       <div className={styles.dot}></div>
     </div>
   );
+}
+
+export function Spinner() {
+  return <FontAwesomeIcon icon="spinner" className={styles.spinner} />;
 }

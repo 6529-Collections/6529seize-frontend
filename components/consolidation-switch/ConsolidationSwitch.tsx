@@ -13,7 +13,7 @@ interface Props {
   onSetView(view: VIEW): any;
 }
 
-export default function ConsolidationSwitch(props: Props) {
+export default function ConsolidationSwitch(props: Readonly<Props>) {
   return (
     <>
       <span className={styles.consolidationSwitchLabel}>

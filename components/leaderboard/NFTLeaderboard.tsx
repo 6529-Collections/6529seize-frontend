@@ -30,7 +30,7 @@ enum Sort {
   total_balance = "total_balance",
 }
 
-export default function NFTLeaderboard(props: Props) {
+export default function NFTLeaderboard(props: Readonly<Props>) {
   const [view, setView] = useState<VIEW>(VIEW.CONSOLIDATION);
   const [pageProps, setPageProps] = useState<Props>(props);
   const [totalResults, setTotalResults] = useState(0);
@@ -77,8 +77,8 @@ export default function NFTLeaderboard(props: Props) {
     <Container className={`no-padding pt-3`} id={`leaderboard-${props.nftId}`}>
       <Row>
         <Col>
-          <h1>COMMUNITY -</h1>
-          <h1>&nbsp;CARD {props.nftId}</h1>
+          <h1>Community -</h1>
+          <h1>&nbsp;Card {props.nftId}</h1>
         </Col>
         <Col className={`d-flex justify-content-center align-items-center`}>
           <ConsolidationSwitch

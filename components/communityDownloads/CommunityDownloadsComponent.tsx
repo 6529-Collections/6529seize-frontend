@@ -77,7 +77,7 @@ export default function CommunityDownloadsComponent(props: Readonly<Props>) {
           <Container className="pt-4">
             <Row>
               <Col>
-                <h1>{props.title.toUpperCase()} DOWNLOADS</h1>
+                <h1>{props.title} Downloads</h1>
               </Col>
             </Row>
             {downloads && downloads.length > 0 && (

@@ -50,7 +50,7 @@ export default function CommunityMetrics(props: Readonly<any>) {
               <Container className="pt-4">
                 <Row>
                   <Col>
-                    <h1>COMMUNITY METRICS</h1>
+                    <h1>Community Metrics</h1>
                   </Col>
                 </Row>
                 <Row className="pt-3 pb-3">

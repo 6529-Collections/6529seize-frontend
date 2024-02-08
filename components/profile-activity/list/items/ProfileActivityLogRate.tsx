@@ -82,17 +82,17 @@ export default function ProfileActivityLogRate({
       <span
         className={`${
           isChangePositive ? "tw-text-green" : "tw-text-red"
-        } tw-text-sm tw-font-medium`}
+        } tw-text-base tw-font-medium`}
       >
         {changeStr}
       </span>
       <span
-        className={`${getTotalRatingClass()} tw-whitespace-nowrap tw-text-sm tw-font-medium`}
+        className={`${getTotalRatingClass()} tw-whitespace-nowrap tw-text-base tw-font-medium`}
       >
         (total {newRatingStr})
       </span>
       {log.contents.rating_matter === RateMatter.REP && (
-        <span className="tw-whitespace-nowrap tw-text-sm tw-font-medium tw-text-iron-100">
+        <span className="tw-whitespace-nowrap tw-text-base tw-font-medium tw-text-iron-100">
           {log.contents.rating_category}
         </span>
       )}
@@ -108,7 +108,7 @@ export default function ProfileActivityLogRate({
       />
 
       {isSystemAdjustment && (
-        <span className="tw-whitespace-nowrap tw-inline-flex tw-items-center tw-gap-x-1.5 tw-rounded-md tw-px-2 tw-py-1 tw-text-xs tw-font-medium tw-text-iron-300 tw-ring-1 tw-ring-inset tw-ring-iron-700">
+        <span className="tw-whitespace-nowrap tw-inline-flex tw-items-center tw-gap-x-1.5 tw-rounded-md tw-px-2 tw-py-1 tw-text-sm tw-font-medium tw-text-iron-300 tw-ring-1 tw-ring-inset tw-ring-iron-700">
           <svg
             className="tw-flex-shrink-0 tw-h-1.5 tw-w-1.5 tw-fill-red"
             viewBox="0 0 6 6"

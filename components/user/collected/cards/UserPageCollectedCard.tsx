@@ -1,16 +1,7 @@
 import Link from "next/link";
-import {
-  CollectedCard,
-  CollectedCollectionType,
-} from "../../../../entities/IProfile";
-import { assertUnreachable } from "../../../../helpers/AllowlistToolHelpers";
+import { CollectedCard } from "../../../../entities/IProfile";
 import { formatNumberWithCommasOrDash } from "../../../../helpers/Helpers";
-
-const COLLECTION_TYPE_TO_TEXT: Record<CollectedCollectionType, string> = {
-  [CollectedCollectionType.MEMES]: "The Memes",
-  [CollectedCollectionType.GRADIENTS]: "Gradients",
-  [CollectedCollectionType.MEMELAB]: "Meme Lab",
-};
+import { COLLECTED_COLLECTIONS_META } from "../filters/user-page-collected-filters.helpers";
 
 export default function UserPageCollectedCard({
   card,
@@ -19,25 +10,12 @@ export default function UserPageCollectedCard({
   readonly card: CollectedCard;
   readonly showDataRow: boolean;
 }) {
-  const getPath = (): string => {
-    const collection = Object.values(CollectedCollectionType).find(
-      (c) => c === card.collection.toUpperCase()
-    );
-    if (!collection) return "";
-    switch (collection) {
-      case CollectedCollectionType.MEMES:
-        return `/the-memes/${card.token_id}`;
-      case CollectedCollectionType.GRADIENTS:
-        return `/6529-gradient/${card.token_id}`;
-      case CollectedCollectionType.MEMELAB:
-        return `/meme-lab/${card.token_id}`;
-      default:
-        assertUnreachable(collection);
-        return "";
-    }
-  };
+  const collectionMeta = COLLECTED_COLLECTIONS_META[card.collection];
+  const path = `${collectionMeta.cardPath}/${card.token_id}`;
 
-  const path = getPath();
+  const showSeizedCount =
+    COLLECTED_COLLECTIONS_META[card.collection].dataRows.seizedCount &&
+    !!card.seized_count;
 
   return (
     <Link href={path} className="tw-no-underline">
@@ -54,7 +32,7 @@ export default function UserPageCollectedCard({
           </div>
           <div className="tw-pt-3 tw-px-2 tw-flex tw-justify-between tw-items-center tw-w-full">
             <span className="tw-text-sm min-[1200px]:tw-text-md tw-font-medium tw-text-iron-400">
-              {COLLECTION_TYPE_TO_TEXT[card.collection]}
+              {collectionMeta.label}
             </span>
             <span className="tw-text-sm min-[1200px]:tw-text-md tw-font-normal tw-text-iron-500">
               #{card.token_id}
@@ -67,7 +45,7 @@ export default function UserPageCollectedCard({
               <span className="tw-text-sm min-[1200px]:tw-text-md tw-font-medium tw-text-iron-50">
                 {card.token_name}
               </span>
-              {!!card.seized_count && (
+              {showSeizedCount && (
                 <span className="tw-text-sm min-[1200px]:tw-text-md tw-font-normal tw-text-iron-400">
                   {card.seized_count}x
                 </span>

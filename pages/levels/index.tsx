@@ -449,7 +449,7 @@ export default function Levels() {
         <div className="tw-pt-12 tw-pb-12">
           <div className="tw-px-6 min-[992px]:tw-px-3 min-[992px]:tw-max-w-[960px] max-[1100px]:tw-max-w-[950px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px] tw-mx-auto">
             <div className="tw-max-w-3xl tw-pb-4 tw-flex tw-flex-col">
-              <h1 className="tw-uppercase">Levels</h1>
+              <h1>Levels</h1>
               <ul className="tw-ml-4 tw-pl-0">
                 <li className="tw-text-justify tw-mb-0 tw-mt-2 tw-font-normal tw-text-base tw-text-neutral-100">
                   Levels are our integrated metric of TDH and Rep.
@@ -488,8 +488,7 @@ export default function Levels() {
                   {LEVELS.map((level) => (
                     <tr
                       key={`level-${level.level}`}
-                      className="hover:tw-bg-neutral-700/40 tw-transition tw-duration-300 tw-ease-out"
-                    >
+                      className="hover:tw-bg-neutral-700/40 tw-transition tw-duration-300 tw-ease-out">
                       <td className="tw-whitespace-nowrap sm:tw-pl-6 tw-pr-3 tw-pl-4 tw-py-3 tw-text-sm tw-font-medium tw-text-neutral-400">
                         {level.level}
                       </td>

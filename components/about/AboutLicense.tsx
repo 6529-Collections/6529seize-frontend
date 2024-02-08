@@ -7,7 +7,7 @@ export default function AboutLicense() {
       <Container>
         <Row>
           <Col className="text-center">
-            <h1 className="float-none">LICENSE</h1>
+            <h1 className="float-none">License</h1>
           </Col>
         </Row>
         <Row>

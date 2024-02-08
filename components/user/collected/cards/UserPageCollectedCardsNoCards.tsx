@@ -38,6 +38,8 @@ export default function UserPageCollectedCardsNoCards({
         return "Congratulations, Gradient full setter!";
       case CollectedCollectionType.MEMELAB:
         return "Congratulations, Meme Lab full setter!";
+      case CollectedCollectionType.NEXTGEN:
+        return "Congratulations, Next Gen full setter!";
       default:
         assertUnreachable(filters.collection);
         return "";

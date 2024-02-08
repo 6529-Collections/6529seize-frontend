@@ -19,7 +19,7 @@ const RememesComponent = dynamic(
   { ssr: false }
 );
 
-export default function ReMemes(props: Props) {
+export default function ReMemes(props: Readonly<Props>) {
   const [breadcrumbs, setBreadcrumbs] = useState<Crumb[]>([
     { display: "Home", href: "/" },
     { display: "ReMemes" },
