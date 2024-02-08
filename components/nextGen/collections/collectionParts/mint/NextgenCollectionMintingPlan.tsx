@@ -49,9 +49,8 @@ export default function NextgenCollectionMintingPlan(props: Readonly<Props>) {
     const index = addressEntries.findIndex((al) => al.keccak === keccak);
     let returnSpots = addressEntries[index].spots;
     if (index > 0) {
-      for (let i = 0; i < index; i++) {
-        returnSpots -= addressEntries[i].spots;
-      }
+      returnSpots =
+        addressEntries[index].spots - addressEntries[index - 1].spots;
     }
     return returnSpots;
   }
