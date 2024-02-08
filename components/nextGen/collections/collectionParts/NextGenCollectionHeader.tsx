@@ -291,14 +291,12 @@ export function NextGenMintCounts(
   }, [collectionMintCount.isFetching]);
 
   useEffect(() => {
-    if (collectionMintCount.data) {
-      const mintC = parseInt(collectionMintCount.data as any);
-      setMintCount(mintC);
-      const avail = props.collection.total_supply - mintC;
-      setAvailable(avail);
-      if (props.setAvailable) {
-        props.setAvailable(avail);
-      }
+    const mintC = parseInt(collectionMintCount.data as any);
+    setMintCount(mintC);
+    const avail = props.collection.total_supply - mintC;
+    setAvailable(avail);
+    if (props.setAvailable) {
+      props.setAvailable(avail);
     }
   }, [collectionMintCount.data]);
 
