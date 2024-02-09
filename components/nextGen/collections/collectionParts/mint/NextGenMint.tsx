@@ -161,7 +161,7 @@ export default function NextGenMint(props: Readonly<Props>) {
       abi: NEXTGEN_CORE.abi,
       chainId: NEXTGEN_CHAIN_ID,
       watch: true,
-      enabled: account.isConnected,
+      enabled: account.isConnected && available > 0,
       args: [props.collection.id, mintForAddress],
     };
   }

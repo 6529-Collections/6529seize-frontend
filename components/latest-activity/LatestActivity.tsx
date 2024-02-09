@@ -1,7 +1,8 @@
+import styles from "./LatestActivity.module.scss";
+import homeStyles from "../../styles/Home.module.scss";
 import { useState, useEffect } from "react";
 import { Container, Row, Col, Table, Dropdown } from "react-bootstrap";
 import { DBResponse } from "../../entities/IDBResponse";
-import styles from "./LatestActivity.module.scss";
 import { Transaction } from "../../entities/ITransaction";
 import Pagination from "../pagination/Pagination";
 import LatestActivityRow from "./LatestActivityRow";
@@ -88,8 +89,8 @@ export default function LatestActivity(props: Readonly<Props>) {
             <h1>
               NFT Activity{" "}
               {showViewAll ? (
-                <a href="/nft-activity">
-                  <span className={styles.viewAllLink}>View All</span>
+                <a href="/nft-activity" className={homeStyles.viewAllLink}>
+                  <span>View All</span>
                 </a>
               ) : (
                 fetching && <DotLoader />
