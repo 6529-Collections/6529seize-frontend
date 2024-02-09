@@ -8,7 +8,11 @@ import { DBResponse } from "../entities/IDBResponse";
 import { NFT, MemesExtendedData, LabNFT } from "../entities/INFT";
 
 import dynamic from "next/dynamic";
-import { numberWithCommas, printMintDate } from "../helpers/Helpers";
+import {
+  isEmptyObject,
+  numberWithCommas,
+  printMintDate,
+} from "../helpers/Helpers";
 import { fetchUrl } from "../services/6529api";
 import HeaderPlaceholder from "../components/header/HeaderPlaceholder";
 import { ProfileActivityLog } from "../entities/IProfile";
@@ -24,8 +28,13 @@ import ProfileActivityLogs, {
 import { Inter } from "next/font/google";
 import { FilterTargetType } from "../components/utils/CommonFilterTargetSelect";
 import { ReactQueryWrapperContext } from "../components/react-query-wrapper/ReactQueryWrapper";
+import NextGenCollectionSlideshow from "../components/nextGen/collections/collectionParts/NextGenCollectionSlideshow";
+import { NextGenCollection } from "../entities/INextgen";
+import { commonApiFetch } from "../services/api/common-api";
+import { formatNameForUrl } from "../components/nextGen/nextgen_helpers";
 export interface IndexPageProps {
   readonly logsPage: Page<ProfileActivityLog>;
+  readonly nextGenFeatured: NextGenCollection;
 }
 
 const INITIAL_ACTIVITY_LOGS_PARAMS: ActivityLogParams = {
@@ -157,14 +166,14 @@ export default function Home({
                   xs={{ span: 12 }}
                   sm={{ span: 12 }}
                   md={{ span: 6 }}
-                  lg={{ span: 6 }}
-                >
+                  lg={{ span: 6 }}>
                   <Container className="no-padding">
                     <Row>
                       {nft.animation ? (
                         <span
-                          className={connectedWallets && styles.nftImagePadding}
-                        >
+                          className={
+                            connectedWallets && styles.nftImagePadding
+                          }>
                           <NFTImage
                             nft={nft}
                             animation={true}
@@ -179,8 +188,9 @@ export default function Home({
                       ) : (
                         <a
                           href={`/the-memes/${nft.id}`}
-                          className={connectedWallets && styles.nftImagePadding}
-                        >
+                          className={
+                            connectedWallets && styles.nftImagePadding
+                          }>
                           <NFTImage
                             nft={nft}
                             animation={true}
@@ -202,8 +212,7 @@ export default function Home({
                     xs={{ span: 12 }}
                     sm={{ span: 12 }}
                     md={{ span: 6 }}
-                    lg={{ span: 6 }}
-                  >
+                    lg={{ span: 6 }}>
                     <Container>
                       <Row>
                         <Col>
@@ -277,8 +286,7 @@ export default function Home({
                                 : `https://github.com/6529-Collections/thememecards/tree/main/card${nft.id}`
                             }
                             target={nft.has_distribution ? "_self" : "_blank"}
-                            rel="noreferrer"
-                          >
+                            rel="noreferrer">
                             Distribution Plan
                           </a>
                         </Col>
@@ -344,8 +352,7 @@ export default function Home({
                           <a
                             href={`https://opensea.io/assets/ethereum/${MEMES_CONTRACT}/${nft.id}`}
                             target="_blank"
-                            rel="noreferrer"
-                          >
+                            rel="noreferrer">
                             <Image
                               className={styles.marketplace}
                               src="/opensea.png"
@@ -354,23 +361,11 @@ export default function Home({
                               height={40}
                             />
                           </a>
-                          {/* <a
-                            href={`https://looksrare.org/collections/${MEMES_CONTRACT}/${nft.id}`}
-                            target="_blank"
-                            rel="noreferrer">
-                            <Image
-                          className={styles.marketplace}
-                          src="/looksrare.png"
-                          alt="looksrare"
-                          width={40}
-                          height={40}
-                        />
-                          </a> */}
+
                           <a
                             href={`https://x2y2.io/eth/${MEMES_CONTRACT}/${nft.id}`}
                             target="_blank"
-                            rel="noreferrer"
-                          >
+                            rel="noreferrer">
                             <Image
                               className={styles.marketplace}
                               src="/x2y2.png"
@@ -386,16 +381,43 @@ export default function Home({
                 )}
               </Row>
             </Container>
+            {pageProps.nextGenFeatured &&
+              !isEmptyObject(pageProps.nextGenFeatured) && (
+                <Container className="pt-3 pb-5">
+                  <Row>
+                    <Col>
+                      <h1>
+                        Discover NextGen - {pageProps.nextGenFeatured.name}{" "}
+                        <a
+                          href={`/nextgen/collection/${formatNameForUrl(
+                            pageProps.nextGenFeatured.name
+                          )}`}
+                          className={styles.viewAllLink}>
+                          <span>View All</span>
+                        </a>
+                      </h1>
+                    </Col>
+                  </Row>
+                  <Row className="pt-3">
+                    <Col>
+                      <NextGenCollectionSlideshow
+                        collection={pageProps.nextGenFeatured}
+                      />
+                    </Col>
+                  </Row>
+                </Container>
+              )}
             <div className="tailwind-scope tw-relative tw-px-2 min-[1000px]:tw-max-w-[850px] min-[1100px]:tw-max-w-[950px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px] tw-mx-auto">
               <div className="tw-px-2">
                 <ProfileActivityLogs
                   initialParams={INITIAL_ACTIVITY_LOGS_PARAMS}
-                  withFilters={true}
-                >
+                  withFilters={true}>
                   <h1 className="tw-block tw-whitespace-nowrap tw-float-none tw-pb-0 tw-mb-0">
                     Community Activity{" "}
-                    <a href="/community-activity">
-                      <span className={styles.viewAllLink}>View All</span>
+                    <a
+                      href="/community-activity"
+                      className={styles.viewAllLink}>
+                      <span>View All</span>
                     </a>
                   </h1>
                 </ProfileActivityLogs>
@@ -403,7 +425,7 @@ export default function Home({
             </div>
             {isNftImageLoaded && (
               <Container className={styles.mainContainer}>
-                <Row>
+                <Row className="pt-3">
                   <Col xs={12} sm={12} md={12} lg={12}>
                     <LatestActivity page={1} pageSize={12} showMore={false} />
                   </Col>
@@ -430,9 +452,14 @@ export async function getServerSideProps(
       headers,
       params: convertActivityLogParams(INITIAL_ACTIVITY_LOGS_PARAMS),
     });
+    const nextGenFeatured = await commonApiFetch<NextGenCollection>({
+      endpoint: `nextgen/featured`,
+      headers: headers,
+    });
     return {
       props: {
         logsPage,
+        nextGenFeatured,
       },
     };
   } catch (e: any) {

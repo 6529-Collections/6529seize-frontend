@@ -565,12 +565,15 @@ export function useMintSharedState() {
   };
 }
 
-export function useCollectionMintCount(collectionId: number) {
+export function useCollectionMintCount(
+  collectionId: number,
+  enableRefresh: boolean
+) {
   return useContractRead({
     address: NEXTGEN_CORE[NEXTGEN_CHAIN_ID] as `0x${string}`,
     abi: NEXTGEN_CORE.abi,
     chainId: NEXTGEN_CHAIN_ID,
-    watch: true,
+    watch: enableRefresh,
     functionName: "viewCirSupply",
     args: [collectionId],
   });

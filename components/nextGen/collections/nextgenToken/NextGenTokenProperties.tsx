@@ -11,19 +11,15 @@ interface Props {
 }
 
 export function displayScore(number: number) {
+  const precision = 3;
   if (number >= 0.01) {
-    return Number(number).toFixed(3).toLocaleString();
+    return number.toLocaleString(undefined, {
+      minimumFractionDigits: precision,
+      maximumFractionDigits: precision,
+    });
   }
 
-  const numberStr = number.toString();
-  const match = RegExp(/0\.0*([1-9])/).exec(numberStr);
-
-  if (match && typeof match.index !== "undefined") {
-    const position = match.index + match[0].length;
-    return numberStr.substring(0, position);
-  }
-
-  return number;
+  return number.toPrecision(precision);
 }
 
 function TraitAccordion(
@@ -137,7 +133,7 @@ export default function NextgenTokenRarity(props: Readonly<Props>) {
       <Row className="pt-4 pb-2">
         <Col className="d-flex justify-content-between align-items-center">
           <span className="font-larger font-bolder">{props.token.name}</span>
-          <span>Token Count: {props.tokenCount}</span>
+          <span>Token Count: {props.tokenCount.toLocaleString()}</span>
         </Col>
       </Row>
       <Row className="pt-2 pb-2">
