@@ -1,4 +1,5 @@
 import styles from "./NextGen.module.scss";
+import homeStyles from "../../../styles/Home.module.scss";
 import { Container, Row, Col } from "react-bootstrap";
 import { NextGenCollection } from "../../../entities/INextgen";
 import {
@@ -10,6 +11,7 @@ import { formatNameForUrl, getStatusFromDates } from "../nextgen_helpers";
 import { Status } from "../nextgen_entities";
 import NextGenCollectionArtist from "./collectionParts/NextGenCollectionArtist";
 import { NextGenView } from "./NextGenNavigationHeader";
+import NextGenCollectionSlideshow from "./collectionParts/NextGenCollectionSlideshow";
 
 interface Props {
   collection: NextGenCollection;
@@ -106,6 +108,27 @@ export default function NextGen(props: Readonly<Props>) {
                 </Col>
               </Row>
             </Container>
+          </Col>
+        </Row>
+      </Container>
+      <Container className="pt-5">
+        <Row>
+          <Col>
+            <h1>
+              Explore {props.collection.name}{" "}
+              <a
+                href={`/nextgen/collection/${formatNameForUrl(
+                  props.collection.name
+                )}/art`}
+                className={homeStyles.viewAllLink}>
+                <span>View All</span>
+              </a>
+            </h1>
+          </Col>
+        </Row>
+        <Row className="pt-3">
+          <Col>
+            <NextGenCollectionSlideshow collection={props.collection} />
           </Col>
         </Row>
       </Container>
