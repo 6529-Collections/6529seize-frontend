@@ -21,17 +21,13 @@ export const commonApiFetch = async <T, U = Record<string, string>>(param: {
   headers?: Record<string, string>;
   params?: U;
 }): Promise<T> => {
-  const h = param.headers ?? {}
-  if (typeof window !== "undefined") {
-    h['x-6529-origin-path'] = window.location.pathname ?? null;
-  }
   let url = `${process.env.API_ENDPOINT}/api/${param.endpoint}`;
   if (param.params) {
     const queryParams = new URLSearchParams(param.params);
     url += `?${queryParams.toString()}`;
   }
   const res = await fetch(url, {
-    headers: getHeaders(h),
+    headers: getHeaders(param.headers),
   });
   if (!res.ok) {
     const body: any = await res.json();
