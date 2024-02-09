@@ -1,5 +1,5 @@
 import styles from "../NextGen.module.scss";
-import { Container, Row, Col, Button } from "react-bootstrap";
+import { Container, Row, Col } from "react-bootstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   AllowlistType,
@@ -133,6 +133,7 @@ export function NextGenPhases(props: Readonly<PhaseProps>) {
     props.collection.public_start,
     props.collection.public_end
   );
+
   function getAllowlistClassName() {
     if (alStatus === Status.LIVE && props.available > 0) {
       return styles.phaseTimeTagActive;
@@ -155,19 +156,22 @@ export function NextGenPhases(props: Readonly<PhaseProps>) {
 
   return (
     <span className="pt-2 pb-2 d-flex align-items-center gap-2 align-items-center">
-      <span
-        className={`d-flex align-items-center font-bolder font-smaller ${
-          styles.nextgenTag
-        } ${getAllowlistClassName()}`}>
-        ALLOWLIST {alStatus}
-      </span>
-      <span
-        className={`d-flex align-items-center font-bolder font-smaller ${
-          styles.nextgenTag
-        } ${getPublicStatusClassName()}`}>
-        PUBLIC PHASE {publicStatus}
-      </span>
-      {/* )} */}
+      {alStatus !== Status.UNAVAILABLE && (
+        <span
+          className={`d-flex align-items-center font-bolder font-smaller ${
+            styles.nextgenTag
+          } ${getAllowlistClassName()}`}>
+          ALLOWLIST {alStatus}
+        </span>
+      )}
+      {publicStatus !== Status.UNAVAILABLE && (
+        <span
+          className={`d-flex align-items-center font-bolder font-smaller ${
+            styles.nextgenTag
+          } ${getPublicStatusClassName()}`}>
+          PUBLIC PHASE {publicStatus}
+        </span>
+      )}
     </span>
   );
 }
@@ -269,9 +273,13 @@ export function NextGenMintCounts(
     setShouldRefetchMintCounts?(shouldRefetchMintCounts: boolean): void;
   }>
 ) {
+  const [enableRefresh, setEnableRefresh] = useState<boolean>(true);
   const [available, setAvailable] = useState<number>(0);
 
-  const collectionMintCount = useCollectionMintCount(props.collection.id);
+  const collectionMintCount = useCollectionMintCount(
+    props.collection.id,
+    enableRefresh
+  );
   const [mintCount, setMintCount] = useState<number>(0);
 
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -295,6 +303,7 @@ export function NextGenMintCounts(
     setMintCount(mintC);
     const avail = props.collection.total_supply - mintC;
     setAvailable(avail);
+    setEnableRefresh(avail > 0);
     if (props.setAvailable) {
       props.setAvailable(avail);
     }

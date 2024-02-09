@@ -198,7 +198,7 @@ export default function LatestActivityRow(props: Readonly<Props>) {
                 minted
               </>
             ) : (
-              "airdrop"
+              "Airdrop"
             )}
             &nbsp;
             {props.tr.token_count}x&nbsp;
@@ -255,12 +255,12 @@ export default function LatestActivityRow(props: Readonly<Props>) {
   }
 
   function getDescription() {
+    const tokenIdStr = `Nextgen #${props.tr.token_id}`;
+
     if (isNullAddress(props.tr.from_address)) {
       return (
         <>
-          {!props.hideNextgenTokenId
-            ? `Nextgen #${props.tr.token_id} minted to`
-            : `Minted to`}
+          {!props.hideNextgenTokenId ? `${tokenIdStr} minted to` : `Minted to`}
           &nbsp;
           <Address
             wallets={[props.tr.to_address]}
@@ -273,7 +273,7 @@ export default function LatestActivityRow(props: Readonly<Props>) {
     if (isNullAddress(props.tr.to_address)) {
       return (
         <>
-          Burnt by&nbsp;
+          {!props.hideNextgenTokenId ? `${tokenIdStr} burnt by` : `Burnt by`}
           <Address
             wallets={[props.tr.from_address]}
             display={props.tr.from_display}
@@ -284,7 +284,20 @@ export default function LatestActivityRow(props: Readonly<Props>) {
 
     return (
       <>
-        {props.tr.value > 0 ? <>Purchased by</> : <>Transferred to</>}&nbsp;
+        {props.tr.value > 0 ? (
+          <>
+            {!props.hideNextgenTokenId
+              ? `${tokenIdStr} purchased by`
+              : `Purchased by`}
+          </>
+        ) : (
+          <>
+            {!props.hideNextgenTokenId
+              ? `${tokenIdStr} transferred to`
+              : `Transferred to`}
+          </>
+        )}
+        &nbsp;
         <Address
           wallets={[props.tr.to_address]}
           display={props.tr.to_display}
@@ -368,6 +381,10 @@ export default function LatestActivityRow(props: Readonly<Props>) {
     }
 
     return "exchange";
+  }
+
+  if (!props.tr.token_count) {
+    return <></>;
   }
 
   return (
