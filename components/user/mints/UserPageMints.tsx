@@ -165,6 +165,16 @@ export default function UserPageMints({
         };
       },
     })),
+    combine: (results) => {
+      return results.reduce((prev, curr) => {
+        if (!curr.data) {
+          return prev;
+        }
+
+        prev.push(curr.data);
+        return prev;
+      }, [] as UserPageMintsDelegation[]);
+    },
   });
 
   const [mintUrl, setMintUrl] = useState<string>("");
@@ -187,14 +197,14 @@ export default function UserPageMints({
 
   const getMintingWallets = (): Set<string> => {
     const wallets = delegations
-      .filter((wallet) => wallet.data?.address)
+      .filter((wallet) => wallet.address)
       .flatMap((wallet) => {
         const res: string[] = [];
-        const address = wallet.data?.address;
+        const address = wallet.address;
         if (address) {
           res.push(address);
         }
-        const delegation = wallet.data?.delegation;
+        const delegation = wallet.delegation;
         if (delegation) {
           res.push(delegation);
         }

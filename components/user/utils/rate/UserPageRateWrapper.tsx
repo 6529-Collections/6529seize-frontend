@@ -8,7 +8,7 @@ import { amIUser } from "../../../../helpers/Helpers";
 
 const SUB_TITLE: Record<RateMatter, string> = {
   [RateMatter.CIC]: "CIC rate",
-  [RateMatter.REP]: "give Rep for",
+  [RateMatter.REP]: "give Rep to",
 };
 
 export default function UserPageRateWrapper({
@@ -93,7 +93,7 @@ export default function UserPageRateWrapper({
           </svg>
           <div className="tw-ml-3 tw-self-center">
             <h3 className="tw-text-sm tw-mb-0 tw-font-semibold tw-text-primary-300">
-              Please make profile to {SUB_TITLE[type]} {profile.profile?.handle}
+              Make a profile to {SUB_TITLE[type]} {profile.profile?.handle}
             </h3>
           </div>
         </div>

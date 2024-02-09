@@ -16,7 +16,8 @@ export default function ProfileActivityLogItemWrapper({
   readonly children: React.ReactNode;
   readonly user: string | null;
 }) {
-  const isArchived = log.type === ProfileActivityLogType.PROFILE_ARCHIVED;
+  const isArchived =
+    log.type === ProfileActivityLogType.PROFILE_ARCHIVED || !log.profile_handle;
 
   const handleOrWallet = log?.profile_handle ?? "";
   const isCurrentUser =
