@@ -13,12 +13,7 @@ import { Transaction } from "../../../../../entities/ITransaction";
 import { QueryKey } from "../../../../react-query-wrapper/ReactQueryWrapper";
 import { commonApiFetch } from "../../../../../services/api/common-api";
 import { MemeLite } from "../../../settings/UserSettingsImgSelectMeme";
-import {
-  NEXTGEN_CORE,
-  NEXTGEN_CHAIN_ID,
-} from "../../../../nextGen/nextgen_contracts";
 import { NextGenCollection } from "../../../../../entities/INextgen";
-import { MEMES_CONTRACT } from "../../../../../constants";
 
 export enum UserPageStatsActivityWalletFilterType {
   ALL = "ALL",

@@ -245,7 +245,7 @@ export default function UserPageStatsActivityWalletTableRow({
   };
 
   const getImageSrc = () => {
-    let src = meme?.icon || "";
+    let src = meme?.icon ?? "";
     if (isNextgenContract(transaction.contract)) {
       src = `${NEXTGEN_MEDIA_BASE_URL}/png/${transaction.token_id}`;
     }

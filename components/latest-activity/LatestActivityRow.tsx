@@ -258,7 +258,7 @@ export default function LatestActivityRow(props: Readonly<Props>) {
 
   function getDescription() {
     const normalized = normalizeNextgenTokenID(props.tr.token_id);
-    const collectionName = props.nextgen_collection?.name || (
+    const collectionName = props.nextgen_collection?.name ?? (
       <>NextGen #{normalized.collection_id}</>
     );
     const tokenInfo = (

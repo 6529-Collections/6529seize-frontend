@@ -3,10 +3,7 @@ import {
   CollectedCard,
   CollectedCollectionType,
 } from "../../../../entities/IProfile";
-import {
-  formatNumberWithCommasOrDash,
-  isMemeLabContract,
-} from "../../../../helpers/Helpers";
+import { formatNumberWithCommasOrDash } from "../../../../helpers/Helpers";
 import { COLLECTED_COLLECTIONS_META } from "../filters/user-page-collected-filters.helpers";
 
 export default function UserPageCollectedCard({
