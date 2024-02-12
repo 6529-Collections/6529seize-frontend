@@ -41,7 +41,7 @@ function useImageChecker(token: NextGenToken, resolution: Resolution) {
           const contentLength = response.headers.get("content-length");
           if (contentLength) {
             const sizeBytes = parseInt(contentLength, 10);
-            setImageSize(Math.round((sizeBytes / (1024 * 1024)) * 100) / 100);
+            setImageSize(Math.round((sizeBytes / (1000 * 1000)) * 100) / 100);
           }
         } else {
           setImageExists(false);

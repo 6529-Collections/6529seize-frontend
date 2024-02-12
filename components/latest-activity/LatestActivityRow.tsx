@@ -14,17 +14,19 @@ import {
   numberWithCommas,
 } from "../../helpers/Helpers";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { MANIFOLD } from "../../constants";
+import { MANIFOLD, NEXTGEN_MEDIA_BASE_URL } from "../../constants";
 import { NFTLite } from "../../entities/INFT";
 import Address from "../address/Address";
 import Tippy from "@tippyjs/react";
 import { Container, Row, Col } from "react-bootstrap";
 import { NEXTGEN_CHAIN_ID, NEXTGEN_CORE } from "../nextGen/nextgen_contracts";
+import { NextGenCollection } from "../../entities/INextgen";
+import { normalizeNextgenTokenID } from "../nextGen/nextgen_helpers";
 
 interface Props {
   nft?: NFTLite;
+  nextgen_collection?: NextGenCollection;
   tr: Transaction;
-  mykey?: string;
   hideNextgenTokenId?: boolean;
 }
 
@@ -205,7 +207,7 @@ export default function LatestActivityRow(props: Readonly<Props>) {
             {printNft()}
             {props.tr.value === 0 && (
               <>
-                &nbsp; to&nbsp;
+                &nbsp;to&nbsp;
                 <Address
                   wallets={[props.tr.to_address]}
                   display={props.tr.to_display}
@@ -241,7 +243,7 @@ export default function LatestActivityRow(props: Readonly<Props>) {
               {props.tr.value > 0 ? "bought" : "received"}&nbsp;
               {props.tr.token_count}x&nbsp;
               {printNft()}
-              &nbsp; from&nbsp;
+              &nbsp;from&nbsp;
               <Address
                 wallets={[props.tr.from_address]}
                 display={props.tr.from_display}
@@ -255,12 +257,32 @@ export default function LatestActivityRow(props: Readonly<Props>) {
   }
 
   function getDescription() {
-    const tokenIdStr = `Nextgen #${props.tr.token_id}`;
+    const normalized = normalizeNextgenTokenID(props.tr.token_id);
+    const collectionName = props.nextgen_collection?.name ?? (
+      <>NextGen #{normalized.collection_id}</>
+    );
+    const tokenInfo = (
+      <a
+        href={`/nextgen/token/${props.tr.token_id}/provenance`}
+        target="_blank"
+        rel="noreferrer">
+        {collectionName} #{normalized.token_id}
+        &nbsp;
+        <Image
+          width={0}
+          height={0}
+          style={{ height: "40px", width: "auto" }}
+          src={`${NEXTGEN_MEDIA_BASE_URL}/png/${props.tr.token_id}`}
+          alt={props.tr.token_id.toString()}
+          className={styles.nftImage}
+        />
+      </a>
+    );
 
     if (isNullAddress(props.tr.from_address)) {
       return (
         <>
-          {!props.hideNextgenTokenId ? `${tokenIdStr} minted to` : `Minted to`}
+          {!props.hideNextgenTokenId ? <>{tokenInfo} minted to</> : `Minted to`}
           &nbsp;
           <Address
             wallets={[props.tr.to_address]}
@@ -273,7 +295,7 @@ export default function LatestActivityRow(props: Readonly<Props>) {
     if (isNullAddress(props.tr.to_address)) {
       return (
         <>
-          {!props.hideNextgenTokenId ? `${tokenIdStr} burnt by` : `Burnt by`}
+          {!props.hideNextgenTokenId ? <>{tokenInfo} burnt by</> : `Burnt by`}
           <Address
             wallets={[props.tr.from_address]}
             display={props.tr.from_display}
@@ -286,15 +308,19 @@ export default function LatestActivityRow(props: Readonly<Props>) {
       <>
         {props.tr.value > 0 ? (
           <>
-            {!props.hideNextgenTokenId
-              ? `${tokenIdStr} purchased by`
-              : `Purchased by`}
+            {!props.hideNextgenTokenId ? (
+              <>{tokenInfo} purchased by</>
+            ) : (
+              `Purchased by`
+            )}
           </>
         ) : (
           <>
-            {!props.hideNextgenTokenId
-              ? `${tokenIdStr} transferred to`
-              : `Transferred to`}
+            {!props.hideNextgenTokenId ? (
+              <>{tokenInfo} transferred to</>
+            ) : (
+              `Transferred to`
+            )}
           </>
         )}
         &nbsp;

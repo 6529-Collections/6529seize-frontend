@@ -70,6 +70,7 @@ export interface BaseTDH {
   memes_cards_sets_szn5: number;
   memes_cards_sets_szn6: number;
   day_change: number;
+  nextgen_balance: number;
 }
 
 export interface TDH extends BaseTDH {
