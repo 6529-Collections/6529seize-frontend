@@ -7,9 +7,12 @@ import { Transaction } from "../../entities/ITransaction";
 import Pagination from "../pagination/Pagination";
 import LatestActivityRow from "./LatestActivityRow";
 import { NFT } from "../../entities/INFT";
-import { areEqualAddresses } from "../../helpers/Helpers";
+import { areEqualAddresses, isNextgenContract } from "../../helpers/Helpers";
 import { fetchAllPages, fetchUrl } from "../../services/6529api";
 import DotLoader from "../dotLoader/DotLoader";
+import { commonApiFetch } from "../../services/api/common-api";
+import { NextGenCollection } from "../../entities/INextgen";
+import { normalizeNextgenTokenID } from "../nextGen/nextgen_helpers";
 
 interface Props {
   page: number;
@@ -37,6 +40,9 @@ export default function LatestActivity(props: Readonly<Props>) {
   const [totalResults, setTotalResults] = useState(0);
 
   const [nfts, setNfts] = useState<NFT[]>([]);
+  const [nextgenCollections, setNextgenCollections] = useState<
+    NextGenCollection[]
+  >([]);
 
   const [typeFilter, setTypeFilter] = useState<TypeFilter>(TypeFilter.ALL);
   const [fetching, setFetching] = useState(false);
@@ -79,6 +85,19 @@ export default function LatestActivity(props: Readonly<Props>) {
         });
       }
     );
+  }, []);
+
+  useEffect(() => {
+    commonApiFetch<{
+      count: number;
+      page: number;
+      next: any;
+      data: NextGenCollection[];
+    }>({
+      endpoint: `nextgen/collections`,
+    }).then((response) => {
+      setNextgenCollections(response.data);
+    });
   }, []);
 
   return (
@@ -124,14 +143,25 @@ export default function LatestActivity(props: Readonly<Props>) {
               {activity &&
                 nfts &&
                 activity.map((tr) => {
-                  const nft = nfts.find(
-                    (n) =>
-                      n.id === tr.token_id &&
-                      areEqualAddresses(n.contract, tr.contract)
-                  );
+                  let nft = undefined;
+                  let nextgenCollection = undefined;
+                  if (isNextgenContract(tr.contract)) {
+                    const normalized = normalizeNextgenTokenID(tr.token_id);
+                    nextgenCollection = nextgenCollections.find(
+                      (c) => c.id === normalized.collection_id
+                    );
+                  } else {
+                    nft = nfts.find(
+                      (n) =>
+                        n.id === tr.token_id &&
+                        areEqualAddresses(n.contract, tr.contract)
+                    );
+                  }
+
                   return (
                     <LatestActivityRow
                       nft={nft}
+                      nextgen_collection={nextgenCollection}
                       tr={tr}
                       key={`${tr.from_address}-${tr.to_address}-${tr.transaction}-${tr.token_id}`}
                     />

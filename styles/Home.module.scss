@@ -148,6 +148,9 @@
   position: relative;
   span {
     bottom: 10px;
+    @media only screen and (max-width: 1200px) {
+      bottom: 4px;
+    }
     position: absolute;
     white-space: nowrap;
     font-size: $font-smaller;
